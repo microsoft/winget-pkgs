@@ -1,0 +1,167 @@
+# Rebuild pipeline for Windows Package Manager.
+
+# Name of the run
+name: '$(Build.DefinitionName)-$(Build.DefinitionVersion)-$(Date:yyyyMMdd)-$(Rev:r)'
+
+trigger: none
+pr: none
+
+jobs:
+
+# Agent phase.
+- job: 'Rebuild'
+  displayName: 'Start Rebuild'
+  pool:
+    vmImage: 'windows-latest'
+  variables:
+    skipComponentGovernanceDetection: ${{ true }}
+    runCodesignValidationInjection: ${{ false }}
+  steps:
+
+  # Allow scripts to access the system token.
+  - checkout: self
+    persistCredentials: true
+    clean: true
+
+  # Downloads all the setup files and its dependencies.
+  - task: AzureCLI@1
+    displayName: 'Azure Setup'
+    inputs:
+      azureSubscription: '$(PackageManagerSubscription)'
+      scriptLocation: inlineScript
+      inlineScript: 'az storage blob download-batch -d . --pattern * -s servicewrapper --output none'
+    env:
+      AZURE_STORAGE_CONNECTION_STRING: $(ValidationStorageAccountConnectionString)
+
+  # PackageManager setup
+  - script: 'pkgmgr_publish_setup.cmd'
+    name: 'pkgmgrsetup'
+    displayName: 'PackageManager Setup'
+    workingDirectory: scripts
+    env:
+      HOST_KEY: $(AzureFunctionHostKey)
+      SIGN_ENDPOINT: $(PackageManagerSignEndpoint)
+
+  - task: CmdLine@2
+    displayName: 'Validate Manifests'
+    inputs:
+      script: 'PackageManagerServiceWrapper.exe rebuild --operationId %BUILD_BUILDNUMBER%'
+      failOnStderr: true
+    condition: succeeded()
+    env:
+      AzureWebJobsStorage: $(ValidationStorageAccountConnectionString)
+      PackageManagerEnvironment: $(PackageManagerEnvironment)
+      PackagePublisher: $(PackagePublisher)
+      SYSTEM_ACCESSTOKEN: $(System.AccessToken)
+      DIApplicationInsightKey: $(DIApplicationInsightKey)
+
+# Agentless phase. Depends on previous job. 
+- job: 'SignPackage'
+  pool: server
+  timeoutInMinutes: 1500
+  displayName: 'Sign package'
+  dependsOn:
+    - 'Rebuild'
+  variables:
+    HostKeySecret: $[ dependencies.Rebuild.outputs['pkgmgrsetup.hostkey']]
+    SignEndpointSecret: $[ dependencies.Rebuild.outputs['pkgmgrsetup.signEndpoint']]
+  steps:
+
+  # Sign Package Manager package.
+  - task: AzureFunction@1
+    displayName: 'Signing package'
+    inputs:
+      function: '$(SignEndpointSecret)'
+      key: '$(HostKeySecret)'
+      body: |
+        {
+        "operationId": "$(Build.BuildNumber)",
+        "pipelineType": "RebuildPipeline",
+        "ProjectId": "$(system.TeamProjectId)",
+        "PlanId": "$(system.PlanId)", 
+        "JobId": "$(system.JobId)", 
+        "TimelineId": "$(system.TimelineId)", 
+        "TaskInstanceId": "$(system.TaskInstanceId)",
+        "AuthToken": "$(system.AccessToken)"
+        }
+      waitForCompletion: "true"
+
+# Agent phase. Depends on previous job.
+- job: 'Publish'
+  displayName: 'Publish'
+  pool:
+    vmImage: 'windows-latest'
+  variables:
+    skipComponentGovernanceDetection: ${{ true }}
+    runCodesignValidationInjection: ${{ false }}
+  dependsOn:
+    - 'SignPackage'
+  steps:
+
+  # Downloads all the setup files and its dependencies.
+  - task: AzureCLI@1
+    displayName: 'Azure Setup'
+    inputs:
+      azureSubscription: '$(PackageManagerSubscription)'
+      scriptLocation: inlineScript
+      inlineScript: 'az storage blob download-batch -d . --pattern * -s servicewrapper --output none'
+    env:
+      AZURE_STORAGE_CONNECTION_STRING: $(ValidationStorageAccountConnectionString)
+
+  # Publish rebuild.
+  - task: CmdLine@2
+    displayName: 'Publish'
+    inputs:
+      script: 'PackageManagerServiceWrapper.exe rebuild-publish --operationId %BUILD_BUILDNUMBER%'
+      failOnStderr: true
+    condition: succeeded()
+    env:
+      AzureWebJobsStorage: $(ValidationStorageAccountConnectionString)
+      AzureServicesAuthConnectionString: $(AzureServicesAuthConnectionString)
+      CacheConnectionString: $(BackupCacheConnectionString)
+      CacheAStorageAccountConnectionString: $(CacheAStorageAccountConnectionString)
+      CacheAStorageAccountName: $(CacheAStorageAccountName)
+      CacheBStorageAccountConnectionString: $(CacheBStorageAccountConnectionString)
+      CacheBStorageAccountName: $(CacheBStorageAccountName)
+      PackageManagerSubscriptionId: $(PackageManagerSubscriptionId)
+      PackageManagerCdnProfile: $(PackageManagerCdnProfile)
+      PackageManagerConnectionStringKv: $(PackageManagerConnectionStringKv)
+      DIApplicationInsightKey: $(DIApplicationInsightKey)
+
+# Agent phase. Depends on previous job.
+- job: 'Cleanup'
+  displayName: 'Cleanup'
+  pool:
+    vmImage: 'windows-latest'
+  dependsOn:
+    - 'Rebuild'
+    - 'Publish'
+    - 'SignPackage'
+  condition: succeededOrFailed()
+  variables:
+    skipComponentGovernanceDetection: ${{ true }}
+    runCodesignValidationInjection: ${{ false }}
+  steps:
+
+    # Don't clone repo.
+  - checkout: none
+
+  - task: AzureCLI@1
+    displayName: 'Azure Setup'
+    inputs:
+      azureSubscription: '$(PackageManagerSubscription)'
+      scriptLocation: inlineScript
+      inlineScript: 'az storage blob download-batch -d . --pattern * -s servicewrapper --output none'
+    env:
+      AZURE_STORAGE_CONNECTION_STRING: $(ValidationStorageAccountConnectionString)
+
+  - task: CmdLine@2
+    displayName: 'Package Manager Cleanup'
+    inputs:
+      script: 'PackageManagerServiceWrapper.exe rebuild-cleanup --operationId %BUILD_BUILDNUMBER%'
+      failOnStderr: true
+    condition: succeeded()
+    env:
+      AzureWebJobsStorage: $(ValidationStorageAccountConnectionString)
+      SYSTEM_ACCESSTOKEN: $(System.AccessToken)
+      DIApplicationInsightKey: $(DIApplicationInsightKey)
