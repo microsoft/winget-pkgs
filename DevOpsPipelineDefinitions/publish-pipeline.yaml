@@ -1,0 +1,123 @@
+# Publish pipeline for Windows Package Manager.
+
+# Name of the run
+name: '$(Build.DefinitionName)-$(Build.DefinitionVersion)-$(Date:yyyyMMdd)-$(Rev:r)'
+
+# Batch CI run. when a pipeline is running, the system waits until the run is completed,
+# then starts another run with all changes that have not yet been built.
+trigger:
+  batch: true
+  branches:
+    include:
+    - master
+
+pr: none
+
+jobs:
+
+# Agent phase.
+- job: 'CommitProcessing'
+  displayName: 'Commit Processing'
+  pool:
+    vmImage: 'windows-latest'
+  variables:
+    skipComponentGovernanceDetection: ${{ true }}
+    runCodesignValidationInjection: ${{ false }}
+  steps:
+
+  # Downloads all the setup files and its dependencies.
+  - task: AzureCLI@1
+    displayName: 'Azure Setup'
+    inputs:
+      azureSubscription: '$(PackageManagerSubscription)'
+      scriptLocation: inlineScript
+      inlineScript: 'az storage blob download-batch -d . --pattern * -s servicewrapper --output none'
+    env:
+      AZURE_STORAGE_CONNECTION_STRING: $(ValidationStorageAccountConnectionString)
+
+  # PackageManager setup
+  - script: 'pkgmgr_publish_setup.cmd'
+    name: 'pkgmgrsetup'
+    displayName: 'PackageManager Setup'
+    workingDirectory: scripts
+    env:
+      HOST_KEY: $(AzureFunctionHostKey)
+      SIGN_ENDPOINT: $(PackageManagerSignEndpoint)
+
+  - task: CmdLine@2
+    displayName: 'Validate Commits'
+    inputs:
+      script: 'PackageManagerServiceWrapper.exe validate-commits --operationId %BUILD_BUILDNUMBER%'
+      failOnStderr: true
+    condition: succeeded()
+    env:
+      AzureWebJobsStorage: $(ValidationStorageAccountConnectionString)
+      CacheConnectionString: $(ActiveCacheConnectionString)
+      PackageManagerEnvironment: $(PackageManagerEnvironment)
+      PackagePublisher: $(PackagePublisher)
+      DIApplicationInsightKey: $(DIApplicationInsightKey)
+
+# Agentless phase. Depends on previous job. 
+- job: 'SignPackage'
+  pool: server
+  timeoutInMinutes: 1500
+  displayName: 'Sign package'
+  dependsOn:
+    - 'CommitProcessing'
+  variables:
+    HostKeySecret: $[ dependencies.CommitProcessing.outputs['pkgmgrsetup.hostkey']]
+    SignEndpointSecret: $[ dependencies.CommitProcessing.outputs['pkgmgrsetup.signEndpoint']]
+  steps:
+
+  # Sign Package Manager package.
+  - task: AzureFunction@1
+    displayName: 'Signing package'
+    inputs:
+      function: '$(SignEndpointSecret)'
+      key: '$(HostKeySecret)'
+      body: |
+        {
+        "operationId": "$(Build.BuildNumber)",
+        "pipelineType": "CommitPipeline",
+        "ProjectId": "$(system.TeamProjectId)",
+        "PlanId": "$(system.PlanId)", 
+        "JobId": "$(system.JobId)", 
+        "TimelineId": "$(system.TimelineId)", 
+        "TaskInstanceId": "$(system.TaskInstanceId)",
+        "AuthToken": "$(system.AccessToken)"
+        }
+      waitForCompletion: "true"
+
+# Agent phase. Depends on previous job.
+- job: 'Publish'
+  displayName: 'Publish'
+  pool:
+    vmImage: 'windows-latest'
+  variables:
+    skipComponentGovernanceDetection: ${{ true }}
+    runCodesignValidationInjection: ${{ false }}
+  dependsOn:
+    - 'SignPackage'
+  steps:
+
+  # Downloads all the setup files and its dependencies.
+  - task: AzureCLI@1
+    displayName: 'Azure Setup'
+    inputs:
+      azureSubscription: '$(PackageManagerSubscription)'
+      scriptLocation: inlineScript
+      inlineScript: 'az storage blob download-batch -d . --pattern * -s servicewrapper --output none'
+    env:
+      AZURE_STORAGE_CONNECTION_STRING: $(ValidationStorageAccountConnectionString)
+
+  # Validates integrity of pull request.
+  - task: CmdLine@2
+    displayName: 'Publish'
+    inputs:
+      script: 'PackageManagerServiceWrapper.exe publish --operationId %BUILD_BUILDNUMBER%'
+      failOnStderr: true
+    condition: succeeded()
+    env:
+      AzureWebJobsStorage: $(ValidationStorageAccountConnectionString)
+      CacheConnectionString: $(ActiveCacheConnectionString)
+      DIApplicationInsightKey: $(DIApplicationInsightKey)
