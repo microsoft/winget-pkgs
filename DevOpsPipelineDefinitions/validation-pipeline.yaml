@@ -34,6 +34,8 @@ jobs:
       HOST_KEY: $(AzureFunctionHostKey)
       SMART_SCREEN_ENDPOINT: $(PackageManagerSmartScreenEndpoint)
       SCAN_ENDPOINT: $(PackageManagerScanEndpoint)
+      LABEL_ENDPOINT: $(PackageManagerSetLabelOnPullRequestEndpoint)
+      CLEANUP_ENDPOINT: $(PackageManagerCleanupEndpoint)
 
   # Validates integrity of pull request.
   - task: CmdLine@2
@@ -79,6 +81,8 @@ jobs:
       body: |
         {
         "operationId": "$(Build.BuildNumber)",
+        "PlanUrl": "$(system.CollectionUri)",
+        "HubName": "$(system.HostType)",
         "ProjectId": "$(system.TeamProjectId)",
         "PlanId": "$(system.PlanId)", 
         "JobId": "$(system.JobId)", 
@@ -97,6 +101,66 @@ jobs:
       body: |
         {
         "operationId": "$(Build.BuildNumber)",
+        "PlanUrl": "$(system.CollectionUri)",
+        "HubName": "$(system.HostType)",
+        "ProjectId": "$(system.TeamProjectId)",
+        "PlanId": "$(system.PlanId)", 
+        "JobId": "$(system.JobId)", 
+        "TimelineId": "$(system.TimelineId)", 
+        "TaskInstanceId": "$(system.TaskInstanceId)",
+        "AuthToken": "$(system.AccessToken)"
+        }
+      waitForCompletion: "true"
+
+# Agentless phase. Runs even if previous jobs failed. 
+- job: 'postvalidation'
+  pool: server
+  displayName: 'Post Validation'
+  dependsOn:
+    - 'FileValidation'
+    - 'ContentValidation'
+  condition: succeededOrFailed()
+  variables:
+    HostKeySecret: $[ dependencies.FileValidation.outputs['pkgmgrsetup.hostkey']]
+    LabelEndpointSecret: $[ dependencies.FileValidation.outputs['pkgmgrsetup.labelEndpoint']]
+    RepositoryId: $[ dependencies.FileValidation.outputs['pkgmgrsetup.repoId']]
+    CleanupEndpointSecret: $[ dependencies.filevalidation.outputs['pkgmgrsetup.cleanupEndpoint']]
+  steps:
+
+  # Set label in GitHub PullRequest.
+  - task: AzureFunction@1
+    displayName: 'Set Label'
+    condition: eq(variables['PackageManager.RepositoryType'], 'GitHub')
+    inputs:
+      function: '$(LabelEndpointSecret)'
+      key: '$(HostKeySecret)'
+      body: |
+        {
+        "operationId": "$(Build.BuildNumber)",
+        "PlanUrl": "$(system.CollectionUri)",
+        "HubName": "$(system.HostType)",
+        "ProjectId": "$(system.TeamProjectId)",
+        "PlanId": "$(system.PlanId)", 
+        "JobId": "$(system.JobId)", 
+        "TimelineId": "$(system.TimelineId)", 
+        "TaskInstanceId": "$(system.TaskInstanceId)",
+        "AuthToken": "$(system.AccessToken)",
+        "BuildRepositoryId": "$(RepositoryId)",
+        "PullRequestNumber": "$(System.PullRequest.PullRequestNumber)",
+        }
+      waitForCompletion: "true"
+      
+  # Cleanup resources.
+  - task: AzureFunction@1
+    displayName: 'Validation cleanup'
+    inputs:
+      function: '$(CleanupEndpointSecret)'
+      key: '$(HostKeySecret)'
+      body: |
+        {
+        "operationId": "$(Build.BuildNumber)",
+        "PlanUrl": "$(system.CollectionUri)",
+        "HubName": "$(system.HostType)",
         "ProjectId": "$(system.TeamProjectId)",
         "PlanId": "$(system.PlanId)", 
         "JobId": "$(system.JobId)", 
