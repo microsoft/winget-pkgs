@@ -1,4 +1,4 @@
-# Publish pipeline for Windows Package Manager.
+# Publish pipeline for WinGet.
 
 # Name of the run
 name: '$(Build.DefinitionName)-$(Build.DefinitionVersion)-$(Date:yyyyMMdd)-$(Rev:r)'
@@ -29,31 +29,30 @@ jobs:
   - task: AzureCLI@1
     displayName: 'Azure Setup'
     inputs:
-      azureSubscription: '$(PackageManagerSubscription)'
+      azureSubscription: '$(WinGet.Subscription)'
       scriptLocation: inlineScript
       inlineScript: 'az storage blob download-batch -d . --pattern * -s servicewrapper --output none'
     env:
       AZURE_STORAGE_CONNECTION_STRING: $(ValidationStorageAccountConnectionString)
 
-  # PackageManager setup
-  - script: 'pkgmgr_publish_setup.cmd'
-    name: 'pkgmgrsetup'
-    displayName: 'PackageManager Setup'
+  # WinGet setup
+  - script: 'winget_publish_setup.cmd'
+    name: 'wingetsetup'
+    displayName: 'WinGet Setup'
     workingDirectory: scripts
     env:
       HOST_KEY: $(AzureFunctionHostKey)
-      SIGN_ENDPOINT: $(PackageManagerSignEndpoint)
+      SIGN_ENDPOINT: $(AzFuncSignEndpoint)
 
   - task: CmdLine@2
     displayName: 'Validate Commits'
     inputs:
-      script: 'PackageManagerServiceWrapper.exe validate-commits --operationId %BUILD_BUILDNUMBER%'
+      script: 'WinGetSvcWrapper.exe validate-commits --operationId %BUILD_BUILDNUMBER%'
       failOnStderr: true
     condition: succeeded()
     env:
       AzureWebJobsStorage: $(ValidationStorageAccountConnectionString)
-      CacheConnectionString: $(ActiveCacheConnectionString)
-      PackageManagerEnvironment: $(PackageManagerEnvironment)
+      CacheConnectionString: $(CacheStorageAccountConnectionString)
       PackagePublisher: $(PackagePublisher)
       DIApplicationInsightKey: $(DIApplicationInsightKey)
 
@@ -65,11 +64,11 @@ jobs:
   dependsOn:
     - 'CommitProcessing'
   variables:
-    HostKeySecret: $[ dependencies.CommitProcessing.outputs['pkgmgrsetup.hostkey']]
-    SignEndpointSecret: $[ dependencies.CommitProcessing.outputs['pkgmgrsetup.signEndpoint']]
+    HostKeySecret: $[ dependencies.CommitProcessing.outputs['wingetsetup.hostkey']]
+    SignEndpointSecret: $[ dependencies.CommitProcessing.outputs['wingetsetup.signEndpoint']]
   steps:
 
-  # Sign Package Manager package.
+  # Sign package.
   - task: AzureFunction@1
     displayName: 'Signing package'
     inputs:
@@ -78,6 +77,8 @@ jobs:
       body: |
         {
         "operationId": "$(Build.BuildNumber)",
+        "PlanUrl": "$(system.CollectionUri)",
+        "HubName": "$(system.HostType)",
         "pipelineType": "CommitPipeline",
         "ProjectId": "$(system.TeamProjectId)",
         "PlanId": "$(system.PlanId)", 
@@ -104,7 +105,7 @@ jobs:
   - task: AzureCLI@1
     displayName: 'Azure Setup'
     inputs:
-      azureSubscription: '$(PackageManagerSubscription)'
+      azureSubscription: '$(WinGet.Subscription)'
       scriptLocation: inlineScript
       inlineScript: 'az storage blob download-batch -d . --pattern * -s servicewrapper --output none'
     env:
@@ -114,10 +115,10 @@ jobs:
   - task: CmdLine@2
     displayName: 'Publish'
     inputs:
-      script: 'PackageManagerServiceWrapper.exe publish --operationId %BUILD_BUILDNUMBER%'
+      script: 'WinGetSvcWrapper.exe publish --operationId %BUILD_BUILDNUMBER%'
       failOnStderr: true
     condition: succeeded()
     env:
       AzureWebJobsStorage: $(ValidationStorageAccountConnectionString)
-      CacheConnectionString: $(ActiveCacheConnectionString)
+      CacheConnectionString: $(CacheStorageAccountConnectionString)
       DIApplicationInsightKey: $(DIApplicationInsightKey)
