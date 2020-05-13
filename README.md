@@ -35,3 +35,7 @@ provided by the bot. You will only need to do this once across all repos using o
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/).
 For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or
 contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
+
+For the avoidance of doubt, you may not make any Submissions linking to third party materials if such 
+Submission is prohibited by the applicable third party and/or otherwise violates such third party's rights.
+
