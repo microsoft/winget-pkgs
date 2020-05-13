@@ -1,4 +1,16 @@
-# Authoring a Manifest
+# Welcome to the Windows Package Manager Community repo
+This repository contains the manifest files for the **Windows Package Manager**.  You are highly encouraged to submit manifests for your favorite tool.
+
+The **Windows Package Manager** is and open source client.  You will find the source code [here](https://github.com/microsoft/winget-cli).
+
+# Submitting a Package
+To submit a package to the repository, you should follow these steps:
+1) Follow the **Contribuing** guidelines below
+2) Author a Manifest
+3) Submit your PR
+4) Respond to any feedback
+
+## Authoring a Manifest
 
 The minimal manifest syntax is below.
 
@@ -21,6 +33,10 @@ Installers:
     Sha256: string # SHA256 calculated from installer
 # ManifestVersion: 0.1.0
 ```
+
+## Author a Manifest
+## Submit your PR
+## Respond to PR feedback
 
 # Contributing
 
