@@ -1,3 +1,26 @@
+# Authoring a Manifest
+
+The minimal manifest syntax is below.
+
+Current limitations are:
+* One manifest per PR
+* One installer per PR
+
+Be sure the manifest filename matches the `Version` and the manifest is located in the folder path matching `manifests\<publisher>\<package>\<version>.yaml`
+
+```yaml
+Id: string # publisher.package format
+Publisher: string # the name of the publisher
+Name: string # the name of the application
+Version: string # version numbering format
+License: string # the open source license or copyright
+InstallerType: string # enumeration of supported installer types (exe, msi, msix)
+Installers:
+  - Arch: string # enumeration of supported architectures
+    URL: string # path to download installation file
+    Sha256: string # SHA256 calculated from installer
+# ManifestVersion: 0.1.0
+```
 
 # Contributing
 
