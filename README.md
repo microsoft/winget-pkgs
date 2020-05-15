@@ -1,4 +1,17 @@
-# Authoring a Manifest
+# Welcome to the Windows Package Manager Community repo
+This repository contains the manifest files for the **Windows Package Manager**.  You are highly encouraged to submit manifests for your favorite application.
+
+The **Windows Package Manager** is and open source client.  You will find the source code [here](https://github.com/microsoft/winget-cli).
+
+# Submitting a Package
+To submit a package to the repository, you should follow these steps:
+1) Follow the **Contributing** guidelines below
+2) Author a Manifest
+3) Test your manifest
+4) Submit your PR
+5) Respond to any feedback
+
+## Authoring a Manifest
 
 The minimal manifest syntax is below.
 
@@ -21,6 +34,31 @@ Installers:
     Sha256: string # SHA256 calculated from installer
 # ManifestVersion: 0.1.0
 ```
+
+### Using the YAMLCreate.ps1
+To help author manifest files, we have provided a YAMLCreate.ps1 powershell script located in the Tools folder.  
+The script will prompt you for the URL to the installer, then will prompt you to fill in metadata.
+
+I recommend running the script in the location where you want to produce the manifest file.  For example: `manifests\<publisher>\<package>\`.  After successful completion, it will produce the YAML file.
+
+
+## Test your manifest
+Now that you have authored your manifest, you should make sure it works as expected.
+1) Verify the syntax.  You can do that by typing the following command: `winget validate <manifest>`
+2) Test the install.  You can do that by installing the manifest: `winget install -m <manifest.`
+For more details, see [packages](https://docs.microsoft.com/windows/package-manager/package).
+
+## Submit your PR
+With the manifes verified, you will need to submit a PR.  Your manifest should be located in the folder path matching `manifests\<publisher>\<package>\<version>.yaml`
+
+### Validation Process
+The PR request will go through a validation process.  During the process, the PR request will get labels to help drive the validation.
+In the event of a failure, the BOT will suggest where the problem is with the submission and assign the PR back to you.  
+
+### Respond to PR feedback
+If the PR has been assigned to you, a timer is triggered.  You will have 7 days to resolve the issue, or the PR will be closed automatically by the BOT.  
+
+For a list of the BOT labels, see [packages](https://docs.microsoft.com/windows/package-manager/package).
 
 # Contributing
 
