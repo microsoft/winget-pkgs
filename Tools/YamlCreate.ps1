@@ -179,7 +179,7 @@ write-host $Hash.Hash  -ForeGroundColor White
 
 $string = "    InstallerType: " + $InstallerType
 write-output $string | out-file $filename -append
-write-host "Sha256 "  -ForeGroundColor Blue -NoNewLine
+write-host "InstallerType "  -ForeGroundColor Blue -NoNewLine
 write-host $InstallerType  -ForeGroundColor White
 
 
