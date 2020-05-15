@@ -67,8 +67,8 @@ $architecture = Read-Host -Prompt 'Enter the architecture (x86, x64, arm, arm64,
 
 $LicenseUrl = Read-Host -Prompt   '[OPTIONAL] Enter the license URL'
 $AppMoniker = Read-Host -Prompt   '[OPTIONAL] Enter the AppMoniker (friendly name). For example: vscode'
-$Tags = Read-Host -Prompt   '[OPTIONAL] Enter any tags that would be useful to discover this tool'
-$Homepage = Read-Host -Prompt   '[OPTIONAL] Enter the homepage of the application'
+$Tags = Read-Host -Prompt   '[OPTIONAL] Enter any tags that would be useful to discover this tool. For example: zip, c++'
+$Homepage = Read-Host -Prompt   '[OPTIONAL] Enter the Url to the homepage of the application'
 $Description = Read-Host -Prompt '[OPTIONAL] Enter a description of the application'
 
 
