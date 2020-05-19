@@ -1,7 +1,7 @@
 # Troubleshooting Errors
 Many of the issues can be caught before submitting your PR, if you follow these steps:
 1) Validate the manifest file by running ```winget validate <manifest>```
-2) Run the installer with the local installer.  This will verify the Sha256 HASH.  ```winget install -m <manifest>```
+2) Run the installer with the manifest on your local machine.  This will verify the Sha256 HASH.  ```winget install --manifest <manifest>``` or ```winget install -m <manifest>```
 
 Once those steps pass, here are some troubleshooting tips.
 
