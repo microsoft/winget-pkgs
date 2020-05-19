@@ -1,7 +1,7 @@
 # Welcome to the Windows Package Manager Community repo
 This repository contains the manifest files for the **Windows Package Manager**.  You are highly encouraged to submit manifests for your favorite application.
 
-The **Windows Package Manager** is and open source client.  You will find the source code [here](https://github.com/microsoft/winget-cli).
+The **Windows Package Manager** is an open source client.  You will find the source code [here](https://github.com/microsoft/winget-cli).
 
 # Submitting a Package
 To submit a package to the repository, you should follow these steps:
