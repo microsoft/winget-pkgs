@@ -45,7 +45,7 @@ I recommend running the script in the location where you want to produce the man
 ## Test your manifest
 Now that you have authored your manifest, you should make sure it works as expected.
 1) Verify the syntax.  You can do that by typing the following command: `winget validate <manifest>`
-2) Test the install.  You can do that by installing the manifest: `winget install -m <manifest.`
+2) Test the install.  You can do that by installing the manifest: `winget install -m <manifest>`
 For more details, see [packages](https://docs.microsoft.com/windows/package-manager/package).
 
 ## Submit your PR
