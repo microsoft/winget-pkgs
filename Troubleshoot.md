@@ -17,7 +17,7 @@ Here are some common mistakes not discovered by the winget validater.
 
 ```folder path: publisher\name```
 
-2) Check for typos in the version.  The file name of the manifest must match the '''Version''' in the manifest  
+2) Check for typos in the version.  The file name of the manifest must match the ```Version``` in the manifest  
 
 ```Version: 123.456```  
 
