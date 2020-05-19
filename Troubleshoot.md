@@ -3,7 +3,7 @@ Many of the issues can be caught before submitting your PR, if you follow these 
 1) Validate the manifest file by running ```winget validate <manifest>```
 2) Run the installer with the manifest on your local machine.  This will verify the Sha256 HASH.  ```winget install --manifest <manifest>``` or ```winget install -m <manifest>```
 
-Once those steps pass, here are some troubleshooting tips.
+Once those steps pass, here are some troubleshooting tips:
 
 ## Manifest-Validation-Error 
 Manifest validation errors indicate that there is a problem with the manifest file.  Many of the issues can be caught before submitting your PR, if you validated the manifest file before submission:  ```winget validate <manifest>```
