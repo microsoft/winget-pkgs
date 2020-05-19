@@ -49,7 +49,7 @@ Now that you have authored your manifest, you should make sure it works as expec
 For more details, see [packages](https://docs.microsoft.com/windows/package-manager/package).
 
 ## Submit your PR
-With the manifes verified, you will need to submit a PR.  Your manifest should be located in the folder path matching `manifests\<publisher>\<package>\<version>.yaml`
+With the manifest verified, you will need to submit a PR.  Your manifest should be located in the folder path matching `manifests\<publisher>\<package>\<version>.yaml`
 
 ### Validation Process
 The PR request will go through a validation process.  During the process, the PR request will get labels to help drive the validation.
