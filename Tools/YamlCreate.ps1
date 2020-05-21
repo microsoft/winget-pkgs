@@ -17,7 +17,13 @@ $OFS
 write-host "Downloading URL.  This will take awhile...  "  -ForeGroundColor Blue 
 $WebClient = New-Object System.Net.WebClient
 # This downloads the installer
-$WebClient.DownloadFile($URL, $Hashfile)
+try {
+    $WebClient.DownloadFile($URL, $Hashfile)
+}
+catch {
+    write-host "Error downloading file. Please run the script again." -ForeGroundColor red
+    exit 1
+}
 
 # This command will get the sha256 hash
 $Hash=get-filehash $hashfile
