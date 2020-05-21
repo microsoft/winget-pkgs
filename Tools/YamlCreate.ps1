@@ -65,11 +65,14 @@ While ($architecture -notin ("x86", "x64", "arm", "arm64", "neutral")) {
 $architecture = Read-Host -Prompt 'Enter the architecture (x86, x64, arm, arm64, Neutral)'
 } 
 
-$LicenseUrl = Read-Host -Prompt   '[OPTIONAL] Enter the license URL'
 $AppMoniker = Read-Host -Prompt   '[OPTIONAL] Enter the AppMoniker (friendly name). For example: vscode'
 $Tags = Read-Host -Prompt   '[OPTIONAL] Enter any tags that would be useful to discover this tool. For example: zip, c++'
 $Homepage = Read-Host -Prompt   '[OPTIONAL] Enter the Url to the homepage of the application'
 $Description = Read-Host -Prompt '[OPTIONAL] Enter a description of the application'
+do {
+    $LicenseUrl = Read-Host -Prompt   '[OPTIONAL] Enter the license URL'
+} while ($LicenseUrl.Length -ge 1 -AND ($LicenseUrl.Length -lt 10 -or $LicenseUrl.Length -gt 2000))
+
 
 
 
