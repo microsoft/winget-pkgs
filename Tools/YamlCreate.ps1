@@ -34,7 +34,7 @@ write-host "File downloaded. Please Fill out required fields. "
 # Read in metadata
 ##########################################
 
-While ($id.Length -eq 0) {
+While ($id.Length -lt 4 -or $id.length -ge 255) {
 write-host  'Enter the package Id, in the following format <Publisher.Appname>' 
 $id = Read-Host -Prompt 'For example: Microsoft.Excel'
 }
