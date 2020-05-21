@@ -40,11 +40,11 @@ $id = Read-Host -Prompt 'For example: Microsoft.Excel'
 }
 
 $host.UI.RawUI.ForegroundColor = "White"
-While ($publisher.Length  -eq 0) {
+While ($publisher.Length  -eq 0 -or $publisher.length -ge 128) {
 $publisher = Read-Host -Prompt 'Enter the publisher'
 }
 
-While ($AppName.Length -eq 0) {
+While ($AppName.Length -eq 0 -or $AppName.length -ge 128) {
 $AppName = Read-Host -Prompt 'Enter the application name'
 }
 
@@ -53,15 +53,15 @@ $version = Read-Host -Prompt 'Enter the version. For example: 1.0, 1.0.0.0'
 $filename=$version + ".yaml"
 }
 
-While ($License.Length  -eq 0) {
+While ($License.Length  -eq 0 -or $License.length -ge 40) {
 $License = Read-Host -Prompt 'Enter the License, For example: MIT, or Copyright (c) Microsoft Corporation'
 }
 
-While ($InstallerType.Length  -eq 0) {
+While ($InstallerType -notin ("exe","msi","msix","inno","nullsoft","appx","wix","zip")) {
 $InstallerType = Read-Host -Prompt   'Enter the InstallerType. For example: exe, msi, msix, inno, nullsoft'
 }
 
-While ($architecture.Length  -eq 0) {
+While ($architecture -notin ("x86", "x64", "arm", "arm64", "neutral")) {
 $architecture = Read-Host -Prompt 'Enter the architecture (x86, x64, arm, arm64, Neutral)'
 } 
 
