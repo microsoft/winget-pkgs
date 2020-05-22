@@ -10,7 +10,11 @@ if (-not (Test-Path -Path $Manifest)) {
 # and properly handle error (beware winget always return True as status code)
 # winget.exe validate $Manifest
 
+# Initialize Temp Folder
+
 $tempFolder = Join-Path -Path $PSScriptRoot -ChildPath 'SandboxTest_Temp'
+
+Get-ChildItem $tempFolder -Recurse -Exclude *.appx, *.appxbundle | Remove-Item -Force
 
 Copy-Item -Path $Manifest -Destination $tempFolder
 
