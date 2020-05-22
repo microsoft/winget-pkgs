@@ -13,7 +13,7 @@ To submit a package to the repository, you should follow these steps:
 
 ## Authoring a Manifest
 
-The minimal manifest syntax is below.
+The minimal manifest syntax is below. For a complete schema and examples, see [package manifest](https://docs.microsoft.com/en-us/windows/package-manager/package/manifest).
 
 Current limitations are:
 * One manifest per PR
