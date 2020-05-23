@@ -6,9 +6,12 @@ if (-not (Test-Path -Path $Manifest)) {
   throw 'The Manifest file does not exist.'
 }
 
-# TODO: Validate manifest file
-# and properly handle error (beware winget always return True as status code)
-# winget.exe validate $Manifest
+# Validate manifest file
+# We can't rely on status code until https://github.com/microsoft/winget-cli/issues/312 is solved
+$validationResult = winget.exe validate $Manifest
+if ($validationResult -like '*Manifest validation failed.*') {
+  throw 'Manifest validation failed.'
+}
 
 # Initialize Temp Folder
 
