@@ -55,7 +55,7 @@ $sandboxTestWsbContent = @"
     </MappedFolder>
   </MappedFolders>
   <LogonCommand>
-  <Command>PowerShell Start-Process PowerShell -WorkingDirectory '$tempFolderInSandbox' -ArgumentList '–ExecutionPolicy Bypass -NoExit -File $bootstrapPs1FileName'</Command>
+  <Command>PowerShell Start-Process PowerShell -WorkingDirectory '$tempFolderInSandbox' -ArgumentList '-ExecutionPolicy Bypass -NoExit -File $bootstrapPs1FileName'</Command>
   </LogonCommand>
 </Configuration>
 "@
