@@ -41,6 +41,10 @@ The script will prompt you for the URL to the installer, then will prompt you to
 
 I recommend running the script in the location where you want to produce the manifest file.  For example: `manifests\<publisher>\<package>\`.  After successful completion, it will produce the YAML file.
 
+### Using Windows Package Manager YAML Generator
+If you prefer to use a GUI to generate YAML files, you can use the **Windows Package Manager YAML Generator**. It is available as an app [in the Microsoft Store](https://www.microsoft.com/en-us/p/windows-package-manager-yaml-generator/9p3n60fs22k5) and the code is also available [on GitHub](https://github.com/ptorr-msft/WinGetYamlGenerator).
+
+Although the Windows Package Manager YAML Generator can create YAML files with multiple installers, winget does not support more than one installer for now.
 
 ## Test your manifest
 Now that you have authored your manifest, you should make sure it works as expected.
