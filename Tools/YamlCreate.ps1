@@ -70,8 +70,12 @@ $AppMoniker = Read-Host -Prompt   '[OPTIONAL] Enter the AppMoniker (friendly nam
 $Tags = Read-Host -Prompt   '[OPTIONAL] Enter any tags that would be useful to discover this tool. For example: zip, c++'
 $Homepage = Read-Host -Prompt   '[OPTIONAL] Enter the Url to the homepage of the application'
 $Description = Read-Host -Prompt '[OPTIONAL] Enter a description of the application'
+
+# Only prompt for silent switches if $InstallerType is "exe"
+if ($InstallerType.ToLower() -eq "exe") {
 $Silent = Read-Host -Prompt '[OPTIONAL] Enter the silent install switch'
 $SilentWithProgress = Read-Host -Prompt '[OPTIONAL] Enter the silent (with progress) install switch'
+}
 
 
 ##########################################
