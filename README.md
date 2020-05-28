@@ -62,7 +62,7 @@ In the event of a failure, the BOT will suggest where the problem is with the su
 ### Respond to PR feedback
 If the PR has been assigned to you, a timer is triggered.  You will have 7 days to resolve the issue, or the PR will be closed automatically by the BOT.  
 
-The installer may be identified as malware. If you believe it's a false positive you can submit the installer to the defender team for analysis from [here](https://www.microsoft.com/en-us/wdsi/filesubmission).
+The installer may be identified as malware. If you believe it's a false positive you can submit the installer to the defender team for analysis from [here](https://www.microsoft.com/wdsi/filesubmission).
 
 For a list of the BOT labels, see [packages](https://docs.microsoft.com/windows/package-manager/package).
 
