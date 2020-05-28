@@ -39,6 +39,8 @@ $dependencies = @($desktopAppInstaller, $vcLibs, $vcLibsUwp)
 
 $tempFolder = Join-Path -Path $PSScriptRoot -ChildPath 'SandboxTest_Temp'
 
+New-Item $tempFolder -ItemType Directory -ea 0 | Out-Null
+
 Get-ChildItem $tempFolder -Recurse -Exclude $dependencies.fileName | Remove-Item -Force
 
 Copy-Item -Path $Manifest -Destination $tempFolder
