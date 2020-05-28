@@ -1,6 +1,9 @@
 # Parse Arguments
 
-param ([string] $Manifest = $(throw "The Manifest parameter is required."))
+Param(
+  [Parameter(Mandatory, HelpMessage = "The path for the Manifest.")]
+  [String] $Manifest
+)
 
 if (-not (Test-Path -Path $Manifest -PathType Leaf)) {
   throw 'The Manifest file does not exist.'
