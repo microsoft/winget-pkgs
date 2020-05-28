@@ -52,6 +52,7 @@ $WebClient = New-Object System.Net.WebClient
 foreach ($dependency in $dependencies) {
   $dependency.file = Join-Path -Path $tempFolder -ChildPath $dependency.fileName
 
+  # Only download if the file does not exist, or its hash does not match.
   if (-Not ((Test-Path -Path $dependency.file -PathType Leaf) -And $dependency.hash -eq $(get-filehash $dependency.file).Hash)) {
     # This downloads the file
     Write-Host "Downloading $($dependency.url) ..."
@@ -59,10 +60,10 @@ foreach ($dependency in $dependencies) {
       $WebClient.DownloadFile($dependency.url, $dependency.file) 
     } 
     catch {
-      throw "Error downloading $($dependency.url)"
+      throw "Error downloading $($dependency.url) ."
     }
     if (-not ($dependency.hash -eq $(get-filehash $dependency.file).Hash)) {
-      throw 'Hashes not match'
+      throw 'Hashes do not match, try gain.'
     }
   }
 }
