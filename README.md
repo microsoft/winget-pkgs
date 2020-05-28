@@ -48,9 +48,19 @@ Although the Windows Package Manager YAML Generator can create YAML files with m
 
 ## Test your manifest
 Now that you have authored your manifest, you should make sure it works as expected.
+
+### Locally
 1) Verify the syntax.  You can do that by typing the following command: `winget validate <manifest>`
 2) Test the install.  You can do that by installing the manifest: `winget install -m <manifest>`
 For more details, see [packages](https://docs.microsoft.com/windows/package-manager/package).
+
+### In Windows Sandbox
+You can use the [`Tools\SandboxTest.ps1`](Tools/SandboxTest.ps1) script for testing a manifest installation in [Windows Sandbox](https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-sandbox/windows-sandbox-overview). The manifest will be also validated.
+
+Just provide the path to manifest as parameter:
+```powershell
+.\Tools\SandboxTest.ps1 <path-to-manifest>
+```
 
 ## Submit your PR
 With the manifest verified, you will need to submit a PR.  Your manifest should be located in the folder path matching `manifests\<publisher>\<package>\<version>.yaml`
