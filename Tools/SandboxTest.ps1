@@ -20,11 +20,11 @@ if ($validationResult -like '*Manifest validation failed.*') {
 
 if (-Not (Test-Path "$env:windir\System32\WindowsSandbox.exe")) {
   Write-Error -Category NotInstalled -Message @'
-Windows Sandbox does not seem to be avaiable. Check the following url for prerequisites and further details:    
+Windows Sandbox does not seem to be available. Check the following URL for prerequisites and further details:    
 https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-sandbox/windows-sandbox-overview
   
 You can run the following command in an elevated PowerShell for enabling Windows Sandbox:
-Get-WindowsOptionalFeature -Online -FeatureName 'Containers-DisposableClientVM'
+Enable-WindowsOptionalFeature -Online -FeatureName 'Containers-DisposableClientVM'
 '@ -ErrorAction Stop
 }
 
