@@ -11,6 +11,8 @@ To submit a package to the repository, you should follow these steps:
 4) Submit your PR
 5) Respond to any feedback
 
+Note: Please check that the package's manifest you intend to submit does not already exist in the manifests folder, and that there is no open PR for it to avoid duplicates.
+
 ## Authoring a Manifest
 
 The minimal manifest syntax is below.
