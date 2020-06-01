@@ -30,7 +30,7 @@ License: string # the open source license or copyright
 InstallerType: string # enumeration of supported installer types (exe, msi, msix)
 Installers:
   - Arch: string # enumeration of supported architectures
-    URL: string # path to download installation file
+    Url: string # path to download installation file
     Sha256: string # SHA256 calculated from installer
 # ManifestVersion: 0.1.0
 ```
