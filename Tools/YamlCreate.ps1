@@ -17,7 +17,13 @@ $OFS
 write-host "Downloading URL.  This will take awhile...  "  -ForeGroundColor Blue 
 $WebClient = New-Object System.Net.WebClient
 # This downloads the installer
-$WebClient.DownloadFile($URL, $Hashfile)
+try {
+    $WebClient.DownloadFile($URL, $Hashfile)
+}
+catch {
+    write-host "Error downloading file. Please run the script again." -ForeGroundColor red
+    exit 1
+}
 
 # This command will get the sha256 hash
 $Hash=get-filehash $hashfile
@@ -34,17 +40,17 @@ write-host "File downloaded. Please Fill out required fields. "
 # Read in metadata
 ##########################################
 
-While ($id.Length -eq 0) {
+While ($id.Length -lt 4 -or $id.length -ge 255) {
 write-host  'Enter the package Id, in the following format <Publisher.Appname>' 
 $id = Read-Host -Prompt 'For example: Microsoft.Excel'
 }
 
 $host.UI.RawUI.ForegroundColor = "White"
-While ($publisher.Length  -eq 0) {
+While ($publisher.Length  -eq 0 -or $publisher.length -ge 128) {
 $publisher = Read-Host -Prompt 'Enter the publisher'
 }
 
-While ($AppName.Length -eq 0) {
+While ($AppName.Length -eq 0 -or $AppName.length -ge 128) {
 $AppName = Read-Host -Prompt 'Enter the application name'
 }
 
@@ -53,23 +59,37 @@ $version = Read-Host -Prompt 'Enter the version. For example: 1.0, 1.0.0.0'
 $filename=$version + ".yaml"
 }
 
-While ($License.Length  -eq 0) {
+While ($License.Length  -eq 0 -or $License.length -ge 40) {
 $License = Read-Host -Prompt 'Enter the License, For example: MIT, or Copyright (c) Microsoft Corporation'
 }
 
-While ($InstallerType.Length  -eq 0) {
+While ($InstallerType -notin ("exe","msi","msix","inno","nullsoft","appx","wix","zip")) {
 $InstallerType = Read-Host -Prompt   'Enter the InstallerType. For example: exe, msi, msix, inno, nullsoft'
 }
 
-While ($architecture.Length  -eq 0) {
+While ($architecture -notin ("x86", "x64", "arm", "arm64", "neutral")) {
 $architecture = Read-Host -Prompt 'Enter the architecture (x86, x64, arm, arm64, Neutral)'
 } 
 
-$LicenseUrl = Read-Host -Prompt   '[OPTIONAL] Enter the license URL'
-$AppMoniker = Read-Host -Prompt   '[OPTIONAL] Enter the AppMoniker (friendly name). For example: vscode'
-$Tags = Read-Host -Prompt   '[OPTIONAL] Enter any tags that would be useful to discover this tool. For example: zip, c++'
-$Homepage = Read-Host -Prompt   '[OPTIONAL] Enter the Url to the homepage of the application'
-$Description = Read-Host -Prompt '[OPTIONAL] Enter a description of the application'
+do {
+    $LicenseUrl = Read-Host -Prompt   '[OPTIONAL] Enter the license URL'
+} while ($LicenseUrl.Length -ge 1 -AND ($LicenseUrl.Length -lt 10 -or $LicenseUrl.Length -gt 2000))
+
+do {
+    $AppMoniker = Read-Host -Prompt   '[OPTIONAL] Enter the AppMoniker (friendly name). For example: vscode'
+} while ($AppMoniker.Length -gt 40)
+
+do {
+    $Tags = Read-Host -Prompt   '[OPTIONAL] Enter any tags that would be useful to discover this tool. For example: zip, c++'
+} while ($Tags.length -gt 40)
+
+do {
+    $Homepage = Read-Host -Prompt   '[OPTIONAL] Enter the Url to the homepage of the application'
+} while ($Homepage.length -ge 1 -AND ($Homepage.Length -lt 10 -or $Homepage.Length -gt 2000))
+
+do {
+    $Description = Read-Host -Prompt '[OPTIONAL] Enter a description of the application'
+} while ($Description.length -gt 500)
 
 
 
