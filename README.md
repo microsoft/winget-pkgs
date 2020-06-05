@@ -28,10 +28,12 @@ Publisher: string # the name of the publisher
 Name: string # the name of the application
 Version: string # version numbering format
 License: string # the open source license or copyright
-InstallerType: string # enumeration of supported installer types (exe, msi, msix)
+InstallerType: string # enumeration of supported installer types (exe, msi, msix, inno, wix, nullsoft, appx)
 Installers:
   - Arch: string # enumeration of supported architectures
+
     URL: string # path to download installation file of the specified version
+
     Sha256: string # SHA256 calculated from installer
 # ManifestVersion: 0.1.0
 ```
@@ -44,6 +46,8 @@ I recommend running the script in the location where you want to produce the man
 
 ### Using Windows Package Manager YAML Generator
 If you prefer to use a GUI to generate YAML files, you can use the **Windows Package Manager YAML Generator**. It is available as an app [in the Microsoft Store](https://www.microsoft.com/en-us/p/windows-package-manager-yaml-generator/9p3n60fs22k5) and the code is also available [on GitHub](https://github.com/ptorr-msft/WinGetYamlGenerator).
+
+Although the Windows Package Manager YAML Generator can create YAML files with multiple installers, winget does not support more than one installer for now.
 
 ## Test your manifest
 Now that you have authored your manifest, you should make sure it works as expected.
