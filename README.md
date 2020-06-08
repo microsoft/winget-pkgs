@@ -13,7 +13,7 @@ To submit a package to the repository, you should follow these steps:
 
 ## Authoring a Manifest
 
-The minimal manifest syntax is below.
+The minimal manifest syntax is below. Additional information on writing manifests can be found on [Microsoft Docs](https://docs.microsoft.com/en-us/windows/package-manager/package/manifest) or on the [v0.1 manifest spec](https://github.com/microsoft/winget-cli/blob/master/doc/ManifestSpecv0.1.md).
 
 Current limitations are:
 * One manifest per PR
@@ -27,7 +27,7 @@ Publisher: string # the name of the publisher
 Name: string # the name of the application
 Version: string # version numbering format
 License: string # the open source license or copyright
-InstallerType: string # enumeration of supported installer types (exe, msi, msix)
+InstallerType: string # enumeration of supported installer types (exe, msi, msix, inno, wix, nullsoft, appx)
 Installers:
   - Arch: string # enumeration of supported architectures
     Url: string # path to download installation file
