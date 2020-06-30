@@ -5,9 +5,6 @@
 
 # define variables
 $OFS = "`r`n"  #linebreak
-$tempFolder=$env:TEMP; 
-# Create a temporary file to generate a sha256 value.
-$Hashfile=$tempFolder + "\TempfileName.txt"
 
 # Prompt for URL
 While ($url.Length -eq 0) {
@@ -17,16 +14,19 @@ $OFS
 write-host "Downloading URL.  This will take awhile...  "  -ForeGroundColor Blue 
 $WebClient = New-Object System.Net.WebClient
 # This downloads the installer
+
 try {
-    $WebClient.DownloadFile($URL, $Hashfile)
+    $stream = $WebClient.OpenRead($URL)
 }
 catch {
     write-host "Error downloading file. Please run the script again." -ForeGroundColor red
     exit 1
 }
 
+
 # This command will get the sha256 hash
-$Hash=get-filehash $hashfile
+$Hash=get-filehash -InputStream $stream
+$stream.Close()
 
 
 $string = "Url: " + $URL  ;
