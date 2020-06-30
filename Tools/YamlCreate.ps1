@@ -233,6 +233,11 @@ write-host $SilentWithProgress  -ForeGroundColor White
 
 }
 
+$FileOldEnconding = Get-Content -Raw $filename
+Remove-Item -Path $filename
+$Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
+[System.IO.File]::WriteAllLines($filename, $FileOldEnconding, $Utf8NoBomEncoding)
+
 $string = "Yaml file created:  " + $filename
 write-output $string
 
