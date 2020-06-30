@@ -9,6 +9,8 @@ assignees: ''
 
 <!-- 
 🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨
+**This template is for the community package repository and related automation**
+Create issues related to the winget.exe client [here](https://github.com/microsoft/winget-cli/issues/new?assignees=&labels=&template=Bug_Report.md&title=}
 
 I ACKNOWLEDGE THE FOLLOWING BEFORE PROCEEDING:
 1. If I delete this entire template and go my own path, the core team may close my issue without further explanation or engagement.
