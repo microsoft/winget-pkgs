@@ -31,9 +31,7 @@ License: string # the open source license or copyright
 InstallerType: string # enumeration of supported installer types (exe, msi, msix, inno, wix, nullsoft, appx)
 Installers:
   - Arch: string # enumeration of supported architectures
-
-    URL: string # path to download installation file of the specified version
-
+    Url: string # path to download installation file of the specified version
     Sha256: string # SHA256 calculated from installer
 # ManifestVersion: 0.1.0
 ```
