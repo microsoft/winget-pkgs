@@ -64,7 +64,7 @@ In the event of a failure, the BOT will suggest where the problem is with the su
 ### Respond to PR feedback
 If the PR has been assigned to you, a timer is triggered.  You will have 7 days to resolve the issue, or the PR will be closed automatically by the BOT.  
 
-For a list of the BOT labels, see [packages](https://docs.microsoft.com/windows/package-manager/package).
+For a list of the BOT labels, see [packages](https://docs.microsoft.com/windows/package-manager/package/repository#pull-request-labels).
 
 # Contributing
 
