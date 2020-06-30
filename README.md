@@ -11,6 +11,8 @@ To submit a package to the repository, you should follow these steps:
 4) Submit your PR
 5) Respond to any feedback
 
+>Note: Please check that the package's manifest you intend to submit does not already exist in the manifests folder, and that there are no open PRs for it in order to avoid duplicates.
+
 ## Authoring a Manifest
 
 The minimal manifest syntax is below. Additional information on writing manifests can be found on [Microsoft Docs](https://docs.microsoft.com/en-us/windows/package-manager/package/manifest) or on the [v0.1 manifest spec](https://github.com/microsoft/winget-cli/blob/master/doc/ManifestSpecv0.1.md).
