@@ -32,7 +32,7 @@ License: string # the open source license or copyright
 InstallerType: string # enumeration of supported installer types (exe, msi, msix, inno, wix, nullsoft, appx)
 Installers:
   - Arch: string # enumeration of supported architectures
-    Url: string # path to download installation file
+    Url: string # path to download installation file of the specified version
     Sha256: string # SHA256 calculated from installer
 # ManifestVersion: 0.1.0
 ```
@@ -84,4 +84,3 @@ contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additio
 
 For the avoidance of doubt, you may not make any Submissions linking to third party materials if such 
 Submission is prohibited by the applicable third party and/or otherwise violates such third party's rights.
-
