@@ -11,6 +11,8 @@ To submit a package to the repository, you should follow these steps:
 4) Submit your PR
 5) Respond to any feedback
 
+>Note: Please check that the package's manifest you intend to submit does not already exist in the manifests folder, and that there are no open PRs for it in order to avoid duplicates.
+
 ## Authoring a Manifest
 
 The minimal manifest syntax is below. Additional information on writing manifests can be found on [Microsoft Docs](https://docs.microsoft.com/en-us/windows/package-manager/package/manifest) or on the [v0.1 manifest spec](https://github.com/microsoft/winget-cli/blob/master/doc/ManifestSpecv0.1.md).
@@ -30,7 +32,7 @@ License: string # the open source license or copyright
 InstallerType: string # enumeration of supported installer types (exe, msi, msix, inno, wix, nullsoft, appx)
 Installers:
   - Arch: string # enumeration of supported architectures
-    Url: string # path to download installation file
+    Url: string # path to download installation file of the specified version
     Sha256: string # SHA256 calculated from installer
 # ManifestVersion: 0.1.0
 ```
@@ -62,7 +64,9 @@ In the event of a failure, the BOT will suggest where the problem is with the su
 ### Respond to PR feedback
 If the PR has been assigned to you, a timer is triggered.  You will have 7 days to resolve the issue, or the PR will be closed automatically by the BOT.  
 
-For a list of the BOT labels, see [packages](https://docs.microsoft.com/windows/package-manager/package).
+The installer may be identified as malware. If you believe it's a false positive you can submit the installer to the defender team for analysis from [here](https://www.microsoft.com/wdsi/filesubmission).
+
+For a list of the BOT labels, see [packages](https://docs.microsoft.com/windows/package-manager/package/repository#pull-request-labels).
 
 # Contributing
 
@@ -80,4 +84,3 @@ contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additio
 
 For the avoidance of doubt, you may not make any Submissions linking to third party materials if such 
 Submission is prohibited by the applicable third party and/or otherwise violates such third party's rights.
-

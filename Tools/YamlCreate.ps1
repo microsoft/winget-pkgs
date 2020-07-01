@@ -5,9 +5,6 @@
 
 # define variables
 $OFS = "`r`n"  #linebreak
-$tempFolder=$env:TEMP; 
-# Create a temporary file to generate a sha256 value.
-$Hashfile=$tempFolder + "\TempfileName.txt"
 
 # Prompt for URL
 While ($url.Length -eq 0) {
@@ -17,16 +14,19 @@ $OFS
 write-host "Downloading URL.  This will take awhile...  "  -ForeGroundColor Blue 
 $WebClient = New-Object System.Net.WebClient
 # This downloads the installer
+
 try {
-    $WebClient.DownloadFile($URL, $Hashfile)
+    $stream = $WebClient.OpenRead($URL)
 }
 catch {
     write-host "Error downloading file. Please run the script again." -ForeGroundColor red
     exit 1
 }
 
+
 # This command will get the sha256 hash
-$Hash=get-filehash $hashfile
+$Hash=get-filehash -InputStream $stream
+$stream.Close()
 
 
 $string = "Url: " + $URL  ;
@@ -91,6 +91,11 @@ do {
     $Description = Read-Host -Prompt '[OPTIONAL] Enter a description of the application'
 } while ($Description.length -gt 500)
 
+# Only prompt for silent switches if $InstallerType is "exe"
+if ($InstallerType.ToLower() -eq "exe") {
+$Silent = Read-Host -Prompt '[OPTIONAL] Enter the silent install switch'
+$SilentWithProgress = Read-Host -Prompt '[OPTIONAL] Enter the silent (with progress) install switch'
+}
 
 
 ##########################################
@@ -132,6 +137,7 @@ write-host "LicenseUrl: "  -ForeGroundColor Blue -NoNewLine
 write-host $LicenseUrl  -ForeGroundColor White
 
 }
+
 if (!($AppMoniker.length -eq 0)) {
 
 $string = "AppMoniker: " + $AppMoniker
@@ -140,6 +146,7 @@ write-host "AppMoniker: "  -ForeGroundColor Blue -NoNewLine
 write-host $AppMoniker  -ForeGroundColor White
 
 }
+
 if (!($Commands.length -eq 0)) {
 
 $string = "Commands: " + $Commands
@@ -148,6 +155,7 @@ write-host "Commands: "  -ForeGroundColor Blue -NoNewLine
 write-host $Commands  -ForeGroundColor White
 
 }
+
 if (!($Tags.length -eq 0)) {
 
 $string = "Tags: " + $Tags
@@ -156,7 +164,6 @@ write-host "Tags: "  -ForeGroundColor Blue -NoNewLine
 write-host $Tags  -ForeGroundColor White
 
 }
-
 
 if (!($Description.length -eq 0)) {
 
@@ -167,8 +174,6 @@ write-host $Description  -ForeGroundColor White
 
 }
 
-
-
 if (!($Homepage.Length -eq 0))  {
 
 $string = "Homepage: "+ $Homepage
@@ -178,6 +183,7 @@ write-host $Homepage  -ForeGroundColor White
 
 }
 
+
 write-output "Installers:" | out-file $filename -append 
 
 
@@ -185,7 +191,6 @@ $string = "  - Arch: " + $architecture
 write-output $string | out-file $filename -append
 write-host "Arch: "  -ForeGroundColor Blue -NoNewLine
 write-host $architecture  -ForeGroundColor White
-
 
 $string = "    Url: " + $Url
 write-output $string | out-file $filename -append
@@ -202,6 +207,36 @@ write-output $string | out-file $filename -append
 write-host "InstallerType "  -ForeGroundColor Blue -NoNewLine
 write-host $InstallerType  -ForeGroundColor White
 
+if (!($Silent.Length) -eq 0 -Or !($SilentWithProgress.Length -eq 0))  {
+
+$string = "    Switches:"
+write-output $string | out-file $filename -append
+write-host "Switches "  -ForeGroundColor Blue -NoNewLine
+
+}
+
+if (!($Silent.Length -eq 0))  {
+
+$string = "      Silent: " + $Silent
+write-output $string | out-file $filename -append
+write-host "Silent "  -ForeGroundColor Blue -NoNewLine
+write-host $Silent  -ForeGroundColor White
+
+}
+
+if (!($SilentWithProgress.Length -eq 0))  {
+
+$string = "      SilentWithProgress: " + $SilentWithProgress
+write-output $string | out-file $filename -append
+write-host "SilentWithProgress "  -ForeGroundColor Blue -NoNewLine
+write-host $SilentWithProgress  -ForeGroundColor White
+
+}
+
+$FileOldEnconding = Get-Content -Raw $filename
+Remove-Item -Path $filename
+$Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
+[System.IO.File]::WriteAllLines($filename, $FileOldEnconding, $Utf8NoBomEncoding)
 
 $string = "Yaml file created:  " + $filename
 write-output $string
