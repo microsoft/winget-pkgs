@@ -234,9 +234,18 @@ if (!($SilentWithProgress.Length -eq 0)) {
 
 }
 
-$RepositoryRoot = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Source)
-$FileLocation = Join-Path "manifests" $publisher $AppName
-$AbsoluteFileLocation = Join-Path $RepositoryRoot $FileLocation
+if ((Get-Location) -match "winget-pkgs\\manifests\\(?<publisher>.+?)\\(?<appname>.+?)$") {
+    $FileLocation = Join-Path "\" "manifests" $Matches.publisher $Matches.appname
+    $AbsoluteFileLocation = Get-Location
+} elseif ((Get-Location) -match "winget-pkgs\\manifests\\(?<publisher>.+?)$") {
+    $appNameDirectory = $id.Split('.')[1]
+    $FileLocation = Join-Path "\" "manifests" $Matches.publisher $appNameDirectory
+    $AbsoluteFileLocation = Join-Path (Get-Location) $appNameDirectory
+} else {
+    $RepositoryRoot = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Source)
+    $FileLocation = Join-Path "\" "manifests" $id.Split('.')[0..1]
+    $AbsoluteFileLocation = Join-Path $RepositoryRoot $FileLocation
+}
 if (-not (Test-Path $AbsoluteFileLocation)) {
     New-Item $AbsoluteFileLocation -ItemType Directory | Out-Null
 }
@@ -248,4 +257,4 @@ $Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
 $string = "Yaml file created:  " + $filename
 write-output $string
 
-write-host "Now place this file in the following location: \$FileLocation  "
+write-host "Now place this file in the following location: $FileLocation  "
