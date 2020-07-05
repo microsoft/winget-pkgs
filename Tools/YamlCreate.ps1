@@ -234,12 +234,18 @@ if (!($SilentWithProgress.Length -eq 0)) {
 
 }
 
+$RepositoryRoot = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Source)
+$FileLocation = Join-Path "manifests" $publisher $AppName
+$AbsoluteFileLocation = Join-Path $RepositoryRoot $FileLocation
+if (-not (Test-Path $AbsoluteFileLocation)) {
+    New-Item $AbsoluteFileLocation -ItemType Directory
+}
 $FileOldEnconding = Get-Content -Raw $filename
 Remove-Item -Path $filename
 $Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
-[System.IO.File]::WriteAllLines($filename, $FileOldEnconding, $Utf8NoBomEncoding)
+[System.IO.File]::WriteAllLines((Join-Path $AbsoluteFileLocation $filename), $FileOldEnconding, $Utf8NoBomEncoding)
 
 $string = "Yaml file created:  " + $filename
 write-output $string
 
-write-host "Now place this file in the following location: \manifests\<publisher>\<appname>  "
+write-host "Now place this file in the following location: \$FileLocation  "
