@@ -238,7 +238,7 @@ $RepositoryRoot = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand
 $FileLocation = Join-Path "manifests" $publisher $AppName
 $AbsoluteFileLocation = Join-Path $RepositoryRoot $FileLocation
 if (-not (Test-Path $AbsoluteFileLocation)) {
-    New-Item $AbsoluteFileLocation -ItemType Directory
+    New-Item $AbsoluteFileLocation -ItemType Directory | Out-Null
 }
 $FileOldEnconding = Get-Content -Raw $filename
 Remove-Item -Path $filename
