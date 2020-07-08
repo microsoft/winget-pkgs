@@ -5,6 +5,7 @@
 
 # define variables
 $OFS = "`r`n"  #linebreak
+$CurrentDirectory = Get-Location
 
 # Prompt for URL
 While ($url.Length -eq 0) {
@@ -57,6 +58,7 @@ $AppName = Read-Host -Prompt 'Enter the application name'
 While ($version.Length  -eq 0) {
 $version = Read-Host -Prompt 'Enter the version. For example: 1.0, 1.0.0.0'
 $filename=$version + ".yaml"
+$filename = Join-Path $CurrentDirectory $filename
 }
 
 While ($License.Length  -eq 0 -or $License.length -ge 40) {
@@ -199,19 +201,19 @@ write-host $Url -ForeGroundColor White
 
 $string = "    Sha256: " + $Hash.Hash
 write-output $string | out-file $filename -append
-write-host "Sha256 "  -ForeGroundColor Blue -NoNewLine
+write-host "Sha256: "  -ForeGroundColor Blue -NoNewLine
 write-host $Hash.Hash  -ForeGroundColor White
 
 $string = "    InstallerType: " + $InstallerType
 write-output $string | out-file $filename -append
-write-host "InstallerType "  -ForeGroundColor Blue -NoNewLine
+write-host "InstallerType: "  -ForeGroundColor Blue -NoNewLine
 write-host $InstallerType  -ForeGroundColor White
 
 if (!($Silent.Length) -eq 0 -Or !($SilentWithProgress.Length -eq 0))  {
 
 $string = "    Switches:"
 write-output $string | out-file $filename -append
-write-host "Switches "  -ForeGroundColor Blue -NoNewLine
+write-host "Switches: "  -ForeGroundColor Blue -NoNewLine
 
 }
 
