@@ -153,6 +153,12 @@ Write-Host @'
 
 '@
 Add-AppxPackage -Path '$($desktopAppInstaller.pathInSandbox)' -DependencyPath '$($vcLibs.pathInSandbox)','$($vcLibsUwp.pathInSandbox)'
+
+Write-Host @'
+
+Tip: you can type 'Update-Environment' to update your environment variables, such as after installing a new software.
+
+'@
 "@
 
 if (-Not [String]::IsNullOrWhiteSpace($Manifest)) {
@@ -195,11 +201,7 @@ $Script
 
 $bootstrapPs1Content += @"
 
-Write-Host @'
-
-Tip: you can type 'Update-Environment' to update your environment variables, such as after installing a new software.
-
-'@
+Write-Host
 "@
 
 $bootstrapPs1FileName = 'Bootstrap.ps1'
