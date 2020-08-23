@@ -1,39 +1,66 @@
-# Parse Arguments
+# Parse arguments
 
 Param(
-  [Parameter(Mandatory, HelpMessage = "The path for the Manifest.")]
-  [String] $Manifest
+  [Parameter(Position=0, HelpMessage = "The Manifest to install in the Sandbox.")]
+  [String] $Manifest,
+  [Parameter(Position=1, HelpMessage = "The script to run in the Sandbox.")]
+  [ScriptBlock] $Script,
+  [Parameter(HelpMessage = "The folder to map in the Sandbox.")]
+  [String] $MapFolder = $pwd
 )
 
-if (-not (Test-Path -Path $Manifest -PathType Leaf)) {
-  throw 'The Manifest file does not exist.'
+$ErrorActionPreference = "Stop"
+
+$mapFolder = [System.IO.Path]::GetFullPath($MapFolder)
+
+if (-Not (Test-Path -Path $mapFolder -PathType Container)) {
+  Write-Error -Category InvalidArgument -Message 'The provided MapFolder is not a folder.'
 }
 
 # Validate manifest file
-# We can't rely on status code until https://github.com/microsoft/winget-cli/issues/312 is solved
-$validationResult = winget.exe validate $Manifest
-if ($validationResult -like '*Manifest validation failed.*') {
-  throw 'Manifest validation failed.'
+
+if (-Not [String]::IsNullOrWhiteSpace($Manifest)) {
+  Write-Host '--> Validating Manifest'
+
+  if (-Not (Test-Path -Path $Manifest -PathType Leaf)) {
+    throw 'The Manifest file does not exist.'
+  }
+
+  winget.exe validate $Manifest
+  if (-Not $?) {
+    throw 'Manifest validation failed.'
+  }
 }
 
 # Check if Windows Sandbox is enabled
 
-if (-Not (Test-Path "$env:windir\System32\WindowsSandbox.exe")) {
+if (-Not (Get-Command 'WindowsSandbox' -ErrorAction SilentlyContinue)) {
   Write-Error -Category NotInstalled -Message @'
-Windows Sandbox does not seem to be available. Check the following URL for prerequisites and further details:    
+Windows Sandbox does not seem to be available. Check the following URL for prerequisites and further details:
 https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-sandbox/windows-sandbox-overview
-  
+
 You can run the following command in an elevated PowerShell for enabling Windows Sandbox:
-Enable-WindowsOptionalFeature -Online -FeatureName 'Containers-DisposableClientVM'
-'@ -ErrorAction Stop
+$ Enable-WindowsOptionalFeature -Online -FeatureName 'Containers-DisposableClientVM'
+'@
 }
+
+# Close Windows Sandbox
+
+$sandbox = Get-Process 'WindowsSandboxClient' -ErrorAction SilentlyContinue
+if ($sandbox) {
+  Write-Host
+  Write-Host '--> Closing Windows Sandbox'
+  $sandbox | Stop-Process
+  Start-Sleep -Seconds 5
+}
+Remove-Variable sandbox
 
 # Set dependencies
 
 $desktopAppInstaller = @{
   fileName = 'Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.appxbundle'
-  url      = 'https://github.com/microsoft/winget-cli/releases/download/v0.1.41821-preview/Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.appxbundle'
-  hash     = '3fff593736c8272a640b5ba0e48343ccc0bbc1630b11abf057c22cedb6ac8ec1'
+  url      = 'https://github.com/microsoft/winget-cli/releases/download/v0.1.42101-preview/Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.appxbundle'
+  hash     = '2ea378a034b836efc6e49751dde253e6c43105d2d584527347ee127b734aa6c6'
 }
 
 $vcLibs = @{
@@ -52,28 +79,32 @@ $dependencies = @($desktopAppInstaller, $vcLibs, $vcLibsUwp)
 
 # Initialize Temp Folder
 
-$tempFolder = Join-Path -Path $PSScriptRoot -ChildPath 'SandboxTest_Temp'
+$tempFolderName = 'SandboxTest'
+$tempFolder = Join-Path -Path ([System.IO.Path]::GetTempPath()) -ChildPath $tempFolderName
 
-New-Item $tempFolder -ItemType Directory -ea 0 | Out-Null
+New-Item $tempFolder -ItemType Directory -ErrorAction SilentlyContinue | Out-Null
 
 Get-ChildItem $tempFolder -Recurse -Exclude $dependencies.fileName | Remove-Item -Force
 
-Copy-Item -Path $Manifest -Destination $tempFolder
-
 # Download dependencies
 
-$WebClient = New-Object System.Net.WebClient
+Write-Host
+Write-Host '--> Downloading dependencies'
 
+$desktopInSandbox = 'C:\Users\WDAGUtilityAccount\Desktop'
+
+$WebClient = New-Object System.Net.WebClient
 foreach ($dependency in $dependencies) {
   $dependency.file = Join-Path -Path $tempFolder -ChildPath $dependency.fileName
+  $dependency.pathInSandbox = Join-Path -Path $desktopInSandbox -ChildPath (Join-Path -Path $tempFolderName -ChildPath $dependency.fileName)
 
   # Only download if the file does not exist, or its hash does not match.
   if (-Not ((Test-Path -Path $dependency.file -PathType Leaf) -And $dependency.hash -eq $(get-filehash $dependency.file).Hash)) {
     # This downloads the file
     Write-Host "Downloading $($dependency.url) ..."
-    try { 
-      $WebClient.DownloadFile($dependency.url, $dependency.file) 
-    } 
+    try {
+      $WebClient.DownloadFile($dependency.url, $dependency.file)
+    }
     catch {
       throw "Error downloading $($dependency.url) ."
     }
@@ -85,14 +116,90 @@ foreach ($dependency in $dependencies) {
 
 # Create Bootstrap script
 
-$manifestFileName = Split-Path $Manifest -Leaf
+$manifestFileName = $Manifest
 
-$bootstrapPs1Content = @"
-Set-PSDebug -Trace 1
+# See: https://stackoverflow.com/a/14382047/12156188
+$bootstrapPs1Content = @'
+function Update-Environment {
+  $locations = 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Environment',
+               'HKCU:\Environment'
 
-Add-AppxPackage -Path '$($desktopAppInstaller.fileName)' -DependencyPath '$($vcLibs.fileName)','$($vcLibsUwp.fileName)'
+  $locations | ForEach-Object {
+    $k = Get-Item $_
+    $k.GetValueNames() | ForEach-Object {
+      $name  = $_
+      $value = $k.GetValue($_)
 
+      if ($userLocation -and $name -ieq 'PATH') {
+        $Env:Path += ";$value"
+      } else {
+        Set-Item -Path Env:$name -Value $value
+      }
+    }
+
+    $userLocation = $true
+  }
+}
+'@
+
+$bootstrapPs1Content += @"
+Write-Host @'
+--> Installing WinGet
+
+
+
+
+
+
+'@
+Add-AppxPackage -Path '$($desktopAppInstaller.pathInSandbox)' -DependencyPath '$($vcLibs.pathInSandbox)','$($vcLibsUwp.pathInSandbox)'
+"@
+
+if (-Not [String]::IsNullOrWhiteSpace($Manifest)) {
+  $bootstrapPs1Content += @"
+
+Write-Host @'
+
+--> Installing the Manifest $manifestFileName
+
+'@
 winget install -m '$manifestFileName'
+"@
+
+  $bootstrapPs1Content += @'
+
+Write-Host @"
+
+--> Refreshing environment variables
+"@
+Update-Environment
+'@
+}
+
+if (-Not [String]::IsNullOrWhiteSpace($Script)) {
+  $bootstrapPs1Content += @"
+
+Write-Host @'
+
+--> Running the following script:
+
+{
+$Script
+}
+
+'@
+
+$Script
+"@
+}
+
+$bootstrapPs1Content += @"
+
+Write-Host @'
+
+Tip: you can type 'Update-Environment' to update your environment variables, such as after installing a new software.
+
+'@
 "@
 
 $bootstrapPs1FileName = 'Bootstrap.ps1'
@@ -100,7 +207,8 @@ $bootstrapPs1Content | Out-File (Join-Path -Path $tempFolder -ChildPath $bootstr
 
 # Create Wsb file
 
-$tempFolderInSandbox = Join-Path -Path 'C:\Users\WDAGUtilityAccount\Desktop' -ChildPath (Split-Path $tempFolder -Leaf)
+$bootstrapPs1InSandbox = Join-Path -Path $desktopInSandbox -ChildPath (Join-Path -Path $tempFolderName -ChildPath $bootstrapPs1FileName)
+$mapFolderInSandbox = Join-Path -Path $desktopInSandbox -ChildPath (Split-Path -Path $mapFolder -Leaf)
 
 $sandboxTestWsbContent = @"
 <Configuration>
@@ -109,9 +217,12 @@ $sandboxTestWsbContent = @"
       <HostFolder>$tempFolder</HostFolder>
       <ReadOnly>true</ReadOnly>
     </MappedFolder>
+    <MappedFolder>
+      <HostFolder>$mapFolder</HostFolder>
+    </MappedFolder>
   </MappedFolders>
   <LogonCommand>
-  <Command>PowerShell Start-Process PowerShell -WorkingDirectory '$tempFolderInSandbox' -ArgumentList '-ExecutionPolicy Bypass -NoExit -File $bootstrapPs1FileName'</Command>
+  <Command>PowerShell Start-Process PowerShell -WindowStyle Maximized -WorkingDirectory '$mapFolderInSandbox' -ArgumentList '-ExecutionPolicy Bypass -NoExit -NoLogo -File $bootstrapPs1InSandbox'</Command>
   </LogonCommand>
 </Configuration>
 "@
@@ -120,6 +231,32 @@ $sandboxTestWsbFileName = 'SandboxTest.wsb'
 $sandboxTestWsbFile = Join-Path -Path $tempFolder -ChildPath $sandboxTestWsbFileName
 $sandboxTestWsbContent | Out-File $sandboxTestWsbFile
 
-Write-Host 'Starting Windows Sandbox and trying to install the manifest file.'
+Write-Host @"
+
+--> Starting Windows Sandbox, and:
+    - Mounting the following directories:
+      - $tempFolder as read-only
+      - $mapFolder as read-and-write
+    - Installing WinGet
+"@
+
+if (-Not [String]::IsNullOrWhiteSpace($Manifest)) {
+  Write-Host @"
+    - Installing the Manifest $manifestFileName
+    - Refreshing environment variables
+"@
+}
+
+if (-Not [String]::IsNullOrWhiteSpace($Script)) {
+  Write-Host @"
+    - Running the following script:
+
+{
+$Script
+}
+"@
+}
+
+Write-Host
 
 WindowsSandbox $SandboxTestWsbFile
