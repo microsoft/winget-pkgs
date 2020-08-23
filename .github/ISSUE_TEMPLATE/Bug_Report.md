@@ -7,7 +7,7 @@ assignees: ''
 
 ---
 
-Create issues related to the winget.exe client [here](https://github.com/microsoft/winget-cli/issues/new?assignees=&labels=&template=Bug_Report.md&title=}
+Create issues related to the winget.exe client [here](https://github.com/microsoft/winget-cli/issues/new?template=Bug_Report.md)
 
 <!-- 
 🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨
