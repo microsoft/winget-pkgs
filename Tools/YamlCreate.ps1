@@ -1,6 +1,6 @@
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 
-# The intent of this file is to help you generate a YAML file for publishing 
+# The intent of this file is to help you generate a YAML file for publishing
 # to the Windows Package Manager repository.
 
 # define variables
@@ -9,10 +9,11 @@ $CurrentDirectory = Get-Location
 
 # Prompt for URL
 While ($url.Length -eq 0) {
-$url = Read-Host -Prompt 'Enter the URL to the installer' }
+    $url = Read-Host -Prompt 'Enter the URL to the installer'
+}
 $OFS
 
-write-host "Downloading URL.  This will take awhile...  "  -ForeGroundColor Blue 
+write-host "Downloading URL.  This will take awhile...  "  -ForeGroundColor Blue
 $WebClient = New-Object System.Net.WebClient
 # This downloads the installer
 
@@ -26,52 +27,51 @@ catch {
 
 
 # This command will get the sha256 hash
-$Hash=get-filehash -InputStream $stream
+$Hash = get-filehash -InputStream $stream
 $stream.Close()
 
 
 $string = "Url: " + $URL  ;
 Write-Output $string
-$string =  "Sha256: " + $Hash.Hash
+$string = "Sha256: " + $Hash.Hash
 $string
 $OFS
-write-host "File downloaded. Please Fill out required fields. "   
+write-host "File downloaded. Please Fill out required fields. "
 
 ##########################################
 # Read in metadata
 ##########################################
 
 While ($id.Length -lt 4 -or $id.length -ge 255) {
-write-host  'Enter the package Id, in the following format <Publisher.Appname>' 
-$id = Read-Host -Prompt 'For example: Microsoft.Excel'
+    write-host  'Enter the package Id, in the following format <Publisher.Appname>'
+    $id = Read-Host -Prompt 'For example: Microsoft.Excel'
 }
 
 $host.UI.RawUI.ForegroundColor = "White"
-While ($publisher.Length  -eq 0 -or $publisher.length -ge 128) {
-$publisher = Read-Host -Prompt 'Enter the publisher'
+While ($publisher.Length -eq 0 -or $publisher.length -ge 128) {
+    $publisher = Read-Host -Prompt 'Enter the publisher'
 }
 
 While ($AppName.Length -eq 0 -or $AppName.length -ge 128) {
-$AppName = Read-Host -Prompt 'Enter the application name'
+    $AppName = Read-Host -Prompt 'Enter the application name'
 }
 
-While ($version.Length  -eq 0) {
-$version = Read-Host -Prompt 'Enter the version. For example: 1.0, 1.0.0.0'
-$filename=$version + ".yaml"
-$filename = Join-Path $CurrentDirectory $filename
+While ($version.Length -eq 0) {
+    $version = Read-Host -Prompt 'Enter the version. For example: 1.0, 1.0.0.0'
+    $filename = $version + ".yaml"
 }
 
-While ($License.Length  -eq 0 -or $License.length -ge 40) {
-$License = Read-Host -Prompt 'Enter the License, For example: MIT, or Copyright (c) Microsoft Corporation'
+While ($License.Length -eq 0 -or $License.length -ge 40) {
+    $License = Read-Host -Prompt 'Enter the License, For example: MIT, or Copyright (c) Microsoft Corporation'
 }
 
-While ($InstallerType -notin ("exe","msi","msix","inno","nullsoft","appx","wix","zip")) {
-$InstallerType = Read-Host -Prompt   'Enter the InstallerType. For example: exe, msi, msix, inno, nullsoft'
+While ($InstallerType -notin ("exe", "msi", "msix", "inno", "nullsoft", "appx", "wix", "zip")) {
+    $InstallerType = Read-Host -Prompt   'Enter the InstallerType. For example: exe, msi, msix, inno, nullsoft'
 }
 
 While ($architecture -notin ("x86", "x64", "arm", "arm64", "neutral")) {
-$architecture = Read-Host -Prompt 'Enter the architecture (x86, x64, arm, arm64, Neutral)'
-} 
+    $architecture = Read-Host -Prompt 'Enter the architecture (x86, x64, arm, arm64, Neutral)'
+}
 
 do {
     $LicenseUrl = Read-Host -Prompt   '[OPTIONAL] Enter the license URL'
@@ -95,8 +95,8 @@ do {
 
 # Only prompt for silent switches if $InstallerType is "exe"
 if ($InstallerType.ToLower() -eq "exe") {
-$Silent = Read-Host -Prompt '[OPTIONAL] Enter the silent install switch'
-$SilentWithProgress = Read-Host -Prompt '[OPTIONAL] Enter the silent (with progress) install switch'
+    $Silent = Read-Host -Prompt '[OPTIONAL] Enter the silent install switch'
+    $SilentWithProgress = Read-Host -Prompt '[OPTIONAL] Enter the silent (with progress) install switch'
 }
 
 
@@ -108,7 +108,7 @@ $OFS
 $string = "Id: " + $id
 write-output $string | out-file $filename
 write-host "Id: "  -ForeGroundColor Blue -NoNewLine
-write-host $id  -ForeGroundColor White  
+write-host $id  -ForeGroundColor White
 
 $string = "Version: " + $Version
 write-output $string | out-file $filename -append
@@ -133,60 +133,60 @@ write-host $License  -ForeGroundColor White
 
 if (!($LicenseUrl.length -eq 0)) {
 
-$string = "LicenseUrl: " + $LicenseUrl
-write-output $string | out-file $filename -append
-write-host "LicenseUrl: "  -ForeGroundColor Blue -NoNewLine
-write-host $LicenseUrl  -ForeGroundColor White
+    $string = "LicenseUrl: " + $LicenseUrl
+    write-output $string | out-file $filename -append
+    write-host "LicenseUrl: "  -ForeGroundColor Blue -NoNewLine
+    write-host $LicenseUrl  -ForeGroundColor White
 
 }
 
 if (!($AppMoniker.length -eq 0)) {
 
-$string = "AppMoniker: " + $AppMoniker
-write-output $string | out-file $filename -append
-write-host "AppMoniker: "  -ForeGroundColor Blue -NoNewLine
-write-host $AppMoniker  -ForeGroundColor White
+    $string = "AppMoniker: " + $AppMoniker
+    write-output $string | out-file $filename -append
+    write-host "AppMoniker: "  -ForeGroundColor Blue -NoNewLine
+    write-host $AppMoniker  -ForeGroundColor White
 
 }
 
 if (!($Commands.length -eq 0)) {
 
-$string = "Commands: " + $Commands
-write-output $string | out-file $filename -append
-write-host "Commands: "  -ForeGroundColor Blue -NoNewLine
-write-host $Commands  -ForeGroundColor White
+    $string = "Commands: " + $Commands
+    write-output $string | out-file $filename -append
+    write-host "Commands: "  -ForeGroundColor Blue -NoNewLine
+    write-host $Commands  -ForeGroundColor White
 
 }
 
 if (!($Tags.length -eq 0)) {
 
-$string = "Tags: " + $Tags
-write-output $string | out-file $filename -append
-write-host "Tags: "  -ForeGroundColor Blue -NoNewLine
-write-host $Tags  -ForeGroundColor White
+    $string = "Tags: " + $Tags
+    write-output $string | out-file $filename -append
+    write-host "Tags: "  -ForeGroundColor Blue -NoNewLine
+    write-host $Tags  -ForeGroundColor White
 
 }
 
 if (!($Description.length -eq 0)) {
 
-$string = "Description: " + $Description
-write-output $string | out-file $filename -append
-write-host "Description: "  -ForeGroundColor Blue -NoNewLine
-write-host $Description  -ForeGroundColor White
+    $string = "Description: " + $Description
+    write-output $string | out-file $filename -append
+    write-host "Description: "  -ForeGroundColor Blue -NoNewLine
+    write-host $Description  -ForeGroundColor White
 
 }
 
-if (!($Homepage.Length -eq 0))  {
+if (!($Homepage.Length -eq 0)) {
 
-$string = "Homepage: "+ $Homepage
-write-output $string | out-file $filename -append
-write-host "Homepage: "  -ForeGroundColor Blue -NoNewLine
-write-host $Homepage  -ForeGroundColor White
+    $string = "Homepage: " + $Homepage
+    write-output $string | out-file $filename -append
+    write-host "Homepage: "  -ForeGroundColor Blue -NoNewLine
+    write-host $Homepage  -ForeGroundColor White
 
 }
 
 
-write-output "Installers:" | out-file $filename -append 
+write-output "Installers:" | out-file $filename -append
 
 
 $string = "  - Arch: " + $architecture
@@ -209,38 +209,54 @@ write-output $string | out-file $filename -append
 write-host "InstallerType: "  -ForeGroundColor Blue -NoNewLine
 write-host $InstallerType  -ForeGroundColor White
 
-if (!($Silent.Length) -eq 0 -Or !($SilentWithProgress.Length -eq 0))  {
+if (!($Silent.Length) -eq 0 -Or !($SilentWithProgress.Length -eq 0)) {
 
-$string = "    Switches:"
-write-output $string | out-file $filename -append
-write-host "Switches: "  -ForeGroundColor Blue -NoNewLine
-
-}
-
-if (!($Silent.Length -eq 0))  {
-
-$string = "      Silent: " + $Silent
-write-output $string | out-file $filename -append
-write-host "Silent "  -ForeGroundColor Blue -NoNewLine
-write-host $Silent  -ForeGroundColor White
+    $string = "    Switches:"
+    write-output $string | out-file $filename -append
+    write-host "Switches: "  -ForeGroundColor Blue -NoNewLine
 
 }
 
-if (!($SilentWithProgress.Length -eq 0))  {
+if (!($Silent.Length -eq 0)) {
 
-$string = "      SilentWithProgress: " + $SilentWithProgress
-write-output $string | out-file $filename -append
-write-host "SilentWithProgress "  -ForeGroundColor Blue -NoNewLine
-write-host $SilentWithProgress  -ForeGroundColor White
+    $string = "      Silent: " + $Silent
+    write-output $string | out-file $filename -append
+    write-host "Silent: "  -ForeGroundColor Blue -NoNewLine
+    write-host $Silent  -ForeGroundColor White
 
 }
 
+if (!($SilentWithProgress.Length -eq 0)) {
+
+    $string = "      SilentWithProgress: " + $SilentWithProgress
+    write-output $string | out-file $filename -append
+    write-host "SilentWithProgress: "  -ForeGroundColor Blue -NoNewLine
+    write-host $SilentWithProgress  -ForeGroundColor White
+
+}
+
+if ($CurrentDirectory -match "winget-pkgs\\manifests\\(?<publisher>.+?)\\(?<appname>.+?)$") {
+    $FileLocation = Join-Path "\" "manifests" $Matches.publisher $Matches.appname
+    $AbsoluteFileLocation = $CurrentDirectory
+} elseif ($CurrentDirectory -match "winget-pkgs\\manifests\\(?<publisher>.+?)$") {
+    $appNameDirectory = $id.Split('.')[1]
+    $FileLocation = Join-Path "\" "manifests" $Matches.publisher $appNameDirectory
+    $AbsoluteFileLocation = Join-Path $CurrentDirectory $appNameDirectory
+} else {
+    $RepositoryRoot = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Source)
+    $FileLocation = Join-Path "\" "manifests" $id.Split('.')[0..1]
+    $AbsoluteFileLocation = Join-Path $RepositoryRoot $FileLocation
+}
+if (-not (Test-Path $AbsoluteFileLocation)) {
+    New-Item $AbsoluteFileLocation -ItemType Directory | Out-Null
+}
 $FileOldEnconding = Get-Content -Raw $filename
 Remove-Item -Path $filename
+$filename = Join-Path $AbsoluteFileLocation $filename
 $Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
 [System.IO.File]::WriteAllLines($filename, $FileOldEnconding, $Utf8NoBomEncoding)
 
 $string = "Yaml file created:  " + $filename
 write-output $string
 
-write-host "Now place this file in the following location: \manifests\<publisher>\<appname>  " 
+write-host "Now place this file in the following location: $FileLocation  "
