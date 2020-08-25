@@ -24,7 +24,7 @@
 #>
 
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-$OFS = "`r`n"  #linebreak
+$NewLine = [System.Environment]::NewLine
 
 # https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_functions?view=powershell-7#filters
 filter TrimString {
@@ -36,7 +36,7 @@ filter TrimString {
 while ([string]::IsNullOrWhiteSpace($URL)) {
     $URL = Read-Host -Prompt 'Enter the URL to the installer' | TrimString
 }
-Write-Host $OFS
+Write-Host $NewLine
 Write-Host "Downloading URL. This will take awhile..." -ForegroundColor Blue
 $WebClient = New-Object System.Net.WebClient
 
@@ -55,7 +55,7 @@ finally {
 Write-Host "Url: $URL"
 Write-Host "Sha256: $Hash"
 
-Write-Host $OFS
+Write-Host $NewLine
 Write-Host "File downloaded. Please Fill out required fields."
 
 #endregion
@@ -129,10 +129,10 @@ if ($InstallerType -ieq "exe") {
 
 # YAML files should always start with the document start separator "---"
 # https://yaml.org/spec/1.2/spec.html#id2760395
-$string = "---$OFS"
+$string = "---$NewLine"
 Write-Output $string | Out-File $ManifestName
 
-Write-Host $OFS
+Write-Host $NewLine
 $string = "Id: $ID"
 Write-Output $string | Out-File $ManifestName -Append
 Write-Host "Id: " -ForegroundColor Blue -NoNewline
@@ -254,7 +254,7 @@ $ManifestPath = Join-Path $AppFolder $ManifestName
 $Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
 [System.IO.File]::WriteAllLines($ManifestPath, $FileOldEncoding, $Utf8NoBomEncoding)
 
-Write-Host $OFS
+Write-Host $NewLine
 Write-Host "Yaml file created: $ManifestPath"
 
 #endregion
