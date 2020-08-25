@@ -127,9 +127,14 @@ if ($InstallerType -ieq "exe") {
 ##########################################
 #region Write metadata
 
+# YAML files should always start with the document start separator "---"
+# https://yaml.org/spec/1.2/spec.html#id2760395
+$string = "---$OFS"
+Write-Output $string | Out-File $ManifestName
+
 Write-Host $OFS
 $string = "Id: $ID"
-Write-Output $string | Out-File $ManifestName
+Write-Output $string | Out-File $ManifestName -Append
 Write-Host "Id: " -ForegroundColor Blue -NoNewline
 Write-Host $ID -ForegroundColor White
 
