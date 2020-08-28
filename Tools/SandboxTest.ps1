@@ -1,9 +1,9 @@
 # Parse arguments
 
 Param(
-  [Parameter(Position=0, HelpMessage = "The Manifest to install in the Sandbox.")]
+  [Parameter(Position = 0, HelpMessage = "The Manifest to install in the Sandbox.")]
   [String] $Manifest,
-  [Parameter(Position=1, HelpMessage = "The script to run in the Sandbox.")]
+  [Parameter(Position = 1, HelpMessage = "The script to run in the Sandbox.")]
   [ScriptBlock] $Script,
   [Parameter(HelpMessage = "The folder to map in the Sandbox.")]
   [String] $MapFolder = $pwd
@@ -86,6 +86,8 @@ New-Item $tempFolder -ItemType Directory -ErrorAction SilentlyContinue | Out-Nul
 
 Get-ChildItem $tempFolder -Recurse -Exclude $dependencies.fileName | Remove-Item -Force
 
+Copy-Item -Path $Manifest -Destination $tempFolder
+
 # Download dependencies
 
 Write-Host
@@ -116,7 +118,8 @@ foreach ($dependency in $dependencies) {
 
 # Create Bootstrap script
 
-$manifestFileName = $Manifest
+$manifestFileName = Split-Path $Manifest -Leaf
+$manifestPathInSandbox = Join-Path -Path $desktopInSandbox -ChildPath (Join-Path -Path $tempFolderName -ChildPath $manifestFileName)
 
 # See: https://stackoverflow.com/a/14382047/12156188
 $bootstrapPs1Content = @'
@@ -169,7 +172,7 @@ Write-Host @'
 --> Installing the Manifest $manifestFileName
 
 '@
-winget install -m '$manifestFileName'
+winget install -m '$manifestPathInSandbox'
 "@
 
   $bootstrapPs1Content += @'
