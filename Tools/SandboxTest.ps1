@@ -11,7 +11,7 @@ Param(
 
 $ErrorActionPreference = "Stop"
 
-$mapFolder = [System.IO.Path]::GetFullPath($MapFolder)
+$mapFolder = (Resolve-Path -Path $MapFolder).Path
 
 if (-Not (Test-Path -Path $mapFolder -PathType Container)) {
   Write-Error -Category InvalidArgument -Message 'The provided MapFolder is not a folder.'
