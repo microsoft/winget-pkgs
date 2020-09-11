@@ -30,6 +30,8 @@ if (-Not [String]::IsNullOrWhiteSpace($Manifest)) {
   if (-Not $?) {
     throw 'Manifest validation failed.'
   }
+
+  Write-Host
 }
 
 # Check if Windows Sandbox is enabled
@@ -48,10 +50,12 @@ $ Enable-WindowsOptionalFeature -Online -FeatureName 'Containers-DisposableClien
 
 $sandbox = Get-Process 'WindowsSandboxClient' -ErrorAction SilentlyContinue
 if ($sandbox) {
-  Write-Host
   Write-Host '--> Closing Windows Sandbox'
+
   $sandbox | Stop-Process
   Start-Sleep -Seconds 5
+
+  Write-Host
 }
 Remove-Variable sandbox
 
@@ -65,7 +69,7 @@ $desktopAppInstaller = @{
 
 $vcLibs = @{
   fileName = 'Microsoft.VCLibs.140.00_14.0.27810.0_x64__8wekyb3d8bbwe.Appx'
-  url      = 'https://github.com/felipecassiors/winget-pkgs/raw/da8548d90369eb8f69a4738dc1474caaffb58e12/Tools/SandboxTest_Temp/Microsoft.VCLibs.140.00_14.0.27810.0_x64__8wekyb3d8bbwe.Appx'
+  url      = 'https://raw.githubusercontent.com/felipecassiors/winget-pkgs/da8548d90369eb8f69a4738dc1474caaffb58e12/Tools/SandboxTest_Temp/Microsoft.VCLibs.140.00_14.0.27810.0_x64__8wekyb3d8bbwe.Appx'
   hash     = 'fe660c46a3ff8462d9574902e735687e92eeb835f75ec462a41ef76b54ef13ed'
 }
 
@@ -86,11 +90,12 @@ New-Item $tempFolder -ItemType Directory -ErrorAction SilentlyContinue | Out-Nul
 
 Get-ChildItem $tempFolder -Recurse -Exclude $dependencies.fileName | Remove-Item -Force
 
-Copy-Item -Path $Manifest -Destination $tempFolder
+if (-Not [String]::IsNullOrWhiteSpace($Manifest)) {
+  Copy-Item -Path $Manifest -Destination $tempFolder
+}
 
 # Download dependencies
 
-Write-Host
 Write-Host '--> Downloading dependencies'
 
 $desktopInSandbox = 'C:\Users\WDAGUtilityAccount\Desktop'
@@ -102,8 +107,11 @@ foreach ($dependency in $dependencies) {
 
   # Only download if the file does not exist, or its hash does not match.
   if (-Not ((Test-Path -Path $dependency.file -PathType Leaf) -And $dependency.hash -eq $(get-filehash $dependency.file).Hash)) {
-    # This downloads the file
-    Write-Host "Downloading $($dependency.url) ..."
+    Write-Host @"
+    - Downloading:
+      $($dependency.url)
+"@
+
     try {
       $WebClient.DownloadFile($dependency.url, $dependency.file)
     }
@@ -116,10 +124,9 @@ foreach ($dependency in $dependencies) {
   }
 }
 
-# Create Bootstrap script
+Write-Host
 
-$manifestFileName = Split-Path $Manifest -Leaf
-$manifestPathInSandbox = Join-Path -Path $desktopInSandbox -ChildPath (Join-Path -Path $tempFolderName -ChildPath $manifestFileName)
+# Create Bootstrap script
 
 # See: https://stackoverflow.com/a/14382047/12156188
 $bootstrapPs1Content = @'
@@ -165,6 +172,9 @@ Tip: you can type 'Update-Environment' to update your environment variables, suc
 "@
 
 if (-Not [String]::IsNullOrWhiteSpace($Manifest)) {
+  $manifestFileName = Split-Path $Manifest -Leaf
+  $manifestPathInSandbox = Join-Path -Path $desktopInSandbox -ChildPath (Join-Path -Path $tempFolderName -ChildPath $manifestFileName)
+
   $bootstrapPs1Content += @"
 
 Write-Host @'
@@ -237,7 +247,6 @@ $sandboxTestWsbFile = Join-Path -Path $tempFolder -ChildPath $sandboxTestWsbFile
 $sandboxTestWsbContent | Out-File $sandboxTestWsbFile
 
 Write-Host @"
-
 --> Starting Windows Sandbox, and:
     - Mounting the following directories:
       - $tempFolder as read-only
