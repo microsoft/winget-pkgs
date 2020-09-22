@@ -1,5 +1,5 @@
 ---
-name: "Package Request/Submission 👀"
+name: "Package Request 👀"
 about: Suggest a package for submission (this does not mean you have to implement it)
 title: ''
 labels: Help-Wanted
