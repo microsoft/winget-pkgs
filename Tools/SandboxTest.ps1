@@ -63,8 +63,8 @@ Remove-Variable sandbox
 
 $desktopAppInstaller = @{
   fileName = 'Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.appxbundle'
-  url      = 'https://github.com/microsoft/winget-cli/releases/download/v0.1.42101-preview/Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.appxbundle'
-  hash     = '2ea378a034b836efc6e49751dde253e6c43105d2d584527347ee127b734aa6c6'
+  url      = 'https://github.com/microsoft/winget-cli/releases/download/v.0.2.2521-preview/Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.appxbundle'
+  hash     = 'a00e73907b75f242e38d5724736778b819807543b6fe7ef470076fe764eebb7e'
 }
 
 $vcLibs = @{
@@ -74,9 +74,9 @@ $vcLibs = @{
 }
 
 $vcLibsUwp = @{
-  fileName = 'Microsoft.VCLibs.140.00.UWPDesktop_14.0.27810.0_x64__8wekyb3d8bbwe.Appx'
-  url      = 'https://raw.githubusercontent.com/felipecassiors/winget-pkgs/da8548d90369eb8f69a4738dc1474caaffb58e12/Tools/SandboxTest_Temp/Microsoft.VCLibs.140.00.UWPDesktop_14.0.27810.0_x64__8wekyb3d8bbwe.Appx'
-  hash     = '66de9fde9d2ebf18893a890987f35d2d145c18cc5ee0e8ecaa09477dcc13b16b'
+  fileName = 'Microsoft.VCLibs.x64.14.00.Desktop.appx'
+  url      = 'https://aka.ms/Microsoft.VCLibs.x64.14.00.Desktop.appx'
+  hash     = '6602159c341bafea747d0edf15669ac72df8817299fbfaa90469909e06794256'
 }
 
 $dependencies = @($desktopAppInstaller, $vcLibs, $vcLibsUwp)
