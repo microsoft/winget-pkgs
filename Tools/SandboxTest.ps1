@@ -150,6 +150,8 @@ function Update-Environment {
     $userLocation = $true
   }
 }
+
+
 '@
 
 $bootstrapPs1Content += @"
@@ -169,6 +171,8 @@ Write-Host @'
 Tip: you can type 'Update-Environment' to update your environment variables, such as after installing a new software.
 
 '@
+
+
 "@
 
 if (-Not [String]::IsNullOrWhiteSpace($Manifest)) {
@@ -176,28 +180,25 @@ if (-Not [String]::IsNullOrWhiteSpace($Manifest)) {
   $manifestPathInSandbox = Join-Path -Path $desktopInSandbox -ChildPath (Join-Path -Path $tempFolderName -ChildPath $manifestFileName)
 
   $bootstrapPs1Content += @"
-
 Write-Host @'
 
 --> Installing the Manifest $manifestFileName
 
 '@
 winget install -m '$manifestPathInSandbox'
-"@
 
-  $bootstrapPs1Content += @'
-
-Write-Host @"
+Write-Host @'
 
 --> Refreshing environment variables
-"@
-Update-Environment
 '@
+Update-Environment
+
+
+"@
 }
 
 if (-Not [String]::IsNullOrWhiteSpace($Script)) {
   $bootstrapPs1Content += @"
-
 Write-Host @'
 
 --> Running the following script:
@@ -209,11 +210,12 @@ $Script
 '@
 
 $Script
+
+
 "@
 }
 
 $bootstrapPs1Content += @"
-
 Write-Host
 "@
 
