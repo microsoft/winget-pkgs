@@ -59,13 +59,41 @@ if ($sandbox) {
 }
 Remove-Variable sandbox
 
+# Initialize Temp Folder
+
+$tempFolderName = 'SandboxTest'
+$tempFolder = Join-Path -Path ([System.IO.Path]::GetTempPath()) -ChildPath $tempFolderName
+
+New-Item $tempFolder -ItemType Directory -ErrorAction SilentlyContinue | Out-Null
+
 # Set dependencies
+
+$apiLatestUrl = 'https://api.github.com/repos/microsoft/winget-cli/releases/latest'
+
+function Get-LatestUrl {
+  ((Invoke-WebRequest $apiLatestUrl -UseBasicParsing | ConvertFrom-Json).assets | Where-Object { $_.name -match '.appxbundle$' }).browser_download_url
+}
+
+function Get-LatestHash {
+  $shaUrl = ((Invoke-WebRequest $apiLatestUrl -UseBasicParsing | ConvertFrom-Json).assets | Where-Object { $_.name -match '.SHA256.txt$' }).browser_download_url
+
+  $shaFile = Join-Path -Path $tempFolder -ChildPath 'Microsoft.DesktopAppInstaller.SHA256.txt'
+  Invoke-WebRequest -UseBasicParsing $shaUrl -OutFile $shaFile
+
+  Get-Content $shaFile
+}
+
+# Hide the progress bar of Invoke-WebRequest
+$oldProgressPreference = $ProgressPreference
+$ProgressPreference = 'SilentlyContinue'
 
 $desktopAppInstaller = @{
   fileName = 'Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.appxbundle'
-  url      = 'https://github.com/microsoft/winget-cli/releases/download/v.0.2.2521-preview/Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.appxbundle'
-  hash     = 'a00e73907b75f242e38d5724736778b819807543b6fe7ef470076fe764eebb7e'
+  url      = $(Get-LatestUrl)
+  hash     = $(Get-LatestHash)
 }
+
+$ProgressPreference = $oldProgressPreference
 
 $vcLibs = @{
   fileName = 'Microsoft.VCLibs.140.00_14.0.27810.0_x64__8wekyb3d8bbwe.Appx'
@@ -81,12 +109,7 @@ $vcLibsUwp = @{
 
 $dependencies = @($desktopAppInstaller, $vcLibs, $vcLibsUwp)
 
-# Initialize Temp Folder
-
-$tempFolderName = 'SandboxTest'
-$tempFolder = Join-Path -Path ([System.IO.Path]::GetTempPath()) -ChildPath $tempFolderName
-
-New-Item $tempFolder -ItemType Directory -ErrorAction SilentlyContinue | Out-Null
+# Clean temp directory
 
 Get-ChildItem $tempFolder -Recurse -Exclude $dependencies.fileName | Remove-Item -Force
 
@@ -96,7 +119,7 @@ if (-Not [String]::IsNullOrWhiteSpace($Manifest)) {
 
 # Download dependencies
 
-Write-Host '--> Downloading dependencies'
+Write-Host '--> Checking dependencies'
 
 $desktopInSandbox = 'C:\Users\WDAGUtilityAccount\Desktop'
 
