@@ -76,6 +76,7 @@ while ([string]::IsNullOrWhiteSpace($Publisher) -or $Publisher.Length -ge 128) {
 
 while ([string]::IsNullOrWhiteSpace($AppName) -or $AppName.Length -ge 128) {
     $AppName = Read-Host -Prompt 'Enter the application name' | TrimString
+    $AppNameFolder = $AppName -replace '\s',''
 }
 
 while ([string]::IsNullOrWhiteSpace($version)) {
@@ -245,7 +246,7 @@ if (-not [string]::IsNullOrWhiteSpace($SilentWithProgress)) {
 
 $ManifestsFolder = (Resolve-Path "$PSScriptRoot\..\manifests").Path
 $PublisherFolder = Join-Path $ManifestsFolder $Publisher
-$AppFolder = Join-Path $PublisherFolder $AppName
+$AppFolder = Join-Path $PublisherFolder $AppNameFolder
 New-Item -ItemType "Directory" -Force -Path $AppFolder | Out-Null
 
 $FileOldEncoding = Get-Content -Raw $ManifestName
