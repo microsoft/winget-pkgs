@@ -39,6 +39,7 @@ jobs:
       SCAN_ENDPOINT: $(AzFuncScanEndpoint)
       LABEL_ENDPOINT: $(AzFuncSetLabelOnPullRequestEndpoint)
       CLEANUP_ENDPOINT: $(AzFuncCleanupEndpoint)
+      LABEL_KEY: $(AzureFunctionLabelKey)
 
   # Validates integrity of pull request.
   - task: CmdLine@2
@@ -125,6 +126,7 @@ jobs:
   condition: succeededOrFailed()
   variables:
     HostKeySecret: $[ dependencies.FileValidation.outputs['wingetsetup.hostkey']]
+    LabelKeySecret : $[ dependencies.FileValidation.outputs['wingetsetup.labelkey']]
     LabelEndpointSecret: $[ dependencies.FileValidation.outputs['wingetsetup.labelEndpoint']]
     RepositoryId: $[ dependencies.FileValidation.outputs['wingetsetup.repoId']]
     CleanupEndpointSecret: $[ dependencies.filevalidation.outputs['wingetsetup.cleanupEndpoint']]
@@ -136,7 +138,7 @@ jobs:
     condition: eq(variables['WinGet.RepositoryType'], 'GitHub')
     inputs:
       function: '$(LabelEndpointSecret)'
-      key: '$(HostKeySecret)'
+      key: '$(LabelKeySecret)'
       body: |
         {
         "operationId": "$(Build.BuildNumber)",
