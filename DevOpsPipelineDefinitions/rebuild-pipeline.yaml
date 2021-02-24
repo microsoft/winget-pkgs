@@ -49,10 +49,12 @@ jobs:
       failOnStderr: true
     condition: succeeded()
     env:
-      AzureWebJobsStorage: $(ValidationStorageAccountConnectionString)
+      ValidationConnectionString: $(ValidationStorageAccountConnectionString)
       PackagePublisher: $(PackagePublisher)
       SYSTEM_ACCESSTOKEN: $(System.AccessToken)
       DIApplicationInsightKey: $(DIApplicationInsightKey)
+      WinGet:AppConfig:Primary: $(AppConfigPrimary)
+      WinGet:AppConfig:Secondary: $(AppConfigSecondary)
 
 # Agentless phase. Depends on previous job. 
 - job: 'SignPackage'
@@ -117,13 +119,15 @@ jobs:
       failOnStderr: true
     condition: succeeded()
     env:
-      AzureWebJobsStorage: $(ValidationStorageAccountConnectionString)
+      ValidationConnectionString: $(ValidationStorageAccountConnectionString)
       CacheConnectionString: $(CacheStorageAccountConnectionString)
       DIApplicationInsightKey: $(DIApplicationInsightKey)
       AzureServicesAuthConnectionString: $(AzureServicesAuthConnectionString)
       WinGetSubscriptionId: $(WinGetSubscriptionId)
       CdnProfileName: $(CdnProfileName)
       CdnEndpointName: $(CdnEndpointName)
+      WinGet:AppConfig:Primary: $(AppConfigPrimary)
+      WinGet:AppConfig:Secondary: $(AppConfigSecondary)
 
 # Agent phase. Depends on previous job.
 - job: 'Cleanup'
@@ -159,6 +163,8 @@ jobs:
       failOnStderr: true
     condition: succeeded()
     env:
-      AzureWebJobsStorage: $(ValidationStorageAccountConnectionString)
+      ValidationConnectionString: $(ValidationStorageAccountConnectionString)
       SYSTEM_ACCESSTOKEN: $(System.AccessToken)
       DIApplicationInsightKey: $(DIApplicationInsightKey)
+      WinGet:AppConfig:Primary: $(AppConfigPrimary)
+      WinGet:AppConfig:Secondary: $(AppConfigSecondary)
