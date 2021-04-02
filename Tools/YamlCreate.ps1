@@ -79,7 +79,12 @@ while ([string]::IsNullOrWhiteSpace($PackageVersion)) {
 }
 
 $PackageIdentifier = [System.String]::Concat($Publisher.Replace(' ',''),'.',$PackageName.Replace(' ',''))
-$ManifestsFolder = (Resolve-Path "$PSScriptRoot\..\manifests").Path
+if (Test-Path -Path "$PSScriptRoot\..\manifests") {
+    $ManifestsFolder = (Resolve-Path "$PSScriptRoot\..\manifests").Path
+} else {
+    $ManifestsFolder = (Resolve-Path ".\").Path
+}
+
 $AppFolder = Join-Path $ManifestsFolder $Publisher.Chars(0) $Publisher.Replace(' ','') $PackageName.Replace(' ','') $PackageVersion
 
 $VersionManifest = $AppFolder + "\$PackageIdentifier" + '.yaml'
@@ -136,7 +141,7 @@ switch ($option) {
             $PackageUrl = Read-Host -Prompt '[OPTIONAL] Enter the Url to the homepage of the application' | TrimString
         } while (-not [string]::IsNullOrWhiteSpace($PackageUrl) -and ($PackageUrl.Length -lt 10 -or $Homepage.Length -gt 2000))
 
-        while ([string]::IsNullOrWhiteSpace($ShortDescription) -or $ShortDescription.Length - '3' -and $ShortDescription.Length -lt '256') {
+        while ([string]::IsNullOrWhiteSpace($ShortDescription) -or $ShortDescription.Length -gt '256') {
             $ShortDescription = Read-Host -Prompt 'Enter a short description of the application' | TrimString
         }
 
