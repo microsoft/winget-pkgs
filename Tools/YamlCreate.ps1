@@ -31,6 +31,26 @@ filter TrimString {
     $_.Trim()
 }
 
+while ([string]::IsNullOrWhiteSpace($OptionMenu)) {
+    Clear-Host
+    Write-Host -ForegroundColor Cyan "Select Mode"
+    Write-Host -ForegroundColor DarkCyan -NoNewline "`n["; Write-Host -NoNewline "1"; Write-Host -ForegroundColor DarkCyan -NoNewline "]"; `
+        Write-Host -ForegroundColor DarkCyan " New Manifest"
+    Write-Host -ForegroundColor DarkCyan -NoNewline "`n["; Write-Host -NoNewline "2"; Write-Host -ForegroundColor DarkCyan -NoNewline "]"; `
+        Write-Host -ForegroundColor DarkCyan " Update Manifest"
+    Write-Host -ForegroundColor DarkCyan -NoNewline "`n["; Write-Host -NoNewline "3"; Write-Host -ForegroundColor DarkCyan -NoNewline "]"; `
+        Write-Host -ForegroundColor DarkCyan " New Locale"
+    Write-Host -ForegroundColor DarkCyan -NoNewline "`n["; Write-Host -NoNewline "q"; Write-Host -ForegroundColor DarkCyan -NoNewline "]"; `
+        Write-Host -ForegroundColor Red " Any key to quit"
+    $OptionMenu = Read-Host "`nSelection"
+    switch ($OptionMenu) {
+        '1' {$Option = 'New'}
+        '2' {$Option = 'Update'}
+        '3' {$Option = 'NewLocale'}
+        default {exit}
+    }
+}
+
 ##########################################
 #region checksum
 while ([string]::IsNullOrWhiteSpace($URL)) {
@@ -64,8 +84,6 @@ Write-Host 'File downloaded. Please Fill out required fields.'
 ##########################################
 #region Read in metadata
 
-$host.UI.RawUI.ForegroundColor = "White"
-
 while ([string]::IsNullOrWhiteSpace($Publisher) -or $Publisher.Length -ge 128) {
     $Publisher = Read-Host -Prompt 'Enter the publisher' | TrimString
 }
@@ -91,20 +109,8 @@ $VersionManifest = $AppFolder + "\$PackageIdentifier" + '.yaml'
 $InstallerManifest = $AppFolder + "\$PackageIdentifier" + '.installer' + '.yaml'
 $DefaultLocaleManifest = $AppFolder + "\$PackageIdentifier" + '.locale.en-US' + '.yaml'
 
-switch ($option) {
-    'Old' {
-        # Use old Manifest
-        # Copy Old files to New Location
-        # Update PackageVersion
-
-    }
-
-    'NewLocale' {
-        # New Locale stuff
-        #https://github.com/microsoft/winget-cli/blob/master/schemas/JSON/manifests/v1.0.0/manifest.locale.1.0.0.json
-    }
-
-    default {
+switch ($Option) {
+    'New' {
         ########## Read Metadata ##########
         while ([string]::IsNullOrWhiteSpace($License) -or $License.Length -ge 40) {
             $License = Read-Host -Prompt 'Enter the License, For example: MIT, or Copyright (c) Microsoft Corporation' | TrimString
@@ -278,6 +284,46 @@ switch ($option) {
         Write-Output "ManifestVersion: 1.0.0" | Out-File $VersionManifest -Append
         Write-Output "ManifestVersion: 1.0.0" | Out-File $InstallerManifest -Append
         Write-Output "ManifestVersion: 1.0.0" | Out-File $DefaultLocaleManifest -Append
+
+        Write-Host $NewLine
+        Write-Host "Yaml file created: $VersionManifest"
+        Write-Host "Yaml file created: $InstallerManifest"
+        Write-Host "Yaml file created: $DefaultLocaleManifest"
+    }
+
+    'Update' {
+        $LastVersion = Get-ChildItem -Path "$AppFolder\..\" | Sort-Object | Select-Object -Last 1 -ExpandProperty 'Name'
+        $OldManifests = Get-ChildItem -Path "$AppFolder\..\$LastVersion"
+
+        if ($OldManifests.Name -eq "$PackageIdentifier.installer.yaml" -and $OldManifests.Name -eq "$PackageIdentifier.locale.en-US.yaml" -and $OldManifests.Name -eq "$PackageIdentifier.yaml") {
+            New-Item -ItemType "Directory" -Force -Path $AppFolder | Out-Null
+            Copy-Item -Path $OldManifests -Destination $AppFolder
+
+            ((Get-Content -Path $VersionManifest) -replace '(?<=PackageVersion: ).*',"$PackageVersion") | Set-Content -Path $VersionManifest
+            ((Get-Content -Path $InstallerManifest) -replace '(?<=PackageVersion: ).*',"$PackageVersion") | Set-Content -Path $InstallerManifest
+            ((Get-Content -Path $DefaultLocaleManifest) -replace '(?<=PackageVersion: ).*',"$PackageVersion") | Set-Content -Path $DefaultLocaleManifest
+
+            ((Get-Content -Path $InstallerManifest) -replace '(?<=InstallerUrl: ).*',"$URL") | Set-Content -Path $InstallerManifest
+            ((Get-Content -Path $InstallerManifest) -replace '(?<=InstallerSha256: ).*',"$Hash") | Set-Content -Path $InstallerManifest
+
+            Write-Host $NewLine
+            Write-Host "Updated Yaml file: $VersionManifest"
+            Write-Host "Updated Yaml file: $InstallerManifest"
+            Write-Host "Updated Yaml file: $DefaultLocaleManifest"
+        } else {
+            $option = "New"
+            Write-Host "Error: The old manifest does not contain a multi manifest."
+        }
+    }
+
+    'NewLocale' {
+        # New Locale stuff
+        #https://github.com/microsoft/winget-cli/blob/master/schemas/JSON/manifests/v1.0.0/manifest.locale.1.0.0.json
+        Write-Host "There is nothing here yet :("
+    }
+
+    Default {
+        Exit
     }
 }
 
@@ -296,10 +342,7 @@ switch ($option) {
 #$Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
 #[System.IO.File]::WriteAllLines($ManifestPath, $FileOldEncoding, $Utf8NoBomEncoding)
 
-Write-Host $NewLine
-Write-Host "Yaml file created: $VersionManifest"
-Write-Host "Yaml file created: $InstallerManifest"
-Write-Host "Yaml file created: $DefaultLocaleManifest"
+
 
 #endregion
 ##########################################
