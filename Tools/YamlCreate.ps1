@@ -37,7 +37,7 @@ while ([string]::IsNullOrWhiteSpace($URL)) {
     $URL = Read-Host -Prompt 'Enter the URL to the installer' | TrimString
 }
 Write-Host $NewLine
-Write-Host "Downloading URL. This will take awhile..." -ForegroundColor Blue
+Write-Host 'Downloading URL. This will take awhile...' -ForegroundColor Blue
 $WebClient = New-Object System.Net.WebClient
 
 try {
@@ -45,7 +45,7 @@ try {
     $Hash = (Get-FileHash -InputStream $Stream -Algorithm SHA256).Hash
 }
 catch {
-    Write-Host "Error downloading file. Please run the script again." -ForegroundColor Red
+    Write-Host 'Error downloading file. Please run the script again.' -ForegroundColor Red
     exit 1
 }
 finally {
@@ -56,7 +56,7 @@ Write-Host "Url: $URL"
 Write-Host "Sha256: $Hash"
 
 Write-Host $NewLine
-Write-Host "File downloaded. Please Fill out required fields."
+Write-Host 'File downloaded. Please Fill out required fields.'
 
 #endregion
 ##########################################
@@ -64,199 +64,237 @@ Write-Host "File downloaded. Please Fill out required fields."
 ##########################################
 #region Read in metadata
 
-while ($ID.Length -lt 4 -or $ID.Length -ge 255) {
-    Write-Host 'Enter the package Id, in the following format <Publisher.Appname>'
-    $ID = Read-Host -Prompt 'For example: Microsoft.Excel' | TrimString
-}
-
 $host.UI.RawUI.ForegroundColor = "White"
+
 while ([string]::IsNullOrWhiteSpace($Publisher) -or $Publisher.Length -ge 128) {
     $Publisher = Read-Host -Prompt 'Enter the publisher' | TrimString
 }
 
-while ([string]::IsNullOrWhiteSpace($AppName) -or $AppName.Length -ge 128) {
-    $AppName = Read-Host -Prompt 'Enter the application name' | TrimString
-    $AppNameFolder = $AppName -replace '\s',''
+while ([string]::IsNullOrWhiteSpace($PackageName) -or $PackageName.Length -ge 128) {
+    $PackageName = Read-Host -Prompt 'Enter the application name' | TrimString
 }
 
-while ([string]::IsNullOrWhiteSpace($version)) {
-    $version = Read-Host -Prompt 'Enter the version. For example: 1.0.0, 1.0.0.0, 1.0' | TrimString
-    $ManifestName = $version + ".yaml"
+while ([string]::IsNullOrWhiteSpace($PackageVersion)) {
+    $PackageVersion = Read-Host -Prompt 'Enter the version. For example: 1.0.0, 1.0.0.0, 1.0' | TrimString
 }
 
-while ([string]::IsNullOrWhiteSpace($License) -or $License.Length -ge 40) {
-    $License = Read-Host -Prompt 'Enter the License, For example: MIT, or Copyright (c) Microsoft Corporation' | TrimString
-}
+$PackageIdentifier = [System.String]::Concat($Publisher.Replace(' ',''),'.',$PackageName.Replace(' ',''))
+$ManifestsFolder = (Resolve-Path "$PSScriptRoot\..\manifests").Path
+$AppFolder = Join-Path $ManifestsFolder $Publisher.Chars(0) $Publisher.Replace(' ','') $PackageName.Replace(' ','') $PackageVersion
 
-while ($InstallerType -notin @("exe", "msi", "msix", "inno", "nullsoft", "appx", "wix", "zip")) {
-    $InstallerType = Read-Host -Prompt 'Enter the InstallerType. For example: exe, msi, msix, inno, nullsoft'
-}
+$VersionManifest = $AppFolder + "\$PackageIdentifier" + '.yaml'
+$InstallerManifest = $AppFolder + "\$PackageIdentifier" + '.installer' + '.yaml'
+$DefaultLocaleManifest = $AppFolder + "\$PackageIdentifier" + '.locale.en-US' + '.yaml'
 
-while ($architecture -notin @("x86", "x64", "arm", "arm64", "neutral")) {
-    $architecture = Read-Host -Prompt 'Enter the architecture (x86, x64, arm, arm64, Neutral)'
-}
+switch ($option) {
+    'Old' {
+        # Use old Manifest
+        # Copy Old files to New Location
+        # Update PackageVersion
 
-do {
-    $LicenseUrl = Read-Host -Prompt '[OPTIONAL] Enter the license URL' | TrimString
-} while (-not [string]::IsNullOrWhiteSpace($LicenseUrl) -and ($LicenseUrl.Length -lt 10 -or $LicenseUrl.Length -gt 2000))
+    }
 
-do {
-    $AppMoniker = Read-Host -Prompt '[OPTIONAL] Enter the AppMoniker (friendly name/alias). For example: vscode' | TrimString
-} while ($AppMoniker.Length -gt 40)
+    'NewLocale' {
+        # New Locale stuff
+        #https://github.com/microsoft/winget-cli/blob/master/schemas/JSON/manifests/v1.0.0/manifest.locale.1.0.0.json
+    }
 
-do {
-    $Tags = Read-Host -Prompt '[OPTIONAL] Enter any tags that would be useful to discover this tool. For example: zip, c++' | TrimString
-} while ($Tags.Length -gt 40)
+    default {
+        ########## Read Metadata ##########
+        while ([string]::IsNullOrWhiteSpace($License) -or $License.Length -ge 40) {
+            $License = Read-Host -Prompt 'Enter the License, For example: MIT, or Copyright (c) Microsoft Corporation' | TrimString
+        }
+        
+        do {
+            $LicenseUrl = Read-Host -Prompt '[OPTIONAL] Enter the license URL' | TrimString
+        } while (-not [string]::IsNullOrWhiteSpace($LicenseUrl) -and ($LicenseUrl.Length -lt 10 -or $LicenseUrl.Length -gt 2000))
 
-do {
-    $Homepage = Read-Host -Prompt '[OPTIONAL] Enter the Url to the homepage of the application' | TrimString
-} while (-not [string]::IsNullOrWhiteSpace($LicenseUrl) -and ($Homepage.Length -lt 10 -or $Homepage.Length -gt 2000))
+        while ($architecture -notin @('x86', 'x64', 'arm', 'arm64', 'neutral')) {
+            $architecture = Read-Host -Prompt 'Enter the architecture (x86, x64, arm, arm64, Neutral)' | TrimString
+        }
 
-do {
-    $Description = Read-Host -Prompt '[OPTIONAL] Enter a description of the application' | TrimString
-} while ($Description.Length -gt 500)
+        while ($InstallerType -notin @('exe', 'msi', 'msix', 'inno', 'nullsoft', 'appx', 'wix', 'zip')) {
+            $InstallerType = Read-Host -Prompt 'Enter the InstallerType. For example: exe, msi, msix, inno, nullsoft' | TrimString
+        }
 
-# Only prompt for silent switches if $InstallerType is "exe"
-if ($InstallerType -ieq "exe") {
-    $Silent = Read-Host -Prompt '[OPTIONAL] Enter the silent install switch'| TrimString
-    $SilentWithProgress = Read-Host -Prompt '[OPTIONAL] Enter the silent (with progress) install switch'| TrimString
+        if ($InstallerType -ieq 'exe') {
+            do {
+                $Silent = Read-Host -Prompt 'Enter the silent install switch' | TrimString
+                $SilentWithProgress = Read-Host -Prompt 'Enter the silent (with progress) install switch' | TrimString
+            } while ([string]::IsNullOrWhiteSpace($Silent) -and [string]::IsNullOrWhiteSpace($SilentWithProgress))
+        }
+
+        do {
+            $Moniker = Read-Host -Prompt '[OPTIONAL] Enter the Moniker (friendly name/alias). For example: vscode' | TrimString
+        } while ($Moniker.Length -gt 40)
+
+        do {
+            $Tags = Read-Host -Prompt '[OPTIONAL] Enter any tags that would be useful to discover this tool. For example: zip, c++' | TrimString
+        } while ($Tags.Length -gt 40)
+
+        do {
+            $PackageUrl = Read-Host -Prompt '[OPTIONAL] Enter the Url to the homepage of the application' | TrimString
+        } while (-not [string]::IsNullOrWhiteSpace($PackageUrl) -and ($PackageUrl.Length -lt 10 -or $Homepage.Length -gt 2000))
+
+        while ([string]::IsNullOrWhiteSpace($ShortDescription) -or $ShortDescription.Length - '3' -and $ShortDescription.Length -lt '256') {
+            $ShortDescription = Read-Host -Prompt 'Enter a short description of the application' | TrimString
+        }
+
+        ########## Create Manifests ##########
+        New-Item -ItemType "Directory" -Force -Path $AppFolder | Out-Null
+
+        Write-Output '# yaml-language-server: $schema=https://aka.ms/winget-manifest.version.1.0.0.schema.json' | Out-File $VersionManifest
+        Write-Output '# yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.0.0.schema.json' | Out-File $InstallerManifest
+        Write-Output '# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultlocale.1.0.0.schema.json' | Out-File $DefaultLocaleManifest
+
+        Write-Output "PackageIdentifier: $PackageIdentifier" | Out-File $VersionManifest -Append
+        Write-Output "PackageIdentifier: $PackageIdentifier" | Out-File $InstallerManifest -Append
+        Write-Output "PackageIdentifier: $PackageIdentifier" | Out-File $DefaultLocaleManifest -Append
+
+        Write-Output "PackageVersion: $PackageVersion" | Out-File $VersionManifest -Append
+        Write-Output "PackageVersion: $PackageVersion" | Out-File $InstallerManifest -Append
+        Write-Output "PackageVersion: $PackageVersion" | Out-File $DefaultLocaleManifest -Append
+
+        Write-Output "DefaultLocale: en-US" | Out-File $VersionManifest -Append
+        Write-Output "DefaultLocale: en-US" | Out-File $InstallerManifest -Append
+
+        Write-Output "InstallModes:" | Out-File $InstallerManifest -Append
+        Write-Output "  - interactive" | Out-File $InstallerManifest -Append
+        Write-Output "  - silent" | Out-File $InstallerManifest -Append
+        Write-Output "  - silentWithProgress" | Out-File $InstallerManifest -Append
+
+        Write-Output "Installers:" | Out-File $InstallerManifest -Append
+        Write-Output "  - Architecture: $architecture" | Out-File $InstallerManifest -Append
+        Write-Output "    InstallerUrl: $URL" | Out-File $InstallerManifest -Append
+        Write-Output "    InstallerSha256: $Hash" | Out-File $InstallerManifest -Append
+
+        if (-not [string]::IsNullOrWhiteSpace($Scope)) {
+            Write-Output "    Scope: $Scope" | Out-File $InstallerManifest -Append
+        } else {
+            Write-Output "#    Scope: " | Out-File $InstallerManifest -Append
+        }
+
+        Write-Output "    InstallerType: $InstallerType" | Out-File $InstallerManifest -Append
+
+        if ((-not [string]::IsNullOrWhiteSpace($Silent)) -or 
+            (-not [string]::IsNullOrWhiteSpace($SilentWithProgress))) {
+            Write-Output "    InstallerSwitches:" | Out-File $InstallerManifest -Append
+        }
+
+        if (-not [string]::IsNullOrWhiteSpace($Silent)) {
+            Write-Output "      Silent: $Silent" | Out-File $InstallerManifest -Append
+        }
+
+        if (-not [string]::IsNullOrWhiteSpace($SilentWithProgress)) {
+            Write-Output "      SilentWithProgress: $SilentWithProgress" | Out-File $InstallerManifest -Append
+        }
+
+        Write-Output "UpgradeBehavior: install" | Out-File $InstallerManifest -Append
+
+        if (-not [string]::IsNullOrWhiteSpace($Publisher)) {
+            Write-Output "Publisher: $Publisher" | Out-File $DefaultLocaleManifest -Append
+        } else {
+            Write-Output "#Publisher: " | Out-File $DefaultLocaleManifest -Append
+        }
+
+        if (-not [string]::IsNullOrWhiteSpace($PublisherUrl)) {
+            Write-Output "PublisherUrl: $PublisherUrl" | Out-File $DefaultLocaleManifest -Append
+        } else {
+            Write-Output "#PublisherUrl: " | Out-File $DefaultLocaleManifest -Append
+        }
+
+        if (-not [string]::IsNullOrWhiteSpace($PublisherSupportUrl)) {
+            Write-Output "PublisherSupportUrl: $PublisherSupportUrl" | Out-File $DefaultLocaleManifest -Append
+        } else {
+            Write-Output "#PublisherSupportUrl: " | Out-File $DefaultLocaleManifest -Append
+        }
+
+        if (-not [string]::IsNullOrWhiteSpace($PrivacyUrl)) {
+            Write-Output "PrivacyUrl: $PrivacyUrl" | Out-File $DefaultLocaleManifest -Append
+        } else {
+            Write-Output "#PrivacyUrl: " | Out-File $DefaultLocaleManifest -Append
+        }
+
+
+        if (-not [string]::IsNullOrWhiteSpace($Author)) {
+            Write-Output "Author: $Author" | Out-File $DefaultLocaleManifest -Append
+        } else {
+            Write-Output "#Author: " | Out-File $DefaultLocaleManifest -Append
+        }
+        
+        Write-Output "PackageName: $PackageName" | Out-File $DefaultLocaleManifest -Append
+        if (-not [string]::IsNullOrWhiteSpace($PackageUrl)) {
+            Write-Output "PackageUrl: $PackageUrl" | Out-File $DefaultLocaleManifest -Append
+        } else {
+            Write-Output "#PackageUrl: " | Out-File $DefaultLocaleManifest -Append
+        }
+        
+        if (-not [string]::IsNullOrWhiteSpace($License)) {
+            Write-Output "License: $License" | Out-File $DefaultLocaleManifest -Append
+        } else {
+            Write-Output "#License: " | Out-File $DefaultLocaleManifest -Append
+        }
+
+        if (-not [string]::IsNullOrWhiteSpace($LicenseUrl)) {
+            Write-Output "LicenseUrl: $LicenseUrl" | Out-File $DefaultLocaleManifest -Append
+        } else {
+            Write-Output "#LicenseUrl: " | Out-File $DefaultLocaleManifest -Append
+        }
+        
+        if (-not [string]::IsNullOrWhiteSpace($Copyright)) {
+            Write-Output "Copyright: $Copyright" | Out-File $DefaultLocaleManifest -Append
+        } else {
+            Write-Output "#Copyright: " | Out-File $DefaultLocaleManifest -Append
+        }
+
+        if (-not [string]::IsNullOrWhiteSpace($CopyrightUrl)) {
+            Write-Output "CopyrightUrl: $CopyrightUrl" | Out-File $DefaultLocaleManifest -Append
+        } else {
+            Write-Output "#CopyrightUrl: " | Out-File $DefaultLocaleManifest -Append
+        }
+
+        Write-Output "ShortDescription: $ShortDescription" | Out-File $DefaultLocaleManifest -Append
+
+        if (-not [string]::IsNullOrWhiteSpace($Moniker)) {
+            Write-Output "Moniker: $Moniker" | Out-File $DefaultLocaleManifest -Append
+        } else {
+            Write-Output "#Moniker: " | Out-File $DefaultLocaleManifest -Append
+        }
+
+        Write-Output "Tags:" | Out-File $DefaultLocaleManifest -Append
+        
+        foreach ($Tag in $Tags.Split(", ")) {
+            Write-Output "  - $Tag" | Out-File $DefaultLocaleManifest -Append
+        }
+        
+        Write-Output "ManifestType: version" | Out-File $VersionManifest -Append
+        Write-Output "ManifestType: installer" | Out-File $InstallerManifest -Append
+        Write-Output "ManifestType: defaultLocale" | Out-File $DefaultLocaleManifest -Append
+        Write-Output "ManifestVersion: 1.0.0" | Out-File $VersionManifest -Append
+        Write-Output "ManifestVersion: 1.0.0" | Out-File $InstallerManifest -Append
+        Write-Output "ManifestVersion: 1.0.0" | Out-File $DefaultLocaleManifest -Append
+    }
 }
 
 #endregion
 ##########################################
 
+
 ##########################################
 #region Write metadata
 
-# YAML files should always start with the document start separator "---"
-# https://yaml.org/spec/1.2/spec.html#id2760395
-$string = "---$NewLine"
-Write-Output $string | Out-File $ManifestName
+# What does this stuff do??
+
+#$FileOldEncoding = Get-Content -Raw $VersionManifest
+#Remove-Item -Path $VersionManifest
+#$ManifestPath = Join-Path $AppFolder $VersionManifest
+#$Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
+#[System.IO.File]::WriteAllLines($ManifestPath, $FileOldEncoding, $Utf8NoBomEncoding)
 
 Write-Host $NewLine
-$string = "Id: $ID"
-Write-Output $string | Out-File $ManifestName -Append
-Write-Host "Id: " -ForegroundColor Blue -NoNewline
-Write-Host $ID -ForegroundColor White
-
-$string = "Version: $Version"
-Write-Output $string | Out-File $ManifestName -Append
-Write-Host "Version: " -ForegroundColor Blue -NoNewline
-Write-Host $Version -ForegroundColor White
-
-$string = "Name: $AppName"
-Write-Output $string | Out-File $ManifestName -Append
-Write-Host "Name: " -ForegroundColor Blue -NoNewline
-Write-Host $AppName -ForegroundColor White
-
-$string = "Publisher: $Publisher"
-Write-Output $string | Out-File $ManifestName -Append
-Write-Host "Publisher: " -ForegroundColor Blue -NoNewline
-Write-Host $Publisher -ForegroundColor White
-
-$string = "License: $License"
-Write-Output $string | Out-File $ManifestName -Append
-Write-Host "License: " -ForegroundColor Blue -NoNewline
-Write-Host $License -ForegroundColor White
-
-if (-not [string]::IsNullOrWhiteSpace($LicenseUrl)) {
-    $string = "LicenseUrl: $LicenseUrl"
-    Write-Output $string | Out-File $ManifestName -Append
-    Write-Host "LicenseUrl: " -ForegroundColor Blue -NoNewline
-    Write-Host $LicenseUrl -ForegroundColor White
-}
-
-if (-not [string]::IsNullOrWhiteSpace($AppMoniker)) {
-    $string = "AppMoniker: $AppMoniker"
-    Write-Output $string | Out-File $ManifestName -Append
-    Write-Host "AppMoniker: " -ForegroundColor Blue -NoNewline
-    Write-Host $AppMoniker -ForegroundColor White
-}
-
-if (-not [string]::IsNullOrWhiteSpace($Commands)) {
-    $string = "Commands: $Commands"
-    Write-Output $string | Out-File $ManifestName -Append
-    Write-Host "Commands: " -ForegroundColor Blue -NoNewline
-    Write-Host $Commands -ForegroundColor White
-}
-
-if (-not [string]::IsNullOrWhiteSpace($Tags)) {
-    $string = "Tags: $Tags"
-    Write-Output $string | Out-File $ManifestName -Append
-    Write-Host "Tags: " -ForegroundColor Blue -NoNewline
-    Write-Host $Tags -ForegroundColor White
-}
-
-if (-not [string]::IsNullOrWhiteSpace($Description)) {
-    $string = "Description: $Description"
-    Write-Output $string | Out-File $ManifestName -Append
-    Write-Host "Description: " -ForegroundColor Blue -NoNewline
-    Write-Host $Description -ForegroundColor White
-}
-
-if (-not [string]::IsNullOrWhiteSpace($Homepage)) {
-    $string = "Homepage: $Homepage"
-    Write-Output $string | Out-File $ManifestName -Append
-    Write-Host "Homepage: " -ForegroundColor Blue -NoNewline
-    Write-Host $Homepage -ForegroundColor White
-}
-
-Write-Output "Installers:" | Out-File $ManifestName -Append
-
-$string = "  - Arch: $architecture"
-Write-Output $string | Out-File $ManifestName -Append
-Write-Host "Arch: " -ForegroundColor Blue -NoNewline
-Write-Host $architecture -ForegroundColor White
-
-$string = "    Url: $URL"
-Write-Output $string | Out-File $ManifestName -Append
-Write-Host "Url: " -ForegroundColor Blue -NoNewline
-Write-Host $URL -ForegroundColor White
-
-$string = "    Sha256: $Hash"
-Write-Output $string | Out-File $ManifestName -Append
-Write-Host "Sha256: " -ForegroundColor Blue -NoNewline
-Write-Host $Hash -ForegroundColor White
-
-$string = "    InstallerType: $InstallerType" 
-Write-Output $string | Out-File $ManifestName -Append
-Write-Host "InstallerType: " -ForegroundColor Blue -NoNewline
-Write-Host $InstallerType -ForegroundColor White
-
-if ((-not [string]::IsNullOrWhiteSpace($Silent)) -or 
-    (-not [string]::IsNullOrWhiteSpace($SilentWithProgress))) {
-    $string = "    Switches:"
-    Write-Output $string | Out-File $ManifestName -Append
-    Write-Host "Switches: " -ForegroundColor Blue -NoNewline
-}
-
-if (-not [string]::IsNullOrWhiteSpace($Silent)) {
-    $string = "      Silent: $Silent"
-    Write-Output $string | Out-File $ManifestName -Append
-    Write-Host "Silent: " -ForegroundColor Blue -NoNewline
-    Write-Host $Silent -ForegroundColor White
-}
-
-if (-not [string]::IsNullOrWhiteSpace($SilentWithProgress)) {
-    $string = "      SilentWithProgress: $SilentWithProgress"
-    Write-Output $string | Out-File $ManifestName -Append
-    Write-Host "SilentWithProgress: " -ForegroundColor Blue -NoNewline
-    Write-Host $SilentWithProgress -ForegroundColor White
-}
-
-$ManifestsFolder = (Resolve-Path "$PSScriptRoot\..\manifests").Path
-$PublisherFolder = Join-Path $ManifestsFolder $Publisher
-$AppFolder = Join-Path $PublisherFolder $AppNameFolder
-New-Item -ItemType "Directory" -Force -Path $AppFolder | Out-Null
-
-$FileOldEncoding = Get-Content -Raw $ManifestName
-Remove-Item -Path $ManifestName
-$ManifestPath = Join-Path $AppFolder $ManifestName
-$Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
-[System.IO.File]::WriteAllLines($ManifestPath, $FileOldEncoding, $Utf8NoBomEncoding)
-
-Write-Host $NewLine
-Write-Host "Yaml file created: $ManifestPath"
+Write-Host "Yaml file created: $VersionManifest"
+Write-Host "Yaml file created: $InstallerManifest"
+Write-Host "Yaml file created: $DefaultLocaleManifest"
 
 #endregion
 ##########################################
