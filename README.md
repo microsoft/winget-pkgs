@@ -15,27 +15,12 @@ To submit a package to the repository, you should follow these steps:
 
 ## Authoring a Manifest
 
-The minimal manifest syntax is below. Additional information on writing manifests can be found on [Microsoft Docs](https://docs.microsoft.com/en-us/windows/package-manager/package/manifest) or on the [v0.1 manifest spec](https://github.com/microsoft/winget-cli/blob/master/doc/ManifestSpecv0.1.md).
+The minimal manifest syntax is below. Additional information on writing manifests can be found on [Microsoft Docs](https://docs.microsoft.com/en-us/windows/package-manager/package/manifest) or on the [v1.0 manifest spec](https://github.com/microsoft/winget-cli/blob/master/doc/ManifestSpecv1.0.md).
 
 Current limitations are:
 * One manifest per PR
-* One installer per PR
 
-Be sure the manifest filename matches the `Version` and the manifest is located in the folder path matching `manifests\<publisher>\<package>\<version>.yaml`
-
-```yaml
-Id: string # publisher.package format
-Publisher: string # the name of the publisher
-Name: string # the name of the application
-Version: string # version numbering format
-License: string # the open source license or copyright
-InstallerType: string # enumeration of supported installer types (exe, msi, msix, inno, wix, nullsoft, appx)
-Installers:
-  - Arch: string # enumeration of supported architectures
-    Url: string # path to download installation file of the specified version
-    Sha256: string # SHA256 calculated from installer
-# ManifestVersion: 0.1.0
-```
+Be sure the manifest filenames match the `PackageIdentifier` manifest naming conventions and the manifest is located in the folder path matching `manifests\<first lower case letter of publisher>\<publisher>\<package>\<version>\.yaml`
 
 ### Using the YAMLCreate.ps1
 To help author manifest files, we have provided a YAMLCreate.ps1 powershell script located in the Tools folder.  
@@ -55,7 +40,7 @@ Now that you have authored your manifest, you should make sure it works as expec
 For more details, see [packages](https://docs.microsoft.com/windows/package-manager/package).
 
 ## Submit your PR
-With the manifest verified, you will need to submit a PR.  Your manifest should be located in the folder path matching `manifests\<publisher>\<package>\<version>.yaml`
+With the manifest verified, you will need to submit a PR.  Your manifest should be located in the folder path matching `manifests\<first lower case letter of publisher>\<publisher>\<package>\<version>.yaml`
 
 ### Validation Process
 The PR request will go through a validation process.  During the process, the PR request will get labels to help drive the validation.
