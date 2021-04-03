@@ -430,37 +430,37 @@ switch ($Option) {
     }
 
     'Update' {
-        while ([string]::IsNullOrWhiteSpace($URL)) {
-            Write-Host ''
-            Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the URL to the installer.'
-            $URL = Read-Host -Prompt 'URL' | TrimString
-        }
-        Write-Host $NewLine
-        Write-Host 'Downloading URL. This will take awhile...' -ForegroundColor Blue
-        $WebClient = New-Object System.Net.WebClient
-
-        try {
-            $Stream = $WebClient.OpenRead($URL)
-            $Hash = (Get-FileHash -InputStream $Stream -Algorithm SHA256).Hash
-        }
-        catch {
-            Write-Host 'Error downloading file. Please run the script again.' -ForegroundColor Red
-            exit 1
-        }
-        finally {
-            $Stream.Close()
-        }
-
-        Write-Host "Url: $URL"
-        Write-Host "Sha256: $Hash"
-
-        Write-Host $NewLine
-        Write-Host 'File downloaded. Please Fill out required fields.'
-
         $LastVersion = Get-ChildItem -Path "$AppFolder\..\" | Sort-Object | Select-Object -Last 1 -ExpandProperty 'Name'
         $OldManifests = Get-ChildItem -Path "$AppFolder\..\$LastVersion"
 
         if ($OldManifests.Name -eq "$PackageIdentifier.installer.yaml" -and $OldManifests.Name -eq "$PackageIdentifier.locale.en-US.yaml" -and $OldManifests.Name -eq "$PackageIdentifier.yaml") {
+            while ([string]::IsNullOrWhiteSpace($URL)) {
+                Write-Host ''
+                Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the URL to the installer.'
+                $URL = Read-Host -Prompt 'URL' | TrimString
+            }
+            Write-Host $NewLine
+            Write-Host 'Downloading URL. This will take awhile...' -ForegroundColor Blue
+            $WebClient = New-Object System.Net.WebClient
+
+            try {
+                $Stream = $WebClient.OpenRead($URL)
+                $Hash = (Get-FileHash -InputStream $Stream -Algorithm SHA256).Hash
+            }
+            catch {
+                Write-Host 'Error downloading file. Please run the script again.' -ForegroundColor Red
+                exit 1
+            }
+            finally {
+                $Stream.Close()
+            }
+
+            Write-Host "Url: $URL"
+            Write-Host "Sha256: $Hash"
+
+            Write-Host $NewLine
+            Write-Host 'File downloaded. Please Fill out required fields.'
+
             New-Item -ItemType "Directory" -Force -Path $AppFolder | Out-Null
             Copy-Item -Path $OldManifests -Destination $AppFolder
 
