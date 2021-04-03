@@ -151,15 +151,27 @@ switch ($Option) {
 
         do {
             Write-Host ''
+            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter any File Extensions that would be useful to discover this tool. For example: html, htm, url'
+            $FileExtensions = Read-Host -Prompt 'FileExtensions' | TrimString
+        } while ($FileExtensions.Length -gt 40)
+
+        do {
+            Write-Host ''
+            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter any Protocols that would be useful to discover this tool. For example: http, https'
+            $Protocols = Read-Host -Prompt 'Protocols' | TrimString
+        } while ($Protocols.Length -gt 40)
+
+        do {
+            Write-Host ''
+            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter any Commands that would be useful to discover this tool. For example: msedge'
+            $Commands = Read-Host -Prompt 'Commands' | TrimString
+        } while ($Commands.Length -gt 40)
+
+        do {
+            Write-Host ''
             Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the Installer Scope. machine or user'
             $Scope = Read-Host -Prompt 'Scope' | TrimString
         } until ([string]::IsNullOrWhiteSpace($Scope) -or ($Scope -eq 'machine' -or $Scope -eq 'user'))
-
-        while ($InstallerType -notin @('exe', 'msi', 'msix', 'inno', 'nullsoft', 'appx', 'wix', 'zip')) {
-            Write-Host ''
-            Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the InstallerType. For example: exe, msi, msix, inno, nullsoft'
-            $InstallerType = Read-Host -Prompt 'InstallerType' | TrimString
-        }
 
         do {
             Write-Host ''
@@ -263,13 +275,38 @@ switch ($Option) {
         Write-Output '# yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.0.0.schema.json' | Out-File $InstallerManifest
         Write-Output "PackageIdentifier: $PackageIdentifier" | Out-File $InstallerManifest -Append
         Write-Output "PackageVersion: $PackageVersion" | Out-File $InstallerManifest -Append
-        Write-Output "DefaultLocale: en-US" | Out-File $InstallerManifest -Append
+        Write-Output "FileExtensions:" | Out-File $InstallerManifest -Append
+        if (-not [string]::IsNullOrWhiteSpace($FileExtensions)) {
+            foreach ($FileExtension in $FileExtensions.Split(", ")) {
+                Write-Output "  - $FileExtension" | Out-File $InstallerManifest -Append
+            }
+        } else {
+            Write-Output "#  - " | Out-File $InstallerManifest -Append
+        }
+        Write-Output "Protocols:" | Out-File $InstallerManifest -Append
+        if (-not [string]::IsNullOrWhiteSpace($Protocols)) {
+            foreach ($Protocol in $Protocols.Split(", ")) {
+                Write-Output "  - $Protocol" | Out-File $InstallerManifest -Append
+            }
+        } else {
+            Write-Output "#  - " | Out-File $InstallerManifest -Append
+        }
+        Write-Output "Commands:" | Out-File $InstallerManifest -Append
+        if (-not [string]::IsNullOrWhiteSpace($Commands)) {
+            foreach ($Command in $Commands.Split(", ")) {
+                Write-Output "  - $Command" | Out-File $InstallerManifest -Append
+            }
+        } else {
+            Write-Output "#  - " | Out-File $InstallerManifest -Append
+        }
+        Write-Output "MinimumOSVersion: 10.0.0.0" | Out-File $InstallerManifest -Append
         Write-Output "InstallModes:" | Out-File $InstallerManifest -Append
         Write-Output "  - interactive" | Out-File $InstallerManifest -Append
         Write-Output "  - silent" | Out-File $InstallerManifest -Append
         Write-Output "  - silentWithProgress" | Out-File $InstallerManifest -Append
         Write-Output "Installers:" | Out-File $InstallerManifest -Append
         Write-Output "  - Architecture: $architecture" | Out-File $InstallerManifest -Append
+        Write-Output "    InstallerType: $InstallerType" | Out-File $InstallerManifest -Append
         Write-Output "    InstallerUrl: $URL" | Out-File $InstallerManifest -Append
         Write-Output "    InstallerSha256: $Hash" | Out-File $InstallerManifest -Append
 
@@ -277,8 +314,8 @@ switch ($Option) {
             Write-Output "    Scope: $Scope" | Out-File $InstallerManifest -Append } else { Write-Output "#    Scope: " | Out-File $InstallerManifest -Append
         }
 
-        Write-Output "    InstallerType: $InstallerType" | Out-File $InstallerManifest -Append
-
+        Write-Output "    InstallerLocale: en-US" | Out-File $InstallerManifest -Append
+        
         if ((-not [string]::IsNullOrWhiteSpace($Silent)) -or (-not [string]::IsNullOrWhiteSpace($SilentWithProgress))) {
             Write-Output "    InstallerSwitches:" | Out-File $InstallerManifest -Append
             Write-Output "      Silent: $Silent" | Out-File $InstallerManifest -Append
@@ -377,8 +414,12 @@ switch ($Option) {
 
         Write-Output "Tags:" | Out-File $DefaultLocaleManifest -Append
         
-        foreach ($Tag in $Tags.Split(", ")) {
-            Write-Output "  - $Tag" | Out-File $DefaultLocaleManifest -Append
+        if (-not [string]::IsNullOrWhiteSpace($Tags)) {
+            foreach ($Tag in $Tags.Split(", ")) {
+                Write-Output "  - $Tag" | Out-File $DefaultLocaleManifest -Append
+            }
+        } else {
+            Write-Output "#  - " | Out-File $DefaultLocaleManifest -Append
         }
         
         Write-Output "ManifestType: defaultLocale" | Out-File $DefaultLocaleManifest -Append
@@ -611,8 +652,12 @@ switch ($Option) {
 
         Write-Output "Tags:" | Out-File $NewLocaleManifest -Append
         
-        foreach ($Tag in $Tags.Split(", ")) {
-            Write-Output "  - $Tag" | Out-File $NewLocaleManifest -Append
+        if (-not [string]::IsNullOrWhiteSpace($Tags)) {
+            foreach ($Tag in $Tags.Split(", ")) {
+                Write-Output "  - $Tag" | Out-File $NewLocaleManifest -Append
+            }
+        } else {
+            Write-Output "#  - " | Out-File $NewLocaleManifest -Append
         }
         
         Write-Output "ManifestType: locale" | Out-File $NewLocaleManifest -Append
