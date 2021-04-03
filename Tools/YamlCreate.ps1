@@ -53,32 +53,7 @@ while ([string]::IsNullOrWhiteSpace($OptionMenu)) {
 
 ##########################################
 #region checksum
-while ([string]::IsNullOrWhiteSpace($URL)) {
-    Write-Host ''
-    Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the URL to the installer.'
-    $URL = Read-Host -Prompt 'URL' | TrimString
-}
-Write-Host $NewLine
-Write-Host 'Downloading URL. This will take awhile...' -ForegroundColor Blue
-$WebClient = New-Object System.Net.WebClient
 
-try {
-    $Stream = $WebClient.OpenRead($URL)
-    $Hash = (Get-FileHash -InputStream $Stream -Algorithm SHA256).Hash
-}
-catch {
-    Write-Host 'Error downloading file. Please run the script again.' -ForegroundColor Red
-    exit 1
-}
-finally {
-    $Stream.Close()
-}
-
-Write-Host "Url: $URL"
-Write-Host "Sha256: $Hash"
-
-Write-Host $NewLine
-Write-Host 'File downloaded. Please Fill out required fields.'
 
 #endregion
 ##########################################
@@ -119,6 +94,33 @@ $DefaultLocaleManifest = $AppFolder + "\$PackageIdentifier" + '.locale.en-US' + 
 
 switch ($Option) {
     'New' {
+        while ([string]::IsNullOrWhiteSpace($URL)) {
+            Write-Host ''
+            Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the URL to the installer.'
+            $URL = Read-Host -Prompt 'URL' | TrimString
+        }
+        Write-Host $NewLine
+        Write-Host 'Downloading URL. This will take awhile...' -ForegroundColor Blue
+        $WebClient = New-Object System.Net.WebClient
+
+        try {
+            $Stream = $WebClient.OpenRead($URL)
+            $Hash = (Get-FileHash -InputStream $Stream -Algorithm SHA256).Hash
+        }
+        catch {
+            Write-Host 'Error downloading file. Please run the script again.' -ForegroundColor Red
+            exit 1
+        }
+        finally {
+            $Stream.Close()
+        }
+
+        Write-Host "Url: $URL"
+        Write-Host "Sha256: $Hash"
+
+        Write-Host $NewLine
+        Write-Host 'File downloaded. Please Fill out required fields.'
+
         ######################################
         #           Collect Metadata         #
         ######################################
@@ -232,6 +234,12 @@ switch ($Option) {
             $ShortDescription = Read-Host -Prompt 'Short description' | TrimString
         }
 
+        do {
+            Write-Host ''
+            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter a long description of the application.'
+            $Description = Read-Host -Prompt 'Long Description' | TrimString
+        } while (-not [string]::IsNullOrWhiteSpace($Description) -and ($Description.Length -lt 10 -or $Description.Length -gt 10000))
+
         ######################################
         #           Create Manifests         #
         ######################################
@@ -289,6 +297,7 @@ switch ($Option) {
         Write-Output '# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultlocale.1.0.0.schema.json' | Out-File $DefaultLocaleManifest
         Write-Output "PackageIdentifier: $PackageIdentifier" | Out-File $DefaultLocaleManifest -Append
         Write-Output "PackageVersion: $PackageVersion" | Out-File $DefaultLocaleManifest -Append
+        Write-Output "PackageLocale: en-US" | Out-File $DefaultLocaleManifest -Append
         
         if (-not [string]::IsNullOrWhiteSpace($Publisher)) {
             Write-Output "Publisher: $Publisher" | Out-File $DefaultLocaleManifest -Append
@@ -354,6 +363,12 @@ switch ($Option) {
 
         Write-Output "ShortDescription: $ShortDescription" | Out-File $DefaultLocaleManifest -Append
 
+        if (-not [string]::IsNullOrWhiteSpace($Description)) {
+            Write-Output "Description: $Description" | Out-File $DefaultLocaleManifest -Append
+        } else {
+            Write-Output "#Description: " | Out-File $DefaultLocaleManifest -Append
+        }
+
         if (-not [string]::IsNullOrWhiteSpace($Moniker)) {
             Write-Output "Moniker: $Moniker" | Out-File $DefaultLocaleManifest -Append
         } else {
@@ -374,6 +389,33 @@ switch ($Option) {
     }
 
     'Update' {
+        while ([string]::IsNullOrWhiteSpace($URL)) {
+            Write-Host ''
+            Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the URL to the installer.'
+            $URL = Read-Host -Prompt 'URL' | TrimString
+        }
+        Write-Host $NewLine
+        Write-Host 'Downloading URL. This will take awhile...' -ForegroundColor Blue
+        $WebClient = New-Object System.Net.WebClient
+
+        try {
+            $Stream = $WebClient.OpenRead($URL)
+            $Hash = (Get-FileHash -InputStream $Stream -Algorithm SHA256).Hash
+        }
+        catch {
+            Write-Host 'Error downloading file. Please run the script again.' -ForegroundColor Red
+            exit 1
+        }
+        finally {
+            $Stream.Close()
+        }
+
+        Write-Host "Url: $URL"
+        Write-Host "Sha256: $Hash"
+
+        Write-Host $NewLine
+        Write-Host 'File downloaded. Please Fill out required fields.'
+
         $LastVersion = Get-ChildItem -Path "$AppFolder\..\" | Sort-Object | Select-Object -Last 1 -ExpandProperty 'Name'
         $OldManifests = Get-ChildItem -Path "$AppFolder\..\$LastVersion"
 
@@ -399,9 +441,185 @@ switch ($Option) {
     }
 
     'NewLocale' {
-        # New Locale stuff
-        #https://github.com/microsoft/winget-cli/blob/master/schemas/JSON/manifests/v1.0.0/manifest.locale.1.0.0.json
-        Throw "There is nothing here yet :("
+        New-Item -ItemType "Directory" -Force -Path $AppFolder | Out-Null
+        ######################################
+        #           Create Manifests         #
+        ######################################
+        while ([string]::IsNullOrWhiteSpace($PackageLocale) -or $PackageLocale.Length -ge 20) {
+            Write-Host ''
+            Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the locale. For example: en-US, en-CA'
+            $PackageLocale = Read-Host -Prompt 'PackageLocale' | TrimString
+            
+            $NewLocaleManifest = $AppFolder + "\$PackageIdentifier" + ".locale.$PackageLocale" + '.yaml'
+        }
+
+        do {
+            Write-Host ''
+            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the Publisher Url'
+            $PublisherUrl = Read-Host -Prompt 'Publisher Url' | TrimString
+        } while (-not [string]::IsNullOrWhiteSpace($PublisherUrl) -and ($PublisherUrl.Length -lt 5 -or $LicenseUrl.Length -gt 2000))
+
+        do {
+            Write-Host ''
+            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the Publisher Support Url'
+            $PublisherSupportUrl = Read-Host -Prompt 'Publisher Support Url' | TrimString
+        } while (-not [string]::IsNullOrWhiteSpace($PublisherSupportUrl) -and ($PublisherSupportUrl.Length -lt 5 -or $PublisherSupportUrl.Length -gt 2000))
+
+        do {
+            Write-Host ''
+            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the Privacy Url'
+            $PrivacyUrl = Read-Host -Prompt 'Privacy Url' | TrimString
+        } while (-not [string]::IsNullOrWhiteSpace($PrivacyUrl) -and ($PrivacyUrl.Length -lt 5 -or $PrivacyUrl.Length -gt 2000))
+
+        do {
+            Write-Host ''
+            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the Application Author'
+            $Author = Read-Host -Prompt 'Author' | TrimString
+        } while (-not [string]::IsNullOrWhiteSpace($Author) -and ($Author.Length -lt 1 -or $Author.Length -gt 50))
+
+        do {
+            Write-Host ''
+            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the Url to the homepage of the application.'
+            $PackageUrl = Read-Host -Prompt 'Homepage' | TrimString
+        } while (-not [string]::IsNullOrWhiteSpace($PackageUrl) -and ($PackageUrl.Length -lt 5 -or $PackageUrl.Length -gt 2000))
+
+        while ([string]::IsNullOrWhiteSpace($License) -or $License.Length -ge 40) {
+            Write-Host ''
+            Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the License. For example: MIT, or Copyright (c) Microsoft Corporation'
+            $License = Read-Host -Prompt 'License' | TrimString
+        }
+        
+        do {
+            Write-Host ''
+            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the License URL.'
+            $LicenseUrl = Read-Host -Prompt 'License URL' | TrimString
+        } while (-not [string]::IsNullOrWhiteSpace($LicenseUrl) -and ($LicenseUrl.Length -lt 10 -or $LicenseUrl.Length -gt 2000))
+
+        do {
+            Write-Host ''
+            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the Copyright'
+            $Copyright = Read-Host -Prompt 'Copyright' | TrimString
+        } while (-not [string]::IsNullOrWhiteSpace($Copyright) -and ($Copyright.Length -lt 5 -or $Copyright.Length -gt 50))
+
+        do {
+            Write-Host ''
+            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the Copyright Url'
+            $CopyrightUrl = Read-Host -Prompt 'CopyrightUrl' | TrimString
+        } while (-not [string]::IsNullOrWhiteSpace($CopyrightUrl) -and ($LicenseUrl.Length -lt 10 -or $LicenseUrl.Length -gt 2000))
+
+        do {
+            Write-Host ''
+            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter any tags that would be useful to discover this tool. For example: zip, c++'
+            $Tags = Read-Host -Prompt 'Tags' | TrimString
+        } while ($Tags.Length -gt 40)
+
+        while ([string]::IsNullOrWhiteSpace($ShortDescription) -or $ShortDescription.Length -gt '256') {
+            Write-Host ''
+            Write-Host -ForegroundColor 'Green' -Object '[Required] Enter a short description of the application.'
+            $ShortDescription = Read-Host -Prompt 'Short description' | TrimString
+        }
+
+        do {
+            Write-Host ''
+            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter a long description of the application.'
+            $Description = Read-Host -Prompt 'Long Description' | TrimString
+        } while (-not [string]::IsNullOrWhiteSpace($Description) -and ($Description.Length -lt 10 -or $Description.Length -gt 10000))
+
+        ######################################
+        #           Locale Manifests         #
+        ######################################
+        Write-Output '# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.0.0.schema.json' | Out-File $NewLocaleManifest
+        Write-Output "PackageIdentifier: $PackageIdentifier" | Out-File $NewLocaleManifest -Append
+        Write-Output "PackageVersion: $PackageVersion" | Out-File $NewLocaleManifest -Append
+        Write-Output "PackageLocale: $PackageLocale" | Out-File $NewLocaleManifest -Append
+        
+        if (-not [string]::IsNullOrWhiteSpace($Publisher)) {
+            Write-Output "Publisher: $Publisher" | Out-File $NewLocaleManifest -Append
+        } else {
+            Write-Output "#Publisher: " | Out-File $NewLocaleManifest -Append
+        }
+
+        if (-not [string]::IsNullOrWhiteSpace($PublisherUrl)) {
+            Write-Output "PublisherUrl: $PublisherUrl" | Out-File $NewLocaleManifest -Append
+        } else {
+            Write-Output "#PublisherUrl: " | Out-File $NewLocaleManifest -Append
+        }
+
+        if (-not [string]::IsNullOrWhiteSpace($PublisherSupportUrl)) {
+            Write-Output "PublisherSupportUrl: $PublisherSupportUrl" | Out-File $NewLocaleManifest -Append
+        } else {
+            Write-Output "#PublisherSupportUrl: " | Out-File $NewLocaleManifest -Append
+        }
+
+        if (-not [string]::IsNullOrWhiteSpace($PrivacyUrl)) {
+            Write-Output "PrivacyUrl: $PrivacyUrl" | Out-File $NewLocaleManifest -Append
+        } else {
+            Write-Output "#PrivacyUrl: " | Out-File $NewLocaleManifest -Append
+        }
+
+        if (-not [string]::IsNullOrWhiteSpace($Author)) {
+            Write-Output "Author: $Author" | Out-File $NewLocaleManifest -Append
+        } else {
+            Write-Output "#Author: " | Out-File $NewLocaleManifest -Append
+        }
+
+        Write-Output "PackageName: $PackageName" | Out-File $NewLocaleManifest -Append
+
+        if (-not [string]::IsNullOrWhiteSpace($PackageUrl)) {
+            Write-Output "PackageUrl: $PackageUrl" | Out-File $NewLocaleManifest -Append
+        } else {
+            Write-Output "#PackageUrl: " | Out-File $NewLocaleManifest -Append
+        }
+
+        if (-not [string]::IsNullOrWhiteSpace($License)) {
+            Write-Output "License: $License" | Out-File $NewLocaleManifest -Append
+        } else {
+            Write-Output "#License: " | Out-File $NewLocaleManifest -Append
+        }
+        
+        if (-not [string]::IsNullOrWhiteSpace($LicenseUrl)) {
+            Write-Output "LicenseUrl: $LicenseUrl" | Out-File $NewLocaleManifest -Append
+        } else {
+            Write-Output "#LicenseUrl: " | Out-File $NewLocaleManifest -Append
+        }
+        
+        if (-not [string]::IsNullOrWhiteSpace($Copyright)) {
+            Write-Output "Copyright: $Copyright" | Out-File $NewLocaleManifest -Append
+        } else {
+            Write-Output "#Copyright: " | Out-File $NewLocaleManifest -Append
+        }
+        
+        if (-not [string]::IsNullOrWhiteSpace($CopyrightUrl)) {
+            Write-Output "CopyrightUrl: $CopyrightUrl" | Out-File $NewLocaleManifest -Append
+        } else {
+            Write-Output "#CopyrightUrl: " | Out-File $NewLocaleManifest -Append
+        }
+
+        Write-Output "ShortDescription: $ShortDescription" | Out-File $NewLocaleManifest -Append
+
+        if (-not [string]::IsNullOrWhiteSpace($Description)) {
+            Write-Output "Description: $Description" | Out-File $NewLocaleManifest -Append
+        } else {
+            Write-Output "#Description: " | Out-File $NewLocaleManifest -Append
+        }
+
+        if (-not [string]::IsNullOrWhiteSpace($Moniker)) {
+            Write-Output "Moniker: $Moniker" | Out-File $NewLocaleManifest -Append
+        } else {
+            Write-Output "#Moniker: " | Out-File $NewLocaleManifest -Append
+        }
+
+        Write-Output "Tags:" | Out-File $NewLocaleManifest -Append
+        
+        foreach ($Tag in $Tags.Split(", ")) {
+            Write-Output "  - $Tag" | Out-File $NewLocaleManifest -Append
+        }
+        
+        Write-Output "ManifestType: locale" | Out-File $NewLocaleManifest -Append
+        Write-Output "ManifestVersion: 1.0.0" | Out-File $NewLocaleManifest -Append
+
+        Write-Host ''
+        Write-Host "Yaml file created: $NewLocaleManifest"
     }
 
     Default {
