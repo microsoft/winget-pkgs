@@ -73,7 +73,7 @@ while ([string]::IsNullOrWhiteSpace($PackageName) -or $PackageName.Length -ge 12
     $PackageName = Read-Host -Prompt 'Application Name' | TrimString
 }
 
-while ([string]::IsNullOrWhiteSpace($PackageVersion)) {
+while ([string]::IsNullOrWhiteSpace($PackageVersion) -or $PackageName.Length -ge 128) {
     Write-Host ''
     Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the version. for example: 1.33.7'
     $PackageVersion = Read-Host -Prompt 'Version' | TrimString
@@ -202,7 +202,7 @@ switch ($Option) {
             Write-Host ''
             Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the Application Author'
             $Author = Read-Host -Prompt 'Author' | TrimString
-        } while (-not [string]::IsNullOrWhiteSpace($Author) -and ($Author.Length -lt 1 -or $Author.Length -gt 50))
+        } while (-not [string]::IsNullOrWhiteSpace($Author) -and ($Author.Length -lt 1 -or $Author.Length -gt 256))
 
         do {
             Write-Host ''
@@ -210,7 +210,7 @@ switch ($Option) {
             $PackageUrl = Read-Host -Prompt 'Homepage' | TrimString
         } while (-not [string]::IsNullOrWhiteSpace($PackageUrl) -and ($PackageUrl.Length -lt 5 -or $PackageUrl.Length -gt 2000))
 
-        while ([string]::IsNullOrWhiteSpace($License) -or $License.Length -ge 40) {
+        while ([string]::IsNullOrWhiteSpace($License) -or $License.Length -ge 512) {
             Write-Host ''
             Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the License. For example: MIT, GPL, Freeware, Proprietary or Copyright (c) Microsoft Corporation'
             $License = Read-Host -Prompt 'License' | TrimString
@@ -226,7 +226,7 @@ switch ($Option) {
             Write-Host ''
             Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the Copyright'
             $Copyright = Read-Host -Prompt 'Copyright' | TrimString
-        } while (-not [string]::IsNullOrWhiteSpace($Copyright) -and ($Copyright.Length -lt 5 -or $Copyright.Length -gt 50))
+        } while (-not [string]::IsNullOrWhiteSpace($Copyright) -and ($Copyright.Length -lt 5 -or $Copyright.Length -gt 512))
 
         do {
             Write-Host ''
@@ -516,7 +516,7 @@ switch ($Option) {
             Write-Host ''
             Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the Application Author'
             $Author = Read-Host -Prompt 'Author' | TrimString
-        } while (-not [string]::IsNullOrWhiteSpace($Author) -and ($Author.Length -lt 1 -or $Author.Length -gt 50))
+        } while (-not [string]::IsNullOrWhiteSpace($Author) -and ($Author.Length -lt 1 -or $Author.Length -gt 256))
 
         do {
             Write-Host ''
@@ -524,7 +524,7 @@ switch ($Option) {
             $PackageUrl = Read-Host -Prompt 'Homepage' | TrimString
         } while (-not [string]::IsNullOrWhiteSpace($PackageUrl) -and ($PackageUrl.Length -lt 5 -or $PackageUrl.Length -gt 2000))
 
-        while ([string]::IsNullOrWhiteSpace($License) -or $License.Length -ge 40) {
+        while ([string]::IsNullOrWhiteSpace($License) -or $License.Length -ge 512) {
             Write-Host ''
             Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the License. For example: MIT, GPL, Freeware, Proprietary or Copyright (c) Microsoft Corporation'
             $License = Read-Host -Prompt 'License' | TrimString
@@ -540,7 +540,7 @@ switch ($Option) {
             Write-Host ''
             Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the Copyright'
             $Copyright = Read-Host -Prompt 'Copyright' | TrimString
-        } while (-not [string]::IsNullOrWhiteSpace($Copyright) -and ($Copyright.Length -lt 5 -or $Copyright.Length -gt 50))
+        } while (-not [string]::IsNullOrWhiteSpace($Copyright) -and ($Copyright.Length -lt 5 -or $Copyright.Length -gt 512))
 
         do {
             Write-Host ''
