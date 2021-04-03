@@ -151,21 +151,21 @@ switch ($Option) {
 
         do {
             Write-Host ''
-            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter any File Extensions that would be useful to discover this tool. For example: html, htm, url'
+            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter any File Extensions the package could support. For example: html, htm, url (Max 256)'
             $FileExtensions = Read-Host -Prompt 'FileExtensions' | TrimString
-        } while ($FileExtensions.Length -gt 40)
+        } while ($FileExtensions.Split(", ").Count -gt '256')
 
         do {
             Write-Host ''
-            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter any Protocols that would be useful to discover this tool. For example: http, https'
+            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter any Protocols the package provides a handler for. For example: http, https (Max 16)'
             $Protocols = Read-Host -Prompt 'Protocols' | TrimString
-        } while ($Protocols.Length -gt 40)
+        } while ($Protocols.Split(", ").Count -gt '16')
 
         do {
             Write-Host ''
-            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter any Commands that would be useful to discover this tool. For example: msedge'
+            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter any Commands or aliases to run the package. For example: msedge (Max 16)'
             $Commands = Read-Host -Prompt 'Commands' | TrimString
-        } while ($Commands.Length -gt 40)
+        } while ($Commands.Split(", ").Count -gt '16')
 
         do {
             Write-Host ''
@@ -212,7 +212,7 @@ switch ($Option) {
 
         while ([string]::IsNullOrWhiteSpace($License) -or $License.Length -ge 40) {
             Write-Host ''
-            Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the License. For example: MIT, or Copyright (c) Microsoft Corporation'
+            Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the License. For example: MIT, GPL, Freeware, Proprietary or Copyright (c) Microsoft Corporation'
             $License = Read-Host -Prompt 'License' | TrimString
         }
         
@@ -236,9 +236,9 @@ switch ($Option) {
 
         do {
             Write-Host ''
-            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter any tags that would be useful to discover this tool. For example: zip, c++'
+            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter any tags that would be useful to discover this tool. For example: zip, c++ (Max 16)'
             $Tags = Read-Host -Prompt 'Tags' | TrimString
-        } while ($Tags.Length -gt 40)
+        } while ($Tags.Split(", ").Count -gt '16')
 
         while ([string]::IsNullOrWhiteSpace($ShortDescription) -or $ShortDescription.Length -gt '256') {
             Write-Host ''
@@ -526,7 +526,7 @@ switch ($Option) {
 
         while ([string]::IsNullOrWhiteSpace($License) -or $License.Length -ge 40) {
             Write-Host ''
-            Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the License. For example: MIT, or Copyright (c) Microsoft Corporation'
+            Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the License. For example: MIT, GPL, Freeware, Proprietary or Copyright (c) Microsoft Corporation'
             $License = Read-Host -Prompt 'License' | TrimString
         }
         
@@ -550,9 +550,9 @@ switch ($Option) {
 
         do {
             Write-Host ''
-            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter any tags that would be useful to discover this tool. For example: zip, c++'
+            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter any tags that would be useful to discover this tool. For example: zip, c++ (Max 16)'
             $Tags = Read-Host -Prompt 'Tags' | TrimString
-        } while ($Tags.Length -gt 40)
+        } while ($Tags.Split(", ").Count -gt '16')
 
         while ([string]::IsNullOrWhiteSpace($ShortDescription) -or $ShortDescription.Length -gt '256') {
             Write-Host ''
