@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.singleton.1.0.0.schema.json
 PackageIdentifier: RomanKubiak.Ctrlr
 PackageVersion: 5.3.201
 PackageName: Ctrlr
@@ -14,10 +15,19 @@ Description: >
   Host them as VST or AU plugins in your favorite DAWs.
 Homepage: https://ctrlr.org/
 Installers:
-  - Architecture: x64
+  - Architecture: neutral # installer installs both x86 and x64 binaries
     InstallerUrl: http://ctrlr.org/nightly/Ctrlr-5.3.201.exe
     InstallerSha256: A35E83BC65E07547D11881C0C04F76449C58EA7CD5BDDE8CD3EBE568107514DB
-    InstallerType: nullsoft
+    # The installer is actually Nullsoft but it has an issue with silent mode:
+    # it uses a wrong installation directory (C:\) and the uninstall does not work.
+    # Thus we override the directory to the default directory that would be used when installed
+    # interactively.
+    InstallerType: exe
+    InstallerSwitches:
+      Custom: /D=C:\Program Files (x86)\Ctrlr
+      Silent: /S
+      SilentWithProgress: /S
+    Scope: machine
 PackageLocale: en-US
 ManifestType: singleton
 ManifestVersion: 1.0.0
