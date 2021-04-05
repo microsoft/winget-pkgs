@@ -61,32 +61,38 @@ while ([string]::IsNullOrWhiteSpace($OptionMenu)) {
 ##########################################
 #region Read in metadata
 
+while ($PackageIdentifier.Length -lt 4 -or $ID.Length -ge 255) {
+    Write-Host
+    Write-Host -ForegroundColor 'Green' -Object ' [Required] Enter the Package Identifier, in the following format <Publisher shortname.Application shortname>. For example: Microsoft.Excel'
+    $PackageIdentifier = Read-Host -Prompt 'PackageIdentifier' | TrimString
+    $PackageIdentifierFolder = $PackageIdentifier.Replace('.','\')
+}
+
 while ([string]::IsNullOrWhiteSpace($Publisher) -or $Publisher.Length -ge 128) {
-    Write-Host ''
-    Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the publisher. For example: Microsoft'
+    Write-Host
+    Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the full publisher name. For example: Microsoft Corporation'
     $Publisher = Read-Host -Prompt 'Publisher' | TrimString
 }
 
 while ([string]::IsNullOrWhiteSpace($PackageName) -or $PackageName.Length -ge 128) {
-    Write-Host ''
-    Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the application name. For example: Teams'
-    $PackageName = Read-Host -Prompt 'Application Name' | TrimString
+    Write-Host
+    Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the full application name. For example: Microsoft Teams'
+    $PackageName = Read-Host -Prompt 'PackageName' | TrimString
 }
 
 while ([string]::IsNullOrWhiteSpace($PackageVersion) -or $PackageName.Length -ge 128) {
-    Write-Host ''
+    Write-Host
     Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the version. for example: 1.33.7'
     $PackageVersion = Read-Host -Prompt 'Version' | TrimString
 }
 
-$PackageIdentifier = [System.String]::Concat($Publisher.Replace(' ',''),'.',$PackageName.Replace(' ',''))
 if (Test-Path -Path "$PSScriptRoot\..\manifests") {
     $ManifestsFolder = (Resolve-Path "$PSScriptRoot\..\manifests").Path
 } else {
     $ManifestsFolder = (Resolve-Path ".\").Path
 }
 
-$AppFolder = Join-Path $ManifestsFolder $Publisher.Chars(0) $Publisher.Replace(' ','') $PackageName.Replace(' ','') $PackageVersion
+$AppFolder = Join-Path $ManifestsFolder $PackageIdentifier.ToLower().Chars(0) $PackageIdentifierPub $PackageIdentifierFolder $PackageVersion
 
 $VersionManifest = $AppFolder + "\$PackageIdentifier" + '.yaml'
 $InstallerManifest = $AppFolder + "\$PackageIdentifier" + '.installer' + '.yaml'
@@ -95,7 +101,7 @@ $DefaultLocaleManifest = $AppFolder + "\$PackageIdentifier" + '.locale.en-US' + 
 switch ($Option) {
     'New' {
         while ([string]::IsNullOrWhiteSpace($URL)) {
-            Write-Host ''
+            Write-Host
             Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the URL to the installer.'
             $URL = Read-Host -Prompt 'URL' | TrimString
         }
@@ -126,131 +132,140 @@ switch ($Option) {
         ######################################
         #           Installer Manifest       #
         while ($architecture -notin @('x86', 'x64', 'arm', 'arm64', 'neutral')) {
-            Write-Host ''
-            Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the architecture (x86, x64, arm, arm64, Neutral)'
+            Write-Host
+            Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the architecture (x86, x64, arm, arm64, neutral)'
             $architecture = Read-Host -Prompt 'Architecture' | TrimString
         }
 
         while ($InstallerType -notin @('exe', 'msi', 'msix', 'inno', 'nullsoft', 'appx', 'wix', 'zip')) {
-            Write-Host ''
+            Write-Host
             Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the InstallerType. For example: exe, msi, msix, inno, nullsoft'
             $InstallerType = Read-Host -Prompt 'InstallerType' | TrimString
         }
 
         if ($InstallerType -ieq 'exe') {
             while ([string]::IsNullOrWhiteSpace($Silent) -or ([string]::IsNullOrWhiteSpace($SilentWithProgress))) {
-                Write-Host ''
+                Write-Host
                 Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the silent install switch. For example: /s, -verysilent /qn'
                 $Silent = Read-Host -Prompt 'Silent switch' | TrimString
 
-                Write-Host ''
+                Write-Host
                 Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the silent with progress install switch. For example: /s, -silent /qb'
                 $SilentWithProgress = Read-Host -Prompt 'Silent with progress switch' | TrimString
             }
         }
+        
+        do {
+            Write-Host
+            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the upgrade method. install or uninstallPrevious'
+            $UpgradeBehavior = Read-Host -Prompt 'UpgradeBehavior' | TrimString
+        } until ([string]::IsNullOrWhiteSpace($UpgradeBehavior) -or ($UpgradeBehavior -eq 'install' -or $UpgradeBehavior -eq 'uninstallPrevious'))
+        if ([string]::IsNullOrWhiteSpace($UpgradeBehavior)) {
+            $UpgradeBehavior = 'install'
+        }
 
         do {
-            Write-Host ''
-            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter any File Extensions the package could support. For example: html, htm, url (Max 256)'
+            Write-Host
+            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter any File Extensions the application could support. For example: html, htm, url (Max 256)'
             $FileExtensions = Read-Host -Prompt 'FileExtensions' | TrimString
         } while ($FileExtensions.Split(", ").Count -gt '256')
 
         do {
-            Write-Host ''
-            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter any Protocols the package provides a handler for. For example: http, https (Max 16)'
+            Write-Host
+            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter any Protocols the application provides a handler for. For example: http, https (Max 16)'
             $Protocols = Read-Host -Prompt 'Protocols' | TrimString
         } while ($Protocols.Split(", ").Count -gt '16')
 
         do {
-            Write-Host ''
-            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter any Commands or aliases to run the package. For example: msedge (Max 16)'
+            Write-Host
+            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter any Commands or aliases to run the application. For example: msedge (Max 16)'
             $Commands = Read-Host -Prompt 'Commands' | TrimString
         } while ($Commands.Split(", ").Count -gt '16')
 
         do {
-            Write-Host ''
+            Write-Host
             Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the Installer Scope. machine or user'
             $Scope = Read-Host -Prompt 'Scope' | TrimString
         } until ([string]::IsNullOrWhiteSpace($Scope) -or ($Scope -eq 'machine' -or $Scope -eq 'user'))
 
+        #        DefaultLocale Manifest      #
         do {
-            Write-Host ''
+            Write-Host
             Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the Moniker (friendly name/alias). For example: vscode'
             $Moniker = Read-Host -Prompt 'Moniker' | TrimString
         } while ($Moniker.Length -gt 40)
-
-        #        DefaultLocale Manifest      #
+        
         do {
-            Write-Host ''
-            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the Publisher Url'
+            Write-Host
+            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the Publisher Url.'
             $PublisherUrl = Read-Host -Prompt 'Publisher Url' | TrimString
         } while (-not [string]::IsNullOrWhiteSpace($PublisherUrl) -and ($PublisherUrl.Length -lt 5 -or $LicenseUrl.Length -gt 2000))
 
         do {
-            Write-Host ''
-            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the Publisher Support Url'
+            Write-Host
+            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the Publisher Support Url.'
             $PublisherSupportUrl = Read-Host -Prompt 'Publisher Support Url' | TrimString
         } while (-not [string]::IsNullOrWhiteSpace($PublisherSupportUrl) -and ($PublisherSupportUrl.Length -lt 5 -or $PublisherSupportUrl.Length -gt 2000))
 
         do {
-            Write-Host ''
-            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the Privacy Url'
+            Write-Host
+            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the Publisher Privacy Url.'
             $PrivacyUrl = Read-Host -Prompt 'Privacy Url' | TrimString
         } while (-not [string]::IsNullOrWhiteSpace($PrivacyUrl) -and ($PrivacyUrl.Length -lt 5 -or $PrivacyUrl.Length -gt 2000))
 
         do {
-            Write-Host ''
-            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the Application Author'
+            Write-Host
+            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the application Author.'
             $Author = Read-Host -Prompt 'Author' | TrimString
-        } while (-not [string]::IsNullOrWhiteSpace($Author) -and ($Author.Length -lt 1 -or $Author.Length -gt 256))
+        } while (-not [string]::IsNullOrWhiteSpace($Author) -and ($Author.Length -lt 2 -or $Author.Length -gt 256))
 
         do {
-            Write-Host ''
+            Write-Host
             Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the Url to the homepage of the application.'
             $PackageUrl = Read-Host -Prompt 'Homepage' | TrimString
         } while (-not [string]::IsNullOrWhiteSpace($PackageUrl) -and ($PackageUrl.Length -lt 5 -or $PackageUrl.Length -gt 2000))
 
         while ([string]::IsNullOrWhiteSpace($License) -or $License.Length -ge 512) {
-            Write-Host ''
-            Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the License. For example: MIT, GPL, Freeware, Proprietary or Copyright (c) Microsoft Corporation'
+            Write-Host
+            Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the application License. For example: MIT, GPL, Freeware, Proprietary or Copyright (c) Microsoft Corporation'
             $License = Read-Host -Prompt 'License' | TrimString
         }
         
         do {
-            Write-Host ''
-            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the License URL.'
+            Write-Host
+            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the application License URL.'
             $LicenseUrl = Read-Host -Prompt 'License URL' | TrimString
         } while (-not [string]::IsNullOrWhiteSpace($LicenseUrl) -and ($LicenseUrl.Length -lt 10 -or $LicenseUrl.Length -gt 2000))
 
         do {
-            Write-Host ''
-            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the Copyright'
+            Write-Host
+            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the application Copyright.'
             $Copyright = Read-Host -Prompt 'Copyright' | TrimString
         } while (-not [string]::IsNullOrWhiteSpace($Copyright) -and ($Copyright.Length -lt 5 -or $Copyright.Length -gt 512))
 
         do {
-            Write-Host ''
-            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the Copyright Url'
+            Write-Host
+            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the application Copyright Url.'
             $CopyrightUrl = Read-Host -Prompt 'CopyrightUrl' | TrimString
         } while (-not [string]::IsNullOrWhiteSpace($CopyrightUrl) -and ($LicenseUrl.Length -lt 10 -or $LicenseUrl.Length -gt 2000))
 
         do {
-            Write-Host ''
+            Write-Host
             Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter any tags that would be useful to discover this tool. For example: zip, c++ (Max 16)'
             $Tags = Read-Host -Prompt 'Tags' | TrimString
         } while ($Tags.Split(", ").Count -gt '16')
 
         while ([string]::IsNullOrWhiteSpace($ShortDescription) -or $ShortDescription.Length -gt '256') {
-            Write-Host ''
+            Write-Host
             Write-Host -ForegroundColor 'Green' -Object '[Required] Enter a short description of the application.'
             $ShortDescription = Read-Host -Prompt 'Short description' | TrimString
         }
 
         do {
-            Write-Host ''
+            Write-Host
             Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter a long description of the application.'
             $Description = Read-Host -Prompt 'Long Description' | TrimString
-        } while (-not [string]::IsNullOrWhiteSpace($Description) -and ($Description.Length -lt 10 -or $Description.Length -gt 10000))
+        } while (-not [string]::IsNullOrWhiteSpace($Description) -and ($Description.Length -lt 3 -or $Description.Length -gt 10000))
 
         ######################################
         #           Create Manifests         #
@@ -266,7 +281,7 @@ switch ($Option) {
         Write-Output "DefaultLocale: en-US" | Out-File $VersionManifest -Append
         Write-Output "ManifestType: version" | Out-File $VersionManifest -Append
         Write-Output "ManifestVersion: 1.0.0" | Out-File $VersionManifest -Append
-        Write-Host ''
+        Write-Host
         Write-Host "Yaml file created: $VersionManifest"
 
         ######################################
@@ -322,10 +337,10 @@ switch ($Option) {
             Write-Output "      SilentWithProgress: $SilentWithProgress" | Out-File $InstallerManifest -Append
         }
 
-        Write-Output "    UpgradeBehavior: install" | Out-File $InstallerManifest -Append
+        Write-Output "    UpgradeBehavior: $UpgradeBehavior" | Out-File $InstallerManifest -Append
         Write-Output "ManifestType: installer" | Out-File $InstallerManifest -Append
         Write-Output "ManifestVersion: 1.0.0" | Out-File $InstallerManifest -Append
-        Write-Host ''
+        Write-Host
         Write-Host "Yaml file created: $InstallerManifest"
 
         ######################################
@@ -425,7 +440,7 @@ switch ($Option) {
         Write-Output "ManifestType: defaultLocale" | Out-File $DefaultLocaleManifest -Append
         Write-Output "ManifestVersion: 1.0.0" | Out-File $DefaultLocaleManifest -Append
 
-        Write-Host ''
+        Write-Host
         Write-Host "Yaml file created: $DefaultLocaleManifest"
     }
 
@@ -435,7 +450,7 @@ switch ($Option) {
 
         if ($OldManifests.Name -eq "$PackageIdentifier.installer.yaml" -and $OldManifests.Name -eq "$PackageIdentifier.locale.en-US.yaml" -and $OldManifests.Name -eq "$PackageIdentifier.yaml") {
             while ([string]::IsNullOrWhiteSpace($URL)) {
-                Write-Host ''
+                Write-Host
                 Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the URL to the installer.'
                 $URL = Read-Host -Prompt 'URL' | TrimString
             }
@@ -487,7 +502,7 @@ switch ($Option) {
         #           Create Manifests         #
         ######################################
         while ([string]::IsNullOrWhiteSpace($PackageLocale) -or $PackageLocale.Length -ge 20) {
-            Write-Host ''
+            Write-Host
             Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the locale. For example: en-US, en-CA'
             $PackageLocale = Read-Host -Prompt 'PackageLocale' | TrimString
             
@@ -495,73 +510,73 @@ switch ($Option) {
         }
 
         do {
-            Write-Host ''
+            Write-Host
             Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the Publisher Url'
             $PublisherUrl = Read-Host -Prompt 'Publisher Url' | TrimString
         } while (-not [string]::IsNullOrWhiteSpace($PublisherUrl) -and ($PublisherUrl.Length -lt 5 -or $LicenseUrl.Length -gt 2000))
 
         do {
-            Write-Host ''
+            Write-Host
             Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the Publisher Support Url'
             $PublisherSupportUrl = Read-Host -Prompt 'Publisher Support Url' | TrimString
         } while (-not [string]::IsNullOrWhiteSpace($PublisherSupportUrl) -and ($PublisherSupportUrl.Length -lt 5 -or $PublisherSupportUrl.Length -gt 2000))
 
         do {
-            Write-Host ''
+            Write-Host
             Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the Privacy Url'
             $PrivacyUrl = Read-Host -Prompt 'Privacy Url' | TrimString
         } while (-not [string]::IsNullOrWhiteSpace($PrivacyUrl) -and ($PrivacyUrl.Length -lt 5 -or $PrivacyUrl.Length -gt 2000))
 
         do {
-            Write-Host ''
+            Write-Host
             Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the Application Author'
             $Author = Read-Host -Prompt 'Author' | TrimString
         } while (-not [string]::IsNullOrWhiteSpace($Author) -and ($Author.Length -lt 1 -or $Author.Length -gt 256))
 
         do {
-            Write-Host ''
+            Write-Host
             Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the Url to the homepage of the application.'
             $PackageUrl = Read-Host -Prompt 'Homepage' | TrimString
         } while (-not [string]::IsNullOrWhiteSpace($PackageUrl) -and ($PackageUrl.Length -lt 5 -or $PackageUrl.Length -gt 2000))
 
         while ([string]::IsNullOrWhiteSpace($License) -or $License.Length -ge 512) {
-            Write-Host ''
-            Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the License. For example: MIT, GPL, Freeware, Proprietary or Copyright (c) Microsoft Corporation'
+            Write-Host
+            Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the application License. For example: MIT, GPL, Freeware, Proprietary or Copyright (c) Microsoft Corporation'
             $License = Read-Host -Prompt 'License' | TrimString
         }
         
         do {
-            Write-Host ''
-            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the License URL.'
+            Write-Host
+            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the application License URL.'
             $LicenseUrl = Read-Host -Prompt 'License URL' | TrimString
         } while (-not [string]::IsNullOrWhiteSpace($LicenseUrl) -and ($LicenseUrl.Length -lt 10 -or $LicenseUrl.Length -gt 2000))
 
         do {
-            Write-Host ''
-            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the Copyright'
+            Write-Host
+            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the application Copyright'
             $Copyright = Read-Host -Prompt 'Copyright' | TrimString
         } while (-not [string]::IsNullOrWhiteSpace($Copyright) -and ($Copyright.Length -lt 5 -or $Copyright.Length -gt 512))
 
         do {
-            Write-Host ''
-            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the Copyright Url'
+            Write-Host
+            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the application Copyright Url'
             $CopyrightUrl = Read-Host -Prompt 'CopyrightUrl' | TrimString
         } while (-not [string]::IsNullOrWhiteSpace($CopyrightUrl) -and ($LicenseUrl.Length -lt 10 -or $LicenseUrl.Length -gt 2000))
 
         do {
-            Write-Host ''
+            Write-Host
             Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter any tags that would be useful to discover this tool. For example: zip, c++ (Max 16)'
             $Tags = Read-Host -Prompt 'Tags' | TrimString
         } while ($Tags.Split(", ").Count -gt '16')
 
         while ([string]::IsNullOrWhiteSpace($ShortDescription) -or $ShortDescription.Length -gt '256') {
-            Write-Host ''
+            Write-Host
             Write-Host -ForegroundColor 'Green' -Object '[Required] Enter a short description of the application.'
             $ShortDescription = Read-Host -Prompt 'Short description' | TrimString
         }
 
         do {
-            Write-Host ''
+            Write-Host
             Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter a long description of the application.'
             $Description = Read-Host -Prompt 'Long Description' | TrimString
         } while (-not [string]::IsNullOrWhiteSpace($Description) -and ($Description.Length -lt 10 -or $Description.Length -gt 10000))
@@ -663,7 +678,7 @@ switch ($Option) {
         Write-Output "ManifestType: locale" | Out-File $NewLocaleManifest -Append
         Write-Output "ManifestVersion: 1.0.0" | Out-File $NewLocaleManifest -Append
 
-        Write-Host ''
+        Write-Host
         Write-Host "Yaml file created: $NewLocaleManifest"
     }
 
