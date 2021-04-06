@@ -505,12 +505,26 @@ switch ($Option) {
             New-Item -ItemType "Directory" -Force -Path $AppFolder | Out-Null
             Copy-Item -Path $OldManifests -Destination $AppFolder
 
+            do {
+                Write-Host
+                Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the application product code. Looks like {CF8E6E00-9C03-4440-81C0-21FACB921A6B}'
+                $ProductCode = Read-Host -Prompt 'ProductCode' | TrimString
+            } while (-not [string]::IsNullOrWhiteSpace($ProductCode) -and ($ProductCode.Length -lt 1 -or $ProductCode.Length -gt 255))
+
+            if (-not [string]::IsNullOrWhiteSpace($ProductCode)) {
+                ((Get-Content -Path $InstallerManifest) -replace '(?<=ProductCode: ).*',"`"$ProductCode`"") | Set-Content -Path $InstallerManifest
+            } else {
+                ((Get-Content -Path $InstallerManifest) -replace '(    ProductCode: ).*',"#    ProductCode: ") | Set-Content -Path $InstallerManifest
+            }
+
             ((Get-Content -Path $VersionManifest) -replace '(?<=PackageVersion: ).*',"$PackageVersion") | Set-Content -Path $VersionManifest
             ((Get-Content -Path $InstallerManifest) -replace '(?<=PackageVersion: ).*',"$PackageVersion") | Set-Content -Path $InstallerManifest
             ((Get-Content -Path $DefaultLocaleManifest) -replace '(?<=PackageVersion: ).*',"$PackageVersion") | Set-Content -Path $DefaultLocaleManifest
 
             ((Get-Content -Path $InstallerManifest) -replace '(?<=InstallerUrl: ).*',"$URL") | Set-Content -Path $InstallerManifest
             ((Get-Content -Path $InstallerManifest) -replace '(?<=InstallerSha256: ).*',"$Hash") | Set-Content -Path $InstallerManifest
+            
+            ((Get-Content -Path $InstallerManifest) -replace '(?<=ProductCode: ).*',"`"$ProductCode`"") | Set-Content -Path $InstallerManifest
 
             $FileOldEncoding = Get-Content -Raw $VersionManifest
             Remove-Item -Path $VersionManifest
