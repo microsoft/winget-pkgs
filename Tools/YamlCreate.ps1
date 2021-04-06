@@ -490,8 +490,7 @@ switch ($Option) {
             Write-Host "Url: $URL"
             Write-Host "Sha256: $Hash"
 
-            Write-Host $NewLine
-            Write-Host 'File downloaded. Please Fill out required fields.'
+            Write-Host
 
             New-Item -ItemType "Directory" -Force -Path $AppFolder | Out-Null
             Copy-Item -Path $OldManifests -Destination $AppFolder
@@ -503,7 +502,22 @@ switch ($Option) {
             ((Get-Content -Path $InstallerManifest) -replace '(?<=InstallerUrl: ).*',"$URL") | Set-Content -Path $InstallerManifest
             ((Get-Content -Path $InstallerManifest) -replace '(?<=InstallerSha256: ).*',"$Hash") | Set-Content -Path $InstallerManifest
 
-            Write-Host $NewLine
+            $FileOldEncoding = Get-Content -Raw $VersionManifest
+            Remove-Item -Path $VersionManifest
+            $Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
+            [System.IO.File]::WriteAllLines($VersionManifest, $FileOldEncoding, $Utf8NoBomEncoding)
+
+            $FileOldEncoding = Get-Content -Raw $InstallerManifest
+            Remove-Item -Path $InstallerManifest
+            $Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
+            [System.IO.File]::WriteAllLines($InstallerManifest, $FileOldEncoding, $Utf8NoBomEncoding)
+
+            $FileOldEncoding = Get-Content -Raw $DefaultLocaleManifest
+            Remove-Item -Path $DefaultLocaleManifest
+            $Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
+            [System.IO.File]::WriteAllLines($DefaultLocaleManifest, $FileOldEncoding, $Utf8NoBomEncoding)
+
+            Write-Host
             Write-Host "Updated Yaml file: $VersionManifest"
             Write-Host "Updated Yaml file: $InstallerManifest"
             Write-Host "Updated Yaml file: $DefaultLocaleManifest"
@@ -694,6 +708,11 @@ switch ($Option) {
         
         Write-Output "ManifestType: locale" | Out-File $NewLocaleManifest -Append
         Write-Output "ManifestVersion: 1.0.0" | Out-File $NewLocaleManifest -Append
+
+        $FileOldEncoding = Get-Content -Raw $NewLocaleManifest
+        Remove-Item -Path $NewLocaleManifest
+        $Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
+        [System.IO.File]::WriteAllLines($NewLocaleManifest, $FileOldEncoding, $Utf8NoBomEncoding)
 
         Write-Host
         Write-Host "Yaml file created: $NewLocaleManifest"
