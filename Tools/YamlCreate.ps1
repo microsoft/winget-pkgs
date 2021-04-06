@@ -68,18 +68,6 @@ while ($PackageIdentifier.Length -lt 4 -or $ID.Length -ge 255) {
     $PackageIdentifierFolder = $PackageIdentifier.Replace('.','\')
 }
 
-while ([string]::IsNullOrWhiteSpace($Publisher) -or $Publisher.Length -ge 128) {
-    Write-Host
-    Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the full publisher name. For example: Microsoft Corporation'
-    $Publisher = Read-Host -Prompt 'Publisher' | TrimString
-}
-
-while ([string]::IsNullOrWhiteSpace($PackageName) -or $PackageName.Length -ge 128) {
-    Write-Host
-    Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the full application name. For example: Microsoft Teams'
-    $PackageName = Read-Host -Prompt 'PackageName' | TrimString
-}
-
 while ([string]::IsNullOrWhiteSpace($PackageVersion) -or $PackageName.Length -ge 128) {
     Write-Host
     Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the version. for example: 1.33.7'
@@ -131,6 +119,18 @@ switch ($Option) {
         #           Collect Metadata         #
         ######################################
         #           Installer Manifest       #
+        while ([string]::IsNullOrWhiteSpace($Publisher) -or $Publisher.Length -ge 128) {
+            Write-Host
+            Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the full publisher name. For example: Microsoft Corporation'
+            $Publisher = Read-Host -Prompt 'Publisher' | TrimString
+        }
+        
+        while ([string]::IsNullOrWhiteSpace($PackageName) -or $PackageName.Length -ge 128) {
+            Write-Host
+            Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the full application name. For example: Microsoft Teams'
+            $PackageName = Read-Host -Prompt 'PackageName' | TrimString
+        }
+
         while ($architecture -notin @('x86', 'x64', 'arm', 'arm64', 'neutral')) {
             Write-Host
             Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the architecture (x86, x64, arm, arm64, neutral)'
@@ -556,6 +556,18 @@ switch ($Option) {
         ######################################
         #           Create Manifests         #
         ######################################
+        while ([string]::IsNullOrWhiteSpace($Publisher) -or $Publisher.Length -ge 128) {
+            Write-Host
+            Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the full publisher name. For example: Microsoft Corporation'
+            $Publisher = Read-Host -Prompt 'Publisher' | TrimString
+        }
+        
+        while ([string]::IsNullOrWhiteSpace($PackageName) -or $PackageName.Length -ge 128) {
+            Write-Host
+            Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the full application name. For example: Microsoft Teams'
+            $PackageName = Read-Host -Prompt 'PackageName' | TrimString
+        }
+        
         while ([string]::IsNullOrWhiteSpace($PackageLocale) -or $PackageLocale.Length -ge 20) {
             Write-Host
             Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the locale. For example: en-US, en-CA'
