@@ -156,8 +156,8 @@ switch ($Option) {
                 do {
                     Write-Host
                     Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter any custom switches for the installer. For example: -norestart'
-                    $Custom = Read-Host -Prompt 'CustomSwitch' | TrimString
-                } while (-not [string]::IsNullOrWhiteSpace($Custom))
+                    $Custom = Read-Host -Prompt 'Custom Switch' | TrimString
+                } while ($Custom.Length -gt '2048')
             }
         } else {
             do {
@@ -172,7 +172,7 @@ switch ($Option) {
                 Write-Host
                 Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter any custom switches for the installer. For example: -norestart'
                 $Custom = Read-Host -Prompt 'CustomSwitch' | TrimString
-            } while (-not [string]::IsNullOrWhiteSpace($Custom) -or (-not [string]::IsNullOrWhiteSpace($Silent)) -or (-not [string]::IsNullOrWhiteSpace($SilentWithProgress)))
+            } while ($Silent.Length -gt '2048') -or ($SilentWithProgress.Lenth -gt '512') -or ($Custom.Length -gt '2048')
         }
 
         do {
