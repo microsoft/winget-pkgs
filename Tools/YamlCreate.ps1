@@ -154,7 +154,13 @@ switch ($Option) {
                 $SilentWithProgress = Read-Host -Prompt 'Silent with progress switch' | TrimString
             }
         }
-        
+
+        do {
+            Write-Host
+            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the application product code. Looks like {CF8E6E00-9C03-4440-81C0-21FACB921A6B}'
+            $ProductCode = Read-Host -Prompt 'ProductCode' | TrimString
+        } while (-not [string]::IsNullOrWhiteSpace($ProductCode) -and ($ProductCode.Length -lt 1 -or $ProductCode.Length -gt 255))
+
         do {
             Write-Host
             Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the upgrade method. install or uninstallPrevious'
@@ -336,6 +342,10 @@ switch ($Option) {
         }
 
         Write-Output "    InstallerLocale: en-US" | Out-File $InstallerManifest -Append
+
+        if (-not [string]::IsNullOrWhiteSpace($ProductCode)) {
+            Write-Output "    ProductCode: `"$ProductCode`"" | Out-File $InstallerManifest -Append } else { Write-Output "#    ProductCode: " | Out-File $InstallerManifest -Append
+        }
         
         if ((-not [string]::IsNullOrWhiteSpace($Silent)) -or (-not [string]::IsNullOrWhiteSpace($SilentWithProgress))) {
             Write-Output "    InstallerSwitches:" | Out-File $InstallerManifest -Append
