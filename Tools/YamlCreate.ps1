@@ -152,7 +152,27 @@ switch ($Option) {
                 Write-Host
                 Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the silent with progress install switch. For example: /s, -silent /qb'
                 $SilentWithProgress = Read-Host -Prompt 'Silent with progress switch' | TrimString
+
+                do {
+                    Write-Host
+                    Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter any custom switches for the installer. For example: -norestart'
+                    $Custom = Read-Host -Prompt 'CustomSwitch' | TrimString
+                } while (-not [string]::IsNullOrWhiteSpace($Custom))
             }
+        } else {
+            do {
+                Write-Host
+                Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the silent install switch. For example: /s, -verysilent /qn'
+                $Silent = Read-Host -Prompt 'Silent' | TrimString
+
+                Write-Host
+                Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the silent with progress install switch. For example: /s, -silent /qb'
+                $SilentWithProgress = Read-Host -Prompt 'SilentWithProgress' | TrimString
+
+                Write-Host
+                Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter any custom switches for the installer. For example: -norestart'
+                $Custom = Read-Host -Prompt 'CustomSwitch' | TrimString
+            } while (-not [string]::IsNullOrWhiteSpace($Custom) -or (-not [string]::IsNullOrWhiteSpace($Silent)) -or (-not [string]::IsNullOrWhiteSpace($SilentWithProgress)))
         }
 
         do {
@@ -349,6 +369,7 @@ switch ($Option) {
         
         if ((-not [string]::IsNullOrWhiteSpace($Silent)) -or (-not [string]::IsNullOrWhiteSpace($SilentWithProgress))) {
             Write-Output "    InstallerSwitches:" | Out-File $InstallerManifest -Append
+            Write-Output "      Custom: $Custom" | Out-File $InstallerManifest -Append
             Write-Output "      Silent: $Silent" | Out-File $InstallerManifest -Append
             Write-Output "      SilentWithProgress: $SilentWithProgress" | Out-File $InstallerManifest -Append
         }
