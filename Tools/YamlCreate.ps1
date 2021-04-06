@@ -92,7 +92,7 @@ if (Test-Path -Path "$PSScriptRoot\..\manifests") {
     $ManifestsFolder = (Resolve-Path ".\").Path
 }
 
-$AppFolder = Join-Path $ManifestsFolder $PackageIdentifier.ToLower().Chars(0) $PackageIdentifierPub $PackageIdentifierFolder $PackageVersion
+$AppFolder = Join-Path $ManifestsFolder $PackageIdentifier.ToLower().Chars(0) $PackageIdentifierFolder $PackageVersion
 
 $VersionManifest = $AppFolder + "\$PackageIdentifier" + '.yaml'
 $InstallerManifest = $AppFolder + "\$PackageIdentifier" + '.installer' + '.yaml'
@@ -281,7 +281,13 @@ switch ($Option) {
         Write-Output "DefaultLocale: en-US" | Out-File $VersionManifest -Append
         Write-Output "ManifestType: version" | Out-File $VersionManifest -Append
         Write-Output "ManifestVersion: 1.0.0" | Out-File $VersionManifest -Append
-        Write-Host
+
+        $FileOldEncoding = Get-Content -Raw $VersionManifest
+        Remove-Item -Path $VersionManifest
+        $Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
+        [System.IO.File]::WriteAllLines($VersionManifest, $FileOldEncoding, $Utf8NoBomEncoding)
+
+        Write-Host 
         Write-Host "Yaml file created: $VersionManifest"
 
         ######################################
@@ -340,6 +346,12 @@ switch ($Option) {
         Write-Output "    UpgradeBehavior: $UpgradeBehavior" | Out-File $InstallerManifest -Append
         Write-Output "ManifestType: installer" | Out-File $InstallerManifest -Append
         Write-Output "ManifestVersion: 1.0.0" | Out-File $InstallerManifest -Append
+
+        $FileOldEncoding = Get-Content -Raw $InstallerManifest
+        Remove-Item -Path $InstallerManifest
+        $Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
+        [System.IO.File]::WriteAllLines($InstallerManifest, $FileOldEncoding, $Utf8NoBomEncoding)
+
         Write-Host
         Write-Host "Yaml file created: $InstallerManifest"
 
@@ -439,6 +451,11 @@ switch ($Option) {
         
         Write-Output "ManifestType: defaultLocale" | Out-File $DefaultLocaleManifest -Append
         Write-Output "ManifestVersion: 1.0.0" | Out-File $DefaultLocaleManifest -Append
+
+        $FileOldEncoding = Get-Content -Raw $DefaultLocaleManifest
+        Remove-Item -Path $DefaultLocaleManifest
+        $Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
+        [System.IO.File]::WriteAllLines($DefaultLocaleManifest, $FileOldEncoding, $Utf8NoBomEncoding)
 
         Write-Host
         Write-Host "Yaml file created: $DefaultLocaleManifest"
@@ -686,23 +703,3 @@ switch ($Option) {
         Exit
     }
 }
-
-#endregion
-##########################################
-
-
-##########################################
-#region Write metadata
-
-# What does this stuff do??
-
-#$FileOldEncoding = Get-Content -Raw $VersionManifest
-#Remove-Item -Path $VersionManifest
-#$ManifestPath = Join-Path $AppFolder $VersionManifest
-#$Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
-#[System.IO.File]::WriteAllLines($ManifestPath, $FileOldEncoding, $Utf8NoBomEncoding)
-
-
-
-#endregion
-##########################################
