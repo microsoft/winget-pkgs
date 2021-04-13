@@ -33,15 +33,18 @@ Fill out as much of the manifest as you can:
 
 
 ```YAML
-Id: string # publisher.package format
-Publisher: string # the name of the publisher
-Name: string # the name of the application
-Version: string # version numbering format
-License: string # the open source license or copyright
-InstallerType: string # enumeration of supported installer types (exe, msi, msix, inno, wix, nullsoft, appx)
-Installers:
-  - Arch: string # enumeration of supported architectures
-    Url: string # path to download installation file
-    Sha256: string # SHA256 calculated from installer
-# ManifestVersion: 0.1.0
+PackageIdentifier:   # publisher.package format (example: "Microsoft.WindowsTerminal")
+PackageVersion:      # version number format x.y.z.a (example: "1.6.10571.0")
+PackageLocale:       # meta-data locale (example: "en-US")
+Publisher:           # publisher name (example: "Microsoft Corporation")
+PackageName:         # package name (example: "Windows Terminal")
+License:             # package license (example: "MIT")
+ShortDescription:    # package description (example: "The new Windows Terminal")
+Installers: 
+ - Architecture:     # installer architecture (example: "x64")
+   InstallerType:    # installer type (example: "msix")
+   InstallerUrl:     # installer URL (should be https://)
+   InstallerSha256:  # SHA256 hash calculated from installer
+ManifestType: singleton
+ManifestVersion: 1.0.0
 ```
