@@ -80,7 +80,8 @@ if (Test-Path -Path "$PSScriptRoot\..\manifests") {
     $ManifestsFolder = (Resolve-Path ".\").Path
 }
 
-$AppFolder = Join-Path $ManifestsFolder $PackageIdentifier.ToLower().Chars(0) $PackageIdentifierFolder $PackageVersion
+# Rewritten to ensure compatibility with Windows PowerShell 5.0: https://stackoverflow.com/a/28421970
+$AppFolder = Join-Path $ManifestsFolder -ChildPath $PackageIdentifier.ToLower().Chars(0) | Join-Path -ChildPath $PackageIdentifierFolder | Join-Path -ChildPath $PackageVersion
 
 $VersionManifest = $AppFolder + "\$PackageIdentifier" + '.yaml'
 $InstallerManifest = $AppFolder + "\$PackageIdentifier" + '.installer' + '.yaml'
