@@ -75,7 +75,7 @@ Function Read-WinGet-MandatoryInfo {
 Function Read-PreviousWinGet-Manifest {
     Switch ($Option) {
         'Update' {
-            $script:LastVersion = Get-ChildItem -Path "$AppFolder\..\" | Sort-Object | Select-Object -Last 1 -ExpandProperty 'Name'
+            $script:LastVersion = Get-ChildItem -Path "$AppFolder\..\" -Exclude $PackageVersion | Sort-Object | Select-Object -Last 1 -ExpandProperty 'Name'
             $script:OldManifests = Get-ChildItem -Path "$AppFolder\..\$LastVersion"
 
             if ($OldManifests.Name -eq "$PackageIdentifier.installer.yaml" -and $OldManifests.Name -eq "$PackageIdentifier.locale.en-US.yaml" -and $OldManifests.Name -eq "$PackageIdentifier.yaml") {
