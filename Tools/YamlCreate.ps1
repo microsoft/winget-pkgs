@@ -107,6 +107,11 @@ Function Read-PreviousWinGet-Manifest {
                     $FetchCommands = [regex]::Matches($OldManifestText,$regex) | foreach {$_.groups[1].value }
                     $Commands = $FetchCommands.Substring(0, $FetchCommands.LastIndexOf(' '))
                     New-Variable -Name "Commands" -Value ($Commands.Split("-").Trim()[1..100] -join ", ") -Scope Script -Force
+                } elseif ($Line -eq "InstallerSuccessCodes:") {
+                    $regex = '(?ms)InstallerSuccessCodes:(.+?):'
+                    $FetchInstallerSuccessCodes = [regex]::Matches($OldManifestText,$regex) | foreach {$_.groups[1].value }
+                    $InstallerSuccessCodes = $FetchInstallerSuccessCodes.Substring(0, $FetchInstallerSuccessCodes.LastIndexOf(' '))
+                    New-Variable -Name "InstallerSuccessCodes" -Value ($InstallerSuccessCodes.Split("-").Trim()[1..100] -join ", ") -Scope Script -Force
                 } elseif ($Line -notlike "PackageVersion*") {
                     $Variable = $Line.Replace("#","").Split(":").Trim()
                     New-Variable -Name $Variable[0] -Value ($Variable[1..10] -join ":") -Scope Script -Force
@@ -233,6 +238,7 @@ Function Read-WinGet-InstallerValues {
     do {
         Write-Host
         Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the application product code. Looks like {CF8E6E00-9C03-4440-81C0-21FACB921A6B}'
+        Write-Host -ForegroundColor 'White' -Object 'Can be found with ' -NoNewline; Write-Host -ForegroundColor 'DarkYellow' 'get-wmiobject Win32_Product | Format-Table IdentifyingNumber, Name, LocalPackage -AutoSize'
         $ProductCode = Read-Host -Prompt 'ProductCode' | TrimString
     } while (-not [string]::IsNullOrWhiteSpace($ProductCode) -and ($ProductCode.Length -lt 1 -or $ProductCode.Length -gt 255))
 
@@ -328,6 +334,25 @@ Function Read-WinGet-InstallerManifest {
                 $script:Commands = $NewCommands
             }
         } while ($Commands.Split(", ").Count -gt '16')
+    }
+
+    if ([string]::IsNullOrWhiteSpace($InstallerSuccessCodes)) {
+        do {
+            Write-Host
+            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] List of additional non-zero installer success exit codes other than known default values by winget (Max 16)'
+            $script:InstallerSuccessCodes = Read-Host -Prompt 'InstallerSuccessCodes' | TrimString
+        } while ($InstallerSuccessCodes.Split(", ").Count -gt '16')
+    } else {
+        do {
+            Write-Host
+            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] List of additional non-zero installer success exit codes other than known default values by winget (Max 16)'
+            Write-Host -ForegroundColor 'DarkGray' "Old Variable: $InstallerSuccessCodes"
+            $NewInstallerSuccessCodes = Read-Host -Prompt 'InstallerSuccessCodes' | TrimString
+    
+            if (-not [string]::IsNullOrWhiteSpace($NewInstallerSuccessCodes)) {
+                $script:InstallerSuccessCodes = $NewInstallerSuccessCodes
+            }
+        } while ($InstallerSuccessCodes.Split(", ").Count -gt '16')
     }
 
 }
@@ -657,6 +682,8 @@ if ($Protocols) {"Protocols:"
 Foreach ($Protocol in $Protocols.Split(",").Trim()) {"  - $Protocol" }}
 if ($Commands) {"Commands:"
 Foreach ($Command in $Commands.Split(",").Trim()) {"  - $Command" }}
+if ($InstallerSuccessCodes) {"InstallerSuccessCodes:"
+Foreach ($InstallerSuccessCode in $InstallerSuccessCodes.Split(",").Trim()) {"  - $Command" }}
 "InstallModes:"
 "  - interactive"
 "  - silent"
