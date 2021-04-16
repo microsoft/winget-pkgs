@@ -683,7 +683,7 @@ Foreach ($Protocol in $Protocols.Split(",").Trim()) {"  - $Protocol" }}
 if ($Commands) {"Commands:"
 Foreach ($Command in $Commands.Split(",").Trim()) {"  - $Command" }}
 if ($InstallerSuccessCodes) {"InstallerSuccessCodes:"
-Foreach ($InstallerSuccessCode in $InstallerSuccessCodes.Split(",").Trim()) {"  - $Command" }}
+Foreach ($InstallerSuccessCode in $InstallerSuccessCodes.Split(",").Trim()) {"  - $InstallerSuccessCode" }}
 "InstallModes:"
 "  - interactive"
 "  - silent"
