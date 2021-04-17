@@ -705,7 +705,7 @@ Write-Host "Yaml file created: $InstallerManifestPath"
 
 ForEach ($Line in (Get-Content $InstallerManifestPath)) {
     $LookForVariable = $Line.Split(":").Trim()
-    if ($LookForVariable[1] -eq '' -and $Line -notin @("FileExtensions:","Protocols:","Commands:","InstallModes:","Installers:","  - Architecture","    InstallerSwitches:")) {
+    if ($LookForVariable[1] -eq '' -and $Line -notin @("FileExtensions:","Protocols:","Commands:","InstallerSuccessCodes:","InstallModes:","Installers:","  - Architecture","    InstallerSwitches:")) {
         ((Get-Content -Path "$InstallerManifestPath") -replace ($LookForVariable[0] + ":"),("#"+$LookForVariable[0] + ":")) | Set-Content -Path "$InstallerManifestPath" -Encoding 'UTF8'
     }
 }
