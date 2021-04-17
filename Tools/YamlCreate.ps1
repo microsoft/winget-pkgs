@@ -265,7 +265,7 @@ Function Read-WinGet-InstallerValues {
     $script:Installers += "      Custom: $Custom`n"
     $script:Installers += "      Silent: $Silent`n"
     $script:Installers += "      SilentWithProgress: $SilentWithProgress`n"}
-    $script:Installers += "    ProductCode: $ProductCode`n"
+    $script:Installers += "    ProductCode: `"$ProductCode`"`n"
     $script:Installers += "    Scope: $Scope`n"
     $script:Installers += "    InstallerLocale: $InstallerLocale`n"
     $script:Installers += "    UpgradeBehavior: $UpgradeBehavior`n"
