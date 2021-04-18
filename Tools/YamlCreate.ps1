@@ -76,6 +76,7 @@ Function Read-PreviousWinGet-Manifest {
     Switch ($Option) {
         'Update' {
             $script:LastVersion = Get-ChildItem -Path "$AppFolder\..\" | Sort-Object | Select-Object -Last 1 -ExpandProperty 'Name'
+            Write-Host -ForegroundColor 'DarkYellow' -Object "Last Version: $LastVersion"
             $script:OldManifests = Get-ChildItem -Path "$AppFolder\..\$LastVersion"
 
             if ($OldManifests.Name -eq "$PackageIdentifier.installer.yaml" -and $OldManifests.Name -eq "$PackageIdentifier.locale.en-US.yaml" -and $OldManifests.Name -eq "$PackageIdentifier.yaml") {
@@ -83,7 +84,7 @@ Function Read-PreviousWinGet-Manifest {
             } elseif ($OldManifests.Name -eq "$PackageIdentifier.yaml") {
                 $script:OldManifestText = Get-Content -Path "$AppFolder\..\$LastVersion\$PackageIdentifier.yaml"
             } else {
-                Throw "Error: Old Manifest not found"
+                Throw "Error: Version $LastVersion does not contain the required manifests"
             }
             
             ForEach ($Line in $OldManifestText -ne '') {
@@ -118,8 +119,8 @@ Function Read-PreviousWinGet-Manifest {
                 }
             }
 
-            if (!(Test-Path $AppFolder)) {New-Item -ItemType "Directory" -Force -Path $AppFolder | Out-Null}
             ForEach ($DifLocale in $OldManifests) {
+                if (!(Test-Path $AppFolder)) {New-Item -ItemType "Directory" -Force -Path $AppFolder | Out-Null}
                 if ($DifLocale.Name -notin @("$PackageIdentifier.yaml","$PackageIdentifier.installer.yaml","$PackageIdentifier.locale.en-US.yaml")) {
                     $DifLocaleContent = Get-Content -Path $DifLocale.FullName
                     Out-File ($AppFolder + "\" + $DifLocale.Name) -InputObject $DifLocaleContent.Replace("PackageVersion: $LastVersion","PackageVersion: $PackageVersion") -Encoding 'UTF8'
