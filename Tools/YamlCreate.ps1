@@ -239,7 +239,7 @@ Function Read-WinGet-InstallerValues {
     do {
         Write-Host
         Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the application product code. Looks like {CF8E6E00-9C03-4440-81C0-21FACB921A6B}'
-        Write-Host -ForegroundColor 'White' -Object 'Can be found with ' -NoNewline; Write-Host -ForegroundColor 'DarkYellow' 'get-wmiobject Win32_Product | Format-Table IdentifyingNumber, Name, LocalPackage -AutoSize'
+        Write-Host -ForegroundColor 'White' -Object 'Can be found with ' -NoNewline; Write-Host -ForegroundColor 'DarkYellow' 'get-wmiobject Win32_Product | Sort-Object Name | Format-Table IdentifyingNumber, Name -AutoSize'
         $ProductCode = Read-Host -Prompt 'ProductCode' | TrimString
     } while (-not [string]::IsNullOrWhiteSpace($ProductCode) -and ($ProductCode.Length -lt 1 -or $ProductCode.Length -gt 255))
 
@@ -258,26 +258,37 @@ Function Read-WinGet-InstallerValues {
         $UpgradeBehavior = 'install'
     }
 
-    $script:Installers += "  - Architecture: $Architecture`n"
-    $script:Installers += "    InstallerType: $InstallerType`n"
-    $script:Installers += "    InstallerUrl: $InstallerUrl`n"
-    $script:Installers += "    InstallerSha256: $InstallerSha256`n"
-    if ($Silent) {$script:Installers += "    InstallerSwitches:`n"
-    $script:Installers += "      Custom: $Custom`n"
-    $script:Installers += "      Silent: $Silent`n"
-    $script:Installers += "      SilentWithProgress: $SilentWithProgress`n"}
-    $script:Installers += "    ProductCode: "
-    if ($ProductCode) {$script:Installers += "`"$ProductCode`"`n"}else{$script:Installers += "`n"}
-    $script:Installers += "    Scope: $Scope`n"
-    $script:Installers += "    InstallerLocale: $InstallerLocale`n"
-    $script:Installers += "    UpgradeBehavior: $UpgradeBehavior`n"
+    $Installer += "  - Architecture: $Architecture`n"
+    $Installer += "    InstallerType: $InstallerType`n"
+    $Installer += "    InstallerUrl: $InstallerUrl`n"
+    $Installer += "    InstallerSha256: $InstallerSha256`n"
+    if ($Silent -or $Custom) {$Installer += "    InstallerSwitches:`n"}
+    if ($Custom) {$Installer += "      Custom: $Custom`n"}
+    if ($Silent) {$Installer += "      Silent: $Silent`n"
+    $Installer += "      SilentWithProgress: $SilentWithProgress`n"}
+    $Installer += "    ProductCode: "
+    if ($ProductCode) {$Installer += "`"$ProductCode`"`n"}else{$Installer += "`n"}
+    $Installer += "    Scope: $Scope`n"
+    $Installer += "    InstallerLocale: $InstallerLocale`n"
+    $Installer += "    UpgradeBehavior: $UpgradeBehavior`n"
+
+    $Installer.TrimEnd().Split("`n") | ForEach-Object {
+        if ($_.Split(":").Trim()[1] -eq '') {
+            $script:Installers += $_.Insert(0,"#") + "`n"
+        } else {
+            $script:Installers += $_ + "`n"
+        }
+    }
 
     do {
         Write-Host
         Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Do you want to create another installer?'
         $AnotherInstaller = Read-Host -Prompt 'y or n' | TrimString
     } while ([string]::IsNullOrWhiteSpace($AnotherInstaller)) 
-    if ($AnotherInstaller -eq 'y') { Read-WinGet-InstallerValues }
+
+    if ($AnotherInstaller -eq 'y') {
+        Read-WinGet-InstallerValues
+    }
 }
 
 Function Read-WinGet-InstallerManifest {
@@ -666,7 +677,13 @@ New-Item -ItemType "Directory" -Force -Path $AppFolder | Out-Null
 
 $VersionManifestPath = $AppFolder + "\$PackageIdentifier" + '.yaml'
 
-Out-File $VersionManifestPath -InputObject $VersionManifest -Encoding 'UTF8'
+$VersionManifest | ForEach-Object {
+    if ($_.Split(":").Trim()[1] -eq '') {
+        $_.Insert(0,"#")
+    } else {
+        $_
+    }
+} | Out-File -Path $VersionManifestPath -Encoding 'UTF8'
 
 Write-Host 
 Write-Host "Yaml file created: $VersionManifestPath"
@@ -700,22 +717,20 @@ New-Item -ItemType "Directory" -Force -Path $AppFolder | Out-Null
 
 $InstallerManifestPath = $AppFolder + "\$PackageIdentifier" + '.installer' + '.yaml'
 
-Out-File $InstallerManifestPath -InputObject $InstallerManifest -Encoding 'UTF8'
+$InstallerManifest | ForEach-Object {
+    if ($_.Split(":").Trim()[1] -eq '' -and $_ -notin @("FileExtensions:","Protocols:","Commands:","InstallerSuccessCodes:","InstallModes:","Installers:","  - Architecture","    InstallerSwitches:")) {
+        $_.Insert(0,"#")
+    } else {
+        $_
+    }
+} | Out-File -Path $InstallerManifestPath -Encoding 'UTF8'
 
 Write-Host 
 Write-Host "Yaml file created: $InstallerManifestPath"
-
-ForEach ($Line in (Get-Content $InstallerManifestPath)) {
-    $LookForVariable = $Line.Split(":").Trim()
-    if ($LookForVariable[1] -eq '' -and $Line -notin @("FileExtensions:","Protocols:","Commands:","InstallerSuccessCodes:","InstallModes:","Installers:","  - Architecture","    InstallerSwitches:")) {
-        ((Get-Content -Path "$InstallerManifestPath") -replace ($LookForVariable[0] + ":"),("#"+$LookForVariable[0] + ":")) | Set-Content -Path "$InstallerManifestPath" -Encoding 'UTF8'
-    }
-}
-((Get-Content -Path "$InstallerManifestPath") -replace "##","#") | Set-Content -Path "$InstallerManifestPath" -Encoding 'UTF8' # Anyway to fix this?
 }
 
 Function Write-WinGet-LocaleManifest {
-$DefaultLocaleManifest = @(
+$LocaleManifest = @(
 if ($PackageLocale -eq 'en-US') {'# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultlocale.1.0.0.schema.json'}else{'# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.0.0.schema.json'}
 "PackageIdentifier: $PackageIdentifier"
 "PackageVersion: $PackageVersion"
@@ -742,20 +757,18 @@ if ($PackageLocale -eq 'en-US') {"ManifestType: defaultLocale"}else{"ManifestTyp
 
 New-Item -ItemType "Directory" -Force -Path $AppFolder | Out-Null
 
-$DefaultLocaleManifestPath = $AppFolder + "\$PackageIdentifier" + ".locale." + "$PackageLocale" + '.yaml'
+$LocaleManifestPath = $AppFolder + "\$PackageIdentifier" + ".locale." + "$PackageLocale" + '.yaml'
 
-Out-File $DefaultLocaleManifestPath -InputObject $DefaultLocaleManifest -Encoding 'UTF8'
+$LocaleManifest | ForEach-Object {
+    if ($_.Split(":").Trim()[1] -eq '' -and $_ -notin @("Tags:", "  -*")) {
+        $_.Insert(0,"#")
+    } else {
+        $_
+    }
+} | Out-File -Path $LocaleManifestPath -Encoding 'UTF8'
 
 Write-Host 
-Write-Host "Yaml file created: $DefaultLocaleManifestPath"
-
-ForEach ($Line in (Get-Content $DefaultLocaleManifestPath)) {
-    $LookForVariable = $Line.Split(":").Trim()
-    if ($LookForVariable[1] -eq '' -and $Line -notin @("Tags:", "  -*")) {
-        ((Get-Content -Path "$DefaultLocaleManifestPath") -replace ($LookForVariable[0] + ":"),("#"+$LookForVariable[0] + ":")) | Set-Content -Path "$DefaultLocaleManifestPath" -Encoding 'UTF8'
-    }
-}
-((Get-Content -Path "$DefaultLocaleManifestPath") -replace "Short#Description","ShortDescription") | Set-Content -Path "$DefaultLocaleManifestPath" -Encoding 'UTF8' # Anyway to fix this?
+Write-Host "Yaml file created: $LocaleManifestPath"
 }
 
 Show-OptionMenu
