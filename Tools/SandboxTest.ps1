@@ -23,6 +23,10 @@ if (-Not (Test-Path -Path $mapFolder -PathType Container)) {
 if (-Not $SkipManifestValidation -And -Not [String]::IsNullOrWhiteSpace($Manifest)) {
   Write-Host '--> Validating Manifest'
 
+  if (-Not (Test-Path -Path $Manifest)) {
+    throw 'The Manifest does not exist.'
+  }
+
   winget.exe validate $Manifest
   if (-Not $?) {
     throw 'Manifest validation failed.'
