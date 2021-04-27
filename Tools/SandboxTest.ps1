@@ -6,7 +6,8 @@ Param(
   [Parameter(Position = 1, HelpMessage = "The script to run in the Sandbox.")]
   [ScriptBlock] $Script,
   [Parameter(HelpMessage = "The folder to map in the Sandbox.")]
-  [String] $MapFolder = $pwd
+  [String] $MapFolder = $pwd,
+  [switch] $SkipManifestValidation
 )
 
 $ErrorActionPreference = "Stop"
@@ -19,12 +20,8 @@ if (-Not (Test-Path -Path $mapFolder -PathType Container)) {
 
 # Validate manifest file
 
-if (-Not [String]::IsNullOrWhiteSpace($Manifest)) {
+if (-Not $SkipManifestValidation -And -Not [String]::IsNullOrWhiteSpace($Manifest)) {
   Write-Host '--> Validating Manifest'
-
-  if (-Not (Test-Path -Path $Manifest -PathType Leaf)) {
-    throw 'The Manifest file does not exist.'
-  }
 
   winget.exe validate $Manifest
   if (-Not $?) {
@@ -75,7 +72,7 @@ function Get-LatestUrl {
 }
 
 function Get-LatestHash {
-  $shaUrl = ((Invoke-WebRequest $apiLatestUrl -UseBasicParsing | ConvertFrom-Json).assets | Where-Object { $_.name -match '.SHA256.txt$' }).browser_download_url
+  $shaUrl = ((Invoke-WebRequest $apiLatestUrl -UseBasicParsing | ConvertFrom-Json).assets | Where-Object { $_.name -match '^Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.txt$' }).browser_download_url
 
   $shaFile = Join-Path -Path $tempFolder -ChildPath 'Microsoft.DesktopAppInstaller.SHA256.txt'
   Invoke-WebRequest -UseBasicParsing $shaUrl -OutFile $shaFile
