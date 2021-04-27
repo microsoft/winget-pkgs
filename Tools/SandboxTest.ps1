@@ -67,15 +67,18 @@ New-Item $tempFolder -ItemType Directory -ErrorAction SilentlyContinue | Out-Nul
 
 $apiLatestUrl = 'https://api.github.com/repos/microsoft/winget-cli/releases/latest'
 
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+$WebClient = New-Object System.Net.WebClient
+
 function Get-LatestUrl {
-  ((Invoke-WebRequest $apiLatestUrl -UseBasicParsing | ConvertFrom-Json).assets | Where-Object { $_.name -match '.appxbundle$' }).browser_download_url
+  ((Invoke-WebRequest $apiLatestUrl -UseBasicParsing | ConvertFrom-Json).assets | Where-Object { $_.name -match '^Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.appxbundle$' }).browser_download_url
 }
 
 function Get-LatestHash {
   $shaUrl = ((Invoke-WebRequest $apiLatestUrl -UseBasicParsing | ConvertFrom-Json).assets | Where-Object { $_.name -match '^Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.txt$' }).browser_download_url
 
   $shaFile = Join-Path -Path $tempFolder -ChildPath 'Microsoft.DesktopAppInstaller.SHA256.txt'
-  Invoke-WebRequest -UseBasicParsing $shaUrl -OutFile $shaFile
+  $WebClient.DownloadFile($shaUrl, $shaFile)
 
   Get-Content $shaFile
 }
@@ -92,26 +95,20 @@ $desktopAppInstaller = @{
 
 $ProgressPreference = $oldProgressPreference
 
-$vcLibs = @{
-  fileName = 'Microsoft.VCLibs.140.00_14.0.27810.0_x64__8wekyb3d8bbwe.Appx'
-  url      = 'https://raw.githubusercontent.com/felipecassiors/winget-pkgs/da8548d90369eb8f69a4738dc1474caaffb58e12/Tools/SandboxTest_Temp/Microsoft.VCLibs.140.00_14.0.27810.0_x64__8wekyb3d8bbwe.Appx'
-  hash     = 'fe660c46a3ff8462d9574902e735687e92eeb835f75ec462a41ef76b54ef13ed'
-}
-
 $vcLibsUwp = @{
   fileName = 'Microsoft.VCLibs.x64.14.00.Desktop.appx'
   url      = 'https://aka.ms/Microsoft.VCLibs.x64.14.00.Desktop.appx'
   hash     = '6602159c341bafea747d0edf15669ac72df8817299fbfaa90469909e06794256'
 }
 
-$dependencies = @($desktopAppInstaller, $vcLibs, $vcLibsUwp)
+$dependencies = @($desktopAppInstaller, $vcLibsUwp)
 
 # Clean temp directory
 
-Get-ChildItem $tempFolder -Recurse -Exclude $dependencies.fileName | Remove-Item -Force
+Get-ChildItem $tempFolder -Recurse -Exclude $dependencies.fileName | Remove-Item -Force -Recurse
 
 if (-Not [String]::IsNullOrWhiteSpace($Manifest)) {
-  Copy-Item -Path $Manifest -Destination $tempFolder
+  Copy-Item -Path $Manifest -Recurse -Destination $tempFolder
 }
 
 # Download dependencies
@@ -120,7 +117,6 @@ Write-Host '--> Checking dependencies'
 
 $desktopInSandbox = 'C:\Users\WDAGUtilityAccount\Desktop'
 
-$WebClient = New-Object System.Net.WebClient
 foreach ($dependency in $dependencies) {
   $dependency.file = Join-Path -Path $tempFolder -ChildPath $dependency.fileName
   $dependency.pathInSandbox = Join-Path -Path $desktopInSandbox -ChildPath (Join-Path -Path $tempFolderName -ChildPath $dependency.fileName)
@@ -136,7 +132,7 @@ foreach ($dependency in $dependencies) {
       $WebClient.DownloadFile($dependency.url, $dependency.file)
     }
     catch {
-      throw "Error downloading $($dependency.url) ."
+      throw "Error downloading $($dependency.url)."
     }
     if (-not ($dependency.hash -eq $(get-filehash $dependency.file).Hash)) {
       throw 'Hashes do not match, try gain.'
@@ -184,7 +180,7 @@ Write-Host @'
 
 
 '@
-Add-AppxPackage -Path '$($desktopAppInstaller.pathInSandbox)' -DependencyPath '$($vcLibs.pathInSandbox)','$($vcLibsUwp.pathInSandbox)'
+Add-AppxPackage -Path '$($desktopAppInstaller.pathInSandbox)' -DependencyPath '$($vcLibsUwp.pathInSandbox)'
 
 Write-Host @'
 
