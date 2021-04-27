@@ -273,7 +273,7 @@ Function Read-WinGet-InstallerValues {
     $Installer += "    UpgradeBehavior: $UpgradeBehavior`n"
 
     $Installer.TrimEnd().Split("`n") | ForEach-Object {
-        if ($_.Split(":").Trim()[1] -eq '') {
+        if ($_.Split(":").Trim()[1] -eq '' -and $_ -notin @("    InstallerSwitches:")) {
             $script:Installers += $_.Insert(0,"#") + "`n"
         } else {
             $script:Installers += $_ + "`n"
@@ -718,7 +718,7 @@ New-Item -ItemType "Directory" -Force -Path $AppFolder | Out-Null
 $InstallerManifestPath = $AppFolder + "\$PackageIdentifier" + '.installer' + '.yaml'
 
 $InstallerManifest | ForEach-Object {
-    if ($_.Split(":").Trim()[1] -eq '' -and $_ -notin @("FileExtensions:","Protocols:","Commands:","InstallerSuccessCodes:","InstallModes:","Installers:","  - Architecture","    InstallerSwitches:")) {
+    if ($_.Split(":").Trim()[1] -eq '' -and $_ -notin @("FileExtensions:","Protocols:","Commands:","InstallerSuccessCodes:","InstallModes:","Installers:","    InstallerSwitches:")) {
         $_.Insert(0,"#")
     } else {
         $_
