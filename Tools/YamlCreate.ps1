@@ -27,6 +27,8 @@ filter TrimString {
     $_.Trim()
 }
 
+$ToNatural = { [regex]::Replace($_, '\d+', { $args[0].Value.PadLeft(20) }) }
+
 Function Show-OptionMenu {
     while ([string]::IsNullOrWhiteSpace($OptionMenu)) {
         Clear-Host
@@ -75,7 +77,7 @@ Function Read-WinGet-MandatoryInfo {
 Function Read-PreviousWinGet-Manifest {
     Switch ($Option) {
         'Update' {
-            $script:LastVersion = Get-ChildItem -Path "$AppFolder\..\" | Sort-Object | Select-Object -Last 1 -ExpandProperty 'Name'
+            $script:LastVersion = Get-ChildItem -Path "$AppFolder\..\" | Sort-Object $ToNatural | Select-Object -Last 1 -ExpandProperty 'Name'
             Write-Host -ForegroundColor 'DarkYellow' -Object "Last Version: $LastVersion"
             $script:OldManifests = Get-ChildItem -Path "$AppFolder\..\$LastVersion"
 
