@@ -783,6 +783,7 @@ Switch ($Option) {
         Write-WinGet-InstallerManifest
         Write-WinGet-VersionManifest
         Write-WinGet-LocaleManifest
+        if (Get-Command "winget.exe" -ErrorAction SilentlyContinue) {winget validate $AppFolder}
     }
 
     'Update' {
@@ -795,6 +796,7 @@ Switch ($Option) {
         Write-WinGet-InstallerManifest
         Write-WinGet-VersionManifest
         Write-WinGet-LocaleManifest
+        if (Get-Command "winget.exe" -ErrorAction SilentlyContinue) {winget validate $AppFolder}
     }
 
     'NewLocale' {
@@ -802,5 +804,6 @@ Switch ($Option) {
         Read-PreviousWinGet-Manifest
         Read-WinGet-LocaleManifest
         Write-WinGet-LocaleManifest
+        if (Get-Command "winget.exe" -ErrorAction SilentlyContinue) {winget validate $AppFolder}
     }
 }
