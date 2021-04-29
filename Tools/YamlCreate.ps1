@@ -94,27 +94,27 @@ Function Read-PreviousWinGet-Manifest {
                     $regex = '(?ms)Tags:(.+?):'
                     $FetchTags = [regex]::Matches($OldManifestText,$regex) | foreach {$_.groups[1].value }
                     $Tags = $FetchTags.Substring(0, $FetchTags.LastIndexOf(' '))
-                    New-Variable -Name "Tags" -Value ($Tags.Split("- ").Trim()[1..100] -join ", ") -Scope Script -Force
+                    New-Variable -Name "Tags" -Value ($Tags.Split("- ").Trim()[1..17] -join ", ") -Scope Script -Force
                 } elseif ($Line -eq "FileExtensions:") {
                     $regex = '(?ms)FileExtensions:(.+?):'
                     $FetchFileExtensions = [regex]::Matches($OldManifestText,$regex) | foreach {$_.groups[1].value }
                     $FileExtensions = $FetchFileExtensions.Substring(0, $FetchFileExtensions.LastIndexOf(' '))
-                    New-Variable -Name "FileExtensions" -Value ($FileExtensions.Split("- ").Trim()[1..100] -join ", ") -Scope Script -Force
+                    New-Variable -Name "FileExtensions" -Value ($FileExtensions.Split("- ").Trim()[1..257] -join ", ") -Scope Script -Force
                 } elseif ($Line -eq "Protocols:") {
                     $regex = '(?ms)Protocols:(.+?):'
                     $FetchProtocols = [regex]::Matches($OldManifestText,$regex) | foreach {$_.groups[1].value }
                     $Protocols = $FetchProtocols.Substring(0, $FetchProtocols.LastIndexOf(' '))
-                    New-Variable -Name "Protocols" -Value ($Protocols.Split("- ").Trim()[1..100] -join ", ") -Scope Script -Force
+                    New-Variable -Name "Protocols" -Value ($Protocols.Split("- ").Trim()[1..17] -join ", ") -Scope Script -Force
                 } elseif ($Line -eq "Commands:") {
                     $regex = '(?ms)Commands:(.+?):'
                     $FetchCommands = [regex]::Matches($OldManifestText,$regex) | foreach {$_.groups[1].value }
                     $Commands = $FetchCommands.Substring(0, $FetchCommands.LastIndexOf(' '))
-                    New-Variable -Name "Commands" -Value ($Commands.Split("- ").Trim()[1..100] -join ", ") -Scope Script -Force
+                    New-Variable -Name "Commands" -Value ($Commands.Split("- ").Trim()[1..17] -join ", ") -Scope Script -Force
                 } elseif ($Line -eq "InstallerSuccessCodes:") {
                     $regex = '(?ms)InstallerSuccessCodes:(.+?):'
                     $FetchInstallerSuccessCodes = [regex]::Matches($OldManifestText,$regex) | foreach {$_.groups[1].value }
                     $InstallerSuccessCodes = $FetchInstallerSuccessCodes.Substring(0, $FetchInstallerSuccessCodes.LastIndexOf(' '))
-                    New-Variable -Name "InstallerSuccessCodes" -Value ($InstallerSuccessCodes.Split("- ").Trim()[1..100] -join ", ") -Scope Script -Force
+                    New-Variable -Name "InstallerSuccessCodes" -Value ($InstallerSuccessCodes.Split("- ").Trim()[1..17] -join ", ") -Scope Script -Force
                 } elseif ($Line -notlike "PackageVersion*") {
                     $Variable = $Line.Replace("#","").Split(":").Trim()
                     New-Variable -Name $Variable[0] -Value ($Variable[1..10] -join ":") -Scope Script -Force
