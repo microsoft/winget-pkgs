@@ -148,26 +148,17 @@ Write-Host
 
 # Create Bootstrap script
 
-# See: https://stackoverflow.com/a/14382047/12156188
+# See: https://stackoverflow.com/a/22670892/12156188
 $bootstrapPs1Content = @'
-function Update-Environment {
-  $locations = 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Environment',
-               'HKCU:\Environment'
-
-  $locations | ForEach-Object {
-    $k = Get-Item $_
-    $k.GetValueNames() | ForEach-Object {
-      $name  = $_
-      $value = $k.GetValue($_)
-
-      if ($userLocation -and $name -ieq 'PATH') {
-        $Env:Path += ";$value"
-      } else {
-        Set-Item -Path Env:$name -Value $value
-      }
-    }
-
-    $userLocation = $true
+function Update-EnvironmentVariables {
+  foreach($level in "Machine","User") {
+    [Environment]::GetEnvironmentVariables($level).GetEnumerator() | % {
+        # For Path variables, append the new values, if they're not already in there
+        if($_.Name -match 'Path$') {
+          $_.Value = ($((Get-Content "Env:$($_.Name)") + ";$($_.Value)") -split ';' | Select -unique) -join ';'
+        }
+        $_
+    } | Set-Content -Path { "Env:$($_.Name)" }
   }
 }
 
@@ -178,17 +169,12 @@ $bootstrapPs1Content += @"
 Write-Host @'
 --> Installing WinGet
 
-
-
-
-
-
 '@
 Add-AppxPackage -Path '$($desktopAppInstaller.pathInSandbox)' -DependencyPath '$($vcLibsUwp.pathInSandbox)'
 
 Write-Host @'
 
-Tip: you can type 'Update-Environment' to update your environment variables, such as after installing a new software.
+Tip: you can type 'Update-EnvironmentVariables' to update your environment variables, such as after installing a new software.
 
 '@
 
@@ -211,7 +197,7 @@ Write-Host @'
 
 --> Refreshing environment variables
 '@
-Update-Environment
+Update-EnvironmentVariables
 
 
 "@
