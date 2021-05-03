@@ -115,7 +115,7 @@ Function Read-PreviousWinGet-Manifest {
                     $FetchInstallerSuccessCodes = [regex]::Matches($OldManifestText,$regex) | foreach {$_.groups[1].value }
                     $InstallerSuccessCodes = $FetchInstallerSuccessCodes.Substring(0, $FetchInstallerSuccessCodes.LastIndexOf(' '))
                     New-Variable -Name "InstallerSuccessCodes" -Value ($InstallerSuccessCodes.Split("- ").Trim()[1..17] -join ", ") -Scope Script -Force
-                } elseif ($Line -notlike "PackageVersion*") {
+                } elseif ($Line -notlike "PackageVersion*" -and $Line -notlike "PackageIdentifier*") {
                     $Variable = $Line.Replace("#","").Split(":").Trim()
                     New-Variable -Name $Variable[0] -Value ($Variable[1..10] -join ":") -Scope Script -Force
                 }
