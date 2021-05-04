@@ -148,7 +148,8 @@ Function Read-PreviousWinGet-Manifest {
                     $regex = '(?ms)Tags:(.+?):'
                     $FetchTags = [regex]::Matches($OldManifestText,$regex) | foreach {$_.groups[1].value }
                     $Tags = $FetchTags.Substring(0, $FetchTags.LastIndexOf(' '))
-                    New-Variable -Name "Tags" -Value ($Tags.Split("- ").Trim()[1..100] -join ", ") -Scope Script -Force
+                    $Tags = $Tags -Split '- '
+                    New-Variable -Name "Tags" -Value ($Tags.Trim()[1..100] -join ", ") -Scope Script -Force
                 } elseif ($Line -notlike "PackageLocale*") {
                     $Variable = $Line.Replace("#","").Split(":").Trim()
                     New-Variable -Name $Variable[0] -Value ($Variable[1..10] -join ":") -Scope Script -Force
