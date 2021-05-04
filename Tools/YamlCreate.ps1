@@ -200,9 +200,9 @@ Function Read-WinGet-InstallerValues {
         $architecture = Read-Host -Prompt 'Architecture' | TrimString
     }
 
-    while ($InstallerType -notin @('exe', 'msi', 'msix', 'inno', 'nullsoft', 'appx', 'wix', 'zip')) {
+    while ($InstallerType -notin @('exe', 'msi', 'msix', 'inno', 'nullsoft', 'appx', 'wix', 'zip', 'burn', 'pwa')) {
         Write-Host
-        Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the InstallerType. For example: exe, msi, msix, inno, nullsoft'
+        Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the InstallerType. For example: exe, msi, msix, inno, nullsoft, appx, wix, burn, pwa, zip'
         $InstallerType = Read-Host -Prompt 'InstallerType' | TrimString
     }
 
