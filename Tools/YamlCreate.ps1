@@ -685,7 +685,7 @@ $VersionManifest | ForEach-Object {
     } else {
         $_
     }
-} | Out-File -Path $VersionManifestPath -Encoding 'UTF8'
+} | Out-File $VersionManifestPath -Encoding 'UTF8'
 
 Write-Host 
 Write-Host "Yaml file created: $VersionManifestPath"
@@ -725,7 +725,7 @@ $InstallerManifest | ForEach-Object {
     } else {
         $_
     }
-} | Out-File -Path $InstallerManifestPath -Encoding 'UTF8'
+} | Out-File $InstallerManifestPath -Encoding 'UTF8'
 
 Write-Host 
 Write-Host "Yaml file created: $InstallerManifestPath"
@@ -767,7 +767,7 @@ $LocaleManifest | ForEach-Object {
     } else {
         $_
     }
-} | Out-File -Path $LocaleManifestPath -Encoding 'UTF8'
+} | Out-File $LocaleManifestPath -Encoding 'UTF8'
 
 Write-Host 
 Write-Host "Yaml file created: $LocaleManifestPath"
