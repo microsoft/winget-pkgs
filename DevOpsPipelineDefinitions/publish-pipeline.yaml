@@ -43,6 +43,7 @@ jobs:
     env:
       HOST_KEY: $(AzureFunctionHostKey)
       SIGN_ENDPOINT: $(AzFuncSignEndpoint)
+      CLEANUP_ENDPOINT: $(AzFuncPublishCleanupEndpoint)
 
   - task: CmdLine@2
     displayName: 'Validate Commits'
@@ -51,10 +52,13 @@ jobs:
       failOnStderr: true
     condition: succeeded()
     env:
-      AzureWebJobsStorage: $(ValidationStorageAccountConnectionString)
+      ValidationConnectionString: $(ValidationStorageAccountConnectionString)
+      ExecutionEnvironment: $(ExecutionEnvironment)
       CacheConnectionString: $(CacheStorageAccountConnectionString)
       PackagePublisher: $(PackagePublisher)
       DIApplicationInsightKey: $(DIApplicationInsightKey)
+      WinGet:AppConfig:Primary: $(AppConfigPrimary)
+      WinGet:AppConfig:Secondary: $(AppConfigSecondary)
 
 # Agentless phase. Depends on previous job. 
 - job: 'SignPackage'
@@ -77,6 +81,7 @@ jobs:
       body: |
         {
         "operationId": "$(Build.BuildNumber)",
+        "BuildId": "$(Build.BuildId)",
         "PlanUrl": "$(system.CollectionUri)",
         "HubName": "$(system.HostType)",
         "pipelineType": "CommitPipeline",
@@ -119,6 +124,45 @@ jobs:
       failOnStderr: true
     condition: succeeded()
     env:
-      AzureWebJobsStorage: $(ValidationStorageAccountConnectionString)
+      ValidationConnectionString: $(ValidationStorageAccountConnectionString)
+      ExecutionEnvironment: $(ExecutionEnvironment)
       CacheConnectionString: $(CacheStorageAccountConnectionString)
       DIApplicationInsightKey: $(DIApplicationInsightKey)
+      WinGet:AppConfig:Primary: $(AppConfigPrimary)
+      WinGet:AppConfig:Secondary: $(AppConfigSecondary)
+
+# Agentless phase. Depends on previous job. 
+- job: 'Cleanup'
+  pool: server
+  timeoutInMinutes: 1500
+  displayName: 'Clean up'
+  dependsOn:
+    - 'CommitProcessing'
+    - 'Publish'
+  variables:
+    HostKeySecret: $[ dependencies.CommitProcessing.outputs['wingetsetup.hostkey']]
+    CleanEndpointSecret: $[ dependencies.CommitProcessing.outputs['wingetsetup.cleanupEndpoint']]
+  steps:
+
+  # Close issues.
+  - task: AzureFunction@1
+    displayName: 'Cleanup Issues'
+    inputs:
+      function: '$(CleanEndpointSecret)'
+      key: '$(HostKeySecret)'
+      body: |
+        {
+        "operationId": "$(Build.BuildNumber)",
+        "BuildId": "$(Build.BuildId)",
+        "PlanUrl": "$(system.CollectionUri)",
+        "HubName": "$(system.HostType)",
+        "pipelineType": "CommitPipeline",
+        "ProjectId": "$(system.TeamProjectId)",
+        "PlanId": "$(system.PlanId)", 
+        "JobId": "$(system.JobId)", 
+        "TimelineId": "$(system.TimelineId)", 
+        "TaskInstanceId": "$(system.TaskInstanceId)",
+        "AuthToken": "$(system.AccessToken)",
+        "BuildRepositoryId": "$(build.repository.id)"
+        }
+      waitForCompletion: "true"
