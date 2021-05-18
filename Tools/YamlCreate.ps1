@@ -27,6 +27,8 @@ filter TrimString {
     $_.Trim()
 }
 
+$ToNatural = { [regex]::Replace($_, '\d+', { $args[0].Value.PadLeft(20) }) }
+
 Function Show-OptionMenu {
     while ([string]::IsNullOrWhiteSpace($OptionMenu)) {
         Clear-Host
@@ -75,7 +77,7 @@ Function Read-WinGet-MandatoryInfo {
 Function Read-PreviousWinGet-Manifest {
     Switch ($Option) {
         'Update' {
-            $script:LastVersion = Get-ChildItem -Path "$AppFolder\..\" | Sort-Object | Select-Object -Last 1 -ExpandProperty 'Name'
+            $script:LastVersion = Get-ChildItem -Path "$AppFolder\..\" | Sort-Object $ToNatural | Select-Object -Last 1 -ExpandProperty 'Name'
             Write-Host -ForegroundColor 'DarkYellow' -Object "Last Version: $LastVersion"
             $script:OldManifests = Get-ChildItem -Path "$AppFolder\..\$LastVersion"
 
@@ -92,28 +94,33 @@ Function Read-PreviousWinGet-Manifest {
                     $regex = '(?ms)Tags:(.+?):'
                     $FetchTags = [regex]::Matches($OldManifestText,$regex) | foreach {$_.groups[1].value }
                     $Tags = $FetchTags.Substring(0, $FetchTags.LastIndexOf(' '))
-                    New-Variable -Name "Tags" -Value ($Tags.Split("-").Trim()[1..100] -join ", ") -Scope Script -Force
+                    $Tags = $Tags -Split '- '
+                    New-Variable -Name "Tags" -Value ($Tags.Trim()[1..17] -join ", ") -Scope Script -Force
                 } elseif ($Line -eq "FileExtensions:") {
                     $regex = '(?ms)FileExtensions:(.+?):'
                     $FetchFileExtensions = [regex]::Matches($OldManifestText,$regex) | foreach {$_.groups[1].value }
                     $FileExtensions = $FetchFileExtensions.Substring(0, $FetchFileExtensions.LastIndexOf(' '))
-                    New-Variable -Name "FileExtensions" -Value ($FileExtensions.Split("-").Trim()[1..100] -join ", ") -Scope Script -Force
+                    $FileExtensions = $FileExtensions -Split '- '
+                    New-Variable -Name "FileExtensions" -Value ($FileExtensions.Trim()[1..257] -join ", ") -Scope Script -Force
                 } elseif ($Line -eq "Protocols:") {
                     $regex = '(?ms)Protocols:(.+?):'
                     $FetchProtocols = [regex]::Matches($OldManifestText,$regex) | foreach {$_.groups[1].value }
                     $Protocols = $FetchProtocols.Substring(0, $FetchProtocols.LastIndexOf(' '))
-                    New-Variable -Name "Protocols" -Value ($Protocols.Split("-").Trim()[1..100] -join ", ") -Scope Script -Force
+                    $Protocols = $Protocols -Split '- '
+                    New-Variable -Name "Protocols" -Value ($Protocols.Trim()[1..17] -join ", ") -Scope Script -Force
                 } elseif ($Line -eq "Commands:") {
                     $regex = '(?ms)Commands:(.+?):'
                     $FetchCommands = [regex]::Matches($OldManifestText,$regex) | foreach {$_.groups[1].value }
                     $Commands = $FetchCommands.Substring(0, $FetchCommands.LastIndexOf(' '))
-                    New-Variable -Name "Commands" -Value ($Commands.Split("-").Trim()[1..100] -join ", ") -Scope Script -Force
+                    $Commands = $Commands -Split '- '
+                    New-Variable -Name "Commands" -Value ($Commands.Trim()[1..17] -join ", ") -Scope Script -Force
                 } elseif ($Line -eq "InstallerSuccessCodes:") {
                     $regex = '(?ms)InstallerSuccessCodes:(.+?):'
                     $FetchInstallerSuccessCodes = [regex]::Matches($OldManifestText,$regex) | foreach {$_.groups[1].value }
                     $InstallerSuccessCodes = $FetchInstallerSuccessCodes.Substring(0, $FetchInstallerSuccessCodes.LastIndexOf(' '))
-                    New-Variable -Name "InstallerSuccessCodes" -Value ($InstallerSuccessCodes.Split("-").Trim()[1..100] -join ", ") -Scope Script -Force
-                } elseif ($Line -notlike "PackageVersion*") {
+                    $InstallerSuccessCodes = $InstallerSuccessCodes -Split '- '
+                    New-Variable -Name "InstallerSuccessCodes" -Value ($InstallerSuccessCodes.Trim()[1..17] -join ", ") -Scope Script -Force
+                } elseif ($Line -notlike "PackageVersion*" -and $Line -notlike "PackageIdentifier*") {
                     $Variable = $Line.Replace("#","").Split(":").Trim()
                     New-Variable -Name $Variable[0] -Value ($Variable[1..10] -join ":") -Scope Script -Force
                 }
@@ -141,7 +148,8 @@ Function Read-PreviousWinGet-Manifest {
                     $regex = '(?ms)Tags:(.+?):'
                     $FetchTags = [regex]::Matches($OldManifestText,$regex) | foreach {$_.groups[1].value }
                     $Tags = $FetchTags.Substring(0, $FetchTags.LastIndexOf(' '))
-                    New-Variable -Name "Tags" -Value ($Tags.Split("-").Trim()[1..100] -join ", ") -Scope Script -Force
+                    $Tags = $Tags -Split '- '
+                    New-Variable -Name "Tags" -Value ($Tags.Trim()[1..17] -join ", ") -Scope Script -Force
                 } elseif ($Line -notlike "PackageLocale*") {
                     $Variable = $Line.Replace("#","").Split(":").Trim()
                     New-Variable -Name $Variable[0] -Value ($Variable[1..10] -join ":") -Scope Script -Force
@@ -192,9 +200,9 @@ Function Read-WinGet-InstallerValues {
         $architecture = Read-Host -Prompt 'Architecture' | TrimString
     }
 
-    while ($InstallerType -notin @('exe', 'msi', 'msix', 'inno', 'nullsoft', 'appx', 'wix', 'zip')) {
+    while ($InstallerType -notin @('exe', 'msi', 'msix', 'inno', 'nullsoft', 'appx', 'wix', 'zip', 'burn', 'pwa')) {
         Write-Host
-        Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the InstallerType. For example: exe, msi, msix, inno, nullsoft'
+        Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the InstallerType. For example: exe, msi, msix, inno, nullsoft, appx, wix, burn, pwa, zip'
         $InstallerType = Read-Host -Prompt 'InstallerType' | TrimString
     }
 
@@ -273,7 +281,7 @@ Function Read-WinGet-InstallerValues {
     $Installer += "    UpgradeBehavior: $UpgradeBehavior`n"
 
     $Installer.TrimEnd().Split("`n") | ForEach-Object {
-        if ($_.Split(":").Trim()[1] -eq '') {
+        if ($_.Split(":").Trim()[1] -eq '' -and $_ -notin @("    InstallerSwitches:")) {
             $script:Installers += $_.Insert(0,"#") + "`n"
         } else {
             $script:Installers += $_ + "`n"
@@ -683,7 +691,7 @@ $VersionManifest | ForEach-Object {
     } else {
         $_
     }
-} | Out-File -Path $VersionManifestPath -Encoding 'UTF8'
+} | Out-File $VersionManifestPath -Encoding 'UTF8'
 
 Write-Host 
 Write-Host "Yaml file created: $VersionManifestPath"
@@ -718,12 +726,12 @@ New-Item -ItemType "Directory" -Force -Path $AppFolder | Out-Null
 $InstallerManifestPath = $AppFolder + "\$PackageIdentifier" + '.installer' + '.yaml'
 
 $InstallerManifest | ForEach-Object {
-    if ($_.Split(":").Trim()[1] -eq '' -and $_ -notin @("FileExtensions:","Protocols:","Commands:","InstallerSuccessCodes:","InstallModes:","Installers:","  - Architecture","    InstallerSwitches:")) {
+    if ($_.Split(":").Trim()[1] -eq '' -and $_ -notin @("FileExtensions:","Protocols:","Commands:","InstallerSuccessCodes:","InstallModes:","Installers:","    InstallerSwitches:")) {
         $_.Insert(0,"#")
     } else {
         $_
     }
-} | Out-File -Path $InstallerManifestPath -Encoding 'UTF8'
+} | Out-File $InstallerManifestPath -Encoding 'UTF8'
 
 Write-Host 
 Write-Host "Yaml file created: $InstallerManifestPath"
@@ -765,7 +773,7 @@ $LocaleManifest | ForEach-Object {
     } else {
         $_
     }
-} | Out-File -Path $LocaleManifestPath -Encoding 'UTF8'
+} | Out-File $LocaleManifestPath -Encoding 'UTF8'
 
 Write-Host 
 Write-Host "Yaml file created: $LocaleManifestPath"
@@ -783,6 +791,7 @@ Switch ($Option) {
         Write-WinGet-InstallerManifest
         Write-WinGet-VersionManifest
         Write-WinGet-LocaleManifest
+        if (Get-Command "winget.exe" -ErrorAction SilentlyContinue) {winget validate $AppFolder}
     }
 
     'Update' {
@@ -795,6 +804,7 @@ Switch ($Option) {
         Write-WinGet-InstallerManifest
         Write-WinGet-VersionManifest
         Write-WinGet-LocaleManifest
+        if (Get-Command "winget.exe" -ErrorAction SilentlyContinue) {winget validate $AppFolder}
     }
 
     'NewLocale' {
@@ -802,5 +812,6 @@ Switch ($Option) {
         Read-PreviousWinGet-Manifest
         Read-WinGet-LocaleManifest
         Write-WinGet-LocaleManifest
+        if (Get-Command "winget.exe" -ErrorAction SilentlyContinue) {winget validate $AppFolder}
     }
 }
