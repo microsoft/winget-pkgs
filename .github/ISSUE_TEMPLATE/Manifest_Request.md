@@ -27,7 +27,7 @@ All good? Then proceed!
 
 - [ ] I would like someone else to build the manifest.
 - [ ] I would like help so I can submit the manifest.
-- [ ] I have performed a search and couldn't fine this package.
+- [ ] I have performed a search and couldn't find this package.
 - [ ] I think there is a new version available and I have provided the URL.
 
 Manifest:
