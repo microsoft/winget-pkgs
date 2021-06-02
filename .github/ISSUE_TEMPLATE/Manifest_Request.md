@@ -11,9 +11,6 @@ assignees: ''
 🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨
 
 I ACKNOWLEDGE THE FOLLOWING BEFORE PROCEEDING:
-1. It might be easier to add the manifest myself.
-1. It is probably faster if I add the manifest myself.
-1. I have looked at the [Windows Package Manager Manifest Creator](https://github.com/microsoft/winget-create).
 
 1. If I delete this entire template and go my own path, the core team may close my issue without further explanation or engagement.
 1. If I list multiple apps in this one issue, the core team may close my issue without further explanation or engagement.
@@ -28,10 +25,15 @@ All good? Then proceed!
 
 # Package Requested
 
+- [ ] I would like someone else to build the manifest.
+- [ ] I would like help so I can submit the manifest.
+- [ ] I have performed a search and couldn't find this package.
+- [ ] I think there is a new version available and I have provided the URL.
+
 Manifest:
 
 
-Fill out as much of the manifest as you can:
+Fill out as much of the manifest metadata you can:
 
 
 ```YAML
