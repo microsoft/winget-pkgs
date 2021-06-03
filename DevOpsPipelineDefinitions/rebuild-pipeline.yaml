@@ -49,10 +49,16 @@ jobs:
       failOnStderr: true
     condition: succeeded()
     env:
-      AzureWebJobsStorage: $(ValidationStorageAccountConnectionString)
+      ValidationConnectionString: $(ValidationStorageAccountConnectionString)
+      ExecutionEnvironment: $(ExecutionEnvironment)
       PackagePublisher: $(PackagePublisher)
       SYSTEM_ACCESSTOKEN: $(System.AccessToken)
       DIApplicationInsightKey: $(DIApplicationInsightKey)
+      WinGet:AppConfig:Primary: $(AppConfigPrimary)
+      WinGet:AppConfig:Secondary: $(AppConfigSecondary)
+      DevOpsOrganization: $(DevOpsOrganization)
+      DevOpsProjectName: $(DevOpsProjectName)
+      DevOpsPublishPipelineDefinitionId: $(DevOpsPublishPipelineDefinitionId)
 
 # Agentless phase. Depends on previous job. 
 - job: 'SignPackage'
@@ -75,6 +81,7 @@ jobs:
       body: |
         {
         "operationId": "$(Build.BuildNumber)",
+        "BuildId": "$(Build.BuildId)",
         "PlanUrl": "$(system.CollectionUri)",
         "HubName": "$(system.HostType)",
         "pipelineType": "RebuildPipeline",
@@ -90,6 +97,7 @@ jobs:
 # Agent phase. Depends on previous job.
 - job: 'Publish'
   displayName: 'Publish'
+  timeoutInMinutes: 300
   pool:
     vmImage: 'windows-latest'
   variables:
@@ -117,9 +125,16 @@ jobs:
       failOnStderr: true
     condition: succeeded()
     env:
-      AzureWebJobsStorage: $(ValidationStorageAccountConnectionString)
+      ValidationConnectionString: $(ValidationStorageAccountConnectionString)
+      ExecutionEnvironment: $(ExecutionEnvironment)
       CacheConnectionString: $(CacheStorageAccountConnectionString)
       DIApplicationInsightKey: $(DIApplicationInsightKey)
+      AzureServicesAuthConnectionString: $(AzureServicesAuthConnectionString)
+      WinGetSubscriptionId: $(WinGetSubscriptionId)
+      CdnProfileName: $(CdnProfileName)
+      CdnEndpointName: $(CdnEndpointName)
+      WinGet:AppConfig:Primary: $(AppConfigPrimary)
+      WinGet:AppConfig:Secondary: $(AppConfigSecondary)
 
 # Agent phase. Depends on previous job.
 - job: 'Cleanup'
@@ -155,6 +170,11 @@ jobs:
       failOnStderr: true
     condition: succeeded()
     env:
-      AzureWebJobsStorage: $(ValidationStorageAccountConnectionString)
+      ValidationConnectionString: $(ValidationStorageAccountConnectionString)
       SYSTEM_ACCESSTOKEN: $(System.AccessToken)
       DIApplicationInsightKey: $(DIApplicationInsightKey)
+      WinGet:AppConfig:Primary: $(AppConfigPrimary)
+      WinGet:AppConfig:Secondary: $(AppConfigSecondary)
+      DevOpsOrganization: $(DevOpsOrganization)
+      DevOpsProjectName: $(DevOpsProjectName)
+      DevOpsPublishPipelineDefinitionId: $(DevOpsPublishPipelineDefinitionId)

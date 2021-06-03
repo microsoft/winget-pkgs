@@ -36,9 +36,13 @@ jobs:
     env:
       HOST_KEY: $(AzureFunctionHostKey)
       SMART_SCREEN_ENDPOINT: $(AzFuncSmartScreenEndpoint)
+      DOMAIN_URLS_VALIDATION_ENDPOINT: $(AzFuncDomainUrlValEndpoint)
+      MANIFEST_POLICY_ENDPOINT: $(AzFuncManifestPolicyEndpoint)
       SCAN_ENDPOINT: $(AzFuncScanEndpoint)
+      INSTALLATION_ENDPOINT: $(AzFuncInstallationVerificationEndpoint)
       LABEL_ENDPOINT: $(AzFuncSetLabelOnPullRequestEndpoint)
       CLEANUP_ENDPOINT: $(AzFuncCleanupEndpoint)
+      LABEL_KEY: $(AzureFunctionLabelKey)
 
   # Validates integrity of pull request.
   - task: CmdLine@2
@@ -48,8 +52,11 @@ jobs:
       failOnStderr: true
     condition: succeeded()
     env:
-      AzureWebJobsStorage: $(ValidationStorageAccountConnectionString)
+      ValidationConnectionString: $(ValidationStorageAccountConnectionString)
+      ExecutionEnvironment: $(ExecutionEnvironment)
       DIApplicationInsightKey: $(DIApplicationInsightKey)
+      WinGet:AppConfig:Primary: $(AppConfigPrimary)
+      WinGet:AppConfig:Secondary: $(AppConfigSecondary)
 
   # Validates manifest integrity.
   - task: CmdLine@2
@@ -59,8 +66,10 @@ jobs:
       failOnStderr: true
     condition: succeeded()
     env:
-      AzureWebJobsStorage: $(ValidationStorageAccountConnectionString)
+      ValidationConnectionString: $(ValidationStorageAccountConnectionString)
       DIApplicationInsightKey: $(DIApplicationInsightKey)
+      WinGet:AppConfig:Primary: $(AppConfigPrimary)
+      WinGet:AppConfig:Secondary: $(AppConfigSecondary)
 
 # Agentless phase. Depends on previous job.
 - job: 'ContentValidation'
@@ -72,18 +81,20 @@ jobs:
   variables:
     HostKeySecret: $[ dependencies.FileValidation.outputs['wingetsetup.hostkey']]
     SmartScreenEndpointSecret: $[ dependencies.FileValidation.outputs['wingetsetup.smartScreenEndpoint']]
-    ScanEndpointSecret: $[ dependencies.FileValidation.outputs['wingetsetup.scanEndpoint']]
+    DomainUrlValidationEndpointSecret: $[ dependencies.FileValidation.outputs['wingetsetup.domainUrlValidationEndpoint']]
+    ManiestPolicyEndpointSecret: $[ dependencies.FileValidation.outputs['wingetsetup.manifestPolicyEndpoint']]
   steps:
 
   # Scans all the urls from manifest contents.
   - task: AzureFunction@1
-    displayName: 'Validation URLs in manifest files'
+    displayName: 'URLs Validation'
     inputs:
       function: '$(SmartScreenEndpointSecret)'
       key: '$(HostKeySecret)'
       body: |
         {
         "operationId": "$(Build.BuildNumber)",
+        "BuildId": "$(Build.BuildId)",
         "PlanUrl": "$(system.CollectionUri)",
         "HubName": "$(system.HostType)",
         "ProjectId": "$(system.TeamProjectId)",
@@ -95,6 +106,62 @@ jobs:
         }
       waitForCompletion: "true"
 
+  # Domain url validations.
+  - task: AzureFunction@1
+    displayName: 'URL Domain validation'
+    inputs:
+      function: '$(DomainUrlValidationEndpointSecret)'
+      key: '$(HostKeySecret)'
+      body: |
+        {
+        "operationId": "$(Build.BuildNumber)",
+        "BuildId": "$(Build.BuildId)",
+        "PlanUrl": "$(system.CollectionUri)",
+        "HubName": "$(system.HostType)",
+        "ProjectId": "$(system.TeamProjectId)",
+        "PlanId": "$(system.PlanId)", 
+        "JobId": "$(system.JobId)", 
+        "TimelineId": "$(system.TimelineId)", 
+        "TaskInstanceId": "$(system.TaskInstanceId)",
+        "AuthToken": "$(system.AccessToken)"
+        }
+      waitForCompletion: "true"
+
+  # Manifest policy checks.
+  - task: AzureFunction@1
+    displayName: 'Manifest Policy Validation'
+    inputs:
+      function: '$(ManiestPolicyEndpointSecret)'
+      key: '$(HostKeySecret)'
+      body: |
+        {
+        "operationId": "$(Build.BuildNumber)",
+        "BuildId": "$(Build.BuildId)",
+        "PlanUrl": "$(system.CollectionUri)",
+        "HubName": "$(system.HostType)",
+        "ProjectId": "$(system.TeamProjectId)",
+        "PlanId": "$(system.PlanId)", 
+        "JobId": "$(system.JobId)", 
+        "TimelineId": "$(system.TimelineId)", 
+        "TaskInstanceId": "$(system.TaskInstanceId)",
+        "AuthToken": "$(system.AccessToken)"
+        }
+      waitForCompletion: "true"
+
+# Agentless phase. Depends on previous job.
+- job: 'InstallerValidation'
+  pool: server
+  displayName: 'Installer Validation'
+  timeoutInMinutes: 1500
+  dependsOn:
+    - 'FileValidation'
+    - 'ContentValidation'
+  variables:
+    HostKeySecret: $[ dependencies.FileValidation.outputs['wingetsetup.hostkey']]
+    ScanEndpointSecret: $[ dependencies.FileValidation.outputs['wingetsetup.scanEndpoint']]
+    InstallationEndpointSecret: $[ dependencies.FileValidation.outputs['wingetsetup.installationEndpoint']]
+  steps:
+
   # Scan installers in manifests.
   - task: AzureFunction@1
     displayName: 'Installers Scan'
@@ -104,6 +171,28 @@ jobs:
       body: |
         {
         "operationId": "$(Build.BuildNumber)",
+        "BuildId": "$(Build.BuildId)",
+        "PlanUrl": "$(system.CollectionUri)",
+        "HubName": "$(system.HostType)",
+        "ProjectId": "$(system.TeamProjectId)",
+        "PlanId": "$(system.PlanId)", 
+        "JobId": "$(system.JobId)", 
+        "TimelineId": "$(system.TimelineId)", 
+        "TaskInstanceId": "$(system.TaskInstanceId)",
+        "AuthToken": "$(system.AccessToken)"
+        }
+      waitForCompletion: "true"
+
+  # Validates installation.
+  - task: AzureFunction@1
+    displayName: 'Installation Validation'
+    inputs:
+      function: '$(InstallationEndpointSecret)'
+      key: '$(HostKeySecret)'
+      body: |
+        {
+        "operationId": "$(Build.BuildNumber)",
+        "BuildId": "$(Build.BuildId)",
         "PlanUrl": "$(system.CollectionUri)",
         "HubName": "$(system.HostType)",
         "ProjectId": "$(system.TeamProjectId)",
@@ -122,9 +211,11 @@ jobs:
   dependsOn:
     - 'FileValidation'
     - 'ContentValidation'
+    - 'InstallerValidation'
   condition: succeededOrFailed()
   variables:
     HostKeySecret: $[ dependencies.FileValidation.outputs['wingetsetup.hostkey']]
+    LabelKeySecret : $[ dependencies.FileValidation.outputs['wingetsetup.labelkey']]
     LabelEndpointSecret: $[ dependencies.FileValidation.outputs['wingetsetup.labelEndpoint']]
     RepositoryId: $[ dependencies.FileValidation.outputs['wingetsetup.repoId']]
     CleanupEndpointSecret: $[ dependencies.filevalidation.outputs['wingetsetup.cleanupEndpoint']]
@@ -136,11 +227,12 @@ jobs:
     condition: eq(variables['WinGet.RepositoryType'], 'GitHub')
     inputs:
       function: '$(LabelEndpointSecret)'
-      key: '$(HostKeySecret)'
+      key: '$(LabelKeySecret)'
       body: |
         {
         "operationId": "$(Build.BuildNumber)",
         "PlanUrl": "$(system.CollectionUri)",
+        "BuildId": "$(Build.BuildId)",
         "HubName": "$(system.HostType)",
         "ProjectId": "$(system.TeamProjectId)",
         "PlanId": "$(system.PlanId)", 
@@ -152,7 +244,7 @@ jobs:
         "PullRequestNumber": "$(System.PullRequest.PullRequestNumber)",
         }
       waitForCompletion: "true"
-      
+
   # Cleanup resources.
   - task: AzureFunction@1
     displayName: 'Validation cleanup'
@@ -163,6 +255,7 @@ jobs:
         {
         "operationId": "$(Build.BuildNumber)",
         "PlanUrl": "$(system.CollectionUri)",
+        "BuildId": "$(Build.BuildId)",
         "HubName": "$(system.HostType)",
         "ProjectId": "$(system.TeamProjectId)",
         "PlanId": "$(system.PlanId)", 
