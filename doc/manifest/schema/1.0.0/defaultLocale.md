@@ -34,6 +34,10 @@ All Windows Package Manager manifests in the Microsoft community repository are 
   #### Required Field
   
   This key represents the locale for package meta-data. The format is BCP-47. This value identifies the language for meta-data to be displayed to a user when no locale file matching their preferences is available. The Microsoft community package repository validation pipelines also use this value to determine appropriate validation rules for this file.
+
+  References:
+  * [Available languages for Windows](https://docs.microsoft.com/windows-hardware/manufacture/desktop/available-language-packs-for-windows)
+  * [Default Input Profiles (Input Locales) in Windows](https://docs.microsoft.com/windows-hardware/manufacture/desktop/default-input-locales-for-windows-language-packs)
  </details>
 
 #### Publisher
