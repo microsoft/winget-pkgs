@@ -88,7 +88,7 @@ All Windows Package Manager manifests in the Microsoft community repository are 
 
  #### Optional Field
 
- This key respresents the scope the package is installed under. The two configurations are "user" and "machine". Some installers support only one of these scopes while others support both via arguments passed to the installer using "InstallerSwitches".
+ This key represents the scope the package is installed under. The two configurations are "user" and "machine". Some installers support only one of these scopes while others support both via arguments passed to the installer using "InstallerSwitches".
  
  >Note: This key may be present in the root of the manifest as the default value for all installer nodes. This key may also be present in an individual installer node as well. If this key is in the manifest root and in an installer node, the value in the installer node will apply.
 
@@ -196,7 +196,7 @@ All Windows Package Manager manifests in the Microsoft community repository are 
 
  This key represents any status codes returned by the installer representing a success condition other than zero.
 
- >Note: Some return codes indicate a reboot is suggested or reqired. The Windows Package Manager does not support the reboot behavior currently. Some installers will force a reboot, and the Windows Package Manager does not currently suppress reboot behavior.
+ >Note: Some return codes indicate a reboot is suggested or required. The Windows Package Manager does not support the reboot behavior currently. Some installers will force a reboot, and the Windows Package Manager does not currently suppress reboot behavior.
  
  >Note: This key may be present in the root of the manifest as the default value for all installer nodes. This key may also be present in an individual installer node as well. If this key is in the manifest root and in an installer node, the value in the installer node will apply.
 
@@ -243,7 +243,7 @@ All Windows Package Manager manifests in the Microsoft community repository are 
 
  #### Optional Field
 
- This key reqpresents any file extensions supported by the package. The Windows Package Manager does not support any behavior related to the file extensions supported by the package.
+ This key represents any file extensions supported by the package. The Windows Package Manager does not support any behavior related to the file extensions supported by the package.
 
  >Note: This key may be present in the root of the manifest as the default value for all installer nodes. This key may also be present in an individual installer node as well. If this key is in the manifest root and in an installer node, the value in the installer node will apply.
 </details>
