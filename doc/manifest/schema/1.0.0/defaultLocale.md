@@ -174,7 +174,9 @@ All Windows Package Manager manifests in the Microsoft community repository are 
 
   #### Optional Field
 
-  This key represents the most common term users would search for when installing or upgrading a package. If only one package uses this moniker, then the install, list and upgrade command will match with this package.
+  This key represents the most common term users would search for when installing or upgrading a package. If only one package uses this moniker, then the install, list and upgrade command may match with this package. 
+  
+  >Note:Moniker is the third property evaluated when searching for a matching package.
  </details>
  
  #### Tags
