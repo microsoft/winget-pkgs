@@ -48,7 +48,7 @@ All Windows Package Manager manifests in the Microsoft community repository are 
 
  #### Optional Field
 
- This key represents the Windows platform targeted by the installer. The Windows Package Manager currently supports "Windows.Desktop" and "Windows.Universal".
+ This key represents the Windows platform targeted by the installer. The Windows Package Manager currently supports "Windows.Desktop" and "Windows.Universal". The Windows Package Manager client currently has no behavior associated with this property. It was added for future looking scenarios.
 
  >Note: This key may be present in the root of the manifest as the default value for all installer nodes. This key may also be present in an individual installer node as well. If this key is in the manifest root and in an installer node, the value in the installer node will apply.
 
@@ -100,7 +100,7 @@ All Windows Package Manager manifests in the Microsoft community repository are 
 
  #### Optional Field
 
- This key represents the install modes supported by the installer. The Microsoft community package repository requires a package support "silent" and "silent with progress". The Windows Package Manager also supports "interactive" installers.
+ This key represents the install modes supported by the installer. The Microsoft community package repository requires a package support "silent" and "silent with progress". The Windows Package Manager also supports "interactive" installers. The Windows Package Manager client does not have any behavior associated with this 
 
  >Note: Some installers will attempt to install missing dependencies. If these dependencies require user interaction, the package will not be allowed into the Microsoft community package repository.
 
@@ -108,6 +108,17 @@ All Windows Package Manager manifests in the Microsoft community repository are 
 </details>
 
 ### InstallerSwitches
+<details>
+ <summary>Switches passed to installers</summary>
+
+ #### Optional Field
+
+ This key represents the set of switches passed to installers. 
+
+ >Note: The Microsoft community repository currently requires support for silent and silent with progress installation. Many custom .exe installers will require the proper switches to meet this requirement. The [Windows Package Manager Manifest Creator](https://github.com/microsoft/winget-create) tool can be used to determine if one of the known tools was used to build an installer with the .exe file extension. In the event the tool is unable to determine the tool used to build the installer, the publisher may have documentation for the proper switches.
+</details>
+
+### Silent
 <details>
  <summary>Silent is the value that should be passed to the installer when user chooses a silent or quiet install</summary>
 
@@ -127,7 +138,7 @@ All Windows Package Manager manifests in the Microsoft community repository are 
 
  #### Optional Field
 
- This key represents switches passed to the installer to provide a silent with progress install experience. This is intended to allow a progress indication to the user, and the indication may come from an installer UI dialogue, but it must not require user interaction to complete.
+ This key represents switches passed to the installer to provide a silent with progress install experience. This is intended to allow a progress indication to the user, and the indication may come from an installer UI dialogue, but it must not require user interaction to complete. The Windows Package Manager currently defaults to this install experience.
 
  >Note: When the Windows Package Manager installs a package using the "silent with progress" install mode, any custom switches will also be passed to the installer. If a user applies override switches via command line via the Windows Package Manager, none of the switches from the manifest will be passed to the installer.
 </details>
@@ -150,7 +161,7 @@ All Windows Package Manager manifests in the Microsoft community repository are 
 
  #### Optional Field
 
- This key represents the path to install the package if the installer supports installing the package in a user configurable location. The &lt;INSTALLPATH&gt; token can be included in the switch value so the Windows Package Manager will replace the token with user provided path.
+ This key represents the path to install the package if the installer supports installing the package in a user configurable location. The **&lt;INSTALLPATH&gt;** token can be included in the switch value so the Windows Package Manager will replace the token with user provided path.
 
 </details>
 
@@ -160,7 +171,7 @@ All Windows Package Manager manifests in the Microsoft community repository are 
 
  #### Optional Field
 
-  This key represents the path logs will be directed to if the installer supports specifying the log path in a user configurable location. The &lt;LOGPATH&gt; token can be included in the switch value so the Windows Package Manager will replace the token with user provided path.
+  This key represents the path logs will be directed to if the installer supports specifying the log path in a user configurable location. The **&lt;LOGPATH&gt;** token can be included in the switch value so the Windows Package Manager will replace the token with user provided path.
 
 </details>
 
@@ -170,7 +181,7 @@ All Windows Package Manager manifests in the Microsoft community repository are 
 
  #### Optional Field
 
- This key represents the switches to be passed to the installer during an upgrade.
+ This key represents the switches to be passed to the installer during an upgrade. This will happen only if the upgrade behavior is "install".
 
  >Note: If a user applies override switches via command line via the Windows Package Manager, none of the switches from the manifest will be passed to the installer.
 
@@ -410,7 +421,7 @@ All Windows Package Manager manifests in the Microsoft community repository are 
 
  #### Optional Field
 
- This key represents the signature file inside an MSIX installer. It is used to provide streaming install for MSIX packages.
+ This key represents the signature file (AppxSignature.p7x) inside an MSIX installer. It is used to provide streaming install for MSIX packages.
 
  >Note: MSIX installers must be signed to be included in the Microsoft community package repository. If the installer is an MSIX this signature should be included in the manifest. The [Windows Package Manager Manifest Creator](https://github.com/microsoft/winget-create) can be used to determine the signature SHA 256. The `winget hash &lt;pathToInstaller&gt; --msix` command can also be used to determine the signature SHA 256.
 
@@ -431,7 +442,7 @@ All Windows Package Manager manifests in the Microsoft community repository are 
 
  #### Required Field
 
- This key must have the value "installer". The Microsoft community package repository validation pipelines also use this value to determine appropriate validation rules when evaluating this file.
+ This key must have the value "version". The Microsoft community package repository validation pipelines also use this value to determine appropriate validation rules when evaluating this file.
 </details>
 
 ### ManifestVersion
