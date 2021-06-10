@@ -195,7 +195,7 @@ All Windows Package Manager manifests in the Microsoft community repository are 
 
  #### Required Field
 
- This key must have the value "version". The Microsoft community package repository validation pipelines also use this value to determine appropriate validation rules when evaluating this file.
+ This key must have the value "defaultLocale". The Microsoft community package repository validation pipelines also use this value to determine appropriate validation rules when evaluating this file.
 </details>
 
 ### ManifestVersion
