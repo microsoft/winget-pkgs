@@ -66,7 +66,7 @@ All Windows Package Manager manifests in the Microsoft community repository are 
 
   #### Optional Field
   
-  This key represents the customer support web site or specific web page provided the publisher or ISV.
+  This key represents the customer support web site or specific web page provided by the publisher or ISV.
  </details>
 
 #### PrivacyUrl
