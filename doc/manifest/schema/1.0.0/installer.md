@@ -1,5 +1,5 @@
 # Windows Package Manager
-## Manifest Schema v1.0.0 "installer" File
+## Manifest Schema v1.0.0 Installer File
 All Windows Package Manager manifests in the Microsoft community repository are submitted using YAML syntax. A JSON schema is provided to aid authoring these files in editors, and in the other tooling related to the Windows Package Manager. This document provides detailed information regarding the usage of the YAML keys in the [installer](https://github.com/microsoft/winget-cli/blob/master/schemas/JSON/manifests/v1.0.0/manifest.installer.1.0.0.json) file for multi-file manifests. Please review the [Manifest Specification](https://github.com/microsoft/winget-cli/blob/master/doc/ManifestSpecv1.0.md) if you are not familiar with this file.
 
 
@@ -83,7 +83,7 @@ All Windows Package Manager manifests in the Microsoft community repository are 
  <summary>List of supported installer modes</summary>
 
  #### Optional Field
- This key represents the install modes supported by the installer. The Microsoft community package repository requires a package support "silent" and "silent with progress". The Windows Package Manager also supports "interactive" installers. The Windows Package Manager client does not have any behavior associated with this 
+ This key represents the install modes supported by the installer. The Microsoft community package repository requires a package support "silent" and "silent with progress". The Windows Package Manager also supports "interactive" installers. The Windows Package Manager client does not have any behavior associated with this key.
 
  >Note: Some installers will attempt to install missing dependencies. If these dependencies require user interaction, the package will not be allowed into the Microsoft community package repository.
 
@@ -385,7 +385,7 @@ All Windows Package Manager manifests in the Microsoft community repository are 
  <summary>The manifest type</summary>
 
  #### Required Field
- This key must have the value "version". The Microsoft community package repository validation pipelines also use this value to determine appropriate validation rules when evaluating this file.
+ This key must have the value "installer". The Microsoft community package repository validation pipelines also use this value to determine appropriate validation rules when evaluating this file.
 </details>
 
 ### ManifestVersion
