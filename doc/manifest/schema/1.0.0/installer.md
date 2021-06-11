@@ -369,7 +369,7 @@ All Windows Package Manager manifests in the Microsoft community repository are 
  #### Optional Field
  This key represents the signature file (AppxSignature.p7x) inside an MSIX installer. It is used to provide streaming install for MSIX packages.
 
- >Note: MSIX installers must be signed to be included in the Microsoft community package repository. If the installer is an MSIX this signature should be included in the manifest. The [Windows Package Manager Manifest Creator](https://github.com/microsoft/winget-create) can be used to determine the signature SHA 256. The `winget hash &lt;pathToInstaller&gt; --msix` command can also be used to determine the signature SHA 256.
+ >Note: MSIX installers must be signed to be included in the Microsoft community package repository. If the installer is an MSIX this signature should be included in the manifest. The [Windows Package Manager Manifest Creator](https://github.com/microsoft/winget-create) can be used to determine the signature SHA 256. The `winget hash <pathToInstaller> --msix` command can also be used to determine the signature SHA 256.
 </details>
 
 ### Installers
