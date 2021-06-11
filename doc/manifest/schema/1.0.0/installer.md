@@ -31,7 +31,7 @@ All Windows Package Manager manifests in the Microsoft community repository are 
  #### Optional Field
  This key represents the distribution channel for a package. Examples may include "stable" or "beta".
 
- >Note: This key is included for future use. The Windows Package Manager currently does not have any behavior associated with this key. The intent behind this key is to help disambiguate the different channels for packages lacking support for side by side installation. Some packages support having more than one package channel available on a system simultaneously. This key is intended to ensure the proper channel for a package is used during install and upgrade scenarios.
+ >Note: This key is included for future use. The Windows Package Manager currently does not have any behavior associated with this key. The intent behind this key is to help disambiguate the different channels for packages lacking support for side by side installation. Some packages support having more than one package channel available on a system simultaneously; in this case it is better to use unique packages rather than channels. This key is intended to ensure the proper channel for a package is used during install and upgrade scenarios.
  </details>
 
 ### Platform
