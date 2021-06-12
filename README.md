@@ -1,4 +1,4 @@
-# Welcome to the Windows Package Manager Community repo
+# Welcome to the Windows Package Manager Community Repository
 This repository contains the manifest files for the **Windows Package Manager**.  You are highly encouraged to submit manifests for your favorite application.
 
 The **Windows Package Manager** is an open source client.  You will find the source code [here](https://github.com/microsoft/winget-cli).
@@ -14,6 +14,8 @@ To submit a package to the repository, you should follow these steps:
 >Note: Please check that the package's manifest you intend to submit does not already exist in the manifests folder, and that there are no open PRs for it in order to avoid duplicates.
 
 ## Authoring a Manifest
+
+You can either use the [Windows Package Manager Manifest Creator](https://github.com/microsoft/winget-create), or you can follow the following manual steps.
 
 The minimal manifest syntax is below. Additional information on writing manifests can be found on [Microsoft Docs](https://docs.microsoft.com/en-us/windows/package-manager/package/manifest) or on the [v1.0 manifest spec](https://github.com/microsoft/winget-cli/blob/master/doc/ManifestSpecv1.0.md).
 
@@ -35,9 +37,19 @@ Although the Windows Package Manager YAML Generator can create YAML files with m
 
 ## Test your manifest
 Now that you have authored your manifest, you should make sure it works as expected.
+
+### Locally
 1) Verify the syntax.  You can do that by typing the following command: `winget validate <manifest>`
 2) Test the install.  You can do that by installing the manifest: `winget install -m <manifest>`
 For more details, see [packages](https://docs.microsoft.com/windows/package-manager/package).
+
+### In Windows Sandbox
+You can use the [`Tools\SandboxTest.ps1`](Tools/SandboxTest.ps1) script for testing a manifest installation in [Windows Sandbox](https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-sandbox/windows-sandbox-overview). The manifest will be also validated.
+
+Just provide the path to manifest as parameter:
+```powershell
+.\Tools\SandboxTest.ps1 <path-to-manifest>
+```
 
 ## Submit your PR
 With the manifest verified, you will need to submit a PR.  Your manifest should be located in the folder path matching `manifests\<first lower case letter of publisher>\<publisher>\<package>\<version>.yaml`
@@ -61,7 +73,7 @@ the rights to use your contribution. For details, visit https://cla.opensource.m
 
 When you submit a pull request, a CLA bot will automatically determine whether you need to provide
 a CLA and decorate the PR appropriately (e.g., status check, comment). Simply follow the instructions
-provided by the bot. You will only need to do this once across all repos using our CLA.
+provided by the bot. You will only need to do this once across all Microsoft repositories using our CLA.
 
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/).
 For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or
