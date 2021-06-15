@@ -1,5 +1,6 @@
 #Requires -Version 5
 $PSVersion = (Get-Host).Version.Major
+$ScriptHeader = '# Created using YamlCreate.ps1'
 
 <#
 .SYNOPSIS
@@ -692,7 +693,7 @@ Function Read-WinGet-LocaleManifest {
 
 Function Write-WinGet-VersionManifest {
 $VersionManifest = @(
-'# Created using YamlCreate.ps1'
+"$ScriptHeader"
 '# yaml-language-server: $schema=https://aka.ms/winget-manifest.version.1.0.0.schema.json'
 ''
 "PackageIdentifier: $PackageIdentifier"
@@ -719,7 +720,7 @@ Write-Host "Yaml file created: $VersionManifestPath"
 
 Function Write-WinGet-InstallerManifest {
 $InstallerManifest = @(
-'# Created using YamlCreate.ps1'
+"$ScriptHeader"
 '# yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.0.0.schema.json'
 ''
 "PackageIdentifier: $PackageIdentifier"
@@ -761,7 +762,7 @@ Write-Host "Yaml file created: $InstallerManifestPath"
 
 Function Write-WinGet-LocaleManifest {
 $LocaleManifest = @(
-'# Created using YamlCreate.ps1'
+"$ScriptHeader"
 if ($PackageLocale -eq 'en-US') {'# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultlocale.1.0.0.schema.json'}else{'# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.0.0.schema.json'}
 ''
 "PackageIdentifier: $PackageIdentifier"
