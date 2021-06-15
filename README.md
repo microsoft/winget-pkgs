@@ -1,6 +1,6 @@
 # Windows Package Manager Community Repository
 This repository contains the manifest files for the **Windows Package Manager** default source.  You are highly encouraged to submit manifests for your favorite application.
->Note: At this time installers must either be MSIX, MSI or .exe application installers. Standalone or portable executables, and compressed .zip files are not supported.
+>Note: At this time installers must either be MSIX, MSI or .exe application installers. Standalone or portable executables, compressed .zip files, and fonts are not currently supported.
 
 The **Windows Package Manager** is an [open source client](https://github.com/microsoft/winget-cli) designed for command-line usage.
 
