@@ -196,33 +196,19 @@ Function Read-WinGet-InstallerValues {
     $Filename = [System.IO.Path]::GetFileName($InstallerUrl)
     $dest = "$env:TEMP\$FileName"
 
-    if ($SaveOption -eq 'n') {
-        try {
-            $Stream = $WebClient.OpenRead($InstallerUrl)
-            $InstallerSha256 = (Get-FileHash -InputStream $Stream -Algorithm SHA256).Hash
-        }
-        catch {
-            Write-Host 'Error downloading file. Please run the script again.' -ForegroundColor Red
-            exit 1
-        }
-        finally {
-            $Stream.Close()
-            Write-Host "Time taken: $((Get-Date).Subtract($start_time).Seconds) second(s)" -ForegroundColor Green
-        }
-    }else{
-        try {
-            $WebClient.DownloadFile($InstallerUrl, $dest)
-        }
-        catch {
-            Write-Host 'Error downloading file. Please run the script again.' -ForegroundColor Red
-            exit 1
-        }
-        finally {
-            Write-Host "Time taken: $((Get-Date).Subtract($start_time).Seconds) second(s)" -ForegroundColor Green
-            $InstallerSha256 = (Get-FileHash -Path $dest -Algorithm SHA256).Hash
-            if ($PSVersion -eq '5') {$FileInformation = Get-AppLockerFileInformation -Path $dest | Select-Object -ExpandProperty Publisher}
-            if ($PSVersion -eq '5') {$MSIProductCode = $FileInformation.BinaryName}
-        }
+    try {
+        $WebClient.DownloadFile($InstallerUrl, $dest)
+    }
+    catch {
+        Write-Host 'Error downloading file. Please run the script again.' -ForegroundColor Red
+        exit 1
+    }
+    finally {
+        Write-Host "Time taken: $((Get-Date).Subtract($start_time).Seconds) second(s)" -ForegroundColor Green
+        $InstallerSha256 = (Get-FileHash -Path $dest -Algorithm SHA256).Hash
+        if ($PSVersion -eq '5') {$FileInformation = Get-AppLockerFileInformation -Path $dest | Select-Object -ExpandProperty Publisher}
+        if ($PSVersion -eq '5') {$MSIProductCode = $FileInformation.BinaryName}
+        if ($SaveOption -eq 'n') {Remove-Item -Path $dest}
     }
 
     while ($architecture -notin @('x86', 'x64', 'arm', 'arm64', 'neutral')) {
