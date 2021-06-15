@@ -1,4 +1,5 @@
 #Requires -Version 5
+$PSVersion = (Get-Host).Version.Major
 
 <#
 .SYNOPSIS
@@ -160,38 +161,68 @@ Function Read-PreviousWinGet-Manifest {
 }
 
 Function Read-WinGet-InstallerValues {
-    Clear-Variable -Name 'Architecture' -Force -ErrorAction SilentlyContinue
-    Clear-Variable -Name 'InstallerType' -Force -ErrorAction SilentlyContinue
-    Clear-Variable -Name 'InstallerUrl' -Force -ErrorAction SilentlyContinue
-    Clear-Variable -Name 'InstallerSha256' -Force -ErrorAction SilentlyContinue
-    Clear-Variable -Name 'Custom' -Force -ErrorAction SilentlyContinue
-    Clear-Variable -Name 'Silent' -Force -ErrorAction SilentlyContinue
-    Clear-Variable -Name 'SilentWithProgress' -Force -ErrorAction SilentlyContinue
-    Clear-Variable -Name 'ProductCode' -Force -ErrorAction SilentlyContinue
-    Clear-Variable -Name 'Scope' -Force -ErrorAction SilentlyContinue
-    Clear-Variable -Name 'InstallerLocale' -Force -ErrorAction SilentlyContinue
-    Clear-Variable -Name 'UpgradeBehavior' -Force -ErrorAction SilentlyContinue
-    Clear-Variable -Name 'AnotherInstaller' -Force -ErrorAction SilentlyContinue
+    $InstallerValues = @(
+        "Architecture"
+        "InstallerType"
+        "InstallerUrl"
+        "InstallerSha256"
+        "Custom"
+        "Silent"
+        "SilentWithProgress"
+        "ProductCode"
+        "Scope"
+        "InstallerLocale"
+        "UpgradeBehavior"
+        "AnotherInstaller"
+    )
+    Foreach ($InstallerValue in $InstallerValues) {Clear-Variable -Name $InstallerValue -Force -ErrorAction SilentlyContinue}
 
     while ([string]::IsNullOrWhiteSpace($InstallerUrl)) {
         Write-Host
         Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the download url to the installer.'
         $InstallerUrl = Read-Host -Prompt 'Url' | TrimString
     }
+
+    while ([string]::IsNullOrWhiteSpace($SaveOption)) {
+        Write-Host
+        Write-Host -ForegroundColor 'Yellow' -Object "Do you want to save the files to the Temp folder?"
+        $SaveOption = Read-Host -Prompt 'y or n' | TrimString
+    }
+
+    $start_time = Get-Date
     Write-Host $NewLine
     Write-Host 'Downloading URL. This will take awhile...' -ForegroundColor Blue
     $WebClient = New-Object System.Net.WebClient
+    $Filename = [System.IO.Path]::GetFileName($InstallerUrl)
+    $dest = "$env:TEMP\$FileName"
 
-    try {
-        $Stream = $WebClient.OpenRead($InstallerUrl)
-        $InstallerSha256 = (Get-FileHash -InputStream $Stream -Algorithm SHA256).Hash
-    }
-    catch {
-        Write-Host 'Error downloading file. Please run the script again.' -ForegroundColor Red
-        exit 1
-    }
-    finally {
-        $Stream.Close()
+    if ($SaveOption -eq 'n') {
+        try {
+            $Stream = $WebClient.OpenRead($InstallerUrl)
+            $InstallerSha256 = (Get-FileHash -InputStream $Stream -Algorithm SHA256).Hash
+        }
+        catch {
+            Write-Host 'Error downloading file. Please run the script again.' -ForegroundColor Red
+            exit 1
+        }
+        finally {
+            $Stream.Close()
+            Write-Host "Time taken: $((Get-Date).Subtract($start_time).Seconds) second(s)" -ForegroundColor Green
+        }
+    }else{
+        try {
+            $WebClient.DownloadFile($InstallerUrl, $dest)
+        }
+        catch {
+            Write-Host 'Error downloading file. Please run the script again.' -ForegroundColor Red
+            exit 1
+        }
+        finally {
+            Write-Host "Time taken: $((Get-Date).Subtract($start_time).Seconds) second(s)" -ForegroundColor Green
+            $InstallerSha256 = (Get-FileHash -Path $dest -Algorithm SHA256).Hash
+            if ($PSVersion -eq '5') {$FileInformation = Get-AppLockerFileInformation -Path $dest | Select-Object -ExpandProperty Publisher}
+            if ($PSVersion -eq '5') {$MSIProductCode = $FileInformation.BinaryName}
+        }
     }
 
     while ($architecture -notin @('x86', 'x64', 'arm', 'arm64', 'neutral')) {
@@ -247,6 +278,7 @@ Function Read-WinGet-InstallerValues {
     do {
         Write-Host
         Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the application product code. Looks like {CF8E6E00-9C03-4440-81C0-21FACB921A6B}'
+        Write-Host -ForegroundColor 'White' -Object "ProductCode found from installer: $MSIProductCode"
         Write-Host -ForegroundColor 'White' -Object 'Can be found with ' -NoNewline; Write-Host -ForegroundColor 'DarkYellow' 'get-wmiobject Win32_Product | Sort-Object Name | Format-Table IdentifyingNumber, Name -AutoSize'
         $ProductCode = Read-Host -Prompt 'ProductCode' | TrimString
     } while (-not [string]::IsNullOrWhiteSpace($ProductCode) -and ($ProductCode.Length -lt 1 -or $ProductCode.Length -gt 255))
