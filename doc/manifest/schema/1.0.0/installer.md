@@ -1,6 +1,6 @@
 # Windows Package Manager
 ## Manifest Schema v1.0.0 Installer File
-All Windows Package Manager manifests in the Microsoft community repository are submitted using YAML syntax. A JSON schema is provided to aid authoring these files in editors, and in the other tooling related to the Windows Package Manager. This document provides detailed information regarding the usage of the YAML keys in the [installer](https://github.com/microsoft/winget-cli/blob/master/schemas/JSON/manifests/v1.0.0/manifest.installer.1.0.0.json) file for multi-file manifests. Please review the [Manifest Specification](https://github.com/microsoft/winget-cli/blob/master/doc/ManifestSpecv1.0.md) if you are not familiar with this file.
+All Windows Package Manager manifests in the Microsoft community repository are submitted using [YAML](https://yaml.org/spec/) syntax. A JSON schema is provided to aid authoring these files in editors, and in the other tooling related to the Windows Package Manager. This document provides detailed information regarding the usage of the YAML keys in the [installer](https://github.com/microsoft/winget-cli/blob/master/schemas/JSON/manifests/v1.0.0/manifest.installer.1.0.0.json) file for multi-file manifests. Please review the [Manifest Specification](https://github.com/microsoft/winget-cli/blob/master/doc/ManifestSpecv1.0.md) if you are not familiar with this file.
 
 
 ## Fields
@@ -19,7 +19,7 @@ All Windows Package Manager manifests in the Microsoft community repository are 
  #### Required Field
  This key represents the version of the package. It is related to the specific release this manifests targets. In some cases you will see a perfectly formed [semantic](https://semver.org) version number, and in other cases you might see something different. These may be date driven, or they might have other characters with some package specific meaning for example.
 
- The Windows Package Manager client uses this version to determine if an upgrade for a package is available. In some cases, packages may be released with a marketing driven version, and that causes trouble with the `winget upgrade` command. 
+ The Windows Package Manager client uses this version to determine if an upgrade for a package is available. In some cases, packages may be released with a marketing driven version, and that causes trouble with the [`winget upgrade`](https://docs.microsoft.com/windows/package-manager/winget/upgrade) command. 
 
  >Note: The current best practice is to use the value reported in Add / Remove Programs when this version of the package is installed. In some cases, packages do not report a version resulting in an upgrade loop or other unwanted behavior. This practice may seem contrary to using semantic versioning, but it provides the best end to end experience for customers. It will take time for publishers and ISVs to migrate to semantic versioning, and some may intentionally choose to preserve other versioning schemes.
 </details>
@@ -59,11 +59,11 @@ All Windows Package Manager manifests in the Microsoft community repository are 
  <summary>Enumeration of supported installer types. InstallerType is required in either root level or individual Installer level</summary>
 
  #### Required Field
- This key represents the installer type for the package. The Windows Package Manager supports MSIX, MSI, and executable installers. Some well known formats provide standard sets of installer switches to provide different installer experiences.
+ This key represents the installer type for the package. The Windows Package Manager supports [MSIX](https://docs.microsoft.com/windows/msix/overview), [MSI](https://docs.microsoft.com/windows/win32/msi/windows-installer-portal), and executable installers. Some well known formats ([Inno](https://jrsoftware.org/isinfo.php), [Nullsoft](https://sourceforge.net/projects/nsis/), [WiX](https://wixtoolset.org/), and [Burn](https://wixtoolset.org/documentation/manual/v3/bundle/)) provide standard sets of installer switches to provide different installer experiences.
 
  >Note: The Windows Package Manager defaults to the install mode providing install progress. A best practice is to determine if one of the supported installer technologies was used to build an installer with the .exe file extension. The [Windows Package Manager Manifest Creator](https://github.com/microsoft/winget-create) tool can be used to determine if one of the known tools was used to build an installer with the .exe file extension.
 
- >Note: The Windows Package Manager does not support loose executables with the .exe or .com file extension directly. Compressed files containing installers, or loose executables are also not supported.
+ >Note: The Windows Package Manager does not support loose executables with the .exe or .com file extension directly. Compressed files containing installers,  loose executables, and Progressive Web Applications (PWAs) are also not supported.
  
  >Note: This key may be present in the root of the manifest as the default value for all installer nodes. This key may also be present in an individual installer node as well. If this key is in the manifest root and in an installer node, the value in the installer node will apply.
 </details>
@@ -105,7 +105,7 @@ All Windows Package Manager manifests in the Microsoft community repository are 
  <summary>Silent is the value that should be passed to the installer when user chooses a silent or quiet install</summary>
 
  #### Optional Field
- This key represents switches passed to the installer to provide a silent install experience.
+ This key represents switches passed to the installer to provide a silent install experience. These would be used when the command `winget install <package> --silent` is executed.
 
  >Note: When the Windows Package Manager installs a package using the "silent" install mode, any custom switches will also be passed to the installer. If a user applies override switches via command line via the Windows Package Manager, none of the switches from the manifest will be passed to the installer.
  
@@ -127,7 +127,7 @@ All Windows Package Manager manifests in the Microsoft community repository are 
  <summary>Interactive is the value that should be passed to the installer when user chooses an interactive install</summary>
 
  #### Optional Field
- This key represents switches passed to the installer to provide an interactive install experience. This is intended to allow a user to interact with the installer.
+ This key represents switches passed to the installer to provide an interactive install experience. This is intended to allow a user to interact with the installer. These would be used when the command `winget install <package> --interactive` is executed.
 
  >Note: When the Windows Package Manager installs a package using the "interactive" install mode, any custom switches will also be passed to the installer. If a user applies override switches via command line via the Windows Package Manager, none of the switches from the manifest will be passed to the installer.
 

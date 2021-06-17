@@ -1,7 +1,7 @@
 # Windows Package Manager
 ## Manifest Schema v1.0.0 Version File
 
-All Windows Package Manager manifests in the Microsoft community repository are submitted using YAML syntax. A JSON schema is provided to aid authoring these files in editors, and in the other tooling related to the Windows Package Manager. This document provides detailed information regarding the usage of the YAML keys in the [version](https://github.com/microsoft/winget-cli/blob/master/schemas/JSON/manifests/v1.0.0/manifest.version.1.0.0.json) file for multi-file manifests. Please review the [Manifest Specification](https://github.com/microsoft/winget-cli/blob/master/doc/ManifestSpecv1.0.md) if you are not familiar with this file.
+All Windows Package Manager manifests in the Microsoft community repository are submitted using [YAML](https://yaml.org/spec/) syntax. A JSON schema is provided to aid authoring these files in editors, and in the other tooling related to the Windows Package Manager. This document provides detailed information regarding the usage of the YAML keys in the [version](https://github.com/microsoft/winget-cli/blob/master/schemas/JSON/manifests/v1.0.0/manifest.version.1.0.0.json) file for multi-file manifests. Please review the [Manifest Specification](https://github.com/microsoft/winget-cli/blob/master/doc/ManifestSpecv1.0.md) if you are not familiar with this file.
 
 ## Fields
 ### PackageIdentifier

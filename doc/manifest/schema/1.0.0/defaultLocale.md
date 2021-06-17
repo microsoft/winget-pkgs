@@ -1,7 +1,7 @@
 # Windows Package Manager
 ## Manifest Schema v1.0.0 Default Locale File
 
-All Windows Package Manager manifests in the Microsoft community repository are submitted using YAML syntax. A JSON schema is provided to aid authoring these files in editors, and in the other tooling related to the Windows Package Manager. This document provides detailed information regarding the usage of the YAML keys in the [default locale](https://github.com/microsoft/winget-cli/blob/master/schemas/JSON/manifests/v1.0.0/manifest.defaultLocale.1.0.0.json) file for multi-file manifests. Please review the [Manifest Specification](https://github.com/microsoft/winget-cli/blob/master/doc/ManifestSpecv1.0.md) if you are not familiar with this file.
+All Windows Package Manager manifests in the Microsoft community repository are submitted using [YAML](https://yaml.org/spec/) syntax. A JSON schema is provided to aid authoring these files in editors, and in the other tooling related to the Windows Package Manager. This document provides detailed information regarding the usage of the YAML keys in the [default locale](https://github.com/microsoft/winget-cli/blob/master/schemas/JSON/manifests/v1.0.0/manifest.defaultLocale.1.0.0.json) file for multi-file manifests. Please review the [Manifest Specification](https://github.com/microsoft/winget-cli/blob/master/doc/ManifestSpecv1.0.md) if you are not familiar with this file.
 
 ## Fields
 ### PackageIdentifier
@@ -159,7 +159,7 @@ All Windows Package Manager manifests in the Microsoft community repository are 
   <summary>The most common package term</summary>
 
   #### Optional Field
-  This key represents the most common term users would search for when installing or upgrading a package. If only one package uses this moniker, then the install, list and upgrade command may match with this package. 
+  This key represents the most common term users would search for when installing or upgrading a package. If only one package uses this moniker, then the [install](https://docs.microsoft.com/windows/package-manager/winget/install), [list](https://docs.microsoft.com/windows/package-manager/winget/list) and [upgrade](https://docs.microsoft.com/windows/package-manager/winget/upgrade) command may match with this package. 
   
   >Note:Moniker is the third property evaluated when searching for a matching package.
  </details>
