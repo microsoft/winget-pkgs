@@ -30,4 +30,6 @@ Before you invest the time to generate and submit a manifest, you should check t
 
 ## What next?
 
-You should take a look at our [v1.0 manifest specification](https://github.com/microsoft/winget-cli/doc/ManifestSpecv1.0.md). Don't worry. If this is starting to look too complicated you can create a new Issue and select [Package Request/Submission 👀](https://github.com/microsoft/winget-pkgs/issues/new/choose).
+You should take a look at our [v1.0 manifest specification](https://github.com/microsoft/winget-cli/blob/master/doc/ManifestSpecv1.0.md). Don't worry. If this is starting to look too complicated you can create a new Issue and select [Package Request/Submission 👀](https://github.com/microsoft/winget-pkgs/issues/new/choose).
+
+The multi-file manifest is the preferred method for building manifests. The mimimum required files are a [version](doc/manifest/schema/1.0.0/version.md) file, a [defaultLocale](doc/manifest/schema/1.0.0/defaultLocale.md) file and an [installer](doc/manifest/schema/1.0.0/installer.md) file.
