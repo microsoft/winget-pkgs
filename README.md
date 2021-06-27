@@ -1,72 +1,67 @@
-# Welcome to the Windows Package Manager Community repo
-This repository contains the manifest files for the **Windows Package Manager**.  You are highly encouraged to submit manifests for your favorite application.
+# Windows Package Manager Community Repository
+This repository contains the manifest files for the **Windows Package Manager** default source.  You are highly encouraged to submit manifests for your favorite application.
+>Note: At this time installers must either be MSIX, MSI or .exe application installers. Standalone or portable executables, compressed .zip files, and fonts are not currently supported.
 
-The **Windows Package Manager** is an open source client.  You will find the source code [here](https://github.com/microsoft/winget-cli).
+The **Windows Package Manager** is an [open source client](https://github.com/microsoft/winget-cli) designed for command-line usage.
 
 # Submitting a Package
-To submit a package to the repository, you should follow these steps:
-1) Follow the **Contributing** guidelines below
-2) Author a Manifest
-3) Test your manifest
-4) Submit your PR
-5) Respond to any feedback
+To submit a package to this repository, you should follow these steps:
+1) Follow the [Contributing](#Contributing) guidelines below.
+2) [Author](AUTHORING_MANIFESTS.md) a Manifest.
+3) [Test](#test-your-manifest) your manifest.
+4) [Submit](#submit-your-pr) your pull request (PR).
+5) Respond to any feedback in your PR.
 
->Note: Please check that the package's manifest you intend to submit does not already exist in the manifests folder, and that there are no open PRs for it in order to avoid duplicates.
+>Note: Please check the package's manifest you intend to submit does not already exist in the repository, and there are no open PRs for it in order to avoid duplicates.
 
 ## Authoring a Manifest
 
-The minimal manifest syntax is below. Additional information on writing manifests can be found on [Microsoft Docs](https://docs.microsoft.com/en-us/windows/package-manager/package/manifest) or on the [v0.1 manifest spec](https://github.com/microsoft/winget-cli/blob/master/doc/ManifestSpecv0.1.md).
+You may either use the [Windows Package Manager Manifest Creator](https://github.com/microsoft/winget-create), the [YAMLCreate](#using-the-yamlcreateps1) PowerShell script, the [Windows Package Manager YAML Generator](#using-windows-package-manager-yaml-generator), or you can craft a manifest manually following our [authoring guidelines](AUTHORING_MANIFESTS.md).
 
-Current limitations are:
-* One manifest per PR
-* One installer per PR
-
-Be sure the manifest filename matches the `Version` and the manifest is located in the folder path matching `manifests\<publisher>\<package>\<version>.yaml`
-
-```yaml
-Id: string # publisher.package format
-Publisher: string # the name of the publisher
-Name: string # the name of the application
-Version: string # version numbering format
-License: string # the open source license or copyright
-InstallerType: string # enumeration of supported installer types (exe, msi, msix, inno, wix, nullsoft, appx)
-Installers:
-  - Arch: string # enumeration of supported architectures
-    Url: string # path to download installation file of the specified version
-    Sha256: string # SHA256 calculated from installer
-# ManifestVersion: 0.1.0
-```
+>Note: Only one manifest may be submitted per PR.
 
 ### Using the YAMLCreate.ps1
-To help author manifest files, we have provided a YAMLCreate.ps1 powershell script located in the Tools folder.  
-The script will prompt you for the URL to the installer, then will prompt you to fill in metadata.
+To help author manifest files, we have provided a YAMLCreate.ps1 [powershell script](Tools/YamlCreate.ps1) located in the Tools folder. The script will prompt you for the URL to the installer, then will prompt you to fill in metadata.
 
-I recommend running the script in the location where you want to produce the manifest file.  For example: `manifests\<publisher>\<package>\`.  After successful completion, it will produce the YAML file.
+>Note: We recommend running the script in the location where you want to produce the manifest file.  For example: `manifests\<p>\<publisher>\<package>\`.  After successful completion, it will produce the YAML files.
 
 ### Using Windows Package Manager YAML Generator
-If you prefer to use a GUI to generate YAML files, you can use the **Windows Package Manager YAML Generator**. It is available as an app [in the Microsoft Store](https://www.microsoft.com/en-us/p/windows-package-manager-yaml-generator/9p3n60fs22k5) and the code is also available [on GitHub](https://github.com/ptorr-msft/WinGetYamlGenerator).
-
-Although the Windows Package Manager YAML Generator can create YAML files with multiple installers, winget does not support more than one installer for now.
+If you prefer to use a GUI to generate YAML files, you can use the **Windows Package Manager YAML Generator**. It is available as an app [in the Microsoft Store](https://www.microsoft.com/p/windows-package-manager-yaml-generator/9p3n60fs22k5) and the code is also available [on GitHub](https://github.com/ptorr-msft/WinGetYamlGenerator).
 
 ## Test your manifest
 Now that you have authored your manifest, you should make sure it works as expected.
-1) Verify the syntax.  You can do that by typing the following command: `winget validate <manifest>`
-2) Test the install.  You can do that by installing the manifest: `winget install -m <manifest>`
-For more details, see [packages](https://docs.microsoft.com/windows/package-manager/package).
+
+### Locally
+1) Verify the syntax by executing the following command:
+```
+winget validate <path-to-manifest>
+```
+
+2) Test the install by executing the following command:
+```
+winget install -m <path-to-manifest>
+```
+
+For more details, see ["Submit packages to Windows Package Manager"](https://docs.microsoft.com/windows/package-manager/package) at Microsoft Docs.
+
+### In Windows Sandbox
+You can use the [Sandbox Test](Tools/SandboxTest.ps1) PowerShell script for testing a manifest installation in [Windows Sandbox](https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-sandbox/windows-sandbox-overview). The manifest will be also validated.
+
+Just provide the path to manifest as parameter:
+```
+.\Tools\SandboxTest.ps1 <path-to-manifest>
+```
 
 ## Submit your PR
-With the manifest verified, you will need to submit a PR.  Your manifest should be located in the folder path matching `manifests\<publisher>\<package>\<version>.yaml`
+With the manifest verified, you will need to submit a PR.  Your manifest should be located in the folder path matching `manifests\<first lower case letter of publisher>\<publisher>\<package>\<version>.yaml`
 
 ### Validation Process
-The PR request will go through a validation process.  During the process, the PR request will get labels to help drive the validation.
-In the event of a failure, the BOT will suggest where the problem is with the submission and assign the PR back to you.  
+The PR request will go through a validation process. During the process, the core team or the Microsoft bot (BOT) will use [labels](https://docs.microsoft.com/windows/package-manager/package/winget-validation#pull-request-labels) to help. In the event of a failure, the BOT will suggest where the problem is with the submission and assign the PR back to you.  
 
 ### Respond to PR feedback
 If the PR has been assigned to you, a timer is triggered.  You will have 7 days to resolve the issue, or the PR will be closed automatically by the BOT.  
 
-The installer may be identified as malware. If you believe it's a false positive you can submit the installer to the defender team for analysis from [here](https://www.microsoft.com/wdsi/filesubmission).
-
-For a list of the BOT labels, see [packages](https://docs.microsoft.com/windows/package-manager/package/repository#pull-request-labels).
+Submissions to the repository are reviewed by Windows Package Manager administrators and/or community moderators. We've provided a [Public Service Announcement](https://github.com/microsoft/winget-pkgs/issues/15674) to help identify these individuals. 
 
 # Contributing
 
@@ -76,11 +71,10 @@ the rights to use your contribution. For details, visit https://cla.opensource.m
 
 When you submit a pull request, a CLA bot will automatically determine whether you need to provide
 a CLA and decorate the PR appropriately (e.g., status check, comment). Simply follow the instructions
-provided by the bot. You will only need to do this once across all repos using our CLA.
+provided by the bot. You will only need to do this once across all Microsoft repositories using our CLA.
 
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/).
 For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or
-contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
+contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments. More information is available in our [Contributing document](CONTRIBUTING.md).
 
-For the avoidance of doubt, you may not make any Submissions linking to third party materials if such 
-Submission is prohibited by the applicable third party and/or otherwise violates such third party's rights.
+For the avoidance of doubt, you may not make any Submissions linking to third party materials if such Submission is prohibited by the applicable third party and/or otherwise violates such third party's rights.
