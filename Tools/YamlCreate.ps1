@@ -124,6 +124,12 @@ Function Read-PreviousWinGet-Manifest {
                     $InstallerSuccessCodes = $FetchInstallerSuccessCodes.Substring(0, $FetchInstallerSuccessCodes.LastIndexOf(' '))
                     $InstallerSuccessCodes = $InstallerSuccessCodes -Split '- '
                     New-Variable -Name "InstallerSuccessCodes" -Value ($InstallerSuccessCodes.Trim()[1..17] -join ", ") -Scope Script -Force
+                } elseif ($Line -eq "InstallModes:") {
+                    $regex = '(?ms)InstallModes:(.+?):'
+                    $FetchInstallModes = [regex]::Matches($OldManifestText,$regex) | foreach {$_.groups[1].value }
+                    $InstallModes = $FetchInstallModes.Substring(0, $FetchInstallModes.LastIndexOf(' '))
+                    $InstallModes = $InstallModes -Split '- '
+                    New-Variable -Name "InstallModes" -Value ($InstallModes.Trim()[1..17] -join ", ") -Scope Script -Force
                 } elseif ($Line -notlike "PackageVersion*" -and $Line -notlike "PackageIdentifier*") {
                     $Variable = $Line.TrimStart("#").Split(":").Trim()
                     New-Variable -Name $Variable[0] -Value ($Variable[1..10] -join ":") -Scope Script -Force
@@ -395,6 +401,25 @@ Function Read-WinGet-InstallerManifest {
                 $script:InstallerSuccessCodes = $NewInstallerSuccessCodes
             }
         } while (($InstallerSuccessCodes -split ", ").Count -ge '16')
+    }
+
+    if ([string]::IsNullOrWhiteSpace($InstallModes)) {
+        do {
+            Write-Host
+            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] List of supported installer modes. interactive / silent / silentWithProgress'
+            $script:InstallModes = Read-Host -Prompt 'InstallModes' | TrimString
+        } while (($InstallModes -split ", ").Count -ge '3')
+    } else {
+        do {
+            Write-Host
+            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] List of supported installer modes. interactive / silent / silentWithProgress'
+            Write-Host -ForegroundColor 'DarkGray' "Old Variable: $InstallModes"
+            $NewInstallModes = Read-Host -Prompt 'InstallModes' | TrimString
+    
+            if (-not [string]::IsNullOrWhiteSpace($NewInstallModes)) {
+                $script:InstallModes = $NewInstallModes
+            }
+        } while (($InstallModes -split ", ").Count -gt '3')
     }
 
 }
@@ -738,10 +763,8 @@ if ($Commands) {"Commands:"
 Foreach ($Command in $Commands.Split(",").Trim()) {"- $Command" }}
 if ($InstallerSuccessCodes) {"InstallerSuccessCodes:"
 Foreach ($InstallerSuccessCode in $InstallerSuccessCodes.Split(",").Trim()) {"- $InstallerSuccessCode" }}
-"InstallModes:"
-"- interactive"
-"- silent"
-"- silentWithProgress"
+if ($InstallModes) {"InstallModes:"
+Foreach ($InstallMode in $InstallModes.Split(",").Trim()) {"- $InstallMode" }}
 "Installers:"
 $Installers.TrimEnd()
 "ManifestType: installer"
