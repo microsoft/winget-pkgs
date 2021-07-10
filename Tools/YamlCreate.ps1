@@ -123,7 +123,7 @@ Function Read-PreviousWinGet-Manifest {
                     $InstallerSuccessCodes = $InstallerSuccessCodes -Split '- '
                     New-Variable -Name "InstallerSuccessCodes" -Value ($InstallerSuccessCodes.Trim()[1..17] -join ", ") -Scope Script -Force
                 } elseif ($Line -notlike "PackageVersion*" -and $Line -notlike "PackageIdentifier*") {
-                    $Variable = $Line.Replace("#","").Split(":").Trim()
+                    $Variable = $Line.TrimStart("#").Split(":").Trim()
                     New-Variable -Name $Variable[0] -Value ($Variable[1..10] -join ":") -Scope Script -Force
                 }
             }
@@ -153,7 +153,7 @@ Function Read-PreviousWinGet-Manifest {
                     $Tags = $Tags -Split '- '
                     New-Variable -Name "Tags" -Value ($Tags.Trim()[1..17] -join ", ") -Scope Script -Force
                 } elseif ($Line -notlike "PackageLocale*") {
-                    $Variable = $Line.Replace("#","").Split(":").Trim()
+                    $Variable = $Line.TrimStart("#").Split(":").Trim()
                     New-Variable -Name $Variable[0] -Value ($Variable[1..10] -join ":") -Scope Script -Force
                 }
             }
