@@ -326,7 +326,7 @@ Function Read-WinGet-InstallerManifest {
             Write-Host
             Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter any File Extensions the application could support. For example: html, htm, url (Max 256)'
             $script:FileExtensions = Read-Host -Prompt 'FileExtensions' | TrimString
-        } while ($FileExtensions.Split(", ").Count -gt '256')
+        } while (($FileExtensions -split ", ").Count -ge '256')
     } else {
         do {
             Write-Host
@@ -337,7 +337,7 @@ Function Read-WinGet-InstallerManifest {
             if (-not [string]::IsNullOrWhiteSpace($NewFileExtensions)) {
                 $script:FileExtensions = $NewFileExtensions
             }
-        } while ($FileExtensions.Split(", ").Count -gt '256')
+        } while (($FileExtensions -split ", ").Count -ge '256')
     }
 
     if ([string]::IsNullOrWhiteSpace($Protocols)) {
@@ -345,7 +345,7 @@ Function Read-WinGet-InstallerManifest {
             Write-Host
             Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter any Protocols the application provides a handler for. For example: http, https (Max 16)'
             $script:Protocols = Read-Host -Prompt 'Protocols' | TrimString
-        } while ($Protocols.Split(", ").Count -gt '16')
+        } while (($Protocols -split ", ").Count -ge '16')
     } else {
         do {
             Write-Host
@@ -356,7 +356,7 @@ Function Read-WinGet-InstallerManifest {
             if (-not [string]::IsNullOrWhiteSpace($NewProtocols)) {
                 $script:Protocols = $NewProtocols
             }
-        } while ($Protocols.Split(", ").Count -gt '16')
+        } while (($Protocols -split ", ").Count -ge '16')
     }
 
     if ([string]::IsNullOrWhiteSpace($Commands)) {
@@ -364,7 +364,7 @@ Function Read-WinGet-InstallerManifest {
             Write-Host
             Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter any Commands or aliases to run the application. For example: msedge (Max 16)'
             $script:Commands = Read-Host -Prompt 'Commands' | TrimString
-        } while ($Commands.Split(", ").Count -gt '16')
+        } while (($Commands -split ", ").Count -ge '16')
     } else {
         do {
             Write-Host
@@ -375,7 +375,7 @@ Function Read-WinGet-InstallerManifest {
             if (-not [string]::IsNullOrWhiteSpace($NewCommands)) {
                 $script:Commands = $NewCommands
             }
-        } while ($Commands.Split(", ").Count -gt '16')
+        } while (($Commands -split ", ").Count -ge '16')
     }
 
     if ([string]::IsNullOrWhiteSpace($InstallerSuccessCodes)) {
@@ -383,7 +383,7 @@ Function Read-WinGet-InstallerManifest {
             Write-Host
             Write-Host -ForegroundColor 'Yellow' -Object '[Optional] List of additional non-zero installer success exit codes other than known default values by winget (Max 16)'
             $script:InstallerSuccessCodes = Read-Host -Prompt 'InstallerSuccessCodes' | TrimString
-        } while ($InstallerSuccessCodes.Split(", ").Count -gt '16')
+        } while (($InstallerSuccessCodes -split ", ").Count -ge '16')
     } else {
         do {
             Write-Host
@@ -394,7 +394,7 @@ Function Read-WinGet-InstallerManifest {
             if (-not [string]::IsNullOrWhiteSpace($NewInstallerSuccessCodes)) {
                 $script:InstallerSuccessCodes = $NewInstallerSuccessCodes
             }
-        } while ($InstallerSuccessCodes.Split(", ").Count -gt '16')
+        } while (($InstallerSuccessCodes -split ", ").Count -ge '16')
     }
 
 }
@@ -639,7 +639,7 @@ Function Read-WinGet-LocaleManifest {
             Write-Host
             Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter any tags that would be useful to discover this tool. For example: zip, c++ (Max 16)'
             $script:Tags = Read-Host -Prompt 'Tags' | TrimString
-        } while ($Tags.Split(", ").Count -gt '16')
+        } while (($Tags -split ", ").Count -ge '16')
     } else {
         do {
             Write-Host
@@ -650,7 +650,7 @@ Function Read-WinGet-LocaleManifest {
             if (-not [string]::IsNullOrWhiteSpace($NewTags)) {
                 $script:Tags = $NewTags
             }
-        } while ($Tags.Split(", ").Count -gt '16')
+        } while (($Tags -split ", ").Count -ge '16')
     }
 
     if ([string]::IsNullOrWhiteSpace($ShortDescription)) {
