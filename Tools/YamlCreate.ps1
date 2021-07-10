@@ -25,6 +25,8 @@ $ScriptHeader = '# Created using YamlCreate.ps1'
     https://github.com/microsoft/winget-pkgs/blob/master/Tools/YamlCreate.ps1
 #>
 
+$Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
+
 filter TrimString {
     $_.Trim()
 }
@@ -713,6 +715,8 @@ $VersionManifest | ForEach-Object {
         $_
     }
 } | Out-File $VersionManifestPath -Encoding 'UTF8'
+$MyRawString = Get-Content -Raw $VersionManifestPath
+[System.IO.File]::WriteAllLines($VersionManifestPath, $MyRawString, $Utf8NoBomEncoding)
 
 Write-Host 
 Write-Host "Yaml file created: $VersionManifestPath"
@@ -755,6 +759,8 @@ $InstallerManifest | ForEach-Object {
         $_
     }
 } | Out-File $InstallerManifestPath -Encoding 'UTF8'
+$MyRawString = Get-Content -Raw $InstallerManifestPath
+[System.IO.File]::WriteAllLines($InstallerManifestPath, $MyRawString, $Utf8NoBomEncoding)
 
 Write-Host 
 Write-Host "Yaml file created: $InstallerManifestPath"
@@ -799,6 +805,8 @@ $LocaleManifest | ForEach-Object {
         $_
     }
 } | Out-File $LocaleManifestPath -Encoding 'UTF8'
+$MyRawString = Get-Content -Raw $LocaleManifestPath
+[System.IO.File]::WriteAllLines($LocaleManifestPath, $MyRawString, $Utf8NoBomEncoding)
 
 Write-Host 
 Write-Host "Yaml file created: $LocaleManifestPath"
