@@ -792,7 +792,7 @@ Write-Host "Yaml file created: $InstallerManifestPath"
 Function Write-WinGet-LocaleManifest {
 $LocaleManifest = @(
 "$ScriptHeader"
-if ($PackageLocale -eq 'en-US') {'# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultlocale.1.0.0.schema.json'}else{'# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.0.0.schema.json'}
+if ($PackageLocale -eq 'en-US') {'# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.0.0.schema.json'}else{'# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.0.0.schema.json'}
 ''
 "PackageIdentifier: $PackageIdentifier"
 "PackageVersion: $PackageVersion"
