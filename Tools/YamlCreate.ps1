@@ -137,10 +137,10 @@ Function Read-PreviousWinGet-Manifest {
             }
 
             ForEach ($DifLocale in $OldManifests) {
-                if (!(Test-Path $AppFolder)) {New-Item -ItemType "Directory" -Force -Path $AppFolder | Out-Null}
                 if ($DifLocale.Name -notin @("$PackageIdentifier.yaml","$PackageIdentifier.installer.yaml","$PackageIdentifier.locale.en-US.yaml")) {
-                    $DifLocaleContent = Get-Content -Path $DifLocale.FullName
-                    Out-File ($AppFolder + "\" + $DifLocale.Name) -InputObject $DifLocaleContent.Replace("PackageVersion: $LastVersion","PackageVersion: $PackageVersion") -Encoding 'UTF8'
+                    if (!(Test-Path $AppFolder)) {New-Item -ItemType "Directory" -Force -Path $AppFolder | Out-Null}
+                    $DifLocaleContent = [System.IO.File]::ReadAllLines($DifLocale.FullName)
+                    [System.IO.File]::WriteAllLines(($AppFolder + "\" + $DifLocale.Name), $DifLocaleContent.Replace("PackageVersion: $LastVersion","PackageVersion: $PackageVersion"), $Utf8NoBomEncoding)
                 }
             }
         }
