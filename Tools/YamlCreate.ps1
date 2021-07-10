@@ -754,7 +754,7 @@ $InstallerManifest = @(
 ''
 "PackageIdentifier: $PackageIdentifier"
 "PackageVersion: $PackageVersion"
-"MinimumOSVersion: 10.0.0.0"
+if ($MinimumOSVersion) {"MinimumOSVersion: $MinimumOSVersion"}else{"MinimumOSVersion: 10.0.0.0"}
 if ($FileExtensions) {"FileExtensions:"
 Foreach ($FileExtension in $FileExtensions.Split(",").Trim()) {"- $FileExtension" }}
 if ($Protocols) {"Protocols:"
