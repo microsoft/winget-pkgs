@@ -56,14 +56,14 @@ Function Show-OptionMenu {
 }
 
 Function Read-WinGet-MandatoryInfo {
-    while ($PackageIdentifier.Length -lt 4 -or $ID.Length -ge 255) {
+    while ($PackageIdentifier.Length -lt 4 -or $ID.Length -gt 255) {
         Write-Host
         Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the Package Identifier, in the following format <Publisher shortname.Application shortname>. For example: Microsoft.Excel'
         $script:PackageIdentifier = Read-Host -Prompt 'PackageIdentifier' | TrimString
         $PackageIdentifierFolder = $PackageIdentifier.Replace('.','\')
     }
     
-    while ([string]::IsNullOrWhiteSpace($PackageVersion) -or $PackageName.Length -ge 128) {
+    while ([string]::IsNullOrWhiteSpace($PackageVersion) -or $PackageName.Length -gt 128) {
         Write-Host
         Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the version. for example: 1.33.7'
         $script:PackageVersion = Read-Host -Prompt 'Version' | TrimString
@@ -332,7 +332,7 @@ Function Read-WinGet-InstallerManifest {
             Write-Host
             Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter any File Extensions the application could support. For example: html, htm, url (Max 256)'
             $script:FileExtensions = Read-Host -Prompt 'FileExtensions' | TrimString
-        } while (($FileExtensions -split ", ").Count -ge '256')
+        } while (($FileExtensions -split ", ").Count -gt '256')
     } else {
         do {
             Write-Host
@@ -343,7 +343,7 @@ Function Read-WinGet-InstallerManifest {
             if (-not [string]::IsNullOrWhiteSpace($NewFileExtensions)) {
                 $script:FileExtensions = $NewFileExtensions
             }
-        } while (($FileExtensions -split ", ").Count -ge '256')
+        } while (($FileExtensions -split ", ").Count -gt '256')
     }
 
     if ([string]::IsNullOrWhiteSpace($Protocols)) {
@@ -351,7 +351,7 @@ Function Read-WinGet-InstallerManifest {
             Write-Host
             Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter any Protocols the application provides a handler for. For example: http, https (Max 16)'
             $script:Protocols = Read-Host -Prompt 'Protocols' | TrimString
-        } while (($Protocols -split ", ").Count -ge '16')
+        } while (($Protocols -split ", ").Count -gt '16')
     } else {
         do {
             Write-Host
@@ -362,7 +362,7 @@ Function Read-WinGet-InstallerManifest {
             if (-not [string]::IsNullOrWhiteSpace($NewProtocols)) {
                 $script:Protocols = $NewProtocols
             }
-        } while (($Protocols -split ", ").Count -ge '16')
+        } while (($Protocols -split ", ").Count -gt '16')
     }
 
     if ([string]::IsNullOrWhiteSpace($Commands)) {
@@ -370,7 +370,7 @@ Function Read-WinGet-InstallerManifest {
             Write-Host
             Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter any Commands or aliases to run the application. For example: msedge (Max 16)'
             $script:Commands = Read-Host -Prompt 'Commands' | TrimString
-        } while (($Commands -split ", ").Count -ge '16')
+        } while (($Commands -split ", ").Count -gt '16')
     } else {
         do {
             Write-Host
@@ -381,7 +381,7 @@ Function Read-WinGet-InstallerManifest {
             if (-not [string]::IsNullOrWhiteSpace($NewCommands)) {
                 $script:Commands = $NewCommands
             }
-        } while (($Commands -split ", ").Count -ge '16')
+        } while (($Commands -split ", ").Count -gt '16')
     }
 
     if ([string]::IsNullOrWhiteSpace($InstallerSuccessCodes)) {
@@ -389,7 +389,7 @@ Function Read-WinGet-InstallerManifest {
             Write-Host
             Write-Host -ForegroundColor 'Yellow' -Object '[Optional] List of additional non-zero installer success exit codes other than known default values by winget (Max 16)'
             $script:InstallerSuccessCodes = Read-Host -Prompt 'InstallerSuccessCodes' | TrimString
-        } while (($InstallerSuccessCodes -split ", ").Count -ge '16')
+        } while (($InstallerSuccessCodes -split ", ").Count -gt '16')
     } else {
         do {
             Write-Host
@@ -400,7 +400,7 @@ Function Read-WinGet-InstallerManifest {
             if (-not [string]::IsNullOrWhiteSpace($NewInstallerSuccessCodes)) {
                 $script:InstallerSuccessCodes = $NewInstallerSuccessCodes
             }
-        } while (($InstallerSuccessCodes -split ", ").Count -ge '16')
+        } while (($InstallerSuccessCodes -split ", ").Count -gt '16')
     }
 
     if ([string]::IsNullOrWhiteSpace($InstallModes)) {
@@ -408,7 +408,7 @@ Function Read-WinGet-InstallerManifest {
             Write-Host
             Write-Host -ForegroundColor 'Yellow' -Object '[Optional] List of supported installer modes. interactive / silent / silentWithProgress'
             $script:InstallModes = Read-Host -Prompt 'InstallModes' | TrimString
-        } while (($InstallModes -split ", ").Count -ge '3')
+        } while (($InstallModes -split ", ").Count -gt '3')
     } else {
         do {
             Write-Host
@@ -584,7 +584,7 @@ Function Read-WinGet-LocaleManifest {
     }
 
     if ([string]::IsNullOrWhiteSpace($License)) {
-        while ([string]::IsNullOrWhiteSpace($License) -or $License.Length -ge 512) {
+        while ([string]::IsNullOrWhiteSpace($License) -or $License.Length -gt 512) {
             Write-Host
             Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the application License. For example: MIT, GPL, Freeware, Proprietary or Copyright (c) Microsoft Corporation'
             $script:License = Read-Host -Prompt 'License' | TrimString
@@ -599,7 +599,7 @@ Function Read-WinGet-LocaleManifest {
             if (-not [string]::IsNullOrWhiteSpace($NewLicense)) {
                 $script:License = $NewLicense
             }
-        } while ([string]::IsNullOrWhiteSpace($License) -or $License.Length -ge 512)
+        } while ([string]::IsNullOrWhiteSpace($License) -or $License.Length -gt 512)
     }
 
     if ([string]::IsNullOrWhiteSpace($LicenseUrl)) {
@@ -664,7 +664,7 @@ Function Read-WinGet-LocaleManifest {
             Write-Host
             Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter any tags that would be useful to discover this tool. For example: zip, c++ (Max 16)'
             $script:Tags = Read-Host -Prompt 'Tags' | TrimString
-        } while (($Tags -split ", ").Count -ge '16')
+        } while (($Tags -split ", ").Count -gt '16')
     } else {
         do {
             Write-Host
@@ -675,7 +675,7 @@ Function Read-WinGet-LocaleManifest {
             if (-not [string]::IsNullOrWhiteSpace($NewTags)) {
                 $script:Tags = $NewTags
             }
-        } while (($Tags -split ", ").Count -ge '16')
+        } while (($Tags -split ", ").Count -gt '16')
     }
 
     if ([string]::IsNullOrWhiteSpace($ShortDescription)) {
