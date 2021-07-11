@@ -200,7 +200,7 @@ Function Read-WinGet-InstallerValues {
 
     $start_time = Get-Date
     Write-Host $NewLine
-    Write-Host 'Downloading URL. This will take awhile...' -ForegroundColor Blue
+    Write-Host 'Downloading URL. This will take a while...' -ForegroundColor Blue
     $WebClient = New-Object System.Net.WebClient
     $Filename = [System.IO.Path]::GetFileName($InstallerUrl)
     $dest = "$env:TEMP\$FileName"
