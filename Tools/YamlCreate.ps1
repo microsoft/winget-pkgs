@@ -86,9 +86,9 @@ Function Read-PreviousWinGet-Manifest {
             $script:OldManifests = Get-ChildItem -Path "$AppFolder\..\$LastVersion"
 
             if ($OldManifests.Name -eq "$PackageIdentifier.installer.yaml" -and $OldManifests.Name -eq "$PackageIdentifier.locale.en-US.yaml" -and $OldManifests.Name -eq "$PackageIdentifier.yaml") {
-                $script:OldManifestText = Get-Content -Path "$AppFolder\..\$LastVersion\$PackageIdentifier.installer.yaml", "$AppFolder\..\$LastVersion\$PackageIdentifier.locale.en-US.yaml", "$AppFolder\..\$LastVersion\$PackageIdentifier.yaml"
+                $script:OldManifestText = Get-Content -Path "$AppFolder\..\$LastVersion\$PackageIdentifier.installer.yaml", "$AppFolder\..\$LastVersion\$PackageIdentifier.locale.en-US.yaml", "$AppFolder\..\$LastVersion\$PackageIdentifier.yaml" -Encoding 'UTF8'
             } elseif ($OldManifests.Name -eq "$PackageIdentifier.yaml") {
-                $script:OldManifestText = Get-Content -Path "$AppFolder\..\$LastVersion\$PackageIdentifier.yaml"
+                $script:OldManifestText = Get-Content -Path "$AppFolder\..\$LastVersion\$PackageIdentifier.yaml" -Encoding 'UTF8'
             } else {
                 Throw "Error: Version $LastVersion does not contain the required manifests"
             }
@@ -148,7 +148,7 @@ Function Read-PreviousWinGet-Manifest {
         'NewLocale' {
             $script:OldManifests = Get-ChildItem -Path "$AppFolder"
             if ($OldManifests.Name -eq "$PackageIdentifier.locale.en-US.yaml") {
-                $script:OldManifestText = Get-Content -Path "$AppFolder\$PackageIdentifier.locale.en-US.yaml"
+                $script:OldManifestText = Get-Content -Path "$AppFolder\$PackageIdentifier.locale.en-US.yaml" -Encoding 'UTF8'
             } else {
                 Throw "Error: Multimanifest required"
             }
