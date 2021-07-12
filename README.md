@@ -16,7 +16,7 @@ To submit a package to this repository, you should follow these steps:
 
 ## Authoring a Manifest
 
-You may either use the [Windows Package Manager Manifest Creator](https://github.com/microsoft/winget-create), the [YAMLCreate](#using-the-yamlcreateps1) PowerShell script, the [Windows Package Manager YAML Generator](#using-windows-package-manager-yaml-generator), or you can craft a manifest manually following our [authoring guidelines](AUTHORING_MANIFESTS.md).
+You may either use the [Windows Package Manager Manifest Creator](https://github.com/microsoft/winget-create), the [YAMLCreate](#using-the-yamlcreateps1) PowerShell script, or you can craft a manifest manually following our [authoring guidelines](AUTHORING_MANIFESTS.md).
 
 >Note: Only one manifest may be submitted per PR.
 
