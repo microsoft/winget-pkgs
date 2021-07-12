@@ -36,10 +36,11 @@ All good? Then proceed!
 
 **Publisher**:
 
-**Publisher Url**
+**Publisher Url**:
 
-**Package Url**
 **Package Name**:
+
+**Package Url**:
 
 **Description**:
 
