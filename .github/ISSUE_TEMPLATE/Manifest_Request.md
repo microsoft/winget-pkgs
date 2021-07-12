@@ -36,6 +36,9 @@ All good? Then proceed!
 
 **Publisher**:
 
+**Publisher Url**
+
+**Package Url**
 **Package Name**:
 
 **Description**:
