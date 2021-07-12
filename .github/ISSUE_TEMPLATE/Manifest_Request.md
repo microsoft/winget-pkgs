@@ -2,7 +2,7 @@
 name: "Package Request/Submission 👀"
 about: Suggest a package for submission (this does not mean you have to implement it)
 title: ''
-labels: Help-Wanted
+labels: 'Help-Wanted, Package-Request'
 assignees: ''
 
 ---
