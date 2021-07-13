@@ -192,11 +192,12 @@ Function Read-WinGet-InstallerValues {
         $InstallerUrl = Read-Host -Prompt 'Url' | TrimString
     }
 
-    while ([string]::IsNullOrWhiteSpace($SaveOption)) {
-        Write-Host
-        Write-Host -ForegroundColor 'Yellow' -Object "Do you want to save the files to the Temp folder?"
-        $SaveOption = Read-Host -Prompt 'y or n' | TrimString
-    }
+    $title   = 'Save to disk?'
+    $msg     = 'Do you want to save the files to the Temp folder?'
+    $options = '&Yes', '&No'
+    $default = 1  # 0=Yes, 1=No
+
+    $SaveOption = $Host.UI.PromptForChoice($title, $msg, $options, $default)
 
     $start_time = Get-Date
     Write-Host $NewLine
@@ -217,7 +218,7 @@ Function Read-WinGet-InstallerValues {
         $InstallerSha256 = (Get-FileHash -Path $dest -Algorithm SHA256).Hash
         if ($PSVersion -eq '5') {$FileInformation = Get-AppLockerFileInformation -Path $dest | Select-Object -ExpandProperty Publisher}
         if ($PSVersion -eq '5') {$MSIProductCode = $FileInformation.BinaryName}
-        if ($SaveOption -eq 'n') {Remove-Item -Path $dest}
+        if ($SaveOption -eq '1') {Remove-Item -Path $dest}
     }
 
     while ($architecture -notin @('x86', 'x64', 'arm', 'arm64', 'neutral')) {
@@ -235,31 +236,31 @@ Function Read-WinGet-InstallerValues {
     if ($InstallerType -ieq 'exe') {
         while ([string]::IsNullOrWhiteSpace($Silent) -or ([string]::IsNullOrWhiteSpace($SilentWithProgress))) {
             Write-Host
-            Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the silent install switch. For example: /s, -verysilent /qn'
+            Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the silent install switch. For example: /S, -verysilent, /qn, --silent, /exenoui'
             $Silent = Read-Host -Prompt 'Silent switch' | TrimString
 
             Write-Host
-            Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the silent with progress install switch. For example: /s, -silent /qb'
+            Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the silent with progress install switch. For example: /S, -silent, /qb, /exebasicui'
             $SilentWithProgress = Read-Host -Prompt 'Silent with progress switch' | TrimString
 
             do {
                 Write-Host
-                Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter any custom switches for the installer. For example: -norestart'
+                Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter any custom switches for the installer. For example: /norestart, -norestart'
                 $Custom = Read-Host -Prompt 'Custom Switch' | TrimString
             } while ($Custom.Length -gt '2048')
         }
     } else {
         do {
             Write-Host
-            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the silent install switch. For example: /s, -verysilent /qn'
+            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the silent install switch. For example: /S, -verysilent, /qn, --silent'
             $Silent = Read-Host -Prompt 'Silent' | TrimString
 
             Write-Host
-            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the silent with progress install switch. For example: /s, -silent /qb'
+            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the silent with progress install switch. For example: /S, -silent, /qb'
             $SilentWithProgress = Read-Host -Prompt 'SilentWithProgress' | TrimString
 
             Write-Host
-            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter any custom switches for the installer. For example: -norestart'
+            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter any custom switches for the installer. For example: /norestart, -norestart'
             $Custom = Read-Host -Prompt 'CustomSwitch' | TrimString
         } while ($Silent.Length -gt '2048' -or $SilentWithProgress.Lenth -gt '512' -or $Custom.Length -gt '2048')
     }
@@ -278,19 +279,27 @@ Function Read-WinGet-InstallerValues {
         $ProductCode = Read-Host -Prompt 'ProductCode' | TrimString
     } while (-not [string]::IsNullOrWhiteSpace($ProductCode) -and ($ProductCode.Length -lt 1 -or $ProductCode.Length -gt 255))
 
-    do {
-        Write-Host
-        Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the Installer Scope. machine or user'
-        $Scope = Read-Host -Prompt 'Scope' | TrimString
-    } until ([string]::IsNullOrWhiteSpace($Scope) -or ($Scope -eq 'machine' -or $Scope -eq 'user'))
+    $title   = 'Scope'
+    $msg     = '[Optional] Enter the Installer Scope.'
+    $options = '&Machine', '&User', '&No idea'
+    $default = 2  # 0=machine, 1=user, #2=blank
 
-    do {
-        Write-Host
-        Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the upgrade method. install or uninstallPrevious'
-        $UpgradeBehavior = Read-Host -Prompt 'UpgradeBehavior' | TrimString
-    } until ([string]::IsNullOrWhiteSpace($UpgradeBehavior) -or ($UpgradeBehavior -eq 'install' -or $UpgradeBehavior -eq 'uninstallPrevious'))
-    if ([string]::IsNullOrWhiteSpace($UpgradeBehavior)) {
-        $UpgradeBehavior = 'install'
+    $ScopeOption = $Host.UI.PromptForChoice($title, $msg, $options, $default)
+    Switch ($ScopeOption) {
+        '0' {$Scope = 'machine'}
+        '1' {$Scope = 'user'}
+        '2' {$Scope = ''}
+    }
+
+    $title   = 'UpgradeBehavior'
+    $msg     = '[Optional] Enter the UpgradeBehavior.'
+    $options = '&install', '&uninstallPrevious'
+    $default = 0  # 0=install, 1=uninstallPrevious
+
+    $UpgradeBehaviorOption = $Host.UI.PromptForChoice($title, $msg, $options, $default)
+    Switch ($UpgradeBehaviorOption) {
+        '0' {$UpgradeBehavior = 'install'}
+        '1' {$UpgradeBehavior = 'uninstallPrevious'}
     }
 
     $Installer += "- InstallerLocale: $InstallerLocale`n"
@@ -315,13 +324,14 @@ Function Read-WinGet-InstallerValues {
         }
     }
 
-    do {
-        Write-Host
-        Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Do you want to create another installer?'
-        $AnotherInstaller = Read-Host -Prompt 'y or n' | TrimString
-    } while ([string]::IsNullOrWhiteSpace($AnotherInstaller)) 
+    $title   = 'Another Installer'
+    $msg     = '[Optional] Do you want to create another installer?'
+    $options = '&Yes', '&No'
+    $default = 1  # 0=Yes, 1=No
 
-    if ($AnotherInstaller -eq 'y') {
+    $AnotherInstaller = $Host.UI.PromptForChoice($title, $msg, $options, $default)
+
+    if ($AnotherInstaller -eq '0') {
         Read-WinGet-InstallerValues
     }
 }
@@ -406,13 +416,13 @@ Function Read-WinGet-InstallerManifest {
     if ([string]::IsNullOrWhiteSpace($InstallModes)) {
         do {
             Write-Host
-            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] List of supported installer modes. interactive / silent / silentWithProgress'
+            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] List of supported installer modes. Options: interactive, silent, silentWithProgress'
             $script:InstallModes = Read-Host -Prompt 'InstallModes' | TrimString
         } while (($InstallModes -split ", ").Count -gt '3')
     } else {
         do {
             Write-Host
-            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] List of supported installer modes. interactive / silent / silentWithProgress'
+            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] List of supported installer modes. Options: interactive, silent, silentWithProgress'
             Write-Host -ForegroundColor 'DarkGray' "Old Variable: $InstallModes"
             $NewInstallModes = Read-Host -Prompt 'InstallModes' | TrimString
     
@@ -586,13 +596,13 @@ Function Read-WinGet-LocaleManifest {
     if ([string]::IsNullOrWhiteSpace($License)) {
         while ([string]::IsNullOrWhiteSpace($License) -or $License.Length -gt 512) {
             Write-Host
-            Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the application License. For example: MIT, GPL, Freeware, Proprietary or Copyright (c) Microsoft Corporation'
+            Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the application License. For example: MIT, GPL, Freeware, Proprietary'
             $script:License = Read-Host -Prompt 'License' | TrimString
         }
     } else {
         do {
             Write-Host
-            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the application License. For example: MIT, GPL, Freeware, Proprietary or Copyright (c) Microsoft Corporation'
+            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the application License. For example: MIT, GPL, Freeware, Proprietary'
             Write-Host -ForegroundColor 'DarkGray' "Old Variable: $License"
             $NewLicense = Read-Host -Prompt 'License' | TrimString
     
@@ -624,13 +634,13 @@ Function Read-WinGet-LocaleManifest {
     if ([string]::IsNullOrWhiteSpace($Copyright)) {
         do {
             Write-Host
-            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the application Copyright.'
+            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the application Copyright. For example: Copyright (c) Microsoft Corporation'
             $script:Copyright = Read-Host -Prompt 'Copyright' | TrimString
         } while (-not [string]::IsNullOrWhiteSpace($Copyright) -and ($Copyright.Length -lt 5 -or $Copyright.Length -gt 512))
     } else {
         do {
             Write-Host
-            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the application Copyright.'
+            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the application Copyright. For example: Copyright (c) Microsoft Corporation'
             Write-Host -ForegroundColor 'DarkGray' "Old Variable: $Copyright"
             $NewCopyright = Read-Host -Prompt 'Copyright' | TrimString
     
