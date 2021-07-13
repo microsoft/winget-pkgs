@@ -25,9 +25,6 @@ To help author manifest files, we have provided a YAMLCreate.ps1 [powershell scr
 
 >Note: We recommend running the script in the location where you want to produce the manifest file.  For example: `manifests\<p>\<publisher>\<package>\`.  After successful completion, it will produce the YAML files.
 
-### Using Windows Package Manager YAML Generator
-If you prefer to use a GUI to generate YAML files, you can use the **Windows Package Manager YAML Generator**. It is available as an app [in the Microsoft Store](https://www.microsoft.com/p/windows-package-manager-yaml-generator/9p3n60fs22k5) and the code is also available [on GitHub](https://github.com/ptorr-msft/WinGetYamlGenerator).
-
 ## Test your manifest
 Now that you have authored your manifest, you should make sure it works as expected.
 
