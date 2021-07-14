@@ -34,7 +34,6 @@ filter TrimString {
 $ToNatural = { [regex]::Replace($_, '\d+', { $args[0].Value.PadLeft(20) }) }
 
 Function Show-OptionMenu {
-    while ([string]::IsNullOrWhiteSpace($OptionMenu)) {
         Clear-Host
         Write-Host -ForegroundColor 'Cyan' -Object 'Select Mode'
         Write-Host -ForegroundColor 'DarkCyan' -NoNewline "`n["; Write-Host -NoNewline '1'; Write-Host -ForegroundColor DarkCyan -NoNewline "]"; `
@@ -45,19 +44,35 @@ Function Show-OptionMenu {
             Write-Host -ForegroundColor 'DarkCyan' -Object ' New Locale'
         Write-Host -ForegroundColor 'DarkCyan' -NoNewline "`n["; Write-Host -NoNewline 'q'; Write-Host -ForegroundColor DarkCyan -NoNewline "]"; `
             Write-Host -ForegroundColor 'Red' -Object ' Any key to quit'
-        $OptionMenu = Read-Host "`nSelection"
-        switch ($OptionMenu) {
+        Write-Host -ForegroundColor 'DarkCyan' -NoNewline "`n"; `
+            Write-Host -ForegroundColor 'White' -NoNewline "Selection: "
+
+        $Keys = @{
+            #Map individual keys to their respective switch
+            [ConsoleKey]::D1 = '1';
+            [ConsoleKey]::D2 = '2';
+            [ConsoleKey]::D3 = '3';
+            [ConsoleKey]::NumPad1 = '1';
+            [ConsoleKey]::NumPad2 = '2';
+            [ConsoleKey]::NumPad3 = '3';
+        }
+
+        do
+        {
+            $keyInfo = [Console]::ReadKey($false)
+        } until ($keyInfo.Key)
+
+        switch ($Keys[$keyInfo.Key]) {
             '1' {$script:Option = 'New'}
             '2' {$script:Option = 'Update'}
             '3' {$script:Option = 'NewLocale'}
             default {exit}
         }
-    }
 }
 
 Function Read-WinGet-MandatoryInfo {
     while ($PackageIdentifier.Length -lt 4 -or $ID.Length -gt 255) {
-        Write-Host
+        Write-Host "`n"
         Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the Package Identifier, in the following format <Publisher shortname.Application shortname>. For example: Microsoft.Excel'
         $script:PackageIdentifier = Read-Host -Prompt 'PackageIdentifier' | TrimString
         $PackageIdentifierFolder = $PackageIdentifier.Replace('.','\')
