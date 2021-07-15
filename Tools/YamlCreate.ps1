@@ -33,19 +33,30 @@ filter TrimString {
 
 $ToNatural = { [regex]::Replace($_, '\d+', { $args[0].Value.PadLeft(20) }) }
 
+Function Write-Colors {
+    Param
+    (
+         [Parameter(Mandatory=$true, Position=0)]
+         [string[]] $TextStrings,
+         [Parameter(Mandatory=$true, Position=1)]
+         [string[]] $Colors
+    )
+    If ($TextStrings.Count -ne $Colors.Count) { Throw "Invalid Function Parameters. Arguments must be of equal length"}
+    $_index = 0
+    Foreach ($String in $TextStrings){
+        Write-Host -ForegroundColor $Colors[$_index] -NoNewline $String
+        $_index++
+    }
+}
+
 Function Show-OptionMenu {
         Clear-Host
-        Write-Host -ForegroundColor 'Cyan' -Object 'Select Mode'
-        Write-Host -ForegroundColor 'DarkCyan' -NoNewline "`n["; Write-Host -NoNewline '1'; Write-Host -ForegroundColor DarkCyan -NoNewline "]"; `
-            Write-Host -ForegroundColor 'DarkCyan' -Object ' New Manifest'
-        Write-Host -ForegroundColor 'DarkCyan' -NoNewline "`n["; Write-Host -NoNewline '2'; Write-Host -ForegroundColor DarkCyan -NoNewline "]"; `
-            Write-Host -ForegroundColor 'DarkCyan' -Object ' Update Manifest'
-        Write-Host -ForegroundColor 'DarkCyan' -NoNewline "`n["; Write-Host -NoNewline '3'; Write-Host -ForegroundColor DarkCyan -NoNewline "]"; `
-            Write-Host -ForegroundColor 'DarkCyan' -Object ' New Locale'
-        Write-Host -ForegroundColor 'DarkCyan' -NoNewline "`n["; Write-Host -NoNewline 'q'; Write-Host -ForegroundColor DarkCyan -NoNewline "]"; `
-            Write-Host -ForegroundColor 'Red' -Object ' Any key to quit'
-        Write-Host -ForegroundColor 'DarkCyan' -NoNewline "`n"; `
-            Write-Host -ForegroundColor 'White' -NoNewline "Selection: "
+        Write-Host -ForegroundColor 'Cyan' "Select Mode"
+        Write-Colors "`n[","1","] New Manifest`n" 'DarkCyan','White','DarkCyan'
+        Write-Colors "`n[","2","] Update Manifest`n" 'DarkCyan','White','DarkCyan'
+        Write-Colors "`n[","3","] New Locale`n" 'DarkCyan','White','DarkCyan'
+        Write-Colors "`n[","q","]"," Any key to quit`n" 'DarkCyan','White','DarkCyan','Red'
+        Write-Colors "`nSelection: " 'White'
 
         $Keys = @{
             #Map individual keys to their respective switch
@@ -66,7 +77,7 @@ Function Show-OptionMenu {
             '1' {$script:Option = 'New'}
             '2' {$script:Option = 'Update'}
             '3' {$script:Option = 'NewLocale'}
-            default {exit}
+            default {Write-Host > exit}
         }
 }
 
