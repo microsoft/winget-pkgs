@@ -8,7 +8,7 @@ Once those steps pass, here are some troubleshooting tips:
 ## Manifest-Validation-Error 
 Manifest validation errors indicate that there is a problem with the manifest file.  Many of the issues can be caught before submitting your PR, if you validated the manifest file before submission:  ```winget validate <manifest>```
 
-For documentation on the manifest specification, please see [manifest](https://docs.microsoft.com/windows/package-manager/package/manifest.md)
+For documentation on the manifest specification, please see the [manifest schema](/doc/manifest/schema)
 
 Here are some common mistakes not discovered by the winget validater.
 1) Make sure the publisher folder and application name folder match the Id.  
