@@ -46,12 +46,6 @@ else {
     }
 }
 
-if ($UseYamlParser) {
-    Write-Host "Using Yaml Parser"
-} else {
-    Write-Host "Not using Yaml Parser"
-}
-
 $Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
 
 filter TrimString {
@@ -1211,15 +1205,17 @@ Switch ($Option) {
         Read-WinGet-InstallerManifest
         New-Variable -Name "PackageLocale" -Value "en-US" -Scope "Script" -Force
         Read-WinGet-LocaleManifest
-        Write-WinGet-InstallerManifest
         If ($UseYamlParser) {
+            Write-WinGet-InstallerManifest-Yaml
             Write-WinGet-VersionManifest-Yaml
             Write-WinGet-LocaleManifest-Yaml
         } Else {
+            Write-WinGet-InstallerManifest
             Write-WinGet-VersionManifest
             Write-WinGet-LocaleManifest
         }
-        if (Get-Command "winget.exe" -ErrorAction SilentlyContinue) {winget validate $AppFolder}
+        Test-Manifest
+        Submit-Manifest
     }
 
     'Update' {
