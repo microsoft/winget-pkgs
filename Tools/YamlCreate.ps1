@@ -1,6 +1,6 @@
 #Requires -Version 5
 $PSVersion = (Get-Host).Version.Major
-$ScriptHeader = '# Created using YamlCreate.ps1 v1.1.7'
+$ScriptHeader = '# Created with YamlCreate.ps1 v1.1.5'
 
 <#
 .SYNOPSIS
@@ -835,7 +835,7 @@ Function Write-WinGet-VersionManifest {
 
 
 $VersionManifest = @(
-"$ScriptHeader"
+"$ScriptHeader" + " using RAW parsing"
 '# yaml-language-server: $schema=https://aka.ms/winget-manifest.version.1.0.0.schema.json'
 ''
 "PackageIdentifier: $PackageIdentifier"
@@ -864,7 +864,7 @@ Write-Host "Yaml file created: $VersionManifestPath"
 
 Function Write-WinGet-InstallerManifest {
 $InstallerManifest = @(
-"$ScriptHeader"
+"$ScriptHeader" + " using RAW parsing"
 '# yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.0.0.schema.json'
 ''
 "PackageIdentifier: $PackageIdentifier"
@@ -906,7 +906,7 @@ Write-Host "Yaml file created: $InstallerManifestPath"
 
 Function Write-WinGet-LocaleManifest {
 $LocaleManifest = @(
-"$ScriptHeader"
+"$ScriptHeader" + " using RAW parsing"
 if ($PackageLocale -eq 'en-US') {'# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.0.0.schema.json'}else{'# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.0.0.schema.json'}
 ''
 "PackageIdentifier: $PackageIdentifier"
@@ -1037,50 +1037,79 @@ Function Submit-Manifest {
 }
 
 Show-OptionMenu
+Function AddYamlListParameter{
+    Param
+    (
+         [Parameter(Mandatory=$true, Position=0)]
+         [PSCustomObject] $Object,
+         [Parameter(Mandatory=$true, Position=1)]
+         [string] $Parameter,
+         [Parameter(Mandatory=$true, Position=2)]
+         [string] $Values
+    )
+    $_Values = @()
+    Foreach ($Value in $Values.Split(",").Trim()){
+        $_Values += $Value
+    }
+    $Object[$Parameter] = $_Values
+}
+
+Function Write-WinGet-VersionManifest-Yaml {
+    [PSCustomObject]$VersionManifest = [ordered]@{}
+    $VersionManifest["PackageIdentifier"] = $PackageIdentifier
+    $VersionManifest["PackageVersion"] = $PackageVersion
+    $VersionManifest["DefaultLocale"] = "en-US"
+    $VersionManifest["ManifestType"] = "version"
+    $VersionManifest["ManifestVersion"] = "1.0.0"
+    # New-Item -ItemType "Directory" -Force -Path $AppFolder | Out-Null
+    
+    # $VersionManifestPath = $AppFolder + "\$PackageIdentifier" + '.yaml'
+    
+    # $VersionManifest | ForEach-Object {
+    #     if ($_.Split(":").Trim()[1] -eq '') {
+    #         $_.Insert(0,"#")
+    #     } else {
+    #         $_
+    #     }
+    # } | Out-File $VersionManifestPath -Encoding 'UTF8'
+
+    # $MyRawString = Get-Content -Raw $VersionManifestPath
+    # [System.IO.File]::WriteAllLines($VersionManifestPath, $MyRawString, $Utf8NoBomEncoding)
+    
+
+    $ManifestTestingPath = $PSScriptRoot+ "\Test" + '.yaml'
+    $ScriptHeader + " using YAML parsing`n# yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.0.0.schema.json`n" > $ManifestTestingPath
+    ConvertTo-Yaml $VersionManifest >> $ManifestTestingPath
+    
+    # Write-Host 
+    # Write-Host "Yaml file created: $VersionManifestPath"
+}
 Function Write-WinGet-InstallerManifest-Yaml {
-    $PackageIdentifier = "Test.Value"
-    [PSCustomObject]$InstallerManifest = [ordered]@{
-        "PackageIdentifier" = $PackageIdentifier
-        "PackageVersion" = $PackageVersion
-        
-        "ManifestType" = "installer"
-        "ManifestVersion" = "1.0.0"
+    [PSCustomObject]$InstallerManifest = [ordered]@{}
+    
+    $InstallerManifest["PackageIdentifier"] = $PackageIdentifier
+    $InstallerManifest["PackageVersion"] = $PackageVersion
+    $InstallerManifest["MinimumOSVersion"] = If ($MinimumOSVersion) {$MinimumOSVersion} Else {"10.0.0.0"}
+
+    $_ListSections = [ordered]@{
+        "FileExtensions" = $FileExtensions
+        "Protocols" = $Protocols
+        "Commands" = $Commands
+        "InstallerSuccessCodes" = $InstallerSuccessCodes
+        "InstallModes" = $InstallModes
     }
-    $InstallerManifest["TestArray"] = @{
-        "Value1" = @(
-            "ValueA"
-            "ValueB"
-        );
-        "Value2" = @(
-            "ValueC"
-            "ValueD"
-        )
+
+    foreach ($Section in $_ListSections.GetEnumerator()) {
+        If ($Section.Value) {AddYamlListParameter $InstallerManifest $Section.Name $Section.Value}
     }
-    $InstallerManifest["Test"] = "This"
-    ConvertTo-Yaml $InstallerManifest | Write-Host
-    # $InstallerManifest = @(
-    # "$ScriptHeader"
-    # '# yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.0.0.schema.json'
-    # ''
-    # "PackageIdentifier: $PackageIdentifier"
-    # "PackageVersion: $PackageVersion"
-    # if ($MinimumOSVersion) {"MinimumOSVersion: $MinimumOSVersion"}else{"MinimumOSVersion: 10.0.0.0"}
-    # if ($FileExtensions) {"FileExtensions:"
-    # Foreach ($FileExtension in $FileExtensions.Split(",").Trim()) {"- $FileExtension" }}
-    # if ($Protocols) {"Protocols:"
-    # Foreach ($Protocol in $Protocols.Split(",").Trim()) {"- $Protocol" }}
-    # if ($Commands) {"Commands:"
-    # Foreach ($Command in $Commands.Split(",").Trim()) {"- $Command" }}
-    # if ($InstallerSuccessCodes) {"InstallerSuccessCodes:"
-    # Foreach ($InstallerSuccessCode in $InstallerSuccessCodes.Split(",").Trim()) {"- $InstallerSuccessCode" }}
-    # if ($InstallModes) {"InstallModes:"
-    # Foreach ($InstallMode in $InstallModes.Split(",").Trim()) {"- $InstallMode" }}
+
     # "Installers:"
     # $Installers.TrimEnd()
-    # "ManifestType: installer"
-    # "ManifestVersion: 1.0.0"
-    # )
-    
+
+    $InstallerManifest["ManifestType"] = "Installer"
+    $InstallerManifest["ManifestVersion"] = "1.0.0"
+    ConvertTo-Yaml $InstallerManifest | Write-Host
+   
     # New-Item -ItemType "Directory" -Force -Path $AppFolder | Out-Null
     
     # $InstallerManifestPath = $AppFolder + "\$PackageIdentifier" + '.installer' + '.yaml'
@@ -1095,12 +1124,16 @@ Function Write-WinGet-InstallerManifest-Yaml {
     # $MyRawString = Get-Content -Raw $InstallerManifestPath
     # [System.IO.File]::WriteAllLines($InstallerManifestPath, $MyRawString, $Utf8NoBomEncoding)
     
+    $ManifestTestingPath = $PSScriptRoot+ "\Test" + '.yaml'
+    $ScriptHeader + " using YAML parsing`n# yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.0.0.schema.json`n" > $ManifestTestingPath
+    ConvertTo-Yaml $VersionManifest >> $ManifestTestingPath
+
     # Write-Host 
     # Write-Host "Yaml file created: $InstallerManifestPath"
     }
 
-# Show-OptionMenu
-Write-WinGet-InstallerManifest-Yaml
+Show-OptionMenu
+# Write-WinGet-VersionManifest-Yaml
 
 Switch ($Option) {
     'New' {
