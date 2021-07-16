@@ -85,11 +85,11 @@ Function Read-PreviousWinGet-Manifest {
             Write-Host -ForegroundColor 'DarkYellow' -Object "Last Version: $LastVersion"
             $script:OldManifests = Get-ChildItem -Path "$AppFolder\..\$LastVersion"
 
-            if (-not ($OldManifests.Name -like "$PackageIdentifier.*.yaml")) {
+            if (-not ($OldManifests.Name -like "$PackageIdentifier*.yaml")) {
                 while ([string]::IsNullOrWhiteSpace($PromptVersion)) {
                     Write-Host
-                    Write-Host -ForegroundColor 'Red' -Object 'Could not find required manifests, input version containing required manifests'
-                    $PromptVersion = Read-Host -Prompt 'Version' | TrimString
+                    Write-Host -ForegroundColor 'Red' -Object 'Could not find required manifests, input a version containing required manifests'
+                    $PromptVersion = Read-Host -Prompt 'Previous Version' | TrimString
                     $script:OldManifests = Get-ChildItem -Path "$AppFolder\..\$PromptVersion"
                 }
             }
