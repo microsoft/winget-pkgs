@@ -452,7 +452,6 @@ Function Read-WinGet-InstallerValues {
         }
         #ProductCode goes here
         AddYamlParameter $_Installer "UpgradeBehavior" $UpgradeBehavior
-    }
 
     Write-Host
     Write-Host
