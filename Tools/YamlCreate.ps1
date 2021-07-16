@@ -77,7 +77,7 @@ Function Show-OptionMenu {
             '1' {$script:Option = 'New'}
             '2' {$script:Option = 'Update'}
             '3' {$script:Option = 'NewLocale'}
-            default {Write-Host > exit}
+            default {exit}
         }
 }
 
