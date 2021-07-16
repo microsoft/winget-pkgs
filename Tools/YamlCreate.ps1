@@ -28,8 +28,9 @@ $ManifestVersion = '1.0.0'
 
 <#
 TO-DO:
-    - Add writing installer using YAML parsing
-    - Add reading installers using YAML parsing
+    - Add writing Product Code to installer manifest
+    - Add/verify logic to handle null $Scope
+    - Add reading from manifests using YAML parsing
     - Ensure licensing for powershell-yaml is met
 #>
 
@@ -396,26 +397,61 @@ Function Read-WinGet-InstallerValues {
         default {$UpgradeBehavior = 'install'}
     }
     #TO-DO Add support for YamlParsing mode
-    $Installer += "- InstallerLocale: $InstallerLocale`n"
-    $Installer += "  Architecture: $Architecture`n"
-    $Installer += "  InstallerType: $InstallerType`n"
-    $Installer += "  Scope: $Scope`n"
-    $Installer += "  InstallerUrl: $InstallerUrl`n"
-    $Installer += "  InstallerSha256: $InstallerSha256`n"
-    if ($Silent -or $Custom) {$Installer += "  InstallerSwitches:`n"}
-    if ($Custom) {$Installer += "    Custom: $Custom`n"}
-    if ($Silent) {$Installer += "    Silent: $Silent`n"
-    $Installer += "    SilentWithProgress: $SilentWithProgress`n"}
-    if (-not [string]::IsNullOrWhiteSpace($ProductCode) -or $InstallerType -eq 'msi') {$Installer += "  ProductCode: " }
-    if (-not [string]::IsNullOrWhiteSpace($ProductCode) -or $InstallerType -eq 'msi') {if (-not [string]::IsNullOrWhiteSpace($ProductCode)) {$Installer += "`'$ProductCode`'`n"}else{$Installer += "`n"}}
-    $Installer += "  UpgradeBehavior: $UpgradeBehavior`n"
+    if (!$UseYamlParser) {
+        $Installer += "- InstallerLocale: $InstallerLocale`n"
+        $Installer += "  Architecture: $Architecture`n"
+        $Installer += "  InstallerType: $InstallerType`n"
+        $Installer += "  Scope: $Scope`n"
+        $Installer += "  InstallerUrl: $InstallerUrl`n"
+        $Installer += "  InstallerSha256: $InstallerSha256`n"
+        if ($Silent -or $Custom) {$Installer += "  InstallerSwitches:`n"}
+        if ($Custom) {$Installer += "    Custom: $Custom`n"}
+        if ($Silent) {$Installer += "    Silent: $Silent`n"
+        $Installer += "    SilentWithProgress: $SilentWithProgress`n"}
+        if (-not [string]::IsNullOrWhiteSpace($ProductCode) -or $InstallerType -eq 'msi') {$Installer += "  ProductCode: " }
+        if (-not [string]::IsNullOrWhiteSpace($ProductCode) -or $InstallerType -eq 'msi') {if (-not [string]::IsNullOrWhiteSpace($ProductCode)) {$Installer += "`'$ProductCode`'`n"}else{$Installer += "`n"}}
+        $Installer += "  UpgradeBehavior: $UpgradeBehavior`n"
 
-    $Installer.TrimEnd().Split("`n") | ForEach-Object {
-        if ($_.Split(":").Trim()[1] -eq '' -and $_ -notin @("  InstallerSwitches:")) {
-            $script:Installers += $_.Insert(0,"#") + "`n"
-        } else {
-            $script:Installers += $_ + "`n"
+        $Installer.TrimEnd().Split("`n") | ForEach-Object {
+            if ($_.Split(":").Trim()[1] -eq '' -and $_ -notin @("  InstallerSwitches:")) {
+                $script:Installers += $_.Insert(0,"#") + "`n"
+            } else {
+                $script:Installers += $_ + "`n"
+            }
         }
+    } else {
+        if (!$script:Installers) {
+            $script:Installers = @()
+        }
+        $_Installer = [ordered] @{}
+
+        $_InstallerSingletons = [ordered] @{
+            "InstallerLocale" = $InstallerLocale
+            "Architecture" = $Architecture
+            "InstallerType" = $InstallerType
+            "Scope" = $Scope
+            "InstallerUrl" = $InstallerUrl
+            "InstallerSha256" = $InstallerSha256
+        }
+        foreach ($_Item in $_InstallerSingletons.GetEnumerator()) {
+            If ($_Item.Value) {AddYamlParameter $_Installer $_Item.Name $_Item.Value}
+        }
+
+        If ($Silent -or $SilentWithProgress -or $Custom){
+            $_InstallerSwitches = [ordered]@{}
+            $_Switches = [ordered] @{
+                "Custom" = $Custom
+                "Silent" = $Silent
+                "SilentWithProgress" = $SilentWithProgress
+            }
+            
+            foreach ($_Item in $_Switches.GetEnumerator()) {
+                If ($_Item.Value) {AddYamlParameter $_InstallerSwitches $_Item.Name $_Item.Value}
+            }
+            $_Installer["InstallerSwitches"] = $_InstallerSwitches
+        }
+        #ProductCode goes here
+        AddYamlParameter $_Installer "UpgradeBehavior" $UpgradeBehavior
     }
 
     Write-Host
@@ -1118,12 +1154,10 @@ Function Write-WinGet-InstallerManifest-Yaml {
         If ($Section.Value) {AddYamlListParameter $InstallerManifest $Section.Name $Section.Value}
     }
 
-    # "Installers:"
-    # $Installers.TrimEnd()
+    $InstallerManifest["Installers"] = $script:Installers
 
-    AddYamlParameter $InstallerManifest "ManifestType" "Installer"
+    AddYamlParameter $InstallerManifest "ManifestType" "installer"
     AddYamlParameter $InstallerManifest "ManifestVersion" $ManifestVersion
-    ConvertTo-Yaml $InstallerManifest | Write-Host
    
     New-Item -ItemType "Directory" -Force -Path $AppFolder | Out-Null
     $InstallerManifestPath = $AppFolder + "\$PackageIdentifier" + '.installer' + '.yaml'
@@ -1137,7 +1171,7 @@ Function Write-WinGet-InstallerManifest-Yaml {
     # } | Out-File $InstallerManifestPath -Encoding 'UTF8'
     
     $ScriptHeader + " using YAML parsing`n# yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.0.0.schema.json`n" > $InstallerManifestPath
-    ConvertTo-Yaml $VersionManifest >> $InstallerManifestPath
+    ConvertTo-Yaml $InstallerManifest >> $InstallerManifestPath
 
     Write-Host 
     Write-Host "Yaml file created: $InstallerManifestPath"
