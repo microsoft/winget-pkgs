@@ -25,6 +25,25 @@ $ScriptHeader = '# Created using YamlCreate.ps1 v1.1.7'
     https://github.com/microsoft/winget-pkgs/blob/master/Tools/YamlCreate.ps1
 #>
 
+if (Get-Module -ListAvailable -Name powershell-yaml) {
+    $UseYamlParser = $true
+} 
+else {
+    try {
+        Install-Module -Name powershell-yaml -Force -Repository PSGallery -Scope CurrentUser
+        $UseYamlParser = $true
+    } 
+    catch {
+        $UseYamlParser = $false
+    }
+}
+
+if ($UseYamlParser) {
+    Write-Host "Using Yaml Parser"
+} else {
+    Write-Host "Not using Yaml Parser"
+}
+
 $Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
 
 filter TrimString {
@@ -813,6 +832,8 @@ Function Read-WinGet-LocaleManifest {
 }
 
 Function Write-WinGet-VersionManifest {
+
+
 $VersionManifest = @(
 "$ScriptHeader"
 '# yaml-language-server: $schema=https://aka.ms/winget-manifest.version.1.0.0.schema.json'
@@ -1016,6 +1037,70 @@ Function Submit-Manifest {
 }
 
 Show-OptionMenu
+Function Write-WinGet-InstallerManifest-Yaml {
+    $PackageIdentifier = "Test.Value"
+    [PSCustomObject]$InstallerManifest = @{
+        "PackageIdentifier" = $PackageIdentifier
+        "PackageVersion" = $PackageVersion
+        
+        "ManifestType" = "installer"
+        "ManifestVersion" = "1.0.0"
+    }
+    $InstallerManifest["TestArray"] = @{
+        "Value1" = @(
+            "ValueA"
+            "ValueB"
+        );
+        "Value2" = @(
+            "ValueC"
+            "ValueD"
+        )
+    }
+    $InstallerManifest["Test"] = "This"
+    ConvertTo-Yaml $InstallerManifest | Write-Host
+    # $InstallerManifest = @(
+    # "$ScriptHeader"
+    # '# yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.0.0.schema.json'
+    # ''
+    # "PackageIdentifier: $PackageIdentifier"
+    # "PackageVersion: $PackageVersion"
+    # if ($MinimumOSVersion) {"MinimumOSVersion: $MinimumOSVersion"}else{"MinimumOSVersion: 10.0.0.0"}
+    # if ($FileExtensions) {"FileExtensions:"
+    # Foreach ($FileExtension in $FileExtensions.Split(",").Trim()) {"- $FileExtension" }}
+    # if ($Protocols) {"Protocols:"
+    # Foreach ($Protocol in $Protocols.Split(",").Trim()) {"- $Protocol" }}
+    # if ($Commands) {"Commands:"
+    # Foreach ($Command in $Commands.Split(",").Trim()) {"- $Command" }}
+    # if ($InstallerSuccessCodes) {"InstallerSuccessCodes:"
+    # Foreach ($InstallerSuccessCode in $InstallerSuccessCodes.Split(",").Trim()) {"- $InstallerSuccessCode" }}
+    # if ($InstallModes) {"InstallModes:"
+    # Foreach ($InstallMode in $InstallModes.Split(",").Trim()) {"- $InstallMode" }}
+    # "Installers:"
+    # $Installers.TrimEnd()
+    # "ManifestType: installer"
+    # "ManifestVersion: 1.0.0"
+    # )
+    
+    # New-Item -ItemType "Directory" -Force -Path $AppFolder | Out-Null
+    
+    # $InstallerManifestPath = $AppFolder + "\$PackageIdentifier" + '.installer' + '.yaml'
+    
+    # $InstallerManifest | ForEach-Object {
+    #     if ($_.Split(":").Trim()[1] -eq '' -and $_ -notin @("FileExtensions:","Protocols:","Commands:","InstallerSuccessCodes:","InstallModes:","Installers:","  InstallerSwitches:")) {
+    #         $_.Insert(0,"#")
+    #     } else {
+    #         $_
+    #     }
+    # } | Out-File $InstallerManifestPath -Encoding 'UTF8'
+    # $MyRawString = Get-Content -Raw $InstallerManifestPath
+    # [System.IO.File]::WriteAllLines($InstallerManifestPath, $MyRawString, $Utf8NoBomEncoding)
+    
+    # Write-Host 
+    # Write-Host "Yaml file created: $InstallerManifestPath"
+    }
+
+# Show-OptionMenu
+Write-WinGet-InstallerManifest-Yaml
 
 Switch ($Option) {
     'New' {
