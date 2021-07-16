@@ -390,9 +390,9 @@ Function Read-WinGet-InstallerValues {
         }
         #ProductCode goes here
         AddYamlParameter $_Installer "UpgradeBehavior" $UpgradeBehavior
-    }
 
-    $script:Installers += $_Installer
+        $script:Installers += $_Installer
+    }
 
     $title   = 'Another Installer'
     $msg     = '[Optional] Do you want to create another installer?'
