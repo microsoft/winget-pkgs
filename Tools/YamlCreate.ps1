@@ -988,7 +988,6 @@ Function Submit-Manifest {
     }
 }
 
-Show-OptionMenu
 Function AddYamlListParameter{
     Param
     (
@@ -1149,9 +1148,7 @@ Function Write-WinGet-LocaleManifest-Yaml {
     Write-Host "Yaml file created: $LocaleManifestPath"
 }
         
-
 Show-OptionMenu
-# Write-WinGet-VersionManifest-Yaml
 
 Switch ($Option) {
     'New' {
