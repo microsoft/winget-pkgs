@@ -872,6 +872,37 @@ Function Test-Manifest {
     }
 }
 
+Function Submit-Manifest {
+    if (Get-Command 'git.exe' -ErrorAction SilentlyContinue) {
+        $title   = 'Submit PR?'
+        $msg     = 'Do you want to submit your PR now?'
+        $options = '&Yes', '&No'
+        $default = 0  # 0=Yes, 1=No
+
+        $PromptSubmit = $Host.UI.PromptForChoice($title, $msg, $options, $default)
+    }
+
+    if ($PromptSubmit -eq '0') {
+        switch ($OptionMenu) {
+            1 {$CommitType = 'New'}
+            2 {$CommitType = 'Update'}
+            3 {$CommitType = 'Locale'}
+        }
+
+        git fetch upstream
+        git checkout -b "$PackageIdentifier-$PackageVersion" FETCH_HEAD
+
+        git add -A
+        git commit -m "$CommitType $PackageIdentifier version $PackageVersion"
+        git push
+
+        if (Get-Command 'gh.exe' -ErrorAction SilentlyContinue) {
+        
+            gh pr create --body-file "$PSScriptRoot\..\.github\PULL_REQUEST_TEMPLATE.md" -f
+        }
+    }
+}
+
 Show-OptionMenu
 
 Switch ($Option) {
@@ -885,6 +916,7 @@ Switch ($Option) {
         Write-WinGet-VersionManifest
         Write-WinGet-LocaleManifest
         Test-Manifest
+        Submit-Manifest
     }
 
     'Update' {
@@ -898,6 +930,7 @@ Switch ($Option) {
         Write-WinGet-VersionManifest
         Write-WinGet-LocaleManifest
         Test-Manifest
+        Submit-Manifest
     }
 
     'NewLocale' {
@@ -906,5 +939,6 @@ Switch ($Option) {
         Read-WinGet-LocaleManifest
         Write-WinGet-LocaleManifest
         if (Get-Command "winget.exe" -ErrorAction SilentlyContinue) {winget validate $AppFolder}
+        Submit-Manifest
     }
 }
