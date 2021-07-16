@@ -845,6 +845,33 @@ Write-Host
 Write-Host "Yaml file created: $LocaleManifestPath"
 }
 
+Function Test-Manifest {
+    if (Get-Command 'winget.exe' -ErrorAction SilentlyContinue) {winget validate $AppFolder}
+
+    if (Get-Command 'WindowsSandbox.exe' -ErrorAction SilentlyContinue) {
+        $title   = 'Sandbox Test'
+        $msg     = '[Recommended] Do you want to test your Manifest in Windows Sandbox?'
+        $options = '&Yes', '&No'
+        $default = 1  # 0=Yes, 1=No
+
+        $SandboxTest = $Host.UI.PromptForChoice($title, $msg, $options, $default)
+
+        if ($SandboxTest -eq '0') {
+            if (Test-Path -Path "$PSScriptRoot\SandboxTest.ps1") {
+                $SandboxScriptPath = (Resolve-Path "$PSScriptRoot\SandboxTest.ps1").Path
+            } else {
+                while ([string]::IsNullOrWhiteSpace($SandboxScriptPath)) {
+                    Write-Host
+                    Write-Host -ForegroundColor 'Green' -Object 'SandboxTest.ps1 not found, input path'
+                    $SandboxScriptPath = Read-Host -Prompt 'SandboxTest.ps1' | TrimString
+                }
+            }
+
+            & $SandboxScriptPath -Manifest $AppFolder
+        }
+    }
+}
+
 Show-OptionMenu
 
 Switch ($Option) {
@@ -857,7 +884,7 @@ Switch ($Option) {
         Write-WinGet-InstallerManifest
         Write-WinGet-VersionManifest
         Write-WinGet-LocaleManifest
-        if (Get-Command "winget.exe" -ErrorAction SilentlyContinue) {winget validate $AppFolder}
+        Test-Manifest
     }
 
     'Update' {
@@ -870,7 +897,7 @@ Switch ($Option) {
         Write-WinGet-InstallerManifest
         Write-WinGet-VersionManifest
         Write-WinGet-LocaleManifest
-        if (Get-Command "winget.exe" -ErrorAction SilentlyContinue) {winget validate $AppFolder}
+        Test-Manifest
     }
 
     'NewLocale' {
