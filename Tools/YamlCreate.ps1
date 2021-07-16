@@ -85,6 +85,15 @@ Function Read-PreviousWinGet-Manifest {
             Write-Host -ForegroundColor 'DarkYellow' -Object "Last Version: $LastVersion"
             $script:OldManifests = Get-ChildItem -Path "$AppFolder\..\$LastVersion"
 
+            if (-not ($OldManifests.Name -like "$PackageIdentifier.*.yaml")) {
+                while ([string]::IsNullOrWhiteSpace($PromptVersion)) {
+                    Write-Host
+                    Write-Host -ForegroundColor 'Red' -Object 'Could not find required manifests, input version containing required manifests'
+                    $PromptVersion = Read-Host -Prompt 'Version' | TrimString
+                    $script:OldManifests = Get-ChildItem -Path "$AppFolder\..\$PromptVersion"
+                }
+            }
+
             if ($OldManifests.Name -eq "$PackageIdentifier.installer.yaml" -and $OldManifests.Name -eq "$PackageIdentifier.locale.en-US.yaml" -and $OldManifests.Name -eq "$PackageIdentifier.yaml") {
                 $script:OldManifestText = Get-Content -Path "$AppFolder\..\$LastVersion\$PackageIdentifier.installer.yaml", "$AppFolder\..\$LastVersion\$PackageIdentifier.locale.en-US.yaml", "$AppFolder\..\$LastVersion\$PackageIdentifier.yaml" -Encoding 'UTF8'
             } elseif ($OldManifests.Name -eq "$PackageIdentifier.yaml") {
@@ -265,11 +274,13 @@ Function Read-WinGet-InstallerValues {
         } while ($Silent.Length -gt '2048' -or $SilentWithProgress.Lenth -gt '512' -or $Custom.Length -gt '2048')
     }
 
-    while ([string]::IsNullOrWhiteSpace($InstallerLocale) -or $InstallerLocale.Length -gt '10') {
+    do {
         Write-Host
-        Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the locale. For example: en-US, en-CA https://docs.microsoft.com/en-us/openspecs/office_standards/ms-oe376/6c085406-a698-4e12-9d4d-c3b0ee3dbc4a'
-        $InstallerLocale = Read-Host -Prompt 'InstallerLocale' | TrimString
-    }
+        Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the installer locale. For example: en-US, en-CA'
+        Write-Host -ForegroundColor 'Blue' -Object 'https://docs.microsoft.com/en-us/openspecs/office_standards/ms-oe376/6c085406-a698-4e12-9d4d-c3b0ee3dbc4a'
+        $ProductCode = Read-Host -Prompt 'InstallerLocale' | TrimString
+    } while (-not [string]::IsNullOrWhiteSpace($InstallerLocale) -and ($InstallerLocale -gt 10))
+    if ([string]::IsNullOrWhiteSpace($InstallerLocale)) {$InstallerLocale = 'en-US'}
 
     do {
         Write-Host
@@ -845,6 +856,73 @@ Write-Host
 Write-Host "Yaml file created: $LocaleManifestPath"
 }
 
+Function Test-Manifest {
+    if (Get-Command 'winget.exe' -ErrorAction SilentlyContinue) {winget validate $AppFolder}
+
+    if (Get-Command 'WindowsSandbox.exe' -ErrorAction SilentlyContinue) {
+        $title   = 'Sandbox Test'
+        $msg     = '[Recommended] Do you want to test your Manifest in Windows Sandbox?'
+        $options = '&Yes', '&No'
+        $default = 0  # 0=Yes, 1=No
+
+        $SandboxTest = $Host.UI.PromptForChoice($title, $msg, $options, $default)
+
+        if ($SandboxTest -eq '0') {
+            if (Test-Path -Path "$PSScriptRoot\SandboxTest.ps1") {
+                $SandboxScriptPath = (Resolve-Path "$PSScriptRoot\SandboxTest.ps1").Path
+            } else {
+                while ([string]::IsNullOrWhiteSpace($SandboxScriptPath)) {
+                    Write-Host
+                    Write-Host -ForegroundColor 'Green' -Object 'SandboxTest.ps1 not found, input path'
+                    $SandboxScriptPath = Read-Host -Prompt 'SandboxTest.ps1' | TrimString
+                }
+            }
+
+            & $SandboxScriptPath -Manifest $AppFolder
+        }
+    }
+}
+
+Function Submit-Manifest {
+    if (Get-Command 'git.exe' -ErrorAction SilentlyContinue) {
+        $title   = 'Submit PR?'
+        $msg     = 'Do you want to submit your PR now?'
+        $options = '&Yes', '&No'
+        $default = 0  # 0=Yes, 1=No
+
+        $PromptSubmit = $Host.UI.PromptForChoice($title, $msg, $options, $default)
+    }
+
+    if ($PromptSubmit -eq '0') {
+        switch ($Option) {
+            'New' {$CommitType = 'New'}
+            'Update' {$CommitType = 'Update'}
+            'NewLocale' {$CommitType = 'Locale'}
+        }
+
+        git fetch upstream
+        git checkout -b "$PackageIdentifier-$PackageVersion" FETCH_HEAD
+
+        git add -A
+        git commit -m "$CommitType : $PackageIdentifier version $PackageVersion"
+        git push
+
+        if (Get-Command 'gh.exe' -ErrorAction SilentlyContinue) {
+        
+            if (Test-Path -Path "$PSScriptRoot\..\.github\PULL_REQUEST_TEMPLATE.md") {
+                gh pr create --body-file "$PSScriptRoot\..\.github\PULL_REQUEST_TEMPLATE.md" -f
+            } else {
+                while ([string]::IsNullOrWhiteSpace($SandboxScriptPath)) {
+                    Write-Host
+                    Write-Host -ForegroundColor 'Green' -Object 'PULL_REQUEST_TEMPLATE.md not found, input path'
+                    $PRTemplate = Read-Host -Prompt 'PR Template' | TrimString
+                }
+                gh pr create --body-file "$PRTemplate" -f
+            }
+        }
+    }
+}
+
 Show-OptionMenu
 
 Switch ($Option) {
@@ -857,7 +935,8 @@ Switch ($Option) {
         Write-WinGet-InstallerManifest
         Write-WinGet-VersionManifest
         Write-WinGet-LocaleManifest
-        if (Get-Command "winget.exe" -ErrorAction SilentlyContinue) {winget validate $AppFolder}
+        Test-Manifest
+        Submit-Manifest
     }
 
     'Update' {
@@ -870,7 +949,8 @@ Switch ($Option) {
         Write-WinGet-InstallerManifest
         Write-WinGet-VersionManifest
         Write-WinGet-LocaleManifest
-        if (Get-Command "winget.exe" -ErrorAction SilentlyContinue) {winget validate $AppFolder}
+        Test-Manifest
+        Submit-Manifest
     }
 
     'NewLocale' {
@@ -879,5 +959,6 @@ Switch ($Option) {
         Read-WinGet-LocaleManifest
         Write-WinGet-LocaleManifest
         if (Get-Command "winget.exe" -ErrorAction SilentlyContinue) {winget validate $AppFolder}
+        Submit-Manifest
     }
 }
