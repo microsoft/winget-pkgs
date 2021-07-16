@@ -46,12 +46,6 @@ else {
     }
 }
 
-if ($UseYamlParser) {
-    Write-Host "Using Yaml Parser"
-} else {
-    Write-Host "Not using Yaml Parser"
-}
-
 $Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
 
 filter TrimString {
@@ -62,7 +56,7 @@ $ToNatural = { [regex]::Replace($_, '\d+', { $args[0].Value.PadLeft(20) }) }
 
 Function Show-OptionMenu {
     while ([string]::IsNullOrWhiteSpace($OptionMenu)) {
-        # Clear-Host
+        Clear-Host
         Write-Host -ForegroundColor 'Cyan' -Object 'Select Mode'
         Write-Host -ForegroundColor 'DarkCyan' -NoNewline "`n["; Write-Host -NoNewline '1'; Write-Host -ForegroundColor DarkCyan -NoNewline "]"; `
             Write-Host -ForegroundColor 'DarkCyan' -Object ' New Manifest'
@@ -1119,15 +1113,17 @@ Switch ($Option) {
         Read-WinGet-InstallerManifest
         New-Variable -Name "PackageLocale" -Value "en-US" -Scope "Script" -Force
         Read-WinGet-LocaleManifest
-        Write-WinGet-InstallerManifest
         If ($UseYamlParser) {
+            Write-WinGet-InstallerManifest-Yaml
             Write-WinGet-VersionManifest-Yaml
             Write-WinGet-LocaleManifest-Yaml
         } Else {
+            Write-WinGet-InstallerManifest
             Write-WinGet-VersionManifest
             Write-WinGet-LocaleManifest
         }
-        if (Get-Command "winget.exe" -ErrorAction SilentlyContinue) {winget validate $AppFolder}
+        Test-Manifest
+        Submit-Manifest
     }
 
     'Update' {
