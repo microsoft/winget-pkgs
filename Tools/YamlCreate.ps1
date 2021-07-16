@@ -107,7 +107,8 @@ Function Read-WinGet-MandatoryInfo {
 Function Read-PreviousWinGet-Manifest {
     Switch ($Option) {
         'Update' {
-            $script:LastVersion = Get-ChildItem -Path "$AppFolder\..\" | Sort-Object $ToNatural | Select-Object -Last 1 -ExpandProperty 'Name'
+            $LastVersion = Split-Path (Split-Path (Get-ChildItem -Path "$AppFolder\..\" -Recurse -Depth 1 -File).FullName ) -Leaf | Sort-Object $ToNatural | Select-Object -Last 1
+
             Write-Host -ForegroundColor 'DarkYellow' -Object "Last Version: $LastVersion"
             $script:OldManifests = Get-ChildItem -Path "$AppFolder\..\$LastVersion"
 
@@ -131,37 +132,37 @@ Function Read-PreviousWinGet-Manifest {
             ForEach ($Line in $OldManifestText -ne '') {
                 if ($Line -eq "Tags:") {
                     $regex = '(?ms)Tags:(.+?):'
-                    $FetchTags = [regex]::Matches($OldManifestText,$regex) | foreach {$_.groups[1].value }
+                    $FetchTags = [regex]::Matches($OldManifestText,$regex) | ForEach-Object {$_.groups[1].value }
                     $Tags = $FetchTags.Substring(0, $FetchTags.LastIndexOf(' '))
                     $Tags = $Tags -Split '- '
                     New-Variable -Name "Tags" -Value ($Tags.Trim()[1..17] -join ", ") -Scope Script -Force
                 } elseif ($Line -eq "FileExtensions:") {
                     $regex = '(?ms)FileExtensions:(.+?):'
-                    $FetchFileExtensions = [regex]::Matches($OldManifestText,$regex) | foreach {$_.groups[1].value }
+                    $FetchFileExtensions = [regex]::Matches($OldManifestText,$regex) | ForEach-Object {$_.groups[1].value }
                     $FileExtensions = $FetchFileExtensions.Substring(0, $FetchFileExtensions.LastIndexOf(' '))
                     $FileExtensions = $FileExtensions -Split '- '
                     New-Variable -Name "FileExtensions" -Value ($FileExtensions.Trim()[1..257] -join ", ") -Scope Script -Force
                 } elseif ($Line -eq "Protocols:") {
                     $regex = '(?ms)Protocols:(.+?):'
-                    $FetchProtocols = [regex]::Matches($OldManifestText,$regex) | foreach {$_.groups[1].value }
+                    $FetchProtocols = [regex]::Matches($OldManifestText,$regex) | ForEach-Object {$_.groups[1].value }
                     $Protocols = $FetchProtocols.Substring(0, $FetchProtocols.LastIndexOf(' '))
                     $Protocols = $Protocols -Split '- '
                     New-Variable -Name "Protocols" -Value ($Protocols.Trim()[1..17] -join ", ") -Scope Script -Force
                 } elseif ($Line -eq "Commands:") {
                     $regex = '(?ms)Commands:(.+?):'
-                    $FetchCommands = [regex]::Matches($OldManifestText,$regex) | foreach {$_.groups[1].value }
+                    $FetchCommands = [regex]::Matches($OldManifestText,$regex) | ForEach-Object {$_.groups[1].value }
                     $Commands = $FetchCommands.Substring(0, $FetchCommands.LastIndexOf(' '))
                     $Commands = $Commands -Split '- '
                     New-Variable -Name "Commands" -Value ($Commands.Trim()[1..17] -join ", ") -Scope Script -Force
                 } elseif ($Line -eq "InstallerSuccessCodes:") {
                     $regex = '(?ms)InstallerSuccessCodes:(.+?):'
-                    $FetchInstallerSuccessCodes = [regex]::Matches($OldManifestText,$regex) | foreach {$_.groups[1].value }
+                    $FetchInstallerSuccessCodes = [regex]::Matches($OldManifestText,$regex) | ForEach-Object {$_.groups[1].value }
                     $InstallerSuccessCodes = $FetchInstallerSuccessCodes.Substring(0, $FetchInstallerSuccessCodes.LastIndexOf(' '))
                     $InstallerSuccessCodes = $InstallerSuccessCodes -Split '- '
                     New-Variable -Name "InstallerSuccessCodes" -Value ($InstallerSuccessCodes.Trim()[1..17] -join ", ") -Scope Script -Force
                 } elseif ($Line -eq "InstallModes:") {
                     $regex = '(?ms)InstallModes:(.+?):'
-                    $FetchInstallModes = [regex]::Matches($OldManifestText,$regex) | foreach {$_.groups[1].value }
+                    $FetchInstallModes = [regex]::Matches($OldManifestText,$regex) | ForEach-Object {$_.groups[1].value }
                     $InstallModes = $FetchInstallModes.Substring(0, $FetchInstallModes.LastIndexOf(' '))
                     $InstallModes = $InstallModes -Split '- '
                     New-Variable -Name "InstallModes" -Value ($InstallModes.Trim()[1..17] -join ", ") -Scope Script -Force
