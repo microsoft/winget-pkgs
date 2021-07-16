@@ -26,6 +26,13 @@ $ManifestVersion = '1.0.0'
     https://github.com/microsoft/winget-pkgs/blob/master/Tools/YamlCreate.ps1
 #>
 
+<#
+TO-DO:
+    - Add writing installer using YAML parsing
+    - Add reading installers using YAML parsing
+    - Ensure licensing for powershell-yaml is met
+#>
+
 if (Get-Module -ListAvailable -Name powershell-yaml) {
     $UseYamlParser = $true
 } 
@@ -370,7 +377,7 @@ Function Read-WinGet-InstallerValues {
         '0' {$UpgradeBehavior = 'install'}
         '1' {$UpgradeBehavior = 'uninstallPrevious'}
     }
-
+    #TO-DO Add support for YamlParsing mode
     $Installer += "- InstallerLocale: $InstallerLocale`n"
     $Installer += "  Architecture: $Architecture`n"
     $Installer += "  InstallerType: $InstallerType`n"
