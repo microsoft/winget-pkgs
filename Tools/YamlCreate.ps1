@@ -85,16 +85,6 @@ Function Read-PreviousWinGet-Manifest {
             Write-Host -ForegroundColor 'DarkYellow' -Object "Last Version: $LastVersion"
             $script:OldManifests = Get-ChildItem -Path "$AppFolder\..\$LastVersion"
 
-            if (-not ($OldManifests.Name -eq "$PackageIdentifier.installer.yaml" -and $OldManifests.Name -eq "$PackageIdentifier.locale.en-US.yaml" -and $OldManifests.Name -eq "$PackageIdentifier.yaml") -or ($OldManifests.Name -eq "$PackageIdentifier.yaml")) {
-                while ([string]::IsNullOrWhiteSpace($PromptVersion)) {
-                    Write-Host
-                    Write-Host -ForegroundColor 'Red' -Object 'Could not find required manifests, input version containing required manifests'
-                    $PromptVersion = Read-Host -Prompt 'Version' | TrimString
-                    $script:LastVersion = $PromptVersion
-                    $script:OldManifests = Get-ChildItem -Path "$AppFolder\..\$LastVersion"
-                }
-            }
-
             if ($OldManifests.Name -eq "$PackageIdentifier.installer.yaml" -and $OldManifests.Name -eq "$PackageIdentifier.locale.en-US.yaml" -and $OldManifests.Name -eq "$PackageIdentifier.yaml") {
                 $script:OldManifestText = Get-Content -Path "$AppFolder\..\$LastVersion\$PackageIdentifier.installer.yaml", "$AppFolder\..\$LastVersion\$PackageIdentifier.locale.en-US.yaml", "$AppFolder\..\$LastVersion\$PackageIdentifier.yaml" -Encoding 'UTF8'
             } elseif ($OldManifests.Name -eq "$PackageIdentifier.yaml") {
@@ -903,7 +893,7 @@ Function Submit-Manifest {
         git checkout -b "$PackageIdentifier-$PackageVersion" FETCH_HEAD
 
         git add -A
-        git commit -m "$CommitType $PackageIdentifier version $PackageVersion"
+        git commit -m "$CommitType : $PackageIdentifier version $PackageVersion"
         git push
 
         if (Get-Command 'gh.exe' -ErrorAction SilentlyContinue) {
