@@ -985,7 +985,7 @@ Function Submit-Manifest {
 Show-OptionMenu
 Function Write-WinGet-InstallerManifest-Yaml {
     $PackageIdentifier = "Test.Value"
-    [PSCustomObject]$InstallerManifest = @{
+    [PSCustomObject]$InstallerManifest = [ordered]@{
         "PackageIdentifier" = $PackageIdentifier
         "PackageVersion" = $PackageVersion
         
