@@ -35,8 +35,6 @@ $ToNatural = { [regex]::Replace($_, '\d+', { $args[0].Value.PadLeft(20) }) }
 
 Function Show-OptionMenu {
     while ([string]::IsNullOrWhiteSpace($OptionMenu)) {
-        Clear-Variable -Name OptionMenu -Force -ErrorAction SilentlyContinue
-        Clear-Variable -Name Option -Force -ErrorAction SilentlyContinue
         Clear-Host
         Write-Host -ForegroundColor 'Cyan' -Object 'Select Mode'
         Write-Host -ForegroundColor 'DarkCyan' -NoNewline "`n["; Write-Host -NoNewline '1'; Write-Host -ForegroundColor DarkCyan -NoNewline "]"; `
@@ -938,8 +936,6 @@ Switch ($Option) {
         Write-WinGet-LocaleManifest
         Test-Manifest
         Submit-Manifest
-        Pause
-        Show-OptionMenu
     }
 
     'Update' {
@@ -954,8 +950,6 @@ Switch ($Option) {
         Write-WinGet-LocaleManifest
         Test-Manifest
         Submit-Manifest
-        Pause
-        Show-OptionMenu
     }
 
     'NewLocale' {
@@ -965,7 +959,5 @@ Switch ($Option) {
         Write-WinGet-LocaleManifest
         if (Get-Command "winget.exe" -ErrorAction SilentlyContinue) {winget validate $AppFolder}
         Submit-Manifest
-        Pause
-        Show-OptionMenu
     }
 }
