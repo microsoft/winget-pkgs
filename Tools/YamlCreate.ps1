@@ -77,7 +77,7 @@ Function Show-OptionMenu {
             '1' {$script:Option = 'New'}
             '2' {$script:Option = 'Update'}
             '3' {$script:Option = 'NewLocale'}
-            default {Write-Host > exit}
+            default {Write-Host; exit}
         }
 }
 
@@ -941,7 +941,7 @@ Function Submit-Manifest {
         git checkout -b "$PackageIdentifier-$PackageVersion" FETCH_HEAD
 
         git add -A
-        git commit -m "$CommitType: `$PackageIdentifier` version $PackageVersion"
+        git commit -m "$CommitType`: `$PackageIdentifier` version $PackageVersion"
         git push
 
         if (Get-Command 'gh.exe' -ErrorAction SilentlyContinue) {
