@@ -898,7 +898,16 @@ Function Submit-Manifest {
 
         if (Get-Command 'gh.exe' -ErrorAction SilentlyContinue) {
         
-            gh pr create --body-file "$PSScriptRoot\..\.github\PULL_REQUEST_TEMPLATE.md" -f
+            if (Test-Path -Path "$PSScriptRoot\..\.github\PULL_REQUEST_TEMPLATE.md") {
+                gh pr create --body-file "$PSScriptRoot\..\.github\PULL_REQUEST_TEMPLATE.md" -f
+            } else {
+                while ([string]::IsNullOrWhiteSpace($SandboxScriptPath)) {
+                    Write-Host
+                    Write-Host -ForegroundColor 'Green' -Object 'PULL_REQUEST_TEMPLATE.md not found, input path'
+                    $PRTemplate = Read-Host -Prompt 'PR Template' | TrimString
+                }
+                gh pr create --body-file "$PRTemplate" -f
+            }
         }
     }
 }
