@@ -852,7 +852,7 @@ Function Test-Manifest {
         $title   = 'Sandbox Test'
         $msg     = '[Recommended] Do you want to test your Manifest in Windows Sandbox?'
         $options = '&Yes', '&No'
-        $default = 1  # 0=Yes, 1=No
+        $default = 0  # 0=Yes, 1=No
 
         $SandboxTest = $Host.UI.PromptForChoice($title, $msg, $options, $default)
 
