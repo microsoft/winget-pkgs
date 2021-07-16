@@ -229,31 +229,42 @@ Function Read-WinGet-InstallerValues {
 
     $title   = 'Save to disk?'
     $msg     = 'Do you want to save the files to the Temp folder?'
-    $options = '&Yes', '&No'
-    $default = 1  # 0=Yes, 1=No
+    $options = '&Yes', '&No', '&Manually Enter SHA256'
+    $default = 1  # 0=Yes, 1=No, 2=Manual
 
     $SaveOption = $Host.UI.PromptForChoice($title, $msg, $options, $default)
 
-    $start_time = Get-Date
-    Write-Host $NewLine
-    Write-Host 'Downloading URL. This will take a while...' -ForegroundColor Blue
-    $WebClient = New-Object System.Net.WebClient
-    $Filename = [System.IO.Path]::GetFileName($InstallerUrl)
-    $dest = "$env:TEMP\$FileName"
+    if ($SaveOption -ne '2') {
+        $start_time = Get-Date
+        Write-Host $NewLine
+        Write-Host 'Downloading URL. This will take a while...' -ForegroundColor Blue
+        $WebClient = New-Object System.Net.WebClient
+        $Filename = [System.IO.Path]::GetFileName($InstallerUrl)
+        $dest = "$env:TEMP\$FileName"
 
-    try {
-        $WebClient.DownloadFile($InstallerUrl, $dest)
+        try {
+            $WebClient.DownloadFile($InstallerUrl, $dest)
+        }
+        catch {
+            Write-Host 'Error downloading file. Please run the script again.' -ForegroundColor Red
+            exit 1
+        }
+        finally {
+            Write-Host "Time taken: $((Get-Date).Subtract($start_time).Seconds) second(s)" -ForegroundColor Green
+            $InstallerSha256 = (Get-FileHash -Path $dest -Algorithm SHA256).Hash
+            if ($PSVersion -eq '5') {$FileInformation = Get-AppLockerFileInformation -Path $dest | Select-Object -ExpandProperty Publisher}
+            if ($PSVersion -eq '5') {$MSIProductCode = $FileInformation.BinaryName}
+            if ($SaveOption -eq '1') {Remove-Item -Path $dest}
+        }
     }
-    catch {
-        Write-Host 'Error downloading file. Please run the script again.' -ForegroundColor Red
-        exit 1
-    }
-    finally {
-        Write-Host "Time taken: $((Get-Date).Subtract($start_time).Seconds) second(s)" -ForegroundColor Green
-        $InstallerSha256 = (Get-FileHash -Path $dest -Algorithm SHA256).Hash
-        if ($PSVersion -eq '5') {$FileInformation = Get-AppLockerFileInformation -Path $dest | Select-Object -ExpandProperty Publisher}
-        if ($PSVersion -eq '5') {$MSIProductCode = $FileInformation.BinaryName}
-        if ($SaveOption -eq '1') {Remove-Item -Path $dest}
+
+    else {
+        while (!($InstallerSha256 -match '[0-9A-Z]{64}')){
+            Write-Host
+            Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the installer SHA256 Hash'
+            $InstallerSha256 = Read-Host -Prompt 'InstallerSha256' | TrimString
+            $InstallerSHA256 = $InstallerSha256.toUpper()
+        }
     }
 
     while ($architecture -notin @('x86', 'x64', 'arm', 'arm64', 'neutral')) {
