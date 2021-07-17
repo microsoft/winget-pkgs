@@ -415,7 +415,7 @@ Function Read-WinGet-InstallerValues {
     }
 
     if ($AnotherInstaller -eq '0') {
-        Write-Host; Read-WinGet-InstallerManifest
+        Write-Host; Read-WinGet-InstallerValues
     }
 }
 
