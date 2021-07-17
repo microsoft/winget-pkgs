@@ -408,7 +408,13 @@ Function Read-WinGet-InstallerValues {
         $keyInfo = [Console]::ReadKey($false)
     } until ($keyInfo.Key)
 
-    if ($keyInfo.Key -eq 'Y') {
+    switch ($keyInfo.Key) {
+        'Y' {$AnotherInstaller = '0'}
+        'N' {$AnotherInstaller = '1'}
+        default {$AnotherInstaller = '1'}
+    }
+
+    if ($AnotherInstaller -eq '0') {
         Write-Host; Read-WinGet-InstallerManifest
     }
 }
