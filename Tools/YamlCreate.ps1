@@ -927,12 +927,20 @@ Function Test-Manifest {
     if (Get-Command 'winget.exe' -ErrorAction SilentlyContinue) {winget validate $AppFolder}
 
     if (Get-Command 'WindowsSandbox.exe' -ErrorAction SilentlyContinue) {
-        $title   = 'Sandbox Test'
-        $msg     = '[Recommended] Do you want to test your Manifest in Windows Sandbox?'
-        $options = '&Yes', '&No'
-        $default = 0  # 0=Yes, 1=No
+        Write-Host -ForegroundColor 'White' "Sandbox Test"
+        Write-Host "[Recommended] Do you want to test your Manifest in Windows Sandbox?"
+        Write-Host -ForegroundColor 'Yellow' -NoNewline '[Y] Yes  '
+        Write-Host -ForegroundColor 'White' -NoNewline "[N] No "
+        Write-Host -NoNewline "(default is 'Y'): "
+        do {
+            $keyInfo = [Console]::ReadKey($false)
+        } until ($keyInfo.Key)
 
-        $SandboxTest = $Host.UI.PromptForChoice($title, $msg, $options, $default)
+        switch ($keyInfo.Key) {
+            'Y' {$SandboxTest = '0'}
+            'N' {$SandboxTest = '1'}
+            default {$SandboxTest = '0'}
+        }
 
         if ($SandboxTest -eq '0') {
             if (Test-Path -Path "$PSScriptRoot\SandboxTest.ps1") {
@@ -952,12 +960,20 @@ Function Test-Manifest {
 
 Function Submit-Manifest {
     if (Get-Command 'git.exe' -ErrorAction SilentlyContinue) {
-        $title   = 'Submit PR?'
-        $msg     = 'Do you want to submit your PR now?'
-        $options = '&Yes', '&No'
-        $default = 0  # 0=Yes, 1=No
+        Write-Host -ForegroundColor 'White' "Submit PR?"
+        Write-Host "Do you want to submit your PR now?"
+        Write-Host -ForegroundColor 'Yellow' -NoNewline '[Y] Yes  '
+        Write-Host -ForegroundColor 'White' -NoNewline "[N] No "
+        Write-Host -NoNewline "(default is 'Y'): "
+        do {
+            $keyInfo = [Console]::ReadKey($false)
+        } until ($keyInfo.Key)
 
-        $PromptSubmit = $Host.UI.PromptForChoice($title, $msg, $options, $default)
+        switch ($keyInfo.Key) {
+            'Y' {$PromptSubmit = '0'}
+            'N' {$PromptSubmit = '1'}
+            default {$PromptSubmit = '0'}
+        }
     }
 
     if ($PromptSubmit -eq '0') {
