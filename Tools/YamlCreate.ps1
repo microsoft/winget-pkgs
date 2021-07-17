@@ -395,14 +395,13 @@ Function Read-WinGet-InstallerValues {
         $keyInfo = [Console]::ReadKey($false)
     } until ($keyInfo.Key)
 
-    switch ($keyInfo.Key) {
-        'Y' {Write-Host; Read-WinGet-InstallerValues}
-        'N' {Write-Host; Read-WinGet-InstallerManifest}
-        default {Write-Host; Read-WinGet-InstallerManifest}
+    if ($keyInfo.Key -eq 'Y') {
+        Write-Host; Read-WinGet-InstallerManifest
     }
 }
 
 Function Read-WinGet-InstallerManifest {
+    Write-Host
     if ([string]::IsNullOrWhiteSpace($FileExtensions)) {
         do {
             Write-Host
