@@ -328,27 +328,35 @@ Function Read-WinGet-InstallerValues {
         $ProductCode = Read-Host -Prompt 'ProductCode' | TrimString
     } while (-not [string]::IsNullOrWhiteSpace($ProductCode) -and ($ProductCode.Length -lt 1 -or $ProductCode.Length -gt 255))
 
-    $title   = 'Scope'
-    $msg     = '[Optional] Enter the Installer Scope.'
-    $options = '&Machine', '&User', '&No idea'
-    $default = 2  # 0=machine, 1=user, #2=blank
+    Write-Host -ForegroundColor 'White' "Scope"
+    Write-Host "[Optional] Enter the Installer Scope."
+    Write-Host -ForegroundColor 'White' -NoNewline "[M] Machine  [U] User  "
+    Write-Host -ForegroundColor 'Yellow' -NoNewline '[N] No idea '
+    Write-Host -NoNewline "(default is 'N'): "
+    do {
+        $keyInfo = [Console]::ReadKey($false)
+    } until ($keyInfo.Key)
 
-    $ScopeOption = $Host.UI.PromptForChoice($title, $msg, $options, $default)
-    Switch ($ScopeOption) {
-        '0' {$Scope = 'machine'}
-        '1' {$Scope = 'user'}
-        '2' {$Scope = ''}
+    switch ($keyInfo.Key) {
+        'M' {$Scope = 'machine'}
+        'U' {$Scope = 'user'}
+        'N' {$Scope = ''}
+        default {$Scope = ''}
     }
 
-    $title   = 'UpgradeBehavior'
-    $msg     = '[Optional] Enter the UpgradeBehavior.'
-    $options = '&install', '&uninstallPrevious'
-    $default = 0  # 0=install, 1=uninstallPrevious
+    Write-Host -ForegroundColor 'White' "UpgradeBehavior"
+    Write-Host "[Optional] Enter the UpgradeBehavior."
+    Write-Host -ForegroundColor 'Yellow' -NoNewline '[I] install  '
+    Write-Host -ForegroundColor 'White' -NoNewline "[U] uninstallPrevious "
+    Write-Host -NoNewline "(default is 'I'): "
+    do {
+        $keyInfo = [Console]::ReadKey($false)
+    } until ($keyInfo.Key)
 
-    $UpgradeBehaviorOption = $Host.UI.PromptForChoice($title, $msg, $options, $default)
-    Switch ($UpgradeBehaviorOption) {
-        '0' {$UpgradeBehavior = 'install'}
-        '1' {$UpgradeBehavior = 'uninstallPrevious'}
+    switch ($keyInfo.Key) {
+        'I' {$UpgradeBehaviorOption = 'install'}
+        'U' {$UpgradeBehaviorOption = 'uninstallPrevious'}
+        default {$UpgradeBehaviorOption = 'install'}
     }
 
     $Installer += "- InstallerLocale: $InstallerLocale`n"
