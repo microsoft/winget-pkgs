@@ -228,12 +228,23 @@ Function Read-WinGet-InstallerValues {
         $InstallerUrl = Read-Host -Prompt 'Url' | TrimString
     }
 
-    $title   = 'Save to disk?'
-    $msg     = 'Do you want to save the files to the Temp folder?'
-    $options = '&Yes', '&No', '&Manually Enter SHA256'
-    $default = 1  # 0=Yes, 1=No, 2=Manual
+    Write-Host
+    Write-Host -ForegroundColor 'White' "Save to disk?"
+    Write-Host "Do you want to save the files to the Temp folder?"
+    Write-Host -ForegroundColor 'White' -NoNewline "[Y] Yes  "
+    Write-Host -ForegroundColor 'Yellow' -NoNewline '[N] No  '
+    Write-Host -ForegroundColor 'White' -NoNewline "[M] Manually Enter SHA256 "
+    Write-Host -NoNewline "(default is 'N'): "
+    do {
+        $keyInfo = [Console]::ReadKey($false)
+    } until ($keyInfo.Key)
 
-    $SaveOption = $Host.UI.PromptForChoice($title, $msg, $options, $default)
+    switch ($keyInfo.Key) {
+        'Y' {$SaveOption = '0'}
+        'N' {$SaveOption = '1'}
+        'M' {$SaveOption = '2'}
+        default {$SaveOption = '1'}
+    }
 
     if ($SaveOption -ne '2') {
         $start_time = Get-Date
@@ -261,6 +272,7 @@ Function Read-WinGet-InstallerValues {
 
     else {
         while (!($InstallerSha256 -match '[0-9A-Z]{64}')){
+            Write-Host
             Write-Host
             Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the installer SHA256 Hash'
             $InstallerSha256 = Read-Host -Prompt 'InstallerSha256' | TrimString
@@ -328,6 +340,7 @@ Function Read-WinGet-InstallerValues {
         $ProductCode = Read-Host -Prompt 'ProductCode' | TrimString
     } while (-not [string]::IsNullOrWhiteSpace($ProductCode) -and ($ProductCode.Length -lt 1 -or $ProductCode.Length -gt 255))
 
+    Write-Host
     Write-Host
     Write-Host -ForegroundColor 'White' "Scope"
     Write-Host "[Optional] Enter the Installer Scope."
