@@ -328,6 +328,7 @@ Function Read-WinGet-InstallerValues {
         $ProductCode = Read-Host -Prompt 'ProductCode' | TrimString
     } while (-not [string]::IsNullOrWhiteSpace($ProductCode) -and ($ProductCode.Length -lt 1 -or $ProductCode.Length -gt 255))
 
+    Write-Host
     Write-Host -ForegroundColor 'White' "Scope"
     Write-Host "[Optional] Enter the Installer Scope."
     Write-Host -ForegroundColor 'White' -NoNewline "[M] Machine  [U] User  "
@@ -344,6 +345,8 @@ Function Read-WinGet-InstallerValues {
         default {$Scope = ''}
     }
 
+    Write-Host
+    Write-Host
     Write-Host -ForegroundColor 'White' "UpgradeBehavior"
     Write-Host "[Optional] Enter the UpgradeBehavior."
     Write-Host -ForegroundColor 'Yellow' -NoNewline '[I] install  '
@@ -354,9 +357,9 @@ Function Read-WinGet-InstallerValues {
     } until ($keyInfo.Key)
 
     switch ($keyInfo.Key) {
-        'I' {$UpgradeBehaviorOption = 'install'}
-        'U' {$UpgradeBehaviorOption = 'uninstallPrevious'}
-        default {$UpgradeBehaviorOption = 'install'}
+        'I' {$UpgradeBehavior = 'install'}
+        'U' {$UpgradeBehavior = 'uninstallPrevious'}
+        default {$UpgradeBehavior = 'install'}
     }
 
     $Installer += "- InstallerLocale: $InstallerLocale`n"
@@ -381,15 +384,21 @@ Function Read-WinGet-InstallerValues {
         }
     }
 
-    $title   = 'Another Installer'
-    $msg     = '[Optional] Do you want to create another installer?'
-    $options = '&Yes', '&No'
-    $default = 1  # 0=Yes, 1=No
+    Write-Host
+    Write-Host
+    Write-Host -ForegroundColor 'White' "Another Installer"
+    Write-Host "[Optional] Do you want to create another installer?"
+    Write-Host -ForegroundColor 'White' -NoNewline "[Y] Yes  "
+    Write-Host -ForegroundColor 'Yellow' -NoNewline '[N] No '
+    Write-Host -NoNewline "(default is 'N'): "
+    do {
+        $keyInfo = [Console]::ReadKey($false)
+    } until ($keyInfo.Key)
 
-    $AnotherInstaller = $Host.UI.PromptForChoice($title, $msg, $options, $default)
-
-    if ($AnotherInstaller -eq '0') {
-        Read-WinGet-InstallerValues
+    switch ($keyInfo.Key) {
+        'Y' {Write-Host; Read-WinGet-InstallerValues}
+        'N' {Write-Host; Read-WinGet-InstallerManifest}
+        default {Write-Host; Read-WinGet-InstallerManifest}
     }
 }
 
