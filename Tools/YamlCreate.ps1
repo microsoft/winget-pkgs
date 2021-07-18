@@ -247,6 +247,7 @@ Function Read-WinGet-InstallerValues {
     }
 
     if ($SaveOption -ne '2') {
+        Write-Host
         $start_time = Get-Date
         Write-Host $NewLine
         Write-Host 'Downloading URL. This will take a while...' -ForegroundColor Blue
@@ -340,7 +341,6 @@ Function Read-WinGet-InstallerValues {
         $ProductCode = Read-Host -Prompt 'ProductCode' | TrimString
     } while (-not [string]::IsNullOrWhiteSpace($ProductCode) -and ($ProductCode.Length -lt 1 -or $ProductCode.Length -gt 255))
 
-    Write-Host
     Write-Host
     Write-Host -ForegroundColor 'White' "Scope"
     Write-Host "[Optional] Enter the Installer Scope."
@@ -933,6 +933,7 @@ Function Test-Manifest {
     if (Get-Command 'winget.exe' -ErrorAction SilentlyContinue) {winget validate $AppFolder}
 
     if (Get-Command 'WindowsSandbox.exe' -ErrorAction SilentlyContinue) {
+        Write-Host
         Write-Host -ForegroundColor 'White' "Sandbox Test"
         Write-Host "[Recommended] Do you want to test your Manifest in Windows Sandbox?"
         Write-Host -ForegroundColor 'Yellow' -NoNewline '[Y] Yes  '
@@ -966,6 +967,8 @@ Function Test-Manifest {
 
 Function Submit-Manifest {
     if (Get-Command 'git.exe' -ErrorAction SilentlyContinue) {
+        Write-Host
+        Write-Host
         Write-Host -ForegroundColor 'White' "Submit PR?"
         Write-Host "Do you want to submit your PR now?"
         Write-Host -ForegroundColor 'Yellow' -NoNewline '[Y] Yes  '
