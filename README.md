@@ -16,7 +16,7 @@ To submit a package to this repository, you should follow these steps:
 
 ## Authoring a Manifest
 
-You may either use the [Windows Package Manager Manifest Creator](https://github.com/microsoft/winget-create), the [YAMLCreate](#using-the-yamlcreateps1) PowerShell script, the [Windows Package Manager YAML Generator](#using-windows-package-manager-yaml-generator), or you can craft a manifest manually following our [authoring guidelines](AUTHORING_MANIFESTS.md).
+You may either use the [Windows Package Manager Manifest Creator](https://github.com/microsoft/winget-create), the [YAMLCreate](#using-the-yamlcreateps1) PowerShell script, or you can craft a manifest manually following our [authoring guidelines](AUTHORING_MANIFESTS.md).
 
 >Note: Only one manifest may be submitted per PR.
 
@@ -24,9 +24,6 @@ You may either use the [Windows Package Manager Manifest Creator](https://github
 To help author manifest files, we have provided a YAMLCreate.ps1 [powershell script](Tools/YamlCreate.ps1) located in the Tools folder. The script will prompt you for the URL to the installer, then will prompt you to fill in metadata.
 
 >Note: We recommend running the script in the location where you want to produce the manifest file.  For example: `manifests\<p>\<publisher>\<package>\`.  After successful completion, it will produce the YAML files.
-
-### Using Windows Package Manager YAML Generator
-If you prefer to use a GUI to generate YAML files, you can use the **Windows Package Manager YAML Generator**. It is available as an app [in the Microsoft Store](https://www.microsoft.com/p/windows-package-manager-yaml-generator/9p3n60fs22k5) and the code is also available [on GitHub](https://github.com/ptorr-msft/WinGetYamlGenerator).
 
 ## Test your manifest
 Now that you have authored your manifest, you should make sure it works as expected.

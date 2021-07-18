@@ -75,7 +75,7 @@ $apiLatestUrl = 'https://api.github.com/repos/microsoft/winget-cli/releases/late
 $WebClient = New-Object System.Net.WebClient
 
 function Get-LatestUrl {
-  ((Invoke-WebRequest $apiLatestUrl -UseBasicParsing | ConvertFrom-Json).assets | Where-Object { $_.name -match '^Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.appxbundle$' }).browser_download_url
+  ((Invoke-WebRequest $apiLatestUrl -UseBasicParsing | ConvertFrom-Json).assets | Where-Object { $_.name -match '^Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.msixbundle$' }).browser_download_url
 }
 
 function Get-LatestHash {
@@ -92,7 +92,7 @@ $oldProgressPreference = $ProgressPreference
 $ProgressPreference = 'SilentlyContinue'
 
 $desktopAppInstaller = @{
-  fileName = 'Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.appxbundle'
+  fileName = 'Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.msixbundle'
   url      = $(Get-LatestUrl)
   hash     = $(Get-LatestHash)
 }
