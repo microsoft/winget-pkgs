@@ -1001,6 +1001,7 @@ Function Submit-Manifest {
             'N' {$CommitType = "New"}
             'M' {$CommitType = "Metadata"}
         }
+        Write-Host
         git fetch upstream
         git checkout -b "$PackageIdentifier-$PackageVersion" FETCH_HEAD
 
