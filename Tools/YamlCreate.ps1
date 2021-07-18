@@ -814,6 +814,7 @@ Function Read-WinGet-LocaleManifest {
 
 Function Write-WinGet-VersionManifest {
 $VersionManifest = @(
+"$ScriptHeader"
 '# yaml-language-server: $schema=https://aka.ms/winget-manifest.version.1.0.0.schema.json'
 ''
 "PackageIdentifier: $PackageIdentifier"
@@ -842,6 +843,7 @@ Write-Host "Yaml file created: $VersionManifestPath"
 
 Function Write-WinGet-InstallerManifest {
 $InstallerManifest = @(
+"$ScriptHeader"
 '# yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.0.0.schema.json'
 ''
 "PackageIdentifier: $PackageIdentifier"
@@ -883,6 +885,7 @@ Write-Host "Yaml file created: $InstallerManifestPath"
 
 Function Write-WinGet-LocaleManifest {
 $LocaleManifest = @(
+"$ScriptHeader"
 if ($PackageLocale -eq 'en-US') {'# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.0.0.schema.json'}else{'# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.0.0.schema.json'}
 ''
 "PackageIdentifier: $PackageIdentifier"
@@ -943,7 +946,7 @@ Function Test-Manifest {
         switch ($keyInfo.Key) {
             'Y' {$SandboxTest = '0'}
             'N' {$SandboxTest = '1'}
-            default {$SandboxTest = '1'}
+            default {$SandboxTest = '0'}
         }
 
         if ($SandboxTest -eq '0') {
@@ -983,24 +986,12 @@ Function Submit-Manifest {
     }
 
     if ($PromptSubmit -eq '0') {
-        <#
         switch ($Option) {
             'New' {$CommitType = 'New'}
             'Update' {$CommitType = 'Update'}
             'NewLocale' {$CommitType = 'Locale'}
         }
-        #>
-        while ($keyInfo.Key -notin @('M', 'N', 'U')) {
-            Write-Host -NoNewLine "`nCommit Type: "
-            do {
-                $keyInfo = [Console]::ReadKey($false)
-            } until ($keyInfo.Key)
-        }
-        switch ($keyInfo.Key) {
-            'U' {$CommitType = "Update"}
-            'N' {$CommitType = "New"}
-            'M' {$CommitType = "Metadata"}
-        }
+
         git fetch upstream
         git checkout -b "$PackageIdentifier-$PackageVersion" FETCH_HEAD
 
@@ -1021,7 +1012,6 @@ Function Submit-Manifest {
                 gh pr create --body-file "$PRTemplate" -f
             }
         }
-        git checkout -b "yc2" FETCH_HEAD
     }
 }
 
