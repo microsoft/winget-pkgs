@@ -862,8 +862,11 @@ Function Write-WinGet-InstallerManifest-Yaml {
     if ($Option -ne 'EditMetadata') {
         $InstallerManifest["Installers"] = $script:Installers
     }
-    else {
+    elseif ($script:OldInstallerManifest) {
         $InstallerManifest["Installers"] = $script:OldInstallerManifest["Installers"]
+    }
+    else {
+        $InstallerManifest["Installers"] = $script:OldVersionManifest["Installers"]
     }
 
     AddYamlParameter $InstallerManifest 'ManifestType' 'installer'
