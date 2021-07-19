@@ -33,15 +33,18 @@ TO-DO:
     - Handle writing null parameters as comments
     - Add reading from manifests using YAML parsing
     - Ensure licensing for powershell-yaml is met
+    - Have "New" package behave as "Update"
+        - Attempt to read last package
+        - If package exists -> Switch to update mode silently
+        - If package not existing -> Continue as new
+    - Add "Edit Metadata" mode -> Input specific version. Metadata is loaded. Edit, and save
 #>
 
 if (Get-Module -ListAvailable -Name powershell-yaml) {
-} 
-else {
+} else {
     try {
         Install-Module -Name powershell-yaml -Force -Repository PSGallery -Scope CurrentUser
-    } 
-    catch {
+    } catch {
         Throw "Unmet dependency. 'powershell-yaml' unable to be installed successfully."
     }
 }
@@ -57,49 +60,48 @@ $ToNatural = { [regex]::Replace($_, '\d+', { $args[0].Value.PadLeft(20) }) }
 Function Write-Colors {
     Param
     (
-         [Parameter(Mandatory=$true, Position=0)]
-         [string[]] $TextStrings,
-         [Parameter(Mandatory=$true, Position=1)]
-         [string[]] $Colors
+        [Parameter(Mandatory = $true, Position = 0)]
+        [string[]] $TextStrings,
+        [Parameter(Mandatory = $true, Position = 1)]
+        [string[]] $Colors
     )
-    If ($TextStrings.Count -ne $Colors.Count) { Throw "Invalid Function Parameters. Arguments must be of equal length"}
+    If ($TextStrings.Count -ne $Colors.Count) { Throw 'Invalid Function Parameters. Arguments must be of equal length' }
     $_index = 0
-    Foreach ($String in $TextStrings){
+    Foreach ($String in $TextStrings) {
         Write-Host -ForegroundColor $Colors[$_index] -NoNewline $String
         $_index++
     }
 }
 
 Function Show-OptionMenu {
-        Clear-Host
-        Write-Host -ForegroundColor 'Cyan' "Select Mode"
-        Write-Colors "`n[","1","] New Manifest`n" 'DarkCyan','White','DarkCyan'
-        Write-Colors "`n[","2","] Update Manifest`n" 'DarkCyan','White','DarkCyan'
-        Write-Colors "`n[","3","] New Locale`n" 'DarkCyan','White','DarkCyan'
-        Write-Colors "`n[","q","]"," Any key to quit`n" 'DarkCyan','White','DarkCyan','Red'
-        Write-Colors "`nSelection: " 'White'
+    Clear-Host
+    Write-Host -ForegroundColor 'Cyan' 'Select Mode'
+    Write-Colors "`n[", '1', "] New Manifest`n" 'DarkCyan', 'White', 'DarkCyan'
+    Write-Colors "`n[", '2', "] Update Manifest`n" 'DarkCyan', 'White', 'DarkCyan'
+    Write-Colors "`n[", '3', "] New Locale`n" 'DarkCyan', 'White', 'DarkCyan'
+    Write-Colors "`n[", 'q', ']', " Any key to quit`n" 'DarkCyan', 'White', 'DarkCyan', 'Red'
+    Write-Colors "`nSelection: " 'White'
 
-        $Keys = @{
-            #Map individual keys to their respective switch
-            [ConsoleKey]::D1 = '1';
-            [ConsoleKey]::D2 = '2';
-            [ConsoleKey]::D3 = '3';
-            [ConsoleKey]::NumPad1 = '1';
-            [ConsoleKey]::NumPad2 = '2';
-            [ConsoleKey]::NumPad3 = '3';
-        }
+    $Keys = @{
+        #Map individual keys to their respective switch
+        [ConsoleKey]::D1      = '1';
+        [ConsoleKey]::D2      = '2';
+        [ConsoleKey]::D3      = '3';
+        [ConsoleKey]::NumPad1 = '1';
+        [ConsoleKey]::NumPad2 = '2';
+        [ConsoleKey]::NumPad3 = '3';
+    }
 
-        do
-        {
-            $keyInfo = [Console]::ReadKey($false)
-        } until ($keyInfo.Key)
+    do {
+        $keyInfo = [Console]::ReadKey($false)
+    } until ($keyInfo.Key)
 
-        switch ($Keys[$keyInfo.Key]) {
-            '1' {$script:Option = 'New'}
-            '2' {$script:Option = 'Update'}
-            '3' {$script:Option = 'NewLocale'}
-            default {Write-Host; exit}
-        }
+    switch ($Keys[$keyInfo.Key]) {
+        '1' { $script:Option = 'New' }
+        '2' { $script:Option = 'Update' }
+        '3' { $script:Option = 'NewLocale' }
+        default { Write-Host; exit }
+    }
 }
 
 Function Read-WinGet-MandatoryInfo {
@@ -118,139 +120,27 @@ Function Read-WinGet-MandatoryInfo {
     
     if (Test-Path -Path "$PSScriptRoot\..\manifests") {
         $ManifestsFolder = (Resolve-Path "$PSScriptRoot\..\manifests").Path
-    }
-    else {
-        $ManifestsFolder = (Resolve-Path ".\").Path
+    } else {
+        $ManifestsFolder = (Resolve-Path '.\').Path
     }
     
     $script:AppFolder = Join-Path $ManifestsFolder -ChildPath $PackageIdentifier.ToLower().Chars(0) | Join-Path -ChildPath $PackageIdentifierFolder | Join-Path -ChildPath $PackageVersion
 }
 
-Function Read-PreviousWinGet-Manifest {
-    Switch ($Option) {
-        'Update' {
-            $LastVersion = Split-Path (Split-Path (Get-ChildItem -Path "$AppFolder\..\" -Recurse -Depth 1 -File -Filter "*.yaml").FullName ) -Leaf | Sort-Object $ToNatural | Select-Object -Last 1
-
-            Write-Host -ForegroundColor 'DarkYellow' -Object "Last Version: $LastVersion"
-            $script:OldManifests = Get-ChildItem -Path "$AppFolder\..\$LastVersion"
-
-            if (-not ($OldManifests.Name -like "$PackageIdentifier*.yaml")) {
-                while ([string]::IsNullOrWhiteSpace($PromptVersion)) {
-                    Write-Host
-                    Write-Host -ForegroundColor 'Red' -Object 'Could not find required manifests, input a version containing required manifests'
-                    $PromptVersion = Read-Host -Prompt 'Previous Version' | TrimString
-                    $script:OldManifests = Get-ChildItem -Path "$AppFolder\..\$PromptVersion"
-                }
-            }
-
-            if ($OldManifests.Name -eq "$PackageIdentifier.installer.yaml" -and $OldManifests.Name -eq "$PackageIdentifier.locale.en-US.yaml" -and $OldManifests.Name -eq "$PackageIdentifier.yaml") {
-                $script:OldManifestText = Get-Content -Path "$AppFolder\..\$LastVersion\$PackageIdentifier.installer.yaml", "$AppFolder\..\$LastVersion\$PackageIdentifier.locale.en-US.yaml", "$AppFolder\..\$LastVersion\$PackageIdentifier.yaml" -Encoding 'UTF8'
-            }
-            elseif ($OldManifests.Name -eq "$PackageIdentifier.yaml") {
-                $script:OldManifestText = Get-Content -Path "$AppFolder\..\$LastVersion\$PackageIdentifier.yaml" -Encoding 'UTF8'
-            }
-            else {
-                Throw "Error: Version $LastVersion does not contain the required manifests"
-            }
-            
-            ForEach ($Line in $OldManifestText -ne '') {
-                if ($Line -eq "Tags:") {
-                    $regex = '(?ms)Tags:(.+?):'
-                    $FetchTags = [regex]::Matches($OldManifestText,$regex) | ForEach-Object {$_.groups[1].value }
-                    $Tags = $FetchTags.Substring(0, $FetchTags.LastIndexOf(' '))
-                    $Tags = $Tags -Split '- '
-                    New-Variable -Name "Tags" -Value ($Tags.Trim()[1..17] -join ", ") -Scope Script -Force
-                }
-                elseif ($Line -eq "FileExtensions:") {
-                    $regex = '(?ms)FileExtensions:(.+?):'
-                    $FetchFileExtensions = [regex]::Matches($OldManifestText,$regex) | ForEach-Object {$_.groups[1].value }
-                    $FileExtensions = $FetchFileExtensions.Substring(0, $FetchFileExtensions.LastIndexOf(' '))
-                    $FileExtensions = $FileExtensions -Split '- '
-                    New-Variable -Name "FileExtensions" -Value ($FileExtensions.Trim()[1..257] -join ", ") -Scope Script -Force
-                }
-                elseif ($Line -eq "Protocols:") {
-                    $regex = '(?ms)Protocols:(.+?):'
-                    $FetchProtocols = [regex]::Matches($OldManifestText,$regex) | ForEach-Object {$_.groups[1].value }
-                    $Protocols = $FetchProtocols.Substring(0, $FetchProtocols.LastIndexOf(' '))
-                    $Protocols = $Protocols -Split '- '
-                    New-Variable -Name "Protocols" -Value ($Protocols.Trim()[1..17] -join ", ") -Scope Script -Force
-                }
-                elseif ($Line -eq "Commands:") {
-                    $regex = '(?ms)Commands:(.+?):'
-                    $FetchCommands = [regex]::Matches($OldManifestText,$regex) | ForEach-Object {$_.groups[1].value }
-                    $Commands = $FetchCommands.Substring(0, $FetchCommands.LastIndexOf(' '))
-                    $Commands = $Commands -Split '- '
-                    New-Variable -Name "Commands" -Value ($Commands.Trim()[1..17] -join ", ") -Scope Script -Force
-                }
-                elseif ($Line -eq "InstallerSuccessCodes:") {
-                    $regex = '(?ms)InstallerSuccessCodes:(.+?):'
-                    $FetchInstallerSuccessCodes = [regex]::Matches($OldManifestText,$regex) | ForEach-Object {$_.groups[1].value }
-                    $InstallerSuccessCodes = $FetchInstallerSuccessCodes.Substring(0, $FetchInstallerSuccessCodes.LastIndexOf(' '))
-                    $InstallerSuccessCodes = $InstallerSuccessCodes -Split '- '
-                    New-Variable -Name "InstallerSuccessCodes" -Value ($InstallerSuccessCodes.Trim()[1..17] -join ", ") -Scope Script -Force
-                }
-                elseif ($Line -eq "InstallModes:") {
-                    $regex = '(?ms)InstallModes:(.+?):'
-                    $FetchInstallModes = [regex]::Matches($OldManifestText,$regex) | ForEach-Object {$_.groups[1].value }
-                    $InstallModes = $FetchInstallModes.Substring(0, $FetchInstallModes.LastIndexOf(' '))
-                    $InstallModes = $InstallModes -Split '- '
-                    New-Variable -Name "InstallModes" -Value ($InstallModes.Trim()[1..17] -join ", ") -Scope Script -Force
-                }
-                elseif ($Line -notlike "PackageVersion*" -and $Line -notlike "PackageIdentifier*") {
-                    $Variable = $Line.TrimStart("#").Split(":").Trim()
-                    New-Variable -Name $Variable[0] -Value ($Variable[1..10] -join ":") -Scope Script -Force
-                }
-            }
-
-            ForEach ($DifLocale in $OldManifests) {
-                if ($DifLocale.Name -notin @("$PackageIdentifier.yaml", "$PackageIdentifier.installer.yaml", "$PackageIdentifier.locale.en-US.yaml")) {
-                    if (!(Test-Path $AppFolder)) { New-Item -ItemType "Directory" -Force -Path $AppFolder | Out-Null }
-                    $DifLocaleContent = [System.IO.File]::ReadAllLines($DifLocale.FullName)
-                    [System.IO.File]::WriteAllLines(($AppFolder + "\" + $DifLocale.Name), $DifLocaleContent.Replace("PackageVersion: $LastVersion", "PackageVersion: $PackageVersion"), $Utf8NoBomEncoding)
-                }
-            }
-        }
-
-        'NewLocale' {
-            $script:OldManifests = Get-ChildItem -Path "$AppFolder"
-            if ($OldManifests.Name -eq "$PackageIdentifier.locale.en-US.yaml") {
-                $script:OldManifestText = Get-Content -Path "$AppFolder\$PackageIdentifier.locale.en-US.yaml" -Encoding 'UTF8'
-            }
-            else {
-                Throw "Error: Multimanifest required"
-            }
-
-            ForEach ($Line in $OldManifestText -ne '') {
-                if ($Line -eq "Tags:") {
-                    $regex = '(?ms)Tags:(.+?):'
-                    $FetchTags = [regex]::Matches($OldManifestText, $regex) | foreach { $_.groups[1].value }
-                    $Tags = $FetchTags.Substring(0, $FetchTags.LastIndexOf(' '))
-                    $Tags = $Tags -Split '- '
-                    New-Variable -Name "Tags" -Value ($Tags.Trim()[1..17] -join ", ") -Scope Script -Force
-                }
-                elseif ($Line -notlike "PackageLocale*") {
-                    $Variable = $Line.TrimStart("#").Split(":").Trim()
-                    New-Variable -Name $Variable[0] -Value ($Variable[1..10] -join ":") -Scope Script -Force
-                }
-            }
-        }
-    }
-}
-
 Function Read-WinGet-InstallerValues {
     $InstallerValues = @(
-        "Architecture"
-        "InstallerType"
-        "InstallerUrl"
-        "InstallerSha256"
-        "Custom"
-        "Silent"
-        "SilentWithProgress"
-        "ProductCode"
-        "Scope"
-        "InstallerLocale"
-        "UpgradeBehavior"
-        "AnotherInstaller"
+        'Architecture'
+        'InstallerType'
+        'InstallerUrl'
+        'InstallerSha256'
+        'Custom'
+        'Silent'
+        'SilentWithProgress'
+        'ProductCode'
+        'Scope'
+        'InstallerLocale'
+        'UpgradeBehavior'
+        'AnotherInstaller'
     )
     Foreach ($InstallerValue in $InstallerValues) { Clear-Variable -Name $InstallerValue -Force -ErrorAction SilentlyContinue }
 
@@ -261,21 +151,21 @@ Function Read-WinGet-InstallerValues {
     }
 
     Write-Host
-    Write-Host -ForegroundColor 'White' "Save to disk?"
-    Write-Host "Do you want to save the files to the Temp folder?"
-    Write-Host -ForegroundColor 'White' -NoNewline "[Y] Yes  "
+    Write-Host -ForegroundColor 'White' 'Save to disk?'
+    Write-Host 'Do you want to save the files to the Temp folder?'
+    Write-Host -ForegroundColor 'White' -NoNewline '[Y] Yes  '
     Write-Host -ForegroundColor 'Yellow' -NoNewline '[N] No  '
-    Write-Host -ForegroundColor 'White' -NoNewline "[M] Manually Enter SHA256 "
+    Write-Host -ForegroundColor 'White' -NoNewline '[M] Manually Enter SHA256 '
     Write-Host -NoNewline "(default is 'N'): "
     do {
         $keyInfo = [Console]::ReadKey($false)
     } until ($keyInfo.Key)
 
     switch ($keyInfo.Key) {
-        'Y' {$SaveOption = '0'}
-        'N' {$SaveOption = '1'}
-        'M' {$SaveOption = '2'}
-        default {$SaveOption = '1'}
+        'Y' { $SaveOption = '0' }
+        'N' { $SaveOption = '1' }
+        'M' { $SaveOption = '2' }
+        default { $SaveOption = '1' }
     }
 
     if ($SaveOption -ne '2') {
@@ -289,22 +179,20 @@ Function Read-WinGet-InstallerValues {
 
         try {
             $WebClient.DownloadFile($InstallerUrl, $dest)
-        }
-        catch {
+        } catch {
             Write-Host 'Error downloading file. Please run the script again.' -ForegroundColor Red
             exit 1
-        }
-        finally {
+        } finally {
             Write-Host "Time taken: $((Get-Date).Subtract($start_time).Seconds) second(s)" -ForegroundColor Green
             $InstallerSha256 = (Get-FileHash -Path $dest -Algorithm SHA256).Hash
-            if ($PSVersion -eq '5') {$FileInformation = Get-AppLockerFileInformation -Path $dest | Select-Object -ExpandProperty Publisher}
-            if ($PSVersion -eq '5') {$MSIProductCode = $FileInformation.BinaryName}
-            if ($SaveOption -eq '1') {Remove-Item -Path $dest}
+            if ($PSVersion -eq '5') { $FileInformation = Get-AppLockerFileInformation -Path $dest | Select-Object -ExpandProperty Publisher }
+            if ($PSVersion -eq '5') { $MSIProductCode = $FileInformation.BinaryName }
+            if ($SaveOption -eq '1') { Remove-Item -Path $dest }
         }
     }
 
     else {
-        while (!($InstallerSha256 -match '[0-9A-Z]{64}')){
+        while (!($InstallerSha256 -match '[0-9A-Z]{64}')) {
             Write-Host
             Write-Host
             Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the installer SHA256 Hash'
@@ -341,8 +229,7 @@ Function Read-WinGet-InstallerValues {
                 $Custom = Read-Host -Prompt 'Custom Switch' | TrimString
             } while ($Custom.Length -gt '2048')
         }
-    }
-    else {
+    } else {
         do {
             Write-Host
             Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the silent install switch. For example: /S, -verysilent, /qn, --silent'
@@ -375,9 +262,9 @@ Function Read-WinGet-InstallerValues {
     } while (-not [string]::IsNullOrWhiteSpace($ProductCode) -and ($ProductCode.Length -lt 1 -or $ProductCode.Length -gt 255))
 
     Write-Host
-    Write-Host -ForegroundColor 'White' "Scope"
-    Write-Host "[Optional] Enter the Installer Scope."
-    Write-Host -ForegroundColor 'White' -NoNewline "[M] Machine  [U] User  "
+    Write-Host -ForegroundColor 'White' 'Scope'
+    Write-Host '[Optional] Enter the Installer Scope.'
+    Write-Host -ForegroundColor 'White' -NoNewline '[M] Machine  [U] User  '
     Write-Host -ForegroundColor 'Yellow' -NoNewline '[N] No idea '
     Write-Host -NoNewline "(default is 'N'): "
     do {
@@ -385,27 +272,27 @@ Function Read-WinGet-InstallerValues {
     } until ($keyInfo.Key)
 
     switch ($keyInfo.Key) {
-        'M' {$Scope = 'machine'}
-        'U' {$Scope = 'user'}
-        'N' {$Scope = ''}
-        default {$Scope = ''}
+        'M' { $Scope = 'machine' }
+        'U' { $Scope = 'user' }
+        'N' { $Scope = '' }
+        default { $Scope = '' }
     }
 
     Write-Host
     Write-Host
-    Write-Host -ForegroundColor 'White' "UpgradeBehavior"
-    Write-Host "[Optional] Enter the UpgradeBehavior."
+    Write-Host -ForegroundColor 'White' 'UpgradeBehavior'
+    Write-Host '[Optional] Enter the UpgradeBehavior.'
     Write-Host -ForegroundColor 'Yellow' -NoNewline '[I] install  '
-    Write-Host -ForegroundColor 'White' -NoNewline "[U] uninstallPrevious "
+    Write-Host -ForegroundColor 'White' -NoNewline '[U] uninstallPrevious '
     Write-Host -NoNewline "(default is 'I'): "
     do {
         $keyInfo = [Console]::ReadKey($false)
     } until ($keyInfo.Key)
 
     switch ($keyInfo.Key) {
-        'I' {$UpgradeBehavior = 'install'}
-        'U' {$UpgradeBehavior = 'uninstallPrevious'}
-        default {$UpgradeBehavior = 'install'}
+        'I' { $UpgradeBehavior = 'install' }
+        'U' { $UpgradeBehavior = 'uninstallPrevious' }
+        default { $UpgradeBehavior = 'install' }
     }
     
     if (!$script:Installers) {
@@ -414,12 +301,12 @@ Function Read-WinGet-InstallerValues {
     $_Installer = [ordered] @{}
 
     $_InstallerSingletons = [ordered] @{
-        "InstallerLocale" = $InstallerLocale
-        "Architecture"    = $Architecture
-        "InstallerType"   = $InstallerType
-        "Scope"           = $Scope
-        "InstallerUrl"    = $InstallerUrl
-        "InstallerSha256" = $InstallerSha256
+        'InstallerLocale' = $InstallerLocale
+        'Architecture'    = $Architecture
+        'InstallerType'   = $InstallerType
+        'Scope'           = $Scope
+        'InstallerUrl'    = $InstallerUrl
+        'InstallerSha256' = $InstallerSha256
     }
     foreach ($_Item in $_InstallerSingletons.GetEnumerator()) {
         If ($_Item.Value) { AddYamlParameter $_Installer $_Item.Name $_Item.Value }
@@ -428,26 +315,26 @@ Function Read-WinGet-InstallerValues {
     If ($Silent -or $SilentWithProgress -or $Custom) {
         $_InstallerSwitches = [ordered]@{}
         $_Switches = [ordered] @{
-            "Custom"             = $Custom
-            "Silent"             = $Silent
-            "SilentWithProgress" = $SilentWithProgress
+            'Custom'             = $Custom
+            'Silent'             = $Silent
+            'SilentWithProgress' = $SilentWithProgress
         }
         
         foreach ($_Item in $_Switches.GetEnumerator()) {
             If ($_Item.Value) { AddYamlParameter $_InstallerSwitches $_Item.Name $_Item.Value }
         }
-        $_Installer["InstallerSwitches"] = $_InstallerSwitches
+        $_Installer['InstallerSwitches'] = $_InstallerSwitches
     }
     #ProductCode goes here
-    AddYamlParameter $_Installer "UpgradeBehavior" $UpgradeBehavior
+    AddYamlParameter $_Installer 'UpgradeBehavior' $UpgradeBehavior
 
     $script:Installers += $_Installer
 
     Write-Host
     Write-Host
-    Write-Host -ForegroundColor 'White' "Another Installer"
-    Write-Host "[Optional] Do you want to create another installer?"
-    Write-Host -ForegroundColor 'White' -NoNewline "[Y] Yes  "
+    Write-Host -ForegroundColor 'White' 'Another Installer'
+    Write-Host '[Optional] Do you want to create another installer?'
+    Write-Host -ForegroundColor 'White' -NoNewline '[Y] Yes  '
     Write-Host -ForegroundColor 'Yellow' -NoNewline '[N] No '
     Write-Host -NoNewline "(default is 'N'): "
     do {
@@ -455,9 +342,9 @@ Function Read-WinGet-InstallerValues {
     } until ($keyInfo.Key)
 
     switch ($keyInfo.Key) {
-        'Y' {$AnotherInstaller = '0'}
-        'N' {$AnotherInstaller = '1'}
-        default {$AnotherInstaller = '1'}
+        'Y' { $AnotherInstaller = '0' }
+        'N' { $AnotherInstaller = '1' }
+        default { $AnotherInstaller = '1' }
     }
 
     if ($AnotherInstaller -eq '0') {
@@ -472,19 +359,18 @@ Function Read-WinGet-InstallerManifest {
             Write-Host
             Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter any File Extensions the application could support. For example: html, htm, url (Max 256)'
             $script:FileExtensions = Read-Host -Prompt 'FileExtensions' | TrimString
-        } while (($FileExtensions -split ", ").Count -gt '256')
-    }
-    else {
+        } while (($FileExtensions -split ', ').Count -gt '256')
+    } else {
         do {
             Write-Host
             Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter any File Extensions the application could support. For example: html, htm, url (Max 256)'
-            Write-Host -ForegroundColor 'DarkGray' "Old Variable: $FileExtensions"
+            Write-Host -ForegroundColor 'DarkGray' "Old Variable: $($FileExtensions -join ', ')"
             $NewFileExtensions = Read-Host -Prompt 'FileExtensions' | TrimString
     
             if (-not [string]::IsNullOrWhiteSpace($NewFileExtensions)) {
                 $script:FileExtensions = $NewFileExtensions
             }
-        } while (($FileExtensions -split ", ").Count -gt '256')
+        } while (($FileExtensions -split ', ').Count -gt '256')
     }
 
     if ([string]::IsNullOrWhiteSpace($Protocols)) {
@@ -492,19 +378,18 @@ Function Read-WinGet-InstallerManifest {
             Write-Host
             Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter any Protocols the application provides a handler for. For example: http, https (Max 16)'
             $script:Protocols = Read-Host -Prompt 'Protocols' | TrimString
-        } while (($Protocols -split ", ").Count -gt '16')
-    }
-    else {
+        } while (($Protocols -split ', ').Count -gt '16')
+    } else {
         do {
             Write-Host
             Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter any Protocols the application provides a handler for. For example: http, https (Max 16)'
-            Write-Host -ForegroundColor 'DarkGray' "Old Variable: $Protocols"
+            Write-Host -ForegroundColor 'DarkGray' "Old Variable: $($Protocols -join ', ')"
             $NewProtocols = Read-Host -Prompt 'Protocols' | TrimString
     
             if (-not [string]::IsNullOrWhiteSpace($NewProtocols)) {
                 $script:Protocols = $NewProtocols
             }
-        } while (($Protocols -split ", ").Count -gt '16')
+        } while (($Protocols -split ', ').Count -gt '16')
     }
 
     if ([string]::IsNullOrWhiteSpace($Commands)) {
@@ -512,19 +397,18 @@ Function Read-WinGet-InstallerManifest {
             Write-Host
             Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter any Commands or aliases to run the application. For example: msedge (Max 16)'
             $script:Commands = Read-Host -Prompt 'Commands' | TrimString
-        } while (($Commands -split ", ").Count -gt '16')
-    }
-    else {
+        } while (($Commands -split ', ').Count -gt '16')
+    } else {
         do {
             Write-Host
             Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter any Commands or aliases to run the application. For example: msedge (Max 16)'
-            Write-Host -ForegroundColor 'DarkGray' "Old Variable: $Commands"
+            Write-Host -ForegroundColor 'DarkGray' "Old Variable: $($Commands -join ', ')"
             $NewCommands = Read-Host -Prompt 'Commands' | TrimString
     
             if (-not [string]::IsNullOrWhiteSpace($NewCommands)) {
                 $script:Commands = $NewCommands
             }
-        } while (($Commands -split ", ").Count -gt '16')
+        } while (($Commands -split ', ').Count -gt '16')
     }
 
     if ([string]::IsNullOrWhiteSpace($InstallerSuccessCodes)) {
@@ -532,19 +416,18 @@ Function Read-WinGet-InstallerManifest {
             Write-Host
             Write-Host -ForegroundColor 'Yellow' -Object '[Optional] List of additional non-zero installer success exit codes other than known default values by winget (Max 16)'
             $script:InstallerSuccessCodes = Read-Host -Prompt 'InstallerSuccessCodes' | TrimString
-        } while (($InstallerSuccessCodes -split ", ").Count -gt '16')
-    }
-    else {
+        } while (($InstallerSuccessCodes -split ', ').Count -gt '16')
+    } else {
         do {
             Write-Host
             Write-Host -ForegroundColor 'Yellow' -Object '[Optional] List of additional non-zero installer success exit codes other than known default values by winget (Max 16)'
-            Write-Host -ForegroundColor 'DarkGray' "Old Variable: $InstallerSuccessCodes"
+            Write-Host -ForegroundColor 'DarkGray' "Old Variable: $($InstallerSuccessCodes -join ', ')"
             $NewInstallerSuccessCodes = Read-Host -Prompt 'InstallerSuccessCodes' | TrimString
     
             if (-not [string]::IsNullOrWhiteSpace($NewInstallerSuccessCodes)) {
                 $script:InstallerSuccessCodes = $NewInstallerSuccessCodes
             }
-        } while (($InstallerSuccessCodes -split ", ").Count -gt '16')
+        } while (($InstallerSuccessCodes -split ', ').Count -gt '16')
     }
 
     if ([string]::IsNullOrWhiteSpace($InstallModes)) {
@@ -552,19 +435,19 @@ Function Read-WinGet-InstallerManifest {
             Write-Host
             Write-Host -ForegroundColor 'Yellow' -Object '[Optional] List of supported installer modes. Options: interactive, silent, silentWithProgress'
             $script:InstallModes = Read-Host -Prompt 'InstallModes' | TrimString
-        } while (($InstallModes -split ", ").Count -gt '3')
-    }
-    else {
+        } while (($InstallModes -split ', ').Count -gt '3')
+    } else {
         do {
             Write-Host
             Write-Host -ForegroundColor 'Yellow' -Object '[Optional] List of supported installer modes. Options: interactive, silent, silentWithProgress'
-            Write-Host -ForegroundColor 'DarkGray' "Old Variable: $InstallModes"
+            Write-Host -ForegroundColor 'DarkGray' "Old Variable: $($InstallModes -join ', ')"
             $NewInstallModes = Read-Host -Prompt 'InstallModes' | TrimString
     
             if (-not [string]::IsNullOrWhiteSpace($NewInstallModes)) {
                 $script:InstallModes = $NewInstallModes
             }
-        } while (($InstallModes -split ", ").Count -gt '3')
+
+        } while (($InstallModes -split ', ').Count -gt '3')
     }
 
 }
@@ -582,8 +465,7 @@ Function Read-WinGet-LocaleManifest {
             Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the full publisher name. For example: Microsoft Corporation'
             $script:Publisher = Read-Host -Prompt 'Publisher' | TrimString
         }
-    }
-    else {
+    } else {
         do {
             Write-Host
             Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the full publisher name. For example: Microsoft Corporation'
@@ -602,8 +484,7 @@ Function Read-WinGet-LocaleManifest {
             Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the full application name. For example: Microsoft Teams'
             $script:PackageName = Read-Host -Prompt 'PackageName' | TrimString
         }
-    }
-    else {
+    } else {
         do {
             Write-Host
             Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the full application name. For example: Microsoft Teams'
@@ -622,8 +503,7 @@ Function Read-WinGet-LocaleManifest {
             Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the Moniker (friendly name/alias). For example: vscode'
             $script:Moniker = Read-Host -Prompt 'Moniker' | TrimString
         } while ($Moniker.Length -gt '40')
-    }
-    else {
+    } else {
         do {
             Write-Host
             Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the Moniker (friendly name/alias). For example: vscode'
@@ -642,8 +522,7 @@ Function Read-WinGet-LocaleManifest {
             Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the Publisher Url.'
             $script:PublisherUrl = Read-Host -Prompt 'Publisher Url' | TrimString
         } while (-not [string]::IsNullOrWhiteSpace($PublisherUrl) -and ($PublisherUrl.Length -lt 5 -or $LicenseUrl.Length -gt 2000))
-    }
-    else {
+    } else {
         do {
             Write-Host
             Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the Publisher Url.'
@@ -662,8 +541,7 @@ Function Read-WinGet-LocaleManifest {
             Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the Publisher Support Url.'
             $script:PublisherSupportUrl = Read-Host -Prompt 'Publisher Support Url' | TrimString
         } while (-not [string]::IsNullOrWhiteSpace($PublisherSupportUrl) -and ($PublisherSupportUrl.Length -lt 5 -or $PublisherSupportUrl.Length -gt 2000))
-    }
-    else {
+    } else {
         do {
             Write-Host
             Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the Publisher Support Url.'
@@ -682,8 +560,7 @@ Function Read-WinGet-LocaleManifest {
             Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the Publisher Privacy Url.'
             $script:PrivacyUrl = Read-Host -Prompt 'Privacy Url' | TrimString
         } while (-not [string]::IsNullOrWhiteSpace($PrivacyUrl) -and ($PrivacyUrl.Length -lt 5 -or $PrivacyUrl.Length -gt 2000))
-    }
-    else {
+    } else {
         do {
             Write-Host
             Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the Publisher Privacy Url.'
@@ -702,8 +579,7 @@ Function Read-WinGet-LocaleManifest {
             Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the application Author.'
             $script:Author = Read-Host -Prompt 'Author' | TrimString
         } while (-not [string]::IsNullOrWhiteSpace($Author) -and ($Author.Length -lt 2 -or $Author.Length -gt 256))
-    }
-    else {
+    } else {
         do {
             Write-Host
             Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the application Author.'
@@ -722,8 +598,7 @@ Function Read-WinGet-LocaleManifest {
             Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the Url to the homepage of the application.'
             $script:PackageUrl = Read-Host -Prompt 'Homepage' | TrimString
         } while (-not [string]::IsNullOrWhiteSpace($PackageUrl) -and ($PackageUrl.Length -lt 5 -or $PackageUrl.Length -gt 2000))
-    }
-    else {
+    } else {
         do {
             Write-Host
             Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the Url to the homepage of the application.'
@@ -742,8 +617,7 @@ Function Read-WinGet-LocaleManifest {
             Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the application License. For example: MIT, GPL, Freeware, Proprietary'
             $script:License = Read-Host -Prompt 'License' | TrimString
         }
-    }
-    else {
+    } else {
         do {
             Write-Host
             Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the application License. For example: MIT, GPL, Freeware, Proprietary'
@@ -762,8 +636,7 @@ Function Read-WinGet-LocaleManifest {
             Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the application License URL.'
             $script:LicenseUrl = Read-Host -Prompt 'License URL' | TrimString
         } while (-not [string]::IsNullOrWhiteSpace($LicenseUrl) -and ($LicenseUrl.Length -lt 10 -or $LicenseUrl.Length -gt 2000))
-    }
-    else {
+    } else {
         do {
             Write-Host
             Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the application License URL.'
@@ -782,8 +655,7 @@ Function Read-WinGet-LocaleManifest {
             Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the application Copyright. For example: Copyright (c) Microsoft Corporation'
             $script:Copyright = Read-Host -Prompt 'Copyright' | TrimString
         } while (-not [string]::IsNullOrWhiteSpace($Copyright) -and ($Copyright.Length -lt 5 -or $Copyright.Length -gt 512))
-    }
-    else {
+    } else {
         do {
             Write-Host
             Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the application Copyright. For example: Copyright (c) Microsoft Corporation'
@@ -802,8 +674,7 @@ Function Read-WinGet-LocaleManifest {
             Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the application Copyright Url.'
             $script:CopyrightUrl = Read-Host -Prompt 'CopyrightUrl' | TrimString
         } while (-not [string]::IsNullOrWhiteSpace($CopyrightUrl) -and ($LicenseUrl.Length -lt 10 -or $LicenseUrl.Length -gt 2000))
-    }
-    else {
+    } else {
         do {
             Write-Host
             Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the application Copyright Url.'
@@ -821,9 +692,8 @@ Function Read-WinGet-LocaleManifest {
             Write-Host
             Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter any tags that would be useful to discover this tool. For example: zip, c++ (Max 16)'
             $script:Tags = Read-Host -Prompt 'Tags' | TrimString
-        } while (($Tags -split ", ").Count -gt '16')
-    }
-    else {
+        } while (($Tags -split ', ').Count -gt '16')
+    } else {
         do {
             Write-Host
             Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter any tags that would be useful to discover this tool. For example: zip, c++ (Max 16)'
@@ -833,7 +703,7 @@ Function Read-WinGet-LocaleManifest {
             if (-not [string]::IsNullOrWhiteSpace($NewTags)) {
                 $script:Tags = $NewTags
             }
-        } while (($Tags -split ", ").Count -gt '16')
+        } while (($Tags -split ', ').Count -gt '16')
     }
 
     if ([string]::IsNullOrWhiteSpace($ShortDescription)) {
@@ -842,8 +712,7 @@ Function Read-WinGet-LocaleManifest {
             Write-Host -ForegroundColor 'Green' -Object '[Required] Enter a short description of the application.'
             $script:ShortDescription = Read-Host -Prompt 'Short Description' | TrimString
         }
-    }
-    else {
+    } else {
         do {
             Write-Host
             Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter a short description of the application.'
@@ -862,8 +731,7 @@ Function Read-WinGet-LocaleManifest {
             Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter a long description of the application.'
             $script:Description = Read-Host -Prompt 'Long Description' | TrimString
         } while (-not [string]::IsNullOrWhiteSpace($Description) -and ($Description.Length -lt 3 -or $Description.Length -gt 10000))
-    }
-    else {
+    } else {
         do {
             Write-Host
             Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter a long description of the application.'
@@ -883,26 +751,25 @@ Function Test-Manifest {
 
     if (Get-Command 'WindowsSandbox.exe' -ErrorAction SilentlyContinue) {
         Write-Host
-        Write-Host -ForegroundColor 'White' "Sandbox Test"
-        Write-Host "[Recommended] Do you want to test your Manifest in Windows Sandbox?"
+        Write-Host -ForegroundColor 'White' 'Sandbox Test'
+        Write-Host '[Recommended] Do you want to test your Manifest in Windows Sandbox?'
         Write-Host -ForegroundColor 'Yellow' -NoNewline '[Y] Yes  '
-        Write-Host -ForegroundColor 'White' -NoNewline "[N] No "
+        Write-Host -ForegroundColor 'White' -NoNewline '[N] No '
         Write-Host -NoNewline "(default is 'Y'): "
         do {
             $keyInfo = [Console]::ReadKey($false)
         } until ($keyInfo.Key)
 
         switch ($keyInfo.Key) {
-            'Y' {$SandboxTest = '0'}
-            'N' {$SandboxTest = '1'}
-            default {$SandboxTest = '0'}
+            'Y' { $SandboxTest = '0' }
+            'N' { $SandboxTest = '1' }
+            default { $SandboxTest = '0' }
         }
 
         if ($SandboxTest -eq '0') {
             if (Test-Path -Path "$PSScriptRoot\SandboxTest.ps1") {
                 $SandboxScriptPath = (Resolve-Path "$PSScriptRoot\SandboxTest.ps1").Path
-            }
-            else {
+            } else {
                 while ([string]::IsNullOrWhiteSpace($SandboxScriptPath)) {
                     Write-Host
                     Write-Host -ForegroundColor 'Green' -Object 'SandboxTest.ps1 not found, input path'
@@ -919,19 +786,19 @@ Function Submit-Manifest {
     if (Get-Command 'git.exe' -ErrorAction SilentlyContinue) {
         Write-Host
         Write-Host
-        Write-Host -ForegroundColor 'White' "Submit PR?"
-        Write-Host "Do you want to submit your PR now?"
+        Write-Host -ForegroundColor 'White' 'Submit PR?'
+        Write-Host 'Do you want to submit your PR now?'
         Write-Host -ForegroundColor 'Yellow' -NoNewline '[Y] Yes  '
-        Write-Host -ForegroundColor 'White' -NoNewline "[N] No "
+        Write-Host -ForegroundColor 'White' -NoNewline '[N] No '
         Write-Host -NoNewline "(default is 'Y'): "
         do {
             $keyInfo = [Console]::ReadKey($false)
         } until ($keyInfo.Key)
 
         switch ($keyInfo.Key) {
-            'Y' {$PromptSubmit = '0'}
-            'N' {$PromptSubmit = '1'}
-            default {$PromptSubmit = '0'}
+            'Y' { $PromptSubmit = '0' }
+            'N' { $PromptSubmit = '1' }
+            default { $PromptSubmit = '0' }
         }
     }
 
@@ -953,8 +820,7 @@ Function Submit-Manifest {
         
             if (Test-Path -Path "$PSScriptRoot\..\.github\PULL_REQUEST_TEMPLATE.md") {
                 gh pr create --body-file "$PSScriptRoot\..\.github\PULL_REQUEST_TEMPLATE.md" -f
-            }
-            else {
+            } else {
                 while ([string]::IsNullOrWhiteSpace($SandboxScriptPath)) {
                     Write-Host
                     Write-Host -ForegroundColor 'Green' -Object 'PULL_REQUEST_TEMPLATE.md not found, input path'
@@ -977,7 +843,7 @@ Function AddYamlListParameter {
         [string] $Values
     )
     $_Values = @()
-    Foreach ($Value in $Values.Split(",").Trim()) {
+    Foreach ($Value in $Values.Split(',').Trim()) {
         $_Values += $Value
     }
     $Object[$Parameter] = $_Values
@@ -996,15 +862,23 @@ Function AddYamlParameter {
     $Object[$Parameter] = $Value
 }
 
+Function GetMultiManifestParameter {
+    Param(
+        [Parameter(Mandatory = $true, Position = 1)]
+        [string] $Parameter
+    )
+    $_vals = $($script:OldInstallerManifest[$Parameter] + $script:OldLocaleManifest[$Parameter] + $script:OldVersionManifest[$Parameter] | Where-Object { $_ })
+    return ($_vals -join ', ')
+}
 Function Write-WinGet-VersionManifest-Yaml {
     [PSCustomObject]$VersionManifest = [ordered]@{}
 
     $_Singletons = [ordered]@{
-        "PackageIdentifier" = $PackageIdentifier
-        "PackageVersion"    = $PackageVersion
-        "DefaultLocale"     = "en-US"
-        "ManifestType"      = "version"
-        "ManifestVersion"   = $ManifestVersion
+        'PackageIdentifier' = $PackageIdentifier
+        'PackageVersion'    = $PackageVersion
+        'DefaultLocale'     = 'en-US'
+        'ManifestType'      = 'version'
+        'ManifestVersion'   = $ManifestVersion
     }
 
     foreach ($_Item in $_Singletons.GetEnumerator()) {
@@ -1012,7 +886,7 @@ Function Write-WinGet-VersionManifest-Yaml {
     }
 
     
-    New-Item -ItemType "Directory" -Force -Path $AppFolder | Out-Null
+    New-Item -ItemType 'Directory' -Force -Path $AppFolder | Out-Null
     
     $VersionManifestPath = $AppFolder + "\$PackageIdentifier" + '.yaml'
     
@@ -1033,27 +907,27 @@ Function Write-WinGet-VersionManifest-Yaml {
 Function Write-WinGet-InstallerManifest-Yaml {
     [PSCustomObject]$InstallerManifest = [ordered]@{}
 
-    AddYamlParameter $InstallerManifest "PackageIdentifier" $PackageIdentifier
-    AddYamlParameter $InstallerManifest "PackageVersion" $PackageVersion
-    $InstallerManifest["MinimumOSVersion"] = If ($MinimumOSVersion) { $MinimumOSVersion } Else { "10.0.0.0" }
+    AddYamlParameter $InstallerManifest 'PackageIdentifier' $PackageIdentifier
+    AddYamlParameter $InstallerManifest 'PackageVersion' $PackageVersion
+    $InstallerManifest['MinimumOSVersion'] = If ($MinimumOSVersion) { $MinimumOSVersion } Else { '10.0.0.0' }
 
     $_ListSections = [ordered]@{
-        "FileExtensions"        = $FileExtensions
-        "Protocols"             = $Protocols
-        "Commands"              = $Commands
-        "InstallerSuccessCodes" = $InstallerSuccessCodes
-        "InstallModes"          = $InstallModes
+        'FileExtensions'        = $FileExtensions
+        'Protocols'             = $Protocols
+        'Commands'              = $Commands
+        'InstallerSuccessCodes' = $InstallerSuccessCodes
+        'InstallModes'          = $InstallModes
     }
     foreach ($Section in $_ListSections.GetEnumerator()) {
         If ($Section.Value) { AddYamlListParameter $InstallerManifest $Section.Name $Section.Value }
     }
 
-    $InstallerManifest["Installers"] = $script:Installers
+    $InstallerManifest['Installers'] = $script:Installers
 
-    AddYamlParameter $InstallerManifest "ManifestType" "installer"
-    AddYamlParameter $InstallerManifest "ManifestVersion" $ManifestVersion
+    AddYamlParameter $InstallerManifest 'ManifestType' 'installer'
+    AddYamlParameter $InstallerManifest 'ManifestVersion' $ManifestVersion
    
-    New-Item -ItemType "Directory" -Force -Path $AppFolder | Out-Null
+    New-Item -ItemType 'Directory' -Force -Path $AppFolder | Out-Null
     $InstallerManifestPath = $AppFolder + "\$PackageIdentifier" + '.installer' + '.yaml'
     
     # $InstallerManifest | ForEach-Object {
@@ -1077,36 +951,36 @@ Function Write-WinGet-LocaleManifest-Yaml {
     if ($PackageLocale -eq 'en-US') { $yamlServer = '# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.0.0.schema.json' }else { $yamlServer = '# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.0.0.schema.json' }
     
     $_Singletons = [ordered]@{
-        "PackageIdentifier"   = $PackageIdentifier
-        "PackageVersion"      = $PackageVersion
-        "PackageLocale"       = $PackageLocale
-        "Publisher"           = $Publisher
-        "PublisherUrl"        = $PublisherUrl
-        "PublisherSupportUrl" = $PublisherSupportUrl
-        "PrivacyUrl"          = $PrivacyUrl
-        "Author"              = $Author
-        "PackageName"         = $PackageName
-        "PackageUrl"          = $PackageUrl
-        "License"             = $License
-        "LicenseUrl"          = $LicenseUrl
-        "Copyright"           = $Copyright
-        "CopyrightUrl"        = $CopyrightUrl
-        "ShortDescription"    = $ShortDescription
-        "Description"         = $Description
+        'PackageIdentifier'   = $PackageIdentifier
+        'PackageVersion'      = $PackageVersion
+        'PackageLocale'       = $PackageLocale
+        'Publisher'           = $Publisher
+        'PublisherUrl'        = $PublisherUrl
+        'PublisherSupportUrl' = $PublisherSupportUrl
+        'PrivacyUrl'          = $PrivacyUrl
+        'Author'              = $Author
+        'PackageName'         = $PackageName
+        'PackageUrl'          = $PackageUrl
+        'License'             = $License
+        'LicenseUrl'          = $LicenseUrl
+        'Copyright'           = $Copyright
+        'CopyrightUrl'        = $CopyrightUrl
+        'ShortDescription'    = $ShortDescription
+        'Description'         = $Description
     }
 
     foreach ($_Item in $_Singletons.GetEnumerator()) {
         If ($_Item.Value) { AddYamlParameter $LocaleManifest $_Item.Name $_Item.Value }
     }
 
-    If ($Tags) { AddYamlListParameter $LocaleManifest "Tags" $Tags }
-    If ($Moniker -and $PackageLocale -eq 'en-US') { AddYamlParameter $LocaleManifest "Moniker" $Moniker }
-    If ($PackageLocale -eq 'en-US') { $_ManifestType = "defaultLocale" }else { $_ManifestType = "locale" }
-    AddYamlParameter $LocaleManifest "ManifestType" $_ManifestType
-    AddYamlParameter $LocaleManifest "ManifestVersion" $ManifestVersion
+    If ($Tags) { AddYamlListParameter $LocaleManifest 'Tags' $Tags }
+    If ($Moniker -and $PackageLocale -eq 'en-US') { AddYamlParameter $LocaleManifest 'Moniker' $Moniker }
+    If ($PackageLocale -eq 'en-US') { $_ManifestType = 'defaultLocale' }else { $_ManifestType = 'locale' }
+    AddYamlParameter $LocaleManifest 'ManifestType' $_ManifestType
+    AddYamlParameter $LocaleManifest 'ManifestVersion' $ManifestVersion
 
-    New-Item -ItemType "Directory" -Force -Path $AppFolder | Out-Null
-    $LocaleManifestPath = $AppFolder + "\$PackageIdentifier" + ".locale." + "$PackageLocale" + '.yaml'
+    New-Item -ItemType 'Directory' -Force -Path $AppFolder | Out-Null
+    $LocaleManifestPath = $AppFolder + "\$PackageIdentifier" + '.locale.' + "$PackageLocale" + '.yaml'
 
     # $LocaleManifest | ForEach-Object {
     #     if ($_.Split(":").Trim()[1] -eq '' -and $_ -notin @("Tags:", "  -*")) {
@@ -1122,6 +996,124 @@ Function Write-WinGet-LocaleManifest-Yaml {
 
     Write-Host 
     Write-Host "Yaml file created: $LocaleManifestPath"
+}
+
+
+Function Read-PreviousWinGet-Manifest-Yaml {
+    Switch ($Option) {
+        'New' {}
+        'Metadata' {}
+        'Update' {
+            $LastVersion = Split-Path (Split-Path (Get-ChildItem -Path "$AppFolder\..\" -Recurse -Depth 1 -File).FullName ) -Leaf | Sort-Object $ToNatural | Select-Object -Last 1
+            Write-Host -ForegroundColor 'DarkYellow' -Object "Last Version: $LastVersion"
+            $script:OldManifests = Get-ChildItem -Path "$AppFolder\..\$LastVersion"
+
+            if (-not ($OldManifests.Name -like "$PackageIdentifier*.yaml")) {
+                while ([string]::IsNullOrWhiteSpace($PromptVersion)) {
+                    Write-Host
+                    Write-Host -ForegroundColor 'Red' -Object 'Could not find required manifests, input a version containing required manifests'
+                    $PromptVersion = Read-Host -Prompt 'Previous Version' | TrimString
+                    $script:OldManifests = Get-ChildItem -Path "$AppFolder\..\$PromptVersion"
+                }
+            }
+
+            #Multimanifest Parsing
+            if ($OldManifests.Name -eq "$PackageIdentifier.installer.yaml" -and $OldManifests.Name -eq "$PackageIdentifier.locale.en-US.yaml" -and $OldManifests.Name -eq "$PackageIdentifier.yaml") {
+                $script:OldManifestType = 'MultiManifest'
+                $OldInstallerText = Get-Content -Path $(Resolve-Path "$AppFolder\..\$LastVersion\$PackageIdentifier.installer.yaml") -Raw
+                $OldLocaleText = Get-Content -Path $(Resolve-Path "$AppFolder\..\$LastVersion\$PackageIdentifier.locale.en-US.yaml") -Raw
+                $OldVersionText = Get-Content -Path $(Resolve-Path "$AppFolder\..\$LastVersion\$PackageIdentifier.yaml") -Raw
+                $script:OldInstallerManifest = ConvertFrom-Yaml -Yaml $OldInstallerText
+                $script:OldLocaleManifest = ConvertFrom-Yaml -Yaml $OldLocaleText
+                $script:OldVersionManifest = ConvertFrom-Yaml -Yaml $OldVersionText
+            }
+            #Singleton Parsing
+            elseif ($OldManifests.Name -eq "$PackageIdentifier.yaml") {
+                $script:OldManifestType = 'Singleton'
+                $OldSingletonText = Get-Content -Path $(Resolve-Path "$AppFolder\..\$LastVersion\$PackageIdentifier.yaml") -Raw
+                $script:OldSingletonManifest = ConvertFrom-Yaml -Yaml $OldSingletonText
+            }
+            else {
+                Throw "Error: Version $LastVersion does not contain the required manifests"
+            }
+
+            #Read old values into variables
+            switch ($script:OldManifestType) {
+                'Multimanifest' {
+                    $_Parameters = @(
+                        "Publisher"; "PublisherUrl"; "PublisherSupportUrl"; "PrivacyUrl"
+                        "Author"; 
+                        "PackageName"; "PackageUrl"; "Moniker"
+                        "License"; "LicenseUrl"
+                        "Copyright"; "CopyrightUrl"
+                        "ShortDescription"; "Description"
+                        "Channel"
+                        "Platform"; "MinimumOSVersion"
+                        "InstallerType"
+                        "Scope"
+                        "UpgradeBehavior"
+                        "PackageFamilyName"; "ProductCode"
+                        "Tags"; "FileExtensions"
+                        "Protocols"; "Commands"
+                        "InstallModes"; "InstallerSuccessCodes"
+                        "Capabilities"; "RestrictedCapabilities"
+                    )
+
+                    Foreach ($param in $_Parameters){
+                        New-Variable -Name $param -Value (GetMultiManifestParameter $param) -Scope Script -Force
+                    }
+                }
+                'Singleton' {
+                    #Tags
+                    #FileExtensions
+                    #Protocols
+                    #Commands
+                    #InstallerSuccessCodes
+                    #InstallModes
+                    #Other single parameter values
+                }
+            }
+            
+#             ForEach ($Line in $OldManifestText -ne '') {
+#                 elseif ($Line -notlike "PackageVersion*" -and $Line -notlike "PackageIdentifier*") {
+#                     $Variable = $Line.TrimStart("#").Split(":").Trim()
+#                     New-Variable -Name $Variable[0] -Value ($Variable[1..10] -join ":") -Scope Script -Force
+#                 }
+#             }
+
+#             ForEach ($DifLocale in $OldManifests) {
+#                 if ($DifLocale.Name -notin @("$PackageIdentifier.yaml", "$PackageIdentifier.installer.yaml", "$PackageIdentifier.locale.en-US.yaml")) {
+#                     if (!(Test-Path $AppFolder)) { New-Item -ItemType "Directory" -Force -Path $AppFolder | Out-Null }
+#                     $DifLocaleContent = [System.IO.File]::ReadAllLines($DifLocale.FullName)
+#                     [System.IO.File]::WriteAllLines(($AppFolder + "\" + $DifLocale.Name), $DifLocaleContent.Replace("PackageVersion: $LastVersion", "PackageVersion: $PackageVersion"), $Utf8NoBomEncoding)
+#                 }
+#             }
+        }
+
+        'NewLocale' {
+#             $script:OldManifests = Get-ChildItem -Path "$AppFolder"
+#             if ($OldManifests.Name -eq "$PackageIdentifier.locale.en-US.yaml") {
+#                 $script:OldManifestText = Get-Content -Path "$AppFolder\$PackageIdentifier.locale.en-US.yaml" -Encoding 'UTF8'
+#             }
+#             else {
+#                 Throw "Error: Multimanifest required"
+#             }
+
+#             ForEach ($Line in $OldManifestText -ne '') {
+#                 if ($Line -eq "Tags:") {
+#                     $regex = '(?ms)Tags:(.+?):'
+#                     $FetchTags = [regex]::Matches($OldManifestText, $regex) | foreach { $_.groups[1].value }
+#                     $Tags = $FetchTags.Substring(0, $FetchTags.LastIndexOf(' '))
+#                     $Tags = $Tags -Split '- '
+#                     New-Variable -Name "Tags" -Value ($Tags.Trim()[1..17] -join ", ") -Scope Script -Force
+#                 }
+#                 elseif ($Line -notlike "PackageLocale*") {
+#                     $Variable = $Line.TrimStart("#").Split(":").Trim()
+#                     New-Variable -Name $Variable[0] -Value ($Variable[1..10] -join ":") -Scope Script -Force
+#                 }
+#             }
+        }
+    }
 }
         
 Show-OptionMenu
@@ -1142,7 +1134,7 @@ Switch ($Option) {
 
     'Update' {
         Read-WinGet-MandatoryInfo
-        Read-PreviousWinGet-Manifest
+        Read-PreviousWinGet-Manifest-Yaml
         Read-WinGet-InstallerValues
         Read-WinGet-InstallerManifest
         New-Variable -Name "PackageLocale" -Value "en-US" -Scope "Script" -Force
