@@ -66,7 +66,7 @@ Function Write-Colors {
         [Parameter(Mandatory = $true, Position = 1)]
         [string[]] $Colors
     )
-    If ($TextStrings.Count -ne $Colors.Count) { Throw 'Invalid Function Parameters. Arguments must be of equal length' }
+    If ($TextStrings.Count -ne $Colors.Count) { Throw "Invalid Function Parameters. Arguments must be of equal length" }
     $_index = 0
     Foreach ($String in $TextStrings) {
         Write-Host -ForegroundColor $Colors[$_index] -NoNewline $String
@@ -76,11 +76,11 @@ Function Write-Colors {
 
 Function Show-OptionMenu {
     Clear-Host
-    Write-Host -ForegroundColor 'Cyan' 'Select Mode'
-    Write-Colors "`n[", '1', "] New Manifest`n" 'DarkCyan', 'White', 'DarkCyan'
-    Write-Colors "`n[", '2', "] Update Manifest`n" 'DarkCyan', 'White', 'DarkCyan'
-    Write-Colors "`n[", '3', "] New Locale`n" 'DarkCyan', 'White', 'DarkCyan'
-    Write-Colors "`n[", 'q', ']', " Any key to quit`n" 'DarkCyan', 'White', 'DarkCyan', 'Red'
+    Write-Host -ForegroundColor 'Cyan' "Select Mode"
+    Write-Colors "`n[", "1", "] New Manifest`n" 'DarkCyan', 'White', 'DarkCyan'
+    Write-Colors "`n[", "2", "] Update Manifest`n" 'DarkCyan', 'White', 'DarkCyan'
+    Write-Colors "`n[", "3", "] New Locale`n" 'DarkCyan', 'White', 'DarkCyan'
+    Write-Colors "`n[", "q", "]", " Any key to quit`n" 'DarkCyan', 'White', 'DarkCyan', 'Red'
     Write-Colors "`nSelection: " 'White'
 
     $Keys = @{
@@ -869,7 +869,7 @@ Function GetMultiManifestParameter {
         [string] $Parameter
     )
     $_vals = $($script:OldInstallerManifest[$Parameter] + $script:OldLocaleManifest[$Parameter] + $script:OldVersionManifest[$Parameter] | Where-Object { $_ })
-    return ($_vals -join ', ')
+    return ($_vals -join ", ")
 }
 Function Write-WinGet-VersionManifest-Yaml {
     [PSCustomObject]$VersionManifest = [ordered]@{}
@@ -1002,20 +1002,23 @@ Function Write-WinGet-LocaleManifest-Yaml {
 
 Function Read-PreviousWinGet-Manifest-Yaml {
     Switch ($Option) {
-        'New' {}
-        'Metadata' {}
         'Update' {
-            $LastVersion = Split-Path (Split-Path (Get-ChildItem -Path "$AppFolder\..\" -Recurse -Depth 1 -File).FullName ) -Leaf | Sort-Object $ToNatural | Select-Object -Last 1
-            Write-Host -ForegroundColor 'DarkYellow' -Object "Last Version: $LastVersion"
-            $script:OldManifests = Get-ChildItem -Path "$AppFolder\..\$LastVersion"
-
-            if (-not ($OldManifests.Name -like "$PackageIdentifier*.yaml")) {
-                while ([string]::IsNullOrWhiteSpace($PromptVersion)) {
-                    Write-Host
-                    Write-Host -ForegroundColor 'Red' -Object 'Could not find required manifests, input a version containing required manifests'
-                    $PromptVersion = Read-Host -Prompt 'Previous Version' | TrimString
-                    $script:OldManifests = Get-ChildItem -Path "$AppFolder\..\$PromptVersion"
+            try {
+                $LastVersion = Split-Path (Split-Path (Get-ChildItem -Path "$AppFolder\..\" -Recurse -Depth 1 -File).FullName ) -Leaf | Sort-Object $ToNatural | Select-Object -Last 1
+                Write-Host -ForegroundColor 'DarkYellow' -Object "Last Version: $LastVersion"
+                $script:OldManifests = Get-ChildItem -Path "$AppFolder\..\$LastVersion"
+    
+                if (-not ($OldManifests.Name -like "$PackageIdentifier*.yaml")) {
+                    while ([string]::IsNullOrWhiteSpace($PromptVersion)) {
+                        Write-Host
+                        Write-Host -ForegroundColor 'Red' -Object 'Could not find required manifests, input a version containing required manifests'
+                        $PromptVersion = Read-Host -Prompt 'Previous Version' | TrimString
+                        $script:OldManifests = Get-ChildItem -Path "$AppFolder\..\$PromptVersion"
+                    }
                 }
+            }
+            catch {
+                throw "App folder does not exist. Please use the 'New' option to create a manifest for this app"
             }
 
             #Multimanifest Parsing
@@ -1035,74 +1038,60 @@ Function Read-PreviousWinGet-Manifest-Yaml {
             }
 
             #Read old values into variables
-            switch ($script:OldManifestType) {
-                'Multimanifest' {
-                    $_Parameters = @(
-                        "Publisher"; "PublisherUrl"; "PublisherSupportUrl"; "PrivacyUrl"
-                        "Author"; 
-                        "PackageName"; "PackageUrl"; "Moniker"
-                        "License"; "LicenseUrl"
-                        "Copyright"; "CopyrightUrl"
-                        "ShortDescription"; "Description"
-                        "Channel"
-                        "Platform"; "MinimumOSVersion"
-                        "InstallerType"
-                        "Scope"
-                        "UpgradeBehavior"
-                        "PackageFamilyName"; "ProductCode"
-                        "Tags"; "FileExtensions"
-                        "Protocols"; "Commands"
-                        "InstallModes"; "InstallerSuccessCodes"
-                        "Capabilities"; "RestrictedCapabilities"
-                    )
+            $_Parameters = @(
+                "Publisher"; "PublisherUrl"; "PublisherSupportUrl"; "PrivacyUrl"
+                "Author"; 
+                "PackageName"; "PackageUrl"; "Moniker"
+                "License"; "LicenseUrl"
+                "Copyright"; "CopyrightUrl"
+                "ShortDescription"; "Description"
+                "Channel"
+                "Platform"; "MinimumOSVersion"
+                "InstallerType"
+                "Scope"
+                "UpgradeBehavior"
+                "PackageFamilyName"; "ProductCode"
+                "Tags"; "FileExtensions"
+                "Protocols"; "Commands"
+                "InstallModes"; "InstallerSuccessCodes"
+                "Capabilities"; "RestrictedCapabilities"
+            )
 
-                    Foreach ($param in $_Parameters){
-                        New-Variable -Name $param -Value (GetMultiManifestParameter $param) -Scope Script -Force
-                    }
-                }
-                'Singleton' {
-                    #Read all parameters
-                }
+            Foreach ($param in $_Parameters) {
+                New-Variable -Name $param -Value $(if ($script:OldManifestType -eq 'MultiManifest') { (GetMultiManifestParameter $param) } else { $script:OldVersionManifest[$param] }) -Scope Script -Force
             }
-            
-#             ForEach ($Line in $OldManifestText -ne '') {
-#                 elseif ($Line -notlike "PackageVersion*" -and $Line -notlike "PackageIdentifier*") {
-#                     $Variable = $Line.TrimStart("#").Split(":").Trim()
-#                     New-Variable -Name $Variable[0] -Value ($Variable[1..10] -join ":") -Scope Script -Force
-#                 }
-#             }
 
-#             ForEach ($DifLocale in $OldManifests) {
-#                 if ($DifLocale.Name -notin @("$PackageIdentifier.yaml", "$PackageIdentifier.installer.yaml", "$PackageIdentifier.locale.en-US.yaml")) {
-#                     if (!(Test-Path $AppFolder)) { New-Item -ItemType "Directory" -Force -Path $AppFolder | Out-Null }
-#                     $DifLocaleContent = [System.IO.File]::ReadAllLines($DifLocale.FullName)
-#                     [System.IO.File]::WriteAllLines(($AppFolder + "\" + $DifLocale.Name), $DifLocaleContent.Replace("PackageVersion: $LastVersion", "PackageVersion: $PackageVersion"), $Utf8NoBomEncoding)
-#                 }
-#             }
+            #             ForEach ($DifLocale in $OldManifests) {
+            #                 if ($DifLocale.Name -notin @("$PackageIdentifier.yaml", "$PackageIdentifier.installer.yaml", "$PackageIdentifier.locale.en-US.yaml")) {
+            #                     if (!(Test-Path $AppFolder)) { New-Item -ItemType "Directory" -Force -Path $AppFolder | Out-Null }
+            #                     $DifLocaleContent = [System.IO.File]::ReadAllLines($DifLocale.FullName)
+            #                     [System.IO.File]::WriteAllLines(($AppFolder + "\" + $DifLocale.Name), $DifLocaleContent.Replace("PackageVersion: $LastVersion", "PackageVersion: $PackageVersion"), $Utf8NoBomEncoding)
+            #                 }
+            #             }
         }
 
         'NewLocale' {
-#             $script:OldManifests = Get-ChildItem -Path "$AppFolder"
-#             if ($OldManifests.Name -eq "$PackageIdentifier.locale.en-US.yaml") {
-#                 $script:OldManifestText = Get-Content -Path "$AppFolder\$PackageIdentifier.locale.en-US.yaml" -Encoding 'UTF8'
-#             }
-#             else {
-#                 Throw "Error: Multimanifest required"
-#             }
+            #             $script:OldManifests = Get-ChildItem -Path "$AppFolder"
+            #             if ($OldManifests.Name -eq "$PackageIdentifier.locale.en-US.yaml") {
+            #                 $script:OldManifestText = Get-Content -Path "$AppFolder\$PackageIdentifier.locale.en-US.yaml" -Encoding 'UTF8'
+            #             }
+            #             else {
+            #                 Throw "Error: Multimanifest required"
+            #             }
 
-#             ForEach ($Line in $OldManifestText -ne '') {
-#                 if ($Line -eq "Tags:") {
-#                     $regex = '(?ms)Tags:(.+?):'
-#                     $FetchTags = [regex]::Matches($OldManifestText, $regex) | foreach { $_.groups[1].value }
-#                     $Tags = $FetchTags.Substring(0, $FetchTags.LastIndexOf(' '))
-#                     $Tags = $Tags -Split '- '
-#                     New-Variable -Name "Tags" -Value ($Tags.Trim()[1..17] -join ", ") -Scope Script -Force
-#                 }
-#                 elseif ($Line -notlike "PackageLocale*") {
-#                     $Variable = $Line.TrimStart("#").Split(":").Trim()
-#                     New-Variable -Name $Variable[0] -Value ($Variable[1..10] -join ":") -Scope Script -Force
-#                 }
-#             }
+            #             ForEach ($Line in $OldManifestText -ne '') {
+            #                 if ($Line -eq "Tags:") {
+            #                     $regex = '(?ms)Tags:(.+?):'
+            #                     $FetchTags = [regex]::Matches($OldManifestText, $regex) | foreach { $_.groups[1].value }
+            #                     $Tags = $FetchTags.Substring(0, $FetchTags.LastIndexOf(' '))
+            #                     $Tags = $Tags -Split '- '
+            #                     New-Variable -Name "Tags" -Value ($Tags.Trim()[1..17] -join ", ") -Scope Script -Force
+            #                 }
+            #                 elseif ($Line -notlike "PackageLocale*") {
+            #                     $Variable = $Line.TrimStart("#").Split(":").Trim()
+            #                     New-Variable -Name $Variable[0] -Value ($Variable[1..10] -join ":") -Scope Script -Force
+            #                 }
+            #             }
         }
     }
 }
