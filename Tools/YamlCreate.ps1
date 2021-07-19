@@ -164,10 +164,10 @@ Function Read-WinGet-InstallerValues {
     } until ($keyInfo.Key)
 
     switch ($keyInfo.Key) {
-        'Y' {$SaveOption = '0'}
-        'N' {$SaveOption = '1'}
-        'M' {$SaveOption = '2'}
-        default {$SaveOption = '1'}
+        'Y' { $SaveOption = '0' }
+        'N' { $SaveOption = '1' }
+        'M' { $SaveOption = '2' }
+        default { $SaveOption = '1' }
     }
 
     if ($SaveOption -ne '2') {
@@ -277,10 +277,10 @@ Function Read-WinGet-InstallerValues {
     } until ($keyInfo.Key)
 
     switch ($keyInfo.Key) {
-        'M' {$Scope = 'machine'}
-        'U' {$Scope = 'user'}
-        'N' {$Scope = ''}
-        default {$Scope = ''}
+        'M' { $Scope = 'machine' }
+        'U' { $Scope = 'user' }
+        'N' { $Scope = '' }
+        default { $Scope = '' }
     }
 
     Write-Host
@@ -295,9 +295,9 @@ Function Read-WinGet-InstallerValues {
     } until ($keyInfo.Key)
 
     switch ($keyInfo.Key) {
-        'I' {$UpgradeBehavior = 'install'}
-        'U' {$UpgradeBehavior = 'uninstallPrevious'}
-        default {$UpgradeBehavior = 'install'}
+        'I' { $UpgradeBehavior = 'install' }
+        'U' { $UpgradeBehavior = 'uninstallPrevious' }
+        default { $UpgradeBehavior = 'install' }
     }
     
     if (!$script:Installers) {
@@ -348,9 +348,9 @@ Function Read-WinGet-InstallerValues {
     } until ($keyInfo.Key)
 
     switch ($keyInfo.Key) {
-        'Y' {$AnotherInstaller = '0'}
-        'N' {$AnotherInstaller = '1'}
-        default {$AnotherInstaller = '1'}
+        'Y' { $AnotherInstaller = '0' }
+        'N' { $AnotherInstaller = '1' }
+        default { $AnotherInstaller = '1' }
     }
 
     if ($AnotherInstaller -eq '0') {
@@ -382,23 +382,29 @@ Function PromptInstallerManifestValue {
 }
 
 Function Read-WinGet-InstallerManifest {
+    Write-Host
     do {
+        if (!$FileExtensions) { $FileExtensions = '' }
         $script:FileExtensions = PromptInstallerManifestValue $FileExtensions 'FileExtensions' '[Optional] Enter any File Extensions the application could support. For example: html, htm, url (Max 256)'
     } while (($FileExtensions -split ", ").Count -gt '256')
 
     do {
+        if (!$Protocols) { $Protocols = '' }
         $script:Protocols = PromptInstallerManifestValue $Protocols 'Protocols' '[Optional] Enter any Protocols the application provides a handler for. For example: http, https (Max 16)'
     } while (($Protocols -split ", ").Count -gt '16')
 
     do {
+        if (!$Commands) { $Commands = '' }
         $script:Commands = PromptInstallerManifestValue $Commands 'Commands' '[Optional] Enter any Commands or aliases to run the application. For example: msedge (Max 16)'
     } while (($Commands -split ", ").Count -gt '16')
 
     do {
+        if (!$InstallerSuccessCodes) { $InstallerSuccessCodes = '' }
         $script:InstallerSuccessCodes = PromptInstallerManifestValue $InstallerSuccessCodes 'Commands' '[Optional] List of additional non-zero installer success exit codes other than known default values by winget (Max 16)'
     } while (($InstallerSuccessCodes -split ", ").Count -gt '16')
 
     do {
+        if (!$InstallModes) { $InstallModes = '' }
         $script:InstallModes = PromptInstallerManifestValue $InstallModes 'InstallModes' '[Optional] List of supported installer modes. Options: interactive, silent, silentWithProgress'
     } while (($InstallModes -split ", ").Count -gt '3')
 }
@@ -727,9 +733,9 @@ Function Test-Manifest {
         } until ($keyInfo.Key)
 
         switch ($keyInfo.Key) {
-            'Y' {$SandboxTest = '0'}
-            'N' {$SandboxTest = '1'}
-            default {$SandboxTest = '0'}
+            'Y' { $SandboxTest = '0' }
+            'N' { $SandboxTest = '1' }
+            default { $SandboxTest = '0' }
         }
 
         if ($SandboxTest -eq '0') {
@@ -763,9 +769,9 @@ Function Submit-Manifest {
         } until ($keyInfo.Key)
 
         switch ($keyInfo.Key) {
-            'Y' {$PromptSubmit = '0'}
-            'N' {$PromptSubmit = '1'}
-            default {$PromptSubmit = '0'}
+            'Y' { $PromptSubmit = '0' }
+            'N' { $PromptSubmit = '1' }
+            default { $PromptSubmit = '0' }
         }
     }
 
@@ -797,6 +803,10 @@ Function Submit-Manifest {
                 gh pr create --body-file "$PRTemplate" -f
             }
         }
+    }
+    else {
+        Write-Host
+        Exit
     }
 }
 
@@ -946,7 +956,7 @@ Function Write-WinGet-LocaleManifest-Yaml {
 
     #TO-DO: Write keys with no values as comments
 
-    $ScriptHeader + " using YAML parsing`n$yamlServer`n" > $VersionManifestPath
+    $ScriptHeader + " using YAML parsing`n$yamlServer`n" > $LocaleManifestPath
     ConvertTo-Yaml $LocaleManifest >> $LocaleManifestPath
 
     Write-Host 
