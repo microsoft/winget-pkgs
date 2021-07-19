@@ -28,7 +28,6 @@ $ManifestVersion = '1.0.0'
 
 <#
 TO-DO:
-    - Add writing Product Code to installer manifest
     - Add/verify logic to handle null $Scope
     - Handle writing null parameters as comments
     - Add reading from manifests using YAML parsing
@@ -326,8 +325,9 @@ Function Read-WinGet-InstallerValues {
         }
         $_Installer['InstallerSwitches'] = $_InstallerSwitches
     }
-    #ProductCode goes here
-    AddYamlParameter $_Installer 'UpgradeBehavior' $UpgradeBehavior
+
+    If ($ProductCode) {AddYamlParameter $_Installer "ProductCode" $ProductCode}
+    AddYamlParameter $_Installer "UpgradeBehavior" $UpgradeBehavior
 
     $script:Installers += $_Installer
 
@@ -931,13 +931,7 @@ Function Write-WinGet-InstallerManifest-Yaml {
     New-Item -ItemType 'Directory' -Force -Path $AppFolder | Out-Null
     $InstallerManifestPath = $AppFolder + "\$PackageIdentifier" + '.installer' + '.yaml'
     
-    # $InstallerManifest | ForEach-Object {
-    #     if ($_.Split(":").Trim()[1] -eq '' -and $_ -notin @("FileExtensions:","Protocols:","Commands:","InstallerSuccessCodes:","InstallModes:","Installers:","  InstallerSwitches:")) {
-    #         $_.Insert(0,"#")
-    #     } else {
-    #         $_
-    #     }
-    # } | Out-File $InstallerManifestPath -Encoding 'UTF8'
+    #TO-DO: Write keys with no values as comments
     
     $ScriptHeader + " using YAML parsing`n# yaml-language-server: `$schema=https://aka.ms/winget-manifest.installer.1.0.0.schema.json`n" > $InstallerManifestPath
     ConvertTo-Yaml $InstallerManifest >> $InstallerManifestPath
@@ -983,15 +977,8 @@ Function Write-WinGet-LocaleManifest-Yaml {
     New-Item -ItemType 'Directory' -Force -Path $AppFolder | Out-Null
     $LocaleManifestPath = $AppFolder + "\$PackageIdentifier" + '.locale.' + "$PackageLocale" + '.yaml'
 
-    # $LocaleManifest | ForEach-Object {
-    #     if ($_.Split(":").Trim()[1] -eq '' -and $_ -notin @("Tags:", "  -*")) {
-    #         $_.Insert(0,"#")
-    #     } else {
-    #         $_
-    #     }
-    # } | Out-File $LocaleManifestPath -Encoding 'UTF8'
-    # $MyRawString = Get-Content -Raw $LocaleManifestPath
-    # [System.IO.File]::WriteAllLines($LocaleManifestPath, $MyRawString, $Utf8NoBomEncoding)
+    #TO-DO: Write keys with no values as comments
+
     $ScriptHeader + " using YAML parsing`n$yamlServer`n" > $VersionManifestPath
     ConvertTo-Yaml $LocaleManifest >> $LocaleManifestPath
 
@@ -1021,14 +1008,12 @@ Function Read-PreviousWinGet-Manifest-Yaml {
                 throw "App folder does not exist. Please use the 'New' option to create a manifest for this app"
             }
 
-            #Multimanifest Parsing
             if ($OldManifests.Name -eq "$PackageIdentifier.installer.yaml" -and $OldManifests.Name -eq "$PackageIdentifier.locale.en-US.yaml" -and $OldManifests.Name -eq "$PackageIdentifier.yaml") {
                 $script:OldManifestType = 'MultiManifest'
                 $script:OldInstallerManifest = ConvertFrom-Yaml -Yaml (Get-Content -Path $(Resolve-Path "$AppFolder\..\$LastVersion\$PackageIdentifier.installer.yaml") -Raw)
                 $script:OldLocaleManifest = ConvertFrom-Yaml -Yaml (Get-Content -Path $(Resolve-Path "$AppFolder\..\$LastVersion\$PackageIdentifier.locale.en-US.yaml") -Raw)
                 $script:OldVersionManifest = ConvertFrom-Yaml -Yaml (Get-Content -Path $(Resolve-Path "$AppFolder\..\$LastVersion\$PackageIdentifier.yaml") -Raw)
             }
-            #Singleton Parsing
             elseif ($OldManifests.Name -eq "$PackageIdentifier.yaml") {
                 $script:OldManifestType = 'Singleton'
                 $script:OldVersionManifest = ConvertFrom-Yaml -Yaml (Get-Content -Path $(Resolve-Path "$AppFolder\..\$LastVersion\$PackageIdentifier.yaml") -Raw)
@@ -1036,8 +1021,6 @@ Function Read-PreviousWinGet-Manifest-Yaml {
             else {
                 Throw "Error: Version $LastVersion does not contain the required manifests"
             }
-
-            #Read old values into variables
             $_Parameters = @(
                 "Publisher"; "PublisherUrl"; "PublisherSupportUrl"; "PrivacyUrl"
                 "Author"; 
@@ -1061,6 +1044,8 @@ Function Read-PreviousWinGet-Manifest-Yaml {
                 New-Variable -Name $param -Value $(if ($script:OldManifestType -eq 'MultiManifest') { (GetMultiManifestParameter $param) } else { $script:OldVersionManifest[$param] }) -Scope Script -Force
             }
 
+            #TO-DO: Update other locale files with updated package version
+
             #             ForEach ($DifLocale in $OldManifests) {
             #                 if ($DifLocale.Name -notin @("$PackageIdentifier.yaml", "$PackageIdentifier.installer.yaml", "$PackageIdentifier.locale.en-US.yaml")) {
             #                     if (!(Test-Path $AppFolder)) { New-Item -ItemType "Directory" -Force -Path $AppFolder | Out-Null }
@@ -1071,6 +1056,9 @@ Function Read-PreviousWinGet-Manifest-Yaml {
         }
 
         'NewLocale' {
+
+            #TO-DO: Read values for new locale
+
             #             $script:OldManifests = Get-ChildItem -Path "$AppFolder"
             #             if ($OldManifests.Name -eq "$PackageIdentifier.locale.en-US.yaml") {
             #                 $script:OldManifestText = Get-Content -Path "$AppFolder\$PackageIdentifier.locale.en-US.yaml" -Encoding 'UTF8'
@@ -1097,10 +1085,11 @@ Function Read-PreviousWinGet-Manifest-Yaml {
 }
         
 Show-OptionMenu
+Read-WinGet-MandatoryInfo
 
 Switch ($Option) {
+    
     'New' {
-        Read-WinGet-MandatoryInfo
         Read-WinGet-InstallerValues
         Read-WinGet-InstallerManifest
         New-Variable -Name "PackageLocale" -Value "en-US" -Scope "Script" -Force
@@ -1113,7 +1102,6 @@ Switch ($Option) {
     }
 
     'Update' {
-        Read-WinGet-MandatoryInfo
         Read-PreviousWinGet-Manifest-Yaml
         Read-WinGet-InstallerValues
         Read-WinGet-InstallerManifest
@@ -1127,8 +1115,7 @@ Switch ($Option) {
     }
 
     'NewLocale' {
-        Read-WinGet-MandatoryInfo
-        Read-PreviousWinGet-Manifest
+        Read-PreviousWinGet-Manifest-Yaml
         Read-WinGet-LocaleManifest
         Write-WinGet-LocaleManifest-Yaml
         if (Get-Command "winget.exe" -ErrorAction SilentlyContinue) { winget validate $AppFolder }
