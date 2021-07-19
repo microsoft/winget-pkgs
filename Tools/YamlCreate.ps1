@@ -376,23 +376,29 @@ Function PromptInstallerManifestValue {
 }
 
 Function Read-WinGet-InstallerManifest {
+    Write-Host
     do {
+        if (!$FileExtensions) { $FileExtensions = '' }
         $script:FileExtensions = PromptInstallerManifestValue $FileExtensions 'FileExtensions' '[Optional] Enter any File Extensions the application could support. For example: html, htm, url (Max 256)'
     } while (($FileExtensions -split ", ").Count -gt '256')
 
     do {
+        if (!$Protocols) { $Protocols = '' }
         $script:Protocols = PromptInstallerManifestValue $Protocols 'Protocols' '[Optional] Enter any Protocols the application provides a handler for. For example: http, https (Max 16)'
     } while (($Protocols -split ", ").Count -gt '16')
 
     do {
+        if (!$Commands) { $Commands = '' }
         $script:Commands = PromptInstallerManifestValue $Commands 'Commands' '[Optional] Enter any Commands or aliases to run the application. For example: msedge (Max 16)'
     } while (($Commands -split ", ").Count -gt '16')
 
     do {
+        if (!$InstallerSuccessCodes) { $InstallerSuccessCodes = '' }
         $script:InstallerSuccessCodes = PromptInstallerManifestValue $InstallerSuccessCodes 'Commands' '[Optional] List of additional non-zero installer success exit codes other than known default values by winget (Max 16)'
     } while (($InstallerSuccessCodes -split ", ").Count -gt '16')
 
     do {
+        if (!$InstallModes) { $InstallModes = '' }
         $script:InstallModes = PromptInstallerManifestValue $InstallModes 'InstallModes' '[Optional] List of supported installer modes. Options: interactive, silent, silentWithProgress'
     } while (($InstallModes -split ", ").Count -gt '3')
 }
@@ -775,6 +781,10 @@ Function Submit-Manifest {
             }
         }
     }
+    else {
+        Write-Host
+        Exit
+    }
 }
 
 Function AddYamlListParameter {
@@ -923,7 +933,7 @@ Function Write-WinGet-LocaleManifest-Yaml {
 
     #TO-DO: Write keys with no values as comments
 
-    $ScriptHeader + " using YAML parsing`n$yamlServer`n" > $VersionManifestPath
+    $ScriptHeader + " using YAML parsing`n$yamlServer`n" > $LocaleManifestPath
     ConvertTo-Yaml $LocaleManifest >> $LocaleManifestPath
 
     Write-Host 
