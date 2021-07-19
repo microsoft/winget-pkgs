@@ -28,7 +28,6 @@ $ManifestVersion = '1.0.0'
 
 <#
 TO-DO:
-    - Add/verify logic to handle null $Scope
     - Handle writing null parameters as comments
     - Add reading from manifests using YAML parsing
         - See if there is a better way to handle reading parameters into variables
@@ -49,7 +48,7 @@ if (Get-Module -ListAvailable -Name powershell-yaml) {
     }
 }
 
-$Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
+# $Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
 
 filter TrimString {
     $_.Trim()
@@ -326,7 +325,7 @@ Function Read-WinGet-InstallerValues {
         $_Installer['InstallerSwitches'] = $_InstallerSwitches
     }
 
-    If ($ProductCode) {AddYamlParameter $_Installer "ProductCode" $ProductCode}
+    If ($ProductCode) { AddYamlParameter $_Installer "ProductCode" $ProductCode }
     AddYamlParameter $_Installer "UpgradeBehavior" $UpgradeBehavior
 
     $script:Installers += $_Installer
@@ -353,104 +352,49 @@ Function Read-WinGet-InstallerValues {
     }
 }
 
-Function Read-WinGet-InstallerManifest {
+Function PromptInstallerManifestValue {
+    Param
+    (
+        [Parameter(Mandatory = $true, Position = 0)]
+        [PSCustomObject] $Variable,
+        [Parameter(Mandatory = $true, Position = 1)]
+        [string] $Key,
+        [Parameter(Mandatory = $true, Position = 2)]
+        [string] $Prompt
+    )
     Write-Host
-    if ([string]::IsNullOrWhiteSpace($FileExtensions)) {
-        do {
-            Write-Host
-            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter any File Extensions the application could support. For example: html, htm, url (Max 256)'
-            $script:FileExtensions = Read-Host -Prompt 'FileExtensions' | TrimString
-        } while (($FileExtensions -split ', ').Count -gt '256')
-    } else {
-        do {
-            Write-Host
-            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter any File Extensions the application could support. For example: html, htm, url (Max 256)'
-            Write-Host -ForegroundColor 'DarkGray' "Old Variable: $($FileExtensions -join ', ')"
-            $NewFileExtensions = Read-Host -Prompt 'FileExtensions' | TrimString
-    
-            if (-not [string]::IsNullOrWhiteSpace($NewFileExtensions)) {
-                $script:FileExtensions = $NewFileExtensions
-            }
-        } while (($FileExtensions -split ', ').Count -gt '256')
+    Write-Host -ForegroundColor 'Yellow' -Object $Prompt
+    if (![string]::IsNullOrWhiteSpace($Variable)) { Write-Host -ForegroundColor 'DarkGray' "Old Value: $Variable" }
+    $NewValue = Read-Host -Prompt $Key | TrimString
+
+    if (-not [string]::IsNullOrWhiteSpace($NewValue)) {
+        return $NewValue
     }
-
-    if ([string]::IsNullOrWhiteSpace($Protocols)) {
-        do {
-            Write-Host
-            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter any Protocols the application provides a handler for. For example: http, https (Max 16)'
-            $script:Protocols = Read-Host -Prompt 'Protocols' | TrimString
-        } while (($Protocols -split ', ').Count -gt '16')
-    } else {
-        do {
-            Write-Host
-            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter any Protocols the application provides a handler for. For example: http, https (Max 16)'
-            Write-Host -ForegroundColor 'DarkGray' "Old Variable: $($Protocols -join ', ')"
-            $NewProtocols = Read-Host -Prompt 'Protocols' | TrimString
-    
-            if (-not [string]::IsNullOrWhiteSpace($NewProtocols)) {
-                $script:Protocols = $NewProtocols
-            }
-        } while (($Protocols -split ', ').Count -gt '16')
+    else {
+        return $Variable
     }
+}
 
-    if ([string]::IsNullOrWhiteSpace($Commands)) {
-        do {
-            Write-Host
-            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter any Commands or aliases to run the application. For example: msedge (Max 16)'
-            $script:Commands = Read-Host -Prompt 'Commands' | TrimString
-        } while (($Commands -split ', ').Count -gt '16')
-    } else {
-        do {
-            Write-Host
-            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter any Commands or aliases to run the application. For example: msedge (Max 16)'
-            Write-Host -ForegroundColor 'DarkGray' "Old Variable: $($Commands -join ', ')"
-            $NewCommands = Read-Host -Prompt 'Commands' | TrimString
-    
-            if (-not [string]::IsNullOrWhiteSpace($NewCommands)) {
-                $script:Commands = $NewCommands
-            }
-        } while (($Commands -split ', ').Count -gt '16')
-    }
+Function Read-WinGet-InstallerManifest {
+    do {
+        $script:FileExtensions = PromptInstallerManifestValue $FileExtensions 'FileExtensions' '[Optional] Enter any File Extensions the application could support. For example: html, htm, url (Max 256)'
+    } while (($FileExtensions -split ", ").Count -gt '256')
 
-    if ([string]::IsNullOrWhiteSpace($InstallerSuccessCodes)) {
-        do {
-            Write-Host
-            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] List of additional non-zero installer success exit codes other than known default values by winget (Max 16)'
-            $script:InstallerSuccessCodes = Read-Host -Prompt 'InstallerSuccessCodes' | TrimString
-        } while (($InstallerSuccessCodes -split ', ').Count -gt '16')
-    } else {
-        do {
-            Write-Host
-            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] List of additional non-zero installer success exit codes other than known default values by winget (Max 16)'
-            Write-Host -ForegroundColor 'DarkGray' "Old Variable: $($InstallerSuccessCodes -join ', ')"
-            $NewInstallerSuccessCodes = Read-Host -Prompt 'InstallerSuccessCodes' | TrimString
-    
-            if (-not [string]::IsNullOrWhiteSpace($NewInstallerSuccessCodes)) {
-                $script:InstallerSuccessCodes = $NewInstallerSuccessCodes
-            }
-        } while (($InstallerSuccessCodes -split ', ').Count -gt '16')
-    }
+    do {
+        $script:Protocols = PromptInstallerManifestValue $Protocols 'Protocols' '[Optional] Enter any Protocols the application provides a handler for. For example: http, https (Max 16)'
+    } while (($Protocols -split ", ").Count -gt '16')
 
-    if ([string]::IsNullOrWhiteSpace($InstallModes)) {
-        do {
-            Write-Host
-            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] List of supported installer modes. Options: interactive, silent, silentWithProgress'
-            $script:InstallModes = Read-Host -Prompt 'InstallModes' | TrimString
-        } while (($InstallModes -split ', ').Count -gt '3')
-    } else {
-        do {
-            Write-Host
-            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] List of supported installer modes. Options: interactive, silent, silentWithProgress'
-            Write-Host -ForegroundColor 'DarkGray' "Old Variable: $($InstallModes -join ', ')"
-            $NewInstallModes = Read-Host -Prompt 'InstallModes' | TrimString
-    
-            if (-not [string]::IsNullOrWhiteSpace($NewInstallModes)) {
-                $script:InstallModes = $NewInstallModes
-            }
+    do {
+        $script:Commands = PromptInstallerManifestValue $Commands 'Commands' '[Optional] Enter any Commands or aliases to run the application. For example: msedge (Max 16)'
+    } while (($Commands -split ", ").Count -gt '16')
 
-        } while (($InstallModes -split ', ').Count -gt '3')
-    }
+    do {
+        $script:InstallerSuccessCodes = PromptInstallerManifestValue $InstallerSuccessCodes 'Commands' '[Optional] List of additional non-zero installer success exit codes other than known default values by winget (Max 16)'
+    } while (($InstallerSuccessCodes -split ", ").Count -gt '16')
 
+    do {
+        $script:InstallModes = PromptInstallerManifestValue $InstallModes 'InstallModes' '[Optional] List of supported installer modes. Options: interactive, silent, silentWithProgress'
+    } while (($InstallModes -split ", ").Count -gt '3')
 }
 
 Function Read-WinGet-LocaleManifest {
@@ -459,7 +403,7 @@ Function Read-WinGet-LocaleManifest {
         Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the Package Locale. For example: en-US, en-CA https://docs.microsoft.com/openspecs/office_standards/ms-oe376/6c085406-a698-4e12-9d4d-c3b0ee3dbc4a'
         $script:PackageLocale = Read-Host -Prompt 'PackageLocale' | TrimString
     }
-
+    
     if ([string]::IsNullOrWhiteSpace($Publisher)) {
         while ([string]::IsNullOrWhiteSpace($Publisher) -or $Publisher.Length -gt '128') {
             Write-Host
