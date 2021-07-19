@@ -1,6 +1,6 @@
 #Requires -Version 5
 $PSVersion = (Get-Host).Version.Major
-$ScriptHeader = '# Created with YamlCreate.ps1 v1.1.5'
+$ScriptHeader = '# Created with YamlCreate.ps1 v2.0.0'
 $ManifestVersion = '1.0.0'
 
 <#
@@ -939,7 +939,7 @@ Function Write-WinGet-InstallerManifest-Yaml {
     #     }
     # } | Out-File $InstallerManifestPath -Encoding 'UTF8'
     
-    $ScriptHeader + " using YAML parsing`n# yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.0.0.schema.json`n" > $InstallerManifestPath
+    $ScriptHeader + " using YAML parsing`n# yaml-language-server: `$schema=https://aka.ms/winget-manifest.installer.1.0.0.schema.json`n" > $InstallerManifestPath
     ConvertTo-Yaml $InstallerManifest >> $InstallerManifestPath
 
     Write-Host 
