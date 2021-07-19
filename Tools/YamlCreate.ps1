@@ -33,6 +33,11 @@ TO-DO:
     - Handle writing null parameters as comments
     - Add reading from manifests using YAML parsing
     - Ensure licensing for powershell-yaml is met
+    - Have "New" package behave as "Update"
+        - Attempt to read last package
+        - If package exists -> Switch to update mode silently
+        - If package not existing -> Continue as new
+    - Add "Edit Metadata" mode -> Input specific version. Metadata is loaded. Edit, and save
 #>
 
 if (Get-Module -ListAvailable -Name powershell-yaml) {
@@ -124,117 +129,6 @@ Function Read-WinGet-MandatoryInfo {
     }
     
     $script:AppFolder = Join-Path $ManifestsFolder -ChildPath $PackageIdentifier.ToLower().Chars(0) | Join-Path -ChildPath $PackageIdentifierFolder | Join-Path -ChildPath $PackageVersion
-}
-
-Function Read-PreviousWinGet-Manifest {
-    Switch ($Option) {
-        'Update' {
-            $LastVersion = Split-Path (Split-Path (Get-ChildItem -Path "$AppFolder\..\" -Recurse -Depth 1 -File).FullName ) -Leaf | Sort-Object $ToNatural | Select-Object -Last 1
-
-            Write-Host -ForegroundColor 'DarkYellow' -Object "Last Version: $LastVersion"
-            $script:OldManifests = Get-ChildItem -Path "$AppFolder\..\$LastVersion"
-
-            if (-not ($OldManifests.Name -like "$PackageIdentifier*.yaml")) {
-                while ([string]::IsNullOrWhiteSpace($PromptVersion)) {
-                    Write-Host
-                    Write-Host -ForegroundColor 'Red' -Object 'Could not find required manifests, input a version containing required manifests'
-                    $PromptVersion = Read-Host -Prompt 'Previous Version' | TrimString
-                    $script:OldManifests = Get-ChildItem -Path "$AppFolder\..\$PromptVersion"
-                }
-            }
-
-            if ($OldManifests.Name -eq "$PackageIdentifier.installer.yaml" -and $OldManifests.Name -eq "$PackageIdentifier.locale.en-US.yaml" -and $OldManifests.Name -eq "$PackageIdentifier.yaml") {
-                $script:OldManifestText = Get-Content -Path "$AppFolder\..\$LastVersion\$PackageIdentifier.installer.yaml", "$AppFolder\..\$LastVersion\$PackageIdentifier.locale.en-US.yaml", "$AppFolder\..\$LastVersion\$PackageIdentifier.yaml" -Encoding 'UTF8'
-            }
-            elseif ($OldManifests.Name -eq "$PackageIdentifier.yaml") {
-                $script:OldManifestText = Get-Content -Path "$AppFolder\..\$LastVersion\$PackageIdentifier.yaml" -Encoding 'UTF8'
-            }
-            else {
-                Throw "Error: Version $LastVersion does not contain the required manifests"
-            }
-            
-            ForEach ($Line in $OldManifestText -ne '') {
-                if ($Line -eq "Tags:") {
-                    $regex = '(?ms)Tags:(.+?):'
-                    $FetchTags = [regex]::Matches($OldManifestText,$regex) | ForEach-Object {$_.groups[1].value }
-                    $Tags = $FetchTags.Substring(0, $FetchTags.LastIndexOf(' '))
-                    $Tags = $Tags -Split '- '
-                    New-Variable -Name "Tags" -Value ($Tags.Trim()[1..17] -join ", ") -Scope Script -Force
-                }
-                elseif ($Line -eq "FileExtensions:") {
-                    $regex = '(?ms)FileExtensions:(.+?):'
-                    $FetchFileExtensions = [regex]::Matches($OldManifestText,$regex) | ForEach-Object {$_.groups[1].value }
-                    $FileExtensions = $FetchFileExtensions.Substring(0, $FetchFileExtensions.LastIndexOf(' '))
-                    $FileExtensions = $FileExtensions -Split '- '
-                    New-Variable -Name "FileExtensions" -Value ($FileExtensions.Trim()[1..257] -join ", ") -Scope Script -Force
-                }
-                elseif ($Line -eq "Protocols:") {
-                    $regex = '(?ms)Protocols:(.+?):'
-                    $FetchProtocols = [regex]::Matches($OldManifestText,$regex) | ForEach-Object {$_.groups[1].value }
-                    $Protocols = $FetchProtocols.Substring(0, $FetchProtocols.LastIndexOf(' '))
-                    $Protocols = $Protocols -Split '- '
-                    New-Variable -Name "Protocols" -Value ($Protocols.Trim()[1..17] -join ", ") -Scope Script -Force
-                }
-                elseif ($Line -eq "Commands:") {
-                    $regex = '(?ms)Commands:(.+?):'
-                    $FetchCommands = [regex]::Matches($OldManifestText,$regex) | ForEach-Object {$_.groups[1].value }
-                    $Commands = $FetchCommands.Substring(0, $FetchCommands.LastIndexOf(' '))
-                    $Commands = $Commands -Split '- '
-                    New-Variable -Name "Commands" -Value ($Commands.Trim()[1..17] -join ", ") -Scope Script -Force
-                }
-                elseif ($Line -eq "InstallerSuccessCodes:") {
-                    $regex = '(?ms)InstallerSuccessCodes:(.+?):'
-                    $FetchInstallerSuccessCodes = [regex]::Matches($OldManifestText,$regex) | ForEach-Object {$_.groups[1].value }
-                    $InstallerSuccessCodes = $FetchInstallerSuccessCodes.Substring(0, $FetchInstallerSuccessCodes.LastIndexOf(' '))
-                    $InstallerSuccessCodes = $InstallerSuccessCodes -Split '- '
-                    New-Variable -Name "InstallerSuccessCodes" -Value ($InstallerSuccessCodes.Trim()[1..17] -join ", ") -Scope Script -Force
-                }
-                elseif ($Line -eq "InstallModes:") {
-                    $regex = '(?ms)InstallModes:(.+?):'
-                    $FetchInstallModes = [regex]::Matches($OldManifestText,$regex) | ForEach-Object {$_.groups[1].value }
-                    $InstallModes = $FetchInstallModes.Substring(0, $FetchInstallModes.LastIndexOf(' '))
-                    $InstallModes = $InstallModes -Split '- '
-                    New-Variable -Name "InstallModes" -Value ($InstallModes.Trim()[1..17] -join ", ") -Scope Script -Force
-                }
-                elseif ($Line -notlike "PackageVersion*" -and $Line -notlike "PackageIdentifier*") {
-                    $Variable = $Line.TrimStart("#").Split(":").Trim()
-                    New-Variable -Name $Variable[0] -Value ($Variable[1..10] -join ":") -Scope Script -Force
-                }
-            }
-
-            ForEach ($DifLocale in $OldManifests) {
-                if ($DifLocale.Name -notin @("$PackageIdentifier.yaml", "$PackageIdentifier.installer.yaml", "$PackageIdentifier.locale.en-US.yaml")) {
-                    if (!(Test-Path $AppFolder)) { New-Item -ItemType "Directory" -Force -Path $AppFolder | Out-Null }
-                    $DifLocaleContent = [System.IO.File]::ReadAllLines($DifLocale.FullName)
-                    [System.IO.File]::WriteAllLines(($AppFolder + "\" + $DifLocale.Name), $DifLocaleContent.Replace("PackageVersion: $LastVersion", "PackageVersion: $PackageVersion"), $Utf8NoBomEncoding)
-                }
-            }
-        }
-
-        'NewLocale' {
-            $script:OldManifests = Get-ChildItem -Path "$AppFolder"
-            if ($OldManifests.Name -eq "$PackageIdentifier.locale.en-US.yaml") {
-                $script:OldManifestText = Get-Content -Path "$AppFolder\$PackageIdentifier.locale.en-US.yaml" -Encoding 'UTF8'
-            }
-            else {
-                Throw "Error: Multimanifest required"
-            }
-
-            ForEach ($Line in $OldManifestText -ne '') {
-                if ($Line -eq "Tags:") {
-                    $regex = '(?ms)Tags:(.+?):'
-                    $FetchTags = [regex]::Matches($OldManifestText, $regex) | foreach { $_.groups[1].value }
-                    $Tags = $FetchTags.Substring(0, $FetchTags.LastIndexOf(' '))
-                    $Tags = $Tags -Split '- '
-                    New-Variable -Name "Tags" -Value ($Tags.Trim()[1..17] -join ", ") -Scope Script -Force
-                }
-                elseif ($Line -notlike "PackageLocale*") {
-                    $Variable = $Line.TrimStart("#").Split(":").Trim()
-                    New-Variable -Name $Variable[0] -Value ($Variable[1..10] -join ":") -Scope Script -Force
-                }
-            }
-        }
-    }
 }
 
 Function Read-WinGet-InstallerValues {
@@ -478,7 +372,7 @@ Function Read-WinGet-InstallerManifest {
         do {
             Write-Host
             Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter any File Extensions the application could support. For example: html, htm, url (Max 256)'
-            Write-Host -ForegroundColor 'DarkGray' "Old Variable: $FileExtensions"
+            Write-Host -ForegroundColor 'DarkGray' "Old Variable: $($FileExtensions -join ", ")"
             $NewFileExtensions = Read-Host -Prompt 'FileExtensions' | TrimString
     
             if (-not [string]::IsNullOrWhiteSpace($NewFileExtensions)) {
@@ -498,7 +392,7 @@ Function Read-WinGet-InstallerManifest {
         do {
             Write-Host
             Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter any Protocols the application provides a handler for. For example: http, https (Max 16)'
-            Write-Host -ForegroundColor 'DarkGray' "Old Variable: $Protocols"
+            Write-Host -ForegroundColor 'DarkGray' "Old Variable: $($Protocols -join ", ")"
             $NewProtocols = Read-Host -Prompt 'Protocols' | TrimString
     
             if (-not [string]::IsNullOrWhiteSpace($NewProtocols)) {
@@ -518,7 +412,7 @@ Function Read-WinGet-InstallerManifest {
         do {
             Write-Host
             Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter any Commands or aliases to run the application. For example: msedge (Max 16)'
-            Write-Host -ForegroundColor 'DarkGray' "Old Variable: $Commands"
+            Write-Host -ForegroundColor 'DarkGray' "Old Variable: $($Commands -join ", ")"
             $NewCommands = Read-Host -Prompt 'Commands' | TrimString
     
             if (-not [string]::IsNullOrWhiteSpace($NewCommands)) {
@@ -538,7 +432,7 @@ Function Read-WinGet-InstallerManifest {
         do {
             Write-Host
             Write-Host -ForegroundColor 'Yellow' -Object '[Optional] List of additional non-zero installer success exit codes other than known default values by winget (Max 16)'
-            Write-Host -ForegroundColor 'DarkGray' "Old Variable: $InstallerSuccessCodes"
+            Write-Host -ForegroundColor 'DarkGray' "Old Variable: $($InstallerSuccessCodes -join ", ")"
             $NewInstallerSuccessCodes = Read-Host -Prompt 'InstallerSuccessCodes' | TrimString
     
             if (-not [string]::IsNullOrWhiteSpace($NewInstallerSuccessCodes)) {
@@ -558,12 +452,13 @@ Function Read-WinGet-InstallerManifest {
         do {
             Write-Host
             Write-Host -ForegroundColor 'Yellow' -Object '[Optional] List of supported installer modes. Options: interactive, silent, silentWithProgress'
-            Write-Host -ForegroundColor 'DarkGray' "Old Variable: $InstallModes"
+            Write-Host -ForegroundColor 'DarkGray' "Old Variable: $($InstallModes -join ", ")"
             $NewInstallModes = Read-Host -Prompt 'InstallModes' | TrimString
     
             if (-not [string]::IsNullOrWhiteSpace($NewInstallModes)) {
                 $script:InstallModes = $NewInstallModes
             }
+
         } while (($InstallModes -split ", ").Count -gt '3')
     }
 
@@ -996,6 +891,14 @@ Function AddYamlParameter {
     $Object[$Parameter] = $Value
 }
 
+Function GetMultiManifestParameter {
+    Param(
+        [Parameter(Mandatory = $true, Position = 1)]
+        [string] $Parameter
+    )
+    $_vals = $($script:OldInstallerManifest[$Parameter] + $script:OldLocaleManifest[$Parameter] + $script:OldVersionManifest[$Parameter]| Where-Object{$_})
+    return ($_vals -join ", ")
+}
 Function Write-WinGet-VersionManifest-Yaml {
     [PSCustomObject]$VersionManifest = [ordered]@{}
 
@@ -1123,6 +1026,124 @@ Function Write-WinGet-LocaleManifest-Yaml {
     Write-Host 
     Write-Host "Yaml file created: $LocaleManifestPath"
 }
+
+
+Function Read-PreviousWinGet-Manifest-Yaml {
+    Switch ($Option) {
+        'New' {}
+        'Metadata' {}
+        'Update' {
+            $LastVersion = Split-Path (Split-Path (Get-ChildItem -Path "$AppFolder\..\" -Recurse -Depth 1 -File).FullName ) -Leaf | Sort-Object $ToNatural | Select-Object -Last 1
+            Write-Host -ForegroundColor 'DarkYellow' -Object "Last Version: $LastVersion"
+            $script:OldManifests = Get-ChildItem -Path "$AppFolder\..\$LastVersion"
+
+            if (-not ($OldManifests.Name -like "$PackageIdentifier*.yaml")) {
+                while ([string]::IsNullOrWhiteSpace($PromptVersion)) {
+                    Write-Host
+                    Write-Host -ForegroundColor 'Red' -Object 'Could not find required manifests, input a version containing required manifests'
+                    $PromptVersion = Read-Host -Prompt 'Previous Version' | TrimString
+                    $script:OldManifests = Get-ChildItem -Path "$AppFolder\..\$PromptVersion"
+                }
+            }
+
+            #Multimanifest Parsing
+            if ($OldManifests.Name -eq "$PackageIdentifier.installer.yaml" -and $OldManifests.Name -eq "$PackageIdentifier.locale.en-US.yaml" -and $OldManifests.Name -eq "$PackageIdentifier.yaml") {
+                $script:OldManifestType = 'MultiManifest'
+                $OldInstallerText = Get-Content -Path $(Resolve-Path "$AppFolder\..\$LastVersion\$PackageIdentifier.installer.yaml") -Raw
+                $OldLocaleText = Get-Content -Path $(Resolve-Path "$AppFolder\..\$LastVersion\$PackageIdentifier.locale.en-US.yaml") -Raw
+                $OldVersionText = Get-Content -Path $(Resolve-Path "$AppFolder\..\$LastVersion\$PackageIdentifier.yaml") -Raw
+                $script:OldInstallerManifest = ConvertFrom-Yaml -Yaml $OldInstallerText
+                $script:OldLocaleManifest = ConvertFrom-Yaml -Yaml $OldLocaleText
+                $script:OldVersionManifest = ConvertFrom-Yaml -Yaml $OldVersionText
+            }
+            #Singleton Parsing
+            elseif ($OldManifests.Name -eq "$PackageIdentifier.yaml") {
+                $script:OldManifestType = 'Singleton'
+                $OldSingletonText = Get-Content -Path $(Resolve-Path "$AppFolder\..\$LastVersion\$PackageIdentifier.yaml") -Raw
+                $script:OldSingletonManifest = ConvertFrom-Yaml -Yaml $OldSingletonText
+            }
+            else {
+                Throw "Error: Version $LastVersion does not contain the required manifests"
+            }
+
+            #Read old values into variables
+            switch ($script:OldManifestType) {
+                'Multimanifest' {
+                    $_Parameters = @(
+                        "Publisher"; "PublisherUrl"; "PublisherSupportUrl"; "PrivacyUrl"
+                        "Author"; 
+                        "PackageName"; "PackageUrl"; "Moniker"
+                        "License"; "LicenseUrl"
+                        "Copyright"; "CopyrightUrl"
+                        "ShortDescription"; "Description"
+                        "Channel"
+                        "Platform"; "MinimumOSVersion"
+                        "InstallerType"
+                        "Scope"
+                        "UpgradeBehavior"
+                        "PackageFamilyName"; "ProductCode"
+                        "Tags"; "FileExtensions"
+                        "Protocols"; "Commands"
+                        "InstallModes"; "InstallerSuccessCodes"
+                        "Capabilities"; "RestrictedCapabilities"
+                    )
+
+                    Foreach ($param in $_Parameters){
+                        New-Variable -Name $param -Value (GetMultiManifestParameter $param) -Scope Script -Force
+                    }
+                }
+                'Singleton' {
+                    #Tags
+                    #FileExtensions
+                    #Protocols
+                    #Commands
+                    #InstallerSuccessCodes
+                    #InstallModes
+                    #Other single parameter values
+                }
+            }
+            
+#             ForEach ($Line in $OldManifestText -ne '') {
+#                 elseif ($Line -notlike "PackageVersion*" -and $Line -notlike "PackageIdentifier*") {
+#                     $Variable = $Line.TrimStart("#").Split(":").Trim()
+#                     New-Variable -Name $Variable[0] -Value ($Variable[1..10] -join ":") -Scope Script -Force
+#                 }
+#             }
+
+#             ForEach ($DifLocale in $OldManifests) {
+#                 if ($DifLocale.Name -notin @("$PackageIdentifier.yaml", "$PackageIdentifier.installer.yaml", "$PackageIdentifier.locale.en-US.yaml")) {
+#                     if (!(Test-Path $AppFolder)) { New-Item -ItemType "Directory" -Force -Path $AppFolder | Out-Null }
+#                     $DifLocaleContent = [System.IO.File]::ReadAllLines($DifLocale.FullName)
+#                     [System.IO.File]::WriteAllLines(($AppFolder + "\" + $DifLocale.Name), $DifLocaleContent.Replace("PackageVersion: $LastVersion", "PackageVersion: $PackageVersion"), $Utf8NoBomEncoding)
+#                 }
+#             }
+        }
+
+        'NewLocale' {
+#             $script:OldManifests = Get-ChildItem -Path "$AppFolder"
+#             if ($OldManifests.Name -eq "$PackageIdentifier.locale.en-US.yaml") {
+#                 $script:OldManifestText = Get-Content -Path "$AppFolder\$PackageIdentifier.locale.en-US.yaml" -Encoding 'UTF8'
+#             }
+#             else {
+#                 Throw "Error: Multimanifest required"
+#             }
+
+#             ForEach ($Line in $OldManifestText -ne '') {
+#                 if ($Line -eq "Tags:") {
+#                     $regex = '(?ms)Tags:(.+?):'
+#                     $FetchTags = [regex]::Matches($OldManifestText, $regex) | foreach { $_.groups[1].value }
+#                     $Tags = $FetchTags.Substring(0, $FetchTags.LastIndexOf(' '))
+#                     $Tags = $Tags -Split '- '
+#                     New-Variable -Name "Tags" -Value ($Tags.Trim()[1..17] -join ", ") -Scope Script -Force
+#                 }
+#                 elseif ($Line -notlike "PackageLocale*") {
+#                     $Variable = $Line.TrimStart("#").Split(":").Trim()
+#                     New-Variable -Name $Variable[0] -Value ($Variable[1..10] -join ":") -Scope Script -Force
+#                 }
+#             }
+        }
+    }
+}
         
 Show-OptionMenu
 
@@ -1142,7 +1163,7 @@ Switch ($Option) {
 
     'Update' {
         Read-WinGet-MandatoryInfo
-        Read-PreviousWinGet-Manifest
+        Read-PreviousWinGet-Manifest-Yaml
         Read-WinGet-InstallerValues
         Read-WinGet-InstallerManifest
         New-Variable -Name "PackageLocale" -Value "en-US" -Scope "Script" -Force
