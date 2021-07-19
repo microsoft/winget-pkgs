@@ -32,6 +32,7 @@ TO-DO:
     - Add/verify logic to handle null $Scope
     - Handle writing null parameters as comments
     - Add reading from manifests using YAML parsing
+        - See if there is a better way to handle reading parameters into variables
     - Ensure licensing for powershell-yaml is met
     - Have "New" package behave as "Update"
         - Attempt to read last package
@@ -1020,18 +1021,14 @@ Function Read-PreviousWinGet-Manifest-Yaml {
             #Multimanifest Parsing
             if ($OldManifests.Name -eq "$PackageIdentifier.installer.yaml" -and $OldManifests.Name -eq "$PackageIdentifier.locale.en-US.yaml" -and $OldManifests.Name -eq "$PackageIdentifier.yaml") {
                 $script:OldManifestType = 'MultiManifest'
-                $OldInstallerText = Get-Content -Path $(Resolve-Path "$AppFolder\..\$LastVersion\$PackageIdentifier.installer.yaml") -Raw
-                $OldLocaleText = Get-Content -Path $(Resolve-Path "$AppFolder\..\$LastVersion\$PackageIdentifier.locale.en-US.yaml") -Raw
-                $OldVersionText = Get-Content -Path $(Resolve-Path "$AppFolder\..\$LastVersion\$PackageIdentifier.yaml") -Raw
-                $script:OldInstallerManifest = ConvertFrom-Yaml -Yaml $OldInstallerText
-                $script:OldLocaleManifest = ConvertFrom-Yaml -Yaml $OldLocaleText
-                $script:OldVersionManifest = ConvertFrom-Yaml -Yaml $OldVersionText
+                $script:OldInstallerManifest = ConvertFrom-Yaml -Yaml (Get-Content -Path $(Resolve-Path "$AppFolder\..\$LastVersion\$PackageIdentifier.installer.yaml") -Raw)
+                $script:OldLocaleManifest = ConvertFrom-Yaml -Yaml (Get-Content -Path $(Resolve-Path "$AppFolder\..\$LastVersion\$PackageIdentifier.locale.en-US.yaml") -Raw)
+                $script:OldVersionManifest = ConvertFrom-Yaml -Yaml (Get-Content -Path $(Resolve-Path "$AppFolder\..\$LastVersion\$PackageIdentifier.yaml") -Raw)
             }
             #Singleton Parsing
             elseif ($OldManifests.Name -eq "$PackageIdentifier.yaml") {
                 $script:OldManifestType = 'Singleton'
-                $OldSingletonText = Get-Content -Path $(Resolve-Path "$AppFolder\..\$LastVersion\$PackageIdentifier.yaml") -Raw
-                $script:OldSingletonManifest = ConvertFrom-Yaml -Yaml $OldSingletonText
+                $script:OldVersionManifest = ConvertFrom-Yaml -Yaml (Get-Content -Path $(Resolve-Path "$AppFolder\..\$LastVersion\$PackageIdentifier.yaml") -Raw)
             }
             else {
                 Throw "Error: Version $LastVersion does not contain the required manifests"
@@ -1064,13 +1061,7 @@ Function Read-PreviousWinGet-Manifest-Yaml {
                     }
                 }
                 'Singleton' {
-                    #Tags
-                    #FileExtensions
-                    #Protocols
-                    #Commands
-                    #InstallerSuccessCodes
-                    #InstallModes
-                    #Other single parameter values
+                    #Read all parameters
                 }
             }
             
