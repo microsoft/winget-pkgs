@@ -29,14 +29,7 @@ $ManifestVersion = '1.0.0'
 <#
 TO-DO:
     - Handle writing null parameters as comments
-    - Add reading from manifests using YAML parsing
-        - See if there is a better way to handle reading parameters into variables
     - Ensure licensing for powershell-yaml is met
-    - Have "New" package behave as "Update"
-        - Attempt to read last package
-        - If package exists -> Switch to update mode silently
-        - If package not existing -> Continue as new
-    - Add "Edit Metadata" mode -> Input specific version. Metadata is loaded. Edit, and save
 #>
 
 if (Get-Module -ListAvailable -Name powershell-yaml) {
@@ -47,8 +40,6 @@ if (Get-Module -ListAvailable -Name powershell-yaml) {
         Throw "Unmet dependency. 'powershell-yaml' unable to be installed successfully."
     }
 }
-
-# $Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
 
 filter TrimString {
     $_.Trim()
@@ -71,18 +62,16 @@ Function Write-Colors {
         $_index++
     }
 }
-
 Function Show-OptionMenu {
     Clear-Host
     Write-Host -ForegroundColor 'Cyan' "Select Mode"
-    Write-Colors "`n[", "1", "] New Manifest`n" 'DarkCyan', 'White', 'DarkCyan'
-    Write-Colors "`n[", "2", "] Update Manifest`n" 'DarkCyan', 'White', 'DarkCyan'
+    Write-Colors "`n[", "1", "] New Manifest or Package Version`n" 'DarkCyan', 'White', 'DarkCyan'
+    Write-Colors "`n[", "2", "] Update Package Metadata`n" 'DarkCyan', 'White', 'DarkCyan'
     Write-Colors "`n[", "3", "] New Locale`n" 'DarkCyan', 'White', 'DarkCyan'
     Write-Colors "`n[", "q", "]", " Any key to quit`n" 'DarkCyan', 'White', 'DarkCyan', 'Red'
     Write-Colors "`nSelection: " 'White'
 
     $Keys = @{
-        #Map individual keys to their respective switch
         [ConsoleKey]::D1      = '1';
         [ConsoleKey]::D2      = '2';
         [ConsoleKey]::D3      = '3';
@@ -97,7 +86,7 @@ Function Show-OptionMenu {
 
     switch ($Keys[$keyInfo.Key]) {
         '1' { $script:Option = 'New' }
-        '2' { $script:Option = 'Update' }
+        '2' { $script:Option = 'EditMetadata' }
         '3' { $script:Option = 'NewLocale' }
         default { Write-Host; exit }
     }
@@ -841,18 +830,11 @@ Function Write-WinGet-VersionManifest-Yaml {
     }
 
     
-    New-Item -ItemType 'Directory' -Force -Path $AppFolder | Out-Null
-    
+    New-Item -ItemType "Directory" -Force -Path $AppFolder | Out-Null
     $VersionManifestPath = $AppFolder + "\$PackageIdentifier" + '.yaml'
     
-    # $VersionManifest | ForEach-Object {
-    #     if ($_.Split(":").Trim()[1] -eq '') {
-    #         $_.Insert(0,"#")
-    #     } else {
-    #         $_
-    #     }
-    # } | Out-File $VersionManifestPath -Encoding 'UTF8'
-
+    #TO-DO: Write keys with no values as comments
+    
     $ScriptHeader + " using YAML parsing`n# yaml-language-server: `$schema=https://aka.ms/winget-manifest.version.1.0.0.schema.json`n" > $VersionManifestPath
     ConvertTo-Yaml $VersionManifest >> $VersionManifestPath
     
@@ -877,7 +859,12 @@ Function Write-WinGet-InstallerManifest-Yaml {
         If ($Section.Value) { AddYamlListParameter $InstallerManifest $Section.Name $Section.Value }
     }
 
-    $InstallerManifest['Installers'] = $script:Installers
+    if ($Option -ne 'EditMetadata') {
+        $InstallerManifest["Installers"] = $script:Installers
+    }
+    else {
+        $InstallerManifest["Installers"] = $script:OldInstallerManifest["Installers"]
+    }
 
     AddYamlParameter $InstallerManifest 'ManifestType' 'installer'
     AddYamlParameter $InstallerManifest 'ManifestVersion' $ManifestVersion
@@ -936,110 +923,106 @@ Function Write-WinGet-LocaleManifest-Yaml {
     $ScriptHeader + " using YAML parsing`n$yamlServer`n" > $LocaleManifestPath
     ConvertTo-Yaml $LocaleManifest >> $LocaleManifestPath
 
+    if ($OldManifests) {
+        ForEach ($DifLocale in $OldManifests) {
+            if ($DifLocale.Name -notin @("$PackageIdentifier.yaml", "$PackageIdentifier.installer.yaml", "$PackageIdentifier.locale.en-US.yaml")) {
+                if (!(Test-Path $AppFolder)) { New-Item -ItemType "Directory" -Force -Path $AppFolder | Out-Null }
+                $script:OldLocaleManifest = ConvertFrom-Yaml -Yaml (Get-Content -Path $DifLocale.FullName -Raw) -Ordered
+                $script:OldLocaleManifest["PackageVersion"] = $PackageVersion
+
+                $yamlServer = '# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.0.0.schema.json'
+            
+                $ScriptHeader + " using YAML parsing`n$yamlServer`n" > ($AppFolder + "\" + $DifLocale.Name)
+                ConvertTo-Yaml $OldLocaleManifest >> ($AppFolder + "\" + $DifLocale.Name)
+            }
+        }
+    }
+
     Write-Host 
     Write-Host "Yaml file created: $LocaleManifestPath"
 }
 
 
 Function Read-PreviousWinGet-Manifest-Yaml {
-    Switch ($Option) {
-        'Update' {
-            try {
-                $LastVersion = Split-Path (Split-Path (Get-ChildItem -Path "$AppFolder\..\" -Recurse -Depth 1 -File).FullName ) -Leaf | Sort-Object $ToNatural | Select-Object -Last 1
-                Write-Host -ForegroundColor 'DarkYellow' -Object "Last Version: $LastVersion"
-                $script:OldManifests = Get-ChildItem -Path "$AppFolder\..\$LastVersion"
     
-                if (-not ($OldManifests.Name -like "$PackageIdentifier*.yaml")) {
-                    while ([string]::IsNullOrWhiteSpace($PromptVersion)) {
-                        Write-Host
-                        Write-Host -ForegroundColor 'Red' -Object 'Could not find required manifests, input a version containing required manifests'
-                        $PromptVersion = Read-Host -Prompt 'Previous Version' | TrimString
-                        $script:OldManifests = Get-ChildItem -Path "$AppFolder\..\$PromptVersion"
-                    }
-                }
-            }
-            catch {
-                throw "App folder does not exist. Please use the 'New' option to create a manifest for this app"
-            }
-
-            if ($OldManifests.Name -eq "$PackageIdentifier.installer.yaml" -and $OldManifests.Name -eq "$PackageIdentifier.locale.en-US.yaml" -and $OldManifests.Name -eq "$PackageIdentifier.yaml") {
-                $script:OldManifestType = 'MultiManifest'
-                $script:OldInstallerManifest = ConvertFrom-Yaml -Yaml (Get-Content -Path $(Resolve-Path "$AppFolder\..\$LastVersion\$PackageIdentifier.installer.yaml") -Raw)
-                $script:OldLocaleManifest = ConvertFrom-Yaml -Yaml (Get-Content -Path $(Resolve-Path "$AppFolder\..\$LastVersion\$PackageIdentifier.locale.en-US.yaml") -Raw)
-                $script:OldVersionManifest = ConvertFrom-Yaml -Yaml (Get-Content -Path $(Resolve-Path "$AppFolder\..\$LastVersion\$PackageIdentifier.yaml") -Raw)
-            }
-            elseif ($OldManifests.Name -eq "$PackageIdentifier.yaml") {
-                $script:OldManifestType = 'Singleton'
-                $script:OldVersionManifest = ConvertFrom-Yaml -Yaml (Get-Content -Path $(Resolve-Path "$AppFolder\..\$LastVersion\$PackageIdentifier.yaml") -Raw)
-            }
-            else {
-                Throw "Error: Version $LastVersion does not contain the required manifests"
-            }
-            $_Parameters = @(
-                "Publisher"; "PublisherUrl"; "PublisherSupportUrl"; "PrivacyUrl"
-                "Author"; 
-                "PackageName"; "PackageUrl"; "Moniker"
-                "License"; "LicenseUrl"
-                "Copyright"; "CopyrightUrl"
-                "ShortDescription"; "Description"
-                "Channel"
-                "Platform"; "MinimumOSVersion"
-                "InstallerType"
-                "Scope"
-                "UpgradeBehavior"
-                "PackageFamilyName"; "ProductCode"
-                "Tags"; "FileExtensions"
-                "Protocols"; "Commands"
-                "InstallModes"; "InstallerSuccessCodes"
-                "Capabilities"; "RestrictedCapabilities"
-            )
-
-            Foreach ($param in $_Parameters) {
-                New-Variable -Name $param -Value $(if ($script:OldManifestType -eq 'MultiManifest') { (GetMultiManifestParameter $param) } else { $script:OldVersionManifest[$param] }) -Scope Script -Force
-            }
-
-            #TO-DO: Update other locale files with updated package version
-
-            #             ForEach ($DifLocale in $OldManifests) {
-            #                 if ($DifLocale.Name -notin @("$PackageIdentifier.yaml", "$PackageIdentifier.installer.yaml", "$PackageIdentifier.locale.en-US.yaml")) {
-            #                     if (!(Test-Path $AppFolder)) { New-Item -ItemType "Directory" -Force -Path $AppFolder | Out-Null }
-            #                     $DifLocaleContent = [System.IO.File]::ReadAllLines($DifLocale.FullName)
-            #                     [System.IO.File]::WriteAllLines(($AppFolder + "\" + $DifLocale.Name), $DifLocaleContent.Replace("PackageVersion: $LastVersion", "PackageVersion: $PackageVersion"), $Utf8NoBomEncoding)
-            #                 }
-            #             }
+    #Exact matching for Locale and edit metadata
+    if (($Option -eq 'NewLocale') -or ($Option -eq 'EditMetadata')) {
+        if (Test-Path  -Path "$AppFolder\..\$PackageVersion") {
+            $script:OldManifests = Get-ChildItem -Path "$AppFolder\..\$PackageVersion"
+            $LastVersion = $PackageVersion
         }
+        while (-not ($OldManifests.Name -like "$PackageIdentifier*.yaml")) {
+            Write-Host
+            Write-Host -ForegroundColor 'Red' -Object 'Could not find required manifests, input a version containing required manifests or "exit" to cancel'
+            $PromptVersion = Read-Host -Prompt 'Version' | TrimString
+            if ($PromptVersion -eq 'exit') { exit 1 }
+            if (Test-Path -Path "$AppFolder\..\$PromptVersion") {
+                $script:OldManifests = Get-ChildItem -Path "$AppFolder\..\$PromptVersion" 
+            }
+            $LastVersion = $PromptVersion
+            $script:AppFolder = (Split-Path $AppFolder)+"\$LastVersion"
+            $script:PackageVersion = $LastVersion
+        }
+    }
 
-        'NewLocale' {
+    if (-not (Test-Path  -Path "$AppFolder\..")) {return}
+    
+    if (!$LastVersion) {
+        try {
+            $LastVersion = Split-Path (Split-Path (Get-ChildItem -Path "$AppFolder\..\" -Recurse -Depth 1 -File).FullName ) -Leaf | Sort-Object $ToNatural | Select-Object -Last 1
+            Write-Host -ForegroundColor 'DarkYellow' -Object "Found Existing Version: $LastVersion"
+            $script:OldManifests = Get-ChildItem -Path "$AppFolder\..\$LastVersion"
+        }
+        catch {
+            Out-Null
+        }
+    }
 
-            #TO-DO: Read values for new locale
+    if ($OldManifests.Name -eq "$PackageIdentifier.installer.yaml" -and $OldManifests.Name -eq "$PackageIdentifier.locale.en-US.yaml" -and $OldManifests.Name -eq "$PackageIdentifier.yaml") {
+        $script:OldManifestType = 'MultiManifest'
+        $script:OldInstallerManifest = ConvertFrom-Yaml -Yaml (Get-Content -Path $(Resolve-Path "$AppFolder\..\$LastVersion\$PackageIdentifier.installer.yaml") -Raw) -Ordered
+        $script:OldLocaleManifest = ConvertFrom-Yaml -Yaml (Get-Content -Path $(Resolve-Path "$AppFolder\..\$LastVersion\$PackageIdentifier.locale.en-US.yaml") -Raw) -Ordered
+        $script:OldVersionManifest = ConvertFrom-Yaml -Yaml (Get-Content -Path $(Resolve-Path "$AppFolder\..\$LastVersion\$PackageIdentifier.yaml") -Raw) -Ordered
+    }
+    elseif ($OldManifests.Name -eq "$PackageIdentifier.yaml") {
+        if ($Option -eq 'NewLocale') { Throw "Error: MultiManifest Required" }
+        $script:OldManifestType = 'Singleton'
+        $script:OldVersionManifest = ConvertFrom-Yaml -Yaml (Get-Content -Path $(Resolve-Path "$AppFolder\..\$LastVersion\$PackageIdentifier.yaml") -Raw) -Ordered
+    }
+    else {
+        Throw "Error: Version $LastVersion does not contain the required manifests"
+    }
 
-            #             $script:OldManifests = Get-ChildItem -Path "$AppFolder"
-            #             if ($OldManifests.Name -eq "$PackageIdentifier.locale.en-US.yaml") {
-            #                 $script:OldManifestText = Get-Content -Path "$AppFolder\$PackageIdentifier.locale.en-US.yaml" -Encoding 'UTF8'
-            #             }
-            #             else {
-            #                 Throw "Error: Multimanifest required"
-            #             }
+    if ($OldManifests) {
 
-            #             ForEach ($Line in $OldManifestText -ne '') {
-            #                 if ($Line -eq "Tags:") {
-            #                     $regex = '(?ms)Tags:(.+?):'
-            #                     $FetchTags = [regex]::Matches($OldManifestText, $regex) | foreach { $_.groups[1].value }
-            #                     $Tags = $FetchTags.Substring(0, $FetchTags.LastIndexOf(' '))
-            #                     $Tags = $Tags -Split '- '
-            #                     New-Variable -Name "Tags" -Value ($Tags.Trim()[1..17] -join ", ") -Scope Script -Force
-            #                 }
-            #                 elseif ($Line -notlike "PackageLocale*") {
-            #                     $Variable = $Line.TrimStart("#").Split(":").Trim()
-            #                     New-Variable -Name $Variable[0] -Value ($Variable[1..10] -join ":") -Scope Script -Force
-            #                 }
-            #             }
+        $_Parameters = @(
+            "Publisher"; "PublisherUrl"; "PublisherSupportUrl"; "PrivacyUrl"
+            "Author"; 
+            "PackageName"; "PackageUrl"; "Moniker"
+            "License"; "LicenseUrl"
+            "Copyright"; "CopyrightUrl"
+            "ShortDescription"; "Description"
+            "Channel"
+            "Platform"; "MinimumOSVersion"
+            "InstallerType"
+            "Scope"
+            "UpgradeBehavior"
+            "PackageFamilyName"; "ProductCode"
+            "Tags"; "FileExtensions"
+            "Protocols"; "Commands"
+            "InstallModes"; "InstallerSuccessCodes"
+            "Capabilities"; "RestrictedCapabilities"
+        )
+
+        Foreach ($param in $_Parameters) {
+            New-Variable -Name $param -Value $(if ($script:OldManifestType -eq 'MultiManifest') { (GetMultiManifestParameter $param) } else { $script:OldVersionManifest[$param] }) -Scope Script -Force
         }
     }
 }
         
 Show-OptionMenu
 Read-WinGet-MandatoryInfo
+Read-PreviousWinGet-Manifest-Yaml
 
 Switch ($Option) {
     
@@ -1055,8 +1038,19 @@ Switch ($Option) {
         Submit-Manifest
     }
 
+    'EditMetadata' {
+        Read-WinGet-InstallerManifest
+        New-Variable -Name "PackageLocale" -Value "en-US" -Scope "Script" -Force
+        Read-WinGet-LocaleManifest
+        Write-WinGet-InstallerManifest-Yaml
+        Write-WinGet-VersionManifest-Yaml
+        Write-WinGet-LocaleManifest-Yaml
+        Test-Manifest
+        Submit-Manifest
+    }
+
     'Update' {
-        Read-PreviousWinGet-Manifest-Yaml
+        # Read-PreviousWinGet-Manifest-Yaml
         Read-WinGet-InstallerValues
         Read-WinGet-InstallerManifest
         New-Variable -Name "PackageLocale" -Value "en-US" -Scope "Script" -Force
@@ -1069,7 +1063,7 @@ Switch ($Option) {
     }
 
     'NewLocale' {
-        Read-PreviousWinGet-Manifest-Yaml
+        # Read-PreviousWinGet-Manifest-Yaml
         Read-WinGet-LocaleManifest
         Write-WinGet-LocaleManifest-Yaml
         if (Get-Command "winget.exe" -ErrorAction SilentlyContinue) { winget validate $AppFolder }
