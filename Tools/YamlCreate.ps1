@@ -793,10 +793,12 @@ Function AddYamlListParameter {
     )
     $_Values = @()
     Foreach ($Value in $Values.Split(",").Trim()) {
-        try {
-            $Value = [int]$Value
+        if ($Parameter -eq 'InstallerSuccessCodes') {
+            try {
+                $Value = [int]$Value
+            }
+            catch {}
         }
-        catch {}
         $_Values += $Value
     }
     $Object[$Parameter] = $_Values
