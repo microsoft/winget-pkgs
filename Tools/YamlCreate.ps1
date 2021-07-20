@@ -243,8 +243,8 @@ Function Read-WinGet-InstallerValues {
         Write-Host
         Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the installer locale. For example: en-US, en-CA'
         Write-Host -ForegroundColor 'Blue' -Object 'https://docs.microsoft.com/en-us/openspecs/office_standards/ms-oe376/6c085406-a698-4e12-9d4d-c3b0ee3dbc4a'
-        $ProductCode = Read-Host -Prompt 'InstallerLocale' | TrimString
-    } while (-not [string]::IsNullOrWhiteSpace($InstallerLocale) -and ($InstallerLocale -gt 10))
+        $InstallerLocale = Read-Host -Prompt 'InstallerLocale' | TrimString
+    } while ($InstallerLocale.Length -gt 10)
     if ([string]::IsNullOrWhiteSpace($InstallerLocale)) { $InstallerLocale = 'en-US' }
 
     do {
