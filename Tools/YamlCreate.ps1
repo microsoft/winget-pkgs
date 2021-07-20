@@ -2,6 +2,8 @@
 $PSVersion = (Get-Host).Version.Major
 $ScriptHeader = '# Created with YamlCreate.ps1 v2.0.0'
 $ManifestVersion = '1.0.0'
+$PSDefaultParameterValues = @{ '*:Encoding' = 'UTF8' }
+$Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
 
 <#
 .SYNOPSIS
@@ -849,6 +851,8 @@ Function Write-WinGet-VersionManifest-Yaml {
     
     $ScriptHeader + " using YAML parsing`n# yaml-language-server: `$schema=https://aka.ms/winget-manifest.version.1.0.0.schema.json`n" > $VersionManifestPath
     ConvertTo-Yaml $VersionManifest >> $VersionManifestPath
+    $MyRawString = Get-Content -Raw $VersionManifestPath
+    [System.IO.File]::WriteAllLines($VersionManifestPath, $MyRawString, $Utf8NoBomEncoding)
     
     Write-Host 
     Write-Host "Yaml file created: $VersionManifestPath"
@@ -896,6 +900,8 @@ Function Write-WinGet-InstallerManifest-Yaml {
     
     $ScriptHeader + " using YAML parsing`n# yaml-language-server: `$schema=https://aka.ms/winget-manifest.installer.1.0.0.schema.json`n" > $InstallerManifestPath
     ConvertTo-Yaml $InstallerManifest >> $InstallerManifestPath
+    $MyRawString = Get-Content -Raw $InstallerManifestPath
+    [System.IO.File]::WriteAllLines($InstallerManifestPath, $MyRawString, $Utf8NoBomEncoding)
 
     Write-Host 
     Write-Host "Yaml file created: $InstallerManifestPath"
@@ -947,18 +953,22 @@ Function Write-WinGet-LocaleManifest-Yaml {
 
     $ScriptHeader + " using YAML parsing`n$yamlServer`n" > $LocaleManifestPath
     ConvertTo-Yaml $LocaleManifest >> $LocaleManifestPath
+    $MyRawString = Get-Content -Raw $LocaleManifestPath
+    [System.IO.File]::WriteAllLines($LocaleManifestPath, $MyRawString, $Utf8NoBomEncoding)
 
     if ($OldManifests) {
         ForEach ($DifLocale in $OldManifests) {
             if ($DifLocale.Name -notin @("$PackageIdentifier.yaml", "$PackageIdentifier.installer.yaml", "$PackageIdentifier.locale.en-US.yaml")) {
                 if (!(Test-Path $AppFolder)) { New-Item -ItemType "Directory" -Force -Path $AppFolder | Out-Null }
-                $script:OldLocaleManifest = ConvertFrom-Yaml -Yaml (Get-Content -Path $DifLocale.FullName -Raw) -Ordered
+                $script:OldLocaleManifest = ConvertFrom-Yaml -Yaml ($(Get-Content -Path $DifLocale.FullName -Encoding UTF8) -join "`n") -Ordered
                 $script:OldLocaleManifest["PackageVersion"] = $PackageVersion
 
                 $yamlServer = '# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.0.0.schema.json'
             
                 $ScriptHeader + " using YAML parsing`n$yamlServer`n" > ($AppFolder + "\" + $DifLocale.Name)
                 ConvertTo-Yaml $OldLocaleManifest >> ($AppFolder + "\" + $DifLocale.Name)
+                $MyRawString = Get-Content -Raw $($AppFolder + "\" + $DifLocale.Name)
+                [System.IO.File]::WriteAllLines($($AppFolder + "\" + $DifLocale.Name), $MyRawString, $Utf8NoBomEncoding)
             }
         }
     }
@@ -1007,14 +1017,14 @@ Function Read-PreviousWinGet-Manifest-Yaml {
 
     if ($OldManifests.Name -eq "$PackageIdentifier.installer.yaml" -and $OldManifests.Name -eq "$PackageIdentifier.locale.en-US.yaml" -and $OldManifests.Name -eq "$PackageIdentifier.yaml") {
         $script:OldManifestType = 'MultiManifest'
-        $script:OldInstallerManifest = ConvertFrom-Yaml -Yaml (Get-Content -Path $(Resolve-Path "$AppFolder\..\$LastVersion\$PackageIdentifier.installer.yaml") -Raw) -Ordered
-        $script:OldLocaleManifest = ConvertFrom-Yaml -Yaml (Get-Content -Path $(Resolve-Path "$AppFolder\..\$LastVersion\$PackageIdentifier.locale.en-US.yaml") -Raw) -Ordered
-        $script:OldVersionManifest = ConvertFrom-Yaml -Yaml (Get-Content -Path $(Resolve-Path "$AppFolder\..\$LastVersion\$PackageIdentifier.yaml") -Raw) -Ordered
+        $script:OldInstallerManifest = ConvertFrom-Yaml -Yaml ($(Get-Content -Path $(Resolve-Path "$AppFolder\..\$LastVersion\$PackageIdentifier.installer.yaml") -Encoding UTF8) -join "`n") -Ordered
+        $script:OldLocaleManifest = ConvertFrom-Yaml -Yaml ($(Get-Content -Path $(Resolve-Path "$AppFolder\..\$LastVersion\$PackageIdentifier.locale.en-US.yaml") -Encoding UTF8) -join "`n") -Ordered
+        $script:OldVersionManifest = ConvertFrom-Yaml -Yaml ($(Get-Content -Path $(Resolve-Path "$AppFolder\..\$LastVersion\$PackageIdentifier.yaml") -Encoding UTF8) -join "`n") -Ordered
     }
     elseif ($OldManifests.Name -eq "$PackageIdentifier.yaml") {
         if ($Option -eq 'NewLocale') { Throw "Error: MultiManifest Required" }
         $script:OldManifestType = 'Singleton'
-        $script:OldVersionManifest = ConvertFrom-Yaml -Yaml (Get-Content -Path $(Resolve-Path "$AppFolder\..\$LastVersion\$PackageIdentifier.yaml") -Raw) -Ordered
+        $script:OldVersionManifest = ConvertFrom-Yaml -Yaml ($(Get-Content -Path $(Resolve-Path "$AppFolder\..\$LastVersion\$PackageIdentifier.yaml") -Encoding UTF8) -join "`n") -Ordered
     }
     else {
         Throw "Error: Version $LastVersion does not contain the required manifests"
