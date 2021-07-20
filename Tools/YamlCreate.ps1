@@ -789,10 +789,14 @@ Function AddYamlListParameter {
         [Parameter(Mandatory = $true, Position = 1)]
         [string] $Parameter,
         [Parameter(Mandatory = $true, Position = 2)]
-        [string] $Values
+        $Values
     )
     $_Values = @()
-    Foreach ($Value in $Values.Split(',').Trim()) {
+    Foreach ($Value in $Values.Split(",").Trim()) {
+        try {
+            $Value = [int]$Value
+        }
+        catch {}
         $_Values += $Value
     }
     $Object[$Parameter] = $_Values
@@ -851,9 +855,8 @@ Function Write-WinGet-InstallerManifest-Yaml {
     if ($script:OldManifestType = 'MultiManifest') {
         $InstallerManifest = $script:OldInstallerManifest
     }
-    else {
-        [PSCustomObject]$InstallerManifest = [ordered]@{}
-    }
+
+    if (!$InstallerManifest) { [PSCustomObject]$InstallerManifest = [ordered]@{} }
 
     AddYamlParameter $InstallerManifest 'PackageIdentifier' $PackageIdentifier
     AddYamlParameter $InstallerManifest 'PackageVersion' $PackageVersion
@@ -900,9 +903,8 @@ Function Write-WinGet-LocaleManifest-Yaml {
     if ($script:OldManifestType = 'MultiManifest') {
         $LocaleManifest = $script:OldLocaleManifest
     }
-    else {
-        [PSCustomObject]$LocaleManifest = [ordered]@{}
-    }
+    
+    if (!$LocaleManifest) { [PSCustomObject]$LocaleManifest = [ordered]@{} }
     
     if ($PackageLocale -eq 'en-US') { $yamlServer = '# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.0.0.schema.json' }else { $yamlServer = '# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.0.0.schema.json' }
     
