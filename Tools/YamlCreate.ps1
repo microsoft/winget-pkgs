@@ -383,7 +383,7 @@ Function Read-WinGet-InstallerManifest {
 
     do {
         if (!$InstallerSuccessCodes) { $InstallerSuccessCodes = '' }
-        $script:InstallerSuccessCodes = PromptInstallerManifestValue $InstallerSuccessCodes 'Commands' '[Optional] List of additional non-zero installer success exit codes other than known default values by winget (Max 16)'
+        $script:InstallerSuccessCodes = PromptInstallerManifestValue $InstallerSuccessCodes 'InstallerSuccessCodes' '[Optional] List of additional non-zero installer success exit codes other than known default values by winget (Max 16)'
     } while (($InstallerSuccessCodes -split ", ").Count -gt '16')
 
     do {
@@ -754,7 +754,6 @@ Function Submit-Manifest {
             'NewLocale' { $CommitType = 'Locale' }
         }
 
-        Write-Host $CommitType
         exit 1
 
         git fetch upstream
