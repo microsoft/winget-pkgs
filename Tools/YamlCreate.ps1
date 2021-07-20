@@ -744,10 +744,18 @@ Function Submit-Manifest {
 
     if ($PromptSubmit -eq '0') {
         switch ($Option) {
-            'New' { $CommitType = 'New' }
-            'Update' { $CommitType = 'Update' }
+            'New' {
+                if ($script:OldManifestType -eq 'None') { $CommitType = 'New' }
+                else {
+                    $CommitType = 'Update'
+                }
+            }
+            'EditMetadata' { $CommitType = 'Metadata' }
             'NewLocale' { $CommitType = 'Locale' }
         }
+
+        Write-Host $CommitType
+        exit 1
 
         git fetch upstream
         git checkout -b "$PackageIdentifier-$PackageVersion" FETCH_HEAD
@@ -948,7 +956,6 @@ Function Write-WinGet-LocaleManifest-Yaml {
 
 Function Read-PreviousWinGet-Manifest-Yaml {
     
-    #Exact matching for Locale and edit metadata
     if (($Option -eq 'NewLocale') -or ($Option -eq 'EditMetadata')) {
         if (Test-Path  -Path "$AppFolder\..\$PackageVersion") {
             $script:OldManifests = Get-ChildItem -Path "$AppFolder\..\$PackageVersion"
@@ -963,12 +970,15 @@ Function Read-PreviousWinGet-Manifest-Yaml {
                 $script:OldManifests = Get-ChildItem -Path "$AppFolder\..\$PromptVersion" 
             }
             $LastVersion = $PromptVersion
-            $script:AppFolder = (Split-Path $AppFolder)+"\$LastVersion"
+            $script:AppFolder = (Split-Path $AppFolder) + "\$LastVersion"
             $script:PackageVersion = $LastVersion
         }
     }
 
-    if (-not (Test-Path  -Path "$AppFolder\..")) {return}
+    if (-not (Test-Path  -Path "$AppFolder\..")) {
+        $script:OldManifestType = 'None'
+        return
+    }
     
     if (!$LastVersion) {
         try {
