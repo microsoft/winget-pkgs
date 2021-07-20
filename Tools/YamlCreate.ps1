@@ -776,8 +776,6 @@ Function Submit-Manifest {
             'NewLocale' { $CommitType = 'Locale' }
         }
 
-        exit 1
-
         git fetch upstream
         git checkout -b "$PackageIdentifier-$PackageVersion" FETCH_HEAD
 
