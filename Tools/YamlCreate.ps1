@@ -84,7 +84,7 @@ Function Write-Colors {
     }
 }
 Function Show-OptionMenu {
-    # Clear-Host
+    Clear-Host
     Write-Host -ForegroundColor 'Cyan' "Select Mode"
     Write-Colors "`n[", "1", "] New Manifest or Package Version`n" 'DarkCyan', 'White', 'DarkCyan'
     Write-Colors "`n[", "2", "] Update Package Metadata`n" 'DarkCyan', 'White', 'DarkCyan'
@@ -401,7 +401,7 @@ Function SortYamlKeys {
     )
     $_Temp = [ordered] @{}
     $SortOrder.GetEnumerator() | ForEach-Object {
-         if ($InputObject.Contains($_)) {
+        if ($InputObject.Contains($_)) {
             $_Temp.Add($_, $InputObject[$_])
         }
     }
@@ -950,7 +950,7 @@ Function Write-WinGet-InstallerManifest-Yaml {
 
     AddYamlParameter $InstallerManifest "ManifestType" "installer"
     AddYamlParameter $InstallerManifest "ManifestVersion" $ManifestVersion
-    If($InstallerManifest["Dependencies"]){
+    If ($InstallerManifest["Dependencies"]) {
         $InstallerManifest["Dependencies"] = SortYamlKeys $InstallerManifest["Dependencies"] $InstallerDependencyProperties
     }
 
