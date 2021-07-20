@@ -990,7 +990,7 @@ Function Submit-Manifest {
             'NewLocale' {$CommitType = 'Locale'}
         }
         #>
-        while ($keyInfo.Key -notin @('M', 'N', 'U')) {
+        while ($keyInfo.Key -notin @('M', 'N', 'U','A','C')) {
             Write-Host -NoNewLine "`nCommit Type: "
             do {
                 $keyInfo = [Console]::ReadKey($false)
