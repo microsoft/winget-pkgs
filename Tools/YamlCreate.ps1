@@ -974,7 +974,7 @@ Function Write-WinGet-LocaleManifest-Yaml {
         ForEach ($DifLocale in $OldManifests) {
             if ($DifLocale.Name -notin @("$PackageIdentifier.yaml", "$PackageIdentifier.installer.yaml", "$PackageIdentifier.locale.en-US.yaml")) {
                 if (!(Test-Path $AppFolder)) { New-Item -ItemType "Directory" -Force -Path $AppFolder | Out-Null }
-                $script:OldLocaleManifest = ConvertFrom-Yaml -Yaml (Get-Content -Path $DifLocale.FullName -Raw) -Ordered
+                $script:OldLocaleManifest = ConvertFrom-Yaml -Yaml ($(Get-Content -Path $DifLocale.FullName -Encoding UTF8) -join "`n") -Ordered
                 $script:OldLocaleManifest["PackageVersion"] = $PackageVersion
 
                 $yamlServer = '# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.0.0.schema.json'
@@ -1029,14 +1029,14 @@ Function Read-PreviousWinGet-Manifest-Yaml {
 
     if ($OldManifests.Name -eq "$PackageIdentifier.installer.yaml" -and $OldManifests.Name -eq "$PackageIdentifier.locale.en-US.yaml" -and $OldManifests.Name -eq "$PackageIdentifier.yaml") {
         $script:OldManifestType = 'MultiManifest'
-        $script:OldInstallerManifest = ConvertFrom-Yaml -Yaml (Get-Content -Path $(Resolve-Path "$AppFolder\..\$LastVersion\$PackageIdentifier.installer.yaml") -Raw) -Ordered
-        $script:OldLocaleManifest = ConvertFrom-Yaml -Yaml (Get-Content -Path $(Resolve-Path "$AppFolder\..\$LastVersion\$PackageIdentifier.locale.en-US.yaml") -Raw) -Ordered
-        $script:OldVersionManifest = ConvertFrom-Yaml -Yaml (Get-Content -Path $(Resolve-Path "$AppFolder\..\$LastVersion\$PackageIdentifier.yaml") -Raw) -Ordered
+        $script:OldInstallerManifest = ConvertFrom-Yaml -Yaml ($(Get-Content -Path $(Resolve-Path "$AppFolder\..\$LastVersion\$PackageIdentifier.installer.yaml") -Encoding UTF8) -join "`n") -Ordered
+        $script:OldLocaleManifest = ConvertFrom-Yaml -Yaml ($(Get-Content -Path $(Resolve-Path "$AppFolder\..\$LastVersion\$PackageIdentifier.locale.en-US.yaml") -Encoding UTF8) -join "`n") -Ordered
+        $script:OldVersionManifest = ConvertFrom-Yaml -Yaml ($(Get-Content -Path $(Resolve-Path "$AppFolder\..\$LastVersion\$PackageIdentifier.yaml") -Encoding UTF8) -join "`n") -Ordered
     }
     elseif ($OldManifests.Name -eq "$PackageIdentifier.yaml") {
         if ($Option -eq 'NewLocale') { Throw "Error: MultiManifest Required" }
         $script:OldManifestType = 'Singleton'
-        $script:OldVersionManifest = ConvertFrom-Yaml -Yaml (Get-Content -Path $(Resolve-Path "$AppFolder\..\$LastVersion\$PackageIdentifier.yaml") -Raw) -Ordered
+        $script:OldVersionManifest = ConvertFrom-Yaml -Yaml ($(Get-Content -Path $(Resolve-Path "$AppFolder\..\$LastVersion\$PackageIdentifier.yaml") -Encoding UTF8) -join "`n") -Ordered
     }
     else {
         Throw "Error: Version $LastVersion does not contain the required manifests"
