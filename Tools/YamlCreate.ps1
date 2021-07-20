@@ -1001,7 +1001,7 @@ Function Submit-Manifest {
             'N' {$CommitType = "New"}
             'M' {$CommitType = "Metadata"}
 	    'A' {$CommitType = "ARP"}
-	    'C' {$CommitType = Read-Host -Prompt 'Enter Custom Commit Message' | TrimString}
+	    'C' {Write-Host; $CommitType = Read-Host -Prompt 'Enter Custom Commit Message' | TrimString}
         }
         Write-Host
         git fetch upstream
