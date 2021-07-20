@@ -847,7 +847,13 @@ Function Write-WinGet-VersionManifest-Yaml {
     Write-Host "Yaml file created: $VersionManifestPath"
 }
 Function Write-WinGet-InstallerManifest-Yaml {
-    [PSCustomObject]$InstallerManifest = [ordered]@{}
+
+    if ($script:OldManifestType = 'MultiManifest') {
+        $InstallerManifest = $script:OldInstallerManifest
+    }
+    else {
+        [PSCustomObject]$InstallerManifest = [ordered]@{}
+    }
 
     AddYamlParameter $InstallerManifest 'PackageIdentifier' $PackageIdentifier
     AddYamlParameter $InstallerManifest 'PackageVersion' $PackageVersion
@@ -890,7 +896,13 @@ Function Write-WinGet-InstallerManifest-Yaml {
 }
 
 Function Write-WinGet-LocaleManifest-Yaml {
-    [PSCustomObject]$LocaleManifest = [ordered]@{}
+    
+    if ($script:OldManifestType = 'MultiManifest') {
+        $LocaleManifest = $script:OldLocaleManifest
+    }
+    else {
+        [PSCustomObject]$LocaleManifest = [ordered]@{}
+    }
     
     if ($PackageLocale -eq 'en-US') { $yamlServer = '# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.0.0.schema.json' }else { $yamlServer = '# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.0.0.schema.json' }
     
