@@ -1026,7 +1026,7 @@ Function Write-WinGet-LocaleManifest-Yaml {
                 if (!(Test-Path $AppFolder)) { New-Item -ItemType "Directory" -Force -Path $AppFolder | Out-Null }
                 $script:OldLocaleManifest = ConvertFrom-Yaml -Yaml ($(Get-Content -Path $DifLocale.FullName -Encoding UTF8) -join "`n") -Ordered
                 $script:OldLocaleManifest["PackageVersion"] = $PackageVersion
-                $script:OldLocaleManifest = SortYamlKeys $LocaleManifest $LocaleProperties
+                $script:OldLocaleManifest = SortYamlKeys $script:OldLocaleManifest $LocaleProperties
 
                 $yamlServer = '# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.0.0.schema.json'
             
