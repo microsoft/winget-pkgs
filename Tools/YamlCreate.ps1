@@ -813,7 +813,7 @@ Function Submit-Manifest {
             'EditMetadata' { $CommitType = 'Metadata' }
             'NewLocale' { $CommitType = 'Locale' }
         }
-
+        
         git fetch upstream
         git checkout -b "$PackageIdentifier-$PackageVersion" FETCH_HEAD
 
@@ -917,7 +917,7 @@ Function Write-WinGet-VersionManifest-Yaml {
 }
 Function Write-WinGet-InstallerManifest-Yaml {
 
-    if ($script:OldManifestType = 'MultiManifest') {
+    if ($script:OldManifestType -eq 'MultiManifest') {
         $InstallerManifest = $script:OldInstallerManifest
     }
 
@@ -972,7 +972,7 @@ Function Write-WinGet-InstallerManifest-Yaml {
 
 Function Write-WinGet-LocaleManifest-Yaml {
     
-    if ($script:OldManifestType = 'MultiManifest') {
+    if ($script:OldManifestType -eq 'MultiManifest') {
         $LocaleManifest = $script:OldLocaleManifest
     }
     
