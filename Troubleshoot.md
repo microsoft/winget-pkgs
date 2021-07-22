@@ -30,7 +30,7 @@ Binary validation errors indicate that the installer failed static analysis.
 Here are some common causes for the Binary-Validation-Error label:
 1) The Sha256 HASH in the manifest does not match the HASH of the installer. Run ```winget hash <installer>``` to generate the hash.
 2) The URL is not valid. Make sure the URL to the installer is publicly available and valid.
-3) The installer has been identified as malware.  If the installer is detected as malware, you can submit the installer to the defender team for [analysis](https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-defender-antivirus/antivirus-false-positives-negatives#submit-a-file-to-microsoft-for-analysis) as a potential false positive.
+3) The installer has been identified as malware.  If the installer is detected as malware, you can submit the installer to the defender team for [analysis](https://docs.microsoft.com/windows/security/threat-protection/windows-defender-antivirus/antivirus-false-positives-negatives#submit-a-file-to-microsoft-for-analysis) as a potential false positive.
 
 ## SmartScreen-Validation-Error
 SmartScreen validation errors indicate that the URL you provided has a bad reputation.

@@ -40,7 +40,7 @@ if (-Not $SkipManifestValidation -And -Not [String]::IsNullOrWhiteSpace($Manifes
 if (-Not (Get-Command 'WindowsSandbox' -ErrorAction SilentlyContinue)) {
   Write-Error -Category NotInstalled -Message @'
 Windows Sandbox does not seem to be available. Check the following URL for prerequisites and further details:
-https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-sandbox/windows-sandbox-overview
+https://docs.microsoft.com/windows/security/threat-protection/windows-sandbox/windows-sandbox-overview
 
 You can run the following command in an elevated PowerShell for enabling Windows Sandbox:
 $ Enable-WindowsOptionalFeature -Online -FeatureName 'Containers-DisposableClientVM'
