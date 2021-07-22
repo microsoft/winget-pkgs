@@ -694,7 +694,7 @@ Function Read-WinGet-LocaleManifest {
         do {
             Write-Host
             Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter any tags that would be useful to discover this tool. For example: zip, c++ (Max 16)'
-            Write-Host -ForegroundColor 'DarkGray' "Old Variable: $Tags"
+            Write-Host -ForegroundColor 'DarkGray' "Old Variable: $($Tags -join ", ")"
             $NewTags = Read-Host -Prompt 'Tags' | TrimString
     
             if (-not [string]::IsNullOrWhiteSpace($NewTags)) {
