@@ -813,8 +813,8 @@ Function Submit-Manifest {
             'EditMetadata' { $CommitType = 'Metadata' }
             'NewLocale' { $CommitType = 'Locale' }
         }
-        
-        git fetch upstream
+
+        git fetch upstream master
         git checkout -b "$PackageIdentifier-$PackageVersion" FETCH_HEAD
 
         git add -A
