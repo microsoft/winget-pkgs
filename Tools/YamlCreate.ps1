@@ -476,23 +476,26 @@ Function Read-WinGet-LocaleManifest {
         } while ($PackageName.Length -gt '128')
     }
 
-    if ([string]::IsNullOrWhiteSpace($Moniker)) {
-        do {
-            Write-Host
-            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the Moniker (friendly name/alias). For example: vscode'
-            $script:Moniker = Read-Host -Prompt 'Moniker' | TrimString
-        } while ($Moniker.Length -gt '40')
-    } else {
-        do {
-            Write-Host
-            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the Moniker (friendly name/alias). For example: vscode'
-            Write-Host -ForegroundColor 'DarkGray' "Old Variable: $Moniker"
-            $NewMoniker = Read-Host -Prompt 'Moniker' | TrimString
-    
-            if (-not [string]::IsNullOrWhiteSpace($NewMoniker)) {
-                $script:Moniker = $NewMoniker
-            }
-        } while ($Moniker.Length -gt '40')
+    if ($Option -ne 'NewLocale') {
+        if ([string]::IsNullOrWhiteSpace($Moniker)) {
+            do {
+                Write-Host
+                Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the Moniker (friendly name/alias). For example: vscode'
+                $script:Moniker = Read-Host -Prompt 'Moniker' | TrimString
+            } while ($Moniker.Length -gt '40')
+        }
+        else {
+            do {
+                Write-Host
+                Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the Moniker (friendly name/alias). For example: vscode'
+                Write-Host -ForegroundColor 'DarkGray' "Old Variable: $Moniker"
+                $NewMoniker = Read-Host -Prompt 'Moniker' | TrimString
+        
+                if (-not [string]::IsNullOrWhiteSpace($NewMoniker)) {
+                    $script:Moniker = $NewMoniker
+                }
+            } while ($Moniker.Length -gt '40')
+        }
     }
 
     if ([string]::IsNullOrWhiteSpace($PublisherUrl)) {
