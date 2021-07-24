@@ -228,14 +228,26 @@ Function Read-WinGet-InstallerValues {
         $InstallerUrl = Read-Host -Prompt 'Url' | TrimString
     }
 
-    $title   = 'Save to disk?'
-    $msg     = 'Do you want to save the files to the Temp folder?'
-    $options = '&Yes', '&No', '&Manually Enter SHA256'
-    $default = 1  # 0=Yes, 1=No, 2=Manual
+    Write-Host
+    Write-Host -ForegroundColor 'White' "Save to disk?"
+    Write-Host "Do you want to save the files to the Temp folder?"
+    Write-Host -ForegroundColor 'White' -NoNewline "[Y] Yes  "
+    Write-Host -ForegroundColor 'Yellow' -NoNewline '[N] No  '
+    Write-Host -ForegroundColor 'White' -NoNewline "[M] Manually Enter SHA256 "
+    Write-Host -NoNewline "(default is 'N'): "
+    do {
+        $keyInfo = [Console]::ReadKey($false)
+    } until ($keyInfo.Key)
 
-    $SaveOption = $Host.UI.PromptForChoice($title, $msg, $options, $default)
+    switch ($keyInfo.Key) {
+        'Y' {$SaveOption = '0'}
+        'N' {$SaveOption = '1'}
+        'M' {$SaveOption = '2'}
+        default {$SaveOption = '1'}
+    }
 
     if ($SaveOption -ne '2') {
+        Write-Host
         $start_time = Get-Date
         Write-Host $NewLine
         Write-Host 'Downloading URL. This will take a while...' -ForegroundColor Blue
@@ -261,6 +273,7 @@ Function Read-WinGet-InstallerValues {
 
     else {
         while (!($InstallerSha256 -match '[0-9A-Z]{64}')){
+            Write-Host
             Write-Host
             Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the installer SHA256 Hash'
             $InstallerSha256 = Read-Host -Prompt 'InstallerSha256' | TrimString
@@ -315,7 +328,7 @@ Function Read-WinGet-InstallerValues {
     do {
         Write-Host
         Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the installer locale. For example: en-US, en-CA'
-        Write-Host -ForegroundColor 'Blue' -Object 'https://docs.microsoft.com/en-us/openspecs/office_standards/ms-oe376/6c085406-a698-4e12-9d4d-c3b0ee3dbc4a'
+        Write-Host -ForegroundColor 'Blue' -Object 'https://docs.microsoft.com/openspecs/office_standards/ms-oe376/6c085406-a698-4e12-9d4d-c3b0ee3dbc4a'
         $ProductCode = Read-Host -Prompt 'InstallerLocale' | TrimString
     } while (-not [string]::IsNullOrWhiteSpace($InstallerLocale) -and ($InstallerLocale -gt 10))
     if ([string]::IsNullOrWhiteSpace($InstallerLocale)) {$InstallerLocale = 'en-US'}
@@ -328,27 +341,38 @@ Function Read-WinGet-InstallerValues {
         $ProductCode = Read-Host -Prompt 'ProductCode' | TrimString
     } while (-not [string]::IsNullOrWhiteSpace($ProductCode) -and ($ProductCode.Length -lt 1 -or $ProductCode.Length -gt 255))
 
-    $title   = 'Scope'
-    $msg     = '[Optional] Enter the Installer Scope.'
-    $options = '&Machine', '&User', '&No idea'
-    $default = 2  # 0=machine, 1=user, #2=blank
+    Write-Host
+    Write-Host -ForegroundColor 'White' "Scope"
+    Write-Host "[Optional] Enter the Installer Scope."
+    Write-Host -ForegroundColor 'White' -NoNewline "[M] Machine  [U] User  "
+    Write-Host -ForegroundColor 'Yellow' -NoNewline '[N] No idea '
+    Write-Host -NoNewline "(default is 'N'): "
+    do {
+        $keyInfo = [Console]::ReadKey($false)
+    } until ($keyInfo.Key)
 
-    $ScopeOption = $Host.UI.PromptForChoice($title, $msg, $options, $default)
-    Switch ($ScopeOption) {
-        '0' {$Scope = 'machine'}
-        '1' {$Scope = 'user'}
-        '2' {$Scope = ''}
+    switch ($keyInfo.Key) {
+        'M' {$Scope = 'machine'}
+        'U' {$Scope = 'user'}
+        'N' {$Scope = ''}
+        default {$Scope = ''}
     }
 
-    $title   = 'UpgradeBehavior'
-    $msg     = '[Optional] Enter the UpgradeBehavior.'
-    $options = '&install', '&uninstallPrevious'
-    $default = 0  # 0=install, 1=uninstallPrevious
+    Write-Host
+    Write-Host
+    Write-Host -ForegroundColor 'White' "UpgradeBehavior"
+    Write-Host "[Optional] Enter the UpgradeBehavior."
+    Write-Host -ForegroundColor 'Yellow' -NoNewline '[I] install  '
+    Write-Host -ForegroundColor 'White' -NoNewline "[U] uninstallPrevious "
+    Write-Host -NoNewline "(default is 'I'): "
+    do {
+        $keyInfo = [Console]::ReadKey($false)
+    } until ($keyInfo.Key)
 
-    $UpgradeBehaviorOption = $Host.UI.PromptForChoice($title, $msg, $options, $default)
-    Switch ($UpgradeBehaviorOption) {
-        '0' {$UpgradeBehavior = 'install'}
-        '1' {$UpgradeBehavior = 'uninstallPrevious'}
+    switch ($keyInfo.Key) {
+        'I' {$UpgradeBehavior = 'install'}
+        'U' {$UpgradeBehavior = 'uninstallPrevious'}
+        default {$UpgradeBehavior = 'install'}
     }
 
     $Installer += "- InstallerLocale: $InstallerLocale`n"
@@ -373,19 +397,30 @@ Function Read-WinGet-InstallerValues {
         }
     }
 
-    $title   = 'Another Installer'
-    $msg     = '[Optional] Do you want to create another installer?'
-    $options = '&Yes', '&No'
-    $default = 1  # 0=Yes, 1=No
+    Write-Host
+    Write-Host
+    Write-Host -ForegroundColor 'White' "Another Installer"
+    Write-Host "[Optional] Do you want to create another installer?"
+    Write-Host -ForegroundColor 'White' -NoNewline "[Y] Yes  "
+    Write-Host -ForegroundColor 'Yellow' -NoNewline '[N] No '
+    Write-Host -NoNewline "(default is 'N'): "
+    do {
+        $keyInfo = [Console]::ReadKey($false)
+    } until ($keyInfo.Key)
 
-    $AnotherInstaller = $Host.UI.PromptForChoice($title, $msg, $options, $default)
+    switch ($keyInfo.Key) {
+        'Y' {$AnotherInstaller = '0'}
+        'N' {$AnotherInstaller = '1'}
+        default {$AnotherInstaller = '1'}
+    }
 
     if ($AnotherInstaller -eq '0') {
-        Read-WinGet-InstallerValues
+        Write-Host; Read-WinGet-InstallerValues
     }
 }
 
 Function Read-WinGet-InstallerManifest {
+    Write-Host
     if ([string]::IsNullOrWhiteSpace($FileExtensions)) {
         do {
             Write-Host
@@ -486,7 +521,7 @@ Function Read-WinGet-InstallerManifest {
 Function Read-WinGet-LocaleManifest {
     while ([string]::IsNullOrWhiteSpace($PackageLocale) -or $PackageLocale.Length -gt '128') {
         Write-Host
-        Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the Package Locale. For example: en-US, en-CA https://docs.microsoft.com/en-us/openspecs/office_standards/ms-oe376/6c085406-a698-4e12-9d4d-c3b0ee3dbc4a'
+        Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the Package Locale. For example: en-US, en-CA https://docs.microsoft.com/openspecs/office_standards/ms-oe376/6c085406-a698-4e12-9d4d-c3b0ee3dbc4a'
         $script:PackageLocale = Read-Host -Prompt 'PackageLocale' | TrimString
     }
 
@@ -898,12 +933,21 @@ Function Test-Manifest {
     if (Get-Command 'winget.exe' -ErrorAction SilentlyContinue) {winget validate $AppFolder}
 
     if (Get-Command 'WindowsSandbox.exe' -ErrorAction SilentlyContinue) {
-        $title   = 'Sandbox Test'
-        $msg     = '[Recommended] Do you want to test your Manifest in Windows Sandbox?'
-        $options = '&Yes', '&No'
-        $default = 0  # 0=Yes, 1=No
+        Write-Host
+        Write-Host -ForegroundColor 'White' "Sandbox Test"
+        Write-Host "[Recommended] Do you want to test your Manifest in Windows Sandbox?"
+        Write-Host -ForegroundColor 'Yellow' -NoNewline '[Y] Yes  '
+        Write-Host -ForegroundColor 'White' -NoNewline "[N] No "
+        Write-Host -NoNewline "(default is 'Y'): "
+        do {
+            $keyInfo = [Console]::ReadKey($false)
+        } until ($keyInfo.Key)
 
-        $SandboxTest = $Host.UI.PromptForChoice($title, $msg, $options, $default)
+        switch ($keyInfo.Key) {
+            'Y' {$SandboxTest = '0'}
+            'N' {$SandboxTest = '1'}
+            default {$SandboxTest = '0'}
+        }
 
         if ($SandboxTest -eq '0') {
             if (Test-Path -Path "$PSScriptRoot\SandboxTest.ps1") {
@@ -923,12 +967,22 @@ Function Test-Manifest {
 
 Function Submit-Manifest {
     if (Get-Command 'git.exe' -ErrorAction SilentlyContinue) {
-        $title   = 'Submit PR?'
-        $msg     = 'Do you want to submit your PR now?'
-        $options = '&Yes', '&No'
-        $default = 0  # 0=Yes, 1=No
+        Write-Host
+        Write-Host
+        Write-Host -ForegroundColor 'White' "Submit PR?"
+        Write-Host "Do you want to submit your PR now?"
+        Write-Host -ForegroundColor 'Yellow' -NoNewline '[Y] Yes  '
+        Write-Host -ForegroundColor 'White' -NoNewline "[N] No "
+        Write-Host -NoNewline "(default is 'Y'): "
+        do {
+            $keyInfo = [Console]::ReadKey($false)
+        } until ($keyInfo.Key)
 
-        $PromptSubmit = $Host.UI.PromptForChoice($title, $msg, $options, $default)
+        switch ($keyInfo.Key) {
+            'Y' {$PromptSubmit = '0'}
+            'N' {$PromptSubmit = '1'}
+            default {$PromptSubmit = '0'}
+        }
     }
 
     if ($PromptSubmit -eq '0') {
