@@ -1004,7 +1004,7 @@ Function Submit-Manifest {
 	        'C' {Write-Host; $CommitType = Read-Host -Prompt 'Enter Custom Commit Message' | TrimString}
         }
         Write-Host
-        git fetch upstream
+        git fetch upstream master
         git checkout -b "$PackageIdentifier-$PackageVersion" FETCH_HEAD
 
         git add -A
