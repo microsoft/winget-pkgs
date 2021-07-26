@@ -38,7 +38,7 @@ else {
 }
 
 $sandboxTestPath = (Resolve-Path ($PSScriptRoot.ToString() + "\SandboxTest.ps1")).ToString()
-& $sandboxTestPath $path
+& $sandboxTestPath -Manifest $path -SkipManifestValidation
 
 if ($Review) {
     Write-Host "Opening $PullRequest in browser..." -ForegroundColor Green
