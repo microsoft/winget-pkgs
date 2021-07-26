@@ -17,6 +17,11 @@ if (-Not (Get-Command "gh" -ErrorAction "SilentlyContinue")) {
     return
 }
 
+if (-Not (Get-Command "git" -ErrorAction "SilentlyContinue")) {
+    Write-Host "Git is not installed. Install it via 'winget install git' and come back here!" -ForegroundColor Red
+    return
+}
+
 gh pr checkout $PullRequest --detach -f | Out-Null
 
 if($LASTEXITCODE -ne 0) {
