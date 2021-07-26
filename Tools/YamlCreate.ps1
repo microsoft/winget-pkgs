@@ -993,7 +993,7 @@ Function Submit-Manifest {
             'NewLocale' {$CommitType = 'Locale'}
         }
         #>
-        while ($keyInfo.Key -notin @('M', 'N', 'U','A','C')) {
+        while ($keyInfo.Key -notin @('M', 'N', 'U','A','C','P')) {
             Write-Host -NoNewLine "`nCommit Type: "
             do {
                 $keyInfo = [Console]::ReadKey($false)
@@ -1004,6 +1004,7 @@ Function Submit-Manifest {
             'N' {$CommitType = "New"}
             'M' {$CommitType = "Metadata"}
 	        'A' {$CommitType = "ARP"}
+            'P' {$CommitType = "ProductCode"}
 	        'C' {Write-Host; $CommitType = Read-Host -Prompt 'Enter Custom Commit Message' | TrimString}
         }
         Write-Host
