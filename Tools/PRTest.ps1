@@ -17,7 +17,7 @@ if (-Not (Get-Command "gh" -ErrorAction "SilentlyContinue")) {
     return
 }
 
-gh pr checkout $PullRequest | Out-Null
+gh pr checkout $PullRequest --detach -f | Out-Null
 
 if($LASTEXITCODE -ne 0) {
     Write-Host "There was an error checking out the PR. Make sure you're logged into GitHub via 'gh auth login' and come back here!" -ForegroundColor Red
