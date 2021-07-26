@@ -333,14 +333,24 @@ Function Read-WinGet-InstallerValues {
     } while (-not [string]::IsNullOrWhiteSpace($InstallerLocale) -and ($InstallerLocale -gt 10))
     if ([string]::IsNullOrWhiteSpace($InstallerLocale)) {$InstallerLocale = 'en-US'}
 
-    do {
-        Write-Host
-        Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the application product code. Looks like {CF8E6E00-9C03-4440-81C0-21FACB921A6B}'
-        Write-Host -ForegroundColor 'White' -Object "ProductCode found from installer: $MSIProductCode"
-        Write-Host -ForegroundColor 'White' -Object 'Can be found with ' -NoNewline; Write-Host -ForegroundColor 'DarkYellow' 'get-wmiobject Win32_Product | Sort-Object Name | Format-Table IdentifyingNumber, Name -AutoSize'
-        $ProductCode = Read-Host -Prompt 'ProductCode' | TrimString
-    } while (-not [string]::IsNullOrWhiteSpace($ProductCode) -and ($ProductCode.Length -lt 1 -or $ProductCode.Length -gt 255))
-
+    if ($InstallerType -ieq 'msi') {
+        while ([string]::IsNullOrWhiteSpace($ProductCode)) {
+            Write-Host
+            Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the application product code. Looks like {CF8E6E00-9C03-4440-81C0-21FACB921A6B}'
+            Write-Host -ForegroundColor 'White' -Object "ProductCode found from installer: $MSIProductCode"
+            Write-Host -ForegroundColor 'White' -Object 'Can be found with ' -NoNewline; Write-Host -ForegroundColor 'DarkYellow' 'get-wmiobject Win32_Product | Sort-Object Name | Format-Table IdentifyingNumber, Name -AutoSize'
+            $ProductCode = Read-Host -Prompt 'ProductCode' | TrimString
+        }
+    } else {
+        do {
+            Write-Host
+            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the application product code. Looks like {CF8E6E00-9C03-4440-81C0-21FACB921A6B}'
+            Write-Host -ForegroundColor 'White' -Object "ProductCode found from installer: $MSIProductCode"
+            Write-Host -ForegroundColor 'White' -Object 'Can be found with ' -NoNewline; Write-Host -ForegroundColor 'DarkYellow' 'get-wmiobject Win32_Product | Sort-Object Name | Format-Table IdentifyingNumber, Name -AutoSize'
+            $ProductCode = Read-Host -Prompt 'ProductCode' | TrimString
+        } while (-not [string]::IsNullOrWhiteSpace($ProductCode) -and ($ProductCode.Length -lt 1 -or $ProductCode.Length -gt 255))
+    }
+   
     Write-Host
     Write-Host -ForegroundColor 'White' "Scope"
     Write-Host "[Optional] Enter the Installer Scope."
