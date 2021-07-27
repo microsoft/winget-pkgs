@@ -1,6 +1,6 @@
 #Requires -Version 5
 $PSVersion = (Get-Host).Version.Major
-$ScriptHeader = '# Created using YamlCreate.ps1 v1.2.0'
+$ScriptHeader = '# Created using YamlCreate.ps1 v1.3.0'
 
 <#
 .SYNOPSIS
@@ -336,7 +336,10 @@ Function Read-WinGet-InstallerValues {
     if ($InstallerType -ieq 'msi') {
         Add-Type -AssemblyName System.Windows.Forms
         $FileBrowser = New-Object System.Windows.Forms.OpenFileDialog -Property @{InitialDirectory="C:\Users\Bittu\Downloads\winget-pkgs";Filter="MSI files (*.msi)|*.msi"}
-        $FileBrowser.ShowDialog()
+        Write-Host
+        Write-Host Write-Host "Select the MSI installer to open it in Orca..."
+        $FileBrowser.ShowDialog() | Out-Null
+        Write-Host "Opening Orca..." -NoNewline
         & 'C:\Program Files (x86)\Orca\Orca.exe' $FileBrowser.FileName
         while ([string]::IsNullOrWhiteSpace($ProductCode)) {
             Write-Host
