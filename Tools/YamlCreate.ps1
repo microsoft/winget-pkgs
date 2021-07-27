@@ -334,6 +334,10 @@ Function Read-WinGet-InstallerValues {
     if ([string]::IsNullOrWhiteSpace($InstallerLocale)) {$InstallerLocale = 'en-US'}
 
     if ($InstallerType -ieq 'msi') {
+        Add-Type -AssemblyName System.Windows.Forms
+        $FileBrowser = New-Object System.Windows.Forms.OpenFileDialog -Property @{InitialDirectory="C:\Users\Bittu\Downloads\winget-pkgs";Filter="MSI files (*.msi)|*.msi"}
+        $FileBrowser.ShowDialog()
+        & 'C:\Program Files (x86)\Orca\Orca.exe' $FileBrowser.FileName
         while ([string]::IsNullOrWhiteSpace($ProductCode)) {
             Write-Host
             Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the application product code. Looks like {CF8E6E00-9C03-4440-81C0-21FACB921A6B}'
