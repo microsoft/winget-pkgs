@@ -43,6 +43,7 @@ jobs:
       LABEL_ENDPOINT: $(AzFuncSetLabelOnPullRequestEndpoint)
       CLEANUP_ENDPOINT: $(AzFuncCleanupEndpoint)
       LABEL_KEY: $(AzureFunctionLabelKey)
+      CATALOG_CONTENT_VERIFICATION_ENDPOINT: $(AzFuncCatalogContentVerificationEndpoint)
 
   # Validates integrity of pull request.
   - task: CmdLine@2
@@ -204,6 +205,41 @@ jobs:
         }
       waitForCompletion: "true"
 
+# Agentless phase. Depends on previous job.
+- job: 'CatalogContentVerification'
+  pool: server
+  displayName: 'Catalog Content Verification'
+  timeoutInMinutes: 1500
+  dependsOn:
+    - 'FileValidation'
+    - 'ContentValidation'
+    - 'InstallerValidation'
+  variables:
+    HostKeySecret: $[ dependencies.FileValidation.outputs['wingetsetup.hostkey']]
+    CatalogContentVerificationEndpointSecret: $[ dependencies.FileValidation.outputs['wingetsetup.catalogContentVerificationEndpoint']]
+  steps:
+
+  # Catalog content verification
+  - task: AzureFunction@1
+    displayName: 'Catalog Content Verification'
+    inputs:
+      function: '$(CatalogContentVerificationEndpointSecret)'
+      key: '$(HostKeySecret)'
+      body: |
+        {
+        "operationId": "$(Build.BuildNumber)",
+        "BuildId": "$(Build.BuildId)",
+        "PlanUrl": "$(system.CollectionUri)",
+        "HubName": "$(system.HostType)",
+        "ProjectId": "$(system.TeamProjectId)",
+        "PlanId": "$(system.PlanId)", 
+        "JobId": "$(system.JobId)", 
+        "TimelineId": "$(system.TimelineId)", 
+        "TaskInstanceId": "$(system.TaskInstanceId)",
+        "AuthToken": "$(system.AccessToken)"
+        }
+      waitForCompletion: "true"
+
 # Agentless phase. Runs even if previous jobs failed. 
 - job: 'postvalidation'
   pool: server
@@ -212,6 +248,7 @@ jobs:
     - 'FileValidation'
     - 'ContentValidation'
     - 'InstallerValidation'
+    - 'CatalogContentVerification'
   condition: succeededOrFailed()
   variables:
     HostKeySecret: $[ dependencies.FileValidation.outputs['wingetsetup.hostkey']]
