@@ -1,6 +1,6 @@
 #Requires -Version 5
 $PSVersion = (Get-Host).Version.Major
-$ScriptHeader = '# Created using YamlCreate.ps1 v1.1.5'
+$ScriptHeader = '# Created using YamlCreate.ps1 v1.2.0'
 
 <#
 .SYNOPSIS
@@ -333,14 +333,24 @@ Function Read-WinGet-InstallerValues {
     } while (-not [string]::IsNullOrWhiteSpace($InstallerLocale) -and ($InstallerLocale -gt 10))
     if ([string]::IsNullOrWhiteSpace($InstallerLocale)) {$InstallerLocale = 'en-US'}
 
-    do {
-        Write-Host
-        Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the application product code. Looks like {CF8E6E00-9C03-4440-81C0-21FACB921A6B}'
-        Write-Host -ForegroundColor 'White' -Object "ProductCode found from installer: $MSIProductCode"
-        Write-Host -ForegroundColor 'White' -Object 'Can be found with ' -NoNewline; Write-Host -ForegroundColor 'DarkYellow' 'get-wmiobject Win32_Product | Sort-Object Name | Format-Table IdentifyingNumber, Name -AutoSize'
-        $ProductCode = Read-Host -Prompt 'ProductCode' | TrimString
-    } while (-not [string]::IsNullOrWhiteSpace($ProductCode) -and ($ProductCode.Length -lt 1 -or $ProductCode.Length -gt 255))
-
+    if ($InstallerType -ieq 'msi') {
+        while ([string]::IsNullOrWhiteSpace($ProductCode)) {
+            Write-Host
+            Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the application product code. Looks like {CF8E6E00-9C03-4440-81C0-21FACB921A6B}'
+            Write-Host -ForegroundColor 'White' -Object "ProductCode found from installer: $MSIProductCode"
+            Write-Host -ForegroundColor 'White' -Object 'Can be found with ' -NoNewline; Write-Host -ForegroundColor 'DarkYellow' 'get-wmiobject Win32_Product | Sort-Object Name | Format-Table IdentifyingNumber, Name -AutoSize'
+            $ProductCode = Read-Host -Prompt 'ProductCode' | TrimString
+        }
+    } else {
+        do {
+            Write-Host
+            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the application product code. Looks like {CF8E6E00-9C03-4440-81C0-21FACB921A6B}'
+            Write-Host -ForegroundColor 'White' -Object "ProductCode found from installer: $MSIProductCode"
+            Write-Host -ForegroundColor 'White' -Object 'Can be found with ' -NoNewline; Write-Host -ForegroundColor 'DarkYellow' 'get-wmiobject Win32_Product | Sort-Object Name | Format-Table IdentifyingNumber, Name -AutoSize'
+            $ProductCode = Read-Host -Prompt 'ProductCode' | TrimString
+        } while (-not [string]::IsNullOrWhiteSpace($ProductCode) -and ($ProductCode.Length -lt 1 -or $ProductCode.Length -gt 255))
+    }
+   
     Write-Host
     Write-Host -ForegroundColor 'White' "Scope"
     Write-Host "[Optional] Enter the Installer Scope."
@@ -946,7 +956,7 @@ Function Test-Manifest {
         switch ($keyInfo.Key) {
             'Y' {$SandboxTest = '0'}
             'N' {$SandboxTest = '1'}
-            default {$SandboxTest = '0'}
+            default {$SandboxTest = '1'}
         }
 
         if ($SandboxTest -eq '0') {
@@ -986,13 +996,29 @@ Function Submit-Manifest {
     }
 
     if ($PromptSubmit -eq '0') {
+        <#
         switch ($Option) {
             'New' {$CommitType = 'New'}
             'Update' {$CommitType = 'Update'}
             'NewLocale' {$CommitType = 'Locale'}
         }
-
-        git fetch upstream
+        #>
+        while ($keyInfo.Key -notin @('M', 'N', 'U','A','C','P')) {
+            Write-Host -NoNewLine "`nCommit Type: "
+            do {
+                $keyInfo = [Console]::ReadKey($false)
+            } until ($keyInfo.Key)
+        }
+        switch ($keyInfo.Key) {
+            'U' {$CommitType = "Update"}
+            'N' {$CommitType = "New"}
+            'M' {$CommitType = "Metadata"}
+	        'A' {$CommitType = "ARP"}
+            'P' {$CommitType = "ProductCode"}
+	        'C' {Write-Host; $CommitType = Read-Host -Prompt 'Enter Custom Commit Message' | TrimString}
+        }
+        Write-Host
+        git fetch upstream master
         git checkout -b "$PackageIdentifier-$PackageVersion" FETCH_HEAD
 
         git add -A
@@ -1012,6 +1038,7 @@ Function Submit-Manifest {
                 gh pr create --body-file "$PRTemplate" -f
             }
         }
+        git switch "master"
     }
 }
 
