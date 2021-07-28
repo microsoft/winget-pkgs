@@ -287,10 +287,29 @@ Function Read-WinGet-InstallerValues {
         $architecture = Read-Host -Prompt 'Architecture' | TrimString
     }
 
+    $FileExtFromUrl =  ($InstallerUrl -split '\.')[-1]
+    if ($FileExtFromUrl -eq 'msi') {
+        $AutoInstallerType = 'msi'
+    } elseif ($FileExtFromUrl -eq "msix" -or $FileExtFromUrl -eq "msixbundle") {
+        $AutoInstallerType = 'msix'
+    } elseif ($FileExtFromUrl -eq 'appx' -or $FileExtFromUrl -eq 'appxbundle') {
+        $AutoInstallerType = 'appx'
+    }
+    else {
+        $AutoInstallerType = $null
+    }
     while ($InstallerType -notin @('exe', 'msi', 'msix', 'inno', 'nullsoft', 'appx', 'wix', 'zip', 'burn', 'pwa')) {
         Write-Host
         Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the InstallerType. For example: exe, msi, msix, inno, nullsoft, appx, wix, burn, pwa, zip'
-        $InstallerType = Read-Host -Prompt 'InstallerType' | TrimString
+        if ($AutoInstallerType -ne $null) {
+            if (($InstallerType = Read-Host -Prompt "InstallerType (Suggested: $AutoInstallerType)") -eq '') {$InstallerType = $AutoInstallerType}
+        } else {
+            while ($InstallerType -notin @('exe', 'msi', 'msix', 'inno', 'nullsoft', 'appx', 'wix', 'zip', 'burn', 'pwa')) {
+                Write-Host
+                Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the InstallerType. For example: exe, msi, msix, inno, nullsoft, appx, wix, burn, pwa, zip'
+                $InstallerType = Read-Host -Prompt 'InstallerType' | TrimString
+            }
+        }
     }
 
     if ($InstallerType -ieq 'exe') {
@@ -336,10 +355,7 @@ Function Read-WinGet-InstallerValues {
     if ($InstallerType -ieq 'msi') {
         Add-Type -AssemblyName System.Windows.Forms
         $FileBrowser = New-Object System.Windows.Forms.OpenFileDialog -Property @{InitialDirectory="C:\Users\Bittu\Downloads\winget-pkgs";Filter="MSI files (*.msi)|*.msi"}
-        Write-Host
-        Write-Host Write-Host "Select the MSI installer to open it in Orca..."
-        $FileBrowser.ShowDialog() | Out-Null
-        Write-Host "Opening Orca..." -NoNewline
+        $FileBrowser.ShowDialog()
         & 'C:\Program Files (x86)\Orca\Orca.exe' $FileBrowser.FileName
         while ([string]::IsNullOrWhiteSpace($ProductCode)) {
             Write-Host
