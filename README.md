@@ -52,7 +52,7 @@ Just provide the path to manifest as parameter:
 ## Submit your PR
 With the manifest verified, you will need to submit a PR.  Your manifest should be located in the folder path matching
 ```
-manifests\<first lower case letter of publisher>\<publisher>\<package>\<publisher>.<package>.yaml
+manifests\<first lower case letter of publisher>\<publisher>\<package>\<version>\
 ```
 
 ### Validation Process
