@@ -24,9 +24,9 @@ if($keyInfo.Key -eq 'C') {
         $CommitType = "Add Metadata"
     } elseif ($CommitType -eq 'umd') {
         $CommitType = "Update Metadata"
-    } elseif ($CommitType = 'pi') {
+    } elseif ($CommitType -eq 'pi') {
         $CommitType = "PackageIdentifier"
-    } elseif ($CommitType = 'mc') {
+    } elseif ($CommitType -eq 'mc') {
         $CommitType = "Moniker Conflict"
     }
 }
