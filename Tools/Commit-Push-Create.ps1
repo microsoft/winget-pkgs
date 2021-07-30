@@ -26,6 +26,8 @@ if($keyInfo.Key -eq 'C') {
         $CommitType = "Update Metadata"
     } elseif ($CommitType = 'pi') {
         $CommitType = "PackageIdentifier"
+    } elseif ($CommitType = 'pi') {
+        $CommitType = "Moniker Conflict"
     }
 }
 git fetch upstream master
