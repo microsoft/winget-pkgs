@@ -24,6 +24,8 @@ if($keyInfo.Key -eq 'C') {
         $CommitType = "Add Metadata"
     } elseif ($CommitType -eq 'umd') {
         $CommitType = "Update Metadata"
+    } elseif ($CommitType = 'pi') {
+        $CommitType = "PackageIdentifier"
     }
 }
 git fetch upstream master
