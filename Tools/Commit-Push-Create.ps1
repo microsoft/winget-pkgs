@@ -29,7 +29,7 @@ if($keyInfo.Key -eq 'C') {
     }
 }
 git fetch upstream master
-git checkout -b "$PackageId-$PkgVersion" FETCH_HEAD
+git checkout -b "$PkgId-$PkgVersion" FETCH_HEAD
 git add -A
 git commit -m "$CommitType`: $PkgId version $PkgVersion"
 git push
