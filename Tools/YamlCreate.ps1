@@ -1019,49 +1019,7 @@ Function Submit-Manifest {
     }
 
     if ($PromptSubmit -eq '0') {
-        <#
-        switch ($Option) {
-            'New' {$CommitType = 'New'}
-            'Update' {$CommitType = 'Update'}
-            'NewLocale' {$CommitType = 'Locale'}
-        }
-        #>
-        while ($keyInfo.Key -notin @('M', 'N', 'U','A','C','P')) {
-            Write-Host -NoNewLine "`nCommit Type: "
-            do {
-                $keyInfo = [Console]::ReadKey($false)
-            } until ($keyInfo.Key)
-        }
-        switch ($keyInfo.Key) {
-            'U' {$CommitType = "Update"}
-            'N' {$CommitType = "New"}
-            'M' {$CommitType = "Metadata"}
-	        'A' {$CommitType = "ARP"}
-            'P' {$CommitType = "ProductCode"}
-	        'C' {Write-Host; $CommitType = Read-Host -Prompt 'Enter Custom Commit Message' | TrimString}
-        }
-        Write-Host
-        git fetch upstream master
-        git checkout -b "$PackageIdentifier-$PackageVersion" FETCH_HEAD
-
-        git add -A
-        git commit -m "$CommitType`: $PackageIdentifier version $PackageVersion"
-        git push
-
-        if (Get-Command 'gh.exe' -ErrorAction SilentlyContinue) {
-        
-            if (Test-Path -Path "$PSScriptRoot\..\.github\PULL_REQUEST_TEMPLATE.md") {
-                gh pr create --body-file "$PSScriptRoot\..\.github\PULL_REQUEST_TEMPLATE.md" -f
-            } else {
-                while ([string]::IsNullOrWhiteSpace($SandboxScriptPath)) {
-                    Write-Host
-                    Write-Host -ForegroundColor 'Green' -Object 'PULL_REQUEST_TEMPLATE.md not found, input path'
-                    $PRTemplate = Read-Host -Prompt 'PR Template' | TrimString
-                }
-                gh pr create --body-file "$PRTemplate" -f
-            }
-        }
-        git switch "master"
+        & "C:\Users\Bittu\Downloads\winget-pkgs\my-fork\Tools\Commit-Push-Create.ps1"
     }
 }
 
