@@ -103,7 +103,7 @@ Team members will be happy to help review specs and guide them to completion.
 
 ### Help Wanted
 
-Once the team have approved an issue/spec, development can proceed. If no developers are immediately available, the spec can be parked ready for a developer to get started. Parked specs' issues will be labeled "Help Wanted". To find a list of development opportunities waiting for developer involvement, visit the Issues and filter on [the Help-Wanted label](https://github.com/microsoft/winget-pkgs/labels/Help%20Wanted).
+Once the team have approved an issue/spec, development can proceed. If no developers are immediately available, the spec can be parked ready for a developer to get started. Parked specs' issues will be labeled "Help Wanted". To find a list of development opportunities waiting for developer involvement, visit the Issues and filter on [the Help-Wanted label](https://github.com/microsoft/winget-pkgs/labels/Help-Wanted).
 
 ---
 
@@ -114,11 +114,12 @@ Once the team have approved an issue/spec, development can proceed. If no develo
 Once you've discussed your proposed feature/fix/etc. with a team member, and you've agreed an approach or a spec has been written and approved, it's time to start development:
 
 1. Fork the repository if you haven't already.
-1. Clone your fork locally.
-1. Create & push a feature branch.
-1. Create a [Draft Pull Request (PR)](https://github.blog/2019-02-14-introducing-draft-pull-requests/).
-1. Work on your changes.
-1. Build and see if it works.
+2. Clone your fork locally.
+> NOTE: Using a shallow clone can significantly speed up the initial clone command.  Pass `--depth=1` to git if you do not need any history in your local repo.
+3. Create & push a feature branch.
+4. Create a [Draft Pull Request (PR)](https://github.blog/2019-02-14-introducing-draft-pull-requests/).
+5. Work on your changes.
+6. Build and see if it works.
 
 ### Testing
 
@@ -138,4 +139,4 @@ Once your code has been reviewed and approved by the requisite number of team me
 
 ## Thank you
 
-Thank you in advance for your contribution! Now, [what's next on the list](https://github.com/microsoft/winget-pkgs/labels/Help%20Wanted)? 😜
+Thank you in advance for your contribution! Now, [what's next on the list](https://github.com/microsoft/winget-pkgs/labels/Help-Wanted)? 😜
