@@ -1048,7 +1048,7 @@ Function Submit-Manifest {
         'N' {$PromptSubmit = '1'}
         default {$PromptSubmit = '0'}
     }
-    if ($PromptSubmit -eq '0') {& "Commit-Push-Create.ps1 $PackageIdentifier $PackageVersion"}
+    if ($PromptSubmit -eq '0') {.\Commit-Push-Create.ps1 $PackageIdentifier $PackageVersion}
 }
 
 Show-OptionMenu
