@@ -298,17 +298,18 @@ Function Read-WinGet-InstallerValues {
     else {
         $AutoInstallerType = $null
     }
-    while ($InstallerType -notin @('exe', 'msi', 'msix', 'inno', 'nullsoft', 'appx', 'wix', 'zip', 'burn', 'pwa')) {
-        Write-Host
-        Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the InstallerType. For example: exe, msi, msix, inno, nullsoft, appx, wix, burn, pwa, zip'
-        if ($AutoInstallerType -ne $null) {
+
+    if ($AutoInstallerType -ne $null) {
+        while ($InstallerType -notin @('exe', 'msi', 'msix', 'inno', 'nullsoft', 'appx', 'wix', 'zip', 'burn', 'pwa')) {
+            Write-Host
+            Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the InstallerType. For example: exe, msi, msix, inno, nullsoft, appx, wix, burn, pwa, zip'
             if (($InstallerType = Read-Host -Prompt "InstallerType (Suggested: $AutoInstallerType)") -eq '') {$InstallerType = $AutoInstallerType}
-        } else {
-            while ($InstallerType -notin @('exe', 'msi', 'msix', 'inno', 'nullsoft', 'appx', 'wix', 'zip', 'burn', 'pwa')) {
-                Write-Host
-                Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the InstallerType. For example: exe, msi, msix, inno, nullsoft, appx, wix, burn, pwa, zip'
-                $InstallerType = Read-Host -Prompt 'InstallerType' | TrimString
-            }
+        }
+    } else {
+        while ($InstallerType -notin @('exe', 'msi', 'msix', 'inno', 'nullsoft', 'appx', 'wix', 'zip', 'burn', 'pwa')) {
+            Write-Host
+            Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the InstallerType. For example: exe, msi, msix, inno, nullsoft, appx, wix, burn, pwa, zip'
+            $InstallerType = Read-Host -Prompt 'InstallerType' | TrimString
         }
     }
 
@@ -353,17 +354,50 @@ Function Read-WinGet-InstallerValues {
     if ([string]::IsNullOrWhiteSpace($InstallerLocale)) {$InstallerLocale = 'en-US'}
 
     if ($InstallerType -ieq 'msi') {
-        Add-Type -AssemblyName System.Windows.Forms
-        $FileBrowser = New-Object System.Windows.Forms.OpenFileDialog -Property @{InitialDirectory="C:\Users\Bittu\Downloads\winget-pkgs";Filter="MSI files (*.msi)|*.msi"}
-        $FileBrowser.ShowDialog()
-        & 'C:\Program Files (x86)\Orca\Orca.exe' $FileBrowser.FileName
-        while ([string]::IsNullOrWhiteSpace($ProductCode)) {
-            Write-Host
-            Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the application product code. Looks like {CF8E6E00-9C03-4440-81C0-21FACB921A6B}'
-            Write-Host -ForegroundColor 'White' -Object "ProductCode found from installer: $MSIProductCode"
-            Write-Host -ForegroundColor 'White' -Object 'Can be found with ' -NoNewline; Write-Host -ForegroundColor 'DarkYellow' 'get-wmiobject Win32_Product | Sort-Object Name | Format-Table IdentifyingNumber, Name -AutoSize'
-            $ProductCode = Read-Host -Prompt 'ProductCode' | TrimString
+        Write-Host
+        Write-Host "Find ProductCode automatically?"
+        Write-Host -ForegroundColor 'White' -NoNewline "[Y] Yes  "
+        Write-Host -ForegroundColor 'White' -NoNewline "[M] Manually Enter ProductCode"
+        Write-Host -NoNewline "(default is 'Y'): "
+        do {
+            $keyInfo = [Console]::ReadKey($false)
+        } until ($keyInfo.Key)
+        switch ($keyInfo.Key) {
+            'Y' {$ProductCodeChoice = '0'}
+            'M' {$ProductCodeChoice = '1'}
+            default {$ProductCodeChoice = '0'}
         }
+        if ($ProductCodeChoice -eq '0') {
+            Write-Host 'Downloading file to find ProductCode...' -ForegroundColor Blue
+            $WebClient = New-Object System.Net.WebClient
+            $Filename = [System.IO.Path]::GetFileName($InstallerUrl)
+            try {
+                $WebClient.DownloadFile($InstallerUrl, "$(Get-Location)\installer.msi")
+                $myMsiProductCode = Get-AppLockerFileInformation -Path "$(Get-Location)\installer.msi" | Select-Object -ExpandProperty PublisherName | Select-Object BinaryName
+            } catch {
+                Write-Host 'Error downloading file.' -ForegroundColor Red
+            }
+            while ([string]::IsNullOrWhiteSpace($ProductCode)) {
+                Write-Host
+                Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the application product code. Looks like {CF8E6E00-9C03-4440-81C0-21FACB921A6B}'
+                Write-Host -ForegroundColor 'White' -Object "ProductCode found from installer: $myMsiProductCode"
+                Write-Host -ForegroundColor 'White' -Object 'Can be found with ' -NoNewline; Write-Host -ForegroundColor 'DarkYellow' 'get-wmiobject Win32_Product | Sort-Object Name | Format-Table IdentifyingNumber, Name -AutoSize'
+                $ProductCode = Read-Host -Prompt 'ProductCode' | TrimString
+            }
+        } else {
+            Add-Type -AssemblyName System.Windows.Forms
+            $FileBrowser = New-Object System.Windows.Forms.OpenFileDialog -Property @{InitialDirectory="C:\Users\Bittu\Downloads\winget-pkgs";Filter="MSI files (*.msi)|*.msi"}
+            $FileBrowser.ShowDialog()
+            & 'C:\Program Files (x86)\Orca\Orca.exe' $FileBrowser.FileName
+            while ([string]::IsNullOrWhiteSpace($ProductCode)) {
+                Write-Host
+                Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the application product code. Looks like {CF8E6E00-9C03-4440-81C0-21FACB921A6B}'
+                Write-Host -ForegroundColor 'White' -Object "ProductCode found from installer: $MSIProductCode"
+                Write-Host -ForegroundColor 'White' -Object 'Can be found with ' -NoNewline; Write-Host -ForegroundColor 'DarkYellow' 'get-wmiobject Win32_Product | Sort-Object Name | Format-Table IdentifyingNumber, Name -AutoSize'
+                $ProductCode = Read-Host -Prompt 'ProductCode' | TrimString
+            }
+        }
+    
     } else {
         do {
             Write-Host
@@ -999,70 +1033,22 @@ Function Test-Manifest {
 }
 
 Function Submit-Manifest {
-    if (Get-Command 'git.exe' -ErrorAction SilentlyContinue) {
-        Write-Host
-        Write-Host
-        Write-Host -ForegroundColor 'White' "Submit PR?"
-        Write-Host "Do you want to submit your PR now?"
-        Write-Host -ForegroundColor 'Yellow' -NoNewline '[Y] Yes  '
-        Write-Host -ForegroundColor 'White' -NoNewline "[N] No "
-        Write-Host -NoNewline "(default is 'Y'): "
-        do {
-            $keyInfo = [Console]::ReadKey($false)
-        } until ($keyInfo.Key)
-
-        switch ($keyInfo.Key) {
-            'Y' {$PromptSubmit = '0'}
-            'N' {$PromptSubmit = '1'}
-            default {$PromptSubmit = '0'}
-        }
+    Write-Host
+    Write-Host
+    Write-Host -ForegroundColor 'White' "Submit PR?"
+    Write-Host "Do you want to submit your PR now?"
+    Write-Host -ForegroundColor 'Yellow' -NoNewline '[Y] Yes  '
+    Write-Host -ForegroundColor 'White' -NoNewline "[N] No "
+    Write-Host -NoNewline "(default is 'Y'): "
+    do {
+        $keyInfo = [Console]::ReadKey($false)
+    } until ($keyInfo.Key)
+    switch ($keyInfo.Key) {
+        'Y' {$PromptSubmit = '0'}
+        'N' {$PromptSubmit = '1'}
+        default {$PromptSubmit = '0'}
     }
-
-    if ($PromptSubmit -eq '0') {
-        <#
-        switch ($Option) {
-            'New' {$CommitType = 'New'}
-            'Update' {$CommitType = 'Update'}
-            'NewLocale' {$CommitType = 'Locale'}
-        }
-        #>
-        while ($keyInfo.Key -notin @('M', 'N', 'U','A','C','P')) {
-            Write-Host -NoNewLine "`nCommit Type: "
-            do {
-                $keyInfo = [Console]::ReadKey($false)
-            } until ($keyInfo.Key)
-        }
-        switch ($keyInfo.Key) {
-            'U' {$CommitType = "Update"}
-            'N' {$CommitType = "New"}
-            'M' {$CommitType = "Metadata"}
-	        'A' {$CommitType = "ARP"}
-            'P' {$CommitType = "ProductCode"}
-	        'C' {Write-Host; $CommitType = Read-Host -Prompt 'Enter Custom Commit Message' | TrimString}
-        }
-        Write-Host
-        git fetch upstream master
-        git checkout -b "$PackageIdentifier-$PackageVersion" FETCH_HEAD
-
-        git add -A
-        git commit -m "$CommitType`: $PackageIdentifier version $PackageVersion"
-        git push
-
-        if (Get-Command 'gh.exe' -ErrorAction SilentlyContinue) {
-        
-            if (Test-Path -Path "$PSScriptRoot\..\.github\PULL_REQUEST_TEMPLATE.md") {
-                gh pr create --body-file "$PSScriptRoot\..\.github\PULL_REQUEST_TEMPLATE.md" -f
-            } else {
-                while ([string]::IsNullOrWhiteSpace($SandboxScriptPath)) {
-                    Write-Host
-                    Write-Host -ForegroundColor 'Green' -Object 'PULL_REQUEST_TEMPLATE.md not found, input path'
-                    $PRTemplate = Read-Host -Prompt 'PR Template' | TrimString
-                }
-                gh pr create --body-file "$PRTemplate" -f
-            }
-        }
-        git switch "master"
-    }
+    if ($PromptSubmit -eq '0') {& "Commit-Push-Create.ps1 $PackageIdentifier $PackageVersion"}
 }
 
 Show-OptionMenu

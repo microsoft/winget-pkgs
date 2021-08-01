@@ -1,6 +1,11 @@
 ﻿Write-Host "Commit Push and Create Pull Request"
-$PkgId = Read-Host -Prompt 'Enter Package Name'
-$PkgVersion = Read-Host -Prompt 'Enter Package Version'
+if ($args[0] -and $args[1]) {
+    $PkgId = $args[0]
+    $PkgVersion = $args[1]
+} else {
+    $PkgId = Read-Host -Prompt 'Enter Package Name'
+    $PkgVersion = Read-Host -Prompt 'Enter Package Version'
+}
 while ($keyInfo.Key -notin @('M', 'N', 'U','A','C','P')) {
     Write-Host -NoNewLine "Commit Type: "
     do {
