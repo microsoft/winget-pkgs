@@ -349,7 +349,7 @@ Function Read-WinGet-InstallerValues {
         Write-Host
         Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the installer locale. For example: en-US, en-CA'
         Write-Host -ForegroundColor 'Blue' -Object 'https://docs.microsoft.com/openspecs/office_standards/ms-oe376/6c085406-a698-4e12-9d4d-c3b0ee3dbc4a'
-        $ProductCode = Read-Host -Prompt 'InstallerLocale' | TrimString
+        $InstallerLocale = Read-Host -Prompt 'InstallerLocale' | TrimString
     } while (-not [string]::IsNullOrWhiteSpace($InstallerLocale) -and ($InstallerLocale -gt 10))
     if ([string]::IsNullOrWhiteSpace($InstallerLocale)) {$InstallerLocale = 'en-US'}
 
@@ -380,7 +380,7 @@ Function Read-WinGet-InstallerValues {
             while ([string]::IsNullOrWhiteSpace($ProductCode)) {
                 Write-Host
                 Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the application product code. Looks like {CF8E6E00-9C03-4440-81C0-21FACB921A6B}'
-                Write-Host -ForegroundColor 'White' -Object "ProductCode found from installer: $myMsiProductCode"
+                Write-Host -ForegroundColor 'White' -Object "ProductCode found from installer: $($myMsiProductCode.BinaryName)"
                 Write-Host -ForegroundColor 'White' -Object 'Can be found with ' -NoNewline; Write-Host -ForegroundColor 'DarkYellow' 'get-wmiobject Win32_Product | Sort-Object Name | Format-Table IdentifyingNumber, Name -AutoSize'
                 $ProductCode = Read-Host -Prompt 'ProductCode' | TrimString
             }
