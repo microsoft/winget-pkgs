@@ -1,4 +1,4 @@
-﻿$workingDir = Get-Location
+﻿$workingDir = "C:\Users\Bittu\Downloads\winget-pkgs"
 $ErrorActionPreference = 'Continue'
 $PkgsDone = [System.Collections.ArrayList]@()
 #git clone https://github.com/microsoft/winget-pkgs.git
@@ -34,7 +34,7 @@ Foreach($i in (Get-ChildItem -Path "$workingDir\my-fork\manifests" -Directory -R
                         if ($Moniker.Contains("'")) {$Moniker = $Moniker.Trim("'")}
                     }
                     Write-Host "$Moniker` : $PkgId version $PkgVersion"
-                    "$Moniker` : $PkgId version $PkgVersion" | Out-File -Append -FilePath C:\Users\Bittu\Downloads\winget-pkgs\wingetPkgAliasOutput.txt
+                    "$Moniker` : $PkgId version $PkgVersion" | Out-File -Append -FilePath $workingDir\wingetPkgAliasOutput.txt
                 }
             }
         }        
