@@ -13,11 +13,11 @@ while ($keyInfo.Key -notin @('M', 'N', 'U','A','C','P')) {
     } until ($keyInfo.Key)
 }
 switch ($keyInfo.Key) {
-    'U' {$CommitType = "Update"}
-    'N' {$CommitType = "New"}
-    'M' {$CommitType = "Metadata"}
-    'A' {$CommitType = "ARP"}
-    'P' {$CommitType = "ProductCode"}
+    'U' {$CommitType = "Update";Write-Host}
+    'N' {$CommitType = "New";Write-Host}
+    'M' {$CommitType = "Metadata";Write-Host}
+    'A' {$CommitType = "ARP";Write-Host}
+    'P' {$CommitType = "ProductCode";Write-Host}
     'C' {Write-Host; $CommitType = Read-Host -Prompt 'Enter Custom Commit Message'}
 }
 if($keyInfo.Key -eq 'C') {
