@@ -857,6 +857,24 @@ Function Enter-PR-Parameters {
         Write-Host
     } else {Write-Host}
 
+    Write-Host
+    Write-Host -ForegroundColor 'White' "Does this pull request resolve any issues?"
+    Write-Host "Enter issue number. For example`: 21983, 43509"
+    Write-Host -ForegroundColor 'White' -NoNewline "[Y] Yes  "
+    Write-Host -ForegroundColor 'Yellow' -NoNewline "[N] No "
+    Write-Host -NoNewline "(default is 'N'): "
+    do {
+        $keyInfo = [Console]::ReadKey($false)
+    } until ($keyInfo.Key)
+    if ($keyInfo.Key -eq 'Y') {
+        Write-Host
+        $PrBodyContent[7] += "`n"
+        $ResolvedIssues = Read-Host -Prompt 'Resolved Issues' | TrimString
+        Foreach($i in ($ResolvedIssues.Split(","))) {
+            $PrBodyContent[7] += "Resolves #$i`n"
+        }
+    } else {Write-Host}
+
     Set-Content -Path PrBodyFile -Value $PrBodyContent | Out-Null
     gh pr create --body-file PrBodyFile -f
     Remove-Item PrBodyFile
