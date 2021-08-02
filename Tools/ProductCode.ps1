@@ -1,4 +1,8 @@
-﻿$DownloadUrl = Read-Host -Prompt "Enter Download Url"
+﻿if($args[0]) {
+    $DownloadUrl = $args[0]
+} else {
+    $DownloadUrl = Read-Host -Prompt "Enter Download Url"
+}
 $WebClient = New-Object System.Net.WebClient
 $Filename = [System.IO.Path]::GetFileName($DownloadUrl)
 $location = "C:\Users\Bittu\Downloads\winget-pkgs\$FileName"
