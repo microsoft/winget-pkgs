@@ -279,12 +279,12 @@ Function Read-WinGet-InstallerValues {
             default {$ProductCodeChoice = '0'}
         }
         if ($ProductCodeChoice -eq '0') {
-            Write-Host 'Downloading file to find ProductCode...' -ForegroundColor Blue
+            Write-Host '`nDownloading file to find ProductCode...' -ForegroundColor Blue
             $WebClient = New-Object System.Net.WebClient
             $Filename = [System.IO.Path]::GetFileName($InstallerUrl)
             try {
                 $WebClient.DownloadFile($InstallerUrl, "$(Get-Location)\installer.msi")
-                $myMsiProductCode = Get-AppLockerFileInformation -Path "$(Get-Location)\installer.msi" | Select-Object -ExpandProperty PublisherName | Select-Object BinaryName
+                $myMsiProductCode = Get-AppLockerFileInformation -Path "$(Get-Location)\installer.msi" | Select-Object -ExpandProperty Publisher | Select-Object BinaryName
             } catch {
                 Write-Host 'Error downloading file.' -ForegroundColor Red
             }
@@ -835,7 +835,7 @@ Function Enter-PR-Parameters {
     Write-Host -ForegroundColor 'White' "Have you signed the Contributor License Agreement (CLA)?"
     Write-Host "Reference Link: https://cla.opensource.microsoft.com/microsoft/winget-pkgs"
     Write-Host -ForegroundColor 'White' -NoNewline "[Y] Yes  "
-    Write-Host -ForegroundColor 'Yellow' -NoNewline '[N] No '
+    Write-Host -ForegroundColor 'Yellow' -NoNewline "[N] No "
     Write-Host -NoNewline "(default is 'N'): "
     do {
         $keyInfo = [Console]::ReadKey($false)
@@ -849,7 +849,7 @@ Function Enter-PR-Parameters {
     Write-Host -ForegroundColor 'White' "Have you checked that there aren't other open pull requests for the same manifest update/change?"
     Write-Host "Reference Link: https://github.com/microsoft/winget-pkgs/pulls"
     Write-Host -ForegroundColor 'White' -NoNewline "[Y] Yes  "
-    Write-Host -ForegroundColor 'Yellow' -NoNewline '[N] No '
+    Write-Host -ForegroundColor 'Yellow' -NoNewline "[N] No "
     Write-Host -NoNewline "(default is 'N'): "
     do {
         $keyInfo = [Console]::ReadKey($false)
@@ -867,7 +867,7 @@ Function Enter-PR-Parameters {
         Write-Host -ForegroundColor 'Red' "Automatic manifest validation failed. Check your manifest and try again"
         Write-Host -ForegroundColor 'White' "Have you validated your manifest locally with 'winget validate --manifest <path>'"
         Write-Host -ForegroundColor 'White' -NoNewline "[Y] Yes  "
-        Write-Host -ForegroundColor 'Yellow' -NoNewline '[N] No '
+        Write-Host -ForegroundColor 'Yellow' -NoNewline "[N] No "
         Write-Host -NoNewline "(default is 'N'): "
         do {
             $keyInfo = [Console]::ReadKey($false)
@@ -881,7 +881,7 @@ Function Enter-PR-Parameters {
     Write-Host
     Write-Host -ForegroundColor 'White' "Have you tested your manifest locally with 'winget install --manifest <path>'?"
     Write-Host -ForegroundColor 'White' -NoNewline "[Y] Yes  "
-    Write-Host -ForegroundColor 'Yellow' -NoNewline '[N] No '
+    Write-Host -ForegroundColor 'Yellow' -NoNewline "[N] No "
     Write-Host -NoNewline "(default is 'N'): "
     do {
         $keyInfo = [Console]::ReadKey($false)
@@ -895,7 +895,7 @@ Function Enter-PR-Parameters {
     Write-Host -ForegroundColor 'White' "Does your manifest conform to the 1.0 schema?"
     Write-Host "Reference Link: https://github.com/microsoft/winget-cli/blob/master/doc/ManifestSpecv1.0.md"
     Write-Host -ForegroundColor 'White' -NoNewline "[Y] Yes  "
-    Write-Host -ForegroundColor 'Yellow' -NoNewline '[N] No '
+    Write-Host -ForegroundColor 'Yellow' -NoNewline "[N] No "
     Write-Host -NoNewline "(default is 'N'): "
     do {
         $keyInfo = [Console]::ReadKey($false)
@@ -905,7 +905,7 @@ Function Enter-PR-Parameters {
         Write-Host
     } else {Write-Host}
 
-    gh pr create --body $PrBodyContent
+    gh pr create --body $PrBodyContent -f
 }
 
 Function Submit-Manifest {
@@ -919,7 +919,6 @@ Function Submit-Manifest {
     do {
         $keyInfo = [Console]::ReadKey($false)
     } until ($keyInfo.Key)
-    Write-Host
     Write-Host
     switch ($keyInfo.Key) {
         'Y' { $PromptSubmit = '0' }
