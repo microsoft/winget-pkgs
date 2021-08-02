@@ -909,6 +909,71 @@ Function Enter-PR-Parameters {
 }
 
 Function Submit-Manifest {
+    if (Get-Command 'git.exe' -ErrorAction SilentlyContinue) {
+        Write-Host
+        Write-Host
+        Write-Host -ForegroundColor 'White' "Submit PR?"
+        Write-Host "Do you want to submit your PR now?"
+        Write-Host -ForegroundColor 'Yellow' -NoNewline '[Y] Yes  '
+        Write-Host -ForegroundColor 'White' -NoNewline "[N] No "
+        Write-Host -NoNewline "(default is 'Y'): "
+        do {
+            $keyInfo = [Console]::ReadKey($false)
+        } until ($keyInfo.Key)
+        Write-Host
+        Write-Host
+
+        switch ($keyInfo.Key) {
+            'Y' { $PromptSubmit = '0' }
+            'N' { $PromptSubmit = '1' }
+            default { $PromptSubmit = '0' }
+        }
+    }
+
+    if ($PromptSubmit -eq '0') {
+        switch ($Option) {
+            'New' {
+                if ($script:OldManifestType -eq 'None') { $CommitType = 'New' }
+                else {
+                    $CommitType = 'Update'
+                }
+            }
+            'EditMetadata' { $CommitType = 'Metadata' }
+            'NewLocale' { $CommitType = 'Locale' }
+        }
+
+        git fetch upstream master -q
+        git switch -d upstream/master
+        if ($LASTEXITCODE -eq '0') {
+            git add -A
+            git commit -m "$CommitType`: $PackageIdentifier version $PackageVersion"
+
+            git switch -c "$PackageIdentifier-$PackageVersion"
+            git push --set-upstream origin "$PackageIdentifier-$PackageVersion"
+
+            if (Get-Command 'gh.exe' -ErrorAction SilentlyContinue) {
+            
+                if (Test-Path -Path "$PSScriptRoot\..\.github\PULL_REQUEST_TEMPLATE.md") {
+                    Enter-PR-Parameters "$PSScriptRoot\..\.github\PULL_REQUEST_TEMPLATE.md"
+                }
+                else {
+                    while ([string]::IsNullOrWhiteSpace($SandboxScriptPath)) {
+                        Write-Host
+                        Write-Host -ForegroundColor 'Green' -Object 'PULL_REQUEST_TEMPLATE.md not found, input path'
+                        $PRTemplate = Read-Host -Prompt 'PR Template' | TrimString
+                    }
+                    Enter-PR-Parameters "$PRTemplate"
+                }
+            }
+        }
+    }
+    else {
+        Write-Host
+        Exit
+    }
+}
+<#
+Function Submit-Manifest {
     Write-Host
     Write-Host
     Write-Host -ForegroundColor 'White' "Submit PR?"
@@ -925,9 +990,8 @@ Function Submit-Manifest {
         'N' { $PromptSubmit = '1' }
         default { $PromptSubmit = '0' }
     }
-    #if ($PromptSubmit -eq '0') {.\Commit-Push-Create.ps1 $PackageIdentifier $PackageVersion}
-    if ($PromptSubmit -eq '0') {Enter-PR-Parameters "$PSScriptRoot\..\.github\PULL_REQUEST_TEMPLATE.md"}
-}
+    if ($PromptSubmit -eq '0') {.\Commit-Push-Create.ps1 $PackageIdentifier $PackageVersion}
+} #>
 
 Function AddYamlListParameter {
     Param
