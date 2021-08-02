@@ -811,7 +811,7 @@ Function Test-Manifest {
         switch ($keyInfo.Key) {
             'Y' { $SandboxTest = '0' }
             'N' { $SandboxTest = '1' }
-            default { $SandboxTest = '0' }
+            default { $SandboxTest = '1' }
         }
 
         if ($SandboxTest -eq '0') {
