@@ -857,7 +857,9 @@ Function Enter-PR-Parameters {
         Write-Host
     } else {Write-Host}
 
-    gh pr create --body "$PrBodyContent" -f
+    Set-Content -Path PrBodyFile -Value $PrBodyContent | Out-Null
+    gh pr create --body-file PrBodyFile -f
+    Remove-Item PrBodyFile
 }
 
 Function Submit-Manifest {
