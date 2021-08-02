@@ -42,7 +42,7 @@ winget install -m <path-to-manifest>
 For more details, see ["Submit packages to Windows Package Manager"](https://docs.microsoft.com/windows/package-manager/package) at Microsoft Docs.
 
 ### In Windows Sandbox
-You can use the [Sandbox Test](Tools/SandboxTest.ps1) PowerShell script for testing a manifest installation in [Windows Sandbox](https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-sandbox/windows-sandbox-overview). The manifest will be also validated.
+You can use the [Sandbox Test](Tools/SandboxTest.ps1) PowerShell script for testing a manifest installation in [Windows Sandbox](https://docs.microsoft.com/windows/security/threat-protection/windows-sandbox/windows-sandbox-overview). The manifest will be also validated.
 
 Just provide the path to manifest as parameter:
 ```

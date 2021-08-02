@@ -17,7 +17,12 @@ if (-Not (Get-Command "gh" -ErrorAction "SilentlyContinue")) {
     return
 }
 
-gh pr checkout $PullRequest | Out-Null
+if (-Not (Get-Command "git" -ErrorAction "SilentlyContinue")) {
+    Write-Host "Git is not installed. Install it via 'winget install git' and come back here!" -ForegroundColor Red
+    return
+}
+
+gh pr checkout $PullRequest --detach -f | Out-Null
 
 if($LASTEXITCODE -ne 0) {
     Write-Host "There was an error checking out the PR. Make sure you're logged into GitHub via 'gh auth login' and come back here!" -ForegroundColor Red
@@ -33,7 +38,7 @@ else {
 }
 
 $sandboxTestPath = (Resolve-Path ($PSScriptRoot.ToString() + "\SandboxTest.ps1")).ToString()
-& $sandboxTestPath $path
+& $sandboxTestPath -Manifest $path -SkipManifestValidation
 
 if ($Review) {
     Write-Host "Opening $PullRequest in browser..." -ForegroundColor Green
