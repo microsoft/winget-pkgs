@@ -187,21 +187,17 @@ Function Read-WinGet-InstallerValues {
 
         try {
             $WebClient.DownloadFile($InstallerUrl, $dest)
-        }
-        catch {
+        } catch {
             Write-Host 'Error downloading file. Please run the script again.' -ForegroundColor Red
             exit 1
-        }
-        finally {
+        } finally {
             Write-Host "Time taken: $((Get-Date).Subtract($start_time).Seconds) second(s)" -ForegroundColor Green
             $InstallerSha256 = (Get-FileHash -Path $dest -Algorithm SHA256).Hash
-            if ($PSVersion -eq '5') { $FileInformation = Get-AppLockerFileInformation -Path $dest | Select-Object -ExpandProperty Publisher }
-            if ($PSVersion -eq '5') { $MSIProductCode = $FileInformation.BinaryName }
+            $FileInformation = Get-AppLockerFileInformation -Path $dest | Select-Object -ExpandProperty Publisher
+            $MSIProductCode = $FileInformation.BinaryName
             if ($SaveOption -eq '1') { Remove-Item -Path $dest }
         }
-    }
-
-    else {
+    } else {
         while (!($InstallerSha256 -match '[0-9A-Z]{64}')) {
             Write-Host
             Write-Host
@@ -264,60 +260,16 @@ Function Read-WinGet-InstallerValues {
     } while ($InstallerLocale.Length -gt 10)
     if ([string]::IsNullOrWhiteSpace($InstallerLocale)) { $InstallerLocale = 'en-US' }
 
-    if ($InstallerType -ieq 'msi') {
-        Write-Host
-        Write-Host "Find ProductCode automatically?"
-        Write-Host -ForegroundColor 'White' -NoNewline "[Y] Yes  "
-        Write-Host -ForegroundColor 'White' -NoNewline "[M] Manually Enter ProductCode"
-        Write-Host -NoNewline "(default is 'Y'): "
-        do {
-            $keyInfo = [Console]::ReadKey($false)
-        } until ($keyInfo.Key)
-        switch ($keyInfo.Key) {
-            'Y' {$ProductCodeChoice = '0'}
-            'M' {$ProductCodeChoice = '1'}
-            default {$ProductCodeChoice = '0'}
-        }
-        if ($ProductCodeChoice -eq '0') {
-            Write-Host '`nDownloading file to find ProductCode...' -ForegroundColor Blue
-            $WebClient = New-Object System.Net.WebClient
-            $Filename = [System.IO.Path]::GetFileName($InstallerUrl)
-            try {
-                $WebClient.DownloadFile($InstallerUrl, "$(Get-Location)\installer.msi")
-                $myMsiProductCode = Get-AppLockerFileInformation -Path "$(Get-Location)\installer.msi" | Select-Object -ExpandProperty Publisher | Select-Object BinaryName
-            } catch {
-                Write-Host 'Error downloading file.' -ForegroundColor Red
-            }
-            while ([string]::IsNullOrWhiteSpace($ProductCode)) {
-                Write-Host
-                Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the application product code. Looks like {CF8E6E00-9C03-4440-81C0-21FACB921A6B}'
-                Write-Host -ForegroundColor 'White' -Object "ProductCode found from installer: $($myMsiProductCode.BinaryName)"
-                Write-Host -ForegroundColor 'White' -Object 'Can be found with ' -NoNewline; Write-Host -ForegroundColor 'DarkYellow' 'get-wmiobject Win32_Product | Sort-Object Name | Format-Table IdentifyingNumber, Name -AutoSize'
-                $ProductCode = Read-Host -Prompt 'ProductCode' | TrimString
-            }
-            Remove-Item "$(Get-Location)\installer.msi"
-        } else {
-            Add-Type -AssemblyName System.Windows.Forms
-            $FileBrowser = New-Object System.Windows.Forms.OpenFileDialog -Property @{InitialDirectory="C:\Users\Bittu\Downloads\winget-pkgs";Filter="MSI files (*.msi)|*.msi"}
-            $FileBrowser.ShowDialog()
-            & 'C:\Program Files (x86)\Orca\Orca.exe' $FileBrowser.FileName
-            while ([string]::IsNullOrWhiteSpace($ProductCode)) {
-                Write-Host
-                Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the application product code. Looks like {CF8E6E00-9C03-4440-81C0-21FACB921A6B}'
-                Write-Host -ForegroundColor 'White' -Object "ProductCode found from installer: $MSIProductCode"
-                Write-Host -ForegroundColor 'White' -Object 'Can be found with ' -NoNewline; Write-Host -ForegroundColor 'DarkYellow' 'get-wmiobject Win32_Product | Sort-Object Name | Format-Table IdentifyingNumber, Name -AutoSize'
-                $ProductCode = Read-Host -Prompt 'ProductCode' | TrimString
-            }
-        }
+    Write-Host
+    Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the application product code. Looks like {CF8E6E00-9C03-4440-81C0-21FACB921A6B}'
+    Write-Host -ForegroundColor 'White' -Object "ProductCode found from installer: $MSIProductCode"
+    Write-Host -ForegroundColor 'White' -Object 'Can be found with ' -NoNewline; Write-Host -ForegroundColor 'DarkYellow' 'get-wmiobject Win32_Product | Sort-Object Name | Format-Table IdentifyingNumber, Name -AutoSize'
+    if ($MSIProductCode -and $InstallerType -eq 'msi') {
+        if (($ProductCode = Read-Host -Prompt "ProductCode ($MSIProductCode)") -eq '') {$ProductCode = $MSIProductCode}
     } else {
-        do {
-            Write-Host
-            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the application product code. Looks like {CF8E6E00-9C03-4440-81C0-21FACB921A6B}'
-            Write-Host -ForegroundColor 'White' -Object "ProductCode found from installer: $MSIProductCode"
-            Write-Host -ForegroundColor 'White' -Object 'Can be found with ' -NoNewline; Write-Host -ForegroundColor 'DarkYellow' 'get-wmiobject Win32_Product | Sort-Object Name | Format-Table IdentifyingNumber, Name -AutoSize'
-            $ProductCode = Read-Host -Prompt 'ProductCode' | TrimString
-        } while (-not [string]::IsNullOrWhiteSpace($ProductCode) -and ($ProductCode.Length -lt 1 -or $ProductCode.Length -gt 255))
+        $ProductCode = Read-Host -Prompt 'ProductCode' | TrimString
     }
+    
 
     Write-Host
     Write-Host -ForegroundColor 'White' "Scope"
@@ -905,7 +857,7 @@ Function Enter-PR-Parameters {
         Write-Host
     } else {Write-Host}
 
-    gh pr create --body $PrBodyContent -f
+    gh pr create --body "$PrBodyContent" -f
 }
 
 Function Submit-Manifest {
