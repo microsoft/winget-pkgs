@@ -34,9 +34,7 @@ TO-DO:
     - Ensure licensing for powershell-yaml is met
 #>
 
-if (Get-Module -ListAvailable -Name powershell-yaml) {
-} 
-else {
+if (-not(Get-Module -ListAvailable -Name powershell-yaml)) {
     try {
         Install-Module -Name powershell-yaml -Force -Repository PSGallery -Scope CurrentUser
     } 
@@ -928,7 +926,8 @@ Function Submit-Manifest {
         'N' { $PromptSubmit = '1' }
         default { $PromptSubmit = '0' }
     }
-    if ($PromptSubmit -eq '0') {.\Commit-Push-Create.ps1 $PackageIdentifier $PackageVersion}
+    #if ($PromptSubmit -eq '0') {.\Commit-Push-Create.ps1 $PackageIdentifier $PackageVersion}
+    if ($PromptSubmit -eq '0') {Enter-PR-Parameters "$PSScriptRoot\..\.github\PULL_REQUEST_TEMPLATE.md"}
 }
 
 Function AddYamlListParameter {
