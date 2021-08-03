@@ -4,7 +4,7 @@ if ($args[1]) {$PkgVersion = $args[1]} else {$PkgVersion = Read-Host -Prompt 'En
 if ($args[2] -and $args[2] -in @('um','am','amd','umd','pi','mpc','u','n','a','pc')) {
     $CommitType = $args[2]
 } else {
-    while ($CommitType -notin @('um','am','amd','umd','pi','mpc','u','n','a','pc')) {
+    while ($CommitType -notin @('um','am','amd','umd','pi','mpc','u','n','a','pc','r')) {
         $CommitType = Read-Host -Prompt 'Enter Commit Message'
     }
 }
@@ -28,6 +28,8 @@ if ($CommitType -eq 'um') {
     $CommitType = "ARP"
 } elseif ($CommitType -eq 'pc') {
     $CommitType = "ProductCode"
+} elseif ($CommitType -eq 'r') {
+    $CommitType = "Remove"
 }
 git fetch upstream master
 git checkout -b "$PkgId-$PkgVersion" FETCH_HEAD
