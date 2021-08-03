@@ -1,12 +1,13 @@
 ﻿Write-Host "Commit Push and Create Pull Request"
-if ($args[0] -and $args[1]) {
-    $PkgId = $args[0]
-    $PkgVersion = $args[1]
+if ($args[0]) {$PkgId = $args[0]} else {$PkgId = Read-Host -Prompt 'Enter Package Name'}
+if ($args[1]) {$PkgVersion = $args[1]} else {$PkgVersion = Read-Host -Prompt 'Enter Package Version'}
+if ($args[2] -and $args[2] -in @('um','am','amd','umd','pi','mpc','u','n','a','pc')) {
+    $CommitType = $args[2]
 } else {
-    $PkgId = Read-Host -Prompt 'Enter Package Name'
-    $PkgVersion = Read-Host -Prompt 'Enter Package Version'
+    while ($CommitType -notin @('um','am','amd','umd','pi','mpc','u','n','a','pc')) {
+        $CommitType = Read-Host -Prompt 'Enter Commit Message'
+    }
 }
-$CommitType = Read-Host -Prompt 'Enter Commit Message'
 if ($CommitType -eq 'um') {
     $CommitType = "Update Moniker"
 } elseif ($CommitType -eq 'am') {
