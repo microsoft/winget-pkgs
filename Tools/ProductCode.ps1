@@ -11,8 +11,9 @@ if($args) {
             exit 1
         }
         if (-not $Orca) {
-            $MyProductCode = Get-AppLockerFileInformation -Path $location | Select-Object -ExpandProperty Publisher | Select-Object BinaryName
-            Write-Host "Found ProductCode is: $($MyProductCode.BinaryName)"
+            $MyProductCode = Get-AppLockerFileInformation -Path $location | Select-Object -ExpandProperty Publisher
+            Write-Host "ProductCode: '$($MyProductCode.BinaryName)'"
+            Write-Host "Version/ARP: $($MyProductCode.BinaryVersion)"
             Remove-Item -Path $location
         } else {
             & "C:\Program Files (x86)\Orca\Orca.exe" $location
