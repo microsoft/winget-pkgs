@@ -1,10 +1,10 @@
 ﻿Write-Host "Commit Push and Create Pull Request"
 if ($args[0]) {$PkgId = $args[0]} else {$PkgId = Read-Host -Prompt 'Enter Package Name'}
 if ($args[1]) {$PkgVersion = $args[1]} else {$PkgVersion = Read-Host -Prompt 'Enter Package Version'}
-if ($args[2] -and $args[2] -in @('um','am','amd','umd','pi','mpc','u','n','a','pc','pcarp','r')) {
+if ($args[2] -and $args[2] -in @('um','am','amd','umd','pi','mpc','u','n','a','pc','pcarp','r','url')) {
     $CommitType = $args[2]
 } else {
-    while ($CommitType -notin @('um','am','amd','umd','pi','mpc','u','n','a','pc','pcarp','r')) {
+    while ($CommitType -notin @('um','am','amd','umd','pi','mpc','u','n','a','pc','pcarp','r','url')) {
         $CommitType = Read-Host -Prompt 'Enter Commit Message'
     }
 }
@@ -32,6 +32,8 @@ if ($CommitType -eq 'um') {
     $CommitType = "ProductCode/ARP"
 } elseif ($CommitType -eq 'r') {
     $CommitType = "Remove"
+} elseif ($CommitType -eq 'url') {
+    $CommitType = "InstallerUrl"
 }
 git fetch upstream master
 git checkout -b "$PkgId-$PkgVersion" FETCH_HEAD
