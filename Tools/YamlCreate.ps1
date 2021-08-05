@@ -830,18 +830,29 @@ Function Enter-PR-Parameters {
         } else {Write-Host}
     }
 
-    Write-Host
-    Write-Host -ForegroundColor 'White' "Have you tested your manifest locally with 'winget install --manifest <path>'?"
-    Write-Host -ForegroundColor 'White' -NoNewline "[Y] Yes  "
-    Write-Host -ForegroundColor 'Yellow' -NoNewline "[N] No "
-    Write-Host -NoNewline "(default is 'N'): "
-    do {
-        $keyInfo = [Console]::ReadKey($false)
-    } until ($keyInfo.Key)
-    if ($keyInfo.Key -eq 'Y') {
+    if ($SandboxTest -eq '0') {
         $PrBodyContent[3] = "- [X] Have you tested your manifest locally with `winget install --manifest <path>`?"
+    } else {
         Write-Host
-    } else {Write-Host}
+        Write-Host -ForegroundColor 'Yellow' "You did not test your Manifest in Windows Sandbox previously."
+        Write-Host -ForegroundColor 'White' "Would you like to still test the manifest?"
+        Write-Host -ForegroundColor 'White' -NoNewline "[Y] Yes  "
+        Write-Host -ForegroundColor 'Yellow' -NoNewline "[N] No "
+        Write-Host -NoNewline "(default is 'Y'): "
+        do {
+            $keyInfo = [Console]::ReadKey($false)
+        } until ($keyInfo.Key)
+        switch($keyInfo.Key) {
+            'Y' {$PrChoice4 = '0'}
+            'N' {$PrChoice4 = '1'}
+            default {$PrChoice4 = '0'}
+        }
+        if ($keyInfo.Key -eq 'Y') {
+            
+            $PrBodyContent[3] = "- [X] Have you tested your manifest locally with `winget install --manifest <path>`?"
+            Write-Host
+        } else {Write-Host}
+    }
 
     Write-Host
     Write-Host -ForegroundColor 'White' "Does your manifest conform to the 1.0 schema?"
@@ -853,6 +864,7 @@ Function Enter-PR-Parameters {
         $keyInfo = [Console]::ReadKey($false)
     } until ($keyInfo.Key)
     if ($keyInfo.Key -eq 'Y') {
+        Test-Manifest
         $PrBodyContent[4] = "- [X] Does your manifest conform to the [1.0 schema](https://github.com/microsoft/winget-cli/blob/master/doc/ManifestSpecv1.0.md)?"
         Write-Host
     } else {Write-Host}
