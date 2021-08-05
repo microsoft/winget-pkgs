@@ -191,8 +191,8 @@ Function Read-WinGet-InstallerValues {
         } finally {
             Write-Host "Time taken: $((Get-Date).Subtract($start_time).Seconds) second(s)" -ForegroundColor Green
             $InstallerSha256 = (Get-FileHash -Path $dest -Algorithm SHA256).Hash
-            if ($PSVersion -eq '5') { $FileInformation = Get-AppLockerFileInformation -Path $dest | Select-Object -ExpandProperty Publisher }
-            if ($PSVersion -eq '5') { $MSIProductCode = $FileInformation.BinaryName }
+            $FileInformation = Get-AppLockerFileInformation -Path $dest | Select-Object Publisher | Select-String -Pattern "{[A-Z0-9]{8}-([A-Z0-9]{4}-){3}[A-Z0-9]{12}}"
+            $MSIProductCode = $FileInformation.Matches
             if ($SaveOption -eq '1') { Remove-Item -Path $dest }
         }
     }
