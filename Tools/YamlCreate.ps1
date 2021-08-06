@@ -822,10 +822,10 @@ Function Submit-Manifest {
     if ($PromptSubmit -eq '0') {
         switch ($Option) {
             'New' {
-                if ($script:OldManifestType -eq 'None') { $CommitType = 'New' }
-                else {
-                    $CommitType = 'Update'
-                }
+                if ( $script:OldManifestType -eq 'None' ) { $CommitType = 'New package' }
+                elseif ($script:LastVersion -lt $script:PackageVersion ) { $CommitType = 'New version' }
+                elseif ($script:PackageVersion -in $script:ExistingVersions) { $CommitType = 'Update' }
+                elseif ($script:LastVersion -gt $script:PackageVersion ) { $CommitType = 'Add version' }
             }
             'EditMetadata' { $CommitType = 'Metadata' }
             'NewLocale' { $CommitType = 'Locale' }
@@ -1090,7 +1090,8 @@ Function Read-PreviousWinGet-Manifest-Yaml {
     
     if (!$LastVersion) {
         try {
-            $LastVersion = Split-Path (Split-Path (Get-ChildItem -Path "$AppFolder\..\" -Recurse -Depth 1 -File).FullName ) -Leaf | Sort-Object $ToNatural | Select-Object -Last 1
+            $script:LastVersion = Split-Path (Split-Path (Get-ChildItem -Path "$AppFolder\..\" -Recurse -Depth 1 -File).FullName ) -Leaf | Sort-Object $ToNatural | Select-Object -Last 1
+            $script:ExistingVersions = Split-Path (Split-Path (Get-ChildItem -Path "$AppFolder\..\" -Recurse -Depth 1 -File).FullName ) -Leaf | Sort-Object $ToNatural | Select-Object -Unique
             Write-Host -ForegroundColor 'DarkYellow' -Object "Found Existing Version: $LastVersion"
             $script:OldManifests = Get-ChildItem -Path "$AppFolder\..\$LastVersion"
         }
