@@ -25,10 +25,15 @@ Foreach($i in (Get-ChildItem -Path "$workingDir\my-fork\manifests" -Directory -R
                     $PkgVersion = (((Get-Content $YamlFile.FullName | Select-String -Pattern "PackageVersion:").ToString()).TrimStart("PackageVersion:")).TrimStart()
                     if ($PkgVersion.Contains('"')) {$PkgVersion = $PkgVersion.Trim('"')}
                     if ($PkgVersion.Contains("'")) {$PkgVersion = $PkgVersion.Trim("'")}
-                    if ((Get-Content $YamlFile.FullName | Select-String -Pattern "InstallerType: msi") -or (Get-Content $YamlFile.FullName | Select-String -Pattern "InstallerType: appx")) {
+                    if ((Get-Content $YamlFile.FullName | Select-String -Pattern "InstallerType: msi") -and -not(Get-Content $YamlFile.FullName | Select-String -Pattern "InstallerType: msix")) {
                         if (-not (Get-Content $YamlFile.FullName | Select-String -Pattern "ProductCode: ")) {
                             Write-Host "PCNF` : $PkgId version $PkgVersion"
-                            "PCNF` : $PkgId version $PkgVersion" | Out-File -Append -FilePath $workingDir\MissingProductCodeOutput.txt
+                            "PCNF` : $PkgId version $PkgVersion" | Out-File -Append -FilePath $workingDir\MissingInstallerInfo.txt
+                        }
+                    } elseif ((Get-Content $YamlFile.FullName | Select-String -Pattern "InstallerType: msix") -or (Get-Content $YamlFile.FullName | Select-String -Pattern "InstallerType: appx")) {
+                        if ((-not (Get-Content $YamlFile.FullName | Select-String -Pattern "SignatureSha256: ")) -or (-not (Get-Content $YamlFile.FullName | Select-String -Pattern "FamilyName: "))) {
+                            Write-Host "SSFN` : $PkgId version $PkgVersion"
+                            "SSFN` : $PkgId version $PkgVersion" | Out-File -Append -FilePath $workingDir\MissingInstallerInfo.txt
                         }
                     }
                 }
