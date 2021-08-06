@@ -10,13 +10,26 @@ if($args) {
             Write-Host 'Error downloading file. Please run the script again.' -ForegroundColor Red
             exit 1
         }
-        if (-not $Orca) {
-            $MyProductCode = Get-AppLockerFileInformation -Path $location | Select-Object -ExpandProperty Publisher
-            Write-Host "ProductCode: '$($MyProductCode.BinaryName)'"
-            Write-Host "Version/ARP: $($MyProductCode.BinaryVersion)"
-            Remove-Item -Path $location
+        if ($location.EndsWith('appx') -or $location.EndsWith('msix') -or $location.EndsWith('appxbundle') -or $location.EndsWith('msixbundle')) {
+            winget hash -f $location -m
+            $ProgressPreference = 'SilentlyContinue'
+            Add-AppxPackage -Path $location
+            $InstalledPkgs = Get-AppxPackage | Select-Object PackageFamilyName,PackageFullName
+            do {
+                $PkgName = Read-Host -Prompt 'Enter Package Name'
+            } until ($InstalledPkgs -match $PkgName)
+            $PkgName = Read-Host -Prompt 'Enter Package Name'
+            Write-Host "PackageFamilyName: $(($InstalledPkgs -match $PkgName).PackageFamilyName)"
+            Remove-AppxPackage $(($InstalledPkgs -match $PkgName).PackageFullName) | Out-Null
         } else {
-            & "C:\Program Files (x86)\Orca\Orca.exe" $location
+            if (-not $Orca) {
+                $MyProductCode = Get-AppLockerFileInformation -Path $location | Select-Object -ExpandProperty Publisher
+                Write-Host "ProductCode: '$($MyProductCode.BinaryName)'"
+                Write-Host "Version/ARP: $($MyProductCode.BinaryVersion)"
+                Remove-Item -Path $location
+            } else {
+                & "C:\Program Files (x86)\Orca\Orca.exe" $location
+            }
         }
     }
 } else {
