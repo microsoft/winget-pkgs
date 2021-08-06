@@ -20,7 +20,8 @@ if($args) {
             } until ($InstalledPkgs -match $PkgName)
             $PkgName = Read-Host -Prompt 'Enter Package Name'
             Write-Host "PackageFamilyName: $(($InstalledPkgs -match $PkgName).PackageFamilyName)"
-            Remove-AppxPackage $(($InstalledPkgs -match $PkgName).PackageFullName) | Out-Null
+            Remove-AppxPackage $(($InstalledPkgs -match $PkgName).PackageFullName)
+            Remove-Item -Path $location
         } else {
             if (-not $Orca) {
                 $MyProductCode = Get-AppLockerFileInformation -Path $location | Select-Object -ExpandProperty Publisher
