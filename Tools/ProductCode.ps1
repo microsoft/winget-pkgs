@@ -14,13 +14,9 @@ if($args) {
             winget hash -f $location -m
             $ProgressPreference = 'SilentlyContinue'
             Add-AppxPackage -Path $location
-            $InstalledPkgs = Get-AppxPackage | Select-Object PackageFamilyName,PackageFullName
-            do {
-                $PkgName = Read-Host -Prompt 'Enter Package Name'
-            } until ($InstalledPkgs -match $PkgName)
-            $PkgName = Read-Host -Prompt 'Enter Package Name'
-            Write-Host "PackageFamilyName: $(($InstalledPkgs -match $PkgName).PackageFamilyName)"
-            Remove-AppxPackage $(($InstalledPkgs -match $PkgName).PackageFullName)
+            $InstalledPkg = Get-AppxPackage | Select-Object -Last 1 | Select-Object PackageFamilyName,PackageFullName
+            Write-Host "PackageFamilyName: $InstalledPkg.PackageFamilyName"
+            Remove-AppxPackage $InstalledPkg.PackageFullName
             Remove-Item -Path $location
         } else {
             if (-not $Orca) {
