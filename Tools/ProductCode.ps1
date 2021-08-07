@@ -15,7 +15,7 @@ if($args) {
             $ProgressPreference = 'SilentlyContinue'
             Add-AppxPackage -Path $location
             $InstalledPkg = Get-AppxPackage | Select-Object -Last 1 | Select-Object PackageFamilyName,PackageFullName
-            Write-Host "PackageFamilyName: $InstalledPkg.PackageFamilyName"
+            Write-Host "PackageFamilyName: $($InstalledPkg.PackageFamilyName)"
             Remove-AppxPackage $InstalledPkg.PackageFullName
             Remove-Item -Path $location
         } else {
