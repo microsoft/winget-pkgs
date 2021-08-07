@@ -42,7 +42,7 @@ winget install -m <path-to-manifest>
 For more details, see ["Submit packages to Windows Package Manager"](https://docs.microsoft.com/windows/package-manager/package) at Microsoft Docs.
 
 ### In Windows Sandbox
-You can use the [Sandbox Test](Tools/SandboxTest.ps1) PowerShell script for testing a manifest installation in [Windows Sandbox](https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-sandbox/windows-sandbox-overview). The manifest will be also validated.
+You can use the [Sandbox Test](Tools/SandboxTest.ps1) PowerShell script for testing a manifest installation in [Windows Sandbox](https://docs.microsoft.com/windows/security/threat-protection/windows-sandbox/windows-sandbox-overview). The manifest will be also validated.
 
 Just provide the path to manifest as parameter:
 ```
@@ -50,7 +50,10 @@ Just provide the path to manifest as parameter:
 ```
 
 ## Submit your PR
-With the manifest verified, you will need to submit a PR.  Your manifest should be located in the folder path matching `manifests\<first lower case letter of publisher>\<publisher>\<package>\<version>.yaml`
+With the manifest verified, you will need to submit a PR.  Your manifest should be located in the folder path matching
+```
+manifests\<first lower case letter of publisher>\<publisher>\<package>\<version>\
+```
 
 ### Validation Process
 The PR request will go through a validation process. During the process, the core team or the Microsoft bot (BOT) will use [labels](https://docs.microsoft.com/windows/package-manager/package/winget-validation#pull-request-labels) to help. In the event of a failure, the BOT will suggest where the problem is with the submission and assign the PR back to you.  
