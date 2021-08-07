@@ -10,7 +10,7 @@ if($args) {
             Write-Host 'Error downloading file. Please run the script again.' -ForegroundColor Red
             exit 1
         }
-        if ($location.EndsWith('appx') -or $location.EndsWith('msix') -or $location.EndsWith('appxbundle') -or $location.EndsWith('msixbundle')) {
+        if ($location.EndsWith('appx','CurrentCultureIgnoreCase') -or $location.EndsWith('msix','CurrentCultureIgnoreCase') -or $location.EndsWith('appxbundle','CurrentCultureIgnoreCase') -or $location.EndsWith('msixbundle','CurrentCultureIgnoreCase')) {
             winget hash -f $location -m
             $ProgressPreference = 'SilentlyContinue'
             Add-AppxPackage -Path $location
