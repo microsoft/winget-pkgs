@@ -170,33 +170,33 @@ Function Read-WinGet-InstallerValues {
     } until ($keyInfo.Key)
 
     switch ($keyInfo.Key) {
-        'Y' { $SaveOption = '0' }
-        'N' { $SaveOption = '1' }
-        'M' { $SaveOption = '2' }
-        default { $SaveOption = '1' }
+        'Y' { $script:SaveOption = '0' }
+        'N' { $script:SaveOption = '1' }
+        'M' { $script:SaveOption = '2' }
+        default { $script:SaveOption = '1' }
     }
 
-    if ($SaveOption -ne '2') {
+    if ($script:SaveOption -ne '2') {
         Write-Host
         $start_time = Get-Date
         Write-Host $NewLine
         Write-Host 'Downloading URL. This will take a while...' -ForegroundColor Blue
         $WebClient = New-Object System.Net.WebClient
         $Filename = [System.IO.Path]::GetFileName($InstallerUrl)
-        $dest = "$env:TEMP\$FileName"
+        $script:dest = "$env:TEMP\$FileName"
 
         try {
-            $WebClient.DownloadFile($InstallerUrl, $dest)
-        } catch {
+            $WebClient.DownloadFile($InstallerUrl, $script:dest)
+        }
+        catch {
             Write-Host 'Error downloading file. Please run the script again.' -ForegroundColor Red
             exit 1
         } finally {
             Write-Host "Time taken: $((Get-Date).Subtract($start_time).Seconds) second(s)" -ForegroundColor Green
-            $InstallerSha256 = (Get-FileHash -Path $dest -Algorithm SHA256).Hash
-            $FileInformation = Get-AppLockerFileInformation -Path $dest | Select-Object Publisher | Select-String -Pattern "{[A-Z0-9]{8}-([A-Z0-9]{4}-){3}[A-Z0-9]{12}}"
+            $InstallerSha256 = (Get-FileHash -Path $script:dest -Algorithm SHA256).Hash
+            $FileInformation = Get-AppLockerFileInformation -Path $script:dest | Select-Object Publisher | Select-String -Pattern "{[A-Z0-9]{8}-([A-Z0-9]{4}-){3}[A-Z0-9]{12}}"
             $MSIProductCode = $FileInformation.Matches
-            if (Get-Command 'winget.exe' -ErrorAction SilentlyContinue) { $SignatureSha256 = winget hash -m $dest | Select-String -Pattern "SignatureSha256:" | ConvertFrom-String; if ($SignatureSha256.P2) { $SignatureSha256 = $SignatureSha256.P2.ToUpper() }}
-            if ($SaveOption -eq '1') { Remove-Item -Path $dest }
+            if ($script:SaveOption -eq '1' -and -not($script:dest.EndsWith('appx','CurrentCultureIgnoreCase') -or $script:dest.EndsWith('msix','CurrentCultureIgnoreCase') -or $script:dest.EndsWith('appxbundle','CurrentCultureIgnoreCase') -or $script:dest.EndsWith('msixbundle','CurrentCultureIgnoreCase'))) {Remove-Item -Path $script:dest}
         }
     }
 
@@ -255,6 +255,7 @@ Function Read-WinGet-InstallerValues {
     }
 
     if ($InstallerType -ieq 'msix' -or $InstallerType -ieq 'appx') {
+        if (Get-Command 'winget.exe' -ErrorAction SilentlyContinue) {$SignatureSha256 = winget hash -m $script:dest | Select-String -Pattern "SignatureSha256:" | ConvertFrom-String; if ($SignatureSha256.P2) {$SignatureSha256 = $SignatureSha256.P2.ToUpper()}}
         if ([string]::IsNullOrWhiteSpace($SignatureSha256)) {
             do {
                 Write-Host
@@ -262,15 +263,40 @@ Function Read-WinGet-InstallerValues {
                 $SignatureSha256 = Read-Host -Prompt 'SignatureSha256' | TrimString
             } while (-not [string]::IsNullOrWhiteSpace($SignatureSha256) -and ($SignatureSha256 -notmatch $InstallerSchema.definitions.Installer.properties.SignatureSha256.pattern))
         }
-
+        
         do {
             Write-Host
             Write-Host -ForegroundColor 'Yellow' -Object '[Recommended] Enter the installer PackageFamilyName'
-            $PackageFamilyName = Read-Host -Prompt 'PackageFamilyName' | TrimString
+            Write-Host -ForegroundColor 'White' "[F] Find Automatically [Note: This will install the pacakge to find Family Name and then removes it.]"
+            Write-Host -ForegroundColor 'White' "[M] Manually Enter PackageFamilyName"
+            Write-Host -NoNewline "Enter Choice (default is 'F'): "
+            do {
+                $keyInfo = [Console]::ReadKey($false)
+            } until ($keyInfo.Key)
+            switch ($keyInfo.Key) {
+                'F' {$ChoicePfn = '0'}
+                'M' {$ChoicePfn = '1'}
+                default {$ChoicePfn = '0'}
+            }
+            if ($ChoicePfn -eq '0') {
+                Add-AppxPackage -Path $script:dest
+                $InstalledPkg = Get-AppxPackage | Select-Object -Last 1 | Select-Object PackageFamilyName,PackageFullName
+                $PackageFamilyName = $InstalledPkg.PackageFamilyName
+                Remove-AppxPackage $InstalledPkg.PackageFullName
+                if ([string]::IsNullOrWhiteSpace($PackageFamilyName)) {
+                    Write-Host -ForegroundColor 'Red' "Error finding PackageFamilyName. Please enter manually."
+                    $PackageFamilyName = Read-Host -Prompt 'PackageFamilyName' | TrimString
+                }
+            } else {
+                $PackageFamilyName = Read-Host -Prompt 'PackageFamilyName' | TrimString
+            }
         } while (-not [string]::IsNullOrWhiteSpace($PackageFamilyName) -and ($PackageFamilyName.Length -gt $InstallerSchema.definitions.PackageFamilyName.maxLength))
+        
+        if($script:SaveOption -eq '1') {Remove-Item -Path $script:dest}
     }
 
     do {
+        Write-Host
         Write-Host
         Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the installer locale. For example: en-US, en-CA'
         Write-Host -ForegroundColor 'Blue' -Object 'https://docs.microsoft.com/openspecs/office_standards/ms-oe376/6c085406-a698-4e12-9d4d-c3b0ee3dbc4a'
@@ -809,7 +835,7 @@ Function Enter-PR-Parameters {
                 Write-Host -ForegroundColor 'Yellow' -NoNewline "[N] No "
                 Write-Host -NoNewline "(default is 'N'): "
                 do {
-                    keyInfo = [Console]::ReadKey($false)
+                    $keyInfo = [Console]::ReadKey($false)
                 } until ($keyInfo.Key)
                 if ($keyInfo.Key -eq 'Y') {
                     $PrBodyContentReply += $_.Replace("[ ]","[X]"), "`n"
