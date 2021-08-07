@@ -25,7 +25,8 @@ if($args) {
                 Write-Host "Version/ARP: $($MyProductCode.BinaryVersion)"
                 Remove-Item -Path $location
             } else {
-                & "C:\Program Files (x86)\Orca\Orca.exe" $location
+                Start-Process -FilePath "C:\Program Files (x86)\Orca\Orca.exe" -ArgumentList $location -Wait
+                Remove-Item -Path $location
             }
         }
     }
