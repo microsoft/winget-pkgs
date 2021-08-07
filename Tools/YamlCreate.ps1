@@ -267,7 +267,7 @@ Function Read-WinGet-InstallerValues {
         do {
             Write-Host
             Write-Host -ForegroundColor 'Yellow' -Object '[Recommended] Enter the installer PackageFamilyName'
-            Write-Host -ForegroundColor 'White' "[F] Find Automatically [Note: This will install the pacakge to find Family Name and then removes it.]"
+            Write-Host -ForegroundColor 'White' "[F] Find Automatically [Note: This will install the package to find Family Name and then removes it.]"
             Write-Host -ForegroundColor 'White' "[M] Manually Enter PackageFamilyName"
             Write-Host -NoNewline "Enter Choice (default is 'F'): "
             do {
@@ -1259,8 +1259,8 @@ Function Read-PreviousWinGet-Manifest-Yaml {
     
     if (!$LastVersion) {
         try {
-            $script:LastVersion = Split-Path (Split-Path (Get-ChildItem -Path "$AppFolder\..\" -Recurse -Depth 1 -File).FullName ) -Leaf | Sort-Object $ToNatural | Select-Object -Last 1
-            $script:ExistingVersions = Split-Path (Split-Path (Get-ChildItem -Path "$AppFolder\..\" -Recurse -Depth 1 -File).FullName ) -Leaf | Sort-Object $ToNatural | Select-Object -Unique
+            $script:LastVersion = Split-Path (Split-Path (Get-ChildItem -Path "$AppFolder\..\" -Recurse -Depth 1 -File -Exclude ".validation").FullName ) -Leaf | Sort-Object $ToNatural | Select-Object -Last 1
+            $script:ExistingVersions = Split-Path (Split-Path (Get-ChildItem -Path "$AppFolder\..\" -Recurse -Depth 1 -File -Exclude ".validation").FullName ) -Leaf | Sort-Object $ToNatural | Select-Object -Unique
             Write-Host -ForegroundColor 'DarkYellow' -Object "Found Existing Version: $LastVersion"
             $script:OldManifests = Get-ChildItem -Path "$AppFolder\..\$LastVersion"
         }
