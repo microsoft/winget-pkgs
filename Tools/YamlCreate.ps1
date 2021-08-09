@@ -288,6 +288,7 @@ Function Read-WinGet-InstallerValues {
                     $PackageFamilyName = Read-Host -Prompt 'PackageFamilyName' | TrimString
                 }
             } else {
+                Write-Host
                 $PackageFamilyName = Read-Host -Prompt 'PackageFamilyName' | TrimString
             }
         } while (-not [string]::IsNullOrWhiteSpace($PackageFamilyName) -and ($PackageFamilyName.Length -gt $InstallerSchema.definitions.PackageFamilyName.maxLength))
