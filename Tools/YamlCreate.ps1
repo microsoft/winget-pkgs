@@ -141,6 +141,8 @@ Function Read-WinGet-InstallerValues {
         "InstallerType"
         "InstallerUrl"
         "InstallerSha256"
+        "SignatureSha256"
+        "PackageFamilyName"
         "Custom"
         "Silent"
         "SilentWithProgress"
@@ -170,23 +172,23 @@ Function Read-WinGet-InstallerValues {
     } until ($keyInfo.Key)
 
     switch ($keyInfo.Key) {
-        'Y' { $SaveOption = '0' }
-        'N' { $SaveOption = '1' }
-        'M' { $SaveOption = '2' }
-        default { $SaveOption = '1' }
+        'Y' { $script:SaveOption = '0' }
+        'N' { $script:SaveOption = '1' }
+        'M' { $script:SaveOption = '2' }
+        default { $script:SaveOption = '1' }
     }
 
-    if ($SaveOption -ne '2') {
+    if ($script:SaveOption -ne '2') {
         Write-Host
         $start_time = Get-Date
         Write-Host $NewLine
         Write-Host 'Downloading URL. This will take a while...' -ForegroundColor Blue
         $WebClient = New-Object System.Net.WebClient
         $Filename = [System.IO.Path]::GetFileName($InstallerUrl)
-        $dest = "$env:TEMP\$FileName"
+        $script:dest = "$env:TEMP\$FileName"
 
         try {
-            $WebClient.DownloadFile($InstallerUrl, $dest)
+            $WebClient.DownloadFile($InstallerUrl, $script:dest)
         }
         catch {
             Write-Host 'Error downloading file. Please run the script again.' -ForegroundColor Red
@@ -194,10 +196,10 @@ Function Read-WinGet-InstallerValues {
         }
         finally {
             Write-Host "Time taken: $((Get-Date).Subtract($start_time).Seconds) second(s)" -ForegroundColor Green
-            $InstallerSha256 = (Get-FileHash -Path $dest -Algorithm SHA256).Hash
-            $FileInformation = Get-AppLockerFileInformation -Path $dest | Select-Object Publisher | Select-String -Pattern "{[A-Z0-9]{8}-([A-Z0-9]{4}-){3}[A-Z0-9]{12}}"
+            $InstallerSha256 = (Get-FileHash -Path $script:dest -Algorithm SHA256).Hash
+            $FileInformation = Get-AppLockerFileInformation -Path $script:dest | Select-Object Publisher | Select-String -Pattern "{[A-Z0-9]{8}-([A-Z0-9]{4}-){3}[A-Z0-9]{12}}"
             $MSIProductCode = $FileInformation.Matches
-            if ($SaveOption -eq '1') { Remove-Item -Path $dest }
+            if ($script:SaveOption -eq '1' -and -not($script:dest.EndsWith('appx','CurrentCultureIgnoreCase') -or $script:dest.EndsWith('msix','CurrentCultureIgnoreCase') -or $script:dest.EndsWith('appxbundle','CurrentCultureIgnoreCase') -or $script:dest.EndsWith('msixbundle','CurrentCultureIgnoreCase'))) {Remove-Item -Path $script:dest}
         }
     }
 
@@ -256,7 +258,50 @@ Function Read-WinGet-InstallerValues {
         } while ($Silent.Length -gt $InstallerSchema.definitions.InstallerSwitches.properties.Silent.maxLength -or $SilentWithProgress.Lenth -gt $InstallerSchema.definitions.InstallerSwitches.properties.SilentWithProgress.maxLength -or $Custom.Length -gt $InstallerSchema.definitions.InstallerSwitches.properties.Custom.maxLength)
     }
 
+    if ($InstallerType -ieq 'msix' -or $InstallerType -ieq 'appx') {
+        if (Get-Command 'winget.exe' -ErrorAction SilentlyContinue) {$SignatureSha256 = winget hash -m $script:dest | Select-String -Pattern "SignatureSha256:" | ConvertFrom-String; if ($SignatureSha256.P2) {$SignatureSha256 = $SignatureSha256.P2.ToUpper()}}
+        if ([string]::IsNullOrWhiteSpace($SignatureSha256)) {
+            do {
+                Write-Host
+                Write-Host -ForegroundColor 'Yellow' -Object '[Recommended] Enter the installer SignatureSha256'
+                $SignatureSha256 = Read-Host -Prompt 'SignatureSha256' | TrimString
+            } while (-not [string]::IsNullOrWhiteSpace($SignatureSha256) -and ($SignatureSha256 -notmatch $InstallerSchema.definitions.Installer.properties.SignatureSha256.pattern))
+        }
+        
+        do {
+            Write-Host
+            Write-Host -ForegroundColor 'Yellow' -Object '[Recommended] Enter the installer PackageFamilyName'
+            Write-Host -ForegroundColor 'White' "[F] Find Automatically [Note: This will install the package to find Family Name and then removes it.]"
+            Write-Host -ForegroundColor 'White' "[M] Manually Enter PackageFamilyName"
+            Write-Host -NoNewline "Enter Choice (default is 'F'): "
+            do {
+                $keyInfo = [Console]::ReadKey($false)
+            } until ($keyInfo.Key)
+            switch ($keyInfo.Key) {
+                'F' {$ChoicePfn = '0'}
+                'M' {$ChoicePfn = '1'}
+                default {$ChoicePfn = '0'}
+            }
+            if ($ChoicePfn -eq '0') {
+                Add-AppxPackage -Path $script:dest
+                $InstalledPkg = Get-AppxPackage | Select-Object -Last 1 | Select-Object PackageFamilyName,PackageFullName
+                $PackageFamilyName = $InstalledPkg.PackageFamilyName
+                Remove-AppxPackage $InstalledPkg.PackageFullName
+                if ([string]::IsNullOrWhiteSpace($PackageFamilyName)) {
+                    Write-Host -ForegroundColor 'Red' "Error finding PackageFamilyName. Please enter manually."
+                    $PackageFamilyName = Read-Host -Prompt 'PackageFamilyName' | TrimString
+                }
+            } else {
+                Write-Host
+                $PackageFamilyName = Read-Host -Prompt 'PackageFamilyName' | TrimString
+            }
+        } while (-not [string]::IsNullOrWhiteSpace($PackageFamilyName) -and ($PackageFamilyName.Length -gt $InstallerSchema.definitions.PackageFamilyName.maxLength))
+        
+        if($script:SaveOption -eq '1') {Remove-Item -Path $script:dest}
+    }
+
     do {
+        Write-Host
         Write-Host
         Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the installer locale. For example: en-US, en-CA'
         Write-Host -ForegroundColor 'Blue' -Object 'https://docs.microsoft.com/openspecs/office_standards/ms-oe376/6c085406-a698-4e12-9d4d-c3b0ee3dbc4a'
@@ -318,6 +363,8 @@ Function Read-WinGet-InstallerValues {
         "Scope"           = $Scope
         "InstallerUrl"    = $InstallerUrl
         "InstallerSha256" = $InstallerSha256
+        "SignatureSha256" = $SignatureSha256
+        "PackageFamilyName" = $PackageFamilyName
     }
     foreach ($_Item in $_InstallerSingletons.GetEnumerator()) {
         If ($_Item.Value) { AddYamlParameter $_Installer $_Item.Name $_Item.Value }
@@ -764,12 +811,12 @@ Function Test-Manifest {
         } until ($keyInfo.Key)
 
         switch ($keyInfo.Key) {
-            'Y' { $SandboxTest = '0' }
-            'N' { $SandboxTest = '1' }
-            default { $SandboxTest = '0' }
+            'Y' { $script:SandboxTest = '0' }
+            'N' { $script:SandboxTest = '1' }
+            default { $script:SandboxTest = '0' }
         }
 
-        if ($SandboxTest -eq '0') {
+        if ($script:SandboxTest -eq '0') {
             if (Test-Path -Path "$PSScriptRoot\SandboxTest.ps1") {
                 $SandboxScriptPath = (Resolve-Path "$PSScriptRoot\SandboxTest.ps1").Path
             }
@@ -789,43 +836,11 @@ Function Test-Manifest {
 Function Enter-PR-Parameters {
     $PrBodyContent = Get-Content $args[0]
     ForEach ($_ in ($PrBodyContent | Where-Object { $_ -like '-*[ ]*' })) {
-        if ($_ -like "*CLA*") {
-            Write-Host
-            Write-Host -ForegroundColor 'White' "Have you signed the Contributor License Agreement (CLA)?"
-            Write-Host "Reference Link: https://cla.opensource.microsoft.com/microsoft/winget-pkgs"
-            Write-Host -ForegroundColor 'White' -NoNewline "[Y] Yes  "
-            Write-Host -ForegroundColor 'Yellow' -NoNewline "[N] No "
-            Write-Host -NoNewline "(default is 'N'): "
-            do {
-                $keyInfo = [Console]::ReadKey($false)
-            } until ($keyInfo.Key)
-            if ($keyInfo.Key -eq 'Y') {
-                $PrBodyContentReply += $_.Replace("[ ]","[X]"), "`n"
-            } else {
-                $PrBodyContentReply += $_, "`n"
-            }
-        } elseif ($_ -like "*open [pull requests]*") {
-            Write-Host
-            Write-Host -ForegroundColor 'White' "Have you checked that there aren't other open pull requests for the same manifest update/change?"
-            Write-Host "Reference Link: https://github.com/microsoft/winget-pkgs/pulls"
-            Write-Host -ForegroundColor 'White' -NoNewline "[Y] Yes  "
-            Write-Host -ForegroundColor 'Yellow' -NoNewline "[N] No "
-            Write-Host -NoNewline "(default is 'N'): "
-            do {
-                $keyInfo = [Console]::ReadKey($false)
-            } until ($keyInfo.Key)
-            if ($keyInfo.Key -eq 'Y') {
-                $PrBodyContentReply += $_.Replace("[ ]","[X]"), "`n"
-            } else {
-                $PrBodyContentReply += $_, "`n"
-            }
-        } elseif ($_ -like "*winget validate*") {
-            if($?) {
-                $PrBodyContentReply += $_.Replace("[ ]","[X]"), "`n"
-            } else {
+        switch -Wildcard ( $_ ) {
+            '*CLA*' {
                 Write-Host
-                Write-Host -ForegroundColor 'Red' "Automatic manifest validation failed. Check your manifest and try again"
-                Write-Host -ForegroundColor 'White' "Have you validated your manifest locally with 'winget validate --manifest <path>'"
+                Write-Host -ForegroundColor 'White' "Have you signed the Contributor License Agreement (CLA)?"
+                Write-Host "Reference Link: https://cla.opensource.microsoft.com/microsoft/winget-pkgs"
                 Write-Host -ForegroundColor 'White' -NoNewline "[Y] Yes  "
                 Write-Host -ForegroundColor 'Yellow' -NoNewline "[N] No "
                 Write-Host -NoNewline "(default is 'N'): "
@@ -838,13 +853,12 @@ Function Enter-PR-Parameters {
                     $PrBodyContentReply += $_, "`n"
                 }
             }
-        } elseif ($_ -like "*tested your manifest*" -and $SandboxTest -eq '0') {
-            if ($SandboxTest -eq '0') {
-                $PrBodyContentReply += $_.Replace("[ ]","[X]"), "`n"
-            } else {
+    
+            '*open `[pull requests`]*' {
                 Write-Host
-                Write-Host -ForegroundColor 'Yellow' "You did not test your Manifest in Windows Sandbox previously."
-                Write-Host -ForegroundColor 'White' "Have you tested your manifest locally with 'winget install --manifest <path>'"
+                Write-Host
+                Write-Host -ForegroundColor 'White' "Have you checked that there aren't other open pull requests for the same manifest update/change?"
+                Write-Host "Reference Link: https://github.com/microsoft/winget-pkgs/pulls"
                 Write-Host -ForegroundColor 'White' -NoNewline "[Y] Yes  "
                 Write-Host -ForegroundColor 'Yellow' -NoNewline "[N] No "
                 Write-Host -NoNewline "(default is 'N'): "
@@ -857,61 +871,111 @@ Function Enter-PR-Parameters {
                     $PrBodyContentReply += $_, "`n"
                 }
             }
-        } elseif ($_ -like "*schema*") {
-            Write-Host
-            Write-Host
-            Write-Host -ForegroundColor 'White' "Does your manifest confirm to the 1.0 schema?"
-            Write-Host "Reference Link: https://github.com/microsoft/winget-cli/blob/master/doc/ManifestSpecv1.0.md"
-            Write-Host -ForegroundColor 'White' -NoNewline "[Y] Yes  "
-            Write-Host -ForegroundColor 'Yellow' -NoNewline "[N] No "
-            Write-Host -NoNewline "(default is 'N'): "
-            do {
-                $keyInfo = [Console]::ReadKey($false)
-            } until ($keyInfo.Key)
-            if ($keyInfo.Key -eq 'Y') {
-                $PrBodyContentReply += $_.Replace("[ ]","[X]"), "`n"
-            } else {
-                $PrBodyContentReply += $_, "`n"
+    
+            '*winget validate*' {
+                if($?) {
+                    $PrBodyContentReply += $_.Replace("[ ]","[X]"), "`n"
+                } else {
+                    Write-Host
+                    Write-Host
+                    Write-Host -ForegroundColor 'Red' "Automatic manifest validation failed. Check your manifest and try again"
+                    Write-Host -ForegroundColor 'White' "Have you validated your manifest locally with 'winget validate --manifest <path>'"
+                    Write-Host -ForegroundColor 'White' -NoNewline "[Y] Yes  "
+                    Write-Host -ForegroundColor 'Yellow' -NoNewline "[N] No "
+                    Write-Host -NoNewline "(default is 'N'): "
+                    do {
+                        $keyInfo = [Console]::ReadKey($false)
+                    } until ($keyInfo.Key)
+                    if ($keyInfo.Key -eq 'Y') {
+                        $PrBodyContentReply += $_.Replace("[ ]","[X]"), "`n"
+                    } else {
+                        $PrBodyContentReply += $_, "`n"
+                    }
+                }
             }
-        } else {
-            Write-Host
-            Write-Host
-            Write-Host -ForegroundColor 'White' $_.TrimStart("- [ ]")
-            Write-Host -ForegroundColor 'White' -NoNewline "[Y] Yes  "
-            Write-Host -ForegroundColor 'Yellow' -NoNewline "[N] No "
-            Write-Host -NoNewline "(default is 'N'): "
-            do {
-                $keyInfo = [Console]::ReadKey($false)
-            } until ($keyInfo.Key)
-            if ($keyInfo.Key -eq 'Y') {
-                $PrBodyContentReply += $_.Replace("[ ]","[X]"), "`n"
-            } else {
-                $PrBodyContentReply += $_, "`n"
+    
+            '*tested your manifest*' {
+                if ($script:SandboxTest -eq '0') {
+                    $PrBodyContentReply += $_.Replace("[ ]","[X]"), "`n"
+                } else {
+                    Write-Host
+                    Write-Host
+                    Write-Host -ForegroundColor 'Yellow' "You did not test your Manifest in Windows Sandbox previously."
+                    Write-Host -ForegroundColor 'White' "Have you tested your manifest locally with 'winget install --manifest <path>'"
+                    Write-Host -ForegroundColor 'White' -NoNewline "[Y] Yes  "
+                    Write-Host -ForegroundColor 'Yellow' -NoNewline "[N] No "
+                    Write-Host -NoNewline "(default is 'N'): "
+                    do {
+                        $keyInfo = [Console]::ReadKey($false)
+                    } until ($keyInfo.Key)
+                    if ($keyInfo.Key -eq 'Y') {
+                        $PrBodyContentReply += $_.Replace("[ ]","[X]"), "`n"
+                    } else {
+                        $PrBodyContentReply += $_, "`n"
+                    }
+                }
+            }
+    
+            '*schema*' {
+                Write-Host
+                Write-Host
+                Write-Host -ForegroundColor 'White' "Does your manifest conform to the 1.0 schema?"
+                Write-Host "Reference Link: https://github.com/microsoft/winget-cli/blob/master/doc/ManifestSpecv1.0.md"
+                Write-Host -ForegroundColor 'White' -NoNewline "[Y] Yes  "
+                Write-Host -ForegroundColor 'Yellow' -NoNewline "[N] No "
+                Write-Host -NoNewline "(default is 'N'): "
+                do {
+                    $keyInfo = [Console]::ReadKey($false)
+                } until ($keyInfo.Key)
+                if ($keyInfo.Key -eq 'Y') {
+                    $PrBodyContentReply += $_.Replace("[ ]","[X]"), "`n"
+                } else {
+                    $PrBodyContentReply += $_, "`n"
+                }
+            }
+    
+            Default {
+                Write-Host
+                Write-Host
+                Write-Host -ForegroundColor 'White' $_.TrimStart("- [ ]")
+                Write-Host -ForegroundColor 'White' -NoNewline "[Y] Yes  "
+                Write-Host -ForegroundColor 'Yellow' -NoNewline "[N] No "
+                Write-Host -NoNewline "(default is 'N'): "
+                do {
+                    $keyInfo = [Console]::ReadKey($false)
+                } until ($keyInfo.Key)
+                if ($keyInfo.Key -eq 'Y') {
+                    $PrBodyContentReply += $_.Replace("[ ]","[X]"), "`n"
+                } else {
+                    $PrBodyContentReply += $_, "`n"
+                }
             }
         }
     }
-        Write-Host
-        Write-Host
-        Write-Host -ForegroundColor 'White' "Does this pull request resolve any issues?"
-        Write-Host -ForegroundColor 'White' -NoNewline "[Y] Yes  "
-        Write-Host -ForegroundColor 'Yellow' -NoNewline "[N] No "
-        Write-Host -NoNewline "(default is 'N'): "
-        do {
-            $keyInfo = [Console]::ReadKey($false)
-        } until ($keyInfo.Key)
-        if ($keyInfo.Key -eq 'Y') {
-            Write-Host
-            Write-Host "Enter issue number. For example`: 21983, 43509"
-            $ResolvedIssues = Read-Host -Prompt 'Resolved Issues'
-            Foreach($i in ($ResolvedIssues.Split(",").Trim())) {
-                $PrBodyContentReply += "Resolves #$i`n"
-            }
-        } else {Write-Host}
-        Set-Content -Path PrBodyFile -Value $PrBodyContentReply | Out-Null
-        gh pr create --body-file PrBodyFile -f
-        Remove-Item PrBodyFile     
-}
 
+    Write-Host
+    Write-Host
+    Write-Host -ForegroundColor 'White' "Does this pull request resolve any issues?"
+    Write-Host -ForegroundColor 'White' -NoNewline "[Y] Yes  "
+    Write-Host -ForegroundColor 'Yellow' -NoNewline "[N] No "
+    Write-Host -NoNewline "(default is 'N'): "
+    do {
+        $keyInfo = [Console]::ReadKey($false)
+    } until ($keyInfo.Key)
+    if ($keyInfo.Key -eq 'Y') {
+        Write-Host
+        Write-Host "Enter issue number. For example`: 21983, 43509"
+        $ResolvedIssues = Read-Host -Prompt 'Resolved Issues'
+        Foreach($i in ($ResolvedIssues.Split(",").Trim())) {
+            $PrBodyContentReply += "Resolves #$i`n"
+        }
+    } else {Write-Host}
+
+    $PrBodyContentReply = ($PrBodyContentReply.Trim() -ne '')
+    Set-Content -Path PrBodyFile -Value $PrBodyContentReply | Out-Null
+    gh pr create --body-file PrBodyFile -f
+    Remove-Item PrBodyFile     
+}
 Function Submit-Manifest {
     if (Get-Command 'git.exe' -ErrorAction SilentlyContinue) {
         Write-Host
@@ -937,10 +1001,10 @@ Function Submit-Manifest {
     if ($PromptSubmit -eq '0') {
         switch ($Option) {
             'New' {
-                if ($script:OldManifestType -eq 'None') { $CommitType = 'New' }
-                else {
-                    $CommitType = 'Update'
-                }
+                if ( $script:OldManifestType -eq 'None' ) { $CommitType = 'New package' }
+                elseif ($script:LastVersion -lt $script:PackageVersion ) { $CommitType = 'New version' }
+                elseif ($script:PackageVersion -in $script:ExistingVersions) { $CommitType = 'Update' }
+                elseif ($script:LastVersion -gt $script:PackageVersion ) { $CommitType = 'Add version' }
             }
             'EditMetadata' { $CommitType = 'Metadata' }
             'NewLocale' { $CommitType = 'Locale' }
@@ -1206,7 +1270,8 @@ Function Read-PreviousWinGet-Manifest-Yaml {
     
     if (!$LastVersion) {
         try {
-            $LastVersion = Split-Path (Split-Path (Get-ChildItem -Path "$AppFolder\..\" -Recurse -Depth 1 -File).FullName ) -Leaf | Sort-Object $ToNatural | Select-Object -Last 1
+            $script:LastVersion = Split-Path (Split-Path (Get-ChildItem -Path "$AppFolder\..\" -Recurse -Depth 1 -File -Exclude ".validation").FullName ) -Leaf | Sort-Object $ToNatural | Select-Object -Last 1
+            $script:ExistingVersions = Split-Path (Split-Path (Get-ChildItem -Path "$AppFolder\..\" -Recurse -Depth 1 -File -Exclude ".validation").FullName ) -Leaf | Sort-Object $ToNatural | Select-Object -Unique
             Write-Host -ForegroundColor 'DarkYellow' -Object "Found Existing Version: $LastVersion"
             $script:OldManifests = Get-ChildItem -Path "$AppFolder\..\$LastVersion"
         }
