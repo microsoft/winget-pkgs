@@ -873,8 +873,8 @@ Function Enter-PR-Parameters {
                 }
                 
                 switch ( KeypressMenu -Prompt $_menu["Prompt"] -Entries $_menu["Entries"] -DefaultString $_menu["DefaultString"] -HelpText $_menu["HelpText"]) {
-                    'Y' { $PrBodyContentReply += $_line.Replace("[ ]", "[X]"), "`n" }
-                    default { $PrBodyContentReply += $_line, "`n" }
+                    'Y' { $PrBodyContentReply += @($_line.Replace("[ ]", "[X]")) }
+                    default { $PrBodyContentReply += @($_line) }
                 }
             }
     
@@ -887,14 +887,14 @@ Function Enter-PR-Parameters {
                 }
                 
                 switch ( KeypressMenu -Prompt $_menu["Prompt"] -Entries $_menu["Entries"] -DefaultString $_menu["DefaultString"] -HelpText $_menu["HelpText"]) {
-                    'Y' { $PrBodyContentReply += $_line.Replace("[ ]", "[X]"), "`n" }
-                    default { $PrBodyContentReply += $_line, "`n" }
+                    'Y' { $PrBodyContentReply += @($_line.Replace("[ ]", "[X]")) }
+                    default { $PrBodyContentReply += @($_line) }
                 }
             }
     
             '*winget validate*' {
                 if ($?) {
-                    $PrBodyContentReply += $_line.Replace("[ ]", "[X]"), "`n"
+                    $PrBodyContentReply += @($_line.Replace("[ ]", "[X]"))
                 }
                 else {
                     $_menu = @{
@@ -906,15 +906,15 @@ Function Enter-PR-Parameters {
                     }
                     
                     switch ( KeypressMenu -Prompt $_menu["Prompt"] -Entries $_menu["Entries"] -DefaultString $_menu["DefaultString"] -HelpText $_menu["HelpText"] -HelpTextColor $_menu["HelpTextColor"]) {
-                        'Y' { $PrBodyContentReply += $_line.Replace("[ ]", "[X]"), "`n" }
-                        default { $PrBodyContentReply += $_line, "`n" }
+                        'Y' { $PrBodyContentReply += @($_line.Replace("[ ]", "[X]")) }
+                        default { $PrBodyContentReply += @($_line) }
                     }
                 }
             }
     
             '*tested your manifest*' {
                 if ($script:SandboxTest -eq '0') {
-                    $PrBodyContentReply += $_line.Replace("[ ]", "[X]"), "`n"
+                    $PrBodyContentReply += @($_line.Replace("[ ]", "[X]"))
                 }
                 else {
                     $_menu = @{
@@ -925,8 +925,8 @@ Function Enter-PR-Parameters {
                     }
                     
                     switch ( KeypressMenu -Prompt $_menu["Prompt"] -Entries $_menu["Entries"] -DefaultString $_menu["DefaultString"] -HelpText $_menu["HelpText"]) {
-                        'Y' { $PrBodyContentReply += $_line.Replace("[ ]", "[X]"), "`n" }
-                        default { $PrBodyContentReply += $_line, "`n" }
+                        'Y' { $PrBodyContentReply += @($_line.Replace("[ ]", "[X]")) }
+                        default { $PrBodyContentReply += @($_line) }
                     }
                 }
             }
@@ -940,8 +940,8 @@ Function Enter-PR-Parameters {
                 }
                 
                 switch ( KeypressMenu -Prompt $_menu["Prompt"] -Entries $_menu["Entries"] -DefaultString $_menu["DefaultString"] -HelpText $_menu["HelpText"]) {
-                    'Y' { $PrBodyContentReply += $_line.Replace("[ ]", "[X]"), "`n" }
-                    default { $PrBodyContentReply += $_line, "`n" }
+                    'Y' { $PrBodyContentReply += @($_line.Replace("[ ]", "[X]")) }
+                    default { $PrBodyContentReply += @($_line) }
                 }
             }
     
@@ -953,8 +953,8 @@ Function Enter-PR-Parameters {
                 }
 
                 switch ( KeypressMenu -Prompt $_menu["Prompt"] -Entries $_menu["Entries"] -DefaultString $_menu["DefaultString"]) {
-                    'Y' { $PrBodyContentReply += $_line.Replace("[ ]", "[X]"), "`n" }
-                    default { $PrBodyContentReply += $_line, "`n" }
+                    'Y' { $PrBodyContentReply += @($_line.Replace("[ ]", "[X]")) }
+                    default { $PrBodyContentReply += @($_line) }
                 }
             }
         }
@@ -971,14 +971,14 @@ Function Enter-PR-Parameters {
             Write-Host
             Write-Host "Enter issue number. For example`: 21983, 43509"
             $ResolvedIssues = Read-Host -Prompt 'Resolved Issues'
+            $PrBodyContentReply += @("")
             Foreach ($i in ($ResolvedIssues.Split(",").Trim())) {
-                $PrBodyContentReply += "Resolves #$i`n"
+                $PrBodyContentReply += @("Resolves #$i")
             }
         }
         default { Write-Host }
     }
 
-    $PrBodyContentReply = ($PrBodyContentReply.Trim() -ne '')
     Set-Content -Path PrBodyFile -Value $PrBodyContentReply | Out-Null
     gh pr create --body-file PrBodyFile -f
     Remove-Item PrBodyFile  
