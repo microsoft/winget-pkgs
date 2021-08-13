@@ -183,14 +183,14 @@ Function Show-OptionMenu {
 }
 
 Function Read-WinGet-MandatoryInfo {
-    while ($PackageIdentifier.Length -lt 4 -or $ID.Length -gt $VersionSchema.properties.PackageIdentifier.maxLength) {
+    while (($PackageIdentifier.Length -lt 4) -or ($ID.Length -gt $VersionSchema.properties.PackageIdentifier.maxLength) -or ($PackageIdentifier -notmatch $VersionSchema.properties.PackageIdentifier.pattern)) {
         Write-Host "`n"
         Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the Package Identifier, in the following format <Publisher shortname.Application shortname>. For example: Microsoft.Excel'
         $script:PackageIdentifier = Read-Host -Prompt 'PackageIdentifier' | TrimString
         $PackageIdentifierFolder = $PackageIdentifier.Replace('.', '\')
     }
     
-    while ([string]::IsNullOrWhiteSpace($PackageVersion) -or ($PackageVersion.Length -gt $VersionSchema.properties.PackageVersion.maxLength)) {
+    while ([string]::IsNullOrWhiteSpace($PackageVersion) -or ($PackageVersion.Length -gt $VersionSchema.properties.PackageVersion.maxLength) -or ($PackageVersion -notmatch $InstallerSchema.definitions.PackageVersion.pattern)) {
         Write-Host
         Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the version. for example: 1.33.7'
         $script:PackageVersion = Read-Host -Prompt 'Version' | TrimString
@@ -358,7 +358,7 @@ Function Read-WinGet-InstallerValues {
                 Write-Host
                 $PackageFamilyName = Read-Host -Prompt 'PackageFamilyName' | TrimString
             }
-        } while (-not [string]::IsNullOrWhiteSpace($PackageFamilyName) -and ($PackageFamilyName.Length -gt $InstallerSchema.definitions.PackageFamilyName.maxLength))
+        } while (-not [string]::IsNullOrWhiteSpace($PackageFamilyName) -and ($PackageFamilyName.Length -gt $InstallerSchema.definitions.PackageFamilyName.maxLength -or $PackageFamilyName -notmatch $InstallerSchema.definitions.PackageFamilyName.pattern))
         
         if ($script:SaveOption -eq '1') { Remove-Item -Path $script:dest }
     }
@@ -538,7 +538,7 @@ Function Read-WinGet-InstallerManifest {
 }
 
 Function Read-WinGet-LocaleManifest {
-    while ([string]::IsNullOrWhiteSpace($script:PackageLocale) -or $script:PackageLocale.Length -gt $LocaleSchema.properties.PackageLocale.maxLength) {
+    while (([string]::IsNullOrWhiteSpace($script:PackageLocale)) -or ($script:PackageLocale.Length -gt $LocaleSchema.properties.PackageLocale.maxLength) -or ($script:PackageLocale -notmatch $LocaleSchema.properties.PackageLocale.pattern)) {
         Write-Host
         Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the Package Locale. For example: en-US, en-CA https://docs.microsoft.com/openspecs/office_standards/ms-oe376/6c085406-a698-4e12-9d4d-c3b0ee3dbc4a'
         $script:PackageLocale = Read-Host -Prompt 'PackageLocale' | TrimString
