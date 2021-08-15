@@ -328,18 +328,17 @@ Function Read-WinGet-InstallerValues {
 
         try {
             $WebClient.DownloadFile($InstallerUrl, $script:dest)
-        }
-        catch {
+        } catch {
             Write-Host 'Error downloading file. Please run the script again.' -ForegroundColor Red
             exit 1
-        }
-        finally {
+        } finally {
             Write-Host "Time taken: $((Get-Date).Subtract($start_time).Seconds) second(s)" -ForegroundColor Green
             $InstallerSha256 = (Get-FileHash -Path $script:dest -Algorithm SHA256).Hash
             $FileInformation = Get-AppLockerFileInformation -Path $script:dest | Select-Object Publisher | Select-String -Pattern "{[A-Z0-9]{8}-([A-Z0-9]{4}-){3}[A-Z0-9]{12}}"
             $MSIProductCode = $FileInformation.Matches
             if ($script:SaveOption -eq '1' -and -not($script:dest.EndsWith('appx', 'CurrentCultureIgnoreCase') -or $script:dest.EndsWith('msix', 'CurrentCultureIgnoreCase') -or $script:dest.EndsWith('appxbundle', 'CurrentCultureIgnoreCase') -or $script:dest.EndsWith('msixbundle', 'CurrentCultureIgnoreCase'))) { Remove-Item -Path $script:dest }
-        } else {
+        }
+    } else {
         while ($InstallerSha256 -notmatch $Patterns.InstallerSha256) {
             Write-Host
             Write-Host
@@ -481,9 +480,7 @@ Function Read-WinGet-InstallerValues {
         default { $UpgradeBehavior = 'install' }
     }
     
-    if (!$script:Installers) {
-        $script:Installers = @()
-    }
+    if (!$script:Installers) { $script:Installers = @() }
 
     $_Installer = [ordered] @{}
 
@@ -502,7 +499,7 @@ Function Read-WinGet-InstallerValues {
         If ($_Item.Value) { AddYamlParameter $_Installer $_Item.Name $_Item.Value }
     }
 
-    If ($Silent -or $SilentWithProgress -or $Custom) {
+    if ($Silent -or $SilentWithProgress -or $Custom) {
         $_InstallerSwitches = [ordered]@{}
         $_Switches = [ordered] @{
             "Custom"             = $Custom
@@ -517,7 +514,7 @@ Function Read-WinGet-InstallerValues {
         $_Installer["InstallerSwitches"] = $_InstallerSwitches
     }
 
-    If ($ProductCode) { AddYamlParameter $_Installer "ProductCode" $ProductCode }
+    if ($ProductCode) { AddYamlParameter $_Installer "ProductCode" $ProductCode }
     AddYamlParameter $_Installer "UpgradeBehavior" $UpgradeBehavior
     $_Installer = SortYamlKeys $_Installer $InstallerEntryProperties
 
