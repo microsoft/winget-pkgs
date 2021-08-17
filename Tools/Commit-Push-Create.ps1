@@ -1,10 +1,11 @@
 ﻿Write-Host "Commit Push and Create Pull Request"
+$acceptedShortForms = @('um','am','amd','umd','pi','mpc','u','add','n','arp','pc','pcarp','r','url','urlpc','ss','fn','ssfn','404')
 if ($args[0]) {$PkgId = $args[0]} else {$PkgId = Read-Host -Prompt 'Enter Package Name'}
 if ($args[1]) {$PkgVersion = $args[1]} else {$PkgVersion = Read-Host -Prompt 'Enter Package Version'}
-if ($args[2] -and $args[2] -in @('um','am','amd','umd','pi','mpc','u','n','a','pc','pcarp','r','url','urlpc','ss','fn','ssfn','404')) {
+if ($args[2] -and $args[2] -in $acceptedShortForms) {
     $CommitType = $args[2]
 } else {
-    while ($CommitType -notin @('um','am','amd','umd','pi','mpc','u','n','a','pc','pcarp','r','url','urlpc','ss','fn','ssfn','404')) {
+    while ($CommitType -notin $acceptedShortForms) {
         $CommitType = Read-Host -Prompt 'Enter Commit Message'
     }
 }
@@ -14,9 +15,10 @@ elseif ($CommitType -eq 'amd') {$CommitType = "Add Metadata"}
 elseif ($CommitType -eq 'umd') {$CommitType = "Update Metadata"}
 elseif ($CommitType -eq 'pi') {$CommitType = "PackageIdentifier"}
 elseif ($CommitType -eq 'mpc') {$CommitType = "Moniker/ProductCode"}
-elseif ($CommitType -eq 'u') {$CommitType = "Update"}
-elseif ($CommitType -eq 'n') {$CommitType = "New"}
-elseif ($CommitType -eq 'a') {$CommitType = "ARP"}
+elseif ($CommitType -eq 'u') {$CommitType = "New Version"}
+elseif ($CommitType -eq 'add') {$CommitType = "Add Version"}
+elseif ($CommitType -eq 'n') {$CommitType = "New Package"}
+elseif ($CommitType -eq 'arp') {$CommitType = "ARP"}
 elseif ($CommitType -eq 'pc') {$CommitType = "ProductCode"}
 elseif ($CommitType -eq 'pcarp') {$CommitType = "ProductCode/ARP"}
 elseif ($CommitType -eq 'r') {$CommitType = "Remove"}
