@@ -4,6 +4,11 @@ This repository contains the manifest files for the **Windows Package Manager** 
 
 The **Windows Package Manager** is an [open source client](https://github.com/microsoft/winget-cli) designed for command-line usage.
 
+# Service Health
+![Validation Pipeline Badge](https://img.shields.io/endpoint?url=https://winget.azurefd.net/api/GetServiceComponentStatusBadge?component=ValidationPipeline "Validation Pipeline Badge")
+
+![Publish Pipeline Badge](https://img.shields.io/endpoint?url=https://winget.azurefd.net/api/GetServiceComponentStatusBadge?component=PublishPipeline "Publish Pipeline Badge")
+
 # Submitting a Package
 To submit a package to this repository, you should follow these steps:
 1) Follow the [Contributing](#Contributing) guidelines below.
@@ -50,7 +55,10 @@ Just provide the path to manifest as parameter:
 ```
 
 ## Submit your PR
-With the manifest verified, you will need to submit a PR.  Your manifest should be located in the folder path matching `manifests\<first lower case letter of publisher>\<publisher>\<package>\<version>.yaml`
+With the manifest verified, you will need to submit a PR.  Your manifest should be located in the folder path matching
+```
+manifests\<first lower case letter of publisher>\<publisher>\<package>\<version>\
+```
 
 ### Validation Process
 The PR request will go through a validation process. During the process, the core team or the Microsoft bot (BOT) will use [labels](https://docs.microsoft.com/windows/package-manager/package/winget-validation#pull-request-labels) to help. In the event of a failure, the BOT will suggest where the problem is with the submission and assign the PR back to you.  
