@@ -4,6 +4,11 @@ This repository contains the manifest files for the **Windows Package Manager** 
 
 The **Windows Package Manager** is an [open source client](https://github.com/microsoft/winget-cli) designed for command-line usage.
 
+# Service Health
+![Validation Pipeline Badge](https://img.shields.io/endpoint?url=https://winget.azurefd.net/api/GetServiceComponentStatusBadge?component=ValidationPipeline "Validation Pipeline Badge")
+
+![Publish Pipeline Badge](https://img.shields.io/endpoint?url=https://winget.azurefd.net/api/GetServiceComponentStatusBadge?component=PublishPipeline "Publish Pipeline Badge")
+
 # Submitting a Package
 To submit a package to this repository, you should follow these steps:
 1) Follow the [Contributing](#Contributing) guidelines below.
