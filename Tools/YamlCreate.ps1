@@ -222,7 +222,7 @@ Function TestUrlValidity {
     }
     catch {}
     if (-not($null -eq $HTTP_Response)) { $HTTP_Response.Close() } 
-    
+
     return $HTTP_Status
 }
 Function Show-OptionMenu {
@@ -257,15 +257,13 @@ Function Show-OptionMenu {
 
 Function Read-WinGet-MandatoryInfo {
     while (!(String.IsValid $PackageIdentifier -MinLength 4 -MaxLength $Patterns.IdentifierMaxLength -MatchPattern $Patterns.PackageIdentifier)) {
-        Write-Host "`n"
-        Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the Package Identifier, in the following format <Publisher shortname.Application shortname>. For example: Microsoft.Excel'
+        Write-Host -ForegroundColor 'Green' -Object '`n[Required] Enter the Package Identifier, in the following format <Publisher shortname.Application shortname>. For example: Microsoft.Excel'
         $script:PackageIdentifier = Read-Host -Prompt 'PackageIdentifier' | TrimString
         $PackageIdentifierFolder = $PackageIdentifier.Replace('.', '\')
     }
     
     while (!(String.IsValid $PackageVersion -MinLength 1 -MaxLength $Patterns.VersionMaxLength -MatchPattern $Patterns.PackageVersion)) {
-        Write-Host
-        Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the version. for example: 1.33.7'
+        Write-Host -ForegroundColor 'Green' -Object '`n[Required] Enter the version. for example: 1.33.7'
         $script:PackageVersion = Read-Host -Prompt 'Version' | TrimString
     }
     
@@ -299,18 +297,17 @@ Function Read-WinGet-InstallerValues {
     Foreach ($InstallerValue in $InstallerValues) { Clear-Variable -Name $InstallerValue -Force -ErrorAction SilentlyContinue }
 
     while (!(String.IsValid $InstallerUrl -MinLength 1 -MaxLength $Patterns.InstallerUrlMaxLength -MatchPattern $Patterns.InstallerUrl)) {
-        Write-Host
-        Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the download url to the installer.'
+        Write-Host -ForegroundColor 'Green' -Object '`n[Required] Enter the download url to the installer.'
         $InstallerUrl = Read-Host -Prompt 'Url' | TrimString
     }
 
     $_menu = @{
-        entries = @("[Y] Yes"; "*[N] No"; "[M] Manually Enter SHA256")
-        Prompt  = "Do you want to save the files to the Temp folder?"
+        entries       = @("[Y] Yes"; "*[N] No"; "[M] Manually Enter SHA256")
+        Prompt        = "Do you want to save the files to the Temp folder?"
         DefaultString = "N"
     }
 
-    switch (KeypressMenu -Prompt $_menu["Prompt"] -Entries $_menu["Entries"] -DefaultString $_menu["DefaultString"]) {
+    switch ( KeypressMenu -Prompt $_menu["Prompt"] -Entries $_menu["Entries"] -DefaultString $_menu["DefaultString"]) {
         'Y' { $script:SaveOption = '0' }
         'N' { $script:SaveOption = '1' }
         'M' { $script:SaveOption = '2' }
@@ -318,82 +315,75 @@ Function Read-WinGet-InstallerValues {
     }
 
     if ($script:SaveOption -ne '2') {
-        Write-Host
         $start_time = Get-Date
-        Write-Host $NewLine
-        Write-Host 'Downloading URL. This will take a while...' -ForegroundColor Blue
+        Write-Host '`n`nDownloading URL. This will take a while...' -ForegroundColor Blue
         $WebClient = New-Object System.Net.WebClient
         $Filename = [System.IO.Path]::GetFileName($InstallerUrl)
         $script:dest = "$env:TEMP\$FileName"
 
         try {
             $WebClient.DownloadFile($InstallerUrl, $script:dest)
-        } catch {
+        }
+        catch {
             Write-Host 'Error downloading file. Please run the script again.' -ForegroundColor Red
             exit 1
-        } finally {
+        }
+        finally {
             Write-Host "Time taken: $((Get-Date).Subtract($start_time).Seconds) second(s)" -ForegroundColor Green
             $InstallerSha256 = (Get-FileHash -Path $script:dest -Algorithm SHA256).Hash
             $FileInformation = Get-AppLockerFileInformation -Path $script:dest | Select-Object Publisher | Select-String -Pattern "{[A-Z0-9]{8}-([A-Z0-9]{4}-){3}[A-Z0-9]{12}}"
             $MSIProductCode = $FileInformation.Matches
             if ($script:SaveOption -eq '1' -and -not($script:dest.EndsWith('appx', 'CurrentCultureIgnoreCase') -or $script:dest.EndsWith('msix', 'CurrentCultureIgnoreCase') -or $script:dest.EndsWith('appxbundle', 'CurrentCultureIgnoreCase') -or $script:dest.EndsWith('msixbundle', 'CurrentCultureIgnoreCase'))) { Remove-Item -Path $script:dest }
         }
-    } else {
+    }
+
+    else {
         while ($InstallerSha256 -notmatch $Patterns.InstallerSha256) {
-            Write-Host
-            Write-Host
-            Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the installer SHA256 Hash'
+            Write-Host -ForegroundColor 'Green' -Object '`n`n[Required] Enter the installer SHA256 Hash'
             $InstallerSha256 = Read-Host -Prompt 'InstallerSha256' | TrimString
             $InstallerSHA256 = $InstallerSha256.toUpper()
         }
     }
 
     while ($architecture -notin @($Patterns.ValidArchitectures)) {
-        Write-Host
-        Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the architecture. Options:' , @($Patterns.ValidArchitectures -join ', ')
+        Write-Host -ForegroundColor 'Green' -Object '`n[Required] Enter the architecture. Options:' , @($Patterns.ValidArchitectures -join ', ')
         $architecture = Read-Host -Prompt 'Architecture' | TrimString
     }
 
     while ($InstallerType -notin @($Patterns.ValidInstallerTypes)) {
-        Write-Host
-        Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the InstallerType. Options:' , @($Patterns.ValidInstallerTypes -join ', ' )
+        Write-Host -ForegroundColor 'Green' -Object '`n[Required] Enter the InstallerType. Options:' , @($Patterns.ValidInstallerTypes -join ', ' )
         $InstallerType = Read-Host -Prompt 'InstallerType' | TrimString
     }
 
     if ($InstallerType -ieq 'exe') {
         do {
-            Write-Host
-            Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the silent install switch. For example: /S, -verysilent, /qn, --silent, /exenoui'
+            Write-Host -ForegroundColor 'Green' -Object '`n[Required] Enter the silent install switch. For example: /S, -verysilent, /qn, --silent, /exenoui'
             $Silent = Read-Host -Prompt 'Silent switch' | TrimString
         } while (!(String.IsValid $Silent -MinLength 1 -MaxLength $Patterns.SilentSwitchMaxLength))
 
         do {
-            Write-Host
-            Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the silent with progress install switch. For example: /S, -silent, /qb, /exebasicui'
+            Write-Host -ForegroundColor 'Green' -Object '`n[Required] Enter the silent with progress install switch. For example: /S, -silent, /qb, /exebasicui'
             $SilentWithProgress = Read-Host -Prompt 'Silent with progress switch' | TrimString
         } while (!(String.IsValid $SilentWithProgress -MinLength 1 -MaxLength $Patterns.ProgressSwitchMaxLength))
 
         do {
-            Write-Host
-            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter any custom switches for the installer. For example: /norestart, -norestart'
+            Write-Host -ForegroundColor 'Yellow' -Object '`n[Optional] Enter any custom switches for the installer. For example: /norestart, -norestart'
             $Custom = Read-Host -Prompt 'Custom Switch' | TrimString
         } while ($Custom.Length -gt $Patterns.CustomSwitchMaxLength)
-    } else {
+    }
+    else {
         do {
-            Write-Host
-            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the silent install switch. For example: /S, /s, /VERYSILENT, /qn, --silent'
+            Write-Host -ForegroundColor 'Yellow' -Object '`n[Optional] Enter the silent install switch. For example: /S, /s, /VERYSILENT, /qn, --silent'
             $Silent = Read-Host -Prompt 'Silent' | TrimString 
         } while ($Silent.Length -gt $Patterns.SilentSwitchMaxLength)
 
         do {
-            Write-Host
-            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the silent with progress install switch. For example: /S, /SILENT, /qb'
+            Write-Host -ForegroundColor 'Yellow' -Object '`n[Optional] Enter the silent with progress install switch. For example: /S, /SILENT, /qb'
             $SilentWithProgress = Read-Host -Prompt 'SilentWithProgress' | TrimString
         } while ($SilentWithProgress.Length -gt $Patterns.ProgressSwitchMaxLength)
 
         do {
-            Write-Host
-            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter any custom switches for the installer. For example: /NORESTART, -norestart, /CURRENTUSER, /ALLUSERS'
+            Write-Host -ForegroundColor 'Yellow' -Object '`n[Optional] Enter any custom switches for the installer. For example: /NORESTART, -norestart, /CURRENTUSER, /ALLUSERS'
             $Custom = Read-Host -Prompt 'CustomSwitch' | TrimString
         } while ($Custom.Length -gt $Patterns.CustomSwitchMaxLength)
     }
@@ -402,8 +392,7 @@ Function Read-WinGet-InstallerValues {
         if (Get-Command 'winget.exe' -ErrorAction SilentlyContinue) { $SignatureSha256 = winget hash -m $script:dest | Select-String -Pattern "SignatureSha256:" | ConvertFrom-String; if ($SignatureSha256.P2) { $SignatureSha256 = $SignatureSha256.P2.ToUpper() } }
         if ([string]::IsNullOrWhiteSpace($SignatureSha256)) {
             do {
-                Write-Host
-                Write-Host -ForegroundColor 'Yellow' -Object '[Recommended] Enter the installer SignatureSha256'
+                Write-Host -ForegroundColor 'Yellow' -Object '`n[Recommended] Enter the installer SignatureSha256'
                 $SignatureSha256 = Read-Host -Prompt 'SignatureSha256' | TrimString
             } while (-not [string]::IsNullOrWhiteSpace($SignatureSha256) -and ($SignatureSha256 -notmatch $Patterns.SignatureSha256))
         }
@@ -430,26 +419,23 @@ Function Read-WinGet-InstallerValues {
                     Write-Host -ForegroundColor 'Red' "Error finding PackageFamilyName. Please enter manually."
                     $PackageFamilyName = Read-Host -Prompt 'PackageFamilyName' | TrimString
                 }
-            } else {
-                Write-Host
-                $PackageFamilyName = Read-Host -Prompt 'PackageFamilyName' | TrimString
+            }
+            else {
+                $PackageFamilyName = Read-Host -Prompt '`nPackageFamilyName' | TrimString
             }
         } while (-not [string]::IsNullOrWhiteSpace($PackageFamilyName) -and (!(String.IsValid $PackageFamilyName -MaxLength $Patterns.FamilyNameMaxLength -MatchPattern $Patterns.FamilyName)))        
         if ($script:SaveOption -eq '1') { Remove-Item -Path $script:dest }
     }
 
     do {
-        Write-Host
-        Write-Host
-        Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the installer locale. For example: en-US, en-CA'
+        Write-Host -ForegroundColor 'Yellow' -Object '`n`n[Optional] Enter the installer locale. For example: en-US, en-CA'
         Write-Host -ForegroundColor 'Blue' -Object 'https://docs.microsoft.com/openspecs/office_standards/ms-oe376/6c085406-a698-4e12-9d4d-c3b0ee3dbc4a'
         $InstallerLocale = Read-Host -Prompt 'InstallerLocale' | TrimString
     } while (-not [string]::IsNullOrWhiteSpace($InstallerLocale) -and (!(String.IsValid $InstallerLocale -MaxLength $Patterns.InstallerLocaleMaxLength -MatchPattern $Patterns.PackageLocale)))
     if ([string]::IsNullOrWhiteSpace($InstallerLocale)) { $InstallerLocale = 'en-US' }
 
     do {
-        Write-Host
-        Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the application product code. Looks like {CF8E6E00-9C03-4440-81C0-21FACB921A6B}'
+        Write-Host -ForegroundColor 'Yellow' -Object '`n[Optional] Enter the application product code. Looks like {CF8E6E00-9C03-4440-81C0-21FACB921A6B}'
         Write-Host -ForegroundColor 'White' -Object "ProductCode found from installer: $MSIProductCode"
         Write-Host -ForegroundColor 'White' -Object 'Can be found with ' -NoNewline; Write-Host -ForegroundColor 'DarkYellow' 'get-wmiobject Win32_Product | Sort-Object Name | Format-Table IdentifyingNumber, Name -AutoSize'
         $ProductCode = Read-Host -Prompt 'ProductCode' | TrimString
@@ -480,8 +466,9 @@ Function Read-WinGet-InstallerValues {
         default { $UpgradeBehavior = 'install' }
     }
     
-    if (!$script:Installers) { $script:Installers = @() }
-
+    if (!$script:Installers) {
+        $script:Installers = @()
+    }
     $_Installer = [ordered] @{}
 
     $_InstallerSingletons = [ordered] @{
@@ -494,12 +481,11 @@ Function Read-WinGet-InstallerValues {
         "SignatureSha256"   = $SignatureSha256
         "PackageFamilyName" = $PackageFamilyName
     }
-
     foreach ($_Item in $_InstallerSingletons.GetEnumerator()) {
         If ($_Item.Value) { AddYamlParameter $_Installer $_Item.Name $_Item.Value }
     }
 
-    if ($Silent -or $SilentWithProgress -or $Custom) {
+    If ($Silent -or $SilentWithProgress -or $Custom) {
         $_InstallerSwitches = [ordered]@{}
         $_Switches = [ordered] @{
             "Custom"             = $Custom
@@ -514,18 +500,18 @@ Function Read-WinGet-InstallerValues {
         $_Installer["InstallerSwitches"] = $_InstallerSwitches
     }
 
-    if ($ProductCode) { AddYamlParameter $_Installer "ProductCode" $ProductCode }
+    If ($ProductCode) { AddYamlParameter $_Installer "ProductCode" $ProductCode }
     AddYamlParameter $_Installer "UpgradeBehavior" $UpgradeBehavior
     $_Installer = SortYamlKeys $_Installer $InstallerEntryProperties
 
     $script:Installers += $_Installer
 
     $_menu = @{
-        entries = @(
+        entries       = @(
             "[Y] Yes"
             "*[N] No"
         )
-        Prompt = "Do you want to create another installer?"
+        Prompt        = "Do you want to create another installer?"
         DefaultString = "N"
     }
 
@@ -535,11 +521,14 @@ Function Read-WinGet-InstallerValues {
         default { $AnotherInstaller = '1' }
     }
 
-    if ($AnotherInstaller -eq '0') { Write-Host; Read-WinGet-InstallerValues }
+    if ($AnotherInstaller -eq '0') {
+        Write-Host; Read-WinGet-InstallerValues
+    }
 }
 
 Function PromptInstallerManifestValue {
-    Param (
+    Param
+    (
         [Parameter(Mandatory = $true, Position = 0)]
         [PSCustomObject] $Variable,
         [Parameter(Mandatory = $true, Position = 1)]
@@ -547,18 +536,12 @@ Function PromptInstallerManifestValue {
         [Parameter(Mandatory = $true, Position = 2)]
         [string] $Prompt
     )
-
-    Write-Host
-    Write-Host -ForegroundColor 'Yellow' -Object $Prompt
+    Write-Host -ForegroundColor 'Yellow' -Object '`n$Prompt'
     if (![string]::IsNullOrWhiteSpace($Variable)) { Write-Host -ForegroundColor 'DarkGray' "Old Value: $Variable" }
     $NewValue = Read-Host -Prompt $Key | TrimString
 
-    if (-not [string]::IsNullOrWhiteSpace($NewValue)) {
-        return $NewValue
-    }
-    else {
-        return $Variable
-    }
+    if (-not [string]::IsNullOrWhiteSpace($NewValue)) { return $NewValue } 
+    else { return $Variable }
 }
 
 Function SortYamlKeys {
@@ -608,21 +591,19 @@ Function Read-WinGet-InstallerManifest {
 
 Function Read-WinGet-LocaleManifest {
     while (!(String.IsValid $script:PackageLocale -MatchPattern $Patterns.PackageLocale -MaxLength $Patterns.PackageLocaleMaxLength -MinLength 1)) {
-        Write-Host
-        Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the Package Locale. For example: en-US, en-CA https://docs.microsoft.com/openspecs/office_standards/ms-oe376/6c085406-a698-4e12-9d4d-c3b0ee3dbc4a'
+        Write-Host -ForegroundColor 'Green' -Object '`n[Required] Enter the Package Locale. For example: en-US, en-CA https://docs.microsoft.com/openspecs/office_standards/ms-oe376/6c085406-a698-4e12-9d4d-c3b0ee3dbc4a'
         $script:PackageLocale = Read-Host -Prompt 'PackageLocale' | TrimString
     }
     
     if ([string]::IsNullOrWhiteSpace($script:Publisher)) {
         while (!(String.IsValid $script:Publisher -MinLength 1 -MaxLength $Patterns.PublisherMaxLength)) {
-            Write-Host
-            Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the full publisher name. For example: Microsoft Corporation'
+            Write-Host -ForegroundColor 'Green' -Object '`n[Required] Enter the full publisher name. For example: Microsoft Corporation'
             $script:Publisher = Read-Host -Prompt 'Publisher' | TrimString
         }
-    } else {
+    }
+    else {
         do {
-            Write-Host
-            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the full publisher name. For example: Microsoft Corporation'
+            Write-Host -ForegroundColor 'Yellow' -Object '`n[Optional] Enter the full publisher name. For example: Microsoft Corporation'
             Write-Host -ForegroundColor 'DarkGray' "Old Variable: $script:Publisher"
             $NewPublisher = Read-Host -Prompt 'Publisher' | TrimString
     
@@ -634,14 +615,13 @@ Function Read-WinGet-LocaleManifest {
 
     if ([string]::IsNullOrWhiteSpace($script:PackageName)) {
         while (!(String.IsValid $script:PackageName -MinLength 1 -MaxLength $Patterns.PackageNameMaxLength)) {
-            Write-Host
-            Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the full application name. For example: Microsoft Teams'
+            Write-Host -ForegroundColor 'Green' -Object '`n[Required] Enter the full application name. For example: Microsoft Teams'
             $script:PackageName = Read-Host -Prompt 'PackageName' | TrimString
         }
-    } else {
+    }
+    else {
         do {
-            Write-Host
-            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the full application name. For example: Microsoft Teams'
+            Write-Host -ForegroundColor 'Yellow' -Object '`n[Optional] Enter the full application name. For example: Microsoft Teams'
             Write-Host -ForegroundColor 'DarkGray' "Old Variable: $script:PackageName"
             $NewPackageName = Read-Host -Prompt 'PackageName' | TrimString
     
@@ -654,14 +634,13 @@ Function Read-WinGet-LocaleManifest {
     if ($Option -ne 'NewLocale') {
         if ([string]::IsNullOrWhiteSpace($script:Moniker)) {
             do {
-                Write-Host
-                Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the Moniker (friendly name/alias). For example: vscode'
+                Write-Host -ForegroundColor 'Yellow' -Object '`n[Optional] Enter the Moniker (friendly name/alias). For example: vscode'
                 $script:Moniker = Read-Host -Prompt 'Moniker' | TrimString
             } while ($script:Moniker.Length -gt $Patterns.MonikerMaxLength)
-        } else {
+        }
+        else {
             do {
-                Write-Host
-                Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the Moniker (friendly name/alias). For example: vscode'
+                Write-Host -ForegroundColor 'Yellow' -Object '`n[Optional] Enter the Moniker (friendly name/alias). For example: vscode'
                 Write-Host -ForegroundColor 'DarkGray' "Old Variable: $script:Moniker"
                 $NewMoniker = Read-Host -Prompt 'Moniker' | TrimString
         
@@ -674,14 +653,13 @@ Function Read-WinGet-LocaleManifest {
 
     if ([string]::IsNullOrWhiteSpace($script:PublisherUrl)) {
         do {
-            Write-Host
-            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the Publisher Url.'
+            Write-Host -ForegroundColor 'Yellow' -Object '`n[Optional] Enter the Publisher Url.'
             $script:PublisherUrl = Read-Host -Prompt 'Publisher Url' | TrimString
         } while (-not [string]::IsNullOrWhiteSpace($script:PublisherUrl) -and (!(String.IsValid $script:PublisherUrl -MatchPattern $Patterns.GenericUrl -MaxLength $Patterns.GenericUrlMaxLength)))
-    } else {
+    }
+    else {
         do {
-            Write-Host
-            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the Publisher Url.'
+            Write-Host -ForegroundColor 'Yellow' -Object '`n[Optional] Enter the Publisher Url.'
             Write-Host -ForegroundColor 'DarkGray' "Old Variable: $script:PublisherUrl"
             $NewPublisherUrl = Read-Host -Prompt 'Publisher Url' | TrimString
     
@@ -693,14 +671,13 @@ Function Read-WinGet-LocaleManifest {
 
     if ([string]::IsNullOrWhiteSpace($script:PublisherSupportUrl)) {
         do {
-            Write-Host
-            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the Publisher Support Url.'
+            Write-Host -ForegroundColor 'Yellow' -Object '`n[Optional] Enter the Publisher Support Url.'
             $script:PublisherSupportUrl = Read-Host -Prompt 'Publisher Support Url' | TrimString
         } while (-not [string]::IsNullOrWhiteSpace($script:PublisherSupportUrl) -and (!(String.IsValid $script:PublisherSupportUrl -MatchPattern $Patterns.GenericUrl -MaxLength $Patterns.GenericUrlMaxLength)))
-    } else {
+    }
+    else {
         do {
-            Write-Host
-            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the Publisher Support Url.'
+            Write-Host -ForegroundColor 'Yellow' -Object '`n[Optional] Enter the Publisher Support Url.'
             Write-Host -ForegroundColor 'DarkGray' "Old Variable: $script:PublisherSupportUrl"
             $NewPublisherSupportUrl = Read-Host -Prompt 'Publisher Support Url' | TrimString
     
@@ -712,14 +689,13 @@ Function Read-WinGet-LocaleManifest {
 
     if ([string]::IsNullOrWhiteSpace($script:PrivacyUrl)) {
         do {
-            Write-Host
-            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the Publisher Privacy Url.'
+            Write-Host -ForegroundColor 'Yellow' -Object '`n[Optional] Enter the Publisher Privacy Url.'
             $script:PrivacyUrl = Read-Host -Prompt 'Privacy Url' | TrimString
         } while (-not [string]::IsNullOrWhiteSpace($script:PrivacyUrl) -and (!(String.IsValid $script:PrivacyUrl -MatchPattern $Patterns.GenericUrl -MaxLength $Patterns.GenericUrlMaxLength)))
-    } else {
+    }
+    else {
         do {
-            Write-Host
-            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the Publisher Privacy Url.'
+            Write-Host -ForegroundColor 'Yellow' -Object '`n[Optional] Enter the Publisher Privacy Url.'
             Write-Host -ForegroundColor 'DarkGray' "Old Variable: $script:PrivacyUrl"
             $NewPrivacyUrl = Read-Host -Prompt 'Privacy Url' | TrimString
     
@@ -731,14 +707,13 @@ Function Read-WinGet-LocaleManifest {
 
     if ([string]::IsNullOrWhiteSpace($script:Author)) {
         do {
-            Write-Host
-            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the application Author.'
+            Write-Host -ForegroundColor 'Yellow' -Object '`n[Optional] Enter the application Author.'
             $script:Author = Read-Host -Prompt 'Author' | TrimString
         } while (-not [string]::IsNullOrWhiteSpace($script:Author) -and (!(String.IsValid $script:Author -MinLength $Patterns.AuthorMinLength -MaxLength $Patterns.AuthorMaxLength)))
-    } else {
+    }
+    else {
         do {
-            Write-Host
-            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the application Author.'
+            Write-Host -ForegroundColor 'Yellow' -Object '`n[Optional] Enter the application Author.'
             Write-Host -ForegroundColor 'DarkGray' "Old Variable: $script:Author"
             $NewAuthor = Read-Host -Prompt 'Author' | TrimString
     
@@ -750,14 +725,13 @@ Function Read-WinGet-LocaleManifest {
 
     if ([string]::IsNullOrWhiteSpace($script:PackageUrl)) {
         do {
-            Write-Host
-            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the Url to the homepage of the application.'
+            Write-Host -ForegroundColor 'Yellow' -Object '`n[Optional] Enter the Url to the homepage of the application.'
             $script:PackageUrl = Read-Host -Prompt 'Homepage' | TrimString
         } while (-not [string]::IsNullOrWhiteSpace($script:PackageUrl) -and (!(String.IsValid $script:PackageUrl -MatchPattern $Patterns.GenericUrl -MaxLength $Patterns.GenericUrlMaxLength)))
-    } else {
+    }
+    else {
         do {
-            Write-Host
-            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the Url to the homepage of the application.'
+            Write-Host -ForegroundColor 'Yellow' -Object '`n[Optional] Enter the Url to the homepage of the application.'
             Write-Host -ForegroundColor 'DarkGray' "Old Variable: $script:PackageUrl"
             $NewPackageUrl = Read-Host -Prompt 'Homepage' | TrimString
     
@@ -769,14 +743,13 @@ Function Read-WinGet-LocaleManifest {
 
     if ([string]::IsNullOrWhiteSpace($script:License)) {
         while (!(String.IsValid $script:License -MinLength 1 -MaxLength $Patterns.LicenseMaxLength)) {
-            Write-Host
-            Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the application License. For example: MIT, GPL, Freeware, Proprietary'
+            Write-Host -ForegroundColor 'Green' -Object '`n[Required] Enter the application License. For example: MIT, GPL, Freeware, Proprietary'
             $script:License = Read-Host -Prompt 'License' | TrimString
         }
-    } else {
+    }
+    else {
         do {
-            Write-Host
-            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the application License. For example: MIT, GPL, Freeware, Proprietary'
+            Write-Host -ForegroundColor 'Yellow' -Object '`n[Optional] Enter the application License. For example: MIT, GPL, Freeware, Proprietary'
             Write-Host -ForegroundColor 'DarkGray' "Old Variable: $script:License"
             $NewLicense = Read-Host -Prompt 'License' | TrimString
     
@@ -788,14 +761,13 @@ Function Read-WinGet-LocaleManifest {
 
     if ([string]::IsNullOrWhiteSpace($script:LicenseUrl)) {
         do {
-            Write-Host
-            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the application License URL.'
+            Write-Host -ForegroundColor 'Yellow' -Object '`n[Optional] Enter the application License URL.'
             $script:LicenseUrl = Read-Host -Prompt 'License URL' | TrimString
         } while (-not [string]::IsNullOrWhiteSpace($script:LicenseUrl) -and (!(String.IsValid $script:LicenseUrl -MatchPattern $Patterns.GenericUrl -MaxLength $Patterns.GenericUrlMaxLength)))
-    } else {
+    }
+    else {
         do {
-            Write-Host
-            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the application License URL.'
+            Write-Host -ForegroundColor 'Yellow' -Object '`n[Optional] Enter the application License URL.'
             Write-Host -ForegroundColor 'DarkGray' "Old Variable: $script:LicenseUrl"
             $NewLicenseUrl = Read-Host -Prompt 'License URL' | TrimString
     
@@ -807,14 +779,13 @@ Function Read-WinGet-LocaleManifest {
 
     if ([string]::IsNullOrWhiteSpace($script:Copyright)) {
         do {
-            Write-Host
-            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the application Copyright. For example: Copyright (c) Microsoft Corporation'
+            Write-Host -ForegroundColor 'Yellow' -Object '`n[Optional] Enter the application Copyright. For example: Copyright (c) Microsoft Corporation'
             $script:Copyright = Read-Host -Prompt 'Copyright' | TrimString
         } while (-not [string]::IsNullOrWhiteSpace($script:Copyright) -and (!(String.IsValid $script:Copyright -MinLength $Patterns.CopyrightMinLength -MaxLength $Patterns.CopyrightMaxLength)))
-    } else {
+    }
+    else {
         do {
-            Write-Host
-            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the application Copyright. For example: Copyright (c) Microsoft Corporation'
+            Write-Host -ForegroundColor 'Yellow' -Object '`n[Optional] Enter the application Copyright. For example: Copyright (c) Microsoft Corporation'
             Write-Host -ForegroundColor 'DarkGray' "Old Variable: $Copyright"
             $NewCopyright = Read-Host -Prompt 'Copyright' | TrimString
     
@@ -826,14 +797,13 @@ Function Read-WinGet-LocaleManifest {
 
     if ([string]::IsNullOrWhiteSpace($script:CopyrightUrl)) {
         do {
-            Write-Host
-            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the application Copyright Url.'
+            Write-Host -ForegroundColor 'Yellow' -Object '`n[Optional] Enter the application Copyright Url.'
             $script:CopyrightUrl = Read-Host -Prompt 'CopyrightUrl' | TrimString
         } while (-not [string]::IsNullOrWhiteSpace($script:CopyrightUrl) -and (!(String.IsValid $script:CopyrightUrl -MatchPattern $Patterns.GenericUrl -MaxLength $Patterns.GenericUrlMaxLength)))
-    } else {
+    }
+    else {
         do {
-            Write-Host
-            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the application Copyright Url.'
+            Write-Host -ForegroundColor 'Yellow' -Object '`n[Optional] Enter the application Copyright Url.'
             Write-Host -ForegroundColor 'DarkGray' "Old Variable: $script:CopyrightUrl"
             $NewCopyrightUrl = Read-Host -Prompt 'CopyrightUrl' | TrimString
     
@@ -845,14 +815,13 @@ Function Read-WinGet-LocaleManifest {
 
     if ([string]::IsNullOrWhiteSpace($script:Tags)) {
         do {
-            Write-Host
-            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter any tags that would be useful to discover this tool. For example: zip, c++ (Max', ($Patterns.TagsMaxItems), 'items)'
+            Write-Host -ForegroundColor 'Yellow' -Object '`n[Optional] Enter any tags that would be useful to discover this tool. For example: zip, c++ (Max', ($Patterns.TagsMaxItems), 'items)'
             $script:Tags = Read-Host -Prompt 'Tags' | TrimString
         } while (($script:Tags -split ",").Count -gt $Patterns.TagsMaxItems)
-    } else {
+    }
+    else {
         do {
-            Write-Host
-            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter any tags that would be useful to discover this tool. For example: zip, c++ (Max', ($Patterns.TagsMaxItems), 'items)'
+            Write-Host -ForegroundColor 'Yellow' -Object '`n[Optional] Enter any tags that would be useful to discover this tool. For example: zip, c++ (Max', ($Patterns.TagsMaxItems), 'items)'
             Write-Host -ForegroundColor 'DarkGray' "Old Variable: $($script:Tags -join ", ")"
             $NewTags = Read-Host -Prompt 'Tags' | TrimString
     
@@ -864,14 +833,13 @@ Function Read-WinGet-LocaleManifest {
 
     if ([string]::IsNullOrWhiteSpace($script:ShortDescription)) {
         while (!(String.IsValid $script:ShortDescription -MinLength 1 -MaxLength $Patterns.ShortDescriptionMaxLength)) {
-            Write-Host
-            Write-Host -ForegroundColor 'Green' -Object '[Required] Enter a short description of the application.'
+            Write-Host -ForegroundColor 'Green' -Object '`n[Required] Enter a short description of the application.'
             $script:ShortDescription = Read-Host -Prompt 'Short Description' | TrimString
         }
-    } else {
+    }
+    else {
         do {
-            Write-Host
-            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter a short description of the application.'
+            Write-Host -ForegroundColor 'Yellow' -Object '`n[Optional] Enter a short description of the application.'
             Write-Host -ForegroundColor 'DarkGray' "Old Variable: $script:ShortDescription"
             $NewShortDescription = Read-Host -Prompt 'Short Description' | TrimString
     
@@ -883,14 +851,13 @@ Function Read-WinGet-LocaleManifest {
 
     if ([string]::IsNullOrWhiteSpace($script:Description)) {
         do {
-            Write-Host
-            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter a long description of the application.'
+            Write-Host -ForegroundColor 'Yellow' -Object '`n[Optional] Enter a long description of the application.'
             $script:Description = Read-Host -Prompt 'Long Description' | TrimString
         } while (-not [string]::IsNullOrWhiteSpace($script:Description) -and (!(String.IsValid $script:Description -MinLength $Patterns.DescriptionMinLength -MaxLength $Patterns.DescriptionMaxLength)))
-    } else {
+    }
+    else {
         do {
-            Write-Host
-            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter a long description of the application.'
+            Write-Host -ForegroundColor 'Yellow' -Object '`n[Optional] Enter a long description of the application.'
             Write-Host -ForegroundColor 'DarkGray' "Old Variable: $script:Description"
             $NewDescription = Read-Host -Prompt 'Description' | TrimString
     
@@ -922,7 +889,8 @@ Function Test-Manifest {
         if ($script:SandboxTest -eq '0') {
             if (Test-Path -Path "$PSScriptRoot\SandboxTest.ps1") {
                 $SandboxScriptPath = (Resolve-Path "$PSScriptRoot\SandboxTest.ps1").Path
-            } else {
+            }
+            else {
                 while ([string]::IsNullOrWhiteSpace($SandboxScriptPath)) {
                     Write-Host
                     Write-Host -ForegroundColor 'Green' -Object 'SandboxTest.ps1 not found, input path'
@@ -964,7 +932,8 @@ Function Enter-PR-Parameters {
                 if ($?) {
                     $PrBodyContentReply += @($_line.Replace("[ ]", "[X]"))
                     $_showMenu = $false
-                } else {
+                }
+                else {
                     $_menu = @{
                         Prompt        = "Have you validated your manifest locally with 'winget validate --manifest <path>'?"
                         Entries       = @("[Y] Yes"; "*[N] No")
@@ -979,7 +948,8 @@ Function Enter-PR-Parameters {
                 if ($script:SandboxTest -eq '0') {
                     $PrBodyContentReply += @($_line.Replace("[ ]", "[X]"))
                     $_showMenu = $false
-                } else {
+                }
+                else {
                     $_menu = @{
                         Prompt        = "Have you tested your manifest locally with 'winget install --manifest <path>'?"
                         Entries       = @("[Y] Yes"; "*[N] No")
@@ -1027,18 +997,19 @@ Function Enter-PR-Parameters {
     
     switch ( KeypressMenu -Prompt $_menu["Prompt"] -Entries $_menu["Entries"] -DefaultString $_menu["DefaultString"]) {
         'Y' {
-            Write-Host
-            Write-Host "Enter issue number. For example`: 21983, 43509"
+            Write-Host '`nEnter issue number. For example`: 21983, 43509'
             $ResolvedIssues = Read-Host -Prompt 'Resolved Issues'
             $PrBodyContentReply += @("")
             Foreach ($i in ($ResolvedIssues.Split(",").Trim())) {
+
                 if ($i.Contains("#")) {
                     $_UrlParameters = $i.Split("#")
                     switch ($_UrlParameters.Count) {
                         2 {
                             if ([string]::IsNullOrWhiteSpace($_urlParameters[0])) {
                                 $_checkedURL = "https://github.com/microsoft/winget-pkgs/issues/$($_urlParameters[1])" 
-                            } else {
+                            }
+                            else {
                                 $_checkedURL = "https://github.com/$($_urlParameters[0])/issues/$($_urlParameters[1])" 
                             }
                         }
@@ -1047,15 +1018,14 @@ Function Enter-PR-Parameters {
                             continue
                         }
                     }
-
                     $_responseCode = TestUrlValidity $_checkedURL
                     if ($_responseCode -ne 200) {
                         Write-Host -ForegroundColor "Red" "Invalid Issue: $i"
                         continue
                     }
-
                     $PrBodyContentReply += @("Resolves $i")
-                } else {
+                }
+                else {
                     $_checkedURL = "https://github.com/microsoft/winget-pkgs/issues/$i"
                     $_responseCode = TestUrlValidity $_checkedURL
                     if ($_responseCode -ne 200) {
@@ -1102,10 +1072,10 @@ Function Submit-Manifest {
         }
 
         $_previousConfig = git config --global --get core.safecrlf
-        
         if ($_previousConfig) {
             git config --global --replace core.safecrlf false
-        } else {
+        }
+        else {
             git config --global --add core.safecrlf false
         }
 
@@ -1122,10 +1092,10 @@ Function Submit-Manifest {
             
                 if (Test-Path -Path "$PSScriptRoot\..\.github\PULL_REQUEST_TEMPLATE.md") {
                     Enter-PR-Parameters "$PSScriptRoot\..\.github\PULL_REQUEST_TEMPLATE.md"
-                } else {
+                }
+                else {
                     while ([string]::IsNullOrWhiteSpace($SandboxScriptPath)) {
-                        Write-Host
-                        Write-Host -ForegroundColor 'Green' -Object 'PULL_REQUEST_TEMPLATE.md not found, input path'
+                        Write-Host -ForegroundColor 'Green' -Object '`nPULL_REQUEST_TEMPLATE.md not found, input path'
                         $PRTemplate = Read-Host -Prompt 'PR Template' | TrimString
                     }
                     Enter-PR-Parameters "$PRTemplate"
@@ -1134,10 +1104,12 @@ Function Submit-Manifest {
         }
         if ($_previousConfig) {
             git config --global --replace core.safecrlf $_previousConfig
-        } else {
+        }
+        else {
             git config --global --unset core.safecrlf
         }
-    } else {
+    }
+    else {
         Write-Host
         Exit
     }
@@ -1167,7 +1139,8 @@ Function AddYamlListParameter {
 }
 
 Function AddYamlParameter {
-    Param (
+    Param
+    (
         [Parameter(Mandatory = $true, Position = 0)]
         [PSCustomObject] $Object,
         [Parameter(Mandatory = $true, Position = 1)]
@@ -1179,7 +1152,7 @@ Function AddYamlParameter {
 }
 
 Function GetMultiManifestParameter {
-    Param (
+    Param(
         [Parameter(Mandatory = $true, Position = 1)]
         [string] $Parameter
     )
@@ -1198,7 +1171,7 @@ Function Write-WinGet-VersionManifest-Yaml {
     }
 
     foreach ($_Item in $_Singletons.GetEnumerator()) {
-        if ($_Item.Value) { AddYamlParameter $VersionManifest $_Item.Name $_Item.Value }
+        If ($_Item.Value) { AddYamlParameter $VersionManifest $_Item.Name $_Item.Value }
     }
     $VersionManifest = SortYamlKeys $VersionManifest $VersionProperties
     
@@ -1212,12 +1185,13 @@ Function Write-WinGet-VersionManifest-Yaml {
     $MyRawString = Get-Content -Raw $VersionManifestPath | TrimString
     [System.IO.File]::WriteAllLines($VersionManifestPath, $MyRawString, $Utf8NoBomEncoding)
     
-    Write-Host 
-    Write-Host "Yaml file created: $VersionManifestPath"
+    Write-Host "`nYaml file created: $VersionManifestPath"
 }
 Function Write-WinGet-InstallerManifest-Yaml {
 
-    if ($script:OldManifestType -eq 'MultiManifest') { $InstallerManifest = $script:OldInstallerManifest }
+    if ($script:OldManifestType -eq 'MultiManifest') {
+        $InstallerManifest = $script:OldInstallerManifest
+    }
 
     if (!$InstallerManifest) { [PSCustomObject]$InstallerManifest = [ordered]@{} }
 
@@ -1236,13 +1210,21 @@ Function Write-WinGet-InstallerManifest-Yaml {
         If ($Section.Value) { AddYamlListParameter $InstallerManifest $Section.Name $Section.Value }
     }
 
-    if ($Option -ne 'EditMetadata') { $InstallerManifest["Installers"] = $script:Installers }
-    elseif ($script:OldInstallerManifest) { $InstallerManifest["Installers"] = $script:OldInstallerManifest["Installers"] }
-    else { $InstallerManifest["Installers"] = $script:OldVersionManifest["Installers"] }
+    if ($Option -ne 'EditMetadata') {
+        $InstallerManifest["Installers"] = $script:Installers
+    }
+    elseif ($script:OldInstallerManifest) {
+        $InstallerManifest["Installers"] = $script:OldInstallerManifest["Installers"]
+    }
+    else {
+        $InstallerManifest["Installers"] = $script:OldVersionManifest["Installers"]
+    }
 
     AddYamlParameter $InstallerManifest "ManifestType" "installer"
     AddYamlParameter $InstallerManifest "ManifestVersion" $ManifestVersion
-    if ($InstallerManifest["Dependencies"]) { $InstallerManifest["Dependencies"] = SortYamlKeys $InstallerManifest["Dependencies"] $InstallerDependencyProperties }
+    If ($InstallerManifest["Dependencies"]) {
+        $InstallerManifest["Dependencies"] = SortYamlKeys $InstallerManifest["Dependencies"] $InstallerDependencyProperties
+    }
 
     $InstallerManifest = SortYamlKeys $InstallerManifest $InstallerProperties
    
@@ -1262,7 +1244,9 @@ Function Write-WinGet-InstallerManifest-Yaml {
 
 Function Write-WinGet-LocaleManifest-Yaml {
     
-    if ($script:OldManifestType -eq 'MultiManifest') { $LocaleManifest = $script:OldLocaleManifest }
+    if ($script:OldManifestType -eq 'MultiManifest') {
+        $LocaleManifest = $script:OldLocaleManifest
+    }
     
     if (!$LocaleManifest) { [PSCustomObject]$LocaleManifest = [ordered]@{} }
     
@@ -1288,12 +1272,12 @@ Function Write-WinGet-LocaleManifest-Yaml {
     }
 
     foreach ($_Item in $_Singletons.GetEnumerator()) {
-        if ($_Item.Value) { AddYamlParameter $LocaleManifest $_Item.Name $_Item.Value }
+        If ($_Item.Value) { AddYamlParameter $LocaleManifest $_Item.Name $_Item.Value }
     }
 
-    if ($Tags) { AddYamlListParameter $LocaleManifest "Tags" $Tags }
-    if ($Moniker -and $PackageLocale -eq 'en-US') { AddYamlParameter $LocaleManifest "Moniker" $Moniker }
-    if ($PackageLocale -eq 'en-US') { $_ManifestType = "defaultLocale" }else { $_ManifestType = "locale" }
+    If ($Tags) { AddYamlListParameter $LocaleManifest "Tags" $Tags }
+    If ($Moniker -and $PackageLocale -eq 'en-US') { AddYamlParameter $LocaleManifest "Moniker" $Moniker }
+    If ($PackageLocale -eq 'en-US') { $_ManifestType = "defaultLocale" }else { $_ManifestType = "locale" }
     AddYamlParameter $LocaleManifest "ManifestType" $_ManifestType
     AddYamlParameter $LocaleManifest "ManifestVersion" $ManifestVersion
     $LocaleManifest = SortYamlKeys $LocaleManifest $LocaleProperties
@@ -1326,8 +1310,7 @@ Function Write-WinGet-LocaleManifest-Yaml {
         }
     }
 
-    Write-Host 
-    Write-Host "Yaml file created: $LocaleManifestPath"
+    Write-Host "`nYaml file created: $LocaleManifestPath"
 }
 
 
@@ -1339,8 +1322,7 @@ Function Read-PreviousWinGet-Manifest-Yaml {
             $LastVersion = $PackageVersion
         }
         while (-not ($OldManifests.Name -like "$PackageIdentifier*.yaml")) {
-            Write-Host
-            Write-Host -ForegroundColor 'Red' -Object 'Could not find required manifests, input a version containing required manifests or "exit" to cancel'
+            Write-Host -ForegroundColor 'Red' -Object '`nCould not find required manifests, input a version containing required manifests or "exit" to cancel'
             $PromptVersion = Read-Host -Prompt 'Version' | TrimString
             if ($PromptVersion -eq 'exit') { exit 1 }
             if (Test-Path -Path "$AppFolder\..\$PromptVersion") {
@@ -1363,8 +1345,7 @@ Function Read-PreviousWinGet-Manifest-Yaml {
             $script:ExistingVersions = Split-Path (Split-Path (Get-ChildItem -Path "$AppFolder\..\" -Recurse -Depth 1 -File -Filter "*.yaml").FullName ) -Leaf | Sort-Object $ToNatural | Select-Object -Unique
             Write-Host -ForegroundColor 'DarkYellow' -Object "Found Existing Version: $LastVersion"
             $script:OldManifests = Get-ChildItem -Path "$AppFolder\..\$LastVersion"
-        }
-        catch { Out-Null }
+        } catch { Out-Null }
     }
 
     if ($OldManifests.Name -eq "$PackageIdentifier.installer.yaml" -and $OldManifests.Name -eq "$PackageIdentifier.locale.en-US.yaml" -and $OldManifests.Name -eq "$PackageIdentifier.yaml") {
