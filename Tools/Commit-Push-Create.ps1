@@ -2,9 +2,8 @@
 $acceptedShortForms = @('um','am','amd','umd','pi','mpc','u','add','n','arp','pc','pcarp','r','url','urlpc','ss','fn','ssfn','404')
 if ($args[0]) {$PkgId = $args[0]} else {$PkgId = Read-Host -Prompt 'Enter Package Name'}
 if ($args[1]) {$PkgVersion = $args[1]} else {$PkgVersion = Read-Host -Prompt 'Enter Package Version'}
-if ($args[2] -and $args[2] -in $acceptedShortForms) {
-    $CommitType = $args[2]
-} else {
+if ($args[2] -and $args[2] -in $acceptedShortForms) { $CommitType = $args[2] }
+else {
     while ($CommitType -notin $acceptedShortForms) {
         $CommitType = Read-Host -Prompt 'Enter Commit Message'
     }
