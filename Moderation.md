@@ -4,7 +4,7 @@ The Windows Package Manager community repository is the location for manifests p
 
 ## Moderators
 
-In addition to Microsoft employees, several community members have been identified through their high quality submissions, willingness to help others, and adhere to our [code of conduct](CODE_OF_CONDUCT.md). You can see who they are in a pinned [public service announcement](https://github.com/microsoft/winget-pkgs/issues/15674).
+In addition to Microsoft employees, several community members have been identified through their high quality submissions, willingness to help others, and adherence to our [code of conduct](CODE_OF_CONDUCT.md). You can see who they are in a pinned [public service announcement](https://github.com/microsoft/winget-pkgs/issues/15674).
 
 When moderation was initially implemented, several objective criteria were observed. These included the number of Pull Requests (PR)s made, the length of time they had been active in the project, and their interaction with others who submitted PRs.
 
