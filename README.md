@@ -4,6 +4,11 @@ This repository contains the manifest files for the **Windows Package Manager** 
 
 The **Windows Package Manager** is an [open source client](https://github.com/microsoft/winget-cli) designed for command-line usage.
 
+# Service Health
+![Validation Pipeline Badge](https://img.shields.io/endpoint?url=https://winget.azurefd.net/api/GetServiceComponentStatusBadge?component=ValidationPipeline "Validation Pipeline Badge")
+
+![Publish Pipeline Badge](https://img.shields.io/endpoint?url=https://winget.azurefd.net/api/GetServiceComponentStatusBadge?component=PublishPipeline "Publish Pipeline Badge")
+
 # Submitting a Package
 To submit a package to this repository, you should follow these steps:
 1) Follow the [Contributing](#Contributing) guidelines below.
@@ -16,7 +21,7 @@ To submit a package to this repository, you should follow these steps:
 
 ## Authoring a Manifest
 
-You may either use the [Windows Package Manager Manifest Creator](https://github.com/microsoft/winget-create), the [YAMLCreate](#using-the-yamlcreateps1) PowerShell script, the [Windows Package Manager YAML Generator](#using-windows-package-manager-yaml-generator), or you can craft a manifest manually following our [authoring guidelines](AUTHORING_MANIFESTS.md).
+You may either use the [Windows Package Manager Manifest Creator](https://github.com/microsoft/winget-create), the [YAMLCreate](#using-the-yamlcreateps1) PowerShell script, or you can craft a manifest manually following our [authoring guidelines](AUTHORING_MANIFESTS.md).
 
 >Note: Only one manifest may be submitted per PR.
 
@@ -24,9 +29,6 @@ You may either use the [Windows Package Manager Manifest Creator](https://github
 To help author manifest files, we have provided a YAMLCreate.ps1 [powershell script](Tools/YamlCreate.ps1) located in the Tools folder. The script will prompt you for the URL to the installer, then will prompt you to fill in metadata.
 
 >Note: We recommend running the script in the location where you want to produce the manifest file.  For example: `manifests\<p>\<publisher>\<package>\`.  After successful completion, it will produce the YAML files.
-
-### Using Windows Package Manager YAML Generator
-If you prefer to use a GUI to generate YAML files, you can use the **Windows Package Manager YAML Generator**. It is available as an app [in the Microsoft Store](https://www.microsoft.com/p/windows-package-manager-yaml-generator/9p3n60fs22k5) and the code is also available [on GitHub](https://github.com/ptorr-msft/WinGetYamlGenerator).
 
 ## Test your manifest
 Now that you have authored your manifest, you should make sure it works as expected.
@@ -45,7 +47,7 @@ winget install -m <path-to-manifest>
 For more details, see ["Submit packages to Windows Package Manager"](https://docs.microsoft.com/windows/package-manager/package) at Microsoft Docs.
 
 ### In Windows Sandbox
-You can use the [Sandbox Test](Tools/SandboxTest.ps1) PowerShell script for testing a manifest installation in [Windows Sandbox](https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-sandbox/windows-sandbox-overview). The manifest will be also validated.
+You can use the [Sandbox Test](Tools/SandboxTest.ps1) PowerShell script for testing a manifest installation in [Windows Sandbox](https://docs.microsoft.com/windows/security/threat-protection/windows-sandbox/windows-sandbox-overview). The manifest will be also validated.
 
 Just provide the path to manifest as parameter:
 ```
@@ -53,7 +55,10 @@ Just provide the path to manifest as parameter:
 ```
 
 ## Submit your PR
-With the manifest verified, you will need to submit a PR.  Your manifest should be located in the folder path matching `manifests\<first lower case letter of publisher>\<publisher>\<package>\<version>.yaml`
+With the manifest verified, you will need to submit a PR.  Your manifest should be located in the folder path matching
+```
+manifests\<first lower case letter of publisher>\<publisher>\<package>\<version>\
+```
 
 ### Validation Process
 The PR request will go through a validation process. During the process, the core team or the Microsoft bot (BOT) will use [labels](https://docs.microsoft.com/windows/package-manager/package/winget-validation#pull-request-labels) to help. In the event of a failure, the BOT will suggest where the problem is with the submission and assign the PR back to you.  
