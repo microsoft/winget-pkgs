@@ -12,7 +12,7 @@ Our intent was not to introduce a numbers game for others to achieve and automat
 
 ## Expectations
 
-Moderators are expected to continue behaving in a manner consistent with what led to their nomination. In addition, they are given the ability to approve PRs for manifests. This should not be seen as the goal, however. The goal is to help ensure high quality manifests, and to help the community with package submission. They should also feel free to take time off and relax. At any time and for any reason they may request to discontinue this responsibility, and it will be honored.
+Moderators are expected to continue behaving in a manner consistent with what led to their nomination. In addition, they are given the ability to approve PRs for manifests. This should not be seen as the goal, however. The goal is to help ensure high quality manifests and to help the community with package submission. They should also feel free to take time off and relax. At any time and for any reason they may request to discontinue this responsibility, and it will be honored.
 
 ### Reviewing Pull Requests
 
