@@ -16,7 +16,7 @@ Moderators are expected to continue behaving in a manner consistent with what le
 
 ### Reviewing Pull Requests
 
-Moderators should review PRs to make sure the metadata is accurate, and that the Windows Package Manager will behave in a predictable manner with the given manifest. This includes reviewing the metadata and testing the installation of packages. Ideally, common issues will be documented, and referred to for the sake of consistency. This might also include tips and tooling to help with the process. Some users are new to GitHub, and may need a bit more support. We've all been new to Git at one point.
+Moderators should review PRs to make sure the metadata is accurate and that the Windows Package Manager will behave in a predictable manner with the given manifest. This includes reviewing the metadata and testing the installation of packages. Ideally, common issues will be documented and referred to for the sake of consistency. This might also include tips and tooling to help with the process. Some users are new to GitHub and may need a bit more support. We've all been new to Git at one point.
 
 ### Providing Feedback
 
