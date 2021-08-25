@@ -1585,7 +1585,9 @@ Function Read-PreviousWinGet-Manifest-Yaml {
         $script:OldManifestType = 'Singleton'
         $script:OldVersionManifest = ConvertFrom-Yaml -Yaml ($(Get-Content -Path $(Resolve-Path "$AppFolder\..\$LastVersion\$PackageIdentifier.yaml") -Encoding UTF8) -join "`n") -Ordered
     } else {
-        Throw "Error: Version $LastVersion does not contain the required manifests"
+        if ($Option -ne 'New') { Throw "Error: Version $LastVersion does not contain the required manifests" }
+        $script:OldManifestType = 'None'
+        return
     }
 
     if ($OldManifests) {
