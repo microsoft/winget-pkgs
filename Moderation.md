@@ -8,7 +8,7 @@ In addition to Microsoft employees, several community members have been identifi
 
 When moderation was initially implemented, several objective criteria were observed. These included the number of Pull Requests (PR)s made, the length of time they had been active in the project, and their interaction with others who submitted PRs.
 
-Our intent was not to introduce a numbers game for others to achieve and automatically become a moderator. Our intent going forward is to ensure the community is sufficnetly supported with individuals who have the technical knowledge and a proven track record of success. 
+Our intent was not to introduce a numbers game for others to achieve and automatically become a moderator. Our intent going forward is to ensure the community is sufficiently supported by individuals who have the technical knowledge and a proven track record of success. 
 
 ## Expectations
 
