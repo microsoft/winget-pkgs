@@ -1,0 +1,23 @@
+# Moderation Overview
+
+The Windows Package Manager community repository is the location for manifests published in the default Windows Package Manager source. Automated pipelines validate and publish these manifests. The quality of the metadata has a direct impact on customer experience. Human review has proven to be an invaluable tool for ensuring the best experiences can be provided.
+
+## Moderators
+
+In addition to Microsoft employees, several community members have been identified through their high quality submissions, willingness to help others, and adhere to our [code of conduct](CODE_OF_CONDUCT.md). You can see who they are in a pinned [public service announcement](https://github.com/microsoft/winget-pkgs/issues/15674).
+
+When moderation was initially implemented, several objective criteria were observed. These included the number of Pull Requests (PR)s made, the length of time they had been active in the project, and their interaction with others who submitted PRs.
+
+Our intent was not to introduce a numbers game for others to achieve and automatically become a moderator. Our intent going forward is to ensure the community is sufficnetly supported with individuals who have the technical knowledge and a proven track record of success. 
+
+## Expectations
+
+Moderators are expected to continue behaving in a manner consistent with what led to their nomination. In addition, they are given the ability to approve PRs for manifests. This should not be seen as the goal, however. The goal is to help ensure high quality manifests, and to help the community with package submission. They should also feel free to take time off and relax. At any time and for any reason they may request to discontinue this responsibility, and it will be honored.
+
+### Reviewing Pull Requests
+
+Moderators should review PRs to make sure the metadata is accurate, and that the Windows Package Manager will behave in a predictable manner with the given manifest. This includes reviewing the metadata and testing the installation of packages. Ideally, common issues will be documented, and referred to for the sake of consistency. This might also include tips and tooling to help with the process. Some users are new to GitHub, and may need a bit more support. We've all been new to Git at one point.
+
+### Providing Feedback
+
+Moderators are often on the front line when new issues are identified. They should collaborate with each other, the community, and the product team. This will help ensure the Windows Package Manager continues to improve. Sometimes this could be by creating an Issue or a Discussion. Other times this may just be discussion in a PR.
