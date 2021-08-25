@@ -8,7 +8,7 @@ In addition to Microsoft employees, several community members have been identifi
 
 When moderation was initially implemented, several objective criteria were observed. These included the number of Pull Requests (PR)s made, the length of time they had been active in the project, and their interaction with others who submitted PRs.
 
-Our intent was not to introduce a numbers game for others to achieve and automatically become a moderator. Our intent going forward is to ensure the community is sufficiently supported by individuals who have the technical knowledge and a proven track record of success. 
+Our intent was not to introduce a numbers game for others to achieve and automatically become a moderator. Our intent going forward is to ensure the community is sufficiently supported by individuals who have the technical knowledge and a proven track record of success. Becoming a moderator is like becoming a [Microsoft Most Valuable Professional](https://mvp.microsoft.com/Pages/what-it-takes-to-be-an-mvp). There isn't a set formula. We're looking at what individual contributors are doing, and how they are doing it. If the need arises to add additional moderators, nominations may come from one of the core team members, or an existing moderator. The nomination will be publicly disclosed in a discussion. If the nominee agrees to the requirements in this document, they may be awarded the status of moderator.
 
 ## Expectations
 
@@ -20,4 +20,4 @@ Moderators should review PRs to make sure the metadata is accurate and that the 
 
 ### Providing Feedback
 
-Moderators are often on the front line when new issues are identified. They should collaborate with each other, the community, and the product team. This will help ensure the Windows Package Manager continues to improve. Sometimes this could be by creating an Issue or a Discussion. Other times this may just be discussion in a PR.
+Moderators are often on the front line when new issues are identified. They should collaborate with each other, the community, and the product team. This will help ensure the Windows Package Manager continues to improve. Sometimes this could be by creating an Issue or a Discussion. Other times this may just be discussion in a PR. Moderators are ambassadors for the Windows Package Manager. Their tone sets the example others will follow. 

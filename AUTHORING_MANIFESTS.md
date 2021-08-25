@@ -33,3 +33,7 @@ Before you invest the time to generate and submit a manifest, you should check t
 You should take a look at our [v1.0 manifest specification](https://github.com/microsoft/winget-cli/blob/master/doc/ManifestSpecv1.0.md). Don't worry. If this is starting to look too complicated you can create a new Issue and select [Package Request/Submission 👀](https://github.com/microsoft/winget-pkgs/issues/new/choose).
 
 The multi-file manifest is the preferred method for building manifests. The mimimum required files are a [version](doc/manifest/schema/1.0.0/version.md) file, a [defaultLocale](doc/manifest/schema/1.0.0/defaultLocale.md) file and an [installer](doc/manifest/schema/1.0.0/installer.md) file.
+
+## Validation
+
+Once you have submitted a PR with a manifest automated validation will begin. The system will check to see if the manifest confirms to the schema. If any errors are detected, one of our helpful bots will provide suggestions. If the schema is valid, the system will perform static analysis on the installer to check for any known vulnerabilities. If static analysis passes, then the system will spin up a clean virtual environment to install the package and perform dynamic analysis. Assuming this passes, the next step is [moderation](Moderation.md).
