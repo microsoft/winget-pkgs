@@ -1,16 +1,15 @@
 # Windows Package Manager Community Repository
 
 This repository contains the manifest files for the **Windows Package Manager** default source.  You are highly encouraged to submit manifests for your favorite application.
->Note: At this time installers must either be MSIX, MSI or .exe application installers. Standalone or portable executables, compressed .zip files, and fonts are not currently supported.
+> Note: At this time installers must either be MSIX, MSI or .exe application installers. Standalone or portable executables, compressed .zip files, and fonts are not currently supported.
 
 The **Windows Package Manager** is an [open source client](https://github.com/microsoft/winget-cli) designed for command-line usage.
 
-# Badges
-## &nbsp; Service Health
+[![Gitter](https://img.shields.io/gitter/room/Microsoft/winget-pkgs?style=for-the-badge)](https://gitter.im/Microsoft/winget-pkgs)
+
+# Service Health
 ![Validation Pipeline Badge](https://img.shields.io/endpoint?url=https://winget.azurefd.net/api/GetServiceComponentStatusBadge?component=ValidationPipeline "Validation Pipeline Badge")
 ![Publish Pipeline Badge](https://img.shields.io/endpoint?url=https://winget.azurefd.net/api/GetServiceComponentStatusBadge?component=PublishPipeline "Publish Pipeline Badge")
-## &nbsp; Gitter Chat
-[![Gitter](https://img.shields.io/gitter/room/Microsoft/winget-pkgs?style=for-the-badge)](https://gitter.im/Microsoft/winget-pkgs)
 
 # Submitting a Package
 To submit a package to this repository, you should follow these steps:
@@ -20,18 +19,18 @@ To submit a package to this repository, you should follow these steps:
 4) [Submit](#submit-your-pr) your pull request (PR).
 5) Respond to any feedback in your PR.
 
->Note: Please check the package's manifest you intend to submit does not already exist in the repository, and there are no open PRs for it in order to avoid duplicates.
+> Note: Please check the package's manifest you intend to submit does not already exist in the repository, and there are no open PRs for it in order to avoid duplicates.
 
 ## Authoring a Manifest
 
 You may either use the [Windows Package Manager Manifest Creator](https://github.com/microsoft/winget-create), the [YAMLCreate](#using-the-yamlcreateps1) PowerShell script, or you can craft a manifest manually following our [authoring guidelines](AUTHORING_MANIFESTS.md).
 
->Note: Only one manifest may be submitted per PR.
+> Note: Only one manifest may be submitted per PR.
 
 ### Using the YAMLCreate.ps1
 To help author manifest files, we have provided a YAMLCreate.ps1 [powershell script](Tools/YamlCreate.ps1) located in the Tools folder. The script will prompt you for the URL to the installer, then will prompt you to fill in metadata.
 
->Note: We recommend running the script in the location where you want to produce the manifest file.  For example: `manifests\<p>\<publisher>\<package>\`.  After successful completion, it will produce the YAML files.
+> Note: We recommend running the script in the location where you want to produce the manifest file.  For example: `manifests\<p>\<publisher>\<package>\`.  After successful completion, it will produce the YAML files.
 
 ## Test your manifest
 Now that you have authored your manifest, you should make sure it works as expected.
