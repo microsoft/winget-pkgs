@@ -9,8 +9,8 @@ The **Windows Package Manager** is an [open source client](https://github.com/mi
 ## &nbsp; Service Health
 ![Validation Pipeline Badge](https://img.shields.io/endpoint?url=https://winget.azurefd.net/api/GetServiceComponentStatusBadge?component=ValidationPipeline "Validation Pipeline Badge")
 ![Publish Pipeline Badge](https://img.shields.io/endpoint?url=https://winget.azurefd.net/api/GetServiceComponentStatusBadge?component=PublishPipeline "Publish Pipeline Badge")
-## &nbsp; Gitter
-[![Gitter](https://img.shields.io/badge/chat-on%20gitter-yellow.svg)](https://gitter.im/Microsoft/winget-pkgs)
+## &nbsp; Gitter Chat
+[![Gitter](https://img.shields.io/gitter/room/Microsoft/winget-pkgs?style=for-the-badge)](https://gitter.im/Microsoft/winget-pkgs)
 
 # Submitting a Package
 To submit a package to this repository, you should follow these steps:
