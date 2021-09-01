@@ -300,7 +300,7 @@ All Windows Package Manager manifests in the Microsoft community repository are 
  <summary>List of appx or msix installer capabilities</summary>
 
  #### Optional Field
- This key represents the capabilities provided by an MSIX package. More information is available for [App capability declarations](https://docs.microsoft.com/en-us/windows/uwp/packaging/app-capability-declarations)
+ This key represents the capabilities provided by an MSIX package. More information is available for [App capability declarations](https://docs.microsoft.com/windows/uwp/packaging/app-capability-declarations)
 
  >Note: This key may be present in the root of the manifest as the default value for all installer nodes. This key may also be present in an individual installer node as well. If this key is in the manifest root and in an installer node, the value in the installer node will apply.
 </details>
@@ -310,7 +310,7 @@ All Windows Package Manager manifests in the Microsoft community repository are 
  <summary>List of appx or msix installer restricted capabilities</summary>
 
  #### Optional Field
- This key represents the restricted capabilities provided by an MSIX package.More information is available for [App capability declarations](https://docs.microsoft.com/en-us/windows/uwp/packaging/app-capability-declarations)
+ This key represents the restricted capabilities provided by an MSIX package.More information is available for [App capability declarations](https://docs.microsoft.com/windows/uwp/packaging/app-capability-declarations)
 
  >Note: This key may be present in the root of the manifest as the default value for all installer nodes. This key may also be present in an individual installer node as well. If this key is in the manifest root and in an installer node, the value in the installer node will apply.
 </details>
