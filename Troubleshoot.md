@@ -41,7 +41,7 @@ Here are some common causes for the Binary-Validation-Error label:
 Windows Defender SmartScreen validation errors indicate that the URL you provided has a bad reputation.
 
 ## Internal-Error
-Internal-Errors indicate there was an error hit by the service.  Microsoft will investigate these and pursue a fix.  For a list of known issues, see our repo [issues](https://github.com/microsoft/winget-pkgs/issues)
+Internal-Errors indicate there was an error hit by the service.  Microsoft will investigate these and pursue a fix.  For a list of known issues, see our repository [issues](https://github.com/microsoft/winget-pkgs/issues)
 
 
 
