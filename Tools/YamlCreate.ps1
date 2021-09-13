@@ -110,7 +110,7 @@ Function Read-PreviousWinGet-Manifest {
             $LastVersion = Split-Path (Split-Path (Get-ChildItem -Path "$AppFolder\..\" -Recurse -Depth 1 -File).FullName ) -Leaf | Sort-Object $ToNatural | Select-Object -Last 1
 
             Write-Host -ForegroundColor 'DarkYellow' -Object "Last Version: $LastVersion"
-            $script:OldManifests = Get-ChildItem -Path "$AppFolder\..\$LastVersion"
+            $script:OldManifests = Get-ChildItem -Path "$AppFolder\..\$LastVersion" -Directory
 
             if (-not ($OldManifests.Name -like "$PackageIdentifier*.yaml")) {
                 while ([string]::IsNullOrWhiteSpace($PromptVersion)) {
