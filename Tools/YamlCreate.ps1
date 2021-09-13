@@ -107,10 +107,10 @@ Function Read-WinGet-MandatoryInfo {
 Function Read-PreviousWinGet-Manifest {
     Switch ($Option) {
         'Update' {
-            $LastVersion = Split-Path (Split-Path (Get-ChildItem -Path "$AppFolder\..\" -Recurse -Depth 1 -File).FullName ) -Leaf | Sort-Object $ToNatural | Select-Object -Last 1
+            $LastVersion = Split-Path (Split-Path (Get-ChildItem -Path "$AppFolder\..\" -Recurse -Depth 1 -File -Exclude ".validation").FullName ) -Leaf | Sort-Object $ToNatural | Select-Object -Last 1
 
             Write-Host -ForegroundColor 'DarkYellow' -Object "Last Version: $LastVersion"
-            $script:OldManifests = Get-ChildItem -Path "$AppFolder\..\$LastVersion" -Directory
+            $script:OldManifests = Get-ChildItem -Path "$AppFolder\..\$LastVersion"
 
             if (-not ($OldManifests.Name -like "$PackageIdentifier*.yaml")) {
                 while ([string]::IsNullOrWhiteSpace($PromptVersion)) {
