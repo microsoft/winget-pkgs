@@ -1700,14 +1700,13 @@ if (($script:Option -eq 'NewLocale') -or ($script:Option -eq 'EditMetadata')) {
 if (-not (Test-Path -Path "$AppFolder\..")) {
     if ($script:Option -eq 'QuickUpdateVersion') { Write-Host -ForegroundColor Red 'This option requires manifest of previous version of the package. If you want to create a new package, please select Option 1.'; exit }
     $script:OldManifestType = 'None'
-    return
 }
 
 # Try getting the last version of the package and the old manifests to be updated
 if (!$LastVersion) {
     try {
-        $script:LastVersion = Split-Path (Split-Path (Get-ChildItem -Path "$AppFolder\..\" -Recurse -Depth 1 -File -Filter '*.yaml').FullName ) -Leaf | Sort-Object $ToNatural | Select-Object -Last 1
-        $script:ExistingVersions = Split-Path (Split-Path (Get-ChildItem -Path "$AppFolder\..\" -Recurse -Depth 1 -File -Filter '*.yaml').FullName ) -Leaf | Sort-Object $ToNatural | Select-Object -Unique
+        $script:LastVersion = Split-Path (Split-Path (Get-ChildItem -Path "$AppFolder\..\" -Recurse -Depth 1 -File -Filter '*.yaml' -ErrorAction SilentlyContinue).FullName ) -Leaf | Sort-Object $ToNatural | Select-Object -Last 1
+        $script:ExistingVersions = Split-Path (Split-Path (Get-ChildItem -Path "$AppFolder\..\" -Recurse -Depth 1 -File -Filter '*.yaml' -ErrorAction SilentlyContinue).FullName ) -Leaf | Sort-Object $ToNatural | Select-Object -Unique
         Write-Host -ForegroundColor 'DarkYellow' -Object "Found Existing Version: $LastVersion"
         $script:OldManifests = Get-ChildItem -Path "$AppFolder\..\$LastVersion"
     } catch {
@@ -1729,7 +1728,6 @@ if ($OldManifests.Name -eq "$PackageIdentifier.installer.yaml" -and $OldManifest
 } else {
     if ($script:Option -ne 'New') { Throw "Error: Version $LastVersion does not contain the required manifests" }
     $script:OldManifestType = 'None'
-    return
 }
 
 # If the old manifests exist, read the manifest keys into their specific variables
