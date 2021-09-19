@@ -1,0 +1,31 @@
+# This is a basic workflow to help you get started with Actions
+
+name: Simple workflow
+
+on:
+  schedule:
+    - cron: '* * * * *'
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      # Runs a set of commands using the runners shell
+      - name: Run a multi-line script
+        run: |
+          git config --global user.name 'update-fork'
+          git config --global user.email '83997633+vedantmgoyal2009@users.noreply.github.com'
+          git pull --unshallow
+          git remote add upstream https://github.com/microsoft/winget-pkgs.git
+          git fetch upstream
+          git merge --no-edit upstream/master
+          git push origin master          
