@@ -1,9 +1,10 @@
 ﻿Param ([switch] $orca,[switch] $sandbox,[switch] $ussf,[switch] $hash, [switch] $myscript)
+$workingDir = "C:\Users\Bittu\Downloads"
 if($args -and -not $myscript) {
     Foreach($downloadUrl in $args) {
         $WebClient = New-Object System.Net.WebClient
         $Filename = [System.IO.Path]::GetFileName($downloadUrl)
-        $location = "C:\Users\Bittu\Downloads\$FileName"
+        $location = "$workingDir\$FileName"
         try {
             $WebClient.DownloadFile($downloadUrl, $location)
         } catch {
@@ -11,7 +12,7 @@ if($args -and -not $myscript) {
             exit 1
         }
         if ($ussf) {
-            Start-Process -FilePath "C:\Users\Bittu\Downloads\ussf.exe" -ArgumentList $location -Wait
+            Start-Process -FilePath "C:\Users\Bittu\OneDrive\Desktop\bittu\things\ussf.exe" -ArgumentList $location -Wait
         } elseif ($hash) {
             $hashInformation = Get-FileHash $location
             Write-Host "Algorithm:` $($hashInformation.Algorithm)"
@@ -20,10 +21,10 @@ if($args -and -not $myscript) {
         } elseif ($orca) {
             Start-Process -FilePath "C:\Program Files (x86)\Orca\Orca.exe" -ArgumentList $location -Wait
         } elseif ($sandbox) {
-            Set-Content -Path C:\Users\Bittu\Downloads\LaunchSandbox.wsb -Value "<Configuration>
+            Set-Content -Path $workingDir\LaunchSandbox.wsb -Value "<Configuration>
               <MappedFolders>
                 <MappedFolder>
-                  <HostFolder>C:\Users\Bittu\Downloads</HostFolder>
+                  <HostFolder>$workingDir</HostFolder>
                   <ReadOnly>false</ReadOnly>
                 </MappedFolder>
               </MappedFolders>
@@ -31,8 +32,8 @@ if($args -and -not $myscript) {
                 <Command>PowerShell Start-Process PowerShell -WindowStyle Maximized -Verb runAs -WorkingDirectory 'C:\Users\WDAGUtilityAccount\Desktop\Downloads' -ArgumentList '-ExecutionPolicy Bypass -NoExit -NoLogo -Command ""Write-Host ""Running installer...`n""; Start-Process -FilePath ""C:\Users\WDAGUtilityAccount\Desktop\Downloads\$Filename"" -Wait; Write-Host ""Getting list of installed programs...`n""; Get-WmiObject -Class Win32_InstalledWin32Program | Select-Object Name,Vendor,Version,MsiProductCode | Out-Null; Get-WmiObject -Class Win32_InstalledWin32Program | Select-Object Name,Vendor,Version,MsiProductCode; Get-FileHash ""C:\Users\WDAGUtilityAccount\Desktop\Downloads\$Filename""""'</Command>
               </LogonCommand>
             </Configuration>"
-            Start-Process -FilePath "C:\Users\Bittu\Downloads\LaunchSandbox.wsb" -Wait
-            Remove-Item "C:\Users\Bittu\Downloads\LaunchSandbox.wsb"
+            Start-Process -FilePath "$workingDir\LaunchSandbox.wsb" -Wait
+            Remove-Item "$workingDir\LaunchSandbox.wsb"
         } elseif (-not $ussf -and -not $hash -and -not $orca -and -not $sandbox) {
             if ($location.EndsWith('appx','CurrentCultureIgnoreCase') -or $location.EndsWith('msix','CurrentCultureIgnoreCase') -or $location.EndsWith('appxbundle','CurrentCultureIgnoreCase') -or $location.EndsWith('msixbundle','CurrentCultureIgnoreCase')) {
                 Write-Host "PackageVersion: $((Get-AppLockerFileInformation -Path $location | Select-Object -ExpandProperty Publisher | Select-Object BinaryVersion).BinaryVersion)"
@@ -51,7 +52,6 @@ if($args -and -not $myscript) {
         Remove-Item $location
     }
 } elseif ($myscript) {
-    $workingDir = "C:\Users\Bittu\Downloads"
     $manifestsPath = "$workingDir\winget-pkgs\manifests"
     $ErrorActionPreference = 'Continue'
     
