@@ -896,8 +896,8 @@ Function Read-WinGet-InstallerManifest {
     # Request Install Modes and validate
     do {
         if (!$InstallModes) { $InstallModes = '' }
-        $InstallModes = $InstallModes | UniqueItems
-        $script:InstallModes = PromptInstallerManifestValue $InstallModes 'InstallModes' "[Optional] List of supported installer modes. Options: $($Patterns.ValidInstallModes -join ', ')"
+        $script:InstallModes = $script:InstallModes | UniqueItems
+        $script:InstallModes = PromptInstallerManifestValue $script:InstallModes 'InstallModes' "[Optional] List of supported installer modes. Options: $($Patterns.ValidInstallModes -join ', ')"
         $script:InstallModes = $script:InstallModes | UniqueItems
         if ( (String.Validate $script:InstallModes -IsNull) -or (($script:InstallModes -split ',').Count -le $Patterns.MaxItemsInstallModes -and $($script:InstallModes.Split(',').Trim() | Where-Object { $_ -CNotIn $Patterns.ValidInstallModes }).Count -eq 0)) {
             $script:_returnValue = [ReturnValue]::Success()
@@ -1476,6 +1476,27 @@ Function Write-WinGet-InstallerManifest-Yaml {
     If ($InstallerManifest['Dependencies']) {
         $InstallerManifest['Dependencies'] = SortYamlKeys $InstallerManifest['Dependencies'] $InstallerDependencyProperties -NoComments
     }
+    # Move Manifest Level Keys to installer Level
+    $_KeysToMove = $InstallerEntryProperties | Where-Object { $_ -in $InstallerProperties }
+    foreach ($_Key in $_KeysToMove) {
+        if ($_Key -in $InstallerManifest.Installers[0].Keys) {
+            # Check if all installers have the same value
+            $_AllAreSame = $true
+            $_FirstInstallerKeyValue = ConvertTo-Json($InstallerManifest.Installers[0].$_Key)
+            foreach ($_Installer in $InstallerManifest.Installers) {
+                $_CurrentInstallerKeyValue = ConvertTo-Json($_Installer.$_Key)
+                $_AllAreSame = $_AllAreSame -and (@(Compare-Object $_CurrentInstallerKeyValue $_FirstInstallerKeyValue).Length -eq 0)
+            }
+            # If all installers are the same move the key to the manifest level
+            if ($_AllAreSame) {
+                $InstallerManifest[$_Key] = $InstallerManifest.Installers[0].$_Key
+                foreach ($_Installer in $InstallerManifest.Installers) {
+                    $_Installer.Remove($_Key)
+                }
+            }
+        }
+    }
+
     $InstallerManifest = SortYamlKeys $InstallerManifest $InstallerProperties -NoComments
    
     # Create the folder for the file if it doesn't exist
@@ -1719,12 +1740,53 @@ if (!$LastVersion) {
 if ($OldManifests.Name -eq "$PackageIdentifier.installer.yaml" -and $OldManifests.Name -eq "$PackageIdentifier.locale.en-US.yaml" -and $OldManifests.Name -eq "$PackageIdentifier.yaml") {
     $script:OldManifestType = 'MultiManifest'
     $script:OldInstallerManifest = ConvertFrom-Yaml -Yaml ($(Get-Content -Path $(Resolve-Path "$AppFolder\..\$LastVersion\$PackageIdentifier.installer.yaml") -Encoding UTF8) -join "`n") -Ordered
+    # Move Manifest Level Keys to installer Level
+    $_KeysToMove = $InstallerEntryProperties | Where-Object { $_ -in $InstallerProperties }
+    foreach ($_Key in $_KeysToMove) {
+        if ($_Key -in $script:OldInstallerManifest.Keys) {
+            foreach ($_Installer in $script:OldInstallerManifest['Installers']) {
+                if ($_Key -eq 'InstallModes') { $script:InstallModes = [string]$script:OldInstallerManifest.$_Key }
+                $_Installer[$_Key] = $script:OldInstallerManifest.$_Key
+            }
+            $script:OldInstallerManifest.Remove($_Key)
+        }
+    }
     $script:OldLocaleManifest = ConvertFrom-Yaml -Yaml ($(Get-Content -Path $(Resolve-Path "$AppFolder\..\$LastVersion\$PackageIdentifier.locale.en-US.yaml") -Encoding UTF8) -join "`n") -Ordered
     $script:OldVersionManifest = ConvertFrom-Yaml -Yaml ($(Get-Content -Path $(Resolve-Path "$AppFolder\..\$LastVersion\$PackageIdentifier.yaml") -Encoding UTF8) -join "`n") -Ordered
 } elseif ($OldManifests.Name -eq "$PackageIdentifier.yaml") {
     if ($script:Option -eq 'NewLocale') { Throw 'Error: MultiManifest Required' }
-    $script:OldManifestType = 'Singleton'
-    $script:OldVersionManifest = ConvertFrom-Yaml -Yaml ($(Get-Content -Path $(Resolve-Path "$AppFolder\..\$LastVersion\$PackageIdentifier.yaml") -Encoding UTF8) -join "`n") -Ordered
+    $script:OldManifestType = 'MultiManifest'
+    $script:OldSingletonManifest = ConvertFrom-Yaml -Yaml ($(Get-Content -Path $(Resolve-Path "$AppFolder\..\$LastVersion\$PackageIdentifier.yaml") -Encoding UTF8) -join "`n") -Ordered
+    # Create new empty manifests
+    $script:OldInstallerManifest = [ordered]@{}
+    $script:OldLocaleManifest = [ordered]@{}
+    $script:OldVersionManifest = [ordered]@{}
+    # Parse version keys to version manifest
+    foreach ($_Key in $($OldSingletonManifest.Keys | Where-Object { $_ -in $VersionProperties })) {
+        $script:OldVersionManifest[$_Key] = $script:OldSingletonManifest.$_Key
+    }
+    $script:OldVersionManifest['ManifestType'] = 'version'
+    #Parse locale keys to locale manifest
+    foreach ($_Key in $($OldSingletonManifest.Keys | Where-Object { $_ -in $LocaleProperties })) {
+        $script:OldLocaleManifest[$_Key] = $script:OldSingletonManifest.$_Key
+    }
+    $script:OldLocaleManifest['ManifestType'] = 'defaultLocale'
+    #Parse installer keys to installer manifest
+    foreach ($_Key in $($OldSingletonManifest.Keys | Where-Object { $_ -in $InstallerProperties })) {
+        $script:OldInstallerManifest[$_Key] = $script:OldSingletonManifest.$_Key
+    }
+    $script:OldInstallerManifest['ManifestType'] = 'installer'
+    # Move Manifest Level Keys to installer Level
+    $_KeysToMove = $InstallerEntryProperties | Where-Object { $_ -in $InstallerProperties }
+    foreach ($_Key in $_KeysToMove) {
+        if ($_Key -in $script:OldInstallerManifest.Keys) {
+            if ($_Key -eq 'InstallModes') { $script:InstallModes = [string]$script:OldInstallerManifest.$_Key }
+            foreach ($_Installer in $script:OldInstallerManifest['Installers']) {
+                $_Installer[$_Key] = $script:OldInstallerManifest.$_Key
+            }
+            $script:OldInstallerManifest.Remove($_Key)
+        }
+    }
 } else {
     if ($script:Option -ne 'New') { Throw "Error: Version $LastVersion does not contain the required manifests" }
     $script:OldManifestType = 'None'
@@ -1747,7 +1809,7 @@ if ($OldManifests) {
         'PackageFamilyName'; 'ProductCode'
         'Tags'; 'FileExtensions'
         'Protocols'; 'Commands'
-        'InstallModes'; 'InstallerSuccessCodes'
+        'InstallerSuccessCodes'
         'Capabilities'; 'RestrictedCapabilities'
     )
     Foreach ($param in $_Parameters) {
