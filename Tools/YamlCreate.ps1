@@ -779,6 +779,7 @@ Function PromptInstallerManifestValue {
     Param
     (
         [Parameter(Mandatory = $true, Position = 0)]
+        [AllowNull()]
         [PSCustomObject] $Variable,
         [Parameter(Mandatory = $true, Position = 1)]
         [string] $Key,
@@ -895,10 +896,9 @@ Function Read-WinGet-InstallerManifest {
 
     # Request Install Modes and validate
     do {
-        if (!$InstallModes) { $InstallModes = '' }
-        $script:InstallModes = $script:InstallModes | UniqueItems
+        if ($script:InstallModes) { $script:InstallModes = $script:InstallModes | UniqueItems }
         $script:InstallModes = PromptInstallerManifestValue $script:InstallModes 'InstallModes' "[Optional] List of supported installer modes. Options: $($Patterns.ValidInstallModes -join ', ')"
-        $script:InstallModes = $script:InstallModes | UniqueItems
+        if ($script:InstallModes) { $script:InstallModes = $script:InstallModes | UniqueItems }
         if ( (String.Validate $script:InstallModes -IsNull) -or (($script:InstallModes -split ',').Count -le $Patterns.MaxItemsInstallModes -and $($script:InstallModes.Split(',').Trim() | Where-Object { $_ -CNotIn $Patterns.ValidInstallModes }).Count -eq 0)) {
             $script:_returnValue = [ReturnValue]::Success()
         } else {
@@ -1592,17 +1592,31 @@ Function Write-WinGet-LocaleManifest-Yaml {
     Write-Host "Yaml file created: $LocaleManifestPath"
 }
 
+function Remove-Manifest-Version {
+    Param(
+        [Parameter(Mandatory = $true, Position = 1)]
+        [string] $PathToVersion
+    )
+
+    # Remove the manifest, and then any parent folders so long as the parent folders are empty
+    do {
+        Remove-Item -Path $PathToVersion -Recurse -Force
+        $PathToVersion = Split-Path $PathToVersion
+    } while (@(Get-ChildItem $PathToVersion).Count -eq 0)
+}
+
 # Initialize the return value to be a success
 $script:_returnValue = [ReturnValue]::new(200)
 
 # Request the user to choose an operation mode
 Clear-Host
-Write-Host -ForegroundColor 'Cyan' 'Select Mode'
-Write-Colors "`n[", '1', "] New Manifest or Package Version`n" 'DarkCyan', 'White', 'DarkCyan'
-Write-Colors "`n[", '2', '] Quick Update Package Version ', "(Note: Must be used only when previous version`'s metadata is complete.)`n" 'DarkCyan', 'White', 'DarkCyan', 'Green'
-Write-Colors "`n[", '3', "] Update Package Metadata`n" 'DarkCyan', 'White', 'DarkCyan'
-Write-Colors "`n[", '4', "] New Locale`n" 'DarkCyan', 'White', 'DarkCyan'
-Write-Colors "`n[", 'q', ']', " Any key to quit`n" 'DarkCyan', 'White', 'DarkCyan', 'Red'
+Write-Host -ForegroundColor 'Yellow' "Select Mode:`n"
+Write-Colors '  [', '1', "] New Manifest or Package Version`n" 'DarkCyan', 'White', 'DarkCyan'
+Write-Colors '  [', '2', '] Quick Update Package Version ', "(Note: Must be used only when previous version`'s metadata is complete.)`n" 'DarkCyan', 'White', 'DarkCyan', 'Green'
+Write-Colors '  [', '3', "] Update Package Metadata`n" 'DarkCyan', 'White', 'DarkCyan'
+Write-Colors '  [', '4', "] New Locale`n" 'DarkCyan', 'White', 'DarkCyan'
+Write-Colors '  [', '5', "] Remove a manifest`n" 'DarkCyan', 'White', 'DarkCyan'
+Write-Colors '  [', 'Q', ']', " Any key to quit`n" 'DarkCyan', 'White', 'DarkCyan', 'Red'
 Write-Colors "`nSelection: " 'White'
 
 # Listen for keypress and set operation mode based on keypress
@@ -1611,10 +1625,12 @@ $Keys = @{
     [ConsoleKey]::D2      = '2';
     [ConsoleKey]::D3      = '3';
     [ConsoleKey]::D4      = '4';
+    [ConsoleKey]::D5      = '5';
     [ConsoleKey]::NumPad1 = '1';
     [ConsoleKey]::NumPad2 = '2';
     [ConsoleKey]::NumPad3 = '3';
     [ConsoleKey]::NumPad4 = '4';
+    [ConsoleKey]::NumPad5 = '5';
 }
 do {
     $keyInfo = [Console]::ReadKey($false)
@@ -1624,6 +1640,7 @@ switch ($Keys[$keyInfo.Key]) {
     '2' { $script:Option = 'QuickUpdateVersion' }
     '3' { $script:Option = 'EditMetadata' }
     '4' { $script:Option = 'NewLocale' }
+    '5' { $script:Option = 'RemoveManifest' }
     default { Write-Host; exit }
 }
 
@@ -1694,7 +1711,7 @@ if (Test-Path -Path "$PSScriptRoot\..\manifests") {
 $script:AppFolder = Join-Path $ManifestsFolder -ChildPath $PackageIdentifier.ToLower().Chars(0) | Join-Path -ChildPath $PackageIdentifierFolder | Join-Path -ChildPath $PackageVersion
 
 # If the user selected `NewLocale` or `EditMetadata` the version *MUST* already exist in the folder structure
-if (($script:Option -eq 'NewLocale') -or ($script:Option -eq 'EditMetadata')) {
+if ($script:Option -in @('NewLocale'; 'EditMetadata'; 'RemoveManifest')) {
     # Try getting the old manifests from the specified folder
     if (Test-Path -Path "$AppFolder\..\$PackageVersion") {
         $script:OldManifests = Get-ChildItem -Path "$AppFolder\..\$PackageVersion"
@@ -1851,35 +1868,52 @@ Switch ($script:Option) {
         Write-WinGet-LocaleManifest-Yaml
         if (Get-Command 'winget.exe' -ErrorAction SilentlyContinue) { winget validate $AppFolder }
     }
+
+    'RemoveManifest' {
+        $_menu = @{
+            entries       = @("[Y] Remove $PackageIdentifier version $PackageVersion"; '*[N] Cancel')
+            Prompt        = 'Are you sure you want to continue?'
+            HelpText      = "Manifest Versions should only be removed when necessary`n"
+            HelpTextColor = 'Red'
+            DefaultString = 'N'
+        }
+        switch ( KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString'] -HelpText $_menu['HelpText'] -HelpTextColor $_menu['HelpTextColor']) {
+            'Y' { continue }
+            default { Write-Host; exit 1 }
+        }
+        Remove-Manifest-Version $AppFolder
+    }
 }
 
-# If the user has winget installed, attempt to validate the manifests
-if (Get-Command 'winget.exe' -ErrorAction SilentlyContinue) { winget validate $AppFolder }
+if ($script:Option -ne 'RemoveManifest') {
+    # If the user has winget installed, attempt to validate the manifests
+    if (Get-Command 'winget.exe' -ErrorAction SilentlyContinue) { winget validate $AppFolder }
 
-# If the user has sandbox enabled, request to test the manifest in the sandbox
-if (Get-Command 'WindowsSandbox.exe' -ErrorAction SilentlyContinue) {
-    $_menu = @{
-        entries       = @('*[Y] Yes'; '[N] No')
-        Prompt        = '[Recommended] Do you want to test your Manifest in Windows Sandbox?'
-        DefaultString = 'Y'
-    }
-    switch ( KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString']) {
-        'Y' { $script:SandboxTest = '0' }
-        'N' { $script:SandboxTest = '1' }
-        default { $script:SandboxTest = '0' }
-    }
-    Write-Host
-    if ($script:SandboxTest -eq '0') {
-        if (Test-Path -Path "$PSScriptRoot\SandboxTest.ps1") {
-            $SandboxScriptPath = (Resolve-Path "$PSScriptRoot\SandboxTest.ps1").Path
-        } else {
-            while ([string]::IsNullOrWhiteSpace($SandboxScriptPath)) {
-                Write-Host
-                Write-Host -ForegroundColor 'Green' -Object 'SandboxTest.ps1 not found, input path'
-                $SandboxScriptPath = Read-Host -Prompt 'SandboxTest.ps1' | TrimString
-            }
+    # If the user has sandbox enabled, request to test the manifest in the sandbox
+    if (Get-Command 'WindowsSandbox.exe' -ErrorAction SilentlyContinue) {
+        $_menu = @{
+            entries       = @('*[Y] Yes'; '[N] No')
+            Prompt        = '[Recommended] Do you want to test your Manifest in Windows Sandbox?'
+            DefaultString = 'Y'
         }
-        & $SandboxScriptPath -Manifest $AppFolder
+        switch ( KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString']) {
+            'Y' { $script:SandboxTest = '0' }
+            'N' { $script:SandboxTest = '1' }
+            default { $script:SandboxTest = '0' }
+        }
+        Write-Host
+        if ($script:SandboxTest -eq '0') {
+            if (Test-Path -Path "$PSScriptRoot\SandboxTest.ps1") {
+                $SandboxScriptPath = (Resolve-Path "$PSScriptRoot\SandboxTest.ps1").Path
+            } else {
+                while ([string]::IsNullOrWhiteSpace($SandboxScriptPath)) {
+                    Write-Host
+                    Write-Host -ForegroundColor 'Green' -Object 'SandboxTest.ps1 not found, input path'
+                    $SandboxScriptPath = Read-Host -Prompt 'SandboxTest.ps1' | TrimString
+                }
+            }
+            & $SandboxScriptPath -Manifest $AppFolder
+        }
     }
 }
 
@@ -1910,6 +1944,7 @@ if ($PromptSubmit -eq '0') {
         }
         'EditMetadata' { $CommitType = 'Metadata' }
         'NewLocale' { $CommitType = 'Locale' }
+        'RemoveManifest' { $CommitType = 'Remove' }
     }
 
     # Change the users git configuration to suppress some git messages
