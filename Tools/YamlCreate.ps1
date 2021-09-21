@@ -56,6 +56,15 @@ try {
     exit 1
 }
 
+# Check for settings directory and create it if none exists
+$script:SettingsPath = Join-Path $env:LOCALAPPDATA -ChildPath 'YamlCreate'
+if (!(Test-Path $script:SettingsPath)) { New-Item -ItemType 'Directory' -Force -Path $script:SettingsPath | Out-Null }
+# Check for settings file and create it if none exists
+$script:SettingsPath = $(Join-Path $script:SettingsPath -ChildPath 'Settings.yaml')
+if (!(Test-Path $script:SettingsPath)) { '# See https://github.com/microsoft/winget-pkgs/tree/master/doc/tools/YamlCreate.md for a list of available settings' > $script:SettingsPath }
+# Load settings from file
+$ScriptSettings = ConvertFrom-Yaml -Yaml ($(Get-Content -Path $script:SettingsPath -Encoding UTF8) -join "`n")
+
 filter TrimString {
     $_.Trim()
 }
@@ -300,16 +309,24 @@ Function Read-WinGet-InstallerValues {
     $InstallerUrl = Request-Installer-Url
 
     # Get or request Installer Sha256
-    $_menu = @{
-        entries       = @('[Y] Yes'; '*[N] No'; '[M] Manually Enter SHA256')
-        Prompt        = 'Do you want to save the files to the Temp folder?'
-        DefaultString = 'N'
-    }
-    switch ( KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString']) {
-        'Y' { $script:SaveOption = '0' }
-        'N' { $script:SaveOption = '1' }
-        'M' { $script:SaveOption = '2' }
-        default { $script:SaveOption = '1' }
+    # Check the settings to see if we need to display this menu
+    switch ($ScriptSettings.SaveToTemporaryFolder) {
+        'true' { $script:SaveOption = '0' }
+        'false' { $script:SaveOption = '1' }
+        'manual' { $script:SaveOption = '2' }
+        default {
+            $_menu = @{
+                entries       = @('[Y] Yes'; '*[N] No'; '[M] Manually Enter SHA256')
+                Prompt        = 'Do you want to save the files to the Temp folder?'
+                DefaultString = 'N'
+            }
+            switch ( KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString']) {
+                'Y' { $script:SaveOption = '0' }
+                'N' { $script:SaveOption = '1' }
+                'M' { $script:SaveOption = '2' }
+                default { $script:SaveOption = '1' }
+            }
+        }
     }
 
     # If user did not select manual entry for Sha256, download file and calculate hash
@@ -538,13 +555,14 @@ Function Read-WinGet-InstallerValues {
         Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the installer locale. For example: en-US, en-CA'
         Write-Host -ForegroundColor 'Blue' -Object 'https://docs.microsoft.com/openspecs/office_standards/ms-oe376/6c085406-a698-4e12-9d4d-c3b0ee3dbc4a'
         $InstallerLocale = Read-Host -Prompt 'InstallerLocale' | TrimString
-        if (String.Validate $InstallerLocale -IsNull) { $InstallerLocale = 'en-US' }
+        # If user defined a default locale, add it
+        if ((String.Validate $InstallerLocale -IsNull) -and (String.Validate -not $ScriptSettings.DefaultInstallerLocale -IsNull)) { $InstallerLocale = $ScriptSettings.DefaultInstallerLocale }
 
-        if (String.Validate $InstallerLocale -MaxLength $Patterns.InstallerLocaleMaxLength -MatchPattern $Patterns.PackageLocale -NotNull) {
+        if (String.Validate $InstallerLocale -MaxLength $Patterns.InstallerLocaleMaxLength -MatchPattern $Patterns.PackageLocale -AllowNull) {
             $script:_returnValue = [ReturnValue]::Success()
         } else {
-            if (String.Validate -not $InstallerLocale -MaxLength $Patterns.InstallerLocaleMaxLength -NotNull) {
-                $script:_returnValue = [ReturnValue]::LengthError(1, $Patterns.InstallerLocaleMaxLength)
+            if (String.Validate -not $InstallerLocale -MaxLength $Patterns.InstallerLocaleMaxLength -AllowNull) {
+                $script:_returnValue = [ReturnValue]::LengthError(0, $Patterns.InstallerLocaleMaxLength)
             } elseif (String.Validate -not $InstallerLocale -MatchPattern $Patterns.PackageLocale) {
                 $script:_returnValue = [ReturnValue]::PatternError()
             } else {
@@ -691,16 +709,24 @@ Function Read-WinGet-InstallerValues-Minimal {
         $_NewInstaller['InstallerUrl'] = $NewInstallerUrl
 
         # Get or request Installer Sha256
-        $_menu = @{
-            entries       = @('[Y] Yes'; '*[N] No'; '[M] Manually Enter SHA256')
-            Prompt        = 'Do you want to save the files to the Temp folder?'
-            DefaultString = 'N'
-        }
-        switch ( KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString']) {
-            'Y' { $script:SaveOption = '0' }
-            'N' { $script:SaveOption = '1' }
-            'M' { $script:SaveOption = '2' }
-            default { $script:SaveOption = '1' }
+        # Check the settings to see if we need to display this menu
+        switch ($ScriptSettings.SaveToTemporaryFolder) {
+            'true' { $script:SaveOption = '0' }
+            'false' { $script:SaveOption = '1' }
+            'manual' { $script:SaveOption = '2' }
+            default {
+                $_menu = @{
+                    entries       = @('[Y] Yes'; '*[N] No'; '[M] Manually Enter SHA256')
+                    Prompt        = 'Do you want to save the files to the Temp folder?'
+                    DefaultString = 'N'
+                }
+                switch ( KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString']) {
+                    'Y' { $script:SaveOption = '0' }
+                    'N' { $script:SaveOption = '1' }
+                    'M' { $script:SaveOption = '2' }
+                    default { $script:SaveOption = '1' }
+                }
+            }
         }
 
         # If user did not select manual entry for Sha256, download file and calculate hash
@@ -1223,12 +1249,17 @@ Function Enter-PR-Parameters {
         $_showMenu = $true
         switch -Wildcard ( $_line ) {
             '*CLA*' {
-                $_menu = @{
-                    Prompt        = 'Have you signed the Contributor License Agreement (CLA)?'
-                    Entries       = @('[Y] Yes'; '*[N] No')
-                    HelpText      = 'Reference Link: https://cla.opensource.microsoft.com/microsoft/winget-pkgs'
-                    HelpTextColor = ''
-                    DefaultString = 'N'
+                if ($ScriptSettings.SignedCLA -eq 'true') {
+                    $PrBodyContentReply += @($_line.Replace('[ ]', '[X]'))
+                    $_showMenu = $false
+                } else {
+                    $_menu = @{
+                        Prompt        = 'Have you signed the Contributor License Agreement (CLA)?'
+                        Entries       = @('[Y] Yes'; '*[N] No')
+                        HelpText      = 'Reference Link: https://cla.opensource.microsoft.com/microsoft/winget-pkgs'
+                        HelpTextColor = ''
+                        DefaultString = 'N'
+                    }
                 }
             }
     
@@ -1645,7 +1676,7 @@ switch ($Keys[$keyInfo.Key]) {
 }
 
 # Confirm the user undertands the implications of using the quick update mode
-if ($script:Option -eq 'QuickUpdateVersion') {
+if (($script:Option -eq 'QuickUpdateVersion') -and ($ScriptSettings.SuppressQuickUpdateWarning -ne 'true')) {
     $_menu = @{
         entries       = @('[Y] Continue with Quick Update'; '[N] Use Full Update Experience'; '*[Q] Exit Script')
         Prompt        = 'Quick Updates only allow for changes to the existing Installer URLs, Sha256 Values, and Product Codes. Are you sure you want to continue?'
@@ -1866,7 +1897,6 @@ Switch ($script:Option) {
     'NewLocale' {
         Read-WinGet-LocaleManifest
         Write-WinGet-LocaleManifest-Yaml
-        if (Get-Command 'winget.exe' -ErrorAction SilentlyContinue) { winget validate $AppFolder }
     }
 
     'RemoveManifest' {
@@ -1891,17 +1921,22 @@ if ($script:Option -ne 'RemoveManifest') {
 
     # If the user has sandbox enabled, request to test the manifest in the sandbox
     if (Get-Command 'WindowsSandbox.exe' -ErrorAction SilentlyContinue) {
-        $_menu = @{
-            entries       = @('*[Y] Yes'; '[N] No')
-            Prompt        = '[Recommended] Do you want to test your Manifest in Windows Sandbox?'
-            DefaultString = 'Y'
+        # Check the settings to see if we need to display this menu
+        if ($ScriptSettings.AlwaysTestManifests -eq 'true') {
+            $script:SandboxTest = '0'
+        } else {
+            $_menu = @{
+                entries       = @('*[Y] Yes'; '[N] No')
+                Prompt        = '[Recommended] Do you want to test your Manifest in Windows Sandbox?'
+                DefaultString = 'Y'
+            }
+            switch ( KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString']) {
+                'Y' { $script:SandboxTest = '0' }
+                'N' { $script:SandboxTest = '1' }
+                default { $script:SandboxTest = '0' }
+            }
+            Write-Host
         }
-        switch ( KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString']) {
-            'Y' { $script:SandboxTest = '0' }
-            'N' { $script:SandboxTest = '1' }
-            default { $script:SandboxTest = '0' }
-        }
-        Write-Host
         if ($script:SandboxTest -eq '0') {
             if (Test-Path -Path "$PSScriptRoot\SandboxTest.ps1") {
                 $SandboxScriptPath = (Resolve-Path "$PSScriptRoot\SandboxTest.ps1").Path
@@ -1911,12 +1946,11 @@ if ($script:Option -ne 'RemoveManifest') {
                     Write-Host -ForegroundColor 'Green' -Object 'SandboxTest.ps1 not found, input path'
                     $SandboxScriptPath = Read-Host -Prompt 'SandboxTest.ps1' | TrimString
                 }
+                & $SandboxScriptPath -Manifest $AppFolder
             }
-            & $SandboxScriptPath -Manifest $AppFolder
         }
     }
 }
-
 # If the user has git installed, request to automatically submit the PR
 if (Get-Command 'git.exe' -ErrorAction SilentlyContinue) {
     $_menu = @{
