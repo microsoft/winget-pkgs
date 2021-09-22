@@ -769,6 +769,33 @@ Function Read-WinGet-InstallerValues-Minimal {
         }
         $_NewInstaller['InstallerSha256'] = $NewInstallerSha256
 
+        # If the installer is `msix` or `appx`, prompt for or detect additional fields
+        if ($_OldInstaller.InstallerType -ieq 'msix' -or $_OldInstaller.InstallerType -ieq 'appx') {
+            # Detect or prompt for Signature Sha256
+            if (Get-Command 'winget.exe' -ErrorAction SilentlyContinue) { $NewSignatureSha256 = winget hash -m $script:dest | Select-String -Pattern 'SignatureSha256:' | ConvertFrom-String; if ($NewSignatureSha256.P2) { $NewSignatureSha256 = $NewSignatureSha256.P2.ToUpper() } }
+            if (String.Validate $NewSignatureSha256 -IsNull) {
+                # Manual entry of Signature Sha256 with validation
+                do {
+                    Write-Host -ForegroundColor 'Red' $script:_returnValue.ErrorString() 
+                    Write-Host -ForegroundColor 'Yellow' -Object '[Recommended] Enter the installer SignatureSha256'
+                    $NewSignatureSha256 = Read-Host -Prompt 'SignatureSha256' | TrimString
+                    if (String.Validate $NewSignatureSha256 -MatchPattern $Patterns.SignatureSha256 -AllowNull) {
+                        $script:_returnValue = [ReturnValue]::Success()
+                    } else {
+                        $script:_returnValue = [ReturnValue]::PatternError()
+                    }
+                } until ($script:_returnValue.StatusCode -eq [ReturnValue]::Success().StatusCode)
+            }
+            # If the SignatureSha256 entered is empty; Ensure we remove it if it exists and don't add it if it doesn't exist
+            if ((String.Validate $NewSignatureSha256 -IsNull) -and ($_NewInstaller.Keys -contains 'SignatureSha256')) { 
+                $_NewInstaller.Remove('SignatureSha256')
+            } elseif (String.Validate -Not $NewSignatureSha256 -IsNull ) {
+                $_NewInstaller['SignatureSha256'] = $NewSignatureSha256
+            }
+
+            if ($script:SaveOption -eq '1') { Remove-Item -Path $script:dest }
+        }
+
         # Get the product code of the new installer
         do {
             Write-Host -ForegroundColor 'Red' $script:_returnValue.ErrorString() 
@@ -1516,7 +1543,8 @@ Function Write-WinGet-InstallerManifest-Yaml {
             $_FirstInstallerKeyValue = ConvertTo-Json($InstallerManifest.Installers[0].$_Key)
             foreach ($_Installer in $InstallerManifest.Installers) {
                 $_CurrentInstallerKeyValue = ConvertTo-Json($_Installer.$_Key)
-                $_AllAreSame = $_AllAreSame -and (@(Compare-Object $_CurrentInstallerKeyValue $_FirstInstallerKeyValue).Length -eq 0)
+                if (String.Validate $_CurrentInstallerKeyValue -IsNull) {$_AllAreSame = $false}
+                else {$_AllAreSame = $_AllAreSame -and (@(Compare-Object $_CurrentInstallerKeyValue $_FirstInstallerKeyValue).Length -eq 0)}
             }
             # If all installers are the same move the key to the manifest level
             if ($_AllAreSame) {
