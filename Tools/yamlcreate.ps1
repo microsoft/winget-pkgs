@@ -56,6 +56,15 @@ try {
     exit 1
 }
 
+# Check for settings directory and create it if none exists
+$script:SettingsPath = Join-Path $env:LOCALAPPDATA -ChildPath 'YamlCreate'
+if (!(Test-Path $script:SettingsPath)) { New-Item -ItemType 'Directory' -Force -Path $script:SettingsPath | Out-Null }
+# Check for settings file and create it if none exists
+$script:SettingsPath = $(Join-Path $script:SettingsPath -ChildPath 'Settings.yaml')
+if (!(Test-Path $script:SettingsPath)) { '# See https://github.com/microsoft/winget-pkgs/tree/master/doc/tools/YamlCreate.md for a list of available settings' > $script:SettingsPath }
+# Load settings from file
+$ScriptSettings = ConvertFrom-Yaml -Yaml ($(Get-Content -Path $script:SettingsPath -Encoding UTF8) -join "`n")
+
 filter TrimString {
     $_.Trim()
 }
@@ -300,16 +309,24 @@ Function Read-WinGet-InstallerValues {
     $InstallerUrl = Request-Installer-Url
 
     # Get or request Installer Sha256
-    $_menu = @{
-        entries       = @('[Y] Yes'; '*[N] No'; '[M] Manually Enter SHA256')
-        Prompt        = 'Do you want to save the files to the Temp folder?'
-        DefaultString = 'N'
-    }
-    switch ( KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString']) {
-        'Y' { $script:SaveOption = '0' }
-        'N' { $script:SaveOption = '1' }
-        'M' { $script:SaveOption = '2' }
-        default { $script:SaveOption = '1' }
+    # Check the settings to see if we need to display this menu
+    switch ($ScriptSettings.SaveToTemporaryFolder) {
+        'true' { $script:SaveOption = '0' }
+        'false' { $script:SaveOption = '1' }
+        'manual' { $script:SaveOption = '2' }
+        default {
+            $_menu = @{
+                entries       = @('[Y] Yes'; '*[N] No'; '[M] Manually Enter SHA256')
+                Prompt        = 'Do you want to save the files to the Temp folder?'
+                DefaultString = 'N'
+            }
+            switch ( KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString']) {
+                'Y' { $script:SaveOption = '0' }
+                'N' { $script:SaveOption = '1' }
+                'M' { $script:SaveOption = '2' }
+                default { $script:SaveOption = '1' }
+            }
+        }
     }
 
     # If user did not select manual entry for Sha256, download file and calculate hash
@@ -538,13 +555,14 @@ Function Read-WinGet-InstallerValues {
         Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the installer locale. For example: en-US, en-CA'
         Write-Host -ForegroundColor 'Blue' -Object 'https://docs.microsoft.com/openspecs/office_standards/ms-oe376/6c085406-a698-4e12-9d4d-c3b0ee3dbc4a'
         $InstallerLocale = Read-Host -Prompt 'InstallerLocale' | TrimString
-        if (String.Validate $InstallerLocale -IsNull) { $InstallerLocale = 'en-US' }
+        # If user defined a default locale, add it
+        if ((String.Validate $InstallerLocale -IsNull) -and (String.Validate -not $ScriptSettings.DefaultInstallerLocale -IsNull)) { $InstallerLocale = $ScriptSettings.DefaultInstallerLocale }
 
-        if (String.Validate $InstallerLocale -MaxLength $Patterns.InstallerLocaleMaxLength -MatchPattern $Patterns.PackageLocale -NotNull) {
+        if (String.Validate $InstallerLocale -MaxLength $Patterns.InstallerLocaleMaxLength -MatchPattern $Patterns.PackageLocale -AllowNull) {
             $script:_returnValue = [ReturnValue]::Success()
         } else {
-            if (String.Validate -not $InstallerLocale -MaxLength $Patterns.InstallerLocaleMaxLength -NotNull) {
-                $script:_returnValue = [ReturnValue]::LengthError(1, $Patterns.InstallerLocaleMaxLength)
+            if (String.Validate -not $InstallerLocale -MaxLength $Patterns.InstallerLocaleMaxLength -AllowNull) {
+                $script:_returnValue = [ReturnValue]::LengthError(0, $Patterns.InstallerLocaleMaxLength)
             } elseif (String.Validate -not $InstallerLocale -MatchPattern $Patterns.PackageLocale) {
                 $script:_returnValue = [ReturnValue]::PatternError()
             } else {
@@ -691,16 +709,24 @@ Function Read-WinGet-InstallerValues-Minimal {
         $_NewInstaller['InstallerUrl'] = $NewInstallerUrl
 
         # Get or request Installer Sha256
-        $_menu = @{
-            entries       = @('[Y] Yes'; '*[N] No'; '[M] Manually Enter SHA256')
-            Prompt        = 'Do you want to save the files to the Temp folder?'
-            DefaultString = 'N'
-        }
-        switch ( KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString']) {
-            'Y' { $script:SaveOption = '0' }
-            'N' { $script:SaveOption = '1' }
-            'M' { $script:SaveOption = '2' }
-            default { $script:SaveOption = '1' }
+        # Check the settings to see if we need to display this menu
+        switch ($ScriptSettings.SaveToTemporaryFolder) {
+            'true' { $script:SaveOption = '0' }
+            'false' { $script:SaveOption = '1' }
+            'manual' { $script:SaveOption = '2' }
+            default {
+                $_menu = @{
+                    entries       = @('[Y] Yes'; '*[N] No'; '[M] Manually Enter SHA256')
+                    Prompt        = 'Do you want to save the files to the Temp folder?'
+                    DefaultString = 'N'
+                }
+                switch ( KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString']) {
+                    'Y' { $script:SaveOption = '0' }
+                    'N' { $script:SaveOption = '1' }
+                    'M' { $script:SaveOption = '2' }
+                    default { $script:SaveOption = '1' }
+                }
+            }
         }
 
         # If user did not select manual entry for Sha256, download file and calculate hash
@@ -779,6 +805,7 @@ Function PromptInstallerManifestValue {
     Param
     (
         [Parameter(Mandatory = $true, Position = 0)]
+        [AllowNull()]
         [PSCustomObject] $Variable,
         [Parameter(Mandatory = $true, Position = 1)]
         [string] $Key,
@@ -895,10 +922,9 @@ Function Read-WinGet-InstallerManifest {
 
     # Request Install Modes and validate
     do {
-        if (!$InstallModes) { $InstallModes = '' }
-        $script:InstallModes = $script:InstallModes | UniqueItems
+        if ($script:InstallModes) { $script:InstallModes = $script:InstallModes | UniqueItems }
         $script:InstallModes = PromptInstallerManifestValue $script:InstallModes 'InstallModes' "[Optional] List of supported installer modes. Options: $($Patterns.ValidInstallModes -join ', ')"
-        $script:InstallModes = $script:InstallModes | UniqueItems
+        if ($script:InstallModes) { $script:InstallModes = $script:InstallModes | UniqueItems }
         if ( (String.Validate $script:InstallModes -IsNull) -or (($script:InstallModes -split ',').Count -le $Patterns.MaxItemsInstallModes -and $($script:InstallModes.Split(',').Trim() | Where-Object { $_ -CNotIn $Patterns.ValidInstallModes }).Count -eq 0)) {
             $script:_returnValue = [ReturnValue]::Success()
         } else {
@@ -1223,12 +1249,17 @@ Function Enter-PR-Parameters {
         $_showMenu = $true
         switch -Wildcard ( $_line ) {
             '*CLA*' {
-                $_menu = @{
-                    Prompt        = 'Have you signed the Contributor License Agreement (CLA)?'
-                    Entries       = @('[Y] Yes'; '*[N] No')
-                    HelpText      = 'Reference Link: https://cla.opensource.microsoft.com/microsoft/winget-pkgs'
-                    HelpTextColor = ''
-                    DefaultString = 'N'
+                if ($ScriptSettings.SignedCLA -eq 'true') {
+                    $PrBodyContentReply += @($_line.Replace('[ ]', '[X]'))
+                    $_showMenu = $false
+                } else {
+                    $_menu = @{
+                        Prompt        = 'Have you signed the Contributor License Agreement (CLA)?'
+                        Entries       = @('[Y] Yes'; '*[N] No')
+                        HelpText      = 'Reference Link: https://cla.opensource.microsoft.com/microsoft/winget-pkgs'
+                        HelpTextColor = ''
+                        DefaultString = 'N'
+                    }
                 }
             }
     
@@ -1592,17 +1623,31 @@ Function Write-WinGet-LocaleManifest-Yaml {
     Write-Host "Yaml file created: $LocaleManifestPath"
 }
 
+function Remove-Manifest-Version {
+    Param(
+        [Parameter(Mandatory = $true, Position = 1)]
+        [string] $PathToVersion
+    )
+
+    # Remove the manifest, and then any parent folders so long as the parent folders are empty
+    do {
+        Remove-Item -Path $PathToVersion -Recurse -Force
+        $PathToVersion = Split-Path $PathToVersion
+    } while (@(Get-ChildItem $PathToVersion).Count -eq 0)
+}
+
 # Initialize the return value to be a success
 $script:_returnValue = [ReturnValue]::new(200)
 
 # Request the user to choose an operation mode
 Clear-Host
-Write-Host -ForegroundColor 'Cyan' 'Select Mode'
-Write-Colors "`n[", '1', "] New Manifest or Package Version`n" 'DarkCyan', 'White', 'DarkCyan'
-Write-Colors "`n[", '2', '] Quick Update Package Version ', "(Note: Must be used only when previous version`'s metadata is complete.)`n" 'DarkCyan', 'White', 'DarkCyan', 'Green'
-Write-Colors "`n[", '3', "] Update Package Metadata`n" 'DarkCyan', 'White', 'DarkCyan'
-Write-Colors "`n[", '4', "] New Locale`n" 'DarkCyan', 'White', 'DarkCyan'
-Write-Colors "`n[", 'q', ']', " Any key to quit`n" 'DarkCyan', 'White', 'DarkCyan', 'Red'
+Write-Host -ForegroundColor 'Yellow' "Select Mode:`n"
+Write-Colors '  [', '1', "] New Manifest or Package Version`n" 'DarkCyan', 'White', 'DarkCyan'
+Write-Colors '  [', '2', '] Quick Update Package Version ', "(Note: Must be used only when previous version`'s metadata is complete.)`n" 'DarkCyan', 'White', 'DarkCyan', 'Green'
+Write-Colors '  [', '3', "] Update Package Metadata`n" 'DarkCyan', 'White', 'DarkCyan'
+Write-Colors '  [', '4', "] New Locale`n" 'DarkCyan', 'White', 'DarkCyan'
+Write-Colors '  [', '5', "] Remove a manifest`n" 'DarkCyan', 'White', 'DarkCyan'
+Write-Colors '  [', 'Q', ']', " Any key to quit`n" 'DarkCyan', 'White', 'DarkCyan', 'Red'
 Write-Colors "`nSelection: " 'White'
 
 # Listen for keypress and set operation mode based on keypress
@@ -1611,10 +1656,12 @@ $Keys = @{
     [ConsoleKey]::D2      = '2';
     [ConsoleKey]::D3      = '3';
     [ConsoleKey]::D4      = '4';
+    [ConsoleKey]::D5      = '5';
     [ConsoleKey]::NumPad1 = '1';
     [ConsoleKey]::NumPad2 = '2';
     [ConsoleKey]::NumPad3 = '3';
     [ConsoleKey]::NumPad4 = '4';
+    [ConsoleKey]::NumPad5 = '5';
 }
 do {
     $keyInfo = [Console]::ReadKey($false)
@@ -1624,11 +1671,12 @@ switch ($Keys[$keyInfo.Key]) {
     '2' { $script:Option = 'QuickUpdateVersion' }
     '3' { $script:Option = 'EditMetadata' }
     '4' { $script:Option = 'NewLocale' }
+    '5' { $script:Option = 'RemoveManifest' }
     default { Write-Host; exit }
 }
 
 # Confirm the user undertands the implications of using the quick update mode
-if ($script:Option -eq 'QuickUpdateVersion') {
+if (($script:Option -eq 'QuickUpdateVersion') -and ($ScriptSettings.SuppressQuickUpdateWarning -ne 'true')) {
     $_menu = @{
         entries       = @('[Y] Continue with Quick Update'; '[N] Use Full Update Experience'; '*[Q] Exit Script')
         Prompt        = 'Quick Updates only allow for changes to the existing Installer URLs, Sha256 Values, and Product Codes. Are you sure you want to continue?'
@@ -1694,7 +1742,7 @@ if (Test-Path -Path "$PSScriptRoot\..\manifests") {
 $script:AppFolder = Join-Path $ManifestsFolder -ChildPath $PackageIdentifier.ToLower().Chars(0) | Join-Path -ChildPath $PackageIdentifierFolder | Join-Path -ChildPath $PackageVersion
 
 # If the user selected `NewLocale` or `EditMetadata` the version *MUST* already exist in the folder structure
-if (($script:Option -eq 'NewLocale') -or ($script:Option -eq 'EditMetadata')) {
+if ($script:Option -in @('NewLocale'; 'EditMetadata'; 'RemoveManifest')) {
     # Try getting the old manifests from the specified folder
     if (Test-Path -Path "$AppFolder\..\$PackageVersion") {
         $script:OldManifests = Get-ChildItem -Path "$AppFolder\..\$PackageVersion"
@@ -1849,40 +1897,60 @@ Switch ($script:Option) {
     'NewLocale' {
         Read-WinGet-LocaleManifest
         Write-WinGet-LocaleManifest-Yaml
-        if (Get-Command 'winget.exe' -ErrorAction SilentlyContinue) { winget validate $AppFolder }
+    }
+
+    'RemoveManifest' {
+        $_menu = @{
+            entries       = @("[Y] Remove $PackageIdentifier version $PackageVersion"; '*[N] Cancel')
+            Prompt        = 'Are you sure you want to continue?'
+            HelpText      = "Manifest Versions should only be removed when necessary`n"
+            HelpTextColor = 'Red'
+            DefaultString = 'N'
+        }
+        switch ( KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString'] -HelpText $_menu['HelpText'] -HelpTextColor $_menu['HelpTextColor']) {
+            'Y' { continue }
+            default { Write-Host; exit 1 }
+        }
+        Remove-Manifest-Version $AppFolder
     }
 }
 
-# If the user has winget installed, attempt to validate the manifests
-if (Get-Command 'winget.exe' -ErrorAction SilentlyContinue) { winget validate $AppFolder }
+if ($script:Option -ne 'RemoveManifest') {
+    # If the user has winget installed, attempt to validate the manifests
+    if (Get-Command 'winget.exe' -ErrorAction SilentlyContinue) { winget validate $AppFolder }
 
-# If the user has sandbox enabled, request to test the manifest in the sandbox
-if (Get-Command 'WindowsSandbox.exe' -ErrorAction SilentlyContinue) {
-    $_menu = @{
-        entries       = @('*[Y] Yes'; '[N] No')
-        Prompt        = '[Recommended] Do you want to test your Manifest in Windows Sandbox?'
-        DefaultString = 'Y'
-    }
-    switch ( KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString']) {
-        'Y' { $script:SandboxTest = '0' }
-        'N' { $script:SandboxTest = '1' }
-        default { $script:SandboxTest = '0' }
-    }
-    Write-Host
-    if ($script:SandboxTest -eq '0') {
-        if (Test-Path -Path "$PSScriptRoot\SandboxTest.ps1") {
-            $SandboxScriptPath = (Resolve-Path "$PSScriptRoot\SandboxTest.ps1").Path
+    # If the user has sandbox enabled, request to test the manifest in the sandbox
+    if (Get-Command 'WindowsSandbox.exe' -ErrorAction SilentlyContinue) {
+        # Check the settings to see if we need to display this menu
+        if ($ScriptSettings.AlwaysTestManifests -eq 'true') {
+            $script:SandboxTest = '0'
         } else {
-            while ([string]::IsNullOrWhiteSpace($SandboxScriptPath)) {
-                Write-Host
-                Write-Host -ForegroundColor 'Green' -Object 'SandboxTest.ps1 not found, input path'
-                $SandboxScriptPath = Read-Host -Prompt 'SandboxTest.ps1' | TrimString
+            $_menu = @{
+                entries       = @('*[Y] Yes'; '[N] No')
+                Prompt        = '[Recommended] Do you want to test your Manifest in Windows Sandbox?'
+                DefaultString = 'Y'
+            }
+            switch ( KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString']) {
+                'Y' { $script:SandboxTest = '0' }
+                'N' { $script:SandboxTest = '1' }
+                default { $script:SandboxTest = '0' }
+            }
+            Write-Host
+        }
+        if ($script:SandboxTest -eq '0') {
+            if (Test-Path -Path "$PSScriptRoot\SandboxTest.ps1") {
+                $SandboxScriptPath = (Resolve-Path "$PSScriptRoot\SandboxTest.ps1").Path
+            } else {
+                while ([string]::IsNullOrWhiteSpace($SandboxScriptPath)) {
+                    Write-Host
+                    Write-Host -ForegroundColor 'Green' -Object 'SandboxTest.ps1 not found, input path'
+                    $SandboxScriptPath = Read-Host -Prompt 'SandboxTest.ps1' | TrimString
+                }
+                & $SandboxScriptPath -Manifest $AppFolder
             }
         }
-        & $SandboxScriptPath -Manifest $AppFolder
     }
 }
-
 # If the user has git installed, request to automatically submit the PR
 if (Get-Command 'git.exe' -ErrorAction SilentlyContinue) {
     $_menu = @{
@@ -1910,6 +1978,7 @@ if ($PromptSubmit -eq '0') {
         }
         'EditMetadata' { $CommitType = 'Metadata' }
         'NewLocale' { $CommitType = 'Locale' }
+        'RemoveManifest' { $CommitType = 'Remove' }
     }
 
     # Change the users git configuration to suppress some git messages
