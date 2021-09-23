@@ -311,8 +311,8 @@ Function Read-WinGet-InstallerValues {
     # Get or request Installer Sha256
     # Check the settings to see if we need to display this menu
     switch ($ScriptSettings.SaveToTemporaryFolder) {
-        'true' { $script:SaveOption = '0' }
-        'false' { $script:SaveOption = '1' }
+        'always' { $script:SaveOption = '0' }
+        'never' { $script:SaveOption = '1' }
         'manual' { $script:SaveOption = '2' }
         default {
             $_menu = @{
@@ -514,12 +514,17 @@ Function Read-WinGet-InstallerValues {
         # If user selected to find automatically -
         # Install package, get family name, uninstall package
         if ($ChoicePfn -eq '0') {
-            Add-AppxPackage -Path $script:dest
-            $InstalledPkg = Get-AppxPackage | Select-Object -Last 1 | Select-Object PackageFamilyName, PackageFullName
-            $PackageFamilyName = $InstalledPkg.PackageFamilyName
-            Remove-AppxPackage $InstalledPkg.PackageFullName
-            if (String.Validate $PackageFamilyName -IsNull) {
-                $script:_returnValue = [ReturnValue]::new(500, 'Could not find PackageFamilyName', 'Value should be entered manually', 1)
+            try {
+                Add-AppxPackage -Path $script:dest
+                $InstalledPkg = Get-AppxPackage | Select-Object -Last 1 | Select-Object PackageFamilyName, PackageFullName
+                $PackageFamilyName = $InstalledPkg.PackageFamilyName
+                Remove-AppxPackage $InstalledPkg.PackageFullName
+            } catch {
+                Out-Null
+            } finally {
+                if (String.Validate $PackageFamilyName -IsNull) {
+                    $script:_returnValue = [ReturnValue]::new(500, 'Could not find PackageFamilyName', 'Value should be entered manually', 1)
+                }
             }
         }
         
@@ -711,8 +716,8 @@ Function Read-WinGet-InstallerValues-Minimal {
         # Get or request Installer Sha256
         # Check the settings to see if we need to display this menu
         switch ($ScriptSettings.SaveToTemporaryFolder) {
-            'true' { $script:SaveOption = '0' }
-            'false' { $script:SaveOption = '1' }
+            'always' { $script:SaveOption = '0' }
+            'never' { $script:SaveOption = '1' }
             'manual' { $script:SaveOption = '2' }
             default {
                 $_menu = @{
@@ -1543,8 +1548,8 @@ Function Write-WinGet-InstallerManifest-Yaml {
             $_FirstInstallerKeyValue = ConvertTo-Json($InstallerManifest.Installers[0].$_Key)
             foreach ($_Installer in $InstallerManifest.Installers) {
                 $_CurrentInstallerKeyValue = ConvertTo-Json($_Installer.$_Key)
-                if (String.Validate $_CurrentInstallerKeyValue -IsNull) {$_AllAreSame = $false}
-                else {$_AllAreSame = $_AllAreSame -and (@(Compare-Object $_CurrentInstallerKeyValue $_FirstInstallerKeyValue).Length -eq 0)}
+                if (String.Validate $_CurrentInstallerKeyValue -IsNull) { $_AllAreSame = $false }
+                else { $_AllAreSame = $_AllAreSame -and (@(Compare-Object $_CurrentInstallerKeyValue $_FirstInstallerKeyValue).Length -eq 0) }
             }
             # If all installers are the same move the key to the manifest level
             if ($_AllAreSame) {
@@ -1950,20 +1955,22 @@ if ($script:Option -ne 'RemoveManifest') {
     # If the user has sandbox enabled, request to test the manifest in the sandbox
     if (Get-Command 'WindowsSandbox.exe' -ErrorAction SilentlyContinue) {
         # Check the settings to see if we need to display this menu
-        if ($ScriptSettings.AlwaysTestManifests -eq 'true') {
-            $script:SandboxTest = '0'
-        } else {
-            $_menu = @{
-                entries       = @('*[Y] Yes'; '[N] No')
-                Prompt        = '[Recommended] Do you want to test your Manifest in Windows Sandbox?'
-                DefaultString = 'Y'
+        switch ($ScriptSettings.TestManifestsInSandbox) {
+            'always' { $script:SandboxTest = '0' }
+            'never' { $script:SandboxTest = '1' }
+            default {
+                $_menu = @{
+                    entries       = @('*[Y] Yes'; '[N] No')
+                    Prompt        = '[Recommended] Do you want to test your Manifest in Windows Sandbox?'
+                    DefaultString = 'Y'
+                }
+                switch ( KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString']) {
+                    'Y' { $script:SandboxTest = '0' }
+                    'N' { $script:SandboxTest = '1' }
+                    default { $script:SandboxTest = '0' }
+                }
+                Write-Host
             }
-            switch ( KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString']) {
-                'Y' { $script:SandboxTest = '0' }
-                'N' { $script:SandboxTest = '1' }
-                default { $script:SandboxTest = '0' }
-            }
-            Write-Host
         }
         if ($script:SandboxTest -eq '0') {
             if (Test-Path -Path "$PSScriptRoot\SandboxTest.ps1") {
@@ -1981,15 +1988,21 @@ if ($script:Option -ne 'RemoveManifest') {
 }
 # If the user has git installed, request to automatically submit the PR
 if (Get-Command 'git.exe' -ErrorAction SilentlyContinue) {
-    $_menu = @{
-        entries       = @('*[Y] Yes'; '[N] No')
-        Prompt        = 'Do you want to submit your PR now?'
-        DefaultString = 'Y'
-    }
-    switch ( KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString']) {
-        'Y' { $PromptSubmit = '0' }
-        'N' { $PromptSubmit = '1' }
-        default { $PromptSubmit = '0' }
+    switch ($ScriptSettings.AutoSubmitPRs) {
+        'always' { $PromptSubmit = '0' }
+        'never' { $PromptSubmit = '1' }
+        default {
+            $_menu = @{
+                entries       = @('*[Y] Yes'; '[N] No')
+                Prompt        = 'Do you want to submit your PR now?'
+                DefaultString = 'Y'
+            }
+            switch ( KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString']) {
+                'Y' { $PromptSubmit = '0' }
+                'N' { $PromptSubmit = '1' }
+                default { $PromptSubmit = '0' }
+            }
+        }
     }
 }
 Write-Host
