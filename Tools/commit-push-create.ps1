@@ -1,6 +1,6 @@
 ﻿Write-Host "Commit Push and Create Pull Request"
 git pull
-$acceptedShortForms = @('um','am','amd','umd','pi','mpc','u','add','n','arp','pc','pcarp','r','url','urlpc','ss','fn','ssfn','404')
+$acceptedShortForms = @('um','am','amd','umd','pi','mpc','u','add','n','arp','pc','pcarp','r','url','urlpc','ss','fn','ssfn','404','hash')
 if ($args[0]) {$PkgId = $args[0]} else {$PkgId = Read-Host -Prompt 'Enter Package Name'}
 if ($args[1]) {$PkgVersion = $args[1]} else {$PkgVersion = Read-Host -Prompt 'Enter Package Version'}
 if ($args[2] -and $args[2] -in $acceptedShortForms) { $CommitType = $args[2] }
@@ -27,6 +27,7 @@ elseif ($CommitType -eq 'urlpc') {$CommitType = "ProductCode/InstallerUrl"}
 elseif ($CommitType -eq 'ss') {$CommitType = "SignatureSha256"}
 elseif ($CommitType -eq 'fn') {$CommitType = "PackageFamilyName"}
 elseif ($CommitType -eq 'ssfn') {$CommitType = "SignatureSha256/FamilyName"}
+elseif ($CommitType -eq 'hash') {$CommitType = "InstallerSha256"}
 git fetch upstream master
 git checkout -b "$PkgId-$PkgVersion" FETCH_HEAD
 git add -A
