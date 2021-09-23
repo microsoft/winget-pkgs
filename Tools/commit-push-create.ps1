@@ -37,13 +37,10 @@ git push
 if (-not $issue) {
 gh pr create --body-file "C:\Users\Bittu\Downloads\winget-pkgs\.github\PULL_REQUEST_TEMPLATE.md" -f
 } else {
-    $PrBodyContent = Get-Content "$PSScriptRoot\..\.github\PULL_REQUEST_TEMPLATE.md"
     Write-Host "Enter issue number. For example`: 21983, 43509"
     $ResolvedIssue = Read-Host -Prompt 'Resolved Issue'
-    if ($ResolvedIssue.Contains('#')) {$PrBodyContent += "Resolves $ResolvedIssue"}
-    else {$PrBodyContent += "Resolves #$ResolvedIssue"}
-    Set-Content -Path PrBodyFile -Value $PrBodyContentReply | Out-Null
-    gh pr create --body-file PrBodyFile -f
-    Remove-Item PrBodyFile
+    if ($ResolvedIssue.Contains('#')) {$PrBodyContent = "- Resolves $ResolvedIssue"}
+    else {$PrBodyContent = "- Resolves #$ResolvedIssue"}
+    gh pr create --body $PrBodyContent -f
 }
 git switch "master"
