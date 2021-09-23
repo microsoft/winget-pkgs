@@ -1,4 +1,5 @@
-﻿Write-Host "Commit Push and Create Pull Request"
+﻿Param ([switch] $issue)
+Write-Host "Commit Push and Create Pull Request"
 git pull
 $acceptedShortForms = @('um','am','amd','umd','pi','mpc','u','add','n','arp','pc','pcarp','r','url','urlpc','ss','fn','ssfn','404','hash')
 if ($args[0]) {$PkgId = $args[0]} else {$PkgId = Read-Host -Prompt 'Enter Package Name'}
@@ -33,5 +34,16 @@ git checkout -b "$PkgId-$PkgVersion" FETCH_HEAD
 git add -A
 git commit -m "$CommitType`: $PkgId version $PkgVersion"
 git push
+if (-not $issue) {
 gh pr create --body-file "C:\Users\Bittu\Downloads\winget-pkgs\.github\PULL_REQUEST_TEMPLATE.md" -f
+} else {
+    $PrBodyContent = Get-Content "$PSScriptRoot\..\.github\PULL_REQUEST_TEMPLATE.md"
+    Write-Host "Enter issue number. For example`: 21983, 43509"
+    $ResolvedIssue = Read-Host -Prompt 'Resolved Issue'
+    if ($ResolvedIssue.Contains('#')) {$PrBodyContent += "Resolves $ResolvedIssue"}
+    else {$PrBodyContent += "Resolves #$ResolvedIssue"}
+    Set-Content -Path PrBodyFile -Value $PrBodyContentReply | Out-Null
+    gh pr create --body-file PrBodyFile -f
+    Remove-Item PrBodyFile
+}
 git switch "master"
