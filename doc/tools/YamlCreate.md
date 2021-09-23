@@ -19,19 +19,21 @@ If you have Git installed, you can also create the pull request for your manifes
 # YamlCreate Settings
 YamlCreate offers a few settings to customize your manifest creation experience. The settings file is found in your local appdata folder under `YamlCreate`. It is empty by default, but you can copy the sample below which describes what all of the available options are; or, you can enter just specific keys as you see fit.
 ```yaml
-# This setting allows you to skip the prompt to test your manifest in windows sandbox
-# If this value is set to true, all manifests will be tested by default
-AlwaysTestManifests: false
-
-# This setting allows you to set a default installer locale
-# Any value defined here will be set as the installer locale if one is not entered
-DefaultInstallerLocale: en-US
+# This setting allows you to set a default action for whether or not to test your manifest in windows sandbox
+    # always - Always tests manifests
+    # never - Never tests manifests
+TestManifestsInSandbox: ask
 
 # This setting allows you to define a default action for whether or not to save files to the temprorary folder
-    # true - Always saves files to the temporary folder
-    # false - Always removes the files from the temporary folder after secript excecution
+    # always - Always saves files to the temporary folder
+    # never - Always removes the files from the temporary folder after secript excecution
     # manual - Never downloads any files. All InstallerSha256 values must be entered manually
-SaveToTemporaryFolder: false
+SaveToTemporaryFolder: ask
+
+# This setting allows you to set a default action for whether or not to submit PR's
+    # always - Always submits PR's automatically
+    # never - Never submits PR's automatically
+AutoSubmitPRs: ask
 
 # This setting allows you to set a default value for whether or not you have signed the Microsoft CLA
 # If this value is set to true, all automatic PR's will be marked as having the CLA signed
@@ -40,4 +42,8 @@ SignedCLA: false
 # This setting allows you to skip the prompt to confirm you want to use quick update mode
 # If this value is set to true, the Quick Update Warning will be skipped
 SuppressQuickUpdateWarning: false
+
+# This setting allows you to set a default installer locale
+# Any value defined here will be set as the installer locale if one is not entered
+DefaultInstallerLocale: en-US
 ```
