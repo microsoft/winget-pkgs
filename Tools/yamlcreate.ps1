@@ -1,4 +1,37 @@
 ﻿#Requires -Version 5
+Param
+(
+    [switch] $Settings,
+    [switch] $help,
+    [Parameter(Mandatory = $false)]
+    [string] $PackageIdentifier,
+    [Parameter(Mandatory = $false)]
+    [string] $PackageVersion
+    
+)
+
+if ($help) {
+    Write-Host -ForegroundColor 'Green' "For full documentation of the script, see https://github.com/microsoft/winget-pkgs/tree/master/doc/tools/YamlCreate.md"
+    Write-Host -ForegroundColor 'Yellow' 'Usage: ' -NoNewline
+    Write-Host -ForegroundColor 'White' '.\YamlCreate.ps1 [-PackageIdentifier <identifier>] [-PackageVersion <version>] [-Settings]'
+    Write-Host
+    exit
+}
+
+# Check for settings directory and create it if none exists
+$script:SettingsPath = Join-Path $env:LOCALAPPDATA -ChildPath 'YamlCreate'
+if (!(Test-Path $script:SettingsPath)) { New-Item -ItemType 'Directory' -Force -Path $script:SettingsPath | Out-Null }
+# Check for settings file and create it if none exists
+$script:SettingsPath = $(Join-Path $script:SettingsPath -ChildPath 'Settings.yaml')
+if (!(Test-Path $script:SettingsPath)) { '# See https://github.com/microsoft/winget-pkgs/tree/master/doc/tools/YamlCreate.md for a list of available settings' > $script:SettingsPath }
+# Load settings from file
+$ScriptSettings = ConvertFrom-Yaml -Yaml ($(Get-Content -Path $script:SettingsPath -Encoding UTF8) -join "`n")
+
+if ($Settings) {
+    Invoke-Item -Path $script:SettingsPath
+    exit
+}
+
 $ScriptHeader = '# Created with YamlCreate.ps1 v2.0.0'
 $ManifestVersion = '1.0.0'
 $PSDefaultParameterValues = @{ '*:Encoding' = 'UTF8' }
@@ -55,15 +88,6 @@ try {
     Write-Host 'Error downloading schemas. Please run the script again.' -ForegroundColor Red
     exit 1
 }
-
-# Check for settings directory and create it if none exists
-$script:SettingsPath = Join-Path $env:LOCALAPPDATA -ChildPath 'YamlCreate'
-if (!(Test-Path $script:SettingsPath)) { New-Item -ItemType 'Directory' -Force -Path $script:SettingsPath | Out-Null }
-# Check for settings file and create it if none exists
-$script:SettingsPath = $(Join-Path $script:SettingsPath -ChildPath 'Settings.yaml')
-if (!(Test-Path $script:SettingsPath)) { '# See https://github.com/microsoft/winget-pkgs/tree/master/doc/tools/YamlCreate.md for a list of available settings' > $script:SettingsPath }
-# Load settings from file
-$ScriptSettings = ConvertFrom-Yaml -Yaml ($(Get-Content -Path $script:SettingsPath -Encoding UTF8) -join "`n")
 
 filter TrimString {
     $_.Trim()
@@ -1408,7 +1432,7 @@ Function Enter-PR-Parameters {
                         Write-Host -ForegroundColor 'Red' "Invalid Issue: $i"
                         continue
                     }
-                    $PrBodyContentReply += @("Resolves #$i")
+                    $PrBodyContentReply += @("- Resolves #$i")
                 }
             }
         }
@@ -1727,11 +1751,13 @@ Write-Host
 
 # Request Package Identifier and Validate
 do {
-    Write-Host -ForegroundColor 'Red' $script:_returnValue.ErrorString()
-    Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the Package Identifier, in the following format <Publisher shortname.Application shortname>. For example: Microsoft.Excel'
-    $script:PackageIdentifier = Read-Host -Prompt 'PackageIdentifier' | TrimString
-    $PackageIdentifierFolder = $PackageIdentifier.Replace('.', '\')
+    if ((String.Validate $PackageIdentifier -IsNull) -or ($script:_returnValue.StatusCode -ne [ReturnValue]::Success().StatusCode)) {
+        Write-Host -ForegroundColor 'Red' $script:_returnValue.ErrorString()
+        Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the Package Identifier, in the following format <Publisher shortname.Application shortname>. For example: Microsoft.Excel'
+        $script:PackageIdentifier = Read-Host -Prompt 'PackageIdentifier' | TrimString
+    }
 
+    $PackageIdentifierFolder = $PackageIdentifier.Replace('.', '\')
     if (String.Validate $PackageIdentifier -MinLength 4 -MaxLength $Patterns.IdentifierMaxLength -MatchPattern $Patterns.PackageIdentifier) {
         $script:_returnValue = [ReturnValue]::Success()
     } else {
@@ -1747,10 +1773,11 @@ do {
 
 # Request Package Version and Validate
 do {
-    Write-Host -ForegroundColor 'Red' $script:_returnValue.ErrorString()
-    Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the version. for example: 1.33.7'
-    $script:PackageVersion = Read-Host -Prompt 'Version' | TrimString
-
+    if ((String.Validate $PackageVersion -IsNull) -or ($script:_returnValue.StatusCode -ne [ReturnValue]::Success().StatusCode)) {
+        Write-Host -ForegroundColor 'Red' $script:_returnValue.ErrorString()
+        Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the version. for example: 1.33.7'
+        $script:PackageVersion = Read-Host -Prompt 'Version' | TrimString
+    }
     if (String.Validate $PackageVersion -MaxLength $Patterns.VersionMaxLength -MatchPattern $Patterns.PackageVersion -NotNull) {
         $script:_returnValue = [ReturnValue]::Success()
     } else {
