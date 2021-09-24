@@ -11,7 +11,7 @@ Param
 )
 
 if ($help) {
-    Write-Host -ForegroundColor 'Green' "For full documentation of the script, see https://github.com/microsoft/winget-pkgs/tree/master/doc/tools/YamlCreate.md"
+    Write-Host -ForegroundColor 'Green' 'For full documentation of the script, see https://github.com/microsoft/winget-pkgs/tree/master/doc/tools/YamlCreate.md'
     Write-Host -ForegroundColor 'Yellow' 'Usage: ' -NoNewline
     Write-Host -ForegroundColor 'White' '.\YamlCreate.ps1 [-PackageIdentifier <identifier>] [-PackageVersion <version>] [-Settings]'
     Write-Host
@@ -1563,28 +1563,60 @@ Function Write-WinGet-InstallerManifest-Yaml {
     If ($InstallerManifest['Dependencies']) {
         $InstallerManifest['Dependencies'] = SortYamlKeys $InstallerManifest['Dependencies'] $InstallerDependencyProperties -NoComments
     }
-    # Move Manifest Level Keys to installer Level
+    # Move Installer Level Keys to Manifest Level
     $_KeysToMove = $InstallerEntryProperties | Where-Object { $_ -in $InstallerProperties }
     foreach ($_Key in $_KeysToMove) {
         if ($_Key -in $InstallerManifest.Installers[0].Keys) {
-            # Check if all installers have the same value
-            $_AllAreSame = $true
-            $_FirstInstallerKeyValue = ConvertTo-Json($InstallerManifest.Installers[0].$_Key)
-            foreach ($_Installer in $InstallerManifest.Installers) {
-                $_CurrentInstallerKeyValue = ConvertTo-Json($_Installer.$_Key)
-                if (String.Validate $_CurrentInstallerKeyValue -IsNull) { $_AllAreSame = $false }
-                else { $_AllAreSame = $_AllAreSame -and (@(Compare-Object $_CurrentInstallerKeyValue $_FirstInstallerKeyValue).Length -eq 0) }
-            }
-            # If all installers are the same move the key to the manifest level
-            if ($_AllAreSame) {
-                $InstallerManifest[$_Key] = $InstallerManifest.Installers[0].$_Key
+            # Handle the switches specially
+            if ($_Key -eq 'InstallerSwitches') {
+                # Go into each of the subkeys to see if they are the same
+                foreach ($_InstallerSwitchKey in $InstallerManifest.Installers[0].$_Key.Keys) {
+                    $_AllAreSame = $true
+                    $_FirstInstallerSwitchKeyValue = ConvertTo-Json($InstallerManifest.Installers[0].$_Key.$_InstallerSwitchKey)
+                    foreach ($_Installer in $InstallerManifest.Installers) {
+                        $_CurrentInstallerSwitchKeyValue = ConvertTo-Json($_Installer.$_Key.$_InstallerSwitchKey)
+                        if (String.Validate $_CurrentInstallerSwitchKeyValue -IsNull) { $_AllAreSame = $false }
+                        else { $_AllAreSame = $_AllAreSame -and (@(Compare-Object $_CurrentInstallerSwitchKeyValue $_FirstInstallerSwitchKeyValue).Length -eq 0) }
+                    }
+                    if ($_AllAreSame) {
+                        if ($_Key -notin $InstallerManifest.Keys) { $InstallerManifest[$_Key] = @{} }
+                        $InstallerManifest.$_Key[$_InstallerSwitchKey] = $InstallerManifest.Installers[0].$_Key.$_InstallerSwitchKey
+                    }
+                }
+                # Remove them from the individual installer switches if we moved them to the manifest level
+                if ($_Key -in $InstallerManifest.Keys) {
+                    foreach ($_InstallerSwitchKey in $InstallerManifest.$_Key.Keys) {
+                        foreach ($_Installer in $InstallerManifest.Installers) {
+                            if ($_Installer.Keys -contains $_Key) {
+                                if ($_Installer.$_Key.Keys -contains $_InstallerSwitchKey) { $_Installer.$_Key.Remove($_InstallerSwitchKey) }
+                                if (@($_Installer.$_Key.Keys).Count -eq 0) { $_Installer.Remove($_Key) }
+                            }
+                        }
+                    }
+                }
+            } else {
+                # Check if all installers are the same
+                $_AllAreSame = $true
+                $_FirstInstallerKeyValue = ConvertTo-Json($InstallerManifest.Installers[0].$_Key)
                 foreach ($_Installer in $InstallerManifest.Installers) {
-                    $_Installer.Remove($_Key)
+                    $_CurrentInstallerKeyValue = ConvertTo-Json($_Installer.$_Key)
+                    if (String.Validate $_CurrentInstallerKeyValue -IsNull) { $_AllAreSame = $false }
+                    else { $_AllAreSame = $_AllAreSame -and (@(Compare-Object $_CurrentInstallerKeyValue $_FirstInstallerKeyValue).Length -eq 0) }
+                }
+                # If all installers are the same move the key to the manifest level
+                if ($_AllAreSame) {
+                    $InstallerManifest[$_Key] = $InstallerManifest.Installers[0].$_Key
+                    foreach ($_Installer in $InstallerManifest.Installers) {
+                        $_Installer.Remove($_Key)
+                    }
                 }
             }
         }
     }
-
+    if ($InstallerManifest.Keys -contains 'InstallerSwitches') { $InstallerManifest['InstallerSwitches'] = SortYamlKeys $InstallerManifest.InstallerSwitches $InstallerSwitchProperties -NoComments }
+    foreach ($_Installer in $InstallerManifest.Installers) {
+        if ($_Installer.Keys -contains 'InstallerSwitches') { $_Installer['InstallerSwitches'] = SortYamlKeys $_Installer.InstallerSwitches $InstallerSwitchProperties -NoComments }
+    }
     $InstallerManifest = SortYamlKeys $InstallerManifest $InstallerProperties -NoComments
    
     # Create the folder for the file if it doesn't exist
@@ -1852,10 +1884,25 @@ if ($OldManifests.Name -eq "$PackageIdentifier.installer.yaml" -and $OldManifest
     $_KeysToMove = $InstallerEntryProperties | Where-Object { $_ -in $InstallerProperties }
     foreach ($_Key in $_KeysToMove) {
         if ($_Key -in $script:OldInstallerManifest.Keys) {
-            foreach ($_Installer in $script:OldInstallerManifest['Installers']) {
-                if ($_Key -eq 'InstallModes') { $script:InstallModes = [string]$script:OldInstallerManifest.$_Key }
-                $_Installer[$_Key] = $script:OldInstallerManifest.$_Key
+            # Handle Installer switches separately
+            if ($_Key -eq 'InstallerSwitches') {
+                $_SwitchKeysToMove = $script:OldInstallerManifest.$_Key.Keys
+                foreach ($_SwitchKey in $_SwitchKeysToMove) {
+                    # If the InstallerSwitches key doesn't exist, we need to create it, otherwise, preserve switches that were already there
+                    foreach ($_Installer in $script:OldInstallerManifest['Installers']) {
+                        if ('InstallerSwitches' -notin $_Installer.Keys) { $_Installer['InstallerSwitches'] = @{} }
+                        $_Installer.InstallerSwitches["$_SwitchKey"] = $script:OldInstallerManifest.$_Key.$_SwitchKey
+                    }
+                }
+                $script:OldInstallerManifest.Remove($_Key)
+                continue
+            } else {
+                foreach ($_Installer in $script:OldInstallerManifest['Installers']) {
+                    if ($_Key -eq 'InstallModes') { $script:InstallModes = [string]$script:OldInstallerManifest.$_Key }
+                    $_Installer[$_Key] = $script:OldInstallerManifest.$_Key
+                }
             }
+            New-Variable -Name $_Key -Value $($script:OldInstallerManifest.$_Key -join ', ') -Scope Script -Force
             $script:OldInstallerManifest.Remove($_Key)
         }
     }
@@ -1888,10 +1935,25 @@ if ($OldManifests.Name -eq "$PackageIdentifier.installer.yaml" -and $OldManifest
     $_KeysToMove = $InstallerEntryProperties | Where-Object { $_ -in $InstallerProperties }
     foreach ($_Key in $_KeysToMove) {
         if ($_Key -in $script:OldInstallerManifest.Keys) {
-            if ($_Key -eq 'InstallModes') { $script:InstallModes = [string]$script:OldInstallerManifest.$_Key }
-            foreach ($_Installer in $script:OldInstallerManifest['Installers']) {
-                $_Installer[$_Key] = $script:OldInstallerManifest.$_Key
+            # Handle Installer switches separately
+            if ($_Key -eq 'InstallerSwitches') {
+                $_SwitchKeysToMove = $script:OldInstallerManifest.$_Key.Keys
+                foreach ($_SwitchKey in $_SwitchKeysToMove) {
+                    # If the InstallerSwitches key doesn't exist, we need to create it, otherwise, preserve switches that were already there
+                    foreach ($_Installer in $script:OldInstallerManifest['Installers']) {
+                        if ('InstallerSwitches' -notin $_Installer.Keys) { $_Installer['InstallerSwitches'] = @{} }
+                        $_Installer.InstallerSwitches["$_SwitchKey"] = $script:OldInstallerManifest.$_Key.$_SwitchKey
+                    }
+                }
+                $script:OldInstallerManifest.Remove($_Key)
+                continue
+            } else {
+                foreach ($_Installer in $script:OldInstallerManifest['Installers']) {
+                    if ($_Key -eq 'InstallModes') { $script:InstallModes = [string]$script:OldInstallerManifest.$_Key }
+                    $_Installer[$_Key] = $script:OldInstallerManifest.$_Key
+                }
             }
+            New-Variable -Name $_Key -Value $($script:OldInstallerManifest.$_Key -join ', ') -Scope Script -Force
             $script:OldInstallerManifest.Remove($_Key)
         }
     }
@@ -1921,7 +1983,8 @@ if ($OldManifests) {
         'Capabilities'; 'RestrictedCapabilities'
     )
     Foreach ($param in $_Parameters) {
-        New-Variable -Name $param -Value $(if ($script:OldManifestType -eq 'MultiManifest') { (GetMultiManifestParameter $param) } else { $script:OldVersionManifest[$param] }) -Scope Script -Force
+        $_ReadValue = $(if ($script:OldManifestType -eq 'MultiManifest') { (GetMultiManifestParameter $param) } else { $script:OldVersionManifest[$param] })
+        if (String.Validate -Not $_ReadValue -IsNull) { New-Variable -Name $param -Value $_ReadValue -Scope Script -Force }
     }
 }
 
