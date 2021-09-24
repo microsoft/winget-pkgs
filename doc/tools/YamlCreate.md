@@ -16,8 +16,13 @@ The script can automatically create commits and branches within your fork of the
 ## GitHub CLI
 If you have Git installed, you can also create the pull request for your manifest directly from the script. You will have to install the GitHub CLI and authorize it with your GitHub Account. Again, winget makes installing the CLI easy. Open up PowerShell and install the GitHub CLI using `winget install GitHub.CLI`. Once the CLI is installed, close, then re-open PowerShell. To log in and authorize the CLI, run the command `gh auth login`. Follow the prompts that appear to finish the authorization.
 
+# Command Line Arguments
+When running YamlCreate through the command line, you can specify additional arguments such as the package identifier or the package version. You can also use the settings switch to open the settings file. More information on the available settings is below.
+
+`.\YamlCreate.ps1 [-PackageIdentifier <identifier>] [-PackageVersion <version>] [-Settings]`
+
 # YamlCreate Settings
-YamlCreate offers a few settings to customize your manifest creation experience. The settings file is found in your local appdata folder under `YamlCreate`. It is empty by default, but you can copy the sample below which describes what all of the available options are; or, you can enter just specific keys as you see fit.
+YamlCreate offers a few settings to customize your manifest creation experience. The settings file is found in the `%LOCALAPPDATA%\YamlCreate` folder. It is empty by default, but you can copy the sample below which describes what all of the available options are; or, you can enter just specific keys as you see fit.
 ```yaml
 # This setting allows you to set a default action for whether or not to test your manifest in windows sandbox
     # always - Always tests manifests
