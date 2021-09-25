@@ -51,4 +51,8 @@ SuppressQuickUpdateWarning: false
 # This setting allows you to set a default installer locale
 # Any value defined here will be set as the installer locale if one is not entered
 DefaultInstallerLocale: en-US
+
+# This setting allows for the usage of various advanced modes
+# Unless you know what you are doing, it is best to leave this disabled
+EnableDeveloperOptions: false
 ```

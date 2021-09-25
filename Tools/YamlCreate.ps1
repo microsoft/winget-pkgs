@@ -2,6 +2,7 @@
 Param
 (
     [switch] $Settings,
+    [switch] $AutoUpgrade,
     [switch] $help,
     [Parameter(Mandatory = $false)]
     [string] $PackageIdentifier,
@@ -845,12 +846,13 @@ Function Read-WinGet-InstallerValues-Minimal {
         } until ($script:_returnValue.StatusCode -eq [ReturnValue]::Success().StatusCode)
 
         # If the product code entered is empty; Ensure we remove it if it exists and don't add it if it doesn't exist
-        if ((String.Validate $NewProductCode -IsNull) -and ($_NewInstaller.Keys -contains 'ProductCode')) { 
-            $_NewInstaller.Remove('ProductCode')
-        } elseif (String.Validate -Not $NewProductCode -IsNull ) {
+        if (String.Validate -not $NewProductCode -IsNull) {
             $_NewInstaller['ProductCode'] = $NewProductCode
+        # We can't rely on the destination path in this case, since the SHA could have been entered manually
+        } elseif ( ($_Installer.Keys -contains 'ProductCode') -and ($_Installer.InstallerType -notin @('exe','nullsoft','inno'))) {
+            $_Installer.Remove('ProductCode')
         }
-
+        
         #Add the updated installer to the new installers array
         $_NewInstaller = SortYamlKeys $_NewInstaller $InstallerEntryProperties -NoComments
         $_NewInstallers += $_NewInstaller
@@ -1732,40 +1734,46 @@ function Remove-Manifest-Version {
 # Initialize the return value to be a success
 $script:_returnValue = [ReturnValue]::new(200)
 
-# Request the user to choose an operation mode
-Clear-Host
-Write-Host -ForegroundColor 'Yellow' "Select Mode:`n"
-Write-Colors '  [', '1', "] New Manifest or Package Version`n" 'DarkCyan', 'White', 'DarkCyan'
-Write-Colors '  [', '2', '] Quick Update Package Version ', "(Note: Must be used only when previous version`'s metadata is complete.)`n" 'DarkCyan', 'White', 'DarkCyan', 'Green'
-Write-Colors '  [', '3', "] Update Package Metadata`n" 'DarkCyan', 'White', 'DarkCyan'
-Write-Colors '  [', '4', "] New Locale`n" 'DarkCyan', 'White', 'DarkCyan'
-Write-Colors '  [', '5', "] Remove a manifest`n" 'DarkCyan', 'White', 'DarkCyan'
-Write-Colors '  [', 'Q', ']', " Any key to quit`n" 'DarkCyan', 'White', 'DarkCyan', 'Red'
-Write-Colors "`nSelection: " 'White'
+$script:UsingAdvancedOption = ($ScriptSettings.EnableDeveloperOptions -eq 'true') -and ($AutoUpgrade)
 
-# Listen for keypress and set operation mode based on keypress
-$Keys = @{
-    [ConsoleKey]::D1      = '1';
-    [ConsoleKey]::D2      = '2';
-    [ConsoleKey]::D3      = '3';
-    [ConsoleKey]::D4      = '4';
-    [ConsoleKey]::D5      = '5';
-    [ConsoleKey]::NumPad1 = '1';
-    [ConsoleKey]::NumPad2 = '2';
-    [ConsoleKey]::NumPad3 = '3';
-    [ConsoleKey]::NumPad4 = '4';
-    [ConsoleKey]::NumPad5 = '5';
-}
-do {
-    $keyInfo = [Console]::ReadKey($false)
-} until ($keyInfo.Key)
-switch ($Keys[$keyInfo.Key]) {
-    '1' { $script:Option = 'New' }
-    '2' { $script:Option = 'QuickUpdateVersion' }
-    '3' { $script:Option = 'EditMetadata' }
-    '4' { $script:Option = 'NewLocale' }
-    '5' { $script:Option = 'RemoveManifest' }
-    default { Write-Host; exit }
+if (!$script:UsingAdvancedOption) {
+    # Request the user to choose an operation mode
+    Clear-Host
+    Write-Host -ForegroundColor 'Yellow' "Select Mode:`n"
+    Write-Colors '  [', '1', "] New Manifest or Package Version`n" 'DarkCyan', 'White', 'DarkCyan'
+    Write-Colors '  [', '2', '] Quick Update Package Version ', "(Note: Must be used only when previous version`'s metadata is complete.)`n" 'DarkCyan', 'White', 'DarkCyan', 'Green'
+    Write-Colors '  [', '3', "] Update Package Metadata`n" 'DarkCyan', 'White', 'DarkCyan'
+    Write-Colors '  [', '4', "] New Locale`n" 'DarkCyan', 'White', 'DarkCyan'
+    Write-Colors '  [', '5', "] Remove a manifest`n" 'DarkCyan', 'White', 'DarkCyan'
+    Write-Colors '  [', 'Q', ']', " Any key to quit`n" 'DarkCyan', 'White', 'DarkCyan', 'Red'
+    Write-Colors "`nSelection: " 'White'
+
+    # Listen for keypress and set operation mode based on keypress
+    $Keys = @{
+        [ConsoleKey]::D1      = '1';
+        [ConsoleKey]::D2      = '2';
+        [ConsoleKey]::D3      = '3';
+        [ConsoleKey]::D4      = '4';
+        [ConsoleKey]::D5      = '5';
+        [ConsoleKey]::NumPad1 = '1';
+        [ConsoleKey]::NumPad2 = '2';
+        [ConsoleKey]::NumPad3 = '3';
+        [ConsoleKey]::NumPad4 = '4';
+        [ConsoleKey]::NumPad5 = '5';
+    }
+    do {
+        $keyInfo = [Console]::ReadKey($false)
+    } until ($keyInfo.Key)
+    switch ($Keys[$keyInfo.Key]) {
+        '1' { $script:Option = 'New' }
+        '2' { $script:Option = 'QuickUpdateVersion' }
+        '3' { $script:Option = 'EditMetadata' }
+        '4' { $script:Option = 'NewLocale' }
+        '5' { $script:Option = 'RemoveManifest' }
+        default { Write-Host; exit }
+    }
+} else {
+    if ($AutoUpgrade) { $script:Option = 'Auto' }
 }
 
 # Confirm the user undertands the implications of using the quick update mode
@@ -1863,7 +1871,7 @@ if ($script:Option -in @('NewLocale'; 'EditMetadata'; 'RemoveManifest')) {
 # If the user selected `QuickUpdateVersion`, the old manifests must exist
 # If the user selected `New`, the old manifest type is specified as none
 if (-not (Test-Path -Path "$AppFolder\..")) {
-    if ($script:Option -eq 'QuickUpdateVersion') { Write-Host -ForegroundColor Red 'This option requires manifest of previous version of the package. If you want to create a new package, please select Option 1.'; exit }
+    if ($script:Option -in @('QuickUpdateVersion', 'Auto')) { Write-Host -ForegroundColor Red 'This option requires manifest of previous version of the package. If you want to create a new package, please select Option 1.'; exit }
     $script:OldManifestType = 'None'
 }
 
@@ -2040,6 +2048,78 @@ Switch ($script:Option) {
         }
         Remove-Manifest-Version $AppFolder
     }
+
+    'Auto' {
+        # Set new package version
+        $script:OldInstallerManifest['PackageVersion'] = $PackageVersion
+        $script:OldLocaleManifest['PackageVersion'] = $PackageVersion
+        $script:OldVersionManifest['PackageVersion'] = $PackageVersion
+        
+        # Update the manifest with URLs that are already there
+        Write-Host $NewLine
+        Write-Host 'Updating Manifest Information. This may take a while...' -ForegroundColor Blue
+        foreach ($_Installer in $script:OldInstallerManifest.Installers) {
+            # Download the file at the URL
+            $WebClient = New-Object System.Net.WebClient
+            $Filename = [System.IO.Path]::GetFileName($($_Installer.InstallerUrl))
+            $script:dest = "$env:TEMP\$Filename"
+            try {
+                $WebClient.DownloadFile($($_Installer.InstallerUrl), $script:dest)
+            } catch {
+                Write-Host 'Error downloading file. Please run the script again.' -ForegroundColor Red
+                exit 1
+            } finally {
+                # Get the Sha256
+                $_Installer['InstallerSha256'] = (Get-FileHash -Path $script:dest -Algorithm SHA256).Hash
+                # Update the product code, if a new one exists
+                # If a new product code doesn't exist, and the installer isn't an `.exe` file, remove the product code if it exists
+                $MSIProductCode = [string]$(Get-AppLockerFileInformation -Path $script:dest | Select-Object Publisher | Select-String -Pattern '{[A-Z0-9]{8}-([A-Z0-9]{4}-){3}[A-Z0-9]{12}}').Matches
+                if (String.Validate -not $MSIProductCode -IsNull) {
+                    $_Installer['ProductCode'] = $MSIProductCode
+                } elseif ( ($_Installer.Keys -contains 'ProductCode') -and ($script:dest -notmatch '.exe$')) {
+                    $_Installer.Remove('ProductCode')
+                }
+                # If the installer is msix or appx, try getting the new SignatureSha256
+                # If the new SignatureSha256 can't be found, remove it if it exists
+                if ($_Installer.InstallerType -in @('msix', 'appx')) {
+                    if (Get-Command 'winget.exe' -ErrorAction SilentlyContinue) { $NewSignatureSha256 = winget hash -m $script:dest | Select-String -Pattern 'SignatureSha256:' | ConvertFrom-String; if ($NewSignatureSha256.P2) { $NewSignatureSha256 = $NewSignatureSha256.P2.ToUpper() } }
+                }
+                if (String.Validate -not $NewSignatureSha256 -IsNull) { 
+                    $_Installer['SignatureSha256'] = $NewSignatureSha256
+                } elseif ($_Installer.Keys -contains 'SignatureSha256') {
+                    $_Installer.Remove('SignatureSha256')
+                }
+                # If the installer is msix or appx, try getting the new package family name
+                # If the new package family name can't be found, remove it if it exists
+                if ($script:dest -match '\.(msix|appx)(bundle){0,1}$') { 
+                    try {
+                        Add-AppxPackage -Path $script:dest
+                        $InstalledPkg = Get-AppxPackage | Select-Object -Last 1 | Select-Object PackageFamilyName, PackageFullName
+                        $PackageFamilyName = $InstalledPkg.PackageFamilyName
+                        Remove-AppxPackage $InstalledPkg.PackageFullName
+                    } catch {
+                        Out-Null
+                    } finally {
+                        if (String.Validate -not $PackageFamilyName -IsNull) {
+                            $_Installer['PackageFamilyName'] = $PackageFamilyName
+                        } elseif ($_Installer.Keys -contains 'PackageFamilyName') {
+                            $_Installer.Remove('PackageFamilyName')
+                        }
+                    }
+                }
+                # Remove the downloaded files
+                Remove-Item -Path $script:dest 
+            }
+        }
+        # Write the new manifests
+        $script:Installers = $script:OldInstallerManifest.Installers
+        New-Variable -Name 'PackageLocale' -Value 'en-US' -Scope 'Script' -Force
+        Write-WinGet-LocaleManifest-Yaml
+        Write-WinGet-InstallerManifest-Yaml
+        Write-WinGet-VersionManifest-Yaml
+        # Remove the old manifests
+        if ($PackageVersion -ne $LastVersion) {Remove-Manifest-Version "$AppFolder\..\$LastVersion"}
+    }
 }
 
 if ($script:Option -ne 'RemoveManifest') {
@@ -2105,7 +2185,7 @@ Write-Host
 if ($PromptSubmit -eq '0') {
     # Determine what type of update should be used as the prefix for the PR
     switch -regex ($Option) {
-        'New|QuickUpdateVersion' {
+        'New|QuickUpdateVersion|Auto' {
             if ( $script:OldManifestType -eq 'None' ) { $CommitType = 'New package' }
             elseif ($script:LastVersion -lt $script:PackageVersion ) { $CommitType = 'New version' }
             elseif ($script:PackageVersion -in $script:ExistingVersions) { $CommitType = 'Update' }
