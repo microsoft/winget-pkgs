@@ -523,16 +523,20 @@ Function Read-WinGet-InstallerValues {
             } until ($script:_returnValue.StatusCode -eq [ReturnValue]::Success().StatusCode)
         }
 
-        # Prompt user to find package name automatically
-        $_menu = @{
-            entries       = @('*[F] Find Automatically [Note: This will install the package to find Family Name and then removes it.]'; '[M] Manually Enter PackageFamilyName')
-            Prompt        = 'Discover the package family name?'
-            DefaultString = 'F'
-        }
-        switch ( KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString']) {
-            'F' { $ChoicePfn = '0' }
-            'M' { $ChoicePfn = '1' }
-            default { $ChoicePfn = '0' }
+        # Prompt user to find package name automatically, unless package was not downloaded
+        if ($script:SaveOption -eq '2' -or (!$(Test-Path $script:dest))) { 
+            $ChoicePfn = '1'
+        } else {
+            $_menu = @{
+                entries       = @('*[F] Find Automatically [Note: This will install the package to find Family Name and then removes it.]'; '[M] Manually Enter PackageFamilyName')
+                Prompt        = 'Discover the package family name?'
+                DefaultString = 'F'
+            }
+            switch ( KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString']) {
+                'F' { $ChoicePfn = '0' }
+                'M' { $ChoicePfn = '1' }
+                default { $ChoicePfn = '0' }
+            }
         }
 
         # If user selected to find automatically -
