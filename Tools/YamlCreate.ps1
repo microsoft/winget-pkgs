@@ -2071,8 +2071,8 @@ if ($script:Option -ne 'RemoveManifest') {
                     Write-Host -ForegroundColor 'Green' -Object 'SandboxTest.ps1 not found, input path'
                     $SandboxScriptPath = Read-Host -Prompt 'SandboxTest.ps1' | TrimString
                 }
-                & $SandboxScriptPath -Manifest $AppFolder
             }
+            & $SandboxScriptPath -Manifest $AppFolder
         }
     }
 }
