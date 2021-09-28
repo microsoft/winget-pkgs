@@ -310,7 +310,7 @@ Function Request-Installer-Url {
 # Prompts the user to enter installer values
 # Sets the $script:Installers value as an output
 # Returns void
-Function Read-WinGet-InstallerValues {
+Function Read-Installer-Values {
     # Clear prompted variables to ensure data from previous installer entries is not used for new entries
     $InstallerValues = @(
         'Architecture'
@@ -708,14 +708,14 @@ Function Read-WinGet-InstallerValues {
 
     # If there are additional entries, run this function again to fetch the values and add them to the installers array
     if ($AnotherInstaller -eq '0') {
-        Write-Host; Read-WinGet-InstallerValues
+        Write-Host; Read-Installer-Values
     }
 }
 
 # Prompts user for Installer Values using the `Quick Update` Method
 # Sets the $script:Installers value as an output
 # Returns void
-Function Read-WinGet-InstallerValues-Minimal {
+Function Read-Installer-Values-Minimal {
     # We know old manifests exist if we got here without error
     # Fetch the old installers based on the manifest type
     if ($script:OldInstallerManifest) { $_OldInstallers = $script:OldInstallerManifest['Installers'] } else {
@@ -848,8 +848,8 @@ Function Read-WinGet-InstallerValues-Minimal {
         # If the product code entered is empty; Ensure we remove it if it exists and don't add it if it doesn't exist
         if (String.Validate -not $NewProductCode -IsNull) {
             $_NewInstaller['ProductCode'] = $NewProductCode
-        # We can't rely on the destination path in this case, since the SHA could have been entered manually
-        } elseif ( ($_Installer.Keys -contains 'ProductCode') -and ($_Installer.InstallerType -notin @('exe','nullsoft','inno'))) {
+            # We can't rely on the destination path in this case, since the SHA could have been entered manually
+        } elseif ( ($_Installer.Keys -contains 'ProductCode') -and ($_Installer.InstallerType -notin @('exe', 'nullsoft', 'inno'))) {
             $_Installer.Remove('ProductCode')
         }
         
@@ -1498,8 +1498,30 @@ Function GetMultiManifestParameter {
     return ($_vals -join ', ')
 }
 
+Function GetDebugString {
+    $debug = ' $debug='
+    $debug += $(switch ($script:Option) {
+            'New' { 'NV' }
+            'QuickUpdateVersion' { 'QU' }
+            'EditMetadata' {'MD'}
+            'NewLocale' {'NL'}
+            'Auto' {'AU'}
+            Default {'XX'}
+        })
+    $debug += $(
+        switch($script:SaveOption){
+            '0' {'S0.'}
+            '1' {'S1.'}
+            '2' {'S2.'}
+            Default {'SU.'}
+        }
+    )
+    $debug += $PSVersionTable.PSVersion -Replace '\.','-'
+    return $debug
+}
+
 # Take all the entered values and write the version manifest file
-Function Write-WinGet-VersionManifest-Yaml {
+Function Write-Version-Manifest {
     # Create new empty manifest
     [PSCustomObject]$VersionManifest = [ordered]@{}
 
@@ -1521,7 +1543,7 @@ Function Write-WinGet-VersionManifest-Yaml {
     $VersionManifestPath = $AppFolder + "\$PackageIdentifier" + '.yaml'
     
     # Write the manifest to the file
-    $ScriptHeader + " using YAML parsing`n# yaml-language-server: `$schema=https://aka.ms/winget-manifest.version.1.0.0.schema.json`n" > $VersionManifestPath
+    $ScriptHeader + "$(GetDebugString)`n# yaml-language-server: `$schema=https://aka.ms/winget-manifest.version.1.0.0.schema.json`n" > $VersionManifestPath
     ConvertTo-Yaml $VersionManifest >> $VersionManifestPath
     $(Get-Content $VersionManifestPath -Encoding UTF8) -replace "(.*)$([char]0x2370)", "# `$1" | Out-File -FilePath $VersionManifestPath -Force
     $MyRawString = Get-Content -Raw $VersionManifestPath | TrimString
@@ -1533,7 +1555,7 @@ Function Write-WinGet-VersionManifest-Yaml {
 }
 
 # Take all the entered values and write the installer manifest file
-Function Write-WinGet-InstallerManifest-Yaml {
+Function Write-Installer-Manifest {
     # If the old manifests exist, copy it so it can be updated in place, otherwise, create a new empty manifest
     if ($script:OldManifestType -eq 'MultiManifest') {
         $InstallerManifest = $script:OldInstallerManifest
@@ -1630,7 +1652,7 @@ Function Write-WinGet-InstallerManifest-Yaml {
     $InstallerManifestPath = $AppFolder + "\$PackageIdentifier" + '.installer' + '.yaml'
     
     # Write the manifest to the file
-    $ScriptHeader + " using YAML parsing`n# yaml-language-server: `$schema=https://aka.ms/winget-manifest.installer.1.0.0.schema.json`n" > $InstallerManifestPath
+    $ScriptHeader + "$(GetDebugString)`n# yaml-language-server: `$schema=https://aka.ms/winget-manifest.installer.1.0.0.schema.json`n" > $InstallerManifestPath
     ConvertTo-Yaml $InstallerManifest >> $InstallerManifestPath
     $(Get-Content $InstallerManifestPath -Encoding UTF8) -replace "(.*)$([char]0x2370)", "# `$1" | Out-File -FilePath $InstallerManifestPath -Force
     $MyRawString = Get-Content -Raw $InstallerManifestPath | TrimString
@@ -1642,7 +1664,7 @@ Function Write-WinGet-InstallerManifest-Yaml {
 }
 
 # Take all the entered values and write the locale manifest file
-Function Write-WinGet-LocaleManifest-Yaml {
+Function Write-Locale-Manifests {
     # If the old manifests exist, copy it so it can be updated in place, otherwise, create a new empty manifest
     if ($script:OldManifestType -eq 'MultiManifest') {
         $LocaleManifest = $script:OldLocaleManifest
@@ -1687,7 +1709,7 @@ Function Write-WinGet-LocaleManifest-Yaml {
     $LocaleManifestPath = $AppFolder + "\$PackageIdentifier" + '.locale.' + "$PackageLocale" + '.yaml'
 
     # Write the manifest to the file
-    $ScriptHeader + " using YAML parsing`n$yamlServer`n" > $LocaleManifestPath
+    $ScriptHeader + "$(GetDebugString)`n$yamlServer`n" > $LocaleManifestPath
     ConvertTo-Yaml $LocaleManifest >> $LocaleManifestPath
     $(Get-Content $LocaleManifestPath -Encoding UTF8) -replace "(.*)$([char]0x2370)", "# `$1" | Out-File -FilePath $LocaleManifestPath -Force
     $MyRawString = Get-Content -Raw $LocaleManifestPath | TrimString
@@ -1704,7 +1726,7 @@ Function Write-WinGet-LocaleManifest-Yaml {
 
                 $yamlServer = '# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.0.0.schema.json'
             
-                $ScriptHeader + " using YAML parsing`n$yamlServer`n" > ($AppFolder + '\' + $DifLocale.Name)
+                $ScriptHeader + "$(GetDebugString)`n$yamlServer`n" > ($AppFolder + '\' + $DifLocale.Name)
                 ConvertTo-Yaml $OldLocaleManifest >> ($AppFolder + '\' + $DifLocale.Name)
                 $(Get-Content $($AppFolder + '\' + $DifLocale.Name) -Encoding UTF8) -replace "(.*)$([char]0x2370)", "# `$1" | Out-File -FilePath $($AppFolder + '\' + $DifLocale.Name) -Force
                 $MyRawString = Get-Content -Raw $($AppFolder + '\' + $DifLocale.Name) | TrimString
@@ -2003,35 +2025,35 @@ if ($OldManifests) {
 # Run the data entry and creation of manifests appropriate to the option the user selected
 Switch ($script:Option) {
     'QuickUpdateVersion' {
-        Read-WinGet-InstallerValues-Minimal
+        Read-Installer-Values-Minimal
         New-Variable -Name 'PackageLocale' -Value 'en-US' -Scope 'Script' -Force
-        Write-WinGet-LocaleManifest-Yaml
-        Write-WinGet-InstallerManifest-Yaml
-        Write-WinGet-VersionManifest-Yaml
+        Write-Locale-Manifests
+        Write-Installer-Manifest
+        Write-Version-Manifest
     }
 
     'New' {
-        Read-WinGet-InstallerValues
+        Read-Installer-Values
         Read-WinGet-InstallerManifest
         New-Variable -Name 'PackageLocale' -Value 'en-US' -Scope 'Script' -Force
         Read-WinGet-LocaleManifest
-        Write-WinGet-InstallerManifest-Yaml
-        Write-WinGet-VersionManifest-Yaml
-        Write-WinGet-LocaleManifest-Yaml
+        Write-Installer-Manifest
+        Write-Version-Manifest
+        Write-Locale-Manifests
     }
 
     'EditMetadata' {
         Read-WinGet-InstallerManifest
         New-Variable -Name 'PackageLocale' -Value 'en-US' -Scope 'Script' -Force
         Read-WinGet-LocaleManifest
-        Write-WinGet-InstallerManifest-Yaml
-        Write-WinGet-VersionManifest-Yaml
-        Write-WinGet-LocaleManifest-Yaml
+        Write-Installer-Manifest
+        Write-Version-Manifest
+        Write-Locale-Manifests
     }
 
     'NewLocale' {
         Read-WinGet-LocaleManifest
-        Write-WinGet-LocaleManifest-Yaml
+        Write-Locale-Manifests
     }
 
     'RemoveManifest' {
@@ -2114,11 +2136,11 @@ Switch ($script:Option) {
         # Write the new manifests
         $script:Installers = $script:OldInstallerManifest.Installers
         New-Variable -Name 'PackageLocale' -Value 'en-US' -Scope 'Script' -Force
-        Write-WinGet-LocaleManifest-Yaml
-        Write-WinGet-InstallerManifest-Yaml
-        Write-WinGet-VersionManifest-Yaml
+        Write-Locale-Manifests
+        Write-Installer-Manifest
+        Write-Version-Manifest
         # Remove the old manifests
-        if ($PackageVersion -ne $LastVersion) {Remove-Manifest-Version "$AppFolder\..\$LastVersion"}
+        if ($PackageVersion -ne $LastVersion) { Remove-Manifest-Version "$AppFolder\..\$LastVersion" }
     }
 }
 
