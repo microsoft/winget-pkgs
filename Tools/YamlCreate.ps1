@@ -7,14 +7,15 @@ Param
     [Parameter(Mandatory = $false)]
     [string] $PackageIdentifier,
     [Parameter(Mandatory = $false)]
-    [string] $PackageVersion
-    
+    [string] $PackageVersion,
+    [Parameter(Mandatory = $false)]
+    [string] $Mode
 )
 
 if ($help) {
     Write-Host -ForegroundColor 'Green' 'For full documentation of the script, see https://github.com/microsoft/winget-pkgs/tree/master/doc/tools/YamlCreate.md'
     Write-Host -ForegroundColor 'Yellow' 'Usage: ' -NoNewline
-    Write-Host -ForegroundColor 'White' '.\YamlCreate.ps1 [-PackageIdentifier <identifier>] [-PackageVersion <version>] [-Settings]'
+    Write-Host -ForegroundColor 'White' '.\YamlCreate.ps1 [-PackageIdentifier <identifier>] [-PackageVersion <version>] [-Mode <1-5>] [-Settings]'
     Write-Host
     exit
 }
@@ -739,120 +740,59 @@ Function Read-Installer-Values-Minimal {
         Write-Host
 
         # Request user enter the new Installer URL
-        $NewInstallerUrl = Request-Installer-Url
-        $_NewInstaller['InstallerUrl'] = $NewInstallerUrl
+        $_NewInstaller['InstallerUrl'] = Request-Installer-Url
 
-        # Get or request Installer Sha256
-        # Check the settings to see if we need to display this menu
-        switch ($ScriptSettings.SaveToTemporaryFolder) {
-            'always' { $script:SaveOption = '0' }
-            'never' { $script:SaveOption = '1' }
-            'manual' { $script:SaveOption = '2' }
-            default {
-                $_menu = @{
-                    entries       = @('[Y] Yes'; '*[N] No'; '[M] Manually Enter SHA256')
-                    Prompt        = 'Do you want to save the files to the Temp folder?'
-                    DefaultString = 'N'
-                }
-                switch ( KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString']) {
-                    'Y' { $script:SaveOption = '0' }
-                    'N' { $script:SaveOption = '1' }
-                    'M' { $script:SaveOption = '2' }
-                    default { $script:SaveOption = '1' }
-                }
+        # Download the file at the URL
+        $WebClient = New-Object System.Net.WebClient
+        $Filename = [System.IO.Path]::GetFileName($($_NewInstaller.InstallerUrl))
+        $script:dest = "$env:TEMP\$Filename"
+        try {
+            $WebClient.DownloadFile($($_NewInstaller.InstallerUrl), $script:dest)
+        } catch {
+            Write-Host 'Error downloading file. Please run the script again.' -ForegroundColor Red
+            exit 1
+        } finally {
+            # Get the Sha256
+            $_NewInstaller['InstallerSha256'] = (Get-FileHash -Path $script:dest -Algorithm SHA256).Hash
+            # Update the product code, if a new one exists
+            # If a new product code doesn't exist, and the installer isn't an `.exe` file, remove the product code if it exists
+            $MSIProductCode = [string]$(Get-AppLockerFileInformation -Path $script:dest | Select-Object Publisher | Select-String -Pattern '{[A-Z0-9]{8}-([A-Z0-9]{4}-){3}[A-Z0-9]{12}}').Matches
+            if (String.Validate -not $MSIProductCode -IsNull) {
+                $_NewInstaller['ProductCode'] = $MSIProductCode
+            } elseif ( ($_NewInstaller.Keys -contains 'ProductCode') -and ($script:dest -notmatch '.exe$')) {
+                $_NewInstaller.Remove('ProductCode')
             }
-        }
-
-        # If user did not select manual entry for Sha256, download file and calculate hash
-        if ($script:SaveOption -ne '2') {
-            Write-Host
-            $start_time = Get-Date
-            Write-Host $NewLine
-            Write-Host 'Downloading URL. This will take a while...' -ForegroundColor Blue
-            $WebClient = New-Object System.Net.WebClient
-            $Filename = [System.IO.Path]::GetFileName($NewInstallerUrl)
-            $script:dest = "$env:TEMP\$FileName"
-
-            try {
-                $WebClient.DownloadFile($NewInstallerUrl, $script:dest)
-            } catch {
-                Write-Host 'Error downloading file. Please run the script again.' -ForegroundColor Red
-                exit 1
-            } finally {
-                Write-Host "Time taken: $((Get-Date).Subtract($start_time).Seconds) second(s)" -ForegroundColor Green
-            
-                $NewInstallerSha256 = (Get-FileHash -Path $script:dest -Algorithm SHA256).Hash
-                $MSIProductCode = $(Get-AppLockerFileInformation -Path $script:dest | Select-Object Publisher | Select-String -Pattern '{[A-Z0-9]{8}-([A-Z0-9]{4}-){3}[A-Z0-9]{12}}').Matches
-                if ($script:SaveOption -eq '1' -and -not($script:dest -match '\.(msix|appx)(bundle){0,1}$')) { Remove-Item -Path $script:dest }
+            # If the installer is msix or appx, try getting the new SignatureSha256
+            # If the new SignatureSha256 can't be found, remove it if it exists
+            if ($_NewInstaller.InstallerType -in @('msix', 'appx')) {
+                if (Get-Command 'winget.exe' -ErrorAction SilentlyContinue) { $NewSignatureSha256 = winget hash -m $script:dest | Select-String -Pattern 'SignatureSha256:' | ConvertFrom-String; if ($NewSignatureSha256.P2) { $NewSignatureSha256 = $NewSignatureSha256.P2.ToUpper() } }
             }
-        } 
-        # Manual Entry of Sha256 with validation
-        else {
-            Write-Host
-            do {
-                Write-Host -ForegroundColor 'Red' $script:_returnValue.ErrorString() 
-                Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the installer SHA256 Hash'
-                $NewInstallerSha256 = Read-Host -Prompt 'InstallerSha256' | TrimString
-                $NewInstallerSha256 = $NewInstallerSha256.toUpper()
-                if ($NewInstallerSha256 -match $Patterns.InstallerSha256) {
-                    $script:_returnValue = [ReturnValue]::Success()
-                } else {
-                    $script:_returnValue = [ReturnValue]::PatternError()
-                }
-            } until ($script:_returnValue.StatusCode -eq [ReturnValue]::Success().StatusCode)
-        }
-        $_NewInstaller['InstallerSha256'] = $NewInstallerSha256
-
-        # If the installer is `msix` or `appx`, prompt for or detect additional fields
-        if ($_OldInstaller.InstallerType -ieq 'msix' -or $_OldInstaller.InstallerType -ieq 'appx') {
-            # Detect or prompt for Signature Sha256
-            if (Get-Command 'winget.exe' -ErrorAction SilentlyContinue) { $NewSignatureSha256 = winget hash -m $script:dest | Select-String -Pattern 'SignatureSha256:' | ConvertFrom-String; if ($NewSignatureSha256.P2) { $NewSignatureSha256 = $NewSignatureSha256.P2.ToUpper() } }
-            if (String.Validate $NewSignatureSha256 -IsNull) {
-                # Manual entry of Signature Sha256 with validation
-                do {
-                    Write-Host -ForegroundColor 'Red' $script:_returnValue.ErrorString() 
-                    Write-Host -ForegroundColor 'Yellow' -Object '[Recommended] Enter the installer SignatureSha256'
-                    $NewSignatureSha256 = Read-Host -Prompt 'SignatureSha256' | TrimString
-                    if (String.Validate $NewSignatureSha256 -MatchPattern $Patterns.SignatureSha256 -AllowNull) {
-                        $script:_returnValue = [ReturnValue]::Success()
-                    } else {
-                        $script:_returnValue = [ReturnValue]::PatternError()
-                    }
-                } until ($script:_returnValue.StatusCode -eq [ReturnValue]::Success().StatusCode)
-            }
-            # If the SignatureSha256 entered is empty; Ensure we remove it if it exists and don't add it if it doesn't exist
-            if ((String.Validate $NewSignatureSha256 -IsNull) -and ($_NewInstaller.Keys -contains 'SignatureSha256')) { 
-                $_NewInstaller.Remove('SignatureSha256')
-            } elseif (String.Validate -Not $NewSignatureSha256 -IsNull ) {
+            if (String.Validate -not $NewSignatureSha256 -IsNull) { 
                 $_NewInstaller['SignatureSha256'] = $NewSignatureSha256
+            } elseif ($_NewInstaller.Keys -contains 'SignatureSha256') {
+                $_NewInstaller.Remove('SignatureSha256')
             }
-
-            if ($script:SaveOption -eq '1') { Remove-Item -Path $script:dest }
-        }
-
-        # Get the product code of the new installer
-        do {
-            Write-Host -ForegroundColor 'Red' $script:_returnValue.ErrorString() 
-            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the application product code. Looks like {CF8E6E00-9C03-4440-81C0-21FACB921A6B}'
-            Write-Host -ForegroundColor 'White' -Object "ProductCode found from installer: $MSIProductCode"
-            Write-Host -ForegroundColor 'White' -Object 'Can be found with ' -NoNewline; Write-Host -ForegroundColor 'DarkYellow' 'get-wmiobject Win32_Product | Sort-Object Name | Format-Table IdentifyingNumber, Name -AutoSize'
-            $NewProductCode = Read-Host -Prompt 'ProductCode' | TrimString
-    
-            if (String.Validate $NewProductCode -MinLength $Patterns.ProductCodeMinLength -MaxLength $Patterns.ProductCodeMaxLength -AllowNull) {
-                $script:_returnValue = [ReturnValue]::Success()
-            } else {
-                $script:_returnValue = [ReturnValue]::LengthError($Patterns.ProductCodeMinLength, $Patterns.ProductCodeMaxLength)
+            # If the installer is msix or appx, try getting the new package family name
+            # If the new package family name can't be found, remove it if it exists
+            if ($script:dest -match '\.(msix|appx)(bundle){0,1}$') { 
+                try {
+                    Add-AppxPackage -Path $script:dest
+                    $InstalledPkg = Get-AppxPackage | Select-Object -Last 1 | Select-Object PackageFamilyName, PackageFullName
+                    $PackageFamilyName = $InstalledPkg.PackageFamilyName
+                    Remove-AppxPackage $InstalledPkg.PackageFullName
+                } catch {
+                    Out-Null
+                } finally {
+                    if (String.Validate -not $PackageFamilyName -IsNull) {
+                        $_NewInstaller['PackageFamilyName'] = $PackageFamilyName
+                    } elseif ($_NewInstaller.Keys -contains 'PackageFamilyName') {
+                        $_NewInstaller.Remove('PackageFamilyName')
+                    }
+                }
             }
-        } until ($script:_returnValue.StatusCode -eq [ReturnValue]::Success().StatusCode)
-
-        # If the product code entered is empty; Ensure we remove it if it exists and don't add it if it doesn't exist
-        if (String.Validate -not $NewProductCode -IsNull) {
-            $_NewInstaller['ProductCode'] = $NewProductCode
-            # We can't rely on the destination path in this case, since the SHA could have been entered manually
-        } elseif ( ($_Installer.Keys -contains 'ProductCode') -and ($_Installer.InstallerType -notin @('exe', 'nullsoft', 'inno'))) {
-            $_Installer.Remove('ProductCode')
-        }
-        
+            # Remove the downloaded files
+            Remove-Item -Path $script:dest 
+        }        
         #Add the updated installer to the new installers array
         $_NewInstaller = SortYamlKeys $_NewInstaller $InstallerEntryProperties -NoComments
         $_NewInstallers += $_NewInstaller
@@ -1761,32 +1701,41 @@ $script:UsingAdvancedOption = ($ScriptSettings.EnableDeveloperOptions -eq 'true'
 if (!$script:UsingAdvancedOption) {
     # Request the user to choose an operation mode
     Clear-Host
-    Write-Host -ForegroundColor 'Yellow' "Select Mode:`n"
-    Write-Colors '  [', '1', "] New Manifest or Package Version`n" 'DarkCyan', 'White', 'DarkCyan'
-    Write-Colors '  [', '2', '] Quick Update Package Version ', "(Note: Must be used only when previous version`'s metadata is complete.)`n" 'DarkCyan', 'White', 'DarkCyan', 'Green'
-    Write-Colors '  [', '3', "] Update Package Metadata`n" 'DarkCyan', 'White', 'DarkCyan'
-    Write-Colors '  [', '4', "] New Locale`n" 'DarkCyan', 'White', 'DarkCyan'
-    Write-Colors '  [', '5', "] Remove a manifest`n" 'DarkCyan', 'White', 'DarkCyan'
-    Write-Colors '  [', 'Q', ']', " Any key to quit`n" 'DarkCyan', 'White', 'DarkCyan', 'Red'
-    Write-Colors "`nSelection: " 'White'
-
-    # Listen for keypress and set operation mode based on keypress
-    $Keys = @{
-        [ConsoleKey]::D1      = '1';
-        [ConsoleKey]::D2      = '2';
-        [ConsoleKey]::D3      = '3';
-        [ConsoleKey]::D4      = '4';
-        [ConsoleKey]::D5      = '5';
-        [ConsoleKey]::NumPad1 = '1';
-        [ConsoleKey]::NumPad2 = '2';
-        [ConsoleKey]::NumPad3 = '3';
-        [ConsoleKey]::NumPad4 = '4';
-        [ConsoleKey]::NumPad5 = '5';
+    if ($Mode -in 1..5)
+    {
+        $UserChoice = $Mode
     }
-    do {
-        $keyInfo = [Console]::ReadKey($false)
-    } until ($keyInfo.Key)
-    switch ($Keys[$keyInfo.Key]) {
+    else
+    {
+        Write-Host -ForegroundColor 'Yellow' "Select Mode:`n"
+        Write-Colors '  [', '1', "] New Manifest or Package Version`n" 'DarkCyan', 'White', 'DarkCyan'
+        Write-Colors '  [', '2', '] Quick Update Package Version ', "(Note: Must be used only when previous version`'s metadata is complete.)`n" 'DarkCyan', 'White', 'DarkCyan', 'Green'
+        Write-Colors '  [', '3', "] Update Package Metadata`n" 'DarkCyan', 'White', 'DarkCyan'
+        Write-Colors '  [', '4', "] New Locale`n" 'DarkCyan', 'White', 'DarkCyan'
+        Write-Colors '  [', '5', "] Remove a manifest`n" 'DarkCyan', 'White', 'DarkCyan'
+        Write-Colors '  [', 'Q', ']', " Any key to quit`n" 'DarkCyan', 'White', 'DarkCyan', 'Red'
+        Write-Colors "`nSelection: " 'White'
+
+        # Listen for keypress and set operation mode based on keypress
+        $Keys = @{
+            [ConsoleKey]::D1      = '1';
+            [ConsoleKey]::D2      = '2';
+            [ConsoleKey]::D3      = '3';
+            [ConsoleKey]::D4      = '4';
+            [ConsoleKey]::D5      = '5';
+            [ConsoleKey]::NumPad1 = '1';
+            [ConsoleKey]::NumPad2 = '2';
+            [ConsoleKey]::NumPad3 = '3';
+            [ConsoleKey]::NumPad4 = '4';
+            [ConsoleKey]::NumPad5 = '5';
+        }
+        do {
+            $keyInfo = [Console]::ReadKey($false)
+        } until ($keyInfo.Key)
+    
+        $UserChoice = $Keys[$keyInfo.Key]
+    }
+    switch ($UserChoice) {
         '1' { $script:Option = 'New' }
         '2' { $script:Option = 'QuickUpdateVersion' }
         '3' { $script:Option = 'EditMetadata' }
