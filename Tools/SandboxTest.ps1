@@ -40,7 +40,7 @@ if (-Not $SkipManifestValidation -And -Not [String]::IsNullOrWhiteSpace($Manifes
 if (-Not (Get-Command 'WindowsSandbox' -ErrorAction SilentlyContinue)) {
   Write-Error -Category NotInstalled -Message @'
 Windows Sandbox does not seem to be available. Check the following URL for prerequisites and further details:
-https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-sandbox/windows-sandbox-overview
+https://docs.microsoft.com/windows/security/threat-protection/windows-sandbox/windows-sandbox-overview
 
 You can run the following command in an elevated PowerShell for enabling Windows Sandbox:
 $ Enable-WindowsOptionalFeature -Online -FeatureName 'Containers-DisposableClientVM'
@@ -75,7 +75,7 @@ $apiLatestUrl = 'https://api.github.com/repos/microsoft/winget-cli/releases/late
 $WebClient = New-Object System.Net.WebClient
 
 function Get-LatestUrl {
-  ((Invoke-WebRequest $apiLatestUrl -UseBasicParsing | ConvertFrom-Json).assets | Where-Object { $_.name -match '^Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.appxbundle$' }).browser_download_url
+  ((Invoke-WebRequest $apiLatestUrl -UseBasicParsing | ConvertFrom-Json).assets | Where-Object { $_.name -match '^Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.msixbundle$' }).browser_download_url
 }
 
 function Get-LatestHash {
@@ -92,7 +92,7 @@ $oldProgressPreference = $ProgressPreference
 $ProgressPreference = 'SilentlyContinue'
 
 $desktopAppInstaller = @{
-  fileName = 'Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.appxbundle'
+  fileName = 'Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.msixbundle'
   url      = $(Get-LatestUrl)
   hash     = $(Get-LatestHash)
 }
@@ -102,7 +102,7 @@ $ProgressPreference = $oldProgressPreference
 $vcLibsUwp = @{
   fileName = 'Microsoft.VCLibs.x64.14.00.Desktop.appx'
   url      = 'https://aka.ms/Microsoft.VCLibs.x64.14.00.Desktop.appx'
-  hash     = '6602159c341bafea747d0edf15669ac72df8817299fbfaa90469909e06794256'
+  hash     = 'A39CEC0E70BE9E3E48801B871C034872F1D7E5E8EEBE986198C019CF2C271040'
 }
 
 $dependencies = @($desktopAppInstaller, $vcLibsUwp)
@@ -188,6 +188,11 @@ if (-Not [String]::IsNullOrWhiteSpace($Manifest)) {
   $bootstrapPs1Content += @"
 Write-Host @'
 
+--> Configuring Winget
+'@
+winget settings --Enable LocalManifestFiles
+
+Write-Host @'`n
 --> Installing the Manifest $manifestFileName
 
 '@
@@ -260,6 +265,7 @@ Write-Host @"
       - $tempFolder as read-only
       - $mapFolder as read-and-write
     - Installing WinGet
+    - Configuring Winget
 "@
 
 if (-Not [String]::IsNullOrWhiteSpace($Manifest)) {
