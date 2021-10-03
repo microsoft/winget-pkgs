@@ -3,7 +3,9 @@
 ![Validation Pipeline Badge](https://img.shields.io/endpoint?url=https://winget.azurefd.net/api/GetServiceComponentStatusBadge?component=ValidationPipeline "Validation Pipeline Badge")
 ![Publish Pipeline Badge](https://img.shields.io/endpoint?url=https://winget.azurefd.net/api/GetServiceComponentStatusBadge?component=PublishPipeline "Publish Pipeline Badge")
 
-This repository contains the manifest files for the **Windows Package Manager** default source.  You are highly encouraged to submit manifests for your favorite application.
+This repository contains the manifest files for the **Windows Package Manager** default source. You are highly encouraged to submit manifests for your favorite application.
+> 👀 Packages delivered via GitHub Releases are now **automatically updated every 12 hours** by [**WinGet Manifests Automatic Updater**](https://github.com/vedantmgoyal2009/winget-pkgs-automation). Please **do not** open PRs to update these packages as it will result in lots of duplicates.
+
 > Note: At this time installers must either be MSIX, MSI or .exe application installers. Standalone or portable executables, compressed .zip files, and fonts are not currently supported.
 
 The **Windows Package Manager** is an [open source client](https://github.com/microsoft/winget-cli) designed for command-line usage.
