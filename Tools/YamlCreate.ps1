@@ -587,7 +587,7 @@ Function Read-WinGet-LocaleManifest {
             Write-Host
             Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the Publisher Url.'
             $script:PublisherUrl = Read-Host -Prompt 'Publisher Url' | TrimString
-        } while (-not [string]::IsNullOrWhiteSpace($PublisherUrl) -and ($PublisherUrl.Length -lt 5 -or $LicenseUrl.Length -gt 2000))
+        } while (-not [string]::IsNullOrWhiteSpace($PublisherUrl) -and ($PublisherUrl.Length -lt 5 -or $PublisherUrl.Length -gt 2000))
     } else {
         do {
             Write-Host
@@ -595,10 +595,10 @@ Function Read-WinGet-LocaleManifest {
             Write-Host -ForegroundColor 'DarkGray' "Old Variable: $PublisherUrl"
             $NewPublisherUrl = Read-Host -Prompt 'Publisher Url' | TrimString
     
-            if (-not [string]::IsNullOrWhiteSpace($NewNewPublisherUrl)) {
+            if (-not [string]::IsNullOrWhiteSpace($NewPublisherUrl)) {
                 $script:PublisherUrl = $NewPublisherUrl
             }
-        } while (-not [string]::IsNullOrWhiteSpace($PublisherUrl) -and ($PublisherUrl.Length -lt 5 -or $LicenseUrl.Length -gt 2000))
+        } while (-not [string]::IsNullOrWhiteSpace($PublisherUrl) -and ($PublisherUrl.Length -lt 5 -or $PublisherUrl.Length -gt 2000))
     }
 
     if ([string]::IsNullOrWhiteSpace($PublisherSupportUrl)) {
