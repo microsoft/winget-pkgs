@@ -2186,7 +2186,7 @@ if ($PromptSubmit -eq '0') {
     git switch -d upstream/master       
     if ($LASTEXITCODE -eq '0') {
         $UniqueBranchID = $(Get-FileHash $script:LocaleManifestPath).Hash[0..6] -Join ''
-        $BranchName = "$PackageIdentifier-$BranchVersion-$UniqueBranchID"
+        $BranchName = "$PackageIdentifier-$PackageVersion-$UniqueBranchID"
         #Git branch names cannot start with `.` cannot contain any of {`..`, `\`, `~`, `^`, `:`, ` `, `?`, `@{`, `[`}, and cannot end with {`/`, `.lock`, `.`}
         $BranchName = $BranchName -replace '[\~,\^,\:,\\,\?,\@\{,\*,\[,\s]{1,}|[.lock|/|\.]*$|^\.{1,}|\.\.', ''
         git add -A
@@ -2196,16 +2196,45 @@ if ($PromptSubmit -eq '0') {
 
         # If the user has the cli too
         if (Get-Command 'gh.exe' -ErrorAction SilentlyContinue) {
-            # Request the user to fill out the PR template
-            if (Test-Path -Path "$PSScriptRoot\..\.github\PULL_REQUEST_TEMPLATE.md") {
-                Enter-PR-Parameters "$PSScriptRoot\..\.github\PULL_REQUEST_TEMPLATE.md"
-            } else {
-                while ([string]::IsNullOrWhiteSpace($SandboxScriptPath)) {
-                    Write-Host
-                    Write-Host -ForegroundColor 'Green' -Object 'PULL_REQUEST_TEMPLATE.md not found, input path'
-                    $PRTemplate = Read-Host -Prompt 'PR Template' | TrimString
+
+            # If we are working out of a winget-pkgs repository, check for already existing PR's
+            if ($ScriptSettings.CheckForExistingPRs -and ($pwd | Select-String 'winget-pkgs')) {
+                $_Manifest = "manifests/" + "$($PackageIdentifier[0])".ToLower() + "/" + $PackageIdentifier.Replace(".","/")+"/"+$PackageVersion
+                $_PRs = gh pr list --search "in:path $_Manifest"
+            }
+            if ($_PRs) {
+                switch ($ScriptSettings.SubmitWithExistingPRs) {
+                    'always' { $_doSubmit = $true }
+                    'never' { $_doSubmit = $false }
+                    Default {
+                        $prs[0].Split("`t")[0]
+                        $_menu = @{
+                            entries       = @('[Y] Yes'; '*[N] No')
+                            Prompt        = 'There may already be a PR for this change. Would you like to submit anyways?'
+                            DefaultString = 'N'
+                            HelpText      = "https://github.com/microsoft/winget-pkgs/issues/$($_PRs[0].Split("`t")[0..1] -join ' - ')`t"
+                            HelpTextColor = 'Blue'  
+                        }
+                        switch ( KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString'] -HelpText $_menu['HelpText'] -HelpTextColor $_menu['HelpTextColor'] ) {
+                            'Y' { $_doSubmit = $true }
+                            default { $_doSubmit = $false }
+                        }
+                    }
+                }       
+            } else { $_doSubmit = $true }
+
+            if ($_doSubmit) {
+                # Request the user to fill out the PR template
+                if (Test-Path -Path "$PSScriptRoot\..\.github\PULL_REQUEST_TEMPLATE.md") {
+                    Enter-PR-Parameters "$PSScriptRoot\..\.github\PULL_REQUEST_TEMPLATE.md"
+                } else {
+                    while ([string]::IsNullOrWhiteSpace($SandboxScriptPath)) {
+                        Write-Host
+                        Write-Host -ForegroundColor 'Green' -Object 'PULL_REQUEST_TEMPLATE.md not found, input path'
+                        $PRTemplate = Read-Host -Prompt 'PR Template' | TrimString
+                    }
+                    Enter-PR-Parameters "$PRTemplate"
                 }
-                Enter-PR-Parameters "$PRTemplate"
             }
         }
     }

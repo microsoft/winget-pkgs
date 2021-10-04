@@ -40,6 +40,15 @@ SaveToTemporaryFolder: ask
     # never - Never submits PR's automatically
 AutoSubmitPRs: ask
 
+# This setting allows you to skip checking for PR's which may conflict with the changes
+# If this value is set to false, the check for existing PRs will be skipped
+CheckForExistingPRs: true
+
+# This setting allows you to set a default action for when conflicting PR's are detetected
+    # always - Always submits PR's if potential conflicts are detected
+    # never - Never submits PR's if potential conflicts are detected
+SubmitWithExistingPRs: ask
+
 # This setting allows you to set a default value for whether or not you have signed the Microsoft CLA
 # If this value is set to true, all automatic PR's will be marked as having the CLA signed
 SignedCLA: false
