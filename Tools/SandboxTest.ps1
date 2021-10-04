@@ -28,8 +28,10 @@ if (-Not $SkipManifestValidation -And -Not [String]::IsNullOrWhiteSpace($Manifes
   }
 
   winget.exe validate $Manifest
-  if (-Not $?) {
-    throw 'Manifest validation failed.'
+  switch ($LASTEXITCODE) {
+    '-1978335191' { throw 'Manifest validation failed.' }
+    '-1978335192' { Start-Sleep -Seconds 5 }
+    Default { continue }
   }
 
   Write-Host
@@ -126,7 +128,7 @@ foreach ($dependency in $dependencies) {
   $dependency.pathInSandbox = Join-Path -Path $desktopInSandbox -ChildPath (Join-Path -Path $tempFolderName -ChildPath $dependency.fileName)
 
   # Only download if the file does not exist, or its hash does not match.
-  if (-Not ((Test-Path -Path $dependency.file -PathType Leaf) -And $dependency.hash -eq $(get-filehash $dependency.file).Hash)) {
+  if (-Not ((Test-Path -Path $dependency.file -PathType Leaf) -And $dependency.hash -eq $(Get-FileHash $dependency.file).Hash)) {
     Write-Host @"
     - Downloading:
       $($dependency.url)
@@ -138,7 +140,7 @@ foreach ($dependency in $dependencies) {
     catch {
       throw "Error downloading $($dependency.url)."
     }
-    if (-not ($dependency.hash -eq $(get-filehash $dependency.file).Hash)) {
+    if (-not ($dependency.hash -eq $(Get-FileHash $dependency.file).Hash)) {
       throw 'Hashes do not match, try gain.'
     }
   }
