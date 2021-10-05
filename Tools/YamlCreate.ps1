@@ -271,10 +271,10 @@ Function Read-WinGet-InstallerValues {
             } else {
                 $Filename = [System.IO.Path]::GetFileName($InstallerUrl)
                 $ContentDisposition = $WebClient.ResponseHeaders['Content-Disposition']
-                if ($null -ne $ContentDisposition -and $ContentDisposition -match "filename\*?=['`"]?(?:UTF-\d['`"]*)?([^;\r\n`"']*)['`"]?;?") {
+                if (-not [string]::IsNullOrWhiteSpace($ContentDisposition) -and $ContentDisposition -match "filename\*?=['`"]?(?:UTF-\d['`"]*)?([^;\r\n`"']*)['`"]?;?") {
                     $FileName = $Matches[1]
                 }
-                Rename-Item -Path $dest -NewName $FileName
+                Rename-Item -Path $dest -NewName $Filename
             }
         }
     }
