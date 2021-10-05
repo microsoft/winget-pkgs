@@ -252,15 +252,9 @@ Function Read-WinGet-InstallerValues {
         Write-Host $NewLine
         Write-Host 'Downloading URL. This will take a while...' -ForegroundColor Blue
         $WebClient = New-Object System.Net.WebClient
-        $Filename = [System.IO.Path]::GetFileName($InstallerUrl)
-        $dest = "$env:TEMP\$FileName"
+        $dest = "$env:TEMP\$(New-Guid)"
 
         try {
-            $ContentDisposition = [System.Net.HttpWebRequest]::Create($InstallerUrl).GetResponse().Headers['Content-Disposition']
-            if ($null -ne $ContentDisposition -and $ContentDisposition -match 'filename="?([^";]+)') {
-                $FileName = $Matches[1]
-                $dest = "$env:TEMP\$FileName"
-            }
             $WebClient.DownloadFile($InstallerUrl, $dest)
         }
         catch {
@@ -272,7 +266,16 @@ Function Read-WinGet-InstallerValues {
             $InstallerSha256 = (Get-FileHash -Path $dest -Algorithm SHA256).Hash
             if ($PSVersion -eq '5') {$FileInformation = Get-AppLockerFileInformation -Path $dest | Select-Object -ExpandProperty Publisher}
             if ($PSVersion -eq '5') {$MSIProductCode = $FileInformation.BinaryName}
-            if ($SaveOption -eq '1') {Remove-Item -Path $dest}
+            if ($SaveOption -eq '1') {
+                Remove-Item -Path $dest
+            } else {
+                $Filename = [System.IO.Path]::GetFileName($InstallerUrl)
+                $ContentDisposition = $WebClient.ResponseHeaders['Content-Disposition']
+                if ($null -ne $ContentDisposition -and $ContentDisposition -match "filename\*?=['`"]?(?:UTF-\d['`"]*)?([^;\r\n`"']*)['`"]?;?") {
+                    $FileName = $Matches[1]
+                }
+                Rename-Item -Path $dest -NewName $FileName
+            }
         }
     }
 
