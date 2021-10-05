@@ -584,7 +584,7 @@ Function Read-Installer-Values {
         if ($script:SaveOption -eq '1') { Remove-Item -Path $script:dest }
     }
 
-    # Request installer locale with validation as optional; Default to `en-US` if no value is entered
+    # Request installer locale with validation as optional
     do {
         Write-Host -ForegroundColor 'Red' $script:_returnValue.ErrorString() 
         Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the installer locale. For example: en-US, en-CA'
@@ -1443,20 +1443,20 @@ Function GetDebugString {
     $debug += $(switch ($script:Option) {
             'New' { 'NV' }
             'QuickUpdateVersion' { 'QU' }
-            'EditMetadata' {'MD'}
-            'NewLocale' {'NL'}
-            'Auto' {'AU'}
-            Default {'XX'}
+            'EditMetadata' { 'MD' }
+            'NewLocale' { 'NL' }
+            'Auto' { 'AU' }
+            Default { 'XX' }
         })
     $debug += $(
-        switch($script:SaveOption){
-            '0' {'S0.'}
-            '1' {'S1.'}
-            '2' {'S2.'}
-            Default {'SU.'}
+        switch ($script:SaveOption) {
+            '0' { 'S0.' }
+            '1' { 'S1.' }
+            '2' { 'S2.' }
+            Default { 'SU.' }
         }
     )
-    $debug += $PSVersionTable.PSVersion -Replace '\.','-'
+    $debug += $PSVersionTable.PSVersion -Replace '\.', '-'
     return $debug
 }
 
@@ -1469,7 +1469,7 @@ Function Write-Version-Manifest {
     $_Singletons = [ordered]@{
         'PackageIdentifier' = $PackageIdentifier
         'PackageVersion'    = $PackageVersion
-        'DefaultLocale'     = 'en-US'
+        'DefaultLocale'     = if ($PackageLocale) { $PackageLocale } else { 'en-US' }
         'ManifestType'      = 'version'
         'ManifestVersion'   = $ManifestVersion
     }
@@ -1612,7 +1612,7 @@ Function Write-Locale-Manifests {
     if (!$LocaleManifest) { [PSCustomObject]$LocaleManifest = [ordered]@{} }
     
     # Set the appropriate langage server depending on if it is a default locale file or generic locale file
-    if ($PackageLocale -eq 'en-US') { $yamlServer = '# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.0.0.schema.json' }else { $yamlServer = '# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.0.0.schema.json' }
+    if ($LocaleManifest.ManifestType -eq 'defaultLocale') { $yamlServer = '# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.0.0.schema.json' } else { $yamlServer = '# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.0.0.schema.json' }
     
     # Add the properties to the manifest
     $_Singletons = [ordered]@{
@@ -1638,9 +1638,8 @@ Function Write-Locale-Manifests {
     }
 
     If ($Tags) { AddYamlListParameter $LocaleManifest 'Tags' $Tags }
-    If ($Moniker -and $PackageLocale -eq 'en-US') { AddYamlParameter $LocaleManifest 'Moniker' $Moniker }
-    If ($PackageLocale -eq 'en-US') { $_ManifestType = 'defaultLocale' }else { $_ManifestType = 'locale' }
-    AddYamlParameter $LocaleManifest 'ManifestType' $_ManifestType
+    If ($Moniker) { AddYamlParameter $LocaleManifest 'Moniker' $Moniker }
+    If (!$LocaleManifest.ManifestType) {$LocaleManifest['ManifestType'] = 'defaultLocale'}
     AddYamlParameter $LocaleManifest 'ManifestVersion' $ManifestVersion
     $LocaleManifest = SortYamlKeys $LocaleManifest $LocaleProperties
 
@@ -1655,10 +1654,10 @@ Function Write-Locale-Manifests {
     $MyRawString = Get-Content -Raw $LocaleManifestPath | TrimString
     [System.IO.File]::WriteAllLines($LocaleManifestPath, $MyRawString, $Utf8NoBomEncoding)
 
-    # Copy over all locale files from previous version that aren't en-US
+    # Copy over all locale files from previous version that aren't the same
     if ($OldManifests) {
         ForEach ($DifLocale in $OldManifests) {
-            if ($DifLocale.Name -notin @("$PackageIdentifier.yaml", "$PackageIdentifier.installer.yaml", "$PackageIdentifier.locale.en-US.yaml")) {
+            if ($DifLocale.Name -notin @("$PackageIdentifier.yaml", "$PackageIdentifier.installer.yaml", "$PackageIdentifier.locale.$PackageLocale.yaml")) {
                 if (!(Test-Path $AppFolder)) { New-Item -ItemType 'Directory' -Force -Path $AppFolder | Out-Null }
                 $script:OldLocaleManifest = ConvertFrom-Yaml -Yaml ($(Get-Content -Path $DifLocale.FullName -Encoding UTF8) -join "`n") -Ordered
                 $script:OldLocaleManifest['PackageVersion'] = $PackageVersion
@@ -1701,12 +1700,9 @@ $script:UsingAdvancedOption = ($ScriptSettings.EnableDeveloperOptions -eq 'true'
 if (!$script:UsingAdvancedOption) {
     # Request the user to choose an operation mode
     Clear-Host
-    if ($Mode -in 1..5)
-    {
+    if ($Mode -in 1..5) {
         $UserChoice = $Mode
-    }
-    else
-    {
+    } else {
         Write-Host -ForegroundColor 'Yellow' "Select Mode:`n"
         Write-Colors '  [', '1', "] New Manifest or Package Version`n" 'DarkCyan', 'White', 'DarkCyan'
         Write-Colors '  [', '2', '] Quick Update Package Version ', "(Note: Must be used only when previous version`'s metadata is complete.)`n" 'DarkCyan', 'White', 'DarkCyan', 'Green'
@@ -1851,7 +1847,7 @@ if (!$LastVersion) {
     try {
         $script:LastVersion = Split-Path (Split-Path (Get-ChildItem -Path "$AppFolder\..\" -Recurse -Depth 1 -File -Filter '*.yaml' -ErrorAction SilentlyContinue).FullName ) -Leaf | Sort-Object $ToNatural | Select-Object -Last 1
         $script:ExistingVersions = Split-Path (Split-Path (Get-ChildItem -Path "$AppFolder\..\" -Recurse -Depth 1 -File -Filter '*.yaml' -ErrorAction SilentlyContinue).FullName ) -Leaf | Sort-Object $ToNatural | Select-Object -Unique
-        if ($script:Option -eq 'Auto' -and $PackageVersion -in $script:ExistingVersions) {$LastVersion = $PackageVersion}
+        if ($script:Option -eq 'Auto' -and $PackageVersion -in $script:ExistingVersions) { $LastVersion = $PackageVersion }
         Write-Host -ForegroundColor 'DarkYellow' -Object "Found Existing Version: $LastVersion"
         $script:OldManifests = Get-ChildItem -Path "$AppFolder\..\$LastVersion"
     } catch {
@@ -1859,9 +1855,19 @@ if (!$LastVersion) {
     }
 }
 
+# If the old manifests exist, find the default locale
+if ($OldManifests.Name -match "$PackageIdentifier\.locale\..*\.yaml") {
+    $_LocaleManifests = $OldManifests | Where-Object { $_.Name -match "$PackageIdentifier\.locale\..*\.yaml" }
+    foreach ($_Manifest in $_LocaleManifests) {
+        $_ManifestContent = ConvertFrom-Yaml -Yaml ($(Get-Content -Path $($_Manifest.FullName) -Encoding UTF8) -join "`n") -Ordered
+        if ($_ManifestContent.ManifestType -eq 'defaultLocale') { $PackageLocale = $_ManifestContent.PackageLocale }
+    }
+    Write-Host "Found defaultLocale $PackageLocale"
+}
+
 # If the old manifests exist, read their information into variables
 # Also ensure additional requirements are met for creating or updating files
-if ($OldManifests.Name -eq "$PackageIdentifier.installer.yaml" -and $OldManifests.Name -eq "$PackageIdentifier.locale.en-US.yaml" -and $OldManifests.Name -eq "$PackageIdentifier.yaml") {
+if ($OldManifests.Name -eq "$PackageIdentifier.installer.yaml" -and $OldManifests.Name -eq "$PackageIdentifier.locale.$PackageLocale.yaml" -and $OldManifests.Name -eq "$PackageIdentifier.yaml") {
     $script:OldManifestType = 'MultiManifest'
     $script:OldInstallerManifest = ConvertFrom-Yaml -Yaml ($(Get-Content -Path $(Resolve-Path "$AppFolder\..\$LastVersion\$PackageIdentifier.installer.yaml") -Encoding UTF8) -join "`n") -Ordered
     # Move Manifest Level Keys to installer Level
@@ -1890,7 +1896,7 @@ if ($OldManifests.Name -eq "$PackageIdentifier.installer.yaml" -and $OldManifest
             $script:OldInstallerManifest.Remove($_Key)
         }
     }
-    $script:OldLocaleManifest = ConvertFrom-Yaml -Yaml ($(Get-Content -Path $(Resolve-Path "$AppFolder\..\$LastVersion\$PackageIdentifier.locale.en-US.yaml") -Encoding UTF8) -join "`n") -Ordered
+    $script:OldLocaleManifest = ConvertFrom-Yaml -Yaml ($(Get-Content -Path $(Resolve-Path "$AppFolder\..\$LastVersion\$PackageIdentifier.locale.$PackageLocale.yaml") -Encoding UTF8) -join "`n") -Ordered
     $script:OldVersionManifest = ConvertFrom-Yaml -Yaml ($(Get-Content -Path $(Resolve-Path "$AppFolder\..\$LastVersion\$PackageIdentifier.yaml") -Encoding UTF8) -join "`n") -Ordered
 } elseif ($OldManifests.Name -eq "$PackageIdentifier.yaml") {
     if ($script:Option -eq 'NewLocale') { Throw 'Error: MultiManifest Required' }
@@ -1947,7 +1953,7 @@ if ($OldManifests.Name -eq "$PackageIdentifier.installer.yaml" -and $OldManifest
 }
 
 # If the old manifests exist, read the manifest keys into their specific variables
-if ($OldManifests) {
+if ($OldManifests -and $Option -ne 'NewLocale') {
     $_Parameters = @(
         'Publisher'; 'PublisherUrl'; 'PublisherSupportUrl'; 'PrivacyUrl'
         'Author'; 
@@ -1976,7 +1982,6 @@ if ($OldManifests) {
 Switch ($script:Option) {
     'QuickUpdateVersion' {
         Read-Installer-Values-Minimal
-        New-Variable -Name 'PackageLocale' -Value 'en-US' -Scope 'Script' -Force
         Write-Locale-Manifests
         Write-Installer-Manifest
         Write-Version-Manifest
@@ -1985,7 +1990,6 @@ Switch ($script:Option) {
     'New' {
         Read-Installer-Values
         Read-WinGet-InstallerManifest
-        New-Variable -Name 'PackageLocale' -Value 'en-US' -Scope 'Script' -Force
         Read-WinGet-LocaleManifest
         Write-Installer-Manifest
         Write-Version-Manifest
@@ -1994,7 +1998,6 @@ Switch ($script:Option) {
 
     'EditMetadata' {
         Read-WinGet-InstallerManifest
-        New-Variable -Name 'PackageLocale' -Value 'en-US' -Scope 'Script' -Force
         Read-WinGet-LocaleManifest
         Write-Installer-Manifest
         Write-Version-Manifest
@@ -2002,6 +2005,9 @@ Switch ($script:Option) {
     }
 
     'NewLocale' {
+        $PackageLocale = $null
+        $script:OldLocaleManifest = [ordered]@{}
+        $script:OldLocaleManifest['ManifestType'] = 'locale'
         Read-WinGet-LocaleManifest
         Write-Locale-Manifests
     }
@@ -2085,7 +2091,6 @@ Switch ($script:Option) {
         }
         # Write the new manifests
         $script:Installers = $script:OldInstallerManifest.Installers
-        New-Variable -Name 'PackageLocale' -Value 'en-US' -Scope 'Script' -Force
         Write-Locale-Manifests
         Write-Installer-Manifest
         Write-Version-Manifest
@@ -2180,10 +2185,10 @@ if ($PromptSubmit -eq '0') {
     git fetch upstream master --quiet
     git switch -d upstream/master       
     if ($LASTEXITCODE -eq '0') {
-        $UniqueBranchID = $(Get-FileHash $script:LocaleManifestPath).Hash[0..6] -Join ""
+        $UniqueBranchID = $(Get-FileHash $script:LocaleManifestPath).Hash[0..6] -Join ''
         $BranchName = "$PackageIdentifier-$BranchVersion-$UniqueBranchID"
         #Git branch names cannot start with `.` cannot contain any of {`..`, `\`, `~`, `^`, `:`, ` `, `?`, `@{`, `[`}, and cannot end with {`/`, `.lock`, `.`}
-        $BranchName =  $BranchName -replace '[\~,\^,\:,\\,\?,\@\{,\*,\[,\s]{1,}|[.lock|/|\.]*$|^\.{1,}|\.\.',""
+        $BranchName = $BranchName -replace '[\~,\^,\:,\\,\?,\@\{,\*,\[,\s]{1,}|[.lock|/|\.]*$|^\.{1,}|\.\.', ''
         git add -A
         git commit -m "$CommitType`: $PackageIdentifier version $PackageVersion" --quiet
         git switch -c "$BranchName" --quiet
