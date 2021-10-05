@@ -256,6 +256,11 @@ Function Read-WinGet-InstallerValues {
         $dest = "$env:TEMP\$FileName"
 
         try {
+            $ContentDisposition = [System.Net.HttpWebRequest]::Create($InstallerUrl).GetResponse().Headers['Content-Disposition']
+            if ($null -ne $ContentDisposition -and $ContentDisposition -match 'filename="?(.*)"?;?') {
+                $FileName = $Matches[1]
+                $dest = "$env:TEMP\$FileName"
+            }
             $WebClient.DownloadFile($InstallerUrl, $dest)
         }
         catch {
