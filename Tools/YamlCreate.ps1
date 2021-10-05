@@ -20,8 +20,9 @@ if ($help) {
     exit
 }
 
+# Set settings directory on basis of Operating System
+$script:SettingsPath = Join-Path $(if ([System.Environment]::OSVersion.Platform -match 'Win') {$env:LOCALAPPDATA} else {$env:HOME+'/.config'} ) -ChildPath 'YamlCreate'
 # Check for settings directory and create it if none exists
-$script:SettingsPath = Join-Path $env:LOCALAPPDATA -ChildPath 'YamlCreate'
 if (!(Test-Path $script:SettingsPath)) { New-Item -ItemType 'Directory' -Force -Path $script:SettingsPath | Out-Null }
 # Check for settings file and create it if none exists
 $script:SettingsPath = $(Join-Path $script:SettingsPath -ChildPath 'Settings.yaml')
