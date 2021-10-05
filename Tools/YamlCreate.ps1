@@ -739,7 +739,7 @@ Function Read-WinGet-LocaleManifest {
             Write-Host
             Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the application Copyright Url.'
             $script:CopyrightUrl = Read-Host -Prompt 'CopyrightUrl' | TrimString
-        } while (-not [string]::IsNullOrWhiteSpace($CopyrightUrl) -and ($LicenseUrl.Length -lt 10 -or $LicenseUrl.Length -gt 2000))
+        } while (-not [string]::IsNullOrWhiteSpace($CopyrightUrl) -and ($CopyrightUrl.Length -lt 10 -or $CopyrightUrl.Length -gt 2000))
     } else {
         do {
             Write-Host
@@ -750,7 +750,7 @@ Function Read-WinGet-LocaleManifest {
             if (-not [string]::IsNullOrWhiteSpace($NewCopyrightUrl)) {
                 $script:CopyrightUrl = $NewCopyrightUrl
             }
-        } while (-not [string]::IsNullOrWhiteSpace($CopyrightUrl) -and ($LicenseUrl.Length -lt 10 -or $LicenseUrl.Length -gt 2000))
+        } while (-not [string]::IsNullOrWhiteSpace($CopyrightUrl) -and ($CopyrightUrl.Length -lt 10 -or $CopyrightUrl.Length -gt 2000))
     }
 
     if ([string]::IsNullOrWhiteSpace($Tags)) {
