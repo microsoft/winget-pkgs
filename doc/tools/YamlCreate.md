@@ -1,5 +1,5 @@
 # Using YamlCreate.ps1
-Using the YamlCreate is easy. First, [create a fork](https://docs.github.com/get-started/quickstart/fork-a-repo) of this repository and then [clone it](https://docs.github.com/repositories/creating-and-managing-repositories/cloning-a-repository) to your computer. Once the repository has finished cloning, open file explorer and navigate to the folder that the repository was cloned into. Inside this folder, you should be able to navigate to the `Tools` folder, which contains the script. Right click on "YamlCreate" and select "Run with PowerShell". If it is your first time running the script, you may see a message that it is installing some additional packages - [NuGet](https://docs.microsoft.com/nuget/), and [powershell-yaml](https://www.powershellgallery.com/packages/powershell-yaml/0.4.2) ([See it on GitHub](https://github.com/cloudbase/powershell-yaml)). These are required for the script to run.
+Using the YamlCreate script is easy. First, [create a fork](https://docs.github.com/get-started/quickstart/fork-a-repo) of this repository and then [clone it](https://docs.github.com/repositories/creating-and-managing-repositories/cloning-a-repository) to your computer. Once the repository has finished cloning, open file explorer and navigate to the folder that the repository was cloned into. Inside this folder, you should be able to navigate to the `Tools` folder, which contains the script. Right click on "YamlCreate" and select "Run with PowerShell". If it is your first time running the script, you may see a message that it is installing some additional packages - [NuGet](https://docs.microsoft.com/nuget/), and [powershell-yaml](https://www.powershellgallery.com/packages/powershell-yaml/0.4.2) ([See it on GitHub](https://github.com/cloudbase/powershell-yaml)). These are required for the script to run.
 
 Once the script begins, it will walk you through a series of prompts to create manifests. Enter the requested information for each of the prompts and once all the prompts are completed, the manifest will be generated! If you have Windows Sandbox enabled and the GitHub CLI installed, you can even automatically test and submit your manifest instead of having to do it manually.
 
@@ -39,6 +39,11 @@ SaveToTemporaryFolder: ask
     # always - Always submits PR's automatically
     # never - Never submits PR's automatically
 AutoSubmitPRs: ask
+
+# This setting allows you to set a default action for when conflicting PRs are detetected
+    # always - Skips checking for conflicting PRs
+    # never - Exits the script if conflicting PRs are detected
+ContinueWithExistingPRs: ask
 
 # This setting allows you to set a default value for whether or not you have signed the Microsoft CLA
 # If this value is set to true, all automatic PR's will be marked as having the CLA signed
