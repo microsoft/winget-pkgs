@@ -1640,7 +1640,7 @@ Function Write-Locale-Manifests {
 
     If ($Tags) { AddYamlListParameter $LocaleManifest 'Tags' $Tags }
     If ($Moniker) { AddYamlParameter $LocaleManifest 'Moniker' $Moniker }
-    If (!$LocaleManifest.ManifestType) {$LocaleManifest['ManifestType'] = 'defaultLocale'}
+    If (!$LocaleManifest.ManifestType) { $LocaleManifest['ManifestType'] = 'defaultLocale' }
     AddYamlParameter $LocaleManifest 'ManifestVersion' $ManifestVersion
     $LocaleManifest = SortYamlKeys $LocaleManifest $LocaleProperties
 
@@ -1803,6 +1803,29 @@ do {
     }
 } until ($script:_returnValue.StatusCode -eq [ReturnValue]::Success().StatusCode)
 
+# Check the api for open PR's
+# This is unauthenticated because the call-rate per minute is assumed to be low
+if ($ScriptSettings.ContinueWithExistingPRs -ne 'always') {
+    $PRApiResponse = @(Invoke-WebRequest "https://api.github.com/search/issues?q=repo%3Amicrosoft%2Fwinget-pkgs%20$($PackageIdentifier -replace '\.', '%2F'))%2F$PackageVersion%20in%3Apath&per_page=1" -UseBasicParsing -ErrorAction SilentlyContinue | ConvertFrom-Json)[0]
+    # If there was a PR found, get the URL and title
+    if ($PRApiResponse.total_count -gt 0) {
+        $_PRUrl = $PRApiResponse.items.html_url
+        $_PRTitle = $PRApiResponse.items.title
+        if ($ScriptSettings.ContinueWithExistingPRs -eq 'never') { Write-Host -ForegroundColor Red "Existing PR Found - $_PRUrl"; exit }
+        $_menu = @{
+            entries       = @('[Y] Yes'; '*[N] No')
+            Prompt        = 'There may already be a PR for this change. Would you like to continue anyways?'
+            DefaultString = 'N'
+            HelpText      = "$_PRTitle - $_PRUrl"
+            HelpTextColor = 'Blue'  
+        }
+        switch ( KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString'] -HelpText $_menu['HelpText'] -HelpTextColor $_menu['HelpTextColor'] ) {
+            'Y' { Write-Host }
+            default { Write-Host; exit 1 }
+        }
+    }   
+}
+
 # Set the root folder where new manifests should be created
 if (Test-Path -Path "$PSScriptRoot\..\manifests") {
     $ManifestsFolder = (Resolve-Path "$PSScriptRoot\..\manifests").Path
@@ -1863,7 +1886,6 @@ if ($OldManifests.Name -match "$PackageIdentifier\.locale\..*\.yaml") {
         $_ManifestContent = ConvertFrom-Yaml -Yaml ($(Get-Content -Path $($_Manifest.FullName) -Encoding UTF8) -join "`n") -Ordered
         if ($_ManifestContent.ManifestType -eq 'defaultLocale') { $PackageLocale = $_ManifestContent.PackageLocale }
     }
-    Write-Host "Found defaultLocale $PackageLocale"
 }
 
 # If the old manifests exist, read their information into variables
@@ -2187,7 +2209,7 @@ if ($PromptSubmit -eq '0') {
     git switch -d upstream/master       
     if ($LASTEXITCODE -eq '0') {
         $UniqueBranchID = $(Get-FileHash $script:LocaleManifestPath).Hash[0..6] -Join ''
-        $BranchName = "$PackageIdentifier-$BranchVersion-$UniqueBranchID"
+        $BranchName = "$PackageIdentifier-$PackageVersion-$UniqueBranchID"
         #Git branch names cannot start with `.` cannot contain any of {`..`, `\`, `~`, `^`, `:`, ` `, `?`, `@{`, `[`}, and cannot end with {`/`, `.lock`, `.`}
         $BranchName = $BranchName -replace '[\~,\^,\:,\\,\?,\@\{,\*,\[,\s]{1,}|[.lock|/|\.]*$|^\.{1,}|\.\.', ''
         git add -A
