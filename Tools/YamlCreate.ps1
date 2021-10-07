@@ -1820,7 +1820,7 @@ do {
 
 # Check the api for open PR's
 # This is unauthenticated because the call-rate per minute is assumed to be low
-if ($ScriptSettings.ContinueWithExistingPRs -ne 'always') {
+if ($ScriptSettings.ContinueWithExistingPRs -ne 'always' -and $script:Option -ne 'RemoveManifest') {
     $PRApiResponse = @(Invoke-WebRequest "https://api.github.com/search/issues?q=repo%3Amicrosoft%2Fwinget-pkgs%20$($PackageIdentifier -replace '\.', '%2F'))%2F$PackageVersion%20in%3Apath&per_page=1" -UseBasicParsing -ErrorAction SilentlyContinue | ConvertFrom-Json)[0]
     # If there was a PR found, get the URL and title
     if ($PRApiResponse.total_count -gt 0) {
