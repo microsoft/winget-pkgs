@@ -1398,6 +1398,11 @@ Function Enter-PR-Parameters {
         default { Write-Host }
     }
 
+    # If we are removing a manifest, we need to include the reason
+    if ($CommitType -eq 'Remove') {
+        $PrBodyContentReply = @("## $($script:RemovalReason)";'')+$PrBodyContentReply
+    }
+
     # Write the PR using a temporary file
     Set-Content -Path PrBodyFile -Value $PrBodyContentReply | Out-Null
     gh pr create --body-file PrBodyFile -f
@@ -2053,6 +2058,7 @@ Switch ($script:Option) {
     }
 
     'RemoveManifest' {
+        # Confirm the user is sure they know what they are doing
         $_menu = @{
             entries       = @("[Y] Remove $PackageIdentifier version $PackageVersion"; '*[N] Cancel')
             Prompt        = 'Are you sure you want to continue?'
@@ -2061,9 +2067,23 @@ Switch ($script:Option) {
             DefaultString = 'N'
         }
         switch ( KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString'] -HelpText $_menu['HelpText'] -HelpTextColor $_menu['HelpTextColor']) {
-            'Y' { continue }
+            'Y' { Write-Host; continue }
             default { Write-Host; exit 1 }
         }
+
+        # Require that a reason for the deletion is provided
+        do {
+            Write-Host -ForegroundColor 'Red' $script:_returnValue.ErrorString() 
+            Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the reason for removing this manifest'
+            $script:RemovalReason = Read-Host -Prompt 'Reason' | TrimString
+            # Check the reason for validity. The length requirements are arbitrary, but they have been set to encourage concise yet meaningful reasons
+            if (String.Validate $script:RemovalReason -MinLength 16 -MaxLength 128 -NotNull) {
+                $script:_returnValue = [ReturnValue]::Success()
+            } else {
+                $script:_returnValue = [ReturnValue]::LengthError(16, 128)
+            }
+        } until ($script:_returnValue.StatusCode -eq [ReturnValue]::Success().StatusCode)
+
         Remove-Manifest-Version $AppFolder
     }
 
@@ -2227,8 +2247,8 @@ if ($PromptSubmit -eq '0') {
     git switch -d upstream/master       
     if ($LASTEXITCODE -eq '0') {
         # Make sure path exists and is valid before hashing
-        if ($script:LocaleManifestPath -and (Test-Path -Path $script:LocaleManifestPath)){ $UniqueBranchID = $(Get-FileHash $script:LocaleManifestPath).Hash[0..6] -Join '' }
-        else {$UniqueBranchID = "DEL"}
+        if ($script:LocaleManifestPath -and (Test-Path -Path $script:LocaleManifestPath)) { $UniqueBranchID = $(Get-FileHash $script:LocaleManifestPath).Hash[0..6] -Join '' }
+        else { $UniqueBranchID = 'DEL' }
         $BranchName = "$PackageIdentifier-$PackageVersion-$UniqueBranchID"
         # Git branch names cannot start with `.` cannot contain any of {`..`, `\`, `~`, `^`, `:`, ` `, `?`, `@{`, `[`}, and cannot end with {`/`, `.lock`, `.`}
         $BranchName = $BranchName -replace '[\~,\^,\:,\\,\?,\@\{,\*,\[,\s]{1,}|[.lock|/|\.]*$|^\.{1,}|\.\.', ''
