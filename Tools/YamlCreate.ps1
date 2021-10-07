@@ -1941,6 +1941,7 @@ if ($OldManifests.Name -eq "$PackageIdentifier.installer.yaml" -and $OldManifest
     if ($script:Option -eq 'NewLocale') { throw [ManifestException]::new('MultiManifest Required') }
     $script:OldManifestType = 'MultiManifest'
     $script:OldSingletonManifest = ConvertFrom-Yaml -Yaml ($(Get-Content -Path $(Resolve-Path "$AppFolder\..\$LastVersion\$PackageIdentifier.yaml") -Encoding UTF8) -join "`n") -Ordered
+    $PackageLocale = $script:OldSingletonManifest.PackageLocale
     # Create new empty manifests
     $script:OldInstallerManifest = [ordered]@{}
     $script:OldLocaleManifest = [ordered]@{}
