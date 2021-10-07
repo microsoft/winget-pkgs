@@ -2226,9 +2226,11 @@ if ($PromptSubmit -eq '0') {
     git fetch upstream master --quiet
     git switch -d upstream/master       
     if ($LASTEXITCODE -eq '0') {
-        $UniqueBranchID = $(Get-FileHash $script:LocaleManifestPath).Hash[0..6] -Join ''
+        # Make sure path exists and is valid before hashing
+        if ($script:LocaleManifestPath -and (Test-Path -Path $script:LocaleManifestPath)){ $UniqueBranchID = $(Get-FileHash $script:LocaleManifestPath).Hash[0..6] -Join '' }
+        else {$UniqueBranchID = "DEL"}
         $BranchName = "$PackageIdentifier-$PackageVersion-$UniqueBranchID"
-        #Git branch names cannot start with `.` cannot contain any of {`..`, `\`, `~`, `^`, `:`, ` `, `?`, `@{`, `[`}, and cannot end with {`/`, `.lock`, `.`}
+        # Git branch names cannot start with `.` cannot contain any of {`..`, `\`, `~`, `^`, `:`, ` `, `?`, `@{`, `[`}, and cannot end with {`/`, `.lock`, `.`}
         $BranchName = $BranchName -replace '[\~,\^,\:,\\,\?,\@\{,\*,\[,\s]{1,}|[.lock|/|\.]*$|^\.{1,}|\.\.', ''
         git add -A
         git commit -m "$CommitType`: $PackageIdentifier version $PackageVersion" --quiet
