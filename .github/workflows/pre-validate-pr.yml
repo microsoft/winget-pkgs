@@ -8,12 +8,13 @@ jobs:
   validate:
     runs-on: ubuntu-latest
     steps:
-      - env:
-          DUPLICATE_PR_FOUND: false
       - name: Checkout repository
         uses: actions/checkout@v2
       - name: Run validation checks
+        id: validation-check
         shell: pwsh
+        env: 
+          DUPLICATE_PR_FOUND: false
         run: |
           (Invoke-WebRequest https://api.github.com/repos/microsoft/winget-pkgs/pulls/${{ github.event.number }}/files).content | ConvertFrom-Json | ForEach-Object { $changedFiles = @($_.filename) }
           $prPath = $changedFiles | ForEach-Object { $_.Remove($_.LastIndexOf("/")) } | Select-Object -Unique
@@ -25,7 +26,7 @@ jobs:
             $env:DUPLICATE_PR_FOUND = $true
             $env:DUPLICATE_PR_NUMBER = $PRApiResponse.items.number
           }
-      - if: ${{ env.DUPLICATE_PR_FOUND == true }}
+      - if: ${{ job.validation-check.env.DUPLICATE_PR_FOUND == true }}
         name: Comment on PR
         uses: actions/github-script@v5
         with:
@@ -34,5 +35,5 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: 'Duplicate of #${{ env.DUPLICATE_PR_NUMBER }}'
+              body: 'Duplicate of #${{ job.validation-check.env.DUPLICATE_PR_NUMBER }}'
             })
