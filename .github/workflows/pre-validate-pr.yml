@@ -17,11 +17,11 @@ jobs:
         id: validation
         shell: pwsh
         run: |
-          (Invoke-WebRequest https://api.github.com/repos/vedantmgoyal2009/winget-pkgs/pulls/${{ github.event.number }}/files).content | ConvertFrom-Json | ForEach-Object { $changedFiles = @($_.filename) }
+          (Invoke-WebRequest https://api.github.com/repos/microsoft/winget-pkgs/pulls/${{ github.event.number }}/files).content | ConvertFrom-Json | ForEach-Object { $changedFiles = @($_.filename) }
           $prPath = $changedFiles | ForEach-Object { $_.Remove($_.LastIndexOf("/")) } | Select-Object -Unique
           $PackageVersion = $prPath.Substring($prPath.LastIndexOf("/")+1)
           $PackageIdentifier = $prPath.Substring($prPath.IndexOf('/',10)+1).TrimEnd("/$PackageVersion") -replace '/','.'
-          $PRApiResponse = @(Invoke-WebRequest "https://api.github.com/search/issues?q=repo%3Avedantmgoyal2009%2Fwinget-pkgs%20$($PackageIdentifier -replace '\.', '%2F'))%2F$PackageVersion%20in%3Apath&per_page=1" -UseBasicParsing -ErrorAction SilentlyContinue | ConvertFrom-Json)[0]
+          $PRApiResponse = @(Invoke-WebRequest "https://api.github.com/search/issues?q=repo%3Amicrosoft%2Fwinget-pkgs%20$($PackageIdentifier -replace '\.', '%2F'))%2F$PackageVersion%20in%3Apath&per_page=1" -UseBasicParsing -ErrorAction SilentlyContinue | ConvertFrom-Json)[0]
           if ($PRApiResponse.total_count -gt 0)
           {
             Write-Output "DUPLICATE_PR_FOUND=yes" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
