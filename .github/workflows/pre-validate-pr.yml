@@ -4,6 +4,9 @@ on:
     types: [opened, synchronize, reopened]
     paths:
       - 'manifests/**'
+env:
+  DUPLICATE_PR_FOUND: 'no'
+  DUPLICATE_PR_NUMBER: ''
 jobs:
   validate:
     runs-on: ubuntu-latest
@@ -11,22 +14,21 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
       - name: Run validation checks
-        id: validation-check
+        id: validation
         shell: pwsh
-        env: 
-          DUPLICATE_PR_FOUND: false
         run: |
-          (Invoke-WebRequest https://api.github.com/repos/microsoft/winget-pkgs/pulls/${{ github.event.number }}/files).content | ConvertFrom-Json | ForEach-Object { $changedFiles = @($_.filename) }
+          (Invoke-WebRequest https://api.github.com/repos/vedantmgoyal2009/winget-pkgs/pulls/${{ github.event.number }}/files).content | ConvertFrom-Json | ForEach-Object { $changedFiles = @($_.filename) }
           $prPath = $changedFiles | ForEach-Object { $_.Remove($_.LastIndexOf("/")) } | Select-Object -Unique
           $PackageVersion = $prPath.Substring($prPath.LastIndexOf("/")+1)
           $PackageIdentifier = $prPath.Substring($prPath.IndexOf('/',10)+1).TrimEnd("/$PackageVersion") -replace '/','.'
-          $PRApiResponse = @(Invoke-WebRequest "https://api.github.com/search/issues?q=repo%3Amicrosoft%2Fwinget-pkgs%20$($PackageIdentifier -replace '\.', '%2F'))%2F$PackageVersion%20in%3Apath&per_page=1" -UseBasicParsing -ErrorAction SilentlyContinue | ConvertFrom-Json)[0]
+          $PRApiResponse = @(Invoke-WebRequest "https://api.github.com/search/issues?q=repo%3Avedantmgoyal2009%2Fwinget-pkgs%20$($PackageIdentifier -replace '\.', '%2F'))%2F$PackageVersion%20in%3Apath&per_page=1" -UseBasicParsing -ErrorAction SilentlyContinue | ConvertFrom-Json)[0]
           if ($PRApiResponse.total_count -gt 0)
           {
-            $env:DUPLICATE_PR_FOUND = $true
-            $env:DUPLICATE_PR_NUMBER = $PRApiResponse.items.number
+            Write-Output "DUPLICATE_PR_FOUND=yes" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+            Write-Output "DUPLICATE_PR_NUMBER=$($PRApiResponse.items.number)" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+            
           }
-      - if: ${{ job.validation-check.env.DUPLICATE_PR_FOUND == true }}
+      - if: ${{ env.DUPLICATE_PR_FOUND == 'yes' }}
         name: Comment on PR
         uses: actions/github-script@v5
         with:
@@ -35,5 +37,5 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: 'Duplicate of #${{ job.validation-check.env.DUPLICATE_PR_NUMBER }}'
+              body: 'Duplicate of #${{ env.DUPLICATE_PR_NUMBER }}'
             })
