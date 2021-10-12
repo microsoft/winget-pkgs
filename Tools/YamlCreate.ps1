@@ -293,6 +293,14 @@ Function TestUrlValidity {
     return $HTTP_Status
 }
 
+# Checks a file name for validity and returns a boolean value
+function Test-ValidFileName {
+    param([string]$FileName)
+    $IndexOfInvalidChar = $FileName.IndexOfAny([System.IO.Path]::GetInvalidFileNameChars())
+    # IndexOfAny() returns the value -1 to indicate no such character was found
+    return $IndexOfInvalidChar -eq -1
+}
+
 # Prompts user to enter an Installer URL, Tests the URL to ensure it results in a response code of 200, validates it against the manifest schema
 # Returns the validated URL which was entered
 Function Request-Installer-Url {
@@ -373,12 +381,28 @@ Function Read-Installer-Values {
         $start_time = Get-Date
         Write-Host $NewLine
         Write-Host 'Downloading URL. This will take a while...' -ForegroundColor Blue
-        $WebClient = New-Object System.Net.WebClient
-        $Filename = [System.IO.Path]::GetFileName($InstallerUrl)
-        $script:dest = "$env:TEMP\$FileName"
-
         try {
-            $WebClient.DownloadFile($InstallerUrl, $script:dest)
+            # Download and store the binary, but do not write to a file yet
+            $download = Invoke-WebRequest -Uri $InstallerUrl -UserAgent 'winget/1.0' -DisableKeepAlive -TimeoutSec 30 -UseBasicParsing
+            # Attempt to get the file from the headers
+            try {
+                $contentDisposition = [System.Net.Mime.ContentDisposition]::new($download.Headers['Content-Disposition'])
+                $_Filename = $contentDisposition.FileName
+            } catch {}
+            # Validate the headers reurned a valid file name
+            if (![string]::IsNullOrWhiteSpace($_Filename) -and $(Test-ValidFileName $_Filename)) {
+                $Filename = $_Filename
+            } 
+            # If the headers did not return a valid file name, build our own file name
+            # Attempt to preserve the extension if it exists, otherwise, create our own
+            else {
+                $Filename = "$PackageIdentifier v$PackageVersion" + $(if ([System.IO.Path]::HasExtension($_Filename)) { [System.IO.Path]::GetExtension($_Filename) } elseif ([System.IO.Path]::HasExtension($InstallerUrl)) { [System.IO.Path]::GetExtension($InstallerUrl) } else { '.winget-tmp' })
+            }
+            # Write File to disk
+            $script:dest = Join-Path -Path $env:TEMP -ChildPath $Filename
+            $file = [System.IO.FileStream]::new($script:dest, [System.IO.FileMode]::Create)
+            $file.Write($download.Content, 0, $download.RawContentLength)
+            $file.Close()
         } catch {
             # Here we also want to pass the exception through for potential debugging
             throw [System.Net.WebException]::new('The file could not be downloaded. Try running the script again', $_.Exception)
@@ -754,12 +778,28 @@ Function Read-Installer-Values-Minimal {
         # Request user enter the new Installer URL
         $_NewInstaller['InstallerUrl'] = Request-Installer-Url
 
-        # Download the file at the URL
-        $WebClient = New-Object System.Net.WebClient
-        $Filename = [System.IO.Path]::GetFileName($($_NewInstaller.InstallerUrl))
-        $script:dest = "$env:TEMP\$Filename"
         try {
-            $WebClient.DownloadFile($($_NewInstaller.InstallerUrl), $script:dest)
+            # Download and store the binary, but do not write to a file yet
+            $download = Invoke-WebRequest -Uri $_NewInstaller['InstallerUrl'] -UserAgent 'winget/1.0' -DisableKeepAlive -TimeoutSec 30 -UseBasicParsing
+            # Attempt to get the file from the headers
+            try {
+                $contentDisposition = [System.Net.Mime.ContentDisposition]::new($download.Headers['Content-Disposition'])
+                $_Filename = $contentDisposition.FileName
+            } catch {}
+            # Validate the headers reurned a valid file name
+            if (![string]::IsNullOrWhiteSpace($_Filename) -and $(Test-ValidFileName $_Filename)) {
+                $Filename = $_Filename
+            } 
+            # If the headers did not return a valid file name, build our own file name
+            # Attempt to preserve the extension if it exists, otherwise, create our own
+            else {
+                $Filename = "$PackageIdentifier v$PackageVersion" + $(if ([System.IO.Path]::HasExtension($_Filename)) { [System.IO.Path]::GetExtension($_Filename) } elseif ([System.IO.Path]::HasExtension($InstallerUrl)) { [System.IO.Path]::GetExtension($InstallerUrl) } else { '.winget-tmp' })
+            }
+            # Write File to disk
+            $script:dest = Join-Path -Path $env:TEMP -ChildPath $Filename
+            $file = [System.IO.FileStream]::new($script:dest, [System.IO.FileMode]::Create)
+            $file.Write($download.Content, 0, $download.RawContentLength)
+            $file.Close()
         } catch {
             # Here we also want to pass the exception through for potential debugging
             throw [System.Net.WebException]::new('The file could not be downloaded. Try running the script again', $_.Exception)
@@ -1400,7 +1440,7 @@ Function Enter-PR-Parameters {
 
     # If we are removing a manifest, we need to include the reason
     if ($CommitType -eq 'Remove') {
-        $PrBodyContentReply = @("## $($script:RemovalReason)";'')+$PrBodyContentReply
+        $PrBodyContentReply = @("## $($script:RemovalReason)"; '') + $PrBodyContentReply
     }
 
     # Write the PR using a temporary file
@@ -2077,10 +2117,10 @@ Switch ($script:Option) {
             Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the reason for removing this manifest'
             $script:RemovalReason = Read-Host -Prompt 'Reason' | TrimString
             # Check the reason for validity. The length requirements are arbitrary, but they have been set to encourage concise yet meaningful reasons
-            if (String.Validate $script:RemovalReason -MinLength 16 -MaxLength 128 -NotNull) {
+            if (String.Validate $script:RemovalReason -MinLength 8 -MaxLength 128 -NotNull) {
                 $script:_returnValue = [ReturnValue]::Success()
             } else {
-                $script:_returnValue = [ReturnValue]::LengthError(16, 128)
+                $script:_returnValue = [ReturnValue]::LengthError(8, 128)
             }
         } until ($script:_returnValue.StatusCode -eq [ReturnValue]::Success().StatusCode)
 
@@ -2097,12 +2137,28 @@ Switch ($script:Option) {
         Write-Host $NewLine
         Write-Host 'Updating Manifest Information. This may take a while...' -ForegroundColor Blue
         foreach ($_Installer in $script:OldInstallerManifest.Installers) {
-            # Download the file at the URL
-            $WebClient = New-Object System.Net.WebClient
-            $Filename = [System.IO.Path]::GetFileName($($_Installer.InstallerUrl))
-            $script:dest = "$env:TEMP\$Filename"
             try {
-                $WebClient.DownloadFile($($_Installer.InstallerUrl), $script:dest)
+                # Download and store the binary, but do not write to a file yet
+                $download = Invoke-WebRequest -Uri $_Installer.InstallerUrl -UserAgent 'winget/1.0' -DisableKeepAlive -TimeoutSec 30 -UseBasicParsing
+                # Attempt to get the file from the headers
+                try {
+                    $contentDisposition = [System.Net.Mime.ContentDisposition]::new($download.Headers['Content-Disposition'])
+                    $_Filename = $contentDisposition.FileName
+                } catch {}
+                # Validate the headers reurned a valid file name
+                if (![string]::IsNullOrWhiteSpace($_Filename) -and $(Test-ValidFileName $_Filename)) {
+                    $Filename = $_Filename
+                } 
+                # If the headers did not return a valid file name, build our own file name
+                # Attempt to preserve the extension if it exists, otherwise, create our own
+                else {
+                    $Filename = "$PackageIdentifier v$PackageVersion" + $(if ([System.IO.Path]::HasExtension($_Filename)) { [System.IO.Path]::GetExtension($_Filename) } elseif ([System.IO.Path]::HasExtension($InstallerUrl)) { [System.IO.Path]::GetExtension($InstallerUrl) } else { '.winget-tmp' })
+                }
+                # Write File to disk
+                $script:dest = Join-Path -Path $env:TEMP -ChildPath $Filename
+                $file = [System.IO.FileStream]::new($script:dest, [System.IO.FileMode]::Create)
+                $file.Write($download.Content, 0, $download.RawContentLength)
+                $file.Close()
             } catch {
                 # Here we also want to pass the exception through for potential debugging
                 throw [System.Net.WebException]::new('The file could not be downloaded. Try running the script again', $_.Exception)
