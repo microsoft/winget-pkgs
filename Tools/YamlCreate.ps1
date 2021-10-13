@@ -1699,8 +1699,8 @@ Function Write-Locale-Manifests {
     }
 
     If ($Tags) { AddYamlListParameter $LocaleManifest 'Tags' $Tags }
-    If ($Moniker) { AddYamlParameter $LocaleManifest 'Moniker' $Moniker }
     If (!$LocaleManifest.ManifestType) { $LocaleManifest['ManifestType'] = 'defaultLocale' }
+    If ($Moniker -and $($LocaleManifest.ManifestType -eq 'defaultLocale')) { AddYamlParameter $LocaleManifest 'Moniker' $Moniker }
     AddYamlParameter $LocaleManifest 'ManifestVersion' $ManifestVersion
     $LocaleManifest = SortYamlKeys $LocaleManifest $LocaleProperties
 
@@ -1722,6 +1722,7 @@ Function Write-Locale-Manifests {
                 if (!(Test-Path $AppFolder)) { New-Item -ItemType 'Directory' -Force -Path $AppFolder | Out-Null }
                 $script:OldLocaleManifest = ConvertFrom-Yaml -Yaml ($(Get-Content -Path $DifLocale.FullName -Encoding UTF8) -join "`n") -Ordered
                 $script:OldLocaleManifest['PackageVersion'] = $PackageVersion
+                if ($script:OldLocaleManifest.Keys -contains 'Moniker') {$script:OldLocaleManifest.Remove('Moniker')}
                 $script:OldLocaleManifest = SortYamlKeys $script:OldLocaleManifest $LocaleProperties
 
                 $yamlServer = '# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.0.0.schema.json'
