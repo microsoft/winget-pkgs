@@ -27,7 +27,7 @@ You may either use the [Windows Package Manager Manifest Creator](https://github
 ### Using the YamlCreate.ps1
 To help author manifest files, we have provided a YamlCreate.ps1 [powershell script](Tools/YamlCreate.ps1) located in the Tools folder. The script will prompt you for the URL to the installer, then will prompt you to fill in metadata. Additional information regarding the YamlCreate script can be found in the [documentation for the script](doc/tools/YamlCreate.md). 
 
-> You can use the script by cloning the repository on your PC and running- the script directly from the **Tools** folder.
+> You can use the script by cloning the repository on your PC and running the script directly from the **Tools** folder.
 
 ## Test your manifest
 Now that you have authored your manifest, you should make sure it works as expected.
