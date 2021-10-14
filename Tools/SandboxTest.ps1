@@ -24,12 +24,14 @@ if (-Not $SkipManifestValidation -And -Not [String]::IsNullOrWhiteSpace($Manifes
   Write-Host '--> Validating Manifest'
 
   if (-Not (Test-Path -Path $Manifest)) {
-    throw 'The Manifest does not exist.'
+    throw [System.IO.DirectoryNotFoundException]::new('The Manifest does not exist.')
   }
 
   winget.exe validate $Manifest
-  if (-Not $?) {
-    throw 'Manifest validation failed.'
+  switch ($LASTEXITCODE) {
+    '-1978335191' { throw [System.Activities.ValidationException]::new('Manifest validation failed.')}
+    '-1978335192' { Start-Sleep -Seconds 5 }
+    Default { continue }
   }
 
   Write-Host
@@ -102,7 +104,7 @@ $ProgressPreference = $oldProgressPreference
 $vcLibsUwp = @{
   fileName = 'Microsoft.VCLibs.x64.14.00.Desktop.appx'
   url      = 'https://aka.ms/Microsoft.VCLibs.x64.14.00.Desktop.appx'
-  hash     = '6602159c341bafea747d0edf15669ac72df8817299fbfaa90469909e06794256'
+  hash     = 'A39CEC0E70BE9E3E48801B871C034872F1D7E5E8EEBE986198C019CF2C271040'
 }
 
 $dependencies = @($desktopAppInstaller, $vcLibsUwp)
@@ -126,7 +128,7 @@ foreach ($dependency in $dependencies) {
   $dependency.pathInSandbox = Join-Path -Path $desktopInSandbox -ChildPath (Join-Path -Path $tempFolderName -ChildPath $dependency.fileName)
 
   # Only download if the file does not exist, or its hash does not match.
-  if (-Not ((Test-Path -Path $dependency.file -PathType Leaf) -And $dependency.hash -eq $(get-filehash $dependency.file).Hash)) {
+  if (-Not ((Test-Path -Path $dependency.file -PathType Leaf) -And $dependency.hash -eq $(Get-FileHash $dependency.file).Hash)) {
     Write-Host @"
     - Downloading:
       $($dependency.url)
@@ -136,10 +138,11 @@ foreach ($dependency in $dependencies) {
       $WebClient.DownloadFile($dependency.url, $dependency.file)
     }
     catch {
-      throw "Error downloading $($dependency.url)."
+      #Pass the exception as an inner exception
+      throw [System.Net.WebException]::new("Error downloading $($dependency.url).",$_.Exception)
     }
-    if (-not ($dependency.hash -eq $(get-filehash $dependency.file).Hash)) {
-      throw 'Hashes do not match, try gain.'
+    if (-not ($dependency.hash -eq $(Get-FileHash $dependency.file).Hash)) {
+      throw [System.Activities.VersionMismatchException]::new('Dependency hash does not match the downloaded file')
     }
   }
 }
@@ -188,6 +191,11 @@ if (-Not [String]::IsNullOrWhiteSpace($Manifest)) {
   $bootstrapPs1Content += @"
 Write-Host @'
 
+--> Configuring Winget
+'@
+winget settings --Enable LocalManifestFiles
+
+Write-Host @'`n
 --> Installing the Manifest $manifestFileName
 
 '@
@@ -260,6 +268,7 @@ Write-Host @"
       - $tempFolder as read-only
       - $mapFolder as read-and-write
     - Installing WinGet
+    - Configuring Winget
 "@
 
 if (-Not [String]::IsNullOrWhiteSpace($Manifest)) {

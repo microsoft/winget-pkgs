@@ -1,6 +1,6 @@
 #Requires -Version 5
 $PSVersion = (Get-Host).Version.Major
-$ScriptHeader = '# Created using YamlCreate.ps1 v1.1.6'
+$ScriptHeader = '# Created using YamlCreate.ps1 v1.1.7'
 
 <#
 .SYNOPSIS
@@ -107,7 +107,7 @@ Function Read-WinGet-MandatoryInfo {
 Function Read-PreviousWinGet-Manifest {
     Switch ($Option) {
         'Update' {
-            $LastVersion = Split-Path (Split-Path (Get-ChildItem -Path "$AppFolder\..\" -Recurse -Depth 1 -File).FullName ) -Leaf | Sort-Object $ToNatural | Select-Object -Last 1
+            $LastVersion = Split-Path (Split-Path (Get-ChildItem -Path "$AppFolder\..\" -Recurse -Depth 1 -File -Filter "*.yaml").FullName ) -Leaf | Sort-Object $ToNatural | Select-Object -Last 1
 
             Write-Host -ForegroundColor 'DarkYellow' -Object "Last Version: $LastVersion"
             $script:OldManifests = Get-ChildItem -Path "$AppFolder\..\$LastVersion"
@@ -330,7 +330,7 @@ Function Read-WinGet-InstallerValues {
         Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the installer locale. For example: en-US, en-CA'
         Write-Host -ForegroundColor 'Blue' -Object 'https://docs.microsoft.com/openspecs/office_standards/ms-oe376/6c085406-a698-4e12-9d4d-c3b0ee3dbc4a'
         $InstallerLocale = Read-Host -Prompt 'InstallerLocale' | TrimString
-    } while (-not [string]::IsNullOrWhiteSpace($InstallerLocale) -and ($InstallerLocale -gt 10))
+    } while (-not [string]::IsNullOrWhiteSpace($InstallerLocale) -and ($InstallerLocale.Length -gt 10))
     if ([string]::IsNullOrWhiteSpace($InstallerLocale)) {$InstallerLocale = 'en-US'}
 
     do {
@@ -587,7 +587,7 @@ Function Read-WinGet-LocaleManifest {
             Write-Host
             Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the Publisher Url.'
             $script:PublisherUrl = Read-Host -Prompt 'Publisher Url' | TrimString
-        } while (-not [string]::IsNullOrWhiteSpace($PublisherUrl) -and ($PublisherUrl.Length -lt 5 -or $LicenseUrl.Length -gt 2000))
+        } while (-not [string]::IsNullOrWhiteSpace($PublisherUrl) -and ($PublisherUrl.Length -lt 5 -or $PublisherUrl.Length -gt 2000))
     } else {
         do {
             Write-Host
@@ -595,10 +595,10 @@ Function Read-WinGet-LocaleManifest {
             Write-Host -ForegroundColor 'DarkGray' "Old Variable: $PublisherUrl"
             $NewPublisherUrl = Read-Host -Prompt 'Publisher Url' | TrimString
     
-            if (-not [string]::IsNullOrWhiteSpace($NewNewPublisherUrl)) {
+            if (-not [string]::IsNullOrWhiteSpace($NewPublisherUrl)) {
                 $script:PublisherUrl = $NewPublisherUrl
             }
-        } while (-not [string]::IsNullOrWhiteSpace($PublisherUrl) -and ($PublisherUrl.Length -lt 5 -or $LicenseUrl.Length -gt 2000))
+        } while (-not [string]::IsNullOrWhiteSpace($PublisherUrl) -and ($PublisherUrl.Length -lt 5 -or $PublisherUrl.Length -gt 2000))
     }
 
     if ([string]::IsNullOrWhiteSpace($PublisherSupportUrl)) {
@@ -739,7 +739,7 @@ Function Read-WinGet-LocaleManifest {
             Write-Host
             Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the application Copyright Url.'
             $script:CopyrightUrl = Read-Host -Prompt 'CopyrightUrl' | TrimString
-        } while (-not [string]::IsNullOrWhiteSpace($CopyrightUrl) -and ($LicenseUrl.Length -lt 10 -or $LicenseUrl.Length -gt 2000))
+        } while (-not [string]::IsNullOrWhiteSpace($CopyrightUrl) -and ($CopyrightUrl.Length -lt 10 -or $CopyrightUrl.Length -gt 2000))
     } else {
         do {
             Write-Host
@@ -750,7 +750,7 @@ Function Read-WinGet-LocaleManifest {
             if (-not [string]::IsNullOrWhiteSpace($NewCopyrightUrl)) {
                 $script:CopyrightUrl = $NewCopyrightUrl
             }
-        } while (-not [string]::IsNullOrWhiteSpace($CopyrightUrl) -and ($LicenseUrl.Length -lt 10 -or $LicenseUrl.Length -gt 2000))
+        } while (-not [string]::IsNullOrWhiteSpace($CopyrightUrl) -and ($CopyrightUrl.Length -lt 10 -or $CopyrightUrl.Length -gt 2000))
     }
 
     if ([string]::IsNullOrWhiteSpace($Tags)) {
