@@ -1,0 +1,42 @@
+name: Rerun Pipelines - Moderators
+on:
+  issue_comment:
+    types: [created]
+env:
+  IsRequestValid: 'null'
+jobs:
+  rerun:
+    if: ${{ github.event.issue.pull_request }}
+    runs-on: ubuntu-latest
+    steps:
+      - if: contains(github.event.comment.body, '@wingetbot rerun')
+        name: Check comment author
+        shell: pwsh
+        run: |
+          $moderators = @('jedieaston','ItzLevvie','OfficialEsco','quhxl','KaranKad','ImJoakim')
+          if ("${{ github.event.comment.user.login }}" -in @($moderators,'${{ github.event.issue.user.login }}'))
+          {
+            Write-Output "IsRequestValid=yes" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          }
+      - if: ${{ env.IsRequestValid == 'yes' }}
+        uses: actions/github-script@v5
+        with:
+          github-token: ${{ secrets.WINGETBOT_PAT }}
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '/AzurePipelines run'
+            })
+      - if: ${{ env.IsRequestValid == 'no' }}
+        uses: actions/github-script@v5
+        with:
+          github-token: ${{ secrets.WINGETBOT_PAT }}
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '<samp>This feature can only be used by PR authors and Moderators.</samp>'
+            })
