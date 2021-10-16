@@ -331,7 +331,7 @@ Function Request-Installer-Url {
 # Prompts the user to enter installer values
 # Sets the $script:Installers value as an output
 # Returns void
-Function Read-Installer-Values {
+Function Read-InstallerEntry {
     # Clear prompted variables to ensure data from previous installer entries is not used for new entries
     $InstallerValues = @(
         'Architecture'
@@ -746,7 +746,7 @@ Function Read-Installer-Values {
 
     # If there are additional entries, run this function again to fetch the values and add them to the installers array
     if ($AnotherInstaller -eq '0') {
-        Write-Host; Read-Installer-Values
+        Write-Host; Read-InstallerEntry
     }
 }
 
@@ -2074,7 +2074,7 @@ Switch ($script:Option) {
     }
 
     'New' {
-        Read-Installer-Values
+        Read-InstallerEntry
         Read-InstallerMetadata
         Read-LocaleMetadata
         Write-InstallerManifest
