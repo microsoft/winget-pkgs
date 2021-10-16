@@ -1306,7 +1306,7 @@ Function Read-LocaleMetadata {
 
 # Requests the user to answer the prompts found in the winget-pkgs pull request template
 # Uses this template and responses to create a PR
-Function Enter-PR-Parameters {
+Function Read-PRBody {
     $PrBodyContent = Get-Content $args[0]
     ForEach ($_line in ($PrBodyContent | Where-Object { $_ -like '-*[ ]*' })) {
         $_showMenu = $true
@@ -2318,14 +2318,14 @@ if ($PromptSubmit -eq '0') {
         if (Get-Command 'gh.exe' -ErrorAction SilentlyContinue) {
             # Request the user to fill out the PR template
             if (Test-Path -Path "$PSScriptRoot\..\.github\PULL_REQUEST_TEMPLATE.md") {
-                Enter-PR-Parameters "$PSScriptRoot\..\.github\PULL_REQUEST_TEMPLATE.md"
+                Read-PRBody "$PSScriptRoot\..\.github\PULL_REQUEST_TEMPLATE.md"
             } else {
                 while ([string]::IsNullOrWhiteSpace($SandboxScriptPath)) {
                     Write-Host
                     Write-Host -ForegroundColor 'Green' -Object 'PULL_REQUEST_TEMPLATE.md not found, input path'
                     $PRTemplate = Read-Host -Prompt 'PR Template' | TrimString
                 }
-                Enter-PR-Parameters "$PRTemplate"
+                Read-PRBody "$PRTemplate"
             }
         }
     }
