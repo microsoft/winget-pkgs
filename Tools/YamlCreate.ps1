@@ -155,7 +155,7 @@ $Patterns = @{
 
 # This function validates whether a string matches Minimum Length, Maximum Length, and Regex pattern
 # The switches can be used to specify if null values are allowed regardless of validation
-Function String.Validate {
+Function Test-String {
     Param
     (
         [Parameter(Mandatory = $true, Position = 0)]
@@ -307,16 +307,16 @@ Function Request-Installer-Url {
         Write-Host -ForegroundColor 'Red' $script:_returnValue.ErrorString()
         Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the download url to the installer.'
         $NewInstallerUrl = Read-Host -Prompt 'Url' | TrimString
-        if (String.Validate $NewInstallerUrl -MaxLength $Patterns.InstallerUrlMaxLength -MatchPattern $Patterns.InstallerUrl -NotNull) {
+        if (Test-String $NewInstallerUrl -MaxLength $Patterns.InstallerUrlMaxLength -MatchPattern $Patterns.InstallerUrl -NotNull) {
             if ((TestUrlValidity $NewInstallerUrl) -ne 200) {
                 $script:_returnValue = [ReturnValue]::new(502, 'Invalid URL Response', 'The URL did not return a successful response from the server', 2)
             } else {
                 $script:_returnValue = [ReturnValue]::Success()
             }
         } else {
-            if (String.Validate -not $NewInstallerUrl -MaxLength $Patterns.InstallerUrlMaxLength -NotNull) {
+            if (Test-String -not $NewInstallerUrl -MaxLength $Patterns.InstallerUrlMaxLength -NotNull) {
                 $script:_returnValue = [ReturnValue]::LengthError(1, $Patterns.InstallerUrlMaxLength)
-            } elseif (String.Validate -not $NewInstallerUrl -MatchPattern $Patterns.InstallerUrl) {
+            } elseif (Test-String -not $NewInstallerUrl -MatchPattern $Patterns.InstallerUrl) {
                 $script:_returnValue = [ReturnValue]::PatternError()
             } else {
                 $script:_returnValue = [ReturnValue]::GenericError()
@@ -477,7 +477,7 @@ Function Read-Installer-Values {
             Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the silent install switch. For example: /S, -verysilent, /qn, --silent, /exenoui'
             $Silent = Read-Host -Prompt 'Silent switch' | TrimString
 
-            if (String.Validate $Silent -MaxLength $Patterns.SilentSwitchMaxLength -NotNull) {
+            if (Test-String $Silent -MaxLength $Patterns.SilentSwitchMaxLength -NotNull) {
                 $script:_returnValue = [ReturnValue]::Success()
             } else {
                 $script:_returnValue = [ReturnValue]::LengthError(1, $Patterns.SilentSwitchMaxLength)
@@ -490,7 +490,7 @@ Function Read-Installer-Values {
             Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the silent with progress install switch. For example: /S, -silent, /qb, /exebasicui'
             $SilentWithProgress = Read-Host -Prompt 'Silent with progress switch' | TrimString
 
-            if (String.Validate $SilentWithProgress -MaxLength $Patterns.ProgressSwitchMaxLength -NotNull) {
+            if (Test-String $SilentWithProgress -MaxLength $Patterns.ProgressSwitchMaxLength -NotNull) {
                 $script:_returnValue = [ReturnValue]::Success()
             } else {
                 $script:_returnValue = [ReturnValue]::LengthError(1, $Patterns.ProgressSwitchMaxLength)
@@ -505,7 +505,7 @@ Function Read-Installer-Values {
             Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the silent install switch. For example: /S, /s, /VERYSILENT, /qn, --silent'
             $Silent = Read-Host -Prompt 'Silent' | TrimString
 
-            if (String.Validate $Silent -MaxLength $Patterns.SilentSwitchMaxLength -AllowNull) {
+            if (Test-String $Silent -MaxLength $Patterns.SilentSwitchMaxLength -AllowNull) {
                 $script:_returnValue = [ReturnValue]::Success()
             } else {
                 $script:_returnValue = [ReturnValue]::LengthError(1, $Patterns.SilentSwitchMaxLength)
@@ -519,7 +519,7 @@ Function Read-Installer-Values {
             Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the silent with progress install switch. For example: /S, /SILENT, /qb'
             $SilentWithProgress = Read-Host -Prompt 'SilentWithProgress' | TrimString
 
-            if (String.Validate $SilentWithProgress -MaxLength $Patterns.ProgressSwitchMaxLength -AllowNull) {
+            if (Test-String $SilentWithProgress -MaxLength $Patterns.ProgressSwitchMaxLength -AllowNull) {
                 $script:_returnValue = [ReturnValue]::Success()
             } else {
                 $script:_returnValue = [ReturnValue]::LengthError(1, $Patterns.ProgressSwitchMaxLength)
@@ -533,7 +533,7 @@ Function Read-Installer-Values {
         Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter any custom switches for the installer. For example: /norestart, -norestart'
         $Custom = Read-Host -Prompt 'Custom Switch' | TrimString
 
-        if (String.Validate $Custom -MaxLength $Patterns.CustomSwitchMaxLength -AllowNull) {
+        if (Test-String $Custom -MaxLength $Patterns.CustomSwitchMaxLength -AllowNull) {
             $script:_returnValue = [ReturnValue]::Success()
         } else {
             $script:_returnValue = [ReturnValue]::LengthError(1, $Patterns.CustomSwitchMaxLength)
@@ -544,14 +544,14 @@ Function Read-Installer-Values {
     if ($InstallerType -ieq 'msix' -or $InstallerType -ieq 'appx') {
         # Detect or prompt for Signature Sha256
         if (Get-Command 'winget.exe' -ErrorAction SilentlyContinue) { $SignatureSha256 = winget hash -m $script:dest | Select-String -Pattern 'SignatureSha256:' | ConvertFrom-String; if ($SignatureSha256.P2) { $SignatureSha256 = $SignatureSha256.P2.ToUpper() } }
-        if (String.Validate $SignatureSha256 -IsNull) {
+        if (Test-String $SignatureSha256 -IsNull) {
             # Manual entry of Signature Sha256 with validation
             do {
                 Write-Host -ForegroundColor 'Red' $script:_returnValue.ErrorString()
                 Write-Host -ForegroundColor 'Yellow' -Object '[Recommended] Enter the installer SignatureSha256'
                 $SignatureSha256 = Read-Host -Prompt 'SignatureSha256' | TrimString
 
-                if (String.Validate $SignatureSha256 -MatchPattern $Patterns.SignatureSha256 -AllowNull) {
+                if (Test-String $SignatureSha256 -MatchPattern $Patterns.SignatureSha256 -AllowNull) {
                     $script:_returnValue = [ReturnValue]::Success()
                 } else {
                     $script:_returnValue = [ReturnValue]::PatternError()
@@ -587,7 +587,7 @@ Function Read-Installer-Values {
                 # Take no action here, we just want to catch the exceptions as a precaution
                 Out-Null
             } finally {
-                if (String.Validate $PackageFamilyName -IsNull) {
+                if (Test-String $PackageFamilyName -IsNull) {
                     $script:_returnValue = [ReturnValue]::new(500, 'Could not find PackageFamilyName', 'Value should be entered manually', 1)
                 }
             }
@@ -602,13 +602,13 @@ Function Read-Installer-Values {
                 $PackageFamilyName = Read-Host -Prompt 'PackageFamilyName' | TrimString
             }
 
-            if (String.Validate $PackageFamilyName -MaxLength $Patterns.FamilyNameMaxLength -MatchPattern $Patterns.FamilyName -AllowNull) {
-                if (String.Validate $PackageFamilyName -IsNull) { $PackageFamilyName = "$([char]0x2370)" }
+            if (Test-String $PackageFamilyName -MaxLength $Patterns.FamilyNameMaxLength -MatchPattern $Patterns.FamilyName -AllowNull) {
+                if (Test-String $PackageFamilyName -IsNull) { $PackageFamilyName = "$([char]0x2370)" }
                 $script:_returnValue = [ReturnValue]::Success()
             } else {
-                if (String.Validate -not $PackageFamilyName -MaxLength $Patterns.FamilyNameMaxLength) {
+                if (Test-String -not $PackageFamilyName -MaxLength $Patterns.FamilyNameMaxLength) {
                     $script:_returnValue = [ReturnValue]::LengthError(1, $Patterns.FamilyNameMaxLength)
-                } elseif (String.Validate -not $PackageFamilyName -MatchPattern $Patterns.FamilyName) {
+                } elseif (Test-String -not $PackageFamilyName -MatchPattern $Patterns.FamilyName) {
                     $script:_returnValue = [ReturnValue]::PatternError()
                 } else {
                     $script:_returnValue = [ReturnValue]::GenericError()
@@ -626,14 +626,14 @@ Function Read-Installer-Values {
         Write-Host -ForegroundColor 'Blue' -Object 'https://docs.microsoft.com/openspecs/office_standards/ms-oe376/6c085406-a698-4e12-9d4d-c3b0ee3dbc4a'
         $InstallerLocale = Read-Host -Prompt 'InstallerLocale' | TrimString
         # If user defined a default locale, add it
-        if ((String.Validate $InstallerLocale -IsNull) -and (String.Validate -not $ScriptSettings.DefaultInstallerLocale -IsNull)) { $InstallerLocale = $ScriptSettings.DefaultInstallerLocale }
+        if ((Test-String $InstallerLocale -IsNull) -and (Test-String -not $ScriptSettings.DefaultInstallerLocale -IsNull)) { $InstallerLocale = $ScriptSettings.DefaultInstallerLocale }
 
-        if (String.Validate $InstallerLocale -MaxLength $Patterns.InstallerLocaleMaxLength -MatchPattern $Patterns.PackageLocale -AllowNull) {
+        if (Test-String $InstallerLocale -MaxLength $Patterns.InstallerLocaleMaxLength -MatchPattern $Patterns.PackageLocale -AllowNull) {
             $script:_returnValue = [ReturnValue]::Success()
         } else {
-            if (String.Validate -not $InstallerLocale -MaxLength $Patterns.InstallerLocaleMaxLength -AllowNull) {
+            if (Test-String -not $InstallerLocale -MaxLength $Patterns.InstallerLocaleMaxLength -AllowNull) {
                 $script:_returnValue = [ReturnValue]::LengthError(0, $Patterns.InstallerLocaleMaxLength)
-            } elseif (String.Validate -not $InstallerLocale -MatchPattern $Patterns.PackageLocale) {
+            } elseif (Test-String -not $InstallerLocale -MatchPattern $Patterns.PackageLocale) {
                 $script:_returnValue = [ReturnValue]::PatternError()
             } else {
                 $script:_returnValue = [ReturnValue]::GenericError()
@@ -649,7 +649,7 @@ Function Read-Installer-Values {
         Write-Host -ForegroundColor 'White' -Object 'Can be found with ' -NoNewline; Write-Host -ForegroundColor 'DarkYellow' 'get-wmiobject Win32_Product | Sort-Object Name | Format-Table IdentifyingNumber, Name -AutoSize'
         $ProductCode = Read-Host -Prompt 'ProductCode' | TrimString
 
-        if (String.Validate $ProductCode -MinLength $Patterns.ProductCodeMinLength -MaxLength $Patterns.ProductCodeMaxLength -AllowNull) {
+        if (Test-String $ProductCode -MinLength $Patterns.ProductCodeMinLength -MaxLength $Patterns.ProductCodeMaxLength -AllowNull) {
             $script:_returnValue = [ReturnValue]::Success()
         } else {
             $script:_returnValue = [ReturnValue]::LengthError($Patterns.ProductCodeMinLength, $Patterns.ProductCodeMaxLength)
@@ -808,7 +808,7 @@ Function Read-Installer-Values-Minimal {
             # Update the product code, if a new one exists
             # If a new product code doesn't exist, and the installer isn't an `.exe` file, remove the product code if it exists
             $MSIProductCode = [string]$(Get-AppLockerFileInformation -Path $script:dest | Select-Object Publisher | Select-String -Pattern '{[A-Z0-9]{8}-([A-Z0-9]{4}-){3}[A-Z0-9]{12}}').Matches
-            if (String.Validate -not $MSIProductCode -IsNull) {
+            if (Test-String -not $MSIProductCode -IsNull) {
                 $_NewInstaller['ProductCode'] = $MSIProductCode
             } elseif ( ($_NewInstaller.Keys -contains 'ProductCode') -and ($script:dest -notmatch '.exe$')) {
                 $_NewInstaller.Remove('ProductCode')
@@ -818,7 +818,7 @@ Function Read-Installer-Values-Minimal {
             if ($_NewInstaller.InstallerType -in @('msix', 'appx')) {
                 if (Get-Command 'winget.exe' -ErrorAction SilentlyContinue) { $NewSignatureSha256 = winget hash -m $script:dest | Select-String -Pattern 'SignatureSha256:' | ConvertFrom-String; if ($NewSignatureSha256.P2) { $NewSignatureSha256 = $NewSignatureSha256.P2.ToUpper() } }
             }
-            if (String.Validate -not $NewSignatureSha256 -IsNull) {
+            if (Test-String -not $NewSignatureSha256 -IsNull) {
                 $_NewInstaller['SignatureSha256'] = $NewSignatureSha256
             } elseif ($_NewInstaller.Keys -contains 'SignatureSha256') {
                 $_NewInstaller.Remove('SignatureSha256')
@@ -835,7 +835,7 @@ Function Read-Installer-Values-Minimal {
                     # Take no action here, we just want to catch the exceptions as a precaution
                     Out-Null
                 } finally {
-                    if (String.Validate -not $PackageFamilyName -IsNull) {
+                    if (Test-String -not $PackageFamilyName -IsNull) {
                         $_NewInstaller['PackageFamilyName'] = $PackageFamilyName
                     } elseif ($_NewInstaller.Keys -contains 'PackageFamilyName') {
                         $_NewInstaller.Remove('PackageFamilyName')
@@ -868,10 +868,10 @@ Function PromptInstallerManifestValue {
     )
     Write-Host -ForegroundColor 'Red' $script:_returnValue.ErrorString()
     Write-Host -ForegroundColor 'Yellow' -Object $Prompt
-    if (String.Validate -not $Variable -IsNull) { Write-Host -ForegroundColor 'DarkGray' "Old Value: $Variable" }
+    if (Test-String -not $Variable -IsNull) { Write-Host -ForegroundColor 'DarkGray' "Old Value: $Variable" }
     $NewValue = Read-Host -Prompt $Key | TrimString
 
-    if (String.Validate -not $NewValue -IsNull) {
+    if (Test-String -not $NewValue -IsNull) {
         return $NewValue
     } else {
         return $Variable
@@ -928,13 +928,13 @@ Function Read-WinGet-InstallerManifest {
         else { $FileExtensions = $FileExtensions | UniqueItems }
         $script:FileExtensions = PromptInstallerManifestValue $FileExtensions 'FileExtensions' "[Optional] Enter any File Extensions the application could support. For example: html, htm, url (Max $($Patterns.MaxItemsFileExtensions))" | UniqueItems
 
-        if (($script:FileExtensions -split ',').Count -le $Patterns.MaxItemsFileExtensions -and $($script:FileExtensions.Split(',').Trim() | Where-Object { String.Validate -not $_ -MaxLength $Patterns.FileExtensionMaxLength -MatchPattern $Patterns.FileExtension -AllowNull }).Count -eq 0) {
+        if (($script:FileExtensions -split ',').Count -le $Patterns.MaxItemsFileExtensions -and $($script:FileExtensions.Split(',').Trim() | Where-Object { Test-String -not $_ -MaxLength $Patterns.FileExtensionMaxLength -MatchPattern $Patterns.FileExtension -AllowNull }).Count -eq 0) {
             $script:_returnValue = [ReturnValue]::Success()
         } else {
             if (($script:FileExtensions -split ',').Count -gt $Patterns.MaxItemsFileExtensions ) {
                 $script:_returnValue = [ReturnValue]::MaxItemsError($Patterns.MaxItemsFileExtensions)
             } else {
-                $script:_returnValue = [ReturnValue]::new(400, 'Invalid Entries', "Some entries do not match the requirements defined in the manifest schema - $($script:FileExtensions.Split(',').Trim() | Where-Object { String.Validate -not $_ -MaxLength $Patterns.FileExtensionMaxLength -MatchPattern $Patterns.FileExtension })", 2)
+                $script:_returnValue = [ReturnValue]::new(400, 'Invalid Entries', "Some entries do not match the requirements defined in the manifest schema - $($script:FileExtensions.Split(',').Trim() | Where-Object { Test-String -not $_ -MaxLength $Patterns.FileExtensionMaxLength -MatchPattern $Patterns.FileExtension })", 2)
             }
         }
     } until ($script:_returnValue.StatusCode -eq [ReturnValue]::Success().StatusCode)
@@ -986,7 +986,7 @@ Function Read-WinGet-InstallerManifest {
         if ($script:InstallModes) { $script:InstallModes = $script:InstallModes | UniqueItems }
         $script:InstallModes = PromptInstallerManifestValue $script:InstallModes 'InstallModes' "[Optional] List of supported installer modes. Options: $($Patterns.ValidInstallModes -join ', ')"
         if ($script:InstallModes) { $script:InstallModes = $script:InstallModes | UniqueItems }
-        if ( (String.Validate $script:InstallModes -IsNull) -or (($script:InstallModes -split ',').Count -le $Patterns.MaxItemsInstallModes -and $($script:InstallModes.Split(',').Trim() | Where-Object { $_ -CNotIn $Patterns.ValidInstallModes }).Count -eq 0)) {
+        if ( (Test-String $script:InstallModes -IsNull) -or (($script:InstallModes -split ',').Count -le $Patterns.MaxItemsInstallModes -and $($script:InstallModes.Split(',').Trim() | Where-Object { $_ -CNotIn $Patterns.ValidInstallModes }).Count -eq 0)) {
             $script:_returnValue = [ReturnValue]::Success()
         } else {
             if (($script:InstallModes -split ',').Count -gt $Patterns.MaxItemsInstallModes ) {
@@ -1001,18 +1001,18 @@ Function Read-WinGet-InstallerManifest {
 # Requests the user to input values for the Locale Manifest file
 Function Read-WinGet-LocaleManifest {
     # Request Package Locale and Validate
-    if (String.Validate -not $script:PackageLocale -MaxLength $Patterns.PackageLocaleMaxLength -MatchPattern $Patterns.PackageLocale -NotNull) {
+    if (Test-String -not $script:PackageLocale -MaxLength $Patterns.PackageLocaleMaxLength -MatchPattern $Patterns.PackageLocale -NotNull) {
         do {
             Write-Host -ForegroundColor 'Red' $script:_returnValue.ErrorString()
             Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the Package Locale. For example: en-US, en-CA'
             Write-Host -ForegroundColor 'Blue' 'Reference Link: https://docs.microsoft.com/openspecs/office_standards/ms-oe376/6c085406-a698-4e12-9d4d-c3b0ee3dbc4a'
             $script:PackageLocale = Read-Host -Prompt 'PackageLocale' | TrimString
-            if (String.Validate $script:PackageLocale -MaxLength $Patterns.PackageLocaleMaxLength -MatchPattern $Patterns.PackageLocale -NotNull) {
+            if (Test-String $script:PackageLocale -MaxLength $Patterns.PackageLocaleMaxLength -MatchPattern $Patterns.PackageLocale -NotNull) {
                 $script:_returnValue = [ReturnValue]::Success()
             } else {
-                if (String.Validate $script:PackageLocale -not -MaxLength $Patterns.PackageLocaleMaxLength -NotNull) {
+                if (Test-String $script:PackageLocale -not -MaxLength $Patterns.PackageLocaleMaxLength -NotNull) {
                     $script:_returnValue = [ReturnValue]::LengthError(1, $Patterns.PackageLocaleMaxLength)
-                } elseif (String.Validate $script:PackageLocale -not -MatchPattern $Patterns.PackageLocale ) {
+                } elseif (Test-String $script:PackageLocale -not -MatchPattern $Patterns.PackageLocale ) {
                     $script:_returnValue = [ReturnValue]::PatternError()
                 } else {
                     $script:_returnValue = [ReturnValue]::GenericError()
@@ -1024,17 +1024,17 @@ Function Read-WinGet-LocaleManifest {
     # Request Publisher Name and Validate
     do {
         Write-Host -ForegroundColor 'Red' $script:_returnValue.ErrorString()
-        if (String.Validate $script:Publisher -IsNull) {
+        if (Test-String $script:Publisher -IsNull) {
             Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the full publisher name. For example: Microsoft Corporation'
         } else {
             Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the full publisher name. For example: Microsoft Corporation'
             Write-Host -ForegroundColor 'DarkGray' "Old Variable: $script:Publisher"
         }
         $NewPublisher = Read-Host -Prompt 'Publisher' | TrimString
-        if (String.Validate $NewPublisher -NotNull) {
+        if (Test-String $NewPublisher -NotNull) {
             $script:Publisher = $NewPublisher
         }
-        if (String.Validate $script:Publisher -MaxLength $Patterns.PublisherMaxLength -NotNull) {
+        if (Test-String $script:Publisher -MaxLength $Patterns.PublisherMaxLength -NotNull) {
             $script:_returnValue = [ReturnValue]::Success()
         } else {
             $script:_returnValue = [ReturnValue]::LengthError(1, $Patterns.PublisherMaxLength)
@@ -1044,16 +1044,16 @@ Function Read-WinGet-LocaleManifest {
     # Request Application Name and Validate
     do {
         Write-Host -ForegroundColor 'Red' $script:_returnValue.ErrorString()
-        if (String.Validate $script:PackageName -IsNull) {
+        if (Test-String $script:PackageName -IsNull) {
             Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the full application name. For example: Microsoft Teams'
         } else {
             Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the full application name. For example: Microsoft Teams'
             Write-Host -ForegroundColor 'DarkGray' "Old Variable: $script:PackageName"
         }
         $NewPackageName = Read-Host -Prompt 'PackageName' | TrimString
-        if (String.Validate -not $NewPackageName -IsNull) { $script:PackageName = $NewPackageName }
+        if (Test-String -not $NewPackageName -IsNull) { $script:PackageName = $NewPackageName }
 
-        if (String.Validate $script:PackageName -MaxLength $Patterns.PackageNameMaxLength -NotNull) {
+        if (Test-String $script:PackageName -MaxLength $Patterns.PackageNameMaxLength -NotNull) {
             $script:_returnValue = [ReturnValue]::Success()
         } else {
             $script:_returnValue = [ReturnValue]::LengthError(1, $Patterns.PackageNameMaxLength)
@@ -1066,11 +1066,11 @@ Function Read-WinGet-LocaleManifest {
         do {
             Write-Host -ForegroundColor 'Red' $script:_returnValue.ErrorString()
             Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the Moniker (friendly name/alias). For example: vscode'
-            if (String.Validate -not $script:Moniker -IsNull) { Write-Host -ForegroundColor 'DarkGray' "Old Variable: $script:Moniker" }
+            if (Test-String -not $script:Moniker -IsNull) { Write-Host -ForegroundColor 'DarkGray' "Old Variable: $script:Moniker" }
             $NewMoniker = Read-Host -Prompt 'Moniker' | TrimString
-            if (String.Validate -not $NewMoniker -IsNull) { $script:Moniker = $NewMoniker }
+            if (Test-String -not $NewMoniker -IsNull) { $script:Moniker = $NewMoniker }
 
-            if (String.Validate $script:Moniker -MaxLength $Patterns.MonikerMaxLength -AllowNull) {
+            if (Test-String $script:Moniker -MaxLength $Patterns.MonikerMaxLength -AllowNull) {
                 $script:_returnValue = [ReturnValue]::Success()
             } else {
                 $script:_returnValue = [ReturnValue]::LengthError(1, $Patterns.MonikerMaxLength)
@@ -1082,15 +1082,15 @@ Function Read-WinGet-LocaleManifest {
     do {
         Write-Host -ForegroundColor 'Red' $script:_returnValue.ErrorString()
         Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the Publisher Url.'
-        if (String.Validate -not $script:PublisherUrl -IsNull) { Write-Host -ForegroundColor 'DarkGray' "Old Variable: $script:PublisherUrl" }
+        if (Test-String -not $script:PublisherUrl -IsNull) { Write-Host -ForegroundColor 'DarkGray' "Old Variable: $script:PublisherUrl" }
         $NewPublisherUrl = Read-Host -Prompt 'Publisher Url' | TrimString
-        if (String.Validate -not $NewPublisherUrl -IsNull) { $script:PublisherUrl = $NewPublisherUrl }
-        if (String.Validate $script:PublisherUrl -MaxLength $Patterns.GenericUrlMaxLength -MatchPattern $Patterns.GenericUrl -AllowNull) {
+        if (Test-String -not $NewPublisherUrl -IsNull) { $script:PublisherUrl = $NewPublisherUrl }
+        if (Test-String $script:PublisherUrl -MaxLength $Patterns.GenericUrlMaxLength -MatchPattern $Patterns.GenericUrl -AllowNull) {
             $script:_returnValue = [ReturnValue]::Success()
         } else {
-            if (String.Validate -not $script:PublisherUrl -MaxLength $Patterns.GenericUrlMaxLength -AllowNull) {
+            if (Test-String -not $script:PublisherUrl -MaxLength $Patterns.GenericUrlMaxLength -AllowNull) {
                 $script:_returnValue = [ReturnValue]::LengthError(1, $Patterns.GenericUrlMaxLength)
-            } elseif (String.Validate -not $script:PublisherUrl -MatchPattern $Patterns.GenericUrl) {
+            } elseif (Test-String -not $script:PublisherUrl -MatchPattern $Patterns.GenericUrl) {
                 $script:_returnValue = [ReturnValue]::PatternError()
             } else {
                 $script:_returnValue = [ReturnValue]::GenericError()
@@ -1102,15 +1102,15 @@ Function Read-WinGet-LocaleManifest {
     do {
         Write-Host -ForegroundColor 'Red' $script:_returnValue.ErrorString()
         Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the Publisher Support Url.'
-        if (String.Validate -not $script:PublisherSupportUrl -IsNull) { Write-Host -ForegroundColor 'DarkGray' "Old Variable: $script:PublisherSupportUrl" }
+        if (Test-String -not $script:PublisherSupportUrl -IsNull) { Write-Host -ForegroundColor 'DarkGray' "Old Variable: $script:PublisherSupportUrl" }
         $NewPublisherSupportUrl = Read-Host -Prompt 'Publisher Support Url' | TrimString
-        if (String.Validate -not $NewPublisherSupportUrl -IsNull) { $script:PublisherSupportUrl = $NewPublisherSupportUrl }
-        if (String.Validate $script:PublisherSupportUrl -MaxLength $Patterns.GenericUrlMaxLength -MatchPattern $Patterns.GenericUrl -AllowNull) {
+        if (Test-String -not $NewPublisherSupportUrl -IsNull) { $script:PublisherSupportUrl = $NewPublisherSupportUrl }
+        if (Test-String $script:PublisherSupportUrl -MaxLength $Patterns.GenericUrlMaxLength -MatchPattern $Patterns.GenericUrl -AllowNull) {
             $script:_returnValue = [ReturnValue]::Success()
         } else {
-            if (String.Validate -not $script:PublisherSupportUrl -MaxLength $Patterns.GenericUrlMaxLength -AllowNull) {
+            if (Test-String -not $script:PublisherSupportUrl -MaxLength $Patterns.GenericUrlMaxLength -AllowNull) {
                 $script:_returnValue = [ReturnValue]::LengthError(1, $Patterns.GenericUrlMaxLength)
-            } elseif (String.Validate -not $script:PublisherSupportUrl -MatchPattern $Patterns.GenericUrl) {
+            } elseif (Test-String -not $script:PublisherSupportUrl -MatchPattern $Patterns.GenericUrl) {
                 $script:_returnValue = [ReturnValue]::PatternError()
             } else {
                 $script:_returnValue = [ReturnValue]::GenericError()
@@ -1122,16 +1122,16 @@ Function Read-WinGet-LocaleManifest {
     do {
         Write-Host -ForegroundColor 'Red' $script:_returnValue.ErrorString()
         Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the Publisher Privacy Url.'
-        if (String.Validate -not $script:PrivacyUrl -IsNull) { Write-Host -ForegroundColor 'DarkGray' "Old Variable: $script:PrivacyUrl" }
+        if (Test-String -not $script:PrivacyUrl -IsNull) { Write-Host -ForegroundColor 'DarkGray' "Old Variable: $script:PrivacyUrl" }
         $NewPrivacyUrl = Read-Host -Prompt 'Publisher Privacy Url' | TrimString
-        if (String.Validate -not $NewPrivacyUrl -IsNull) { $script:PrivacyUrl = $NewPrivacyUrl }
+        if (Test-String -not $NewPrivacyUrl -IsNull) { $script:PrivacyUrl = $NewPrivacyUrl }
 
-        if (String.Validate $script:PrivacyUrl -MaxLength $Patterns.GenericUrlMaxLength -MatchPattern $Patterns.GenericUrl -AllowNull) {
+        if (Test-String $script:PrivacyUrl -MaxLength $Patterns.GenericUrlMaxLength -MatchPattern $Patterns.GenericUrl -AllowNull) {
             $script:_returnValue = [ReturnValue]::Success()
         } else {
-            if (String.Validate -not $script:PrivacyUrl -MaxLength $Patterns.GenericUrlMaxLength -AllowNull) {
+            if (Test-String -not $script:PrivacyUrl -MaxLength $Patterns.GenericUrlMaxLength -AllowNull) {
                 $script:_returnValue = [ReturnValue]::LengthError(1, $Patterns.GenericUrlMaxLength)
-            } elseif (String.Validate -not $script:PrivacyUrl -MatchPattern $Patterns.GenericUrl) {
+            } elseif (Test-String -not $script:PrivacyUrl -MatchPattern $Patterns.GenericUrl) {
                 $script:_returnValue = [ReturnValue]::PatternError()
             } else {
                 $script:_returnValue = [ReturnValue]::GenericError()
@@ -1143,11 +1143,11 @@ Function Read-WinGet-LocaleManifest {
     do {
         Write-Host -ForegroundColor 'Red' $script:_returnValue.ErrorString()
         Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the application Author.'
-        if (String.Validate -not $script:Author -IsNull) { Write-Host -ForegroundColor 'DarkGray' "Old Variable: $script:Author" }
+        if (Test-String -not $script:Author -IsNull) { Write-Host -ForegroundColor 'DarkGray' "Old Variable: $script:Author" }
         $NewAuthor = Read-Host -Prompt 'Author' | TrimString
-        if (String.Validate -not $NewAuthor -IsNull) { $script:Author = $NewAuthor }
+        if (Test-String -not $NewAuthor -IsNull) { $script:Author = $NewAuthor }
 
-        if (String.Validate $script:Author -MinLength $Patterns.AuthorMinLength -MaxLength $Patterns.AuthorMaxLength -AllowNull) {
+        if (Test-String $script:Author -MinLength $Patterns.AuthorMinLength -MaxLength $Patterns.AuthorMaxLength -AllowNull) {
             $script:_returnValue = [ReturnValue]::Success()
         } else {
             $script:_returnValue = [ReturnValue]::LengthError($Patterns.AuthorMinLength, $Patterns.AuthorMaxLength)
@@ -1158,15 +1158,15 @@ Function Read-WinGet-LocaleManifest {
     do {
         Write-Host -ForegroundColor 'Red' $script:_returnValue.ErrorString()
         Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the Url to the homepage of the application.'
-        if (String.Validate -not $script:PackageUrl -IsNull) { Write-Host -ForegroundColor 'DarkGray' "Old Variable: $script:PackageUrl" }
+        if (Test-String -not $script:PackageUrl -IsNull) { Write-Host -ForegroundColor 'DarkGray' "Old Variable: $script:PackageUrl" }
         $NewPackageUrl = Read-Host -Prompt 'Homepage' | TrimString
-        if (String.Validate -not $NewPackageUrl -IsNull) { $script:PackageUrl = $NewPackageUrl }
-        if (String.Validate $script:PackageUrl -MaxLength $Patterns.GenericUrlMaxLength -MatchPattern $Patterns.GenericUrl -AllowNull) {
+        if (Test-String -not $NewPackageUrl -IsNull) { $script:PackageUrl = $NewPackageUrl }
+        if (Test-String $script:PackageUrl -MaxLength $Patterns.GenericUrlMaxLength -MatchPattern $Patterns.GenericUrl -AllowNull) {
             $script:_returnValue = [ReturnValue]::Success()
         } else {
-            if (String.Validate -not $script:PackageUrl -MaxLength $Patterns.GenericUrlMaxLength -AllowNull) {
+            if (Test-String -not $script:PackageUrl -MaxLength $Patterns.GenericUrlMaxLength -AllowNull) {
                 $script:_returnValue = [ReturnValue]::LengthError(1, $Patterns.GenericUrlMaxLength)
-            } elseif (String.Validate -not $script:PackageUrl -MatchPattern $Patterns.GenericUrl) {
+            } elseif (Test-String -not $script:PackageUrl -MatchPattern $Patterns.GenericUrl) {
                 $script:_returnValue = [ReturnValue]::PatternError()
             } else {
                 $script:_returnValue = [ReturnValue]::GenericError()
@@ -1177,17 +1177,17 @@ Function Read-WinGet-LocaleManifest {
     # Request License and Validate
     do {
         Write-Host -ForegroundColor 'Red' $script:_returnValue.ErrorString()
-        if (String.Validate $script:License -IsNull) {
+        if (Test-String $script:License -IsNull) {
             Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the application License. For example: MIT, GPL, Freeware, Proprietary'
         } else {
             Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the application License. For example: MIT, GPL, Freeware, Proprietary'
             Write-Host -ForegroundColor 'DarkGray' "Old Variable: $script:License"
         }
         $NewLicense = Read-Host -Prompt 'License' | TrimString
-        if (String.Validate -not $NewLicense -IsNull) { $script:License = $NewLicense }
-        if (String.Validate $script:License -MinLength $Patterns.LicenseMinLength -MaxLength $Patterns.LicenseMaxLength -NotNull) {
+        if (Test-String -not $NewLicense -IsNull) { $script:License = $NewLicense }
+        if (Test-String $script:License -MinLength $Patterns.LicenseMinLength -MaxLength $Patterns.LicenseMaxLength -NotNull) {
             $script:_returnValue = [ReturnValue]::Success()
-        } elseif (String.Validate $script:License -IsNull) {
+        } elseif (Test-String $script:License -IsNull) {
             $script:_returnValue = [ReturnValue]::new(400, 'Required Field', 'The value entered cannot be null or empty', 2)
         } else {
             $script:_returnValue = [ReturnValue]::LengthError($Patterns.LicenseMinLength, $Patterns.LicenseMaxLength)
@@ -1198,16 +1198,16 @@ Function Read-WinGet-LocaleManifest {
     do {
         Write-Host -ForegroundColor 'Red' $script:_returnValue.ErrorString()
         Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the application License URL.'
-        if (String.Validate -not $script:LicenseUrl -IsNull) { Write-Host -ForegroundColor 'DarkGray' "Old Variable: $script:LicenseUrl" }
+        if (Test-String -not $script:LicenseUrl -IsNull) { Write-Host -ForegroundColor 'DarkGray' "Old Variable: $script:LicenseUrl" }
         $NewLicenseUrl = Read-Host -Prompt 'License URL' | TrimString
-        if (String.Validate -not $NewLicenseUrl -IsNull) { $script:LicenseUrl = $NewLicenseUrl }
+        if (Test-String -not $NewLicenseUrl -IsNull) { $script:LicenseUrl = $NewLicenseUrl }
 
-        if (String.Validate $script:LicenseUrl -MaxLength $Patterns.GenericUrlMaxLength -MatchPattern $Patterns.GenericUrl -AllowNull) {
+        if (Test-String $script:LicenseUrl -MaxLength $Patterns.GenericUrlMaxLength -MatchPattern $Patterns.GenericUrl -AllowNull) {
             $script:_returnValue = [ReturnValue]::Success()
         } else {
-            if (String.Validate -not $script:LicenseUrl -MaxLength $Patterns.GenericUrlMaxLength -AllowNull) {
+            if (Test-String -not $script:LicenseUrl -MaxLength $Patterns.GenericUrlMaxLength -AllowNull) {
                 $script:_returnValue = [ReturnValue]::LengthError(1, $Patterns.GenericUrlMaxLength)
-            } elseif (String.Validate -not $script:LicenseUrl -MatchPattern $Patterns.GenericUrl) {
+            } elseif (Test-String -not $script:LicenseUrl -MatchPattern $Patterns.GenericUrl) {
                 $script:_returnValue = [ReturnValue]::PatternError()
             } else {
                 $script:_returnValue = [ReturnValue]::GenericError()
@@ -1220,10 +1220,10 @@ Function Read-WinGet-LocaleManifest {
         Write-Host -ForegroundColor 'Red' $script:_returnValue.ErrorString()
         Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the application Copyright.'
         Write-Host -ForegroundColor 'Blue' 'Example: Copyright (c) Microsoft Corporation'
-        if (String.Validate -not $script:Copyright -IsNull) { Write-Host -ForegroundColor 'DarkGray' "Old Variable: $script:Copyright" }
+        if (Test-String -not $script:Copyright -IsNull) { Write-Host -ForegroundColor 'DarkGray' "Old Variable: $script:Copyright" }
         $NewCopyright = Read-Host -Prompt 'Copyright' | TrimString
-        if (String.Validate -not $NewCopyright -IsNull) { $script:Copyright = $NewCopyright }
-        if (String.Validate $script:Copyright -MinLength $Patterns.CopyrightMinLength -MaxLength $Patterns.CopyrightMaxLength -AllowNull) {
+        if (Test-String -not $NewCopyright -IsNull) { $script:Copyright = $NewCopyright }
+        if (Test-String $script:Copyright -MinLength $Patterns.CopyrightMinLength -MaxLength $Patterns.CopyrightMaxLength -AllowNull) {
             $script:_returnValue = [ReturnValue]::Success()
         } else {
             $script:_returnValue = [ReturnValue]::LengthError($Patterns.CopyrightMinLength, $Patterns.CopyrightMaxLength)
@@ -1234,15 +1234,15 @@ Function Read-WinGet-LocaleManifest {
     do {
         Write-Host -ForegroundColor 'Red' $script:_returnValue.ErrorString()
         Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the application Copyright Url.'
-        if (String.Validate -not $script:CopyrightUrl -IsNull) { Write-Host -ForegroundColor 'DarkGray' "Old Variable: $script:CopyrightUrl" }
+        if (Test-String -not $script:CopyrightUrl -IsNull) { Write-Host -ForegroundColor 'DarkGray' "Old Variable: $script:CopyrightUrl" }
         $NewCopyrightUrl = Read-Host -Prompt 'CopyrightUrl' | TrimString
-        if (String.Validate -not $NewCopyrightUrl -IsNull) { $script:CopyrightUrl = $NewCopyrightUrl }
-        if (String.Validate $script:CopyrightUrl -MaxLength $Patterns.GenericUrlMaxLength -MatchPattern $Patterns.GenericUrl -AllowNull) {
+        if (Test-String -not $NewCopyrightUrl -IsNull) { $script:CopyrightUrl = $NewCopyrightUrl }
+        if (Test-String $script:CopyrightUrl -MaxLength $Patterns.GenericUrlMaxLength -MatchPattern $Patterns.GenericUrl -AllowNull) {
             $script:_returnValue = [ReturnValue]::Success()
         } else {
-            if (String.Validate -not $script:CopyrightUrl -MaxLength $Patterns.GenericUrlMaxLength -AllowNull) {
+            if (Test-String -not $script:CopyrightUrl -MaxLength $Patterns.GenericUrlMaxLength -AllowNull) {
                 $script:_returnValue = [ReturnValue]::LengthError(1, $Patterns.GenericUrlMaxLength)
-            } elseif (String.Validate -not $script:CopyrightUrl -MatchPattern $Patterns.GenericUrl) {
+            } elseif (Test-String -not $script:CopyrightUrl -MatchPattern $Patterns.GenericUrl) {
                 $script:_returnValue = [ReturnValue]::PatternError()
             } else {
                 $script:_returnValue = [ReturnValue]::GenericError()
@@ -1256,12 +1256,12 @@ Function Read-WinGet-LocaleManifest {
         Write-Host -ForegroundColor 'Red' $script:_returnValue.ErrorString()
         Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter any tags that would be useful to discover this tool.'
         Write-Host -ForegroundColor 'Blue' -Object 'Example: zip, c++, photos, OBS (Max', ($Patterns.TagsMaxItems), 'items)'
-        if (String.Validate -not $script:Tags -IsNull) {
+        if (Test-String -not $script:Tags -IsNull) {
             $script:Tags = $script:Tags | UniqueItems
             Write-Host -ForegroundColor 'DarkGray' "Old Variable: $script:Tags"
         }
         $NewTags = Read-Host -Prompt 'Tags' | TrimString | UniqueItems
-        if (String.Validate -not $NewTags -IsNull) { $script:Tags = $NewTags }
+        if (Test-String -not $NewTags -IsNull) { $script:Tags = $NewTags }
         if (($script:Tags -split ',').Count -le $Patterns.TagsMaxItems) {
             $script:_returnValue = [ReturnValue]::Success()
         } else {
@@ -1272,15 +1272,15 @@ Function Read-WinGet-LocaleManifest {
     # Request Short Description and Validate
     do {
         Write-Host -ForegroundColor 'Red' $script:_returnValue.ErrorString()
-        if (String.Validate $script:ShortDescription -IsNull) {
+        if (Test-String $script:ShortDescription -IsNull) {
             Write-Host -ForegroundColor 'Green' -Object '[Required] Enter a short description of the application.'
         } else {
             Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter a short description of the application.'
             Write-Host -ForegroundColor 'DarkGray' "Old Variable: $script:ShortDescription"
         }
         $NewShortDescription = Read-Host -Prompt 'Short Description' | TrimString
-        if (String.Validate -not $NewShortDescription -IsNull) { $script:ShortDescription = $NewShortDescription }
-        if (String.Validate $script:ShortDescription -MaxLength $Patterns.ShortDescriptionMaxLength -NotNull) {
+        if (Test-String -not $NewShortDescription -IsNull) { $script:ShortDescription = $NewShortDescription }
+        if (Test-String $script:ShortDescription -MaxLength $Patterns.ShortDescriptionMaxLength -NotNull) {
             $script:_returnValue = [ReturnValue]::Success()
         } else {
             $script:_returnValue = [ReturnValue]::LengthError(1, $Patterns.ShortDescriptionMaxLength)
@@ -1291,10 +1291,10 @@ Function Read-WinGet-LocaleManifest {
     do {
         Write-Host -ForegroundColor 'Red' $script:_returnValue.ErrorString()
         Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter a long description of the application.'
-        if (String.Validate -not $script:Description -IsNull) { Write-Host -ForegroundColor 'DarkGray' "Old Variable: $script:Description" }
+        if (Test-String -not $script:Description -IsNull) { Write-Host -ForegroundColor 'DarkGray' "Old Variable: $script:Description" }
         $NewDescription = Read-Host -Prompt 'Description' | TrimString
-        if (String.Validate -not $NewDescription -IsNull) { $script:Description = $NewDescription }
-        if (String.Validate $script:Description -MinLength $Patterns.DescriptionMinLength -MaxLength $Patterns.DescriptionMaxLength -AllowNull) {
+        if (Test-String -not $NewDescription -IsNull) { $script:Description = $NewDescription }
+        if (Test-String $script:Description -MinLength $Patterns.DescriptionMinLength -MaxLength $Patterns.DescriptionMaxLength -AllowNull) {
             $script:_returnValue = [ReturnValue]::Success()
         } else {
             $script:_returnValue = [ReturnValue]::LengthError($Patterns.DescriptionMinLength, $Patterns.DescriptionMaxLength)
@@ -1602,7 +1602,7 @@ Function Write-Installer-Manifest {
                     $_FirstInstallerSwitchKeyValue = ConvertTo-Json($InstallerManifest.Installers[0].$_Key.$_InstallerSwitchKey)
                     foreach ($_Installer in $InstallerManifest.Installers) {
                         $_CurrentInstallerSwitchKeyValue = ConvertTo-Json($_Installer.$_Key.$_InstallerSwitchKey)
-                        if (String.Validate $_CurrentInstallerSwitchKeyValue -IsNull) { $_AllAreSame = $false }
+                        if (Test-String $_CurrentInstallerSwitchKeyValue -IsNull) { $_AllAreSame = $false }
                         else { $_AllAreSame = $_AllAreSame -and (@(Compare-Object $_CurrentInstallerSwitchKeyValue $_FirstInstallerSwitchKeyValue).Length -eq 0) }
                     }
                     if ($_AllAreSame) {
@@ -1627,7 +1627,7 @@ Function Write-Installer-Manifest {
                 $_FirstInstallerKeyValue = ConvertTo-Json($InstallerManifest.Installers[0].$_Key)
                 foreach ($_Installer in $InstallerManifest.Installers) {
                     $_CurrentInstallerKeyValue = ConvertTo-Json($_Installer.$_Key)
-                    if (String.Validate $_CurrentInstallerKeyValue -IsNull) { $_AllAreSame = $false }
+                    if (Test-String $_CurrentInstallerKeyValue -IsNull) { $_AllAreSame = $false }
                     else { $_AllAreSame = $_AllAreSame -and (@(Compare-Object $_CurrentInstallerKeyValue $_FirstInstallerKeyValue).Length -eq 0) }
                 }
                 # If all installers are the same move the key to the manifest level
@@ -1822,19 +1822,19 @@ Write-Host
 
 # Request Package Identifier and Validate
 do {
-    if ((String.Validate $PackageIdentifier -IsNull) -or ($script:_returnValue.StatusCode -ne [ReturnValue]::Success().StatusCode)) {
+    if ((Test-String $PackageIdentifier -IsNull) -or ($script:_returnValue.StatusCode -ne [ReturnValue]::Success().StatusCode)) {
         Write-Host -ForegroundColor 'Red' $script:_returnValue.ErrorString()
         Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the Package Identifier, in the following format <Publisher shortname.Application shortname>. For example: Microsoft.Excel'
         $script:PackageIdentifier = Read-Host -Prompt 'PackageIdentifier' | TrimString
     }
 
     $PackageIdentifierFolder = $PackageIdentifier.Replace('.', '\')
-    if (String.Validate $PackageIdentifier -MinLength 4 -MaxLength $Patterns.IdentifierMaxLength -MatchPattern $Patterns.PackageIdentifier) {
+    if (Test-String $PackageIdentifier -MinLength 4 -MaxLength $Patterns.IdentifierMaxLength -MatchPattern $Patterns.PackageIdentifier) {
         $script:_returnValue = [ReturnValue]::Success()
     } else {
-        if (String.Validate -not $PackageIdentifier -MinLength 4 -MaxLength $Patterns.IdentifierMaxLength) {
+        if (Test-String -not $PackageIdentifier -MinLength 4 -MaxLength $Patterns.IdentifierMaxLength) {
             $script:_returnValue = [ReturnValue]::LengthError(4, $Patterns.IdentifierMaxLength)
-        } elseif (String.Validate -not $PackageIdentifier -MatchPattern $Patterns.PackageIdentifier) {
+        } elseif (Test-String -not $PackageIdentifier -MatchPattern $Patterns.PackageIdentifier) {
             $script:_returnValue = [ReturnValue]::PatternError()
         } else {
             $script:_returnValue = [ReturnValue]::GenericError()
@@ -1844,17 +1844,17 @@ do {
 
 # Request Package Version and Validate
 do {
-    if ((String.Validate $PackageVersion -IsNull) -or ($script:_returnValue.StatusCode -ne [ReturnValue]::Success().StatusCode)) {
+    if ((Test-String $PackageVersion -IsNull) -or ($script:_returnValue.StatusCode -ne [ReturnValue]::Success().StatusCode)) {
         Write-Host -ForegroundColor 'Red' $script:_returnValue.ErrorString()
         Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the version. for example: 1.33.7'
         $script:PackageVersion = Read-Host -Prompt 'Version' | TrimString
     }
-    if (String.Validate $PackageVersion -MaxLength $Patterns.VersionMaxLength -MatchPattern $Patterns.PackageVersion -NotNull) {
+    if (Test-String $PackageVersion -MaxLength $Patterns.VersionMaxLength -MatchPattern $Patterns.PackageVersion -NotNull) {
         $script:_returnValue = [ReturnValue]::Success()
     } else {
-        if (String.Validate -not $PackageVersion -MaxLength $Patterns.VersionMaxLength -NotNull) {
+        if (Test-String -not $PackageVersion -MaxLength $Patterns.VersionMaxLength -NotNull) {
             $script:_returnValue = [ReturnValue]::LengthError(1, $Patterns.VersionMaxLength)
-        } elseif (String.Validate -not $PackageVersion -MatchPattern $Patterns.PackageVersion) {
+        } elseif (Test-String -not $PackageVersion -MatchPattern $Patterns.PackageVersion) {
             $script:_returnValue = [ReturnValue]::PatternError()
         } else {
             $script:_returnValue = [ReturnValue]::GenericError()
@@ -2058,7 +2058,7 @@ if ($OldManifests -and $Option -ne 'NewLocale') {
     )
     Foreach ($param in $_Parameters) {
         $_ReadValue = $(if ($script:OldManifestType -eq 'MultiManifest') { (GetMultiManifestParameter $param) } else { $script:OldVersionManifest[$param] })
-        if (String.Validate -Not $_ReadValue -IsNull) { New-Variable -Name $param -Value $_ReadValue -Scope Script -Force }
+        if (Test-String -Not $_ReadValue -IsNull) { New-Variable -Name $param -Value $_ReadValue -Scope Script -Force }
     }
 }
 
@@ -2116,7 +2116,7 @@ Switch ($script:Option) {
             Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the reason for removing this manifest'
             $script:RemovalReason = Read-Host -Prompt 'Reason' | TrimString
             # Check the reason for validity. The length requirements are arbitrary, but they have been set to encourage concise yet meaningful reasons
-            if (String.Validate $script:RemovalReason -MinLength 8 -MaxLength 128 -NotNull) {
+            if (Test-String $script:RemovalReason -MinLength 8 -MaxLength 128 -NotNull) {
                 $script:_returnValue = [ReturnValue]::Success()
             } else {
                 $script:_returnValue = [ReturnValue]::LengthError(8, 128)
@@ -2167,7 +2167,7 @@ Switch ($script:Option) {
                 # Update the product code, if a new one exists
                 # If a new product code doesn't exist, and the installer isn't an `.exe` file, remove the product code if it exists
                 $MSIProductCode = [string]$(Get-AppLockerFileInformation -Path $script:dest | Select-Object Publisher | Select-String -Pattern '{[A-Z0-9]{8}-([A-Z0-9]{4}-){3}[A-Z0-9]{12}}').Matches
-                if (String.Validate -not $MSIProductCode -IsNull) {
+                if (Test-String -not $MSIProductCode -IsNull) {
                     $_Installer['ProductCode'] = $MSIProductCode
                 } elseif ( ($_Installer.Keys -contains 'ProductCode') -and ($script:dest -notmatch '.exe$')) {
                     $_Installer.Remove('ProductCode')
@@ -2177,7 +2177,7 @@ Switch ($script:Option) {
                 if ($_Installer.InstallerType -in @('msix', 'appx')) {
                     if (Get-Command 'winget.exe' -ErrorAction SilentlyContinue) { $NewSignatureSha256 = winget hash -m $script:dest | Select-String -Pattern 'SignatureSha256:' | ConvertFrom-String; if ($NewSignatureSha256.P2) { $NewSignatureSha256 = $NewSignatureSha256.P2.ToUpper() } }
                 }
-                if (String.Validate -not $NewSignatureSha256 -IsNull) {
+                if (Test-String -not $NewSignatureSha256 -IsNull) {
                     $_Installer['SignatureSha256'] = $NewSignatureSha256
                 } elseif ($_Installer.Keys -contains 'SignatureSha256') {
                     $_Installer.Remove('SignatureSha256')
@@ -2194,7 +2194,7 @@ Switch ($script:Option) {
                         # Take no action here, we just want to catch the exceptions as a precaution
                         Out-Null
                     } finally {
-                        if (String.Validate -not $PackageFamilyName -IsNull) {
+                        if (Test-String -not $PackageFamilyName -IsNull) {
                             $_Installer['PackageFamilyName'] = $PackageFamilyName
                         } elseif ($_Installer.Keys -contains 'PackageFamilyName') {
                             $_Installer.Remove('PackageFamilyName')
