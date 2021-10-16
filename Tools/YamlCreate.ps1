@@ -1741,7 +1741,8 @@ Function Write-LocaleManifest {
     Write-Host "Yaml file created: $LocaleManifestPath"
 }
 
-function Remove-Manifest-Version {
+function Remove-ManifestVersion {
+    [CmdletBinding(SupportsShouldProcess)]
     Param(
         [Parameter(Mandatory = $true, Position = 1)]
         [string] $PathToVersion
@@ -2125,7 +2126,7 @@ Switch ($script:Option) {
             }
         } until ($script:_returnValue.StatusCode -eq [ReturnValue]::Success().StatusCode)
 
-        Remove-Manifest-Version $AppFolder
+        Remove-ManifestVersion $AppFolder
     }
 
     'Auto' {
@@ -2213,7 +2214,7 @@ Switch ($script:Option) {
         Write-InstallerManifest
         Write-VersionManifest
         # Remove the old manifests
-        if ($PackageVersion -ne $LastVersion) { Remove-Manifest-Version "$AppFolder\..\$LastVersion" }
+        if ($PackageVersion -ne $LastVersion) { Remove-ManifestVersion "$AppFolder\..\$LastVersion" }
     }
 }
 
