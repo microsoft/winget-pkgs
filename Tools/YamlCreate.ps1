@@ -1522,7 +1522,7 @@ Function GetDebugString {
 }
 
 # Take all the entered values and write the version manifest file
-Function Write-Version-Manifest {
+Function Write-VersionManifest {
     # Create new empty manifest
     [PSCustomObject]$VersionManifest = [ordered]@{}
 
@@ -2070,7 +2070,7 @@ Switch ($script:Option) {
         Read-Installer-Values-Minimal
         Write-LocaleManifest
         Write-Installer-Manifest
-        Write-Version-Manifest
+        Write-VersionManifest
     }
 
     'New' {
@@ -2078,7 +2078,7 @@ Switch ($script:Option) {
         Read-WinGet-InstallerManifest
         Read-WinGet-LocaleManifest
         Write-Installer-Manifest
-        Write-Version-Manifest
+        Write-VersionManifest
         Write-LocaleManifest
     }
 
@@ -2086,7 +2086,7 @@ Switch ($script:Option) {
         Read-WinGet-InstallerManifest
         Read-WinGet-LocaleManifest
         Write-Installer-Manifest
-        Write-Version-Manifest
+        Write-VersionManifest
         Write-LocaleManifest
     }
 
@@ -2211,7 +2211,7 @@ Switch ($script:Option) {
         $script:Installers = $script:OldInstallerManifest.Installers
         Write-LocaleManifest
         Write-Installer-Manifest
-        Write-Version-Manifest
+        Write-VersionManifest
         # Remove the old manifests
         if ($PackageVersion -ne $LastVersion) { Remove-Manifest-Version "$AppFolder\..\$LastVersion" }
     }
