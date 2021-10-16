@@ -976,7 +976,7 @@ Function Read-WinGet-InstallerManifest {
                 $script:InstallerSuccessCodes.Split(',').Trim()| ForEach-Object {[long]$_}
                 $script:_returnValue = [ReturnValue]::Success()
             } catch {
-                $script:_returnValue = [ReturnValue]::new(400,"Invalid Data Type","The value entered does not match the type requirements defined in the manifest schema")
+                $script:_returnValue = [ReturnValue]::new(400,"Invalid Data Type","The value entered does not match the type requirements defined in the manifest schema",2)
             }
         } else {
             $script:_returnValue = [ReturnValue]::MaxItemsError($Patterns.MaxItemsSuccessCodes)
