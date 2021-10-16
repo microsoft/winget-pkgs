@@ -969,6 +969,13 @@ Function Read-WinGet-InstallerManifest {
         $script:InstallerSuccessCodes = PromptInstallerManifestValue $InstallerSuccessCodes 'InstallerSuccessCodes' "[Optional] List of additional non-zero installer success exit codes other than known default values by winget (Max $($Patterns.MaxItemsSuccessCodes))" | UniqueItems
         if (($script:InstallerSuccessCodes -split ',').Count -le $Patterns.MaxItemsSuccessCodes) {
             $script:_returnValue = [ReturnValue]::Success()
+            try {
+                #Ensure all values are integers
+                $script:InstallerSuccessCodes.Split(',').Trim()| ForEach-Object {[long]$_}
+                $script:_returnValue = [ReturnValue]::Success()
+            } catch {
+                $script:_returnValue = [ReturnValue]::new(400,"Invalid Data Type","The value entered does not match the type requirements defined in the manifest schema")
+            }
         } else {
             $script:_returnValue = [ReturnValue]::MaxItemsError($Patterns.MaxItemsSuccessCodes)
         }
@@ -1461,14 +1468,6 @@ Function AddYamlListParameter {
     )
     $_Values = @()
     Foreach ($Value in $Values.Split(',').Trim()) {
-        if ($Parameter -eq 'InstallerSuccessCodes') {
-            try {
-                $Value = [int]$Value
-            } catch {
-                # If we can't cast the value to an integer, it doesn't matter
-                # Continue using the value as is
-            }
-        }
         $_Values += $Value
     }
     $Object[$Parameter] = $_Values
@@ -1721,7 +1720,7 @@ Function Write-Locale-Manifests {
                 if (!(Test-Path $AppFolder)) { New-Item -ItemType 'Directory' -Force -Path $AppFolder | Out-Null }
                 $script:OldLocaleManifest = ConvertFrom-Yaml -Yaml ($(Get-Content -Path $DifLocale.FullName -Encoding UTF8) -join "`n") -Ordered
                 $script:OldLocaleManifest['PackageVersion'] = $PackageVersion
-                if ($script:OldLocaleManifest.Keys -contains 'Moniker') {$script:OldLocaleManifest.Remove('Moniker')}
+                if ($script:OldLocaleManifest.Keys -contains 'Moniker') { $script:OldLocaleManifest.Remove('Moniker') }
                 $script:OldLocaleManifest = SortYamlKeys $script:OldLocaleManifest $LocaleProperties
 
                 $yamlServer = '# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.0.0.schema.json'
