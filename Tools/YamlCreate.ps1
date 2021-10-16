@@ -928,7 +928,7 @@ Function Read-InstallerMetadata {
     do {
         if (!$FileExtensions) { $FileExtensions = '' }
         else { $FileExtensions = $FileExtensions | UniqueItems }
-        $script:FileExtensions = PromptInstallerManifestValue $FileExtensions 'FileExtensions' "[Optional] Enter any File Extensions the application could support. For example: html, htm, url (Max $($Patterns.MaxItemsFileExtensions))" | UniqueItems
+        $script:FileExtensions = PromptInstallerManifestValue -Variable $FileExtensions -Key 'FileExtensions' -Prompt "[Optional] Enter any File Extensions the application could support. For example: html, htm, url (Max $($Patterns.MaxItemsFileExtensions))" | UniqueItems
 
         if (($script:FileExtensions -split ',').Count -le $Patterns.MaxItemsFileExtensions -and $($script:FileExtensions.Split(',').Trim() | Where-Object { Test-String -not $_ -MaxLength $Patterns.FileExtensionMaxLength -MatchPattern $Patterns.FileExtension -AllowNull }).Count -eq 0) {
             $script:_returnValue = [ReturnValue]::Success()
@@ -945,7 +945,7 @@ Function Read-InstallerMetadata {
     do {
         if (!$Protocols) { $Protocols = '' }
         else { $Protocols = $Protocols | UniqueItems }
-        $script:Protocols = PromptInstallerManifestValue $Protocols 'Protocols' "[Optional] Enter any Protocols the application provides a handler for. For example: http, https (Max $($Patterns.MaxItemsProtocols))" | UniqueItems
+        $script:Protocols = PromptInstallerManifestValue -Variable $Protocols -Key 'Protocols' -Prompt "[Optional] Enter any Protocols the application provides a handler for. For example: http, https (Max $($Patterns.MaxItemsProtocols))" | UniqueItems
         if (($script:Protocols -split ',').Count -le $Patterns.MaxItemsProtocols) {
             $script:_returnValue = [ReturnValue]::Success()
         } else {
@@ -957,7 +957,7 @@ Function Read-InstallerMetadata {
     do {
         if (!$Commands) { $Commands = '' }
         else { $Commands = $Commands | UniqueItems }
-        $script:Commands = PromptInstallerManifestValue $Commands 'Commands' "[Optional] Enter any Commands or aliases to run the application. For example: msedge (Max $($Patterns.MaxItemsCommands))" | UniqueItems
+        $script:Commands = PromptInstallerManifestValue -Variable $Commands -Key 'Commands' -Prompt "[Optional] Enter any Commands or aliases to run the application. For example: msedge (Max $($Patterns.MaxItemsCommands))" | UniqueItems
         if (($script:Commands -split ',').Count -le $Patterns.MaxItemsCommands) {
             $script:_returnValue = [ReturnValue]::Success()
         } else {
@@ -968,7 +968,7 @@ Function Read-InstallerMetadata {
     # Request Installer Success Codes and validate
     do {
         if (!$InstallerSuccessCodes) { $InstallerSuccessCodes = '' }
-        $script:InstallerSuccessCodes = PromptInstallerManifestValue $InstallerSuccessCodes 'InstallerSuccessCodes' "[Optional] List of additional non-zero installer success exit codes other than known default values by winget (Max $($Patterns.MaxItemsSuccessCodes))" | UniqueItems
+        $script:InstallerSuccessCodes = PromptInstallerManifestValue -Variable $InstallerSuccessCodes -Key 'InstallerSuccessCodes' -Prompt "[Optional] List of additional non-zero installer success exit codes other than known default values by winget (Max $($Patterns.MaxItemsSuccessCodes))" | UniqueItems
         if (($script:InstallerSuccessCodes -split ',').Count -le $Patterns.MaxItemsSuccessCodes) {
             $script:_returnValue = [ReturnValue]::Success()
             try {
@@ -986,7 +986,7 @@ Function Read-InstallerMetadata {
     # Request Install Modes and validate
     do {
         if ($script:InstallModes) { $script:InstallModes = $script:InstallModes | UniqueItems }
-        $script:InstallModes = PromptInstallerManifestValue $script:InstallModes 'InstallModes' "[Optional] List of supported installer modes. Options: $($Patterns.ValidInstallModes -join ', ')"
+        $script:InstallModes = PromptInstallerManifestValue -Variable $script:InstallModes -Key 'InstallModes' -Prompt "[Optional] List of supported installer modes. Options: $($Patterns.ValidInstallModes -join ', ')"
         if ($script:InstallModes) { $script:InstallModes = $script:InstallModes | UniqueItems }
         if ( (Test-String $script:InstallModes -IsNull) -or (($script:InstallModes -split ',').Count -le $Patterns.MaxItemsInstallModes -and $($script:InstallModes.Split(',').Trim() | Where-Object { $_ -CNotIn $Patterns.ValidInstallModes }).Count -eq 0)) {
             $script:_returnValue = [ReturnValue]::Success()
