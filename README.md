@@ -31,6 +31,7 @@ To help author manifest files, we have provided a YamlCreate.ps1 [powershell scr
 
 ## Test your manifest
 Now that you have authored your manifest, you should make sure it works as expected.
+>Note: You will need to run `winget settings --enable LocalManifestFiles` in an administrative shell before working with local manifests.
 
 ### Locally
 1) Verify the syntax by executing the following command:
