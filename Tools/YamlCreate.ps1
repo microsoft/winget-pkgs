@@ -1576,7 +1576,7 @@ Function Write-InstallerManifest {
         'InstallModes'          = $InstallModes
     }
     foreach ($Section in $_ListSections.GetEnumerator()) {
-        If ($Section.Value) { AddYamlListParameter $InstallerManifest $Section.Name $Section.Value }
+        If ($Section.Value) { AddYamlListParameter -Object $InstallerManifest -Parameter $Section.Name -Values $Section.Value }
     }
 
     if ($Option -ne 'EditMetadata') {
@@ -1698,7 +1698,7 @@ Function Write-LocaleManifest {
         If ($_Item.Value) { AddYamlParameter -Object $LocaleManifest -Parameter $_Item.Name -Value $_Item.Value }
     }
 
-    If ($Tags) { AddYamlListParameter $LocaleManifest 'Tags' $Tags }
+    If ($Tags) { AddYamlListParameter -Object $LocaleManifest -Parameter 'Tags' -Values $Tags }
     If (!$LocaleManifest.ManifestType) { $LocaleManifest['ManifestType'] = 'defaultLocale' }
     If ($Moniker -and $($LocaleManifest.ManifestType -eq 'defaultLocale')) { AddYamlParameter -Object $LocaleManifest -Parameter 'Moniker' -Value $Moniker }
     AddYamlParameter -Object $LocaleManifest -Parameter 'ManifestVersion' -Value $ManifestVersion
