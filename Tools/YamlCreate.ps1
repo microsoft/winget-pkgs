@@ -63,7 +63,6 @@ $ofs = ', '
 .LINK
     https://github.com/microsoft/winget-pkgs/blob/master/Tools/YamlCreate.ps1
 #>
-# TO-DO: Ensure licensing for powershell-yaml is met
 
 # Installs `powershell-yaml` as a dependency for parsing yaml content
 if (-not(Get-Module -ListAvailable -Name powershell-yaml)) {
