@@ -703,7 +703,7 @@ Function Read-InstallerEntry {
         'PackageFamilyName' = $PackageFamilyName
     }
     foreach ($_Item in $_InstallerSingletons.GetEnumerator()) {
-        If ($_Item.Value) { AddYamlParameter $_Installer $_Item.Name $_Item.Value }
+        If ($_Item.Value) { AddYamlParameter -Object $_Installer -Parameter $_Item.Name -Value $_Item.Value }
     }
 
     # Add the installer switches to the installer entry, if they exist
@@ -715,15 +715,15 @@ Function Read-InstallerEntry {
             'SilentWithProgress' = $SilentWithProgress
         }
         foreach ($_Item in $_Switches.GetEnumerator()) {
-            If ($_Item.Value) { AddYamlParameter $_InstallerSwitches $_Item.Name $_Item.Value }
+            If ($_Item.Value) { AddYamlParameter -Object $_InstallerSwitches -Parameter $_Item.Name -Value $_Item.Value }
         }
         $_InstallerSwitches = SortYamlKeys $_InstallerSwitches $InstallerSwitchProperties -NoComments
         $_Installer['InstallerSwitches'] = $_InstallerSwitches
     }
 
     # Add the product code to the installer entry, if it exists
-    If ($ProductCode) { AddYamlParameter $_Installer 'ProductCode' $ProductCode }
-    AddYamlParameter $_Installer 'UpgradeBehavior' $UpgradeBehavior
+    If ($ProductCode) { AddYamlParameter -Object $_Installer -Parameter 'ProductCode' -Value $ProductCode }
+    AddYamlParameter -Object $_Installer -Parameter 'UpgradeBehavior' -Value $UpgradeBehavior
 
     # Add the completed installer to the installers array
     $_Installer = SortYamlKeys $_Installer $InstallerEntryProperties -NoComments
@@ -1535,7 +1535,7 @@ Function Write-VersionManifest {
         'ManifestVersion'   = $ManifestVersion
     }
     foreach ($_Item in $_Singletons.GetEnumerator()) {
-        If ($_Item.Value) { AddYamlParameter $VersionManifest $_Item.Name $_Item.Value }
+        If ($_Item.Value) { AddYamlParameter -Object $VersionManifest -Parameter $_Item.Name -Value $_Item.Value }
     }
     $VersionManifest = SortYamlKeys $VersionManifest $VersionProperties
 
@@ -1564,8 +1564,8 @@ Function Write-InstallerManifest {
     if (!$InstallerManifest) { [PSCustomObject]$InstallerManifest = [ordered]@{} }
 
     #Add the properties to the manifest
-    AddYamlParameter $InstallerManifest 'PackageIdentifier' $PackageIdentifier
-    AddYamlParameter $InstallerManifest 'PackageVersion' $PackageVersion
+    AddYamlParameter -Object $InstallerManifest -Parameter 'PackageIdentifier' -Value $PackageIdentifier
+    AddYamlParameter -Object $InstallerManifest -Parameter 'PackageVersion' -Value $PackageVersion
     $InstallerManifest['MinimumOSVersion'] = If ($MinimumOSVersion) { $MinimumOSVersion } Else { '10.0.0.0' }
 
     $_ListSections = [ordered]@{
@@ -1587,8 +1587,8 @@ Function Write-InstallerManifest {
         $InstallerManifest['Installers'] = $script:OldVersionManifest['Installers']
     }
 
-    AddYamlParameter $InstallerManifest 'ManifestType' 'installer'
-    AddYamlParameter $InstallerManifest 'ManifestVersion' $ManifestVersion
+    AddYamlParameter -Object $InstallerManifest -Parameter 'ManifestType' -Value 'installer'
+    AddYamlParameter -Object $InstallerManifest -Parameter 'ManifestVersion' -Value $ManifestVersion
     If ($InstallerManifest['Dependencies']) {
         $InstallerManifest['Dependencies'] = SortYamlKeys $InstallerManifest['Dependencies'] $InstallerDependencyProperties -NoComments
     }
@@ -1695,13 +1695,13 @@ Function Write-LocaleManifest {
         'Description'         = $Description
     }
     foreach ($_Item in $_Singletons.GetEnumerator()) {
-        If ($_Item.Value) { AddYamlParameter $LocaleManifest $_Item.Name $_Item.Value }
+        If ($_Item.Value) { AddYamlParameter -Object $LocaleManifest -Parameter $_Item.Name -Value $_Item.Value }
     }
 
     If ($Tags) { AddYamlListParameter $LocaleManifest 'Tags' $Tags }
     If (!$LocaleManifest.ManifestType) { $LocaleManifest['ManifestType'] = 'defaultLocale' }
-    If ($Moniker -and $($LocaleManifest.ManifestType -eq 'defaultLocale')) { AddYamlParameter $LocaleManifest 'Moniker' $Moniker }
-    AddYamlParameter $LocaleManifest 'ManifestVersion' $ManifestVersion
+    If ($Moniker -and $($LocaleManifest.ManifestType -eq 'defaultLocale')) { AddYamlParameter -Object $LocaleManifest -Parameter 'Moniker' -Value $Moniker }
+    AddYamlParameter -Object $LocaleManifest -Parameter 'ManifestVersion' -Value $ManifestVersion
     $LocaleManifest = SortYamlKeys $LocaleManifest $LocaleProperties
 
     # Create the folder for the file if it doesn't exist
