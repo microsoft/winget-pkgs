@@ -203,7 +203,7 @@ Function Test-String {
 }
 
 # Takes an array of strings and an array of colors then writes one line of text composed of each string being its respective color
-Function Write-Colors {
+Function Write-MulticolorLine {
     Param
     (
         [Parameter(Mandatory = $true, Position = 0)]
@@ -1766,13 +1766,13 @@ if (!$script:UsingAdvancedOption) {
         $UserChoice = $Mode
     } else {
         Write-Host -ForegroundColor 'Yellow' "Select Mode:`n"
-        Write-Colors '  [', '1', "] New Manifest or Package Version`n" 'DarkCyan', 'White', 'DarkCyan'
-        Write-Colors '  [', '2', '] Quick Update Package Version ', "(Note: Must be used only when previous version`'s metadata is complete.)`n" 'DarkCyan', 'White', 'DarkCyan', 'Green'
-        Write-Colors '  [', '3', "] Update Package Metadata`n" 'DarkCyan', 'White', 'DarkCyan'
-        Write-Colors '  [', '4', "] New Locale`n" 'DarkCyan', 'White', 'DarkCyan'
-        Write-Colors '  [', '5', "] Remove a manifest`n" 'DarkCyan', 'White', 'DarkCyan'
-        Write-Colors '  [', 'Q', ']', " Any key to quit`n" 'DarkCyan', 'White', 'DarkCyan', 'Red'
-        Write-Colors "`nSelection: " 'White'
+        Write-MulticolorLine '  [', '1', "] New Manifest or Package Version`n" 'DarkCyan', 'White', 'DarkCyan'
+        Write-MulticolorLine '  [', '2', '] Quick Update Package Version ', "(Note: Must be used only when previous version`'s metadata is complete.)`n" 'DarkCyan', 'White', 'DarkCyan', 'Green'
+        Write-MulticolorLine '  [', '3', "] Update Package Metadata`n" 'DarkCyan', 'White', 'DarkCyan'
+        Write-MulticolorLine '  [', '4', "] New Locale`n" 'DarkCyan', 'White', 'DarkCyan'
+        Write-MulticolorLine '  [', '5', "] Remove a manifest`n" 'DarkCyan', 'White', 'DarkCyan'
+        Write-MulticolorLine '  [', 'Q', ']', " Any key to quit`n" 'DarkCyan', 'White', 'DarkCyan', 'Red'
+        Write-MulticolorLine "`nSelection: " 'White'
 
         # Listen for keypress and set operation mode based on keypress
         $Keys = @{
