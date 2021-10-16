@@ -753,7 +753,7 @@ Function Read-Installer-Values {
 # Prompts user for Installer Values using the `Quick Update` Method
 # Sets the $script:Installers value as an output
 # Returns void
-Function Read-Installer-Values-Minimal {
+Function Read-QuickInstallerEntry {
     # We know old manifests exist if we got here without error
     # Fetch the old installers based on the manifest type
     if ($script:OldInstallerManifest) { $_OldInstallers = $script:OldInstallerManifest['Installers'] } else {
@@ -2067,7 +2067,7 @@ if ($OldManifests -and $Option -ne 'NewLocale') {
 # Run the data entry and creation of manifests appropriate to the option the user selected
 Switch ($script:Option) {
     'QuickUpdateVersion' {
-        Read-Installer-Values-Minimal
+        Read-QuickInstallerEntry
         Write-LocaleManifest
         Write-InstallerManifest
         Write-VersionManifest
