@@ -1,4 +1,6 @@
 #Requires -Version 5
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingWriteHost', '', Justification='This script is not intended to have any outputs piped')]
+
 Param
 (
     [switch] $Settings,
