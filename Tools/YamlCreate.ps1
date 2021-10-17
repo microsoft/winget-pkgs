@@ -223,7 +223,7 @@ Function Write-MulticolorLine {
 
 # Custom menu prompt that listens for keypresses. Requires a prompt and array of entries at minimum. Entries preceeded with `*` are shown in green
 # Returns a console key value
-Function KeypressMenu {
+Function Invoke-KeypressMenu {
     Param
     (
         [Parameter(Mandatory = $true, Position = 0)]
@@ -275,7 +275,7 @@ Function KeypressMenu {
 }
 
 # Checks a URL and returns the status code received from the URL
-Function TestUrlValidity {
+Function Test-Url {
     Param
     (
         [Parameter(Mandatory = $true, Position = 0)]
@@ -296,7 +296,7 @@ Function TestUrlValidity {
 }
 
 # Checks a file name for validity and returns a boolean value
-function Test-ValidFileName {
+Function Test-ValidFileName {
     param([string]$FileName)
     $IndexOfInvalidChar = $FileName.IndexOfAny([System.IO.Path]::GetInvalidFileNameChars())
     # IndexOfAny() returns the value -1 to indicate no such character was found
@@ -305,13 +305,13 @@ function Test-ValidFileName {
 
 # Prompts user to enter an Installer URL, Tests the URL to ensure it results in a response code of 200, validates it against the manifest schema
 # Returns the validated URL which was entered
-Function Request-Installer-Url {
+Function Request-InstallerUrl {
     do {
         Write-Host -ForegroundColor 'Red' $script:_returnValue.ErrorString()
         Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the download url to the installer.'
         $NewInstallerUrl = Read-Host -Prompt 'Url' | TrimString
         if (Test-String $NewInstallerUrl -MaxLength $Patterns.InstallerUrlMaxLength -MatchPattern $Patterns.InstallerUrl -NotNull) {
-            if ((TestUrlValidity $NewInstallerUrl) -ne 200) {
+            if ((Test-Url $NewInstallerUrl) -ne 200) {
                 $script:_returnValue = [ReturnValue]::new(502, 'Invalid URL Response', 'The URL did not return a successful response from the server', 2)
             } else {
                 $script:_returnValue = [ReturnValue]::Success()
@@ -388,7 +388,7 @@ Function Read-InstallerEntry {
     Foreach ($InstallerValue in $InstallerValues) { Clear-Variable -Name $InstallerValue -Force -ErrorAction SilentlyContinue }
 
     # Request user enter Installer URL
-    $InstallerUrl = Request-Installer-Url
+    $InstallerUrl = Request-InstallerUrl
 
     # Get or request Installer Sha256
     # Check the settings to see if we need to display this menu
@@ -402,7 +402,7 @@ Function Read-InstallerEntry {
                 Prompt        = 'Do you want to save the files to the Temp folder?'
                 DefaultString = 'N'
             }
-            switch ( KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString']) {
+            switch ( Invoke-KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString']) {
                 'Y' { $script:SaveOption = '0' }
                 'N' { $script:SaveOption = '1' }
                 'M' { $script:SaveOption = '2' }
@@ -586,7 +586,7 @@ Function Read-InstallerEntry {
                 Prompt        = 'Discover the package family name?'
                 DefaultString = 'F'
             }
-            switch ( KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString']) {
+            switch ( Invoke-KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString']) {
                 'F' { $ChoicePfn = '0' }
                 'M' { $ChoicePfn = '1' }
                 default { $ChoicePfn = '0' }
@@ -680,7 +680,7 @@ Function Read-InstallerEntry {
         Prompt        = '[Optional] Enter the Installer Scope'
         DefaultString = 'N'
     }
-    switch ( KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString']) {
+    switch ( Invoke-KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString']) {
         'M' { $Scope = 'machine' }
         'U' { $Scope = 'user' }
         'N' { $Scope = '' }
@@ -693,7 +693,7 @@ Function Read-InstallerEntry {
         Prompt        = '[Optional] Enter the Upgrade Behavior'
         DefaultString = 'I'
     }
-    switch ( KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString']) {
+    switch ( Invoke-KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString']) {
         'I' { $UpgradeBehavior = 'install' }
         'U' { $UpgradeBehavior = 'uninstallPrevious' }
         default { $UpgradeBehavior = 'install' }
@@ -719,7 +719,7 @@ Function Read-InstallerEntry {
         'PackageFamilyName' = $PackageFamilyName
     }
     foreach ($_Item in $_InstallerSingletons.GetEnumerator()) {
-        If ($_Item.Value) { AddYamlParameter -Object $_Installer -Parameter $_Item.Name -Value $_Item.Value }
+        If ($_Item.Value) { Add-YamlParameter -Object $_Installer -Parameter $_Item.Name -Value $_Item.Value }
     }
 
     # Add the installer switches to the installer entry, if they exist
@@ -731,18 +731,18 @@ Function Read-InstallerEntry {
             'SilentWithProgress' = $SilentWithProgress
         }
         foreach ($_Item in $_Switches.GetEnumerator()) {
-            If ($_Item.Value) { AddYamlParameter -Object $_InstallerSwitches -Parameter $_Item.Name -Value $_Item.Value }
+            If ($_Item.Value) { Add-YamlParameter -Object $_InstallerSwitches -Parameter $_Item.Name -Value $_Item.Value }
         }
-        $_InstallerSwitches = SortYamlKeys $_InstallerSwitches $InstallerSwitchProperties -NoComments
+        $_InstallerSwitches = Restore-YamlKeyOrder $_InstallerSwitches $InstallerSwitchProperties -NoComments
         $_Installer['InstallerSwitches'] = $_InstallerSwitches
     }
 
     # Add the product code to the installer entry, if it exists
-    If ($ProductCode) { AddYamlParameter -Object $_Installer -Parameter 'ProductCode' -Value $ProductCode }
-    AddYamlParameter -Object $_Installer -Parameter 'UpgradeBehavior' -Value $UpgradeBehavior
+    If ($ProductCode) { Add-YamlParameter -Object $_Installer -Parameter 'ProductCode' -Value $ProductCode }
+    Add-YamlParameter -Object $_Installer -Parameter 'UpgradeBehavior' -Value $UpgradeBehavior
 
     # Add the completed installer to the installers array
-    $_Installer = SortYamlKeys $_Installer $InstallerEntryProperties -NoComments
+    $_Installer = Restore-YamlKeyOrder $_Installer $InstallerEntryProperties -NoComments
     $script:Installers += $_Installer
 
     # Prompt the user for additional intaller entries
@@ -754,7 +754,7 @@ Function Read-InstallerEntry {
         Prompt        = 'Do you want to create another installer?'
         DefaultString = 'N'
     }
-    switch ( KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString']) {
+    switch ( Invoke-KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString']) {
         'Y' { $AnotherInstaller = '0' }
         'N' { $AnotherInstaller = '1' }
         default { $AnotherInstaller = '1' }
@@ -793,7 +793,7 @@ Function Read-QuickInstallerEntry {
         Write-Host
 
         # Request user enter the new Installer URL
-        $_NewInstaller['InstallerUrl'] = Request-Installer-Url
+        $_NewInstaller['InstallerUrl'] = Request-InstallerUrl
 
         try {
             Get-InstallerFile -URI $_NewInstaller['InstallerUrl'] -PackageIdentifier $PackageIdentifier -PackageVersion $PackageVersion
@@ -844,7 +844,7 @@ Function Read-QuickInstallerEntry {
             Remove-Item -Path $script:dest
         }
         #Add the updated installer to the new installers array
-        $_NewInstaller = SortYamlKeys $_NewInstaller $InstallerEntryProperties -NoComments
+        $_NewInstaller = Restore-YamlKeyOrder $_NewInstaller $InstallerEntryProperties -NoComments
         $_NewInstallers += $_NewInstaller
     }
     $script:Installers = $_NewInstallers
@@ -853,7 +853,7 @@ Function Read-QuickInstallerEntry {
 # Requests the user enter an optional value with a prompt
 # If the value already exists, also print the existing value
 # Returns the new value if entered, Returns the existing value if no new value was entered
-Function PromptInstallerManifestValue {
+Function Read-InstallerMetadataValue {
     Param
     (
         [Parameter(Mandatory = $true, Position = 0)]
@@ -879,7 +879,7 @@ Function PromptInstallerManifestValue {
 # Sorts keys within an object based on a reference ordered dictionary
 # If a key does not exist, it sets the value to a special character to be removed / commented later
 # Returns the result as a new object
-Function SortYamlKeys {
+Function Restore-YamlKeyOrder {
     Param
     (
         [Parameter(Mandatory = $true, Position = 0)]
@@ -924,7 +924,7 @@ Function Read-InstallerMetadata {
     do {
         if (!$FileExtensions) { $FileExtensions = '' }
         else { $FileExtensions = $FileExtensions | UniqueItems }
-        $script:FileExtensions = PromptInstallerManifestValue -Variable $FileExtensions -Key 'FileExtensions' -Prompt "[Optional] Enter any File Extensions the application could support. For example: html, htm, url (Max $($Patterns.MaxItemsFileExtensions))" | UniqueItems
+        $script:FileExtensions = Read-InstallerMetadataValue -Variable $FileExtensions -Key 'FileExtensions' -Prompt "[Optional] Enter any File Extensions the application could support. For example: html, htm, url (Max $($Patterns.MaxItemsFileExtensions))" | UniqueItems
 
         if (($script:FileExtensions -split ',').Count -le $Patterns.MaxItemsFileExtensions -and $($script:FileExtensions.Split(',').Trim() | Where-Object { Test-String -not $_ -MaxLength $Patterns.FileExtensionMaxLength -MatchPattern $Patterns.FileExtension -AllowNull }).Count -eq 0) {
             $script:_returnValue = [ReturnValue]::Success()
@@ -941,7 +941,7 @@ Function Read-InstallerMetadata {
     do {
         if (!$Protocols) { $Protocols = '' }
         else { $Protocols = $Protocols | UniqueItems }
-        $script:Protocols = PromptInstallerManifestValue -Variable $Protocols -Key 'Protocols' -Prompt "[Optional] Enter any Protocols the application provides a handler for. For example: http, https (Max $($Patterns.MaxItemsProtocols))" | UniqueItems
+        $script:Protocols = Read-InstallerMetadataValue -Variable $Protocols -Key 'Protocols' -Prompt "[Optional] Enter any Protocols the application provides a handler for. For example: http, https (Max $($Patterns.MaxItemsProtocols))" | UniqueItems
         if (($script:Protocols -split ',').Count -le $Patterns.MaxItemsProtocols) {
             $script:_returnValue = [ReturnValue]::Success()
         } else {
@@ -953,7 +953,7 @@ Function Read-InstallerMetadata {
     do {
         if (!$Commands) { $Commands = '' }
         else { $Commands = $Commands | UniqueItems }
-        $script:Commands = PromptInstallerManifestValue -Variable $Commands -Key 'Commands' -Prompt "[Optional] Enter any Commands or aliases to run the application. For example: msedge (Max $($Patterns.MaxItemsCommands))" | UniqueItems
+        $script:Commands = Read-InstallerMetadataValue -Variable $Commands -Key 'Commands' -Prompt "[Optional] Enter any Commands or aliases to run the application. For example: msedge (Max $($Patterns.MaxItemsCommands))" | UniqueItems
         if (($script:Commands -split ',').Count -le $Patterns.MaxItemsCommands) {
             $script:_returnValue = [ReturnValue]::Success()
         } else {
@@ -964,7 +964,7 @@ Function Read-InstallerMetadata {
     # Request Installer Success Codes and validate
     do {
         if (!$InstallerSuccessCodes) { $InstallerSuccessCodes = '' }
-        $script:InstallerSuccessCodes = PromptInstallerManifestValue -Variable $InstallerSuccessCodes -Key 'InstallerSuccessCodes' -Prompt "[Optional] List of additional non-zero installer success exit codes other than known default values by winget (Max $($Patterns.MaxItemsSuccessCodes))" | UniqueItems
+        $script:InstallerSuccessCodes = Read-InstallerMetadataValue -Variable $InstallerSuccessCodes -Key 'InstallerSuccessCodes' -Prompt "[Optional] List of additional non-zero installer success exit codes other than known default values by winget (Max $($Patterns.MaxItemsSuccessCodes))" | UniqueItems
         if (($script:InstallerSuccessCodes -split ',').Count -le $Patterns.MaxItemsSuccessCodes) {
             $script:_returnValue = [ReturnValue]::Success()
             try {
@@ -982,7 +982,7 @@ Function Read-InstallerMetadata {
     # Request Install Modes and validate
     do {
         if ($script:InstallModes) { $script:InstallModes = $script:InstallModes | UniqueItems }
-        $script:InstallModes = PromptInstallerManifestValue -Variable $script:InstallModes -Key 'InstallModes' -Prompt "[Optional] List of supported installer modes. Options: $($Patterns.ValidInstallModes -join ', ')"
+        $script:InstallModes = Read-InstallerMetadataValue -Variable $script:InstallModes -Key 'InstallModes' -Prompt "[Optional] List of supported installer modes. Options: $($Patterns.ValidInstallModes -join ', ')"
         if ($script:InstallModes) { $script:InstallModes = $script:InstallModes | UniqueItems }
         if ( (Test-String $script:InstallModes -IsNull) -or (($script:InstallModes -split ',').Count -le $Patterns.MaxItemsInstallModes -and $($script:InstallModes.Split(',').Trim() | Where-Object { $_ -CNotIn $Patterns.ValidInstallModes }).Count -eq 0)) {
             $script:_returnValue = [ReturnValue]::Success()
@@ -1384,7 +1384,7 @@ Function Read-PRBody {
         }
 
         if ($_showMenu) {
-            switch ( KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString'] -HelpText $_menu['HelpText'] -HelpTextColor $_menu['HelpTextColor']) {
+            switch ( Invoke-KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString'] -HelpText $_menu['HelpText'] -HelpTextColor $_menu['HelpTextColor']) {
                 'Y' { $PrBodyContentReply += @($_line.Replace('[ ]', '[X]')) }
                 default { $PrBodyContentReply += @($_line) }
             }
@@ -1397,7 +1397,7 @@ Function Read-PRBody {
         Prompt        = 'Does this pull request resolve any issues?'
         DefaultString = 'N'
     }
-    switch ( KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString']) {
+    switch ( Invoke-KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString']) {
         'Y' {
             # If there were issues resolved by the PR, request user to enter them
             Write-Host
@@ -1422,7 +1422,7 @@ Function Read-PRBody {
                             continue
                         }
                     }
-                    $_responseCode = TestUrlValidity $_checkedURL
+                    $_responseCode = Test-Url $_checkedURL
                     if ($_responseCode -ne 200) {
                         Write-Host -ForegroundColor 'Red' "Invalid Issue: $i"
                         continue
@@ -1430,7 +1430,7 @@ Function Read-PRBody {
                     $PrBodyContentReply += @("Resolves $i")
                 } else {
                     $_checkedURL = "https://github.com/microsoft/winget-pkgs/issues/$i"
-                    $_responseCode = TestUrlValidity $_checkedURL
+                    $_responseCode = Test-Url $_checkedURL
                     if ($_responseCode -ne 200) {
                         Write-Host -ForegroundColor 'Red' "Invalid Issue: $i"
                         continue
@@ -1454,7 +1454,7 @@ Function Read-PRBody {
 }
 
 # Takes a comma separated list of values, converts it to an array object, and adds the result to a specified object-key
-Function AddYamlListParameter {
+Function Add-YamlListParameter {
     Param
     (
         [Parameter(Mandatory = $true, Position = 0)]
@@ -1472,7 +1472,7 @@ Function AddYamlListParameter {
 }
 
 # Takes a single value and adds it to a specified object-key
-Function AddYamlParameter {
+Function Add-YamlParameter {
     Param
     (
         [Parameter(Mandatory = $true, Position = 0)]
@@ -1486,7 +1486,7 @@ Function AddYamlParameter {
 }
 
 # Fetch the value of a manifest value regardless of which manifest file it exists in
-Function GetMultiManifestParameter {
+Function Get-MultiManifestParameter {
     Param(
         [Parameter(Mandatory = $true, Position = 1)]
         [string] $Parameter
@@ -1495,7 +1495,7 @@ Function GetMultiManifestParameter {
     return ($_vals -join ', ')
 }
 
-Function GetDebugString {
+Function Get-DebugString {
     $debug = ' $debug='
     $debug += $(switch ($script:Option) {
             'New' { 'NV' }
@@ -1531,16 +1531,16 @@ Function Write-VersionManifest {
         'ManifestVersion'   = $ManifestVersion
     }
     foreach ($_Item in $_Singletons.GetEnumerator()) {
-        If ($_Item.Value) { AddYamlParameter -Object $VersionManifest -Parameter $_Item.Name -Value $_Item.Value }
+        If ($_Item.Value) { Add-YamlParameter -Object $VersionManifest -Parameter $_Item.Name -Value $_Item.Value }
     }
-    $VersionManifest = SortYamlKeys $VersionManifest $VersionProperties
+    $VersionManifest = Restore-YamlKeyOrder $VersionManifest $VersionProperties
 
     # Create the folder for the file if it doesn't exist
     New-Item -ItemType 'Directory' -Force -Path $AppFolder | Out-Null
     $VersionManifestPath = $AppFolder + "\$PackageIdentifier" + '.yaml'
 
     # Write the manifest to the file
-    $ScriptHeader + "$(GetDebugString)`n# yaml-language-server: `$schema=https://aka.ms/winget-manifest.version.1.0.0.schema.json`n" > $VersionManifestPath
+    $ScriptHeader + "$(Get-DebugString)`n# yaml-language-server: `$schema=https://aka.ms/winget-manifest.version.1.0.0.schema.json`n" > $VersionManifestPath
     ConvertTo-Yaml $VersionManifest >> $VersionManifestPath
     $(Get-Content $VersionManifestPath -Encoding UTF8) -replace "(.*)$([char]0x2370)", "# `$1" | Out-File -FilePath $VersionManifestPath -Force
     $MyRawString = Get-Content -Raw $VersionManifestPath | TrimString
@@ -1560,8 +1560,8 @@ Function Write-InstallerManifest {
     if (!$InstallerManifest) { [PSCustomObject]$InstallerManifest = [ordered]@{} }
 
     #Add the properties to the manifest
-    AddYamlParameter -Object $InstallerManifest -Parameter 'PackageIdentifier' -Value $PackageIdentifier
-    AddYamlParameter -Object $InstallerManifest -Parameter 'PackageVersion' -Value $PackageVersion
+    Add-YamlParameter -Object $InstallerManifest -Parameter 'PackageIdentifier' -Value $PackageIdentifier
+    Add-YamlParameter -Object $InstallerManifest -Parameter 'PackageVersion' -Value $PackageVersion
     $InstallerManifest['MinimumOSVersion'] = If ($MinimumOSVersion) { $MinimumOSVersion } Else { '10.0.0.0' }
 
     $_ListSections = [ordered]@{
@@ -1572,7 +1572,7 @@ Function Write-InstallerManifest {
         'InstallModes'          = $InstallModes
     }
     foreach ($Section in $_ListSections.GetEnumerator()) {
-        If ($Section.Value) { AddYamlListParameter -Object $InstallerManifest -Parameter $Section.Name -Values $Section.Value }
+        If ($Section.Value) { Add-YamlListParameter -Object $InstallerManifest -Parameter $Section.Name -Values $Section.Value }
     }
 
     if ($Option -ne 'EditMetadata') {
@@ -1583,10 +1583,10 @@ Function Write-InstallerManifest {
         $InstallerManifest['Installers'] = $script:OldVersionManifest['Installers']
     }
 
-    AddYamlParameter -Object $InstallerManifest -Parameter 'ManifestType' -Value 'installer'
-    AddYamlParameter -Object $InstallerManifest -Parameter 'ManifestVersion' -Value $ManifestVersion
+    Add-YamlParameter -Object $InstallerManifest -Parameter 'ManifestType' -Value 'installer'
+    Add-YamlParameter -Object $InstallerManifest -Parameter 'ManifestVersion' -Value $ManifestVersion
     If ($InstallerManifest['Dependencies']) {
-        $InstallerManifest['Dependencies'] = SortYamlKeys $InstallerManifest['Dependencies'] $InstallerDependencyProperties -NoComments
+        $InstallerManifest['Dependencies'] = Restore-YamlKeyOrder $InstallerManifest['Dependencies'] $InstallerDependencyProperties -NoComments
     }
     # Move Installer Level Keys to Manifest Level
     $_KeysToMove = $InstallerEntryProperties | Where-Object { $_ -in $InstallerProperties }
@@ -1638,18 +1638,18 @@ Function Write-InstallerManifest {
             }
         }
     }
-    if ($InstallerManifest.Keys -contains 'InstallerSwitches') { $InstallerManifest['InstallerSwitches'] = SortYamlKeys $InstallerManifest.InstallerSwitches $InstallerSwitchProperties -NoComments }
+    if ($InstallerManifest.Keys -contains 'InstallerSwitches') { $InstallerManifest['InstallerSwitches'] = Restore-YamlKeyOrder $InstallerManifest.InstallerSwitches $InstallerSwitchProperties -NoComments }
     foreach ($_Installer in $InstallerManifest.Installers) {
-        if ($_Installer.Keys -contains 'InstallerSwitches') { $_Installer['InstallerSwitches'] = SortYamlKeys $_Installer.InstallerSwitches $InstallerSwitchProperties -NoComments }
+        if ($_Installer.Keys -contains 'InstallerSwitches') { $_Installer['InstallerSwitches'] = Restore-YamlKeyOrder $_Installer.InstallerSwitches $InstallerSwitchProperties -NoComments }
     }
-    $InstallerManifest = SortYamlKeys $InstallerManifest $InstallerProperties -NoComments
+    $InstallerManifest = Restore-YamlKeyOrder $InstallerManifest $InstallerProperties -NoComments
 
     # Create the folder for the file if it doesn't exist
     New-Item -ItemType 'Directory' -Force -Path $AppFolder | Out-Null
     $InstallerManifestPath = $AppFolder + "\$PackageIdentifier" + '.installer' + '.yaml'
 
     # Write the manifest to the file
-    $ScriptHeader + "$(GetDebugString)`n# yaml-language-server: `$schema=https://aka.ms/winget-manifest.installer.1.0.0.schema.json`n" > $InstallerManifestPath
+    $ScriptHeader + "$(Get-DebugString)`n# yaml-language-server: `$schema=https://aka.ms/winget-manifest.installer.1.0.0.schema.json`n" > $InstallerManifestPath
     ConvertTo-Yaml $InstallerManifest >> $InstallerManifestPath
     $(Get-Content $InstallerManifestPath -Encoding UTF8) -replace "(.*)$([char]0x2370)", "# `$1" | Out-File -FilePath $InstallerManifestPath -Force
     $MyRawString = Get-Content -Raw $InstallerManifestPath | TrimString
@@ -1691,21 +1691,21 @@ Function Write-LocaleManifest {
         'Description'         = $Description
     }
     foreach ($_Item in $_Singletons.GetEnumerator()) {
-        If ($_Item.Value) { AddYamlParameter -Object $LocaleManifest -Parameter $_Item.Name -Value $_Item.Value }
+        If ($_Item.Value) { Add-YamlParameter -Object $LocaleManifest -Parameter $_Item.Name -Value $_Item.Value }
     }
 
-    If ($Tags) { AddYamlListParameter -Object $LocaleManifest -Parameter 'Tags' -Values $Tags }
+    If ($Tags) { Add-YamlListParameter -Object $LocaleManifest -Parameter 'Tags' -Values $Tags }
     If (!$LocaleManifest.ManifestType) { $LocaleManifest['ManifestType'] = 'defaultLocale' }
-    If ($Moniker -and $($LocaleManifest.ManifestType -eq 'defaultLocale')) { AddYamlParameter -Object $LocaleManifest -Parameter 'Moniker' -Value $Moniker }
-    AddYamlParameter -Object $LocaleManifest -Parameter 'ManifestVersion' -Value $ManifestVersion
-    $LocaleManifest = SortYamlKeys $LocaleManifest $LocaleProperties
+    If ($Moniker -and $($LocaleManifest.ManifestType -eq 'defaultLocale')) { Add-YamlParameter -Object $LocaleManifest -Parameter 'Moniker' -Value $Moniker }
+    Add-YamlParameter -Object $LocaleManifest -Parameter 'ManifestVersion' -Value $ManifestVersion
+    $LocaleManifest = Restore-YamlKeyOrder $LocaleManifest $LocaleProperties
 
     # Create the folder for the file if it doesn't exist
     New-Item -ItemType 'Directory' -Force -Path $AppFolder | Out-Null
     $script:LocaleManifestPath = $AppFolder + "\$PackageIdentifier" + '.locale.' + "$PackageLocale" + '.yaml'
 
     # Write the manifest to the file
-    $ScriptHeader + "$(GetDebugString)`n$yamlServer`n" > $LocaleManifestPath
+    $ScriptHeader + "$(Get-DebugString)`n$yamlServer`n" > $LocaleManifestPath
     ConvertTo-Yaml $LocaleManifest >> $LocaleManifestPath
     $(Get-Content $LocaleManifestPath -Encoding UTF8) -replace "(.*)$([char]0x2370)", "# `$1" | Out-File -FilePath $LocaleManifestPath -Force
     $MyRawString = Get-Content -Raw $LocaleManifestPath | TrimString
@@ -1719,11 +1719,11 @@ Function Write-LocaleManifest {
                 $script:OldLocaleManifest = ConvertFrom-Yaml -Yaml ($(Get-Content -Path $DifLocale.FullName -Encoding UTF8) -join "`n") -Ordered
                 $script:OldLocaleManifest['PackageVersion'] = $PackageVersion
                 if ($script:OldLocaleManifest.Keys -contains 'Moniker') { $script:OldLocaleManifest.Remove('Moniker') }
-                $script:OldLocaleManifest = SortYamlKeys $script:OldLocaleManifest $LocaleProperties
+                $script:OldLocaleManifest = Restore-YamlKeyOrder $script:OldLocaleManifest $LocaleProperties
 
                 $yamlServer = '# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.0.0.schema.json'
 
-                $ScriptHeader + "$(GetDebugString)`n$yamlServer`n" > ($AppFolder + '\' + $DifLocale.Name)
+                $ScriptHeader + "$(Get-DebugString)`n$yamlServer`n" > ($AppFolder + '\' + $DifLocale.Name)
                 ConvertTo-Yaml $OldLocaleManifest >> ($AppFolder + '\' + $DifLocale.Name)
                 $(Get-Content $($AppFolder + '\' + $DifLocale.Name) -Encoding UTF8) -replace "(.*)$([char]0x2370)", "# `$1" | Out-File -FilePath $($AppFolder + '\' + $DifLocale.Name) -Force
                 $MyRawString = Get-Content -Raw $($AppFolder + '\' + $DifLocale.Name) | TrimString
@@ -1811,7 +1811,7 @@ if (($script:Option -eq 'QuickUpdateVersion') -and ($ScriptSettings.SuppressQuic
         HelpTextColor = 'Red'
         DefaultString = 'Q'
     }
-    switch ( KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString'] -HelpText $_menu['HelpText'] -HelpTextColor $_menu['HelpTextColor']) {
+    switch ( Invoke-KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString'] -HelpText $_menu['HelpText'] -HelpTextColor $_menu['HelpTextColor']) {
         'Y' { Write-Host -ForegroundColor DarkYellow -Object "`n`nContinuing with Quick Update" }
         'N' { $script:Option = 'New'; Write-Host -ForegroundColor DarkYellow -Object "`n`nSwitched to Full Update Experience" }
         default { Write-Host; exit }
@@ -1877,7 +1877,7 @@ if ($ScriptSettings.ContinueWithExistingPRs -ne 'always' -and $script:Option -ne
             HelpText      = "$_PRTitle - $_PRUrl"
             HelpTextColor = 'Blue'
         }
-        switch ( KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString'] -HelpText $_menu['HelpText'] -HelpTextColor $_menu['HelpTextColor'] ) {
+        switch ( Invoke-KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString'] -HelpText $_menu['HelpText'] -HelpTextColor $_menu['HelpTextColor'] ) {
             'Y' { Write-Host }
             default { Write-Host; exit }
         }
@@ -2056,7 +2056,7 @@ if ($OldManifests -and $Option -ne 'NewLocale') {
         'Capabilities'; 'RestrictedCapabilities'
     )
     Foreach ($param in $_Parameters) {
-        $_ReadValue = $(if ($script:OldManifestType -eq 'MultiManifest') { (GetMultiManifestParameter $param) } else { $script:OldVersionManifest[$param] })
+        $_ReadValue = $(if ($script:OldManifestType -eq 'MultiManifest') { (Get-MultiManifestParameter $param) } else { $script:OldVersionManifest[$param] })
         if (Test-String -Not $_ReadValue -IsNull) { New-Variable -Name $param -Value $_ReadValue -Scope Script -Force }
     }
 }
@@ -2104,7 +2104,7 @@ Switch ($script:Option) {
             HelpTextColor = 'Red'
             DefaultString = 'N'
         }
-        switch ( KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString'] -HelpText $_menu['HelpText'] -HelpTextColor $_menu['HelpTextColor']) {
+        switch ( Invoke-KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString'] -HelpText $_menu['HelpText'] -HelpTextColor $_menu['HelpTextColor']) {
             'Y' { Write-Host; continue }
             default { Write-Host; exit 1 }
         }
@@ -2210,7 +2210,7 @@ if ($script:Option -ne 'RemoveManifest') {
                     Prompt        = '[Recommended] Do you want to test your Manifest in Windows Sandbox?'
                     DefaultString = 'Y'
                 }
-                switch ( KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString']) {
+                switch ( Invoke-KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString']) {
                     'Y' { $script:SandboxTest = '0' }
                     'N' { $script:SandboxTest = '1' }
                     default { $script:SandboxTest = '0' }
@@ -2243,7 +2243,7 @@ if (Get-Command 'git.exe' -ErrorAction SilentlyContinue) {
                 Prompt        = 'Do you want to submit your PR now?'
                 DefaultString = 'Y'
             }
-            switch ( KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString']) {
+            switch ( Invoke-KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString']) {
                 'Y' { $PromptSubmit = '0' }
                 'N' { $PromptSubmit = '1' }
                 default { $PromptSubmit = '0' }
