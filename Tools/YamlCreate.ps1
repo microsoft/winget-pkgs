@@ -340,28 +340,19 @@ Function Get-InstallerFile {
         [string] $PackageVersion
 
     )
-
-    # Download and store the binary, but do not write to a file yet
-    $download = Invoke-WebRequest -Uri $URI -UserAgent 'winget/1.0' -DisableKeepAlive -TimeoutSec 30 -UseBasicParsing
-    # Attempt to get the file from the headers
-    try {
-        $contentDisposition = [System.Net.Mime.ContentDisposition]::new($download.Headers['Content-Disposition'])
-        $_Filename = $contentDisposition.FileName
-    } catch { Out-Null }
-    # Validate the headers reurned a valid file name
-    if (![string]::IsNullOrWhiteSpace($_Filename) -and $(Test-ValidFileName $_Filename)) {
-        $Filename = $_Filename
-    }
-    # If the headers did not return a valid file name, build our own file name
-    # Attempt to preserve the extension if it exists, otherwise, create our own
-    else {
-        $Filename = "$PackageIdentifier v$PackageVersion" + $(if ([System.IO.Path]::HasExtension($_Filename)) { [System.IO.Path]::GetExtension($_Filename) } elseif ([System.IO.Path]::HasExtension($InstallerUrl)) { [System.IO.Path]::GetExtension($URI) } else { '.winget-tmp' })
-    }
-    # Write File to disk
+    # Create a filename based on the Package Identifier and Version; Try to get the extension from the URL
+    # If the extension isn't found, use a custom one
+    $Filename = "$PackageIdentifier v$PackageVersion" + $(if([System.IO.Path]::HasExtension($URI)) { [System.IO.Path]::GetExtension($URI) } else { '.winget-tmp' })
     $script:dest = Join-Path -Path $env:TEMP -ChildPath $Filename
-    $file = [System.IO.FileStream]::new($script:dest, [System.IO.FileMode]::Create)
-    $file.Write($download.Content, 0, $download.RawContentLength)
-    $file.Close()
+
+    # Create a new web client for downloading the file
+    $WebClient = [System.Net.WebClient]::new()
+    # If the system has a default proxy set, use it
+    $WebClient.Proxy = [System.Net.WebProxy]::GetDefaultProxy()
+    # Download the file
+    $WebClient.DownloadFile($URI, $dest)
+    # Dispose of the web client to release the resources it uses
+    $WebClient.Dispose()
 }
 
 # Prompts the user to enter installer values
