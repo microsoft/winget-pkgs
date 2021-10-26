@@ -24,12 +24,12 @@ if (-Not $SkipManifestValidation -And -Not [String]::IsNullOrWhiteSpace($Manifes
   Write-Host '--> Validating Manifest'
 
   if (-Not (Test-Path -Path $Manifest)) {
-    throw 'The Manifest does not exist.'
+    throw [System.IO.DirectoryNotFoundException]::new('The Manifest does not exist.')
   }
 
   winget.exe validate $Manifest
   switch ($LASTEXITCODE) {
-    '-1978335191' { throw 'Manifest validation failed.' }
+    '-1978335191' { throw [System.Activities.ValidationException]::new('Manifest validation failed.')}
     '-1978335192' { Start-Sleep -Seconds 5 }
     Default { continue }
   }
@@ -138,10 +138,11 @@ foreach ($dependency in $dependencies) {
       $WebClient.DownloadFile($dependency.url, $dependency.file)
     }
     catch {
-      throw "Error downloading $($dependency.url)."
+      #Pass the exception as an inner exception
+      throw [System.Net.WebException]::new("Error downloading $($dependency.url).",$_.Exception)
     }
     if (-not ($dependency.hash -eq $(Get-FileHash $dependency.file).Hash)) {
-      throw 'Hashes do not match, try gain.'
+      throw [System.Activities.VersionMismatchException]::new('Dependency hash does not match the downloaded file')
     }
   }
 }
