@@ -348,7 +348,8 @@ Function Get-InstallerFile {
     # Create a new web client for downloading the file
     $WebClient = [System.Net.WebClient]::new()
     # If the system has a default proxy set, use it
-    $WebClient.Proxy = [System.Net.WebProxy]::GetDefaultProxy()
+    # Powershell Core will automatically use this, so it's only necessary for PS5
+    if ($PSVersionTable.PSVersion.Major -lt 6){ $WebClient.Proxy = [System.Net.WebProxy]::GetDefaultProxy() }
     # Download the file
     $WebClient.DownloadFile($URI, $dest)
     # Dispose of the web client to release the resources it uses
