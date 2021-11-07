@@ -4,7 +4,13 @@
 name: '$(Build.DefinitionName)-$(Build.DefinitionVersion)-$(System.PullRequest.PullRequestNumber)-$(Date:yyyyMMdd)-$(Rev:r)'
 
 trigger: none
-pr: none
+pr:
+  branches:
+    include:
+      - master
+  paths:
+    include:
+      - manifests
 
 jobs:
 
@@ -55,6 +61,8 @@ jobs:
     condition: succeeded()
     env:
       ValidationConnectionString: $(ValidationStorageAccountConnectionString)
+      GithubRepository: $(GithubRepository)
+      GithubServiceAccountToken: $(GithubServiceAccountToken)
       ExecutionEnvironment: $(ExecutionEnvironment)
       DIApplicationInsightKey: $(DIApplicationInsightKey)
       WinGet:AppConfig:Primary: $(AppConfigPrimary)
