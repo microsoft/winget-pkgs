@@ -1,5 +1,5 @@
 # Using SandboxTest.ps1
-The sandbox test script is designed to allow you to test manifests locally without having to install the application to your windows installation directly. To do this, it makes use of the [Windows Sandbox](https://docs.microsoft.com/windows/security/threat-protection/windows-sandbox/windows-sandbox-overview).
+The sandbox test script is designed to allow you to test manifests locally without having to install the application to your Windows installation directly. To do this, it makes use of the [Windows Sandbox](https://docs.microsoft.com/windows/security/threat-protection/windows-sandbox/windows-sandbox-overview).
 
 First, [create a fork](https://docs.github.com/get-started/quickstart/fork-a-repo) of this repository and then [clone it](https://docs.github.com/repositories/creating-and-managing-repositories/cloning-a-repository) to your computer. Once the repository has finished cloning, you will need to open a powershell terminal since the SandboxTest script is designed to be run from the command line. In the powershell terminal which you just opened, navigate to the folder the repository was cloned into and then into the `Tools` folder. You can do this by using `cd <drive>\<path-to-parent>\winget-pkgs\Tools`. Once you are here, you should be ready to run the script. 
 
