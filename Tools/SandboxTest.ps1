@@ -165,7 +165,13 @@ function Update-EnvironmentVariables {
   }
 }
 
-
+function Get-ARPTable {
+  $registry_paths = @('HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*','HKLM:\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*', 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*', 'HKCU:\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*')
+  return Get-ItemProperty $registry_paths -ErrorAction SilentlyContinue | 
+       Select-Object DisplayName, DisplayVersion, Publisher, @{N='ProductCode'; E={$_.PSChildName}} |
+       Where-Object {$null -ne $_.DisplayName } |
+       Where-Object {$null -ne $_.Publisher }
+}
 '@
 
 $bootstrapPs1Content += @"
@@ -192,7 +198,7 @@ Write-Host @'
 --> Configuring Winget
 '@
 winget settings --Enable LocalManifestFiles
-
+`$originalARP = Get-ARPTable
 Write-Host @'
 
 
@@ -206,12 +212,13 @@ Write-Host @'
 --> Refreshing environment variables
 '@
 Update-EnvironmentVariables
+`$currentARP = Get-ARPTable
 
 Write-Host @'
 
---> Opening ARP Entries
+--> Comparing ARP Entries
 '@
-appwiz.cpl
+(Compare-Object `$currentARP `$originalARP -IncludeEqual -ExcludeDifferent).InputObject 
 
 "@
 }
@@ -280,7 +287,7 @@ if (-Not [String]::IsNullOrWhiteSpace($Manifest)) {
   Write-Host @"
     - Installing the Manifest $manifestFileName
     - Refreshing environment variables
-    - Opening ARP Entries
+    - Comparing ARP Entries
 "@
 }
 
