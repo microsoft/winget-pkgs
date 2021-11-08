@@ -207,6 +207,11 @@ Write-Host @'
 '@
 Update-EnvironmentVariables
 
+Write-Host @'
+
+--> Opening ARP Entries
+'@
+appwiz.cpl
 
 "@
 }
@@ -275,6 +280,7 @@ if (-Not [String]::IsNullOrWhiteSpace($Manifest)) {
   Write-Host @"
     - Installing the Manifest $manifestFileName
     - Refreshing environment variables
+    - Opening ARP Entries
 "@
 }
 
