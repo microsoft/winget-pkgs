@@ -212,13 +212,12 @@ Write-Host @'
 --> Refreshing environment variables
 '@
 Update-EnvironmentVariables
-`$currentARP = Get-ARPTable
 
 Write-Host @'
 
 --> Comparing ARP Entries
 '@
-(Compare-Object `$currentARP `$originalARP -IncludeEqual -ExcludeDifferent).InputObject 
+(Compare-Object (Get-ARPTable) `$originalARP -Property DisplayName,DisplayVersion,Publisher,ProductCode)| Select-Object -Property * -ExcludeProperty SideIndicator | Format-Table
 
 "@
 }
