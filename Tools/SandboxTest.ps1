@@ -171,14 +171,12 @@ function Update-EnvironmentVariables {
 $bootstrapPs1Content += @"
 Write-Host @'
 --> Installing WinGet
-
 '@
+`$ProgressPreference = 'SilentlyContinue'
 Add-AppxPackage -Path '$($desktopAppInstaller.pathInSandbox)' -DependencyPath '$($vcLibsUwp.pathInSandbox)'
 
 Write-Host @'
-
 Tip: you can type 'Update-EnvironmentVariables' to update your environment variables, such as after installing a new software.
-
 '@
 
 
@@ -195,7 +193,9 @@ Write-Host @'
 '@
 winget settings --Enable LocalManifestFiles
 
-Write-Host @'`n
+Write-Host @'
+
+
 --> Installing the Manifest $manifestFileName
 
 '@
