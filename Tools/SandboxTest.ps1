@@ -169,8 +169,7 @@ function Get-ARPTable {
   $registry_paths = @('HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*','HKLM:\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*', 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*', 'HKCU:\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*')
   return Get-ItemProperty $registry_paths -ErrorAction SilentlyContinue | 
        Select-Object DisplayName, DisplayVersion, Publisher, @{N='ProductCode'; E={$_.PSChildName}} |
-       Where-Object {$null -ne $_.DisplayName } |
-       Where-Object {$null -ne $_.Publisher }
+       Where-Object {$null -ne $_.DisplayName }
 }
 '@
 
