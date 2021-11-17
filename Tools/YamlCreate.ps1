@@ -67,6 +67,24 @@ $ofs = ', '
     https://github.com/microsoft/winget-pkgs/blob/master/Tools/YamlCreate.ps1
 #>
 
+<# 
+----- TO DO  -----
+# Installer Properties -
+    # Dependencies
+        # - Windows Libraries
+        # - Winget Package Dependencies
+    # Release Date
+    # ARP Data
+        # - Display Name
+        # - Publisher
+        # - Display Version
+# Locale Properties -
+    # Release Notes
+    # Release Notes URL
+# Misc changes -
+    # Sort file extensions
+#>
+
 # Installs `powershell-yaml` as a dependency for parsing yaml content
 if (-not(Get-Module -ListAvailable -Name powershell-yaml)) {
     try {
