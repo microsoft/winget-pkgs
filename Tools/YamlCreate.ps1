@@ -1582,7 +1582,7 @@ Function Write-InstallerManifest {
         $InstallerManifest['Dependencies'] = Restore-YamlKeyOrder $InstallerManifest['Dependencies'] $InstallerDependencyProperties -NoComments
     }
     # Move Installer Level Keys to Manifest Level
-    $_KeysToMove = $InstallerEntryProperties | Where-Object { $_ -in $InstallerProperties }
+    $_KeysToMove = $InstallerEntryProperties | Where-Object { $_ -in $InstallerProperties  -and $_ -ne 'ProductCode'}
     foreach ($_Key in $_KeysToMove) {
         if ($_Key -in $InstallerManifest.Installers[0].Keys) {
             # Handle the switches specially
