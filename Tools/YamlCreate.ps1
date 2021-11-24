@@ -1697,7 +1697,7 @@ Function Write-LocaleManifest {
                 $script:OldLocaleManifest['ManifestVersion'] = $ManifestVersion
                 $script:OldLocaleManifest = Restore-YamlKeyOrder $script:OldLocaleManifest $LocaleProperties
 
-                $yamlServer = "# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.$ManifestVersion.schema.json"
+                $yamlServer = "# yaml-language-server: `$schema=https://aka.ms/winget-manifest.locale.$ManifestVersion.schema.json"
 
                 $ScriptHeader + "$(Get-DebugString)`n$yamlServer`n" > ($AppFolder + '\' + $DifLocale.Name)
                 ConvertTo-Yaml $OldLocaleManifest >> ($AppFolder + '\' + $DifLocale.Name)
