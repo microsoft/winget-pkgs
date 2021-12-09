@@ -38,7 +38,7 @@ if ($Settings) {
     exit
 }
 
-$ScriptHeader = '# Created with YamlCreate.ps1 v2.0.3'
+$ScriptHeader = '# Created with YamlCreate.ps1 v2.0.4'
 $ManifestVersion = '1.1.0'
 $PSDefaultParameterValues = @{ '*:Encoding' = 'UTF8' }
 $Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
@@ -2234,10 +2234,11 @@ if ($PromptSubmit -eq '0') {
     # Determine what type of update should be used as the prefix for the PR
     switch -regex ($Option) {
         'New|QuickUpdateVersion|Auto' {
-            if ( $script:OldManifestType -eq 'None' ) { $CommitType = 'New package' }
-            elseif ($script:LastVersion -lt $script:PackageVersion ) { $CommitType = 'New version' }
+            $AllVersions = (@($script:ExistingVersions) + @($PackageVersion)) | Sort-Object $ToNatural
+            if ($AllVersions.Count -eq '1') { $CommitType = 'New package' }
             elseif ($script:PackageVersion -in $script:ExistingVersions) { $CommitType = 'Update' }
-            elseif ($script:LastVersion -gt $script:PackageVersion ) { $CommitType = 'Add version' }
+            elseif (($AllVersions.IndexOf($PackageVersion) + 1) -eq $AllVersions.Count) { $CommitType = 'New version' }
+            elseif (($AllVersions.IndexOf($PackageVersion) + 1) -ne $AllVersions.Count) { $CommitType = 'Add version' }
         }
         'EditMetadata' { $CommitType = 'Metadata' }
         'NewLocale' { $CommitType = 'Locale' }
