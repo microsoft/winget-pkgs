@@ -38,7 +38,7 @@ if ($Settings) {
     exit
 }
 
-$ScriptHeader = '# Created with YamlCreate.ps1 v2.0.3'
+$ScriptHeader = '# Created with YamlCreate.ps1 v2.0.4'
 $ManifestVersion = '1.1.0'
 $PSDefaultParameterValues = @{ '*:Encoding' = 'UTF8' }
 $Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
@@ -106,6 +106,14 @@ filter TrimString {
 
 filter UniqueItems {
     [string]$($_.Split(',').Trim() | Select-Object -Unique)
+}
+
+filter ToLower {
+    [string]$_.ToLower()
+}
+
+filter NoWhitespace {
+    [string]$_ -replace '\s{1,}', '-'
 }
 
 $ToNatural = { [regex]::Replace($_, '\d+', { $args[0].Value.PadLeft(20) }) }
@@ -896,8 +904,8 @@ Function Read-InstallerMetadata {
     # Request File Extensions and validate
     do {
         if (!$FileExtensions) { $FileExtensions = '' }
-        else { $FileExtensions = $FileExtensions | UniqueItems }
-        $script:FileExtensions = Read-InstallerMetadataValue -Variable $FileExtensions -Key 'FileExtensions' -Prompt "[Optional] Enter any File Extensions the application could support. For example: html, htm, url (Max $($Patterns.MaxItemsFileExtensions))" | UniqueItems
+        else { $FileExtensions = $FileExtensions | ToLower | UniqueItems }
+        $script:FileExtensions = Read-InstallerMetadataValue -Variable $FileExtensions -Key 'FileExtensions' -Prompt "[Optional] Enter any File Extensions the application could support. For example: html, htm, url (Max $($Patterns.MaxItemsFileExtensions))" | ToLower | UniqueItems
 
         if (($script:FileExtensions -split ',').Count -le $Patterns.MaxItemsFileExtensions -and $($script:FileExtensions.Split(',').Trim() | Where-Object { Test-String -not $_ -MaxLength $Patterns.FileExtensionMaxLength -MatchPattern $Patterns.FileExtension -AllowNull }).Count -eq 0) {
             $script:_returnValue = [ReturnValue]::Success()
@@ -913,8 +921,8 @@ Function Read-InstallerMetadata {
     # Request Protocols and validate
     do {
         if (!$Protocols) { $Protocols = '' }
-        else { $Protocols = $Protocols | UniqueItems }
-        $script:Protocols = Read-InstallerMetadataValue -Variable $Protocols -Key 'Protocols' -Prompt "[Optional] Enter any Protocols the application provides a handler for. For example: http, https (Max $($Patterns.MaxItemsProtocols))" | UniqueItems
+        else { $Protocols = $Protocols | ToLower | UniqueItems }
+        $script:Protocols = Read-InstallerMetadataValue -Variable $Protocols -Key 'Protocols' -Prompt "[Optional] Enter any Protocols the application provides a handler for. For example: http, https (Max $($Patterns.MaxItemsProtocols))" | ToLower | UniqueItems
         if (($script:Protocols -split ',').Count -le $Patterns.MaxItemsProtocols) {
             $script:_returnValue = [ReturnValue]::Success()
         } else {
@@ -926,7 +934,7 @@ Function Read-InstallerMetadata {
     do {
         if (!$Commands) { $Commands = '' }
         else { $Commands = $Commands | UniqueItems }
-        $script:Commands = Read-InstallerMetadataValue -Variable $Commands -Key 'Commands' -Prompt "[Optional] Enter any Commands or aliases to run the application. For example: msedge (Max $($Patterns.MaxItemsCommands))" | UniqueItems
+        $script:Commands = Read-InstallerMetadataValue -Variable $Commands -Key 'Commands' -Prompt "[Optional] Enter any Commands or aliases to run the application. For example: msedge (Max $($Patterns.MaxItemsCommands))" | UniqueItems 
         if (($script:Commands -split ',').Count -le $Patterns.MaxItemsCommands) {
             $script:_returnValue = [ReturnValue]::Success()
         } else {
@@ -1038,7 +1046,7 @@ Function Read-LocaleMetadata {
             Write-Host -ForegroundColor 'Red' $script:_returnValue.ErrorString()
             Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the Moniker (friendly name/alias). For example: vscode'
             if (Test-String -not $script:Moniker -IsNull) { Write-Host -ForegroundColor 'DarkGray' "Old Variable: $script:Moniker" }
-            $NewMoniker = Read-Host -Prompt 'Moniker' | TrimString
+            $NewMoniker = Read-Host -Prompt 'Moniker' | ToLower | TrimString | NoWhitespace
             if (Test-String -not $NewMoniker -IsNull) { $script:Moniker = $NewMoniker }
 
             if (Test-String $script:Moniker -MaxLength $Patterns.MonikerMaxLength -AllowNull) {
@@ -1228,10 +1236,10 @@ Function Read-LocaleMetadata {
         Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter any tags that would be useful to discover this tool.'
         Write-Host -ForegroundColor 'Blue' -Object 'Example: zip, c++, photos, OBS (Max', ($Patterns.TagsMaxItems), 'items)'
         if (Test-String -not $script:Tags -IsNull) {
-            $script:Tags = $script:Tags | UniqueItems
+            $script:Tags = $script:Tags | ToLower | UniqueItems
             Write-Host -ForegroundColor 'DarkGray' "Old Variable: $script:Tags"
         }
-        $NewTags = Read-Host -Prompt 'Tags' | TrimString | UniqueItems
+        $NewTags = Read-Host -Prompt 'Tags' | TrimString | ToLower | UniqueItems 
         if (Test-String -not $NewTags -IsNull) { $script:Tags = $NewTags }
         if (($script:Tags -split ',').Count -le $Patterns.TagsMaxItems) {
             $script:_returnValue = [ReturnValue]::Success()
@@ -1615,6 +1623,12 @@ Function Write-InstallerManifest {
     foreach ($_Installer in $InstallerManifest.Installers) {
         if ($_Installer.Keys -contains 'InstallerSwitches') { $_Installer['InstallerSwitches'] = Restore-YamlKeyOrder $_Installer.InstallerSwitches $InstallerSwitchProperties -NoComments }
     }
+    
+    # Clean up the existing files just in case
+    if ($InstallerManifest['Commands']) { $InstallerManifest['Commands'] = @($InstallerManifest['Commands'] | UniqueItems | NoWhitespace | Sort-Object) }
+    if ($InstallerManifest['Protocols']) { $InstallerManifest['Protocols'] = @($InstallerManifest['Protocols'] | ToLower | UniqueItems | NoWhitespace | Sort-Object) }
+    if ($InstallerManifest['FileExtensions']) { $InstallerManifest['FileExtensions'] = @($InstallerManifest['FileExtensions'] | ToLower | UniqueItems | NoWhitespace | Sort-Object) }
+
     $InstallerManifest = Restore-YamlKeyOrder $InstallerManifest $InstallerProperties -NoComments
 
     # Create the folder for the file if it doesn't exist
@@ -1671,6 +1685,11 @@ Function Write-LocaleManifest {
     If (!$LocaleManifest.ManifestType) { $LocaleManifest['ManifestType'] = 'defaultLocale' }
     If ($Moniker -and $($LocaleManifest.ManifestType -eq 'defaultLocale')) { Add-YamlParameter -Object $LocaleManifest -Parameter 'Moniker' -Value $Moniker }
     Add-YamlParameter -Object $LocaleManifest -Parameter 'ManifestVersion' -Value $ManifestVersion
+
+    # Clean up the existing files just in case
+    if ($LocaleManifest['Tags']) { $LocaleManifest['Tags'] = @($LocaleManifest['Tags'] | ToLower | UniqueItems | NoWhitespace | Sort-Object) }
+    if ($LocaleManifest['Moniker']) { $LocaleManifest['Moniker'] = $LocaleManifest['Moniker'] | ToLower | NoWhitespace }
+
     $LocaleManifest = Restore-YamlKeyOrder $LocaleManifest $LocaleProperties
 
     # Create the folder for the file if it doesn't exist
@@ -1693,6 +1712,8 @@ Function Write-LocaleManifest {
                 $script:OldLocaleManifest['PackageVersion'] = $PackageVersion
                 if ($script:OldLocaleManifest.Keys -contains 'Moniker') { $script:OldLocaleManifest.Remove('Moniker') }
                 $script:OldLocaleManifest['ManifestVersion'] = $ManifestVersion
+                # Clean up the existing files just in case
+                if ($script:OldLocaleManifest['Tags']) { $script:OldLocaleManifest['Tags'] = @($script:OldLocaleManifest['Tags'] | ToLower | UniqueItems | NoWhitespace | Sort-Object) }
                 $script:OldLocaleManifest = Restore-YamlKeyOrder $script:OldLocaleManifest $LocaleProperties
 
                 $yamlServer = "# yaml-language-server: `$schema=https://aka.ms/winget-manifest.locale.$ManifestVersion.schema.json"
@@ -2234,10 +2255,11 @@ if ($PromptSubmit -eq '0') {
     # Determine what type of update should be used as the prefix for the PR
     switch -regex ($Option) {
         'New|QuickUpdateVersion|Auto' {
-            if ( $script:OldManifestType -eq 'None' ) { $CommitType = 'New package' }
-            elseif ($script:LastVersion -lt $script:PackageVersion ) { $CommitType = 'New version' }
+            $AllVersions = (@($script:ExistingVersions) + @($PackageVersion)) | Sort-Object $ToNatural
+            if ($AllVersions.Count -eq '1') { $CommitType = 'New package' }
             elseif ($script:PackageVersion -in $script:ExistingVersions) { $CommitType = 'Update' }
-            elseif ($script:LastVersion -gt $script:PackageVersion ) { $CommitType = 'Add version' }
+            elseif (($AllVersions.IndexOf($PackageVersion) + 1) -eq $AllVersions.Count) { $CommitType = 'New version' }
+            elseif (($AllVersions.IndexOf($PackageVersion) + 1) -ne $AllVersions.Count) { $CommitType = 'Add version' }
         }
         'EditMetadata' { $CommitType = 'Metadata' }
         'NewLocale' { $CommitType = 'Locale' }
