@@ -44,6 +44,8 @@ jobs:
       HOST_KEY: $(AzureFunctionHostKey)
       SIGN_ENDPOINT: $(AzFuncSignEndpoint)
       CLEANUP_ENDPOINT: $(AzFuncPublishCleanupEndpoint)
+      MANIFEST_PUBLISH_COMPLETION_ENDPOINT: $(AzFuncManifestPublishCompletionEndpoint)
+      WAIVER_COMMIT_ENDPOINT: $(AzFuncWaiverCommitEndpoint)
 
   - task: CmdLine@2
     displayName: 'Validate Commits'
@@ -132,17 +134,64 @@ jobs:
       WinGet:AppConfig:Secondary: $(AppConfigSecondary)
 
 # Agentless phase. Depends on previous job. 
-- job: 'Cleanup'
+- job: 'PostPublish'
   pool: server
   timeoutInMinutes: 1500
-  displayName: 'Clean up'
+  displayName: 'Post publish'
   dependsOn:
     - 'CommitProcessing'
     - 'Publish'
+  condition: and(succeeded(), ne(variables['Source.SkipPostPublish'], 'true'))
   variables:
     HostKeySecret: $[ dependencies.CommitProcessing.outputs['wingetsetup.hostkey']]
     CleanEndpointSecret: $[ dependencies.CommitProcessing.outputs['wingetsetup.cleanupEndpoint']]
+    ManifestPublishCompletionEndPoint: $[ dependencies.CommitProcessing.outputs['wingetsetup.manifestPublishCompletionEndPoint']]
+    WaiverCommitEndPoint: $[ dependencies.CommitProcessing.outputs['wingetsetup.waiverCommitEndPoint']]
   steps:
+
+  - task: AzureFunction@1
+    displayName: 'Waiver Commit'
+    inputs:
+      function: '$(WaiverCommitEndPoint)'
+      key: '$(HostKeySecret)'
+      body: |
+        {
+        "operationId": "$(Build.BuildNumber)",
+        "BuildId": "$(Build.BuildId)",
+        "PlanUrl": "$(system.CollectionUri)",
+        "HubName": "$(system.HostType)",
+        "pipelineType": "CommitPipeline",
+        "ProjectId": "$(system.TeamProjectId)",
+        "PlanId": "$(system.PlanId)", 
+        "JobId": "$(system.JobId)", 
+        "TimelineId": "$(system.TimelineId)", 
+        "TaskInstanceId": "$(system.TaskInstanceId)",
+        "AuthToken": "$(system.AccessToken)",
+        "BuildRepositoryId": "$(build.repository.id)"
+        }
+      waitForCompletion: "true"
+
+  - task: AzureFunction@1
+    displayName: 'Pull Request Notification'
+    inputs:
+      function: '$(ManifestPublishCompletionEndPoint)'
+      key: '$(HostKeySecret)'
+      body: |
+        {
+        "operationId": "$(Build.BuildNumber)",
+        "BuildId": "$(Build.BuildId)",
+        "PlanUrl": "$(system.CollectionUri)",
+        "HubName": "$(system.HostType)",
+        "pipelineType": "CommitPipeline",
+        "ProjectId": "$(system.TeamProjectId)",
+        "PlanId": "$(system.PlanId)", 
+        "JobId": "$(system.JobId)", 
+        "TimelineId": "$(system.TimelineId)", 
+        "TaskInstanceId": "$(system.TaskInstanceId)",
+        "AuthToken": "$(system.AccessToken)",
+        "BuildRepositoryId": "$(build.repository.id)"
+        }
+      waitForCompletion: "true"
 
   # Close issues.
   - task: AzureFunction@1
