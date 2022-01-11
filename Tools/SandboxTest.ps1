@@ -165,20 +165,23 @@ function Update-EnvironmentVariables {
   }
 }
 
-
+function Get-ARPTable {
+  $registry_paths = @('HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*','HKLM:\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*', 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*', 'HKCU:\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*')
+  return Get-ItemProperty $registry_paths -ErrorAction SilentlyContinue | 
+       Select-Object DisplayName, DisplayVersion, Publisher, @{N='ProductCode'; E={$_.PSChildName}} |
+       Where-Object {$null -ne $_.DisplayName }
+}
 '@
 
 $bootstrapPs1Content += @"
 Write-Host @'
 --> Installing WinGet
-
 '@
+`$ProgressPreference = 'SilentlyContinue'
 Add-AppxPackage -Path '$($desktopAppInstaller.pathInSandbox)' -DependencyPath '$($vcLibsUwp.pathInSandbox)'
 
 Write-Host @'
-
 Tip: you can type 'Update-EnvironmentVariables' to update your environment variables, such as after installing a new software.
-
 '@
 
 
@@ -194,8 +197,10 @@ Write-Host @'
 --> Configuring Winget
 '@
 winget settings --Enable LocalManifestFiles
+`$originalARP = Get-ARPTable
+Write-Host @'
 
-Write-Host @'`n
+
 --> Installing the Manifest $manifestFileName
 
 '@
@@ -207,6 +212,11 @@ Write-Host @'
 '@
 Update-EnvironmentVariables
 
+Write-Host @'
+
+--> Comparing ARP Entries
+'@
+(Compare-Object (Get-ARPTable) `$originalARP -Property DisplayName,DisplayVersion,Publisher,ProductCode)| Select-Object -Property * -ExcludeProperty SideIndicator | Format-Table
 
 "@
 }
@@ -275,6 +285,7 @@ if (-Not [String]::IsNullOrWhiteSpace($Manifest)) {
   Write-Host @"
     - Installing the Manifest $manifestFileName
     - Refreshing environment variables
+    - Comparing ARP Entries
 "@
 }
 
