@@ -1655,7 +1655,7 @@ Function Write-InstallerManifest {
 
     # Create the folder for the file if it doesn't exist
     New-Item -ItemType 'Directory' -Force -Path $AppFolder | Out-Null
-    $InstallerManifestPath = $AppFolder + "\$PackageIdentifier" + '.installer' + '.yaml'
+    $script:InstallerManifestPath = $AppFolder + "\$PackageIdentifier" + '.installer' + '.yaml'
 
     # Write the manifest to the file
     $ScriptHeader + "$(Get-DebugString)`n# yaml-language-server: `$schema=https://aka.ms/winget-manifest.installer.$ManifestVersion.schema.json`n" > $InstallerManifestPath
@@ -2303,8 +2303,10 @@ if ($PromptSubmit -eq '0') {
     git switch -d upstream/master
     if ($LASTEXITCODE -eq '0') {
         # Make sure path exists and is valid before hashing
-        if ($script:LocaleManifestPath -and (Test-Path -Path $script:LocaleManifestPath)) { $UniqueBranchID = $(Get-FileHash $script:LocaleManifestPath).Hash[0..6] -Join '' }
-        else { $UniqueBranchID = 'DEL' }
+        $UniqueBranchID = ''
+        if ($script:LocaleManifestPath -and (Test-Path -Path $script:LocaleManifestPath)) { $UniqueBranchID = $UniqueBranchID + $($(Get-FileHash $script:LocaleManifestPath).Hash[0..6] -Join '') }
+        if ($script:InstallerManifestPath -and (Test-Path -Path $script:InstallerManifestPath)) { $UniqueBranchID = $UniqueBranchID + $($(Get-FileHash $script:InstallerManifestPath).Hash[0..6] -Join '') }
+        if (Test-String -IsNull $UniqueBranchID) { $UniqueBranchID = 'DEL' }
         $BranchName = "$PackageIdentifier-$PackageVersion-$UniqueBranchID"
         # Git branch names cannot start with `.` cannot contain any of {`..`, `\`, `~`, `^`, `:`, ` `, `?`, `@{`, `[`}, and cannot end with {`/`, `.lock`, `.`}
         $BranchName = $BranchName -replace '[\~,\^,\:,\\,\?,\@\{,\*,\[,\s]{1,}|[.lock|/|\.]*$|^\.{1,}|\.\.', ''
