@@ -54,7 +54,7 @@ if ($Settings) {
     exit
 }
 
-$ScriptHeader = '# Created with YamlCreate.ps1 v2.0.4'
+$ScriptHeader = '# Created with YamlCreate.ps1 v2.0.5'
 $ManifestVersion = '1.1.0'
 $PSDefaultParameterValues = @{ '*:Encoding' = 'UTF8' }
 $Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
@@ -81,24 +81,6 @@ $ofs = ', '
     https://github.com/microsoft/winget-pkgs/issues/
 .LINK
     https://github.com/microsoft/winget-pkgs/blob/master/Tools/YamlCreate.ps1
-#>
-
-<# 
------ TO DO  -----
-# Installer Properties -
-    # Dependencies
-        # - Windows Libraries
-        # - Winget Package Dependencies
-    # Release Date
-    # ARP Data
-        # - Display Name
-        # - Publisher
-        # - Display Version
-# Locale Properties -
-    # Release Notes
-    # Release Notes URL
-# Misc changes -
-    # Sort file extensions
 #>
 
 # Fetch Schema data from github for entry validation, key ordering, and automatic commenting
