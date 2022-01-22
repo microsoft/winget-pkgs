@@ -162,6 +162,8 @@ $Patterns = @{
     ValidInstallModes         = $InstallerSchema.definitions.InstallModes.items.enum
     FileExtension             = $InstallerSchema.definitions.FileExtensions.items.pattern
     FileExtensionMaxLength    = $InstallerSchema.definitions.FileExtensions.items.maxLength
+    ReleaseNotesMinLength     = $LocaleSchema.properties.ReleaseNotes.MinLength
+    ReleaseNotesMaxLength     = $LocaleSchema.properties.ReleaseNotes.MaxLength
 }
 
 # This function validates whether a string matches Minimum Length, Maximum Length, and Regex pattern
@@ -701,6 +703,26 @@ Function Read-InstallerEntry {
         'U' { $_Installer['UpgradeBehavior'] = 'uninstallPrevious' }
         default { $_Installer['UpgradeBehavior'] = 'install' }
     }
+    Write-Host
+
+    # Request release date
+    $script:ReleaseDatePrompted = $true
+    do {
+        Write-Host -ForegroundColor 'Red' $script:_returnValue.ErrorString()
+        Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the application release date. Example: 2021-11-17'
+        Read-Host -Prompt 'ReleaseDate' -OutVariable ReleaseDate | Out-Null
+        try {
+            Get-Date([datetime]$($ReleaseDate | TrimString)) -f 'yyyy-MM-dd' -OutVariable _ValidDate | Out-Null
+            if ($_ValidDate) { $_Installer['ReleaseDate'] = $_ValidDate | TrimString }
+            $script:_returnValue = [ReturnValue]::Success()
+        } catch {
+            if (Test-String $ReleaseDate -IsNull) {
+                $script:_returnValue = [ReturnValue]::Success()
+            } else {
+                $script:_returnValue = [ReturnValue]::new(400, 'Invalid Date', 'Input could not be resolved to a date', 2)
+            }
+        }
+    } until ($script:_returnValue.StatusCode -eq [ReturnValue]::Success().StatusCode)
 
     if ($script:SaveOption -eq '1' -and (Test-Path -Path $script:dest)) { Remove-Item -Path $script:dest }
 
@@ -792,7 +814,7 @@ Function Read-QuickInstallerEntry {
                 }
                 if (Test-String -not $MSIProductCode -IsNull) {
                     $_NewInstaller['ProductCode'] = $MSIProductCode
-                } elseif ( ($_NewInstaller.Keys -contains 'ProductCode') -and ($_NewInstaller.InstallerType -in @('appx';'msi';'msix';'appxbundle';'msixbundle'))) {
+                } elseif ( ($_NewInstaller.Keys -contains 'ProductCode') -and ($_NewInstaller.InstallerType -in @('appx'; 'msi'; 'msix'; 'appxbundle'; 'msixbundle'))) {
                     $_NewInstaller.Remove('ProductCode')
                 }
                 # If the installer is msix or appx, try getting the new SignatureSha256
@@ -1283,6 +1305,36 @@ Function Read-LocaleMetadata {
             $script:_returnValue = [ReturnValue]::LengthError($Patterns.DescriptionMinLength, $Patterns.DescriptionMaxLength)
         }
     } until ($script:_returnValue.StatusCode -eq [ReturnValue]::Success().StatusCode)
+
+    # Request ReleaseNotes and Validate
+    do {
+        Write-Host -ForegroundColor 'Red' $script:_returnValue.ErrorString()
+        Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter release notes for this version of the package.'
+        $script:ReleaseNotes = Read-Host -Prompt 'ReleaseNotes' | TrimString
+        if (Test-String $script:ReleaseNotes -MinLength $Patterns.ReleaseNotesMinLength -MaxLength $Patterns.ReleaseNotesMaxLength -AllowNull) {
+            $script:_returnValue = [ReturnValue]::Success()
+        } else {
+            $script:_returnValue = [ReturnValue]::LengthError($Patterns.ReleaseNotesMinLength, $Patterns.ReleaseNotesMaxLength)
+        }
+    } until ($script:_returnValue.StatusCode -eq [ReturnValue]::Success().StatusCode)
+
+    # Request ReleaseNotes URL and Validate
+    do {
+        Write-Host -ForegroundColor 'Red' $script:_returnValue.ErrorString()
+        Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the release notes URL for this version of the package.'
+        $script:ReleaseNotesUrl = Read-Host -Prompt 'ReleaseNotesUrl' | TrimString
+        if (Test-String $script:ReleaseNotesUrl -MaxLength $Patterns.GenericUrlMaxLength -MatchPattern $Patterns.GenericUrl -AllowNull) {
+            $script:_returnValue = [ReturnValue]::Success()
+        } else {
+            if (Test-String -not $script:ReleaseNotesUrl -MaxLength $Patterns.GenericUrlMaxLength -AllowNull) {
+                $script:_returnValue = [ReturnValue]::LengthError(1, $Patterns.GenericUrlMaxLength)
+            } elseif (Test-String -not $script:ReleaseNotesUrl -MatchPattern $Patterns.GenericUrl) {
+                $script:_returnValue = [ReturnValue]::PatternError()
+            } else {
+                $script:_returnValue = [ReturnValue]::GenericError()
+            }
+        }
+    } until ($script:_returnValue.StatusCode -eq [ReturnValue]::Success().StatusCode)
 }
 
 # Requests the user to answer the prompts found in the winget-pkgs pull request template
@@ -1568,6 +1620,10 @@ Function Write-InstallerManifest {
         $InstallerManifest['Installers'] = $script:OldVersionManifest['Installers']
     }
 
+    foreach ($_Installer in $InstallerManifest.Installers){
+        if ($_Installer['ReleaseDate'] -and !$script:ReleaseDatePrompted) { $_Installer.Remove('ReleaseDate') }
+    }
+
     Add-YamlParameter -Object $InstallerManifest -Parameter 'ManifestType' -Value 'installer'
     Add-YamlParameter -Object $InstallerManifest -Parameter 'ManifestVersion' -Value $ManifestVersion
     If ($InstallerManifest['Dependencies']) {
@@ -1677,6 +1733,8 @@ Function Write-LocaleManifest {
         'CopyrightUrl'        = $CopyrightUrl
         'ShortDescription'    = $ShortDescription
         'Description'         = $Description
+        'ReleaseNotes'        = $ReleaseNotes
+        'ReleaseNotesUrl'     = $ReleaseNotesUrl
     }
     foreach ($_Item in $_Singletons.GetEnumerator()) {
         If ($_Item.Value) { Add-YamlParameter -Object $LocaleManifest -Parameter $_Item.Name -Value $_Item.Value }
@@ -1690,6 +1748,10 @@ Function Write-LocaleManifest {
     # Clean up the existing files just in case
     if ($LocaleManifest['Tags']) { $LocaleManifest['Tags'] = @($LocaleManifest['Tags'] | ToLower | UniqueItems | NoWhitespace | Sort-Object) }
     if ($LocaleManifest['Moniker']) { $LocaleManifest['Moniker'] = $LocaleManifest['Moniker'] | ToLower | NoWhitespace }
+
+    # Clean up the volatile fields
+    if ($LocaleManifest['ReleaseNotes'] -and (Test-String $script:ReleaseNotes -IsNull)) { $LocaleManifest.Remove('ReleaseNotes') }
+    if ($LocaleManifest['ReleaseNotesUrl'] -and (Test-String $script:ReleaseNotes -IsNull)) { $LocaleManifest.Remove('ReleaseNotesUrl') }
 
     $LocaleManifest = Restore-YamlKeyOrder $LocaleManifest $LocaleProperties
 
@@ -1718,6 +1780,11 @@ Function Write-LocaleManifest {
                 $script:OldLocaleManifest['ManifestVersion'] = $ManifestVersion
                 # Clean up the existing files just in case
                 if ($script:OldLocaleManifest['Tags']) { $script:OldLocaleManifest['Tags'] = @($script:OldLocaleManifest['Tags'] | ToLower | UniqueItems | NoWhitespace | Sort-Object) }
+
+                # Clean up the volatile fields
+                if ($OldLocaleManifest['ReleaseNotes'] -and (Test-String $script:ReleaseNotes -IsNull)) { $OldLocaleManifest.Remove('ReleaseNotes') }
+                if ($OldLocaleManifest['ReleaseNotesUrl'] -and (Test-String $script:ReleaseNotes -IsNull)) { $OldLocaleManifest.Remove('ReleaseNotesUrl') }
+
                 $script:OldLocaleManifest = Restore-YamlKeyOrder $script:OldLocaleManifest $LocaleProperties
 
                 $yamlServer = "# yaml-language-server: `$schema=https://aka.ms/winget-manifest.locale.$ManifestVersion.schema.json"
@@ -2151,7 +2218,7 @@ Switch ($script:Option) {
                 }
                 if (Test-String -not $MSIProductCode -IsNull) {
                     $_Installer['ProductCode'] = $MSIProductCode
-                } elseif ( ($_Installer.Keys -contains 'ProductCode') -and ($_Installer.InstallerType -in @('appx';'msi';'msix';'appxbundle';'msixbundle'))) {
+                } elseif ( ($_Installer.Keys -contains 'ProductCode') -and ($_Installer.InstallerType -in @('appx'; 'msi'; 'msix'; 'appxbundle'; 'msixbundle'))) {
                     $_Installer.Remove('ProductCode')
                 }
                 # If the installer is msix or appx, try getting the new SignatureSha256
