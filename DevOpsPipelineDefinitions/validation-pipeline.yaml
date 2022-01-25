@@ -50,7 +50,6 @@ jobs:
       CLEANUP_ENDPOINT: $(AzFuncCleanupEndpoint)
       LABEL_KEY: $(AzureFunctionLabelKey)
       CATALOG_CONTENT_VERIFICATION_ENDPOINT: $(AzFuncCatalogContentVerificationEndpoint)
-      DEPENDENCIES_VERIFICATION_ENDPOINT: $(AzFuncDependenciesVerificationEndpoint)
 
   # Validates integrity of pull request.
   - task: CmdLine@2
@@ -77,6 +76,20 @@ jobs:
     condition: succeeded()
     env:
       ValidationConnectionString: $(ValidationStorageAccountConnectionString)
+      DIApplicationInsightKey: $(DIApplicationInsightKey)
+      WinGet:AppConfig:Primary: $(AppConfigPrimary)
+      WinGet:AppConfig:Secondary: $(AppConfigSecondary)
+
+  # Validates manifest dependencies.
+  - task: CmdLine@2
+    displayName: 'Validate Manifest Dependencies'
+    inputs:
+      script: 'WinGetSvcWrapper.exe validate-dependencies --operationId %BUILD_BUILDNUMBER%'
+      failOnStderr: true
+    condition: succeeded()
+    env:
+      ValidationConnectionString: $(ValidationStorageAccountConnectionString)
+      CacheConnectionString: $(CacheStorageAccountConnectionString)
       DIApplicationInsightKey: $(DIApplicationInsightKey)
       WinGet:AppConfig:Primary: $(AppConfigPrimary)
       WinGet:AppConfig:Secondary: $(AppConfigSecondary)
@@ -226,7 +239,6 @@ jobs:
   variables:
     HostKeySecret: $[ dependencies.FileValidation.outputs['wingetsetup.hostkey']]
     CatalogContentVerificationEndpointSecret: $[ dependencies.FileValidation.outputs['wingetsetup.catalogContentVerificationEndpoint']]
-    DependenciesVerificationEndpointSecret: $[ dependencies.FileValidation.outputs['wingetsetup.dependenciesVerificationEndpoint']]
   steps:
 
   # Catalog content verification
