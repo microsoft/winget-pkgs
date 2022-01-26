@@ -294,6 +294,7 @@ Function Test-Url {
     )
     try {
         $HTTP_Request = [System.Net.WebRequest]::Create($URL)
+        $HTTP_Request.UserAgent = "Microsoft-Delivery-Optimization/10.1"
         $HTTP_Response = $HTTP_Request.GetResponse()
         $HTTP_Status = [int]$HTTP_Response.StatusCode
     } catch {
@@ -358,6 +359,7 @@ Function Get-InstallerFile {
 
     # Create a new web client for downloading the file
     $_WebClient = [System.Net.WebClient]::new()
+    $_WebClient.Headers.Add("User-Agent", "Microsoft-Delivery-Optimization/10.1")
     # If the system has a default proxy set, use it
     # Powershell Core will automatically use this, so it's only necessary for PS5
     if ($PSVersionTable.PSVersion.Major -lt 6) { $_WebClient.Proxy = [System.Net.WebProxy]::GetDefaultProxy() }
