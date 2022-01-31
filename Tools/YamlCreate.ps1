@@ -1,5 +1,5 @@
 #Requires -Version 5
-[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingWriteHost', '', Justification='This script is not intended to have any outputs piped')]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingWriteHost', '', Justification = 'This script is not intended to have any outputs piped')]
 
 Param
 (
@@ -23,6 +23,22 @@ if ($help) {
     exit
 }
 
+# Installs `powershell-yaml` as a dependency for parsing yaml content
+if (-not(Get-Module -ListAvailable -Name powershell-yaml)) {
+    try {
+        Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force
+        Install-Module -Name powershell-yaml -Force -Repository PSGallery -Scope CurrentUser
+    } catch {
+        # If there was an exception while installing powershell-yaml, pass it as an InternalException for further debugging
+        throw [UnmetDependencyException]::new("'powershell-yaml' unable to be installed successfully", $_.Exception)
+    } finally {
+        # Double check that it was installed properly
+        if (-not(Get-Module -ListAvailable -Name powershell-yaml)) {
+            throw [UnmetDependencyException]::new("'powershell-yaml' is not found")
+        }
+    }
+}
+
 # Set settings directory on basis of Operating System
 $script:SettingsPath = Join-Path $(if ([System.Environment]::OSVersion.Platform -match 'Win') { $env:LOCALAPPDATA } else { $env:HOME + '/.config' } ) -ChildPath 'YamlCreate'
 # Check for settings directory and create it if none exists
@@ -38,8 +54,8 @@ if ($Settings) {
     exit
 }
 
-$ScriptHeader = '# Created with YamlCreate.ps1 v2.0.0'
-$ManifestVersion = '1.0.0'
+$ScriptHeader = '# Created with YamlCreate.ps1 v2.0.6'
+$ManifestVersion = '1.1.0'
 $PSDefaultParameterValues = @{ '*:Encoding' = 'UTF8' }
 $Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
 $ofs = ', '
@@ -67,30 +83,14 @@ $ofs = ', '
     https://github.com/microsoft/winget-pkgs/blob/master/Tools/YamlCreate.ps1
 #>
 
-# Installs `powershell-yaml` as a dependency for parsing yaml content
-if (-not(Get-Module -ListAvailable -Name powershell-yaml)) {
-    try {
-        Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force
-        Install-Module -Name powershell-yaml -Force -Repository PSGallery -Scope CurrentUser
-    } catch {
-        # If there was an exception while installing powershell-yaml, pass it as an InternalException for further debugging
-        throw [UnmetDependencyException]::new("'powershell-yaml' unable to be installed successfully", $_.Exception)
-    } finally {
-        # Double check that it was installed properly
-        if (-not(Get-Module -ListAvailable -Name powershell-yaml)) {
-            throw [UnmetDependencyException]::new("'powershell-yaml' is not found")
-        }
-    }
-}
-
 # Fetch Schema data from github for entry validation, key ordering, and automatic commenting
 try {
     $ProgressPreference = 'SilentlyContinue'
-    $LocaleSchema = @(Invoke-WebRequest 'https://raw.githubusercontent.com/microsoft/winget-cli/master/schemas/JSON/manifests/v1.0.0/manifest.defaultLocale.1.0.0.json' -UseBasicParsing | ConvertFrom-Json)
+    $LocaleSchema = @(Invoke-WebRequest "https://raw.githubusercontent.com/microsoft/winget-cli/master/schemas/JSON/manifests/v$ManifestVersion/manifest.defaultLocale.$ManifestVersion.json" -UseBasicParsing | ConvertFrom-Json)
     $LocaleProperties = (ConvertTo-Yaml $LocaleSchema.properties | ConvertFrom-Yaml -Ordered).Keys
-    $VersionSchema = @(Invoke-WebRequest 'https://raw.githubusercontent.com/microsoft/winget-cli/master/schemas/JSON/manifests/v1.0.0/manifest.version.1.0.0.json' -UseBasicParsing | ConvertFrom-Json)
+    $VersionSchema = @(Invoke-WebRequest "https://raw.githubusercontent.com/microsoft/winget-cli/master/schemas/JSON/manifests/v$ManifestVersion/manifest.version.$ManifestVersion.json" -UseBasicParsing | ConvertFrom-Json)
     $VersionProperties = (ConvertTo-Yaml $VersionSchema.properties | ConvertFrom-Yaml -Ordered).Keys
-    $InstallerSchema = @(Invoke-WebRequest 'https://raw.githubusercontent.com/microsoft/winget-cli/master/schemas/JSON/manifests/v1.0.0/manifest.installer.1.0.0.json' -UseBasicParsing | ConvertFrom-Json)
+    $InstallerSchema = @(Invoke-WebRequest "https://raw.githubusercontent.com/microsoft/winget-cli/master/schemas/JSON/manifests/v$ManifestVersion/manifest.installer.$ManifestVersion.json" -UseBasicParsing | ConvertFrom-Json)
     $InstallerProperties = (ConvertTo-Yaml $InstallerSchema.properties | ConvertFrom-Yaml -Ordered).Keys
     $InstallerSwitchProperties = (ConvertTo-Yaml $InstallerSchema.definitions.InstallerSwitches.properties | ConvertFrom-Yaml -Ordered).Keys
     $InstallerEntryProperties = (ConvertTo-Yaml $InstallerSchema.definitions.Installer.properties | ConvertFrom-Yaml -Ordered).Keys
@@ -106,6 +106,14 @@ filter TrimString {
 
 filter UniqueItems {
     [string]$($_.Split(',').Trim() | Select-Object -Unique)
+}
+
+filter ToLower {
+    [string]$_.ToLower()
+}
+
+filter NoWhitespace {
+    [string]$_ -replace '\s{1,}', '-'
 }
 
 $ToNatural = { [regex]::Replace($_, '\d+', { $args[0].Value.PadLeft(20) }) }
@@ -154,6 +162,8 @@ $Patterns = @{
     ValidInstallModes         = $InstallerSchema.definitions.InstallModes.items.enum
     FileExtension             = $InstallerSchema.definitions.FileExtensions.items.pattern
     FileExtensionMaxLength    = $InstallerSchema.definitions.FileExtensions.items.maxLength
+    ReleaseNotesMinLength     = $LocaleSchema.properties.ReleaseNotes.MinLength
+    ReleaseNotesMaxLength     = $LocaleSchema.properties.ReleaseNotes.MaxLength
 }
 
 # This function validates whether a string matches Minimum Length, Maximum Length, and Regex pattern
@@ -187,13 +197,13 @@ Function Test-String {
     if ($PSBoundParameters.ContainsKey('MatchPattern')) {
         $_isValid = $_isValid -and ($InputString -match $MatchPattern)
     }
-    if ($AllowNull -and [string]::IsNullOrEmpty($InputString)) {
+    if ($AllowNull -and [string]::IsNullOrWhiteSpace($InputString)) {
         $_isValid = $true
-    } elseif ($NotNull -and [string]::IsNullOrEmpty($InputString)) {
+    } elseif ($NotNull -and [string]::IsNullOrWhiteSpace($InputString)) {
         $_isValid = $false
     }
     if ($IsNull) {
-        $_isValid = [string]::IsNullOrEmpty($InputString)
+        $_isValid = [string]::IsNullOrWhiteSpace($InputString)
     }
 
     if ($Not) {
@@ -284,6 +294,7 @@ Function Test-Url {
     )
     try {
         $HTTP_Request = [System.Net.WebRequest]::Create($URL)
+        $HTTP_Request.UserAgent = "Microsoft-Delivery-Optimization/10.1"
         $HTTP_Response = $HTTP_Request.GetResponse()
         $HTTP_Status = [int]$HTTP_Response.StatusCode
     } catch {
@@ -343,52 +354,98 @@ Function Get-InstallerFile {
     )
     # Create a filename based on the Package Identifier and Version; Try to get the extension from the URL
     # If the extension isn't found, use a custom one
-    $Filename = "$PackageIdentifier v$PackageVersion" + $(if([System.IO.Path]::HasExtension($URI)) { [System.IO.Path]::GetExtension($URI) } else { '.winget-tmp' })
-    $script:dest = Join-Path -Path $env:TEMP -ChildPath $Filename
+    $_Filename = "$PackageIdentifier v$PackageVersion - $(Get-Date -f 'yyyy.MM.dd-hh.mm.ss')" + $(if ([System.IO.Path]::HasExtension($URI)) { [System.IO.Path]::GetExtension($URI) } else { '.winget-tmp' })
+    $_OutFile = Join-Path -Path $env:TEMP -ChildPath $_Filename
 
     # Create a new web client for downloading the file
-    $WebClient = [System.Net.WebClient]::new()
+    $_WebClient = [System.Net.WebClient]::new()
+    $_WebClient.Headers.Add("User-Agent", "Microsoft-Delivery-Optimization/10.1")
     # If the system has a default proxy set, use it
     # Powershell Core will automatically use this, so it's only necessary for PS5
-    if ($PSVersionTable.PSVersion.Major -lt 6){ $WebClient.Proxy = [System.Net.WebProxy]::GetDefaultProxy() }
+    if ($PSVersionTable.PSVersion.Major -lt 6) { $_WebClient.Proxy = [System.Net.WebProxy]::GetDefaultProxy() }
     # Download the file
-    $WebClient.DownloadFile($URI, $dest)
+    $_WebClient.DownloadFile($URI, $_OutFile)
     # Dispose of the web client to release the resources it uses
-    $WebClient.Dispose()
+    $_WebClient.Dispose()
+
+    return $_OutFile
 }
 
-# Prompts the user to enter installer values
-# Sets the $script:Installers value as an output
-# Returns void
-Function Read-InstallerEntry {
-    # Clear prompted variables to ensure data from previous installer entries is not used for new entries
-    $InstallerValues = @(
-        'Architecture'
-        'InstallerType'
-        'InstallerUrl'
-        'InstallerSha256'
-        'SignatureSha256'
-        'PackageFamilyName'
-        'Custom'
-        'Silent'
-        'SilentWithProgress'
-        'ProductCode'
-        'Scope'
-        'InstallerLocale'
-        'UpgradeBehavior'
-        'AnotherInstaller'
+Function Get-MSIProperty {
+    Param
+    (
+        [Parameter(Mandatory = $true)]
+        [string] $MSIPath,
+        [Parameter(Mandatory = $true)]
+        [string] $Parameter
     )
-    Foreach ($InstallerValue in $InstallerValues) { Clear-Variable -Name $InstallerValue -Force -ErrorAction SilentlyContinue }
+    try {
+        $windowsInstaller = New-Object -com WindowsInstaller.Installer
+        $database = $windowsInstaller.GetType().InvokeMember('OpenDatabase', 'InvokeMethod', $null, $windowsInstaller, @($MSIPath, 0))
+        $view = $database.GetType().InvokeMember('OpenView', 'InvokeMethod', $null, $database, ("SELECT Value FROM Property WHERE Property = '$Parameter'"))
+        $view.GetType().InvokeMember('Execute', 'InvokeMethod', $null, $view, $null)
+        $record = $view.GetType().InvokeMember('Fetch', 'InvokeMethod', $null, $view, $null)
+        $outputObject = $($record.GetType().InvokeMember('StringData', 'GetProperty', $null, $record, 1))
+        $view.GetType().InvokeMember('Close', 'InvokeMethod', $null, $view, $null)
+        [System.Runtime.InteropServices.Marshal]::FinalReleaseComObject($view)
+        [System.Runtime.InteropServices.Marshal]::FinalReleaseComObject($database)
+        [System.Runtime.InteropServices.Marshal]::FinalReleaseComObject($windowsInstaller)
+        [System.GC]::Collect()
+        [System.GC]::WaitForPendingFinalizers()
+        return $outputObject
+    } catch {
+        Write-Error -Message $_.ToString()
+        break
+    }
+}
 
-    # Request user enter Installer URL
-    $InstallerUrl = Request-InstallerUrl
+Function Get-ItemMetadata {
+    Param
+    (
+        [Parameter(Mandatory = $true)]
+        [string] $FilePath
+    )
+    try {
+        $MetaDataObject = [ordered] @{}
+        $FileInformation = (Get-Item $FilePath)
+        $ShellApplication = New-Object -ComObject Shell.Application
+        $ShellFolder = $ShellApplication.Namespace($FileInformation.Directory.FullName)
+        $ShellFile = $ShellFolder.ParseName($FileInformation.Name)
+        $MetaDataProperties = [ordered] @{}
+        0..400 | ForEach-Object -Process {
+            $DataValue = $ShellFolder.GetDetailsOf($null, $_)
+            $PropertyValue = (Get-Culture).TextInfo.ToTitleCase($DataValue.Trim()).Replace(' ', '')
+            if ($PropertyValue -ne '') {
+                $MetaDataProperties["$_"] = $PropertyValue
+            }
+        }
+        foreach ($Key in $MetaDataProperties.Keys) {
+            $Property = $MetaDataProperties[$Key]
+            $Value = $ShellFolder.GetDetailsOf($ShellFile, [int] $Key)
+            if ($Property -in 'Attributes', 'Folder', 'Type', 'SpaceFree', 'TotalSize', 'SpaceUsed') {
+                continue
+            }
+            If (($null -ne $Value) -and ($Value -ne '')) {
+                $MetaDataObject["$Property"] = $Value
+            }
+        }
+        [void][System.Runtime.InteropServices.Marshal]::FinalReleaseComObject($ShellFile)
+        [void][System.Runtime.InteropServices.Marshal]::FinalReleaseComObject($ShellFolder)
+        [void][System.Runtime.InteropServices.Marshal]::FinalReleaseComObject($ShellApplication)
+        [System.GC]::Collect()
+        [System.GC]::WaitForPendingFinalizers()
+        return $MetaDataObject
+    } catch {
+        Write-Error -Message $_.ToString()
+        break
+    }
+}
 
-    # Get or request Installer Sha256
-    # Check the settings to see if we need to display this menu
+Function Get-UserSavePreference {
     switch ($ScriptSettings.SaveToTemporaryFolder) {
-        'always' { $script:SaveOption = '0' }
-        'never' { $script:SaveOption = '1' }
-        'manual' { $script:SaveOption = '2' }
+        'always' { $_Preference = '0' }
+        'never' { $_Preference = '1' }
+        'manual' { $_Preference = '2' }
         default {
             $_menu = @{
                 entries       = @('[Y] Yes'; '*[N] No'; '[M] Manually Enter SHA256')
@@ -396,83 +453,139 @@ Function Read-InstallerEntry {
                 DefaultString = 'N'
             }
             switch ( Invoke-KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString']) {
-                'Y' { $script:SaveOption = '0' }
-                'N' { $script:SaveOption = '1' }
-                'M' { $script:SaveOption = '2' }
-                default { $script:SaveOption = '1' }
+                'Y' { $_Preference = '0' }
+                'N' { $_Preference = '1' }
+                'M' { $_Preference = '2' }
+                default { $_Preference = '1' }
             }
         }
     }
+    return $_Preference
+}
 
-    # If user did not select manual entry for Sha256, download file and calculate hash
-    # Also attempt to detect installer type and architecture
-    if ($script:SaveOption -ne '2') {
-        Write-Host
-        $start_time = Get-Date
-        Write-Host $NewLine
-        Write-Host 'Downloading URL. This will take a while...' -ForegroundColor Blue
-        try {
-            Get-InstallerFile -URI $InstallerUrl -PackageIdentifier $PackageIdentifier -PackageVersion $PackageVersion
-        } catch {
-            # Here we also want to pass any exceptions through for potential debugging
-            throw [System.Net.WebException]::new('The file could not be downloaded. Try running the script again', $_.Exception)
-        } finally {
-            Write-Host "Time taken: $((Get-Date).Subtract($start_time).Seconds) second(s)" -ForegroundColor Green
+Function Get-PathInstallerType {
+    Param
+    (
+        [Parameter(Mandatory = $true, Position = 0)]
+        [string] $Path
+    )
 
-            $InstallerSha256 = (Get-FileHash -Path $script:dest -Algorithm SHA256).Hash
-
-            if ($script:dest -match '\.msix(bundle){0,1}$') { $InstallerType = 'msix' }
-            elseif ($script:dest -match '\.msi$') { $InstallerType = 'msi' }
-            elseif ($script:dest -match '\.appx(bundle){0,1}$') { $InstallerType = 'appx' }
-            elseif ($script:dest -match '\.zip$') { $InstallerType = 'zip' }
-
-            if ($InstallerUrl -match '\b(x|win){0,1}64\b') { $architecture = 'x64' }
-            elseif ($InstallerUrl -match '\b((win|ia)32)|(x{0,1}86)\b') { $architecture = 'x86' }
-            elseif ($InstallerUrl -match '\b(arm|aarch)64\b') { $architecture = 'arm64' }
-            elseif ($InstallerUrl -match '\barm\b') { $architecture = 'arm' }
-
-            $MSIProductCode = $(Get-AppLockerFileInformation -Path $script:dest | Select-Object Publisher | Select-String -Pattern '{[A-Z0-9]{8}-([A-Z0-9]{4}-){3}[A-Z0-9]{12}}').Matches
-
-            if ($script:SaveOption -eq '1' -and -not($script:dest -match '\.(msix|appx)(bundle){0,1}$')) { Remove-Item -Path $script:dest }
+    if ($Path -match '\.msix(bundle){0,1}$') { return 'msix' }
+    if ($Path -match '\.msi$') {
+        $ObjectMetadata = Get-ItemMetadata $Path
+        if ($ObjectMetadata.Keys -contains 'ProgramName') {
+            if ($ObjectMetadata.ProgramName -ne 'Windows Installer') { return 'wix' }
         }
+        return 'msi' 
     }
-    # Manual Entry of Sha256 with validation
-    else {
-        Write-Host
-        do {
-            Write-Host -ForegroundColor 'Red' $script:_returnValue.ErrorString()
-            Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the installer SHA256 Hash'
-            $InstallerSha256 = Read-Host -Prompt 'InstallerSha256' | TrimString
-            $InstallerSHA256 = $InstallerSha256.toUpper()
-            if ($InstallerSha256 -match $Patterns.InstallerSha256) {
-                $script:_returnValue = [ReturnValue]::Success()
-            } else {
-                $script:_returnValue = [ReturnValue]::PatternError()
+    if ($Path -match '\.appx(bundle){0,1}$') { return 'appx' }
+    if ($Path -match '\.zip$') { return 'zip' }
+    return $null
+}
+
+Function Get-UriArchitecture {
+    Param
+    (
+        [Parameter(Mandatory = $true, Position = 0)]
+        [string] $URI
+    )
+
+    if ($URI -match '\b(x|win){0,1}64\b') { return 'x64' }
+    if ($URI -match '\b((win|ia)32)|(x{0,1}86)\b') { return 'x86' }
+    if ($URI -match '\b(arm|aarch)64\b') { return 'arm64' }
+    if ($URI -match '\barm\b') { return 'arm' }
+    return $null
+}
+
+# Prompts the user to enter installer values
+# Sets the $script:Installers value as an output
+# Returns void
+Function Read-InstallerEntry {
+    $_Installer = [ordered] @{}
+    # Request user enter Installer URL
+    $_Installer['InstallerUrl'] = Request-InstallerUrl
+  
+    if ($_Installer.InstallerUrl -in ($script:Installers).InstallerUrl) {
+        $_MatchingInstaller = $script:Installers | Where-Object { $_.InstallerUrl -eq $_Installer.InstallerUrl } | Select-Object -First 1
+        if ($_MatchingInstaller.InstallerSha256) { $_Installer['InstallerSha256'] = $_MatchingInstaller.InstallerSha256 }
+        if ($_MatchingInstaller.InstallerType) { $_Installer['InstallerType'] = $_MatchingInstaller.InstallerType }
+        if ($_MatchingInstaller.ProductCode) { $_Installer['ProductCode'] = $_MatchingInstaller.ProductCode }
+        if ($_MatchingInstaller.PackageFamilyName) { $_Installer['PackageFamilyName'] = $_MatchingInstaller.PackageFamilyName }
+        if ($_MatchingInstaller.SignatureSha256) { $_Installer['SignatureSha256'] = $_MatchingInstaller.SignatureSha256 }
+    }
+
+    # Get or request Installer Sha256
+    # Check the settings to see if we need to display this menu
+    if ($_Installer.Keys -notcontains 'InstallerSha256') {
+        
+        $script:SaveOption = Get-UserSavePreference
+        # If user did not select manual entry for Sha256, download file and calculate hash
+        # Also attempt to detect installer type and architecture
+        if ($script:SaveOption -ne '2') {
+            Write-Host
+            $start_time = Get-Date
+            Write-Host $NewLine
+            Write-Host 'Downloading URL. This will take a while...' -ForegroundColor Blue
+            try {
+                $script:dest = Get-InstallerFile -URI $_Installer['InstallerUrl'] -PackageIdentifier $PackageIdentifier -PackageVersion $PackageVersion
+            } catch {
+                # Here we also want to pass any exceptions through for potential debugging
+                throw [System.Net.WebException]::new('The file could not be downloaded. Try running the script again', $_.Exception)
+            } finally {
+                Write-Host "Time taken: $((Get-Date).Subtract($start_time).Seconds) second(s)" -ForegroundColor Green
+                $_Installer['InstallerSha256'] = (Get-FileHash -Path $script:dest -Algorithm SHA256).Hash
+                Get-PathInstallerType -Path $script:dest -OutVariable _ | Out-Null
+                if ($_) { $_Installer['InstallerType'] = $_ | Select-Object -First 1 }
+                Get-UriArchitecture -URI $_Installer['InstallerUrl'] -OutVariable _ | Out-Null
+                if ($_) { $_Installer['Architecture'] = $_ | Select-Object -First 1 }
+                if ([System.Environment]::OSVersion.Platform -match 'Win' -and ($script:dest).EndsWith('.msi')) {
+                    $ProductCode = ([string](Get-MSIProperty -MSIPath $script:dest -Parameter 'ProductCode') | Select-String -Pattern '{[A-Z0-9]{8}-([A-Z0-9]{4}-){3}[A-Z0-9]{12}}').Matches.Value
+                }
+                if (Test-String -Not "$ProductCode" -IsNull) { $_Installer['ProductCode'] = "$ProductCode" }
             }
-        } until ($script:_returnValue.StatusCode -eq [ReturnValue]::Success().StatusCode)
+        }
+        # Manual Entry of Sha256 with validation
+        else {
+            Write-Host
+            do {
+                Write-Host -ForegroundColor 'Red' $script:_returnValue.ErrorString()
+                Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the installer SHA256 Hash'
+                $_Installer['InstallerSha256'] = Read-Host -Prompt 'InstallerSha256' | TrimString
+                $_Installer['InstallerSha256'] = $_Installer['InstallerSha256'].toUpper()
+                if ($_Installer['InstallerSha256'] -match $Patterns.InstallerSha256) {
+                    $script:_returnValue = [ReturnValue]::Success()
+                } else {
+                    $script:_returnValue = [ReturnValue]::PatternError()
+                }
+            } until ($script:_returnValue.StatusCode -eq [ReturnValue]::Success().StatusCode)
+        }
     }
 
     # Manual Entry of Architecture with validation
-    if ($architecture -CNotIn @($Patterns.ValidArchitectures)) {
-        do {
-            Write-Host -ForegroundColor 'Red' $script:_returnValue.ErrorString()
-            Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the architecture. Options:' , @($Patterns.ValidArchitectures -join ', ')
-            $architecture = Read-Host -Prompt 'Architecture' | TrimString
-            if ($architecture -Cin @($Patterns.ValidArchitectures)) {
-                $script:_returnValue = [ReturnValue]::Success()
-            } else {
-                $script:_returnValue = [ReturnValue]::new(400, 'Invalid Architecture', "Value must exist in the enum - $(@($Patterns.ValidArchitectures -join ', '))", 2)
-            }
-        } until ($script:_returnValue.StatusCode -eq [ReturnValue]::Success().StatusCode)
-    }
+    do {
+        Write-Host -ForegroundColor 'Red' $script:_returnValue.ErrorString()
+        if (Test-String $_Installer['Architecture'] -IsNull) { Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the architecture. Options:' , @($Patterns.ValidArchitectures -join ', ') }
+        else {
+            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the architecture. Options:' , @($Patterns.ValidArchitectures -join ', ')
+            Write-Host -ForegroundColor 'DarkGray' -Object "Old Variable: $($_Installer['Architecture'])"
+        }
+        Read-Host -Prompt 'Architecture' -OutVariable _ | Out-Null
+        if (Test-String $_ -Not -IsNull) { $_Installer['Architecture'] = $_ | TrimString }
+
+        if ($_Installer['Architecture'] -Cin @($Patterns.ValidArchitectures)) {
+            $script:_returnValue = [ReturnValue]::Success()
+        } else {
+            $script:_returnValue = [ReturnValue]::new(400, 'Invalid Architecture', "Value must exist in the enum - $(@($Patterns.ValidArchitectures -join ', '))", 2)
+        }
+    } until ($script:_returnValue.StatusCode -eq [ReturnValue]::Success().StatusCode)
 
     # Manual Entry of Installer Type with validation
-    if ($InstallerType -CNotIn @($Patterns.ValidInstallerTypes)) {
+    if ($_Installer['InstallerType'] -CNotIn @($Patterns.ValidInstallerTypes)) {
         do {
             Write-Host -ForegroundColor 'Red' $script:_returnValue.ErrorString()
             Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the InstallerType. Options:' , @($Patterns.ValidInstallerTypes -join ', ' )
-            $InstallerType = Read-Host -Prompt 'InstallerType' | TrimString
-            if ($InstallerType -Cin @($Patterns.ValidInstallerTypes)) {
+            $_Installer['InstallerType'] = Read-Host -Prompt 'InstallerType' | TrimString
+            if ($_Installer['InstallerType'] -Cin @($Patterns.ValidInstallerTypes)) {
                 $script:_returnValue = [ReturnValue]::Success()
             } else {
                 $script:_returnValue = [ReturnValue]::new(400, 'Invalid Installer Type', "Value must exist in the enum - $(@($Patterns.ValidInstallerTypes -join ', '))", 2)
@@ -480,89 +593,68 @@ Function Read-InstallerEntry {
         } until ($script:_returnValue.StatusCode -eq [ReturnValue]::Success().StatusCode)
     }
 
+    $_Switches = [ordered] @{}
     # If Installer Type is `exe`, require the silent switches to be entered
-    if ($InstallerType -ieq 'exe') {
-        # Required entry of `Silent` switches with validation
-        do {
-            Write-Host -ForegroundColor 'Red' $script:_returnValue.ErrorString()
-            Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the silent install switch. For example: /S, -verysilent, /qn, --silent, /exenoui'
-            $Silent = Read-Host -Prompt 'Silent switch' | TrimString
+    do {
+        Write-Host -ForegroundColor 'Red' $script:_returnValue.ErrorString()
+        if ($_Installer['InstallerType'] -ieq 'exe') { Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the silent install switch. For example: /S, -verysilent, /qn, --silent, /exenoui' }
+        else { Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the silent install switch. For example: /S, -verysilent, /qn, --silent, /exenoui' }
+        Read-Host -Prompt 'Silent switch' -OutVariable _ | Out-Null
+        if ($_) { $_Switches['Silent'] = $_ | TrimString }
 
-            if (Test-String $Silent -MaxLength $Patterns.SilentSwitchMaxLength -NotNull) {
-                $script:_returnValue = [ReturnValue]::Success()
-            } else {
-                $script:_returnValue = [ReturnValue]::LengthError(1, $Patterns.SilentSwitchMaxLength)
-            }
-        } until ($script:_returnValue.StatusCode -eq [ReturnValue]::Success().StatusCode)
+        if (Test-String $_Switches['Silent'] -MaxLength $Patterns.SilentSwitchMaxLength -NotNull) {
+            $script:_returnValue = [ReturnValue]::Success()
+        } elseif ($_Installer['InstallerType'] -ne 'exe' -and (Test-String $_Switches['Silent'] -MaxLength $Patterns.SilentSwitchMaxLength -AllowNull)) {
+            $script:_returnValue = [ReturnValue]::Success()
+        } else {
+            $script:_returnValue = [ReturnValue]::LengthError(1, $Patterns.SilentSwitchMaxLength)
+        }
+    } until ($script:_returnValue.StatusCode -eq [ReturnValue]::Success().StatusCode)
 
-        # Required entry of `SilentWithProgress` swtich with validation
-        do {
-            Write-Host -ForegroundColor 'Red' $script:_returnValue.ErrorString()
-            Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the silent with progress install switch. For example: /S, -silent, /qb, /exebasicui'
-            $SilentWithProgress = Read-Host -Prompt 'Silent with progress switch' | TrimString
+    do {
+        Write-Host -ForegroundColor 'Red' $script:_returnValue.ErrorString()
+        if ($_Installer['InstallerType'] -ieq 'exe') { Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the silent with progress install switch. For example: /S, -silent, /qb, /exebasicui' }
+        else { Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the silent with progress install switch. For example: /S, -silent, /qb, /exebasicui' }
+        Read-Host -Prompt 'Silent with progress switch' -OutVariable _ | Out-Null
+        if ($_) { $_Switches['SilentWithProgress'] = $_ | TrimString }
 
-            if (Test-String $SilentWithProgress -MaxLength $Patterns.ProgressSwitchMaxLength -NotNull) {
-                $script:_returnValue = [ReturnValue]::Success()
-            } else {
-                $script:_returnValue = [ReturnValue]::LengthError(1, $Patterns.ProgressSwitchMaxLength)
-            }
-        } until ($script:_returnValue.StatusCode -eq [ReturnValue]::Success().StatusCode)
-    }
-    # If Installer Type is not `exe`, the silent switches are optional
-    else {
-        # Optional entry of `Silent` switch with validation
-        do {
-            Write-Host -ForegroundColor 'Red' $script:_returnValue.ErrorString()
-            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the silent install switch. For example: /S, /s, /VERYSILENT, /qn, --silent'
-            $Silent = Read-Host -Prompt 'Silent' | TrimString
-
-            if (Test-String $Silent -MaxLength $Patterns.SilentSwitchMaxLength -AllowNull) {
-                $script:_returnValue = [ReturnValue]::Success()
-            } else {
-                $script:_returnValue = [ReturnValue]::LengthError(1, $Patterns.SilentSwitchMaxLength)
-            }
-
-        } until ($script:_returnValue.StatusCode -eq [ReturnValue]::Success().StatusCode)
-
-        # Optional entry of `SilentWithProgress` switch with validation
-        do {
-            Write-Host -ForegroundColor 'Red' $script:_returnValue.ErrorString()
-            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the silent with progress install switch. For example: /S, /SILENT, /qb'
-            $SilentWithProgress = Read-Host -Prompt 'SilentWithProgress' | TrimString
-
-            if (Test-String $SilentWithProgress -MaxLength $Patterns.ProgressSwitchMaxLength -AllowNull) {
-                $script:_returnValue = [ReturnValue]::Success()
-            } else {
-                $script:_returnValue = [ReturnValue]::LengthError(1, $Patterns.ProgressSwitchMaxLength)
-            }
-        } until ($script:_returnValue.StatusCode -eq [ReturnValue]::Success().StatusCode)
-    }
+        if (Test-String $_Switches['SilentWithProgress'] -MaxLength $Patterns.ProgressSwitchMaxLength -NotNull) {
+            $script:_returnValue = [ReturnValue]::Success()
+        } elseif ($_Installer['InstallerType'] -ne 'exe' -and (Test-String $_Switches['SilentWithProgress'] -MaxLength $Patterns.ProgressSwitchMaxLength -AllowNull)) {
+            $script:_returnValue = [ReturnValue]::Success()
+        } else {
+            $script:_returnValue = [ReturnValue]::LengthError(1, $Patterns.ProgressSwitchMaxLength)
+        }
+    } until ($script:_returnValue.StatusCode -eq [ReturnValue]::Success().StatusCode)
 
     # Optional entry of `Custom` switches with validation for all installer types
     do {
         Write-Host -ForegroundColor 'Red' $script:_returnValue.ErrorString()
         Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter any custom switches for the installer. For example: /norestart, -norestart'
-        $Custom = Read-Host -Prompt 'Custom Switch' | TrimString
-
-        if (Test-String $Custom -MaxLength $Patterns.CustomSwitchMaxLength -AllowNull) {
+        Read-Host -Prompt 'Custom Switch' -OutVariable _ | Out-Null
+        if ($_) { $_Switches['Custom'] = $_ | TrimString }
+        if (Test-String $_Switches['Custom'] -MaxLength $Patterns.CustomSwitchMaxLength -AllowNull) {
             $script:_returnValue = [ReturnValue]::Success()
         } else {
             $script:_returnValue = [ReturnValue]::LengthError(1, $Patterns.CustomSwitchMaxLength)
         }
     } until ($script:_returnValue.StatusCode -eq [ReturnValue]::Success().StatusCode)
 
+    if ($_Switches.Keys.Count -gt 0) { $_Installer['InstallerSwitches'] = $_Switches }
+
     # If the installer is `msix` or `appx`, prompt for or detect additional fields
-    if ($InstallerType -ieq 'msix' -or $InstallerType -ieq 'appx') {
+    if ($_Installer['InstallerType'] -in @('msix'; 'appx')) {
         # Detect or prompt for Signature Sha256
         if (Get-Command 'winget.exe' -ErrorAction SilentlyContinue) { $SignatureSha256 = winget hash -m $script:dest | Select-String -Pattern 'SignatureSha256:' | ConvertFrom-String; if ($SignatureSha256.P2) { $SignatureSha256 = $SignatureSha256.P2.ToUpper() } }
-        if (Test-String $SignatureSha256 -IsNull) {
+        if ($SignatureSha256) { $_Installer['SignatureSha256'] = $SignatureSha256 }
+        if (Test-String $_Installer['SignatureSha256'] -IsNull) {
             # Manual entry of Signature Sha256 with validation
             do {
                 Write-Host -ForegroundColor 'Red' $script:_returnValue.ErrorString()
                 Write-Host -ForegroundColor 'Yellow' -Object '[Recommended] Enter the installer SignatureSha256'
-                $SignatureSha256 = Read-Host -Prompt 'SignatureSha256' | TrimString
-
-                if (Test-String $SignatureSha256 -MatchPattern $Patterns.SignatureSha256 -AllowNull) {
+                Read-Host -Prompt 'SignatureSha256' -OutVariable _ | Out-Null
+                if ($_) { $_Installer['SignatureSha256'] = $_ | TrimString }
+                if (Test-String $_Installer['SignatureSha256'] -MatchPattern $Patterns.SignatureSha256 -AllowNull) {
                     $script:_returnValue = [ReturnValue]::Success()
                 } else {
                     $script:_returnValue = [ReturnValue]::PatternError()
@@ -580,7 +672,6 @@ Function Read-InstallerEntry {
                 DefaultString = 'F'
             }
             switch ( Invoke-KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString']) {
-                'F' { $ChoicePfn = '0' }
                 'M' { $ChoicePfn = '1' }
                 default { $ChoicePfn = '0' }
             }
@@ -592,13 +683,13 @@ Function Read-InstallerEntry {
             try {
                 Add-AppxPackage -Path $script:dest
                 $InstalledPkg = Get-AppxPackage | Select-Object -Last 1 | Select-Object PackageFamilyName, PackageFullName
-                $PackageFamilyName = $InstalledPkg.PackageFamilyName
+                if ($InstalledPkg.PackageFamilyName) { $_Installer['PackageFamilyName'] = $InstalledPkg.PackageFamilyName }
                 Remove-AppxPackage $InstalledPkg.PackageFullName
             } catch {
                 # Take no action here, we just want to catch the exceptions as a precaution
                 Out-Null
             } finally {
-                if (Test-String $PackageFamilyName -IsNull) {
+                if (Test-String $_Installer['PackageFamilyName'] -IsNull) {
                     $script:_returnValue = [ReturnValue]::new(500, 'Could not find PackageFamilyName', 'Value should be entered manually', 1)
                 }
             }
@@ -610,24 +701,22 @@ Function Read-InstallerEntry {
             if (($ChoicePfn -ne '0') -or ($script:_returnValue.StatusCode -ne [ReturnValue]::Success().StatusCode)) {
                 Write-Host -ForegroundColor 'Red' $script:_returnValue.ErrorString()
                 Write-Host -ForegroundColor 'Yellow' -Object '[Recommended] Enter the PackageFamilyName'
-                $PackageFamilyName = Read-Host -Prompt 'PackageFamilyName' | TrimString
+                Read-Host -Prompt 'PackageFamilyName' -OutVariable _ | Out-Null
+                if ($_) { $_Installer['PackageFamilyName'] = $_ | TrimString }
             }
-
-            if (Test-String $PackageFamilyName -MaxLength $Patterns.FamilyNameMaxLength -MatchPattern $Patterns.FamilyName -AllowNull) {
-                if (Test-String $PackageFamilyName -IsNull) { $PackageFamilyName = "$([char]0x2370)" }
+            if (Test-String $_Installer['PackageFamilyName'] -MaxLength $Patterns.FamilyNameMaxLength -MatchPattern $Patterns.FamilyName -AllowNull) {
+                if (Test-String $_Installer['PackageFamilyName'] -IsNull) { $_Installer['PackageFamilyName'] = "$([char]0x2370)" }
                 $script:_returnValue = [ReturnValue]::Success()
             } else {
-                if (Test-String -not $PackageFamilyName -MaxLength $Patterns.FamilyNameMaxLength) {
+                if (Test-String -not $_Installer['PackageFamilyName'] -MaxLength $Patterns.FamilyNameMaxLength) {
                     $script:_returnValue = [ReturnValue]::LengthError(1, $Patterns.FamilyNameMaxLength)
-                } elseif (Test-String -not $PackageFamilyName -MatchPattern $Patterns.FamilyName) {
+                } elseif (Test-String -not $_Installer['PackageFamilyName'] -MatchPattern $Patterns.FamilyName) {
                     $script:_returnValue = [ReturnValue]::PatternError()
                 } else {
                     $script:_returnValue = [ReturnValue]::GenericError()
                 }
             }
-
         } until ($script:_returnValue.StatusCode -eq [ReturnValue]::Success().StatusCode)
-        if ($script:SaveOption -eq '1') { Remove-Item -Path $script:dest }
     }
 
     # Request installer locale with validation as optional
@@ -635,16 +724,17 @@ Function Read-InstallerEntry {
         Write-Host -ForegroundColor 'Red' $script:_returnValue.ErrorString()
         Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the installer locale. For example: en-US, en-CA'
         Write-Host -ForegroundColor 'Blue' -Object 'https://docs.microsoft.com/openspecs/office_standards/ms-oe376/6c085406-a698-4e12-9d4d-c3b0ee3dbc4a'
-        $InstallerLocale = Read-Host -Prompt 'InstallerLocale' | TrimString
+        Read-Host -Prompt 'InstallerLocale' -OutVariable _
+        if ($_) { $_Installer['InstallerLocale'] = $_ | TrimString }
         # If user defined a default locale, add it
-        if ((Test-String $InstallerLocale -IsNull) -and (Test-String -not $ScriptSettings.DefaultInstallerLocale -IsNull)) { $InstallerLocale = $ScriptSettings.DefaultInstallerLocale }
+        if ((Test-String $_Installer['InstallerLocale'] -IsNull) -and (Test-String -not $ScriptSettings.DefaultInstallerLocale -IsNull)) { $_Installer['InstallerLocale'] = $ScriptSettings.DefaultInstallerLocale }
 
-        if (Test-String $InstallerLocale -MaxLength $Patterns.InstallerLocaleMaxLength -MatchPattern $Patterns.PackageLocale -AllowNull) {
+        if (Test-String $_Installer['InstallerLocale'] -MaxLength $Patterns.InstallerLocaleMaxLength -MatchPattern $Patterns.PackageLocale -AllowNull) {
             $script:_returnValue = [ReturnValue]::Success()
         } else {
-            if (Test-String -not $InstallerLocale -MaxLength $Patterns.InstallerLocaleMaxLength -AllowNull) {
+            if (Test-String -not $_Installer['InstallerLocale'] -MaxLength $Patterns.InstallerLocaleMaxLength -AllowNull) {
                 $script:_returnValue = [ReturnValue]::LengthError(0, $Patterns.InstallerLocaleMaxLength)
-            } elseif (Test-String -not $InstallerLocale -MatchPattern $Patterns.PackageLocale) {
+            } elseif (Test-String -not $_Installer['InstallerLocale'] -MatchPattern $Patterns.PackageLocale) {
                 $script:_returnValue = [ReturnValue]::PatternError()
             } else {
                 $script:_returnValue = [ReturnValue]::GenericError()
@@ -656,11 +746,13 @@ Function Read-InstallerEntry {
     do {
         Write-Host -ForegroundColor 'Red' $script:_returnValue.ErrorString()
         Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the application product code. Looks like {CF8E6E00-9C03-4440-81C0-21FACB921A6B}'
-        Write-Host -ForegroundColor 'White' -Object "ProductCode found from installer: $MSIProductCode"
+        Write-Host -ForegroundColor 'White' -Object "ProductCode found from installer: $($_Installer['ProductCode'])"
         Write-Host -ForegroundColor 'White' -Object 'Can be found with ' -NoNewline; Write-Host -ForegroundColor 'DarkYellow' 'get-wmiobject Win32_Product | Sort-Object Name | Format-Table IdentifyingNumber, Name -AutoSize'
-        $ProductCode = Read-Host -Prompt 'ProductCode' | TrimString
+        $NewProductCode = Read-Host -Prompt 'ProductCode' | TrimString
+        if (Test-String $NewProductCode -Not -IsNull) { $_Installer['ProductCode'] = $NewProductCode }
+        elseif (Test-String $_Installer['ProductCode'] -Not -IsNull) { $_Installer['ProductCode'] = "$($_Installer['ProductCode'])" }
 
-        if (Test-String $ProductCode -MinLength $Patterns.ProductCodeMinLength -MaxLength $Patterns.ProductCodeMaxLength -AllowNull) {
+        if (Test-String $_Installer['ProductCode'] -MinLength $Patterns.ProductCodeMinLength -MaxLength $Patterns.ProductCodeMaxLength -AllowNull) {
             $script:_returnValue = [ReturnValue]::Success()
         } else {
             $script:_returnValue = [ReturnValue]::LengthError($Patterns.ProductCodeMinLength, $Patterns.ProductCodeMaxLength)
@@ -674,10 +766,9 @@ Function Read-InstallerEntry {
         DefaultString = 'N'
     }
     switch ( Invoke-KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString']) {
-        'M' { $Scope = 'machine' }
-        'U' { $Scope = 'user' }
-        'N' { $Scope = '' }
-        default { $Scope = '' }
+        'M' { $_Installer['Scope'] = 'machine' }
+        'U' { $_Installer['Scope'] = 'user' }
+        default { }
     }
 
     # Request upgrade behavior
@@ -687,52 +778,36 @@ Function Read-InstallerEntry {
         DefaultString = 'I'
     }
     switch ( Invoke-KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString']) {
-        'I' { $UpgradeBehavior = 'install' }
-        'U' { $UpgradeBehavior = 'uninstallPrevious' }
-        default { $UpgradeBehavior = 'install' }
+        'U' { $_Installer['UpgradeBehavior'] = 'uninstallPrevious' }
+        default { $_Installer['UpgradeBehavior'] = 'install' }
     }
+    Write-Host
+
+    # Request release date
+    $script:ReleaseDatePrompted = $true
+    do {
+        Write-Host -ForegroundColor 'Red' $script:_returnValue.ErrorString()
+        Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the application release date. Example: 2021-11-17'
+        Read-Host -Prompt 'ReleaseDate' -OutVariable ReleaseDate | Out-Null
+        try {
+            Get-Date([datetime]$($ReleaseDate | TrimString)) -f 'yyyy-MM-dd' -OutVariable _ValidDate | Out-Null
+            if ($_ValidDate) { $_Installer['ReleaseDate'] = $_ValidDate | TrimString }
+            $script:_returnValue = [ReturnValue]::Success()
+        } catch {
+            if (Test-String $ReleaseDate -IsNull) {
+                $script:_returnValue = [ReturnValue]::Success()
+            } else {
+                $script:_returnValue = [ReturnValue]::new(400, 'Invalid Date', 'Input could not be resolved to a date', 2)
+            }
+        }
+    } until ($script:_returnValue.StatusCode -eq [ReturnValue]::Success().StatusCode)
+
+    if ($script:SaveOption -eq '1' -and (Test-Path -Path $script:dest)) { Remove-Item -Path $script:dest }
 
     # If the installers array is empty, create it
     if (!$script:Installers) {
         $script:Installers = @()
     }
-
-    # Set up a new empty installer
-    $_Installer = [ordered] @{}
-
-    # Add the single-line parameters to the installer entry
-    $_InstallerSingletons = [ordered] @{
-        'InstallerLocale'   = $InstallerLocale
-        'Architecture'      = $Architecture
-        'InstallerType'     = $InstallerType
-        'Scope'             = $Scope
-        'InstallerUrl'      = $InstallerUrl
-        'InstallerSha256'   = $InstallerSha256
-        'SignatureSha256'   = $SignatureSha256
-        'PackageFamilyName' = $PackageFamilyName
-    }
-    foreach ($_Item in $_InstallerSingletons.GetEnumerator()) {
-        If ($_Item.Value) { Add-YamlParameter -Object $_Installer -Parameter $_Item.Name -Value $_Item.Value }
-    }
-
-    # Add the installer switches to the installer entry, if they exist
-    If ($Silent -or $SilentWithProgress -or $Custom) {
-        $_InstallerSwitches = [ordered]@{}
-        $_Switches = [ordered] @{
-            'Custom'             = $Custom
-            'Silent'             = $Silent
-            'SilentWithProgress' = $SilentWithProgress
-        }
-        foreach ($_Item in $_Switches.GetEnumerator()) {
-            If ($_Item.Value) { Add-YamlParameter -Object $_InstallerSwitches -Parameter $_Item.Name -Value $_Item.Value }
-        }
-        $_InstallerSwitches = Restore-YamlKeyOrder $_InstallerSwitches $InstallerSwitchProperties -NoComments
-        $_Installer['InstallerSwitches'] = $_InstallerSwitches
-    }
-
-    # Add the product code to the installer entry, if it exists
-    If ($ProductCode) { Add-YamlParameter -Object $_Installer -Parameter 'ProductCode' -Value $ProductCode }
-    Add-YamlParameter -Object $_Installer -Parameter 'UpgradeBehavior' -Value $UpgradeBehavior
 
     # Add the completed installer to the installers array
     $_Installer = Restore-YamlKeyOrder $_Installer $InstallerEntryProperties -NoComments
@@ -776,6 +851,7 @@ Function Read-QuickInstallerEntry {
         # This is to ensure all previously entered and un-modified parameters are retained
         $_iteration += 1
         $_NewInstaller = $_OldInstaller
+        $_NewInstaller.Remove('InstallerSha256');
 
         # Show the user which installer entry they should be entering information for
         Write-Host -ForegroundColor 'Green' "Installer Entry #$_iteration`:`n"
@@ -788,53 +864,75 @@ Function Read-QuickInstallerEntry {
         # Request user enter the new Installer URL
         $_NewInstaller['InstallerUrl'] = Request-InstallerUrl
 
-        try {
-            Get-InstallerFile -URI $_NewInstaller['InstallerUrl'] -PackageIdentifier $PackageIdentifier -PackageVersion $PackageVersion
-        } catch {
-            # Here we also want to pass any exceptions through for potential debugging
-            throw [System.Net.WebException]::new('The file could not be downloaded. Try running the script again', $_.Exception)
-        } finally {
-            # Get the Sha256
-            $_NewInstaller['InstallerSha256'] = (Get-FileHash -Path $script:dest -Algorithm SHA256).Hash
-            # Update the product code, if a new one exists
-            # If a new product code doesn't exist, and the installer isn't an `.exe` file, remove the product code if it exists
-            $MSIProductCode = [string]$(Get-AppLockerFileInformation -Path $script:dest | Select-Object Publisher | Select-String -Pattern '{[A-Z0-9]{8}-([A-Z0-9]{4}-){3}[A-Z0-9]{12}}').Matches
-            if (Test-String -not $MSIProductCode -IsNull) {
-                $_NewInstaller['ProductCode'] = $MSIProductCode
-            } elseif ( ($_NewInstaller.Keys -contains 'ProductCode') -and ($script:dest -notmatch '.exe$')) {
-                $_NewInstaller.Remove('ProductCode')
-            }
-            # If the installer is msix or appx, try getting the new SignatureSha256
-            # If the new SignatureSha256 can't be found, remove it if it exists
-            if ($_NewInstaller.InstallerType -in @('msix', 'appx')) {
-                if (Get-Command 'winget.exe' -ErrorAction SilentlyContinue) { $NewSignatureSha256 = winget hash -m $script:dest | Select-String -Pattern 'SignatureSha256:' | ConvertFrom-String; if ($NewSignatureSha256.P2) { $NewSignatureSha256 = $NewSignatureSha256.P2.ToUpper() } }
-            }
-            if (Test-String -not $NewSignatureSha256 -IsNull) {
-                $_NewInstaller['SignatureSha256'] = $NewSignatureSha256
-            } elseif ($_NewInstaller.Keys -contains 'SignatureSha256') {
-                $_NewInstaller.Remove('SignatureSha256')
-            }
-            # If the installer is msix or appx, try getting the new package family name
-            # If the new package family name can't be found, remove it if it exists
-            if ($script:dest -match '\.(msix|appx)(bundle){0,1}$') {
-                try {
-                    Add-AppxPackage -Path $script:dest
-                    $InstalledPkg = Get-AppxPackage | Select-Object -Last 1 | Select-Object PackageFamilyName, PackageFullName
-                    $PackageFamilyName = $InstalledPkg.PackageFamilyName
-                    Remove-AppxPackage $InstalledPkg.PackageFullName
-                } catch {
-                    # Take no action here, we just want to catch the exceptions as a precaution
-                    Out-Null
-                } finally {
-                    if (Test-String -not $PackageFamilyName -IsNull) {
-                        $_NewInstaller['PackageFamilyName'] = $PackageFamilyName
-                    } elseif ($_NewInstaller.Keys -contains 'PackageFamilyName') {
-                        $_NewInstaller.Remove('PackageFamilyName')
+        if ($_NewInstaller.InstallerUrl -in ($_NewInstallers).InstallerUrl) {
+            $_MatchingInstaller = $_NewInstallers | Where-Object { $_.InstallerUrl -eq $_NewInstaller.InstallerUrl } | Select-Object -First 1
+            if ($_MatchingInstaller.InstallerSha256) { $_NewInstaller['InstallerSha256'] = $_MatchingInstaller.InstallerSha256 } 
+            if ($_MatchingInstaller.InstallerType) { $_NewInstaller['InstallerType'] = $_MatchingInstaller.InstallerType }
+            if ($_MatchingInstaller.ProductCode) { $_NewInstaller['ProductCode'] = $_MatchingInstaller.ProductCode }
+            elseif ( ($_NewInstaller.Keys -contains 'ProductCode') -and ($script:dest -notmatch '.exe$')) { $_NewInstaller.Remove('ProductCode') }
+            if ($_MatchingInstaller.PackageFamilyName) { $_NewInstaller['PackageFamilyName'] = $_MatchingInstaller.PackageFamilyName }
+            elseif ($_NewInstaller.Keys -contains 'PackageFamilyName') { $_NewInstaller.Remove('PackageFamilyName') }
+            if ($_MatchingInstaller.SignatureSha256) { $_NewInstaller['SignatureSha256'] = $_MatchingInstaller.SignatureSha256 }
+            elseif ($_NewInstaller.Keys -contains 'SignatureSha256') { $_NewInstaller.Remove('SignatureSha256') }
+        }
+
+        if ($_NewInstaller.Keys -notcontains 'InstallerSha256') {
+            try {
+                $script:dest = Get-InstallerFile -URI $_NewInstaller['InstallerUrl'] -PackageIdentifier $PackageIdentifier -PackageVersion $PackageVersion
+            } catch {
+                # Here we also want to pass any exceptions through for potential debugging
+                throw [System.Net.WebException]::new('The file could not be downloaded. Try running the script again', $_.Exception)
+            } finally {
+                # Check that MSI's aren't actually WIX
+                if ($_NewInstaller['InstallerType'] -eq 'msi'){
+                    $DetectedType = Get-PathInstallerType $script:dest
+                    if ($DetectedType -in @('msi';'wix')){$_NewInstaller['InstallerType'] = $DetectedType}
+                }
+                # Get the Sha256
+                $_NewInstaller['InstallerSha256'] = (Get-FileHash -Path $script:dest -Algorithm SHA256).Hash
+                # Update the product code, if a new one exists
+                # If a new product code doesn't exist, and the installer isn't an `.exe` file, remove the product code if it exists
+                $MSIProductCode = $null
+                if ([System.Environment]::OSVersion.Platform -match 'Win' -and ($script:dest).EndsWith('.msi')) {
+                    $MSIProductCode = ([string](Get-MSIProperty -MSIPath $script:dest -Parameter 'ProductCode') | Select-String -Pattern '{[A-Z0-9]{8}-([A-Z0-9]{4}-){3}[A-Z0-9]{12}}').Matches.Value
+                }
+                if (Test-String -not $MSIProductCode -IsNull) {
+                    $_NewInstaller['ProductCode'] = $MSIProductCode
+                } elseif ( ($_NewInstaller.Keys -contains 'ProductCode') -and ($_NewInstaller.InstallerType -in @('appx'; 'msi'; 'msix'; 'wix'; 'burn'))) {
+                    $_NewInstaller.Remove('ProductCode')
+                }
+                # If the installer is msix or appx, try getting the new SignatureSha256
+                # If the new SignatureSha256 can't be found, remove it if it exists
+                if ($_NewInstaller.InstallerType -in @('msix', 'appx')) {
+                    if (Get-Command 'winget.exe' -ErrorAction SilentlyContinue) { $NewSignatureSha256 = winget hash -m $script:dest | Select-String -Pattern 'SignatureSha256:' | ConvertFrom-String; if ($NewSignatureSha256.P2) { $NewSignatureSha256 = $NewSignatureSha256.P2.ToUpper() } }
+                }
+                if (Test-String -not $NewSignatureSha256 -IsNull) {
+                    $_NewInstaller['SignatureSha256'] = $NewSignatureSha256
+                } elseif ($_NewInstaller.Keys -contains 'SignatureSha256') {
+                    $_NewInstaller.Remove('SignatureSha256')
+                }
+                # If the installer is msix or appx, try getting the new package family name
+                # If the new package family name can't be found, remove it if it exists
+                if ($script:dest -match '\.(msix|appx)(bundle){0,1}$') {
+                    try {
+                        Add-AppxPackage -Path $script:dest
+                        $InstalledPkg = Get-AppxPackage | Select-Object -Last 1 | Select-Object PackageFamilyName, PackageFullName
+                        $PackageFamilyName = $InstalledPkg.PackageFamilyName
+                        Remove-AppxPackage $InstalledPkg.PackageFullName
+                    } catch {
+                        # Take no action here, we just want to catch the exceptions as a precaution
+                        Out-Null
+                    } finally {
+                        if (Test-String -not $PackageFamilyName -IsNull) {
+                            $_NewInstaller['PackageFamilyName'] = $PackageFamilyName
+                        } elseif ($_NewInstaller.Keys -contains 'PackageFamilyName') {
+                            $_NewInstaller.Remove('PackageFamilyName')
+                        }
                     }
                 }
+                # Remove the downloaded files
+                Remove-Item -Path $script:dest
             }
-            # Remove the downloaded files
-            Remove-Item -Path $script:dest
         }
         #Add the updated installer to the new installers array
         $_NewInstaller = Restore-YamlKeyOrder $_NewInstaller $InstallerEntryProperties -NoComments
@@ -859,7 +957,7 @@ Function Read-InstallerMetadataValue {
     )
     Write-Host -ForegroundColor 'Red' $script:_returnValue.ErrorString()
     Write-Host -ForegroundColor 'Yellow' -Object $Prompt
-    if (Test-String -not $Variable -IsNull) { Write-Host -ForegroundColor 'DarkGray' "Old Value: $Variable" }
+    if (Test-String -not $Variable -IsNull) { Write-Host -ForegroundColor 'DarkGray' "Old Variable: $Variable" }
     $NewValue = Read-Host -Prompt $Key | TrimString
 
     if (Test-String -not $NewValue -IsNull) {
@@ -916,8 +1014,8 @@ Function Read-InstallerMetadata {
     # Request File Extensions and validate
     do {
         if (!$FileExtensions) { $FileExtensions = '' }
-        else { $FileExtensions = $FileExtensions | UniqueItems }
-        $script:FileExtensions = Read-InstallerMetadataValue -Variable $FileExtensions -Key 'FileExtensions' -Prompt "[Optional] Enter any File Extensions the application could support. For example: html, htm, url (Max $($Patterns.MaxItemsFileExtensions))" | UniqueItems
+        else { $FileExtensions = $FileExtensions | ToLower | UniqueItems }
+        $script:FileExtensions = Read-InstallerMetadataValue -Variable $FileExtensions -Key 'FileExtensions' -Prompt "[Optional] Enter any File Extensions the application could support. For example: html, htm, url (Max $($Patterns.MaxItemsFileExtensions))" | ToLower | UniqueItems
 
         if (($script:FileExtensions -split ',').Count -le $Patterns.MaxItemsFileExtensions -and $($script:FileExtensions.Split(',').Trim() | Where-Object { Test-String -not $_ -MaxLength $Patterns.FileExtensionMaxLength -MatchPattern $Patterns.FileExtension -AllowNull }).Count -eq 0) {
             $script:_returnValue = [ReturnValue]::Success()
@@ -933,8 +1031,8 @@ Function Read-InstallerMetadata {
     # Request Protocols and validate
     do {
         if (!$Protocols) { $Protocols = '' }
-        else { $Protocols = $Protocols | UniqueItems }
-        $script:Protocols = Read-InstallerMetadataValue -Variable $Protocols -Key 'Protocols' -Prompt "[Optional] Enter any Protocols the application provides a handler for. For example: http, https (Max $($Patterns.MaxItemsProtocols))" | UniqueItems
+        else { $Protocols = $Protocols | ToLower | UniqueItems }
+        $script:Protocols = Read-InstallerMetadataValue -Variable $Protocols -Key 'Protocols' -Prompt "[Optional] Enter any Protocols the application provides a handler for. For example: http, https (Max $($Patterns.MaxItemsProtocols))" | ToLower | UniqueItems
         if (($script:Protocols -split ',').Count -le $Patterns.MaxItemsProtocols) {
             $script:_returnValue = [ReturnValue]::Success()
         } else {
@@ -946,7 +1044,7 @@ Function Read-InstallerMetadata {
     do {
         if (!$Commands) { $Commands = '' }
         else { $Commands = $Commands | UniqueItems }
-        $script:Commands = Read-InstallerMetadataValue -Variable $Commands -Key 'Commands' -Prompt "[Optional] Enter any Commands or aliases to run the application. For example: msedge (Max $($Patterns.MaxItemsCommands))" | UniqueItems
+        $script:Commands = Read-InstallerMetadataValue -Variable $Commands -Key 'Commands' -Prompt "[Optional] Enter any Commands or aliases to run the application. For example: msedge (Max $($Patterns.MaxItemsCommands))" | UniqueItems 
         if (($script:Commands -split ',').Count -le $Patterns.MaxItemsCommands) {
             $script:_returnValue = [ReturnValue]::Success()
         } else {
@@ -962,10 +1060,10 @@ Function Read-InstallerMetadata {
             $script:_returnValue = [ReturnValue]::Success()
             try {
                 #Ensure all values are integers
-                $script:InstallerSuccessCodes.Split(',').Trim()| ForEach-Object {[long]$_}
+                $script:InstallerSuccessCodes.Split(',').Trim() | ForEach-Object { [long]$_ }
                 $script:_returnValue = [ReturnValue]::Success()
             } catch {
-                $script:_returnValue = [ReturnValue]::new(400,"Invalid Data Type","The value entered does not match the type requirements defined in the manifest schema",2)
+                $script:_returnValue = [ReturnValue]::new(400, 'Invalid Data Type', 'The value entered does not match the type requirements defined in the manifest schema', 2)
             }
         } else {
             $script:_returnValue = [ReturnValue]::MaxItemsError($Patterns.MaxItemsSuccessCodes)
@@ -1058,7 +1156,7 @@ Function Read-LocaleMetadata {
             Write-Host -ForegroundColor 'Red' $script:_returnValue.ErrorString()
             Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the Moniker (friendly name/alias). For example: vscode'
             if (Test-String -not $script:Moniker -IsNull) { Write-Host -ForegroundColor 'DarkGray' "Old Variable: $script:Moniker" }
-            $NewMoniker = Read-Host -Prompt 'Moniker' | TrimString
+            $NewMoniker = Read-Host -Prompt 'Moniker' | ToLower | TrimString | NoWhitespace
             if (Test-String -not $NewMoniker -IsNull) { $script:Moniker = $NewMoniker }
 
             if (Test-String $script:Moniker -MaxLength $Patterns.MonikerMaxLength -AllowNull) {
@@ -1248,10 +1346,10 @@ Function Read-LocaleMetadata {
         Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter any tags that would be useful to discover this tool.'
         Write-Host -ForegroundColor 'Blue' -Object 'Example: zip, c++, photos, OBS (Max', ($Patterns.TagsMaxItems), 'items)'
         if (Test-String -not $script:Tags -IsNull) {
-            $script:Tags = $script:Tags | UniqueItems
+            $script:Tags = $script:Tags | ToLower | UniqueItems
             Write-Host -ForegroundColor 'DarkGray' "Old Variable: $script:Tags"
         }
-        $NewTags = Read-Host -Prompt 'Tags' | TrimString | UniqueItems
+        $NewTags = Read-Host -Prompt 'Tags' | TrimString | ToLower | UniqueItems 
         if (Test-String -not $NewTags -IsNull) { $script:Tags = $NewTags }
         if (($script:Tags -split ',').Count -le $Patterns.TagsMaxItems) {
             $script:_returnValue = [ReturnValue]::Success()
@@ -1289,6 +1387,36 @@ Function Read-LocaleMetadata {
             $script:_returnValue = [ReturnValue]::Success()
         } else {
             $script:_returnValue = [ReturnValue]::LengthError($Patterns.DescriptionMinLength, $Patterns.DescriptionMaxLength)
+        }
+    } until ($script:_returnValue.StatusCode -eq [ReturnValue]::Success().StatusCode)
+
+    # Request ReleaseNotes and Validate
+    do {
+        Write-Host -ForegroundColor 'Red' $script:_returnValue.ErrorString()
+        Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter release notes for this version of the package.'
+        $script:ReleaseNotes = Read-Host -Prompt 'ReleaseNotes' | TrimString
+        if (Test-String $script:ReleaseNotes -MinLength $Patterns.ReleaseNotesMinLength -MaxLength $Patterns.ReleaseNotesMaxLength -AllowNull) {
+            $script:_returnValue = [ReturnValue]::Success()
+        } else {
+            $script:_returnValue = [ReturnValue]::LengthError($Patterns.ReleaseNotesMinLength, $Patterns.ReleaseNotesMaxLength)
+        }
+    } until ($script:_returnValue.StatusCode -eq [ReturnValue]::Success().StatusCode)
+
+    # Request ReleaseNotes URL and Validate
+    do {
+        Write-Host -ForegroundColor 'Red' $script:_returnValue.ErrorString()
+        Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the release notes URL for this version of the package.'
+        $script:ReleaseNotesUrl = Read-Host -Prompt 'ReleaseNotesUrl' | TrimString
+        if (Test-String $script:ReleaseNotesUrl -MaxLength $Patterns.GenericUrlMaxLength -MatchPattern $Patterns.GenericUrl -AllowNull) {
+            $script:_returnValue = [ReturnValue]::Success()
+        } else {
+            if (Test-String -not $script:ReleaseNotesUrl -MaxLength $Patterns.GenericUrlMaxLength -AllowNull) {
+                $script:_returnValue = [ReturnValue]::LengthError(1, $Patterns.GenericUrlMaxLength)
+            } elseif (Test-String -not $script:ReleaseNotesUrl -MatchPattern $Patterns.GenericUrl) {
+                $script:_returnValue = [ReturnValue]::PatternError()
+            } else {
+                $script:_returnValue = [ReturnValue]::GenericError()
+            }
         }
     } until ($script:_returnValue.StatusCode -eq [ReturnValue]::Success().StatusCode)
 }
@@ -1533,7 +1661,7 @@ Function Write-VersionManifest {
     $VersionManifestPath = $AppFolder + "\$PackageIdentifier" + '.yaml'
 
     # Write the manifest to the file
-    $ScriptHeader + "$(Get-DebugString)`n# yaml-language-server: `$schema=https://aka.ms/winget-manifest.version.1.0.0.schema.json`n" > $VersionManifestPath
+    $ScriptHeader + "$(Get-DebugString)`n# yaml-language-server: `$schema=https://aka.ms/winget-manifest.version.$ManifestVersion.schema.json`n" > $VersionManifestPath
     ConvertTo-Yaml $VersionManifest >> $VersionManifestPath
     $(Get-Content $VersionManifestPath -Encoding UTF8) -replace "(.*)$([char]0x2370)", "# `$1" | Out-File -FilePath $VersionManifestPath -Force
     $MyRawString = Get-Content -Raw $VersionManifestPath | TrimString
@@ -1576,13 +1704,17 @@ Function Write-InstallerManifest {
         $InstallerManifest['Installers'] = $script:OldVersionManifest['Installers']
     }
 
+    foreach ($_Installer in $InstallerManifest.Installers) {
+        if ($_Installer['ReleaseDate'] -and !$script:ReleaseDatePrompted) { $_Installer.Remove('ReleaseDate') }
+    }
+
     Add-YamlParameter -Object $InstallerManifest -Parameter 'ManifestType' -Value 'installer'
     Add-YamlParameter -Object $InstallerManifest -Parameter 'ManifestVersion' -Value $ManifestVersion
     If ($InstallerManifest['Dependencies']) {
         $InstallerManifest['Dependencies'] = Restore-YamlKeyOrder $InstallerManifest['Dependencies'] $InstallerDependencyProperties -NoComments
     }
     # Move Installer Level Keys to Manifest Level
-    $_KeysToMove = $InstallerEntryProperties | Where-Object { $_ -in $InstallerProperties  -and $_ -ne 'ProductCode'}
+    $_KeysToMove = $InstallerEntryProperties | Where-Object { $_ -in $InstallerProperties -and $_ -ne 'ProductCode' }
     foreach ($_Key in $_KeysToMove) {
         if ($_Key -in $InstallerManifest.Installers[0].Keys) {
             # Handle the switches specially
@@ -1635,14 +1767,20 @@ Function Write-InstallerManifest {
     foreach ($_Installer in $InstallerManifest.Installers) {
         if ($_Installer.Keys -contains 'InstallerSwitches') { $_Installer['InstallerSwitches'] = Restore-YamlKeyOrder $_Installer.InstallerSwitches $InstallerSwitchProperties -NoComments }
     }
+    
+    # Clean up the existing files just in case
+    if ($InstallerManifest['Commands']) { $InstallerManifest['Commands'] = @($InstallerManifest['Commands'] | UniqueItems | NoWhitespace | Sort-Object) }
+    if ($InstallerManifest['Protocols']) { $InstallerManifest['Protocols'] = @($InstallerManifest['Protocols'] | ToLower | UniqueItems | NoWhitespace | Sort-Object) }
+    if ($InstallerManifest['FileExtensions']) { $InstallerManifest['FileExtensions'] = @($InstallerManifest['FileExtensions'] | ToLower | UniqueItems | NoWhitespace | Sort-Object) }
+
     $InstallerManifest = Restore-YamlKeyOrder $InstallerManifest $InstallerProperties -NoComments
 
     # Create the folder for the file if it doesn't exist
     New-Item -ItemType 'Directory' -Force -Path $AppFolder | Out-Null
-    $InstallerManifestPath = $AppFolder + "\$PackageIdentifier" + '.installer' + '.yaml'
+    $script:InstallerManifestPath = $AppFolder + "\$PackageIdentifier" + '.installer' + '.yaml'
 
     # Write the manifest to the file
-    $ScriptHeader + "$(Get-DebugString)`n# yaml-language-server: `$schema=https://aka.ms/winget-manifest.installer.1.0.0.schema.json`n" > $InstallerManifestPath
+    $ScriptHeader + "$(Get-DebugString)`n# yaml-language-server: `$schema=https://aka.ms/winget-manifest.installer.$ManifestVersion.schema.json`n" > $InstallerManifestPath
     ConvertTo-Yaml $InstallerManifest >> $InstallerManifestPath
     $(Get-Content $InstallerManifestPath -Encoding UTF8) -replace "(.*)$([char]0x2370)", "# `$1" | Out-File -FilePath $InstallerManifestPath -Force
     $MyRawString = Get-Content -Raw $InstallerManifestPath | TrimString
@@ -1660,9 +1798,6 @@ Function Write-LocaleManifest {
         $LocaleManifest = $script:OldLocaleManifest
     }
     if (!$LocaleManifest) { [PSCustomObject]$LocaleManifest = [ordered]@{} }
-
-    # Set the appropriate langage server depending on if it is a default locale file or generic locale file
-    if ($LocaleManifest.ManifestType -eq 'defaultLocale') { $yamlServer = '# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.0.0.schema.json' } else { $yamlServer = '# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.0.0.schema.json' }
 
     # Add the properties to the manifest
     $_Singletons = [ordered]@{
@@ -1682,6 +1817,8 @@ Function Write-LocaleManifest {
         'CopyrightUrl'        = $CopyrightUrl
         'ShortDescription'    = $ShortDescription
         'Description'         = $Description
+        'ReleaseNotes'        = $ReleaseNotes
+        'ReleaseNotesUrl'     = $ReleaseNotesUrl
     }
     foreach ($_Item in $_Singletons.GetEnumerator()) {
         If ($_Item.Value) { Add-YamlParameter -Object $LocaleManifest -Parameter $_Item.Name -Value $_Item.Value }
@@ -1691,7 +1828,19 @@ Function Write-LocaleManifest {
     If (!$LocaleManifest.ManifestType) { $LocaleManifest['ManifestType'] = 'defaultLocale' }
     If ($Moniker -and $($LocaleManifest.ManifestType -eq 'defaultLocale')) { Add-YamlParameter -Object $LocaleManifest -Parameter 'Moniker' -Value $Moniker }
     Add-YamlParameter -Object $LocaleManifest -Parameter 'ManifestVersion' -Value $ManifestVersion
+
+    # Clean up the existing files just in case
+    if ($LocaleManifest['Tags']) { $LocaleManifest['Tags'] = @($LocaleManifest['Tags'] | ToLower | UniqueItems | NoWhitespace | Sort-Object) }
+    if ($LocaleManifest['Moniker']) { $LocaleManifest['Moniker'] = $LocaleManifest['Moniker'] | ToLower | NoWhitespace }
+
+    # Clean up the volatile fields
+    if ($LocaleManifest['ReleaseNotes'] -and (Test-String $script:ReleaseNotes -IsNull)) { $LocaleManifest.Remove('ReleaseNotes') }
+    if ($LocaleManifest['ReleaseNotesUrl'] -and (Test-String $script:ReleaseNotes -IsNull)) { $LocaleManifest.Remove('ReleaseNotesUrl') }
+
     $LocaleManifest = Restore-YamlKeyOrder $LocaleManifest $LocaleProperties
+
+    # Set the appropriate langage server depending on if it is a default locale file or generic locale file
+    if ($LocaleManifest.ManifestType -eq 'defaultLocale') { $yamlServer = "# yaml-language-server: `$schema=https://aka.ms/winget-manifest.defaultLocale.$ManifestVersion.schema.json" } else { $yamlServer = "# yaml-language-server: `$schema=https://aka.ms/winget-manifest.locale.$ManifestVersion.schema.json" }
 
     # Create the folder for the file if it doesn't exist
     New-Item -ItemType 'Directory' -Force -Path $AppFolder | Out-Null
@@ -1712,9 +1861,17 @@ Function Write-LocaleManifest {
                 $script:OldLocaleManifest = ConvertFrom-Yaml -Yaml ($(Get-Content -Path $DifLocale.FullName -Encoding UTF8) -join "`n") -Ordered
                 $script:OldLocaleManifest['PackageVersion'] = $PackageVersion
                 if ($script:OldLocaleManifest.Keys -contains 'Moniker') { $script:OldLocaleManifest.Remove('Moniker') }
+                $script:OldLocaleManifest['ManifestVersion'] = $ManifestVersion
+                # Clean up the existing files just in case
+                if ($script:OldLocaleManifest['Tags']) { $script:OldLocaleManifest['Tags'] = @($script:OldLocaleManifest['Tags'] | ToLower | UniqueItems | NoWhitespace | Sort-Object) }
+
+                # Clean up the volatile fields
+                if ($OldLocaleManifest['ReleaseNotes'] -and (Test-String $script:ReleaseNotes -IsNull)) { $OldLocaleManifest.Remove('ReleaseNotes') }
+                if ($OldLocaleManifest['ReleaseNotesUrl'] -and (Test-String $script:ReleaseNotes -IsNull)) { $OldLocaleManifest.Remove('ReleaseNotesUrl') }
+
                 $script:OldLocaleManifest = Restore-YamlKeyOrder $script:OldLocaleManifest $LocaleProperties
 
-                $yamlServer = '# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.0.0.schema.json'
+                $yamlServer = "# yaml-language-server: `$schema=https://aka.ms/winget-manifest.locale.$ManifestVersion.schema.json"
 
                 $ScriptHeader + "$(Get-DebugString)`n$yamlServer`n" > ($AppFolder + '\' + $DifLocale.Name)
                 ConvertTo-Yaml $OldLocaleManifest >> ($AppFolder + '\' + $DifLocale.Name)
@@ -1743,6 +1900,8 @@ function Remove-ManifestVersion {
         $PathToVersion = Split-Path $PathToVersion
     } while (@(Get-ChildItem $PathToVersion).Count -eq 0)
 }
+
+## START OF MAIN SCRIPT ##
 
 # Initialize the return value to be a success
 $script:_returnValue = [ReturnValue]::new(200)
@@ -2129,19 +2288,27 @@ Switch ($script:Option) {
         Write-Host 'Updating Manifest Information. This may take a while...' -ForegroundColor Blue
         foreach ($_Installer in $script:OldInstallerManifest.Installers) {
             try {
-                Get-InstallerFile -URI $_Installer.InstallerUrl -PackageIdentifier $PackageIdentifier -PackageVersion $PackageVersion
+                $script:dest = Get-InstallerFile -URI $_Installer.InstallerUrl -PackageIdentifier $PackageIdentifier -PackageVersion $PackageVersion
             } catch {
                 # Here we also want to pass any exceptions through for potential debugging
                 throw [System.Net.WebException]::new('The file could not be downloaded. Try running the script again', $_.Exception)
             } finally {
+                # Check that MSI's aren't actually WIX
+                if ($_Installer['InstallerType'] -eq 'msi'){
+                    $DetectedType = Get-PathInstallerType $script:dest
+                    if ($DetectedType -in @('msi';'wix')){$_Installer['InstallerType'] = $DetectedType}
+                }
                 # Get the Sha256
                 $_Installer['InstallerSha256'] = (Get-FileHash -Path $script:dest -Algorithm SHA256).Hash
                 # Update the product code, if a new one exists
                 # If a new product code doesn't exist, and the installer isn't an `.exe` file, remove the product code if it exists
-                $MSIProductCode = [string]$(Get-AppLockerFileInformation -Path $script:dest | Select-Object Publisher | Select-String -Pattern '{[A-Z0-9]{8}-([A-Z0-9]{4}-){3}[A-Z0-9]{12}}').Matches
+                $MSIProductCode = $null
+                if ([System.Environment]::OSVersion.Platform -match 'Win' -and ($script:dest).EndsWith('.msi')) {
+                    $MSIProductCode = ([string](Get-MSIProperty -MSIPath $script:dest -Parameter 'ProductCode') | Select-String -Pattern '{[A-Z0-9]{8}-([A-Z0-9]{4}-){3}[A-Z0-9]{12}}').Matches.Value
+                }
                 if (Test-String -not $MSIProductCode -IsNull) {
                     $_Installer['ProductCode'] = $MSIProductCode
-                } elseif ( ($_Installer.Keys -contains 'ProductCode') -and ($script:dest -notmatch '.exe$')) {
+                } elseif ( ($_Installer.Keys -contains 'ProductCode') -and ($_Installer.InstallerType -in @('appx'; 'msi'; 'msix'; 'wix'; 'burn'))) {
                     $_Installer.Remove('ProductCode')
                 }
                 # If the installer is msix or appx, try getting the new SignatureSha256
@@ -2251,10 +2418,11 @@ if ($PromptSubmit -eq '0') {
     # Determine what type of update should be used as the prefix for the PR
     switch -regex ($Option) {
         'New|QuickUpdateVersion|Auto' {
-            if ( $script:OldManifestType -eq 'None' ) { $CommitType = 'New package' }
-            elseif ($script:LastVersion -lt $script:PackageVersion ) { $CommitType = 'New version' }
+            $AllVersions = (@($script:ExistingVersions) + @($PackageVersion)) | Sort-Object $ToNatural
+            if ($AllVersions.Count -eq '1') { $CommitType = 'New package' }
             elseif ($script:PackageVersion -in $script:ExistingVersions) { $CommitType = 'Update' }
-            elseif ($script:LastVersion -gt $script:PackageVersion ) { $CommitType = 'Add version' }
+            elseif (($AllVersions.IndexOf($PackageVersion) + 1) -eq $AllVersions.Count) { $CommitType = 'New version' }
+            elseif (($AllVersions.IndexOf($PackageVersion) + 1) -ne $AllVersions.Count) { $CommitType = 'Add version' }
         }
         'EditMetadata' { $CommitType = 'Metadata' }
         'NewLocale' { $CommitType = 'Locale' }
@@ -2274,8 +2442,10 @@ if ($PromptSubmit -eq '0') {
     git switch -d upstream/master
     if ($LASTEXITCODE -eq '0') {
         # Make sure path exists and is valid before hashing
-        if ($script:LocaleManifestPath -and (Test-Path -Path $script:LocaleManifestPath)) { $UniqueBranchID = $(Get-FileHash $script:LocaleManifestPath).Hash[0..6] -Join '' }
-        else { $UniqueBranchID = 'DEL' }
+        $UniqueBranchID = ''
+        if ($script:LocaleManifestPath -and (Test-Path -Path $script:LocaleManifestPath)) { $UniqueBranchID = $UniqueBranchID + $($(Get-FileHash $script:LocaleManifestPath).Hash[0..6] -Join '') }
+        if ($script:InstallerManifestPath -and (Test-Path -Path $script:InstallerManifestPath)) { $UniqueBranchID = $UniqueBranchID + $($(Get-FileHash $script:InstallerManifestPath).Hash[0..6] -Join '') }
+        if (Test-String -IsNull $UniqueBranchID) { $UniqueBranchID = 'DEL' }
         $BranchName = "$PackageIdentifier-$PackageVersion-$UniqueBranchID"
         # Git branch names cannot start with `.` cannot contain any of {`..`, `\`, `~`, `^`, `:`, ` `, `?`, `@{`, `[`}, and cannot end with {`/`, `.lock`, `.`}
         $BranchName = $BranchName -replace '[\~,\^,\:,\\,\?,\@\{,\*,\[,\s]{1,}|[.lock|/|\.]*$|^\.{1,}|\.\.', ''
