@@ -294,7 +294,7 @@ Function Test-Url {
     )
     try {
         $HTTP_Request = [System.Net.WebRequest]::Create($URL)
-        $HTTP_Request.UserAgent = "Microsoft-Delivery-Optimization/10.1"
+        $HTTP_Request.UserAgent = 'Microsoft-Delivery-Optimization/10.1'
         $HTTP_Response = $HTTP_Request.GetResponse()
         $HTTP_Status = [int]$HTTP_Response.StatusCode
     } catch {
@@ -359,7 +359,7 @@ Function Get-InstallerFile {
 
     # Create a new web client for downloading the file
     $_WebClient = [System.Net.WebClient]::new()
-    $_WebClient.Headers.Add("User-Agent", "Microsoft-Delivery-Optimization/10.1")
+    $_WebClient.Headers.Add('User-Agent', 'Microsoft-Delivery-Optimization/10.1')
     # If the system has a default proxy set, use it
     # Powershell Core will automatically use this, so it's only necessary for PS5
     if ($PSVersionTable.PSVersion.Major -lt 6) { $_WebClient.Proxy = [System.Net.WebProxy]::GetDefaultProxy() }
@@ -884,9 +884,9 @@ Function Read-QuickInstallerEntry {
                 throw [System.Net.WebException]::new('The file could not be downloaded. Try running the script again', $_.Exception)
             } finally {
                 # Check that MSI's aren't actually WIX
-                if ($_NewInstaller['InstallerType'] -eq 'msi'){
+                if ($_NewInstaller['InstallerType'] -eq 'msi') {
                     $DetectedType = Get-PathInstallerType $script:dest
-                    if ($DetectedType -in @('msi';'wix')){$_NewInstaller['InstallerType'] = $DetectedType}
+                    if ($DetectedType -in @('msi'; 'wix')) { $_NewInstaller['InstallerType'] = $DetectedType }
                 }
                 # Get the Sha256
                 $_NewInstaller['InstallerSha256'] = (Get-FileHash -Path $script:dest -Algorithm SHA256).Hash
@@ -2294,9 +2294,9 @@ Switch ($script:Option) {
                 throw [System.Net.WebException]::new('The file could not be downloaded. Try running the script again', $_.Exception)
             } finally {
                 # Check that MSI's aren't actually WIX
-                if ($_Installer['InstallerType'] -eq 'msi'){
+                if ($_Installer['InstallerType'] -eq 'msi') {
                     $DetectedType = Get-PathInstallerType $script:dest
-                    if ($DetectedType -in @('msi';'wix')){$_Installer['InstallerType'] = $DetectedType}
+                    if ($DetectedType -in @('msi'; 'wix')) { $_Installer['InstallerType'] = $DetectedType }
                 }
                 # Get the Sha256
                 $_Installer['InstallerSha256'] = (Get-FileHash -Path $script:dest -Algorithm SHA256).Hash
