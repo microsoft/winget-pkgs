@@ -296,6 +296,7 @@ Function Test-Url {
         $HTTP_Request = [System.Net.WebRequest]::Create($URL)
         $HTTP_Request.UserAgent = 'Microsoft-Delivery-Optimization/10.1'
         $HTTP_Response = $HTTP_Request.GetResponse()
+        $script:ResponseUri = $HTTP_Response.ResponseUri.AbsoluteUri
         $HTTP_Status = [int]$HTTP_Response.StatusCode
     } catch {
         # Take no action here; If there is an exception, we will treat it like a 404
@@ -319,22 +320,44 @@ Function Test-ValidFileName {
 # Returns the validated URL which was entered
 Function Request-InstallerUrl {
     do {
-        Write-Host -ForegroundColor 'Red' $script:_returnValue.ErrorString()
-        Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the download url to the installer.'
-        $NewInstallerUrl = Read-Host -Prompt 'Url' | TrimString
-        if (Test-String $NewInstallerUrl -MaxLength $Patterns.InstallerUrlMaxLength -MatchPattern $Patterns.InstallerUrl -NotNull) {
-            if ((Test-Url $NewInstallerUrl) -ne 200) {
-                $script:_returnValue = [ReturnValue]::new(502, 'Invalid URL Response', 'The URL did not return a successful response from the server', 2)
-            } else {
-                $script:_returnValue = [ReturnValue]::Success()
-            }
+        Write-Host -ForegroundColor $(if ($script:_returnValue.Severity -gt 1) { 'red' } else { 'yellow' }) $script:_returnValue.ErrorString()
+        if ($script:_returnValue.StatusCode -ne 409) {
+            Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the download url to the installer.'
+            $NewInstallerUrl = Read-Host -Prompt 'Url' | TrimString
+        }
+        $script:_returnValue = [ReturnValue]::GenericError()
+        if ((Test-Url $NewInstallerUrl) -ne 200) {
+            $script:_returnValue = [ReturnValue]::new(502, 'Invalid URL Response', 'The URL did not return a successful response from the server', 2)
         } else {
-            if (Test-String -not $NewInstallerUrl -MaxLength $Patterns.InstallerUrlMaxLength -NotNull) {
-                $script:_returnValue = [ReturnValue]::LengthError(1, $Patterns.InstallerUrlMaxLength)
-            } elseif (Test-String -not $NewInstallerUrl -MatchPattern $Patterns.InstallerUrl) {
-                $script:_returnValue = [ReturnValue]::PatternError()
-            } else {
-                $script:_returnValue = [ReturnValue]::GenericError()
+            if (($script:ResponseUri -ne $NewInstallerUrl) -and ($ScriptSettings.UseRedirectedURL -ne 'never') -and ($NewInstallerUrl -notmatch 'github')) {
+                #If urls don't match, ask to update; If they do update, set custom error and check for validity;
+                $_menu = @{
+                    entries       = @('*[Y] Use detected URL'; '[N] Use original URL')
+                    Prompt        = 'The URL provided appears to be redirected. Would you like to use the destination URL instead?'
+                    HelpText      = "Discovered URL: $($script:ResponseUri)"
+                    DefaultString = 'Y'
+                }
+                switch ($(if ($ScriptSettings.UseRedirectedURL -eq 'always') { 'Y' } else { Invoke-KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString'] -HelpText $_menu['HelpText'] })) {
+                    'N' { Write-Host -ForegroundColor 'Green' "`nOriginal URL Retained - Proceeding with $NewInstallerUrl`n" } #Continue without replacing URL
+                    default { 
+                        $NewInstallerUrl = $script:ResponseUri
+                        $script:_returnValue = [ReturnValue]::new(409, 'URL Changed', 'The URL was changed during processing and will be re-validated', 1)
+                        Write-Host
+                    }
+                }
+            }
+            if ($script:_returnValue.StatusCode -ne 409) {
+                if (Test-String $NewInstallerUrl -MaxLength $Patterns.InstallerUrlMaxLength -MatchPattern $Patterns.InstallerUrl -NotNull) {
+                    $script:_returnValue = [ReturnValue]::Success()
+                } else {
+                    if (Test-String -not $NewInstallerUrl -MaxLength $Patterns.InstallerUrlMaxLength -NotNull) {
+                        $script:_returnValue = [ReturnValue]::LengthError(1, $Patterns.InstallerUrlMaxLength)
+                    } elseif (Test-String -not $NewInstallerUrl -MatchPattern $Patterns.InstallerUrl) {
+                        $script:_returnValue = [ReturnValue]::PatternError()
+                    } else {
+                        $script:_returnValue = [ReturnValue]::GenericError()
+                    }
+                }
             }
         }
     } until ($script:_returnValue.StatusCode -eq [ReturnValue]::Success().StatusCode)
@@ -879,12 +902,14 @@ Function Read-QuickInstallerEntry {
 
         if ($_NewInstaller.Keys -notcontains 'InstallerSha256') {
             try {
+                Write-Host -ForegroundColor 'Green' 'Downloading Installer. . .'
                 $script:dest = Get-InstallerFile -URI $_NewInstaller['InstallerUrl'] -PackageIdentifier $PackageIdentifier -PackageVersion $PackageVersion
             } catch {
                 # Here we also want to pass any exceptions through for potential debugging
                 throw [System.Net.WebException]::new('The file could not be downloaded. Try running the script again', $_.Exception)
             } finally {
                 # Check that MSI's aren't actually WIX
+                Write-Host -ForegroundColor 'Green' "Installer Downloaded!`nProcessing installer data. . . "
                 if ($_NewInstaller['InstallerType'] -eq 'msi') {
                     $DetectedType = Get-PathInstallerType $script:dest
                     if ($DetectedType -in @('msi'; 'wix')) { $_NewInstaller['InstallerType'] = $DetectedType }
@@ -933,6 +958,7 @@ Function Read-QuickInstallerEntry {
                 }
                 # Remove the downloaded files
                 Remove-Item -Path $script:dest
+                Write-Host -ForegroundColor 'Green' "Installer updated!`n"
             }
         }
         #Add the updated installer to the new installers array
