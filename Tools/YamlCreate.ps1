@@ -54,7 +54,7 @@ if ($Settings) {
     exit
 }
 
-$ScriptHeader = '# Created with YamlCreate.ps1 v2.0.7'
+$ScriptHeader = '# Created with YamlCreate.ps1 v2.1.0'
 $ManifestVersion = '1.1.0'
 $PSDefaultParameterValues = @{ '*:Encoding' = 'UTF8' }
 $Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
@@ -464,6 +464,70 @@ Function Get-ItemMetadata {
     }
 }
 
+function Get-Property ($Object, $PropertyName, [object[]]$ArgumentList) {
+    return $Object.GetType().InvokeMember($PropertyName, 'Public, Instance, GetProperty', $null, $Object, $ArgumentList)
+}
+
+Function Get-MsiDatabase {
+    Param
+    (
+        [Parameter(Mandatory = $true)]
+        [string] $FilePath
+    )
+    Write-Host -ForegroundColor 'Yellow' 'Reading Installer Database. This may take some time. . .'
+    $windowsInstaller = New-Object -com WindowsInstaller.Installer
+    $MSI = $windowsInstaller.OpenDatabase($FilePath, 0)
+    $_TablesView = $MSI.OpenView('select * from _Tables')
+    $_TablesView.Execute()
+    $_Database = @{}
+    do {
+        $_Table = $_TablesView.Fetch()
+        if ($_Table) {
+            $_TableName = Get-Property $_Table StringData 1
+            $_Database["$_TableName"] = @{}
+        }
+    } while ($_Table)
+    [void][System.Runtime.InteropServices.Marshal]::FinalReleaseComObject($_TablesView)
+    foreach ($_Table in $_Database.Keys) {
+        # Write-Host $_Table
+        $_ItemView = $MSI.OpenView("select * from $_Table")
+        $_ItemView.Execute()
+        do {
+            $_Item = $_ItemView.Fetch()
+            if ($_Item) {
+                $_ItemValue = $null
+                $_ItemName = Get-Property $_Item StringData 1
+                if ($_Table -eq 'Property') { $_ItemValue = Get-Property $_Item StringData 2 -ErrorAction SilentlyContinue }
+                $_Database.$_Table["$_ItemName"] = $_ItemValue
+            }
+        } while ($_Item)
+        [void][System.Runtime.InteropServices.Marshal]::FinalReleaseComObject($_ItemView)
+    }
+    [void][System.Runtime.InteropServices.Marshal]::FinalReleaseComObject($MSI)
+    [void][System.Runtime.InteropServices.Marshal]::FinalReleaseComObject($windowsInstaller)
+    Write-Host -ForegroundColor 'Yellow' 'Closing Installer Database. . .'
+    return $_Database
+}
+
+Function Test-IsWix {
+    Param
+    (
+        [Parameter(Mandatory = $true)]
+        [object] $Database,
+        [Parameter(Mandatory = $true)]
+        [object] $MetaDataObject
+    )
+    # If any of the table names match wix
+    if ($Database.Keys -match 'wix') { return $true }
+    # If any of the keys in the property table match wix
+    if ($Database.Property.Keys.Where({ $_ -match 'wix' })) { return $true }
+    # If the CreatedBy value matches wix
+    if ($MetaDataObject.ProgramName -match 'wix') { return $true }
+    # If the CreatedBy value matches xml
+    if ($MetaDataObject.ProgramName -match 'xml') { return $true }
+    return $false
+}
+
 Function Get-UserSavePreference {
     switch ($ScriptSettings.SaveToTemporaryFolder) {
         'always' { $_Preference = '0' }
@@ -496,9 +560,9 @@ Function Get-PathInstallerType {
     if ($Path -match '\.msix(bundle){0,1}$') { return 'msix' }
     if ($Path -match '\.msi$') {
         $ObjectMetadata = Get-ItemMetadata $Path
-        if ($ObjectMetadata.Keys -contains 'ProgramName') {
-            if ($ObjectMetadata.ProgramName -match 'XML') { return 'wix' }
-            if ($ObjectMetadata.ProgramName -match 'wix') { return 'wix' }
+        $ObjectDatabase = Get-MsiDatabase $Path
+        if (Test-IsWix -Database $ObjectDatabase -MetaDataObject $ObjectMetadata ) {
+            return 'wix'
         }
         return 'msi' 
     }
