@@ -993,6 +993,7 @@ Function Read-QuickInstallerEntry {
                 }
                 # If the installer is msix or appx, try getting the new SignatureSha256
                 # If the new SignatureSha256 can't be found, remove it if it exists
+                $NewSignatureSha256 = $null
                 if ($_NewInstaller.InstallerType -in @('msix', 'appx')) {
                     if (Get-Command 'winget.exe' -ErrorAction SilentlyContinue) { $NewSignatureSha256 = winget hash -m $script:dest | Select-String -Pattern 'SignatureSha256:' | ConvertFrom-String; if ($NewSignatureSha256.P2) { $NewSignatureSha256 = $NewSignatureSha256.P2.ToUpper() } }
                 }
@@ -2404,6 +2405,7 @@ Switch ($script:Option) {
                 }
                 # If the installer is msix or appx, try getting the new SignatureSha256
                 # If the new SignatureSha256 can't be found, remove it if it exists
+                $NewSignatureSha256 = $null
                 if ($_Installer.InstallerType -in @('msix', 'appx')) {
                     if (Get-Command 'winget.exe' -ErrorAction SilentlyContinue) { $NewSignatureSha256 = winget hash -m $script:dest | Select-String -Pattern 'SignatureSha256:' | ConvertFrom-String; if ($NewSignatureSha256.P2) { $NewSignatureSha256 = $NewSignatureSha256.P2.ToUpper() } }
                 }
