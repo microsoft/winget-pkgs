@@ -59,6 +59,10 @@ $ManifestVersion = '1.1.0'
 $PSDefaultParameterValues = @{ '*:Encoding' = 'UTF8' }
 $Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
 $ofs = ', '
+$callingUICulture = [Threading.Thread]::CurrentThread.CurrentUICulture
+$callingCulture = [Threading.Thread]::CurrentThread.CurrentCulture
+[Threading.Thread]::CurrentThread.CurrentUICulture = 'en-US'
+[Threading.Thread]::CurrentThread.CurrentCulture = 'en-US'
 
 <#
 .SYNOPSIS
@@ -2040,7 +2044,11 @@ if (!$script:UsingAdvancedOption) {
         '3' { $script:Option = 'EditMetadata' }
         '4' { $script:Option = 'NewLocale' }
         '5' { $script:Option = 'RemoveManifest' }
-        default { Write-Host; exit }
+        default { 
+            Write-Host
+            [Threading.Thread]::CurrentThread.CurrentUICulture = $callingUICulture
+            exit
+        }
     }
 } else {
     if ($AutoUpgrade) { $script:Option = 'Auto' }
@@ -2058,7 +2066,12 @@ if (($script:Option -eq 'QuickUpdateVersion') -and ($ScriptSettings.SuppressQuic
     switch ( Invoke-KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString'] -HelpText $_menu['HelpText'] -HelpTextColor $_menu['HelpTextColor']) {
         'Y' { Write-Host -ForegroundColor DarkYellow -Object "`n`nContinuing with Quick Update" }
         'N' { $script:Option = 'New'; Write-Host -ForegroundColor DarkYellow -Object "`n`nSwitched to Full Update Experience" }
-        default { Write-Host; exit }
+        default {
+            Write-Host
+            [Threading.Thread]::CurrentThread.CurrentUICulture = $callingUICulture
+            [Threading.Thread]::CurrentThread.CurrentCulture = $callingCulture
+            exit
+        }
     }
 }
 Write-Host
@@ -2113,7 +2126,12 @@ if ($ScriptSettings.ContinueWithExistingPRs -ne 'always' -and $script:Option -ne
     if ($PRApiResponse.total_count -gt 0) {
         $_PRUrl = $PRApiResponse.items.html_url
         $_PRTitle = $PRApiResponse.items.title
-        if ($ScriptSettings.ContinueWithExistingPRs -eq 'never') { Write-Host -ForegroundColor Red "Existing PR Found - $_PRUrl"; exit }
+        if ($ScriptSettings.ContinueWithExistingPRs -eq 'never') {
+            Write-Host -ForegroundColor Red "Existing PR Found - $_PRUrl"
+            [Threading.Thread]::CurrentThread.CurrentUICulture = $callingUICulture
+            [Threading.Thread]::CurrentThread.CurrentCulture = $callingCulture
+            exit
+        }
         $_menu = @{
             entries       = @('[Y] Yes'; '*[N] No')
             Prompt        = 'There may already be a PR for this change. Would you like to continue anyways?'
@@ -2123,7 +2141,12 @@ if ($ScriptSettings.ContinueWithExistingPRs -ne 'always' -and $script:Option -ne
         }
         switch ( Invoke-KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString'] -HelpText $_menu['HelpText'] -HelpTextColor $_menu['HelpTextColor'] ) {
             'Y' { Write-Host }
-            default { Write-Host; exit }
+            default {
+                Write-Host
+                [Threading.Thread]::CurrentThread.CurrentUICulture = $callingUICulture
+                [Threading.Thread]::CurrentThread.CurrentCulture = $callingCulture
+                exit
+            }
         }
     }
 }
@@ -2150,7 +2173,11 @@ if ($script:Option -in @('NewLocale'; 'EditMetadata'; 'RemoveManifest')) {
         Write-Host
         Write-Host -ForegroundColor 'Red' -Object 'Could not find required manifests, input a version containing required manifests or "exit" to cancel'
         $PromptVersion = Read-Host -Prompt 'Version' | TrimString
-        if ($PromptVersion -eq 'exit') { exit }
+        if ($PromptVersion -eq 'exit') {
+            [Threading.Thread]::CurrentThread.CurrentUICulture = $callingUICulture
+            [Threading.Thread]::CurrentThread.CurrentCulture = $callingCulture
+            exit 
+        }
         if (Test-Path -Path "$AppFolder\..\$PromptVersion") {
             $script:OldManifests = Get-ChildItem -Path "$AppFolder\..\$PromptVersion"
         }
@@ -2164,7 +2191,12 @@ if ($script:Option -in @('NewLocale'; 'EditMetadata'; 'RemoveManifest')) {
 # If the user selected `QuickUpdateVersion`, the old manifests must exist
 # If the user selected `New`, the old manifest type is specified as none
 if (-not (Test-Path -Path "$AppFolder\..")) {
-    if ($script:Option -in @('QuickUpdateVersion', 'Auto')) { Write-Host -ForegroundColor Red 'This option requires manifest of previous version of the package. If you want to create a new package, please select Option 1.'; exit }
+    if ($script:Option -in @('QuickUpdateVersion', 'Auto')) {
+        Write-Host -ForegroundColor Red 'This option requires manifest of previous version of the package. If you want to create a new package, please select Option 1.'
+        [Threading.Thread]::CurrentThread.CurrentUICulture = $callingUICulture
+        [Threading.Thread]::CurrentThread.CurrentCulture = $callingCulture
+        exit 
+    }
     $script:OldManifestType = 'None'
 }
 
@@ -2350,7 +2382,12 @@ Switch ($script:Option) {
         }
         switch ( Invoke-KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString'] -HelpText $_menu['HelpText'] -HelpTextColor $_menu['HelpTextColor']) {
             'Y' { Write-Host; continue }
-            default { Write-Host; exit 1 }
+            default {
+                Write-Host;
+                [Threading.Thread]::CurrentThread.CurrentUICulture = $callingUICulture
+                [Threading.Thread]::CurrentThread.CurrentCulture = $callingCulture
+                exit 1 
+            }
         }
 
         # Require that a reason for the deletion is provided
@@ -2571,8 +2608,12 @@ if ($PromptSubmit -eq '0') {
     }
 } else {
     Write-Host
+    [Threading.Thread]::CurrentThread.CurrentUICulture = $callingUICulture
+    [Threading.Thread]::CurrentThread.CurrentCulture = $callingCulture
     exit
 }
+[Threading.Thread]::CurrentThread.CurrentUICulture = $callingUICulture
+[Threading.Thread]::CurrentThread.CurrentCulture = $callingCulture
 
 # Error levels for the ReturnValue class
 Enum ErrorLevel {
