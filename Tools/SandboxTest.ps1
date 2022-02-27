@@ -24,12 +24,12 @@ if (-Not $SkipManifestValidation -And -Not [String]::IsNullOrWhiteSpace($Manifes
   Write-Host '--> Validating Manifest'
 
   if (-Not (Test-Path -Path $Manifest)) {
-    throw 'The Manifest does not exist.'
+    throw [System.IO.DirectoryNotFoundException]::new('The Manifest does not exist.')
   }
 
   winget.exe validate $Manifest
   switch ($LASTEXITCODE) {
-    '-1978335191' { throw 'Manifest validation failed.' }
+    '-1978335191' { throw [System.Activities.ValidationException]::new('Manifest validation failed.')}
     '-1978335192' { Start-Sleep -Seconds 5 }
     Default { continue }
   }
@@ -138,10 +138,11 @@ foreach ($dependency in $dependencies) {
       $WebClient.DownloadFile($dependency.url, $dependency.file)
     }
     catch {
-      throw "Error downloading $($dependency.url)."
+      #Pass the exception as an inner exception
+      throw [System.Net.WebException]::new("Error downloading $($dependency.url).",$_.Exception)
     }
     if (-not ($dependency.hash -eq $(Get-FileHash $dependency.file).Hash)) {
-      throw 'Hashes do not match, try gain.'
+      throw [System.Activities.VersionMismatchException]::new('Dependency hash does not match the downloaded file')
     }
   }
 }
@@ -164,20 +165,23 @@ function Update-EnvironmentVariables {
   }
 }
 
-
+function Get-ARPTable {
+  $registry_paths = @('HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*','HKLM:\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*', 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*', 'HKCU:\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*')
+  return Get-ItemProperty $registry_paths -ErrorAction SilentlyContinue | 
+       Select-Object DisplayName, DisplayVersion, Publisher, @{N='ProductCode'; E={$_.PSChildName}} |
+       Where-Object {$null -ne $_.DisplayName }
+}
 '@
 
 $bootstrapPs1Content += @"
 Write-Host @'
 --> Installing WinGet
-
 '@
+`$ProgressPreference = 'SilentlyContinue'
 Add-AppxPackage -Path '$($desktopAppInstaller.pathInSandbox)' -DependencyPath '$($vcLibsUwp.pathInSandbox)'
 
 Write-Host @'
-
 Tip: you can type 'Update-EnvironmentVariables' to update your environment variables, such as after installing a new software.
-
 '@
 
 
@@ -193,8 +197,10 @@ Write-Host @'
 --> Configuring Winget
 '@
 winget settings --Enable LocalManifestFiles
+`$originalARP = Get-ARPTable
+Write-Host @'
 
-Write-Host @'`n
+
 --> Installing the Manifest $manifestFileName
 
 '@
@@ -206,6 +212,11 @@ Write-Host @'
 '@
 Update-EnvironmentVariables
 
+Write-Host @'
+
+--> Comparing ARP Entries
+'@
+(Compare-Object (Get-ARPTable) `$originalARP -Property DisplayName,DisplayVersion,Publisher,ProductCode)| Select-Object -Property * -ExcludeProperty SideIndicator | Format-Table
 
 "@
 }
@@ -274,6 +285,7 @@ if (-Not [String]::IsNullOrWhiteSpace($Manifest)) {
   Write-Host @"
     - Installing the Manifest $manifestFileName
     - Refreshing environment variables
+    - Comparing ARP Entries
 "@
 }
 
