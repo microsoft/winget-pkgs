@@ -10,6 +10,7 @@ variables:
   Rebuild.SkipManifestIndexUpdate: $[coalesce(variables.SkipManifestIndexUpdate, 'False')]
   Rebuild.SkipPausePublishPipeline: $[coalesce(variables.SkipPausePublishPipeline, 'False')]
   Rebuild.EnableCacheContainerBackup: $[coalesce(variables.EnableCacheContainerBackup, 'False')]
+  Rebuild.SkipRestSourceRebuild: $[coalesce(variables.SkipRestSourceRebuild, 'False')]
 
 jobs:
 
@@ -48,6 +49,7 @@ jobs:
       SIGN_ENDPOINT: $(AzFuncSignEndpoint)
       PUBLISH_ENDPOINT: $(AzFuncRebuildPublishEndpoint)
       CLEANUP_ENDPOINT: $(AzFuncRebuildCleanupEndpoint)
+      RESTSOURCE_REBUILD_ENDPOINT: $(AzFuncRestSourceRebuildEndpoint)
 
   - task: CmdLine@2
     displayName: 'Validate Manifests'
@@ -142,6 +144,43 @@ jobs:
       waitForCompletion: "true"
 
 # Agentless phase. Depends on previous job.
+- job: 'PublishToRestSource'
+  pool: server
+  timeoutInMinutes: 1500
+  displayName: 'Publish to rest source'
+  dependsOn:
+    - 'Rebuild'
+    - 'SignPackage'
+    - 'Publish'
+  condition: and(succeededOrFailed(), ne(variables['Rebuild.SkipRestSourceRebuild'], 'True'))
+  variables:
+    HostKeySecret: $[ dependencies.Rebuild.outputs['wingetsetup.hostkey']]
+    RestSourceRebuildEndpointSecret: $[ dependencies.Rebuild.outputs['wingetsetup.restsourceRebuildEndpoint']]
+  steps:
+
+  # Rebuild Rest source.
+  - task: AzureFunction@1
+    displayName: 'Publish to rest source'
+    inputs:
+      function: '$(RestSourceRebuildEndpointSecret)'
+      key: '$(HostKeySecret)'
+      body: |
+        {
+        "operationId": "$(Build.BuildNumber)",
+        "BuildId": "$(Build.BuildId)",
+        "PlanUrl": "$(system.CollectionUri)",
+        "HubName": "$(system.HostType)",
+        "pipelineType": "RebuildPipeline",
+        "ProjectId": "$(system.TeamProjectId)",
+        "PlanId": "$(system.PlanId)", 
+        "JobId": "$(system.JobId)", 
+        "TimelineId": "$(system.TimelineId)", 
+        "TaskInstanceId": "$(system.TaskInstanceId)",
+        "AuthToken": "$(system.AccessToken)"
+        }
+      waitForCompletion: "true"
+
+# Agentless phase. Depends on previous job.
 - job: 'Cleanup'
   pool: server
   timeoutInMinutes: 1500
@@ -150,6 +189,7 @@ jobs:
     - 'Rebuild'
     - 'SignPackage'
     - 'Publish'
+    - 'PublishToRestSource'
   condition: and(succeededOrFailed(), ne(variables['Rebuild.SkipPausePublishPipeline'], 'True'))
   variables:
     HostKeySecret: $[ dependencies.Rebuild.outputs['wingetsetup.hostkey']]
