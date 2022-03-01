@@ -204,7 +204,7 @@ Write-Host @'
 --> Installing the Manifest $manifestFileName
 
 '@
-winget install -m '$manifestPathInSandbox'
+winget install -m '$manifestPathInSandbox' --verbose-logs
 
 Write-Host @'
 
