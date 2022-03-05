@@ -6,6 +6,12 @@ name: '$(Build.DefinitionName)-$(Build.DefinitionVersion)-$(Date:yyyyMMdd)-$(Rev
 trigger: none
 pr: none
 
+variables:
+  Rebuild.SkipManifestIndexUpdate: $[coalesce(variables.SkipManifestIndexUpdate, 'False')]
+  Rebuild.SkipPausePublishPipeline: $[coalesce(variables.SkipPausePublishPipeline, 'False')]
+  Rebuild.EnableCacheContainerBackup: $[coalesce(variables.EnableCacheContainerBackup, 'False')]
+  Rebuild.SkipRestSourceRebuild: $[coalesce(variables.SkipRestSourceRebuild, 'False')]
+
 jobs:
 
 # Agent phase.
@@ -34,13 +40,16 @@ jobs:
       AZURE_STORAGE_CONNECTION_STRING: $(ValidationStorageAccountConnectionString)
 
   # WinGet setup
-  - script: 'winget_publish_setup.cmd'
+  - script: 'winget_rebuild_setup.cmd'
     name: 'wingetsetup'
     displayName: 'WinGet Setup'
     workingDirectory: scripts
     env:
       HOST_KEY: $(AzureFunctionHostKey)
       SIGN_ENDPOINT: $(AzFuncSignEndpoint)
+      PUBLISH_ENDPOINT: $(AzFuncRebuildPublishEndpoint)
+      CLEANUP_ENDPOINT: $(AzFuncRebuildCleanupEndpoint)
+      RESTSOURCE_REBUILD_ENDPOINT: $(AzFuncRestSourceRebuildEndpoint)
 
   - task: CmdLine@2
     displayName: 'Validate Manifests'
@@ -49,10 +58,16 @@ jobs:
       failOnStderr: true
     condition: succeeded()
     env:
-      AzureWebJobsStorage: $(ValidationStorageAccountConnectionString)
+      ValidationConnectionString: $(ValidationStorageAccountConnectionString)
+      ExecutionEnvironment: $(ExecutionEnvironment)
       PackagePublisher: $(PackagePublisher)
       SYSTEM_ACCESSTOKEN: $(System.AccessToken)
       DIApplicationInsightKey: $(DIApplicationInsightKey)
+      WinGet:AppConfig:Primary: $(AppConfigPrimary)
+      WinGet:AppConfig:Secondary: $(AppConfigSecondary)
+      DevOpsOrganization: $(DevOpsOrganization)
+      DevOpsProjectName: $(DevOpsProjectName)
+      DevOpsPublishPipelineDefinitionId: $(DevOpsPublishPipelineDefinitionId)
 
 # Agentless phase. Depends on previous job. 
 - job: 'SignPackage'
@@ -75,6 +90,7 @@ jobs:
       body: |
         {
         "operationId": "$(Build.BuildNumber)",
+        "BuildId": "$(Build.BuildId)",
         "PlanUrl": "$(system.CollectionUri)",
         "HubName": "$(system.HostType)",
         "pipelineType": "RebuildPipeline",
@@ -87,78 +103,117 @@ jobs:
         }
       waitForCompletion: "true"
 
-# Agent phase. Depends on previous job.
+# Agentless phase. Depends on previous job.
 - job: 'Publish'
+  pool: server
+  timeoutInMinutes: 1500
   displayName: 'Publish'
-  pool:
-    vmImage: 'windows-latest'
-  variables:
-    skipComponentGovernanceDetection: ${{ true }}
-    runCodesignValidationInjection: ${{ false }}
-  dependsOn:
-    - 'SignPackage'
-  steps:
-
-  # Downloads all the setup files and its dependencies.
-  - task: AzureCLI@1
-    displayName: 'Azure Setup'
-    inputs:
-      azureSubscription: '$(WinGet.Subscription)'
-      scriptLocation: inlineScript
-      inlineScript: 'az storage blob download-batch -d . --pattern * -s servicewrapper --output none'
-    env:
-      AZURE_STORAGE_CONNECTION_STRING: $(ValidationStorageAccountConnectionString)
-
-  # Publish rebuild.
-  - task: CmdLine@2
-    displayName: 'Publish'
-    inputs:
-      script: 'WinGetSvcWrapper.exe rebuild-publish --operationId %BUILD_BUILDNUMBER%'
-      failOnStderr: true
-    condition: succeeded()
-    env:
-      AzureWebJobsStorage: $(ValidationStorageAccountConnectionString)
-      CacheConnectionString: $(CacheStorageAccountConnectionString)
-      DIApplicationInsightKey: $(DIApplicationInsightKey)
-      AzureServicesAuthConnectionString: $(AzureServicesAuthConnectionString)
-      WinGetSubscriptionId: $(WinGetSubscriptionId)
-      CdnProfileName: $(CdnProfileName)
-      CdnEndpointName: $(CdnEndpointName)
-
-# Agent phase. Depends on previous job.
-- job: 'Cleanup'
-  displayName: 'Cleanup'
-  pool:
-    vmImage: 'windows-latest'
   dependsOn:
     - 'Rebuild'
-    - 'Publish'
     - 'SignPackage'
-  condition: succeededOrFailed()
   variables:
-    skipComponentGovernanceDetection: ${{ true }}
-    runCodesignValidationInjection: ${{ false }}
+    HostKeySecret: $[ dependencies.Rebuild.outputs['wingetsetup.hostkey']]
+    PublishEndpointSecret: $[ dependencies.Rebuild.outputs['wingetsetup.publishEndpoint']]
   steps:
 
-    # Don't clone repo.
-  - checkout: none
-
-  - task: AzureCLI@1
-    displayName: 'Azure Setup'
+  # Rebuild Publish.
+  - task: AzureFunction@1
+    displayName: 'Publish'
     inputs:
-      azureSubscription: '$(WinGet.Subscription)'
-      scriptLocation: inlineScript
-      inlineScript: 'az storage blob download-batch -d . --pattern * -s servicewrapper --output none'
-    env:
-      AZURE_STORAGE_CONNECTION_STRING: $(ValidationStorageAccountConnectionString)
+      function: '$(PublishEndpointSecret)'
+      key: '$(HostKeySecret)'
+      body: |
+        {
+        "operationId": "$(Build.BuildNumber)",
+        "BuildId": "$(Build.BuildId)",
+        "PlanUrl": "$(system.CollectionUri)",
+        "HubName": "$(system.HostType)",
+        "pipelineType": "RebuildPipeline",
+        "ProjectId": "$(system.TeamProjectId)",
+        "PlanId": "$(system.PlanId)", 
+        "JobId": "$(system.JobId)", 
+        "TimelineId": "$(system.TimelineId)", 
+        "TaskInstanceId": "$(system.TaskInstanceId)",
+        "AuthToken": "$(system.AccessToken)",
+        "ContainerName": "$(CacheContainerName)",
+        "CommitTablePartitionKey": "$(CommitTablePartitionKey)",
+        "CommitTableRowKey": "$(CommitTableRowKey)",
+        "EnableCacheContainerBackup": "$(Rebuild.EnableCacheContainerBackup)",
+        "SkipManifestIndexUpdate": "$(Rebuild.SkipManifestIndexUpdate)",
+        }
+      waitForCompletion: "true"
 
-  - task: CmdLine@2
-    displayName: 'WinGet Cleanup'
+# Agentless phase. Depends on previous job.
+- job: 'PublishToRestSource'
+  pool: server
+  timeoutInMinutes: 1500
+  displayName: 'Publish to rest source'
+  dependsOn:
+    - 'Rebuild'
+    - 'SignPackage'
+    - 'Publish'
+  condition: and(succeededOrFailed(), ne(variables['Rebuild.SkipRestSourceRebuild'], 'True'))
+  variables:
+    HostKeySecret: $[ dependencies.Rebuild.outputs['wingetsetup.hostkey']]
+    RestSourceRebuildEndpointSecret: $[ dependencies.Rebuild.outputs['wingetsetup.restsourceRebuildEndpoint']]
+  steps:
+
+  # Rebuild Rest source.
+  - task: AzureFunction@1
+    displayName: 'Publish to rest source'
     inputs:
-      script: 'WinGetSvcWrapper.exe rebuild-cleanup --operationId %BUILD_BUILDNUMBER%'
-      failOnStderr: true
-    condition: succeeded()
-    env:
-      AzureWebJobsStorage: $(ValidationStorageAccountConnectionString)
-      SYSTEM_ACCESSTOKEN: $(System.AccessToken)
-      DIApplicationInsightKey: $(DIApplicationInsightKey)
+      function: '$(RestSourceRebuildEndpointSecret)'
+      key: '$(HostKeySecret)'
+      body: |
+        {
+        "operationId": "$(Build.BuildNumber)",
+        "BuildId": "$(Build.BuildId)",
+        "PlanUrl": "$(system.CollectionUri)",
+        "HubName": "$(system.HostType)",
+        "pipelineType": "RebuildPipeline",
+        "ProjectId": "$(system.TeamProjectId)",
+        "PlanId": "$(system.PlanId)", 
+        "JobId": "$(system.JobId)", 
+        "TimelineId": "$(system.TimelineId)", 
+        "TaskInstanceId": "$(system.TaskInstanceId)",
+        "AuthToken": "$(system.AccessToken)"
+        }
+      waitForCompletion: "true"
+
+# Agentless phase. Depends on previous job.
+- job: 'Cleanup'
+  pool: server
+  timeoutInMinutes: 1500
+  displayName: 'Cleanup'
+  dependsOn:
+    - 'Rebuild'
+    - 'SignPackage'
+    - 'Publish'
+    - 'PublishToRestSource'
+  condition: and(succeededOrFailed(), ne(variables['Rebuild.SkipPausePublishPipeline'], 'True'))
+  variables:
+    HostKeySecret: $[ dependencies.Rebuild.outputs['wingetsetup.hostkey']]
+    CleanupEndpointSecret: $[ dependencies.Rebuild.outputs['wingetsetup.cleanupEndpoint']]
+  steps:
+
+  # Rebuild cleanup.
+  - task: AzureFunction@1
+    displayName: 'Cleanup'
+    inputs:
+      function: '$(CleanupEndpointSecret)'
+      key: '$(HostKeySecret)'
+      body: |
+        {
+        "operationId": "$(Build.BuildNumber)",
+        "BuildId": "$(Build.BuildId)",
+        "PlanUrl": "$(system.CollectionUri)",
+        "HubName": "$(system.HostType)",
+        "pipelineType": "RebuildPipeline",
+        "ProjectId": "$(system.TeamProjectId)",
+        "PlanId": "$(system.PlanId)", 
+        "JobId": "$(system.JobId)", 
+        "TimelineId": "$(system.TimelineId)", 
+        "TaskInstanceId": "$(system.TaskInstanceId)",
+        "AuthToken": "$(system.AccessToken)",
+        }
+      waitForCompletion: "true"
