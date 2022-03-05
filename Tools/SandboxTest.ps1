@@ -81,9 +81,9 @@ function Get-LatestUrl {
 }
 
 function Get-LatestHash {
-  $shaUrl = ((Invoke-WebRequest $apiLatestUrl -UseBasicParsing | ConvertFrom-Json).assets | Where-Object { $_.name -match '^Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.txt$' }).browser_download_url
+  $shaUrl = ((Invoke-WebRequest $apiLatestUrl -UseBasicParsing | ConvertFrom-Json).assets | Where-Object { $_.name -match '^Microsoft.DesktopAppInstaller_8wekyb3db8bbwe.txt$' }).browser_download_url
 
-  $shaFile = Join-Path -Path $tempFolder -ChildPath 'Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.txt'
+  $shaFile = Join-Path -Path $tempFolder -ChildPath 'Microsoft.DesktopAppInstaller_8wekyb3db8bbwe.txt'
   $WebClient.DownloadFile($shaUrl, $shaFile)
 
   Get-Content $shaFile
@@ -106,8 +106,13 @@ $vcLibsUwp = @{
   url      = 'https://aka.ms/Microsoft.VCLibs.x64.14.00.Desktop.appx'
   hash     = 'A39CEC0E70BE9E3E48801B871C034872F1D7E5E8EEBE986198C019CF2C271040'
 }
+$uiLibsUwp = @{
+    fileName = 'Microsoft.UI.Xaml.2.7.zip'
+    url = 'https://www.nuget.org/api/v2/package/Microsoft.UI.Xaml/2.7.0'
+    hash = "422FD24B231E87A842C4DAEABC6A335112E0D35B86FAC91F5CE7CF327E36A591"
+}
 
-$dependencies = @($desktopAppInstaller, $vcLibsUwp)
+$dependencies = @($desktopAppInstaller, $vcLibsUwp, $uiLibsUwp)
 
 # Clean temp directory
 
@@ -147,6 +152,14 @@ foreach ($dependency in $dependencies) {
   }
 }
 
+# Extract Microsoft.UI.Xaml from zip (if freshly downloaded).
+# This is a workaround until https://github.com/microsoft/winget-cli/issues/1861 is resolved.
+
+if (-Not (Test-Path (Join-Path -Path $tempFolder -ChildPath \Microsoft.UI.Xaml.2.7\tools\AppX\x64\Release\Microsoft.UI.Xaml.2.7.appx))){
+  Expand-Archive -Path $uiLibsUwp.file -DestinationPath ($tempFolder + "\Microsoft.UI.Xaml.2.7") -Force
+}  
+$uiLibsUwp.file = (Join-Path -Path $tempFolder -ChildPath \Microsoft.UI.Xaml.2.7\tools\AppX\x64\Release\Microsoft.UI.Xaml.2.7.appx)
+$uiLibsUwp.pathInSandbox = Join-Path -Path $desktopInSandbox -ChildPath (Join-Path -Path $tempFolderName -ChildPath \Microsoft.UI.Xaml.2.7\tools\AppX\x64\Release\Microsoft.UI.Xaml.2.7.appx)
 Write-Host
 
 # Create Bootstrap script
@@ -178,7 +191,7 @@ Write-Host @'
 --> Installing WinGet
 '@
 `$ProgressPreference = 'SilentlyContinue'
-Add-AppxPackage -Path '$($desktopAppInstaller.pathInSandbox)' -DependencyPath '$($vcLibsUwp.pathInSandbox)'
+Add-AppxPackage -Path '$($desktopAppInstaller.pathInSandbox)' -DependencyPath '$($vcLibsUwp.pathInSandbox)','$($uiLibsUwp.pathInSandbox)'
 
 Write-Host @'
 Tip: you can type 'Update-EnvironmentVariables' to update your environment variables, such as after installing a new software.
