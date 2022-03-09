@@ -54,11 +54,15 @@ if ($Settings) {
     exit
 }
 
-$ScriptHeader = '# Created with YamlCreate.ps1 v2.0.7'
+$ScriptHeader = '# Created with YamlCreate.ps1 v2.1.0'
 $ManifestVersion = '1.1.0'
 $PSDefaultParameterValues = @{ '*:Encoding' = 'UTF8' }
 $Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
 $ofs = ', '
+$callingUICulture = [Threading.Thread]::CurrentThread.CurrentUICulture
+$callingCulture = [Threading.Thread]::CurrentThread.CurrentCulture
+[Threading.Thread]::CurrentThread.CurrentUICulture = 'en-US'
+[Threading.Thread]::CurrentThread.CurrentCulture = 'en-US'
 
 <#
 .SYNOPSIS
@@ -296,6 +300,7 @@ Function Test-Url {
         $HTTP_Request = [System.Net.WebRequest]::Create($URL)
         $HTTP_Request.UserAgent = 'Microsoft-Delivery-Optimization/10.1'
         $HTTP_Response = $HTTP_Request.GetResponse()
+        $script:ResponseUri = $HTTP_Response.ResponseUri.AbsoluteUri
         $HTTP_Status = [int]$HTTP_Response.StatusCode
     } catch {
         # Take no action here; If there is an exception, we will treat it like a 404
@@ -319,22 +324,44 @@ Function Test-ValidFileName {
 # Returns the validated URL which was entered
 Function Request-InstallerUrl {
     do {
-        Write-Host -ForegroundColor 'Red' $script:_returnValue.ErrorString()
-        Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the download url to the installer.'
-        $NewInstallerUrl = Read-Host -Prompt 'Url' | TrimString
-        if (Test-String $NewInstallerUrl -MaxLength $Patterns.InstallerUrlMaxLength -MatchPattern $Patterns.InstallerUrl -NotNull) {
-            if ((Test-Url $NewInstallerUrl) -ne 200) {
-                $script:_returnValue = [ReturnValue]::new(502, 'Invalid URL Response', 'The URL did not return a successful response from the server', 2)
-            } else {
-                $script:_returnValue = [ReturnValue]::Success()
-            }
+        Write-Host -ForegroundColor $(if ($script:_returnValue.Severity -gt 1) { 'red' } else { 'yellow' }) $script:_returnValue.ErrorString()
+        if ($script:_returnValue.StatusCode -ne 409) {
+            Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the download url to the installer.'
+            $NewInstallerUrl = Read-Host -Prompt 'Url' | TrimString
+        }
+        $script:_returnValue = [ReturnValue]::GenericError()
+        if ((Test-Url $NewInstallerUrl) -ne 200) {
+            $script:_returnValue = [ReturnValue]::new(502, 'Invalid URL Response', 'The URL did not return a successful response from the server', 2)
         } else {
-            if (Test-String -not $NewInstallerUrl -MaxLength $Patterns.InstallerUrlMaxLength -NotNull) {
-                $script:_returnValue = [ReturnValue]::LengthError(1, $Patterns.InstallerUrlMaxLength)
-            } elseif (Test-String -not $NewInstallerUrl -MatchPattern $Patterns.InstallerUrl) {
-                $script:_returnValue = [ReturnValue]::PatternError()
-            } else {
-                $script:_returnValue = [ReturnValue]::GenericError()
+            if (($script:ResponseUri -ne $NewInstallerUrl) -and ($ScriptSettings.UseRedirectedURL -ne 'never') -and ($NewInstallerUrl -notmatch 'github')) {
+                #If urls don't match, ask to update; If they do update, set custom error and check for validity;
+                $_menu = @{
+                    entries       = @('*[Y] Use detected URL'; '[N] Use original URL')
+                    Prompt        = 'The URL provided appears to be redirected. Would you like to use the destination URL instead?'
+                    HelpText      = "Discovered URL: $($script:ResponseUri)"
+                    DefaultString = 'Y'
+                }
+                switch ($(if ($ScriptSettings.UseRedirectedURL -eq 'always') { 'Y' } else { Invoke-KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString'] -HelpText $_menu['HelpText'] })) {
+                    'N' { Write-Host -ForegroundColor 'Green' "`nOriginal URL Retained - Proceeding with $NewInstallerUrl`n" } #Continue without replacing URL
+                    default { 
+                        $NewInstallerUrl = $script:ResponseUri
+                        $script:_returnValue = [ReturnValue]::new(409, 'URL Changed', 'The URL was changed during processing and will be re-validated', 1)
+                        Write-Host
+                    }
+                }
+            }
+            if ($script:_returnValue.StatusCode -ne 409) {
+                if (Test-String $NewInstallerUrl -MaxLength $Patterns.InstallerUrlMaxLength -MatchPattern $Patterns.InstallerUrl -NotNull) {
+                    $script:_returnValue = [ReturnValue]::Success()
+                } else {
+                    if (Test-String -not $NewInstallerUrl -MaxLength $Patterns.InstallerUrlMaxLength -NotNull) {
+                        $script:_returnValue = [ReturnValue]::LengthError(1, $Patterns.InstallerUrlMaxLength)
+                    } elseif (Test-String -not $NewInstallerUrl -MatchPattern $Patterns.InstallerUrl) {
+                        $script:_returnValue = [ReturnValue]::PatternError()
+                    } else {
+                        $script:_returnValue = [ReturnValue]::GenericError()
+                    }
+                }
             }
         }
     } until ($script:_returnValue.StatusCode -eq [ReturnValue]::Success().StatusCode)
@@ -441,6 +468,70 @@ Function Get-ItemMetadata {
     }
 }
 
+function Get-Property ($Object, $PropertyName, [object[]]$ArgumentList) {
+    return $Object.GetType().InvokeMember($PropertyName, 'Public, Instance, GetProperty', $null, $Object, $ArgumentList)
+}
+
+Function Get-MsiDatabase {
+    Param
+    (
+        [Parameter(Mandatory = $true)]
+        [string] $FilePath
+    )
+    Write-Host -ForegroundColor 'Yellow' 'Reading Installer Database. This may take some time. . .'
+    $windowsInstaller = New-Object -com WindowsInstaller.Installer
+    $MSI = $windowsInstaller.OpenDatabase($FilePath, 0)
+    $_TablesView = $MSI.OpenView('select * from _Tables')
+    $_TablesView.Execute()
+    $_Database = @{}
+    do {
+        $_Table = $_TablesView.Fetch()
+        if ($_Table) {
+            $_TableName = Get-Property $_Table StringData 1
+            $_Database["$_TableName"] = @{}
+        }
+    } while ($_Table)
+    [void][System.Runtime.InteropServices.Marshal]::FinalReleaseComObject($_TablesView)
+    foreach ($_Table in $_Database.Keys) {
+        # Write-Host $_Table
+        $_ItemView = $MSI.OpenView("select * from $_Table")
+        $_ItemView.Execute()
+        do {
+            $_Item = $_ItemView.Fetch()
+            if ($_Item) {
+                $_ItemValue = $null
+                $_ItemName = Get-Property $_Item StringData 1
+                if ($_Table -eq 'Property') { $_ItemValue = Get-Property $_Item StringData 2 -ErrorAction SilentlyContinue }
+                $_Database.$_Table["$_ItemName"] = $_ItemValue
+            }
+        } while ($_Item)
+        [void][System.Runtime.InteropServices.Marshal]::FinalReleaseComObject($_ItemView)
+    }
+    [void][System.Runtime.InteropServices.Marshal]::FinalReleaseComObject($MSI)
+    [void][System.Runtime.InteropServices.Marshal]::FinalReleaseComObject($windowsInstaller)
+    Write-Host -ForegroundColor 'Yellow' 'Closing Installer Database. . .'
+    return $_Database
+}
+
+Function Test-IsWix {
+    Param
+    (
+        [Parameter(Mandatory = $true)]
+        [object] $Database,
+        [Parameter(Mandatory = $true)]
+        [object] $MetaDataObject
+    )
+    # If any of the table names match wix
+    if ($Database.Keys -match 'wix') { return $true }
+    # If any of the keys in the property table match wix
+    if ($Database.Property.Keys.Where({ $_ -match 'wix' })) { return $true }
+    # If the CreatedBy value matches wix
+    if ($MetaDataObject.ProgramName -match 'wix') { return $true }
+    # If the CreatedBy value matches xml
+    if ($MetaDataObject.ProgramName -match 'xml') { return $true }
+    return $false
+}
+
 Function Get-UserSavePreference {
     switch ($ScriptSettings.SaveToTemporaryFolder) {
         'always' { $_Preference = '0' }
@@ -473,9 +564,9 @@ Function Get-PathInstallerType {
     if ($Path -match '\.msix(bundle){0,1}$') { return 'msix' }
     if ($Path -match '\.msi$') {
         $ObjectMetadata = Get-ItemMetadata $Path
-        if ($ObjectMetadata.Keys -contains 'ProgramName') {
-            if ($ObjectMetadata.ProgramName -match 'XML') { return 'wix' }
-            if ($ObjectMetadata.ProgramName -match 'wix') { return 'wix' }
+        $ObjectDatabase = Get-MsiDatabase $Path
+        if (Test-IsWix -Database $ObjectDatabase -MetaDataObject $ObjectMetadata ) {
+            return 'wix'
         }
         return 'msi' 
     }
@@ -879,12 +970,14 @@ Function Read-QuickInstallerEntry {
 
         if ($_NewInstaller.Keys -notcontains 'InstallerSha256') {
             try {
+                Write-Host -ForegroundColor 'Green' 'Downloading Installer. . .'
                 $script:dest = Get-InstallerFile -URI $_NewInstaller['InstallerUrl'] -PackageIdentifier $PackageIdentifier -PackageVersion $PackageVersion
             } catch {
                 # Here we also want to pass any exceptions through for potential debugging
                 throw [System.Net.WebException]::new('The file could not be downloaded. Try running the script again', $_.Exception)
             } finally {
                 # Check that MSI's aren't actually WIX
+                Write-Host -ForegroundColor 'Green' "Installer Downloaded!`nProcessing installer data. . . "
                 if ($_NewInstaller['InstallerType'] -eq 'msi') {
                     $DetectedType = Get-PathInstallerType $script:dest
                     if ($DetectedType -in @('msi'; 'wix')) { $_NewInstaller['InstallerType'] = $DetectedType }
@@ -904,6 +997,7 @@ Function Read-QuickInstallerEntry {
                 }
                 # If the installer is msix or appx, try getting the new SignatureSha256
                 # If the new SignatureSha256 can't be found, remove it if it exists
+                $NewSignatureSha256 = $null
                 if ($_NewInstaller.InstallerType -in @('msix', 'appx')) {
                     if (Get-Command 'winget.exe' -ErrorAction SilentlyContinue) { $NewSignatureSha256 = winget hash -m $script:dest | Select-String -Pattern 'SignatureSha256:' | ConvertFrom-String; if ($NewSignatureSha256.P2) { $NewSignatureSha256 = $NewSignatureSha256.P2.ToUpper() } }
                 }
@@ -933,6 +1027,7 @@ Function Read-QuickInstallerEntry {
                 }
                 # Remove the downloaded files
                 Remove-Item -Path $script:dest
+                Write-Host -ForegroundColor 'Green' "Installer updated!`n"
             }
         }
         #Add the updated installer to the new installers array
@@ -1949,7 +2044,11 @@ if (!$script:UsingAdvancedOption) {
         '3' { $script:Option = 'EditMetadata' }
         '4' { $script:Option = 'NewLocale' }
         '5' { $script:Option = 'RemoveManifest' }
-        default { Write-Host; exit }
+        default { 
+            Write-Host
+            [Threading.Thread]::CurrentThread.CurrentUICulture = $callingUICulture
+            exit
+        }
     }
 } else {
     if ($AutoUpgrade) { $script:Option = 'Auto' }
@@ -1967,7 +2066,12 @@ if (($script:Option -eq 'QuickUpdateVersion') -and ($ScriptSettings.SuppressQuic
     switch ( Invoke-KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString'] -HelpText $_menu['HelpText'] -HelpTextColor $_menu['HelpTextColor']) {
         'Y' { Write-Host -ForegroundColor DarkYellow -Object "`n`nContinuing with Quick Update" }
         'N' { $script:Option = 'New'; Write-Host -ForegroundColor DarkYellow -Object "`n`nSwitched to Full Update Experience" }
-        default { Write-Host; exit }
+        default {
+            Write-Host
+            [Threading.Thread]::CurrentThread.CurrentUICulture = $callingUICulture
+            [Threading.Thread]::CurrentThread.CurrentCulture = $callingCulture
+            exit
+        }
     }
 }
 Write-Host
@@ -2022,7 +2126,12 @@ if ($ScriptSettings.ContinueWithExistingPRs -ne 'always' -and $script:Option -ne
     if ($PRApiResponse.total_count -gt 0) {
         $_PRUrl = $PRApiResponse.items.html_url
         $_PRTitle = $PRApiResponse.items.title
-        if ($ScriptSettings.ContinueWithExistingPRs -eq 'never') { Write-Host -ForegroundColor Red "Existing PR Found - $_PRUrl"; exit }
+        if ($ScriptSettings.ContinueWithExistingPRs -eq 'never') {
+            Write-Host -ForegroundColor Red "Existing PR Found - $_PRUrl"
+            [Threading.Thread]::CurrentThread.CurrentUICulture = $callingUICulture
+            [Threading.Thread]::CurrentThread.CurrentCulture = $callingCulture
+            exit
+        }
         $_menu = @{
             entries       = @('[Y] Yes'; '*[N] No')
             Prompt        = 'There may already be a PR for this change. Would you like to continue anyways?'
@@ -2032,7 +2141,12 @@ if ($ScriptSettings.ContinueWithExistingPRs -ne 'always' -and $script:Option -ne
         }
         switch ( Invoke-KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString'] -HelpText $_menu['HelpText'] -HelpTextColor $_menu['HelpTextColor'] ) {
             'Y' { Write-Host }
-            default { Write-Host; exit }
+            default {
+                Write-Host
+                [Threading.Thread]::CurrentThread.CurrentUICulture = $callingUICulture
+                [Threading.Thread]::CurrentThread.CurrentCulture = $callingCulture
+                exit
+            }
         }
     }
 }
@@ -2059,7 +2173,11 @@ if ($script:Option -in @('NewLocale'; 'EditMetadata'; 'RemoveManifest')) {
         Write-Host
         Write-Host -ForegroundColor 'Red' -Object 'Could not find required manifests, input a version containing required manifests or "exit" to cancel'
         $PromptVersion = Read-Host -Prompt 'Version' | TrimString
-        if ($PromptVersion -eq 'exit') { exit }
+        if ($PromptVersion -eq 'exit') {
+            [Threading.Thread]::CurrentThread.CurrentUICulture = $callingUICulture
+            [Threading.Thread]::CurrentThread.CurrentCulture = $callingCulture
+            exit 
+        }
         if (Test-Path -Path "$AppFolder\..\$PromptVersion") {
             $script:OldManifests = Get-ChildItem -Path "$AppFolder\..\$PromptVersion"
         }
@@ -2073,7 +2191,12 @@ if ($script:Option -in @('NewLocale'; 'EditMetadata'; 'RemoveManifest')) {
 # If the user selected `QuickUpdateVersion`, the old manifests must exist
 # If the user selected `New`, the old manifest type is specified as none
 if (-not (Test-Path -Path "$AppFolder\..")) {
-    if ($script:Option -in @('QuickUpdateVersion', 'Auto')) { Write-Host -ForegroundColor Red 'This option requires manifest of previous version of the package. If you want to create a new package, please select Option 1.'; exit }
+    if ($script:Option -in @('QuickUpdateVersion', 'Auto')) {
+        Write-Host -ForegroundColor Red 'This option requires manifest of previous version of the package. If you want to create a new package, please select Option 1.'
+        [Threading.Thread]::CurrentThread.CurrentUICulture = $callingUICulture
+        [Threading.Thread]::CurrentThread.CurrentCulture = $callingCulture
+        exit 
+    }
     $script:OldManifestType = 'None'
 }
 
@@ -2259,7 +2382,12 @@ Switch ($script:Option) {
         }
         switch ( Invoke-KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString'] -HelpText $_menu['HelpText'] -HelpTextColor $_menu['HelpTextColor']) {
             'Y' { Write-Host; continue }
-            default { Write-Host; exit 1 }
+            default {
+                Write-Host;
+                [Threading.Thread]::CurrentThread.CurrentUICulture = $callingUICulture
+                [Threading.Thread]::CurrentThread.CurrentCulture = $callingCulture
+                exit 1 
+            }
         }
 
         # Require that a reason for the deletion is provided
@@ -2314,6 +2442,7 @@ Switch ($script:Option) {
                 }
                 # If the installer is msix or appx, try getting the new SignatureSha256
                 # If the new SignatureSha256 can't be found, remove it if it exists
+                $NewSignatureSha256 = $null
                 if ($_Installer.InstallerType -in @('msix', 'appx')) {
                     if (Get-Command 'winget.exe' -ErrorAction SilentlyContinue) { $NewSignatureSha256 = winget hash -m $script:dest | Select-String -Pattern 'SignatureSha256:' | ConvertFrom-String; if ($NewSignatureSha256.P2) { $NewSignatureSha256 = $NewSignatureSha256.P2.ToUpper() } }
                 }
@@ -2479,8 +2608,12 @@ if ($PromptSubmit -eq '0') {
     }
 } else {
     Write-Host
+    [Threading.Thread]::CurrentThread.CurrentUICulture = $callingUICulture
+    [Threading.Thread]::CurrentThread.CurrentCulture = $callingCulture
     exit
 }
+[Threading.Thread]::CurrentThread.CurrentUICulture = $callingUICulture
+[Threading.Thread]::CurrentThread.CurrentCulture = $callingCulture
 
 # Error levels for the ReturnValue class
 Enum ErrorLevel {
