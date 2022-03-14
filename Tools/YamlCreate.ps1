@@ -54,7 +54,7 @@ if ($Settings) {
     exit
 }
 
-$ScriptHeader = '# Created with YamlCreate.ps1 v2.1.0'
+$ScriptHeader = '# Created with YamlCreate.ps1 v2.1.1'
 $ManifestVersion = '1.1.0'
 $PSDefaultParameterValues = @{ '*:Encoding' = 'UTF8' }
 $Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
@@ -381,8 +381,10 @@ Function Get-InstallerFile {
     )
     # Create a filename based on the Package Identifier and Version; Try to get the extension from the URL
     # If the extension isn't found, use a custom one
-    $_Filename = "$PackageIdentifier v$PackageVersion - $(Get-Date -f 'yyyy.MM.dd-hh.mm.ss')" + $(if ([System.IO.Path]::HasExtension($URI)) { [System.IO.Path]::GetExtension($URI) } else { '.winget-tmp' })
-    $_OutFile = Join-Path -Path $env:TEMP -ChildPath $_Filename
+    $_URIPath = $URI.Split('?')[0]
+    $_Filename = "$PackageIdentifier v$PackageVersion - $(Get-Date -f 'yyyy.MM.dd-hh.mm.ss')" + $(if ([System.IO.Path]::HasExtension($_URIPath)) { [System.IO.Path]::GetExtension($_URIPath) } else { '.winget-tmp' })
+    if (Test-ValidFileName $_Filename){ $_OutFile = Join-Path -Path $env:TEMP -ChildPath $_Filename }
+    else { $_OutFile = (New-TemporaryFile).FullName }
 
     # Create a new web client for downloading the file
     $_WebClient = [System.Net.WebClient]::new()
