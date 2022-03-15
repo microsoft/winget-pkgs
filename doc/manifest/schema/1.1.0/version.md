@@ -3,6 +3,15 @@
 
 All Windows Package Manager manifests in the Microsoft community repository are submitted using [YAML](https://yaml.org/spec/) syntax. A JSON schema is provided to aid authoring these files in editors, and in the other tooling related to the Windows Package Manager. This document provides detailed information regarding the usage of the YAML keys in the [version](https://github.com/microsoft/winget-cli/blob/master/schemas/JSON/manifests/v1.1.0/manifest.version.1.1.0.json) file for multi-file manifests. Please review the [Manifest Specification](https://github.com/microsoft/winget-cli/blob/master/doc/ManifestSpecv1.1.md) if you are not familiar with this file.
 
+### [Version Manifest](#tab/version/)
+```YAML
+PackageIdentifier:      # The package unique identifier
+PackageVersion:         # The package version
+DefaultLocale:          # The default package meta-data locale
+ManifestType: version   # The manifest type
+ManifestVersion: 1.1.0  # The manifest syntax version
+```
+
 ## Fields
 ### PackageIdentifier
 <details>
