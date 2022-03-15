@@ -2,7 +2,7 @@
 ## Manifest Schema v1.1.0 Installer File
 All Windows Package Manager manifests in the Microsoft community repository are submitted using [YAML](https://yaml.org/spec/) syntax. A JSON schema is provided to aid authoring these files in editors, and in the other tooling related to the Windows Package Manager. This document provides detailed information regarding the usage of the YAML keys in the [installer](https://github.com/microsoft/winget-cli/blob/master/schemas/JSON/manifests/v1.1.0/manifest.installer.1.1.0.json) file for multi-file manifests. Please review the [Manifest Specification](https://github.com/microsoft/winget-cli/blob/master/doc/ManifestSpecv1.1.md) if you are not familiar with this file.
 
-### [Default Locale Manifest](#tab/defaultLocale/)
+### [Installer Manifest](#tab/installer/)
 
 ```YAML
 PackageIdentifier:            # The package unique identifier
