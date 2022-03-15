@@ -13,14 +13,6 @@ MimimumOSVersion:             # Optional installer minimum operating system vers
 InstallerType:                # The installer type
 Scope:                        # Optional installer scope
 InstallModes:                 # Optional installer modes
-InstallerSwitches:            # Optional installer switches
-  Silent:                     # Optional installer switches for silent
-  SilentWithProgress:         # Optional installer switches for silent with progress
-  Interactive:                # Optional installer switches for interactive
-  InstallLocation:            # Optional install location path
-  Log:                        # Optional installer log file path
-  Upgrade:                    # Optional installer switches for upgrade
-  Custom:                     # Optional installer switches for custom behavior
 InstallerSuccessCodes:        # Optional non-zero installer success codes
 UpgradeBehavior:              # Optional upgrade method
 Commands:                     # Optional commands or aliases to run the package
