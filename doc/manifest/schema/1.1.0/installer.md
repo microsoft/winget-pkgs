@@ -10,8 +10,6 @@ PackageVersion:               # The package version
 Channel:                      # *Not implemented* distribution channel
 Platform:                     # Optional installer supported operating system
 MimimumOSVersion:             # Optional installer minimum operating system version
-InstallerType:                # The installer type
-Scope:                        # Optional installer scope
 InstallModes:                 # Optional installer modes
 InstallerSuccessCodes:        # Optional non-zero installer success codes
 UpgradeBehavior:              # Optional upgrade method
