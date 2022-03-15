@@ -142,7 +142,7 @@ ManifestVersion: 1.1.0        # The manifest syntax version
   <summary>The package license</summary>
 
   **Required Field**
-  This key represents the license governing the use and or distribution for the product. This could be an open source license, or a commercial license.
+  This key represents the license governing the use and or distribution for the product. This could be an open source license, or a commercial license. Please note that a copyright is not considered a license. If there is no available information on a product's license, "Proprietary" should be the value in this field.
  </details>
 
 #### LicenseUrl
