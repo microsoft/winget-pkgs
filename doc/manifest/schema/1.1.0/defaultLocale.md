@@ -3,6 +3,30 @@
 
 All Windows Package Manager manifests in the Microsoft community repository are submitted using [YAML](https://yaml.org/spec/) syntax. A JSON schema is provided to aid authoring these files in editors, and in the other tooling related to the Windows Package Manager. This document provides detailed information regarding the usage of the YAML keys in the [default locale](https://github.com/microsoft/winget-cli/blob/master/schemas/JSON/manifests/v1.1.0/manifest.defaultLocale.1.1.0.json) file for multi-file manifests. Please review the [Manifest Specification](https://github.com/microsoft/winget-cli/blob/master/doc/ManifestSpecv1.1.md) if you are not familiar with this file.
 
+### [Default Locale Manifest](#tab/defaultLocale/)
+```YAML
+PackageIdentifier:            # The package unique identifier
+PackageVersion:               # The package version
+PackageLocale:                # The package meta-data locale
+Publisher:                    # The publisher name
+PublisherURL:                 # Optional publisher home page
+PublisherSupportUrul:         # Optional publisher support page
+PrivacyUrl:                   # Optional publisher privacy page
+Author:                       # Optional author
+PackageName:                  # The package name
+PackageURL:                   # Optional package home page
+License:                      # The package license
+LicenseUrl:                   # Optional package home page
+Copyright:                    # Optional package copyright
+CopyrightUrl:                 # Optional package copyright page
+ShortDescription:             # The short package description
+Description:                  # Optional full package description
+Moniker:                      # Optional most common package term
+Tags:                         # Optional list of package terms
+ManifestType: defaultLocale   # The manifest type
+ManifestVersion: 1.1.0        # The manifest syntax version
+```
+
 ## Fields
 ### PackageIdentifier
 <details>
@@ -19,7 +43,7 @@ All Windows Package Manager manifests in the Microsoft community repository are 
  #### Required Field
  This key represents the version of the package. It is related to the specific release this manifests targets. In some cases you will see a perfectly formed [semantic](https://semver.org) version number, and in other cases you might see something different. These may be date driven, or they might have other characters with some package specific meaning for example.
 
- The Windows Package Manager client uses this version to determine whether or not an upgrade for a package is available. In some cases, packages may be released with a marketing driven version, and that causes trouble with the `winget upgrade` command. 
+ The Windows Package Manager client uses this version to determine whether or not an upgrade for a package is available. In some cases, packages may be released with a marketing driven version, and that causes trouble with the `winget upgrade` command.
 
  The current best practice is to use the value reported in Add / Remove Programs when this version of the package is installed. In some cases, packages do not report a version resulting in an upgrade loop or other unwanted behavior.
 </details>
@@ -45,7 +69,7 @@ All Windows Package Manager manifests in the Microsoft community repository are 
   #### Required Field
   This key represents the name of the publisher for a given package. This field is intended to allow the full publisher's or ISV's name to be displayed as they wish.
 
-  >Note: With the 1.0 release of the Windows Package Manager, this name affects how packages from a source are mapped to Apps installed in Windows 10 via Add / Remove Programs (ARP). The best practice is to ensure this matches the ARP entry for the package when it has been installed. The impact is associated with `winget upgrade` and `winget list`.
+  >Note: With the 1.0 release of the Windows Package Manager, this name affects how packages from a source are mapped to Apps installed in Windows 10 and Windows 11 via Add / Remove Programs (ARP). The best practice is to ensure this matches the ARP entry for the package when it has been installed. The impact is associated with `winget upgrade` and `winget list`.
  </details>
 
 #### PublisherUrl
