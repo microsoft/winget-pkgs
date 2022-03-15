@@ -28,11 +28,26 @@ ProductCode:                  # Optional product code
 Capabilities:                 # Optional list of MSIX package capabilities
 RestrictedCapabilities:       # Optional list of MSIX package restricted capabilities
 Installers:                   # The list of package installers
-  InstallerLocale:            # Optional locale of the installer
-  Architecture:               # The architecture of the installer
-  InstallerUrl:               # The installer URL
-  InstallerSha256:            # The SHA256 hash of the installer
-  SignatureSha256:            # Optional SHA256 hash of the MSIX signature
+  - InstallerLocale:          # Optional locale of the installer
+    Architecture:             # The architecture of the installer
+    InstallerType:            # The installer type
+    InstallerUrl:             # The installer URL
+    InstallerSha256:          # The SHA256 hash of the installer
+    SignatureSha256:          # Optional SHA256 hash of the MSIX signature
+    ProductCode:              # Optional product code of the installer
+    Scope:                    # Optional installer scope
+    InstallerSwitches:        # Optional installer switches
+      Silent:                 # Optional installer switches for silent
+      SilentWithProgress:     # Optional installer switches for silent with progress
+      Interactive:            # Optional installer switches for interactive
+      InstallLocation:        # Optional install location path
+      Log:                    # Optional installer log file path
+      Upgrade:                # Optional installer switches for upgrade
+      Custom:                 # Optional installer switches for custom behavior
+    AppsAndFeaturesEntries:   # Optional entries from the Add and Remove Programs (ARP) table
+      - DisplayName:          # The program name shown in the ARP entry
+        DisplayVersion:       # The version displayed in the ARP entry
+        Publisher:            # The publisher displayed in the ARP entry
 ManifestType: installer       # The manifest type
 ManifestVersion: 1.1.0        # The manifest syntax version
 ```
