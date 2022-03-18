@@ -1,8 +1,12 @@
 # Windows Package Manager Community Repository
-This repository contains the manifest files for the **Windows Package Manager** default source.  You are highly encouraged to submit manifests for your favorite application.
->Note: At this time installers must either be MSIX, MSI or .exe application installers. Standalone or portable executables, compressed .zip files, and fonts are not currently supported.
+[![Gitter](https://img.shields.io/gitter/room/Microsoft/winget-pkgs)](https://gitter.im/Microsoft/winget-pkgs)
+![Validation Pipeline Badge](https://img.shields.io/endpoint?url=https://winget-pme.azurefd.net/api/GetServiceComponentStatusBadge?component=ValidationPipeline "Validation Pipeline Badge")
+![Publish Pipeline Badge](https://img.shields.io/endpoint?url=https://winget-pme.azurefd.net/api/GetServiceComponentStatusBadge?component=PublishPipeline "Publish Pipeline Badge")
 
-The **Windows Package Manager** is an [open source client](https://github.com/microsoft/winget-cli) designed for command-line usage.
+This repository contains the manifest files for the **Windows Package Manager** default source.  You are highly encouraged to submit manifests for your favorite application.
+> Note: At this time installers must either be MSIX, MSI or .exe application installers. Standalone or portable executables, compressed .zip files, and fonts are not currently supported.
+
+The **Windows Package Manager** is an [open source client](https://github.com/microsoft/winget-cli) designed for command-line usage. If you are interested in exploring third-party repositories offering private winget package hosting, see [third-party repositories](THIRD_PARTY.md).
 
 # Submitting a Package
 To submit a package to this repository, you should follow these steps:
@@ -12,21 +16,22 @@ To submit a package to this repository, you should follow these steps:
 4) [Submit](#submit-your-pr) your pull request (PR).
 5) Respond to any feedback in your PR.
 
->Note: Please check the package's manifest you intend to submit does not already exist in the repository, and there are no open PRs for it in order to avoid duplicates.
+> Note: Please check the package's manifest you intend to submit does not already exist in the repository, and there are no open PRs for it in order to avoid duplicates.
 
 ## Authoring a Manifest
 
-You may either use the [Windows Package Manager Manifest Creator](https://github.com/microsoft/winget-create), the [YAMLCreate](#using-the-yamlcreateps1) PowerShell script, or you can craft a manifest manually following our [authoring guidelines](AUTHORING_MANIFESTS.md).
+You may either use the [Windows Package Manager Manifest Creator](https://github.com/microsoft/winget-create), the [YamlCreate](#using-the-yamlcreateps1) PowerShell script, or you can craft a manifest manually following our [authoring guidelines](AUTHORING_MANIFESTS.md).
 
->Note: Only one manifest may be submitted per PR.
+> Note: Only one manifest may be submitted per PR.
 
-### Using the YAMLCreate.ps1
-To help author manifest files, we have provided a YAMLCreate.ps1 [powershell script](Tools/YamlCreate.ps1) located in the Tools folder. The script will prompt you for the URL to the installer, then will prompt you to fill in metadata.
+### Using the YamlCreate.ps1
+To help author manifest files, we have provided a YamlCreate.ps1 [powershell script](Tools/YamlCreate.ps1) located in the Tools folder. The script will prompt you for the URL to the installer, then will prompt you to fill in metadata. Additional information regarding the YamlCreate script can be found in the [documentation for the script](doc/tools/YamlCreate.md). 
 
->Note: We recommend running the script in the location where you want to produce the manifest file.  For example: `manifests\<p>\<publisher>\<package>\`.  After successful completion, it will produce the YAML files.
+> You can use the script by cloning the repository on your PC and running the script directly from the **Tools** folder.
 
 ## Test your manifest
 Now that you have authored your manifest, you should make sure it works as expected.
+>Note: You will need to run `winget settings --enable LocalManifestFiles` in an administrative shell before working with local manifests.
 
 ### Locally
 1) Verify the syntax by executing the following command:
@@ -56,25 +61,22 @@ manifests\<first lower case letter of publisher>\<publisher>\<package>\<version>
 ```
 
 ### Validation Process
-The PR request will go through a validation process. During the process, the core team or the Microsoft bot (BOT) will use [labels](https://docs.microsoft.com/windows/package-manager/package/winget-validation#pull-request-labels) to help. In the event of a failure, the BOT will suggest where the problem is with the submission and assign the PR back to you.  
+The PR request will go through a validation process. The core team or the Microsoft bot (BOT) will use [labels](https://docs.microsoft.com/windows/package-manager/package/winget-validation#pull-request-labels) to help during the process. In the event of a failure, the BOT will suggest the problem with the submission and assign the PR back to you.
+ 
 
 ### Respond to PR feedback
-If the PR has been assigned to you, a timer is triggered.  You will have 7 days to resolve the issue, or the PR will be closed automatically by the BOT.  
+If the PR has been assigned to you, a timer is triggered. You will have 7 days to resolve the issue, or the BOT will automatically close the PR.  
 
 Submissions to the repository are reviewed by Windows Package Manager administrators and/or community moderators. We've provided a [Public Service Announcement](https://github.com/microsoft/winget-pkgs/issues/15674) to help identify these individuals. 
 
 # Contributing
 
-This project welcomes contributions and suggestions.  Most contributions require you to agree to a
-Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us
-the rights to use your contribution. For details, visit https://cla.opensource.microsoft.com.
+This project welcomes contributions and suggestions.  Most contributions require you to agree to a Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us the rights to use your contribution. For details, visit https://cla.opensource.microsoft.com.
 
-When you submit a pull request, a CLA bot will automatically determine whether you need to provide
-a CLA and decorate the PR appropriately (e.g., status check, comment). Simply follow the instructions
-provided by the bot. You will only need to do this once across all Microsoft repositories using our CLA.
+When you submit a pull request, a CLA bot will automatically determine whether you need to provide a CLA and decorate the PR appropriately (e.g., status check, comment). Follow the instructions provided by the bot. You will only need to do this once across all Microsoft repositories using our CLA.
 
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/).
-For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or
+See the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or
 contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments. More information is available in our [Contributing document](CONTRIBUTING.md).
 
-For the avoidance of doubt, you may not make any Submissions linking to third party materials if such Submission is prohibited by the applicable third party and/or otherwise violates such third party's rights.
+To avoid doubt, you may not make any Submissions linking to third party materials if such Submission is prohibited by the applicable third party and/or otherwise violates such third party's rights.
