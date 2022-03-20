@@ -391,7 +391,7 @@ Function Get-InstallerFile {
     # If the extension isn't found, use a custom one
     $_URIPath = $URI.Split('?')[0]
     $_Filename = "$PackageIdentifier v$PackageVersion - $(Get-Date -f 'yyyy.MM.dd-hh.mm.ss')" + $(if ([System.IO.Path]::HasExtension($_URIPath)) { [System.IO.Path]::GetExtension($_URIPath) } else { '.winget-tmp' })
-    if (Test-ValidFileName $_Filename){ $_OutFile = Join-Path -Path $env:TEMP -ChildPath $_Filename }
+    if (Test-ValidFileName $_Filename) { $_OutFile = Join-Path -Path $env:TEMP -ChildPath $_Filename }
     else { $_OutFile = (New-TemporaryFile).FullName }
 
     # Create a new web client for downloading the file
@@ -2257,7 +2257,9 @@ if ($OldManifests.Name -eq "$PackageIdentifier.installer.yaml" -and $OldManifest
             } else {
                 foreach ($_Installer in $script:OldInstallerManifest['Installers']) {
                     if ($_Key -eq 'InstallModes') { $script:InstallModes = [string]$script:OldInstallerManifest.$_Key }
-                    $_Installer[$_Key] = $script:OldInstallerManifest.$_Key
+                    if ($_Key -notin $_Installer.Keys) {
+                        $_Installer[$_Key] = $script:OldInstallerManifest.$_Key
+                    }
                 }
             }
             New-Variable -Name $_Key -Value $($script:OldInstallerManifest.$_Key -join ', ') -Scope Script -Force
@@ -2309,7 +2311,9 @@ if ($OldManifests.Name -eq "$PackageIdentifier.installer.yaml" -and $OldManifest
             } else {
                 foreach ($_Installer in $script:OldInstallerManifest['Installers']) {
                     if ($_Key -eq 'InstallModes') { $script:InstallModes = [string]$script:OldInstallerManifest.$_Key }
-                    $_Installer[$_Key] = $script:OldInstallerManifest.$_Key
+                    if ($_Key -notin $_Installer.Keys) {
+                        $_Installer[$_Key] = $script:OldInstallerManifest.$_Key
+                    }
                 }
             }
             New-Variable -Name $_Key -Value $($script:OldInstallerManifest.$_Key -join ', ') -Scope Script -Force
