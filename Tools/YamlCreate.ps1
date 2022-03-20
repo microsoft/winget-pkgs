@@ -23,6 +23,14 @@ if ($help) {
     exit
 }
 
+# Check whether the script is present inside a fork/clone of microsoft/winget-pkgs repository
+try {
+    $script:gitTopLevel = (Resolve-Path $(git rev-parse --show-toplevel)).Path
+} catch {
+    # If there was an exception, the user isn't in a git repo. Throw a custom exception and pass the original exception as an InternalException
+    throw [UnmetDependencyException]::new('This script must be run from inside a clone of the winget-pkgs repository', $_.Exception)
+}
+
 # Installs `powershell-yaml` as a dependency for parsing yaml content
 if (-not(Get-Module -ListAvailable -Name powershell-yaml)) {
     try {
@@ -54,7 +62,7 @@ if ($Settings) {
     exit
 }
 
-$ScriptHeader = '# Created with YamlCreate.ps1 v2.1.1'
+$ScriptHeader = '# Created with YamlCreate.ps1 v2.1.2'
 $ManifestVersion = '1.1.0'
 $PSDefaultParameterValues = @{ '*:Encoding' = 'UTF8' }
 $Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
@@ -2511,8 +2519,8 @@ if ($script:Option -ne 'RemoveManifest') {
             }
         }
         if ($script:SandboxTest -eq '0') {
-            if (Test-Path -Path "$PSScriptRoot\SandboxTest.ps1") {
-                $SandboxScriptPath = (Resolve-Path "$PSScriptRoot\SandboxTest.ps1").Path
+            if (Test-Path -Path "$gitTopLevel\Tools\SandboxTest.ps1") {
+                $SandboxScriptPath = (Resolve-Path "$gitTopLevel\Tools\SandboxTest.ps1").Path
             } else {
                 while ([string]::IsNullOrWhiteSpace($SandboxScriptPath)) {
                     Write-Host
@@ -2581,7 +2589,7 @@ if ($PromptSubmit -eq '0') {
         $BranchName = "$PackageIdentifier-$PackageVersion-$UniqueBranchID"
         # Git branch names cannot start with `.` cannot contain any of {`..`, `\`, `~`, `^`, `:`, ` `, `?`, `@{`, `[`}, and cannot end with {`/`, `.lock`, `.`}
         $BranchName = $BranchName -replace '[\~,\^,\:,\\,\?,\@\{,\*,\[,\s]{1,}|[.lock|/|\.]*$|^\.{1,}|\.\.', ''
-        git add *manifests/*
+        git add "$((Resolve-Path "$gitTopLevel\manifests").Path)\*"
         git commit -m "$CommitType`: $PackageIdentifier version $PackageVersion" --quiet
         git switch -c "$BranchName" --quiet
         git push --set-upstream origin "$BranchName" --quiet
@@ -2589,8 +2597,8 @@ if ($PromptSubmit -eq '0') {
         # If the user has the cli too
         if (Get-Command 'gh.exe' -ErrorAction SilentlyContinue) {
             # Request the user to fill out the PR template
-            if (Test-Path -Path "$PSScriptRoot\..\.github\PULL_REQUEST_TEMPLATE.md") {
-                Read-PRBody "$PSScriptRoot\..\.github\PULL_REQUEST_TEMPLATE.md"
+            if (Test-Path -Path "$gitTopLevel\.github\PULL_REQUEST_TEMPLATE.md") {
+                Read-PRBody (Resolve-Path "$gitTopLevel\.github\PULL_REQUEST_TEMPLATE.md").Path
             } else {
                 while ([string]::IsNullOrWhiteSpace($SandboxScriptPath)) {
                     Write-Host
