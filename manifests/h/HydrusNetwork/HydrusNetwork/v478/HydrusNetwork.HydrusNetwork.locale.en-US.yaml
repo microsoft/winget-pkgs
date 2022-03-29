@@ -1,0 +1,65 @@
+# Created with YamlCreate.ps1 v2.1.2 $debug=QUSU.7-2-1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.1.0.schema.json
+
+PackageIdentifier: HydrusNetwork.HydrusNetwork
+PackageVersion: v478
+PackageLocale: en-US
+Publisher: Hydrus Network
+PublisherUrl: https://github.com/hydrusnetwork/hydrus
+PublisherSupportUrl: https://github.com/hydrusnetwork/hydrus/issues
+# PrivacyUrl: 
+Author: Hydrus Network
+PackageName: Hydrus Network
+PackageUrl: https://github.com/hydrusnetwork/hydrus
+License: WTFPL
+LicenseUrl: https://github.com/hydrusnetwork/hydrus/blob/master/license.txt
+Copyright: Copyright (C) 2010 by Kris Craig
+CopyrightUrl: https://github.com/hydrusnetwork/hydrus/blob/master/license.txt
+ShortDescription: A personal booru-style media tagger that can import files and tags from your hard drive and popular websites. Content can be shared with other users via user-run servers.
+Description: |-
+  The hydrus network client is an application written for Anon and other internet-fluent media nerds who have large image/swf/webm collections.
+  It browses with tags instead of folders, a little like a booru on your desktop. Advanced users can share tags and files anonymously through custom servers that any user may run.
+  Everything is free and privacy is the first concern. Executable releases are available for Windows, Linux, and macOS.
+  The program is in python, so you can also run it straight from the source code.
+Moniker: hydrus-network
+Tags:
+- booru
+- cross-platform
+- image-database
+# Agreements: 
+ReleaseNotes: |-
+  misc
+  • if a file note text is crazy and can't be displayed, this is now handled and the best visual approximation is displayed (and saved back on ok) instead
+  • fixed an error in the cloudflare problem detection calls for the newer versions of cloudscraper (>=1.2.60) while maintaining support for the older versions. fingers crossed, we also shouldn't repeat this specific error if they refactor again
+
+  file history chart updates
+  • fixed the 'inbox' line in file history, which has to be calculated in an odd way and was not counting on file imports adding to the inbox
+  • the file history chart now expands its y axis range to show all data even if deleted_files is huge. we'll see how nice this actually is IRL
+  • bumped the file history resolution up from 1,000 to 2,000 steps
+  • the y axis should now show localised numbers, 5,000 instead of 5000, but the method by which this occurs involves fox tongues and the breath of a slighted widow, so it may just not work for some machines
+
+  cleanup, mostly file location stuff
+  • I believe I have replaced all the remaining surplus static 'my files' references with code compatible with multiple local file services. when I add the capability to create new local file services, there now won't be a problem trying to display thumbnails or generate menu actions etc... if they aren't in 'my files'
+  • pulled the autocomplete dropdown file domain button code out to its own class and refactored it and the multiple location context panel to their own file
+  • added a 'default file location' option to 'files and trash' page, and a bunch of dialogs (e.g. the search panel when you make a new export folder) and similar now pull it to initialise. for most users this will stay 'my files' forever, but when we hit multiple local file services, it may want to change
+  • the file domain override options in 'manage tag display and search' now work on the new location system and support multple file services
+  • in downloaders, when highlighting, a database job that does the 'show files' filter (e.g. to include those in trash or not) now works on the new location context system and will handle files that will be imported to places other than my files
+  • refactored client api file service parsing
+  • refactored client api hashes parsing
+  • cleaned a whole heap of misc location code
+  • cleaned misc basic code across hydrus and client constant files
+  • gave 'you don't want the server' help page a very quick pass
+
+  client api
+  • in prep for multiple local file services, delete_files now takes an optional file_service_key or file_service_name. by default, it now deletes from all appropriate local services, so behaviour is unchanged from before without the parameter if you just want to delete m8
+  • undelete files is the same. when we have multiple local file services, an undelete without a file service will undelete to all locations that have a delete record
+  • delete_files also now takes an optional 'reason' parameter
+  • the 'set_notes' command now checks the type of the notes Object. it obviously has to be string-to-string
+  • the 'get_thumbnail' command should now never 404. if you ask for a pdf thumb, it gives the pdf default thumb, and if there is no thumb for whatever reason, you get the hydrus fallback thumbnail. just like in the client itself
+  • updated client api help to talk about these
+  • updated the unit tests to handle them too
+  • did a pass over the client api help to unify indent style and fix other small formatting issues
+  • client api version is now 28
+ReleaseNotesUrl: https://github.com/hydrusnetwork/hydrus/releases/tag/v478
+ManifestType: defaultLocale
+ManifestVersion: 1.1.0
