@@ -24,6 +24,12 @@ ShortDescription:             # The short package description
 Description:                  # Optional full package description
 Moniker:                      # Optional most common package term
 Tags:                         # Optional list of package terms
+Agreement:                    # Optional package agreements
+  - AgreementLabel:           # Optional agreement label
+    Agreement:                # Optional agreement text
+    AgreementUrl:             # Optional agreement URL
+ReleaseNotes:                 # Optional release notes
+ReleaseNotesURL:              # Optional release notes URL
 ManifestType: defaultLocale   # The manifest type
 ManifestVersion: 1.1.0        # The manifest syntax version
 ```
@@ -219,6 +225,53 @@ ManifestVersion: 1.1.0        # The manifest syntax version
 
   >Note: The best practice is to present these terms in all lower case with hyphens rather than spaces.
  </details>
+
+ #### Agreement
+ 
+ <details>
+   <summary>List of package agreements</summary>
+
+   **Optional Field**
+   This key holds any agreements a user must accept prior to download and subsequent install or upgrade.
+
+   >Note: In the Windows Package Manager Community Repository, these are only allowed to be submitted by verified developers.
+  </details>
+
+#### AgreementLabel
+  
+<details>
+  <summary>The label for a package agreement</summary>
+    
+  **Optional Field**
+  This key represents the label for a package agreement.
+</details>
+  
+#### Agreement
+
+<details>
+  <summary>The text for a package agreement</summary>
+    
+  **Optional Field**
+  This key represents the text or body of a package agreement.
+</details>
+
+#### AgreementUrl
+
+<details>
+  <summary>The URL for a package agreement</summary>
+  
+  **Optional Field**
+  This key represents the URL for a package agreement.
+</details>
+
+#### ReleaseNotes:
+
+<details>
+  <summary>The Release Notes for a package.</summary>
+  
+  **Optional Field**
+  This key represents release notes for a package.
+</details>
 
 ### ManifestType
 
