@@ -23,7 +23,7 @@ ManifestVersion: 1.1.0  # The manifest syntax version
 </details>
 
 <details>
- <summary><h3>PackageVersion</h3> - The package version</summary>
+ <summary><b>PackageVersion</b> - The package version</summary>
 
  **Required Field**
 
@@ -35,21 +35,21 @@ ManifestVersion: 1.1.0  # The manifest syntax version
 </details>
 
 <details>
- <summary><h3>DefaultLocale</h3> - The default package meta-data locale</summary>
+ <summary><b>DefaultLocale</b> - The default package meta-data locale</summary>
 
  **Required Field**
  This key represents the default locale for package meta-data. The format is BCP-47. This value identifies the language for meta-data to be displayed to a user when no locale file matching their preferences is available. The Microsoft community package repository validation pipelines also use this value to determine appropriate validation rules for that corresponding locale file.
 </details>
 
 <details>
- <summary><h3>ManifestType</h3> - The manifest type</summary>
+ <summary><b>ManifestType</b> - The manifest type</summary>
 
  **Required Field**
  This key must have the value "version". The Microsoft community package repository validation pipelines also use this value to determine appropriate validation rules when evaluating this file.
 </details>
 
 <details>
- <summary><h3>ManifestVersion</h3> - The manifest syntax version</summary>
+ <summary><b>ManifestVersion</b> - The manifest syntax version</summary>
 
  **Required Field**
  This key must have the value "1.1.0". The Microsoft community package repository validation pipelines also use this value to determine appropriate validation rules when evaluating this file.
