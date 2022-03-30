@@ -4,7 +4,7 @@ As specified in the [singleton JSON schema](https://github.com/microsoft/winget-
 
 >Note: The singleton manifest format has been deprecated in the Windows Package Manager Community Repository. The Windows Package Manager 1.2 client still supports singleton manifests.
 
-### [Singleton Manifest](#tab/singleton/)
+### Singleton Manifest
 
 ```YAML
 PackageIdentifier:              # The package unique identifier

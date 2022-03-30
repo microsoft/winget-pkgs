@@ -1,10 +1,10 @@
 # Windows Package Manager
 ## Manifest Schema v1.1.0 Installer File
-All Windows Package Manager manifests in the Microsoft community repository are submitted using [YAML](https://yaml.org/spec/) syntax. A [JSON schema](https://github.com/microsoft/winget-cli/blob/master/schemas/JSON/manifests/v1.1.0/manifest.installer.1.1.0.json) is provided to aid authoring these files in editors, and in the other tooling related to the Windows Package Manager. This document provides detailed information regarding the usage of the YAML keys in the [installer](https://github.com/microsoft/winget-cli/blob/master/schemas/JSON/manifests/v1.1.0/manifest.installer.1.1.0.json) file for multi-file manifests. 
+All Windows Package Manager manifests in the Microsoft community repository are submitted using [YAML](https://yaml.org/spec/) syntax. A [JSON schema](https://github.com/microsoft/winget-cli/blob/master/schemas/JSON/manifests/v1.1.0/manifest.installer.1.1.0.json) is provided to aid authoring these files in editors, and in the other tooling related to the Windows Package Manager. This document provides detailed information regarding the usage of the YAML keys in the installer file for multi-file manifests. 
 
 >Note: The 1.1 manifest schema was released with the Windows Package Manager 1.2. Any fields marked *Not implemented* are not supported in the 1.2 client, but may be supported in a 1.3-preview client.
 
-### Installer Manifest]
+### Installer Manifest
 
 ```YAML
 PackageIdentifier:              # The package unique identifier
