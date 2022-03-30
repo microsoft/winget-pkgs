@@ -30,7 +30,7 @@ Agreement:                    # Optional package agreements
     AgreementUrl:             # Optional agreement URL
 ReleaseDate:                  # Optional release date
 ReleaseNotes:                 # Optional release notes
-ReleaseNotesURL:              # Optional release notes URL
+ReleaseNotesUrl:              # Optional release notes URL
 ManifestType: defaultLocale   # The manifest type
 ManifestVersion: 1.1.0        # The manifest syntax version
 ```
@@ -278,6 +278,6 @@ ManifestVersion: 1.1.0        # The manifest syntax version
  <summary><b>ManifestVersion</b> - The manifest syntax version</summary>
 
  **Required Field**
- 
+
  This key must have the value "1.1.0". The Microsoft community package repository validation pipelines also use this value to determine appropriate validation rules when evaluating this file.
 </details>
