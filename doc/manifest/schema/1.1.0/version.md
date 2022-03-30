@@ -1,7 +1,7 @@
 # Windows Package Manager
 ## Manifest Schema v1.1.0 Version File
 
-All Windows Package Manager manifests in the Microsoft community repository are submitted using [YAML](https://yaml.org/spec/) syntax. A JSON schema is provided to aid authoring these files in editors, and in the other tooling related to the Windows Package Manager. This document provides detailed information regarding the usage of the YAML keys in the [version](https://github.com/microsoft/winget-cli/blob/master/schemas/JSON/manifests/v1.1.0/manifest.version.1.1.0.json) file for multi-file manifests.
+All Windows Package Manager manifests in the Microsoft community repository are submitted using [YAML](https://yaml.org/spec/) syntax. A [JSON schema](https://github.com/microsoft/winget-cli/blob/master/schemas/JSON/manifests/v1.1.0/manifest.version.1.1.0.json) is provided to aid authoring these files in editors, and in the other tooling related to the Windows Package Manager. This document provides detailed information regarding the usage of the YAML keys in the [version](https://github.com/microsoft/winget-cli/blob/master/schemas/JSON/manifests/v1.1.0/manifest.version.1.1.0.json) file for multi-file manifests.
 
 ### [Version Manifest](#tab/version/)
 
@@ -19,7 +19,12 @@ ManifestVersion: 1.1.0  # The manifest syntax version
  <summary><b>PackageIdentifier</b> - The package unique identifier</summary>
 
  **Required Field**
- This key is the unique identifier for a given package. This value is generally in the form of `Publisher.Package`. It is case sensitve, and this value must match the folder structure under the partition directory in GitHub.
+
+ This key is the unique identifier for a given package. 
+ 
+ **Windows Package Manager Community Repository**
+ 
+ This value is generally in the form of `Publisher.Package`. It is case sensitve, and this value must match the folder structure under the partition directory.
 </details>
 
 <details>
@@ -38,13 +43,19 @@ ManifestVersion: 1.1.0  # The manifest syntax version
  <summary><b>DefaultLocale</b> - The default package meta-data locale</summary>
 
  **Required Field**
- This key represents the default locale for package meta-data. The format is BCP-47. This value identifies the language for meta-data to be displayed to a user when no locale file matching their preferences is available. The Microsoft community package repository validation pipelines also use this value to determine appropriate validation rules for that corresponding locale file.
+
+ This key represents the default locale for package meta-data. The format is BCP-47. This value identifies the language for meta-data to be displayed to a user when no locale file matching their preferences is available.
+
+ **Windows Package Manager Community Repository**
+
+ The validation pipelines use this value to ensure the corresponding locale file is present and conforms with the defaultLocale YAML specification.
 </details>
 
 <details>
  <summary><b>ManifestType</b> - The manifest type</summary>
 
  **Required Field**
+ 
  This key must have the value "version". The Microsoft community package repository validation pipelines also use this value to determine appropriate validation rules when evaluating this file.
 </details>
 
