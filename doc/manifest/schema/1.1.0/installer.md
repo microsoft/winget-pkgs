@@ -64,6 +64,53 @@ ManifestType: installer         # The manifest type
 ManifestVersion: 1.1.0          # The manifest syntax version
 ```
 
+### [Installer Minimal Example](#tab/minimal/)
+
+Path: manifests/m/Microsoft/WindowsTerminal/1.9.1942/Microsoft.WindowsTerminal.installer.yaml
+
+```YAML
+PackageIdentifier: Microsoft.WindowsTerminal
+PackageVersion: 1.9.1942.0
+Installers:
+  - Architecture: x64
+    InstallerType: msix
+    InstallerUrl: https://github.com/microsoft/terminal/releases/download/v1.9.1942.0/Microsoft.WindowsTerminal_1.9.1942.0_8wekyb3d8bbwe.msixbundle
+    InstallerSha256: 578D987D58B3CE5F6BF3316C6A5AECE8EB6B94DBCD1963413D81CB313D6C28D5
+ManifestType: installer
+ManifestVersion: 1.1.0
+```
+
+### [Installer Complex Example](#tab/minimal/)
+
+Path: manifests/m/Microsoft/WindowsTerminal/1.9.1942/Microsoft.WindowsTerminal.installer.yaml
+
+```YAML
+PackageIdentifier: Microsoft.WindowsTerminal
+PackageVersion: 1.9.1942.0
+Platform:
+- Windows.Desktop
+MinimumOSVersion: 10.0.18362.0
+InstallerType: msix
+InstallModes:
+- silent
+PackageFamilyName: Microsoft.WindowsTerminal_8wekyb3d8bbwe
+Installers:
+- Architecture: x64
+  InstallerUrl: https://github.com/microsoft/terminal/releases/download/v1.9.1942.0/Microsoft.WindowsTerminal_1.9.1942.0_8wekyb3d8bbwe.msixbundle
+  InstallerSha256: 578D987D58B3CE5F6BF3316C6A5AECE8EB6B94DBCD1963413D81CB313D6C28D5
+  SignatureSha256: 889A0BA756E74386F95A37F6A813C6D383DC21349A2D18E2B192D4E0E7F80659
+- Architecture: arm64
+  InstallerUrl: https://github.com/microsoft/terminal/releases/download/v1.9.1942.0/Microsoft.WindowsTerminal_1.9.1942.0_8wekyb3d8bbwe.msixbundle
+  InstallerSha256: 578D987D58B3CE5F6BF3316C6A5AECE8EB6B94DBCD1963413D81CB313D6C28D5
+  SignatureSha256: 889A0BA756E74386F95A37F6A813C6D383DC21349A2D18E2B192D4E0E7F80659
+- Architecture: x86
+  InstallerUrl: https://github.com/microsoft/terminal/releases/download/v1.9.1942.0/Microsoft.WindowsTerminal_1.9.1942.0_8wekyb3d8bbwe.msixbundle
+  InstallerSha256: 578D987D58B3CE5F6BF3316C6A5AECE8EB6B94DBCD1963413D81CB313D6C28D5
+  SignatureSha256: 889A0BA756E74386F95A37F6A813C6D383DC21349A2D18E2B192D4E0E7F80659
+ManifestType: installer
+ManifestVersion: 1.0.0
+```
+
 ## Fields
 
 ### PackageIdentifier
