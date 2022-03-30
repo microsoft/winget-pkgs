@@ -99,11 +99,6 @@ ManifestType: singleton
 ManifestVersion: 1.1.0
 ```
 
-### [Installer Complex Example](#tab/minimal/)
-
-```YAML
-```
-
 ## Fields
 
 ### PackageIdentifier
