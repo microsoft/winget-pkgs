@@ -15,19 +15,15 @@ ManifestVersion: 1.1.0  # The manifest syntax version
 
 ## Fields
 
-### PackageIdentifier
-
 <details>
- <summary>The package unique identifier</summary>
+ <summary> <h3>PackageIdentifier</h3> - The package unique identifier</summary>
 
  **Required Field**
  This key is the unique identifier for a given package. This value is generally in the form of `Publisher.Package`. It is case sensitve, and this value must match the folder structure under the partition directory in GitHub.
 </details>
 
-### PackageVersion
-
 <details>
- <summary>The package version</summary>
+ <summary> <h3>PackageVersion</h3> - The package version</summary>
 
  **Required Field**
 
@@ -38,25 +34,22 @@ ManifestVersion: 1.1.0  # The manifest syntax version
  The current best practice is to use the value reported in Add / Remove Programs when this version of the package is installed. In some cases, packages do not report a version resulting in an upgrade loop or other unwanted behavior.
 </details>
 
-### DefaultLocale
 <details>
- <summary>The default package meta-data locale</summary>
+ <summary><h3>DefaultLocale</h3> - The default package meta-data locale</summary>
 
  **Required Field**
  This key represents the default locale for package meta-data. The format is BCP-47. This value identifies the language for meta-data to be displayed to a user when no locale file matching their preferences is available. The Microsoft community package repository validation pipelines also use this value to determine appropriate validation rules for that corresponding locale file.
 </details>
 
-### ManifestType
 <details>
- <summary>The manifest type</summary>
+ <summary><h3>ManifestType</h3> - The manifest type</summary>
 
  **Required Field**
  This key must have the value "version". The Microsoft community package repository validation pipelines also use this value to determine appropriate validation rules when evaluating this file.
 </details>
 
-### ManifestVersion
 <details>
- <summary>The manifest syntax version</summary>
+ <summary><h3>ManifestVersion</h3> - The manifest syntax version</summary>
 
  **Required Field**
  This key must have the value "1.1.0". The Microsoft community package repository validation pipelines also use this value to determine appropriate validation rules when evaluating this file.
