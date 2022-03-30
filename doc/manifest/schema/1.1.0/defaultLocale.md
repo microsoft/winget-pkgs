@@ -1,7 +1,7 @@
 # Windows Package Manager
 ## Manifest Schema v1.1.0 Default Locale File
 
-All Windows Package Manager manifests in the Microsoft community repository are submitted using [YAML](https://yaml.org/spec/) syntax. A JSON schema is provided to aid authoring these files in editors, and in the other tooling related to the Windows Package Manager. This document provides detailed information regarding the usage of the YAML keys in the [default locale](https://github.com/microsoft/winget-cli/blob/master/schemas/JSON/manifests/v1.1.0/manifest.defaultLocale.1.1.0.json) file for multi-file manifests.
+All Windows Package Manager manifests in the Microsoft community repository are submitted using [YAML](https://yaml.org/spec/) syntax. A [JSON schema](https://github.com/microsoft/winget-cli/blob/master/schemas/JSON/manifests/v1.1.0/manifest.defaultLocale.1.1.0.json) is provided to aid authoring these files in editors, and in the other tooling related to the Windows Package Manager. This document provides detailed information regarding the usage of the YAML keys in the [default locale](https://github.com/microsoft/winget-cli/blob/master/schemas/JSON/manifests/v1.1.0/manifest.defaultLocale.1.1.0.json) file for multi-file manifests.
 
 ### [Default Locale Manifest](#tab/defaultLocale/)
 
@@ -263,7 +263,7 @@ ManifestVersion: 1.1.0        # The manifest syntax version
 </details>
 
 <details>
-  <summary><b>ReleaseNotesURL</b> - The Release Notes web page for a package.</summary>
+  <summary><b>ReleaseNotesUrl</b> - The Release Notes web page for a package.</summary>
   
   **Optional Field**
 

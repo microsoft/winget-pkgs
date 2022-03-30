@@ -1,4 +1,5 @@
 # Windows Package Manager
+
 ## Manifest Schema 1.1
 
 The Windows Package Manager 1.2 client does not support all fields in the 1.1 schema.
