@@ -58,7 +58,7 @@ ManifestVersion: 1.1.0        # The manifest syntax version
  The current best practice is to use the value reported in Add / Remove Programs when this version of the package is installed. In some cases, packages do not report a version resulting in an upgrade loop or other unwanted behavior.
 </details>
 
-#### PackageLocale
+### PackageLocale
 
 <details>
   <summary>The package meta-data locale</summary>
@@ -75,7 +75,7 @@ ManifestVersion: 1.1.0        # The manifest syntax version
 
  </details>
 
-#### Publisher
+### Publisher
 
 <details>
   <summary>The publisher name</summary>
@@ -86,7 +86,7 @@ ManifestVersion: 1.1.0        # The manifest syntax version
   >Note: With the 1.0 release of the Windows Package Manager, this name affects how packages from a source are mapped to Apps installed in Windows 10 and Windows 11 via Add / Remove Programs (ARP). The best practice is to ensure this matches the ARP entry for the package when it has been installed. The impact is associated with `winget upgrade` and `winget list`.
  </details>
 
-#### PublisherUrl
+### PublisherUrl
 
 <details>
   <summary>The publisher home page</summary>
@@ -95,7 +95,7 @@ ManifestVersion: 1.1.0        # The manifest syntax version
   This key represents the web site for the publisher or ISV.
  </details>
 
-#### PublisherSupportUrl
+### PublisherSupportUrl
 
 <details>
   <summary>The publisher support page</summary>
@@ -104,7 +104,7 @@ ManifestVersion: 1.1.0        # The manifest syntax version
   This key represents the customer support web site or specific web page provided by the publisher or ISV.
  </details>
 
-#### PrivacyUrl
+### PrivacyUrl
 
 <details>
   <summary>The publisher privacy page or the package privacy page</summary>
@@ -113,7 +113,7 @@ ManifestVersion: 1.1.0        # The manifest syntax version
   This key represents the privacy web site or specific web page provided the publisher or ISV. If there is a privacy web site or specific web page for the package it is preferred over a generic privacy page for the publisher.
  </details>
 
-#### Author
+### Author
 
 <details>
   <summary>The package author</summary>
@@ -122,7 +122,7 @@ ManifestVersion: 1.1.0        # The manifest syntax version
   Thie key represents the author of a package. In some cases, the author is an individual who develops and or maintains the package.
  </details>
 
-#### PackageName
+### PackageName
 
 <details>
   <summary>The package name</summary>
@@ -133,7 +133,7 @@ ManifestVersion: 1.1.0        # The manifest syntax version
   >Note: With the 1.0 release of the Windows Package Manager, this name affects how packages from a source are mapped to Apps installed in Windows 10 via Add / Remove Programs (ARP). The best practice is to ensure this matches the ARP entry for the package name when it has been installed. The impact is associated with `winget upgrade` and `winget list`.
  </details>
 
-#### PackageUrl
+### PackageUrl
 
 <details>
   <summary>The package home page</summary>
@@ -142,7 +142,7 @@ ManifestVersion: 1.1.0        # The manifest syntax version
   This key represents the web site for the package.
  </details>
 
-#### License
+### License
 
 <details>
   <summary>The package license</summary>
@@ -151,7 +151,7 @@ ManifestVersion: 1.1.0        # The manifest syntax version
   This key represents the license governing the use and or distribution for the product. This could be an open source license, or a commercial license. Please note that a copyright is not considered a license. If there is no available information on a product's license, "Proprietary" should be the value in this field.
  </details>
 
-#### LicenseUrl
+### LicenseUrl
 
 <details>
   <summary>The license page</summary>
@@ -162,7 +162,7 @@ ManifestVersion: 1.1.0        # The manifest syntax version
   If this is a link to the license file for an open source project, it should be specific to the version for the package. Some open source projects change their license over time.
  </details>
 
-#### Copyright
+### Copyright
 
 <details>
   <summary>The package copyright</summary>
@@ -171,7 +171,7 @@ ManifestVersion: 1.1.0        # The manifest syntax version
   This key represents the copyright for the package.
  </details>
 
-#### CopyrightUrl
+### CopyrightUrl
 
 <details>
   <summary>The package copyright page</summary>
@@ -182,7 +182,7 @@ ManifestVersion: 1.1.0        # The manifest syntax version
   If this is a link to the copyright file for an open source project, it should be specific to the version for the package. Some open source projects change their copyright over time.
  </details>
 
-#### ShortDescription
+### ShortDescription
 
 <details>
   <summary>The short package description</summary>
@@ -193,7 +193,7 @@ ManifestVersion: 1.1.0        # The manifest syntax version
   >Note: This should be something descriptive about what the package does, and it should not simply state something like "&lt;package name&gt; installer" or "&lt;package name&gt; setup".
  </details>
  
-#### Description
+### Description
 
 <details>
   <summary>The full package description</summary>
@@ -204,7 +204,7 @@ ManifestVersion: 1.1.0        # The manifest syntax version
   >Note: This was included for future integration with the Microsoft Store source to provide the ability to display the full package description.
  </details>
  
-#### Moniker
+### Moniker
 
 <details>
   <summary>The most common package term</summary>
@@ -215,7 +215,7 @@ ManifestVersion: 1.1.0        # The manifest syntax version
   >Note:Moniker is the third property evaluated when searching for a matching package.
  </details>
  
-#### Tags
+### Tags
 
 <details>
   <summary>List of additional package search terms</summary>
@@ -226,7 +226,7 @@ ManifestVersion: 1.1.0        # The manifest syntax version
   >Note: The best practice is to present these terms in all lower case with hyphens rather than spaces.
  </details>
 
- #### Agreement
+ ### Agreement
  
  <details>
    <summary>List of package agreements</summary>
@@ -264,7 +264,7 @@ ManifestVersion: 1.1.0        # The manifest syntax version
   This key represents the URL for a package agreement.
 </details>
 
-#### ReleaseNotes:
+### ReleaseNotes:
 
 <details>
   <summary>The Release Notes for a package.</summary>

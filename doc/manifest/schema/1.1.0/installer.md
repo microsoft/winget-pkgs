@@ -1,53 +1,68 @@
 # Windows Package Manager
 ## Manifest Schema v1.1.0 Installer File
-All Windows Package Manager manifests in the Microsoft community repository are submitted using [YAML](https://yaml.org/spec/) syntax. A JSON schema is provided to aid authoring these files in editors, and in the other tooling related to the Windows Package Manager. This document provides detailed information regarding the usage of the YAML keys in the [installer](https://github.com/microsoft/winget-cli/blob/master/schemas/JSON/manifests/v1.1.0/manifest.installer.1.1.0.json) file for multi-file manifests. Please review the [Manifest Specification](https://github.com/microsoft/winget-cli/blob/master/doc/ManifestSpecv1.1.md) if you are not familiar with this file.
+All Windows Package Manager manifests in the Microsoft community repository are submitted using [YAML](https://yaml.org/spec/) syntax. A JSON schema is provided to aid authoring these files in editors, and in the other tooling related to the Windows Package Manager. This document provides detailed information regarding the usage of the YAML keys in the [installer](https://github.com/microsoft/winget-cli/blob/master/schemas/JSON/manifests/v1.1.0/manifest.installer.1.1.0.json) file for multi-file manifests. 
+
+>Note: The 1.1 manifest schema was released with the Windows Package Manager 1.2. Any fields marked *Not implemented* are not supported in the 1.2 client, but may be supported in a 1.3-preview client.
 
 ### [Installer Manifest](#tab/installer/)
 
 ```YAML
-PackageIdentifier:            # The package unique identifier
-PackageVersion:               # The package version
-Channel:                      # *Not implemented* distribution channel
-Platform:                     # Optional installer supported operating system
-MimimumOSVersion:             # Optional installer minimum operating system version
-InstallModes:                 # Optional installer modes
-InstallerSuccessCodes:        # Optional non-zero installer success codes
-UpgradeBehavior:              # Optional upgrade method
-Commands:                     # Optional commands or aliases to run the package
-Protocols:                    # Optional list of protocols supported by the package
-FileExtensions:               # Optional list of file extensions supported by the package
-Dependencies:                 # *Experimental* list of dependencies required by the package
-  WindowsFeatures:            # *Not implemented* list of Windows feature dependencies
-  WindowsLibraries:           # *Not implemented* list of Windows library dependencies
-  PackageDependencies:        # *Experimental* list of package dependencies
-  ExternalDependencies:       # *Not implemented* list of external dependencies
-PackageFamilyName:            # Optional MSIX package family name
-ProductCode:                  # Optional product code
-Capabilities:                 # Optional list of MSIX package capabilities
-RestrictedCapabilities:       # Optional list of MSIX package restricted capabilities
-Installers:                   # The list of package installers
-  - InstallerLocale:          # Optional locale of the installer
-    Architecture:             # The architecture of the installer
-    InstallerType:            # The installer type
-    InstallerUrl:             # The installer URL
-    InstallerSha256:          # The SHA256 hash of the installer
-    SignatureSha256:          # Optional SHA256 hash of the MSIX signature
-    ProductCode:              # Optional product code of the installer
-    Scope:                    # Optional installer scope
-    InstallerSwitches:        # Optional installer switches
-      Silent:                 # Optional installer switches for silent
-      SilentWithProgress:     # Optional installer switches for silent with progress
-      Interactive:            # Optional installer switches for interactive
-      InstallLocation:        # Optional install location path
-      Log:                    # Optional installer log file path
-      Upgrade:                # Optional installer switches for upgrade
-      Custom:                 # Optional installer switches for custom behavior
-    AppsAndFeaturesEntries:   # Optional entries from the Add and Remove Programs (ARP) table
-      - DisplayName:          # The program name shown in the ARP entry
-        DisplayVersion:       # The version displayed in the ARP entry
-        Publisher:            # The publisher displayed in the ARP entry
-ManifestType: installer       # The manifest type
-ManifestVersion: 1.1.0        # The manifest syntax version
+PackageIdentifier:              # The package unique identifier
+PackageVersion:                 # The package version
+Channel:                        # *Not implemented* distribution channel
+Installers:                     # The list of package installers
+  - Architecture:               # The architecture of the installer
+    InstallerLocale:            # Optional locale of the installer
+    Platform:                   # Optional installer supported operating system
+    MimimumOSVersion:           # Optional installer minimum operating system version
+    InstallerType:              # The installer type
+    InstallerUrl:               # The installer URL
+    InstallerSha256:            # The SHA256 hash of the installer
+    SignatureSha256:            # Optional SHA256 hash of the MSIX signature
+    Scope:                      # Optional installer scope
+    InstallModes:               # Optional installer modes
+    InstallerSwitches:          # Optional installer switches
+      Silent:                   # Optional installer switches for silent
+      SilentWithProgress:       # Optional installer switches for silent with progress
+      Interactive:              # Optional installer switches for interactive
+      InstallLocation:          # Optional install location path
+      Log:                      # Optional installer log file path
+      Upgrade:                  # Optional installer switches for upgrade
+      Custom:                   # Optional installer switches for custom behavior
+    UpgradeBehavior:            # Optional upgrade method
+    Commands:                   # Optional commands or aliases to run the package
+    Protocols:                  # Optional list of protocols supported by the package
+    FileExtensions:             # Optional list of file extensions supported by the package
+    Dependencies:               # *Experimental* list of dependencies required by the package
+      - ExternalDependencies:   # *Not implemented* list of external dependencies
+        PackageDependencies:    # *Experimental* list of package dependencies
+        WindowsFeatures:        # *Not implemented* list of Windows feature dependencies
+        WindowsLibraries:       # *Not implemented* list of Windows library dependencies
+    PackageFamilyName:          # Optional MSIX package family name
+    Capabilities:               # Optional list of MSIX package capabilities
+    RestrictedCapabilities:     # Optional list of MSIX package restricted capabilities
+    InstallerAbortsTerminal:    # *Not implemented* Optional indicator for packages that abort terminal
+    InstallLocationRequired:    # *Not implemented* Optional indicator for packages that require install location
+    RequireExplicitUpgrade:     # Optional indicator for packages that upgrade themselves
+    ElevationRequirement:       # *Not implemented* scope required to install package
+    UnsupportedOSArchitectures: # Optional architectures the package is not supported on
+    Markets:                    # Optional markets the package is allowed to be installed
+    ExcludedMarkets:            # Optional markets the package is not allowed to be installed
+    InstallerSuccessCodes:      # Optional non-zero installer success codes
+    ExpectedReturnCodes:        # Optional non-zero installer return codes
+      - ExpectedReturnCode:     # Optional non-zero installer return code
+        ReturnResponse:         # Optional response for an expected return code
+    MimimumOSVersion:           # Optional installer minimum operating system version
+    ProductCode:                # Optional product code of the installer
+    AppsAndFeaturesEntries:     # *Not implemented* Optional entries from the Add and Remove Programs (ARP) table
+      - DisplayName:            # *Not implemented* Optional program name shown in the ARP entry
+        DisplayVersion:         # *Not implemented* Optional version displayed in the ARP entry
+        Publisher:              # *Not implemented* Optional publisher displayed in the ARP entry
+        ProductCode:            # *Not implemented* Optional product code of the installer
+        UpgradeCode:            # *Not implemented* Optional upgrade code of the installer
+        InstallerType:          # *Not implemented* Optional installer type
+ManifestType: installer         # The manifest type
+ManifestVersion: 1.1.0          # The manifest syntax version
 ```
 
 ## Fields
@@ -107,6 +122,19 @@ ManifestVersion: 1.1.0        # The manifest syntax version
  >Note: This key may be present in the root of the manifest as the default value for all installer nodes. This key may also be present in an individual installer node as well. If this key is in the manifest root and in an installer node, the value in the installer node will apply.
 </details>
 
+### InstallModes
+
+<details>
+ <summary>List of supported installer modes</summary>
+
+ **Optional Field**
+ This key represents the install modes supported by the installer. The Microsoft community package repository requires a package support "silent" and "silent with progress". The Windows Package Manager also supports "interactive" installers. The Windows Package Manager client does not have any behavior associated with this key.
+
+ >Note: Some installers will attempt to install missing dependencies. If these dependencies require user interaction, the package will not be allowed into the Microsoft community package repository.
+
+ >Note: This key may be present in the root of the manifest as the default value for all installer nodes. This key may also be present in an individual installer node as well. If this key is in the manifest root and in an installer node, the value in the installer node will apply.
+</details>
+
 ### InstallerType
 
 <details>
@@ -130,19 +158,6 @@ ManifestVersion: 1.1.0        # The manifest syntax version
  **Optional Field**
  This key represents the scope the package is installed under. The two configurations are "user" and "machine". Some installers support only one of these scopes while others support both via arguments passed to the installer using "InstallerSwitches".
  
- >Note: This key may be present in the root of the manifest as the default value for all installer nodes. This key may also be present in an individual installer node as well. If this key is in the manifest root and in an installer node, the value in the installer node will apply.
-</details>
-
-### InstallModes
-
-<details>
- <summary>List of supported installer modes</summary>
-
- **Optional Field**
- This key represents the install modes supported by the installer. The Microsoft community package repository requires a package support "silent" and "silent with progress". The Windows Package Manager also supports "interactive" installers. The Windows Package Manager client does not have any behavior associated with this key.
-
- >Note: Some installers will attempt to install missing dependencies. If these dependencies require user interaction, the package will not be allowed into the Microsoft community package repository.
-
  >Note: This key may be present in the root of the manifest as the default value for all installer nodes. This key may also be present in an individual installer node as well. If this key is in the manifest root and in an installer node, the value in the installer node will apply.
 </details>
 
@@ -214,7 +229,7 @@ ManifestVersion: 1.1.0        # The manifest syntax version
 ### Upgrade
 
 <details>
- <summary>Upgrade is the value that should be passed to the installer when user chooses an upgrade</summary>
+ <summary>Upgrade is the value that should be passed to the installer when user chooses an upgrade.</summary>
 
  **Optional Field**
  This key represents the switches to be passed to the installer during an upgrade. This will happen only if the upgrade behavior is "install".
@@ -225,7 +240,7 @@ ManifestVersion: 1.1.0        # The manifest syntax version
 ### Custom
 
 <details>
- <summary>Custom switches will be passed directly to the installer by winget</summary>
+ <summary>Custom switches will be passed directly to the installer by the Windows Package Manager.</summary>
 
  **Optional Field**
  This key represents any switches the Windows Package Manager will pass to the installer in addition to "Silent", "SilentWithProgress", and "Interactive".
@@ -236,7 +251,7 @@ ManifestVersion: 1.1.0        # The manifest syntax version
 ### InstallerSuccessCodes
 
 <details>
- <summary>List of additional non-zero installer success exit codes other than known default values by winget</summary>
+ <summary>List of additional non-zero installer success exit codes other than known default values by the Windows Package Manager.</summary>
 
  **Optional Field**
  This key represents any status codes returned by the installer representing a success condition other than zero.
