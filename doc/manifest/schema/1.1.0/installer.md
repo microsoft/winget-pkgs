@@ -52,7 +52,6 @@ Installers:                     # The list of package installers
     ExpectedReturnCodes:        # Optional non-zero installer return codes
       - ExpectedReturnCode:     # Optional non-zero installer return code
         ReturnResponse:         # Optional response for an expected return code
-    MimimumOSVersion:           # Optional installer minimum operating system version
     ProductCode:                # Optional product code of the installer
     AppsAndFeaturesEntries:     # *Not implemented* Optional entries from the Add and Remove Programs (ARP) table
       - DisplayName:            # *Not implemented* Optional program name shown in the ARP entry
@@ -100,7 +99,39 @@ ManifestVersion: 1.1.0          # The manifest syntax version
  >Note: This key is included for future use. The Windows Package Manager currently does not have any behavior associated with this key. The intent behind this key is to help disambiguate the different channels for packages lacking support for side by side installation. Some packages support having more than one package channel available on a system simultaneously; in this case it is better to use unique packages rather than channels. This key is intended to ensure the proper channel for a package is used during install and upgrade scenarios.
  </details>
 
-### Platform
+### Installers
+
+<details>
+ <summary>Package installer</summary>
+
+ **Required Field**
+ The key represents an installer for a package.
+
+ >Note: Many of the keys related to installers may either be at the root level of the manifest, or included in an installer. Any values provided at the root level and not specified in an installer will be inherited.
+</details>
+
+#### Architecture
+
+<details>
+ <summary>The installer target architecture</summary>
+
+ **Required Field**
+ This key represents the hardware architecture targeted by the installer. The Windows Package Manager will attempt to determine the best architecture to use. If emulation is available and the native hardware architecture does not have a supported installer, the emulated architecture may be used.
+ </details>
+ 
+#### InstallerLocale
+
+<details>
+ <summary>Locale for package installer</summary>
+
+ **Optional Field**
+ This key represents the locale for an installer *not* the package meta-data. Some installers are compiled with locale or language specific properties. If this key is present, it is used to represent the package locale for an installer.
+ 
+ >Note: This key may be present in the root of the manifest as the default value for all installer nodes. This key may also be present in an individual installer node as well. If this key is in the manifest root and in an installer node, the value in the installer node will apply.
+
+</details>
+
+#### Platform
 
 <details>
  <summary>The installer supported operating system</summary>
@@ -111,7 +142,7 @@ ManifestVersion: 1.1.0          # The manifest syntax version
  >Note: This key may be present in the root of the manifest as the default value for all installer nodes. This key may also be present in an individual installer node as well. If this key is in the manifest root and in an installer node, the value in the installer node will apply.
 </details>
 
-### MinimumOSVersion
+#### MinimumOSVersion
 
 <details>
  <summary>The installer minimum operating system version</summary>
@@ -122,7 +153,64 @@ ManifestVersion: 1.1.0          # The manifest syntax version
  >Note: This key may be present in the root of the manifest as the default value for all installer nodes. This key may also be present in an individual installer node as well. If this key is in the manifest root and in an installer node, the value in the installer node will apply.
 </details>
 
-### InstallModes
+#### InstallerType
+
+<details>
+ <summary>Enumeration of supported installer types.</summary>
+
+ **Required Field**
+ This key represents the installer type for the package. The Windows Package Manager supports [MSIX](https://docs.microsoft.com/windows/msix/overview), [MSI](https://docs.microsoft.com/windows/win32/msi/windows-installer-portal), and executable installers. Some well known formats ([Inno](https://jrsoftware.org/isinfo.php), [Nullsoft](https://sourceforge.net/projects/nsis/), [WiX](https://wixtoolset.org/), and [Burn](https://wixtoolset.org/documentation/manual/v3/bundle/)) provide standard sets of installer switches to provide different installer experiences.
+
+ >Note: The Windows Package Manager defaults to the install mode providing install progress. A best practice is to determine if one of the supported installer technologies was used to build an installer with the .exe file extension. The [Windows Package Manager Manifest Creator](https://github.com/microsoft/winget-create) tool can be used to determine if one of the known tools was used to build an installer with the .exe file extension.
+
+ >Note: The Windows Package Manager does not support loose executables with the .exe or .com file extension directly. Compressed files containing installers,  loose executables, and Progressive Web Applications (PWAs) are also not supported.
+ 
+ >Note: This key may be present in the root of the manifest as the default value for all installer nodes. This key may also be present in an individual installer node as well. If this key is in the manifest root and in an installer node, the value in the installer node will apply.
+</details>
+
+#### InstallerUrl
+
+<details>
+ <summary>The installer Url</summary>
+
+ **Required Field**
+ This key represents the URL to download the installer.
+</details>
+
+#### InstallerSha256
+
+<details>
+ <summary>Sha256 is required. Sha256 of the installer</summary>
+
+ **Required Field**
+ This key represents the SHA 256 hash for the installer. It is used to confirm the installer has not been modified. The Windows Package Manager will compare the hash in the manifest with the calculated hash of the installer after it has been downloaded.
+
+ >Note:  The [Windows Package Manager Manifest Creator](https://github.com/microsoft/winget-create) can be used to determine the SHA 256 of the installer. The `winget hash &lt;pathToInstaller&gt;` command can also be used to determine the SHA 256 of the installer.
+</details>
+
+#### SignatureSha256
+
+<details>
+ <summary>SignatureSha256 is recommended for appx or msix. It is the sha256 of signature file inside appx or msix. Could be used during streaming install if applicable</summary>
+
+ **Optional Field**
+ This key represents the signature file (AppxSignature.p7x) inside an MSIX installer. It is used to provide streaming install for MSIX packages.
+
+ >Note: MSIX installers must be signed to be included in the Microsoft community package repository. If the installer is an MSIX this signature should be included in the manifest. The [Windows Package Manager Manifest Creator](https://github.com/microsoft/winget-create) can be used to determine the signature SHA 256. The `winget hash <pathToInstaller> --msix` command can also be used to determine the signature SHA 256.
+</details>
+
+#### Scope
+
+<details>
+ <summary>Scope indicates if the installer is per user or per machine</summary>
+
+ **Optional Field**
+ This key represents the scope the package is installed under. The two configurations are "user" and "machine". Some installers support only one of these scopes while others support both via arguments passed to the installer using "InstallerSwitches".
+ 
+ >Note: This key may be present in the root of the manifest as the default value for all installer nodes. This key may also be present in an individual installer node as well. If this key is in the manifest root and in an installer node, the value in the installer node will apply.
+</details>
+
+#### InstallModes
 
 <details>
  <summary>List of supported installer modes</summary>
@@ -135,33 +223,7 @@ ManifestVersion: 1.1.0          # The manifest syntax version
  >Note: This key may be present in the root of the manifest as the default value for all installer nodes. This key may also be present in an individual installer node as well. If this key is in the manifest root and in an installer node, the value in the installer node will apply.
 </details>
 
-### InstallerType
-
-<details>
- <summary>Enumeration of supported installer types. InstallerType is required in either root level or individual Installer level</summary>
-
- **Required Field**
- This key represents the installer type for the package. The Windows Package Manager supports [MSIX](https://docs.microsoft.com/windows/msix/overview), [MSI](https://docs.microsoft.com/windows/win32/msi/windows-installer-portal), and executable installers. Some well known formats ([Inno](https://jrsoftware.org/isinfo.php), [Nullsoft](https://sourceforge.net/projects/nsis/), [WiX](https://wixtoolset.org/), and [Burn](https://wixtoolset.org/documentation/manual/v3/bundle/)) provide standard sets of installer switches to provide different installer experiences.
-
- >Note: The Windows Package Manager defaults to the install mode providing install progress. A best practice is to determine if one of the supported installer technologies was used to build an installer with the .exe file extension. The [Windows Package Manager Manifest Creator](https://github.com/microsoft/winget-create) tool can be used to determine if one of the known tools was used to build an installer with the .exe file extension.
-
- >Note: The Windows Package Manager does not support loose executables with the .exe or .com file extension directly. Compressed files containing installers,  loose executables, and Progressive Web Applications (PWAs) are also not supported.
- 
- >Note: This key may be present in the root of the manifest as the default value for all installer nodes. This key may also be present in an individual installer node as well. If this key is in the manifest root and in an installer node, the value in the installer node will apply.
-</details>
-
-### Scope
-
-<details>
- <summary>Scope indicates if the installer is per user or per machine</summary>
-
- **Optional Field**
- This key represents the scope the package is installed under. The two configurations are "user" and "machine". Some installers support only one of these scopes while others support both via arguments passed to the installer using "InstallerSwitches".
- 
- >Note: This key may be present in the root of the manifest as the default value for all installer nodes. This key may also be present in an individual installer node as well. If this key is in the manifest root and in an installer node, the value in the installer node will apply.
-</details>
-
-### InstallerSwitches
+#### InstallerSwitches
 
 <details>
  <summary>Switches passed to installers</summary>
@@ -172,7 +234,7 @@ ManifestVersion: 1.1.0          # The manifest syntax version
  >Note: The Microsoft community repository currently requires support for silent and silent with progress installation. Many custom .exe installers will require the proper switches to meet this requirement. The [Windows Package Manager Manifest Creator](https://github.com/microsoft/winget-create) tool can be used to determine if one of the known tools was used to build an installer with the .exe file extension. In the event the tool is unable to determine the tool used to build the installer, the publisher may have documentation for the proper switches.
 </details>
 
-### Silent
+##### Silent
 
 <details>
  <summary>Silent is the value that should be passed to the installer when user chooses a silent or quiet install</summary>
@@ -185,7 +247,7 @@ ManifestVersion: 1.1.0          # The manifest syntax version
  >Note: This key may be present in the root of the manifest as the default value for all installer nodes. This key may also be present in an individual installer node as well. If this key is in the manifest root and in an installer node, the value in the installer node will apply.
 </details>
 
-### SilentWithProgress
+##### SilentWithProgress
 
 <details>
  <summary>SilentWithProgress is the value that should be passed to the installer when user chooses a non-interactive install</summary>
@@ -196,7 +258,7 @@ ManifestVersion: 1.1.0          # The manifest syntax version
  >Note: When the Windows Package Manager installs a package using the "silent with progress" install mode, any custom switches will also be passed to the installer. If a user applies override switches via command line via the Windows Package Manager, none of the switches from the manifest will be passed to the installer.
 </details>
 
-### Interactive
+##### Interactive
 
 <details>
  <summary>Interactive is the value that should be passed to the installer when user chooses an interactive install</summary>
@@ -208,7 +270,7 @@ ManifestVersion: 1.1.0          # The manifest syntax version
 
 </details>
 
-### InstallLocation
+##### InstallLocation
 
 <details>
  <summary>InstallLocation is the value passed to the installer for custom install location. </summary>
@@ -217,7 +279,7 @@ ManifestVersion: 1.1.0          # The manifest syntax version
  This key represents the path to install the package if the installer supports installing the package in a user configurable location. The **&lt;INSTALLPATH&gt;** token can be included in the switch value so the Windows Package Manager will replace the token with user provided path.
 </details>
 
-### Log
+##### Log
 
 <details>
  <summary>Log is the value passed to the installer for custom log file path.</summary>
@@ -226,7 +288,7 @@ ManifestVersion: 1.1.0          # The manifest syntax version
   This key represents the path logs will be directed to if the installer supports specifying the log path in a user configurable location. The **&lt;LOGPATH&gt;** token can be included in the switch value so the Windows Package Manager will replace the token with user provided path.
 </details>
 
-### Upgrade
+##### Upgrade
 
 <details>
  <summary>Upgrade is the value that should be passed to the installer when user chooses an upgrade.</summary>
@@ -237,7 +299,7 @@ ManifestVersion: 1.1.0          # The manifest syntax version
  >Note: If a user applies override switches via command line via the Windows Package Manager, none of the switches from the manifest will be passed to the installer.
 </details>
 
-### Custom
+##### Custom
 
 <details>
  <summary>Custom switches will be passed directly to the installer by the Windows Package Manager.</summary>
@@ -248,20 +310,7 @@ ManifestVersion: 1.1.0          # The manifest syntax version
  >Note: If a user applies override switches via command line via the Windows Package Manager, none of the switches from the manifest will be passed to the installer.
 </details>
 
-### InstallerSuccessCodes
-
-<details>
- <summary>List of additional non-zero installer success exit codes other than known default values by the Windows Package Manager.</summary>
-
- **Optional Field**
- This key represents any status codes returned by the installer representing a success condition other than zero.
-
- >Note: Some return codes indicate a reboot is suggested or required. The Windows Package Manager does not support the reboot behavior currently. Some installers will force a reboot, and the Windows Package Manager does not currently suppress reboot behavior.
- 
- >Note: This key may be present in the root of the manifest as the default value for all installer nodes. This key may also be present in an individual installer node as well. If this key is in the manifest root and in an installer node, the value in the installer node will apply.
-</details>
-
-### UpgradeBehavior
+#### UpgradeBehavior
 
 <details>
  <summary>The upgrade method</summary>
@@ -272,7 +321,7 @@ ManifestVersion: 1.1.0          # The manifest syntax version
  >Note: This key may be present in the root of the manifest as the default value for all installer nodes. This key may also be present in an individual installer node as well. If this key is in the manifest root and in an installer node, the value in the installer node will apply.
 </details>
 
-### Commands
+#### Commands
 
 <details>
  <summary>List of commands or aliases to run the package</summary>
@@ -285,7 +334,7 @@ ManifestVersion: 1.1.0          # The manifest syntax version
  >Note: This key may be present in the root of the manifest as the default value for all installer nodes. This key may also be present in an individual installer node as well. If this key is in the manifest root and in an installer node, the value in the installer node will apply.
 </details>
 
-### Protocols
+#### Protocols
 
 <details>
  <summary>List of protocols the package provides a handler for</summary>
@@ -296,7 +345,7 @@ ManifestVersion: 1.1.0          # The manifest syntax version
  >Note: This key may be present in the root of the manifest as the default value for all installer nodes. This key may also be present in an individual installer node as well. If this key is in the manifest root and in an installer node, the value in the installer node will apply.
 </details>
 
-### FileExtensions
+#### FileExtensions
 
 <details>
  <summary>List of file extensions the package could support</summary>
@@ -307,7 +356,7 @@ ManifestVersion: 1.1.0          # The manifest syntax version
  >Note: This key may be present in the root of the manifest as the default value for all installer nodes. This key may also be present in an individual installer node as well. If this key is in the manifest root and in an installer node, the value in the installer node will apply.
 </details>
 
-### Dependencies
+#### Dependencies
 
 <details>
  <summary>List of dependencies needed to install or execute the package</summary>
@@ -320,40 +369,7 @@ ManifestVersion: 1.1.0          # The manifest syntax version
  >Note: This key may be present in the root of the manifest as the default value for all installer nodes. This key may also be present in an individual installer node as well. If this key is in the manifest root and in an installer node, the value in the installer node will apply.
 </details>
 
-### WindowsFeatures
-
-<details>
- <summary>List of Windows feature dependencies</summary>
-
- **Optional Field**
- This key represents any Windows features required to install or run the package.
-
- >Note: The Windows Package Manager does not support any behavior related to dependencies.
-</details>
-
-### WindowsLibraries
-
-<details>
- <summary>List of Windows library dependencies</summary>
-
- **Optional Field**
- This key represents any Windows libraries required to install or run the package.
-
- >Note: The Windows Package Manager does not support any behavior related to dependencies.
-</details>
-
-### PackageDependencies
-
-<details>
- <summary>List of package dependencies from current source</summary>
-
- **Optional Field**
- This key represents any packages from the same source required to install or run the package.
-
- >Note: The Windows Package Manager does not support any behavior related to dependencies.
-</details>
-
-### ExternalDependencies
+##### ExternalDependencies
 
 <details>
  <summary>List of external package dependencies</summary>
@@ -364,7 +380,40 @@ ManifestVersion: 1.1.0          # The manifest syntax version
  >Note: The Windows Package Manager does not support any behavior related to dependencies.
 </details>
 
-### PackageFamilyName
+##### PackageDependencies
+
+<details>
+ <summary>List of package dependencies from current source</summary>
+
+ **Optional Field**
+ This key represents any packages from the same source required to install or run the package.
+
+ >Note: The Windows Package Manager does not support any behavior related to dependencies.
+</details>
+
+##### WindowsFeatures
+
+<details>
+ <summary>List of Windows feature dependencies</summary>
+
+ **Optional Field**
+ This key represents any Windows features required to install or run the package.
+
+ >Note: The Windows Package Manager does not support any behavior related to dependencies.
+</details>
+
+##### WindowsLibraries
+
+<details>
+ <summary>List of Windows library dependencies</summary>
+
+ **Optional Field**
+ This key represents any Windows libraries required to install or run the package.
+
+ >Note: The Windows Package Manager does not support any behavior related to dependencies.
+</details>
+
+#### PackageFamilyName
 
 <details>
  <summary>PackageFamilyName for appx or msix installer. Could be used for correlation of packages across sources</summary>
@@ -375,18 +424,7 @@ ManifestVersion: 1.1.0          # The manifest syntax version
  >Note: This key may be present in the root of the manifest as the default value for all installer nodes. This key may also be present in an individual installer node as well. If this key is in the manifest root and in an installer node, the value in the installer node will apply.
 </details>
 
-### ProductCode
-
-<details>
- <summary>ProductCode could be used for correlation of packages across sources</summary>
-
- **Optional Field**
- This key represents the product code specified in an MSI installer. This value is used to assist with matching packages from a source to the program installed in Windows via Add / Remove Programs for list, and upgrade behavior.
- 
- >Note: This key may be present in the root of the manifest as the default value for all installer nodes. This key may also be present in an individual installer node as well. If this key is in the manifest root and in an installer node, the value in the installer node will apply.
-</details>
-
-### Capabilities
+#### Capabilities
 
 <details>
  <summary>List of appx or msix installer capabilities</summary>
@@ -397,7 +435,7 @@ ManifestVersion: 1.1.0          # The manifest syntax version
  >Note: This key may be present in the root of the manifest as the default value for all installer nodes. This key may also be present in an individual installer node as well. If this key is in the manifest root and in an installer node, the value in the installer node will apply.
 </details>
 
-### RestrictedCapabilities
+#### RestrictedCapabilities
 
 <details>
  <summary>List of appx or msix installer restricted capabilities</summary>
@@ -408,76 +446,200 @@ ManifestVersion: 1.1.0          # The manifest syntax version
  >Note: This key may be present in the root of the manifest as the default value for all installer nodes. This key may also be present in an individual installer node as well. If this key is in the manifest root and in an installer node, the value in the installer node will apply.
 </details>
 
-### Installer
+#### InstallerAbortsTerminal
 
 <details>
- <summary>Package installer</summary>
-
- **Required Field**
- The key represents an installer for a package.
-
- >Note: Many of the keys related to installers may either be at the root level of the manifest, or included in an installer. Any values provided at the root level and not specified in an installer will be inherited.
-</details>
-
-### InstallerLocale
-
-<details>
- <summary>Locale for package installer</summary>
+ <summary>Indicator for installers that abort the terminal.</summary>
 
  **Optional Field**
- This key represents the locale for an installer *not* the package meta-data. Some installers are compiled with locale or language specific properties. If this key is present, it is used to represent the package locale for an installer.
+ This key represents the behavior associated with installers that abort the terminal. This most often occurs when a user is performing an upgrade of the running terminal. 
+
+ >Note: Windows Terminal no longer causes this to occur as the MSIX install behavior from the Windows Package Manager is deferred registration.
+</details>
+
+#### InstallLocationRequired
+
+<details>
+ <summary>Indicator for packages requiring an install location to be specified.</summary>
+
+ **Optional Field**
+ This key represents the requirement to have an install location specified. These installers are known to deploy files to the location the installer is executed in.
+
+ >Note: The behavior associated with this key is not implemented in the Windows Package Manager 1.2 client.
+</details>
+
+#### RequireExplicitUpgrade
+
+<details>
+  <summary>Indicator for packages that upgrade themselves.</summary>
+
+  **Optional Field**
+  This key identifies packages that upgrade themselves. By default, they are excluded from `winget upgrade --all`.
+</details>
+
+#### ElevationRequirement
+
+<details>
+  <summary>Indicator for elevation requirements when installing or upgrading packages.</summary>
+
+  **Optional Field** This key represents which scope a package is required to be executed under. Some packages require user level execution while others require administrative level execution.
+
+ >Note: The behavior associated with this key is not implemented in the Windows Package Manager 1.2 client.
+</details>
+
+#### UnsupportedOSArchitectures
+
+<details>
+  <summary>List of unsupported architectures for a package.</summary>
+
+  **Optional Field** This key represents any known architectures a package is known not to be compatible with. Generally, this is associated with emulation modes.
+</details>
+
+#### Markets
+
+<details>
+  <summary>List of supported markets for a package.</summary>
+
+  **Optional Field** This key represents any markets a package may be installed in.
+
+  >Note: If a market is listed in both this key and the ExcludedMarkets key, the market will be excluded. Both keys are present to reduce the need to list the larger set of markets.
+</details>
+
+#### ExcludedMarkets
+
+<details>
+  <summary>List of unsupported markets for a package.</summary>
+
+  **Optional Field** This key represents any markets a package may not be installed in.
+
+  >Note: If a market is listed in both this key and the Markets key, the market will be excluded. Both keys are present to reduce the need to list the larger set of markets.
+</details>
+
+#### InstallerSuccessCodes
+
+<details>
+ <summary>List of additional non-zero installer success exit codes other than known default values by the Windows Package Manager.</summary>
+
+ **Optional Field**
+ This key represents any status codes returned by the installer representing a success condition other than zero.
+
+ >Note: Some return codes indicate a reboot is suggested or required. The Windows Package Manager does not support the reboot behavior currently. Some installers will force a reboot, and the Windows Package Manager does not currently suppress reboot behavior.
  
  >Note: This key may be present in the root of the manifest as the default value for all installer nodes. This key may also be present in an individual installer node as well. If this key is in the manifest root and in an installer node, the value in the installer node will apply.
-
 </details>
 
-### Architecture
+#### ExpectedReturnCodes
 
 <details>
- <summary>The installer target architecture</summary>
-
- **Required Field**
- This key represents the hardware architecture targeted by the installer. The Windows Package Manager will attempt to determine the best architecture to use. If emulation is available and the native hardware architecture does not have a supported installer, the emulated architecture may be used.
- </details>
-
-### InstallerUrl
-
-<details>
- <summary>The installer Url</summary>
-
- **Required Field**
- This key represents the URL to download the installer.
-</details>
-
-### InstallerSha256
-
-<details>
- <summary>Sha256 is required. Sha256 of the installer</summary>
-
- **Required Field**
- This key represents the SHA 256 hash for the installer. It is used to confirm the installer has not been modified. The Windows Package Manager will compare the hash in the manifest with the calculated hash of the installer after it has been downloaded.
-
- >Note:  The [Windows Package Manager Manifest Creator](https://github.com/microsoft/winget-create) can be used to determine the SHA 256 of the installer. The `winget hash &lt;pathToInstaller&gt;` command can also be used to determine the SHA 256 of the installer.
-</details>
-
-### SignatureSha256
-
-<details>
- <summary>SignatureSha256 is recommended for appx or msix. It is the sha256 of signature file inside appx or msix. Could be used during streaming install if applicable</summary>
+ <summary>List of additional non-zero installer  exit codes other than known default values by the Windows Package Manager.</summary>
 
  **Optional Field**
- This key represents the signature file (AppxSignature.p7x) inside an MSIX installer. It is used to provide streaming install for MSIX packages.
+ This key represents any status codes returned by the installer representing a condition other than zero.
 
- >Note: MSIX installers must be signed to be included in the Microsoft community package repository. If the installer is an MSIX this signature should be included in the manifest. The [Windows Package Manager Manifest Creator](https://github.com/microsoft/winget-create) can be used to determine the signature SHA 256. The `winget hash <pathToInstaller> --msix` command can also be used to determine the signature SHA 256.
+ >Note: Some return codes indicate a reboot is suggested or required. The Windows Package Manager does not support the reboot behavior currently. Some installers will force a reboot, and the Windows Package Manager does not currently suppress reboot behavior.
+ 
+ >Note: This key may be present in the root of the manifest as the default value for all installer nodes. This key may also be present in an individual installer node as well. If this key is in the manifest root and in an installer node, the value in the installer node will apply.
 </details>
 
-### Installers
+##### ExpectedReturnCode
 
 <details>
- <summary>Array of package installers</summary>
+ <summary>The non-zero installer exit code other than known default values by the Windows Package Manager.</summary>
 
- **Required Field**
- This key must be present for each installer for this version of the package. There may be multiple installer nodes to support different architectures, locales, install scopes (User vs. Machine)
+ **Optional Field**
+ This key represents any status code returned by the installer representing a condition other than zero. MSIX and MSI packages have well known return codes. This is primarily intended for executable installers that have custom or unique return coes that can be mapped to a return response.
+</details>
+
+##### ReturnResponse
+
+<details>
+ <summary>The return response to be displayed in the event an expected return code is encountered.</summary>
+
+ **Optional Field**
+ This key represents a return response to display when an installer returns an expected return code. MSIX and MSI packages have well known return codes. This is primarily intended for executable installers that have custom or unique return coes that can be mapped to a return response.
+
+ >Note: An enumerated list of values in the JSON schema must be specified for consistency of user experience.
+</details>
+
+#### ProductCode
+
+<details>
+ <summary>ProductCode is used for correlation of packages with manifests is configured sources.</summary>
+
+ **Optional Field**
+ This key represents the product code specified in an MSI installer. This value is used to assist with matching packages from a source to the program installed in Windows via Add / Remove Programs for list, and upgrade behavior.
+ 
+ >Note: This key may be present in the root of the manifest as the default value for all installer nodes. This key may also be present in an individual installer node as well. If this key is in the manifest root and in an installer node, the value in the installer node will apply.
+</details>
+
+#### AppsAndFeaturesEntries
+<details>
+ <summary>AppsAndFeaturesEntries are used to match installed packages with manifests is configured sources.</summary>
+
+ **Optional Field**
+  This key represents the values reported by Windows Apps & Features. When a package is installed, entries are made into the Windows Registry. 
+
+  >Note: The AppsAndFeatures behavior is not implemented in the Windows Package Manager 1.2 client.
+</details>
+
+##### DisplayName
+<details>
+ <summary>DisplayName is what is displayed in the Control Panel for installed packages.</summary>
+
+ **Optional Field**
+ This key represents the package name as displayed in Windows Apps & Features. It is used to help correlate installed packages with manifests in configured sources.
+
+ >Note: The AppsAndFeatures behavior is not implemented in the Windows Package Manager 1.2 client.
+</details>
+
+##### DisplayVersion
+<details>
+ <summary>DisplayVersion is the version displayed in the Control Panel for installed packages.</summary>
+
+ **Optional Field**
+ This key represents the package version as displayed in Windows Apps & Features. It is used to help correlate installed packages with manifests in configured sources.
+ 
+ >Note: The AppsAndFeatures behavior is not implemented in the Windows Package Manager 1.2 client.
+</details>
+
+##### Publisher
+<details>
+ <summary>Publisher is the value of the package publisher reported in the Windows registry.</summary>
+
+ **Optional Field**
+ This key represents the Publisher reported in the Windows registry. It is used to help correlate installed packages with manifests in configured sources.
+ 
+ >Note: The AppsAndFeatures behavior is not implemented in the Windows Package Manager 1.2 client.
+</details>                  # *Not implemented* Optional publisher displayed in the ARP entry
+
+##### ProductCode
+<details>
+ <summary>ProductCode is used for correlation of packages with manifests is configured sources.</summary>
+
+ **Optional Field**
+ This key represents the product code for a package. It is used to help correlate installed packages with manifests in configured sources.
+
+ >Note: This key is displayed twice for completeness. As the AppsAndFeatures behavior is not implemented in the Windows Package Manager 1.2 client, the description and usage above is implemented.
+</details>
+
+##### UpgradeCode
+<details>
+ <summary>UpgradeCode is used for correlation of packages with manifests is configured sources.</summary>
+
+ **Optional Field**
+ This key represents the upgrade code for a package. It is used to help correlate installed packages with manifests in configured sources.
+
+ >Note: The AppsAndFeatures behavior is not implemented in the Windows Package Manager 1.2 client.
+</details>
+
+##### InstallerType
+<details>
+ <summary>Enumeration of supported installer types.</summary>
+
+ **Optional Field**
+ This key represents the. It is used to help correlate installed packages with manifests in configured sources. In some cases an installer is an .exe based installer, but it contains an MSI installer. This key will help the Windows Package Manager understand if upgrading an MSI should be performed when it is contained in an .exe installer.
+
+ >Note: This key is displayed twice for completeness. As the AppsAndFeatures behavior is not implemented in the Windows Package Manager 1.2 client, the description and usage above is implemented.
 </details>
 
 ### ManifestType
