@@ -1,7 +1,7 @@
 # Windows Package Manager
 ## Manifest Schema v1.1.0 Default Locale File
 
-All Windows Package Manager manifests in the Microsoft community repository are submitted using [YAML](https://yaml.org/spec/) syntax. A JSON schema is provided to aid authoring these files in editors, and in the other tooling related to the Windows Package Manager. This document provides detailed information regarding the usage of the YAML keys in the [default locale](https://github.com/microsoft/winget-cli/blob/master/schemas/JSON/manifests/v1.1.0/manifest.defaultLocale.1.1.0.json) file for multi-file manifests. Please review the [Manifest Specification](https://github.com/microsoft/winget-cli/blob/master/doc/ManifestSpecv1.1.md) if you are not familiar with this file.
+All Windows Package Manager manifests in the Microsoft community repository are submitted using [YAML](https://yaml.org/spec/) syntax. A JSON schema is provided to aid authoring these files in editors, and in the other tooling related to the Windows Package Manager. This document provides detailed information regarding the usage of the YAML keys in the [default locale](https://github.com/microsoft/winget-cli/blob/master/schemas/JSON/manifests/v1.1.0/manifest.defaultLocale.1.1.0.json) file for multi-file manifests.
 
 ### [Default Locale Manifest](#tab/defaultLocale/)
 
@@ -28,6 +28,7 @@ Agreement:                    # Optional package agreements
   - AgreementLabel:           # Optional agreement label
     Agreement:                # Optional agreement text
     AgreementUrl:             # Optional agreement URL
+ReleaseDate:                  # Optional release date
 ReleaseNotes:                 # Optional release notes
 ReleaseNotesURL:              # Optional release notes URL
 ManifestType: defaultLocale   # The manifest type
@@ -192,7 +193,7 @@ ManifestVersion: 1.1.0        # The manifest syntax version
 
   >Note: This should be something descriptive about what the package does, and it should not simply state something like "&lt;package name&gt; installer" or "&lt;package name&gt; setup".
  </details>
- 
+
 ### Description
 
 <details>
@@ -264,6 +265,15 @@ ManifestVersion: 1.1.0        # The manifest syntax version
   This key represents the URL for a package agreement.
 </details>
 
+### ReleaseDate:
+
+<details>
+  <summary>The Release Date for a package.</summary>
+  
+  **Optional Field**
+  This key represents the release date for a package.
+</details>
+
 ### ReleaseNotes:
 
 <details>
@@ -271,6 +281,15 @@ ManifestVersion: 1.1.0        # The manifest syntax version
   
   **Optional Field**
   This key represents release notes for a package.
+</details>
+
+### ReleaseNotesURL:
+
+<details>
+  <summary>The Release Notes web page for a package.</summary>
+  
+  **Optional Field**
+  This key represents release notes web page for a package.
 </details>
 
 ### ManifestType
