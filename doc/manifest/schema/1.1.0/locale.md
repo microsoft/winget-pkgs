@@ -15,7 +15,7 @@ PublisherSupportUrul:         # Optional publisher support page
 PrivacyUrl:                   # Optional publisher privacy page
 Author:                       # Optional author
 PackageName:                  # Optional package name
-PackageURL:                   # Optional package home page
+PackageUrl:                   # Optional package home page
 License:                      # Optional package license
 LicenseUrl:                   # Optional package home page
 Copyright:                    # Optional package copyright
@@ -28,6 +28,7 @@ Agreement:                    # Optional package agreements
   - AgreementLabel:           # Optional agreement label
     Agreement:                # Optional agreement text
     AgreementUrl:             # Optional agreement URL
+ReleaseDate:                  # Optional release date
 ReleaseNotes:                 # Optional release notes
 ReleaseNotesURL:              # Optional release notes URL
 ManifestType: defaultLocale   # The manifest type
@@ -264,6 +265,15 @@ ManifestVersion: 1.1.0        # The manifest syntax version
   This key represents the URL for a package agreement.
 </details>
 
+### ReleaseDate:
+
+<details>
+  <summary>The Release Date for a package.</summary>
+  
+  **Optional Field**
+  This key represents the release date for a package.
+</details>
+
 ### ReleaseNotes:
 
 <details>
@@ -271,6 +281,15 @@ ManifestVersion: 1.1.0        # The manifest syntax version
   
   **Optional Field**
   This key represents release notes for a package.
+</details>
+
+### ReleaseNotesURL:
+
+<details>
+  <summary>The Release Notes web page for a package.</summary>
+  
+  **Optional Field**
+  This key represents release notes web page for a package.
 </details>
 
 ### ManifestType
