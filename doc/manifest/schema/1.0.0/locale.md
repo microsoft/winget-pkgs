@@ -1,7 +1,7 @@
 # Windows Package Manager
-## Manifest Schema v1.1.0 Default Locale File
+## Manifest Schema v1.0.0 Default Locale File
 
-All Windows Package Manager manifests in the Microsoft community repository are submitted using [YAML](https://yaml.org/spec/) syntax. A [JSON schema](https://github.com/microsoft/winget-cli/blob/master/schemas/JSON/manifests/v1.1.0/manifest.locale.1.1.0.json) is provided to aid authoring these files in editors, and in the other tooling related to the Windows Package Manager. This document provides detailed information regarding the usage of the YAML keys in the locale file for multi-file manifests.
+All Windows Package Manager manifests in the Microsoft community repository are submitted using [YAML](https://yaml.org/spec/) syntax. A [JSON schema](https://github.com/microsoft/winget-cli/blob/master/schemas/JSON/manifests/v1.0.0/manifest.locale.1.0.0.json) is provided to aid authoring these files in editors, and in the other tooling related to the Windows Package Manager. This document provides detailed information regarding the usage of the YAML keys in the locale file for multi-file manifests.
 
 ### Locale Manifest
 
@@ -32,7 +32,7 @@ ReleaseDate:                  # Optional release date
 ReleaseNotes:                 # Optional release notes
 ReleaseNotesUrl:              # Optional release notes URL
 ManifestType: locale          # The manifest type
-ManifestVersion: 1.1.0        # The manifest syntax version
+ManifestVersion: 1.0.0        # The manifest syntax version
 ```
 
 ## Fields
@@ -279,5 +279,5 @@ ManifestVersion: 1.1.0        # The manifest syntax version
 
  **Required Field**
 
- This key must have the value "1.1.0". The Microsoft community package repository validation pipelines also use this value to determine appropriate validation rules when evaluating this file.
+ This key must have the value "1.0.0". The Microsoft community package repository validation pipelines also use this value to determine appropriate validation rules when evaluating this file.
 </details>
