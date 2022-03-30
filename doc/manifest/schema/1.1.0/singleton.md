@@ -1,6 +1,6 @@
 
 ## Minimal singleton YAML file example
-As specified in the [singleton JSON schema](https://github.com/microsoft/winget-cli/blob/master/schemas/JSON/manifests/v1.0.0/manifest.singleton.1.0.0.json), only a number of fields are required. The singleton format is only valid for packages containing a single installer and a single locale. If more than one installer or locale is provided, the multiple YAML file format and schema must be used.
+As specified in the [singleton JSON schema](https://github.com/microsoft/winget-cli/blob/master/schemas/JSON/manifests/v1.1.0/manifest.singleton.1.1.0.json), only a number of fields are required. The singleton format is only valid for packages containing a single installer and a single locale. If more than one installer or locale is provided, the multiple YAML file format and schema must be used.
 
 >Note: The singleton manifest format has been deprecated in the Windows Package Manager Community Repository. The Windows Package Manager 1.2 client still supports singleton manifests.
 
