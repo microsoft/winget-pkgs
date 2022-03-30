@@ -259,7 +259,7 @@ ManifestVersion: 1.1.0        # The manifest syntax version
 </details>
 
 <details>
-  <summary><b>ReleaseNotesURL</b> - The Release Notes web page for a package.</summary>
+  <summary><b>ReleaseNotesUrl</b> - The Release Notes web page for a package.</summary>
   
   **Optional Field**
 

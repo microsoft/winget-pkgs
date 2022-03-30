@@ -24,7 +24,7 @@ Agreement:                       # Optional package agreements
     AgreementUrl:                # Optional agreement URL
 ReleaseDate:                     # Optional release date
 ReleaseNotes:                    # Optional release notes
-ReleaseNotesURL:                 # Optional release notes URL
+ReleaseNotesUrl:                 # Optional release notes URL
 Installers:                     # The package installer
   - Architecture:               # The architecture of the installer
     InstallerLocale:            # Optional locale of the installer
@@ -212,7 +212,7 @@ ManifestVersion: 1.1.0
 </details>
 
 <details>
-  <summary><b>ReleaseNotesURL</b> - The Release Notes web page for a package.</summary>
+  <summary><b>ReleaseNotesUrl</b> - The Release Notes web page for a package.</summary>
   
   **Optional Field**
 
@@ -734,6 +734,6 @@ ManifestVersion: 1.1.0
  <summary><b>ManifestVersion</b> - The manifest syntax version</summary>
 
  **Required Field**
- 
+
  This key must have the value "1.1.0". The Microsoft community package repository validation pipelines also use this value to determine appropriate validation rules when evaluating this file.
 </details>
