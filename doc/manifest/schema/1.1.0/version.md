@@ -16,7 +16,7 @@ ManifestVersion: 1.1.0  # The manifest syntax version
 ## Fields
 
 <details>
- <summary><h3>PackageIdentifier</h3> - The package unique identifier</summary>
+ <summary>**PackageIdentifier** - The package unique identifier</summary>
 
  **Required Field**
  This key is the unique identifier for a given package. This value is generally in the form of `Publisher.Package`. It is case sensitve, and this value must match the folder structure under the partition directory in GitHub.
