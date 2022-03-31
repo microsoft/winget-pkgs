@@ -145,7 +145,7 @@ ManifestVersion: 1.1.0        # The manifest syntax version
 
   **Optional Field**
 
-  This key represents the license web site or specific web page provided the publisher or ISV. If there is a license web site or specific web page for the package it is preferred over a generic license page for the publisher.
+  This key represents the license web site or specific web page provided the publisher or ISV. If there is a license web site or specific web page for the package, it is preferred over a generic license page for the publisher.
   
   If this is a link to the license file for an open source project, it should be specific to the version for the package. Some open source projects change their license over time.
  </details>
