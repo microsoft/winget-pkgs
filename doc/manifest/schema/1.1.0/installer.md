@@ -502,7 +502,7 @@ ManifestVersion: 1.1.0
 
   **Optional Field** 
   
-  This key represents any known architectures a package is known not to be compatible with. Generally, this is associated with emulation modes.
+  This key represents any architectures a package is known not to be compatible with. Generally, this is associated with emulation modes.
 </details>
 
 <details>
