@@ -562,7 +562,7 @@ ManifestVersion: 1.1.0
 
  **Optional Field**
 
- This key represents a return response to display when an installer returns an expected return code. MSIX and MSI packages have well known return codes. This is primarily intended for executable installers that have custom or unique return coes that can be mapped to a return response.
+ This key represents a return response to display when an installer returns an expected return code. MSIX and MSI packages have well known return codes. This is primarily intended for executable installers that have custom or unique return codes that can be mapped to a return response.
 
  >Note: An enumerated list of values in the JSON schema must be specified for consistency of user experience.
 </details>
