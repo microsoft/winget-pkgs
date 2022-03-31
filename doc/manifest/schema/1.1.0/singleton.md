@@ -653,7 +653,7 @@ ManifestVersion: 1.1.0
 </details>
 
 <details>
- <summary><b>AppsAndFeaturesEntries</b> - AppsAndFeaturesEntries are used to match installed packages with manifests is configured sources.</summary>
+ <summary><b>AppsAndFeaturesEntries</b> - AppsAndFeaturesEntries are used to match installed packages with manifests in configured sources.</summary>
 
  **Optional Field**
 
