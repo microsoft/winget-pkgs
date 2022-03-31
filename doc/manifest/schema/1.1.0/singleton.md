@@ -693,7 +693,7 @@ ManifestVersion: 1.1.0
 </details>                  # *Not implemented* Optional publisher displayed in the ARP entry
 
 <details>
- <summary><b>ProductCode</b> - ProductCode is used for correlation of packages with manifests is configured sources.</summary>
+ <summary><b>ProductCode</b> - ProductCode is used for correlation of packages with manifests in configured sources.</summary>
 
  **Optional Field**
 
