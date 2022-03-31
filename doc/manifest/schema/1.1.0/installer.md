@@ -642,7 +642,7 @@ ManifestVersion: 1.1.0
 
  **Optional Field**
 
- This key represents the. It is used to help correlate installed packages with manifests in configured sources. In some cases an installer is an .exe based installer, but it contains an MSI installer. This key will help the Windows Package Manager understand if upgrading an MSI should be performed when it is contained in an .exe installer.
+ This key represents the installer type for the package. It is used to help correlate installed packages with manifests in configured sources. In some cases, an installer is an .exe based installer, but contains an MSI installer. This key will help the Windows Package Manager understand if upgrading an MSI should be performed when it is contained in an .exe installer.
 
  >Note: This key is displayed twice for completeness. As the AppsAndFeatures behavior is not implemented in the Windows Package Manager 1.2 client, the description and usage above is implemented.
 </details>
