@@ -163,7 +163,7 @@ ManifestVersion: 1.1.0        # The manifest syntax version
 
   **Optional Field**
 
-  This key represents the copyright web site or specific web page provided the publisher or ISV. If there is a copyright web site or specific web page for the package it is preferred over a generic copyright page for the publisher.
+  This key represents the copyright web site or specific web page provided the publisher or ISV. If there is a copyright web site or specific web page for the package, it is preferred over a generic copyright page for the publisher.
   
   If this is a link to the copyright file for an open source project, it should be specific to the version for the package. Some open source projects change their copyright over time.
  </details>
