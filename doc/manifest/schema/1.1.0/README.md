@@ -25,7 +25,7 @@ Example:
 * Publisher folder is the name of the company that publishes the tool.  For example: Microsoft.
 * The child folder package is the name of the application or tool.  For example: WindowsTerminal.
 * The child folder package version is the version of the package. For example: 1.6.10571.0.
-* The filename must be a combination of the application name and the current version.  For example: WindowsTerminal.yaml.
+* The filename must be a combination of the publisher name and the application name. For example: Microsoft.WindowsTerminal.yaml.
 
 The publisher and application folders MUST match the values used to define the Id.  See PackageIdentifier: in the YAML for more detail.
 The version in the folder name MUST match the version field value in the YAML file.  See PackageVersion: in the YAML for more detail.
