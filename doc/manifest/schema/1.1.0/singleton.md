@@ -379,7 +379,7 @@ ManifestVersion: 1.1.0
 
  **Optional Field**
 
- This key represents the path to install the package if the installer supports installing the package in a user configurable location. The **&lt;INSTALLPATH&gt;** token can be included in the switch value so the Windows Package Manager will replace the token with user provided path.
+ This key represents the path to install the package if the installer supports installing the package in a user configurable location. The **&lt;INSTALLPATH&gt;** token can be included in the switch value so the Windows Package Manager will replace the token with the user provided path.
 </details>
 
 <details>
