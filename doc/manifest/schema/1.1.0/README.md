@@ -1,3 +1,11 @@
+[schemaFolder]:                             https://github.com/microsoft/winget-cli/tree/master/schemas/JSON/manifests/v1.1.0
+[versionSchema]:                            https://github.com/microsoft/winget-cli/tree/master/schemas/JSON/manifests/v1.1.0/manifest.version.1.1.0.json
+[defaultLocaleSchema]:                      https://github.com/microsoft/winget-cli/tree/master/schemas/JSON/manifests/v1.1.0/manifest.defaultLocale.1.1.0.json
+[localeSchema]:                             https://github.com/microsoft/winget-cli/tree/master/schemas/JSON/manifests/v1.1.0/manifest.locale.1.1.0.json
+[installerSchema]:                          https://github.com/microsoft/winget-cli/tree/master/schemas/JSON/manifests/v1.1.0/manifest.installer.1.1.0.json
+[Windows Package Manager Manifest Creator]: https://github.com/microsoft/winget-create
+[YAML Create]:                              https://github.com/microsoft/winget-pkgs/blob/master/Tools/YamlCreate.ps1
+
 # Windows Package Manager
 
 ## Manifest Schema 1.1
@@ -6,13 +14,13 @@ The Windows Package Manager 1.2 client does not support all fields in the 1.1 sc
 
 The Windows Package Manager uses manifests (YAML files) to locate and install packages for Windows users. This specification provides references to JSON schemas as well as best practices.
 
-Manifests submitted to the Windows Package Manager Community Repository should be submitted as a multi-file manifest. Only one version of a package may be submitted per pull request. The [singleton](singleton.md) manifest format is supported by the client, but has been deprecated in the community repository. Rich tooling exists to generate manifests. The [Windows Package Manager Manifest Creator](https://github.com/microsoft/winget-create) and [YAML Create](https://github.com/microsoft/winget-pkgs/blob/master/Tools/YamlCreate.ps1) were both designed to produce well formed and rich manifests.
+Manifests submitted to the Windows Package Manager Community Repository should be submitted as a multi-file manifest. Only one version of a package may be submitted per pull request. The [singleton](singleton.md) manifest format is supported by the client, but has been deprecated in the community repository. Rich tooling exists to generate manifests. The [Windows Package Manager Manifest Creator] and [YAML Create] were both designed to produce well formed and rich manifests.
 
 A multi-file manifest contains:
-* One [version](version.md) ([JSON Schema](https://github.com/microsoft/winget-cli/blob/master/schemas/JSON/manifests/v1.1.0/manifest.version.1.1.0.json)) file
-* One [default locale](defaultLocale.md) ([JSON Schema](https://github.com/microsoft/winget-cli/blob/master/schemas/JSON/manifests/v1.1.0/manifest.defaultLocale.1.1.0.json)) file
-* One [installer](installer.md) ([JSON Schema](https://github.com/microsoft/winget-cli/blob/master/schemas/JSON/manifests/v1.1.0/manifest.installer.1.1.0.json)) file
-* Additional optional [locale](locale.md) ([JSON Schema](https://github.com/microsoft/winget-cli/blob/master/schemas/JSON/manifests/v1.1.0/manifest.locale.1.1.0.json)) files
+* One [version](version.md) ([JSON Schema][versionSchema]) file
+* One [default locale](defaultLocale.md) ([JSON Schema][defaultLocaleSchema]) file
+* One [installer](installer.md) ([JSON Schema][installerSchema]) file
+* Additional optional [locale](locale.md) ([JSON Schema][localeSchema]) files
 
 ## YAML file name and folder structure
 YAML files shall be added to the repository with the following folder structure:
@@ -31,7 +39,7 @@ The publisher and application folders MUST match the values used to define the I
 The version in the folder name MUST match the version field value in the YAML file.  See PackageVersion: in the YAML for more detail.
 
 There are two primary types of manifests. A single file manifest (singleton) and a multi-file manifest. 
-[JSON schemas](https://github.com/microsoft/winget-cli/tree/master/schemas/JSON/manifests/v1.1.0) have been provided 
+[JSON schemas][schemaFolder] have been provided 
 to help strongly type attributes and requirements.
 
 ## YAML Syntax

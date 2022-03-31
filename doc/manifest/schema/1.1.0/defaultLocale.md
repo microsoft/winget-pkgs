@@ -1,7 +1,16 @@
+[JSON schema]:                                      https://github.com/microsoft/winget-cli/blob/master/schemas/JSON/manifests/v1.1.0/manifest.defaultLocale.1.1.0.json
+[YAML]:                                             https://yaml.org/spec/
+[semantic version]:                                 https://semver.org
+[Available languages for Windows]:                  https://docs.microsoft.com/windows-hardware/manufacture/desktop/available-language-packs-for-windows
+[Default Input Profiles Input Locales in Windows]:  https://docs.microsoft.com/windows-hardware/manufacture/desktop/default-input-locales-for-windows-language-packs
+[install]:                                          https://docs.microsoft.com/windows/package-manager/winget/install
+[list]:                                             https://docs.microsoft.com/windows/package-manager/winget/list
+[upgrade]:                                          https://docs.microsoft.com/windows/package-manager/winget/upgrade
+
 # Windows Package Manager
 ## Manifest Schema v1.1.0 Default Locale File
 
-All Windows Package Manager manifests in the Microsoft community repository are submitted using [YAML](https://yaml.org/spec/) syntax. A [JSON schema](https://github.com/microsoft/winget-cli/blob/master/schemas/JSON/manifests/v1.1.0/manifest.defaultLocale.1.1.0.json) is provided to aid authoring these files in editors, and in the other tooling related to the Windows Package Manager. This document provides detailed information regarding the usage of the YAML keys in the defaultLocale file for multi-file manifests.
+All Windows Package Manager manifests in the Microsoft community repository are submitted using [YAML] syntax. A [JSON schema] is provided to aid authoring these files in editors, and in the other tooling related to the Windows Package Manager. This document provides detailed information regarding the usage of the YAML keys in the defaultLocale file for multi-file manifests.
 
 ### Default Locale Manifest
 
@@ -50,7 +59,7 @@ ManifestVersion: 1.1.0        # The manifest syntax version
 
  **Required Field**
 
- This key represents the version of the package. It is related to the specific release this manifests targets. In some cases you will see a perfectly formed [semantic](https://semver.org) version number, and in other cases you might see something different. These may be date driven, or they might have other characters with some package specific meaning for example.
+ This key represents the version of the package. It is related to the specific release this manifests targets. In some cases you will see a perfectly formed [semantic version] number, and in other cases you might see something different. These may be date driven, or they might have other characters with some package specific meaning for example.
 
  The Windows Package Manager client uses this version to determine whether or not an upgrade for a package is available. In some cases, packages may be released with a marketing driven version, and that causes trouble with the `winget upgrade` command.
 
@@ -66,8 +75,8 @@ ManifestVersion: 1.1.0        # The manifest syntax version
 
   **References:**
 
-* [Available languages for Windows](https://docs.microsoft.com/windows-hardware/manufacture/desktop/available-language-packs-for-windows)
-* [Default Input Profiles (Input Locales) in Windows](https://docs.microsoft.com/windows-hardware/manufacture/desktop/default-input-locales-for-windows-language-packs)
+* [Available languages for Windows]
+* [Default Input Profiles (Input Locales) in Windows]
 
   >Note: This field is the key to determining which fields are required for the Microsoft community repository. The default locale specified in the version file must match with this value.
  </details>
@@ -194,7 +203,7 @@ ManifestVersion: 1.1.0        # The manifest syntax version
 
   **Optional Field**
 
-  This key represents the most common term users would search for when installing or upgrading a package. If only one package uses this moniker, then the [install](https://docs.microsoft.com/windows/package-manager/winget/install), [list](https://docs.microsoft.com/windows/package-manager/winget/list) and [upgrade](https://docs.microsoft.com/windows/package-manager/winget/upgrade) command may match with this package. 
+  This key represents the most common term users would search for when installing or upgrading a package. If only one package uses this moniker, then the [install], [list] and [upgrade] command may match with this package. 
   
   >Note:Moniker is the third property evaluated when searching for a matching package.
 </details>
