@@ -103,7 +103,7 @@ ManifestVersion: 1.1.0        # The manifest syntax version
 
   **Optional Field**
 
-  This key represents the privacy web site or specific web page provided the publisher or ISV. If there is a privacy web site or specific web page for the package it is preferred over a generic privacy page for the publisher.
+  This key represents the privacy web site or specific web page provided the publisher or ISV. If there is a privacy web site or specific web page for the package, it is preferred over a generic privacy page for the publisher.
  </details>
 
 <details>
