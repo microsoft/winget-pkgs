@@ -1,6 +1,20 @@
+[JSON schema]:                              https://github.com/microsoft/winget-cli/blob/master/schemas/JSON/manifests/v1.1.0/manifest.singleton.1.1.0.json
+[semantic version]:                         https://semver.org
+[install]:                                  https://docs.microsoft.com/windows/package-manager/winget/install
+[list]:                                     https://docs.microsoft.com/windows/package-manager/winget/list
+[upgrade]:                                  https://docs.microsoft.com/windows/package-manager/winget/upgrade
+[`winget upgrade`]:                         https://docs.microsoft.com/windows/package-manager/winget/upgrade
+[MSIX]:                                     https://docs.microsoft.com/windows/msix/overview
+[MSI]:                                      https://docs.microsoft.com/windows/win32/msi/windows-installer-portal
+[Inno]:                                     https://jrsoftware.org/isinfo.php
+[Nullsoft]:                                 https://sourceforge.net/projects/nsis
+[WiX]:                                      https://wixtoolset.org
+[Burn]:                                     https://wixtoolset.org/documentation/manual/v3/bundle
+[Windows Package Manager Manifest Creator]: https://github.com/microsoft/winget-create
+[App capability declarations]:              https://docs.microsoft.com/windows/uwp/packaging/app-capability-declarations
 
 ## Minimal singleton YAML file example
-As specified in the [singleton JSON schema](https://github.com/microsoft/winget-cli/blob/master/schemas/JSON/manifests/v1.1.0/manifest.singleton.1.1.0.json), only a number of fields are required. The singleton format is only valid for packages containing a single installer and a single locale. If more than one installer or locale is provided, the multiple YAML file format and schema must be used.
+As specified in the singleton [JSON schema], only a number of fields are required. The singleton format is only valid for packages containing a single installer and a single locale. If more than one installer or locale is provided, the multiple YAML file format and schema must be used.
 
 >Note: The singleton manifest format has been deprecated in the Windows Package Manager Community Repository. The Windows Package Manager 1.2 client still supports singleton manifests.
 
@@ -114,9 +128,9 @@ ManifestVersion: 1.1.0
 
  **Required Field**
 
- This key represents the version of the package. It is related to the specific release this manifests targets. In some cases you will see a perfectly formed [semantic](https://semver.org) version number, and in other cases you might see something different. These may be date driven, or they might have other characters with some package specific meaning for example.
+ This key represents the version of the package. It is related to the specific release this manifests targets. In some cases you will see a perfectly formed [semantic version] number, and in other cases you might see something different. These may be date driven, or they might have other characters with some package specific meaning for example.
 
- The Windows Package Manager client uses this version to determine if an upgrade for a package is available. In some cases, packages may be released with a marketing driven version, and that causes trouble with the [`winget upgrade`](https://docs.microsoft.com/windows/package-manager/winget/upgrade) command. 
+ The Windows Package Manager client uses this version to determine if an upgrade for a package is available. In some cases, packages may be released with a marketing driven version, and that causes trouble with the [`winget upgrade`] command. 
 
  >Note: The current best practice is to use the value reported in Add / Remove Programs when this version of the package is installed. In some cases, packages do not report a version resulting in an upgrade loop or other unwanted behavior. This practice may seem contrary to using semantic versioning, but it provides the best end to end experience for customers. It will take time for publishers and ISVs to migrate to semantic versioning, and some may intentionally choose to preserve other versioning schemes. In these cases, it is best practice to include the "AppsAndFeaturesEntries" section for each installer.
 </details>
@@ -146,7 +160,7 @@ ManifestVersion: 1.1.0
 
   **Optional Field**
 
-  This key represents the most common term users would search for when installing or upgrading a package. If only one package uses this moniker, then the [install](https://docs.microsoft.com/windows/package-manager/winget/install), [list](https://docs.microsoft.com/windows/package-manager/winget/list) and [upgrade](https://docs.microsoft.com/windows/package-manager/winget/upgrade) command may match with this package. 
+  This key represents the most common term users would search for when installing or upgrading a package. If only one package uses this moniker, then the [install], [list] and [upgrade] command may match with this package. 
   
   >Note:Moniker is the third property evaluated when searching for a matching package.
 </details>
@@ -273,9 +287,9 @@ ManifestVersion: 1.1.0
 
  **Required Field**
 
- This key represents the installer type for the package. The Windows Package Manager supports [MSIX](https://docs.microsoft.com/windows/msix/overview), [MSI](https://docs.microsoft.com/windows/win32/msi/windows-installer-portal), and executable installers. Some well known formats ([Inno](https://jrsoftware.org/isinfo.php), [Nullsoft](https://sourceforge.net/projects/nsis/), [WiX](https://wixtoolset.org/), and [Burn](https://wixtoolset.org/documentation/manual/v3/bundle/)) provide standard sets of installer switches to provide different installer experiences.
+ This key represents the installer type for the package. The Windows Package Manager supports [MSIX], [MSI], and executable installers. Some well known formats ([Inno], [Nullsoft], [WiX], and [Burn]) provide standard sets of installer switches to provide different installer experiences.
 
- >Note: The Windows Package Manager defaults to the install mode providing install progress. A best practice is to determine if one of the supported installer technologies was used to build an installer with the .exe file extension. The [Windows Package Manager Manifest Creator](https://github.com/microsoft/winget-create) tool can be used to determine if one of the known tools was used to build an installer with the .exe file extension.
+ >Note: The Windows Package Manager defaults to the install mode providing install progress. A best practice is to determine if one of the supported installer technologies was used to build an installer with the .exe file extension. The [Windows Package Manager Manifest Creator] tool can be used to determine if one of the known tools was used to build an installer with the .exe file extension.
 
  >Note: The Windows Package Manager does not support loose executables with the .exe or .com file extension directly. Compressed files containing installers,  loose executables, and Progressive Web Applications (PWAs) are also not supported.
  
@@ -297,7 +311,7 @@ ManifestVersion: 1.1.0
 
  This key represents the SHA 256 hash for the installer. It is used to confirm the installer has not been modified. The Windows Package Manager will compare the hash in the manifest with the calculated hash of the installer after it has been downloaded.
 
- >Note:  The [Windows Package Manager Manifest Creator](https://github.com/microsoft/winget-create) can be used to determine the SHA 256 of the installer. The `winget hash &lt;pathToInstaller&gt;` command can also be used to determine the SHA 256 of the installer.
+ >Note:  The [Windows Package Manager Manifest Creator] can be used to determine the SHA 256 of the installer. The `winget hash &lt;pathToInstaller&gt;` command can also be used to determine the SHA 256 of the installer.
 </details>
 
 <details>
@@ -307,7 +321,7 @@ ManifestVersion: 1.1.0
 
  This key represents the signature file (AppxSignature.p7x) inside an MSIX installer. It is used to provide streaming install for MSIX packages.
 
- >Note: MSIX installers must be signed to be included in the Microsoft community package repository. If the installer is an MSIX this signature should be included in the manifest. The [Windows Package Manager Manifest Creator](https://github.com/microsoft/winget-create) can be used to determine the signature SHA 256. The `winget hash <pathToInstaller> --msix` command can also be used to determine the signature SHA 256.
+ >Note: MSIX installers must be signed to be included in the Microsoft community package repository. If the installer is an MSIX this signature should be included in the manifest. The [Windows Package Manager Manifest Creator] can be used to determine the signature SHA 256. The `winget hash <pathToInstaller> --msix` command can also be used to determine the signature SHA 256.
 </details>
 
 <details>
@@ -339,7 +353,7 @@ ManifestVersion: 1.1.0
 
  This key represents the set of switches passed to installers. 
 
- >Note: The Microsoft community repository currently requires support for silent and silent with progress installation. Many custom .exe installers will require the proper switches to meet this requirement. The [Windows Package Manager Manifest Creator](https://github.com/microsoft/winget-create) tool can be used to determine if one of the known tools was used to build an installer with the .exe file extension. In the event the tool is unable to determine the tool used to build the installer, the publisher may have documentation for the proper switches.
+ >Note: The Microsoft community repository currently requires support for silent and silent with progress installation. Many custom .exe installers will require the proper switches to meet this requirement. The [Windows Package Manager Manifest Creator] tool can be used to determine if one of the known tools was used to build an installer with the .exe file extension. In the event the tool is unable to determine the tool used to build the installer, the publisher may have documentation for the proper switches.
 </details>
 
 <details>
@@ -519,7 +533,7 @@ ManifestVersion: 1.1.0
 
  **Optional Field**
 
- This key represents the capabilities provided by an MSIX package. More information is available for [App capability declarations](https://docs.microsoft.com/windows/uwp/packaging/app-capability-declarations)
+ This key represents the capabilities provided by an MSIX package. More information is available for [App capability declarations]
 
  >Note: This key may be present in the root of the manifest as the default value for all installer nodes. This key may also be present in an individual installer node as well. If this key is in the manifest root and in an installer node, the value in the installer node will apply.
 </details>
@@ -529,7 +543,7 @@ ManifestVersion: 1.1.0
 
  **Optional Field**
 
- This key represents the restricted capabilities provided by an MSIX package.More information is available for [App capability declarations](https://docs.microsoft.com/windows/uwp/packaging/app-capability-declarations)
+ This key represents the restricted capabilities provided by an MSIX package.More information is available for [App capability declarations]
 
  >Note: This key may be present in the root of the manifest as the default value for all installer nodes. This key may also be present in an individual installer node as well. If this key is in the manifest root and in an installer node, the value in the installer node will apply.
 </details>
@@ -690,7 +704,7 @@ ManifestVersion: 1.1.0
  This key represents the Publisher reported in the Windows registry. It is used to help correlate installed packages with manifests in configured sources.
  
  >Note: The AppsAndFeatures behavior is not implemented in the Windows Package Manager 1.2 client.
-</details>                  # *Not implemented* Optional publisher displayed in the ARP entry
+</details>
 
 <details>
  <summary><b>ProductCode</b> - ProductCode is used for correlation of packages with manifests in configured sources.</summary>
