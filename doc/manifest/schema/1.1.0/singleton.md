@@ -703,7 +703,7 @@ ManifestVersion: 1.1.0
 </details>
 
 <details>
- <summary><b>UpgradeCode</b> - UpgradeCode is used for correlation of packages with manifests is configured sources.</summary>
+ <summary><b>UpgradeCode</b> - UpgradeCode is used for correlation of packages with manifests in configured sources.</summary>
 
  **Optional Field**
 
