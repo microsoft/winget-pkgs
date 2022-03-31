@@ -301,7 +301,7 @@ ManifestVersion: 1.1.0
 </details>
 
 <details>
- <summary><b>SignatureSha256</b> - SignatureSha256 is recommended for appx or msix. It is the sha256 of signature file inside appx or msix. Could be used during streaming install if applicable</summary>
+ <summary><b>SignatureSha256</b> - SignatureSha256 is recommended for appx or msix. It is the sha256 of the signature file inside the appx or msix. Could be used during streaming install if applicable.</summary>
 
  **Optional Field**
 
