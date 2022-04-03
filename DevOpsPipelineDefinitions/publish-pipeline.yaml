@@ -46,6 +46,7 @@ jobs:
       CLEANUP_ENDPOINT: $(AzFuncPublishCleanupEndpoint)
       MANIFEST_PUBLISH_COMPLETION_ENDPOINT: $(AzFuncManifestPublishCompletionEndpoint)
       WAIVER_COMMIT_ENDPOINT: $(AzFuncWaiverCommitEndpoint)
+      RESTSOURCE_UPDATE_ENDPOINT: $(AzFuncRestSourceUpdateEndpoint)
 
   - task: CmdLine@2
     displayName: 'Validate Commits'
@@ -134,6 +135,41 @@ jobs:
       WinGet:AppConfig:Secondary: $(AppConfigSecondary)
 
 # Agentless phase. Depends on previous job. 
+- job: 'PublishToRestSource'
+  pool: server
+  timeoutInMinutes: 1500
+  displayName: 'Publish to rest source'
+  dependsOn:
+    - 'CommitProcessing'
+    - 'Publish'
+  variables:
+    HostKeySecret: $[ dependencies.CommitProcessing.outputs['wingetsetup.hostkey']]
+    RestSourceUpdateEndpointSecret: $[ dependencies.CommitProcessing.outputs['wingetsetup.restsourceUpdateEndpoint']]
+  steps:
+
+  # Publish updates to rest source
+  - task: AzureFunction@1
+    displayName: 'Publishing to rest source'
+    inputs:
+      function: '$(RestSourceUpdateEndpointSecret)'
+      key: '$(HostKeySecret)'
+      body: |
+        {
+        "operationId": "$(Build.BuildNumber)",
+        "BuildId": "$(Build.BuildId)",
+        "PlanUrl": "$(system.CollectionUri)",
+        "HubName": "$(system.HostType)",
+        "pipelineType": "CommitPipeline",
+        "ProjectId": "$(system.TeamProjectId)",
+        "PlanId": "$(system.PlanId)", 
+        "JobId": "$(system.JobId)", 
+        "TimelineId": "$(system.TimelineId)", 
+        "TaskInstanceId": "$(system.TaskInstanceId)",
+        "AuthToken": "$(system.AccessToken)"
+        }
+      waitForCompletion: "true"
+
+# Agentless phase. Depends on previous job. 
 - job: 'PostPublish'
   pool: server
   timeoutInMinutes: 1500
@@ -141,6 +177,7 @@ jobs:
   dependsOn:
     - 'CommitProcessing'
     - 'Publish'
+    - 'PublishToRestSource'
   condition: and(succeeded(), ne(variables['Source.SkipPostPublish'], 'true'))
   variables:
     HostKeySecret: $[ dependencies.CommitProcessing.outputs['wingetsetup.hostkey']]
