@@ -44,7 +44,13 @@ else {
 }
 
 $sandboxTestPath = (Resolve-Path ($PSScriptRoot.ToString() + "\SandboxTest.ps1")).ToString()
-& $sandboxTestPath -Manifest $path -SkipManifestValidation -Prerelease $Prerelease -EnableExperimentalFeatures $EnableExperimentalFeatures
+$params = @{
+    Manifest = $path
+    SkipManifestValidation = $true
+    Prerelease = $Prerelease
+    EnableExperimentalFeatures = $EnableExperimentalFeatures
+}
+& $sandboxTestPath @params
 
 if ($Review) {
     Write-Host "Opening $PullRequest in browser..." -ForegroundColor Green
