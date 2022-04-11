@@ -5,7 +5,9 @@ Param(
   [String] $PullRequest,
   [Parameter(HelpMessage = "Open the Pull Request's review page in the default browser")]
   [Switch] $Review = $false,
-  [Switch] $KeepBranch = $false
+  [Switch] $KeepBranch = $false,
+  [Switch] $Prerelease = $false,
+  [Switch] $EnableExperimentalFeatures = $false
 )
 
 $PullRequest = $PullRequest.TrimStart('#')
@@ -42,7 +44,7 @@ else {
 }
 
 $sandboxTestPath = (Resolve-Path ($PSScriptRoot.ToString() + "\SandboxTest.ps1")).ToString()
-& $sandboxTestPath -Manifest $path -SkipManifestValidation
+& $sandboxTestPath -Manifest $path -SkipManifestValidation -Prerelease $Prerelease -EnableExperimentalFeatures $EnableExperimentalFeatures
 
 if ($Review) {
     Write-Host "Opening $PullRequest in browser..." -ForegroundColor Green
