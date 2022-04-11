@@ -7,7 +7,8 @@ Param(
   [ScriptBlock] $Script,
   [Parameter(HelpMessage = "The folder to map in the Sandbox.")]
   [String] $MapFolder = $pwd,
-  [switch] $SkipManifestValidation
+  [switch] $SkipManifestValidation,
+  [switch] $Prerelease
 )
 
 $ErrorActionPreference = "Stop"
@@ -71,7 +72,8 @@ New-Item $tempFolder -ItemType Directory -ErrorAction SilentlyContinue | Out-Nul
 
 # Set dependencies
 
-$apiLatestUrl = 'https://api.github.com/repos/microsoft/winget-cli/releases/latest'
+$apiLatestUrl = if ($Prerelease) {'https://api.github.com/repos/microsoft/winget-cli/releases?per_page=1'} else  {'https://api.github.com/repos/microsoft/winget-cli/releases/latest'}
+
 
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 $WebClient = New-Object System.Net.WebClient
