@@ -152,7 +152,7 @@ if ($Settings) {
 }
 
 $ScriptHeader = '# Created with YamlCreate.ps1 v2.1.2'
-$ManifestVersion = '1.1.0'
+$ManifestVersion = '1.2.0'
 $PSDefaultParameterValues = @{ '*:Encoding' = 'UTF8' }
 $Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
 $ofs = ', '
@@ -228,7 +228,7 @@ $Patterns = @{
     InstallerSha256           = $InstallerSchema.definitions.Installer.properties.InstallerSha256.pattern
     InstallerUrl              = $InstallerSchema.definitions.Installer.properties.InstallerUrl.pattern
     InstallerUrlMaxLength     = $InstallerSchema.definitions.Installer.properties.InstallerUrl.maxLength
-    ValidArchitectures        = $InstallerSchema.definitions.Installer.properties.Architecture.enum
+    ValidArchitectures        = $InstallerSchema.definitions.Architecture.enum
     ValidInstallerTypes       = $InstallerSchema.definitions.InstallerType.enum
     SilentSwitchMaxLength     = $InstallerSchema.definitions.InstallerSwitches.properties.Silent.maxLength
     ProgressSwitchMaxLength   = $InstallerSchema.definitions.InstallerSwitches.properties.SilentWithProgress.maxLength
