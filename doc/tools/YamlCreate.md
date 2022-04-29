@@ -45,6 +45,11 @@ AutoSubmitPRs: ask
     # never - Exits the script if conflicting PRs are detected
 ContinueWithExistingPRs: ask
 
+# This setting allows you to set a default action for when redirected URLs are detetected
+    # always - Always uses the detected destination URL
+    # never - Always uses the originally entered URL
+UseRedirectedURL: ask
+
 # This setting allows you to set a default value for whether or not you have signed the Microsoft CLA
 # If this value is set to true, all automatic PR's will be marked as having the CLA signed
 SignedCLA: false
