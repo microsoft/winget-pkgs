@@ -9,8 +9,9 @@ pr: none
 variables:
   Rebuild.SkipManifestIndexUpdate: $[coalesce(variables.SkipManifestIndexUpdate, 'False')]
   Rebuild.SkipPausePublishPipeline: $[coalesce(variables.SkipPausePublishPipeline, 'False')]
-  Rebuild.EnableCacheContainerBackup: $[coalesce(variables.EnableCacheContainerBackup, 'False')]
+  Rebuild.EnableContainerBackup: $[coalesce(variables.EnableContainerBackup, 'False')]
   Rebuild.SkipRestSourceRebuild: $[coalesce(variables.SkipRestSourceRebuild, 'False')]
+  Rebuild.ClearContainer: $[coalesce(variables.ClearContainer, 'False')]
 
 jobs:
 
@@ -138,8 +139,9 @@ jobs:
         "ContainerName": "$(CacheContainerName)",
         "CommitTablePartitionKey": "$(CommitTablePartitionKey)",
         "CommitTableRowKey": "$(CommitTableRowKey)",
-        "EnableCacheContainerBackup": "$(Rebuild.EnableCacheContainerBackup)",
+        "EnableContainerBackup": "$(Rebuild.EnableContainerBackup)",
         "SkipManifestIndexUpdate": "$(Rebuild.SkipManifestIndexUpdate)",
+        "ClearContainer": "$(Rebuild.ClearContainer)",
         }
       waitForCompletion: "true"
 
@@ -152,7 +154,7 @@ jobs:
     - 'Rebuild'
     - 'SignPackage'
     - 'Publish'
-  condition: and(succeededOrFailed(), ne(variables['Rebuild.SkipRestSourceRebuild'], 'True'))
+  condition: and(succeeded(), ne(variables['Rebuild.SkipRestSourceRebuild'], 'True'))
   variables:
     HostKeySecret: $[ dependencies.Rebuild.outputs['wingetsetup.hostkey']]
     RestSourceRebuildEndpointSecret: $[ dependencies.Rebuild.outputs['wingetsetup.restsourceRebuildEndpoint']]

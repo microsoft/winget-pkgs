@@ -23,6 +23,14 @@ if ($help) {
     exit
 }
 
+# Check whether the script is present inside a fork/clone of microsoft/winget-pkgs repository
+try {
+    $script:gitTopLevel = (Resolve-Path $(git rev-parse --show-toplevel)).Path
+} catch {
+    # If there was an exception, the user isn't in a git repo. Throw a custom exception and pass the original exception as an InternalException
+    throw [UnmetDependencyException]::new('This script must be run from inside a clone of the winget-pkgs repository', $_.Exception)
+}
+
 # Installs `powershell-yaml` as a dependency for parsing yaml content
 if (-not(Get-Module -ListAvailable -Name powershell-yaml)) {
     try {
@@ -54,7 +62,7 @@ if ($Settings) {
     exit
 }
 
-$ScriptHeader = '# Created with YamlCreate.ps1 v2.1.1'
+$ScriptHeader = '# Created with YamlCreate.ps1 v2.1.2'
 $ManifestVersion = '1.1.0'
 $PSDefaultParameterValues = @{ '*:Encoding' = 'UTF8' }
 $Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
@@ -383,7 +391,7 @@ Function Get-InstallerFile {
     # If the extension isn't found, use a custom one
     $_URIPath = $URI.Split('?')[0]
     $_Filename = "$PackageIdentifier v$PackageVersion - $(Get-Date -f 'yyyy.MM.dd-hh.mm.ss')" + $(if ([System.IO.Path]::HasExtension($_URIPath)) { [System.IO.Path]::GetExtension($_URIPath) } else { '.winget-tmp' })
-    if (Test-ValidFileName $_Filename){ $_OutFile = Join-Path -Path $env:TEMP -ChildPath $_Filename }
+    if (Test-ValidFileName $_Filename) { $_OutFile = Join-Path -Path $env:TEMP -ChildPath $_Filename }
     else { $_OutFile = (New-TemporaryFile).FullName }
 
     # Create a new web client for downloading the file
@@ -1115,13 +1123,13 @@ Function Read-InstallerMetadata {
         else { $FileExtensions = $FileExtensions | ToLower | UniqueItems }
         $script:FileExtensions = Read-InstallerMetadataValue -Variable $FileExtensions -Key 'FileExtensions' -Prompt "[Optional] Enter any File Extensions the application could support. For example: html, htm, url (Max $($Patterns.MaxItemsFileExtensions))" | ToLower | UniqueItems
 
-        if (($script:FileExtensions -split ',').Count -le $Patterns.MaxItemsFileExtensions -and $($script:FileExtensions.Split(',').Trim() | Where-Object { Test-String -not $_ -MaxLength $Patterns.FileExtensionMaxLength -MatchPattern $Patterns.FileExtension -AllowNull }).Count -eq 0) {
+        if (($script:FileExtensions -split ',').Count -le $Patterns.MaxItemsFileExtensions -and $($script:FileExtensions.Split(',').Trim() | Where-Object { Test-String -Not $_ -MaxLength $Patterns.FileExtensionMaxLength -MatchPattern $Patterns.FileExtension -AllowNull }).Count -eq 0) {
             $script:_returnValue = [ReturnValue]::Success()
         } else {
             if (($script:FileExtensions -split ',').Count -gt $Patterns.MaxItemsFileExtensions ) {
                 $script:_returnValue = [ReturnValue]::MaxItemsError($Patterns.MaxItemsFileExtensions)
             } else {
-                $script:_returnValue = [ReturnValue]::new(400, 'Invalid Entries', "Some entries do not match the requirements defined in the manifest schema - $($script:FileExtensions.Split(',').Trim() | Where-Object { Test-String -not $_ -MaxLength $Patterns.FileExtensionMaxLength -MatchPattern $Patterns.FileExtension })", 2)
+                $script:_returnValue = [ReturnValue]::new(400, 'Invalid Entries', "Some entries do not match the requirements defined in the manifest schema - $($script:FileExtensions.Split(',').Trim() | Where-Object { Test-String -Not $_ -MaxLength $Patterns.FileExtensionMaxLength -MatchPattern $Patterns.FileExtension })", 2)
             }
         }
     } until ($script:_returnValue.StatusCode -eq [ReturnValue]::Success().StatusCode)
@@ -1582,10 +1590,11 @@ Function Read-PRBody {
             }
 
             '*schema*' {
+                $_Match = ($_line | Select-String -Pattern 'https://+.+(?=\))').Matches.Value 
                 $_menu = @{
-                    Prompt        = 'Does your manifest conform to the 1.0 schema?'
+                    Prompt        = $_line.TrimStart('- [ ]') -replace '\[|\]|\(.+\)', ''
                     Entries       = @('[Y] Yes'; '*[N] No')
-                    HelpText      = 'Reference Link: https://github.com/microsoft/winget-cli/blob/master/doc/ManifestSpecv1.0.md'
+                    HelpText      = "Reference Link: $_Match"
                     HelpTextColor = ''
                     DefaultString = 'N'
                 }
@@ -2249,7 +2258,9 @@ if ($OldManifests.Name -eq "$PackageIdentifier.installer.yaml" -and $OldManifest
             } else {
                 foreach ($_Installer in $script:OldInstallerManifest['Installers']) {
                     if ($_Key -eq 'InstallModes') { $script:InstallModes = [string]$script:OldInstallerManifest.$_Key }
-                    $_Installer[$_Key] = $script:OldInstallerManifest.$_Key
+                    if ($_Key -notin $_Installer.Keys) {
+                        $_Installer[$_Key] = $script:OldInstallerManifest.$_Key
+                    }
                 }
             }
             New-Variable -Name $_Key -Value $($script:OldInstallerManifest.$_Key -join ', ') -Scope Script -Force
@@ -2301,7 +2312,9 @@ if ($OldManifests.Name -eq "$PackageIdentifier.installer.yaml" -and $OldManifest
             } else {
                 foreach ($_Installer in $script:OldInstallerManifest['Installers']) {
                     if ($_Key -eq 'InstallModes') { $script:InstallModes = [string]$script:OldInstallerManifest.$_Key }
-                    $_Installer[$_Key] = $script:OldInstallerManifest.$_Key
+                    if ($_Key -notin $_Installer.Keys) {
+                        $_Installer[$_Key] = $script:OldInstallerManifest.$_Key
+                    }
                 }
             }
             New-Variable -Name $_Key -Value $($script:OldInstallerManifest.$_Key -join ', ') -Scope Script -Force
@@ -2511,8 +2524,8 @@ if ($script:Option -ne 'RemoveManifest') {
             }
         }
         if ($script:SandboxTest -eq '0') {
-            if (Test-Path -Path "$PSScriptRoot\SandboxTest.ps1") {
-                $SandboxScriptPath = (Resolve-Path "$PSScriptRoot\SandboxTest.ps1").Path
+            if (Test-Path -Path "$gitTopLevel\Tools\SandboxTest.ps1") {
+                $SandboxScriptPath = (Resolve-Path "$gitTopLevel\Tools\SandboxTest.ps1").Path
             } else {
                 while ([string]::IsNullOrWhiteSpace($SandboxScriptPath)) {
                     Write-Host
@@ -2581,7 +2594,7 @@ if ($PromptSubmit -eq '0') {
         $BranchName = "$PackageIdentifier-$PackageVersion-$UniqueBranchID"
         # Git branch names cannot start with `.` cannot contain any of {`..`, `\`, `~`, `^`, `:`, ` `, `?`, `@{`, `[`}, and cannot end with {`/`, `.lock`, `.`}
         $BranchName = $BranchName -replace '[\~,\^,\:,\\,\?,\@\{,\*,\[,\s]{1,}|[.lock|/|\.]*$|^\.{1,}|\.\.', ''
-        git add *manifests/*
+        git add "$((Resolve-Path "$gitTopLevel\manifests").Path)\*"
         git commit -m "$CommitType`: $PackageIdentifier version $PackageVersion" --quiet
         git switch -c "$BranchName" --quiet
         git push --set-upstream origin "$BranchName" --quiet
@@ -2589,8 +2602,8 @@ if ($PromptSubmit -eq '0') {
         # If the user has the cli too
         if (Get-Command 'gh.exe' -ErrorAction SilentlyContinue) {
             # Request the user to fill out the PR template
-            if (Test-Path -Path "$PSScriptRoot\..\.github\PULL_REQUEST_TEMPLATE.md") {
-                Read-PRBody "$PSScriptRoot\..\.github\PULL_REQUEST_TEMPLATE.md"
+            if (Test-Path -Path "$gitTopLevel\.github\PULL_REQUEST_TEMPLATE.md") {
+                Read-PRBody (Resolve-Path "$gitTopLevel\.github\PULL_REQUEST_TEMPLATE.md").Path
             } else {
                 while ([string]::IsNullOrWhiteSpace($SandboxScriptPath)) {
                     Write-Host
