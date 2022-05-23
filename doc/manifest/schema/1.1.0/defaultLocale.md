@@ -20,7 +20,7 @@ PackageVersion:               # The package version
 PackageLocale:                # The package meta-data locale
 Publisher:                    # The publisher name
 PublisherURL:                 # Optional publisher home page
-PublisherSupportUrul:         # Optional publisher support page
+PublisherSupportUrl:          # Optional publisher support page
 PrivacyUrl:                   # Optional publisher privacy page
 Author:                       # Optional author
 PackageName:                  # The package name
