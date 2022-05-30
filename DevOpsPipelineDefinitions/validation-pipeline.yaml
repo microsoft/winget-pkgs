@@ -4,7 +4,13 @@
 name: '$(Build.DefinitionName)-$(Build.DefinitionVersion)-$(System.PullRequest.PullRequestNumber)-$(Date:yyyyMMdd)-$(Rev:r)'
 
 trigger: none
-pr: none
+pr:
+  branches:
+    include:
+      - master
+  paths:
+    include:
+      - manifests
 
 jobs:
 
@@ -54,6 +60,8 @@ jobs:
     condition: succeeded()
     env:
       ValidationConnectionString: $(ValidationStorageAccountConnectionString)
+      GithubRepository: $(GithubRepository)
+      GithubServiceAccountToken: $(GithubServiceAccountToken)
       ExecutionEnvironment: $(ExecutionEnvironment)
       DIApplicationInsightKey: $(DIApplicationInsightKey)
       WinGet:AppConfig:Primary: $(AppConfigPrimary)
@@ -68,6 +76,20 @@ jobs:
     condition: succeeded()
     env:
       ValidationConnectionString: $(ValidationStorageAccountConnectionString)
+      DIApplicationInsightKey: $(DIApplicationInsightKey)
+      WinGet:AppConfig:Primary: $(AppConfigPrimary)
+      WinGet:AppConfig:Secondary: $(AppConfigSecondary)
+
+  # Validates manifest dependencies.
+  - task: CmdLine@2
+    displayName: 'Validate Manifest Dependencies'
+    inputs:
+      script: 'WinGetSvcWrapper.exe validate-dependencies --operationId %BUILD_BUILDNUMBER%'
+      failOnStderr: true
+    condition: succeeded()
+    env:
+      ValidationConnectionString: $(ValidationStorageAccountConnectionString)
+      CacheConnectionString: $(CacheStorageAccountConnectionString)
       DIApplicationInsightKey: $(DIApplicationInsightKey)
       WinGet:AppConfig:Primary: $(AppConfigPrimary)
       WinGet:AppConfig:Secondary: $(AppConfigSecondary)

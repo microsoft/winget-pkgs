@@ -4,8 +4,14 @@ Param(
   [Parameter(Position = 0, HelpMessage = "The Pull Request to checkout.", Mandatory=$true)]
   [String] $PullRequest,
   [Parameter(HelpMessage = "Open the Pull Request's review page in the default browser")]
-  [Switch] $Review = $false
+  [Switch] $Review = $false,
+  [Switch] $KeepBranch = $false,
+  [Switch] $Prerelease = $false,
+  [Switch] $EnableExperimentalFeatures = $false
 )
+
+$PullRequest = $PullRequest.TrimStart('#')
+
 $ErrorActionPreference = "Stop"
 
 $repositoryRoot = "https://github.com/microsoft/winget-pkgs/"
@@ -22,7 +28,7 @@ if (-Not (Get-Command "git" -ErrorAction "SilentlyContinue")) {
     return
 }
 
-gh pr checkout $PullRequest --detach -f | Out-Null
+gh pr checkout $PullRequest $(if (!$KeepBranch){'--detach'}) -f | Out-Null
 
 if($LASTEXITCODE -ne 0) {
     Write-Host "There was an error checking out the PR. Make sure you're logged into GitHub via 'gh auth login' and come back here!" -ForegroundColor Red
@@ -38,7 +44,13 @@ else {
 }
 
 $sandboxTestPath = (Resolve-Path ($PSScriptRoot.ToString() + "\SandboxTest.ps1")).ToString()
-& $sandboxTestPath -Manifest $path -SkipManifestValidation
+$params = @{
+    Manifest = $path
+    SkipManifestValidation = $true
+    Prerelease = $Prerelease
+    EnableExperimentalFeatures = $EnableExperimentalFeatures
+}
+& $sandboxTestPath @params
 
 if ($Review) {
     Write-Host "Opening $PullRequest in browser..." -ForegroundColor Green

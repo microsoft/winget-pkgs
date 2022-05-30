@@ -1,16 +1,18 @@
 # Parse arguments
 
 Param(
-  [Parameter(Position = 0, HelpMessage = "The Manifest to install in the Sandbox.")]
+  [Parameter(Position = 0, HelpMessage = 'The Manifest to install in the Sandbox.')]
   [String] $Manifest,
-  [Parameter(Position = 1, HelpMessage = "The script to run in the Sandbox.")]
+  [Parameter(Position = 1, HelpMessage = 'The script to run in the Sandbox.')]
   [ScriptBlock] $Script,
-  [Parameter(HelpMessage = "The folder to map in the Sandbox.")]
+  [Parameter(HelpMessage = 'The folder to map in the Sandbox.')]
   [String] $MapFolder = $pwd,
-  [switch] $SkipManifestValidation
+  [switch] $SkipManifestValidation,
+  [switch] $Prerelease,
+  [switch] $EnableExperimentalFeatures
 )
 
-$ErrorActionPreference = "Stop"
+$ErrorActionPreference = 'Stop'
 
 $mapFolder = (Resolve-Path -Path $MapFolder).Path
 
@@ -24,12 +26,14 @@ if (-Not $SkipManifestValidation -And -Not [String]::IsNullOrWhiteSpace($Manifes
   Write-Host '--> Validating Manifest'
 
   if (-Not (Test-Path -Path $Manifest)) {
-    throw 'The Manifest does not exist.'
+    throw [System.IO.DirectoryNotFoundException]::new('The Manifest does not exist.')
   }
 
   winget.exe validate $Manifest
-  if (-Not $?) {
-    throw 'Manifest validation failed.'
+  switch ($LASTEXITCODE) {
+    '-1978335191' { throw [System.Activities.ValidationException]::new('Manifest validation failed.') }
+    '-1978335192' { Start-Sleep -Seconds 5 }
+    Default { continue }
   }
 
   Write-Host
@@ -64,12 +68,12 @@ Remove-Variable sandbox
 
 $tempFolderName = 'SandboxTest'
 $tempFolder = Join-Path -Path ([System.IO.Path]::GetTempPath()) -ChildPath $tempFolderName
-
 New-Item $tempFolder -ItemType Directory -ErrorAction SilentlyContinue | Out-Null
 
 # Set dependencies
 
-$apiLatestUrl = 'https://api.github.com/repos/microsoft/winget-cli/releases/latest'
+$apiLatestUrl = if ($Prerelease) { 'https://api.github.com/repos/microsoft/winget-cli/releases?per_page=1' } else { 'https://api.github.com/repos/microsoft/winget-cli/releases/latest' }
+
 
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 $WebClient = New-Object System.Net.WebClient
@@ -102,10 +106,15 @@ $ProgressPreference = $oldProgressPreference
 $vcLibsUwp = @{
   fileName = 'Microsoft.VCLibs.x64.14.00.Desktop.appx'
   url      = 'https://aka.ms/Microsoft.VCLibs.x64.14.00.Desktop.appx'
-  hash     = '6602159c341bafea747d0edf15669ac72df8817299fbfaa90469909e06794256'
+  hash     = 'A39CEC0E70BE9E3E48801B871C034872F1D7E5E8EEBE986198C019CF2C271040'
+}
+$uiLibsUwp = @{
+  fileName = 'Microsoft.UI.Xaml.2.7.zip'
+  url      = 'https://www.nuget.org/api/v2/package/Microsoft.UI.Xaml/2.7.0'
+  hash     = '422FD24B231E87A842C4DAEABC6A335112E0D35B86FAC91F5CE7CF327E36A591'
 }
 
-$dependencies = @($desktopAppInstaller, $vcLibsUwp)
+$dependencies = @($desktopAppInstaller, $vcLibsUwp, $uiLibsUwp)
 
 # Clean temp directory
 
@@ -126,7 +135,7 @@ foreach ($dependency in $dependencies) {
   $dependency.pathInSandbox = Join-Path -Path $desktopInSandbox -ChildPath (Join-Path -Path $tempFolderName -ChildPath $dependency.fileName)
 
   # Only download if the file does not exist, or its hash does not match.
-  if (-Not ((Test-Path -Path $dependency.file -PathType Leaf) -And $dependency.hash -eq $(get-filehash $dependency.file).Hash)) {
+  if (-Not ((Test-Path -Path $dependency.file -PathType Leaf) -And $dependency.hash -eq $(Get-FileHash $dependency.file).Hash)) {
     Write-Host @"
     - Downloading:
       $($dependency.url)
@@ -134,17 +143,45 @@ foreach ($dependency in $dependencies) {
 
     try {
       $WebClient.DownloadFile($dependency.url, $dependency.file)
+    } catch {
+      #Pass the exception as an inner exception
+      throw [System.Net.WebException]::new("Error downloading $($dependency.url).", $_.Exception)
     }
-    catch {
-      throw "Error downloading $($dependency.url)."
-    }
-    if (-not ($dependency.hash -eq $(get-filehash $dependency.file).Hash)) {
-      throw 'Hashes do not match, try gain.'
+    if (-not ($dependency.hash -eq $(Get-FileHash $dependency.file).Hash)) {
+      throw [System.Activities.VersionMismatchException]::new('Dependency hash does not match the downloaded file')
     }
   }
 }
 
+# Extract Microsoft.UI.Xaml from zip (if freshly downloaded).
+# This is a workaround until https://github.com/microsoft/winget-cli/issues/1861 is resolved.
+
+if (-Not (Test-Path (Join-Path -Path $tempFolder -ChildPath \Microsoft.UI.Xaml.2.7\tools\AppX\x64\Release\Microsoft.UI.Xaml.2.7.appx))) {
+  Expand-Archive -Path $uiLibsUwp.file -DestinationPath ($tempFolder + '\Microsoft.UI.Xaml.2.7') -Force
+}  
+$uiLibsUwp.file = (Join-Path -Path $tempFolder -ChildPath \Microsoft.UI.Xaml.2.7\tools\AppX\x64\Release\Microsoft.UI.Xaml.2.7.appx)
+$uiLibsUwp.pathInSandbox = Join-Path -Path $desktopInSandbox -ChildPath (Join-Path -Path $tempFolderName -ChildPath \Microsoft.UI.Xaml.2.7\tools\AppX\x64\Release\Microsoft.UI.Xaml.2.7.appx)
 Write-Host
+
+# Create Bootstrap settings
+# dependencies and portableInstall are enabled for forward compatibility with PR's
+$bootstrapSettingsContent = @{}
+$bootstrapSettingsContent['$schema'] = 'https://aka.ms/winget-settings.schema.json'
+$bootstrapSettingsContent['logging'] = @{level = 'verbose' }
+if ($EnableExperimentalFeatures) {
+  $bootstrapSettingsContent['experimentalFeatures'] = @{
+    dependencies    = $true
+    portableInstall = $true
+  }
+}
+
+$settingsFolderName = 'WingetSettings'
+$settingsFolder = Join-Path -Path $tempFolder -ChildPath $settingsFolderName
+
+New-Item $settingsFolder -ItemType Directory -ErrorAction SilentlyContinue | Out-Null
+$bootstrapSettingsFileName = 'settings.json'
+$bootstrapSettingsContent | ConvertTo-Json | Out-File (Join-Path -Path $settingsFolder -ChildPath $bootstrapSettingsFileName) -Encoding ascii
+$settingsPathInSandbox = Join-Path -Path $desktopInSandbox -ChildPath (Join-Path -Path $tempFolderName -ChildPath "$settingsFolderName\settings.json")
 
 # Create Bootstrap script
 
@@ -162,20 +199,23 @@ function Update-EnvironmentVariables {
   }
 }
 
-
+function Get-ARPTable {
+  $registry_paths = @('HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*','HKLM:\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*', 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*', 'HKCU:\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*')
+  return Get-ItemProperty $registry_paths -ErrorAction SilentlyContinue | 
+       Select-Object DisplayName, DisplayVersion, Publisher, @{N='ProductCode'; E={$_.PSChildName}} |
+       Where-Object {$null -ne $_.DisplayName }
+}
 '@
 
 $bootstrapPs1Content += @"
 Write-Host @'
 --> Installing WinGet
-
 '@
-Add-AppxPackage -Path '$($desktopAppInstaller.pathInSandbox)' -DependencyPath '$($vcLibsUwp.pathInSandbox)'
+`$ProgressPreference = 'SilentlyContinue'
+Add-AppxPackage -Path '$($desktopAppInstaller.pathInSandbox)' -DependencyPath '$($vcLibsUwp.pathInSandbox)','$($uiLibsUwp.pathInSandbox)'
 
 Write-Host @'
-
 Tip: you can type 'Update-EnvironmentVariables' to update your environment variables, such as after installing a new software.
-
 '@
 
 
@@ -188,10 +228,18 @@ if (-Not [String]::IsNullOrWhiteSpace($Manifest)) {
   $bootstrapPs1Content += @"
 Write-Host @'
 
+--> Configuring Winget
+'@
+winget settings --Enable LocalManifestFiles
+copy -Path $settingsPathInSandbox -Destination C:\Users\WDAGUtilityAccount\AppData\Local\Packages\Microsoft.DesktopAppInstaller_8wekyb3d8bbwe\LocalState\settings.json
+`$originalARP = Get-ARPTable
+Write-Host @'
+
+
 --> Installing the Manifest $manifestFileName
 
 '@
-winget install -m '$manifestPathInSandbox'
+winget install -m '$manifestPathInSandbox' --verbose-logs
 
 Write-Host @'
 
@@ -199,6 +247,11 @@ Write-Host @'
 '@
 Update-EnvironmentVariables
 
+Write-Host @'
+
+--> Comparing ARP Entries
+'@
+(Compare-Object (Get-ARPTable) `$originalARP -Property DisplayName,DisplayVersion,Publisher,ProductCode)| Select-Object -Property * -ExcludeProperty SideIndicator | Format-Table
 
 "@
 }
@@ -221,9 +274,9 @@ $Script
 "@
 }
 
-$bootstrapPs1Content += @"
+$bootstrapPs1Content += @'
 Write-Host
-"@
+'@
 
 $bootstrapPs1FileName = 'Bootstrap.ps1'
 $bootstrapPs1Content | Out-File (Join-Path -Path $tempFolder -ChildPath $bootstrapPs1FileName)
@@ -260,12 +313,14 @@ Write-Host @"
       - $tempFolder as read-only
       - $mapFolder as read-and-write
     - Installing WinGet
+    - Configuring Winget
 "@
 
 if (-Not [String]::IsNullOrWhiteSpace($Manifest)) {
   Write-Host @"
     - Installing the Manifest $manifestFileName
     - Refreshing environment variables
+    - Comparing ARP Entries
 "@
 }
 
