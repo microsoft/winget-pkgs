@@ -1,3 +1,8 @@
+[Manifest Specification]:   doc/manifest/schema/1.1.0
+[versionSchema]:            doc/manifest/schema/1.1.0/version.md
+[defaultLocaleSchema]:      doc/manifest/schema/1.1.0/defaultLocale.md
+[installerSchema]:          doc/manifest/schema/1.1.0/installer.md
+
 # Authoring Manifests
 
 First, we want to say thank you. Your contribution is highly valued. And we appreciate the time you have taken to get here and read this document. Let's start out with a few definitions to help you understand our vocabulary.
@@ -30,9 +35,9 @@ Before you invest the time to generate and submit a manifest, you should check t
 
 ## What next?
 
-You should take a look at our [v1.0 manifest specification](https://github.com/microsoft/winget-cli/blob/master/doc/ManifestSpecv1.0.md). Don't worry. If this is starting to look too complicated you can create a new Issue and select [Package Request/Submission 👀](https://github.com/microsoft/winget-pkgs/issues/new/choose).
+You should take a look at our [Manifest Specification]. Don't worry. If this is starting to look too complicated you can create a new Issue and select [Package Request/Submission 👀](https://github.com/microsoft/winget-pkgs/issues/new/choose).
 
-The multi-file manifest is the preferred method for building manifests. The mimimum required files are a [version](doc/manifest/schema/1.0.0/version.md) file, a [defaultLocale](doc/manifest/schema/1.0.0/defaultLocale.md) file and an [installer](doc/manifest/schema/1.0.0/installer.md) file.
+The multi-file manifest is the preferred method for building manifests. The minimum required files are a [version][versionSchema] file, a [defaultLocale][defaultLocaleSchema] file and an [installer][installerSchema] file.
 
 ## Creating your first manifest
 Once you have package in mind that doesn't already exist in the repository, you can now start [creating your package manifest](https://docs.microsoft.com/en-us/windows/package-manager/package/manifest?tabs=minschema%2Cversion-example). We recommend using the [Windows Package Manager Manifest Creator (a.k.a Winget-Create)](https://github.com/microsoft/winget-create) to help you generate your manifest. Winget-Create is a command line tool that will prompt you for relevant metadata related to your package. Once you are done, Winget-Create will validate your manifest to verify that it is correct and allow you to submit your newly-created manifest directly to the winget-pkgs repository by linking your GitHub account. Alternatively, you can use the [YamlCreate.ps1 Script](Tools/YamlCreate.ps1). More information on using YamlCreate is found in the [script documentation](doc/tools/YamlCreate.md).

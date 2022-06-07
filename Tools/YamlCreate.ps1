@@ -23,12 +23,101 @@ if ($help) {
     exit
 }
 
-# Check whether the script is present inside a fork/clone of microsoft/winget-pkgs repository
-try {
-    $script:gitTopLevel = (Resolve-Path $(git rev-parse --show-toplevel)).Path
-} catch {
-    # If there was an exception, the user isn't in a git repo. Throw a custom exception and pass the original exception as an InternalException
-    throw [UnmetDependencyException]::new('This script must be run from inside a clone of the winget-pkgs repository', $_.Exception)
+# Custom menu prompt that listens for keypresses. Requires a prompt and array of entries at minimum. Entries preceeded with `*` are shown in green
+# Returns a console key value
+Function Invoke-KeypressMenu {
+    Param
+    (
+        [Parameter(Mandatory = $true, Position = 0)]
+        [string] $Prompt,
+        [Parameter(Mandatory = $true, Position = 1)]
+        [string[]] $Entries,
+        [Parameter(Mandatory = $false)]
+        [string] $HelpText,
+        [Parameter(Mandatory = $false)]
+        [string] $HelpTextColor,
+        [Parameter(Mandatory = $false)]
+        [string] $DefaultString
+    )
+
+    Write-Host "`n"
+    Write-Host -ForegroundColor 'Yellow' "$Prompt"
+    if ($PSBoundParameters.ContainsKey('HelpText') -and (![string]::IsNullOrWhiteSpace($HelpText))) {
+        if ($PSBoundParameters.ContainsKey('HelpTextColor') -and (![string]::IsNullOrWhiteSpace($HelpTextColor))) {
+            Write-Host -ForegroundColor $HelpTextColor $HelpText
+        } else {
+            Write-Host -ForegroundColor 'Blue' $HelpText
+        }
+    }
+    foreach ($entry in $Entries) {
+        $_isDefault = $entry.StartsWith('*')
+        if ($_isDefault) {
+            $_entry = '  ' + $entry.Substring(1)
+            $_color = 'Green'
+        } else {
+            $_entry = '  ' + $entry
+            $_color = 'White'
+        }
+        Write-Host -ForegroundColor $_color $_entry
+    }
+    Write-Host
+    if ($PSBoundParameters.ContainsKey('DefaultString') -and (![string]::IsNullOrWhiteSpace($DefaultString))) {
+        Write-Host -NoNewline "Enter Choice (default is '$DefaultString'): "
+    } else {
+        Write-Host -NoNewline 'Enter Choice ('
+        Write-Host -NoNewline -ForegroundColor 'Green' 'Green'
+        Write-Host -NoNewline ' is default): '
+    }
+
+    do {
+        $keyInfo = [Console]::ReadKey($false)
+    } until ($keyInfo.Key)
+
+    return $keyInfo.Key
+}
+
+#If the user has git installed, make sure it is a patched version
+if (Get-Command 'git.exe' -ErrorAction SilentlyContinue) {
+    $GitMinimumVersion = [System.Version]::Parse('2.35.2')
+    $gitVersionString = ((git version) | Select-String '([0-9]{1,}\.){3,4}').Matches.Value.Trim(' ', '.')
+    $gitVersion = [System.Version]::Parse($gitVersionString)
+    if ($gitVersion -lt $GitMinimumVersion) {
+        # Prompt user to install git
+        if (Get-Command 'winget.exe' -ErrorAction SilentlyContinue) {
+            $_menu = @{
+                entries       = @('[Y] Upgrade Git'; '[N] Do not upgrade')
+                Prompt        = 'The version of git installed on your machine does not satisfy the requirement of version >= 2.35.2; Would you like to upgrade?'
+                HelpText      = "Upgrading will attempt to upgrade git using winget`n"
+                DefaultString = ''
+            }
+            switch (Invoke-KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString'] -HelpText $_menu['HelpText']) {
+                'Y' { 
+                    Write-Host
+                    try {
+                        winget upgrade --id Git.Git --exact
+                    } catch {
+                        throw [UnmetDependencyException]::new('Git could not be upgraded sucessfully', $_)
+                    } finally {
+                        $gitVersionString = ((git version) | Select-String '([0-9]{1,}\.){3,4}').Matches.Value.Trim(' ', '.')
+                        $gitVersion = [System.Version]::Parse($gitVersionString)
+                        if ($gitVersion -lt $GitMinimumVersion) {
+                            throw [UnmetDependencyException]::new('Git could not be upgraded sucessfully')
+                        }
+                    }
+                 }
+                default { Write-Host; throw [UnmetDependencyException]::new('The version of git installed on your machine does not satisfy the requirement of version >= 2.35.2') }
+            }
+        } else {
+            throw [UnmetDependencyException]::new('The version of git installed on your machine does not satisfy the requirement of version >= 2.35.2')
+        }
+    }
+    # Check whether the script is present inside a fork/clone of microsoft/winget-pkgs repository
+    try {
+        $script:gitTopLevel = (Resolve-Path $(git rev-parse --show-toplevel)).Path
+    } catch {
+        # If there was an exception, the user isn't in a git repo. Throw a custom exception and pass the original exception as an InternalException
+        throw [UnmetDependencyException]::new('This script must be run from inside a clone of the winget-pkgs repository', $_.Exception)
+    }
 }
 
 # Installs `powershell-yaml` as a dependency for parsing yaml content
@@ -242,59 +331,6 @@ Function Write-MulticolorLine {
         Write-Host -ForegroundColor $Colors[$_index] -NoNewline $String
         $_index++
     }
-}
-
-# Custom menu prompt that listens for keypresses. Requires a prompt and array of entries at minimum. Entries preceeded with `*` are shown in green
-# Returns a console key value
-Function Invoke-KeypressMenu {
-    Param
-    (
-        [Parameter(Mandatory = $true, Position = 0)]
-        [string] $Prompt,
-        [Parameter(Mandatory = $true, Position = 1)]
-        [string[]] $Entries,
-        [Parameter(Mandatory = $false)]
-        [string] $HelpText,
-        [Parameter(Mandatory = $false)]
-        [string] $HelpTextColor,
-        [Parameter(Mandatory = $false)]
-        [string] $DefaultString
-    )
-
-    Write-Host "`n"
-    Write-Host -ForegroundColor 'Yellow' "$Prompt"
-    if ($PSBoundParameters.ContainsKey('HelpText') -and (![string]::IsNullOrWhiteSpace($HelpText))) {
-        if ($PSBoundParameters.ContainsKey('HelpTextColor') -and (![string]::IsNullOrWhiteSpace($HelpTextColor))) {
-            Write-Host -ForegroundColor $HelpTextColor $HelpText
-        } else {
-            Write-Host -ForegroundColor 'Blue' $HelpText
-        }
-    }
-    foreach ($entry in $Entries) {
-        $_isDefault = $entry.StartsWith('*')
-        if ($_isDefault) {
-            $_entry = '  ' + $entry.Substring(1)
-            $_color = 'Green'
-        } else {
-            $_entry = '  ' + $entry
-            $_color = 'White'
-        }
-        Write-Host -ForegroundColor $_color $_entry
-    }
-    Write-Host
-    if ($PSBoundParameters.ContainsKey('DefaultString') -and (![string]::IsNullOrWhiteSpace($DefaultString))) {
-        Write-Host -NoNewline "Enter Choice (default is '$DefaultString'): "
-    } else {
-        Write-Host -NoNewline 'Enter Choice ('
-        Write-Host -NoNewline -ForegroundColor 'Green' 'Green'
-        Write-Host -NoNewline ' is default): '
-    }
-
-    do {
-        $keyInfo = [Console]::ReadKey($false)
-    } until ($keyInfo.Key)
-
-    return $keyInfo.Key
 }
 
 # Checks a URL and returns the status code received from the URL
@@ -1123,13 +1159,13 @@ Function Read-InstallerMetadata {
         else { $FileExtensions = $FileExtensions | ToLower | UniqueItems }
         $script:FileExtensions = Read-InstallerMetadataValue -Variable $FileExtensions -Key 'FileExtensions' -Prompt "[Optional] Enter any File Extensions the application could support. For example: html, htm, url (Max $($Patterns.MaxItemsFileExtensions))" | ToLower | UniqueItems
 
-        if (($script:FileExtensions -split ',').Count -le $Patterns.MaxItemsFileExtensions -and $($script:FileExtensions.Split(',').Trim() | Where-Object { Test-String -not $_ -MaxLength $Patterns.FileExtensionMaxLength -MatchPattern $Patterns.FileExtension -AllowNull }).Count -eq 0) {
+        if (($script:FileExtensions -split ',').Count -le $Patterns.MaxItemsFileExtensions -and $($script:FileExtensions.Split(',').Trim() | Where-Object { Test-String -Not $_ -MaxLength $Patterns.FileExtensionMaxLength -MatchPattern $Patterns.FileExtension -AllowNull }).Count -eq 0) {
             $script:_returnValue = [ReturnValue]::Success()
         } else {
             if (($script:FileExtensions -split ',').Count -gt $Patterns.MaxItemsFileExtensions ) {
                 $script:_returnValue = [ReturnValue]::MaxItemsError($Patterns.MaxItemsFileExtensions)
             } else {
-                $script:_returnValue = [ReturnValue]::new(400, 'Invalid Entries', "Some entries do not match the requirements defined in the manifest schema - $($script:FileExtensions.Split(',').Trim() | Where-Object { Test-String -not $_ -MaxLength $Patterns.FileExtensionMaxLength -MatchPattern $Patterns.FileExtension })", 2)
+                $script:_returnValue = [ReturnValue]::new(400, 'Invalid Entries', "Some entries do not match the requirements defined in the manifest schema - $($script:FileExtensions.Split(',').Trim() | Where-Object { Test-String -Not $_ -MaxLength $Patterns.FileExtensionMaxLength -MatchPattern $Patterns.FileExtension })", 2)
             }
         }
     } until ($script:_returnValue.StatusCode -eq [ReturnValue]::Success().StatusCode)
@@ -1590,10 +1626,11 @@ Function Read-PRBody {
             }
 
             '*schema*' {
+                $_Match = ($_line | Select-String -Pattern 'https://+.+(?=\))').Matches.Value 
                 $_menu = @{
-                    Prompt        = 'Does your manifest conform to the 1.0 schema?'
+                    Prompt        = $_line.TrimStart('- [ ]') -replace '\[|\]|\(.+\)', ''
                     Entries       = @('[Y] Yes'; '*[N] No')
-                    HelpText      = 'Reference Link: https://github.com/microsoft/winget-cli/blob/master/doc/ManifestSpecv1.0.md'
+                    HelpText      = "Reference Link: $_Match"
                     HelpTextColor = ''
                     DefaultString = 'N'
                 }
