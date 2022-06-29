@@ -1,29 +1,50 @@
-[JSON Schema]:                              https://github.com/microsoft/winget-cli/blob/master/schemas/JSON/manifests/v1.1.0/manifest.installer.1.1.0.json
-[Windows Package Manager Manifest Creator]: https://github.com/microsoft/winget-create
-[YAML]:                                     https://yaml.org/spec
+[JSON schema]:                              https://github.com/microsoft/winget-cli/blob/master/schemas/JSON/manifests/v1.2.0/manifest.singleton.1.2.0.json
 [semantic version]:                         https://semver.org
+[install]:                                  https://docs.microsoft.com/windows/package-manager/winget/install
+[list]:                                     https://docs.microsoft.com/windows/package-manager/winget/list
+[upgrade]:                                  https://docs.microsoft.com/windows/package-manager/winget/upgrade
 [`winget upgrade`]:                         https://docs.microsoft.com/windows/package-manager/winget/upgrade
-[App capability declarations]:              https://docs.microsoft.com/windows/uwp/packaging/app-capability-declarations
 [MSIX]:                                     https://docs.microsoft.com/windows/msix/overview
 [MSI]:                                      https://docs.microsoft.com/windows/win32/msi/windows-installer-portal
 [Inno]:                                     https://jrsoftware.org/isinfo.php
 [Nullsoft]:                                 https://sourceforge.net/projects/nsis
 [WiX]:                                      https://wixtoolset.org
 [Burn]:                                     https://wixtoolset.org/documentation/manual/v3/bundle
+[Windows Package Manager Manifest Creator]: https://github.com/microsoft/winget-create
+[App capability declarations]:              https://docs.microsoft.com/windows/uwp/packaging/app-capability-declarations
 
-# Windows Package Manager
-## Manifest Schema v1.1.0 Installer File
-All Windows Package Manager manifests in the Microsoft community repository are submitted using [YAML] syntax. A [JSON schema] is provided to aid authoring these files in editors, and in the other tooling related to the Windows Package Manager. This document provides detailed information regarding the usage of the YAML keys in the installer file for multi-file manifests. 
+## Minimal singleton YAML file example
+As specified in the singleton [JSON schema], only a number of fields are required. The singleton format is only valid for packages containing a single installer and a single locale. If more than one installer or locale is provided, the multiple YAML file format and schema must be used.
 
->Note: The 1.1 manifest schema was released with the Windows Package Manager 1.2. Any fields marked *Not implemented* are not supported in the 1.2 client, but may be supported in a 1.3-preview client.
+>Note: The singleton manifest format has been deprecated in the Windows Package Manager Community Repository. The Windows Package Manager 1.3 client still supports singleton manifests.
 
-### Installer Manifest
+### Singleton Manifest
 
 ```YAML
 PackageIdentifier:              # The package unique identifier
 PackageVersion:                 # The package version
 Channel:                        # *Not implemented* distribution channel
-Installers:                     # The list of package installers
+PackageLocale:                  # The package meta-data locale
+Publisher:                      # The publisher name
+PackageName:                    # The package name
+License:                        # The package license
+ShortDescription:               # The short package description
+Description:                     # Optional full package description
+Moniker:                         # Optional most common package term
+Tags:                            # Optional list of package terms
+Agreement:                       # Optional package agreements
+  - AgreementLabel:              # Optional agreement label
+    Agreement:                   # Optional agreement text
+    AgreementUrl:                # Optional agreement URL
+Documentation:                # Optional documentation
+  - DocumentLabel:            # Optional documentation label
+    DocumentUrl:              # Optional documentation URL
+ReleaseDate:                     # Optional release date
+ReleaseNotes:                    # Optional release notes
+ReleaseNotesUrl:                 # Optional release notes URL
+PurchaseUrl:                  # *Not implemented* Optional purchase URL
+InstallationNotes:            # Optional notes displayed upon installation
+Installers:                     # The package installer
   - Architecture:               # The architecture of the installer
     InstallerLocale:            # Optional locale of the installer
     Platform:                   # Optional installer supported operating system
@@ -65,6 +86,7 @@ Installers:                     # The list of package installers
     ExpectedReturnCodes:        # Optional non-zero installer return codes
       - ExpectedReturnCode:     # Optional non-zero installer return code
         ReturnResponse:         # Optional response for an expected return code
+        ReturnResponseUrl:      # Optional response URL for an expected return code        
     ProductCode:                # Optional product code of the installer
     AppsAndFeaturesEntries:     # *Not implemented* Optional entries from the Add and Remove Programs (ARP) table
       - DisplayName:            # *Not implemented* Optional program name shown in the ARP entry
@@ -73,55 +95,31 @@ Installers:                     # The list of package installers
         ProductCode:            # *Not implemented* Optional product code of the installer
         UpgradeCode:            # *Not implemented* Optional upgrade code of the installer
         InstallerType:          # *Not implemented* Optional installer type
-ManifestType: installer         # The manifest type
-ManifestVersion: 1.1.0          # The manifest syntax version
+    UnsupportedArguments:       # Optional list of Windows Package Manager Client arguments the installer does not support
+      - UnsupportedArgument:    # Optional unsupported Windows Package Manager Client argument
+    DisplayInstallWarnings:     # *Not implemented* Optional indicator for packages that are known to interfere with running application during install        
+ManifestType: singleton         # The manifest type
+ManifestVersion: 1.2.0          # The manifest syntax version
 ```
 
-### Installer Minimal Example
-
-Path: manifests/m/Microsoft/WindowsTerminal/1.9.1942/Microsoft.WindowsTerminal.installer.yaml
+### [Singleton Minimal Example](#tab/minimal/)
 
 ```YAML
 PackageIdentifier: Microsoft.WindowsTerminal
-PackageVersion: 1.9.1942.0
-Installers:
-  - Architecture: x64
-    InstallerType: msix
-    InstallerUrl: https://github.com/microsoft/terminal/releases/download/v1.9.1942.0/Microsoft.WindowsTerminal_1.9.1942.0_8wekyb3d8bbwe.msixbundle
-    InstallerSha256: 578D987D58B3CE5F6BF3316C6A5AECE8EB6B94DBCD1963413D81CB313D6C28D5
-ManifestType: installer
-ManifestVersion: 1.1.0
-```
-
-### Installer Complex Example
-
-Path: manifests/m/Microsoft/WindowsTerminal/1.9.1942/Microsoft.WindowsTerminal.installer.yaml
-
-```YAML
-PackageIdentifier: Microsoft.WindowsTerminal
-PackageVersion: 1.9.1942.0
-Platform:
-- Windows.Desktop
-MinimumOSVersion: 10.0.18362.0
-InstallerType: msix
-InstallModes:
-- silent
-PackageFamilyName: Microsoft.WindowsTerminal_8wekyb3d8bbwe
-Installers:
-- Architecture: x64
-  InstallerUrl: https://github.com/microsoft/terminal/releases/download/v1.9.1942.0/Microsoft.WindowsTerminal_1.9.1942.0_8wekyb3d8bbwe.msixbundle
-  InstallerSha256: 578D987D58B3CE5F6BF3316C6A5AECE8EB6B94DBCD1963413D81CB313D6C28D5
-  SignatureSha256: 889A0BA756E74386F95A37F6A813C6D383DC21349A2D18E2B192D4E0E7F80659
-- Architecture: arm64
-  InstallerUrl: https://github.com/microsoft/terminal/releases/download/v1.9.1942.0/Microsoft.WindowsTerminal_1.9.1942.0_8wekyb3d8bbwe.msixbundle
-  InstallerSha256: 578D987D58B3CE5F6BF3316C6A5AECE8EB6B94DBCD1963413D81CB313D6C28D5
-  SignatureSha256: 889A0BA756E74386F95A37F6A813C6D383DC21349A2D18E2B192D4E0E7F80659
-- Architecture: x86
-  InstallerUrl: https://github.com/microsoft/terminal/releases/download/v1.9.1942.0/Microsoft.WindowsTerminal_1.9.1942.0_8wekyb3d8bbwe.msixbundle
-  InstallerSha256: 578D987D58B3CE5F6BF3316C6A5AECE8EB6B94DBCD1963413D81CB313D6C28D5
-  SignatureSha256: 889A0BA756E74386F95A37F6A813C6D383DC21349A2D18E2B192D4E0E7F80659
-ManifestType: installer
-ManifestVersion: 1.1.0
+PackageVersion: 1.6.10571.0
+PackageLocale: en-US
+Publisher: Microsoft
+PackageName: Windows Terminal
+License: MIT
+ShortDescription: The new Windows Terminal, a tabbed command line experience for Windows.
+Installers: 
+ - Architecture: x64
+   InstallerType: msix
+   InstallerUrl: https://github.com/microsoft/terminal/releases/download/v1.6.10571.0/Microsoft.WindowsTerminal_1.6.10571.0_8wekyb3d8bbwe.msixbundle
+   InstallerSha256: 092aa89b1881e058d31b1a8d88f31bb298b5810afbba25c5cb341cfa4904d843
+   SignatureSha256: e53f48473621390c8243ada6345826af7c713cf1f4bbbf0d030599d1e4c175ee
+ManifestType: singleton
+ManifestVersion: 1.2.0
 ```
 
 ## Fields
@@ -154,6 +152,134 @@ ManifestVersion: 1.1.0
  This key represents the distribution channel for a package. Examples may include "stable" or "beta".
 
  >Note: This key is included for future use. The Windows Package Manager currently does not have any behavior associated with this key. The intent behind this key is to help disambiguate the different channels for packages lacking support for side by side installation. Some packages support having more than one package channel available on a system simultaneously; in this case it is better to use unique packages rather than channels. This key is intended to ensure the proper channel for a package is used during install and upgrade scenarios.
+ </details>
+
+<details>
+  <summary><b>Description</b> - The full package description</summary>
+
+  **Optional Field**
+
+  This key represents the full or long description for a package. It is *not* currently used in the Windows Package Manager.
+
+  >Note: This was included for future integration with the Microsoft Store source to provide the ability to display the full package description.
+ </details>
+
+<details>
+  <summary><b>Moniker</b> - The most common package term</summary>
+
+  **Optional Field**
+
+  This key represents the most common term users would search for when installing or upgrading a package. If only one package uses this moniker, then the [install], [list] and [upgrade] command may match with this package. 
+  
+  >Note:Moniker is the third property evaluated when searching for a matching package.
+</details>
+
+<details>
+  <summary><b>Tags</b> - List of additional package search terms</summary>
+
+  **Optional Field**
+
+  This key represents other common term users would search for when looking for packages. 
+
+  >Note: The best practice is to present these terms in all lower case with hyphens rather than spaces.
+ </details>
+ 
+ <details>
+   <summary><b>Agreement</b> - List of package agreements</summary>
+
+   **Optional Field**
+
+   This key holds any agreements a user must accept prior to download and subsequent install or upgrade.
+
+   >Note: In the Windows Package Manager Community Repository, these are only allowed to be submitted by verified developers.
+  </details>
+  
+<details>
+  <summary><b>AgreementLabel</b> - The label for a package agreement</summary>
+    
+  **Optional Field**
+
+  This key represents the label for a package agreement.
+</details>
+
+<details>
+  <summary><b>Agreement</b> - The text for a package agreement</summary>
+    
+  **Optional Field**
+
+  This key represents the text or body of a package agreement.
+</details>
+
+<details>
+  <summary><b>AgreementUrl</b> - The URL for a package agreement</summary>
+  
+  **Optional Field**
+
+  This key represents the URL for a package agreement.
+</details>
+
+<details>
+  <summary><b>Documentation</b> - List of documentation</summary>
+  
+  **Optional Field**
+
+  This key holds any documentation for providing software guides such as manuals and troubleshooting URLs.
+</details>
+
+<details>
+  <summary><b>DocumentLabel</b> - The documentation label</summary>
+  
+  **Optional Field**
+
+  This key represents the label for a documentation.
+</details>
+
+<details>
+  <summary><b>DocumentUrl</b> - List of documentation</summary>
+  
+  **Optional Field**
+
+  This key represents the URL for a documentation.
+</details>
+
+<details>
+  <summary><b>ReleaseDate</b> - The Release Date for a package.</summary>
+  
+  **Optional Field**
+
+  This key represents the release date for a package.
+</details>
+
+<details>
+  <summary><b>ReleaseNotes</b> - The Release Notes for a package.</summary>
+  
+  **Optional Field**
+
+  This key represents release notes for a package.
+</details>
+
+<details>
+  <summary><b>ReleaseNotesUrl</b> - The Release Notes web page for a package.</summary>
+  
+  **Optional Field**
+
+  This key represents release notes web page for a package.
+</details>
+
+<details>
+  <summary><b>PurchaseUrl</b> - The Purchase URL for a package.</summary>
+  
+  **Optional Field**
+
+  This key represents the purchase url for acquiring entitlement for a package.
+</details>
+
+<details>
+  <summary><b>InstallationNotes</b> - The Installation Notes for a package.</summary>
+  
+  **Optional Field**
+
+  This key represents the notes displayed to the user upon completion of a package installation.
 </details>
 
 <details>
@@ -172,7 +298,7 @@ ManifestVersion: 1.1.0
  **Required Field**
 
  This key represents the hardware architecture targeted by the installer. The Windows Package Manager will attempt to determine the best architecture to use. If emulation is available and the native hardware architecture does not have a supported installer, the emulated architecture may be used.
-</details>
+ </details>
 
 <details>
  <summary><b>InstallerLocale</b> - Locale for package installer</summary>
@@ -182,6 +308,7 @@ ManifestVersion: 1.1.0
  This key represents the locale for an installer *not* the package meta-data. Some installers are compiled with locale or language specific properties. If this key is present, it is used to represent the package locale for an installer.
  
  >Note: This key may be present in the root of the manifest as the default value for all installer nodes. This key may also be present in an individual installer node as well. If this key is in the manifest root and in an installer node, the value in the installer node will apply.
+
 </details>
 
 <details>
@@ -213,7 +340,7 @@ ManifestVersion: 1.1.0
 
  >Note: The Windows Package Manager defaults to the install mode providing install progress. A best practice is to determine if one of the supported installer technologies was used to build an installer with the .exe file extension. The [Windows Package Manager Manifest Creator] tool can be used to determine if one of the known tools was used to build an installer with the .exe file extension.
 
- >Note: The Windows Package Manager 1.2 does not support loose executables with the .exe or .com file extension directly. Compressed files containing installers,  loose executables, and Progressive Web Applications (PWAs) are also not supported.
+ >Note: The Windows Package Manager does not support loose executables with the .exe or .com file extension directly. Compressed files containing installers,  loose executables, and Progressive Web Applications (PWAs) are also not supported.
  
  >Note: This key may be present in the root of the manifest as the default value for all installer nodes. This key may also be present in an individual installer node as well. If this key is in the manifest root and in an installer node, the value in the installer node will apply.
 </details>
@@ -237,7 +364,7 @@ ManifestVersion: 1.1.0
 </details>
 
 <details>
- <summary><b>SignatureSha256</b> - SignatureSha256 is recommended for appx or msix. It is the sha256 of signature file inside appx or msix. Could be used during streaming install if applicable</summary>
+ <summary><b>SignatureSha256</b> - SignatureSha256 is recommended for appx or msix. It is the sha256 of the signature file inside the appx or msix. Could be used during streaming install if applicable.</summary>
 
  **Optional Field**
 
@@ -269,15 +396,13 @@ ManifestVersion: 1.1.0
 </details>
 
 <details>
-  <summary><b>InstallerSwitches</b> - Switches passed to installers</summary>
+ <summary><b>InstallerSwitches</b> - Switches passed to installers</summary>
 
-  **Optional Field**
+ **Optional Field**
 
-  This key represents the set of switches passed to installers. 
+ This key represents the set of switches passed to installers. 
 
-   **Windows Package Manager Community Repository**
-
-   The Microsoft community repository currently requires support for silent and silent with progress installation. Many custom .exe installers will require the proper switches to meet this requirement. The [Windows Package Manager Manifest Creator] tool can be used to determine if one of the known tools was used to build an installer with the .exe file extension. In the event the tool is unable to determine the tool used to build the installer, the publisher may have documentation for the proper switches.
+ >Note: The Microsoft community repository currently requires support for silent and silent with progress installation. Many custom .exe installers will require the proper switches to meet this requirement. The [Windows Package Manager Manifest Creator] tool can be used to determine if one of the known tools was used to build an installer with the .exe file extension. In the event the tool is unable to determine the tool used to build the installer, the publisher may have documentation for the proper switches.
 </details>
 
 <details>
@@ -317,7 +442,7 @@ ManifestVersion: 1.1.0
 
  **Optional Field**
 
- This key represents the path to install the package if the installer supports installing the package in a user configurable location. The **&lt;INSTALLPATH&gt;** token can be included in the switch value so the Windows Package Manager will replace the token with user provided path.
+ This key represents the path to install the package if the installer supports installing the package in a user configurable location. The **&lt;INSTALLPATH&gt;** token can be included in the switch value so the Windows Package Manager will replace the token with the user provided path.
 </details>
 
 <details>
@@ -325,7 +450,7 @@ ManifestVersion: 1.1.0
 
  **Optional Field**
 
-  This key represents the path logs will be directed to if the installer supports specifying the log path in a user configurable location. The **&lt;LOGPATH&gt;** token can be included in the switch value so the Windows Package Manager will replace the token with user provided path.
+  This key represents the path logs will be directed to if the installer supports specifying the log path in a user configurable location. The **&lt;LOGPATH&gt;** token can be included in the switch value so the Windows Package Manager will replace the token with the user provided path.
 </details>
 
 <details>
@@ -467,7 +592,7 @@ ManifestVersion: 1.1.0
 
  **Optional Field**
 
- This key represents the restricted capabilities provided by an MSIX package. More information is available for [App capability declarations]
+ This key represents the restricted capabilities provided by an MSIX package.More information is available for [App capability declarations]
 
  >Note: This key may be present in the root of the manifest as the default value for all installer nodes. This key may also be present in an individual installer node as well. If this key is in the manifest root and in an installer node, the value in the installer node will apply.
 </details>
@@ -503,7 +628,7 @@ ManifestVersion: 1.1.0
 <details>
   <summary><b>ElevationRequirement</b> - Indicator for elevation requirements when installing or upgrading packages.</summary>
 
-  **Optional Field**
+  **Optional Field** 
   
   This key represents which scope a package is required to be executed under. Some packages require user level execution while others require administrative level execution.
 
@@ -567,7 +692,7 @@ ManifestVersion: 1.1.0
 
  **Optional Field**
 
- This key represents any status code returned by the installer representing a condition other than zero. MSIX and MSI packages have well known return codes. This is primarily intended for executable installers that have custom or unique return codes that can be mapped to a return response.
+ This key represents any status code returned by the installer representing a condition other than zero. MSIX and MSI packages have well known return codes. This is primarily intended for executable installers that have custom or unique return coes that can be mapped to a return response.
 </details>
 
 <details>
@@ -575,13 +700,23 @@ ManifestVersion: 1.1.0
 
  **Optional Field**
 
- This key represents a return response to display when an installer returns an expected return code. MSIX and MSI packages have well known return codes. This is primarily intended for executable installers that have custom or unique return codes that can be mapped to a return response.
+ This key represents a return response to display when an installer returns an expected return code. MSIX and MSI packages have well known return codes. This is primarily intended for executable installers that have custom or unique return coes that can be mapped to a return response.
 
  >Note: An enumerated list of values in the JSON schema must be specified for consistency of user experience.
 </details>
 
 <details>
- <summary><b>ProductCode</b> - ProductCode is used for correlation of packages with manifests is configured sources.</summary>
+ <summary><b>ReturnResponseUrl</b> - The return response URL to be displayed in the event an expected return code is encountered.</summary>
+
+ **Optional Field**
+
+ This key represents a return response URL to display when an installer returns an expected return code. MSIX and MSI packages have well known return codes. This is primarily intended for executable installers that have custom or unique return codes that can be mapped to a return response.
+
+ >Note: An enumerated list of values in the JSON schema must be specified for consistency of user experience.
+</details>
+
+<details>
+ <summary><b>ProductCode</b> - ProductCode is used for correlation of packages with manifests in configured sources.</summary>
 
  **Optional Field**
 
@@ -628,7 +763,7 @@ ManifestVersion: 1.1.0
  This key represents the Publisher reported in the Windows registry. It is used to help correlate installed packages with manifests in configured sources.
  
  >Note: The AppsAndFeatures behavior is not implemented in the Windows Package Manager 1.2 client.
-</details>                  
+</details>
 
 <details>
  <summary><b>ProductCode</b> - ProductCode is used for correlation of packages with manifests in configured sources.</summary>
@@ -661,6 +796,25 @@ ManifestVersion: 1.1.0
 </details>
 
 <details>
+ <summary><b>UnsupportedArguments</b> - List of unsupported Windows Package Manager Client arguments for an installer.</summary>
+
+ **Optional Field**
+
+ This key represents the list of Windows Package Manager Client arguments the installer does not support. Only the `--log` and `--location` arguments can be specified as unsupported arguments for an installer.
+
+</details>
+
+<details>
+ <summary><b>DisplayInstallWarnings</b> - Indicator for displaying a warning message prior to install or upgrade.</summary>
+
+ **Optional Field**
+
+This key represents whether a warning message is displayed to the user prior to install or upgrade if the package is known to interfere with any running applications.
+
+>Note: The DisplayInstallWarnings behavior is not implemented in the Windows Package Manager 1.3 client.
+</details>
+
+<details>
  <summary><b>ManifestType</b> - The manifest type</summary>
 
  **Required Field**
@@ -673,5 +827,5 @@ ManifestVersion: 1.1.0
 
  **Required Field**
 
- This key must have the value "1.1.0". The Microsoft community package repository validation pipelines also use this value to determine appropriate validation rules when evaluating this file.
+ This key must have the value "1.2.0". The Microsoft community package repository validation pipelines also use this value to determine appropriate validation rules when evaluating this file.
 </details>
