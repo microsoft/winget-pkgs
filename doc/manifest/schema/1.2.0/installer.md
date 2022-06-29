@@ -683,7 +683,6 @@ ManifestVersion: 1.2.0
 This key represents whether a warning message is displayed to the user prior to install or upgrade if the package is known to interfere with any running applications.
 
 >Note: The DisplayInstallWarnings behavior is not implemented in the Windows Package Manager 1.3 client.
-
 </details>
 
 <details>

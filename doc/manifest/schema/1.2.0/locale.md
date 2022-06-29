@@ -39,7 +39,7 @@ Agreement:                    # Optional package agreements
     AgreementUrl:             # Optional agreement URL
 Documentation:                # Optional documentation
   - DocumentLabel:            # Optional documentation label
-    DocumentUrl:              # Optional documentation URL    
+    DocumentUrl:              # Optional documentation URL
 ReleaseDate:                  # Optional release date
 ReleaseNotes:                 # Optional release notes
 ReleaseNotesUrl:              # Optional release notes URL
