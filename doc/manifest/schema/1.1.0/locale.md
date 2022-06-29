@@ -8,7 +8,7 @@
 [upgrade]:                                          https://docs.microsoft.com/windows/package-manager/winget/upgrade
 
 # Windows Package Manager
-## Manifest Schema v1.1.0 Default Locale File
+## Manifest Schema v1.1.0 Locale File
 
 All Windows Package Manager manifests in the Microsoft community repository are submitted using [YAML] syntax. A [JSON schema] is provided to aid authoring these files in editors, and in the other tooling related to the Windows Package Manager. This document provides detailed information regarding the usage of the YAML keys in the locale file for multi-file manifests.
 

@@ -1,4 +1,4 @@
-[JSON schema]:                                      https://github.com/microsoft/winget-cli/blob/master/schemas/JSON/manifests/v1.1.0/manifest.defaultLocale.1.2.0.json
+[JSON schema]:                                      https://github.com/microsoft/winget-cli/blob/master/schemas/JSON/manifests/v1.2.0/manifest.defaultLocale.1.2.0.json
 [YAML]:                                             https://yaml.org/spec/
 [semantic version]:                                 https://semver.org
 [Available languages for Windows]:                  https://docs.microsoft.com/windows-hardware/manufacture/desktop/available-language-packs-for-windows
