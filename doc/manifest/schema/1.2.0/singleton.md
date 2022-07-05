@@ -1,4 +1,4 @@
-[JSON schema]:                              https://github.com/microsoft/winget-cli/blob/master/schemas/JSON/manifests/v1.1.0/manifest.singleton.1.1.0.json
+[JSON schema]:                              https://github.com/microsoft/winget-cli/blob/master/schemas/JSON/manifests/v1.2.0/manifest.singleton.1.2.0.json
 [semantic version]:                         https://semver.org
 [install]:                                  https://docs.microsoft.com/windows/package-manager/winget/install
 [list]:                                     https://docs.microsoft.com/windows/package-manager/winget/list
@@ -16,7 +16,7 @@
 ## Minimal singleton YAML file example
 As specified in the singleton [JSON schema], only a number of fields are required. The singleton format is only valid for packages containing a single installer and a single locale. If more than one installer or locale is provided, the multiple YAML file format and schema must be used.
 
->Note: The singleton manifest format has been deprecated in the Windows Package Manager Community Repository. The Windows Package Manager 1.2 client still supports singleton manifests.
+>Note: The singleton manifest format has been deprecated in the Windows Package Manager Community Repository. The Windows Package Manager 1.3 client still supports singleton manifests.
 
 ### Singleton Manifest
 
@@ -36,9 +36,14 @@ Agreement:                       # Optional package agreements
   - AgreementLabel:              # Optional agreement label
     Agreement:                   # Optional agreement text
     AgreementUrl:                # Optional agreement URL
+Documentation:                # Optional documentation
+  - DocumentLabel:            # Optional documentation label
+    DocumentUrl:              # Optional documentation URL
 ReleaseDate:                     # Optional release date
 ReleaseNotes:                    # Optional release notes
 ReleaseNotesUrl:                 # Optional release notes URL
+PurchaseUrl:                  # *Not implemented* Optional purchase URL
+InstallationNotes:            # Optional notes displayed upon installation
 Installers:                     # The package installer
   - Architecture:               # The architecture of the installer
     InstallerLocale:            # Optional locale of the installer
@@ -81,6 +86,7 @@ Installers:                     # The package installer
     ExpectedReturnCodes:        # Optional non-zero installer return codes
       - ExpectedReturnCode:     # Optional non-zero installer return code
         ReturnResponse:         # Optional response for an expected return code
+        ReturnResponseUrl:      # Optional response URL for an expected return code        
     ProductCode:                # Optional product code of the installer
     AppsAndFeaturesEntries:     # *Not implemented* Optional entries from the Add and Remove Programs (ARP) table
       - DisplayName:            # *Not implemented* Optional program name shown in the ARP entry
@@ -89,8 +95,11 @@ Installers:                     # The package installer
         ProductCode:            # *Not implemented* Optional product code of the installer
         UpgradeCode:            # *Not implemented* Optional upgrade code of the installer
         InstallerType:          # *Not implemented* Optional installer type
+    UnsupportedArguments:       # Optional list of Windows Package Manager Client arguments the installer does not support
+      - UnsupportedArgument:    # Optional unsupported Windows Package Manager Client argument
+    DisplayInstallWarnings:     # *Not implemented* Optional indicator for packages that are known to interfere with running application during install        
 ManifestType: singleton         # The manifest type
-ManifestVersion: 1.1.0          # The manifest syntax version
+ManifestVersion: 1.2.0          # The manifest syntax version
 ```
 
 ### [Singleton Minimal Example](#tab/minimal/)
@@ -110,7 +119,7 @@ Installers:
    InstallerSha256: 092aa89b1881e058d31b1a8d88f31bb298b5810afbba25c5cb341cfa4904d843
    SignatureSha256: e53f48473621390c8243ada6345826af7c713cf1f4bbbf0d030599d1e4c175ee
 ManifestType: singleton
-ManifestVersion: 1.1.0
+ManifestVersion: 1.2.0
 ```
 
 ## Fields
@@ -210,6 +219,30 @@ ManifestVersion: 1.1.0
 </details>
 
 <details>
+  <summary><b>Documentation</b> - List of documentation</summary>
+  
+  **Optional Field**
+
+  This key holds any documentation for providing software guides such as manuals and troubleshooting URLs.
+</details>
+
+<details>
+  <summary><b>DocumentLabel</b> - The documentation label</summary>
+  
+  **Optional Field**
+
+  This key represents the label for a documentation.
+</details>
+
+<details>
+  <summary><b>DocumentUrl</b> - List of documentation</summary>
+  
+  **Optional Field**
+
+  This key represents the URL for a documentation.
+</details>
+
+<details>
   <summary><b>ReleaseDate</b> - The Release Date for a package.</summary>
   
   **Optional Field**
@@ -231,6 +264,22 @@ ManifestVersion: 1.1.0
   **Optional Field**
 
   This key represents release notes web page for a package.
+</details>
+
+<details>
+  <summary><b>PurchaseUrl</b> - The Purchase URL for a package.</summary>
+  
+  **Optional Field**
+
+  This key represents the purchase url for acquiring entitlement for a package.
+</details>
+
+<details>
+  <summary><b>InstallationNotes</b> - The Installation Notes for a package.</summary>
+  
+  **Optional Field**
+
+  This key represents the notes displayed to the user upon completion of a package installation.
 </details>
 
 <details>
@@ -657,6 +706,16 @@ ManifestVersion: 1.1.0
 </details>
 
 <details>
+ <summary><b>ReturnResponseUrl</b> - The return response URL to be displayed in the event an expected return code is encountered.</summary>
+
+ **Optional Field**
+
+ This key represents a return response URL to display when an installer returns an expected return code. MSIX and MSI packages have well known return codes. This is primarily intended for executable installers that have custom or unique return codes that can be mapped to a return response.
+
+ >Note: An enumerated list of values in the JSON schema must be specified for consistency of user experience.
+</details>
+
+<details>
  <summary><b>ProductCode</b> - ProductCode is used for correlation of packages with manifests in configured sources.</summary>
 
  **Optional Field**
@@ -737,6 +796,25 @@ ManifestVersion: 1.1.0
 </details>
 
 <details>
+ <summary><b>UnsupportedArguments</b> - List of unsupported Windows Package Manager Client arguments for an installer.</summary>
+
+ **Optional Field**
+
+ This key represents the list of Windows Package Manager Client arguments the installer does not support. Only the `--log` and `--location` arguments can be specified as unsupported arguments for an installer.
+
+</details>
+
+<details>
+ <summary><b>DisplayInstallWarnings</b> - Indicator for displaying a warning message prior to install or upgrade.</summary>
+
+ **Optional Field**
+
+This key represents whether a warning message is displayed to the user prior to install or upgrade if the package is known to interfere with any running applications.
+
+>Note: The DisplayInstallWarnings behavior is not implemented in the Windows Package Manager 1.3 client.
+</details>
+
+<details>
  <summary><b>ManifestType</b> - The manifest type</summary>
 
  **Required Field**
@@ -749,5 +827,5 @@ ManifestVersion: 1.1.0
 
  **Required Field**
 
- This key must have the value "1.1.0". The Microsoft community package repository validation pipelines also use this value to determine appropriate validation rules when evaluating this file.
+ This key must have the value "1.2.0". The Microsoft community package repository validation pipelines also use this value to determine appropriate validation rules when evaluating this file.
 </details>

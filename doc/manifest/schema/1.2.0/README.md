@@ -1,16 +1,16 @@
-[schemaFolder]:                             https://github.com/microsoft/winget-cli/tree/master/schemas/JSON/manifests/v1.1.0
-[versionSchema]:                            https://github.com/microsoft/winget-cli/tree/master/schemas/JSON/manifests/v1.1.0/manifest.version.1.1.0.json
-[defaultLocaleSchema]:                      https://github.com/microsoft/winget-cli/tree/master/schemas/JSON/manifests/v1.1.0/manifest.defaultLocale.1.1.0.json
-[localeSchema]:                             https://github.com/microsoft/winget-cli/tree/master/schemas/JSON/manifests/v1.1.0/manifest.locale.1.1.0.json
-[installerSchema]:                          https://github.com/microsoft/winget-cli/tree/master/schemas/JSON/manifests/v1.1.0/manifest.installer.1.1.0.json
+[schemaFolder]:                             https://github.com/microsoft/winget-cli/tree/master/schemas/JSON/manifests/v1.2.0
+[versionSchema]:                            https://github.com/microsoft/winget-cli/tree/master/schemas/JSON/manifests/v1.2.0/manifest.version.1.2.0.json
+[defaultLocaleSchema]:                      https://github.com/microsoft/winget-cli/tree/master/schemas/JSON/manifests/v1.2.0/manifest.defaultLocale.1.2.0.json
+[localeSchema]:                             https://github.com/microsoft/winget-cli/tree/master/schemas/JSON/manifests/v1.2.0/manifest.locale.1.2.0.json
+[installerSchema]:                          https://github.com/microsoft/winget-cli/tree/master/schemas/JSON/manifests/v1.2.0/manifest.installer.1.2.0.json
 [Windows Package Manager Manifest Creator]: https://github.com/microsoft/winget-create
 [YAML Create]:                              https://github.com/microsoft/winget-pkgs/blob/master/Tools/YamlCreate.ps1
 
 # Windows Package Manager
 
-## Manifest Schema 1.1
+## Manifest Schema 1.2
 
-The Windows Package Manager 1.2 client does not support all fields in the 1.1 schema.
+The Windows Package Manager 1.3 client does not support all fields in the 1.2 schema.
 
 The Windows Package Manager uses manifests (YAML files) to locate and install packages for Windows users. This specification provides references to JSON schemas as well as best practices.
 
