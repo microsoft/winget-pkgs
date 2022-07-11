@@ -1,4 +1,4 @@
-[JSON schema]:                                      https://github.com/microsoft/winget-cli/blob/master/schemas/JSON/manifests/v1.1.0/manifest.defaultLocale.1.1.0.json
+[JSON schema]:                                      https://github.com/microsoft/winget-cli/blob/master/schemas/JSON/manifests/v1.2.0/manifest.defaultLocale.1.2.0.json
 [YAML]:                                             https://yaml.org/spec/
 [semantic version]:                                 https://semver.org
 [Available languages for Windows]:                  https://docs.microsoft.com/windows-hardware/manufacture/desktop/available-language-packs-for-windows
@@ -8,7 +8,7 @@
 [upgrade]:                                          https://docs.microsoft.com/windows/package-manager/winget/upgrade
 
 # Windows Package Manager
-## Manifest Schema v1.1.0 Default Locale File
+## Manifest Schema v1.2.0 Default Locale File
 
 All Windows Package Manager manifests in the Microsoft community repository are submitted using [YAML] syntax. A [JSON schema] is provided to aid authoring these files in editors, and in the other tooling related to the Windows Package Manager. This document provides detailed information regarding the usage of the YAML keys in the defaultLocale file for multi-file manifests.
 
@@ -37,11 +37,16 @@ Agreement:                    # Optional package agreements
   - AgreementLabel:           # Optional agreement label
     Agreement:                # Optional agreement text
     AgreementUrl:             # Optional agreement URL
+Documentation:                # Optional documentation
+  - DocumentLabel:            # Optional documentation label
+    DocumentUrl:              # Optional documentation URL
 ReleaseDate:                  # Optional release date
 ReleaseNotes:                 # Optional release notes
 ReleaseNotesUrl:              # Optional release notes URL
+PurchaseUrl:                  # *Not implemented* Optional purchase URL
+InstallationNotes:            # Optional notes displayed upon installation
 ManifestType: defaultLocale   # The manifest type
-ManifestVersion: 1.1.0        # The manifest syntax version
+ManifestVersion: 1.2.0        # The manifest syntax version
 ```
 
 ## Fields
@@ -63,7 +68,7 @@ ManifestVersion: 1.1.0        # The manifest syntax version
 
  The Windows Package Manager client uses this version to determine whether or not an upgrade for a package is available. In some cases, packages may be released with a marketing driven version, and that causes trouble with the `winget upgrade` command.
 
- The current best practice for the Windows Package Manager 1.2 client is to use the value reported in Windows Apps & Features when this version of the package is installed. In some cases, packages do not report a version resulting in an upgrade loop or other unwanted behavior.
+ The current best practice for the Windows Package Manager 1.3 client is to use the value reported in Windows Apps & Features when this version of the package is installed. In some cases, packages do not report a version resulting in an upgrade loop or other unwanted behavior.
 </details>
 
 <details>
@@ -89,7 +94,7 @@ ManifestVersion: 1.1.0        # The manifest syntax version
 
   This key represents the name of the publisher for a given package. This field is intended to allow the full publisher's or ISV's name to be displayed as they wish.
 
-  >Note: With the 1.2 release of the Windows Package Manager, this name affects how packages from a source are mapped to Apps installed in Windows 10 and Windows 11 via Add / Remove Programs (ARP) and Windows Apps & Features respectively. The best practice is to ensure this matches the entry for the package when it has been installed. The impact is associated with `winget upgrade` and `winget list`.
+  >Note: With the 1.3 release of the Windows Package Manager, this name affects how packages from a source are mapped to Apps installed in Windows 10 and Windows 11 via Add / Remove Programs (ARP) and Windows Apps & Features respectively. The best practice is to ensure this matches the entry for the package when it has been installed. The impact is associated with `winget upgrade` and `winget list`.
  </details>
 
 <details>
@@ -131,7 +136,7 @@ ManifestVersion: 1.1.0        # The manifest syntax version
 
   This key represents the name of the package. This field is intended to allow the full package name to be displayed as the publisher or ISV wishes.
 
-  >Note: With the 1.2 release of the Windows Package Manager, this name affects how packages from a source are mapped to Apps installed in Windows 10 via Add / Remove Programs (ARP). The best practice is to ensure this matches the ARP entry for the package name when it has been installed. The impact is associated with `winget upgrade` and `winget list`.
+  >Note: With the 1.3 release of the Windows Package Manager, this name affects how packages from a source are mapped to Apps installed in Windows 10 via Add / Remove Programs (ARP). The best practice is to ensure this matches the ARP entry for the package name when it has been installed. The impact is associated with `winget upgrade` and `winget list`.
  </details>
 
 <details>
@@ -256,6 +261,30 @@ ManifestVersion: 1.1.0        # The manifest syntax version
 </details>
 
 <details>
+  <summary><b>Documentation</b> - List of documentation</summary>
+  
+  **Optional Field**
+
+  This key holds any documentation for providing software guides such as manuals and troubleshooting URLs.
+</details>
+
+<details>
+  <summary><b>DocumentLabel</b> - The documentation label</summary>
+  
+  **Optional Field**
+
+  This key represents the label for a documentation.
+</details>
+
+<details>
+  <summary><b>DocumentUrl</b> - List of documentation</summary>
+  
+  **Optional Field**
+
+  This key represents the URL for a documentation.
+</details>
+
+<details>
   <summary><b>ReleaseDate</b> - The Release Date for a package.</summary>
   
   **Optional Field**
@@ -280,6 +309,22 @@ ManifestVersion: 1.1.0        # The manifest syntax version
 </details>
 
 <details>
+  <summary><b>PurchaseUrl</b> - The Purchase URL for a package.</summary>
+  
+  **Optional Field**
+
+  This key represents the purchase url for acquiring entitlement for a package.
+</details>
+
+<details>
+  <summary><b>InstallationNotes</b> - The Installation Notes for a package.</summary>
+  
+  **Optional Field**
+
+  This key represents the notes displayed to the user upon completion of a package installation.
+</details>
+
+<details>
  <summary><b>ManifestType</b> - The manifest type</summary>
 
  **Required Field**
@@ -292,5 +337,5 @@ ManifestVersion: 1.1.0        # The manifest syntax version
 
  **Required Field**
 
- This key must have the value "1.1.0". The Microsoft community package repository validation pipelines also use this value to determine appropriate validation rules when evaluating this file.
+ This key must have the value "1.2.0". The Microsoft community package repository validation pipelines also use this value to determine appropriate validation rules when evaluating this file.
 </details>

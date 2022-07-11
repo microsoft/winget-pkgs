@@ -567,7 +567,7 @@ ManifestVersion: 1.1.0
 
  **Optional Field**
 
- This key represents any status code returned by the installer representing a condition other than zero. MSIX and MSI packages have well known return codes. This is primarily intended for executable installers that have custom or unique return coes that can be mapped to a return response.
+ This key represents any status code returned by the installer representing a condition other than zero. MSIX and MSI packages have well known return codes. This is primarily intended for executable installers that have custom or unique return codes that can be mapped to a return response.
 </details>
 
 <details>

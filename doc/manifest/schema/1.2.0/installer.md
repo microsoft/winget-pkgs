@@ -1,4 +1,4 @@
-[JSON Schema]:                              https://github.com/microsoft/winget-cli/blob/master/schemas/JSON/manifests/v1.1.0/manifest.installer.1.1.0.json
+[JSON Schema]:                              https://github.com/microsoft/winget-cli/blob/master/schemas/JSON/manifests/v1.2.0/manifest.installer.1.2.0.json
 [Windows Package Manager Manifest Creator]: https://github.com/microsoft/winget-create
 [YAML]:                                     https://yaml.org/spec
 [semantic version]:                         https://semver.org
@@ -12,10 +12,10 @@
 [Burn]:                                     https://wixtoolset.org/documentation/manual/v3/bundle
 
 # Windows Package Manager
-## Manifest Schema v1.1.0 Installer File
+## Manifest Schema v1.2.0 Installer File
 All Windows Package Manager manifests in the Microsoft community repository are submitted using [YAML] syntax. A [JSON schema] is provided to aid authoring these files in editors, and in the other tooling related to the Windows Package Manager. This document provides detailed information regarding the usage of the YAML keys in the installer file for multi-file manifests. 
 
->Note: The 1.1 manifest schema was released with the Windows Package Manager 1.2. Any fields marked *Not implemented* are not supported in the 1.2 client, but may be supported in a 1.3-preview client.
+>Note: The 1.2 manifest schema was released with the Windows Package Manager 1.3. Any fields marked *Not implemented* are not supported in the 1.3 client, but may be supported in a 1.4-preview client.
 
 ### Installer Manifest
 
@@ -57,7 +57,7 @@ Installers:                     # The list of package installers
     InstallerAbortsTerminal:    # *Not implemented* Optional indicator for packages that abort terminal
     InstallLocationRequired:    # *Not implemented* Optional indicator for packages that require install location
     RequireExplicitUpgrade:     # Optional indicator for packages that upgrade themselves
-    ElevationRequirement:       # *Not implemented* scope required to install package
+    ElevationRequirement:       # Optional scope required to install package
     UnsupportedOSArchitectures: # Optional architectures the package is not supported on
     Markets:                    # Optional markets the package is allowed to be installed
     ExcludedMarkets:            # Optional markets the package is not allowed to be installed
@@ -65,16 +65,20 @@ Installers:                     # The list of package installers
     ExpectedReturnCodes:        # Optional non-zero installer return codes
       - ExpectedReturnCode:     # Optional non-zero installer return code
         ReturnResponse:         # Optional response for an expected return code
+        ReturnResponseUrl:      # Optional response URL for an expected return code
     ProductCode:                # Optional product code of the installer
-    AppsAndFeaturesEntries:     # *Not implemented* Optional entries from the Add and Remove Programs (ARP) table
-      - DisplayName:            # *Not implemented* Optional program name shown in the ARP entry
-        DisplayVersion:         # *Not implemented* Optional version displayed in the ARP entry
-        Publisher:              # *Not implemented* Optional publisher displayed in the ARP entry
-        ProductCode:            # *Not implemented* Optional product code of the installer
-        UpgradeCode:            # *Not implemented* Optional upgrade code of the installer
-        InstallerType:          # *Not implemented* Optional installer type
+    AppsAndFeaturesEntries:     # Optional entries from the Add and Remove Programs (ARP) table
+      - DisplayName:            # Optional program name shown in the ARP entry
+        DisplayVersion:         # Optional version displayed in the ARP entry
+        Publisher:              # Optional publisher displayed in the ARP entry
+        ProductCode:            # Optional product code of the installer
+        UpgradeCode:            # Optional upgrade code of the installer
+        InstallerType:          # Optional installer type
+    UnsupportedArguments:       # Optional list of Windows Package Manager Client arguments the installer does not support
+      - UnsupportedArgument:    # Optional unsupported Windows Package Manager Client argument
+    DisplayInstallWarnings:     # *Not implemented* Optional indicator for packages that are known to interfere with running application during install
 ManifestType: installer         # The manifest type
-ManifestVersion: 1.1.0          # The manifest syntax version
+ManifestVersion: 1.2.0          # The manifest syntax version
 ```
 
 ### Installer Minimal Example
@@ -90,7 +94,7 @@ Installers:
     InstallerUrl: https://github.com/microsoft/terminal/releases/download/v1.9.1942.0/Microsoft.WindowsTerminal_1.9.1942.0_8wekyb3d8bbwe.msixbundle
     InstallerSha256: 578D987D58B3CE5F6BF3316C6A5AECE8EB6B94DBCD1963413D81CB313D6C28D5
 ManifestType: installer
-ManifestVersion: 1.1.0
+ManifestVersion: 1.2.0
 ```
 
 ### Installer Complex Example
@@ -121,7 +125,7 @@ Installers:
   InstallerSha256: 578D987D58B3CE5F6BF3316C6A5AECE8EB6B94DBCD1963413D81CB313D6C28D5
   SignatureSha256: 889A0BA756E74386F95A37F6A813C6D383DC21349A2D18E2B192D4E0E7F80659
 ManifestType: installer
-ManifestVersion: 1.1.0
+ManifestVersion: 1.2.0
 ```
 
 ## Fields
@@ -209,11 +213,11 @@ ManifestVersion: 1.1.0
 
  **Required Field**
 
- This key represents the installer type for the package. The Windows Package Manager supports [MSIX], [MSI], and executable installers. Some well known formats ([Inno], [Nullsoft], [WiX], and [Burn]) provide standard sets of installer switches to provide different installer experiences.
+ This key represents the installer type for the package. The Windows Package Manager supports [MSIX], [MSI], and executable installers. Some well known formats ([Inno], [Nullsoft], [WiX], and [Burn]) provide standard sets of installer switches to provide different installer experiences. [Portable] packages are now supported in Windows Package Manager 1.3.
 
  >Note: The Windows Package Manager defaults to the install mode providing install progress. A best practice is to determine if one of the supported installer technologies was used to build an installer with the .exe file extension. The [Windows Package Manager Manifest Creator] tool can be used to determine if one of the known tools was used to build an installer with the .exe file extension.
 
- >Note: The Windows Package Manager 1.2 does not support loose executables with the .exe or .com file extension directly. Compressed files containing installers,  loose executables, and Progressive Web Applications (PWAs) are also not supported.
+ >Note: The Windows Package Manager 1.3 does not support loose executables with the .com file extension directly. Compressed files containing installers, loose executables, and Progressive Web Applications (PWAs) are also not supported.
  
  >Note: This key may be present in the root of the manifest as the default value for all installer nodes. This key may also be present in an individual installer node as well. If this key is in the manifest root and in an installer node, the value in the installer node will apply.
 </details>
@@ -489,7 +493,7 @@ ManifestVersion: 1.1.0
 
  This key represents the requirement to have an install location specified. These installers are known to deploy files to the location the installer is executed in.
 
- >Note: The behavior associated with this key is not implemented in the Windows Package Manager 1.2 client.
+ >Note: The behavior associated with this key is not implemented in the Windows Package Manager 1.3 client.
 </details>
 
 <details>
@@ -506,8 +510,6 @@ ManifestVersion: 1.1.0
   **Optional Field**
   
   This key represents which scope a package is required to be executed under. Some packages require user level execution while others require administrative level execution.
-
- >Note: The behavior associated with this key is not implemented in the Windows Package Manager 1.2 client.
 </details>
 
 <details>
@@ -567,7 +569,7 @@ ManifestVersion: 1.1.0
 
  **Optional Field**
 
- This key represents any status code returned by the installer representing a condition other than zero. MSIX and MSI packages have well known return codes. This is primarily intended for executable installers that have custom or unique return coes that can be mapped to a return response.
+ This key represents any status code returned by the installer representing a condition other than zero. MSIX and MSI packages have well known return codes. This is primarily intended for executable installers that have custom or unique return codes that can be mapped to a return response.
 </details>
 
 <details>
@@ -576,6 +578,16 @@ ManifestVersion: 1.1.0
  **Optional Field**
 
  This key represents a return response to display when an installer returns an expected return code. MSIX and MSI packages have well known return codes. This is primarily intended for executable installers that have custom or unique return codes that can be mapped to a return response.
+
+ >Note: An enumerated list of values in the JSON schema must be specified for consistency of user experience.
+</details>
+
+<details>
+ <summary><b>ReturnResponseUrl</b> - The return response URL to be displayed in the event an expected return code is encountered.</summary>
+
+ **Optional Field**
+
+ This key represents a return response URL to display when an installer returns an expected return code. MSIX and MSI packages have well known return codes. This is primarily intended for executable installers that have custom or unique return codes that can be mapped to a return response.
 
  >Note: An enumerated list of values in the JSON schema must be specified for consistency of user experience.
 </details>
@@ -597,7 +609,6 @@ ManifestVersion: 1.1.0
 
   This key represents the values reported by Windows Apps & Features. When a package is installed, entries are made into the Windows Registry. 
 
-  >Note: The AppsAndFeatures behavior is not implemented in the Windows Package Manager 1.2 client.
 </details>
 
 <details>
@@ -607,7 +618,6 @@ ManifestVersion: 1.1.0
 
  This key represents the package name as displayed in Windows Apps & Features. It is used to help correlate installed packages with manifests in configured sources.
 
- >Note: The AppsAndFeatures behavior is not implemented in the Windows Package Manager 1.2 client.
 </details>
 
 <details>
@@ -617,7 +627,6 @@ ManifestVersion: 1.1.0
 
  This key represents the package version as displayed in Windows Apps & Features. It is used to help correlate installed packages with manifests in configured sources.
  
- >Note: The AppsAndFeatures behavior is not implemented in the Windows Package Manager 1.2 client.
 </details>
 
 <details>
@@ -627,7 +636,6 @@ ManifestVersion: 1.1.0
 
  This key represents the Publisher reported in the Windows registry. It is used to help correlate installed packages with manifests in configured sources.
  
- >Note: The AppsAndFeatures behavior is not implemented in the Windows Package Manager 1.2 client.
 </details>                  
 
 <details>
@@ -637,7 +645,7 @@ ManifestVersion: 1.1.0
 
  This key represents the product code for a package. It is used to help correlate installed packages with manifests in configured sources.
 
- >Note: This key is displayed twice for completeness. As the AppsAndFeatures behavior is not implemented in the Windows Package Manager 1.2 client, the description and usage above is implemented.
+ >Note: This key is displayed twice for completeness.
 </details>
 
 <details>
@@ -646,8 +654,6 @@ ManifestVersion: 1.1.0
  **Optional Field**
 
  This key represents the upgrade code for a package. It is used to help correlate installed packages with manifests in configured sources.
-
- >Note: The AppsAndFeatures behavior is not implemented in the Windows Package Manager 1.2 client.
 </details>
 
 <details>
@@ -657,7 +663,26 @@ ManifestVersion: 1.1.0
 
  This key represents the installer type for the package. It is used to help correlate installed packages with manifests in configured sources. In some cases, an installer is an .exe based installer, but contains an MSI installer. This key will help the Windows Package Manager understand if upgrading an MSI should be performed when it is contained in an .exe installer.
 
- >Note: This key is displayed twice for completeness. As the AppsAndFeatures behavior is not implemented in the Windows Package Manager 1.2 client, the description and usage above is implemented.
+ >Note: This key is displayed twice for completeness.
+</details>
+
+<details>
+ <summary><b>UnsupportedArguments</b> - List of unsupported Windows Package Manager Client arguments for an installer.</summary>
+
+ **Optional Field**
+
+ This key represents the list of Windows Package Manager Client arguments the installer does not support. Only the `--log` and `--location` arguments can be specified as unsupported arguments for an installer.
+
+</details>
+
+<details>
+ <summary><b>DisplayInstallWarnings</b> - Indicator for displaying a warning message prior to install or upgrade.</summary>
+
+ **Optional Field**
+
+This key represents whether a warning message is displayed to the user prior to install or upgrade if the package is known to interfere with any running applications.
+
+>Note: The DisplayInstallWarnings behavior is not implemented in the Windows Package Manager 1.3 client.
 </details>
 
 <details>
@@ -673,5 +698,5 @@ ManifestVersion: 1.1.0
 
  **Required Field**
 
- This key must have the value "1.1.0". The Microsoft community package repository validation pipelines also use this value to determine appropriate validation rules when evaluating this file.
+ This key must have the value "1.2.0". The Microsoft community package repository validation pipelines also use this value to determine appropriate validation rules when evaluating this file.
 </details>
