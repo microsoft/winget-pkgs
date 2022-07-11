@@ -106,7 +106,7 @@ $ProgressPreference = $oldProgressPreference
 $vcLibsUwp = @{
   fileName = 'Microsoft.VCLibs.x64.14.00.Desktop.appx'
   url      = 'https://aka.ms/Microsoft.VCLibs.x64.14.00.Desktop.appx'
-  hash     = 'A39CEC0E70BE9E3E48801B871C034872F1D7E5E8EEBE986198C019CF2C271040'
+  hash     = '9BFDE6CFCC530EF073AB4BC9C4817575F63BE1251DD75AAA58CB89299697A569'
 }
 $uiLibsUwp = @{
   fileName = 'Microsoft.UI.Xaml.2.7.zip'
