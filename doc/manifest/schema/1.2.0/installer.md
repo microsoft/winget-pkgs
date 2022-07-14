@@ -27,7 +27,7 @@ Installers:                     # The list of package installers
   - Architecture:               # The architecture of the installer
     InstallerLocale:            # Optional locale of the installer
     Platform:                   # Optional installer supported operating system
-    MimimumOSVersion:           # Optional installer minimum operating system version
+    MinimumOSVersion:           # Optional installer minimum operating system version
     InstallerType:              # The installer type
     InstallerUrl:               # The installer URL
     InstallerSha256:            # The SHA256 hash of the installer
@@ -135,7 +135,7 @@ ManifestVersion: 1.2.0
 
  **Required Field**
 
- This key is the unique identifier for a given package. This value is generally in the form of `Publisher.Package`. It is case sensitve, and this value must match the folder structure under the partition directory in GitHub.
+ This key is the unique identifier for a given package. This value is generally in the form of `Publisher.Package`. It is case sensitive, and this value must match the folder structure under the partition directory in GitHub.
 </details>
 
 <details>
