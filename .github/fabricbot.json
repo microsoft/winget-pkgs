@@ -484,8 +484,7 @@
         ],
         "eventType": "pull_request",
         "eventNames": [
-          "issue_comment",
-          "pull_request_review"
+          "issue_comment"
         ]
       }
     },
@@ -980,87 +979,6 @@
           }
         ]
       }
-    },
-    {
-      "taskType": "trigger",
-      "capabilityId": "IssueResponder",
-      "subCapability": "PullRequestResponder",
-      "version": "1.0",
-      "config": {
-        "conditions": {
-          "operator": "or",
-          "operands": [
-            {
-              "name": "labelAdded",
-              "parameters": {
-                "label": "Azure-Pipeline-Passed"
-              }
-            }
-          ]
-        },
-        "eventType": "pull_request",
-        "eventNames": [
-          "pull_request",
-          "issues",
-          "project_card"
-        ],
-        "taskName": "Automated Pipeline succeeds - Start Manual Testing",
-        "actions": [
-          {
-            "name": "assignToGitHubUserGroup",
-            "parameters": {
-              "groupId": "5eab07f7a70633230c0dbe9c",
-              "skipOpener": true
-            }
-          },
-          {
-            "name": "addReply",
-            "parameters": {
-              "comment": "Hello ${issueAuthor},\nThis submission has moved to manual review."
-            }
-          },
-          {
-            "name": "removeLabel",
-            "parameters": {
-              "label": "Needs-Attention"
-            }
-          }
-        ]
-      },
-      "disabled": true
-    },
-    {
-      "taskType": "trigger",
-      "capabilityId": "IssueResponder",
-      "subCapability": "PullRequestReviewResponder",
-      "version": "1.0",
-      "config": {
-        "conditions": {
-          "operator": "and",
-          "operands": [
-            {
-              "name": "hasLabel",
-              "parameters": {
-                "label": "Validation-Completed"
-              }
-            }
-          ]
-        },
-        "eventType": "pull_request",
-        "eventNames": [
-          "pull_request_review"
-        ],
-        "actions": [
-          {
-            "name": "addLabel",
-            "parameters": {
-              "label": "Validation-Completed"
-            }
-          }
-        ],
-        "taskName": "Manual Review: Validation complete!!"
-      },
-      "disabled": true
     },
     {
       "taskType": "trigger",
@@ -2156,12 +2074,6 @@
         "taskName": "Error-Analysis-Timeout",
         "actions": [
           {
-            "name": "assignToGitHubUserGroup",
-            "parameters": {
-              "groupId": "5f11edb727b58f1b987f2685"
-            }
-          },
-          {
             "name": "addReply",
             "parameters": {
               "comment": "Hello @${issueAuthor},\nStatic analysis has timed out.  The PR has been assigned to a developer to investigate."
@@ -2171,6 +2083,20 @@
             "name": "addLabel",
             "parameters": {
               "label": "Needs-Attention"
+            }
+          },
+          {
+            "name": "assignToIcmUserGroup",
+            "parameters": {
+              "groupId": "61b7eb27cfff4b19dc1a8ec7",
+              "assignmentTarget": "Primary"
+            }
+          },
+          {
+            "name": "assignToIcmUserGroup",
+            "parameters": {
+              "groupId": "61b7eb27cfff4b19dc1a8ec7",
+              "assignmentTarget": "FirstBackup"
             }
           }
         ]
@@ -2233,119 +2159,6 @@
           }
         ]
       }
-    },
-    {
-      "taskType": "scheduled",
-      "capabilityId": "ScheduledSearch",
-      "subCapability": "ScheduledSearch",
-      "version": "1.1",
-      "config": {
-        "frequency": [
-          {
-            "weekDay": 0,
-            "hours": [
-              0,
-              6,
-              12,
-              18
-            ]
-          },
-          {
-            "weekDay": 1,
-            "hours": [
-              0,
-              6,
-              12,
-              18
-            ]
-          },
-          {
-            "weekDay": 2,
-            "hours": [
-              0,
-              6,
-              12,
-              18
-            ]
-          },
-          {
-            "weekDay": 3,
-            "hours": [
-              0,
-              6,
-              12,
-              18
-            ]
-          },
-          {
-            "weekDay": 4,
-            "hours": [
-              0,
-              6,
-              12,
-              18
-            ]
-          },
-          {
-            "weekDay": 5,
-            "hours": [
-              0,
-              6,
-              12,
-              18
-            ]
-          },
-          {
-            "weekDay": 6,
-            "hours": [
-              0,
-              6,
-              12,
-              18
-            ]
-          }
-        ],
-        "searchTerms": [
-          {
-            "name": "isOpen",
-            "parameters": {}
-          },
-          {
-            "name": "hasLabel",
-            "parameters": {
-              "label": "Error-Analysis-Timeout"
-            }
-          },
-          {
-            "name": "noActivitySince",
-            "parameters": {
-              "days": 1
-            }
-          },
-          {
-            "name": "noLabel",
-            "parameters": {
-              "label": "Timeout-Retry"
-            }
-          }
-        ],
-        "taskName": "Retry following 24 hour delay from ESRP (#41)",
-        "actions": [
-          {
-            "name": "addReply",
-            "parameters": {
-              "comment": "/Azp Run"
-            }
-          },
-          {
-            "name": "addLabel",
-            "parameters": {
-              "label": "Timeout-Retry"
-            }
-          }
-        ]
-      },
-      "disabled": true
     },
     {
       "taskType": "trigger",
@@ -5153,39 +4966,6 @@
     }
   ],
   "userGroups": [
-    {
-      "_id": "5eab07f7a70633230c0dbe9c",
-      "groupType": "GitHub",
-      "name": "winget Test Team",
-      "githubUserNames": [
-        "kevinlams",
-        "denelon"
-      ],
-      "description": "This is the team for processing the manual validation.  ",
-      "assignmentSchemes": [
-        {
-          "target": "All",
-          "lastAssignedIndex": 968
-        }
-      ]
-    },
-    {
-      "_id": "5f11edb727b58f1b987f2685",
-      "groupType": "GitHub",
-      "name": "winget-dev-team",
-      "githubUserNames": [
-        "ashpatil-msft",
-        "msftrubengu",
-        "zachcarp"
-      ],
-      "description": "Dev Team working on Package Manager Service",
-      "assignmentSchemes": [
-        {
-          "target": "All",
-          "lastAssignedIndex": 177
-        }
-      ]
-    },
     {
       "_id": "61b7eb27cfff4b19dc1a8ec7",
       "groupType": "ICM",
