@@ -1,7 +1,7 @@
 # Troubleshooting Errors
 Many of the issues can be caught before submitting your PR, if you follow these steps:
 1) Validate the manifest file by running ```winget validate <path-to-the-manifest>```
-2) Install the manifest on your local machine.  This will verify the Sha256 Hash and check whether the application is able to install silenty (without any human interaction) or not.  You can do this by running: ```winget install --manifest <path-to-the-manifest>``` or ```winget install -m <path-to-the-manifest>```
+2) Install the manifest on your local machine.  This will verify the Sha256 Hash and check whether the application is able to install silently (without any human interaction) or not.  You can do this by running: ```winget install --manifest <path-to-the-manifest>``` or ```winget install -m <path-to-the-manifest>```
 
 Once those steps pass, here are some troubleshooting tips:
 
@@ -10,7 +10,7 @@ Manifest validation errors indicate that there is a problem with the manifest fi
 
 For documentation on the manifest specification, please see the [manifest schema](/doc/manifest/schema)
 
-Here are some common mistakes not discovered by the winget validater.
+Here are some common mistakes not discovered by the winget validaton.
 
 1) Check the publisher folder and application name folder. 
 2) Check for typos in the filename.

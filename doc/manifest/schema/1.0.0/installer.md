@@ -23,7 +23,7 @@ All Windows Package Manager manifests in the Microsoft community repository are 
  <summary>The package unique identifier</summary>
 
  #### Required Field
- This key is the unique identifier for a given package. This value is generally in the form of `Publisher.Package`. It is case sensitve, and this value must match the folder structure under the partition directory in GitHub.
+ This key is the unique identifier for a given package. This value is generally in the form of `Publisher.Package`. It is case sensitive, and this value must match the folder structure under the partition directory in GitHub.
 </details>
 
 ### PackageVersion
