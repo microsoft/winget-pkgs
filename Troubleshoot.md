@@ -10,7 +10,7 @@ Manifest validation errors indicate that there is a problem with the manifest fi
 
 For documentation on the manifest specification, please see the [manifest schema](/doc/manifest/schema)
 
-Here are some common mistakes not discovered by the winget validaton.
+Here are some common mistakes not discovered by the winget validation.
 
 1) Check the publisher folder and application name folder. 
 2) Check for typos in the filename.
