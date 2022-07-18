@@ -29,9 +29,9 @@ YamlCreate offers a few settings to customize your manifest creation experience.
     # never - Never tests manifests
 TestManifestsInSandbox: ask
 
-# This setting allows you to define a default action for whether or not to save files to the temprorary folder
+# This setting allows you to define a default action for whether or not to save files to the temporary folder
     # always - Always saves files to the temporary folder
-    # never - Always removes the files from the temporary folder after secript excecution
+    # never - Always removes the files from the temporary folder after script execution
     # manual - Never downloads any files. All InstallerSha256 values must be entered manually
 SaveToTemporaryFolder: ask
 
@@ -40,12 +40,12 @@ SaveToTemporaryFolder: ask
     # never - Never submits PR's automatically
 AutoSubmitPRs: ask
 
-# This setting allows you to set a default action for when conflicting PRs are detetected
+# This setting allows you to set a default action for when conflicting PRs are detected
     # always - Skips checking for conflicting PRs
     # never - Exits the script if conflicting PRs are detected
 ContinueWithExistingPRs: ask
 
-# This setting allows you to set a default action for when redirected URLs are detetected
+# This setting allows you to set a default action for when redirected URLs are detected
     # always - Always uses the detected destination URL
     # never - Always uses the originally entered URL
 UseRedirectedURL: ask

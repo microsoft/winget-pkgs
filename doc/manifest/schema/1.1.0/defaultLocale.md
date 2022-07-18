@@ -20,7 +20,7 @@ PackageVersion:               # The package version
 PackageLocale:                # The package meta-data locale
 Publisher:                    # The publisher name
 PublisherURL:                 # Optional publisher home page
-PublisherSupportUrul:         # Optional publisher support page
+PublisherSupportUrl:          # Optional publisher support page
 PrivacyUrl:                   # Optional publisher privacy page
 Author:                       # Optional author
 PackageName:                  # The package name
@@ -121,7 +121,7 @@ ManifestVersion: 1.1.0        # The manifest syntax version
 
   **Optional Field**
 
-  Thie key represents the author of a package. In some cases, the author is an individual who develops and or maintains the package. In other cases this may be a URL pointing to the contributors web page for a package.
+  This key represents the author of a package. In some cases, the author is an individual who develops and or maintains the package. In other cases this may be a URL pointing to the contributors web page for a package.
  </details>
 
 <details>
