@@ -87,7 +87,7 @@ All Windows Package Manager manifests in the Microsoft community repository are 
   <summary>The package author</summary>
 
   #### Optional Field
-  Thie key represents the author of a package. In some cases, the author is an individual who develops and or maintains the package.
+  This key represents the author of a package. In some cases, the author is an individual who develops and or maintains the package.
  </details>
 
 #### PackageName
