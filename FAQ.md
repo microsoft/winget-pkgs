@@ -1,7 +1,7 @@
 # Frequently Asked Questions
 ## Table of Contents
-1. [What is an ARP Entry?](What-is-an-ARP-Entry?)
-1. [What should I do if a package is being published by a new publisher?](#What-should-I-do-if-a-package-is-being-published-by-a-new-publisher?)
+  1. [**What is an ARP Entry?**](#what-is-an-arp-entry)
+  1. [**What should I do if a package is being published by a new publisher?**](#what-should-i-do-if-a-package-is-being-published-by-a-new-publisher)
 -----
 ## **What is an ARP Entry?**
 ARP stands for `A`dd and `R`emove `P`rograms. In Windows, installer files put information about the package they have installed into the Windows Registry. This information is used to tell Windows exactly what a program is and how to uninstall or modify it. Users can view these entries through the Add and Remove Programs option in Control Panel, or by running `appwiz.cpl`. Each entry in the table is an ARP Entry, and the Windows Package Manager uses these entries to help determine which applications are currently installed on your system.
