@@ -14,4 +14,4 @@ For the package version added under the old publisher, the metadata should be up
 For the package version added under the new package identifier, the metadata should be complete and accurate. Additionally, the `AppsAndFeaturesEntries` should be added for each installer node. The `ProductCode` entries should be specified under this version.
 
 *Additional Notes*:
-While this is currently the best practice, this may change in the future with the implementation of [microsoft/winget-cl#1899](https://github.com/microsoft/winget-cli/issues/1899) and [microsoft/winget-cl#1900](https://github.com/microsoft/winget-cli/issues/1900).
+While this is currently the best practice, this may change in the future with the implementation of [microsoft/winget-cl#1899](https://github.com/microsoft/winget-cli/issues/1899) and [microsoft/winget-cl#1900](https://github.com/microsoft/winget-cli/issues/1900). The origination of this best practice can be foud [here](https://github.com/microsoft/winget-pkgs/issues/66937#issuecomment-1190154419)
