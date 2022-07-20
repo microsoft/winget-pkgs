@@ -3,11 +3,12 @@
   1. [**What is an ARP Entry?**](#what-is-an-arp-entry)
   2. [**What is the difference between a Marketing Version and Package Version?**](#what-is-the-difference-between-a-marketing-version-and-package-version)
   3. [**How do I submit a package?**](#how-do-i-submit-a-package)
-  4. [**What should I do if a package is being published by a new publisher?**](#what-should-i-do-if-a-package-is-being-published-by-a-new-publisher)
-  5. [**How long do packages take to be published?**](#how-long-do-packages-take-to-be-published)
-  6. [**Why does a package have the version "Unknown"?**](#why-does-a-package-have-the-version-unknown)
-  7. [**My applications keep upgrading even when up to date!**](#my-applications-keep-upgrading-even-when-up-to-date)
-  8. [**How can I use PowerShell to parse the output from winget?**](#how-can-i-use-powershell-to-parse-the-output-from-winget)
+  4. [**How do I get the AppsAndFeaturesEntries for an installer?**](#how-do-i-get-the-appsandfeaturesentries-for-an-installer)
+  5. [**What should I do if a package is being published by a new publisher?**](#what-should-i-do-if-a-package-is-being-published-by-a-new-publisher)
+  6. [**How long do packages take to be published?**](#how-long-do-packages-take-to-be-published)
+  7. [**Why does a package have the version "Unknown"?**](#why-does-a-package-have-the-version-unknown)
+  8. [**My applications keep upgrading even when up to date!**](#my-applications-keep-upgrading-even-when-up-to-date)
+  9. [**How can I use PowerShell to parse the output from winget?**](#how-can-i-use-powershell-to-parse-the-output-from-winget)
 -----
 ## **What is an ARP Entry?**
 ARP stands for `A`dd and `R`emove `P`rograms. In Windows, installer files put information about the package they have installed into the Windows Registry. This information is used to tell Windows exactly what a program is and how to uninstall or modify it. Users can view these entries through the Add and Remove Programs option in Control Panel, or by running `appwiz.cpl`. Alternatively, the `Apps & features` menu in Windows Settings can be used to view the entries. Each entry in the table is an ARP Entry, and the Windows Package Manager uses these entries to help determine which applications are currently installed on your system.
@@ -21,6 +22,8 @@ First is the [Windows Package Manager Manifest Creator (a.k.a Winget-Create)](ht
 Second is the [YamlCreate PowerShell Script](Tools/YamlCreate.ps1). This tool is great for those who are technically inclined and understand the basics of forking, cloning, and commits. YamlCreate iterates much faster than Winget-Create but has largely the same functionality. More information on YamlCreate can be found in the [Script Documentation](doc/tools/YamlCreate.md).
 
 Need more information? Take a look at the document on [Authoring Manifests](AUTHORING_MANIFESTS.md).
+## **How do I get the AppsAndFeaturesEntries for an installer?**
+The best way to get the AppsAndFeaturesEntries, or the ARP Entries, for an installer is to run the installer inside of the [Windows Sandbox](https://docs.microsoft.com/windows/security/threat-protection/windows-sandbox/windows-sandbox-overview). Instructions on how to enable the sandbox can be found at the link above, or in the [SandboxTest PowerShell Script Documentation](doc/tools/SandboxTest.md). The [SandboxTest PowerShell Script](/Tools/SandboxTest.ps1) is a great way to get the AppsAndFeaturesEntries for a manifest you have already created. The SandboxTest Script will validate and test the manifest by downloading and installing the package in the Sandbox and comparing the ARP Entries before and after the installation. For the technically savvy, @jedieaston has created an [Add-ARPEntries Script](https://github.com/jedieaston/Add-ARPEntries) which uses Docker to populate the AppsAndFeaturesEntries for an existing manifest. Please note, however, that only the ARP Entry for the *Primary Component* should be added when a package installs multiple components.
 ## **What should I do if a package is being published by a new publisher?**
 The best practice for this is to create a situation where the package automatically switches to the new publisher using the ARP Entries for the package. To do this, two copies of the package must be added to the repository - one under the original package identifier and one under a new package identifier for the new publisher. This will cause anyone on a package published by the old publisher to be updated to the new version, at which point the ARP Entries will cause the Windows Package Manager to match the package to the new publisher and all future updates will be taken from the new package identifier.
 
