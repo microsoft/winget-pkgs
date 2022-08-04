@@ -125,6 +125,52 @@
             {
               "name": "labelAdded",
               "parameters": {
+                "label": "Manifest-Installer-Validation-Error"
+              }
+            }
+          ]
+        },
+        "eventType": "pull_request",
+        "eventNames": [
+          "pull_request",
+          "issues",
+          "project_card"
+        ],
+        "taskName": "Pipeline: Manifest installer validation error",
+        "actions": [
+          {
+            "name": "addReply",
+            "parameters": {
+              "comment": "Hello @${issueAuthor},\nDuring validation, the MSIX package was evaluated. There were either inconsistencies or values not present in the manifest.\nPlease adjust the manifest accordingly.\n\nTemplate: msftbot/validationError/manifest/installerValidation"
+            }
+          },
+          {
+            "name": "assignToUser",
+            "parameters": {
+              "user": "PR Author"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "Needs-Author-Feedback"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "taskType": "trigger",
+      "capabilityId": "IssueResponder",
+      "subCapability": "PullRequestResponder",
+      "version": "1.0",
+      "config": {
+        "conditions": {
+          "operator": "or",
+          "operands": [
+            {
+              "name": "labelAdded",
+              "parameters": {
                 "label": "URL-Validation-Error"
               }
             }
@@ -828,7 +874,7 @@
           "issues",
           "project_card"
         ],
-        "taskName": "Manual Review: Uninstallation Failed",
+        "taskName": "Manual Review: Uninstall Failed",
         "actions": [
           {
             "name": "addReply",
@@ -1173,7 +1219,7 @@
           "issues",
           "project_card"
         ],
-        "taskName": "Manual Review: Unattend Installation. Setup is not silent. Did you miss adding switches?",
+        "taskName": "Manual Review: Unattended Installation. Setup is not silent. Did you miss adding switches?",
         "actions": [
           {
             "name": "assignToUser",
@@ -1592,6 +1638,121 @@
           ]
         },
         "eventType": "pull_request",
+        "eventNames": [
+          "issue_comment"
+        ],
+        "taskName": "Helper to close",
+        "actions": [
+          {
+            "name": "closeIssue",
+            "parameters": {}
+          },
+          {
+            "name": "removeLabel",
+            "parameters": {
+              "label": "Needs-Triage"
+            }
+          },
+          {
+            "name": "removeLabel",
+            "parameters": {
+              "label": "Needs-Attention"
+            }
+          },
+          {
+            "name": "removeLabel",
+            "parameters": {
+              "label": "Needs-Feedback-Hub"
+            }
+          },
+          {
+            "name": "removeLabel",
+            "parameters": {
+              "label": "Needs-Author-Feedback"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "taskType": "trigger",
+      "capabilityId": "IssueResponder",
+      "subCapability": "IssuesOnlyResponder",
+      "version": "1.0",
+      "config": {
+        "conditions": {
+          "operator": "and",
+          "operands": [
+            {
+              "name": "commentContains",
+              "parameters": {
+                "bodyPattern": "/clo",
+                "isRegex": true,
+                "commentPattern": "Close\\s+with\\s+reason\\s*:[\\w\\s\\-\\(\\)\\[\\]\\{\\}\\\\\\/.+=@#$%&^*`~|'\",<>?]*(?=;)"
+              }
+            },
+            {
+              "operator": "or",
+              "operands": [
+                {
+                  "name": "activitySenderHasPermissions",
+                  "parameters": {
+                    "permissions": "admin"
+                  }
+                },
+                {
+                  "name": "activitySenderHasPermissions",
+                  "parameters": {
+                    "permissions": "write"
+                  }
+                },
+                {
+                  "name": "isActivitySender",
+                  "parameters": {
+                    "user": "ImJoakim"
+                  }
+                },
+                {
+                  "name": "isActivitySender",
+                  "parameters": {
+                    "user": "ItzLevvie"
+                  }
+                },
+                {
+                  "name": "isActivitySender",
+                  "parameters": {
+                    "user": "jedieaston"
+                  }
+                },
+                {
+                  "name": "isActivitySender",
+                  "parameters": {
+                    "user": "KaranKad"
+                  }
+                },
+                {
+                  "name": "isActivitySender",
+                  "parameters": {
+                    "user": "OfficialEsco"
+                  }
+                },
+                {
+                  "name": "isActivitySender",
+                  "parameters": {
+                    "user": "quhxl"
+                  }
+                },
+                {
+                  "name": "isActivitySender",
+                  "parameters": {
+                    "user": "Trenly"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "eventType": "issue",
         "eventNames": [
           "issue_comment"
         ],
@@ -2121,7 +2282,7 @@
           "issues",
           "project_card"
         ],
-        "taskName": "Error-Install-Availabilty",
+        "taskName": "Error-Install-Availability",
         "actions": [
           {
             "name": "assignToUser",
@@ -2606,7 +2767,7 @@
           {
             "name": "addReply",
             "parameters": {
-              "comment": "Hello @${issueAuthor},\nThe validation code has detected one of the URLs in the manifest is not using the HTTPS protocol.  Please update all URLs in the manifest to use HTTPS instead.\n\nTemplate: msftbot/validationError/urls/http"
+              "comment": "Hello @${issueAuthor},\nThe validation code has detected one of the URLs in the manifest is not using the HTTPS protocol.  Please update all URLs in the manifest to use HTTPS instead.\n\nTemplate: msftbot/validationError/urls/https"
             }
           },
           {
@@ -2948,6 +3109,12 @@
             "name": "removeLabel",
             "parameters": {
               "label": "Manifest-Validation-Error"
+            }
+          },
+          {
+            "name": "removeLabel",
+            "parameters": {
+              "label": "Manifest-Installer-Validation-Error"
             }
           },
           {
@@ -3333,6 +3500,12 @@
             "name": "removeLabel",
             "parameters": {
               "label": "Manifest-Validation-Error"
+            }
+          },
+          {
+            "name": "removeLabel",
+            "parameters": {
+              "label": "Manifest-Installer-Validation-Error"
             }
           },
           {
@@ -4542,7 +4715,7 @@
           {
             "name": "addReply",
             "parameters": {
-              "comment": "@${issueAuthor},\n\nThis package appears to require dependencies in order to install succesfully.\n\nThis PR is blocked until support for dependencies is implemented in:\n* microsoft/winget-cli/issues/163\n\nTemplate: msftbot/blockingIssue/dependencySupport"
+              "comment": "@${issueAuthor},\n\nThis package appears to require dependencies in order to install successfully.\n\nThis PR is blocked until support for dependencies is implemented in:\n* microsoft/winget-cli/issues/163\n\nTemplate: msftbot/blockingIssue/dependencySupport"
             }
           },
           {
@@ -4804,54 +4977,6 @@
           "operator": "and",
           "operands": [
             {
-              "name": "labelAdded",
-              "parameters": {
-                "label": "Validation-Shell-Execute"
-              }
-            }
-          ]
-        },
-        "eventType": "pull_request",
-        "eventNames": [
-          "pull_request",
-          "issues",
-          "project_card"
-        ],
-        "actions": [
-          {
-            "name": "addReply",
-            "parameters": {
-              "comment": "${issueAuthor},\n\nDuring validation, an error was encountered during an attempt to execute the package. This PR has been assigned to our on call staff to evaluate.\n\nTemplate: msftbot/validationError/shellExecute"
-            }
-          },
-          {
-            "name": "assignToIcmUserGroup",
-            "parameters": {
-              "groupId": "61b7eb27cfff4b19dc1a8ec7",
-              "assignmentTarget": "Primary"
-            }
-          },
-          {
-            "name": "assignToIcmUserGroup",
-            "parameters": {
-              "groupId": "61b7eb27cfff4b19dc1a8ec7",
-              "assignmentTarget": "FirstBackup"
-            }
-          }
-        ],
-        "taskName": "Assign validation-shell-execute to engineer on call"
-      }
-    },
-    {
-      "taskType": "trigger",
-      "capabilityId": "IssueResponder",
-      "subCapability": "PullRequestResponder",
-      "version": "1.0",
-      "config": {
-        "conditions": {
-          "operator": "and",
-          "operands": [
-            {
               "operator": "or",
               "operands": [
                 {
@@ -4899,6 +5024,52 @@
           }
         ],
         "taskName": "Assign author-not-authorized to engineer on call"
+      }
+    },
+    {
+      "taskType": "trigger",
+      "capabilityId": "IssueResponder",
+      "subCapability": "PullRequestResponder",
+      "version": "1.0",
+      "config": {
+        "conditions": {
+          "operator": "and",
+          "operands": [
+            {
+              "name": "labelAdded",
+              "parameters": {
+                "label": "Validation-Shell-Execute"
+              }
+            }
+          ]
+        },
+        "eventType": "pull_request",
+        "eventNames": [
+          "pull_request",
+          "issues",
+          "project_card"
+        ],
+        "taskName": "Pipeline: Shell Execute Failure",
+        "actions": [
+          {
+            "name": "addReply",
+            "parameters": {
+              "comment": "Hello @${issueAuthor},\nThe package manager bot determined there was an issue with one of the installers listed in the url field, and cannot continue.   \n\nThe application included in this pull request failed to install during dynamic validation. This test is designed to ensure that the application installs on all environments without warnings. Please, verify that the application installs correctly on architectures specified in the manifest using winget cli.\n\nTemplate: msftbot/validationError/installers/shellExecute"
+            }
+          },
+          {
+            "name": "assignToUser",
+            "parameters": {
+              "user": "PR Author"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "Needs-Author-Feedback"
+            }
+          }
+        ]
       }
     }
   ],
