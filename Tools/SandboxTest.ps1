@@ -171,7 +171,7 @@ $bootstrapSettingsContent['logging'] = @{level = 'verbose' }
 if ($EnableExperimentalFeatures) {
   $bootstrapSettingsContent['experimentalFeatures'] = @{
     dependencies    = $true
-    portableInstall = $true
+    zipInstall = $true
   }
 }
 
