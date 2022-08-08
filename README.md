@@ -4,7 +4,7 @@
 ![Publish Pipeline Badge](https://img.shields.io/endpoint?url=https://winget-pme.azurefd.net/api/GetServiceComponentStatusBadge?component=PublishPipeline "Publish Pipeline Badge")
 
 This repository contains the manifest files for the **Windows Package Manager** default source.  You are highly encouraged to submit manifests for your favorite application.
-> Note: At this time installers must either be MSIX, MSI or .exe application installers. Standalone or portable executables, compressed .zip files, and fonts are not currently supported.
+> Note: At this time installers must either be MSIX, MSI or .exe application installers. Compressed .zip files and fonts are not currently supported.
 
 The **Windows Package Manager** is an [open source client](https://github.com/microsoft/winget-cli) designed for command-line usage. If you are interested in exploring third-party repositories offering private winget package hosting, see [third-party repositories](THIRD_PARTY.md).
 
