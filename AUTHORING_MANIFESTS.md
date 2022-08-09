@@ -11,7 +11,7 @@ First, we want to say thank you. Your contribution is highly valued. And we appr
 
 ### What is a manifest?
 
-Manifests are the YAML files in this repository containing the metadata used by the Windows Package Manager to install and upgrade software on Windows 10. There are hundreds of these files partitioned under the [manifests](/manifests) directory. We've had to partition the directory structure so you don't have to scroll as much in the GitHub.com site when you are looking for a manifest.
+Manifests are the YAML files in this repository containing the metadata used by the Windows Package Manager to install and upgrade software on Windows 10. There are thousands of these files partitioned under the [manifests](/manifests) directory. We've had to partition the directory structure so you don't have to scroll as much in the GitHub.com site when you are looking for a manifest.
 
 ### What is a package?
 
@@ -31,7 +31,7 @@ The partition directory is determined by taking the first letter from the "Packa
 
 ## First steps
 
-Before you invest the time to generate and submit a manifest, you should check to see if the package already exists. Start out with `winget search package`. If that doesn't yield anything, try a quick search using the search box in the top left corner of GitHub for the package "In this repository". If you still don't find anything, finally check to see if there is already a [PR](https://github.com/microsoft/winget-pkgs/pulls) for the package by putting the package in the filters box, and be sure to remove the "is:pr is:open" filters.
+Before you invest the time to generate and submit a manifest, you should check to see if the package already exists. Start out with `winget search <package>`. If that doesn't yield anything, try a quick search using the search box in the top left corner of GitHub for the package "In this repository". If you still don't find anything, finally check to see if there is already a [PR](https://github.com/microsoft/winget-pkgs/pulls) for the package by putting the package in the filters box, and be sure to remove the "is:pr is:open" filters.
 
 ## What next?
 
