@@ -164,14 +164,14 @@ $uiLibsUwp.pathInSandbox = Join-Path -Path $desktopInSandbox -ChildPath (Join-Pa
 Write-Host
 
 # Create Bootstrap settings
-# dependencies and portableInstall are enabled for forward compatibility with PR's
+# dependencies and zipInstall are enabled for forward compatibility with PR's
 $bootstrapSettingsContent = @{}
 $bootstrapSettingsContent['$schema'] = 'https://aka.ms/winget-settings.schema.json'
 $bootstrapSettingsContent['logging'] = @{level = 'verbose' }
 if ($EnableExperimentalFeatures) {
   $bootstrapSettingsContent['experimentalFeatures'] = @{
     dependencies    = $true
-    portableInstall = $true
+    zipInstall      = $true
   }
 }
 
@@ -337,3 +337,4 @@ $Script
 Write-Host
 
 WindowsSandbox $SandboxTestWsbFile
+
