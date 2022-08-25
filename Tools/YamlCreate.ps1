@@ -151,7 +151,7 @@ if ($Settings) {
     exit
 }
 
-$ScriptHeader = '# Created with YamlCreate.ps1 v2.1.3'
+$ScriptHeader = '# Created with YamlCreate.ps1 v2.1.4'
 $ManifestVersion = '1.2.0'
 $PSDefaultParameterValues = @{ '*:Encoding' = 'UTF8' }
 $Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
@@ -2390,6 +2390,11 @@ if ($OldManifests -and $Option -ne 'NewLocale') {
         $_ReadValue = $(if ($script:OldManifestType -eq 'MultiManifest') { (Get-MultiManifestParameter $param) } else { $script:OldVersionManifest[$param] })
         if (Test-String -Not $_ReadValue -IsNull) { New-Variable -Name $param -Value $_ReadValue -Scope Script -Force }
     }
+}
+
+# If the old manifests exist, make sure to use the same casing as the existing package identifier
+if ($OldManifests) {
+    $script:PackageIdentifier = $OldManifests.Where({$_.Name -like "$PackageIdentifier.yaml"}).BaseName
 }
 
 # Run the data entry and creation of manifests appropriate to the option the user selected
