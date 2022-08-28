@@ -151,8 +151,8 @@ if ($Settings) {
     exit
 }
 
-$ScriptHeader = '# Created with YamlCreate.ps1 v2.1.2'
-$ManifestVersion = '1.1.0'
+$ScriptHeader = '# Created with YamlCreate.ps1 v2.1.4'
+$ManifestVersion = '1.2.0'
 $PSDefaultParameterValues = @{ '*:Encoding' = 'UTF8' }
 $Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
 $ofs = ', '
@@ -228,7 +228,7 @@ $Patterns = @{
     InstallerSha256           = $InstallerSchema.definitions.Installer.properties.InstallerSha256.pattern
     InstallerUrl              = $InstallerSchema.definitions.Installer.properties.InstallerUrl.pattern
     InstallerUrlMaxLength     = $InstallerSchema.definitions.Installer.properties.InstallerUrl.maxLength
-    ValidArchitectures        = $InstallerSchema.definitions.Installer.properties.Architecture.enum
+    ValidArchitectures        = $InstallerSchema.definitions.Architecture.enum
     ValidInstallerTypes       = $InstallerSchema.definitions.InstallerType.enum
     SilentSwitchMaxLength     = $InstallerSchema.definitions.InstallerSwitches.properties.Silent.maxLength
     ProgressSwitchMaxLength   = $InstallerSchema.definitions.InstallerSwitches.properties.SilentWithProgress.maxLength
@@ -733,37 +733,39 @@ Function Read-InstallerEntry {
 
     $_Switches = [ordered] @{}
     # If Installer Type is `exe`, require the silent switches to be entered
-    do {
-        Write-Host -ForegroundColor 'Red' $script:_returnValue.ErrorString()
-        if ($_Installer['InstallerType'] -ieq 'exe') { Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the silent install switch. For example: /S, -verysilent, /qn, --silent, /exenoui' }
-        else { Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the silent install switch. For example: /S, -verysilent, /qn, --silent, /exenoui' }
-        Read-Host -Prompt 'Silent switch' -OutVariable _ | Out-Null
-        if ($_) { $_Switches['Silent'] = $_ | TrimString }
+    if ($_Installer['InstallerType'] -ne 'portable') {
+        do {
+            Write-Host -ForegroundColor 'Red' $script:_returnValue.ErrorString()
+            if ($_Installer['InstallerType'] -ieq 'exe') { Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the silent install switch. For example: /S, -verysilent, /qn, --silent, /exenoui' }
+            else { Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the silent install switch. For example: /S, -verysilent, /qn, --silent, /exenoui' }
+            Read-Host -Prompt 'Silent switch' -OutVariable _ | Out-Null
+            if ($_) { $_Switches['Silent'] = $_ | TrimString }
 
-        if (Test-String $_Switches['Silent'] -MaxLength $Patterns.SilentSwitchMaxLength -NotNull) {
-            $script:_returnValue = [ReturnValue]::Success()
-        } elseif ($_Installer['InstallerType'] -ne 'exe' -and (Test-String $_Switches['Silent'] -MaxLength $Patterns.SilentSwitchMaxLength -AllowNull)) {
-            $script:_returnValue = [ReturnValue]::Success()
-        } else {
-            $script:_returnValue = [ReturnValue]::LengthError(1, $Patterns.SilentSwitchMaxLength)
-        }
-    } until ($script:_returnValue.StatusCode -eq [ReturnValue]::Success().StatusCode)
+            if (Test-String $_Switches['Silent'] -MaxLength $Patterns.SilentSwitchMaxLength -NotNull) {
+                $script:_returnValue = [ReturnValue]::Success()
+            } elseif ($_Installer['InstallerType'] -ne 'exe' -and (Test-String $_Switches['Silent'] -MaxLength $Patterns.SilentSwitchMaxLength -AllowNull)) {
+                $script:_returnValue = [ReturnValue]::Success()
+            } else {
+                $script:_returnValue = [ReturnValue]::LengthError(1, $Patterns.SilentSwitchMaxLength)
+            }
+        } until ($script:_returnValue.StatusCode -eq [ReturnValue]::Success().StatusCode)
 
-    do {
-        Write-Host -ForegroundColor 'Red' $script:_returnValue.ErrorString()
-        if ($_Installer['InstallerType'] -ieq 'exe') { Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the silent with progress install switch. For example: /S, -silent, /qb, /exebasicui' }
-        else { Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the silent with progress install switch. For example: /S, -silent, /qb, /exebasicui' }
-        Read-Host -Prompt 'Silent with progress switch' -OutVariable _ | Out-Null
-        if ($_) { $_Switches['SilentWithProgress'] = $_ | TrimString }
+        do {
+            Write-Host -ForegroundColor 'Red' $script:_returnValue.ErrorString()
+            if ($_Installer['InstallerType'] -ieq 'exe') { Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the silent with progress install switch. For example: /S, -silent, /qb, /exebasicui' }
+            else { Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the silent with progress install switch. For example: /S, -silent, /qb, /exebasicui' }
+            Read-Host -Prompt 'Silent with progress switch' -OutVariable _ | Out-Null
+            if ($_) { $_Switches['SilentWithProgress'] = $_ | TrimString }
 
-        if (Test-String $_Switches['SilentWithProgress'] -MaxLength $Patterns.ProgressSwitchMaxLength -NotNull) {
-            $script:_returnValue = [ReturnValue]::Success()
-        } elseif ($_Installer['InstallerType'] -ne 'exe' -and (Test-String $_Switches['SilentWithProgress'] -MaxLength $Patterns.ProgressSwitchMaxLength -AllowNull)) {
-            $script:_returnValue = [ReturnValue]::Success()
-        } else {
-            $script:_returnValue = [ReturnValue]::LengthError(1, $Patterns.ProgressSwitchMaxLength)
-        }
-    } until ($script:_returnValue.StatusCode -eq [ReturnValue]::Success().StatusCode)
+            if (Test-String $_Switches['SilentWithProgress'] -MaxLength $Patterns.ProgressSwitchMaxLength -NotNull) {
+                $script:_returnValue = [ReturnValue]::Success()
+            } elseif ($_Installer['InstallerType'] -ne 'exe' -and (Test-String $_Switches['SilentWithProgress'] -MaxLength $Patterns.ProgressSwitchMaxLength -AllowNull)) {
+                $script:_returnValue = [ReturnValue]::Success()
+            } else {
+                $script:_returnValue = [ReturnValue]::LengthError(1, $Patterns.ProgressSwitchMaxLength)
+            }
+        } until ($script:_returnValue.StatusCode -eq [ReturnValue]::Success().StatusCode)
+    }
 
     # Optional entry of `Custom` switches with validation for all installer types
     do {
@@ -881,21 +883,22 @@ Function Read-InstallerEntry {
     } until ($script:_returnValue.StatusCode -eq [ReturnValue]::Success().StatusCode)
 
     # Request product code with validation
-    do {
-        Write-Host -ForegroundColor 'Red' $script:_returnValue.ErrorString()
-        Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the application product code. Looks like {CF8E6E00-9C03-4440-81C0-21FACB921A6B}'
-        Write-Host -ForegroundColor 'White' -Object "ProductCode found from installer: $($_Installer['ProductCode'])"
-        Write-Host -ForegroundColor 'White' -Object 'Can be found with ' -NoNewline; Write-Host -ForegroundColor 'DarkYellow' 'get-wmiobject Win32_Product | Sort-Object Name | Format-Table IdentifyingNumber, Name -AutoSize'
-        $NewProductCode = Read-Host -Prompt 'ProductCode' | TrimString
-        if (Test-String $NewProductCode -Not -IsNull) { $_Installer['ProductCode'] = $NewProductCode }
-        elseif (Test-String $_Installer['ProductCode'] -Not -IsNull) { $_Installer['ProductCode'] = "$($_Installer['ProductCode'])" }
+    if ($_Installer.InstallerType -notmatch 'portable') {
+        do {
+            Write-Host -ForegroundColor 'Red' $script:_returnValue.ErrorString()
+            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the application product code. Looks like {CF8E6E00-9C03-4440-81C0-21FACB921A6B}'
+            Write-Host -ForegroundColor 'White' -Object "ProductCode found from installer: $($_Installer['ProductCode'])"
+            Write-Host -ForegroundColor 'White' -Object 'Can be found with ' -NoNewline; Write-Host -ForegroundColor 'DarkYellow' 'get-wmiobject Win32_Product | Sort-Object Name | Format-Table IdentifyingNumber, Name -AutoSize'
+            $NewProductCode = Read-Host -Prompt 'ProductCode' | TrimString
+            if (Test-String $NewProductCode -Not -IsNull) { $_Installer['ProductCode'] = $NewProductCode }
+            elseif (Test-String $_Installer['ProductCode'] -Not -IsNull) { $_Installer['ProductCode'] = "$($_Installer['ProductCode'])" }
 
-        if (Test-String $_Installer['ProductCode'] -MinLength $Patterns.ProductCodeMinLength -MaxLength $Patterns.ProductCodeMaxLength -AllowNull) {
-            $script:_returnValue = [ReturnValue]::Success()
-        } else {
-            $script:_returnValue = [ReturnValue]::LengthError($Patterns.ProductCodeMinLength, $Patterns.ProductCodeMaxLength)
-        }
-    } until ($script:_returnValue.StatusCode -eq [ReturnValue]::Success().StatusCode)
+            if (Test-String $_Installer['ProductCode'] -MinLength $Patterns.ProductCodeMinLength -MaxLength $Patterns.ProductCodeMaxLength -AllowNull) {
+                $script:_returnValue = [ReturnValue]::Success()
+            } else {
+                $script:_returnValue = [ReturnValue]::LengthError($Patterns.ProductCodeMinLength, $Patterns.ProductCodeMaxLength)
+            }
+        } until ($script:_returnValue.StatusCode -eq [ReturnValue]::Success().StatusCode)
 
     # Request installer scope
     $_menu = @{
@@ -920,6 +923,7 @@ Function Read-InstallerEntry {
         default { $_Installer['UpgradeBehavior'] = 'install' }
     }
     Write-Host
+}
 
     # Request release date
     $script:ReleaseDatePrompted = $true
@@ -2386,6 +2390,11 @@ if ($OldManifests -and $Option -ne 'NewLocale') {
         $_ReadValue = $(if ($script:OldManifestType -eq 'MultiManifest') { (Get-MultiManifestParameter $param) } else { $script:OldVersionManifest[$param] })
         if (Test-String -Not $_ReadValue -IsNull) { New-Variable -Name $param -Value $_ReadValue -Scope Script -Force }
     }
+}
+
+# If the old manifests exist, make sure to use the same casing as the existing package identifier
+if ($OldManifests) {
+    $script:PackageIdentifier = $OldManifests.Where({$_.Name -like "$PackageIdentifier.yaml"}).BaseName
 }
 
 # Run the data entry and creation of manifests appropriate to the option the user selected
