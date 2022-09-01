@@ -2,7 +2,7 @@
 [YAML]:                                             https://yaml.org/spec
 [semantic version]:                                 https://semver.org
 [Available languages for Windows]:                  https://docs.microsoft.com/windows-hardware/manufacture/desktop/available-language-packs-for-windows
-[Default Input Profiles Input Locales in Windows]:  https://docs.microsoft.com/windows-hardware/manufacture/desktop/default-input-locales-for-windows-language-packs
+[locales]:                                          https://docs.microsoft.com/windows-hardware/manufacture/desktop/default-input-locales-for-windows-language-packs
 [install]:                                          https://docs.microsoft.com/windows/package-manager/winget/install
 [list]:                                             https://docs.microsoft.com/windows/package-manager/winget/list
 [upgrade]:                                          https://docs.microsoft.com/windows/package-manager/winget/upgrade
@@ -33,11 +33,11 @@ ShortDescription:             # Optional short package description
 Description:                  # Optional full package description
 Moniker:                      # Optional most common package term
 Tags:                         # Optional list of package terms
-Agreement:                    # Optional package agreements
+Agreements:                   # Optional package agreements
   - AgreementLabel:           # Optional agreement label
     Agreement:                # Optional agreement text
     AgreementUrl:             # Optional agreement URL
-Documentation:                # Optional documentation
+Documentations:               # Optional documentation
   - DocumentLabel:            # Optional documentation label
     DocumentUrl:              # Optional documentation URL
 ReleaseDate:                  # Optional release date
@@ -81,7 +81,7 @@ ManifestVersion: 1.2.0        # The manifest syntax version
   **References**
 
 * [Available languages for Windows]
-* [Default Input Profiles (Input Locales) in Windows]
+* [Default Input Profiles (Input Locales) in Windows][locales]
 
   >Note: This field is the key to determining which fields are required for the Microsoft community repository. The default locale specified in the version file must match with this value.
  </details>
@@ -223,7 +223,7 @@ ManifestVersion: 1.2.0        # The manifest syntax version
  </details>
  
  <details>
-   <summary><b>Agreement</b> - List of package agreements</summary>
+   <summary><b>Agreements/b> - List of package agreements</summary>
 
    **Optional Field**
 
@@ -257,7 +257,7 @@ ManifestVersion: 1.2.0        # The manifest syntax version
 </details>
 
 <details>
-  <summary><b>Documentation</b> - List of documentation</summary>
+  <summary><b>Documentations</b> - List of documentation</summary>
   
   **Optional Field**
 
