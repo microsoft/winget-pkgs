@@ -29,21 +29,21 @@ Publisher:                      # The publisher name
 PackageName:                    # The package name
 License:                        # The package license
 ShortDescription:               # The short package description
-Description:                     # Optional full package description
-Moniker:                         # Optional most common package term
-Tags:                            # Optional list of package terms
-Agreements:                      # Optional package agreements
-  - AgreementLabel:              # Optional agreement label
-    Agreement:                   # Optional agreement text
-    AgreementUrl:                # Optional agreement URL
-Documentations:               # Optional documentation
-  - DocumentLabel:            # Optional documentation label
-    DocumentUrl:              # Optional documentation URL
-ReleaseDate:                     # Optional release date
-ReleaseNotes:                    # Optional release notes
-ReleaseNotesUrl:                 # Optional release notes URL
-PurchaseUrl:                  # *Not implemented* Optional purchase URL
-InstallationNotes:            # Optional notes displayed upon installation
+Description:                    # Optional full package description
+Moniker:                        # Optional most common package term
+Tags:                           # Optional list of package terms
+Agreements:                     # Optional package agreements
+  - AgreementLabel:             # Optional agreement label
+    Agreement:                  # Optional agreement text
+    AgreementUrl:               # Optional agreement URL
+Documentations:                 # Optional documentation
+  - DocumentLabel:              # Optional documentation label
+    DocumentUrl:                # Optional documentation URL
+ReleaseDate:                    # Optional release date
+ReleaseNotes:                   # Optional release notes
+ReleaseNotesUrl:                # Optional release notes URL
+PurchaseUrl:                    # *Not implemented* Optional purchase URL
+InstallationNotes:              # Optional notes displayed upon installation
 Installers:                     # The package installer
   - Architecture:               # The architecture of the installer
     InstallerLocale:            # Optional locale of the installer

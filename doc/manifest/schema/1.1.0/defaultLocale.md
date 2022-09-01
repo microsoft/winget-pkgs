@@ -33,7 +33,7 @@ ShortDescription:             # The short package description
 Description:                  # Optional full package description
 Moniker:                      # Optional most common package term
 Tags:                         # Optional list of package terms
-Agreements:                    # Optional package agreements
+Agreements:                   # Optional package agreements
   - AgreementLabel:           # Optional agreement label
     Agreement:                # Optional agreement text
     AgreementUrl:             # Optional agreement URL
