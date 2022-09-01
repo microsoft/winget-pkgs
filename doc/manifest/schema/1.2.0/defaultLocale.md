@@ -37,7 +37,7 @@ Agreement:                    # Optional package agreements
   - AgreementLabel:           # Optional agreement label
     Agreement:                # Optional agreement text
     AgreementUrl:             # Optional agreement URL
-Documentation:                # Optional documentation
+Documentations:               # Optional documentation
   - DocumentLabel:            # Optional documentation label
     DocumentUrl:              # Optional documentation URL
 ReleaseDate:                  # Optional release date
@@ -261,7 +261,7 @@ ManifestVersion: 1.2.0        # The manifest syntax version
 </details>
 
 <details>
-  <summary><b>Documentation</b> - List of documentation</summary>
+  <summary><b>Documentations</b> - List of documentation</summary>
   
   **Optional Field**
 
