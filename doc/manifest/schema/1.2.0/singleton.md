@@ -32,7 +32,7 @@ ShortDescription:               # The short package description
 Description:                     # Optional full package description
 Moniker:                         # Optional most common package term
 Tags:                            # Optional list of package terms
-Agreement:                       # Optional package agreements
+Agreements:                      # Optional package agreements
   - AgreementLabel:              # Optional agreement label
     Agreement:                   # Optional agreement text
     AgreementUrl:                # Optional agreement URL
@@ -185,7 +185,7 @@ ManifestVersion: 1.2.0
  </details>
  
  <details>
-   <summary><b>Agreement</b> - List of package agreements</summary>
+   <summary><b>Agreements</b> - List of package agreements</summary>
 
    **Optional Field**
 
