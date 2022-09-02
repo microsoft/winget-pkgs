@@ -51,7 +51,7 @@ winget install wingetcreate
 ```
 
 ### Creating your manifest with Winget-Create
-Now that you have Winget-Create installed onto your machine, you are ready to generate your first manifest by running the [New command](https://github.com/microsoft/winget-create/blob/main/doc/new.md). To do so, simply run the following command in your terminal: 
+Now that you have Winget-Create installed onto your machine, you are ready to generate your first manifest by running the [New command](https://github.com/microsoft/winget-create/blob/main/doc/new.md). To do so, simply run the following command in your terminal:
 
 ```powershell
 wingetcreate new <Installer URL(s)>

@@ -5,14 +5,14 @@ Many of the issues can be caught before submitting your PR, if you follow these 
 
 Once those steps pass, here are some troubleshooting tips:
 
-## Manifest-Validation-Error 
+## Manifest-Validation-Error
 Manifest validation errors indicate that there is a problem with the manifest file.  Many of the issues can be caught before submitting your PR, when you validate the manifests before submission:  ```winget validate <path-to-the-manifest>```
 
 For documentation on the manifest specification, please see the [manifest schema](/doc/manifest/schema)
 
 Here are some common mistakes not discovered by the winget validation.
 
-1) Check the publisher folder and application name folder. 
+1) Check the publisher folder and application name folder.
 2) Check for typos in the filename.
 
 Both of them should match the `PackageIdentifier` of the manifest.
@@ -22,15 +22,15 @@ PackageIdentifier: `<publisher>.<name>`
 
 Manifest Path: `<first-letter-of-the-publisher>\<publisher>\<name>\<version>`
 
-Filenames: 
+Filenames:
 - For singleton manifest: `<publisher>.<name>.yaml`
 - For multi-manifests
   - Installer: `<PackageIdentifier>.installer.yaml`
   - Locale: `<PackageIdentifier>.locale.<language-code>.yaml`
   - Version: `<PackageIdentifier>.yaml`
-  
+
 ## Binary-Validation-Error
-Binary validation errors indicate that the installer failed static analysis.  
+Binary validation errors indicate that the installer failed static analysis.
 
 Here are some common causes for the Binary-Validation-Error label:
 1) The Sha256 HASH in the manifest does not match the HASH of the installer. Run ```winget hash <installer>``` to generate the hash.
@@ -42,6 +42,3 @@ Windows Defender SmartScreen validation errors indicate that the URL you provide
 
 ## Internal-Error
 Internal-Errors indicate there was an error hit by the service.  Microsoft will investigate these and pursue a fix.  For a list of known issues, see our repository [issues](https://github.com/microsoft/winget-pkgs/issues)
-
-
-

@@ -38,8 +38,8 @@ Example:
 The publisher and application folders MUST match the values used to define the Id.  See PackageIdentifier: in the YAML for more detail.
 The version in the folder name MUST match the version field value in the YAML file.  See PackageVersion: in the YAML for more detail.
 
-There are two primary types of manifests. A single file manifest (singleton) and a multi-file manifest. 
-[JSON schemas][schemaFolder] have been provided 
+There are two primary types of manifests. A single file manifest (singleton) and a multi-file manifest.
+[JSON schemas][schemaFolder] have been provided
 to help strongly type attributes and requirements.
 
 ## YAML Syntax

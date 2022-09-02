@@ -25,7 +25,7 @@ You may either use the [Windows Package Manager Manifest Creator](https://github
 > Note: Only one manifest may be submitted per PR.
 
 ### Using the YamlCreate.ps1
-To help author manifest files, we have provided a YamlCreate.ps1 [PowerShell script](Tools/YamlCreate.ps1) located in the Tools folder. The script will prompt you for the URL to the installer, then will prompt you to fill in metadata. Additional information regarding the YamlCreate script can be found in the [documentation for the script](doc/tools/YamlCreate.md). 
+To help author manifest files, we have provided a YamlCreate.ps1 [PowerShell script](Tools/YamlCreate.ps1) located in the Tools folder. The script will prompt you for the URL to the installer, then will prompt you to fill in metadata. Additional information regarding the YamlCreate script can be found in the [documentation for the script](doc/tools/YamlCreate.md).
 
 > You can use the script by cloning the repository on your PC and running the script directly from the **Tools** folder.
 
@@ -62,12 +62,12 @@ manifests\<first lower case letter of publisher>\<publisher>\<package>\<version>
 
 ### Validation Process
 The PR request will go through a validation process. The core team or the Microsoft bot (BOT) will use [labels](https://docs.microsoft.com/windows/package-manager/package/winget-validation#pull-request-labels) to help during the process. In the event of a failure, the BOT will suggest the problem with the submission and assign the PR back to you.
- 
+
 
 ### Respond to PR feedback
-If the PR has been assigned to you, a timer is triggered. You will have 7 days to resolve the issue, or the BOT will automatically close the PR.  
+If the PR has been assigned to you, a timer is triggered. You will have 7 days to resolve the issue, or the BOT will automatically close the PR.
 
-Submissions to the repository are reviewed by Windows Package Manager administrators and/or community moderators. We've provided a [Public Service Announcement](https://github.com/microsoft/winget-pkgs/issues/15674) to help identify these individuals. 
+Submissions to the repository are reviewed by Windows Package Manager administrators and/or community moderators. We've provided a [Public Service Announcement](https://github.com/microsoft/winget-pkgs/issues/15674) to help identify these individuals.
 
 # Contributing
 
