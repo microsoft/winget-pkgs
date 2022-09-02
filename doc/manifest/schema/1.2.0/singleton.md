@@ -3,7 +3,6 @@
 [install]:                                  https://docs.microsoft.com/windows/package-manager/winget/install
 [list]:                                     https://docs.microsoft.com/windows/package-manager/winget/list
 [upgrade]:                                  https://docs.microsoft.com/windows/package-manager/winget/upgrade
-[`winget upgrade`]:                         https://docs.microsoft.com/windows/package-manager/winget/upgrade
 [MSIX]:                                     https://docs.microsoft.com/windows/msix/overview
 [MSI]:                                      https://docs.microsoft.com/windows/win32/msi/windows-installer-portal
 [Inno]:                                     https://jrsoftware.org/isinfo.php
@@ -29,21 +28,21 @@ Publisher:                      # The publisher name
 PackageName:                    # The package name
 License:                        # The package license
 ShortDescription:               # The short package description
-Description:                     # Optional full package description
-Moniker:                         # Optional most common package term
-Tags:                            # Optional list of package terms
-Agreement:                       # Optional package agreements
-  - AgreementLabel:              # Optional agreement label
-    Agreement:                   # Optional agreement text
-    AgreementUrl:                # Optional agreement URL
-Documentation:                # Optional documentation
-  - DocumentLabel:            # Optional documentation label
-    DocumentUrl:              # Optional documentation URL
-ReleaseDate:                     # Optional release date
-ReleaseNotes:                    # Optional release notes
-ReleaseNotesUrl:                 # Optional release notes URL
-PurchaseUrl:                  # *Not implemented* Optional purchase URL
-InstallationNotes:            # Optional notes displayed upon installation
+Description:                    # Optional full package description
+Moniker:                        # Optional most common package term
+Tags:                           # Optional list of package terms
+Agreements:                     # Optional package agreements
+  - AgreementLabel:             # Optional agreement label
+    Agreement:                  # Optional agreement text
+    AgreementUrl:               # Optional agreement URL
+Documentations:                 # Optional documentation
+  - DocumentLabel:              # Optional documentation label
+    DocumentUrl:                # Optional documentation URL
+ReleaseDate:                    # Optional release date
+ReleaseNotes:                   # Optional release notes
+ReleaseNotesUrl:                # Optional release notes URL
+PurchaseUrl:                    # *Not implemented* Optional purchase URL
+InstallationNotes:              # Optional notes displayed upon installation
 Installers:                     # The package installer
   - Architecture:               # The architecture of the installer
     InstallerLocale:            # Optional locale of the installer
@@ -139,7 +138,7 @@ ManifestVersion: 1.2.0
 
  This key represents the version of the package. It is related to the specific release this manifests targets. In some cases you will see a perfectly formed [semantic version] number, and in other cases you might see something different. These may be date driven, or they might have other characters with some package specific meaning for example.
 
- The Windows Package Manager client uses this version to determine if an upgrade for a package is available. In some cases, packages may be released with a marketing driven version, and that causes trouble with the [`winget upgrade`] command. 
+ The Windows Package Manager client uses this version to determine if an upgrade for a package is available. In some cases, packages may be released with a marketing driven version, and that causes trouble with the [`winget upgrade`][upgrade] command.
 
  >Note: The current best practice is to use the value reported in Add / Remove Programs when this version of the package is installed. In some cases, packages do not report a version resulting in an upgrade loop or other unwanted behavior. This practice may seem contrary to using semantic versioning, but it provides the best end to end experience for customers. It will take time for publishers and ISVs to migrate to semantic versioning, and some may intentionally choose to preserve other versioning schemes. In these cases, it is best practice to include the "AppsAndFeaturesEntries" section for each installer.
 </details>
@@ -185,7 +184,7 @@ ManifestVersion: 1.2.0
  </details>
  
  <details>
-   <summary><b>Agreement</b> - List of package agreements</summary>
+   <summary><b>Agreements</b> - List of package agreements</summary>
 
    **Optional Field**
 
@@ -219,7 +218,7 @@ ManifestVersion: 1.2.0
 </details>
 
 <details>
-  <summary><b>Documentation</b> - List of documentation</summary>
+  <summary><b>Documentations</b> - List of documentation</summary>
   
   **Optional Field**
 
