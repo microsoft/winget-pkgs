@@ -91,7 +91,7 @@ if (Get-Command 'git.exe' -ErrorAction SilentlyContinue) {
                 DefaultString = ''
             }
             switch (Invoke-KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString'] -HelpText $_menu['HelpText']) {
-                'Y' { 
+                'Y' {
                     Write-Host
                     try {
                         winget upgrade --id Git.Git --exact
@@ -104,7 +104,7 @@ if (Get-Command 'git.exe' -ErrorAction SilentlyContinue) {
                             throw [UnmetDependencyException]::new('Git could not be upgraded sucessfully')
                         }
                     }
-                 }
+                }
                 default { Write-Host; throw [UnmetDependencyException]::new('The version of git installed on your machine does not satisfy the requirement of version >= 2.35.2') }
             }
         } else {
@@ -151,7 +151,7 @@ if ($Settings) {
     exit
 }
 
-$ScriptHeader = '# Created with YamlCreate.ps1 v2.1.5'
+$ScriptHeader = '# Created with YamlCreate.ps1 v2.1.6'
 $ManifestVersion = '1.2.0'
 $PSDefaultParameterValues = @{ '*:Encoding' = 'UTF8' }
 $Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
@@ -387,7 +387,7 @@ Function Request-InstallerUrl {
                 }
                 switch ($(if ($ScriptSettings.UseRedirectedURL -eq 'always') { 'Y' } else { Invoke-KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString'] -HelpText $_menu['HelpText'] })) {
                     'N' { Write-Host -ForegroundColor 'Green' "`nOriginal URL Retained - Proceeding with $NewInstallerUrl`n" } #Continue without replacing URL
-                    default { 
+                    default {
                         $NewInstallerUrl = $script:ResponseUri
                         $script:_returnValue = [ReturnValue]::new(409, 'URL Changed', 'The URL was changed during processing and will be re-validated', 1)
                         Write-Host
@@ -614,7 +614,7 @@ Function Get-PathInstallerType {
         if (Test-IsWix -Database $ObjectDatabase -MetaDataObject $ObjectMetadata ) {
             return 'wix'
         }
-        return 'msi' 
+        return 'msi'
     }
     if ($Path -match '\.appx(bundle){0,1}$') { return 'appx' }
     if ($Path -match '\.zip$') { return 'zip' }
@@ -642,7 +642,7 @@ Function Read-InstallerEntry {
     $_Installer = [ordered] @{}
     # Request user enter Installer URL
     $_Installer['InstallerUrl'] = Request-InstallerUrl
-  
+
     if ($_Installer.InstallerUrl -in ($script:Installers).InstallerUrl) {
         $_MatchingInstaller = $script:Installers | Where-Object { $_.InstallerUrl -eq $_Installer.InstallerUrl } | Select-Object -First 1
         if ($_MatchingInstaller.InstallerSha256) { $_Installer['InstallerSha256'] = $_MatchingInstaller.InstallerSha256 }
@@ -655,7 +655,7 @@ Function Read-InstallerEntry {
     # Get or request Installer Sha256
     # Check the settings to see if we need to display this menu
     if ($_Installer.Keys -notcontains 'InstallerSha256') {
-        
+
         $script:SaveOption = Get-UserSavePreference
         # If user did not select manual entry for Sha256, download file and calculate hash
         # Also attempt to detect installer type and architecture
@@ -900,30 +900,30 @@ Function Read-InstallerEntry {
             }
         } until ($script:_returnValue.StatusCode -eq [ReturnValue]::Success().StatusCode)
 
-    # Request installer scope
-    $_menu = @{
-        entries       = @('[M] Machine'; '[U] User'; '*[N] No idea')
-        Prompt        = '[Optional] Enter the Installer Scope'
-        DefaultString = 'N'
-    }
-    switch ( Invoke-KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString']) {
-        'M' { $_Installer['Scope'] = 'machine' }
-        'U' { $_Installer['Scope'] = 'user' }
-        default { }
-    }
+        # Request installer scope
+        $_menu = @{
+            entries       = @('[M] Machine'; '[U] User'; '*[N] No idea')
+            Prompt        = '[Optional] Enter the Installer Scope'
+            DefaultString = 'N'
+        }
+        switch ( Invoke-KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString']) {
+            'M' { $_Installer['Scope'] = 'machine' }
+            'U' { $_Installer['Scope'] = 'user' }
+            default { }
+        }
 
-    # Request upgrade behavior
-    $_menu = @{
-        entries       = @('*[I] Install'; '[U] Uninstall Previous')
-        Prompt        = '[Optional] Enter the Upgrade Behavior'
-        DefaultString = 'I'
+        # Request upgrade behavior
+        $_menu = @{
+            entries       = @('*[I] Install'; '[U] Uninstall Previous')
+            Prompt        = '[Optional] Enter the Upgrade Behavior'
+            DefaultString = 'I'
+        }
+        switch ( Invoke-KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString']) {
+            'U' { $_Installer['UpgradeBehavior'] = 'uninstallPrevious' }
+            default { $_Installer['UpgradeBehavior'] = 'install' }
+        }
+        Write-Host
     }
-    switch ( Invoke-KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString']) {
-        'U' { $_Installer['UpgradeBehavior'] = 'uninstallPrevious' }
-        default { $_Installer['UpgradeBehavior'] = 'install' }
-    }
-    Write-Host
-}
 
     # Request release date
     $script:ReleaseDatePrompted = $true
@@ -1008,7 +1008,7 @@ Function Read-QuickInstallerEntry {
 
         if ($_NewInstaller.InstallerUrl -in ($_NewInstallers).InstallerUrl) {
             $_MatchingInstaller = $_NewInstallers | Where-Object { $_.InstallerUrl -eq $_NewInstaller.InstallerUrl } | Select-Object -First 1
-            if ($_MatchingInstaller.InstallerSha256) { $_NewInstaller['InstallerSha256'] = $_MatchingInstaller.InstallerSha256 } 
+            if ($_MatchingInstaller.InstallerSha256) { $_NewInstaller['InstallerSha256'] = $_MatchingInstaller.InstallerSha256 }
             if ($_MatchingInstaller.InstallerType) { $_NewInstaller['InstallerType'] = $_MatchingInstaller.InstallerType }
             if ($_MatchingInstaller.ProductCode) { $_NewInstaller['ProductCode'] = $_MatchingInstaller.ProductCode }
             elseif ( ($_NewInstaller.Keys -contains 'ProductCode') -and ($script:dest -notmatch '.exe$')) { $_NewInstaller.Remove('ProductCode') }
@@ -1190,7 +1190,7 @@ Function Read-InstallerMetadata {
     do {
         if (!$Commands) { $Commands = '' }
         else { $Commands = $Commands | UniqueItems }
-        $script:Commands = Read-InstallerMetadataValue -Variable $Commands -Key 'Commands' -Prompt "[Optional] Enter any Commands or aliases to run the application. For example: msedge (Max $($Patterns.MaxItemsCommands))" | UniqueItems 
+        $script:Commands = Read-InstallerMetadataValue -Variable $Commands -Key 'Commands' -Prompt "[Optional] Enter any Commands or aliases to run the application. For example: msedge (Max $($Patterns.MaxItemsCommands))" | UniqueItems
         if (($script:Commands -split ',').Count -le $Patterns.MaxItemsCommands) {
             $script:_returnValue = [ReturnValue]::Success()
         } else {
@@ -1495,7 +1495,7 @@ Function Read-LocaleMetadata {
             $script:Tags = $script:Tags | ToLower | UniqueItems
             Write-Host -ForegroundColor 'DarkGray' "Old Variable: $script:Tags"
         }
-        $NewTags = Read-Host -Prompt 'Tags' | TrimString | ToLower | UniqueItems 
+        $NewTags = Read-Host -Prompt 'Tags' | TrimString | ToLower | UniqueItems
         if (Test-String -not $NewTags -IsNull) { $script:Tags = $NewTags }
         if (($script:Tags -split ',').Count -le $Patterns.TagsMaxItems) {
             $script:_returnValue = [ReturnValue]::Success()
@@ -1630,7 +1630,7 @@ Function Read-PRBody {
             }
 
             '*schema*' {
-                $_Match = ($_line | Select-String -Pattern 'https://+.+(?=\))').Matches.Value 
+                $_Match = ($_line | Select-String -Pattern 'https://+.+(?=\))').Matches.Value
                 $_menu = @{
                     Prompt        = $_line.TrimStart('- [ ]') -replace '\[|\]|\(.+\)', ''
                     Entries       = @('[Y] Yes'; '*[N] No')
@@ -1782,13 +1782,13 @@ Function Get-DebugString {
         }
     )
     $debug += $(switch (([System.Environment]::NewLine).Length) {
-        1 { 'LF.' }
-        2 { 'CRLF.' }
-        Default { 'XX.' }
-    })
+            1 { 'LF.' }
+            2 { 'CRLF.' }
+            Default { 'XX.' }
+        })
     $debug += $PSVersionTable.PSVersion -Replace '\.', '-'
     $debug += '.'
-    $debug += [System.Environment]::OSVersion.Platform 
+    $debug += [System.Environment]::OSVersion.Platform
     return $debug
 }
 
@@ -1812,7 +1812,7 @@ Function Write-VersionManifest {
 
     # Create the folder for the file if it doesn't exist
     New-Item -ItemType 'Directory' -Force -Path $AppFolder | Out-Null
-    $VersionManifestPath = $AppFolder + "\$PackageIdentifier" + '.yaml'
+    $script:VersionManifestPath = $AppFolder + "\$PackageIdentifier" + '.yaml'
 
     # Write the manifest to the file
     $ScriptHeader + "$(Get-DebugString)`n# yaml-language-server: `$schema=https://aka.ms/winget-manifest.version.$ManifestVersion.schema.json`n" > $VersionManifestPath
@@ -1921,7 +1921,7 @@ Function Write-InstallerManifest {
     foreach ($_Installer in $InstallerManifest.Installers) {
         if ($_Installer.Keys -contains 'InstallerSwitches') { $_Installer['InstallerSwitches'] = Restore-YamlKeyOrder $_Installer.InstallerSwitches $InstallerSwitchProperties -NoComments }
     }
-    
+
     # Clean up the existing files just in case
     if ($InstallerManifest['Commands']) { $InstallerManifest['Commands'] = @($InstallerManifest['Commands'] | UniqueItems | NoWhitespace | Sort-Object) }
     if ($InstallerManifest['Protocols']) { $InstallerManifest['Protocols'] = @($InstallerManifest['Protocols'] | ToLower | UniqueItems | NoWhitespace | Sort-Object) }
@@ -2102,7 +2102,7 @@ if (!$script:UsingAdvancedOption) {
         '3' { $script:Option = 'EditMetadata' }
         '4' { $script:Option = 'NewLocale' }
         '5' { $script:Option = 'RemoveManifest' }
-        default { 
+        default {
             Write-Host
             [Threading.Thread]::CurrentThread.CurrentUICulture = $callingUICulture
             exit
@@ -2234,7 +2234,7 @@ if ($script:Option -in @('NewLocale'; 'EditMetadata'; 'RemoveManifest')) {
         if ($PromptVersion -eq 'exit') {
             [Threading.Thread]::CurrentThread.CurrentUICulture = $callingUICulture
             [Threading.Thread]::CurrentThread.CurrentCulture = $callingCulture
-            exit 
+            exit
         }
         if (Test-Path -Path "$AppFolder\..\$PromptVersion") {
             $script:OldManifests = Get-ChildItem -Path "$AppFolder\..\$PromptVersion"
@@ -2253,7 +2253,7 @@ if (-not (Test-Path -Path "$AppFolder\..")) {
         Write-Host -ForegroundColor Red 'This option requires manifest of previous version of the package. If you want to create a new package, please select Option 1.'
         [Threading.Thread]::CurrentThread.CurrentUICulture = $callingUICulture
         [Threading.Thread]::CurrentThread.CurrentCulture = $callingCulture
-        exit 
+        exit
     }
     $script:OldManifestType = 'None'
 }
@@ -2401,7 +2401,7 @@ if ($OldManifests -and $Option -ne 'NewLocale') {
 
 # If the old manifests exist, make sure to use the same casing as the existing package identifier
 if ($OldManifests) {
-    $script:PackageIdentifier = $OldManifests.Where({$_.Name -like "$PackageIdentifier.yaml"}).BaseName
+    $script:PackageIdentifier = $OldManifests.Where({ $_.Name -like "$PackageIdentifier.yaml" }).BaseName
 }
 
 # Run the data entry and creation of manifests appropriate to the option the user selected
@@ -2453,7 +2453,7 @@ Switch ($script:Option) {
                 Write-Host;
                 [Threading.Thread]::CurrentThread.CurrentUICulture = $callingUICulture
                 [Threading.Thread]::CurrentThread.CurrentCulture = $callingCulture
-                exit 1 
+                exit 1
             }
         }
 
@@ -2646,7 +2646,7 @@ if ($PromptSubmit -eq '0') {
         $BranchName = "$PackageIdentifier-$PackageVersion-$UniqueBranchID"
         # Git branch names cannot start with `.` cannot contain any of {`..`, `\`, `~`, `^`, `:`, ` `, `?`, `@{`, `[`}, and cannot end with {`/`, `.lock`, `.`}
         $BranchName = $BranchName -replace '[\~,\^,\:,\\,\?,\@\{,\*,\[,\s]{1,}|[.lock|/|\.]*$|^\.{1,}|\.\.', ''
-        git add "$((Resolve-Path "$gitTopLevel\manifests").Path)\*"
+        git add --renormalize "$((Get-Item $VersionManifestPath).DirectoryName)\*"
         git commit -m "$CommitType`: $PackageIdentifier version $PackageVersion" --quiet
         git switch -c "$BranchName" --quiet
         git push --set-upstream origin "$BranchName" --quiet
