@@ -104,7 +104,7 @@ if (Get-Command 'git' -ErrorAction SilentlyContinue) {
                             throw [UnmetDependencyException]::new('Git could not be upgraded sucessfully')
                         }
                     }
-                 }
+                }
                 default { Write-Host; throw [UnmetDependencyException]::new('The version of git installed on your machine does not satisfy the requirement of version >= 2.35.2') }
             }
         } else {
@@ -151,7 +151,7 @@ if ($Settings) {
     exit
 }
 
-$ScriptHeader = '# Created with YamlCreate.ps1 v2.1.5'
+$ScriptHeader = '# Created with YamlCreate.ps1 v2.1.6'
 $ManifestVersion = '1.2.0'
 $PSDefaultParameterValues = @{ '*:Encoding' = 'UTF8' }
 $Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
@@ -901,30 +901,30 @@ Function Read-InstallerEntry {
             }
         } until ($script:_returnValue.StatusCode -eq [ReturnValue]::Success().StatusCode)
 
-    # Request installer scope
-    $_menu = @{
-        entries       = @('[M] Machine'; '[U] User'; '*[N] No idea')
-        Prompt        = '[Optional] Enter the Installer Scope'
-        DefaultString = 'N'
-    }
-    switch ( Invoke-KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString']) {
-        'M' { $_Installer['Scope'] = 'machine' }
-        'U' { $_Installer['Scope'] = 'user' }
-        default { }
-    }
+        # Request installer scope
+        $_menu = @{
+            entries       = @('[M] Machine'; '[U] User'; '*[N] No idea')
+            Prompt        = '[Optional] Enter the Installer Scope'
+            DefaultString = 'N'
+        }
+        switch ( Invoke-KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString']) {
+            'M' { $_Installer['Scope'] = 'machine' }
+            'U' { $_Installer['Scope'] = 'user' }
+            default { }
+        }
 
-    # Request upgrade behavior
-    $_menu = @{
-        entries       = @('*[I] Install'; '[U] Uninstall Previous')
-        Prompt        = '[Optional] Enter the Upgrade Behavior'
-        DefaultString = 'I'
+        # Request upgrade behavior
+        $_menu = @{
+            entries       = @('*[I] Install'; '[U] Uninstall Previous')
+            Prompt        = '[Optional] Enter the Upgrade Behavior'
+            DefaultString = 'I'
+        }
+        switch ( Invoke-KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString']) {
+            'U' { $_Installer['UpgradeBehavior'] = 'uninstallPrevious' }
+            default { $_Installer['UpgradeBehavior'] = 'install' }
+        }
+        Write-Host
     }
-    switch ( Invoke-KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString']) {
-        'U' { $_Installer['UpgradeBehavior'] = 'uninstallPrevious' }
-        default { $_Installer['UpgradeBehavior'] = 'install' }
-    }
-    Write-Host
-}
 
     # Request release date
     $script:ReleaseDatePrompted = $true
@@ -1783,10 +1783,10 @@ Function Get-DebugString {
         }
     )
     $debug += $(switch (([System.Environment]::NewLine).Length) {
-        1 { 'LF.' }
-        2 { 'CRLF.' }
-        Default { 'XX.' }
-    })
+            1 { 'LF.' }
+            2 { 'CRLF.' }
+            Default { 'XX.' }
+        })
     $debug += $PSVersionTable.PSVersion -Replace '\.', '-'
     $debug += '.'
     $debug += [System.Environment]::OSVersion.Platform
@@ -2402,7 +2402,7 @@ if ($OldManifests -and $Option -ne 'NewLocale') {
 
 # If the old manifests exist, make sure to use the same casing as the existing package identifier
 if ($OldManifests) {
-    $script:PackageIdentifier = $OldManifests.Where({$_.Name -like "$PackageIdentifier.yaml"}).BaseName
+    $script:PackageIdentifier = $OldManifests.Where({ $_.Name -like "$PackageIdentifier.yaml" }).BaseName
 }
 
 # Run the data entry and creation of manifests appropriate to the option the user selected
@@ -2647,7 +2647,7 @@ if ($PromptSubmit -eq '0') {
         $BranchName = "$PackageIdentifier-$PackageVersion-$UniqueBranchID"
         # Git branch names cannot start with `.` cannot contain any of {`..`, `\`, `~`, `^`, `:`, ` `, `?`, `@{`, `[`}, and cannot end with {`/`, `.lock`, `.`}
         $BranchName = $BranchName -replace '[\~,\^,\:,\\,\?,\@\{,\*,\[,\s]{1,}|[.lock|/|\.]*$|^\.{1,}|\.\.', ''
-        git add "$((Resolve-Path "$gitTopLevel\manifests").Path)\*"
+        git add --renormalize "$((Get-Item $VersionManifestPath).DirectoryName)\*"
         git commit -m "$CommitType`: $PackageIdentifier version $PackageVersion" --quiet
         git switch -c "$BranchName" --quiet
         git push --set-upstream origin "$BranchName" --quiet
