@@ -1,10 +1,10 @@
 # Windows Package Manager Community Repository
 [![Gitter](https://img.shields.io/gitter/room/Microsoft/winget-pkgs)](https://gitter.im/Microsoft/winget-pkgs)
-![Validation Pipeline Badge](https://img.shields.io/endpoint?url=https://winget-pme.azurefd.net/api/GetServiceComponentStatusBadge?component=ValidationPipeline "Validation Pipeline Badge")
-![Publish Pipeline Badge](https://img.shields.io/endpoint?url=https://winget-pme.azurefd.net/api/GetServiceComponentStatusBadge?component=PublishPipeline "Publish Pipeline Badge")
+[![Validation Pipeline Badge](https://img.shields.io/endpoint?url=https://winget-pme.azurefd.net/api/GetServiceComponentStatusBadge?component=ValidationPipeline "Validation Pipeline Badge")](https://dev.azure.com/ms/winget-pkgs/_build?definitionId=337)
+[![Publish Pipeline Badge](https://img.shields.io/endpoint?url=https://winget-pme.azurefd.net/api/GetServiceComponentStatusBadge?component=PublishPipeline "Publish Pipeline Badge")](https://dev.azure.com/ms/winget-pkgs/_build?definitionId=338)
 
 This repository contains the manifest files for the **Windows Package Manager** default source.  You are highly encouraged to submit manifests for your favorite application.
-> Note: At this time installers must either be MSIX, MSI or .exe application installers. Standalone or portable executables, compressed .zip files, and fonts are not currently supported.
+> Note: At this time installers must either be MSIX, MSI or .exe application installers. Compressed .zip files and fonts are not currently supported.
 
 The **Windows Package Manager** is an [open source client](https://github.com/microsoft/winget-cli) designed for command-line usage. If you are interested in exploring third-party repositories offering private winget package hosting, see [third-party repositories](THIRD_PARTY.md).
 
@@ -25,7 +25,7 @@ You may either use the [Windows Package Manager Manifest Creator](https://github
 > Note: Only one manifest may be submitted per PR.
 
 ### Using the YamlCreate.ps1
-To help author manifest files, we have provided a YamlCreate.ps1 [powershell script](Tools/YamlCreate.ps1) located in the Tools folder. The script will prompt you for the URL to the installer, then will prompt you to fill in metadata. Additional information regarding the YamlCreate script can be found in the [documentation for the script](doc/tools/YamlCreate.md). 
+To help author manifest files, we have provided a YamlCreate.ps1 [PowerShell script](Tools/YamlCreate.ps1) located in the Tools folder. The script will prompt you for the URL to the installer, then will prompt you to fill in metadata. Additional information regarding the YamlCreate script can be found in the [documentation for the script](doc/tools/YamlCreate.md). 
 
 > You can use the script by cloning the repository on your PC and running the script directly from the **Tools** folder.
 

@@ -1,26 +1,43 @@
-# Created using YamlCreate.ps1 v1.1.7
-# yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.0.0.schema.json
+# Created with YamlCreate.ps1 v2.1.2 $debug=QUSU.7-2-5
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.1.0.schema.json
 
 PackageIdentifier: Vertexshare.WebpConverter
 PackageVersion: 1.2.0000
 MinimumOSVersion: 10.0.0.0
+InstallerType: exe # InstallShield Basic MSI
+Scope: machine
 InstallModes:
 - interactive
-# - silent
+- silent
 - silentWithProgress
+InstallerSwitches:
+  Silent: /s /v/quiet
+  SilentWithProgress: /v/passive
+  InstallLocation: /v"INSTALLDIR=\"<INSTALLPATH>\""
+  Log: /v"/log \"<LOGPATH>\""
+ExpectedReturnCodes:
+- InstallerReturnCode: -1
+  ReturnResponse: cancelledByUser
+- InstallerReturnCode: 1601
+  ReturnResponse: contactSupport
+- InstallerReturnCode: 1602
+  ReturnResponse: cancelledByUser
+- InstallerReturnCode: 1618
+  ReturnResponse: installInProgress
+- InstallerReturnCode: 1625
+  ReturnResponse: blockedByPolicy
+- InstallerReturnCode: 1638
+  ReturnResponse: alreadyInstalled
+- InstallerReturnCode: 1641
+  ReturnResponse: rebootInitiated
+- InstallerReturnCode: 3010
+  ReturnResponse: rebootRequiredToFinish
+UpgradeBehavior: install
+ElevationRequirement: elevationRequired
 Installers:
 - Architecture: x86
-  InstallerType: exe # InstallShield
-  Scope: machine
   InstallerUrl: https://vertexshare.com/download/webp-converter/webpconverter-win.exe
   InstallerSha256: 2994524E44CF83735F947E238E233A11A599EFAC63FDA05111BE5DE49DC1610A
-  InstallerSwitches:
-    # Silent: /s /v"/quiet" # The installation needs administrator privileges, but "/quiet" doesn't request for that
-    SilentWithProgress: /v"/passive"
-    InstallLocation: /v"INSTALLDIR=\"<INSTALLPATH>\""
-    Log: /f2"<LOGPATH>" /v"/log \"<LOGPATH>\""
   ProductCode: '{86A460D6-DBE9-4DB8-AC6A-84B837DF46A7}'
-  UpgradeBehavior: install
 ManifestType: installer
-ManifestVersion: 1.0.0
-
+ManifestVersion: 1.1.0

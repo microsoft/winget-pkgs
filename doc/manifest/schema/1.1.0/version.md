@@ -28,7 +28,7 @@ ManifestVersion: 1.1.0  # The manifest syntax version
  
  **Windows Package Manager Community Repository**
  
- This value is generally in the form of `Publisher.Package`. It is case sensitve, and this value must match the folder structure under the partition directory.
+ This value is generally in the form of `Publisher.Package`. It is case sensitive, and this value must match the folder structure under the partition directory.
 </details>
 
 <details>

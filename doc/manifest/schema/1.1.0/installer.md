@@ -27,7 +27,7 @@ Installers:                     # The list of package installers
   - Architecture:               # The architecture of the installer
     InstallerLocale:            # Optional locale of the installer
     Platform:                   # Optional installer supported operating system
-    MimimumOSVersion:           # Optional installer minimum operating system version
+    MinimumOSVersion:           # Optional installer minimum operating system version
     InstallerType:              # The installer type
     InstallerUrl:               # The installer URL
     InstallerSha256:            # The SHA256 hash of the installer
@@ -131,7 +131,7 @@ ManifestVersion: 1.1.0
 
  **Required Field**
 
- This key is the unique identifier for a given package. This value is generally in the form of `Publisher.Package`. It is case sensitve, and this value must match the folder structure under the partition directory in GitHub.
+ This key is the unique identifier for a given package. This value is generally in the form of `Publisher.Package`. It is case sensitive, and this value must match the folder structure under the partition directory in GitHub.
 </details>
 
 <details>
@@ -567,7 +567,7 @@ ManifestVersion: 1.1.0
 
  **Optional Field**
 
- This key represents any status code returned by the installer representing a condition other than zero. MSIX and MSI packages have well known return codes. This is primarily intended for executable installers that have custom or unique return coes that can be mapped to a return response.
+ This key represents any status code returned by the installer representing a condition other than zero. MSIX and MSI packages have well known return codes. This is primarily intended for executable installers that have custom or unique return codes that can be mapped to a return response.
 </details>
 
 <details>

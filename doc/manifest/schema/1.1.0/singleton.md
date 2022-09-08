@@ -3,7 +3,6 @@
 [install]:                                  https://docs.microsoft.com/windows/package-manager/winget/install
 [list]:                                     https://docs.microsoft.com/windows/package-manager/winget/list
 [upgrade]:                                  https://docs.microsoft.com/windows/package-manager/winget/upgrade
-[`winget upgrade`]:                         https://docs.microsoft.com/windows/package-manager/winget/upgrade
 [MSIX]:                                     https://docs.microsoft.com/windows/msix/overview
 [MSI]:                                      https://docs.microsoft.com/windows/win32/msi/windows-installer-portal
 [Inno]:                                     https://jrsoftware.org/isinfo.php
@@ -29,21 +28,21 @@ Publisher:                      # The publisher name
 PackageName:                    # The package name
 License:                        # The package license
 ShortDescription:               # The short package description
-Description:                     # Optional full package description
-Moniker:                         # Optional most common package term
-Tags:                            # Optional list of package terms
-Agreement:                       # Optional package agreements
-  - AgreementLabel:              # Optional agreement label
-    Agreement:                   # Optional agreement text
-    AgreementUrl:                # Optional agreement URL
-ReleaseDate:                     # Optional release date
-ReleaseNotes:                    # Optional release notes
-ReleaseNotesUrl:                 # Optional release notes URL
+Description:                    # Optional full package description
+Moniker:                        # Optional most common package term
+Tags:                           # Optional list of package terms
+Agreements:                     # Optional package agreements
+  - AgreementLabel:             # Optional agreement label
+    Agreement:                  # Optional agreement text
+    AgreementUrl:               # Optional agreement URL
+ReleaseDate:                    # Optional release date
+ReleaseNotes:                   # Optional release notes
+ReleaseNotesUrl:                # Optional release notes URL
 Installers:                     # The package installer
   - Architecture:               # The architecture of the installer
     InstallerLocale:            # Optional locale of the installer
     Platform:                   # Optional installer supported operating system
-    MimimumOSVersion:           # Optional installer minimum operating system version
+    MinimumOSVersion:           # Optional installer minimum operating system version
     InstallerType:              # The installer type
     InstallerUrl:               # The installer URL
     InstallerSha256:            # The SHA256 hash of the installer
@@ -120,7 +119,7 @@ ManifestVersion: 1.1.0
 
  **Required Field**
 
- This key is the unique identifier for a given package. This value is generally in the form of `Publisher.Package`. It is case sensitve, and this value must match the folder structure under the partition directory in GitHub.
+ This key is the unique identifier for a given package. This value is generally in the form of `Publisher.Package`. It is case sensitive, and this value must match the folder structure under the partition directory in GitHub.
 </details>
 
 <details>
@@ -130,7 +129,7 @@ ManifestVersion: 1.1.0
 
  This key represents the version of the package. It is related to the specific release this manifests targets. In some cases you will see a perfectly formed [semantic version] number, and in other cases you might see something different. These may be date driven, or they might have other characters with some package specific meaning for example.
 
- The Windows Package Manager client uses this version to determine if an upgrade for a package is available. In some cases, packages may be released with a marketing driven version, and that causes trouble with the [`winget upgrade`] command. 
+ The Windows Package Manager client uses this version to determine if an upgrade for a package is available. In some cases, packages may be released with a marketing driven version, and that causes trouble with the [`winget upgrade`][upgrade] command.
 
  >Note: The current best practice is to use the value reported in Add / Remove Programs when this version of the package is installed. In some cases, packages do not report a version resulting in an upgrade loop or other unwanted behavior. This practice may seem contrary to using semantic versioning, but it provides the best end to end experience for customers. It will take time for publishers and ISVs to migrate to semantic versioning, and some may intentionally choose to preserve other versioning schemes. In these cases, it is best practice to include the "AppsAndFeaturesEntries" section for each installer.
 </details>
@@ -176,7 +175,7 @@ ManifestVersion: 1.1.0
  </details>
  
  <details>
-   <summary><b>Agreement</b> - List of package agreements</summary>
+   <summary><b>Agreements</b> - List of package agreements</summary>
 
    **Optional Field**
 
