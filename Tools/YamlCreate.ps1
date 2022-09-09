@@ -151,7 +151,7 @@ if ($Settings) {
     exit
 }
 
-$ScriptHeader = '# Created with YamlCreate.ps1 v2.1.4'
+$ScriptHeader = '# Created with YamlCreate.ps1 v2.1.5'
 $ManifestVersion = '1.2.0'
 $PSDefaultParameterValues = @{ '*:Encoding' = 'UTF8' }
 $Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
@@ -1781,7 +1781,14 @@ Function Get-DebugString {
             Default { 'SU.' }
         }
     )
+    $debug += $(switch (([System.Environment]::NewLine).Length) {
+        1 { 'LF.' }
+        2 { 'CRLF.' }
+        Default { 'XX.' }
+    })
     $debug += $PSVersionTable.PSVersion -Replace '\.', '-'
+    $debug += '.'
+    $debug += [System.Environment]::OSVersion.Platform 
     return $debug
 }
 
