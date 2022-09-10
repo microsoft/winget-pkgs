@@ -2647,7 +2647,7 @@ if ($PromptSubmit -eq '0') {
         $BranchName = "$PackageIdentifier-$PackageVersion-$UniqueBranchID"
         # Git branch names cannot start with `.` cannot contain any of {`..`, `\`, `~`, `^`, `:`, ` `, `?`, `@{`, `[`}, and cannot end with {`/`, `.lock`, `.`}
         $BranchName = $BranchName -replace '[\~,\^,\:,\\,\?,\@\{,\*,\[,\s]{1,}|[.lock|/|\.]*$|^\.{1,}|\.\.', ''
-        git add --renormalize "$(Join-Path (Get-Item $VersionManifestPath).DirectoryName -ChildPath '*')"
+        git add --renormalize (Join-Path -Path (Get-Item $VersionManifestPath).DirectoryName -ChildPath '*')
         git commit -m "$CommitType`: $PackageIdentifier version $PackageVersion" --quiet
         git switch -c "$BranchName" --quiet
         git push --set-upstream origin "$BranchName" --quiet
