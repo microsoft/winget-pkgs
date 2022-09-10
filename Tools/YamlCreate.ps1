@@ -79,7 +79,7 @@ Function Invoke-KeypressMenu {
 #If the user has git installed, make sure it is a patched version
 if (Get-Command 'git' -ErrorAction SilentlyContinue) {
     $GitMinimumVersion = [System.Version]::Parse('2.35.2')
-    $gitVersionString = ((git version) | Select-String '([0-9]{1,}\.){3,4}').Matches.Value.Trim(' ', '.')
+    $gitVersionString = ((git version) | Select-String '([0-9]{1,}\.?){3,}').Matches.Value.Trim(' ', '.')
     $gitVersion = [System.Version]::Parse($gitVersionString)
     if ($gitVersion -lt $GitMinimumVersion) {
         # Prompt user to install git
@@ -98,7 +98,7 @@ if (Get-Command 'git' -ErrorAction SilentlyContinue) {
                     } catch {
                         throw [UnmetDependencyException]::new('Git could not be upgraded sucessfully', $_)
                     } finally {
-                        $gitVersionString = ((git version) | Select-String '([0-9]{1,}\.){3,4}').Matches.Value.Trim(' ', '.')
+                        $gitVersionString = ((git version) | Select-String '([0-9]{1,}\.?){3,}').Matches.Value.Trim(' ', '.')
                         $gitVersion = [System.Version]::Parse($gitVersionString)
                         if ($gitVersion -lt $GitMinimumVersion) {
                             throw [UnmetDependencyException]::new('Git could not be upgraded sucessfully')
