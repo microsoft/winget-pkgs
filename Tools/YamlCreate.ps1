@@ -428,7 +428,7 @@ Function Get-InstallerFile {
     # If the extension isn't found, use a custom one
     $_URIPath = $URI.Split('?')[0]
     $_Filename = "$PackageIdentifier v$PackageVersion - $(Get-Date -f 'yyyy.MM.dd-hh.mm.ss')" + $(if ([System.IO.Path]::HasExtension($_URIPath)) { [System.IO.Path]::GetExtension($_URIPath) } else { '.winget-tmp' })
-    if (Test-ValidFileName $_Filename) { $_OutFile = Join-Path -Path $env:TEMP -ChildPath $_Filename }
+    if (Test-ValidFileName $_Filename) { $_OutFile = Join-Path $env:TEMP -ChildPath $_Filename }
     else { $_OutFile = (New-TemporaryFile).FullName }
 
     # Create a new web client for downloading the file
@@ -1813,7 +1813,7 @@ Function Write-VersionManifest {
 
     # Create the folder for the file if it doesn't exist
     New-Item -ItemType 'Directory' -Force -Path $AppFolder | Out-Null
-    $script:VersionManifestPath = Join-Path -Path $AppFolder -ChildPath "$PackageIdentifier.yaml"
+    $script:VersionManifestPath = Join-Path $AppFolder -ChildPath "$PackageIdentifier.yaml"
 
     # Write the manifest to the file
     $ScriptHeader + "$(Get-DebugString)`n# yaml-language-server: `$schema=https://aka.ms/winget-manifest.version.$ManifestVersion.schema.json`n" > $VersionManifestPath
@@ -1932,7 +1932,7 @@ Function Write-InstallerManifest {
 
     # Create the folder for the file if it doesn't exist
     New-Item -ItemType 'Directory' -Force -Path $AppFolder | Out-Null
-    $script:InstallerManifestPath = Join-Path -Path $AppFolder -ChildPath "$PackageIdentifier.installer.yaml"
+    $script:InstallerManifestPath = Join-Path $AppFolder -ChildPath "$PackageIdentifier.installer.yaml"
 
     # Write the manifest to the file
     $ScriptHeader + "$(Get-DebugString)`n# yaml-language-server: `$schema=https://aka.ms/winget-manifest.installer.$ManifestVersion.schema.json`n" > $InstallerManifestPath
@@ -1999,7 +1999,7 @@ Function Write-LocaleManifest {
 
     # Create the folder for the file if it doesn't exist
     New-Item -ItemType 'Directory' -Force -Path $AppFolder | Out-Null
-    $script:LocaleManifestPath = Join-Path -Path $AppFolder -ChildPath "$PackageIdentifier.locale.$PackageLocale.yaml"
+    $script:LocaleManifestPath = Join-Path $AppFolder -ChildPath "$PackageIdentifier.locale.$PackageLocale.yaml"
 
     # Write the manifest to the file
     $ScriptHeader + "$(Get-DebugString)`n$yamlServer`n" > $LocaleManifestPath
@@ -2028,11 +2028,11 @@ Function Write-LocaleManifest {
 
                 $yamlServer = "# yaml-language-server: `$schema=https://aka.ms/winget-manifest.locale.$ManifestVersion.schema.json"
 
-                $ScriptHeader + "$(Get-DebugString)`n$yamlServer`n" > ($AppFolder + '\' + $DifLocale.Name)
-                ConvertTo-Yaml $OldLocaleManifest >> ($AppFolder + '\' + $DifLocale.Name)
-                $(Get-Content $($AppFolder + '\' + $DifLocale.Name) -Encoding UTF8) -replace "(.*)$([char]0x2370)", "# `$1" | Out-File -FilePath $($AppFolder + '\' + $DifLocale.Name) -Force
-                $MyRawString = Get-Content -Raw $($AppFolder + '\' + $DifLocale.Name) | TrimString
-                [System.IO.File]::WriteAllLines($($AppFolder + '\' + $DifLocale.Name), $MyRawString, $Utf8NoBomEncoding)
+                $ScriptHeader + "$(Get-DebugString)`n$yamlServer`n" > (Join-Path $AppFolder -ChildPath $DifLocale.Name)
+                ConvertTo-Yaml $OldLocaleManifest >> (Join-Path $AppFolder -ChildPath $DifLocale.Name)
+                $(Get-Content $(Join-Path $AppFolder -ChildPath $DifLocale.Name) -Encoding UTF8) -replace "(.*)$([char]0x2370)", "# `$1" | Out-File -FilePath $(Join-Path $AppFolder -ChildPath $DifLocale.Name) -Force
+                $MyRawString = Get-Content -Raw $(Join-Path $AppFolder -ChildPath $DifLocale.Name) | TrimString
+                [System.IO.File]::WriteAllLines($(Join-Path $AppFolder -ChildPath $DifLocale.Name), $MyRawString, $Utf8NoBomEncoding)
             }
         }
     }
