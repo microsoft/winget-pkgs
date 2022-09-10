@@ -1813,7 +1813,7 @@ Function Write-VersionManifest {
 
     # Create the folder for the file if it doesn't exist
     New-Item -ItemType 'Directory' -Force -Path $AppFolder | Out-Null
-    $VersionManifestPath = $AppFolder + "\$PackageIdentifier" + '.yaml'
+    $script:VersionManifestPath = Join-Path -Path $AppFolder -ChildPath "$PackageIdentifier.yaml"
 
     # Write the manifest to the file
     $ScriptHeader + "$(Get-DebugString)`n# yaml-language-server: `$schema=https://aka.ms/winget-manifest.version.$ManifestVersion.schema.json`n" > $VersionManifestPath
@@ -1932,7 +1932,7 @@ Function Write-InstallerManifest {
 
     # Create the folder for the file if it doesn't exist
     New-Item -ItemType 'Directory' -Force -Path $AppFolder | Out-Null
-    $script:InstallerManifestPath = $AppFolder + "\$PackageIdentifier" + '.installer' + '.yaml'
+    $script:InstallerManifestPath = Join-Path -Path $AppFolder -ChildPath "$PackageIdentifier.installer.yaml"
 
     # Write the manifest to the file
     $ScriptHeader + "$(Get-DebugString)`n# yaml-language-server: `$schema=https://aka.ms/winget-manifest.installer.$ManifestVersion.schema.json`n" > $InstallerManifestPath
@@ -1999,7 +1999,7 @@ Function Write-LocaleManifest {
 
     # Create the folder for the file if it doesn't exist
     New-Item -ItemType 'Directory' -Force -Path $AppFolder | Out-Null
-    $script:LocaleManifestPath = $AppFolder + "\$PackageIdentifier" + '.locale.' + "$PackageLocale" + '.yaml'
+    $script:LocaleManifestPath = Join-Path -Path $AppFolder -ChildPath "$PackageIdentifier.locale.$PackageLocale.yaml"
 
     # Write the manifest to the file
     $ScriptHeader + "$(Get-DebugString)`n$yamlServer`n" > $LocaleManifestPath
