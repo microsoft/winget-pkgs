@@ -160,6 +160,7 @@ $callingUICulture = [Threading.Thread]::CurrentThread.CurrentUICulture
 $callingCulture = [Threading.Thread]::CurrentThread.CurrentCulture
 [Threading.Thread]::CurrentThread.CurrentUICulture = 'en-US'
 [Threading.Thread]::CurrentThread.CurrentCulture = 'en-US'
+$env:TEMP = '/tmp/'
 
 <#
 .SYNOPSIS
