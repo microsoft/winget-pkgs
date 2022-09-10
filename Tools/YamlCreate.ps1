@@ -77,7 +77,7 @@ Function Invoke-KeypressMenu {
 }
 
 #If the user has git installed, make sure it is a patched version
-if (Get-Command 'git.exe' -ErrorAction SilentlyContinue) {
+if (Get-Command 'git' -ErrorAction SilentlyContinue) {
     $GitMinimumVersion = [System.Version]::Parse('2.35.2')
     $gitVersionString = ((git version) | Select-String '([0-9]{1,}\.){3,4}').Matches.Value.Trim(' ', '.')
     $gitVersion = [System.Version]::Parse($gitVersionString)
@@ -2590,7 +2590,7 @@ if ($script:Option -ne 'RemoveManifest') {
     }
 }
 # If the user has git installed, request to automatically submit the PR
-if (Get-Command 'git.exe' -ErrorAction SilentlyContinue) {
+if (Get-Command 'git' -ErrorAction SilentlyContinue) {
     switch ($ScriptSettings.AutoSubmitPRs) {
         'always' { $PromptSubmit = '0' }
         'never' { $PromptSubmit = '1' }
@@ -2652,7 +2652,7 @@ if ($PromptSubmit -eq '0') {
         git push --set-upstream origin "$BranchName" --quiet
 
         # If the user has the cli too
-        if (Get-Command 'gh.exe' -ErrorAction SilentlyContinue) {
+        if (Get-Command 'gh' -ErrorAction SilentlyContinue) {
             # Request the user to fill out the PR template
             if (Test-Path -Path "$gitTopLevel\.github\PULL_REQUEST_TEMPLATE.md") {
                 Read-PRBody (Resolve-Path "$gitTopLevel\.github\PULL_REQUEST_TEMPLATE.md").Path
