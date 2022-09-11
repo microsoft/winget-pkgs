@@ -2054,6 +2054,7 @@ function Remove-ManifestVersion {
         Remove-Item -Path $PathToVersion -Recurse -Force
         $PathToVersion = Split-Path $PathToVersion
     } while (@(Get-ChildItem $PathToVersion).Count -eq 0)
+    return $PathToVersion
 }
 
 ## START OF MAIN SCRIPT ##
@@ -2242,7 +2243,7 @@ if ($script:Option -in @('NewLocale'; 'EditMetadata'; 'RemoveManifest')) {
         }
         # If a new version is entered, we need to be sure to update the folder for writing manifests
         $LastVersion = $PromptVersion
-        $script:AppFolder = (Split-Path $AppFolder) + "\$LastVersion"
+        $script:AppFolder = Join-Path (Split-Path $AppFolder) -ChildPath $LastVersion
         $script:PackageVersion = $LastVersion
     }
 }
@@ -2471,7 +2472,7 @@ Switch ($script:Option) {
             }
         } until ($script:_returnValue.StatusCode -eq [ReturnValue]::Success().StatusCode)
 
-        Remove-ManifestVersion $AppFolder
+        $AppFolder = Remove-ManifestVersion $AppFolder
     }
 
     'Auto' {
