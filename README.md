@@ -3,7 +3,7 @@
 [![Validation Pipeline Badge](https://img.shields.io/endpoint?url=https://winget-pme.azurefd.net/api/GetServiceComponentStatusBadge?component=ValidationPipeline "Validation Pipeline Badge")](https://dev.azure.com/ms/winget-pkgs/_build?definitionId=337)
 [![Publish Pipeline Badge](https://img.shields.io/endpoint?url=https://winget-pme.azurefd.net/api/GetServiceComponentStatusBadge?component=PublishPipeline "Publish Pipeline Badge")](https://dev.azure.com/ms/winget-pkgs/_build?definitionId=338)
 
-This repository contains the manifest files for the **Windows Package Manager** default source.  You are highly encouraged to submit manifests for your favorite application.
+This repository contains the manifest files for the **Windows Package Manager** default source. You are highly encouraged to submit manifests for your favorite application.
 > Note: At this time installers must either be MSIX, MSI or .exe application installers. Compressed .zip files and fonts are not currently supported.
 
 The **Windows Package Manager** is an [open source client](https://github.com/microsoft/winget-cli) designed for command-line usage. If you are interested in exploring third-party repositories offering private winget package hosting, see [third-party repositories](THIRD_PARTY.md).
@@ -55,7 +55,7 @@ Just provide the path to manifest as parameter:
 ```
 
 ## Submit your PR
-With the manifest verified, you will need to submit a PR.  Your manifest should be located in the folder path matching
+With the manifest verified, you will need to submit a PR. Your manifest should be located in the folder path matching
 ```
 manifests\<first lower case letter of publisher>\<publisher>\<package>\<version>\
 ```
@@ -71,7 +71,7 @@ Submissions to the repository are reviewed by Windows Package Manager administra
 
 # Contributing
 
-This project welcomes contributions and suggestions.  Most contributions require you to agree to a Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us the rights to use your contribution. For details, visit https://cla.opensource.microsoft.com.
+This project welcomes contributions and suggestions. Most contributions require you to agree to a Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us the rights to use your contribution. For details, visit https://cla.opensource.microsoft.com.
 
 When you submit a pull request, a CLA bot will automatically determine whether you need to provide a CLA and decorate the PR appropriately (e.g., status check, comment). Follow the instructions provided by the bot. You will only need to do this once across all Microsoft repositories using our CLA.
 

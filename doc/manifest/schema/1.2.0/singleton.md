@@ -675,7 +675,7 @@ ManifestVersion: 1.2.0
 </details>
 
 <details>
- <summary><b>ExpectedReturnCodes</b> - List of additional non-zero installer  exit codes other than known default values by the Windows Package Manager.</summary>
+ <summary><b>ExpectedReturnCodes</b> - List of additional non-zero installer exit codes other than known default values by the Windows Package Manager.</summary>
 
  **Optional Field**
 
