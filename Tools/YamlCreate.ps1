@@ -1601,7 +1601,7 @@ Function Read-PRBody {
             }
 
             '*winget validate*' {
-                if ($?) {
+                if ($? -and $(Get-Command 'winget' -ErrorAction SilentlyContinue)) {
                     $PrBodyContentReply += @($_line.Replace('[ ]', '[X]'))
                     $_showMenu = $false
                 } else {
