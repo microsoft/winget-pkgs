@@ -83,7 +83,7 @@ if (Get-Command 'git' -ErrorAction SilentlyContinue) {
     $gitVersion = [System.Version]::Parse($gitVersionString)
     if ($gitVersion -lt $GitMinimumVersion) {
         # Prompt user to install git
-        if (Get-Command 'winget.exe' -ErrorAction SilentlyContinue) {
+        if (Get-Command 'winget' -ErrorAction SilentlyContinue) {
             $_menu = @{
                 entries       = @('[Y] Upgrade Git'; '[N] Do not upgrade')
                 Prompt        = 'The version of git installed on your machine does not satisfy the requirement of version >= 2.35.2; Would you like to upgrade?'
@@ -160,7 +160,7 @@ $callingUICulture = [Threading.Thread]::CurrentThread.CurrentUICulture
 $callingCulture = [Threading.Thread]::CurrentThread.CurrentCulture
 [Threading.Thread]::CurrentThread.CurrentUICulture = 'en-US'
 [Threading.Thread]::CurrentThread.CurrentCulture = 'en-US'
-$env:TEMP = '/tmp/'
+if (-not ([System.Environment]::OSVersion.Platform -match 'Win')) { $env:TEMP = '/tmp/'}
 
 <#
 .SYNOPSIS
@@ -786,7 +786,7 @@ Function Read-InstallerEntry {
     # If the installer is `msix` or `appx`, prompt for or detect additional fields
     if ($_Installer['InstallerType'] -in @('msix'; 'appx')) {
         # Detect or prompt for Signature Sha256
-        if (Get-Command 'winget.exe' -ErrorAction SilentlyContinue) { $SignatureSha256 = winget hash -m $script:dest | Select-String -Pattern 'SignatureSha256:' | ConvertFrom-String; if ($SignatureSha256.P2) { $SignatureSha256 = $SignatureSha256.P2.ToUpper() } }
+        if (Get-Command 'winget' -ErrorAction SilentlyContinue) { $SignatureSha256 = winget hash -m $script:dest | Select-String -Pattern 'SignatureSha256:' | ConvertFrom-String; if ($SignatureSha256.P2) { $SignatureSha256 = $SignatureSha256.P2.ToUpper() } }
         if ($SignatureSha256) { $_Installer['SignatureSha256'] = $SignatureSha256 }
         if (Test-String $_Installer['SignatureSha256'] -IsNull) {
             # Manual entry of Signature Sha256 with validation
@@ -1050,7 +1050,7 @@ Function Read-QuickInstallerEntry {
                 # If the new SignatureSha256 can't be found, remove it if it exists
                 $NewSignatureSha256 = $null
                 if ($_NewInstaller.InstallerType -in @('msix', 'appx')) {
-                    if (Get-Command 'winget.exe' -ErrorAction SilentlyContinue) { $NewSignatureSha256 = winget hash -m $script:dest | Select-String -Pattern 'SignatureSha256:' | ConvertFrom-String; if ($NewSignatureSha256.P2) { $NewSignatureSha256 = $NewSignatureSha256.P2.ToUpper() } }
+                    if (Get-Command 'winget' -ErrorAction SilentlyContinue) { $NewSignatureSha256 = winget hash -m $script:dest | Select-String -Pattern 'SignatureSha256:' | ConvertFrom-String; if ($NewSignatureSha256.P2) { $NewSignatureSha256 = $NewSignatureSha256.P2.ToUpper() } }
                 }
                 if (Test-String -not $NewSignatureSha256 -IsNull) {
                     $_NewInstaller['SignatureSha256'] = $NewSignatureSha256
@@ -2512,7 +2512,7 @@ Switch ($script:Option) {
                 # If the new SignatureSha256 can't be found, remove it if it exists
                 $NewSignatureSha256 = $null
                 if ($_Installer.InstallerType -in @('msix', 'appx')) {
-                    if (Get-Command 'winget.exe' -ErrorAction SilentlyContinue) { $NewSignatureSha256 = winget hash -m $script:dest | Select-String -Pattern 'SignatureSha256:' | ConvertFrom-String; if ($NewSignatureSha256.P2) { $NewSignatureSha256 = $NewSignatureSha256.P2.ToUpper() } }
+                    if (Get-Command 'winget' -ErrorAction SilentlyContinue) { $NewSignatureSha256 = winget hash -m $script:dest | Select-String -Pattern 'SignatureSha256:' | ConvertFrom-String; if ($NewSignatureSha256.P2) { $NewSignatureSha256 = $NewSignatureSha256.P2.ToUpper() } }
                 }
                 if (Test-String -not $NewSignatureSha256 -IsNull) {
                     $_Installer['SignatureSha256'] = $NewSignatureSha256
@@ -2554,10 +2554,10 @@ Switch ($script:Option) {
 
 if ($script:Option -ne 'RemoveManifest') {
     # If the user has winget installed, attempt to validate the manifests
-    if (Get-Command 'winget.exe' -ErrorAction SilentlyContinue) { winget validate $AppFolder }
+    if (Get-Command 'winget' -ErrorAction SilentlyContinue) { winget validate $AppFolder }
 
     # If the user has sandbox enabled, request to test the manifest in the sandbox
-    if (Get-Command 'WindowsSandbox.exe' -ErrorAction SilentlyContinue) {
+    if (Get-Command 'WindowsSandbox' -ErrorAction SilentlyContinue) {
         # Check the settings to see if we need to display this menu
         switch ($ScriptSettings.TestManifestsInSandbox) {
             'always' { $script:SandboxTest = '0' }
@@ -2647,7 +2647,7 @@ if ($PromptSubmit -eq '0') {
         $BranchName = "$PackageIdentifier-$PackageVersion-$UniqueBranchID"
         # Git branch names cannot start with `.` cannot contain any of {`..`, `\`, `~`, `^`, `:`, ` `, `?`, `@{`, `[`}, and cannot end with {`/`, `.lock`, `.`}
         $BranchName = $BranchName -replace '[\~,\^,\:,\\,\?,\@\{,\*,\[,\s]{1,}|[.lock|/|\.]*$|^\.{1,}|\.\.', ''
-        git add "$(Join-Path (Get-Item $VersionManifestPath).DirectoryName -ChildPath '*')"
+        git add "$(Join-Path (Get-Item $AppFolder).Parent.FullName -ChildPath '*')"
         git commit -m "$CommitType`: $PackageIdentifier version $PackageVersion" --quiet
         git switch -c "$BranchName" --quiet
         git push --set-upstream origin "$BranchName" --quiet
