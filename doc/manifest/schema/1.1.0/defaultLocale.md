@@ -156,7 +156,7 @@ ManifestVersion: 1.1.0        # The manifest syntax version
   **Optional Field**
 
   This key represents the license web site or specific web page provided the publisher or ISV. If there is a license web site or specific web page for the package it is preferred over a generic license page for the publisher.
-  
+
   If this is a link to the license file for an open source project, it should be specific to the version for the package. Some open source projects change their license over time.
  </details>
 
@@ -174,7 +174,7 @@ ManifestVersion: 1.1.0        # The manifest syntax version
   **Optional Field**
 
   This key represents the copyright web site or specific web page provided the publisher or ISV. If there is a copyright web site or specific web page for the package it is preferred over a generic copyright page for the publisher.
-  
+
   If this is a link to the copyright file for an open source project, it should be specific to the version for the package. Some open source projects change their copyright over time.
  </details>
 
@@ -203,8 +203,8 @@ ManifestVersion: 1.1.0        # The manifest syntax version
 
   **Optional Field**
 
-  This key represents the most common term users would search for when installing or upgrading a package. If only one package uses this moniker, then the [install], [list] and [upgrade] command may match with this package. 
-  
+  This key represents the most common term users would search for when installing or upgrading a package. If only one package uses this moniker, then the [install], [list] and [upgrade] command may match with this package.
+
   >Note:Moniker is the third property evaluated when searching for a matching package.
 </details>
 
@@ -218,7 +218,7 @@ ManifestVersion: 1.1.0        # The manifest syntax version
   >Note: The best practice is to present these terms in all lower case with hyphens rather than spaces.
 </details>
 
- 
+
 <details>
   <summary><b>Agreements</b> - List of package agreements</summary>
 
@@ -230,10 +230,10 @@ ManifestVersion: 1.1.0        # The manifest syntax version
 
    Agreements are only allowed in the community repository when the manifest is maintained by a verified developer.
 </details>
-  
+
 <details>
   <summary><b>AgreementLabel</b> - The label for a package agreement</summary>
-    
+
   **Optional Field**
 
   This key represents the label for a package agreement.
@@ -241,7 +241,7 @@ ManifestVersion: 1.1.0        # The manifest syntax version
 
 <details>
   <summary><b>Agreement</b> - The text for a package agreement</summary>
-    
+
   **Optional Field**
 
   This key represents the text or body of a package agreement.
@@ -249,7 +249,7 @@ ManifestVersion: 1.1.0        # The manifest syntax version
 
 <details>
   <summary><b>AgreementUrl</b> - The URL for a package agreement</summary>
-  
+
   **Optional Field**
 
   This key represents the URL for a package agreement.
@@ -257,7 +257,7 @@ ManifestVersion: 1.1.0        # The manifest syntax version
 
 <details>
   <summary><b>ReleaseDate</b> - The Release Date for a package.</summary>
-  
+
   **Optional Field**
 
   This key represents the release date for a package.
@@ -265,7 +265,7 @@ ManifestVersion: 1.1.0        # The manifest syntax version
 
 <details>
   <summary><b>ReleaseNotes</b> - The Release Notes for a package.</summary>
-  
+
   **Optional Field**
 
   This key represents release notes for a package.
@@ -273,7 +273,7 @@ ManifestVersion: 1.1.0        # The manifest syntax version
 
 <details>
   <summary><b>ReleaseNotesUrl</b> - The Release Notes web page for a package.</summary>
-  
+
   **Optional Field**
 
   This key represents release notes web page for a package.
