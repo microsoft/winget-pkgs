@@ -1,0 +1,75 @@
+name: Line Endings
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+    types:
+      - opened
+      - synchronize
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/github-script@v6
+        with:
+          script: |
+            // Get changed files
+            switch (context.eventName) {
+              case 'push':
+                console.log(`Event type: ${context.eventName}`);
+                baseSha = context.payload.before;
+                headSha = context.payload.after;
+                break;
+              case 'pull_request':
+                console.log(`Event type: ${context.eventName}`);
+                baseSha = context.payload.pull_request.base.sha;
+                headSha = context.payload.pull_request.head.sha;
+                break;
+              default:
+                console.error(
+                  `The action only works for push and pull_request events, not ${context.eventName}`
+                );
+                return;
+            }
+            const changedFiles = [
+              ...(
+                await github.rest.repos.compareCommits({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  base: baseSha,
+                  head: headSha,
+                  per_page: 100,
+                })
+              ).data.files.flatMap((file) =>
+                file.status !== 'removed' || file.status !== 'renamed' ? file.filename : []
+              ),
+            ];
+            console.log(`Changed files: ${changedFiles}`);
+            // Check if any of the changed files have LF line endings
+            const filesWithLfLineEndings = [];
+            for (file of changedFiles) {
+              var contents = require('fs').readFileSync(file, 'utf8');
+              if (contents.search(/(?<!\r)\n/) > -1) { // Check for LF
+                filesWithLfLineEndings.push(file);
+              }
+            }
+            console.log(`Files with LF line endings: ${filesWithLfLineEndings}`);
+            // Comment on the PR if any files have LF line endings
+            if (filesWithLfLineEndings.length > 0 && context.eventName === 'pull_request') {
+              console.log(`Creating comment on PR #${context.issue.number}`);
+              github.rest.pulls.createReview({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: context.issue.number,
+                body: `The following files have LF line endings:\n${filesWithLfLineEndings
+                  .map((file) => `- ${file}`)
+                  .join('\n')}\n\nPlease modify the files to use CRLF line endings.`,
+                event: 'REQUEST_CHANGES',
+              });
+              console.log(`Review created... Happy checking!`);
+            }
