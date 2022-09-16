@@ -3,16 +3,17 @@
 
 Param
 (
-  [switch] $Settings,
-  [switch] $AutoUpgrade,
-  [switch] $help,
-  [switch] $SkipPRCheck,
-  [Parameter(Mandatory = $false)]
-  [string] $PackageIdentifier,
-  [Parameter(Mandatory = $false)]
-  [string] $PackageVersion,
-  [Parameter(Mandatory = $false)]
-  [string] $Mode
+    [switch] $Settings,
+    [switch] $AutoUpgrade,
+    [switch] $help,
+    [switch] $SkipPRCheck,
+    [switch] $Preserve
+    [Parameter(Mandatory = $false)]
+    [string] $PackageIdentifier,
+    [Parameter(Mandatory = $false)]
+    [string] $PackageVersion,
+    [Parameter(Mandatory = $false)]
+    [string] $Mode
 )
 
 if ($help) {
@@ -152,7 +153,7 @@ if ($Settings) {
 }
 
 $ScriptHeader = '# Created with YamlCreate.ps1 v2.1.6'
-$ManifestVersion = '1.2.0'
+$ManifestVersion = '1.4.0'
 $PSDefaultParameterValues = @{ '*:Encoding' = 'UTF8' }
 $Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
 $ofs = ', '
@@ -226,50 +227,56 @@ $ToNatural = { [regex]::Replace($_, '\d+', { $args[0].Value.PadLeft(20) }) }
 
 # Various patterns used in validation to simplify the validation logic
 $Patterns = @{
-  PackageIdentifier         = $VersionSchema.properties.PackageIdentifier.pattern
-  IdentifierMaxLength       = $VersionSchema.properties.PackageIdentifier.maxLength
-  PackageVersion            = $InstallerSchema.definitions.PackageVersion.pattern
-  VersionMaxLength          = $VersionSchema.properties.PackageVersion.maxLength
-  InstallerSha256           = $InstallerSchema.definitions.Installer.properties.InstallerSha256.pattern
-  InstallerUrl              = $InstallerSchema.definitions.Installer.properties.InstallerUrl.pattern
-  InstallerUrlMaxLength     = $InstallerSchema.definitions.Installer.properties.InstallerUrl.maxLength
-  ValidArchitectures        = $InstallerSchema.definitions.Architecture.enum
-  ValidInstallerTypes       = $InstallerSchema.definitions.InstallerType.enum
-  SilentSwitchMaxLength     = $InstallerSchema.definitions.InstallerSwitches.properties.Silent.maxLength
-  ProgressSwitchMaxLength   = $InstallerSchema.definitions.InstallerSwitches.properties.SilentWithProgress.maxLength
-  CustomSwitchMaxLength     = $InstallerSchema.definitions.InstallerSwitches.properties.Custom.maxLength
-  SignatureSha256           = $InstallerSchema.definitions.Installer.properties.SignatureSha256.pattern
-  FamilyName                = $InstallerSchema.definitions.PackageFamilyName.pattern
-  FamilyNameMaxLength       = $InstallerSchema.definitions.PackageFamilyName.maxLength
-  PackageLocale             = $LocaleSchema.properties.PackageLocale.pattern
-  InstallerLocaleMaxLength  = $InstallerSchema.definitions.Locale.maxLength
-  ProductCodeMinLength      = $InstallerSchema.definitions.ProductCode.minLength
-  ProductCodeMaxLength      = $InstallerSchema.definitions.ProductCode.maxLength
-  MaxItemsFileExtensions    = $InstallerSchema.definitions.FileExtensions.maxItems
-  MaxItemsProtocols         = $InstallerSchema.definitions.Protocols.maxItems
-  MaxItemsCommands          = $InstallerSchema.definitions.Commands.maxItems
-  MaxItemsSuccessCodes      = $InstallerSchema.definitions.InstallerSuccessCodes.maxItems
-  MaxItemsInstallModes      = $InstallerSchema.definitions.InstallModes.maxItems
-  PackageLocaleMaxLength    = $LocaleSchema.properties.PackageLocale.maxLength
-  PublisherMaxLength        = $LocaleSchema.properties.Publisher.maxLength
-  PackageNameMaxLength      = $LocaleSchema.properties.PackageName.maxLength
-  MonikerMaxLength          = $LocaleSchema.definitions.Tag.maxLength
-  GenericUrl                = $LocaleSchema.definitions.Url.pattern
-  GenericUrlMaxLength       = $LocaleSchema.definitions.Url.maxLength
-  AuthorMinLength           = $LocaleSchema.properties.Author.minLength
-  AuthorMaxLength           = $LocaleSchema.properties.Author.maxLength
-  LicenseMaxLength          = $LocaleSchema.properties.License.maxLength
-  CopyrightMinLength        = $LocaleSchema.properties.Copyright.minLength
-  CopyrightMaxLength        = $LocaleSchema.properties.Copyright.maxLength
-  TagsMaxItems              = $LocaleSchema.properties.Tags.maxItems
-  ShortDescriptionMaxLength = $LocaleSchema.properties.ShortDescription.maxLength
-  DescriptionMinLength      = $LocaleSchema.properties.Description.minLength
-  DescriptionMaxLength      = $LocaleSchema.properties.Description.maxLength
-  ValidInstallModes         = $InstallerSchema.definitions.InstallModes.items.enum
-  FileExtension             = $InstallerSchema.definitions.FileExtensions.items.pattern
-  FileExtensionMaxLength    = $InstallerSchema.definitions.FileExtensions.items.maxLength
-  ReleaseNotesMinLength     = $LocaleSchema.properties.ReleaseNotes.MinLength
-  ReleaseNotesMaxLength     = $LocaleSchema.properties.ReleaseNotes.MaxLength
+    PackageIdentifier         = $VersionSchema.properties.PackageIdentifier.pattern
+    IdentifierMaxLength       = $VersionSchema.properties.PackageIdentifier.maxLength
+    PackageVersion            = $InstallerSchema.definitions.PackageVersion.pattern
+    VersionMaxLength          = $VersionSchema.properties.PackageVersion.maxLength
+    InstallerSha256           = $InstallerSchema.definitions.Installer.properties.InstallerSha256.pattern
+    InstallerUrl              = $InstallerSchema.definitions.Installer.properties.InstallerUrl.pattern
+    InstallerUrlMaxLength     = $InstallerSchema.definitions.Installer.properties.InstallerUrl.maxLength
+    ValidArchitectures        = $InstallerSchema.definitions.Architecture.enum
+    ValidInstallerTypes       = $InstallerSchema.definitions.InstallerType.enum
+    ValidNestedInstallerTypes = $InstallerSchema.definitions.NestedInstallerType.enum
+    SilentSwitchMaxLength     = $InstallerSchema.definitions.InstallerSwitches.properties.Silent.maxLength
+    ProgressSwitchMaxLength   = $InstallerSchema.definitions.InstallerSwitches.properties.SilentWithProgress.maxLength
+    CustomSwitchMaxLength     = $InstallerSchema.definitions.InstallerSwitches.properties.Custom.maxLength
+    SignatureSha256           = $InstallerSchema.definitions.Installer.properties.SignatureSha256.pattern
+    FamilyName                = $InstallerSchema.definitions.PackageFamilyName.pattern
+    FamilyNameMaxLength       = $InstallerSchema.definitions.PackageFamilyName.maxLength
+    PackageLocale             = $LocaleSchema.properties.PackageLocale.pattern
+    InstallerLocaleMaxLength  = $InstallerSchema.definitions.Locale.maxLength
+    ProductCodeMinLength      = $InstallerSchema.definitions.ProductCode.minLength
+    ProductCodeMaxLength      = $InstallerSchema.definitions.ProductCode.maxLength
+    MaxItemsFileExtensions    = $InstallerSchema.definitions.FileExtensions.maxItems
+    MaxItemsProtocols         = $InstallerSchema.definitions.Protocols.maxItems
+    MaxItemsCommands          = $InstallerSchema.definitions.Commands.maxItems
+    MaxItemsSuccessCodes      = $InstallerSchema.definitions.InstallerSuccessCodes.maxItems
+    MaxItemsInstallModes      = $InstallerSchema.definitions.InstallModes.maxItems
+    PackageLocaleMaxLength    = $LocaleSchema.properties.PackageLocale.maxLength
+    PublisherMaxLength        = $LocaleSchema.properties.Publisher.maxLength
+    PackageNameMaxLength      = $LocaleSchema.properties.PackageName.maxLength
+    MonikerMaxLength          = $LocaleSchema.definitions.Tag.maxLength
+    GenericUrl                = $LocaleSchema.definitions.Url.pattern
+    GenericUrlMaxLength       = $LocaleSchema.definitions.Url.maxLength
+    AuthorMinLength           = $LocaleSchema.properties.Author.minLength
+    AuthorMaxLength           = $LocaleSchema.properties.Author.maxLength
+    LicenseMaxLength          = $LocaleSchema.properties.License.maxLength
+    CopyrightMinLength        = $LocaleSchema.properties.Copyright.minLength
+    CopyrightMaxLength        = $LocaleSchema.properties.Copyright.maxLength
+    TagsMaxItems              = $LocaleSchema.properties.Tags.maxItems
+    ShortDescriptionMaxLength = $LocaleSchema.properties.ShortDescription.maxLength
+    DescriptionMinLength      = $LocaleSchema.properties.Description.minLength
+    DescriptionMaxLength      = $LocaleSchema.properties.Description.maxLength
+    ValidInstallModes         = $InstallerSchema.definitions.InstallModes.items.enum
+    FileExtension             = $InstallerSchema.definitions.FileExtensions.items.pattern
+    FileExtensionMaxLength    = $InstallerSchema.definitions.FileExtensions.items.maxLength
+    ReleaseNotesMinLength     = $LocaleSchema.properties.ReleaseNotes.MinLength
+    ReleaseNotesMaxLength     = $LocaleSchema.properties.ReleaseNotes.MaxLength
+    RelativeFilePathMinLength = $InstallerSchema.Definitions.NestedInstallerFiles.items.properties.RelativeFilePath.minLength
+    RelativeFilePathMaxLength = $InstallerSchema.Definitions.NestedInstallerFiles.items.properties.RelativeFilePath.maxLength
+    PortableCommandAliasMinLength = $InstallerSchema.Definitions.NestedInstallerFiles.items.properties.PortableCommandAlias.minLength
+    PortableCommandAliasMaxLength = $InstallerSchema.Definitions.NestedInstallerFiles.items.properties.PortableCommandAlias.maxLength
+    ArchiveInstallerTypes = @('zip')
 }
 
 # This function validates whether a string matches Minimum Length, Maximum Length, and Regex pattern
@@ -317,6 +324,25 @@ Function Test-String {
   } else {
     return $_isValid
   }
+}
+
+# Gets the effective installer type from an installer
+Function Get-EffectiveInstallerType {
+    Param
+    (
+        [Parameter(Mandatory = $true, Position = 0)]
+        [PSCustomObject] $Installer
+    )
+    if ($Installer.Keys -notcontains 'InstallerType') {
+        throw [System.ArgumentException]::new('Invalid Function Parameters. Installer must contain `InstallerType` key')
+    }
+    if ($Installer.InstallerType -notin $Patterns.ArchiveInstallerTypes){
+        return $Installer.InstallerType
+    }
+    if ($Installer.Keys -notcontains 'NestedInstallerType') {
+        throw [System.ArgumentException]::new("Invalid Function Parameters. Installer type $($Installer.InstallerType) must contain `NestedInstallerType` key")
+    }
+    return $Installer.NestedInstallerType
 }
 
 # Takes an array of strings and an array of colors then writes one line of text composed of each string being its respective color
@@ -757,12 +783,13 @@ Function Read-InstallerEntry {
       }
     } until ($script:_returnValue.StatusCode -eq [ReturnValue]::Success().StatusCode)
 
-    do {
-      Write-Host -ForegroundColor 'Red' $script:_returnValue.ErrorString()
-      if ($_Installer['InstallerType'] -ieq 'exe') { Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the silent with progress install switch. For example: /S, -silent, /qb, /exebasicui' }
-      else { Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the silent with progress install switch. For example: /S, -silent, /qb, /exebasicui' }
-      Read-Host -Prompt 'Silent with progress switch' -OutVariable _ | Out-Null
-      if ($_) { $_Switches['SilentWithProgress'] = $_ | TrimString }
+        do {
+            Write-Host -ForegroundColor 'Red' $script:_returnValue.ErrorString()
+            # TODO: Switch to Effective Installer Type
+            if ($_Installer['InstallerType'] -ieq 'exe') { Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the silent with progress install switch. For example: /S, -silent, /qb, /exebasicui' }
+            else { Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the silent with progress install switch. For example: /S, -silent, /qb, /exebasicui' }
+            Read-Host -Prompt 'Silent with progress switch' -OutVariable _ | Out-Null
+            if ($_) { $_Switches['SilentWithProgress'] = $_ | TrimString }
 
       if (Test-String $_Switches['SilentWithProgress'] -MaxLength $Patterns.ProgressSwitchMaxLength -NotNull) {
         $script:_returnValue = [ReturnValue]::Success()
@@ -1025,75 +1052,78 @@ Function Read-QuickInstallerEntry {
       elseif ($_NewInstaller.Keys -contains 'SignatureSha256') { $_NewInstaller.Remove('SignatureSha256') }
     }
 
-    if ($_NewInstaller.Keys -notcontains 'InstallerSha256') {
-      try {
-        Write-Host -ForegroundColor 'Green' 'Downloading Installer. . .'
-        $script:dest = Get-InstallerFile -URI $_NewInstaller['InstallerUrl'] -PackageIdentifier $PackageIdentifier -PackageVersion $PackageVersion
-      } catch {
-        # Here we also want to pass any exceptions through for potential debugging
-        throw [System.Net.WebException]::new('The file could not be downloaded. Try running the script again', $_.Exception)
-      } finally {
-        # Check that MSI's aren't actually WIX
-        Write-Host -ForegroundColor 'Green' "Installer Downloaded!`nProcessing installer data. . . "
-        if ($_NewInstaller['InstallerType'] -eq 'msi') {
-          $DetectedType = Get-PathInstallerType $script:dest
-          if ($DetectedType -in @('msi'; 'wix')) { $_NewInstaller['InstallerType'] = $DetectedType }
-        }
-        # Get the Sha256
-        $_NewInstaller['InstallerSha256'] = (Get-FileHash -Path $script:dest -Algorithm SHA256).Hash
-        # Update the product code, if a new one exists
-        # If a new product code doesn't exist, and the installer isn't an `.exe` file, remove the product code if it exists
-        $MSIProductCode = $null
-        if ([System.Environment]::OSVersion.Platform -match 'Win' -and ($script:dest).EndsWith('.msi')) {
-          $MSIProductCode = ([string](Get-MSIProperty -MSIPath $script:dest -Parameter 'ProductCode') | Select-String -Pattern '{[A-Z0-9]{8}-([A-Z0-9]{4}-){3}[A-Z0-9]{12}}').Matches.Value
-        } elseif ([System.Environment]::OSVersion.Platform -match 'Unix' -and (Get-Item $script:dest).Name.EndsWith('.msi')) {
-          $MSIProductCode = ([string](file $script:dest) | Select-String -Pattern '{[A-Z0-9]{8}-([A-Z0-9]{4}-){3}[A-Z0-9]{12}}').Matches.Value
-        }
-        if (Test-String -not $MSIProductCode -IsNull) {
-          $_NewInstaller['ProductCode'] = $MSIProductCode
-        } elseif ( ($_NewInstaller.Keys -contains 'ProductCode') -and ($_NewInstaller.InstallerType -in @('appx'; 'msi'; 'msix'; 'wix'; 'burn'))) {
-          $_NewInstaller.Remove('ProductCode')
-        }
-        # If the installer is msix or appx, try getting the new SignatureSha256
-        # If the new SignatureSha256 can't be found, remove it if it exists
-        $NewSignatureSha256 = $null
-        if ($_NewInstaller.InstallerType -in @('msix', 'appx')) {
-          if (Get-Command 'winget' -ErrorAction SilentlyContinue) { $NewSignatureSha256 = winget hash -m $script:dest | Select-String -Pattern 'SignatureSha256:' | ConvertFrom-String; if ($NewSignatureSha256.P2) { $NewSignatureSha256 = $NewSignatureSha256.P2.ToUpper() } }
-        }
-        if (Test-String -not $NewSignatureSha256 -IsNull) {
-          $_NewInstaller['SignatureSha256'] = $NewSignatureSha256
-        } elseif ($_NewInstaller.Keys -contains 'SignatureSha256') {
-          $_NewInstaller.Remove('SignatureSha256')
-        }
-        # If the installer is msix or appx, try getting the new package family name
-        # If the new package family name can't be found, remove it if it exists
-        if ($script:dest -match '\.(msix|appx)(bundle){0,1}$') {
-          try {
-            Add-AppxPackage -Path $script:dest
-            $InstalledPkg = Get-AppxPackage | Select-Object -Last 1 | Select-Object PackageFamilyName, PackageFullName
-            $PackageFamilyName = $InstalledPkg.PackageFamilyName
-            Remove-AppxPackage $InstalledPkg.PackageFullName
-          } catch {
-            # Take no action here, we just want to catch the exceptions as a precaution
-            Out-Null
-          } finally {
-            if (Test-String -not $PackageFamilyName -IsNull) {
-              $_NewInstaller['PackageFamilyName'] = $PackageFamilyName
-            } elseif ($_NewInstaller.Keys -contains 'PackageFamilyName') {
-              $_NewInstaller.Remove('PackageFamilyName')
+        if ($_NewInstaller.Keys -notcontains 'InstallerSha256') {
+            try {
+                Write-Host -ForegroundColor 'Green' 'Downloading Installer. . .'
+                $script:dest = Get-InstallerFile -URI $_NewInstaller['InstallerUrl'] -PackageIdentifier $PackageIdentifier -PackageVersion $PackageVersion
+            } catch {
+                # Here we also want to pass any exceptions through for potential debugging
+                throw [System.Net.WebException]::new('The file could not be downloaded. Try running the script again', $_.Exception)
+            } finally {
+                # Check that MSI's aren't actually WIX
+                Write-Host -ForegroundColor 'Green' "Installer Downloaded!`nProcessing installer data. . . "
+                if ($_NewInstaller['InstallerType'] -eq 'msi') {
+                    $DetectedType = Get-PathInstallerType $script:dest
+                    if ($DetectedType -in @('msi'; 'wix')) { $_NewInstaller['InstallerType'] = $DetectedType }
+                }
+                # Get the Sha256
+                $_NewInstaller['InstallerSha256'] = (Get-FileHash -Path $script:dest -Algorithm SHA256).Hash
+                # Update the product code, if a new one exists
+                # If a new product code doesn't exist, and the installer isn't an `.exe` file, remove the product code if it exists
+                $MSIProductCode = $null
+                if ([System.Environment]::OSVersion.Platform -match 'Win' -and ($script:dest).EndsWith('.msi')) {
+                    $MSIProductCode = ([string](Get-MSIProperty -MSIPath $script:dest -Parameter 'ProductCode') | Select-String -Pattern '{[A-Z0-9]{8}-([A-Z0-9]{4}-){3}[A-Z0-9]{12}}').Matches.Value
+                }
+                elseif ([System.Environment]::OSVersion.Platform -match 'Unix' -and (Get-Item $script:dest).Name.EndsWith('.msi')) {
+                    $MSIProductCode = ([string](file $script:dest) | Select-String -Pattern '{[A-Z0-9]{8}-([A-Z0-9]{4}-){3}[A-Z0-9]{12}}').Matches.Value
+                }
+                if (Test-String -not $MSIProductCode -IsNull) {
+                    $_NewInstaller['ProductCode'] = $MSIProductCode
+                # TODO: Switch to Effective Installer Type
+                } elseif ( ($_NewInstaller.Keys -contains 'ProductCode') -and ($_NewInstaller.InstallerType -in @('appx'; 'msi'; 'msix'; 'wix'; 'burn'))) {
+                    $_NewInstaller.Remove('ProductCode')
+                }
+                # If the installer is msix or appx, try getting the new SignatureSha256
+                # If the new SignatureSha256 can't be found, remove it if it exists
+                $NewSignatureSha256 = $null
+                if ($_NewInstaller.InstallerType -in @('msix', 'appx')) {
+                    if (Get-Command 'winget' -ErrorAction SilentlyContinue) { $NewSignatureSha256 = winget hash -m $script:dest | Select-String -Pattern 'SignatureSha256:' | ConvertFrom-String; if ($NewSignatureSha256.P2) { $NewSignatureSha256 = $NewSignatureSha256.P2.ToUpper() } }
+                }
+                if (Test-String -not $NewSignatureSha256 -IsNull) {
+                    $_NewInstaller['SignatureSha256'] = $NewSignatureSha256
+                } elseif ($_NewInstaller.Keys -contains 'SignatureSha256') {
+                    $_NewInstaller.Remove('SignatureSha256')
+                }
+                # If the installer is msix or appx, try getting the new package family name
+                # If the new package family name can't be found, remove it if it exists
+                if ($script:dest -match '\.(msix|appx)(bundle){0,1}$') {
+                    try {
+                        Add-AppxPackage -Path $script:dest
+                        $InstalledPkg = Get-AppxPackage | Select-Object -Last 1 | Select-Object PackageFamilyName, PackageFullName
+                        $PackageFamilyName = $InstalledPkg.PackageFamilyName
+                        # TODO: If Adding failed, don't remove
+                        Remove-AppxPackage $InstalledPkg.PackageFullName
+                    } catch {
+                        # Take no action here, we just want to catch the exceptions as a precaution
+                        Out-Null
+                    } finally {
+                        if (Test-String -not $PackageFamilyName -IsNull) {
+                            $_NewInstaller['PackageFamilyName'] = $PackageFamilyName
+                        } elseif ($_NewInstaller.Keys -contains 'PackageFamilyName') {
+                            $_NewInstaller.Remove('PackageFamilyName')
+                        }
+                    }
+                }
+                # Remove the downloaded files
+                Remove-Item -Path $script:dest
+                Write-Host -ForegroundColor 'Green' "Installer updated!`n"
             }
-          }
         }
-        # Remove the downloaded files
-        Remove-Item -Path $script:dest
-        Write-Host -ForegroundColor 'Green' "Installer updated!`n"
-      }
+        #Add the updated installer to the new installers array
+        $_NewInstaller = Restore-YamlKeyOrder $_NewInstaller $InstallerEntryProperties -NoComments
+        $_NewInstallers += $_NewInstaller
     }
-    #Add the updated installer to the new installers array
-    $_NewInstaller = Restore-YamlKeyOrder $_NewInstaller $InstallerEntryProperties -NoComments
-    $_NewInstallers += $_NewInstaller
-  }
-  $script:Installers = $_NewInstallers
+    $script:Installers = $_NewInstallers
 }
 
 # Requests the user enter an optional value with a prompt
@@ -1135,19 +1165,23 @@ Function Restore-YamlKeyOrder {
     [switch] $NoComments
   )
 
-  $_ExcludedKeys = @(
-    'InstallerSwitches'
-    'Capabilities'
-    'RestrictedCapabilities'
-    'InstallerSuccessCodes'
-    'ProductCode'
-    'PackageFamilyName'
-    'InstallerLocale'
-    'InstallerType'
-    'Scope'
-    'UpgradeBehavior'
-    'Dependencies'
-  )
+    $_ExcludedKeys = @(
+        'InstallerSwitches'
+        'Capabilities'
+        'RestrictedCapabilities'
+        'InstallerSuccessCodes'
+        'ProductCode'
+        'PackageFamilyName'
+        'InstallerLocale'
+        'InstallerType'
+        'NestedInstallerType'
+        'NestedInstallerFiles'
+        'Scope'
+        'UpgradeBehavior'
+        'Dependencies'
+        'InstallationMetadata'
+        'Platform'
+    )
 
   $_Temp = [ordered] @{}
   $SortOrder.GetEnumerator() | ForEach-Object {
@@ -1843,10 +1877,10 @@ Function Write-InstallerManifest {
   }
   if (!$InstallerManifest) { [PSCustomObject]$InstallerManifest = [ordered]@{} }
 
-  #Add the properties to the manifest
-  Add-YamlParameter -Object $InstallerManifest -Parameter 'PackageIdentifier' -Value $PackageIdentifier
-  Add-YamlParameter -Object $InstallerManifest -Parameter 'PackageVersion' -Value $PackageVersion
-  $InstallerManifest['MinimumOSVersion'] = If ($MinimumOSVersion) { $MinimumOSVersion } Else { '10.0.0.0' }
+    #Add the properties to the manifest
+    Add-YamlParameter -Object $InstallerManifest -Parameter 'PackageIdentifier' -Value $PackageIdentifier
+    Add-YamlParameter -Object $InstallerManifest -Parameter 'PackageVersion' -Value $PackageVersion
+    $InstallerManifest['MinimumOSVersion'] = If ($MinimumOSVersion) { $MinimumOSVersion } Else { "$([char]0x2370)" }
 
   $_ListSections = [ordered]@{
     'FileExtensions'        = $FileExtensions
@@ -1867,9 +1901,9 @@ Function Write-InstallerManifest {
     $InstallerManifest['Installers'] = $script:OldVersionManifest['Installers']
   }
 
-  foreach ($_Installer in $InstallerManifest.Installers) {
-    if ($_Installer['ReleaseDate'] -and !$script:ReleaseDatePrompted) { $_Installer.Remove('ReleaseDate') }
-  }
+    foreach ($_Installer in $InstallerManifest.Installers) {
+        if ($_Installer['ReleaseDate'] -and !$script:ReleaseDatePrompted -and !$Preserve) { $_Installer.Remove('ReleaseDate') }
+    }
 
   Add-YamlParameter -Object $InstallerManifest -Parameter 'ManifestType' -Value 'installer'
   Add-YamlParameter -Object $InstallerManifest -Parameter 'ManifestVersion' -Value $ManifestVersion
@@ -1996,9 +2030,9 @@ Function Write-LocaleManifest {
   if ($LocaleManifest['Tags']) { $LocaleManifest['Tags'] = @($LocaleManifest['Tags'] | ToLower | UniqueItems | NoWhitespace | Sort-Object) }
   if ($LocaleManifest['Moniker']) { $LocaleManifest['Moniker'] = $LocaleManifest['Moniker'] | ToLower | NoWhitespace }
 
-  # Clean up the volatile fields
-  if ($LocaleManifest['ReleaseNotes'] -and (Test-String $script:ReleaseNotes -IsNull)) { $LocaleManifest.Remove('ReleaseNotes') }
-  if ($LocaleManifest['ReleaseNotesUrl'] -and (Test-String $script:ReleaseNotesUrl -IsNull)) { $LocaleManifest.Remove('ReleaseNotesUrl') }
+    # Clean up the volatile fields
+    if ($LocaleManifest['ReleaseNotes'] -and (Test-String $script:ReleaseNotes -IsNull) -and !$Preserve) { $LocaleManifest.Remove('ReleaseNotes') }
+    if ($LocaleManifest['ReleaseNotesUrl'] -and (Test-String $script:ReleaseNotesUrl -IsNull) -and !$Preserve) { $LocaleManifest.Remove('ReleaseNotesUrl') }
 
   $LocaleManifest = Restore-YamlKeyOrder $LocaleManifest $LocaleProperties
 
@@ -2028,9 +2062,9 @@ Function Write-LocaleManifest {
         # Clean up the existing files just in case
         if ($script:OldLocaleManifest['Tags']) { $script:OldLocaleManifest['Tags'] = @($script:OldLocaleManifest['Tags'] | ToLower | UniqueItems | NoWhitespace | Sort-Object) }
 
-        # Clean up the volatile fields
-        if ($OldLocaleManifest['ReleaseNotes'] -and (Test-String $script:ReleaseNotes -IsNull)) { $OldLocaleManifest.Remove('ReleaseNotes') }
-        if ($OldLocaleManifest['ReleaseNotesUrl'] -and (Test-String $script:ReleaseNotesUrl -IsNull)) { $OldLocaleManifest.Remove('ReleaseNotesUrl') }
+                # Clean up the volatile fields
+                if ($OldLocaleManifest['ReleaseNotes'] -and (Test-String $script:ReleaseNotes -IsNull) -and !$Preserve) { $OldLocaleManifest.Remove('ReleaseNotes') }
+                if ($OldLocaleManifest['ReleaseNotesUrl'] -and (Test-String $script:ReleaseNotesUrl -IsNull) -and !$Preserve) { $OldLocaleManifest.Remove('ReleaseNotesUrl') }
 
         $script:OldLocaleManifest = Restore-YamlKeyOrder $script:OldLocaleManifest $LocaleProperties
 
@@ -2385,28 +2419,28 @@ if ($OldManifests.Name -eq "$PackageIdentifier.installer.yaml" -and $OldManifest
 
 # If the old manifests exist, read the manifest keys into their specific variables
 if ($OldManifests -and $Option -ne 'NewLocale') {
-  $_Parameters = @(
-    'Publisher'; 'PublisherUrl'; 'PublisherSupportUrl'; 'PrivacyUrl'
-    'Author';
-    'PackageName'; 'PackageUrl'; 'Moniker'
-    'License'; 'LicenseUrl'
-    'Copyright'; 'CopyrightUrl'
-    'ShortDescription'; 'Description'
-    'Channel'
-    'Platform'; 'MinimumOSVersion'
-    'InstallerType'
-    'Scope'
-    'UpgradeBehavior'
-    'PackageFamilyName'; 'ProductCode'
-    'Tags'; 'FileExtensions'
-    'Protocols'; 'Commands'
-    'InstallerSuccessCodes'
-    'Capabilities'; 'RestrictedCapabilities'
-  )
-  Foreach ($param in $_Parameters) {
-    $_ReadValue = $(if ($script:OldManifestType -eq 'MultiManifest') { (Get-MultiManifestParameter $param) } else { $script:OldVersionManifest[$param] })
-    if (Test-String -Not $_ReadValue -IsNull) { New-Variable -Name $param -Value $_ReadValue -Scope Script -Force }
-  }
+    $_Parameters = @(
+        'Publisher'; 'PublisherUrl'; 'PublisherSupportUrl'; 'PrivacyUrl'
+        'Author';
+        'PackageName'; 'PackageUrl'; 'Moniker'
+        'License'; 'LicenseUrl'
+        'Copyright'; 'CopyrightUrl'
+        'ShortDescription'; 'Description'
+        'Channel'
+        'Platform'; 'MinimumOSVersion'
+        'InstallerType'; 'NestedInstallerType'
+        'Scope'
+        'UpgradeBehavior'
+        'PackageFamilyName'; 'ProductCode'
+        'Tags'; 'FileExtensions'
+        'Protocols'; 'Commands'
+        'InstallerSuccessCodes'
+        'Capabilities'; 'RestrictedCapabilities'
+    )
+    Foreach ($param in $_Parameters) {
+        $_ReadValue = $(if ($script:OldManifestType -eq 'MultiManifest') { (Get-MultiManifestParameter $param) } else { $script:OldVersionManifest[$param] })
+        if (Test-String -Not $_ReadValue -IsNull) { New-Variable -Name $param -Value $_ReadValue -Scope Script -Force }
+    }
 }
 
 # If the old manifests exist, make sure to use the same casing as the existing package identifier
