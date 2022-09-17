@@ -15,6 +15,7 @@ Param
   [Parameter(Mandatory = $false)]
   [string] $Mode
 )
+$ProgressPreference = 'SilentlyContinue'
 
 if ($help) {
   Write-Host -ForegroundColor 'Green' 'For full documentation of the script, see https://github.com/microsoft/winget-pkgs/tree/master/doc/tools/YamlCreate.md'
@@ -196,7 +197,6 @@ $SchemaUrls = @{
 
 # Fetch Schema data from github for entry validation, key ordering, and automatic commenting
 try {
-  $ProgressPreference = 'SilentlyContinue'
   $LocaleSchema = @(Invoke-WebRequest $SchemaUrls.defaultLocale -UseBasicParsing | ConvertFrom-Json)
   $LocaleProperties = (ConvertTo-Yaml $LocaleSchema.properties | ConvertFrom-Yaml -Ordered).Keys
   $VersionSchema = @(Invoke-WebRequest $SchemaUrls.version -UseBasicParsing | ConvertFrom-Json)
