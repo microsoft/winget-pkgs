@@ -3,17 +3,17 @@
 
 Param
 (
-    [switch] $Settings,
-    [switch] $AutoUpgrade,
-    [switch] $help,
-    [switch] $SkipPRCheck,
-    [switch] $Preserve,
-    [Parameter(Mandatory = $false)]
-    [string] $PackageIdentifier,
-    [Parameter(Mandatory = $false)]
-    [string] $PackageVersion,
-    [Parameter(Mandatory = $false)]
-    [string] $Mode
+  [switch] $Settings,
+  [switch] $AutoUpgrade,
+  [switch] $help,
+  [switch] $SkipPRCheck,
+  [switch] $Preserve,
+  [Parameter(Mandatory = $false)]
+  [string] $PackageIdentifier,
+  [Parameter(Mandatory = $false)]
+  [string] $PackageVersion,
+  [Parameter(Mandatory = $false)]
+  [string] $Mode
 )
 
 if ($help) {
@@ -227,56 +227,56 @@ $ToNatural = { [regex]::Replace($_, '\d+', { $args[0].Value.PadLeft(20) }) }
 
 # Various patterns used in validation to simplify the validation logic
 $Patterns = @{
-    PackageIdentifier             = $VersionSchema.properties.PackageIdentifier.pattern
-    IdentifierMaxLength           = $VersionSchema.properties.PackageIdentifier.maxLength
-    PackageVersion                = $InstallerSchema.definitions.PackageVersion.pattern
-    VersionMaxLength              = $VersionSchema.properties.PackageVersion.maxLength
-    InstallerSha256               = $InstallerSchema.definitions.Installer.properties.InstallerSha256.pattern
-    InstallerUrl                  = $InstallerSchema.definitions.Installer.properties.InstallerUrl.pattern
-    InstallerUrlMaxLength         = $InstallerSchema.definitions.Installer.properties.InstallerUrl.maxLength
-    ValidArchitectures            = $InstallerSchema.definitions.Architecture.enum
-    ValidInstallerTypes           = $InstallerSchema.definitions.InstallerType.enum
-    ValidNestedInstallerTypes     = $InstallerSchema.definitions.NestedInstallerType.enum
-    SilentSwitchMaxLength         = $InstallerSchema.definitions.InstallerSwitches.properties.Silent.maxLength
-    ProgressSwitchMaxLength       = $InstallerSchema.definitions.InstallerSwitches.properties.SilentWithProgress.maxLength
-    CustomSwitchMaxLength         = $InstallerSchema.definitions.InstallerSwitches.properties.Custom.maxLength
-    SignatureSha256               = $InstallerSchema.definitions.Installer.properties.SignatureSha256.pattern
-    FamilyName                    = $InstallerSchema.definitions.PackageFamilyName.pattern
-    FamilyNameMaxLength           = $InstallerSchema.definitions.PackageFamilyName.maxLength
-    PackageLocale                 = $LocaleSchema.properties.PackageLocale.pattern
-    InstallerLocaleMaxLength      = $InstallerSchema.definitions.Locale.maxLength
-    ProductCodeMinLength          = $InstallerSchema.definitions.ProductCode.minLength
-    ProductCodeMaxLength          = $InstallerSchema.definitions.ProductCode.maxLength
-    MaxItemsFileExtensions        = $InstallerSchema.definitions.FileExtensions.maxItems
-    MaxItemsProtocols             = $InstallerSchema.definitions.Protocols.maxItems
-    MaxItemsCommands              = $InstallerSchema.definitions.Commands.maxItems
-    MaxItemsSuccessCodes          = $InstallerSchema.definitions.InstallerSuccessCodes.maxItems
-    MaxItemsInstallModes          = $InstallerSchema.definitions.InstallModes.maxItems
-    PackageLocaleMaxLength        = $LocaleSchema.properties.PackageLocale.maxLength
-    PublisherMaxLength            = $LocaleSchema.properties.Publisher.maxLength
-    PackageNameMaxLength          = $LocaleSchema.properties.PackageName.maxLength
-    MonikerMaxLength              = $LocaleSchema.definitions.Tag.maxLength
-    GenericUrl                    = $LocaleSchema.definitions.Url.pattern
-    GenericUrlMaxLength           = $LocaleSchema.definitions.Url.maxLength
-    AuthorMinLength               = $LocaleSchema.properties.Author.minLength
-    AuthorMaxLength               = $LocaleSchema.properties.Author.maxLength
-    LicenseMaxLength              = $LocaleSchema.properties.License.maxLength
-    CopyrightMinLength            = $LocaleSchema.properties.Copyright.minLength
-    CopyrightMaxLength            = $LocaleSchema.properties.Copyright.maxLength
-    TagsMaxItems                  = $LocaleSchema.properties.Tags.maxItems
-    ShortDescriptionMaxLength     = $LocaleSchema.properties.ShortDescription.maxLength
-    DescriptionMinLength          = $LocaleSchema.properties.Description.minLength
-    DescriptionMaxLength          = $LocaleSchema.properties.Description.maxLength
-    ValidInstallModes             = $InstallerSchema.definitions.InstallModes.items.enum
-    FileExtension                 = $InstallerSchema.definitions.FileExtensions.items.pattern
-    FileExtensionMaxLength        = $InstallerSchema.definitions.FileExtensions.items.maxLength
-    ReleaseNotesMinLength         = $LocaleSchema.properties.ReleaseNotes.MinLength
-    ReleaseNotesMaxLength         = $LocaleSchema.properties.ReleaseNotes.MaxLength
-    RelativeFilePathMinLength     = $InstallerSchema.Definitions.NestedInstallerFiles.items.properties.RelativeFilePath.minLength
-    RelativeFilePathMaxLength     = $InstallerSchema.Definitions.NestedInstallerFiles.items.properties.RelativeFilePath.maxLength
-    PortableCommandAliasMinLength = $InstallerSchema.Definitions.NestedInstallerFiles.items.properties.PortableCommandAlias.minLength
-    PortableCommandAliasMaxLength = $InstallerSchema.Definitions.NestedInstallerFiles.items.properties.PortableCommandAlias.maxLength
-    ArchiveInstallerTypes         = @('zip')
+  PackageIdentifier             = $VersionSchema.properties.PackageIdentifier.pattern
+  IdentifierMaxLength           = $VersionSchema.properties.PackageIdentifier.maxLength
+  PackageVersion                = $InstallerSchema.definitions.PackageVersion.pattern
+  VersionMaxLength              = $VersionSchema.properties.PackageVersion.maxLength
+  InstallerSha256               = $InstallerSchema.definitions.Installer.properties.InstallerSha256.pattern
+  InstallerUrl                  = $InstallerSchema.definitions.Installer.properties.InstallerUrl.pattern
+  InstallerUrlMaxLength         = $InstallerSchema.definitions.Installer.properties.InstallerUrl.maxLength
+  ValidArchitectures            = $InstallerSchema.definitions.Architecture.enum
+  ValidInstallerTypes           = $InstallerSchema.definitions.InstallerType.enum
+  ValidNestedInstallerTypes     = $InstallerSchema.definitions.NestedInstallerType.enum
+  SilentSwitchMaxLength         = $InstallerSchema.definitions.InstallerSwitches.properties.Silent.maxLength
+  ProgressSwitchMaxLength       = $InstallerSchema.definitions.InstallerSwitches.properties.SilentWithProgress.maxLength
+  CustomSwitchMaxLength         = $InstallerSchema.definitions.InstallerSwitches.properties.Custom.maxLength
+  SignatureSha256               = $InstallerSchema.definitions.Installer.properties.SignatureSha256.pattern
+  FamilyName                    = $InstallerSchema.definitions.PackageFamilyName.pattern
+  FamilyNameMaxLength           = $InstallerSchema.definitions.PackageFamilyName.maxLength
+  PackageLocale                 = $LocaleSchema.properties.PackageLocale.pattern
+  InstallerLocaleMaxLength      = $InstallerSchema.definitions.Locale.maxLength
+  ProductCodeMinLength          = $InstallerSchema.definitions.ProductCode.minLength
+  ProductCodeMaxLength          = $InstallerSchema.definitions.ProductCode.maxLength
+  MaxItemsFileExtensions        = $InstallerSchema.definitions.FileExtensions.maxItems
+  MaxItemsProtocols             = $InstallerSchema.definitions.Protocols.maxItems
+  MaxItemsCommands              = $InstallerSchema.definitions.Commands.maxItems
+  MaxItemsSuccessCodes          = $InstallerSchema.definitions.InstallerSuccessCodes.maxItems
+  MaxItemsInstallModes          = $InstallerSchema.definitions.InstallModes.maxItems
+  PackageLocaleMaxLength        = $LocaleSchema.properties.PackageLocale.maxLength
+  PublisherMaxLength            = $LocaleSchema.properties.Publisher.maxLength
+  PackageNameMaxLength          = $LocaleSchema.properties.PackageName.maxLength
+  MonikerMaxLength              = $LocaleSchema.definitions.Tag.maxLength
+  GenericUrl                    = $LocaleSchema.definitions.Url.pattern
+  GenericUrlMaxLength           = $LocaleSchema.definitions.Url.maxLength
+  AuthorMinLength               = $LocaleSchema.properties.Author.minLength
+  AuthorMaxLength               = $LocaleSchema.properties.Author.maxLength
+  LicenseMaxLength              = $LocaleSchema.properties.License.maxLength
+  CopyrightMinLength            = $LocaleSchema.properties.Copyright.minLength
+  CopyrightMaxLength            = $LocaleSchema.properties.Copyright.maxLength
+  TagsMaxItems                  = $LocaleSchema.properties.Tags.maxItems
+  ShortDescriptionMaxLength     = $LocaleSchema.properties.ShortDescription.maxLength
+  DescriptionMinLength          = $LocaleSchema.properties.Description.minLength
+  DescriptionMaxLength          = $LocaleSchema.properties.Description.maxLength
+  ValidInstallModes             = $InstallerSchema.definitions.InstallModes.items.enum
+  FileExtension                 = $InstallerSchema.definitions.FileExtensions.items.pattern
+  FileExtensionMaxLength        = $InstallerSchema.definitions.FileExtensions.items.maxLength
+  ReleaseNotesMinLength         = $LocaleSchema.properties.ReleaseNotes.MinLength
+  ReleaseNotesMaxLength         = $LocaleSchema.properties.ReleaseNotes.MaxLength
+  RelativeFilePathMinLength     = $InstallerSchema.Definitions.NestedInstallerFiles.items.properties.RelativeFilePath.minLength
+  RelativeFilePathMaxLength     = $InstallerSchema.Definitions.NestedInstallerFiles.items.properties.RelativeFilePath.maxLength
+  PortableCommandAliasMinLength = $InstallerSchema.Definitions.NestedInstallerFiles.items.properties.PortableCommandAlias.minLength
+  PortableCommandAliasMaxLength = $InstallerSchema.Definitions.NestedInstallerFiles.items.properties.PortableCommandAlias.maxLength
+  ArchiveInstallerTypes         = @('zip')
 }
 
 # This function validates whether a string matches Minimum Length, Maximum Length, and Regex pattern
@@ -328,21 +328,21 @@ Function Test-String {
 
 # Gets the effective installer type from an installer
 Function Get-EffectiveInstallerType {
-    Param
-    (
-        [Parameter(Mandatory = $true, Position = 0)]
-        [PSCustomObject] $Installer
-    )
-    if ($Installer.Keys -notcontains 'InstallerType') {
-        throw [System.ArgumentException]::new('Invalid Function Parameters. Installer must contain `InstallerType` key')
-    }
-    if ($Installer.InstallerType -notin $Patterns.ArchiveInstallerTypes) {
-        return $Installer.InstallerType
-    }
-    if ($Installer.Keys -notcontains 'NestedInstallerType') {
-        throw [System.ArgumentException]::new("Invalid Function Parameters. Installer type $($Installer.InstallerType) must contain `NestedInstallerType` key")
-    }
-    return $Installer.NestedInstallerType
+  Param
+  (
+    [Parameter(Mandatory = $true, Position = 0)]
+    [PSCustomObject] $Installer
+  )
+  if ($Installer.Keys -notcontains 'InstallerType') {
+    throw [System.ArgumentException]::new('Invalid Function Parameters. Installer must contain `InstallerType` key')
+  }
+  if ($Installer.InstallerType -notin $Patterns.ArchiveInstallerTypes) {
+    return $Installer.InstallerType
+  }
+  if ($Installer.Keys -notcontains 'NestedInstallerType') {
+    throw [System.ArgumentException]::new("Invalid Function Parameters. Installer type $($Installer.InstallerType) must contain `NestedInstallerType` key")
+  }
+  return $Installer.NestedInstallerType
 }
 
 # Takes an array of strings and an array of colors then writes one line of text composed of each string being its respective color
@@ -670,87 +670,87 @@ Function Get-UriArchitecture {
 # Takes the installer as an input
 # Returns the modified installer
 Function Read-NestedInstaller {
-    Param(
-        [Parameter(Mandatory = $true, Position = 0)]
-        [PSCustomObject] $_Installer
-    )
+  Param(
+    [Parameter(Mandatory = $true, Position = 0)]
+    [PSCustomObject] $_Installer
+  )
 
-    if ($_Installer['InstallerType'] -CIn @($Patterns.ArchiveInstallerTypes)) {
-        # Manual Entry of Nested Installer Type with validation
-        if ($_Installer['NestedInstallerType'] -CNotIn @($Patterns.ValidInstallerTypes)) {
-            do {
-                Write-Host -ForegroundColor 'Red' $script:_returnValue.ErrorString()
-                Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the NestedInstallerType. Options:' , @($Patterns.ValidNestedInstallerTypes -join ', ' )
-                $_Installer['NestedInstallerType'] = Read-Host -Prompt 'NestedInstallerType' | TrimString
-                if ($_Installer['NestedInstallerType'] -Cin @($Patterns.ValidNestedInstallerTypes)) {
-                    $script:_returnValue = [ReturnValue]::Success()
-                } else {
-                    $script:_returnValue = [ReturnValue]::new(400, 'Invalid Installer Type', "Value must exist in the enum - $(@($Patterns.ValidNestedInstallerTypes -join ', '))", 2)
-                }
-            } until ($script:_returnValue.StatusCode -eq [ReturnValue]::Success().StatusCode)
+  if ($_Installer['InstallerType'] -CIn @($Patterns.ArchiveInstallerTypes)) {
+    # Manual Entry of Nested Installer Type with validation
+    if ($_Installer['NestedInstallerType'] -CNotIn @($Patterns.ValidInstallerTypes)) {
+      do {
+        Write-Host -ForegroundColor 'Red' $script:_returnValue.ErrorString()
+        Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the NestedInstallerType. Options:' , @($Patterns.ValidNestedInstallerTypes -join ', ' )
+        $_Installer['NestedInstallerType'] = Read-Host -Prompt 'NestedInstallerType' | TrimString
+        if ($_Installer['NestedInstallerType'] -Cin @($Patterns.ValidNestedInstallerTypes)) {
+          $script:_returnValue = [ReturnValue]::Success()
+        } else {
+          $script:_returnValue = [ReturnValue]::new(400, 'Invalid Installer Type', "Value must exist in the enum - $(@($Patterns.ValidNestedInstallerTypes -join ', '))", 2)
         }
-        $_EffectiveType = Get-EffectiveInstallerType $_Installer
-
-        $_NestedInstallerFiles = @()
-        do {
-            $_InstallerFile = [ordered] @{}
-            $AnotherNestedInstaller = $false
-            $_RelativePath = $null
-            $_Alias = $null
-            do {
-                Write-Host -ForegroundColor 'Red' $script:_returnValue.ErrorString()
-                Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the relative path to the installer file'
-                if (Test-String -not $_RelativePath -IsNull) { Write-Host -ForegroundColor 'DarkGray' "Old Variable: $_RelativePath" }
-                $_RelativePath = Read-Host -Prompt 'RelativeFilePath' | TrimString
-                if (Test-String -not $_RelativePath -IsNull) { $_InstallerFile['RelativeFilePath'] = $_RelativePath }
-
-                if (Test-String $_RelativePath -MinLength $Patterns.RelativeFilePathMinLength -MaxLength $Patterns.RelativeFilePathMaxLength) {
-                    $script:_returnValue = [ReturnValue]::Success()
-                } else {
-                    $script:_returnValue = [ReturnValue]::LengthError($Patterns.RelativeFilePathMinLength, $Patterns.RelativeFilePathMaxLength)
-                }
-                if ($_RelativePath -in @($_NestedInstallerFiles.RelativeFilePath)) {
-                    $script:_returnValue = [ReturnValue]::new(400, 'Path Collision', 'Relative file path must be unique', 2)
-                }
-            } until ($script:_returnValue.StatusCode -eq [ReturnValue]::Success().StatusCode)
-
-            if ($_EffectiveType -eq 'portable') {
-                do {
-                    Write-Host -ForegroundColor 'Red' $script:_returnValue.ErrorString()
-                    Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the portable command alias'
-                    if (Test-String -not $_Alias -IsNull) { Write-Host -ForegroundColor 'DarkGray' "Old Variable: $_Alias" }
-                    $_Alias = Read-Host -Prompt 'PortableCommandAlias' | TrimString
-                    if (Test-String -not $_Alias -IsNull) { $_InstallerFile['PortableCommandAlias'] = $_Alias }
-
-                    if (Test-String $_Alias -MinLength $Patterns.PortableCommandAliasMinLength -MaxLength $Patterns.PortableCommandAliasMaxLength) {
-                        $script:_returnValue = [ReturnValue]::Success()
-                    } else {
-                        $script:_returnValue = [ReturnValue]::LengthError($Patterns.PortableCommandAliasMinLength, $Patterns.PortableCommandAliasMaxLength)
-                    }
-                    if ($_Alias -in @($_NestedInstallerFiles.PortableCommandAlias)) {
-                        $script:_returnValue = [ReturnValue]::new(400, 'Alias Collision', 'Aliases must be unique', 2)
-                    }
-                } until ($script:_returnValue.StatusCode -eq [ReturnValue]::Success().StatusCode)
-
-                # Prompt to see if multiple entries are needed
-                $_menu = @{
-                    entries       = @(
-                        '[Y] Yes'
-                        '*[N] No'
-                    )
-                    Prompt        = 'Do you want to create another portable installer entry?'
-                    DefaultString = 'N'
-                }
-                switch ( Invoke-KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString']) {
-                    'Y' { $AnotherNestedInstaller = $true }
-                    default { $AnotherNestedInstaller = $false }
-                }
-            }
-            $_NestedInstallerFiles += $_InstallerFile
-        } until (!$AnotherNestedInstaller)
-        $_Installer['NestedInstallerFiles'] = $_NestedInstallerFiles
+      } until ($script:_returnValue.StatusCode -eq [ReturnValue]::Success().StatusCode)
     }
-    return $_Installer
+    $_EffectiveType = Get-EffectiveInstallerType $_Installer
+
+    $_NestedInstallerFiles = @()
+    do {
+      $_InstallerFile = [ordered] @{}
+      $AnotherNestedInstaller = $false
+      $_RelativePath = $null
+      $_Alias = $null
+      do {
+        Write-Host -ForegroundColor 'Red' $script:_returnValue.ErrorString()
+        Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the relative path to the installer file'
+        if (Test-String -not $_RelativePath -IsNull) { Write-Host -ForegroundColor 'DarkGray' "Old Variable: $_RelativePath" }
+        $_RelativePath = Read-Host -Prompt 'RelativeFilePath' | TrimString
+        if (Test-String -not $_RelativePath -IsNull) { $_InstallerFile['RelativeFilePath'] = $_RelativePath }
+
+        if (Test-String $_RelativePath -MinLength $Patterns.RelativeFilePathMinLength -MaxLength $Patterns.RelativeFilePathMaxLength) {
+          $script:_returnValue = [ReturnValue]::Success()
+        } else {
+          $script:_returnValue = [ReturnValue]::LengthError($Patterns.RelativeFilePathMinLength, $Patterns.RelativeFilePathMaxLength)
+        }
+        if ($_RelativePath -in @($_NestedInstallerFiles.RelativeFilePath)) {
+          $script:_returnValue = [ReturnValue]::new(400, 'Path Collision', 'Relative file path must be unique', 2)
+        }
+      } until ($script:_returnValue.StatusCode -eq [ReturnValue]::Success().StatusCode)
+
+      if ($_EffectiveType -eq 'portable') {
+        do {
+          Write-Host -ForegroundColor 'Red' $script:_returnValue.ErrorString()
+          Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the portable command alias'
+          if (Test-String -not $_Alias -IsNull) { Write-Host -ForegroundColor 'DarkGray' "Old Variable: $_Alias" }
+          $_Alias = Read-Host -Prompt 'PortableCommandAlias' | TrimString
+          if (Test-String -not $_Alias -IsNull) { $_InstallerFile['PortableCommandAlias'] = $_Alias }
+
+          if (Test-String $_Alias -MinLength $Patterns.PortableCommandAliasMinLength -MaxLength $Patterns.PortableCommandAliasMaxLength) {
+            $script:_returnValue = [ReturnValue]::Success()
+          } else {
+            $script:_returnValue = [ReturnValue]::LengthError($Patterns.PortableCommandAliasMinLength, $Patterns.PortableCommandAliasMaxLength)
+          }
+          if ($_Alias -in @($_NestedInstallerFiles.PortableCommandAlias)) {
+            $script:_returnValue = [ReturnValue]::new(400, 'Alias Collision', 'Aliases must be unique', 2)
+          }
+        } until ($script:_returnValue.StatusCode -eq [ReturnValue]::Success().StatusCode)
+
+        # Prompt to see if multiple entries are needed
+        $_menu = @{
+          entries       = @(
+            '[Y] Yes'
+            '*[N] No'
+          )
+          Prompt        = 'Do you want to create another portable installer entry?'
+          DefaultString = 'N'
+        }
+        switch ( Invoke-KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString']) {
+          'Y' { $AnotherNestedInstaller = $true }
+          default { $AnotherNestedInstaller = $false }
+        }
+      }
+      $_NestedInstallerFiles += $_InstallerFile
+    } until (!$AnotherNestedInstaller)
+    $_Installer['NestedInstallerFiles'] = $_NestedInstallerFiles
+  }
+  return $_Installer
 }
 
 # Prompts the user to enter installer values
@@ -851,44 +851,44 @@ Function Read-InstallerEntry {
     } until ($script:_returnValue.StatusCode -eq [ReturnValue]::Success().StatusCode)
   }
 
-    # If the installer requires nested installer files, get them
-    $_Installer = Read-NestedInstaller $_Installer
+  # If the installer requires nested installer files, get them
+  $_Installer = Read-NestedInstaller $_Installer
 
-    $_Switches = [ordered] @{}
-    # If Installer Type is `exe`, require the silent switches to be entered
-    if ((Get-EffectiveInstallerType $_Installer) -ne 'portable') {
-        do {
-            Write-Host -ForegroundColor 'Red' $script:_returnValue.ErrorString()
-            if ((Get-EffectiveInstallerType $_Installer) -ieq 'exe') { Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the silent install switch. For example: /S, -verysilent, /qn, --silent, /exenoui' }
-            else { Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the silent install switch. For example: /S, -verysilent, /qn, --silent, /exenoui' }
-            Read-Host -Prompt 'Silent switch' -OutVariable _ | Out-Null
-            if ($_) { $_Switches['Silent'] = $_ | TrimString }
+  $_Switches = [ordered] @{}
+  # If Installer Type is `exe`, require the silent switches to be entered
+  if ((Get-EffectiveInstallerType $_Installer) -ne 'portable') {
+    do {
+      Write-Host -ForegroundColor 'Red' $script:_returnValue.ErrorString()
+      if ((Get-EffectiveInstallerType $_Installer) -ieq 'exe') { Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the silent install switch. For example: /S, -verysilent, /qn, --silent, /exenoui' }
+      else { Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the silent install switch. For example: /S, -verysilent, /qn, --silent, /exenoui' }
+      Read-Host -Prompt 'Silent switch' -OutVariable _ | Out-Null
+      if ($_) { $_Switches['Silent'] = $_ | TrimString }
 
-            if (Test-String $_Switches['Silent'] -MaxLength $Patterns.SilentSwitchMaxLength -NotNull) {
-                $script:_returnValue = [ReturnValue]::Success()
-            } elseif ((Get-EffectiveInstallerType $_Installer) -ne 'exe' -and (Test-String $_Switches['Silent'] -MaxLength $Patterns.SilentSwitchMaxLength -AllowNull)) {
-                $script:_returnValue = [ReturnValue]::Success()
-            } else {
-                $script:_returnValue = [ReturnValue]::LengthError(1, $Patterns.SilentSwitchMaxLength)
-            }
-        } until ($script:_returnValue.StatusCode -eq [ReturnValue]::Success().StatusCode)
+      if (Test-String $_Switches['Silent'] -MaxLength $Patterns.SilentSwitchMaxLength -NotNull) {
+        $script:_returnValue = [ReturnValue]::Success()
+      } elseif ((Get-EffectiveInstallerType $_Installer) -ne 'exe' -and (Test-String $_Switches['Silent'] -MaxLength $Patterns.SilentSwitchMaxLength -AllowNull)) {
+        $script:_returnValue = [ReturnValue]::Success()
+      } else {
+        $script:_returnValue = [ReturnValue]::LengthError(1, $Patterns.SilentSwitchMaxLength)
+      }
+    } until ($script:_returnValue.StatusCode -eq [ReturnValue]::Success().StatusCode)
 
-        do {
-            Write-Host -ForegroundColor 'Red' $script:_returnValue.ErrorString()
-            if ((Get-EffectiveInstallerType $_Installer) -ieq 'exe') { Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the silent with progress install switch. For example: /S, -silent, /qb, /exebasicui' }
-            else { Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the silent with progress install switch. For example: /S, -silent, /qb, /exebasicui' }
-            Read-Host -Prompt 'Silent with progress switch' -OutVariable _ | Out-Null
-            if ($_) { $_Switches['SilentWithProgress'] = $_ | TrimString }
+    do {
+      Write-Host -ForegroundColor 'Red' $script:_returnValue.ErrorString()
+      if ((Get-EffectiveInstallerType $_Installer) -ieq 'exe') { Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the silent with progress install switch. For example: /S, -silent, /qb, /exebasicui' }
+      else { Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the silent with progress install switch. For example: /S, -silent, /qb, /exebasicui' }
+      Read-Host -Prompt 'Silent with progress switch' -OutVariable _ | Out-Null
+      if ($_) { $_Switches['SilentWithProgress'] = $_ | TrimString }
 
-            if (Test-String $_Switches['SilentWithProgress'] -MaxLength $Patterns.ProgressSwitchMaxLength -NotNull) {
-                $script:_returnValue = [ReturnValue]::Success()
-            } elseif ((Get-EffectiveInstallerType $_Installer) -ne 'exe' -and (Test-String $_Switches['SilentWithProgress'] -MaxLength $Patterns.ProgressSwitchMaxLength -AllowNull)) {
-                $script:_returnValue = [ReturnValue]::Success()
-            } else {
-                $script:_returnValue = [ReturnValue]::LengthError(1, $Patterns.ProgressSwitchMaxLength)
-            }
-        } until ($script:_returnValue.StatusCode -eq [ReturnValue]::Success().StatusCode)
-    }
+      if (Test-String $_Switches['SilentWithProgress'] -MaxLength $Patterns.ProgressSwitchMaxLength -NotNull) {
+        $script:_returnValue = [ReturnValue]::Success()
+      } elseif ((Get-EffectiveInstallerType $_Installer) -ne 'exe' -and (Test-String $_Switches['SilentWithProgress'] -MaxLength $Patterns.ProgressSwitchMaxLength -AllowNull)) {
+        $script:_returnValue = [ReturnValue]::Success()
+      } else {
+        $script:_returnValue = [ReturnValue]::LengthError(1, $Patterns.ProgressSwitchMaxLength)
+      }
+    } until ($script:_returnValue.StatusCode -eq [ReturnValue]::Success().StatusCode)
+  }
 
   # Optional entry of `Custom` switches with validation for all installer types
   do {
@@ -1005,16 +1005,16 @@ Function Read-InstallerEntry {
     }
   } until ($script:_returnValue.StatusCode -eq [ReturnValue]::Success().StatusCode)
 
-    # Request product code with validation
-    if ((Get-EffectiveInstallerType $_Installer) -notmatch 'portable') {
-        do {
-            Write-Host -ForegroundColor 'Red' $script:_returnValue.ErrorString()
-            Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the application product code. Looks like {CF8E6E00-9C03-4440-81C0-21FACB921A6B}'
-            Write-Host -ForegroundColor 'White' -Object "ProductCode found from installer: $($_Installer['ProductCode'])"
-            Write-Host -ForegroundColor 'White' -Object 'Can be found with ' -NoNewline; Write-Host -ForegroundColor 'DarkYellow' 'get-wmiobject Win32_Product | Sort-Object Name | Format-Table IdentifyingNumber, Name -AutoSize'
-            $NewProductCode = Read-Host -Prompt 'ProductCode' | TrimString
-            if (Test-String $NewProductCode -Not -IsNull) { $_Installer['ProductCode'] = $NewProductCode }
-            elseif (Test-String $_Installer['ProductCode'] -Not -IsNull) { $_Installer['ProductCode'] = "$($_Installer['ProductCode'])" }
+  # Request product code with validation
+  if ((Get-EffectiveInstallerType $_Installer) -notmatch 'portable') {
+    do {
+      Write-Host -ForegroundColor 'Red' $script:_returnValue.ErrorString()
+      Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the application product code. Looks like {CF8E6E00-9C03-4440-81C0-21FACB921A6B}'
+      Write-Host -ForegroundColor 'White' -Object "ProductCode found from installer: $($_Installer['ProductCode'])"
+      Write-Host -ForegroundColor 'White' -Object 'Can be found with ' -NoNewline; Write-Host -ForegroundColor 'DarkYellow' 'get-wmiobject Win32_Product | Sort-Object Name | Format-Table IdentifyingNumber, Name -AutoSize'
+      $NewProductCode = Read-Host -Prompt 'ProductCode' | TrimString
+      if (Test-String $NewProductCode -Not -IsNull) { $_Installer['ProductCode'] = $NewProductCode }
+      elseif (Test-String $_Installer['ProductCode'] -Not -IsNull) { $_Installer['ProductCode'] = "$($_Installer['ProductCode'])" }
 
       if (Test-String $_Installer['ProductCode'] -MinLength $Patterns.ProductCodeMinLength -MaxLength $Patterns.ProductCodeMaxLength -AllowNull) {
         $script:_returnValue = [ReturnValue]::Success()
@@ -1118,14 +1118,14 @@ Function Read-QuickInstallerEntry {
     $_NewInstaller = $_OldInstaller
     $_NewInstaller.Remove('InstallerSha256');
 
-        # Show the user which installer entry they should be entering information for
-        Write-Host -ForegroundColor 'Green' "Installer Entry #$_iteration`:`n"
-        if ($_OldInstaller.InstallerLocale) { Write-Host -ForegroundColor 'Yellow' "`tInstallerLocale: $($_OldInstaller.InstallerLocale)" }
-        if ($_OldInstaller.Architecture) { Write-Host -ForegroundColor 'Yellow' "`tArchitecture: $($_OldInstaller.Architecture)" }
-        if ($_OldInstaller.InstallerType) { Write-Host -ForegroundColor 'Yellow' "`tInstallerType: $($_OldInstaller.InstallerType)" }
-        if ($_OldInstaller.NestedInstallerType ) { Write-Host -ForegroundColor 'Yellow' "`tNestedInstallerType: $($_OldInstaller.NestedInstallerType)" }
-        if ($_OldInstaller.Scope) { Write-Host -ForegroundColor 'Yellow' "`tScope: $($_OldInstaller.Scope)" }
-        Write-Host
+    # Show the user which installer entry they should be entering information for
+    Write-Host -ForegroundColor 'Green' "Installer Entry #$_iteration`:`n"
+    if ($_OldInstaller.InstallerLocale) { Write-Host -ForegroundColor 'Yellow' "`tInstallerLocale: $($_OldInstaller.InstallerLocale)" }
+    if ($_OldInstaller.Architecture) { Write-Host -ForegroundColor 'Yellow' "`tArchitecture: $($_OldInstaller.Architecture)" }
+    if ($_OldInstaller.InstallerType) { Write-Host -ForegroundColor 'Yellow' "`tInstallerType: $($_OldInstaller.InstallerType)" }
+    if ($_OldInstaller.NestedInstallerType ) { Write-Host -ForegroundColor 'Yellow' "`tNestedInstallerType: $($_OldInstaller.NestedInstallerType)" }
+    if ($_OldInstaller.Scope) { Write-Host -ForegroundColor 'Yellow' "`tScope: $($_OldInstaller.Scope)" }
+    Write-Host
 
     # Request user enter the new Installer URL
     $_NewInstaller['InstallerUrl'] = Request-InstallerUrl
@@ -1142,116 +1142,80 @@ Function Read-QuickInstallerEntry {
       elseif ($_NewInstaller.Keys -contains 'SignatureSha256') { $_NewInstaller.Remove('SignatureSha256') }
     }
 
-<<<<<<< HEAD
-=======
-    $_iteration = 0
-    $_NewInstallers = @()
-    foreach ($_OldInstaller in $_OldInstallers) {
-        # Create the new installer as an exact copy of the old installer entry
-        # This is to ensure all previously entered and un-modified parameters are retained
-        $_iteration += 1
-        $_NewInstaller = $_OldInstaller
-        $_NewInstaller.Remove('InstallerSha256');
-
-        # Show the user which installer entry they should be entering information for
-        Write-Host -ForegroundColor 'Green' "Installer Entry #$_iteration`:`n"
-        if ($_OldInstaller.InstallerLocale) { Write-Host -ForegroundColor 'Yellow' "`tInstallerLocale: $($_OldInstaller.InstallerLocale)" }
-        if ($_OldInstaller.Architecture) { Write-Host -ForegroundColor 'Yellow' "`tArchitecture: $($_OldInstaller.Architecture)" }
-        if ($_OldInstaller.InstallerType) { Write-Host -ForegroundColor 'Yellow' "`tInstallerType: $($_OldInstaller.InstallerType)" }
-        if ($_OldInstaller.NestedInstallerType ) { Write-Host -ForegroundColor 'Yellow' "`tNestedInstallerType: $($_OldInstaller.NestedInstallerType)" }
-        if ($_OldInstaller.Scope) { Write-Host -ForegroundColor 'Yellow' "`tScope: $($_OldInstaller.Scope)" }
-        Write-Host
-
-        # Request user enter the new Installer URL
-        $_NewInstaller['InstallerUrl'] = Request-InstallerUrl
-
-        if ($_NewInstaller.InstallerUrl -in ($_NewInstallers).InstallerUrl) {
-            $_MatchingInstaller = $_NewInstallers | Where-Object { $_.InstallerUrl -eq $_NewInstaller.InstallerUrl } | Select-Object -First 1
-            if ($_MatchingInstaller.InstallerSha256) { $_NewInstaller['InstallerSha256'] = $_MatchingInstaller.InstallerSha256 }
-            if ($_MatchingInstaller.InstallerType) { $_NewInstaller['InstallerType'] = $_MatchingInstaller.InstallerType }
-            if ($_MatchingInstaller.ProductCode) { $_NewInstaller['ProductCode'] = $_MatchingInstaller.ProductCode }
-            elseif ( ($_NewInstaller.Keys -contains 'ProductCode') -and ($script:dest -notmatch '.exe$')) { $_NewInstaller.Remove('ProductCode') }
-            if ($_MatchingInstaller.PackageFamilyName) { $_NewInstaller['PackageFamilyName'] = $_MatchingInstaller.PackageFamilyName }
-            elseif ($_NewInstaller.Keys -contains 'PackageFamilyName') { $_NewInstaller.Remove('PackageFamilyName') }
-            if ($_MatchingInstaller.SignatureSha256) { $_NewInstaller['SignatureSha256'] = $_MatchingInstaller.SignatureSha256 }
-            elseif ($_NewInstaller.Keys -contains 'SignatureSha256') { $_NewInstaller.Remove('SignatureSha256') }
+    if ($_NewInstaller.Keys -notcontains 'InstallerSha256') {
+      try {
+        Write-Host -ForegroundColor 'Green' 'Downloading Installer. . .'
+        $script:dest = Get-InstallerFile -URI $_NewInstaller['InstallerUrl'] -PackageIdentifier $PackageIdentifier -PackageVersion $PackageVersion
+      } catch {
+        # Here we also want to pass any exceptions through for potential debugging
+        throw [System.Net.WebException]::new('The file could not be downloaded. Try running the script again', $_.Exception)
+      } finally {
+        # Check that MSI's aren't actually WIX
+        Write-Host -ForegroundColor 'Green' "Installer Downloaded!`nProcessing installer data. . . "
+        if ($_NewInstaller['InstallerType'] -eq 'msi') {
+          $DetectedType = Get-PathInstallerType $script:dest
+          if ($DetectedType -in @('msi'; 'wix')) { $_NewInstaller['InstallerType'] = $DetectedType }
         }
-
->>>>>>> 49c4639a0a (Stage 2 of zip implementation)
-        if ($_NewInstaller.Keys -notcontains 'InstallerSha256') {
-            try {
-                Write-Host -ForegroundColor 'Green' 'Downloading Installer. . .'
-                $script:dest = Get-InstallerFile -URI $_NewInstaller['InstallerUrl'] -PackageIdentifier $PackageIdentifier -PackageVersion $PackageVersion
-            } catch {
-                # Here we also want to pass any exceptions through for potential debugging
-                throw [System.Net.WebException]::new('The file could not be downloaded. Try running the script again', $_.Exception)
-            } finally {
-                # Check that MSI's aren't actually WIX
-                Write-Host -ForegroundColor 'Green' "Installer Downloaded!`nProcessing installer data. . . "
-                if ($_NewInstaller['InstallerType'] -eq 'msi') {
-                    $DetectedType = Get-PathInstallerType $script:dest
-                    if ($DetectedType -in @('msi'; 'wix')) { $_NewInstaller['InstallerType'] = $DetectedType }
-                }
-                # Get the Sha256
-                $_NewInstaller['InstallerSha256'] = (Get-FileHash -Path $script:dest -Algorithm SHA256).Hash
-                # Update the product code, if a new one exists
-                # If a new product code doesn't exist, and the installer isn't an `.exe` file, remove the product code if it exists
-                $MSIProductCode = $null
-                if ([System.Environment]::OSVersion.Platform -match 'Win' -and ($script:dest).EndsWith('.msi')) {
-                    $MSIProductCode = ([string](Get-MSIProperty -MSIPath $script:dest -Parameter 'ProductCode') | Select-String -Pattern '{[A-Z0-9]{8}-([A-Z0-9]{4}-){3}[A-Z0-9]{12}}').Matches.Value
-                } elseif ([System.Environment]::OSVersion.Platform -match 'Unix' -and (Get-Item $script:dest).Name.EndsWith('.msi')) {
-                    $MSIProductCode = ([string](file $script:dest) | Select-String -Pattern '{[A-Z0-9]{8}-([A-Z0-9]{4}-){3}[A-Z0-9]{12}}').Matches.Value
-                }
-                if (Test-String -not $MSIProductCode -IsNull) {
-                    $_NewInstaller['ProductCode'] = $MSIProductCode
-                } elseif ( ($_NewInstaller.Keys -contains 'ProductCode') -and ((Get-EffectiveInstallerType $_Installer) -in @('appx'; 'msi'; 'msix'; 'wix'; 'burn'))) {
-                    $_NewInstaller.Remove('ProductCode')
-                }
-                # If the installer is msix or appx, try getting the new SignatureSha256
-                # If the new SignatureSha256 can't be found, remove it if it exists
-                $NewSignatureSha256 = $null
-                if ($_NewInstaller.InstallerType -in @('msix', 'appx')) {
-                    if (Get-Command 'winget' -ErrorAction SilentlyContinue) { $NewSignatureSha256 = winget hash -m $script:dest | Select-String -Pattern 'SignatureSha256:' | ConvertFrom-String; if ($NewSignatureSha256.P2) { $NewSignatureSha256 = $NewSignatureSha256.P2.ToUpper() } }
-                }
-                if (Test-String -not $NewSignatureSha256 -IsNull) {
-                    $_NewInstaller['SignatureSha256'] = $NewSignatureSha256
-                } elseif ($_NewInstaller.Keys -contains 'SignatureSha256') {
-                    $_NewInstaller.Remove('SignatureSha256')
-                }
-                # If the installer is msix or appx, try getting the new package family name
-                # If the new package family name can't be found, remove it if it exists
-                if ($script:dest -match '\.(msix|appx)(bundle){0,1}$') {
-                    try {
-                        $_didError = $false
-                        Add-AppxPackage -Path $script:dest -ErrorVariable _didError
-                        $InstalledPkg = Get-AppxPackage | Select-Object -Last 1 | Select-Object PackageFamilyName, PackageFullName
-                        $PackageFamilyName = $InstalledPkg.PackageFamilyName
-                        if ($_didError){ Remove-AppxPackage $InstalledPkg.PackageFullName }
-                    } catch {
-                        # Take no action here, we just want to catch the exceptions as a precaution
-                        Out-Null
-                    } finally {
-                        if (Test-String -not $PackageFamilyName -IsNull) {
-                            $_NewInstaller['PackageFamilyName'] = $PackageFamilyName
-                        } elseif ($_NewInstaller.Keys -contains 'PackageFamilyName') {
-                            $_NewInstaller.Remove('PackageFamilyName')
-                        }
-                    }
-                }
-                # Remove the downloaded files
-                Remove-Item -Path $script:dest
-                Write-Host -ForegroundColor 'Green' "Installer updated!`n"
+        # Get the Sha256
+        $_NewInstaller['InstallerSha256'] = (Get-FileHash -Path $script:dest -Algorithm SHA256).Hash
+        # Update the product code, if a new one exists
+        # If a new product code doesn't exist, and the installer isn't an `.exe` file, remove the product code if it exists
+        $MSIProductCode = $null
+        if ([System.Environment]::OSVersion.Platform -match 'Win' -and ($script:dest).EndsWith('.msi')) {
+          $MSIProductCode = ([string](Get-MSIProperty -MSIPath $script:dest -Parameter 'ProductCode') | Select-String -Pattern '{[A-Z0-9]{8}-([A-Z0-9]{4}-){3}[A-Z0-9]{12}}').Matches.Value
+        } elseif ([System.Environment]::OSVersion.Platform -match 'Unix' -and (Get-Item $script:dest).Name.EndsWith('.msi')) {
+          $MSIProductCode = ([string](file $script:dest) | Select-String -Pattern '{[A-Z0-9]{8}-([A-Z0-9]{4}-){3}[A-Z0-9]{12}}').Matches.Value
+        }
+        if (Test-String -not $MSIProductCode -IsNull) {
+          $_NewInstaller['ProductCode'] = $MSIProductCode
+        } elseif ( ($_NewInstaller.Keys -contains 'ProductCode') -and ((Get-EffectiveInstallerType $_Installer) -in @('appx'; 'msi'; 'msix'; 'wix'; 'burn'))) {
+          $_NewInstaller.Remove('ProductCode')
+        }
+        # If the installer is msix or appx, try getting the new SignatureSha256
+        # If the new SignatureSha256 can't be found, remove it if it exists
+        $NewSignatureSha256 = $null
+        if ($_NewInstaller.InstallerType -in @('msix', 'appx')) {
+          if (Get-Command 'winget' -ErrorAction SilentlyContinue) { $NewSignatureSha256 = winget hash -m $script:dest | Select-String -Pattern 'SignatureSha256:' | ConvertFrom-String; if ($NewSignatureSha256.P2) { $NewSignatureSha256 = $NewSignatureSha256.P2.ToUpper() } }
+        }
+        if (Test-String -not $NewSignatureSha256 -IsNull) {
+          $_NewInstaller['SignatureSha256'] = $NewSignatureSha256
+        } elseif ($_NewInstaller.Keys -contains 'SignatureSha256') {
+          $_NewInstaller.Remove('SignatureSha256')
+        }
+        # If the installer is msix or appx, try getting the new package family name
+        # If the new package family name can't be found, remove it if it exists
+        if ($script:dest -match '\.(msix|appx)(bundle){0,1}$') {
+          try {
+            $_didError = $false
+            Add-AppxPackage -Path $script:dest -ErrorVariable _didError
+            $InstalledPkg = Get-AppxPackage | Select-Object -Last 1 | Select-Object PackageFamilyName, PackageFullName
+            $PackageFamilyName = $InstalledPkg.PackageFamilyName
+            if ($_didError) { Remove-AppxPackage $InstalledPkg.PackageFullName }
+          } catch {
+            # Take no action here, we just want to catch the exceptions as a precaution
+            Out-Null
+          } finally {
+            if (Test-String -not $PackageFamilyName -IsNull) {
+              $_NewInstaller['PackageFamilyName'] = $PackageFamilyName
+            } elseif ($_NewInstaller.Keys -contains 'PackageFamilyName') {
+              $_NewInstaller.Remove('PackageFamilyName')
             }
+          }
         }
-
-        # Force a re-check of the Nested Installer Paths in case they changed between versions
-        $_NewInstaller = Read-NestedInstaller $_NewInstaller
-
-        #Add the updated installer to the new installers array
-        $_NewInstaller = Restore-YamlKeyOrder $_NewInstaller $InstallerEntryProperties -NoComments
-        $_NewInstallers += $_NewInstaller
+        # Remove the downloaded files
+        Remove-Item -Path $script:dest
+        Write-Host -ForegroundColor 'Green' "Installer updated!`n"
+      }
     }
-    $script:Installers = $_NewInstallers
+
+    # Force a re-check of the Nested Installer Paths in case they changed between versions
+    $_NewInstaller = Read-NestedInstaller $_NewInstaller
+
+    #Add the updated installer to the new installers array
+    $_NewInstaller = Restore-YamlKeyOrder $_NewInstaller $InstallerEntryProperties -NoComments
+    $_NewInstallers += $_NewInstaller
+  }
+  $script:Installers = $_NewInstallers
 }
 
 # Requests the user enter an optional value with a prompt
@@ -1293,23 +1257,23 @@ Function Restore-YamlKeyOrder {
     [switch] $NoComments
   )
 
-    $_ExcludedKeys = @(
-        'InstallerSwitches'
-        'Capabilities'
-        'RestrictedCapabilities'
-        'InstallerSuccessCodes'
-        'ProductCode'
-        'PackageFamilyName'
-        'InstallerLocale'
-        'InstallerType'
-        'NestedInstallerType'
-        'NestedInstallerFiles'
-        'Scope'
-        'UpgradeBehavior'
-        'Dependencies'
-        'InstallationMetadata'
-        'Platform'
-    )
+  $_ExcludedKeys = @(
+    'InstallerSwitches'
+    'Capabilities'
+    'RestrictedCapabilities'
+    'InstallerSuccessCodes'
+    'ProductCode'
+    'PackageFamilyName'
+    'InstallerLocale'
+    'InstallerType'
+    'NestedInstallerType'
+    'NestedInstallerFiles'
+    'Scope'
+    'UpgradeBehavior'
+    'Dependencies'
+    'InstallationMetadata'
+    'Platform'
+  )
 
   $_Temp = [ordered] @{}
   $SortOrder.GetEnumerator() | ForEach-Object {
@@ -2005,14 +1969,14 @@ Function Write-InstallerManifest {
   }
   if (!$InstallerManifest) { [PSCustomObject]$InstallerManifest = [ordered]@{} }
 
-    #Add the properties to the manifest
-    Add-YamlParameter -Object $InstallerManifest -Parameter 'PackageIdentifier' -Value $PackageIdentifier
-    Add-YamlParameter -Object $InstallerManifest -Parameter 'PackageVersion' -Value $PackageVersion
-    If ($MinimumOSVersion) {
-        $InstallerManifest['MinimumOSVersion'] = $MinimumOSVersion
-    } Else {
-        If ($InstallerManifest['MinimumOSVersion']) {$_InstallerManifest.Remove('MinimumOSVersion')}
-    }
+  #Add the properties to the manifest
+  Add-YamlParameter -Object $InstallerManifest -Parameter 'PackageIdentifier' -Value $PackageIdentifier
+  Add-YamlParameter -Object $InstallerManifest -Parameter 'PackageVersion' -Value $PackageVersion
+  If ($MinimumOSVersion) {
+    $InstallerManifest['MinimumOSVersion'] = $MinimumOSVersion
+  } Else {
+    If ($InstallerManifest['MinimumOSVersion']) { $_InstallerManifest.Remove('MinimumOSVersion') }
+  }
 
   $_ListSections = [ordered]@{
     'FileExtensions'        = $FileExtensions
@@ -2033,69 +1997,78 @@ Function Write-InstallerManifest {
     $InstallerManifest['Installers'] = $script:OldVersionManifest['Installers']
   }
 
-    foreach ($_Installer in $InstallerManifest.Installers) {
-        if ($_Installer['ReleaseDate'] -and !$script:ReleaseDatePrompted -and !$Preserve) { $_Installer.Remove('ReleaseDate') }
+  foreach ($_Installer in $InstallerManifest.Installers) {
+    if ($_Installer['ReleaseDate'] -and !$script:ReleaseDatePrompted -and !$Preserve) { $_Installer.Remove('ReleaseDate') }
+    elseif ($Preserve) {
+      try {
+        Get-Date([datetime]$($_Installer['ReleaseDate'])) -f 'yyyy-MM-dd' -OutVariable _ValidDate | Out-Null
+        if ($_ValidDate) { $_Installer['ReleaseDate'] = $_ValidDate | TrimString }
+      } catch {
+        # Release date isn't valid
+        $_Installer.Remove('ReleaseDate')
+      }
     }
+  }
 
-    Add-YamlParameter -Object $InstallerManifest -Parameter 'ManifestType' -Value 'installer'
-    Add-YamlParameter -Object $InstallerManifest -Parameter 'ManifestVersion' -Value $ManifestVersion
-    If ($InstallerManifest['Dependencies']) {
-        $InstallerManifest['Dependencies'] = Restore-YamlKeyOrder $InstallerManifest['Dependencies'] $InstallerDependencyProperties -NoComments
-    }
-    # Move Installer Level Keys to Manifest Level
-    $_KeysToMove = $InstallerEntryProperties | Where-Object { $_ -in $InstallerProperties -and $_ -notin @('ProductCode','NestedInstallerFiles','NestedInstallerType') }
-    foreach ($_Key in $_KeysToMove) {
-        if ($_Key -in $InstallerManifest.Installers[0].Keys) {
-            # Handle the switches specially
-            if ($_Key -eq 'InstallerSwitches') {
-                # Go into each of the subkeys to see if they are the same
-                foreach ($_InstallerSwitchKey in $InstallerManifest.Installers[0].$_Key.Keys) {
-                    $_AllAreSame = $true
-                    $_FirstInstallerSwitchKeyValue = ConvertTo-Json($InstallerManifest.Installers[0].$_Key.$_InstallerSwitchKey)
-                    foreach ($_Installer in $InstallerManifest.Installers) {
-                        $_CurrentInstallerSwitchKeyValue = ConvertTo-Json($_Installer.$_Key.$_InstallerSwitchKey)
-                        if (Test-String $_CurrentInstallerSwitchKeyValue -IsNull) { $_AllAreSame = $false }
-                        else { $_AllAreSame = $_AllAreSame -and (@(Compare-Object $_CurrentInstallerSwitchKeyValue $_FirstInstallerSwitchKeyValue).Length -eq 0) }
-                    }
-                    if ($_AllAreSame) {
-                        if ($_Key -notin $InstallerManifest.Keys) { $InstallerManifest[$_Key] = @{} }
-                        $InstallerManifest.$_Key[$_InstallerSwitchKey] = $InstallerManifest.Installers[0].$_Key.$_InstallerSwitchKey
-                    }
-                }
-                # Remove them from the individual installer switches if we moved them to the manifest level
-                if ($_Key -in $InstallerManifest.Keys) {
-                    foreach ($_InstallerSwitchKey in $InstallerManifest.$_Key.Keys) {
-                        foreach ($_Installer in $InstallerManifest.Installers) {
-                            if ($_Installer.Keys -contains $_Key) {
-                                if ($_Installer.$_Key.Keys -contains $_InstallerSwitchKey) { $_Installer.$_Key.Remove($_InstallerSwitchKey) }
-                                if (@($_Installer.$_Key.Keys).Count -eq 0) { $_Installer.Remove($_Key) }
-                            }
-                        }
-                    }
-                }
-            } else {
-                # Check if all installers are the same
-                $_AllAreSame = $true
-                $_FirstInstallerKeyValue = ConvertTo-Json($InstallerManifest.Installers[0].$_Key)
-                foreach ($_Installer in $InstallerManifest.Installers) {
-                    $_CurrentInstallerKeyValue = ConvertTo-Json($_Installer.$_Key)
-                    if (Test-String $_CurrentInstallerKeyValue -IsNull) { $_AllAreSame = $false }
-                    else { $_AllAreSame = $_AllAreSame -and (@(Compare-Object $_CurrentInstallerKeyValue $_FirstInstallerKeyValue).Length -eq 0) }
-                }
-                # If all installers are the same move the key to the manifest level
-                if ($_AllAreSame) {
-                    $InstallerManifest[$_Key] = $InstallerManifest.Installers[0].$_Key
-                    foreach ($_Installer in $InstallerManifest.Installers) {
-                        $_Installer.Remove($_Key)
-                    }
-                }
-            }
+  Add-YamlParameter -Object $InstallerManifest -Parameter 'ManifestType' -Value 'installer'
+  Add-YamlParameter -Object $InstallerManifest -Parameter 'ManifestVersion' -Value $ManifestVersion
+  If ($InstallerManifest['Dependencies']) {
+    $InstallerManifest['Dependencies'] = Restore-YamlKeyOrder $InstallerManifest['Dependencies'] $InstallerDependencyProperties -NoComments
+  }
+  # Move Installer Level Keys to Manifest Level
+  $_KeysToMove = $InstallerEntryProperties | Where-Object { $_ -in $InstallerProperties -and $_ -notin @('ProductCode', 'NestedInstallerFiles', 'NestedInstallerType') }
+  foreach ($_Key in $_KeysToMove) {
+    if ($_Key -in $InstallerManifest.Installers[0].Keys) {
+      # Handle the switches specially
+      if ($_Key -eq 'InstallerSwitches') {
+        # Go into each of the subkeys to see if they are the same
+        foreach ($_InstallerSwitchKey in $InstallerManifest.Installers[0].$_Key.Keys) {
+          $_AllAreSame = $true
+          $_FirstInstallerSwitchKeyValue = ConvertTo-Json($InstallerManifest.Installers[0].$_Key.$_InstallerSwitchKey)
+          foreach ($_Installer in $InstallerManifest.Installers) {
+            $_CurrentInstallerSwitchKeyValue = ConvertTo-Json($_Installer.$_Key.$_InstallerSwitchKey)
+            if (Test-String $_CurrentInstallerSwitchKeyValue -IsNull) { $_AllAreSame = $false }
+            else { $_AllAreSame = $_AllAreSame -and (@(Compare-Object $_CurrentInstallerSwitchKeyValue $_FirstInstallerSwitchKeyValue).Length -eq 0) }
+          }
+          if ($_AllAreSame) {
+            if ($_Key -notin $InstallerManifest.Keys) { $InstallerManifest[$_Key] = @{} }
+            $InstallerManifest.$_Key[$_InstallerSwitchKey] = $InstallerManifest.Installers[0].$_Key.$_InstallerSwitchKey
+          }
         }
+        # Remove them from the individual installer switches if we moved them to the manifest level
+        if ($_Key -in $InstallerManifest.Keys) {
+          foreach ($_InstallerSwitchKey in $InstallerManifest.$_Key.Keys) {
+            foreach ($_Installer in $InstallerManifest.Installers) {
+              if ($_Installer.Keys -contains $_Key) {
+                if ($_Installer.$_Key.Keys -contains $_InstallerSwitchKey) { $_Installer.$_Key.Remove($_InstallerSwitchKey) }
+                if (@($_Installer.$_Key.Keys).Count -eq 0) { $_Installer.Remove($_Key) }
+              }
+            }
+          }
+        }
+      } else {
+        # Check if all installers are the same
+        $_AllAreSame = $true
+        $_FirstInstallerKeyValue = ConvertTo-Json($InstallerManifest.Installers[0].$_Key)
+        foreach ($_Installer in $InstallerManifest.Installers) {
+          $_CurrentInstallerKeyValue = ConvertTo-Json($_Installer.$_Key)
+          if (Test-String $_CurrentInstallerKeyValue -IsNull) { $_AllAreSame = $false }
+          else { $_AllAreSame = $_AllAreSame -and (@(Compare-Object $_CurrentInstallerKeyValue $_FirstInstallerKeyValue).Length -eq 0) }
+        }
+        # If all installers are the same move the key to the manifest level
+        if ($_AllAreSame) {
+          $InstallerManifest[$_Key] = $InstallerManifest.Installers[0].$_Key
+          foreach ($_Installer in $InstallerManifest.Installers) {
+            $_Installer.Remove($_Key)
+          }
+        }
+      }
     }
-    if ($InstallerManifest.Keys -contains 'InstallerSwitches') { $InstallerManifest['InstallerSwitches'] = Restore-YamlKeyOrder $InstallerManifest.InstallerSwitches $InstallerSwitchProperties -NoComments }
-    foreach ($_Installer in $InstallerManifest.Installers) {
-        if ($_Installer.Keys -contains 'InstallerSwitches') { $_Installer['InstallerSwitches'] = Restore-YamlKeyOrder $_Installer.InstallerSwitches $InstallerSwitchProperties -NoComments }
-    }
+  }
+  if ($InstallerManifest.Keys -contains 'InstallerSwitches') { $InstallerManifest['InstallerSwitches'] = Restore-YamlKeyOrder $InstallerManifest.InstallerSwitches $InstallerSwitchProperties -NoComments }
+  foreach ($_Installer in $InstallerManifest.Installers) {
+    if ($_Installer.Keys -contains 'InstallerSwitches') { $_Installer['InstallerSwitches'] = Restore-YamlKeyOrder $_Installer.InstallerSwitches $InstallerSwitchProperties -NoComments }
+  }
 
   # Clean up the existing files just in case
   if ($InstallerManifest['Commands']) { $InstallerManifest['Commands'] = @($InstallerManifest['Commands'] | UniqueItems | NoWhitespace | Sort-Object) }
@@ -2162,9 +2135,9 @@ Function Write-LocaleManifest {
   if ($LocaleManifest['Tags']) { $LocaleManifest['Tags'] = @($LocaleManifest['Tags'] | ToLower | UniqueItems | NoWhitespace | Sort-Object) }
   if ($LocaleManifest['Moniker']) { $LocaleManifest['Moniker'] = $LocaleManifest['Moniker'] | ToLower | NoWhitespace }
 
-    # Clean up the volatile fields
-    if ($LocaleManifest['ReleaseNotes'] -and (Test-String $script:ReleaseNotes -IsNull) -and !$Preserve) { $LocaleManifest.Remove('ReleaseNotes') }
-    if ($LocaleManifest['ReleaseNotesUrl'] -and (Test-String $script:ReleaseNotesUrl -IsNull) -and !$Preserve) { $LocaleManifest.Remove('ReleaseNotesUrl') }
+  # Clean up the volatile fields
+  if ($LocaleManifest['ReleaseNotes'] -and (Test-String $script:ReleaseNotes -IsNull) -and !$Preserve) { $LocaleManifest.Remove('ReleaseNotes') }
+  if ($LocaleManifest['ReleaseNotesUrl'] -and (Test-String $script:ReleaseNotesUrl -IsNull) -and !$Preserve) { $LocaleManifest.Remove('ReleaseNotesUrl') }
 
   $LocaleManifest = Restore-YamlKeyOrder $LocaleManifest $LocaleProperties
 
@@ -2194,9 +2167,9 @@ Function Write-LocaleManifest {
         # Clean up the existing files just in case
         if ($script:OldLocaleManifest['Tags']) { $script:OldLocaleManifest['Tags'] = @($script:OldLocaleManifest['Tags'] | ToLower | UniqueItems | NoWhitespace | Sort-Object) }
 
-                # Clean up the volatile fields
-                if ($OldLocaleManifest['ReleaseNotes'] -and (Test-String $script:ReleaseNotes -IsNull) -and !$Preserve) { $OldLocaleManifest.Remove('ReleaseNotes') }
-                if ($OldLocaleManifest['ReleaseNotesUrl'] -and (Test-String $script:ReleaseNotesUrl -IsNull) -and !$Preserve) { $OldLocaleManifest.Remove('ReleaseNotesUrl') }
+        # Clean up the volatile fields
+        if ($OldLocaleManifest['ReleaseNotes'] -and (Test-String $script:ReleaseNotes -IsNull) -and !$Preserve) { $OldLocaleManifest.Remove('ReleaseNotes') }
+        if ($OldLocaleManifest['ReleaseNotesUrl'] -and (Test-String $script:ReleaseNotesUrl -IsNull) -and !$Preserve) { $OldLocaleManifest.Remove('ReleaseNotesUrl') }
 
         $script:OldLocaleManifest = Restore-YamlKeyOrder $script:OldLocaleManifest $LocaleProperties
 
@@ -2551,28 +2524,28 @@ if ($OldManifests.Name -eq "$PackageIdentifier.installer.yaml" -and $OldManifest
 
 # If the old manifests exist, read the manifest keys into their specific variables
 if ($OldManifests -and $Option -ne 'NewLocale') {
-    $_Parameters = @(
-        'Publisher'; 'PublisherUrl'; 'PublisherSupportUrl'; 'PrivacyUrl'
-        'Author';
-        'PackageName'; 'PackageUrl'; 'Moniker'
-        'License'; 'LicenseUrl'
-        'Copyright'; 'CopyrightUrl'
-        'ShortDescription'; 'Description'
-        'Channel'
-        'Platform'; 'MinimumOSVersion'
-        'InstallerType'; 'NestedInstallerType'
-        'Scope'
-        'UpgradeBehavior'
-        'PackageFamilyName'; 'ProductCode'
-        'Tags'; 'FileExtensions'
-        'Protocols'; 'Commands'
-        'InstallerSuccessCodes'
-        'Capabilities'; 'RestrictedCapabilities'
-    )
-    Foreach ($param in $_Parameters) {
-        $_ReadValue = $(if ($script:OldManifestType -eq 'MultiManifest') { (Get-MultiManifestParameter $param) } else { $script:OldVersionManifest[$param] })
-        if (Test-String -Not $_ReadValue -IsNull) { New-Variable -Name $param -Value $_ReadValue -Scope Script -Force }
-    }
+  $_Parameters = @(
+    'Publisher'; 'PublisherUrl'; 'PublisherSupportUrl'; 'PrivacyUrl'
+    'Author';
+    'PackageName'; 'PackageUrl'; 'Moniker'
+    'License'; 'LicenseUrl'
+    'Copyright'; 'CopyrightUrl'
+    'ShortDescription'; 'Description'
+    'Channel'
+    'Platform'; 'MinimumOSVersion'
+    'InstallerType'; 'NestedInstallerType'
+    'Scope'
+    'UpgradeBehavior'
+    'PackageFamilyName'; 'ProductCode'
+    'Tags'; 'FileExtensions'
+    'Protocols'; 'Commands'
+    'InstallerSuccessCodes'
+    'Capabilities'; 'RestrictedCapabilities'
+  )
+  Foreach ($param in $_Parameters) {
+    $_ReadValue = $(if ($script:OldManifestType -eq 'MultiManifest') { (Get-MultiManifestParameter $param) } else { $script:OldVersionManifest[$param] })
+    if (Test-String -Not $_ReadValue -IsNull) { New-Variable -Name $param -Value $_ReadValue -Scope Script -Force }
+  }
 }
 
 # If the old manifests exist, make sure to use the same casing as the existing package identifier
