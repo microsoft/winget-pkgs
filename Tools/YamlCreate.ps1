@@ -1222,11 +1222,11 @@ Function Read-QuickInstallerEntry {
                 # If the new package family name can't be found, remove it if it exists
                 if ($script:dest -match '\.(msix|appx)(bundle){0,1}$') {
                     try {
-                        Add-AppxPackage -Path $script:dest
+                        $_didError = $false
+                        Add-AppxPackage -Path $script:dest -ErrorVariable _didError
                         $InstalledPkg = Get-AppxPackage | Select-Object -Last 1 | Select-Object PackageFamilyName, PackageFullName
                         $PackageFamilyName = $InstalledPkg.PackageFamilyName
-                        # TODO: If Adding failed, don't remove
-                        Remove-AppxPackage $InstalledPkg.PackageFullName
+                        if ($_didError){ Remove-AppxPackage $InstalledPkg.PackageFullName }
                     } catch {
                         # Take no action here, we just want to catch the exceptions as a precaution
                         Out-Null
@@ -2008,7 +2008,11 @@ Function Write-InstallerManifest {
     #Add the properties to the manifest
     Add-YamlParameter -Object $InstallerManifest -Parameter 'PackageIdentifier' -Value $PackageIdentifier
     Add-YamlParameter -Object $InstallerManifest -Parameter 'PackageVersion' -Value $PackageVersion
-    $InstallerManifest['MinimumOSVersion'] = If ($MinimumOSVersion) { $MinimumOSVersion } Else { "$([char]0x2370)" }
+    If ($MinimumOSVersion) {
+        $InstallerManifest['MinimumOSVersion'] = $MinimumOSVersion
+    } Else {
+        If ($InstallerManifest['MinimumOSVersion']) {$_InstallerManifest.Remove('MinimumOSVersion')}
+    }
 
   $_ListSections = [ordered]@{
     'FileExtensions'        = $FileExtensions
