@@ -1198,7 +1198,7 @@ Function Read-QuickInstallerEntry {
             Add-AppxPackage -Path $script:dest -ErrorVariable _didError
             $InstalledPkg = Get-AppxPackage | Select-Object -Last 1 | Select-Object PackageFamilyName, PackageFullName
             $PackageFamilyName = $InstalledPkg.PackageFamilyName
-            if ($_didError) { Remove-AppxPackage $InstalledPkg.PackageFullName }
+            if (!$_didError) { Remove-AppxPackage $InstalledPkg.PackageFullName }
           } catch {
             # Take no action here, we just want to catch the exceptions as a precaution
             Out-Null
