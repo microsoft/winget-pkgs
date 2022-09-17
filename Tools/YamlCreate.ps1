@@ -163,7 +163,7 @@ $callingCulture = [Threading.Thread]::CurrentThread.CurrentCulture
 [Threading.Thread]::CurrentThread.CurrentCulture = 'en-US'
 if (-not ([System.Environment]::OSVersion.Platform -match 'Win')) { $env:TEMP = '/tmp/' }
 
-$useDirectSchemaLink = (Invoke-WebRequest "https://aka.ms/winget-manifest.version.$ManifestVersion.schema.json").BaseResponse.ContentLenth -eq -1
+$useDirectSchemaLink = (Invoke-WebRequest "https://aka.ms/winget-manifest.version.$ManifestVersion.schema.json" -UseBasicParsing).BaseResponse.ContentLength -eq -1
 $SchemaUrls = @{
   version = if($useDirectSchemaLink) {"https://raw.githubusercontent.com/microsoft/winget-cli/master/schemas/JSON/manifests/v$ManifestVersion/manifest.version.$ManifestVersion.json"} else {"https://aka.ms/winget-manifest.version.$ManifestVersion.schema.json"}
   defaultLocale = if($useDirectSchemaLink) {"https://raw.githubusercontent.com/microsoft/winget-cli/master/schemas/JSON/manifests/v$ManifestVersion/manifest.defaultLocale.$ManifestVersion.json"} else {"https://aka.ms/winget-manifest.defaultLocale.$ManifestVersion.schema.json"}
