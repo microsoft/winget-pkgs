@@ -1942,6 +1942,11 @@ Function Write-InstallerManifest {
   New-Item -ItemType 'Directory' -Force -Path $AppFolder | Out-Null
   $script:InstallerManifestPath = Join-Path $AppFolder -ChildPath "$PackageIdentifier.installer.yaml"
 
+  # Write the manifest to the file
+  $ScriptHeader + "$(Get-DebugString)`n# yaml-language-server: `$schema=https://aka.ms/winget-manifest.installer.$ManifestVersion.schema.json`n" > $InstallerManifestPath
+  ConvertTo-Yaml $InstallerManifest >> $InstallerManifestPath
+  $(Get-Content $InstallerManifestPath -Encoding UTF8) -replace "(.*)$([char]0x2370)", "# `$1" | Out-File -FilePath $InstallerManifestPath -Force
+  $MyRawString = Get-Content $InstallerManifestPath | RightTrimString | Select-Object -SkipLast 1 # Skip the last one because it will always just be an empty newline
   [System.IO.File]::WriteAllLines($InstallerManifestPath, $MyRawString, $Utf8NoBomEncoding)
 
   # Tell user the file was created and the path to the file
