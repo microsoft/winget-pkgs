@@ -206,6 +206,10 @@ filter TrimString {
   $_.Trim()
 }
 
+filter RightTrimString {
+  $_.TrimEnd()
+}
+
 filter UniqueItems {
   [string]$($_.Split(',').Trim() | Select-Object -Unique)
 }
@@ -1823,7 +1827,7 @@ Function Write-VersionManifest {
   $ScriptHeader + "$(Get-DebugString)`n# yaml-language-server: `$schema=https://aka.ms/winget-manifest.version.$ManifestVersion.schema.json`n" > $VersionManifestPath
   ConvertTo-Yaml $VersionManifest >> $VersionManifestPath
   $(Get-Content $VersionManifestPath -Encoding UTF8) -replace "(.*)$([char]0x2370)", "# `$1" | Out-File -FilePath $VersionManifestPath -Force
-  $MyRawString = Get-Content -Raw $VersionManifestPath | TrimString
+  $MyRawString = Get-Content $VersionManifestPath | RightTrimString | Select-Object -SkipLast 1 # Skip the last one because it will always just be an empty newline
   [System.IO.File]::WriteAllLines($VersionManifestPath, $MyRawString, $Utf8NoBomEncoding)
 
   # Tell user the file was created and the path to the file
@@ -1942,7 +1946,7 @@ Function Write-InstallerManifest {
   $ScriptHeader + "$(Get-DebugString)`n# yaml-language-server: `$schema=https://aka.ms/winget-manifest.installer.$ManifestVersion.schema.json`n" > $InstallerManifestPath
   ConvertTo-Yaml $InstallerManifest >> $InstallerManifestPath
   $(Get-Content $InstallerManifestPath -Encoding UTF8) -replace "(.*)$([char]0x2370)", "# `$1" | Out-File -FilePath $InstallerManifestPath -Force
-  $MyRawString = Get-Content -Raw $InstallerManifestPath | TrimString
+  $MyRawString = Get-Content $InstallerManifestPath | RightTrimString | Select-Object -SkipLast 1 # Skip the last one because it will always just be an empty newline
   [System.IO.File]::WriteAllLines($InstallerManifestPath, $MyRawString, $Utf8NoBomEncoding)
 
   # Tell user the file was created and the path to the file
@@ -2009,7 +2013,7 @@ Function Write-LocaleManifest {
   $ScriptHeader + "$(Get-DebugString)`n$yamlServer`n" > $LocaleManifestPath
   ConvertTo-Yaml $LocaleManifest >> $LocaleManifestPath
   $(Get-Content $LocaleManifestPath -Encoding UTF8) -replace "(.*)$([char]0x2370)", "# `$1" | Out-File -FilePath $LocaleManifestPath -Force
-  $MyRawString = Get-Content -Raw $LocaleManifestPath | TrimString
+  $MyRawString = Get-Content $LocaleManifestPath | RightTrimString | Select-Object -SkipLast 1 # Skip the last one because it will always just be an empty newline
   [System.IO.File]::WriteAllLines($LocaleManifestPath, $MyRawString, $Utf8NoBomEncoding)
 
   # Copy over all locale files from previous version that aren't the same
@@ -2035,7 +2039,7 @@ Function Write-LocaleManifest {
         $ScriptHeader + "$(Get-DebugString)`n$yamlServer`n" > (Join-Path $AppFolder -ChildPath $DifLocale.Name)
         ConvertTo-Yaml $OldLocaleManifest >> (Join-Path $AppFolder -ChildPath $DifLocale.Name)
         $(Get-Content $(Join-Path $AppFolder -ChildPath $DifLocale.Name) -Encoding UTF8) -replace "(.*)$([char]0x2370)", "# `$1" | Out-File -FilePath $(Join-Path $AppFolder -ChildPath $DifLocale.Name) -Force
-        $MyRawString = Get-Content -Raw $(Join-Path $AppFolder -ChildPath $DifLocale.Name) | TrimString
+        $MyRawString = Get-Content $(Join-Path $AppFolder -ChildPath $DifLocale.Name) | RightTrimStrin | Select-Object -SkipLast 1 # Skip the last one because it will always just be an empty newline
         [System.IO.File]::WriteAllLines($(Join-Path $AppFolder -ChildPath $DifLocale.Name), $MyRawString, $Utf8NoBomEncoding)
       }
     }
