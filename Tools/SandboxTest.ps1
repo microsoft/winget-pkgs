@@ -158,20 +158,20 @@ foreach ($dependency in $dependencies) {
 
 if (-Not (Test-Path (Join-Path -Path $tempFolder -ChildPath \Microsoft.UI.Xaml.2.7\tools\AppX\x64\Release\Microsoft.UI.Xaml.2.7.appx))) {
   Expand-Archive -Path $uiLibsUwp.file -DestinationPath ($tempFolder + '\Microsoft.UI.Xaml.2.7') -Force
-}  
+}
 $uiLibsUwp.file = (Join-Path -Path $tempFolder -ChildPath \Microsoft.UI.Xaml.2.7\tools\AppX\x64\Release\Microsoft.UI.Xaml.2.7.appx)
 $uiLibsUwp.pathInSandbox = Join-Path -Path $desktopInSandbox -ChildPath (Join-Path -Path $tempFolderName -ChildPath \Microsoft.UI.Xaml.2.7\tools\AppX\x64\Release\Microsoft.UI.Xaml.2.7.appx)
 Write-Host
 
 # Create Bootstrap settings
-# dependencies and portableInstall are enabled for forward compatibility with PR's
+# dependencies and zipInstall are enabled for forward compatibility with PR's
 $bootstrapSettingsContent = @{}
 $bootstrapSettingsContent['$schema'] = 'https://aka.ms/winget-settings.schema.json'
 $bootstrapSettingsContent['logging'] = @{level = 'verbose' }
 if ($EnableExperimentalFeatures) {
   $bootstrapSettingsContent['experimentalFeatures'] = @{
     dependencies    = $true
-    portableInstall = $true
+    zipInstall      = $true
   }
 }
 
@@ -201,7 +201,7 @@ function Update-EnvironmentVariables {
 
 function Get-ARPTable {
   $registry_paths = @('HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*','HKLM:\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*', 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*', 'HKCU:\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*')
-  return Get-ItemProperty $registry_paths -ErrorAction SilentlyContinue | 
+  return Get-ItemProperty $registry_paths -ErrorAction SilentlyContinue |
        Select-Object DisplayName, DisplayVersion, Publisher, @{N='ProductCode'; E={$_.PSChildName}} |
        Where-Object {$null -ne $_.DisplayName }
 }
@@ -337,3 +337,4 @@ $Script
 Write-Host
 
 WindowsSandbox $SandboxTestWsbFile
+
