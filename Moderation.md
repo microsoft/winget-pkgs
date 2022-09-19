@@ -20,4 +20,4 @@ Moderators should review PRs to ensure the metadata is accurate and that the Win
 
 ### Providing Feedback
 
-Moderators are often on the front line when new issues are identified. They should collaborate with each other, the community, and the product team. This will help ensure the Windows Package Manager continues to improve. Sometimes this could be by creating an Issue or a Discussion. Other times this may just be discussion in a PR. Moderators are ambassadors for the Windows Package Manager. Their tone sets the example others will follow. 
+Moderators are often on the front line when new issues are identified. They should collaborate with each other, the community, and the product team. This will help ensure the Windows Package Manager continues to improve. Sometimes this could be by creating an Issue or a Discussion. Other times this may just be discussion in a PR. Moderators are ambassadors for the Windows Package Manager. Their tone sets the example others will follow.
