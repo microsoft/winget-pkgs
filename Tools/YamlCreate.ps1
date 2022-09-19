@@ -171,10 +171,10 @@ if ($ScriptSettings.EnableDeveloperOptions -eq $true -and $null -ne $ScriptSetti
 
 $useDirectSchemaLink = (Invoke-WebRequest "https://aka.ms/winget-manifest.version.$ManifestVersion.schema.json" -UseBasicParsing).BaseResponse.ContentLength -eq -1
 $SchemaUrls = @{
-  version = if($useDirectSchemaLink) {"https://raw.githubusercontent.com/microsoft/winget-cli/master/schemas/JSON/manifests/v$ManifestVersion/manifest.version.$ManifestVersion.json"} else {"https://aka.ms/winget-manifest.version.$ManifestVersion.schema.json"}
-  defaultLocale = if($useDirectSchemaLink) {"https://raw.githubusercontent.com/microsoft/winget-cli/master/schemas/JSON/manifests/v$ManifestVersion/manifest.defaultLocale.$ManifestVersion.json"} else {"https://aka.ms/winget-manifest.defaultLocale.$ManifestVersion.schema.json"}
-  locale = if($useDirectSchemaLink) {"https://raw.githubusercontent.com/microsoft/winget-cli/master/schemas/JSON/manifests/v$ManifestVersion/manifest.locale.$ManifestVersion.json"} else {"https://aka.ms/winget-manifest.locale.$ManifestVersion.schema.json"}
-  installer = if($useDirectSchemaLink) {"https://raw.githubusercontent.com/microsoft/winget-cli/master/schemas/JSON/manifests/v$ManifestVersion/manifest.installer.$ManifestVersion.json"} else  {"https://aka.ms/winget-manifest.installer.$ManifestVersion.schema.json"}
+  version       = if ($useDirectSchemaLink) { "https://raw.githubusercontent.com/microsoft/winget-cli/master/schemas/JSON/manifests/v$ManifestVersion/manifest.version.$ManifestVersion.json" } else { "https://aka.ms/winget-manifest.version.$ManifestVersion.schema.json" }
+  defaultLocale = if ($useDirectSchemaLink) { "https://raw.githubusercontent.com/microsoft/winget-cli/master/schemas/JSON/manifests/v$ManifestVersion/manifest.defaultLocale.$ManifestVersion.json" } else { "https://aka.ms/winget-manifest.defaultLocale.$ManifestVersion.schema.json" }
+  locale        = if ($useDirectSchemaLink) { "https://raw.githubusercontent.com/microsoft/winget-cli/master/schemas/JSON/manifests/v$ManifestVersion/manifest.locale.$ManifestVersion.json" } else { "https://aka.ms/winget-manifest.locale.$ManifestVersion.schema.json" }
+  installer     = if ($useDirectSchemaLink) { "https://raw.githubusercontent.com/microsoft/winget-cli/master/schemas/JSON/manifests/v$ManifestVersion/manifest.installer.$ManifestVersion.json" } else { "https://aka.ms/winget-manifest.installer.$ManifestVersion.schema.json" }
 }
 
 <#
@@ -2749,7 +2749,7 @@ if ($script:Option -ne 'RemoveManifest') {
           $SandboxScriptPath = Read-Host -Prompt 'SandboxTest.ps1' | TrimString
         }
       }
-      if ($script:UsesPrerelease){
+      if ($script:UsesPrerelease) {
         & $SandboxScriptPath -Manifest $AppFolder -Prerelease -EnableExperimentalFeatures
       } else {
         & $SandboxScriptPath -Manifest $AppFolder
