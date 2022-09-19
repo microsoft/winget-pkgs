@@ -165,7 +165,8 @@ $callingCulture = [Threading.Thread]::CurrentThread.CurrentCulture
 if (-not ([System.Environment]::OSVersion.Platform -match 'Win')) { $env:TEMP = '/tmp/' }
 
 if ($ScriptSettings.EnableDeveloperOptions -eq $true -and $null -ne $ScriptSettings.OverrideManifestVersion) {
-    $ManifestVersion = $ScriptSettings.OverrideManifestVersion
+  $script:UsesPrerelease = $ScriptSettings.OverrideManifestVersion -gt $ManifestVersion
+  $ManifestVersion = $ScriptSettings.OverrideManifestVersion
 }
 
 $useDirectSchemaLink = (Invoke-WebRequest "https://aka.ms/winget-manifest.version.$ManifestVersion.schema.json" -UseBasicParsing).BaseResponse.ContentLength -eq -1
@@ -2748,7 +2749,11 @@ if ($script:Option -ne 'RemoveManifest') {
           $SandboxScriptPath = Read-Host -Prompt 'SandboxTest.ps1' | TrimString
         }
       }
-      & $SandboxScriptPath -Manifest $AppFolder
+      if ($script:UsesPrerelease){
+        & $SandboxScriptPath -Manifest $AppFolder -Prerelease -EnableExperimentalFeatures
+      } else {
+        & $SandboxScriptPath -Manifest $AppFolder
+      }
     }
   }
 }
