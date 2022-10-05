@@ -16,7 +16,7 @@ ARP stands for `A`dd and `R`emove `P`rograms. In Windows, installer files put in
 ## **What is the difference between a Marketing Version and Package Version?**
 Sometimes publishers use two different versions to refer to software. The version most commonly seen on the website or download page for a package is the Marketing Version. This is generally is used for the `PackageVersion` field of manifests, but there are exceptions. The Package Version, sometimes referred to as `Build Version`,`Actual Version`, or `DisplayVersion` is the version which is written to the ARP entry. This value is what the Windows Package Manager uses to determine which version of an application is currently installed on your system, and should be mapped to the `AppsAndFeaturesEntries >> DisplayVersion` in a manifest.
 ## **How do I submit a package?**
-Getting started is the hard part. There are several tools which we recommend for both creating and submitting packages. 
+Getting started is the hard part. There are several tools which we recommend for both creating and submitting packages.
 
 First is the [Windows Package Manager Manifest Creator (a.k.a Winget-Create)](https://github.com/microsoft/winget-create). Winget-Create is a command line tool that will prompt you for relevant metadata related to your package. Once you are done, Winget-Create will validate your manifest to verify that it is correct and allow you to submit your newly-created manifest directly to the winget-pkgs repository by linking your GitHub account.
 
