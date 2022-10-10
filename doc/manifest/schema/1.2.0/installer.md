@@ -77,7 +77,7 @@ Installers:                     # The list of package installers
     UnsupportedArguments:       # Optional list of Windows Package Manager Client arguments the installer does not support
       - UnsupportedArgument:    # Optional unsupported Windows Package Manager Client argument
     DisplayInstallWarnings:     # *Not implemented* Optional indicator for packages that are known to interfere with running application during install
-		ReleaseDate:                # Optional release date
+    ReleaseDate:                # Optional release date
 ManifestType: installer         # The manifest type
 ManifestVersion: 1.2.0          # The manifest syntax version
 ```

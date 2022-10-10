@@ -73,7 +73,7 @@ Installers:                     # The list of package installers
         ProductCode:            # *Not implemented* Optional product code of the installer
         UpgradeCode:            # *Not implemented* Optional upgrade code of the installer
         InstallerType:          # *Not implemented* Optional installer type
-		ReleaseDate:                # Optional release date
+    ReleaseDate:                # Optional release date
 ManifestType: installer         # The manifest type
 ManifestVersion: 1.1.0          # The manifest syntax version
 ```
