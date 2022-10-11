@@ -3130,6 +3130,18 @@
           {
             "name": "removeLabel",
             "parameters": {
+              "label": "Manifest-Version-Error"
+            }
+          },
+          {
+            "name": "removeLabel",
+            "parameters": {
+              "label": "Manifest-Dependencies-Error"
+            }
+          },
+          {
+            "name": "removeLabel",
+            "parameters": {
               "label": "PullRequest-Error"
             }
           },
@@ -3528,6 +3540,18 @@
             "name": "removeLabel",
             "parameters": {
               "label": "PullRequest-Error"
+            }
+          },
+          {
+            "name": "removeLabel",
+            "parameters": {
+              "label": "Manifest-Version-Error"
+            }
+          },
+          {
+            "name": "removeLabel",
+            "parameters": {
+              "label": "Manifest-Dependencies-Error"
             }
           },
           {
@@ -4978,6 +5002,52 @@
           }
         ],
         "taskName": "Assign author-not-authorized to engineer on call"
+      }
+    },
+    {
+      "taskType": "trigger",
+      "capabilityId": "IssueResponder",
+      "subCapability": "PullRequestResponder",
+      "version": "1.0",
+      "config": {
+        "conditions": {
+          "operator": "and",
+          "operands": [
+            {
+              "name": "labelAdded",
+              "parameters": {
+                "label": "Manifest-Version-Error"
+              }
+            }
+          ]
+        },
+        "eventType": "pull_request",
+        "eventNames": [
+          "pull_request",
+          "issues",
+          "project_card"
+        ],
+        "actions": [
+          {
+            "name": "addReply",
+            "parameters": {
+              "comment": "Hello @${issueAuthor},\n\nThe package manager bot determined that the ManifestVersion key does not match any version  currently approved for release.Please verify the manifest file is compliant with the package manager [1.0 manifest specification](https://github.com/microsoft/winget-pkgs/tree/master/doc/manifest/schema/1.0.0), [1.1 manifest specification](https://github.com/microsoft/winget-pkgs/tree/master/doc/manifest/schema/1.1.0), or [1.2 manifest specification](https://github.com/microsoft/winget-pkgs/tree/master/doc/manifest/schema/1.2.0).\n\nFor details on the specific error, see the details link below in the build pipeline.\n\nTemplate: msftbot/validationError/manifest/version"
+            }
+          },
+          {
+            "name": "assignToUser",
+            "parameters": {
+              "user": "PR Author"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "Needs-Author-Feedback"
+            }
+          }
+        ],
+        "taskName": "Notify Author of Manifest Version Error"
       }
     },
     {
