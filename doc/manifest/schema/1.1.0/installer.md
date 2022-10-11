@@ -73,6 +73,7 @@ Installers:                     # The list of package installers
         ProductCode:            # *Not implemented* Optional product code of the installer
         UpgradeCode:            # *Not implemented* Optional upgrade code of the installer
         InstallerType:          # *Not implemented* Optional installer type
+    ReleaseDate:                # Optional release date
 ManifestType: installer         # The manifest type
 ManifestVersion: 1.1.0          # The manifest syntax version
 ```
@@ -658,6 +659,14 @@ ManifestVersion: 1.1.0
  This key represents the installer type for the package. It is used to help correlate installed packages with manifests in configured sources. In some cases, an installer is an .exe based installer, but contains an MSI installer. This key will help the Windows Package Manager understand if upgrading an MSI should be performed when it is contained in an .exe installer.
 
  >Note: This key is displayed twice for completeness. As the AppsAndFeatures behavior is not implemented in the Windows Package Manager 1.2 client, the description and usage above is implemented.
+</details>
+
+<details>
+  <summary><b>ReleaseDate</b> - The Release Date for a package.</summary>
+
+  **Optional Field**
+
+  This key represents the release date for a package.
 </details>
 
 <details>

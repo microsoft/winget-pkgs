@@ -40,7 +40,6 @@ Agreements:                   # Optional package agreements
 Documentations:               # Optional documentation
   - DocumentLabel:            # Optional documentation label
     DocumentUrl:              # Optional documentation URL
-ReleaseDate:                  # Optional release date
 ReleaseNotes:                 # Optional release notes
 ReleaseNotesUrl:              # Optional release notes URL
 PurchaseUrl:                  # *Not implemented* Optional purchase URL
@@ -282,14 +281,6 @@ ManifestVersion: 1.2.0        # The manifest syntax version
   **Optional Field**
 
   This key represents the URL for a documentation.
-</details>
-
-<details>
-  <summary><b>ReleaseDate</b> - The Release Date for a package.</summary>
-
-  **Optional Field**
-
-  This key represents the release date for a package.
 </details>
 
 <details>
