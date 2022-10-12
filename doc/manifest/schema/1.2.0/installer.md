@@ -77,6 +77,7 @@ Installers:                     # The list of package installers
     UnsupportedArguments:       # Optional list of Windows Package Manager Client arguments the installer does not support
       - UnsupportedArgument:    # Optional unsupported Windows Package Manager Client argument
     DisplayInstallWarnings:     # *Not implemented* Optional indicator for packages that are known to interfere with running application during install
+    ReleaseDate:                # Optional release date
 ManifestType: installer         # The manifest type
 ManifestVersion: 1.2.0          # The manifest syntax version
 ```
@@ -683,6 +684,14 @@ ManifestVersion: 1.2.0
 This key represents whether a warning message is displayed to the user prior to install or upgrade if the package is known to interfere with any running applications.
 
 >Note: The DisplayInstallWarnings behavior is not implemented in the Windows Package Manager 1.3 client.
+</details>
+
+<details>
+  <summary><b>ReleaseDate</b> - The Release Date for a package.</summary>
+
+  **Optional Field**
+
+  This key represents the release date for a package.
 </details>
 
 <details>
