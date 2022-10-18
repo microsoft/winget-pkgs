@@ -65,4 +65,8 @@ DefaultInstallerLocale: en-US
 # This setting allows for the usage of various advanced modes
 # Unless you know what you are doing, it is best to leave this disabled
 EnableDeveloperOptions: false
+
+# This setting allows for the selection of which manifest version is used
+# The script is not tested with all manifest versions, and stability is not guaranteed. Use with caution
+OverrideManifestVersion: 1.4.0
 ```
