@@ -37,7 +37,6 @@ Agreements:                   # Optional package agreements
   - AgreementLabel:           # Optional agreement label
     Agreement:                # Optional agreement text
     AgreementUrl:             # Optional agreement URL
-ReleaseDate:                  # Optional release date
 ReleaseNotes:                 # Optional release notes
 ReleaseNotesUrl:              # Optional release notes URL
 ManifestType: locale          # The manifest type
@@ -249,14 +248,6 @@ ManifestVersion: 1.1.0        # The manifest syntax version
   **Optional Field**
 
   This key represents the URL for a package agreement.
-</details>
-
-<details>
-  <summary><b>ReleaseDate</b> - The Release Date for a package.</summary>
-
-  **Optional Field**
-
-  This key represents the release date for a package.
 </details>
 
 <details>
