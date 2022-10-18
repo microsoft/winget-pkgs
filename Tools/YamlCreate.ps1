@@ -661,7 +661,7 @@ Function Get-PathInstallerType {
     return 'msi'
   }
   if ($Path -match '\.appx(bundle){0,1}$') { return 'appx' }
-  if ($Path -match '\.zip$') { return 'zip' }
+  # if ($Path -match '\.zip$') { return 'zip' }
   return $null
 }
 
