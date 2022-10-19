@@ -22,6 +22,7 @@ jobs:
   variables:
     skipComponentGovernanceDetection: ${{ true }}
     runCodesignValidationInjection: ${{ false }}
+  timeoutInMinutes: 0
   steps:
 
   # Downloads all the setup files and its dependencies.
@@ -50,7 +51,6 @@ jobs:
       CLEANUP_ENDPOINT: $(AzFuncCleanupEndpoint)
       LABEL_KEY: $(AzureFunctionLabelKey)
       CATALOG_CONTENT_VERIFICATION_ENDPOINT: $(AzFuncCatalogContentVerificationEndpoint)
-      DEPENDENCIES_VERIFICATION_ENDPOINT: $(AzFuncDependenciesVerificationEndpoint)
 
   # Validates integrity of pull request.
   - task: CmdLine@2
@@ -77,6 +77,7 @@ jobs:
     condition: succeeded()
     env:
       ValidationConnectionString: $(ValidationStorageAccountConnectionString)
+      CacheConnectionString: $(CacheStorageAccountConnectionString)
       DIApplicationInsightKey: $(DIApplicationInsightKey)
       WinGet:AppConfig:Primary: $(AppConfigPrimary)
       WinGet:AppConfig:Secondary: $(AppConfigSecondary)
@@ -108,9 +109,9 @@ jobs:
         "PlanUrl": "$(system.CollectionUri)",
         "HubName": "$(system.HostType)",
         "ProjectId": "$(system.TeamProjectId)",
-        "PlanId": "$(system.PlanId)", 
-        "JobId": "$(system.JobId)", 
-        "TimelineId": "$(system.TimelineId)", 
+        "PlanId": "$(system.PlanId)",
+        "JobId": "$(system.JobId)",
+        "TimelineId": "$(system.TimelineId)",
         "TaskInstanceId": "$(system.TaskInstanceId)",
         "AuthToken": "$(system.AccessToken)"
         }
@@ -129,9 +130,9 @@ jobs:
         "PlanUrl": "$(system.CollectionUri)",
         "HubName": "$(system.HostType)",
         "ProjectId": "$(system.TeamProjectId)",
-        "PlanId": "$(system.PlanId)", 
-        "JobId": "$(system.JobId)", 
-        "TimelineId": "$(system.TimelineId)", 
+        "PlanId": "$(system.PlanId)",
+        "JobId": "$(system.JobId)",
+        "TimelineId": "$(system.TimelineId)",
         "TaskInstanceId": "$(system.TaskInstanceId)",
         "AuthToken": "$(system.AccessToken)"
         }
@@ -150,9 +151,9 @@ jobs:
         "PlanUrl": "$(system.CollectionUri)",
         "HubName": "$(system.HostType)",
         "ProjectId": "$(system.TeamProjectId)",
-        "PlanId": "$(system.PlanId)", 
-        "JobId": "$(system.JobId)", 
-        "TimelineId": "$(system.TimelineId)", 
+        "PlanId": "$(system.PlanId)",
+        "JobId": "$(system.JobId)",
+        "TimelineId": "$(system.TimelineId)",
         "TaskInstanceId": "$(system.TaskInstanceId)",
         "AuthToken": "$(system.AccessToken)"
         }
@@ -185,9 +186,9 @@ jobs:
         "PlanUrl": "$(system.CollectionUri)",
         "HubName": "$(system.HostType)",
         "ProjectId": "$(system.TeamProjectId)",
-        "PlanId": "$(system.PlanId)", 
-        "JobId": "$(system.JobId)", 
-        "TimelineId": "$(system.TimelineId)", 
+        "PlanId": "$(system.PlanId)",
+        "JobId": "$(system.JobId)",
+        "TimelineId": "$(system.TimelineId)",
         "TaskInstanceId": "$(system.TaskInstanceId)",
         "AuthToken": "$(system.AccessToken)"
         }
@@ -206,9 +207,9 @@ jobs:
         "PlanUrl": "$(system.CollectionUri)",
         "HubName": "$(system.HostType)",
         "ProjectId": "$(system.TeamProjectId)",
-        "PlanId": "$(system.PlanId)", 
-        "JobId": "$(system.JobId)", 
-        "TimelineId": "$(system.TimelineId)", 
+        "PlanId": "$(system.PlanId)",
+        "JobId": "$(system.JobId)",
+        "TimelineId": "$(system.TimelineId)",
         "TaskInstanceId": "$(system.TaskInstanceId)",
         "AuthToken": "$(system.AccessToken)"
         }
@@ -226,7 +227,6 @@ jobs:
   variables:
     HostKeySecret: $[ dependencies.FileValidation.outputs['wingetsetup.hostkey']]
     CatalogContentVerificationEndpointSecret: $[ dependencies.FileValidation.outputs['wingetsetup.catalogContentVerificationEndpoint']]
-    DependenciesVerificationEndpointSecret: $[ dependencies.FileValidation.outputs['wingetsetup.dependenciesVerificationEndpoint']]
   steps:
 
   # Catalog content verification
@@ -242,15 +242,15 @@ jobs:
         "PlanUrl": "$(system.CollectionUri)",
         "HubName": "$(system.HostType)",
         "ProjectId": "$(system.TeamProjectId)",
-        "PlanId": "$(system.PlanId)", 
-        "JobId": "$(system.JobId)", 
-        "TimelineId": "$(system.TimelineId)", 
+        "PlanId": "$(system.PlanId)",
+        "JobId": "$(system.JobId)",
+        "TimelineId": "$(system.TimelineId)",
         "TaskInstanceId": "$(system.TaskInstanceId)",
         "AuthToken": "$(system.AccessToken)"
         }
       waitForCompletion: "true"
 
-# Agentless phase. Runs even if previous jobs failed. 
+# Agentless phase. Runs even if previous jobs failed.
 - job: 'postvalidation'
   pool: server
   displayName: 'Post Validation'
@@ -282,9 +282,9 @@ jobs:
         "BuildId": "$(Build.BuildId)",
         "HubName": "$(system.HostType)",
         "ProjectId": "$(system.TeamProjectId)",
-        "PlanId": "$(system.PlanId)", 
-        "JobId": "$(system.JobId)", 
-        "TimelineId": "$(system.TimelineId)", 
+        "PlanId": "$(system.PlanId)",
+        "JobId": "$(system.JobId)",
+        "TimelineId": "$(system.TimelineId)",
         "TaskInstanceId": "$(system.TaskInstanceId)",
         "AuthToken": "$(system.AccessToken)",
         "BuildRepositoryId": "$(RepositoryId)",
@@ -305,9 +305,9 @@ jobs:
         "BuildId": "$(Build.BuildId)",
         "HubName": "$(system.HostType)",
         "ProjectId": "$(system.TeamProjectId)",
-        "PlanId": "$(system.PlanId)", 
-        "JobId": "$(system.JobId)", 
-        "TimelineId": "$(system.TimelineId)", 
+        "PlanId": "$(system.PlanId)",
+        "JobId": "$(system.JobId)",
+        "TimelineId": "$(system.TimelineId)",
         "TaskInstanceId": "$(system.TaskInstanceId)",
         "AuthToken": "$(system.AccessToken)"
         }
