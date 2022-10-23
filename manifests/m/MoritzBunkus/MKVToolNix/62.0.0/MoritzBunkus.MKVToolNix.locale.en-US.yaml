@@ -23,23 +23,28 @@ Tags:
 # Agreements:
 ReleaseNotes: |-
   New features and enhancements
-  - all: IETF BCP 47/RFC 5646 language tags: implemented support for officially registered IANA language tag extensions.
-  - mkvmerge: track selection: when using language tags for selecting which tracks to keep, mkvmerge will now use component-based language tag matching instead of comparing them verbatim. This means that only those components (language, region etc.) the user specified will be required to exist and be equal. For example, if a file contains three subtitle tracks with languages es (generic Spanish), es-MX (Spanish as spoken in Mexico) and es-ES (Spanish as spoken in Spain), the user can use --stracks es to match all three tracks or be more specific with e.g. --stracks es-MX which would only match one track. Similarly inverting the selection with e.g. --stracks !es would get rid of all three tracks, not just the one for the generic Spanish.
-  - MKVToolNix GUI: multiplexer: deriving track languages from file names: the GUI can now detect full BCP 47/RFC 5646 language tags in file names. Part of the implementation of #3173.
-  - MKVToolNix GUI: multiplexer: deriving track languages from file names: the default list of boundary characters now includes -. Part of the implementation of #3173.
-  - MKVToolNix GUI: multiplexer: the GUI now defaults to the "lower" process priority setting for new installations in order to leave more room for other applications, especially interactive ones. Up to and including v59 the default was the "normal" process priority. v60 changed that to "lowest", which turned out to be much slower on Windows for no real gain over "lower". The setting will be auto-corrected by the GUI if the settings file were saved last with a version between v60.0.0.0 & v60.0.0.17 & "lowest" & it is still set to "lowest".
-  - HEVC dumper development tool: the tool has been renamed to xvc_dump and extended to be able to dump AVC/H.264 bitstreams, too. It now also detects the type of bitstream framing (ISO 14496-15 vs. ITU-T H.264/H.265 Annex B).
+  - all: IETF BCP 47/TFC 5646 language tags: all ISO 639 languages are now available, even the ones that aren't of types "Constructed", "Living" or "Special".
+  - mkvmerge, mkvpropedit: chapters: both programs will now write elements set to their default value, too (e.g. the legacy language element if it's set to eng). This is done to be more consistent with how MKVToolNix GUI writes chapters. Implements #3210.
+  - MKVToolNix GUI: multiplexer: when adding new files as attachments the GUI checks if there are other attachments with the same name. If so, the GUI would ask whether to skip the affected files or add them anyway. There's now an option in the preferences to always skip such files, and it's enabled by default. Implements #3213.
+  - MKVToolNix GUI: chapter editor: removed the support for explicitly setting the legacy country elements. Instead the legacy country elements are derived from the region parts of the IETF BCP 47 languages. Part of the implementation of #3193.
 
   Bug fixes
-  - all: IETF BCP 47/RFC 5646 language tags: fixed a corner case of wrongfully allowing scripts/variants not listed in any of the entries in the prefix list when the prefix list contains prefixes restricting scripts/variants and a prefix solely with the language at the same time (example: the variant ekavsk with its prefixes sr, sr-Cyrl and sr-Latn where e.g. sr-ekavsk and sr-Cyrl-ekavsk should be allowed but not sr-Bali-ekavsk).
-  - mkvmerge: HEVC/H.265: the frame type of B frames was often wrongfully signalled as P frames instead, both with BlockGroup (missing second references) and SimpleBlock ("discardable" flag not set) elements.
-  - mkvmerge: SSA/ASS packetizer: the frame numbers will now be re-calculated when appending SSA/ASS tracks so that frame numbers of appended tracks are always strictly higher than frame numbers of the track they're appended to.
-  - mkvmerge, MKVToolNix GUI's chapter editor: BCP 47/RFC 5646 language tags: when BCP 47 language tags are used with a language code that isn't part of ISO 639-2, the programs will now write a legacy language element set to und ("undetermined") instead of not writing such an element at all or writing one with an invalid code. Fixes #3174.
-  - mkvmerge, MKVToolNix GUI's chapter editor: BCP 47/RFC 5646 language tags: the programs will ensure that the legacy and IETF language elements written will be unique within the scope of the same "chapter display" element.
-  - mkvinfo, MKVToolNix GUI's info tool: in summary mode the frame type was reported wrong for BlockGroup elements in which the ReferenceBlock elements were located behind the Block element.
+  - mkvmerge: fixed a crash when splitting by chapters is enabled but there are no chapters at all. Part of the fix of #3198.
+  - mkvmerge: the error message when trying to split by a chapter number that doesn't exist contained the wrong number of chapters that actually do exist. Part of the fix of #3198.
+  - mkvmerge: AVC ES parser: fixed mkvmerge aborting due to uncaught exception when encountering bad SPS data. Part of the fix of #3176.
+  - mkvmerge: AVC/H.264 parser: re-added the hack --engage all_i_slices_are_key_frames which was accidentally removed in release v61.
+  - mkvmerge: AVI reader: fixed a crash trying to allocate too big of a memory chunk due to an integer overflows in check conditions. Part of the fix of #3176.
+  - mkvmerge: HEVC ES parser: fixed another issue with frame type recognition. Certain frames were marked as B frames/discardable on the container level even though they could be reference pictures. Now only SLNR pictures (sub-layer non-reference) are marked that way. Fixes #3192.
+  - mkvmerge: HEVC ES reader: improved file content detection for HEVC ES files with wrong file name extensions (e.g. .mkv), which fixes them being mis-detected as something else, e.g. DTS. Fixes #3201.
+  - mkvmerge: HEVC ES parser: "end of sequence" NALUs are kept now, and no superfluous flushing will be done when one is found. This prevents splitting NALUs into two different Matroska blocks when they should really be part of a single one, also causing problems with erroneous timestamps. Mostly affects DoVi NALUs. Fixes #3202.
+  - mkvmerge: Matroska reader, TrueHD: mkvmerge will now probe much more TrueHD frames trying to find the first sync frame. This fixes track detection in situations when a TrueHD doesn't start with a sync frame, e.g. when the source file's the result of splitting between sync frames.
+  - mkvmerge, MKVToolNix GUI's chapter editor: IETF BCP 47/RFC 5646 language tags: when reading chapters from MPLS playlist files, the ChapLanguageIETF element will now be set to the configured default chapter language, not just the legacy ChapterLanguage element. Part of the fix of #3193.
+  - mkvmerge, mkvpropedit, MKVToolNix GUI's chapter editor: IETF BCP 47 elements will now always be created before writing chapters unless IETF BCP 47 elements are disabled. Part of the fix of #3193.
+  - mkvmerge, mkvpropedit, MKVToolNix GUI's chapter editor: when a chapter display element contains legacy language & country elements but no IETF BCP 47 elements and IETF BCP 47 elements aren't disabled, the IETF BCP 47 elements created will contain the region from the legacy element. Part of the fix of #3193.
+  - mkvmerge, mkvpropedit, MKVToolNix GUI's chapter editor: Legacy country elements are now created when IETF BCP 47 elements are present & contain a region code allowed in legacy country elements. Part of the fix of #3193.
 
   Build system changes
-  - all: std::codecvt_utf8 is now used instead of Boost's utf8_codecvt_facet. The bundled copy the latter in lib/boost has therefore been removed.
+  - The tools sub-directory is now always built. The corresponding configure option --with-tools has been removed. The install target still doesn't install them, though.
 ReleaseNotesUrl: https://mkvtoolnix.download/doc/NEWS.md
 # PurchaseUrl:
 # InstallationNotes:
