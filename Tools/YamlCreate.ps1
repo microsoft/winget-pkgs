@@ -39,8 +39,14 @@ Function Invoke-KeypressMenu {
     [Parameter(Mandatory = $false)]
     [string] $HelpTextColor,
     [Parameter(Mandatory = $false)]
-    [string] $DefaultString
+    [string] $DefaultString,
+    [Parameter(Mandatory = $false)]
+    [string[]] $AllowedCharacters
   )
+
+  if (!$PSBoundParameters.ContainsKey('AllowedCharacters')) {
+    $AllowedCharacters = @($Entries.TrimStart('*').Chars(1))
+  }
 
   Write-Host "`n"
   Write-Host -ForegroundColor 'Yellow' "$Prompt"
@@ -73,6 +79,10 @@ Function Invoke-KeypressMenu {
 
   do {
     $keyInfo = [Console]::ReadKey($false)
+    if ($keyInfo.KeyChar -notin $AllowedCharacters -and $ScriptSettings.ExplicitMenuOptions -eq $true -and $AllowedCharacters.Length -gt 0){
+      if ($keyInfo.Key -eq 'Enter') { Write-Host}
+      $keyInfo = $null
+    }
   } until ($keyInfo.Key)
 
   return $keyInfo.Key
@@ -87,7 +97,7 @@ if (Get-Command 'git' -ErrorAction SilentlyContinue) {
     # Prompt user to install git
     if (Get-Command 'winget' -ErrorAction SilentlyContinue) {
       $_menu = @{
-        entries       = @('[Y] Upgrade Git'; '[N] Do not upgrade')
+        entries       = @('[Y] Upgrade Git'; '*[N] Do not upgrade')
         Prompt        = 'The version of git installed on your machine does not satisfy the requirement of version >= 2.35.2; Would you like to upgrade?'
         HelpText      = "Upgrading will attempt to upgrade git using winget`n"
         DefaultString = ''
