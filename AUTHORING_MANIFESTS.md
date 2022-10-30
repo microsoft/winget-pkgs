@@ -1,7 +1,7 @@
-[Manifest Specification]:   doc/manifest/schema/1.1.0
-[versionSchema]:            doc/manifest/schema/1.1.0/version.md
-[defaultLocaleSchema]:      doc/manifest/schema/1.1.0/defaultLocale.md
-[installerSchema]:          doc/manifest/schema/1.1.0/installer.md
+[Manifest Specification]:   doc/manifest/schema/1.2.0
+[versionSchema]:            doc/manifest/schema/1.2.0/version.md
+[defaultLocaleSchema]:      doc/manifest/schema/1.2.0/defaultLocale.md
+[installerSchema]:          doc/manifest/schema/1.2.0/installer.md
 
 # Authoring Manifests
 
@@ -11,7 +11,7 @@ First, we want to say thank you. Your contribution is highly valued. And we appr
 
 ### What is a manifest?
 
-Manifests are the YAML files in this repository containing the metadata used by the Windows Package Manager to install and upgrade software on Windows 10. There are hundreds of these files partitioned under the [manifests](/manifests) directory. We've had to partition the directory structure so you don't have to scroll as much in the GitHub.com site when you are looking for a manifest.
+Manifests are the YAML files in this repository containing the metadata used by the Windows Package Manager to install and upgrade software on Windows 10. There are thousands of these files partitioned under the [manifests](/manifests) directory. We've had to partition the directory structure so you don't have to scroll as much in the GitHub.com site when you are looking for a manifest.
 
 ### What is a package?
 
@@ -31,13 +31,13 @@ The partition directory is determined by taking the first letter from the "Packa
 
 ## First steps
 
-Before you invest the time to generate and submit a manifest, you should check to see if the package already exists. Start out with `winget search package`. If that doesn't yield anything, try a quick search using the search box in the top left corner of GitHub for the package "In this repository". If you still don't find anything, finally check to see if there is already a [PR](https://github.com/microsoft/winget-pkgs/pulls) for the package by putting the package in the filters box, and be sure to remove the "is:pr is:open" filters.
+Before you invest the time to generate and submit a manifest, you should check to see if the package already exists. Start out with `winget search <package>`. If that doesn't yield anything, try a quick search using the search box in the top left corner of GitHub for the package "In this repository". If you still don't find anything, finally check to see if there is already a [PR](https://github.com/microsoft/winget-pkgs/pulls) for the package by putting the package in the filters box, and be sure to remove the "is:pr is:open" filters.
 
 ## What next?
 
 You should take a look at our [Manifest Specification]. Don't worry. If this is starting to look too complicated you can create a new Issue and select [Package Request/Submission 👀](https://github.com/microsoft/winget-pkgs/issues/new/choose).
 
-The multi-file manifest is the preferred method for building manifests. The minimum required files are a [version][versionSchema] file, a [defaultLocale][defaultLocaleSchema] file and an [installer][installerSchema] file.
+Manifests submitted to the Windows Package Manager Community Repository should be submitted as a multi-file manifest. The minimum required files are a [version][versionSchema] file, a [defaultLocale][defaultLocaleSchema] file and an [installer][installerSchema] file.
 
 ## Creating your first manifest
 Once you have package in mind that doesn't already exist in the repository, you can now start [creating your package manifest](https://docs.microsoft.com/en-us/windows/package-manager/package/manifest?tabs=minschema%2Cversion-example). We recommend using the [Windows Package Manager Manifest Creator (a.k.a Winget-Create)](https://github.com/microsoft/winget-create) to help you generate your manifest. Winget-Create is a command line tool that will prompt you for relevant metadata related to your package. Once you are done, Winget-Create will validate your manifest to verify that it is correct and allow you to submit your newly-created manifest directly to the winget-pkgs repository by linking your GitHub account. Alternatively, you can use the [YamlCreate.ps1 Script](Tools/YamlCreate.ps1). More information on using YamlCreate is found in the [script documentation](doc/tools/YamlCreate.md).
@@ -51,7 +51,7 @@ winget install wingetcreate
 ```
 
 ### Creating your manifest with Winget-Create
-Now that you have Winget-Create installed onto your machine, you are ready to generate your first manifest by running the [New command](https://github.com/microsoft/winget-create/blob/main/doc/new.md). To do so, simply run the following command in your terminal: 
+Now that you have Winget-Create installed onto your machine, you are ready to generate your first manifest by running the [New command](https://github.com/microsoft/winget-create/blob/main/doc/new.md). To do so, simply run the following command in your terminal:
 
 ```powershell
 wingetcreate new <Installer URL(s)>
