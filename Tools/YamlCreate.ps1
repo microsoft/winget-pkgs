@@ -163,7 +163,7 @@ if ($Settings) {
   exit
 }
 
-$ScriptHeader = '# Created with YamlCreate.ps1 v2.2.0'
+$ScriptHeader = '# Created with YamlCreate.ps1 v2.2.1'
 $ManifestVersion = '1.2.0'
 $PSDefaultParameterValues = @{ '*:Encoding' = 'UTF8' }
 $Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
@@ -663,8 +663,16 @@ Function Get-PathInstallerType {
 
   if ($Path -match '\.msix(bundle){0,1}$') { return 'msix' }
   if ($Path -match '\.msi$') {
-    $ObjectMetadata = Get-ItemMetadata $Path
-    $ObjectDatabase = Get-MsiDatabase $Path
+    if ([System.Environment]::OSVersion.Platform -match 'Unix') {
+      $ObjectDatabase = @{}
+      $ObjectMetadata = @{
+        ProgramName = $(([string](file $script:dest) | Select-String -Pattern 'Creating Application.+,').Matches.Value)
+      }
+    } else {
+      $ObjectMetadata = Get-ItemMetadata $Path
+      $ObjectDatabase = Get-MsiDatabase $Path
+    }
+
     if (Test-IsWix -Database $ObjectDatabase -MetaDataObject $ObjectMetadata ) {
       return 'wix'
     }
