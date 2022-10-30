@@ -29,7 +29,7 @@ All Windows Package Manager manifests in the Microsoft community repository are 
  #### Required Field
  This key represents the version of the package. It is related to the specific release this manifests targets. In some cases you will see a perfectly formed [semantic version] number, and in other cases you might see something different. These may be date driven, or they might have other characters with some package specific meaning for example.
 
- The Windows Package Manager client uses this version to determine whether or not an upgrade for a package is available. In some cases, packages may be released with a marketing driven version, and that causes trouble with the `winget upgrade` command. 
+ The Windows Package Manager client uses this version to determine whether or not an upgrade for a package is available. In some cases, packages may be released with a marketing driven version, and that causes trouble with the `winget upgrade` command.
 
  The current best practice is to use the value reported in Add / Remove Programs when this version of the package is installed. In some cases, packages do not report a version resulting in an upgrade loop or other unwanted behavior.
 </details>
@@ -87,7 +87,7 @@ All Windows Package Manager manifests in the Microsoft community repository are 
   <summary>The package author</summary>
 
   #### Optional Field
-  Thie key represents the author of a package. In some cases, the author is an individual who develops and or maintains the package.
+  This key represents the author of a package. In some cases, the author is an individual who develops and or maintains the package.
  </details>
 
 #### PackageName
@@ -99,7 +99,7 @@ All Windows Package Manager manifests in the Microsoft community repository are 
 
   >Note: With the 1.0 release of the Windows Package Manager, this name affects how packages from a source are mapped to Apps installed in Windows 10 via Add / Remove Programs (ARP). The best practice is to ensure this matches the ARP entry for the package name when it has been installed. The impact is associated with `winget upgrade` and `winget list`.
  </details>
- 
+
 #### PackageUrl
 <details>
   <summary>The package home page</summary>
@@ -122,7 +122,7 @@ All Windows Package Manager manifests in the Microsoft community repository are 
 
   #### Optional Field
   This key represents the license web site or specific web page provided the publisher or ISV. If there is a license web site or specific web page for the package it is preferred over a generic license page for the publisher.
-  
+
   If this is a link to the license file for an open source project, it should be specific to the version for the package. Some open source projects change their license over time.
  </details>
 
@@ -140,7 +140,7 @@ All Windows Package Manager manifests in the Microsoft community repository are 
 
   #### Optional Field
   This key represents the copyright web site or specific web page provided the publisher or ISV. If there is a copyright web site or specific web page for the package it is preferred over a generic copyright page for the publisher.
-  
+
   If this is a link to the copyright file for an open source project, it should be specific to the version for the package. Some open source projects change their copyright over time.
  </details>
 
@@ -153,7 +153,7 @@ All Windows Package Manager manifests in the Microsoft community repository are 
 
   >Note: This should be something descriptive about what the package does, and it should not simply state something like "&lt;package name&gt; installer" or "&lt;package name&gt; setup".
  </details>
- 
+
  #### Description
 <details>
   <summary>The full package description</summary>
@@ -163,27 +163,27 @@ All Windows Package Manager manifests in the Microsoft community repository are 
 
   >Note: This was included for future integration with the Microsoft Store source to provide the ability to display the full package description.
  </details>
- 
+
  #### Moniker
 <details>
   <summary>The most common package term</summary>
 
   #### Optional Field
-  This key represents the most common term users would search for when installing or upgrading a package. If only one package uses this moniker, then the [install], [list] and [upgrade] command may match with this package. 
-  
+  This key represents the most common term users would search for when installing or upgrading a package. If only one package uses this moniker, then the [install], [list] and [upgrade] command may match with this package.
+
   >Note:Moniker is the third property evaluated when searching for a matching package.
  </details>
- 
+
  #### Tags
 <details>
   <summary>List of additional package search terms</summary>
 
   #### Optional Field
-  This key represents other common term users would search for when looking for packages. 
+  This key represents other common term users would search for when looking for packages.
 
   >Note: The best practice is to present these terms in all lower case with hyphens rather than spaces.
  </details>
- 
+
 
 ### ManifestType
 <details>
