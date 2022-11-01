@@ -39,8 +39,14 @@ Function Invoke-KeypressMenu {
     [Parameter(Mandatory = $false)]
     [string] $HelpTextColor,
     [Parameter(Mandatory = $false)]
-    [string] $DefaultString
+    [string] $DefaultString,
+    [Parameter(Mandatory = $false)]
+    [string[]] $AllowedCharacters
   )
+
+  if (!$PSBoundParameters.ContainsKey('AllowedCharacters')) {
+    $AllowedCharacters = @($Entries.TrimStart('*').Chars(1))
+  }
 
   Write-Host "`n"
   Write-Host -ForegroundColor 'Yellow' "$Prompt"
@@ -73,6 +79,10 @@ Function Invoke-KeypressMenu {
 
   do {
     $keyInfo = [Console]::ReadKey($false)
+    if ($keyInfo.KeyChar -notin $AllowedCharacters -and $ScriptSettings.ExplicitMenuOptions -eq $true -and $AllowedCharacters.Length -gt 0){
+      if ($keyInfo.Key -eq 'Enter') { Write-Host}
+      $keyInfo = $null
+    }
   } until ($keyInfo.Key)
 
   return $keyInfo.Key
@@ -87,7 +97,7 @@ if (Get-Command 'git' -ErrorAction SilentlyContinue) {
     # Prompt user to install git
     if (Get-Command 'winget' -ErrorAction SilentlyContinue) {
       $_menu = @{
-        entries       = @('[Y] Upgrade Git'; '[N] Do not upgrade')
+        entries       = @('[Y] Upgrade Git'; '*[N] Do not upgrade')
         Prompt        = 'The version of git installed on your machine does not satisfy the requirement of version >= 2.35.2; Would you like to upgrade?'
         HelpText      = "Upgrading will attempt to upgrade git using winget`n"
         DefaultString = ''
@@ -153,7 +163,7 @@ if ($Settings) {
   exit
 }
 
-$ScriptHeader = '# Created with YamlCreate.ps1 v2.2.0'
+$ScriptHeader = '# Created with YamlCreate.ps1 v2.2.1'
 $ManifestVersion = '1.2.0'
 $PSDefaultParameterValues = @{ '*:Encoding' = 'UTF8' }
 $Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
@@ -653,8 +663,16 @@ Function Get-PathInstallerType {
 
   if ($Path -match '\.msix(bundle){0,1}$') { return 'msix' }
   if ($Path -match '\.msi$') {
-    $ObjectMetadata = Get-ItemMetadata $Path
-    $ObjectDatabase = Get-MsiDatabase $Path
+    if ([System.Environment]::OSVersion.Platform -match 'Unix') {
+      $ObjectDatabase = @{}
+      $ObjectMetadata = @{
+        ProgramName = $(([string](file $script:dest) | Select-String -Pattern 'Creating Application.+,').Matches.Value)
+      }
+    } else {
+      $ObjectMetadata = Get-ItemMetadata $Path
+      $ObjectDatabase = Get-MsiDatabase $Path
+    }
+
     if (Test-IsWix -Database $ObjectDatabase -MetaDataObject $ObjectMetadata ) {
       return 'wix'
     }
