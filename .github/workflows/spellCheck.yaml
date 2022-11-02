@@ -1,24 +1,54 @@
 name: Spell Checking
-on: 
+
+on:
   pull_request_target:
   push:
     branches:
       - "**"
     tags-ignore:
       - "**"
+
 jobs:
-  Spell-Checking:
+  spelling:
+    name: Check Spelling
+    permissions:
+      contents: read
+      pull-requests: read
+      actions: read
+    outputs:
+      followup: ${{ steps.spelling.outputs.followup }}
     runs-on: ubuntu-latest
+    if: "contains(github.event_name, 'pull_request') || github.event_name == 'push'"
+    concurrency:
+      group: spelling-${{ github.event.pull_request.number || github.ref }}
+      # note: If you use only_check_changed_files, you do not want cancel-in-progress
+      cancel-in-progress: true
     steps:
-      - name: checkout-merge
-        if: "contains(github.event_name, 'pull_request')"
-        uses: actions/checkout@v2
-        with:
-          ref: refs/pull/${{github.event.pull_request.number}}/merge
-      - name: checkout
-        if: ${{ github.event_name == 'push' }}
-        uses: actions/checkout@v2
-      - uses: check-spelling/check-spelling@v0.0.19
-        id: spelling
-        with:
-          shortest_word: 2
+    - name: check-spelling
+      id: spelling
+      uses: check-spelling/check-spelling@v0.0.20
+      with:
+        suppress_push_for_open_pull_request: 1
+        checkout: true
+        post_comment: 0
+        dictionary_source_prefixes: '{"cspell": "https://raw.githubusercontent.com/check-spelling/cspell-dicts/v20220427/dictionaries/","cspell1": "https://raw.githubusercontent.com/check-spelling/cspell-dicts/v20220814/dictionaries/"}'
+        extra_dictionaries:
+          cspell:powershell/powershell.txt
+          cspell:typescript/typescript.txt
+          cspell:lorem-ipsum/dictionary.txt
+          cspell1:software-terms/src/software-terms.txt
+
+  comment:
+    name: Report
+    runs-on: ubuntu-latest
+    needs: spelling
+    permissions:
+      contents: write
+      pull-requests: write
+    if: (success() || failure()) && needs.spelling.outputs.followup
+    steps:
+    - name: comment
+      uses: check-spelling/check-spelling@v0.0.20
+      with:
+        checkout: true
+        task: ${{ needs.spelling.outputs.followup }}
