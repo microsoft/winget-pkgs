@@ -163,8 +163,8 @@ if ($Settings) {
   exit
 }
 
-$ScriptHeader = '# Created with YamlCreate.ps1 v2.2.1'
-$ManifestVersion = '1.2.0'
+$ScriptHeader = '# Created with YamlCreate.ps1 v2.2.2'
+$ManifestVersion = '1.4.0'
 $PSDefaultParameterValues = @{ '*:Encoding' = 'UTF8' }
 $Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
 $ofs = ', '
@@ -679,7 +679,7 @@ Function Get-PathInstallerType {
     return 'msi'
   }
   if ($Path -match '\.appx(bundle){0,1}$') { return 'appx' }
-  # if ($Path -match '\.zip$') { return 'zip' }
+  if ($Path -match '\.zip$') { return 'zip' }
   return $null
 }
 
