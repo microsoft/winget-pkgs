@@ -2663,6 +2663,7 @@ Switch ($script:Option) {
     # Update the manifest with URLs that are already there
     Write-Host $NewLine
     Write-Host 'Updating Manifest Information. This may take a while...' -ForegroundColor Blue
+    $_NewInstallers = @();
     foreach ($_Installer in $script:OldInstallerManifest.Installers) {
       try {
         $script:dest = Get-InstallerFile -URI $_Installer.InstallerUrl -PackageIdentifier $PackageIdentifier -PackageVersion $PackageVersion
@@ -2722,9 +2723,10 @@ Switch ($script:Option) {
       }
       # Remove the downloaded files
       Remove-Item -Path $script:dest
+      $_NewInstallers += Restore-YamlKeyOrder $_Installer $InstallerEntryProperties -NoComments
     }
     # Write the new manifests
-    $script:Installers = $script:OldInstallerManifest.Installers
+    $script:Installers = $_NewInstallers
     Write-LocaleManifest
     Write-InstallerManifest
     Write-VersionManifest
