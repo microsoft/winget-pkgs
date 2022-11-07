@@ -56,6 +56,7 @@ When duplicate issues are raised, moderators are able to use this special variat
 
 Moderators are often the first to see and triage new issues, and so they have the ability to apply certain labels to pull requests and issues. Below is a list of labels that moderators can apply:
 * `Area-External`
+* `Installer-Issue`
 * `Blocking-Issue`
 * `Interactive-Only-Installer`
 * `Dependencies`
