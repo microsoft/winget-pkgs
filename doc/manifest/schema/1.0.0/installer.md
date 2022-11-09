@@ -23,7 +23,7 @@ All Windows Package Manager manifests in the Microsoft community repository are 
  <summary>The package unique identifier</summary>
 
  #### Required Field
- This key is the unique identifier for a given package. This value is generally in the form of `Publisher.Package`. It is case sensitve, and this value must match the folder structure under the partition directory in GitHub.
+ This key is the unique identifier for a given package. This value is generally in the form of `Publisher.Package`. It is case sensitive, and this value must match the folder structure under the partition directory in GitHub.
 </details>
 
 ### PackageVersion
@@ -33,7 +33,7 @@ All Windows Package Manager manifests in the Microsoft community repository are 
  #### Required Field
  This key represents the version of the package. It is related to the specific release this manifests targets. In some cases you will see a perfectly formed [semantic version] number, and in other cases you might see something different. These may be date driven, or they might have other characters with some package specific meaning for example.
 
- The Windows Package Manager client uses this version to determine if an upgrade for a package is available. In some cases, packages may be released with a marketing driven version, and that causes trouble with the [`winget upgrade`] command. 
+ The Windows Package Manager client uses this version to determine if an upgrade for a package is available. In some cases, packages may be released with a marketing driven version, and that causes trouble with the [`winget upgrade`] command.
 
  >Note: The current best practice is to use the value reported in Add / Remove Programs when this version of the package is installed. In some cases, packages do not report a version resulting in an upgrade loop or other unwanted behavior. This practice may seem contrary to using semantic versioning, but it provides the best end to end experience for customers. It will take time for publishers and ISVs to migrate to semantic versioning, and some may intentionally choose to preserve other versioning schemes.
 </details>
@@ -64,7 +64,7 @@ All Windows Package Manager manifests in the Microsoft community repository are 
 
  #### Optional Field
  This key represents the minimum version of the Windows operating system supported by the package.
- 
+
  >Note: This key may be present in the root of the manifest as the default value for all installer nodes. This key may also be present in an individual installer node as well. If this key is in the manifest root and in an installer node, the value in the installer node will apply.
 </details>
 
@@ -78,7 +78,7 @@ All Windows Package Manager manifests in the Microsoft community repository are 
  >Note: The Windows Package Manager defaults to the install mode providing install progress. A best practice is to determine if one of the supported installer technologies was used to build an installer with the .exe file extension. The [Windows Package Manager Manifest Creator] tool can be used to determine if one of the known tools was used to build an installer with the .exe file extension.
 
  >Note: The Windows Package Manager does not support loose executables with the .exe or .com file extension directly. Compressed files containing installers,  loose executables, and Progressive Web Applications (PWAs) are also not supported.
- 
+
  >Note: This key may be present in the root of the manifest as the default value for all installer nodes. This key may also be present in an individual installer node as well. If this key is in the manifest root and in an installer node, the value in the installer node will apply.
 </details>
 
@@ -88,7 +88,7 @@ All Windows Package Manager manifests in the Microsoft community repository are 
 
  #### Optional Field
  This key represents the scope the package is installed under. The two configurations are "user" and "machine". Some installers support only one of these scopes while others support both via arguments passed to the installer using "InstallerSwitches".
- 
+
  >Note: This key may be present in the root of the manifest as the default value for all installer nodes. This key may also be present in an individual installer node as well. If this key is in the manifest root and in an installer node, the value in the installer node will apply.
 </details>
 
@@ -109,7 +109,7 @@ All Windows Package Manager manifests in the Microsoft community repository are 
  <summary>Switches passed to installers</summary>
 
  #### Optional Field
- This key represents the set of switches passed to installers. 
+ This key represents the set of switches passed to installers.
 
  >Note: The Microsoft community repository currently requires support for silent and silent with progress installation. Many custom .exe installers will require the proper switches to meet this requirement. The [Windows Package Manager Manifest Creator] tool can be used to determine if one of the known tools was used to build an installer with the .exe file extension. In the event the tool is unable to determine the tool used to build the installer, the publisher may have documentation for the proper switches.
 </details>
@@ -122,7 +122,7 @@ All Windows Package Manager manifests in the Microsoft community repository are 
  This key represents switches passed to the installer to provide a silent install experience. These would be used when the command `winget install <package> --silent` is executed.
 
  >Note: When the Windows Package Manager installs a package using the "silent" install mode, any custom switches will also be passed to the installer. If a user applies override switches via command line via the Windows Package Manager, none of the switches from the manifest will be passed to the installer.
- 
+
  >Note: This key may be present in the root of the manifest as the default value for all installer nodes. This key may also be present in an individual installer node as well. If this key is in the manifest root and in an installer node, the value in the installer node will apply.
 </details>
 
@@ -179,7 +179,7 @@ All Windows Package Manager manifests in the Microsoft community repository are 
 
  #### Optional Field
  This key represents any switches the Windows Package Manager will pass to the installer in addition to "Silent", "SilentWithProgress", and "Interactive".
- 
+
  >Note: If a user applies override switches via command line via the Windows Package Manager, none of the switches from the manifest will be passed to the installer.
 </details>
 
@@ -191,7 +191,7 @@ All Windows Package Manager manifests in the Microsoft community repository are 
  This key represents any status codes returned by the installer representing a success condition other than zero.
 
  >Note: Some return codes indicate a reboot is suggested or required. The Windows Package Manager does not support the reboot behavior currently. Some installers will force a reboot, and the Windows Package Manager does not currently suppress reboot behavior.
- 
+
  >Note: This key may be present in the root of the manifest as the default value for all installer nodes. This key may also be present in an individual installer node as well. If this key is in the manifest root and in an installer node, the value in the installer node will apply.
 </details>
 
@@ -213,7 +213,7 @@ All Windows Package Manager manifests in the Microsoft community repository are 
  This key represents any commands or aliases used to execute the package after it has been installed.
 
  >Note: The Windows Package Manager does not update the path during the install workflow. In those cases, the user may need to restart their shell or terminal before the command will execute the newly installed package. The Windows Package Manager does not support any behavior related to commands or aliases.
- 
+
  >Note: This key may be present in the root of the manifest as the default value for all installer nodes. This key may also be present in an individual installer node as well. If this key is in the manifest root and in an installer node, the value in the installer node will apply.
 </details>
 
@@ -295,7 +295,7 @@ All Windows Package Manager manifests in the Microsoft community repository are 
 
  #### Optional Field
  This key represents the package family name specified in an MSIX installer. This value is used to assist with matching packages from a source to the program installed in Windows via Add / Remove Programs for list, and upgrade behavior.
- 
+
  >Note: This key may be present in the root of the manifest as the default value for all installer nodes. This key may also be present in an individual installer node as well. If this key is in the manifest root and in an installer node, the value in the installer node will apply.
 </details>
 
@@ -305,7 +305,7 @@ All Windows Package Manager manifests in the Microsoft community repository are 
 
  #### Optional Field
  This key represents the product code specified in an MSI installer. This value is used to assist with matching packages from a source to the program installed in Windows via Add / Remove Programs for list, and upgrade behavior.
- 
+
  >Note: This key may be present in the root of the manifest as the default value for all installer nodes. This key may also be present in an individual installer node as well. If this key is in the manifest root and in an installer node, the value in the installer node will apply.
 </details>
 
@@ -345,7 +345,7 @@ All Windows Package Manager manifests in the Microsoft community repository are 
 
  #### Optional Field
  This key represents the locale for an installer *not* the package meta-data. Some installers are compiled with locale or language specific properties. If this key is present, it is used to represent the package locale for an installer.
- 
+
  >Note: This key may be present in the root of the manifest as the default value for all installer nodes. This key may also be present in an individual installer node as well. If this key is in the manifest root and in an installer node, the value in the installer node will apply.
 
 </details>
