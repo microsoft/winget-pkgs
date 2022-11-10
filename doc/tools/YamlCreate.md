@@ -58,6 +58,10 @@ SignedCLA: false
 # If this value is set to true, the Quick Update Warning will be skipped
 SuppressQuickUpdateWarning: false
 
+# This setting allows you to require that the exact key corresponding to a menu option be pressed
+# If this value is set to true, there is effectively no default action for menus
+ExplicitMenuOptions: false
+
 # This setting allows you to set a default installer locale
 # Any value defined here will be set as the installer locale if one is not entered
 DefaultInstallerLocale: en-US
