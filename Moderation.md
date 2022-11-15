@@ -4,11 +4,24 @@ The Windows Package Manager community repository is the location for manifests p
 
 ## Moderators
 
-In addition to Microsoft employees, several community members have been identified through their high-quality submissions, willingness to help others, and adherence to our [code of conduct](CODE_OF_CONDUCT.md). You can see who they are in a pinned [public service announcement](https://github.com/microsoft/winget-pkgs/issues/15674).
+In addition to Microsoft employees, several community members have been identified through their high-quality submissions, willingness to help others, and adherence to our [code of conduct](CODE_OF_CONDUCT.md).
 
 When we initially implemented moderation, we observed several objective criteria. These included the number of Pull Requests (PR)s made, the length of time they had been active in the project, and their interaction with others who submitted PRs.
 
 Our intent was not to introduce a numbers game for others to achieve and automatically become a moderator. Our goal from now on is to ensure the community is sufficiently supported by individuals who have the technical knowledge and a proven track record of success. Becoming a moderator is like becoming a [Microsoft Most Valuable Professional](https://mvp.microsoft.com/en-us/Pages/what-it-takes-to-be-an-mvp). There isn't a set formula. We're looking at what individual contributors are doing, and how they are doing it. If the need arises to add additional moderators, nominations may come from one of the core team members or an existing moderator. We will publicly disclose the nomination in a discussion. If the nominee agrees to the requirements in this document, they may be awarded the status of moderator.
+
+| Windows Package Manager Administrators | Community Moderators |
+| :---: | :---: |
+| **[@denelon](https://github.com/denelon)** 				| **[@ImJoakim](https://github.com/ImJoakim)** |
+| **[@hackean-msft](https://github.com/hackean-msft)** 		| **[@ItzLevvie](https://github.com/ItzLevvie)** |
+| **[@JohnMcPMS](https://github.com/JohnMcPMS)**			| **[@jedieaston](https://github.com/jedieaston)** |
+| **[@KevinLaMS](https://github.com/KevinLaMS)** 			| **[@KaranKad](https://github.com/KaranKad)** |
+| **[@msftrubengu](https://github.com/msftrubengu)** 		| **[@mdanish-kh](https://github.com/mdanish-kh)** |
+| **[@ranm-msft](https://github.com/ranm-msft)** 			| **[@OfficialEsco](https://github.com/OfficialEsco)** |
+| **[@ryfu-msft](https://github.com/ryfu-msft)** 			| **[@quhxl](https://github.com/quhxl)** |
+| **[@stephengillie](https://github.com/stephengillie)** 	| **[@russellbanks](https://github.com/russellbanks)** |
+| **[@yao-msft](https://github.com/yao-msft)** 				| **[@Trenly](https://github.com/Trenly)** |
+| **[@zachcarp](https://github.com/zachcarp)** 				| |
 
 ## Expectations
 
@@ -56,6 +69,7 @@ When duplicate issues are raised, moderators are able to use this special variat
 
 Moderators are often the first to see and triage new issues, and so they have the ability to apply certain labels to pull requests and issues. Below is a list of labels that moderators can apply:
 * `Area-External`
+* `Installer-Issue`
 * `Blocking-Issue`
 * `Interactive-Only-Installer`
 * `Dependencies`
