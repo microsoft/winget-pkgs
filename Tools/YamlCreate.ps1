@@ -79,8 +79,8 @@ Function Invoke-KeypressMenu {
 
   do {
     $keyInfo = [Console]::ReadKey($false)
-    if ($keyInfo.KeyChar -notin $AllowedCharacters -and $ScriptSettings.ExplicitMenuOptions -eq $true -and $AllowedCharacters.Length -gt 0){
-      if ($keyInfo.Key -eq 'Enter') { Write-Host}
+    if ($keyInfo.KeyChar -notin $AllowedCharacters -and $ScriptSettings.ExplicitMenuOptions -eq $true -and $AllowedCharacters.Length -gt 0) {
+      if ($keyInfo.Key -eq 'Enter') { Write-Host }
       $keyInfo = $null
     }
   } until ($keyInfo.Key)
@@ -1770,7 +1770,7 @@ Function Read-PRBody {
         if ($? -and $(Get-Command 'winget' -ErrorAction SilentlyContinue)) {
           $PrBodyContentReply += @($_line.Replace('[ ]', '[X]'))
           $_showMenu = $false
-        } else {
+        } elseif ($script:Option -ne 'RemoveManifest') {
           $_menu = @{
             Prompt        = "Have you validated your manifest locally with 'winget validate --manifest <path>'?"
             Entries       = @('[Y] Yes'; '*[N] No')
@@ -1785,7 +1785,7 @@ Function Read-PRBody {
         if ($script:SandboxTest -eq '0') {
           $PrBodyContentReply += @($_line.Replace('[ ]', '[X]'))
           $_showMenu = $false
-        } else {
+        } elseif ($script:Option -ne 'RemoveManifest') {
           $_menu = @{
             Prompt        = "Have you tested your manifest locally with 'winget install --manifest <path>'?"
             Entries       = @('[Y] Yes'; '*[N] No')
@@ -1797,13 +1797,18 @@ Function Read-PRBody {
       }
 
       '*schema*' {
-        $_Match = ($_line | Select-String -Pattern 'https://+.+(?=\))').Matches.Value
-        $_menu = @{
-          Prompt        = $_line.TrimStart('- [ ]') -replace '\[|\]|\(.+\)', ''
-          Entries       = @('[Y] Yes'; '*[N] No')
-          HelpText      = "Reference Link: $_Match"
-          HelpTextColor = ''
-          DefaultString = 'N'
+        if ($script:Option -ne 'RemoveManifest') {
+          $_Match = ($_line | Select-String -Pattern 'https://+.+(?=\))').Matches.Value
+          $_menu = @{
+            Prompt        = $_line.TrimStart('- [ ]') -replace '\[|\]|\(.+\)', ''
+            Entries       = @('[Y] Yes'; '*[N] No')
+            HelpText      = "Reference Link: $_Match"
+            HelpTextColor = ''
+            DefaultString = 'N'
+          }
+        } else {
+          $_showMenu = $false
+          $PrBodyContentReply += @($_line)
         }
       }
 
