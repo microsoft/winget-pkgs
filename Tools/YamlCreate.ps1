@@ -1778,6 +1778,9 @@ Function Read-PRBody {
             HelpTextColor = 'Red'
             DefaultString = 'N'
           }
+        } else {
+          $_showMenu = $false
+          $PrBodyContentReply += @($_line)
         }
       }
 
@@ -1793,6 +1796,9 @@ Function Read-PRBody {
             HelpTextColor = 'Red'
             DefaultString = 'N'
           }
+        } else {
+          $_showMenu = $false
+          $PrBodyContentReply += @($_line)
         }
       }
 
