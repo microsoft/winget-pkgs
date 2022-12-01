@@ -115,7 +115,7 @@ Once you've discussed your proposed feature/fix/etc. with a team member, and you
 
 1. Fork the repository if you haven't already.
 2. Clone your fork locally.
-> NOTE: Using a shallow clone can significantly speed up the initial clone command.  Pass `--depth=1` to git if you do not need any history in your local repo.
+> NOTE: Using a shallow clone can significantly speed up the initial clone command.Pass `--depth=1` to git if you do not need any history in your local repo.
 3. Create & push a feature branch.
 4. Create a [Draft Pull Request (PR)](https://github.blog/2019-02-14-introducing-draft-pull-requests/).
 5. Work on your changes.
