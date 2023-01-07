@@ -73,5 +73,4 @@ Moderators are often the first to see and triage new issues, and so they have th
 * `Blocking-Issue`
 * `Interactive-Only-Installer`
 * `Dependencies`
-* `.zip`
-> Note: Adding `Interactive-Only-Installer`, `Dependencies`, or `.zip` will automatically add `Blocking-Issue`
+> Note: Adding `Interactive-Only-Installer` or `Dependencies`, will automatically add `Blocking-Issue`
