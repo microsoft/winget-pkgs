@@ -1,0 +1,173 @@
+{
+ "properties": {
+  "displayName": "[Preview]: Configure VMSS created with Shared Image Gallery images to install the Guest Attestation extension",
+  "policyType": "BuiltIn",
+  "mode": "Indexed",
+  "description": "Configure VMSS created with Shared Image Gallery images to automatically install the Guest Attestation extension to allow Azure Security Center to proactively attest and monitor the boot integrity. Boot integrity is attested via Remote Attestation.",
+  "metadata": {
+   "category": "Security Center",
+   "version": "2.0.0-preview",
+   "preview": true
+  },
+  "parameters": {
+   "effect": {
+    "type": "String",
+    "metadata": {
+     "displayName": "Effect",
+     "description": "Enable or disable the execution of the policy"
+    },
+    "allowedValues": [
+     "DeployIfNotExists",
+     "Disabled"
+    ],
+    "defaultValue": "DeployIfNotExists"
+   },
+   "attestationEndpoint": {
+    "type": "String",
+    "metadata": {
+     "displayName": "Guest attestation tenant URL",
+     "description": "The Microsoft Azure Attestation (MAA) custom tenant URL."
+    },
+    "defaultValue": ""
+   }
+  },
+  "policyRule": {
+   "if": {
+    "allOf": [
+     {
+      "field": "type",
+      "equals": "Microsoft.Compute/virtualMachineScaleSets"
+     },
+     {
+      "field": "Microsoft.Compute/virtualMachineScaleSets/virtualMachineProfile.securityProfile.securityType",
+      "equals": "TrustedLaunch"
+     },
+     {
+      "field": "Microsoft.Compute/virtualMachineScaleSets/virtualMachineProfile.securityProfile.uefiSettings",
+      "exists": "true"
+     },
+     {
+      "field": "Microsoft.Compute/virtualMachineScaleSets/virtualMachineProfile.securityProfile.uefiSettings.vTpmEnabled",
+      "equals": "true"
+     },
+     {
+      "field": "Microsoft.Compute/virtualMachineScaleSets/virtualMachineProfile.securityProfile.uefiSettings.secureBootEnabled",
+      "equals": "true"
+     },
+     {
+      "field": "Microsoft.Compute/imageid",
+      "exists": "true"
+     }
+    ]
+   },
+   "then": {
+    "effect": "[parameters('effect')]",
+    "details": {
+     "type": "Microsoft.Compute/virtualMachineScaleSets/extensions",
+     "existenceCondition": {
+      "allOf": [
+       {
+        "field": "Microsoft.Compute/virtualMachineScaleSets/extensions/publisher",
+        "in": [
+         "Microsoft.Azure.Security.LinuxAttestation",
+         "Microsoft.Azure.Security.WindowsAttestation"
+        ]
+       },
+       {
+        "field": "Microsoft.Compute/virtualMachineScaleSets/extensions/type",
+        "equals": "GuestAttestation"
+       },
+       {
+        "field": "Microsoft.Compute/virtualMachineScaleSets/extensions/provisioningState",
+        "in": [
+         "Succeeded",
+         "Provisioning succeeded"
+        ]
+       }
+      ]
+     },
+     "roleDefinitionIds": [
+      "/providers/microsoft.authorization/roleDefinitions/acdd72a7-3385-48ef-bd42-f606fba81ae7",
+      "/providers/microsoft.authorization/roleDefinitions/9980e02c-c2be-4d73-94e8-173b1dc7cf3c"
+     ],
+     "deployment": {
+      "properties": {
+       "mode": "incremental",
+       "parameters": {
+        "vmName": {
+         "value": "[field('name')]"
+        },
+        "location": {
+         "value": "[field('location')]"
+        },
+        "imageId": {
+         "value": "[field('Microsoft.Compute/imageid')]"
+        },
+        "attestationEndpoint": {
+         "value": "[parameters('attestationEndpoint')]"
+        }
+       },
+       "template": {
+        "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+        "contentVersion": "1.0.0.0",
+        "parameters": {
+         "vmName": {
+          "type": "string"
+         },
+         "location": {
+          "type": "string"
+         },
+         "imageId": {
+          "type": "string"
+         },
+         "attestationEndpoint": {
+          "type": "string"
+         }
+        },
+        "variables": {
+         "extensionName": "GuestAttestation",
+         "extensionPublisherPrefix": "Microsoft.Azure.Security.",
+         "extensionPublisherSuffix": "Attestation",
+         "extensionVersion": "1.0",
+         "maaTenantName": "GuestAttestation",
+         "ascReportingEndpoint": ""
+        },
+        "resources": [
+         {
+          "type": "Microsoft.Compute/virtualMachineScaleSets/extensions",
+          "apiVersion": "2018-10-01",
+          "name": "[concat(parameters('vmName'), '/', variables('extensionName'))]",
+          "location": "[parameters('location')]",
+          "properties": {
+           "publisher": "[concat(variables('extensionPublisherPrefix'), reference(split(parameters('imageId'), '/versions')[0], '2021-07-01').osType, variables('extensionPublisherSuffix'))]",
+           "type": "[variables('extensionName')]",
+           "typeHandlerVersion": "[variables('extensionVersion')]",
+           "autoUpgradeMinorVersion": true,
+           "settings": {
+            "AttestationConfig": {
+             "MaaSettings": {
+              "maaEndpoint": "[parameters('attestationEndpoint')]",
+              "maaTenantName": "[variables('maaTenantName')]"
+             },
+             "AscSettings": {
+              "ascReportingEndpoint": "[variables('ascReportingEndpoint')]",
+              "ascReportingFrequency": ""
+             },
+             "useCustomToken": "false",
+             "disableAlerts": "false"
+            }
+           }
+          }
+         }
+        ]
+       }
+      }
+     }
+    }
+   }
+  }
+ },
+ "id": "/providers/Microsoft.Authorization/policyDefinitions/009259b0-12e8-42c9-94e7-7af86aa58d13",
+ "type": "Microsoft.Authorization/policyDefinitions",
+ "name": "009259b0-12e8-42c9-94e7-7af86aa58d13"
+}

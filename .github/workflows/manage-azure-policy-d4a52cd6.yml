@@ -1,0 +1,44 @@
+name: manage-azure-policy-d4a52cd6
+on:
+  workflow_dispatch:
+    inputs:
+      remarks:
+        description: 'Reason for triggering the workflow run'
+        required: false
+        default: 'Updating Azure Policies'
+
+
+## Uncomment the following if you wish to automatically trigger workflow run with every commit
+#
+#  push:
+#    paths:
+#      - 'policies/Audit_virtual_machines_without_disaster_recovery_configured_0015ea4d-51ff-4ce3-8d8c-f3f8f0179a56/**'
+#      - 'policies/Restrict_location_of_information_processing,_storage_and_services_0040d2e5-2779-170d-6a2c-1f5fca353335/**'
+#      - 'policies/Vulnerability_assessment_should_be_enabled_on_your_Synapse_workspaces_0049a6b3-a662-4f3e-8635-39cf44ace45a/**'
+#      - 'policies/Establish_parameters_for_searching_secret_authenticators_and_verifiers_0065241c-72e9-3b2c-556f-75de66332a94/**'
+#      - 'policies/SQL_Server_Integration_Services_integration_runtimes_on_Azure_Data_Factory_should_be_joined_to_a_virtual_network_0088bc63-6dee-4a9c-9d29-91cfdc848952/**'
+#      - 'policies/_Preview_Configure_VMSS_created_with_Shared_Image_Gallery_images_to_install_the_Guest_Attestation_extension_009259b0-12e8-42c9-94e7-7af86aa58d13/**'
+#      - 'policies/Private_endpoint_connections_on_Batch_accounts_should_be_enabled_009a0c92-f5b4-4776-9b66-4ed2b4775563/**'
+#      - .github/workflows/manage-azure-policy-d4a52cd6.yml
+jobs:
+  apply-azure-policy:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Login to Azure
+      uses: azure/login@v1
+      with:
+        creds: ${{secrets.AZURE_CREDENTIALS_d4a52cd6}}
+        allow-no-subscriptions: true
+    - name: Create or Update Azure Policies
+      uses: azure/manage-azure-policy@v0
+      with:
+        paths: |
+          policies/Audit_virtual_machines_without_disaster_recovery_configured_0015ea4d-51ff-4ce3-8d8c-f3f8f0179a56/**
+          policies/Restrict_location_of_information_processing,_storage_and_services_0040d2e5-2779-170d-6a2c-1f5fca353335/**
+          policies/Vulnerability_assessment_should_be_enabled_on_your_Synapse_workspaces_0049a6b3-a662-4f3e-8635-39cf44ace45a/**
+          policies/Establish_parameters_for_searching_secret_authenticators_and_verifiers_0065241c-72e9-3b2c-556f-75de66332a94/**
+          policies/SQL_Server_Integration_Services_integration_runtimes_on_Azure_Data_Factory_should_be_joined_to_a_virtual_network_0088bc63-6dee-4a9c-9d29-91cfdc848952/**
+          policies/_Preview_Configure_VMSS_created_with_Shared_Image_Gallery_images_to_install_the_Guest_Attestation_extension_009259b0-12e8-42c9-94e7-7af86aa58d13/**
+          policies/Private_endpoint_connections_on_Batch_accounts_should_be_enabled_009a0c92-f5b4-4776-9b66-4ed2b4775563/**

@@ -1,0 +1,51 @@
+{
+ "properties": {
+  "displayName": "SQL Server Integration Services integration runtimes on Azure Data Factory should be joined to a virtual network",
+  "policyType": "BuiltIn",
+  "mode": "All",
+  "description": "Azure Virtual Network deployment provides enhanced security and isolation for your SQL Server Integration Services integration runtimes on Azure Data Factory, as well as subnets, access control policies, and other features to further restrict access.",
+  "metadata": {
+   "version": "2.0.0",
+   "category": "Data Factory"
+  },
+  "parameters": {
+   "effect": {
+    "type": "String",
+    "metadata": {
+     "displayName": "Effect",
+     "description": "The effect determines what happens when the policy rule is evaluated to match."
+    },
+    "allowedValues": [
+     "Audit",
+     "Deny",
+     "Disabled"
+    ],
+    "defaultValue": "Audit"
+   }
+  },
+  "policyRule": {
+   "if": {
+    "allOf": [
+     {
+      "field": "type",
+      "equals": "Microsoft.DataFactory/factories/integrationRuntimes"
+     },
+     {
+      "field": "Microsoft.DataFactory/factories/integrationruntimes/type",
+      "equals": "Managed"
+     },
+     {
+      "field": "Microsoft.DataFactory/factories/integrationRuntimes/Managed.typeProperties.computeProperties.vnetProperties.vnetId",
+      "exists": "false"
+     }
+    ]
+   },
+   "then": {
+    "effect": "[parameters('effect')]"
+   }
+  }
+ },
+ "id": "/providers/Microsoft.Authorization/policyDefinitions/0088bc63-6dee-4a9c-9d29-91cfdc848952",
+ "type": "Microsoft.Authorization/policyDefinitions",
+ "name": "0088bc63-6dee-4a9c-9d29-91cfdc848952"
+}
