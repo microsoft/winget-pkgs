@@ -90,7 +90,7 @@ Function Invoke-KeypressMenu {
 
 #If the user has git installed, make sure it is a patched version
 if (Get-Command 'git' -ErrorAction SilentlyContinue) {
-  $GitMinimumVersion = [System.Version]::Parse('2.35.2')
+  $GitMinimumVersion = [System.Version]::Parse('2.39.1')
   $gitVersionString = ((git version) | Select-String '([0-9]{1,}\.?){3,}').Matches.Value.Trim(' ', '.')
   $gitVersion = [System.Version]::Parse($gitVersionString)
   if ($gitVersion -lt $GitMinimumVersion) {
