@@ -2,9 +2,10 @@
 [![Gitter](https://img.shields.io/gitter/room/Microsoft/winget-pkgs)](https://gitter.im/Microsoft/winget-pkgs)
 [![Validation Pipeline Badge](https://img.shields.io/endpoint?url=https://winget-pme.azurefd.net/api/GetServiceComponentStatusBadge?component=ValidationPipeline "Validation Pipeline Badge")](https://dev.azure.com/ms/winget-pkgs/_build?definitionId=337)
 [![Publish Pipeline Badge](https://img.shields.io/endpoint?url=https://winget-pme.azurefd.net/api/GetServiceComponentStatusBadge?component=PublishPipeline "Publish Pipeline Badge")](https://dev.azure.com/ms/winget-pkgs/_build?definitionId=338)
+[![Github Status](https://img.shields.io/endpoint?url=https://api.bittu.eu.org/github-status-badge-endpoint)](https://www.githubstatus.com)
 
 This repository contains the manifest files for the **Windows Package Manager** default source. You are highly encouraged to submit manifests for your favorite application.
-> Note: At this time installers must either be MSIX, MSI or .exe application installers. Compressed .zip files and fonts are not currently supported.
+> Note: At this time installers must be MSIX, MSI, APPX, or .exe application installers. Script-based installers and fonts are not currently supported.
 
 The **Windows Package Manager** is an [open source client](https://github.com/microsoft/winget-cli) designed for command-line usage. If you are interested in exploring third-party repositories offering private winget package hosting, see [third-party repositories](THIRD_PARTY.md).
 
