@@ -79,8 +79,8 @@ Function Invoke-KeypressMenu {
 
   do {
     $keyInfo = [Console]::ReadKey($false)
-    if ($keyInfo.KeyChar -notin $AllowedCharacters -and $ScriptSettings.ExplicitMenuOptions -eq $true -and $AllowedCharacters.Length -gt 0){
-      if ($keyInfo.Key -eq 'Enter') { Write-Host}
+    if ($keyInfo.KeyChar -notin $AllowedCharacters -and $ScriptSettings.ExplicitMenuOptions -eq $true -and $AllowedCharacters.Length -gt 0) {
+      if ($keyInfo.Key -eq 'Enter') { Write-Host }
       $keyInfo = $null
     }
   } until ($keyInfo.Key)
@@ -163,8 +163,8 @@ if ($Settings) {
   exit
 }
 
-$ScriptHeader = '# Created with YamlCreate.ps1 v2.2.1'
-$ManifestVersion = '1.2.0'
+$ScriptHeader = '# Created with YamlCreate.ps1 v2.2.2'
+$ManifestVersion = '1.4.0'
 $PSDefaultParameterValues = @{ '*:Encoding' = 'UTF8' }
 $Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
 $ofs = ', '
@@ -679,7 +679,7 @@ Function Get-PathInstallerType {
     return 'msi'
   }
   if ($Path -match '\.appx(bundle){0,1}$') { return 'appx' }
-  # if ($Path -match '\.zip$') { return 'zip' }
+  if ($Path -match '\.zip$') { return 'zip' }
   return $null
 }
 
@@ -1770,7 +1770,7 @@ Function Read-PRBody {
         if ($? -and $(Get-Command 'winget' -ErrorAction SilentlyContinue)) {
           $PrBodyContentReply += @($_line.Replace('[ ]', '[X]'))
           $_showMenu = $false
-        } else {
+        } elseif ($script:Option -ne 'RemoveManifest') {
           $_menu = @{
             Prompt        = "Have you validated your manifest locally with 'winget validate --manifest <path>'?"
             Entries       = @('[Y] Yes'; '*[N] No')
@@ -1778,6 +1778,9 @@ Function Read-PRBody {
             HelpTextColor = 'Red'
             DefaultString = 'N'
           }
+        } else {
+          $_showMenu = $false
+          $PrBodyContentReply += @($_line)
         }
       }
 
@@ -1785,7 +1788,7 @@ Function Read-PRBody {
         if ($script:SandboxTest -eq '0') {
           $PrBodyContentReply += @($_line.Replace('[ ]', '[X]'))
           $_showMenu = $false
-        } else {
+        } elseif ($script:Option -ne 'RemoveManifest') {
           $_menu = @{
             Prompt        = "Have you tested your manifest locally with 'winget install --manifest <path>'?"
             Entries       = @('[Y] Yes'; '*[N] No')
@@ -1793,17 +1796,25 @@ Function Read-PRBody {
             HelpTextColor = 'Red'
             DefaultString = 'N'
           }
+        } else {
+          $_showMenu = $false
+          $PrBodyContentReply += @($_line)
         }
       }
 
       '*schema*' {
-        $_Match = ($_line | Select-String -Pattern 'https://+.+(?=\))').Matches.Value
-        $_menu = @{
-          Prompt        = $_line.TrimStart('- [ ]') -replace '\[|\]|\(.+\)', ''
-          Entries       = @('[Y] Yes'; '*[N] No')
-          HelpText      = "Reference Link: $_Match"
-          HelpTextColor = ''
-          DefaultString = 'N'
+        if ($script:Option -ne 'RemoveManifest') {
+          $_Match = ($_line | Select-String -Pattern 'https://+.+(?=\))').Matches.Value
+          $_menu = @{
+            Prompt        = $_line.TrimStart('- [ ]') -replace '\[|\]|\(.+\)', ''
+            Entries       = @('[Y] Yes'; '*[N] No')
+            HelpText      = "Reference Link: $_Match"
+            HelpTextColor = ''
+            DefaultString = 'N'
+          }
+        } else {
+          $_showMenu = $false
+          $PrBodyContentReply += @($_line)
         }
       }
 
@@ -2663,6 +2674,7 @@ Switch ($script:Option) {
     # Update the manifest with URLs that are already there
     Write-Host $NewLine
     Write-Host 'Updating Manifest Information. This may take a while...' -ForegroundColor Blue
+    $_NewInstallers = @();
     foreach ($_Installer in $script:OldInstallerManifest.Installers) {
       try {
         $script:dest = Get-InstallerFile -URI $_Installer.InstallerUrl -PackageIdentifier $PackageIdentifier -PackageVersion $PackageVersion
@@ -2722,9 +2734,10 @@ Switch ($script:Option) {
       }
       # Remove the downloaded files
       Remove-Item -Path $script:dest
+      $_NewInstallers += Restore-YamlKeyOrder $_Installer $InstallerEntryProperties -NoComments
     }
     # Write the new manifests
-    $script:Installers = $script:OldInstallerManifest.Installers
+    $script:Installers = $_NewInstallers
     Write-LocaleManifest
     Write-InstallerManifest
     Write-VersionManifest
