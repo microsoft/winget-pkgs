@@ -1,7 +1,7 @@
-[Manifest Specification]:   doc/manifest/schema/1.2.0
-[versionSchema]:            doc/manifest/schema/1.2.0/version.md
-[defaultLocaleSchema]:      doc/manifest/schema/1.2.0/defaultLocale.md
-[installerSchema]:          doc/manifest/schema/1.2.0/installer.md
+[Manifest Specification]:   doc/manifest/schema/1.4.0
+[versionSchema]:            doc/manifest/schema/1.4.0/version.md
+[defaultLocaleSchema]:      doc/manifest/schema/1.4.0/defaultLocale.md
+[installerSchema]:          doc/manifest/schema/1.4.0/installer.md
 
 # Authoring Manifests
 
@@ -51,7 +51,7 @@ winget install wingetcreate
 ```
 
 ### Creating your manifest with Winget-Create
-Now that you have Winget-Create installed onto your machine, you are ready to generate your first manifest by running the [New command](https://github.com/microsoft/winget-create/blob/main/doc/new.md). To do so, simply run the following command in your terminal: 
+Now that you have Winget-Create installed onto your machine, you are ready to generate your first manifest by running the [New command](https://github.com/microsoft/winget-create/blob/main/doc/new.md). To do so, simply run the following command in your terminal:
 
 ```powershell
 wingetcreate new <Installer URL(s)>
