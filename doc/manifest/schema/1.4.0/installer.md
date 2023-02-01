@@ -33,7 +33,7 @@ Installers:                     	# The list of package installers
     InstallerSha256:            	# The SHA256 hash of the installer
     SignatureSha256:            	# Optional SHA256 hash of the MSIX signature
     NestedInstallerType:					# The installer type when InstallerType is an archive type
-    NestedInstallerFiles:					# Deatils about the installers when InstallerType is an archive type
+    NestedInstallerFiles:					# Details about the installers when InstallerType is an archive type
       - RelativeFilePath:					# The relative path to the nested installer file
         PortableCommandAlias:			# The command alias to be used for calling the package. Only applies when NestedInstallerType is 'portable'
     Scope:                      	# Optional installer scope
@@ -290,7 +290,7 @@ ManifestVersion: 1.4.0
 </details>
 
 <details>
- <summary><b>PortableCommandAilas</b> - The command alias to be used for calling the package</summary>
+ <summary><b>PortableCommandAlias</b> - The command alias to be used for calling the package</summary>
 
  **Required Field**
 
