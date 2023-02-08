@@ -32,10 +32,10 @@ Installers:                     	# The list of package installers
     InstallerUrl:               	# The installer URL
     InstallerSha256:            	# The SHA256 hash of the installer
     SignatureSha256:            	# Optional SHA256 hash of the MSIX signature
-		NestedInstallerType:					# The installer type when InstallerType is an archive type
-		NestedInstallerFiles:					# Deatils about the installers when InstallerType is an archive type
-			- RelativeFilePath:					# The relative path to the nested installer file
-				PortableCommandAlias:			# The command alias to be used for calling the package. Only applies when NestedInstallerType is 'portable'
+    NestedInstallerType:					# The installer type when InstallerType is an archive type
+    NestedInstallerFiles:					# Details about the installers when InstallerType is an archive type
+      - RelativeFilePath:					# The relative path to the nested installer file
+        PortableCommandAlias:			# The command alias to be used for calling the package. Only applies when NestedInstallerType is 'portable'
     Scope:                      	# Optional installer scope
     InstallModes:              		# Optional installer modes
     InstallerSwitches:         	 	# Optional installer switches
@@ -82,14 +82,14 @@ Installers:                     	# The list of package installers
       - UnsupportedArgument:    	# Optional unsupported Windows Package Manager Client argument
     DisplayInstallWarnings:     	# *Not implemented* Optional indicator for packages that are known to interfere with running application during install
     ReleaseDate:                	# Optional release date
-		InstallationMetadata:					# Optional metadata for deeper installation detection
-			- DefaultInstallLocation: 	# Optional default install location for the package
-			  Files:										# Optional list of files installed by the package
-				  - RelativeFilePath:   	# Optional relative path to the installed file
-						FileSha256:						# Optional Sha256 of the installed file
-						FileType:							# Optional installed file type. Treated as 'other' if not specified
-						InvocationParameter:	# Optional parameter for invocable files
-						DisplayName:					# Optional display name for invocable files
+    InstallationMetadata:					# Optional metadata for deeper installation detection
+      - DefaultInstallLocation: 	# Optional default install location for the package
+        Files:										# Optional list of files installed by the package
+          - RelativeFilePath:   	# Optional relative path to the installed file
+            FileSha256:						# Optional Sha256 of the installed file
+            FileType:							# Optional installed file type. Treated as 'other' if not specified
+            InvocationParameter:	# Optional parameter for invocable files
+            DisplayName:					# Optional display name for invocable files
 ManifestType: installer         	# The manifest type
 ManifestVersion: 1.4.0          	# The manifest syntax version
 ```
@@ -290,7 +290,7 @@ ManifestVersion: 1.4.0
 </details>
 
 <details>
- <summary><b>PortableCommandAilas</b> - The command alias to be used for calling the package</summary>
+ <summary><b>PortableCommandAlias</b> - The command alias to be used for calling the package</summary>
 
  **Required Field**
 
