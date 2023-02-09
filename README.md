@@ -27,25 +27,12 @@ To submit a package to this repository, you should follow these steps:
 
 There are some tools available to help you author a manifest.
 
-- [Windows Package Manager Manifest Creator](https://github.com/microsoft/winget-create)
-- [Komac - **Ko**tlin **Ma**nifest **C**reator for WinGet](https://github.com/russellbanks/Komac)
-- [YamlCreate.ps1](#using-the-yamlcreateps1)
+- [Windows Package Manager Manifest Creator](https://github.com/microsoft/winget-create) (**Official**)
+- Other WinGet Manifest Creators developed by the community:
+  - [Komac - **Ko**tlin **Ma**nifest **C**reator for WinGet](https://github.com/russellbanks/Komac) (maintained by [**@russellbanks**](https://github.com/russellbanks))
+  - [YamlCreate.ps1](doc/tools/YamlCreate.md)
 
 > Note: Only one manifest may be submitted per PR.
-
-### Using the Komac CLI (maintained by [**@russellbanks**](https://github.com/russellbanks))
-
-Download the appropriate installer for your OS from the [releases page](https://github.com/russellbanks/Komac/releases) and install it. Open a terminal and run `komac` to get started.
-
-- To create a new manifest, run `komac new` and follow the self-explanatory prompts. To give a slight idea, you will be prompted for Package Identifier, Version, and the URLs to the installer. Additionally, you will be prompted for the metadata such as Publisher, Package Name, License, and more. It will take a little effort to fill out all the metadata, but on updating the manifest, you'll be prompted only for Identifier, Version, and Installer URLs.
-
-- To update an existing manifest, run `komac update`. If you're using Komac in CI pipelines, pass the information using `--id`, `--version` and `--urls` parameters. Additionally, you can pass the `--submit` parameter to submit the PR automatically.
-
-### Using the YamlCreate.ps1 (community-maintained)
-
-To help author manifest files, we have provided a YamlCreate.ps1 [PowerShell script](Tools/YamlCreate.ps1) located in the Tools folder. The script will prompt you for the URL to the installer, then will prompt you to fill in metadata. Additional information regarding the YamlCreate script can be found in the [documentation for the script](doc/tools/YamlCreate.md).
-
-> You can use the script by cloning the repository on your PC and running the script directly from the **Tools** folder.
 
 ## Test your manifest
 
