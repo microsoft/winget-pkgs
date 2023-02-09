@@ -33,7 +33,7 @@ There are some tools available to help you author a manifest.
 
 > Note: Only one manifest may be submitted per PR.
 
-### Using the Komac CLI (maintained by [**@russellbanks**](https://github.com/russellbanks) - a community moderator & contributors)
+### Using the Komac CLI (maintained by [**@russellbanks**](https://github.com/russellbanks))
 
 Download the appropriate installer for your OS from the [releases page](https://github.com/russellbanks/Komac/releases) and install it. Open a terminal and run `komac` to get started.
 
