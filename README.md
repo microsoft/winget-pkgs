@@ -27,10 +27,10 @@ To submit a package to this repository, you should follow these steps:
 
 A few different tools are available to help you author a manifest.
 
-- [Windows Package Manager Manifest Creator](https://github.com/microsoft/winget-create) (**Official**)
+- [Windows Package Manager Manifest Creator](https://github.com/microsoft/winget-create)
+- [YamlCreate.ps1](doc/tools/YamlCreate.md)
 - Other WinGet Manifest Creators developed by the community:
   - [Komac - **Ko**tlin **Ma**nifest **C**reator for WinGet](https://github.com/russellbanks/Komac) (maintained by [**@russellbanks**](https://github.com/russellbanks))
-  - [YamlCreate.ps1](doc/tools/YamlCreate.md) (maintained by Microsoft & community)
 
 > Note: Only one manifest may be submitted per PR.
 
