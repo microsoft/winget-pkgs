@@ -179,7 +179,11 @@ if ($ScriptSettings.EnableDeveloperOptions -eq $true -and $null -ne $ScriptSetti
   $ManifestVersion = $ScriptSettings.OverrideManifestVersion
 }
 
-$useDirectSchemaLink = (Invoke-WebRequest "https://aka.ms/winget-manifest.version.$ManifestVersion.schema.json" -UseBasicParsing).BaseResponse.ContentLength -eq -1
+$useDirectSchemaLink = if ($env:GITHUB_ACTIONS -eq $true) {
+  $true
+} else {
+  (Invoke-WebRequest "https://aka.ms/winget-manifest.version.$ManifestVersion.schema.json" -UseBasicParsing).BaseResponse.ContentLength -eq -1
+}
 $SchemaUrls = @{
   version       = if ($useDirectSchemaLink) { "https://raw.githubusercontent.com/microsoft/winget-cli/master/schemas/JSON/manifests/v$ManifestVersion/manifest.version.$ManifestVersion.json" } else { "https://aka.ms/winget-manifest.version.$ManifestVersion.schema.json" }
   defaultLocale = if ($useDirectSchemaLink) { "https://raw.githubusercontent.com/microsoft/winget-cli/master/schemas/JSON/manifests/v$ManifestVersion/manifest.defaultLocale.$ManifestVersion.json" } else { "https://aka.ms/winget-manifest.defaultLocale.$ManifestVersion.schema.json" }
