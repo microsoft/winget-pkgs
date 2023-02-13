@@ -98,7 +98,7 @@ if (Get-Command 'git' -ErrorAction SilentlyContinue) {
     if (Get-Command 'winget' -ErrorAction SilentlyContinue) {
       $_menu = @{
         entries       = @('[Y] Upgrade Git'; '*[N] Do not upgrade')
-        Prompt        = 'The version of git installed on your machine does not satisfy the requirement of version >= 2.35.2; Would you like to upgrade?'
+        Prompt        = 'The version of git installed on your machine does not satisfy the requirement of version >= 2.39.1; Would you like to upgrade?'
         HelpText      = "Upgrading will attempt to upgrade git using winget`n"
         DefaultString = ''
       }
@@ -117,10 +117,10 @@ if (Get-Command 'git' -ErrorAction SilentlyContinue) {
             }
           }
         }
-        default { Write-Host; throw [UnmetDependencyException]::new('The version of git installed on your machine does not satisfy the requirement of version >= 2.35.2') }
+        default { Write-Host; throw [UnmetDependencyException]::new('The version of git installed on your machine does not satisfy the requirement of version >= 2.39.1') }
       }
     } else {
-      throw [UnmetDependencyException]::new('The version of git installed on your machine does not satisfy the requirement of version >= 2.35.2')
+      throw [UnmetDependencyException]::new('The version of git installed on your machine does not satisfy the requirement of version >= 2.39.1')
     }
   }
   # Check whether the script is present inside a fork/clone of microsoft/winget-pkgs repository
