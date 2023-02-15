@@ -1,9 +1,8 @@
 #Streamlines Winget-pkgs manifest PR moderator approval by watching the clipboard - copy a PR title to your clipboard, and Watch-Packages attempts to parse the PackageIdentifier and version number, gathers the version from Winget, and gives feedback in your Powershell console. Also outputs valid titles to a logging file. Freeing moderators to focus on approving and helping. 
 
 $MainFolder = "C:\ManVal" #Created in the manual validation pipeline
-$WingetFolder = "$MainFolder\manifests"
-$PRFile = "$MainFolder\misc\PR.txt"
-$authFile = "$MainFolder\misc\Auth.csv"
+$PRFile = "$MainFolder\PR.txt"
+$authFile = "$MainFolder\PRWatcher-Auth.csv"
 
 function Watch-PRTitles {
 	[CmdletBinding()]
