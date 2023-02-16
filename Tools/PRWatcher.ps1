@@ -34,19 +34,23 @@ function Watch-PRTitles {
 				#Write-Debug 0 $title[$prVerLoc]
 			}catch {
 				try {
-					[System.Version]$prVersion = $title[-2]
-				#Write-Debug 1 $title[-2]
+					[System.Version]$prVersion = $title[-1]
 				}catch {
 					try {
-						[System.Version]$prVersion = $title[-3]
-				#Write-Debug 2 $title[-3]
+						[System.Version]$prVersion = $title[-2]
+					#Write-Debug 1 $title[-2]
 					}catch {
 						try {
-							[System.Version]$prVersion = $title[-4]
-				#Write-Debug 3 $title[-4]
+							[System.Version]$prVersion = $title[-3]
+					#Write-Debug 2 $title[-3]
 						}catch {
-							$prVersion = $title[-2]
-				#Write-Debug 4
+							try {
+								[System.Version]$prVersion = $title[-4]
+					#Write-Debug 3 $title[-4]
+							}catch {
+								$prVersion = $title[-2]
+					#Write-Debug 4
+							}
 						}
 					}
 				}
