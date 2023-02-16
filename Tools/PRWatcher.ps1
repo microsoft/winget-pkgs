@@ -1,13 +1,12 @@
 #Streamlines Winget-pkgs manifest PR moderator approval by watching the clipboard - copy a PR title to your clipboard, and Watch-PRTitles attempts to parse the PackageIdentifier and version number, gathers the version from Winget, and gives feedback in your Powershell console. Also outputs valid titles to a logging file. Freeing moderators to focus on approving and helping. 
 
-$MainFolder = "C:\ManVal" #Created in the manual validation pipeline
-$PRFile = "$MainFolder\PR.txt"
-$authFile = "$MainFolder\Auth.csv"
 
 function Watch-PRTitles {
 	[CmdletBinding()]
 	param(
 		[switch]$noNew,
+		$LogFile = ".\PR.txt",
+		$authFile = ".\Auth.csv",
 		$oldclip = ""
 	)
 	while($true){
@@ -139,8 +138,8 @@ function Watch-PRTitles {
 			if ($noRecord -eq $false) {
 				if ($clip.length -le 128) {
 				$clip = $clip -join "" | where {$_ -match "[#][0-9]{5}"}
-				#Write-Host "Output $clip to $PRFile"
-				$clip | Out-File $PRFile -Append
+				#Write-Host "Output $clip to $LogFile"
+				$clip | Out-File $LogFile -Append
 			} else {
 				Write-Host -f $cautionColor "$timevar Item length greater than 128 characters."
 			} 
