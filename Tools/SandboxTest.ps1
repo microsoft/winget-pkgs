@@ -231,6 +231,7 @@ Write-Host @'
 --> Configuring Winget
 '@
 winget settings --Enable LocalManifestFiles
+winget settings --Enable LocalArchiveMalwareScanOverride
 copy -Path $settingsPathInSandbox -Destination C:\Users\WDAGUtilityAccount\AppData\Local\Packages\Microsoft.DesktopAppInstaller_8wekyb3d8bbwe\LocalState\settings.json
 `$originalARP = Get-ARPTable
 Write-Host @'
@@ -239,7 +240,7 @@ Write-Host @'
 --> Installing the Manifest $manifestFileName
 
 '@
-winget install -m '$manifestPathInSandbox' --verbose-logs
+winget install -m '$manifestPathInSandbox' --verbose-logs --ignore-local-archive-malware-scan
 
 Write-Host @'
 
