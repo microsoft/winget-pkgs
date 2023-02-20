@@ -22,7 +22,7 @@ function Watch-PRTitles {
 
 			if ($title[1]) {
 				$title = $title[1] -split " "
-			}else {
+			} else {
 				$title = $title -split " "
 			}
 			#Split the title by spaces. Try extracting the version location as the next item after the word "version", and if that fails, use the 2nd to the last item, then 3rd to last, and 4th to last. For some reason almost everyone puts the version number as the last item, and GitHub appends the PR number. 
@@ -102,35 +102,35 @@ function Watch-PRTitles {
 			if ($cleanOut -eq "Added") {
 				Write-Host -f $invalidColor "$timevar Error reading package identifier"
 				$noRecord = $true
-			}elseif ($wingetOutput -eq "No package found matching input criteria.") {
+			} elseif ($wingetOutput -eq "No package found matching input criteria.") {
 				if ($noNew -eq $true) {
 					$noRecord = $true
 				}
 				Write-Host -f $invalidColor $timevar ($cleanOut) $wingetOutput
-			}elseif ($prVersion -eq "") {
+			} elseif ($null -eq $prVersion -or "" -eq $prVersion) {
 				$noRecord = $true
 				Write-Host -f $invalidColor "$timevar Error reading PR version"
-			}elseif ($wingetVersion -eq "Unknown") {
+			} elseif ($wingetVersion -eq "Unknown") {
 				Write-Host -f $invalidColor "$timevar Error reading Winget version"
-			}elseif ($wingetVersion -eq "input") {
+			} elseif ($wingetVersion -eq "input") {
 				$noRecord = $true
 				Write-Host $wingetOutput
-			}elseif ($wingetVersion -eq $null) {
+			} elseif ($wingetVersion -eq $null) {
 				Write-Host $wingetOutput
-			}elseif ($wingetVersion -eq "add-watermark") {
+			} elseif ($wingetVersion -eq "add-watermark") {
 				$noRecord = $true
 				Write-Host -f $invalidColor "$timevar Error reading package identifier"
-			}elseif ($prVersion -gt $wingetVersion) {
+			} elseif ($prVersion -gt $wingetVersion) {
 				Write-Host -f $validColor "$timevar $cleanOut prVersion $prVersion is greater than wingetVersion $wingetVersion"
-			}elseif ($prVersion -lt $wingetVersion) {
+			} elseif ($prVersion -lt $wingetVersion) {
 				$outMsg = "$timevar $cleanOut prVersion $prVersion is less than wingetVersion $wingetVersion"
 				Write-Host -f $invalidColor $outMsg
 				if ($copyClip) {
 					$outMsg | clip
 				}
-			}elseif ($prVersion -eq $wingetVersion) {
+			} elseif ($prVersion -eq $wingetVersion) {
 				Write-Host -f $cautionColor "$timevar $cleanOut prVersion $prVersion is equal to wingetVersion $wingetVersion"
-			}else {
+			} else {
 				$wingetOutput
 			};
 			$oldclip = $clip
@@ -148,13 +148,6 @@ function Watch-PRTitles {
 		sleep 1
 	}
 }
-
-<#Bug: Non-semantic version numbers get garbled.
-Example: https://github.com/microsoft/winget-pkgs/search?o=desc&q=chrisant996.Clink&s=committer-date&type=commits
-
-$carryClip sections are an unfinished attempt to address this bug.
-#>
-
 
 #Utility functions
 #Extract package name from clipboard contents
