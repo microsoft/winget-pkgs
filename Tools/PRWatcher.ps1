@@ -26,28 +26,34 @@ function Watch-PRTitles {
 				$title = $title -split " "
 			}
 			#Split the title by spaces. Try extracting the version location as the next item after the word "version", and if that fails, use the 2nd to the last item, then 3rd to last, and 4th to last. For some reason almost everyone puts the version number as the last item, and GitHub appends the PR number. 
+			$prVerLoc =($title | Select-String "version").linenumber 
+			#Version is on the line before the line number, and this set indexes with 1 - but the following array indexes with 0, so the value is automatically transformed by the index mismatch. 
 			try {
-				#Version is on the line before the line number, and this set indexes with 1 - but the following array indexes with 0, so the value is automatically transformed by the index mismatch. 
-				$prVerLoc =($title | Select-String "version").linenumber 
-				[System.Version]$prVersion = $title[$prVerLoc]
-				#Write-Debug 0 $title[$prVerLoc]
-			}catch {
+				try {
+					[System.Version]$prVersion = $title[$prVerLoc]
+					#Write-Debug 0 $title[$prVerLoc]
+				} catch {
+					[string]$prVersion = $title[$prVerLoc]
+				}
+			} catch {
+				#Otherwise we have to go hunting for the version number.
 				try {
 					[System.Version]$prVersion = $title[-1]
-				}catch {
+				} catch {
 					try {
 						[System.Version]$prVersion = $title[-2]
 					#Write-Debug 1 $title[-2]
-					}catch {
+					} catch {
 						try {
 							[System.Version]$prVersion = $title[-3]
 					#Write-Debug 2 $title[-3]
-						}catch {
+						} catch {
 							try {
 								[System.Version]$prVersion = $title[-4]
 					#Write-Debug 3 $title[-4]
-							}catch {
-								$prVersion = $title[-2]
+							} catch {
+								#If it's not a semantic version, guess that it's the 2nd to last, based on the above logic.
+								[string]$prVersion = $title[-2]
 					#Write-Debug 4
 							}
 						}
@@ -55,10 +61,6 @@ function Watch-PRTitles {
 				}
 			}
 			#Store version number
-			if ($prVersion -eq "") {
-				$prVersion = $carryClip 
-			}
-			
 			$validColor = "green"
 			$invalidColor = "red"
 			$cautionColor = "yellow"
@@ -85,10 +87,14 @@ function Watch-PRTitles {
 			
 			$wingetOutput = Search-WinGetManifest $cleanOut 
 			
+			$wgLine = ($wingetOutput | Select-String " $cleanOut ")
 			try {
-				$wgLine = ($wingetOutput | Select-String " $cleanOut ")
-				[System.Version]$wingetVersion = ($wgLine -replace "\s+"," " -split " ")[-2]
-			}catch {
+				try {
+					[System.Version]$wingetVersion = ($wgLine -replace "\s+"," " -split " ")[-2]
+				} catch {
+					[string]$wingetVersion = ($wgLine -replace "\s+"," " -split " ")[-2]
+				}
+			} catch {
 				$wingetVersion = ""
 			}
 			
@@ -134,7 +140,6 @@ function Watch-PRTitles {
 				$wingetOutput
 			};
 			$oldclip = $clip
-			$carryClip = $prVersion 
 			if ($noRecord -eq $false) {
 				if ($clip.length -le 128) {
 				$clip = $clip -join "" | where {$_ -match "[#][0-9]{5}"}
