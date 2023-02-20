@@ -10,16 +10,16 @@ function Watch-PRTitles {
 		$oldclip = ""
 	)
 	while($true){
-		$timevar = (get-date -Format T) + ":"
 		$clip = Get-Clipboard;
-		$AuthList = gc $authFile | ConvertFrom-Csv
-		$carryClip = ""
-		$copyClip = $false
+		#$carryClip = ""
 		
 		if (diff $clip $oldclip) {
+			$timevar = (get-date -Format T) + ":"
+			$AuthList = gc $authFile | ConvertFrom-Csv
+			$copyClip = $false
 			$noRecord = $false
-			$title = $clip -split ": "
 
+			$title = $clip -split ": "
 			if ($title[1]) {
 				$title = $title[1] -split " "
 			} else {
@@ -133,6 +133,8 @@ function Watch-PRTitles {
 				Write-Host -f $invalidColor $outMsg
 				if ($copyClip) {
 					$outMsg | clip
+					$clip = $outMsg
+					$oldclip = $outMsg
 				}
 			} elseif ($prVersion -eq $wingetVersion) {
 				Write-Host -f $cautionColor "$timevar $cleanOut prVersion $prVersion is equal to wingetVersion $wingetVersion"
