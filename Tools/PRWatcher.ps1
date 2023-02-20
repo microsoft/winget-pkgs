@@ -7,6 +7,8 @@ function Watch-PRTitles {
 		[switch]$noNew,
 		$LogFile = ".\PR.txt",
 		$authFile = ".\Auth.csv",
+		[ValidateSet("Default","MonoWarm","MonoCool","RainbowRotate")]
+		$Chromatic = "Default",
 		$oldclip = ""
 	)
 	while($true){
@@ -60,10 +62,39 @@ function Watch-PRTitles {
 					}
 				}
 			}
-			#Store version number
 			$validColor = "green"
 			$invalidColor = "red"
 			$cautionColor = "yellow"
+			
+			Switch ($Chromatic)
+				#Color schemes, to accomodate needs and also add variety.
+				{
+					"Default" {
+						$validColor = "Green"
+						$invalidColor = "Red"
+						$cautionColor = "Yellow"
+					}
+					"MonoWarm" {
+						$validColor = "White"
+						$invalidColor = "Red"
+						$cautionColor = "Yellow"
+					}
+					"MonoCool" {
+						$validColor = "Green"
+						$invalidColor = "Blue"
+						$cautionColor = "Cyan"
+					}
+					"RainbowRotate" {
+						$validColor = Get-Random ("Green","White","Cyan")
+						$invalidColor = Get-Random ("Red","Blue","Magenta")
+						$cautionColor = Get-Random ("Yellow","DarkCyan","Grey")
+					}
+					Default {
+						$validColor = "Green"
+						$invalidColor = "Red"
+						$cautionColor = "Yellow"
+					}
+				}
 			
 			#Get the PackageIdentifier out of the PR title, and alert if it matches the auth list.
 			$cleanOut = (Get-CleanClip); 
