@@ -83,7 +83,7 @@ function Watch-PRTitles {
 				Write-Host " = = = = = = "
 			}
 			
-			$wingetOutput = Search-Winget $cleanOut 
+			$wingetOutput = Search-WinGetManifest $cleanOut 
 			
 			try {
 				$wgLine = ($wingetOutput | Select-String " $cleanOut ")
@@ -178,7 +178,7 @@ function Get-CleanClip {
 }
 
 #Minimize output for automation
-function Search-Winget ($term) {
+function Search-WinGetManifest ($term) {
 	$out = winget search $term --disable-interactivity
 	return $out
 }

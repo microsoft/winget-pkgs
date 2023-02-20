@@ -1,10 +1,10 @@
 # Using PRWatcher.ps1
-PRWatcher includes Watch-PRTitles, to give information about pull requests (PRs) from watching their titles in your clipboard. Also includes utility programs Get-CleanClip and Search-Winget. To use, load the file contents into your PowerShell application through your desired means. (Copy/paste, Import-Module, include in Profile, et cetera.) Then run "Watch-PRTitles" and the script will monitor your clipboard, attempting to parse PackageIdentifiers and version numbers, and comparing these to Winget's public manifest.
+PRWatcher includes Watch-PRTitles, to give information about pull requests (PRs) from watching their titles in your clipboard. To use, load the file contents into your PowerShell application through your desired means. (Copy/paste, Import-Module, include in Profile, et cetera.) Then run "Watch-PRTitles" and the script will monitor your clipboard, attempting to parse PackageIdentifiers and version numbers, and comparing these to WinGet's public manifest.
 
 ## Utility Functions
 Additionally included are utility functions:  
 - Get-CleanClip to extract the PackageIdentifier. 
-- Search-Winget, to streamline non-interactive Winget search. 
+- Search-WinGetManifest to streamline non-interactive WinGet search. 
 
 These are library functions also used in other Manual Validation functions, as part of the philosophy of building a declarative layer to handle operations and build objects, and an imperative layer on top to orchestrate operations. These utility functions are in the declarative layer, while Watch-PRTitles is in the imperative layer.
 
