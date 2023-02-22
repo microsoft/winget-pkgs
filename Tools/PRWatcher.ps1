@@ -33,32 +33,32 @@ function Watch-PRTitles {
 			try {
 				try {
 					[System.Version]$prVersion = $title[$prVerLoc]
-					Write-Debug 0 $title[$prVerLoc]
+					#Write-Debug 0 $title[$prVerLoc]
 				} catch {
 					[string]$prVersion = $title[$prVerLoc]
-					Write-Debug 1 $title[$prVerLoc]
+					#Write-Debug 1 $title[$prVerLoc]
 				}
 			} catch {
 				#Otherwise we have to go hunting for the version number.
 				try {
 					[System.Version]$prVersion = $title[-1]
-					Write-Debug 2 $title[-1]
+					#Write-Debug 2 $title[-1]
 				} catch {
 					try {
 						[System.Version]$prVersion = $title[-2]
-						Write-Debug 3 $title[-2]
+						#Write-Debug 3 $title[-2]
 					} catch {
 						try {
 							[System.Version]$prVersion = $title[-3]
-							Write-Debug 4 $title[-3]
+							#Write-Debug 4 $title[-3]
 						} catch {
 							try {
 								[System.Version]$prVersion = $title[-4]
-								Write-Debug 5 $title[-4]
+								#Write-Debug 5 $title[-4]
 							} catch {
 								#If it's not a semantic version, guess that it's the 2nd to last, based on the above logic.
 								[string]$prVersion = $title[-2]
-								Write-Debug 6 $title[-2]
+								#Write-Debug 6 $title[-2]
 							}
 						}
 					}
@@ -87,9 +87,9 @@ function Watch-PRTitles {
 						$cautionColor = "Cyan"
 					}
 					"RainbowRotate" {
-						$validColor = Get-Random ("Green","White","Cyan")
+						$validColor = Get-Random ("Green","White","Gray")
 						$invalidColor = Get-Random ("Red","Blue","Magenta")
-						$cautionColor = Get-Random ("Yellow","DarkCyan","Grey")
+						$cautionColor = Get-Random ("Yellow","DarkCyan","Cyan")
 					}
 					Default {
 						$validColor = "Green"
@@ -178,7 +178,7 @@ function Watch-PRTitles {
 			if ($noRecord -eq $false) {
 				if ($clip.length -le 128) {
 				$clip = $clip -join "" | where {$_ -match "[#][0-9]{5}"}
-				Write-Debug "Output $clip to $LogFile"
+				#Write-Debug "Output $clip to $LogFile"
 				$clip | Out-File $LogFile -Append
 			} else {
 				Write-Host -f $cautionColor "$timevar Item length greater than 128 characters."
@@ -200,20 +200,20 @@ function Get-CleanClip {
 	$out = $out -join "" #removes accidental line breaks
 	#$DebugPreference = 'Continue'
 	$i = 0
-	Write-Debug "$i time: $out";$i++
+	#Write-Debug "$i time: $out";$i++
 	$out =  $out -replace "Add "
 	$out =  $out -replace "Automatic deletion of "
 	$out =  $out -replace "Automatic update of "
 	$out =  $out -replace "Remove "
 	$out =  $out -replace "Update "
-	Write-Debug "$i time: $out";$i++
+	#Write-Debug "$i time: $out";$i++
 	if ($out.contains(": ")) {
 		$out =  ($out -split ": ")[1]
 	}
-	Write-Debug "$i time: $out";$i++
+	#Write-Debug "$i time: $out";$i++
 
 	$out =  ($out -split " ")[0]
-	Write-Debug "$i time: $out";$i++
+	#Write-Debug "$i time: $out";$i++
 	$out	
 }
 
