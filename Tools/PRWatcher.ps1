@@ -33,9 +33,7 @@ function Watch-PRTitles {
 			#Split the title by spaces. Try extracting the version location as the next item after the word "version", and if that fails, use the 2nd to the last item, then 3rd to last, and 4th to last. For some reason almost everyone puts the version number as the last item, and GitHub appends the PR number. 
 			$prVerLoc =($title | Select-String "version").linenumber 
 			#Version is on the line before the line number, and this set indexes with 1 - but the following array indexes with 0, so the value is automatically transformed by the index mismatch. 
-			if ($null -eq $prVerLoc) {
-				continue
-			} else {
+			if ($null -ne $prVerLoc) {
 				try {
 					[System.Version]$prVersion = $title[$prVerLoc]
 					#Write-Debug 0 $title[$prVerLoc]
