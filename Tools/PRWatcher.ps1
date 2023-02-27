@@ -21,7 +21,7 @@ function Watch-PRTitles {
 			$AuthList = Get-Content $authFile | ConvertFrom-Csv
 		}
 		
-		if (diff $clip $oldclip) {
+		if (Compare-Object $clip $oldclip) {
 			$timevar = (get-date -Format T) + ":"
 			$copyClip = $false
 			$noRecord = $false
@@ -107,9 +107,9 @@ function Watch-PRTitles {
 			$cleanOut = (Get-CleanClip); 
 			$AuthMatch = $AuthList.PackageIdentifier -match ($cleanOut.split("[.]")[0]+"."+$cleanOut.split("[.]")[1])
 			if ($AuthMatch) {
-				$AuthListLine = $AuthList | where {$_.PackageIdentifier -match $AuthMatch}
-				$strictness = $AuthListLine.strictness | sort -Unique
-				$AuthAccount = $AuthListLine.account | sort -Unique
+				$AuthListLine = $AuthList | Where-Object {$_.PackageIdentifier -match $AuthMatch}
+				$strictness = $AuthListLine.strictness | Sort-Object -Unique
+				$AuthAccount = $AuthListLine.account | Sort-Object -Unique
 				$strictColor = ""
 				if ($strictness -eq "must") {
 					$strictColor = $invalidColor
@@ -159,7 +159,7 @@ function Watch-PRTitles {
 			} elseif ($WinGetVersion -eq "input") {
 				$noRecord = $true
 				Write-Host $WinGetOutput
-			} elseif ($WinGetVersion -eq $null) {
+			} elseif ($null -eq $WinGetVersion) {
 				Write-Host $WinGetOutput
 			} elseif ($WinGetVersion -eq "add-watermark") {
 				$noRecord = $true
@@ -182,7 +182,7 @@ function Watch-PRTitles {
 			$oldclip = $clip
 			if ($noRecord -eq $false) {
 				if ($clip.length -le 128) {
-				$clip = $clip -join "" | where {$_ -match "[#][0-9]{5}"}
+				$clip = $clip -join "" | Where-Object {$_ -match "[#][0-9]{5}"}
 				#Write-Debug "Output $clip to $LogFile"
 				$clip | Out-File $LogFile -Append
 			} else {
@@ -190,7 +190,7 @@ function Watch-PRTitles {
 			} 
 			}
 		};
-		sleep 1
+		Start-Sleep 1
 	}
 }
 
@@ -227,5 +227,3 @@ function Search-WinGetManifest ($term) {
 	$out = WinGet search $term --disable-interactivity
 	return $out
 }
-
-
