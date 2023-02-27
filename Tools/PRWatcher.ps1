@@ -1,5 +1,8 @@
-#Streamlines Winget-pkgs manifest PR moderator approval by watching the clipboard - copy a PR title to your clipboard, and Watch-PRTitles attempts to parse the PackageIdentifier and version number, gathers the version from Winget, and gives feedback in your Powershell console. Also outputs valid titles to a logging file. Freeing moderators to focus on approving and helping. 
-
+#Copyright 2023 Microsoft Corporation
+#Author: Stephen Gillie
+#Created: 2/15/2023
+#Updated: 2/24/2023
+#Notes: Streamlines WinGet-pkgs manifest PR moderator approval by watching the clipboard - copy a PR title to your clipboard, and Watch-PRTitles attempts to parse the PackageIdentifier and version number, gathers the version from WinGet, and gives feedback in your Powershell console. Also outputs valid titles to a logging file. Freeing moderators to focus on approving and helping. 
 
 function Watch-PRTitles {
 	[CmdletBinding()]
@@ -118,17 +121,17 @@ function Watch-PRTitles {
 				Write-Host " = = = = = = "
 			}
 			
-			$wingetOutput = Search-WinGetManifest $cleanOut 
+			$WinGetOutput = Search-WinGetManifest $cleanOut 
 			
-			$wgLine = ($wingetOutput | Select-String " $cleanOut ")
+			$wgLine = ($WinGetOutput | Select-String " $cleanOut ")
 			try {
 				try {
-					[System.Version]$wingetVersion = ($wgLine -replace "\s+"," " -split " ")[-2]
+					[System.Version]$WinGetVersion = ($wgLine -replace "\s+"," " -split " ")[-2]
 				} catch {
-					[string]$wingetVersion = ($wgLine -replace "\s+"," " -split " ")[-2]
+					[string]$WinGetVersion = ($wgLine -replace "\s+"," " -split " ")[-2]
 				}
 			} catch {
-				$wingetVersion = ""
+				$WinGetVersion = ""
 			}
 			
 			$titlejoin = ($title -join " ")
@@ -141,38 +144,38 @@ function Watch-PRTitles {
 			if ($cleanOut -eq "Added") {
 				Write-Host -f $invalidColor "$timevar Error reading package identifier"
 				$noRecord = $true
-			} elseif ($wingetOutput -eq "No package found matching input criteria.") {
+			} elseif ($WinGetOutput -eq "No package found matching input criteria.") {
 				if ($noNew -eq $true) {
 					$noRecord = $true
 				}
-				Write-Host -f $invalidColor $timevar ($cleanOut) $wingetOutput
+				Write-Host -f $invalidColor $timevar ($cleanOut) $WinGetOutput
 			} elseif ($null -eq $prVersion -or "" -eq $prVersion) {
 				$noRecord = $true
 				Write-Host -f $invalidColor "$timevar Error reading PR version"
-			} elseif ($wingetVersion -eq "Unknown") {
-				Write-Host -f $invalidColor "$timevar Error reading Winget version"
-			} elseif ($wingetVersion -eq "input") {
+			} elseif ($WinGetVersion -eq "Unknown") {
+				Write-Host -f $invalidColor "$timevar Error reading WinGet version"
+			} elseif ($WinGetVersion -eq "input") {
 				$noRecord = $true
-				Write-Host $wingetOutput
-			} elseif ($wingetVersion -eq $null) {
-				Write-Host $wingetOutput
-			} elseif ($wingetVersion -eq "add-watermark") {
+				Write-Host $WinGetOutput
+			} elseif ($WinGetVersion -eq $null) {
+				Write-Host $WinGetOutput
+			} elseif ($WinGetVersion -eq "add-watermark") {
 				$noRecord = $true
 				Write-Host -f $invalidColor "$timevar Error reading package identifier"
-			} elseif ($prVersion -gt $wingetVersion) {
-				Write-Host -f $validColor "$timevar $cleanOut prVersion $prVersion is greater than wingetVersion $wingetVersion"
-			} elseif ($prVersion -lt $wingetVersion) {
-				$outMsg = "$timevar $cleanOut prVersion $prVersion is less than wingetVersion $wingetVersion"
+			} elseif ($prVersion -gt $WinGetVersion) {
+				Write-Host -f $validColor "$timevar $cleanOut prVersion $prVersion is greater than WinGetVersion $WinGetVersion"
+			} elseif ($prVersion -lt $WinGetVersion) {
+				$outMsg = "$timevar $cleanOut prVersion $prVersion is less than WinGetVersion $WinGetVersion"
 				Write-Host -f $invalidColor $outMsg
 				if ($copyClip) {
 					$outMsg | clip
 					$clip = $outMsg
 					$oldclip = $outMsg
 				}
-			} elseif ($prVersion -eq $wingetVersion) {
-				Write-Host -f $cautionColor "$timevar $cleanOut prVersion $prVersion is equal to wingetVersion $wingetVersion"
+			} elseif ($prVersion -eq $WinGetVersion) {
+				Write-Host -f $cautionColor "$timevar $cleanOut prVersion $prVersion is equal to WinGetVersion $WinGetVersion"
 			} else {
-				$wingetOutput
+				$WinGetOutput
 			};
 			$oldclip = $clip
 			if ($noRecord -eq $false) {
@@ -219,7 +222,7 @@ function Get-CleanClip {
 
 #Minimize output for automation
 function Search-WinGetManifest ($term) {
-	$out = winget search $term --disable-interactivity
+	$out = WinGet search $term --disable-interactivity
 	return $out
 }
 

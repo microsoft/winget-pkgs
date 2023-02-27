@@ -30,9 +30,14 @@ This setting prevents logging the PR title if the package isn't already in the W
 ## -authFile
 Location of Auth.csv - defaults to current path location. This might become a built-in web location in future versions.
 
-## -LogFIle
+## -LogFile
 Location of logging file - defaults to "Log.txt" in current path location.
 
- 
+## -Chromatic
+Color schemes, for accessability and variety:
 
-
+Color    | Warning | Caution | OK
+Default | Red   | Yellow | Green
+MonoWarm| Red | Yellow | White
+MonoCool | Blue  | Cyan | Green
+RainbowRotate| Red, Blue, Magenta | Yellow, DarkCyan, Cyan | Green, White, Gray
