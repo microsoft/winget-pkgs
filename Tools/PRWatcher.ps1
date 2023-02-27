@@ -33,7 +33,9 @@ function Watch-PRTitles {
 			#Split the title by spaces. Try extracting the version location as the next item after the word "version", and if that fails, use the 2nd to the last item, then 3rd to last, and 4th to last. For some reason almost everyone puts the version number as the last item, and GitHub appends the PR number. 
 			$prVerLoc =($title | Select-String "version").linenumber 
 			#Version is on the line before the line number, and this set indexes with 1 - but the following array indexes with 0, so the value is automatically transformed by the index mismatch. 
-			try {
+			if ($null -eq $prVerLoc) {
+				continue
+			} else {
 				try {
 					[System.Version]$prVersion = $title[$prVerLoc]
 					#Write-Debug 0 $title[$prVerLoc]
@@ -41,28 +43,28 @@ function Watch-PRTitles {
 					[string]$prVersion = $title[$prVerLoc]
 					#Write-Debug 1 $title[$prVerLoc]
 				}
+			}
+				
+			#Otherwise we have to go hunting for the version number.
+			try {
+				[System.Version]$prVersion = $title[-1]
+				#Write-Debug 2 $title[-1]
 			} catch {
-				#Otherwise we have to go hunting for the version number.
 				try {
-					[System.Version]$prVersion = $title[-1]
-					#Write-Debug 2 $title[-1]
+					[System.Version]$prVersion = $title[-2]
+					#Write-Debug 3 $title[-2]
 				} catch {
 					try {
-						[System.Version]$prVersion = $title[-2]
-						#Write-Debug 3 $title[-2]
+						[System.Version]$prVersion = $title[-3]
+						#Write-Debug 4 $title[-3]
 					} catch {
 						try {
-							[System.Version]$prVersion = $title[-3]
-							#Write-Debug 4 $title[-3]
+							[System.Version]$prVersion = $title[-4]
+							#Write-Debug 5 $title[-4]
 						} catch {
-							try {
-								[System.Version]$prVersion = $title[-4]
-								#Write-Debug 5 $title[-4]
-							} catch {
-								#If it's not a semantic version, guess that it's the 2nd to last, based on the above logic.
-								[string]$prVersion = $title[-2]
-								#Write-Debug 6 $title[-2]
-							}
+							#If it's not a semantic version, guess that it's the 2nd to last, based on the above logic.
+							[string]$prVersion = $title[-2]
+							#Write-Debug 6 $title[-2]
 						}
 					}
 				}
