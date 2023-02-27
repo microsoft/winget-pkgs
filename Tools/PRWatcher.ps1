@@ -17,10 +17,12 @@ function Watch-PRTitles {
 	while($true){
 		$clip = Get-Clipboard;
 		#$carryClip = ""
+		if (Test-Path $authFile) {
+			$AuthList = Get-Content $authFile | ConvertFrom-Csv
+		}
 		
 		if (diff $clip $oldclip) {
 			$timevar = (get-date -Format T) + ":"
-			$AuthList = gc $authFile | ConvertFrom-Csv
 			$copyClip = $false
 			$noRecord = $false
 
