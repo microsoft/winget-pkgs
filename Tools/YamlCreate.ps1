@@ -2847,7 +2847,6 @@ if ($PromptSubmit -eq '0') {
   }
 
   # Fetch the upstream branch, create a commit onto the detached head, and push it to a new branch
-
   git fetch upstream master --quiet
   git switch -d upstream/master
   if ($LASTEXITCODE -eq '0') {
