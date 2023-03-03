@@ -2839,7 +2839,7 @@ if ($PromptSubmit -eq '0') {
   }
 
   # check if upstream exists
-  $remoteUpstreamUrl = $(git remote get-url upstream)
+  ($remoteUpstreamUrl = $(git remote get-url upstream)) *> $null
   if ($remoteUpstreamUrl -and $remoteUpstreamUrl -ne $wingetUpstream) {
     git remote set-url upstream $wingetUpstream
   } elseif (!$remoteUpstreamUrl) {
