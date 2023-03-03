@@ -2842,7 +2842,7 @@ if ($PromptSubmit -eq '0') {
   $remoteUpstreamUrl = $(git remote get-url upstream)
   if ($remoteUpstreamUrl -and $remoteUpstreamUrl -ne $wingetUpstream) {
     git remote set-url upstream $wingetUpstream
-  } else {
+  } elseif (!$remoteUpstreamUrl) {
     git remote add upstream $wingetUpstream
   }
 
