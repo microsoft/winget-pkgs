@@ -2843,6 +2843,7 @@ if ($PromptSubmit -eq '0') {
   if ($remoteUpstreamUrl -and $remoteUpstreamUrl -ne $wingetUpstream) {
     git remote set-url upstream $wingetUpstream
   } elseif (!$remoteUpstreamUrl) {
+    Write-Host  -ForegroundColor 'Yellow' 'Upstream does not exist. Permanently adding https://github.com/microsoft/winget-pkgs as remote upstream'
     git remote add upstream $wingetUpstream
   }
 
