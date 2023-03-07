@@ -147,8 +147,12 @@ function Watch-PRTitles {
 				Write-Host -f $invalidColor "$timevar Error reading package identifier"
 				$noRecord = $true
 			} elseif ($WinGetOutput -eq "No package found matching input criteria.") {
-				if ($noNew -eq $true) {
+				if ($noNew) {
 					$noRecord = $true
+				} else {
+					if ($title[-1] -match "[#][0-9]{5}") {
+						Create-Sandbox ($title[-1] -replace"#","")
+					}
 				}
 				Write-Host -f $invalidColor $timevar ($cleanOut) $WinGetOutput
 			} elseif ($null -eq $prVersion -or "" -eq $prVersion) {
@@ -226,4 +230,16 @@ function Get-CleanClip {
 function Search-WinGetManifest ($term) {
 	$out = WinGet search $term --disable-interactivity
 	return $out
+}
+
+#Kills any current sandbox and makes a new one.
+function Create-Sandbox {
+	param(
+		$PRNumber = (Get-Clipboard)
+	) 
+	Get-Process *sandbox* | %{Stop-Process $_}
+	Get-Process *wingetautomator* | %{Stop-Process $_}
+	$version = "1.5.441-preview"
+	$process ="wingetautomator://install?pull_request_number=$PRNumber&winget_cli_version=v$version&watch=yes"
+	Start-Process $process
 }
