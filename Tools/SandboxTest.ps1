@@ -164,14 +164,14 @@ $uiLibsUwp.pathInSandbox = Join-Path -Path $desktopInSandbox -ChildPath (Join-Pa
 Write-Host
 
 # Create Bootstrap settings
-# dependencies and zipInstall are enabled for forward compatibility with PR's
+# Experimental features can be enabled for forward compatibility with PR's
 $bootstrapSettingsContent = @{}
 $bootstrapSettingsContent['$schema'] = 'https://aka.ms/winget-settings.schema.json'
 $bootstrapSettingsContent['logging'] = @{level = 'verbose' }
 if ($EnableExperimentalFeatures) {
   $bootstrapSettingsContent['experimentalFeatures'] = @{
     dependencies    = $true
-    zipInstall      = $true
+    openLogsArgument = $true
   }
 }
 
@@ -231,6 +231,7 @@ Write-Host @'
 --> Configuring Winget
 '@
 winget settings --Enable LocalManifestFiles
+winget settings --Enable LocalArchiveMalwareScanOverride
 copy -Path $settingsPathInSandbox -Destination C:\Users\WDAGUtilityAccount\AppData\Local\Packages\Microsoft.DesktopAppInstaller_8wekyb3d8bbwe\LocalState\settings.json
 `$originalARP = Get-ARPTable
 Write-Host @'
@@ -239,7 +240,7 @@ Write-Host @'
 --> Installing the Manifest $manifestFileName
 
 '@
-winget install -m '$manifestPathInSandbox' --verbose-logs
+winget install -m '$manifestPathInSandbox' --verbose-logs --ignore-local-archive-malware-scan
 
 Write-Host @'
 
