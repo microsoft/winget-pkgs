@@ -163,7 +163,7 @@ if ($Settings) {
   exit
 }
 
-$ScriptHeader = '# Created with YamlCreate.ps1 v2.2.3'
+$ScriptHeader = '# Created with YamlCreate.ps1 v2.2.4'
 $ManifestVersion = '1.4.0'
 $PSDefaultParameterValues = @{ '*:Encoding' = 'UTF8' }
 $Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
@@ -1821,6 +1821,11 @@ Function Read-PRBody {
           $_showMenu = $false
           $PrBodyContentReply += @($_line)
         }
+      }
+
+      '*only modifies one*' {
+        $PrBodyContentReply += @($_line.Replace('[ ]', '[X]'))
+        $_showMenu = $false
       }
 
       Default {
