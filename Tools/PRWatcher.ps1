@@ -238,7 +238,7 @@ function Create-Sandbox {
 		[string]$PRNumber = (Get-Clipboard)
 	) 
 	$FirstLetter = $PRNumber[0]
-	if ($FirstLetter = "#") {
+	if ($FirstLetter -eq "#") {
 		[string]$PRNumber = $PRNumber[1..$PRNumber.length] -join ""
 	}
 	Get-Process *sandbox* | %{Stop-Process $_}
