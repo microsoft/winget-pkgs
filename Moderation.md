@@ -49,7 +49,7 @@ Moderators are able to approve most pull requests for automatic merge. When a mo
 Occasionally the automatic validation runs into an issue which is transient, or may be solved by re-running the validation. This will remove most error labels and will cause the validation service to start a brand new validation instance.
 
 ### Removing Pull Request Feedback
-> Trigger: Comment `@MSFTbot reset feedback` on a pull request
+> Trigger: Comment `[Policy] reset feedback` on a pull request
 
 The bots which help keep the repository clean sometimes make mistakes or or sometimes a moderator misclicks and accidentally requests changes. This can add the `Needs-Author-Feedback` or `Needs-Attention` labels to pull requests that don't need them. Moderators can remove these labels without re-running the pipelines to allow for the PR to be re-reviewed and merged.
 ### Closing Pull Requests and Issues
@@ -65,7 +65,7 @@ When duplicate issues are raised, moderators are able to use this special variat
 > Note: This does not work for cross-repository duplicates
 
 ### Tagging of Issues and Pull Requests
-> Trigger: Comment `@MSFTbot <label-name>`
+> Trigger: Comment `[Policy] <label-name>`
 
 Moderators are often the first to see and triage new issues, and so they have the ability to apply certain labels to pull requests and issues. Below is a list of labels that moderators can apply:
 * `Area-External`
@@ -73,5 +73,4 @@ Moderators are often the first to see and triage new issues, and so they have th
 * `Blocking-Issue`
 * `Interactive-Only-Installer`
 * `Dependencies`
-* `.zip`
-> Note: Adding `Interactive-Only-Installer`, `Dependencies`, or `.zip` will automatically add `Blocking-Issue`
+> Note: Adding `Interactive-Only-Installer` or `Dependencies`, will automatically add `Blocking-Issue`
