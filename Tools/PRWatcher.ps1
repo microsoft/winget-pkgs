@@ -12,7 +12,8 @@ function Watch-PRTitles {
 		$authFile = ".\Auth.csv",
 		[ValidateSet("Default","MonoWarm","MonoCool","RainbowRotate")]
 		$Chromatic = "Default",
-		$oldclip = ""
+		$oldclip = "",
+		$hashPRRegex = "[#][0-9]{5,6}"
 	)
 	while($true){
 		$clip = Get-Clipboard;
@@ -150,7 +151,7 @@ function Watch-PRTitles {
 				if ($noNew) {
 					$noRecord = $true
 				} else {
-					if ($title[-1] -match "[#][0-9]{5}") {
+					if ($title[-1] -match $hashPRRegex) {
 						Create-Sandbox ($title[-1] -replace"#","")
 					}
 				}
@@ -186,7 +187,7 @@ function Watch-PRTitles {
 			$oldclip = $clip
 			if ($noRecord -eq $false) {
 				if ($clip.length -le 128) {
-				$clip = $clip -join "" | Where-Object {$_ -match "[#][0-9]{5}"}
+				$clip = $clip -join "" | Where-Object {$_ -match $hashPRRegex}
 				#Write-Debug "Output $clip to $LogFile"
 				$clip | Out-File $LogFile -Append
 			} else {
