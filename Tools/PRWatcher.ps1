@@ -16,8 +16,7 @@ function Watch-PRTitles {
 		$hashPRRegex = "[#][0-9]{5,6}"
 	)
 	while($true){
-		$clip = Get-Clipboard;
-		#$carryClip = ""
+		$clip = ((Get-Clipboard) -join "") -replace "PackageVersion:"," version" | select-string -NotMatch "^[c][:]";
 		if (Test-Path $authFile) {
 			$AuthList = Get-Content $authFile | ConvertFrom-Csv
 		}
@@ -105,7 +104,7 @@ function Watch-PRTitles {
 				}
 			
 			#Get the PackageIdentifier out of the PR title, and alert if it matches the auth list.
-			$cleanOut = (Get-CleanClip); 
+			$cleanOut = (Get-CleanClip $clip); 
 			$AuthMatch = $AuthList.PackageIdentifier -match ($cleanOut.split("[.]")[0]+"."+$cleanOut.split("[.]")[1])
 			if ($AuthMatch) {
 				$AuthListLine = $AuthList | Where-Object {$_.PackageIdentifier -match $AuthMatch}
