@@ -232,11 +232,15 @@ function Search-WinGetManifest ($term) {
 	return $out
 }
 
-#Kills any current sandbox and makes a new one.
+#Terminates any current sandbox and makes a new one.
 function Create-Sandbox {
 	param(
-		$PRNumber = (Get-Clipboard)
+		[string]$PRNumber = (Get-Clipboard)
 	) 
+	$FirstLetter = $PRNumber[0]
+	if ($FirstLetter = "#") {
+		[string]$PRNumber = $PRNumber[1..$PRNumber.length] -join ""
+	}
 	Get-Process *sandbox* | %{Stop-Process $_}
 	Get-Process *wingetautomator* | %{Stop-Process $_}
 	$version = "1.5.441-preview"
