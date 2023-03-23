@@ -3,7 +3,7 @@
 [![Gitter](https://img.shields.io/gitter/room/Microsoft/winget-pkgs)](https://gitter.im/Microsoft/winget-pkgs)
 [![Validation Pipeline Badge](https://img.shields.io/endpoint?url=https://winget-pme.azurefd.net/api/GetServiceComponentStatusBadge?component=ValidationPipeline 'Validation Pipeline Badge')](https://dev.azure.com/ms/winget-pkgs/_build?definitionId=337)
 [![Publish Pipeline Badge](https://img.shields.io/endpoint?url=https://winget-pme.azurefd.net/api/GetServiceComponentStatusBadge?component=PublishPipeline 'Publish Pipeline Badge')](https://dev.azure.com/ms/winget-pkgs/_build?definitionId=338)
-[![Github Status](https://img.shields.io/endpoint?url=https://api.bittu.eu.org/github-status-badge-endpoint)](https://www.githubstatus.com)
+[![GitHub Status](https://img.shields.io/endpoint?url=https://api.bittu.eu.org/github-status-badge-endpoint)](https://www.githubstatus.com)
 
 This repository contains the manifest files for the **Windows Package Manager** default source. You are highly encouraged to submit manifests for your favorite application.
 
@@ -30,7 +30,7 @@ A few different tools are available to help you author a manifest.
 - [Windows Package Manager Manifest Creator](https://github.com/microsoft/winget-create)
 - [YamlCreate.ps1](doc/tools/YamlCreate.md)
 - Other WinGet Manifest Creators developed by the community:
-  - [Komac - **Ko**tlin **Ma**nifest **C**reator for WinGet](https://github.com/russellbanks/Komac) (maintained by [**@russellbanks**](https://github.com/russellbanks))
+  - [Komac - Kotlin Manifest Creator for WinGet](https://github.com/russellbanks/Komac) (maintained by [**@russellbanks**](https://github.com/russellbanks))
 
 > Note: Only one manifest may be submitted per PR.
 
