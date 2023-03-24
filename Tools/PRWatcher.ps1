@@ -1,13 +1,13 @@
 #Copyright 2023 Microsoft Corporation
 #Author: Stephen Gillie
-#Title: PRWatcher v0.7.2
+#Title: PRWatcher v0.7.3
 #Created: 2/15/2023
 #Updated: 3/23/2023
 #Notes: Streamlines WinGet-pkgs manifest PR moderator approval by watching the clipboard - copy a PR title to your clipboard, and Watch-PRTitles attempts to parse the PackageIdentifier and version number, gathers the version from WinGet, and gives feedback in your Powershell console. Also outputs valid titles to a logging file. Freeing moderators to focus on approving and helping. 
 #Update log:
-#0.7 To start somewhere.
 #0.7.1 Caps keyword Function.
 #0.7.2 Rename variable WinGetVersion to ManifestVersion.
+#0.7.3 Remove commented debug lines.
 
 Function Watch-PRTitles {
 	[CmdletBinding()]
@@ -43,33 +43,26 @@ Function Watch-PRTitles {
 				if ($null -ne $prVerLoc) {
 					try {
 						[System.Version]$prVersion = $title[$prVerLoc]
-						#Write-Debug 0 $title[$prVerLoc]
 					} catch {
 						[string]$prVersion = $title[$prVerLoc]
-						#Write-Debug 1 $title[$prVerLoc]
 					}
 				}; #end if null
 				
 				#Otherwise we have to go hunting for the version number.
 				try {
 					[System.Version]$prVersion = $title[-1]
-					#Write-Debug 2 $title[-1]
 				} catch {
 					try {
 						[System.Version]$prVersion = $title[-2]
-						#Write-Debug 3 $title[-2]
 					} catch {
 						try {
 							[System.Version]$prVersion = $title[-3]
-							#Write-Debug 4 $title[-3]
 						} catch {
 							try {
 								[System.Version]$prVersion = $title[-4]
-								#Write-Debug 5 $title[-4]
 							} catch {
 								#If it's not a semantic version, guess that it's the 2nd to last, based on the above logic.
 								[string]$prVersion = $title[-2]
-								#Write-Debug 6 $title[-2]
 							}
 						}
 					}
