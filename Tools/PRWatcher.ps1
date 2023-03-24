@@ -1,12 +1,13 @@
 #Copyright 2023 Microsoft Corporation
 #Author: Stephen Gillie
-#Title: PRWatcher v0.8
+#Title: PRWatcher v0.7.2
 #Created: 2/15/2023
 #Updated: 3/23/2023
 #Notes: Streamlines WinGet-pkgs manifest PR moderator approval by watching the clipboard - copy a PR title to your clipboard, and Watch-PRTitles attempts to parse the PackageIdentifier and version number, gathers the version from WinGet, and gives feedback in your Powershell console. Also outputs valid titles to a logging file. Freeing moderators to focus on approving and helping. 
 #Update log:
 #0.7 To start somewhere.
 #0.7.1 Caps keyword Function.
+#0.7.2 Rename variable WinGetVersion to ManifestVersion.
 
 Function Watch-PRTitles {
 	[CmdletBinding()]
@@ -132,12 +133,12 @@ Function Watch-PRTitles {
 				$wgLine = ($WinGetOutput | Select-String " $cleanOut ")
 				try {
 					try {
-						[System.Version]$WinGetVersion = ($wgLine -replace "\s+"," " -split " ")[-2]
+						[System.Version]$ManifestVersion = ($wgLine -replace "\s+"," " -split " ")[-2]
 					} catch {
-						[string]$WinGetVersion = ($wgLine -replace "\s+"," " -split " ")[-2]
+						[string]$ManifestVersion = ($wgLine -replace "\s+"," " -split " ")[-2]
 					}
 				} catch {
-					$WinGetVersion = ""
+					$ManifestVersion = ""
 				}
 				
 				$titlejoin = ($title -join " ")
@@ -162,28 +163,28 @@ Function Watch-PRTitles {
 				} elseif ($null -eq $prVersion -or "" -eq $prVersion) {
 					$noRecord = $true
 					Write-Host -f $invalidColor "$timevar Error reading PR version"
-				} elseif ($WinGetVersion -eq "Unknown") {
+				} elseif ($ManifestVersion -eq "Unknown") {
 					Write-Host -f $invalidColor "$timevar Error reading WinGet version"
-				} elseif ($WinGetVersion -eq "input") {
+				} elseif ($ManifestVersion -eq "input") {
 					$noRecord = $true
 					Write-Host $WinGetOutput
-				} elseif ($null -eq $WinGetVersion) {
+				} elseif ($null -eq $ManifestVersion) {
 					Write-Host $WinGetOutput
-				} elseif ($WinGetVersion -eq "add-watermark") {
+				} elseif ($ManifestVersion -eq "add-watermark") {
 					$noRecord = $true
 					Write-Host -f $invalidColor "$timevar Error reading package identifier"
-				} elseif ($prVersion -gt $WinGetVersion) {
-					Write-Host -f $validColor "$timevar $cleanOut prVersion $prVersion is greater than WinGetVersion $WinGetVersion"
-				} elseif ($prVersion -lt $WinGetVersion) {
-					$outMsg = "$timevar $cleanOut prVersion $prVersion is less than WinGetVersion $WinGetVersion"
+				} elseif ($prVersion -gt $ManifestVersion) {
+					Write-Host -f $validColor "$timevar $cleanOut prVersion $prVersion is greater than ManifestVersion $ManifestVersion"
+				} elseif ($prVersion -lt $ManifestVersion) {
+					$outMsg = "$timevar $cleanOut prVersion $prVersion is less than ManifestVersion $ManifestVersion"
 					Write-Host -f $invalidColor $outMsg
 					if ($copyClip) {
 						$outMsg | clip
 						$clip = $outMsg
 						$oldclip = $outMsg
 					}
-				} elseif ($prVersion -eq $WinGetVersion) {
-					Write-Host -f $cautionColor "$timevar $cleanOut prVersion $prVersion is equal to WinGetVersion $WinGetVersion"
+				} elseif ($prVersion -eq $ManifestVersion) {
+					Write-Host -f $cautionColor "$timevar $cleanOut prVersion $prVersion is equal to ManifestVersion $ManifestVersion"
 				} else {
 					$WinGetOutput
 				};
