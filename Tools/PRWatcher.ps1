@@ -1,10 +1,14 @@
 #Copyright 2023 Microsoft Corporation
 #Author: Stephen Gillie
+#Title: PRWatcher v0.8
 #Created: 2/15/2023
-#Updated: 2/24/2023
+#Updated: 3/23/2023
 #Notes: Streamlines WinGet-pkgs manifest PR moderator approval by watching the clipboard - copy a PR title to your clipboard, and Watch-PRTitles attempts to parse the PackageIdentifier and version number, gathers the version from WinGet, and gives feedback in your Powershell console. Also outputs valid titles to a logging file. Freeing moderators to focus on approving and helping. 
+#Update log:
+#0.7 To start somewhere.
+#0.7.1 Caps keyword Function.
 
-function Watch-PRTitles {
+Function Watch-PRTitles {
 	[CmdletBinding()]
 	param(
 		[switch]$noNew,
@@ -201,7 +205,7 @@ function Watch-PRTitles {
 
 #Utility functions
 #Extract package name from clipboard contents
-function Get-CleanClip {
+Function Get-CleanClip {
 	[CmdletBinding()]
 	param(
 		$out = (Get-Clipboard)
@@ -228,13 +232,13 @@ function Get-CleanClip {
 }
 
 #Minimize output for automation
-function Search-WinGetManifest ($term) {
+Function Search-WinGetManifest ($term) {
 	$out = WinGet search $term --disable-interactivity
 	return $out
 }
 
 #Terminates any current sandbox and makes a new one.
-function Create-Sandbox {
+Function Create-Sandbox {
 	param(
 		[string]$PRNumber = (Get-Clipboard)
 	) 
