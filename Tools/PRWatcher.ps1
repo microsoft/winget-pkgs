@@ -1,30 +1,35 @@
 #Copyright 2023 Microsoft Corporation
 #Author: Stephen Gillie
-#Title: PRWatcher v0.7.3
+#Title: PRWatcher v0.7.4
 #Created: 2/15/2023
 #Updated: 3/23/2023
 #Notes: Streamlines WinGet-pkgs manifest PR moderator approval by watching the clipboard - copy a PR title to your clipboard, and Watch-PRTitles attempts to parse the PackageIdentifier and version number, gathers the version from WinGet, and gives feedback in your Powershell console. Also outputs valid titles to a logging file. Freeing moderators to focus on approving and helping. 
 #Update log:
-#0.7.1 Caps keyword Function.
 #0.7.2 Rename variable WinGetVersion to ManifestVersion.
 #0.7.3 Remove commented debug lines.
+#0.7.4 Bugfix for Auth match section.
 
 Function Watch-PRTitles {
 	[CmdletBinding()]
 	param(
 		[switch]$noNew,
 		$LogFile = ".\PR.txt",
-		$authFile = ".\Auth.csv",
+		$AuthFile = ".\Auth.csv",
 		[ValidateSet("Default","MonoWarm","MonoCool","RainbowRotate")]
 		$Chromatic = "Default",
 		$oldclip = "",
-		$hashPRRegex = "[#][0-9]{5,6}"
+		$hashPRRegex = "[#][0-9]{5,6}",
+		$AuthList = ""
 	)
+	if (Test-Path $AuthFile) {
+		$AuthList = Get-Content $AuthFile | ConvertFrom-Csv
+		Write-Host "Using Auth file $AuthFile" -f green
+	} else {
+		Write-Host "Auth file $AuthFile not found!" -f red
+	}
+	Write-Host "Loaded $($AuthList.count) Auth file entries."
 	while($true){
 		$clip = ((Get-Clipboard) -join "") -replace "PackageVersion:"," version" | select-string -NotMatch "^[c][:]";
-		if (Test-Path $authFile) {
-			$AuthList = Get-Content $authFile | ConvertFrom-Csv
-		}
 		if ($clip) {
 			if (Compare-Object $clip $oldclip) {
 				$timevar = (get-date -Format T) + ":"
@@ -103,7 +108,7 @@ Function Watch-PRTitles {
 				
 				#Get the PackageIdentifier out of the PR title, and alert if it matches the auth list.
 				$cleanOut = (Get-CleanClip $clip); 
-				$AuthMatch = $AuthList.PackageIdentifier -match ($cleanOut.split("[.]")[0]+"."+$cleanOut.split("[.]")[1])
+				$AuthMatch = $AuthList.PackageIdentifier -match $cleanOut
 				if ($AuthMatch) {
 					$AuthListLine = $AuthList | Where-Object {$_.PackageIdentifier -match $AuthMatch}
 					$strictness = $AuthListLine.strictness | Sort-Object -Unique
