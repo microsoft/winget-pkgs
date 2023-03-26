@@ -106,7 +106,7 @@ $ProgressPreference = $oldProgressPreference
 $vcLibsUwp = @{
   fileName = 'Microsoft.VCLibs.x64.14.00.Desktop.appx'
   url      = 'https://aka.ms/Microsoft.VCLibs.x64.14.00.Desktop.appx'
-  hash     = 'A39CEC0E70BE9E3E48801B871C034872F1D7E5E8EEBE986198C019CF2C271040'
+  hash     = '9BFDE6CFCC530EF073AB4BC9C4817575F63BE1251DD75AAA58CB89299697A569'
 }
 $uiLibsUwp = @{
   fileName = 'Microsoft.UI.Xaml.2.7.zip'
@@ -158,20 +158,20 @@ foreach ($dependency in $dependencies) {
 
 if (-Not (Test-Path (Join-Path -Path $tempFolder -ChildPath \Microsoft.UI.Xaml.2.7\tools\AppX\x64\Release\Microsoft.UI.Xaml.2.7.appx))) {
   Expand-Archive -Path $uiLibsUwp.file -DestinationPath ($tempFolder + '\Microsoft.UI.Xaml.2.7') -Force
-}  
+}
 $uiLibsUwp.file = (Join-Path -Path $tempFolder -ChildPath \Microsoft.UI.Xaml.2.7\tools\AppX\x64\Release\Microsoft.UI.Xaml.2.7.appx)
 $uiLibsUwp.pathInSandbox = Join-Path -Path $desktopInSandbox -ChildPath (Join-Path -Path $tempFolderName -ChildPath \Microsoft.UI.Xaml.2.7\tools\AppX\x64\Release\Microsoft.UI.Xaml.2.7.appx)
 Write-Host
 
 # Create Bootstrap settings
-# dependencies and portableInstall are enabled for forward compatibility with PR's
+# Experimental features can be enabled for forward compatibility with PR's
 $bootstrapSettingsContent = @{}
 $bootstrapSettingsContent['$schema'] = 'https://aka.ms/winget-settings.schema.json'
 $bootstrapSettingsContent['logging'] = @{level = 'verbose' }
 if ($EnableExperimentalFeatures) {
   $bootstrapSettingsContent['experimentalFeatures'] = @{
     dependencies    = $true
-    portableInstall = $true
+    openLogsArgument = $true
   }
 }
 
@@ -201,7 +201,7 @@ function Update-EnvironmentVariables {
 
 function Get-ARPTable {
   $registry_paths = @('HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*','HKLM:\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*', 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*', 'HKCU:\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*')
-  return Get-ItemProperty $registry_paths -ErrorAction SilentlyContinue | 
+  return Get-ItemProperty $registry_paths -ErrorAction SilentlyContinue |
        Select-Object DisplayName, DisplayVersion, Publisher, @{N='ProductCode'; E={$_.PSChildName}} |
        Where-Object {$null -ne $_.DisplayName }
 }
@@ -231,6 +231,7 @@ Write-Host @'
 --> Configuring Winget
 '@
 winget settings --Enable LocalManifestFiles
+winget settings --Enable LocalArchiveMalwareScanOverride
 copy -Path $settingsPathInSandbox -Destination C:\Users\WDAGUtilityAccount\AppData\Local\Packages\Microsoft.DesktopAppInstaller_8wekyb3d8bbwe\LocalState\settings.json
 `$originalARP = Get-ARPTable
 Write-Host @'
@@ -239,7 +240,7 @@ Write-Host @'
 --> Installing the Manifest $manifestFileName
 
 '@
-winget install -m '$manifestPathInSandbox' --verbose-logs
+winget install -m '$manifestPathInSandbox' --verbose-logs --ignore-local-archive-malware-scan
 
 Write-Host @'
 
@@ -337,3 +338,4 @@ $Script
 Write-Host
 
 WindowsSandbox $SandboxTestWsbFile
+

@@ -1,0 +1,77 @@
+# Rebuild pipeline for WinGet rest source.
+
+# Name of the run
+name: '$(Build.DefinitionName)-$(Build.DefinitionVersion)-$(Date:yyyyMMdd)-$(Rev:r)'
+
+trigger: none
+pr: none
+
+jobs:
+
+# Agent phase.
+- job: 'Rebuild'
+  displayName: 'Start Rebuild'
+  pool:
+    vmImage: 'windows-latest'
+  variables:
+    skipComponentGovernanceDetection: ${{ true }}
+    runCodesignValidationInjection: ${{ false }}
+  timeoutInMinutes: 0
+  steps:
+
+  # Allow scripts to access the system token.
+  - checkout: none
+    persistCredentials: true
+
+  # Downloads all the setup files and its dependencies.
+  - task: AzureCLI@1
+    displayName: 'Azure Setup'
+    inputs:
+      azureSubscription: '$(WinGet.Subscription)'
+      scriptLocation: inlineScript
+      inlineScript: 'az storage blob download-batch -d . --pattern * -s servicewrapper --output none'
+    env:
+      AZURE_STORAGE_CONNECTION_STRING: $(ValidationStorageAccountConnectionString)
+
+  # WinGet setup
+  - script: 'winget_rebuild_setup.cmd'
+    name: 'wingetsetup'
+    displayName: 'WinGet Setup'
+    workingDirectory: scripts
+    env:
+      HOST_KEY: $(AzureFunctionHostKey)
+      RESTSOURCE_REBUILD_ENDPOINT: $(AzFuncRestSourceRebuildEndpoint)
+
+# Agentless phase. Depends on previous job.
+- job: 'PublishToRestSource'
+  pool: server
+  timeoutInMinutes: 1500
+  displayName: 'Publish to rest source'
+  dependsOn:
+    - 'Rebuild'
+  variables:
+    HostKeySecret: $[ dependencies.Rebuild.outputs['wingetsetup.hostkey']]
+    RestSourceRebuildEndpointSecret: $[ dependencies.Rebuild.outputs['wingetsetup.restsourceRebuildEndpoint']]
+  steps:
+
+  # Rebuild Rest source.
+  - task: AzureFunction@1
+    displayName: 'Publish to rest source'
+    inputs:
+      function: '$(RestSourceRebuildEndpointSecret)'
+      key: '$(HostKeySecret)'
+      body: |
+        {
+        "operationId": "$(Build.BuildNumber)",
+        "BuildId": "$(Build.BuildId)",
+        "PlanUrl": "$(system.CollectionUri)",
+        "HubName": "$(system.HostType)",
+        "pipelineType": "RebuildPipeline",
+        "ProjectId": "$(system.TeamProjectId)",
+        "PlanId": "$(system.PlanId)", 
+        "JobId": "$(system.JobId)", 
+        "TimelineId": "$(system.TimelineId)", 
+        "TaskInstanceId": "$(system.TaskInstanceId)",
+        "AuthToken": "$(system.AccessToken)"
+        }
+      waitForCompletion: "true"
