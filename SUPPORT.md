@@ -8,7 +8,7 @@ For help and questions about using this project, please look at the [docs site f
 
 ## Microsoft Support Policy
 
-Support for Windows Terminal is limited to the resources listed above.
+Support for Windows Package Manager Community Repository is limited to the resources listed above.
 
 [gh-issue]: https://github.com/microsoft/winget-pkgs/issues/new/choose
 [gh-bug]: https://github.com/microsoft/winget-pkgs/issues/new?assignees=&labels=Issue-Bug&template=package_issue.yml&title=%5BPackage+Issue%5D%3A+Package.Identifer
