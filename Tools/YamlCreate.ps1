@@ -39,8 +39,14 @@ Function Invoke-KeypressMenu {
     [Parameter(Mandatory = $false)]
     [string] $HelpTextColor,
     [Parameter(Mandatory = $false)]
-    [string] $DefaultString
+    [string] $DefaultString,
+    [Parameter(Mandatory = $false)]
+    [string[]] $AllowedCharacters
   )
+
+  if (!$PSBoundParameters.ContainsKey('AllowedCharacters')) {
+    $AllowedCharacters = @($Entries.TrimStart('*').Chars(1))
+  }
 
   Write-Host "`n"
   Write-Host -ForegroundColor 'Yellow' "$Prompt"
@@ -73,6 +79,10 @@ Function Invoke-KeypressMenu {
 
   do {
     $keyInfo = [Console]::ReadKey($false)
+    if ($keyInfo.KeyChar -notin $AllowedCharacters -and $ScriptSettings.ExplicitMenuOptions -eq $true -and $AllowedCharacters.Length -gt 0) {
+      if ($keyInfo.Key -eq 'Enter') { Write-Host }
+      $keyInfo = $null
+    }
   } until ($keyInfo.Key)
 
   return $keyInfo.Key
@@ -80,15 +90,15 @@ Function Invoke-KeypressMenu {
 
 #If the user has git installed, make sure it is a patched version
 if (Get-Command 'git' -ErrorAction SilentlyContinue) {
-  $GitMinimumVersion = [System.Version]::Parse('2.35.2')
+  $GitMinimumVersion = [System.Version]::Parse('2.39.1')
   $gitVersionString = ((git version) | Select-String '([0-9]{1,}\.?){3,}').Matches.Value.Trim(' ', '.')
   $gitVersion = [System.Version]::Parse($gitVersionString)
   if ($gitVersion -lt $GitMinimumVersion) {
     # Prompt user to install git
     if (Get-Command 'winget' -ErrorAction SilentlyContinue) {
       $_menu = @{
-        entries       = @('[Y] Upgrade Git'; '[N] Do not upgrade')
-        Prompt        = 'The version of git installed on your machine does not satisfy the requirement of version >= 2.35.2; Would you like to upgrade?'
+        entries       = @('[Y] Upgrade Git'; '*[N] Do not upgrade')
+        Prompt        = 'The version of git installed on your machine does not satisfy the requirement of version >= 2.39.1; Would you like to upgrade?'
         HelpText      = "Upgrading will attempt to upgrade git using winget`n"
         DefaultString = ''
       }
@@ -107,10 +117,10 @@ if (Get-Command 'git' -ErrorAction SilentlyContinue) {
             }
           }
         }
-        default { Write-Host; throw [UnmetDependencyException]::new('The version of git installed on your machine does not satisfy the requirement of version >= 2.35.2') }
+        default { Write-Host; throw [UnmetDependencyException]::new('The version of git installed on your machine does not satisfy the requirement of version >= 2.39.1') }
       }
     } else {
-      throw [UnmetDependencyException]::new('The version of git installed on your machine does not satisfy the requirement of version >= 2.35.2')
+      throw [UnmetDependencyException]::new('The version of git installed on your machine does not satisfy the requirement of version >= 2.39.1')
     }
   }
   # Check whether the script is present inside a fork/clone of microsoft/winget-pkgs repository
@@ -153,8 +163,8 @@ if ($Settings) {
   exit
 }
 
-$ScriptHeader = '# Created with YamlCreate.ps1 v2.2.0'
-$ManifestVersion = '1.2.0'
+$ScriptHeader = '# Created with YamlCreate.ps1 v2.2.4'
+$ManifestVersion = '1.4.0'
 $PSDefaultParameterValues = @{ '*:Encoding' = 'UTF8' }
 $Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
 $ofs = ', '
@@ -163,13 +173,18 @@ $callingCulture = [Threading.Thread]::CurrentThread.CurrentCulture
 [Threading.Thread]::CurrentThread.CurrentUICulture = 'en-US'
 [Threading.Thread]::CurrentThread.CurrentCulture = 'en-US'
 if (-not ([System.Environment]::OSVersion.Platform -match 'Win')) { $env:TEMP = '/tmp/' }
+$wingetUpstream = 'https://github.com/microsoft/winget-pkgs.git'
 
 if ($ScriptSettings.EnableDeveloperOptions -eq $true -and $null -ne $ScriptSettings.OverrideManifestVersion) {
   $script:UsesPrerelease = $ScriptSettings.OverrideManifestVersion -gt $ManifestVersion
   $ManifestVersion = $ScriptSettings.OverrideManifestVersion
 }
 
-$useDirectSchemaLink = (Invoke-WebRequest "https://aka.ms/winget-manifest.version.$ManifestVersion.schema.json" -UseBasicParsing).BaseResponse.ContentLength -eq -1
+$useDirectSchemaLink = if ($env:GITHUB_ACTIONS -eq $true) {
+  $true
+} else {
+  (Invoke-WebRequest "https://aka.ms/winget-manifest.version.$ManifestVersion.schema.json" -UseBasicParsing).BaseResponse.ContentLength -eq -1
+}
 $SchemaUrls = @{
   version       = if ($useDirectSchemaLink) { "https://raw.githubusercontent.com/microsoft/winget-cli/master/schemas/JSON/manifests/v$ManifestVersion/manifest.version.$ManifestVersion.json" } else { "https://aka.ms/winget-manifest.version.$ManifestVersion.schema.json" }
   defaultLocale = if ($useDirectSchemaLink) { "https://raw.githubusercontent.com/microsoft/winget-cli/master/schemas/JSON/manifests/v$ManifestVersion/manifest.defaultLocale.$ManifestVersion.json" } else { "https://aka.ms/winget-manifest.defaultLocale.$ManifestVersion.schema.json" }
@@ -653,15 +668,23 @@ Function Get-PathInstallerType {
 
   if ($Path -match '\.msix(bundle){0,1}$') { return 'msix' }
   if ($Path -match '\.msi$') {
-    $ObjectMetadata = Get-ItemMetadata $Path
-    $ObjectDatabase = Get-MsiDatabase $Path
+    if ([System.Environment]::OSVersion.Platform -match 'Unix') {
+      $ObjectDatabase = @{}
+      $ObjectMetadata = @{
+        ProgramName = $(([string](file $script:dest) | Select-String -Pattern 'Creating Application.+,').Matches.Value)
+      }
+    } else {
+      $ObjectMetadata = Get-ItemMetadata $Path
+      $ObjectDatabase = Get-MsiDatabase $Path
+    }
+
     if (Test-IsWix -Database $ObjectDatabase -MetaDataObject $ObjectMetadata ) {
       return 'wix'
     }
     return 'msi'
   }
   if ($Path -match '\.appx(bundle){0,1}$') { return 'appx' }
-  # if ($Path -match '\.zip$') { return 'zip' }
+  if ($Path -match '\.zip$') { return 'zip' }
   return $null
 }
 
@@ -800,20 +823,19 @@ Function Read-InstallerEntry {
       } catch {
         # Here we also want to pass any exceptions through for potential debugging
         throw [System.Net.WebException]::new('The file could not be downloaded. Try running the script again', $_.Exception)
-      } finally {
-        Write-Host "Time taken: $((Get-Date).Subtract($start_time).Seconds) second(s)" -ForegroundColor Green
-        $_Installer['InstallerSha256'] = (Get-FileHash -Path $script:dest -Algorithm SHA256).Hash
-        Get-PathInstallerType -Path $script:dest -OutVariable _ | Out-Null
-        if ($_) { $_Installer['InstallerType'] = $_ | Select-Object -First 1 }
-        Get-UriArchitecture -URI $_Installer['InstallerUrl'] -OutVariable _ | Out-Null
-        if ($_) { $_Installer['Architecture'] = $_ | Select-Object -First 1 }
-        if ([System.Environment]::OSVersion.Platform -match 'Win' -and ($script:dest).EndsWith('.msi')) {
-          $ProductCode = ([string](Get-MSIProperty -MSIPath $script:dest -Parameter 'ProductCode') | Select-String -Pattern '{[A-Z0-9]{8}-([A-Z0-9]{4}-){3}[A-Z0-9]{12}}').Matches.Value
-        } elseif ([System.Environment]::OSVersion.Platform -match 'Unix' -and (Get-Item $script:dest).Name.EndsWith('.msi')) {
-          $ProductCode = ([string](file $script:dest) | Select-String -Pattern '{[A-Z0-9]{8}-([A-Z0-9]{4}-){3}[A-Z0-9]{12}}').Matches.Value
-        }
-        if (Test-String -Not "$ProductCode" -IsNull) { $_Installer['ProductCode'] = "$ProductCode" }
       }
+      Write-Host "Time taken: $((Get-Date).Subtract($start_time).Seconds) second(s)" -ForegroundColor Green
+      $_Installer['InstallerSha256'] = (Get-FileHash -Path $script:dest -Algorithm SHA256).Hash
+      Get-PathInstallerType -Path $script:dest -OutVariable _ | Out-Null
+      if ($_) { $_Installer['InstallerType'] = $_ | Select-Object -First 1 }
+      Get-UriArchitecture -URI $_Installer['InstallerUrl'] -OutVariable _ | Out-Null
+      if ($_) { $_Installer['Architecture'] = $_ | Select-Object -First 1 }
+      if ([System.Environment]::OSVersion.Platform -match 'Win' -and ($script:dest).EndsWith('.msi')) {
+        $ProductCode = ([string](Get-MSIProperty -MSIPath $script:dest -Parameter 'ProductCode') | Select-String -Pattern '{[A-Z0-9]{8}-([A-Z0-9]{4}-){3}[A-Z0-9]{12}}').Matches.Value
+      } elseif ([System.Environment]::OSVersion.Platform -match 'Unix' -and (Get-Item $script:dest).Name.EndsWith('.msi')) {
+        $ProductCode = ([string](file $script:dest) | Select-String -Pattern '{[A-Z0-9]{8}-([A-Z0-9]{4}-){3}[A-Z0-9]{12}}').Matches.Value
+      }
+      if (Test-String -Not "$ProductCode" -IsNull) { $_Installer['ProductCode'] = "$ProductCode" }
     }
     # Manual Entry of Sha256 with validation
     else {
@@ -1165,63 +1187,62 @@ Function Read-QuickInstallerEntry {
       } catch {
         # Here we also want to pass any exceptions through for potential debugging
         throw [System.Net.WebException]::new('The file could not be downloaded. Try running the script again', $_.Exception)
-      } finally {
-        # Check that MSI's aren't actually WIX
-        Write-Host -ForegroundColor 'Green' "Installer Downloaded!`nProcessing installer data. . . "
-        if ($_NewInstaller['InstallerType'] -eq 'msi') {
-          $DetectedType = Get-PathInstallerType $script:dest
-          if ($DetectedType -in @('msi'; 'wix')) { $_NewInstaller['InstallerType'] = $DetectedType }
-        }
-        # Get the Sha256
-        $_NewInstaller['InstallerSha256'] = (Get-FileHash -Path $script:dest -Algorithm SHA256).Hash
-        # Update the product code, if a new one exists
-        # If a new product code doesn't exist, and the installer isn't an `.exe` file, remove the product code if it exists
-        $MSIProductCode = $null
-        if ([System.Environment]::OSVersion.Platform -match 'Win' -and ($script:dest).EndsWith('.msi')) {
-          $MSIProductCode = ([string](Get-MSIProperty -MSIPath $script:dest -Parameter 'ProductCode') | Select-String -Pattern '{[A-Z0-9]{8}-([A-Z0-9]{4}-){3}[A-Z0-9]{12}}').Matches.Value
-        } elseif ([System.Environment]::OSVersion.Platform -match 'Unix' -and (Get-Item $script:dest).Name.EndsWith('.msi')) {
-          $MSIProductCode = ([string](file $script:dest) | Select-String -Pattern '{[A-Z0-9]{8}-([A-Z0-9]{4}-){3}[A-Z0-9]{12}}').Matches.Value
-        }
-        if (Test-String -not $MSIProductCode -IsNull) {
-          $_NewInstaller['ProductCode'] = $MSIProductCode
-        } elseif ( ($_NewInstaller.Keys -contains 'ProductCode') -and ((Get-EffectiveInstallerType $_Installer) -in @('appx'; 'msi'; 'msix'; 'wix'; 'burn'))) {
-          $_NewInstaller.Remove('ProductCode')
-        }
-        # If the installer is msix or appx, try getting the new SignatureSha256
-        # If the new SignatureSha256 can't be found, remove it if it exists
-        $NewSignatureSha256 = $null
-        if ($_NewInstaller.InstallerType -in @('msix', 'appx')) {
-          if (Get-Command 'winget' -ErrorAction SilentlyContinue) { $NewSignatureSha256 = winget hash -m $script:dest | Select-String -Pattern 'SignatureSha256:' | ConvertFrom-String; if ($NewSignatureSha256.P2) { $NewSignatureSha256 = $NewSignatureSha256.P2.ToUpper() } }
-        }
-        if (Test-String -not $NewSignatureSha256 -IsNull) {
-          $_NewInstaller['SignatureSha256'] = $NewSignatureSha256
-        } elseif ($_NewInstaller.Keys -contains 'SignatureSha256') {
-          $_NewInstaller.Remove('SignatureSha256')
-        }
-        # If the installer is msix or appx, try getting the new package family name
-        # If the new package family name can't be found, remove it if it exists
-        if ($script:dest -match '\.(msix|appx)(bundle){0,1}$') {
-          try {
-            $_didError = $false
-            Add-AppxPackage -Path $script:dest -ErrorVariable _didError
-            $InstalledPkg = Get-AppxPackage | Select-Object -Last 1 | Select-Object PackageFamilyName, PackageFullName
-            $PackageFamilyName = $InstalledPkg.PackageFamilyName
-            if (!$_didError) { Remove-AppxPackage $InstalledPkg.PackageFullName }
-          } catch {
-            # Take no action here, we just want to catch the exceptions as a precaution
-            Out-Null
-          } finally {
-            if (Test-String -not $PackageFamilyName -IsNull) {
-              $_NewInstaller['PackageFamilyName'] = $PackageFamilyName
-            } elseif ($_NewInstaller.Keys -contains 'PackageFamilyName') {
-              $_NewInstaller.Remove('PackageFamilyName')
-            }
+      }
+      # Check that MSI's aren't actually WIX
+      Write-Host -ForegroundColor 'Green' "Installer Downloaded!`nProcessing installer data. . . "
+      if ($_NewInstaller['InstallerType'] -eq 'msi') {
+        $DetectedType = Get-PathInstallerType $script:dest
+        if ($DetectedType -in @('msi'; 'wix')) { $_NewInstaller['InstallerType'] = $DetectedType }
+      }
+      # Get the Sha256
+      $_NewInstaller['InstallerSha256'] = (Get-FileHash -Path $script:dest -Algorithm SHA256).Hash
+      # Update the product code, if a new one exists
+      # If a new product code doesn't exist, and the installer isn't an `.exe` file, remove the product code if it exists
+      $MSIProductCode = $null
+      if ([System.Environment]::OSVersion.Platform -match 'Win' -and ($script:dest).EndsWith('.msi')) {
+        $MSIProductCode = ([string](Get-MSIProperty -MSIPath $script:dest -Parameter 'ProductCode') | Select-String -Pattern '{[A-Z0-9]{8}-([A-Z0-9]{4}-){3}[A-Z0-9]{12}}').Matches.Value
+      } elseif ([System.Environment]::OSVersion.Platform -match 'Unix' -and (Get-Item $script:dest).Name.EndsWith('.msi')) {
+        $MSIProductCode = ([string](file $script:dest) | Select-String -Pattern '{[A-Z0-9]{8}-([A-Z0-9]{4}-){3}[A-Z0-9]{12}}').Matches.Value
+      }
+      if (Test-String -not $MSIProductCode -IsNull) {
+        $_NewInstaller['ProductCode'] = $MSIProductCode
+      } elseif ( ($_NewInstaller.Keys -contains 'ProductCode') -and ((Get-EffectiveInstallerType $_Installer) -in @('appx'; 'msi'; 'msix'; 'wix'; 'burn'))) {
+        $_NewInstaller.Remove('ProductCode')
+      }
+      # If the installer is msix or appx, try getting the new SignatureSha256
+      # If the new SignatureSha256 can't be found, remove it if it exists
+      $NewSignatureSha256 = $null
+      if ($_NewInstaller.InstallerType -in @('msix', 'appx')) {
+        if (Get-Command 'winget' -ErrorAction SilentlyContinue) { $NewSignatureSha256 = winget hash -m $script:dest | Select-String -Pattern 'SignatureSha256:' | ConvertFrom-String; if ($NewSignatureSha256.P2) { $NewSignatureSha256 = $NewSignatureSha256.P2.ToUpper() } }
+      }
+      if (Test-String -not $NewSignatureSha256 -IsNull) {
+        $_NewInstaller['SignatureSha256'] = $NewSignatureSha256
+      } elseif ($_NewInstaller.Keys -contains 'SignatureSha256') {
+        $_NewInstaller.Remove('SignatureSha256')
+      }
+      # If the installer is msix or appx, try getting the new package family name
+      # If the new package family name can't be found, remove it if it exists
+      if ($script:dest -match '\.(msix|appx)(bundle){0,1}$') {
+        try {
+          $_didError = $false
+          Add-AppxPackage -Path $script:dest -ErrorVariable _didError
+          $InstalledPkg = Get-AppxPackage | Select-Object -Last 1 | Select-Object PackageFamilyName, PackageFullName
+          $PackageFamilyName = $InstalledPkg.PackageFamilyName
+          if (!$_didError) { Remove-AppxPackage $InstalledPkg.PackageFullName }
+        } catch {
+          # Take no action here, we just want to catch the exceptions as a precaution
+          Out-Null
+        } finally {
+          if (Test-String -not $PackageFamilyName -IsNull) {
+            $_NewInstaller['PackageFamilyName'] = $PackageFamilyName
+          } elseif ($_NewInstaller.Keys -contains 'PackageFamilyName') {
+            $_NewInstaller.Remove('PackageFamilyName')
           }
         }
-        # Remove the downloaded files
-        Remove-Item -Path $script:dest
-        Write-Host -ForegroundColor 'Green' "Installer updated!`n"
       }
+      # Remove the downloaded files
+      Remove-Item -Path $script:dest
+      Write-Host -ForegroundColor 'Green' "Installer updated!`n"
     }
 
     # Force a re-check of the Nested Installer Paths in case they changed between versions
@@ -1754,7 +1775,7 @@ Function Read-PRBody {
         if ($? -and $(Get-Command 'winget' -ErrorAction SilentlyContinue)) {
           $PrBodyContentReply += @($_line.Replace('[ ]', '[X]'))
           $_showMenu = $false
-        } else {
+        } elseif ($script:Option -ne 'RemoveManifest') {
           $_menu = @{
             Prompt        = "Have you validated your manifest locally with 'winget validate --manifest <path>'?"
             Entries       = @('[Y] Yes'; '*[N] No')
@@ -1762,6 +1783,9 @@ Function Read-PRBody {
             HelpTextColor = 'Red'
             DefaultString = 'N'
           }
+        } else {
+          $_showMenu = $false
+          $PrBodyContentReply += @($_line)
         }
       }
 
@@ -1769,7 +1793,7 @@ Function Read-PRBody {
         if ($script:SandboxTest -eq '0') {
           $PrBodyContentReply += @($_line.Replace('[ ]', '[X]'))
           $_showMenu = $false
-        } else {
+        } elseif ($script:Option -ne 'RemoveManifest') {
           $_menu = @{
             Prompt        = "Have you tested your manifest locally with 'winget install --manifest <path>'?"
             Entries       = @('[Y] Yes'; '*[N] No')
@@ -1777,18 +1801,31 @@ Function Read-PRBody {
             HelpTextColor = 'Red'
             DefaultString = 'N'
           }
+        } else {
+          $_showMenu = $false
+          $PrBodyContentReply += @($_line)
         }
       }
 
       '*schema*' {
-        $_Match = ($_line | Select-String -Pattern 'https://+.+(?=\))').Matches.Value
-        $_menu = @{
-          Prompt        = $_line.TrimStart('- [ ]') -replace '\[|\]|\(.+\)', ''
-          Entries       = @('[Y] Yes'; '*[N] No')
-          HelpText      = "Reference Link: $_Match"
-          HelpTextColor = ''
-          DefaultString = 'N'
+        if ($script:Option -ne 'RemoveManifest') {
+          $_Match = ($_line | Select-String -Pattern 'https://+.+(?=\))').Matches.Value
+          $_menu = @{
+            Prompt        = $_line.TrimStart('- [ ]') -replace '\[|\]|\(.+\)', ''
+            Entries       = @('[Y] Yes'; '*[N] No')
+            HelpText      = "Reference Link: $_Match"
+            HelpTextColor = ''
+            DefaultString = 'N'
+          }
+        } else {
+          $_showMenu = $false
+          $PrBodyContentReply += @($_line)
         }
+      }
+
+      '*only modifies one*' {
+        $PrBodyContentReply += @($_line.Replace('[ ]', '[X]'))
+        $_showMenu = $false
       }
 
       Default {
@@ -2647,69 +2684,70 @@ Switch ($script:Option) {
     # Update the manifest with URLs that are already there
     Write-Host $NewLine
     Write-Host 'Updating Manifest Information. This may take a while...' -ForegroundColor Blue
+    $_NewInstallers = @();
     foreach ($_Installer in $script:OldInstallerManifest.Installers) {
       try {
         $script:dest = Get-InstallerFile -URI $_Installer.InstallerUrl -PackageIdentifier $PackageIdentifier -PackageVersion $PackageVersion
       } catch {
         # Here we also want to pass any exceptions through for potential debugging
         throw [System.Net.WebException]::new('The file could not be downloaded. Try running the script again', $_.Exception)
-      } finally {
-        # Check that MSI's aren't actually WIX
-        if ($_Installer['InstallerType'] -eq 'msi') {
-          $DetectedType = Get-PathInstallerType $script:dest
-          if ($DetectedType -in @('msi'; 'wix')) { $_Installer['InstallerType'] = $DetectedType }
-        }
-        # Get the Sha256
-        $_Installer['InstallerSha256'] = (Get-FileHash -Path $script:dest -Algorithm SHA256).Hash
-        # Update the product code, if a new one exists
-        # If a new product code doesn't exist, and the installer isn't an `.exe` file, remove the product code if it exists
-        $MSIProductCode = $null
-        if ([System.Environment]::OSVersion.Platform -match 'Win' -and ($script:dest).EndsWith('.msi')) {
-          $MSIProductCode = ([string](Get-MSIProperty -MSIPath $script:dest -Parameter 'ProductCode') | Select-String -Pattern '{[A-Z0-9]{8}-([A-Z0-9]{4}-){3}[A-Z0-9]{12}}').Matches.Value
-        } elseif ([System.Environment]::OSVersion.Platform -match 'Unix' -and (Get-Item $script:dest).Name.EndsWith('.msi')) {
-          $MSIProductCode = ([string](file $script:dest) | Select-String -Pattern '{[A-Z0-9]{8}-([A-Z0-9]{4}-){3}[A-Z0-9]{12}}').Matches.Value
-        }
-        if (Test-String -not $MSIProductCode -IsNull) {
-          $_Installer['ProductCode'] = $MSIProductCode
-        } elseif ( ($_Installer.Keys -contains 'ProductCode') -and ($_Installer.InstallerType -in @('appx'; 'msi'; 'msix'; 'wix'; 'burn'))) {
-          $_Installer.Remove('ProductCode')
-        }
-        # If the installer is msix or appx, try getting the new SignatureSha256
-        # If the new SignatureSha256 can't be found, remove it if it exists
-        $NewSignatureSha256 = $null
-        if ($_Installer.InstallerType -in @('msix', 'appx')) {
-          if (Get-Command 'winget' -ErrorAction SilentlyContinue) { $NewSignatureSha256 = winget hash -m $script:dest | Select-String -Pattern 'SignatureSha256:' | ConvertFrom-String; if ($NewSignatureSha256.P2) { $NewSignatureSha256 = $NewSignatureSha256.P2.ToUpper() } }
-        }
-        if (Test-String -not $NewSignatureSha256 -IsNull) {
-          $_Installer['SignatureSha256'] = $NewSignatureSha256
-        } elseif ($_Installer.Keys -contains 'SignatureSha256') {
-          $_Installer.Remove('SignatureSha256')
-        }
-        # If the installer is msix or appx, try getting the new package family name
-        # If the new package family name can't be found, remove it if it exists
-        if ($script:dest -match '\.(msix|appx)(bundle){0,1}$') {
-          try {
-            Add-AppxPackage -Path $script:dest
-            $InstalledPkg = Get-AppxPackage | Select-Object -Last 1 | Select-Object PackageFamilyName, PackageFullName
-            $PackageFamilyName = $InstalledPkg.PackageFamilyName
-            Remove-AppxPackage $InstalledPkg.PackageFullName
-          } catch {
-            # Take no action here, we just want to catch the exceptions as a precaution
-            Out-Null
-          } finally {
-            if (Test-String -not $PackageFamilyName -IsNull) {
-              $_Installer['PackageFamilyName'] = $PackageFamilyName
-            } elseif ($_Installer.Keys -contains 'PackageFamilyName') {
-              $_Installer.Remove('PackageFamilyName')
-            }
+      }
+      # Check that MSI's aren't actually WIX
+      if ($_Installer['InstallerType'] -eq 'msi') {
+        $DetectedType = Get-PathInstallerType $script:dest
+        if ($DetectedType -in @('msi'; 'wix')) { $_Installer['InstallerType'] = $DetectedType }
+      }
+      # Get the Sha256
+      $_Installer['InstallerSha256'] = (Get-FileHash -Path $script:dest -Algorithm SHA256).Hash
+      # Update the product code, if a new one exists
+      # If a new product code doesn't exist, and the installer isn't an `.exe` file, remove the product code if it exists
+      $MSIProductCode = $null
+      if ([System.Environment]::OSVersion.Platform -match 'Win' -and ($script:dest).EndsWith('.msi')) {
+        $MSIProductCode = ([string](Get-MSIProperty -MSIPath $script:dest -Parameter 'ProductCode') | Select-String -Pattern '{[A-Z0-9]{8}-([A-Z0-9]{4}-){3}[A-Z0-9]{12}}').Matches.Value
+      } elseif ([System.Environment]::OSVersion.Platform -match 'Unix' -and (Get-Item $script:dest).Name.EndsWith('.msi')) {
+        $MSIProductCode = ([string](file $script:dest) | Select-String -Pattern '{[A-Z0-9]{8}-([A-Z0-9]{4}-){3}[A-Z0-9]{12}}').Matches.Value
+      }
+      if (Test-String -not $MSIProductCode -IsNull) {
+        $_Installer['ProductCode'] = $MSIProductCode
+      } elseif ( ($_Installer.Keys -contains 'ProductCode') -and ($_Installer.InstallerType -in @('appx'; 'msi'; 'msix'; 'wix'; 'burn'))) {
+        $_Installer.Remove('ProductCode')
+      }
+      # If the installer is msix or appx, try getting the new SignatureSha256
+      # If the new SignatureSha256 can't be found, remove it if it exists
+      $NewSignatureSha256 = $null
+      if ($_Installer.InstallerType -in @('msix', 'appx')) {
+        if (Get-Command 'winget' -ErrorAction SilentlyContinue) { $NewSignatureSha256 = winget hash -m $script:dest | Select-String -Pattern 'SignatureSha256:' | ConvertFrom-String; if ($NewSignatureSha256.P2) { $NewSignatureSha256 = $NewSignatureSha256.P2.ToUpper() } }
+      }
+      if (Test-String -not $NewSignatureSha256 -IsNull) {
+        $_Installer['SignatureSha256'] = $NewSignatureSha256
+      } elseif ($_Installer.Keys -contains 'SignatureSha256') {
+        $_Installer.Remove('SignatureSha256')
+      }
+      # If the installer is msix or appx, try getting the new package family name
+      # If the new package family name can't be found, remove it if it exists
+      if ($script:dest -match '\.(msix|appx)(bundle){0,1}$') {
+        try {
+          Add-AppxPackage -Path $script:dest
+          $InstalledPkg = Get-AppxPackage | Select-Object -Last 1 | Select-Object PackageFamilyName, PackageFullName
+          $PackageFamilyName = $InstalledPkg.PackageFamilyName
+          Remove-AppxPackage $InstalledPkg.PackageFullName
+        } catch {
+          # Take no action here, we just want to catch the exceptions as a precaution
+          Out-Null
+        } finally {
+          if (Test-String -not $PackageFamilyName -IsNull) {
+            $_Installer['PackageFamilyName'] = $PackageFamilyName
+          } elseif ($_Installer.Keys -contains 'PackageFamilyName') {
+            $_Installer.Remove('PackageFamilyName')
           }
         }
-        # Remove the downloaded files
-        Remove-Item -Path $script:dest
       }
+      # Remove the downloaded files
+      Remove-Item -Path $script:dest
+      $_NewInstallers += Restore-YamlKeyOrder $_Installer $InstallerEntryProperties -NoComments
     }
     # Write the new manifests
-    $script:Installers = $script:OldInstallerManifest.Installers
+    $script:Installers = $_NewInstallers
     Write-LocaleManifest
     Write-InstallerManifest
     Write-VersionManifest
@@ -2805,6 +2843,15 @@ if ($PromptSubmit -eq '0') {
     git config --add core.safecrlf false
   }
 
+  # check if upstream exists
+  ($remoteUpstreamUrl = $(git remote get-url upstream)) *> $null
+  if ($remoteUpstreamUrl -and $remoteUpstreamUrl -ne $wingetUpstream) {
+    git remote set-url upstream $wingetUpstream
+  } elseif (!$remoteUpstreamUrl) {
+    Write-Host  -ForegroundColor 'Yellow' 'Upstream does not exist. Permanently adding https://github.com/microsoft/winget-pkgs as remote upstream'
+    git remote add upstream $wingetUpstream
+  }
+
   # Fetch the upstream branch, create a commit onto the detached head, and push it to a new branch
   git fetch upstream master --quiet
   git switch -d upstream/master
@@ -2844,6 +2891,10 @@ if ($PromptSubmit -eq '0') {
   } else {
     git config --unset core.safecrlf
   }
+  if ($remoteUpstreamUrl -and $remoteUpstreamUrl -ne $wingetUpstream) {
+    git remote set-url upstream $remoteUpstreamUrl
+  }
+
 } else {
   Write-Host
   [Threading.Thread]::CurrentThread.CurrentUICulture = $callingUICulture
