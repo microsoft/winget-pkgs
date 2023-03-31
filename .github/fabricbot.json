@@ -4441,6 +4441,12 @@
           {
             "name": "removeLabel",
             "parameters": {
+              "label": "Merge-Ready"
+            }
+          },
+          {
+            "name": "removeLabel",
+            "parameters": {
               "label": "Validation-Hash-Verification-Failed"
             }
           },
@@ -4847,6 +4853,12 @@
         ],
         "taskName": "Remove all Event Labels on rerun (not moderator approved)",
         "actions": [
+          {
+            "name": "removeLabel",
+            "parameters": {
+              "label": "Merge-Ready"
+            }
+          },
           {
             "name": "removeLabel",
             "parameters": {
@@ -6238,6 +6250,67 @@
             }
           }
         ]
+      }
+    },
+    {
+      "taskType": "trigger",
+      "capabilityId": "IssueResponder",
+      "subCapability": "PullRequestResponder",
+      "version": "1.0",
+      "config": {
+        "conditions": {
+          "operator": "and",
+          "operands": [
+            {
+              "operator": "or",
+              "operands": [
+                {
+                  "name": "labelAdded",
+                  "parameters": {
+                    "label": "Needs-Attention"
+                  }
+                },
+                {
+                  "name": "labelAdded",
+                  "parameters": {
+                    "label": "Needs-Author-Feedback"
+                  }
+                },
+                {
+                  "name": "labelAdded",
+                  "parameters": {
+                    "label": "Blocking-Issue"
+                  }
+                },
+                {
+                  "name": "labelRemoved",
+                  "parameters": {
+                    "label": "Moderator-Approved"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "eventType": "pull_request",
+        "eventNames": [
+          "pull_request",
+          "issues",
+          "project_card"
+        ],
+        "actions": [
+          {
+            "name": "removeLabel",
+            "parameters": {
+              "label": "Merge-Ready"
+            }
+          }
+        ],
+        "taskName": "Remove Merge-Ready when Feedback Needed",
+        "dangerZone": {
+          "respondToBotActions": true,
+          "acceptRespondToBotActions": true
+        }
       }
     },
     {
