@@ -79,8 +79,8 @@ Function Invoke-KeypressMenu {
 
   do {
     $keyInfo = [Console]::ReadKey($false)
-    if ($keyInfo.KeyChar -notin $AllowedCharacters -and $ScriptSettings.ExplicitMenuOptions -eq $true -and $AllowedCharacters.Length -gt 0){
-      if ($keyInfo.Key -eq 'Enter') { Write-Host}
+    if ($keyInfo.KeyChar -notin $AllowedCharacters -and $ScriptSettings.ExplicitMenuOptions -eq $true -and $AllowedCharacters.Length -gt 0) {
+      if ($keyInfo.Key -eq 'Enter') { Write-Host }
       $keyInfo = $null
     }
   } until ($keyInfo.Key)
@@ -90,7 +90,7 @@ Function Invoke-KeypressMenu {
 
 #If the user has git installed, make sure it is a patched version
 if (Get-Command 'git' -ErrorAction SilentlyContinue) {
-  $GitMinimumVersion = [System.Version]::Parse('2.35.2')
+  $GitMinimumVersion = [System.Version]::Parse('2.39.1')
   $gitVersionString = ((git version) | Select-String '([0-9]{1,}\.?){3,}').Matches.Value.Trim(' ', '.')
   $gitVersion = [System.Version]::Parse($gitVersionString)
   if ($gitVersion -lt $GitMinimumVersion) {
@@ -98,7 +98,7 @@ if (Get-Command 'git' -ErrorAction SilentlyContinue) {
     if (Get-Command 'winget' -ErrorAction SilentlyContinue) {
       $_menu = @{
         entries       = @('[Y] Upgrade Git'; '*[N] Do not upgrade')
-        Prompt        = 'The version of git installed on your machine does not satisfy the requirement of version >= 2.35.2; Would you like to upgrade?'
+        Prompt        = 'The version of git installed on your machine does not satisfy the requirement of version >= 2.39.1; Would you like to upgrade?'
         HelpText      = "Upgrading will attempt to upgrade git using winget`n"
         DefaultString = ''
       }
@@ -117,10 +117,10 @@ if (Get-Command 'git' -ErrorAction SilentlyContinue) {
             }
           }
         }
-        default { Write-Host; throw [UnmetDependencyException]::new('The version of git installed on your machine does not satisfy the requirement of version >= 2.35.2') }
+        default { Write-Host; throw [UnmetDependencyException]::new('The version of git installed on your machine does not satisfy the requirement of version >= 2.39.1') }
       }
     } else {
-      throw [UnmetDependencyException]::new('The version of git installed on your machine does not satisfy the requirement of version >= 2.35.2')
+      throw [UnmetDependencyException]::new('The version of git installed on your machine does not satisfy the requirement of version >= 2.39.1')
     }
   }
   # Check whether the script is present inside a fork/clone of microsoft/winget-pkgs repository
@@ -163,8 +163,8 @@ if ($Settings) {
   exit
 }
 
-$ScriptHeader = '# Created with YamlCreate.ps1 v2.2.1'
-$ManifestVersion = '1.2.0'
+$ScriptHeader = '# Created with YamlCreate.ps1 v2.2.4'
+$ManifestVersion = '1.4.0'
 $PSDefaultParameterValues = @{ '*:Encoding' = 'UTF8' }
 $Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
 $ofs = ', '
@@ -173,13 +173,18 @@ $callingCulture = [Threading.Thread]::CurrentThread.CurrentCulture
 [Threading.Thread]::CurrentThread.CurrentUICulture = 'en-US'
 [Threading.Thread]::CurrentThread.CurrentCulture = 'en-US'
 if (-not ([System.Environment]::OSVersion.Platform -match 'Win')) { $env:TEMP = '/tmp/' }
+$wingetUpstream = 'https://github.com/microsoft/winget-pkgs.git'
 
 if ($ScriptSettings.EnableDeveloperOptions -eq $true -and $null -ne $ScriptSettings.OverrideManifestVersion) {
   $script:UsesPrerelease = $ScriptSettings.OverrideManifestVersion -gt $ManifestVersion
   $ManifestVersion = $ScriptSettings.OverrideManifestVersion
 }
 
-$useDirectSchemaLink = (Invoke-WebRequest "https://aka.ms/winget-manifest.version.$ManifestVersion.schema.json" -UseBasicParsing).BaseResponse.ContentLength -eq -1
+$useDirectSchemaLink = if ($env:GITHUB_ACTIONS -eq $true) {
+  $true
+} else {
+  (Invoke-WebRequest "https://aka.ms/winget-manifest.version.$ManifestVersion.schema.json" -UseBasicParsing).BaseResponse.ContentLength -eq -1
+}
 $SchemaUrls = @{
   version       = if ($useDirectSchemaLink) { "https://raw.githubusercontent.com/microsoft/winget-cli/master/schemas/JSON/manifests/v$ManifestVersion/manifest.version.$ManifestVersion.json" } else { "https://aka.ms/winget-manifest.version.$ManifestVersion.schema.json" }
   defaultLocale = if ($useDirectSchemaLink) { "https://raw.githubusercontent.com/microsoft/winget-cli/master/schemas/JSON/manifests/v$ManifestVersion/manifest.defaultLocale.$ManifestVersion.json" } else { "https://aka.ms/winget-manifest.defaultLocale.$ManifestVersion.schema.json" }
@@ -679,7 +684,7 @@ Function Get-PathInstallerType {
     return 'msi'
   }
   if ($Path -match '\.appx(bundle){0,1}$') { return 'appx' }
-  # if ($Path -match '\.zip$') { return 'zip' }
+  if ($Path -match '\.zip$') { return 'zip' }
   return $null
 }
 
@@ -1770,7 +1775,7 @@ Function Read-PRBody {
         if ($? -and $(Get-Command 'winget' -ErrorAction SilentlyContinue)) {
           $PrBodyContentReply += @($_line.Replace('[ ]', '[X]'))
           $_showMenu = $false
-        } else {
+        } elseif ($script:Option -ne 'RemoveManifest') {
           $_menu = @{
             Prompt        = "Have you validated your manifest locally with 'winget validate --manifest <path>'?"
             Entries       = @('[Y] Yes'; '*[N] No')
@@ -1778,6 +1783,9 @@ Function Read-PRBody {
             HelpTextColor = 'Red'
             DefaultString = 'N'
           }
+        } else {
+          $_showMenu = $false
+          $PrBodyContentReply += @($_line)
         }
       }
 
@@ -1785,7 +1793,7 @@ Function Read-PRBody {
         if ($script:SandboxTest -eq '0') {
           $PrBodyContentReply += @($_line.Replace('[ ]', '[X]'))
           $_showMenu = $false
-        } else {
+        } elseif ($script:Option -ne 'RemoveManifest') {
           $_menu = @{
             Prompt        = "Have you tested your manifest locally with 'winget install --manifest <path>'?"
             Entries       = @('[Y] Yes'; '*[N] No')
@@ -1793,18 +1801,31 @@ Function Read-PRBody {
             HelpTextColor = 'Red'
             DefaultString = 'N'
           }
+        } else {
+          $_showMenu = $false
+          $PrBodyContentReply += @($_line)
         }
       }
 
       '*schema*' {
-        $_Match = ($_line | Select-String -Pattern 'https://+.+(?=\))').Matches.Value
-        $_menu = @{
-          Prompt        = $_line.TrimStart('- [ ]') -replace '\[|\]|\(.+\)', ''
-          Entries       = @('[Y] Yes'; '*[N] No')
-          HelpText      = "Reference Link: $_Match"
-          HelpTextColor = ''
-          DefaultString = 'N'
+        if ($script:Option -ne 'RemoveManifest') {
+          $_Match = ($_line | Select-String -Pattern 'https://+.+(?=\))').Matches.Value
+          $_menu = @{
+            Prompt        = $_line.TrimStart('- [ ]') -replace '\[|\]|\(.+\)', ''
+            Entries       = @('[Y] Yes'; '*[N] No')
+            HelpText      = "Reference Link: $_Match"
+            HelpTextColor = ''
+            DefaultString = 'N'
+          }
+        } else {
+          $_showMenu = $false
+          $PrBodyContentReply += @($_line)
         }
+      }
+
+      '*only modifies one*' {
+        $PrBodyContentReply += @($_line.Replace('[ ]', '[X]'))
+        $_showMenu = $false
       }
 
       Default {
@@ -2822,6 +2843,15 @@ if ($PromptSubmit -eq '0') {
     git config --add core.safecrlf false
   }
 
+  # check if upstream exists
+  ($remoteUpstreamUrl = $(git remote get-url upstream)) *> $null
+  if ($remoteUpstreamUrl -and $remoteUpstreamUrl -ne $wingetUpstream) {
+    git remote set-url upstream $wingetUpstream
+  } elseif (!$remoteUpstreamUrl) {
+    Write-Host  -ForegroundColor 'Yellow' 'Upstream does not exist. Permanently adding https://github.com/microsoft/winget-pkgs as remote upstream'
+    git remote add upstream $wingetUpstream
+  }
+
   # Fetch the upstream branch, create a commit onto the detached head, and push it to a new branch
   git fetch upstream master --quiet
   git switch -d upstream/master
@@ -2861,6 +2891,10 @@ if ($PromptSubmit -eq '0') {
   } else {
     git config --unset core.safecrlf
   }
+  if ($remoteUpstreamUrl -and $remoteUpstreamUrl -ne $wingetUpstream) {
+    git remote set-url upstream $remoteUpstreamUrl
+  }
+
 } else {
   Write-Host
   [Threading.Thread]::CurrentThread.CurrentUICulture = $callingUICulture
