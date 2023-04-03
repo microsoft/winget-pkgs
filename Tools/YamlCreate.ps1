@@ -753,17 +753,17 @@ Function Read-NestedInstaller {
       if ($_EffectiveType -eq 'portable') {
         do {
           Write-Host -ForegroundColor 'Red' $script:_returnValue.ErrorString()
-          Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the portable command alias'
-          if (Test-String -not $_Alias -IsNull) { Write-Host -ForegroundColor 'DarkGray' "Old Variable: $_Alias" }
+          Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the portable command alias'
+          if (Test-String -not "$($_InstallerFile['PortableCommandAlias'])" -IsNull) { Write-Host -ForegroundColor 'DarkGray' "Old Variable: $($_InstallerFile['PortableCommandAlias'])" }
           $_Alias = Read-Host -Prompt 'PortableCommandAlias' | TrimString
           if (Test-String -not $_Alias -IsNull) { $_InstallerFile['PortableCommandAlias'] = $_Alias }
 
-          if (Test-String $_Alias -MinLength $Patterns.PortableCommandAliasMinLength -MaxLength $Patterns.PortableCommandAliasMaxLength) {
+          if (Test-String $_InstallerFile['PortableCommandAlias'] -MinLength $Patterns.PortableCommandAliasMinLength -MaxLength $Patterns.PortableCommandAliasMaxLength -AllowNull) {
             $script:_returnValue = [ReturnValue]::Success()
           } else {
             $script:_returnValue = [ReturnValue]::LengthError($Patterns.PortableCommandAliasMinLength, $Patterns.PortableCommandAliasMaxLength)
           }
-          if ($_Alias -in @($_NestedInstallerFiles.PortableCommandAlias)) {
+          if ("$($_InstallerFile['PortableCommandAlias'])" -in @($_NestedInstallerFiles.PortableCommandAlias)) {
             $script:_returnValue = [ReturnValue]::new(400, 'Alias Collision', 'Aliases must be unique', 2)
           }
         } until ($script:_returnValue.StatusCode -eq [ReturnValue]::Success().StatusCode)
