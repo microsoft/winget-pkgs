@@ -757,7 +757,6 @@ Function Read-NestedInstaller {
           if (Test-String -not "$($_InstallerFile['PortableCommandAlias'])" -IsNull) { Write-Host -ForegroundColor 'DarkGray' "Old Variable: $($_InstallerFile['PortableCommandAlias'])" }
           $_Alias = Read-Host -Prompt 'PortableCommandAlias' | TrimString
           if (Test-String -not $_Alias -IsNull) { $_InstallerFile['PortableCommandAlias'] = $_Alias }
-          elseif (Test-String -not $_InstallerFile['PortableCommandAlias'] -IsNull) { $_InstallerFile['PortableCommandAlias'] = "$($_InstallerFile['PortableCommandAlias'])" }
 
           if (Test-String $_InstallerFile['PortableCommandAlias'] -MinLength $Patterns.PortableCommandAliasMinLength -MaxLength $Patterns.PortableCommandAliasMaxLength -AllowNull) {
             $script:_returnValue = [ReturnValue]::Success()
