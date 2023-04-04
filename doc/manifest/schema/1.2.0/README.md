@@ -30,28 +30,28 @@ Example:
 `manifests/m/Microsoft/WindowsTerminal/1.9.1942/Microsoft.WindowsTerminal.installer.yaml`
 
 * Manifests are partitioned by the first letter of the publisher name (in lower case). For example: m.
-* Publisher folder is the name of the company that publishes the tool.  For example: Microsoft.
-* The child folder package is the name of the application or tool.  For example: WindowsTerminal.
+* Publisher folder is the name of the company that publishes the tool. For example: Microsoft.
+* The child folder package is the name of the application or tool. For example: WindowsTerminal.
 * The child folder package version is the version of the package. For example: 1.6.10571.0.
 * The filename must be a combination of the publisher name and the application name. For example: Microsoft.WindowsTerminal.yaml.
 
-The publisher and application folders MUST match the values used to define the Id.  See PackageIdentifier: in the YAML for more detail.
-The version in the folder name MUST match the version field value in the YAML file.  See PackageVersion: in the YAML for more detail.
+The publisher and application folders MUST match the values used to define the Id. See PackageIdentifier: in the YAML for more detail.
+The version in the folder name MUST match the version field value in the YAML file. See PackageVersion: in the YAML for more detail.
 
-There are two primary types of manifests. A single file manifest (singleton) and a multi-file manifest. 
-[JSON schemas][schemaFolder] have been provided 
+There are two primary types of manifests. A single file manifest (singleton) and a multi-file manifest.
+[JSON schemas][schemaFolder] have been provided
 to help strongly type attributes and requirements.
 
 ## YAML Syntax
 Each field in the file must be PascalCased and cannot be duplicated.
 
 ## Best Practices
-The package identifier must be unique.  You cannot have multiple submissions with the same package identifier. Only one pull request per package version is allowed.
+The package identifier must be unique. You cannot have multiple submissions with the same package identifier. Only one pull request per package version is allowed.
 
-Avoid creating multiple publisher folders.  For example, do not create "Contoso Ltd." if there is already a "Contoso" folder.
+Avoid creating multiple publisher folders. For example, do not create "Contoso Ltd." if there is already a "Contoso" folder.
 
 All tools must support a silent install to be permitted in the Windows Package Manager Community Repository. If you have an executable that does not support a silent install, then we cannot provide that tool at this time.
 
-Provide as many fields as possible.  The more meta-data you provide the better the user experience will be. In some cases, the fields may not yet be supported by the Windows Package Manager client (winget.exe).
+Provide as many fields as possible. The more meta-data you provide the better the user experience will be. In some cases, the fields may not yet be supported by the Windows Package Manager client (winget.exe).
 
 The length of strings in this specification should be limited to 100 characters before a line break.
