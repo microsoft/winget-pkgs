@@ -210,7 +210,7 @@ Function Get-CleanClip {
 	param(
 		$out = (Get-Clipboard)
 	)
-	$out = $out -replace "_"," "
+	$out = $out -replace "_v"," "
 	$out = $out -join "" #removes accidental line breaks
 	#$DebugPreference = 'Continue'
 	$i = 0
