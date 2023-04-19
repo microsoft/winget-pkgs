@@ -29,7 +29,8 @@ Function Watch-PRTitles {
 	}
 	Write-Host "Loaded $($AuthList.count) Auth file entries."
 	while($true){
-		$clip = ((Get-Clipboard) -join "") -replace "PackageVersion:"," version" | select-string -NotMatch "^[c][:]";
+		$clip = (Get-Clipboard) | select-string "[#][0-9]{5,6}$";
+		#$clip = ((Get-Clipboard) -join "") -replace "PackageVersion:"," version" | select-string -NotMatch "^[c][:]";
 		if ($clip) {
 			if (Compare-Object $clip $oldclip) {
 				$timevar = (get-date -Format T) + ":"
