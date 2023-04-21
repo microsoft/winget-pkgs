@@ -6170,6 +6170,50 @@
       "version": "1.0",
       "config": {
         "conditions": {
+          "operator": "and",
+          "operands": [
+            {
+              "name": "labelAdded",
+              "parameters": {
+                "label": "zip-binary"
+              }
+            }
+          ]
+        },
+        "eventType": "pull_request",
+        "eventNames": [
+          "pull_request",
+          "issues",
+          "project_card"
+        ],
+        "taskName": "Blocked by Zipped Binaries",
+        "dangerZone": {
+          "respondToBotActions": true,
+          "acceptRespondToBotActions": true
+        },
+        "actions": [
+          {
+            "name": "addReply",
+            "parameters": {
+              "comment": "Hello @${issueAuthor},\n\nThis package appears to depend on .dlls that aren't available via symlink.\n\nThis PR is blocked until support for zipped binaries is implemented in:\n* microsoft/winget-cli/issues/2711\n\nTemplate: msftbot/blockingIssue/zipBinary"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "Blocking-Issue"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "taskType": "trigger",
+      "capabilityId": "IssueResponder",
+      "subCapability": "PullRequestResponder",
+      "version": "1.0",
+      "config": {
+        "conditions": {
           "operator": "or",
           "operands": [
             {
