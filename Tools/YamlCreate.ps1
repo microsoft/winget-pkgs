@@ -163,7 +163,7 @@ if ($Settings) {
   exit
 }
 
-$ScriptHeader = '# Created with YamlCreate.ps1 v2.2.2'
+$ScriptHeader = '# Created with YamlCreate.ps1 v2.2.4'
 $ManifestVersion = '1.4.0'
 $PSDefaultParameterValues = @{ '*:Encoding' = 'UTF8' }
 $Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
@@ -173,6 +173,7 @@ $callingCulture = [Threading.Thread]::CurrentThread.CurrentCulture
 [Threading.Thread]::CurrentThread.CurrentUICulture = 'en-US'
 [Threading.Thread]::CurrentThread.CurrentCulture = 'en-US'
 if (-not ([System.Environment]::OSVersion.Platform -match 'Win')) { $env:TEMP = '/tmp/' }
+$wingetUpstream = 'https://github.com/microsoft/winget-pkgs.git'
 
 if ($ScriptSettings.EnableDeveloperOptions -eq $true -and $null -ne $ScriptSettings.OverrideManifestVersion) {
   $script:UsesPrerelease = $ScriptSettings.OverrideManifestVersion -gt $ManifestVersion
@@ -752,17 +753,17 @@ Function Read-NestedInstaller {
       if ($_EffectiveType -eq 'portable') {
         do {
           Write-Host -ForegroundColor 'Red' $script:_returnValue.ErrorString()
-          Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the portable command alias'
-          if (Test-String -not $_Alias -IsNull) { Write-Host -ForegroundColor 'DarkGray' "Old Variable: $_Alias" }
+          Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the portable command alias'
+          if (Test-String -not "$($_InstallerFile['PortableCommandAlias'])" -IsNull) { Write-Host -ForegroundColor 'DarkGray' "Old Variable: $($_InstallerFile['PortableCommandAlias'])" }
           $_Alias = Read-Host -Prompt 'PortableCommandAlias' | TrimString
           if (Test-String -not $_Alias -IsNull) { $_InstallerFile['PortableCommandAlias'] = $_Alias }
 
-          if (Test-String $_Alias -MinLength $Patterns.PortableCommandAliasMinLength -MaxLength $Patterns.PortableCommandAliasMaxLength) {
+          if (Test-String $_InstallerFile['PortableCommandAlias'] -MinLength $Patterns.PortableCommandAliasMinLength -MaxLength $Patterns.PortableCommandAliasMaxLength -AllowNull) {
             $script:_returnValue = [ReturnValue]::Success()
           } else {
             $script:_returnValue = [ReturnValue]::LengthError($Patterns.PortableCommandAliasMinLength, $Patterns.PortableCommandAliasMaxLength)
           }
-          if ($_Alias -in @($_NestedInstallerFiles.PortableCommandAlias)) {
+          if ("$($_InstallerFile['PortableCommandAlias'])" -in @($_NestedInstallerFiles.PortableCommandAlias)) {
             $script:_returnValue = [ReturnValue]::new(400, 'Alias Collision', 'Aliases must be unique', 2)
           }
         } until ($script:_returnValue.StatusCode -eq [ReturnValue]::Success().StatusCode)
@@ -1822,6 +1823,11 @@ Function Read-PRBody {
         }
       }
 
+      '*only modifies one*' {
+        $PrBodyContentReply += @($_line.Replace('[ ]', '[X]'))
+        $_showMenu = $false
+      }
+
       Default {
         $_menu = @{
           Prompt        = $_line.TrimStart('- [ ]')
@@ -2837,6 +2843,15 @@ if ($PromptSubmit -eq '0') {
     git config --add core.safecrlf false
   }
 
+  # check if upstream exists
+  ($remoteUpstreamUrl = $(git remote get-url upstream)) *> $null
+  if ($remoteUpstreamUrl -and $remoteUpstreamUrl -ne $wingetUpstream) {
+    git remote set-url upstream $wingetUpstream
+  } elseif (!$remoteUpstreamUrl) {
+    Write-Host  -ForegroundColor 'Yellow' 'Upstream does not exist. Permanently adding https://github.com/microsoft/winget-pkgs as remote upstream'
+    git remote add upstream $wingetUpstream
+  }
+
   # Fetch the upstream branch, create a commit onto the detached head, and push it to a new branch
   git fetch upstream master --quiet
   git switch -d upstream/master
@@ -2876,6 +2891,10 @@ if ($PromptSubmit -eq '0') {
   } else {
     git config --unset core.safecrlf
   }
+  if ($remoteUpstreamUrl -and $remoteUpstreamUrl -ne $wingetUpstream) {
+    git remote set-url upstream $remoteUpstreamUrl
+  }
+
 } else {
   Write-Host
   [Threading.Thread]::CurrentThread.CurrentUICulture = $callingUICulture
