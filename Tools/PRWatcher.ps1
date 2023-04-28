@@ -252,7 +252,7 @@ Function Create-Sandbox {
 	}
 	Get-Process *sandbox* | %{Stop-Process $_}
 	Get-Process *wingetautomator* | %{Stop-Process $_}
-	$version = "1.5.441-preview"
+	$version = "1.5.1081-preview"
 	$process ="wingetautomator://install?pull_request_number=$PRNumber&winget_cli_version=v$version&watch=yes"
 	Start-Process $process
 }
