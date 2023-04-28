@@ -155,9 +155,13 @@ Function Watch-PRTitles {
 						$noRecord = $true
 					} else {
 						if ($title[-1] -match $hashPRRegex) {
-							Create-Sandbox ($title[-1] -replace"#","")
-						}
-					}
+							if ((get-command Validate-Package).name) {
+								Validate-Package
+							} else {
+								Create-Sandbox ($title[-1] -replace"#","")
+							}
+						}; #end if noNew
+					}; #end if cleanOut
 					Write-Host -f $invalidColor $timevar ($cleanOut) $WinGetOutput
 				} elseif ($null -eq $prVersion -or "" -eq $prVersion) {
 					$noRecord = $true
