@@ -154,7 +154,7 @@ Function Watch-PRTitles {
 						$noRecord = $true
 					} else {
 						if ($title[-1] -match $hashPRRegex) {
-							if ((get-command Validate-Package).name) {
+							if ((Get-Command Validate-Package).name) {
 								Validate-Package
 							} else {
 								Create-Sandbox ($title[-1] -replace"#","")
