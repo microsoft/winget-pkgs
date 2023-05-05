@@ -142,8 +142,7 @@ Function Watch-PRTitles {
 				
 				$titlejoin = ($title -join " ")
 				if (($titlejoin -match "Automatic deletion") -OR ($titlejoin -match "Remove")) {
-					$validColor = "red"
-					$invalidColor = "green"
+					$validColor,$invalidColor = $invalidColor,$validColor #Swapping variable values.
 					$copyClip = $true
 				}
 				
