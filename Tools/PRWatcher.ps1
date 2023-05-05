@@ -31,6 +31,9 @@ Function Watch-PRTitles {
 	while($true){
 		$clip = (Get-Clipboard) | select-string "[#][0-9]{5,6}$";
 		#$clip = ((Get-Clipboard) -join "") -replace "PackageVersion:"," version" | select-string -NotMatch "^[c][:]";
+		if ((Get-Command Cycle-VMs).name) {
+			Cycle-VMs
+		}
 		if ($clip) {
 			if (Compare-Object $clip $oldclip) {
 				$timevar = (get-date -Format T) + ":"
