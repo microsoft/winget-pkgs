@@ -703,6 +703,18 @@ Function Get-UriArchitecture {
   return $null
 }
 
+Function Get-UriScope {
+  Param
+  (
+    [Parameter(Mandatory = $true, Position = 0)]
+    [string] $URI
+  )
+
+  if ($URI -match '\buser\b') { return 'user' }
+  if ($URI -match '\bmachine\b') { return 'x86' }
+  return $null
+}
+
 # Prompts the user to enter the details for an archive Installer
 # Takes the installer as an input
 # Returns the modified installer
@@ -831,6 +843,8 @@ Function Read-InstallerEntry {
       if ($_) { $_Installer['InstallerType'] = $_ | Select-Object -First 1 }
       Get-UriArchitecture -URI $_Installer['InstallerUrl'] -OutVariable _ | Out-Null
       if ($_) { $_Installer['Architecture'] = $_ | Select-Object -First 1 }
+      Get-UriScope -URI $_Installer['InstallerUrl'] -OutVariable _ | Out-Null
+      if ($_) { $_Installer['Scope'] = $_ | Select-Object -First 1 }
       if ([System.Environment]::OSVersion.Platform -match 'Win' -and ($script:dest).EndsWith('.msi')) {
         $ProductCode = ([string](Get-MSIProperty -MSIPath $script:dest -Parameter 'ProductCode') | Select-String -Pattern '{[A-Z0-9]{8}-([A-Z0-9]{4}-){3}[A-Z0-9]{12}}').Matches.Value
       } elseif ([System.Environment]::OSVersion.Platform -match 'Unix' -and (Get-Item $script:dest).Name.EndsWith('.msi')) {
@@ -1062,16 +1076,18 @@ Function Read-InstallerEntry {
       }
     } until ($script:_returnValue.StatusCode -eq [ReturnValue]::Success().StatusCode)
 
-    # Request installer scope
-    $_menu = @{
-      entries       = @('[M] Machine'; '[U] User'; '*[N] No idea')
-      Prompt        = '[Optional] Enter the Installer Scope'
-      DefaultString = 'N'
-    }
-    switch ( Invoke-KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString']) {
-      'M' { $_Installer['Scope'] = 'machine' }
-      'U' { $_Installer['Scope'] = 'user' }
-      default { }
+    # Manual Entry of Scope
+    if (Test-String $_Installer['Scope'] -IsNull) {
+      $_menu = @{
+        entries       = @('[M] Machine'; '[U] User'; '*[N] No idea')
+        Prompt        = '[Optional] Enter the Installer Scope'
+        DefaultString = 'N'
+      }
+      switch ( Invoke-KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString']) {
+        'M' { $_Installer['Scope'] = 'machine' }
+        'U' { $_Installer['Scope'] = 'user' }
+        default { }
+      }
     }
 
     # Request upgrade behavior
@@ -2850,7 +2866,7 @@ if ($PromptSubmit -eq '0') {
   if ($remoteUpstreamUrl -and $remoteUpstreamUrl -ne $wingetUpstream) {
     git remote set-url upstream $wingetUpstream
   } elseif (!$remoteUpstreamUrl) {
-    Write-Host  -ForegroundColor 'Yellow' 'Upstream does not exist. Permanently adding https://github.com/microsoft/winget-pkgs as remote upstream'
+    Write-Host -ForegroundColor 'Yellow' 'Upstream does not exist. Permanently adding https://github.com/microsoft/winget-pkgs as remote upstream'
     git remote add upstream $wingetUpstream
   }
 
