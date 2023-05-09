@@ -9,7 +9,8 @@ Param(
   [String] $MapFolder = $pwd,
   [switch] $SkipManifestValidation,
   [switch] $Prerelease,
-  [switch] $EnableExperimentalFeatures
+  [switch] $EnableExperimentalFeatures,
+  [string] $WinGetVersion
 )
 
 $ErrorActionPreference = 'Stop'
@@ -74,9 +75,20 @@ New-Item $tempFolder -ItemType Directory -ErrorAction SilentlyContinue | Out-Nul
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 $WebClient = New-Object System.Net.WebClient
 
-function Get-LatestRelease {
-  $apiLatestUrl = if ($Prerelease) { 'https://api.github.com/repos/microsoft/winget-cli/releases?per_page=1' } else { 'https://api.github.com/repos/microsoft/winget-cli/releases/latest' }
-  $releasesAPIResponse = Invoke-RestMethod $apiLatestUrl
+function Get-Release {
+  $releasesAPIResponse = Invoke-RestMethod 'https://api.github.com/repos/microsoft/winget-cli/releases?per_page=100'
+  if (!$Prerelease) {
+    $releasesAPIResponse = $releasesAPIResponse.Where({ !$_.prerelease })
+  }
+  if (![String]::IsNullOrWhiteSpace($WinGetVersion)) {
+    $releasesAPIResponse = @($releasesAPIResponse.Where({ $_.tag_name -match $('^v?' + [regex]::escape($WinGetVersion)) }))
+  }
+  if ($releasesAPIResponse.Length -lt 1) {
+    Write-Output 'No WinGet releases found matching criteria'
+    exit 1
+  }
+  $releasesAPIResponse = $releasesAPIResponse | Sort-Object -Property published_at -Descending
+
   $assets = $releasesAPIResponse[0].assets
   $shaFileUrl = $assets.Where({ $_.name -eq 'Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.txt' }).browser_download_url
   $shaFile = New-TemporaryFile
@@ -94,7 +106,7 @@ function Get-LatestRelease {
 $oldProgressPreference = $ProgressPreference
 $ProgressPreference = 'SilentlyContinue'
 
-$latestRelease = Get-LatestRelease
+$latestRelease = Get-Release
 $desktopAppInstaller = @{
   url    = $latestRelease.msixFileUrl
   hash   = $latestRelease.shaFileContent
