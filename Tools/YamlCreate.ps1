@@ -711,7 +711,7 @@ Function Get-UriScope {
   )
 
   if ($URI -match '\buser\b') { return 'user' }
-  if ($URI -match '\bmachine\b') { return 'x86' }
+  if ($URI -match '\bmachine\b') { return 'machine' }
   return $null
 }
 
