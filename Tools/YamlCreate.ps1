@@ -453,7 +453,7 @@ Function Request-InstallerUrl {
           }
         }
       }
-      $NewInstallerUrl = [System.Web.HttpUtility]::UrlDecode($NewInstallerUrl)
+      $NewInstallerUrl = [System.Web.HttpUtility]::UrlDecode([System.Web.HttpUtility]::UrlEncode($NewInstallerUrl))
       if ($script:_returnValue.StatusCode -ne 409) {
         if (Test-String $NewInstallerUrl -MaxLength $Patterns.InstallerUrlMaxLength -MatchPattern $Patterns.InstallerUrl -NotNull) {
           $script:_returnValue = [ReturnValue]::Success()
@@ -2703,7 +2703,7 @@ Switch ($script:Option) {
     Write-Host 'Updating Manifest Information. This may take a while...' -ForegroundColor Blue
     $_NewInstallers = @();
     foreach ($_Installer in $script:OldInstallerManifest.Installers) {
-      $_Installer['InstallerUrl'] = [System.Web.HttpUtility]::UrlDecode($_Installer.InstallerUrl)
+      $_Installer['InstallerUrl'] = [System.Web.HttpUtility]::UrlDecode([System.Web.HttpUtility]::UrlEncode($_Installer.InstallerUrl))
       try {
         $script:dest = Get-InstallerFile -URI $_Installer.InstallerUrl -PackageIdentifier $PackageIdentifier -PackageVersion $PackageVersion
       } catch {
