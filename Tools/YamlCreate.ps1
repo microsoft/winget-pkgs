@@ -689,7 +689,7 @@ Function Get-ExeType {
   $reader.Dispose()
   $fileStream.Dispose()
 
-  if ($bytes.ToString() -eq $nsis.ToString()) { return 'nullsoft' }
+  if ($bytes[0..223].ToString() -eq $nsis.ToString()) { return 'nullsoft' }
   if ($bytes.ToString() -eq $inno.ToString()) { return 'inno' }
   return $null
 }
