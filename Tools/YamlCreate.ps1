@@ -163,7 +163,7 @@ if ($Settings) {
   exit
 }
 
-$ScriptHeader = '# Created with YamlCreate.ps1 v2.2.5'
+$ScriptHeader = '# Created with YamlCreate.ps1 v2.2.6'
 $ManifestVersion = '1.4.0'
 $PSDefaultParameterValues = @{ '*:Encoding' = 'UTF8' }
 $Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
@@ -638,6 +638,62 @@ Function Test-IsWix {
   return $false
 }
 
+Function Get-ExeType {
+  Param
+  (
+    [Parameter(Mandatory = $true)]
+    [String] $Path
+  )
+
+  $nsis = @(
+    77; 90; -112; 0; 3; 0; 0; 0; 4; 0; 0; 0; -1; -1; 0; 0;
+    -72; 0; 0; 0; 0; 0; 0; 0; 64; 0; 0; 0; 0; 0; 0; 0; 0; 0;
+    0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0;
+    0; 0; 0; 0; 0; 0; -40; 0; 0; 0; 14; 31; -70; 14; 0; -76;
+    9; -51; 33; -72; 1; 76; -51; 33; 84; 104; 105; 115;
+    32; 112; 114; 111; 103; 114; 97; 109; 32; 99; 97;
+    110; 110; 111; 116; 32; 98; 101; 32; 114; 117; 110;
+    32; 105; 110; 32; 68; 79; 83; 32; 109; 111; 100;
+    101; 46; 13; 13; 10; 36; 0; 0; 0; 0; 0; 0; 0; -83; 49;
+    8; -127; -23; 80; 102; -46; -23; 80; 102; -46; -23;
+    80; 102; -46; 42; 95; 57; -46; -21; 80; 102; -46;
+    -23; 80; 103; -46; 76; 80; 102; -46; 42; 95; 59; -46;
+    -26; 80; 102; -46; -67; 115; 86; -46; -29; 80; 102;
+    -46; 46; 86; 96; -46; -24; 80; 102; -46; 82; 105; 99;
+    104; -23; 80; 102; -46; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0;
+    0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 80; 69; 0; 0; 76;
+    1; 5; 0
+  )
+
+  $inno = [byte[]]@(
+    77; 90; 80; 0; 2; 0; 0; 0; 4; 0; 15; 0; 255; 255; 0; 0;
+    184; 0; 0; 0; 0; 0; 0; 0; 64; 0; 26; 0; 0; 0; 0; 0; 0; 0;
+    0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0;
+    0; 0; 0; 0; 0; 0; 0; 1; 0; 0; 186; 16; 0; 14; 31; 180; 9;
+    205; 33; 184; 1; 76; 205; 33; 144; 144; 84; 104; 105;
+    115; 32; 112; 114; 111; 103; 114; 97; 109; 32; 109;
+    117; 115; 116; 32; 98; 101; 32; 114; 117; 110; 32;
+    117; 110; 100; 101; 114; 32; 87; 105; 110; 51; 50;
+    13; 10; 36; 55; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0;
+    0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0;
+    0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0;
+    0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0;
+    0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0;
+    0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0;
+    0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0;
+    0; 0; 80; 69; 0; 0; 76; 1; 10; 0)
+
+  $fileStream = New-Object -TypeName System.IO.FileStream -ArgumentList ($Path, [System.IO.FileMode]::Open, [System.IO.FileAccess]::Read)
+  $reader = New-Object -TypeName System.IO.BinaryReader -ArgumentList $fileStream
+  $bytes = $reader.ReadBytes(264)
+  $reader.Dispose()
+  $fileStream.Dispose()
+
+  if ($bytes.ToString() -eq $nsis.ToString()) { return 'nullsoft' }
+  if ($bytes.ToString() -eq $inno.ToString()) { return 'inno' }
+  return $null
+}
+
 Function Get-UserSavePreference {
   switch ($ScriptSettings.SaveToTemporaryFolder) {
     'always' { $_Preference = '0' }
@@ -686,6 +742,8 @@ Function Get-PathInstallerType {
   }
   if ($Path -match '\.appx(bundle){0,1}$') { return 'appx' }
   if ($Path -match '\.zip$') { return 'zip' }
+  if ($Path -match '\.exe$') { return Get-ExeType($Path) }
+
   return $null
 }
 
