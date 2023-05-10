@@ -683,15 +683,34 @@ Function Get-ExeType {
     0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0;
     0; 0; 80; 69; 0; 0; 76; 1; 10; 0)
 
+  $burn = @(46; 119; 105; 120; 98; 117; 114; 110)
+
+  $exeType = $null
+
   $fileStream = New-Object -TypeName System.IO.FileStream -ArgumentList ($Path, [System.IO.FileMode]::Open, [System.IO.FileAccess]::Read)
   $reader = New-Object -TypeName System.IO.BinaryReader -ArgumentList $fileStream
   $bytes = $reader.ReadBytes(264)
+
+  if (($bytes[0..223] -join '') -eq ($nsis -join '')) { $exeType = 'nullsoft' }
+  elseif (($bytes -join '') -eq ($inno -join '')) { $exeType = 'inno' }
+  # The burn header can appear before a certain point in the binary. Check to see if it's present in the first 264 bytes read
+  elseif (($bytes -join '') -match ($burn -join '')) { $exeType = 'burn' }
+  # If the burn header isn't present in the first 264 bytes, scan through the rest of the binary
+  else {
+    $rollingBytes = $bytes[ - $burn.Length..-1]
+    for ($i = 265; $i -lt $fileStream.Length; $i++) {
+      $rollingBytes = $rollingBytes[1..$rollingBytes.Length]
+      $rollingBytes += $reader.ReadByte()
+      if (($rollingBytes -join '') -match ($burn -join '')) {
+        $exeType = 'burn'
+        break
+      }
+    }
+  }
+
   $reader.Dispose()
   $fileStream.Dispose()
-
-  if (($bytes[0..223] -join '') -eq ($nsis -join '')) { return 'nullsoft' }
-  if (($bytes -join '') -eq ($inno -join '')) { return 'inno' }
-  return $null
+  return $exeType
 }
 
 Function Get-UserSavePreference {
@@ -2761,7 +2780,7 @@ Switch ($script:Option) {
     Write-Host 'Updating Manifest Information. This may take a while...' -ForegroundColor Blue
     $_NewInstallers = @();
     foreach ($_Installer in $script:OldInstallerManifest.Installers) {
-      $_Installer['InstallerUrl'] = [System.Web.HttpUtility]::UrlDecode($_Installer.InstallerUrl.Replace('+','%2B'))
+      $_Installer['InstallerUrl'] = [System.Web.HttpUtility]::UrlDecode($_Installer.InstallerUrl.Replace('+', '%2B'))
       try {
         $script:dest = Get-InstallerFile -URI $_Installer.InstallerUrl -PackageIdentifier $PackageIdentifier -PackageVersion $PackageVersion
       } catch {
