@@ -698,7 +698,7 @@ Function Get-ExeType {
   # If the burn header isn't present in the first 264 bytes, scan through the rest of the binary
   else {
     $rollingBytes = $bytes[ - $burn.Length..-1]
-    for ($i = 265; $i -lt $fileStream.Length; $i++) {
+    for ($i = 265; $i -lt ($fileStream.Length,524280|Measure-Object -Minimum).Minimum; $i++) {
       $rollingBytes = $rollingBytes[1..$rollingBytes.Length]
       $rollingBytes += $reader.ReadByte()
       if (($rollingBytes -join '') -match ($burn -join '')) {
