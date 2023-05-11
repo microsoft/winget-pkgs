@@ -1282,11 +1282,11 @@ Function Read-QuickInstallerEntry {
         # Here we also want to pass any exceptions through for potential debugging
         throw [System.Net.WebException]::new('The file could not be downloaded. Try running the script again', $_.Exception)
       }
-      # Check that MSI's aren't actually WIX, and EXE's aren't NSIS or INNO
+      # Check that MSI's aren't actually WIX, and EXE's aren't NSIS, INNO or BURN
       Write-Host -ForegroundColor 'Green' "Installer Downloaded!`nProcessing installer data. . . "
       if ($_NewInstaller['InstallerType'] -in @('msi'; 'exe')) {
         $DetectedType = Get-PathInstallerType $script:dest
-        if ($DetectedType -in @('msi'; 'wix'; 'nullsoft'; 'inno')) { $_NewInstaller['InstallerType'] = $DetectedType }
+        if ($DetectedType -in @('msi'; 'wix'; 'nullsoft'; 'inno'; 'burn')) { $_NewInstaller['InstallerType'] = $DetectedType }
       }
       # Get the Sha256
       $_NewInstaller['InstallerSha256'] = (Get-FileHash -Path $script:dest -Algorithm SHA256).Hash
@@ -2787,10 +2787,10 @@ Switch ($script:Option) {
         # Here we also want to pass any exceptions through for potential debugging
         throw [System.Net.WebException]::new('The file could not be downloaded. Try running the script again', $_.Exception)
       }
-      # Check that MSI's aren't actually WIX, and EXE's aren't NSIS or INNO
+      # Check that MSI's aren't actually WIX, and EXE's aren't NSIS, INNO or BURN
       if ($_Installer['InstallerType'] -in @('msi'; 'exe')) {
         $DetectedType = Get-PathInstallerType $script:dest
-        if ($DetectedType -in @('msi'; 'wix'; 'nullsoft'; 'inno')) { $_Installer['InstallerType'] = $DetectedType }
+        if ($DetectedType -in @('msi'; 'wix'; 'nullsoft'; 'inno'; 'burn')) { $_Installer['InstallerType'] = $DetectedType }
       }
       # Get the Sha256
       $_Installer['InstallerSha256'] = (Get-FileHash -Path $script:dest -Algorithm SHA256).Hash
