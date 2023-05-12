@@ -7,7 +7,8 @@ Param(
   [Switch] $Review = $false,
   [Switch] $KeepBranch = $false,
   [Switch] $Prerelease = $false,
-  [Switch] $EnableExperimentalFeatures = $false
+  [Switch] $EnableExperimentalFeatures = $false,
+  [string] $WinGetVersion = $null
 )
 
 $PullRequest = $PullRequest.TrimStart('#')
@@ -49,6 +50,7 @@ $params = @{
     SkipManifestValidation = $true
     Prerelease = $Prerelease
     EnableExperimentalFeatures = $EnableExperimentalFeatures
+    $WinGetVersion = $WinGetVersion
 }
 & $sandboxTestPath @params
 
