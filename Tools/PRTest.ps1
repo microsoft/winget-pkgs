@@ -50,7 +50,7 @@ $params = @{
     SkipManifestValidation = $true
     Prerelease = $Prerelease
     EnableExperimentalFeatures = $EnableExperimentalFeatures
-    $WinGetVersion = $WinGetVersion
+    WinGetVersion = $WinGetVersion
 }
 & $sandboxTestPath @params
 
