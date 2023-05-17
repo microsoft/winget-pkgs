@@ -29,7 +29,8 @@ Function Watch-PRTitles {
 	}
 	Write-Host "Loaded $($AuthList.count) Auth file entries."
 	while($true){
-		$clip = (Get-Clipboard) | select-string "[#][0-9]{5,6}$";
+		$clip2 = (Get-Clipboard) 
+		$clip = $clip2 | select-string "[#][0-9]{5,6}$";
 		#$clip = ((Get-Clipboard) -join "") -replace "PackageVersion:"," version" | select-string -NotMatch "^[c][:]";
 		if ((Get-Command Cycle-VMs).name) {
 			Cycle-VMs
@@ -51,9 +52,13 @@ Function Watch-PRTitles {
 				#Version is on the line before the line number, and this set indexes with 1 - but the following array indexes with 0, so the value is automatically transformed by the index mismatch. 
 				if ($null -ne $prVerLoc) {
 					try {
-						[System.Version]$prVersion = $title[$prVerLoc]
+					$PackageVersion = (($clip2 | select-string "PackageVersion")[0] -split ": ")[1]
 					} catch {
-						[string]$prVersion = $title[$prVerLoc]
+						try {
+							[System.Version]$prVersion = $title[$prVerLoc]
+						} catch {
+							[string]$prVersion = $title[$prVerLoc]
+						}
 					}
 				}; #end if null
 				
@@ -111,8 +116,13 @@ Function Watch-PRTitles {
 					}; #end Switch Chromatic
 				
 				#Get the PackageIdentifier out of the PR title, and alert if it matches the auth list.
-				$cleanOut = (Get-CleanClip $clip); 
-				$AuthMatch = $AuthList.PackageIdentifier -match $cleanOut
+				$PackageIdentifier = ""
+				try {
+					$PackageIdentifier = (($clip2 | select-string "PackageIdentifier")[0] -split ": ")[1]
+				} catch {
+					$PackageIdentifier = (Get-CleanClip $clip); 
+				}
+				$AuthMatch = $AuthList.PackageIdentifier -match $PackageIdentifier
 				if ($AuthMatch) {
 					$AuthListLine = $AuthList | Where-Object {$_.PackageIdentifier -match $AuthMatch}
 					$strictness = $AuthListLine.strictness | Sort-Object -Unique
@@ -130,9 +140,9 @@ Function Watch-PRTitles {
 					Write-Host " = = = = = = "
 				}
 				
-				$WinGetOutput = Search-WinGetManifest $cleanOut 
+				$WinGetOutput = Search-WinGetManifest $PackageIdentifier 
 				
-				$wgLine = ($WinGetOutput | Select-String " $cleanOut ")
+				$wgLine = ($WinGetOutput | Select-String " $PackageIdentifier ")
 				try {
 					try {
 						[System.Version]$ManifestVersion = ($wgLine -replace "\s+"," " -split " ")[-2]
@@ -149,7 +159,7 @@ Function Watch-PRTitles {
 					$copyClip = $true
 				}
 				
-				if ($cleanOut -eq "Added") {
+				if ($PackageIdentifier -eq "Added") {
 					Write-Host -f $invalidColor "$timevar Error reading package identifier"
 					$noRecord = $true
 				} elseif ($WinGetOutput -eq "No package found matching input criteria.") {
@@ -163,8 +173,8 @@ Function Watch-PRTitles {
 								Create-Sandbox ($title[-1] -replace"#","")
 							}
 						}; #end if noNew
-					}; #end if cleanOut
-					Write-Host -f $invalidColor $timevar ($cleanOut) $WinGetOutput
+					}; #end if PackageIdentifier
+					Write-Host -f $invalidColor $timevar ($PackageIdentifier) $WinGetOutput
 				} elseif ($null -eq $prVersion -or "" -eq $prVersion) {
 					$noRecord = $true
 					Write-Host -f $invalidColor "$timevar Error reading PR version"
@@ -179,9 +189,9 @@ Function Watch-PRTitles {
 					$noRecord = $true
 					Write-Host -f $invalidColor "$timevar Error reading package identifier"
 				} elseif ($prVersion -gt $ManifestVersion) {
-					Write-Host -f $validColor "$timevar $cleanOut prVersion $prVersion is greater than ManifestVersion $ManifestVersion"
+					Write-Host -f $validColor "$timevar $PackageIdentifier prVersion $prVersion is greater than ManifestVersion $ManifestVersion"
 				} elseif ($prVersion -lt $ManifestVersion) {
-					$outMsg = "$timevar $cleanOut prVersion $prVersion is less than ManifestVersion $ManifestVersion"
+					$outMsg = "$timevar $PackageIdentifier prVersion $prVersion is less than ManifestVersion $ManifestVersion"
 					Write-Host -f $invalidColor $outMsg
 					if ($copyClip) {
 						$outMsg | clip
@@ -189,7 +199,7 @@ Function Watch-PRTitles {
 						$oldclip = $outMsg
 					}
 				} elseif ($prVersion -eq $ManifestVersion) {
-					Write-Host -f $cautionColor "$timevar $cleanOut prVersion $prVersion is equal to ManifestVersion $ManifestVersion"
+					Write-Host -f $cautionColor "$timevar $PackageIdentifier prVersion $prVersion is equal to ManifestVersion $ManifestVersion"
 				} else {
 					$WinGetOutput
 				};
@@ -239,8 +249,8 @@ Function Get-CleanClip {
 
 #Minimize output for automation
 Function Search-WinGetManifest ($term) {
-	$out = WinGet search $term --disable-interactivity
-	return $out
+	$out = WinGet search $term --disable-interactivity  | where {$_ -notmatch "Γûê"}
+	return $out 
 }
 
 #Terminates any current sandbox and makes a new one.
