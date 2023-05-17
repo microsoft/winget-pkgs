@@ -15,7 +15,7 @@ Function Watch-PRTitles {
 		[switch]$noNew,
 		$LogFile = ".\PR.txt",
 		$AuthFile = ".\Auth.csv",
-		[ValidateSet("Default","MonoWarm","MonoCool","RainbowRotate")]
+		[ValidateSet("Default","Warm","Cool","RainbowRotate","Afghanistan","Albania","Algeria","American Samoa","Andorra","Angola","Anguilla","Antigua And Barbuda","Argentina","Armenia","Aruba","Australia","Austria","Azerbaijan","Bahamas","Bahrain","Bangladesh","Barbados","Belarus","Belgium","Belize","Benin","Bermuda","Bhutan","Bolivia","Bosnia And Herzegovina","Botswana","Bouvet Island","Brazil","Brunei Darussalam","Bulgaria","Burkina Faso","Burundi","Cabo Verde","Cambodia","Cameroon","Canada","Central African Republic","Chad","Chile","China","Colombia","Comoros","Cook Islands","Costa Rica","Croatia","Cuba","CuraΓö£┬║ao","Cyprus","Czechia","CΓö£Γöñte D'Ivoire","Democratic Republic Of The Congo","Denmark","Djibouti","Dominica","Dominican Republic","Ecuador","Egypt","El Salvador","Equatorial Guinea","Eritrea","Estonia","Eswatini","Ethiopia","Fiji","Finland","France","French Polynesia","Gabon","Gambia","Georgia","Germany","Ghana","Greece","Grenada","Guatemala","Guinea","Guinea-Bissau","Guyana","Haiti","Holy See (Vatican City State)","Honduras","Hungary","Iceland","India","Indonesia","Iran","Iraq","Ireland","Israel","Italy","Jamaica","Japan","Jordan","Kazakhstan","Kenya","Kiribati","Kuwait","Kyrgyzstan","Laos","Latvia","Lebanon","Lesotho","Liberia","Libya","Liechtenstein","Lithuania","Luxembourg","Madagascar","Malawi","Malaysia","Maldives","Mali","Malta","Marshall Islands","Mauritania","Mauritius","Mexico","Micronesia","Moldova","Monaco","Mongolia","Montenegro","Morocco","Mozambique","Myanmar","Namibia","Nauru","Nepal","Netherlands","New Zealand","Nicaragua","Niger","Nigeria","Niue","Norfolk Island","North Korea","North Macedonia","Norway","Oman","Pakistan","Palau","Palestine","Panama","Papua New Guinea","Paraguay","Peru","Philippines","Pitcairn Islands","Poland","Portugal","Qatar","Republic Of The Congo","Romania","Russian Federation","Rwanda","Saint Kitts And Nevis","Saint Lucia","Saint Vincent And The Grenadines","Samoa","San Marino","Sao Tome And Principe","Saudi Arabia","Senegal","Serbia","Seychelles","Sierra Leone","Singapore","Slovakia","Slovenia","Solomon Islands","Somalia","South Africa","South Korea","South Sudan","Spain","Sri Lanka","Sudan","Suriname","Sweden","Switzerland","Syrian Arab Republic","Tajikistan","Tanzania, United Republic Of","Thailand","Togo","Tonga","Trinidad And Tobago","Tunisia","Turkey","Turkmenistan","Tuvalu","Uganda","Ukraine","United Arab Emirates","United Kingdom","United States","Uruguay","Uzbekistan","Vanuatu","Venezuela","Vietnam","Yemen","Zambia","Zimbabwe","Åland Islands")]
 		$Chromatic = "Default",
 		$oldclip = "",
 		$hashPRRegex = "[#][0-9]{5,6}",
@@ -108,6 +108,1065 @@ Function Watch-PRTitles {
 							$invalidColor = Get-Random ("Red","Blue","Magenta")
 							$cautionColor = Get-Random ("Yellow","DarkCyan","Cyan")
 						}
+#https://www.flagpictures.com/countries/flag-colors/
+"Afghanistan"{
+	$validColor = "Black"
+	$invalidColor = "Green"
+	$cautionColor = "Red"
+	$invalidColor = "White"
+}
+"Albania"{
+	$validColor = "Red"
+	$invalidColor = "Black"
+}
+"Algeria"{
+	$validColor = "Green"
+	$invalidColor = "Red"
+	$cautionColor = "White"
+}
+"American Samoa"{
+	$validColor = "Blue"
+	$invalidColor = "Red"
+	$cautionColor = "White"
+}
+"Andorra"{
+	$validColor = "Blue"
+	$invalidColor = "Red"
+	$cautionColor = "Yellow"
+}
+"Angola"{
+	$validColor = "Red"
+	$invalidColor = "Black"
+	$cautionColor = "Yellow"
+}
+"Anguilla"{
+	$validColor = "Blue"
+	$invalidColor = "White"
+}
+"Antigua And Barbuda"{
+	$validColor = "Red"
+	$invalidColor = "Black"
+	$cautionColor = "Blue"
+	$invalidColor = "White"
+	$invalidColor = "Yellow"
+}
+"Argentina"{
+	$validColor = "Light Blue"
+	$invalidColor = "White"
+}
+"Armenia"{
+	$validColor = "Red"
+	$invalidColor = "Blue"
+	$cautionColor = "Orange"
+}
+"Aruba"{
+	$validColor = "Blue"
+	$invalidColor = "Red"
+	$cautionColor = "Yellow"
+}
+"Australia"{
+	$validColor = "Blue"
+	$invalidColor = "Red"
+	$cautionColor = "White"
+}
+"Austria"{
+	$validColor = "Red"
+	$invalidColor = "White"
+}
+"Azerbaijan"{
+	$validColor = "Light Blue"
+	$invalidColor = "Green"
+	$cautionColor = "Red"
+}
+"Bahamas"{
+	$validColor = "Black"
+	$invalidColor = "Aquamarine Blue"
+	$cautionColor = "Yellow"
+}
+"Bahrain"{
+	$validColor = "Red"
+	$invalidColor = "White"
+}
+"Bangladesh"{
+	$validColor = "Red"
+	$invalidColor = "Green"
+}
+"Barbados"{
+	$validColor = "Blue"
+	$invalidColor = "Black"
+	$cautionColor = "Gold"
+}
+"Belarus"{
+	$validColor = "Red"
+	$invalidColor = "Green"
+	$cautionColor = "White"
+}
+"Belgium"{
+	$validColor = "Black"
+	$invalidColor = "Red"
+	$cautionColor = "Yellow"
+}
+"Belize"{
+	$validColor = "Blue"
+	$invalidColor = "Red"
+	$cautionColor = "White"
+}
+"Benin"{
+	$validColor = "Green"
+	$invalidColor = "Red"
+	$cautionColor = "Yellow"
+}
+"Bermuda"{
+	$validColor = "Red"
+}
+"Bhutan"{
+	$validColor = "Fulvous"
+	$invalidColor = "Gold"
+	$cautionColor = "White"
+}
+"Bolivia"{
+	$validColor = "Red"
+	$invalidColor = "Green"
+	$cautionColor = "Yellow"
+}
+"Bosnia And Herzegovina"{
+	$validColor = "Blue"
+	$invalidColor = "White"
+	$cautionColor = "Yellow"
+}
+"Botswana"{
+	$validColor = "Light Blue"
+	$invalidColor = "Black"
+	$cautionColor = "White"
+}
+"Bouvet Island"{
+	$validColor = "Blue"
+	$invalidColor = "Red"
+	$cautionColor = "White"
+}
+"Brazil"{
+	$validColor = "Green"
+	$invalidColor = "Blue"
+	$cautionColor = "Gold"
+}
+"Brunei Darussalam"{
+	$validColor = "Yellow"
+	$invalidColor = "Black"
+	$cautionColor = "Red"
+	$invalidColor = "White"
+}
+"Bulgaria"{
+	$validColor = "White"
+	$invalidColor = "Green"
+	$cautionColor = "Red"
+}
+"Burkina Faso"{
+	$validColor = "Red"
+	$invalidColor = "Green"
+	$cautionColor = "Yellow"
+}
+"Burundi"{
+	$validColor = "Red"
+	$invalidColor = "Green"
+	$cautionColor = "White"
+}
+"Cabo Verde"{
+	$validColor = "Blue"
+	$invalidColor = "Gold"
+	$cautionColor = "Red"
+	$invalidColor = "White"
+}
+"Cambodia"{
+	$validColor = "Red"
+	$invalidColor = "Blue"
+	$cautionColor = "White"
+}
+"Cameroon"{
+	$validColor = "Red"
+	$invalidColor = "Green"
+	$cautionColor = "Yellow"
+}
+"Canada"{
+	$validColor = "Red"
+	$invalidColor = "White"
+}
+"Central African Republic"{
+	$validColor = "Blue"
+	$invalidColor = "Green"
+	$cautionColor = "Red"
+	$invalidColor = "White"
+	$invalidColor = "Yellow"
+}
+"Chad"{
+	$validColor = "Blue"
+	$invalidColor = "Red"
+	$cautionColor = "Yellow"
+}
+"Chile"{
+	$validColor = "Red"
+	$invalidColor = "Blue"
+	$cautionColor = "White"
+}
+"China"{
+	$validColor = "Red"
+	$invalidColor = "Gold"
+}
+"Colombia"{
+	$validColor = "Yellow"
+	$invalidColor = "Blue"
+	$cautionColor = "Red"
+}
+"Comoros"{
+	$validColor = "Yellow"
+	$invalidColor = "Blue"
+	$cautionColor = "Green"
+	$invalidColor = "Red"
+	$invalidColor = "White"
+}
+"Cook Islands"{
+	$validColor = "Blue"
+	$invalidColor = "Red"
+	$cautionColor = "White"
+}
+"Costa Rica"{
+	$validColor = "Blue"
+	$invalidColor = "Red"
+	$cautionColor = "White"
+}
+"Croatia"{
+	$validColor = "Red"
+	$invalidColor = "Blue"
+	$cautionColor = "White"
+}
+"Cuba"{
+	$validColor = "Blue"
+	$invalidColor = "Red"
+	$cautionColor = "White"
+}
+"Curaçao"{
+	$validColor = "Blue"
+	$invalidColor = "White"
+	$cautionColor = "Yellow"
+}
+"Cyprus"{
+	$validColor = "Blue"
+	$invalidColor = "White"
+}
+"Czechia"{
+	$validColor = "Blue"
+	$invalidColor = "Red"
+	$cautionColor = "White"
+}
+"Côte D'Ivoire"{
+	$validColor = "Orange"
+	$invalidColor = "Green"
+	$cautionColor = "White"
+}
+"Democratic Republic Of The Congo"{
+	$validColor = "Blue"
+	$invalidColor = "Red"
+	$cautionColor = "Yellow"
+}
+"Denmark"{
+	$validColor = "Red"
+	$invalidColor = "White"
+}
+"Djibouti"{
+	$validColor = "Light Blue"
+	$invalidColor = "Green"
+	$cautionColor = "Red"
+	$invalidColor = "White"
+}
+"Dominica"{
+	$validColor = "Green"
+	$invalidColor = "Black"
+	$cautionColor = "Red"
+	$invalidColor = "White"
+	$invalidColor = "Yellow"
+}
+"Dominican Republic"{
+	$validColor = "Blue"
+	$invalidColor = "Red"
+	$cautionColor = "White"
+}
+"Ecuador"{
+	$validColor = "Yellow"
+	$invalidColor = "Blue"
+	$cautionColor = "Red"
+}
+"Egypt"{
+	$validColor = "Black"
+	$invalidColor = "Gold"
+	$cautionColor = "Red"
+	$invalidColor = "White"
+}
+"El Salvador"{
+	$validColor = "Blue"
+	$invalidColor = "Gold"
+	$cautionColor = "White"
+}
+"Equatorial Guinea"{
+	$validColor = "Green"
+	$invalidColor = "Blue"
+	$cautionColor = "Red"
+	$invalidColor = "White"
+}
+"Eritrea"{
+	$validColor = "Green"
+	$invalidColor = "Blue"
+	$cautionColor = "Red"
+	$invalidColor = "Yellow"
+}
+"Estonia"{
+	$validColor = "Blue"
+	$invalidColor = "Black"
+	$cautionColor = "White"
+}
+"Eswatini"{
+	$validColor = "Black"
+	$invalidColor = "Blue"
+	$cautionColor = "Red"
+	$invalidColor = "White"
+	$invalidColor = "Yellow"
+}
+"Ethiopia"{
+	$validColor = "Green"
+	$invalidColor = "Blue"
+	$cautionColor = "Red"
+	$invalidColor = "Yellow"
+}
+"Fiji"{
+	$validColor = "Dark Blue"
+	$invalidColor = "Gold"
+	$cautionColor = "Light Blue"
+	$invalidColor = "Red"
+	$invalidColor = "White"
+}
+"Finland"{
+	$validColor = "White"
+	$invalidColor = "Blue"
+}
+"France"{
+	$validColor = "Blue"
+	$invalidColor = "Red"
+	$cautionColor = "White"
+}
+"French Polynesia"{
+	$validColor = "Red"
+	$invalidColor = "Blue"
+	$cautionColor = "Golden"
+	$invalidColor = "White"
+}
+"Gabon"{
+	$validColor = "Green"
+	$invalidColor = "Blue"
+	$cautionColor = "Yellow"
+}
+"Gambia"{
+	$validColor = "Red"
+	$invalidColor = "Blue"
+	$cautionColor = "Green"
+	$invalidColor = "White"
+}
+"Georgia"{
+	$validColor = "Red"
+	$invalidColor = "White"
+}
+"Germany"{
+	$validColor = "Black"
+	$invalidColor = "Gold"
+	$cautionColor = "Red"
+}
+"Ghana"{
+	$validColor = "Red"
+	$invalidColor = "Black"
+	$cautionColor = "Green"
+	$invalidColor = "Yellow"
+}
+"Greece"{
+	$validColor = "Blue"
+	$invalidColor = "White"
+}
+"Grenada"{
+	$validColor = "Green"
+	$invalidColor = "Red"
+	$cautionColor = "Yellow"
+}
+"Guatemala"{
+	$validColor = "Blue"
+	$invalidColor = "White"
+}
+"Guinea"{
+	$validColor = "Red"
+	$invalidColor = "Green"
+	$cautionColor = "Yellow"
+}
+"Guinea-Bissau"{
+	$validColor = "Red"
+	$invalidColor = "Black"
+	$cautionColor = "Green"
+	$invalidColor = "Yellow"
+}
+"Guyana"{
+	$validColor = "Black"
+	$invalidColor = "Green"
+	$cautionColor = "Red"
+	$invalidColor = "White"
+	$invalidColor = "Yellow"
+}
+"Haiti"{
+	$validColor = "Blue"
+	$invalidColor = "Red"
+}
+"Holy See (Vatican City State)"{
+	$validColor = "Yellow"
+	$invalidColor = "White"
+}
+"Honduras"{
+	$validColor = "Blue"
+	$invalidColor = "White"
+}
+"Hong Kong" {
+	$validColor = "Red"
+	$invalidColor = "White"
+}
+"Hungary"{
+	$validColor = "Red"
+	$invalidColor = "Green"
+	$cautionColor = "White"
+}
+"Iceland"{
+	$validColor = "Blue"
+	$invalidColor = "Red"
+	$cautionColor = "White"
+}
+"India"{
+	$validColor = "Blue"
+	$invalidColor = "Green"
+	$cautionColor = "Saffron Orange"
+	$invalidColor = "White"
+}
+"Indonesia"{
+	$validColor = "Red"
+	$invalidColor = "White"
+}
+"Iran"{
+	$validColor = "Green"
+	$invalidColor = "Red"
+	$cautionColor = "White"
+}
+"Iraq"{
+	$validColor = "Red"
+	$invalidColor = "Black"
+	$cautionColor = "Green"
+	$invalidColor = "White"
+}
+"Ireland"{
+	$validColor = "Green Or Blue"
+}
+"Israel"{
+	$validColor = "Blue"
+	$invalidColor = "White"
+}
+"Italy"{
+	$validColor = "Green"
+	$invalidColor = "Red"
+	$cautionColor = "White"
+}
+"Jamaica"{
+	$validColor = "Green"
+	$invalidColor = "Black"
+	$cautionColor = "Gold"
+}
+"Japan"{
+	$validColor = "Red"
+	$invalidColor = "White"
+}
+"Jordan"{
+	$validColor = "Black"
+	$invalidColor = "Green"
+	$cautionColor = "Red"
+	$invalidColor = "White"
+}
+"Kazakhstan"{
+	$validColor = "Blue"
+	$invalidColor = "Yellow"
+}
+"Kenya"{
+	$validColor = "Black"
+	$invalidColor = "Green"
+	$invalidColor = "Red"
+	$invalidColor = "White"
+}
+"Kiribati"{
+	$validColor = "Red"
+	$invalidColor = "Blue"
+	$cautionColor = "Gold"
+	$invalidColor = "White"
+}
+"Kuwait"{
+	$validColor = "Green"
+	$invalidColor = "Black"
+	$cautionColor = "Red"
+	$invalidColor = "White"
+}
+"Kyrgyzstan"{
+	$validColor = "Red"
+	$invalidColor = "Yellow"
+}
+"Laos"{
+	$validColor = "Red"
+	$invalidColor = "Blue"
+	$cautionColor = "White"
+}
+"Latvia"{
+	$validColor = "Red"
+	$invalidColor = "White"
+}
+"Lebanon"{
+	$validColor = "Red"
+	$invalidColor = "Green"
+	$cautionColor = "White"
+}
+"Lesotho"{
+	$validColor = "Blue"
+	$invalidColor = "Black"
+	$cautionColor = "Green"
+	$invalidColor = "White"
+}
+"Liberia"{
+	$validColor = "Red"
+	$invalidColor = "Blue"
+	$cautionColor = "White"
+}
+"Libya"{
+	$validColor = "Red"
+	$invalidColor = "Black"
+	$cautionColor = "Green"
+	$invalidColor = "White"
+}
+"Liechtenstein"{
+	$validColor = "Blue"
+	$invalidColor = "Red"
+}
+"Lithuania"{
+	$validColor = "Yellow"
+	$invalidColor = "Green"
+	$cautionColor = "Red"
+}
+"Luxembourg"{
+	$validColor = "Red"
+	$invalidColor = "Light Blue"
+	$cautionColor = "White"
+}
+"Macao" {
+	$validColor = "Green"
+	$invalidColor = "White"
+}
+"Madagascar"{
+	$validColor = "Red"
+	$invalidColor = "Green"
+	$cautionColor = "White"
+}
+"Malawi"{
+	$validColor = "Black"
+	$invalidColor = "Green"
+	$cautionColor = "Red"
+}
+"Malaysia"{
+	$validColor = "Red"
+	$invalidColor = "Dark Blue"
+	$cautionColor = "White"
+	$invalidColor = "Yellow"
+}
+"Maldives"{
+	$validColor = "Red"
+	$invalidColor = "White"
+}
+"Mali"{
+	$validColor = "Green"
+	$invalidColor = "Red"
+	$cautionColor = "Yellow"
+}
+"Malta"{
+	$validColor = "Red"
+	$invalidColor = "White"
+}
+"Marshall Islands"{
+	$validColor = "Blue"
+	$invalidColor = "Orange"
+	$cautionColor = "White"
+}
+"Mauritania"{
+	$validColor = "Green"
+	$invalidColor = "Red"
+	$cautionColor = "Yellow"
+}
+"Mauritius"{
+	$validColor = "Red"
+	$invalidColor = "Blue"
+	$cautionColor = "Green"
+	$invalidColor = "Yellow"
+}
+"Mexico"{
+	$validColor = "Green"
+	$invalidColor = "Red"
+	$cautionColor = "White"
+}
+"Micronesia"{
+	$validColor = "Blue"
+	$invalidColor = "White"
+}
+"Moldova"{
+	$validColor = "Blue"
+	$invalidColor = "Gold"
+	$cautionColor = "Red"
+	$invalidColor = "Yellow"
+}
+"Monaco"{
+	$validColor = "Red"
+	$invalidColor = "White"
+}
+"Mongolia"{
+	$validColor = "Blue"
+	$invalidColor = "Red"
+	$cautionColor = "Yellow"
+}
+"Montenegro"{
+	$validColor = "Red"
+	$invalidColor = "Gold"
+}
+"Morocco"{
+	$validColor = "Red"
+	$invalidColor = "Green"
+}
+"Mozambique"{
+	$validColor = "Black"
+	$invalidColor = "Green"
+	$cautionColor = "Red"
+	$invalidColor = "White"
+	$invalidColor = "Yellow"
+}
+"Myanmar"{
+	$validColor = "Yellow"
+	$invalidColor = "Green"
+	$cautionColor = "Red"
+	$invalidColor = "White"
+}
+"Namibia"{
+	$validColor = "Blue"
+	$invalidColor = "Green"
+	$cautionColor = "Red"
+	$invalidColor = "White"
+	$invalidColor = "Yellow"
+}
+"Nauru"{
+	$validColor = "Blue"
+	$invalidColor = "White"
+	$cautionColor = "Yellow"
+}
+"Nepal"{
+	$validColor = "Crimson"
+	$invalidColor = "Blue"
+	$cautionColor = "White"
+}
+"Netherlands"{
+	$validColor = "Red"
+	$invalidColor = "Blue"
+	$cautionColor = "White"
+}
+"New Zealand"{
+	$validColor = "White"
+	$invalidColor = "Blue"
+	$cautionColor = "Red"
+}
+"Nicaragua"{
+	$validColor = "Blue"
+	$invalidColor = "White"
+}
+"Niger"{
+	$validColor = "Orange"
+	$invalidColor = "Green"
+	$cautionColor = "White"
+}
+"Nigeria"{
+	$validColor = "Green"
+	$invalidColor = "White"
+}
+"Niue"{
+	$validColor = "Gold"
+}
+"Norfolk Island"{
+	$validColor = "Green"
+	$invalidColor = "White"
+}
+"North Korea"{
+	$validColor = "Red"
+	$invalidColor = "Blue"
+	$cautionColor = "White"
+}
+"North Macedonia"{
+	$validColor = "Red"
+	$invalidColor = "Yellow"
+}
+"Norway"{
+	$validColor = "Red"
+	$invalidColor = "Blue"
+	$cautionColor = "White"
+}
+"Oman"{
+	$validColor = "Red"
+	$invalidColor = "Green"
+	$cautionColor = "White"
+}
+"Pakistan"{
+	$validColor = "Green"
+	$invalidColor = "White"
+}
+"Palau"{
+	$validColor = "Yellow"
+	$invalidColor = "Blue"
+}
+"Palestine"{
+	$validColor = "Black"
+	$invalidColor = "Green"
+	$cautionColor = "Red"
+	$invalidColor = "White"
+}
+"Panama"{
+	$validColor = "Blue"
+	$invalidColor = "Red"
+	$cautionColor = "White"
+}
+"Papua New Guinea"{
+	$validColor = "Red"
+	$invalidColor = "Black"
+	$cautionColor = "White"
+	$invalidColor = "Yellow"
+}
+"Paraguay"{
+	$validColor = "Red"
+	$invalidColor = "Blue"
+	$cautionColor = "White"
+}
+"Peru"{
+	$validColor = "Red"
+	$invalidColor = "White"
+}
+"Philippines"{
+	$validColor = "Blue"
+	$invalidColor = "Red"
+	$cautionColor = "White"
+	$invalidColor = "Yellow"
+}
+"Pitcairn Islands"{
+	$validColor = "Blue"
+	$invalidColor = "Black"
+	$cautionColor = "Brown"
+	$invalidColor = "Green"
+	$cautionColor = "Red"
+	$invalidColor = "White"
+	$invalidColor = "Yellow"
+}
+"Poland"{
+	$validColor = "White"
+	$invalidColor = "Red"
+}
+"Portugal"{
+	$validColor = "Red"
+	$invalidColor = "Green"
+	$cautionColor = "White"
+}
+"Qatar"{
+	$validColor = "Maroon"
+	$invalidColor = "White"
+}
+"Republic Of The Congo"{
+	$validColor = "Green"
+	$invalidColor = "Red"
+	$cautionColor = "Yellow"
+}
+"Romania"{
+	$validColor = "Blue"
+	$invalidColor = "Red"
+	$cautionColor = "Yellow"
+}
+"Russian Federation"{
+	$validColor = "White"
+	$invalidColor = "Blue"
+	$cautionColor = "Red"
+}
+"Rwanda"{
+	$validColor = "Sky Blue"
+	$invalidColor = "Green"
+	$cautionColor = "Yellow"
+}
+"Saint Kitts And Nevis"{
+	$validColor = "Green"
+	$invalidColor = "Red"
+	$cautionColor = "White"
+}
+"Saint Lucia"{
+	$validColor = "Light Blue"
+	$invalidColor = "Black"
+	$cautionColor = "White"
+	$invalidColor = "Yellow"
+}
+"Saint Vincent And The Grenadines"{
+	$validColor = "Blue"
+	$invalidColor = "Green"
+	$cautionColor = "Yellow"
+}
+"Samoa"{
+	$validColor = "Red"
+	$invalidColor = "Blue"
+	$cautionColor = "White"
+}
+"San Marino"{
+	$validColor = "White"
+	$invalidColor = "Light Blue"
+}
+"Sao Tome And Principe"{
+	$validColor = "Green"
+	$invalidColor = "Black"
+	$cautionColor = "Red"
+	$invalidColor = "Yellow"
+}
+"Saudi Arabia"{
+	$validColor = "Green"
+	$invalidColor = "White"
+}
+"Senegal"{
+	$validColor = "Green"
+	$invalidColor = "Red"
+	$cautionColor = "Yellow"
+}
+"Serbia"{
+	$validColor = "Red"
+	$invalidColor = "Blue"
+	$cautionColor = "White"
+}
+"Seychelles"{
+	$validColor = "Blue"
+	$invalidColor = "Green"
+	$cautionColor = "Red"
+	$invalidColor = "White"
+	$invalidColor = "Yellow"
+}
+"Sierra Leone"{
+	$validColor = "Green"
+	$invalidColor = "Blue"
+	$cautionColor = "White"
+}
+"Singapore"{
+	$validColor = "Red"
+	$invalidColor = "White"
+}
+"Slovakia"{
+	$validColor = "White"
+	$invalidColor = "Blue"
+	$cautionColor = "Red"
+}
+"Slovenia"{
+	$validColor = "Black"
+	$invalidColor = "Blue"
+	$cautionColor = "Gold"
+	$invalidColor = "Green"
+	$invalidColor = "Red"
+	$invalidColor = "White"
+}
+"Solomon Islands"{
+	$validColor = "Olive Green"
+	$invalidColor = "Blue"
+	$cautionColor = "Yellow"
+}
+"Somalia"{
+	$validColor = "Blue"
+	$invalidColor = "White"
+}
+"South Africa"{
+	$validColor = "Red"
+	$invalidColor = "Black"
+	$cautionColor = "Blue"
+	$invalidColor = "Gold"
+	$invalidColor = "Green"
+	$invalidColor = "White"
+}
+"South Korea"{
+	$validColor = "White"
+	$invalidColor = "Black"
+	$cautionColor = "Blue"
+	$invalidColor = "Red"
+}
+"South Sudan"{
+	$validColor = "Black"
+	$invalidColor = "Blue"
+	$cautionColor = "Green"
+	$invalidColor = "Red"
+	$invalidColor = "White"
+	$invalidColor = "Yellow"
+}
+"Spain"{
+	$validColor = "Red"
+	$invalidColor = "Gold"
+}
+"Sri Lanka"{
+	$validColor = "Maroon"
+	$invalidColor = "Gold"
+	$cautionColor = "Green"
+	$invalidColor = "Orange"
+}
+"Sudan"{
+	$validColor = "Red"
+	$invalidColor = "Black"
+	$cautionColor = "Green"
+	$invalidColor = "White"
+}
+"Suriname"{
+	$validColor = "Gold"
+	$invalidColor = "Green"
+	$cautionColor = "Red"
+	$invalidColor = "White"
+}
+"Sweden"{
+	$validColor = "Blue"
+	$invalidColor = "Gold"
+}
+"Switzerland"{
+	$validColor = "Red"
+	$invalidColor = "White"
+}
+"Syrian Arab Republic"{
+	$validColor = "Red"
+	$invalidColor = "Black"
+	$cautionColor = "Green"
+	$invalidColor = "White"
+}
+"Tajikistan"{
+	$validColor = "Golden"
+	$invalidColor = "Green"
+	$cautionColor = "Red"
+	$invalidColor = "White"
+}
+"Tanzania, United Republic Of"{
+	$validColor = "Green"
+	$invalidColor = "Black"
+	$cautionColor = "Blue"
+	$invalidColor = "Yellow"
+}
+"Thailand"{
+	$validColor = "Red"
+	$invalidColor = "Blue"
+	$cautionColor = "White"
+}
+"Togo"{
+	$validColor = "Green"
+	$invalidColor = "Red"
+	$cautionColor = "White"
+	$invalidColor = "Yellow"
+}
+"Tonga"{
+	$validColor = "Red"
+	$invalidColor = "White"
+}
+"Trinidad And Tobago"{
+	$validColor = "Red"
+	$invalidColor = "Black"
+	$cautionColor = "White"
+}
+"Tunisia"{
+	$validColor = "Red"
+	$invalidColor = "White"
+}
+"Turkey"{
+	$validColor = "Red"
+	$invalidColor = "White"
+}
+"Turkmenistan"{
+	$validColor = "Green"
+	$invalidColor = "White"
+}
+"Tuvalu"{
+	$validColor = "Dark Blue"
+	$invalidColor = "Gold"
+	$cautionColor = "Red"
+	$invalidColor = "Sky Blue"
+	$invalidColor = "White"
+}
+"Uganda"{
+	$validColor = "Blue"
+	$invalidColor = "Red"
+	$cautionColor = "White"
+	$invalidColor = "Yellow"
+}
+"Ukraine"{
+	$validColor = "Blue"
+	$invalidColor = "Gold"
+}
+"United Arab Emirates"{
+	$validColor = "Red"
+	$invalidColor = "Black"
+	$cautionColor = "Green"
+	$invalidColor = "White"
+}
+"United Kingdom"{
+	$validColor = "Red"
+	$invalidColor = "Blue"
+	$cautionColor = "White"
+}
+"United States"{
+	$validColor = "Red"
+	$invalidColor = "White"
+	$cautionColor = "Blue"
+}
+"Uruguay"{
+	$validColor = "Blue"
+	$invalidColor = "White"
+}
+"Uzbekistan"{
+	$validColor = "Blue"
+	$invalidColor = "Green"
+	$cautionColor = "Red"
+	$invalidColor = "White"
+}
+"Vanuatu"{
+	$validColor = "Red"
+	$invalidColor = "Black"
+	$cautionColor = "Green"
+	$invalidColor = "Yellow"
+}
+"Venezuela"{
+	$validColor = "Yellow"
+	$invalidColor = "Blue"
+	$cautionColor = "Red"
+}
+"Vietnam"{
+	$validColor = "Red"
+	$invalidColor = "Yellow"
+}
+"Yemen"{
+	$validColor = "Red"
+	$invalidColor = "Black"
+	$cautionColor = "White"
+}
+"Zambia"{
+	$validColor = "Green"
+	$invalidColor = "Black"
+	$cautionColor = "Orange"
+	$invalidColor = "Red"
+}
+"Zimbabwe"{
+	$validColor = "Green"
+	$invalidColor = "Black"
+	$cautionColor = "Red"
+	$invalidColor = "White"
+	$invalidColor = "Yellow"
+}
+"Åland Islands"{
+	$validColor = "Blue"
+	$invalidColor = "Gold"
+	$cautionColor = "Red"
+}
 						Default {
 							$validColor = "Green"
 							$invalidColor = "Red"
