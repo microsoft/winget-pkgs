@@ -8,9 +8,9 @@
 
 # Windows Package Manager
 
-## Manifest Schema 1.4
+## Manifest Schema 1.5
 
-The Windows Package Manager 1.4 client does not support all fields in the 1.4 schema.
+The Windows Package Manager 1.5 client does not support all fields in the 1.5 schema.
 
 The Windows Package Manager uses manifests (YAML files) to locate and install packages for Windows users. This specification provides references to JSON schemas as well as best practices.
 

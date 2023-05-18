@@ -15,7 +15,7 @@
 ## Minimal singleton YAML file example
 As specified in the singleton [JSON schema], only a number of fields are required. The singleton format is only valid for packages containing a single installer and a single locale. If more than one installer or locale is provided, the multiple YAML file format and schema must be used.
 
->Note: The singleton manifest format has been deprecated in the Windows Package Manager Community Repository. The Windows Package Manager 1.4 client still supports singleton manifests.
+>Note: The singleton manifest format has been deprecated in the Windows Package Manager Community Repository. The Windows Package Manager 1.5 client still supports singleton manifests.
 
 ### Singleton Manifest
 
@@ -347,7 +347,7 @@ ManifestVersion: 1.5.0
 
  **Required Field**
 
- This key represents the installer type for the package. The Windows Package Manager supports [MSIX], [MSI], and executable installers. Some well known formats ([Inno], [Nullsoft], [WiX], and [Burn]) provide standard sets of installer switches to provide different installer experiences. Portable packages are supported as of Windows Package Manager 1.3. Zip packages are supported as of Windows Package Manager 1.4.
+ This key represents the installer type for the package. The Windows Package Manager supports [MSIX], [MSI], and executable installers. Some well known formats ([Inno], [Nullsoft], [WiX], and [Burn]) provide standard sets of installer switches to provide different installer experiences. Portable packages are supported as of Windows Package Manager 1.3. Zip packages are supported as of Windows Package Manager 1.5.
 
  >Note: The Windows Package Manager defaults to the install mode providing install progress. A best practice is to determine if one of the supported installer technologies was used to build an installer with the .exe file extension. The [Windows Package Manager Manifest Creator] tool can be used to determine if one of the known tools was used to build an installer with the .exe file extension.
 
@@ -846,7 +846,7 @@ ManifestVersion: 1.5.0
 
 This key represents whether a warning message is displayed to the user prior to install or upgrade if the package is known to interfere with any running applications.
 
->Note: The DisplayInstallWarnings behavior is not implemented in the Windows Package Manager 1.4 client.
+>Note: The DisplayInstallWarnings behavior is not implemented in the Windows Package Manager 1.5 client.
 </details>
 
 <details>

@@ -67,7 +67,7 @@ ManifestVersion: 1.5.0        # The manifest syntax version
 
  The Windows Package Manager client uses this version to determine whether or not an upgrade for a package is available. In some cases, packages may be released with a marketing driven version, and that causes trouble with the `winget upgrade` command.
 
- The current best practice for the Windows Package Manager 1.4 client is to use the value reported in Windows Apps & Features when this version of the package is installed. In some cases, packages do not report a version resulting in an upgrade loop or other unwanted behavior.
+ The current best practice for the Windows Package Manager 1.5 client is to use the value reported in Windows Apps & Features when this version of the package is installed. In some cases, packages do not report a version resulting in an upgrade loop or other unwanted behavior.
 </details>
 
 <details>
@@ -93,7 +93,7 @@ ManifestVersion: 1.5.0        # The manifest syntax version
 
   This key represents the name of the publisher for a given package. This field is intended to allow the full publisher's or ISV's name to be displayed as they wish.
 
-  >Note: With the 1.4 release of the Windows Package Manager, this name affects how packages from a source are mapped to Apps installed in Windows 10 and Windows 11 via Add / Remove Programs (ARP) and Windows Apps & Features respectively. The best practice is to ensure this matches the entry for the package when it has been installed. The impact is associated with `winget upgrade` and `winget list`.
+  >Note: With the 1.5 release of the Windows Package Manager, this name affects how packages from a source are mapped to Apps installed in Windows 10 and Windows 11 via Add / Remove Programs (ARP) and Windows Apps & Features respectively. The best practice is to ensure this matches the entry for the package when it has been installed. The impact is associated with `winget upgrade` and `winget list`.
  </details>
 
 <details>
@@ -135,7 +135,7 @@ ManifestVersion: 1.5.0        # The manifest syntax version
 
   This key represents the name of the package. This field is intended to allow the full package name to be displayed as the publisher or ISV wishes.
 
-  >Note: With the 1.4 release of the Windows Package Manager, this name affects how packages from a source are mapped to Apps installed in Windows 10 via Add / Remove Programs (ARP). The best practice is to ensure this matches the ARP entry for the package name when it has been installed. The impact is associated with `winget upgrade` and `winget list`.
+  >Note: With the 1.5 release of the Windows Package Manager, this name affects how packages from a source are mapped to Apps installed in Windows 10 via Add / Remove Programs (ARP). The best practice is to ensure this matches the ARP entry for the package name when it has been installed. The impact is associated with `winget upgrade` and `winget list`.
  </details>
 
 <details>

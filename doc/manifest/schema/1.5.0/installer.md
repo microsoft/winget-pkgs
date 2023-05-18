@@ -15,7 +15,7 @@
 ## Manifest Schema v1.5.0 Installer File
 All Windows Package Manager manifests in the Microsoft community repository are submitted using [YAML] syntax. A [JSON schema] is provided to aid authoring these files in editors, and in the other tooling related to the Windows Package Manager. This document provides detailed information regarding the usage of the YAML keys in the installer file for multi-file manifests.
 
->Note: The 1.4 manifest schema was released with the Windows Package Manager 1.4. Any fields marked *Not implemented* are not supported in the 1.4 client, but may be supported in a 1.5-preview client.
+>Note: The 1.5 manifest schema was released with the Windows Package Manager 1.5. Any fields marked *Not implemented* are not supported in the 1.5 client, but may be supported in a 1.6-preview client.
 
 ### Installer Manifest
 
@@ -226,11 +226,11 @@ ManifestVersion: 1.5.0
 
  **Required Field**
 
- This key represents the installer type for the package. The Windows Package Manager supports [MSIX], [MSI], and executable installers. Some well known formats ([Inno], [Nullsoft], [WiX], and [Burn]) provide standard sets of installer switches to provide different installer experiences. Portable packages are supported as of Windows Package Manager 1.3. Zip packages are supported as of Windows Package Manager 1.4.
+ This key represents the installer type for the package. The Windows Package Manager supports [MSIX], [MSI], and executable installers. Some well known formats ([Inno], [Nullsoft], [WiX], and [Burn]) provide standard sets of installer switches to provide different installer experiences. Portable packages are supported as of Windows Package Manager 1.3. Zip packages are supported as of Windows Package Manager 1.5.
 
  >Note: The Windows Package Manager defaults to the install mode providing install progress. A best practice is to determine if one of the supported installer technologies was used to build an installer with the .exe file extension. The [Windows Package Manager Manifest Creator] tool can be used to determine if one of the known tools was used to build an installer with the .exe file extension.
 
- >Note: The Windows Package Manager 1.4 does not support loose executables with the .com file extension directly. Progressive Web Applications (PWAs) and fonts are also not supported.
+ >Note: The Windows Package Manager 1.5 does not support loose executables with the .com file extension directly. Progressive Web Applications (PWAs) and fonts are also not supported.
 
  >Note: This key may be present in the root of the manifest as the default value for all installer nodes. This key may also be present in an individual installer node as well. If this key is in the manifest root and in an installer node, the value in the installer node will apply.
 </details>
@@ -727,7 +727,7 @@ ManifestVersion: 1.5.0
 
 This key represents whether a warning message is displayed to the user prior to install or upgrade if the package is known to interfere with any running applications.
 
->Note: The DisplayInstallWarnings behavior is not implemented in the Windows Package Manager 1.4 client.
+>Note: The DisplayInstallWarnings behavior is not implemented in the Windows Package Manager 1.5 client.
 </details>
 
 <details>
