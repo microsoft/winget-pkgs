@@ -1,8 +1,8 @@
-[schemaFolder]:                             https://github.com/microsoft/winget-cli/tree/master/schemas/JSON/manifests/v1.4.0
-[versionSchema]:                            https://github.com/microsoft/winget-cli/tree/master/schemas/JSON/manifests/v1.4.0/manifest.version.1.4.0.json
-[defaultLocaleSchema]:                      https://github.com/microsoft/winget-cli/tree/master/schemas/JSON/manifests/v1.4.0/manifest.defaultLocale.1.4.0.json
-[localeSchema]:                             https://github.com/microsoft/winget-cli/tree/master/schemas/JSON/manifests/v1.4.0/manifest.locale.1.4.0.json
-[installerSchema]:                          https://github.com/microsoft/winget-cli/tree/master/schemas/JSON/manifests/v1.4.0/manifest.installer.1.4.0.json
+[schemaFolder]:                             https://github.com/microsoft/winget-cli/tree/master/schemas/JSON/manifests/v1.5.0
+[versionSchema]:                            https://github.com/microsoft/winget-cli/tree/master/schemas/JSON/manifests/v1.5.0/manifest.version.1.5.0.json
+[defaultLocaleSchema]:                      https://github.com/microsoft/winget-cli/tree/master/schemas/JSON/manifests/v1.5.0/manifest.defaultLocale.1.5.0.json
+[localeSchema]:                             https://github.com/microsoft/winget-cli/tree/master/schemas/JSON/manifests/v1.5.0/manifest.locale.1.5.0.json
+[installerSchema]:                          https://github.com/microsoft/winget-cli/tree/master/schemas/JSON/manifests/v1.5.0/manifest.installer.1.5.0.json
 [Windows Package Manager Manifest Creator]: https://github.com/microsoft/winget-create
 [YAML Create]:                              https://github.com/microsoft/winget-pkgs/blob/master/Tools/YamlCreate.ps1
 

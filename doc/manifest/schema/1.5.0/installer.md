@@ -1,4 +1,4 @@
-[JSON Schema]:                              https://github.com/microsoft/winget-cli/blob/master/schemas/JSON/manifests/v1.4.0/manifest.installer.1.4.0.json
+[JSON Schema]:                              https://github.com/microsoft/winget-cli/blob/master/schemas/JSON/manifests/v1.5.0/manifest.installer.1.5.0.json
 [Windows Package Manager Manifest Creator]: https://github.com/microsoft/winget-create
 [YAML]:                                     https://yaml.org/spec
 [semantic version]:                         https://semver.org
@@ -12,7 +12,7 @@
 [Burn]:                                     https://wixtoolset.org/documentation/manual/v3/bundle
 
 # Windows Package Manager
-## Manifest Schema v1.4.0 Installer File
+## Manifest Schema v1.5.0 Installer File
 All Windows Package Manager manifests in the Microsoft community repository are submitted using [YAML] syntax. A [JSON schema] is provided to aid authoring these files in editors, and in the other tooling related to the Windows Package Manager. This document provides detailed information regarding the usage of the YAML keys in the installer file for multi-file manifests.
 
 >Note: The 1.4 manifest schema was released with the Windows Package Manager 1.4. Any fields marked *Not implemented* are not supported in the 1.4 client, but may be supported in a 1.5-preview client.
@@ -91,7 +91,7 @@ Installers:                     	# The list of package installers
             InvocationParameter:	# Optional parameter for invocable files
             DisplayName:					# Optional display name for invocable files
 ManifestType: installer         	# The manifest type
-ManifestVersion: 1.4.0          	# The manifest syntax version
+ManifestVersion: 1.5.0          	# The manifest syntax version
 ```
 
 ### Installer Minimal Example
@@ -107,7 +107,7 @@ Installers:
     InstallerUrl: https://github.com/microsoft/terminal/releases/download/v1.9.1942.0/Microsoft.WindowsTerminal_1.9.1942.0_8wekyb3d8bbwe.msixbundle
     InstallerSha256: 578D987D58B3CE5F6BF3316C6A5AECE8EB6B94DBCD1963413D81CB313D6C28D5
 ManifestType: installer
-ManifestVersion: 1.4.0
+ManifestVersion: 1.5.0
 ```
 
 ### Installer Complex Example
@@ -138,7 +138,7 @@ Installers:
   InstallerSha256: 578D987D58B3CE5F6BF3316C6A5AECE8EB6B94DBCD1963413D81CB313D6C28D5
   SignatureSha256: 889A0BA756E74386F95A37F6A813C6D383DC21349A2D18E2B192D4E0E7F80659
 ManifestType: installer
-ManifestVersion: 1.4.0
+ManifestVersion: 1.5.0
 ```
 
 ## Fields
@@ -815,5 +815,5 @@ This key represents whether a warning message is displayed to the user prior to 
 
  **Required Field**
 
- This key must have the value "1.4.0". The Microsoft community package repository validation pipelines also use this value to determine appropriate validation rules when evaluating this file.
+ This key must have the value "1.5.0". The Microsoft community package repository validation pipelines also use this value to determine appropriate validation rules when evaluating this file.
 </details>

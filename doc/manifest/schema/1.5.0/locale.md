@@ -1,4 +1,4 @@
-[JSON schema]:                                      https://github.com/microsoft/winget-cli/blob/master/schemas/JSON/manifests/v1.4.0/manifest.locale.1.4.0.json
+[JSON schema]:                                      https://github.com/microsoft/winget-cli/blob/master/schemas/JSON/manifests/v1.5.0/manifest.locale.1.5.0.json
 [YAML]:                                             https://yaml.org/spec
 [semantic version]:                                 https://semver.org
 [Available languages for Windows]:                  https://docs.microsoft.com/windows-hardware/manufacture/desktop/available-language-packs-for-windows
@@ -8,7 +8,7 @@
 [upgrade]:                                          https://docs.microsoft.com/windows/package-manager/winget/upgrade
 
 # Windows Package Manager
-## Manifest Schema v1.4.0 Locale File
+## Manifest Schema v1.5.0 Locale File
 
 All Windows Package Manager manifests in the Microsoft community repository are submitted using [YAML] syntax. A [JSON schema] is provided to aid authoring these files in editors, and in the other tooling related to the Windows Package Manager. This document provides detailed information regarding the usage of the YAML keys in the locale file for multi-file manifests.
 
@@ -45,7 +45,7 @@ ReleaseNotesUrl:              # Optional release notes URL
 PurchaseUrl:                  # Optional purchase URL
 InstallationNotes:            # Optional notes displayed upon installation
 ManifestType: locale          # The manifest type
-ManifestVersion: 1.4.0        # The manifest syntax version
+ManifestVersion: 1.5.0        # The manifest syntax version
 ```
 
 ## Fields
@@ -324,5 +324,5 @@ ManifestVersion: 1.4.0        # The manifest syntax version
 
  **Required Field**
 
- This key must have the value "1.4.0". The Microsoft community package repository validation pipelines also use this value to determine appropriate validation rules when evaluating this file.
+ This key must have the value "1.5.0". The Microsoft community package repository validation pipelines also use this value to determine appropriate validation rules when evaluating this file.
 </details>

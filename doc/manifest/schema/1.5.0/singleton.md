@@ -1,4 +1,4 @@
-[JSON schema]:                              https://github.com/microsoft/winget-cli/blob/master/schemas/JSON/manifests/v1.4.0/manifest.singleton.1.4.0.json
+[JSON schema]:                              https://github.com/microsoft/winget-cli/blob/master/schemas/JSON/manifests/v1.5.0/manifest.singleton.1.5.0.json
 [semantic version]:                         https://semver.org
 [install]:                                  https://docs.microsoft.com/windows/package-manager/winget/install
 [list]:                                     https://docs.microsoft.com/windows/package-manager/winget/list
@@ -110,7 +110,7 @@ Installers:                     	# The package installer
             InvocationParameter:	# Optional parameter for invocable files
             DisplayName:					# Optional display name for invocable files
 ManifestType: singleton         	# The manifest type
-ManifestVersion: 1.4.0          	# The manifest syntax version
+ManifestVersion: 1.5.0          	# The manifest syntax version
 ```
 
 ### [Singleton Minimal Example](#tab/minimal/)
@@ -130,7 +130,7 @@ Installers:
    InstallerSha256: 092aa89b1881e058d31b1a8d88f31bb298b5810afbba25c5cb341cfa4904d843
    SignatureSha256: e53f48473621390c8243ada6345826af7c713cf1f4bbbf0d030599d1e4c175ee
 ManifestType: singleton
-ManifestVersion: 1.4.0
+ManifestVersion: 1.5.0
 ```
 
 ## Fields
@@ -926,5 +926,5 @@ This key represents whether a warning message is displayed to the user prior to 
 
  **Required Field**
 
- This key must have the value "1.4.0". The Microsoft community package repository validation pipelines also use this value to determine appropriate validation rules when evaluating this file.
+ This key must have the value "1.5.0". The Microsoft community package repository validation pipelines also use this value to determine appropriate validation rules when evaluating this file.
 </details>
