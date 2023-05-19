@@ -50,44 +50,51 @@ Function Watch-PRTitles {
 				#Split the title by spaces. Try extracting the version location as the next item after the word "version", and if that fails, use the 2nd to the last item, then 3rd to last, and 4th to last. For some reason almost everyone puts the version number as the last item, and GitHub appends the PR number. 
 				$prVerLoc =($title | Select-String "version").linenumber 
 				#Version is on the line before the line number, and this set indexes with 1 - but the following array indexes with 0, so the value is automatically transformed by the index mismatch. 
-				if ($null -ne $prVerLoc) {
-					try {
+				try {
 					$prVersion = (($clip2 | select-string "PackageVersion")[0] -split ": ")[1]
-					} catch {
+					write-host 1
+				} catch {
+					if ($null -ne $prVerLoc) {
 						try {
 							[System.Version]$prVersion = $title[$prVerLoc]
+							write-host 2
 						} catch {
 							[string]$prVersion = $title[$prVerLoc]
+							write-host 3
 						}
-					}
-				}; #end if null
-				
-				#Otherwise we have to go hunting for the version number.
-				try {
-					[System.Version]$prVersion = $title[-1]
-				} catch {
-					try {
-						[System.Version]$prVersion = $title[-2]
-					} catch {
+					} else {
+					#Otherwise we have to go hunting for the version number.
 						try {
-							[System.Version]$prVersion = $title[-3]
+							[System.Version]$prVersion = $title[-1]
+							write-host 4
 						} catch {
 							try {
-								[System.Version]$prVersion = $title[-4]
+								[System.Version]$prVersion = $title[-2]
+								write-host 5
 							} catch {
-								#If it's not a semantic version, guess that it's the 2nd to last, based on the above logic.
-								[string]$prVersion = $title[-2]
+								try {
+									[System.Version]$prVersion = $title[-3]
+									write-host 6
+								} catch {
+									try {
+										[System.Version]$prVersion = $title[-4]
+										write-host 7
+									} catch {
+										#If it's not a semantic version, guess that it's the 2nd to last, based on the above logic.
+										[string]$prVersion = $title[-2]
+										write-host 8
+									}
+								}
 							}
-						}
-					}
+						}; #end try
+					}; #end if null
 				}; #end try
 				$validColor = "green"
 				$invalidColor = "red"
 				$cautionColor = "yellow"
 				
-				Switch ($Chromatic)
+				Switch ($Chromatic) {
 					#Color schemes, to accomodate needs and also add variety.
-					{
 						"Default" {
 							$validColor = "Green"
 							$invalidColor = "Red"
