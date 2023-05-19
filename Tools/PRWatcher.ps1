@@ -52,7 +52,7 @@ Function Watch-PRTitles {
 				#Version is on the line before the line number, and this set indexes with 1 - but the following array indexes with 0, so the value is automatically transformed by the index mismatch. 
 				if ($null -ne $prVerLoc) {
 					try {
-					$PackageVersion = (($clip2 | select-string "PackageVersion")[0] -split ": ")[1]
+					$prVersion = (($clip2 | select-string "PackageVersion")[0] -split ": ")[1]
 					} catch {
 						try {
 							[System.Version]$prVersion = $title[$prVerLoc]
