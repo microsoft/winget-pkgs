@@ -83,7 +83,7 @@ function Get-Release {
   if (![String]::IsNullOrWhiteSpace($WinGetVersion)) {
     $releasesAPIResponse = @($releasesAPIResponse.Where({ $_.tag_name -match $('^v?' + [regex]::escape($WinGetVersion)) }))
   }
-  if ($releasesAPIResponse.Length -lt 1) {
+  if ($releasesAPIResponse.Count -lt 1) {
     Write-Output 'No WinGet releases found matching criteria'
     exit 1
   }
