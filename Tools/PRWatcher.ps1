@@ -34,11 +34,11 @@ Function Watch-PRTitles {
 		$clip2 = (Get-Clipboard) 
 		$clip = $clip2 | select-string "[#][0-9]{5,6}$";
 		#$clip = ((Get-Clipboard) -join "") -replace "PackageVersion:"," version" | select-string -NotMatch "^[c][:]";
-		if ((Get-Command Cycle-VMs).name) {
-			Cycle-VMs
-		}
 		if ($clip) {
 			if (Compare-Object $clip $oldclip) {
+		if ((Get-Command Get-Status).name) {
+			(Get-Status | where {$_.status -eq "ValidationComplete"})
+		}
 				$timevar = (get-date -Format T) + ":"
 				$copyClip = $false
 				$noRecord = $false
