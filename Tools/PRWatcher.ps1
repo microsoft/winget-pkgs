@@ -53,41 +53,37 @@ Function Watch-PRTitles {
 				$prVerLoc =($title | Select-String "version").linenumber 
 				#Version is on the line before the line number, and this set indexes with 1 - but the following array indexes with 0, so the value is automatically transformed by the index mismatch. 
 				try {
-					$prVersion = (($clip2 | select-string "PackageVersion")[0] -split ": ")[1]
-					write-host 1
+					$prVersion = (($clip2 | select-string "PackageVersion")[0] -split ": ")[1] -replace "'","" -replace '"',''
 				} catch {
-					if ($null -ne $prVerLoc) {
 						try {
-							[System.Version]$prVersion = $title[$prVerLoc]
-							write-host 2
-						} catch {
-							[string]$prVersion = $title[$prVerLoc]
-							write-host 3
-						}
-					} else {
-					#Otherwise we have to go hunting for the version number.
-						try {
-							[System.Version]$prVersion = $title[-1]
-							write-host 4
-						} catch {
+					$prVersion = (($clip2 | select-string "PackageVersion")[1] -split ": ")[1]
+					} catch {
+						if ($null -ne $prVerLoc) {
 							try {
-								[System.Version]$prVersion = $title[-2]
-								write-host 5
+								[System.Version]$prVersion = $title[$prVerLoc]
+							} catch {
+								[string]$prVersion = $title[$prVerLoc]
+							}
+						} else {
+						#Otherwise we have to go hunting for the version number.
+							try {
+								[System.Version]$prVersion = $title[-1]
 							} catch {
 								try {
-									[System.Version]$prVersion = $title[-3]
-									write-host 6
+									[System.Version]$prVersion = $title[-2]
 								} catch {
 									try {
-										[System.Version]$prVersion = $title[-4]
-										write-host 7
+										[System.Version]$prVersion = $title[-3]
 									} catch {
-										#If it's not a semantic version, guess that it's the 2nd to last, based on the above logic.
-										[string]$prVersion = $title[-2]
-										write-host 8
+										try {
+											[System.Version]$prVersion = $title[-4]
+										} catch {
+											#If it's not a semantic version, guess that it's the 2nd to last, based on the above logic.
+											[string]$prVersion = $title[-2]
+										}
 									}
 								}
-							}
+							}; #end try
 						}; #end try
 					}; #end if null
 				}; #end try
