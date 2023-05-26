@@ -114,13 +114,13 @@ Function Watch-PRTitles {
 						}
 #https://www.flagpictures.com/countries/flag-colors/
 "Afghanistan"{
-	$validColor = "DarkGrey"
+	$validColor = "DarkGray"
 	$validColor = "Green"
 	$invalidColor = "Red"
 	$cautionColor = "White"
 }
 "Albania"{
-	$validColor = "DarkGrey"
+	$validColor = "DarkGray"
 	$invalidColor = "Red"
 }
 "Algeria"{
@@ -139,7 +139,7 @@ Function Watch-PRTitles {
 	$cautionColor = "Yellow"
 }
 "Angola"{
-	$validColor = "DarkGrey"
+	$validColor = "DarkGray"
 	$invalidColor = "Red"
 	$cautionColor = "Yellow"
 }
@@ -149,7 +149,7 @@ Function Watch-PRTitles {
 }
 "Antigua And Barbuda"{
 	$invalidColor = "Red"
-	$validColor = "DarkGrey"
+	$validColor = "DarkGray"
 	$invalidColor = "Blue"
 	$validColor = "White"
 	$cautionColor = "Yellow"
@@ -183,7 +183,7 @@ Function Watch-PRTitles {
 	$cautionColor = "Cyan"
 }
 "Bahamas"{
-	$validColor = "DarkGrey"
+	$validColor = "DarkGray"
 	$invalidColor = "Cyan"
 	$cautionColor = "Yellow"
 }
@@ -196,7 +196,7 @@ Function Watch-PRTitles {
 	$invalidColor = "Red"
 }
 "Barbados"{
-	$validColor = "DarkGrey"
+	$validColor = "DarkGray"
 	$invalidColor = "Blue"
 	$cautionColor = "DarkYellow"
 }
@@ -206,7 +206,7 @@ Function Watch-PRTitles {
 	$cautionColor = "White"
 }
 "Belgium"{
-	$validColor = "DarkGrey"
+	$validColor = "DarkGray"
 	$invalidColor = "Red"
 	$cautionColor = "Yellow"
 }
@@ -239,7 +239,7 @@ Function Watch-PRTitles {
 	$cautionColor = "Yellow"
 }
 "Botswana"{
-	$validColor = "DarkGrey"
+	$validColor = "DarkGray"
 	$invalidColor = "White"
 	$cautionColor = "Cyan"
 }
@@ -254,7 +254,7 @@ Function Watch-PRTitles {
 	$cautionColor = "DarkYellow"
 }
 "Brunei Darussalam"{
-	$validColor = "DarkGrey"
+	$validColor = "DarkGray"
 	$invalidColor = "Red"
 	$validColor = "White"
 	$cautionColor = "Yellow"
@@ -383,7 +383,7 @@ Function Watch-PRTitles {
 }
 "Dominica"{
 	$validColor = "Green"
-	$validColor = "DarkGrey"
+	$validColor = "DarkGray"
 	$validColor = "White"
 	$invalidColor = "Red"
 	$cautionColor = "Yellow"
@@ -399,7 +399,7 @@ Function Watch-PRTitles {
 	$cautionColor = "Yellow"
 }
 "Egypt"{
-	$validColor = "DarkGrey"
+	$validColor = "DarkGray"
 	$invalidColor = "DarkYellow"
 	$invalidColor = "Red"
 	$cautionColor = "White"
@@ -422,12 +422,12 @@ Function Watch-PRTitles {
 	$cautionColor = "Yellow"
 }
 "Estonia"{
-	$validColor = "DarkGrey"
+	$validColor = "DarkGray"
 	$invalidColor = "Blue"
 	$cautionColor = "White"
 }
 "Eswatini"{
-	$validColor = "DarkGrey"
+	$validColor = "DarkGray"
 	$validColor = "White"
 	$invalidColor = "Red"
 	$cautionColor = "Blue"
@@ -477,12 +477,12 @@ Function Watch-PRTitles {
 	$invalidColor = "Red"
 }
 "Germany"{
-	$validColor = "DarkGrey"
+	$validColor = "DarkGray"
 	$invalidColor = "Red"
 	$cautionColor = "DarkYellow"
 }
 "Ghana"{
-	$validColor = "DarkGrey"
+	$validColor = "DarkGray"
 	$validColor = "Green"
 	$invalidColor = "Red"
 	$cautionColor = "Yellow"
@@ -506,13 +506,13 @@ Function Watch-PRTitles {
 	$cautionColor = "Yellow"
 }
 "Guinea-Bissau"{
-	$validColor = "DarkGrey"
+	$validColor = "DarkGray"
 	$validColor = "Green"
 	$invalidColor = "Red"
 	$cautionColor = "Yellow"
 }
 "Guyana"{
-	$validColor = "DarkGrey"
+	$validColor = "DarkGray"
 	$validColor = "Green"
 	$validColor = "White"
 	$invalidColor = "Red"
@@ -561,7 +561,7 @@ Function Watch-PRTitles {
 }
 "Iraq"{
 	$invalidColor = "Red"
-	$validColor = "DarkGrey"
+	$validColor = "DarkGray"
 	$validColor = "Green"
 	$cautionColor = "White"
 }
@@ -580,7 +580,7 @@ Function Watch-PRTitles {
 }
 "Jamaica"{
 	$validColor = "Green"
-	$invalidColor = "DarkGrey"
+	$invalidColor = "DarkGray"
 	$cautionColor = "DarkYellow"
 }
 "Japan"{
@@ -588,7 +588,7 @@ Function Watch-PRTitles {
 	$invalidColor = "Red"
 }
 "Jordan"{
-	$validColor = "DarkGrey"
+	$validColor = "DarkGray"
 	$validColor = "Green"
 	$invalidColor = "Red"
 	$cautionColor = "White"
@@ -598,7 +598,7 @@ Function Watch-PRTitles {
 	$invalidColor = "Blue"
 }
 "Kenya"{
-	$validColor = "DarkGrey"
+	$validColor = "DarkGray"
 	$validColor = "Green"
 	$invalidColor = "Red"
 	$cautionColor = "White"
@@ -611,7 +611,7 @@ Function Watch-PRTitles {
 }
 "Kuwait"{
 	$validColor = "Green"
-	$validColor = "DarkGrey"
+	$validColor = "DarkGray"
 	$invalidColor = "Red"
 	$cautionColor = "White"
 }
@@ -634,7 +634,7 @@ Function Watch-PRTitles {
 	$cautionColor = "White"
 }
 "Lesotho"{
-	$validColor = "DarkGrey"
+	$validColor = "DarkGray"
 	$validColor = "Green"
 	$invalidColor = "Blue"
 	$cautionColor = "White"
@@ -645,7 +645,7 @@ Function Watch-PRTitles {
 	$cautionColor = "Blue"
 }
 "Libya"{
-	$validColor = "DarkGrey"
+	$validColor = "DarkGray"
 	$validColor = "Green"
 	$invalidColor = "Red"
 	$cautionColor = "White"
@@ -676,7 +676,7 @@ Function Watch-PRTitles {
 "Malawi"{
 	$validColor = "Green"
 	$invalidColor = "Red"
-	$cautionColor = "DarkGrey"
+	$cautionColor = "DarkGray"
 }
 "Malaysia"{
 	$validColor = "White"
@@ -746,7 +746,7 @@ Function Watch-PRTitles {
 	$invalidColor = "Red"
 }
 "Mozambique"{
-	$validColor = "DarkGrey"
+	$validColor = "DarkGray"
 	$validColor = "Green"
 	$validColor = "White"
 	$invalidColor = "Red"
@@ -833,7 +833,7 @@ Function Watch-PRTitles {
 	$invalidColor = "Blue"
 }
 "Palestine"{
-	$validColor = "DarkGrey"
+	$validColor = "DarkGray"
 	$validColor = "Green"
 	$invalidColor = "Red"
 	$cautionColor = "White"
@@ -844,7 +844,7 @@ Function Watch-PRTitles {
 	$cautionColor = "Blue"
 }
 "Papua New Guinea"{
-	$validColor = "DarkGrey"
+	$validColor = "DarkGray"
 	$validColor = "White"
 	$invalidColor = "Red"
 	$cautionColor = "Yellow"
@@ -866,7 +866,7 @@ Function Watch-PRTitles {
 }
 "Pitcairn Islands"{
 	$validColor = "Green"
-	$validColor = "DarkGrey"
+	$validColor = "DarkGray"
 	$validColor = "White"
 	$invalidColor = "Red"
 	$invalidColor = "Blue"
@@ -912,7 +912,7 @@ Function Watch-PRTitles {
 	$cautionColor = "White"
 }
 "Saint Lucia"{
-	$validColor = "DarkGrey"
+	$validColor = "DarkGray"
 	$validColor = "White"
 	$invalidColor = "Cyan"
 	$cautionColor = "Yellow"
@@ -933,7 +933,7 @@ Function Watch-PRTitles {
 }
 "Sao Tome And Principe"{
 	$validColor = "Green"
-	$validColor = "DarkGrey"
+	$validColor = "DarkGray"
 	$invalidColor = "Red"
 	$cautionColor = "Yellow"
 }
@@ -973,7 +973,7 @@ Function Watch-PRTitles {
 	$cautionColor = "Blue"
 }
 "Slovenia"{
-	$validColor = "DarkGrey"
+	$validColor = "DarkGray"
 	$validColor = "Green"
 	$invalidColor = "Red"
 	$invalidColor = "Blue"
@@ -990,7 +990,7 @@ Function Watch-PRTitles {
 	$cautionColor = "White"
 }
 "South Africa"{
-	$validColor = "DarkGrey"
+	$validColor = "DarkGray"
 	$validColor = "Green"
 	$invalidColor = "Red"
 	$invalidColor = "Blue"
@@ -999,12 +999,12 @@ Function Watch-PRTitles {
 }
 "South Korea"{
 	$validColor = "White"
-	$validColor = "DarkGrey"
+	$validColor = "DarkGray"
 	$invalidColor = "Red"
 	$cautionColor = "Blue"
 }
 "South Sudan"{
-	$validColor = "DarkGrey"
+	$validColor = "DarkGray"
 	$validColor = "Green"
 	$validColor = "White"
 	$invalidColor = "Blue"
@@ -1021,7 +1021,7 @@ Function Watch-PRTitles {
 	$cautionColor = "DarkYellow"
 }
 "Sudan"{
-	$validColor = "DarkGrey"
+	$validColor = "DarkGray"
 	$validColor = "Green"
 	$invalidColor = "Red"
 	$cautionColor = "White"
@@ -1041,7 +1041,7 @@ Function Watch-PRTitles {
 	$cautionColor = "White"
 }
 "Syrian Arab Republic"{
-	$validColor = "DarkGrey"
+	$validColor = "DarkGray"
 	$validColor = "Green"
 	$invalidColor = "Red"
 	$cautionColor = "White"
@@ -1054,7 +1054,7 @@ Function Watch-PRTitles {
 }
 "Tanzania, United Republic Of"{
 	$validColor = "Green"
-	$validColor = "DarkGrey"
+	$validColor = "DarkGray"
 	$invalidColor = "Blue"
 	$cautionColor = "Yellow"
 }
@@ -1074,7 +1074,7 @@ Function Watch-PRTitles {
 	$cautionColor = "White"
 }
 "Trinidad And Tobago"{
-	$validColor = "DarkGrey"
+	$validColor = "DarkGray"
 	$invalidColor = "Red"
 	$cautionColor = "White"
 }
@@ -1108,7 +1108,7 @@ Function Watch-PRTitles {
 	$invalidColor = "DarkYellow"
 }
 "United Arab Emirates"{
-	$validColor = "DarkGrey"
+	$validColor = "DarkGray"
 	$validColor = "Green"
 	$invalidColor = "Red"
 	$cautionColor = "White"
@@ -1134,7 +1134,7 @@ Function Watch-PRTitles {
 	$cautionColor = "White"
 }
 "Vanuatu"{
-	$validColor = "DarkGrey"
+	$validColor = "DarkGray"
 	$validColor = "Green"
 	$invalidColor = "Red"
 	$cautionColor = "Yellow"
@@ -1149,19 +1149,19 @@ Function Watch-PRTitles {
 	$cautionColor = "Yellow"
 }
 "Yemen"{
-	$validColor = "DarkGrey"
+	$validColor = "DarkGray"
 	$invalidColor = "Red"
 	$cautionColor = "White"
 }
 "Zambia"{
 	$validColor = "Green"
-	$validColor = "DarkGrey"
+	$validColor = "DarkGray"
 	$invalidColor = "Red"
 	$cautionColor = "DarkYellow"
 }
 "Zimbabwe"{
 	$validColor = "Green"
-	$validColor = "DarkGrey"
+	$validColor = "DarkGray"
 	$validColor = "White"
 	$invalidColor = "Red"
 	$cautionColor = "Yellow"
