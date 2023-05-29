@@ -163,7 +163,7 @@ if ($Settings) {
   exit
 }
 
-$ScriptHeader = '# Created with YamlCreate.ps1 v2.2.6'
+$ScriptHeader = '# Created with YamlCreate.ps1 v2.2.7'
 $ManifestVersion = '1.4.0'
 $PSDefaultParameterValues = @{ '*:Encoding' = 'UTF8' }
 $Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
@@ -696,7 +696,7 @@ Function Get-ExeType {
   # The burn header can appear before a certain point in the binary. Check to see if it's present in the first 264 bytes read
   elseif (($bytes -join '') -match ($burn -join '')) { $exeType = 'burn' }
   # If the burn header isn't present in the first 264 bytes, scan through the rest of the binary
-  else {
+  elseif ($ScriptSettings.IdentifyBurnInstallers -eq 'true') {
     $rollingBytes = $bytes[ - $burn.Length..-1]
     for ($i = 265; $i -lt ($fileStream.Length,524280|Measure-Object -Minimum).Minimum; $i++) {
       $rollingBytes = $rollingBytes[1..$rollingBytes.Length]
@@ -1300,7 +1300,7 @@ Function Read-QuickInstallerEntry {
       }
       if (Test-String -not $MSIProductCode -IsNull) {
         $_NewInstaller['ProductCode'] = $MSIProductCode
-      } elseif ( ($_NewInstaller.Keys -contains 'ProductCode') -and ((Get-EffectiveInstallerType $_Installer) -in @('appx'; 'msi'; 'msix'; 'wix'; 'burn'))) {
+      } elseif ( ($_NewInstaller.Keys -contains 'ProductCode') -and ((Get-EffectiveInstallerType $_NewInstaller) -in @('appx'; 'msi'; 'msix'; 'wix'; 'burn'))) {
         $_NewInstaller.Remove('ProductCode')
       }
       # If the installer is msix or appx, try getting the new SignatureSha256
