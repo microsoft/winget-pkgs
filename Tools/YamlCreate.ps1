@@ -98,7 +98,7 @@ if (Get-Command 'git' -ErrorAction SilentlyContinue) {
     if (Get-Command 'winget' -ErrorAction SilentlyContinue) {
       $_menu = @{
         entries       = @('[Y] Upgrade Git'; '*[N] Do not upgrade')
-        Prompt        = 'The version of git installed on your machine does not satisfy the requirement of version >= 2.35.2; Would you like to upgrade?'
+        Prompt        = 'The version of git installed on your machine does not satisfy the requirement of version >= 2.39.1; Would you like to upgrade?'
         HelpText      = "Upgrading will attempt to upgrade git using winget`n"
         DefaultString = ''
       }
@@ -117,10 +117,10 @@ if (Get-Command 'git' -ErrorAction SilentlyContinue) {
             }
           }
         }
-        default { Write-Host; throw [UnmetDependencyException]::new('The version of git installed on your machine does not satisfy the requirement of version >= 2.35.2') }
+        default { Write-Host; throw [UnmetDependencyException]::new('The version of git installed on your machine does not satisfy the requirement of version >= 2.39.1') }
       }
     } else {
-      throw [UnmetDependencyException]::new('The version of git installed on your machine does not satisfy the requirement of version >= 2.35.2')
+      throw [UnmetDependencyException]::new('The version of git installed on your machine does not satisfy the requirement of version >= 2.39.1')
     }
   }
   # Check whether the script is present inside a fork/clone of microsoft/winget-pkgs repository
@@ -163,7 +163,7 @@ if ($Settings) {
   exit
 }
 
-$ScriptHeader = '# Created with YamlCreate.ps1 v2.2.2'
+$ScriptHeader = '# Created with YamlCreate.ps1 v2.2.7'
 $ManifestVersion = '1.4.0'
 $PSDefaultParameterValues = @{ '*:Encoding' = 'UTF8' }
 $Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
@@ -173,13 +173,18 @@ $callingCulture = [Threading.Thread]::CurrentThread.CurrentCulture
 [Threading.Thread]::CurrentThread.CurrentUICulture = 'en-US'
 [Threading.Thread]::CurrentThread.CurrentCulture = 'en-US'
 if (-not ([System.Environment]::OSVersion.Platform -match 'Win')) { $env:TEMP = '/tmp/' }
+$wingetUpstream = 'https://github.com/microsoft/winget-pkgs.git'
 
 if ($ScriptSettings.EnableDeveloperOptions -eq $true -and $null -ne $ScriptSettings.OverrideManifestVersion) {
   $script:UsesPrerelease = $ScriptSettings.OverrideManifestVersion -gt $ManifestVersion
   $ManifestVersion = $ScriptSettings.OverrideManifestVersion
 }
 
-$useDirectSchemaLink = (Invoke-WebRequest "https://aka.ms/winget-manifest.version.$ManifestVersion.schema.json" -UseBasicParsing).BaseResponse.ContentLength -eq -1
+$useDirectSchemaLink = if ($env:GITHUB_ACTIONS -eq $true) {
+  $true
+} else {
+  (Invoke-WebRequest "https://aka.ms/winget-manifest.version.$ManifestVersion.schema.json" -UseBasicParsing).BaseResponse.ContentLength -eq -1
+}
 $SchemaUrls = @{
   version       = if ($useDirectSchemaLink) { "https://raw.githubusercontent.com/microsoft/winget-cli/master/schemas/JSON/manifests/v$ManifestVersion/manifest.version.$ManifestVersion.json" } else { "https://aka.ms/winget-manifest.version.$ManifestVersion.schema.json" }
   defaultLocale = if ($useDirectSchemaLink) { "https://raw.githubusercontent.com/microsoft/winget-cli/master/schemas/JSON/manifests/v$ManifestVersion/manifest.defaultLocale.$ManifestVersion.json" } else { "https://aka.ms/winget-manifest.defaultLocale.$ManifestVersion.schema.json" }
@@ -448,6 +453,7 @@ Function Request-InstallerUrl {
           }
         }
       }
+      $NewInstallerUrl = [System.Web.HttpUtility]::UrlDecode($NewInstallerUrl.Replace('+','%2B'))
       if ($script:_returnValue.StatusCode -ne 409) {
         if (Test-String $NewInstallerUrl -MaxLength $Patterns.InstallerUrlMaxLength -MatchPattern $Patterns.InstallerUrl -NotNull) {
           $script:_returnValue = [ReturnValue]::Success()
@@ -632,6 +638,81 @@ Function Test-IsWix {
   return $false
 }
 
+Function Get-ExeType {
+  Param
+  (
+    [Parameter(Mandatory = $true)]
+    [String] $Path
+  )
+
+  $nsis = @(
+    77; 90; -112; 0; 3; 0; 0; 0; 4; 0; 0; 0; -1; -1; 0; 0;
+    -72; 0; 0; 0; 0; 0; 0; 0; 64; 0; 0; 0; 0; 0; 0; 0; 0; 0;
+    0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0;
+    0; 0; 0; 0; 0; 0; -40; 0; 0; 0; 14; 31; -70; 14; 0; -76;
+    9; -51; 33; -72; 1; 76; -51; 33; 84; 104; 105; 115;
+    32; 112; 114; 111; 103; 114; 97; 109; 32; 99; 97;
+    110; 110; 111; 116; 32; 98; 101; 32; 114; 117; 110;
+    32; 105; 110; 32; 68; 79; 83; 32; 109; 111; 100;
+    101; 46; 13; 13; 10; 36; 0; 0; 0; 0; 0; 0; 0; -83; 49;
+    8; -127; -23; 80; 102; -46; -23; 80; 102; -46; -23;
+    80; 102; -46; 42; 95; 57; -46; -21; 80; 102; -46;
+    -23; 80; 103; -46; 76; 80; 102; -46; 42; 95; 59; -46;
+    -26; 80; 102; -46; -67; 115; 86; -46; -29; 80; 102;
+    -46; 46; 86; 96; -46; -24; 80; 102; -46; 82; 105; 99;
+    104; -23; 80; 102; -46; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0;
+    0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 80; 69; 0; 0; 76;
+    1; 5; 0
+  )
+
+  $inno = @(
+    77; 90; 80; 0; 2; 0; 0; 0; 4; 0; 15; 0; 255; 255; 0; 0;
+    184; 0; 0; 0; 0; 0; 0; 0; 64; 0; 26; 0; 0; 0; 0; 0; 0; 0;
+    0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0;
+    0; 0; 0; 0; 0; 0; 0; 1; 0; 0; 186; 16; 0; 14; 31; 180; 9;
+    205; 33; 184; 1; 76; 205; 33; 144; 144; 84; 104; 105;
+    115; 32; 112; 114; 111; 103; 114; 97; 109; 32; 109;
+    117; 115; 116; 32; 98; 101; 32; 114; 117; 110; 32;
+    117; 110; 100; 101; 114; 32; 87; 105; 110; 51; 50;
+    13; 10; 36; 55; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0;
+    0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0;
+    0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0;
+    0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0;
+    0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0;
+    0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0;
+    0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0;
+    0; 0; 80; 69; 0; 0; 76; 1; 10; 0)
+
+  $burn = @(46; 119; 105; 120; 98; 117; 114; 110)
+
+  $exeType = $null
+
+  $fileStream = New-Object -TypeName System.IO.FileStream -ArgumentList ($Path, [System.IO.FileMode]::Open, [System.IO.FileAccess]::Read)
+  $reader = New-Object -TypeName System.IO.BinaryReader -ArgumentList $fileStream
+  $bytes = $reader.ReadBytes(264)
+
+  if (($bytes[0..223] -join '') -eq ($nsis -join '')) { $exeType = 'nullsoft' }
+  elseif (($bytes -join '') -eq ($inno -join '')) { $exeType = 'inno' }
+  # The burn header can appear before a certain point in the binary. Check to see if it's present in the first 264 bytes read
+  elseif (($bytes -join '') -match ($burn -join '')) { $exeType = 'burn' }
+  # If the burn header isn't present in the first 264 bytes, scan through the rest of the binary
+  elseif ($ScriptSettings.IdentifyBurnInstallers -eq 'true') {
+    $rollingBytes = $bytes[ - $burn.Length..-1]
+    for ($i = 265; $i -lt ($fileStream.Length,524280|Measure-Object -Minimum).Minimum; $i++) {
+      $rollingBytes = $rollingBytes[1..$rollingBytes.Length]
+      $rollingBytes += $reader.ReadByte()
+      if (($rollingBytes -join '') -match ($burn -join '')) {
+        $exeType = 'burn'
+        break
+      }
+    }
+  }
+
+  $reader.Dispose()
+  $fileStream.Dispose()
+  return $exeType
+}
+
 Function Get-UserSavePreference {
   switch ($ScriptSettings.SaveToTemporaryFolder) {
     'always' { $_Preference = '0' }
@@ -680,6 +761,8 @@ Function Get-PathInstallerType {
   }
   if ($Path -match '\.appx(bundle){0,1}$') { return 'appx' }
   if ($Path -match '\.zip$') { return 'zip' }
+  if ($Path -match '\.exe$') { return Get-ExeType($Path) }
+
   return $null
 }
 
@@ -694,6 +777,18 @@ Function Get-UriArchitecture {
   if ($URI -match '\b((win|ia)32)|(x{0,1}86)\b') { return 'x86' }
   if ($URI -match '\b(arm|aarch)64\b') { return 'arm64' }
   if ($URI -match '\barm\b') { return 'arm' }
+  return $null
+}
+
+Function Get-UriScope {
+  Param
+  (
+    [Parameter(Mandatory = $true, Position = 0)]
+    [string] $URI
+  )
+
+  if ($URI -match '\buser\b') { return 'user' }
+  if ($URI -match '\bmachine\b') { return 'machine' }
   return $null
 }
 
@@ -748,17 +843,17 @@ Function Read-NestedInstaller {
       if ($_EffectiveType -eq 'portable') {
         do {
           Write-Host -ForegroundColor 'Red' $script:_returnValue.ErrorString()
-          Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the portable command alias'
-          if (Test-String -not $_Alias -IsNull) { Write-Host -ForegroundColor 'DarkGray' "Old Variable: $_Alias" }
+          Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the portable command alias'
+          if (Test-String -not "$($_InstallerFile['PortableCommandAlias'])" -IsNull) { Write-Host -ForegroundColor 'DarkGray' "Old Variable: $($_InstallerFile['PortableCommandAlias'])" }
           $_Alias = Read-Host -Prompt 'PortableCommandAlias' | TrimString
           if (Test-String -not $_Alias -IsNull) { $_InstallerFile['PortableCommandAlias'] = $_Alias }
 
-          if (Test-String $_Alias -MinLength $Patterns.PortableCommandAliasMinLength -MaxLength $Patterns.PortableCommandAliasMaxLength) {
+          if (Test-String $_InstallerFile['PortableCommandAlias'] -MinLength $Patterns.PortableCommandAliasMinLength -MaxLength $Patterns.PortableCommandAliasMaxLength -AllowNull) {
             $script:_returnValue = [ReturnValue]::Success()
           } else {
             $script:_returnValue = [ReturnValue]::LengthError($Patterns.PortableCommandAliasMinLength, $Patterns.PortableCommandAliasMaxLength)
           }
-          if ($_Alias -in @($_NestedInstallerFiles.PortableCommandAlias)) {
+          if ("$($_InstallerFile['PortableCommandAlias'])" -in @($_NestedInstallerFiles.PortableCommandAlias)) {
             $script:_returnValue = [ReturnValue]::new(400, 'Alias Collision', 'Aliases must be unique', 2)
           }
         } until ($script:_returnValue.StatusCode -eq [ReturnValue]::Success().StatusCode)
@@ -825,6 +920,8 @@ Function Read-InstallerEntry {
       if ($_) { $_Installer['InstallerType'] = $_ | Select-Object -First 1 }
       Get-UriArchitecture -URI $_Installer['InstallerUrl'] -OutVariable _ | Out-Null
       if ($_) { $_Installer['Architecture'] = $_ | Select-Object -First 1 }
+      Get-UriScope -URI $_Installer['InstallerUrl'] -OutVariable _ | Out-Null
+      if ($_) { $_Installer['Scope'] = $_ | Select-Object -First 1 }
       if ([System.Environment]::OSVersion.Platform -match 'Win' -and ($script:dest).EndsWith('.msi')) {
         $ProductCode = ([string](Get-MSIProperty -MSIPath $script:dest -Parameter 'ProductCode') | Select-String -Pattern '{[A-Z0-9]{8}-([A-Z0-9]{4}-){3}[A-Z0-9]{12}}').Matches.Value
       } elseif ([System.Environment]::OSVersion.Platform -match 'Unix' -and (Get-Item $script:dest).Name.EndsWith('.msi')) {
@@ -1056,16 +1153,18 @@ Function Read-InstallerEntry {
       }
     } until ($script:_returnValue.StatusCode -eq [ReturnValue]::Success().StatusCode)
 
-    # Request installer scope
-    $_menu = @{
-      entries       = @('[M] Machine'; '[U] User'; '*[N] No idea')
-      Prompt        = '[Optional] Enter the Installer Scope'
-      DefaultString = 'N'
-    }
-    switch ( Invoke-KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString']) {
-      'M' { $_Installer['Scope'] = 'machine' }
-      'U' { $_Installer['Scope'] = 'user' }
-      default { }
+    # Manual Entry of Scope
+    if (Test-String $_Installer['Scope'] -IsNull) {
+      $_menu = @{
+        entries       = @('[M] Machine'; '[U] User'; '*[N] No idea')
+        Prompt        = '[Optional] Enter the Installer Scope'
+        DefaultString = 'N'
+      }
+      switch ( Invoke-KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString']) {
+        'M' { $_Installer['Scope'] = 'machine' }
+        'U' { $_Installer['Scope'] = 'user' }
+        default { }
+      }
     }
 
     # Request upgrade behavior
@@ -1183,11 +1282,11 @@ Function Read-QuickInstallerEntry {
         # Here we also want to pass any exceptions through for potential debugging
         throw [System.Net.WebException]::new('The file could not be downloaded. Try running the script again', $_.Exception)
       }
-      # Check that MSI's aren't actually WIX
+      # Check that MSI's aren't actually WIX, and EXE's aren't NSIS, INNO or BURN
       Write-Host -ForegroundColor 'Green' "Installer Downloaded!`nProcessing installer data. . . "
-      if ($_NewInstaller['InstallerType'] -eq 'msi') {
+      if ($_NewInstaller['InstallerType'] -in @('msi'; 'exe')) {
         $DetectedType = Get-PathInstallerType $script:dest
-        if ($DetectedType -in @('msi'; 'wix')) { $_NewInstaller['InstallerType'] = $DetectedType }
+        if ($DetectedType -in @('msi'; 'wix'; 'nullsoft'; 'inno'; 'burn')) { $_NewInstaller['InstallerType'] = $DetectedType }
       }
       # Get the Sha256
       $_NewInstaller['InstallerSha256'] = (Get-FileHash -Path $script:dest -Algorithm SHA256).Hash
@@ -1201,7 +1300,7 @@ Function Read-QuickInstallerEntry {
       }
       if (Test-String -not $MSIProductCode -IsNull) {
         $_NewInstaller['ProductCode'] = $MSIProductCode
-      } elseif ( ($_NewInstaller.Keys -contains 'ProductCode') -and ((Get-EffectiveInstallerType $_Installer) -in @('appx'; 'msi'; 'msix'; 'wix'; 'burn'))) {
+      } elseif ( ($_NewInstaller.Keys -contains 'ProductCode') -and ((Get-EffectiveInstallerType $_NewInstaller) -in @('appx'; 'msi'; 'msix'; 'wix'; 'burn'))) {
         $_NewInstaller.Remove('ProductCode')
       }
       # If the installer is msix or appx, try getting the new SignatureSha256
@@ -1816,6 +1915,11 @@ Function Read-PRBody {
           $_showMenu = $false
           $PrBodyContentReply += @($_line)
         }
+      }
+
+      '*only modifies one*' {
+        $PrBodyContentReply += @($_line.Replace('[ ]', '[X]'))
+        $_showMenu = $false
       }
 
       Default {
@@ -2676,16 +2780,17 @@ Switch ($script:Option) {
     Write-Host 'Updating Manifest Information. This may take a while...' -ForegroundColor Blue
     $_NewInstallers = @();
     foreach ($_Installer in $script:OldInstallerManifest.Installers) {
+      $_Installer['InstallerUrl'] = [System.Web.HttpUtility]::UrlDecode($_Installer.InstallerUrl.Replace('+', '%2B'))
       try {
         $script:dest = Get-InstallerFile -URI $_Installer.InstallerUrl -PackageIdentifier $PackageIdentifier -PackageVersion $PackageVersion
       } catch {
         # Here we also want to pass any exceptions through for potential debugging
         throw [System.Net.WebException]::new('The file could not be downloaded. Try running the script again', $_.Exception)
       }
-      # Check that MSI's aren't actually WIX
-      if ($_Installer['InstallerType'] -eq 'msi') {
+      # Check that MSI's aren't actually WIX, and EXE's aren't NSIS, INNO or BURN
+      if ($_Installer['InstallerType'] -in @('msi'; 'exe')) {
         $DetectedType = Get-PathInstallerType $script:dest
-        if ($DetectedType -in @('msi'; 'wix')) { $_Installer['InstallerType'] = $DetectedType }
+        if ($DetectedType -in @('msi'; 'wix'; 'nullsoft'; 'inno'; 'burn')) { $_Installer['InstallerType'] = $DetectedType }
       }
       # Get the Sha256
       $_Installer['InstallerSha256'] = (Get-FileHash -Path $script:dest -Algorithm SHA256).Hash
@@ -2833,6 +2938,15 @@ if ($PromptSubmit -eq '0') {
     git config --add core.safecrlf false
   }
 
+  # check if upstream exists
+  ($remoteUpstreamUrl = $(git remote get-url upstream)) *> $null
+  if ($remoteUpstreamUrl -and $remoteUpstreamUrl -ne $wingetUpstream) {
+    git remote set-url upstream $wingetUpstream
+  } elseif (!$remoteUpstreamUrl) {
+    Write-Host -ForegroundColor 'Yellow' 'Upstream does not exist. Permanently adding https://github.com/microsoft/winget-pkgs as remote upstream'
+    git remote add upstream $wingetUpstream
+  }
+
   # Fetch the upstream branch, create a commit onto the detached head, and push it to a new branch
   git fetch upstream master --quiet
   git switch -d upstream/master
@@ -2872,6 +2986,10 @@ if ($PromptSubmit -eq '0') {
   } else {
     git config --unset core.safecrlf
   }
+  if ($remoteUpstreamUrl -and $remoteUpstreamUrl -ne $wingetUpstream) {
+    git remote set-url upstream $remoteUpstreamUrl
+  }
+
 } else {
   Write-Host
   [Threading.Thread]::CurrentThread.CurrentUICulture = $callingUICulture
