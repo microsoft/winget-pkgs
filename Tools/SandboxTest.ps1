@@ -235,6 +235,12 @@ Write-Host @'
 Add-AppxPackage -Path '$($desktopAppInstaller.pathInSandbox)' -DependencyPath '$($vcLibsUwp.pathInSandbox)','$($uiLibsUwp.pathInSandbox)'
 
 Write-Host @'
+--> Disabling safety warning when running installer
+'@
+New-Item -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Policies\Associations' | Out-Null
+New-ItemProperty -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Policies\Associations' -Name 'ModRiskFileTypes' -Type 'String' -Value '.bat;.exe;.reg;.vbs;.chm;.msi;.js;.cmd' | Out-Null
+
+Write-Host @'
 Tip: you can type 'Update-EnvironmentVariables' to update your environment variables, such as after installing a new software.
 '@
 
