@@ -191,6 +191,18 @@ configuration:
                       label: Needs-Feedback-Hub
                   - removeLabel:
                       label: Needs-Author-Feedback
+              # Retry Automerge
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[rR]etry[\s-][aA]utomerge'
+                      isRegex: True
+                  - hasLabel:
+                      label: Validation-Completed
+                  - hasLabel:
+                      label: Moderator-Approved
+                then:
+                  - enableAutoMerge:
+                      mergeMethod: Squash
           # If the payload is a Pull_Request_Review and an approval, add the Moderator-Approved label
           - if:
               - payloadType: Pull_Request_Review
@@ -199,7 +211,5 @@ configuration:
             then:
               - addLabel:
                   label: Moderator-Approved
-            description: >-
-              Add the Moderator-Approved label when a moderator approves a PR
 onFailure:
 onSuccess:
