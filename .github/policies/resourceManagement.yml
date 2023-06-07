@@ -1,121 +1,12 @@
-id: 
+id:
 name: GitOps.PullRequestIssueManagement
 description: GitOps.PullRequestIssueManagement primitive
-owner: 
+owner:
 resource: repository
 disabled: false
-where: 
+where:
 configuration:
   resourceManagementConfiguration:
-    scheduledSearches:
-    - description: 
-      frequencies:
-      - hourly:
-          hour: 6
-      filters:
-      - isPullRequest
-      - isOpen
-      - hasLabel:
-          label: No-Recent-Activity
-      - noActivitySince:
-          days: 7
-      - hasLabel:
-          label: Needs-Author-Feedback
-      actions:
-      - closeIssue
-    - description: 
-      frequencies:
-      - hourly:
-          hour: 6
-      filters:
-      - isPullRequest
-      - isOpen
-      - hasLabel:
-          label: Needs-Author-Feedback
-      - noActivitySince:
-          days: 7
-      - isNotLabeledWith:
-          label: No-Recent-Activity
-      - isNotLabeledWith:
-          label: Blocking-Issue
-      actions:
-      - addLabel:
-          label: No-Recent-Activity
-      - addReply:
-          reply: >-
-            Hello @${issueAuthor},
-
-
-            This pull request has been automatically marked as stale because it has been marked as requiring author feedback but has not had any activity for **7 days**. It will be closed if no further activity occurs **within 7 days of this comment**.
-
-
-            Template: msftbot/noRecentActivity
-    - description: 
-      frequencies:
-      - hourly:
-          hour: 3
-      filters:
-      - isIssue
-      - isOpen
-      - hasLabel:
-          label: Needs-Author-Feedback
-      - hasLabel:
-          label: No-Recent-Activity
-      - noActivitySince:
-          days: 7
-      - isNotLabeledWith:
-          label: Blocking-Issue
-      actions:
-      - closeIssue
-    - description: 
-      frequencies:
-      - hourly:
-          hour: 3
-      filters:
-      - isIssue
-      - isOpen
-      - noActivitySince:
-          days: 7
-      - isNotLabeledWith:
-          label: No-Recent-Activity
-      - isNotLabeledWith:
-          label: Blocking-Issue
-      - hasLabel:
-          label: Needs-Author-Feedback
-      actions:
-      - addLabel:
-          label: No-Recent-Activity
-      - addReply:
-          reply: >-
-            Hello @${issueAuthor},
-
-
-            This issue has been automatically marked as stale because it has been marked as requiring author feedback but has not had any activity for **7 days**. It will be closed if no further activity occurs **within 7 days of this comment**.
-
-
-            Template: msftbot/noRecentActivity
-    - description: 
-      frequencies:
-      - hourly:
-          hour: 3
-      filters:
-      - isIssue
-      - isOpen
-      - hasLabel:
-          label: Resolution-Duplicate
-      - noActivitySince:
-          days: 1
-      actions:
-      - addReply:
-          reply: >-
-            Hello @${issueAuthor},
-
-
-            This issue has been marked as duplicate and has not had any activity for **1 day**. It will be closed for housekeeping purposes.
-
-
-            Template: msftbot/duplicate/warning
-      - closeIssue
     eventResponderTasks:
     - if:
       - payloadType: Pull_Request
@@ -141,7 +32,7 @@ configuration:
           - PR Author
       - addLabel:
           label: Needs-Author-Feedback
-      description: 
+      description:
     - if:
       - payloadType: Pull_Request
       - or:
@@ -178,7 +69,7 @@ configuration:
           - PR Author
       - addLabel:
           label: Needs-Author-Feedback
-      description: 
+      description:
     - if:
       - payloadType: Pull_Request
       - or:
@@ -201,7 +92,7 @@ configuration:
           - PR Author
       - addLabel:
           label: Needs-Author-Feedback
-      description: 
+      description:
     - if:
       - payloadType: Pull_Request
       - or:
@@ -224,7 +115,7 @@ configuration:
           label: Azure-Pipeline-Passed
       - addLabel:
           label: Needs-Author-Feedback
-      description: 
+      description:
     - if:
       - payloadType: Pull_Request
       - or:
@@ -248,7 +139,7 @@ configuration:
           - PR Author
       - addLabel:
           label: Needs-Author-Feedback
-      description: 
+      description:
     - if:
       - payloadType: Pull_Request
       - or:
@@ -280,14 +171,14 @@ configuration:
           - PR Author
       - addLabel:
           label: Needs-Author-Feedback
-      description: 
+      description:
     - if:
       - payloadType: Pull_Request
       - isAction:
           action: Opened
       then:
       - addCodeFlowLink
-      description: 
+      description:
     - if:
       - payloadType: Pull_Request_Review
       - isAction:
@@ -308,7 +199,7 @@ configuration:
 
 
             Template: msftbot/changesRequested
-      description: 
+      description:
     - if:
       - payloadType: Issue_Comment
       - isActivitySender:
@@ -323,7 +214,7 @@ configuration:
           label: Needs-Author-Feedback
       - addLabel:
           label: Needs-Attention
-      description: 
+      description:
     - if:
       - payloadType: Pull_Request_Review
       - isActivitySender:
@@ -338,7 +229,7 @@ configuration:
           label: Needs-Author-Feedback
       - addLabel:
           label: Needs-Attention
-      description: 
+      description:
     - if:
       - payloadType: Pull_Request
       - not:
@@ -349,7 +240,7 @@ configuration:
       then:
       - removeLabel:
           label: No-Recent-Activity
-      description: 
+      description:
     - if:
       - payloadType: Issue_Comment
       - hasLabel:
@@ -357,7 +248,7 @@ configuration:
       then:
       - removeLabel:
           label: No-Recent-Activity
-      description: 
+      description:
     - if:
       - payloadType: Pull_Request
       - hasLabel:
@@ -365,14 +256,14 @@ configuration:
       then:
       - enableAutoMerge:
           mergeMethod: Squash
-      description: 
+      description:
     - if:
       - payloadType: Pull_Request
       - labelRemoved:
           label: Validation-Completed
       then:
       - disableAutoMerge
-      description: 
+      description:
     - if:
       - payloadType: Pull_Request
       - or:
@@ -400,7 +291,7 @@ configuration:
           label: Needs-Attention
       - addLabel:
           label: Needs-Author-Feedback
-      description: 
+      description:
     - if:
       - payloadType: Pull_Request
       - or:
@@ -425,7 +316,7 @@ configuration:
           label: Needs-Attention
       - addLabel:
           label: Needs-Author-Feedback
-      description: 
+      description:
     - if:
       - payloadType: Pull_Request
       - labelAdded:
@@ -449,7 +340,7 @@ configuration:
           label: Needs-Attention
       - addLabel:
           label: Needs-Author-Feedback
-      description: 
+      description:
     - if:
       - payloadType: Pull_Request
       - or:
@@ -474,7 +365,7 @@ configuration:
           label: Needs-Attention
       - addLabel:
           label: Needs-Author-Feedback
-      description: 
+      description:
     - if:
       - payloadType: Pull_Request
       - or:
@@ -510,7 +401,8 @@ configuration:
 
 
             Template: msftbot/validationCompleted
-      description: 
+      description:
+      triggerOnOwnActions: true
     - if:
       - payloadType: Pull_Request
       - labelAdded:
@@ -533,7 +425,7 @@ configuration:
             Template: msftbot/validationError/smartScreen
       - addLabel:
           label: Needs-SmartScreen-Investigation
-      description: 
+      description:
     - if:
       - payloadType: Pull_Request
       - or:
@@ -566,7 +458,7 @@ configuration:
           label: Needs-Attention
       - addLabel:
           label: Needs-Author-Feedback
-      description: 
+      description:
     - if:
       - payloadType: Pull_Request
       - or:
@@ -593,7 +485,7 @@ configuration:
           label: Needs-Attention
       - addLabel:
           label: Needs-Author-Feedback
-      description: 
+      description:
     - if:
       - payloadType: Pull_Request
       - labelAdded:
@@ -620,7 +512,7 @@ configuration:
           label: Needs-Attention
       - addLabel:
           label: Needs-Author-Feedback
-      description: 
+      description:
     - if:
       - payloadType: Pull_Request
       - labelAdded:
@@ -644,7 +536,7 @@ configuration:
             Template: msftbot/blockingIssue/accessDeniedError
       - removeLabel:
           label: Needs-Attention
-      description: 
+      description:
     - if:
       - payloadType: Issue_Comment
       - commentContains:
@@ -689,7 +581,7 @@ configuration:
           label: Needs-Attention
       - addLabel:
           label: Blocking-Issue
-      description: 
+      description:
     - if:
       - payloadType: Issue_Comment
       - commentContains:
@@ -732,7 +624,7 @@ configuration:
           label: Needs-Author-Feedback
       - addLabel:
           label: Blocking-Issue
-      description: 
+      description:
     - if:
       - payloadType: Issue_Comment
       - commentContains:
@@ -773,7 +665,7 @@ configuration:
       then:
       - addLabel:
           label: Dependencies
-      description: 
+      description:
     - if:
       - payloadType: Issue_Comment
       - commentContains:
@@ -814,7 +706,7 @@ configuration:
       then:
       - addLabel:
           label: Dependencies
-      description: 
+      description:
     - if:
       - payloadType: Issue_Comment
       - commentContains:
@@ -859,7 +751,7 @@ configuration:
           label: Needs-Attention
       - addLabel:
           label: Area-External
-      description: 
+      description:
     - if:
       - payloadType: Issue_Comment
       - commentContains:
@@ -902,7 +794,7 @@ configuration:
           label: Installer-Issue
       - addLabel:
           label: Area-External
-      description: 
+      description:
     - if:
       - payloadType: Issue_Comment
       - commentContains:
@@ -949,7 +841,7 @@ configuration:
           label: Installer-Issue
       - addLabel:
           label: Area-External
-      description: 
+      description:
     - if:
       - payloadType: Issue_Comment
       - commentContains:
@@ -990,7 +882,7 @@ configuration:
       then:
       - addLabel:
           label: Area-External
-      description: 
+      description:
     - if:
       - payloadType: Issue_Comment
       - commentContains:
@@ -1031,7 +923,7 @@ configuration:
       then:
       - addLabel:
           label: Interactive-Only-Installer
-      description: 
+      description:
     - if:
       - payloadType: Issue_Comment
       - commentContains:
@@ -1072,7 +964,7 @@ configuration:
       then:
       - addLabel:
           label: Interactive-Only-Installer
-      description: 
+      description:
     - if:
       - payloadType: Issue_Comment
       - commentContains:
@@ -1131,7 +1023,7 @@ configuration:
           label: Needs-Author-Feedback
       - addLabel:
           label: Resolution-Duplicate
-      description: 
+      description:
     - if:
       - payloadType: Issue_Comment
       - commentContains:
@@ -1176,7 +1068,7 @@ configuration:
           label: Needs-Attention
       - removeLabel:
           label: Moderator-Approved
-      description: 
+      description:
     - if:
       - payloadType: Issue_Comment
       - commentContains:
@@ -1224,7 +1116,7 @@ configuration:
           label: Needs-Feedback-Hub
       - removeLabel:
           label: Needs-Author-Feedback
-      description: 
+      description:
     - if:
       - payloadType: Issues
       - commentContains:
@@ -1272,7 +1164,7 @@ configuration:
           label: Needs-Feedback-Hub
       - removeLabel:
           label: Needs-Author-Feedback
-      description: 
+      description:
     - if:
       - payloadType: Issue_Comment
       - commentContains:
@@ -1313,7 +1205,7 @@ configuration:
       then:
       - addLabel:
           label: zip-binary
-      description: 
+      description:
     - if:
       - payloadType: Issue_Comment
       - commentContains:
@@ -1354,7 +1246,7 @@ configuration:
       then:
       - addLabel:
           label: zip-binary
-      description: 
+      description:
     - if:
       - payloadType: Issue_Comment
       - commentContains:
@@ -1412,7 +1304,7 @@ configuration:
 
 
             Template: msftbot/manualReview
-      description: 
+      description:
     - if:
       - payloadType: Issue_Comment
       - commentContains:
@@ -1453,7 +1345,7 @@ configuration:
       then:
       - addLabel:
           label: Needs-CLA
-      description: 
+      description:
     - if:
       - payloadType: Issues
       - hasLabel:
@@ -1464,7 +1356,7 @@ configuration:
       then:
       - removeLabel:
           label: Help-Wanted
-      description: 
+      description:
     - if:
       - payloadType: Issues
       - isLabeled
@@ -1488,7 +1380,7 @@ configuration:
           label: Needs-Feedback-Hub
       - addLabel:
           label: Needs-Author-Feedback
-      description: 
+      description:
     - if:
       - payloadType: Issue_Comment
       - commentContains:
@@ -1515,7 +1407,7 @@ configuration:
             Template: msftbot/feedbackHub
       - addLabel:
           label: Needs-Author-Feedback
-      description: 
+      description:
     - if:
       - payloadType: Issues
       - or:
@@ -1525,7 +1417,7 @@ configuration:
       then:
       - addLabel:
           label: Needs-Triage
-      description: 
+      description:
     - if:
       - payloadType: Pull_Request
       - labelAdded:
@@ -1555,7 +1447,7 @@ configuration:
           label: Needs-Attention
       - addLabel:
           label: Needs-Author-Feedback
-      description: 
+      description:
     - if:
       - payloadType: Pull_Request
       - labelAdded:
@@ -1581,7 +1473,7 @@ configuration:
           label: Needs-Attention
       - addLabel:
           label: Needs-Author-Feedback
-      description: 
+      description:
     - if:
       - payloadType: Pull_Request
       - or:
@@ -1613,7 +1505,7 @@ configuration:
             Template: msftbot/validationError/internalError
       - addLabel:
           label: Needs-Attention
-      description: 
+      description:
     - if:
       - payloadType: Pull_Request
       - hasLabel:
@@ -1640,7 +1532,7 @@ configuration:
           teamId: 85579
           primary: False
           secondary: True
-      description: 
+      description:
     - if:
       - payloadType: Pull_Request
       - labelAdded:
@@ -1667,7 +1559,7 @@ configuration:
           label: Azure-Pipeline-Passed
       - addLabel:
           label: Needs-Author-Feedback
-      description: 
+      description:
     - if:
       - payloadType: Pull_Request
       - not:
@@ -1697,7 +1589,7 @@ configuration:
           label: Manifest-Path-Error
       - addLabel:
           label: Needs-Author-Feedback
-      description: 
+      description:
     - if:
       - payloadType: Issue_Comment
       - or:
@@ -1706,7 +1598,7 @@ configuration:
       then:
       - removeLabel:
           label: No-Recent-Activity
-      description: 
+      description:
     - if:
       - payloadType: Pull_Request
       - labelAdded:
@@ -1729,7 +1621,7 @@ configuration:
           label: Needs-Attention
       - addLabel:
           label: Needs-Author-Feedback
-      description: 
+      description:
     - if:
       - payloadType: Pull_Request
       - labelAdded:
@@ -1753,7 +1645,7 @@ configuration:
             Template: msftbot/validationError/urls/indirect
       - addLabel:
           label: Needs-Author-Feedback
-      description: 
+      description:
     - if:
       - payloadType: Issue_Comment
       - commentContains:
@@ -1765,7 +1657,7 @@ configuration:
       then:
       - addLabel:
           label: Publish-Pipeline-Succeeded
-      description: 
+      description:
     - if:
       - payloadType: Pull_Request
       - isActivitySender:
@@ -1777,7 +1669,7 @@ configuration:
       then:
       - approvePullRequest:
           comment: ''
-      description: 
+      description:
     - if:
       - payloadType: Pull_Request
       - labelAdded:
@@ -1800,7 +1692,7 @@ configuration:
           label: Needs-Author-Feedback
       - assignTo:
           author: True
-      description: 
+      description:
     - if:
       - payloadType: Pull_Request
       - or:
@@ -1829,7 +1721,7 @@ configuration:
           teamId: 85579
           primary: False
           secondary: True
-      description: 
+      description:
     - if:
       - payloadType: Pull_Request
       - or:
@@ -1948,7 +1840,7 @@ configuration:
           label: Manifest-AppsAndFeaturesVersion-Error
       - removeLabel:
           label: Validation-Shell-Execute
-      description: 
+      description:
     - if:
       - payloadType: Issue_Comment
       - or:
@@ -2078,7 +1970,7 @@ configuration:
           label: Manifest-AppsAndFeaturesVersion-Error
       - removeLabel:
           label: Validation-Shell-Execute
-      description: 
+      description:
     - if:
       - payloadType: Pull_Request
       - hasLabel:
@@ -2090,7 +1982,7 @@ configuration:
       - addLabel:
           label: Retry-1
       - reopenIssue
-      description: 
+      description:
     - if:
       - payloadType: Pull_Request_Review
       - isReviewState:
@@ -2130,7 +2022,7 @@ configuration:
       then:
       - addLabel:
           label: Moderator-Approved
-      description: 
+      description:
     - if:
       - payloadType: Issues
       - isAction:
@@ -2138,7 +2030,7 @@ configuration:
       then:
       - removeLabel:
           label: Needs-Triage
-      description: 
+      description:
     - if:
       - payloadType: Issue_Comment
       - commentContains:
@@ -2169,7 +2061,7 @@ configuration:
           label: Needs-Author-Feedback
       - removeLabel:
           label: Needs-Feedback-Hub
-      description: 
+      description:
     - if:
       - payloadType: Pull_Request
       - labelAdded:
@@ -2191,7 +2083,7 @@ configuration:
 
 
             Template: msftbot/requiresApproval/moderator
-      description: 
+      description:
     - if:
       - payloadType: Pull_Request
       - or:
@@ -2208,7 +2100,7 @@ configuration:
           teamId: 85579
           primary: False
           secondary: True
-      description: 
+      description:
     - if:
       - payloadType: Pull_Request
       - or:
@@ -2245,7 +2137,7 @@ configuration:
           teamId: 85579
           primary: False
           secondary: True
-      description: 
+      description:
     - if:
       - payloadType: Pull_Request
       - or:
@@ -2270,7 +2162,7 @@ configuration:
           teamId: 85579
           primary: False
           secondary: True
-      description: 
+      description:
     - if:
       - payloadType: Pull_Request
       - labelAdded:
@@ -2282,7 +2174,7 @@ configuration:
           comment: ''
       - addLabel:
           label: Validation-Completed
-      description: 
+      description:
     - if:
       - payloadType: Pull_Request
       - labelAdded:
@@ -2307,7 +2199,8 @@ configuration:
           label: Needs-Author-Feedback
       - removeLabel:
           label: Needs-Attention
-      description: 
+      description:
+      triggerOnOwnActions: true
     - if:
       - payloadType: Pull_Request
       - labelAdded:
@@ -2336,7 +2229,8 @@ configuration:
           label: Needs-Attention
       - addLabel:
           label: Needs-Author-Feedback
-      description: 
+      description:
+      triggerOnOwnActions: true
     - if:
       - payloadType: Issues
       - labelAdded:
@@ -2361,7 +2255,8 @@ configuration:
             Template: msftbot/blockingIssue/dependencySupport
       - addLabel:
           label: Blocking-Issue
-      description: 
+      description:
+      triggerOnOwnActions: true
     - if:
       - payloadType: Pull_Request
       - labelAdded:
@@ -2390,7 +2285,8 @@ configuration:
             Template: msftbot/blockingIssue/interactiveOnlyInstall
       - addLabel:
           label: Blocking-Issue
-      description: 
+      description:
+      triggerOnOwnActions: true
     - if:
       - payloadType: Issues
       - labelAdded:
@@ -2415,7 +2311,8 @@ configuration:
             Template: msftbot/blockingIssue/interactiveOnlyInstall
       - addLabel:
           label: Blocking-Issue
-      description: 
+      description:
+      triggerOnOwnActions: true
     - if:
       - payloadType: Pull_Request
       - labelAdded:
@@ -2444,7 +2341,8 @@ configuration:
           label: Needs-Author-Feedback
       - removeLabel:
           label: Needs-Attention
-      description: 
+      description:
+      triggerOnOwnActions: true
     - if:
       - payloadType: Issues
       - labelAdded:
@@ -2469,7 +2367,8 @@ configuration:
             Template: msftbot/blockingIssue/zipBinary
       - addLabel:
           label: Blocking-Issue
-      description: 
+      description:
+      triggerOnOwnActions: true
     - if:
       - payloadType: Pull_Request
       - labelAdded:
@@ -2484,7 +2383,8 @@ configuration:
 
 
             Template: msftbot/needsCLA
-      description: 
+      description:
+      triggerOnOwnActions: true
     - if:
       - payloadType: Pull_Request
       - or:
@@ -2503,7 +2403,7 @@ configuration:
       then:
       - addLabel:
           label: Blocking-Issue
-      description: 
+      description:
     - if:
       - payloadType: Pull_Request
       - labelAdded:
@@ -2528,7 +2428,8 @@ configuration:
             Template: msftbot/blockingIssue/hardwareDependency
       - addLabel:
           label: Blocking-Issue
-      description: 
+      description:
+      triggerOnOwnActions: true
     - if:
       - payloadType: Pull_Request
       - labelAdded:
@@ -2547,7 +2448,7 @@ configuration:
           teamId: 85579
           primary: False
           secondary: True
-      description: 
+      description:
     - if:
       - payloadType: Pull_Request
       - labelAdded:
@@ -2566,7 +2467,7 @@ configuration:
           author: True
       - addLabel:
           label: Needs-Author-Feedback
-      description: 
+      description:
     - if:
       - payloadType: Pull_Request
       - or:
@@ -2592,7 +2493,7 @@ configuration:
           teamId: 85579
           primary: False
           secondary: True
-      description: 
+      description:
     - if:
       - payloadType: Pull_Request
       - labelAdded:
@@ -2615,7 +2516,7 @@ configuration:
           - PR Author
       - addLabel:
           label: Needs-Author-Feedback
-      description: 
+      description:
     - if:
       - payloadType: Pull_Request
       - labelAdded:
@@ -2638,6 +2539,6 @@ configuration:
           - PR Author
       - addLabel:
           label: Needs-Author-Feedback
-      description: 
-onFailure: 
-onSuccess: 
+      description:
+onFailure:
+onSuccess:
