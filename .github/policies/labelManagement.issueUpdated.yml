@@ -56,6 +56,42 @@ configuration:
               mergeMethod: Squash
         # The policy service should trigger even when the update was initiated by the policy service
         triggerOnOwnActions: true
+      - description: Approve pull requests that have completed validation and have been approved by a moderator
+        if:
+          - payloadType: Pull_Request
+          - or:
+              - and:
+                  - hasLabel:
+                      label: Validation-Completed
+                  - labelAdded:
+                      label: Moderator-Approved
+              - and:
+                  - labelAdded:
+                      label: Validation-Completed
+                  - hasLabel:
+                      label: Moderator-Approved
+          - isOpen
+          - and:
+              - not:
+                  hasLabel:
+                    label: Blocking-Issue
+              - not:
+                  hasLabel:
+                    label: Needs-Author-Feedback
+              - not:
+                  hasLabel:
+                    label: Needs-Attention
+        then:
+          - approvePullRequest:
+              comment: >-
+                Hello ${issueAuthor},
+
+                Validation has completed.
+
+
+                Template: msftbot/validationCompleted
+        # The policy service should trigger even when the update was initiated by the policy service
+        triggerOnOwnActions: true
       - description: Remove "Help-Wanted" label when an issue goes into PR
         if:
           - payloadType: Issues
@@ -101,6 +137,7 @@ configuration:
               label: Needs-Attention # This will automatically assign the ICM Users
       - description: >-
           When changes are requested on a pull request
+          * Disable automerge
           * Add a reply notifying the issue author
           * Assign to the author
           * Label with Needs-Author-Feedback
@@ -111,6 +148,7 @@ configuration:
           - isReviewState:
               reviewState: Changes_requested
         then:
+          - disableAutoMerge
           - addReply:
               reply: >-
                 Hello @${issueAuthor},
