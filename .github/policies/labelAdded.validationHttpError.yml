@@ -1,6 +1,6 @@
-id: labelAdded.urlValidationError
+id: labelAdded.validationHttpError
 name: GitOps.PullRequestIssueManagement
-description: Handlers when "URL-Validation-Error" label is added
+description: Handlers when "Validation-HTTP-Error" label is added
 owner:
 resource: repository
 disabled: false
@@ -9,34 +9,34 @@ configuration:
   resourceManagementConfiguration:
     eventResponderTasks:
       - description: >-
-          When the label "URL-Validation-Error" is added to a pull request
-          * Add the PR specific reply notifying the issue author
-          * Assign to the Author
+          When the label "Validation-HTTP-Error" is added to a pull request
+          * Add a reply notifying the issue author
+          * Assign to the author
           * Label with Needs-Author-Feedback
-          * Remove the Needs-Attention Label
-          * Remove the Azure-Pipeline-Passed Label
+          * Remove Azure-Pipeline-Passed label
+          * Remove Needs-Attention label
         if:
           - payloadType: Pull_Request
           - labelAdded:
-              label: URL-Validation-Error
+              label: Validation-HTTP-Error
         then:
           - addReply:
               reply: >-
                 Hello @${issueAuthor},
 
 
-                The package manager bot determined there was an issue with some of the URLs included in the manifest file. Please check the pull request for more details and make sure the urls are correct.
+                The validation code has detected one of the URLs in the manifest is not using the HTTPS protocol. Please update all URLs in the manifest to use HTTPS instead.
 
 
-                Template: msftbot/validationError/urls/smartScreen
+                Template: msftbot/validationError/urls/https
           - assignTo:
               author: True
           - addLabel:
               label: Needs-Author-Feedback
           - removeLabel:
-              label: Needs-Attention
-          - removeLabel:
               label: Azure-Pipeline-Passed
+          - removeLabel:
+              label: Needs-Attention
         # The policy service should trigger even when the label was added by the policy service
         triggerOnOwnActions: true
 onFailure:
