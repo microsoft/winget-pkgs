@@ -1,6 +1,6 @@
 id: labelAdded.pullRequestError
 name: GitOps.PullRequestIssueManagement
-description: GitOps.PullRequestIssueManagement primitive
+description: Handlers when "Pull-Request-Error" label is added
 owner:
 resource: repository
 disabled: false
@@ -9,41 +9,38 @@ configuration:
   resourceManagementConfiguration:
     eventResponderTasks:
       - description: >-
-          When the label "Pull-Request-Error" is added to a pull request
+          When the label "Internal-Error-*" is added to a pull request
           * Add a reply notifying the issue author
-          * Assign to the author
-          * Label with Needs-Author-Feedback
+          * Label with Needs-Attention
         if:
           - payloadType: Pull_Request
-          - or:
-              - labelAdded:
-                  label: Internal-Error
-              - labelAdded:
-                  label: Internal-Error-PR
-              - labelAdded:
-                  label: Internal-Error-Manifest
-              - labelAdded:
-                  label: Internal-Error-URL
-              - labelAdded:
-                  label: Internal-Error-Domain
-              - labelAdded:
-                  label: Internal-Error-Keyword-Policy
-              - labelAdded:
-                  label: Internal-Error-Static-Scan
-              - labelAdded:
-                  label: Internal-Error-Dynamic-Scan
+          - labelAdded:
+              label: Pull-Request-Error
         then:
           - addReply:
               reply: >-
                 Hello @${issueAuthor},
 
 
-                The pull request encountered an internal error and has been assigned to a developer to investigate.
+                The package manager bot determined there was an issue with the pull request. Make sure the manifest files are under the manifests\partition\publisher\appname\version directory and only one package version is being modified in your PR. The partition of the path must be the first letter of the publisher in lower-case.
 
 
-                Template: msftbot/validationError/internalError
+                Example:
+
+                Path: manifests / m / Microsoft / WindowsTerminal / 1.6.10571.0 / WindowsTerminal.yaml
+
+
+                For details on the error, see the details link below in the build pipeline.
+
+
+                You may also try the [Windows Package Manager Manifest Creator](https://github.com/microsoft/winget-create)
+
+
+                Template: msftbot/validationError/pullRequest
+          - assignTo:
+              author: True
           - addLabel:
-              label: Needs-Attention # This will automatically assign the ICM Users
+              label: Needs-Author-Feedback
         # The policy service should trigger even when the label was added by the policy service
         triggerOnOwnActions: true
 onFailure:

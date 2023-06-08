@@ -1,6 +1,8 @@
-id: labelManagement.issueOpened
+id: labelManagement.issueUpdated
 name: GitOps.PullRequestIssueManagement
-description: GitOps.PullRequestIssueManagement primitive
+description: >-
+  Handlers for when an issue is updated and not closed
+  This primarily includes handlers for comments, reviews, and re-runs
 owner:
 resource: repository
 disabled: false
@@ -24,6 +26,8 @@ configuration:
         then:
           - removeLabel:
               label: No-Recent-Activity
+        # The policy service should not trigger itself here, or else the label would be removed immediately after being added
+        triggerOnOwnActions: False
       - description: Remove "Help-Wanted" label when an issue goes into PR
         if:
           - payloadType: Issues
