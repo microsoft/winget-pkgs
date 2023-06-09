@@ -90,4 +90,6 @@ Moderators are often the first to see and triage new issues, and so they have th
 * `Needs-CLA`
 * `Zip-Binary`
 
-> Note: Adding `Interactive-Only-Installer`, `Dependencies` or `Zip-Binary` will automatically add `Blocking-Issue`
+> **Note**: 
+> * Adding `Dependencies`, `Hardware`, `Interactive-Only-Installer`,  or `Zip-Binary` will automatically add `Blocking-Issue`
+> * Adding `Needs-Attention` will automatically assign the repo maintainers
