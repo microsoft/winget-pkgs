@@ -77,13 +77,19 @@ When duplicate issues are raised, moderators are able to use this special variat
 
 Moderators are often the first to see and triage new issues, and so they have the ability to apply certain labels to pull requests and issues. Below is a list of labels that moderators can apply:
 
+* `Area-Bots`
 * `Area-External`
+* `Area-Matching`
+* `Area-Validation-Pipeline`
 * `Blocking-Issue`
 * `Dependencies`
-* `Needs-Attention`
-* `Needs-CLA`
+* `Hardware`
 * `Installer-Issue`
 * `Interactive-Only-Installer`
+* `Needs-Attention`
+* `Needs-CLA`
 * `Zip-Binary`
 
-> Note: Adding `Interactive-Only-Installer`, `Dependencies` or `Zip-Binary` will automatically add `Blocking-Issue`
+> **Note**: 
+> * Adding `Dependencies`, `Hardware`, `Interactive-Only-Installer`,  or `Zip-Binary` will automatically add `Blocking-Issue`
+> * Adding `Needs-Attention` to a PR will automatically assign the repository maintainers
