@@ -1,0 +1,68 @@
+id: scheduledSearch.cleanClosedIssues
+name: GitOps.PullRequestIssueManagement
+description: Ensure old labels are removed from closed issues
+owner:
+resource: repository
+disabled: false
+where:
+configuration:
+  resourceManagementConfiguration:
+    scheduledSearches:
+      - description: >-
+          Search for PR where -
+          * Pull Request is not Open
+          * Pull request has has a label which should have been removed
+
+          Then -
+          * Remove the labels
+        frequencies:
+          - weekday:
+              day: Friday
+              time: 11:00
+        filters:
+          - isPullRequest
+          - not: isOpen
+          - or:
+              - hasLabel:
+                  label: Needs-Attention
+              - hasLabel:
+                  label: Needs-Author-Feedback
+        actions:
+          - removeLabel:
+              label: Needs-Attention
+          - removeLabel:
+              label: Needs-Author-Feedback
+      - description: >-
+          Search for Issues where -
+          * Issue is not Open
+          * Issue has a label which should have been removed
+
+          Then -
+          * Remove the labels
+        frequencies:
+          - weekday:
+              day: Friday
+              time: 11:00
+        filters:
+          - isIssue
+          - not: isOpen
+          - or:
+              - hasLabel:
+                  label: Needs-Triage
+              - hasLabel:
+                  label: Needs-Attention
+              - hasLabel:
+                  label: Needs-Author-Feedback
+              - hasLabel:
+                  label: Help-Wanted
+        actions:
+          - removeLabel:
+              label: Needs-Triage
+          - removeLabel:
+              label: Needs-Attention
+          - removeLabel:
+              label: Needs-Author-Feedback
+          - removeLabel:
+              label: Help-Wanted
+onFailure:
+onSuccess:
