@@ -35,7 +35,7 @@ Installers:                     	# The list of package installers
     NestedInstallerType:					# The installer type when InstallerType is an archive type
     NestedInstallerFiles:					# Details about the installers when InstallerType is an archive type
       - RelativeFilePath:					# The relative path to the nested installer file
-        PortableCommandAlias:			# The command alias to be used for calling the package. Only applies when NestedInstallerType is 'portable'
+        PortableCommandAlias:			# Optional command alias to be used for calling the package. Only applies when NestedInstallerType is 'portable'
     Scope:                      	# Optional installer scope
     InstallModes:              		# Optional installer modes
     InstallerSwitches:         	 	# Optional installer switches
@@ -292,7 +292,7 @@ ManifestVersion: 1.4.0
 <details>
  <summary><b>PortableCommandAlias</b> - The command alias to be used for calling the package</summary>
 
- **Required Field**
+ **Optional Field**
 
  The alias which is added to the PATH for calling the package from the command line.
 
@@ -557,6 +557,11 @@ ManifestVersion: 1.4.0
   **Optional Field**
 
   This key represents which scope a package is required to be executed under. Some packages require user level execution while others require administrative level execution.
+
+* elevationRequired - Must be run from a shell that is running in an administrative context (e.g - Admin user using powershell/terminal/cmd with "Run as Administrator")
+* elevationProhibited - Must be run from a shell that is not running in an administrative context
+* elevatesSelf - If called from a non-administrative context, will request elevation. If called from an administrative context, may or may not request elevation.
+
 </details>
 
 <details>
