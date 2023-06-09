@@ -215,6 +215,17 @@ configuration:
                       label: Needs-Feedback-Hub
                   - removeLabel:
                       label: Needs-Author-Feedback
+              # Reopen with reason <>;
+              - if:
+                  - commentContains:
+                      pattern: "[rR]eopen\\s+[wW]ith\\s+[rR]eason\\s*:[\\w\\s\\-\\(\\)\\[\\]\\{\\}\\\\\\/.+=@\\#$%&^*`~|'\",<>?]*(?=;)"
+                      isRegex: True
+                then:
+                  - reopenIssue
+                  - removeLabel:
+                      label: Resolution-Duplicate
+                  - removeLabel:
+                      label: No-Recent-Activity
           # If the payload is a Pull_Request_Review and an approval, add the Moderator-Approved label
           - if:
               - payloadType: Pull_Request_Review
