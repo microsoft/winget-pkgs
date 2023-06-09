@@ -92,4 +92,4 @@ Moderators are often the first to see and triage new issues, and so they have th
 
 > **Note**: 
 > * Adding `Dependencies`, `Hardware`, `Interactive-Only-Installer`,  or `Zip-Binary` will automatically add `Blocking-Issue`
-> * Adding `Needs-Attention` will automatically assign the repo maintainers
+> * Adding `Needs-Attention` to a PR will automatically assign the repository maintainers
