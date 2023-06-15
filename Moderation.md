@@ -87,9 +87,10 @@ Moderators are often the first to see and triage new issues, and so they have th
 * `Installer-Issue`
 * `Interactive-Only-Installer`
 * `Needs-Attention`
+* `Needs-Author-Feedback`
 * `Needs-CLA`
 * `Zip-Binary`
 
-> **Note**: 
+> **Note**:
 > * Adding `Dependencies`, `Hardware`, `Interactive-Only-Installer`,  or `Zip-Binary` will automatically add `Blocking-Issue`
 > * Adding `Needs-Attention` to a PR will automatically assign the repository maintainers
