@@ -1,0 +1,34 @@
+id: labelAdded.authorNotAuthorized
+name: GitOps.PullRequestIssueManagement
+description: Handlers when "Author-Not-Authorized" label is added
+owner:
+resource: repository
+disabled: false
+where:
+configuration:
+  resourceManagementConfiguration:
+    eventResponderTasks:
+      - description: >-
+          When the label "Author-Not-Authorized" is added to a pull request
+          * Add the PR specific reply notifying the issue author
+          * Label with Needs-Attention
+        if:
+          - payloadType: Pull_Request
+          - labelAdded:
+              label: Author-Not-Authorized
+        then:
+          - addReply:
+              reply: >-
+                ${issueAuthor},
+
+
+                Changes to one or more files in your PR require authorization to modify. This PR has been assigned to our on call staff to evaluate.
+
+
+                Template: msftbot/requiresApproval/MSFT
+          - addLabel:
+              label: Needs-Attention # This will automatically assign the ICM Users
+        # The policy service should trigger even when the label was added by the policy service
+        triggerOnOwnActions: true
+onFailure:
+onSuccess:

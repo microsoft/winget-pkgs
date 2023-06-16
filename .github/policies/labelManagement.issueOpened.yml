@@ -1,0 +1,90 @@
+id: labelManagement.issueOpened
+name: GitOps.PullRequestIssueManagement
+description: Handlers for when an issue is first opened
+owner:
+resource: repository
+disabled: false
+where:
+configuration:
+  resourceManagementConfiguration:
+    eventResponderTasks:
+      - description: Add CodeFlow link to new PRs
+        if:
+          - payloadType: Pull_Request
+          - isAction:
+              action: Opened
+        then:
+          - addCodeFlowLink
+      - description: Add Needs-Triage to new issues
+        if:
+          - payloadType: Issues
+          - isAction:
+              action: Opened
+        then:
+          - addLabel:
+              label: Needs-Triage
+      - description: >-
+          When a pull request is opened, if the files match DevOpsPipelineDefinitions/*
+          * Add a message to the author
+          * Assign to the author
+          * Add the "Needs-Author-Feedback" label
+        if:
+          - payloadType: Pull_Request
+          - filesMatchPattern:
+              pattern: DevOpsPipelineDefinitions/*
+          - or:
+              - activitySenderHasPermission:
+                  permission: Read
+              - activitySenderHasPermission:
+                  permission: None
+        then:
+          - addReply:
+              reply: >-
+                Hello @${issueAuthor},
+
+
+                Sorry we cannot process ${number} because you are changing validation-pipeline.yaml. Please remove that file from your PR. If you would like to discuss changes to validation-pipeline.yml, please file an issue.
+
+
+                Template: msftbot/pipelineModified
+          - assignTo:
+              author: True
+          - addLabel:
+              label: Needs-Author-Feedback
+      - description: >-
+          When a pull request is opened, if the files are Yaml files, are not in the Manifests folder, and are not in DevOpsPipelineDefinitions
+          * Add a message to the author
+          * Assign to the author
+          * Add the "Needs-Author-Feedback" label
+          * Add the "Manifest-Path-Error" label
+        if:
+          - payloadType: Pull_Request
+          - not:
+              filesMatchPattern:
+                pattern: ^manifests/*
+          - not:
+              filesMatchPattern:
+                pattern: DevOpsPipelineDefinitions
+          - filesMatchPattern:
+              pattern: ^.*\.yaml
+        then:
+          - addReply:
+              reply: >-
+                Hello @${issueAuthor},
+
+
+                It looks like this pull request is missing the manifests folder. For example: manifests\<first letter of the publisher in lower-case>\<publisher>\<application>\<version>\*.yaml
+
+
+                Please review the path of your manifest file and resubmit.
+
+
+                Template: msftbot/validationError/manifest/missingManifestsFolder
+          - assignTo:
+              author: True
+          - addLabel:
+              label: Needs-Author-Feedback
+          - addLabel:
+              label: Manifest-Path-Error
+onFailure:
+onSuccess:
