@@ -8,7 +8,7 @@ where:
 configuration:
   resourceManagementConfiguration:
     eventResponderTasks:
-      - description: Remove "Needs-Triage" when an issue is closed
+      - description: Remove labels when an issue is closed
         if:
           - payloadType: Issues
           - isAction:
@@ -16,5 +16,23 @@ configuration:
         then:
           - removeLabel:
               label: Needs-Triage
+          - removeLabel:
+              label: Needs-Attention
+          - removeLabel:
+              label: Needs-Author-Feedback
+          - removeLabel:
+              label: Help-Wanted
+        ## TODO: Unassign author
+      - description: Remove labels when a pull request is closed
+        if:
+          - payloadType: Pull_Request
+          - isAction:
+              action: Closed
+        then:
+          - removeLabel:
+              label: Needs-Attention
+          - removeLabel:
+              label: Needs-Author-Feedback
+        ## TODO: Unassign ICM Users
 onFailure:
 onSuccess:

@@ -28,6 +28,76 @@ configuration:
               label: No-Recent-Activity
         # The policy service should not trigger itself here, or else the label would be removed immediately after being added
         triggerOnOwnActions: False
+      - description: Try re-enabling automerge on every PR event
+        if:
+          - or:
+            - payloadType: Pull_Request
+            - payloadType: Pull_Request_Review
+            - payloadType: Pull_Request_Review_Comment
+            - payloadType: Issue_Comment
+          - not:
+              isAction:
+                action: Closed
+          - hasLabel:
+              label: Validation-Completed
+          - hasLabel:
+              label: Moderator-Approved
+          - hasLabel:
+              label: Azure-Pipeline-Passed
+          - and:
+            - not:
+                hasLabel:
+                  label: Needs-Attention
+            - not:
+                hasLabel:
+                  label: Needs-Author-Feedback
+        then:
+          - enableAutoMerge:
+              mergeMethod: Squash
+        # The policy service should trigger even when the update was initiated by the policy service
+        triggerOnOwnActions: true
+      - description: Clean email replies on every comment
+        if:
+        - payloadType: Issue_Comment
+        then:
+        - cleanEmailReply
+      - description: Approve pull requests that have completed validation and have been approved by a moderator
+        if:
+          - payloadType: Pull_Request
+          - or:
+              - and:
+                  - hasLabel:
+                      label: Validation-Completed
+                  - labelAdded:
+                      label: Moderator-Approved
+              - and:
+                  - labelAdded:
+                      label: Validation-Completed
+                  - hasLabel:
+                      label: Moderator-Approved
+          - isOpen
+          - and:
+              - not:
+                  hasLabel:
+                    label: Blocking-Issue
+              - not:
+                  hasLabel:
+                    label: Needs-Author-Feedback
+              - not:
+                  hasLabel:
+                    label: Needs-Attention
+        then:
+          - approvePullRequest:
+              comment: ""
+          - addReply: >-
+                Hello ${issueAuthor},
+
+                Validation has completed.
+
+
+                Template: msftbot/validationCompleted
+        # The policy service should trigger even when the update was initiated by the policy service
+        triggerOnOwnActions: true
       - description: Remove "Help-Wanted" label when an issue goes into PR
         if:
           - payloadType: Issues
@@ -73,6 +143,7 @@ configuration:
               label: Needs-Attention # This will automatically assign the ICM Users
       - description: >-
           When changes are requested on a pull request
+          * Disable automerge
           * Add a reply notifying the issue author
           * Assign to the author
           * Label with Needs-Author-Feedback
@@ -83,6 +154,7 @@ configuration:
           - isReviewState:
               reviewState: Changes_requested
         then:
+          - disableAutoMerge
           - addReply:
               reply: >-
                 Hello @${issueAuthor},
