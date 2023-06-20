@@ -1,0 +1,42 @@
+id: scheduledSearch.markBlockedIssues
+name: GitOps.PullRequestIssueManagement
+description: Synchronize blocking labels to any linked issues
+owner:
+resource: repository
+disabled: false
+where:
+configuration:
+  resourceManagementConfiguration:
+    scheduledSearches:
+      - description: >-
+          Search for PR where -
+          * Pull Request is Open
+          * Pull request has the label "Blocking-Issue"
+
+          Then -
+          * Synchronize specific labels to any linked issues
+        frequencies:
+          - daily:
+              time: 11:00
+        filters:
+          - isPullRequest
+          - isOpen
+          - hasLabel:
+              label: Blocking-Issue
+        actions:
+          - labelSync:
+              pattern: Blocking-Issue
+          - labelSync:
+              pattern: Hardware
+          - labelSync:
+              pattern: Dependencies
+          - labelSync:
+              pattern: zip-binary
+          - labelSync:
+              pattern: Area-External
+          - labelSync:
+              pattern: Installer-Issue
+          - labelSync:
+              pattern: Interactive-Only-Installer
+onFailure:
+onSuccess:
