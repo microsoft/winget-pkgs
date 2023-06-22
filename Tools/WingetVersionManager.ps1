@@ -24,7 +24,7 @@ if ($Latest) {
     $releasesAPIResponse = @($releasesAPIResponse | Select-Object -First 1)
 }
 
-if ($releasesAPIResponse.Length -lt 1) {
+if ($releasesAPIResponse.Count -lt 1) {
     Write-Output 'No releases found matching criteria'
     exit 1
 }
