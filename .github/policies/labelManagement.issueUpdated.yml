@@ -28,7 +28,7 @@ configuration:
               label: No-Recent-Activity
         # The policy service should not trigger itself here, or else the label would be removed immediately after being added
         triggerOnOwnActions: False
-      - description: Try re-enabling automerge on every PR event
+      - description: Try re-enabling automerge on every PR event for packages
         if:
           - or:
             - payloadType: Pull_Request
@@ -44,6 +44,32 @@ configuration:
               label: Moderator-Approved
           - hasLabel:
               label: Azure-Pipeline-Passed
+          - and:
+            - not:
+                hasLabel:
+                  label: Needs-Attention
+            - not:
+                hasLabel:
+                  label: Needs-Author-Feedback
+        then:
+          - enableAutoMerge:
+              mergeMethod: Squash
+        # The policy service should trigger even when the update was initiated by the policy service
+        triggerOnOwnActions: true
+      - description: Try re-enabling automerge on every PR event for Validation-Metadata
+        if:
+          - or:
+            - payloadType: Pull_Request
+            - payloadType: Pull_Request_Review
+            - payloadType: Pull_Request_Review_Comment
+            - payloadType: Issue_Comment
+          - not:
+              isAction:
+                action: Closed
+          - hasLabel:
+              label: Validation-Completed
+          - hasLabel:
+              label: Validation-Metadata
           - and:
             - not:
                 hasLabel:
