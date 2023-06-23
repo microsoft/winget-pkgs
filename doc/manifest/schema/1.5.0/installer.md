@@ -189,6 +189,14 @@ ManifestVersion: 1.5.0
  **Required Field**
 
  This key represents the hardware architecture targeted by the installer. The Windows Package Manager will attempt to determine the best architecture to use. If emulation is available and the native hardware architecture does not have a supported installer, the emulated architecture may be used.
+
+ Available architectures:
+ * x86
+ * x64
+ * arm
+ * arm64
+ * neutral
+
 </details>
 
 <details>
