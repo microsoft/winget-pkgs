@@ -1,0 +1,102 @@
+id: flaggedPackages
+name: GitOps.PullRequestIssueManagement
+description: Add keywords to this file to restrict packages that have been removed from the repository for a reason
+owner:
+resource: repository
+disabled: false
+where:
+configuration:
+  resourceManagementConfiguration:
+    eventResponderTasks:
+      - if:
+          - payloadType: Pull_Request
+          - isAction:
+              action: Opened
+          - or:
+              # Estmob SendAnywhere
+              - titleContains:
+                  pattern: Estmob
+                  isRegex: False
+              - bodyContains:
+                  pattern: Estmob
+                  isRegex: False
+              - titleContains:
+                  pattern: SendAnywhere
+                  isRegex: False
+              - bodyContains:
+                  pattern: SendAnywhere
+                  isRegex: False
+              # Filezilla Client/Server
+              - titleContains:
+                  pattern: Filezilla
+                  isRegex: False
+              - bodyContains:
+                  pattern: Filezilla
+                  isRegex: False
+              # CheatEngine
+              - titleContains:
+                  pattern: CheatEngine
+                  isRegex: False
+              - bodyContains:
+                  pattern: CheatEngine
+                  isRegex: False
+              # GitCredentialManager
+              - titleContains:
+                  pattern: GitCredentialManager
+                  isRegex: False
+              - bodyContains:
+                  pattern: GitCredentialManager
+                  isRegex: False
+              # ranpha.LavFiltersMegamix
+              - titleContains:
+                  pattern: ranhpa
+                  isRegex: False
+              - bodyContains:
+                  pattern: ranhpa
+                  isRegex: False
+              - titleContains:
+                  pattern: LavFiltersMegamix
+                  isRegex: False
+              - bodyContains:
+                  pattern: LavFiltersMegamix
+                  isRegex: False
+              # Mariocube
+              - titleContains:
+                  pattern: Mariocube
+                  isRegex: False
+              - bodyContains:
+                  pattern: Mariocube
+                  isRegex: False
+        then:
+          - addLabel:
+              label: Package-Flagged
+          - addReply:
+              reply: >-
+                @${issueAuthor},
+
+
+                The package in your PR appears to be flagged. See the table below for more information. If it is not clear why you are seeing this message, please open a [new issue](https://github.com/microsoft/winget-pkgs/issues/new) inquiring about the status of the package.
+
+                | Package Name | Block Reason | Reference |
+
+                | ----- | ----- | ----- |
+
+                | EstMob SendAnywhere | Installs PUA when machine language is ko-KR | #47643 |
+
+                | Filezilla Client | Redistribution not allowed by license | #78578 |
+
+                | Filezilla Server | Redistribution not allowed by license | #78578 |
+
+                | CheatEngine | Installs PUA | #61767 |
+
+                | Git GitCredentialManager | Publisher has requested removal | #100542 |
+
+                | Ranpha LavFiltersMegamix | Package is known to be an unofficial redistritbution which hijacks the official package | #95155 |
+
+                | Mariocube - Any | Publisher is known to distribute packages unofficially with misrepresentation of origin | #109796 / #103191 (comment) |
+
+
+
+                Template: msftbot/validationError/packageFlagged
+onFailure:
+onSuccess:
