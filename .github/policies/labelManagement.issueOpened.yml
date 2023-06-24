@@ -15,6 +15,13 @@ configuration:
               action: Opened
         then:
           - addCodeFlowLink
+          # If the user is a first-time contributor, add the Needs-CLA Label
+          - if:
+              - activitySenderHasAssociation:
+                  association: FIRST_TIME_CONTRIBUTOR
+            then:
+              - addLabel:
+                  label: Needs-CLA
       - description: Add Needs-Triage to new issues
         if:
           - payloadType: Issues
