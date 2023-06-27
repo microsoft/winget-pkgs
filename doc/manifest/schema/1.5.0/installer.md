@@ -189,6 +189,14 @@ ManifestVersion: 1.5.0
  **Required Field**
 
  This key represents the hardware architecture targeted by the installer. The Windows Package Manager will attempt to determine the best architecture to use. If emulation is available and the native hardware architecture does not have a supported installer, the emulated architecture may be used.
+
+ Available architectures:
+ * x86
+ * x64
+ * arm
+ * arm64
+ * neutral
+
 </details>
 
 <details>
@@ -557,6 +565,10 @@ ManifestVersion: 1.5.0
   **Optional Field**
 
   This key represents which scope a package is required to be executed under. Some packages require user level execution while others require administrative level execution.
+
+* elevationRequired - Must be run from a shell that is running in an administrative context (e.g - Admin user using powershell/terminal/cmd with "Run as Administrator")
+* elevationProhibited - Must be run from a shell that is not running in an administrative context
+* elevatesSelf - If called from a non-administrative context, will request elevation. If called from an administrative context, may or may not request elevation.
 </details>
 
 <details>
