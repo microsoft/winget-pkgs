@@ -24,7 +24,7 @@ if ($Latest) {
     $releasesAPIResponse = @($releasesAPIResponse | Select-Object -First 1)
 }
 
-if ($releasesAPIResponse.Length -lt 1) {
+if ($releasesAPIResponse.Count -lt 1) {
     Write-Output 'No releases found matching criteria'
     exit 1
 }
@@ -41,7 +41,8 @@ if ($Clean){
 }
 
 $shaFile = New-TemporaryFile
-Invoke-WebRequest -Uri $shaFileUrl -OutFile $shaFile
+$webclient = [System.Net.WebClient]::new()
+$webclient.DownloadFile($shaFileUrl, $shaFile)
 $sha256 = Get-Content $shaFile -Tail 1
 Remove-Item $shaFile -Force
 
@@ -60,7 +61,7 @@ foreach ($file in $existingFiles) {
 if (!$msixFile){
     $outputPath = Join-Path $versionFolder -ChildPath "winget_$releaseTag.msix"
     Write-Output "Downloading version $releaseTag to $outputPath"
-    Invoke-WebRequest -Uri $msixFileUrl -OutFile $outputPath
+    $webclient.DownloadFile($msixFileUrl, $outputPath)
     $file = Get-Item $outputPath
     if ((Get-FileHash $file).Hash.ToLower() -ne $sha256) {
         Write-Output 'Download failed. Installer hashes do not match.'
