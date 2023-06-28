@@ -5,15 +5,16 @@ Param
 (
     [switch] $Clean,
     [switch] $Prerelease,
-    [switch] $Latest,
+    [bool] $Latest = $True,
     [Parameter(Mandatory = $false)]
     [string] $Version
 )
 
 $releasesAPIResponse = Invoke-RestMethod 'https://api.github.com/repos/microsoft/winget-cli/releases?per_page=100'
 
-if (!$Prerelease) {
-    $releasesAPIResponse = $releasesAPIResponse.Where({ !$_.prerelease })
+$releasesAPIResponse = switch ($Prerelease) {
+    ($True) {$releasesAPIResponse.Where({$_.prerelease})}
+    ($False) {$releasesAPIResponse.Where({!$_.prerelease})}
 }
 
 if ($PSBoundParameters.Keys -contains 'Version') {
