@@ -57,12 +57,14 @@ Occasionally the automatic validation runs into an issue which is transient, or 
 
 The bots which help keep the repository clean sometimes make mistakes or or sometimes a moderator misclicks and accidentally requests changes. This can add the `Needs-Author-Feedback` or `Needs-Attention` labels to pull requests that don't need them. Moderators can remove these labels without re-running the pipelines to allow for the PR to be re-reviewed and merged.
 
-### Closing Pull Requests and Issues
+### Closing or Re-opening Pull Requests and Issues
 
 > Trigger: Comment `Close with reason: <reason>;` on a pull request or issue
 
-In order to help keep the issues queues clean, moderators are able to close pull requests and issues. Closing can only be reverted by repository admins and should be used only with good reason.
-> Note: When closing pull requests or issues, the ending semicolon is required. Using a URL in the reason is not supported
+> Trigger: Comment `Reopen with reason: <reason>;` on a pull request or issue
+
+In order to help keep the issues queues clean, moderators are able to close/re-open pull requests and issues. It is important to exercise discretion when closing/re-opening, ensuring that it is done with good reason.
+> Note: The ending semicolon is required. Using a URL in the reason is not supported
 
 ### Marking Issues as Duplicate
 
@@ -77,13 +79,20 @@ When duplicate issues are raised, moderators are able to use this special variat
 
 Moderators are often the first to see and triage new issues, and so they have the ability to apply certain labels to pull requests and issues. Below is a list of labels that moderators can apply:
 
+* `Area-Bots`
 * `Area-External`
+* `Area-Matching`
+* `Area-Validation-Pipeline`
 * `Blocking-Issue`
 * `Dependencies`
-* `Needs-Attention`
-* `Needs-CLA`
+* `Hardware`
 * `Installer-Issue`
 * `Interactive-Only-Installer`
+* `Needs-Attention`
+* `Needs-Author-Feedback`
+* `Needs-CLA`
 * `Zip-Binary`
 
-> Note: Adding `Interactive-Only-Installer`, `Dependencies` or `Zip-Binary` will automatically add `Blocking-Issue`
+> **Note**:
+> * Adding `Dependencies`, `Hardware`, `Interactive-Only-Installer`,  or `Zip-Binary` will automatically add `Blocking-Issue`
+> * Adding `Needs-Attention` to a PR will automatically assign the repository maintainers
