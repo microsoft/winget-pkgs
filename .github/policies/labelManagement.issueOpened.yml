@@ -93,5 +93,18 @@ configuration:
               label: Needs-Author-Feedback
           - addLabel:
               label: Manifest-Path-Error
+      - description: >-
+          When a pull request is opened, if the content contains "Hash Mismatch" or "Hash does not match" (case insensitive)
+          * Add the Update-Request label
+        if:
+          - payloadType: Issues
+          - isAction:
+              action: Opened
+          - bodyContains:
+              pattern: (?i)hash[\s-](mismatch|does\snot\smatch)
+              isRegex: True
+        then:
+          - addLabel:
+              label: Update-Request
 onFailure:
 onSuccess:
