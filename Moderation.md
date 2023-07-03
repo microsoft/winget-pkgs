@@ -91,6 +91,7 @@ Moderators are often the first to see and triage new issues, and so they have th
 * `Needs-Attention`
 * `Needs-Author-Feedback`
 * `Needs-CLA`
+* `Needs-Manual-Merge`
 * `Zip-Binary`
 
 > **Note**:
