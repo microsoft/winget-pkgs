@@ -3,10 +3,44 @@ The sandbox test script is designed to allow you to test manifests locally witho
 
 First, [create a fork](https://docs.github.com/get-started/quickstart/fork-a-repo) of this repository and then [clone it](https://docs.github.com/repositories/creating-and-managing-repositories/cloning-a-repository) to your computer. Once the repository has finished cloning, you will need to open a PowerShell terminal since the SandboxTest script is designed to be run from the command line. In the PowerShell terminal which you just opened, navigate to the folder the repository was cloned into and then into the `Tools` folder. You can do this by using `cd <drive>\<path-to-parent>\winget-pkgs\Tools`. Once you are here, you should be ready to run the script.
 
-To test a manifest, simply call the script with the full path to the manifest as an argument. This will validate the manifest, open Windows Sandbox, and attempt to install the package defined in the manifest. If you have already validated your package, you can skip the validation by adding `-SkipManifestValidation` when running the command.
+## Usage
+
+To test a manifest, simply call the script with the full path to the manifest as an argument. This will validate the manifest, open Windows Sandbox, and attempt to install the package defined in the manifest.
 
 ```raw
-.\SandboxTest.ps1 <path-to-manifest> [-SkipManifestValidation]
+.\SandboxTest.ps1 <path-to-manifest> [<options>]
+```
+The following optional arguments are supported:
+
+| Argument | Description |
+|-------------|-------------|  
+| **-Script** | Post-installation script to run in the Sandbox |
+| **-MapFolder** | The folder to map in Sandbox. Default is the current directory |
+| **-WinGetVersion** | Specify version of WinGet to use in Sandbox |
+| **-Prerelease** | Allow preview release versions of WinGet |
+| **-EnableExperimentalFeatures** | Enable WinGet experimental features |
+| **-SkipManifestValidation** | Skip `winget validate -m <manifest>` if you have already validated the manifest |
+
+### Examples
+
+Test manifest on the latest stable release of WinGet
+```raw
+.\SandboxTest.ps1 <path-to-manifest>
+```
+
+Test manifest on the latest preview release of WinGet
+```raw
+.\SandboxTest.ps1 <path-to-manifest> -Prerelease
+```
+
+Test manifest on a specified version of WinGet
+```raw
+.\SandboxTest.ps1 <path-to-manifest> -WinGetVersion 1.4.2011 -Prerelease -Script {Write-Host 'The script has finished'}
+```
+
+Install a package from the repository in Sandbox 
+```raw
+.\SandboxTest.ps1 -WinGetVersion 1.5 -Script {winget install <PackageIdentifier> --accept-source-agreements}
 ```
 
 # System Requirements
