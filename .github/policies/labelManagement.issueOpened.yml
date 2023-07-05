@@ -15,6 +15,13 @@ configuration:
               action: Opened
         then:
           - addCodeFlowLink
+          # If the user is a first-time contributor, add the Needs-CLA Label
+          - if:
+              - activitySenderHasAssociation:
+                  association: FIRST_TIME_CONTRIBUTOR
+            then:
+              - addLabel:
+                  label: Needs-CLA
       - description: Add Needs-Triage to new issues
         if:
           - payloadType: Issues
@@ -86,5 +93,21 @@ configuration:
               label: Needs-Author-Feedback
           - addLabel:
               label: Manifest-Path-Error
+      - description: >-
+          When an issue is opened, if the content contains "Hash Mismatch" or "Hash does not match" (case insensitive)
+          * Add the Package-Update label
+          * Add the Error-Hash-Mismatch label
+        if:
+          - payloadType: Issues
+          - isAction:
+              action: Opened
+          - bodyContains:
+              pattern: (?i)hash[\s-](mismatch|does\snot\smatch)
+              isRegex: True
+        then:
+          - addLabel:
+              label: Package-Update
+          - addLabel:
+              label: Error-Hash-Mismatch # It's okay to add this label to issues since the labelAdded.errorHashMismatch triggers only respond to PRs
 onFailure:
 onSuccess:
