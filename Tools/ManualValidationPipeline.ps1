@@ -9,7 +9,7 @@
 #2.11: Add notElevated switch to open non-elevated window during manual validation.
 #2.53 Version jump from April. 
 
-$build = 358
+$build = 366
 $appName = "Manual Validation" 
 Write-Host "$appName build: $build"
 $MainFolder = "C:\ManVal"
@@ -38,7 +38,7 @@ Function Validate-Package {
 	param(
 		#[Parameter(mandatory=$true)]
 		$out = ((Get-Clipboard) -split "`n"),
-		[ValidateSet("Win10","Win10")][string]$OS = (Get-OSFromVersion),
+		[ValidateSet("Win10","Win11")][string]$OS = (Get-OSFromVersion),
 		[int]$vm = ((Get-NextFreeVM -OS $OS) -replace"vm",""),
 		#$out = ((Get-SecondMatch) -split "`n"),
 		[switch]$NoFiles,
@@ -456,9 +456,9 @@ if (Test-Path $RemoteFolder\files.txt) {
 Out-Log `"Reading `$(`$files.count) file changes in the last `$(((Get-Date) -`$TimeStart).TotalSeconds) seconds. Starting bulk file execution:`"
 `$files = `$files | where {`$_ -notmatch 'unins'} | where {`$_ -notmatch 'dotnet'} | where {`$_ -notmatch 'redis'} | where {`$_ -notmatch 'System32'} | where {`$_ -notmatch 'SysWOW64'} | where {`$_ -notmatch 'WinSxS'} | where {`$_ -notmatch 'dump64a'} 
 `$files | Out-File 'C:\Users\user\Desktop\ChangedFiles.txt'  
-`$files | select-string '[.]exe`$' | %{Out-Log `$_; start-process `$_};
-`$files | select-string '[.]msi`$' | %{Out-Log `$_; start-process `$_};
-`$files | select-string '[.]lnk`$' | %{Out-Log `$_; start-process `$_};
+`$files | select-string '[.]exe`$' | %{Out-Log `$_; try{Start-Process `$_}catch{}};
+`$files | select-string '[.]msi`$' | %{Out-Log `$_; try{Start-Process `$_}catch{}};
+`$files | select-string '[.]lnk`$' | %{Out-Log `$_; try{Start-Process `$_}catch{}};
 
 Out-Log `" = = = = End file list. Starting Defender scan.`"
 Start-MpScan;
@@ -718,7 +718,7 @@ Function Cycle-VMs {
 			}
 			"Regenerate" {
 				Disgenerate-PipelineVm $VM.vm
-				Generate-PipelineVm 
+				Generate-PipelineVm -OS $VM.os
 			}
 			default {
 				#Write-Host "Complete"
@@ -772,7 +772,6 @@ Function Rebuild-Status {
 
 Function Run-StatusTracker {
 	while ($true) {
-		Get-Status
 		#$StuckVMs = (diff (Get-Status | where {$_.status -eq "ValidationComplete"}).vm ((Get-ConnectedVMs).vm -replace "vm","")).inputobject
 		#Foreach ($vm in $StuckVMs) {
 			#Set-Status Complete $vm
@@ -780,6 +779,7 @@ Function Run-StatusTracker {
 		Cycle-VMs;
 		sleep 5;
 		cls
+		Get-Status
 		$clip = (Get-Clipboard)
 		If ($clip -match  "https://dev.azure.com/ms/") {
 			Get-AutoValLogs
@@ -878,6 +878,7 @@ Function Get-ManifestFile {
 		$clip = (Get-SecondMatch),
 		$FileName = "Package"
 	); 
+	$clip = $clip | where {$_ -notmatch "marked this conversation as resolved."}
 	if (!(test-path "C:\ManVal\vm\$vm\manifest\")){md "C:\ManVal\vm\$vm\manifest\"}
 
 <#
@@ -1062,7 +1063,7 @@ Function Add-InstallerSwitch {
 		}
 	}
 	$fileInsert = "  InstallerSwitches:`n    Silent: $Data"
-	Add-ValidationData $vm -Data $Data -Selector $Selector -fileInsert $fileInsert -Force
+	Add-ValidationData $vm -Data $Data -Selector $Selector -fileInsert $fileInsert #-Force
 }
 
 #@wingetbot waivers 
