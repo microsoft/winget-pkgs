@@ -144,6 +144,14 @@ configuration:
                 then:
                   - addLabel:
                       label: Area-Validation-Pipeline
+              # Needs-Author-Feedback
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[Nn]eeds[\s-][Aa]uthor[\s-][fF]eedback'
+                      isRegex: True
+                then:
+                  - addLabel:
+                      label: Needs-Author-Feedback
               # Needs-Attention
               - if:
                   - commentContains:
@@ -161,6 +169,14 @@ configuration:
 
 
                         Template: msftbot/manualReview
+              # Needs-Manual-Merge
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[Nn]eeds[\s-][Mm]anual[\s-][mM]erge'
+                      isRegex: True
+                then:
+                  - addLabel:
+                      label: Needs-Manual-Merge
               # Reset-Feedback
               - if:
                   - commentContains:
@@ -215,6 +231,17 @@ configuration:
                       label: Needs-Feedback-Hub
                   - removeLabel:
                       label: Needs-Author-Feedback
+              # Reopen with reason <>;
+              - if:
+                  - commentContains:
+                      pattern: "[rR]eopen\\s+[wW]ith\\s+[rR]eason\\s*:[\\w\\s\\-\\(\\)\\[\\]\\{\\}\\\\\\/.+=@\\#$%&^*`~|'\",<>?]*(?=;)"
+                      isRegex: True
+                then:
+                  - reopenIssue
+                  - removeLabel:
+                      label: Resolution-Duplicate
+                  - removeLabel:
+                      label: No-Recent-Activity
           # If the payload is a Pull_Request_Review and an approval, add the Moderator-Approved label
           - if:
               - payloadType: Pull_Request_Review
