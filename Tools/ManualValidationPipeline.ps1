@@ -1,15 +1,15 @@
 #Copyright 2022-2023 Microsoft Corporation
 #Author: Stephen Gillie
-#Title: Manual Validation Pipeline v2.53
+#Title: Manual Validation Pipeline v2.54
 #Created: 10/19/2022
-#Updated: 6/29/2023
+#Updated: 7/10/2023
 #Notes: Utilities to streamline evaluating 3rd party PRs.
 #Update log:
-#2.10.2: Add bugfix to prevent extraneous WinGet upgrade logging.
 #2.11: Add notElevated switch to open non-elevated window during manual validation.
 #2.53 Version jump from April. 
+#2.54 Filter comments by hashtag from Get-YamlValue. 
 
-$build = 366
+$build = 367
 $appName = "Manual Validation" 
 Write-Host "$appName build: $build"
 $MainFolder = "C:\ManVal"
@@ -1221,7 +1221,7 @@ Function Get-YamlValue {
 		[string]$StringName,
 		$clip = (Get-Clipboard)
 	)
-	(($clip | select-string $StringName) -split ": ")[1]
+	((($clip | select-string $StringName) -split ": ")[1] -split "#")[0]
 }
 
 Function Test-Admin {
