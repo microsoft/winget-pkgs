@@ -1,15 +1,15 @@
 #Copyright 2022-2023 Microsoft Corporation
 #Author: Stephen Gillie
-#Title: Manual Validation Pipeline v2.54
+#Title: Manual Validation Pipeline v2.56
 #Created: 10/19/2022
 #Updated: 7/10/2023
 #Notes: Utilities to streamline evaluating 3rd party PRs.
 #Update log:
-#2.11: Add notElevated switch to open non-elevated window during manual validation.
-#2.53 Version jump from April. 
 #2.54 Filter comments by hashtag from Get-YamlValue. 
+#2.55 Bugfix Reset-Status with 0 VMs.
+#2.56 Update Validate-Package to use Get-YamlValue in params.
 
-$build = 367
+$build = 373
 $appName = "Manual Validation" 
 Write-Host "$appName build: $build"
 $MainFolder = "C:\ManVal"
@@ -46,8 +46,8 @@ Function Validate-Package {
 		[switch]$InspectNew,
 		[switch]$notElevated,
 		$ManualDependency,
-		$PackageIdentifier = ((($out | Select-String "PackageIdentifier") -split ": ")[1] ),
-		$PackageVersion = ((($out | Select-String "PackageVersion:") -split ": ")[1]  -replace '"',''-replace "'",''),
+		$PackageIdentifier = (Get-YamlValue -StringName "PackageIdentifier" $out),
+		$PackageVersion = ((Get-YamlValue -StringName "PackageVersion" $out) -replace '"',''-replace "'",''),
 		$RemoteFolder = "//$remoteIP/ManVal/vm/$vm",
 		$installerLine = "--manifest $RemoteFolder/manifest",
 		[ValidateSet("x86","x64","arm","arm32","arm64","neutral")][string]$Arch,
@@ -761,7 +761,8 @@ Function Get-Status{
 
 Function Reset-Status {
 	if (!(Get-ConnectedVMs)){
-		(get-status | where {$_.status -ne "Ready"}).vm|%{Set-Status Complete $_}
+		$VMs = (get-status | where {$_.status -ne "Ready"}).vm
+		Foreach ($VM in $VMs) {Set-Status Complete $_}
 		Get-Process *vmwp* | Stop-Process
 	}
 }
@@ -854,7 +855,13 @@ Function Revert-VM {
 	Restore-VMCheckpoint -Name $CheckpointName -VMName $VMName -Confirm:$false
 }
 
-Function Get-OSFromVersion {if ([system.version](Get-YamlValue -StringName MinimumOSVersion) -ge [system.version]"10.0.22000.0"){"Win11"}else{"Win10"}}
+Function Get-OSFromVersion {
+	try{
+		if ([system.version](Get-YamlValue -StringName MinimumOSVersion) -ge [system.version]"10.0.22000.0"){"Win11"}else{"Win10"}
+	} catch {
+		"Win10"
+	}
+}
 
 Function Get-TrackerVMVersion {gc $VMversion}
 
