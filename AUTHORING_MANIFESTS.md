@@ -66,3 +66,13 @@ If you decide to create or edit your manifest by manually editing the YAML, it i
 ```powershell
 winget validate --manifest <Path to manifest>
 ```
+
+## Testing
+It is important to test your manifest before submission to ensure it meets the repository's quality standards. While it isn't possible to describe everything that we check for when reviewing contributions, testing your manifest helps keep the quality of contributions high and increases the chance of your contribution being accepted.
+
+* Manifests should be tested to ensure applications can install unattended
+* Manifests should be tested to ensure application version matches the Package Version, or that AppsAndFeaturesEntries are included if necessary
+* Manifests should be tested to ensure application publisher matches the defaultLocale Publisher, or that AppsAndFeaturesEntries are included if necessary
+* Manifests should be tested to ensure application name matches the defaultLocale PackageName, or that AppsAndFeaturesEntries are included if necessary
+
+By testing your manifest, you h
