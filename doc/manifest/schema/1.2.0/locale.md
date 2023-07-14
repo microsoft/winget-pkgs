@@ -26,7 +26,7 @@ Author:                       # Optional author
 PackageName:                  # Optional package name
 PackageUrl:                   # Optional package home page
 License:                      # Optional package license
-LicenseUrl:                   # Optional package home page
+LicenseUrl:                   # Optional package license page
 Copyright:                    # Optional package copyright
 CopyrightUrl:                 # Optional package copyright page
 ShortDescription:             # Optional short package description
