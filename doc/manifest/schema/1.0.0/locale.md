@@ -18,7 +18,7 @@ PackageIdentifier:            # The package unique identifier
 PackageVersion:               # The package version
 PackageLocale:                # The package meta-data locale
 Publisher:                    # Optional publisher name
-PublisherURL:                 # Optional publisher home page
+PublisherUrl:                 # Optional publisher home page
 PublisherSupportUrl:          # Optional publisher support page
 PrivacyUrl:                   # Optional publisher privacy page
 Author:                       # Optional author
