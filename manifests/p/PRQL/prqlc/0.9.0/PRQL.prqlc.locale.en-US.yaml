@@ -1,0 +1,54 @@
+# Created with Komac v1.9.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.4.0.schema.json
+
+PackageIdentifier: PRQL.prqlc
+PackageVersion: 0.9.0
+PackageLocale: en-US
+Publisher: PRQL Developers
+PublisherUrl: https://prql-lang.org
+PublisherSupportUrl: https://github.com/PRQL/prql/issues
+PackageName: PRQL compiler CLI ? prqlc
+PackageUrl: https://github.com/PRQL/prql
+License: APACHE-2.0
+LicenseUrl: https://github.com/PRQL/prql/blob/main/LICENSE
+ShortDescription: prqlc serves as a CLI for the PRQL compiler.
+Moniker: prqlc
+ReleaseNotes: |-
+  - The major breaking change is a new syntax for lists, which have been renamed to _tuples_, and are now represented with braces {} rather than brackets [].
+  - Some significant changes regarding SQL dialects:
+  - Operators and functions can be defined on per-dialect basis. (@aljazerzen, #2681)
+  - _Breaking_: The sql.duckdb target supports DuckDB 0.8 (@eitsupi, #2810).
+  - _Breaking_: The sql.hive target is removed (@eitsupi, #2837).
+  - New arithmetic operators.
+    These compile to different function or operator depending on the target.
+  - _Breaking:_ Operator / now always performs floating division (@aljazerzen, #2684). _TODO: add link to division operator docs_
+  - Truncated integer division operator // (@aljazerzen, #2684).
+  - Regex search operator ~= (@max-sixty, #2458).
+    An example:
+  - New aggregation functions: every, any, average, and concat_array.  _Breaking:_ Remove avg in favor of average.
+  - _Breaking:_ We've changed our function declaration syntax to match other declarations.
+    Functions were one of the first language constructs in PRQL, and since then we've added normal declarations there's no compelling reason for functions to be different.
+  - Experimental modules, which allow importing declarations from other files.
+    Docs are forthcoming.
+  - Relation literals create a relation (a "table") as an _array_ of _tuples_.
+    This example demonstrates the new syntax for arrays [] and tuples {}. (@aljazerzen, #2605)
+  - this can be used to refer to the current pipeline, for situations where plain column name would be ambiguous:
+  - _Breaking:_ functions count, rank and row_number now require an argument of the array to operate on.
+    In most cases you can directly replace count with count this.
+    The non_null argument of count has been removed.
+  - We've changed how we handle colors.
+  - prqlc can now show backtraces when the standard backtrace env var (RUST_BACKTRACE) is active. (@max-sixty, #2751)
+  - Numbers expressed with scientific notation — 1e9 — are now handled correctly by the compiler (@max-sixty, #2865).
+  - prql-python now provides type hints (@philpep, #2912)
+  - Annotations in PRQL.
+    These have limited support but are currently used to specify binding strengths.
+    They're modeled after Rust's annotations, but with @ syntax, more similar to traditional decorators. (#2729)
+  - Remove BigQuery's special handling of quoted identifiers, now that our module system handles its semantics (@max-sixty, #2609).
+  - ClickHouse is tested in CI (@eitsupi, #2815).
+  - @maxmcd, with #2533
+  - @khoa165, with #2876
+  - @philpep, with #2912
+  - @not-my-profile, with #2971
+ReleaseNotesUrl: https://github.com/PRQL/prql/releases/tag/0.9.0
+ManifestType: defaultLocale
+ManifestVersion: 1.4.0
