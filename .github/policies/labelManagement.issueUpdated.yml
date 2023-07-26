@@ -160,6 +160,8 @@ configuration:
         then:
           - removeLabel:
               label: Help-Wanted
+        # The policy service should trigger even when the update was initiated by the policy service
+        triggerOnOwnActions: true
       - description: Retry validation one time on pull requests that have the Internal-Error-Dynamic-Scan label
         if:
           - payloadType: Pull_Request
@@ -233,7 +235,7 @@ configuration:
         then:
           - addReply:
               reply: >-
-                Hello @${issueAuthor},
+                Hello ${issueAuthor},
 
 
                 Static analysis has timed out. The PR has been assigned to a developer to investigate.
@@ -360,6 +362,10 @@ configuration:
               label: Manifest-AppsAndFeaturesVersion-Error
           - removeLabel:
               label: Validation-Shell-Execute
+          - removeLabel:
+              label: Manifest-Content-Incomplete
+          - removeLabel:
+              label: Validation-Open-Url-Failed
       - description: Remove status labels when a PR is re-run
         if:
           - payloadType: Issue_Comment
@@ -490,5 +496,7 @@ configuration:
               label: Manifest-AppsAndFeaturesVersion-Error
           - removeLabel:
               label: Validation-Shell-Execute
+          - removeLabel:
+              label: Validation-Open-Url-Failed
 onFailure:
 onSuccess:
