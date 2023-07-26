@@ -1,0 +1,51 @@
+id: labelAdded.manifestContentIncomplete
+name: GitOps.PullRequestIssueManagement
+description: Handlers when "Manifest-Content-Incomplete" label is added
+owner:
+resource: repository
+disabled: false
+where:
+configuration:
+  resourceManagementConfiguration:
+    eventResponderTasks:
+      - description: >-
+          When the label "Manifest-Content-Incomplete" is added to a pull request
+          * Add the PR specific reply notifying the issue author
+          * Assign to the Author
+          * Label with Needs-Author-Feedback
+          * Remove the Needs-Attention Label
+        if:
+          - payloadType: Pull_Request
+          - labelAdded:
+              label: "Manifest-Content-Incomplete"
+        then:
+          - addReply:
+              reply: >-
+                @${issueAuthor},
+
+
+                Your manifest appears to contain one or more issues with the content. Please ensure it meets the contribution guidelines.
+
+                * Manifests should be tested to ensure applications can install unattended
+
+                * Manifests should be tested to ensure application version matches the Package Version, or that AppsAndFeaturesEntries are included if necessary
+
+                * Manifests should be tested to ensure application publisher matches the defaultLocale Publisher, or that AppsAndFeaturesEntries are included if necessary
+
+                * Manifests should be tested to ensure application name matches the defaultLocale PackageName, or that AppsAndFeaturesEntries are included if necessary
+
+
+                Please review your manifest and make the appropriate changes. This PR will be automatically closed if no changes are made.
+
+
+                Template: msftbot/validationError/manifest/contentIncomplete
+          - assignTo:
+              author: True
+          - addLabel:
+              label: Needs-Author-Feedback
+          - removeLabel:
+              label: Needs-Attention
+        # The policy service should trigger even when the label was added by the policy service
+        triggerOnOwnActions: true
+onFailure:
+onSuccess:
