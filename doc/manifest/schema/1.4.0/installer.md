@@ -557,6 +557,11 @@ ManifestVersion: 1.4.0
   **Optional Field**
 
   This key represents which scope a package is required to be executed under. Some packages require user level execution while others require administrative level execution.
+
+* elevationRequired - Must be run from a shell that is running in an administrative context (e.g - Admin user using powershell/terminal/cmd with "Run as Administrator")
+* elevationProhibited - Must be run from a shell that is not running in an administrative context
+* elevatesSelf - If called from a non-administrative context, will request elevation. If called from an administrative context, may or may not request elevation.
+
 </details>
 
 <details>

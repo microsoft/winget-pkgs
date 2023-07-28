@@ -7,7 +7,8 @@ Param(
   [Switch] $Review = $false,
   [Switch] $KeepBranch = $false,
   [Switch] $Prerelease = $false,
-  [Switch] $EnableExperimentalFeatures = $false
+  [Switch] $EnableExperimentalFeatures = $false,
+  [string] $WinGetVersion = $null
 )
 
 $PullRequest = $PullRequest.TrimStart('#')
@@ -19,12 +20,12 @@ $repositoryRoot = "https://github.com/microsoft/winget-pkgs/"
 $rootDirectory = ((Resolve-Path (git rev-parse --show-toplevel)).ToString() + "\")
 
 if (-Not (Get-Command "gh" -ErrorAction "SilentlyContinue")) {
-    Write-Host "The GitHub CLI is not installed. Install it via 'winget install gh' and come back here!" -ForegroundColor Red
+    Write-Host "The GitHub CLI is not installed. Install it via 'winget install GitHub.cli' and come back here!" -ForegroundColor Red
     return
 }
 
 if (-Not (Get-Command "git" -ErrorAction "SilentlyContinue")) {
-    Write-Host "Git is not installed. Install it via 'winget install git' and come back here!" -ForegroundColor Red
+    Write-Host "Git is not installed. Install it via 'winget install Git.Git' and come back here!" -ForegroundColor Red
     return
 }
 
@@ -49,6 +50,7 @@ $params = @{
     SkipManifestValidation = $true
     Prerelease = $Prerelease
     EnableExperimentalFeatures = $EnableExperimentalFeatures
+    WinGetVersion = $WinGetVersion
 }
 & $sandboxTestPath @params
 
