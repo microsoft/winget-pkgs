@@ -1,0 +1,115 @@
+# Created with WinGet Automation using Komac v1.10.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.4.0.schema.json
+
+PackageIdentifier: DrewNaylor.UXL-Launcher
+PackageVersion: '4.0'
+PackageLocale: en-US
+Publisher: Drew Naylor
+PublisherUrl: https://github.com/DrewNaylor
+PublisherSupportUrl: https://github.com/DrewNaylor/UXL-Launcher/issues
+PackageName: UXL Launcher
+PackageUrl: https://github.com/DrewNaylor/UXL-Launcher
+License: GNU GPL v3+
+LicenseUrl: https://github.com/DrewNaylor/UXL-Launcher/blob/master/LICENSE.txt
+ShortDescription: DrewNaylor.UXL-Launcher
+Description: |-
+  An app launcher meant to launch Microsoft Office 2010, 2013, 2016, 2019 desktop software/apps, including ones from Office 365.
+  Not associated with Microsoft and Microsoft does not endorse this software.
+  You may need to run winget as an administrator to install this package due to issues where Inno Setup doesn't properly ask for UAC when installing with winget.
+  Not associated with Inno Setup.
+Moniker: uxl-launcher
+Tags:
+- gui
+- launcher
+- office
+- tool
+- utility
+ReleaseNotes: |-
+  Added
+  - New theme: ProDark (issue #185)
+  - Description: Dark theme meant to resemble Office 2019's "Black" theme.
+    The colors may not match exactly as they were eyeballed from the colors used in Word 2019.
+    This theme is not associated with Microsoft, and Microsoft Office is a copyright and trademark/registered trademark of Microsoft Corporation in the United States and other countries.
+  - This is the new default dark theme used when matching the Windows 10 theme settings (see below).
+  - You can now choose which dark theme UXL Launcher uses when set to match the Windows 10 theme settings by changing the Dark theme for system theme matching dropdown under Tools>Options>Theme (previously Personalization). (issue #186, pull request #192)
+  - Current choices are Maudern, ProDark, and TenDark.
+    Anything else will be set to ProDark and will not be displayed in the Options window dropdown, unlike the theme list dropdown.
+  - PortableThemeEngine also gained this feature and was bumped to version 2.1, while the built-in theme engine was bumped to version 1.04.
+    No other theme engine changes are in this version, so themes won't have to change their theme engine runtime version numbers if people don't want to, but I did anyway.
+  - If you want to specify the dark theme for system theme matching when using PortableThemeEngine, you'd set libportablethemeengine.
+    ThemeEngine.
+    DarkThemeForSystemThemeMatching to one of the options above.
+    Anything not in that list will be set to ProDark.
+    Once the dark theme is applied, the property will automatically be reset to ProDark in case you want to go back to the default dark theme in the same session without specifying it again.
+  - PortableThemeEngineDebugger may be of use to people who want to experiment with this feature, though you'll have to build it yourself as a binary isn't provided.
+  - Tabs in the Options and About windows can now be switched between using the mouse scroll wheel.
+    This functionality is provided by libscrollswitchtabs, part of the drews-libs project.
+  - In case you decline migrating settings on the first startup of an application upgrade, you can now migrate them at any time using the Migrate settings button under Tools>Options...>Maintenance. (issue #178)
+  - NB: This will overwrite your current settings, so use caution.
+  - It'll only work if you're running the program from the same place as the previous version.
+  - This feature may be useful for people using the Zip file version as, by default, that one doesn't ask to migrate settings on first startup even if there's a UXL_Launcher folder in LocalAppData.
+    It'll have to be extracted to the same place to work as the previous list item states, though.
+  - After migrating, the app will restart automatically.
+  - Any time a setting requires an application restart (for now, only turning on or off the theme engine), a messagebox will pop up asking the user if they want to restart now. (issue #177)
+  - If this message is declined, it won't pop up again during that session even if the theme engine is turned on or off multiple times in that session.
+  - Description from the commit:
+  Changed
+  - Many of the controls in the Options window have been moved around (some across tabs) and had their text changed to better explain what they do.
+    See pull request #190 for more details.
+  - Switched the tabs for Bypass configured location and the Office drive location (now simply Root drive path) (issue #73)
+  - Instead of requiring users to type in the drive letter they installed Office to, they can now select it from a dropdown of all drives that are "ready".
+  - If they change the drive letter manually in the config file, it'll show up in the list, but changing it to something else and saving settings will get rid of it.
+  - Please be aware that this means arbitrary drive letters can no longer be placed into the drive letter box as only drives Windows determines as "ready" are available.
+    This is what was originally intended, so it's no big loss.
+  - Arbitrary drive letters can still be used by modifying the config file, but if the location is unavailable, a warning label will show up below the dropdown.
+  - If you plug in a drive after opening the Options window, you can click the Refresh button next to the dropdown to have it show up in the dropdown as long as it's ready. (issue #191)
+  - Controls and groupboxes have been resized and repositioned so they look better.
+    One major example of this is on the Theme tab, where the theme details textbox has been moved to the right side and the checkboxes and other controls have been moved to the left side.
+  - The theme details textbox is now slightly taller.
+  - Now the Enable Office 365/Click-to-Run Compatibility checkbox is hidden if Office 2019 is selected, since it's irrelevant for that version.
+  - Tab text update:
+  - General has been renamed to Versions + Compatibility.
+  - Advanced has been renamed to Root Path.
+  - Personalization has been renamed to Theme as mentioned above.
+  - More details for the first two items (issue #183)
+  - Enable Office 365/Click-to-Run Compatibility checkbox has been changed to Enable Office 365/Click-to-Run Compatibility [line break]
+  - Since 64-bit Office is the default for Office 2019 when downloaded from the Office website, there were changes in the Root Path tab:
+  - 64-bit Windows is now Program Files (x86): 32-bit Office on 64-bit Windows
+  - 32-bit Windows is now Program Files: 64-bit Office on 64-bit Windows, [line break]
+  - Program Files: 64-bit... is the new default, since 64-bit Office is now the default download as mentioned above.
+  - The description and recommended selection labels have been updated to accommodate this change.
+  - Due to Microsoft recommending 64-bit Office 2019 by default when downloading from Office.com, the setting cpuIsSixtyFourBit now defaults to False instead of True.
+    The name would have been changed, but that doesn't allow for easily migrating settings between versions.
+  - More details (issue #184)
+  - Match Windows 10 theme checkbox text has been changed to Match system theme and its tooltip now references the Dark theme for system theme matching dropdown.
+  - Instead of using 32-bit Mode or 64-bit Mode in the titlebar, we'll now display PF Mode or PF-x86 Mode since that's more accurate to what's going on.
+  - Office 2019 (16nomsi) is now the default version of Office in the Office version selector dropdown and the userOfficeVersion setting.
+  - Tab indexes have been improved so that the buttons at the bottom of the Options window go from right to left instead of left to right.
+    This means that the Save button will be reached first instead of Defaults, for example.
+  - If (Custom) is selected in the theme list dropdown and there's nothing in the custom theme path textbox, the theme description textbox will now display, "You can use a custom theme by clicking Browse... and picking a custom theme file from the file system or by pasting the custom theme path in the custom theme path textbox."
+  - The strings with "private" in their names that were used in the Office Locater code have been removed and the public strings are being modified instead.
+    This'll help optimize things.
+  - Some apps are passing the value of My.
+    Settings.bypassConfiguredLocationForAllApps directly to the isolated error handler to reduce code duplication. (issue #188)
+  - When the custom theme path textbox is empty, the theme details textbox now has info on what to do to use a custom theme.
+  Fixed
+  - Security vulnerability: It used to be possible to change My.
+    Settings.officeDriveLocation to something like https://google.com/search?q=, which would take users to a Google search.
+    This has been fixed by checking the length of the setting, and if it's not equal to 1, changing it back to C before using it on startup.
+  - During the release candidate stage, it was discovered that changing the setting in the config file to an arbitrary value while the Options window is open then clicking Cancel in the Options window would cause that arbitrary value to show up in the drive letter dropdown even though it wasn't used.
+    This no longer happens.
+  - Bug: "match system theme" checkbox doesn't block the custom theme controls from being used if "(Custom)" is selected in the dropdown. (issue #194)
+  Removed
+  - Deleted the future change notice from the Options window since it's implemented now.
+  - Installer startup prompt isn't there anymore due to making it simpler to add to winget.
+  Deprecation/future change notices
+  - TE1.x/UXL Launcher Theme Engine will be deprecated sometime after support for TE2.x/PortableThemeEngine is introduced, and UXL Launcher 5.0 will fully remove support for TE1.x.
+    Estimated deprecation timeline; may be changed at any moment:
+  - TE1.x full support; TE2.x gains features to match what TE1.x can do <-- You Are Here
+  - TE2.x support introduced; TE1.x is still the default but can be switched to using TE2.x via the UI
+  - TE2.x becomes the default; TE1.x is deprecated but support is still available and can be used again through the UI
+  - TE2.x is still the default; TE1.x is still available, but the UI to switch back to it is removed so you'll have to edit the config file instead
+  - TE1.x support is fully removed; only TE2.x remains
+ReleaseNotesUrl: https://github.com/DrewNaylor/UXL-Launcher/releases/tag/v4.0
+ManifestType: defaultLocale
+ManifestVersion: 1.4.0
