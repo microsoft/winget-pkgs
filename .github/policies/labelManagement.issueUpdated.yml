@@ -13,11 +13,11 @@ configuration:
       - description: Remove "No-Recent-Activity" when a pull request or issue is updated
         if:
           - or:
-            - payloadType: Pull_Request
-            - payloadType: Pull_Request_Review
-            - payloadType: Pull_Request_Review_Comment
-            - payloadType: Issue_Comment
-            - payloadType: Issues
+              - payloadType: Pull_Request
+              - payloadType: Pull_Request_Review
+              - payloadType: Pull_Request_Review_Comment
+              - payloadType: Issue_Comment
+              - payloadType: Issues
           - not:
               isAction:
                 action: Closed
@@ -28,13 +28,13 @@ configuration:
               label: No-Recent-Activity
         # The policy service should not trigger itself here, or else the label would be removed immediately after being added
         triggerOnOwnActions: False
-      - description: Try re-enabling automerge on every PR event
+      - description: Try re-enabling automerge on every PR event for packages
         if:
           - or:
-            - payloadType: Pull_Request
-            - payloadType: Pull_Request_Review
-            - payloadType: Pull_Request_Review_Comment
-            - payloadType: Issue_Comment
+              - payloadType: Pull_Request
+              - payloadType: Pull_Request_Review
+              - payloadType: Pull_Request_Review_Comment
+              - payloadType: Issue_Comment
           - not:
               isAction:
                 action: Closed
@@ -45,12 +45,38 @@ configuration:
           - hasLabel:
               label: Azure-Pipeline-Passed
           - and:
-            - not:
-                hasLabel:
-                  label: Needs-Attention
-            - not:
-                hasLabel:
-                  label: Needs-Author-Feedback
+              - not:
+                  hasLabel:
+                    label: Needs-Attention
+              - not:
+                  hasLabel:
+                    label: Needs-Author-Feedback
+        then:
+          - enableAutoMerge:
+              mergeMethod: Squash
+        # The policy service should trigger even when the update was initiated by the policy service
+        triggerOnOwnActions: true
+      - description: Try re-enabling automerge on every PR event for Validation-Metadata
+        if:
+          - or:
+              - payloadType: Pull_Request
+              - payloadType: Pull_Request_Review
+              - payloadType: Pull_Request_Review_Comment
+              - payloadType: Issue_Comment
+          - not:
+              isAction:
+                action: Closed
+          - hasLabel:
+              label: Validation-Completed
+          - hasLabel:
+              label: Validation-Metadata
+          - and:
+              - not:
+                  hasLabel:
+                    label: Needs-Attention
+              - not:
+                  hasLabel:
+                    label: Needs-Author-Feedback
         then:
           - enableAutoMerge:
               mergeMethod: Squash
@@ -58,9 +84,9 @@ configuration:
         triggerOnOwnActions: true
       - description: Clean email replies on every comment
         if:
-        - payloadType: Issue_Comment
+          - payloadType: Issue_Comment
         then:
-        - cleanEmailReply
+          - cleanEmailReply
       - description: Approve pull requests that have completed validation and have been approved by a moderator
         if:
           - payloadType: Pull_Request
@@ -90,14 +116,40 @@ configuration:
           - approvePullRequest:
               comment: ""
           - addReply: >-
-                Hello ${issueAuthor},
+              Hello ${issueAuthor},
 
-                Validation has completed.
+              Validation has completed.
 
 
-                Template: msftbot/validationCompleted
+              Template: msftbot/validationCompleted
         # The policy service should trigger even when the update was initiated by the policy service
         triggerOnOwnActions: true
+      - description: Sync labels with issues on all pull request events
+        if:
+          - or:
+              - payloadType: Pull_Request
+              - payloadType: Pull_Request_Review
+              - payloadType: Pull_Request_Review_Comment
+          - not:
+              isAction:
+                action: Closed
+        then:
+          - labelSync:
+              pattern: Blocking-Issue
+          - labelSync:
+              pattern: Hardware
+          - labelSync:
+              pattern: Dependencies
+          - labelSync:
+              pattern: zip-binary
+          - labelSync:
+              pattern: Area-External
+          - labelSync:
+              pattern: Installer-Issue
+          - labelSync:
+              pattern: Interactive-Only-Installer
+          - inPrLabel:
+              label: In-PR
       - description: Remove "Help-Wanted" label when an issue goes into PR
         if:
           - payloadType: Issues
@@ -108,6 +160,8 @@ configuration:
         then:
           - removeLabel:
               label: Help-Wanted
+        # The policy service should trigger even when the update was initiated by the policy service
+        triggerOnOwnActions: true
       - description: Retry validation one time on pull requests that have the Internal-Error-Dynamic-Scan label
         if:
           - payloadType: Pull_Request
@@ -126,9 +180,9 @@ configuration:
           * Add the Needs-Attention Label
         if:
           - or:
-            - payloadType: Pull_Request_Review
-            - payloadType: Pull_Request_Review_Comment
-            - payloadType: Issue_Comment
+              - payloadType: Pull_Request_Review
+              - payloadType: Pull_Request_Review_Comment
+              - payloadType: Issue_Comment
           - isActivitySender:
               issueAuthor: True
           - hasLabel:
@@ -181,7 +235,7 @@ configuration:
         then:
           - addReply:
               reply: >-
-                Hello @${issueAuthor},
+                Hello ${issueAuthor},
 
 
                 Static analysis has timed out. The PR has been assigned to a developer to investigate.
@@ -308,6 +362,10 @@ configuration:
               label: Manifest-AppsAndFeaturesVersion-Error
           - removeLabel:
               label: Validation-Shell-Execute
+          - removeLabel:
+              label: Manifest-Content-Incomplete
+          - removeLabel:
+              label: Validation-Open-Url-Failed
       - description: Remove status labels when a PR is re-run
         if:
           - payloadType: Issue_Comment
@@ -438,5 +496,9 @@ configuration:
               label: Manifest-AppsAndFeaturesVersion-Error
           - removeLabel:
               label: Validation-Shell-Execute
+          - removeLabel:
+              label: Validation-Open-Url-Failed
+          - removeLabel:
+              label: Possible-Duplicate
 onFailure:
 onSuccess:

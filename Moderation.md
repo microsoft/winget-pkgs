@@ -88,9 +88,11 @@ Moderators are often the first to see and triage new issues, and so they have th
 * `Hardware`
 * `Installer-Issue`
 * `Interactive-Only-Installer`
+* `Manifest-Content-Incomplete`
 * `Needs-Attention`
 * `Needs-Author-Feedback`
 * `Needs-CLA`
+* `Needs-Manual-Merge`
 * `Zip-Binary`
 
 > **Note**:
