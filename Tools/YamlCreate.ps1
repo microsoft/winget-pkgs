@@ -454,7 +454,7 @@ Function Request-InstallerUrl {
         }
       }
       $NewInstallerUrl = [System.Web.HttpUtility]::UrlDecode($NewInstallerUrl.Replace('+','%2B'))
-      $NewInstallerUrl.Replace(' ','%20')
+      $NewInstallerUrl = $NewInstallerUrl.Replace(' ','%20')
       if ($script:_returnValue.StatusCode -ne 409) {
         if (Test-String $NewInstallerUrl -MaxLength $Patterns.InstallerUrlMaxLength -MatchPattern $Patterns.InstallerUrl -NotNull) {
           $script:_returnValue = [ReturnValue]::Success()
