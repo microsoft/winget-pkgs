@@ -44,5 +44,25 @@ configuration:
               comment: ""
           - addLabel:
               label: Validation-Completed
+      - description: >-
+          Merge Validation Waivers when
+          * Created by wingetbot
+          * Files modified only contains .validation file
+        if:
+          - payloadType: Pull_Request
+          - filesMatchPattern:
+                pattern: ^.*\.validation
+          - not:
+              filesMatchPattern:
+                pattern: ^.*\.yaml
+          - isActivitySender:
+              user: wingetbot
+        then:
+          - addLabel:
+              label: Validation-Metadata
+          - addLabel:
+              label: Validation-Completed
+          - approvePullRequest:
+              comment: "This looks like an automatic waiver. You should be all set!"
 onFailure:
 onSuccess:
