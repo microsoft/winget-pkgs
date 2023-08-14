@@ -77,5 +77,5 @@ EnableDeveloperOptions: false
 
 # This setting allows for the selection of which manifest version is used
 # The script is not tested with all manifest versions, and stability is not guaranteed. Use with caution
-OverrideManifestVersion: 1.4.0
+OverrideManifestVersion: 1.6.0
 ```
