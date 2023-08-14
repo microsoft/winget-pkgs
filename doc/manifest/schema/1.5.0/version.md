@@ -1,6 +1,9 @@
 [JSON schema]:      https://github.com/microsoft/winget-cli/blob/master/schemas/JSON/manifests/v1.5.0/manifest.version.1.5.0.json
 [YAML]:             https://yaml.org/spec
 [semantic version]: https://semver.org
+<!--
+TEST
+-->
 
 # Windows Package Manager
 ## Manifest Schema v1.5.0 Version File
