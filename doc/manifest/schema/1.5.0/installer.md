@@ -67,7 +67,7 @@ Installers:                     	# The list of package installers
     ExcludedMarkets:            	# Optional markets the package is not allowed to be installed
     InstallerSuccessCodes:      	# Optional non-zero installer success codes
     ExpectedReturnCodes:        	# Optional non-zero installer return codes
-      - ExpectedReturnCode:     	# Optional non-zero installer return code
+      - InstallerReturnCode:     	# Optional non-zero installer return code
         ReturnResponse:         	# Optional response for an expected return code
         ReturnResponseUrl:      	# Optional response URL for an expected return code
     ProductCode:                	# Optional product code of the installer
@@ -189,6 +189,14 @@ ManifestVersion: 1.5.0
  **Required Field**
 
  This key represents the hardware architecture targeted by the installer. The Windows Package Manager will attempt to determine the best architecture to use. If emulation is available and the native hardware architecture does not have a supported installer, the emulated architecture may be used.
+
+ Available architectures:
+ * x86
+ * x64
+ * arm
+ * arm64
+ * neutral
+
 </details>
 
 <details>
@@ -616,7 +624,7 @@ ManifestVersion: 1.5.0
 </details>
 
 <details>
- <summary><b>ExpectedReturnCode</b> - The non-zero installer exit code other than known default values by the Windows Package Manager.</summary>
+ <summary><b>InstallerReturnCode</b> - The non-zero installer exit code other than known default values by the Windows Package Manager.</summary>
 
  **Optional Field**
 
