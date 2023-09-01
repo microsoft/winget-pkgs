@@ -15,7 +15,7 @@ The **Windows Package Manager** is an [open source client](https://github.com/mi
 
 To submit a package to this repository, you should follow these steps:
 
-1. Follow the [Contributing](#Contributing) guidelines below.
+1. Follow the [Contributing](#contributing) guidelines below.
 2. [Author](AUTHORING_MANIFESTS.md) a Manifest.
 3. [Test](#test-your-manifest) your manifest.
 4. [Submit](#submit-your-pr) your pull request (PR).
