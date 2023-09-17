@@ -1,0 +1,51 @@
+id: labelAdded.validationMergeConflict
+name: GitOps.PullRequestIssueManagement
+description: Handlers when "Validation-Merge-Conflict" label is added
+owner:
+resource: repository
+disabled: false
+where:
+configuration:
+  resourceManagementConfiguration:
+    eventResponderTasks:
+      - description: >-
+          When the "Validation-Merge-Conflict" label is added to a pull request
+          * Add a reply notifying the author
+          * Assign to the author
+          * Remove the "Azure-Pipeline-Passed" label
+          * Add the "Needs-Author-Feedback" label
+          * Add the "Needs-Attention" label as necessary
+        if:
+          - payloadType: Pull_Request
+          - labelAdded:
+              label: Validation-Merge-Conflict
+        then:
+          - addReply:
+              reply: >-
+                Hello @${issueAuthor},
+
+
+                The PR could not be validated because there is a merge conflict which adds bad characters to the manifest. Please address the merge conflict and resubmit.
+
+
+                Template: msftbot/mergeConflict
+          - removeLabel:
+              label: Azure-Pipeline-Passed
+          - assignTo:
+              author: True
+          - addLabel:
+              label: Needs-Author-Feedback
+          # If the merge conflict came from a bot, add the Needs-Attention label
+          - if:
+              - or:
+                  - activitySenderHasPermission:
+                      permission: Write
+                  - activitySenderHasPermission:
+                      permission: Admin
+            then:
+              - addLabel:
+                  label: Needs-Attention # This will automatically assign the ICM Users
+        # The policy service should trigger even when the label was added by the policy service
+        triggerOnOwnActions: true
+onFailure:
+onSuccess:

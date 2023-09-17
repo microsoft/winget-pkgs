@@ -1,0 +1,43 @@
+id: labelAdded.validationIndirectUrl
+name: GitOps.PullRequestIssueManagement
+description: Handlers when "Validation-Indirect-URL" label is added
+owner:
+resource: repository
+disabled: false
+where:
+configuration:
+  resourceManagementConfiguration:
+    eventResponderTasks:
+      - description: >-
+          When the label "Validation-Indirect-URL" is added to a pull request
+          * Add a reply notifying the issue author
+          * Assign to the author
+          * Label with Needs-Author-Feedback
+          * Remove Azure-Pipeline-Passed label
+          * Remove Needs-Attention label
+        if:
+          - payloadType: Pull_Request
+          - labelAdded:
+              label: Validation-Indirect-URL
+        then:
+          - addReply:
+              reply: >-
+                Hello @${issueAuthor},
+
+
+                This URL in this manifest is not a direct URL. It is using the provided URL as a parameter and passing that URL to a different website. This pattern is not supported. Please update the manifest to use a direct link for the URL.
+
+
+                Template: msftbot/validationError/urls/indirect
+          - removeLabel:
+              label: Azure-Pipeline-Passed
+          - assignTo:
+              author: True
+          - removeLabel:
+              label: Needs-Attention
+          - addLabel:
+              label: Needs-Author-Feedback
+        # The policy service should trigger even when the label was added by the policy service
+        triggerOnOwnActions: true
+onFailure:
+onSuccess:
