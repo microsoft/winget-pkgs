@@ -121,9 +121,9 @@ $vcLibsUwp = @{
   SaveTo = $(Join-Path $tempFolder -ChildPath 'Microsoft.VCLibs.x64.14.00.Desktop.appx')
 }
 $uiLibsUwp = @{
-  url      = 'https://www.nuget.org/api/v2/package/Microsoft.UI.Xaml/2.7.0'
-  hash     = '422FD24B231E87A842C4DAEABC6A335112E0D35B86FAC91F5CE7CF327E36A591'
-  SaveTo   = $(Join-Path $tempFolder -ChildPath 'Microsoft.UI.Xaml.2.7.zip')
+  url      = 'https://github.com/microsoft/microsoft-ui-xaml/releases/download/v2.7.3/Microsoft.UI.Xaml.2.7.x64.appx'
+  hash     = '8CE30D92ABEC6522BEB2544E7B716983F5CBA50751B580D89A36048BF4D90316'
+  SaveTo   = $(Join-Path $tempFolder -ChildPath 'Microsoft.UI.Xaml.2.7.x64.appx')
 }
 
 $dependencies = @($desktopAppInstaller, $vcLibsUwp, $uiLibsUwp)
@@ -170,16 +170,6 @@ foreach ($dependency in $dependencies) {
   }
 }
 
-# Extract Microsoft.UI.Xaml from zip (if freshly downloaded).
-# This is a workaround until https://github.com/microsoft/winget-cli/issues/1861 is resolved.
-
-if (-Not (Test-Path (Join-Path -Path $tempFolder -ChildPath \Microsoft.UI.Xaml.2.7\tools\AppX\x64\Release\Microsoft.UI.Xaml.2.7.appx))) {
-  Expand-Archive -Path $uiLibsUwp.SaveTo -DestinationPath ($tempFolder + '\Microsoft.UI.Xaml.2.7') -Force
-}
-$uiLibsUwp.file = (Join-Path -Path $tempFolder -ChildPath \Microsoft.UI.Xaml.2.7\tools\AppX\x64\Release\Microsoft.UI.Xaml.2.7.appx)
-$uiLibsUwp.pathInSandbox = Join-Path -Path $desktopInSandbox -ChildPath (Join-Path -Path $tempFolderName -ChildPath \Microsoft.UI.Xaml.2.7\tools\AppX\x64\Release\Microsoft.UI.Xaml.2.7.appx)
-Write-Host
-
 # Copy the version of winget to the sandbox test folder
 Copy-Item -Path $desktopAppInstaller.SaveTo -Destination (Join-Path -Path $tempFolder -ChildPath (Split-Path $desktopAppInstaller.SaveTo -Leaf))
 
@@ -222,8 +212,8 @@ function Update-EnvironmentVariables {
 function Get-ARPTable {
   $registry_paths = @('HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*','HKLM:\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*', 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*', 'HKCU:\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*')
   return Get-ItemProperty $registry_paths -ErrorAction SilentlyContinue |
-       Select-Object DisplayName, DisplayVersion, Publisher, @{N='ProductCode'; E={$_.PSChildName}} |
-       Where-Object {$null -ne $_.DisplayName }
+      Where-Object { $_.DisplayName -and (-not $_.SystemComponent -or $_.SystemComponent -ne 1 ) } |
+      Select-Object DisplayName, DisplayVersion, Publisher, @{N='ProductCode'; E={$_.PSChildName}}, @{N='Scope'; E={if($_.PSDrive.Name -eq 'HKCU') {'User'} else {'Machine'}}}
 }
 '@
 
@@ -278,7 +268,7 @@ Write-Host @'
 
 --> Comparing ARP Entries
 '@
-(Compare-Object (Get-ARPTable) `$originalARP -Property DisplayName,DisplayVersion,Publisher,ProductCode)| Select-Object -Property * -ExcludeProperty SideIndicator | Format-Table
+(Compare-Object (Get-ARPTable) `$originalARP -Property DisplayName,DisplayVersion,Publisher,ProductCode,Scope)| Select-Object -Property * -ExcludeProperty SideIndicator | Format-Table
 
 "@
 }
