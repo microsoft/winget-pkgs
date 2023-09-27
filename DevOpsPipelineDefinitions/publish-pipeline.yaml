@@ -24,8 +24,9 @@ jobs:
     skipComponentGovernanceDetection: ${{ true }}
     runCodesignValidationInjection: ${{ false }}
   timeoutInMinutes: 0
+  
   steps:
-
+  
   # Downloads all the setup files and its dependencies.
   - task: AzureCLI@1
     displayName: 'Azure Setup'
@@ -46,7 +47,7 @@ jobs:
       SIGN_ENDPOINT: $(AzFuncSignEndpoint)
       CLEANUP_ENDPOINT: $(AzFuncPublishCleanupEndpoint)
       MANIFEST_PUBLISH_COMPLETION_ENDPOINT: $(AzFuncManifestPublishCompletionEndpoint)
-      WAIVER_COMMIT_ENDPOINT: $(AzFuncWaiverCommitEndpoint)
+      PIPELINE_TASK_MESSAGE_QUEUE_ENDPOINT: $(AzFuncPipelineTaskMessageQueueEndPoint)
       RESTSOURCE_UPDATE_ENDPOINT: $(AzFuncRestSourceUpdateEndpoint)
 
   - task: CmdLine@2
@@ -109,6 +110,7 @@ jobs:
   dependsOn:
     - 'SignPackage'
   timeoutInMinutes: 0
+  
   steps:
 
   # Downloads all the setup files and its dependencies.
@@ -139,6 +141,9 @@ jobs:
       CdnEndpointName: $(CdnEndpointName)
       CdnResourceGroup: $(CdnResourceGroup)
       CdnAzureServicesAuthConnectionString: $(AzureServicesAuthConnectionString)
+      FdCdnProfileName: $(FdCdnProfileName)
+      FdCdnEndpointName: $(FdCdnEndpointName)
+      FdCdnResourceGroup: $(FdCdnResourceGroup)
       CacheContainerName: $(CacheContainerName)
       WinGet::SubscriptionId: $(WinGet.SubscriptionId)
 
@@ -191,13 +196,13 @@ jobs:
     HostKeySecret: $[ dependencies.CommitProcessing.outputs['wingetsetup.hostkey']]
     CleanEndpointSecret: $[ dependencies.CommitProcessing.outputs['wingetsetup.cleanupEndpoint']]
     ManifestPublishCompletionEndPoint: $[ dependencies.CommitProcessing.outputs['wingetsetup.manifestPublishCompletionEndPoint']]
-    WaiverCommitEndPoint: $[ dependencies.CommitProcessing.outputs['wingetsetup.waiverCommitEndPoint']]
+    PipelineTaskMessageQueueEndPoint: $[ dependencies.CommitProcessing.outputs['wingetsetup.PipelineTaskMessageQueueEndPoint']]
   steps:
 
   - task: AzureFunction@1
     displayName: 'Waiver Commit'
     inputs:
-      function: '$(WaiverCommitEndPoint)'
+      function: '$(PipelineTaskMessageQueueEndPoint)'
       key: '$(HostKeySecret)'
       body: |
         {
@@ -212,7 +217,8 @@ jobs:
         "TimelineId": "$(system.TimelineId)", 
         "TaskInstanceId": "$(system.TaskInstanceId)",
         "AuthToken": "$(system.AccessToken)",
-        "BuildRepositoryId": "$(build.repository.id)"
+        "BuildRepositoryId": "$(build.repository.id)",
+        "TaskIdentifier": "WaiverCommit"
         }
       waitForCompletion: "true"
 
