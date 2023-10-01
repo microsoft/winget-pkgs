@@ -16,7 +16,7 @@ ARP stands for `A`dd and `R`emove `P`rograms. In Windows, installer files put in
 ## **What is the difference between a Marketing Version and Package Version?**
 Sometimes publishers use two different versions to refer to software. The version most commonly seen on the website or download page for a package is the Marketing Version. This is generally is used for the `PackageVersion` field of manifests, but there are exceptions. The Package Version, sometimes referred to as `Build Version`,`Actual Version`, or `DisplayVersion` is the version which is written to the ARP entry. This value is what the Windows Package Manager uses to determine which version of an application is currently installed on your system, and should be mapped to the `AppsAndFeaturesEntries >> DisplayVersion` in a manifest.
 ## **How do I submit a package?**
-Getting started is the hard part. There are several tools which we recommend for both creating and submitting packages. 
+Getting started is the hard part. There are several tools which we recommend for both creating and submitting packages.
 
 First is the [Windows Package Manager Manifest Creator (a.k.a Winget-Create)](https://github.com/microsoft/winget-create). Winget-Create is a command line tool that will prompt you for relevant metadata related to your package. Once you are done, Winget-Create will validate your manifest to verify that it is correct and allow you to submit your newly-created manifest directly to the winget-pkgs repository by linking your GitHub account.
 
@@ -33,7 +33,7 @@ For the package version added under the old publisher, the metadata should be up
 For the package version added under the new package identifier, the metadata should be complete and accurate. Additionally, the `AppsAndFeaturesEntries` should be added for each installer node. The `ProductCode` entries should be specified under this version.
 
 *Additional Notes*:
-While this is currently the best practice, this may change in the future with the implementation of [microsoft/winget-cl#1899](https://github.com/microsoft/winget-cli/issues/1899) and [microsoft/winget-cl#1900](https://github.com/microsoft/winget-cli/issues/1900). The origination of this best practice can be foud [here](https://github.com/microsoft/winget-pkgs/issues/66937#issuecomment-1190154419)
+While this is currently the best practice, this may change in the future with the implementation of [microsoft/winget-cl#1899](https://github.com/microsoft/winget-cli/issues/1899) and [microsoft/winget-cl#1900](https://github.com/microsoft/winget-cli/issues/1900). The origination of this best practice can be found [here](https://github.com/microsoft/winget-pkgs/issues/66937#issuecomment-1190154419)
 ## **How long do packages take to be published?**
 The answer to this question depends on multiple factors. First, the pull request approval. When submitting a package to the repository, your pull request will go through a series of automated checks in the validation pipeline. You will see labels applied to your pull request based on the results of the validation. Secondly, all pull requests must be reviewed and approved by one of our [community moderators](https://github.com/microsoft/winget-pkgs/blob/master/Moderation.md). Finally, the pull request must be merged and pass through the publishing pipeline. Once the publishing pipeline has succeeded for your pull request, you will see a comment and a label indicating this status.
 

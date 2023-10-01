@@ -1,0 +1,43 @@
+id: labelAdded.validationShellExecute
+name: GitOps.PullRequestIssueManagement
+description: Handlers when "Validation-Shell-Execute" label is added
+owner:
+resource: repository
+disabled: false
+where:
+configuration:
+  resourceManagementConfiguration:
+    eventResponderTasks:
+      - description: >-
+          When the label "Validation-Shell-Execute" is added to a pull request
+          * Add the PR specific reply notifying the issue author
+          * Assign to the Author
+          * Label with Needs-Author-Feedback
+          * Remove the Needs-Attention Label
+        if:
+          - payloadType: Pull_Request
+          - labelAdded:
+              label: Validation-Shell-Execute
+        then:
+          - addReply:
+              reply: >-
+                Hello @${issueAuthor},
+
+
+                The package manager bot determined there was an issue with one of the installers listed in the url field, and cannot continue.
+
+
+                The application included in this pull request failed to install during dynamic validation. This test is designed to ensure that the application installs on all environments without warnings. Please, verify that the application installs correctly on architectures specified in the manifest using winget cli.
+
+
+                Template: msftbot/validationError/installers/shellExecute
+          - assignTo:
+              author: True
+          - addLabel:
+              label: Needs-Author-Feedback
+          - removeLabel:
+              label: Needs-Attention
+        # The policy service should trigger even when the label was added by the policy service
+        triggerOnOwnActions: true
+onFailure:
+onSuccess:
