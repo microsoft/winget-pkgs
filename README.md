@@ -5,7 +5,7 @@
 [![Publish Pipeline Badge](https://img.shields.io/endpoint?url=https://winget-pme.azurefd.net/api/GetServiceComponentStatusBadge?component=PublishPipeline 'Publish Pipeline Badge')](https://dev.azure.com/ms/winget-pkgs/_build?definitionId=338)
 [![GitHub Status](https://img.shields.io/endpoint?url=https://api.bittu.eu.org/github-status-badge-endpoint)](https://www.githubstatus.com)
 
-This repository contains the manifest files for the **Windows Package Manager** default source. To browse the available packages, you can use the third-party services listed [here](THIRD_PARTY.md).
+This repository contains the manifest files for the **Windows Package Manager** default source. To browse the available packages, you can use one of the third-party services listed [here](THIRD_PARTY.md).
 
 The **Windows Package Manager** is an [open source client](https://github.com/microsoft/winget-cli) designed for command-line usage. If you are interested in exploring third-party repositories offering private winget package hosting, see [third-party repositories](THIRD_PARTY.md).
 
