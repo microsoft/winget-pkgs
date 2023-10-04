@@ -67,5 +67,20 @@ configuration:
               label: Validation-Completed
           - approvePullRequest:
               comment: "This looks like an automatic waiver. You should be all set!"
+      - description: Close automatic waiver PRs when "Validation-Merge-Conflict" label is added
+        if:
+          - payloadType: Pull_Request
+          - isActivitySender:
+              user: wingetbot
+          - isOpen
+          - labelAdded:
+              label: Validation-Merge-Conflict
+          - filesMatchPattern:
+                pattern: ^.*\.validation
+          - not:
+              filesMatchPattern:
+                pattern: ^.*\.yaml
+        then:
+          - closeIssue
 onFailure:
 onSuccess:
