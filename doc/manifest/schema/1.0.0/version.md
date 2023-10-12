@@ -24,7 +24,7 @@ All Windows Package Manager manifests in the Microsoft community repository are 
  #### Required Field
  This key represents the version of the package. It is related to the specific release this manifests targets. In some cases you will see a perfectly formed [semantic version] number, and in other cases you might see something different. These may be date driven, or they might have other characters with some package specific meaning for example.
 
- The Windows Package Manager client uses this version to determine whether or not an upgrade for a package is available. In some cases, packages may be released with a marketing driven version, and that causes trouble with the `winget upgrade` command. 
+ The Windows Package Manager client uses this version to determine whether or not an upgrade for a package is available. In some cases, packages may be released with a marketing driven version, and that causes trouble with the `winget upgrade` command.
 
  The current best practice is to use the value reported in Add / Remove Programs when this version of the package is installed. In some cases, packages do not report a version resulting in an upgrade loop or other unwanted behavior.
 </details>
