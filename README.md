@@ -14,12 +14,6 @@ The **Windows Package Manager** is an [open source client](https://github.com/mi
 
 # Submitting a Package
 
-You are highly encouraged to submit manifests for your favorite application.
-
-> [!IMPORTANT]
-> At this time installers must be MSIX, MSI, APPX, or .exe application installers. Script-based installers and fonts are not currently supported.
-
-To submit a package to this repository, you should follow these steps:
 
 1. Follow the [Contributing](#contributing) guidelines below.
 2. [Author](AUTHORING_MANIFESTS.md) a Manifest.
