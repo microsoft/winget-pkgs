@@ -115,7 +115,8 @@ Once you've discussed your proposed feature/fix/etc. with a team member, and you
 
 1. Fork the repository if you haven't already.
 2. Clone your fork locally.
-> NOTE: Using a shallow clone can significantly speed up the initial clone command.Pass `--depth=1` to git if you do not need any history in your local repo.
+> [!NOTE]
+> Using a shallow clone can significantly speed up the initial clone command.Pass `--depth=1` to git if you do not need any history in your local repo.
 3. Create & push a feature branch.
 4. Create a [Draft Pull Request (PR)](https://github.blog/2019-02-14-introducing-draft-pull-requests/).
 5. Work on your changes.
@@ -123,13 +124,22 @@ Once you've discussed your proposed feature/fix/etc. with a team member, and you
 
 ### Testing
 
-Testing is a key component in the development workflow.
+Testing is a key component in the development workflow. The PR Template asks if you have tested your manifest locally, but what does this mean? When testing your manifest, this is what you should be looking for -
+
+* Manifests should be tested to ensure applications can install unattended
+* Manifests should be tested to ensure application version matches the Package Version, or that AppsAndFeaturesEntries are included if necessary
+* Manifests should be tested to ensure application publisher matches the defaultLocale Publisher, or that AppsAndFeaturesEntries are included if necessary
+* Manifests should be tested to ensure application name matches the defaultLocale PackageName, or that AppsAndFeaturesEntries are included if necessary
+
+After enabling the setting for local manifests (`winget settings --enable LocalManifestFiles`), manifests can be tested locally with `winget install --manifest <path>`.
+If your system supports Windows Sandbox, you can also use the [SandboxTest.ps1 Script](https://github.com/microsoft/winget-pkgs/blob/master/doc/tools/SandboxTest.md) to test the manifest in the Windows Sandbox. This is the preferred method, as it ensures the package doesn't require any dependencies to install.
 
 ### Code Review
 
 When you'd like the team to take a look, (even if the work is not yet fully-complete), mark the Draft PR as 'Ready For Review' so that the team can review your work and provide comments, suggestions, and request changes. It may take several cycles, but the end result will be solid, testable, conformant code that is safe for us to merge.
 
-> ⚠ Remember: **changes you make may affect both the Windows Package Manager and the schema support implemented in our validation pipelines!** Because of this, we will treat community PR's with the same level of scrutiny and rigor as commits submitted to the official Windows source by team members and partners.
+> [!IMPORTANT]
+> Remember - **changes you make may affect both the Windows Package Manager and the schema support implemented in our validation pipelines!** Because of this, we will treat community PR's with the same level of scrutiny and rigor as commits submitted to the official Windows source by team members and partners.
 
 ### Merge
 

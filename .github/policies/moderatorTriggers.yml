@@ -1,6 +1,6 @@
 id: moderatorTriggers
 name: GitOps.PullRequestIssueManagement
-description: GitOps.PullRequestIssueManagement primitive
+description: Defines the users and permissions for the moderators
 owner:
 resource: repository
 disabled: false
@@ -120,6 +120,38 @@ configuration:
                 then:
                   - addLabel:
                       label: Hardware
+              # Area-Bots
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[aA]rea[\s-][bB]ots'
+                      isRegex: True
+                then:
+                  - addLabel:
+                      label: Area-Bots
+              # Area-Matching
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[aA]rea[\s-][mM]atching'
+                      isRegex: True
+                then:
+                  - addLabel:
+                      label: Area-Matching
+              # Area-Validation-Pipeline
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[aA]rea[\s-][vV]alidation[\s-][pP]ipeline'
+                      isRegex: True
+                then:
+                  - addLabel:
+                      label: Area-Validation-Pipeline
+              # Needs-Author-Feedback
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[Nn]eeds[\s-][Aa]uthor[\s-][fF]eedback'
+                      isRegex: True
+                then:
+                  - addLabel:
+                      label: Needs-Author-Feedback
               # Needs-Attention
               - if:
                   - commentContains:
@@ -137,6 +169,22 @@ configuration:
 
 
                         Template: msftbot/manualReview
+              # Needs-Manual-Merge
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[Nn]eeds[\s-][Mm]anual[\s-][mM]erge'
+                      isRegex: True
+                then:
+                  - addLabel:
+                      label: Needs-Manual-Merge
+              # Manifest-Content-Incomplete
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+([Mm]anifest[\s-])?[Cc]ontent[\s-][Ii]ncomplete'
+                      isRegex: True
+                then:
+                  - addLabel:
+                      label: Manifest-Content-Incomplete
               # Reset-Feedback
               - if:
                   - commentContains:
@@ -191,18 +239,17 @@ configuration:
                       label: Needs-Feedback-Hub
                   - removeLabel:
                       label: Needs-Author-Feedback
-              # Retry Automerge
+              # Reopen with reason <>;
               - if:
                   - commentContains:
-                      pattern: '\[[Pp]olicy\]\s+[rR]etry[\s-][aA]utomerge'
+                      pattern: "[rR]eopen\\s+[wW]ith\\s+[rR]eason\\s*:[\\w\\s\\-\\(\\)\\[\\]\\{\\}\\\\\\/.+=@\\#$%&^*`~|'\",<>?]*(?=;)"
                       isRegex: True
-                  - hasLabel:
-                      label: Validation-Completed
-                  - hasLabel:
-                      label: Moderator-Approved
                 then:
-                  - enableAutoMerge:
-                      mergeMethod: Squash
+                  - reopenIssue
+                  - removeLabel:
+                      label: Resolution-Duplicate
+                  - removeLabel:
+                      label: No-Recent-Activity
           # If the payload is a Pull_Request_Review and an approval, add the Moderator-Approved label
           - if:
               - payloadType: Pull_Request_Review
