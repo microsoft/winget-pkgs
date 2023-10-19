@@ -19,14 +19,14 @@ PackageIdentifier:            # The package unique identifier
 PackageVersion:               # The package version
 PackageLocale:                # The package meta-data locale
 Publisher:                    # The publisher name
-PublisherURL:                 # Optional publisher home page
+PublisherUrl:                 # Optional publisher home page
 PublisherSupportUrl:          # Optional publisher support page
 PrivacyUrl:                   # Optional publisher privacy page
 Author:                       # Optional author
 PackageName:                  # The package name
-PackageURL:                   # Optional package home page
+PackageUrl:                   # Optional package home page
 License:                      # The package license
-LicenseUrl:                   # Optional package home page
+LicenseUrl:                   # Optional package license page
 Copyright:                    # Optional package copyright
 CopyrightUrl:                 # Optional package copyright page
 ShortDescription:             # The short package description
