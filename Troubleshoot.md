@@ -16,7 +16,8 @@ Here are some common mistakes not discovered by the winget validation.
 2) Check for typos in the filename.
 
 Both of them should match the `PackageIdentifier` of the manifest.
-> Note: `PackageIdentifier` is case-sensitive and so the path of the manifest and filename.
+> [!IMPORTANT]
+`PackageIdentifier` is case-sensitive and so the path of the manifest and filename.
 
 PackageIdentifier: `<publisher>.<name>`
 
