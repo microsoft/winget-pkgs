@@ -122,6 +122,42 @@ Once you've discussed your proposed feature/fix/etc. with a team member, and you
 5. Work on your changes.
 6. Build and see if it works.
 
+ # Contribution guidelines 
+Welcome to [winget-pkgs]! We're thrilled that you'd like to contribute. Your help is essential for making it better.
+
+## Getting Started
+
+Before you start contributing, please make sure you have read and understood our [Code of Conduct](CODE_OF_CONDUCT.md).
+
+### Fork the Repository
+
+First, fork the [repository](https://github.com/microsoft/winget-pkgs) to your own GitHub account. This will create a copy of the project under your account.
+
+
+### Clone the Repository
+```
+git clone https://github.com/microsoft/winget-pkgs
+```
+### Navigate to the project directory 📁
+```
+cd winget-pkgs
+```
+Create a new branch for your feature or bug fix:
+```
+ git checkout -b feature-branch
+ ```
+
+Make your changes and commit them:
+```
+git add .
+git commit -m "Description of your changes"
+```
+Push your changes to your fork:
+```
+git push origin feature-branch
+```
+Finally Click on Create Pull request to contribute on this repository.
+
 ### Testing
 
 Testing is a key component in the development workflow. The PR Template asks if you have tested your manifest locally, but what does this mean? When testing your manifest, this is what you should be looking for -

@@ -1,0 +1,62 @@
+# Created with YamlCreate.ps1 v2.2.10 $debug=QUSU.CRLF.7-3-7.Win32NT
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.5.0.schema.json
+
+PackageIdentifier: Hugo.Hugo
+PackageVersion: 0.119.0
+PackageLocale: en-US
+Publisher: The Hugo Authors
+PublisherUrl: https://gohugo.io/
+PublisherSupportUrl: https://discourse.gohugo.io/
+# PrivacyUrl:
+# Author:
+PackageName: Hugo
+PackageUrl: https://gohugo.io/
+License: Apache-2.0
+LicenseUrl: https://gohugo.io/about/license/
+Copyright: Copyright 2023 The Hugo Authors.
+# CopyrightUrl:
+ShortDescription: The world’s fastest framework for building websites
+Description: Hugo is one of the most popular open-source static site generators. With its amazing speed and flexibility, Hugo makes building websites fun again.
+# Moniker:
+Tags:
+- blog
+- blog-engine
+- cms
+- content-management-system
+- documentation
+- documentation-tool
+- static-site
+- static-site-generator
+ReleaseNotes: |-
+  This version is built with Go 1.21.1 which contains some relevant security fixes for the html/template package, see Issue 62196 and Issue 62197. This is the main reason Hugo 0.119.0 is released sooner rather than later. But this release also comes with a dependency refresh and some useful image processing improvements:
+  - A new general-purpose Process method and filter.
+  - A new Opacity filter.
+
+  Process support all of the existing scaling operations, but it can also be used do simple format conversions (e.g. from JPG to PNG). A before/after example:
+
+  {{ $watermark := resources.Get "logo.jpg" | images.Filter
+        (images.GaussianBlur 6)
+        (images.Opacity 0.5)
+  }}
+  {{ $watermark = $watermark.Resize (printf "%dx%d png" $watermark.Width $watermark.Height )
+
+  There are some issues with the above:
+  1. The source image does not support transparency, so the transparency pixels will be filled with the configured background colour.
+  2. The image will be decoded and encoded twice with a potential loss in quality.
+  3. It's clumsy.
+
+  With Hugo 0.119.0 the above can be written as:
+
+  {{ $watermark := resources.Get "logo.jpg" | images.Filter
+        (images.GaussianBlur 6)
+        (images.Opacity 0.5)
+        (images.Process "png")
+  }}
+ReleaseNotesUrl: https://github.com/gohugoio/hugo/releases/tag/v0.119.0
+# PurchaseUrl:
+# InstallationNotes:
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://gohugo.io/documentation/
+ManifestType: defaultLocale
+ManifestVersion: 1.5.0
