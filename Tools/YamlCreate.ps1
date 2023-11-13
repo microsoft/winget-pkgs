@@ -163,8 +163,8 @@ if ($Settings) {
   exit
 }
 
-$ScriptHeader = '# Created with YamlCreate.ps1 v2.2.6'
-$ManifestVersion = '1.4.0'
+$ScriptHeader = '# Created with YamlCreate.ps1 v2.2.10'
+$ManifestVersion = '1.5.0'
 $PSDefaultParameterValues = @{ '*:Encoding' = 'UTF8' }
 $Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
 $ofs = ', '
@@ -454,6 +454,7 @@ Function Request-InstallerUrl {
         }
       }
       $NewInstallerUrl = [System.Web.HttpUtility]::UrlDecode($NewInstallerUrl.Replace('+','%2B'))
+      $NewInstallerUrl = $NewInstallerUrl.Replace(' ','%20')
       if ($script:_returnValue.StatusCode -ne 409) {
         if (Test-String $NewInstallerUrl -MaxLength $Patterns.InstallerUrlMaxLength -MatchPattern $Patterns.InstallerUrl -NotNull) {
           $script:_returnValue = [ReturnValue]::Success()
@@ -696,7 +697,7 @@ Function Get-ExeType {
   # The burn header can appear before a certain point in the binary. Check to see if it's present in the first 264 bytes read
   elseif (($bytes -join '') -match ($burn -join '')) { $exeType = 'burn' }
   # If the burn header isn't present in the first 264 bytes, scan through the rest of the binary
-  else {
+  elseif ($ScriptSettings.IdentifyBurnInstallers -eq 'true') {
     $rollingBytes = $bytes[ - $burn.Length..-1]
     for ($i = 265; $i -lt ($fileStream.Length,524280|Measure-Object -Minimum).Minimum; $i++) {
       $rollingBytes = $rollingBytes[1..$rollingBytes.Length]
@@ -1404,6 +1405,8 @@ Function Restore-YamlKeyOrder {
     'Dependencies'
     'InstallationMetadata'
     'Platform'
+    'Icons'
+    'Agreements'
   )
 
   $_Temp = [ordered] @{}
@@ -2781,6 +2784,7 @@ Switch ($script:Option) {
     $_NewInstallers = @();
     foreach ($_Installer in $script:OldInstallerManifest.Installers) {
       $_Installer['InstallerUrl'] = [System.Web.HttpUtility]::UrlDecode($_Installer.InstallerUrl.Replace('+', '%2B'))
+      $_Installer['InstallerUrl'] = $_Installer.InstallerUrl.Replace(' ', '%20')
       try {
         $script:dest = Get-InstallerFile -URI $_Installer.InstallerUrl -PackageIdentifier $PackageIdentifier -PackageVersion $PackageVersion
       } catch {
