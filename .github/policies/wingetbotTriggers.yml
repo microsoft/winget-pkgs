@@ -82,5 +82,23 @@ configuration:
                 pattern: ^.*\.yaml
         then:
           - closeIssue
+      - description: >-
+          If a pull request is assigned to wingetbot
+          * Assign the ICM users
+        if:
+          - isPullRequest
+          - isOpen
+          - isAssignedToUser:
+              user: wingetbot
+          - not: # If it already has been labeled needing attention, don't re-trigger
+              hasLabel:
+                label: Needs-Attention
+        then:
+          - addLabel:
+              label: Needs-Attention # This will automatically assign the ICM Users
+          - removeLabel:
+              label: Needs-Author-Feedback
+        # The policy service should trigger even when the assignment was made by the policy service
+        triggerOnOwnActions: true
 onFailure:
 onSuccess:
