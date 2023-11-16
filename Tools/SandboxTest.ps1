@@ -10,7 +10,9 @@ Param(
   [switch] $SkipManifestValidation,
   [switch] $Prerelease,
   [switch] $EnableExperimentalFeatures,
-  [string] $WinGetVersion
+  [string] $WinGetVersion,
+  [Parameter(HelpMessage = 'Additional options for WinGet')]
+  [string] $WinGetOptions
 )
 
 $ErrorActionPreference = 'Stop'
@@ -201,7 +203,7 @@ function Update-EnvironmentVariables {
   foreach($level in "Machine","User") {
     [Environment]::GetEnvironmentVariables($level).GetEnumerator() | % {
         # For Path variables, append the new values, if they're not already in there
-        if($_.Name -match 'Path$') {
+        if($_.Name -match '^Path$') {
           $_.Value = ($((Get-Content "Env:$($_.Name)") + ";$($_.Value)") -split ';' | Select -unique) -join ';'
         }
         $_
@@ -212,8 +214,8 @@ function Update-EnvironmentVariables {
 function Get-ARPTable {
   $registry_paths = @('HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*','HKLM:\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*', 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*', 'HKCU:\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*')
   return Get-ItemProperty $registry_paths -ErrorAction SilentlyContinue |
-       Select-Object DisplayName, DisplayVersion, Publisher, @{N='ProductCode'; E={$_.PSChildName}} |
-       Where-Object {$null -ne $_.DisplayName }
+      Where-Object { $_.DisplayName -and (-not $_.SystemComponent -or $_.SystemComponent -ne 1 ) } |
+      Select-Object DisplayName, DisplayVersion, Publisher, @{N='ProductCode'; E={$_.PSChildName}}, @{N='Scope'; E={if($_.PSDrive.Name -eq 'HKCU') {'User'} else {'Machine'}}}
 }
 '@
 
@@ -256,7 +258,7 @@ Write-Host @'
 --> Installing the Manifest $manifestFileName
 
 '@
-winget install -m '$manifestPathInSandbox' --verbose-logs --ignore-local-archive-malware-scan
+winget install -m '$manifestPathInSandbox' --verbose-logs --ignore-local-archive-malware-scan $WinGetOptions
 
 Write-Host @'
 
@@ -268,7 +270,7 @@ Write-Host @'
 
 --> Comparing ARP Entries
 '@
-(Compare-Object (Get-ARPTable) `$originalARP -Property DisplayName,DisplayVersion,Publisher,ProductCode)| Select-Object -Property * -ExcludeProperty SideIndicator | Format-Table
+(Compare-Object (Get-ARPTable) `$originalARP -Property DisplayName,DisplayVersion,Publisher,ProductCode,Scope)| Select-Object -Property * -ExcludeProperty SideIndicator | Format-Table
 
 "@
 }
@@ -354,4 +356,3 @@ $Script
 Write-Host
 
 WindowsSandbox $SandboxTestWsbFile
-

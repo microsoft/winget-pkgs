@@ -109,5 +109,44 @@ configuration:
               label: Package-Update
           - addLabel:
               label: Error-Hash-Mismatch # It's okay to add this label to issues since the labelAdded.errorHashMismatch triggers only respond to PRs
+          - removeLabel:
+              label: Issue-Bug
+      - description: >-
+          When a PR is opened/updated, if the content is in a project folder and user is not repo admin
+          * Add Project-File label
+        if:
+          - payloadType: Pull_Request
+          - isOpen
+          - or:
+            - filesMatchPattern:
+                pattern: ^.github\\.*
+            - filesMatchPattern:
+                pattern: ^.vscode\\.*
+            - filesMatchPattern:
+                pattern: ^doc\\.*
+            - filesMatchPattern:
+                pattern: ^Tools\\.*
+            - filesMatchPattern:
+                pattern: ^.*\.md$
+          - not:
+              activitySenderHasPermission:
+                permission: Admin
+        then:
+          - addLabel:
+              label: Project-File
+      - description: >-
+          When a PR is opened/updated, if the content contains .validation and user is not repo admin
+          * Add Author-Not-Authorized label
+        if:
+          - payloadType: Pull_Request
+          - isOpen
+          - filesMatchPattern:
+                pattern: ^.*\.validation
+          - not:
+              activitySenderHasPermission:
+                permission: Admin
+        then:
+          - addLabel:
+              label: Author-Not-Authorized
 onFailure:
 onSuccess:

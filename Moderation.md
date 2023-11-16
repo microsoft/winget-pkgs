@@ -64,7 +64,8 @@ The bots which help keep the repository clean sometimes make mistakes or or some
 > Trigger: Comment `Reopen with reason: <reason>;` on a pull request or issue
 
 In order to help keep the issues queues clean, moderators are able to close/re-open pull requests and issues. It is important to exercise discretion when closing/re-opening, ensuring that it is done with good reason.
-> Note: The ending semicolon is required. Using a URL in the reason is not supported
+> [!IMPORTANT]
+> The ending semicolon is required. Using a URL in the reason is not supported
 
 ### Marking Issues as Duplicate
 
@@ -95,6 +96,6 @@ Moderators are often the first to see and triage new issues, and so they have th
 * `Needs-Manual-Merge`
 * `Zip-Binary`
 
-> **Note**:
+> [!NOTE]
 > * Adding `Dependencies`, `Hardware`, `Interactive-Only-Installer`,  or `Zip-Binary` will automatically add `Blocking-Issue`
 > * Adding `Needs-Attention` to a PR will automatically assign the repository maintainers
