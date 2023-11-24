@@ -1,0 +1,84 @@
+# Created with YamlCreate.ps1 v2.2.10 $debug=QUSU.CRLF.7-4-0.Win32NT
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.5.0.schema.json
+
+PackageIdentifier: arch1t3cht.Aegisub
+PackageVersion: 9706-cibuilds-20caaabc0
+PackageLocale: en-US
+Publisher: Aegisub Team
+PublisherUrl: https://github.com/arch1t3cht
+PublisherSupportUrl: https://github.com/arch1t3cht/Aegisub/issues
+# PrivacyUrl:
+Author: arch1t3cht
+PackageName: Aegisub
+PackageUrl: https://github.com/arch1t3cht/Aegisub
+License: GPL-2.0
+LicenseUrl: https://github.com/arch1t3cht/Aegisub/blob/feature/LICENCE
+Copyright: Copyright © 2005-2019 Rodrigo Braz Monteiro, Niels Martin Hansen, Thomas Goyne et al.
+# CopyrightUrl:
+ShortDescription: Cross-platform advanced subtitle editor, with new feature branches.
+# Description:
+# Moniker:
+Tags:
+- audio
+- caption
+- subtitle
+- video
+ReleaseNotes: |-
+  Nothing too big in this release, but it's been a while since the last one and a lot of dependencies got updated in the meantime, so it's worth making a new release.
+  Keep in mind that cutting-edge builds can always be found on the actions page.
+
+  New features
+  - Some more small improvements to the VapourSynth video provider:
+    - Make the method of showing a yes/no dialog in aegisub_vs.py configurable and do not always import tkinter. This is useful for systems that do not ship tkinter with Python by default.
+    - Improve the VSScript DLL loading logic on Windows (#97) and improve its error messages.
+    - Improve documentation in aegisub_vs.py
+    - Add an option to control whether user plugins should be loaded, which is off by default on Windows. This can prevent crashes when users have an old version of libvslsmashsource installed, for example. Note that this option only controls user plugins, and that system plugins (like plugins installed in /usr/lib/vapoursynth on Windows) will always be loaded.
+    - Allow VapourSynth scripts to control the progress dialog displayed when loading the audio or video through specially formatted log messages, and add progress reporting to aegisub_vs.py. For example, keyframe generation will now show a proper progress bar instead of just printing progress to the output log.
+    - Fix the lwindex parsing in aegisub_vs.py for files that have more than one video stream (which includes files containing embedded images).
+    - Allow the VapourSynth video provider to open images again with the default script. This worked in the past, but was broken when VFR handling was added since Aegisub doesn't like timecode lists with just one element. Now it works again.
+  - Allow reading compressed subtitles from an mkv file.
+  - Add an option to build with the latest git version of wxWidgets instead of wxWidgets 3.1.7, and build wx master artifacts for Windows on the CI alongside the normal versions. This is relevant because wx master adds the option for an experimental dark mode on Windows. Thus, by downloading a wx master build instead of an ordinary one, enabling dark mode in the Options, and setting the rest of the UI colors in Options > Interface > Colors, you can now have a dark mode for Aegisub on Windows.
+    Please note that this dark mode is an experimental feature from wxWidgets that uses undocumented Windows APIs. It's not perfect, and has all kinds of small rendering quirks. Some additional quirks come from wx master itself. Please do not report issues with dark mode or wx master specifically for now, since many of them cannot be fixed from Aegisub's side.
+    Thanks to @seproDev for most of the work on the dark mode builds.
+
+  Various bugfixes
+  - Fix a case where automation scripts could crash when io.open fails on Windows. This came up when running LuaInterpret more than once, for example.
+  - Fix #15 for real this time.
+  - Fix the Clean Tags Lua library script for \k tags with noninteger duration (#92)
+  - Fix dropdowns in some Lua dialogs on Mac not having an "empty" option. This came up in DependencyControl's Install Script dialog, for example.
+  - Make further fixes to audio and video provider selection. The intended logic hasn't changed from the one described in the last release, but some cases where it wouldn't work correctly were fixed. (#23, #61, #83)
+  - Fix a crash when failing to load a track using Avisynth while another one is still loaded (#61)
+  - Fix the progress dialog when the progress switches from being indeterminate back to showing a proper progress bar.
+  - Bring back the hacks to make the IME on Mac work with the subtitle edit box again. (#91)
+
+  Updated Dependencies
+  Unless stated otherwise, these updates mostly affect Windows, since Linux and Mac pull most of their dependencies from package repositories. This also only mentions dependencies that were manually bumped - various other dependencies on Windows track the latest upstream versions already.
+  - Update FFmpeg to 6.0. Also make the Ubuntu AppImage use the meson wrap for FFmpeg so that it can also use FFmpeg 6.0 (which is necessary for updated FFMS2)
+  - FFMS2 was updated upstream, in particular with fixes to audio decoding.
+  - The libass meson wrap was updated upstream, so for the first time in a long while libass on Windows is now caught up with master. In particular, libass on Windows is now past 0.17.0, and thus includes support for the LayoutRes headers added in that version.
+
+  Backend stuff
+  - Update the luajit wrap for luajit's rolling releases
+  - Fix the library path rewriting for libraries bundled with Mac builds when the libraries use @rpath. This was the issue that broke the Mac build on the previous feature release. (#77)
+  - Fix an error in the luajit wrap that'd make luajit frequently crash on ARM64 systems like Apple Silicon, and update it further to properly match the Makefile's logic for the affected parts.
+  - Fix various issues for cross-compilation, like a bug in the luajit wrap when cross-compiling and disabling tests.
+  - Fix a compilation error on ARM64 mac due to a mismatching iconv_t typedef.
+  - Add support for code signing when building Mac app bundles.
+
+  With these changes, compiling on Apple Silicon should now be possible and yield a fully functional build. Even cross-compiling for ARM64 is possible, although it needs a lot of hacks to get all the dependencies sorted. Official ARM64 Mac builds might come eventually when I figure out the code signing and possibly notarization.
+  Thanks to @ctrlcctrlv for funding the ARM64 Mac machine that allowed me to test and fix alĺ of these issues.
+
+  Even more detailed backend stuff (this is only for the sake of completeness and should only interest you if you're a maintainer)
+  - Add a fallback URL for the nasm wrap since their website is down quite frequently (thanks, @seproDev !).
+  - Fix a case where iconv_close(iconv_invalid) could be called (#74).
+  - Fix a missing order-only dependency for libresrc that would randomly cause first-time compilation to fail.
+  - Fix dictionary downloading on Mac builds when the bundling script is run more than once.
+  - Copy aegisub_vs.py for the build folder, which makes testing easier.
+  - Add a manual trigger option to the CI.
+  - Replace [provides] with [provide] in some wrap files since meson no longer accepts the former.
+ReleaseNotesUrl: https://github.com/arch1t3cht/Aegisub/releases/tag/feature_11
+# PurchaseUrl:
+# InstallationNotes:
+# Documentations:
+ManifestType: defaultLocale
+ManifestVersion: 1.5.0
