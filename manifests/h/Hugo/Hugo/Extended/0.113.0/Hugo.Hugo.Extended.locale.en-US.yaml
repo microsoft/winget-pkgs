@@ -1,0 +1,63 @@
+# Created with YamlCreate.ps1 v2.2.8 $debug=QUSU.CRLF.7-3-4.Win32NT
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.4.0.schema.json
+
+PackageIdentifier: Hugo.Hugo.Extended
+PackageVersion: 0.113.0
+PackageLocale: en-US
+Publisher: The Hugo Authors
+PublisherUrl: https://gohugo.io/
+PublisherSupportUrl: https://discourse.gohugo.io/
+# PrivacyUrl:
+Author: The Hugo Authors
+PackageName: Hugo (Extended)
+PackageUrl: https://gohugo.io/
+License: Apache-2.0
+LicenseUrl: https://gohugo.io/about/license/
+Copyright: Copyright 2023 The Hugo Authors.
+# CopyrightUrl:
+ShortDescription: The world’s fastest framework for building websites (with WebP encoding and Sass transpiling support)
+Description: |-
+  Hugo is one of the most popular open-source static site generators. With its amazing speed and flexibility, Hugo makes building websites fun again.
+  Hugo is available in two flavors: standard and extended. With the extended flavor you can:
+  - Encode WebP images (decoding is also available in the standard build)
+  - Transpile Sass to CSS using the embedded LibSass transpiler
+# Moniker:
+Tags:
+- blog
+- blog-engine
+- cms
+- content-management-system
+- documentation
+- documentation-tool
+- static-site
+- static-site-generator
+ReleaseNotes: |-
+  This release adds TLS/HTTPS support to hugo server (see cf38c73 and #11064 for details) entirely backed by mkcert. We still default to http which is recommended and good enough for 99% of the Hugo use, but there are some situations where you really need it.
+  We have added a new sub command and some new flags to hugo server to enable this:
+
+  ```
+  # Installs a local CA in the system root store. You only need to do this once.
+  hugo server trust
+
+  # Generates locally-trusted certificates (if not already created) and starts the server with TLS/HTTPS enabled.
+  hugo server --tlsAuto
+  ```
+
+  Note that we just delegate to mkcert using its default settings, so all of their documentation is relevant.
+  Also note that this is currently only supported for Linux, MacOS and Windows. And if you install on Linux using Snap, you will currently get an access denied error when running hugo server trust. A workaround for that, or if you need to use some of mkcert's advanced options, is to use mkcert directly to install the local CA:
+
+  ```
+  go install filippo.io/mkcert@latest
+  mkcert -install
+  ```
+
+  You can then start the server with hugo server --tlsAuto.
+  If you have obtained the TLS certificate and key file by other means, you can use the --tlsCertFile and --tlsKeyFile flags. When --tlsAuto or --tlsCertFile and --tlsKeyFile is set and no --baseURL is provided as a flag, the server is started with TLS and https as the protocol.
+ReleaseNotesUrl: https://github.com/gohugoio/hugo/releases/tag/v0.113.0
+# PurchaseUrl:
+# InstallationNotes:
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://gohugo.io/documentation/
+ManifestType: defaultLocale
+ManifestVersion: 1.4.0
