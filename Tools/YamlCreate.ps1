@@ -825,7 +825,7 @@ Function Get-PackageFamilyName {
   # Make the downloaded installer a zip file
   $_MSIX = Get-Item $FilePath
   $_Zip = Join-Path $_MSIX.Directory.FullName -ChildPath 'MSIX_YamlCreate.zip'
-  $_ZipFolder = [System.IO.Path]::GetDirectoryName($zip)+ '\' + [System.IO.Path]::GetFileNameWithoutExtension($zip)
+  $_ZipFolder = [System.IO.Path]::GetDirectoryName($_ZIp)+ '\' + [System.IO.Path]::GetFileNameWithoutExtension($_Zip)
   Copy-Item -Path $_MSIX.FullName -Destination $_Zip
   # Progress preference has to be set globally for Expand-Archive
   # https://github.com/PowerShell/Microsoft.PowerShell.Archive/issues/77#issuecomment-601947496
@@ -837,9 +837,9 @@ Function Get-PackageFamilyName {
   $global:ProgressPreference = $globalPreference
   # Package could be a single package or a bundle, so regex search for either of them
   $_AppxManifest = Get-ChildItem $_ZipFolder -Recurse -File -Filter '*.xml' | Where-Object {$_.Name -match '^Appx(Bundle)?Manifest.xml$'} | Select-Object -First 1
-  [XML] $_XMLContent = Get-Content $_AppxManifest -Raw
+  [XML] $_XMLContent = Get-Content $_AppxManifest.FullName -Raw
   # The path to the node is different between single package and bundles, this should work to get either
-  $_Identity = @($_XMLContent.Bundle.Identity) + @($_XMLContent.Identity)
+  $_Identity = @($_XMLContent.Bundle.Identity) + @($_XMLContent.Package.Identity)
   # Cleanup the files that were created
   Remove-Item $_Zip -Force
   Remove-Item $_ZipFolder -Recurse -Force
