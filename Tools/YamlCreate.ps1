@@ -163,7 +163,7 @@ if ($Settings) {
   exit
 }
 
-$ScriptHeader = '# Created with YamlCreate.ps1 v2.2.10'
+$ScriptHeader = '# Created with YamlCreate.ps1 v2.2.11'
 $ManifestVersion = '1.5.0'
 $PSDefaultParameterValues = @{ '*:Encoding' = 'UTF8' }
 $Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
@@ -2077,6 +2077,26 @@ Function Get-DebugString {
   return $debug
 }
 
+Function Write-ManifestContent {
+  Param
+  (
+    [Parameter(Mandatory = $true, Position = 0)]
+    [string] $FilePath,
+    [Parameter(Mandatory = $true, Position = 1)]
+    [PSCustomObject] $YamlContent,
+    [Parameter(Mandatory = $true, Position = 1)]
+    [string] $Schema
+  )
+  [System.IO.File]::WriteAllLines($FilePath, @(
+      $ScriptHeader + $(Get-DebugString);
+      "# yaml-language-server: `$schema=$Schema)";
+      '';
+      $(ConvertTo-Yaml $YamlContent).TrimEnd() -replace "(.*)$([char]0x2370)", "# `$1"
+    ), $Utf8NoBomEncoding)
+
+  Write-Host "Yaml file created: $FilePath"
+}
+
 # Take all the entered values and write the version manifest file
 Function Write-VersionManifest {
   # Create new empty manifest
@@ -2100,15 +2120,7 @@ Function Write-VersionManifest {
   $script:VersionManifestPath = Join-Path $AppFolder -ChildPath "$PackageIdentifier.yaml"
 
   # Write the manifest to the file
-  $ScriptHeader + "$(Get-DebugString)`n# yaml-language-server: `$schema=$($SchemaUrls.version)`n" > $VersionManifestPath
-  ConvertTo-Yaml $VersionManifest >> $VersionManifestPath
-  $(Get-Content $VersionManifestPath -Encoding UTF8) -replace "(.*)$([char]0x2370)", "# `$1" | Out-File -FilePath $VersionManifestPath -Force
-  $MyRawString = Get-Content $VersionManifestPath | RightTrimString | Select-Object -SkipLast 1 # Skip the last one because it will always just be an empty newline
-  [System.IO.File]::WriteAllLines($VersionManifestPath, $MyRawString, $Utf8NoBomEncoding)
-
-  # Tell user the file was created and the path to the file
-  Write-Host
-  Write-Host "Yaml file created: $VersionManifestPath"
+  Write-ManifestContent -FilePath $VersionManifestPath -YamlContent $VersionManifest -Schema $SchemaUrls.version
 }
 
 # Take all the entered values and write the installer manifest file
@@ -2232,15 +2244,7 @@ Function Write-InstallerManifest {
   $script:InstallerManifestPath = Join-Path $AppFolder -ChildPath "$PackageIdentifier.installer.yaml"
 
   # Write the manifest to the file
-  $ScriptHeader + "$(Get-DebugString)`n# yaml-language-server: `$schema=$($SchemaUrls.installer)`n" > $InstallerManifestPath
-  ConvertTo-Yaml $InstallerManifest >> $InstallerManifestPath
-  $(Get-Content $InstallerManifestPath -Encoding UTF8) -replace "(.*)$([char]0x2370)", "# `$1" | Out-File -FilePath $InstallerManifestPath -Force
-  $MyRawString = Get-Content $InstallerManifestPath | RightTrimString | Select-Object -SkipLast 1 # Skip the last one because it will always just be an empty newline
-  [System.IO.File]::WriteAllLines($InstallerManifestPath, $MyRawString, $Utf8NoBomEncoding)
-
-  # Tell user the file was created and the path to the file
-  Write-Host
-  Write-Host "Yaml file created: $InstallerManifestPath"
+  Write-ManifestContent -FilePath $InstallerManifestPath -YamlContent $InstallerManifest -Schema $SchemaUrls.installer
 }
 
 # Take all the entered values and write the locale manifest file
@@ -2292,18 +2296,14 @@ Function Write-LocaleManifest {
   $LocaleManifest = Restore-YamlKeyOrder $LocaleManifest $LocaleProperties
 
   # Set the appropriate langage server depending on if it is a default locale file or generic locale file
-  if ($LocaleManifest.ManifestType -eq 'defaultLocale') { $yamlServer = "# yaml-language-server: `$schema=$($SchemaUrls.defaultLocale)" } else { $yamlServer = "# yaml-language-server: `$schema=$($SchemaUrls.locale)" }
+  if ($LocaleManifest.ManifestType -eq 'defaultLocale') { $yamlServer = $SchemaUrls.defaultLocale } else { $yamlServer = $SchemaUrls.locale }
 
   # Create the folder for the file if it doesn't exist
   New-Item -ItemType 'Directory' -Force -Path $AppFolder | Out-Null
   $script:LocaleManifestPath = Join-Path $AppFolder -ChildPath "$PackageIdentifier.locale.$PackageLocale.yaml"
 
   # Write the manifest to the file
-  $ScriptHeader + "$(Get-DebugString)`n$yamlServer`n" > $LocaleManifestPath
-  ConvertTo-Yaml $LocaleManifest >> $LocaleManifestPath
-  $(Get-Content $LocaleManifestPath -Encoding UTF8) -replace "(.*)$([char]0x2370)", "# `$1" | Out-File -FilePath $LocaleManifestPath -Force
-  $MyRawString = Get-Content $LocaleManifestPath | RightTrimString | Select-Object -SkipLast 1 # Skip the last one because it will always just be an empty newline
-  [System.IO.File]::WriteAllLines($LocaleManifestPath, $MyRawString, $Utf8NoBomEncoding)
+  Write-ManifestContent -FilePath $LocaleManifestPath -YamlContent $LocaleManifest -Schema $yamlServer
 
   # Copy over all locale files from previous version that aren't the same
   if ($OldManifests) {
@@ -2322,21 +2322,10 @@ Function Write-LocaleManifest {
         if ($OldLocaleManifest['ReleaseNotesUrl'] -and (Test-String $script:ReleaseNotesUrl -IsNull) -and !$Preserve) { $OldLocaleManifest.Remove('ReleaseNotesUrl') }
 
         $script:OldLocaleManifest = Restore-YamlKeyOrder $script:OldLocaleManifest $LocaleProperties
-
-        $yamlServer = "# yaml-language-server: `$schema=https://aka.ms/winget-manifest.locale.$ManifestVersion.schema.json"
-
-        $ScriptHeader + "$(Get-DebugString)`n$yamlServer`n" > (Join-Path $AppFolder -ChildPath $DifLocale.Name)
-        ConvertTo-Yaml $OldLocaleManifest >> (Join-Path $AppFolder -ChildPath $DifLocale.Name)
-        $(Get-Content $(Join-Path $AppFolder -ChildPath $DifLocale.Name) -Encoding UTF8) -replace "(.*)$([char]0x2370)", "# `$1" | Out-File -FilePath $(Join-Path $AppFolder -ChildPath $DifLocale.Name) -Force
-        $MyRawString = Get-Content $(Join-Path $AppFolder -ChildPath $DifLocale.Name) | RightTrimString | Select-Object -SkipLast 1 # Skip the last one because it will always just be an empty newline
-        [System.IO.File]::WriteAllLines($(Join-Path $AppFolder -ChildPath $DifLocale.Name), $MyRawString, $Utf8NoBomEncoding)
+        Write-ManifestContent -FilePath $(Join-Path $AppFolder -ChildPath $DifLocale.Name) -YamlContent $OldLocaleManifest -Schema $SchemaUrls.locale
       }
     }
   }
-
-  # Tell user the file was created and the path to the file
-  Write-Host
-  Write-Host "Yaml file created: $LocaleManifestPath"
 }
 
 function Remove-ManifestVersion {
