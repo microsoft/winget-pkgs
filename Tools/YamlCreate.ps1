@@ -2084,7 +2084,7 @@ Function Write-ManifestContent {
     [string] $FilePath,
     [Parameter(Mandatory = $true, Position = 1)]
     [PSCustomObject] $YamlContent,
-    [Parameter(Mandatory = $true, Position = 1)]
+    [Parameter(Mandatory = $true, Position = 2)]
     [string] $Schema
   )
   [System.IO.File]::WriteAllLines($FilePath, @(
