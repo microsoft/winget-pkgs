@@ -163,7 +163,7 @@ if ($Settings) {
   exit
 }
 
-$ScriptHeader = '# Created with YamlCreate.ps1 v2.2.11'
+$ScriptHeader = '# Created with YamlCreate.ps1 v2.2.12'
 $ManifestVersion = '1.5.0'
 $PSDefaultParameterValues = @{ '*:Encoding' = 'UTF8' }
 $Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
@@ -793,6 +793,60 @@ Function Get-UriScope {
   return $null
 }
 
+function Get-PublisherHash($publisherName)
+{
+    # Sourced from https://marcinotorowski.com/2021/12/19/calculating-hash-part-of-msix-package-family-name
+    $publisherNameAsUnicode = [System.Text.Encoding]::Unicode.GetBytes($publisherName);
+    $publisherSha256 = [System.Security.Cryptography.HashAlgorithm]::Create("SHA256").ComputeHash($publisherNameAsUnicode);
+    $publisherSha256First8Bytes = $publisherSha256 | Select-Object -First 8;
+    $publisherSha256AsBinary = $publisherSha256First8Bytes | ForEach-Object { [System.Convert]::ToString($_, 2).PadLeft(8, '0') };
+    $asBinaryStringWithPadding = [System.String]::Concat($publisherSha256AsBinary).PadRight(65, '0');
+
+    $encodingTable = "0123456789ABCDEFGHJKMNPQRSTVWXYZ";
+
+    $result = "";
+    for ($i = 0; $i -lt $asBinaryStringWithPadding.Length; $i += 5)
+    {
+        $asIndex = [System.Convert]::ToInt32($asBinaryStringWithPadding.Substring($i, 5), 2);
+        $result += $encodingTable[$asIndex];
+    }
+
+    return $result.ToLower();
+}
+
+Function Get-PackageFamilyName {
+  Param
+  (
+    [Parameter(Mandatory = $true, Position = 0)]
+    [string] $FilePath
+  )
+  if ($FilePath -notmatch '\.(msix|appx)(bundle){0,1}$') { return $null }
+
+  # Make the downloaded installer a zip file
+  $_MSIX = Get-Item $FilePath
+  $_Zip = Join-Path $_MSIX.Directory.FullName -ChildPath 'MSIX_YamlCreate.zip'
+  $_ZipFolder = [System.IO.Path]::GetDirectoryName($_ZIp)+ '\' + [System.IO.Path]::GetFileNameWithoutExtension($_Zip)
+  Copy-Item -Path $_MSIX.FullName -Destination $_Zip
+  # Progress preference has to be set globally for Expand-Archive
+  # https://github.com/PowerShell/Microsoft.PowerShell.Archive/issues/77#issuecomment-601947496
+  $globalPreference = $global:ProgressPreference
+  $global:ProgressPreference = 'SilentlyContinue'
+  # Expand the zip file to access the manifest inside
+  Expand-Archive $_Zip -DestinationPath $_ZipFolder -Force
+  # Restore the old progress preference
+  $global:ProgressPreference = $globalPreference
+  # Package could be a single package or a bundle, so regex search for either of them
+  $_AppxManifest = Get-ChildItem $_ZipFolder -Recurse -File -Filter '*.xml' | Where-Object {$_.Name -match '^Appx(Bundle)?Manifest.xml$'} | Select-Object -First 1
+  [XML] $_XMLContent = Get-Content $_AppxManifest.FullName -Raw
+  # The path to the node is different between single package and bundles, this should work to get either
+  $_Identity = @($_XMLContent.Bundle.Identity) + @($_XMLContent.Package.Identity)
+  # Cleanup the files that were created
+  Remove-Item $_Zip -Force
+  Remove-Item $_ZipFolder -Recurse -Force
+  # Return the PFN
+  return $_Identity.Name + '_' + $(Get-PublisherHash $_Identity.Publisher)
+}
+
 # Prompts the user to enter the details for an archive Installer
 # Takes the installer as an input
 # Returns the modified installer
@@ -1061,7 +1115,7 @@ Function Read-InstallerEntry {
       $ChoicePfn = '1'
     } else {
       $_menu = @{
-        entries       = @('*[F] Find Automatically [Note: This will install the package to find Family Name and then removes it.]'; '[M] Manually Enter PackageFamilyName')
+        entries       = @('*[F] Find Automatically'; '[M] Manually Enter PackageFamilyName')
         Prompt        = 'Discover the package family name?'
         DefaultString = 'F'
       }
@@ -1074,18 +1128,9 @@ Function Read-InstallerEntry {
     # If user selected to find automatically -
     # Install package, get family name, uninstall package
     if ($ChoicePfn -eq '0') {
-      try {
-        Add-AppxPackage -Path $script:dest
-        $InstalledPkg = Get-AppxPackage | Select-Object -Last 1 | Select-Object PackageFamilyName, PackageFullName
-        if ($InstalledPkg.PackageFamilyName) { $_Installer['PackageFamilyName'] = $InstalledPkg.PackageFamilyName }
-        Remove-AppxPackage $InstalledPkg.PackageFullName
-      } catch {
-        # Take no action here, we just want to catch the exceptions as a precaution
-        Out-Null
-      } finally {
-        if (Test-String $_Installer['PackageFamilyName'] -IsNull) {
-          $script:_returnValue = [ReturnValue]::new(500, 'Could not find PackageFamilyName', 'Value should be entered manually', 1)
-        }
+      $_Installer['PackageFamilyName'] = Get-PackageFamilyName $script:dest
+      if (Test-String -not $_Installer['PackageFamilyName'] -MatchPattern $Patterns.FamilyName) {
+        $script:_returnValue = [ReturnValue]::new(500, 'Could not find PackageFamilyName', 'Value should be entered manually', 1)
       }
     }
 
@@ -1318,21 +1363,11 @@ Function Read-QuickInstallerEntry {
       # If the installer is msix or appx, try getting the new package family name
       # If the new package family name can't be found, remove it if it exists
       if ($script:dest -match '\.(msix|appx)(bundle){0,1}$') {
-        try {
-          $_didError = $false
-          Add-AppxPackage -Path $script:dest -ErrorVariable _didError
-          $InstalledPkg = Get-AppxPackage | Select-Object -Last 1 | Select-Object PackageFamilyName, PackageFullName
-          $PackageFamilyName = $InstalledPkg.PackageFamilyName
-          if (!$_didError) { Remove-AppxPackage $InstalledPkg.PackageFullName }
-        } catch {
-          # Take no action here, we just want to catch the exceptions as a precaution
-          Out-Null
-        } finally {
-          if (Test-String -not $PackageFamilyName -IsNull) {
-            $_NewInstaller['PackageFamilyName'] = $PackageFamilyName
-          } elseif ($_NewInstaller.Keys -contains 'PackageFamilyName') {
-            $_NewInstaller.Remove('PackageFamilyName')
-          }
+        $PackageFamilyName= Get-PackageFamilyName $script:dest
+        if (Test-String $PackageFamilyName -MatchPattern $Patterns.FamilyName) {
+          $_NewInstaller['PackageFamilyName'] = $PackageFamilyName
+        } elseif ($_NewInstaller.Keys -contains 'PackageFamilyName') {
+          $_NewInstaller.Remove('PackageFamilyName')
         }
       }
       # Remove the downloaded files
@@ -2815,20 +2850,12 @@ Switch ($script:Option) {
       # If the installer is msix or appx, try getting the new package family name
       # If the new package family name can't be found, remove it if it exists
       if ($script:dest -match '\.(msix|appx)(bundle){0,1}$') {
-        try {
-          Add-AppxPackage -Path $script:dest
-          $InstalledPkg = Get-AppxPackage | Select-Object -Last 1 | Select-Object PackageFamilyName, PackageFullName
-          $PackageFamilyName = $InstalledPkg.PackageFamilyName
-          Remove-AppxPackage $InstalledPkg.PackageFullName
-        } catch {
-          # Take no action here, we just want to catch the exceptions as a precaution
-          Out-Null
-        } finally {
-          if (Test-String -not $PackageFamilyName -IsNull) {
-            $_Installer['PackageFamilyName'] = $PackageFamilyName
-          } elseif ($_Installer.Keys -contains 'PackageFamilyName') {
-            $_Installer.Remove('PackageFamilyName')
-          }
+        $PackageFamilyName = Get-PackageFamilyName $script:dest
+
+        if (Test-String $PackageFamilyName -MatchPattern $Patterns.FamilyName) {
+          $_Installer['PackageFamilyName'] = $PackageFamilyName
+        } elseif ($_NewInstaller.Keys -contains 'PackageFamilyName') {
+          $_Installer.Remove('PackageFamilyName')
         }
       }
       # Remove the downloaded files
