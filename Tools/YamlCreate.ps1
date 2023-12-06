@@ -226,6 +226,7 @@ try {
   $InstallerSwitchProperties = (ConvertTo-Yaml $InstallerSchema.definitions.InstallerSwitches.properties | ConvertFrom-Yaml -Ordered).Keys
   $InstallerEntryProperties = (ConvertTo-Yaml $InstallerSchema.definitions.Installer.properties | ConvertFrom-Yaml -Ordered).Keys
   $InstallerDependencyProperties = (ConvertTo-Yaml $InstallerSchema.definitions.Dependencies.properties | ConvertFrom-Yaml -Ordered).Keys
+  $AppsAndFeaturesEntryProperties = (ConvertTo-Yaml $InstallerSchema.definitions.AppsAndFeaturesEntry.properties | ConvertFrom-Yaml -Ordered).Keys
 } catch {
   # Here we want to pass the exception as an inner exception for debugging if necessary
   throw [System.Net.WebException]::new('Manifest schemas could not be downloaded. Try running the script again', $_.Exception)
@@ -305,6 +306,12 @@ $Patterns = @{
   PortableCommandAliasMinLength = $InstallerSchema.Definitions.NestedInstallerFiles.items.properties.PortableCommandAlias.minLength
   PortableCommandAliasMaxLength = $InstallerSchema.Definitions.NestedInstallerFiles.items.properties.PortableCommandAlias.maxLength
   ArchiveInstallerTypes         = @('zip')
+  ARP_DisplayNameMinLength      = $InstallerSchema.Definitions.AppsAndFeaturesEntry.properties.DisplayName.minLength
+  ARP_DisplayNameMaxLength      = $InstallerSchema.Definitions.AppsAndFeaturesEntry.properties.DisplayName.maxLength
+  ARP_PublisherMinLength        = $InstallerSchema.Definitions.AppsAndFeaturesEntry.properties.Publisher.minLength
+  ARP_PublisherMaxLength        = $InstallerSchema.Definitions.AppsAndFeaturesEntry.properties.Publisher.maxLength
+  ARP_DisplayVersionMinLength   = $InstallerSchema.Definitions.AppsAndFeaturesEntry.properties.DisplayVersion.minLength
+  ARP_DisplayVersionMaxLength   = $InstallerSchema.Definitions.AppsAndFeaturesEntry.properties.DisplayVersion.maxLength
 }
 
 # This function validates whether a string matches Minimum Length, Maximum Length, and Regex pattern
@@ -934,6 +941,110 @@ Function Read-NestedInstaller {
   return $_Installer
 }
 
+Function Read-AppsAndFeaturesEntries {
+  Param(
+    [Parameter(Mandatory = $true, Position = 0)]
+    [PSCustomObject] $_Installer
+  )
+
+  $_AppsAndFeaturesEntries = @()
+  Write-Host 'Reading ARP Entries'
+  # TODO: Support adding AppsAndFeaturesEntries if they don't exist
+  if (!$_Installer.AppsAndFeaturesEntries) {
+    return
+  }
+
+  # TODO: Support Multiple AppsAndFeaturesEntries once WinGet supports it
+  # For now, only select and retain the first entry
+  foreach ($_AppsAndFeaturesEntry in @($_Installer.AppsAndFeaturesEntries[0])) {
+       $_AppsAndFeaturesEntries += Read-AppsAndFeaturesEntry $_AppsAndFeaturesEntry
+  }
+  return $_AppsAndFeaturesEntries
+}
+
+Function Read-AppsAndFeaturesEntry {
+  Param(
+    [Parameter(Mandatory = $true, Position = 0)]
+    [PSCustomObject] $_AppsAndFeaturesEntry
+  )
+
+  # TODO: Support adding new fields instead of only editing existing ones
+  if ($_AppsAndFeaturesEntry.DisplayName) { $_AppsAndFeaturesEntry['DisplayName'] = Read-ARPDisplayName $_AppsAndFeaturesEntry.DisplayName }
+  if ($_AppsAndFeaturesEntry.DisplayVersion) { $_AppsAndFeaturesEntry['DisplayVersion'] = Read-ARPDisplayVersion $_AppsAndFeaturesEntry.DisplayVersion }
+  if ($_AppsAndFeaturesEntry.Publisher) { $_AppsAndFeaturesEntry['Publisher'] = Read-ARPPublisher $_AppsAndFeaturesEntry.Publisher }
+  # TODO: Support ProductCode and UpgradeCode
+  return Restore-YamlKeyOrder $_AppsAndFeaturesEntry $AppsAndFeaturesEntryProperties -NoComments
+}
+
+Function Read-ARPDisplayName {
+  Param(
+    [Parameter(Mandatory = $true, Position = 0)]
+    [string] $_DisplayName
+  )
+  # Request DisplayName and Validate
+  do {
+    Write-Host -ForegroundColor 'Red' $script:_returnValue.ErrorString()
+    Write-Host -ForegroundColor 'Yellow' -Object '[Recommended] Enter the application name as it appears in control panel'
+    if (Test-String -not $_DisplayName -IsNull) { Write-Host -ForegroundColor 'DarkGray' "Old Variable: $_DisplayName" }
+    $NewValue = Read-Host -Prompt 'DisplayName' | TrimString
+    if (Test-String -not $NewValue -IsNull) { $_DisplayName = $NewValue }
+
+    if (Test-String $_DisplayName -MinLength $Patterns.ARP_DisplayNameMinLength -MaxLength $Patterns.ARP_DisplayNameMaxLength -AllowNull) {
+      $script:_returnValue = [ReturnValue]::Success()
+    } else {
+      $script:_returnValue = [ReturnValue]::LengthError($Patterns.ARP_DisplayNameMinLength, $Patterns.ARP_DisplayNameMaxLength)
+    }
+  } until ($script:_returnValue.StatusCode -eq [ReturnValue]::Success().StatusCode)
+
+  return $_DisplayName
+}
+
+Function Read-ARPPublisher {
+  Param(
+    [Parameter(Mandatory = $true, Position = 0)]
+    [string] $_Publisher
+  )
+  # Request Publisher Name and Validate
+  do {
+    Write-Host -ForegroundColor 'Red' $script:_returnValue.ErrorString()
+    Write-Host -ForegroundColor 'Yellow' -Object '[Recommended] Enter the Publisher name as it appears in control panel'
+    if (Test-String -not $_Publisher -IsNull) { Write-Host -ForegroundColor 'DarkGray' "Old Variable: $_Publisher" }
+    $NewValue = Read-Host -Prompt 'Publisher' | TrimString
+    if (Test-String -not $NewValue -IsNull) { $_Publisher = $NewValue }
+
+    if (Test-String $_Publisher -MinLength $Patterns.ARP_PublisherMinLength -MaxLength $Patterns.ARP_PublisherMaxLength -AllowNull) {
+      $script:_returnValue = [ReturnValue]::Success()
+    } else {
+      $script:_returnValue = [ReturnValue]::LengthError($Patterns.ARP_PublisherMinLength, $Patterns.ARP_PublisherMaxLength)
+    }
+  } until ($script:_returnValue.StatusCode -eq [ReturnValue]::Success().StatusCode)
+
+  return $_Publisher
+}
+
+Function Read-ARPDisplayVersion {
+  Param(
+    [Parameter(Mandatory = $true, Position = 0)]
+    [string] $_DisplayVersion
+  )
+  # Request DisplayVersion and Validate
+  do {
+    Write-Host -ForegroundColor 'Red' $script:_returnValue.ErrorString()
+    Write-Host -ForegroundColor 'Yellow' -Object '[Recommended] Enter the application version as it appears in control panel'
+    if (Test-String -not $_DisplayVersion -IsNull) { Write-Host -ForegroundColor 'DarkGray' "Old Variable: $_DisplayVersion" }
+    $NewValue = Read-Host -Prompt 'DisplayVersion' | TrimString
+    if (Test-String -not $NewValue -IsNull) { $_DisplayVersion = $NewValue }
+
+    if (Test-String $_DisplayVersion -MinLength $Patterns.ARP_DisplayVersionMinLength -MaxLength $Patterns.ARP_DisplayVersionMaxLength -AllowNull) {
+      $script:_returnValue = [ReturnValue]::Success()
+    } else {
+      $script:_returnValue = [ReturnValue]::LengthError($Patterns.ARP_DisplayVersionMinLength, $Patterns.ARP_DisplayVersionMaxLength)
+    }
+  } until ($script:_returnValue.StatusCode -eq [ReturnValue]::Success().StatusCode)
+
+  return $_DisplayVersion
+}
+
 # Prompts the user to enter installer values
 # Sets the $script:Installers value as an output
 # Returns void
@@ -1245,6 +1356,11 @@ Function Read-InstallerEntry {
     }
   } until ($script:_returnValue.StatusCode -eq [ReturnValue]::Success().StatusCode)
 
+  $AppsAndFeaturesEntries = Read-AppsAndFeaturesEntries $_Installer
+  if ($AppsAndFeaturesEntries) {
+    $_Installer['AppsAndFeaturesEntries'] = @($AppsAndFeaturesEntries)
+  }
+
   if ($script:SaveOption -eq '1' -and (Test-Path -Path $script:dest)) { Remove-Item -Path $script:dest }
 
   # If the installers array is empty, create it
@@ -1378,6 +1494,12 @@ Function Read-QuickInstallerEntry {
     # Force a re-check of the Nested Installer Paths in case they changed between versions
     $_NewInstaller = Read-NestedInstaller $_NewInstaller
 
+    # Force a re-check of the ARP entries in case they changed between versions
+    $AppsAndFeaturesEntries = Read-AppsAndFeaturesEntries $_NewInstaller
+    if ($AppsAndFeaturesEntries) {
+      $_NewInstaller['AppsAndFeaturesEntries'] = @($AppsAndFeaturesEntries)
+    }
+
     #Add the updated installer to the new installers array
     $_NewInstaller = Restore-YamlKeyOrder $_NewInstaller $InstallerEntryProperties -NoComments
     $_NewInstallers += $_NewInstaller
@@ -1430,6 +1552,7 @@ Function Restore-YamlKeyOrder {
     'RestrictedCapabilities'
     'InstallerSuccessCodes'
     'ProductCode'
+    'UpgradeCode'
     'PackageFamilyName'
     'InstallerLocale'
     'InstallerType'
