@@ -948,7 +948,6 @@ Function Read-AppsAndFeaturesEntries {
   )
 
   $_AppsAndFeaturesEntries = @()
-  Write-Host 'Reading ARP Entries'
   # TODO: Support adding AppsAndFeaturesEntries if they don't exist
   if (!$_Installer.AppsAndFeaturesEntries) {
     return
