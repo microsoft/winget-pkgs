@@ -971,7 +971,7 @@ Function Read-AppsAndFeaturesEntry {
   if ($_AppsAndFeaturesEntry.DisplayName) { $_AppsAndFeaturesEntry['DisplayName'] = Read-ARPDisplayName $_AppsAndFeaturesEntry.DisplayName }
   if ($_AppsAndFeaturesEntry.DisplayVersion) { $_AppsAndFeaturesEntry['DisplayVersion'] = Read-ARPDisplayVersion $_AppsAndFeaturesEntry.DisplayVersion }
   if ($_AppsAndFeaturesEntry.Publisher) { $_AppsAndFeaturesEntry['Publisher'] = Read-ARPPublisher $_AppsAndFeaturesEntry.Publisher }
-  # TODO: Support ProductCode and UpgradeCode
+  # TODO: Support ProductCode, UpgradeCode, and InstallerType
   return Restore-YamlKeyOrder $_AppsAndFeaturesEntry $AppsAndFeaturesEntryProperties -NoComments
 }
 
