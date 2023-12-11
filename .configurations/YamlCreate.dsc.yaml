@@ -120,13 +120,13 @@ properties:
         TestScript: |
           $isAdmin = ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
           $caption = (Get-CimInstance Win32_OperatingSystem).Caption
-          $isSandboxApplicable = $caption -match 'Windows 10 Pro' -or $caption -match 'Microsoft Windows 10 Enterprise' -or $caption -match 'Windows 11'
+          $isSandboxApplicable = $caption -match 'Windows (10|11) (Pro|Enterprise|Education)'
           if (!$isAdmin -or !$isSandboxApplicable) {return $false}
           $((dism /online /Get-Features /Format:Table | Select-String 'Containers-DisposableClientVM').Line.Trim() -split ' ' |Select-Object -Last 1) -eq 'Enabled'
         SetScript: |-
           $isAdmin = ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
           $caption = (Get-CimInstance Win32_OperatingSystem).Caption
-          $isSandboxApplicable = $caption -match 'Windows 10 Pro' -or $caption -match 'Microsoft Windows 10 Enterprise' -or $caption -match 'Windows 11'
+          $isSandboxApplicable = $caption -match 'Windows (10|11) (Pro|Enterprise|Education)'
           if ($isAdmin -and $isSandboxApplicable) {
             dism /online /enable-feature /featurename:Containers-DisposableClientVM /norestart
           }
