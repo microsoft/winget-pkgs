@@ -10,6 +10,9 @@
   8. [**Why does a package have the version "Unknown"?**](#why-does-a-package-have-the-version-unknown)
   9. [**My applications keep upgrading even when up to date!**](#my-applications-keep-upgrading-even-when-up-to-date)
   10. [**How can I use PowerShell to parse the output from winget?**](#how-can-i-use-powershell-to-parse-the-output-from-winget)
+  11. [**Why do WinGet and AppInstaller have different versions?**](#why-do-winget-and-appinstaller-have-different-versions)
+  12. [**How do I know the packages in the Community Repository are safe?**](#how-do-i-know-the-packages-in-the-community-repository-are-safe)
+  13. [**How do portable applications get “Installed”?**](#how-do-portable-applications-get-installed)
 -----
 ## **What is an ARP Entry?**
 ARP stands for `A`dd and `R`emove `P`rograms. In Windows, installer files put information about the package they have installed into the Windows Registry. This information is used to tell Windows exactly what a program is and how to uninstall or modify it. Users can view these entries through the Add and Remove Programs option in Control Panel, or by running `appwiz.cpl`. Alternatively, the `Apps & features` menu in Windows Settings can be used to view the entries. Each entry in the table is an ARP Entry, and the Windows Package Manager uses these entries to help determine which applications are currently installed on your system.
@@ -50,3 +53,13 @@ The Windows Package Manager is still in development and does not yet support emi
 * [Add list option to format output as JSON - microsoft/winget-cli#2032](https://github.com/microsoft/winget-cli/issues/2032)
 
 Also, take a look at the [discussions](https://github.com/microsoft/winget-cli/discussions/categories/powershell) based around PowerShell support!
+## Why do WinGet and AppInstaller have different versions?
+Simply put, the two applications have different versions because they are two separate pieces of software. Even though WinGet is included with the AppInstaller package it is fundamentally different. A change to WinGet that may require an increment of the major version would not necessarily be a breaking change in AppInstaller.
+## How do I know the packages in the Community Repository are safe?
+While not all the details can be made public, the general approach is a defense in depth.
+
+All new manifests are first scanned to be sure the manifest has the correct syntax. Assuming the author created the manifest correctly, each installer is then checked. Installers are downloaded to a secured environment and scanned with multiple utilities to check for any form of malware; after this the installer is executed and the installation is validated. This validation includes checking that no system files were changed, no suspicious services were added, and a multitude of other checks are performed to ensure the program is exactly what it appears to be. The application is also run after installation to be sure that no suspicious processes are kicked off.
+
+The last automated check is a content validation to ensure that the package description and other metadata fields don’t violate one of the policies in place such as those against excessively profane language or adult content. There are additional manual checks in place, as each submission requires moderator approval before it can be merged. This gives an extra opportunity for moderators to check for the installation of any potentially unwanted applications, applications which change settings unexpectedly, and to ensure the installation truly works as expected.
+## How do portable applications get “Installed”?
+WinGet does something special here and takes the same actions an installer would. It downloads the application files and moves them into an install directory. Then, WinGet creates the registry entries which make it show up as an installed application. Finally, the application is added to the PATH environment variable, so any CLI applications just work. There are some interesting quirks, where the way an application is added to PATH depends upon the environment WinGet is running in. If developer mode is enabled or WinGet was run from administrative context, a links directory will be created and added to the PATH; if neither of those are true, the full path to the installation folder will be added instead.

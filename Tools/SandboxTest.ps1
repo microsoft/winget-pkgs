@@ -10,7 +10,9 @@ Param(
   [switch] $SkipManifestValidation,
   [switch] $Prerelease,
   [switch] $EnableExperimentalFeatures,
-  [string] $WinGetVersion
+  [string] $WinGetVersion,
+  [Parameter(HelpMessage = 'Additional options for WinGet')]
+  [string] $WinGetOptions
 )
 
 $ErrorActionPreference = 'Stop'
@@ -201,7 +203,7 @@ function Update-EnvironmentVariables {
   foreach($level in "Machine","User") {
     [Environment]::GetEnvironmentVariables($level).GetEnumerator() | % {
         # For Path variables, append the new values, if they're not already in there
-        if($_.Name -match 'Path$') {
+        if($_.Name -match '^Path$') {
           $_.Value = ($((Get-Content "Env:$($_.Name)") + ";$($_.Value)") -split ';' | Select -unique) -join ';'
         }
         $_
@@ -256,7 +258,7 @@ Write-Host @'
 --> Installing the Manifest $manifestFileName
 
 '@
-winget install -m '$manifestPathInSandbox' --verbose-logs --ignore-local-archive-malware-scan
+winget install -m '$manifestPathInSandbox' --verbose-logs --ignore-local-archive-malware-scan $WinGetOptions
 
 Write-Host @'
 
@@ -354,4 +356,3 @@ $Script
 Write-Host
 
 WindowsSandbox $SandboxTestWsbFile
-
