@@ -96,7 +96,9 @@ properties:
     #   will cause this DSC resource to fail in some cases. It is possible
     #   to enable the sandbox by manually registering all the containers
     #   packages with DISM and then use DISM again to enable the Windows
-    #   feature. While DSC is maturing, this step has been disabled.
+    #   feature. While DSC is maturing, the script resource has been used
+    #   to check the privelege level and edition of windows before Sandbox
+    #   can be enabled using DSC.
     ########################################################################
     #  - resource: Microsoft.WindowsSandbox.DSC/WindowsSandbox
     #  id: install-windows-sandbox
@@ -105,4 +107,27 @@ properties:
     #    allowPrerelease: true
     #  settings:
     #    Ensure: Present
+    - resource: PSDscResources/Script
+      id: install-windows-sandbox
+      directives:
+        description: Enable Windows Sandbox
+        allowPrerelease: true
+      settings:
+        GetScript: |
+          $isAdmin = ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+          if (!$isAdmin) { return @{Result = 'Dism must be run as admin'}}
+          @{Result = $((dism /online /Get-Features /Format:Table | Select-String 'Containers-DisposableClientVM').Line.Trim() -split ' ' |Select-Object -Last 1)}
+        TestScript: |
+          $isAdmin = ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+          $caption = (Get-CimInstance Win32_OperatingSystem).Caption
+          $isSandboxApplicable = $caption -match 'Windows (10|11) (Pro|Enterprise|Education)'
+          if (!$isAdmin -or !$isSandboxApplicable) {return $false}
+          $((dism /online /Get-Features /Format:Table | Select-String 'Containers-DisposableClientVM').Line.Trim() -split ' ' |Select-Object -Last 1) -eq 'Enabled'
+        SetScript: |
+          $isAdmin = ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+          $caption = (Get-CimInstance Win32_OperatingSystem).Caption
+          $isSandboxApplicable = $caption -match 'Windows (10|11) (Pro|Enterprise|Education)'
+          if ($isAdmin -and $isSandboxApplicable) {
+            dism /online /enable-feature /featurename:Containers-DisposableClientVM /norestart
+          }
   configurationVersion: 0.2.0
