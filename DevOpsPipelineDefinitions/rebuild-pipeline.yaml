@@ -6,169 +6,196 @@ name: '$(Build.DefinitionName)-$(Build.DefinitionVersion)-$(Date:yyyyMMdd)-$(Rev
 trigger: none
 pr: none
 
-jobs:
+variables:
+  Rebuild.SkipManifestIndexUpdate: $[coalesce(variables.SkipManifestIndexUpdate, 'False')]
+  Rebuild.SkipPausePublishPipeline: $[coalesce(variables.SkipPausePublishPipeline, 'False')]
+  Rebuild.EnableContainerBackup: $[coalesce(variables.EnableContainerBackup, 'False')]
+  Rebuild.ClearContainer: $[coalesce(variables.ClearContainer, 'False')]
 
-# Agent phase.
-- job: 'Rebuild'
-  displayName: 'Start Rebuild'
-  pool:
-    vmImage: 'windows-latest'
-  variables:
-    skipComponentGovernanceDetection: ${{ true }}
-    runCodesignValidationInjection: ${{ false }}
-  steps:
+resources:
+  repositories:
+  - repository: 1ESPipelineTemplates
+    type: git
+    name: 1ESPipelineTemplates/1ESPipelineTemplates
+    ref: refs/tags/release
+extends:
+  template: v1/1ES.Official.PipelineTemplate.yml@1ESPipelineTemplates
+  parameters:
+    pool:
+      name: Azure-Pipelines-1ESPT-ExDShared
+      image: windows-2022
+      os: windows
+    customBuildTags:
+    - ES365AIMigrationTooling
 
-  # Allow scripts to access the system token.
-  - checkout: self
-    persistCredentials: true
-    clean: true
+    stages:
+    - stage: WinGetSvc_Rebuild
+      jobs:
+      # Agent phase.
+      - job: 'Rebuild'
+        displayName: 'Start Rebuild'
+        variables:
+          skipComponentGovernanceDetection: ${{ true }}
+          runCodesignValidationInjection: ${{ false }}
+        timeoutInMinutes: 0
+        
+        steps:
 
-  # Downloads all the setup files and its dependencies.
-  - task: AzureCLI@1
-    displayName: 'Azure Setup'
-    inputs:
-      azureSubscription: '$(WinGet.Subscription)'
-      scriptLocation: inlineScript
-      inlineScript: 'az storage blob download-batch -d . --pattern * -s servicewrapper --output none'
-    env:
-      AZURE_STORAGE_CONNECTION_STRING: $(ValidationStorageAccountConnectionString)
+        # Allow scripts to access the system token.
+        - checkout: self
+          persistCredentials: true
+          clean: true
 
-  # WinGet setup
-  - script: 'winget_publish_setup.cmd'
-    name: 'wingetsetup'
-    displayName: 'WinGet Setup'
-    workingDirectory: scripts
-    env:
-      HOST_KEY: $(AzureFunctionHostKey)
-      SIGN_ENDPOINT: $(AzFuncSignEndpoint)
+        # Downloads all the setup files and its dependencies.
+        - task: AzureCLI@1
+          displayName: 'Azure Setup'
+          inputs:
+            azureSubscription: '$(WinGet.Subscription)'
+            scriptLocation: inlineScript
+            inlineScript: 'az storage blob download-batch -d . --pattern * -s servicewrapper --output none'
+          env:
+            AZURE_STORAGE_CONNECTION_STRING: $(ValidationStorageAccountConnectionString)
 
-  - task: CmdLine@2
-    displayName: 'Validate Manifests'
-    inputs:
-      script: 'WinGetSvcWrapper.exe rebuild --operationId %BUILD_BUILDNUMBER%'
-      failOnStderr: true
-    condition: succeeded()
-    env:
-      ValidationConnectionString: $(ValidationStorageAccountConnectionString)
-      ExecutionEnvironment: $(ExecutionEnvironment)
-      PackagePublisher: $(PackagePublisher)
-      SYSTEM_ACCESSTOKEN: $(System.AccessToken)
-      DIApplicationInsightKey: $(DIApplicationInsightKey)
-      WinGet:AppConfig:Primary: $(AppConfigPrimary)
-      WinGet:AppConfig:Secondary: $(AppConfigSecondary)
+        # WinGet setup
+        - task: CmdLine@2
+          name: 'wingetsetup'
+          displayName: 'WinGet Setup'
+          env:
+            HOST_KEY: $(AzureFunctionHostKey)
+            SIGN_ENDPOINT: $(AzFuncSignEndpoint)
+            PUBLISH_ENDPOINT: $(AzFuncRebuildPublishEndpoint)
+            CLEANUP_ENDPOINT: $(AzFuncRebuildCleanupEndpoint)
+            RESTSOURCE_REBUILD_ENDPOINT: $(AzFuncRestSourceRebuildEndpoint)
+          inputs:
+            script: 'winget_rebuild_setup.cmd'
+            workingDirectory: scripts
 
-# Agentless phase. Depends on previous job. 
-- job: 'SignPackage'
-  pool: server
-  timeoutInMinutes: 1500
-  displayName: 'Sign package'
-  dependsOn:
-    - 'Rebuild'
-  variables:
-    HostKeySecret: $[ dependencies.Rebuild.outputs['wingetsetup.hostkey']]
-    SignEndpointSecret: $[ dependencies.Rebuild.outputs['wingetsetup.signEndpoint']]
-  steps:
+        - task: CmdLine@2
+          displayName: 'Validate Manifests'
+          inputs:
+            script: 'WinGetSvcWrapper.exe rebuild --operationId %BUILD_BUILDNUMBER%'
+            failOnStderr: true
+          condition: succeeded()
+          env:
+            ValidationConnectionString: $(ValidationStorageAccountConnectionString)
+            ExecutionEnvironment: $(ExecutionEnvironment)
+            PackagePublisher: $(PackagePublisher)
+            SYSTEM_ACCESSTOKEN: $(System.AccessToken)
+            DIApplicationInsightKey: $(DIApplicationInsightKey)
+            WinGet:AppConfig:Primary: $(AppConfigPrimary)
+            WinGet:AppConfig:Secondary: $(AppConfigSecondary)
+            DevOpsOrganization: $(DevOpsOrganization)
+            DevOpsProjectName: $(DevOpsProjectName)
+            DevOpsPublishPipelineDefinitionId: $(DevOpsPublishPipelineDefinitionId)
 
-  # Sign package.
-  - task: AzureFunction@1
-    displayName: 'Signing package'
-    inputs:
-      function: '$(SignEndpointSecret)'
-      key: '$(HostKeySecret)'
-      body: |
-        {
-        "operationId": "$(Build.BuildNumber)",
-        "BuildId": "$(Build.BuildId)",
-        "PlanUrl": "$(system.CollectionUri)",
-        "HubName": "$(system.HostType)",
-        "pipelineType": "RebuildPipeline",
-        "ProjectId": "$(system.TeamProjectId)",
-        "PlanId": "$(system.PlanId)", 
-        "JobId": "$(system.JobId)", 
-        "TimelineId": "$(system.TimelineId)", 
-        "TaskInstanceId": "$(system.TaskInstanceId)",
-        "AuthToken": "$(system.AccessToken)"
-        }
-      waitForCompletion: "true"
+      # Agentless phase. Depends on previous job. 
+      - job: 'SignPackage'
+        pool: server
+        timeoutInMinutes: 1500
+        displayName: 'Sign package'
+        dependsOn:
+          - 'Rebuild'
+        variables:
+          HostKeySecret: $[ dependencies.Rebuild.outputs['wingetsetup.hostkey']]
+          SignEndpointSecret: $[ dependencies.Rebuild.outputs['wingetsetup.signEndpoint']]
+        steps:
 
-# Agent phase. Depends on previous job.
-- job: 'Publish'
-  displayName: 'Publish'
-  timeoutInMinutes: 300
-  pool:
-    vmImage: 'windows-latest'
-  variables:
-    skipComponentGovernanceDetection: ${{ true }}
-    runCodesignValidationInjection: ${{ false }}
-  dependsOn:
-    - 'SignPackage'
-  steps:
+        # Sign package.
+        - task: AzureFunction@1
+          displayName: 'Signing package'
+          inputs:
+            function: '$(SignEndpointSecret)'
+            key: '$(HostKeySecret)'
+            body: |
+              {
+              "operationId": "$(Build.BuildNumber)",
+              "BuildId": "$(Build.BuildId)",
+              "PlanUrl": "$(system.CollectionUri)",
+              "HubName": "$(system.HostType)",
+              "pipelineType": "RebuildPipeline",
+              "ProjectId": "$(system.TeamProjectId)",
+              "PlanId": "$(system.PlanId)", 
+              "JobId": "$(system.JobId)", 
+              "TimelineId": "$(system.TimelineId)", 
+              "TaskInstanceId": "$(system.TaskInstanceId)",
+              "AuthToken": "$(system.AccessToken)"
+              }
+            waitForCompletion: "true"
 
-  # Downloads all the setup files and its dependencies.
-  - task: AzureCLI@1
-    displayName: 'Azure Setup'
-    inputs:
-      azureSubscription: '$(WinGet.Subscription)'
-      scriptLocation: inlineScript
-      inlineScript: 'az storage blob download-batch -d . --pattern * -s servicewrapper --output none'
-    env:
-      AZURE_STORAGE_CONNECTION_STRING: $(ValidationStorageAccountConnectionString)
+      # Agentless phase. Depends on previous job.
+      - job: 'Publish'
+        pool: server
+        timeoutInMinutes: 1500
+        displayName: 'Publish'
+        dependsOn:
+          - 'Rebuild'
+          - 'SignPackage'
+        variables:
+          HostKeySecret: $[ dependencies.Rebuild.outputs['wingetsetup.hostkey']]
+          PublishEndpointSecret: $[ dependencies.Rebuild.outputs['wingetsetup.publishEndpoint']]
+        steps:
 
-  # Publish rebuild.
-  - task: CmdLine@2
-    displayName: 'Publish'
-    inputs:
-      script: 'WinGetSvcWrapper.exe rebuild-publish --operationId %BUILD_BUILDNUMBER%'
-      failOnStderr: true
-    condition: succeeded()
-    env:
-      ValidationConnectionString: $(ValidationStorageAccountConnectionString)
-      ExecutionEnvironment: $(ExecutionEnvironment)
-      CacheConnectionString: $(CacheStorageAccountConnectionString)
-      DIApplicationInsightKey: $(DIApplicationInsightKey)
-      AzureServicesAuthConnectionString: $(AzureServicesAuthConnectionString)
-      WinGetSubscriptionId: $(WinGetSubscriptionId)
-      CdnProfileName: $(CdnProfileName)
-      CdnEndpointName: $(CdnEndpointName)
-      WinGet:AppConfig:Primary: $(AppConfigPrimary)
-      WinGet:AppConfig:Secondary: $(AppConfigSecondary)
+        # Rebuild Publish.
+        - task: AzureFunction@1
+          displayName: 'Publish'
+          inputs:
+            function: '$(PublishEndpointSecret)'
+            key: '$(HostKeySecret)'
+            body: |
+              {
+              "operationId": "$(Build.BuildNumber)",
+              "BuildId": "$(Build.BuildId)",
+              "PlanUrl": "$(system.CollectionUri)",
+              "HubName": "$(system.HostType)",
+              "pipelineType": "RebuildPipeline",
+              "ProjectId": "$(system.TeamProjectId)",
+              "PlanId": "$(system.PlanId)", 
+              "JobId": "$(system.JobId)", 
+              "TimelineId": "$(system.TimelineId)", 
+              "TaskInstanceId": "$(system.TaskInstanceId)",
+              "AuthToken": "$(system.AccessToken)",
+              "ContainerName": "$(CacheContainerName)",
+              "CommitTablePartitionKey": "$(CommitTablePartitionKey)",
+              "CommitTableRowKey": "$(CommitTableRowKey)",
+              "EnableContainerBackup": "$(Rebuild.EnableContainerBackup)",
+              "SkipManifestIndexUpdate": "$(Rebuild.SkipManifestIndexUpdate)",
+              "ClearContainer": "$(Rebuild.ClearContainer)",
+              }
+            waitForCompletion: "true"
 
-# Agent phase. Depends on previous job.
-- job: 'Cleanup'
-  displayName: 'Cleanup'
-  pool:
-    vmImage: 'windows-latest'
-  dependsOn:
-    - 'Rebuild'
-    - 'Publish'
-    - 'SignPackage'
-  condition: succeededOrFailed()
-  variables:
-    skipComponentGovernanceDetection: ${{ true }}
-    runCodesignValidationInjection: ${{ false }}
-  steps:
+      # Agentless phase. Depends on previous job.
+      - job: 'Cleanup'
+        pool: server
+        timeoutInMinutes: 1500
+        displayName: 'Cleanup'
+        dependsOn:
+          - 'Rebuild'
+          - 'SignPackage'
+          - 'Publish'
+        condition: and(succeededOrFailed(), ne(variables['Rebuild.SkipPausePublishPipeline'], 'True'))
+        variables:
+          HostKeySecret: $[ dependencies.Rebuild.outputs['wingetsetup.hostkey']]
+          CleanupEndpointSecret: $[ dependencies.Rebuild.outputs['wingetsetup.cleanupEndpoint']]
+        steps:
 
-    # Don't clone repo.
-  - checkout: none
-
-  - task: AzureCLI@1
-    displayName: 'Azure Setup'
-    inputs:
-      azureSubscription: '$(WinGet.Subscription)'
-      scriptLocation: inlineScript
-      inlineScript: 'az storage blob download-batch -d . --pattern * -s servicewrapper --output none'
-    env:
-      AZURE_STORAGE_CONNECTION_STRING: $(ValidationStorageAccountConnectionString)
-
-  - task: CmdLine@2
-    displayName: 'WinGet Cleanup'
-    inputs:
-      script: 'WinGetSvcWrapper.exe rebuild-cleanup --operationId %BUILD_BUILDNUMBER%'
-      failOnStderr: true
-    condition: succeeded()
-    env:
-      ValidationConnectionString: $(ValidationStorageAccountConnectionString)
-      SYSTEM_ACCESSTOKEN: $(System.AccessToken)
-      DIApplicationInsightKey: $(DIApplicationInsightKey)
-      WinGet:AppConfig:Primary: $(AppConfigPrimary)
-      WinGet:AppConfig:Secondary: $(AppConfigSecondary)
+        # Rebuild cleanup.
+        - task: AzureFunction@1
+          displayName: 'Cleanup'
+          inputs:
+            function: '$(CleanupEndpointSecret)'
+            key: '$(HostKeySecret)'
+            body: |
+              {
+              "operationId": "$(Build.BuildNumber)",
+              "BuildId": "$(Build.BuildId)",
+              "PlanUrl": "$(system.CollectionUri)",
+              "HubName": "$(system.HostType)",
+              "pipelineType": "RebuildPipeline",
+              "ProjectId": "$(system.TeamProjectId)",
+              "PlanId": "$(system.PlanId)", 
+              "JobId": "$(system.JobId)", 
+              "TimelineId": "$(system.TimelineId)", 
+              "TaskInstanceId": "$(system.TaskInstanceId)",
+              "AuthToken": "$(system.AccessToken)",
+              }
+            waitForCompletion: "true"

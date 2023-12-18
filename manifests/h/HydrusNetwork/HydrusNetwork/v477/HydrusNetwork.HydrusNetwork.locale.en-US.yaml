@@ -1,0 +1,58 @@
+# Created with YamlCreate.ps1 v2.1.1 $debug=QUSU.7-2-1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.1.0.schema.json
+
+PackageIdentifier: HydrusNetwork.HydrusNetwork
+PackageVersion: v477
+PackageLocale: en-US
+Publisher: Hydrus Network
+PublisherUrl: https://github.com/hydrusnetwork/hydrus
+PublisherSupportUrl: https://github.com/hydrusnetwork/hydrus/issues
+# PrivacyUrl: 
+Author: Hydrus Network
+PackageName: Hydrus Network
+PackageUrl: https://github.com/hydrusnetwork/hydrus
+License: WTFPL
+LicenseUrl: https://github.com/hydrusnetwork/hydrus/blob/master/license.txt
+Copyright: Copyright (C) 2010 by Kris Craig
+CopyrightUrl: https://github.com/hydrusnetwork/hydrus/blob/master/license.txt
+ShortDescription: A personal booru-style media tagger that can import files and tags from your hard drive and popular websites. Content can be shared with other users via user-run servers.
+Description: |-
+  The hydrus network client is an application written for Anon and other internet-fluent media nerds who have large image/swf/webm collections.
+  It browses with tags instead of folders, a little like a booru on your desktop. Advanced users can share tags and files anonymously through custom servers that any user may run.
+  Everything is free and privacy is the first concern. Executable releases are available for Windows, Linux, and macOS.
+  The program is in python, so you can also run it straight from the source code.
+Moniker: hydrus-network
+Tags:
+- booru
+- cross-platform
+- image-database
+# Agreements: 
+ReleaseNotes: |-
+  misc
+  • the network engine now parses the 'last-modified' response header for raw files. if this time is earlier than any parsed source time, it is used as the source time and saved to the new 'domain modified time' system. this provides decent post time parsing for a bunch of sites by default, which will also help for subscription timing and similar
+  • to get better apng duration, updated the apng parser to count up every frame duration separately. previously, if ffmpeg couldn't figure it out, I was just defaulting to 24 fps and estimating. now it is calculated properly, and for variable framerate apngs too. all apngs are scheduled for a metadata regen this week. thanks to the user who submitted some long apngs where this problem was apparent
+  • fixed a bug in the network engine filter that figures out url class precedence. url classes with more parameters were being accidentally sorted above those with more path components, which was messing with some url class matching and automatic parser linking
+  • improved the message when an url class fails to match because the given url has too few path components
+  • fixed a time delta display bug where it could say '2 years, 12 months' and similar, which was due to a rounding issue on 30 day months and the, for example, 362nd day of the year
+  • fixed a little bug where if you forced an archive action on an already archived file, that file would appear to get a fake newer archived timestamp in UI until you restarted
+  • updated the default nitter parsers to pull a creator tag. this seemed to not have been actually done when previously thought
+  • the image renderer now handles certain broken files better, including files truncated to 0 size by disk problem. a proper error popup is made, and file integrity and rescan jobs are scheduled
+
+  file history chart
+  • for a long time, a user has been generating some cool charts on file history (how many files you've had in your db over time, how many were deleted, etc...) in matplotlib. you may have run his script before on your own database. we've been talking a while about integrating it into the client, and this week I finally got around to it and implemented it in QtCharts. please check out the new 'view file history' underneath Mr Bones's entry in the help menu. I would like to do more in this area, and now I have learned a little more about QtCharts I'd like to revisit and polish up my old bandwidth charts and think more about drawing some normal curves and so on of other interesting data. let me know what you think!
+  • I did brush up a couple things with the bandwidth bar chart already, improving date display and the y axis label format
+
+  client api
+  • a user has written several expansions for the client api. I really appreciate the work
+  • the client api now has note support! there is a new 'add notes' permission, 'include_notes' parameter in 'file_metadata' to fetch notes, and 'set_notes' and 'delete_notes' POST commands
+  • the system predicate parser now supports note system preds
+  • hydrus now supports bigger GET requests, up to 2 megabytes total length (which will help if you are sending a big json search object via GET)
+  • and the client api now supports CBOR as an alternate to JSON, if requested (via content-type header for POST, 'cbor' arg for GET). CBOR is basically a compressed byte-friendly version of JSON that works a bit faster and is more accessible in some lower level languages
+  • cbor2 is now in the requirements.txt(s), and about->help shows it too
+  • I added a little api help on CBOR
+  • I integrated the guy's unit tests for the new notes support into the main hydrus test suite
+  • the client api version is now 27
+  • I added links to the client api help to this new list of hydrus-related projects on github, which was helpfully compiled by another user: https://github.com/stars/hydrusnetwork/lists/hydrus-related-projects
+ReleaseNotesUrl: https://github.com/hydrusnetwork/hydrus/releases/tag/v477
+ManifestType: defaultLocale
+ManifestVersion: 1.1.0
