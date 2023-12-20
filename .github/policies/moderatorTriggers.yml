@@ -1,0 +1,270 @@
+id: moderatorTriggers
+name: GitOps.PullRequestIssueManagement
+description: Defines the users and permissions for the moderators
+owner:
+resource: repository
+disabled: false
+where:
+configuration:
+  resourceManagementConfiguration:
+    eventResponderTasks:
+      - if:
+          # If the activity sender is any one of the moderators, has Admin permission on the repo, or has Write permissions on the repo. . .
+          - or:
+              - activitySenderHasPermission:
+                  permission: Admin
+              - activitySenderHasPermission:
+                  permission: Write
+              - isActivitySender:
+                  user: ImJoakim
+                  issueAuthor: False
+              - isActivitySender:
+                  user: ItzLevvie
+                  issueAuthor: False
+              - isActivitySender:
+                  user: jedieaston
+                  issueAuthor: False
+              - isActivitySender:
+                  user: KaranKad
+                  issueAuthor: False
+              - isActivitySender:
+                  user: OfficialEsco
+                  issueAuthor: False
+              - isActivitySender:
+                  user: quhxl
+                  issueAuthor: False
+              - isActivitySender:
+                  user: Trenly
+                  issueAuthor: False
+              - isActivitySender:
+                  user: mdanish-kh
+                  issueAuthor: False
+              - isActivitySender:
+                  user: russellbanks
+                  issueAuthor: False
+        then:
+          # If the payload is an issue_Comment or a Pull_Request_Review_Comment
+          - if:
+              - or:
+                  - payloadType: Issue_Comment
+                  - payloadType: Pull_Request_Review_Comment
+            # Take different actions based on the comment pattern
+            then:
+              # Blocking-Issue
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[bB]locking[\s-][iI]ssue'
+                      isRegex: True
+                then:
+                  - removeLabel:
+                      label: Needs-Author-Feedback
+                  - removeLabel:
+                      label: Needs-Attention
+                  - addLabel:
+                      label: Blocking-Issue
+              # Needs-CLA
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[Nn]eeds[\s-][Cc][Ll][Aa]'
+                      isRegex: True
+                then:
+                  - addLabel:
+                      label: Needs-CLA
+              # Dependencies
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[dD]ependencies'
+                      isRegex: True
+                then:
+                  - addLabel:
+                      label: Dependencies
+              # Area-External
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[aA]rea[\s-][eE]xternal'
+                      isRegex: True
+                then:
+                  - addLabel:
+                      label: Area-External
+              # Installer-Issue
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[iI]nstaller[\s-][iI]ssue'
+                      isRegex: True
+                then:
+                  - addLabel:
+                      label: Installer-Issue
+                  - addLabel:
+                      label: Area-External
+              # Interactive-Only-Installer
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[iI]nteractive[\s-][oO]nly([\s-][iI]nstaller)?'
+                      isRegex: True
+                then:
+                  - addLabel:
+                      label: Interactive-Only-Installer
+              # Zip-Binary
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[zZ]ip[\s-][bB]inary'
+                      isRegex: True
+                then:
+                  - addLabel:
+                      label: zip-binary
+              # Hardware
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[hH]ardware'
+                      isRegex: True
+                then:
+                  - addLabel:
+                      label: Hardware
+              # Area-Bots
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[aA]rea[\s-][bB]ots'
+                      isRegex: True
+                then:
+                  - addLabel:
+                      label: Area-Bots
+              # Area-Matching
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[aA]rea[\s-][mM]atching'
+                      isRegex: True
+                then:
+                  - addLabel:
+                      label: Area-Matching
+              # Area-Validation-Pipeline
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[aA]rea[\s-][vV]alidation[\s-][pP]ipeline'
+                      isRegex: True
+                then:
+                  - addLabel:
+                      label: Area-Validation-Pipeline
+              # Needs-Author-Feedback
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[Nn]eeds[\s-][Aa]uthor[\s-][fF]eedback'
+                      isRegex: True
+                then:
+                  - addLabel:
+                      label: Needs-Author-Feedback
+              # Needs-Attention
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[Nn]eeds[\s-][Aa]ttention'
+                      isRegex: True
+                then:
+                  - addLabel:
+                      label: Needs-Attention
+                  - addReply:
+                      reply: >-
+                        Hello ${issueAuthor},
+
+
+                        Your pull request requires attention from a repository administrator. It has been assigned to a developer for review.
+
+
+                        Template: msftbot/manualReview
+              # Needs-Manual-Merge
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[Nn]eeds[\s-][Mm]anual[\s-][mM]erge'
+                      isRegex: True
+                then:
+                  - addLabel:
+                      label: Needs-Manual-Merge
+              # Manifest-Content-Incomplete
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+([Mm]anifest[\s-])?[Cc]ontent[\s-][Ii]ncomplete'
+                      isRegex: True
+                then:
+                  - addLabel:
+                      label: Manifest-Content-Incomplete
+              # Unblocked
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[uU]nblocked'
+                      isRegex: True
+                then:
+                  - removeLabel:
+                      label: Blocking-Issue
+              # Reset-Feedback
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[rR]eset\s+[fF]eedback'
+                      isRegex: True
+                then:
+                  - removeLabel:
+                      label: Needs-Author-Feedback
+                  - removeLabel:
+                      label: Needs-Attention
+                  - removeLabel:
+                      label: Moderator-Approved
+                  ## TODO: Dismiss All Pull Request Reviews
+              # Duplicate of #
+              - if:
+                  - commentContains:
+                      pattern: Duplicate\s+of\s+\#?\s*\d+
+                      isRegex: True
+                then:
+                  - addReply:
+                      reply: >-
+                        Hello @${issueAuthor},
+
+
+                        We've identified this as a duplicate of another issue or PR that already exists. This specific instance is being closed in favor of the linked issue. Please add your 👍 to the other issue to raise its priority. Thanks for your contribution!
+
+
+                        Template: msftbot/duplicate/closed
+                  - closeIssue
+                  - removeLabel:
+                      label: Needs-Triage
+                  - removeLabel:
+                      label: Needs-Attention
+                  - removeLabel:
+                      label: Needs-Feedback-Hub
+                  - removeLabel:
+                      label: Needs-Author-Feedback
+                  - addLabel:
+                      label: Resolution-Duplicate
+              # Close with reason <>;
+              - if:
+                  - commentContains:
+                      pattern: "[cC]lose\\s+[wW]ith\\s+[rR]eason\\s*:[\\w\\s\\-\\(\\)\\[\\]\\{\\}\\\\\\/.+=@\\#$%&^*`~|'\",<>?]*(?=;)"
+                      isRegex: True
+                then:
+                  - closeIssue
+                  - removeLabel:
+                      label: Needs-Triage
+                  - removeLabel:
+                      label: Needs-Attention
+                  - removeLabel:
+                      label: Needs-Feedback-Hub
+                  - removeLabel:
+                      label: Needs-Author-Feedback
+              # Reopen with reason <>;
+              - if:
+                  - commentContains:
+                      pattern: "[rR]eopen\\s+[wW]ith\\s+[rR]eason\\s*:[\\w\\s\\-\\(\\)\\[\\]\\{\\}\\\\\\/.+=@\\#$%&^*`~|'\",<>?]*(?=;)"
+                      isRegex: True
+                then:
+                  - reopenIssue
+                  - removeLabel:
+                      label: Resolution-Duplicate
+                  - removeLabel:
+                      label: No-Recent-Activity
+          # If the payload is a Pull_Request_Review and an approval, add the Moderator-Approved label
+          - if:
+              - payloadType: Pull_Request_Review
+              - isReviewState:
+                  reviewState: Approved
+            then:
+              - addLabel:
+                  label: Moderator-Approved
+onFailure:
+onSuccess:
