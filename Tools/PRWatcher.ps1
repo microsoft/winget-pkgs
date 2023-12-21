@@ -1,15 +1,17 @@
 #Copyright 2023 Microsoft Corporation
 #Author: Stephen Gillie
-#Title: PRWatcher v0.8.2
+#Title: PRWatcher v1.2.3
 #Created: 2/15/2023
-#Updated: 6/27/2023
-#Notes: Streamlines WinGet-pkgs manifest PR moderator approval by watching the clipboard - copy a PR title to your clipboard, and Watch-PRTitles attempts to parse the PackageIdentifier and version number, gathers the version from WinGet, and gives feedback in your Powershell console. Also outputs valid titles to a logging file. Freeing moderators to focus on approving and helping. 
+#Updated: 12/21/2023
+#Notes: Streamlines WinGet-pkgs manifest PR moderator approval by watching the clipboard - copy a PR's FIles tab to your clipboard, and Watch-PRTitles parse the PR, start a VM to review if new, and approve the PR if it passes all checks. Also outputs valid titles to a logging file. Freeing moderators to focus on approving and helping. 
 #Update log:
-#0.8 Update PackageIdentifier and PackageVersion detection by starting with the manifest file.
-#0.8.1 Update WinGet version in Create-Sandbox.
-#0.8.2 Make new version detection of semantic type.
+#1.1.5 Bugfixes to colors.
+#1.1.4 Improve run check, PR parsing, and added a previous manifest check, to check if Apps and Features entries have changed.
+#1.1.1 Add review file checking. (Review file contents lost in repo refresh incident.)
+#1.1.0 Automatic PR approval.
+#1.0.0 Redesign output to be easier to read, based on Markdown table formatting. Remove unused utility functions.
 
-$CountrySet = "Default","Warm","Cool","Random","Afghanistan","Albania","Algeria","American Samoa","Andorra","Angola","Anguilla","Antigua And Barbuda","Argentina","Armenia","Aruba","Australia","Austria","Azerbaijan","Bahamas","Bahrain","Bangladesh","Barbados","Belarus","Belgium","Belize","Benin","Bermuda","Bhutan","Bolivia","Bosnia And Herzegovina","Botswana","Bouvet Island","Brazil","Brunei Darussalam","Bulgaria","Burkina Faso","Burundi","Cabo Verde","Cambodia","Cameroon","Canada","Central African Republic","Chad","Chile","China","Colombia","Comoros","Cook Islands","Costa Rica","Croatia","Cuba","CuraΓö£┬║ao","Cyprus","Czechia","CΓö£Γöñte D'Ivoire","Democratic Republic Of The Congo","Denmark","Djibouti","Dominica","Dominican Republic","Ecuador","Egypt","El Salvador","Equatorial Guinea","Eritrea","Estonia","Eswatini","Ethiopia","Fiji","Finland","France","French Polynesia","Gabon","Gambia","Georgia","Germany","Ghana","Greece","Grenada","Guatemala","Guinea","Guinea-Bissau","Guyana","Haiti","Holy See (Vatican City State)","Honduras","Hungary","Iceland","India","Indonesia","Iran","Iraq","Ireland","Israel","Italy","Jamaica","Japan","Jordan","Kazakhstan","Kenya","Kiribati","Kuwait","Kyrgyzstan","Laos","Latvia","Lebanon","Lesotho","Liberia","Libya","Liechtenstein","Lithuania","Luxembourg","Madagascar","Malawi","Malaysia","Maldives","Mali","Malta","Marshall Islands","Mauritania","Mauritius","Mexico","Micronesia","Moldova","Monaco","Mongolia","Montenegro","Morocco","Mozambique","Myanmar","Namibia","Nauru","Nepal","Netherlands","New Zealand","Nicaragua","Niger","Nigeria","Niue","Norfolk Island","North Korea","North Macedonia","Norway","Oman","Pakistan","Palau","Palestine","Panama","Papua New Guinea","Paraguay","Peru","Philippines","Pitcairn Islands","Poland","Portugal","Qatar","Republic Of The Congo","Romania","Russian Federation","Rwanda","Saint Kitts And Nevis","Saint Lucia","Saint Vincent And The Grenadines","Samoa","San Marino","Sao Tome And Principe","Saudi Arabia","Senegal","Serbia","Seychelles","Sierra Leone","Singapore","Slovakia","Slovenia","Solomon Islands","Somalia","South Africa","South Korea","South Sudan","Spain","Sri Lanka","Sudan","Suriname","Sweden","Switzerland","Syrian Arab Republic","Tajikistan","Tanzania"," United Republic Of","Thailand","Togo","Tonga","Trinidad And Tobago","Tunisia","Turkey","Turkmenistan","Tuvalu","Uganda","Ukraine","United Arab Emirates","United Kingdom","United States","Uruguay","Uzbekistan","Vanuatu","Venezuela","Vietnam","Yemen","Zambia","Zimbabwe","Åland Islands"
+$appName = "PR Watcher"
 
 Function Watch-PRTitles {
 	[CmdletBinding()]
@@ -17,12 +19,15 @@ Function Watch-PRTitles {
 		[switch]$noNew,
 		$LogFile = ".\PR.txt",
 		$AuthFile = ".\Auth.csv",
-		[ValidateSet("Default","Warm","Cool","Random","Afghanistan","Albania","Algeria","American Samoa","Andorra","Angola","Anguilla","Antigua And Barbuda","Argentina","Armenia","Aruba","Australia","Austria","Azerbaijan","Bahamas","Bahrain","Bangladesh","Barbados","Belarus","Belgium","Belize","Benin","Bermuda","Bhutan","Bolivia","Bosnia And Herzegovina","Botswana","Bouvet Island","Brazil","Brunei Darussalam","Bulgaria","Burkina Faso","Burundi","Cabo Verde","Cambodia","Cameroon","Canada","Central African Republic","Chad","Chile","China","Colombia","Comoros","Cook Islands","Costa Rica","Croatia","Cuba","CuraΓö£┬║ao","Cyprus","Czechia","CΓö£Γöñte D'Ivoire","Democratic Republic Of The Congo","Denmark","Djibouti","Dominica","Dominican Republic","Ecuador","Egypt","El Salvador","Equatorial Guinea","Eritrea","Estonia","Eswatini","Ethiopia","Fiji","Finland","France","French Polynesia","Gabon","Gambia","Georgia","Germany","Ghana","Greece","Grenada","Guatemala","Guinea","Guinea-Bissau","Guyana","Haiti","Holy See (Vatican City State)","Honduras","Hungary","Iceland","India","Indonesia","Iran","Iraq","Ireland","Israel","Italy","Jamaica","Japan","Jordan","Kazakhstan","Kenya","Kiribati","Kuwait","Kyrgyzstan","Laos","Latvia","Lebanon","Lesotho","Liberia","Libya","Liechtenstein","Lithuania","Luxembourg","Madagascar","Malawi","Malaysia","Maldives","Mali","Malta","Marshall Islands","Mauritania","Mauritius","Mexico","Micronesia","Moldova","Monaco","Mongolia","Montenegro","Morocco","Mozambique","Myanmar","Namibia","Nauru","Nepal","Netherlands","New Zealand","Nicaragua","Niger","Nigeria","Niue","Norfolk Island","North Korea","North Macedonia","Norway","Oman","Pakistan","Palau","Palestine","Panama","Papua New Guinea","Paraguay","Peru","Philippines","Pitcairn Islands","Poland","Portugal","Qatar","Republic Of The Congo","Romania","Russian Federation","Rwanda","Saint Kitts And Nevis","Saint Lucia","Saint Vincent And The Grenadines","Samoa","San Marino","Sao Tome And Principe","Saudi Arabia","Senegal","Serbia","Seychelles","Sierra Leone","Singapore","Slovakia","Slovenia","Solomon Islands","Somalia","South Africa","South Korea","South Sudan","Spain","Sri Lanka","Sudan","Suriname","Sweden","Switzerland","Syrian Arab Republic","Tajikistan","Tanzania, United Republic Of","Thailand","Togo","Tonga","Trinidad And Tobago","Tunisia","Turkey","Turkmenistan","Tuvalu","Uganda","Ukraine","United Arab Emirates","United Kingdom","United States","Uruguay","Uzbekistan","Vanuatu","Venezuela","Vietnam","Yemen","Zambia","Zimbabwe","Åland Islands")]
+		$ReviewFile = ".\Review.csv",
+		[ValidateSet("Default","Warm","Cool","Random","Afghanistan","Albania","Algeria","American Samoa","Andorra","Angola","Anguilla","Antigua And Barbuda","Argentina","Armenia","Aruba","Australia","Austria","Azerbaijan","Bahamas","Bahrain","Bangladesh","Barbados","Belarus","Belgium","Belize","Benin","Bermuda","Bhutan","Bolivia","Bosnia And Herzegovina","Botswana","Bouvet Island","Brazil","Brunei Darussalam","Bulgaria","Burkina Faso","Burundi","Cabo Verde","Cambodia","Cameroon","Canada","Central African Republic","Chad","Chile","China","Colombia","Comoros","Cook Islands","Costa Rica","Croatia","Cuba","Curacao","Cyprus","Czechia","Cöte D'Ivoire","Democratic Republic Of The Congo","Denmark","Djibouti","Dominica","Dominican Republic","Ecuador","Egypt","El Salvador","Equatorial Guinea","Eritrea","Estonia","Eswatini","Ethiopia","Fiji","Finland","France","French Polynesia","Gabon","Gambia","Georgia","Germany","Ghana","Greece","Grenada","Guatemala","Guinea","Guinea-Bissau","Guyana","Haiti","Holy See (Vatican City State)","Honduras","Hungary","Iceland","India","Indonesia","Iran","Iraq","Ireland","Israel","Italy","Jamaica","Japan","Jordan","Kazakhstan","Kenya","Kiribati","Kuwait","Kyrgyzstan","Laos","Latvia","Lebanon","Lesotho","Liberia","Libya","Liechtenstein","Lithuania","Luxembourg","Madagascar","Malawi","Malaysia","Maldives","Mali","Malta","Marshall Islands","Mauritania","Mauritius","Mexico","Micronesia","Moldova","Monaco","Mongolia","Montenegro","Morocco","Mozambique","Myanmar","Namibia","Nauru","Nepal","Netherlands","New Zealand","Nicaragua","Niger","Nigeria","Niue","Norfolk Island","North Korea","North Macedonia","Norway","Oman","Pakistan","Palau","Palestine","Panama","Papua New Guinea","Paraguay","Peru","Philippines","Pitcairn Islands","Poland","Portugal","Qatar","Republic Of The Congo","Romania","Russian Federation","Rwanda","Saint Kitts And Nevis","Saint Lucia","Saint Vincent And The Grenadines","Samoa","San Marino","Sao Tome And Principe","Saudi Arabia","Senegal","Serbia","Seychelles","Sierra Leone","Singapore","Slovakia","Slovenia","Solomon Islands","Somalia","South Africa","South Korea","South Sudan","Spain","Sri Lanka","Sudan","Suriname","Sweden","Switzerland","Syrian Arab Republic","Tajikistan","Tanzania, United Republic Of","Thailand","Togo","Tonga","Trinidad And Tobago","Tunisia","Turkey","Turkmenistan","Tuvalu","Uganda","Ukraine","United Arab Emirates","United Kingdom","United States","Uruguay","Uzbekistan","Vanuatu","Venezuela","Vietnam","Yemen","Zambia","Zimbabwe","Åland Islands")]
 		$Chromatic = "Default",
 		$oldclip = "",
 		$hashPRRegex = "[#][0-9]{5,6}",
-		$AuthList = ""
+		$AuthList = "",
+		$ReviewList = ""
 	)
+	
 	if (Test-Path $AuthFile) {
 		$AuthList = Get-Content $AuthFile | ConvertFrom-Csv
 		Write-Host "Using Auth file $AuthFile" -f green
@@ -30,63 +35,28 @@ Function Watch-PRTitles {
 		Write-Host "Auth file $AuthFile not found!" -f red
 	}
 	Write-Host "Loaded $($AuthList.count) Auth file entries."
-	while($true){
-		$clip2 = (Get-Clipboard) 
-		$clip = $clip2 | select-string "[#][0-9]{5,6}$";
-		#$clip = ((Get-Clipboard) -join "") -replace "PackageVersion:"," version" | select-string -NotMatch "^[c][:]";
-		if ($clip) {
-			if (Compare-Object $clip $oldclip) {
-		if ((Get-Command Get-Status).name) {
-			(Get-Status | where {$_.status -eq "ValidationComplete"})
-		}
-				$timevar = (get-date -Format T) + ":"
-				$copyClip = $false
-				$noRecord = $false
 
-				$title = $clip -split ": "
-				if ($title[1]) {
-					$title = $title[1] -split " "
-				} else {
-					$title = $title -split " "
+	if (Test-Path $ReviewFile) {
+		$ReviewList = Get-Content $ReviewFile | ConvertFrom-Csv
+		Write-Host "Using Review file $ReviewFile" -f green
+	} else {
+		Write-Host "Review file $ReviewFile not found!" -f red
+	}
+	Write-Host "Loaded $($ReviewFile.count) Review file entries."
+	Write-Host " - - - - - -  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - "
+	Write-Host "| Timestmp | $(Set-PadRight PR# 6) | $(Set-PadRight PackageIdentifier) | $(Set-PadRight prVersion 14) | A | R | W | F | I | $(Set-PadRight ManifestVer 14)  | OK |"
+
+	if ((Get-Command Set-TrackerMode).name) {Set-TrackerMode "Approving"}
+	while($true){
+		$clip = (Get-Clipboard) 
+		$PRtitle = $clip | select-string "[#][0-9]{5,6}$";
+		$PR = ($PRtitle -split "#")[1]
+		#$PRtitle = ((Get-Clipboard) -join "") -replace "PackageVersion:"," version" | select-string -NotMatch "^[c][:]";
+		if ($PRtitle) {
+			if (Compare-Object $PRtitle $oldclip) {
+				if ((Get-Command Get-Status).name) {
+					(Get-Status | where {$_.status -eq "ValidationComplete"} | Format-Table)
 				}
-				#Split the title by spaces. Try extracting the version location as the next item after the word "version", and if that fails, use the 2nd to the last item, then 3rd to last, and 4th to last. For some reason almost everyone puts the version number as the last item, and GitHub appends the PR number. 
-				$prVerLoc =($title | Select-String "version").linenumber 
-				#Version is on the line before the line number, and this set indexes with 1 - but the following array indexes with 0, so the value is automatically transformed by the index mismatch. 
-				try {
-					[System.Version]$prVersion = (($clip2 | select-string "PackageVersion")[0] -split ": ")[1] -replace "'","" -replace '"',''
-				} catch {
-						try {
-					[System.Version]$prVersion = (($clip2 | select-string "PackageVersion")[1] -split ": ")[1]
-					} catch {
-						if ($null -ne $prVerLoc) {
-							try {
-								[System.Version]$prVersion = $title[$prVerLoc]
-							} catch {
-								[string]$prVersion = $title[$prVerLoc]
-							}
-						} else {
-						#Otherwise we have to go hunting for the version number.
-							try {
-								[System.Version]$prVersion = $title[-1]
-							} catch {
-								try {
-									[System.Version]$prVersion = $title[-2]
-								} catch {
-									try {
-										[System.Version]$prVersion = $title[-3]
-									} catch {
-										try {
-											[System.Version]$prVersion = $title[-4]
-										} catch {
-											#If it's not a semantic version, guess that it's the 2nd to last, based on the above logic.
-											[string]$prVersion = $title[-2]
-										}
-									}
-								}
-							}; #end try
-						}; #end try
-					}; #end if null
-				}; #end try
 				$validColor = "green"
 				$invalidColor = "red"
 				$cautionColor = "yellow"
@@ -981,7 +951,7 @@ Function Watch-PRTitles {
 	$cautionColor = "White"
 }
 "Solomon Islands"{
-	$validColor = "Olive Green"
+	$validColor = "Green"
 	$invalidColor = "Blue"
 	$cautionColor = "Yellow"
 }
@@ -1177,110 +1147,310 @@ Function Watch-PRTitles {
 							$cautionColor = "Yellow"
 						}
 					}; #end Switch Chromatic
-				
-				#Get the PackageIdentifier out of the PR title, and alert if it matches the auth list.
+
+				$noRecord = $false
+				$title = $PRtitle -split ": "
+				if ($title[1]) {
+					$title = $title[1] -split " "
+				} else {
+					$title = $title -split " "
+				}
+				$Submitter = (($clip | select-string "wants to merge") -split " ")[0]
+
+				#Split the title by spaces. Try extracting the version location as the next item after the word "version", and if that fails, use the 2nd to the last item, then 3rd to last, and 4th to last. For some reason almost everyone puts the version number as the last item, and GitHub appends the PR number. 
+				$prVerLoc =($title | Select-String "version").linenumber 
+				#Version is on the line before the line number, and this set indexes with 1 - but the following array indexes with 0, so the value is automatically transformed by the index mismatch. 
+				try {
+					[System.Version]$prVersion = Get-YamlValue PackageVersion $clip -replace "'","" -replace '"',''
+				} catch {
+					try {
+						$prVersion = Get-YamlValue PackageVersion $clip -replace "'","" -replace '"',''
+					} catch {
+							try {
+						[System.Version]$prVersion = Get-YamlValue PackageVersion $clip
+						} catch {
+							if ($null -ne $prVerLoc) {
+								try {
+									[System.Version]$prVersion = $title[$prVerLoc]
+								} catch {
+									[string]$prVersion = $title[$prVerLoc]
+								}
+							} else {
+							#Otherwise we have to go hunting for the version number.
+								try {
+									[System.Version]$prVersion = $title[-1]
+								} catch {
+									try {
+										[System.Version]$prVersion = $title[-2]
+									} catch {
+										try {
+											[System.Version]$prVersion = $title[-3]
+										} catch {
+											try {
+												[System.Version]$prVersion = $title[-4]
+											} catch {
+												#If it's not a semantic version, guess that it's the 2nd to last, based on the above logic.
+												[string]$prVersion = $title[-2]
+											}
+										}
+									}
+								}; #end try
+							}; #end try
+						}; #end if null
+					}; #end try
+				}; #end try
+								
+				#Get the PackageIdentifier and alert if it matches the auth list.
 				$PackageIdentifier = ""
 				try {
-					$PackageIdentifier = (($clip2 | select-string "PackageIdentifier")[0] -split ": ")[1]
+					$PackageIdentifier = Get-YamlValue PackageIdentifier $clip -replace '"',""
 				} catch {
-					$PackageIdentifier = (Get-CleanClip $clip); 
+					$PackageIdentifier = (Get-CleanClip $PRtitle); -replace '"',""
 				}
-				$AuthMatch = $AuthList.PackageIdentifier -match $PackageIdentifier
-				if ($AuthMatch) {
-					$AuthListLine = $AuthList | Where-Object {$_.PackageIdentifier -match $AuthMatch}
-					$strictness = $AuthListLine.strictness | Sort-Object -Unique
-					$AuthAccount = $AuthListLine.account | Sort-Object -Unique
-					$strictColor = ""
-					if ($strictness -eq "must") {
-						$strictColor = $invalidColor
-					} else {
-						$strictColor = $cautionColor
-					}
-					Write-Host -nonewline " = = = = = = Submitter "
-					Write-Host -nonewline -f $strictColor "$strictness"
-					Write-Host -nonewline " match "
-					Write-Host -nonewline -f $strictColor "$AuthAccount"
-					Write-Host " = = = = = = "
+				$matchColor = $validColor
+				
+				Write-Host -nonewline -f $matchColor "| $(get-date -Format T) | $PR | $(Set-PadRight $PackageIdentifier) | "
+								
+				#Variable effervescence
+				$prAuth = "+"
+				$Auth = "A"
+				$Review = "R"
+				$AnF = "F"
+				$InstVer = "I"
+				$PRvMan = "P"
+				$BadWordFilter = "W"
+				$Approve = "+"
+				
+				
+				$WinGetOutput = Find-WinGetPackage $PackageIdentifier | where {$_.id -eq $PackageIdentifier}
+				$ManifestVersion = $WinGetOutput.version
+				$ManifestVersionParams = ($ManifestVersion -split "[.]").count
+				$prVersionParams = ($prVersion -split "[.]").count
+				
+				if (($prVersion.GetType().Name -eq "String") -or ($ManifestVersion.GetType().Name -eq "String")) {
 				}
-				
-				$WinGetOutput = Search-WinGetManifest $PackageIdentifier 
-				
-				$wgLine = ($WinGetOutput | Select-String " $PackageIdentifier ")
-				try {
-					try {
-						[System.Version]$ManifestVersion = ($wgLine -replace "\s+"," " -split " ")[-2]
-					} catch {
-						[string]$ManifestVersion = ($wgLine -replace "\s+"," " -split " ")[-2]
-					}
-				} catch {
-					$ManifestVersion = ""
-				}
-				
-				$titlejoin = ($title -join " ")
-				if (($titlejoin -match "Automatic deletion") -OR ($titlejoin -match "Remove")) {
-					$validColor,$invalidColor = $invalidColor,$validColor #Swapping variable values.
-					$copyClip = $true
-				}
-				
-				if ($PackageIdentifier -eq "Added") {
-					Write-Host -f $invalidColor "$timevar Error reading package identifier"
-					$noRecord = $true
-				} elseif ($WinGetOutput -eq "No package found matching input criteria.") {
+
+				if ($WinGetOutput -eq $null) {
+					$PRvMan = "N"
+					$matchColor = $invalidColor
+					$Approve = "-!"
 					if ($noNew) {
 						$noRecord = $true
 					} else {
 						if ($title[-1] -match $hashPRRegex) {
 							if ((Get-Command Validate-Package).name) {
-								Validate-Package
+								Validate-Package -Silent -InspectNew
 							} else {
 								Create-Sandbox ($title[-1] -replace"#","")
-							}
-						}; #end if noNew
-					}; #end if PackageIdentifier
-					Write-Host -f $invalidColor $timevar ($PackageIdentifier) $WinGetOutput
-				} elseif ($null -eq $prVersion -or "" -eq $prVersion) {
-					$noRecord = $true
-					Write-Host -f $invalidColor "$timevar Error reading PR version"
-				} elseif ($ManifestVersion -eq "Unknown") {
-					Write-Host -f $invalidColor "$timevar Error reading WinGet version"
-				} elseif ($ManifestVersion -eq "input") {
-					$noRecord = $true
-					Write-Host $WinGetOutput
-				} elseif ($null -eq $ManifestVersion) {
-					Write-Host $WinGetOutput
-				} elseif ($ManifestVersion -eq "add-watermark") {
-					$noRecord = $true
-					Write-Host -f $invalidColor "$timevar Error reading package identifier"
-				} elseif ($prVersion -gt $ManifestVersion) {
-					Write-Host -f $validColor "$timevar $PackageIdentifier prVersion $prVersion is greater than ManifestVersion $ManifestVersion"
-				} elseif ($prVersion -lt $ManifestVersion) {
-					$outMsg = "$timevar $PackageIdentifier prVersion $prVersion is less than ManifestVersion $ManifestVersion"
-					Write-Host -f $invalidColor $outMsg
-					if ($copyClip) {
-						$outMsg | clip
-						$clip = $outMsg
-						$oldclip = $outMsg
+							}; #end if Get-Command
+						}; #end if title
+					}; #end if noNew
+				} elseif ($WinGetOutput -ne $null) {
+					If ($PRtitle -match " [.]") {
+					#If has spaces (4.4 .5 .220)
+						ReplyTo-PR -PR $PR -Body "Spaces detected in version number."
+						$matchColor = $invalidColor
+						$prAuth = "-!"
 					}
-				} elseif ($prVersion -eq $ManifestVersion) {
-					Write-Host -f $cautionColor "$timevar $PackageIdentifier prVersion $prVersion is equal to ManifestVersion $ManifestVersion"
-				} else {
-					$WinGetOutput
-				};
-				$oldclip = $clip
-				if ($noRecord -eq $false) {
-					if ($clip.length -le 128) {
-						$clip = $clip -join "" | Where-Object {$_ -match $hashPRRegex}
-						#Write-Debug "Output $clip to $LogFile"
-						$clip | Out-File $LogFile -Append
+					<#
+					#>
+					if ($ManifestVersionParams -ne $prVersionParams) {
+						$greaterOrLessThan = ""
+						if ($prVersionParams -lt $ManifestVersionParams) {
+							#If current manifest has more params (dots) than PR (2.3.4.500 to 2.3.4)
+							$greaterOrLessThan = "less"
+						} elseif ($prVersionParams -gt $ManifestVersionParams) {
+							#If current manifest has fewer params (dots) than PR (2.14 to 2.14.3.222)
+							$greaterOrLessThan = "greater"
+						}
+						$matchColor = $invalidColor
+						$Approve = "-!"
+						$Body = "Hi @$Submitter,`n`n> This PR's version number $prVersion has $prVersionParams parameters (sets of numbers between dots - major, minor, etc), which is $greaterOrLessThan than the current manifest's version $($ManifestVersion), which has $ManifestVersionParams parameters.`n`nIs this intentional?"
+						$Body = $Body + "`n`n(Automated response - build $build)"
+						ReplyTo-PR -PR $PR -Body $Body
+						Add-PRLabel $PR
+					}
+				}
+				
+				
+				Write-Host -nonewline -f $matchColor "$(Set-PadRight $prVersion.toString() 14) | "
+				$matchColor = $validColor
+				
+				$AuthMatch = $AuthList | where {$_.PackageIdentifier -match (($PackageIdentifier -split "[.]")[0..1] -join ".")}
+				
+				if ($AuthMatch) {
+					$strictness = $AuthMatch.strictness | Sort-Object -Unique
+					$AuthAccount = $AuthMatch.account | Sort-Object -Unique
+					
+					$matchVar = ""
+					$matchColor = $cautionColor
+					if ($AuthAccount -cmatch $Submitter) {
+						$matchVar = "matches"
+						$Auth = "+"
+						$matchColor = $validColor
 					} else {
-						Write-Host -f $cautionColor "$timevar Item length greater than 128 characters."
+						$matchVar = "does not match"
+						$Auth = "-"
+						$matchColor = $invalidColor
+					}
+					
+					if ($strictness -eq "must") {
+						$Auth += "!"
+					} else {
+					}
+				}
+				if ($Auth -eq "-!") {
+						Get-PRApproval -PR $PR -PackageIdentifier $PackageIdentifier
+				}
+
+
+				Write-Host -nonewline -f $matchColor "$Auth | "
+				$matchColor = $validColor
+				
+				
+				
+				$ReviewMatch = $ReviewList | where {$_.PackageIdentifier -match (($PackageIdentifier -split "[.]")[0..1] -join ".")}
+				
+				if ($ReviewMatch) {
+					$Review = $ReviewMatch.Reason | Sort-Object -Unique
+					$matchColor = $cautionColor
+				}
+				Write-Host -nonewline -f $matchColor "$Review | "
+				$matchColor = $validColor
+				
+				<#Need to rework into bad word filter.
+				$BadWordFilterList = @(".bat", ".ps1", ".cmd","accept-eula", "AcceptEULA", "accepteula ", "accept_gdpr ", "accept-licenses", "accept-license","ACCEPTEULA")
+				$BadWordFilterMatch = $BadWordFilterList | where {$_ -match ($clip -split " ")}
+				
+				if ($BadWordFilterMatch) {
+					$BadWordFilter = "-!"
+					$Approved = "-!"
+					$matchColor = $invalidColor
+				}
+				#>
+				Write-Host -nonewline -f $matchColor "$BadWordFilter | "
+				$matchColor = $validColor
+				
+								
+				$ANFOld = Check-ForManifestEntries -PackageIdentifier $PackageIdentifier -Version $ManifestVersion
+				$ANFCurrent = [bool]($clip | Select-String "AppsAndFeaturesEntries")
+				
+				if ($PRvMan -ne "N") {
+					if (($ANFOld -eq $true) -and ($ANFCurrent -eq $false)) {
+						$matchColor = $invalidColor
+						$AnF = "-"
+						ReplyTo-PR -PR $PR -Body (Get-CannedResponse AppsAndFeaturesMissing -NoClip -UserInput $Submitter)
+						Add-PRLabel $PR
+					} elseif (($ANFOld -eq $false) -and ($ANFCurrent -eq $true)) {
+						$matchColor = $cautionColor
+						$AnF = "+"
+						ReplyTo-PR -PR $PR -Body (Get-CannedResponse AppsAndFeaturesNew -NoClip -UserInput $Submitter)
+						#Add-PRLabel $PR
+					} elseif (($ANFOld -eq $false) -and ($ANFCurrent -eq $false)) {
+						$AnF = "0"
+					} elseif (($ANFOld -eq $true) -and ($ANFCurrent -eq $true)) {
+						$AnF = "1"
+					}
+				}
+				Write-Host -nonewline -f $matchColor "$AnF | "
+				$matchColor = $validColor
+				
+				
+				if ($PRvMan -ne "N") {
+					try {
+						if ([bool]($clip -match "InstallerUrl")) {
+							$InstallerUrl = Get-YamlValue InstallerUrl -clip $clip 
+							#write-host "InstallerUrl: $InstallerUrl $installerMatches prVersion: $prVersion" -f "blue"
+							$installerMatches = [bool]($InstallerUrl | select-string $prVersion)
+							if (!($installerMatches)) {
+								#Matches when the dots are removed from semantec versions in the URL.
+								$installerMatches2 = [bool]($InstallerUrl | select-string ($prVersion -replace "[.]",""))
+								if (!($installerMatches2)) {
+									$matchColor = $invalidColor
+									$InstVer = "-"
+								}
+							}
+						}
+					} catch {
+						$matchColor = $invalidColor
+						$InstVer = "-"
+					}; #end try
+				}; #end if PRvMan
+				
+				try {
+				if (($prVersion = Get-YamlValue PackageVersion $clip) -match " ") {
+					$matchColor = $invalidColor
+					$InstVer = "-!"
+				}
+				}catch{}
+				
+				Write-Host -nonewline -f $matchColor "$InstVer | "
+				$matchColor = $validColor
+				
+				if (($PRtitle -match "Automatic deletion") -OR ($PRtitle -match "Remove")) {
+					#$validColor,$invalidColor = $invalidColor,$validColor #Swapping variable values.
+				}
+				
+				if ($PRvMan -ne "N") {
+					if ($null -eq $prVersion -or "" -eq $prVersion) {
+						$noRecord = $true
+						$PRvMan = "Error:prVersion"
+						$matchColor = $invalidColor
+					} elseif ($ManifestVersion -eq "Unknown") {
+						$noRecord = $true
+						$PRvMan = "Error:ManifestVersion"
+						$matchColor = $invalidColor
+					} elseif ($null -eq $ManifestVersion) {
+						$noRecord = $true
+						$PRvMan =  $WinGetOutput
+						$matchColor = $invalidColor
+					} elseif ($prVersion -gt $ManifestVersion) {
+						$PRvMan = $ManifestVersion.toString()
+					} elseif ($prVersion -lt $ManifestVersion) {
+						$PRvMan = $ManifestVersion.toString()
+						$matchColor = $cautionColor
+					} elseif ($prVersion -eq $ManifestVersion) {
+						$PRvMan = "="
+					} else {
+						$noRecord = $true
+						$PRvMan =  $WinGetOutput
+					};
+				};
+
+
+				if (($Approve -eq "-!") -or ($Auth -eq "-!") -or ($AnF -eq "-") -or ($InstVer -eq "-!") -or ($prAuth -eq "-!") -or ($PRvMan -eq "N")) {
+				#-or ($PRvMan -match "^Error")
+					$matchColor = $cautionColor
+					$Approve = "-!"
+					$noRecord = $true
+				}
+
+				$PRvMan = Set-PadRight $PRvMan 14
+				Write-Host -nonewline -f $matchColor "$PRvMan | "
+				$matchColor = $validColor
+				
+				if ($Approve -eq "+") {
+					$Approve = Approve-PR $PR
+				}
+
+				Write-Host -nonewline -f $matchColor "$Approve | "
+				Write-Host -f $matchColor ""
+
+				$oldclip = $PRtitle
+				if ($noRecord -eq $false) {
+					if ($PRtitle.length -le 128) {
+						$PRtitle = $PRtitle -join "" | Where-Object {$_ -match $hashPRRegex}
+						#Write-Debug "Output $PRtitle to $LogFile"
+						$PRtitle | Out-File $LogFile -Append
+					} else {
+						Write-Host -f $cautionColor "Item length greater than 128 characters."
 					} ; #end if clip
 				}; #end if noRecord
 			}; #end if Compare-Object
 		}; #end if clip
 		Start-Sleep 1
-	}
-}
+	}; #end if PRtitle
+}; #end function
 
 #Utility functions
 #Extract package name from clipboard contents
@@ -1310,12 +1480,6 @@ Function Get-CleanClip {
 	$out	
 }
 
-#Minimize output for automation
-Function Search-WinGetManifest ($term) {
-	$out = WinGet search $term --disable-interactivity  | where {$_ -notmatch "Γûê"}
-	return $out 
-}
-
 #Terminates any current sandbox and makes a new one.
 Function Create-Sandbox {
 	param(
@@ -1331,3 +1495,39 @@ Function Create-Sandbox {
 	$process ="wingetautomator://install?pull_request_number=$PRNumber&winget_cli_version=v$version&watch=yes"
 	Start-Process $process
 }
+
+Function Check-ForManifestEntries {
+	param(
+		$PackageIdentifier,
+		$Version,
+		$Entry = "AppsAndFeaturesEntries",
+		$Path = ($PackageIdentifier -replace "[.]","/")
+	)
+	try{
+		$content = ((iwr "https://raw.githubusercontent.com/microsoft/winget-pkgs/master/manifests/$($packageidentifier[0].tostring().tolower())/$Path/$Version/$PackageIdentifier.installer.yaml").content)
+		$out = (Get-YamlValue $Entry $content)
+	}catch{}
+	if ($out) {$true} else {$false}
+}
+
+Function Set-PadRight {
+	param(
+	[string]$PackageIdentifier,
+	[int]$PadChars = 32
+	)
+	$out = $PackageIdentifier
+	if ($PackageIdentifier.Length -lt $PadChars) {
+		$out = $PackageIdentifier +(" "*($PadChars - $PackageIdentifier.Length -1)) 
+	} elseif ($PackageIdentifier.Length -lt $PadChars) {
+		$out = $PackageIdentifier[0..($PadChars -1)]
+	}
+	
+	if ($out.GetType().name -eq "Array") {
+		
+	}
+	$out = $out -join ""
+
+	$out
+}
+
+$CountrySet = "Default","Warm","Cool","Random","Afghanistan","Albania","Algeria","American Samoa","Andorra","Angola","Anguilla","Antigua And Barbuda","Argentina","Armenia","Aruba","Australia","Austria","Azerbaijan","Bahamas","Bahrain","Bangladesh","Barbados","Belarus","Belgium","Belize","Benin","Bermuda","Bhutan","Bolivia","Bosnia And Herzegovina","Botswana","Bouvet Island","Brazil","Brunei Darussalam","Bulgaria","Burkina Faso","Burundi","Cabo Verde","Cambodia","Cameroon","Canada","Central African Republic","Chad","Chile","China","Colombia","Comoros","Cook Islands","Costa Rica","Croatia","Cuba","Curacao","Cyprus","Czechia","Cöte D'Ivoire","Democratic Republic Of The Congo","Denmark","Djibouti","Dominica","Dominican Republic","Ecuador","Egypt","El Salvador","Equatorial Guinea","Eritrea","Estonia","Eswatini","Ethiopia","Fiji","Finland","France","French Polynesia","Gabon","Gambia","Georgia","Germany","Ghana","Greece","Grenada","Guatemala","Guinea","Guinea-Bissau","Guyana","Haiti","Holy See (Vatican City State)","Honduras","Hungary","Iceland","India","Indonesia","Iran","Iraq","Ireland","Israel","Italy","Jamaica","Japan","Jordan","Kazakhstan","Kenya","Kiribati","Kuwait","Kyrgyzstan","Laos","Latvia","Lebanon","Lesotho","Liberia","Libya","Liechtenstein","Lithuania","Luxembourg","Madagascar","Malawi","Malaysia","Maldives","Mali","Malta","Marshall Islands","Mauritania","Mauritius","Mexico","Micronesia","Moldova","Monaco","Mongolia","Montenegro","Morocco","Mozambique","Myanmar","Namibia","Nauru","Nepal","Netherlands","New Zealand","Nicaragua","Niger","Nigeria","Niue","Norfolk Island","North Korea","North Macedonia","Norway","Oman","Pakistan","Palau","Palestine","Panama","Papua New Guinea","Paraguay","Peru","Philippines","Pitcairn Islands","Poland","Portugal","Qatar","Republic Of The Congo","Romania","Russian Federation","Rwanda","Saint Kitts And Nevis","Saint Lucia","Saint Vincent And The Grenadines","Samoa","San Marino","Sao Tome And Principe","Saudi Arabia","Senegal","Serbia","Seychelles","Sierra Leone","Singapore","Slovakia","Slovenia","Solomon Islands","Somalia","South Africa","South Korea","South Sudan","Spain","Sri Lanka","Sudan","Suriname","Sweden","Switzerland","Syrian Arab Republic","Tajikistan","Tanzania"," United Republic Of","Thailand","Togo","Tonga","Trinidad And Tobago","Tunisia","Turkey","Turkmenistan","Tuvalu","Uganda","Ukraine","United Arab Emirates","United Kingdom","United States","Uruguay","Uzbekistan","Vanuatu","Venezuela","Vietnam","Yemen","Zambia","Zimbabwe","Åland Islands"
