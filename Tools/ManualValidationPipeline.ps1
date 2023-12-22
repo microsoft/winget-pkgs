@@ -1,19 +1,15 @@
 #Copyright 2022-2023 Microsoft Corporation
 #Author: Stephen Gillie
-#Title: Manual Validation Pipeline v3.2.2
+#Title: Manual Validation Pipeline v3.3.0
 #Created: 10/19/2022
-#Updated: 12/21/2023
+#Updated: 12/22/2023
 #Notes: Utilities to streamline evaluating 3rd party PRs.
 #Update log:
+#3.3.0 Start consolidating PR commands into Invoke-GitHubPRRequest
 #3.2.2 Add silent option to many functions to reduce extraneous console output and better PR Watcher functionality.
 #3.2.1 Add automation for processing GitHub diff'd PRs, and improve automation for processing individual files into a manifest.
-#3.2.0 Time tracking system.
-#3.1.2 Add more validation orchestration functions.
-#3.1.1 Numerous improvements to VM build automation.
-#3.1.0 Add GitHub functions and relocate other PR tools.
-#3.0.0 Add status-based orchestration system. Numerous orchestration bugfixes and upgrades. Remove unused Operation command blocks.
 
-$build = 487
+$build = 489
 $appName = "Manual Validation" 
 Write-Host "$appName build: $build"
 $MainFolder = "C:\ManVal"
@@ -189,18 +185,45 @@ Function Approve-PR {
 	sleep $GitHubRateLimitDelay;
 }
 
+#GET = Read; POST = Append; PUT = Write; DELETE = delete
+Function Invoke-GitHubPRRequest {
+	param(
+		$PR,
+		[ValidateSet("GET","DELETE","POST","PUT")][string]$Method = "GET",
+		[ValidateSet("assignees","labels")][string]$Type = "labels",
+		[string]$Data,
+		[ValidateSet("content","StatusDescription")][string]$Output = "StatusDescription"		
+	)
+				#https://api.github.com/repos/microsoft/winget-pkgs/issues/131157/labels
+	$uri = "https://api.github.com/repos/microsoft/winget-pkgs/issues/$pr/$Type"
+	#$prData = Invoke-GitHubRequest $uri -JSON
+	
+	if ($Method -eq "GET") {
+		$out = Invoke-GitHubRequest -Method $Method -Uri $uri
+	} else {
+		$Response = @{}
+		$Response.$Type = @()
+		$Response.$Type += $Data
+		[string]$Body = $Response | ConvertTo-Json
+		$out = Invoke-GitHubRequest -Method $Method -Uri $uri -Body $Body
+	}
+
+	$out.$Output #| ConvertFrom-Json
+	#$out.StatusDescription
+	sleep $GitHubRateLimitDelay;
+}
+
 Function Add-PRLabel {
 	param(
 		$PR,
 		[string]$Label = "Needs-Author-Feedback",
-		[ValidateSet("DELETE","POST","PUT")][string]$Method = "POST"
+		[ValidateSet("GET","DELETE","POST","PUT")][string]$Method = "POST"
 	)
 
 	$uri = "https://api.github.com/repos/microsoft/winget-pkgs/issues/$pr/labels"
 	#$prData = Invoke-GitHubRequest $uri -JSON
 	
 	$Response = @{}
-	#$Response.labels = $prData.name
 	$Response.labels = @()
 	$Response.labels += $Label
 	[string]$Body = $Response | ConvertTo-Json
@@ -261,17 +284,11 @@ Function Add-UserToPR {
 	param(
 		$PR,
 		[array]$Body,
-		[Switch]$Remove,
-		[Switch]$Silent
+		[string]$Method
 	)
 	$Response = @{}
 	$Response.assignees = $Body
 	[string]$Body = $Response | ConvertTo-Json
-
-	$Method = "Post"
-	if ($Remove) {
-		$Method = "Delete"
-	}
 
 	$uri = "https://api.github.com/repos/microsoft/winget-pkgs/issues/$PR/assignees" 
 	$out = Invoke-GitHubRequest -Method $Method -Uri $uri -Body $Body
