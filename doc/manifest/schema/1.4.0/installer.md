@@ -35,7 +35,7 @@ Installers:                     	# The list of package installers
     NestedInstallerType:					# The installer type when InstallerType is an archive type
     NestedInstallerFiles:					# Details about the installers when InstallerType is an archive type
       - RelativeFilePath:					# The relative path to the nested installer file
-        PortableCommandAlias:			# The command alias to be used for calling the package. Only applies when NestedInstallerType is 'portable'
+        PortableCommandAlias:			# Optional command alias to be used for calling the package. Only applies when NestedInstallerType is 'portable'
     Scope:                      	# Optional installer scope
     InstallModes:              		# Optional installer modes
     InstallerSwitches:         	 	# Optional installer switches
@@ -67,7 +67,7 @@ Installers:                     	# The list of package installers
     ExcludedMarkets:            	# Optional markets the package is not allowed to be installed
     InstallerSuccessCodes:      	# Optional non-zero installer success codes
     ExpectedReturnCodes:        	# Optional non-zero installer return codes
-      - ExpectedReturnCode:     	# Optional non-zero installer return code
+      - InstallerReturnCode:     	# Optional non-zero installer return code
         ReturnResponse:         	# Optional response for an expected return code
         ReturnResponseUrl:      	# Optional response URL for an expected return code
     ProductCode:                	# Optional product code of the installer
@@ -292,7 +292,7 @@ ManifestVersion: 1.4.0
 <details>
  <summary><b>PortableCommandAlias</b> - The command alias to be used for calling the package</summary>
 
- **Required Field**
+ **Optional Field**
 
  The alias which is added to the PATH for calling the package from the command line.
 
@@ -557,6 +557,11 @@ ManifestVersion: 1.4.0
   **Optional Field**
 
   This key represents which scope a package is required to be executed under. Some packages require user level execution while others require administrative level execution.
+
+* elevationRequired - Must be run from a shell that is running in an administrative context (e.g - Admin user using powershell/terminal/cmd with "Run as Administrator")
+* elevationProhibited - Must be run from a shell that is not running in an administrative context
+* elevatesSelf - If called from a non-administrative context, will request elevation. If called from an administrative context, may or may not request elevation.
+
 </details>
 
 <details>
@@ -612,7 +617,7 @@ ManifestVersion: 1.4.0
 </details>
 
 <details>
- <summary><b>ExpectedReturnCode</b> - The non-zero installer exit code other than known default values by the Windows Package Manager.</summary>
+ <summary><b>InstallerReturnCode</b> - The non-zero installer exit code other than known default values by the Windows Package Manager.</summary>
 
  **Optional Field**
 
