@@ -82,7 +82,8 @@ ManifestVersion: 1.5.0        # The manifest syntax version
 * [Available languages for Windows]
 * [Default Input Profiles (Input Locales) in Windows][locales]
 
-  >Note: This field is the key to determining which fields are required for the Microsoft community repository. The default locale specified in the version file must match with this value.
+  > [!NOTE]
+	This field is the key to determining which fields are required for the Microsoft community repository. The default locale specified in the version file must match with this value.
  </details>
 
 <details>
@@ -92,7 +93,8 @@ ManifestVersion: 1.5.0        # The manifest syntax version
 
   This key represents the name of the publisher for a given package. This field is intended to allow the full publisher's or ISV's name to be displayed as they wish.
 
-  >Note: With the 1.0 release of the Windows Package Manager, this name affects how packages from a source are mapped to Apps installed in Windows 10 and Windows 11 via Add / Remove Programs (ARP). The best practice is to ensure this matches the ARP entry for the package when it has been installed. The impact is associated with `winget upgrade` and `winget list`.
+  > [!NOTE]
+	With the 1.0 release of the Windows Package Manager, this name affects how packages from a source are mapped to Apps installed in Windows 10 and Windows 11 via Add / Remove Programs (ARP). The best practice is to ensure this matches the ARP entry for the package when it has been installed. The impact is associated with `winget upgrade` and `winget list`.
  </details>
 
 <details>
@@ -134,7 +136,8 @@ ManifestVersion: 1.5.0        # The manifest syntax version
 
   This key represents the name of the package. This field is intended to allow the full package name to be displayed as the publisher or ISV wishes.
 
-  >Note: With the 1.0 release of the Windows Package Manager, this name affects how packages from a source are mapped to Apps installed in Windows 10 via Add / Remove Programs (ARP). The best practice is to ensure this matches the ARP entry for the package name when it has been installed. The impact is associated with `winget upgrade` and `winget list`.
+  > [!NOTE]
+	With the 1.0 release of the Windows Package Manager, this name affects how packages from a source are mapped to Apps installed in Windows 10 via Add / Remove Programs (ARP). The best practice is to ensure this matches the ARP entry for the package name when it has been installed. The impact is associated with `winget upgrade` and `winget list`.
  </details>
 
 <details>
@@ -188,7 +191,8 @@ ManifestVersion: 1.5.0        # The manifest syntax version
 
   This key represents the description for a package. It is intended for use in `winget show` to help a user understand what the package is.
 
-  >Note: This should be something descriptive about what the package does, and it should not simply state something like "&lt;package name&gt; installer" or "&lt;package name&gt; setup".
+  > [!NOTE]
+	This should be something descriptive about what the package does, and it should not simply state something like "&lt;package name&gt; installer" or "&lt;package name&gt; setup".
  </details>
 
 <details>
@@ -198,7 +202,8 @@ ManifestVersion: 1.5.0        # The manifest syntax version
 
   This key represents the full or long description for a package. It is *not* currently used in the Windows Package Manager.
 
-  >Note: This was included for future integration with the Microsoft Store source to provide the ability to display the full package description.
+  > [!NOTE]
+	This was included for future integration with the Microsoft Store source to provide the ability to display the full package description.
  </details>
 
 <details>
@@ -218,7 +223,8 @@ ManifestVersion: 1.5.0        # The manifest syntax version
 
   This key represents other common term users would search for when looking for packages.
 
-  >Note: The best practice is to present these terms in all lower case with hyphens rather than spaces.
+  > [!NOTE]
+	The best practice is to present these terms in all lower case with hyphens rather than spaces.
  </details>
 
  <details>
@@ -228,7 +234,8 @@ ManifestVersion: 1.5.0        # The manifest syntax version
 
    This key holds any agreements a user must accept prior to download and subsequent install or upgrade.
 
-   >Note: In the Windows Package Manager Community Repository, these are only allowed to be submitted by verified developers.
+   > [!IMPORTANT]
+	 In the Windows Package Manager Community Repository, these are only allowed to be submitted by verified developers.
   </details>
 
 <details>
