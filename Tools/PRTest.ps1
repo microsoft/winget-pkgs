@@ -1,4 +1,5 @@
 # This script does a checkout of a Pull Request using the GitHub CLI, and then runs it using SandboxTest.ps1.
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingWriteHost', '', Justification = 'This script is not intended to have any outputs piped')]
 
 Param(
     [Parameter(Position = 0, HelpMessage = 'The Pull Request to checkout.', Mandatory = $true)]

@@ -1,4 +1,7 @@
 # Parse arguments
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingWriteHost', '', Justification = 'This script is not intended to have any outputs piped')]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', 'Prerelease', Justification = 'The variable is used in a conditional but ScriptAnalyser does not recognize the scope')]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', 'WinGetVersion', Justification = 'The variable is used in a conditional but ScriptAnalyser does not recognize the scope')]
 
 Param(
   [Parameter(Position = 0, HelpMessage = 'The Manifest to install in the Sandbox.')]
@@ -79,11 +82,11 @@ $WebClient = New-Object System.Net.WebClient
 
 function Get-Release {
   $releasesAPIResponse = Invoke-RestMethod 'https://api.github.com/repos/microsoft/winget-cli/releases?per_page=100'
-  if (!$Prerelease) {
+  if (!$script:Prerelease) {
     $releasesAPIResponse = $releasesAPIResponse.Where({ !$_.prerelease })
   }
-  if (![String]::IsNullOrWhiteSpace($WinGetVersion)) {
-    $releasesAPIResponse = @($releasesAPIResponse.Where({ $_.tag_name -match $('^v?' + [regex]::escape($WinGetVersion)) }))
+  if (![String]::IsNullOrWhiteSpace($script:WinGetVersion)) {
+    $releasesAPIResponse = @($releasesAPIResponse.Where({ $_.tag_name -match $('^v?' + [regex]::escape($script:WinGetVersion)) }))
   }
   if ($releasesAPIResponse.Count -lt 1) {
     Write-Output 'No WinGet releases found matching criteria'
