@@ -123,15 +123,15 @@ $vcLibsUwp = @{
   SaveTo = $(Join-Path $tempFolder -ChildPath 'Microsoft.VCLibs.x64.14.00.Desktop.appx')
 }
 $uiLibsUwp = @{
-  url      = 'https://github.com/microsoft/microsoft-ui-xaml/releases/download/v2.7.3/Microsoft.UI.Xaml.2.7.x64.appx'
-  hash     = '8CE30D92ABEC6522BEB2544E7B716983F5CBA50751B580D89A36048BF4D90316'
-  SaveTo   = $(Join-Path $tempFolder -ChildPath 'Microsoft.UI.Xaml.2.7.x64.appx')
+  url    = 'https://github.com/microsoft/microsoft-ui-xaml/releases/download/v2.7.3/Microsoft.UI.Xaml.2.7.x64.appx'
+  hash   = '8CE30D92ABEC6522BEB2544E7B716983F5CBA50751B580D89A36048BF4D90316'
+  SaveTo = $(Join-Path $tempFolder -ChildPath 'Microsoft.UI.Xaml.2.7.x64.appx')
 }
 
 $dependencies = @($desktopAppInstaller, $vcLibsUwp, $uiLibsUwp)
 
 # Clean temp directory
-Get-ChildItem $tempFolder -Recurse -Exclude $($(Split-Path $dependencies.SaveTo -Leaf) -replace '\.([^\.]+)$','.*') | Remove-Item -Force -Recurse
+Get-ChildItem $tempFolder -Recurse -Exclude $($(Split-Path $dependencies.SaveTo -Leaf) -replace '\.([^\.]+)$', '.*') | Remove-Item -Force -Recurse
 
 if (-Not [String]::IsNullOrWhiteSpace($Manifest)) {
   Copy-Item -Path $Manifest -Recurse -Destination $tempFolder
@@ -156,8 +156,7 @@ foreach ($dependency in $dependencies) {
     try {
       # If the directory doesn't already exist, create it
       $saveDirectory = Split-Path $dependency.SaveTo
-      if (-Not (Test-Path -Path $saveDirectory))
-      {
+      if (-Not (Test-Path -Path $saveDirectory)) {
         New-Item -ItemType Directory -Path $saveDirectory -Force | Out-Null
       }
       $WebClient.DownloadFile($dependency.url, $dependency.SaveTo)
