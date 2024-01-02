@@ -1,5 +1,10 @@
-#Requires -Version 5
+﻿#Requires -Version 5
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingWriteHost', '', Justification = 'This script is not intended to have any outputs piped')]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', 'Preserve', Justification = 'The variable is used in a conditional but ScriptAnalyser does not recognize the scope')]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseSingularNouns', Scope = 'Function', Target = 'Read-AppsAndFeaturesEntries',
+  Justification = 'Ths function is a wrapper which calls the singular Read-AppsAndFeaturesEntry as many times as necessary. It corresponds exactly to a pluralized manifest field')]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseSingularNouns', Scope = 'Function', Target = '*Metadata',
+  Justification = 'Metadata is used as a mass noun and is therefore singular in the cases used in this script')]
 
 Param
 (
@@ -163,7 +168,7 @@ if ($Settings) {
   exit
 }
 
-$ScriptHeader = '# Created with YamlCreate.ps1 v2.2.12'
+$ScriptHeader = '# Created with YamlCreate.ps1 v2.2.13'
 $ManifestVersion = '1.5.0'
 $PSDefaultParameterValues = @{ '*:Encoding' = 'UTF8' }
 $Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
@@ -460,8 +465,8 @@ Function Request-InstallerUrl {
           }
         }
       }
-      $NewInstallerUrl = [System.Web.HttpUtility]::UrlDecode($NewInstallerUrl.Replace('+','%2B'))
-      $NewInstallerUrl = $NewInstallerUrl.Replace(' ','%20')
+      $NewInstallerUrl = [System.Web.HttpUtility]::UrlDecode($NewInstallerUrl.Replace('+', '%2B'))
+      $NewInstallerUrl = $NewInstallerUrl.Replace(' ', '%20')
       if ($script:_returnValue.StatusCode -ne 409) {
         if (Test-String $NewInstallerUrl -MaxLength $Patterns.InstallerUrlMaxLength -MatchPattern $Patterns.InstallerUrl -NotNull) {
           $script:_returnValue = [ReturnValue]::Success()
@@ -601,7 +606,7 @@ Function Get-MsiDatabase {
   do {
     $_Table = $_TablesView.Fetch()
     if ($_Table) {
-      $_TableName = Get-Property $_Table StringData 1
+      $_TableName = Get-Property -Object $_Table -PropertyName StringData -ArgumentList 1
       $_Database["$_TableName"] = @{}
     }
   } while ($_Table)
@@ -614,8 +619,8 @@ Function Get-MsiDatabase {
       $_Item = $_ItemView.Fetch()
       if ($_Item) {
         $_ItemValue = $null
-        $_ItemName = Get-Property $_Item StringData 1
-        if ($_Table -eq 'Property') { $_ItemValue = Get-Property $_Item StringData 2 -ErrorAction SilentlyContinue }
+        $_ItemName = Get-Property -Object $_Item -PropertyName StringData -ArgumentList 1
+        if ($_Table -eq 'Property') { $_ItemValue = Get-Property -Object $_Item -PropertyName StringData -ArgumentList 2 -ErrorAction SilentlyContinue }
         $_Database.$_Table["$_ItemName"] = $_ItemValue
       }
     } while ($_Item)
@@ -706,7 +711,7 @@ Function Get-ExeType {
   # If the burn header isn't present in the first 264 bytes, scan through the rest of the binary
   elseif ($ScriptSettings.IdentifyBurnInstallers -eq 'true') {
     $rollingBytes = $bytes[ - $burn.Length..-1]
-    for ($i = 265; $i -lt ($fileStream.Length,524280|Measure-Object -Minimum).Minimum; $i++) {
+    for ($i = 265; $i -lt ($fileStream.Length, 524280 | Measure-Object -Minimum).Minimum; $i++) {
       $rollingBytes = $rollingBytes[1..$rollingBytes.Length]
       $rollingBytes += $reader.ReadByte()
       if (($rollingBytes -join '') -match ($burn -join '')) {
@@ -800,25 +805,23 @@ Function Get-UriScope {
   return $null
 }
 
-function Get-PublisherHash($publisherName)
-{
-    # Sourced from https://marcinotorowski.com/2021/12/19/calculating-hash-part-of-msix-package-family-name
-    $publisherNameAsUnicode = [System.Text.Encoding]::Unicode.GetBytes($publisherName);
-    $publisherSha256 = [System.Security.Cryptography.HashAlgorithm]::Create("SHA256").ComputeHash($publisherNameAsUnicode);
-    $publisherSha256First8Bytes = $publisherSha256 | Select-Object -First 8;
-    $publisherSha256AsBinary = $publisherSha256First8Bytes | ForEach-Object { [System.Convert]::ToString($_, 2).PadLeft(8, '0') };
-    $asBinaryStringWithPadding = [System.String]::Concat($publisherSha256AsBinary).PadRight(65, '0');
+function Get-PublisherHash($publisherName) {
+  # Sourced from https://marcinotorowski.com/2021/12/19/calculating-hash-part-of-msix-package-family-name
+  $publisherNameAsUnicode = [System.Text.Encoding]::Unicode.GetBytes($publisherName);
+  $publisherSha256 = [System.Security.Cryptography.HashAlgorithm]::Create('SHA256').ComputeHash($publisherNameAsUnicode);
+  $publisherSha256First8Bytes = $publisherSha256 | Select-Object -First 8;
+  $publisherSha256AsBinary = $publisherSha256First8Bytes | ForEach-Object { [System.Convert]::ToString($_, 2).PadLeft(8, '0') };
+  $asBinaryStringWithPadding = [System.String]::Concat($publisherSha256AsBinary).PadRight(65, '0');
 
-    $encodingTable = "0123456789ABCDEFGHJKMNPQRSTVWXYZ";
+  $encodingTable = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
 
-    $result = "";
-    for ($i = 0; $i -lt $asBinaryStringWithPadding.Length; $i += 5)
-    {
-        $asIndex = [System.Convert]::ToInt32($asBinaryStringWithPadding.Substring($i, 5), 2);
-        $result += $encodingTable[$asIndex];
-    }
+  $result = '';
+  for ($i = 0; $i -lt $asBinaryStringWithPadding.Length; $i += 5) {
+    $asIndex = [System.Convert]::ToInt32($asBinaryStringWithPadding.Substring($i, 5), 2);
+    $result += $encodingTable[$asIndex];
+  }
 
-    return $result.ToLower();
+  return $result.ToLower();
 }
 
 Function Get-PackageFamilyName {
@@ -832,7 +835,7 @@ Function Get-PackageFamilyName {
   # Make the downloaded installer a zip file
   $_MSIX = Get-Item $FilePath
   $_Zip = Join-Path $_MSIX.Directory.FullName -ChildPath 'MSIX_YamlCreate.zip'
-  $_ZipFolder = [System.IO.Path]::GetDirectoryName($_ZIp)+ '\' + [System.IO.Path]::GetFileNameWithoutExtension($_Zip)
+  $_ZipFolder = [System.IO.Path]::GetDirectoryName($_ZIp) + '\' + [System.IO.Path]::GetFileNameWithoutExtension($_Zip)
   Copy-Item -Path $_MSIX.FullName -Destination $_Zip
   # Progress preference has to be set globally for Expand-Archive
   # https://github.com/PowerShell/Microsoft.PowerShell.Archive/issues/77#issuecomment-601947496
@@ -843,7 +846,7 @@ Function Get-PackageFamilyName {
   # Restore the old progress preference
   $global:ProgressPreference = $globalPreference
   # Package could be a single package or a bundle, so regex search for either of them
-  $_AppxManifest = Get-ChildItem $_ZipFolder -Recurse -File -Filter '*.xml' | Where-Object {$_.Name -match '^Appx(Bundle)?Manifest.xml$'} | Select-Object -First 1
+  $_AppxManifest = Get-ChildItem $_ZipFolder -Recurse -File -Filter '*.xml' | Where-Object { $_.Name -match '^Appx(Bundle)?Manifest.xml$' } | Select-Object -First 1
   [XML] $_XMLContent = Get-Content $_AppxManifest.FullName -Raw
   # The path to the node is different between single package and bundles, this should work to get either
   $_Identity = @($_XMLContent.Bundle.Identity) + @($_XMLContent.Package.Identity)
@@ -956,7 +959,7 @@ Function Read-AppsAndFeaturesEntries {
   # TODO: Support Multiple AppsAndFeaturesEntries once WinGet supports it
   # For now, only select and retain the first entry
   foreach ($_AppsAndFeaturesEntry in @($_Installer.AppsAndFeaturesEntries[0])) {
-       $_AppsAndFeaturesEntries += Read-AppsAndFeaturesEntry $_AppsAndFeaturesEntry
+    $_AppsAndFeaturesEntries += Read-AppsAndFeaturesEntry $_AppsAndFeaturesEntry
   }
   return $_AppsAndFeaturesEntries
 }
@@ -1478,7 +1481,7 @@ Function Read-QuickInstallerEntry {
       # If the installer is msix or appx, try getting the new package family name
       # If the new package family name can't be found, remove it if it exists
       if ($script:dest -match '\.(msix|appx)(bundle){0,1}$') {
-        $PackageFamilyName= Get-PackageFamilyName $script:dest
+        $PackageFamilyName = Get-PackageFamilyName $script:dest
         if (Test-String $PackageFamilyName -MatchPattern $Patterns.FamilyName) {
           $_NewInstaller['PackageFamilyName'] = $PackageFamilyName
         } elseif ($_NewInstaller.Keys -contains 'PackageFamilyName') {
@@ -1536,6 +1539,8 @@ Function Read-InstallerMetadataValue {
 # If a key does not exist, it sets the value to a special character to be removed / commented later
 # Returns the result as a new object
 Function Restore-YamlKeyOrder {
+  [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', 'InputObject', Justification = 'The variable is used inside a conditional but ScriptAnalyser does not recognize the scope')]
+  [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', 'NoComments', Justification = 'The variable is used inside a conditional but ScriptAnalyser does not recognize the scope')]
   Param
   (
     [Parameter(Mandatory = $true, Position = 0)]
