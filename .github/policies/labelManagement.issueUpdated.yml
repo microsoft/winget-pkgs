@@ -51,6 +51,9 @@ configuration:
               - not:
                   hasLabel:
                     label: Needs-Author-Feedback
+              - not:
+                  hasLabel:
+                    label: Changes-Requested
         then:
           - enableAutoMerge:
               mergeMethod: Squash
@@ -77,6 +80,9 @@ configuration:
               - not:
                   hasLabel:
                     label: Needs-Author-Feedback
+              - not:
+                  hasLabel:
+                    label: Changes-Requested
         then:
           - enableAutoMerge:
               mergeMethod: Squash
@@ -112,6 +118,9 @@ configuration:
               - not:
                   hasLabel:
                     label: Needs-Attention
+              - not:
+                  hasLabel:
+                    label: Changes-Requested
         then:
           - approvePullRequest:
               comment: ""
@@ -196,9 +205,7 @@ configuration:
       - description: >-
           When changes are requested on a pull request
           * Disable automerge
-          * Add a reply notifying the issue author
-          * Assign to the author
-          * Label with Needs-Author-Feedback
+          * Label with Changes-Requested
         if:
           - payloadType: Pull_Request_Review
           - isAction:
@@ -207,19 +214,8 @@ configuration:
               reviewState: Changes_requested
         then:
           - disableAutoMerge
-          - addReply:
-              reply: >-
-                Hello @${issueAuthor},
-
-
-                The package manager bot determined changes have been requested to your PR.
-
-
-                Template: msftbot/changesRequested
-          - assignTo:
-              author: True
           - addLabel:
-              label: Needs-Author-Feedback
+              label: Changes-Requested
       - description: >-
           If static analysis has timed out, and the retry has timed out
           * Add a reply notifying the issue author
@@ -355,6 +351,8 @@ configuration:
           - removeLabel:
               label: Moderator-Approved
           - removeLabel:
+              label: Changes-Requested
+          - removeLabel:
               label: Unexpected-File
           - removeLabel:
               label: Validation-Merge-Conflict
@@ -386,6 +384,7 @@ configuration:
               - activitySenderHasPermission:
                   permission: Write
         then:
+          # Don't remove Changes-Requested here beacause it is just a re-run, no new commits have been added
           - removeLabel:
               label: Validation-Completed
           - removeLabel:
