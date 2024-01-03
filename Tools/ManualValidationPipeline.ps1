@@ -9,12 +9,14 @@
 #3.2.2 Add silent option to many functions to reduce extraneous console output and better PR Watcher functionality.
 #3.2.1 Add automation for processing GitHub diff'd PRs, and improve automation for processing individual files into a manifest.
 
-$build = 489
-$appName = "Manual Validation" 
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingWriteHost', '', Justification = 'Console application. Outputs have been manually suppressed where desired.')]
+
+$build = 513
+$appName = "Manual Validation"
 Write-Host "$appName build: $build"
 $MainFolder = "C:\ManVal"
 #Share this folder with Windows File Sharing, then access it from within the VM across the network, as \\LaptopIPAddress\SharedFolder. For LaptopIPAddress use Ethernet adapter vEthernet (Default Switch) IPv4 Address.
-cd $MainFolder
+Set-Location $MainFolder
 
 $ipconfig = (ipconfig)
 $remoteIP = ([ipaddress](($ipconfig[($ipconfig | select-string "vEthernet").LineNumber..$ipconfig.length] | select-string "IPv4 Address") -split ": ")[1]).IPAddressToString
@@ -25,7 +27,7 @@ $imagesFolder = "$MainFolder\Images" #VM Images folder
 $logsFolder = "$MainFolder\logs" #VM Images folder
 $runPath = "$MainFolder\vm\" #VM working folder
 $writeFolder = "$MainFolder\write" #Folder with write permissions
-$vmCounter = "$MainFolder\vmcounter.txt" 
+$vmCounter = "$MainFolder\vmcounter.txt"
 $VMversion = "$MainFolder\VMversion.txt"
 $StatusFile = "$writeFolder\status.csv"
 $timecardfile = "$logsFolder\timecard.txt"
@@ -33,33 +35,29 @@ $TrackerModeFile = "$logsFolder\trackermode.txt"
 
 $CheckpointName = "Validation"
 $VMUserName = "user" #Set to the internal username you're using in your VMs.
-$SandboxUserName = "WDAGUtilityAccount" #Set to the internal username used in your Sandbox.
-$PCUserName = $VMUserName #((whoami) -split "\\")[1]; #Set to your username, or use the commented "whoami" section to autodetect.
 
 $GitHubRateLimitDelay = 0.5 #seconds
 
 #PR tools
-Function Get-AutoValLogs {
-	#Needs $GitHubToken to be set up in your $PROFILE or somewhere more secure. Needs permissions: workflow, 
+Function Get-AutoValLog {
+	#Needs $GitHubToken to be set up in your $PROFILE or somewhere more secure. Needs permissions: workflow,
 	param(
 		$clip = (Get-Clipboard),
-		#$PR = (($clip -split " " | select-string "[#][0-9]{5,6}" ) -replace "#",""),
 		$PR = (($clip -split "/" | select-string "[0-9]{5,6}" )),
 		$DestinationPath = "$MainFolder\Installers",
 		$LogPath = "$DestinationPath\InstallationVerificationLogs\",
 		$ZipPath = "$DestinationPath\InstallationVerificationLogs.zip",
 		[switch]$CleanoutDirectory,
-		[switch]$Whatif,
+		[switch]$DemoMode,
 		[switch]$Force
 	)
 	#Get-Process *photosapp* | Stop-Process
-	$AutoValbuild = ((((iwr "https://dev.azure.com/ms/winget-pkgs/_apis/build/builds?branchName=refs/pull/$PR/merge&api-version=6.0").content | ConvertFrom-Json).value[0]._links.web.href) -split "=")[1]
+	$AutoValbuild = ((((Invoke-WebRequest "https://dev.azure.com/ms/winget-pkgs/_apis/build/builds?branchName=refs/pull/$PR/merge&api-version=6.0").content | ConvertFrom-Json).value[0]._links.web.href) -split "=")[1]
 	if ($AutoValbuild) {
-			
-		#Write-Host "AutoValbuild: $AutoValbuild"
+
 		#This downloads to Windows default location, which has already been set to $DestinationPath
 		start-process "https://dev.azure.com/ms/ed6a5dfa-6e7f-413b-842c-8305dd9e89e6/_apis/build/builds/$AutoValbuild/artifacts?artifactName=InstallationVerificationLogs&api-version=7.0&%24format=zip"
-		sleep 2;
+		Start-Sleep 2;
 		if (!(Test-Path $ZipPath) -AND !$Force) {
 			Write-Host "No logs."
 			"No logs." | clip
@@ -68,38 +66,35 @@ Function Get-AutoValLogs {
 		Expand-Archive $ZipPath -DestinationPath $DestinationPath;
 		Remove-Item $ZipPath
 		if ($CleanoutDirectory) {
-			Get-ChildItem $DestinationPath | Remove-Item -Recurse 
+			Get-ChildItem $DestinationPath | Remove-Item -Recurse
 		}
 		$UserInput = (
-			(gci $LogPath).FullName| %{
+			(Get-ChildItem $LogPath).FullName| ForEach-Object {
 			if ($_ -match "png") {Start-Process $_} #Open PNGs with default app.
 			Get-Content $_ |Where-Object {
 				$_ -match '[[]FAIL[]]' -OR $_ -match 'fail' -OR $_ -match 'error' -OR $_ -match 'exception'}
 			}
 		) -split "`n" | Select-Object -Unique;
-		
-		$UserInput = $UserInput -replace "Standard error: ","" 
+
+		$UserInput = $UserInput -replace "Standard error: ",""
 		if ($UserInput -ne "") {
 			Start-Process "https://github.com/microsoft/winget-pkgs/pull/$PR"
-			
-			#$UserInput = $UserInput -replace "`n","\n"
+
 			$UserInput = ($UserInput -split "`n") -notmatch ' success or error status`: 0'
 			$UserInput = ($UserInput -split "`n") -notmatch 'api-ms-win-core-errorhandling'
 			$UserInput = ($UserInput -split "`n") -notmatch '``Windows Error Reporting``'
 			$UserInput = ($UserInput -split "`n") -notmatch 'The FileSystemWatcher has detected an error '
-			$UserInput = $UserInput -replace "2023-","`n> 2023-" 
-			$UserInput = $UserInput -replace " MSI ","`n> MSI " 
+			$UserInput = $UserInput -replace "2023-","`n> 2023-"
+			$UserInput = $UserInput -replace " MSI ","`n> MSI "
 			$UserInput = $UserInput | Select-Object -Unique
-			
-			#$UserInput = $UserInput -replace "\n","<br />"
-			#$Response.body = "Automatic Validation ended with:\n> $UserInput"
+
 			$UserInput = "Automatic Validation ended with:`n> "+$UserInput
 			$UserInput += "`n`n(Automated response - build $build.)"
-			
-			if ($Whatif) {
-				Write-Host "PR: $PR - Whatif: Created"
+
+			if ($DemoMode) {
+				Write-Host "PR: $PR - DemoMode: Created"
 			} else {
-				$out = ReplyTo-PR -PR $PR -Body $UserInput 
+				$out = Reply-ToPR -PR $PR -Body $UserInput
 				Write-Host "PR: $PR - $out"
 			}
 		} else {
@@ -113,7 +108,7 @@ Function Get-AutoValLogs {
 Function Invoke-GitHubRequest {
 	param(
 	[Parameter(mandatory=$true)][string]$Uri,
-	[string]$Body = "",
+	[string]$Body,
 	[ValidateSet("DELETE","GET","HEAD","PATCH","POST","PUT")][string]$Method = "GET",
 	$Headers = @{"Authorization"="Bearer $GitHubToken"; "Accept"="application/vnd.github+json"; "X-GitHub-Api-Version"="2022-11-28"},
 	[switch]$JSON
@@ -123,7 +118,7 @@ Function Invoke-GitHubRequest {
 	} else {
 		$out = (Invoke-WebRequest -Method $Method -Uri $Uri -Headers $Headers)
 	}
-	#GitHub requires the value be the .body property of the variable. This makes more sense with CURL, where this is the -data parameter. However with Invoke-WebRequest it's the -Body parameter, so we end up with the awkward situation of having a Body parameter that needs to be prepended with a body property.
+	#GitHub requires the value be the .body property of the variable. This makes more sense with CURL, Where-Object this is the -data parameter. However with Invoke-WebRequest it's the -Body parameter, so we end up with the awkward situation of having a Body parameter that needs to be prepended with a body property.
 	if ($JSON) {
 		$out.content | ConvertFrom-Json
 	} else {
@@ -131,13 +126,12 @@ Function Invoke-GitHubRequest {
 	}
 }
 
-Function Add-GitHubReview{
+Function Add-GitHubReview {
 	param(
 		$PR,
 		[string]$Body = ""
 	)
 	$prData = Invoke-GitHubRequest https://api.github.com/repos/microsoft/winget-pkgs/pulls/$pr/commits -JSON
-	$commit = ($prData.commit.url -split "/")[-1]
 	$prData = Invoke-GitHubRequest https://api.github.com/repos/microsoft/winget-pkgs/commits/$commit -JSON
 	$position = ($commitData.files -split "`n" | Select-String "Architecture:" ).LineNumber -1
 	$position
@@ -159,7 +153,7 @@ Function Add-GitHubReview{
 	$out = Invoke-GitHubRequest -Method Post -Uri $uri -Body $Body
 
 	$out.StatusDescription
-	sleep $GitHubRateLimitDelay;
+	Start-Sleep $GitHubRateLimitDelay;
 }
 
 Function Approve-PR {
@@ -170,7 +164,7 @@ Function Approve-PR {
 
 	$prData = Invoke-GitHubRequest https://api.github.com/repos/microsoft/winget-pkgs/pulls/$pr/commits -JSON
 	$commit = ($prData.commit.url -split "/")[-1]
-	
+
 	$Response = @{}
 	$Response.body = $Body
 	$Response.commit = $commit
@@ -182,35 +176,61 @@ Function Approve-PR {
 	$out = Invoke-GitHubRequest -Method Post -Uri $uri -Body $Body
 
 	$out.StatusDescription
-	sleep $GitHubRateLimitDelay;
+	Start-Sleep $GitHubRateLimitDelay;
 }
 
 #GET = Read; POST = Append; PUT = Write; DELETE = delete
 Function Invoke-GitHubPRRequest {
 	param(
 		$PR,
-		[ValidateSet("GET","DELETE","POST","PUT")][string]$Method = "GET",
-		[ValidateSet("assignees","labels")][string]$Type = "labels",
+		[ValidateSet("GET","DELETE","PATCH","POST","PUT")][string]$Method = "GET",
+		[ValidateSet("assignees","comments","files","labels","reviews","")][string]$Type = "labels",
 		[string]$Data,
-		[ValidateSet("content","StatusDescription")][string]$Output = "StatusDescription"		
+		[ValidateSet("issues","pulls")][string]$Path = "issues",
+		[ValidateSet("content","StatusDescription")][string]$Output = "StatusDescription",
+		[switch]$JSON,
+		[Switch]$Silent
 	)
-				#https://api.github.com/repos/microsoft/winget-pkgs/issues/131157/labels
-	$uri = "https://api.github.com/repos/microsoft/winget-pkgs/issues/$pr/$Type"
-	#$prData = Invoke-GitHubRequest $uri -JSON
-	
+	$Response = @{}
+	$ResponseType = $Type
+
+	if (($Type -eq "") -OR ($Type -eq "files")){
+		$Path = "pulls"
+	} elseif ($Type -eq "comments") {
+		$Response.body += $Data
+	} elseif ($Type -eq "reviews") {
+		$Response.body = $Data
+		$prData = Invoke-GitHubRequest https://api.github.com/repos/microsoft/winget-pkgs/pulls/$pr/commits -JSON
+		$Response.commit = ($prData.commit.url -split "/")[-1]
+		$Response.event = "APPROVE"
+	} elseif ($Type -eq "") {
+		$Response.title = ""
+		$Response.body = ""
+		$Response.state = $Data
+		$Response.base = "master"
+	} else {
+ 		$Response.$ResponseType = @()
+		$Response.$ResponseType += $Data
+	}
+
+	$uri = "https://api.github.com/repos/microsoft/winget-pkgs/$Path/$pr/$Type"
+	$uri = $uri -replace "/$",""
+
 	if ($Method -eq "GET") {
 		$out = Invoke-GitHubRequest -Method $Method -Uri $uri
 	} else {
-		$Response = @{}
-		$Response.$Type = @()
-		$Response.$Type += $Data
 		[string]$Body = $Response | ConvertTo-Json
 		$out = Invoke-GitHubRequest -Method $Method -Uri $uri -Body $Body
 	}
 
-	$out.$Output #| ConvertFrom-Json
-	#$out.StatusDescription
-	sleep $GitHubRateLimitDelay;
+	if (!($Silent)) {
+		if ($JSON) {
+			$out.$Output | ConvertFrom-Json
+		} else {
+			$out.$Output 
+		}
+	}
+	Start-Sleep $GitHubRateLimitDelay;
 }
 
 Function Add-PRLabel {
@@ -219,20 +239,7 @@ Function Add-PRLabel {
 		[string]$Label = "Needs-Author-Feedback",
 		[ValidateSet("GET","DELETE","POST","PUT")][string]$Method = "POST"
 	)
-
-	$uri = "https://api.github.com/repos/microsoft/winget-pkgs/issues/$pr/labels"
-	#$prData = Invoke-GitHubRequest $uri -JSON
-	
-	$Response = @{}
-	$Response.labels = @()
-	$Response.labels += $Label
-	[string]$Body = $Response | ConvertTo-Json
-
-	#Write-Host $Response.body
-	$out = Invoke-GitHubRequest -Method $Method -Uri $uri -Body $Body
-
-	$out.StatusDescription
-	sleep $GitHubRateLimitDelay;
+	Invoke-GitHubPRRequest -PR $PR -Method $Method -Type "labels" -Data $Label
 }
 
 Function Update-PR {
@@ -245,7 +252,7 @@ Function Update-PR {
 
 	$prData = Invoke-GitHubRequest https://api.github.com/repos/microsoft/winget-pkgs/pulls/$pr/commits -JSON
 	$commit = ($prData.commit.url -split "/")[-1]
-	
+
 	#{"title":"new title","body":"updated body","state":"open","base":"master"}'
 	$Response = @{}
 	$Response.title = $Title
@@ -259,25 +266,23 @@ Function Update-PR {
 
 	$out = Invoke-GitHubRequest -Uri $uri -Method Post -Body $Body
 	$out.StatusDescription
-	sleep $GitHubRateLimitDelay;
+	Start-Sleep $GitHubRateLimitDelay;
 }
 
-Function ReplyTo-PR {
+Function Reply-ToPR {
 	param(
 		$PR,
-		[string]$Body,
+		[string]$UserInput,
+		[string]$CannedResponse,
+		[string]$Body = (Get-CannedResponse $CannedResponse -UserInput $UserInput -NoClip),
 		[Switch]$Silent
 	)
-	$Response = @{}
-	$Response.body = $Body
-	[string]$Body = $Response | ConvertTo-Json
 
-	$uri = "https://api.github.com/repos/microsoft/winget-pkgs/issues/$PR/comments" 
-	$out = Invoke-GitHubRequest -Method Post -Uri $uri -Body $Body
-	if (!($Silent)) {
-		$out.StatusDescription -join ""
+	if ($Silent) {
+		Invoke-GitHubPRRequest -PR $PR -Method Post -Type "comments" -Data $Body -Output StatusDescription -Silent
+	} else {
+		Invoke-GitHubPRRequest -PR $PR -Method Post -Type "comments" -Data $Body -Output StatusDescription
 	}
-	sleep $GitHubRateLimitDelay;
 }
 
 Function Add-UserToPR {
@@ -286,35 +291,114 @@ Function Add-UserToPR {
 		[array]$Body,
 		[string]$Method
 	)
-	$Response = @{}
-	$Response.assignees = $Body
-	[string]$Body = $Response | ConvertTo-Json
-
-	$uri = "https://api.github.com/repos/microsoft/winget-pkgs/issues/$PR/assignees" 
-	$out = Invoke-GitHubRequest -Method $Method -Uri $uri -Body $Body
+	$out = Invoke-GitHubPRRequest -Method $Method -Type "assignees" -Data $Body
 	if (!($Silent)) {
 		$out.StatusDescription -join ""
 	}
-	sleep $GitHubRateLimitDelay;
 }
 
-Function Convert-ImageToBase64Link {
+Function Set-GitHubPreset {
 	param(
-		$FileName = "C:\ManVal\misc\forbidden.png"
+		[int]$PR,
+		[string]$UserName = (invoke-gitHubPRRequest $PR -Type "" -Output content -JSON).user.login,
+		[ValidateSet("DefenderFail")][string]$Preset,
+		$CannedResponse = $Preset,
+		$Data
 	)
-	[String]$base64 = [convert]::ToBase64String((Get-Content $FileName -AsByteStream -Raw))
-	$Ext = ($FileName -split "[.]")[1]
-	return "<img src=`"data:image/$Ext;base64, $base64`" />"
+	Switch ($Preset) {
+		"DefenderFail" {
+			$Data = "Needs-Attention"
+		}
+	}
+
+	Reply-ToPR -PR $PR -CannedResponse $CannedResponse -UserInput $UserName
+	Invoke-GitHubPRRequest -PR $PR -Method POST -Type labels -Data $Data
+}
+
+#PR Watcher GitHub tools.
+Function Check-PRInstallerStatusInnerWrapper {
+	param(
+		$PR,
+		$Pull = (Invoke-GitHubPRRequest $PR -Type files -Output content -JSON),
+		$PullContents = ((Invoke-GitHubRequest -Uri $Pull.contents_url[0] -JSON).content),
+		$PullInstallerContents = (([System.Text.Encoding]::UTF8.GetString( [convert]::FromBase64String($PullContents)) -split "`n")),
+		$Url = (Get-YamlValue -StringName InstallerUrl -clip $PullInstallerContents),
+		$Code = (Invoke-WebRequest $Url -Method Head -ErrorAction SilentlyContinue).StatusCode
+	)
+	return $Code
+}
+
+Function Check-PRInstallerStatus {
+	param(
+		$PR
+	)
+	$out = ""
+try {$out = "Status Code: "+(Check-PRInstallerStatusInnerWrapper $PR)}catch{$out = $error[0].Exception.Message}
+	$out = $out + "`n`n(Automated message - build $build)"
+return $out
+}
+
+Function Get-ManifestListing {
+	param(
+		$PackageIdentifier,
+		$Version = (Find-WinGetPackage $PackageIdentifier | Where-Object {$_.id -eq $PackageIdentifier}).version,
+		$Path = ($PackageIdentifier -replace "[.]","/"),
+		$FirstLetter = ($PackageIdentifier[0].tostring().tolower())
+	)
+	try{
+		$Names = (Invoke-GitHubRequest -Uri "https://api.github.com/repos/microsoft/winget-pkgs/contents/manifests/$FirstLetter/$Path/$Version/" -JSON).name
+	}catch{
+		$Names = "Error"
+	}
+	return $Names -replace "$($PackageIdentifier)[.]",""
+}
+
+Function Get-ListingDiff {
+	param(
+		$Clip = (Get-Clipboard),
+		$PackageIdentifier = (Get-YamlValue PackageIdentifier $Clip -replace '"',""),
+		$CurrentManifest = (Get-ManifestListing $PackageIdentifier),
+		$PRManifest = ($clip -split "`n" | Where-Object {$_ -match ".yaml"} | Where-Object {$_ -match $PackageIdentifier} |%{($_ -split "/")[-1] -replace "$($PackageIdentifier)[.]",""})
+	)
+	if ($CurrentManifest -ne "Error") {
+		diff $currentManifest $PRManifest
+	} else {
+		$CurrentManifest
+	}
+}
+
+Function Get-WinGetFile {
+	param(
+		$PackageIdentifier,
+		$Version,
+		$Type = "installer",
+		$Path = ($PackageIdentifier -replace "[.]","/"),
+		$FirstLetter = ($PackageIdentifier[0].tostring().tolower())
+	)
+	try{
+		$content = (Invoke-WebRequest "https://raw.githubusercontent.com/microsoft/winget-pkgs/master/manifests/$FirstLetter/$Path/$Version/$PackageIdentifier.$Type.yaml").content
+	}catch{
+		$content = "Error"
+	}
+	return $content
+}
+
+Function Check-FileExist {
+	param(
+		$PackageIdentifier,
+		$Version,
+		$Type
+	)
+	$content = Get-WinGetFile $PackageIdentifier $Version $Type
+	if ($content -ne "Error") {$true} else {$false}
 }
 
 #Package validation
-Function Validate-Package {
+Function Get-TrackerVMValidate {
 	param(
-		#[Parameter(mandatory=$true)]
 		$out = ((Get-Clipboard) -split "`n"),
 		[ValidateSet("Win10","Win11")][string]$OS = (Get-OSFromVersion),
 		[int]$vm = ((Get-NextFreeVM -OS $OS) -replace"vm",""),
-		#$out = ((Get-SecondMatch) -split "`n"),
 		[switch]$NoFiles,
 		[ValidateSet("Config","DevHomeConfig","Pin","Scan")][string]$Operation = "Scan",
 		[switch]$InspectNew,
@@ -322,27 +406,25 @@ Function Validate-Package {
 		$ManualDependency,
 		$PackageIdentifier = ((Get-YamlValue -StringName "PackageIdentifier" $out) -replace '"',''-replace "'",''),
 		$PackageVersion = ((Get-YamlValue -StringName "PackageVersion" $out) -replace '"',''-replace "'",''),
-		[int]$PR = (Get-JustPRNumbers $out),
+		[int]$PR = (Get-JustPRNumber $out),
 		$RemoteFolder = "//$remoteIP/ManVal/vm/$vm",
 		$installerLine = "--manifest $RemoteFolder/manifest",
 		[ValidateSet("x86","x64","arm","arm32","arm64","neutral")][string]$Arch,
 		[ValidateSet("User","Machine")][string]$Scope,
-		#[ValidateSet("de-DE","en-US","es-ES","fr-FR","it-IT","ja-JP","ko-KR","pt-BR","ru-RU","zh-CN","zh-HK","zh-TW")]
 		[string]$Locale,
 		[switch]$Silent,
-		$vmStatusFile = "$RemoteFolder\$vm.txt",
 		$optionsLine = ""
 	)
 	Test-Admin
 	if ($vm -eq 0){
 		Write-Host "No available $OS VMs";
-		Generate-PipelineVm -OS $OS;
+		Get-PipelineVmGenerate -OS $OS;
 		#Break;
 		}
 	if ($Silent) {
-		Set-Status "Prevalidation" $vm $PackageIdentifier $PR -Silent
+		Get-TrackerVMSetStatus "Prevalidation" $vm $PackageIdentifier $PR -Silent
 	} else {
-		Set-Status "Prevalidation" $vm $PackageIdentifier $PR
+		Get-TrackerVMSetStatus "Prevalidation" $vm $PackageIdentifier $PR
 	}
 	if ((Get-VM "vm$vm").state -ne "Running") {Start-VM "vm$vm"}
 	if ($PackageIdentifier -eq "") {
@@ -375,8 +457,8 @@ Function Validate-Package {
 		$optionsLine += " --scope $Scope "
 		$logLine += "scope $Scope "
 	}
-	$Archs = ($out | Select-String -notmatch "arm"| select-string "Architecture: " )|%{($_ -split ": ")[1]} 	
-	$archDetect = ""	
+	$Archs = ($out | Select-String -notmatch "arm"| select-string "Architecture: " )|ForEach-Object{($_ -split ": ")[1]} 
+	$archDetect = ""
 	$archColor = "yellow"
 	if ($Archs) {
 		if ($Archs[0].length -ge 2) {
@@ -386,7 +468,6 @@ Function Validate-Package {
 				$Arch = $Archs[0]
 				$archDetect = "Detected"
 			}
-			$otherArch = $Archs | select-string -notmatch $Arch
 			$archColor = "red"
 		} else {
 			if ($Archs -eq "neutral") {
@@ -403,14 +484,8 @@ Function Validate-Package {
 		if (!($Silent)) {
 			Write-Host "$archDetect Arch $Arch of available architectures: $Archs" -f $archColor
 		}
-		#$optionsLine += " --architecture $Arch "
 		$logLine += "$Arch "
 	}
-<#Automatic manual dependency support to preinstall dependencies when dependencies are not supported, for more complete testing confirmation. 
-	if (!$ManualDependency) {
-		$ManualDependency = try {($out[($out | Select-String "PackageDependencies:").LineNumber] -split ": ")[1]}catch{}
-	}
- #>
 	$MDLog = ""
 	if ($ManualDependency) {
 		$MDLog = $ManualDependency
@@ -426,7 +501,6 @@ Function Validate-Package {
 		$nonElevatedShell = "if ([bool](([System.Security.Principal.WindowsIdentity]::GetCurrent()).groups -match 'S-1-5-32-544')){& explorer.exe 'C:\Program Files\PowerShell\7\pwsh.exe';Stop-Process (Get-Process WindowsTerminal).id}"
 		#If elevated, run^^ and exit, else run cmds.
 	}
-$packageDeveloper = ($PackageIdentifier -split "[.]")[0]
 $packageName = ($PackageIdentifier -split "[.]")[1]
 
 $cmdsOut = ""
@@ -445,14 +519,14 @@ Function Out-Log ([string]`$logData,[string]`$logColor='cyan') {
 };
 Function Out-ErrorData (`$errArray,[string]`$serviceName,`$errorName='errors') {
 	Out-Log `"Detected `$(`$errArray.count) `$serviceName `$(`$errorName): `"
-	`$errArray | %{Out-Log `$_ 'red'}
+	`$errArray | ForEach-Object {Out-Log `$_ 'red'}
 };
-Set-Status 'Installing'
+Get-TrackerVMSetStatus 'Installing'
 Out-Log ' = = = = Starting Manual Validation pipeline version $build on VM $vm  $PackageIdentifier $logLine  = = = = '
 
 Out-Log 'Pre-testing log cleanup.'
 Out-Log 'Upgrading installed applications.'
-Out-Log (`$null = (WinGet upgrade --all --include-pinned --disable-interactivity))
+Out-Log (WinGet upgrade --all --include-pinned --disable-interactivity)
 Out-Log 'Clearing PowerShell errors.'
 `$Error.Clear()
 Out-Log 'Clearing Application Log.'
@@ -473,55 +547,55 @@ Out-Log `"Main Package Install with args: `$wingetArgs`"
 
 Out-Log `"`$(`$mainpackage.processname) finished with exit code: `$(`$mainpackage.ExitCode)`";
 If (`$mainpackage.ExitCode -ne 0) {
-	Out-Log 'Install Failed.'; 
+	Out-Log 'Install Failed.';
 	explorer.exe `$WinGetLogFolder;
-Out-ErrorData ((Get-ChildItem `$WinGetLogFolder).fullname | %{Get-Content `$_ |Where-Object {`$_ -match '[[]FAIL[]]' -OR `$_ -match 'failed' -OR `$_ -match 'error' -OR `$_ -match 'does not match'}}) 'WinGet'
+Out-ErrorData ((Get-ChildItem `$WinGetLogFolder).fullname | ForEach-Object {Get-Content `$_ |Where-Object {`$_ -match '[[]FAIL[]]' -OR `$_ -match 'failed' -OR `$_ -match 'error' -OR `$_ -match 'does not match'}}) 'WinGet'
 Out-ErrorData '$MDLog' 'Manual' 'Dependency'
 Out-ErrorData `$Error 'PowerShell'
 Out-ErrorData (Get-EventLog Application -EntryType Error -after `$TimeStart  -ErrorAction Ignore).Message 'Application Log'
 
 Out-Log `" = = = = Failing Manual Validation pipeline version $build on VM $vm for $PackageIdentifier $logLine in `$(((Get-Date) -`$TimeStart).TotalSeconds) seconds. = = = = `"
-Set-Status 'ValidationComplete' 
+Get-TrackerVMSetStatus 'ValidationComplete'
 	Break;
-} 
-#Read-Host 'Install complete, press ENTER to continue...' #Uncomment to examine installer before scanning, for when scanning disrupts the install. 
+}
+#Read-Host 'Install complete, press ENTER to continue...' #Uncomment to examine installer before scanning, for when scanning disrupts the install.
 
-Set-Status 'Scanning' 
+Get-TrackerVMSetStatus 'Scanning'
 
 Out-Log 'Install complete, starting file change scan.'
 `$files = ''
 if (Test-Path $RemoteFolder\files.txt) {
-	`$files = Get-Content $RemoteFolder\files.txt 
+	`$files = Get-Content $RemoteFolder\files.txt
 } else {
-	`$files1 = (Get-ChildItem c:\ -File -Recurse -ErrorAction Ignore -Force | where {`$_.CreationTime -gt `$TimeStart}).FullName
-	`$files2 = (Get-ChildItem c:\ -File -Recurse -ErrorAction Ignore -Force | where {`$_.LastAccessTIme -gt `$TimeStart}).FullName
+	`$files1 = (Get-ChildItem c:\ -File -Recurse -ErrorAction Ignore -Force | Where-Object {`$_.CreationTime -gt `$TimeStart}).FullName
+	`$files2 = (Get-ChildItem c:\ -File -Recurse -ErrorAction Ignore -Force | Where-Object {`$_.LastAccessTIme -gt `$TimeStart}).FullName
 	`$files = `$files1 + `$files2 | Select-Object -Unique
 }
 
 Out-Log `"Reading `$(`$files.count) file changes in the last `$(((Get-Date) -`$TimeStart).TotalSeconds) seconds. Starting bulk file execution:`"
-`$files = `$files | where {`$_ -notmatch 'unins'} | where {`$_ -notmatch 'dotnet'} | where {`$_ -notmatch 'redis'} | where {`$_ -notmatch 'System32'} | where {`$_ -notmatch 'SysWOW64'} | where {`$_ -notmatch 'WinSxS'} | where {`$_ -notmatch 'dump64a'} | where {`$_ -notmatch 'CbsTemp'} 
-`$files | Out-File 'C:\Users\user\Desktop\ChangedFiles.txt'  
-`$files | select-string '[.]exe`$' | %{if (`$_ -match '$packageName') {Out-Log `$_ 'green'}else{Out-Log `$_ 'cyan'}; try{Start-Process `$_}catch{}};
-`$files | select-string '[.]msi`$' | %{if (`$_ -match '$packageName') {Out-Log `$_ 'green'}else{Out-Log `$_ 'cyan'}; try{Start-Process `$_}catch{}};
-`$files | select-string '[.]lnk`$' | %{if (`$_ -match '$packageName') {Out-Log `$_ 'green'}else{Out-Log `$_ 'cyan'}; try{Start-Process `$_}catch{}};
+`$files = `$files | Where-Object {`$_ -notmatch 'unins'} | Where-Object {`$_ -notmatch 'dotnet'} | Where-Object {`$_ -notmatch 'redis'} | Where-Object {`$_ -notmatch 'System32'} | Where-Object {`$_ -notmatch 'SysWOW64'} | Where-Object {`$_ -notmatch 'WinSxS'} | Where-Object {`$_ -notmatch 'dump64a'} | Where-Object {`$_ -notmatch 'CbsTemp'}
+`$files | Out-File 'C:\Users\user\Desktop\ChangedFiles.txt'
+`$files | select-string '[.]exe`$' | ForEach-Object {if (`$_ -match '$packageName') {Out-Log `$_ 'green'}else{Out-Log `$_ 'cyan'}; try{Start-Process `$_}catch{}};
+`$files | select-string '[.]msi`$' | ForEach-Object {if (`$_ -match '$packageName') {Out-Log `$_ 'green'}else{Out-Log `$_ 'cyan'}; try{Start-Process `$_}catch{}};
+`$files | select-string '[.]lnk`$' | ForEach-Object {if (`$_ -match '$packageName') {Out-Log `$_ 'green'}else{Out-Log `$_ 'cyan'}; try{Start-Process `$_}catch{}};
 
 Out-Log `" = = = = End file list. Starting Defender scan.`"
 Start-MpScan;
 
 Out-Log `"Defender scan complete, closing windows...`"
-(get-process | Where-Object { `$_.mainwindowtitle -ne '' -and `$_.processname -notmatch '$packageName' -and `$_.processname -ne 'powershell'  -and `$_.processname -ne 'WindowsTerminal' -and `$_.processname -ne 'csrss' -and `$_.processname -ne 'dwm'})| %{
+(get-process | Where-Object { `$_.mainwindowtitle -ne '' -and `$_.processname -notmatch '$packageName' -and `$_.processname -ne 'powershell'  -and `$_.processname -ne 'WindowsTerminal' -and `$_.processname -ne 'csrss' -and `$_.processname -ne 'dwm'})| ForEach-Object {
 	`$process = (Stop-Process `$_ -PassThru);
 	Out-Log `"`$(`$process.processname) finished with exit code: `$(`$process.ExitCode)`";
 }
 
-Out-ErrorData ((Get-ChildItem `$WinGetLogFolder).fullname | %{Get-Content `$_ |Where-Object {`$_ -match '[[]FAIL[]]' -OR `$_ -match 'failed' -OR `$_ -match 'error' -OR `$_ -match 'does not match'}}) 'WinGet'
+Out-ErrorData ((Get-ChildItem `$WinGetLogFolder).fullname | ForEach-Object {Get-Content `$_ |Where-Object {`$_ -match '[[]FAIL[]]' -OR `$_ -match 'failed' -OR `$_ -match 'error' -OR `$_ -match 'does not match'}}) 'WinGet'
 Out-ErrorData '$MDLog' 'Manual' 'Dependency'
 Out-ErrorData `$Error 'PowerShell'
 Out-ErrorData (Get-EventLog Application -EntryType Error -after `$TimeStart  -ErrorAction Ignore).Message 'Application Log'
 Out-ErrorData (Get-MPThreat).ThreatName `"Defender (with signature version `$((Get-MpComputerStatus).QuickScanSignatureVersion))`"
 
 Out-Log `" = = = = Completing Manual Validation pipeline version $build on VM $vm for $PackageIdentifier $logLine in `$(((Get-Date) -`$TimeStart).TotalSeconds) seconds. = = = = `"
-Set-Status 'ValidationComplete'
+Get-TrackerVMSetStatus 'ValidationComplete'
 "
 	}
 	Default {
@@ -537,19 +611,19 @@ Set-Status 'ValidationComplete'
 		if (!($Silent)) {
 			Write-Host "Removing previous manifest and adding current..."
 		}
-		Remove-FileIfExists "$manifestFolder"  -remake -Silent
+		Get-RemoveFileIfExist "$manifestFolder"  -remake -Silent
 		$Files = @()
 		$Files += "Package.installer.yaml"
-		$FileNames = ($out | select-string "[.]yaml") |%{($_ -split "/")[-1]}
+		$FileNames = ($out | select-string "[.]yaml") |ForEach-Object{($_ -split "/")[-1]}
 		$replace = $FileNames[-1] -replace ".yaml"
-		$FileNames | %{
+		$FileNames | ForEach-Object {
 			$Files += $_ -replace $replace,"Package"
 		}
 		$out = $out -join "`n" -split "@@"
 		for ($i=0;$i -lt $Files.length;$i++) {
 			$File = $Files[$i]
-			$inputObj = $out[$i*2] -split "`n" 
-			$inputObj = $inputObj[1..(($inputObj| Select-String "ManifestVersion" -SimpleMatch).LineNumber -1)] | where {$_ -notmatch "marked this conversation as resolved."}
+			$inputObj = $out[$i*2] -split "`n"
+			$inputObj = $inputObj[1..(($inputObj| Select-String "ManifestVersion" -SimpleMatch).LineNumber -1)] | Where-Object {$_ -notmatch "marked this conversation as resolved."}
 			$FilePath = "$manifestFolder\$File"
 			if (!($Silent)) {
 				Write-Host "Writing $($inputObj.length) lines to $FilePath"
@@ -562,7 +636,7 @@ Set-Status 'ValidationComplete'
 			}
 			$fileContents -replace "0New version: ","0" -replace "0New package: ","0" -replace "0Add version: ","0" -replace "0Add package: ","0" -replace "0Add ","0" -replace "0New ","0" -replace "0package:  ","0" | Out-File $FilePath
 		}
-		$filecount = (ls $manifestFolder).count
+		$filecount = (Get-ChildItem $manifestFolder).count
 		$filedir = "ok"
 		$filecolor = "green"
 		if ($filecount -lt 3) { $filedir = "too low"; $filecolor = "red"}
@@ -572,9 +646,9 @@ Set-Status 'ValidationComplete'
 			Write-Host -f $filecolor "File count $filecount is $filedir"
 		}
 		if ($filecount -lt 3) { break}
-		Check-ManifestFile $vm -Silent;
+		Get-ManifestFileCheck $vm -Silent;
 	}#end if NoFiles
-	
+
 	if ($InspectNew) {
 		$PackageResult = Find-WinGetPackage $PackageIdentifier
 		if (!($Silent)) {
@@ -582,7 +656,7 @@ Set-Status 'ValidationComplete'
 		}
 		Write-Host $PackageResult
 		if ($PackageResult -eq "No package found matching input criteria.") {
-			Open-AllURLs
+			Open-AllURL
 			Start-Process "https://www.bing.com/search?q=$PackageIdentifier"
 			$a,$b = $PackageIdentifier -split "[.]"
 			if ($a -ne "") {
@@ -602,42 +676,42 @@ Set-Status 'ValidationComplete'
 	if (!($Silent)) {
 		Write-Host "File operations complete, starting VM operations."
 	}
-	Revert-VM $vm -Silent
-	Launch-VMTrackerWindow $vm
+	Get-TrackerVMRevert $vm -Silent
+	Get-TrackerVMLaunchWindow $vm
 }
 
-Function Validate-PackageByID {
+Function Get-TrackerVMValidateByID {
 	param(
 		$PackageIdentifier = (Get-Clipboard)
 	)
-	Validate-Package -installerLine "--id $PackageIdentifier" -PackageIdentifier $PackageIdentifier -NoFiles #-notElevated 
+	Get-TrackerVMValidate -installerLine "--id $PackageIdentifier" -PackageIdentifier $PackageIdentifier -NoFiles #-notElevated
 }
 
-Function Validate-PackageByConfig {
+Function Get-TrackerVMValidateByConfig {
 	param(
 	$PackageIdentifier = "Microsoft.Devhome",
 	$ManualDependency = "Git.Git"
 	)
 
-	Validate-Package -installerLine "--id $PackageIdentifier" -PackageIdentifier $PackageIdentifier -NoFiles -ManualDependency $ManualDependency -Operation "DevHomeConfig"
-	sleep 2
-	Validate-Package -installerLine "--id $ManualDependency" -PackageIdentifier $ManualDependency -NoFiles -Operation "Config"
+	Get-TrackerVMValidate -installerLine "--id $PackageIdentifier" -PackageIdentifier $PackageIdentifier -NoFiles -ManualDependency $ManualDependency -Operation "DevHomeConfig"
+	Start-Sleep 2
+	Get-TrackerVMValidate -installerLine "--id $ManualDependency" -PackageIdentifier $ManualDependency -NoFiles -Operation "Config"
 }
 
-Function Validate-PackageByArch {
+Function Get-TrackerVMValidateByArch {
 	param(
 	)
-	Validate-Package -Arch x64;
-	sleep 2; 
-	Validate-Package -Arch x86
+	Get-TrackerVMValidate -Arch x64;
+	Start-Sleep 2;
+	Get-TrackerVMValidate -Arch x86
 }
 
-Function Validate-PackageByScope {
+Function Get-TrackerVMValidateByScope {
 	param(
 	)
-	Validate-Package -Scope Machine;
-	sleep 2; 
-	Validate-Package -Scope User
+	Get-TrackerVMValidate -Scope Machine;
+	Start-Sleep 2;
+	Get-TrackerVMValidate -Scope User
 }
 
 Function Get-ManifestAutomation {
@@ -648,15 +722,15 @@ Function Get-ManifestAutomation {
 		$Scope
 	)
 
-	#Read-Host "Copy Installer file to clipboard, then press Enter to continue." 
-	(Get-Clipboard) -join "" | clip;
-	Get-ManifestFile $vm
-	
-	Read-Host "Copy defaultLocale file to clipboard, then press Enter to continue." 
+	#Read-Host "Copy Installer file to clipboard, then press Enter to continue."
 	(Get-Clipboard) -join "" | clip;
 	Get-ManifestFile $vm
 
-	Read-Host "Copy version file to clipboard, then press Enter to continue." 
+	Read-Host "Copy defaultLocale file to clipboard, then press Enter to continue."
+	(Get-Clipboard) -join "" | clip;
+	Get-ManifestFile $vm
+
+	Read-Host "Copy version file to clipboard, then press Enter to continue."
 	(Get-Clipboard) -join "" | clip;
 	if ($Arch) {
 		Get-ManifestFile $vm -Arch $Arch
@@ -665,7 +739,7 @@ Function Get-ManifestAutomation {
 	} elseif ($Scope) {
 		Get-ManifestFile $vm -Scope $Scope
 	} else {
-		Get-ManifestFile $vm 
+		Get-ManifestFile $vm
 	}
 }
 
@@ -674,18 +748,17 @@ Function Complete-TrackerVM {
 	param(
 		[Parameter(mandatory=$true)][int]$vm,
 		$VMFolder = "$MainFolder\vm\$vm",
-		$filesFileName = "$VMFolder\files.txt",
-		[switch]$Reset
+		$filesFileName = "$VMFolder\files.txt"
 	)
 	Test-Admin
-	Set-Status "Completing" $vm
-	Stop-Process -id ((Get-ConnectedVMs)|where {$_.VM -match "vm$vm"}).id -ErrorAction Ignore
+	Get-TrackerVMSetStatus "Completing" $vm
+	Stop-Process -id ((Get-ConnectedVM)|Where-Object {$_.VM -match "vm$vm"}).id -ErrorAction Ignore
 	Stop-TrackerVM $vm
-	Remove-FileIfExists $filesFileName
-	Set-Status "Ready" $vm " " 1
+	Get-RemoveFileIfExist $filesFileName
+	Get-TrackerVMSetStatus "Ready" $vm " " 1
 }
 
-Function Generate-PipelineVm {
+Function Get-PipelineVmGenerate {
 	param(
 		[int]$vm = (Get-Content $vmCounter),
 		[int]$version = (Get-TrackerVMversion),
@@ -699,8 +772,8 @@ Function Generate-PipelineVm {
 	Write-Host "Creating VM $newVmName version $version OS $OS"
 	[int]$vm+1|Out-File $vmCounter
 	"`"$vm`",`"Generating`",`"$version`",`"$OS`",`"`",`"1`",`"0`""|Out-File $StatusFile -Append -Encoding unicode
-	Remove-FileIfExists $destinationPath -remake
-	Remove-FileIfExists $VMFolder -remake
+	Get-RemoveFileIfExist $destinationPath -remake
+	Get-RemoveFileIfExist $VMFolder -remake
 	$vmImageFolder = ""
 
 	switch ($OS) {
@@ -714,15 +787,15 @@ Function Generate-PipelineVm {
 
 	Write-Host "Takes about 120 seconds..."
 	Import-VM -Path $vmImageFolder -Copy -GenerateNewId -VhdDestinationPath $destinationPath -VirtualMachinePath $destinationPath;
-	Rename-VM (Get-VM | where {($_.CheckpointFileLocation)+"\" -eq $destinationPath}) -NewName $newVmName
+	Rename-VM (Get-VM | Where-Object {($_.CheckpointFileLocation)+"\" -eq $destinationPath}) -NewName $newVmName
 	Start-VM $newVmName
 	Remove-VMCheckpoint -VMName $newVmName -Name "Backup"
-	Revert-VM $vm
-	Launch-VMTrackerWindow $vm
+	Get-TrackerVMRevert $vm
+	Get-TrackerVMLaunchWindow $vm
 	Write-Host "Took $(((get-date)-$startTime).TotalSeconds) seconds..."
 }
 
-Function Disgenerate-PipelineVm {
+Function Get-PipelineVmDisgenerate {
 	param(
 		[Parameter(mandatory=$true)][int]$vm,
 		$destinationPath = "$imagesFolder\$vm\",
@@ -730,37 +803,36 @@ Function Disgenerate-PipelineVm {
 		$vmName = "vm$vm"
 	)
 	Test-Admin
-	Set-Status 'Disgenerate' $vm
+	Get-TrackerVMSetStatus 'Disgenerate' $vm
 	Stop-TrackerVM $vm
 	Remove-VM -Name $vmName -Force
 
 	$out = Get-Status
-	$out = $out | where {$_.vm -notmatch $VM}
-	Write-Status $out 
+	$out = $out | Where-Object {$_.vm -notmatch $VM}
+	Write-Status $out
 
 	$delay = 15
-	0..$delay | %{
+	0..$delay | ForEach-Object {
 		$pct = $_ / $delay * 100
 		Write-Progress -Activity "Remove VM" -Status "$_ of $delay" -PercentComplete $pct
-		sleep $GitHubRateLimitDelay
+		Start-Sleep $GitHubRateLimitDelay
 	}
-	Remove-FileIfExists $destinationPath
-	Remove-FileIfExists $VMFolder
+	Get-RemoveFileIfExist $destinationPath
+	Get-RemoveFileIfExist $VMFolder
 }
 
-Function Start-ImageVM {
+Function Get-ImageVMStart {
 	param(
 		[ValidateSet("Win10","Win11")][string]$OS = "Win10"
 	)
 	Test-Admin
 	$vm = 0
 	Start-VM $OS;
-	Revert-VM $vm $OS;
-	Launch-VMTrackerWindow $vm $OS
-	#Set-Status "Ready" $vm
+	Get-TrackerVMRevert $vm $OS;
+	Get-TrackerVMLaunchWindow $vm $OS
 }
 
-Function Stop-ImageVM {
+Function Get-ImageVMStop {
 	param(
 		[ValidateSet("Win10","Win11")][string]$OS = "Win10"
 	)
@@ -778,17 +850,17 @@ Function Stop-ImageVM {
 	$ImageLoc = "$imagesFolder\$OS-image\"
 	[int]$version = [int](Get-TrackerVMVersion) + 1
 	Write-Host "Writing $OS version $version"
-	Set-TrackerVMVersion $version
-	Stop-Process -id ((Get-ConnectedVMs)|where {$_.VM -match "$OS"}).id -ErrorAction Ignore
+	Get-TrackerVMSetVersion $version
+	Stop-Process -id ((Get-ConnectedVM)|Where-Object {$_.VM -match "$OS"}).id -ErrorAction Ignore
 	Redo-Checkpoint $vm $OS;
 	Stop-TrackerVM $vm $OS;
 	Write-Host "Letting VM cool..."
-	sleep $GitHubRateLimitDelay;
+	Start-Sleep $GitHubRateLimitDelay;
 	Robocopy.exe $OriginalLoc $ImageLoc -mir
 }
 
-Function Remove-PR {
-	#This hasn't been tested, and is just the skeleton of a Quick Remover for Bad PRs. 
+Function Get-RemovePR {
+	#This hasn't been tested, and is just the skeleton of a Quick Remover for Bad PRs.
 	param(
 		$gitUrl,
 		$branchName,
@@ -796,85 +868,76 @@ Function Remove-PR {
 	)
 	git clone $gitUrl
 	git branch $branchName
-	rm folder $prFolder
+	Remove-Item folder $prFolder
 	git commit
-	start-process $gitUrl
+	Start-Process $gitUrl
 	Write-Host "go make PR on GitHub"
 }
 
-Function Sum-Array {
+Function Get-ArraySum {
 	param(
 		$in = 0,
 		$out = 0
 	)
-	$in |%{$out += $_*1}
+	$in |ForEach-Object{$out += $_*1}
 	$out
 }
 
 #VM Orchestration
-Function Run-StatusTracker {
-	$openPrReview = $false
+Function Get-TrackerVMStatusTracker {
 	while ($true) {
-		#$StuckVMs = (diff (Get-Status | where {$_.status -eq "ValidationComplete"}).vm ((Get-ConnectedVMs).vm -replace "vm","")).inputobject
-		#Foreach ($vm in $StuckVMs) {
-			#Set-Status Complete $vm
-		#}
-		cls
+		Clear-Host
 		$GetStatus = Get-Status
-		$GetStatus | ft;
-		$VMRAM = Sum-Array $GetStatus.RAM
+		$GetStatus | Format-Table;
+		$VMRAM = Get-ArraySum $GetStatus.RAM
 		$ramColor = "green"
 		if ($VMRAM -gt 16) {
 			$ramColor = "red"
 		} elseif ($VMRAM -gt 8) {
 			$ramColor = "yellow"
-		}  
+		}
 		Write-Host "VM RAM Total: " -nonewline
 		Write-Host -f $ramColor $VMRAM
 		$timeClockColor = "red"
 		if (Get-TimeRunning) {$timeClockColor = "green"}
 		Write-Host -nonewline "Build: $build - Hours worked: "
 		Write-Host -f $timeClockColor (Get-HoursWorkedToday)
-		Check-TrackerVMMem;
+		Get-TrackerVMMemCheck;
 		Get-TrackerVMRAM;
-		Cycle-VMs;
-		
+		Get-TrackerVMCycle;
+
 		$clip = (Get-Clipboard)
 		If ($clip -match  "https://dev.azure.com/ms/") {
 			Write-Host "Gathering Automated Validation Logs"
-			Get-AutoValLogs
+			Get-AutoValLog
 		} elseIf ($clip -match  "Skip to content") {
 			$valMode = Get-TrackerMode
 			if ($valMode -eq "Validating") {
 
 				Write-Host $valMode
-				Validate-Package;
+				Get-TrackerVMValidate;
 				$valMode | clip
-			#} elseif ($valMode -eq "Approving") {
-				#Set-TrackerMode "Validating"
-			} 
+			}
 		} elseIf ($clip -match  " Windows Package Manager") {
 			Write-Host "Gathering PR Headings"
-			Get-PRNumbers
+			Get-PRNumber
 		} elseIf ($clip -match  "^manifests`/") {
 			Write-Host "Opening manifest file"
 			$ManifestUrl = "https://github.com/microsoft/winget-pkgs/tree/master/"+$clip
 			$ManifestUrl | clip
 			start-process ($ManifestUrl)
-		} 
-		if (!(Get-ConnectedVMs)) {
-			Reset-Status
-			Rotate-TrackerVMs
 		}
-		sleep 5;
+		if (!(Get-ConnectedVM)) {
+			Get-TrackerVMResetStatus
+			Get-TrackerVMRotate
+		}
+		Start-Sleep 5;
 	}
 }
 
-Function Cycle-VMs {
+Function Get-TrackerVMCycle {
 	param(
-		[int]$Validate
 	)
-	#Get-Content $File | %{& [scriptblock]::Create($Command+" "+$vm)
 	$VMs = Get-Status
 	Foreach ($VM in $VMs) {
 		Switch ($VM.status) {
@@ -883,7 +946,7 @@ Function Cycle-VMs {
 			}
 			"Approved" {
 				Approve-PR $VM.PR
-				Set-Status "Complete" $VM.vm
+				Get-TrackerVMSetStatus "Complete" $VM.vm
 			}
 			"CheckpointReady" {
 				Redo-Checkpoint $VM.vm
@@ -892,18 +955,18 @@ Function Cycle-VMs {
 				Complete-TrackerVM $VM.vm
 			}
 			"Disgenerate" {
-				Disgenerate-PipelineVm $VM.vm
+				Get-PipelineVmDisgenerate $VM.vm
 			}
 			"Revert" {
-				Revert-VM $VM.vm
+				Get-TrackerVMRevert $VM.vm
 			}
 			"Regenerate" {
-				Disgenerate-PipelineVm $VM.vm
-				Generate-PipelineVm -OS $VM.os
+				Get-PipelineVmDisgenerate $VM.vm
+				Get-PipelineVmGenerate -OS $VM.os
 			}
 			"SendStatus" {
-				ReplyTo-PR $VM.PR (Get-CannedResponse ManValEnd (Get-SharedError -NoClip) -NoClip)
-				Set-Status "Complete" $VM.vm
+				Reply-ToPR -PR $VM.PR -UserInput (Get-SharedError -NoClip) -CannedResponse ManValEnd 
+				Get-TrackerVMSetStatus "Complete" $VM.vm
 			}
 			default {
 				#Write-Host "Complete"
@@ -912,7 +975,7 @@ Function Cycle-VMs {
 	}
 }
 
-Function Set-Status {
+Function Get-TrackerVMSetStatus {
 	param(
 		[ValidateSet("AddVCRedist","Approved","CheckpointComplete","Checkpointing","CheckpointReady","Completing","Complete","Disgenerate","Generating","Installing","Prescan","Prevalidation","Ready","Rebooting","Regenerate","Restoring","Revert","Scanning","SendStatus","Setup","SetupComplete","Starting","Updating","ValidationComplete")]
 		$Status = "Complete",
@@ -923,13 +986,13 @@ Function Set-Status {
 	)
 	$out = Get-Status
 	if ($Status) {
-		($out | where {$_.vm -match $VM}).Status = $Status
+		($out | Where-Object {$_.vm -match $VM}).Status = $Status
 	}
 	if ($Package) {
-		($out | where {$_.vm -match $VM}).Package = $Package
+		($out | Where-Object {$_.vm -match $VM}).Package = $Package
 	}
 	if ($PR) {
-		($out | where {$_.vm -match $VM}).PR = $PR
+		($out | Where-Object {$_.vm -match $VM}).PR = $PR
 	}
 	if ($Silent) {
 		Write-Status $out -Silent
@@ -950,7 +1013,7 @@ Function Write-Status {
 	$out | ConvertTo-Csv | Out-File $StatusFile -Encoding unicode
 }
 
-Function Get-Status{
+Function Get-Status {
 	param(
 		[int]$vm,
 		[ValidateSet("AddVCRedist","Approved","CheckpointComplete","Checkpointing","CheckpointReady","Completing","Complete","Disgenerate","Generating","Installing","Prescan","Prevalidation","Ready","Rebooting","Regenerate","Restoring","Revert","Scanning","SendStatus","Setup","SetupComplete","Starting","Updating","ValidationComplete")]
@@ -959,30 +1022,30 @@ Function Get-Status{
 		$out = (Get-Content $StatusFile | ConvertFrom-Csv)
 	)
 	if ($OS) {
-		$out = ($out | where {$_.OS -eq $OS})
+		$out = ($out | Where-Object {$_.OS -eq $OS})
 	}
 	if ($vm) {
-		$out = ($out | where {$_.vm -eq $vm}).status
+		$out = ($out | Where-Object {$_.vm -eq $vm}).status
 	}
 	if ($Status) {
-		$out = ($out | where {$_.version -eq (Get-TrackerVMVersion)}| where {$_.status -eq $Status}).vm	
+		$out = ($out | Where-Object {$_.version -eq (Get-TrackerVMVersion)}| Where-Object {$_.status -eq $Status}).vm
 	}
-	$out 
+	$out
 }
 
-Function Reset-Status {
-	if (!(Get-ConnectedVMs)){
-		$VMs = (Get-Status | where {$_.status -ne "Ready"}).vm
-		Foreach ($VM in $VMs) {Set-Status Complete $VM}
+Function Get-TrackerVMResetStatus {
+	if (!(Get-ConnectedVM)){
+		$VMs = (Get-Status | Where-Object {$_.status -ne "Ready"}).vm
+		Foreach ($VM in $VMs) {Get-TrackerVMSetStatus Complete $VM}
 		Get-Process *vmwp* | Stop-Process
 	}
 }
 
-Function Rebuild-Status {
-	$Status = Get-VM | where {$_.name -notmatch "vm0"}|
-	select @{n="vm";e={$_.name}},
+Function Get-TrackerVMRebuildStatus{
+	$Status = Get-VM | Where-Object {$_.name -notmatch "vm0"}|
+	Select-Object @{n="vm";e={$_.name}},
 	@{n="status";e={"Ready"}},
-	@{n="version";e={60}},
+	@{n="version";e={(Get-TrackerVMVersion)}},
 	@{n="OS";e={"Win10"}},
 	@{n="Package";e={""}},
 	@{n="PR";e={"1"}},
@@ -992,12 +1055,12 @@ Function Rebuild-Status {
 
 Function Get-TrackerMode {
 	param(
-		$mode = (gc $TrackerModeFile)
+		$mode = (Get-Content $TrackerModeFile)
 	)
 	$mode
 }
 
-Function Set-TrackerMode {
+Function Get-TrackerVMSetMode {
 	param(
 		[ValidateSet("Validating","Approving","Idle")]
 		$Status = "Validating"
@@ -1005,11 +1068,11 @@ Function Set-TrackerMode {
 	$Status | out-file $TrackerModeFile
 }
 
-Function Check-TrackerVMMem {
+Function Get-TrackerVMMemCheck {
 	Param(
 		$VMs = (get-vm)
 	)
-	$VMs | %{
+	$VMs | ForEach-Object {
 		if(($_.MemoryDemand / $_.MemoryMaximum) -ge 0.9){
 			set-vm -VMName $_.name -MemoryMaximumBytes "$(($_.MemoryMaximum / 1073741824)+2)GB"
 		}
@@ -1028,9 +1091,9 @@ Function Get-SharedError {
 	}
 }
 
-Function Get-ConnectedVMs {
+Function Get-ConnectedVM {
 	Test-Admin
-	(Get-Process *vmconnect*) | select id, @{n="VM";e={%{$_.mainwindowtitle[0..4] -join ""}}}
+	(Get-Process *vmconnect*) | Select-Object id, @{n="VM";e={ForEach-Object{$_.mainwindowtitle[0..4] -join ""}}}
 }
 
 Function Get-NextFreeVM {
@@ -1046,24 +1109,24 @@ Function Get-NextFreeVM {
 	}
 }
 
-Function Get-ExistingVMs {
+Function Get-ExistingVM {
 	Test-Admin
 	(Get-VM).name |select-string -notmatch "Win"
 }
 
 Function Get-TrackerVMRAM {
 	$status = Get-Status
-	$status |% {$_.RAM = [math]::Round((Get-VM -Name ("vm"+$_.vm)).MemoryAssigned/1024/1024/1024,2)}
-	Write-Status $status 
+	$status |ForEach-Object {$_.RAM = [math]::Round((Get-VM -Name ("vm"+$_.vm)).MemoryAssigned/1024/1024/1024,2)}
+	Write-Status $status
 }
 
-Function Launch-VMTrackerWindow {
+Function Get-TrackerVMLaunchWindow {
 	param(
 		[Parameter(mandatory=$true)][int]$vm,
 		$VMName = "vm$vm"
 	)
 	Test-Admin
-	Get-ConnectedVMs | where {$_.vm -match $VMName} | %{Stop-Process -id $_.id}
+	Get-ConnectedVM | Where-Object {$_.vm -match $VMName} | ForEach-Object {Stop-Process -id $_.id}
 	C:\Windows\System32\vmconnect.exe localhost $VMName
 }
 
@@ -1073,13 +1136,13 @@ Function Redo-Checkpoint {
 		$VMName = "vm$vm"
 	)
 	Test-Admin
-	Set-Status "Checkpointing" $vm
+	Get-TrackerVMSetStatus "Checkpointing" $vm
 	Remove-VMCheckpoint -Name $CheckpointName -VMName $VMName
 	Checkpoint-VM -SnapshotName $CheckpointName -VMName $VMName
-	Set-Status "Complete" $vm
+	Get-TrackerVMSetStatus "Complete" $vm
 }
 
-Function Revert-VM {
+Function Get-TrackerVMRevert {
 	param(
 		[Parameter(mandatory=$true)][int]$vm,
 		$VMName = "vm$vm",
@@ -1087,9 +1150,9 @@ Function Revert-VM {
 	)
 	Test-Admin
 	if ($Silent) {
-		Set-Status "Restoring" $vm -Silent
+		Get-TrackerVMSetStatus "Restoring" $vm -Silent
 	} else {
-		Set-Status "Restoring" $vm
+		Get-TrackerVMSetStatus "Restoring" $vm
 	}
 	Restore-VMCheckpoint -Name $CheckpointName -VMName $VMName -Confirm:$false
 }
@@ -1102,24 +1165,24 @@ Function Get-OSFromVersion {
 	}
 }
 
-Function Get-TrackerVMVersion {[int](gc $VMversion)}
+Function Get-TrackerVMVersion {[int](Get-Content $VMversion)}
 
-Function Set-TrackerVMVersion {param([int]$Version) $Version|out-file $VMversion}
+Function Get-TrackerVMSetVersion {param([int]$Version) $Version|out-file $VMversion}
 
-Function Remove-LesserVMs {
-	(Get-Status | where {
+Function Get-TrackerVMRemoveLesser {
+	(Get-Status | Where-Object {
 		$_.version -lt (Get-TrackerVMVersion)
-	}).vm |%{
-		Set-Status Disgenerate $_
+	}).vm |ForEach-Object{
+		Get-TrackerVMSetStatus Disgenerate $_
 	}
 }
 
-Function Rotate-TrackerVMs {
+Function Get-TrackerVMRotate {
 	$status = Get-Status
-	$VMs = $status | where {$_.version -lt (Get-TrackerVMVersion)}
+	$VMs = $status | Where-Object {$_.version -lt (Get-TrackerVMVersion)}
 	if ($VMs){
-		if (!(($status | where {$_.status -ne "Ready"}).count)) {
-			Set-Status Regenerate ($VMs.VM | Get-Random)
+		if (!(($status | Where-Object {$_.status -ne "Ready"}).count)) {
+			Get-TrackerVMSetStatus Regenerate ($VMs.VM | Get-Random)
 		}
 	}
 }
@@ -1136,9 +1199,7 @@ Function Stop-TrackerVM {
 #File Management
 Function Get-ManifestFile {
 	param(
-		#[Parameter(mandatory=$true)]
 		[int]$vm = ((Get-NextFreeVM) -replace "vm",""),
-		[Switch]$Installer,
 		$clip = (Get-SecondMatch),
 		$FileName = "Package",
 		$Arch,
@@ -1146,14 +1207,14 @@ Function Get-ManifestFile {
 		$Scope
 	);
 	$manifestFolder = "$MainFolder\vm\$vm\manifest"
-	$clip = $clip | where {$_ -notmatch "marked this conversation as resolved."}
+	$clip = $clip | Where-Object {$_ -notmatch "marked this conversation as resolved."}
 
 
 <#
 	if (!(test-path "$manifestFolder")){md "$manifestFolder"}
 
 		$clip = $clip -join "`n" -split "@@"
-		$inputObj = $inputObj[1..(($inputObj| Select-String "ManifestVersion" -SimpleMatch).LineNumber -1)] | where {$_ -notmatch "marked this conversation as resolved."}
+		$inputObj = $inputObj[1..(($inputObj| Select-String "ManifestVersion" -SimpleMatch).LineNumber -1)] | Where-Object {$_ -notmatch "marked this conversation as resolved."}
 
 		$FilePath = "$manifestFolder\$File"
 		Write-Host "Writing $($inputObj.length) lines to $FilePath"
@@ -1167,26 +1228,26 @@ Function Get-ManifestFile {
 		"defaultLocale" {
 			$Locale = (Get-YamlValue PackageLocale $clip)
 			$FileName = "$FileName.locale.$Locale"
-		} 
+		}
 		"Locale" {
 			$Locale = (Get-YamlValue PackageLocale $clip)
 			$FileName = "$FileName.locale.$Locale"
-		} 
+		}
 		"installer" {
-			Remove-FileIfExists "$manifestFolder"  -remake
+			Get-RemoveFileIfExist "$manifestFolder"  -remake
 			$FileName = "$FileName.installer"
-		} 
+		}
 		"version" {
 			if ($Arch) {
-				Validate-Package -vm $vm -NoFiles -Arch $Arch -PR 0 
+				Get-TrackerVMValidate -vm $vm -NoFiles -Arch $Arch -PR 0
 			} elseif ($OS) {
-				Validate-Package -vm $vm -NoFiles -OS $OS  -PR 0 
+				Get-TrackerVMValidate -vm $vm -NoFiles -OS $OS  -PR 0
 			} elseif ($Scope) {
-				Validate-Package -vm $vm -NoFiles -Scope $Scope  -PR 0 
+				Get-TrackerVMValidate -vm $vm -NoFiles -Scope $Scope  -PR 0
 			} else {
-				Validate-Package -vm $vm -NoFiles  -PR 0 
+				Get-TrackerVMValidate -vm $vm -NoFiles  -PR 0
 			}
-		} 
+		}
 		Default {
 			Write-Host "Error: Bad ManifestType"
 			Write-Host $clip
@@ -1202,7 +1263,7 @@ Function Get-SecondMatch {
 		$clip = (Get-Clipboard),
 		$depth = 1
 	)
-	#If $current and $prev don't match, return the $prev element, which is $depth lines below the $current line. Start at $clip[$depth] and go until the end - this starts $current at $clip[$depth], and $prev gets moved backwards to $clip[0] and moves through until $current is at the end of the array, $clip[$clip.length], and $prev is $depth previous, at $clip[$clip.length - $depth]. 
+	#If $current and $prev don't match, return the $prev element, which is $depth lines below the $current line. Start at $clip[$depth] and go until the end - this starts $current at $clip[$depth], and $prev gets moved backwards to $clip[0] and moves through until $current is at the end of the array, $clip[$clip.length], and $prev is $depth previous, at $clip[$clip.length - $depth].
 	for ($depthUnit = $depth;$depthUnit -lt $clip.length; $depthUnit++){
 		$current = ($clip[$depthUnit] -split ": ")[0]
 		$prevUnit = $clip[$depthUnit - $depth]
@@ -1222,13 +1283,13 @@ Function Test-Hash {
 		$FileName,
 		$hashVar=(Get-Clipboard),
 		[Switch]$noDelete
-	) 
+	)
 	$out = (Get-FileHash $FileName) -match $hashVar
 	switch ($noDelete) {
 		$true {
 		}
 		$false {
-			Remove-FileIfExists $FileName
+			Get-RemoveFileIfExist $FileName
 		}
 	}
 	switch ($out) {
@@ -1248,13 +1309,13 @@ Function Find-Hash ($FileName) {
 	Test-Hash $file $hash
 }
 
-Function Check-ManifestFile {
+Function Get-ManifestFileCheck {
 	param(
 		[Parameter(mandatory=$true)][int]$vm,
 		$filePath = "$runPath\$vm\manifest\Package.yaml",
 		[Switch]$Silent
 	)
-	$fileContents = gc $filePath
+	$fileContents = Get-Content $filePath
 	if ($fileContents[-1] -ne "0") {
 		$fileContents[-1] = ($fileContents[-1] -split ".0")[0]+".0"
 		if (!($Silent)){
@@ -1264,7 +1325,7 @@ Function Check-ManifestFile {
 	}
 }
 
-Function Rotate-TrackerVMLogs {
+Function Get-TrackerVMRotateLog {
 	$logYesterDate = (get-date -f dd) - 1
 	Move-Item "$writeFolder\logs\$logYesterDate" "$logsFolder\$logYesterDate"
 }
@@ -1280,19 +1341,13 @@ Function Add-ValidationData {
 		$fileContents = (Get-Content $FilePath),
 		$Selector = "Installers:",
 		$offset = 1,
-		#[switch]$Force,
 		$lineNo = (($fileContents| Select-String $Selector -List).LineNumber -$offset),
 		$fileInsert = "Dependencies:`n  PackageDependencies:`n    - PackageIdentifier: $Data",
 		$fileOutput = ($fileContents[0..($lineNo -1)]+$fileInsert+$fileContents[$lineNo..($fileContents.length)])
 	)
-	#This is an example of a "sideways wrapper". Bubble all parameters up 1 line as variables. Bubble all variables as high as possible in the function. Bubble variables at the top into parameters. Watch all the flexibility that unlocks.
-	#if ($Force) {
 		Write-Host "Writing $($fileContents.length) lines to $FilePath"
-		Out-File -FilePath $FilePath -InputObject $fileOutput 
-		Set-Status "Revert" $VM;
-	#} else {
-		#Write-Host "We don't support dependencies. You may be looking for: `n $fileInsert"
-	#}
+		Out-File -FilePath $FilePath -InputObject $fileOutput
+		Get-TrackerVMSetStatus "Revert" $VM;
 }
 
 Function Add-InstallerSwitch {
@@ -1302,7 +1357,7 @@ Function Add-InstallerSwitch {
 		$Selector = "ManifestType:",
 		[ValidateSet("EXE","MSI","MSIX","Inno","Nullsoft","InstallShield")]
 		[string]$InstallerType
-		
+
 	)
 	switch ($InstallerType) {
 		"MSIX"{
@@ -1322,15 +1377,12 @@ Function Add-InstallerSwitch {
 	Add-ValidationData $vm -Data $Data -Selector $Selector -fileInsert $fileInsert #-Force
 }
 
-#@wingetbot waivers 
+#@wingetbot waivers
 Function Get-CannedResponse {
 	param(
-		[ValidateSet("AppFail","Approve","AutomationBlock","AutoValEnd","AppsAndFeaturesNew","AppsAndFeaturesMissing","Drivers","DefenderFail","EULA","GenevaValPipe","GenevaWingetbotMention","HashFailRegen","IcMValidationEphemeral","IcMValidationEvery","IcMValidationFirst","IcMValidationStale","IcMWaiverCommit","InstallerFail","InstallerNotUnattended","InstallerUrlBad","ManValEnd","NoCause","NoExe","NoRecentActivity","NotGoodFit","Only64bit","PackageFail","Paths","PendingAttendedInstaller","Unattended","Unavailable","UrlBad")]
+		[ValidateSet("AppFail","Approve","AutomationBlock","AutoValEnd","AppsAndFeaturesNew","AppsAndFeaturesMissing","Drivers","DefenderFail","HashFailRegen","IcMValidationEphemeral","IcMValidationEvery","IcMValidationFirst","IcMValidationStale","IcMWaiverCommit","InstallerFail","InstallerNotUnattended","InstallerUrlBad","ListingDiff","ManValEnd","NoCause","NoExe","NoRecentActivity","NotGoodFit","Only64bit","PackageFail","Paths","PendingAttendedInstaller","RemoveAsk","Unattended","Unavailable","UrlBad","WordFilter")]
 		[string]$Response,
 		$UserInput=(Get-Clipboard),
-		$Dependency64 = "Microsoft.VCRedist.2015+.x64",
-		$Dependency32 = "Microsoft.VCRedist.2015+.x86",
-		[int]$TruncateAfterLine=10,
 		[switch]$NoClip
 	)
 	[string]$Username = "@"+$UserInput.replace(" ","")+","
@@ -1362,8 +1414,8 @@ Function Get-CannedResponse {
 		"DefenderFail" {
 			$out = "Hi $Username`n`nThe package didn't pass a Defender or similar security scan. This might be a false positive and we can rescan tomorrow."
 		}
-		"EULA" {
-			$out = "Hi $Username`n`nThe installation isn't unattended It requires the user to accept an EULA:`n`nIs there an installer switch to accept this and have it install automatically?"
+		"WordFilter" {
+			$out = "This manifest contains a term that is blocked:`n`n> $UserInput"
 		}
 		"HashFailRegen" {
 			$out = "Closing to regenerate with correct hash."
@@ -1374,8 +1426,8 @@ Function Get-CannedResponse {
 		"InstallerNotUnattended" {
 			$out = "Pending:`n* https://github.com/microsoft/winget-cli/issues/910"
 		}
-		"UrlBad" {
-			$out = "Hi $Username`n`nI'm not able to find this InstallerUrl from the PackageUrl. Is there another page on the developer's site that has a link to the package?"
+		"ListingDiff" {
+			$out = "This PR omits these files that are present in the current manifest:`n> $UserInput"
 		}
 		"ManValEnd" {
 			$out = "Manual Validation ended with:`n> $UserInput"
@@ -1407,15 +1459,21 @@ Function Get-CannedResponse {
 		"Unattended" {
 			$out = "Hi $Username`n`nThe installation isn't unattended:`n`nIs there an installer switch to bypass this and have it install automatically?"
 		}
+		"RemoveAsk" {
+			$out = "Hi $Username`n`nThis package installer is still available. Why should it be removed?"
+		}
 		"Unavailable" {
 			$out = "Hi $Username`n`nThe installer isn't available from the publisher's website:"
+		}
+		"UrlBad" {
+			$out = "Hi $Username`n`nI'm not able to find this InstallerUrl from the PackageUrl. Is there another page on the developer's site that has a link to the package?"
 		}
 	}
 	$out += "`n`n(Automated response - build $build.)"
 	if ($NoClip) {
-		$out 
+		$out
 	} else {
-		$out |clip	
+		$out |clip
 	}
 }
 
@@ -1425,18 +1483,18 @@ Function Get-PRApproval {
 		[int]$PR = (($Clip -split "#")[1]),
 		$PackageIdentifier = ((($clip -split ": ")[1] -split " ")[0]),
 		$auth = (Get-Content  C:\repos\winget-pkgs\Tools\Auth.csv | ConvertFrom-Csv),
-		$Approver = ((($auth | where {$_.PackageIdentifier -match $PackageIdentifier}).account -split "/" | where {$_ -notmatch "\("}) -join ", @"),
-		[switch]$WhatIf
+		$Approver = ((($auth | Where-Object {$_.PackageIdentifier -match $PackageIdentifier}).account -split "/" | Where-Object {$_ -notmatch "\("}) -join ", @"),
+		[switch]$DemoMode
 	)
-	if ($WhatIf) {
-		Write-Host "WhatIf: ReplyTo-PR $pr requesting approval from @$Approver."
+	if ($DemoMode) {
+		Write-Host "DemoMode: Reply-ToPR $pr requesting approval from @$Approver."
 	} else {
-		ReplyTo-PR $pr (Get-CannedResponse approve $Approver -NoClip)
+		Reply-ToPR $pr (Get-CannedResponse approve $Approver -NoClip)
 	}
 }
 
 #Timeclock
-Function Set-Timeclock {
+Function Get-TimeclockSet {
 	Param(
 		[ValidateSet("Start","Stop")][string]$mode = "Start",
 		$time = (get-date -Format s),
@@ -1449,7 +1507,7 @@ Function Set-Timeclock {
 Function Get-Timeclock {
 	Param(
 	)
-	gc $timecardfile | select @{n="Date";e={get-date ($_ -split " ")[0]}},@{n="State";e={($_ -split " ")[1]}} 
+	Get-Content $timecardfile | Select-Object @{n="Date";e={get-date ($_ -split " ")[0]}},@{n="State";e={($_ -split " ")[1]}}
 	#
 }
 
@@ -1457,12 +1515,12 @@ Function Get-HoursWorkedToday {
 	Param(
 		$Today = (get-date).Day
 	)
-	[array]$time = (Get-Timeclock).date | where {(get-date $_.date).day -eq $Today} | %{($_ -split " ")[1]}
-	if (($time.count % 2) -eq 1) { 
+	[array]$time = (Get-Timeclock).date | Where-Object {(get-date $_.date).day -eq $Today} | ForEach-Object {($_ -split " ")[1]}
+	if (($time.count % 2) -eq 1) {
 		$time += (get-date -f T)
 	}
 	$aggregator = 0;
-	for ($incrementor=0;$incrementor -lt $time.count; $incrementor=$incrementor+2){ 
+	for ($incrementor=0;$incrementor -lt $time.count; $incrementor=$incrementor+2){
 		$aggregator += ( get-date $time[$incrementor+1]) - (get-date $time[$incrementor])
 		#Write-Host $aggregator
 	};
@@ -1470,7 +1528,7 @@ Function Get-HoursWorkedToday {
 }
 
 Function Get-TimeRunning {
-	if (	((gc $timecardfile)[-1] -split " ")[1] -eq "Start"){
+	if (	((Get-Content $timecardfile)[-1] -split " ")[1] -eq "Start"){
 		$True
 	}  else {
 		$False
@@ -1478,13 +1536,13 @@ Function Get-TimeRunning {
 }
 
 #Clipboard
-Function Get-PRNumbers {
+Function Get-PRNumber {
 	param(
 		$out = (Get-Clipboard),
 		[switch]$NoClip,
 		$dashboardPRRegex = "[0-9]{5,6}[:]"
 	)
-	$out = $out | select-string $dashboardPRRegex| sort -descending
+	$out = $out | select-string $dashboardPRRegex| Sort-Object -descending
 	if ($NoClip) {
 		$out
 		} else {
@@ -1492,23 +1550,23 @@ Function Get-PRNumbers {
 	}
 }
 
-Function Get-JustPRNumbers {
+Function Get-JustPRNumber {
 	param(
 		$out = (Get-Clipboard),
 		$dashboardPRRegex = "[#][0-9]{5,6}"
 	)
-	$out = ($out -split " " | select-string $dashboardPRRegex) -replace '#','' | sort -unique
+	$out = ($out -split " " | select-string $dashboardPRRegex) -replace '#','' | Sort-Object -unique
 	return $out
 }
 
-Function Sort-Clipboard {
+Function Get-SortedClipboard {
 	param(
 		$out = (Get-Clipboard)
 	)
-	$out | sort | clip
+	$out | Sort-Object | clip
 }
 
-Function Open-AllURLs {
+Function Open-AllURL {
 	param(
 		$out = (Get-Clipboard)
 	)
@@ -1517,35 +1575,35 @@ Function Open-AllURLs {
 	$out = $out | Select-String -NotMatch "[.]exe$"
 	$out = $out | Select-String -NotMatch "[.]msi$"
 	$out = $out | Select-String -NotMatch "[.]zip$"
-	$out = $out | sort -unique
-	$out = $out | %{start-process $_}
+	$out = $out | Sort-Object -unique
+	$out = $out | ForEach-Object {start-process $_}
 }
 
-Function Open-PRs {
+Function Open-PR {
 	param(
 		[switch]$Review,
 		$clip = (Get-Clipboard)
 	)
 	$clip = ($clip -split " " | select-string "#[0-9]{5,6}") -replace "#",""
-	
+
 	foreach ($PR in $clip){
 		$URL = "https://github.com/microsoft/winget-pkgs/pull/$PR#issue-comment-box"
 		if ($Review) {
 			$URL = "https://github.com/microsoft/winget-pkgs/pull/$PR/files"
 		}
-		
+
 		Start-Process $URL
-		sleep $GitHubRateLimitDelay
+		Start-Sleep $GitHubRateLimitDelay
 	}
 }
 
-Function Remove-FileIfExists {
+Function Get-RemoveFileIfExist {
 	param(
 		$FilePath,
 		[switch]$remake,
 		[switch]$Silent
 	)
-	if (test-path $FilePath) {rm $FilePath -recurse}
+	if (test-path $FilePath) {Remove-Item $FilePath -recurse}
 	if ($Silent) {
 		if ($remake) {$null = mkdir $FilePath}
 	}else {
@@ -1566,7 +1624,7 @@ Function Test-Admin {
 	if (![bool](([System.Security.Principal.WindowsIdentity]::GetCurrent()).groups -match "S-1-5-32-544")){Write-Host "Try elevating your session.";break}
 }
 
-Function Find-InstallerSets {
+Function Find-InstallerSet {
 	param(
 		$clip = (Get-Clipboard),
 		$delineator = "- "
@@ -1576,13 +1634,13 @@ Function Find-InstallerSets {
 	$InstallerSection = $clip[$optionsLine..$manifestLIne]
 	$setCount = ($InstallerSection | Select-String $delineator).count
 	Write-Host "$setCount sets detected:"
-	$InstallerSection -split $delineator | %{
+	$InstallerSection -split $delineator | ForEach-Object {
 		$inputVar = $_
 		Write-Host $inputVar
 
 	#Arch, Scope, Locale
 		$out = @{};
-		$inputVar -split "`n" | %{
+		$inputVar -split "`n" | ForEach-Object {
 			$key,$value = ($_ -split ": " -replace " ","");
 			$out[$key] = $value
 		}
@@ -1590,3 +1648,14 @@ Function Find-InstallerSets {
 		$out.Remove("")
 	}
 }
+
+#Etc
+Function Convert-ImageToBase64Link {
+	param(
+		$FileName = "C:\ManVal\misc\forbidden.png"
+	)
+	[String]$base64 = [convert]::ToBase64String((Get-Content $FileName -AsByteStream -Raw))
+	$Ext = ($FileName -split "[.]")[1]
+	return "<img src=`"data:image/$Ext;base64, $base64`" />"
+}
+

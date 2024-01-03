@@ -3,7 +3,7 @@
 #Title: PRWatcher v1.2.3
 #Created: 2/15/2023
 #Updated: 12/21/2023
-#Notes: Streamlines WinGet-pkgs manifest PR moderator approval by watching the clipboard - copy a PR's FIles tab to your clipboard, and Watch-PRTitles parse the PR, start a VM to review if new, and approve the PR if it passes all checks. Also outputs valid titles to a logging file. Freeing moderators to focus on approving and helping. 
+#Notes: Streamlines WinGet-pkgs manifest PR moderator approval by watching the clipboard - copy a PR's FIles tab to your clipboard, and Get-PRWatch parse the PR, start a VM to review if new, and approve the PR if it passes all checks. Also outputs valid titles to a logging file. Freeing moderators to focus on approving and helping.
 #Update log:
 #1.1.5 Bugfixes to colors.
 #1.1.4 Improve run check, PR parsing, and added a previous manifest check, to check if Apps and Features entries have changed.
@@ -11,23 +11,23 @@
 #1.1.0 Automatic PR approval.
 #1.0.0 Redesign output to be easier to read, based on Markdown table formatting. Remove unused utility functions.
 
-$appName = "PR Watcher"
 
-Function Watch-PRTitles {
+#[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingWriteHost', '', Justification = 'Console application. Outputs have been manually suppressed where desired.')]
+
+Function Get-PRWatch {
 	[CmdletBinding()]
 	param(
 		[switch]$noNew,
 		$LogFile = ".\PR.txt",
 		$AuthFile = ".\Auth.csv",
 		$ReviewFile = ".\Review.csv",
-		[ValidateSet("Default","Warm","Cool","Random","Afghanistan","Albania","Algeria","American Samoa","Andorra","Angola","Anguilla","Antigua And Barbuda","Argentina","Armenia","Aruba","Australia","Austria","Azerbaijan","Bahamas","Bahrain","Bangladesh","Barbados","Belarus","Belgium","Belize","Benin","Bermuda","Bhutan","Bolivia","Bosnia And Herzegovina","Botswana","Bouvet Island","Brazil","Brunei Darussalam","Bulgaria","Burkina Faso","Burundi","Cabo Verde","Cambodia","Cameroon","Canada","Central African Republic","Chad","Chile","China","Colombia","Comoros","Cook Islands","Costa Rica","Croatia","Cuba","Curacao","Cyprus","Czechia","Cöte D'Ivoire","Democratic Republic Of The Congo","Denmark","Djibouti","Dominica","Dominican Republic","Ecuador","Egypt","El Salvador","Equatorial Guinea","Eritrea","Estonia","Eswatini","Ethiopia","Fiji","Finland","France","French Polynesia","Gabon","Gambia","Georgia","Germany","Ghana","Greece","Grenada","Guatemala","Guinea","Guinea-Bissau","Guyana","Haiti","Holy See (Vatican City State)","Honduras","Hungary","Iceland","India","Indonesia","Iran","Iraq","Ireland","Israel","Italy","Jamaica","Japan","Jordan","Kazakhstan","Kenya","Kiribati","Kuwait","Kyrgyzstan","Laos","Latvia","Lebanon","Lesotho","Liberia","Libya","Liechtenstein","Lithuania","Luxembourg","Madagascar","Malawi","Malaysia","Maldives","Mali","Malta","Marshall Islands","Mauritania","Mauritius","Mexico","Micronesia","Moldova","Monaco","Mongolia","Montenegro","Morocco","Mozambique","Myanmar","Namibia","Nauru","Nepal","Netherlands","New Zealand","Nicaragua","Niger","Nigeria","Niue","Norfolk Island","North Korea","North Macedonia","Norway","Oman","Pakistan","Palau","Palestine","Panama","Papua New Guinea","Paraguay","Peru","Philippines","Pitcairn Islands","Poland","Portugal","Qatar","Republic Of The Congo","Romania","Russian Federation","Rwanda","Saint Kitts And Nevis","Saint Lucia","Saint Vincent And The Grenadines","Samoa","San Marino","Sao Tome And Principe","Saudi Arabia","Senegal","Serbia","Seychelles","Sierra Leone","Singapore","Slovakia","Slovenia","Solomon Islands","Somalia","South Africa","South Korea","South Sudan","Spain","Sri Lanka","Sudan","Suriname","Sweden","Switzerland","Syrian Arab Republic","Tajikistan","Tanzania, United Republic Of","Thailand","Togo","Tonga","Trinidad And Tobago","Tunisia","Turkey","Turkmenistan","Tuvalu","Uganda","Ukraine","United Arab Emirates","United Kingdom","United States","Uruguay","Uzbekistan","Vanuatu","Venezuela","Vietnam","Yemen","Zambia","Zimbabwe","Åland Islands")]
-		$Chromatic = "Default",
+		[ValidateSet("Default","Warm","Cool","Random","Afghanistan","Albania","Algeria","American Samoa","Andorra","Angola","Anguilla","Antigua And Barbuda","Argentina","Armenia","Aruba","Australia","Austria","Azerbaijan","Bahamas","Bahrain","Bangladesh","Barbados","Belarus","Belgium","Belize","Benin","Bermuda","Bhutan","Bolivia","Bosnia And Herzegovina","Botswana","Bouvet Island","Brazil","Brunei Darussalam","Bulgaria","Burkina Faso","Burundi","Cabo Verde","Cambodia","Cameroon","Canada","Central African Republic","Chad","Chile","China","Colombia","Comoros","Cook Islands","Costa Rica","Croatia","Cuba","Curacao","Cyprus","Czechia","Cöte D'Ivoire","Democratic Republic Of The Congo","Denmark","Djibouti","Dominica","Dominican Republic","Ecuador","Egypt","El Salvador","Equatorial Guinea","Eritrea","Estonia","Eswatini","Ethiopia","Fiji","Finland","France","French Polynesia","Gabon","Gambia","Georgia","Germany","Ghana","Greece","Grenada","Guatemala","Guinea","Guinea-Bissau","Guyana","Haiti","Holy See (Vatican City State)","Honduras","Hungary","Iceland","India","Indonesia","Iran","Iraq","Ireland","Israel","Italy","Jamaica","Japan","Jordan","Kazakhstan","Kenya","Kiribati","Kuwait","Kyrgyzstan","Laos","Latvia","Lebanon","Lesotho","Liberia","Libya","Liechtenstein","Lithuania","Luxembourg","Madagascar","Malawi","Malaysia","Maldives","Mali","Malta","Marshall Islands","Mauritania","Mauritius","Mexico","Micronesia","Moldova","Monaco","Mongolia","Montenegro","Morocco","Mozambique","Myanmar","Namibia","Nauru","Nepal","Netherlands","New Zealand","Nicaragua","Niger","Nigeria","Niue","Norfolk Island","North Korea","North Macedonia","Norway","Oman","Pakistan","Palau","Palestine","Panama","Papua New Guinea","Paraguay","Peru","Philippines","Pitcairn Islands","Poland","Portugal","Qatar","Republic Of The Congo","Romania","Russian Federation","Rwanda","Saint Kitts And Nevis","Saint Lucia","Saint Vincent And The Grenadines","Samoa","San Marino","Sao Tome And Principe","Saudi Arabia","Senegal","Serbia","Seychelles","Sierra Leone","Singapore","Slovakia","Slovenia","Solomon Islands","Somalia","South Africa","South Korea","South Sudan","Spain","Sri Lanka","Sudan","Suriname","Sweden","Switzerland","Syrian Arab Republic","Tajikistan","Tanzania, United Republic Of","Thailand","Togo","Tonga","Trinidad And Tobago","Tunisia","Turkey","Turkmenistan","Tuvalu","Uganda","Ukraine","United Arab Emirates","United Kingdom","United States","Uruguay","Uzbekistan","Vanuatu","Venezuela","Vietnam","Yemen","Zambia","Zimbabwe","Åland Islands")]$Chromatic = "Default",
 		$oldclip = "",
 		$hashPRRegex = "[#][0-9]{5,6}",
 		$AuthList = "",
 		$ReviewList = ""
 	)
-	
+
 	if (Test-Path $AuthFile) {
 		$AuthList = Get-Content $AuthFile | ConvertFrom-Csv
 		Write-Host "Using Auth file $AuthFile" -f green
@@ -44,23 +44,22 @@ Function Watch-PRTitles {
 	}
 	Write-Host "Loaded $($ReviewFile.count) Review file entries."
 	Write-Host " - - - - - -  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - "
-	Write-Host "| Timestmp | $(Set-PadRight PR# 6) | $(Set-PadRight PackageIdentifier) | $(Set-PadRight prVersion 14) | A | R | W | F | I | $(Set-PadRight ManifestVer 14)  | OK |"
+	Write-Host "| Timestmp | $(Get-PadRight PR# 6) | $(Get-PadRight PackageIdentifier) | $(Get-PadRight prVersion 14) | A | R | W | F | I | D | $(Get-PadRight ManifestVer 14)  | OK |"
 
-	if ((Get-Command Set-TrackerMode).name) {Set-TrackerMode "Approving"}
+	if ((Get-Command Get-TrackerVMSetMode).name) {Get-TrackerVMSetMode "Approving"}
 	while($true){
-		$clip = (Get-Clipboard) 
+		$clip = (Get-Clipboard)
 		$PRtitle = $clip | select-string "[#][0-9]{5,6}$";
 		$PR = ($PRtitle -split "#")[1]
-		#$PRtitle = ((Get-Clipboard) -join "") -replace "PackageVersion:"," version" | select-string -NotMatch "^[c][:]";
 		if ($PRtitle) {
 			if (Compare-Object $PRtitle $oldclip) {
 				if ((Get-Command Get-Status).name) {
-					(Get-Status | where {$_.status -eq "ValidationComplete"} | Format-Table)
+					(Get-Status | Where-Object {$_.status -eq "ValidationComplete"} | Format-Table)
 				}
 				$validColor = "green"
 				$invalidColor = "red"
 				$cautionColor = "yellow"
-				
+
 				Switch ($Chromatic) {
 					#Color schemes, to accomodate needs and also add variety.
 						"Default" {
@@ -286,7 +285,7 @@ Function Watch-PRTitles {
 	$cautionColor = "DarkYellow"
 }
 "Colombia"{
-	$nvalidColor = "Blue"
+	$invalidColor = "Blue"
 	$invalidColor = "Red"
 	$cautionColor = "Yellow"
 }
@@ -1157,9 +1156,9 @@ Function Watch-PRTitles {
 				}
 				$Submitter = (($clip | select-string "wants to merge") -split " ")[0]
 
-				#Split the title by spaces. Try extracting the version location as the next item after the word "version", and if that fails, use the 2nd to the last item, then 3rd to last, and 4th to last. For some reason almost everyone puts the version number as the last item, and GitHub appends the PR number. 
-				$prVerLoc =($title | Select-String "version").linenumber 
-				#Version is on the line before the line number, and this set indexes with 1 - but the following array indexes with 0, so the value is automatically transformed by the index mismatch. 
+				#Split the title by spaces. Try extracting the version location as the next item after the word "version", and if that fails, use the 2nd to the last item, then 3rd to last, and 4th to last. For some reason almost everyone puts the version number as the last item, and GitHub appends the PR number.
+				$prVerLoc =($title | Select-String "version").linenumber
+				#Version is on the line before the line number, and this set indexes with 1 - but the following array indexes with 0, so the value is automatically transformed by the index mismatch.
 				try {
 					[System.Version]$prVersion = Get-YamlValue PackageVersion $clip -replace "'","" -replace '"',''
 				} catch {
@@ -1199,7 +1198,7 @@ Function Watch-PRTitles {
 						}; #end if null
 					}; #end try
 				}; #end try
-								
+
 				#Get the PackageIdentifier and alert if it matches the auth list.
 				$PackageIdentifier = ""
 				try {
@@ -1208,29 +1207,27 @@ Function Watch-PRTitles {
 					$PackageIdentifier = (Get-CleanClip $PRtitle); -replace '"',""
 				}
 				$matchColor = $validColor
-				
-				Write-Host -nonewline -f $matchColor "| $(get-date -Format T) | $PR | $(Set-PadRight $PackageIdentifier) | "
-								
+
+				Write-Host -nonewline -f $matchColor "| $(get-date -Format T) | $PR | $(Get-PadRight $PackageIdentifier) | "
+
 				#Variable effervescence
 				$prAuth = "+"
 				$Auth = "A"
 				$Review = "R"
+				$WordFilter = "W"
 				$AnF = "F"
 				$InstVer = "I"
+				$ListingDiff = "D"
 				$PRvMan = "P"
-				$BadWordFilter = "W"
 				$Approve = "+"
-				
-				
-				$WinGetOutput = Find-WinGetPackage $PackageIdentifier | where {$_.id -eq $PackageIdentifier}
+
+				$WinGetOutput = Find-WinGetPackage $PackageIdentifier | Where-Object {$_.id -eq $PackageIdentifier}
 				$ManifestVersion = $WinGetOutput.version
 				$ManifestVersionParams = ($ManifestVersion -split "[.]").count
 				$prVersionParams = ($prVersion -split "[.]").count
-				
-				if (($prVersion.GetType().Name -eq "String") -or ($ManifestVersion.GetType().Name -eq "String")) {
-				}
 
-				if ($WinGetOutput -eq $null) {
+
+				if ($null -eq $WinGetOutput) {
 					$PRvMan = "N"
 					$matchColor = $invalidColor
 					$Approve = "-!"
@@ -1238,22 +1235,20 @@ Function Watch-PRTitles {
 						$noRecord = $true
 					} else {
 						if ($title[-1] -match $hashPRRegex) {
-							if ((Get-Command Validate-Package).name) {
-								Validate-Package -Silent -InspectNew
+							if ((Get-Command Get-TrackerVMValidate).name) {
+								Get-TrackerVMValidate -Silent -InspectNew
 							} else {
-								Create-Sandbox ($title[-1] -replace"#","")
+								Get-Sandbox ($title[-1] -replace"#","")
 							}; #end if Get-Command
 						}; #end if title
 					}; #end if noNew
-				} elseif ($WinGetOutput -ne $null) {
+				} elseif ($null -ne $WinGetOutput) {
 					If ($PRtitle -match " [.]") {
 					#If has spaces (4.4 .5 .220)
-						ReplyTo-PR -PR $PR -Body "Spaces detected in version number."
+						Reply-ToPR -PR $PR -Body "Spaces detected in version number." -Silent
 						$matchColor = $invalidColor
 						$prAuth = "-!"
 					}
-					<#
-					#>
 					if ($ManifestVersionParams -ne $prVersionParams) {
 						$greaterOrLessThan = ""
 						if ($prVersionParams -lt $ManifestVersionParams) {
@@ -1267,21 +1262,21 @@ Function Watch-PRTitles {
 						$Approve = "-!"
 						$Body = "Hi @$Submitter,`n`n> This PR's version number $prVersion has $prVersionParams parameters (sets of numbers between dots - major, minor, etc), which is $greaterOrLessThan than the current manifest's version $($ManifestVersion), which has $ManifestVersionParams parameters.`n`nIs this intentional?"
 						$Body = $Body + "`n`n(Automated response - build $build)"
-						ReplyTo-PR -PR $PR -Body $Body
-						Add-PRLabel $PR
+						Reply-ToPR -PR $PR -Body $Body -Silent 
+						invoke-GitHubPRRequest -PR $PR -Method POST -Type labels -Data "Needs-Author-Feedback"
 					}
 				}
-				
-				
-				Write-Host -nonewline -f $matchColor "$(Set-PadRight $prVersion.toString() 14) | "
+
+
+				Write-Host -nonewline -f $matchColor "$(Get-PadRight $prVersion.toString() 14) | "
 				$matchColor = $validColor
-				
-				$AuthMatch = $AuthList | where {$_.PackageIdentifier -match (($PackageIdentifier -split "[.]")[0..1] -join ".")}
-				
+
+				$AuthMatch = $AuthList | Where-Object {$_.PackageIdentifier -match (($PackageIdentifier -split "[.]")[0..1] -join ".")}
+
 				if ($AuthMatch) {
 					$strictness = $AuthMatch.strictness | Sort-Object -Unique
 					$AuthAccount = $AuthMatch.account | Sort-Object -Unique
-					
+
 					$matchVar = ""
 					$matchColor = $cautionColor
 					if ($AuthAccount -cmatch $Submitter) {
@@ -1293,7 +1288,7 @@ Function Watch-PRTitles {
 						$Auth = "-"
 						$matchColor = $invalidColor
 					}
-					
+
 					if ($strictness -eq "must") {
 						$Auth += "!"
 					} else {
@@ -1306,60 +1301,61 @@ Function Watch-PRTitles {
 
 				Write-Host -nonewline -f $matchColor "$Auth | "
 				$matchColor = $validColor
-				
-				
-				
-				$ReviewMatch = $ReviewList | where {$_.PackageIdentifier -match (($PackageIdentifier -split "[.]")[0..1] -join ".")}
-				
+
+
+
+				$ReviewMatch = $ReviewList | Where-Object {$_.PackageIdentifier -match (($PackageIdentifier -split "[.]")[0..1] -join ".")}
+
 				if ($ReviewMatch) {
 					$Review = $ReviewMatch.Reason | Sort-Object -Unique
 					$matchColor = $cautionColor
 				}
 				Write-Host -nonewline -f $matchColor "$Review | "
 				$matchColor = $validColor
-				
-				<#Need to rework into bad word filter.
-				$BadWordFilterList = @(".bat", ".ps1", ".cmd","accept-eula", "AcceptEULA", "accepteula ", "accept_gdpr ", "accept-licenses", "accept-license","ACCEPTEULA")
-				$BadWordFilterMatch = $BadWordFilterList | where {$_ -match ($clip -split " ")}
-				
-				if ($BadWordFilterMatch) {
-					$BadWordFilter = "-!"
+
+				#$WordFilterList = @(".bat", ".ps1", ".cmd","accept_gdpr ", "accept-licenses", "accept-license","eula")
+				$WordFilterList = @("accept_gdpr ", "accept-licenses", "accept-license","eula")
+				$WordFilterMatch = $WordFilterList | ForEach-Object {$Clip -match $_}
+
+				if ($WordFilterMatch) {
+					$WordFilter = "-!"
 					$Approved = "-!"
 					$matchColor = $invalidColor
+					Reply-ToPR -PR $PR -CannedResponse WordFilter -UserInput $WordFilterMatch -Silent
 				}
-				#>
-				Write-Host -nonewline -f $matchColor "$BadWordFilter | "
+				Write-Host -nonewline -f $matchColor "$WordFilter | "
 				$matchColor = $validColor
-				
-								
-				$ANFOld = Check-ForManifestEntries -PackageIdentifier $PackageIdentifier -Version $ManifestVersion
-				$ANFCurrent = [bool]($clip | Select-String "AppsAndFeaturesEntries")
-				
-				if ($PRvMan -ne "N") {
-					if (($ANFOld -eq $true) -and ($ANFCurrent -eq $false)) {
-						$matchColor = $invalidColor
-						$AnF = "-"
-						ReplyTo-PR -PR $PR -Body (Get-CannedResponse AppsAndFeaturesMissing -NoClip -UserInput $Submitter)
-						Add-PRLabel $PR
-					} elseif (($ANFOld -eq $false) -and ($ANFCurrent -eq $true)) {
-						$matchColor = $cautionColor
-						$AnF = "+"
-						ReplyTo-PR -PR $PR -Body (Get-CannedResponse AppsAndFeaturesNew -NoClip -UserInput $Submitter)
-						#Add-PRLabel $PR
-					} elseif (($ANFOld -eq $false) -and ($ANFCurrent -eq $false)) {
-						$AnF = "0"
-					} elseif (($ANFOld -eq $true) -and ($ANFCurrent -eq $true)) {
-						$AnF = "1"
+
+				if ($null -ne $WinGetOutput) {
+					$ANFOld = Get-ManifestEntryCheck -PackageIdentifier $PackageIdentifier -Version $ManifestVersion
+					$ANFCurrent = [bool]($clip | Select-String "AppsAndFeaturesEntries")
+
+					if ($PRvMan -ne "N") {
+						if (($ANFOld -eq $true) -and ($ANFCurrent -eq $false)) {
+							$matchColor = $invalidColor
+							$AnF = "-"
+							Reply-ToPR -PR $PR -CannedResponse AppsAndFeaturesMissing -UserInput $Submitter -Silent
+							invoke-GitHubPRRequest -PR $PR -Method POST -Type labels -Data "Needs-Author-Feedback"
+						} elseif (($ANFOld -eq $false) -and ($ANFCurrent -eq $true)) {
+							$matchColor = $cautionColor
+							$AnF = "+"
+							Reply-ToPR -PR $PR -CannedResponse AppsAndFeaturesNew -UserInput $Submitter -Silent
+							#invoke-GitHubPRRequest -PR $PR -Method POST -Type labels -Data "Needs-Author-Feedback"
+						} elseif (($ANFOld -eq $false) -and ($ANFCurrent -eq $false)) {
+							$AnF = "0"
+						} elseif (($ANFOld -eq $true) -and ($ANFCurrent -eq $true)) {
+							$AnF = "1"
+						}
 					}
 				}
 				Write-Host -nonewline -f $matchColor "$AnF | "
 				$matchColor = $validColor
-				
-				
+
+
 				if ($PRvMan -ne "N") {
 					try {
 						if ([bool]($clip -match "InstallerUrl")) {
-							$InstallerUrl = Get-YamlValue InstallerUrl -clip $clip 
+							$InstallerUrl = Get-YamlValue InstallerUrl -clip $clip
 							#write-host "InstallerUrl: $InstallerUrl $installerMatches prVersion: $prVersion" -f "blue"
 							$installerMatches = [bool]($InstallerUrl | select-string $prVersion)
 							if (!($installerMatches)) {
@@ -1376,21 +1372,39 @@ Function Watch-PRTitles {
 						$InstVer = "-"
 					}; #end try
 				}; #end if PRvMan
-				
+
 				try {
 				if (($prVersion = Get-YamlValue PackageVersion $clip) -match " ") {
 					$matchColor = $invalidColor
 					$InstVer = "-!"
 				}
-				}catch{}
-				
+				}catch{
+					$null = (Get-Process) #This section intentionally left blank.
+				}
+
 				Write-Host -nonewline -f $matchColor "$InstVer | "
 				$matchColor = $validColor
-				
+
+				$GLD = Get-ListingDiff $clip | Where-Object {$_.SideIndicator -eq "<="} #Ignores when a PR adds files that didn't exist before.
+				if ($GLD -ne $null) {
+					if ($GLD -eq "Error") {
+						$ListingDiff = "E"
+						$matchColor = $invalidColor
+					} else {
+
+						$ListingDiff = "-!"
+						$matchColor = $cautionColor
+						Reply-ToPR -PR $PR -CannedResponse ListingDiff -UserInput $GLD -Silent
+						invoke-GitHubPRRequest -PR $PR -Method POST -Type labels -Data "Needs-Author-Feedback"
+					}
+				}
+				Write-Host -nonewline -f $matchColor "$ListingDiff | "
+				$matchColor = $validColor
+
 				if (($PRtitle -match "Automatic deletion") -OR ($PRtitle -match "Remove")) {
 					#$validColor,$invalidColor = $invalidColor,$validColor #Swapping variable values.
 				}
-				
+
 				if ($PRvMan -ne "N") {
 					if ($null -eq $prVersion -or "" -eq $prVersion) {
 						$noRecord = $true
@@ -1418,17 +1432,17 @@ Function Watch-PRTitles {
 				};
 
 
-				if (($Approve -eq "-!") -or ($Auth -eq "-!") -or ($AnF -eq "-") -or ($InstVer -eq "-!") -or ($prAuth -eq "-!") -or ($PRvMan -eq "N")) {
+				if (($Approve -eq "-!") -or ($Auth -eq "-!") -or ($AnF -eq "-") -or ($InstVer -eq "-!") -or ($prAuth -eq "-!") -or ($ListingDiff -eq "-!") -or ($WordFilter -eq "-!") -or ($PRvMan -eq "N")) {
 				#-or ($PRvMan -match "^Error")
 					$matchColor = $cautionColor
 					$Approve = "-!"
 					$noRecord = $true
 				}
 
-				$PRvMan = Set-PadRight $PRvMan 14
+				$PRvMan = Get-PadRight $PRvMan 14
 				Write-Host -nonewline -f $matchColor "$PRvMan | "
 				$matchColor = $validColor
-				
+
 				if ($Approve -eq "+") {
 					$Approve = Approve-PR $PR
 				}
@@ -1461,69 +1475,60 @@ Function Get-CleanClip {
 	)
 	$out = $out -replace "_v"," "
 	$out = $out -join "" #removes accidental line breaks
-	#$DebugPreference = 'Continue'
-	$i = 0
-	#Write-Debug "$i time: $out";$i++
 	$out =  $out -replace "Add "
 	$out =  $out -replace "Automatic deletion of "
 	$out =  $out -replace "Automatic update of "
 	$out =  $out -replace "Remove "
 	$out =  $out -replace "Update "
-	#Write-Debug "$i time: $out";$i++
 	if ($out.contains(": ")) {
 		$out =  ($out -split ": ")[1]
 	}
-	#Write-Debug "$i time: $out";$i++
 
 	$out =  ($out -split " ")[0]
-	#Write-Debug "$i time: $out";$i++
-	$out	
+	$out
 }
 
 #Terminates any current sandbox and makes a new one.
-Function Create-Sandbox {
+Function Get-Sandbox {
 	param(
 		[string]$PRNumber = (Get-Clipboard)
-	) 
+	)
 	$FirstLetter = $PRNumber[0]
 	if ($FirstLetter -eq "#") {
 		[string]$PRNumber = $PRNumber[1..$PRNumber.length] -join ""
 	}
-	Get-Process *sandbox* | %{Stop-Process $_}
-	Get-Process *wingetautomator* | %{Stop-Process $_}
+	Get-Process *sandbox* | ForEach-Object {Stop-Process $_}
+	Get-Process *wingetautomator* | ForEach-Object {Stop-Process $_}
 	$version = "1.6.1573-preview"
 	$process ="wingetautomator://install?pull_request_number=$PRNumber&winget_cli_version=v$version&watch=yes"
 	Start-Process $process
 }
 
-Function Check-ForManifestEntries {
+Function Get-ManifestEntryCheck {
 	param(
 		$PackageIdentifier,
 		$Version,
-		$Entry = "AppsAndFeaturesEntries",
-		$Path = ($PackageIdentifier -replace "[.]","/")
+		$Entry = "AppsAndFeaturesEntries"
 	)
-	try{
-		$content = ((iwr "https://raw.githubusercontent.com/microsoft/winget-pkgs/master/manifests/$($packageidentifier[0].tostring().tolower())/$Path/$Version/$PackageIdentifier.installer.yaml").content)
-		$out = (Get-YamlValue $Entry $content)
-	}catch{}
+	$content = Get-WinGetFile $PackageIdentifier $Version
+	$out = (Get-YamlValue $Entry $content)
 	if ($out) {$true} else {$false}
 }
 
-Function Set-PadRight {
+Function Get-PadRight {
 	param(
 	[string]$PackageIdentifier,
 	[int]$PadChars = 32
 	)
 	$out = $PackageIdentifier
 	if ($PackageIdentifier.Length -lt $PadChars) {
-		$out = $PackageIdentifier +(" "*($PadChars - $PackageIdentifier.Length -1)) 
+		$out = $PackageIdentifier +(" "*($PadChars - $PackageIdentifier.Length -1))
 	} elseif ($PackageIdentifier.Length -lt $PadChars) {
 		$out = $PackageIdentifier[0..($PadChars -1)]
 	}
-	
+
 	if ($out.GetType().name -eq "Array") {
-		
+
 	}
 	$out = $out -join ""
 

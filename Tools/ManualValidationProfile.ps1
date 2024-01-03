@@ -1,5 +1,5 @@
 $VM = 0
-$build = 119
+$build = 122
 $ipconfig = (ipconfig)
 $remoteIP = ([ipaddress](($ipconfig | select-string "Default Gateway") -split ": ")[1]).IPAddressToString
 #$remoteIP = ([ipaddress](($ipconfig[($ipconfig | select-string "vEthernet").LineNumber..$ipconfig.length] | select-string "IPv4 Address") -split ": ")[1]).IPAddressToString
@@ -26,19 +26,31 @@ Function Send-SharedError {
 	)
 	Write-Host "Writing $($c.length) lines."
 	$c | Out-File "$writeFolder\err.txt"
-	Set-Status "Complete"
+	Set-Status "SendStatus"
 }
-Function Set-Status {
+
+Function Get-TrackerVMSetStatus {
 	param(
-		[ValidateSet("Prevalidation","CheckpointComplete","Checkpointing","CheckpointReady","Completing","Complete","Disgenerate","Generating","Prescan","Ready","Rebooting","Regenerate","Restoring","Revert","Scanning","Setup","SetupComplete","Starting","Updating","Installing","ValidationComplete")]
-		$Status = "Complete"
+		[ValidateSet("AddVCRedist","Approved","CheckpointComplete","Checkpointing","CheckpointReady","Completing","Complete","Disgenerate","Generating","Installing","Prescan","Prevalidation","Ready","Rebooting","Regenerate","Restoring","Revert","Scanning","SendStatus","Setup","SetupComplete","Starting","Updating","ValidationComplete")]
+		$Status = "Complete",
+		[string]$Package,
+		[int]$PR
 	)
-	Write-Host "Setting $vm state $Status"
-	$out = Get-Content $statusFile |ConvertFrom-Csv
-	($out | where {$_.vm -match $VM}).status = $Status
-	$out | ConvertTo-Csv | out-file $statusFile
+	$out = Get-Status
+	if ($Status) {
+		($out | where {$_.vm -match $VM}).Status = $Status
+	}
+	if ($Package) {
+		($out | where {$_.vm -match $VM}).Package = $Package
+	}
+	if ($PR) {
+		($out | where {$_.vm -match $VM}).PR = $PR
+	}
+	$out | ConvertTo-Csv | Out-File $StatusFile
+	Write-Host "Setting $vm $Package $PR state $Status"
 }
-Function Run-Validation {
+
+Function Get-TrackerVMRunValidation {
 	param(
 		$fileName = "cmds.ps1"
 	)
@@ -46,10 +58,10 @@ Function Run-Validation {
 	& $homePath\$fileName 
 }
 
-Function Get-Status{
+Function Get-TrackerVMStatus{
 	param(
 		[int]$vm,
-		[ValidateSet("Prevalidation","CheckpointComplete","Checkpointing","CheckpointReady","Completing","Complete","Disgenerate","Generating","Prescan","Ready","Rebooting","Regenerate","Restoring","Revert","Scanning","Setup","SetupComplete","Starting","Updating","Installing","ValidationComplete")]
+		[ValidateSet("AddVCRedist","Approved","CheckpointComplete","Checkpointing","CheckpointReady","Completing","Complete","Disgenerate","Generating","Installing","Prescan","Prevalidation","Ready","Rebooting","Regenerate","Restoring","Revert","Scanning","SendStatus","Setup","SetupComplete","Starting","Updating","ValidationComplete")]
 		$Status,
 		$out = (Get-Content $StatusFile | ConvertFrom-Csv | where {$_.status -notmatch "ImagePark"})
 	)
@@ -60,14 +72,5 @@ Function Get-Status{
 		$out = ($out | where {$_.status -eq $Status}).vm	
 	}
 	$out
-}
-
-Function Update-Stuff {
-	Set-Status "Updating"
-	WinGet upgrade --all --include-pinned --disable-interactivity
-	Update-MpSignature
-	Start-MpScan
-	Set-Status "CheckpointReady"
-	Shutdown -R -T 05
 }
 
