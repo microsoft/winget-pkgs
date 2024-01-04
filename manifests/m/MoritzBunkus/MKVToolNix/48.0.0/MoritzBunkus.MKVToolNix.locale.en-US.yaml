@@ -1,0 +1,57 @@
+# Created with YamlCreate.ps1 v2.2.0 $debug=QUS2.CRLF.7-2-7.Win32NT
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.2.0.schema.json
+
+PackageIdentifier: MoritzBunkus.MKVToolNix
+PackageVersion: 48.0.0
+PackageLocale: en-US
+Publisher: Moritz Bunkus
+PublisherUrl: https://www.bunkus.org/
+PublisherSupportUrl: https://mkvtoolnix.download/community.html
+PrivacyUrl: https://mkvtoolnix.download/privacy-policy.html
+Author: Moritz Bunkus
+PackageName: MKVToolNix
+PackageUrl: https://mkvtoolnix.download/
+License: GPL-2.0
+LicenseUrl: https://gitlab.com/mbunkus/mkvtoolnix/-/blob/main/COPYING
+Copyright: © 2002 – 2020 Moritz Bunkus
+# CopyrightUrl:
+ShortDescription: MKVToolNix is a set of tools to create, alter and inspect Matroska files under Linux, other Unices and Windows.
+# Description:
+# Moniker:
+Tags:
+- mkv
+# Agreements:
+ReleaseNotes: |-
+  New features and enhancements
+  - mkvmerge: AC-3: file identification will report AC-3 tracks encoded in Dolby Surround EX as codec "AC-3 Dolby Surround EX". Implements #2740.
+  - MKVToolNix GUI: multiplexer: on new installations the GUI will now recognize all known ISO 639-2 language codes in file names by default instead of only the top 100 of languages by native speakers.
+  - MKVToolNix GUI: multiplexer: on new installations the list of "often used languages" will by default only contain certain agnostic ones ("multiple languages", "no linguistic content", "reserved for local use", "uncoded languages"), "English" and the default user interface language. The "list of spoken languages by native speaks" isn't used anymore. Also implements #2716.
+  - MKVToolNix GUI: header editor: added an option to remove all attachments to the tree context menu. Implements #2835.
+  - MKVToolNix GUI: while the GUI is running it will remember the last page that was selected when the preferences dialog is closed. Upon re-opening the preferences that page will be selected by default. Implements #2852.
+
+  Bug fixes
+  - mkvmerge: fixed a segmentation fault when exiting prematurely due to write errors such as the destination having run out of space. Fixes #2843.
+  - mkvmerge: DTS: fixed wrong channel count for DTS tracks with XCh extensions. Fixes #2715.
+  - mkvmerge: MPEG TS reader: fixed detecting AVC/H.264 and HEVC/H.265 tracks that consist of only a single frame. Part of the fix of #2849.
+  - mkvmerge: MPEG TS reader: fixed handling of unbounded PES sizes for tracks that consist of only a single PES packet. Part of the fix of #2849.
+  - mkvmerge: MPEG TS reader: PGS subtitle tracks are now exempt from the "detect bogus subtitle timestamps" heuristic which could lead to some PGS subtitles not being timestamped correctly. Symptoms were that they were shown at the wrong time or that they were shown indefinitely. Fixes #2736 and partially fixes #2824.
+  - mkvmerge: MPEG TS reader: when reading MPLS playlists the start timestamps of a play items were handled wrong: all the timestamps of packets read were compared to that start timestamp, dropping those packets whose timestamps were smaller than the play item's start timestamp. The correct behavior is to accept all packets as soon as the first one with a timestamp equal to or larger than the play item's start timestamp is encountered. This could result in PGS subtitle entries located right at the start of the play item being garbled/lost as they consist of multiple PES packets for which some timestamps are often slightly smaller. Part of the fix of #2824.
+  - mkvmerge: MPEG TS reader: when reading MPLS playlists mkvmerge will no longer read the whole M2TS files they reference, processing only the packets lying inside the timestamp range given by the playlists's play item's start & end timestamps. Instead mkvmerge will use the index information present in corresponding clip information (CLPI) files in order to seek to the nearest file position of the play item's start timestamp. Additionally mkvmerge will simply stop processing a file once the end timestamp is seen. This change greatly speeds up processing files from which only small portions must be read. Part of the fix of #2824.
+  - mkvmerge: WavPack: fixed support for files created by v5 of the program. Checksums, DSD audio data and non-standard sampling rates are handled correctly. Patch by David Bryant.
+  - MKVToolNix GUI: multiplexer: fixed the cursor being positioned wrong after entering or pasting characters that aren't allowed in file names into the "destination file" control. Fixes #2855.
+
+  Build system changes
+  - libEBML v1.4.0 and libMatroska v1.6.0 are now required.
+
+  Other changes
+  - The source code repository's main development branch was renamed to main.
+ReleaseNotesUrl: https://mkvtoolnix.download/doc/NEWS.md
+# PurchaseUrl:
+# InstallationNotes:
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://mkvtoolnix.download/docs.html
+- DocumentLabel: FAQ
+  DocumentUrl: https://gitlab.com/mbunkus/mkvtoolnix/-/wikis/FAQ
+ManifestType: defaultLocale
+ManifestVersion: 1.2.0

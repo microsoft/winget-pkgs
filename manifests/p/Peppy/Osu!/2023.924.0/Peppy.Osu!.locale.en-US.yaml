@@ -1,0 +1,121 @@
+# Created with WinGet Automation using Komac v1.11.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.5.0.schema.json
+
+PackageIdentifier: Peppy.Osu!
+PackageVersion: 2023.924.0
+PackageLocale: en-US
+Publisher: ppy Pty Ltd
+PublisherUrl: https://osu.ppy.sh/home
+PublisherSupportUrl: https://github.com/ppy/osu/issues
+PrivacyUrl: https://osu.ppy.sh/legal/en/Privacy
+Author: Dean "peppy" Herbert
+PackageName: osu!
+PackageUrl: https://osu.ppy.sh
+License: MIT
+LicenseUrl: https://raw.githubusercontent.com/ppy/osu/master/LICENCE
+Copyright: Copyright (c) 2022 ppy Pty Ltd <contact@ppy.sh>.
+CopyrightUrl: https://raw.githubusercontent.com/ppy/osu/master/LICENCE
+ShortDescription: A free-to-win rhythm game. Rhythm is just a click away!
+Description: A free-to-win rhythm game developed by peppy with four game modes:osu!standard, a circle clicking simulator; osu!taiko, a drumming emulator; osu!catch, a fruit salad catcher; and osu!mania, a key smashing synthesizer.
+Tags:
+- beatmap-parser
+- game
+- osu
+- osu!
+- rhythm
+ReleaseNotes: |-
+  Code Quality
+  - Rename SliderVelocity to SliderVelocityMultiplier to distinguish from Velocity (ppy/osu#24728 by @peppy)
+  - Add debug output for skin configuration lookups (ppy/osu#24726 by @peppy)
+  - We've struggled with debugging these over the years so I think this was worth a couple of hours of work.
+  - Clean up ImportTask / ArchiveReader implementations (ppy/osu#24807 by @peppy)
+  - Remove LegacyDifficultyControlPoint / LegacyBpmMultiplier (ppy/osu#24738 by @peppy)
+  - Parse only supported schemes as URIs (ppy/osu#24814 by @LukynkaCZE)
+  - Refactor storyboard resource lookup to be more streamlined (ppy/osu#24809 by @peppy)
+  - Fix issues after storyboard resource lookup refactor (ppy/osu#24863 by @bdach)
+  - General improvements to README (ppy/osu#24875 by @peppy)
+  Smaller changes
+  - Fix masking broken with TexturedVertex3D (ppy/osu-framework#5987 by @smoogipoo)
+  - Revert masking SSBO changes (ppy/osu-resources#279 by @smoogipoo)
+  - Tidy up InterpolatingFramedClock (ppy/osu-framework#5992 by @peppy)
+  - Fix opening links potentially causing crashes due to system misconfigurations (and log errors instead) (ppy/osu-framework#5989 by @yesseruser)
+  - Remove local veldrid-spirv iOS native libraries (ppy/osu-framework#5995 by @frenzibyte)
+  - Update all dependencies (except for Moq) (ppy/osu#24831 by @peppy)
+  - Avoid throwing exception when attempting to access WebRequest response in fail path (ppy/osu-framework#5998 by @peppy)
+  - Don't block cut/copy platform actions on empty textbox selection (ppy/osu-framework#5997 by @peppy)
+  - Update clocks in line with framework changes (ppy/osu#24870 by @peppy)
+  - Fix crash when clicking update notification on iOS (ppy/osu-framework#5991 by @peppy)
+  Gameplay
+  - Default to normal bank if invalid sample bank is specified (ppy/osu#24800 by @sw1tchbl4d3r)
+  - Some existing beatmaps specify an invalid sample bank in the .osu file.
+    While stable would fallback to the normal sample bank, lazer would - until now - just refuse to play the sample.
+    This change replicates the behaviour of stable.
+  - I considered having the slider ball not appear until the head is hit, but I don't think a change like this would sit well as it would potentially reduce readability
+  - I intentionally made the snaking only happen on a successful hit. So if you miss the slider head completely, the outwards snaking will never complete.
+    This could be a good visual cue.
+  - The original plan I had animation wise was to have the portion of path before the slider ball's current position fade out on slider head hit, but this would mean duplicating the slider path.
+    And I don't think this is a good idea from a performance perspective for such an edge case.
+  Smaller changes
+  - Apply further fixes to note lock when classic mod is enabled (ppy/osu#24720 by @bdach)
+  - Apply further fixes to note lock when classic mod is enabled (ppy/osu#24762 by @bdach)
+  - This change in particular moves across an edge case from stable wherein slider heads will always block input from reaching objects underneath them, until the slider is fully completed.
+  - Update osu! spinner ticks calculation method to better match osu!(stable) (ppy/osu#24661 by @frenzibyte)
+  - osu!(stable) calculates the spins requirement for completion in "half spins", meanwhile lazer tried to do roughly the same but applied a slightly overestimated 0.6x factor to "convert" into full spins. This PR updates the number of spins required to be closer to expectations.
+  - Add two spins gap before awarding bonus score on osu! spinners (ppy/osu#24662 by @frenzibyte)
+  - As it turns out, in previous lazer versions a player could gain two extra bonus spins on any spinner in any map compared to stable.
+    For the sake of balancing, this PR mimics stable behaviour and adds a gap of two spins which need to be performed after required spins in order to receive bonus score.
+  - Fix sliders not always being the correct length on some beatmaps (ppy/osu#24739 by @peppy)
+  - Intentionally reintroduces some floating-point imprecisions from stable to fix a rare case wherein a particular beatmap was missing a slider tick.
+  - Fix sliders not always being the correct length on some more beatmaps (ppy/osu#24848 by @Magnus-Cosmos)
+  - Fixes another edge case beatmap wherein some sliders were too short.
+  - Fix game crash when using "Bubbles" mod on a beatmap with no hit circles (ppy/osu#24889 by @Fabiano1337)
+  - Fixes bubbles mod crashing when no HitCircle is placed in a map like in Issue #24444
+  Gameplay (osu!mania)
+  - Fix osu!mania legacy skin configurations not working when notes are not skinned (ppy/osu#24727 by @peppy)
+  - Originally disabled a while back, but as far as I can tell this does not look required anymore (we have much better classic fallback support these days).
+  Platform
+  - Fix game mode not triggering on new macOS versions (ppy/osu#24612 by @peppy)
+  Reliability
+  - Fix MemoryStreamArchiveReader.
+    GetStream() failing in some cases (ppy/osu#24846 by @bdach)
+  - Fix broken automatic beatmap download setting migration (ppy/osu#24866 by @bdach)
+  Smaller changes
+  - Add new beatmap information wedge design (ppy/osu#22116 by @mk56-spn)
+  - For future use!
+  - Implement beatmap options popover (ppy/osu#24712 by @Joehuu)
+  - For future use!
+  - Link new song select wedge title and artist to search text box (ppy/osu#24733 by @Joehuu)
+  - For future use!
+  - Fix rate adjust mods not showing "x" prefix on customisation slider's tooltip (ppy/osu#24795 by @peppy)
+  - | Before | After |
+  - Fix dummy beatmap showing AR 5 on song select (ppy/osu#24828 by @Joehuu)
+  - Fix shift-delete not working at song select (ppy/osu#24878 by @peppy)
+  - In combination with ppy/osu-framework#5997, closes #24867
+  Smaller changes
+  - Update spectator server development endpoint URLs (ppy/osu#24718 by @bdach)
+  Testing
+  - Improve scoring test scene usability (ppy/osu#24790 by @bdach)
+  - Fix Score V1 simulation in scoring test scene incorrectly applying multiplier (ppy/osu#24792 by @bdach)
+  - Refactor scoring test scene for ruleset extensibility (and move existing instance to osu! ruleset project) (ppy/osu#24821 by @bdach)
+  - Add scoring test scene for taiko (ppy/osu#24822 by @bdach)
+  - Fix crash when loading player instance without exiting previous instance (ppy/osu#24854 by @frenzibyte)
+  - Add scoring test scene for catch (ppy/osu#24823 by @bdach)
+  - Add scoring test scene for mania (ppy/osu#24824 by @bdach)
+  - Fix TestFriendScore intermittently failing due to randomness  (ppy/osu#24880 by @bdach)
+  Smaller changes
+  - Add animation support for beatmap status pills (ppy/osu#24722 by @peppy)
+  - https://github.com/ppy/osu/assets/191335/c80ef526-d9ac-4213-abd4-208eda1f7d45
+  - Update badge header background color in line with web (ppy/osu#24735 by @Joehuu)
+  - | Before | After | Web |
+  - Use @2x variant of profile badges (ppy/osu#24734 by @Joehuu)
+  - Update localisations (ppy/osu-resources#280 by @peppy)
+  - Implement "nano" size beatmap card (ppy/osu#24845 by @bdach)
+  - Used in the new notification fired when attempting to import score without the beatmap present.
+  - Adjust beatmap card thumbnail dim state to match web better (ppy/osu#24860 by @bdach)
+  - | before | after |
+  New Contributors
+  - @isakvik made their first contribution in #24736
+  - @Givikap120 made their first contribution in #24705
+ReleaseNotesUrl: https://github.com/ppy/osu/releases/tag/2023.924.0
+ManifestType: defaultLocale
+ManifestVersion: 1.5.0
