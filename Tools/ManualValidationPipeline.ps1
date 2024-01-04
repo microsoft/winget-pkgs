@@ -1,17 +1,19 @@
-#Copyright 2022-2023 Microsoft Corporation
+#Copyright 2022-2024 Microsoft Corporation
 #Author: Stephen Gillie
-#Title: Manual Validation Pipeline v3.3.0
+#Title: Manual Validation Pipeline v3.4.3
 #Created: 10/19/2022
-#Updated: 12/22/2023
+#Updated: 01/04/2024
 #Notes: Utilities to streamline evaluating 3rd party PRs.
 #Update log:
-#3.3.0 Start consolidating PR commands into Invoke-GitHubPRRequest
-#3.2.2 Add silent option to many functions to reduce extraneous console output and better PR Watcher functionality.
-#3.2.1 Add automation for processing GitHub diff'd PRs, and improve automation for processing individual files into a manifest.
+#3.4.3 Auto-populate Reply-ToPR UserInput with PR author's name.
+#3.4.2 Move Open-PR gathering of PR numbers to Get-JustPRNumber.
+#3.4.1 Add InstallerNotSilent canned response.
+#3.4.0 Add Get-AutoValBuild to get the build number from the PR number.
+manifest.
 
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingWriteHost', '', Justification = 'Console application. Outputs have been manually suppressed where desired.')]
 
-$build = 513
+$build = 517
 $appName = "Manual Validation"
 Write-Host "$appName build: $build"
 $MainFolder = "C:\ManVal"
@@ -52,7 +54,7 @@ Function Get-AutoValLog {
 		[switch]$Force
 	)
 	#Get-Process *photosapp* | Stop-Process
-	$AutoValbuild = ((((Invoke-WebRequest "https://dev.azure.com/ms/winget-pkgs/_apis/build/builds?branchName=refs/pull/$PR/merge&api-version=6.0").content | ConvertFrom-Json).value[0]._links.web.href) -split "=")[1]
+	$AutoValbuild = Get-AutoValBuild $PR 
 	if ($AutoValbuild) {
 
 		#This downloads to Windows default location, which has already been set to $DestinationPath
@@ -103,6 +105,27 @@ Function Get-AutoValLog {
 	} else {
 		Write-Host "PR: $PR - No errors to post."
 	}
+}
+
+Function Get-AutoValBuild {
+	param(
+		$PR,
+		$content = ((Invoke-WebRequest "https://dev.azure.com/ms/winget-pkgs/_apis/build/builds?branchName=refs/pull/$PR/merge&api-version=6.0").content | ConvertFrom-Json),
+		$href = ($content.value[0]._links.web.href),
+		$build = (($href -split "=")[1])
+	)
+	return $build
+}
+
+Function Get-ADOLog {
+	param(
+		$PR,
+		$build = (Get-AutoValBuild $PR),
+		$Log = (36),
+		$content = (Invoke-GitHubRequest https://dev.azure.com/ms/ed6a5dfa-6e7f-413b-842c-8305dd9e89e6/_apis/build/builds/$build/logs/$Log).content
+	)
+	$content = $content -join "" -split "`n"
+	return $content
 }
 
 Function Invoke-GitHubRequest {
@@ -272,7 +295,7 @@ Function Update-PR {
 Function Reply-ToPR {
 	param(
 		$PR,
-		[string]$UserInput,
+		[string]$UserInput = ((Invoke-GitHubPRRequest $PR -Type "" -Method get -Output content -JSON).user.login),
 		[string]$CannedResponse,
 		[string]$Body = (Get-CannedResponse $CannedResponse -UserInput $UserInput -NoClip),
 		[Switch]$Silent
@@ -1380,7 +1403,7 @@ Function Add-InstallerSwitch {
 #@wingetbot waivers
 Function Get-CannedResponse {
 	param(
-		[ValidateSet("AppFail","Approve","AutomationBlock","AutoValEnd","AppsAndFeaturesNew","AppsAndFeaturesMissing","Drivers","DefenderFail","HashFailRegen","IcMValidationEphemeral","IcMValidationEvery","IcMValidationFirst","IcMValidationStale","IcMWaiverCommit","InstallerFail","InstallerNotUnattended","InstallerUrlBad","ListingDiff","ManValEnd","NoCause","NoExe","NoRecentActivity","NotGoodFit","Only64bit","PackageFail","Paths","PendingAttendedInstaller","RemoveAsk","Unattended","Unavailable","UrlBad","WordFilter")]
+		[ValidateSet("AppFail","Approve","AutomationBlock","AutoValEnd","AppsAndFeaturesNew","AppsAndFeaturesMissing","Drivers","DefenderFail","HashFailRegen","InstallerFail","InstallerNotUnattended","InstallerNotSilent","InstallerUrlBad","ListingDiff","ManValEnd","NoCause","NoExe","NoRecentActivity","NotGoodFit","Only64bit","PackageFail","Paths","PendingAttendedInstaller","RemoveAsk","Unattended","Unavailable","UrlBad","WordFilter")]
 		[string]$Response,
 		$UserInput=(Get-Clipboard),
 		[switch]$NoClip
@@ -1425,6 +1448,9 @@ Function Get-CannedResponse {
 		}
 		"InstallerNotUnattended" {
 			$out = "Pending:`n* https://github.com/microsoft/winget-cli/issues/910"
+		}
+		"InstallerNotSilent" {
+			$out = "Hi $Username`n`nThe installation isn't unattended. Is there an installer switch to have the package install silently?"
 		}
 		"ListingDiff" {
 			$out = "This PR omits these files that are present in the current manifest:`n> $UserInput"
@@ -1582,11 +1608,11 @@ Function Open-AllURL {
 Function Open-PR {
 	param(
 		[switch]$Review,
-		$clip = (Get-Clipboard)
+		$clip = (Get-Clipboard),
+		$justPRs = (Get-JustPRNumber $clip)
 	)
-	$clip = ($clip -split " " | select-string "#[0-9]{5,6}") -replace "#",""
 
-	foreach ($PR in $clip){
+	foreach ($PR in $justPRs){
 		$URL = "https://github.com/microsoft/winget-pkgs/pull/$PR#issue-comment-box"
 		if ($Review) {
 			$URL = "https://github.com/microsoft/winget-pkgs/pull/$PR/files"
