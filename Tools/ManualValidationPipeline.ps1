@@ -1,19 +1,18 @@
 #Copyright 2022-2024 Microsoft Corporation
 #Author: Stephen Gillie
-#Title: Manual Validation Pipeline v3.4.3
+#Title: Manual Validation Pipeline v3.5.3
 #Created: 10/19/2022
-#Updated: 01/04/2024
+#Updated: 1/5/2024
 #Notes: Utilities to streamline evaluating 3rd party PRs.
 #Update log:
-#3.4.3 Auto-populate Reply-ToPR UserInput with PR author's name.
-#3.4.2 Move Open-PR gathering of PR numbers to Get-JustPRNumber.
-#3.4.1 Add InstallerNotSilent canned response.
-#3.4.0 Add Get-AutoValBuild to get the build number from the PR number.
-manifest.
+#3.5.3 Automatically convert Invoke-GitHubPRRequest Content output from JSON.
+#3.5.2 Rename Set-GitHubPreset to Get-GitHubPreset, and Get-TrackerVMStatusTracker to Get-TrackerVMRunTracker
+#3.5.1 Remove out-of-date InstallerNotUnattended canned response and adjust grammar on Apps and Features canned responses. 
+#3.5.0 Add Get-PRLabelAction to action PRs based on label, and Add-Waiver to add the correct waiver (or approve a Validation-Completed PR) to enable a one-stop LGTM mode. 
 
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingWriteHost', '', Justification = 'Console application. Outputs have been manually suppressed where desired.')]
 
-$build = 517
+$build = 525
 $appName = "Manual Validation"
 Write-Host "$appName build: $build"
 $MainFolder = "C:\ManVal"
@@ -202,6 +201,81 @@ Function Approve-PR {
 	Start-Sleep $GitHubRateLimitDelay;
 }
 
+Function Get-PRLabelAction {
+	param(
+	$PR,
+	$Labels = ((Invoke-GitHubPRRequest -PR $PR -Type "labels" -Output content -JSON).name)
+	)
+	Write-Output "PR $PR has labels $Labels"
+	Foreach ($Label in $Labels) {
+		Switch ($Label) {
+			"Error-Hash-Mismatch" {
+				$PR | %{Reply-ToPR -PR $PR -UserInput ((Get-ADOLog $PR)[30..34]) -CannedResponse AutoValEnd}
+			}
+			"Validation-Unattended-Failure" {
+				Get-AutoValLog  $PR
+			}
+			"Binary-Validation-Error" {
+				$PR | %{Reply-ToPR -PR $PR -UserInput ((Get-ADOLog $PR)[30..34]) -CannedResponse AutoValEnd}
+			}
+			"Validation-Installation-Error" {
+				Get-AutoValLog  $PR
+			}
+			"Validation-Shell-Execute" {
+				Get-AutoValLog  $PR
+			}
+			"Validation-Executable-Error" {
+				Get-AutoValLog  $PR
+			}
+			"Validation-Hash-Verification-Failed" {
+				Get-AutoValLog  $PR
+			}
+			"Validation-Domain" {
+			}
+			"Validation-Merge-Conflict" {
+			}
+			"URL-Validation-Error" {
+			}
+			"Error-Installer-Availiability" {
+				$PR | %{Reply-ToPR -PR $PR -Body (Check-PRInstallerStatus $PR)}
+			}
+		}
+	}
+}
+
+Function Add-Waiver {
+	param(
+	$PR,
+	$Labels = ((Invoke-GitHubPRRequest -PR $PR -Type "labels" -Output content -JSON).name)
+	)
+	Foreach ($Label in $Labels) {
+		$Waiver = ""
+		Switch ($Label) {
+			"Validation-Unattended-Failed" {
+				$Waiver = $Label
+			}
+			"Validation-Installation-Error" {
+				$Waiver = $Label
+			}
+			"Validation-Shell-Execute" {
+				$Waiver = $Label
+			}
+			"Validation-Executable-Error" {
+				$Waiver = $Label
+			}
+			"Validation-Domain" {
+				$Waiver = $Label
+			}
+			"Validation-Completed" {
+				Approve-PR $PR
+			}
+		}
+		if ($Waiver -ne "") {
+			Invoke-GitHubPRRequest $PR -Type comments -Output StatusDescription -Method POST -Data "@wingetbot waivers Add $Waiver"
+		}; # end if Waiver
+	}; # end Foreach Label
+}; # end Function
+
 #GET = Read; POST = Append; PUT = Write; DELETE = delete
 Function Invoke-GitHubPRRequest {
 	param(
@@ -247,7 +321,7 @@ Function Invoke-GitHubPRRequest {
 	}
 
 	if (!($Silent)) {
-		if ($JSON) {
+		if (($JSON) -OR ($Output -eq "content")) {
 			$out.$Output | ConvertFrom-Json
 		} else {
 			$out.$Output 
@@ -320,7 +394,7 @@ Function Add-UserToPR {
 	}
 }
 
-Function Set-GitHubPreset {
+Function Get-GitHubPreset {
 	param(
 		[int]$PR,
 		[string]$UserName = (invoke-gitHubPRRequest $PR -Type "" -Output content -JSON).user.login,
@@ -907,7 +981,7 @@ Function Get-ArraySum {
 }
 
 #VM Orchestration
-Function Get-TrackerVMStatusTracker {
+Function Get-TrackerVMRunTracker {
 	while ($true) {
 		Clear-Host
 		$GetStatus = Get-Status
@@ -968,7 +1042,7 @@ Function Get-TrackerVMCycle {
 				Add-ValidationData $VM.vm
 			}
 			"Approved" {
-				Approve-PR $VM.PR
+				Add-Waiver $VM.PR
 				Get-TrackerVMSetStatus "Complete" $VM.vm
 			}
 			"CheckpointReady" {
@@ -1064,7 +1138,7 @@ Function Get-TrackerVMResetStatus {
 	}
 }
 
-Function Get-TrackerVMRebuildStatus{
+Function Get-TrackerVMRebuildStatus {
 	$Status = Get-VM | Where-Object {$_.name -notmatch "vm0"}|
 	Select-Object @{n="vm";e={$_.name}},
 	@{n="status";e={"Ready"}},
@@ -1403,7 +1477,7 @@ Function Add-InstallerSwitch {
 #@wingetbot waivers
 Function Get-CannedResponse {
 	param(
-		[ValidateSet("AppFail","Approve","AutomationBlock","AutoValEnd","AppsAndFeaturesNew","AppsAndFeaturesMissing","Drivers","DefenderFail","HashFailRegen","InstallerFail","InstallerNotUnattended","InstallerNotSilent","InstallerUrlBad","ListingDiff","ManValEnd","NoCause","NoExe","NoRecentActivity","NotGoodFit","Only64bit","PackageFail","Paths","PendingAttendedInstaller","RemoveAsk","Unattended","Unavailable","UrlBad","WordFilter")]
+		[ValidateSet("AppFail","Approve","AutomationBlock","AutoValEnd","AppsAndFeaturesNew","AppsAndFeaturesMissing","Drivers","DefenderFail","HashFailRegen","InstallerFail","InstallerNotSilent","InstallerUrlBad","ListingDiff","ManValEnd","NoCause","NoExe","NoRecentActivity","NotGoodFit","Only64bit","PackageFail","Paths","PendingAttendedInstaller","RemoveAsk","Unattended","Unavailable","UrlBad","WordFilter")]
 		[string]$Response,
 		$UserInput=(Get-Clipboard),
 		[switch]$NoClip
@@ -1411,10 +1485,10 @@ Function Get-CannedResponse {
 	[string]$Username = "@"+$UserInput.replace(" ","")+","
 	switch ($Response) {
 		"AppsAndFeaturesNew" {
-			$out = "Hi $Username`n`nThis manifest adds Apps and Features entries that aren't present in previous PR versions. Should these entries be added to the previous versions also?"
+			$out = "Hi $Username`n`nThis manifest adds Apps and Features entries that aren't present in previous PR versions. Should these entries also be added to the previous versions?"
 		}
 		"AppsAndFeaturesMissing" {
-			$out = "Hi $Username`n`nThis manifest removes Apps and Features entries that are present in previous PR versions. Should these entries be added to this version also?"
+			$out = "Hi $Username`n`nThis manifest removes Apps and Features entries that are present in previous PR versions. Should these entries also be added to this version?"
 		}
 		"AppFail" {
 			$out = "Hi $Username`n`nThe application installed normally, but gave an error instead of launching:`n"
@@ -1445,9 +1519,6 @@ Function Get-CannedResponse {
 		}
 		"InstallerFail" {
 			$out = "Hi $Username`n`nThe installer did not complete:`n"
-		}
-		"InstallerNotUnattended" {
-			$out = "Pending:`n* https://github.com/microsoft/winget-cli/issues/910"
 		}
 		"InstallerNotSilent" {
 			$out = "Hi $Username`n`nThe installation isn't unattended. Is there an installer switch to have the package install silently?"

@@ -1,15 +1,12 @@
-#Copyright 2023 Microsoft Corporation
+#Copyright 2023-2024 Microsoft Corporation
 #Author: Stephen Gillie
-#Title: PRWatcher v1.2.3
+#Title: PRWatcher v1.2.5
 #Created: 2/15/2023
-#Updated: 12/21/2023
+#Updated: 1/5/2024
 #Notes: Streamlines WinGet-pkgs manifest PR moderator approval by watching the clipboard - copy a PR's FIles tab to your clipboard, and Get-PRWatch parse the PR, start a VM to review if new, and approve the PR if it passes all checks. Also outputs valid titles to a logging file. Freeing moderators to focus on approving and helping.
 #Update log:
-#1.1.5 Bugfixes to colors.
-#1.1.4 Improve run check, PR parsing, and added a previous manifest check, to check if Apps and Features entries have changed.
-#1.1.1 Add review file checking. (Review file contents lost in repo refresh incident.)
-#1.1.0 Automatic PR approval.
-#1.0.0 Redesign output to be easier to read, based on Markdown table formatting. Remove unused utility functions.
+#1.2.5 Capitalize "Invoke" in Cmdlet names. 
+#1.2.4 Update WordFilter to exclude URLs. 
 
 
 #[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingWriteHost', '', Justification = 'Console application. Outputs have been manually suppressed where desired.')]
@@ -1263,7 +1260,7 @@ Function Get-PRWatch {
 						$Body = "Hi @$Submitter,`n`n> This PR's version number $prVersion has $prVersionParams parameters (sets of numbers between dots - major, minor, etc), which is $greaterOrLessThan than the current manifest's version $($ManifestVersion), which has $ManifestVersionParams parameters.`n`nIs this intentional?"
 						$Body = $Body + "`n`n(Automated response - build $build)"
 						Reply-ToPR -PR $PR -Body $Body -Silent 
-						invoke-GitHubPRRequest -PR $PR -Method POST -Type labels -Data "Needs-Author-Feedback"
+						Invoke-GitHubPRRequest -PR $PR -Method POST -Type labels -Data "Needs-Author-Feedback" -Output StatusDescription
 					}
 				}
 
@@ -1315,7 +1312,7 @@ Function Get-PRWatch {
 
 				#$WordFilterList = @(".bat", ".ps1", ".cmd","accept_gdpr ", "accept-licenses", "accept-license","eula")
 				$WordFilterList = @("accept_gdpr ", "accept-licenses", "accept-license","eula")
-				$WordFilterMatch = $WordFilterList | ForEach-Object {$Clip -match $_}
+				$WordFilterMatch = $WordFilterList | ForEach-Object {$Clip -match $_} | ForEach-Object {$_ -match "Url"} 
 
 				if ($WordFilterMatch) {
 					$WordFilter = "-!"
@@ -1335,12 +1332,12 @@ Function Get-PRWatch {
 							$matchColor = $invalidColor
 							$AnF = "-"
 							Reply-ToPR -PR $PR -CannedResponse AppsAndFeaturesMissing -UserInput $Submitter -Silent
-							invoke-GitHubPRRequest -PR $PR -Method POST -Type labels -Data "Needs-Author-Feedback"
+							Invoke-GitHubPRRequest -PR $PR -Method POST -Type labels -Data "Needs-Author-Feedback"
 						} elseif (($ANFOld -eq $false) -and ($ANFCurrent -eq $true)) {
 							$matchColor = $cautionColor
 							$AnF = "+"
 							Reply-ToPR -PR $PR -CannedResponse AppsAndFeaturesNew -UserInput $Submitter -Silent
-							#invoke-GitHubPRRequest -PR $PR -Method POST -Type labels -Data "Needs-Author-Feedback"
+							#Invoke-GitHubPRRequest -PR $PR -Method POST -Type labels -Data "Needs-Author-Feedback"
 						} elseif (($ANFOld -eq $false) -and ($ANFCurrent -eq $false)) {
 							$AnF = "0"
 						} elseif (($ANFOld -eq $true) -and ($ANFCurrent -eq $true)) {
@@ -1395,7 +1392,7 @@ Function Get-PRWatch {
 						$ListingDiff = "-!"
 						$matchColor = $cautionColor
 						Reply-ToPR -PR $PR -CannedResponse ListingDiff -UserInput $GLD -Silent
-						invoke-GitHubPRRequest -PR $PR -Method POST -Type labels -Data "Needs-Author-Feedback"
+						Invoke-GitHubPRRequest -PR $PR -Method POST -Type labels -Data "Needs-Author-Feedback"
 					}
 				}
 				Write-Host -nonewline -f $matchColor "$ListingDiff | "
