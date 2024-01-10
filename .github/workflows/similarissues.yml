@@ -7,6 +7,8 @@ on:
 jobs:
   getSimilarIssues:
     runs-on: ubuntu-latest
+    permissions:
+      issues: read
     outputs:
       message: ${{ steps.getBody.outputs.message }}
     steps:
@@ -21,6 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       issues: write
+    if: needs.getSimilarIssues.outputs.message != ''
     steps:
       - name: Add comment
         run: gh issue comment "$NUMBER" --repo "$REPO" --body "$BODY"
