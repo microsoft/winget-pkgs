@@ -1,15 +1,15 @@
 #Copyright 2023-2024 Microsoft Corporation
 #Author: Stephen Gillie
-#Title: PRWatcher v1.2.5
+#Title: PRWatcher v1.2.7
 #Created: 2/15/2023
-#Updated: 1/5/2024
+#Updated: 1/11/2024
 #Notes: Streamlines WinGet-pkgs manifest PR moderator approval by watching the clipboard - copy a PR's FIles tab to your clipboard, and Get-PRWatch parse the PR, start a VM to review if new, and approve the PR if it passes all checks. Also outputs valid titles to a logging file. Freeing moderators to focus on approving and helping.
 #Update log:
+#1.2.7 Add PR Record system to gather PR numbers at decision points. 
+#1.2.6 Bugfix to WordFilter. 
 #1.2.5 Capitalize "Invoke" in Cmdlet names. 
-#1.2.4 Update WordFilter to exclude URLs. 
 
 
-#[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingWriteHost', '', Justification = 'Console application. Outputs have been manually suppressed where desired.')]
 
 Function Get-PRWatch {
 	[CmdletBinding()]
@@ -1260,7 +1260,8 @@ Function Get-PRWatch {
 						$Body = "Hi @$Submitter,`n`n> This PR's version number $prVersion has $prVersionParams parameters (sets of numbers between dots - major, minor, etc), which is $greaterOrLessThan than the current manifest's version $($ManifestVersion), which has $ManifestVersionParams parameters.`n`nIs this intentional?"
 						$Body = $Body + "`n`n(Automated response - build $build)"
 						Reply-ToPR -PR $PR -Body $Body -Silent 
-						Invoke-GitHubPRRequest -PR $PR -Method POST -Type labels -Data "Needs-Author-Feedback" -Output StatusDescription
+						Invoke-GitHubPRRequest -PR $PR -Method POST -Type labels -Data "Needs-Author-Feedback" -Output StatusDescription -Silent
+						Add-PRToRecord $PR "Feedback"
 					}
 				}
 
@@ -1312,7 +1313,7 @@ Function Get-PRWatch {
 
 				#$WordFilterList = @(".bat", ".ps1", ".cmd","accept_gdpr ", "accept-licenses", "accept-license","eula")
 				$WordFilterList = @("accept_gdpr ", "accept-licenses", "accept-license","eula")
-				$WordFilterMatch = $WordFilterList | ForEach-Object {$Clip -match $_} | ForEach-Object {$_ -match "Url"} 
+				$WordFilterMatch = $WordFilterList | ForEach-Object {($Clip -match $_) -notmatch "Url"}
 
 				if ($WordFilterMatch) {
 					$WordFilter = "-!"
@@ -1333,6 +1334,7 @@ Function Get-PRWatch {
 							$AnF = "-"
 							Reply-ToPR -PR $PR -CannedResponse AppsAndFeaturesMissing -UserInput $Submitter -Silent
 							Invoke-GitHubPRRequest -PR $PR -Method POST -Type labels -Data "Needs-Author-Feedback"
+							Add-PRToRecord $PR "Feedback"
 						} elseif (($ANFOld -eq $false) -and ($ANFCurrent -eq $true)) {
 							$matchColor = $cautionColor
 							$AnF = "+"
@@ -1393,6 +1395,7 @@ Function Get-PRWatch {
 						$matchColor = $cautionColor
 						Reply-ToPR -PR $PR -CannedResponse ListingDiff -UserInput $GLD -Silent
 						Invoke-GitHubPRRequest -PR $PR -Method POST -Type labels -Data "Needs-Author-Feedback"
+						Add-PRToRecord $PR "Feedback"
 					}
 				}
 				Write-Host -nonewline -f $matchColor "$ListingDiff | "
@@ -1442,6 +1445,7 @@ Function Get-PRWatch {
 
 				if ($Approve -eq "+") {
 					$Approve = Approve-PR $PR
+					Add-PRToRecord $PR "Approved"
 				}
 
 				Write-Host -nonewline -f $matchColor "$Approve | "
@@ -1452,7 +1456,7 @@ Function Get-PRWatch {
 					if ($PRtitle.length -le 128) {
 						$PRtitle = $PRtitle -join "" | Where-Object {$_ -match $hashPRRegex}
 						#Write-Debug "Output $PRtitle to $LogFile"
-						$PRtitle | Out-File $LogFile -Append
+						Add-PRToRecord $PR "Approved"
 					} else {
 						Write-Host -f $cautionColor "Item length greater than 128 characters."
 					} ; #end if clip

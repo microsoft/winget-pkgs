@@ -1,18 +1,19 @@
 #Copyright 2022-2024 Microsoft Corporation
 #Author: Stephen Gillie
-#Title: Manual Validation Pipeline v3.5.3
+#Title: Manual Validation Pipeline v3.6.3
 #Created: 10/19/2022
-#Updated: 1/5/2024
+#Updated: 1/11/2024
 #Notes: Utilities to streamline evaluating 3rd party PRs.
 #Update log:
-#3.5.3 Automatically convert Invoke-GitHubPRRequest Content output from JSON.
-#3.5.2 Rename Set-GitHubPreset to Get-GitHubPreset, and Get-TrackerVMStatusTracker to Get-TrackerVMRunTracker
-#3.5.1 Remove out-of-date InstallerNotUnattended canned response and adjust grammar on Apps and Features canned responses. 
-#3.5.0 Add Get-PRLabelAction to action PRs based on label, and Add-Waiver to add the correct waiver (or approve a Validation-Completed PR) to enable a one-stop LGTM mode. 
+#3.6.3 Numerous quality of life and speed improvements.
+#3.6.2 Add Installer checking automation.
+#3.6.1 Add Add-PRToRecord and Get-PRTitle to automate reporting.
+#3.6.0 Add numerous functions to get text from PR and add suggestions on specific lines. 
+#3.5.5 Rename Get-AutoValBuild to Get-BuildFromPR.
+#3.5.4 Rearrange commonly-developed functions to be near the top.
 
-[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingWriteHost', '', Justification = 'Console application. Outputs have been manually suppressed where desired.')]
 
-$build = 525
+$build = 561
 $appName = "Manual Validation"
 Write-Host "$appName build: $build"
 $MainFolder = "C:\ManVal"
@@ -33,13 +34,237 @@ $VMversion = "$MainFolder\VMversion.txt"
 $StatusFile = "$writeFolder\status.csv"
 $timecardfile = "$logsFolder\timecard.txt"
 $TrackerModeFile = "$logsFolder\trackermode.txt"
+$LogFile = "C:\ManVal\misc\ApprovedPRs.txt"
 
 $CheckpointName = "Validation"
 $VMUserName = "user" #Set to the internal username you're using in your VMs.
+$GitHubUserName = "stephengillie"
 
 $GitHubRateLimitDelay = 0.5 #seconds
 
+#Automation tools
+Function Get-PRLabelAction {
+	param(
+	$PR,
+	$Labels = ((Invoke-GitHubPRRequest -PR $PR -Type "labels" -Output content -JSON).name)
+	)
+	Write-Output "PR $PR has labels $Labels"
+	Foreach ($Label in $Labels) {
+		Switch ($Label) {
+			"Binary-Validation-Error" {
+				$PR | %{Reply-ToPR -PR $PR -UserInput ((Get-ADOLog $PR)[30..34]) -CannedResponse AutoValEnd}
+			}
+			"Error-Hash-Mismatch" {
+				$Log = (Get-ADOLog $PR)
+				$line = ($Log | Select-String "Specified hash doesn't match").LineNumber
+				$EndLine = ($line[-1] +1)
+				$PR | %{Reply-ToPR -PR $PR -UserInput ($Log[$line[0]..$EndLine]) -CannedResponse AutoValEnd}
+			}
+			"Error-Installer-Availability" {
+				$PR | %{Reply-ToPR -PR $PR -Body (Check-PRInstallerStatus $PR)}
+			}
+			"Manifest-AppsAndFeaturesVersion-Error" {
+				$PR | %{Reply-ToPR -PR $PR -UserInput ((Get-ADOLog $PR -Log 25)[50]) -CannedResponse AutoValEnd}
+			}
+			"Manifest-Installer-Validation-Error" {
+				$PR | %{Reply-ToPR -PR $PR -UserInput ((Get-ADOLog $PR -Log 25)[60]) -CannedResponse AutoValEnd}
+			}
+			"Manifest-Validation-Error" {
+				$PR | %{Reply-ToPR -PR $PR -UserInput ((Get-ADOLog $PR -Log 25)[32]) -CannedResponse AutoValEnd}
+			}
+			"PullRequest-Error" {
+				$PR | %{Reply-ToPR -PR $PR -UserInput ((Get-ADOLog $PR -Log 24)[28]) -CannedResponse AutoValEnd}
+			}
+			"URL-Validation-Error" {
+			}
+			"Validation-Domain" {
+			}
+			"Validation-Executable-Error" {
+				Get-AutoValLog  $PR
+			}
+			"Validation-Hash-Verification-Failed" {
+				Get-AutoValLog  $PR
+			}
+			"Validation-Merge-Conflict" {
+			}
+			"Validation-Installation-Error" {
+				Get-AutoValLog  $PR
+			}
+			"Validation-Shell-Execute" {
+				Get-AutoValLog  $PR
+			}
+			"Validation-Unattended-Failed" {
+				Get-AutoValLog  $PR
+			}
+		}
+	}
+}
+
+Function Add-Waiver {
+	param(
+	$PR,
+	$Labels = ((Invoke-GitHubPRRequest -PR $PR -Type "labels" -Output content -JSON).name)
+	)
+	Foreach ($Label in $Labels) {
+		$Waiver = ""
+		Switch ($Label) {
+			"Internal-Error-Dynamic-Scan" {
+				Add-PRLabel -PR $PR -Label "Validation-Completed" -Method PUT
+				Add-PRToRecord $PR "Manually-Validated-IEDS"
+			}
+			"Validation-Completed" {
+				Approve-PR $PR
+				Add-PRToRecord $PR "Approved"
+			}
+			"Validation-Domain" {
+				Add-PRToRecord $PR "Waiver"
+				$Waiver = $Label
+			}
+			"Validation-Executable-Error" {
+				Add-PRToRecord $PR "Waiver"
+				$Waiver = $Label
+			}
+			"Validation-Forbidden-URL-Error" {
+				Add-PRToRecord $PR "Waiver"
+				$Waiver = $Label
+			}
+			"Validation-Installation-Error" {
+				Add-PRToRecord $PR "Waiver"
+				$Waiver = $Label
+			}
+			"Validation-No-Executables" {
+				Add-PRToRecord $PR "Waiver"
+				$Waiver = $Label
+			}
+			"Validation-Shell-Execute" {
+				Add-PRToRecord $PR "Waiver"
+				$Waiver = $Label
+			}
+			"Validation-Unattended-Failed" {
+				Add-PRToRecord $PR "Waiver"
+				$Waiver = $Label
+			}
+			"Validation-Unapproved-URL" {
+				Add-PRToRecord $PR "Waiver"
+				$Waiver = $Label
+			}
+		}
+		if ($Waiver -ne "") {
+			Invoke-GitHubPRRequest $PR -Type comments -Output StatusDescription -Method POST -Data "@wingetbot waivers Add $Waiver"
+		}; # end if Waiver
+	}; # end Foreach Label
+}; # end Function
+
+Function Get-GitHubPreset {
+	param(
+		[int]$PR,
+		[ValidateSet("DefenderFail","InstallerNotSilent","PackageUrl")][string]$Preset,
+		[string]$UserName = (Invoke-GitHubPRRequest $PR -Type "" -Output content -JSON).user.login,
+		$CannedResponse = $Preset,
+		$Label
+	)
+	Switch ($Preset) {
+		"DefenderFail" {
+			$Label = "Needs-Attention"
+			Add-PRToRecord $PR "Blocking"
+		}
+		"InstallerNotSilent" {
+			$Label = "Needs-Author-Feedback"
+			Add-PRToRecord $PR "Feedback"
+		}
+		"PackageUrl" {
+			$Label = "Changes-Requested"
+		}
+	}
+
+	Reply-ToPR -PR $PR -CannedResponse $CannedResponse -UserInput $UserName
+	Add-PRLabel -PR $PR -Label $Label
+}
+
 #PR tools
+#GET = Read; POST = Append; PUT = Write; DELETE = delete
+Function Invoke-GitHubRequest {
+	param(
+		[Parameter(mandatory=$true)][string]$Uri,
+		[string]$Body,
+		[ValidateSet("DELETE","GET","HEAD","PATCH","POST","PUT")][string]$Method = "GET",
+		$Headers = @{"Authorization"="Bearer $GitHubToken"; "Accept"="application/vnd.github+json"; "X-GitHub-Api-Version"="2022-11-28"},
+		#[ValidateSet("content","StatusDescription")][string]$Output = "content",
+		[switch]$JSON
+	)
+	if ($Body) {
+		$out = (Invoke-WebRequest -Method $Method -Uri $Uri -Headers $Headers -Body $Body -ContentType application/json)
+	} else {
+		$out = (Invoke-WebRequest -Method $Method -Uri $Uri -Headers $Headers)
+	}
+	#GitHub requires the value be the .body property of the variable. This makes more sense with CURL, Where-Object this is the -data parameter. However with Invoke-WebRequest it's the -Body parameter, so we end up with the awkward situation of having a Body parameter that needs to be prepended with a body property.
+	#if (!($Silent)) {
+		if (($JSON)){ # -OR ($Output -eq "content")) {
+			$out| ConvertFrom-Json
+		} else {
+			$out
+		}
+	#}
+	Start-Sleep $GitHubRateLimitDelay;
+}
+
+Function Invoke-GitHubPRRequest {
+	param(
+		$PR,
+		[ValidateSet("GET","DELETE","PATCH","POST","PUT")][string]$Method = "GET",
+		[ValidateSet("assignees","comments","commits","files","labels","reviews","")][string]$Type = "labels",
+		[string]$Data,
+		[ValidateSet("issues","pulls")][string]$Path = "issues",
+		[ValidateSet("content","StatusDescription")][string]$Output = "StatusDescription",
+		[switch]$JSON,
+		[Switch]$Silent
+	)
+	$Response = @{}
+	$ResponseType = $Type
+
+	if (($Type -eq "") -OR ($Type -eq "files")){
+		$Path = "pulls"
+	} elseif ($Type -eq "comments") {
+		$Response.body += $Data
+	} elseif ($Type -eq "commits") {
+		$prData = Invoke-GitHubRequest https://api.github.com/repos/microsoft/winGet-pkgs/pulls/$pr/commits -JSON
+		$commit = (($prData.commit.url -split "/")[-1])
+		$uri = "https://api.github.com/repos/microsoft/winGet-pkgs/$Type/$commit"
+	} elseif ($Type -eq "reviews") {
+		$Response.body = $Data
+		$prData = Invoke-GitHubRequest https://api.github.com/repos/microsoft/winGet-pkgs/pulls/$pr/commits -JSON
+		$Response.commit = ($prData.commit.url -split "/")[-1]
+		$Response.event = "APPROVE"
+	} elseif ($Type -eq "") {
+		#$Response.title = ""
+		#$Response.body = ""
+		$Response.state = "closed"
+		$Response.base = "master"
+	} else {
+ 		$Response.$ResponseType = @()
+		$Response.$ResponseType += $Data
+	}
+
+	$uri = "https://api.github.com/repos/microsoft/winget-pkgs/$Path/$pr/$Type"
+	$uri = $uri -replace "/$",""
+
+	if ($Method -eq "GET") {
+		$out = Invoke-GitHubRequest -Method $Method -Uri $uri
+	} else {
+		[string]$Body = $Response | ConvertTo-Json
+		$out = Invoke-GitHubRequest -Method $Method -Uri $uri -Body $Body
+
+	}
+
+	if (!($Silent)) {
+		if (($JSON) -OR ($Output -eq "content")) {
+			$out.$Output | ConvertFrom-Json
+		} else {
+			$out.$Output 
+		}
+	}
+}
+
 Function Get-AutoValLog {
 	#Needs $GitHubToken to be set up in your $PROFILE or somewhere more secure. Needs permissions: workflow,
 	param(
@@ -53,11 +278,11 @@ Function Get-AutoValLog {
 		[switch]$Force
 	)
 	#Get-Process *photosapp* | Stop-Process
-	$AutoValbuild = Get-AutoValBuild $PR 
-	if ($AutoValbuild) {
+	$BuildNumber = Get-BuildFromPR $PR 
+	if ($BuildNumber) {
 
 		#This downloads to Windows default location, which has already been set to $DestinationPath
-		start-process "https://dev.azure.com/ms/ed6a5dfa-6e7f-413b-842c-8305dd9e89e6/_apis/build/builds/$AutoValbuild/artifacts?artifactName=InstallationVerificationLogs&api-version=7.0&%24format=zip"
+		Start-Process "https://dev.azure.com/ms/ed6a5dfa-6e7f-413b-842c-8305dd9e89e6/_apis/build/builds/$BuildNumber/artifacts?artifactName=InstallationVerificationLogs&api-version=7.0&%24format=zip"
 		Start-Sleep 2;
 		if (!(Test-Path $ZipPath) -AND !$Force) {
 			Write-Host "No logs."
@@ -79,7 +304,7 @@ Function Get-AutoValLog {
 
 		$UserInput = $UserInput -replace "Standard error: ",""
 		if ($UserInput -ne "") {
-			Start-Process "https://github.com/microsoft/winget-pkgs/pull/$PR"
+			if ($clip -match "\[FAIL\] Installer failed security check.") {Get-GitHubPreset $PR DefenderFail}
 
 			$UserInput = ($UserInput -split "`n") -notmatch ' success or error status`: 0'
 			$UserInput = ($UserInput -split "`n") -notmatch 'api-ms-win-core-errorhandling'
@@ -106,10 +331,10 @@ Function Get-AutoValLog {
 	}
 }
 
-Function Get-AutoValBuild {
+Function Get-BuildFromPR {
 	param(
 		$PR,
-		$content = ((Invoke-WebRequest "https://dev.azure.com/ms/winget-pkgs/_apis/build/builds?branchName=refs/pull/$PR/merge&api-version=6.0").content | ConvertFrom-Json),
+		$content = ((Invoke-GitHubRequest "https://dev.azure.com/ms/winGet-pkgs/_apis/build/builds?branchName=refs/pull/$PR/merge&api-version=6.0").content | ConvertFrom-Json),
 		$href = ($content.value[0]._links.web.href),
 		$build = (($href -split "=")[1])
 	)
@@ -119,7 +344,7 @@ Function Get-AutoValBuild {
 Function Get-ADOLog {
 	param(
 		$PR,
-		$build = (Get-AutoValBuild $PR),
+		$build = (Get-BuildFromPR $PR),
 		$Log = (36),
 		$content = (Invoke-GitHubRequest https://dev.azure.com/ms/ed6a5dfa-6e7f-413b-842c-8305dd9e89e6/_apis/build/builds/$build/logs/$Log).content
 	)
@@ -127,65 +352,104 @@ Function Get-ADOLog {
 	return $content
 }
 
-Function Invoke-GitHubRequest {
+Function Get-CommitFile {
 	param(
-	[Parameter(mandatory=$true)][string]$Uri,
-	[string]$Body,
-	[ValidateSet("DELETE","GET","HEAD","PATCH","POST","PUT")][string]$Method = "GET",
-	$Headers = @{"Authorization"="Bearer $GitHubToken"; "Accept"="application/vnd.github+json"; "X-GitHub-Api-Version"="2022-11-28"},
-	[switch]$JSON
+		$PR
 	)
-	if ($Body) {
-		$out = (Invoke-WebRequest -Method $Method -Uri $Uri -Headers $Headers -Body $Body)
-	} else {
-		$out = (Invoke-WebRequest -Method $Method -Uri $Uri -Headers $Headers)
-	}
-	#GitHub requires the value be the .body property of the variable. This makes more sense with CURL, Where-Object this is the -data parameter. However with Invoke-WebRequest it's the -Body parameter, so we end up with the awkward situation of having a Body parameter that needs to be prepended with a body property.
-	if ($JSON) {
-		$out.content | ConvertFrom-Json
-	} else {
-		$out
-	}
+	$File = 0
+	$Commit = Invoke-GitHubPRRequest -PR $PR -Type commits -Output content -JSON
+	$CommitFile = Invoke-GitHubRequest -Uri $Commit.files[$File].contents_url
+	$EncodedFile = $CommitFile.Content  | ConvertFrom-Json
+	Get-DecodeGitHubFile $EncodedFile.content
+
 }
 
-Function Add-GitHubReview {
+#$fileInsert = "Dependencies:`n  PackageDependencies:`n  - PackageIdentifier: $Dependency"
+#$Suggestion = "``````suggestion`n$fileInsert`n``````"
+Function Add-GitHubReviewComment {
 	param(
 		$PR,
-		[string]$Body = ""
+		[string]$Comment = "",
+		$Commit = (Invoke-GitHubPRRequest -PR $PR -Type commits -Output content -JSON),
+		$commitID = $commit.sha,
+		$Filename = $commit.files.filename,
+		$Side = "RIGHT",
+		$StartLine,
+		$Line
 	)
-	$prData = Invoke-GitHubRequest https://api.github.com/repos/microsoft/winget-pkgs/pulls/$pr/commits -JSON
-	$prData = Invoke-GitHubRequest https://api.github.com/repos/microsoft/winget-pkgs/commits/$commit -JSON
-	$position = ($commitData.files -split "`n" | Select-String "Architecture:" ).LineNumber -1
-	$position
-	$path = "manifests/a/Adamant/Messenger/4.3.1/Adamant.Messenger.locale.en-US.yaml"
+	if ($Filename.GetType().BaseType.Name -eq "Array") {
+		$Filename = $Filename[0]
+	}
 
-	#$Response = @{}
-	#$Response.body = $Body
+	$Response = @{}
+	$Response.body = $Comment
+	$Response.commit_id = $commitID
+	$Response.path = $Filename
+	if ($StartLine) {
+		$Response.start_line = $StartLine
+	}
+	$Response.start_side = $Side
+	$Response.line = $Line
+	$Response.side = $Side
+	[string]$Body = $Response | ConvertTo-Json
 
-	#$Response = @{"commit_id"="$commit";"body"="$Body";"event"="REQUEST_CHANGES";"comments"=""}
-	#$Response.comments = @()
-	#$Response.comments[0] = @["path"="$path";"position"="$position";"body"="``````suggestion\nArchitecture= x64\n``````."]
-	#[string]$Body = $Response | ConvertTo-Json
-	[string]$Body = '{"commit_id":"'+$commit+'","body":"","event":"REQUEST_CHANGES","comments":[{"path":"'+$path+'","position":'+$position+',"body":"```suggestion\nArchitecture: x64\n```."}]}'
+	$uri = "https://api.github.com/repos/microsoft/winGet-pkgs/pulls/$pr/comments"
 
-	$body
-	$uri = "https://api.github.com/repos/microsoft/winget-pkgs/pulls/$pr/reviews"
-
-	#Write-Host $Response.body
-	$out = Invoke-GitHubRequest -Method Post -Uri $uri -Body $Body
-
+	$out = Invoke-GitHubRequest -Method Post -Uri $uri -Body $Body 
 	$out.StatusDescription
-	Start-Sleep $GitHubRateLimitDelay;
+}
+
+Function Get-UpdateHashInPR {
+	param(
+		$PR,
+		$SearchTerm = "Expected hash",
+		$SearchString = (Get-YamlValue $SearchTerm),
+		$LineNumbers = ((Get-CommitFile $PR | Select-String $SearchString).LineNumber),
+		$ReplaceTerm = "Actual hash",
+		$ReplaceString = ("  InstallerSha256: "+(Get-YamlValue $ReplaceTerm)),
+		$comment = "``````suggestion`n$ReplaceString`n``````"
+	)
+	foreach ($Line in $LineNumbers) {
+		Add-GitHubReviewComment -PR $PR -Comment $comment -LIne $Line
+	}
+	Add-PRToRecord $PR "Feedback"
+}
+
+Function Add-DependencyToPR {
+	param(
+		$PR,
+		$SearchString = "Installers:",
+		[array]$clip = (Get-Clipboard),
+		[string]$ReplaceString = ($clip -join "`n"),
+		$comment = "``````suggestion`n$ReplaceString`n``````"
+	)
+	Get-UpdateHashInPR -pr $PR -ReplaceString (Get-Clipboard)
+}
+
+Function Add-PRToRecord {
+	param(
+		$PR,
+		[ValidateSet("Approved","Blocking","Feedback","Retry","Manual","Closed","Project","Squash","Waiver")]
+		$Action
+	)
+	"$PR,$Action" | Out-File $LogFile -Append 
+}
+
+Function Get-PRFromRecord {
+	param(
+		$Action
+	)
+	("PR,Action`n" + (Get-Content $LogFile)) -split " " | ConvertFrom-Csv | Where-Object {$_.Action -match $Action}
 }
 
 Function Approve-PR {
 	param(
 		$PR,
-		[string]$Body = ""
+		[string]$Body = "",
+		$prData = (Invoke-GitHubRequest https://api.github.com/repos/microsoft/winGet-pkgs/pulls/$pr/commits -JSON),
+		$commit = (($prData.commit.url -split "/")[-1]),
+		$uri = "https://api.github.com/repos/microsoft/winGet-pkgs/pulls/$pr/reviews"
 	)
-
-	$prData = Invoke-GitHubRequest https://api.github.com/repos/microsoft/winget-pkgs/pulls/$pr/commits -JSON
-	$commit = ($prData.commit.url -split "/")[-1]
 
 	$Response = @{}
 	$Response.body = $Body
@@ -193,141 +457,132 @@ Function Approve-PR {
 	$Response.event = "APPROVE"
 	[string]$Body = $Response | ConvertTo-Json
 
-	#Write-Host $Response.body
-	$uri = "https://api.github.com/repos/microsoft/winget-pkgs/pulls/$pr/reviews"
-	$out = Invoke-GitHubRequest -Method Post -Uri $uri -Body $Body
-
+	$out = Invoke-GitHubRequest -Method Post -Uri $uri -Body $Body 
 	$out.StatusDescription
-	Start-Sleep $GitHubRateLimitDelay;
 }
 
-Function Get-PRLabelAction {
+Function Get-CannedResponse {
 	param(
-	$PR,
-	$Labels = ((Invoke-GitHubPRRequest -PR $PR -Type "labels" -Output content -JSON).name)
+		[ValidateSet("AppFail","Approve","AutomationBlock","AutoValEnd","AppsAndFeaturesNew","AppsAndFeaturesMissing","Drivers","DefenderFail","HashFailRegen","InstallerFail","InstallerNotSilent","PackageUrl","InstallerUrlBad","ListingDiff","ManValEnd","NoCause","NoExe","NoRecentActivity","NotGoodFit","Only64bit","PackageFail","Paths","PendingAttendedInstaller","RemoveAsk","Unattended","Unavailable","UrlBad","WhatIsIEDS","WordFilter")]
+		[string]$Response,
+		$UserInput=(Get-Clipboard),
+		[switch]$NoClip,
+		[switch]$NotAutomated
 	)
-	Write-Output "PR $PR has labels $Labels"
-	Foreach ($Label in $Labels) {
-		Switch ($Label) {
-			"Error-Hash-Mismatch" {
-				$PR | %{Reply-ToPR -PR $PR -UserInput ((Get-ADOLog $PR)[30..34]) -CannedResponse AutoValEnd}
-			}
-			"Validation-Unattended-Failure" {
-				Get-AutoValLog  $PR
-			}
-			"Binary-Validation-Error" {
-				$PR | %{Reply-ToPR -PR $PR -UserInput ((Get-ADOLog $PR)[30..34]) -CannedResponse AutoValEnd}
-			}
-			"Validation-Installation-Error" {
-				Get-AutoValLog  $PR
-			}
-			"Validation-Shell-Execute" {
-				Get-AutoValLog  $PR
-			}
-			"Validation-Executable-Error" {
-				Get-AutoValLog  $PR
-			}
-			"Validation-Hash-Verification-Failed" {
-				Get-AutoValLog  $PR
-			}
-			"Validation-Domain" {
-			}
-			"Validation-Merge-Conflict" {
-			}
-			"URL-Validation-Error" {
-			}
-			"Error-Installer-Availiability" {
-				$PR | %{Reply-ToPR -PR $PR -Body (Check-PRInstallerStatus $PR)}
-			}
+	[string]$Username = "@"+$UserInput.replace(" ","")+","
+	switch ($Response) {
+		"AppsAndFeaturesNew" {
+			$out = "Hi $Username`n`nThis manifest adds Apps and Features entries that aren't present in previous PR versions. Should these entries also be added to the previous versions?"
 		}
+		"AppsAndFeaturesMissing" {
+			$out = "Hi $Username`n`nThis manifest removes Apps and Features entries that are present in previous PR versions. Should these entries also be added to this version?"
+		}
+		"AppFail" {
+			$out = "Hi $Username`n`nThe application installed normally, but gave an error instead of launching:`n"
+		}
+		"Approve" {
+			$out = "Hi $Username`n`nDo you approve of these changes?"
+		}
+		"AutomationBlock" {
+			$out = "This might be due to a network block of data centers, to prevent automated downloads."
+		}
+		"UserAgentBlock" {
+			$out = "This might be due to user-agent throttling."
+		}
+		"AutoValEnd" {
+			$out = "Automatic Validation ended with:`n> $UserInput"
+		}
+		"Drivers" {
+			$out = "Hi $Username`n`nThe installation is unattended, but installs a driver which isn't unattended:`n`Unfortunately, installer switches are not usually provided for this situation. Are you aware of an installer switch to have the driver silently install as well?"
+		}
+		"DefenderFail" {
+			$out = "Hi $Username`n`nThe package didn't pass a Defender or similar security scan. This might be a false positive and we can rescan tomorrow."
+		}
+		"HashFailRegen" {
+			$out = "Closing to regenerate with correct hash."
+		}
+		"InstallerFail" {
+			$out = "Hi $Username`n`nThe installer did not complete:`n"
+		}
+		"InstallerNotSilent" {
+			$out = "Hi $Username`n`nThe installation isn't unattended. Is there an installer switch to have the package install silently?"
+		}
+		"PackageUrl" {
+			$out = "Hi $Username`n`nCould you add an PackageUrl?"
+		}
+		"ListingDiff" {
+			$out = "This PR omits these files that are present in the current manifest:`n> $UserInput"
+		}
+		"ManValEnd" {
+			$out = "Manual Validation ended with:`n> $UserInput"
+		}
+		"NoCause" {
+			$out = "I'm not able to find the cause for this error. It installs and runs normally on a Windows 10 VM."
+		}
+		"NoExe" {
+			$out = "Hi $Username`n`nThe installer doesn't appear to install any executables, only supporting files:`n`nIs this expected?"
+		}
+		"NoRecentActivity" {
+			$out = "No recent activity."
+		}
+		"NotGoodFit" {
+			$out = "Hi $Username`n`nUnfortunately, this package might not be a good fit for inclusion into the WinGet public manifests. Please consider using a local manifest (`WinGet install --manifest C:\path\to\manifest\files\`) for local installations. "
+		}
+		"Only64bit" {
+			$out = "Hi $Username`n`nValidation failed on the x86 package, and x86 packages are validated on 32-bit OSes. So this might be a 64-bit package."
+		}
+		"PackageFail" {
+			$out = "Hi $Username`n`nThe package installs normally, but fails to run:`n"
+		}
+		"Paths" {
+			$out = "Please update file name and path to match this change."
+		}
+		"PendingAttendedInstaller" {
+			$out = "Pending:`n* https://github.com/microsoft/winGet-cli/issues/910"
+		}
+		"Unattended" {
+			$out = "Hi $Username`n`nThe installation isn't unattended:`n`nIs there an installer switch to bypass this and have it install automatically?"
+		}
+		"RemoveAsk" {
+			$out = "Hi $Username`n`nThis package installer is still available. Why should it be removed?"
+		}
+		"Unavailable" {
+			$out = "Hi $Username`n`nThe installer isn't available from the publisher's website:"
+		}
+		"UrlBad" {
+			$out = "Hi $Username`n`nI'm not able to find this InstallerUrl from the PackageUrl. Is there another page on the developer's site that has a link to the package?"
+		}
+		"WhatIsIEDS" {
+			$out = "Hi $Username`n`nThe label `Internal-Error-Dynamic-Scan` is a blanket error for one of a number of internal pipeline errors or issues that occurred during the Dynamic Scan step of our validation process. It only indicates a pipeline issue and does not reflect on your package. Sorry for any confusion caused."
+		}
+		"WordFilter" {
+			$out = "This manifest contains a term that is blocked:`n`n> $UserInput"
+		}
+	}
+	if (!($NotAutomated)) {
+		$out += "`n`n(Automated response - build $build.)"
+	}
+	if ($NoClip) {
+		$out
+	} else {
+		$out |clip
 	}
 }
 
-Function Add-Waiver {
+Function Get-PRApproval {
 	param(
-	$PR,
-	$Labels = ((Invoke-GitHubPRRequest -PR $PR -Type "labels" -Output content -JSON).name)
+		$Clip = (Get-Clipboard),
+		[int]$PR = (($Clip -split "#")[1]),
+		$PackageIdentifier = ((($clip -split ": ")[1] -split " ")[0]),
+		$auth = (Get-Content  C:\repos\winGet-pkgs\Tools\Auth.csv | ConvertFrom-Csv),
+		$Approver = ((($auth | Where-Object {$_.PackageIdentifier -match $PackageIdentifier}).account -split "/" | Where-Object {$_ -notmatch "\("}) -join ", @"),
+		[switch]$DemoMode
 	)
-	Foreach ($Label in $Labels) {
-		$Waiver = ""
-		Switch ($Label) {
-			"Validation-Unattended-Failed" {
-				$Waiver = $Label
-			}
-			"Validation-Installation-Error" {
-				$Waiver = $Label
-			}
-			"Validation-Shell-Execute" {
-				$Waiver = $Label
-			}
-			"Validation-Executable-Error" {
-				$Waiver = $Label
-			}
-			"Validation-Domain" {
-				$Waiver = $Label
-			}
-			"Validation-Completed" {
-				Approve-PR $PR
-			}
-		}
-		if ($Waiver -ne "") {
-			Invoke-GitHubPRRequest $PR -Type comments -Output StatusDescription -Method POST -Data "@wingetbot waivers Add $Waiver"
-		}; # end if Waiver
-	}; # end Foreach Label
-}; # end Function
-
-#GET = Read; POST = Append; PUT = Write; DELETE = delete
-Function Invoke-GitHubPRRequest {
-	param(
-		$PR,
-		[ValidateSet("GET","DELETE","PATCH","POST","PUT")][string]$Method = "GET",
-		[ValidateSet("assignees","comments","files","labels","reviews","")][string]$Type = "labels",
-		[string]$Data,
-		[ValidateSet("issues","pulls")][string]$Path = "issues",
-		[ValidateSet("content","StatusDescription")][string]$Output = "StatusDescription",
-		[switch]$JSON,
-		[Switch]$Silent
-	)
-	$Response = @{}
-	$ResponseType = $Type
-
-	if (($Type -eq "") -OR ($Type -eq "files")){
-		$Path = "pulls"
-	} elseif ($Type -eq "comments") {
-		$Response.body += $Data
-	} elseif ($Type -eq "reviews") {
-		$Response.body = $Data
-		$prData = Invoke-GitHubRequest https://api.github.com/repos/microsoft/winget-pkgs/pulls/$pr/commits -JSON
-		$Response.commit = ($prData.commit.url -split "/")[-1]
-		$Response.event = "APPROVE"
-	} elseif ($Type -eq "") {
-		$Response.title = ""
-		$Response.body = ""
-		$Response.state = $Data
-		$Response.base = "master"
+	if ($DemoMode) {
+		Write-Host "DemoMode: Reply-ToPR $pr requesting approval from @$Approver."
 	} else {
- 		$Response.$ResponseType = @()
-		$Response.$ResponseType += $Data
+		Reply-ToPR $pr (Get-CannedResponse approve $Approver -NoClip)
 	}
-
-	$uri = "https://api.github.com/repos/microsoft/winget-pkgs/$Path/$pr/$Type"
-	$uri = $uri -replace "/$",""
-
-	if ($Method -eq "GET") {
-		$out = Invoke-GitHubRequest -Method $Method -Uri $uri
-	} else {
-		[string]$Body = $Response | ConvertTo-Json
-		$out = Invoke-GitHubRequest -Method $Method -Uri $uri -Body $Body
-	}
-
-	if (!($Silent)) {
-		if (($JSON) -OR ($Output -eq "content")) {
-			$out.$Output | ConvertFrom-Json
-		} else {
-			$out.$Output 
-		}
-	}
-	Start-Sleep $GitHubRateLimitDelay;
 }
 
 Function Add-PRLabel {
@@ -339,6 +594,13 @@ Function Add-PRLabel {
 	Invoke-GitHubPRRequest -PR $PR -Method $Method -Type "labels" -Data $Label
 }
 
+Function Get-PRTitle {
+	param(
+		$PR
+	)
+	(invoke-GitHubPRRequest -PR $PR -Type "" -Output content -JSON).title
+}
+
 Function Update-PR {
 	param(
 		$PR,
@@ -347,7 +609,7 @@ Function Update-PR {
 		[ValidateSet("open","closed")][string]$State = "open"
 	)
 
-	$prData = Invoke-GitHubRequest https://api.github.com/repos/microsoft/winget-pkgs/pulls/$pr/commits -JSON
+	$prData = Invoke-GitHubRequest https://api.github.com/repos/microsoft/winGet-pkgs/pulls/$pr/commits -JSON
 	$commit = ($prData.commit.url -split "/")[-1]
 
 	#{"title":"new title","body":"updated body","state":"open","base":"master"}'
@@ -359,18 +621,16 @@ Function Update-PR {
 	[string]$Body = $Response | ConvertTo-Json
 	Write-Host $Body
 	Write-Host $Response.body
-	$uri = "https://api.github.com/repos/microsoft/winget-pkgs/pulls/$pr/update-branch"
+	$uri = "https://api.github.com/repos/microsoft/winGet-pkgs/pulls/$pr/update-branch"
 
-	$out = Invoke-GitHubRequest -Uri $uri -Method Post -Body $Body
-	$out.StatusDescription
-	Start-Sleep $GitHubRateLimitDelay;
+	Invoke-GitHubRequest -Uri $uri -Method Post -Body $Body -Output StatusDescription 
 }
 
 Function Reply-ToPR {
 	param(
 		$PR,
-		[string]$UserInput = ((Invoke-GitHubPRRequest $PR -Type "" -Method get -Output content -JSON).user.login),
 		[string]$CannedResponse,
+		[string]$UserInput = ((Invoke-GitHubPRRequest $PR -Type "" -Method get -Output content -JSON).user.login),
 		[string]$Body = (Get-CannedResponse $CannedResponse -UserInput $UserInput -NoClip),
 		[Switch]$Silent
 	)
@@ -385,109 +645,23 @@ Function Reply-ToPR {
 Function Add-UserToPR {
 	param(
 		$PR,
-		[array]$Body,
-		[string]$Method
+		[array]$User = $GitHubUserName,
+		[string]$Method,
+		[switch]$Silent
 	)
-	$out = Invoke-GitHubPRRequest -Method $Method -Type "assignees" -Data $Body
-	if (!($Silent)) {
-		$out.StatusDescription -join ""
+	if ($Silent) {
+		Invoke-GitHubPRRequest -Method $Method -Type "assignees" -Data $User -Output StatusDescription -Silent
+	} else {
+		Invoke-GitHubPRRequest -Method $Method -Type "assignees" -Data $User -Output StatusDescription
 	}
 }
 
-Function Get-GitHubPreset {
-	param(
-		[int]$PR,
-		[string]$UserName = (invoke-gitHubPRRequest $PR -Type "" -Output content -JSON).user.login,
-		[ValidateSet("DefenderFail")][string]$Preset,
-		$CannedResponse = $Preset,
-		$Data
-	)
-	Switch ($Preset) {
-		"DefenderFail" {
-			$Data = "Needs-Attention"
-		}
-	}
-
-	Reply-ToPR -PR $PR -CannedResponse $CannedResponse -UserInput $UserName
-	Invoke-GitHubPRRequest -PR $PR -Method POST -Type labels -Data $Data
-}
-
-#PR Watcher GitHub tools.
-Function Check-PRInstallerStatusInnerWrapper {
-	param(
-		$PR,
-		$Pull = (Invoke-GitHubPRRequest $PR -Type files -Output content -JSON),
-		$PullContents = ((Invoke-GitHubRequest -Uri $Pull.contents_url[0] -JSON).content),
-		$PullInstallerContents = (([System.Text.Encoding]::UTF8.GetString( [convert]::FromBase64String($PullContents)) -split "`n")),
-		$Url = (Get-YamlValue -StringName InstallerUrl -clip $PullInstallerContents),
-		$Code = (Invoke-WebRequest $Url -Method Head -ErrorAction SilentlyContinue).StatusCode
-	)
-	return $Code
-}
-
-Function Check-PRInstallerStatus {
+Function Get-RerunPR {
 	param(
 		$PR
 	)
-	$out = ""
-try {$out = "Status Code: "+(Check-PRInstallerStatusInnerWrapper $PR)}catch{$out = $error[0].Exception.Message}
-	$out = $out + "`n`n(Automated message - build $build)"
-return $out
-}
-
-Function Get-ManifestListing {
-	param(
-		$PackageIdentifier,
-		$Version = (Find-WinGetPackage $PackageIdentifier | Where-Object {$_.id -eq $PackageIdentifier}).version,
-		$Path = ($PackageIdentifier -replace "[.]","/"),
-		$FirstLetter = ($PackageIdentifier[0].tostring().tolower())
-	)
-	try{
-		$Names = (Invoke-GitHubRequest -Uri "https://api.github.com/repos/microsoft/winget-pkgs/contents/manifests/$FirstLetter/$Path/$Version/" -JSON).name
-	}catch{
-		$Names = "Error"
-	}
-	return $Names -replace "$($PackageIdentifier)[.]",""
-}
-
-Function Get-ListingDiff {
-	param(
-		$Clip = (Get-Clipboard),
-		$PackageIdentifier = (Get-YamlValue PackageIdentifier $Clip -replace '"',""),
-		$CurrentManifest = (Get-ManifestListing $PackageIdentifier),
-		$PRManifest = ($clip -split "`n" | Where-Object {$_ -match ".yaml"} | Where-Object {$_ -match $PackageIdentifier} |%{($_ -split "/")[-1] -replace "$($PackageIdentifier)[.]",""})
-	)
-	if ($CurrentManifest -ne "Error") {
-		diff $currentManifest $PRManifest
-	} else {
-		$CurrentManifest
-	}
-}
-
-Function Get-WinGetFile {
-	param(
-		$PackageIdentifier,
-		$Version,
-		$Type = "installer",
-		$Path = ($PackageIdentifier -replace "[.]","/"),
-		$FirstLetter = ($PackageIdentifier[0].tostring().tolower())
-	)
-	try{
-		$content = (Invoke-WebRequest "https://raw.githubusercontent.com/microsoft/winget-pkgs/master/manifests/$FirstLetter/$Path/$Version/$PackageIdentifier.$Type.yaml").content
-	}catch{
-		$content = "Error"
-	}
-	return $content
-}
-
-Function Check-FileExist {
-	param(
-		$PackageIdentifier,
-		$Version,
-		$Type
-	)
-	$content = Get-WinGetFile $PackageIdentifier $Version $Type
-	if ($content -ne "Error") {$true} else {$false}
+	Invoke-GitHubPRRequest $PR -Type comments -Output StatusDescription -Method POST -Data "/AzurePipelines run"
+	add-prToRecord $PR "Retry"
 }
 
 #Package validation
@@ -680,7 +854,7 @@ Out-Log `" = = = = End file list. Starting Defender scan.`"
 Start-MpScan;
 
 Out-Log `"Defender scan complete, closing windows...`"
-(get-process | Where-Object { `$_.mainwindowtitle -ne '' -and `$_.processname -notmatch '$packageName' -and `$_.processname -ne 'powershell'  -and `$_.processname -ne 'WindowsTerminal' -and `$_.processname -ne 'csrss' -and `$_.processname -ne 'dwm'})| ForEach-Object {
+(Get-process | Where-Object { `$_.mainwindowtitle -ne '' -and `$_.processname -notmatch '$packageName' -and `$_.processname -ne 'powershell'  -and `$_.processname -ne 'WindowsTerminal' -and `$_.processname -ne 'csrss' -and `$_.processname -ne 'dwm'})| ForEach-Object {
 	`$process = (Stop-Process `$_ -PassThru);
 	Out-Log `"`$(`$process.processname) finished with exit code: `$(`$process.ExitCode)`";
 }
@@ -811,9 +985,39 @@ Function Get-TrackerVMValidateByScope {
 	Get-TrackerVMValidate -Scope User
 }
 
+#Manifests Etc
+Function Get-SingleFileAutomation {
+	param(
+		$PackageIdentifier = (Get-YamlValue PackageIdentifier),
+		$version = ((Get-YamlValue PackageVersion) -replace "'","" -replace '"',""), 
+		$listing = (Get-ManifestListing $PackageIdentifier),
+		$vm = (Get-ManifestFile)[-1]
+	)
+	
+	for ($file = 0; $file -lt $listing.length;$file++) {
+		Get-ManifestFile $vm -clip (Get-WinGetFile -PackageIdentifier $PackageIdentifier -Version $version -FileName $listing[$file])
+	}
+}
+
+Function Get-WinGetFile {
+	param(
+		$PackageIdentifier,
+		$Version,
+		$FileName = "installer.yaml",
+		$Path = ($PackageIdentifier -replace "[.]","/"),
+		$FirstLetter = ($PackageIdentifier[0].tostring().tolower())
+	)
+	try{
+		$content = (Invoke-GitHubRequest -Uri "https://raw.githubusercontent.com/microsoft/winGet-pkgs/master/manifests/$FirstLetter/$Path/$Version/$PackageIdentifier.$FileName").content
+	}catch{
+		$content = "Error"
+	}
+	return ($content -split "`n")
+}
+
 Function Get-ManifestAutomation {
 	param(
-		$vm =(Get-NextFreeVM),
+		$vm = (Get-NextFreeVM),
 		$Arch,
 		$OS,
 		$Scope
@@ -837,6 +1041,137 @@ Function Get-ManifestAutomation {
 		Get-ManifestFile $vm -Scope $Scope
 	} else {
 		Get-ManifestFile $vm
+	}
+}
+
+Function Get-ManifestFile {
+	param(
+		[int]$vm = ((Get-NextFreeVM) -replace "vm",""),
+		$clip = (Get-SecondMatch),
+		$FileName = "Package",
+		$Arch,
+		$OS,
+		$Scope
+	);
+	$manifestFolder = "$MainFolder\vm\$vm\manifest"
+	$clip = $clip | Where-Object {$_ -notmatch "marked this conversation as resolved."}
+
+	$YamlValue = (Get-YamlValue ManifestType $clip)
+	switch ($YamlValue) {
+		"defaultLocale" {
+			$Locale = (Get-YamlValue PackageLocale $clip)
+			$FileName = "$FileName.locale.$Locale"
+		}
+		"Locale" {
+			$Locale = (Get-YamlValue PackageLocale $clip)
+			$FileName = "$FileName.locale.$Locale"
+		}
+		"installer" {
+			Get-RemoveFileIfExist "$manifestFolder"  -remake
+			$FileName = "$FileName.installer"
+		}
+		"version" {
+			if ($Arch) {
+				Get-TrackerVMValidate -vm $vm -NoFiles -Arch $Arch -PR 0
+			} elseif ($OS) {
+				Get-TrackerVMValidate -vm $vm -NoFiles -OS $OS  -PR 0
+			} elseif ($Scope) {
+				Get-TrackerVMValidate -vm $vm -NoFiles -Scope $Scope  -PR 0
+			} else {
+				Get-TrackerVMValidate -vm $vm -NoFiles  -PR 0
+			}
+		}
+		Default {
+			Write-Host "Error: Bad ManifestType"
+			Write-Host $clip
+		}
+	}
+	$FilePath = "$manifestFolder\$FileName.yaml"
+	Write-Host "Writing $($clip.length) lines to $FilePath"
+	$clip -replace "0New version: ","0" -replace "0Add version: ","0" -replace "0Add ","0" -replace "0New ","0" | Out-File $FilePath -Encoding unicode
+	return $vm
+}
+
+Function Check-BulkPRInstallerStatus {
+	param(
+		$clip = (Get-Clipboard)
+	)
+	#If a line starts with Remove, run Check-PRInstallerStatus on the first item of the next line.
+	for ($line = 0;$line -lt $clip.length;$line++){
+		if (($clip[$line] -split " ")[0] -ceq "Remove") {
+			(($clip[$line +1] -split " ")[0] -replace "#","")  | %{
+				Reply-ToPR $_ -Body (Check-PRInstallerStatus $_)
+			}; #end ForEach-Object Reply-ToPR
+		}; #end if clip
+	}; #end for line
+}
+
+Function Check-PRInstallerStatusInnerWrapper {
+	param(
+		$PR,
+		$Pull = (Invoke-GitHubPRRequest $PR -Type files -Output content -JSON),
+		$PullContents = ((Invoke-GitHubRequest -Uri $Pull.contents_url[0] -JSON).content),
+		$PullInstallerContents = (Get-DecodeGitHubFile $PullContents),
+		$Url = (Get-YamlValue -StringName InstallerUrl -clip $PullInstallerContents),
+		$Code = (Invoke-GitHubRequest $Url -Method Head -ErrorAction SilentlyContinue).StatusCode
+	)
+	return $Code
+}
+
+Function Check-PRInstallerStatus {
+	param(
+		$PR
+	)
+	$out = ""
+try {$out = "URL: `nStatus Code: "+(Check-PRInstallerStatusInnerWrapper $PR)}catch{$out = $error[0].Exception.Message}
+	$out = $out + "`n`n(Automated message - build $build)"
+return $out
+}
+
+Function Get-ManifestListing {
+	param(
+		$PackageIdentifier,
+		$Version = (Find-WinGetPackage $PackageIdentifier | Where-Object {$_.id -eq $PackageIdentifier}).version,
+		$Path = ($PackageIdentifier -replace "[.]","/"),
+		$FirstLetter = ($PackageIdentifier[0].tostring().tolower())
+	)
+	try{
+		$Names = (Invoke-GitHubRequest -Uri "https://api.github.com/repos/microsoft/winGet-pkgs/contents/manifests/$FirstLetter/$Path/$Version/" -JSON).name
+	}catch{
+		$Names = "Error"
+	}
+	return $Names -replace "$($PackageIdentifier)[.]",""
+}
+
+Function Get-ListingDiff {
+	param(
+		$Clip = (Get-Clipboard),
+		$PackageIdentifier = (Get-YamlValue PackageIdentifier $Clip -replace '"',""),
+		$CurrentManifest = (Get-ManifestListing $PackageIdentifier),
+		$PRManifest = ($clip -split "`n" | Where-Object {$_ -match ".yaml"} | Where-Object {$_ -match $PackageIdentifier} |%{($_ -split "/")[-1] -replace "$($PackageIdentifier)[.]",""})
+	)
+	if ($CurrentManifest -ne "Error") {
+		diff $currentManifest $PRManifest
+	} else {
+		$CurrentManifest
+	}
+}
+
+Function Check-FileExist {
+	param(
+		$PackageIdentifier,
+		$Version,
+		$Type
+	)
+	$content = Get-WinGetFile $PackageIdentifier $Version $Type
+	if ($content -ne "Error") {$true} else {$false}
+}
+
+Function Get-OSFromVersion {
+	try{
+		if ([system.version](Get-YamlValue -StringName MinimumOSVersion) -ge [system.version]"10.0.22000.0"){"Win11"}else{"Win10"}
+	} catch {
+		"Win10"
 	}
 }
 
@@ -889,7 +1224,7 @@ Function Get-PipelineVmGenerate {
 	Remove-VMCheckpoint -VMName $newVmName -Name "Backup"
 	Get-TrackerVMRevert $vm
 	Get-TrackerVMLaunchWindow $vm
-	Write-Host "Took $(((get-date)-$startTime).TotalSeconds) seconds..."
+	Write-Host "Took $(((Get-Date)-$startTime).TotalSeconds) seconds..."
 }
 
 Function Get-PipelineVmDisgenerate {
@@ -952,7 +1287,7 @@ Function Get-ImageVMStop {
 	Redo-Checkpoint $vm $OS;
 	Stop-TrackerVM $vm $OS;
 	Write-Host "Letting VM cool..."
-	Start-Sleep $GitHubRateLimitDelay;
+	Start-Sleep 30;
 	Robocopy.exe $OriginalLoc $ImageLoc -mir
 }
 
@@ -977,7 +1312,7 @@ Function Get-ArraySum {
 		$out = 0
 	)
 	$in |ForEach-Object{$out += $_*1}
-	$out
+	[math]::Round($out,2)
 }
 
 #VM Orchestration
@@ -1020,7 +1355,7 @@ Function Get-TrackerVMRunTracker {
 			Get-PRNumber
 		} elseIf ($clip -match  "^manifests`/") {
 			Write-Host "Opening manifest file"
-			$ManifestUrl = "https://github.com/microsoft/winget-pkgs/tree/master/"+$clip
+			$ManifestUrl = "https://github.com/microsoft/winGet-pkgs/tree/master/"+$clip
 			$ManifestUrl | clip
 			start-process ($ManifestUrl)
 		}
@@ -1062,8 +1397,10 @@ Function Get-TrackerVMCycle {
 				Get-PipelineVmGenerate -OS $VM.os
 			}
 			"SendStatus" {
-				Reply-ToPR -PR $VM.PR -UserInput (Get-SharedError -NoClip) -CannedResponse ManValEnd 
+				$SharedError = (Get-SharedError -NoClip)
+				Reply-ToPR -PR $VM.PR -UserInput $SharedError -CannedResponse ManValEnd 
 				Get-TrackerVMSetStatus "Complete" $VM.vm
+				if ($SharedError -match "\[FAIL\] Installer failed security check.") {Get-GitHubPreset $PR DefenderFail}
 			}
 			default {
 				#Write-Host "Complete"
@@ -1131,9 +1468,11 @@ Function Get-Status {
 }
 
 Function Get-TrackerVMResetStatus {
+	$VMs = (Get-Status | Where-Object {$_.Status -ne "Ready"} | Where-Object {$_.RAM -eq 0}).VM
+	Foreach ($VM in $VMs) {
+		Get-TrackerVMSetStatus Complete $VM
+	}
 	if (!(Get-ConnectedVM)){
-		$VMs = (Get-Status | Where-Object {$_.status -ne "Ready"}).vm
-		Foreach ($VM in $VMs) {Get-TrackerVMSetStatus Complete $VM}
 		Get-Process *vmwp* | Stop-Process
 	}
 }
@@ -1167,7 +1506,7 @@ Function Get-TrackerVMSetMode {
 
 Function Get-TrackerVMMemCheck {
 	Param(
-		$VMs = (get-vm)
+		$VMs = (Get-VM)
 	)
 	$VMs | ForEach-Object {
 		if(($_.MemoryDemand / $_.MemoryMaximum) -ge 0.9){
@@ -1254,14 +1593,6 @@ Function Get-TrackerVMRevert {
 	Restore-VMCheckpoint -Name $CheckpointName -VMName $VMName -Confirm:$false
 }
 
-Function Get-OSFromVersion {
-	try{
-		if ([system.version](Get-YamlValue -StringName MinimumOSVersion) -ge [system.version]"10.0.22000.0"){"Win11"}else{"Win10"}
-	} catch {
-		"Win10"
-	}
-}
-
 Function Get-TrackerVMVersion {[int](Get-Content $VMversion)}
 
 Function Get-TrackerVMSetVersion {param([int]$Version) $Version|out-file $VMversion}
@@ -1293,68 +1624,11 @@ Function Stop-TrackerVM {
 	Stop-VM $VMName -TurnOff
 }
 
-#File Management
-Function Get-ManifestFile {
-	param(
-		[int]$vm = ((Get-NextFreeVM) -replace "vm",""),
-		$clip = (Get-SecondMatch),
-		$FileName = "Package",
-		$Arch,
-		$OS,
-		$Scope
-	);
-	$manifestFolder = "$MainFolder\vm\$vm\manifest"
-	$clip = $clip | Where-Object {$_ -notmatch "marked this conversation as resolved."}
-
-
-<#
-	if (!(test-path "$manifestFolder")){md "$manifestFolder"}
-
-		$clip = $clip -join "`n" -split "@@"
-		$inputObj = $inputObj[1..(($inputObj| Select-String "ManifestVersion" -SimpleMatch).LineNumber -1)] | Where-Object {$_ -notmatch "marked this conversation as resolved."}
-
-		$FilePath = "$manifestFolder\$File"
-		Write-Host "Writing $($inputObj.length) lines to $FilePath"
-		Out-File -FilePath $FilePath -InputObject $inputObj
-		#Bugfix to catch package identifier appended to last line of last file.
-		$fileContents = (Get-Content $FilePath)
-#>
-
-	$YamlValue = (Get-YamlValue ManifestType $clip)
-	switch ($YamlValue) {
-		"defaultLocale" {
-			$Locale = (Get-YamlValue PackageLocale $clip)
-			$FileName = "$FileName.locale.$Locale"
-		}
-		"Locale" {
-			$Locale = (Get-YamlValue PackageLocale $clip)
-			$FileName = "$FileName.locale.$Locale"
-		}
-		"installer" {
-			Get-RemoveFileIfExist "$manifestFolder"  -remake
-			$FileName = "$FileName.installer"
-		}
-		"version" {
-			if ($Arch) {
-				Get-TrackerVMValidate -vm $vm -NoFiles -Arch $Arch -PR 0
-			} elseif ($OS) {
-				Get-TrackerVMValidate -vm $vm -NoFiles -OS $OS  -PR 0
-			} elseif ($Scope) {
-				Get-TrackerVMValidate -vm $vm -NoFiles -Scope $Scope  -PR 0
-			} else {
-				Get-TrackerVMValidate -vm $vm -NoFiles  -PR 0
-			}
-		}
-		Default {
-			Write-Host "Error: Bad ManifestType"
-			Write-Host $clip
-		}
-	}
-	$FilePath = "$manifestFolder\$FileName.yaml"
-	Write-Host "Writing $($clip.length) lines to $FilePath"
-	$clip -replace "0New version: ","0" -replace "0Add version: ","0" -replace "0Add ","0" -replace "0New ","0" | Out-File $FilePath
+Function Get-TrackerVMReset {
+	Get-Status | Where-Object {$_.Status -ne "Ready"} | Where-Object {$_.Package -eq ""} | %{Get-TrackerVMSetStatus Complete $_.VM}
 }
 
+#File Management
 Function Get-SecondMatch {
 	param(
 		$clip = (Get-Clipboard),
@@ -1423,7 +1697,7 @@ Function Get-ManifestFileCheck {
 }
 
 Function Get-TrackerVMRotateLog {
-	$logYesterDate = (get-date -f dd) - 1
+	$logYesterDate = (Get-Date -f dd) - 1
 	Move-Item "$writeFolder\logs\$logYesterDate" "$logsFolder\$logYesterDate"
 }
 
@@ -1431,7 +1705,8 @@ Function Get-TrackerVMRotateLog {
 Function Add-ValidationData {
 	param(
 		[Parameter(mandatory=$true)][int]$vm,
-		$Data = 'Microsoft.VCRedist.2015+.x64',
+		[ValidateSet("Microsoft.VCRedist.2015+.x64","Microsoft.DotNet.DesktopRuntime.8","Oracle.JavaRuntimeEnvironment")]$Common = "Microsoft.VCRedist.2015+.x64",
+		$Dependency = $Common,
 		$VMFolder = "$MainFolder\vm\$vm",
 		$manifestFolder = "$VMFolder\manifest",
 		$FilePath = "$manifestFolder\Package.installer.yaml",
@@ -1439,7 +1714,7 @@ Function Add-ValidationData {
 		$Selector = "Installers:",
 		$offset = 1,
 		$lineNo = (($fileContents| Select-String $Selector -List).LineNumber -$offset),
-		$fileInsert = "Dependencies:`n  PackageDependencies:`n    - PackageIdentifier: $Data",
+		$fileInsert = "Dependencies:`n  PackageDependencies:`n  - PackageIdentifier: $Dependency",
 		$fileOutput = ($fileContents[0..($lineNo -1)]+$fileInsert+$fileContents[$lineNo..($fileContents.length)])
 	)
 		Write-Host "Writing $($fileContents.length) lines to $FilePath"
@@ -1474,128 +1749,12 @@ Function Add-InstallerSwitch {
 	Add-ValidationData $vm -Data $Data -Selector $Selector -fileInsert $fileInsert #-Force
 }
 
-#@wingetbot waivers
-Function Get-CannedResponse {
-	param(
-		[ValidateSet("AppFail","Approve","AutomationBlock","AutoValEnd","AppsAndFeaturesNew","AppsAndFeaturesMissing","Drivers","DefenderFail","HashFailRegen","InstallerFail","InstallerNotSilent","InstallerUrlBad","ListingDiff","ManValEnd","NoCause","NoExe","NoRecentActivity","NotGoodFit","Only64bit","PackageFail","Paths","PendingAttendedInstaller","RemoveAsk","Unattended","Unavailable","UrlBad","WordFilter")]
-		[string]$Response,
-		$UserInput=(Get-Clipboard),
-		[switch]$NoClip
-	)
-	[string]$Username = "@"+$UserInput.replace(" ","")+","
-	switch ($Response) {
-		"AppsAndFeaturesNew" {
-			$out = "Hi $Username`n`nThis manifest adds Apps and Features entries that aren't present in previous PR versions. Should these entries also be added to the previous versions?"
-		}
-		"AppsAndFeaturesMissing" {
-			$out = "Hi $Username`n`nThis manifest removes Apps and Features entries that are present in previous PR versions. Should these entries also be added to this version?"
-		}
-		"AppFail" {
-			$out = "Hi $Username`n`nThe application installed normally, but gave an error instead of launching:`n"
-		}
-		"Approve" {
-			$out = "Hi $Username`n`nDo you approve of these changes?"
-		}
-		"AutomationBlock" {
-			$out = "This might be due to a network block of data centers, to prevent automated downloads."
-		}
-		"UserAgentBlock" {
-			$out = "This might be due to user-agent throttling."
-		}
-		"AutoValEnd" {
-			$out = "Automatic Validation ended with:`n> $UserInput"
-		}
-		"Drivers" {
-			$out = "Hi $Username`n`nThe installation is unattended, but installs a driver which isn't unattended:`n`Unfortunately, installer switches are not usually provided for this situation. Are you aware of an installer switch to have the driver silently install as well?"
-		}
-		"DefenderFail" {
-			$out = "Hi $Username`n`nThe package didn't pass a Defender or similar security scan. This might be a false positive and we can rescan tomorrow."
-		}
-		"WordFilter" {
-			$out = "This manifest contains a term that is blocked:`n`n> $UserInput"
-		}
-		"HashFailRegen" {
-			$out = "Closing to regenerate with correct hash."
-		}
-		"InstallerFail" {
-			$out = "Hi $Username`n`nThe installer did not complete:`n"
-		}
-		"InstallerNotSilent" {
-			$out = "Hi $Username`n`nThe installation isn't unattended. Is there an installer switch to have the package install silently?"
-		}
-		"ListingDiff" {
-			$out = "This PR omits these files that are present in the current manifest:`n> $UserInput"
-		}
-		"ManValEnd" {
-			$out = "Manual Validation ended with:`n> $UserInput"
-		}
-		"NoCause" {
-			$out = "I'm not able to find the cause for this error. It installs and runs normally on a Windows 10 VM."
-		}
-		"NoExe" {
-			$out = "Hi $Username`n`nThe installer doesn't appear to install any executables, only supporting files:`n`nIs this expected?"
-		}
-		"NoRecentActivity" {
-			$out = "No recent activity."
-		}
-		"NotGoodFit" {
-			$out = "Hi $Username`n`nUnfortunately, this package might not be a good fit for inclusion into the WinGet public manifests. Please consider using a local manifest (`WinGet install --manifest C:\path\to\manifest\files\`) for local installations. "
-		}
-		"Only64bit" {
-			$out = "Hi $Username`n`nValidation failed on the x86 package, and x86 packages are validated on 32-bit OSes. So this might be a 64-bit package."
-		}
-		"PackageFail" {
-			$out = "Hi $Username`n`nThe package installs normally, but fails to run:`n"
-		}
-		"Paths" {
-			$out = "Please update file name and path to match this change."
-		}
-		"PendingAttendedInstaller" {
-			$out = "Pending:`n* https://github.com/microsoft/winget-cli/issues/910"
-		}
-		"Unattended" {
-			$out = "Hi $Username`n`nThe installation isn't unattended:`n`nIs there an installer switch to bypass this and have it install automatically?"
-		}
-		"RemoveAsk" {
-			$out = "Hi $Username`n`nThis package installer is still available. Why should it be removed?"
-		}
-		"Unavailable" {
-			$out = "Hi $Username`n`nThe installer isn't available from the publisher's website:"
-		}
-		"UrlBad" {
-			$out = "Hi $Username`n`nI'm not able to find this InstallerUrl from the PackageUrl. Is there another page on the developer's site that has a link to the package?"
-		}
-	}
-	$out += "`n`n(Automated response - build $build.)"
-	if ($NoClip) {
-		$out
-	} else {
-		$out |clip
-	}
-}
-
-Function Get-PRApproval {
-	param(
-		$Clip = (Get-Clipboard),
-		[int]$PR = (($Clip -split "#")[1]),
-		$PackageIdentifier = ((($clip -split ": ")[1] -split " ")[0]),
-		$auth = (Get-Content  C:\repos\winget-pkgs\Tools\Auth.csv | ConvertFrom-Csv),
-		$Approver = ((($auth | Where-Object {$_.PackageIdentifier -match $PackageIdentifier}).account -split "/" | Where-Object {$_ -notmatch "\("}) -join ", @"),
-		[switch]$DemoMode
-	)
-	if ($DemoMode) {
-		Write-Host "DemoMode: Reply-ToPR $pr requesting approval from @$Approver."
-	} else {
-		Reply-ToPR $pr (Get-CannedResponse approve $Approver -NoClip)
-	}
-}
-
 #Timeclock
 Function Get-TimeclockSet {
 	Param(
 		[ValidateSet("Start","Stop")][string]$mode = "Start",
-		$time = (get-date -Format s),
-		$timeStamp = (get-date $time -Format s)
+		$time = (Get-Date -Format s),
+		$timeStamp = (Get-Date $time -Format s)
 	)
 	if (Get-TimeRunning) { $mode = "Stop"}
 	$timeStamp + " "+ $mode >> $timecardfile
@@ -1604,21 +1763,21 @@ Function Get-TimeclockSet {
 Function Get-Timeclock {
 	Param(
 	)
-	Get-Content $timecardfile | Select-Object @{n="Date";e={get-date ($_ -split " ")[0]}},@{n="State";e={($_ -split " ")[1]}}
+	Get-Content $timecardfile | Select-Object @{n="Date";e={Get-Date ($_ -split " ")[0]}},@{n="State";e={($_ -split " ")[1]}}
 	#
 }
 
 Function Get-HoursWorkedToday {
 	Param(
-		$Today = (get-date).Day
+		$Today = (Get-Date).Day
 	)
-	[array]$time = (Get-Timeclock).date | Where-Object {(get-date $_.date).day -eq $Today} | ForEach-Object {($_ -split " ")[1]}
+	[array]$time = (Get-Timeclock).date | Where-Object {(Get-Date $_.date).day -eq $Today} | ForEach-Object {($_ -split " ")[1]}
 	if (($time.count % 2) -eq 1) {
-		$time += (get-date -f T)
+		$time += (Get-Date -f T)
 	}
 	$aggregator = 0;
 	for ($incrementor=0;$incrementor -lt $time.count; $incrementor=$incrementor+2){
-		$aggregator += ( get-date $time[$incrementor+1]) - (get-date $time[$incrementor])
+		$aggregator += ( Get-Date $time[$incrementor+1]) - (Get-Date $time[$incrementor])
 		#Write-Host $aggregator
 	};
 	[math]::Round($aggregator.totalHours,2)
@@ -1680,13 +1839,17 @@ Function Open-PR {
 	param(
 		[switch]$Review,
 		$clip = (Get-Clipboard),
-		$justPRs = (Get-JustPRNumber $clip)
+		$justPRs = (Get-JustPRNumber $clip),
+		[switch]$NoCheck
 	)
+	If (!($NoCheck) -AND !($Review)) {
+		Check-BulkPRInstallerStatus
+	}
 
 	foreach ($PR in $justPRs){
-		$URL = "https://github.com/microsoft/winget-pkgs/pull/$PR#issue-comment-box"
+		$URL = "https://github.com/microsoft/winGet-pkgs/pull/$PR#issue-comment-box"
 		if ($Review) {
-			$URL = "https://github.com/microsoft/winget-pkgs/pull/$PR/files"
+			$URL = "https://github.com/microsoft/winGet-pkgs/pull/$PR/files"
 		}
 
 		Start-Process $URL
@@ -1714,7 +1877,11 @@ Function Get-YamlValue {
 		[string]$StringName,
 		$clip = (Get-Clipboard)
 	)
-	((($clip | select-string $StringName) -split ": ")[1] -split "#")[0]
+	$clip = ($clip | select-string $StringName)
+	$clip = ($clip -split ": ")[1]
+	$clip = ($clip -split "#")[0]
+	$clip = ((($clip.ToCharArray()) | where {$_ -match "\S"}) -join "")
+	Return $clip
 }
 
 Function Test-Admin {
@@ -1744,6 +1911,15 @@ Function Find-InstallerSet {
 		$out["ProductCode"]
 		$out.Remove("")
 	}
+}
+
+Function Get-DecodeGitHubFile {
+	param(
+		[string]$Base64String,
+		$Bits = ([Convert]::FromBase64String($Base64String)),
+		$String = ([System.Text.Encoding]::UTF8.GetString($Bits))
+	)
+	return $String  -split "`n"
 }
 
 #Etc
