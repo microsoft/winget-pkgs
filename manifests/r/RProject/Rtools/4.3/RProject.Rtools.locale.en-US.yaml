@@ -1,0 +1,133 @@
+# Created with YamlCreate.ps1 v2.2.13 $debug=QUSU.CRLF.7-4-0.Win32NT
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.5.0.schema.json
+
+PackageIdentifier: RProject.Rtools
+PackageVersion: "4.3"
+PackageLocale: en-US
+Publisher: The R Foundation
+PublisherUrl: https://www.r-project.org/
+PublisherSupportUrl: https://www.r-project.org/help.html
+# PrivacyUrl:
+# Author:
+PackageName: Rtools
+PackageUrl: https://cloud.r-project.org/bin/windows/Rtools/rtools43/rtools.html
+License: Apache-2.0
+LicenseUrl: https://www.r-project.org/Licenses
+# Copyright:
+# CopyrightUrl:
+ShortDescription: Rtools is a toolchain bundle used for building R packages from source (those that need compilation of C/C++ or Fortran code) and for building R itself.
+# Description:
+Moniker: rtools
+Tags:
+- r
+- rstats
+ReleaseNotes: |-
+  Distributed as rtools43-5863-5818.exe.
+
+  R packages able to read files using libwebp should be rebuilt and reinstalled due to a security vulnerability (CVE-2023-2863): this could also be indirect via libtiff, proj or gdal. These Rtools libraries use libwebp: av*, gdal, Magick*, mfuuid, opencv*, sharpyuv, spatialite, tiff, urlmon, uuid and vpx.
+
+  Gdal now supports LERC compression. R packages linking to gdal need to be rebuilt/reinstalled to use the feature.
+
+  GCC has been updated from 12.2.0 to 12.3.0. This update only includes bug-fixes, but does not make static libraries incompatible. The update allowed e.g. to build latest version of openTBB, building of which crashed with the previous version.
+
+  A fix to bug PR30079 has been back-ported to binutils. Due to the bug, linking against an import library could fail with an error, but import libraries are normally not used with R.
+
+  Pkg-config has been added and allows R packages to specify the libraries to link (linking orders) via MXE packages names, instead of listing them individually. This can be useful for packages where recent Rtools updates required changes in linking orders (even though patches for those changes were provided to package maintainers by the Rtools maintainer). For example, tiff Makevars file can now do:
+
+  ifeq (,$(shell pkg-config --version 2>/dev/null))
+    LIBSHARPYUV = $(or $(and $(wildcard $(R_TOOLS_SOFT)/lib/libsharpyuv.a),-lsharpyuv),)
+    PKG_LIBS = -ltiff -ljpeg -lz -lzstd -lwebp $(LIBSHARPYUV) -llzma
+  else
+    PKG_LIBS = $(shell pkg-config --libs libtiff-4)
+  endif
+
+  assuming that there is no pkg-config on PATH other than in Rtools (that is not always the case for github actions). See the documentation for more details (for R 4.3, for R-devel). The documentation includes hints on the issue with github actions.
+
+  Pkg-config files have been improved and added in Rtools to make this possible. Testing of these included building CRAN packages that are still downloading pre-compiled static libraries, even when they are in Rtools (which is in violation of CRAN repository policy, and although patches had been provided already with Rtools42 for most of these). These packages can use pkg-config files for libraries and C flags (headers) as follows:
+
+  apcf (geos), av (libavfilter), clustermq (libzmq), curl (curl), eaf (gsl), gdtools (cairo, freetype2), gert (libgit2), ggiraph (libpng), gpg (gpgme), gslnls (gsl), hdf5r (hdf5_hl, WRAP = 1_12_0, -DH5_USE_110_API), ijtiff (libtiff-4), image.textlinedetector (opencv4), jqr (jq), magick (Magick++), opencv (opencv4), openssl (libssh2), pdftools (poppler-cpp), QF (gsl), ragg (freetype2, libtiff-4, libjpeg), rcontroll (gsl), redland (redland), redux (hiredis), RMariaDB (libmariadbclient), RMySQL (libmariadbclient), RPostgres (libpq), rsvg (librsvg-2.0), rvg (libpng), rzmq (libzmq), sodium (libsodium), ssh (libssh), strawr (libcurl), surveyvoi (mpfr), svglite (libpng), systemfonts (freetype2), textshaping (freetype2, harfbuzz, fribidi), V8 (libv8), vdiffr (libpng), webp (libwebp), websocket (openssl), xml2 (libxml-2.0), xslt (libexslt). With some, it is necessary to also set PKG_CPPFLAGS using pkg-config, not just PKG_LIBS.
+
+  This Rtools update does not require any changes in linking orders of CRAN packages, but it can be expected that some of the future releases will require some. While it may be easier for package authors to use pkg-config rather than specify the linking orders directly, there is no need to switch at the moment (for packages using libraries from Rtools).
+
+  The cross-compilers are now built on Ubuntu 22.04 (previously Ubuntu 20.04) and link to some libraries available in that distribution. Users of the cross-compilers may hence have to update their systems.
+
+  Upstream MXE changes have been merged from 6b9e861453bc81fde71810336a064e418cf4eac0, with numerous additional updates to selected MXE packages as detailed below.
+
+  An experimental build of Rtools43 for aarch64 has been created and is supported by the same Rtools code base. A number of package updates in Rtools was triggered by these efforts: in some cases, newer versions build with LLVM (for aarch64) while the older do not. The experimental builds are now available from here and unstable experimental snapshots from here. See this blog post for initial information on the R on Windows/aarch64 (ARM64) efforts. No assumptions should be made on that the aarch64 Rtools (or R support) will stay in the current form. The links for the builds should be considered as temporary. The aarch64 support is only part of R-devel (not R 4.3). R packages downloading pre-compiled static libraries are a significant source of pain and additional effort for Rtools developments, including the LLVM/aarch64 support.
+
+  These packages have been updated:
+
+  blosc 1.21.2 to 1.21.5
+  dbus 1.15.4 to 1.15.8
+  dlfcn-win32 1.3.1 to 1.4.1
+  file 5.44 to 5.45
+  flac 1.4.2 to 1.4.3
+  freetype 2.13.0 to 2.13.2
+  freetype-bootstrap 2.13.0 to 2.13.2
+  freexl 1.0.6 to 2.0.0
+  fribidi 1.0.12 to 1.0.13
+  gcc 12.2.0 to 12.3.0
+  gcc-host 12.2.0 to 12.3.0
+  gdal 3.6.2 to 3.7.2
+  glib 2.76.0 to 2.76.5
+  gmp 6.2.1 to 6.3.0
+  gnutls 3.6.16 to 3.8.0
+  gpgme 1.18.0 to 1.22.0
+  harfbuzz 7.1.0 to 8.2.0
+  hdf5 1.12.0 to 1.12.1
+  hiredis 1.1.0 to 1.2.0
+  icu4c 72.1 to 73.2
+  ilmbase 2.2.0 to 2.2.1
+  imagemagick 7.1.1-3 to 7.1.1-15
+  intel-tbb 9e219e2 to 2021.10.0
+  json-c 0.16 to 0.17
+  kealib 1.5.0 to 1.5.1
+  libassuan 2.5.5 to 2.5.6
+  libgcrypt 1.10.1 to 1.10.2
+  libgit2 1.6.2 to 1.7.1
+  libgpg_error 1.46 to 1.47
+  libpng 1.6.39 to 1.6.40
+  libsbml 5.19.0 to 5.20.2
+  libssh 0.10.4 to 0.10.5
+  libwebp 1.3.0 to 1.3.2
+  libxml2 2.10.3 to 2.10.4
+  libxslt 1.1.37 to 1.1.38
+  libzmq c59104a to de5ee18
+  minizip 3.0.8 to 4.0.1
+  mpfr 4.2.0 to 4.2.1
+  netcdf 4.9.1 to 4.9.2
+  nettle 3.8.1 to 3.9.1
+  openblas 0.3.21 to 0.3.24
+  opencv 4.7.0 to 4.8.0
+  openssl 3.0.8 to 3.1.2
+  pixman 0.33.6 to 0.42.2
+  poppler 23.03.0 to 23.09.0
+  postgresql 13.10 to 13.12
+  proj 9.2.0 to 9.3.0
+  raptor2 2.0.15 to 2.0.16
+  sdl2 2.26.4 to 2.28.3
+  spatialite 5.0.1 to 5.1.0
+  sqlite 3410100 to 3430100
+  tiff 4.5.0 to 4.5.1
+  x264 20180806-2245 to a8b68ebf
+  xz 5.4.1 to 5.4.4
+  zlib 1.2.13 to 1.3
+  zstd 1.5.4 to 1.5.5
+
+  These packages have been added:
+
+  brotli 1.0.9
+  pkgconf-host 1.8.0
+
+  These packages have been removed:
+
+  freetds
+  mesa
+  qt6-qtbase
+  qtbase
+ReleaseNotesUrl: https://cloud.r-project.org/bin/windows/Rtools/rtools43/news.html
+# PurchaseUrl:
+# InstallationNotes:
+# Documentations:
+ManifestType: defaultLocale
+ManifestVersion: 1.5.0
