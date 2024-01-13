@@ -1,19 +1,21 @@
 #Copyright 2022-2024 Microsoft Corporation
 #Author: Stephen Gillie
-#Title: Manual Validation Pipeline v3.6.3
+#Title: Manual Validation Pipeline v3.7.0
 #Created: 10/19/2022
-#Updated: 1/11/2024
+#Updated: 1/12/2024
 #Notes: Utilities to streamline evaluating 3rd party PRs.
 #Update log:
+#3.7.0 Add Get-PRReportFromRecord to simplify reporting.
+#3.6.9 Add ValidationSet to Get-PRFromRecord and Add-PRLabel.
+#3.6.8 Remove unnecessary Get-CommitFile code. 
+#3.6.7 Bugfix to AutoValLog DefenderFail auto-commenting.
+#3.6.6 Bugfix to Invoke-GitHubPRRequest.
+#3.6.5 Add several new GitHub Presets.
+#3.6.4 Bugfix to IEDS approval - to work off the Retry-1 label instead of the IEDS label. 
 #3.6.3 Numerous quality of life and speed improvements.
-#3.6.2 Add Installer checking automation.
-#3.6.1 Add Add-PRToRecord and Get-PRTitle to automate reporting.
-#3.6.0 Add numerous functions to get text from PR and add suggestions on specific lines. 
-#3.5.5 Rename Get-AutoValBuild to Get-BuildFromPR.
-#3.5.4 Rearrange commonly-developed functions to be near the top.
 
 
-$build = 561
+$build = 567
 $appName = "Manual Validation"
 Write-Host "$appName build: $build"
 $MainFolder = "C:\ManVal"
@@ -108,9 +110,10 @@ Function Add-Waiver {
 	Foreach ($Label in $Labels) {
 		$Waiver = ""
 		Switch ($Label) {
-			"Internal-Error-Dynamic-Scan" {
+			"Retry-1" {
 				Add-PRLabel -PR $PR -Label "Validation-Completed" -Method PUT
-				Add-PRToRecord $PR "Manually-Validated-IEDS"
+				Add-PRLabel -PR $PR -Label "Retry-1" -Method POST
+				Add-PRToRecord $PR "Manual"
 			}
 			"Validation-Completed" {
 				Approve-PR $PR
@@ -158,27 +161,46 @@ Function Add-Waiver {
 Function Get-GitHubPreset {
 	param(
 		[int]$PR,
-		[ValidateSet("DefenderFail","InstallerNotSilent","PackageUrl")][string]$Preset,
+		[ValidateSet("Approved","BadPR","DefenderFail","Feedback","InstallerNotSilent","PackageUrl","Waiver")][string]$Preset,
 		[string]$UserName = (Invoke-GitHubPRRequest $PR -Type "" -Output content -JSON).user.login,
 		$CannedResponse = $Preset,
 		$Label
 	)
 	Switch ($Preset) {
+		"Approved" {
+			Approve-PR $PR; 
+			Add-PRToRecord $PR $Preset
+		}
+		"BadPR" {
+			Reply-ToPR $PR -Body "Bad PR." ; 
+			Add-PRToRecord $PR Closed
+		}
 		"DefenderFail" {
 			$Label = "Needs-Attention"
 			Add-PRToRecord $PR "Blocking"
+			Reply-ToPR -PR $PR -CannedResponse $CannedResponse -UserInput $UserName
+			Add-PRLabel -PR $PR -Label $Label
+		}
+		"Feedback" {
+			Add-PRLabel $PR
+			Add-PRToRecord $PR $Preset
 		}
 		"InstallerNotSilent" {
 			$Label = "Needs-Author-Feedback"
-			Add-PRToRecord $PR "Feedback"
+			Add-PRToRecord $PR Feedback
+			Reply-ToPR -PR $PR -CannedResponse $CannedResponse -UserInput $UserName
+			Add-PRLabel -PR $PR -Label $Label
 		}
 		"PackageUrl" {
 			$Label = "Changes-Requested"
+			Reply-ToPR -PR $PR -CannedResponse $CannedResponse -UserInput $UserName
+			Add-PRLabel -PR $PR -Label $Label
+		}
+		"Waiver" {
+			Add-Waiver $PR; 
+			Add-PRToRecord $PR $Preset
 		}
 	}
-
-	Reply-ToPR -PR $PR -CannedResponse $CannedResponse -UserInput $UserName
-	Add-PRLabel -PR $PR -Label $Label
 }
 
 #PR tools
@@ -221,9 +243,11 @@ Function Invoke-GitHubPRRequest {
 	)
 	$Response = @{}
 	$ResponseType = $Type
+	$uri = "https://api.github.com/repos/microsoft/winget-pkgs/$Path/$pr/$Type"
 
 	if (($Type -eq "") -OR ($Type -eq "files")){
 		$Path = "pulls"
+		$uri = "https://api.github.com/repos/microsoft/winget-pkgs/$Path/$pr/$Type"
 	} elseif ($Type -eq "comments") {
 		$Response.body += $Data
 	} elseif ($Type -eq "commits") {
@@ -245,7 +269,6 @@ Function Invoke-GitHubPRRequest {
 		$Response.$ResponseType += $Data
 	}
 
-	$uri = "https://api.github.com/repos/microsoft/winget-pkgs/$Path/$pr/$Type"
 	$uri = $uri -replace "/$",""
 
 	if ($Method -eq "GET") {
@@ -304,7 +327,8 @@ Function Get-AutoValLog {
 
 		$UserInput = $UserInput -replace "Standard error: ",""
 		if ($UserInput -ne "") {
-			if ($clip -match "\[FAIL\] Installer failed security check.") {Get-GitHubPreset $PR DefenderFail}
+			#Start-Process "https://github.com/microsoft/winGet-pkgs/pull/$PR"
+			if ($UserInput -match "\[FAIL\] Installer failed security check.") {Get-GitHubPreset $PR DefenderFail}
 
 			$UserInput = ($UserInput -split "`n") -notmatch ' success or error status`: 0'
 			$UserInput = ($UserInput -split "`n") -notmatch 'api-ms-win-core-errorhandling'
@@ -356,9 +380,8 @@ Function Get-CommitFile {
 	param(
 		$PR
 	)
-	$File = 0
 	$Commit = Invoke-GitHubPRRequest -PR $PR -Type commits -Output content -JSON
-	$CommitFile = Invoke-GitHubRequest -Uri $Commit.files[$File].contents_url
+	$CommitFile = Invoke-GitHubRequest -Uri $Commit.files.contents_url
 	$EncodedFile = $CommitFile.Content  | ConvertFrom-Json
 	Get-DecodeGitHubFile $EncodedFile.content
 
@@ -437,9 +460,32 @@ Function Add-PRToRecord {
 
 Function Get-PRFromRecord {
 	param(
+		[ValidateSet("Approved","Blocking","Feedback","Retry","Manual","Closed","Project","Squash","Waiver")]
 		$Action
 	)
 	("PR,Action`n" + (Get-Content $LogFile)) -split " " | ConvertFrom-Csv | Where-Object {$_.Action -match $Action}
+}
+
+Function Get-PRReportFromRecord {
+	param(
+		[ValidateSet("Approved","Blocking","Feedback","Retry","Manual","Closed","Project","Squash","Waiver")]
+		$Action,
+		$out = "",
+		$n = 0,
+		$Record = ((Get-PRFromRecord $Action).PR | Select-Object -Unique), 
+		$length = $Record.length
+	)
+
+	(Get-Content $LogFile) | ConvertFrom-Csv | Where-Object {$_.Action -notmatch $Action} | ConvertTo-Csv|Out-File $LogFile
+
+	Foreach ($PR in $Record) {
+		$Title = Get-PRTitle $PR
+		$out += "$Title #$PR`n";
+		$n++;
+		$pct = $n / $length
+		Write-Progress -Activity "Get-PRTitle" -Status "$PR  - $n / $length = "  -PercentComplete ($pct*100)
+	}
+	return $out
 }
 
 Function Approve-PR {
@@ -588,8 +634,10 @@ Function Get-PRApproval {
 Function Add-PRLabel {
 	param(
 		$PR,
+		[ValidateSet("Changes-Requested","Needs-Author-Feedback","Retry-1","Needs-Attention","Validation-Completed")]
 		[string]$Label = "Needs-Author-Feedback",
-		[ValidateSet("GET","DELETE","POST","PUT")][string]$Method = "POST"
+		[ValidateSet("GET","DELETE","POST","PUT")]
+		[string]$Method = "POST"
 	)
 	Invoke-GitHubPRRequest -PR $PR -Method $Method -Type "labels" -Data $Label
 }

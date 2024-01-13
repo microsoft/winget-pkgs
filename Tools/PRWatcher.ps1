@@ -1,13 +1,13 @@
 #Copyright 2023-2024 Microsoft Corporation
 #Author: Stephen Gillie
-#Title: PRWatcher v1.2.7
+#Title: PRWatcher v1.2.8
 #Created: 2/15/2023
-#Updated: 1/11/2024
+#Updated: 1/12/2024
 #Notes: Streamlines WinGet-pkgs manifest PR moderator approval by watching the clipboard - copy a PR's FIles tab to your clipboard, and Get-PRWatch parse the PR, start a VM to review if new, and approve the PR if it passes all checks. Also outputs valid titles to a logging file. Freeing moderators to focus on approving and helping.
 #Update log:
+#1.2.8 Clean up approved PR recording, and remove unnecessary code.
 #1.2.7 Add PR Record system to gather PR numbers at decision points. 
 #1.2.6 Bugfix to WordFilter. 
-#1.2.5 Capitalize "Invoke" in Cmdlet names. 
 
 
 
@@ -1445,22 +1445,13 @@ Function Get-PRWatch {
 
 				if ($Approve -eq "+") {
 					$Approve = Approve-PR $PR
-					Add-PRToRecord $PR "Approved"
+					Add-PRToRecord $PR Approved
 				}
 
 				Write-Host -nonewline -f $matchColor "$Approve | "
 				Write-Host -f $matchColor ""
 
 				$oldclip = $PRtitle
-				if ($noRecord -eq $false) {
-					if ($PRtitle.length -le 128) {
-						$PRtitle = $PRtitle -join "" | Where-Object {$_ -match $hashPRRegex}
-						#Write-Debug "Output $PRtitle to $LogFile"
-						Add-PRToRecord $PR "Approved"
-					} else {
-						Write-Host -f $cautionColor "Item length greater than 128 characters."
-					} ; #end if clip
-				}; #end if noRecord
 			}; #end if Compare-Object
 		}; #end if clip
 		Start-Sleep 1
