@@ -1,0 +1,64 @@
+# Created with YamlCreate.ps1 v2.2.4 $debug=NVS0.CRLF.7-4-0-preview-2.Win32NT
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.4.0.schema.json
+
+PackageIdentifier: Hashicorp.Packer
+PackageVersion: 1.9.0
+PackageLocale: en-US
+Publisher: HashiCorp
+PublisherUrl: https://www.packer.io/
+PublisherSupportUrl: https://www.packer.io/community
+PrivacyUrl: https://www.hashicorp.com/privacy
+Author: Copyright (c) 2010-2023 Mitchell Hashimoto
+PackageName: Packer
+PackageUrl: https://www.packer.io/
+License: MPL-2.0
+LicenseUrl: https://github.com/hashicorp/packer/blob/main/LICENSE
+Copyright: Copyright (c) 2010-2023 Mitchell Hashimoto
+# CopyrightUrl:
+ShortDescription: Packer is a tool for building identical machine images for multiple platforms from a single source configuration.
+# Description:
+Moniker: packer
+Tags:
+- developing
+- packer
+- virtualization
+# Agreements:
+ReleaseNotes: |-
+  NOTES:
+  - Breaking Change: Iteration fingerprints used to be computed from the Git SHA of the repository where the template is located when running packer build. This changes with this release, and now fingerprints are automatically generated as a ULID. This implies that continuing an existing iteration will require users to define the fingerprint in the environment manually in order to adopt this behaviour, otherwise, by default, a new iteration will be created. This does not impact workflows where the fingerprint was defined through the HCP_PACKER_ITERATION_FINGERPRINT environment variable, and these builds will work exactly as they did before. GH-12172
+  - Breaking Change: Community-maintained plugins bundled with the Packer binary have been removed. These external plugin components are released independently of Packer core and can be installed directly by the user. Users relying on the external plugin components listed below should refer to the packer plugins sub-command and, if using HCL2, a required_plugins block to define a list of plugins for building a template.
+
+  PLUGINS
+  - Remove provisioner plugins for Chef, Converge, Puppet, Salt, and Inspec as vendored plugins. These plugins have been previously archived and not updated in release since being archived. These plugins can be installed using packer init or with the Packer plugins sub-command packer plugins install github.com/hashicorp/chef. GH-12374
+  - The following community plugins won't be bundled with Packer anymore:
+    - Alicloud
+    - CloudStack
+    - HCloud
+    - HyperOne
+    - Hyper-V
+    - JDCloud
+    - LXC
+    - LXD
+    - NCloud
+    - OpenStack
+    - Proxmox
+    - TencentCloud
+    - Triton
+    - Yandex
+  - Users relying on these external plugin components should refer to the packer plugins sub-command and, if using HCL2, a required_plugins block to define a list of plugins to use for building a template.
+
+  IMPROVEMENTS:
+  - core/hcp: Now, fingerprints used by HCP Packer are randomly generated ULIDs instead of a Git SHA, and a new one is always generated, unless one is specified in the environment. GH-12172
+
+  BUG FIXES:
+  - Fix LDFLAGS for release pipelines: Between Packer 1.8.5 and Packer 1.8.7, changes to the LDFLAGS in use for building the binaries for Packer had mistakenly removed some compilation flags, leading to the final binaries not being stripped. This change raised the size of the built binaries by as much as 45%. In this release, we fixed the LDFLAGS during compilation, yielding leaner binaries.
+  - Bumped gopsutil to v3. This fixes a macOS intermittent crash reported by the community GH-12430
+
+ReleaseNotesUrl: https://github.com/hashicorp/packer/blob/v1.9.0/CHANGELOG.md
+# PurchaseUrl:
+# InstallationNotes:
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://www.packer.io/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.4.0
