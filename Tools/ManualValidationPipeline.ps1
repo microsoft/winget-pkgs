@@ -1,21 +1,27 @@
 #Copyright 2022-2024 Microsoft Corporation
 #Author: Stephen Gillie
-#Title: Manual Validation Pipeline v3.7.0
+#Title: Manual Validation Pipeline v3.11.0
 #Created: 10/19/2022
-#Updated: 1/12/2024
+#Updated: 1/17/2024
 #Notes: Utilities to streamline evaluating 3rd party PRs.
 #Update log:
+#3.11.0 Add numerous updates to bulk functions.
+#3.10.0 Add Check-Duplicate to identify InstallerUrls with the previous manifest version in the URL path or file name.
+#3.9.0 Add Get-LineFromCommitFile to streamline returning a specific string from a commit file.
+#3.8.6 Improve Add-Waiver output to include PR number.
+#3.8.5 Bugfix to removal PR installer check auto-comment.
+#3.8.4 Add Network-Blocker label to Add-PRLabel's defaults.
+#3.8.3 Nullify Get-ManifestFile output inside Get-ManifestAutomation.
+#3.8.2 Bugfix to security check auto-comment.
+#3.8.1 Rewrite Get-PRInstallerStatus and inner wrapper to better expose URL in PR comment.
+#3.8.0 Add Get-NonstandardPRComments function to automate "controversy check", by only opening PRs that don't have the default comments.
+#3.7.1 Relocate reporting functions.
 #3.7.0 Add Get-PRReportFromRecord to simplify reporting.
-#3.6.9 Add ValidationSet to Get-PRFromRecord and Add-PRLabel.
-#3.6.8 Remove unnecessary Get-CommitFile code. 
-#3.6.7 Bugfix to AutoValLog DefenderFail auto-commenting.
-#3.6.6 Bugfix to Invoke-GitHubPRRequest.
-#3.6.5 Add several new GitHub Presets.
-#3.6.4 Bugfix to IEDS approval - to work off the Retry-1 label instead of the IEDS label. 
-#3.6.3 Numerous quality of life and speed improvements.
 
+#Edit: I need to filter these out on removals. Sorry for the spam. 
+#Tim Kurtzmann
 
-$build = 567
+$build = 601
 $appName = "Manual Validation"
 Write-Host "$appName build: $build"
 $MainFolder = "C:\ManVal"
@@ -47,37 +53,92 @@ $GitHubRateLimitDelay = 0.5 #seconds
 #Automation tools
 Function Get-PRLabelAction {
 	param(
-	$PR,
+	[int]$PR,
 	$Labels = ((Invoke-GitHubPRRequest -PR $PR -Type "labels" -Output content -JSON).name)
 	)
 	Write-Output "PR $PR has labels $Labels"
 	Foreach ($Label in $Labels) {
 		Switch ($Label) {
 			"Binary-Validation-Error" {
-				$PR | %{Reply-ToPR -PR $PR -UserInput ((Get-ADOLog $PR)[30..34]) -CannedResponse AutoValEnd}
+				$UserInput = Get-LineFromCommitFile $PR -SearchString "Installer Verification Analysis Context Information:" -length 5
+				Reply-ToPR -PR $PR -UserInput $UserInput -CannedResponse AutoValEnd
+				if ($UserInput -match "BlockingDetectionFound") {
+					Get-GitHubPreset -PR $PR -Preset AutomationBlock
+				}
 			}
 			"Error-Hash-Mismatch" {
-				$Log = (Get-ADOLog $PR)
-				$line = ($Log | Select-String "Specified hash doesn't match").LineNumber
-				$EndLine = ($line[-1] +1)
-				$PR | %{Reply-ToPR -PR $PR -UserInput ($Log[$line[0]..$EndLine]) -CannedResponse AutoValEnd}
+				$UserInput = Get-LineFromCommitFile $PR -SearchString "Actual hash" -Length 1 
+				if ($UserInput -notmatch "Actual hash") {
+					$UserInput = Get-LineFromCommitFile $PR -LogNumber 26 -SearchString "Actual hash" -Length 1 
+				}
+				if ($UserInput -notmatch "Actual hash") {
+					$UserInput = Get-LineFromCommitFile $PR -LogNumber 36 -SearchString "Actual hash" -Length 1 
+				}
+				if ($UserInput -match "Actual hash") {
+					Reply-ToPR -PR $PR -UserInput $UserInput -CannedResponse AutoValEnd
+				}
 			}
 			"Error-Installer-Availability" {
-				$PR | %{Reply-ToPR -PR $PR -Body (Check-PRInstallerStatus $PR)}
+				$UserInput = Get-LineFromCommitFile $PR -SearchString "Installer Verification Analysis Context Information:" -length 5
+				Reply-ToPR -PR $PR -UserInput $UserInput -CannedResponse AutoValEnd
+				Get-GitHubPreset -PR $PR -Preset CheckInstaller
+			}
+			"Internal-Error-Dynamic-Scan" {
+				Get-RerunPR $PR
 			}
 			"Manifest-AppsAndFeaturesVersion-Error" {
-				$PR | %{Reply-ToPR -PR $PR -UserInput ((Get-ADOLog $PR -Log 25)[50]) -CannedResponse AutoValEnd}
+				$UserInput = Get-LineFromCommitFile $PR -LogNumber 25 -SearchString "[error] Manifest Error:"
+				if ($null -match $UserInput) {
+					$UserInput = Get-LineFromCommitFile $PR -LogNumber 15 -SearchString "[error] Manifest Error:"
+				}
+				Reply-ToPR -PR $PR -UserInput $UserInput -CannedResponse AutoValEnd
 			}
 			"Manifest-Installer-Validation-Error" {
-				$PR | %{Reply-ToPR -PR $PR -UserInput ((Get-ADOLog $PR -Log 25)[60]) -CannedResponse AutoValEnd}
+				Reply-ToPR -PR $PR -UserInput ((Get-ADOLog $PR -Log 25)[60]) -CannedResponse AutoValEnd
 			}
 			"Manifest-Validation-Error" {
-				$PR | %{Reply-ToPR -PR $PR -UserInput ((Get-ADOLog $PR -Log 25)[32]) -CannedResponse AutoValEnd}
+				$UserInput = Get-LineFromCommitFile $PR -LogNumber 25 -SearchString "[error] Manifest Error:"
+				if ("" -eq $UserInput) {
+					$UserInput = Get-LineFromCommitFile $PR -LogNumber 25 -SearchString "[error] One or more errors occurred."
+				}
+				if ("" -eq $UserInput) {
+					$UserInput = Get-LineFromCommitFile $PR -LogNumber 31 -SearchString "[error] Manifest Error:"
+				}
+				if ("" -eq $UserInput) {
+					$UserInput = Get-LineFromCommitFile $PR -LogNumber 31 -SearchString "[error] One or more errors occurred."
+				}
+				if ("" -eq $UserInput) {
+					$UserInput = Get-LineFromCommitFile $PR -LogNumber 44 -SearchString "[error] Manifest Error:"
+				}
+				if ("" -eq $UserInput) {
+					$UserInput = Get-LineFromCommitFile $PR -LogNumber 44 -SearchString "[error] One or more errors occurred."
+				}
+				if ($UserInput) {
+					Reply-ToPR -PR $PR -UserInput $UserInput -CannedResponse AutoValEnd
+				}
+			}
+			"Possible-Duplicate" {
+				$UserInput = Check-Duplicate $PR
+				if ($UserInput) {
+					$UserInput = "InstallerUrl contains Manifest version instead of PR version:`n"+$UserInput + "`n`n(Automated message - build $build)"
+					Reply-ToPR -PR $PR -Body $UserInput
+					Get-GitHubPreset $PR Feedback
+				}
 			}
 			"PullRequest-Error" {
-				$PR | %{Reply-ToPR -PR $PR -UserInput ((Get-ADOLog $PR -Log 24)[28]) -CannedResponse AutoValEnd}
+				$UserInput = Get-LineFromCommitFile $PR -LogNumber 24 -SearchString "[error] One or more errors occurred."
+				if ($null -match $UserInput) {
+					$UserInput = Get-LineFromCommitFile $PR -LogNumber 25 -SearchString "[error] One or more errors occurred."
+				}
+				if ($null -match $UserInput) {
+					$UserInput = Get-LineFromCommitFile $PR -LogNumber 14 -SearchString "[error] One or more errors occurred."
+				}
+				Reply-ToPR -PR $PR -UserInput $UserInput -CannedResponse AutoValEnd
 			}
 			"URL-Validation-Error" {
+				$UserInput = Get-LineFromCommitFile $PR -LogNumber 32 -SearchString "Validation result: Failed"
+				Reply-ToPR -PR $PR -UserInput $UserInput -CannedResponse AutoValEnd
+				Get-GitHubPreset -PR $PR -Preset CheckInstaller
 			}
 			"Validation-Domain" {
 			}
@@ -153,15 +214,16 @@ Function Add-Waiver {
 			}
 		}
 		if ($Waiver -ne "") {
-			Invoke-GitHubPRRequest $PR -Type comments -Output StatusDescription -Method POST -Data "@wingetbot waivers Add $Waiver"
+			$out = Invoke-GitHubPRRequest $PR -Type comments -Output StatusDescription -Method POST -Data "@wingetbot waivers Add $Waiver"
+			Write-Output "$($PR): $out"
 		}; # end if Waiver
 	}; # end Foreach Label
 }; # end Function
 
 Function Get-GitHubPreset {
 	param(
-		[int]$PR,
-		[ValidateSet("Approved","BadPR","DefenderFail","Feedback","InstallerNotSilent","PackageUrl","Waiver")][string]$Preset,
+		$PR,
+		[ValidateSet("Approved","AutomationBlock","ChangesRequested","CheckInstaller","BadPR","DefenderFail","Feedback","InstallerNotSilent","InstallerMissing","MergeConflicts","PackageUrl","ResetPR","Waiver")][string]$Preset,
 		[string]$UserName = (Invoke-GitHubPRRequest $PR -Type "" -Output content -JSON).user.login,
 		$CannedResponse = $Preset,
 		$Label
@@ -171,9 +233,27 @@ Function Get-GitHubPreset {
 			Approve-PR $PR; 
 			Add-PRToRecord $PR $Preset
 		}
+		"AutomationBlock" {
+			Add-PRToRecord $PR Blocking
+			Reply-ToPR -PR $PR -CannedResponse AutomationBlock -UserInput $UserName
+			Add-PRLabel $PR Network-Blocker
+		}
+		"Blocking" {
+			Add-PRLabel $PR Network-Blocker
+			Add-PRToRecord $PR Blocking
+		}
 		"BadPR" {
 			Reply-ToPR $PR -Body "Bad PR." ; 
 			Add-PRToRecord $PR Closed
+		}
+		"ChangesRequested" {
+			$Label = "Needs-Author-Feedback"
+			Add-PRLabel -PR $PR -Label $Label
+			Add-PRLabel $PR Changes-Requested
+			Add-PRToRecord $PR Feedback
+		}
+		"CheckInstaller" {
+			Reply-ToPR -PR $PR -Body (Check-PRInstallerStatus $PR)
 		}
 		"DefenderFail" {
 			$Label = "Needs-Attention"
@@ -191,10 +271,33 @@ Function Get-GitHubPreset {
 			Reply-ToPR -PR $PR -CannedResponse $CannedResponse -UserInput $UserName
 			Add-PRLabel -PR $PR -Label $Label
 		}
-		"PackageUrl" {
-			$Label = "Changes-Requested"
+		"InstallerMissing" {
+			$Label = "Needs-Author-Feedback"
+			Add-PRToRecord $PR Feedback
 			Reply-ToPR -PR $PR -CannedResponse $CannedResponse -UserInput $UserName
 			Add-PRLabel -PR $PR -Label $Label
+		}
+		"MergeConflicts" {
+			Reply-ToPR -PR $PR -Body "Merge Conflicts."
+			Add-PRToRecord $PR Closed
+		}
+		"OneManifestPerPR" {
+			$Label = "Needs-Author-Feedback"
+			Add-PRToRecord $PR Feedback
+			Reply-ToPR -PR $PR -CannedResponse $CannedResponse -UserInput $UserName
+			Add-PRLabel -PR $PR -Label $Label
+		}
+		"PackageUrl" {
+			$Label = "Changes-Requested"
+			Add-PRToRecord $PR Feedback
+			Reply-ToPR -PR $PR -CannedResponse $CannedResponse -UserInput $UserName
+			Add-PRLabel -PR $PR -Label $Label
+		}
+		"ResetPR" {
+			Reply-ToPR $PR -Body "Reset PR."
+			Invoke-GitHubPRRequest -PR $PR -Type assignees -Method DELETE -Data $UserName
+			Add-PRToRecord $PR Closed
+			Add-PRLabel -PR $PR -Method DELETE
 		}
 		"Waiver" {
 			Add-Waiver $PR; 
@@ -292,7 +395,7 @@ Function Get-AutoValLog {
 	#Needs $GitHubToken to be set up in your $PROFILE or somewhere more secure. Needs permissions: workflow,
 	param(
 		$clip = (Get-Clipboard),
-		$PR = (($clip -split "/" | select-string "[0-9]{5,6}" )),
+		$PR = ($clip -split "/" | select-string "[0-9]{5,6}" ),
 		$DestinationPath = "$MainFolder\Installers",
 		$LogPath = "$DestinationPath\InstallationVerificationLogs\",
 		$ZipPath = "$DestinationPath\InstallationVerificationLogs.zip",
@@ -369,11 +472,26 @@ Function Get-ADOLog {
 	param(
 		$PR,
 		$build = (Get-BuildFromPR $PR),
-		$Log = (36),
-		$content = (Invoke-GitHubRequest https://dev.azure.com/ms/ed6a5dfa-6e7f-413b-842c-8305dd9e89e6/_apis/build/builds/$build/logs/$Log).content
+		$LogNumber = (36),
+		$content = (Invoke-GitHubRequest https://dev.azure.com/ms/ed6a5dfa-6e7f-413b-842c-8305dd9e89e6/_apis/build/builds/$build/logs/$LogNumber).content
 	)
 	$content = $content -join "" -split "`n"
 	return $content
+}
+
+Function Get-LineFromCommitFile {
+	param(
+		$PR,
+		$LogNumber = (36),
+		$SearchString = "Specified hash doesn't match",
+		$Log = (Get-ADOLog $PR -Log $LogNumber),
+		$MatchOffset = (-1),
+		$MatchLine = (($Log | Select-String -SimpleMatch $SearchString).LineNumber + $MatchOffset),
+		$Length = 0,
+		$EndLine = ($MatchLine + $Length),
+		$output = ($Log[$MatchLine..$EndLine])
+	)
+	return $output 
 }
 
 Function Get-CommitFile {
@@ -449,45 +567,6 @@ Function Add-DependencyToPR {
 	Get-UpdateHashInPR -pr $PR -ReplaceString (Get-Clipboard)
 }
 
-Function Add-PRToRecord {
-	param(
-		$PR,
-		[ValidateSet("Approved","Blocking","Feedback","Retry","Manual","Closed","Project","Squash","Waiver")]
-		$Action
-	)
-	"$PR,$Action" | Out-File $LogFile -Append 
-}
-
-Function Get-PRFromRecord {
-	param(
-		[ValidateSet("Approved","Blocking","Feedback","Retry","Manual","Closed","Project","Squash","Waiver")]
-		$Action
-	)
-	("PR,Action`n" + (Get-Content $LogFile)) -split " " | ConvertFrom-Csv | Where-Object {$_.Action -match $Action}
-}
-
-Function Get-PRReportFromRecord {
-	param(
-		[ValidateSet("Approved","Blocking","Feedback","Retry","Manual","Closed","Project","Squash","Waiver")]
-		$Action,
-		$out = "",
-		$n = 0,
-		$Record = ((Get-PRFromRecord $Action).PR | Select-Object -Unique), 
-		$length = $Record.length
-	)
-
-	(Get-Content $LogFile) | ConvertFrom-Csv | Where-Object {$_.Action -notmatch $Action} | ConvertTo-Csv|Out-File $LogFile
-
-	Foreach ($PR in $Record) {
-		$Title = Get-PRTitle $PR
-		$out += "$Title #$PR`n";
-		$n++;
-		$pct = $n / $length
-		Write-Progress -Activity "Get-PRTitle" -Status "$PR  - $n / $length = "  -PercentComplete ($pct*100)
-	}
-	return $out
-}
-
 Function Approve-PR {
 	param(
 		$PR,
@@ -509,7 +588,7 @@ Function Approve-PR {
 
 Function Get-CannedResponse {
 	param(
-		[ValidateSet("AppFail","Approve","AutomationBlock","AutoValEnd","AppsAndFeaturesNew","AppsAndFeaturesMissing","Drivers","DefenderFail","HashFailRegen","InstallerFail","InstallerNotSilent","PackageUrl","InstallerUrlBad","ListingDiff","ManValEnd","NoCause","NoExe","NoRecentActivity","NotGoodFit","Only64bit","PackageFail","Paths","PendingAttendedInstaller","RemoveAsk","Unattended","Unavailable","UrlBad","WhatIsIEDS","WordFilter")]
+		[ValidateSet("AppFail","Approve","AutomationBlock","AutoValEnd","AppsAndFeaturesNew","AppsAndFeaturesMissing","Drivers","DefenderFail","HashFailRegen","InstallerFail","InstallerMissing","InstallerNotSilent","NormalInstall","PackageUrl","InstallerUrlBad","ListingDiff","ManValEnd","NoCause","NoExe","NoRecentActivity","NotGoodFit","OneManifestPerPR","Only64bit","PackageFail","Paths","PendingAttendedInstaller","RemoveAsk","Unattended","Unavailable","UrlBad","WhatIsIEDS","WordFilter")]
 		[string]$Response,
 		$UserInput=(Get-Clipboard),
 		[switch]$NoClip,
@@ -550,6 +629,9 @@ Function Get-CannedResponse {
 		"InstallerFail" {
 			$out = "Hi $Username`n`nThe installer did not complete:`n"
 		}
+		"InstallerMissing" {
+			$out = "Hi $Username`n`nHas the installer been removed?"
+		}
 		"InstallerNotSilent" {
 			$out = "Hi $Username`n`nThe installation isn't unattended. Is there an installer switch to have the package install silently?"
 		}
@@ -573,6 +655,12 @@ Function Get-CannedResponse {
 		}
 		"NotGoodFit" {
 			$out = "Hi $Username`n`nUnfortunately, this package might not be a good fit for inclusion into the WinGet public manifests. Please consider using a local manifest (`WinGet install --manifest C:\path\to\manifest\files\`) for local installations. "
+		}
+		"NormalInstall" {
+			$out = "This package installs and launches normally on a Windows 10 VM."
+		}
+		"OneManifestPerPR" {
+			$out = "Hi $Username`n`nWe have a limit of 1 manifest change, addition, or removal per PR. This PR modifies more than one PR. Can these changes be spread across multiple PRs?"
 		}
 		"Only64bit" {
 			$out = "Hi $Username`n`nValidation failed on the x86 package, and x86 packages are validated on 32-bit OSes. So this might be a 64-bit package."
@@ -631,10 +719,27 @@ Function Get-PRApproval {
 	}
 }
 
+Function Get-NonstandardPRComments {
+	param(
+		$PR,
+		$comments = (Invoke-GitHubPRRequest $PR -Type comments -Output content)
+	)
+	$comments = $comments.body
+	$comments = $comments | Where-Object {$_ -notmatch "Validation Pipeline Badge"} #Pipeline status
+	$comments = $comments | Where-Object {$_ -notmatch "AzurePipelines run"} #Run pipelines
+	$comments = $comments | Where-Object {$_ -notmatch "Azure Pipelines successfully started running 1 pipeline"} #Run confirmation
+	$comments = $comments | Where-Object {$_ -notmatch "The check-in policies require a moderator to approve PRs from the community"} #Validation complete 
+	$comments = $comments | Where-Object {$_ -notmatch "wingetbot waivers Add"} #Any waivers
+	$comments = $comments | Where-Object {$_ -notmatch "This account is bot account and belongs to CoolPlayLin"} #CoolPlayLin's automation
+	$comments = $comments | Where-Object {$_ -notmatch "This account is automated by Github Actions and the source code was created by CoolPlayLin"} #Exorcism0666's automation
+	$comments = $comments | Where-Object {$_ -notmatch "Response status code does not indicate success"} #My automation - removal PR where URL failed status check.
+	return $comments
+}
+
 Function Add-PRLabel {
 	param(
 		$PR,
-		[ValidateSet("Changes-Requested","Needs-Author-Feedback","Retry-1","Needs-Attention","Validation-Completed")]
+		[ValidateSet("Changes-Requested","Network-Blocker","Needs-Author-Feedback","Retry-1","Needs-Attention","Validation-Completed")]
 		[string]$Label = "Needs-Author-Feedback",
 		[ValidateSet("GET","DELETE","POST","PUT")]
 		[string]$Method = "POST"
@@ -709,7 +814,7 @@ Function Get-RerunPR {
 		$PR
 	)
 	Invoke-GitHubPRRequest $PR -Type comments -Output StatusDescription -Method POST -Data "/AzurePipelines run"
-	add-prToRecord $PR "Retry"
+	Add-PRToRecord $PR "Retry"
 }
 
 #Package validation
@@ -1082,13 +1187,13 @@ Function Get-ManifestAutomation {
 	Read-Host "Copy version file to clipboard, then press Enter to continue."
 	(Get-Clipboard) -join "" | clip;
 	if ($Arch) {
-		Get-ManifestFile $vm -Arch $Arch
+		$null = Get-ManifestFile $vm -Arch $Arch
 	} elseif ($OS) {
-		Get-ManifestFile $vm -OS $OS
+		$null = Get-ManifestFile $vm -OS $OS
 	} elseif ($Scope) {
-		Get-ManifestFile $vm -Scope $Scope
+		$null = Get-ManifestFile $vm -Scope $Scope
 	} else {
-		Get-ManifestFile $vm
+		$null = Get-ManifestFile $vm
 	}
 }
 
@@ -1146,7 +1251,7 @@ Function Check-BulkPRInstallerStatus {
 	)
 	#If a line starts with Remove, run Check-PRInstallerStatus on the first item of the next line.
 	for ($line = 0;$line -lt $clip.length;$line++){
-		if (($clip[$line] -split " ")[0] -ceq "Remove") {
+		if (($clip[$line] -replace ":","" -split " ")[0] -ceq "Remove") {
 			(($clip[$line +1] -split " ")[0] -replace "#","")  | %{
 				Reply-ToPR $_ -Body (Check-PRInstallerStatus $_)
 			}; #end ForEach-Object Reply-ToPR
@@ -1156,11 +1261,7 @@ Function Check-BulkPRInstallerStatus {
 
 Function Check-PRInstallerStatusInnerWrapper {
 	param(
-		$PR,
-		$Pull = (Invoke-GitHubPRRequest $PR -Type files -Output content -JSON),
-		$PullContents = ((Invoke-GitHubRequest -Uri $Pull.contents_url[0] -JSON).content),
-		$PullInstallerContents = (Get-DecodeGitHubFile $PullContents),
-		$Url = (Get-YamlValue -StringName InstallerUrl -clip $PullInstallerContents),
+		$Url,
 		$Code = (Invoke-GitHubRequest $Url -Method Head -ErrorAction SilentlyContinue).StatusCode
 	)
 	return $Code
@@ -1168,12 +1269,30 @@ Function Check-PRInstallerStatusInnerWrapper {
 
 Function Check-PRInstallerStatus {
 	param(
-		$PR
+		$PR,
+		$Pull = (Invoke-GitHubPRRequest $PR -Type files -Output content -JSON),
+		$PullInstallerContents = (Get-DecodeGitHubFile ((Invoke-GitHubRequest -Uri $Pull.contents_url[0] -JSON).content)),
+		$Url = (Get-YamlValue -StringName InstallerUrl -clip $PullInstallerContents)
 	)
 	$out = ""
-try {$out = "URL: `nStatus Code: "+(Check-PRInstallerStatusInnerWrapper $PR)}catch{$out = $error[0].Exception.Message}
-	$out = $out + "`n`n(Automated message - build $build)"
-return $out
+	try {
+		$out = "Status Code: "+(Check-PRInstallerStatusInnerWrapper $Url)}catch{$out = $error[0].Exception.Message
+	}
+	$out = "URL: $Url `n"+$out + "`n`n(Automated message - build $build)"
+	return $out
+}
+
+Function Check-Duplicate {
+	param(
+		$PR,
+		$Pull = (Invoke-GitHubPRRequest $PR -Type files -Output content -JSON),
+		$PullInstallerContents = (Get-DecodeGitHubFile ((Invoke-GitHubRequest -Uri $Pull.contents_url[0] -JSON).content)),
+		$Url = (Get-YamlValue -StringName InstallerUrl -clip $PullInstallerContents),
+		$PackageIdentifier = (Get-YamlValue -StringName PackageIdentifier -clip $PullInstallerContents),
+		$Version = (Find-WinGetPackage $PackageIdentifier | where {$_.ID -eq $PackageIdentifier}).Version,
+		$out = ($PullInstallerContents -match $Version)
+	)
+	return $out | select-string "http"
 }
 
 Function Get-ManifestListing {
@@ -1448,7 +1567,7 @@ Function Get-TrackerVMCycle {
 				$SharedError = (Get-SharedError -NoClip)
 				Reply-ToPR -PR $VM.PR -UserInput $SharedError -CannedResponse ManValEnd 
 				Get-TrackerVMSetStatus "Complete" $VM.vm
-				if ($SharedError -match "\[FAIL\] Installer failed security check.") {Get-GitHubPreset $PR DefenderFail}
+				if ($SharedError -match "\[FAIL\] Installer failed security check.") {Get-GitHubPreset $VM.PR DefenderFail}
 			}
 			default {
 				#Write-Host "Complete"
@@ -1839,8 +1958,53 @@ Function Get-TimeRunning {
 	}
 }
 
+#Reporting
+Function Add-PRToRecord {
+	param(
+		$PR,
+		[ValidateSet("Approved","Blocking","Feedback","Retry","Manual","Closed","Project","Squash","Waiver")]
+		$Action
+	)
+	"$PR,$Action" | Out-File $LogFile -Append 
+}
+
+Function Get-PRFromRecord {
+	param(
+		[ValidateSet("Approved","Blocking","Feedback","Retry","Manual","Closed","Project","Squash","Waiver")]
+		$Action
+	)
+	("PR,Action`n" + (Get-Content $LogFile)) -split " " | ConvertFrom-Csv | Where-Object {$_.Action -match $Action}
+}
+
+Function Get-PRReportFromRecord {
+	param(
+		[ValidateSet("Approved","Blocking","Feedback","Retry","Manual","Closed","Project","Squash","Waiver")]
+		$Action,
+		$out = "",
+		$n = 0,
+		$Record = ((Get-PRFromRecord $Action).PR | Select-Object -Unique), 
+		$length = $Record.length,
+		[switch]$NoClip
+	)
+
+	(Get-Content $LogFile) | ConvertFrom-Csv | Where-Object {$_.Action -notmatch $Action} | ConvertTo-Csv|Out-File $LogFile
+
+	Foreach ($PR in $Record) {
+		$Title = Get-PRTitle $PR
+		$out += "$Title #$PR`n";
+		$n++;
+		[math]::round($pct = $n / $length,2)
+		Write-Progress -Activity "Get-PRTitle" -Status "$PR  - $n / $length = $pct %"  -PercentComplete ($pct*100)
+	}
+	if ($NoClip) {
+		return $out
+	} else {
+		$out | clip
+	}
+}
+
 #Clipboard
-Function Get-PRNumber {
+Function Get-PRNumber { #Returns with leading hash (#123456), defaults to clipboard output.
 	param(
 		$out = (Get-Clipboard),
 		[switch]$NoClip,
@@ -1854,7 +2018,7 @@ Function Get-PRNumber {
 	}
 }
 
-Function Get-JustPRNumber {
+Function Get-JustPRNumber { #Returns without leading hash (123456)
 	param(
 		$out = (Get-Clipboard),
 		$dashboardPRRegex = "[#][0-9]{5,6}"
@@ -1891,7 +2055,8 @@ Function Open-PR {
 		[switch]$NoCheck
 	)
 	If (!($NoCheck) -AND !($Review)) {
-		Check-BulkPRInstallerStatus
+		Check-BulkPRInstallerStatus -clip $clip
+		$justPRs = $justPRs | %{if(Get-NonstandardPRComments $_){return $_}}
 	}
 
 	foreach ($PR in $justPRs){

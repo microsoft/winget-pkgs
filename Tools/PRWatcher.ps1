@@ -1,13 +1,13 @@
 #Copyright 2023-2024 Microsoft Corporation
 #Author: Stephen Gillie
-#Title: PRWatcher v1.2.8
+#Title: PRWatcher v1.2.9
 #Created: 2/15/2023
-#Updated: 1/12/2024
+#Updated: 1/17/2024
 #Notes: Streamlines WinGet-pkgs manifest PR moderator approval by watching the clipboard - copy a PR's FIles tab to your clipboard, and Get-PRWatch parse the PR, start a VM to review if new, and approve the PR if it passes all checks. Also outputs valid titles to a logging file. Freeing moderators to focus on approving and helping.
 #Update log:
+#1.2.9 Bugfix to Apps and Features detection. 
 #1.2.8 Clean up approved PR recording, and remove unnecessary code.
 #1.2.7 Add PR Record system to gather PR numbers at decision points. 
-#1.2.6 Bugfix to WordFilter. 
 
 
 
@@ -1323,6 +1323,7 @@ Function Get-PRWatch {
 				}
 				Write-Host -nonewline -f $matchColor "$WordFilter | "
 				$matchColor = $validColor
+				
 
 				if ($null -ne $WinGetOutput) {
 					$ANFOld = Get-ManifestEntryCheck -PackageIdentifier $PackageIdentifier -Version $ManifestVersion
@@ -1503,7 +1504,7 @@ Function Get-ManifestEntryCheck {
 		$Entry = "AppsAndFeaturesEntries"
 	)
 	$content = Get-WinGetFile $PackageIdentifier $Version
-	$out = (Get-YamlValue $Entry $content)
+	$out = ($content | Where-Object {$_ -match $Entry})
 	if ($out) {$true} else {$false}
 }
 
