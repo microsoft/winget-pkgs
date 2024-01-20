@@ -1,13 +1,15 @@
 #Copyright 2023-2024 Microsoft Corporation
 #Author: Stephen Gillie
-#Title: PRWatcher v1.2.9
+#Title: PRWatcher v1.2.13
 #Created: 2/15/2023
-#Updated: 1/17/2024
+#Updated: 1/19/2024
 #Notes: Streamlines WinGet-pkgs manifest PR moderator approval by watching the clipboard - copy a PR's FIles tab to your clipboard, and Get-PRWatch parse the PR, start a VM to review if new, and approve the PR if it passes all checks. Also outputs valid titles to a logging file. Freeing moderators to focus on approving and helping.
 #Update log:
+#1.2.13 Ignore removals when checking Apps and Features entries.
+#1.2.12 Bugfix to file clobbering detection auto-reply.
+#1.2.11 Make space detection auto-reply more robust.
+#1.2.10 Change Invoke-GitHubPRRequest Silent output to be an Output option instead of a separate flag 
 #1.2.9 Bugfix to Apps and Features detection. 
-#1.2.8 Clean up approved PR recording, and remove unnecessary code.
-#1.2.7 Add PR Record system to gather PR numbers at decision points. 
 
 
 
@@ -1242,7 +1244,9 @@ Function Get-PRWatch {
 				} elseif ($null -ne $WinGetOutput) {
 					If ($PRtitle -match " [.]") {
 					#If has spaces (4.4 .5 .220)
-						Reply-ToPR -PR $PR -Body "Spaces detected in version number." -Silent
+						$Body = "Spaces detected in version number."
+						$Body = $Body + "`n`n(Automated response - build $build)"
+						Reply-ToPR -PR $PR -Body $Body -Silent
 						$matchColor = $invalidColor
 						$prAuth = "-!"
 					}
@@ -1260,7 +1264,7 @@ Function Get-PRWatch {
 						$Body = "Hi @$Submitter,`n`n> This PR's version number $prVersion has $prVersionParams parameters (sets of numbers between dots - major, minor, etc), which is $greaterOrLessThan than the current manifest's version $($ManifestVersion), which has $ManifestVersionParams parameters.`n`nIs this intentional?"
 						$Body = $Body + "`n`n(Automated response - build $build)"
 						Reply-ToPR -PR $PR -Body $Body -Silent 
-						Invoke-GitHubPRRequest -PR $PR -Method POST -Type labels -Data "Needs-Author-Feedback" -Output StatusDescription -Silent
+						Invoke-GitHubPRRequest -PR $PR -Method POST -Type labels -Data "Needs-Author-Feedback" -Output Silent
 						Add-PRToRecord $PR "Feedback"
 					}
 				}
@@ -1326,15 +1330,15 @@ Function Get-PRWatch {
 				
 
 				if ($null -ne $WinGetOutput) {
-					$ANFOld = Get-ManifestEntryCheck -PackageIdentifier $PackageIdentifier -Version $ManifestVersion
-					$ANFCurrent = [bool]($clip | Select-String "AppsAndFeaturesEntries")
+					if (($PRvMan -ne "N") -AND (($PRtitle -notmatch "Automatic deletion") -AND ($PRtitle -notmatch "Remove"))) {
+						$ANFOld = Get-ManifestEntryCheck -PackageIdentifier $PackageIdentifier -Version $ManifestVersion
+						$ANFCurrent = [bool]($clip | Select-String "AppsAndFeaturesEntries")
 
-					if ($PRvMan -ne "N") {
 						if (($ANFOld -eq $true) -and ($ANFCurrent -eq $false)) {
 							$matchColor = $invalidColor
 							$AnF = "-"
 							Reply-ToPR -PR $PR -CannedResponse AppsAndFeaturesMissing -UserInput $Submitter -Silent
-							Invoke-GitHubPRRequest -PR $PR -Method POST -Type labels -Data "Needs-Author-Feedback"
+							Invoke-GitHubPRRequest -PR $PR -Method POST -Type labels -Data "Needs-Author-Feedback" -Output Silent
 							Add-PRToRecord $PR "Feedback"
 						} elseif (($ANFOld -eq $false) -and ($ANFCurrent -eq $true)) {
 							$matchColor = $cautionColor
@@ -1352,7 +1356,7 @@ Function Get-PRWatch {
 				$matchColor = $validColor
 
 
-				if ($PRvMan -ne "N") {
+				if (($PRvMan -ne "N") -OR ($PRtitle -notmatch "Automatic deletion") -OR ($PRtitle -notmatch "Remove")) {
 					try {
 						if ([bool]($clip -match "InstallerUrl")) {
 							$InstallerUrl = Get-YamlValue InstallerUrl -clip $clip
@@ -1385,7 +1389,7 @@ Function Get-PRWatch {
 				Write-Host -nonewline -f $matchColor "$InstVer | "
 				$matchColor = $validColor
 
-				$GLD = Get-ListingDiff $clip | Where-Object {$_.SideIndicator -eq "<="} #Ignores when a PR adds files that didn't exist before.
+				$GLD = (Get-ListingDiff $clip | Where-Object {$_.SideIndicator -eq "<="}).installer.yaml #Ignores when a PR adds files that didn't exist before.
 				if ($GLD -ne $null) {
 					if ($GLD -eq "Error") {
 						$ListingDiff = "E"
@@ -1395,7 +1399,7 @@ Function Get-PRWatch {
 						$ListingDiff = "-!"
 						$matchColor = $cautionColor
 						Reply-ToPR -PR $PR -CannedResponse ListingDiff -UserInput $GLD -Silent
-						Invoke-GitHubPRRequest -PR $PR -Method POST -Type labels -Data "Needs-Author-Feedback"
+						Invoke-GitHubPRRequest -PR $PR -Method POST -Type labels -Data "Needs-Author-Feedback" -Output Silent
 						Add-PRToRecord $PR "Feedback"
 					}
 				}
