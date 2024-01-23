@@ -1,4 +1,7 @@
 # Parse arguments
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingWriteHost', '', Justification = 'This script is not intended to have any outputs piped')]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', 'Prerelease', Justification = 'The variable is used in a conditional but ScriptAnalyser does not recognize the scope')]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', 'WinGetVersion', Justification = 'The variable is used in a conditional but ScriptAnalyser does not recognize the scope')]
 
 Param(
   [Parameter(Position = 0, HelpMessage = 'The Manifest to install in the Sandbox.')]
@@ -10,7 +13,9 @@ Param(
   [switch] $SkipManifestValidation,
   [switch] $Prerelease,
   [switch] $EnableExperimentalFeatures,
-  [string] $WinGetVersion
+  [string] $WinGetVersion,
+  [Parameter(HelpMessage = 'Additional options for WinGet')]
+  [string] $WinGetOptions
 )
 
 $ErrorActionPreference = 'Stop'
@@ -77,11 +82,11 @@ $WebClient = New-Object System.Net.WebClient
 
 function Get-Release {
   $releasesAPIResponse = Invoke-RestMethod 'https://api.github.com/repos/microsoft/winget-cli/releases?per_page=100'
-  if (!$Prerelease) {
+  if (!$script:Prerelease) {
     $releasesAPIResponse = $releasesAPIResponse.Where({ !$_.prerelease })
   }
-  if (![String]::IsNullOrWhiteSpace($WinGetVersion)) {
-    $releasesAPIResponse = @($releasesAPIResponse.Where({ $_.tag_name -match $('^v?' + [regex]::escape($WinGetVersion)) }))
+  if (![String]::IsNullOrWhiteSpace($script:WinGetVersion)) {
+    $releasesAPIResponse = @($releasesAPIResponse.Where({ $_.tag_name -match $('^v?' + [regex]::escape($script:WinGetVersion)) }))
   }
   if ($releasesAPIResponse.Count -lt 1) {
     Write-Output 'No WinGet releases found matching criteria'
@@ -121,15 +126,15 @@ $vcLibsUwp = @{
   SaveTo = $(Join-Path $tempFolder -ChildPath 'Microsoft.VCLibs.x64.14.00.Desktop.appx')
 }
 $uiLibsUwp = @{
-  url      = 'https://github.com/microsoft/microsoft-ui-xaml/releases/download/v2.7.3/Microsoft.UI.Xaml.2.7.x64.appx'
-  hash     = '8CE30D92ABEC6522BEB2544E7B716983F5CBA50751B580D89A36048BF4D90316'
-  SaveTo   = $(Join-Path $tempFolder -ChildPath 'Microsoft.UI.Xaml.2.7.x64.appx')
+  url    = 'https://github.com/microsoft/microsoft-ui-xaml/releases/download/v2.7.3/Microsoft.UI.Xaml.2.7.x64.appx'
+  hash   = '8CE30D92ABEC6522BEB2544E7B716983F5CBA50751B580D89A36048BF4D90316'
+  SaveTo = $(Join-Path $tempFolder -ChildPath 'Microsoft.UI.Xaml.2.7.x64.appx')
 }
 
 $dependencies = @($desktopAppInstaller, $vcLibsUwp, $uiLibsUwp)
 
 # Clean temp directory
-Get-ChildItem $tempFolder -Recurse -Exclude $($(Split-Path $dependencies.SaveTo -Leaf) -replace '\.([^\.]+)$','.*') | Remove-Item -Force -Recurse
+Get-ChildItem $tempFolder -Recurse -Exclude $($(Split-Path $dependencies.SaveTo -Leaf) -replace '\.([^\.]+)$', '.*') | Remove-Item -Force -Recurse
 
 if (-Not [String]::IsNullOrWhiteSpace($Manifest)) {
   Copy-Item -Path $Manifest -Recurse -Destination $tempFolder
@@ -154,8 +159,7 @@ foreach ($dependency in $dependencies) {
     try {
       # If the directory doesn't already exist, create it
       $saveDirectory = Split-Path $dependency.SaveTo
-      if (-Not (Test-Path -Path $saveDirectory))
-      {
+      if (-Not (Test-Path -Path $saveDirectory)) {
         New-Item -ItemType Directory -Path $saveDirectory -Force | Out-Null
       }
       $WebClient.DownloadFile($dependency.url, $dependency.SaveTo)
@@ -201,7 +205,7 @@ function Update-EnvironmentVariables {
   foreach($level in "Machine","User") {
     [Environment]::GetEnvironmentVariables($level).GetEnumerator() | % {
         # For Path variables, append the new values, if they're not already in there
-        if($_.Name -match 'Path$') {
+        if($_.Name -match '^Path$') {
           $_.Value = ($((Get-Content "Env:$($_.Name)") + ";$($_.Value)") -split ';' | Select -unique) -join ';'
         }
         $_
@@ -256,7 +260,7 @@ Write-Host @'
 --> Installing the Manifest $manifestFileName
 
 '@
-winget install -m '$manifestPathInSandbox' --verbose-logs --ignore-local-archive-malware-scan
+winget install -m '$manifestPathInSandbox' --verbose-logs --ignore-local-archive-malware-scan --dependency-source winget $WinGetOptions
 
 Write-Host @'
 
@@ -354,4 +358,3 @@ $Script
 Write-Host
 
 WindowsSandbox $SandboxTestWsbFile
-

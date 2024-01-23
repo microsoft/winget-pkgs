@@ -69,7 +69,7 @@ Just provide the path to manifest as parameter:
 
 ## Submit your PR
 
-With the manifest verified, you will need to submit a PR. Your manifest should be located in the folder path matching
+Once you have verified your manifest, it's time to submit a PR. Place your manifest in a folder path that matches the following structure:
 
 ```
 manifests\<first lower case letter of publisher>\<publisher>\<package>\<version>\
@@ -77,13 +77,13 @@ manifests\<first lower case letter of publisher>\<publisher>\<package>\<version>
 
 ### Validation Process
 
-The PR request will go through a validation process. The core team or the Microsoft bot (BOT) will use [labels](https://docs.microsoft.com/windows/package-manager/package/winget-validation#pull-request-labels) to help during the process. In the event of a failure, the BOT will suggest the problem with the submission and assign the PR back to you.
+Your PR will go through a validation process. The core team or the Microsoft bot (BOT) will use  [labels](https://docs.microsoft.com/windows/package-manager/package/winget-validation#pull-request-labels)  to assist during the process. In case of a failure, the BOT will suggest the problem with the submission and assign the PR back to you.
 
 ### Respond to PR feedback
 
-If the PR has been assigned to you, a timer is triggered. You will have 7 days to resolve the issue, or the BOT will automatically close the PR.
+If your PR has been assigned to you, a timer will be triggered. You will have 7 days to resolve the issue, or the BOT will automatically close the PR.
 
-Submissions to the repository are reviewed by Windows Package Manager administrators and/or community moderators. We've provided a [Public Service Announcement](https://github.com/microsoft/winget-pkgs/issues/15674) to help identify these individuals.
+Submissions to the repository are reviewed by Windows Package Manager administrators and/or community moderators. To help identify these individuals, we have provided a  [Public Service Announcement](https://github.com/microsoft/winget-pkgs/issues/15674).
 
 # Contributing
 
