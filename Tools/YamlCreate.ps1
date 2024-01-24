@@ -2694,6 +2694,7 @@ if (($script:Option -eq 'MovePackageIdentifier')) {
       $BranchesCreated = @()
 
       foreach ($Version in $VersionsToMove) {
+        Write-Host
         Write-Host -ForegroundColor Yellow -Object "Moving version $Version [$(1+$BranchesCreated.Count/2)/$($VersionsToMove.Count)]"
         # Copy the manifests to the new directory
         $SourceFolder = Join-Path -Path $FromAppFolder -ChildPath $Version
