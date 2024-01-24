@@ -2634,7 +2634,7 @@ if (($script:Option -eq 'QuickUpdateVersion') -and ($ScriptSettings.SuppressQuic
 }
 Write-Host
 
-# Confirm the user undertands the implications of using the quick update mode
+# Confirm the user undertands the implications of moving package
 if (($script:Option -eq 'MovePackageIdentifier')) {
   $_menu = @{
     entries       = @('[Y] Continue moving package'; '*[Q] Exit Script')
@@ -2689,6 +2689,9 @@ if (($script:Option -eq 'MovePackageIdentifier')) {
       # Update the ref for upstream master
       git fetch upstream master --quiet
 
+      # Create an array for logging all the branches that were created
+      $BranchesCreated = @()
+
       foreach ($Version in $VersionsToMove) {
         # Copy the manifests to the new directory
         $SourceFolder = Join-Path -Path $FromAppFolder -ChildPath $Version
@@ -2710,6 +2713,10 @@ if (($script:Option -eq 'MovePackageIdentifier')) {
         $BranchName = "Move-$OldPackageIdentifier-v$Version"
         git switch -c "$BranchName" --quiet
         git push --set-upstream origin "$BranchName" --quiet
+        $BranchesCreated += $BranchName
+        if ($ScriptSettings.AutoSubmitPRs -eq 'Always') {
+          gh pr create -f
+        }
 
         # Switch back to the master branch
         git switch -d upstream/master -q
@@ -2720,11 +2727,27 @@ if (($script:Option -eq 'MovePackageIdentifier')) {
         $BranchName = "Remove-$OldPackageIdentifier-v$Version"
         git switch -c "$BranchName" --quiet
         git push --set-upstream origin "$BranchName" --quiet
+        $BranchesCreated += $BranchName
+        if ($ScriptSettings.AutoSubmitPRs -eq 'Always') {
+          gh pr create -f
+        }
       }
 
     }
     default {
       Out-Null # Intentionally do nothing here
+    }
+  }
+  if ($ScriptSettings.AutoSubmitPRs -eq 'Ask') {
+    $_menu = @{
+      entries       = @('[Y] Yes'; '*[N] No')
+      Prompt        = "Do you want to submit all $($BranchesCreated.Count) PRs now?"
+      HelpText      = "If you choose 'No', the pull requests will need to be manually created"
+      DefaultString = 'N'
+    }
+    switch ( Invoke-KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString'] -HelpText $_menu['HelpText']) {
+      'Y' { $PromptSubmit = '0' }
+      default { Out-Null }
     }
   }
   Invoke-CleanExit
