@@ -2731,7 +2731,7 @@ if (($script:Option -eq 'MovePackageIdentifier')) {
 }
 
 # Request Package Identifier and Validate
-Read-PackageIdentifier $script:PackageIdentifier
+$script:PackageIdentifier = Read-PackageIdentifier $script:PackageIdentifier
 
 # Request Package Version and Validate
 do {
