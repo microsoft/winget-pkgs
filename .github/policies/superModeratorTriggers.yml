@@ -1,0 +1,81 @@
+id: superModeratorTriggers
+name: GitOps.PullRequestIssueManagement
+description: |-
+  Defines additional permissions that can be given to "Super-Moderators"
+  Contractors, consultants, or other users explicitly authorized by Microsoft
+  can be given special permissions exceeding those of normal moderators by
+  adding them to this file.
+owner:
+resource: repository
+disabled: false
+where:
+configuration:
+  resourceManagementConfiguration:
+    eventResponderTasks:
+      - if:
+          # If the activity sender is any one of the super-moderators, has Admin permission on the repo, or has Write permissions on the repo. . .
+          - or:
+              - activitySenderHasPermission:
+                  permission: Admin
+              - activitySenderHasPermission:
+                  permission: Write
+              - isActivitySender:
+                  user: denelon
+                  issueAuthor: False
+        then:
+          # If the payload is an issue_Comment or a Pull_Request_Review_Comment
+          - if:
+              - or:
+                  - payloadType: Issue_Comment
+                  - payloadType: Pull_Request_Review_Comment
+            # Take different actions based on the comment pattern
+            then:
+              # Force-Merge
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[Ff]orce[\s-][Mm]erge'
+                      isRegex: True
+                then:
+                  - approvePullRequest:
+                      comment: "This PR is being forcibly merged"
+                  - enableAutoMerge:
+                      mergeMethod: Squash
+                  - removeLabel:
+                      label: Needs-Attention
+                  - removeLabel:
+                      label: Needs-Author-Feedback
+              # Lock-Issue
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[Ll]ock[\s-][Ii]ssue'
+                      isRegex: True
+                then:
+                  - lockIssue
+              # PSA
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[Pp][Ss][Aa]'
+                      isRegex: True
+                then:
+                  - addLabel:
+                      label: Public-Service-Announcement
+              # Manually-Validated
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[Mm]anually[\s-][Vv]alidated'
+                      isRegex: True
+                then:
+                  - addLabel:
+                      label: Validation-Completed
+                  - removeLabel:
+                      label: Needs-Attention
+              # Triaged
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[Tt]riaged'
+                      isRegex: True
+                then:
+                  - removeLabel:
+                      label: Needs-Triage
+onFailure:
+onSuccess:
