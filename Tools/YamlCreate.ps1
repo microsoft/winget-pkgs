@@ -319,6 +319,14 @@ $Patterns = @{
   ARP_DisplayVersionMaxLength   = $InstallerSchema.Definitions.AppsAndFeaturesEntry.properties.DisplayVersion.maxLength
 }
 
+# Since this script changes the UI Calling Culture, a clean exit should set it back to the user preference
+Function Invoke-CleanExit {
+  Write-Host
+  [Threading.Thread]::CurrentThread.CurrentUICulture = $callingUICulture
+  [Threading.Thread]::CurrentThread.CurrentCulture = $callingCulture
+  exit
+}
+
 # This function validates whether a string matches Minimum Length, Maximum Length, and Regex pattern
 # The switches can be used to specify if null values are allowed regardless of validation
 Function Test-String {
@@ -2620,10 +2628,7 @@ if (($script:Option -eq 'QuickUpdateVersion') -and ($ScriptSettings.SuppressQuic
     'Y' { Write-Host -ForegroundColor DarkYellow -Object "`n`nContinuing with Quick Update" }
     'N' { $script:Option = 'New'; Write-Host -ForegroundColor DarkYellow -Object "`n`nSwitched to Full Update Experience" }
     default {
-      Write-Host
-      [Threading.Thread]::CurrentThread.CurrentUICulture = $callingUICulture
-      [Threading.Thread]::CurrentThread.CurrentCulture = $callingCulture
-      exit
+      Invoke-CleanExit
     }
   }
 }
@@ -2722,10 +2727,7 @@ if (($script:Option -eq 'MovePackageIdentifier')) {
       Out-Null # Intentionally do nothing here
     }
   }
-  Write-Host
-  [Threading.Thread]::CurrentThread.CurrentUICulture = $callingUICulture
-  [Threading.Thread]::CurrentThread.CurrentCulture = $callingCulture
-  exit
+  Invoke-CleanExit
 }
 
 # Request Package Identifier and Validate
@@ -2761,9 +2763,7 @@ if ($ScriptSettings.ContinueWithExistingPRs -ne 'always' -and $script:Option -ne
     $_PRTitle = $PRApiResponse.items.title
     if ($ScriptSettings.ContinueWithExistingPRs -eq 'never') {
       Write-Host -ForegroundColor Red "Existing PR Found - $_PRUrl"
-      [Threading.Thread]::CurrentThread.CurrentUICulture = $callingUICulture
-      [Threading.Thread]::CurrentThread.CurrentCulture = $callingCulture
-      exit
+      Invoke-CleanExit
     }
     $_menu = @{
       entries       = @('[Y] Yes'; '*[N] No')
@@ -2775,10 +2775,7 @@ if ($ScriptSettings.ContinueWithExistingPRs -ne 'always' -and $script:Option -ne
     switch ( Invoke-KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString'] -HelpText $_menu['HelpText'] -HelpTextColor $_menu['HelpTextColor'] ) {
       'Y' { Write-Host }
       default {
-        Write-Host
-        [Threading.Thread]::CurrentThread.CurrentUICulture = $callingUICulture
-        [Threading.Thread]::CurrentThread.CurrentCulture = $callingCulture
-        exit
+        Invoke-CleanExit
       }
     }
   }
@@ -2800,9 +2797,7 @@ if ($script:Option -in @('NewLocale'; 'EditMetadata'; 'RemoveManifest')) {
     Write-Host -ForegroundColor 'Red' -Object 'Could not find required manifests, input a version containing required manifests or "exit" to cancel'
     $PromptVersion = Read-Host -Prompt 'Version' | TrimString
     if ($PromptVersion -eq 'exit') {
-      [Threading.Thread]::CurrentThread.CurrentUICulture = $callingUICulture
-      [Threading.Thread]::CurrentThread.CurrentCulture = $callingCulture
-      exit
+      Invoke-CleanExit
     }
     if (Test-Path -Path "$AppFolder\..\$PromptVersion") {
       $script:OldManifests = Get-ChildItem -Path "$AppFolder\..\$PromptVersion"
@@ -2819,9 +2814,7 @@ if ($script:Option -in @('NewLocale'; 'EditMetadata'; 'RemoveManifest')) {
 if (-not (Test-Path -Path "$AppFolder\..")) {
   if ($script:Option -in @('QuickUpdateVersion', 'Auto')) {
     Write-Host -ForegroundColor Red 'This option requires manifest of previous version of the package. If you want to create a new package, please select Option 1.'
-    [Threading.Thread]::CurrentThread.CurrentUICulture = $callingUICulture
-    [Threading.Thread]::CurrentThread.CurrentCulture = $callingCulture
-    exit
+    Invoke-CleanExit
   }
   $script:OldManifestType = 'None'
 }
@@ -3018,10 +3011,7 @@ Switch ($script:Option) {
     switch ( Invoke-KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString'] -HelpText $_menu['HelpText'] -HelpTextColor $_menu['HelpTextColor']) {
       'Y' { Write-Host; continue }
       default {
-        Write-Host;
-        [Threading.Thread]::CurrentThread.CurrentUICulture = $callingUICulture
-        [Threading.Thread]::CurrentThread.CurrentCulture = $callingCulture
-        exit 1
+        Invoke-CleanExit
       }
     }
 
@@ -3257,9 +3247,7 @@ if ($PromptSubmit -eq '0') {
 
 } else {
   Write-Host
-  [Threading.Thread]::CurrentThread.CurrentUICulture = $callingUICulture
-  [Threading.Thread]::CurrentThread.CurrentCulture = $callingCulture
-  exit
+  Invoke-CleanExit
 }
 [Threading.Thread]::CurrentThread.CurrentUICulture = $callingUICulture
 [Threading.Thread]::CurrentThread.CurrentCulture = $callingCulture
