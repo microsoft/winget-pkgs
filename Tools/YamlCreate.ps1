@@ -2654,7 +2654,6 @@ if (($script:Option -eq 'MovePackageIdentifier')) {
         if (!(Test-Path -Path "$FromAppFolder")) {
           Write-Host -ForegroundColor 'Red' -Object "No manifests found for $OldPackageIdentifier"
         } else {
-          $OldPackageIdentifier = $PackageIdentifier
           $manifestsExist = $true
           Write-Host
         }
