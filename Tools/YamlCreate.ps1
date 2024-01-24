@@ -2684,9 +2684,6 @@ if (($script:Option -eq 'MovePackageIdentifier')) {
       # Update the ref for upstream master
       git fetch upstream master --quiet
 
-      # Create an array for logging all the branches that were created
-      $BranchesCreated = @()
-
       foreach ($Version in $VersionsToMove) {
         # Copy the manifests to the new directory
         $SourceFolder = Join-Path -Path $FromAppFolder -ChildPath $Version
@@ -2708,7 +2705,6 @@ if (($script:Option -eq 'MovePackageIdentifier')) {
         $BranchName = "Move-$OldPackageIdentifier-v$Version"
         git switch -c "$BranchName" --quiet
         git push --set-upstream origin "$BranchName" --quiet
-        $BranchesCreated += $BranchName
 
         # Switch back to the master branch
         git switch -d upstream/master -q
@@ -2719,18 +2715,16 @@ if (($script:Option -eq 'MovePackageIdentifier')) {
         $BranchName = "Remove-$OldPackageIdentifier-v$Version"
         git switch -c "$BranchName" --quiet
         git push --set-upstream origin "$BranchName" --quiet
-        $BranchesCreated += $BranchName
       }
 
-      Write-Output $BranchesCreated
     }
     default {
-      Write-Host
-      [Threading.Thread]::CurrentThread.CurrentUICulture = $callingUICulture
-      [Threading.Thread]::CurrentThread.CurrentCulture = $callingCulture
-      exit
+      Out-Null # Intentionally do nothing here
     }
   }
+  Write-Host
+  [Threading.Thread]::CurrentThread.CurrentUICulture = $callingUICulture
+  [Threading.Thread]::CurrentThread.CurrentCulture = $callingCulture
   exit
 }
 
