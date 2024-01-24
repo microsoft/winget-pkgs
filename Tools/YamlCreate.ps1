@@ -2650,6 +2650,10 @@ if (($script:Option -eq 'MovePackageIdentifier')) {
       # for the user, but it will create and push the branches
       Write-Host; Write-Host
 
+      # Update the ref for upstream master and switch to it to ensure the latest manifest information
+      git fetch upstream master --quiet
+      git switch -d upstream/master -q
+
       # Request the current identifier and validate that it exists
       Write-Host -ForegroundColor 'Green' -Object "What is the current package identifier?" -NoNewline
       do {
@@ -2685,9 +2689,6 @@ if (($script:Option -eq 'MovePackageIdentifier')) {
 
       # Get a list of the versions to move
       $VersionsToMove = @(Get-ChildItem -Path $FromAppFolder | Where-Object {@(Get-ChildItem -Directory -Path $_.FullName).Count -eq 0}).Name
-
-      # Update the ref for upstream master
-      git fetch upstream master --quiet
 
       # Create an array for logging all the branches that were created
       $BranchesCreated = @()
@@ -2746,7 +2747,12 @@ if (($script:Option -eq 'MovePackageIdentifier')) {
       DefaultString = 'N'
     }
     switch ( Invoke-KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString'] -HelpText $_menu['HelpText']) {
-      'Y' { $PromptSubmit = '0' }
+      'Y' {
+        foreach ($Branch in $BranchesCreated) {
+          git switch $Branch --quiet
+          gh pr create -f
+        }
+       }
       default { Out-Null }
     }
   }
