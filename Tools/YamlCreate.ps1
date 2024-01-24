@@ -2703,7 +2703,7 @@ if (($script:Option -eq 'MovePackageIdentifier')) {
 
         # Create and push to a new branch
         git switch -d upstream/master -q
-        git add $DestinationFolder.FullName
+        git add $DestinationFolder
         git commit -m "Move $OldPackageIdentifier $Version to $NewPackageIdentifier $Version" --quiet
         $BranchName = "Move-$OldPackageIdentifier-v$Version"
         git switch -c "$BranchName" --quiet
