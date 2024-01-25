@@ -168,7 +168,7 @@ if ($Settings) {
   exit
 }
 
-$ScriptHeader = '# Created with YamlCreate.ps1 v2.3.0'
+$ScriptHeader = '# Created with YamlCreate.ps1 v2.3.1'
 $ManifestVersion = '1.5.0'
 $PSDefaultParameterValues = @{ '*:Encoding' = 'UTF8' }
 $Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
@@ -179,6 +179,7 @@ $callingCulture = [Threading.Thread]::CurrentThread.CurrentCulture
 [Threading.Thread]::CurrentThread.CurrentCulture = 'en-US'
 if (-not ([System.Environment]::OSVersion.Platform -match 'Win')) { $env:TEMP = '/tmp/' }
 $wingetUpstream = 'https://github.com/microsoft/winget-pkgs.git'
+$RunHash = $(Get-FileHash -InputStream $([IO.MemoryStream]::new([byte[]][char[]]$(Get-Date).Ticks.ToString()))).Hash.Substring(0,8)
 
 if ($ScriptSettings.EnableDeveloperOptions -eq $true -and $null -ne $ScriptSettings.OverrideManifestVersion) {
   $script:UsesPrerelease = $ScriptSettings.OverrideManifestVersion -gt $ManifestVersion
@@ -2706,7 +2707,6 @@ if (($script:Option -eq 'MovePackageIdentifier')) {
 
       # Create an array for logging all the branches that were created
       $BranchesCreated = @()
-      $RunHash = $(Get-FileHash -InputStream $([IO.MemoryStream]::new([byte[]][char[]]$(Get-Date).ToString()))).Hash.Substring(0,6)
 
       foreach ($Version in $VersionsToMove) {
         Write-Host
@@ -3243,12 +3243,7 @@ if ($PromptSubmit -eq '0') {
   git fetch upstream master --quiet
   git switch -d upstream/master
   if ($LASTEXITCODE -eq '0') {
-    # Make sure path exists and is valid before hashing
-    $UniqueBranchID = ''
-    if ($script:LocaleManifestPath -and (Test-Path -Path $script:LocaleManifestPath)) { $UniqueBranchID = $UniqueBranchID + $($(Get-FileHash $script:LocaleManifestPath).Hash[0..6] -Join '') }
-    if ($script:InstallerManifestPath -and (Test-Path -Path $script:InstallerManifestPath)) { $UniqueBranchID = $UniqueBranchID + $($(Get-FileHash $script:InstallerManifestPath).Hash[0..6] -Join '') }
-    if (Test-String -IsNull $UniqueBranchID) { $UniqueBranchID = 'DEL' }
-    $BranchName = "$PackageIdentifier-$PackageVersion-$UniqueBranchID"
+    $BranchName = "$PackageIdentifier-$PackageVersion-$RunHash"
     # Git branch names cannot start with `.` cannot contain any of {`..`, `\`, `~`, `^`, `:`, ` `, `?`, `@{`, `[`}, and cannot end with {`/`, `.lock`, `.`}
     $BranchName = $BranchName -replace '[\~,\^,\:,\\,\?,\@\{,\*,\[,\s]{1,}|[.lock|/|\.]*$|^\.{1,}|\.\.', ''
     git add "$(Join-Path (Get-Item $AppFolder).Parent.FullName -ChildPath '*')"
