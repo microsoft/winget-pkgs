@@ -2615,7 +2615,7 @@ if (!$script:UsingAdvancedOption) {
   if ($AutoUpgrade) { $script:Option = 'Auto' }
 }
 
-# Confirm the user undertands the implications of using the quick update mode
+# Confirm the user understands the implications of using the quick update mode
 if (($script:Option -eq 'QuickUpdateVersion') -and ($ScriptSettings.SuppressQuickUpdateWarning -ne 'true')) {
   $_menu = @{
     entries       = @('[Y] Continue with Quick Update'; '[N] Use Full Update Experience'; '*[Q] Exit Script')
