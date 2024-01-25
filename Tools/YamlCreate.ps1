@@ -2649,7 +2649,7 @@ if (($script:Option -eq 'QuickUpdateVersion') -and ($ScriptSettings.SuppressQuic
 }
 Write-Host
 
-# Confirm the user undertands the implications of moving package
+# Confirm the user understands the implications of moving package
 if (($script:Option -eq 'MovePackageIdentifier')) {
   $_menu = @{
     entries       = @('[Y] Continue moving package'; '*[Q] Exit Script')
