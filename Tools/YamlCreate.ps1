@@ -319,8 +319,23 @@ $Patterns = @{
   ARP_DisplayVersionMaxLength   = $InstallerSchema.Definitions.AppsAndFeaturesEntry.properties.DisplayVersion.maxLength
 }
 
+# check if upstream exists
+($remoteUpstreamUrl = $(git remote get-url upstream)) *> $null
+if ($remoteUpstreamUrl -and $remoteUpstreamUrl -ne $wingetUpstream) {
+  git remote set-url upstream $wingetUpstream
+} elseif (!$remoteUpstreamUrl) {
+  Write-Host -ForegroundColor 'Yellow' 'Upstream does not exist. Permanently adding https://github.com/microsoft/winget-pkgs as remote upstream'
+  git remote add upstream $wingetUpstream
+}
+
 # Since this script changes the UI Calling Culture, a clean exit should set it back to the user preference
+# If the remote upstream was changed, that should also be set back
 Function Invoke-CleanExit {
+
+  if ($remoteUpstreamUrl -and $remoteUpstreamUrl -ne $wingetUpstream) {
+    git remote set-url upstream $remoteUpstreamUrl
+  }
+
   Write-Host
   [Threading.Thread]::CurrentThread.CurrentUICulture = $callingUICulture
   [Threading.Thread]::CurrentThread.CurrentCulture = $callingCulture
@@ -3225,15 +3240,6 @@ if ($PromptSubmit -eq '0') {
     git config --add core.safecrlf false
   }
 
-  # check if upstream exists
-  ($remoteUpstreamUrl = $(git remote get-url upstream)) *> $null
-  if ($remoteUpstreamUrl -and $remoteUpstreamUrl -ne $wingetUpstream) {
-    git remote set-url upstream $wingetUpstream
-  } elseif (!$remoteUpstreamUrl) {
-    Write-Host -ForegroundColor 'Yellow' 'Upstream does not exist. Permanently adding https://github.com/microsoft/winget-pkgs as remote upstream'
-    git remote add upstream $wingetUpstream
-  }
-
   # Fetch the upstream branch, create a commit onto the detached head, and push it to a new branch
   git fetch upstream master --quiet
   git switch -d upstream/master
@@ -3272,9 +3278,6 @@ if ($PromptSubmit -eq '0') {
     git config --replace core.safecrlf $_previousConfig
   } else {
     git config --unset core.safecrlf
-  }
-  if ($remoteUpstreamUrl -and $remoteUpstreamUrl -ne $wingetUpstream) {
-    git remote set-url upstream $remoteUpstreamUrl
   }
 
 } else {
