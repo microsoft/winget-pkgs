@@ -168,7 +168,7 @@ if ($Settings) {
   exit
 }
 
-$ScriptHeader = '# Created with YamlCreate.ps1 v2.3.1'
+$ScriptHeader = '# Created with YamlCreate.ps1 v2.3.2'
 $ManifestVersion = '1.5.0'
 $PSDefaultParameterValues = @{ '*:Encoding' = 'UTF8' }
 $Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
@@ -2756,7 +2756,7 @@ if (($script:Option -eq 'MovePackageIdentifier')) {
       Out-Null # Intentionally do nothing here
     }
   }
-  if ($ScriptSettings.AutoSubmitPRs -eq 'Ask') {
+  if ($ScriptSettings.AutoSubmitPRs -eq 'Ask' -and $BranchesCreated.Count -gt 0) {
     $_menu = @{
       entries       = @('[Y] Yes'; '*[N] No')
       Prompt        = "Do you want to submit all $($BranchesCreated.Count) PRs now?"
