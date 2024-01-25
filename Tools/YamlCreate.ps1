@@ -2703,10 +2703,10 @@ if (($script:Option -eq 'MovePackageIdentifier')) {
         # Rename the files
         Get-ChildItem -Path $DestinationFolder -Filter "*$OldPackageIdentifier*" -Recurse | ForEach-Object {Rename-Item -Path $_.FullName -NewName $($_.Name -replace [regex]::Escape($OldPackageIdentifier),"$NewPackageIdentifier")}
         # Update PackageIdentifier in all files
-        Get-ChildItem -Path $DestinationFolder -Filter "*$NewPackageIdentifier*" -Recurse | ForEach-Object  {[System.IO.File]::WriteAllLines($_.FullName, $((Get-Content -Path $_.FullName -Raw) -replace [regex]::Escape($OldPackageIdentifier),"$NewPackageIdentifier"), $Utf8NoBomEncoding)}
+        Get-ChildItem -Path $DestinationFolder -Filter "*$NewPackageIdentifier*" -Recurse | ForEach-Object  {[System.IO.File]::WriteAllLines($_.FullName, $((Get-Content -Path $_.FullName -Raw).TrimEnd() -replace [regex]::Escape($OldPackageIdentifier),"$NewPackageIdentifier"), $Utf8NoBomEncoding)}
         # Update Moniker in all files
         if (Test-String $NewMoniker -Not -IsNull) {
-          Get-ChildItem -Path $DestinationFolder -Filter "*$NewPackageIdentifier*" -Recurse | ForEach-Object  {[System.IO.File]::WriteAllLines($_.FullName, $((Get-Content -Path $_.FullName -Raw) -replace "Moniker:.*","Moniker: $NewMoniker"), $Utf8NoBomEncoding)}
+          Get-ChildItem -Path $DestinationFolder -Filter "*$NewPackageIdentifier*" -Recurse | ForEach-Object  {[System.IO.File]::WriteAllLines($_.FullName, $((Get-Content -Path $_.FullName -Raw).TrimEnd() -replace "Moniker:.*","Moniker: $NewMoniker"), $Utf8NoBomEncoding)}
         }
 
         # Create and push to a new branch
