@@ -2692,6 +2692,7 @@ if (($script:Option -eq 'MovePackageIdentifier')) {
 
       # Create an array for logging all the branches that were created
       $BranchesCreated = @()
+      $RunHash = $(Get-FileHash -InputStream $([IO.MemoryStream]::new([byte[]][char[]]$(Get-Date).ToString()))).Hash.Substring(0,6)
 
       foreach ($Version in $VersionsToMove) {
         Write-Host
@@ -2713,7 +2714,7 @@ if (($script:Option -eq 'MovePackageIdentifier')) {
         git switch -d upstream/master -q
         git add $DestinationFolder
         git commit -m "Move $OldPackageIdentifier $Version to $NewPackageIdentifier $Version" --quiet
-        $BranchName = "Move-$OldPackageIdentifier-v$Version"
+        $BranchName = "Move-$OldPackageIdentifier-v$Version-$RunHash"
         git switch -c "$BranchName" --quiet
         git push --set-upstream origin "$BranchName" --quiet
         $BranchesCreated += $BranchName
@@ -2727,7 +2728,7 @@ if (($script:Option -eq 'MovePackageIdentifier')) {
         # Create and push to a new branch
         git add $(Remove-ManifestVersion $SourceFolder)
         git commit -m "Remove $OldPackageIdentifier $Version to $NewPackageIdentifier $Version" --quiet
-        $BranchName = "Remove-$OldPackageIdentifier-v$Version"
+        $BranchName = "Remove-$OldPackageIdentifier-v$Version-$RunHash"
         git switch -c "$BranchName" --quiet
         git push --set-upstream origin "$BranchName" --quiet
         $BranchesCreated += $BranchName
