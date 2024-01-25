@@ -2661,8 +2661,7 @@ if (($script:Option -eq 'MovePackageIdentifier')) {
   switch ( Invoke-KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString'] -HelpText $_menu['HelpText'] -HelpTextColor $_menu['HelpTextColor']) {
     'Y' {
       # To move a package doesn't require a package version like the other functions of YamlCreate. Therefore, to avoid requesting the information twice
-      # the entirety of the Move packages script happens here. This will then exit the script directly. Additionally, this mode will not create the PRs
-      # for the user, but it will create and push the branches
+      # the entirety of the Move packages script happens here. This will then exit the script directly.
       Write-Host; Write-Host
 
       # Update the ref for upstream master and switch to it to ensure the latest manifest information
