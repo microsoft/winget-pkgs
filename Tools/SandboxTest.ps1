@@ -122,7 +122,7 @@ $ProgressPreference = $oldProgressPreference
 
 $vcLibsUwp = @{
   url    = 'https://aka.ms/Microsoft.VCLibs.x64.14.00.Desktop.appx'
-  hash   = '9BFDE6CFCC530EF073AB4BC9C4817575F63BE1251DD75AAA58CB89299697A569'
+  hash   = 'B56A9101F706F9D95F815F5B7FA6EFBAC972E86573D378B96A07CFF5540C5961'
   SaveTo = $(Join-Path $tempFolder -ChildPath 'Microsoft.VCLibs.x64.14.00.Desktop.appx')
 }
 $uiLibsUwp = @{
