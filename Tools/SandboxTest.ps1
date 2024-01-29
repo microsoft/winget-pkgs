@@ -190,6 +190,7 @@ copy -Path $settingsPathInSandbox -Destination C:\Users\WDAGUtilityAccount\AppDa
 Write-Host @'
 
 --> Installing the Manifest $manifestFileName
+
 '@
 winget install -m '$manifestPathInSandbox' --verbose-logs --ignore-local-archive-malware-scan --dependency-source winget $WinGetOptions
 
