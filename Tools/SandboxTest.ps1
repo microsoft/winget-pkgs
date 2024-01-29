@@ -95,6 +95,7 @@ function Get-Release {
   $releasesAPIResponse = $releasesAPIResponse | Sort-Object -Property published_at -Descending
 
   $assets = $releasesAPIResponse[0].assets
+  $script:versionTag = $releasesAPIResponse[0].tag_name
   $shaFileUrl = $assets.Where({ $_.name -eq 'Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.txt' }).browser_download_url
   $shaFile = New-TemporaryFile
   $WebClient.DownloadFile($shaFileUrl, $shaFile.FullName)
@@ -225,9 +226,11 @@ $bootstrapPs1Content += @"
 Write-Host @'
 --> Installing WinGet
 '@
-`$ProgressPreference = 'SilentlyContinue'
-Add-AppxPackage -Path '$($desktopAppInstaller.pathInSandbox)' -DependencyPath '$($vcLibsUwp.pathInSandbox)','$($uiLibsUwp.pathInSandbox)'
-
+Install-PackageProvider -Name NuGet -Force | Out-Null
+Install-Module -Name Microsoft.WinGet.Client -Force -Repository PSGallery | Out-Null
+# Need to use Start-Job to prevent progress bars from staying on screen. Could do this by setting the progress preference too, but this seemed cleaner
+Start-Job -ScriptBlock {Repair-WinGetPackageManager -Version $versionTag} -Name 'Install-Winget' | Out-Null
+Wait-Job -Name 'Install-Winget' | Out-Null
 Write-Host @'
 --> Disabling safety warning when running installer
 '@
@@ -237,8 +240,6 @@ New-ItemProperty -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Policies
 Write-Host @'
 Tip: you can type 'Update-EnvironmentVariables' to update your environment variables, such as after installing a new software.
 '@
-
-
 "@
 
 if (-Not [String]::IsNullOrWhiteSpace($Manifest)) {
@@ -247,40 +248,33 @@ if (-Not [String]::IsNullOrWhiteSpace($Manifest)) {
 
   $bootstrapPs1Content += @"
 Write-Host @'
-
 --> Configuring Winget
 '@
 winget settings --Enable LocalManifestFiles
 winget settings --Enable LocalArchiveMalwareScanOverride
 copy -Path $settingsPathInSandbox -Destination C:\Users\WDAGUtilityAccount\AppData\Local\Packages\Microsoft.DesktopAppInstaller_8wekyb3d8bbwe\LocalState\settings.json
 `$originalARP = Get-ARPTable
+
 Write-Host @'
-
-
 --> Installing the Manifest $manifestFileName
-
 '@
 winget install -m '$manifestPathInSandbox' --verbose-logs --ignore-local-archive-malware-scan --dependency-source winget $WinGetOptions
 
 Write-Host @'
-
 --> Refreshing environment variables
 '@
 Update-EnvironmentVariables
 
 Write-Host @'
-
 --> Comparing ARP Entries
 '@
 (Compare-Object (Get-ARPTable) `$originalARP -Property DisplayName,DisplayVersion,Publisher,ProductCode,Scope)| Select-Object -Property * -ExcludeProperty SideIndicator | Format-Table
-
 "@
 }
 
 if (-Not [String]::IsNullOrWhiteSpace($Script)) {
   $bootstrapPs1Content += @"
 Write-Host @'
-
 --> Running the following script:
 
 {
