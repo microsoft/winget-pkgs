@@ -119,8 +119,7 @@ $bootstrapSettingsContent['$schema'] = 'https://aka.ms/winget-settings.schema.js
 $bootstrapSettingsContent['logging'] = @{level = 'verbose' }
 if ($EnableExperimentalFeatures) {
   $bootstrapSettingsContent['experimentalFeatures'] = @{
-    dependencies     = $true
-    openLogsArgument = $true
+    windowsFeature     = $true
   }
 }
 
@@ -135,7 +134,7 @@ $settingsPathInSandbox = Join-Path -Path $desktopInSandbox -ChildPath (Join-Path
 # Create Bootstrap script
 
 # See: https://stackoverflow.com/a/22670892/12156188
-$bootstrapPs1Content = @'
+$bootstrapPs1Content = @"
 function Update-EnvironmentVariables {
   foreach($level in "Machine","User") {
     [Environment]::GetEnvironmentVariables($level).GetEnumerator() | % {
@@ -154,12 +153,11 @@ function Get-ARPTable {
       Where-Object { $_.DisplayName -and (-not $_.SystemComponent -or $_.SystemComponent -ne 1 ) } |
       Select-Object DisplayName, DisplayVersion, Publisher, @{N='ProductCode'; E={$_.PSChildName}}, @{N='Scope'; E={if($_.PSDrive.Name -eq 'HKCU') {'User'} else {'Machine'}}}
 }
-'@
 
-$bootstrapPs1Content += @"
 Write-Host @'
 --> Installing WinGet
 '@
+
 Install-PackageProvider -Name NuGet -Force | Out-Null
 Install-Module -Name Microsoft.WinGet.Client -Force -Repository PSGallery | Out-Null
 # Need to use Start-Job to prevent progress bars from staying on screen. Could do this by setting the progress preference too, but this seemed cleaner
