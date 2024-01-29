@@ -93,90 +93,24 @@ function Get-Release {
     exit 1
   }
   $releasesAPIResponse = $releasesAPIResponse | Sort-Object -Property published_at -Descending
-
-  $assets = $releasesAPIResponse[0].assets
-  $script:versionTag = $releasesAPIResponse[0].tag_name
-  $shaFileUrl = $assets.Where({ $_.name -eq 'Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.txt' }).browser_download_url
-  $shaFile = New-TemporaryFile
-  $WebClient.DownloadFile($shaFileUrl, $shaFile.FullName)
-
-  return @{
-    shaFileUrl     = $assets.Where({ $_.name -eq 'Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.txt' }).browser_download_url
-    msixFileUrl    = $assets.Where({ $_.name -eq 'Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.msixbundle' }).browser_download_url
-    releaseTag     = $releasesAPIResponse[0].tag_name
-    shaFileContent = $(Get-Content $shaFile.FullName)
-  }
+  return $releasesAPIResponse[0].tag_name
 }
 
 # Hide the progress bar of Invoke-WebRequest
 $oldProgressPreference = $ProgressPreference
 $ProgressPreference = 'SilentlyContinue'
 
-$latestRelease = Get-Release
-$desktopAppInstaller = @{
-  url    = $latestRelease.msixFileUrl
-  hash   = $latestRelease.shaFileContent
-  SaveTo = $(Join-Path $env:LOCALAPPDATA -ChildPath "Packages\Microsoft.DesktopAppInstaller_8wekyb3d8bbwe\bin\$($latestRelease.releaseTag)\Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.msixbundle")
-}
-
-$ProgressPreference = $oldProgressPreference
-
-$vcLibsUwp = @{
-  url    = 'https://aka.ms/Microsoft.VCLibs.x64.14.00.Desktop.appx'
-  hash   = 'B56A9101F706F9D95F815F5B7FA6EFBAC972E86573D378B96A07CFF5540C5961'
-  SaveTo = $(Join-Path $tempFolder -ChildPath 'Microsoft.VCLibs.x64.14.00.Desktop.appx')
-}
-$uiLibsUwp = @{
-  url    = 'https://github.com/microsoft/microsoft-ui-xaml/releases/download/v2.7.3/Microsoft.UI.Xaml.2.7.x64.appx'
-  hash   = '8CE30D92ABEC6522BEB2544E7B716983F5CBA50751B580D89A36048BF4D90316'
-  SaveTo = $(Join-Path $tempFolder -ChildPath 'Microsoft.UI.Xaml.2.7.x64.appx')
-}
-
-$dependencies = @($desktopAppInstaller, $vcLibsUwp, $uiLibsUwp)
+# Get the release information to be used for installing WinGet
+$versionTag = Get-Release
 
 # Clean temp directory
-Get-ChildItem $tempFolder -Recurse -Exclude $($(Split-Path $dependencies.SaveTo -Leaf) -replace '\.([^\.]+)$', '.*') | Remove-Item -Force -Recurse
+Get-ChildItem $tempFolder -Recurse | Remove-Item -Force -Recurse
 
 if (-Not [String]::IsNullOrWhiteSpace($Manifest)) {
   Copy-Item -Path $Manifest -Recurse -Destination $tempFolder
 }
 
-# Download dependencies
-
-Write-Host '--> Checking dependencies'
-
 $desktopInSandbox = 'C:\Users\WDAGUtilityAccount\Desktop'
-
-foreach ($dependency in $dependencies) {
-  $dependency.pathInSandbox = Join-Path -Path $desktopInSandbox -ChildPath (Join-Path -Path $tempFolderName -ChildPath $(Split-Path $dependency.SaveTo -Leaf))
-
-  # Only download if the file does not exist, or its hash does not match.
-  if (-Not ((Test-Path -Path $dependency.SaveTo) -And $dependency.hash -eq $(Get-FileHash $dependency.SaveTo).Hash)) {
-    Write-Host @"
-    - Downloading:
-      $($dependency.url)
-"@
-
-    try {
-      # If the directory doesn't already exist, create it
-      $saveDirectory = Split-Path $dependency.SaveTo
-      if (-Not (Test-Path -Path $saveDirectory)) {
-        New-Item -ItemType Directory -Path $saveDirectory -Force | Out-Null
-      }
-      $WebClient.DownloadFile($dependency.url, $dependency.SaveTo)
-
-    } catch {
-      #Pass the exception as an inner exception
-      throw [System.Net.WebException]::new("Error downloading $($dependency.url).", $_.Exception)
-    }
-    if (-not ($dependency.hash -eq $(Get-FileHash $dependency.SaveTo).Hash)) {
-      throw [System.Activities.VersionMismatchException]::new('Dependency hash does not match the downloaded file')
-    }
-  }
-}
-
-# Copy the version of winget to the sandbox test folder
-Copy-Item -Path $desktopAppInstaller.SaveTo -Destination (Join-Path -Path $tempFolder -ChildPath (Split-Path $desktopAppInstaller.SaveTo -Leaf))
 
 # Create Bootstrap settings
 # Experimental features can be enabled for forward compatibility with PR's
@@ -233,13 +167,11 @@ Start-Job -ScriptBlock {Repair-WinGetPackageManager -Version $versionTag} -Name 
 Wait-Job -Name 'Install-Winget' | Out-Null
 Write-Host @'
 --> Disabling safety warning when running installer
+
 '@
 New-Item -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Policies\Associations' | Out-Null
 New-ItemProperty -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Policies\Associations' -Name 'ModRiskFileTypes' -Type 'String' -Value '.bat;.exe;.reg;.vbs;.chm;.msi;.js;.cmd' | Out-Null
 
-Write-Host @'
-Tip: you can type 'Update-EnvironmentVariables' to update your environment variables, such as after installing a new software.
-'@
 "@
 
 if (-Not [String]::IsNullOrWhiteSpace($Manifest)) {
@@ -256,12 +188,16 @@ copy -Path $settingsPathInSandbox -Destination C:\Users\WDAGUtilityAccount\AppDa
 `$originalARP = Get-ARPTable
 
 Write-Host @'
+
 --> Installing the Manifest $manifestFileName
 '@
 winget install -m '$manifestPathInSandbox' --verbose-logs --ignore-local-archive-malware-scan --dependency-source winget $WinGetOptions
 
 Write-Host @'
+
 --> Refreshing environment variables
+Tip: you can type 'Update-EnvironmentVariables' to update your environment variables, such as after installing a new software.
+
 '@
 Update-EnvironmentVariables
 
@@ -269,6 +205,7 @@ Write-Host @'
 --> Comparing ARP Entries
 '@
 (Compare-Object (Get-ARPTable) `$originalARP -Property DisplayName,DisplayVersion,Publisher,ProductCode,Scope)| Select-Object -Property * -ExcludeProperty SideIndicator | Format-Table
+
 "@
 }
 
