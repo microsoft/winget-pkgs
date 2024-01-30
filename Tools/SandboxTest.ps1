@@ -78,7 +78,6 @@ New-Item $tempFolder -ItemType Directory -ErrorAction SilentlyContinue | Out-Nul
 
 # Set dependencies
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-$WebClient = New-Object System.Net.WebClient
 
 function Get-Release {
   $releasesAPIResponse = Invoke-RestMethod 'https://api.github.com/repos/microsoft/winget-cli/releases?per_page=100'
@@ -95,10 +94,6 @@ function Get-Release {
   $releasesAPIResponse = $releasesAPIResponse | Sort-Object -Property published_at -Descending
   return $releasesAPIResponse[0].tag_name
 }
-
-# Hide the progress bar of Invoke-WebRequest
-$oldProgressPreference = $ProgressPreference
-$ProgressPreference = 'SilentlyContinue'
 
 # Get the release information to be used for installing WinGet
 $versionTag = Get-Release
@@ -136,31 +131,40 @@ $settingsPathInSandbox = Join-Path -Path $desktopInSandbox -ChildPath (Join-Path
 # See: https://stackoverflow.com/a/22670892/12156188
 $bootstrapPs1Content = @"
 function Update-EnvironmentVariables {
-  foreach($level in "Machine","User") {
-    [Environment]::GetEnvironmentVariables($level).GetEnumerator() | % {
+  foreach(`$level in "Machine","User") {
+    [Environment]::GetEnvironmentVariables(`$level).GetEnumerator() | % {
         # For Path variables, append the new values, if they're not already in there
-        if($_.Name -match '^Path$') {
-          $_.Value = ($((Get-Content "Env:$($_.Name)") + ";$($_.Value)") -split ';' | Select -unique) -join ';'
+        if(`$_.Name -match '^Path$') {
+          `$_.Value = (`$((Get-Content "Env:`$(`$_.Name)") + ";`$(`$_.Value)") -split ';' | Select -unique) -join ';'
         }
-        $_
+        `$_
     } | Set-Content -Path { "Env:$($_.Name)" }
   }
 }
 
 function Get-ARPTable {
-  $registry_paths = @('HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*','HKLM:\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*', 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*', 'HKCU:\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*')
-  return Get-ItemProperty $registry_paths -ErrorAction SilentlyContinue |
-      Where-Object { $_.DisplayName -and (-not $_.SystemComponent -or $_.SystemComponent -ne 1 ) } |
-      Select-Object DisplayName, DisplayVersion, Publisher, @{N='ProductCode'; E={$_.PSChildName}}, @{N='Scope'; E={if($_.PSDrive.Name -eq 'HKCU') {'User'} else {'Machine'}}}
+  `$registry_paths = @('HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*','HKLM:\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*', 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*', 'HKCU:\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*')
+  return Get-ItemProperty `$registry_paths -ErrorAction SilentlyContinue |
+      Where-Object { `$_.DisplayName -and (-not `$_.SystemComponent -or `$_.SystemComponent -ne 1 ) } |
+      Select-Object DisplayName, DisplayVersion, Publisher, @{N='ProductCode'; E={`$_.PSChildName}}, @{N='Scope'; E={if(`$_.PSDrive.Name -eq 'HKCU') {'User'} else {'Machine'}}}
 }
 
 Write-Host @'
 --> Installing WinGet
 '@
+try {
+  Install-PackageProvider -Name NuGet -Force | Out-Null
+  Install-Module -Name Microsoft.WinGet.Client -Force -Repository PSGallery | Out-Null
+} catch {
+  throw "Microsoft.Winget.Client was not installed successfully"
+} finally {
+  # Check to be sure it acutally installed
+  if (-not(Get-Module -ListAvailable -Name Microsoft.Winget.Client)) {
+    throw "Microsoft.Winget.Client was not found. Check that the Windows Package Manager PowerShell module was installed correctly."
+  }
+}
 
-Install-PackageProvider -Name NuGet -Force | Out-Null
-Install-Module -Name Microsoft.WinGet.Client -Force -Repository PSGallery | Out-Null
-# Need to use Start-Job to prevent progress bars from staying on screen. Could do this by setting the progress preference too, but this seemed cleaner
+# Use Start-Job to run the job as a background task without UI, which suppresses the progress bars without affecting the progress preference
 Start-Job -ScriptBlock {Repair-WinGetPackageManager -Version $versionTag} -Name 'Install-Winget' | Out-Null
 Wait-Job -Name 'Install-Winget' | Out-Null
 Write-Host @'
