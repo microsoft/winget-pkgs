@@ -138,7 +138,7 @@ function Update-EnvironmentVariables {
           `$_.Value = (`$((Get-Content "Env:`$(`$_.Name)") + ";`$(`$_.Value)") -split ';' | Select -unique) -join ';'
         }
         `$_
-    } | Set-Content -Path { "Env:$($_.Name)" }
+    } | Set-Content -Path { "Env:`$(`$_.Name)" }
   }
 }
 
