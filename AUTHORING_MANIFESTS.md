@@ -1,7 +1,7 @@
-[Manifest Specification]:   doc/manifest/schema/1.4.0
-[versionSchema]:            doc/manifest/schema/1.4.0/version.md
-[defaultLocaleSchema]:      doc/manifest/schema/1.4.0/defaultLocale.md
-[installerSchema]:          doc/manifest/schema/1.4.0/installer.md
+[Manifest Specification]:   doc/manifest/schema/1.5.0
+[versionSchema]:            doc/manifest/schema/1.5.0/version.md
+[defaultLocaleSchema]:      doc/manifest/schema/1.5.0/defaultLocale.md
+[installerSchema]:          doc/manifest/schema/1.5.0/installer.md
 
 # Authoring Manifests
 
@@ -40,7 +40,7 @@ You should take a look at our [Manifest Specification]. Don't worry. If this is 
 Manifests submitted to the Windows Package Manager Community Repository should be submitted as a multi-file manifest. The minimum required files are a [version][versionSchema] file, a [defaultLocale][defaultLocaleSchema] file and an [installer][installerSchema] file.
 
 ## Creating your first manifest
-Once you have package in mind that doesn't already exist in the repository, you can now start [creating your package manifest](https://docs.microsoft.com/en-us/windows/package-manager/package/manifest?tabs=minschema%2Cversion-example). We recommend using the [Windows Package Manager Manifest Creator (a.k.a Winget-Create)](https://github.com/microsoft/winget-create) to help you generate your manifest. Winget-Create is a command line tool that will prompt you for relevant metadata related to your package. Once you are done, Winget-Create will validate your manifest to verify that it is correct and allow you to submit your newly-created manifest directly to the winget-pkgs repository by linking your GitHub account. Alternatively, you can use the [YamlCreate.ps1 Script](Tools/YamlCreate.ps1). More information on using YamlCreate is found in the [script documentation](doc/tools/YamlCreate.md).
+Once you have a package in mind that doesn't already exist in the repository, you can now start [creating your package manifest](https://docs.microsoft.com/en-us/windows/package-manager/package/manifest?tabs=minschema%2Cversion-example). We recommend using the [Windows Package Manager Manifest Creator (a.k.a Winget-Create)](https://github.com/microsoft/winget-create) to help you generate your manifest. Winget-Create is a command line tool that will prompt you for relevant metadata related to your package. Once you are done, Winget-Create will validate your manifest to verify that it is correct and allow you to submit your newly-created manifest directly to the winget-pkgs repository by linking your GitHub account. Alternatively, you can use the [YamlCreate.ps1 Script](Tools/YamlCreate.ps1). More information on using YamlCreate is found in the [script documentation](doc/tools/YamlCreate.md).
 
 
 ### How do I install Winget-Create?
@@ -66,3 +66,14 @@ If you decide to create or edit your manifest by manually editing the YAML, it i
 ```powershell
 winget validate --manifest <Path to manifest>
 ```
+
+## Testing
+It is important to test your manifest before submission to ensure it meets the repository's quality standards. While it isn't possible to describe everything that we check for when reviewing contributions, testing your manifest helps keep the quality of contributions high and increases the chance of your contribution being accepted.
+
+* Manifests should be tested to ensure applications can install unattended
+* Manifests should be tested to ensure application version matches the Package Version, or that AppsAndFeaturesEntries are included if necessary
+* Manifests should be tested to ensure application publisher matches the defaultLocale Publisher, or that AppsAndFeaturesEntries are included if necessary
+* Manifests should be tested to ensure application name matches the defaultLocale PackageName, or that AppsAndFeaturesEntries are included if necessary
+
+After enabling the setting for local manifests (`winget settings --enable LocalManifestFiles`), manifests can be tested locally with `winget install --manifest <path>`.
+If your system supports Windows Sandbox, you can also use the [SandboxTest.ps1 Script](https://github.com/microsoft/winget-pkgs/blob/master/doc/tools/SandboxTest.md) to test the manifest in the Windows Sandbox. This is the preferred method, as it ensures the package doesn't require any dependencies to install.

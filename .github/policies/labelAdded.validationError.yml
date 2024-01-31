@@ -1,0 +1,45 @@
+id: labelAdded.validationError
+name: GitOps.PullRequestIssueManagement
+description: Handlers when "Validation-Error" label is added
+owner:
+resource: repository
+disabled: false
+where:
+configuration:
+  resourceManagementConfiguration:
+    eventResponderTasks:
+      - description: >-
+          When the label "Validation-Error" is added to a pull request
+          * Add a reply notifying the issue author
+          * Assign to the author
+          * Label with Needs-Author-Feedback
+          * Remove Azure-Pipeline-Passed label
+          * Remove Needs-Attention label
+        if:
+          - payloadType: Pull_Request
+          - labelAdded:
+              label: Validation-Error
+        then:
+          - addReply:
+              reply: >-
+                Hello @${issueAuthor},
+
+
+                An issue was identified during the manual review, and the PR request cannot be approved. Please see comments for more information.
+
+                Please address the issue and resubmit, or if you disagree with this resolution, please raise an issue and flag this PR for further discussion.
+
+
+                Template: msftbot/validationError/manualReview
+          - assignTo:
+              author: True
+          - addLabel:
+              label: Needs-Author-Feedback
+          - removeLabel:
+              label: Azure-Pipeline-Passed
+          - removeLabel:
+              label: Needs-Attention
+        # The policy service should trigger even when the label was added by the policy service
+        triggerOnOwnActions: true
+onFailure:
+onSuccess:
