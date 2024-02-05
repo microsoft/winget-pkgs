@@ -1,7 +1,7 @@
-[Manifest Specification]:   doc/manifest/schema/1.5.0
-[versionSchema]:            doc/manifest/schema/1.5.0/version.md
-[defaultLocaleSchema]:      doc/manifest/schema/1.5.0/defaultLocale.md
-[installerSchema]:          doc/manifest/schema/1.5.0/installer.md
+[Manifest Specification]:   doc/manifest/schema/1.6.0
+[versionSchema]:            doc/manifest/schema/1.6.0/version.md
+[defaultLocaleSchema]:      doc/manifest/schema/1.6.0/defaultLocale.md
+[installerSchema]:          doc/manifest/schema/1.6.0/installer.md
 
 # Authoring Manifests
 
