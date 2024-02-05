@@ -551,7 +551,7 @@ ManifestVersion: 1.6.0
 
  **Optional Field**
 
- This key represents what the Windows Package Manager should do regarding the currently installed package during a package upgrade. If the package should be uninstalled first, the "uninstallPrevious" value should be specified. If the package should not be upgradeable through WinGet, the "deny" value should be specified.
+ This key represents what the Windows Package Manager should do regarding the currently installed package during a package upgrade. If the package should be uninstalled first, the "uninstallPrevious" value should be specified. If the package should not be upgraded through WinGet, the "deny" value should be specified.
 
  > [!NOTE]
  This key may be present in the root of the manifest as the default value for all installer nodes. This key may also be present in an individual installer node as well. If this key is in the manifest root and in an installer node, the value in the installer node will apply.
