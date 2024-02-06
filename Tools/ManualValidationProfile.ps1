@@ -1,5 +1,5 @@
 $VM = 0
-$build = 122
+$build = 129
 $ipconfig = (ipconfig)
 $remoteIP = ([ipaddress](($ipconfig | select-string "Default Gateway") -split ": ")[1]).IPAddressToString
 #$remoteIP = ([ipaddress](($ipconfig[($ipconfig | select-string "vEthernet").LineNumber..$ipconfig.length] | select-string "IPv4 Address") -split ": ")[1]).IPAddressToString
@@ -26,7 +26,7 @@ Function Send-SharedError {
 	)
 	Write-Host "Writing $($c.length) lines."
 	$c | Out-File "$writeFolder\err.txt"
-	Set-Status "SendStatus"
+	Get-TrackerVMSetStatus "SendStatus"
 }
 
 Function Get-TrackerVMSetStatus {
@@ -36,7 +36,7 @@ Function Get-TrackerVMSetStatus {
 		[string]$Package,
 		[int]$PR
 	)
-	$out = Get-Status
+	$out = Get-TrackerVMStatus
 	if ($Status) {
 		($out | where {$_.vm -match $VM}).Status = $Status
 	}
@@ -73,4 +73,3 @@ Function Get-TrackerVMStatus{
 	}
 	$out
 }
-
