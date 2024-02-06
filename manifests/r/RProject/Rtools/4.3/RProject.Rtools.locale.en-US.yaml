@@ -1,4 +1,4 @@
-# Created with YamlCreate.ps1 v2.3.2 $debug=QUSU.CRLF.7-4-1.Win32NT
+# Created with YamlCreate.ps1 v2.3.1 Dumplings Mod $debug=QUSU.CRLF.7-4-1.Win32NT
 # yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.5.0.schema.json
 
 PackageIdentifier: RProject.Rtools
@@ -22,79 +22,15 @@ Tags:
 - r
 - rstats
 ReleaseNotes: |-
-  Distributed as rtools43-5948-5818.exe.
-
-  gRPC and dependencies re2, abseil and c-ares have been added. Protobuf has been updated to 25.2. Rtools now include also the native protocol buffer compiler (protoc).
-
-  A batch-file wrapper has been created for pkg-config to simplify use in some github action runners. See the documentation for more details (for R 4.3, for R-devel).
-
-  The pkg-config configuration has been fixed to allow detection of expanded absolute paths, which improves output for some libraries (MXE packages).
-
-  Packages linking httpuv now also need to link dbghelp, uuid and ole32. This affects one CRAN package, httpuv.
-
-  Packages linking protobuf now also need to link the abseil libraries. The number of abseil libraries is large, but one may avoid the need for specifying them individually by using pkg-config.
-
-  Code using xml2 may have to be updated to follow changes in the API. This required changes in one CRAN package, XML.
-
-  Upstream MXE changes have been merged from fca881fdf19405f80252967c97590976f2c2b570, with numerous additional updates to selected MXE packages as detailed below.
-
-  GCC has been patched to avoid a size limit for pre-compiled headers (PCH), back-porting a change from a later version. This change does not make static libraries incompatible.
-
-  An experimental build of this version of Rtools43 for aarch64 is available from here and unstable experimental snapshots from here. See this blog post for initial information on the R on Windows/aarch64 (ARM64) efforts. No assumptions should be made on that the aarch64 Rtools (or R support) will stay in the current form. The links for the builds should be considered as temporary and currently the content replaces that from previous version of Rtools. The aarch64 support is only part of R-devel (not R 4.3).
-
-  These packages have been updated:
-
-  armadillo 12.0.1 to 12.6.7
-  blas 3.11.0 to 3.12.0
-  boost 1.81.0 to 1.84.0
-  brotli 1.0.9 to 1.1.0
-  cblas 3.11.0 to 3.12.0
-  cmake-host 3.24.3 to 3.28.1
-  curl 7.88.1 to 8.5.0
-  fontconfig 2.14.2 to 2.15.0
-  gdal 3.7.2 to 3.8.2
-  gpgme 1.22.0 to 1.23.2
-  harfbuzz 8.2.0 to 8.3.0
-  icu4c 73.2 to 74.1
-  imagemagick 7.1.1-15 to 7.1.1-25
-  intel-tbb 2021.10.0 to 2021.11.0
-  isl 0.16.1 to 0.24
-  jasper 4.0.0 to 4.1.1
-  kealib 1.5.1 to 1.5.3
-  lapack 3.11.0 to 3.12.0
-  lcms 2.15 to 2.16
-  libarchive 3.6.2 to 3.7.2
-  libgcrypt 1.10.2 to 1.10.3
-  libgsf 1.14.50 to 1.14.51
-  libraw 0.21.1 to 0.21.2
-  libsndfile 1.2.0 to 1.2.2
-  libssh 0.10.5 to 0.10.6
-  libssh2 1.10.0 to 1.11.0
-  libuv 1.44.2 to 1.47.0
-  libvpx 1.13.0 to 1.13.1
-  libxml2 2.10.4 to 2.12.3
-  libxslt 1.1.38 to 1.1.39
-  libzmq de5ee18 to 959a133
-  minizip 4.0.1 to 4.0.4
-  openblas 0.3.24 to 0.3.26
-  opencv 4.8.0 to 4.9.0
-  openssl 3.1.2 to 3.1.4
-  pango 1.50.14 to 1.51.0
-  postgresql 13.12 to 13.13
-  proj 9.3.0 to 9.3.1
-  protobuf 21.12 to 25.2
-  sdl2 2.28.3 to 2.28.5
-  sqlite 3430100 to 3440200
-  tiff 4.5.1 to 4.6.0
-  xz 5.4.4 to 5.4.5
-  zlib 1.3 to 1.3.1
-
-  These packages have been added:
-
-  abseil-cpp 20230802.1
-  c-ares 1_25_0
-  grpc 1.60.0
-  re2 2023-11-01
+  Distributed as rtools43-5958-5975.exe.
+  This is a correction release which fixes a problem in the build of the Msys2 part of release 5948.
+  A typical symptom of the problem in 5948 is that Msys2 packages cannot be installed or upgraded using pacman.
+  Users who have already upgraded to 5948 and wish to avoid another upgrade may choose to fix the problem by running update-ca-trust in the Rtools (Msys2) shell, this will allow installation/upgrading of packages.
+  A more complete fixup is to run:
+  for F in /var/lib/pacman/local/*/install ; do
+    bash -c  "cd / ; . $F ; [[ \$(type -t post_install)  == function ]] && post_install"
+  done
+  At the time of this correction release, the corresponding experimental build for aarch64 has been updated. It has several improvements allowing more of CRAN packages to be built for aarch64 than with 5948.
 ReleaseNotesUrl: https://cloud.r-project.org/bin/windows/Rtools/rtools43/news.html
 # PurchaseUrl:
 # InstallationNotes:
