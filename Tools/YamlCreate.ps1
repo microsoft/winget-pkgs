@@ -168,8 +168,8 @@ if ($Settings) {
   exit
 }
 
-$ScriptHeader = '# Created with YamlCreate.ps1 v2.3.2'
-$ManifestVersion = '1.5.0'
+$ScriptHeader = '# Created with YamlCreate.ps1 v2.3.3'
+$ManifestVersion = '1.6.0'
 $PSDefaultParameterValues = @{ '*:Encoding' = 'UTF8' }
 $Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
 $ofs = ', '
@@ -189,7 +189,7 @@ if ($ScriptSettings.EnableDeveloperOptions -eq $true -and $null -ne $ScriptSetti
 $useDirectSchemaLink = if ($env:GITHUB_ACTIONS -eq $true) {
   $true
 } else {
-  (Invoke-WebRequest "https://aka.ms/winget-manifest.version.$ManifestVersion.schema.json" -UseBasicParsing).BaseResponse.ContentLength -eq -1
+  (Invoke-WebRequest "https://aka.ms/winget-manifest.version.$ManifestVersion.schema.json" -UseBasicParsing).BaseResponse.ResponseUri.IdnHost -match 'bing'
 }
 $SchemaUrls = @{
   version       = if ($useDirectSchemaLink) { "https://raw.githubusercontent.com/microsoft/winget-cli/master/schemas/JSON/manifests/v$ManifestVersion/manifest.version.$ManifestVersion.json" } else { "https://aka.ms/winget-manifest.version.$ManifestVersion.schema.json" }
