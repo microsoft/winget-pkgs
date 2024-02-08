@@ -68,18 +68,18 @@ Validation ususally proceeds in this way:
 1. Automatic Validation Pipeline performs analysis of manifest and URLs, then automated install of package in a VM. Any errors in this step will add an error label to the PR. If no errors, proceed to step 7.
 1. Error label applied to PR. 
 1. An hourly scripted process will extract the error from the validation run logs and add to the PR comments.
-  - If no errors, and the package is on the auto-waiver list (described below) then the PR gets a waiver.
-  - For Defender errors, it will retry after an 18-hour break. This should be long enough to allow Defender teams to update signatures and clear false positives, and short enough to minimize blocking.
-  - Some other specific types of PR have special handling.
+  1. If no errors, and the package is on the auto-waiver list (described below) then the PR gets a waiver.
+  1. For Defender errors, it will retry after an 18-hour break. This should be long enough to allow Defender teams to update signatures and clear false positives, and short enough to minimize blocking.
+  1. Some other specific types of PR have special handling.
 1. Remediation of errant PRs.
-  - Manifest errors either need a manifest update or sometimes a manifest path update. The error should be available in the comments.
-  - URL and download errors can sometimes be fixed through removing the URL from the manifest, if it's not an `InstallerUrl`. If it is, then another source for the package would be needed for the PR to proceed.
-  - Installer errors can sometimes be fixed by updating installer switches, or adding a dependency if the error states that one is missing.
-  - Application launch and run errors can also sometimes be fixed through adding a dependency, again only if one is called for.
-  - Other kinds of errors can't easliy be advanced past and might block a PR for some time.
-  - If no errors, then install the manifest in a local VM - essentially the Manual Validation Pipeline again - and examine. if still no errors, then the PR gets a waiver. (Some packages, most frequently CLI and tray-based, require manual review.)
+  1. Manifest errors either need a manifest update or sometimes a manifest path update. The error should be available in the comments.
+  1. URL and download errors can sometimes be fixed through removing the URL from the manifest, if it's not an `InstallerUrl`. If it is, then another source for the package would be needed for the PR to proceed.
+  1. Installer errors can sometimes be fixed by updating installer switches, or adding a dependency if the error states that one is missing.
+  1. Application launch and run errors can also sometimes be fixed through adding a dependency, again only if one is called for.
+  1. Other kinds of errors can't easliy be advanced past and might block a PR for some time.
+  1. If no errors, then install the manifest in a local VM 1. essentially the Manual Validation Pipeline again 1. and examine. if still no errors, then the PR gets a waiver. (Some packages, most frequently CLI and tray-based, require manual review.)
 1. After remediation, return to step 2.
-  - If the issue couldn't be remediated, then the PR doesn't have a clear path and might linger for some time.
+  1. If the issue couldn't be remediated, then the PR doesn't have a clear path and might linger for some time.
 1. `Validation-Complete` label applied.
 1. Moderator reviews, performs Validation Checks below, and approves if they pass.
 1. Publish pipeline reviews and publishes repository into WinGet source data file.
