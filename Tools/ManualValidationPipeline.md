@@ -78,7 +78,7 @@ Validation ususally proceeds in this way:
   - Application launch and run errors can also sometimes be fixed through adding a dependency, again only if one is called for.
   - Other kinds of errors can't easliy be advanced past and might block a PR for some time.
   - If no errors, then install the manifest in a local VM - essentially the Manual Validation Pipeline again - and examine. if still no errors, then the PR gets a waiver. (Some packages, most frequently CLI and tray-based, require manual review.)
-1. After remediation, return to #2.
+1. After remediation, return to step 2.
   - If the issue couldn't be remediated, then the PR doesn't have a clear path and might linger for some time.
 1. `Validation-Complete` label applied.
 1. Moderator reviews, performs Validation Checks below, and approves if they pass.
@@ -90,12 +90,12 @@ Validation ususally proceeds in this way:
 
 The following checks are performed on each PR before approval:
 
+- User has a CLA on file.
 - Has passed through the Validation process described above and received the label `Validation-Complete` but not any error labels. (`Azure-Pipeline-Passed` label optional.)
 - All Conversations are Resolved. (This blocks merging.)
-- Any concerns raised are settled and any discussion has reached a conclusion.
+- Any concerns raised are settled and any discussions have reached a conclusion.
 - Manual package review, using the Manual Validation Pipeline yet again. 
   - This check is skipped for new versions of packages with manifests already in the repository. 
-- Previous manifest version check. If there's no previous manifest for this software package, launch install into Manual Validation Pipeline.
 - PR Version is valid, and either semantic or string. 
   - Note: "latest" is a reserved version number and will need verification. 
 - `A` - Auth.csv review.
@@ -110,6 +110,10 @@ The following checks are performed on each PR before approval:
 - `I` - InstallerUrl contains PackageVersion. This check doesn't block but is informative. In the future it might check for other manifest versions, to ensure the installer isn't for another version of the software package.
 - `D` -  Directory Listing - If the PR has more than 2 files, then this checks the previous version to see if the files are the same. Blocks if files are different, otherwise output the number of files in the directory. Only checks on addition PRs and skips new packages.
 - `V` -  Versions remaining - If the PR is the highest version remaining in the repo, automated reply, and block if the user isn't in Auth.csv. Otherwise output the number of versions in the version directory. Only checks on removal PRs.
+- Previous manifest version. 
+  - If the previous version is lower than the current PR version, then it's a newer version, output the previous version. 
+  - If the previous version is equal to the current PR version, then they're the same (it's an update) so output "=". 
+  - If the previous version is higher than the current PR version, then it's a newer version, output the previous version, but in the "caution" color for the selected chromatic set. 
 
 (The letters are meant to not spell any word. If this spells a word, please let me know.)
 
