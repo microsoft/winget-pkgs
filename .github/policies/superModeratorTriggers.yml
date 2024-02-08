@@ -22,6 +22,9 @@ configuration:
               - isActivitySender:
                   user: denelon
                   issueAuthor: False
+              - isActivitySender:
+                  user: stephengillie
+                  issueAuthor: False
         then:
           # If the payload is an issue_Comment or a Pull_Request_Review_Comment
           - if:
@@ -35,47 +38,36 @@ configuration:
                   - commentContains:
                       pattern: '\[[Pp]olicy\]\s+[Ff]orce[\s-][Mm]erge'
                       isRegex: True
+                  - isPullRequest
                 then:
                   - approvePullRequest:
-                      comment: "This PR is being forcibly merged"
+                      comment: >-
+                        A Microsoft-authorized representative is forcibly merging this PR
+
+
+                        Template: msftbot/microsoft/merge
                   - enableAutoMerge:
                       mergeMethod: Squash
                   - removeLabel:
                       label: Needs-Attention
                   - removeLabel:
                       label: Needs-Author-Feedback
-              # Lock-Issue
-              - if:
-                  - commentContains:
-                      pattern: '\[[Pp]olicy\]\s+[Ll]ock[\s-][Ii]ssue'
-                      isRegex: True
-                then:
-                  - lockIssue
-              # PSA
-              - if:
-                  - commentContains:
-                      pattern: '\[[Pp]olicy\]\s+[Pp][Ss][Aa]'
-                      isRegex: True
-                then:
-                  - addLabel:
-                      label: Public-Service-Announcement
               # Manually-Validated
               - if:
                   - commentContains:
                       pattern: '\[[Pp]olicy\]\s+[Mm]anually[\s-][Vv]alidated'
                       isRegex: True
+                  - isPullRequest
                 then:
+                  - addReply:
+                      reply:  >-
+                        A Microsoft-authorized representative has manually validated this pull requests to conform with the security requirements of this repository. This package may be exempt from additional pipeline runs.
+
+
+                        Template: msftbot/microsoft/merge
                   - addLabel:
                       label: Validation-Completed
                   - removeLabel:
                       label: Needs-Attention
-              # Triaged
-              - if:
-                  - commentContains:
-                      pattern: '\[[Pp]olicy\]\s+[Tt]riaged'
-                      isRegex: True
-                then:
-                  - removeLabel:
-                      label: Needs-Triage
 onFailure:
 onSuccess:

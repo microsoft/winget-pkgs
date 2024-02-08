@@ -48,8 +48,11 @@ configuration:
               - or:
                   - payloadType: Issue_Comment
                   - payloadType: Pull_Request_Review_Comment
+            # Remove the Needs-Triage label
             # Take different actions based on the comment pattern
             then:
+              - removeLabel:
+                  label: Needs-Triage
               # Blocking-Issue
               - if:
                   - commentContains:
@@ -249,6 +252,14 @@ configuration:
                 then:
                   - removeLabel:
                       label: Blocking-Issue
+              # PSA
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[Pp][Ss][Aa]'
+                      isRegex: True
+                then:
+                  - addLabel:
+                      label: Public-Service-Announcement
               # Reset-Feedback
               - if:
                   - commentContains:
