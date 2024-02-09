@@ -86,16 +86,31 @@ Moderators are often the first to see and triage new issues, and so they have th
 * `Area-Validation-Pipeline`
 * `Blocking-Issue`
 * `Dependencies`
+* `DriverInstall`
 * `Hardware`
 * `Installer-Issue`
 * `Interactive-Only-Installer`
+* `Last-Version-Remaining`
+* `License-Blocks-Install`
 * `Manifest-Content-Incomplete`
 * `Needs-Attention`
 * `Needs-Author-Feedback`
 * `Needs-CLA`
 * `Needs-Manual-Merge`
+* `Network-Blocker`
+* `Portable-Tar`
+* `Scripted-Application`
+* `Windows-Features`
 * `Zip-Binary`
 
 > [!NOTE]
-> * Adding `Hardware`, `Interactive-Only-Installer`,  or `Zip-Binary` will automatically add `Blocking-Issue`
+>
+> * Applying the following labels will automatically add `Blocking-Issue`
+>   * `Hardware`
+>   * `Interactive-Only-Installer`
+>   * `License-Blocks-Install`
+>   * `Portable-Tar`
+>   * `Windows-Features`
+>   * `Zip-Binary`
 > * Adding `Needs-Attention` to a PR will automatically assign the repository maintainers
+> * `[Policy] Unblocked` will remove `Blocking-Issue` label.
