@@ -47,6 +47,14 @@ The Word Filter List began as a way to catch EULA and other license agreement in
 
 The WordFilterList.txt file is a plain text file, interpreted as an array of strings. (To-do - currently a variable in the PS1 file.)
 
+## Version Parameter check
+
+Versions are usually dot-delimited integers. Version parameters are the characters (major, minor, etc) between the dots. Semantic versions can have up to 4 parameters, while strings can have many more. For most packages, the number of versions does not change very often. But for some packages, one version might have major, minor, and patch, while the subsequent adds a build parameter, and the following removes both the patch and the build. Packages in this list skip this check.
+
+### Data structure
+
+The VersionParameterCheckSkipList.csv file is CSV as named, with 3 columns: PackageIdentifier, UserName who authorized, and PR number where authorized.
+
 ## Addition and Removal
 
 We have a policy of one manifest change per PR. This means that adding a new manifest version and removing the previous usually requires 2 PRs, an addition PR and a removal PR.
@@ -83,7 +91,7 @@ Validation ususally proceeds in this way:
 1. `Validation-Complete` label applied.
 1. Moderator reviews, performs Validation Checks below, and approves if they pass.
 1. Publish pipeline reviews and publishes repository into WinGet source data file.
-1. CDN flushes to repositorypulate with the most recent WinGet source data file version.
+1. CDN flushes to repopulate with the most recent WinGet source data file version.
 1. New manifest data is available to WinGet users.
 
 ## Approval checks

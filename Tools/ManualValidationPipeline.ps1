@@ -1,19 +1,21 @@
 #Copyright 2022-2024 Microsoft Corporation
 #Author: Stephen Gillie
-#Title: Manual Validation Pipeline v3.25.9
+#Title: Manual Validation Pipeline v3.26.11
 #Created: 10/19/2022
-#Updated: 2/7/2024
+#Updated: 2/8/2024
 #Notes: Utilities to streamline evaluating 3rd party PRs.
 #Update log:
+#3.26.11 - Bugfixes to last version remaining check in PR Watcher.
+#3.26.10 - Have Manual Validation not open MSEdge before scan, and modify to close more after.
+#3.26.9 - Bugfix readd Get-SharedError functionality to VM Orchestration.
+#3.26.8 - Change log wording from "version" to "build".
+#3.26.7 - Add another place to check for Internal-Error-Manifest labels.
+#3.26.6 - Modify IEDS call in Add-Waiver to avoid accidentally adding Validation-Complete and a waiver at the same time.
+#3.26.5 - Change Add-PRToRecord Action parameters from positional to tagged.
+#3.26.4 - Update Add-PRToRecord with PR Title collection, to reduce reporting API calls.
 #3.26.3 - Add title collection parameter to reporting tools.
-#3.26.2 - Move ADO calls to Get-WebRequest.
-#3.26.1 - Move regexes and URLs into common variables.
-#3.26.0 - Depreciate wrapper functions: Reply-ToPR (partial), Add-PRLabel, Add-UserToPR, Approve-PR2, Get-JustPRNumber (merged into Get-PRNumber), Get-PRTitle, Get-PRUserName. Depreciate unused functions Convert-ImageToBase64Link & Get-FunctionCountInPSFile.
-#3.25.11 - Caps a few items, including Select-String, True, and False. Update a function name to Get-LazySearchGitHub. Rearrange a few functions into better groups.
-#3.25.10 - Identify PR as parameter, then bugfix to revert overzealous replacing.
-#3.25.9 - "Bubble up" numerous single-caller functions into the calling function. Depreciate functions: Check-Duplicate, Check-FileExist, Check-PRInstallerStatus, Find-Hash, Find-InstallerSet, Get-ExistingVM, Get-RemovePR, Get-RerunPR, Get-RetryDefender, Get-SharedError, Get-TrackerVMMemCheck, Get-TrackerVMReset, Test-Hash, Update-PR - this is the approach to a 4.0 redesign.
 
-$build = 713
+$build = 720
 $appName = "Manual Validation"
 Write-Host "$appName build: $build"
 $MainFolder = "C:\ManVal"
@@ -1407,7 +1409,7 @@ Function Get-PRWatch {
 						$Body = $Body + "`n`n(Automated response - build $build)"
 						Invoke-GitHubPRRequest -PR $PR -Method Post -Type comments -Data $Body -Output Silent 
 						$null = Invoke-GitHubPRRequest -PR $PR -Method POST -Type labels -Data Needs-Author-Feedback
-						Add-PRToRecord -PR $PR "Feedback"
+						Add-PRToRecord -PR $PR -Action "Feedback" -Title $PRtitle
 					}
 				}
 				Write-Host -nonewline -f $matchColor "$(Get-PadRight $PRVersion.toString() 14) | "
@@ -1492,7 +1494,7 @@ Function Get-PRWatch {
 							$AnF = "-"
 							Reply-ToPR -PR $PR -CannedResponse AppsAndFeaturesMissing -UserInput $Submitter -Silent
 							Invoke-GitHubPRRequest -PR $PR -Method POST -Type labels -Data "Needs-Author-Feedback" -Output Silent
-							Add-PRToRecord -PR $PR "Feedback"
+							Add-PRToRecord -PR $PR -Action "Feedback" -Title $PRtitle
 						} elseif (($ANFOld -eq $False) -and ($ANFCurrent -eq $True)) {
 							$matchColor = $cautionColor
 							$AnF = "+"
@@ -1550,14 +1552,14 @@ Function Get-PRWatch {
 
 
 				if (($PRvMan -ne "N") -AND (($PRtitle -match "Automatic deletion") -OR ($PRtitle -match "Delete") -OR ($PRtitle -match "Remove"))) {#Removal PR
-					$Versions = Get-ManifestListing MathiasSvensson.MultiCommander 0 -Versions
+					$Versions = Get-ManifestListing  -PackageIdentifier $PackageIdentifier  -Version 0 -Versions
 					$NumVersions = $Versions.count
-					if ($ManifestVersion -eq $Versions[-1]) {
+					if (($prVersion -eq $Versions[-1]) -OR ($NumVersions -eq 1)) {
 						$matchColor = $invalidColor
 						Reply-ToPR -PR $PR -CannedResponse VersionCount -UserInput $Submitter -Silent
 						Invoke-GitHubPRRequest -PR $PR -Method POST -Type labels -Data "Needs-Author-Feedback" -Output Silent
 						Invoke-GitHubPRRequest -PR $PR -Method POST -Type labels -Data "Last-Version-Remaining" -Output Silent
-						Add-PRToRecord -PR $PR "Feedback"
+						Add-PRToRecord -PR $PR -Action "Feedback" -Title $PRtitle
 						$NumVersions = "L"
 					}
 				} else {#Addition PR
@@ -1571,7 +1573,7 @@ Function Get-PRWatch {
 							$matchColor = $cautionColor
 							Reply-ToPR -PR $PR -CannedResponse ListingDiff -UserInput $GLD -Silent
 							Invoke-GitHubPRRequest -PR $PR -Method POST -Type labels -Data "Needs-Author-Feedback" -Output Silent
-							Add-PRToRecord -PR $PR "Feedback"
+							Add-PRToRecord -PR $PR -Action "Feedback" -Title $PRtitle
 						}#end if GLD
 					}#end if null
 				}#end if PRvMan
@@ -1636,7 +1638,7 @@ Function Get-PRWatch {
 
 				if ($Approve -eq "+") {
 					$Approve = Approve-PR -PR $PR
-					Add-PRToRecord -PR $PR Approved
+					Add-PRToRecord -PR $PR -Action "Approved" -Title $PRtitle
 				}
 
 				Write-Host -nonewline -f $matchColor "$Approve | "
@@ -1721,19 +1723,19 @@ Function Get-GitHubPreset {
 		Switch ($Preset) {
 			"Approved" {
 				$out += Approve-PR -PR $PR; 
-				Add-PRToRecord -PR $PR $Preset
+				Add-PRToRecord -PR $PR -Action $Preset
 			}
 			"AutomationBlock" {
-				Add-PRToRecord -PR $PR Blocking
+				Add-PRToRecord -PR $PR -Action "Blocking"
 				$out += Reply-ToPR -PR $PR -CannedResponse AutomationBlock -UserInput ((Invoke-GitHubPRRequest -PR $PR -Type "" -Output content -JSON).user.login)
 				$out += Invoke-GitHubPRRequest -PR $PR -Method POST -Type labels -Data Network-Blocker
 			}
 			"Blocking" {
-				Add-PRToRecord -PR $PR Blocking
+				Add-PRToRecord -PR $PR -Action "Blocking"
 				$out += Invoke-GitHubPRRequest -PR $PR -Method POST -Type labels -Data Blocking-Issue
 			}
 			"ChangesRequested" {
-				Add-PRToRecord -PR $PR Feedback
+				Add-PRToRecord -PR $PR -Action "Feedback"
 				$out += Invoke-GitHubPRRequest -PR $PR -Method POST -Type labels -Data Needs-Author-Feedback
 				$out += Invoke-GitHubPRRequest -PR $PR -Method POST -Type labels -Data Changes-Requested
 			}
@@ -1755,17 +1757,17 @@ Function Get-GitHubPreset {
 				$out = $out += Invoke-GitHubPRRequest -PR $PR -Method Post -Type comments -Data $Body -Output StatusDescription 
 			}
 			"Closed" {
-				Add-PRToRecord -PR $PR $Preset
+				Add-PRToRecord -PR $PR -Action $Preset
 				$out += $Preset; 
 			}
 			"DefenderFail" {
-				Add-PRToRecord -PR $PR Blocking
+				Add-PRToRecord -PR $PR -Action "Blocking"
 				$out += Reply-ToPR -PR $PR -CannedResponse $CannedResponse -UserInput ((Invoke-GitHubPRRequest -PR $PR -Type "" -Output content -JSON).user.login)
 				$out += Invoke-GitHubPRRequest -PR $PR -Method POST -Type labels -Data Needs-Attention
 				$out += Invoke-GitHubPRRequest -PR $PR -Method POST -Type labels -Data Validation-Defender-Error
 			}
 			"Feedback" {
-				Add-PRToRecord -PR $PR $Preset
+				Add-PRToRecord -PR $PR -Action $Preset
 				$out = $out += Invoke-GitHubPRRequest -PR $PR -Method POST -Type labels -Data
 			}
 			"GitHubStatus" {
@@ -1781,12 +1783,12 @@ Function Get-GitHubPreset {
 				$out += $Preset; 
 			}
 			"InstallerNotSilent" {
-				Add-PRToRecord -PR $PR Feedback
+				Add-PRToRecord -PR $PR -Action "Feedback"
 				$out += Reply-ToPR -PR $PR -CannedResponse $CannedResponse -UserInput ((Invoke-GitHubPRRequest -PR $PR -Type "" -Output content -JSON).user.login)
 				$out += Invoke-GitHubPRRequest -PR $PR -Method POST -Type labels -Data Needs-Author-Feedback
 			}
 			"InstallerMissing" {
-				Add-PRToRecord -PR $PR Feedback
+				Add-PRToRecord -PR $PR -Action "Feedback"
 				$out += Reply-ToPR -PR $PR -CannedResponse $CannedResponse -UserInput ((Invoke-GitHubPRRequest -PR $PR -Type "" -Output content -JSON).user.login)
 				$out += Invoke-GitHubPRRequest -PR $PR -Method POST -Type labels -Data Needs-Author-Feedback
 			}
@@ -1795,33 +1797,33 @@ Function Get-GitHubPreset {
 				$out += $Preset; 
 			}
 			"MergeConflicts" {
-				Add-PRToRecord -PR $PR Closed
+				Add-PRToRecord -PR $PR -Action "Closed"
 				$out += Reply-ToPR -PR $PR -Body "Merge Conflicts."
 			}
 			"NetworkBlocker" {
-				Add-PRToRecord -PR $PR Blocking
+				Add-PRToRecord -PR $PR -Action "Blocking"
 				$out += Invoke-GitHubPRRequest -PR $PR -Method POST -Type labels -Data Network-Blocker
 			}
 			"OneManifestPerPR" {
-				Add-PRToRecord -PR $PR Feedback
+				Add-PRToRecord -PR $PR -Action "Feedback"
 				$out += Reply-ToPR -PR $PR -CannedResponse $CannedResponse -UserInput ((Invoke-GitHubPRRequest -PR $PR -Type "" -Output content -JSON).user.login)
 				$out += Invoke-GitHubPRRequest -PR $PR -Method POST -Type labels -Data Needs-Author-Feedback
 			}
 			"PackageUrl" {
-				Add-PRToRecord -PR $PR Feedback
+				Add-PRToRecord -PR $PR -Action "Feedback"
 				$out += Reply-ToPR -PR $PR -CannedResponse $CannedResponse -UserInput ((Invoke-GitHubPRRequest -PR $PR -Type "" -Output content -JSON).user.login)
 				$out += Invoke-GitHubPRRequest -PR $PR -Method POST -Type labels -Data Changes-Requested
 			}
 			"Project" {
-				Add-PRToRecord -PR $PR $Preset
+				Add-PRToRecord -PR $PR -Action $Preset
 				$out += $Preset; 
 			}
 			"Retry" {
-				Add-PRToRecord -PR $PR $Preset
+				Add-PRToRecord -PR $PR -Action $Preset
 				$out += Invoke-GitHubPRRequest -PR $PR -Type comments -Output StatusDescription -Method POST -Data "/AzurePipelines run"
 			}
 			"Squash" {
-				Add-PRToRecord -PR $PR $Preset
+				Add-PRToRecord -PR $PR -Action $Preset
 				$out += $Preset; 
 			}
 			"Timeclock" {
@@ -1833,14 +1835,14 @@ Function Get-GitHubPreset {
 				$out += $Preset; 
 			}
 			"VedantResetPR" {
-				Add-PRToRecord -PR $PR Closed
+				Add-PRToRecord -PR $PR -Action "Closed"
 				$out += Reply-ToPR -PR $PR -Body "Reset PR."
 				$out += Invoke-GitHubPRRequest -PR $PR -Type assignees -Method DELETE -Data (Invoke-GitHubPRRequest -PR $PR -Type "" -Output content -JSON).user.login
 				$out += Invoke-GitHubPRRequest -PR $PR -Method POST -Type labels -Data -Method DELETE
 			}
 			"Waiver" {
 				$out += Add-Waiver -PR $PR; 
-				Add-PRToRecord -PR $PR $Preset
+				Add-PRToRecord -PR $PR -Action $Preset
 			}
 			"WorkSearch" {
 				Get-WorkSearch
@@ -1924,6 +1926,9 @@ Function Get-PRLabelAction {
 				$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 15 -SearchString "[error] One or more errors occurred."
 				if ($null -match $UserInput) {
 					$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 25 -SearchString "Processing manifest" -length 7
+				}
+				if ($null -match $UserInput) {
+					$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 39 -SearchString "Processing manifest" -length 7
 				}
 				if ($UserInput) {
 					Reply-ToPR -PR $PR -UserInput $UserInput -CannedResponse AutoValEnd
@@ -2083,52 +2088,52 @@ Function Add-Waiver {
 		Switch ($Label) {
 			"Error-Analysis-Timeout" {
 				Invoke-GitHubPRRequest -PR $PR -Method PUT -Type labels -Data "Validation-Completed" 
-				Add-PRToRecord -PR $PR "Manual"
+				Add-PRToRecord -PR $PR -Action "Manual"
 				$Waiver = $Label
 			}
 			"Policy-Test-2.3" {
-				Add-PRToRecord -PR $PR "Waiver"
+				Add-PRToRecord -PR $PR -Action "Waiver"
 				$Waiver = $Label
 			}
 			"Validation-Completed" {
 				Get-GitHubPreset -Preset Approved -PR $PR
 			}
 			"Validation-Domain" {
-				Add-PRToRecord -PR $PR "Waiver"
+				Add-PRToRecord -PR $PR -Action "Waiver"
 				$Waiver = $Label
 			}
 			"Validation-Executable-Error" {
-				Add-PRToRecord -PR $PR "Waiver"
+				Add-PRToRecord -PR $PR -Action "Waiver"
 				$Waiver = $Label
 			}
 			"Validation-Forbidden-URL-Error" {
-				Add-PRToRecord -PR $PR "Waiver"
+				Add-PRToRecord -PR $PR -Action "Waiver"
 				$Waiver = $Label
 			}
 			"Validation-Installation-Error" {
-				Add-PRToRecord -PR $PR "Waiver"
+				Add-PRToRecord -PR $PR -Action "Waiver"
 				$Waiver = $Label
 			}
 			"Validation-No-Executables" {
-				Add-PRToRecord -PR $PR "Waiver"
+				Add-PRToRecord -PR $PR -Action "Waiver"
 				$Waiver = $Label
 			}
 			"Validation-Shell-Execute" {
-				Add-PRToRecord -PR $PR "Waiver"
+				Add-PRToRecord -PR $PR -Action "Waiver"
 				$Waiver = $Label
 			}
 			"Validation-Unattended-Failed" {
-				Add-PRToRecord -PR $PR "Waiver"
+				Add-PRToRecord -PR $PR -Action "Waiver"
 				$Waiver = $Label
 			}
 			"Validation-Unapproved-URL" {
-				Add-PRToRecord -PR $PR "Waiver"
+				Add-PRToRecord -PR $PR -Action "Waiver"
 				$Waiver = $Label
 			}
-			"Retry-1" {
+			"Internal-Error-Dynamic-Scan" {
 				Invoke-GitHubPRRequest -PR $PR -Method PUT -Type labels -Data "Validation-Completed"
 				Invoke-GitHubPRRequest -PR $PR -Method POST -Type labels -Data "Retry-1"
-				Add-PRToRecord -PR $PR "Manual"
+				Add-PRToRecord -PR $PR -Action "Manual"
 			}
 		}
 		if ($Waiver -ne "") {
@@ -3052,7 +3057,7 @@ Function Out-ErrorData (`$errArray,[string]`$serviceName,`$errorName='errors') {
 	`$errArray | ForEach-Object {Out-Log `$_ 'red'}
 };
 Get-TrackerVMSetStatus 'Installing'
-Out-Log ' = = = = Starting Manual Validation pipeline version $build on VM $vm $PackageIdentifier $logLine = = = = '
+Out-Log ' = = = = Starting Manual Validation pipeline build $build on VM $vm $PackageIdentifier $logLine = = = = '
 
 Out-Log 'Pre-testing log cleanup.'
 Out-Log 'Upgrading installed applications.'
@@ -3084,7 +3089,7 @@ Out-ErrorData '$MDLog' 'Manual' 'Dependency'
 Out-ErrorData `$Error 'PowerShell'
 Out-ErrorData (Get-EventLog Application -EntryType Error -after `$TimeStart -ErrorAction Ignore).Message 'Application Log'
 
-Out-Log `" = = = = Failing Manual Validation pipeline version $build on VM $vm for $PackageIdentifier $logLine in `$(((Get-Date) -`$TimeStart).TotalSeconds) seconds. = = = = `"
+Out-Log `" = = = = Failing Manual Validation pipeline build $build on VM $vm for $PackageIdentifier $logLine in `$(((Get-Date) -`$TimeStart).TotalSeconds) seconds. = = = = `"
 Get-TrackerVMSetStatus 'ValidationComplete'
 	Break;
 }
@@ -3103,7 +3108,7 @@ if (Test-Path $RemoteFolder\files.txt) {
 }
 
 Out-Log `"Reading `$(`$files.count) file changes in the last `$(((Get-Date) -`$TimeStart).TotalSeconds) seconds. Starting bulk file execution:`"
-`$files = `$files | Where-Object {`$_ -notmatch 'unins'} | Where-Object {`$_ -notmatch 'dotnet'} | Where-Object {`$_ -notmatch 'redis'} | Where-Object {`$_ -notmatch 'System32'} | Where-Object {`$_ -notmatch 'SysWOW64'} | Where-Object {`$_ -notmatch 'WinSxS'} | Where-Object {`$_ -notmatch 'dump64a'} | Where-Object {`$_ -notmatch 'CbsTemp'}
+`$files = `$files | Where-Object {`$_ -notmatch 'unins'} | Where-Object {`$_ -notmatch 'dotnet'} | Where-Object {`$_ -notmatch 'redis'} | Where-Object {`$_ -notmatch 'msedge'} | Where-Object {`$_ -notmatch 'System32'} | Where-Object {`$_ -notmatch 'SysWOW64'} | Where-Object {`$_ -notmatch 'WinSxS'} | Where-Object {`$_ -notmatch 'dump64a'} | Where-Object {`$_ -notmatch 'CbsTemp'}
 `$files | Out-File 'C:\Users\user\Desktop\ChangedFiles.txt'
 `$files | Select-String '[.]exe`$' | ForEach-Object {if (`$_ -match '$packageName') {Out-Log `$_ 'green'}else{Out-Log `$_ 'cyan'}; try{Start-Process `$_}catch{}};
 `$files | Select-String '[.]msi`$' | ForEach-Object {if (`$_ -match '$packageName') {Out-Log `$_ 'green'}else{Out-Log `$_ 'cyan'}; try{Start-Process `$_}catch{}};
@@ -3114,10 +3119,12 @@ Start-MpScan;
 
 Out-Log `"Defender scan complete, closing windows...`"
 Get-Process msedge | Stop-Process
-(Get-process | Where-Object { `$_.mainwindowtitle -ne '' -and `$_.processname -notmatch '$packageName' -and `$_.processname -ne 'powershell' -and `$_.processname -ne 'WindowsTerminal' -and `$_.processname -ne 'csrss' -and `$_.processname -ne 'dwm'})| ForEach-Object {
-	`$process = (Stop-Process `$_ -PassThru);
-	Out-Log `"`$(`$process.processname) finished with exit code: `$(`$process.ExitCode)`";
-}
+Get-Process mip | Stop-Process
+Get-Process powershell | where {`$_.id -ne `$PID} | Stop-Process
+Get-Process explorer | where {`$_.id -ne `$explorerPid} | Stop-Process
+
+Get-process | Where-Object { `$_.mainwindowtitle -ne '' -and `$_.processname -notmatch '$packageName' -and `$_.processname -ne 'powershell' -and `$_.processname -ne 'WindowsTerminal' -and `$_.processname -ne 'csrss' -and `$_.processname -ne 'dwm'}| Stop-Process
+#Get-Process | Where-Object {`$_.id -notmatch `$PID -and `$_.id -notmatch `$explorerPid -and `$_.processname -notmatch `$packageName -and `$_.processname -ne 'csrss' -and `$_.processname -ne 'dwm'} | Stop-Process
 
 Out-ErrorData ((Get-ChildItem `$WinGetLogFolder).fullname | ForEach-Object {Get-Content `$_ |Where-Object {`$_ -match '[[]FAIL[]]' -OR `$_ -match 'failed' -OR `$_ -match 'error' -OR `$_ -match 'does not match'}}) 'WinGet'
 Out-ErrorData '$MDLog' 'Manual' 'Dependency'
@@ -3125,7 +3132,7 @@ Out-ErrorData `$Error 'PowerShell'
 Out-ErrorData (Get-EventLog Application -EntryType Error -after `$TimeStart -ErrorAction Ignore).Message 'Application Log'
 Out-ErrorData (Get-MPThreat).ThreatName `"Defender (with signature version `$((Get-MpComputerStatus).QuickScanSignatureVersion))`"
 
-Out-Log `" = = = = Completing Manual Validation pipeline version $build on VM $vm for $PackageIdentifier $logLine in `$(((Get-Date) -`$TimeStart).TotalSeconds) seconds. = = = = `"
+Out-Log `" = = = = Completing Manual Validation pipeline build $build on VM $vm for $PackageIdentifier $logLine in `$(((Get-Date) -`$TimeStart).TotalSeconds) seconds. = = = = `"
 Get-TrackerVMSetStatus 'ValidationComplete'
 "
 	}
@@ -3693,7 +3700,7 @@ Function Get-TrackerVMCycle {
 				Get-PipelineVmGenerate -OS $VM.os
 			}
 			"SendStatus" {
-				$SharedError = (Get-SharedError -NoClip) -replace "Faulting","`n> Faulting" -replace "2024","`n> 2024"
+				$SharedError = (Get-Content "$writeFolder\err.txt") -replace "Faulting","`n> Faulting" -replace "2024","`n> 2024"
 				Reply-ToPR -PR $VM.PR -UserInput $SharedError -CannedResponse ManValEnd 
 				Get-TrackerVMSetStatus "Complete" $VM.vm
 				if (($SharedError -match "\[FAIL\] Installer failed security check.") -OR ($SharedError -match "Detected 1 Defender")) {
