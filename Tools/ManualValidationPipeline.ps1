@@ -1,21 +1,19 @@
 #Copyright 2022-2024 Microsoft Corporation
 #Author: Stephen Gillie
-#Title: Manual Validation Pipeline v3.26.11
+#Title: Manual Validation Pipeline v3.26.17
 #Created: 10/19/2022
-#Updated: 2/8/2024
+#Updated: 2/9/2024
 #Notes: Utilities to streamline evaluating 3rd party PRs.
 #Update log:
+#3.26.17 - Add disclaimer to highest version removal messaging, noting that this might be in error if the developer is switching from semantic to string, or string to semantic, for versioning. More info: https://github.com/microsoft/winget-pkgs/pull/138372#issuecomment-1936761047
+#3.26.16 - Add spaces to dependency injection, to be more perfect YAML. 
+#3.26.15 - Filter out new labels. Stop filtering out Validation-Completed from ToWork. 
+#3.26.14 - Test out blanking PR output for non-PR presets.
+#3.26.13 - Add new "Version-Parameter-Mismatch" label to automatic messaging.
+#3.26.12 - Bugfix to Get-GitHubPreset.
 #3.26.11 - Bugfixes to last version remaining check in PR Watcher.
-#3.26.10 - Have Manual Validation not open MSEdge before scan, and modify to close more after.
-#3.26.9 - Bugfix readd Get-SharedError functionality to VM Orchestration.
-#3.26.8 - Change log wording from "version" to "build".
-#3.26.7 - Add another place to check for Internal-Error-Manifest labels.
-#3.26.6 - Modify IEDS call in Add-Waiver to avoid accidentally adding Validation-Complete and a waiver at the same time.
-#3.26.5 - Change Add-PRToRecord Action parameters from positional to tagged.
-#3.26.4 - Update Add-PRToRecord with PR Title collection, to reduce reporting API calls.
-#3.26.3 - Add title collection parameter to reporting tools.
 
-$build = 720
+$build = 726
 $appName = "Manual Validation"
 Write-Host "$appName build: $build"
 $MainFolder = "C:\ManVal"
@@ -1409,6 +1407,7 @@ Function Get-PRWatch {
 						$Body = $Body + "`n`n(Automated response - build $build)"
 						Invoke-GitHubPRRequest -PR $PR -Method Post -Type comments -Data $Body -Output Silent 
 						$null = Invoke-GitHubPRRequest -PR $PR -Method POST -Type labels -Data Needs-Author-Feedback
+						$null = Invoke-GitHubPRRequest -PR $PR -Method POST -Type labels -Data Version-Parameter-Mismatch
 						Add-PRToRecord -PR $PR -Action "Feedback" -Title $PRtitle
 					}
 				}
@@ -1768,7 +1767,7 @@ Function Get-GitHubPreset {
 			}
 			"Feedback" {
 				Add-PRToRecord -PR $PR -Action $Preset
-				$out = $out += Invoke-GitHubPRRequest -PR $PR -Method POST -Type labels -Data
+				$out = $out += Invoke-GitHubPRRequest -PR $PR -Method POST -Type labels -Data "Needs-Author-Feedback"
 			}
 			"GitHubStatus" {
 				return (Invoke-GitHubRequest -Uri https://www.githubstatus.com/api/v2/summary.json -JSON) | Select-Object @{n="Status";e={$_.incidents[0].status}},@{n="Message";e={$_.incidents[0].name+" ("+$_.incidents.count+")"}}
@@ -1833,6 +1832,7 @@ Function Get-GitHubPreset {
 			"Validating" {
 				Get-TrackerVMSetMode Validating
 				$out += $Preset; 
+				$PR = ""
 			}
 			"VedantResetPR" {
 				Add-PRToRecord -PR $PR -Action "Closed"
@@ -2187,7 +2187,7 @@ Function Get-SearchGitHub {
 	$VC = "label:Validation-Completed+" #Completed
 	$nVC = "-"+$VC #Completed
 	$nNSA = "-label:Internal-Error-NoSupportedArchitectures+"
-	
+
 	$date = Get-Date (Get-Date).AddDays(-$Days) -Format "yyyy-MM-dd"
 	$Recent = "created:>$($date)+" #Created in the past week.
 	
@@ -2196,9 +2196,11 @@ Function Get-SearchGitHub {
 	#Building block settings
 	$Blocking = $nHW
 	$Blocking = $Blocking + $nNSA
+	$Blocking = $Blocking + "-label:DriverInstall+"
+	$Blocking = $Blocking + "-label:Agreements+"
 	$Blocking = $Blocking + "-label:License-Blocks-Install+"
 	$Blocking = $Blocking + "-label:Network-Blocker+"
-	$Blocking = $Blocking + "-label:portable-jar+"
+	$Blocking = $Blocking + "-label:portable-archive+"
 	$Blocking = $Blocking + "-label:Project-File+"
 	$Blocking = $Blocking + "-label:Reboot+"
 	$Blocking = $Blocking + "-label:Scripted-Application+"
@@ -2250,7 +2252,6 @@ Function Get-SearchGitHub {
 	if ($Title) {
 		$Url = $Url + "$Title in:title"
 	}
-
 	switch ($Preset) {
 		"Approval"{
 			$Url = $Url + $Cna
@@ -2344,7 +2345,6 @@ $Url = $Url + "-label:Manifest-AppsAndFeaturesVersion-Error+"
 		}
 		"ToWork"{
 			$Url = $Url + $Set1 #Blocking + Common + Review1
-			$Url = $Url + $nVC
 		}
 		"ToWork2"{
 			$Url = $Url + $HaventWorked
@@ -2484,7 +2484,7 @@ Function Get-CannedResponse {
 			$out = "Hi $Username`n`nI'm not able to find this InstallerUrl from the PackageUrl. Is there another page on the developer's site that has a link to the package?"
 		}
 		"VersionCount" {
-			$out = "Hi $Username`n`nThis manifest has the highest version number for this package. Is it available from another location?"
+			$out = "Hi $Username`n`nThis manifest has the highest version number for this package. Is it available from another location? (This might be in error if the version is switching from semantic to string, or string to semantic.)"
 		}
 		"WhatIsIEDS" {
 			$out = "Hi $Username`n`nThe label `Internal-Error-Dynamic-Scan` is a blanket error for one of a number of internal pipeline errors or issues that occurred during the Dynamic Scan step of our validation process. It only indicates a pipeline issue and does not reflect on your package. Sorry for any confusion caused."
@@ -3987,7 +3987,7 @@ Function Add-ValidationData {
 		$Selector = "Installers:",
 		$offset = 1,
 		$lineNo = (($fileContents| Select-String $Selector -List).LineNumber -$offset),
-		$fileInsert = "Dependencies:`n  PackageDependencies:`n - PackageIdentifier: $Dependency",
+		$fileInsert = "Dependencies:`n  PackageDependencies:`n   - PackageIdentifier: $Dependency",
 		$fileOutput = ($fileContents[0..($lineNo -1)]+$fileInsert+$fileContents[$lineNo..($fileContents.length)])
 	)
 		Write-Host "Writing $($fileContents.length) lines to $FilePath"
@@ -4077,7 +4077,7 @@ Function Add-DependencyToPR {
 		$Dependency = "Microsoft.VCRedist.2015+.x64",
 		$SearchString = "Installers:",
 		$LineNumbers = ((Get-CommitFile -PR $PR | Select-String $SearchString).LineNumber),
-		$ReplaceString = "Dependencies:`n  PackageDependencies:`n - PackageIdentifier: $Dependency`nInstallers:",
+		$ReplaceString = "Dependencies:`n  PackageDependencies:`n   - PackageIdentifier: $Dependency`nInstallers:",
 		$comment = "``````suggestion`n$ReplaceString`n```````n`n(Automated response - build $build.)"
 	)
 	$out = ""
