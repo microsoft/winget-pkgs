@@ -1,0 +1,30 @@
+name: Upstream sync
+
+on:
+  schedule:
+    - cron: '0 * * * *'
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0 # fetch the entire history
+
+      - name: Setup Git
+        id: git
+        uses: actions/setup-git@v2
+        with:
+          git_user_name: 'GitHub Actions'
+          git_user_email: 'actions@github.com'
+
+      - name: Hard reset master branch from upstream
+        run: |
+          git -c user.name='${{ steps.git.outputs.GIT_USER_NAME }}' -c user.email='${{ steps.git.outputs.GIT_USER_EMAIL }}' fetch upstream
+          git -c user.name='${{ steps.git.outputs.GIT_USER_NAME }}' -c user.email='${{ steps.git.outputs.GIT_USER_EMAIL }}' reset --hard upstream/master
+          git -c user.name='${{ steps.git.outputs.GIT_USER_NAME }}' -c user.email='${{ steps.git.outputs.GIT_USER_EMAIL }}' push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          UPSTREAM_REPO: 'microsoft/winget-pkgs' # replace with the name of the upstream repository
