@@ -1,19 +1,19 @@
 #Copyright 2022-2024 Microsoft Corporation
 #Author: Stephen Gillie
-#Title: Manual Validation Pipeline v3.26.17
+#Title: Manual Validation Pipeline v3.29.1
 #Created: 10/19/2022
-#Updated: 2/9/2024
+#Updated: 2/12/2024
 #Notes: Utilities to streamline evaluating 3rd party PRs.
 #Update log:
+#3.29.1 - Improve Get-PRPopulateRecord PR title deduplication.
+#3.29.0 - Add Get-PRPopulateRecord to reduce API calls through distributing PR titles to list members where this property is blank.
+#3.28.2 - Update Get-PRReportFromRecord to get data from the CSV in a less-hacky way. 
+#3.28.1 - Bugfix to Add-ValidationData, adding spaces to make the 3rd line valid YAML.
+#3.28.0 - Add several new states to Get-PRStateFromComments, update filter system and add several filter items to Get-AutoValLog, and add several filter items to validation execution.
+#3.27.18 - Bugfix to Get-WorkSearch pagewise functionality, by shifting the labels filter and (after fixing) the running in a VM filter, down below the Count update.
 #3.26.17 - Add disclaimer to highest version removal messaging, noting that this might be in error if the developer is switching from semantic to string, or string to semantic, for versioning. More info: https://github.com/microsoft/winget-pkgs/pull/138372#issuecomment-1936761047
-#3.26.16 - Add spaces to dependency injection, to be more perfect YAML. 
-#3.26.15 - Filter out new labels. Stop filtering out Validation-Completed from ToWork. 
-#3.26.14 - Test out blanking PR output for non-PR presets.
-#3.26.13 - Add new "Version-Parameter-Mismatch" label to automatic messaging.
-#3.26.12 - Bugfix to Get-GitHubPreset.
-#3.26.11 - Bugfixes to last version remaining check in PR Watcher.
 
-$build = 726
+$build = 731
 $appName = "Manual Validation"
 Write-Host "$appName build: $build"
 $MainFolder = "C:\ManVal"
@@ -1661,10 +1661,11 @@ Function Get-WorkSearch {
 		$Count= 30
 		$Page = 0
 		While ($Count -eq 30) {
-			$PRs = (Get-SearchGitHub -Preset $Preset -Page $Page) | where {$_ -notin (Get-Status).pr} 
-			$Count = $PRs.length
+			$PRs = (Get-SearchGitHub -Preset $Preset -Page $Page -NoLabels) 
+			$Count = $PRs.length #If fewer than 30 PRs (1 page) are returned, then complete the loop and continue instead of starting another loop.
 			Write-Output "$(Get-Date -f T) $Preset Page $Page beginning with $Count Results"
-
+			$PRs = $PRs | where {$_.labels} | where {$_.number -notin (Get-Status).pr} 
+			
 			Foreach ($FullPR in $PRs) {
 				$PR = $FullPR.number
 				$Comments = (Invoke-GitHubPRRequest -PR $PR -Type comments -Output content)
@@ -2562,6 +2563,7 @@ Function Get-AutoValLog {
 			$UserInput = ($UserInput -split "`n") -notmatch 'The FileSystemWatcher has detected an error '
 			$UserInput = ($UserInput -split "`n") -notmatch "with working directory 'D:\\TOOLS'. The specified executable is not a valid application for this OS platform"
 			$UserInput = ($UserInput -split "`n") -notmatch "ThrowIfExceptional"
+			$UserInput = ($UserInput -split "`n") -notmatch "ERROR: Signature Update failed"
 			$UserInput = ($UserInput -split "`n") -notmatch "Setting error JSON 1.0 fields"
 			$UserInput = $UserInput -replace "2023-","`n> 2023-"
 			$UserInput = $UserInput -replace " MSI ","`n> MSI "
@@ -2777,17 +2779,6 @@ Function Get-PRApproval {
 	}
 }
 
-Function Get-NonstandardPRComments {
-	param(
-		$PR,
-		$comments = (Invoke-GitHubPRRequest -PR $PR -Type comments -Output content).body
-	)
-	foreach ($NSComment in $NonstandardPRComments) {
-		$comments = $comments | Where-Object {$_ -notmatch $NSComment}
-	}
-	return $comments
-}
-
 Function Reply-ToPR {
 	param(
 		$PR,
@@ -2802,6 +2793,17 @@ Function Reply-ToPR {
 	} else {
 		Invoke-GitHubPRRequest -PR $PR -Method Post -Type "comments" -Data $Body -Output StatusDescription
 	}
+}
+
+Function Get-NonstandardPRComments {
+	param(
+		$PR,
+		$comments = (Invoke-GitHubPRRequest -PR $PR -Type comments -Output content).body
+	)
+	foreach ($NSComment in $NonstandardPRComments) {
+		$comments = $comments | Where-Object {$_ -notmatch $NSComment}
+	}
+	return $comments
 }
 
 Function Get-PRStateFromComments {
@@ -2832,8 +2834,11 @@ Function Get-PRStateFromComments {
 		if (($Comment.UserName -eq $GitHubUserName) -AND ($Comment.body -match "The package didn't pass a Defender or similar security scan")) {
 			$State = "DefenderFail"
 		}
-		if (($Comment.body -match "which is greater than the current manifest's version")) {
-			$State = "VersionParamResponse"
+		if (($Comment.UserName -eq $GitHubUserName) -AND ($Comment.body -match "Status Code: 200")) {
+			$State = "InstallerAvailable"
+		}
+		if (($Comment.UserName -eq $GitHubUserName) -AND ($Comment.body -match "Response status code does not indicate success")) {
+			$State = "InstallerRemoved"
 		}
 		if (($Comment.UserName -eq $GitHubUserName) -AND ($Comment.body -match "which is greater than the current manifest's version")) {
 			$State = "VersionParamMismatch"
@@ -2842,12 +2847,19 @@ Function Get-PRStateFromComments {
 		($Comment.body -match "The package manager bot determined there was an issue with one of the installers listed in the url field") -OR #URL error
 		($Comment.body -match "The package manager bot determined there was an issue with installing the application correctly") -OR #Validation-Installation-Error
 		($Comment.body -match "The pull request encountered an internal error and has been assigned to a developer to investigate") -OR  #Internal-Error
-		($Comment.body -match "this application failed to install without user input") #Validation-Unattended-Failed
+		($Comment.body -match "this application failed to install without user input")  -OR #Validation-Unattended-Failed
+		($Comment.body -match "Please verify the manifest file is compliant with the package manager") #Manifest-Validation-Error
 		)) {
 			$State = "LabelAction"
 		}
 		if (($Comment.UserName -eq $FabricBot) -AND ($Comment.body -match "One or more of the installer URLs doesn't appear valid")) {
 			$State = "DomainReview"
+		}
+		if (($Comment.UserName -eq $GitHubUserName) -AND ($Comment.body -match "Sequence contains no elements")) {
+			$State = "SequenceError"
+		}
+		if (($Comment.UserName -eq $GitHubUserName) -AND ($Comment.body -match "SQL error or missing database")) {
+			$State = "SQLMissingError"
 		}
 		if (($Comment.UserName -eq $FabricBot) -AND ($Comment.body -match "The package manager bot determined changes have been requested to your PR")) {
 			$State = "ChangesRequested"
@@ -3108,7 +3120,7 @@ if (Test-Path $RemoteFolder\files.txt) {
 }
 
 Out-Log `"Reading `$(`$files.count) file changes in the last `$(((Get-Date) -`$TimeStart).TotalSeconds) seconds. Starting bulk file execution:`"
-`$files = `$files | Where-Object {`$_ -notmatch 'unins'} | Where-Object {`$_ -notmatch 'dotnet'} | Where-Object {`$_ -notmatch 'redis'} | Where-Object {`$_ -notmatch 'msedge'} | Where-Object {`$_ -notmatch 'System32'} | Where-Object {`$_ -notmatch 'SysWOW64'} | Where-Object {`$_ -notmatch 'WinSxS'} | Where-Object {`$_ -notmatch 'dump64a'} | Where-Object {`$_ -notmatch 'CbsTemp'}
+`$files = `$files | Where-Object {`$_ -notmatch 'unins'} | Where-Object {`$_ -notmatch 'dotnet'} | Where-Object {`$_ -notmatch 'servicing'} | Where-Object {`$_ -notmatch 'Prefetch'} | Where-Object {`$_ -notmatch 'Provisioning'} | Where-Object {`$_ -notmatch 'redis'} | Where-Object {`$_ -notmatch 'msedge'} | Where-Object {`$_ -notmatch 'System32'} | Where-Object {`$_ -notmatch 'SysWOW64'} | Where-Object {`$_ -notmatch 'WinSxS'} | Where-Object {`$_ -notmatch 'dump64a'} | Where-Object {`$_ -notmatch 'CbsTemp'}
 `$files | Out-File 'C:\Users\user\Desktop\ChangedFiles.txt'
 `$files | Select-String '[.]exe`$' | ForEach-Object {if (`$_ -match '$packageName') {Out-Log `$_ 'green'}else{Out-Log `$_ 'cyan'}; try{Start-Process `$_}catch{}};
 `$files | Select-String '[.]msi`$' | ForEach-Object {if (`$_ -match '$packageName') {Out-Log `$_ 'green'}else{Out-Log `$_ 'cyan'}; try{Start-Process `$_}catch{}};
@@ -3700,7 +3712,16 @@ Function Get-TrackerVMCycle {
 				Get-PipelineVmGenerate -OS $VM.os
 			}
 			"SendStatus" {
-				$SharedError = (Get-Content "$writeFolder\err.txt") -replace "Faulting","`n> Faulting" -replace "2024","`n> 2024"
+				$SharedError = (Get-Content $SharedErrorFile) 
+				$SharedError = $SharedError -replace "Faulting","`n> Faulting" 
+				$SharedError = $SharedError -replace "2024","`n> 2024"
+				$SharedError = $SharedError -replace " (caller: 00007FFA008A5769)",""
+				$SharedError = $SharedError -replace " (caller: 00007FFA008AA79F)",""
+				$SharedError = $SharedError -replace "Exception(1) tid(f1c) 80D02002",""
+				$SharedError = $SharedError -replace "Exception(2) tid(f1c) 80072EE2     ",""
+				$SharedError = $SharedError -replace "Exception(4) tid(f1c) 80072EE2     ",""
+				$SharedError = $SharedError -replace "tid(f1c)",""
+				$SharedError = $SharedError -replace "C:\__w\1\s\external\pkg\src\AppInstallerCommonCore\Downloader.cpp(185)\WindowsPackageManager.dll!00007FFA008A37C9:",""
 				Reply-ToPR -PR $VM.PR -UserInput $SharedError -CannedResponse ManValEnd 
 				Get-TrackerVMSetStatus "Complete" $VM.vm
 				if (($SharedError -match "\[FAIL\] Installer failed security check.") -OR ($SharedError -match "Detected 1 Defender")) {
@@ -3987,7 +4008,7 @@ Function Add-ValidationData {
 		$Selector = "Installers:",
 		$offset = 1,
 		$lineNo = (($fileContents| Select-String $Selector -List).LineNumber -$offset),
-		$fileInsert = "Dependencies:`n  PackageDependencies:`n   - PackageIdentifier: $Dependency",
+		$fileInsert = "Dependencies:`n  PackageDependencies:`n     - PackageIdentifier: $Dependency",
 		$fileOutput = ($fileContents[0..($lineNo -1)]+$fileInsert+$fileContents[$lineNo..($fileContents.length)])
 	)
 		Write-Host "Writing $($fileContents.length) lines to $FilePath"
@@ -4140,12 +4161,24 @@ Function Add-PRToRecord {
 	"$PR,$Action,$Title" | Out-File $LogFile -Append 
 }
 
+Function Get-PRPopulateRecord {
+	param(
+		$Logs = (gc $LogFile | ConvertFrom-Csv)
+	)
+	Foreach ($Log in $Logs) {
+		$PotentialTitle = 
+		$Log.title = ($Logs | where {$_.title} | where {$_.PR -match $Log.PR}).title | Sort-Object -Unique
+	}
+	$Logs | ConvertTo-Csv|Out-File $LogFile
+}
+
 Function Get-PRFromRecord {
 	param(
 		[ValidateSet("Approved","Blocking","Feedback","Retry","Manual","Closed","Project","Squash","Waiver")]
 		$Action
 	)
-	("PR,Action,Title`n" + (Get-Content $LogFile)) -split " " | ConvertFrom-Csv | Where-Object {$_.Action -match $Action}
+	Get-PRPopulateRecord
+	(Get-Content $LogFile) | ConvertFrom-Csv -Header ("PR","Action","Title") | Where-Object {$_.Action -match $Action}
 }
 
 Function Get-PRReportFromRecord {
@@ -4154,7 +4187,7 @@ Function Get-PRReportFromRecord {
 		$Action,
 		$out = "",
 		$line = 0,
-		$Record = ((Get-PRFromRecord $Action).PR | Select-Object -Unique),
+		$Record = ((Get-PRFromRecord $Action) | Sort-Object PR -Unique),
 		[switch]$NoClip
 	)
 
@@ -4162,10 +4195,9 @@ Function Get-PRReportFromRecord {
 
 	Foreach ($PR in $Record) {
 		$line++
-		$Title = ""
-		if ($PR.Title) {
-			$Title = $PR.Title
-		} else {
+		$Title = $PR.Title
+		$PR = $PR.PR
+		if (!($Title)) {
 			$Title = (Invoke-GitHubPRRequest -PR $PR -Type "" -Output content -JSON).title
 		}
 		Get-TrackerProgress -PR $PR $MyInvocation.MyCommand $line $Record.length
@@ -4347,6 +4379,7 @@ $NonstandardPRComments = ("Validation Pipeline Badge",#Pipeline status
 "Sequence contains no elements"#New Sequence error.
 )
 
+#C-sharp window location types.
 Add-Type @"
 using System;
 using System.Runtime.InteropServices;
