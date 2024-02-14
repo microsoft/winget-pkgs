@@ -48,8 +48,11 @@ configuration:
               - or:
                   - payloadType: Issue_Comment
                   - payloadType: Pull_Request_Review_Comment
+            # Remove the Needs-Triage label
             # Take different actions based on the comment pattern
             then:
+              - removeLabel:
+                  label: Needs-Triage
               # Blocking-Issue
               - if:
                   - commentContains:
@@ -78,6 +81,22 @@ configuration:
                 then:
                   - addLabel:
                       label: Dependencies
+              # Windows Features
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[wW]indows[\s-]?[fF]eature(s)?'
+                      isRegex: True
+                then:
+                  - addLabel:
+                      label: WindowsFeatures
+              # portable-archive
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[pP]ortable[\s-][aA]rchive'
+                      isRegex: True
+                then:
+                  - addLabel:
+                      label: portable-archive
               # Area-External
               - if:
                   - commentContains:
@@ -185,6 +204,62 @@ configuration:
                 then:
                   - addLabel:
                       label: Manifest-Content-Incomplete
+              # Last-Version-Remaining
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[Ll]ast[\s-][Vv]ersion([\s-][Rr]emaining)?'
+                      isRegex: True
+                then:
+                  - addLabel:
+                      label: Last-Version-Remaining
+              # License-Blocks-Install
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[Ll]icense[\s-][Bb]locks([\s-][Ii]nstall)?'
+                      isRegex: True
+                then:
+                  - addLabel:
+                      label: License-Blocks-Install
+              # Scripted-Application
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[Ss]cript(ed)?[\s-][Aa]pplication'
+                      isRegex: True
+                then:
+                  - addLabel:
+                      label: Scripted-Application
+              # DriverInstall
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[Dd]river[\s-][Ii]nstall'
+                      isRegex: True
+                then:
+                  - addLabel:
+                      label: DriverInstall
+              # Network-Blocker
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[Nn]etwork[\s-][Bb]lock(?:er|ed)'
+                      isRegex: True
+                then:
+                  - addLabel:
+                      label: Network-Blocker
+              # Unblocked
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[uU]nblocked'
+                      isRegex: True
+                then:
+                  - removeLabel:
+                      label: Blocking-Issue
+              # PSA
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[Pp][Ss][Aa]'
+                      isRegex: True
+                then:
+                  - addLabel:
+                      label: Public-Service-Announcement
               # Reset-Feedback
               - if:
                   - commentContains:
@@ -197,6 +272,18 @@ configuration:
                       label: Needs-Attention
                   - removeLabel:
                       label: Moderator-Approved
+                  - removeLabel:
+                      label: Changes-Requested
+                  - removeLabel:
+                      label: Last-Version-Remaining
+                  - removeLabel:
+                      label: License-Blocks-Install
+                  - removeLabel:
+                      label: Scripted-Application
+                  - removeLabel:
+                      label: DriverInstall
+                  - removeLabel:
+                      label: Network-Blocker
                   ## TODO: Dismiss All Pull Request Reviews
               # Duplicate of #
               - if:
