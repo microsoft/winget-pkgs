@@ -1,4 +1,7 @@
 # Parse arguments
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingWriteHost', '', Justification = 'This script is not intended to have any outputs piped')]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', 'Prerelease', Justification = 'The variable is used in a conditional but ScriptAnalyser does not recognize the scope')]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', 'WinGetVersion', Justification = 'The variable is used in a conditional but ScriptAnalyser does not recognize the scope')]
 
 Param(
   [Parameter(Position = 0, HelpMessage = 'The Manifest to install in the Sandbox.')]
@@ -79,11 +82,11 @@ $WebClient = New-Object System.Net.WebClient
 
 function Get-Release {
   $releasesAPIResponse = Invoke-RestMethod 'https://api.github.com/repos/microsoft/winget-cli/releases?per_page=100'
-  if (!$Prerelease) {
+  if (!$script:Prerelease) {
     $releasesAPIResponse = $releasesAPIResponse.Where({ !$_.prerelease })
   }
-  if (![String]::IsNullOrWhiteSpace($WinGetVersion)) {
-    $releasesAPIResponse = @($releasesAPIResponse.Where({ $_.tag_name -match $('^v?' + [regex]::escape($WinGetVersion)) }))
+  if (![String]::IsNullOrWhiteSpace($script:WinGetVersion)) {
+    $releasesAPIResponse = @($releasesAPIResponse.Where({ $_.tag_name -match $('^v?' + [regex]::escape($script:WinGetVersion)) }))
   }
   if ($releasesAPIResponse.Count -lt 1) {
     Write-Output 'No WinGet releases found matching criteria'
@@ -109,29 +112,30 @@ $oldProgressPreference = $ProgressPreference
 $ProgressPreference = 'SilentlyContinue'
 
 $latestRelease = Get-Release
+$versionTag = $latestRelease.releaseTag
 $desktopAppInstaller = @{
   url    = $latestRelease.msixFileUrl
   hash   = $latestRelease.shaFileContent
-  SaveTo = $(Join-Path $env:LOCALAPPDATA -ChildPath "Packages\Microsoft.DesktopAppInstaller_8wekyb3d8bbwe\bin\$($latestRelease.releaseTag)\Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.msixbundle")
+  SaveTo = $(Join-Path $env:LOCALAPPDATA -ChildPath "Packages\Microsoft.DesktopAppInstaller_8wekyb3d8bbwe\bin\$versionTag\Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.msixbundle")
 }
 
 $ProgressPreference = $oldProgressPreference
 
 $vcLibsUwp = @{
   url    = 'https://aka.ms/Microsoft.VCLibs.x64.14.00.Desktop.appx'
-  hash   = '9BFDE6CFCC530EF073AB4BC9C4817575F63BE1251DD75AAA58CB89299697A569'
+  hash   = 'B56A9101F706F9D95F815F5B7FA6EFBAC972E86573D378B96A07CFF5540C5961'
   SaveTo = $(Join-Path $tempFolder -ChildPath 'Microsoft.VCLibs.x64.14.00.Desktop.appx')
 }
 $uiLibsUwp = @{
-  url      = 'https://github.com/microsoft/microsoft-ui-xaml/releases/download/v2.7.3/Microsoft.UI.Xaml.2.7.x64.appx'
-  hash     = '8CE30D92ABEC6522BEB2544E7B716983F5CBA50751B580D89A36048BF4D90316'
-  SaveTo   = $(Join-Path $tempFolder -ChildPath 'Microsoft.UI.Xaml.2.7.x64.appx')
+  url    = 'https://github.com/microsoft/microsoft-ui-xaml/releases/download/v2.7.3/Microsoft.UI.Xaml.2.7.x64.appx'
+  hash   = '8CE30D92ABEC6522BEB2544E7B716983F5CBA50751B580D89A36048BF4D90316'
+  SaveTo = $(Join-Path $tempFolder -ChildPath 'Microsoft.UI.Xaml.2.7.x64.appx')
 }
 
 $dependencies = @($desktopAppInstaller, $vcLibsUwp, $uiLibsUwp)
 
 # Clean temp directory
-Get-ChildItem $tempFolder -Recurse -Exclude $($(Split-Path $dependencies.SaveTo -Leaf) -replace '\.([^\.]+)$','.*') | Remove-Item -Force -Recurse
+Get-ChildItem $tempFolder -Recurse -Exclude $($(Split-Path $dependencies.SaveTo -Leaf) -replace '\.([^\.]+)$', '.*') | Remove-Item -Force -Recurse
 
 if (-Not [String]::IsNullOrWhiteSpace($Manifest)) {
   Copy-Item -Path $Manifest -Recurse -Destination $tempFolder
@@ -156,18 +160,21 @@ foreach ($dependency in $dependencies) {
     try {
       # If the directory doesn't already exist, create it
       $saveDirectory = Split-Path $dependency.SaveTo
-      if (-Not (Test-Path -Path $saveDirectory))
-      {
+      if (-Not (Test-Path -Path $saveDirectory)) {
         New-Item -ItemType Directory -Path $saveDirectory -Force | Out-Null
       }
       $WebClient.DownloadFile($dependency.url, $dependency.SaveTo)
 
     } catch {
-      #Pass the exception as an inner exception
-      throw [System.Net.WebException]::new("Error downloading $($dependency.url).", $_.Exception)
+      # If the download failed, remove the item so the sandbox can fall-back to using the PowerShell module
+      Remove-Item $dependency.SaveTo -Force | Out-Null
     }
     if (-not ($dependency.hash -eq $(Get-FileHash $dependency.SaveTo).Hash)) {
-      throw [System.Activities.VersionMismatchException]::new('Dependency hash does not match the downloaded file')
+      # If the hash didn't match, remove the item so the sandbox can fall-back to using the PowerShell module
+      Write-Host -ForegroundColor Red '      Dependency hash does not match the downloaded file'
+      Write-Host -ForegroundColor Red '      Please open an issue referencing this error at https://bit.ly/WinGet-SandboxTest-Needs-Update'
+      Write-Host
+      Remove-Item $dependency.SaveTo -Force | Out-Null
     }
   }
 }
@@ -224,7 +231,23 @@ Write-Host @'
 --> Installing WinGet
 '@
 `$ProgressPreference = 'SilentlyContinue'
-Add-AppxPackage -Path '$($desktopAppInstaller.pathInSandbox)' -DependencyPath '$($vcLibsUwp.pathInSandbox)','$($uiLibsUwp.pathInSandbox)'
+try {
+  Add-AppxPackage -Path '$($desktopAppInstaller.pathInSandbox)' -DependencyPath '$($vcLibsUwp.pathInSandbox)','$($uiLibsUwp.pathInSandbox)'
+} catch {
+  Write-Host -ForegroundColor Red 'Could not install from cached packages. Falling back to Repair-WinGetPackageManager cmdlet'
+  try {
+    Install-PackageProvider -Name NuGet -Force | Out-Null
+    Install-Module -Name Microsoft.WinGet.Client -Force -Repository PSGallery | Out-Null
+  } catch {
+    throw "Microsoft.Winget.Client was not installed successfully"
+  } finally {
+    # Check to be sure it acutally installed
+    if (-not(Get-Module -ListAvailable -Name Microsoft.Winget.Client)) {
+      throw "Microsoft.Winget.Client was not found. Check that the Windows Package Manager PowerShell module was installed correctly."
+    }
+  }
+  Repair-WinGetPackageManager -Version $versionTag
+}
 
 Write-Host @'
 --> Disabling safety warning when running installer
@@ -258,7 +281,7 @@ Write-Host @'
 --> Installing the Manifest $manifestFileName
 
 '@
-winget install -m '$manifestPathInSandbox' --verbose-logs --ignore-local-archive-malware-scan $WinGetOptions
+winget install -m '$manifestPathInSandbox' --verbose-logs --ignore-local-archive-malware-scan --dependency-source winget $WinGetOptions
 
 Write-Host @'
 
