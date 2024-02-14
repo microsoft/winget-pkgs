@@ -1,19 +1,23 @@
 #Copyright 2022-2024 Microsoft Corporation
 #Author: Stephen Gillie
-#Title: Manual Validation Pipeline v3.29.1
+#Title: Manual Validation Pipeline v3.32.0
 #Created: 10/19/2022
-#Updated: 2/12/2024
+#Updated: 2/13/2024
 #Notes: Utilities to streamline evaluating 3rd party PRs.
 #Update log:
+#3.32.0 - Auto-DefenderFail completion and PR update on completed VMs when a DefenderFail error is present.
+#3.31.4 - Bugfix to Get-PRPopulateRecord
+#3.31.3 - Add a new standard comment, and rename the variable.
+#3.31.2 - Fix filtering from previous addition.
+#3.31.1 - Group several functions under VM Versioning.
+#3.31.0 - Increase TrackerVM Versioning from single digit to OS-based. 
+#3.30.1 - Add ConfigFile call to Validation function, and readd a Config section based on it.
+#3.30.0 - Move WinGet arguments up out of the Scan section, in prep for the next step.
+#3.29.3 - Add auto-reply when there's more than one manifest version change.
+#3.29.2 - Remove unnecessary UserInput calls for Reply-ToPR.
 #3.29.1 - Improve Get-PRPopulateRecord PR title deduplication.
-#3.29.0 - Add Get-PRPopulateRecord to reduce API calls through distributing PR titles to list members where this property is blank.
-#3.28.2 - Update Get-PRReportFromRecord to get data from the CSV in a less-hacky way. 
-#3.28.1 - Bugfix to Add-ValidationData, adding spaces to make the 3rd line valid YAML.
-#3.28.0 - Add several new states to Get-PRStateFromComments, update filter system and add several filter items to Get-AutoValLog, and add several filter items to validation execution.
-#3.27.18 - Bugfix to Get-WorkSearch pagewise functionality, by shifting the labels filter and (after fixing) the running in a VM filter, down below the Count update.
-#3.26.17 - Add disclaimer to highest version removal messaging, noting that this might be in error if the developer is switching from semantic to string, or string to semantic, for versioning. More info: https://github.com/microsoft/winget-pkgs/pull/138372#issuecomment-1936761047
 
-$build = 731
+$build = 736
 $appName = "Manual Validation"
 Write-Host "$appName build: $build"
 $MainFolder = "C:\ManVal"
@@ -26,7 +30,7 @@ $RemoteMainFolder = "//$remoteIP/"
 $SharedFolder = "$RemoteMainFolder/write"
 
 $imagesFolder = "$MainFolder\Images" #VM Images folder
-$logsFolder = "$MainFolder\logs" #VM Images folder
+$logsFolder = "$MainFolder\logs" #VM Logs folder
 $runPath = "$MainFolder\vm\" #VM working folder
 $writeFolder = "$MainFolder\write" #Folder with write permissions
 $vmCounter = "$MainFolder\vmcounter.txt"
@@ -1727,7 +1731,7 @@ Function Get-GitHubPreset {
 			}
 			"AutomationBlock" {
 				Add-PRToRecord -PR $PR -Action "Blocking"
-				$out += Reply-ToPR -PR $PR -CannedResponse AutomationBlock -UserInput ((Invoke-GitHubPRRequest -PR $PR -Type "" -Output content -JSON).user.login)
+				$out += Reply-ToPR -PR $PR -CannedResponse AutomationBlock 
 				$out += Invoke-GitHubPRRequest -PR $PR -Method POST -Type labels -Data Network-Blocker
 			}
 			"Blocking" {
@@ -1762,7 +1766,7 @@ Function Get-GitHubPreset {
 			}
 			"DefenderFail" {
 				Add-PRToRecord -PR $PR -Action "Blocking"
-				$out += Reply-ToPR -PR $PR -CannedResponse $CannedResponse -UserInput ((Invoke-GitHubPRRequest -PR $PR -Type "" -Output content -JSON).user.login)
+				$out += Reply-ToPR -PR $PR -CannedResponse $CannedResponse
 				$out += Invoke-GitHubPRRequest -PR $PR -Method POST -Type labels -Data Needs-Attention
 				$out += Invoke-GitHubPRRequest -PR $PR -Method POST -Type labels -Data Validation-Defender-Error
 			}
@@ -1784,12 +1788,12 @@ Function Get-GitHubPreset {
 			}
 			"InstallerNotSilent" {
 				Add-PRToRecord -PR $PR -Action "Feedback"
-				$out += Reply-ToPR -PR $PR -CannedResponse $CannedResponse -UserInput ((Invoke-GitHubPRRequest -PR $PR -Type "" -Output content -JSON).user.login)
+				$out += Reply-ToPR -PR $PR -CannedResponse $CannedResponse
 				$out += Invoke-GitHubPRRequest -PR $PR -Method POST -Type labels -Data Needs-Author-Feedback
 			}
 			"InstallerMissing" {
 				Add-PRToRecord -PR $PR -Action "Feedback"
-				$out += Reply-ToPR -PR $PR -CannedResponse $CannedResponse -UserInput ((Invoke-GitHubPRRequest -PR $PR -Type "" -Output content -JSON).user.login)
+				$out += Reply-ToPR -PR $PR -CannedResponse $CannedResponse
 				$out += Invoke-GitHubPRRequest -PR $PR -Method POST -Type labels -Data Needs-Author-Feedback
 			}
 			"LabelAction" {
@@ -1806,12 +1810,12 @@ Function Get-GitHubPreset {
 			}
 			"OneManifestPerPR" {
 				Add-PRToRecord -PR $PR -Action "Feedback"
-				$out += Reply-ToPR -PR $PR -CannedResponse $CannedResponse -UserInput ((Invoke-GitHubPRRequest -PR $PR -Type "" -Output content -JSON).user.login)
+				$out += Reply-ToPR -PR $PR -CannedResponse $CannedResponse
 				$out += Invoke-GitHubPRRequest -PR $PR -Method POST -Type labels -Data Needs-Author-Feedback
 			}
 			"PackageUrl" {
 				Add-PRToRecord -PR $PR -Action "Feedback"
-				$out += Reply-ToPR -PR $PR -CannedResponse $CannedResponse -UserInput ((Invoke-GitHubPRRequest -PR $PR -Type "" -Output content -JSON).user.login)
+				$out += Reply-ToPR -PR $PR -CannedResponse $CannedResponse
 				$out += Invoke-GitHubPRRequest -PR $PR -Method POST -Type labels -Data Changes-Requested
 			}
 			"Project" {
@@ -2011,6 +2015,9 @@ Function Get-PRLabelAction {
 				}
 				if ($null -match $UserInput) {
 					$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 27 -SearchString "[error] One or more errors occurred."
+				}
+				if ($UserInput -match "The pull request contains more than one manifest") {
+					Get-GitHubPreset -Preset OneManifestPerPR -PR $PR
 				}
 				if ($UserInput) {
 					Reply-ToPR -PR $PR -UserInput $UserInput -CannedResponse AutoValEnd
@@ -2800,8 +2807,8 @@ Function Get-NonstandardPRComments {
 		$PR,
 		$comments = (Invoke-GitHubPRRequest -PR $PR -Type comments -Output content).body
 	)
-	foreach ($NSComment in $NonstandardPRComments) {
-		$comments = $comments | Where-Object {$_ -notmatch $NSComment}
+	foreach ($StdComment in $StandardPRComments) {
+		$comments = $comments | Where-Object {$_ -notmatch $StdComment}
 	}
 	return $comments
 }
@@ -2952,6 +2959,7 @@ Function Get-TrackerVMValidate {
 		[ValidateSet("x86","x64","arm","arm32","arm64","neutral")][string]$Arch,
 		[ValidateSet("User","Machine")][string]$Scope,
 		$InstallerType,
+		$ConfigFile,
 		[string]$Locale,
 		[switch]$Silent,
 		$optionsLine = ""
@@ -2968,90 +2976,208 @@ Function Get-TrackerVMValidate {
 		Get-TrackerVMSetStatus "Prevalidation" $vm $PackageIdentifier -PR $PR
 	}
 	if ((Get-VM "vm$vm").state -ne "Running") {Start-VM "vm$vm"}
-	if ($PackageIdentifier -eq "") {
-		Write-Host "Bad PackageIdentifier: $PackageIdentifier"
-		#Break;
-		$PackageIdentifier | clip
-	}
-	if (!($Silent)) {
-		Write-Host "Running Manual Validation build $build on vm$vm for package $PackageIdentifier version $PackageVersion"
-	}
+	if ($ConfigFile) {
+		$wingetArgs = 'configure -f $ConfigFile'
+		$Operation = "Config"
+		if (!($Silent)) {
+			Write-Host "Running Manual Config build $build on vm$vm for file $ConfigFile"
+		}
+	} else {
+		if ($PackageIdentifier -eq "") {
+			Write-Host "Bad PackageIdentifier: $PackageIdentifier"
+			#Break;
+			$PackageIdentifier | clip
+		}
+		if (!($Silent)) {
+			Write-Host "Running Manual Validation build $build on vm$vm for package $PackageIdentifier version $PackageVersion"
+		}
 
-	$logLine = "$OS "
-	$nonElevatedShell = ""
-	$logExt = "log"
-	$VMFolder = "$MainFolder\vm\$vm"
-	$manifestFolder = "$VMFolder\manifest"
-	$CmdsFileName = "$VMFolder\cmds.ps1"
+		$logLine = "$OS "
+		$nonElevatedShell = ""
+		$logExt = "log"
+		$VMFolder = "$MainFolder\vm\$vm"
+		$manifestFolder = "$VMFolder\manifest"
+		$CmdsFileName = "$VMFolder\cmds.ps1"
 
-	if ($PackageVersion) {
-		$logExt = $PackageVersion+"."+$logExt
-		$logLine += "version $PackageVersion "
-	}
-	if ($Locale) {
-		$logExt = $Locale+"."+$logExt
-		$optionsLine += " --locale $Locale "
-		$logLine += "locale $Locale "
-	}
-	if ($Scope) {
-		$logExt = $Scope+"."+$logExt
-		$optionsLine += " --scope $Scope "
-		$logLine += "scope $Scope "
-	}
-	if ($InstallerType) {
-		$logExt = $InstallerType+"."+$logExt
-		$optionsLine += " --installer-type $InstallerType "
-		$logLine += "InstallerType $InstallerType "
-	}
-	$Archs = ($out | Select-String -notmatch "arm"| Select-String "Architecture: " )|ForEach-Object{($_ -split ": ")[1]} 
-	$archDetect = ""
-	$archColor = "yellow"
-	if ($Archs) {
-		if ($Archs[0].length -ge 2) {
-			if ($Arch) {
-				$archDetect = "Selected"
+		if ($PackageVersion) {
+			$logExt = $PackageVersion+"."+$logExt
+			$logLine += "version $PackageVersion "
+		}
+		if ($Locale) {
+			$logExt = $Locale+"."+$logExt
+			$optionsLine += " --locale $Locale "
+			$logLine += "locale $Locale "
+		}
+		if ($Scope) {
+			$logExt = $Scope+"."+$logExt
+			$optionsLine += " --scope $Scope "
+			$logLine += "scope $Scope "
+		}
+		if ($InstallerType) {
+			$logExt = $InstallerType+"."+$logExt
+			$optionsLine += " --installer-type $InstallerType "
+			$logLine += "InstallerType $InstallerType "
+		}
+		$Archs = ($out | Select-String -notmatch "arm"| Select-String "Architecture: " )|ForEach-Object{($_ -split ": ")[1]} 
+		$archDetect = ""
+		$archColor = "yellow"
+		if ($Archs) {
+			if ($Archs[0].length -ge 2) {
+				if ($Arch) {
+					$archDetect = "Selected"
+				} else {
+					$Arch = $Archs[0]
+					$archDetect = "Detected"
+				}
+				$archColor = "red"
 			} else {
-				$Arch = $Archs[0]
+				if ($Archs -eq "neutral") {
+					$archColor = "yellow"
+				} else {
+				$Arch = $Archs
 				$archDetect = "Detected"
-			}
-			$archColor = "red"
-		} else {
-			if ($Archs -eq "neutral") {
-				$archColor = "yellow"
-			} else {
-			$Arch = $Archs
-			$archDetect = "Detected"
-			$archColor = "green"
+				$archColor = "green"
+				}
 			}
 		}
-	}
-	if ($Arch) {
-		$logExt = $Arch+"."+$logExt
-		if (!($Silent)) {
-			Write-Host "$archDetect Arch $Arch of available architectures: $Archs" -f $archColor
+		if ($Arch) {
+			$logExt = $Arch+"."+$logExt
+			if (!($Silent)) {
+				Write-Host "$archDetect Arch $Arch of available architectures: $Archs" -f $archColor
+			}
+			$logLine += "$Arch "
 		}
-		$logLine += "$Arch "
-	}
-	$MDLog = ""
-	if ($ManualDependency) {
-		$MDLog = $ManualDependency
-		if (!($Silent)) {
-			Write-Host " = = = = Installing manual dependency $ManualDependency = = = = "
+		$MDLog = ""
+		if ($ManualDependency) {
+			$MDLog = $ManualDependency
+			if (!($Silent)) {
+				Write-Host " = = = = Installing manual dependency $ManualDependency = = = = "
+			}
+			[string]$ManualDependency = "Out-Log 'Installing manual dependency $ManualDependency.';Start-Process 'winget' 'install "+$ManualDependency+" --accept-package-agreements --ignore-local-archive-malware-scan' -wait`n"
 		}
-		[string]$ManualDependency = "Out-Log 'Installing manual dependency $ManualDependency.';Start-Process 'winget' 'install "+$ManualDependency+" --accept-package-agreements --ignore-local-archive-malware-scan' -wait`n"
-	}
-	if ($notElevated -OR ($out | Select-String "ElevationRequirement: elevationProhibited")) {
-		if (!($Silent)) {
-			Write-Host " = = = = Detecting de-elevation requirement = = = = "
+		if ($notElevated -OR ($out | Select-String "ElevationRequirement: elevationProhibited")) {
+			if (!($Silent)) {
+				Write-Host " = = = = Detecting de-elevation requirement = = = = "
+			}
+			$nonElevatedShell = "if ([bool](([System.Security.Principal.WindowsIdentity]::GetCurrent()).groups -match 'S-1-5-32-544')){& explorer.exe 'C:\Program Files\PowerShell\7\pwsh.exe';Stop-Process (Get-Process WindowsTerminal).id}"
+			#If elevated, run^^ and exit, else run cmds.
 		}
-		$nonElevatedShell = "if ([bool](([System.Security.Principal.WindowsIdentity]::GetCurrent()).groups -match 'S-1-5-32-544')){& explorer.exe 'C:\Program Files\PowerShell\7\pwsh.exe';Stop-Process (Get-Process WindowsTerminal).id}"
-		#If elevated, run^^ and exit, else run cmds.
+		$packageName = ($PackageIdentifier -split "[.]")[1]
+		$wingetArgs = 'install $optionsLine $installerLine --accept-package-agreements --ignore-local-archive-malware-scan'
 	}
-$packageName = ($PackageIdentifier -split "[.]")[1]
-
-$cmdsOut = ""
+	$cmdsOut = ""
 
 switch ($Operation) {
+"Config" {
+$cmdsOut = "$nonElevatedShell
+`$TimeStart = Get-Date;
+`$explorerPid = (Get-Process Explorer).id;
+`$ManValLogFolder = `"$SharedFolder/logs/$(Get-Date -UFormat %B)/`$(Get-Date -Format dd)`"
+Function Out-Log ([string]`$logData,[string]`$logColor='cyan') {
+	`$TimeStamp = (Get-Date -Format T) + ': ';
+	`$logEntry = `$TimeStamp + `$logData
+	Write-Host `$logEntry -f `$logColor;
+	md `$ManValLogFolder -ErrorAction Ignore
+	`$logEntry | Out-File `"`$ManValLogFolder/$PackageIdentifier.$logExt`" -Append -Encoding unicode
+};
+Function Out-ErrorData (`$errArray,[string]`$serviceName,`$errorName='errors') {
+	Out-Log `"Detected `$(`$errArray.count) `$serviceName `$(`$errorName): `"
+	`$errArray | ForEach-Object {Out-Log `$_ 'red'}
+};
+Get-TrackerVMSetStatus 'Installing'
+Out-Log ' = = = = Starting Manual Validation pipeline build $build on VM $vm Config file $ConfigFile $logLine = = = = '
+
+Out-Log 'Pre-testing log cleanup.'
+Out-Log 'Upgrading installed applications.'
+Out-Log (WinGet upgrade --all --include-pinned --disable-interactivity)
+Out-Log 'Clearing PowerShell errors.'
+`$Error.Clear()
+Out-Log 'Clearing Application Log.'
+Clear-EventLog -LogName Application -ErrorAction Ignore
+Out-Log 'Clearing WinGet Log folder.'
+`$WinGetLogFolder = 'C:\Users\User\AppData\Local\Packages\Microsoft.DesktopAppInstaller_8wekyb3d8bbwe\LocalState\DiagOutputDir'
+rm `$WinGetLogFolder\*
+Out-Log 'Updating Defender signature.'
+Update-MpSignature
+Out-Log 'Gathering WinGet info.'
+`$info = winget --info
+Out-ErrorData @(`$info[0],`$info[3],`$info[4],`$info[5]) 'WinGet' 'infos'
+
+$ManualDependency
+Out-Log `"Main Package Install with args: $wingetArgs`"
+`$mainpackage = (Start-Process 'winget' $wingetArgs -wait -PassThru);
+
+Out-Log `"`$(`$mainpackage.processname) finished with exit code: `$(`$mainpackage.ExitCode)`";
+If (`$mainpackage.ExitCode -ne 0) {
+	Out-Log 'Install Failed.';
+	explorer.exe `$WinGetLogFolder;
+Out-ErrorData ((Get-ChildItem `$WinGetLogFolder).fullname | ForEach-Object {Get-Content `$_ |Where-Object {`$_ -match '[[]FAIL[]]' -OR `$_ -match 'failed' -OR `$_ -match 'error' -OR `$_ -match 'does not match'}}) 'WinGet'
+Out-ErrorData '$MDLog' 'Manual' 'Dependency'
+Out-ErrorData `$Error 'PowerShell'
+Out-ErrorData (Get-EventLog Application -EntryType Error -after `$TimeStart -ErrorAction Ignore).Message 'Application Log'
+
+Out-Log `" = = = = Failing Manual Validation pipeline build $build on VM $vm for Config file $ConfigFile $logLine in `$(((Get-Date) -`$TimeStart).TotalSeconds) seconds. = = = = `"
+Get-TrackerVMSetStatus 'ValidationComplete'
+	Break;
+}
+#Read-Host 'Install complete, press ENTER to continue...' #Uncomment to examine installer before scanning, for when scanning disrupts the install.
+
+Get-TrackerVMSetStatus 'Scanning'
+
+Out-Log 'Install complete, starting file change scan.'
+`$files = ''
+if (Test-Path $RemoteFolder\files.txt) {
+	`$files = Get-Content $RemoteFolder\files.txt
+} else {
+	`$files1 = (Get-ChildItem c:\ -File -Recurse -ErrorAction Ignore -Force | Where-Object {`$_.CreationTime -gt `$TimeStart}).FullName
+	`$files2 = (Get-ChildItem c:\ -File -Recurse -ErrorAction Ignore -Force | Where-Object {`$_.LastAccessTIme -gt `$TimeStart}).FullName
+	`$files = `$files1 + `$files2 | Select-Object -Unique
+}
+
+Out-Log `"Reading `$(`$files.count) file changes in the last `$(((Get-Date) -`$TimeStart).TotalSeconds) seconds. Starting bulk file execution:`"
+`$files = `$files | Where-Object {`$_ -notmatch 'unins'} | Where-Object {`$_ -notmatch 'dotnet'} | Where-Object {`$_ -notmatch 'servicing'} | Where-Object {`$_ -notmatch 'Prefetch'} | Where-Object {`$_ -notmatch 'Provisioning'} | Where-Object {`$_ -notmatch 'redis'} | Where-Object {`$_ -notmatch 'msedge'} | Where-Object {`$_ -notmatch 'System32'} | Where-Object {`$_ -notmatch 'SysWOW64'} | Where-Object {`$_ -notmatch 'WinSxS'} | Where-Object {`$_ -notmatch 'dump64a'} | Where-Object {`$_ -notmatch 'CbsTemp'}
+`$files | Out-File 'C:\Users\user\Desktop\ChangedFiles.txt'
+`$files | Select-String '[.]exe`$' | ForEach-Object {if (`$_ -match '$packageName') {Out-Log `$_ 'green'}else{Out-Log `$_ 'cyan'}; try{Start-Process `$_}catch{}};
+`$files | Select-String '[.]msi`$' | ForEach-Object {if (`$_ -match '$packageName') {Out-Log `$_ 'green'}else{Out-Log `$_ 'cyan'}; try{Start-Process `$_}catch{}};
+`$files | Select-String '[.]lnk`$' | ForEach-Object {if (`$_ -match '$packageName') {Out-Log `$_ 'green'}else{Out-Log `$_ 'cyan'}; try{Start-Process `$_}catch{}};
+
+Out-Log `" = = = = End file list. Starting Defender scan.`"
+Start-MpScan;
+
+Out-Log `"Defender scan complete, closing windows...`"
+Get-Process msedge | Stop-Process
+Get-Process mip | Stop-Process
+Get-Process powershell | where {`$_.id -ne `$PID} | Stop-Process
+Get-Process explorer | where {`$_.id -ne `$explorerPid} | Stop-Process
+
+Get-process | Where-Object { `$_.mainwindowtitle -ne '' -and `$_.processname -notmatch '$packageName' -and `$_.processname -ne 'powershell' -and `$_.processname -ne 'WindowsTerminal' -and `$_.processname -ne 'csrss' -and `$_.processname -ne 'dwm'}| Stop-Process
+#Get-Process | Where-Object {`$_.id -notmatch `$PID -and `$_.id -notmatch `$explorerPid -and `$_.processname -notmatch `$packageName -and `$_.processname -ne 'csrss' -and `$_.processname -ne 'dwm'} | Stop-Process
+
+`$WinGetLogs = ((Get-ChildItem `$WinGetLogFolder).fullname | ForEach-Object {Get-Content `$_ |Where-Object {`$_ -match '[[]FAIL[]]' -OR `$_ -match 'failed' -OR `$_ -match 'error' -OR `$_ -match 'does not match'}})
+`$DefenderThreat = (Get-MPThreat).ThreatName
+
+Out-ErrorData `$WinGetLogs 'WinGet'
+Out-ErrorData '$MDLog' 'Manual' 'Dependency'
+Out-ErrorData `$Error 'PowerShell'
+Out-ErrorData (Get-EventLog Application -EntryType Error -after `$TimeStart -ErrorAction Ignore).Message 'Application Log'
+Out-ErrorData `$DefenderThreat `"Defender (with signature version `$((Get-MpComputerStatus).QuickScanSignatureVersion))`"
+
+if ((`$WinGetLogs -match '\[FAIL\] Installer failed security check.') -OR 
+(`$WinGetLogs -match 'Operation did not complete successfully because the file contains a virus or potentially unwanted software')){
+	Send-SharedError -Clip $WinGetLogs
+	Out-Log `" = = = = Failing Manual Validation pipeline build $build on VM $vm for $PackageIdentifier $logLine in `$(((Get-Date) -`$TimeStart).TotalSeconds) seconds. = = = = `"
+	Get-TrackerVMSetStatus 'SendStatus'
+} elseif (`$DefenderThreat) {
+	Send-SharedError -Clip $DefenderThreat
+	Out-Log `" = = = = Failing Manual Validation pipeline build $build on VM $vm for $PackageIdentifier $logLine in `$(((Get-Date) -`$TimeStart).TotalSeconds) seconds. = = = = `"
+	Get-TrackerVMSetStatus 'SendStatus'
+} else {
+	Out-Log `" = = = = Completing Manual Validation pipeline build $build on VM $vm for Config file $ConfigFile $logLine in `$(((Get-Date) -`$TimeStart).TotalSeconds) seconds. = = = = `"
+	Get-TrackerVMSetStatus 'ValidationComplete'
+}
+
+"
+	}#end Config
 "Scan" {
 $cmdsOut = "$nonElevatedShell
 `$TimeStart = Get-Date;
@@ -3088,9 +3214,8 @@ Out-Log 'Gathering WinGet info.'
 Out-ErrorData @(`$info[0],`$info[3],`$info[4],`$info[5]) 'WinGet' 'infos'
 
 $ManualDependency
-`$wingetArgs = 'install $optionsLine $installerLine --accept-package-agreements --ignore-local-archive-malware-scan'
-Out-Log `"Main Package Install with args: `$wingetArgs`"
-`$mainpackage = (Start-Process 'winget' `$wingetArgs -wait -PassThru);
+Out-Log `"Main Package Install with args: $wingetArgs`"
+`$mainpackage = (Start-Process 'winget' $wingetArgs -wait -PassThru);
 
 Out-Log `"`$(`$mainpackage.processname) finished with exit code: `$(`$mainpackage.ExitCode)`";
 If (`$mainpackage.ExitCode -ne 0) {
@@ -3138,21 +3263,36 @@ Get-Process explorer | where {`$_.id -ne `$explorerPid} | Stop-Process
 Get-process | Where-Object { `$_.mainwindowtitle -ne '' -and `$_.processname -notmatch '$packageName' -and `$_.processname -ne 'powershell' -and `$_.processname -ne 'WindowsTerminal' -and `$_.processname -ne 'csrss' -and `$_.processname -ne 'dwm'}| Stop-Process
 #Get-Process | Where-Object {`$_.id -notmatch `$PID -and `$_.id -notmatch `$explorerPid -and `$_.processname -notmatch `$packageName -and `$_.processname -ne 'csrss' -and `$_.processname -ne 'dwm'} | Stop-Process
 
-Out-ErrorData ((Get-ChildItem `$WinGetLogFolder).fullname | ForEach-Object {Get-Content `$_ |Where-Object {`$_ -match '[[]FAIL[]]' -OR `$_ -match 'failed' -OR `$_ -match 'error' -OR `$_ -match 'does not match'}}) 'WinGet'
+`$WinGetLogs = ((Get-ChildItem `$WinGetLogFolder).fullname | ForEach-Object {Get-Content `$_ |Where-Object {`$_ -match '[[]FAIL[]]' -OR `$_ -match 'failed' -OR `$_ -match 'error' -OR `$_ -match 'does not match'}})
+`$DefenderThreat = (Get-MPThreat).ThreatName
+
+Out-ErrorData `$WinGetLogs 'WinGet'
 Out-ErrorData '$MDLog' 'Manual' 'Dependency'
 Out-ErrorData `$Error 'PowerShell'
 Out-ErrorData (Get-EventLog Application -EntryType Error -after `$TimeStart -ErrorAction Ignore).Message 'Application Log'
-Out-ErrorData (Get-MPThreat).ThreatName `"Defender (with signature version `$((Get-MpComputerStatus).QuickScanSignatureVersion))`"
+Out-ErrorData `$DefenderThreat `"Defender (with signature version `$((Get-MpComputerStatus).QuickScanSignatureVersion))`"
 
-Out-Log `" = = = = Completing Manual Validation pipeline build $build on VM $vm for $PackageIdentifier $logLine in `$(((Get-Date) -`$TimeStart).TotalSeconds) seconds. = = = = `"
-Get-TrackerVMSetStatus 'ValidationComplete'
+if ((`$WinGetLogs -match '\[FAIL\] Installer failed security check.') -OR 
+(`$WinGetLogs -match 'Operation did not complete successfully because the file contains a virus or potentially unwanted software')){
+	Send-SharedError -Clip $WinGetLogs
+	Out-Log `" = = = = Failing Manual Validation pipeline build $build on VM $vm for $PackageIdentifier $logLine in `$(((Get-Date) -`$TimeStart).TotalSeconds) seconds. = = = = `"
+	Get-TrackerVMSetStatus 'SendStatus'
+} elseif (`$DefenderThreat) {
+	Send-SharedError -Clip $DefenderThreat
+	Out-Log `" = = = = Failing Manual Validation pipeline build $build on VM $vm for $PackageIdentifier $logLine in `$(((Get-Date) -`$TimeStart).TotalSeconds) seconds. = = = = `"
+	Get-TrackerVMSetStatus 'SendStatus'
+} else {
+	Out-Log `" = = = = Completing Manual Validation pipeline build $build on VM $vm for $PackageIdentifier $logLine in `$(((Get-Date) -`$TimeStart).TotalSeconds) seconds. = = = = `"
+	Get-TrackerVMSetStatus 'ValidationComplete'
+}
+
 "
-	}
+	}#end Scan
 	Default {
 		Write-Host "Error: Bad Function"
 		Break;
 	}
-	}
+	} 
 
 		$cmdsOut | Out-File $CmdsFileName
 
@@ -3424,8 +3564,8 @@ Function Get-OSFromVersion {
 Function Get-PipelineVmGenerate {
 	param(
 		[int]$vm = (Get-Content $vmCounter),
-		[int]$version = (Get-TrackerVMversion),
 		[ValidateSet("Win10","Win11")][string]$OS = "Win10",
+		[int]$version = (Get-TrackerVMVersion -OS $OS),
 		$destinationPath = "$imagesFolder\$vm\",
 		$VMFolder = "$MainFolder\vm\$vm",
 		$newVmName = "vm$vm",
@@ -3512,7 +3652,7 @@ Function Get-ImageVMStop {
 		}
 	}
 	$ImageLoc = "$imagesFolder\$OS-image\"
-	[int]$version = [int](Get-TrackerVMVersion) + 1
+	[int]$version = [int](Get-TrackerVMVersion -OS $OS) + 1
 	Write-Host "Writing $OS version $version"
 	Get-TrackerVMSetVersion $version
 	Stop-Process -id ((Get-ConnectedVM)|Where-Object {$_.VM -match "$OS"}).id -ErrorAction Ignore
@@ -3649,7 +3789,7 @@ Function Get-Status {
 		$out = ($out | Where-Object {$_.vm -eq $vm}).status
 	}
 	if ($Status) {
-		$out = ($out | Where-Object {$_.version -eq (Get-TrackerVMVersion)}| Where-Object {$_.status -eq $Status}).vm
+		$out = ($out | Where-Object {$_.version -eq (Get-TrackerVMVersion -OS $OS)}| Where-Object {$_.status -eq $Status}).vm
 	}
 	$out
 }
@@ -3669,12 +3809,41 @@ Function Get-TrackerVMRebuildStatus {
 	$Status = Get-VM | Where-Object {$_.name -notmatch "vm0"}|
 	Select-Object @{n="vm";e={$_.name}},
 	@{n="status";e={"Ready"}},
-	@{n="version";e={(Get-TrackerVMVersion)}},
+	@{n="version";e={(Get-TrackerVMVersion -OS "Win10")}},
 	@{n="OS";e={"Win10"}},
 	@{n="Package";e={""}},
 	@{n="PR";e={"1"}},
 	@{n="RAM";e={"0"}}
 	Write-Status $Status
+}
+
+#VM Versioning
+Function Get-TrackerVMVersion {
+	param(
+		[ValidateSet("Win10","Win11")][string]$OS = "Win10",
+		[int]$VM = ((Get-Content $VMversion | ConvertFrom-Csv | Where-Object {$_.OS -eq $OS}).version)
+	)
+	Return $VM
+}
+
+Function Get-TrackerVMSetVersion {
+	param(
+		[int]$Version,
+		[ValidateSet("Win10","Win11")][string]$OS = "Win10",
+		$Versions = (Get-Content $VMversion | ConvertFrom-Csv)
+	)
+	($Versions | Where-Object {$_.OS -eq $OS}).Version = $Version
+	$Versions | ConvertTo-Csv|Out-File $VMversion
+}
+
+Function Get-TrackerVMRotate {
+	$status = Get-Status
+	$VMs = $status | Where-Object {$_.version -lt (Get-TrackerVMVersion -OS "Win10")}
+	if ($VMs){
+		if (!(($status | Where-Object {$_.status -ne "Ready"}).count)) {
+			Get-TrackerVMSetStatus Regenerate ($VMs.VM | Get-Random)
+		}
+	}
 }
 
 #VM Orchestration
@@ -3695,7 +3864,7 @@ Function Get-TrackerVMCycle {
 				Redo-Checkpoint $VM.vm
 			}
 			"Complete" {
-				if (($VMs | Where-Object {$_.vm -eq $VM.vm} ).version -lt (Get-TrackerVMVersion)) {
+				if (($VMs | Where-Object {$_.vm -eq $VM.vm} ).version -lt (Get-TrackerVMVersion -OS $VM.os)) {
 					Get-TrackerVMSetStatus "Regenerate" $VM.vm
 				} else {
 					Complete-TrackerVM $VM.vm
@@ -3721,7 +3890,7 @@ Function Get-TrackerVMCycle {
 				$SharedError = $SharedError -replace "Exception(2) tid(f1c) 80072EE2     ",""
 				$SharedError = $SharedError -replace "Exception(4) tid(f1c) 80072EE2     ",""
 				$SharedError = $SharedError -replace "tid(f1c)",""
-				$SharedError = $SharedError -replace "C:\__w\1\s\external\pkg\src\AppInstallerCommonCore\Downloader.cpp(185)\WindowsPackageManager.dll!00007FFA008A37C9:",""
+				$SharedError = $SharedError -replace "C:\\__w\\1\\s\\external\\pkg\\src\\AppInstallerCommonCore\\Downloader.cpp(185)\\WindowsPackageManager.dll!00007FFA008A37C9:",""
 				Reply-ToPR -PR $VM.PR -UserInput $SharedError -CannedResponse ManValEnd 
 				Get-TrackerVMSetStatus "Complete" $VM.vm
 				if (($SharedError -match "\[FAIL\] Installer failed security check.") -OR ($SharedError -match "Detected 1 Defender")) {
@@ -3778,32 +3947,6 @@ Function Redo-Checkpoint {
 	Remove-VMCheckpoint -Name $CheckpointName -VMName $VMName
 	Checkpoint-VM -SnapshotName $CheckpointName -VMName $VMName
 	Get-TrackerVMSetStatus "Complete" $vm
-}
-
-Function Get-TrackerVMVersion {
-	[int](Get-Content $VMversion)
-}
-
-Function Get-TrackerVMSetVersion {
-	param([int]$Version) $Version|out-file $VMversion
-}
-
-Function Get-TrackerVMRemoveLesser {
-	(Get-Status | Where-Object {
-		$_.version -lt (Get-TrackerVMVersion)
-	}).vm |ForEach-Object{
-		Get-TrackerVMSetStatus Disgenerate $_
-	}
-}
-
-Function Get-TrackerVMRotate {
-	$status = Get-Status
-	$VMs = $status | Where-Object {$_.version -lt (Get-TrackerVMVersion)}
-	if ($VMs){
-		if (!(($status | Where-Object {$_.status -ne "Ready"}).count)) {
-			Get-TrackerVMSetStatus Regenerate ($VMs.VM | Get-Random)
-		}
-	}
 }
 
 #VM Window Management
@@ -4163,11 +4306,10 @@ Function Add-PRToRecord {
 
 Function Get-PRPopulateRecord {
 	param(
-		$Logs = (gc $LogFile | ConvertFrom-Csv)
+		$Logs = (Get-Content $LogFile | ConvertFrom-Csv -Header ("PR","Action","Title"))
 	)
 	Foreach ($Log in $Logs) {
-		$PotentialTitle = 
-		$Log.title = ($Logs | where {$_.title} | where {$_.PR -match $Log.PR}).title | Sort-Object -Unique
+		$Log.title = ($Logs | Where-Object {$_.title} | Where-Object {$_.PR -match $Log.PR}).title | Sort-Object -Unique
 	}
 	$Logs | ConvertTo-Csv|Out-File $LogFile
 }
@@ -4361,13 +4503,14 @@ $WordFilterList = "accept_gdpr ", "accept-licenses", "accept-license","eula","do
 $CountrySet = "Default","Warm","Cool","Random","Afghanistan","Albania","Algeria","American Samoa","Andorra","Angola","Anguilla","Antigua And Barbuda","Argentina","Armenia","Aruba","Australia","Austria","Azerbaijan","Bahamas","Bahrain","Bangladesh","Barbados","Belarus","Belgium","Belize","Benin","Bermuda","Bhutan","Bolivia","Bosnia And Herzegovina","Botswana","Bouvet Island","Brazil","Brunei Darussalam","Bulgaria","Burkina Faso","Burundi","Cabo Verde","Cambodia","Cameroon","Canada","Central African Republic","Chad","Chile","China","Colombia","Comoros","Cook Islands","Costa Rica","Croatia","Cuba","Curacao","Cyprus","Czechia","CÃ¶te D'Ivoire","Democratic Republic Of The Congo","Denmark","Djibouti","Dominica","Dominican Republic","Ecuador","Egypt","El Salvador","Equatorial Guinea","Eritrea","Estonia","Eswatini","Ethiopia","Fiji","Finland","France","French Polynesia","Gabon","Gambia","Georgia","Germany","Ghana","Greece","Grenada","Guatemala","Guinea","Guinea-Bissau","Guyana","Haiti","Holy See (Vatican City State)","Honduras","Hungary","Iceland","India","Indonesia","Iran","Iraq","Ireland","Israel","Italy","Jamaica","Japan","Jordan","Kazakhstan","Kenya","Kiribati","Kuwait","Kyrgyzstan","Laos","Latvia","Lebanon","Lesotho","Liberia","Libya","Liechtenstein","Lithuania","Luxembourg","Madagascar","Malawi","Malaysia","Maldives","Mali","Malta","Marshall Islands","Mauritania","Mauritius","Mexico","Micronesia","Moldova","Monaco","Mongolia","Montenegro","Morocco","Mozambique","Myanmar","Namibia","Nauru","Nepal","Netherlands","New Zealand","Nicaragua","Niger","Nigeria","Niue","Norfolk Island","North Korea","North Macedonia","Norway","Oman","Pakistan","Palau","Palestine","Panama","Papua New Guinea","Paraguay","Peru","Philippines","Pitcairn Islands","Poland","Portugal","Qatar","Republic Of The Congo","Romania","Russian Federation","Rwanda","Saint Kitts And Nevis","Saint Lucia","Saint Vincent And The Grenadines","Samoa","San Marino","Sao Tome And Principe","Saudi Arabia","Senegal","Serbia","Seychelles","Sierra Leone","Singapore","Slovakia","Slovenia","Solomon Islands","Somalia","South Africa","South Korea","South Sudan","Spain","Sri Lanka","Sudan","Suriname","Sweden","Switzerland","Syrian Arab Republic","Tajikistan","Tanzania"," United Republic Of","Thailand","Togo","Tonga","Trinidad And Tobago","Tunisia","Turkey","Turkmenistan","Tuvalu","Uganda","Ukraine","United Arab Emirates","United Kingdom","United States","Uruguay","Uzbekistan","Vanuatu","Venezuela","Vietnam","Yemen","Zambia","Zimbabwe","Ã…land Islands"
 
 #Misc Data
-$NonstandardPRComments = ("Validation Pipeline Badge",#Pipeline status
+$StandardPRComments = ("Validation Pipeline Badge",#Pipeline status
 "wingetbot run",#Run pipelines
 "AzurePipelines run",#Run pipelines
 "Azure Pipelines successfully started running 1 pipeline",#Run confirmation
 "The check-in policies require a moderator to approve PRs from the community",#Validation complete 
 "microsoft-github-policy-service agree",#CLA acceptance
 "wingetbot waivers Add",#Any waivers
+"Manifest Schema Version: 1.4.0 less than 1.5.0 for ID:",#Manifest depreciation for 1.4.0
 "This account is bot account and belongs to CoolPlayLin",#CoolPlayLin's automation
 "This account is automated by Github Actions and the source code was created by CoolPlayLin",#Exorcism0666's automation
 "Response status code does not indicate success",#My automation - removal PR where URL failed status check.
