@@ -70,7 +70,7 @@ Sometimes, the pipeline has an internal error. If the error happens during a lat
 
 ## Validation process
 
-Validation ususally proceeds in this way:
+Validation usually proceeds in this way:
 
 1. PR opened.
 1. Automatic Validation Pipeline performs analysis of manifest and URLs, then automated install of package in a VM. Any errors in this step will add an error label to the PR. If no errors, proceed to step 7.
@@ -84,7 +84,7 @@ Validation ususally proceeds in this way:
   - URL and download errors can sometimes be fixed through removing the URL from the manifest, if it's not an `InstallerUrl`. If it is, then another source for the package would be needed for the PR to proceed.
   - Installer errors can sometimes be fixed by updating installer switches, or adding a dependency if the error states that one is missing.
   - Application launch and run errors can also sometimes be fixed through adding a dependency, again only if one is called for.
-  - Other kinds of errors can't easliy be advanced past and might block a PR for some time.
+  - Other kinds of errors can't easily be advanced past and might block a PR for some time.
   - If no errors, then install the manifest in a local VM - essentially the Manual Validation Pipeline again - and examine. if still no errors, then the PR gets a waiver. (Some packages, most frequently CLI and tray-based, require manual review.)
 1. After remediation, return to step 2.
   - If the issue couldn't be remediated, then the PR doesn't have a clear path and might linger for some time.
