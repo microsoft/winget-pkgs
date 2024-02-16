@@ -101,6 +101,7 @@ Moderators are often the first to see and triage new issues, and so they have th
 * `Portable-Archive`
 * `Scripted-Application`
 * `Windows-Features`
+* `Version-Parameter-Mismatch`
 * `Zip-Binary`
 * `PSA`
 
