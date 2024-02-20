@@ -95,6 +95,7 @@ Moderators are often the first to see and triage new issues, and so they have th
 * `Last-Version-Remaining`
 * `License-Blocks-Install`
 * `Manifest-Content-Incomplete`
+* `Moderator-Approved`
 * `Needs-Attention`
 * `Needs-Author-Feedback`
 * `Needs-CLA`
