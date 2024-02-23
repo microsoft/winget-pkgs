@@ -90,20 +90,24 @@ Moderators are often the first to see and triage new issues, and so they have th
 * `Hardware`
 * `Installer-Issue`
 * `Interactive-Only-Installer`
+* `Issue-Bug`
+* `Issue-Feature`
 * `Last-Version-Remaining`
 * `License-Blocks-Install`
 * `Manifest-Content-Incomplete`
+* `Moderator-Approved`
 * `Needs-Attention`
 * `Needs-Author-Feedback`
 * `Needs-CLA`
 * `Needs-Manual-Merge`
 * `Network-Blocker`
+* `Package-Update`
 * `Portable-Archive`
+* `PSA`
 * `Scripted-Application`
 * `Windows-Features`
 * `Version-Parameter-Mismatch`
 * `Zip-Binary`
-* `PSA`
 
 > [!NOTE]
 >
