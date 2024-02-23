@@ -1,43 +1,64 @@
 # Validation Pipeline
 
-- Auth.csv
-- Review.csv
+- Unified data file
 - Addition and Removal
 - Manual Validation Pipeline
 - Validation process
 - Approval checks
-- Auto-waiver system.
 
-## Auth.csv
+## Unified data file ManualValidationPipeline.csv
 
-The Auth file was originally meant to be a stopgap solution, to restrict some uploads to certain users, until the Authorized Publishers feature is complete. It has since grown to include additional features. 
+Replaces and adds: 
+
+- Auth.csv
+  - The Auth file was originally meant to be a stopgap solution, to restrict some uploads to certain users, until the Authorized Publishers feature is complete. It has since grown to include additional features. 
+- Review.csv
+  - To identify and block on issues that are otherwise hard to capture, the Review file allows a note to show in the PR Watcher output when the specified package is reviewed.
+- Auto-waiver system
+  - Filling a gap in the waiver application system, this adds a waiver when a package fails with a specific label, but logs show no error. The waiver is only applied if the error label matches the label listed in waiver.csv. 
+- Version Parameter check override.
+  - Versions are usually dot-delimited integers. Version parameters are the characters (major, minor, etc) between the dots. 
+  - Semantic versions can have up to 4 parameters, while strings can have many more. 
+  - For most packages, the number of versions does not change very often. But for some packages, one version might have major, minor, and patch, while the subsequent adds a build parameter, and the following removes both the patch and the build. 
+  - Packages in this list skip this check.
+- Code 200 override 
+  - For removing packages that are still available, hence the "Code 200" is the HTTP response code. 
+  - This is for packages that frequently get their manifest removed while the package is still available from the host. 
+- Agreement check 
+  - For the new Agreements section, where the Agreement was verified. 
 
 ### Data structure
 
-The file is a CSV as named, with another slash-delimited list of users nested in the Account column. Headers:
+The file is a CSV as named, with another slash-delimited list of users nested in the gitHubUserName column. Headers:
 
  ```
-PackageIdentifier, Account, strictness, updateType
+PackageIdentifier, gitHubUserName, authStrictness, authUpdateType, autoWaiverLabel, versionParamOverrideUserName, versionParamOverridePR, code200OverrideUserName, code200OverridePR, AgreementOverridePR, reviewText
 ```
 
-- `PackageIdentifier` matches to `PackageIdentifier`s from PRs.
-- `Account` matches to a GitHub account name.
-- `strictness` can be either `should` or `must`. 
-- `updateType` is new, to control if the new automatic update feature should update this row.
+- Formerly Auth.csv
+  - `PackageIdentifier` matches to `PackageIdentifier`s from PRs.
+  - `gitHubUserName` matches to a GitHub account name.
+  - `authStrictness` can be either `should` or `must`. 
+  - `authUpdateType` is new, to control if the new automatic update feature should update this row.
+- Auto-waiver system
+  - `autoWaiverLabel` holds the label allowed for auto-waiver.
+- Version Parameter check override.
+  - `versionParamOverrideUserName` User who requested override. Might merge with `gitHubUserName` above.
+  - `versionParamOverridePR` PR where override was requested.
+- Code 200 override - for removing packages that are still available.
+  - `code200OverrideUserName` User who requested override. Might merge with `gitHubUserName` above.
+  - `code200OverridePR` PR where override was requested.
+- Agreement check - for the new Agreements section.
+  - `AgreementOverridePR` PR where Agreement was verified.
+- Formerly Review.csv (pending)
+  - `reviewText` holds warnings or alerts about packages.
+  - `reviewPR` PR where review check was requested.
 
-Being on the Auth.csv list brings a few benefits:
+Being listed in the `gitHubUserName`, with either value for `authStrictness`, brings a few benefits:
 
 - Control who uploads manifests for your software packages, for better control over releases. 
   - Block uploads simply by setting `Account` to your GitHub account and `strictness` to `must`, then simply not uploading.
 - Skip some Approval checks, such as the version parameter check and no blocking on package removal.
-
-## Review.csv
-
-To identify and block on issues that are otherwise hard to capture, the Review file allows a note to show in the PR Watcher output when the specified package is reviewed.
-
-### Data structure
-
-The Review.csv file is a CSV as named, with 3 columns: PackageIdentifier, Note, and PR number where the issue was first noted.
 
 ## Word Filter List
 
@@ -49,7 +70,6 @@ The WordFilterList.txt file is a plain text file, interpreted as an array of str
 
 ## Version Parameter check
 
-Versions are usually dot-delimited integers. Version parameters are the characters (major, minor, etc) between the dots. Semantic versions can have up to 4 parameters, while strings can have many more. For most packages, the number of versions does not change very often. But for some packages, one version might have major, minor, and patch, while the subsequent adds a build parameter, and the following removes both the patch and the build. Packages in this list skip this check.
 
 ### Data structure
 
@@ -124,13 +144,5 @@ The following checks are performed on each PR before approval:
   - If the previous version is higher than the current PR version, then it's a newer version, output the previous version, but in the "caution" color for the selected chromatic set. 
 
 (The letters are meant to not spell any word. If this spells a word, please let me know.)
-
-## Auto-waiver system
-
-Filling a gap in the waiver application system, this adds a waiver when a package fails with a specific label, but logs show no error. The waiver is only applied if the error label matches the label listed in waiver.csv. 
-
-### Data structure
-
-The waiver.csv file is a CSV as named, with just 2 columns: PackageIdentifier and Label. 
 
 
