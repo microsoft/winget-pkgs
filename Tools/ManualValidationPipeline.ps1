@@ -1,26 +1,16 @@
 #Copyright 2022-2024 Microsoft Corporation
 #Author: Stephen Gillie
-#Title: Manual Validation Pipeline v3.56.5
+#Title: Manual Validation Pipeline v3.66.2
 #Created: 10/19/2022
-#Updated: 2/22/2024
+#Updated: 2/23/2024
 #Notes: Utilities to streamline evaluating 3rd party PRs.
 #Update log:
+#3.66.2 - Reduce manual validation scan time by scanning only files added during the install.
+#3.66.1 - Bugfix AnF missing message and Manifest-Installer-Validation-Error label output. Bugfix Get-PRApproval. Increase Prevalidation state for Get-PRStateFromComments. 
+#3.66.0 - Rewrite Defender calls to wait 18 hours before running. 
 #3.56.5 - Add Get-ValidationData and Add-ValidationData to interface with the unified CSV.
-#3.56.4 - Rename Get-WinGetFile to Get-FileFromGitHub. Rename Add-ValidationData to Add-ToValidationFile. Remove Get-ManifestFileCheck.
-#3.56.3 - Automate emitting Defender and Hash Mismatch errors from manual pipeline into PRs.
-#3.56.2 - Add Get-GitHubRateLimit to help diagnose rate limit bugs.
-#3.56.1 - Fix multi-PR bug when starting manual validation. 
-#3.56.0 - Rewrite Configure section to automate WiNGet Configure testing.
-#3.55.1 - Rewrite several searches, and remove several unused searches. Change Days switch from "created" to "updated". 
-#3.55.0 - Rewrite numerous LabelActions. Most are just adding more ADOLogs to check. For Validation-Defender-Error, having that label clobbers other label actions, and the only action it takes is to retry if it's been more than 18 hours since the last retry. 
-#3.54.4 - Add Policy switch to Reply-ToPR, for Policy Label text - strings in this section have "[Policy] " prepended to them and are nested within an HTML Comment block. 
-#3.54.3 - Don't check word filter on removals, and skip lines with "Agreement" in them also.
-#3.54.2 - Remove Changes Requested as a Preset.
-#3.54.1 - Fix a typo. Spread out some complex IF statements.
-#3.54.0 - Unify Auth.csv and Waiver.csv, along with a couple of pending data files, into new ManualValidationPipeline.csv.
-#3.35.3 - Update Get-TrackerVMRotate to only work with VMs of the specified OS - to prevent a Win10 refresh from also forcing a Win11 refresh.
 
-$build = 808
+$build = 815
 $appName = "Manual Validation"
 Write-Host "$appName build: $build"
 $MainFolder = "C:\ManVal"
@@ -1506,7 +1496,7 @@ Function Get-PRWatch {
 						if (($ANFOld -eq $True) -and ($ANFCurrent -eq $False)) {
 							$matchColor = $invalidColor
 							$AnF = "-"
-							Reply-ToPR -PR $PR -CannedResponse AppsAndFeaturesMissing -UserInput $Submitter "[Policy] Needs-Author-Feedback" -Silent
+							Reply-ToPR -PR $PR -CannedResponse AppsAndFeaturesMissing -UserInput $Submitter -Policy "Needs-Author-Feedback" -Silent
 							Add-PRToRecord -PR $PR -Action "Feedback" -Title $PRtitle
 						} elseif (($ANFOld -eq $False) -and ($ANFCurrent -eq $True)) {
 							$matchColor = $cautionColor
@@ -1886,7 +1876,8 @@ Function Get-PRLabelAction { #Soothing label action.
 	Write-Output "PR $PR has labels $Labels"
 	if ($Labels -contains "Validation-Defender-Error") {
 		$PRState = Get-PRStateFromComments $PR
-		if (($PRState | where {$_.event -eq "Running"})[-1].created_at -lt (Get-Date).AddHours(-18)) { #If the last DefenderFail comment was made more than 18 hours ago. 18 instead of 24 because this handles someone who worked on this at the end of one 8-hour workday and the start of the next.
+		if (($PRState | where {$_.event -eq "PreValidation"})[-1].created_at -lt (Get-Date).AddHours(-18) -AND #Last Prevalidation was 18 hours ago.
+		($PRState | where {$_.event -eq "Running"})[-1].created_at -lt (Get-Date).AddHours(-18)) {  #Last Run was 18 hours ago.
 			Get-GitHubPreset Retry -PR $PR
 			#Break
 		}
@@ -2002,7 +1993,31 @@ Function Get-PRLabelAction { #Soothing label action.
 					}
 				}
 				"Manifest-Installer-Validation-Error" {
-					Reply-ToPR -PR $PR -UserInput ((Get-ADOLog -PR $PR -Log 25)[60]) -CannedResponse AutoValEnd
+					$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 25 -SearchString "[error] Manifest Error:"
+					if ("" -eq $UserInput) {
+						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 25 -SearchString "[error] One or more errors occurred."
+					}
+					if ("" -eq $UserInput) {
+						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 31 -SearchString "[error] Manifest Error:"
+					}
+					if ("" -eq $UserInput) {
+						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 31 -SearchString "[error] One or more errors occurred."
+					}
+					if ("" -eq $UserInput) {
+						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 44 -SearchString "[error] Manifest Error:"
+					}
+					if ("" -eq $UserInput) {
+						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 44 -SearchString "[error] One or more errors occurred."
+					}
+					if ("" -eq $UserInput) {
+						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 15 -SearchString "[error] Manifest Error:"
+					}
+					if ("" -eq $UserInput) {
+						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 15 -SearchString "[error] One or more errors occurred."
+					}
+					if ($UserInput) {
+						Reply-ToPR -PR $PR -UserInput $UserInput -CannedResponse AutoValEnd
+					}
 				}
 				"Manifest-Validation-Error" {
 					$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 25 -SearchString "[error] Manifest Error:"
@@ -2173,7 +2188,7 @@ Function Add-Waiver {
 
 Function Get-SearchGitHub {
 	param(
-		[ValidateSet("Approval","AutomaticWaiverAddition","Blocking","Created","Duplicate","Defender","IEDS","Incomplete","IEM","Label","NA","NAF","NANoIEDS","None","PrePipeline","Problematic","Squash","ToWork","ToWork2","User","VCNA")][string]$Preset = "Approval",
+		[ValidateSet("Approval","Blocking","Defender","IEDS","ToWork","ToWork2")][string]$Preset = "Approval",
 		[Switch]$Browser,
 		$Url = "https://api.github.com/search/issues?page=$Page&q=",
 		$Author, #wingetbot
@@ -2494,6 +2509,7 @@ Function Get-AutoValLog {
 				$_ -match 'not applicable' -OR 
 				$_ -match 'No suitable' -OR 
 				$_ -match 'Terminating context' -OR 
+				($_ -match 'exit code' -AND $_ -notmatch 'exit code: 0') 
 				$_ -match 'fail' -OR 
 				$_ -match 'error' -OR 
 				$_ -match 'exception'}
@@ -2726,8 +2742,8 @@ Function Get-PRApproval {
 		$Clip = (Get-Clipboard),
 		[int]$PR = (($Clip -split "#")[1]),
 		$PackageIdentifier = ((($clip -split ": ")[1] -split " ")[0]),
-		$auth = (Get-Content C:\repos\winget-pkgs\Tools\Auth.csv | ConvertFrom-Csv),
-		$Approver = ((($auth | Where-Object {$_.PackageIdentifier -match $PackageIdentifier}).account -split "/" | Where-Object {$_ -notmatch "\("}) -join ", @"),
+		$auth = (Get-ValidationData -Property PackageIdentifier -Match $PackageIdentifier -Exact).gitHubUserName,
+		$Approver = (($auth -split "/" | Where-Object {$_ -notmatch "\("}) -join ", @"),
 		[switch]$DemoMode
 	)
 	if ($DemoMode) {
@@ -2784,7 +2800,9 @@ Function Get-PRStateFromComments {
 		if (($Comment.UserName -eq $Wingetbot) -AND ($Comment.body -match "Service Badge")) {
 			$State = "PreRun"
 		}
-		if (($Comment.UserName -eq $Wingetbot) -OR ($Comment.UserName -eq $GitHubUserName) -AND ($Comment.body -match "AzurePipelines run")) {
+		if (($Comment.body -match "AzurePipelines run") -OR
+		($Comment.body -match "azp run") -OR
+		($Comment.body -match "wingetbot run")) {
 			$State = "PreValidation"
 		}
 		if (($Comment.UserName -eq $AzurePipelines) -AND ($Comment.body -match "Azure Pipelines successfully started running 1 pipeline")) {
@@ -3138,11 +3156,13 @@ Out-Log 'Gathering WinGet info.'
 `$info = winget --info
 Out-ErrorData @(`$info[0],`$info[3],`$info[4],`$info[5]) 'WinGet' 'infos'
 
+`$InstallStart = Get-Date;
 $ManualDependency
 Out-Log `"Main Package Install with args: $wingetArgs`"
 `$mainpackage = (Start-Process 'winget' '$wingetArgs' -wait -PassThru);
-
 Out-Log `"`$(`$mainpackage.processname) finished with exit code: `$(`$mainpackage.ExitCode)`";
+`$InstallEnd = Get-Date;
+
 If (`$mainpackage.ExitCode -ne 0) {
 	Out-Log 'Install Failed.';
 	explorer.exe `$WinGetLogFolder;
@@ -3179,8 +3199,8 @@ Out-Log 'Install complete, starting file change scan.'
 if (Test-Path $RemoteFolder\files.txt) {
 	`$files = Get-Content $RemoteFolder\files.txt
 } else {
-	`$files1 = (Get-ChildItem c:\ -File -Recurse -ErrorAction Ignore -Force | Where-Object {`$_.CreationTime -gt `$TimeStart}).FullName
-	`$files2 = (Get-ChildItem c:\ -File -Recurse -ErrorAction Ignore -Force | Where-Object {`$_.LastAccessTIme -gt `$TimeStart}).FullName
+	`$files1 = (Get-ChildItem c:\ -File -Recurse -ErrorAction Ignore -Force | Where-Object {`$_.CreationTime -gt `$InstallStart}| Where-Object {`$_.CreationTime -lt `$InstallEnd}).FullName
+	`$files2 = (Get-ChildItem c:\ -File -Recurse -ErrorAction Ignore -Force | Where-Object {`$_.CreationTime -gt `$InstallStart}| Where-Object {`$_.LastAccessTIme -lt `$InstallEnd}).FullName
 	`$files = `$files1 + `$files2 | Select-Object -Unique
 }
 
