@@ -64,7 +64,8 @@ The bots which help keep the repository clean sometimes make mistakes or or some
 > Trigger: Comment `Reopen with reason: <reason>;` on a pull request or issue
 
 In order to help keep the issues queues clean, moderators are able to close/re-open pull requests and issues. It is important to exercise discretion when closing/re-opening, ensuring that it is done with good reason.
-> Note: The ending semicolon is required. Using a URL in the reason is not supported
+> [!IMPORTANT]
+> The ending semicolon is required. Using a URL in the reason is not supported
 
 ### Marking Issues as Duplicate
 
@@ -85,16 +86,37 @@ Moderators are often the first to see and triage new issues, and so they have th
 * `Area-Validation-Pipeline`
 * `Blocking-Issue`
 * `Dependencies`
+* `DriverInstall`
 * `Hardware`
 * `Installer-Issue`
 * `Interactive-Only-Installer`
+* `Issue-Bug`
+* `Issue-Feature`
+* `Last-Version-Remaining`
+* `License-Blocks-Install`
 * `Manifest-Content-Incomplete`
+* `Moderator-Approved`
 * `Needs-Attention`
 * `Needs-Author-Feedback`
 * `Needs-CLA`
 * `Needs-Manual-Merge`
+* `Network-Blocker`
+* `Package-Update`
+* `Portable-Archive`
+* `PSA`
+* `Scripted-Application`
+* `Windows-Features`
+* `Version-Parameter-Mismatch`
 * `Zip-Binary`
 
-> **Note**:
-> * Adding `Dependencies`, `Hardware`, `Interactive-Only-Installer`,  or `Zip-Binary` will automatically add `Blocking-Issue`
+> [!NOTE]
+>
+> * Applying the following labels will automatically add `Blocking-Issue`
+>   * `Hardware`
+>   * `Interactive-Only-Installer`
+>   * `License-Blocks-Install`
+>   * `Portable-Archive`
+>   * `Windows-Features`
+>   * `Zip-Binary`
 > * Adding `Needs-Attention` to a PR will automatically assign the repository maintainers
+> * `[Policy] Unblocked` will remove `Blocking-Issue` label.
