@@ -26,9 +26,14 @@ Tags:
 - static-site
 - static-site-generator
 ReleaseNotes: |-
-  These release notes will be expanded soon.Note
-  - Make HTML behave exactly like other content formats (note) 676e6875d @bep #11999
-  - commands: Make the server flag --renderToDisk into --renderToMemory (note) 9c6d37787 @bep #11987
+  The work title for the v0.123.0 release has been "the million pages release", introducing a new memory limit that allows for a streaming build, shifting large objects out of memory when not in use. This release is also a rewrite of the Hugo core, fixing lots of long-lived bugs and adding some other exciting improvements (see below). There are some breaking changes that have been announced for a long time. Most sites will not be affected by this, but we recommend that you test your site with the new Hugo version before you set it up to build to production. Many people have contributed to this release, but a special shoutout goes to @bep and @jmooring, but also to @TiGR and @McShelby for their help testing and reporting bugs.
+  A list of notable new features:
+  - You can now set a upper memory limit (default 25% of system memory) via the OS environment variable HUGO_MEMORYLIMIT (in gigabytes) allowing for much larger data/page sets and/or running on lower specced PCs. This is backed by a partitioned LRU cache used throughout Hugo. A cache that gets dynamically resized in low memory situations, allowing Go's Garbage Collector to free the memory. Note that for regular sized Hugo sites, the performance should be about the same as before.
+  - New dependency tracker for partial server rebuilds. This quickly calculates the delta given a changed resource (e.g. a content file, template, JS file etc.) and supports transitive relations.
+  - A new document store. Previously, a little simplified, we split the document store (where we store pages and resources) in a tree per language. This worked pretty well, but the structure made some operations harder than they needed to be. We have now restructured it into one Radix tree for all languages. Internally the language is considered to be a dimension of that tree, and the tree can be viewed in all dimensions concurrently. This makes some operations re. language simpler (e.g. finding translations is just a slice range), but the idea is that it should also be relatively inexpensive to add more dimensions if needed (e.g. role). With this we also introduce a new logical page Path which we will used going forward to support other content data sources.
+  - Add warnidf template function, see docs
+  - Add the [params] concept to front matter, see docs
+  - Add images.Dither filter, see docs
   Bug fixes
   - Fix handling of build options for term pages 5ada27bf6 @bep #12058
   - Fix sample logic when adding content files in server afe5b6d7d @bep #12054
