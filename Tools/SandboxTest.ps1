@@ -232,7 +232,10 @@ Write-Host @'
 '@
 `$ProgressPreference = 'SilentlyContinue'
 try {
-  Add-AppxPackage -Path '$($desktopAppInstaller.pathInSandbox)' -DependencyPath '$($vcLibsUwp.pathInSandbox)','$($uiLibsUwp.pathInSandbox)'
+  Add-AppxPackage -Path '$($desktopAppInstaller.pathInSandbox)' -DependencyPath '$($vcLibsUwp.pathInSandbox)','$($uiLibsUwp.pathInSandbox)' -ErrorAction SilentlyContinue
+  if (!(Get-Command winget -ErrorAction SilentlyContinue)) {
+    throw
+  }
 } catch {
   Write-Host -ForegroundColor Red 'Could not install from cached packages. Falling back to Repair-WinGetPackageManager cmdlet'
   try {
