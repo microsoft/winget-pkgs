@@ -1,5 +1,10 @@
-#Requires -Version 5
+﻿#Requires -Version 5
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingWriteHost', '', Justification = 'This script is not intended to have any outputs piped')]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', 'Preserve', Justification = 'The variable is used in a conditional but ScriptAnalyser does not recognize the scope')]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseSingularNouns', '', Scope = 'Function', Target = 'Read-AppsAndFeaturesEntries',
+  Justification = 'Ths function is a wrapper which calls the singular Read-AppsAndFeaturesEntry as many times as necessary. It corresponds exactly to a pluralized manifest field')]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseSingularNouns', '', Scope = 'Function', Target = '*Metadata',
+  Justification = 'Metadata is used as a mass noun and is therefore singular in the cases used in this script')]
 
 Param
 (
@@ -163,8 +168,8 @@ if ($Settings) {
   exit
 }
 
-$ScriptHeader = '# Created with YamlCreate.ps1 v2.2.12'
-$ManifestVersion = '1.5.0'
+$ScriptHeader = '# Created with YamlCreate.ps1 v2.3.4'
+$ManifestVersion = '1.6.0'
 $PSDefaultParameterValues = @{ '*:Encoding' = 'UTF8' }
 $Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
 $ofs = ', '
@@ -174,6 +179,7 @@ $callingCulture = [Threading.Thread]::CurrentThread.CurrentCulture
 [Threading.Thread]::CurrentThread.CurrentCulture = 'en-US'
 if (-not ([System.Environment]::OSVersion.Platform -match 'Win')) { $env:TEMP = '/tmp/' }
 $wingetUpstream = 'https://github.com/microsoft/winget-pkgs.git'
+$RunHash = $(Get-FileHash -InputStream $([IO.MemoryStream]::new([byte[]][char[]]$(Get-Date).Ticks.ToString()))).Hash.Substring(0,8)
 
 if ($ScriptSettings.EnableDeveloperOptions -eq $true -and $null -ne $ScriptSettings.OverrideManifestVersion) {
   $script:UsesPrerelease = $ScriptSettings.OverrideManifestVersion -gt $ManifestVersion
@@ -183,7 +189,7 @@ if ($ScriptSettings.EnableDeveloperOptions -eq $true -and $null -ne $ScriptSetti
 $useDirectSchemaLink = if ($env:GITHUB_ACTIONS -eq $true) {
   $true
 } else {
-  (Invoke-WebRequest "https://aka.ms/winget-manifest.version.$ManifestVersion.schema.json" -UseBasicParsing).BaseResponse.ContentLength -eq -1
+  (Invoke-WebRequest "https://aka.ms/winget-manifest.version.$ManifestVersion.schema.json" -UseBasicParsing).Content -match '<!doctype html>'
 }
 $SchemaUrls = @{
   version       = if ($useDirectSchemaLink) { "https://raw.githubusercontent.com/microsoft/winget-cli/master/schemas/JSON/manifests/v$ManifestVersion/manifest.version.$ManifestVersion.json" } else { "https://aka.ms/winget-manifest.version.$ManifestVersion.schema.json" }
@@ -312,6 +318,29 @@ $Patterns = @{
   ARP_PublisherMaxLength        = $InstallerSchema.Definitions.AppsAndFeaturesEntry.properties.Publisher.maxLength
   ARP_DisplayVersionMinLength   = $InstallerSchema.Definitions.AppsAndFeaturesEntry.properties.DisplayVersion.minLength
   ARP_DisplayVersionMaxLength   = $InstallerSchema.Definitions.AppsAndFeaturesEntry.properties.DisplayVersion.maxLength
+}
+
+# check if upstream exists
+($remoteUpstreamUrl = $(git remote get-url upstream)) *> $null
+if ($remoteUpstreamUrl -and $remoteUpstreamUrl -ne $wingetUpstream) {
+  git remote set-url upstream $wingetUpstream
+} elseif (!$remoteUpstreamUrl) {
+  Write-Host -ForegroundColor 'Yellow' 'Upstream does not exist. Permanently adding https://github.com/microsoft/winget-pkgs as remote upstream'
+  git remote add upstream $wingetUpstream
+}
+
+# Since this script changes the UI Calling Culture, a clean exit should set it back to the user preference
+# If the remote upstream was changed, that should also be set back
+Function Invoke-CleanExit {
+
+  if ($remoteUpstreamUrl -and $remoteUpstreamUrl -ne $wingetUpstream) {
+    git remote set-url upstream $remoteUpstreamUrl
+  }
+
+  Write-Host
+  [Threading.Thread]::CurrentThread.CurrentUICulture = $callingUICulture
+  [Threading.Thread]::CurrentThread.CurrentCulture = $callingCulture
+  exit
 }
 
 # This function validates whether a string matches Minimum Length, Maximum Length, and Regex pattern
@@ -460,8 +489,8 @@ Function Request-InstallerUrl {
           }
         }
       }
-      $NewInstallerUrl = [System.Web.HttpUtility]::UrlDecode($NewInstallerUrl.Replace('+','%2B'))
-      $NewInstallerUrl = $NewInstallerUrl.Replace(' ','%20')
+      $NewInstallerUrl = [System.Web.HttpUtility]::UrlDecode($NewInstallerUrl.Replace('+', '%2B'))
+      $NewInstallerUrl = $NewInstallerUrl.Replace(' ', '%20')
       if ($script:_returnValue.StatusCode -ne 409) {
         if (Test-String $NewInstallerUrl -MaxLength $Patterns.InstallerUrlMaxLength -MatchPattern $Patterns.InstallerUrl -NotNull) {
           $script:_returnValue = [ReturnValue]::Success()
@@ -601,7 +630,7 @@ Function Get-MsiDatabase {
   do {
     $_Table = $_TablesView.Fetch()
     if ($_Table) {
-      $_TableName = Get-Property $_Table StringData 1
+      $_TableName = Get-Property -Object $_Table -PropertyName StringData -ArgumentList 1
       $_Database["$_TableName"] = @{}
     }
   } while ($_Table)
@@ -614,8 +643,8 @@ Function Get-MsiDatabase {
       $_Item = $_ItemView.Fetch()
       if ($_Item) {
         $_ItemValue = $null
-        $_ItemName = Get-Property $_Item StringData 1
-        if ($_Table -eq 'Property') { $_ItemValue = Get-Property $_Item StringData 2 -ErrorAction SilentlyContinue }
+        $_ItemName = Get-Property -Object $_Item -PropertyName StringData -ArgumentList 1
+        if ($_Table -eq 'Property') { $_ItemValue = Get-Property -Object $_Item -PropertyName StringData -ArgumentList 2 -ErrorAction SilentlyContinue }
         $_Database.$_Table["$_ItemName"] = $_ItemValue
       }
     } while ($_Item)
@@ -706,7 +735,7 @@ Function Get-ExeType {
   # If the burn header isn't present in the first 264 bytes, scan through the rest of the binary
   elseif ($ScriptSettings.IdentifyBurnInstallers -eq 'true') {
     $rollingBytes = $bytes[ - $burn.Length..-1]
-    for ($i = 265; $i -lt ($fileStream.Length,524280|Measure-Object -Minimum).Minimum; $i++) {
+    for ($i = 265; $i -lt ($fileStream.Length, 524280 | Measure-Object -Minimum).Minimum; $i++) {
       $rollingBytes = $rollingBytes[1..$rollingBytes.Length]
       $rollingBytes += $reader.ReadByte()
       if (($rollingBytes -join '') -match ($burn -join '')) {
@@ -800,25 +829,23 @@ Function Get-UriScope {
   return $null
 }
 
-function Get-PublisherHash($publisherName)
-{
-    # Sourced from https://marcinotorowski.com/2021/12/19/calculating-hash-part-of-msix-package-family-name
-    $publisherNameAsUnicode = [System.Text.Encoding]::Unicode.GetBytes($publisherName);
-    $publisherSha256 = [System.Security.Cryptography.HashAlgorithm]::Create("SHA256").ComputeHash($publisherNameAsUnicode);
-    $publisherSha256First8Bytes = $publisherSha256 | Select-Object -First 8;
-    $publisherSha256AsBinary = $publisherSha256First8Bytes | ForEach-Object { [System.Convert]::ToString($_, 2).PadLeft(8, '0') };
-    $asBinaryStringWithPadding = [System.String]::Concat($publisherSha256AsBinary).PadRight(65, '0');
+function Get-PublisherHash($publisherName) {
+  # Sourced from https://marcinotorowski.com/2021/12/19/calculating-hash-part-of-msix-package-family-name
+  $publisherNameAsUnicode = [System.Text.Encoding]::Unicode.GetBytes($publisherName);
+  $publisherSha256 = [System.Security.Cryptography.HashAlgorithm]::Create('SHA256').ComputeHash($publisherNameAsUnicode);
+  $publisherSha256First8Bytes = $publisherSha256 | Select-Object -First 8;
+  $publisherSha256AsBinary = $publisherSha256First8Bytes | ForEach-Object { [System.Convert]::ToString($_, 2).PadLeft(8, '0') };
+  $asBinaryStringWithPadding = [System.String]::Concat($publisherSha256AsBinary).PadRight(65, '0');
 
-    $encodingTable = "0123456789ABCDEFGHJKMNPQRSTVWXYZ";
+  $encodingTable = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
 
-    $result = "";
-    for ($i = 0; $i -lt $asBinaryStringWithPadding.Length; $i += 5)
-    {
-        $asIndex = [System.Convert]::ToInt32($asBinaryStringWithPadding.Substring($i, 5), 2);
-        $result += $encodingTable[$asIndex];
-    }
+  $result = '';
+  for ($i = 0; $i -lt $asBinaryStringWithPadding.Length; $i += 5) {
+    $asIndex = [System.Convert]::ToInt32($asBinaryStringWithPadding.Substring($i, 5), 2);
+    $result += $encodingTable[$asIndex];
+  }
 
-    return $result.ToLower();
+  return $result.ToLower();
 }
 
 Function Get-PackageFamilyName {
@@ -832,7 +859,7 @@ Function Get-PackageFamilyName {
   # Make the downloaded installer a zip file
   $_MSIX = Get-Item $FilePath
   $_Zip = Join-Path $_MSIX.Directory.FullName -ChildPath 'MSIX_YamlCreate.zip'
-  $_ZipFolder = [System.IO.Path]::GetDirectoryName($_ZIp)+ '\' + [System.IO.Path]::GetFileNameWithoutExtension($_Zip)
+  $_ZipFolder = [System.IO.Path]::GetDirectoryName($_ZIp) + '\' + [System.IO.Path]::GetFileNameWithoutExtension($_Zip)
   Copy-Item -Path $_MSIX.FullName -Destination $_Zip
   # Progress preference has to be set globally for Expand-Archive
   # https://github.com/PowerShell/Microsoft.PowerShell.Archive/issues/77#issuecomment-601947496
@@ -843,7 +870,7 @@ Function Get-PackageFamilyName {
   # Restore the old progress preference
   $global:ProgressPreference = $globalPreference
   # Package could be a single package or a bundle, so regex search for either of them
-  $_AppxManifest = Get-ChildItem $_ZipFolder -Recurse -File -Filter '*.xml' | Where-Object {$_.Name -match '^Appx(Bundle)?Manifest.xml$'} | Select-Object -First 1
+  $_AppxManifest = Get-ChildItem $_ZipFolder -Recurse -File -Filter '*.xml' | Where-Object { $_.Name -match '^Appx(Bundle)?Manifest.xml$' } | Select-Object -First 1
   [XML] $_XMLContent = Get-Content $_AppxManifest.FullName -Raw
   # The path to the node is different between single package and bundles, this should work to get either
   $_Identity = @($_XMLContent.Bundle.Identity) + @($_XMLContent.Package.Identity)
@@ -852,6 +879,39 @@ Function Get-PackageFamilyName {
   Remove-Item $_ZipFolder -Recurse -Force
   # Return the PFN
   return $_Identity.Name + '_' + $(Get-PublisherHash $_Identity.Publisher)
+}
+
+# Prompts the user to enter the Package Identifier if it has not been set
+# Validates that the package identifier matches the schema
+# Returns the package identifier
+Function Read-PackageIdentifier {
+  Param(
+    [Parameter(Mandatory = $true, Position = 0)]
+    [AllowEmptyString()]
+    [string] $PackageIdentifier
+  )
+  $_EnteredIdentifier = $PackageIdentifier
+  do {
+    if ((Test-String $_EnteredIdentifier -IsNull) -or ($script:_returnValue.StatusCode -ne [ReturnValue]::Success().StatusCode)) {
+      Write-Host -ForegroundColor 'Red' $script:_returnValue.ErrorString()
+      Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the Package Identifier, in the following format <Publisher shortname.Application shortname>. For example: Microsoft.Excel'
+      $_EnteredIdentifier = Read-Host -Prompt 'PackageIdentifier' | TrimString
+    }
+
+    $script:PackageIdentifierFolder = $_EnteredIdentifier.Replace('.', '\')
+    if (Test-String $_EnteredIdentifier -MinLength 4 -MaxLength $Patterns.IdentifierMaxLength -MatchPattern $Patterns.PackageIdentifier) {
+      $script:_returnValue = [ReturnValue]::Success()
+    } else {
+      if (Test-String -not $_EnteredIdentifier -MinLength 4 -MaxLength $Patterns.IdentifierMaxLength) {
+        $script:_returnValue = [ReturnValue]::LengthError(4, $Patterns.IdentifierMaxLength)
+      } elseif (Test-String -not $_EnteredIdentifier -MatchPattern $Patterns.PackageIdentifier) {
+        $script:_returnValue = [ReturnValue]::PatternError()
+      } else {
+        $script:_returnValue = [ReturnValue]::GenericError()
+      }
+    }
+  } until ($script:_returnValue.StatusCode -eq [ReturnValue]::Success().StatusCode)
+  return $_EnteredIdentifier
 }
 
 # Prompts the user to enter the details for an archive Installer
@@ -956,7 +1016,7 @@ Function Read-AppsAndFeaturesEntries {
   # TODO: Support Multiple AppsAndFeaturesEntries once WinGet supports it
   # For now, only select and retain the first entry
   foreach ($_AppsAndFeaturesEntry in @($_Installer.AppsAndFeaturesEntries[0])) {
-       $_AppsAndFeaturesEntries += Read-AppsAndFeaturesEntry $_AppsAndFeaturesEntry
+    $_AppsAndFeaturesEntries += Read-AppsAndFeaturesEntry $_AppsAndFeaturesEntry
   }
   return $_AppsAndFeaturesEntries
 }
@@ -1478,7 +1538,7 @@ Function Read-QuickInstallerEntry {
       # If the installer is msix or appx, try getting the new package family name
       # If the new package family name can't be found, remove it if it exists
       if ($script:dest -match '\.(msix|appx)(bundle){0,1}$') {
-        $PackageFamilyName= Get-PackageFamilyName $script:dest
+        $PackageFamilyName = Get-PackageFamilyName $script:dest
         if (Test-String $PackageFamilyName -MatchPattern $Patterns.FamilyName) {
           $_NewInstaller['PackageFamilyName'] = $PackageFamilyName
         } elseif ($_NewInstaller.Keys -contains 'PackageFamilyName') {
@@ -1536,6 +1596,8 @@ Function Read-InstallerMetadataValue {
 # If a key does not exist, it sets the value to a special character to be removed / commented later
 # Returns the result as a new object
 Function Restore-YamlKeyOrder {
+  [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', 'InputObject', Justification = 'The variable is used inside a conditional but ScriptAnalyser does not recognize the scope')]
+  [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', 'NoComments', Justification = 'The variable is used inside a conditional but ScriptAnalyser does not recognize the scope')]
   Param
   (
     [Parameter(Mandatory = $true, Position = 0)]
@@ -2249,7 +2311,7 @@ Function Write-ManifestContent {
       "# yaml-language-server: `$schema=$Schema";
       '';
       # This regex looks for lines with the special character ⍰ and comments them out
-      $(ConvertTo-Yaml $YamlContent).TrimEnd() -replace "(.*)$([char]0x2370)", "# `$1"
+      $(ConvertTo-Yaml $YamlContent).TrimEnd() -replace "(.*)\s+$([char]0x2370)", "# `$1"
     ), $Utf8NoBomEncoding)
 
   Write-Host "Yaml file created: $FilePath"
@@ -2503,6 +2565,13 @@ function Remove-ManifestVersion {
 
 ## START OF MAIN SCRIPT ##
 
+# Set the root folder where new manifests should be created
+if (Test-Path -Path "$PSScriptRoot\..\manifests") {
+  $ManifestsFolder = (Resolve-Path "$PSScriptRoot\..\manifests").Path
+} else {
+  $ManifestsFolder = (Resolve-Path '.\').Path
+}
+
 # Initialize the return value to be a success
 $script:_returnValue = [ReturnValue]::new(200)
 
@@ -2511,7 +2580,7 @@ $script:UsingAdvancedOption = ($ScriptSettings.EnableDeveloperOptions -eq 'true'
 if (!$script:UsingAdvancedOption) {
   # Request the user to choose an operation mode
   Clear-Host
-  if ($Mode -in 1..5) {
+  if ($Mode -in 1..6) {
     $UserChoice = $Mode
   } else {
     Write-Host -ForegroundColor 'Yellow' "Select Mode:`n"
@@ -2520,6 +2589,7 @@ if (!$script:UsingAdvancedOption) {
     Write-MulticolorLine '  [', '3', "] Update Package Metadata`n" 'DarkCyan', 'White', 'DarkCyan'
     Write-MulticolorLine '  [', '4', "] New Locale`n" 'DarkCyan', 'White', 'DarkCyan'
     Write-MulticolorLine '  [', '5', "] Remove a manifest`n" 'DarkCyan', 'White', 'DarkCyan'
+    Write-MulticolorLine '  [', '6', "] Move package to a new identifier`n" 'DarkCyan', 'White', 'DarkCyan'
     Write-MulticolorLine '  [', 'Q', ']', " Any key to quit`n" 'DarkCyan', 'White', 'DarkCyan', 'Red'
     Write-MulticolorLine "`nSelection: " 'White'
 
@@ -2530,11 +2600,13 @@ if (!$script:UsingAdvancedOption) {
       [ConsoleKey]::D3      = '3';
       [ConsoleKey]::D4      = '4';
       [ConsoleKey]::D5      = '5';
+      [ConsoleKey]::D6      = '6';
       [ConsoleKey]::NumPad1 = '1';
       [ConsoleKey]::NumPad2 = '2';
       [ConsoleKey]::NumPad3 = '3';
       [ConsoleKey]::NumPad4 = '4';
       [ConsoleKey]::NumPad5 = '5';
+      [ConsoleKey]::NumPad6 = '6';
     }
     do {
       $keyInfo = [Console]::ReadKey($false)
@@ -2548,6 +2620,7 @@ if (!$script:UsingAdvancedOption) {
     '3' { $script:Option = 'EditMetadata' }
     '4' { $script:Option = 'NewLocale' }
     '5' { $script:Option = 'RemoveManifest' }
+    '6' { $script:Option = 'MovePackageIdentifier' }
     default {
       Write-Host
       [Threading.Thread]::CurrentThread.CurrentUICulture = $callingUICulture
@@ -2558,7 +2631,7 @@ if (!$script:UsingAdvancedOption) {
   if ($AutoUpgrade) { $script:Option = 'Auto' }
 }
 
-# Confirm the user undertands the implications of using the quick update mode
+# Confirm the user understands the implications of using the quick update mode
 if (($script:Option -eq 'QuickUpdateVersion') -and ($ScriptSettings.SuppressQuickUpdateWarning -ne 'true')) {
   $_menu = @{
     entries       = @('[Y] Continue with Quick Update'; '[N] Use Full Update Experience'; '*[Q] Exit Script')
@@ -2571,36 +2644,140 @@ if (($script:Option -eq 'QuickUpdateVersion') -and ($ScriptSettings.SuppressQuic
     'Y' { Write-Host -ForegroundColor DarkYellow -Object "`n`nContinuing with Quick Update" }
     'N' { $script:Option = 'New'; Write-Host -ForegroundColor DarkYellow -Object "`n`nSwitched to Full Update Experience" }
     default {
-      Write-Host
-      [Threading.Thread]::CurrentThread.CurrentUICulture = $callingUICulture
-      [Threading.Thread]::CurrentThread.CurrentCulture = $callingCulture
-      exit
+      Invoke-CleanExit
     }
   }
 }
 Write-Host
 
-# Request Package Identifier and Validate
-do {
-  if ((Test-String $PackageIdentifier -IsNull) -or ($script:_returnValue.StatusCode -ne [ReturnValue]::Success().StatusCode)) {
-    Write-Host -ForegroundColor 'Red' $script:_returnValue.ErrorString()
-    Write-Host -ForegroundColor 'Green' -Object '[Required] Enter the Package Identifier, in the following format <Publisher shortname.Application shortname>. For example: Microsoft.Excel'
-    $script:PackageIdentifier = Read-Host -Prompt 'PackageIdentifier' | TrimString
+# Confirm the user understands the implications of moving package
+if (($script:Option -eq 'MovePackageIdentifier')) {
+  $_menu = @{
+    entries       = @('[Y] Continue moving package'; '*[Q] Exit Script')
+    Prompt        = 'Packages should only be moved between identifiers when necessary. Are you sure you want to continue?'
+    HelpText      = 'This mode should be used with caution. If you are not 100% certain what you are doing, please open an issue at GitHub'
+    HelpTextColor = 'Red'
+    DefaultString = 'Q'
   }
+  switch ( Invoke-KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString'] -HelpText $_menu['HelpText'] -HelpTextColor $_menu['HelpTextColor']) {
+    'Y' {
+      # To move a package doesn't require a package version like the other functions of YamlCreate. Therefore, to avoid requesting the information twice
+      # the entirety of the Move packages script happens here. This will then exit the script directly.
+      Write-Host; Write-Host
 
-  $PackageIdentifierFolder = $PackageIdentifier.Replace('.', '\')
-  if (Test-String $PackageIdentifier -MinLength 4 -MaxLength $Patterns.IdentifierMaxLength -MatchPattern $Patterns.PackageIdentifier) {
-    $script:_returnValue = [ReturnValue]::Success()
-  } else {
-    if (Test-String -not $PackageIdentifier -MinLength 4 -MaxLength $Patterns.IdentifierMaxLength) {
-      $script:_returnValue = [ReturnValue]::LengthError(4, $Patterns.IdentifierMaxLength)
-    } elseif (Test-String -not $PackageIdentifier -MatchPattern $Patterns.PackageIdentifier) {
-      $script:_returnValue = [ReturnValue]::PatternError()
-    } else {
-      $script:_returnValue = [ReturnValue]::GenericError()
+      # Update the ref for upstream master and switch to it to ensure the latest manifest information
+      git fetch upstream master --quiet
+      git switch -d upstream/master -q
+
+      # Request the current identifier and validate that it exists
+      Write-Host -ForegroundColor 'Green' -Object "What is the current package identifier?" -NoNewline
+      do {
+        $OldPackageIdentifier = Read-PackageIdentifier -PackageIdentifier $null
+        # Set the folder for the specific package
+        $FromAppFolder = Join-Path $ManifestsFolder -ChildPath $OldPackageIdentifier.ToLower().Chars(0) | Join-Path -ChildPath $OldPackageIdentifier.Replace('.',$([IO.Path]::DirectorySeparatorChar))
+        if (!(Test-Path -Path "$FromAppFolder")) {
+          Write-Host -ForegroundColor 'Red' -Object "No manifests found for $OldPackageIdentifier"
+        } else {
+          $manifestsExist = $true
+          Write-Host
+        }
+      } while (!$manifestsExist)
+
+      # Request the new identifier
+      Write-Host -ForegroundColor 'Green' -Object "What is the new package identifier?" -NoNewline
+      $NewPackageIdentifier = Read-PackageIdentifier -PackageIdentifier $null
+      $ToAppFolder = Join-Path $ManifestsFolder -ChildPath $NewPackageIdentifier.ToLower().Chars(0) | Join-Path -ChildPath $NewPackageIdentifier.Replace('.',[IO.Path]::DirectorySeparatorChar)
+      Write-Host
+
+      # Request the new moniker, in case the moniker needs to be updated
+      do {
+        Write-Host -ForegroundColor 'Red' $script:_returnValue.ErrorString()
+        Write-Host -ForegroundColor 'Yellow' -Object '[Optional] Enter the Moniker (friendly name/alias). For example: vscode'
+        if (Test-String -not $NewMoniker -IsNull) { Write-Host -ForegroundColor 'DarkGray' "Old Variable: $NewMoniker" }
+        $NewMoniker = Read-Host -Prompt 'Moniker' | ToLower | TrimString | NoWhitespace
+        if (Test-String $NewMoniker -MaxLength $Patterns.MonikerMaxLength -AllowNull) {
+          $script:_returnValue = [ReturnValue]::Success()
+        } else {
+          $script:_returnValue = [ReturnValue]::LengthError(1, $Patterns.MonikerMaxLength)
+        }
+      } until ($script:_returnValue.StatusCode -eq [ReturnValue]::Success().StatusCode)
+
+      # Get a list of the versions to move
+      $VersionsToMove = @(Get-ChildItem -Path $FromAppFolder | Where-Object {@(Get-ChildItem -Directory -Path $_.FullName).Count -eq 0}).Name
+
+      # Create an array for logging all the branches that were created
+      $BranchesCreated = @()
+
+      foreach ($Version in $VersionsToMove) {
+        Write-Host
+        Write-Host -ForegroundColor Yellow -Object "Moving version $Version [$(1+$BranchesCreated.Count/2)/$($VersionsToMove.Count)]"
+        # Copy the manifests to the new directory
+        $SourceFolder = Join-Path -Path $FromAppFolder -ChildPath $Version
+        $DestinationFolder = Join-Path -Path $ToAppFolder -ChildPath $Version
+        Copy-Item -Path $SourceFolder -Destination $DestinationFolder -Recurse -Force
+        # Rename the files
+        Get-ChildItem -Path $DestinationFolder -Filter "*$OldPackageIdentifier*" -Recurse | ForEach-Object {Rename-Item -Path $_.FullName -NewName $($_.Name -replace [regex]::Escape($OldPackageIdentifier),"$NewPackageIdentifier")}
+        # Update PackageIdentifier in all files
+        Get-ChildItem -Path $DestinationFolder -Filter "*$NewPackageIdentifier*" -Recurse | ForEach-Object  {[System.IO.File]::WriteAllLines($_.FullName, $((Get-Content -Path $_.FullName -Raw).TrimEnd() -replace [regex]::Escape($OldPackageIdentifier),"$NewPackageIdentifier"), $Utf8NoBomEncoding)}
+        # Update Moniker in all files
+        if (Test-String $NewMoniker -Not -IsNull) {
+          Get-ChildItem -Path $DestinationFolder -Filter "*$NewPackageIdentifier*" -Recurse | ForEach-Object  {[System.IO.File]::WriteAllLines($_.FullName, $((Get-Content -Path $_.FullName -Raw).TrimEnd() -replace "Moniker:.*","Moniker: $NewMoniker"), $Utf8NoBomEncoding)}
+        }
+
+        # Create and push to a new branch
+        git switch -d upstream/master -q
+        git add $DestinationFolder
+        git commit -m "Move $OldPackageIdentifier $Version to $NewPackageIdentifier $Version" --quiet
+        $BranchName = "Move-$OldPackageIdentifier-v$Version-$RunHash"
+        git switch -c "$BranchName" --quiet
+        git push --set-upstream origin "$BranchName" --quiet
+        $BranchesCreated += $BranchName
+        if ($ScriptSettings.AutoSubmitPRs -eq 'Always') {
+          gh pr create -f
+        }
+
+        # Switch back to the master branch
+        git switch -d upstream/master -q
+        # Remove the manifest for the old version
+        # Create and push to a new branch
+        git add $(Remove-ManifestVersion $SourceFolder)
+        git commit -m "Remove $OldPackageIdentifier $Version to $NewPackageIdentifier $Version" --quiet
+        $BranchName = "Remove-$OldPackageIdentifier-v$Version-$RunHash"
+        git switch -c "$BranchName" --quiet
+        git push --set-upstream origin "$BranchName" --quiet
+        $BranchesCreated += $BranchName
+        if ($ScriptSettings.AutoSubmitPRs -eq 'Always') {
+          gh pr create -f
+        }
+      }
+
+    }
+    default {
+      Out-Null # Intentionally do nothing here
     }
   }
-} until ($script:_returnValue.StatusCode -eq [ReturnValue]::Success().StatusCode)
+  if ($ScriptSettings.AutoSubmitPRs -eq 'Ask' -and $BranchesCreated.Count -gt 0) {
+    $_menu = @{
+      entries       = @('[Y] Yes'; '*[N] No')
+      Prompt        = "Do you want to submit all $($BranchesCreated.Count) PRs now?"
+      HelpText      = "If you choose 'No', the pull requests will need to be manually created"
+      DefaultString = 'N'
+    }
+    switch ( Invoke-KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString'] -HelpText $_menu['HelpText']) {
+      'Y' {
+        foreach ($Branch in $BranchesCreated) {
+          git switch $Branch --quiet
+          gh pr create -f
+        }
+       }
+      default { Out-Null }
+    }
+  }
+  Invoke-CleanExit
+}
+
+# Request Package Identifier and Validate
+$script:PackageIdentifier = Read-PackageIdentifier $script:PackageIdentifier
 
 # Request Package Version and Validate
 do {
@@ -2632,9 +2809,7 @@ if ($ScriptSettings.ContinueWithExistingPRs -ne 'always' -and $script:Option -ne
     $_PRTitle = $PRApiResponse.items.title
     if ($ScriptSettings.ContinueWithExistingPRs -eq 'never') {
       Write-Host -ForegroundColor Red "Existing PR Found - $_PRUrl"
-      [Threading.Thread]::CurrentThread.CurrentUICulture = $callingUICulture
-      [Threading.Thread]::CurrentThread.CurrentCulture = $callingCulture
-      exit
+      Invoke-CleanExit
     }
     $_menu = @{
       entries       = @('[Y] Yes'; '*[N] No')
@@ -2646,20 +2821,10 @@ if ($ScriptSettings.ContinueWithExistingPRs -ne 'always' -and $script:Option -ne
     switch ( Invoke-KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString'] -HelpText $_menu['HelpText'] -HelpTextColor $_menu['HelpTextColor'] ) {
       'Y' { Write-Host }
       default {
-        Write-Host
-        [Threading.Thread]::CurrentThread.CurrentUICulture = $callingUICulture
-        [Threading.Thread]::CurrentThread.CurrentCulture = $callingCulture
-        exit
+        Invoke-CleanExit
       }
     }
   }
-}
-
-# Set the root folder where new manifests should be created
-if (Test-Path -Path "$PSScriptRoot\..\manifests") {
-  $ManifestsFolder = (Resolve-Path "$PSScriptRoot\..\manifests").Path
-} else {
-  $ManifestsFolder = (Resolve-Path '.\').Path
 }
 
 # Set the folder for the specific package and version
@@ -2678,9 +2843,7 @@ if ($script:Option -in @('NewLocale'; 'EditMetadata'; 'RemoveManifest')) {
     Write-Host -ForegroundColor 'Red' -Object 'Could not find required manifests, input a version containing required manifests or "exit" to cancel'
     $PromptVersion = Read-Host -Prompt 'Version' | TrimString
     if ($PromptVersion -eq 'exit') {
-      [Threading.Thread]::CurrentThread.CurrentUICulture = $callingUICulture
-      [Threading.Thread]::CurrentThread.CurrentCulture = $callingCulture
-      exit
+      Invoke-CleanExit
     }
     if (Test-Path -Path "$AppFolder\..\$PromptVersion") {
       $script:OldManifests = Get-ChildItem -Path "$AppFolder\..\$PromptVersion"
@@ -2697,9 +2860,7 @@ if ($script:Option -in @('NewLocale'; 'EditMetadata'; 'RemoveManifest')) {
 if (-not (Test-Path -Path "$AppFolder\..")) {
   if ($script:Option -in @('QuickUpdateVersion', 'Auto')) {
     Write-Host -ForegroundColor Red 'This option requires manifest of previous version of the package. If you want to create a new package, please select Option 1.'
-    [Threading.Thread]::CurrentThread.CurrentUICulture = $callingUICulture
-    [Threading.Thread]::CurrentThread.CurrentCulture = $callingCulture
-    exit
+    Invoke-CleanExit
   }
   $script:OldManifestType = 'None'
 }
@@ -2896,10 +3057,7 @@ Switch ($script:Option) {
     switch ( Invoke-KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString'] -HelpText $_menu['HelpText'] -HelpTextColor $_menu['HelpTextColor']) {
       'Y' { Write-Host; continue }
       default {
-        Write-Host;
-        [Threading.Thread]::CurrentThread.CurrentUICulture = $callingUICulture
-        [Threading.Thread]::CurrentThread.CurrentCulture = $callingCulture
-        exit 1
+        Invoke-CleanExit
       }
     }
 
@@ -3081,25 +3239,11 @@ if ($PromptSubmit -eq '0') {
     git config --add core.safecrlf false
   }
 
-  # check if upstream exists
-  ($remoteUpstreamUrl = $(git remote get-url upstream)) *> $null
-  if ($remoteUpstreamUrl -and $remoteUpstreamUrl -ne $wingetUpstream) {
-    git remote set-url upstream $wingetUpstream
-  } elseif (!$remoteUpstreamUrl) {
-    Write-Host -ForegroundColor 'Yellow' 'Upstream does not exist. Permanently adding https://github.com/microsoft/winget-pkgs as remote upstream'
-    git remote add upstream $wingetUpstream
-  }
-
   # Fetch the upstream branch, create a commit onto the detached head, and push it to a new branch
   git fetch upstream master --quiet
   git switch -d upstream/master
   if ($LASTEXITCODE -eq '0') {
-    # Make sure path exists and is valid before hashing
-    $UniqueBranchID = ''
-    if ($script:LocaleManifestPath -and (Test-Path -Path $script:LocaleManifestPath)) { $UniqueBranchID = $UniqueBranchID + $($(Get-FileHash $script:LocaleManifestPath).Hash[0..6] -Join '') }
-    if ($script:InstallerManifestPath -and (Test-Path -Path $script:InstallerManifestPath)) { $UniqueBranchID = $UniqueBranchID + $($(Get-FileHash $script:InstallerManifestPath).Hash[0..6] -Join '') }
-    if (Test-String -IsNull $UniqueBranchID) { $UniqueBranchID = 'DEL' }
-    $BranchName = "$PackageIdentifier-$PackageVersion-$UniqueBranchID"
+    $BranchName = "$PackageIdentifier-$PackageVersion-$RunHash"
     # Git branch names cannot start with `.` cannot contain any of {`..`, `\`, `~`, `^`, `:`, ` `, `?`, `@{`, `[`}, and cannot end with {`/`, `.lock`, `.`}
     $BranchName = $BranchName -replace '[\~,\^,\:,\\,\?,\@\{,\*,\[,\s]{1,}|[.lock|/|\.]*$|^\.{1,}|\.\.', ''
     git add "$(Join-Path (Get-Item $AppFolder).Parent.FullName -ChildPath '*')"
@@ -3129,15 +3273,10 @@ if ($PromptSubmit -eq '0') {
   } else {
     git config --unset core.safecrlf
   }
-  if ($remoteUpstreamUrl -and $remoteUpstreamUrl -ne $wingetUpstream) {
-    git remote set-url upstream $remoteUpstreamUrl
-  }
 
 } else {
   Write-Host
-  [Threading.Thread]::CurrentThread.CurrentUICulture = $callingUICulture
-  [Threading.Thread]::CurrentThread.CurrentCulture = $callingCulture
-  exit
+  Invoke-CleanExit
 }
 [Threading.Thread]::CurrentThread.CurrentUICulture = $callingUICulture
 [Threading.Thread]::CurrentThread.CurrentCulture = $callingCulture
