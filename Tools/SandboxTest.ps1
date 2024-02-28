@@ -20,7 +20,7 @@ Param(
 
 $ErrorActionPreference = 'Stop'
 
-$useNuGetForMicrosoftUIXaml = $true
+$useNuGetForMicrosoftUIXaml = $false
 $mapFolder = (Resolve-Path -Path $MapFolder).Path
 
 if (-Not (Test-Path -Path $mapFolder -PathType Container)) {
@@ -127,10 +127,15 @@ $vcLibsUwp = @{
   hash   = 'B56A9101F706F9D95F815F5B7FA6EFBAC972E86573D378B96A07CFF5540C5961'
   SaveTo = $(Join-Path $tempFolder -ChildPath 'Microsoft.VCLibs.x64.14.00.Desktop.appx')
 }
-$uiLibsUwp = @{
+$uiLibsUwp_2_7 = @{
   url    = 'https://github.com/microsoft/microsoft-ui-xaml/releases/download/v2.7.3/Microsoft.UI.Xaml.2.7.x64.appx'
   hash   = '8CE30D92ABEC6522BEB2544E7B716983F5CBA50751B580D89A36048BF4D90316'
   SaveTo = $(Join-Path $tempFolder -ChildPath 'Microsoft.UI.Xaml.2.7.x64.appx')
+}
+$uiLibsUwp_2_8 = @{
+  url    = 'https://github.com/microsoft/microsoft-ui-xaml/releases/download/v2.8.6/Microsoft.UI.Xaml.2.8.x64.appx'
+  hash   = '249D2AFB41CC009494841372BD6DD2DF46F87386D535DDF8D9F32C97226D2E46'
+  SaveTo = $(Join-Path $tempFolder -ChildPath 'Microsoft.UI.Xaml.2.8.x64.appx')
 }
 $uiLibs_nuget = @{
   url    = 'https://www.nuget.org/api/v2/package/Microsoft.UI.Xaml/2.8.6'
@@ -138,7 +143,7 @@ $uiLibs_nuget = @{
   SaveTo = $(Join-Path $tempFolder -ChildPath 'Microsoft.UI.Xaml.2.8.zip')
 }
 
-$dependencies = @($desktopAppInstaller, $vcLibsUwp, $uiLibsUwp)
+$dependencies = @($desktopAppInstaller, $vcLibsUwp, $uiLibsUwp_2_7, $uiLibsUwp_2_8)
 
 if ($useNuGetForMicrosoftUIXaml) {
   $dependencies += $uiLibs_nuget
@@ -255,7 +260,8 @@ Write-Host @'
 `$ProgressPreference = 'SilentlyContinue'
 try {
   Add-AppxPackage -Path '$($vcLibsUwp.pathInSandbox)' -ErrorAction Stop
-  Add-AppxPackage -Path '$($uiLibsUwp.pathInSandbox)' -ErrorAction Stop
+  Add-AppxPackage -Path '$($uiLibsUwp_2_7.pathInSandbox)' -ErrorAction Stop
+  Add-AppxPackage -Path '$($uiLibsUwp_2_8.pathInSandbox)' -ErrorAction Stop
   Add-AppxPackage -Path '$($desktopAppInstaller.pathInSandbox)' -ErrorAction Stop
 } catch {
   Write-Host -ForegroundColor Red 'Could not install from cached packages. Falling back to Repair-WinGetPackageManager cmdlet'
