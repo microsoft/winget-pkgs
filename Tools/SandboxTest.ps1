@@ -20,6 +20,7 @@ Param(
 
 $ErrorActionPreference = 'Stop'
 
+$useNuGetForMicrosoftUIXaml = $true
 $mapFolder = (Resolve-Path -Path $MapFolder).Path
 
 if (-Not (Test-Path -Path $mapFolder -PathType Container)) {
@@ -131,8 +132,17 @@ $uiLibsUwp = @{
   hash   = '8CE30D92ABEC6522BEB2544E7B716983F5CBA50751B580D89A36048BF4D90316'
   SaveTo = $(Join-Path $tempFolder -ChildPath 'Microsoft.UI.Xaml.2.7.x64.appx')
 }
+$uiLibs_nuget = @{
+  url    = 'https://www.nuget.org/api/v2/package/Microsoft.UI.Xaml/2.8.6'
+  hash   = '6B62BD3C277F55518C3738121B77585AC5E171C154936EC58D87268BBAE91736'
+  SaveTo = $(Join-Path $tempFolder -ChildPath 'Microsoft.UI.Xaml.2.8.zip')
+}
 
 $dependencies = @($desktopAppInstaller, $vcLibsUwp, $uiLibsUwp)
+
+if ($useNuGetForMicrosoftUIXaml) {
+  $dependencies += $uiLibs_nuget
+}
 
 # Clean temp directory
 Get-ChildItem $tempFolder -Recurse -Exclude $($(Split-Path $dependencies.SaveTo -Leaf) -replace '\.([^\.]+)$', '.*') | Remove-Item -Force -Recurse
@@ -226,13 +236,27 @@ function Get-ARPTable {
 }
 '@
 
+### The NuGet may be needed if the latest Appx Packages are not available on GitHub ###
+if ($useNuGetForMicrosoftUIXaml) {
+  $bootstrapPs1Content += @"
+`$ProgressPreference = 'SilentlyContinue'
+
+Expand-Archive -Path $($uiLibs_nuget.pathInSandbox) -DestinationPath C:\Users\WDAGUtilityAccount\Downloads\Microsoft.UI.Xaml -ErrorAction SilentlyContinue
+Get-ChildItem C:\Users\WDAGUtilityAccount\Downloads\Microsoft.UI.Xaml\tools\AppX\x64\Release -Filter *.appx | Add-AppxPackage
+
+"@
+}
+#######################################################################################
+
 $bootstrapPs1Content += @"
 Write-Host @'
 --> Installing WinGet
 '@
 `$ProgressPreference = 'SilentlyContinue'
 try {
-  Add-AppxPackage -Path '$($desktopAppInstaller.pathInSandbox)' -DependencyPath '$($vcLibsUwp.pathInSandbox)','$($uiLibsUwp.pathInSandbox)' -ErrorAction Stop
+  Add-AppxPackage -Path '$($vcLibsUwp.pathInSandbox)' -ErrorAction Stop
+  Add-AppxPackage -Path '$($uiLibsUwp.pathInSandbox)' -ErrorAction Stop
+  Add-AppxPackage -Path '$($desktopAppInstaller.pathInSandbox)' -ErrorAction Stop
 } catch {
   Write-Host -ForegroundColor Red 'Could not install from cached packages. Falling back to Repair-WinGetPackageManager cmdlet'
   try {
