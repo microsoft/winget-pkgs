@@ -1,26 +1,23 @@
 #Copyright 2022-2024 Microsoft Corporation
 #Author: Stephen Gillie
-#Title: Manual Validation Pipeline v3.86.4
+#Title: Manual Validation Pipeline v3.88.2
 #Created: 10/19/2022
-#Updated: 2/27/2024
+#Updated: 2/28/2024
 #Notes: Utilities to streamline evaluating 3rd party PRs.
 #Update log:
+#3.88.2 - Clean up pending comments. Add Needs-Author-Feedback to PR comment functions.
+#3.88.1 - Change GitHubUserName from camelCase to PascalCase. 
+#3.88.0 - Unfurl and bugfix validation scanning and execution filter logic. 
+#3.87.1 - Update a few reuses of the variable "build" to be "PRBuild". 
+#3.87.0 - Rewrite "noise" filter logic in Get-AutoValLog. 
+#3.86.8 - Bugfix to LabelAction, with Get-LineFromCommitFile returning null objects instead of empty strings.
+#3.86.7 - Move all Defender logic into LabelAction. 
+#3.86.6 - Add progress bar to WorkSearch. 
+#3.86.5 - Bugfix Defenderfail replacing names with the MagicLabels contents - using a plus in a parameter doesn't append the array member to the string, but instead dump the entire array, and index indicator, into the next free parameter by order. Fix is to declare the array member within the string.
 #3.86.4 - Add Get-PRFullReport to automate reporting daily PR activity into a log file. 
-#3.68.3 - Sort the data file by PackageIdentifier whenever adding to it.
-#3.68.2 - Add Function Get-TrackerVMValidateBothArchAndScope to start all 4 for the same manifest. 
-#3.69.1 - Validation updates: Accept Configure agremeents in Configure section, and add 15 second minimum to validation scan time, for processes to complete. Add a couple of filters to ChangedFiles output. Open a PowerShell window at the end of the run, for manual program testing. 
-#3.69.0 - Depreciate Get-ADOLog, being subsumed withing Get-LineFromCommitFile. 
-#3.68.5 - Add many noise strings to Get-AutoValLog's filtering. 
-#3.68.4 - Rename Get-CannedResponse to Get-CannedMessage.
-#3.68.3 - Add explicit Defender handling to Get-WorkSearch.
-#3.68.2 - Update GitHub API rate limit delay from 0.5 seconds to 0.33. 
-#3.68.1 - Change AnF settings being added to a block instead of a pass. 
-#3.68.0 - Learned about magic strings, and begin replacing them with common array variables. 
-#3.67.0 - Added Agreements override section - if AgreementsUrl exactly matches, it clobbers the Word Filter. 
-#3.66.2 - Reduce manual validation scan time by scanning only files added during the install.
 
-$build = 841
-$appName = "Manual Validation"
+$build = 853
+$appName = "ManualValidationPipeline"
 Write-Host "$appName build: $build"
 $MainFolder = "C:\ManVal"
 $Owner = "microsoft"
@@ -102,7 +99,7 @@ $MagicLabels = "Validation-Defender-Error", #0
 "Validation-Unattended-Failed", #23
 "Policy-Test-1.2", #24
 "Policy-Test-2.3", #25
-"Policy-Test-2.3", #26
+"Validation-Completed", #26
 "Validation-Forbidden-URL-Error", #27
 "Validation-Unapproved-URL", #28
 "Validation-Retry", #29
@@ -1410,7 +1407,7 @@ Function Get-PRWatch {
 				$AuthMatch = $AuthList | Where-Object {$_.PackageIdentifier -match (($PackageIdentifier -split "[.]")[0..1] -join ".")}
 
 				if ($AuthMatch) {
-					$AuthAccount = $AuthMatch.gitHubUserName | Sort-Object -Unique
+					$AuthAccount = $AuthMatch.GitHubUserName | Sort-Object -Unique
 				}
 
 				if ($null -eq $WinGetOutput) {
@@ -1752,6 +1749,7 @@ Function Get-WorkSearch {
 		$Count= 30
 		$Page = 0
 		While ($Count -eq 30) {
+			$line = 0
 			$PRs = (Get-SearchGitHub -Preset $Preset -Page $Page -NoLabels) 
 			$Count = $PRs.length #If fewer than 30 PRs (1 page) are returned, then complete the loop and continue instead of starting another loop.
 			Write-Output "$(Get-Date -f T) $Preset Page $Page beginning with $Count Results"
@@ -1759,6 +1757,8 @@ Function Get-WorkSearch {
 			
 			Foreach ($FullPR in $PRs) {
 				$PR = $FullPR.number
+				Get-TrackerProgress -PR $PR $MyInvocation.MyCommand $line $PRs.length
+				$line++
 				$Comments = (Invoke-GitHubPRRequest -PR $PR -Type comments -Output content)
 				if(($FullPR.title  -match "Remove") -OR 
 				($FullPR.title  -match "Delete") -OR 
@@ -1773,16 +1773,19 @@ Function Get-WorkSearch {
 					}
 				} elseif ($Preset -eq "Defender"){
 					Get-GitHubPreset -Preset LabelAction -PR $PR
-				} else { #ToWork2
-					Open-PRInBrowser -PR $PR
+				} else { #ToWork etc
 					$Comments = ($Comments | select created_at,@{n="UserName";e={$_.user.login -replace "\[bot\]"}},body)
 					$State = (Get-PRStateFromComments -PR $PR -Comments $Comments)
 					$LastState = $State[-1]
-					if ($LastState.event -eq "LabelAction") { 
+					if ($LastState.event -eq "DefenderFail") { 
+						Get-PRLabelAction -PR $PR
+					} elseif ($LastState.event -eq "LabelAction") { 
 						Get-GitHubPreset -Preset LabelAction -PR $PR
-					} elseif (($State[-2].event -eq "AutoValFail") -AND ($LastState.event -eq "DefenderFail") -AND ($LastState.created_at -lt (Get-Date).AddHours(-18))) { 
-						Get-GitHubPreset -Preset Retry -PR $PR
+						Open-PRInBrowser -PR $PR
 					} else {
+						if ($Comments[-1].UserName -ne $GitHubUserName) {
+							Open-PRInBrowser -PR $PR
+						}
 					}#end if LastCommenter
 				}#end if Preset
 			}#end foreach FullPR
@@ -1856,7 +1859,7 @@ Function Get-GitHubPreset {
 			}
 			"DefenderFail" {
 				Add-PRToRecord -PR $PR -Action "Blocking"
-				$out += Reply-ToPR -PR $PR -CannedResponse $Preset -Policy "Needs-Attention`n[Policy] "+$MagicLabels[0]
+				$out += Reply-ToPR -PR $PR -CannedResponse $Preset -Policy "Needs-Attention`n[Policy] $($MagicLabels[0])"
 			}
 			"Feedback" {
 				Add-PRToRecord -PR $PR -Action $Preset
@@ -2101,30 +2104,30 @@ Function Get-PRLabelAction { #Soothing label action.
 						Reply-ToPR -PR $PR -UserInput $UserInput -CannedResponse AutoValEnd
 					}
 				}
-				$MagicLabels[11] {
+				$MagicLabels[11] { #Manifest-Validation-Error
 					$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 25 -SearchString $MagicStrings[2]
-					if ("" -eq $UserInput) {
+					if ($null -eq $UserInput) {
 						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 25 -SearchString $MagicStrings[1]
 					}
-					if ("" -eq $UserInput) {
+					if ($null -eq $UserInput) {
 						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 31 -SearchString $MagicStrings[2]
 					}
-					if ("" -eq $UserInput) {
+					if ($null -eq $UserInput) {
 						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 31 -SearchString $MagicStrings[1]
 					}
-					if ("" -eq $UserInput) {
+					if ($null -eq $UserInput) {
 						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 44 -SearchString $MagicStrings[2]
 					}
-					if ("" -eq $UserInput) {
+					if ($null -eq $UserInput) {
 						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 44 -SearchString $MagicStrings[1]
 					}
-					if ("" -eq $UserInput) {
+					if ($null -eq $UserInput) {
 						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 15 -SearchString $MagicStrings[2]
 					}
-					if ("" -eq $UserInput) {
+					if ($null -eq $UserInput) {
 						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 15 -SearchString $MagicStrings[1]
 					}
-					if ($UserInput) {
+					if ($null -ne $UserInput) {
 						Reply-ToPR -PR $PR -UserInput $UserInput -CannedResponse AutoValEnd
 					}
 				}
@@ -2276,7 +2279,7 @@ Function Get-SearchGitHub {
 		$Author, #wingetbot
 		$Commenter, #wingetbot
 		$Title,
-		[string]$Label, #[ValidateSet("Error-Analysis-Timeout","Unexpected-File","Needs-CLA","Error-Analysis-Timeout")]
+		[string]$Label, 
 		$Page = 1,
 		[int]$Days,
 		[Switch]$IEDS,
@@ -2588,23 +2591,27 @@ Function Get-AutoValLog {
 		}
 		$UserInput = (
 			(Get-ChildItem $LogPath).FullName| ForEach-Object {
-			if ($_ -match "png") {Start-Process $_} #Open PNGs with default app.
-			Get-Content $_ |Where-Object {
-				$_ -match '[[]FAIL[]]' -OR 
-				$_ -match 'not applicable' -OR 
-				$_ -match 'No suitable' -OR 
-				($_ -match 'exit code') -OR 
-				$_ -match 'fail' -OR 
-				$_ -match 'error' -OR 
-				$_ -match 'exception'}
+				if ($_ -match "png") {
+					Start-Process $_
+				} #Open PNGs with default app.
+				Get-Content $_ |Where-Object {
+					$_ -match '[[]FAIL[]]' -OR 
+					$_ -match 'error' -OR 
+					$_ -match 'exception' -OR 
+					$_ -match 'exit code' -OR 
+					$_ -match 'fail' -OR 
+					$_ -match 'No suitable' -OR 
+					$_ -match 'not supported' -OR #not supported by this processor type
+					#$_ -match 'not applicable' -OR 
+					$_ -match 'Unable to locate nested installer'
+				}
 			}
 		) -split "`n" | Select-Object -Unique;
-
 		$UserInput = $UserInput -replace "Standard error: ",""
-		$UserInput = $UserInput -replace "Exception during executable launch operation System.InvalidOperationException: No process is associated with this object.",""
+
 		if ($UserInput -ne "") {
 			if (($UserInput -match "\[FAIL\] Installer failed security check.") -OR ($UserInput -match "Operation did not complete successfully because the file contains a virus or potentially unwanted software")) {
-				Get-GitHubPreset DefenderFail -PR $PR
+				Get-GitHubPreset -Preset DefenderFail -PR $PR
 			}
 			if ($UserInput -match "SQL error or missing database") {
 				Get-GitHubPreset Retry -PR $PR
@@ -2614,46 +2621,38 @@ Function Get-AutoValLog {
 				Open-PRInBrowser -PR $PR
 			}
 
-			$UserInput = ($UserInput -split "`n") -notmatch ' success or error status`: 0'
-			$UserInput = ($UserInput -split "`n") -notmatch 'api-ms-win-core-errorhandling'
-			$UserInput = ($UserInput -split "`n") -notmatch '``Windows Error Reporting``'
-			$UserInput = ($UserInput -split "`n") -notmatch 'The FileSystemWatcher has detected an error '
-			$UserInput = ($UserInput -split "`n") -notmatch "with working directory 'D:\\TOOLS'. The specified executable is not a valid application for this OS platform"
-			$UserInput = ($UserInput -split "`n") -notmatch "ThrowIfExceptional"
-			$UserInput = ($UserInput -split "`n") -notmatch "The process cannot access the file because it is being used by another process"
-			$UserInput = ($UserInput -split "`n") -notmatch "ISWEBVIEW2INSTALLED"
-			$UserInput = ($UserInput -split "`n") -notmatch "Terminating context"
-			$UserInput = ($UserInput -split "`n") -notmatch "Exit code`: 0"
-			$UserInput = ($UserInput -split "`n") -notmatch "Windows Installer installed the product"
-			$UserInput = ($UserInput -split "`n") -notmatch "Could not create system restore point"
-			$UserInput = ($UserInput -split "`n") -notmatch "--- End of inner exception stack trace ---"
-			$UserInput = ($UserInput -split "`n") -notmatch "Installation failed with exit code -1978334972"
-			$UserInput = ($UserInput -split "`n") -notmatch "ERROR: Signature Update failed"
-			$UserInput = ($UserInput -split "`n") -notmatch "Setting error JSON 1.0 fields"
-			$UserInput = ($UserInput -split "`n") -replace "2024-","`n> 2024-"
-			$UserInput = ($UserInput -split "`n") -replace " MSI ","`n> MSI "
-			$UserInput = ($UserInput -split "`n") | Select-Object -Unique
+			$UserInput = $UserInput -notmatch ' success or error status`: 0'
+			$UserInput = $UserInput -notmatch '``Windows Error Reporting``'
+			$UserInput = $UserInput -notmatch 'api-ms-win-core-errorhandling'
+			$UserInput = $UserInput -notmatch 'The FileSystemWatcher has detected an error '
+			$UserInput = $UserInput -notmatch "--- End of inner exception stack trace ---"
+			$UserInput = $UserInput -notmatch "Could not create system restore point"
+			$UserInput = $UserInput -notmatch "ERROR: Signature Update failed"
+			$UserInput = $UserInput -notmatch "Exception during executable launch operation System.InvalidOperationException: No process is associated with this object."
+			$UserInput = $UserInput -notmatch "Exit code`: 0"
+			$UserInput = $UserInput -notmatch "Installation failed with exit code -1978334972"
+			$UserInput = $UserInput -notmatch "ISWEBVIEW2INSTALLED"
+			$UserInput = $UserInput -notmatch "SchedNetFx"
+			$UserInput = $UserInput -notmatch "Setting error JSON 1.0 fields"
+			$UserInput = $UserInput -notmatch "Terminating context"
+			$UserInput = $UserInput -notmatch "The process cannot access the file because it is being used by another process"
+			$UserInput = $UserInput -notmatch "ThrowIfExceptional"
+			$UserInput = $UserInput -notmatch "Windows Installer installed the product"
+			$UserInput = $UserInput -notmatch "with working directory 'D:\\TOOLS'. The specified executable is not a valid application for this OS platform"
 
-			$UserInput = "Automatic Validation ended with:`n> "+($UserInput -split "`n")
-			$UserInput = ($UserInput -split "`n")+"`n`n(Automated response - build $build.)"
-			$UserInput = ($UserInput -split "`n") -replace "2024-","`n> 2024-"
+			$UserInput = $UserInput | Select-Object -Unique
+			$UserInput = "Automatic Validation ended with:`n"+($UserInput -join "`n> ")+"`n`n(Automated response - build $build.)"
 
-			if ($DemoMode) {
-				Write-Output "PR: $PR - DemoMode: Created"
-			} else {
-				$out = Reply-ToPR -PR $PR -Body $UserInput
-	if (!($Silent)) {
+			$out = Reply-ToPR -PR $PR -Body $UserInput
+			if (!($Silent)) {
 				Write-Host "PR: $PR - $out"
-				}
 			}
 		} else {
-			$UserInput = "Automatic Validation ended with:`n> "
-			$UserInput += "No errors to post."
-			$UserInput += "`n`n(Automated response - build $build.)"
+			$UserInput = "Automatic Validation ended with:`n> No errors to post.`n`n(Automated response - build $build.)"
 			$out = Reply-ToPR -PR $PR -Body $UserInput
-	if (!($Silent)) {
-			Write-Host "PR: $PR - $out - No errors to post."
-	}
+			if (!($Silent)) {
+				Write-Host "PR: $PR - $out - No errors to post."
+			}
 			$Title = ((Invoke-GitHubPRRequest -PR $PR -Type "" -Output content -JSON).title);
 			foreach ($Waiver in $WaiverList) {
 				if ($Title -match $Waiver.PackageIdentifier) {
@@ -2663,7 +2662,9 @@ Function Get-AutoValLog {
 		}
 	} else {
 		if (!($Silent)) {
-			Write-Host "PR: $PR - No build found."
+			$UserInput = "Automatic Validation ended with:`n> ADO Build not found.`n`n(Automated response - build $build.)"
+			$out = Reply-ToPR -PR $PR -Body $UserInput
+			Write-Host "PR: $PR - $out - Build not found."
 		}
 	}
 }
@@ -2812,18 +2813,18 @@ Function Get-BuildFromPR {
 		$PR,
 		$content = ((Invoke-WebRequest "$ADOMSBaseUrl/$Repo/_apis/build/builds?branchName=refs/pull/$PR/merge&api-version=6.0").content | ConvertFrom-Json),
 		$href = ($content.value[0]._links.web.href),
-		$build = (($href -split "=")[1])
+		$PRbuild = (($href -split "=")[1])
 	)
-	return $build
+	return $PRbuild
 }
 
 Function Get-LineFromCommitFile {
 	param(
 		$PR,
-		$build = (Get-BuildFromPR -PR $PR),
+		$PRbuild = (Get-BuildFromPR -PR $PR),
 		$LogNumber = (36),
 		$SearchString = "Specified hash doesn't match",
-		$content = (Invoke-WebRequest "$ADOMSBaseUrl/ed6a5dfa-6e7f-413b-842c-8305dd9e89e6/_apis/build/builds/$build/logs/$LogNumber").content,
+		$content = (Invoke-WebRequest "$ADOMSBaseUrl/ed6a5dfa-6e7f-413b-842c-8305dd9e89e6/_apis/build/builds/$PRbuild/logs/$LogNumber").content,
 		$Log = ($content -join "" -split "`n"),
 		$MatchOffset = (-1),
 		$MatchLine = (($Log | Select-String -SimpleMatch $SearchString).LineNumber + $MatchOffset | where {$_ -gt 0}),
@@ -2841,7 +2842,7 @@ Function Get-PRApproval {
 		$Clip = (Get-Clipboard),
 		[int]$PR = (($Clip -split "#")[1]),
 		$PackageIdentifier = ((($clip -split ": ")[1] -split " ")[0]),
-		$auth = (Get-ValidationData -Property PackageIdentifier -Match $PackageIdentifier -Exact).gitHubUserName,
+		$auth = (Get-ValidationData -Property PackageIdentifier -Match $PackageIdentifier -Exact).GitHubUserName,
 		$Approver = (($auth -split "/" | Where-Object {$_ -notmatch "\("}) -join ", @"),
 		[switch]$DemoMode
 	)
@@ -3257,14 +3258,23 @@ Out-Log `"Main Package Install with args: $wingetArgs`"
 `$mainpackage = (Start-Process 'winget' '$wingetArgs' -wait -PassThru);
 Out-Log `"`$(`$mainpackage.processname) finished with exit code: `$(`$mainpackage.ExitCode)`";
 `$SleepSeconds = 15 #Sleep a few seconds for processes to complete.
-if ((`$InstallStart).AddSeconds(`$SleepSeconds) -gt (Get-Date)) {sleep ((`$InstallStart).AddSeconds(`$SleepSeconds)-(Get-Date)).totalseconds} 
+if ((`$InstallStart).AddSeconds(`$SleepSeconds) -gt (Get-Date)) {
+	sleep ((`$InstallStart).AddSeconds(`$SleepSeconds)-(Get-Date)).totalseconds
+} 
 `$InstallEnd = Get-Date;
 
 If (`$mainpackage.ExitCode -ne 0) {
 	Out-Log 'Install Failed.';
 	explorer.exe `$WinGetLogFolder;
 
-`$WinGetLogs = ((Get-ChildItem `$WinGetLogFolder).fullname | ForEach-Object {Get-Content `$_ |Where-Object {`$_ -match '[[]FAIL[]]' -OR `$_ -match 'failed' -OR `$_ -match 'error' -OR `$_ -match 'does not match'}})
+`$WinGetLogs = ((Get-ChildItem `$WinGetLogFolder).fullname | ForEach-Object {
+	Get-Content `$_ | Where-Object {
+		`$_ -match '[[]FAIL[]]' -OR 
+		`$_ -match 'failed' -OR 
+		`$_ -match 'error' -OR 
+		`$_ -match 'does not match'
+	}
+})
 `$DefenderThreat = (Get-MPThreat).ThreatName
 
 Out-ErrorData `$WinGetLogs 'WinGet'
@@ -3293,16 +3303,56 @@ Get-TrackerVMSetStatus 'Scanning'
 
 Out-Log 'Install complete, starting file change scan.'
 `$files = ''
-if (Test-Path $RemoteFolder\files.txt) {
+if (Test-Path $RemoteFolder\files.txt) {#If we have a list of files to run - a relic from before automatic file gathering. 
 	`$files = Get-Content $RemoteFolder\files.txt
 } else {
-	`$files1 = (Get-ChildItem c:\ -File -Recurse -ErrorAction Ignore -Force | Where-Object {`$_.CreationTime -gt `$InstallStart}| Where-Object {`$_.CreationTime -lt `$InstallEnd}).FullName
-	`$files2 = (Get-ChildItem c:\ -File -Recurse -ErrorAction Ignore -Force | Where-Object {`$_.CreationTime -gt `$InstallStart}| Where-Object {`$_.LastAccessTIme -lt `$InstallEnd}).FullName
-	`$files = `$files1 + `$files2 | Select-Object -Unique
+	`$files1 = (
+		Get-ChildItem c:\ -File -Recurse -ErrorAction Ignore -Force | 
+		Where-Object {`$_.CreationTime -gt `$InstallStart} | 
+		Where-Object {`$_.CreationTime -lt `$InstallEnd}
+	).FullName
+	`$files2 = (
+		Get-ChildItem c:\ -File -Recurse -ErrorAction Ignore -Force | 
+		Where-Object {`$_.LastAccessTIme -gt `$InstallStart} | 
+		Where-Object {`$_.LastAccessTIme -lt `$InstallEnd}
+	).FullName
+	`$files3 = (
+		Get-ChildItem c:\ -File -Recurse -ErrorAction Ignore -Force | 
+		Where-Object {`$_.LastWriteTIme -gt `$InstallStart} | 
+		Where-Object {`$_.LastWriteTIme -lt `$InstallEnd}
+	).FullName
+	`$files = `$files1 + `$files2 + `$files3 | Select-Object -Unique
 }
 
 Out-Log `"Reading `$(`$files.count) file changes in the last `$(((Get-Date) -`$TimeStart).TotalSeconds) seconds. Starting bulk file execution:`"
-`$files = `$files | Where-Object {`$_ -notmatch 'unins'} | Where-Object {`$_ -notmatch 'dotnet'} | Where-Object {`$_ -notmatch 'servicing'} | Where-Object {`$_ -notmatch 'Prefetch'} | Where-Object {`$_ -notmatch 'Provisioning'} | Where-Object {`$_ -notmatch 'redis'} | Where-Object {`$_ -notmatch 'msedge'} | Where-Object {`$_ -notmatch 'System32'} | Where-Object {`$_ -notmatch 'SysWOW64'} | Where-Object {`$_ -notmatch 'WinSxS'} | Where-Object {`$_ -notmatch 'dump64a'} | Where-Object {`$_ -notmatch 'CbsTemp'} | Where-Object {`$_ -notmatch 'EdgeCore'} | Where-Object {`$_ -notmatch 'Windows Defender'}
+`$files = `$files | 
+Where-Object {`$_ -notmatch 'AppRepository'} |
+Where-Object {`$_ -notmatch 'assembly'} | 
+Where-Object {`$_ -notmatch 'CbsTemp'} | 
+Where-Object {`$_ -notmatch 'CryptnetUrlCache'} | 
+Where-Object {`$_ -notmatch 'DesktopAppInstaller'} | 
+Where-Object {`$_ -notmatch 'dotnet'} | 
+Where-Object {`$_ -notmatch 'dump64a'} | 
+Where-Object {`$_ -notmatch 'EdgeCore'} | 
+Where-Object {`$_ -notmatch 'EdgeUpdate'} | 
+Where-Object {`$_ -notmatch 'ErrorDialog = ErrorDlg'} | 
+Where-Object {`$_ -notmatch 'Microsoft.Windows.Search'} | 
+Where-Object {`$_ -notmatch 'Microsoft\\Edge\\Application'} | 
+Where-Object {`$_ -notmatch 'msedge'} | 
+Where-Object {`$_ -notmatch 'NativeImages'} | 
+Where-Object {`$_ -notmatch 'Prefetch'} | 
+Where-Object {`$_ -notmatch 'Provisioning'} | 
+Where-Object {`$_ -notmatch 'redis'} | 
+Where-Object {`$_ -notmatch 'servicing'} | 
+Where-Object {`$_ -notmatch 'System32'} | 
+Where-Object {`$_ -notmatch 'SysWOW64'} | 
+Where-Object {`$_ -notmatch 'unins'} | 
+Where-Object {`$_ -notmatch 'waasmedic'} | 
+Where-Object {`$_ -notmatch 'Windows Defender'} | 
+Where-Object {`$_ -notmatch 'Windows Error Reporting'} | 
+Where-Object {`$_ -notmatch 'WindowsUpdate'} | 
+Where-Object {`$_ -notmatch 'WinSxS'}
+
 `$files | Out-File 'C:\Users\user\Desktop\ChangedFiles.txt'
 `$files | Select-String '[.]exe`$' | ForEach-Object {if (`$_ -match '$packageName') {Out-Log `$_ 'green'}else{Out-Log `$_ 'cyan'}; try{Start-Process `$_}catch{}};
 `$files | Select-String '[.]msi`$' | ForEach-Object {if (`$_ -match '$packageName') {Out-Log `$_ 'green'}else{Out-Log `$_ 'cyan'}; try{Start-Process `$_}catch{}};
@@ -4191,7 +4241,7 @@ Function Get-UpdateHashInPR {
 		$comment = "``````suggestion`n$ReplaceString`n```````n`n(Automated response - build $build.)"
 	)
 	foreach ($Line in $LineNumbers) {
-		Add-GitHubReviewComment -PR $PR -Comment $comment -LIne $Line
+		Add-GitHubReviewComment -PR $PR -Comment $comment -Line $Line -Policy "Needs-Author-Feedback"
 	}
 }
 
@@ -4207,7 +4257,7 @@ Function Get-UpdateHashInPR2 {
 		$comment = "``````suggestion`n$ReplaceString`n```````n`n(Automated response - build $build.)"
 	)
 	foreach ($Line in $LineNumbers) {
-		Add-GitHubReviewComment -PR $PR -Comment $comment -LIne $Line
+		Add-GitHubReviewComment -PR $PR -Comment $comment -Line $Line -Policy "Needs-Author-Feedback"
 	}
 }
 
@@ -4223,7 +4273,7 @@ Function Get-UpdateArchInPR {
 		$comment = "``````suggestion`n$ReplaceString`n```````n`n(Automated response - build $build.)"
 	)
 	foreach ($Line in $LineNumbers) {
-		Add-GitHubReviewComment -PR $PR -Comment $comment -LIne $Line
+		Add-GitHubReviewComment -PR $PR -Comment $comment -Line $Line -Policy "Needs-Author-Feedback"
 	}
 }
 
@@ -4238,7 +4288,7 @@ Function Add-DependencyToPR {
 	)
 	$out = ""
 	foreach ($Line in $LineNumbers) {
-		$out += Add-GitHubReviewComment -PR $PR -Comment $comment -LIne $Line
+		$out += Add-GitHubReviewComment -PR $PR -Comment $comment -Line $Line -Policy "Needs-Author-Feedback"
 	}
 }
 
@@ -4492,7 +4542,7 @@ Function Get-ValidationData {
 Function Add-ValidationData {
 	param(
 		[Parameter(mandatory=$True)][string]$PackageIdentifier,
-		[string]$gitHubUserName,
+		[string]$GitHubUserName,
 		[ValidateSet("should","must")][string]$authStrictness,
 		[ValidateSet("auto","manual")][string]$authUpdateType,
 		[string]$autoWaiverLabel,
@@ -4505,13 +4555,13 @@ Function Add-ValidationData {
 		[string]$reviewText,
 		$data = (Get-Content $DataFileName | ConvertFrom-Csv)
 	)
-	$out = ($data | where {$_.PackageIdentifier -eq $PackageIdentifier} | Select-Object "PackageIdentifier","gitHubUserName","authStrictness","authUpdateType","autoWaiverLabel","versionParamOverrideUserName","versionParamOverridePR","code200OverrideUserName","code200OverridePR","AgreementOverridePR","AgreementURL","reviewText")
+	$out = ($data | where {$_.PackageIdentifier -eq $PackageIdentifier} | Select-Object "PackageIdentifier","GitHubUserName","authStrictness","authUpdateType","autoWaiverLabel","versionParamOverrideUserName","versionParamOverridePR","code200OverrideUserName","code200OverridePR","AgreementOverridePR","AgreementURL","reviewText")
 	if ($null -eq $out) {
-		$out = ( "" | Select-Object "PackageIdentifier","gitHubUserName","authStrictness","authUpdateType","autoWaiverLabel","versionParamOverrideUserName","versionParamOverridePR","code200OverrideUserName","code200OverridePR","AgreementOverridePR","AgreementURL","reviewText")
+		$out = ( "" | Select-Object "PackageIdentifier","GitHubUserName","authStrictness","authUpdateType","autoWaiverLabel","versionParamOverrideUserName","versionParamOverridePR","code200OverrideUserName","code200OverridePR","AgreementOverridePR","AgreementURL","reviewText")
 		$out.PackageIdentifier = $PackageIdentifier
 	}
 
-		$out.gitHubUserName = $gitHubUserName
+		$out.GitHubUserName = $GitHubUserName
 		$out.authStrictness = $authStrictness
 		$out.authUpdateType = $authUpdateType
 		$out.autoWaiverLabel = $autoWaiverLabel
