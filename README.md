@@ -22,7 +22,8 @@ To submit a package to this repository, you should follow these steps:
 4. [Submit](#submit-your-pr) your pull request (PR).
 5. Respond to any feedback in your PR.
 
-> Note: Please check the package's manifest you intend to submit does not already exist in the repository, and there are no open PRs for it in order to avoid duplicates.
+> [!NOTE]
+> Please check the package's manifest you intend to submit does not already exist in the repository, and there are no open PRs for it in order to avoid duplicates.
 
 ## Authoring a Manifest
 
@@ -33,13 +34,15 @@ A few different tools are available to help you author a manifest.
 - Other WinGet Manifest Creators developed by the community:
   - [Komac - Community Manifest Creator](https://github.com/russellbanks/Komac) (maintained by [**@russellbanks**](https://github.com/russellbanks))
 
-> Note: Only one manifest may be submitted per PR.
+> [!NOTE]
+> Only one manifest may be submitted per PR.
 
 ## Test your manifest
 
 Now that you have authored your manifest, you should make sure it works as expected.
 
-> Note: You will need to run `winget settings --enable LocalManifestFiles` in an administrative shell before working with local manifests.
+> [!NOTE]
+> You will need to run `winget settings --enable LocalManifestFiles` in an administrative shell before working with local manifests.
 
 ### Locally
 
