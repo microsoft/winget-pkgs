@@ -1,22 +1,16 @@
 #Copyright 2022-2024 Microsoft Corporation
 #Author: Stephen Gillie
-#Title: Manual Validation Pipeline v3.88.2
+#Title: Manual Validation Pipeline v3.88.5
 #Created: 10/19/2022
-#Updated: 2/28/2024
+#Updated: 3/01/2024
 #Notes: Utilities to streamline evaluating 3rd party PRs.
 #Update log:
+#3.88.5 - Add another term to manual validation post-install filtering.
+#3.88.4 - Expand Manifest-AppsAndFeaturesVersion-Error log output to include MagicString 1. 
+#3.88.3 - Skip the 0th page of GitHub searches, because they return identical data to the 1st page. 
 #3.88.2 - Clean up pending comments. Add Needs-Author-Feedback to PR comment functions.
-#3.88.1 - Change GitHubUserName from camelCase to PascalCase. 
-#3.88.0 - Unfurl and bugfix validation scanning and execution filter logic. 
-#3.87.1 - Update a few reuses of the variable "build" to be "PRBuild". 
-#3.87.0 - Rewrite "noise" filter logic in Get-AutoValLog. 
-#3.86.8 - Bugfix to LabelAction, with Get-LineFromCommitFile returning null objects instead of empty strings.
-#3.86.7 - Move all Defender logic into LabelAction. 
-#3.86.6 - Add progress bar to WorkSearch. 
-#3.86.5 - Bugfix Defenderfail replacing names with the MagicLabels contents - using a plus in a parameter doesn't append the array member to the string, but instead dump the entire array, and index indicator, into the next free parameter by order. Fix is to declare the array member within the string.
-#3.86.4 - Add Get-PRFullReport to automate reporting daily PR activity into a log file. 
 
-$build = 853
+$build = 857
 $appName = "ManualValidationPipeline"
 Write-Host "$appName build: $build"
 $MainFolder = "C:\ManVal"
@@ -114,7 +108,7 @@ Function Get-TrackerVMRunTracker {
 		if (([int](get-date -f mm) -eq 20)) {
 			$HourLatch = $True
 		}
-		if ($HourLatch) {
+		if ($HourLatch) { #Hourly Run functionality
 			$HourLatch = $False
 			[console]::beep(500,250);[console]::beep(500,250);[console]::beep(500,250) #Beep 3x to alert the PC user.
 			$PresetList = ("Defender","ToWork2")
@@ -1747,7 +1741,7 @@ Function Get-WorkSearch {
 	)
 	Foreach ($Preset in $PresetList) {
 		$Count= 30
-		$Page = 0
+		$Page = 1
 		While ($Count -eq 30) {
 			$line = 0
 			$PRs = (Get-SearchGitHub -Preset $Preset -Page $Page -NoLabels) 
@@ -1963,7 +1957,6 @@ Function Get-PRLabelAction { #Soothing label action.
 		if (($PRState | where {$_.event -eq "PreValidation"})[-1].created_at -lt (Get-Date).AddHours(-8) -AND #Last Prevalidation was 8 hours ago.
 		($PRState | where {$_.event -eq "Running"})[-1].created_at -lt (Get-Date).AddHours(-18)) {  #Last Run was 18 hours ago.
 			Get-GitHubPreset Retry -PR $PR
-			#Break
 		}
 	} else {
 		
@@ -2068,10 +2061,19 @@ Function Get-PRLabelAction { #Soothing label action.
 				$MagicLabels[9] {
 					$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 25 -SearchString $MagicStrings[2]
 					if ($null -match $UserInput) {
+						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 25 -SearchString $MagicStrings[1]
+					}
+					if ($null -match $UserInput) {
 						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 15 -SearchString $MagicStrings[2]
 					}
 					if ($null -match $UserInput) {
+						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 15 -SearchString $MagicStrings[1]
+					}
+					if ($null -match $UserInput) {
 						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 39 -SearchString $MagicStrings[2]
+					}
+					if ($null -match $UserInput) {
+						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 39 -SearchString $MagicStrings[1]
 					}
 					if ($UserInput) {
 						Reply-ToPR -PR $PR -UserInput $UserInput -CannedResponse AutoValEnd
@@ -2996,7 +2998,7 @@ Function Invoke-GitHubRequest {
 	#GitHub requires the value be the .body property of the variable. This makes more sense with CURL, Where-Object this is the -data parameter. However with Invoke-WebRequest it's the -Body parameter, so we end up with the awkward situation of having a Body parameter that needs to be prepended with a body property.
 	#if (!($Silent)) {
 		if (($JSON)){ # -OR ($Output -eq "content")) {
-			$out| ConvertFrom-Json
+			$out | ConvertFrom-Json
 		} else {
 			$out
 		}
@@ -3335,6 +3337,7 @@ Where-Object {`$_ -notmatch 'dotnet'} |
 Where-Object {`$_ -notmatch 'dump64a'} | 
 Where-Object {`$_ -notmatch 'EdgeCore'} | 
 Where-Object {`$_ -notmatch 'EdgeUpdate'} | 
+Where-Object {`$_ -notmatch 'EdgeWebView'} | 
 Where-Object {`$_ -notmatch 'ErrorDialog = ErrorDlg'} | 
 Where-Object {`$_ -notmatch 'Microsoft.Windows.Search'} | 
 Where-Object {`$_ -notmatch 'Microsoft\\Edge\\Application'} | 
