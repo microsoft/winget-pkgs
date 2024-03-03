@@ -91,7 +91,7 @@ Installers:                     	# The list of package installers
             FileType:							# Optional installed file type. Treated as 'other' if not specified
             InvocationParameter:	# Optional parameter for invocable files
             DisplayName:					# Optional display name for invocable files
-		DownloadCommandProhibited:		# Optional indicator for packages which cannot be downloaded for offline installation
+            DownloadCommandProhibited:		# Optional indicator for packages which cannot be downloaded for offline installation
 ManifestType: installer         	# The manifest type
 ManifestVersion: 1.6.0          	# The manifest syntax version
 ```
