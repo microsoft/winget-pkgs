@@ -1,16 +1,21 @@
 #Copyright 2022-2024 Microsoft Corporation
 #Author: Stephen Gillie
-#Title: Manual Validation Pipeline v3.88.5
+#Title: Manual Validation Pipeline v3.88.10
 #Created: 10/19/2022
-#Updated: 3/01/2024
+#Updated: 3/5/2024
 #Notes: Utilities to streamline evaluating 3rd party PRs.
 #Update log:
+#3.88.10 - Rename CannedResponse to CannedMessage in Reply-ToPR.
+#3.88.9 - Rename Drivers CannedMessage to DriverInstall.
+#3.88.8 - Add DriverInstall GitHubPreset. 
+#3.88.7 - Rename Get-GitHubPreset CloseReason to UserInput and reuse for Feedback, Duplicate, and ResitrictedSubmitter.
+#3.88.6 - Add waivering logic for Policy-Test-2.3.
 #3.88.5 - Add another term to manual validation post-install filtering.
 #3.88.4 - Expand Manifest-AppsAndFeaturesVersion-Error log output to include MagicString 1. 
 #3.88.3 - Skip the 0th page of GitHub searches, because they return identical data to the 1st page. 
 #3.88.2 - Clean up pending comments. Add Needs-Author-Feedback to PR comment functions.
 
-$build = 857
+$build = 862
 $appName = "ManualValidationPipeline"
 Write-Host "$appName build: $build"
 $MainFolder = "C:\ManVal"
@@ -97,7 +102,8 @@ $MagicLabels = "Validation-Defender-Error", #0
 "Validation-Forbidden-URL-Error", #27
 "Validation-Unapproved-URL", #28
 "Validation-Retry", #29
-"Needs-Author-Feedback"
+"Needs-Author-Feedback",#30
+"Policy-Test-2.3" #31
 
 #First tab
 Function Get-TrackerVMRunTracker {
@@ -1519,7 +1525,7 @@ Function Get-PRWatch {
 				} else {
 					#Explicit mismatch - URL is present and does not match, or URL is missing.
 					$AgreementAccept = "-!"
-					Reply-ToPR -PR $PR -CannedResponse AgreementMismatch -UserInput $AgreementUrlFromList -Silent
+					Reply-ToPR -PR $PR -CannedMessage AgreementMismatch -UserInput $AgreementUrlFromList -Silent
 				}
 			} else {
 				$AgreementAccept = "+"
@@ -1546,7 +1552,7 @@ Function Get-PRWatch {
 					$WordFilter = "-!"
 					$Approved = "-!"
 					$matchColor = $invalidColor
-					Reply-ToPR -PR $PR -CannedResponse WordFilter -UserInput $WordFilterMatch -Silent
+					Reply-ToPR -PR $PR -CannedMessage WordFilter -UserInput $WordFilterMatch -Silent
 				}
 			}
 				Write-Host -nonewline -f $matchColor "$WordFilter | "
@@ -1569,12 +1575,12 @@ Function Get-PRWatch {
 						if (($ANFOld -eq $True) -and ($ANFCurrent -eq $False)) {
 							$matchColor = $invalidColor
 							$AnF = "-"
-							Reply-ToPR -PR $PR -CannedResponse AppsAndFeaturesMissing -UserInput $Submitter -Policy $MagicLabels[30] -Silent
+							Reply-ToPR -PR $PR -CannedMessage AppsAndFeaturesMissing -UserInput $Submitter -Policy $MagicLabels[30] -Silent
 							Add-PRToRecord -PR $PR -Action "Feedback" -Title $PRtitle
 						} elseif (($ANFOld -eq $False) -and ($ANFCurrent -eq $True)) {
 							$matchColor = $cautionColor
 							$AnF = "-"
-							Reply-ToPR -PR $PR -CannedResponse AppsAndFeaturesNew -UserInput $Submitter -Policy $MagicLabels[30] -Silent
+							Reply-ToPR -PR $PR -CannedMessage AppsAndFeaturesNew -UserInput $Submitter -Policy $MagicLabels[30] -Silent
 							#Invoke-GitHubPRRequest -PR $PR -Method POST -Type comments -Data "[Policy] Needs-Author-Feedback"
 						} elseif (($ANFOld -eq $False) -and ($ANFCurrent -eq $False)) {
 							$AnF = "0"
@@ -1638,7 +1644,7 @@ Function Get-PRWatch {
 					$NumVersions = ($WinGetOutput.AvailableVersions | sort).count
 					if (($prVersion -eq $ManifestVersion) -OR ($NumVersions -eq 1)) {
 						$matchColor = $invalidColor
-						Reply-ToPR -PR $PR -CannedResponse VersionCount -UserInput $Submitter -Silent -Policy "[Policy] Needs-Author-Feedback`n[Policy] Last-Version-Remaining" -Output Silent
+						Reply-ToPR -PR $PR -CannedMessage VersionCount -UserInput $Submitter -Silent -Policy "[Policy] Needs-Author-Feedback`n[Policy] Last-Version-Remaining" -Output Silent
 						Add-PRToRecord -PR $PR -Action "Feedback" -Title $PRtitle
 						$NumVersions = "L"
 					}
@@ -1651,7 +1657,7 @@ Function Get-PRWatch {
 						} else {
 							$ListingDiff = "-!"
 							$matchColor = $cautionColor
-							Reply-ToPR -PR $PR -CannedResponse ListingDiff -UserInput $GLD -Silent
+							Reply-ToPR -PR $PR -CannedMessage ListingDiff -UserInput $GLD -Silent
 							Invoke-GitHubPRRequest -PR $PR -Method POST -Type comments -Data "[Policy] Needs-Author-Feedback" -Output Silent
 							Add-PRToRecord -PR $PR -Action "Feedback" -Title $PRtitle
 						}#end if GLD
@@ -1792,10 +1798,10 @@ Function Get-WorkSearch {
 #Automation tools
 Function Get-GitHubPreset {
 	param(
-		[ValidateSet("Approved","AutomationBlock","BadPR","Blocking","CheckInstaller","Closed","Completed","DefenderFail","Feedback","IdleMode","IEDSMode","InstallerNotSilent","InstallerMissing","LabelAction","MergeConflicts","NetworkBlocker","OneManifestPerPR","PackageUrl","Paths","PossibleDuplicate","Project","Retry","Squash","Timeclock","Validating","VedantResetPR","WorkSearch","Waiver")][string]$Preset,
+		[ValidateSet("Approved","AutomationBlock","BadPR","Blocking","CheckInstaller","Closed","Completed","DefenderFail","DriverInstall","Duplicate","Feedback","IdleMode","IEDSMode","InstallerNotSilent","InstallerMissing","LabelAction","MergeConflicts","NetworkBlocker","OneManifestPerPR","PackageUrl","Paths","PossibleDuplicate","Project","Restr","Retry","Squash","Timeclock","Validating","VedantResetPR","WorkSearch","Waiver")][string]$Preset,
 		$PR = (Get-Clipboard),
-		$CannedResponse = $Preset,
-		$CloseReason,
+		$CannedMessage = $Preset,
+		$UserInput,
 		[Switch]$Force,
 		$out = ""
 	)
@@ -1817,7 +1823,7 @@ Function Get-GitHubPreset {
 			}
 			"AutomationBlock" {
 				Add-PRToRecord -PR $PR -Action "Blocking"
-				$out += Reply-ToPR -PR $PR -CannedResponse AutomationBlock -Policy "Network-Blocker"
+				$out += Reply-ToPR -PR $PR -CannedMessage AutomationBlock -Policy "Network-Blocker"
 			}
 			"Blocking" {
 				Add-PRToRecord -PR $PR -Action "Blocking"
@@ -1844,20 +1850,35 @@ Function Get-GitHubPreset {
 				$out += Reply-ToPR -PR $PR -Body "This package installs and launches normally on a Windows 10 VM." -Policy "Manually-Validated"
 			}
 			"Closed" {
-				if ($CloseReason) {
+				if ($UserInput) {
 					Add-PRToRecord -PR $PR -Action $Preset
-					$out += Invoke-GitHubPRRequest -PR $PR -Type comments -Output StatusDescription -Method POST -Data "Close with reason: $CloseReason;"
+					$out += Invoke-GitHubPRRequest -PR $PR -Type comments -Output StatusDescription -Method POST -Data "Close with reason: $UserInput;"
 				} else {
-					Write-Output "-CloseReason needed to close PR."
+					Write-Output "-UserInput needed to use preset $preset"
 				}
 			}
 			"DefenderFail" {
 				Add-PRToRecord -PR $PR -Action "Blocking"
-				$out += Reply-ToPR -PR $PR -CannedResponse $Preset -Policy "Needs-Attention`n[Policy] $($MagicLabels[0])"
+				$out += Reply-ToPR -PR $PR -CannedMessage $Preset -Policy "Needs-Attention`n[Policy] $($MagicLabels[0])"
+			}
+			"DriverInstall" {
+				Add-PRToRecord -PR $PR -Action "Blocking"
+				$out += Reply-ToPR -PR $PR -CannedMessage $Preset -Policy "DriverInstall"
+			}
+			"Duplicate" {
+				if ($UserInput -match "[0-9]{5,6}") {
+					Get-GitHubPreset -Preset Closed -PR $PR -UserInput "Duplicate of #$UserInput"
+				} else {
+					Write-Output "-UserInput PRNumber needed to close as duplicate."
+				}
 			}
 			"Feedback" {
 				Add-PRToRecord -PR $PR -Action $Preset
-				$out += Invoke-GitHubPRRequest -PR $PR -Method POST -Type comments -Data "[Policy] Needs-Author-Feedback"
+				if ($UserInput) {
+					$out += Reply-ToPR -PR $PR -Body $UserInput -Policy "Needs-Author-Feedback"
+				} else {
+					Write-Output "-UserInput needed to use preset $preset"
+				}
 			}
 			"GitHubStatus" {
 				return (Invoke-GitHubRequest -Uri https://www.githubstatus.com/api/v2/summary.json -JSON) | Select-Object @{n="Status";e={$_.incidents[0].status}},@{n="Message";e={$_.incidents[0].name+" ("+$_.incidents.count+")"}}
@@ -1871,28 +1892,28 @@ Function Get-GitHubPreset {
 			}
 			"InstallerNotSilent" {
 				Add-PRToRecord -PR $PR -Action "Feedback"
-				$out += Reply-ToPR -PR $PR -CannedResponse $Preset -Policy $MagicLabels[30]
+				$out += Reply-ToPR -PR $PR -CannedMessage $Preset -Policy $MagicLabels[30]
 			}
 			"InstallerMissing" {
 				Add-PRToRecord -PR $PR -Action "Feedback"
-				$out += Reply-ToPR -PR $PR -CannedResponse $Preset -Policy $MagicLabels[30]
+				$out += Reply-ToPR -PR $PR -CannedMessage $Preset -Policy $MagicLabels[30]
 			}
 			"LabelAction" {
 				Get-PRLabelAction -PR $PR
 			}
 			"MergeConflicts" {
-				Get-GitHubPreset -Preset Closed -PR $PR -CloseReason "Merge Conflicts."
+				Get-GitHubPreset -Preset Closed -PR $PR -UserInput "Merge Conflicts"
 			}
 			"NetworkBlocker" {
 				Write-Output "Use AutomationBlock instead."
 			}
 			"OneManifestPerPR" {
 				Add-PRToRecord -PR $PR -Action "Feedback"
-				$out += Reply-ToPR -PR $PR -CannedResponse $Preset  -Policy $MagicLabels[30]
+				$out += Reply-ToPR -PR $PR -CannedMessage $Preset  -Policy $MagicLabels[30]
 			}
 			"PackageUrl" {
 				Add-PRToRecord -PR $PR -Action "Feedback"
-				$out += Reply-ToPR -PR $PR -CannedResponse $Preset -Policy $MagicLabels[30]
+				$out += Reply-ToPR -PR $PR -CannedMessage $Preset -Policy $MagicLabels[30]
 			}
 			"PossibleDuplicate" {
 				$Pull = (Invoke-GitHubPRRequest -PR $PR -Type files -Output content -JSON)
@@ -1911,6 +1932,9 @@ Function Get-GitHubPreset {
 			"Project" {
 				Add-PRToRecord -PR $PR -Action $Preset
 			}
+			"RestrictedSubmitter" {
+				Get-GitHubPreset -Preset Closed -PR $PR -UserInput "Restricted Submitter"
+			}
 			"Retry" {
 				Add-PRToRecord -PR $PR -Action $Preset
 				$out += Invoke-GitHubPRRequest -PR $PR -Type comments -Output StatusDescription -Method POST -Data "@wingetbot run"
@@ -1924,13 +1948,6 @@ Function Get-GitHubPreset {
 			"Validating" {
 				Get-TrackerVMSetMode Validating
 				$PR = ""
-			}
-			"VedantResetPR" {
-				#Add-PRToRecord -PR $PR -Action "Closed"
-				#$out += Reply-ToPR -PR $PR -Body "Reset PR."
-				#$out += Invoke-GitHubPRRequest -PR $PR -Type assignees -Method DELETE -Data (Invoke-GitHubPRRequest -PR $PR -Type "" -Output content -JSON).user.login
-				#$out += Invoke-GitHubPRRequest -PR $PR -Method POST -Type labels -Data -Method DELETE
-				Write-Output "VedantResetPR is offline."
 			}
 			"Waiver" {
 				$out += Add-Waiver -PR $PR; 
@@ -1974,7 +1991,7 @@ Function Get-PRLabelAction { #Soothing label action.
 						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 26 -SearchString $MagicStrings[0] -length 10
 					}
 					if ($UserInput) {
-						Reply-ToPR -PR $PR -UserInput $UserInput -CannedResponse AutoValEnd
+						Reply-ToPR -PR $PR -UserInput $UserInput -CannedMessage AutoValEnd
 					}
 					if ($UserInput -match $MagicStrings[3]) {
 						Get-GitHubPreset -PR $PR -Preset AutomationBlock
@@ -1983,7 +2000,7 @@ Function Get-PRLabelAction { #Soothing label action.
 				$MagicLabels[2] {
 					$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 36 -SearchString $MagicStrings[0] -length 3
 					if ($UserInput) {
-						Reply-ToPR -PR $PR -UserInput $UserInput -CannedResponse AutoValEnd
+						Reply-ToPR -PR $PR -UserInput $UserInput -CannedMessage AutoValEnd
 					}
 					if ($UserInput -match $MagicStrings[3]) {
 						Get-GitHubPreset -PR $PR -Preset AutomationBlock
@@ -2004,14 +2021,14 @@ Function Get-PRLabelAction { #Soothing label action.
 						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 50 -SearchString $MagicStrings[0] -Length 10 
 					}
 					if ("" -ne $UserInput) {
-						Reply-ToPR -PR $PR -UserInput $UserInput -CannedResponse AutoValEnd
+						Reply-ToPR -PR $PR -UserInput $UserInput -CannedMessage AutoValEnd
 						Get-UpdateHashInPR2 -PR $PR -Clip $UserInput
 					}
 				}
 				$MagicLabels[4] { 
 					$UserInput = Get-LineFromCommitFile -PR $PR -SearchString $MagicStrings[6] -length 5
 					if ($UserInput) {
-						Reply-ToPR -PR $PR -UserInput $UserInput -CannedResponse AutoValEnd
+						Reply-ToPR -PR $PR -UserInput $UserInput -CannedMessage AutoValEnd
 						Get-GitHubPreset -PR $PR -Preset CheckInstaller
 					}
 				}
@@ -2024,7 +2041,7 @@ Function Get-PRLabelAction { #Soothing label action.
 						if ($MagicStrings[5] -in $UserInput) {
 							Get-GitHubPreset -PR $PR Retry
 						}
-						Reply-ToPR -PR $PR -UserInput $UserInput -CannedResponse AutoValEnd
+						Reply-ToPR -PR $PR -UserInput $UserInput -CannedMessage AutoValEnd
 					}
 				}
 				$MagicLabels[6] {
@@ -2039,9 +2056,9 @@ Function Get-PRLabelAction { #Soothing label action.
 						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 39 -SearchString $MagicStrings[4] -length 7
 					}
 					if ($UserInput) {
-						Reply-ToPR -PR $PR -UserInput $UserInput -CannedResponse AutoValEnd
+						Reply-ToPR -PR $PR -UserInput $UserInput -CannedMessage AutoValEnd
 						if ($UserInput -match "Sequence contains no elements") { #Reindex fixes this.
-							Reply-ToPR -PR $PR -CannedResponse SequenceNoElements
+							Reply-ToPR -PR $PR -CannedMessage SequenceNoElements
 							$PRtitle = ((Invoke-GitHubPRRequest -PR $PR -Type "" -Output content -JSON).title)
 							if (($PRtitle -match "Automatic deletion") -OR ($PRtitle -match "Remove")) {
 								Get-GitHubPreset -Preset Completed -PR $PR
@@ -2055,7 +2072,7 @@ Function Get-PRLabelAction { #Soothing label action.
 						if ($MagicStrings[5] -in $UserInput) {
 							Get-GitHubPreset -PR $PR Retry
 						}
-						Reply-ToPR -PR $PR -UserInput $UserInput -CannedResponse AutoValEnd
+						Reply-ToPR -PR $PR -UserInput $UserInput -CannedMessage AutoValEnd
 					}
 				}
 				$MagicLabels[9] {
@@ -2076,7 +2093,7 @@ Function Get-PRLabelAction { #Soothing label action.
 						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 39 -SearchString $MagicStrings[1]
 					}
 					if ($UserInput) {
-						Reply-ToPR -PR $PR -UserInput $UserInput -CannedResponse AutoValEnd
+						Reply-ToPR -PR $PR -UserInput $UserInput -CannedMessage AutoValEnd
 					}
 				}
 				$MagicLabels[10] {
@@ -2103,7 +2120,7 @@ Function Get-PRLabelAction { #Soothing label action.
 						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 15 -SearchString $MagicStrings[1]
 					}
 					if ($UserInput) {
-						Reply-ToPR -PR $PR -UserInput $UserInput -CannedResponse AutoValEnd
+						Reply-ToPR -PR $PR -UserInput $UserInput -CannedMessage AutoValEnd
 					}
 				}
 				$MagicLabels[11] { #Manifest-Validation-Error
@@ -2130,7 +2147,7 @@ Function Get-PRLabelAction { #Soothing label action.
 						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 15 -SearchString $MagicStrings[1]
 					}
 					if ($null -ne $UserInput) {
-						Reply-ToPR -PR $PR -UserInput $UserInput -CannedResponse AutoValEnd
+						Reply-ToPR -PR $PR -UserInput $UserInput -CannedMessage AutoValEnd
 					}
 				}
 				$MagicLabels[12] {
@@ -2151,14 +2168,14 @@ Function Get-PRLabelAction { #Soothing label action.
 						Get-GitHubPreset -Preset OneManifestPerPR -PR $PR
 					}
 					if ($UserInput) {
-						Reply-ToPR -PR $PR -UserInput $UserInput -CannedResponse AutoValEnd
+						Reply-ToPR -PR $PR -UserInput $UserInput -CannedMessage AutoValEnd
 					}
 				}
 				$MagicLabels[14] {
 					$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 32 -SearchString "Validation result: Failed"
 					Get-GitHubPreset -PR $PR -Preset CheckInstaller
 					if ($UserInput) {
-						Reply-ToPR -PR $PR -UserInput $UserInput -CannedResponse AutoValEnd
+						Reply-ToPR -PR $PR -UserInput $UserInput -CannedMessage AutoValEnd
 					}
 				}
 				$MagicLabels[15] {
@@ -2172,7 +2189,7 @@ Function Get-PRLabelAction { #Soothing label action.
 				$MagicLabels[18] {
 					$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 25 -SearchString $MagicStrings[1]
 					if ($UserInput) {
-						Reply-ToPR -PR $PR -UserInput $UserInput -CannedResponse AutoValEnd
+						Reply-ToPR -PR $PR -UserInput $UserInput -CannedMessage AutoValEnd
 					}
 				}
 				$MagicLabels[19] {
@@ -2210,6 +2227,10 @@ Function Add-Waiver {
 			$MagicLabels[2] {
 				Get-GitHubPreset -Preset Completed -PR $PR
 				Add-PRToRecord -PR $PR -Action "Manual"
+				$Waiver = $Label
+			}
+			$MagicLabels[31] {
+				Add-PRToRecord -PR $PR -Action "Waiver"
 				$Waiver = $Label
 			}
 			$MagicLabels[24] {
@@ -2432,7 +2453,7 @@ Function Get-SearchGitHub {
 
 Function Get-CannedMessage {
 	param(
-		[ValidateSet("AgreementMismatch","AppFail","Approve","AutomationBlock","AutoValEnd","AppsAndFeaturesNew","AppsAndFeaturesMissing","Drivers","DefenderFail","HashFailRegen","InstallerFail","InstallerMissing","InstallerNotSilent","NormalInstall","InstallerUrlBad","ListingDiff","ManValEnd","ManifestVersion","NoCause","NoExe","NoRecentActivity","NotGoodFit","OneManifestPerPR","Only64bit","PackageFail","PackageUrl","Paths","PendingAttendedInstaller","RemoveAsk","SequenceNoElements","Unattended","Unavailable","UrlBad","VersionCount","WhatIsIEDS","WordFilter")]
+		[ValidateSet("AgreementMismatch","AppFail","Approve","AutomationBlock","AutoValEnd","AppsAndFeaturesNew","AppsAndFeaturesMissing","DriverInstall","DefenderFail","HashFailRegen","InstallerFail","InstallerMissing","InstallerNotSilent","NormalInstall","InstallerUrlBad","ListingDiff","ManValEnd","ManifestVersion","NoCause","NoExe","NoRecentActivity","NotGoodFit","OneManifestPerPR","Only64bit","PackageFail","PackageUrl","Paths","PendingAttendedInstaller","RemoveAsk","SequenceNoElements","Unattended","Unavailable","UrlBad","VersionCount","WhatIsIEDS","WordFilter")]
 		[string]$Response,
 		$UserInput=(Get-Clipboard),
 		[switch]$NoClip,
@@ -2464,7 +2485,7 @@ Function Get-CannedMessage {
 		"AutoValEnd" {
 			$out = "Automatic Validation ended with:`n> $UserInput"
 		}
-		"Drivers" {
+		"DriverInstall" {
 			$out = "Hi $Username`n`nThe installation is unattended, but installs a driver which isn't unattended:`n`Unfortunately, installer switches are not usually provided for this situation. Are you aware of an installer switch to have the driver silently install as well?"
 		}
 		"DefenderFail" {
@@ -2605,7 +2626,8 @@ Function Get-AutoValLog {
 					$_ -match 'No suitable' -OR 
 					$_ -match 'not supported' -OR #not supported by this processor type
 					#$_ -match 'not applicable' -OR 
-					$_ -match 'Unable to locate nested installer'
+					$_ -match 'Unable to locate nested installer' -OR
+					$_ -match 'Windows cannot install package' 
 				}
 			}
 		) -split "`n" | Select-Object -Unique;
@@ -2625,9 +2647,9 @@ Function Get-AutoValLog {
 
 			$UserInput = $UserInput -notmatch ' success or error status`: 0'
 			$UserInput = $UserInput -notmatch '``Windows Error Reporting``'
-			$UserInput = $UserInput -notmatch 'api-ms-win-core-errorhandling'
-			$UserInput = $UserInput -notmatch 'The FileSystemWatcher has detected an error '
 			$UserInput = $UserInput -notmatch "--- End of inner exception stack trace ---"
+			$UserInput = $UserInput -notmatch 'api-ms-win-core-errorhandling'
+			$UserInput = $UserInput -notmatch "because the current user does not have that package installed"
 			$UserInput = $UserInput -notmatch "Could not create system restore point"
 			$UserInput = $UserInput -notmatch "ERROR: Signature Update failed"
 			$UserInput = $UserInput -notmatch "Exception during executable launch operation System.InvalidOperationException: No process is associated with this object."
@@ -2637,6 +2659,7 @@ Function Get-AutoValLog {
 			$UserInput = $UserInput -notmatch "SchedNetFx"
 			$UserInput = $UserInput -notmatch "Setting error JSON 1.0 fields"
 			$UserInput = $UserInput -notmatch "Terminating context"
+			$UserInput = $UserInput -notmatch 'The FileSystemWatcher has detected an error '
 			$UserInput = $UserInput -notmatch "The process cannot access the file because it is being used by another process"
 			$UserInput = $UserInput -notmatch "ThrowIfExceptional"
 			$UserInput = $UserInput -notmatch "Windows Installer installed the product"
@@ -2848,15 +2871,15 @@ Function Get-PRApproval {
 		$Approver = (($auth -split "/" | Where-Object {$_ -notmatch "\("}) -join ", @"),
 		[switch]$DemoMode
 	)
-	Reply-ToPR -PR $PR -UserInput $Approver -CannedResponse Approve -Policy "Needs-Review"
+	Reply-ToPR -PR $PR -UserInput $Approver -CannedMessage Approve -Policy "Needs-Review"
 }
 
 Function Reply-ToPR {
 	param(
 		$PR,
-		[string]$CannedResponse,
+		[string]$CannedMessage,
 		[string]$UserInput = ((Invoke-GitHubPRRequest -PR $PR -Type "" -Output content -JSON).user.login),
-		[string]$Body = (Get-CannedMessage $CannedResponse -UserInput $UserInput -NoClip),
+		[string]$Body = (Get-CannedMessage $CannedMessage -UserInput $UserInput -NoClip),
 		[string]$Policy,
 		[Switch]$Silent
 	)
@@ -4015,7 +4038,7 @@ Function Get-TrackerVMCycle {
 				$SharedError = $SharedError -replace "Exception(4) tid(f1c) 80072EE2     ",""
 				$SharedError = $SharedError -replace "tid(f1c)",""
 				$SharedError = $SharedError -replace "C:\\__w\\1\\s\\external\\pkg\\src\\AppInstallerCommonCore\\Downloader.cpp(185)\\WindowsPackageManager.dll!00007FFA008A37C9:",""
-				Reply-ToPR -PR $VM.PR -UserInput $SharedError -CannedResponse ManValEnd 
+				Reply-ToPR -PR $VM.PR -UserInput $SharedError -CannedMessage ManValEnd 
 				Get-TrackerVMSetStatus "Complete" $VM.vm
 				if (($SharedError -match "\[FAIL\] Installer failed security check.") -OR ($SharedError -match "Detected 1 Defender")) {
 					Get-GitHubPreset -Preset DefenderFail -PR $VM.PR 
@@ -4599,7 +4622,7 @@ Function Get-Sandbox {
 Function Get-PadRight {
 	param(
 	[string]$PackageIdentifier,
-	[int]$PadChars = 32
+	[int]$PadChars = 45
 	)
 	$out = $PackageIdentifier
 	if ($PackageIdentifier.Length -lt $PadChars) {
