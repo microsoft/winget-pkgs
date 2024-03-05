@@ -21,6 +21,10 @@ Think of a package as an application or a program. We use a "PackageIdentifier" 
 
 Package versions are associated with a specific release. In some cases you will see a perfectly formed [semantic](https://semver.org) version number, and in other cases you might see something different. These may be date driven, or they might have other characters with some package specific meaning. The YAML key for a package version is "PackageVersion".
 
+### Apps And Features entries
+
+Most installers write accurate version data to the Windows Registry, but not all. To help with version matching and correllation between the installed application and the manifest in repo, additional `AppsAndFeaturesEntries` metadata can be used. These include the `PackageFamilyName`, `ProductCode`, and `UpgradeCode`. Additional information on version matching and correllation, and its impact on sort order, can be found below.
+
 ## Understanding the directory structure
 
 Once you have determined the "PackageIdentifier" and the "PackageVersion" it is possible to know the proper location for the manifest. We will use Microsoft Windows Terminal version 1.6.10571.0 for our example.
@@ -83,6 +87,50 @@ It is important to test your manifest before submission to ensure it meets the r
 After enabling the setting for local manifests (`winget settings --enable LocalManifestFiles`), manifests can be tested locally with `winget install --manifest <path>`.
 If your system supports Windows Sandbox, you can also use the [SandboxTest.ps1 Script](https://github.com/microsoft/winget-pkgs/blob/master/doc/tools/SandboxTest.md) to test the manifest in the Windows Sandbox. This is the preferred method, as it ensures the package doesn't require any dependencies to install.
 
+## Version Matching & Correllation
+
+The goal is to accurately determine the currently installed version, and all available versions of this application, so upgrades can be correctly suggested when available, and not suggested when not available. Most installers write accurate version data to the Windows Registry. But some do not, and `Portable` type applications generally cannot as they usually don't have installers. The data available to meet this goal consists of the files on disk, data in Windows Registry, and manifests in the winget-pkgs repo.
+
+### Metadata 
+
+- DisplayName
+- DisplayVersion
+  - Displayed in the Control Panel's Add & Remove Programs page (ARP) and/or Apps and features Settings page (ANF). 
+  - Should not be used if it's always equal to PackageVersion.
+  - Must be unique per package. if multiple versions are sharing the same DisplayVersion, we may only keep the 'latest' one in the repo.
+- Package Familyname (MSIX)
+- ProductCode & Upgradecode (MSI)
+  - The ProductCode can be at any level, but UpgradeCode can only be used in AppsAndFeaturesEntries. 
+
+### 4 main use cases: 
+
+1. Package does not write DisplayVersion to registry.
+  1. DisplayName contains version. DisplayName is required in every manifest, to match installed packages to available versions.
+  1. ProductCode contains version. ProductCode is required in every manifest, to match installed packages to available versions.
+1. PackageVersion differed from DisplayVersion at any point in the manifest history. PackageVersion is required in every manifest, to prevent version range mapping errors.
+1. ProductCode of the installed product differs from the ProductCode of the installer. ProductCode is required in at least one manifest to match installed packages to available packages.
+
+Note: Having incorrect values may have adverse effects, so these shouldn't be used unless there are reports of matching issues.
+
+## Sorting and sort order
+
+As long as a PackageVersion sticks to either semantic or string, it's pretty easy to sort. But switching usually causes the order to become confused. Insofar as being YAML compliant, these are all supposed to be strings, leading to a few manifests having their PackageVersion numbers nested in quotes. 
+
+### Semantic
+
+If composed solely of numbers and dots, the PackageVersion will generally be interpreted as a semantic or similar type of version. 
+
+- A "version parameter" is a set of numbers between dots in a version number - major, minor, patch, build, etc. 
+- Digits are sorted within a version parameter, with further-left parameters having magnitude over further-right parameters. 
+  - This might disrupt some temporal versioning schemae, such as `DD.MM.YYYY`, as a version from 31 Mar 2023 (`31.03.2023`) would be sorted as newer than one from 1 Feb 2024 (`01.02.2024`). 
+
+### String
+
+If any letters, spaces, or other non-numeric characters (other than dots) are added, the PackageVersion will fallback to string interpretation. 
+
+- Digits are sorted independently, and version `3.9.E` would be sorted higher than `3.10.B`. because 9 is larger than 1. This system doesn't have the concept of version parameters. 
+- This includes all versions. So if a package has manifests with PackageVersions `0.1.1`, `v0.1.3`, and `v0.1.4` in the winget-pkgs repo, then the string sorting determines `0.1.1` as the highest version number. 
+
 ## Pre-release, early release, release candidate, and alpha & beta versions. 
 
 Many packages have "pre-release" PackageIdentifiers, to both spread the pre-release client and also keep mainline users on the stable release. There is definite demand for most pre-release software, and creating a pre-release PackageIdentifier is a great way to help satisfy this demand while still meeting the need to deliver a stable product. Also, there is usually a large community pushback when pre-release packages are submitted under a mainline PackageIdentifier. 
@@ -104,20 +152,76 @@ Developers are free to version their products as they please. This section is me
 
 ### How to make pre-release versions available
 
-Usually, just appending the appropriate term to the mainline PackageIdentifier is enough. The appropriate term would depend on how the developers refer to their early releases  - such as `.alpha`, `.beta`, `.pre`,  `.rc`, etc. And this new PackageIdentifier would replace the mainline PackageIdentifier in pre-release manifests, manifest names, and manifest paths. 
+If the pre-release versions have different metadata, then just appending the appropriate term to the mainline PackageIdentifier might be enough. The appropriate term would depend on how the developers refer to their early releases  - such as `.alpha`, `.beta`, `.pre`,  `.rc`, etc. And this new PackageIdentifier would replace the mainline PackageIdentifier in pre-release manifests, manifest names, and manifest paths. 
 
 Some examples: 
 
-- Mainline PackageIdentifier: `Microsoft.Edge`
-- Mainline Repository path: ./manifests/m/Microsoft/Edge
-- Beta PackageIdentifier: `Microsoft.Edge.Beta`
-- Beta Repository path: ./manifests/m/Microsoft/Edge/Beta
+Microsoft.OpenSSH: 
 
 - Mainline PackageIdentifier: `Microsoft.OpenSSH`
 - Mainline Repository path: ./manifests/m/Microsoft/OpenSSH
+
 - Beta PackageIdentifier: `Microsoft.OpenSSH.Beta`
 - Beta Repository path: ./manifests/m/Microsoft/OpenSSH/Beta
 
-Use the version number that the pre-release software adds to Apps and features Settings page, or other locations including the Registry, so that the WinGet package manager can provide updates to the pre-release version.
+Microsoft Edge: 
 
-Note: Pre-release PackageIdentifiers are subordinate to mainline PackageIdentifiers - if the pre-release PackageIdentifier is causing an issue in the mainline, then the mainline should have priority and the pre-release should be modified or removed. 
+- Mainline PackageIdentifier: `Microsoft.Edge`
+- Mainline Repository path: ./manifests/m/Microsoft/Edge
+- AppsAndFeaturesEntries:
+  - DisplayName: Microsoft Edge
+  - UpgradeCode: '{883C2625-37F7-357F-A0F4-DFAF391B2B9C}'
+
+- Beta PackageIdentifier: `Microsoft.Edge.Beta`
+- Beta Repository path: ./manifests/m/Microsoft/Edge/Beta
+- AppsAndFeaturesEntries:
+  - DisplayName: Microsoft Edge Beta
+  - UpgradeCode: '{55B884A6-908D-3E59-BDCE-5E4BFA64FA7B}'
+
+Use the version number that the pre-release software adds to Apps and features Settings page, or other locations including the Registry, so that the WinGet package manager can provide updates to the pre-release version. 
+
+Note: Pre-release PackageIdentifiers are subordinate to mainline PackageIdentifiers. If the pre-release PackageIdentifier is causing an issue in the mainline, such as causing an upgrade loop by having an identical UpgradeCode, then the mainline should have priority and the pre-release version should be modified or removed.
+
+### Support for release channels (released, beta, alpha)
+
+Notes, ideas, and discussion on how to implement and support release channels is ongoing in [a winget-cli issue](https://github.com/microsoft/winget-cli/issues/147).
+
+## Troubleshooting
+
+###  Display Version Overlap: 
+
+- Can be caused by the PackageVersion differring from the DisplayVersion at any point in the manifest history, and the fix is to add the PackageVersion to every manifest. Another option is to remove the manifests where they differ.
+- Actual log example: `2024-01-31T22:16:48.6603831Z ##[error] Manifest Error: DisplayVersion declared in the manifest has overlap with existing DisplayVersion range in the index. Existing DisplayVersion range in index: [ [5.17.5 (31030), 5.17.5 (31030)]]`
+- DisplayVersion is treated as a range, from the lowest manifest version in the repo to the highest. 
+- This might lead to unexpected matching situations. For example, if the version ranges are 5.17.2 to 5.17.29988, and a PR's version is 5.17.5, then it falls inside that range.
+- In the future, it might be changed from a range, to an array of known manifest DisplayVersions, and require exact matching.
+
+
+### Scope swapping, accidental side-by-side installs, and one of the packages refuses to upgrade: 
+
+- This issue appears to be common to MSI installers. 
+- When installing to `%LOCALAPPDATA%` for `user` scope, the software package's registry entries are added to `HKEY_LOCAL_MACHINE` instead of `HKEY_CURRENT_USER`.
+- This makes the `user` scope software package appear to be of `machine` scope instead.
+  - Related to Winget incorrectly detects per-user MSI scope (No applicable update found) winget-cli#3011
+- So a user can only get a "user" scope when installing for the first time, unless one of the below Workarounds is in place. 
+- This means, for subsequent upgrades through `winget upgrade`, the user will end up getting the "machine" scope installation. 
+  - A dual (or side-by-side) installation of the package (both user and machine scope) will result. 
+  - And both of these may show up in `winget list` and other places which list installed packages, causing confusion. Especially when one of the packages refuses to upgrade. 
+- Workarounds: 
+  - Package maintainers can remove `user` scope from packages, 
+  - Technical users can still retain the user scope install if they want by passing the args to the installer on update. For example:
+
+` winget upgrade Package.Identifier --custom "MSIINSTALLPERUSER=1"`
+
+### Upgrade always available for one package.
+
+This issue is slightly different from scope swapping above, in that there's only one version of the package installed. It can be caused by a few different situations:
+
+- Two manifests have the same data. If both the variants use the same DisplayName, ProductCode, Publisher and other package matching related information, then an existing install of a stable package may be mapped to a higher available version of a pre-release version by WinGet, even if the PackageIdentifiers are different. The fix is to remove the lower-version manifest.
+- Version schema changes significantly - or changes between string and semantic. If a letter is added to one version number, then it can cause this issue with every version of the package. The fix is to remove manifests with the previous version schema, and only offer those with the latest schema.
+- Installer not writing accurate version data to the Windows Registry - either every installer writes the same version number, do not write a version number, do not write a consistent or accurate version number or have a similar issue with the version data in the registry. The fix here is to add the Apps and features metadata described above.
+
+### For a package that always writes the same version to registry: 
+
+Our package manager could update the Windows Registry, modify the installer nodes, and set DisplayVersion for the installer. But if the user or application performed any activity (reinstall, repair, update, uninstall, etc) outside of the package manager, then it would overwrite, or not write, this data. 
+The DisplayVersion must be unique for every version of a package. If all versions of this package write the same DisplayVersion to Control Panel, then the best option is to only offer the latest version of the package. This situation is similar to the situation for vanity URLs, which always host the latest version of the package.
