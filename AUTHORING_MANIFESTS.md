@@ -104,11 +104,11 @@ The goal is to accurately determine the currently installed version, and all ava
 
 ### 4 main use cases: 
 
-1. Package does not write DisplayVersion to registry.
-  1. DisplayName contains version. DisplayName is required in every manifest, to match installed packages to available versions.
-  1. ProductCode contains version. ProductCode is required in every manifest, to match installed packages to available versions.
-1. PackageVersion differed from DisplayVersion at any point in the manifest history. PackageVersion is required in every manifest, to prevent version range mapping errors.
-1. ProductCode of the installed product differs from the ProductCode of the installer. ProductCode is required in at least one manifest to match installed packages to available packages.
+- Package does not write DisplayVersion to registry.
+  - DisplayName contains version. DisplayName is required in every manifest, to match installed packages to available versions.
+  - ProductCode contains version. ProductCode is required in every manifest, to match installed packages to available versions.
+- PackageVersion differed from DisplayVersion at any point in the manifest history. PackageVersion is required in every manifest, to prevent version range mapping errors.
+- ProductCode of the installed product differs from the ProductCode of the installer. ProductCode is required in at least one manifest to match installed packages to available packages.
 
 Note: Having incorrect values may have adverse effects, so these shouldn't be used unless there are reports of matching issues.
 
@@ -133,7 +133,7 @@ If any letters, spaces, or other non-numeric characters (other than dots) are ad
 
 ## Pre-release, early release, release candidate, and alpha & beta versions. 
 
-Many packages have "pre-release" PackageIdentifiers, to both spread the pre-release client and also keep mainline users on the stable release. There is definite demand for most pre-release software, and creating a pre-release PackageIdentifier is a great way to help satisfy this demand while still meeting the need to deliver a stable product. Also, there is usually a large community pushback when pre-release packages are submitted under a mainline PackageIdentifier. 
+Many packages have "pre-release" PackageIdentifiers, to both spread the pre-release client and also keep mainline users on the stable release. When pre-release packages are submitted under a mainline PackageIdentifier, it can be disruptive to users who value stability over new features. There is definite demand for most pre-release software, and creating a pre-release PackageIdentifier is a great way to help satisfy this demand while still meeting the need to deliver a stable product.  
 
 Developers are free to version their products as they please. This section is meant to guide manifest submitters in creating manifests to meet both needs. While we try to ensure packages install and upgrade correctly, we don't necessarily know all software and their release mechanisms/cadences. Having an open-source repository allows individuals with much better knowledge of specific software packages to maintain those packages, including splitting pre-release channels from mainline channels when appropriate. 
 
@@ -195,7 +195,6 @@ Notes, ideas, and discussion on how to implement and support release channels is
 - DisplayVersion is treated as a range, from the lowest manifest version in the repo to the highest. 
 - This might lead to unexpected matching situations. For example, if the version ranges are 5.17.2 to 5.17.29988, and a PR's version is 5.17.5, then it falls inside that range.
 - In the future, it might be changed from a range, to an array of known manifest DisplayVersions, and require exact matching.
-
 
 ### Scope swapping, accidental side-by-side installs, and one of the packages refuses to upgrade: 
 
