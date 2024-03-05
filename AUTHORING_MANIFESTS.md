@@ -133,7 +133,7 @@ If any letters, spaces, or other non-numeric characters (other than dots) are ad
 
 ## Pre-release, early release, release candidate, and alpha & beta versions. 
 
-Many packages have "pre-release" PackageIdentifiers, to both spread the pre-release client and also keep mainline users on the stable release. When pre-release packages are submitted under a mainline PackageIdentifier, it can be disruptive to users who value stability over new features. There is definite demand for most pre-release software, and creating a pre-release PackageIdentifier is a great way to help satisfy this demand while still meeting the need to deliver a stable product.  
+Many packages have "pre-release" PackageIdentifiers, to both spread the pre-release client and also keep mainline users on the stable release. When pre-release packages are submitted under a mainline PackageIdentifier, it can be disruptive to users who value stability over new features. And sometimes the pre-release version number includes a letter, disrupting the sort order. There is definite demand for most pre-release software, and creating a pre-release PackageIdentifier is a great way to help satisfy this demand while still meeting the need to deliver a stable product.  
 
 Developers are free to version their products as they please. This section is meant to guide manifest submitters in creating manifests to meet both needs. While we try to ensure packages install and upgrade correctly, we don't necessarily know all software and their release mechanisms/cadences. Having an open-source repository allows individuals with much better knowledge of specific software packages to maintain those packages, including splitting pre-release channels from mainline channels when appropriate. 
 
@@ -143,12 +143,6 @@ Developers are free to version their products as they please. This section is me
 - Some developers might add a common term such as "alpha", "beta", or "pre" - or an alphabet letter such as "b", or other indicator to their version numbers.
 - Other developers might add a different development line with a separate repo, different application names and icons, and separate version schema.
 - Not all letters indicate pre-release channels. For example, some developers append "-E" to the version number, to differentiate mainline Electron releases from their other mainline releases. If in doubt, ask the developer. 
-
-### Adding or removing letters from the version can cause matching issues
-
-- As long as a package version sticks to either semantic or string, it's pretty easy to sort. But switching usually causes the order to become confused.
-**This can cause the "upgrade always available" bug.**
-- This is another problem caused by adding pre-release versions into the mainline channel - it frequently disrupts the sort order, especially when the pre-release versions have letters in their version numbers, but the mainline versions do not.
 
 ### How to make pre-release versions available
 
@@ -201,7 +195,7 @@ Notes, ideas, and discussion on how to implement and support release channels is
 - This issue appears to be common to MSI installers. 
 - When installing to `%LOCALAPPDATA%` for `user` scope, the software package's registry entries are added to `HKEY_LOCAL_MACHINE` instead of `HKEY_CURRENT_USER`.
 - This makes the `user` scope software package appear to be of `machine` scope instead.
-  - Related to Winget incorrectly detects per-user MSI scope (No applicable update found) winget-cli#3011
+  - Related to [Winget incorrectly detects per-user MSI scope (`No applicable update found`)](https://github.com/microsoft/winget-cli/issues/3011)
 - So a user can only get a "user" scope when installing for the first time, unless one of the below Workarounds is in place. 
 - This means, for subsequent upgrades through `winget upgrade`, the user will end up getting the "machine" scope installation. 
   - A dual (or side-by-side) installation of the package (both user and machine scope) will result. 
