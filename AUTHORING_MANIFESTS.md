@@ -140,13 +140,13 @@ Developers are free to version their products as they please. This section is me
 ### How to tell if it's a release candidate?
 
 - Most developers are very clear about pre-release and mainline versions. Ideally, this would be communicated to users through manifests and PackageIdentifiers. 
-- Some developers might add a common term such as "alpha", "beta", or "pre" - or an alphabet letter such as "b", or other indicator to their version numbers.
+- Some developers might add a common term such as `.alpha`, `.beta`, `.pre`,  `.rc`, - or an alphabet letter such as `b`, or other indicator to their version numbers.
 - Other developers might add a different development line with a separate repo, different application names and icons, and separate version schema.
 - Not all letters indicate pre-release channels. For example, some developers append "-E" to the version number, to differentiate mainline Electron releases from their other mainline releases. If in doubt, ask the developer. 
 
 ### How to make pre-release versions available
 
-If the pre-release versions have different metadata, then just appending the appropriate term to the mainline PackageIdentifier might be enough. The appropriate term would depend on how the developers refer to their early releases  - such as `.alpha`, `.beta`, `.pre`,  `.rc`, etc. And this new PackageIdentifier would replace the mainline PackageIdentifier in pre-release manifests, manifest names, and manifest paths. 
+If the pre-release versions have different metadata, then just appending the appropriate term to the mainline PackageIdentifier might be enough. The appropriate term would depend on how the developers refer to their early releases. And this new PackageIdentifier would replace the mainline PackageIdentifier in pre-release manifests, manifest names, and manifest paths. 
 
 Some examples: 
 
