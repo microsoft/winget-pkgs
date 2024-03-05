@@ -178,7 +178,7 @@ Note: Pre-release PackageIdentifiers are subordinate to mainline PackageIdentifi
 
 ### Support for release channels (released, beta, alpha)
 
-Notes, ideas, and discussion on how to implement and support release channels is ongoing in [a winget-cli issue](https://github.com/microsoft/winget-cli/issues/147).
+Notes, ideas, and discussion on how to implement and support release channels [is ongoing](https://github.com/microsoft/winget-cli/issues/147).
 
 ## Troubleshooting
 
@@ -210,7 +210,7 @@ Notes, ideas, and discussion on how to implement and support release channels is
 
 This issue is slightly different from scope swapping above, in that there's only one version of the package installed. It can be caused by a few different situations:
 
-- Two manifests have the same data. If both the variants use the same DisplayName, ProductCode, Publisher and other package matching related information, then an existing install of a stable package may be mapped to a higher available version of a pre-release version by WinGet, even if the PackageIdentifiers are different. The fix is to remove the lower-version manifest.
+- Two manifests have the same data. If both the variants use the same DisplayName, ProductCode, Publisher and other package matching related information, then an existing install of a stable package may be mapped to a higher available version of a pre-release version by WinGet, even if the PackageIdentifiers are different. The fix is to remove the pre-release manifest, as the mainline has priority.
 - Version schema changes significantly - or changes between string and semantic. If a letter is added to one version number, then it can cause this issue with every version of the package. The fix is to remove manifests with the previous version schema, and only offer those with the latest schema.
 - Installer not writing accurate version data to the Windows Registry - either every installer writes the same version number, do not write a version number, do not write a consistent or accurate version number or have a similar issue with the version data in the registry. The fix here is to add the Apps and features metadata described above.
 
