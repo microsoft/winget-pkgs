@@ -46,7 +46,7 @@ Now that you have authored your manifest, you should make sure it works as expec
 1. Verify the syntax by executing the following command:
 
 ```
-winget validate <path-to-manifest>
+winget validate --manifest <path-to-manifest>
 ```
 
 2. Test the install by executing the following command:
