@@ -2,20 +2,18 @@
 #Author: Stephen Gillie
 #Title: Manual Validation Pipeline v3.88.10
 #Created: 10/19/2022
-#Updated: 3/5/2024
+#Updated: 3/6/2024
 #Notes: Utilities to streamline evaluating 3rd party PRs.
 #Update log:
+#3.88.16 - Add to AutoValLog's filters.
+#3.88.15 - Add PolicyWrapper CannedMessage to streamline setting up an invisible policy label comment. 
+#3.88.14 - Add another log location to Binary-Validation-Error LabelAction. 
+#3.88.13 - Set Retry and Waiver presets offline temporarily.
+#3.88.12 - Add ResetApproval Preset to reset PRs for approval.  
+#3.88.11 - Bugfix RestrictedSubmitter CannedMessage. 
 #3.88.10 - Rename CannedResponse to CannedMessage in Reply-ToPR.
-#3.88.9 - Rename Drivers CannedMessage to DriverInstall.
-#3.88.8 - Add DriverInstall GitHubPreset. 
-#3.88.7 - Rename Get-GitHubPreset CloseReason to UserInput and reuse for Feedback, Duplicate, and ResitrictedSubmitter.
-#3.88.6 - Add waivering logic for Policy-Test-2.3.
-#3.88.5 - Add another term to manual validation post-install filtering.
-#3.88.4 - Expand Manifest-AppsAndFeaturesVersion-Error log output to include MagicString 1. 
-#3.88.3 - Skip the 0th page of GitHub searches, because they return identical data to the 1st page. 
-#3.88.2 - Clean up pending comments. Add Needs-Author-Feedback to PR comment functions.
 
-$build = 862
+$build = 867
 $appName = "ManualValidationPipeline"
 Write-Host "$appName build: $build"
 $MainFolder = "C:\ManVal"
@@ -114,7 +112,7 @@ Function Get-TrackerVMRunTracker {
 		if (([int](get-date -f mm) -eq 20)) {
 			$HourLatch = $True
 		}
-		if ($HourLatch) { #Hourly Run functionality
+		if ($HourLatch) {#Hourly Run functionality
 			$HourLatch = $False
 			[console]::beep(500,250);[console]::beep(500,250);[console]::beep(500,250) #Beep 3x to alert the PC user.
 			$PresetList = ("Defender","ToWork2")
@@ -1742,7 +1740,7 @@ Function Get-PRWatch {
 #Third tab
 Function Get-WorkSearch {
 	param(
-		$PresetList = @("Approval","Defender","ToWork"),
+		$PresetList = @("Approval","ToWork"),
 		$Days = 7
 	)
 	Foreach ($Preset in $PresetList) {
@@ -1773,7 +1771,7 @@ Function Get-WorkSearch {
 					}
 				} elseif ($Preset -eq "Defender"){
 					Get-GitHubPreset -Preset LabelAction -PR $PR
-				} else { #ToWork etc
+				} else {#ToWork etc
 					$Comments = ($Comments | select created_at,@{n="UserName";e={$_.user.login -replace "\[bot\]"}},body)
 					$State = (Get-PRStateFromComments -PR $PR -Comments $Comments)
 					$LastState = $State[-1]
@@ -1793,12 +1791,12 @@ Function Get-WorkSearch {
 			$Page++
 		}#end While Count
 	}#end Foreach Preset
-}#end Function
+}#end Get-WorkSearch
 
 #Automation tools
 Function Get-GitHubPreset {
 	param(
-		[ValidateSet("Approved","AutomationBlock","BadPR","Blocking","CheckInstaller","Closed","Completed","DefenderFail","DriverInstall","Duplicate","Feedback","IdleMode","IEDSMode","InstallerNotSilent","InstallerMissing","LabelAction","MergeConflicts","NetworkBlocker","OneManifestPerPR","PackageUrl","Paths","PossibleDuplicate","Project","Restr","Retry","Squash","Timeclock","Validating","VedantResetPR","WorkSearch","Waiver")][string]$Preset,
+		[ValidateSet("Approved","AutomationBlock","BadPR","Blocking","CheckInstaller","Closed","Completed","DefenderFail","DriverInstall","Duplicate","Feedback","IdleMode","IEDSMode","InstallerNotSilent","InstallerMissing","LabelAction","MergeConflicts","NetworkBlocker","OneManifestPerPR","PackageUrl","Paths","PossibleDuplicate","Project","RestrictedSubmitter","ResetApproval","Retry","Squash","Timeclock","Validating","VedantResetPR","WorkSearch","Waiver")][string]$Preset,
 		$PR = (Get-Clipboard),
 		$CannedMessage = $Preset,
 		$UserInput,
@@ -1935,9 +1933,12 @@ Function Get-GitHubPreset {
 			"RestrictedSubmitter" {
 				Get-GitHubPreset -Preset Closed -PR $PR -UserInput "Restricted Submitter"
 			}
+			"ResetApproval" {
+				$out += Reply-ToPR -PR $PR -Body "Reset approval workflow." -Policy "Reset Feedback `n[Policy] Validation Completed `n[Policy] Approved"			}
 			"Retry" {
-				Add-PRToRecord -PR $PR -Action $Preset
-				$out += Invoke-GitHubPRRequest -PR $PR -Type comments -Output StatusDescription -Method POST -Data "@wingetbot run"
+				#Add-PRToRecord -PR $PR -Action $Preset
+				#$out += Invoke-GitHubPRRequest -PR $PR -Type comments -Output StatusDescription -Method POST -Data "@wingetbot run"
+				Write-Host "$preset offline."
 			}
 			"Squash" {
 				Add-PRToRecord -PR $PR -Action $Preset
@@ -1950,8 +1951,9 @@ Function Get-GitHubPreset {
 				$PR = ""
 			}
 			"Waiver" {
-				$out += Add-Waiver -PR $PR; 
-				Add-PRToRecord -PR $PR -Action $Preset
+				#Add-PRToRecord -PR $PR -Action $Preset
+				#$out += Add-Waiver -PR $PR; 
+				Write-Host "$preset offline."
 			}
 			"WorkSearch" {
 				Get-WorkSearch
@@ -1989,6 +1991,9 @@ Function Get-PRLabelAction { #Soothing label action.
 					}
 					if ("" -eq $UserInput) {
 						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 26 -SearchString $MagicStrings[0] -length 10
+					}
+					if ("" -eq $UserInput) {
+						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 34 -SearchString $MagicStrings[0] -length 10
 					}
 					if ($UserInput) {
 						Reply-ToPR -PR $PR -UserInput $UserInput -CannedMessage AutoValEnd
@@ -2057,7 +2062,7 @@ Function Get-PRLabelAction { #Soothing label action.
 					}
 					if ($UserInput) {
 						Reply-ToPR -PR $PR -UserInput $UserInput -CannedMessage AutoValEnd
-						if ($UserInput -match "Sequence contains no elements") { #Reindex fixes this.
+						if ($UserInput -match "Sequence contains no elements") {#Reindex fixes this.
 							Reply-ToPR -PR $PR -CannedMessage SequenceNoElements
 							$PRtitle = ((Invoke-GitHubPRRequest -PR $PR -Type "" -Output content -JSON).title)
 							if (($PRtitle -match "Automatic deletion") -OR ($PRtitle -match "Remove")) {
@@ -2123,7 +2128,7 @@ Function Get-PRLabelAction { #Soothing label action.
 						Reply-ToPR -PR $PR -UserInput $UserInput -CannedMessage AutoValEnd
 					}
 				}
-				$MagicLabels[11] { #Manifest-Validation-Error
+				$MagicLabels[11] {#Manifest-Validation-Error
 					$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 25 -SearchString $MagicStrings[2]
 					if ($null -eq $UserInput) {
 						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 25 -SearchString $MagicStrings[1]
@@ -2288,11 +2293,12 @@ Function Add-Waiver {
 			}
 		}
 		if ($Waiver -ne "") {
-			$out = Invoke-GitHubPRRequest -PR $PR -Type comments -Output StatusDescription -Method POST -Data "@wingetbot waivers Add $Waiver"
+			#$out = Invoke-GitHubPRRequest -PR $PR -Type comments -Output StatusDescription -Method POST -Data "@wingetbot waivers Add $Waiver"
+			$out = "Waivers offline."
 			Write-Output $out
 		}; #end if Waiver
 	}; #end Foreach Label
-}; #end Function
+}; #end Add-Waiver
 
 Function Get-SearchGitHub {
 	param(
@@ -2451,9 +2457,9 @@ Function Get-SearchGitHub {
 	}
 }
 
-Function Get-CannedMessage {
+Function Get-CannedMessage {#
 	param(
-		[ValidateSet("AgreementMismatch","AppFail","Approve","AutomationBlock","AutoValEnd","AppsAndFeaturesNew","AppsAndFeaturesMissing","DriverInstall","DefenderFail","HashFailRegen","InstallerFail","InstallerMissing","InstallerNotSilent","NormalInstall","InstallerUrlBad","ListingDiff","ManValEnd","ManifestVersion","NoCause","NoExe","NoRecentActivity","NotGoodFit","OneManifestPerPR","Only64bit","PackageFail","PackageUrl","Paths","PendingAttendedInstaller","RemoveAsk","SequenceNoElements","Unattended","Unavailable","UrlBad","VersionCount","WhatIsIEDS","WordFilter")]
+		[ValidateSet("AgreementMismatch","AppFail","Approve","AutomationBlock","AutoValEnd","AppsAndFeaturesNew","AppsAndFeaturesMissing","DriverInstall","DefenderFail","HashFailRegen","InstallerFail","InstallerMissing","InstallerNotSilent","NormalInstall","InstallerUrlBad","ListingDiff","ManValEnd","ManifestVersion","NoCause","NoExe","NoRecentActivity","NotGoodFit","OneManifestPerPR","Only64bit","PackageFail","PackageUrl","Paths","PendingAttendedInstaller","PolicyWrapper","RemoveAsk","SequenceNoElements","Unattended","Unavailable","UrlBad","VersionCount","WhatIsIEDS","WordFilter")]
 		[string]$Response,
 		$UserInput=(Get-Clipboard),
 		[switch]$NoClip,
@@ -2544,6 +2550,9 @@ Function Get-CannedMessage {
 		}
 		"PendingAttendedInstaller" {
 			$out = "Pending:`n* https://github.com/microsoft/winget-cli/issues/910"
+		}
+		"PolicyWrapper" {
+			$out = "<!--`n[Policy] $UserInput`n-->"
 		}
 		"RemoveAsk" {
 			$out = "Hi $Username`n`nThis package installer is still available. Why should it be removed?"
@@ -2651,6 +2660,7 @@ Function Get-AutoValLog {
 			$UserInput = $UserInput -notmatch 'api-ms-win-core-errorhandling'
 			$UserInput = $UserInput -notmatch "because the current user does not have that package installed"
 			$UserInput = $UserInput -notmatch "Could not create system restore point"
+			$UserInput = $UserInput -notmatch "Dest filename"
 			$UserInput = $UserInput -notmatch "ERROR: Signature Update failed"
 			$UserInput = $UserInput -notmatch "Exception during executable launch operation System.InvalidOperationException: No process is associated with this object."
 			$UserInput = $UserInput -notmatch "Exit code`: 0"
@@ -3020,7 +3030,7 @@ Function Invoke-GitHubRequest {
 	}
 	#GitHub requires the value be the .body property of the variable. This makes more sense with CURL, Where-Object this is the -data parameter. However with Invoke-WebRequest it's the -Body parameter, so we end up with the awkward situation of having a Body parameter that needs to be prepended with a body property.
 	#if (!($Silent)) {
-		if (($JSON)){ # -OR ($Output -eq "content")) {
+		if (($JSON)){# -OR ($Output -eq "content")) {
 			$out | ConvertFrom-Json
 		} else {
 			$out
