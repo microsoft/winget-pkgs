@@ -89,20 +89,23 @@ If your system supports Windows Sandbox, you can also use the [SandboxTest.ps1 S
 
 ## Version Matching & Correllation
 
-The goal is to accurately determine the currently installed version, and all available versions of this application, so upgrades can be correctly suggested when available, and not suggested when not available. Most installers write accurate version data to the Windows Registry, but some do not, The data available to meet this goal consists of the files on disk, data in Windows Registry, and manifests in the winget-pkgs repo.
+The goal is to accurately determine the currently installed version, and all available versions of this application, so upgrades can be correctly suggested when available, and not suggested when not available. Most installers write accurate version data to the Windows Registry, but some do not. Winget writes these entries for portable installer type, so they are guaranteed to match. The data available to meet this goal consists of the files on disk, data in Windows Registry, and manifests in the winget-pkgs repo.
 
 ### Metadata 
 
-- DisplayName
-- DisplayVersion
-  - Displayed in the Control Panel's Add & Remove Programs page (ARP) and/or Apps and features Settings page (ANF). 
-  - Should not be used if it's always equal to PackageVersion.
-  - Must be unique per version. if multiple versions are sharing the same DisplayVersion, we may only keep the 'latest' one in the repo.
-- Package Familyname (MSIX)
-  - This isn’t a valid AppsAndFeaturesEntry field and can only be used outside of the AppsAndFeaturesEntries.
-- ProductCode & UpgradeCode (MSI)
-  - The ProductCode can be at any level, but UpgradeCode can only be used in AppsAndFeaturesEntries. 
-  - Exe's should also have product codes. Even though they aren’t contained in the file the same way an MSI has it defined in the database, the registry key the EXE writes into defines the product code,
+- AppsAndFeaturesEntries
+  - DisplayName
+  - DisplayVersion
+    - Displayed in the Control Panel's Add & Remove Programs page (ARP) and/or Apps and features Settings page (ANF). 
+    - Should not be used if it's equal to PackageVersion, in every manifest for a given PackageIdentifier.
+    - Must be unique per PackageIdentifier. If multiple versions are sharing the same DisplayVersion, we may only keep the 'latest' one in the repo.
+  - ProductCode (MSI & EXE) & UpgradeCode (MSI)
+    - MSI installers provide these directly.
+    - EXE installers often provide a ProductCode - defined by the Registry key written by the installer.
+- Outside of AppsAndFeaturesEntries.
+  - Package Familyname (MSIX)
+  - ProductCode (MSI & EXE) (See above)
+    - The ProductCode can be at any level.
 
 ### 4 main use cases: 
 
@@ -116,22 +119,22 @@ The goal is to accurately determine the currently installed version, and all ava
 
 Inherently all the versions are strings - a sematic version is just a string with a certain format. YAML will interpret any alpha-numerics as strings automatically, and if there are multiple, it is smart enough to interpret that value as a string also. The quotes are only needed when the value is also a valid decimal number as 1.23 can be interpreted as string or a number whereas "1.23" can only be interpreted as a string
 
-### Semantic
-
-If composed solely of numbers and dots, the PackageVersion will generally be interpreted as a semantic or similar type of version. 
-
-- A "version parameter" is a set of numbers between dots in a version number - major, minor, patch, build, etc. 
-- Digits are sorted within a version parameter, with further-left parameters having magnitude over further-right parameters. 
-  - This might disrupt some temporal versioning schemae, such as `DD.MM.YYYY`, as a version from 31 Mar 2023 (`31.03.2023`) would be sorted as newer than one from 1 Feb 2024 (`01.02.2024`). 
-
-### String
-
-If any letters, spaces, or other non-numeric characters (other than dots) are added, the PackageVersion will fallback to string interpretation. 
-
 - Winget breaks at each dot and compares each part individually. Where a part contains an numeral-alpha, the numeral is considered before the alpha.
-- Suggested reading: the commented code at winget-cli has more detail on the nuances of how versions are broken into Parts, and Parts are broken into "integer" and "other"
-- https://github.com/microsoft/winget-cli/blob/8a006549c4aa0dd13cc17f6185ce30a1f4c2e71b/src/AppInstallerSharedLib/Public/AppInstallerVersions.h#L19
-- https://github.com/microsoft/winget-cli/blob/8a006549c4aa0dd13cc17f6185ce30a1f4c2e71b/src/AppInstallerSharedLib/Versions.cpp#L308
+
+Versions are parsed by:
+1. Parse approximate comparator sign if applicable.
+2. Split the string based on the given variable data.
+3. Parse a leading, positive integer from each split part.
+4. Save any remaining non-digits as a supplemental value.
+
+Versions are compared by:
+- For each part in each version:
+  -  If both sides have no more parts, return equal.
+  -  Else if one side has no more parts, it is less.
+  -  Else if integers are not equal, return comparison of integers.
+  -  Else if only one side has a non-empty string part, it is less.
+  -  Else if string parts not equal, return comparison of strings.
+- If all parts are same, use approximate comparator if applicable (not approximate to another approximate version, and not unknown).
 
 ## Pre-release, early release, release candidate, and alpha & beta versions. 
 
@@ -186,11 +189,14 @@ Notes, ideas, and discussion on how to implement and support release channels [i
 
 ###  Display Version Overlap: 
 
-- Can be caused by the PackageVersion differring from the DisplayVersion at any point in the manifest history, and the fix is to add the PackageVersion to every manifest. Another option is to remove the manifests where they differ.
-- Actual log example: `2024-01-31T22:16:48.6603831Z ##[error] Manifest Error: DisplayVersion declared in the manifest has overlap with existing DisplayVersion range in the index. Existing DisplayVersion range in index: [ [5.17.5 (31030), 5.17.5 (31030)]]`
-- DisplayVersion is treated as a range, from the lowest DisplayVersion in a single manifest to the highest DisplayVersion in the same manifest. 
-- Each manifest creates its own version range. 
-- Two manifests cannot have overlapping ranges, but any given package can have multiple ranges if there are multiple manifests
+- Can be caused by the PackageVersion differring from the DisplayVersion at any point in the manifest history, and the fix is to add the DisplayVersion to every manifest. 
+  - Another option is to remove the manifests where these values differ.
+- Cause: 
+  - Each manifest creates its own a range of DisplayVersion numbers, between the lowest and highest DisplayVersion in the same manifest. 
+  - Multiple manifests can create multiple ranges within a PackageIdentifier, but these DisplayVersion ranges cannot overlap.
+  - Actual log example: `2024-01-31T22:16:48.6603831Z ##[error] Manifest Error: DisplayVersion declared in the manifest has overlap with existing DisplayVersion range in the index. Existing DisplayVersion range in index: [ [5.17.5 (31030), 5.17.5 (31030)]]`
+    - "Manifest" indicates the current PR's manifest.
+    - "Index" indicates all manifests currently in the repo and under the same PackageIdentifier.
 - This might lead to unexpected matching situations. For example, if the version ranges are 5.17.2 to 5.17.29988, and a PR's version is 5.17.5, then it falls inside that range.
 
 ### Scope swapping, accidental side-by-side installs, and one of the packages refuses to upgrade: 
@@ -216,8 +222,12 @@ This issue is slightly different from scope swapping above, in that there's only
 - Two manifests have the same data. If both the variants use the same DisplayName, ProductCode, Publisher and other package matching related information, then an existing install of a stable package may be mapped to a higher available version of a pre-release version by WinGet, even if the PackageIdentifiers are different. The fix is to remove the pre-release manifest, as the mainline has priority.
 - Version schema changes significantly - or changes between string and semantic. If a letter is added to one version number, then it can cause this issue with every version of the package. The fix is to remove manifests with the previous version schema, and only offer those with the latest schema.
 - Installer not writing accurate version data to the Windows Registry - either every installer writes the same version number, do not write a version number, do not write a consistent or accurate version number or have a similar issue with the version data in the registry. The fix here is to add the Apps and features metadata described above.
-- Or it could be that the manifest has an incorrect PackageVersion specified too
+- Manifest has an incorrect PackageVersion specified. 
 
 ### For a package that always writes the same version to registry: 
 
-Our package manager cannont update the Windows Registry, except for `Portable` application. 
+As described earlier, the DisplayVersion must be unique for every version of a package. 
+
+- Our package manager only updates the Windows Registry for `Portable` applications. 
+- If all versions of a package write the same DisplayVersion to Control Panel, then the best option is to only offer the latest version of the package. 
+- This situation is similar to the situation for vanity URLs, which always host the latest version of the package.
