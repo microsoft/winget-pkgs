@@ -89,7 +89,7 @@ If your system supports Windows Sandbox, you can also use the [SandboxTest.ps1 S
 
 ## Version Matching & Correllation
 
-The goal is to accurately determine the currently installed version, and all available versions of this application, so upgrades can be correctly suggested when available, and not suggested when not available. Most installers write accurate version data to the Windows Registry. But some do not, and `Portable` type applications generally cannot as they usually don't have installers. The data available to meet this goal consists of the files on disk, data in Windows Registry, and manifests in the winget-pkgs repo.
+The goal is to accurately determine the currently installed version, and all available versions of this application, so upgrades can be correctly suggested when available, and not suggested when not available. Most installers write accurate version data to the Windows Registry, but some do not, The data available to meet this goal consists of the files on disk, data in Windows Registry, and manifests in the winget-pkgs repo.
 
 ### Metadata 
 
@@ -97,10 +97,12 @@ The goal is to accurately determine the currently installed version, and all ava
 - DisplayVersion
   - Displayed in the Control Panel's Add & Remove Programs page (ARP) and/or Apps and features Settings page (ANF). 
   - Should not be used if it's always equal to PackageVersion.
-  - Must be unique per package. if multiple versions are sharing the same DisplayVersion, we may only keep the 'latest' one in the repo.
+  - Must be unique per version. if multiple versions are sharing the same DisplayVersion, we may only keep the 'latest' one in the repo.
 - Package Familyname (MSIX)
-- ProductCode & Upgradecode (MSI)
+  - This isn’t a valid AppsAndFeaturesEntry field and can only be used outside of the AppsAndFeaturesEntries.
+- ProductCode & UpgradeCode (MSI)
   - The ProductCode can be at any level, but UpgradeCode can only be used in AppsAndFeaturesEntries. 
+  - Exe's should also have product codes. Even though they aren’t contained in the file the same way an MSI has it defined in the database, the registry key the EXE writes into defines the product code,
 
 ### 4 main use cases: 
 
@@ -110,11 +112,9 @@ The goal is to accurately determine the currently installed version, and all ava
 - PackageVersion differed from DisplayVersion at any point in the manifest history. PackageVersion is required in every manifest, to prevent version range mapping errors.
 - ProductCode of the installed product differs from the ProductCode of the installer. ProductCode is required in at least one manifest to match installed packages to available packages.
 
-Note: Having incorrect values may have adverse effects, so these shouldn't be used unless there are reports of matching issues.
-
 ## Sorting and sort order
 
-As long as a PackageVersion sticks to either semantic or string, it's pretty easy to sort. But switching usually causes the order to become confused. Insofar as being YAML compliant, these are all supposed to be strings, leading to a few manifests having their PackageVersion numbers nested in quotes. 
+Inherently all the versions are strings - a sematic version is just a string with a certain format. YAML will interpret any alpha-numerics as strings automatically, and if there are multiple, it is smart enough to interpret that value as a string also. The quotes are only needed when the value is also a valid decimal number as 1.23 can be interpreted as string or a number whereas "1.23" can only be interpreted as a string
 
 ### Semantic
 
@@ -128,8 +128,10 @@ If composed solely of numbers and dots, the PackageVersion will generally be int
 
 If any letters, spaces, or other non-numeric characters (other than dots) are added, the PackageVersion will fallback to string interpretation. 
 
-- Digits are sorted independently, and version `3.9.E` would be sorted higher than `3.10.B`. because 9 is larger than 1. This system doesn't have the concept of version parameters. 
-- This includes all versions. So if a package has manifests with PackageVersions `0.1.1`, `v0.1.3`, and `v0.1.4` in the winget-pkgs repo, then the string sorting determines `0.1.1` as the highest version number. 
+- Winget breaks at each dot and compares each part individually. Where a part contains an numeral-alpha, the numeral is considered before the alpha.
+- Suggested reading: the commented code at winget-cli has more detail on the nuances of how versions are broken into Parts, and Parts are broken into "integer" and "other"
+- https://github.com/microsoft/winget-cli/blob/8a006549c4aa0dd13cc17f6185ce30a1f4c2e71b/src/AppInstallerSharedLib/Public/AppInstallerVersions.h#L19
+- https://github.com/microsoft/winget-cli/blob/8a006549c4aa0dd13cc17f6185ce30a1f4c2e71b/src/AppInstallerSharedLib/Versions.cpp#L308
 
 ## Pre-release, early release, release candidate, and alpha & beta versions. 
 
@@ -186,13 +188,14 @@ Notes, ideas, and discussion on how to implement and support release channels [i
 
 - Can be caused by the PackageVersion differring from the DisplayVersion at any point in the manifest history, and the fix is to add the PackageVersion to every manifest. Another option is to remove the manifests where they differ.
 - Actual log example: `2024-01-31T22:16:48.6603831Z ##[error] Manifest Error: DisplayVersion declared in the manifest has overlap with existing DisplayVersion range in the index. Existing DisplayVersion range in index: [ [5.17.5 (31030), 5.17.5 (31030)]]`
-- DisplayVersion is treated as a range, from the lowest manifest version in the repo to the highest. 
+- DisplayVersion is treated as a range, from the lowest DisplayVersion in a single manifest to the highest DisplayVersion in the same manifest. 
+- Each manifest creates its own version range. 
+- Two manifests cannot have overlapping ranges, but any given package can have multiple ranges if there are multiple manifests
 - This might lead to unexpected matching situations. For example, if the version ranges are 5.17.2 to 5.17.29988, and a PR's version is 5.17.5, then it falls inside that range.
-- In the future, it might be changed from a range, to an array of known manifest DisplayVersions, and require exact matching.
 
 ### Scope swapping, accidental side-by-side installs, and one of the packages refuses to upgrade: 
 
-- This issue appears to be common to MSI installers. 
+- This issue appears to be common to WIX installers. 
 - When installing to `%LOCALAPPDATA%` for `user` scope, the software package's registry entries are added to `HKEY_LOCAL_MACHINE` instead of `HKEY_CURRENT_USER`.
 - This makes the `user` scope software package appear to be of `machine` scope instead.
   - Related to [Winget incorrectly detects per-user MSI scope (`No applicable update found`)](https://github.com/microsoft/winget-cli/issues/3011)
@@ -213,8 +216,8 @@ This issue is slightly different from scope swapping above, in that there's only
 - Two manifests have the same data. If both the variants use the same DisplayName, ProductCode, Publisher and other package matching related information, then an existing install of a stable package may be mapped to a higher available version of a pre-release version by WinGet, even if the PackageIdentifiers are different. The fix is to remove the pre-release manifest, as the mainline has priority.
 - Version schema changes significantly - or changes between string and semantic. If a letter is added to one version number, then it can cause this issue with every version of the package. The fix is to remove manifests with the previous version schema, and only offer those with the latest schema.
 - Installer not writing accurate version data to the Windows Registry - either every installer writes the same version number, do not write a version number, do not write a consistent or accurate version number or have a similar issue with the version data in the registry. The fix here is to add the Apps and features metadata described above.
+- Or it could be that the manifest has an incorrect PackageVersion specified too
 
 ### For a package that always writes the same version to registry: 
 
-Our package manager could update the Windows Registry, modify the installer nodes, and set DisplayVersion for the installer. But if the user or application performed any activity (reinstall, repair, update, uninstall, etc) outside of the package manager, then it would overwrite, or not write, this data. 
-The DisplayVersion must be unique for every version of a package. If all versions of this package write the same DisplayVersion to Control Panel, then the best option is to only offer the latest version of the package. This situation is similar to the situation for vanity URLs, which always host the latest version of the package.
+Our package manager cannont update the Windows Registry, except for `Portable` application. 
