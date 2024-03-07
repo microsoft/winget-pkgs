@@ -291,7 +291,6 @@ using(Stream stream = Application.GetResourceStream(new Uri(imageUrl)).Stream)
 		}// end drawButton
 
 		public void drawOutBox(ref RichTextBox outBox, int pointX,int pointY,int sizeX,int sizeY,string text, string name){
-
 			outBox = new RichTextBox();
 			outBox.Text = text;
 			outBox.Name = name;
@@ -353,8 +352,8 @@ using(Stream stream = Application.GetResourceStream(new Uri(imageUrl)).Stream)
  			int col7 = gridItemWidth*inc;inc++;
  			int col8 = gridItemWidth*inc;inc++;
  			int col9 = gridItemWidth*inc;inc++;
- 			 						
-			drawOutBox(ref vmBox, col0, row0, gridItemWidth*6,gridItemHeight*5, "vmBox", "vmBox");
+ 			 			
+			drawOutBox(ref vmBox, col0, row0, gridItemWidth*6,gridItemHeight*5, "vmBox text", "vmBox");
 
 			drawButton(ref btn27, col6, row0, gridItemWidth*2, gridItemHeight, "Work Search", Work_Search_Button_Click);
 			drawUrlBox(ref urlBox,col8, row0, gridItemWidth*2,gridItemHeight,defaultSite);
@@ -367,7 +366,7 @@ using(Stream stream = Application.GetResourceStream(new Uri(imageUrl)).Stream)
 			drawButton(ref btn25, col7, row4, gridItemWidth, gridItemHeight, "Manifest One Per PR", Manifest_One_Per_PR_Button_Click);
 			drawButton(ref btn26, col8, row4, gridItemWidth, gridItemHeight, "Merge Conflicts", Merge_Conflicts_Button_Click);
  			drawButton(ref btn13, col9, row4, gridItemWidth, gridItemHeight, "Network Blocker", Network_Blocker_Button_Click);			
-			drawOutBox(ref valBox, col0, row5, this.ClientRectangle.Width,gridItemHeight*4, "valBox", "valBox");
+			drawOutBox(ref valBox, col0, row5, this.ClientRectangle.Width,gridItemHeight*4, "valBox text", "valBox");
 			 			drawButton(ref btn10, col0, row9, gridItemWidth, gridItemHeight, "Approving", Approving_Button_Click); 			drawButton(ref btn11, col1, row9, gridItemWidth, gridItemHeight, "IEDS", IEDS_Button_Click);			drawButton(ref btn18, col2, row9, gridItemWidth, gridItemHeight, "Validating", Validating_Button_Click);
 			drawButton(ref btn19, col3, row9, gridItemWidth, gridItemHeight, "Idle", Idle_Button_Click);
 
@@ -574,7 +573,7 @@ Gilgamech is making web browsers, games, self-driving RC cars, and other technol
 //GetPRApproval
 //ReplyToPR
 //NonstandardComments - Ready
-//PRStateFromComment
+//PRStateFromComment - Ready
 
 
 
@@ -762,7 +761,7 @@ Gilgamech is making web browsers, games, self-driving RC cars, and other technol
 
 //Clipboard
 //PRNumber - Ready
-//SortedClipboard
+//SortedClipboard - Ready
 //OpenAllURLs
 //OpenPRInBrowser
 //YamlValue - Ready
