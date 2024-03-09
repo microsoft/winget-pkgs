@@ -1,43 +1,44 @@
 //Copyright 2022-2024 Microsoft Corporation
 //Author: Stephen Gillie
-//Title: WinGet Approval Pipeline v3.-94.1
+//Title: WinGet Approval Pipeline v3.-91.1
 //Created: 1/19/2024
-//Updated: 3/6/2024
+//Updated: 3/8/2024
 //Notes: Utilities to streamline evaluating 3rd party PRs.
 //Update log:
+//3.-88.0 - Port DecodeGitHubFile. 
+//3.-88.0 - Port FileFromGitHub. 
+//3.-88.0 - Port SecondMatch. 
+//3.-89.0 - Port SetVMVersion. 
+//3.-90.0 - Port GetVMVersion. 
+//3.-91.2 - Subsume PopulateToken into a GetContent call.
+//3.-91.1 - Create GetContent as equivalent for PowerShell Get-Content. 
+//3.-91.0 - Port ADOBuildFromPR. 
+//3.-92.0 - Port AddGitHubReviewComment. 
+//3.-93.0 - Port CannedMessage. 
 //3.-94.1 - Rearrange functions, map locations for future function ports. 
-//3.-94.0 - Port ApprovePR. Successfully approve PR with application!
-//3.-95.0 - Port InvokeGitHubPRRequest as InvokeGitHubRequest wrapper.
-//3.-96.0 - Port InvokeGitHubRequest as webRequest wrapper.
-//3.-97.0 - Develop JSON functions and serialization processes. 
-//3.-98.0 - Modify webRequest to support more verbs than just GET, and optionally provide authentication headers.
-//3.-99.2 - Import GitHub token from file (shift left!)
-//3.-99.1 - "Port" C# window class and rect struct back from a C#-in-PS Add-Type call.
-//3.-99.0 - Add button & RichTextArea construction functions, rebuild application top. 
-//3.-100.0 - Use the tried-and-true strategy of "Start with the OPB and delete what you don't need."
 
 
 
 
 
 
-/*Contents: (Remaining functions to port or depreciate: 94)
+/*Contents: (Remaining functions to port or depreciate: 84)
 - Init vars (?)
 - Boilerplate (?)
 - UI top-of-box (?)
 	- Menu (?)
 - Tabs (3)
-- Automation Tools (7)
-- PR tools (7)
+- Automation Tools (6)
+- PR tools (5)
 - Network tools (1)
 - Validation Starts Here (6)
 - Manifests Etc (7)
 - VM Image Management (3)
 - VM Pipeline Management (6)
 - VM Status (5)
-- VM Versioning (3)
-- VM Orchestration (6)
-- File Management (8)
+- VM Versioning (1)
+- VM Orchestration (4)
+- File Management (5)
 - Inject into files on disk (2)
 - Inject into PRs (4)
 - Timeclock (4)
@@ -45,8 +46,110 @@
 - Clipboard (5)
 - Etc (7)
 - PR Watcher Utility functions (2)
-- Powershell equivalency (?)
+- Powershell equivalency (+4)
 - VM Window management (3)
+- Msic data (+1)
+*/
+
+
+
+
+
+
+/*
+Partial (5): 
+CheckStandardPRComments needs work on data structures. 
+PRInstallerStatusInnerWrapper might be unnecessary.
+Get-TrackerVMWindowLoc
+Get-TrackerVMWindowSet
+Get-TrackerVMWindowArrange#Get-Status, Get-TrackerVMWindowSet, Get-TrackerVMWindowLoc
+
+#Todo: 
+Get-TimeRunning
+Add-PRToRecord
+Get-PRNumber
+Get-SortedClipboard
+Get-YamlValue
+Test-Admin
+Write-Status
+Get-TrackerProgress
+Get-ArraySum
+Get-GitHubRateLimit
+Get-PadRight
+Reply-ToPR
+Get-LineFromCommitFile
+Get-Status
+Get-ManifestOtherAutomation
+Get-ManifestEntryCheck
+Get-CommitFile
+
+#Blocked:
+Get-ManifestListing#Find-WinGetPackage
+Get-OSFromVersion#Get-YamlValue
+Get-ConnectedVM#Test-Admin
+Get-LoadFileIfExists#Test-Path
+Add-ToValidationFile#Get-TrackerVMSetStatus
+Add-InstallerSwitch#Add-ToValidationFile
+Get-Timeclock#Get-Date
+Get-PRPopulateRecord#ConvertTo-Csv
+Get-PRFullReport#Get-PRReportFromRecord
+Open-AllURL#Start-Process
+Open-PRInBrowser#Start-Process
+Get-LazySearchWinGet#Invoke-Command
+Get-ValidationData#ConvertFrom-Csv
+Add-ValidationData#ConvertTo-Csv
+Get-UpdateArchInPR#Get-CommitFile
+Add-DependencyToPR#Get-CommitFile
+Get-TrackerVMValidateByID#Get-TrackerVMValidate
+Get-TrackerVMValidateByConfig#Get-TrackerVMValidate
+Get-TrackerVMValidateByArch#Get-TrackerVMValidate
+Get-TrackerVMValidateByScope#Get-TrackerVMValidate
+Get-TrackerVMValidateBothArchAndScope#Get-TrackerVMValidate
+
+Get-PRApproval#Get-ValidationData, Reply-ToPR
+Add-Waiver#Add-PRToRecord, Get-GitHubPreset
+Get-SearchGitHub#Get-Date, Start-Process
+Get-ManifestAutomation#Get-ManifestFile, Get-NextFreeVM
+Get-ListingDiff#Get-ManifestListing, Get-YamlValue
+Stop-TrackerVM#Stop-VM, Test-Admin
+Get-TrackerVMSetStatus#Get-Status, Write-Status
+Get-TrackerVMRebuildStatus#Get-VM, Write-Status
+Get-TrackerVMRotateLog#Get-Date, Move-Item
+Get-UpdateHashInPR#Add-GitHubReviewComment, Get-CommitFile
+Get-TimeclockSet#Get-Date, Get-TimeRunning
+Get-HoursWorkedToday#Get-Date, Get-Timeclock
+Get-PRFromRecord#Get-PRPopulateRecord, ConvertFrom-Csv
+Get-Sandbox#Stop-Process, Start-Process
+
+Get-TrackerVMLaunchWindow#Get-ConnectedVM, Stop-Process, Test-Admin 
+Get-TrackerVMRevert#Get-TrackerVMSetStatus, Restore-VMCheckpoint, Test-Admin
+Get-NextFreeVM#Get-Random, Get-Status, Test-Admin
+Get-RemoveFileIfExist#New-Item, Remove-Item, Test-Path
+Get-UpdateHashInPR2#Add-GitHubReviewComment, Get-CommitFile, Get-YamlValue
+Get-PRReportFromRecord#ConvertTo-Csv, Get-PRFromRecord, Get-TrackerProgress
+Get-SingleFileAutomation#Get-ManifestFile, Get-ManifestListing, Get-YamlValue
+
+Get-TrackerVMRunTracker#Get-ArraySum, Get-AutoValLog, Get-ConnectedVM, Get-Date, Get-HoursWorkedToday, Get-PRLabelAction, Get-PRNumber, Get-Random, Get-RandomIEDS, Get-SearchGitHub, Get-Status, Get-TimeRunning, Get-TrackerMode, Get-TrackerVMCycle, Get-TrackerVMRotate, Get-TrackerVMValidate, Get-TrackerVMWindowArrange, Get-VM, Set-Vm, start-process
+Get-PRWatch#Add-PRToRecord, Approve-PR, Compare-Object, Find-WinGetPackage, Get-CleanClip, Get-Command, Get-Date, Get-ListingDiff, Get-LoadFileIfExists, Get-ManifestEntryCheck, Get-PadRight, Get-PRApproval, get-random, Get-Sandbox, Get-Status, Get-TrackerVMValidate, Get-ValidationData, Get-YamlValue, Reply-ToPR
+Get-WorkSearch#Get-Date, Get-GitHubPreset, Get-PRLabelAction, Get-PRStateFromComments, Get-SearchGitHub, Get-Status, Get-TrackerProgress, Open-PRInBrowser
+Get-GitHubPreset#Add-PRToRecord, Add-Waiver, Approve-PR, Check-PRInstallerStatusInnerWrapper, Find-WinGetPackage, Get-GitHubPreset, Get-PRLabelAction, Get-TimeclockSet, Get-WorkSearch, Get-YamlValue, Reply-ToPR
+Get-PRLabelAction#Soothing label action. #Get-AutoValLog, Get-Date, Get-GitHubPreset, Get-LineFromCommitFile, Get-PRStateFromComments, Get-UpdateHashInPR2, Get-ValidationData, Reply-ToPR
+Get-AutoValLog#Expand-Archive, Get-BuildFromPR, Get-ChildItem, Get-GitHubPreset, Get-ValidationData, Open-PRInBrowser, Remove-Item, Reply-ToPR, Start-Process, Stop-Process, Test-Path
+Get-RandomIEDS#Get-CommitFile, Get-ManifestFile, Get-NextFreeVM, Get-Random, Get-SearchGitHub, Get-Status, Get-YamlValue
+Get-TrackerVMValidate#Find-WinGetPackage,  ForEach-Object,  Get-ChildItem,  Get-NextFreeVM,  Get-OSFromVersion,  Get-PipelineVmGenerate,  Get-PRNumber,   Get-RemoveFileIfExist,  Get-TrackerVMLaunchWindow,  Get-TrackerVMRevert,  Get-TrackerVMSetStatus,  Get-VM,  Get-YamlValue,  Open-AllURL,  Start-Process,  Test-Admin
+Get-ManifestFile#Get-NextFreeVM, Get-RemoveFileIfExist, Get-TrackerVMValidate, Get-YamlValue
+Get-PipelineVmGenerate#Get-Date, Get-RemoveFileIfExist, Get-TrackerVMLaunchWindow, Get-TrackerVMRevert, Get-VM, Import-VM, Remove-VMCheckpoint, Rename-VM, Start-VM, Test-Admin
+Get-PipelineVmDisgenerate#Get-ConnectedVM, Get-RemoveFileIfExist, Get-Status, Get-TrackerVMSetStatus, Remove-VM, Stop-Process, Stop-TrackerVM, Test-Admin, Write-Progress, Write-Status
+Get-ImageVMStart#Get-TrackerVMLaunchWindow, Get-TrackerVMRevert, Start-VM, Test-Admin
+Get-ImageVMStop#Get-ConnectedVM, Redo-Checkpoint, Stop-Process, Stop-TrackerVM, Test-Admin
+Get-ImageVMMove#Get-Date, Get-VM, Move-VMStorage, Rename-VM, Test-Admin
+Get-TrackerVMResetStatus#Get-ConnectedVM, Get-Status, Get-TrackerVMSetStatus, Stop-Process
+Get-TrackerVMRotate#Get-Random, Get-Status, Get-TrackerVMSetStatus, Get-TrackerVMVersion
+Complete-TrackerVM#Get-ConnectedVM, Get-RemoveFileIfExist, Get-TrackerVMSetStatus, Stop-Process, Stop-TrackerVM, Test-Admin
+Redo-Checkpoint#Checkpoint-VM, Get-TrackerVMSetStatus, Redo-Checkpoint, Remove-VMCheckpoint, Test-Admin
+Get-TrackerVMCycle#Add-ToValidationFile, Add-Waiver, Complete-TrackerVM, Get-GitHubPreset, Get-PipelineVmDisgenerate, Get-PipelineVmGenerate, Get-Status, Get-TrackerVMRevert, Get-TrackerVMSetStatus, Redo-Checkpoint, Reply-ToPR
+
+
 */
 
 
@@ -62,9 +165,11 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Windows.Forms;
 using System.Web.Script.Serialization;
@@ -72,14 +177,14 @@ using System.Web.Script.Serialization;
 namespace WinGetApprovalNamespace {
     public class WinGetApprovalPipeline : Form {
 		//vars
-        public int build = 343;//Get-RebuildPipeApp
+        public int build = 349;//Get-RebuildPipeApp
 		public string appName = "WinGetApprovalPipeline";
 		public string appTitle = "WinGet Approval Pipeline - Build ";
 		public static string owner = "microsoft";
 		public static string repo = "winget-pkgs";
 
 		//public IPAddress ipconfig = (ipconfig);
-		//public IPAddress remoteIP = ([ipaddress](($ipconfig[($ipconfig | Select-String "vEthernet").LineNumber..$ipconfig.length] | Select-String "IPv4 Address") -split ": ")[1]).IPAddressToString;
+		//public IPAddress remoteIP = ([ipaddress](($ipconfig[($ipconfig | Select-String "vEthernet").LineNumber..$ipconfig.Length] | Select-String "IPv4 Address") -split ": ")[1]).IPAddressToString;
 		public static string RemoteMainFolder = "//$remoteIP/";
 		public string SharedFolder = RemoteMainFolder+"/write";
 
@@ -172,21 +277,9 @@ namespace WinGetApprovalNamespace {
 			Application.SetCompatibleTextRenderingDefault(false);
 			Application.Run(new WinGetApprovalPipeline());
         }// end Main
-
-		public void PopulateToken() {
-			try {
-				// Open the text file using a stream reader.
-				using (var sr = new StreamReader(GitHubTokenFile)) {
-					// Read the stream as a string, and write the string to the console.
-					GitHubToken = sr.ReadToEnd();
-				}
-			} catch (IOException e) {
-				MessageBox.Show("The token file "+GitHubTokenFile+" could not be read:\n" + e.Message, "Error");
-			}
-		}
 		
         public WinGetApprovalPipeline() {
-			PopulateToken();
+			GitHubToken = GetContent(GitHubTokenFile);
 			this.Text = appTitle + build;
 			this.Size = new Size(WindowWidth,WindowHeight);
 			this.StartPosition = FormStartPosition.CenterScreen;
@@ -203,77 +296,6 @@ namespace WinGetApprovalNamespace {
 			//drawOutBox();
    
         } // end WinGetApprovalPipeline		
-
-        public void loadNewPage() {
-
-//Download HTML file
-//Parse HTML to Document variable
-//Write Document variable to page
-//Interpret Javascript to modify Document variable
-			//history.Add(urlBox.Text);
-			history[historyIndex] = urlBox.Text;
-			string imageUrl = "";
-			string pageSource = "";
-			displayLine = 0;
-			// Download website, stick source in pageSource
-			//webRequest(ref pageSource, imageUrl, WebRequestMethods.Http.Get);
-
-			// Do some replacing
-			doSomeReplacing(ref pageSource);
-			
-			// Set form name to page title
-			try {
-			}catch{
-			}// end try 
-
-			
-			//favicon 
-			try {
-				// <link rel="shortcut icon" href="/favicon.ico" type="image/vnd.microsoft.icon">
-				//imageUrl = pageSource.Substring(pageSource.IndexOf("<link")+5, pageSource.IndexOf(">") - pageSource.IndexOf("<link"));
-				imageUrl = findIndexOf(pageSource,"<link",">",5,0);
-				//imageUrl = imageUrl.Substring(imageUrl.IndexOf("href=")+6, imageUrl.IndexOf('"') - imageUrl.IndexOf("href="));
-				imageUrl = findIndexOf(imageUrl,"href=","",6,0);
-				
-			}catch{
-				imageUrl = history[historyIndex] + "/favicon.ico";
-			}// end try 
-			try {
-/*
-using(Stream stream = Application.GetResourceStream(new Uri(imageUrl)).Stream)
-{
-    Icon myIcon = new System.Drawing.Icon(stream);
-}
-				WebClient client = new WebClient();
-				Stream stream = client.OpenRead(imageUrl);
-				stream.Flush();
-				stream.Close();
-				//this.Text += "Favicon: "+imageUrl;
-*/
-
-				WebRequest request = WebRequest.Create(imageUrl);
-				request.Method = WebRequestMethods.Http.Get;// WebRequestMethods.Http.Get;
-				//request.UserAgent = "WinGetApprovalPipeline";
-				WebResponse response = request.GetResponse();
-				Stream stream = response.GetResponseStream();
-				this.Icon = new Icon(stream);
-				//pictureBox1.Image = Bitmap.FromStream(stream);
-
-			}catch{
-				//this.Icon = Icon.ExtractAssociatedIcon(System.Reflection.Assembly.GetExecutingAssembly().Location);
-				//this.Text = "Favicon missing:"+imageUrl+" - " + this.Text;
-			}// end try 
-
-			// Split head & body 
-			//Goto <body then goto the next >
-			try {
-				//parsedHtml = pageSource.Substring(pageSource.IndexOf("<body"), pageSource.IndexOf("</body") - pageSource.IndexOf("<body")).Split('<');
-				parsedHtml = findIndexOf(pageSource,"<body","</body",0,0).Split('<');
-			}catch{
-				parsedHtml = pageSource.Split('<');
-			}; // end try 
-			drawPage(parsedHtml);
-        }// end loadNewPage
 
 
 
@@ -489,7 +511,92 @@ Gilgamech is making web browsers, games, self-driving RC cars, and other technol
 //LabelAction
 //AddWaiver
 //SearchGitHub
-//CannedMessage - Ready
+
+//[ValidateSet("AgreementMismatch","AppFail","Approve","AutomationBlock","AutoValEnd","AppsAndFeaturesNew","AppsAndFeaturesMissing","DriverInstall","DefenderFail","HashFailRegen","InstallerFail","InstallerMissing","InstallerNotSilent","NormalInstall","InstallerUrlBad","ListingDiff","ManValEnd","ManifestVersion","NoCause","NoExe","NoRecentActivity","NotGoodFit","OneManifestPerPR","Only64bit","PackageFail","PackageUrl","Paths","PendingAttendedInstaller","PolicyWrapper","RemoveAsk","SequenceNoElements","Unattended","Unavailable","UrlBad","VersionCount","WhatIsIEDS","WordFilter")]
+		public string CannedMessage (string Message, string UserInput = "") {
+			string string_out = "";
+			string Username = "@"+UserInput.Replace(" ","")+",";
+			string greeting = "Hi "+ Username + Environment.NewLine + Environment.NewLine;
+			//Most of these aren't used frequently enough to store and should be depreciated.
+			if (Message == "AgreementMismatch"){
+				string_out = greeting  + "This package uses Agreements, but this PR's AgreementsUrl doesn't match the AgreementsUrl on file.";
+			} else if (Message == "AppsAndFeaturesNew"){
+				string_out = greeting + "This manifest adds Apps and Features entries that aren't present in previous PR versions. These entries should be added to the previous versions, or removed from this version.";
+			} else if (Message == "AppsAndFeaturesMissing"){
+				string_out = greeting + "This manifest removes Apps and Features entries that are present in previous PR versions. These entries should be added to this version, to maintain version matching, and prevent the 'upgrade always available' situation with this package.";
+			} else if (Message == "AppFail"){
+				string_out = greeting + "The application installed normally, but gave an error instead of launching:" + Environment.NewLine;
+			} else if (Message == "Approve"){
+				string_out = greeting + "Do you approve of these changes?";
+			} else if (Message == "AutomationBlock"){
+				string_out = "This might be due to a network block of data centers, to prevent automated downloads.";
+			} else if (Message == "UserAgentBlock"){
+				string_out = "This might be due to user-agent throttling.";
+			} else if (Message == "AutoValEnd"){
+				string_out = "Automatic Validation ended with:" + Environment.NewLine + "> " + UserInput;
+			} else if (Message == "DriverInstall"){
+				string_out = greeting + "The installation is unattended, but installs a driver which isn't unattended:" + Environment.NewLine + "Unfortunately, installer switches are not usually provided for this situation. Are you aware of an installer switch to have the driver silently install as well?";
+			} else if (Message == "DefenderFail"){
+				string_out = greeting + "The package didn't pass a Defender or similar security scan. This might be a false positive and we can rescan tomorrow.";
+			} else if (Message == "HashFailRegen"){
+				string_out = "Closing to regenerate with correct hash.";
+			} else if (Message == "InstallerFail"){
+				string_out = greeting + "The installer did not complete:" + Environment.NewLine;
+			} else if (Message == "InstallerMissing"){
+				string_out = greeting + "Has the installer been removed?";
+			} else if (Message == "InstallerNotSilent"){
+				string_out = greeting + "The installation isn't unattended. Is there an installer switch to have the package install silently?";
+			} else if (Message == "ListingDiff"){
+				string_out = "This PR omits these files that are present in the current manifest:" + Environment.NewLine + "> " + UserInput;
+			} else if (Message == "ManifestVersion"){
+				string_out = greeting + "We don't often see the `1.0.0` manifest version anymore. Would it be possible to upgrade this to the [1.5.0]($GitHubBaseUrl/tree/master/doc/manifest/schema/1.5.0) version, possibly through a tool such as [WinGetCreate](https://learn.microsoft.com/en-us/windows/package-manager/package/manifest?tabs=minschema%2Cversion-example), [YAMLCreate]($GitHubBaseUrl/blob/master/Tools/YamlCreate.ps1), or [Komac](https://github.com/russellbanks/Komac)? ";
+			} else if (Message == "ManValEnd"){
+				string_out = "Manual Validation ended with:" + Environment.NewLine + "> " + UserInput;
+			} else if (Message == "NoCause"){
+				string_out = "I'm not able to find the cause for this error. It installs and runs normally on a Windows 10 VM.";
+			} else if (Message == "NoExe"){
+				string_out = greeting + "The installer doesn't appear to install any executables, only supporting files:" + Environment.NewLine + Environment.NewLine + "Is this expected?";
+			} else if (Message == "NoRecentActivity"){
+				string_out = "No recent activity.";
+			} else if (Message == "NotGoodFit"){
+				string_out = greeting + "Unfortunately, this package might not be a good fit for inclusion into the WinGet public manifests. Please consider using a local manifest (\\WinGet install --manifest C:\\path\\to\\manifest\\files\\) for local installations. ";
+			} else if (Message == "NormalInstall"){
+				string_out = "This package installs and launches normally on a Windows 10 VM.";
+			} else if (Message == "OneManifestPerPR"){
+				string_out = greeting + "We have a limit of 1 manifest change, addition, or removal per PR. This PR modifies more than one PR. Can these changes be spread across multiple PRs?";
+			} else if (Message == "Only64bit"){
+				string_out = greeting + "Validation failed on the x86 package, and x86 packages are validated on 32-bit OSes. So this might be a 64-bit package.";
+			} else if (Message == "PackageFail"){
+				string_out = greeting + "The package installs normally, but fails to run:" + Environment.NewLine;
+			} else if (Message == "PackageUrl"){
+				string_out = greeting + "Could you add a PackageUrl?";
+			} else if (Message == "Paths"){
+				string_out = "Please update file name and path to match this change.";
+			} else if (Message == "PendingAttendedInstaller"){
+				string_out = "Pending:" + Environment.NewLine + "* https://github.com/microsoft/winget-cli/issues/910";
+			} else if (Message == "PolicyWrapper"){
+				string_out = "<!--" + Environment.NewLine + "[Policy] " + UserInput + Environment.NewLine + "-->";
+			} else if (Message == "RemoveAsk"){
+				string_out = greeting + "This package installer is still available. Why should it be removed?";
+			} else if (Message == "SequenceNoElements"){
+				string_out = "> Sequence contains no elements" + Environment.NewLine + Environment.NewLine + " - $GitHubBaseUrl/issues/133371";
+			} else if (Message == "Unavailable"){
+				string_out = greeting + "The installer isn't available from the publisher's website:";
+			} else if (Message == "Unattended"){
+				string_out = greeting + "The installation isn't unattended:" + Environment.NewLine + Environment.NewLine + "Is there an installer switch to bypass this and have it install automatically?";
+			} else if (Message == "UrlBad"){
+				string_out = greeting + "I'm not able to find this InstallerUrl from the PackageUrl. Is there another page on the developer's site that has a link to the package?";
+			} else if (Message == "VersionCount"){
+				string_out = greeting + "This manifest has the highest version number for this package. Is it available from another location? (This might be in error if the version is switching from semantic to string, or string to semantic.)";
+			} else if (Message == "WhatIsIEDS"){
+				string_out = greeting + "The label `Internal-Error-Dynamic-Scan` is a blanket error for one of a number of internal pipeline errors or issues that occurred during the Dynamic Scan step of our validation process. It only indicates a pipeline issue and does not reflect on your package. Sorry for any confusion caused.";
+			} else if (Message == "WordFilter"){
+				string_out = "This manifest contains a term that is blocked:" + Environment.NewLine + Environment.NewLine + "> " + UserInput;
+			}
+			string_out  += Environment.NewLine + Environment.NewLine + "(Automated response - build " + build + ".)";
+			return string_out;
+		}
+
 //AutoValLog
 //RandomIEDS
 
@@ -510,7 +617,7 @@ Gilgamech is making web browsers, games, self-driving RC cars, and other technol
 			string Url = GitHubApiBaseUrl+"/"+Path+"/"+PR+"/"+Type;
 			string commitUrl = GitHubApiBaseUrl+"/pulls/"+PR+"/commits";
 			//dynamic prData = FromJson(InvokeGitHubRequest(commitUrl));
-			string commit = "";//((prData["commit"]["url"].split("/"))[-1]);
+			string commit = "";//((prData["commit"]["url"].Split("/"))[-1]);
 
 			if ((Type == "") || (Type == "files") || (Type == "reviews")){
 				Path = "pulls";
@@ -553,7 +660,7 @@ Gilgamech is making web browsers, games, self-driving RC cars, and other technol
 		public string ApprovePR(int PR,string Data = "") {
 			string commitUrl = GitHubApiBaseUrl+"/pulls/"+PR+"/commits";
 			//dynamic prData = FromJson(InvokeGitHubRequest(commitUrl));
-			string commit = "";//((prData["commit"]["url"].split("/"))[-1]);
+			string commit = "";//((prData["commit"]["url"].Split("/"))[-1]);
 			string Url = GitHubApiBaseUrl+"/pulls/"+PR+"/reviews";
 
 
@@ -567,14 +674,146 @@ Gilgamech is making web browsers, games, self-driving RC cars, and other technol
 			return out_var;
 		}
 
-//AddGitHubReviewComment - Ready
 //GetBuildFromPR - Ready
+		public string AddGitHubReviewComment (int PR, string Comment,int? StartLine,int Line) {
+			dynamic Commit = FromJson(InvokeGitHubPRRequest(PR, "Get", "commits","","","content"));
+			string CommitID = Commit["sha"];
+			string Filename = Commit["files"]["filename"];
+			string Side = "RIGHT";
+			if (Filename.GetType().BaseType.Name == "Array") {
+				//Filename = Filename[0];
+			}
+
+			Dictionary <string,object> Response = new Dictionary <string,object>();
+			Response.Add("body", Comment);
+			Response.Add("body", Comment);
+			Response.Add("Commit_id", CommitID);
+			Response.Add("path", Filename);
+			if (null != StartLine) {
+				Response.Add("start_line", StartLine);
+			}
+			Response.Add("start_side", Side);
+			Response.Add("line", Line);
+			Response.Add("side", Side);
+			string Body = ToJson(Response);
+
+			string uri = GitHubApiBaseUrl+"/pulls/"+PR+"/comments";
+			string string_out = InvokeGitHubRequest(uri, WebRequestMethods.Http.Post, Body);
+			return string_out;//.StatusDescription;
+		}
+
+		public string ADOBuildFromPR (int PR) {
+			dynamic content = FromJson(webRequest(ADOMSBaseUrl+"/"+repo+"/_apis/build/builds?branchName=refs/pull/"+PR+"/merge&api-version=6.0"));
+			string href = content["value"][0]["_links"]["web"]["href"];
+			string PRbuild = href;//href.Split(new string[] { "=" })[1][0];
+			return PRbuild;
+		}
+
 //GetLineFromCommitFile
 //GetPRApproval
 //ReplyToPR
-//NonstandardComments - Ready
-//PRStateFromComment - Ready
 
+
+		public bool CheckStandardPRComments (int PR) {
+			bool out_bool = false;
+			Dictionary<string,object> comments = new Dictionary<string,object>();
+			comments = FromJson(InvokeGitHubPRRequest(PR,"GET","comments","","","content"));
+			foreach (string StdComment in StandardPRComments) {
+				if (!comments.Keys.Any(key => key.Contains(StdComment))) {
+					out_bool = true;
+				}
+			}
+			return out_bool;
+		}
+
+/*
+		public string PRStateFromComments (int PR){
+			string[] Comments = InvokeGitHubPRRequest(PR, "comments","","","content"); //| select created_at,@{n="UserName";e={$_.user.login -replace "\[bot\]"}},body)
+			//Robot usernames
+			string Wingetbot = "wingetbot";
+			string AzurePipelines = "azure-pipelines";
+			string FabricBot = "microsoft-github-policy-service";
+			Dictionary<string,object> string_out = new Dictionary<string,object>();
+			
+			foreach (Dictionary<string,object> Comment in Comments) {
+				string State = "";
+				string Comment_created_at = "test";//[TimeZoneInfo]::ConvertTimeBySystemTimeZoneId(Comment.created_at, 'Pacific Standard Time')
+				if (string.Equals(Comment.UserName, Wingetbot) && string.Equals(Comment.body, "Service Badge")) {
+					State = "PreRun";
+				}
+				if (string.Contains(Comment.body, "AzurePipelines run") || 
+				string.Contains(Comment.body, "AzurePipelines run") || 
+				string.Contains(Comment.body, "azp run") || 
+				string.Contains(Comment.body, "wingetbot run")) {
+					State = "PreValidation";
+				}
+				if (string.Equals(Comment.UserName, AzurePipelines) && string.Contains(Comment.body, "Azure Pipelines successfully started running 1 pipeline")) {
+					State = "Running";
+				}
+				if (string.Equals(Comment.UserName, FabricBot) && string.Contains(Comment.body, "The check-in policies require a moderator to approve PRs from the community")) {
+					State = "PreApproval";
+				}
+				if (string.Equals(Comment.UserName, GitHubUserName) && string.Contains(Comment.body, "The package didn't pass a Defender or similar security scan")) {
+					State = "DefenderFail";
+				}
+				if (string.Equals(Comment.UserName, GitHubUserName) && string.Contains(Comment.body, "Status Code: 200")) {
+					State = "InstallerAvailable";
+				}
+				if (string.Equals(Comment.UserName, GitHubUserName) && string.Contains(Comment.body, "Response status code does not indicate success")) {
+					State = "InstallerRemoved";
+				}
+				if (string.Equals(Comment.UserName, GitHubUserName) && string.Contains(Comment.body, "which is greater than the current manifest's version")) {
+					State = "VersionParamMismatch";
+				}
+				if (string.Equals(Comment.UserName, FabricBot) && (
+				string.Equals(Comment.body, "The package manager bot determined there was an issue with one of the installers listed in the url field") || //URL error
+				string.Equals(Comment.body, "The package manager bot determined there was an issue with installing the application correctly") || //Validation-Installation-Error
+				string.Equals(Comment.body, "The pull request encountered an internal error and has been assigned to a developer to investigate") ||  //Internal-Error
+				string.Equals(Comment.body, "this application failed to install without user input")  || //Validation-Unattended-Failed
+				string.Equals(Comment.body, "Please verify the manifest file is compliant with the package manager") //Manifest-Validation-Error
+				)) {
+					State = "LabelAction";
+				}
+				if (string.Equals(Comment.UserName, FabricBot) && string.Contains(Comment.body, "One or more of the installer URLs doesn't appear valid")) {
+					State = "DomainReview";
+				}
+				if (string.Equals(Comment.UserName, GitHubUserName) && string.Contains(Comment.body, "Sequence contains no elements")) {
+					State = "SequenceError";
+				}
+				if (string.Equals(Comment.UserName, GitHubUserName) && string.Contains(Comment.body, "This manifest has the highest version number for this package")) {
+					State = "HighestVersionRemoval";
+				}
+				if (string.Equals(Comment.UserName, GitHubUserName) && string.Contains(Comment.body, "SQL error or missing database")) {
+					State = "SQLMissingError";
+				}
+				if (string.Equals(Comment.UserName, FabricBot) && string.Contains(Comment.body, "The package manager bot determined changes have been requested to your PR")) {
+					State = "ChangesRequested";
+				}
+				if (string.Equals(Comment.UserName, FabricBot) && string.Contains(Comment.body, "I am sorry to report that the Sha256 Hash does not match the installer")) {
+					State = "HashMismatch";
+				}
+				if (string.Equals(Comment.UserName, GitHubUserName) && string.Contains(Comment.body, "Automatic Validation ended with:")) {
+					State = "AutoValEnd";
+				}
+				if (string.Equals(Comment.UserName, GitHubUserName) && string.Contains(Comment.body, "Manual Validation ended with:")) {
+					State = "ManValEnd";
+				}
+				if (string.Equals(Comment.UserName, AzurePipelines) && string.Contains(Comment.body, "Pull request contains merge conflicts")) {
+					State = "MergeConflicts";
+				}
+				if (string.Equals(Comment.UserName, FabricBot) && string.Contains(Comment.body, "Validation has completed")) {
+					State = "ValidationCompleted";
+				}
+				if (string.Equals(Comment.UserName, Wingetbot) && string.Contains(Comment.body, "Publish pipeline succeeded for this Pull Request")) {
+					State = "PublishSucceeded";
+				}
+				if (!string.Equals(State, "")) {
+					string_out += Comment; //| select @{n="event";e={State}},created_at;
+				}
+			}
+			return string_out;
+		}
+*/
 
 
 
@@ -607,9 +846,13 @@ Gilgamech is making web browsers, games, self-driving RC cars, and other technol
 
 			return response_out;
 		}
-//GitHub requires the value be the .body property of the variable. This makes more sense with CURL, Where-Object this is the -data parameter. However with webRequest it's the -Body parameter, so we end up with the awkward situation of having a Body parameter that needs to be prepended with a body property.
+		//GitHub requires the value be the .body property of the variable. This makes more sense with CURL, Where-Object this is the -data parameter. However with webRequest it's the -Body parameter, so we end up with the awkward situation of having a Body parameter that needs to be prepended with a body property.
 
-//PRInstallerStatusInnerWrapper - Ready
+		public void PRInstallerStatusInnerWrapper (string Url){
+			//This was a hack to get around Invoke-WebRequest hard blocking on failure, where this needed to be captured and transmitted to a PR comment. And so might not be needed here.
+			//string Code = InvokeWebRequest (Url, "Head").StatusCode
+			//return $Code
+		}
 
 
 
@@ -679,8 +922,27 @@ Gilgamech is making web browsers, games, self-driving RC cars, and other technol
 
 
 //VM Versioning
-//GetVMVersion - Ready
-//SetVMVersion - Ready
+		public int GetVMVersion (string OS = "Win10") {
+			//[ValidateSet("Win10","Win11")][string]OS = "Win10",
+			int VMVersion;
+			string VMData = GetContent(VMversion);
+			List<string> Line = VMData.Split('\n').ToList();
+			string Line2 = Line.Where(n => n.Contains(OS)).FirstOrDefault();
+			Line2 = Line2.Replace("\"","");
+			VMVersion = Int32.Parse(Line2.Split(',','"')[1]);
+			return VMVersion;
+		}
+
+		public void SetVMVersion (int Version, string OS = "Win10") {
+			string VMData = GetContent(VMversion);
+			List<string> Line = VMData.Split('\n').ToList();
+			string Line2 = Line.Where(n => n.Contains(OS)).FirstOrDefault();
+			Line2 = Line2.Replace("\"","");
+			int CurrentVersion = Int32.Parse(Line2.Split(',','"')[1]);
+			VMData = VMData.Replace(OS+"\",\""+CurrentVersion,OS+"\",\""+Version);
+			File.WriteAllText(VMversion,VMData);
+		}
+
 //RotateVMs
 
 
@@ -690,8 +952,15 @@ Gilgamech is making web browsers, games, self-driving RC cars, and other technol
 
 //VM Orchestration
 //VMCycle
-//GetMode - Ready
-//SetMode - Ready
+		public string GetMode() {
+			string mode = GetContent(TrackerModeFile);
+			return mode;
+		}
+
+		public void SetMode(string Status = "Validating") {
+			//[ValidateSet("Approving","Idle","IEDS","Validating")]
+			File.WriteAllText(TrackerModeFile,Status);
+		}
 //ConnectedVM
 //NextFreeVM
 //RedoCheckpoint
@@ -702,16 +971,48 @@ Gilgamech is making web browsers, games, self-driving RC cars, and other technol
 
 
 //File Management
-//SecondMatch
+		//File Management
+		public string SecondMatch(string clip, int depth = 1) {
+			string[] clipArray = clip.Split('\n');
+			List<string> sa_out = new List<string>();
+			//If $current and $prev don't match, return the $prev element, which is $depth lines below the $current line. Start at $clip[$depth] and go until the end - this starts $current at $clip[$depth], and $prev gets moved backwards to $clip[0] and moves through until $current is at the end of the array, $clip[$clip.Length], and $prev is $depth previous, at $clip[$clip.Length - $depth].
+			for (int depthUnit = depth;depthUnit < clip.Length; depthUnit++){
+				string current = clipArray[depthUnit].Split(':')[0];
+				string prevUnit = clipArray[depthUnit - depth];
+				string prev = prevUnit.Split(':')[0];
+				if (current != prev) {
+					sa_out.Add(prevUnit);
+				}
+			}
+			//Then complete the last depth items of the array by starting at clip[-depth] and work backwards through the last items in reverse order to clip[-1].
+			for (int depthUnit = depth ;depthUnit > 0; depthUnit--){
+				sa_out.Add(clipArray[-depthUnit]);
+				
+			}
+		string string_joined = string.Join("\n", sa_out);
+		return string_joined;
+		}
 //RotateLog
 //RemoveFileIfExist
 //LoadFileIfExists
-//GetFileFromGitHub - Ready
+		public string FileFromGitHub(string PackageIdentifier, int Version, string FileName = "installer.yaml") {
+			string Path = PackageIdentifier.Replace('.','/');
+			string FirstLetter = PackageIdentifier[0].ToString().ToLower();
+			string content = "";
+			try{
+				content = InvokeGitHubRequest(GitHubContentBaseUrl+"/master/manifests/"+FirstLetter+"/"+Path+"/"+Version+"/"+PackageIdentifier+"."+FileName);
+			}catch{
+				content = "Error";
+			}
+			return content;
+		}
 //ManifestEntryCheck
-//DecodeGitHubFile - Ready
+		public string DecodeGitHubFile (string Base64String) {
+			var Bits = System.Convert.FromBase64String(Base64String);
+			string String = System.Text.Encoding.UTF8.GetString(Bits);
+			return String;
+		}
 //GetCommitFIle
-
-
 
 
 
@@ -797,6 +1098,34 @@ Gilgamech is making web browsers, games, self-driving RC cars, and other technol
 		//Powershell equivalency imperatives
 		//Start-Sleep = Thread.Sleep(GitHubRateLimitDelay);
 		//Get-Process = Process[] processes //Above;
+		public dynamic FromJson(string string_input) {
+			dynamic dynamic_output = new System.Dynamic.ExpandoObject();
+			dynamic_output = serializer.Deserialize<dynamic>(string_input);
+			return dynamic_output;
+		}
+			
+		public string ToJson(dynamic dynamic_input) {
+			string string_out;
+			string_out = serializer.Serialize(dynamic_input);
+			return string_out;
+		}
+
+		public string GetContent(string Filename) {
+			string string_out = "";
+			try {
+				// Open the text file using a stream reader.
+				using (var sr = new StreamReader(Filename)) {
+					// Read the stream as a string, and write the string to the console.
+					string_out = sr.ReadToEnd();
+				}
+			} catch (IOException e) {
+				MessageBox.Show("The token file "+Filename+" could not be read:\n" + e.Message, "Error");
+			}
+			return string_out;
+		}
+
+		//Set-Content = File.WriteAllText(path, content)
+
 		public string webRequest(string Url, string Method = WebRequestMethods.Http.Get, string Body = "",bool Authorization = false){ 
 			string response_out = "";
 
@@ -845,17 +1174,6 @@ Gilgamech is making web browsers, games, self-driving RC cars, and other technol
 		return response_out;
 		}// end webRequest	
 
-		public dynamic FromJson(string input_string) {
-			dynamic output_dynamic = new System.Dynamic.ExpandoObject();
-			output_dynamic = serializer.Deserialize<dynamic>(input_string);
-			return output_dynamic;
-		}
-			
-		public string ToJson(dynamic input_dynamic) {
-			string output_string;
-			output_string = serializer.Serialize(input_dynamic);
-			return output_string;
-		}
 
 
 
@@ -915,6 +1233,78 @@ Gilgamech is making web browsers, games, self-driving RC cars, and other technol
 
 
 		//Depreciate or bust
+        public void loadNewPage() {
+
+//Download HTML file
+//Parse HTML to Document variable
+//Write Document variable to page
+//Interpret Javascript to modify Document variable
+			//history.Add(urlBox.Text);
+			history[historyIndex] = urlBox.Text;
+			string imageUrl = "";
+			string pageSource = "";
+			displayLine = 0;
+			// Download website, stick source in pageSource
+			//webRequest(ref pageSource, imageUrl, WebRequestMethods.Http.Get);
+
+			// Do some replacing
+			doSomeReplacing(ref pageSource);
+			
+			// Set form name to page title
+			try {
+			}catch{
+			}// end try 
+
+			
+			//favicon 
+			try {
+				// <link rel="shortcut icon" href="/favicon.ico" type="image/vnd.microsoft.icon">
+				//imageUrl = pageSource.Substring(pageSource.IndexOf("<link")+5, pageSource.IndexOf(">") - pageSource.IndexOf("<link"));
+				imageUrl = findIndexOf(pageSource,"<link",">",5,0);
+				//imageUrl = imageUrl.Substring(imageUrl.IndexOf("href=")+6, imageUrl.IndexOf('"') - imageUrl.IndexOf("href="));
+				imageUrl = findIndexOf(imageUrl,"href=","",6,0);
+				
+			}catch{
+				imageUrl = history[historyIndex] + "/favicon.ico";
+			}// end try 
+			try {
+/*
+using(Stream stream = Application.GetResourceStream(new Uri(imageUrl)).Stream)
+{
+    Icon myIcon = new System.Drawing.Icon(stream);
+}
+				WebClient client = new WebClient();
+				Stream stream = client.OpenRead(imageUrl);
+				stream.Flush();
+				stream.Close();
+				//this.Text += "Favicon: "+imageUrl;
+*/
+
+				WebRequest request = WebRequest.Create(imageUrl);
+				request.Method = WebRequestMethods.Http.Get;// WebRequestMethods.Http.Get;
+				//request.UserAgent = "WinGetApprovalPipeline";
+				WebResponse response = request.GetResponse();
+				Stream stream = response.GetResponseStream();
+				this.Icon = new Icon(stream);
+				//pictureBox1.Image = Bitmap.FromStream(stream);
+
+			}catch{
+				//this.Icon = Icon.ExtractAssociatedIcon(System.Reflection.Assembly.GetExecutingAssembly().Location);
+				//this.Text = "Favicon missing:"+imageUrl+" - " + this.Text;
+			}// end try 
+
+			// Split head & body 
+			//Goto <body then goto the next >
+			try {
+				//parsedHtml = pageSource.Substring(pageSource.IndexOf("<body"), pageSource.IndexOf("</body") - pageSource.IndexOf("<body")).Split('<');
+				parsedHtml = findIndexOf(pageSource,"<body","</body",0,0).Split('<');
+			}catch{
+				parsedHtml = pageSource.Split('<');
+			}; // end try 
+			drawPage(parsedHtml);
+        }// end loadNewPage
+
+
 		public string findIndexOf(string pageString,string startString,string endString,int startPlus,int endPlus){
 			return pageString.Substring(pageString.IndexOf(startString)+startPlus, pageString.IndexOf(endString) - pageString.IndexOf(startString)+endPlus);
         }// end findIndexOf
@@ -1239,16 +1629,16 @@ Gilgamech is making web browsers, games, self-driving RC cars, and other technol
         }// end Approved_Button_Click
 		
         public void Add_Waiver_Button_Click(object sender, EventArgs e) {
-			string Url = "https://api.github.com/rate_limit";
+			//string Url = "https://api.github.com/rate_limit";
 			string response_out = "";
-			response_out = InvokeGitHubRequest(Url);
+			response_out = CannedMessage("AutoValEnd","testing testing 1..2..3.");
 			valBox.AppendText(Environment.NewLine + response_out);
         }// end Approved_Button_Click
 		
         public void Retry_Button_Click(object sender, EventArgs e) {
 			string Path = "issues";
 			string Type = "comments";
-			int PR = 141505;
+			int PR = Int32.Parse(urlBox.Text.Replace("#",""));
 			string Url = GitHubApiBaseUrl+"/"+Path+"/"+PR+"/"+Type;
 			string response_in = "";
 			string response_out = "";
@@ -1273,9 +1663,10 @@ Gilgamech is making web browsers, games, self-driving RC cars, and other technol
         }// end Approved_Button_Click
 		
         public void Blocking_Issue_Button_Click(object sender, EventArgs e) {
-			string Url = "https://api.github.com/rate_limit";
+			//string Url = "https://api.github.com/rate_limit";
 			string response_out = "";
-			response_out = InvokeGitHubRequest(Url);
+			int PR = Int32.Parse(urlBox.Text.Replace("#",""));
+			response_out = ADOBuildFromPR(PR);
 			valBox.AppendText(Environment.NewLine + response_out);
         }// end Approved_Button_Click
 		
@@ -1294,9 +1685,9 @@ Gilgamech is making web browsers, games, self-driving RC cars, and other technol
         }// end Approved_Button_Click
 		
         public void Closed_Button_Click(object sender, EventArgs e) {
-			string Url = "https://api.github.com/rate_limit";
+			//string Url = "https://api.github.com/rate_limit";
 			string response_out = "";
-			response_out = InvokeGitHubRequest(Url);
+			response_out = Regex.IsMatch("test", "test").ToString();
 			valBox.AppendText(Environment.NewLine + response_out);
         }// end Approved_Button_Click
 		
@@ -1322,9 +1713,10 @@ Gilgamech is making web browsers, games, self-driving RC cars, and other technol
         }// end Approved_Button_Click
 		
         public void Installer_Missing_Button_Click(object sender, EventArgs e) {
-			string Url = "https://api.github.com/rate_limit";
+			//string Url = "https://api.github.com/rate_limit";
+			int PR = Int32.Parse(urlBox.Text.Replace("#",""));
 			string response_out = "";
-			response_out = InvokeGitHubRequest(Url);
+			response_out = CheckStandardPRComments(PR).ToString();
 			valBox.AppendText(Environment.NewLine + response_out);
         }// end Approved_Button_Click
 		
@@ -1350,9 +1742,9 @@ Gilgamech is making web browsers, games, self-driving RC cars, and other technol
         }// end Approved_Button_Click
 		
         public void Network_Blocker_Button_Click(object sender, EventArgs e) {
-			string Url = "https://api.github.com/rate_limit";
-			string response_out = "";
-			response_out = InvokeGitHubRequest(Url);
+			//string Url = "https://api.github.com/rate_limit";
+			int response_out = 0;
+			response_out = GetVMVersion();
 			valBox.AppendText(Environment.NewLine + response_out);
         }// end Approved_Button_Click
 		
@@ -1384,6 +1776,42 @@ Gilgamech is making web browsers, games, self-driving RC cars, and other technol
 			response_out = InvokeGitHubRequest(Url);
 			valBox.AppendText(Environment.NewLine + response_out);
         }// end Approved_Button_Click
+
+
+
+
+
+
+
+
+
+//Misc Data
+
+public string[] StandardPRComments = {"Validation Pipeline Badge",//Pipeline status
+"wingetbot run",//Run pipelines
+"azp run",//Run pipelines
+"AzurePipelines run",//Run pipelines
+"Azure Pipelines successfully started running 1 pipeline",//Run confirmation
+"The check-in policies require a moderator to approve PRs from the community",//Validation complete 
+"microsoft-github-policy-service agree",//CLA acceptance
+"wingetbot waivers Add",//Any waivers
+"The pull request encountered an internal error and has been assigned to a developer to investigate",//IEDS or other error
+"Manifest Schema Version: 1.4.0 less than 1.5.0 for ID:",//Manifest depreciation for 1.4.0
+"This account is bot account and belongs to CoolPlayLin",//CoolPlayLin's automation
+"This account is automated by Github Actions and the source code was created by CoolPlayLin",//Exorcism0666's automation
+"Response status code does not indicate success",//My automation - removal PR where URL failed status check.
+"Automatic Validation ended with",//My automation - Validation output might be immaterial if unactioned.
+"Manual Validation ended with",//My automation - Validation output might be immaterial if unactioned.
+"No errors to post",//My automation - AutoValLog with no logs.
+"The package didn't pass a Defender or similar security scan",//My automation - DefenderFail.
+"Installer failed security check",//My automation - AutoValLog DefenderFail.
+"Sequence contains no elements"//New Sequence error.
+};
+
+
+
+
+
 
     }// end WinGetApprovalPipeline
 }// end WinGetApprovalNamespace

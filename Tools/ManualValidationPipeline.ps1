@@ -5,15 +5,11 @@
 #Updated: 3/6/2024
 #Notes: Utilities to streamline evaluating 3rd party PRs.
 #Update log:
+#3.88.18 - Restore waiver and retry fucntionality. 
+#3.88.17 - Add ManuallyValidated GitHub Preset.
 #3.88.16 - Add to AutoValLog's filters.
-#3.88.15 - Add PolicyWrapper CannedMessage to streamline setting up an invisible policy label comment. 
-#3.88.14 - Add another log location to Binary-Validation-Error LabelAction. 
-#3.88.13 - Set Retry and Waiver presets offline temporarily.
-#3.88.12 - Add ResetApproval Preset to reset PRs for approval.  
-#3.88.11 - Bugfix RestrictedSubmitter CannedMessage. 
-#3.88.10 - Rename CannedResponse to CannedMessage in Reply-ToPR.
 
-$build = 867
+$build = 869
 $appName = "ManualValidationPipeline"
 Write-Host "$appName build: $build"
 $MainFolder = "C:\ManVal"
@@ -1796,7 +1792,7 @@ Function Get-WorkSearch {
 #Automation tools
 Function Get-GitHubPreset {
 	param(
-		[ValidateSet("Approved","AutomationBlock","BadPR","Blocking","CheckInstaller","Closed","Completed","DefenderFail","DriverInstall","Duplicate","Feedback","IdleMode","IEDSMode","InstallerNotSilent","InstallerMissing","LabelAction","MergeConflicts","NetworkBlocker","OneManifestPerPR","PackageUrl","Paths","PossibleDuplicate","Project","RestrictedSubmitter","ResetApproval","Retry","Squash","Timeclock","Validating","VedantResetPR","WorkSearch","Waiver")][string]$Preset,
+		[ValidateSet("Approved","AutomationBlock","BadPR","Blocking","CheckInstaller","Closed","Completed","DefenderFail","DriverInstall","Duplicate","Feedback","IdleMode","IEDSMode","InstallerNotSilent","InstallerMissing","LabelAction","ManuallyValidated","MergeConflicts","NetworkBlocker","OneManifestPerPR","PackageUrl","Paths","PossibleDuplicate","Project","RestrictedSubmitter","ResetApproval","Retry","Squash","Timeclock","Validating","VedantResetPR","WorkSearch","Waiver")][string]$Preset,
 		$PR = (Get-Clipboard),
 		$CannedMessage = $Preset,
 		$UserInput,
@@ -1899,6 +1895,9 @@ Function Get-GitHubPreset {
 			"LabelAction" {
 				Get-PRLabelAction -PR $PR
 			}
+			"ManuallyValidated" {
+				$out += Reply-ToPR -PR $PR -Body "Completing validation." -Policy "Manually-Validated"
+			}
 			"MergeConflicts" {
 				Get-GitHubPreset -Preset Closed -PR $PR -UserInput "Merge Conflicts"
 			}
@@ -1936,9 +1935,8 @@ Function Get-GitHubPreset {
 			"ResetApproval" {
 				$out += Reply-ToPR -PR $PR -Body "Reset approval workflow." -Policy "Reset Feedback `n[Policy] Validation Completed `n[Policy] Approved"			}
 			"Retry" {
-				#Add-PRToRecord -PR $PR -Action $Preset
-				#$out += Invoke-GitHubPRRequest -PR $PR -Type comments -Output StatusDescription -Method POST -Data "@wingetbot run"
-				Write-Host "$preset offline."
+				Add-PRToRecord -PR $PR -Action $Preset
+				$out += Invoke-GitHubPRRequest -PR $PR -Type comments -Output StatusDescription -Method POST -Data "@wingetbot run"
 			}
 			"Squash" {
 				Add-PRToRecord -PR $PR -Action $Preset
@@ -1951,9 +1949,8 @@ Function Get-GitHubPreset {
 				$PR = ""
 			}
 			"Waiver" {
-				#Add-PRToRecord -PR $PR -Action $Preset
-				#$out += Add-Waiver -PR $PR; 
-				Write-Host "$preset offline."
+				Add-PRToRecord -PR $PR -Action $Preset
+				$out += Add-Waiver -PR $PR; 
 			}
 			"WorkSearch" {
 				Get-WorkSearch
@@ -2293,8 +2290,7 @@ Function Add-Waiver {
 			}
 		}
 		if ($Waiver -ne "") {
-			#$out = Invoke-GitHubPRRequest -PR $PR -Type comments -Output StatusDescription -Method POST -Data "@wingetbot waivers Add $Waiver"
-			$out = "Waivers offline."
+			$out = Invoke-GitHubPRRequest -PR $PR -Type comments -Output StatusDescription -Method POST -Data "@wingetbot waivers Add $Waiver"
 			Write-Output $out
 		}; #end if Waiver
 	}; #end Foreach Label
@@ -2457,7 +2453,7 @@ Function Get-SearchGitHub {
 	}
 }
 
-Function Get-CannedMessage {#
+Function Get-CannedMessage {
 	param(
 		[ValidateSet("AgreementMismatch","AppFail","Approve","AutomationBlock","AutoValEnd","AppsAndFeaturesNew","AppsAndFeaturesMissing","DriverInstall","DefenderFail","HashFailRegen","InstallerFail","InstallerMissing","InstallerNotSilent","NormalInstall","InstallerUrlBad","ListingDiff","ManValEnd","ManifestVersion","NoCause","NoExe","NoRecentActivity","NotGoodFit","OneManifestPerPR","Only64bit","PackageFail","PackageUrl","Paths","PendingAttendedInstaller","PolicyWrapper","RemoveAsk","SequenceNoElements","Unattended","Unavailable","UrlBad","VersionCount","WhatIsIEDS","WordFilter")]
 		[string]$Response,
@@ -2492,7 +2488,7 @@ Function Get-CannedMessage {#
 			$out = "Automatic Validation ended with:`n> $UserInput"
 		}
 		"DriverInstall" {
-			$out = "Hi $Username`n`nThe installation is unattended, but installs a driver which isn't unattended:`n`Unfortunately, installer switches are not usually provided for this situation. Are you aware of an installer switch to have the driver silently install as well?"
+			$out = "Hi $Username`n`nThe installation is unattended, but installs a driver which isn't unattended:`nUnfortunately, installer switches are not usually provided for this situation. Are you aware of an installer switch to have the driver silently install as well?"
 		}
 		"DefenderFail" {
 			$out = "Hi $Username`n`nThe package didn't pass a Defender or similar security scan. This might be a false positive and we can rescan tomorrow."
@@ -2673,7 +2669,7 @@ Function Get-AutoValLog {
 			$UserInput = $UserInput -notmatch "The process cannot access the file because it is being used by another process"
 			$UserInput = $UserInput -notmatch "ThrowIfExceptional"
 			$UserInput = $UserInput -notmatch "Windows Installer installed the product"
-			$UserInput = $UserInput -notmatch "with working directory 'D:\\TOOLS'. The specified executable is not a valid application for this OS platform"
+			$UserInput = $UserInput -notmatch "with working directory 'D:\\TOOLS'."
 
 			$UserInput = $UserInput | Select-Object -Unique
 			$UserInput = "Automatic Validation ended with:`n"+($UserInput -join "`n> ")+"`n`n(Automated response - build $build.)"
@@ -4116,8 +4112,8 @@ Function Get-SecondMatch {
 	for ($depthUnit = $depth;$depthUnit -lt $clip.length; $depthUnit++){
 		$current = ($clip[$depthUnit] -split ": ")[0]
 		$prevUnit = $clip[$depthUnit - $depth]
-		$prev = ($prevUnit -split ": ")[0]
-		if ($current -ne $PRev) {
+		$Prev = ($prevUnit -split ": ")[0]
+		if ($current -ne $Prev) {
 			$prevUnit
 		}
 	}
