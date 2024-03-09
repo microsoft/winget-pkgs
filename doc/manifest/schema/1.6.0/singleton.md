@@ -53,10 +53,10 @@ Installers:                     	# The package installer
     InstallerUrl:               	# The installer URL
     InstallerSha256:            	# The SHA256 hash of the installer
     SignatureSha256:            	# Optional SHA256 hash of the MSIX signature
-    NestedInstallerType:					# The installer type when InstallerType is an archive type
-    NestedInstallerFiles:					# Details about the installers when InstallerType is an archive type
-      - RelativeFilePath:					# The relative path to the nested installer file
-        PortableCommandAlias:			# The command alias to be used for calling the package. Only applies when NestedInstallerType is 'portable'
+    NestedInstallerType:          # The installer type when InstallerType is an archive type
+    NestedInstallerFiles:         # Details about the installers when InstallerType is an archive type
+      - RelativeFilePath:         # The relative path to the nested installer file
+        PortableCommandAlias:     # The command alias to be used for calling the package. Only applies when NestedInstallerType is 'portable'
     Scope:                      	# Optional installer scope
     InstallModes:               	# Optional installer modes
     InstallerSwitches:          	# Optional installer switches
@@ -102,15 +102,15 @@ Installers:                     	# The package installer
     UnsupportedArguments:       	# Optional list of Windows Package Manager Client arguments the installer does not support
       - UnsupportedArgument:    	# Optional unsupported Windows Package Manager Client argument
     DisplayInstallWarnings:     	# *Not implemented* Optional indicator for packages that are known to interfere with running application during install
-    InstallationMetadata:					# Optional metadata for deeper installation detection
+    InstallationMetadata:         # Optional metadata for deeper installation detection
       - DefaultInstallLocation: 	# Optional default install location for the package
-        Files:										# Optional list of files installed by the package
+        Files:                    # Optional list of files installed by the package
           - RelativeFilePath:   	# Optional relative path to the installed file
-            FileSha256:						# Optional Sha256 of the installed file
-            FileType:							# Optional installed file type. Treated as 'other' if not specified
+            FileSha256:           # Optional Sha256 of the installed file
+            FileType:             # Optional installed file type. Treated as 'other' if not specified
             InvocationParameter:	# Optional parameter for invocable files
-            DisplayName:					# Optional display name for invocable files
-		DownloadCommandProhibited:		# Optional indicator for packages which cannot be downloaded for offline installation
+            DisplayName:          # Optional display name for invocable files
+    DownloadCommandProhibited:    # Optional indicator for packages which cannot be downloaded for offline installation
 ManifestType: singleton         	# The manifest type
 ManifestVersion: 1.6.0          	# The manifest syntax version
 ```
