@@ -16,6 +16,9 @@ configuration:
               - activitySenderHasPermission:
                   permission: Write
               - isActivitySender:
+                  user: stephengillie
+                  issueAuthor: False
+              - isActivitySender:
                   user: ImJoakim
                   issueAuthor: False
               - isActivitySender:
@@ -48,8 +51,11 @@ configuration:
               - or:
                   - payloadType: Issue_Comment
                   - payloadType: Pull_Request_Review_Comment
+            # Remove the Needs-Triage label
             # Take different actions based on the comment pattern
             then:
+              - removeLabel:
+                  label: Needs-Triage
               # Blocking-Issue
               - if:
                   - commentContains:
@@ -86,14 +92,14 @@ configuration:
                 then:
                   - addLabel:
                       label: WindowsFeatures
-              # portable-tar
+              # portable-archive
               - if:
                   - commentContains:
-                      pattern: '\[[Pp]olicy\]\s+[pP]ortable[\s-][tT]ar'
+                      pattern: '\[[Pp]olicy\]\s+[pP]ortable[\s-][aA]rchive'
                       isRegex: True
                 then:
                   - addLabel:
-                      label: portable-tar
+                      label: portable-archive
               # Area-External
               - if:
                   - commentContains:
@@ -168,6 +174,14 @@ configuration:
                 then:
                   - addLabel:
                       label: Needs-Author-Feedback
+              # Moderator-Approved
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[mM]oderator[\s-][Aa]pproved'
+                      isRegex: True
+                then:
+                  - addLabel:
+                      label: Moderator-Approved
               # Needs-Attention
               - if:
                   - commentContains:
@@ -241,6 +255,14 @@ configuration:
                 then:
                   - addLabel:
                       label: Network-Blocker
+              # Version-Parameter-Mismatch
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[vV]ersion[\s-][pP]arameter[\s-][mM]ismatch'
+                      isRegex: True
+                then:
+                  - addLabel:
+                      label: Version-Parameter-Mismatch
               # Unblocked
               - if:
                   - commentContains:
@@ -249,6 +271,38 @@ configuration:
                 then:
                   - removeLabel:
                       label: Blocking-Issue
+              # PSA
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[Pp][Ss][Aa]'
+                      isRegex: True
+                then:
+                  - addLabel:
+                      label: Public-Service-Announcement
+              # Issue-Bug
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[iI]ssue[\s-][bB]ug'
+                      isRegex: True
+                then:
+                  - addLabel:
+                      label: Issue-Bug
+              # Issue-Feature
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[iI]ssue[\s-][fF]eature'
+                      isRegex: True
+                then:
+                  - addLabel:
+                      label: Issue-Feature
+              # Package-Update
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[pP]ackage[\s-][uU]pdate'
+                      isRegex: True
+                then:
+                  - addLabel:
+                      label: Package-Update
               # Reset-Feedback
               - if:
                   - commentContains:
@@ -273,6 +327,8 @@ configuration:
                       label: DriverInstall
                   - removeLabel:
                       label: Network-Blocker
+                  - removeLabel:
+                      label: Manifest-Metadata-Consistency
                   ## TODO: Dismiss All Pull Request Reviews
               # Duplicate of #
               - if:
