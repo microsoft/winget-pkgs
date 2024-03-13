@@ -1,15 +1,16 @@
 #Copyright 2022-2024 Microsoft Corporation
 #Author: Stephen Gillie
-#Title: Manual Validation Pipeline v3.88.10
+#Title: Manual Validation Pipeline v3.88.21
 #Created: 10/19/2022
-#Updated: 3/6/2024
+#Updated: 3/12/2024
 #Notes: Utilities to streamline evaluating 3rd party PRs.
 #Update log:
+#3.88.21 - Move filtering from Get-Status to Get-NextFreeVM.
+#3.88.20 - Add LabelAction for Manifest-Version-Error.
+#3.88.19 - A few bugfixes.
 #3.88.18 - Restore waiver and retry fucntionality. 
-#3.88.17 - Add ManuallyValidated GitHub Preset.
-#3.88.16 - Add to AutoValLog's filters.
 
-$build = 869
+$build = 870
 $appName = "ManualValidationPipeline"
 Write-Host "$appName build: $build"
 $MainFolder = "C:\ManVal"
@@ -97,7 +98,8 @@ $MagicLabels = "Validation-Defender-Error", #0
 "Validation-Unapproved-URL", #28
 "Validation-Retry", #29
 "Needs-Author-Feedback",#30
-"Policy-Test-2.3" #31
+"Policy-Test-2.7", #31
+"Manifest-Version-Error"#32
 
 #First tab
 Function Get-TrackerVMRunTracker {
@@ -1431,7 +1433,6 @@ Function Get-PRWatch {
 					if (($ManifestVersionParams -ne $PRVersionParams) -AND 
 					($PRtitle -notmatch "Automatic deletion") -AND 
 					($PRtitle -notmatch "Delete") -AND 
-					($PRtitle -notmatch "Delete") -AND 
 					($PRtitle -notmatch "Remove") -AND 
 					($InstallerType -notmatch "portable") -AND 
 					($AuthAccount -cnotmatch $Submitter)) {
@@ -2213,6 +2214,33 @@ Function Get-PRLabelAction { #Soothing label action.
 				$MagicLabels[23] {
 					Get-AutoValLog -PR $PR
 				}
+				$MagicLabels[32] {
+					$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 25 -SearchString $MagicStrings[2]
+					if ($null -eq $UserInput) {
+						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 25 -SearchString $MagicStrings[1]
+					}
+					if ($null -eq $UserInput) {
+						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 31 -SearchString $MagicStrings[2]
+					}
+					if ($null -eq $UserInput) {
+						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 31 -SearchString $MagicStrings[1]
+					}
+					if ($null -eq $UserInput) {
+						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 44 -SearchString $MagicStrings[2]
+					}
+					if ($null -eq $UserInput) {
+						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 44 -SearchString $MagicStrings[1]
+					}
+					if ($null -eq $UserInput) {
+						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 15 -SearchString $MagicStrings[2]
+					}
+					if ($null -eq $UserInput) {
+						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 15 -SearchString $MagicStrings[1]
+					}
+					if ($null -ne $UserInput) {
+						Reply-ToPR -PR $PR -UserInput $UserInput -CannedMessage AutoValEnd
+					}
+				}
 			}#end Switch Label
 		}#end Foreach Label
 	}#end if Label
@@ -2654,6 +2682,7 @@ Function Get-AutoValLog {
 			$UserInput = $UserInput -notmatch '``Windows Error Reporting``'
 			$UserInput = $UserInput -notmatch "--- End of inner exception stack trace ---"
 			$UserInput = $UserInput -notmatch 'api-ms-win-core-errorhandling'
+			$UserInput = $UserInput -notmatch "2: 3: Error"
 			$UserInput = $UserInput -notmatch "because the current user does not have that package installed"
 			$UserInput = $UserInput -notmatch "Could not create system restore point"
 			$UserInput = $UserInput -notmatch "Dest filename"
@@ -3932,15 +3961,6 @@ Function Get-Status {
 		[ValidateSet("Win10","Win11")][string]$OS,
 		$out = (Get-Content $StatusFile | ConvertFrom-Csv)
 	)
-	if ($OS) {
-		$out = ($out | Where-Object {$_.OS -eq $OS})
-	}
-	if ($vm) {
-		$out = ($out | Where-Object {$_.vm -eq $vm}).status
-	}
-	if ($Status) {
-		$out = ($out | Where-Object {$_.version -eq (Get-TrackerVMVersion -OS $OS)}| Where-Object {$_.status -eq $Status}).vm
-	}
 	$out
 }
 
@@ -4079,11 +4099,16 @@ Function Get-ConnectedVM {
 
 Function Get-NextFreeVM {
 	param(
-		[ValidateSet("Win10","Win11")][string]$OS = "Win10"
+		[ValidateSet("Win10","Win11")][string]	$OS = "Win10",
+		$Status = "Ready"
 	)
 	Test-Admin
 	try {
-		Get-Status -OS $OS -Status Ready |Get-Random -ErrorAction SilentlyContinue
+		$out_status = Get-Status 
+		$out_status = $out_status | Where-Object {$_.OS -eq $OS}
+		$out_status = ($out_status| Where-Object {$_.version -eq (Get-TrackerVMVersion -OS $OS)}| Where-Object {$_.status -eq $Status}).vm
+		$out_status = $out_status |Get-Random -ErrorAction SilentlyContinue
+		return $out_status;
 	} catch {
 		Write-Host "No available $OS VMs"
 		return 0
