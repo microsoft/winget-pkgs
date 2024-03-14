@@ -1,33 +1,32 @@
 //Copyright 2022-2024 Microsoft Corporation
 //Author: Stephen Gillie
-//Title: WinGet Approval Pipeline v3.-77.1
+//Title: WinGet Approval Pipeline v3.-75.0
 //Created: 1/19/2024
-//Updated: 3/12/2024
-//Notes: Utilities to streamline evaluating 3rd party PRs.
+//Updated: 3/13/2024
+//Notes: Tool to streamline evaluating winget-pkgs PRs.
 //Update log:
-//3.-77.1 - Use CsvHelper and develop a CSV solution.
+//3.-75.0 - Port AddWaiver. 
+//3.-76.3 - Find Get-Clipboard equivalent and set up PR field population.
+//3.-76.2 - Connect lower buttons to SetMode. Add another input field to display current mode.
+//3.-76.1 - Create TestPath as equivalent for PowerShell Test-Path. Bonus, this informs about data type, not just existence.  
+//3.-76.0 - Depreciate LazySearchWinGet. 
+//3.-77.2 - Develop in-code functional CSV reader and writer. 
+//3.-77.1 - Use CsvHelper and develop a CSV solution. This stopped working after updates rebooted the laptop that night.
 //3.-77.0 - Port GitHubRateLimit.
 //3.-78.0 - Port ReplyToPR.
 //3.-79.0 - Port ArraySum. 
-//3.-80.0 - Port TrackerProgress. 
-//3.-81.0 - Port WriteStatus. 
-//3.-82.0 - Port YamlValue. 
-//3.-83.0 - Port SortedClipboard. 
-//3.-84.0 - Port PRNumber. 
-//3.-85.1 - Create OutFile as equivalent for PowerShell Out-File. (Combines WriteAllLines, WriteAllText, AppendAllLines, and AppendAllText into a single function.) 
-//3.-85.0 - Port AddPRToRecord. 
 
 
 
 
 
-/*Contents: (Remaining functions to port or depreciate: 70)
+/*Contents: (Remaining functions to port or depreciate: 69)
 - Init vars (?)
 - Boilerplate (?)
 - UI top-of-box (?)
 	- Menu (?)
 - Tabs (3)
-- Automation Tools (6)
+- Automation Tools (5)
 - PR tools (2)
 - Network tools (0)
 - Validation Starts Here (6)
@@ -45,9 +44,9 @@
 - Clipboard (3)
 - Etc (4)
 - PR Watcher Utility functions (1)
-- Powershell equivalency (+7)
+- Powershell equivalency (+8)
 - VM Window management (3)
-- Misc data (+1)
+- Misc data (+5)
 */
 
 
@@ -61,7 +60,7 @@ CheckStandardPRComments needs work on data structures.
 PRInstallerStatusInnerWrapper might be unnecessary.
 Get-TrackerVMWindowLoc
 Get-TrackerVMWindowSet
-Get-TrackerVMWindowArrange#Get-Status, Get-TrackerVMWindowSet, Get-TrackerVMWindowLoc
+Get-TrackerVMWindowArrange#Get-TrackerVMWindowSet, Get-TrackerVMWindowLoc
 PadRight
 PRStateFromComments
 LineFromCommitFile
@@ -76,32 +75,30 @@ Get-OSFromVersion
 Test-Admin
 Get-ValidationData
 Add-ValidationData
+Get-TrackerVMSetStatus
+Get-LoadFileIfExists
 
 #Blocked:
 Get-ManifestListing#Find-WinGetPackage
 Get-ConnectedVM#Test-Admin
-Get-LoadFileIfExists#Test-Path
 Add-ToValidationFile#Get-TrackerVMSetStatus
 Add-InstallerSwitch#Add-ToValidationFile
 Get-Timeclock#Get-Date
 Get-PRFullReport#Get-PRReportFromRecord
 Open-AllURL#Start-Process
 Open-PRInBrowser#Start-Process
-Get-LazySearchWinGet#Invoke-Command
 Get-UpdateArchInPR#Get-CommitFile
 Add-DependencyToPR#Get-CommitFile
+Get-ListingDiff#Get-ManifestListing
+Get-TrackerVMRebuildStatus#Get-VM
+Get-PRApproval#Get-ValidationData
+Get-PRFromRecord#Get-PRPopulateRecord
+Get-PRReportFromRecord#Get-PRFromRecord
 Get-TrackerVMValidateByID#Get-TrackerVMValidate
 Get-TrackerVMValidateByConfig#Get-TrackerVMValidate
 Get-TrackerVMValidateByArch#Get-TrackerVMValidate
 Get-TrackerVMValidateByScope#Get-TrackerVMValidate
 Get-TrackerVMValidateBothArchAndScope#Get-TrackerVMValidate
-Add-Waiver#Get-GitHubPreset
-Get-ListingDiff#Get-ManifestListing
-Get-TrackerVMSetStatus#Get-Status
-Get-TrackerVMRebuildStatus#Get-VM
-Get-PRApproval#Get-ValidationData
-Get-PRFromRecord#Get-PRPopulateRecord
-Get-PRReportFromRecord#Get-PRFromRecord
 
 Get-SearchGitHub#Get-Date, Start-Process
 Get-ManifestAutomation#Get-ManifestFile, Get-NextFreeVM
@@ -113,31 +110,31 @@ Get-HoursWorkedToday#Get-Date, Get-Timeclock
 Get-SingleFileAutomation#Get-ManifestFile, Get-ManifestListing
 Get-Sandbox#Stop-Process, Start-Process
 Get-UpdateHashInPR2#Add-GitHubReviewComment, Get-CommitFile
+Get-NextFreeVM#Get-Random, Test-Admin
+Get-RemoveFileIfExist#New-Item, Remove-Item
 
 Get-TrackerVMLaunchWindow#Get-ConnectedVM, Stop-Process, Test-Admin 
 Get-TrackerVMRevert#Get-TrackerVMSetStatus, Restore-VMCheckpoint, Test-Admin
-Get-NextFreeVM#Get-Random, Get-Status, Test-Admin
-Get-RemoveFileIfExist#New-Item, Remove-Item, Test-Path
 
-Get-TrackerVMRunTracker#Get-AutoValLog, Get-ConnectedVM, Get-Date, Get-HoursWorkedToday, Get-PRLabelAction, Get-Random, Get-RandomIEDS, Get-SearchGitHub, Get-Status, Get-TimeRunning, Get-TrackerMode, Get-TrackerVMCycle, Get-TrackerVMRotate, Get-TrackerVMValidate, Get-TrackerVMWindowArrange, Get-VM, Set-Vm, start-process
-Get-PRWatch#Approve-PR, Compare-Object, Find-WinGetPackage, Get-CleanClip, Get-Command, Get-Date, Get-ListingDiff, Get-LoadFileIfExists, Get-ManifestEntryCheck, Get-PadRight, Get-PRApproval, get-random, Get-Sandbox, Get-Status, Get-TrackerVMValidate, Get-ValidationData
-Get-WorkSearch#Get-Date, Get-GitHubPreset, Get-PRLabelAction, Get-PRStateFromComments, Get-SearchGitHub, Get-Status, Open-PRInBrowser
-Get-GitHubPreset#Add-Waiver, Approve-PR, Check-PRInstallerStatusInnerWrapper, Find-WinGetPackage, Get-PRLabelAction, Get-TimeclockSet, Get-WorkSearch
+Get-TrackerVMRunTracker#Get-AutoValLog, Get-ConnectedVM, Get-Date, Get-HoursWorkedToday, Get-PRLabelAction, Get-Random, Get-RandomIEDS, Get-SearchGitHub, Get-TimeRunning, Get-TrackerMode, Get-TrackerVMCycle, Get-TrackerVMRotate, Get-TrackerVMValidate, Get-TrackerVMWindowArrange, Get-VM, Set-Vm, start-process
+Get-PRWatch#Approve-PR, Compare-Object, Find-WinGetPackage, Get-CleanClip, Get-Command, Get-Date, Get-ListingDiff, Get-LoadFileIfExists, Get-ManifestEntryCheck, Get-PadRight, Get-PRApproval, get-random, Get-Sandbox, Get-TrackerVMValidate, Get-ValidationData
+Get-WorkSearch#Get-Date, Get-GitHubPreset, Get-PRLabelAction, Get-PRStateFromComments, Get-SearchGitHub, Open-PRInBrowser
+Get-GitHubPreset#Approve-PR, Check-PRInstallerStatusInnerWrapper, Find-WinGetPackage, Get-PRLabelAction, Get-TimeclockSet, Get-WorkSearch
 Get-PRLabelAction#Soothing label action. #Get-AutoValLog, Get-Date, Get-GitHubPreset, Get-LineFromCommitFile, Get-PRStateFromComments, Get-UpdateHashInPR2, Get-ValidationData
-Get-AutoValLog#Expand-Archive, Get-BuildFromPR, Get-ChildItem, Get-GitHubPreset, Get-ValidationData, Open-PRInBrowser, Remove-Item, Start-Process, Stop-Process, Test-Path
-Get-RandomIEDS#Get-CommitFile, Get-ManifestFile, Get-NextFreeVM, Get-Random, Get-SearchGitHub, Get-Status
+Get-AutoValLog#Expand-Archive, Get-BuildFromPR, Get-ChildItem, Get-GitHubPreset, Get-ValidationData, Open-PRInBrowser, Remove-Item, Start-Process, Stop-Process
+Get-RandomIEDS#Get-CommitFile, Get-ManifestFile, Get-NextFreeVM, Get-Random, Get-SearchGitHub
 Get-TrackerVMValidate#Find-WinGetPackage,  ForEach-Object,  Get-ChildItem,  Get-NextFreeVM,  Get-OSFromVersion,  Get-PipelineVmGenerate,    Get-RemoveFileIfExist,  Get-TrackerVMLaunchWindow,  Get-TrackerVMRevert,  Get-TrackerVMSetStatus,  Get-VM,  Get-YamlValue,  Open-AllURL,  Start-Process,  Test-Admin
 Get-ManifestFile#Get-NextFreeVM, Get-RemoveFileIfExist, Get-TrackerVMValidate
 Get-PipelineVmGenerate#Get-Date, Get-RemoveFileIfExist, Get-TrackerVMLaunchWindow, Get-TrackerVMRevert, Get-VM, Import-VM, Remove-VMCheckpoint, Rename-VM, Start-VM, Test-Admin
-Get-PipelineVmDisgenerate#Get-ConnectedVM, Get-RemoveFileIfExist, Get-Status, Get-TrackerVMSetStatus, Remove-VM, Stop-Process, Stop-TrackerVM, Test-Admin, Write-Progress
+Get-PipelineVmDisgenerate#Get-ConnectedVM, Get-RemoveFileIfExist, Get-TrackerVMSetStatus, Remove-VM, Stop-Process, Stop-TrackerVM, Test-Admin, Write-Progress
 Get-ImageVMStart#Get-TrackerVMLaunchWindow, Get-TrackerVMRevert, Start-VM, Test-Admin
 Get-ImageVMStop#Get-ConnectedVM, Redo-Checkpoint, Stop-Process, Stop-TrackerVM, Test-Admin
 Get-ImageVMMove#Get-Date, Get-VM, Move-VMStorage, Rename-VM, Test-Admin
-Get-TrackerVMResetStatus#Get-ConnectedVM, Get-Status, Get-TrackerVMSetStatus, Stop-Process
-Get-TrackerVMRotate#Get-Random, Get-Status, Get-TrackerVMSetStatus, Get-TrackerVMVersion
+Get-TrackerVMResetStatus#Get-ConnectedVM, Get-TrackerVMSetStatus, Stop-Process
+Get-TrackerVMRotate#Get-Random, Get-TrackerVMSetStatus, Get-TrackerVMVersion
 Complete-TrackerVM#Get-ConnectedVM, Get-RemoveFileIfExist, Get-TrackerVMSetStatus, Stop-Process, Stop-TrackerVM, Test-Admin
 Redo-Checkpoint#Checkpoint-VM, Get-TrackerVMSetStatus, Redo-Checkpoint, Remove-VMCheckpoint, Test-Admin
-Get-TrackerVMCycle#Add-ToValidationFile, Add-Waiver, Complete-TrackerVM, Get-GitHubPreset, Get-PipelineVmDisgenerate, Get-PipelineVmGenerate, Get-Status, Get-TrackerVMRevert, Get-TrackerVMSetStatus, Redo-Checkpoint
+Get-TrackerVMCycle#Add-ToValidationFile, Complete-TrackerVM, Get-GitHubPreset, Get-PipelineVmDisgenerate, Get-PipelineVmGenerate, Get-TrackerVMRevert, Get-TrackerVMSetStatus, Redo-Checkpoint
 
 
 */
@@ -154,6 +151,7 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -163,12 +161,11 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Windows.Forms;
 using System.Web.Script.Serialization;
-using CsvHelper;
 
 namespace WinGetApprovalNamespace {
     public class WinGetApprovalPipeline : Form {
 		//vars
-        public int build = 363;//Get-RebuildPipeApp	
+        public int build = 387;//Get-RebuildPipeApp	
 		public string appName = "WinGetApprovalPipeline";
 		public string appTitle = "WinGet Approval Pipeline - Build ";
 		public static string owner = "microsoft";
@@ -204,7 +201,6 @@ namespace WinGetApprovalNamespace {
 		public static string GitHubBaseUrl = "https://github.com/"+owner+"/"+repo;
 		public static string GitHubContentBaseUrl = "https://raw.githubusercontent.com/"+owner+"/"+repo;
 		public static string GitHubApiBaseUrl = "https://api.github.com/repos/"+owner+"/"+repo;
-
 		public string ADOMSBaseUrl = "https://dev.azure.com/ms";
 
 		public string CheckpointName = "Validation";
@@ -212,7 +208,6 @@ namespace WinGetApprovalNamespace {
 		public string GitHubUserName = "stephengillie";
 		//public string SystemRAM = (Get-CimInstance Win32_PhysicalMemory | Measure-Object -Property capacity -Sum).sum /1gb;
 
-		public string defaultSite = "#141505";
 		public int displayLine = 0;
 
 		public static string string_PRRegex = "[0-9]{5,6}";
@@ -225,7 +220,7 @@ namespace WinGetApprovalNamespace {
         public Regex regex_hashPRRegexEnd = new Regex(@string_hashPRRegexEnd);
         public Regex regex_colonPRRegex = new Regex(@string_colonPRRegex);
 
-		public string GitHubTokenFile = "C:\\Users\\v-sgillie\\Documents\\PowerShell\\ght.txt";
+		public string file_GitHubToken = "C:\\Users\\v-sgillie\\Documents\\PowerShell\\ght.txt";
 		public string GitHubToken;
 		public int GitHubRateLimitDelay = 333;
 
@@ -235,13 +230,13 @@ namespace WinGetApprovalNamespace {
 
 		//ui
 		public RichTextBox outBox = new RichTextBox();
-		public RichTextBox valBox, vmBox;
+		public RichTextBox outBox_val, outBox_vm;
 		public System.Drawing.Bitmap myBitmap;//Depreciate
 		public System.Drawing.Graphics pageGraphics;//Depreciate?
 		public Panel pagePanel;
 		public ContextMenuStrip contextMenu1;//Menu?
 
-		public TextBox urlBox;
+		public TextBox inputBox_PRNumber, inputBox_Status;
         public Button btn0, btn1, btn2, btn3, btn4, btn5, btn6, btn7, btn8, btn9;
         public Button btn10, btn11, btn12, btn13, btn14, btn15, btn16, btn17, btn18, btn19;
         public Button btn20, btn21, btn22, btn23, btn24, btn25, btn26, btn27, btn28;
@@ -274,10 +269,16 @@ namespace WinGetApprovalNamespace {
         }// end Main
 		
         public WinGetApprovalPipeline() {
-			GitHubToken = GetContent(GitHubTokenFile);
+			if (TestPath(file_GitHubToken) == "File") {
+				GitHubToken = GetContent(file_GitHubToken);
+			} else {
+				string AboutText = "GitHub token not found." + Environment.NewLine;
+				AboutText += "Token location: " + file_GitHubToken + Environment.NewLine;
+				MessageBox.Show(AboutText);
+			}
 
 			System.Windows.Forms.Timer timer = new System.Windows.Forms.Timer();
-			timer.Interval = (5 * 1000); // 10 secs
+			timer.Interval = (1 * 1000); // 10 secs
 			timer.Tick += new EventHandler(timer_Run);
 			timer.Start();
 			
@@ -376,30 +377,50 @@ namespace WinGetApprovalNamespace {
  			int col7 = gridItemWidth*inc;inc++;
  			int col8 = gridItemWidth*inc;inc++;
  			int col9 = gridItemWidth*inc;inc++;
- 			 			
-			drawOutBox(ref vmBox, col0, row0, gridItemWidth*6,gridItemHeight*5, "vmBox text", "vmBox");
+ 			 
+			
+			drawOutBox(ref outBox_vm, col0, row0, gridItemWidth*6,gridItemHeight*5, "", "outBox_vm");
 
-			drawButton(ref btn27, col6, row0, gridItemWidth*2, gridItemHeight, "(GetStatus) Work Search", Work_Search_Button_Click);
-			drawUrlBox(ref urlBox,col8, row0, gridItemWidth*2,gridItemHeight,defaultSite);
+			//Make gridItemWidth*2 when AddWaiver is disabled.
+ 			drawButton(ref btn3, col6, row0, gridItemWidth, gridItemHeight, "Add Waiver", Add_Waiver_Button_Click);
+			drawButton(ref btn27, col7, row0, gridItemWidth, gridItemHeight, "Work Search", Work_Search_Button_Click); 
+			drawUrlBox(ref inputBox_PRNumber,col8, row0, gridItemWidth*2,gridItemHeight,"000000");
  			
-			drawButton(ref btn2, col6, row1, gridItemWidth, gridItemHeight, "(Clipboard) Needs Feedback", Needs_Feedback_Button_Click); 			drawButton(ref btn3, col7, row1, gridItemWidth, gridItemHeight, "(Canned) Add Waiver", Add_Waiver_Button_Click); 			drawButton(ref btn4, col8, row1, gridItemWidth, gridItemHeight, "(comments) Retry", Retry_Button_Click); 			drawButton(ref btn5, col9, row1, gridItemWidth, gridItemHeight, "Approved", Approved_Button_Click); 			 			drawButton(ref btn6, col6, row2, gridItemWidth, gridItemHeight, "(ADOBuild) Blocking Issue", Blocking_Issue_Button_Click); 			drawButton(ref btn7, col7, row2, gridItemWidth, gridItemHeight, "(Log RL) Check Installer", Check_Installer_Button_Click); 			drawButton(ref btn8, col8, row2, gridItemWidth, gridItemHeight, "(ULog RL) Project File", Project_File_Button_Click); 			drawButton(ref btn9, col9, row2, gridItemWidth, gridItemHeight, "(IsMatch) Closed", Closed_Button_Click); 			
- 			drawButton(ref btn14, col6, row3, gridItemWidth, gridItemHeight, "(Log RL) Defender Fail", Defender_Fail_Button_Click); 			drawButton(ref btn15, col7, row3, gridItemWidth, gridItemHeight, "(CSV VMver) Automation Block", Automation_Block_Button_Click);
+			drawButton(ref btn2, col6, row1, gridItemWidth, gridItemHeight, "(Clipboard) Needs Feedback", Needs_Feedback_Button_Click);
+ 			drawButton(ref btn4, col8, row1, gridItemWidth, gridItemHeight, "(comments) Retry", Retry_Button_Click);
+ 			drawButton(ref btn5, col9, row1, gridItemWidth, gridItemHeight, "Approved", Approved_Button_Click);
+ 			
+ 			drawButton(ref btn6, col6, row2, gridItemWidth, gridItemHeight, "(ADOBuild) Blocking Issue", Blocking_Issue_Button_Click);
+ 			drawButton(ref btn7, col7, row2, gridItemWidth, gridItemHeight, "(Log RL) Check Installer", Check_Installer_Button_Click);
+ 			drawButton(ref btn8, col8, row2, gridItemWidth, gridItemHeight, "(ULog RL) Project File", Project_File_Button_Click);
+ 			drawButton(ref btn9, col9, row2, gridItemWidth, gridItemHeight, "(IsMatch) Closed", Closed_Button_Click);
+ 			
+ 			drawButton(ref btn14, col6, row3, gridItemWidth, gridItemHeight, "(Log RL) Defender Fail", Defender_Fail_Button_Click);
+ 			drawButton(ref btn15, col7, row3, gridItemWidth, gridItemHeight, "(CSV VMver) Automation Block", Automation_Block_Button_Click);
  			drawButton(ref btn16, col8, row3, gridItemWidth, gridItemHeight, "(Reply) Installer Not Silent", Installer_Not_Silent_Button_Click);
- 			drawButton(ref btn17, col9, row3, gridItemWidth, gridItemHeight, "(StdComm) Installer Missing", Installer_Missing_Button_Click);			
+ 			drawButton(ref btn17, col9, row3, gridItemWidth, gridItemHeight, "(StdComm) Installer Missing", Installer_Missing_Button_Click);
+			
 			drawButton(ref btn24, col6, row4, gridItemWidth, gridItemHeight, "(Log RL) Needs PackageUrl", Needs_PackageUrl_Button_Click);
 			drawButton(ref btn25, col7, row4, gridItemWidth, gridItemHeight, "(Log RL) Manifest One Per PR", Manifest_One_Per_PR_Button_Click);
 			drawButton(ref btn26, col8, row4, gridItemWidth, gridItemHeight, "(Log RL) Merge Conflicts", Merge_Conflicts_Button_Click);
- 			drawButton(ref btn13, col9, row4, gridItemWidth, gridItemHeight, "(VMVer) Network Blocker", Network_Blocker_Button_Click);			
-			drawOutBox(ref valBox, col0, row5, this.ClientRectangle.Width,gridItemHeight*4, "valBox text", "valBox");
-			 			drawButton(ref btn10, col0, row9, gridItemWidth, gridItemHeight, "(Log RL) Approving", Approving_Button_Click); 			drawButton(ref btn11, col1, row9, gridItemWidth, gridItemHeight, "(Log RL) IEDS", IEDS_Button_Click);			drawButton(ref btn18, col2, row9, gridItemWidth, gridItemHeight, "(Log RL) Validating", Validating_Button_Click);
-			drawButton(ref btn19, col3, row9, gridItemWidth, gridItemHeight, "(Log RL) Idle", Idle_Button_Click);
+ 			drawButton(ref btn13, col9, row4, gridItemWidth, gridItemHeight, "(VMVer) Network Blocker", Network_Blocker_Button_Click);
+			
+			drawOutBox(ref outBox_val, col0, row5, this.ClientRectangle.Width,gridItemHeight*4, "", "outBox_val");
+			
+ 			drawButton(ref btn10, col0, row9, gridItemWidth, gridItemHeight, "Approving", Approving_Button_Click);
+ 			drawButton(ref btn11, col1, row9, gridItemWidth, gridItemHeight, "IEDS", IEDS_Button_Click);
+			drawButton(ref btn18, col2, row9, gridItemWidth, gridItemHeight, "Validating", Validating_Button_Click);
+			drawButton(ref btn19, col3, row9, gridItemWidth, gridItemHeight, "Idle", Idle_Button_Click);
+			drawButton(ref btn19, col4, row9, gridItemWidth, gridItemHeight, "Config", Config_Button_Click);
+			
+			drawUrlBox(ref inputBox_Status,col8, row9, gridItemWidth*2,gridItemHeight,"000000");
 
  	   }// end drawGoButton
 
 		public void OnResize(object sender, System.EventArgs e) {
 			//outBox.Height = ClientRectangle.Height - gridItemHeight;
 			//outBox.Width = ClientRectangle.Width - 0;
-			//urlBox.Width = ClientRectangle.Width - gridItemWidth*2;
+			//inputBox_PRNumber.Width = ClientRectangle.Width - gridItemWidth*2;
 			//btn1.Left = ClientRectangle.Width/4;
 		}
 
@@ -429,7 +450,24 @@ namespace WinGetApprovalNamespace {
 		
 
 private void timer_Run(object sender, EventArgs e) {
-	GetStatus();
+	dynamic Records = GetStatus();
+	outBox_vm.Text = "| vm | status | version | OS | Package | PR | RAM |";
+	for (int r = 1; r < Records.Length -1; r++){
+		var row = Records[r];
+		outBox_vm.AppendText(Environment.NewLine + "| " + row["vm"] + " | " + row["status"] + " | " + row["version"] + " | " + row["OS"] + " | " + row["Package"] + " | " + row["PR"] + " | " + row["RAM"] + " | "); // 
+	}
+
+	string clip = Clipboard.GetText();
+	Regex regex = new Regex("[0-9]{6}");
+	string[] clipSplit = clip.Replace("\r\n","\n").Replace("\n"," ").Split(' ');
+	string c = clipSplit.Where(n => regex.IsMatch(n)).FirstOrDefault();
+	if (null != c) {
+		if (regex.IsMatch(c)) {
+			inputBox_PRNumber.Text = c;
+		}
+	}
+	
+	inputBox_Status.Text = GetMode();
 }
 
 		//Menu
@@ -444,13 +482,13 @@ private void timer_Run(object sender, EventArgs e) {
 		}// end Save_Click
 		
 		public void About_Click (object sender, EventArgs e) {
-			string AboutText = "Old Person Browser" + Environment.NewLine;
-			AboutText += "(c) 2020 Gilgamech Technologies" + Environment.NewLine;
+			string AboutText = "WinGet Approval Pipeline" + Environment.NewLine;
+			AboutText += "(c) 2024 Microsoft Corp" + Environment.NewLine;
 			AboutText += "" + Environment.NewLine;
-			AboutText += "Report bugs (stuff not working):" + Environment.NewLine;
-			AboutText += "OldPersonBrowser-Bugs@Gilgamech.com" + Environment.NewLine;
-			AboutText += "Request new features on Patreon:" + Environment.NewLine;
-			AboutText += "patreon.com/Gilgamech" + Environment.NewLine;
+			AboutText += "Report bugs and request features:" + Environment.NewLine;
+			AboutText += "https://Github.com/winget-pkgs/issues/" + Environment.NewLine;
+			AboutText += "" + Environment.NewLine;
+			AboutText += "" + Environment.NewLine;
 			MessageBox.Show(AboutText);
 		} // end Link_Click
 /*
@@ -460,8 +498,8 @@ Gilgamech is making web browsers, games, self-driving RC cars, and other technol
 		public void WordWrap_Click (object sender, EventArgs e) {
 			// Link
 			// historyIndex++;
-			// urlBox.Text = e.LinkText;
-			// history[historyIndex] = urlBox.Text;
+			// inputBox_PRNumber.Text = e.LinkText;
+			// history[historyIndex] = inputBox_PRNumber.Text;
 			// loadNewPage();
 		} // end Link_Click
 
@@ -469,7 +507,7 @@ Gilgamech is making web browsers, games, self-driving RC cars, and other technol
 			Array.Resize(ref history, history.Length + 1);
 			historyIndex++;
 			history[historyIndex] = e.Link.LinkData.ToString();
-			// urlBox.Text = history[historyIndex];
+			// inputBox_PRNumber.Text = history[historyIndex];
 			loadNewPage();
 		} // end TextBox_Link
 		
@@ -516,7 +554,66 @@ Gilgamech is making web browsers, games, self-driving RC cars, and other technol
 //Automation Tools
 //GitHubPreset
 //LabelAction
-//AddWaiver
+
+public string AddWaiver(int PR) {
+	dynamic Labels = FromJson(InvokeGitHubPRRequest(PR ,"GET","labels","","issues","content"));
+	string string_out = "";
+	foreach (dynamic Label in Labels) {
+		string Labelname = Label["name"];
+		string Waiver = "";
+		if (Labelname == MagicLabels[2]){
+			//GitHubPreset(PR,"Completed")l
+			AddPRToRecord(PR,"Manual");
+			Waiver = Labelname;
+		} else if (Labelname == MagicLabels[31]){
+			AddPRToRecord(PR,"Waiver");
+			Waiver = Labelname;
+		} else if (Labelname == MagicLabels[24]){
+			AddPRToRecord(PR,"Waiver");
+			Waiver = Labelname;
+		} else if (Labelname == MagicLabels[25]){
+			AddPRToRecord(PR,"Waiver");
+			Waiver = Labelname;
+		} else if (Labelname == MagicLabels[26]){
+			//GitHubPreset(PR,"Approved")l
+		} else if (Labelname == MagicLabels[15]){
+			AddPRToRecord(PR,"Waiver");
+			Waiver = Labelname;
+		} else if (Labelname == MagicLabels[16]){
+			AddPRToRecord(PR,"Waiver");
+			Waiver = Labelname;
+		} else if (Labelname == MagicLabels[27]){
+			AddPRToRecord(PR,"Waiver");
+			Waiver = Labelname;
+		} else if (Labelname == MagicLabels[21]){
+			AddPRToRecord(PR,"Waiver");
+			Waiver = Labelname;
+		} else if (Labelname == MagicLabels[20]){
+			AddPRToRecord(PR,"Waiver");
+			Waiver = Labelname;
+		} else if (Labelname == MagicLabels[22]){
+			AddPRToRecord(PR,"Waiver");
+			Waiver = Labelname;
+		} else if (Labelname == MagicLabels[23]){
+			AddPRToRecord(PR,"Waiver");
+			Waiver = Labelname;
+		} else if (Labelname == MagicLabels[28]){
+			AddPRToRecord(PR,"Waiver");
+			Waiver = Labelname;
+		} else if (Labelname == MagicLabels[29]){
+			//GitHubPreset(PR,"Completed")l
+			AddPRToRecord(PR,"Manual");
+		} else if (Labelname == MagicLabels[6]){
+			//GitHubPreset(PR,"Completed")l
+			AddPRToRecord(PR,"Manual");
+		}
+		if (Waiver != "") {
+			 string_out += InvokeGitHubPRRequest(PR,"POST","comments","@wingetbot waivers Add "+Waiver,"issues","StatusDescription");
+		}; //end if Waiver
+	}; //end Foreach Label
+	return string_out;
+} //end Add-Waiver
+
 //SearchGitHub
 
 //[ValidateSet("AgreementMismatch","AppFail","Approve","AutomationBlock","AutoValEnd","AppsAndFeaturesNew","AppsAndFeaturesMissing","DriverInstall","DefenderFail","HashFailRegen","InstallerFail","InstallerMissing","InstallerNotSilent","NormalInstall","InstallerUrlBad","ListingDiff","ManValEnd","ManifestVersion","NoCause","NoExe","NoRecentActivity","NotGoodFit","OneManifestPerPR","Only64bit","PackageFail","PackageUrl","Paths","PendingAttendedInstaller","PolicyWrapper","RemoveAsk","SequenceNoElements","Unattended","Unavailable","UrlBad","VersionCount","WhatIsIEDS","WordFilter")]
@@ -950,18 +1047,11 @@ Gilgamech is making web browsers, games, self-driving RC cars, and other technol
 //SetStatus
 
 		//var row = Line.Where(n => n.Contains(OS)).FirstOrDefault();
-	public IEnumerable<class_Status> GetStatus(){
 	//[ValidateSet("AddVCRedist","Approved","CheckpointComplete","Checkpointing","CheckpointReady","Completing","Complete","Disgenerate","Generating","Installing","Prescan","Prevalidation","Ready","Rebooting","Regenerate","Restoring","Revert","Scanning","SendStatus","Setup","SetupComplete","Starting","Updating","ValidationCompleted")]
-	//[ValidateSet("Win10","Win11")]
-		using (StreamReader reader = new StreamReader(StatusFile))
-		using (CsvReader csv = new CsvReader(reader)) {
-			var Records = csv.GetRecords<class_Status>();
-			vmBox.Text = "| vm | status | version | OS | Package | PR | RAM |";
-			foreach (var row in Records){
-				vmBox.AppendText(Environment.NewLine + "| " + row.vm + " | " + row.status + " | " + row.version + " | " + row.OS + " | " + row.Package + " | " + row.PR + " | " + row.RAM + " | ");
-			}
+	public dynamic GetStatus(){
+		//if (TestPath(StatusFile) == "File") {}
+		dynamic Records = FromCsv(GetContent(StatusFile));
 		return Records;
-		}
 	}
 
 		public void WriteStatus (string string_out){
@@ -1107,10 +1197,10 @@ Gilgamech is making web browsers, games, self-driving RC cars, and other technol
 
 
 //Reporting
-		public void AddPRToRecord ( int PR, string Action, string Title){
+		public void AddPRToRecord ( int PR, string Action, string Title = ""){
 		//[ValidateSet("Approved","Blocking","Feedback","Retry","Manual","Closed","Project","Squash","Waiver")]
 			Title = Title.Split('#')[0];
-			string string_out = (PR+","+Action+","+Title);
+			string string_out = (PR+","+Action+","+Title + Environment.NewLine);
 			OutFile(LogFile, string_out, true);
 		}
 
@@ -1179,7 +1269,6 @@ Gilgamech is making web browsers, games, self-driving RC cars, and other technol
 
 //Etc
 //TestAdmin - Ready
-//LazySearch
 		public void TrackerProgress(int PR, string Activity, string Incrementor, string Length){
 			//int Percent = System.Math.Round(Incrementor / Length*100,2);
 			//Write-Progress -Activity $Activity -Status "$PR - $Incrementor / $Length = $Percent %" -PercentComplete Percent
@@ -1228,45 +1317,16 @@ Gilgamech is making web browsers, games, self-driving RC cars, and other technol
 
 
 
-		//Powershell equivalency imperatives
+		//Powershell functional equivalency imperatives
 		//Start-Sleep = Thread.Sleep(GitHubRateLimitDelay);
 		//Get-Process = Process[] processes //Above;
+		//Get-Clipboard = Clipboard.GetText()
+		
+		///JSON
 		public dynamic FromJson(string string_input) {
 			dynamic dynamic_output = new System.Dynamic.ExpandoObject();
 			dynamic_output = serializer.Deserialize<dynamic>(string_input);
 			return dynamic_output;
-		}
-		
-		public Dictionary<string, object>[] FromCsv(string string_input) {
-			//CSV isn't just a 2d object array - it's an array of Dictionary<string,object>, whose string keys are the column headers. 
-			string[] firstDimension = string_input.Split('\n');
-			Dictionary<string, object>[] matrix = new Dictionary<string, object> [1];
-			for (int i = 0; i < firstDimension.Length -1; i++){
-				matrix[i] = new Dictionary<string, object>();
-				//Need to enumerate values to create first row.
- 				string[] secondDimension = firstDimension[i].Split(',');
-				for (int j = 0; j < secondDimension.Length -1; j++){
-					//Need to record or access first row to match with values. 
-					matrix[i].Add(j.ToString(), secondDimension[j]);
-				}
-			}
-			return matrix;
-		}
-
-		public string ToCsv(Dictionary<string, object>[] object_input) {
-			string string_out = "";
-			//Write header row (th). Support for multi-line headers maybe someday but not today. 
-			foreach (string obj in object_input[0].Keys){
-					string_out += obj.ToString()+",";
-			}
-			//Write data rows (td).
-			for (int i = 0; i < object_input.Length; i++){
-			string_out += "\n";
-				foreach (object obj in object_input[i]){
-					string_out += obj.ToString()+",";
-				}
-			}
-			return string_out;
 		}
 		
 		public string ToJson(dynamic dynamic_input) {
@@ -1274,7 +1334,51 @@ Gilgamech is making web browsers, games, self-driving RC cars, and other technol
 			string_out = serializer.Serialize(dynamic_input);
 			return string_out;
 		}
+		//CSV
+		public Dictionary<string, object>[] FromCsv(string csv_in) {
+			//CSV isn't just a 2d object array - it's an array of Dictionary<string,object>, whose string keys are the column headers. 
+			string[] Rows = csv_in.Replace("\r\n","\n").Replace("\"","").Split('\n');
+			string[] columnHeaders = Rows[0].Split(',');
+			Dictionary<string, object>[] matrix = new Dictionary<string, object> [Rows.Length];
+			for (int row = 1; row < Rows.Length; row++){
+				matrix[row] = new Dictionary<string, object>();
+				//Need to enumerate values to create first row.
+ 				string[] rowData = Rows[row].Split(',');
+				for (int col = 0; col < rowData.Length; col++){
+					//Need to record or access first row to match with values. 
+					matrix[row].Add(columnHeaders[col].ToString(), rowData[col]);
+				}
+			}
+			return matrix;
+		}
 
+		public string ToCsv(Dictionary<string, object>[] matrix) {
+			string csv_out = "";
+			//Arrays seem to have a buffer row above and below the data.
+			int topRow = 1;
+			Dictionary<string, object> headerRow = matrix[topRow];
+			//Write header row (th). Support for multi-line headers maybe someday but not today. 
+			if (headerRow != null) {
+				string[] columnHeaders = new string[headerRow.Keys.Count];
+				headerRow.Keys.CopyTo(columnHeaders, 0);
+				//var a = matrix[0].Keys;
+				foreach (string columnHeader in columnHeaders){
+						csv_out += columnHeader.ToString()+",";
+				}
+				csv_out = csv_out.TrimEnd(',');
+				// Write data rows (td).
+				for (int row = topRow; row < matrix.Length -1; row++){
+					csv_out += "\n";
+					foreach (string columnHeader in columnHeaders){
+						csv_out += matrix[row][columnHeader]+",";
+					}
+					csv_out = csv_out.TrimEnd(',');
+				}
+			}
+			csv_out += "\n";
+			return csv_out;
+		}
+		//File
 		public string GetContent(string Filename) {
 			string string_out = "";
 			try {
@@ -1308,7 +1412,28 @@ Gilgamech is making web browsers, games, self-driving RC cars, and other technol
 				}				
 			}
 		}
-		
+
+		public string TestPath(string path) {
+				string string_out = "";
+				if (path != null) {
+						path = path.Trim();
+					if (Directory.Exists(path)) {
+						string_out = "Directory";
+					} else if (new[] {"\\", "/"}.Any(x => path.EndsWith(x))){// if has trailing slash then it's a directory
+						string_out = "Directory";
+					} else if (File.Exists(path)) {
+						string_out = "File";
+					} else if (string.IsNullOrWhiteSpace(Path.GetExtension(path))) {// if has extension then its a file; directory otherwise
+						string_out = "File";
+					} else {// neither file nor directory exists. guess intention
+						string_out = "None";
+					}
+				} else {// neither file nor directory exists. guess intention
+					string_out = "Empty";
+				}
+				return string_out;
+			}
+		//Web
 		public string webRequest(string Url, string Method = WebRequestMethods.Http.Get, string Body = "",bool Authorization = false){ 
 			string response_out = "";
 
@@ -1356,7 +1481,6 @@ Gilgamech is making web browsers, games, self-driving RC cars, and other technol
 				}
 		return response_out;
 		}// end webRequest	
-
 
 
 
@@ -1422,8 +1546,8 @@ Gilgamech is making web browsers, games, self-driving RC cars, and other technol
 //Parse HTML to Document variable
 //Write Document variable to page
 //Interpret Javascript to modify Document variable
-			//history.Add(urlBox.Text);
-			history[historyIndex] = urlBox.Text;
+			//history.Add(inputBox_PRNumber.Text);
+			history[historyIndex] = inputBox_PRNumber.Text;
 			string imageUrl = "";
 			string pageSource = "";
 			displayLine = 0;
@@ -1486,7 +1610,6 @@ using(Stream stream = Application.GetResourceStream(new Uri(imageUrl)).Stream)
 			}; // end try 
 			drawPage(parsedHtml);
         }// end loadNewPage
-
 
 		public string findIndexOf(string pageString,string startString,string endString,int startPlus,int endPlus){
 			return pageString.Substring(pageString.IndexOf(startString)+startPlus, pageString.IndexOf(endString) - pageString.IndexOf(startString)+endPlus);
@@ -1734,33 +1857,11 @@ using(Stream stream = Application.GetResourceStream(new Uri(imageUrl)).Stream)
             item.MenuItems.Add("Back", new EventHandler(Navigate_Back));
             item.MenuItems.Add("Forward", new EventHandler(Navigate_Forward));
             item.MenuItems.Add("Show History", new EventHandler(Show_History));
-            item.MenuItems.Add("Show Scroll Position", new EventHandler(GetScroll_Position));
+            //item.MenuItems.Add("Show Scroll Position", new EventHandler(GetScroll_Position));
         item = new MenuItem("Help");
         this.Menu.MenuItems.Add(item);
             item.MenuItems.Add("About", new EventHandler(About_Click));
 	   }// end drawMenuBar
-
-		//Utility
-        [DllImport("user32.dll")]
-        private static extern int SendMessage(IntPtr hwndLock, Int32 wMsg, Int32 wParam, ref Point pt);
-
-        public static Point GetScrollPos(RichTextBox txtbox) {
-            const int EM_GETSCROLLPOS = 0x0400 + 221;
-            Point pt = new Point();
-
-            SendMessage(txtbox.Handle, EM_GETSCROLLPOS, 0, ref pt);
-            return pt;
-        }
-
-        public static void SetScrollPos(Point pt,RichTextBox txtbox) {
-            const int EM_SETSCROLLPOS = 0x0400 + 222;
-
-            SendMessage(txtbox.Handle, EM_SETSCROLLPOS, 0, ref pt);
-        }        
-
-        public void GetScroll_Position(object sender, EventArgs e) {
-			MessageBox.Show("x = "+GetScrollPos(outBox).X);
-        }// end GetScroll_Position
 
 		//Menu 
 		public void Show_History(object sender, EventArgs e) {
@@ -1782,36 +1883,42 @@ using(Stream stream = Application.GetResourceStream(new Uri(imageUrl)).Stream)
 		
 		public void Navigate_Back(object sender, EventArgs e) {
 			historyIndex--;
-			// urlBox.Text = history[historyIndex];
+			// inputBox_PRNumber.Text = history[historyIndex];
 			loadNewPage();
 		}// end Save_Click
 		
 		public void Navigate_Forward(object sender, EventArgs e) {
 			Array.Resize(ref history, history.Length + 1);
 			historyIndex++;
-			// urlBox.Text = history[historyIndex];
+			// inputBox_PRNumber.Text = history[historyIndex];
 			loadNewPage();
 		}// end Save_Click
 		
-		//Demo variables and functions
-		dynamic myDynamic = new { PropertyTrue = true, PropertyTwo = 2, PropertyNumber = "Number", MyMethod = new Func<int>(() =>  {return (22+33);})};
-		
+
+
+
+
+
+//Connective functions.		
 		public void Work_Search_Button_Click(object sender, EventArgs e) {
-			
+			GetStatus();
         }// end Approved_Button_Click
 		
         public void Needs_Feedback_Button_Click(object sender, EventArgs e) {
-			valBox.AppendText(Environment.NewLine + Clipboard.GetText());
+			outBox_val.AppendText(Environment.NewLine + Clipboard.GetText());
         }// end Approved_Button_Click
 		
         public void Add_Waiver_Button_Click(object sender, EventArgs e) {
-			valBox.AppendText(Environment.NewLine + CannedMessage("AutoValEnd","testing testing 1..2..3."));
+			int PR = Int32.Parse(inputBox_PRNumber.Text.Replace("#",""));
+			string string_out = AddWaiver(PR);
+			outBox_val.AppendText(Environment.NewLine + "Waiver: "+PR + " "+ string_out);
+			//outBox_val.AppendText(Environment.NewLine + CannedMessage("AutoValEnd","testing testing 1..2..3."));
         }// end Approved_Button_Click
 		
         public void Retry_Button_Click(object sender, EventArgs e) {
 			string Path = "issues";
 			string Type = "comments";
-			int PR = Int32.Parse(urlBox.Text.Replace("#",""));
+			int PR = Int32.Parse(inputBox_PRNumber.Text.Replace("#",""));
 			string Url = GitHubApiBaseUrl+"/"+Path+"/"+PR+"/"+Type;
 			string response_in = "";
 			string response_out = "";
@@ -1825,98 +1932,109 @@ using(Stream stream = Application.GetResourceStream(new Uri(imageUrl)).Stream)
 				response_out += "- response_list " + myText;//serializer.Serialize(item);
 			}
 
-			valBox.AppendText(Environment.NewLine + WebRequestMethods.Http.Get + " " +  Url + " - " + response_out);
+			outBox_val.AppendText(Environment.NewLine + WebRequestMethods.Http.Get + " " +  Url + " - " + response_out);
         }// end Approved_Button_Click
 		
         public void Approved_Button_Click(object sender, EventArgs e) {
-			int PR = Int32.Parse(urlBox.Text.Replace("#",""));
+			int PR = Int32.Parse(inputBox_PRNumber.Text.Replace("#",""));
 			string response_out = ApprovePR(PR);
-			valBox.AppendText(Environment.NewLine + "PR "+ PR + ": " + response_out);
+			outBox_val.AppendText(Environment.NewLine + "PR "+ PR + ": " + response_out);
         }// end Approved_Button_Click
 		
         public void Blocking_Issue_Button_Click(object sender, EventArgs e) {
-			int PR = Int32.Parse(urlBox.Text.Replace("#",""));
+			int PR = Int32.Parse(inputBox_PRNumber.Text.Replace("#",""));
 			int response_out = ADOBuildFromPR(PR);
-			valBox.AppendText(Environment.NewLine + response_out);
+			outBox_val.AppendText(Environment.NewLine + response_out);
         }// end Approved_Button_Click
 		
         public void Check_Installer_Button_Click(object sender, EventArgs e) {
-			valBox.AppendText(Environment.NewLine + InvokeGitHubRequest("https://api.github.com/rate_limit", WebRequestMethods.Http.Get,"",true));
+			outBox_val.AppendText(Environment.NewLine + InvokeGitHubRequest("https://api.github.com/rate_limit", WebRequestMethods.Http.Get,"",true));
         }// end Approved_Button_Click
 		
         public void Project_File_Button_Click(object sender, EventArgs e) {
-			valBox.AppendText(Environment.NewLine + webRequest("https://api.github.com/rate_limit", WebRequestMethods.Http.Get,"",true));
+			outBox_val.AppendText(Environment.NewLine + webRequest("https://api.github.com/rate_limit", WebRequestMethods.Http.Get,"",true));
         }// end Approved_Button_Click
 		
         public void Closed_Button_Click(object sender, EventArgs e) {
-			valBox.AppendText(Environment.NewLine + Regex.IsMatch("test", "test").ToString());
+			outBox_val.AppendText(Environment.NewLine + Regex.IsMatch("test", "test").ToString());
         }// end Approved_Button_Click
 		
         public void Defender_Fail_Button_Click(object sender, EventArgs e) {
-			valBox.AppendText(Environment.NewLine + InvokeGitHubRequest("https://api.github.com/rate_limit", WebRequestMethods.Http.Get,"",true));
+			outBox_val.AppendText(Environment.NewLine + "TestPath: " + TestPath(file_testCsv));
         }// end Approved_Button_Click
 		
         public void Automation_Block_Button_Click(object sender, EventArgs e) {
-			using (StreamReader reader = new StreamReader(VMversion))
-			using (CsvReader csv = new CsvReader(reader)) {
-				var Records = csv.GetRecords<class_VMVersion>();
-				foreach (var row in Records){
-					valBox.AppendText(Environment.NewLine + "OS: " + row.OS + " - Version: " + row.Version);
+			if (TestPath(file_testCsv) == "File") {
+				dynamic Records = FromCsv(GetContent(file_testCsv));
+				//var Records = csv.GetRecords<class_VMVersion>();
+				outBox_val.AppendText(Environment.NewLine + "Records.Length: "+Records.Length);
+				for (int r = 1; r < Records.Length -1; r++){
+						outBox_val.AppendText(Environment.NewLine + "OS: " + Records[r]["OS"] + " - Version: " + Records[r]["Version"]);
 				}
 			}
         }// end Approved_Button_Click
 
 
-		
         public void Installer_Not_Silent_Button_Click(object sender, EventArgs e) {
-			int PR = Int32.Parse(urlBox.Text.Replace("#",""));
+			int PR = Int32.Parse(inputBox_PRNumber.Text.Replace("#",""));
 			string response_out = ReplyToPR(PR,"ManValEnd");
-			valBox.AppendText(Environment.NewLine + response_out);
+			outBox_val.AppendText(Environment.NewLine + response_out);
         }// end Approved_Button_Click
 		
         public void Installer_Missing_Button_Click(object sender, EventArgs e) {
-			int PR = Int32.Parse(urlBox.Text.Replace("#",""));
+			int PR = Int32.Parse(inputBox_PRNumber.Text.Replace("#",""));
 			string response_out = CheckStandardPRComments(PR).ToString();
-			valBox.AppendText(Environment.NewLine + response_out);
+			outBox_val.AppendText(Environment.NewLine + response_out);
         }// end Approved_Button_Click
 		
         public void Needs_PackageUrl_Button_Click(object sender, EventArgs e) {
-			valBox.AppendText(Environment.NewLine + InvokeGitHubRequest("https://api.github.com/rate_limit", WebRequestMethods.Http.Get,"",true));
+			outBox_val.AppendText(Environment.NewLine + InvokeGitHubRequest("https://api.github.com/rate_limit", WebRequestMethods.Http.Get,"",true));
         }// end Approved_Button_Click
 		
         public void Manifest_One_Per_PR_Button_Click(object sender, EventArgs e) {
-			valBox.AppendText(Environment.NewLine + InvokeGitHubRequest("https://api.github.com/rate_limit", WebRequestMethods.Http.Get,"",true));
+			outBox_val.AppendText(Environment.NewLine + InvokeGitHubRequest("https://api.github.com/rate_limit", WebRequestMethods.Http.Get,"",true));
         }// end Approved_Button_Click
 		
         public void Merge_Conflicts_Button_Click(object sender, EventArgs e) {
-			int PR = Int32.Parse(urlBox.Text.Replace("#",""));
+			int PR = Int32.Parse(inputBox_PRNumber.Text.Replace("#",""));
 			int response_out = ADOBuildFromPR(PR);
-			valBox.AppendText(Environment.NewLine + response_out);
+			outBox_val.AppendText(Environment.NewLine + response_out);
         }// end Approved_Button_Click
 		
         public void Network_Blocker_Button_Click(object sender, EventArgs e) {
-			valBox.AppendText(Environment.NewLine + GetVMVersion().ToString());
+			outBox_val.AppendText(Environment.NewLine + GetVMVersion().ToString());
         }// end Approved_Button_Click
 		
 		//Modes
         public void Approving_Button_Click(object sender, EventArgs e) {
-			valBox.AppendText(Environment.NewLine + InvokeGitHubRequest("https://api.github.com/rate_limit", WebRequestMethods.Http.Get,"",true));
+			string Status = "Approving";
+			SetMode(Status);//[ValidateSet("Approving","Idle","IEDS","Validating")]
+			outBox_val.AppendText(Environment.NewLine + "Status: "+Status);
         }// end Approved_Button_Click
 		
         public void IEDS_Button_Click(object sender, EventArgs e) {
-			valBox.AppendText(Environment.NewLine + InvokeGitHubRequest("https://api.github.com/rate_limit", WebRequestMethods.Http.Get,"",true));
+			string Status = "IEDS";
+			SetMode(Status);//[ValidateSet("Approving","Idle","IEDS","Validating")]
+			outBox_val.AppendText(Environment.NewLine + "Status: "+Status);
         }// end Approved_Button_Click
 		
         public void Validating_Button_Click(object sender, EventArgs e) {
-			valBox.AppendText(Environment.NewLine + InvokeGitHubRequest("https://api.github.com/rate_limit", WebRequestMethods.Http.Get,"",true));
+			string Status = "Validating";
+			SetMode(Status);//[ValidateSet("Approving","Idle","IEDS","Validating")]
+			outBox_val.AppendText(Environment.NewLine + "Status: "+Status);
         }// end Approved_Button_Click
 		
         public void Idle_Button_Click(object sender, EventArgs e) {
-			valBox.AppendText(Environment.NewLine + InvokeGitHubRequest("https://api.github.com/rate_limit", WebRequestMethods.Http.Get,"",true));
+			string Status = "Idle";
+			SetMode(Status);//[ValidateSet("Approving","Idle","IEDS","Validating")]
+			outBox_val.AppendText(Environment.NewLine + "Status: "+Status);
         }// end Approved_Button_Click
 
-
-
+        public void Config_Button_Click(object sender, EventArgs e) {
+			string Status = "Idle";
+			SetMode(Status);//[ValidateSet("Approving","Idle","IEDS","Validating")]
+			outBox_val.AppendText(Environment.NewLine + "Status: "+Status);
+        }// end Approved_Button_Click
 
 
 
@@ -1924,7 +2042,6 @@ using(Stream stream = Application.GetResourceStream(new Uri(imageUrl)).Stream)
 
 
 //Misc Data
-
 public string[] StandardPRComments = {"Validation Pipeline Badge",//Pipeline status
 "wingetbot run",//Run pipelines
 "azp run",//Run pipelines
@@ -1946,25 +2063,64 @@ public string[] StandardPRComments = {"Validation Pipeline Badge",//Pipeline sta
 "Sequence contains no elements"//New Sequence error.
 };
 
+public string[] WordFilterList = {"accept_gdpr ", 
+"accept-licenses", 
+"accept-license", 
+"eula",
+"downloadarchive.documentfoundation.org"
+};
 
+public string[] CountrySet = {"Default",
+"Warm","Cool","Random","Afghanistan","Albania","Algeria","American Samoa","Andorra","Angola","Anguilla","Antigua And Barbuda","Argentina","Armenia","Aruba","Australia","Austria","Azerbaijan","Bahamas","Bahrain","Bangladesh","Barbados","Belarus","Belgium","Belize","Benin","Bermuda","Bhutan","Bolivia","Bosnia And Herzegovina","Botswana","Bouvet Island","Brazil","Brunei Darussalam","Bulgaria","Burkina Faso","Burundi","Cabo Verde","Cambodia","Cameroon","Canada","Central African Republic","Chad","Chile","China","Colombia","Comoros","Cook Islands","Costa Rica","Croatia","Cuba","Curacao","Cyprus","Czechia","CÃ¶te D'Ivoire","Democratic Republic Of The Congo","Denmark","Djibouti","Dominica","Dominican Republic","Ecuador","Egypt","El Salvador","Equatorial Guinea","Eritrea","Estonia","Eswatini","Ethiopia","Fiji","Finland","France","French Polynesia","Gabon","Gambia","Georgia","Germany","Ghana","Greece","Grenada","Guatemala","Guinea","Guinea-Bissau","Guyana","Haiti","Holy See (Vatican City State)","Honduras","Hungary","Iceland","India","Indonesia","Iran","Iraq","Ireland","Israel","Italy","Jamaica","Japan","Jordan","Kazakhstan","Kenya","Kiribati","Kuwait","Kyrgyzstan","Laos","Latvia","Lebanon","Lesotho","Liberia","Libya","Liechtenstein","Lithuania","Luxembourg","Madagascar","Malawi","Malaysia","Maldives","Mali","Malta","Marshall Islands","Mauritania","Mauritius","Mexico","Micronesia","Moldova","Monaco","Mongolia","Montenegro","Morocco","Mozambique","Myanmar","Namibia","Nauru","Nepal","Netherlands","New Zealand","Nicaragua","Niger","Nigeria","Niue","Norfolk Island","North Korea","North Macedonia","Norway","Oman","Pakistan","Palau","Palestine","Panama","Papua New Guinea","Paraguay","Peru","Philippines","Pitcairn Islands","Poland","Portugal","Qatar","Republic Of The Congo","Romania","Russian Federation","Rwanda","Saint Kitts And Nevis","Saint Lucia","Saint Vincent And The Grenadines","Samoa","San Marino","Sao Tome And Principe","Saudi Arabia","Senegal","Serbia","Seychelles","Sierra Leone","Singapore","Slovakia","Slovenia","Solomon Islands","Somalia","South Africa","South Korea","South Sudan","Spain","Sri Lanka","Sudan","Suriname","Sweden","Switzerland","Syrian Arab Republic","Tajikistan","Tanzania"," United Republic Of","Thailand","Togo","Tonga","Trinidad And Tobago","Tunisia","Turkey","Turkmenistan","Tuvalu","Uganda","Ukraine","United Arab Emirates","United Kingdom","United States","Uruguay","Uzbekistan","Vanuatu","Venezuela","Vietnam","Yemen","Zambia","Zimbabwe","Ã…land Islands"
+};
+
+public string[] MagicStrings = {"Installer Verification Analysis Context Information:", //0
+"[error] One or more errors occurred.", //1
+"[error] Manifest Error:", //2
+"BlockingDetectionFound", //3
+"Processing manifest", //4
+"SQL error or missing database", //5
+"Error occurred while downloading installer" //6
+};
+
+public string[] MagicLabels = {"Validation-Defender-Error", //0
+"Binary-Validation-Error", //1
+"Error-Analysis-Timeout", //2
+"Error-Hash-Mismatch", //3
+"Error-Installer-Availability", //4
+"Internal-Error", //5
+"Internal-Error-Dynamic-Scan", //6
+"Internal-Error-Manifest", //7
+"Internal-Error-URL", //8
+"Manifest-AppsAndFeaturesVersion-Error", //9
+"Manifest-Installer-Validation-Error", //10
+"Manifest-Validation-Error", //11
+"Possible-Duplicate", //12
+"PullRequest-Error", //13
+"URL-Validation-Error", //14
+"Validation-Domain", //15
+"Validation-Executable-Error", //16
+"Validation-Hash-Verification-Failed", //17
+"Validation-Missing-Dependency", //18
+"Validation-Merge-Conflict", //19
+"Validation-No-Executables", //20
+"Validation-Installation-Error", //21
+"Validation-Shell-Execute", //22
+"Validation-Unattended-Failed", //23
+"Policy-Test-1.2", //24
+"Policy-Test-2.3", //25
+"Validation-Completed", //26
+"Validation-Forbidden-URL-Error", //27
+"Validation-Unapproved-URL", //28
+"Validation-Retry", //29
+"Needs-Author-Feedback",//30
+"Policy-Test-2.3" //31
+};
 
 
 
 
     }// end WinGetApprovalPipeline
-	public class class_VMVersion { //OS, Version
-		public string OS { get; set; }	
-		public int Version { get; set; }
-	}
-	public class class_Status { //vm,status,version,OS,Package,PR,RAM
-		public int vm { get; set; }	
-		public string status { get; set; }	
-		public int version { get; set; }	
-		public string OS { get; set; }	
-		public string Package { get; set; }	
-		public int PR { get; set; }	
-		public int RAM { get; set; }	
-	}
 }// end WinGetApprovalNamespace
 
 

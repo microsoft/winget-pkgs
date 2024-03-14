@@ -2691,6 +2691,7 @@ Function Get-AutoValLog {
 			$UserInput = $UserInput -notmatch "Exit code`: 0"
 			$UserInput = $UserInput -notmatch "Installation failed with exit code -1978334972"
 			$UserInput = $UserInput -notmatch "ISWEBVIEW2INSTALLED"
+			$UserInput = $UserInput -notmatch "MpCmdRun"
 			$UserInput = $UserInput -notmatch "SchedNetFx"
 			$UserInput = $UserInput -notmatch "Setting error JSON 1.0 fields"
 			$UserInput = $UserInput -notmatch "Terminating context"
@@ -4687,6 +4688,7 @@ $StandardPRComments = ("Validation Pipeline Badge",#Pipeline status
 "Manifest Schema Version: 1.4.0 less than 1.5.0 for ID:",#Manifest depreciation for 1.4.0
 "This account is bot account and belongs to CoolPlayLin",#CoolPlayLin's automation
 "This account is automated by Github Actions and the source code was created by CoolPlayLin",#Exorcism0666's automation
+"Poke 👉", #gama-bot's automation
 "Response status code does not indicate success",#My automation - removal PR where URL failed status check.
 "Automatic Validation ended with",#My automation - Validation output might be immaterial if unactioned.
 "Manual Validation ended with",#My automation - Validation output might be immaterial if unactioned.
