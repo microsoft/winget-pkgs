@@ -1,26 +1,21 @@
 //Copyright 2022-2024 Microsoft Corporation
 //Author: Stephen Gillie
-//Title: WinGet Approval Pipeline v3.-75.0
+//Title: WinGet Approval Pipeline v3.-73.0
 //Created: 1/19/2024
-//Updated: 3/13/2024
+//Updated: 3/14/2024
 //Notes: Tool to streamline evaluating winget-pkgs PRs.
 //Update log:
+//3.-72.1 - Improve PR field regex. 
+//3.-72.0 - Port CommitFile. 
+//3.-73.0 - Port ManifestEntryCheck. 
+//3.-74.0 - Soft-depreciate ManifestOtherAutomation. 
 //3.-75.0 - Port AddWaiver. 
-//3.-76.3 - Find Get-Clipboard equivalent and set up PR field population.
-//3.-76.2 - Connect lower buttons to SetMode. Add another input field to display current mode.
-//3.-76.1 - Create TestPath as equivalent for PowerShell Test-Path. Bonus, this informs about data type, not just existence.  
-//3.-76.0 - Depreciate LazySearchWinGet. 
-//3.-77.2 - Develop in-code functional CSV reader and writer. 
-//3.-77.1 - Use CsvHelper and develop a CSV solution. This stopped working after updates rebooted the laptop that night.
-//3.-77.0 - Port GitHubRateLimit.
-//3.-78.0 - Port ReplyToPR.
-//3.-79.0 - Port ArraySum. 
 
 
 
 
 
-/*Contents: (Remaining functions to port or depreciate: 69)
+/*Contents: (Remaining functions to port or depreciate: 66)
 - Init vars (?)
 - Boilerplate (?)
 - UI top-of-box (?)
@@ -30,13 +25,13 @@
 - PR tools (2)
 - Network tools (0)
 - Validation Starts Here (6)
-- Manifests Etc (7)
+- Manifests Etc (6)
 - VM Image Management (3)
 - VM Pipeline Management (6)
 - VM Status (3)
 - VM Versioning (1)
 - VM Orchestration (4)
-- File Management (5)
+- File Management (4)
 - Inject into files on disk (2)
 - Inject into PRs (4)
 - Timeclock (4)
@@ -67,16 +62,15 @@ LineFromCommitFile
 PRPopulateRecord
 
 #Todo: 
-Get-ManifestOtherAutomation
-Get-ManifestEntryCheck
-Get-CommitFile
-Get-TimeRunning
-Get-OSFromVersion
-Test-Admin
-Get-ValidationData
 Add-ValidationData
 Get-TrackerVMSetStatus
 Get-LoadFileIfExists
+Get-UpdateArchInPR
+Add-DependencyToPR
+Get-TimeRunning
+Get-OSFromVersion
+Test-Admin
+Get-PRApproval
 
 #Blocked:
 Get-ManifestListing#Find-WinGetPackage
@@ -87,11 +81,8 @@ Get-Timeclock#Get-Date
 Get-PRFullReport#Get-PRReportFromRecord
 Open-AllURL#Start-Process
 Open-PRInBrowser#Start-Process
-Get-UpdateArchInPR#Get-CommitFile
-Add-DependencyToPR#Get-CommitFile
 Get-ListingDiff#Get-ManifestListing
 Get-TrackerVMRebuildStatus#Get-VM
-Get-PRApproval#Get-ValidationData
 Get-PRFromRecord#Get-PRPopulateRecord
 Get-PRReportFromRecord#Get-PRFromRecord
 Get-TrackerVMValidateByID#Get-TrackerVMValidate
@@ -99,17 +90,17 @@ Get-TrackerVMValidateByConfig#Get-TrackerVMValidate
 Get-TrackerVMValidateByArch#Get-TrackerVMValidate
 Get-TrackerVMValidateByScope#Get-TrackerVMValidate
 Get-TrackerVMValidateBothArchAndScope#Get-TrackerVMValidate
+Get-UpdateHashInPR#Add-GitHubReviewComment
+Get-UpdateHashInPR2#Add-GitHubReviewComment
 
 Get-SearchGitHub#Get-Date, Start-Process
 Get-ManifestAutomation#Get-ManifestFile, Get-NextFreeVM
 Stop-TrackerVM#Stop-VM, Test-Admin
 Get-TrackerVMRotateLog#Get-Date, Move-Item
-Get-UpdateHashInPR#Add-GitHubReviewComment, Get-CommitFile
 Get-TimeclockSet#Get-Date, Get-TimeRunning
 Get-HoursWorkedToday#Get-Date, Get-Timeclock
 Get-SingleFileAutomation#Get-ManifestFile, Get-ManifestListing
 Get-Sandbox#Stop-Process, Start-Process
-Get-UpdateHashInPR2#Add-GitHubReviewComment, Get-CommitFile
 Get-NextFreeVM#Get-Random, Test-Admin
 Get-RemoveFileIfExist#New-Item, Remove-Item
 
@@ -117,12 +108,12 @@ Get-TrackerVMLaunchWindow#Get-ConnectedVM, Stop-Process, Test-Admin
 Get-TrackerVMRevert#Get-TrackerVMSetStatus, Restore-VMCheckpoint, Test-Admin
 
 Get-TrackerVMRunTracker#Get-AutoValLog, Get-ConnectedVM, Get-Date, Get-HoursWorkedToday, Get-PRLabelAction, Get-Random, Get-RandomIEDS, Get-SearchGitHub, Get-TimeRunning, Get-TrackerMode, Get-TrackerVMCycle, Get-TrackerVMRotate, Get-TrackerVMValidate, Get-TrackerVMWindowArrange, Get-VM, Set-Vm, start-process
-Get-PRWatch#Approve-PR, Compare-Object, Find-WinGetPackage, Get-CleanClip, Get-Command, Get-Date, Get-ListingDiff, Get-LoadFileIfExists, Get-ManifestEntryCheck, Get-PadRight, Get-PRApproval, get-random, Get-Sandbox, Get-TrackerVMValidate, Get-ValidationData
+Get-PRWatch#Approve-PR, Compare-Object, Find-WinGetPackage, Get-CleanClip, Get-Command, Get-Date, Get-ListingDiff, Get-LoadFileIfExists, Get-PadRight, Get-PRApproval, Get-Random, Get-Sandbox, Get-TrackerVMValidate
 Get-WorkSearch#Get-Date, Get-GitHubPreset, Get-PRLabelAction, Get-PRStateFromComments, Get-SearchGitHub, Open-PRInBrowser
 Get-GitHubPreset#Approve-PR, Check-PRInstallerStatusInnerWrapper, Find-WinGetPackage, Get-PRLabelAction, Get-TimeclockSet, Get-WorkSearch
-Get-PRLabelAction#Soothing label action. #Get-AutoValLog, Get-Date, Get-GitHubPreset, Get-LineFromCommitFile, Get-PRStateFromComments, Get-UpdateHashInPR2, Get-ValidationData
-Get-AutoValLog#Expand-Archive, Get-BuildFromPR, Get-ChildItem, Get-GitHubPreset, Get-ValidationData, Open-PRInBrowser, Remove-Item, Start-Process, Stop-Process
-Get-RandomIEDS#Get-CommitFile, Get-ManifestFile, Get-NextFreeVM, Get-Random, Get-SearchGitHub
+Get-PRLabelAction#Soothing label action. #Get-AutoValLog, Get-Date, Get-GitHubPreset, Get-PRStateFromComments, Get-UpdateHashInPR2
+Get-AutoValLog#Expand-Archive, Get-BuildFromPR, Get-ChildItem, Get-GitHubPreset, Open-PRInBrowser, Remove-Item, Start-Process, Stop-Process
+Get-RandomIEDS#Get-ManifestFile, Get-NextFreeVM, Get-Random, Get-SearchGitHub
 Get-TrackerVMValidate#Find-WinGetPackage,  ForEach-Object,  Get-ChildItem,  Get-NextFreeVM,  Get-OSFromVersion,  Get-PipelineVmGenerate,    Get-RemoveFileIfExist,  Get-TrackerVMLaunchWindow,  Get-TrackerVMRevert,  Get-TrackerVMSetStatus,  Get-VM,  Get-YamlValue,  Open-AllURL,  Start-Process,  Test-Admin
 Get-ManifestFile#Get-NextFreeVM, Get-RemoveFileIfExist, Get-TrackerVMValidate
 Get-PipelineVmGenerate#Get-Date, Get-RemoveFileIfExist, Get-TrackerVMLaunchWindow, Get-TrackerVMRevert, Get-VM, Import-VM, Remove-VMCheckpoint, Rename-VM, Start-VM, Test-Admin
@@ -165,7 +156,7 @@ using System.Web.Script.Serialization;
 namespace WinGetApprovalNamespace {
     public class WinGetApprovalPipeline : Form {
 		//vars
-        public int build = 387;//Get-RebuildPipeApp	
+        public int build = 389;//Get-RebuildPipeApp	
 		public string appName = "WinGetApprovalPipeline";
 		public string appTitle = "WinGet Approval Pipeline - Build ";
 		public static string owner = "microsoft";
@@ -383,10 +374,11 @@ namespace WinGetApprovalNamespace {
 
 			//Make gridItemWidth*2 when AddWaiver is disabled.
  			drawButton(ref btn3, col6, row0, gridItemWidth, gridItemHeight, "Add Waiver", Add_Waiver_Button_Click);
-			drawButton(ref btn27, col7, row0, gridItemWidth, gridItemHeight, "Work Search", Work_Search_Button_Click); 
+ 			drawButton(ref btn3, col7, row0, gridItemWidth, gridItemHeight, "Open In Browser", Open_In_Browser_Button_Click);
 			drawUrlBox(ref inputBox_PRNumber,col8, row0, gridItemWidth*2,gridItemHeight,"000000");
  			
 			drawButton(ref btn2, col6, row1, gridItemWidth, gridItemHeight, "(Clipboard) Needs Feedback", Needs_Feedback_Button_Click);
+			drawButton(ref btn27, col7, row1, gridItemWidth, gridItemHeight, "Work Search", Work_Search_Button_Click); 
  			drawButton(ref btn4, col8, row1, gridItemWidth, gridItemHeight, "(comments) Retry", Retry_Button_Click);
  			drawButton(ref btn5, col9, row1, gridItemWidth, gridItemHeight, "Approved", Approved_Button_Click);
  			
@@ -458,12 +450,12 @@ private void timer_Run(object sender, EventArgs e) {
 	}
 
 	string clip = Clipboard.GetText();
-	Regex regex = new Regex("[0-9]{6}");
-	string[] clipSplit = clip.Replace("\r\n","\n").Replace("\n"," ").Split(' ');
+	Regex regex = new Regex("^[0-9]{6}$");
+	string[] clipSplit = clip.Replace("\r\n","\n").Replace("\n"," ").Replace("#"," ").Split(' ');
 	string c = clipSplit.Where(n => regex.IsMatch(n)).FirstOrDefault();
 	if (null != c) {
 		if (regex.IsMatch(c)) {
-			inputBox_PRNumber.Text = c;
+			inputBox_PRNumber.Text = "#"+c;
 		}
 	}
 	
@@ -1009,7 +1001,20 @@ public string AddWaiver(int PR) {
 //Manifests Etc - Section needs refactor badly
 //SingleFileAutomation
 //ManifestAutomation
-//ManifestOtherAutomation
+
+/*This function doesn't seem to be complete. 
+		public string ManifestOtherAutomation(bool Installer){
+			string[] array_Title = Clipboard.GetText().Split(" version "); //Get PackageIdentifier?
+			string[] array_Version = array_Title[1].Split("#");
+			string PR = Version[1];
+			string string_Title = array_Title[0]
+			string string_Version = array_Version[0]
+			if ($Installer) {
+				$file = FileFromGitHub(Title,Version)
+			}
+		}
+*/
+
 //ManifestFile
 //ManifestListing
 //ListingDiff
@@ -1143,6 +1148,7 @@ public string AddWaiver(int PR) {
 //RotateLog
 //RemoveFileIfExist
 //LoadFileIfExists
+
 		public string FileFromGitHub(string PackageIdentifier, int Version, string FileName = "installer.yaml") {
 			string Path = PackageIdentifier.Replace('.','/');
 			string FirstLetter = PackageIdentifier[0].ToString().ToLower();
@@ -1154,14 +1160,34 @@ public string AddWaiver(int PR) {
 			}
 			return content;
 		}
-//ManifestEntryCheck
+
+		public bool ManifestEntryCheck(string PackageIdentifier, int Version, string Entry = "AppsAndFeaturesEntries"){
+			string content = FileFromGitHub(PackageIdentifier,Version);
+			string string_out = "";
+			string_out = string_out.Split('\n').Where(n => n.Contains(Entry)).FirstOrDefault(); // s.IndexOf(": ");
+			if (string_out == "") {
+				return false;
+			} else {
+				return true;
+			}
+		}
+
 		public string DecodeGitHubFile (string Base64String) {
 			var Bits = System.Convert.FromBase64String(Base64String);
 			string String = System.Text.Encoding.UTF8.GetString(Bits);
 			return String;
 		}
-//GetCommitFIle
 
+		public string CommitFile(int PR, string File, string url){
+			dynamic Commit = FromJson(InvokeGitHubPRRequest(PR,"commits","content"));
+			if (Commit["files"]["contents_url"].GetType() == "String") {
+				url =  Commit["files"]["contents_url"];
+			} else {
+				url =  Commit["files"]["contents_url"]["File"];
+			}
+			dynamic EncodedFile = FromJson(InvokeGitHubRequest(url));
+			return DecodeGitHubFile(EncodedFile["content"]);
+		}
 
 
 
@@ -1197,7 +1223,7 @@ public string AddWaiver(int PR) {
 
 
 //Reporting
-		public void AddPRToRecord ( int PR, string Action, string Title = ""){
+		public void AddPRToRecord(int PR, string Action, string Title = ""){
 		//[ValidateSet("Approved","Blocking","Feedback","Retry","Manual","Closed","Project","Squash","Waiver")]
 			Title = Title.Split('#')[0];
 			string string_out = (PR+","+Action+","+Title + Environment.NewLine);
@@ -1288,7 +1314,16 @@ public string AddWaiver(int PR) {
 			dynamic Logged_Rate = FromJson(InvokeGitHubRequest(Url));
 			//Response["rate"] | select @{n="source";e={"Logged"}}, limit, used, remaining, @{n="reset";e={([System.DateTimeOffset]::FromUnixTimeSeconds(_.reset)).DateTime.AddHours(-8)}}
 		}
-//GetValidationData
+
+/*
+		public dynamic ValidationData(string Property, string Match,bool Exact){
+			dynamic data = FromCsv(GetContent(DataFileName)).Where(n => n["Property"] != null).Where(n => n["Property"].Contains(Match));
+			if (Exact == true) {
+				data = data.Where(n => n.Property == Match);
+			}
+			return data;
+		}
+*/
 //AddValidationData
 
 
@@ -1915,6 +1950,13 @@ using(Stream stream = Application.GetResourceStream(new Uri(imageUrl)).Stream)
 			//outBox_val.AppendText(Environment.NewLine + CannedMessage("AutoValEnd","testing testing 1..2..3."));
         }// end Approved_Button_Click
 		
+        public void Open_In_Browser_Button_Click(object sender, EventArgs e) {
+			int PR = Int32.Parse(inputBox_PRNumber.Text.Replace("#",""));
+			string string_out = AddWaiver(PR);
+			outBox_val.AppendText(Environment.NewLine + "Waiver: "+PR + " "+ string_out);
+			//outBox_val.AppendText(Environment.NewLine + CannedMessage("AutoValEnd","testing testing 1..2..3."));
+        }// end Approved_Button_Click
+		
         public void Retry_Button_Click(object sender, EventArgs e) {
 			string Path = "issues";
 			string Type = "comments";
@@ -1960,12 +2002,12 @@ using(Stream stream = Application.GetResourceStream(new Uri(imageUrl)).Stream)
         }// end Approved_Button_Click
 		
         public void Defender_Fail_Button_Click(object sender, EventArgs e) {
-			outBox_val.AppendText(Environment.NewLine + "TestPath: " + TestPath(file_testCsv));
+			outBox_val.AppendText(Environment.NewLine + "TestPath: " + TestPath(StatusFile));
         }// end Approved_Button_Click
 		
         public void Automation_Block_Button_Click(object sender, EventArgs e) {
-			if (TestPath(file_testCsv) == "File") {
-				dynamic Records = FromCsv(GetContent(file_testCsv));
+			if (TestPath(StatusFile) == "File") {
+				dynamic Records = FromCsv(GetContent(StatusFile));
 				//var Records = csv.GetRecords<class_VMVersion>();
 				outBox_val.AppendText(Environment.NewLine + "Records.Length: "+Records.Length);
 				for (int r = 1; r < Records.Length -1; r++){
