@@ -2059,7 +2059,7 @@ Function Read-LocaleMetadata {
 # Uses this template and responses to create a PR
 Function Read-PRBody {
   $PrBodyContent = Get-Content $args[0]
-  ForEach ($_line in ($PrBodyContent | Where-Object { $_ -like '-*[ ]*' })) {
+  ForEach ($_line in ($PrBodyContent| Where-Object { $_ -like '-*[ ]*' })) {
     $_showMenu = $true
     switch -Wildcard ( $_line ) {
       '*CLA*' {
@@ -2144,6 +2144,12 @@ Function Read-PRBody {
         $_showMenu = $false
       }
 
+      '*linked issue*' {
+        # Linked issues is handled as a separate prompt below so that the issue numbers can be gathered
+        $PrBodyContentReply += @($_line)
+        $_showMenu = $false
+      }
+
       Default {
         $_menu = @{
           Prompt        = $_line.TrimStart('- [ ]')
@@ -2171,6 +2177,8 @@ Function Read-PRBody {
   }
   switch ( Invoke-KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString']) {
     'Y' {
+      $PrBodyContentReply.Where({$_ -match 'linked issues'}).ForEach({$_.Replace('[ ]', '[X]')})
+
       # If there were issues resolved by the PR, request user to enter them
       Write-Host
       Write-Host "Enter issue number. For example`: 21983, 43509"
@@ -2221,6 +2229,7 @@ Function Read-PRBody {
 
   # Write the PR using a temporary file
   Set-Content -Path PrBodyFile -Value $PrBodyContentReply | Out-Null
+  return
   gh pr create --body-file PrBodyFile -f
   Remove-Item PrBodyFile
 }
