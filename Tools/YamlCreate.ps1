@@ -168,7 +168,7 @@ if ($Settings) {
   exit
 }
 
-$ScriptHeader = '# Created with YamlCreate.ps1 v2.3.4'
+$ScriptHeader = '# Created with YamlCreate.ps1 v2.3.5'
 $ManifestVersion = '1.6.0'
 $PSDefaultParameterValues = @{ '*:Encoding' = 'UTF8' }
 $Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
@@ -179,7 +179,7 @@ $callingCulture = [Threading.Thread]::CurrentThread.CurrentCulture
 [Threading.Thread]::CurrentThread.CurrentCulture = 'en-US'
 if (-not ([System.Environment]::OSVersion.Platform -match 'Win')) { $env:TEMP = '/tmp/' }
 $wingetUpstream = 'https://github.com/microsoft/winget-pkgs.git'
-$RunHash = $(Get-FileHash -InputStream $([IO.MemoryStream]::new([byte[]][char[]]$(Get-Date).Ticks.ToString()))).Hash.Substring(0,8)
+$RunHash = $(Get-FileHash -InputStream $([IO.MemoryStream]::new([byte[]][char[]]$(Get-Date).Ticks.ToString()))).Hash.Substring(0, 8)
 
 if ($ScriptSettings.EnableDeveloperOptions -eq $true -and $null -ne $ScriptSettings.OverrideManifestVersion) {
   $script:UsesPrerelease = $ScriptSettings.OverrideManifestVersion -gt $ManifestVersion
@@ -2670,11 +2670,11 @@ if (($script:Option -eq 'MovePackageIdentifier')) {
       git switch -d upstream/master -q
 
       # Request the current identifier and validate that it exists
-      Write-Host -ForegroundColor 'Green' -Object "What is the current package identifier?" -NoNewline
+      Write-Host -ForegroundColor 'Green' -Object 'What is the current package identifier?' -NoNewline
       do {
         $OldPackageIdentifier = Read-PackageIdentifier -PackageIdentifier $null
         # Set the folder for the specific package
-        $FromAppFolder = Join-Path $ManifestsFolder -ChildPath $OldPackageIdentifier.ToLower().Chars(0) | Join-Path -ChildPath $OldPackageIdentifier.Replace('.',$([IO.Path]::DirectorySeparatorChar))
+        $FromAppFolder = Join-Path $ManifestsFolder -ChildPath $OldPackageIdentifier.ToLower().Chars(0) | Join-Path -ChildPath $OldPackageIdentifier.Replace('.', $([IO.Path]::DirectorySeparatorChar))
         if (!(Test-Path -Path "$FromAppFolder")) {
           Write-Host -ForegroundColor 'Red' -Object "No manifests found for $OldPackageIdentifier"
         } else {
@@ -2684,9 +2684,9 @@ if (($script:Option -eq 'MovePackageIdentifier')) {
       } while (!$manifestsExist)
 
       # Request the new identifier
-      Write-Host -ForegroundColor 'Green' -Object "What is the new package identifier?" -NoNewline
+      Write-Host -ForegroundColor 'Green' -Object 'What is the new package identifier?' -NoNewline
       $NewPackageIdentifier = Read-PackageIdentifier -PackageIdentifier $null
-      $ToAppFolder = Join-Path $ManifestsFolder -ChildPath $NewPackageIdentifier.ToLower().Chars(0) | Join-Path -ChildPath $NewPackageIdentifier.Replace('.',[IO.Path]::DirectorySeparatorChar)
+      $ToAppFolder = Join-Path $ManifestsFolder -ChildPath $NewPackageIdentifier.ToLower().Chars(0) | Join-Path -ChildPath $NewPackageIdentifier.Replace('.', [IO.Path]::DirectorySeparatorChar)
       Write-Host
 
       # Request the new moniker, in case the moniker needs to be updated
@@ -2703,7 +2703,7 @@ if (($script:Option -eq 'MovePackageIdentifier')) {
       } until ($script:_returnValue.StatusCode -eq [ReturnValue]::Success().StatusCode)
 
       # Get a list of the versions to move
-      $VersionsToMove = @(Get-ChildItem -Path $FromAppFolder | Where-Object {@(Get-ChildItem -Directory -Path $_.FullName).Count -eq 0}).Name
+      $VersionsToMove = @(Get-ChildItem -Path $FromAppFolder | Where-Object { @(Get-ChildItem -Directory -Path $_.FullName).Count -eq 0 }).Name
 
       # Create an array for logging all the branches that were created
       $BranchesCreated = @()
@@ -2716,12 +2716,12 @@ if (($script:Option -eq 'MovePackageIdentifier')) {
         $DestinationFolder = Join-Path -Path $ToAppFolder -ChildPath $Version
         Copy-Item -Path $SourceFolder -Destination $DestinationFolder -Recurse -Force
         # Rename the files
-        Get-ChildItem -Path $DestinationFolder -Filter "*$OldPackageIdentifier*" -Recurse | ForEach-Object {Rename-Item -Path $_.FullName -NewName $($_.Name -replace [regex]::Escape($OldPackageIdentifier),"$NewPackageIdentifier")}
+        Get-ChildItem -Path $DestinationFolder -Filter "*$OldPackageIdentifier*" -Recurse | ForEach-Object { Rename-Item -Path $_.FullName -NewName $($_.Name -replace [regex]::Escape($OldPackageIdentifier), "$NewPackageIdentifier") }
         # Update PackageIdentifier in all files
-        Get-ChildItem -Path $DestinationFolder -Filter "*$NewPackageIdentifier*" -Recurse | ForEach-Object  {[System.IO.File]::WriteAllLines($_.FullName, $((Get-Content -Path $_.FullName -Raw).TrimEnd() -replace [regex]::Escape($OldPackageIdentifier),"$NewPackageIdentifier"), $Utf8NoBomEncoding)}
+        Get-ChildItem -Path $DestinationFolder -Filter "*$NewPackageIdentifier*" -Recurse | ForEach-Object { [System.IO.File]::WriteAllLines($_.FullName, $((Get-Content -Path $_.FullName -Raw).TrimEnd() -replace [regex]::Escape($OldPackageIdentifier), "$NewPackageIdentifier"), $Utf8NoBomEncoding) }
         # Update Moniker in all files
         if (Test-String $NewMoniker -Not -IsNull) {
-          Get-ChildItem -Path $DestinationFolder -Filter "*$NewPackageIdentifier*" -Recurse | ForEach-Object  {[System.IO.File]::WriteAllLines($_.FullName, $((Get-Content -Path $_.FullName -Raw).TrimEnd() -replace "Moniker:.*","Moniker: $NewMoniker"), $Utf8NoBomEncoding)}
+          Get-ChildItem -Path $DestinationFolder -Filter "*$NewPackageIdentifier*" -Recurse | ForEach-Object { [System.IO.File]::WriteAllLines($_.FullName, $((Get-Content -Path $_.FullName -Raw).TrimEnd() -replace 'Moniker:.*', "Moniker: $NewMoniker"), $Utf8NoBomEncoding) }
         }
 
         # Create and push to a new branch
@@ -2756,7 +2756,7 @@ if (($script:Option -eq 'MovePackageIdentifier')) {
       Out-Null # Intentionally do nothing here
     }
   }
-  if ($ScriptSettings.AutoSubmitPRs -eq 'Ask' -and $BranchesCreated.Count -gt 0) {
+  if ($ScriptSettings.AutoSubmitPRs -notin @('Always', 'Never') -and $BranchesCreated.Count -gt 0) {
     $_menu = @{
       entries       = @('[Y] Yes'; '*[N] No')
       Prompt        = "Do you want to submit all $($BranchesCreated.Count) PRs now?"
@@ -2769,7 +2769,7 @@ if (($script:Option -eq 'MovePackageIdentifier')) {
           git switch $Branch --quiet
           gh pr create -f
         }
-       }
+      }
       default { Out-Null }
     }
   }
