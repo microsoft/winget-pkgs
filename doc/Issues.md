@@ -4,7 +4,7 @@ GitHub uses Issues to track work. Community members are welcome to submit issues
 Issues related to the WinGet client itself should be routed over to the [winget-cli](https://github.com/microsoft/winget-cli) repository.
 
 ## Request a New Package
-Please file issues using one of our [Issue templates](https://github.com/microsoft/winget-pkgsissues/new/choose)
+Please file issues using one of our [Issue templates](https://github.com/microsoft/winget-pkgs/issues/new/choose)
 
 ## Request a New Package Version
-Please file issues using one of our [Issue templates](https://github.com/microsoft/winget-pkgsissues/new/choose)
+Please file issues using one of our [Issue templates](https://github.com/microsoft/winget-pkgs/issues/new/choose)
