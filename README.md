@@ -12,11 +12,6 @@ This repository contains the manifest files for the **Windows Package Manager** 
 
 The **Windows Package Manager** is an [open source client](https://github.com/microsoft/winget-cli) designed for command-line usage. If you are interested in exploring private repositories offering private WinGet package hosting, see [private repositories](doc/private/README.md).
 
-## Repology
-[Repology](https://repology.org/), the packaging hub monitors package repositories comparing package versions and other information.
-
-[![Repository status](https://repology.org/badge/repository-big/winget.svg)](https://repology.org/repository/winget)
-
 # Documentation
 
 Please check the [overview](doc/README.md) for detailed topics. Common topics for the WinGet Community repository are available below"
@@ -25,6 +20,11 @@ Please check the [overview](doc/README.md) for detailed topics. Common topics fo
 * [Submitting a manifest](doc/README.md#submitting-a-manifest)
 * [Requesting a new package](doc/Issues.md#Request-a-New-Package)
 * [Requesting a new package version](doc/Issues.md#Request-a-New-Package-Version)
+
+## Repology
+[Repology](https://repology.org/), the packaging hub monitors package repositories comparing package versions and other information.
+
+[![Repository status](https://repology.org/badge/repository-big/winget.svg)](https://repology.org/repository/winget)
 
 # Contributing
 

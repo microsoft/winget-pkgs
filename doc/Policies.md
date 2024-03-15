@@ -16,6 +16,8 @@ WinGet manifests support adding agreements to manifests. These agreements are be
 
 When switches passed to installers represent an explicit agreement between the publisher and the user, agreements must be added to the manifest. The community repository will allow the agreement title and the agreement URL, but not the agreement body to be included. Only verified developers are allowed to provide the agreement text.
 
+Manifests with agreements require a review by Microsoft.
+
 ## Manifest Types
 WinGet supports a singleton manifest type, but these are prohibited in the community repository. The singleton manifest does not support localization well, and the tooling created for generating manifests do a great job of simplifying the process of generating manifests for WinGet packages.
 
