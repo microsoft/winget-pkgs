@@ -10,7 +10,7 @@ This repository contains the manifest files for the **Windows Package Manager** 
 > [!IMPORTANT]
 > At this time installers must be MSIX, MSI, APPX, or .exe application installers. Script-based installers and fonts are not currently supported.
 
-The **Windows Package Manager** is an [open source client](https://github.com/microsoft/winget-cli) designed for command-line usage. If you are interested in exploring private repositories offering private WinGet package hosting, see [private repositories](doc/README.md).
+The **Windows Package Manager** is an [open source client](https://github.com/microsoft/winget-cli) designed for command-line usage. If you are interested in exploring private repositories offering private WinGet package hosting, see [private repositories](doc/private/README.md).
 
 ## Repology
 [Repology](https://repology.org/), the packaging hub monitors package repositories comparing package versions and other information.
