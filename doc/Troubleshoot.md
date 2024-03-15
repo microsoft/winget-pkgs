@@ -8,7 +8,7 @@ Once those steps pass, here are some troubleshooting tips:
 ## Manifest-Validation-Error
 Manifest validation errors indicate that there is a problem with the manifest file. Many of the issues can be caught before submitting your PR, when you validate the manifests before submission:  ```winget validate <path-to-the-manifest>```
 
-For documentation on the manifest specification, please see the [manifest schema](/doc/manifest/schema)
+For documentation on the manifest specification, please see the [manifest schema](/doc/manifest/README.md)
 
 Here are some common mistakes not discovered by the winget validation.
 
