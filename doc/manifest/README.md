@@ -1,5 +1,5 @@
 # WinGet Manifests
-The Windows Package Manager supports several different schema versions. The intent is to follow semantic versioning so ealier versions of the WinGet client are able to install packages using earlier versions of the schema.
+The Windows Package Manager supports several different schema versions. The intent is to follow semantic versioning so earlier versions of the WinGet client are able to install packages using earlier versions of the schema.
 
 This repository contains manifests for packages submitted by publishers and independent community members. Ideally, software publishers will automate the submission process when new releases are made available.
 
