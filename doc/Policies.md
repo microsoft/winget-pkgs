@@ -6,7 +6,7 @@ Policy documentation at [Microsoft Learn](https://learn.microsoft.com/windows/pa
 Manifests submitted to the community repository are subject to [moderation](Moderation.md).
 
 ## Installer Types
-WinGet supports MSIX, MSI and exe-based installers. These installer types may aslo be nested within the .zip (compressed) installer type. Scripts are considered as unsupported. Examples include batch files (.bat) and PowerShell scripts (.ps1).
+WinGet supports MSIX, MSI and exe-based installers. These installer types may also be nested within the .zip (compressed) installer type. Scripts are considered as unsupported. Examples include batch files (.bat) and PowerShell scripts (.ps1).
 
 ## Installer Behaviors
 The packages submitted to the community repository must be able to install without requiring user interaction. The default mechanism used in WinGet is "silent with progress". This means installers may launch a UI experience, but users must not be required to interact with this UI to complete a successful installation.
