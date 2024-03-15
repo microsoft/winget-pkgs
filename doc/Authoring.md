@@ -113,7 +113,7 @@ There are a few typical use cases when `AppsAndFeaturesEntries` should be specif
 
 3. The `DisplayVersion` the installer writes to the registry is inherently un-ordered or cannot be sorted properly by WinGet
 
-    There are many ways that publishers choose to version their software. This leads to some cases where the way WinGet sorts versions will not work properly. Some examples include packages that only use commit hashses for their releases, packages which prefix the version number with a string, or packages using date versioning of DD-MM-YYYY.
+    There are many ways that publishers choose to version their software. This leads to some cases where the way WinGet sorts versions will not work properly. Some examples include packages that only use commit hashes for their releases, packages which prefix the version number with a string, or packages using date versioning of DD-MM-YYYY.
 
 	When this happens, `PackageVersion` should be set to something which is sortable by WinGet and `DisplayVersion` should be set to the value the installer writes to the registry. For more information, see the section on [Version Sorting in WinGet](/doc/Authoring.md#version-sorting-in-winget)
 
@@ -148,14 +148,14 @@ When comparing one `Part` to another, WinGet goes through the following process.
 	* If one `Part` has a value in `string` and the other does not, the `Part` which ***does not*** have a value in `string` is considered to be greater
 	* Example: When comparing `34` and `34-beta`, the `integer` is equal for both (`34`). However, the `string` for the former is empty and the `string` for the latter is `-beta`, so `34` is the larger `Part`. This leads to `1.2.34` being considered a higher `Version` than `1.2.34-beta`
 4. If both parts have a value in `string`, perform a case-insensitive comparison of the two
-	* If the values of `string` are not equal, the lexographical comparison determines which `Part` is larger
+	* If the values of `string` are not equal, the lexographic comparison determines which `Part` is larger
 
 #### Examples of Version Comparisons
 
 | Version A | Version B | Comparison Result | Explanation |
 | --- | --- | --- | ---|
 | 1.2.0 | 1.2 | Equal | `Version B` will be padded with zeros to match the same number of `Parts` as `Version A` |
-| 1.2 | 1.2-rc | `Version A` | The `-rc` causes `Version B` to have a `string` in the seond `Part` where `Version A` does not |
+| 1.2 | 1.2-rc | `Version A` | The `-rc` causes `Version B` to have a `string` in the second `Part` where `Version A` does not |
 | 1.2.3 | 1.2.4-rc | `Version B` | The `integer` on the third `Part` is larger for `Version B` |
 | v1.2 | 1.1 | `Version B` | The leading `v` causes the `integer` for `Version A` to be `0`, which is less than `1` |
 | 1.2.3a | 1.2.3b | `Version B` | `b` is lexographically greater than `a` |
