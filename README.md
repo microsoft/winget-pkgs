@@ -14,7 +14,7 @@ The **Windows Package Manager** is an [open source client](https://github.com/mi
 
 # Documentation
 
-Please check the [overview](doc/README.md) for detailed topics. Common topics for the WinGet Community repository are available below"
+Please check the [overview](doc/README.md) for detailed topics. Common topics for the WinGet Community repository are available below:
 * [Authoring a manifest](doc/README.md#authoring-a-manifest)
 * [Testing a manifest](doc/README.md#testing-a-manifest)
 * [Submitting a manifest](doc/README.md#submitting-a-manifest)
