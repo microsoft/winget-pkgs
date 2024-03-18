@@ -31,7 +31,7 @@ A few different tools are available to help you author a manifest.
 - [Windows Package Manager Manifest Creator](https://github.com/microsoft/winget-create)
 - [YamlCreate.ps1](doc/tools/YamlCreate.md)
 - Other WinGet Manifest Creators developed by the community:
-  - [Komac - Kotlin Manifest Creator for WinGet](https://github.com/russellbanks/Komac) (maintained by [**@russellbanks**](https://github.com/russellbanks))
+  - [Komac - Community Manifest Creator](https://github.com/russellbanks/Komac) (maintained by [**@russellbanks**](https://github.com/russellbanks))
 
 > Note: Only one manifest may be submitted per PR.
 
@@ -46,13 +46,13 @@ Now that you have authored your manifest, you should make sure it works as expec
 1. Verify the syntax by executing the following command:
 
 ```
-winget validate <path-to-manifest>
+winget validate --manifest <path-to-manifest>
 ```
 
 2. Test the install by executing the following command:
 
 ```
-winget install -m <path-to-manifest>
+winget install --manifest <path-to-manifest>
 ```
 
 For more details, see ["Submit packages to Windows Package Manager"](https://docs.microsoft.com/windows/package-manager/package) at Microsoft Docs.

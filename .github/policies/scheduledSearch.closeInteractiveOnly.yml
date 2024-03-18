@@ -1,0 +1,35 @@
+id: scheduledSearch.closeInteractiveOnly
+name: GitOps.PullRequestIssueManagement
+description: Close stale pull requests marked with "No-Recent-Activity" and "Interactive-Only-Installer"
+owner:
+resource: repository
+disabled: false
+where:
+configuration:
+  resourceManagementConfiguration:
+    scheduledSearches:
+      - description: >-
+          Search for PR where -
+          * Pull Request is Open
+          * Pull request has the label No-Recent-Activity
+          * Pull request has the label Interactive-Only-Installer
+          * Has not had activity in the last 3 days
+
+          Then -
+          * Close the PR
+        frequencies:
+          - hourly:
+              hour: 12
+        filters:
+          - isPullRequest
+          - isOpen
+          - hasLabel:
+              label: No-Recent-Activity
+          - hasLabel:
+              label: Interactive-Only-Installer
+          - noActivitySince:
+              days: 3
+        actions:
+          - closeIssue
+onFailure:
+onSuccess:
