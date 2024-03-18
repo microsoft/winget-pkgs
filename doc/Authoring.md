@@ -44,7 +44,7 @@ Manifests submitted to the Windows Package Manager Community Repository should b
 Once you have a package in mind that doesn't already exist in the repository, you can now start [creating your package manifest](https://docs.microsoft.com/en-us/windows/package-manager/package/manifest?tabs=minschema%2Cversion-example). We recommend using the [Windows Package Manager Manifest Creator (a.k.a Winget-Create)](https://github.com/microsoft/winget-create) to help you generate your manifest. Winget-Create is a command line tool that will prompt you for relevant metadata related to your package. Once you are done, Winget-Create will validate your manifest to verify that it is correct and allow you to submit your newly-created manifest directly to the winget-pkgs repository by linking your GitHub account. Alternatively, you can use the [YamlCreate.ps1 Script](Tools/YamlCreate.ps1). More information on using YamlCreate is found in the [script documentation](doc/tools/YamlCreate.md).
 
 ## Installer Architectures
-If you are authoring a manifest yourself one of the important things to note related to installer types is architecture. In many cases the installer itself may be an x86 installer, but it will actually install the package for the architecture of the system. In these cases, the installer type in the manifest should target the architecture of the system it will be installed on. So in some cases the actual installer itself targets x86, but in fact it will install an x64 version of the package.
+If you are authoring a manifest yourself one of the important things to note related to installer types is architecture. In many cases the installer itself may be an x86 installer, but it will actually install the package for the architecture of the system. In these cases, the installer type in the manifest should indicate the architecture of the installed binaries. So in some cases the actual installer itself targets x86, but in fact it will install an x64 version of the package.
 
 
 ### How do I install Winget-Create?
@@ -101,9 +101,8 @@ Version Matching and Package Correlation is the process by which WinGet attempts
 There are a few typical use cases when `AppsAndFeaturesEntries` should be specified in a manifest.
 
 1. The installer does not write a `DisplayVersion` to registry and either of the following are true:
-    a. The `DisplayName` contains the version.
-
-    b. The `ProductCode` contains version.
+   1.  The `DisplayName` contains the version.
+   2.  The `ProductCode` contains version.
 
 	In either of these cases, the respective field is required in every manifest to accurately match the installed package version to an available version from the source.
 
@@ -117,7 +116,7 @@ There are a few typical use cases when `AppsAndFeaturesEntries` should be specif
 
 	When this happens, `PackageVersion` should be set to something which is sortable by WinGet and `DisplayVersion` should be set to the value the installer writes to the registry. For more information, see the section on [Version Sorting in WinGet](/doc/Authoring.md#version-sorting-in-winget)
 
-3. The `InstallerType` of the installer which writes the registry keys does not match the `InstallerType` of the manifest
+4. The `InstallerType` of the installer which writes the registry keys does not match the `InstallerType` of the manifest
 
     In some cases an EXE installer may call an embedded MSI which writes data to the registry in a different format. While the `InstallerType` may be correctly identified in the manifest, the WinGet CLI will detect the registry entries as being from an MSI and return an error that the installation technology does not match when running `winget upgrade`. This requires the `InstallerType` to be specified in `AppsAndFeaturesEntries`
 
@@ -148,7 +147,7 @@ When comparing one `Part` to another, WinGet goes through the following process.
 	* If one `Part` has a value in `string` and the other does not, the `Part` which ***does not*** have a value in `string` is considered to be greater
 	* Example: When comparing `34` and `34-beta`, the `integer` is equal for both (`34`). However, the `string` for the former is empty and the `string` for the latter is `-beta`, so `34` is the larger `Part`. This leads to `1.2.34` being considered a higher `Version` than `1.2.34-beta`
 4. If both parts have a value in `string`, perform a case-insensitive comparison of the two
-	* If the values of `string` are not equal, the lexographic comparison determines which `Part` is larger
+	* If the values of `string` are not equal, the lexicographic comparison determines which `Part` is larger
 
 #### Examples of Version Comparisons
 
@@ -158,4 +157,4 @@ When comparing one `Part` to another, WinGet goes through the following process.
 | 1.2 | 1.2-rc | `Version A` | The `-rc` causes `Version B` to have a `string` in the second `Part` where `Version A` does not |
 | 1.2.3 | 1.2.4-rc | `Version B` | The `integer` on the third `Part` is larger for `Version B` |
 | v1.2 | 1.1 | `Version B` | The leading `v` causes the `integer` for `Version A` to be `0`, which is less than `1` |
-| 1.2.3a | 1.2.3b | `Version B` | `b` is lexographically greater than `a` |
+| 1.2.3a | 1.2.3b | `Version B` | `b` is lexicographically greater than `a` |
