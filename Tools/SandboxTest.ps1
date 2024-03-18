@@ -20,6 +20,7 @@ Param(
 
 $ErrorActionPreference = 'Stop'
 
+$useNuGetForMicrosoftUIXaml = $false
 $mapFolder = (Resolve-Path -Path $MapFolder).Path
 
 if (-Not (Test-Path -Path $mapFolder -PathType Container)) {
@@ -112,10 +113,11 @@ $oldProgressPreference = $ProgressPreference
 $ProgressPreference = 'SilentlyContinue'
 
 $latestRelease = Get-Release
+$versionTag = $latestRelease.releaseTag
 $desktopAppInstaller = @{
   url    = $latestRelease.msixFileUrl
   hash   = $latestRelease.shaFileContent
-  SaveTo = $(Join-Path $env:LOCALAPPDATA -ChildPath "Packages\Microsoft.DesktopAppInstaller_8wekyb3d8bbwe\bin\$($latestRelease.releaseTag)\Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.msixbundle")
+  SaveTo = $(Join-Path $env:LOCALAPPDATA -ChildPath "Packages\Microsoft.DesktopAppInstaller_8wekyb3d8bbwe\bin\$versionTag\Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.msixbundle")
 }
 
 $ProgressPreference = $oldProgressPreference
@@ -125,13 +127,27 @@ $vcLibsUwp = @{
   hash   = 'B56A9101F706F9D95F815F5B7FA6EFBAC972E86573D378B96A07CFF5540C5961'
   SaveTo = $(Join-Path $tempFolder -ChildPath 'Microsoft.VCLibs.x64.14.00.Desktop.appx')
 }
-$uiLibsUwp = @{
+$uiLibsUwp_2_7 = @{
   url    = 'https://github.com/microsoft/microsoft-ui-xaml/releases/download/v2.7.3/Microsoft.UI.Xaml.2.7.x64.appx'
   hash   = '8CE30D92ABEC6522BEB2544E7B716983F5CBA50751B580D89A36048BF4D90316'
   SaveTo = $(Join-Path $tempFolder -ChildPath 'Microsoft.UI.Xaml.2.7.x64.appx')
 }
+$uiLibsUwp_2_8 = @{
+  url    = 'https://github.com/microsoft/microsoft-ui-xaml/releases/download/v2.8.6/Microsoft.UI.Xaml.2.8.x64.appx'
+  hash   = '249D2AFB41CC009494841372BD6DD2DF46F87386D535DDF8D9F32C97226D2E46'
+  SaveTo = $(Join-Path $tempFolder -ChildPath 'Microsoft.UI.Xaml.2.8.x64.appx')
+}
+$uiLibs_nuget = @{
+  url    = 'https://www.nuget.org/api/v2/package/Microsoft.UI.Xaml/2.8.6'
+  hash   = '6B62BD3C277F55518C3738121B77585AC5E171C154936EC58D87268BBAE91736'
+  SaveTo = $(Join-Path $tempFolder -ChildPath 'Microsoft.UI.Xaml.2.8.zip')
+}
 
-$dependencies = @($desktopAppInstaller, $vcLibsUwp, $uiLibsUwp)
+$dependencies = @($desktopAppInstaller, $vcLibsUwp, $uiLibsUwp_2_7, $uiLibsUwp_2_8)
+
+if ($useNuGetForMicrosoftUIXaml) {
+  $dependencies += $uiLibs_nuget
+}
 
 # Clean temp directory
 Get-ChildItem $tempFolder -Recurse -Exclude $($(Split-Path $dependencies.SaveTo -Leaf) -replace '\.([^\.]+)$', '.*') | Remove-Item -Force -Recurse
@@ -165,11 +181,15 @@ foreach ($dependency in $dependencies) {
       $WebClient.DownloadFile($dependency.url, $dependency.SaveTo)
 
     } catch {
-      #Pass the exception as an inner exception
-      throw [System.Net.WebException]::new("Error downloading $($dependency.url).", $_.Exception)
+      # If the download failed, remove the item so the sandbox can fall-back to using the PowerShell module
+      Remove-Item $dependency.SaveTo -Force | Out-Null
     }
     if (-not ($dependency.hash -eq $(Get-FileHash $dependency.SaveTo).Hash)) {
-      throw [System.Activities.VersionMismatchException]::new('Dependency hash does not match the downloaded file')
+      # If the hash didn't match, remove the item so the sandbox can fall-back to using the PowerShell module
+      Write-Host -ForegroundColor Red '      Dependency hash does not match the downloaded file'
+      Write-Host -ForegroundColor Red '      Please open an issue referencing this error at https://bit.ly/WinGet-SandboxTest-Needs-Update'
+      Write-Host
+      Remove-Item $dependency.SaveTo -Force | Out-Null
     }
   }
 }
@@ -221,12 +241,43 @@ function Get-ARPTable {
 }
 '@
 
+### The NuGet may be needed if the latest Appx Packages are not available on GitHub ###
+if ($useNuGetForMicrosoftUIXaml) {
+  $bootstrapPs1Content += @"
+`$ProgressPreference = 'SilentlyContinue'
+
+Expand-Archive -Path $($uiLibs_nuget.pathInSandbox) -DestinationPath C:\Users\WDAGUtilityAccount\Downloads\Microsoft.UI.Xaml -ErrorAction SilentlyContinue
+Get-ChildItem C:\Users\WDAGUtilityAccount\Downloads\Microsoft.UI.Xaml\tools\AppX\x64\Release -Filter *.appx | Add-AppxPackage
+
+"@
+}
+#######################################################################################
+
 $bootstrapPs1Content += @"
 Write-Host @'
 --> Installing WinGet
 '@
 `$ProgressPreference = 'SilentlyContinue'
-Add-AppxPackage -Path '$($desktopAppInstaller.pathInSandbox)' -DependencyPath '$($vcLibsUwp.pathInSandbox)','$($uiLibsUwp.pathInSandbox)'
+try {
+  Add-AppxPackage -Path '$($vcLibsUwp.pathInSandbox)' -ErrorAction Stop
+  Add-AppxPackage -Path '$($uiLibsUwp_2_7.pathInSandbox)' -ErrorAction Stop
+  Add-AppxPackage -Path '$($uiLibsUwp_2_8.pathInSandbox)' -ErrorAction Stop
+  Add-AppxPackage -Path '$($desktopAppInstaller.pathInSandbox)' -ErrorAction Stop
+} catch {
+  Write-Host -ForegroundColor Red 'Could not install from cached packages. Falling back to Repair-WinGetPackageManager cmdlet'
+  try {
+    Install-PackageProvider -Name NuGet -Force | Out-Null
+    Install-Module -Name Microsoft.WinGet.Client -Force -Repository PSGallery | Out-Null
+  } catch {
+    throw "Microsoft.Winget.Client was not installed successfully"
+  } finally {
+    # Check to be sure it acutally installed
+    if (-not(Get-Module -ListAvailable -Name Microsoft.Winget.Client)) {
+      throw "Microsoft.Winget.Client was not found. Check that the Windows Package Manager PowerShell module was installed correctly."
+    }
+  }
+  Repair-WinGetPackageManager -Version $versionTag
+}
 
 Write-Host @'
 --> Disabling safety warning when running installer
