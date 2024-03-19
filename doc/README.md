@@ -5,7 +5,7 @@
 A few different tools are available to help you author a manifest.
 
 - [Windows Package Manager Manifest Creator](https://github.com/microsoft/winget-create)
-- [YamlCreate.ps1](doc/tools/YamlCreate.md)
+- [YamlCreate.ps1](tools/YamlCreate.md)
 - Other WinGet Manifest Creators developed by the community:
   - [Komac - Community Manifest Creator](https://github.com/russellbanks/Komac) (maintained by [**@russellbanks**](https://github.com/russellbanks))
 
