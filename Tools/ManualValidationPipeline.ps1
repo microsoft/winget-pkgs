@@ -10,7 +10,7 @@
 #3.88.19 - A few bugfixes.
 #3.88.18 - Restore waiver and retry fucntionality. 
 
-$build = 870
+$build = 871
 $appName = "ManualValidationPipeline"
 Write-Host "$appName build: $build"
 $MainFolder = "C:\ManVal"
@@ -2387,7 +2387,6 @@ Function Get-SearchGitHub {
 	$Blocking = $Blocking + "-label:Project-File+"
 	$Blocking = $Blocking + "-label:Reboot+"
 	$Blocking = $Blocking + "-label:Scripted-Application+"
-	$Blocking = $Blocking + "-label:WindowsFeatures+"
 	$Blocking = $Blocking + "-label:zip-binary+"
 	
 	$Common = $nBI
