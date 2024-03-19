@@ -1,21 +1,24 @@
 //Copyright 2022-2024 Microsoft Corporation
 //Author: Stephen Gillie
-//Title: WinGet Approval Pipeline v3.-73.0
+//Title: WinGet Approval Pipeline v3.-68.0
 //Created: 1/19/2024
-//Updated: 3/14/2024
+//Updated: 3/15/2024
 //Notes: Tool to streamline evaluating winget-pkgs PRs.
 //Update log:
+//3.-68.0 - Depreciate RotateLog.
+//3.-69.0 - Finish porting PRPopulateRecord.
+//3.-70.1 - Create RefreshStatus to handle updating outBox_vm. This was done before by standard PowerShell display of a CSV-like array as a table.
+//3.-70.0 - Port SetStatus.
+//3.-71.0 - Port GetValidationData.
+//3.-71.0 - Depreciate AddValidationData.
 //3.-72.1 - Improve PR field regex. 
-//3.-72.0 - Port CommitFile. 
-//3.-73.0 - Port ManifestEntryCheck. 
-//3.-74.0 - Soft-depreciate ManifestOtherAutomation. 
-//3.-75.0 - Port AddWaiver. 
 
 
 
 
 
-/*Contents: (Remaining functions to port or depreciate: 66)
+
+/*Contents: (Remaining functions to port or depreciate: 62)
 - Init vars (?)
 - Boilerplate (?)
 - UI top-of-box (?)
@@ -28,20 +31,28 @@
 - Manifests Etc (6)
 - VM Image Management (3)
 - VM Pipeline Management (6)
-- VM Status (3)
+- VM Status (2)
 - VM Versioning (1)
 - VM Orchestration (4)
-- File Management (4)
+- File Management (3)
 - Inject into files on disk (2)
 - Inject into PRs (4)
 - Timeclock (4)
-- Reporting (3)
+- Reporting (2)
 - Clipboard (3)
-- Etc (4)
+- Etc (2)
 - PR Watcher Utility functions (1)
 - Powershell equivalency (+8)
 - VM Window management (3)
 - Misc data (+5)
+
+Et cetera:
+- UserInput field 
+- Mode through button effects
+- VM control buttons
+- PR counters on certain buttons - Approval-Ready, ToWork, Defender, IEDS
+- Better way to display VM/Validation lists.
+- CLI switches such as --hourly-run
 */
 
 
@@ -59,11 +70,8 @@ Get-TrackerVMWindowArrange#Get-TrackerVMWindowSet, Get-TrackerVMWindowLoc
 PadRight
 PRStateFromComments
 LineFromCommitFile
-PRPopulateRecord
 
 #Todo: 
-Add-ValidationData
-Get-TrackerVMSetStatus
 Get-LoadFileIfExists
 Get-UpdateArchInPR
 Add-DependencyToPR
@@ -71,27 +79,27 @@ Get-TimeRunning
 Get-OSFromVersion
 Test-Admin
 Get-PRApproval
+Add-ToValidationFile
+Get-PRFromRecord
+Get-UpdateHashInPR
+Get-UpdateHashInPR2
 
 #Blocked:
 Get-ManifestListing#Find-WinGetPackage
 Get-ConnectedVM#Test-Admin
-Add-ToValidationFile#Get-TrackerVMSetStatus
 Add-InstallerSwitch#Add-ToValidationFile
 Get-Timeclock#Get-Date
-Get-PRFullReport#Get-PRReportFromRecord
 Open-AllURL#Start-Process
 Open-PRInBrowser#Start-Process
 Get-ListingDiff#Get-ManifestListing
 Get-TrackerVMRebuildStatus#Get-VM
-Get-PRFromRecord#Get-PRPopulateRecord
 Get-PRReportFromRecord#Get-PRFromRecord
+Get-PRFullReport#Get-PRReportFromRecord
 Get-TrackerVMValidateByID#Get-TrackerVMValidate
 Get-TrackerVMValidateByConfig#Get-TrackerVMValidate
 Get-TrackerVMValidateByArch#Get-TrackerVMValidate
 Get-TrackerVMValidateByScope#Get-TrackerVMValidate
 Get-TrackerVMValidateBothArchAndScope#Get-TrackerVMValidate
-Get-UpdateHashInPR#Add-GitHubReviewComment
-Get-UpdateHashInPR2#Add-GitHubReviewComment
 
 Get-SearchGitHub#Get-Date, Start-Process
 Get-ManifestAutomation#Get-ManifestFile, Get-NextFreeVM
@@ -103,9 +111,10 @@ Get-SingleFileAutomation#Get-ManifestFile, Get-ManifestListing
 Get-Sandbox#Stop-Process, Start-Process
 Get-NextFreeVM#Get-Random, Test-Admin
 Get-RemoveFileIfExist#New-Item, Remove-Item
+Get-TrackerVMRevert#Restore-VMCheckpoint, Test-Admin
+Get-TrackerVMResetStatus#Get-ConnectedVM, Stop-Process
 
 Get-TrackerVMLaunchWindow#Get-ConnectedVM, Stop-Process, Test-Admin 
-Get-TrackerVMRevert#Get-TrackerVMSetStatus, Restore-VMCheckpoint, Test-Admin
 
 Get-TrackerVMRunTracker#Get-AutoValLog, Get-ConnectedVM, Get-Date, Get-HoursWorkedToday, Get-PRLabelAction, Get-Random, Get-RandomIEDS, Get-SearchGitHub, Get-TimeRunning, Get-TrackerMode, Get-TrackerVMCycle, Get-TrackerVMRotate, Get-TrackerVMValidate, Get-TrackerVMWindowArrange, Get-VM, Set-Vm, start-process
 Get-PRWatch#Approve-PR, Compare-Object, Find-WinGetPackage, Get-CleanClip, Get-Command, Get-Date, Get-ListingDiff, Get-LoadFileIfExists, Get-PadRight, Get-PRApproval, Get-Random, Get-Sandbox, Get-TrackerVMValidate
@@ -114,14 +123,13 @@ Get-GitHubPreset#Approve-PR, Check-PRInstallerStatusInnerWrapper, Find-WinGetPac
 Get-PRLabelAction#Soothing label action. #Get-AutoValLog, Get-Date, Get-GitHubPreset, Get-PRStateFromComments, Get-UpdateHashInPR2
 Get-AutoValLog#Expand-Archive, Get-BuildFromPR, Get-ChildItem, Get-GitHubPreset, Open-PRInBrowser, Remove-Item, Start-Process, Stop-Process
 Get-RandomIEDS#Get-ManifestFile, Get-NextFreeVM, Get-Random, Get-SearchGitHub
-Get-TrackerVMValidate#Find-WinGetPackage,  ForEach-Object,  Get-ChildItem,  Get-NextFreeVM,  Get-OSFromVersion,  Get-PipelineVmGenerate,    Get-RemoveFileIfExist,  Get-TrackerVMLaunchWindow,  Get-TrackerVMRevert,  Get-TrackerVMSetStatus,  Get-VM,  Get-YamlValue,  Open-AllURL,  Start-Process,  Test-Admin
+Get-TrackerVMValidate#Find-WinGetPackage, ForEach-Object, Get-ChildItem, Get-NextFreeVM, Get-OSFromVersion, Get-PipelineVmGenerate,  Get-RemoveFileIfExist, Get-TrackerVMLaunchWindow, Get-TrackerVMRevert,  Get-VM, Get-YamlValue, Open-AllURL, Start-Process, Test-Admin
 Get-ManifestFile#Get-NextFreeVM, Get-RemoveFileIfExist, Get-TrackerVMValidate
 Get-PipelineVmGenerate#Get-Date, Get-RemoveFileIfExist, Get-TrackerVMLaunchWindow, Get-TrackerVMRevert, Get-VM, Import-VM, Remove-VMCheckpoint, Rename-VM, Start-VM, Test-Admin
 Get-PipelineVmDisgenerate#Get-ConnectedVM, Get-RemoveFileIfExist, Get-TrackerVMSetStatus, Remove-VM, Stop-Process, Stop-TrackerVM, Test-Admin, Write-Progress
 Get-ImageVMStart#Get-TrackerVMLaunchWindow, Get-TrackerVMRevert, Start-VM, Test-Admin
 Get-ImageVMStop#Get-ConnectedVM, Redo-Checkpoint, Stop-Process, Stop-TrackerVM, Test-Admin
 Get-ImageVMMove#Get-Date, Get-VM, Move-VMStorage, Rename-VM, Test-Admin
-Get-TrackerVMResetStatus#Get-ConnectedVM, Get-TrackerVMSetStatus, Stop-Process
 Get-TrackerVMRotate#Get-Random, Get-TrackerVMSetStatus, Get-TrackerVMVersion
 Complete-TrackerVM#Get-ConnectedVM, Get-RemoveFileIfExist, Get-TrackerVMSetStatus, Stop-Process, Stop-TrackerVM, Test-Admin
 Redo-Checkpoint#Checkpoint-VM, Get-TrackerVMSetStatus, Redo-Checkpoint, Remove-VMCheckpoint, Test-Admin

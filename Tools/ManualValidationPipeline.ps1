@@ -39,7 +39,7 @@ $PeriodicRunLog = "$MainFolder\misc\PeriodicRunLog.txt"
 $SharedErrorFile = "$writeFolder\err.txt"
 $DataFileName = "$ReposFolder\Tools\ManualValidationPipeline.csv"
 
-$Win10Folder = "$imagesFolder\Win10-Created010424-Original"
+$Win10Folder = "$imagesFolder\Win10-Created031524-Original"
 $Win11Folder = "$imagesFolder\Win11-Created010424-Original"
 
 $GitHubBaseUrl = "https://github.com/$Owner/$Repo"
