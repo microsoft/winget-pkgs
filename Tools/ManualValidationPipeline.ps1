@@ -3415,9 +3415,9 @@ Where-Object {`$_ -notmatch 'WindowsUpdate'} |
 Where-Object {`$_ -notmatch 'WinSxS'}
 
 `$files | Out-File 'C:\Users\user\Desktop\ChangedFiles.txt'
-`$files | Select-String '[.]exe`$' | ForEach-Object {if (`$_ -match '$packageName') {Out-Log `$_ 'green'}else{Out-Log `$_ 'cyan'}; try{Start-Process `$_}catch{}};
-`$files | Select-String '[.]msi`$' | ForEach-Object {if (`$_ -match '$packageName') {Out-Log `$_ 'green'}else{Out-Log `$_ 'cyan'}; try{Start-Process `$_}catch{}};
-`$files | Select-String '[.]lnk`$' | ForEach-Object {if (`$_ -match '$packageName') {Out-Log `$_ 'green'}else{Out-Log `$_ 'cyan'}; try{Start-Process `$_}catch{}};
+`$files | Select-String '[.]exe`$' | ForEach-Object {if (`$_ -match '$packageName') {Out-Log `$_ 'green'} else{Out-Log `$_ 'cyan'}; try{Start-Process `$_}catch{}};
+`$files | Select-String '[.]msi`$' | ForEach-Object {if (`$_ -match '$packageName') {Out-Log `$_ 'green'} else{Out-Log `$_ 'cyan'}; try{Start-Process `$_}catch{}};
+`$files | Select-String '[.]lnk`$' | ForEach-Object {if (`$_ -match '$packageName') {Out-Log `$_ 'green'} else{Out-Log `$_ 'cyan'}; try{Start-Process `$_}catch{}};
 
 Out-Log `" = = = = End file list. Starting Defender scan.`"
 Start-MpScan;
@@ -3745,7 +3745,7 @@ Function Get-ListingDiff {
 
 Function Get-OSFromVersion {
 	try{
-		if ([system.version](Get-YamlValue -StringName MinimumOSVersion) -ge [system.version]"10.0.22000.0"){"Win11"}else{"Win10"}
+		if ([system.version](Get-YamlValue -StringName MinimumOSVersion) -ge [system.version]"10.0.22000.0"){"Win11"} else{"Win10"}
 	} catch {
 		"Win10"
 	}
@@ -4162,7 +4162,7 @@ Function Get-RemoveFileIfExist {
 	if (Test-Path $FilePath) {Remove-Item $FilePath -Recurse}
 	if ($Silent) {
 		if ($remake) {$null = New-Item -ItemType Directory -Path $FilePath}
-	}else {
+	} else {
 		if ($remake) {New-Item -ItemType Directory -Path $FilePath}
 	}
 
