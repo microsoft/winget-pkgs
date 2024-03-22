@@ -2,48 +2,27 @@
 //Author: Stephen Gillie
 //Title: WinGet Approval Pipeline v3.-40.1
 //Created: 1/19/2024
-//Updated: 3/20/2024
-//Notes: Tool to streamline evaluating winget-pkgs PRs.
+//Updated: 3/21/2024
+//Notes: Tool to streamline evaluating winget-pkgs PRs. 
 //Update log:
+//3.-38.0 - Port WorkSearch 75%.
+//3.-39.1 - Add RetryPR to centralize these lines.
+//3.-39.0 - Port LabelAction.
+//3.-40.2 - Complete porting LineFromCommitFile.
 //3.-40.1 - Complete porting PRStateFromComments.
-//3.-40.0 - Port AutoValLog.
-//3.-41.0 - Port RemoveFileifExist, rename to RemoveItem.
-//3.-42.0 - Port GitHubPreset and populate buttons.
-//3.-43.0 - Port NextFreeVM.
-//3.-44.0 - Port RotateVMs.
-//3.-45.0 - Port LaunchWindow.
-//3.-46.0 - Port ResetStatus.
-//3.-47.2 - Create StopProcessesByName to stop all processes with the supplied name.
-//3.-47.1 - Rename webRequest to InvokeWebRequest.
-//3.-47.0 - Port Sandbox.
-//3.-48.1 - Add drawLabel. Centralize font type and size.
-//3.-48.0 - Depreciate ConnectedVM.
-//3.-49.0 - Port SearchGitHub.
-//3.-50.0 - Port TestAdmin.
-//3.-51.0 - Port OpenPRInBrowser.
-//3.-52.0 - Port OpenAllURL.
-//3.-53.0 - Port PRFullReport.
-//3.-54.0 - Port PRReportFromRecord.
-//3.-55.0 - Port PRFromRecord.
-//3.-56.0 - Port AddInstallerSwitch (80%).
-//3.-56.0 - Port AddToValidationFile (80%).
-//3.-57.0 - Depreciate Inject into PR section. (Could be revived after porting is complete.)
-//3.-61.1 - Bugfix to not constantly ask for trackermode file when missing.
-//3.-61.0 - GetPRApproval.
-//3.-62.2 - Rename YamlValue variables to be more clear.
 
 
 
 
 
 
-/*Contents: (Remaining functions to port or depreciate: 32)
+/*Contents: (Remaining functions to port or depreciate: 31)
 - Init vars
 - Boilerplate
 - UI top-of-box
 	- Menu
-- Tabs (3)
-- Automation Tools (3)
+- Tabs (2)
+- Automation Tools (2)
 - PR tools (1)
 - Network tools
 - Validation Starts Here (6)
@@ -75,18 +54,16 @@ Et cetera:
 
 
 
-
 /*
 Partial (7): 
 CheckStandardPRComments needs work on data structures. 
 Get-TrackerVMWindowLoc
 Get-TrackerVMWindowSet
 Get-TrackerVMWindowArrange#Get-TrackerVMWindowSet, Get-TrackerVMWindowLoc
-LineFromCommitFile
-AddValidationData 80%
+AddValidationData
+WorkSearch
 
 #Todo:
-Get-WorkSearch
 
 #Blocked:
 Get-ManifestListing#Find-WinGetPackage
@@ -117,7 +94,7 @@ Get-PipelineVmGenerate#Get-TrackerVMRevert, Get-VM, Import-VM, Remove-VMCheckpoi
 			Get-SingleFileAutomation#Get-ManifestFile, Get-ManifestListing
 			Get-RandomIEDS#Get-ManifestFile
 			Get-TrackerVMRunTracker#Get-RandomIEDS, Get-TrackerVMCycle, Get-TrackerVMValidate, Get-TrackerVMWindowArrange, Get-VM, Set-VM
-		Get-PRWatch#Compare-Object, Find-WinGetPackage, Get-ListingDiff, Get-TrackerVMValidate
+		Get-PRWatch#Find-WinGetPackage, Get-ListingDiff, Get-TrackerVMValidate
 
 */
 
@@ -137,6 +114,7 @@ using System.Globalization;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Management;
 using System.Net;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
@@ -149,7 +127,7 @@ using System.Web.Script.Serialization;
 namespace WinGetApprovalNamespace {
     public class WinGetApprovalPipeline : Form {
 		//vars
-        public int build = 428;//Get-RebuildPipeApp	
+        public int build = 445;//Get-RebuildPipeApp	
 		public string appName = "WinGetApprovalPipeline";
 		public string appTitle = "WinGet Approval Pipeline - Build ";
 		public static string owner = "microsoft";
@@ -231,16 +209,23 @@ namespace WinGetApprovalNamespace {
         public Button btn10, btn11, btn12, btn13, btn14, btn15, btn16, btn17, btn18, btn19;
         public Button btn20, btn21, btn22, btn23, btn24, btn25, btn26, btn27, btn28;
 		
-		public Color DefaultButtonColor = Color.FromArgb(240,240,240);
-		public Color ActiveButtonColor = Color.FromArgb(200,240,240);
+		int DarkMode = 1;//(int)Microsoft.Win32.Registry.GetValue("HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", "AppsUseLightTheme", -1);
+		//0 : dark theme
+		//1 : light theme
+		//-1 : AppsUseLightTheme could not be found
+		
+		public Color color_DefaultBack = Color.FromArgb(240,240,240);
+		public Color color_DefaultText = Color.FromArgb(0,0,0);
+		public Color color_InputBack = Color.FromArgb(255,255,255);
+		public Color color_ActiveBack = Color.FromArgb(200,240,240);
 
 		//Grid
 		public static int gridItemWidth = 70;
 		public static int gridItemHeight = 45;
 
 		public int lineHeight = 14;
-		public int WindowWidth = gridItemWidth*10+20;
-		public int WindowHeight = gridItemHeight*12+20;
+		public int WindowWidth = gridItemWidth*10+10;
+		public int WindowHeight = gridItemHeight*12+10;
 		
 		//Fonts
 		string AppFont = "Calibri";
@@ -284,14 +269,26 @@ namespace WinGetApprovalNamespace {
 			this.Text = appTitle + build;
 			this.Size = new Size(WindowWidth,WindowHeight);
 			//this.StartPosition = FormStartPosition.CenterScreen;
-			this.Resize += new System.EventHandler(this.OnResize);
+			this.FormBorderStyle = FormBorderStyle.FixedSingle;
+
+			this.MaximizeBox = false;
+			//this.MinimizeBox = false;
+			//this.Resize += new System.EventHandler(this.OnResize);
 			this.AutoScroll = true;
 			this.Icon = Icon.ExtractAssociatedIcon(System.Reflection.Assembly.GetExecutingAssembly().Location);
 			Array.Resize(ref history, history.Length + 2);
 			history[historyIndex] = "about:blank";
 			historyIndex++;
-
-
+			
+		if (DarkMode == 0) {
+			color_DefaultBack = Color.FromArgb(15,15,15);
+			color_DefaultText = Color.FromArgb(255,255,255);
+			color_ActiveBack = Color.FromArgb(15,55,105);
+			color_InputBack = Color.FromArgb(0,0,0);
+		}
+			this.BackColor = color_DefaultBack;
+			this.ForeColor = color_DefaultText;
+			
 			drawMenuBar();
 			drawUrlBoxAndGoButton();
 			//drawOutBox();
@@ -310,6 +307,8 @@ namespace WinGetApprovalNamespace {
 			button.Text = buttonText;
 			button.Location = new Point(pointX, pointY);
 			button.Size = new Size(sizeX, sizeY);
+			button.BackColor = color_DefaultBack;
+			button.ForeColor = color_DefaultText;
 			button.Click += new EventHandler(buttonOnclick);
 			button.Font = new Font(buttonFont, buttonFontSIze);
 			Controls.Add(button);
@@ -324,6 +323,8 @@ namespace WinGetApprovalNamespace {
 			outBox.WordWrap = true;
 			outBox.ReadOnly = true;
 			outBox.DetectUrls = true;
+			outBox.BackColor = color_DefaultBack;
+			outBox.ForeColor = color_DefaultText;
 			outBox.Font = new Font(AppFont, AppFontSIze);
 			outBox.Location = new Point(pointX, pointY);
 			//outBox.LinkClicked  += new LinkClickedEventHandler(Link_Click);
@@ -347,6 +348,8 @@ namespace WinGetApprovalNamespace {
 			urlBox.Name = "urlBox";
 			urlBox.Font = new Font(AppFont, urlBoxFontSIze);
 			urlBox.Location = new Point(pointX, pointY);
+			urlBox.BackColor = color_InputBack;
+			urlBox.ForeColor = color_DefaultText;
 			urlBox.Width = sizeX;
 			urlBox.Height = sizeY;
 			urlBox.KeyUp += urlBox_KeyUp;
@@ -359,7 +362,8 @@ namespace WinGetApprovalNamespace {
 			//newLabel.ImageList = imageList1;
 			newLabel.ImageIndex = 1;
 			newLabel.ImageAlign = ContentAlignment.TopLeft;
-
+			newLabel.BackColor = color_DefaultBack;
+			newLabel.ForeColor = color_DefaultText;
 			newLabel.Name = "newLabel";
 			newLabel.Font = new Font(AppFont, AppFontSIze);
 			newLabel.Location = new Point(pointX, pointY);
@@ -539,7 +543,58 @@ Gilgamech is making web browsers, games, self-driving RC cars, and other technol
 //Tabs
 //RunTracker
 //PRWatch
-//WorkSearch
+public void WorkSearch(int Days = 7) {
+string[] PresetList = {"Approval","ToWork"};
+	foreach (string Preset in PresetList) {
+		int Count= 30;
+		int Page = 1;
+		while (Count == 30) {
+			int line = 0;
+			Dictionary<string,dynamic>[] PRs = SearchGitHub(Preset,Page,Days,false,true);
+
+			Count = PRs.Length; //if fewer than 30 PRs (1 page) are returned, then complete the loop and continue instead of starting another loop.
+			PRs = PRs.Where(n => n["labels"] != null).ToArray();//.Where(n => n["number"] -notin (Get-Status).pr} 
+			
+			foreach (Dictionary<string,dynamic>FullPR in PRs) {
+				int PR = FullPR["number"];
+				//Get-TrackerProgress -PR $PR $MyInvocation.MyCommand line PRs.Length
+				line++;
+				if((FullPR["title"].Contains("Remove")) || 
+				(FullPR["title"].Contains("Delete")) || 
+				(FullPR["title"].Contains("Automatic deletion"))){
+					//Get-GitHubPreset CheckInstaller -PR $PR
+				}
+				dynamic Comments = InvokeGitHubPRRequest(PR,"comments");
+				if (Preset == "Approval"){
+					if (CheckStandardPRComments(PR,Comments)){
+						OpenPRInBrowser(PR);
+					} else {
+						OpenPRInBrowser(PR,true);
+					}
+				} else if (Preset == "Defender"){
+					LabelAction(PR);
+				} else {//ToWork etc
+/*
+					$Comments = ($Comments | select created_at,@{n="UserName";e={$_.user.login.Replace("\\[bot\\]")}},body)
+					State = (Get-PRStateFromComments -PR $PR -Comments $Comments)
+					$LastState = $State[-1]
+					if ($LastState.event == "DefenderFail") { 
+						Get-PRLabelAction -PR $PR
+					} else if ($LastState.event == "LabelAction") { 
+						Get-GitHubPreset -Preset LabelAction -PR $PR
+						OpenPRInBrowser(PR);
+					} else {
+						if ($Comments[-1].UserName != $GitHubUserName) {
+							OpenPRInBrowser(PR);
+						}
+					}//end if LastCommenter
+*/
+				}//end if Preset
+			}//end foreach FullPR
+			Page++;
+		}//end While Count
+	}//end foreach Preset
+}//end Get-WorkSearch
 
 
 
@@ -547,11 +602,244 @@ Gilgamech is making web browsers, games, self-driving RC cars, and other technol
 
 
 //Automation Tools
-//GitHubPreset
-//LabelAction
+		public void LabelAction(int PR){
+		string[] PRLabels = FromJson(InvokeGitHubPRRequest(PR,"labels","content"))["name"];
+			//Write-Output "PR $PR has labels $PRLabels"
+			if (PRLabels.Any(n => MagicLabels[0].Contains(n))) {
+				List<string> PRState = PRStateFromComments(PR);
+		/*
+				if (($PRState.Where(n => n.event == "PreValidation"})[-1].created_at < (Get-Date).AddHours(-8) && //Last Prevalidation was 8 hours ago.
+				($PRState.Where(n => n.event == "Running"})[-1].created_at < (Get-Date).AddHours(-18)) {  //Last Run was 18 hours ago.
+					Get-GitHubPreset Retry -PR $PR
+				}
+		*/
+			} else {
+				
+				foreach (string Label in PRLabels) {
+					string UserInput = "";
+					if (Label == MagicLabels[1]) {
+						UserInput = LineFromCommitFile(PR,36,MagicStrings[0],10);
+						if (UserInput == null) {
+							UserInput = LineFromCommitFile(PR,41,MagicStrings[0],10);
+						}
+						if (UserInput == null) {
+							UserInput = LineFromCommitFile(PR,50,MagicStrings[0],10);
+						}
+						if (UserInput == null) {
+							UserInput = LineFromCommitFile(PR,26,MagicStrings[0],10);
+						}
+						if (UserInput == null) {
+							UserInput = LineFromCommitFile(PR,34,MagicStrings[0],10);
+						}
+						if (UserInput != null) {
+							ReplyToPR(PR,"AutoValEnd",UserInput);
+						}
+						if (UserInput.Contains(MagicStrings[3])) {
+							AddPRToRecord(PR,"Blocking");
+							ReplyToPR(PR,"AutomationBlock","","Network-Blocker");
+						}
+					} else if (Label == MagicLabels[2]) {
+							UserInput = LineFromCommitFile(PR,36,MagicStrings[0],3);
+							if (UserInput == null) {
+								ReplyToPR(PR,"AutoValEnd",UserInput);
+							}
+							if (UserInput.Contains(MagicStrings[3])) {
+								AddPRToRecord(PR,"Blocking");
+								ReplyToPR(PR,"AutomationBlock","","Network-Blocker");
+							}
+						} else if (Label == MagicLabels[3]) {
+							UserInput = LineFromCommitFile(PR,36,MagicStrings[0],10);
+							if (UserInput == null) {
+								UserInput = LineFromCommitFile(PR,26,MagicStrings[0],10); 
+							}
+							if (UserInput == null) {
+								UserInput = LineFromCommitFile(PR,36,MagicStrings[0],10); 
+							}
+							if (UserInput == null) {
+								UserInput = LineFromCommitFile(PR,37,MagicStrings[0],10); 
+							}
+							if (UserInput == null) {
+								UserInput = LineFromCommitFile(PR,50,MagicStrings[0],10); 
+							}
+							if (UserInput == null) {
+								ReplyToPR(PR,"AutoValEnd",UserInput);
+								//Get-UpdateHashInPR2 -PR $PR -Clip UserInput
+							}
+						} else if (Label == MagicLabels[4]) { 
+							UserInput = LineFromCommitFile(PR,36,MagicStrings[6],5);
+							if (UserInput == null) {
+								ReplyToPR(PR,"AutoValEnd",UserInput);
+								//Get-GitHubPreset -PR $PR -Preset CheckInstaller
+							}
+						} else if (Label == MagicLabels[5]) {
+							UserInput = LineFromCommitFile(PR,25,MagicStrings[1]);
+							if (UserInput == null) {
+								UserInput = LineFromCommitFile(PR,15,MagicStrings[1]);
+							}
+							if (UserInput == null) {
+								if (UserInput.Contains(MagicStrings[5])) {
+									RetryPR(PR);
+								}
+								ReplyToPR(PR,"AutoValEnd",UserInput);
+							}
+						} else if (Label == MagicLabels[6]) {
+							RetryPR(PR);
+						} else if (Label == MagicLabels[7]) {
+							UserInput = LineFromCommitFile(PR,15,MagicStrings[1]);
+							if (UserInput == null) {
+								UserInput = LineFromCommitFile(PR,25,MagicStrings[4],7);
+							}
+							if (UserInput == null) {
+								UserInput = LineFromCommitFile(PR,39,MagicStrings[4],7);
+							}
+							if (UserInput == null) {
+								if (UserInput.Contains("Sequence contains no elements")) {//Reindex fixes this.
+									ReplyToPR(PR,"SequenceNoElements");
+
+									string PRtitle = FromJson(InvokeGitHubPRRequest(PR,""))["title"];
+									if ((PRtitle.Contains("Automatic deletion")) || (PRtitle.Contains("Remove"))) {
+										ReplyToPR(PR,"","","Manually-Validated","This package installs and launches normally on a Windows 10 VM.");
+									}
+								}
+							}
+						} else if (Label == MagicLabels[8]) {
+							UserInput = LineFromCommitFile(PR,25,MagicStrings[1]);
+							if (UserInput == null) {
+								if (UserInput.Contains(MagicStrings[5])) {
+									RetryPR(PR);
+								}
+								ReplyToPR(PR,"AutoValEnd",UserInput);
+							}
+						} else if (Label == MagicLabels[9]) {
+							UserInput = LineFromCommitFile(PR,25,MagicStrings[2]);
+							if (UserInput == null) {
+								UserInput = LineFromCommitFile(PR,25,MagicStrings[1]);
+							}
+							if (UserInput == null) {
+								UserInput = LineFromCommitFile(PR,15,MagicStrings[2]);
+							}
+							if (UserInput == null) {
+								UserInput = LineFromCommitFile(PR,15,MagicStrings[1]);
+							}
+							if (UserInput == null) {
+								UserInput = LineFromCommitFile(PR,39,MagicStrings[2]);
+							}
+							if (UserInput == null) {
+								UserInput = LineFromCommitFile(PR,39,MagicStrings[1]);
+							}
+							if (UserInput == null) {
+								ReplyToPR(PR,"AutoValEnd",UserInput);
+							}
+						} else if (Label == MagicLabels[10]) {
+							UserInput = LineFromCommitFile(PR,25,MagicStrings[2]);
+							if (UserInput == null) {
+								UserInput = LineFromCommitFile(PR,25,MagicStrings[1]);
+							}
+							if (UserInput == null) {
+								UserInput = LineFromCommitFile(PR,31,MagicStrings[2]);
+							}
+							if (UserInput == null) {
+								UserInput = LineFromCommitFile(PR,31,MagicStrings[1]);
+							}
+							if (UserInput == null) {
+								UserInput = LineFromCommitFile(PR,44,MagicStrings[2]);
+							}
+							if (UserInput == null) {
+								UserInput = LineFromCommitFile(PR,44,MagicStrings[1]);
+							}
+							if (UserInput == null) {
+								UserInput = LineFromCommitFile(PR,15,MagicStrings[2]);
+							}
+							if (UserInput == null) {
+								UserInput = LineFromCommitFile(PR,15,MagicStrings[1]);
+							}
+							if (UserInput == null) {
+								ReplyToPR(PR,"AutoValEnd",UserInput);
+							}
+						} else if (Label == MagicLabels[11]) {//Manifest-Validation-Error
+							UserInput = LineFromCommitFile(PR,25,MagicStrings[2]);
+							if (null == UserInput) {
+								UserInput = LineFromCommitFile(PR,25,MagicStrings[1]);
+							}
+							if (null == UserInput) {
+								UserInput = LineFromCommitFile(PR,31,MagicStrings[2]);
+							}
+							if (null == UserInput) {
+								UserInput = LineFromCommitFile(PR,31,MagicStrings[1]);
+							}
+							if (null == UserInput) {
+								UserInput = LineFromCommitFile(PR,44,MagicStrings[2]);
+							}
+							if (null == UserInput) {
+								UserInput = LineFromCommitFile(PR,44,MagicStrings[1]);
+							}
+							if (null == UserInput) {
+								UserInput = LineFromCommitFile(PR,15,MagicStrings[2]);
+							}
+							if (null == UserInput) {
+								UserInput = LineFromCommitFile(PR,15,MagicStrings[1]);
+							}
+							if (null != UserInput) {
+								ReplyToPR(PR,"AutoValEnd",UserInput);
+							}
+						} else if (Label == MagicLabels[12]) {
+							//Get-GitHubPreset PossibleDuplicate -PR PR
+						} else if (Label == MagicLabels[13]) {
+							UserInput = LineFromCommitFile(PR,24,MagicStrings[1]);
+							if (UserInput == null) {
+								UserInput = LineFromCommitFile(PR,25,MagicStrings[1]);
+							}
+							if (UserInput == null) {
+								UserInput = LineFromCommitFile(PR,14,MagicStrings[1]);
+							}
+							if (UserInput == null) {
+								UserInput = LineFromCommitFile(PR,27,MagicStrings[1]);
+							}
+							if (UserInput.Contains("The pull request contains more than one manifest")) {
+								AddPRToRecord(PR,"Feedback");//[ValidateSet("Approved","Blocking","Feedback","Retry","Manual","Closed","Project","Squash","Waiver")]
+								ReplyToPR(PR,"OneManifestPerPR",MagicLabels[30]);
+							}
+							if (UserInput == null) {
+								ReplyToPR(PR,"AutoValEnd",UserInput);
+							}
+						} else if (Label == MagicLabels[14]) {
+							UserInput = LineFromCommitFile(PR,32,"Validation result: Failed");
+							//Get-GitHubPreset -PR PR -Preset CheckInstaller
+							if (UserInput == null) {
+								ReplyToPR(PR,"AutoValEnd",UserInput);
+							}
+						} else if (Label == MagicLabels[15]) {
+						} else if (Label == MagicLabels[16]) {
+							AutoValLog(PR);
+						} else if (Label == MagicLabels[17]) {
+							AutoValLog(PR);
+						} else if (Label == MagicLabels[18]) {
+							UserInput = LineFromCommitFile(PR,25,MagicStrings[1]);
+							if (UserInput == null) {
+								ReplyToPR(PR,"AutoValEnd",UserInput);
+							}
+						} else if (Label == MagicLabels[19]) {
+						} else if (Label == MagicLabels[20]) {
+							string PRtitle = FromJson(InvokeGitHubPRRequest(PR,""))["title"];
+							foreach (Dictionary<string,object> Waiver in GetValidationData("autoWaiverLabel")) {
+								if (PRtitle.Contains((string)Waiver["PackageIdentifier"])) {
+									AddWaiver(PR);
+								}
+							}
+						} else if (Label == MagicLabels[21]) {
+							AutoValLog(PR);
+						} else if (Label == MagicLabels[22]) {
+							AutoValLog(PR);
+						} else if (Label == MagicLabels[23]) {
+							AutoValLog(PR);
+					}//end if Label
+				}//end foreach Label
+			}//end if Label
+		}
+
 
 		public string AddWaiver(int PR) {
-			dynamic Labels = FromJson(InvokeGitHubPRRequest(PR ,"GET","labels","","issues","content"));
+			dynamic Labels = FromJson(InvokeGitHubPRRequest(PR ,WebRequestMethods.Http.Get,"labels","","issues"));
 			string string_out = "";
 			foreach (dynamic Label in Labels) {
 				string Labelname = Label["name"];
@@ -603,14 +891,14 @@ Gilgamech is making web browsers, games, self-driving RC cars, and other technol
 					AddPRToRecord(PR,"Manual");
 				}
 				if (Waiver != "") {
-					string_out += InvokeGitHubPRRequest(PR,"POST","comments","@wingetbot waivers Add "+Waiver,"issues","StatusDescription");
+					string_out += InvokeGitHubPRRequest(PR,WebRequestMethods.Http.Post,"comments","@wingetbot waivers Add "+Waiver,"issues");
 				}; //end if Waiver
 			}; //end Foreach Label
 			return string_out;
 		} //end Add-Waiver
 
-
-		public dynamic SearchGitHub(string Preset = "Approval",bool Browser = false, string Author = "", string Commenter = "", string Title = "",string Label = "", int Page = 1,int Days = 0,bool IEDS = false,bool NotWorked = false,bool NoLabels = false,bool AllowClosedPRs = false){
+								//SearchGitHub(string Preset, int Page = 1, int Days = 0, bool IEDS = false, bool NoLabels = false, bool Browser = false)
+		public dynamic SearchGitHub(string Preset, int Page = 1,int Days = 0,bool IEDS = false,bool NoLabels = false,bool Browser = false){
 		//[ValidateSet("Approval","Blocking","Defender","IEDS","ToWork","ToWork2")]
 		string Url = "https://api.github.com/search/issues?page=Page&q=";
 			if (Browser == true) {
@@ -619,9 +907,9 @@ Gilgamech is making web browsers, games, self-driving RC cars, and other technol
 			//Base settings;
 			string Base = "repo:"+owner+"/"+repo+"+";
 			Base += "is:pr+";
-			if (AllowClosedPRs == false) {
+			//if (AllowClosedPRs == false) {
 				Base += "is:open+";
-			}
+			//}
 			Base += "draft:false+";
 			
 			//Smaller blocks;
@@ -633,8 +921,6 @@ Gilgamech is making web browsers, games, self-driving RC cars, and other technol
 			string IEDSLabel = "label:Internal-Error-Dynamic-Scan+";
 			string nIEDS = "-"+IEDSLabel;
 			string string_IEM = "label:Internal-Error-Manifest+";
-			string nIOI = "-label:Interactive-Only-Installer+";
-			string string_MMC = "label:Manifest-Metadata-Consistency+";
 			string string_NA = "label:Needs-Attention+";
 			string string_NAF = "label:Needs-Author-Feedback+";
 			string nNSA = "-label:Internal-Error-NoSupportedArchitectures+";
@@ -676,8 +962,7 @@ Gilgamech is making web browsers, games, self-driving RC cars, and other technol
 			Review2 += "-"+string_NAF;
 			Review2 += "-label:Needs-Review+";
 			
-			string Workable =  "-" + string_MMC;
-			Workable += "-label:Validation-Merge-Conflict+";
+			string Workable = "-label:Validation-Merge-Conflict+";
 			Workable += "-label:Unexpected-File+";
 			
 			//Composite settings;
@@ -685,35 +970,31 @@ Gilgamech is making web browsers, games, self-driving RC cars, and other technol
 			string Set2 = Set1 + Review2;
 			Url += Base;
 			
-			if (Author != "") {
-				Url += "author:"+Author;
-			}
-			if (Commenter != "") {
-				Url += "commenter:"+Commenter;
-			}
-			if (Days > 0) {
-				Url += Recent;
-			}
-			if (IEDS == true) {
-				Url += nIEDS;
-			}
-			if (Label != "") {
-				Url += "label:"+Label;
-			}
-			if (NotWorked == true) {
-				Url += HaventWorked;
-			}
-			if (Title != "") {
-				Url += "Title in:title";
-			}
+			// if (Author != "") {
+				// Url += "author:"+Author;
+			// }
+			// if (Commenter != "") {
+				// Url += "commenter:"+Commenter;
+			// }
+			// if (Days > 0) {
+				// Url += Recent;
+			// }
+			// if (IEDS == true) {
+				// Url += nIEDS;
+			// }
+			// if (Label != "") {
+				// Url += "label:"+Label;
+			// }
+			// if (NotWorked == true) {
+				// Url += HaventWorked;
+			// }
+			// if (Title != "") {
+				// Url += "Title in:title";
+			// }
 			if (Preset == "Approval") {
 				Url += Cna;
 				Url += Set2; //Blocking + Common + Review1 + Review2;
 				Url += Workable;
-			} else if (Preset == "Blocking") {
-				Url += string_nBI;
-				Url += nIOI;
-				Url += string_nHW;
 			} else if (Preset == "Defender") {
 				Url += Defender;
 			} else if (Preset == "IEDS") {
@@ -835,97 +1116,101 @@ Gilgamech is making web browsers, games, self-driving RC cars, and other technol
 		}
 
 
-public string AutoValLog (string clip){
-	//Download
-	//Unzip
-	//Filter
-	//Post
-	string string_out = "";
-	int PR = Int32.Parse(inputBox_PRNumber.Text.Replace("#",""));
-	int DownloadSeconds = 4;
-	var WaiverList = GetValidationData("autoWaiverLabel");
-	//Get-Process *photosapp* | Stop-Process
-	int? BuildNumber = ADOBuildFromPR(PR);
-	if (BuildNumber != null) {
+		public string AutoValLog (int PR){
+			//int PR = Int32.Parse(inputBox_PRNumber.Text.Replace("#",""));
+			//Download
+			//Unzip
+			//Filter
+			//Post
+			string string_out = "";
+			int DownloadSeconds = 4;
+			//Get-Process *photosapp* | Stop-Process
+			int? BuildNumber = ADOBuildFromPR(PR);
+			if (BuildNumber != null) {
 
-		string Url =ADOMSBaseUrl+"/ed6a5dfa-6e7f-413b-842c-8305dd9e89e6/_apis/build/builds/" + BuildNumber + "/artifacts?artifactName=InstallationVerificationLogs&api-version=7.0&%24format=zip";
-		System.Diagnostics.Process.Start(Url);//This downloads to Windows default location, which has already been set to DestinationPath
-		Thread.Sleep(DownloadSeconds);//Sleep while download completes.
+				string Url =ADOMSBaseUrl+"/ed6a5dfa-6e7f-413b-842c-8305dd9e89e6/_apis/build/builds/" + BuildNumber + "/artifacts?artifactName=InstallationVerificationLogs&api-version=7.0&%24format=zip";
+				System.Diagnostics.Process.Start(Url);//This downloads to Windows default location, which has already been set to DestinationPath
+				Thread.Sleep(DownloadSeconds);//Sleep while download completes.
 
-		RemoveItem(LogPath);
-		using (FileStream compressedFileStream = File.Open(ZipPath, FileMode.Open)){
-			using (FileStream outputFileStream = File.Create(DestinationPath)){
-				using (var decompressor = new DeflateStream(compressedFileStream, CompressionMode.Decompress)){
-					decompressor.CopyTo(outputFileStream);
+				RemoveItem(LogPath);
+				using (FileStream compressedFileStream = File.Open(ZipPath, FileMode.Open)){
+					using (FileStream outputFileStream = File.Create(DestinationPath)){
+						using (var decompressor = new DeflateStream(compressedFileStream, CompressionMode.Decompress)){
+							decompressor.CopyTo(outputFileStream);
+						}
+					}
 				}
+				RemoveItem(ZipPath);
+				List<string> UserInput = new List<string>();
+
+				string[] files = Directory.GetFileSystemEntries(LogPath, "*", SearchOption.AllDirectories);
+				foreach (string file in files) {
+						if (file.Contains("png")) {
+							System.Diagnostics.Process.Start(file);
+						} //Open PNGs with default app.
+							string[] fileContents = GetContent(file).Split('\n');
+							UserInput.Concat(fileContents.Where(n => n.Contains("[[]FAIL[]]")).ToList());
+							UserInput.Concat(fileContents.Where(n => n.Contains("error")).ToList());
+							UserInput.Concat(fileContents.Where(n => n.Contains("exception")).ToList());
+							UserInput.Concat(fileContents.Where(n => n.Contains("exit code")).ToList());
+							UserInput.Concat(fileContents.Where(n => n.Contains("fail")).ToList());
+							UserInput.Concat(fileContents.Where(n => n.Contains("No suitable")).ToList());
+							UserInput.Concat(fileContents.Where(n => n.Contains("not supported")).ToList());//not supported by this processor type
+							// UserInput += fileContents.Where(n => n.Contains("not applicable")).ToList());
+							UserInput.Concat(fileContents.Where(n => n.Contains("Unable to locate nested installer")).ToList());
+							UserInput.Concat(fileContents.Where(n => n.Contains("Windows cannot install package")).ToList());
+					}
+
+				if (UserInput != null) {
+					// if (UserInput.Contains("[FAIL] Installer failed security check.") || UserInput.Contains("Operation did not complete successfully because the file contains a virus or potentially unwanted software")) {
+						//Get-GitHubPreset -Preset DefenderFail -PR PR
+					// }
+
+					UserInput = UserInput.Where(n => !n.Contains(" success or error status: 0")).ToList();
+					UserInput = UserInput.Where(n => !n.Contains("Windows Error Reporting")).ToList();
+					UserInput = UserInput.Where(n => !n.Contains("--- End of inner exception stack trace ---")).ToList();
+					UserInput = UserInput.Where(n => !n.Contains("api-ms-win-core-errorhandling")).ToList();
+					UserInput = UserInput.Where(n => !n.Contains("because the current user does not have that package installed")).ToList();
+					UserInput = UserInput.Where(n => !n.Contains("Could not create system restore point")).ToList();
+					UserInput = UserInput.Where(n => !n.Contains("Dest filename")).ToList();
+					UserInput = UserInput.Where(n => !n.Contains("ERROR: Signature Update failed")).ToList();
+					UserInput = UserInput.Where(n => !n.Contains("Exception during executable launch operation System.InvalidOperationException: No process is associated with this object.")).ToList();
+					UserInput = UserInput.Where(n => !n.Contains("Exception(1) ")).ToList();
+					UserInput = UserInput.Where(n => !n.Contains("Exit code: 0")).ToList();
+					UserInput = UserInput.Where(n => !n.Contains("Installation failed with exit code -1978334972")).ToList();
+					UserInput = UserInput.Where(n => !n.Contains("ISWEBVIEW2INSTALLED")).ToList();
+					UserInput = UserInput.Where(n => !n.Contains("ResultException")).ToList();
+					UserInput = UserInput.Where(n => !n.Contains("SchedNetFx")).ToList();
+					UserInput = UserInput.Where(n => !n.Contains("Setting error JSON 1.0 fields")).ToList();
+					UserInput = UserInput.Where(n => !n.Contains("Standard error: ")).ToList();
+					UserInput = UserInput.Where(n => !n.Contains("Terminating context")).ToList();
+					UserInput = UserInput.Where(n => !n.Contains("The FileSystemWatcher has detected an error ")).ToList();
+					UserInput = UserInput.Where(n => !n.Contains("The process cannot access the file because it is being used by another process")).ToList();
+					UserInput = UserInput.Where(n => !n.Contains("ThrowifExceptional")).ToList();
+					UserInput = UserInput.Where(n => !n.Contains("Windows Installer installed the product")).ToList();
+					UserInput = UserInput.Where(n => !n.Contains("with working directory \"D:TOOLS\".")).ToList();
+					UserInput = UserInput.Distinct().ToList();
+
+					string message = "Automatic Validation ended with:" + Environment.NewLine + string.Join(Environment.NewLine+"> ",UserInput) +Environment.NewLine +Environment.NewLine + "(Automated response - build "+build+".)";
+
+					string_out = ReplyToPR(PR,message);
+				} else {
+					string message = "Automatic Validation ended with:" + Environment.NewLine+"> No errors to post."+Environment.NewLine + Environment.NewLine +"(Automated response - build "+build+".)";
+					string_out = ReplyToPR(PR,message);
+				}
+			} else {
+				string message = "Automatic Validation ended with:" + Environment.NewLine+"> ADO Build not found."+Environment.NewLine + Environment.NewLine +"(Automated response - build "+build+".)";
+				string_out = ReplyToPR(PR,message);
 			}
+			return string_out;
 		}
-		RemoveItem(ZipPath);
-		List<string> UserInput = new List<string>();
-
-		string[] files = Directory.GetFileSystemEntries(LogPath, "*", SearchOption.AllDirectories);
-		foreach (string file in files) {
-				if (file.Contains("png")) {
-					System.Diagnostics.Process.Start(file);
-				} //Open PNGs with default app.
-					string[] fileContents = GetContent(file).Split('\n');
-					UserInput.Concat(fileContents.Where(n => n.Contains("[[]FAIL[]]")).ToList());
-					UserInput.Concat(fileContents.Where(n => n.Contains("error")).ToList());
-					UserInput.Concat(fileContents.Where(n => n.Contains("exception")).ToList());
-					UserInput.Concat(fileContents.Where(n => n.Contains("exit code")).ToList());
-					UserInput.Concat(fileContents.Where(n => n.Contains("fail")).ToList());
-					UserInput.Concat(fileContents.Where(n => n.Contains("No suitable")).ToList());
-					UserInput.Concat(fileContents.Where(n => n.Contains("not supported")).ToList());//not supported by this processor type
-					// UserInput += fileContents.Where(n => n.Contains("not applicable")).ToList());
-					UserInput.Concat(fileContents.Where(n => n.Contains("Unable to locate nested installer")).ToList());
-					UserInput.Concat(fileContents.Where(n => n.Contains("Windows cannot install package")).ToList());
-			}
-
-		if (UserInput != null) {
-			// if (UserInput.Contains("[FAIL] Installer failed security check.") || UserInput.Contains("Operation did not complete successfully because the file contains a virus or potentially unwanted software")) {
-				//Get-GitHubPreset -Preset DefenderFail -PR PR
-			// }
-
-			UserInput = UserInput.Where(n => !n.Contains(" success or error status: 0")).ToList();
-			UserInput = UserInput.Where(n => !n.Contains("Windows Error Reporting")).ToList();
-			UserInput = UserInput.Where(n => !n.Contains("--- End of inner exception stack trace ---")).ToList();
-			UserInput = UserInput.Where(n => !n.Contains("api-ms-win-core-errorhandling")).ToList();
-			UserInput = UserInput.Where(n => !n.Contains("because the current user does not have that package installed")).ToList();
-			UserInput = UserInput.Where(n => !n.Contains("Could not create system restore point")).ToList();
-			UserInput = UserInput.Where(n => !n.Contains("Dest filename")).ToList();
-			UserInput = UserInput.Where(n => !n.Contains("ERROR: Signature Update failed")).ToList();
-			UserInput = UserInput.Where(n => !n.Contains("Exception during executable launch operation System.InvalidOperationException: No process is associated with this object.")).ToList();
-			UserInput = UserInput.Where(n => !n.Contains("Exit code: 0")).ToList();
-			UserInput = UserInput.Where(n => !n.Contains("Installation failed with exit code -1978334972")).ToList();
-			UserInput = UserInput.Where(n => !n.Contains("ISWEBVIEW2INSTALLED")).ToList();
-			UserInput = UserInput.Where(n => !n.Contains("SchedNetFx")).ToList();
-			UserInput = UserInput.Where(n => !n.Contains("Setting error JSON 1.0 fields")).ToList();
-			UserInput = UserInput.Where(n => !n.Contains("Standard error: ")).ToList();
-			UserInput = UserInput.Where(n => !n.Contains("Terminating context")).ToList();
-			UserInput = UserInput.Where(n => !n.Contains("The FileSystemWatcher has detected an error ")).ToList();
-			UserInput = UserInput.Where(n => !n.Contains("The process cannot access the file because it is being used by another process")).ToList();
-			UserInput = UserInput.Where(n => !n.Contains("ThrowifExceptional")).ToList();
-			UserInput = UserInput.Where(n => !n.Contains("Windows Installer installed the product")).ToList();
-			UserInput = UserInput.Where(n => !n.Contains("with working directory \"D:TOOLS\".")).ToList();
-			UserInput = UserInput.Distinct().ToList();
-
-			string message = "Automatic Validation ended with:" + Environment.NewLine + string.Join(Environment.NewLine+"> ",UserInput) +Environment.NewLine +Environment.NewLine + "(Automated response - build "+build+".)";
-
-			string_out = ReplyToPR(PR,message);
-		} else {
-			string message = "Automatic Validation ended with:" + Environment.NewLine+"> No errors to post."+Environment.NewLine + Environment.NewLine +"(Automated response - build "+build+".)";
-			string_out = ReplyToPR(PR,message);
-		}
-	} else {
-		string message = "Automatic Validation ended with:" + Environment.NewLine+"> ADO Build not found."+Environment.NewLine + Environment.NewLine +"(Automated response - build "+build+".)";
-		string_out = ReplyToPR(PR,message);
-	}
-	return string_out;
-}
 
 //RandomIEDS
 
-
+		public string RetryPR(int PR) {
+			AddPRToRecord(PR,"Retry");
+			return InvokeGitHubPRRequest(PR ,"POST","comments","@wingetbot run");
+		}
 
 
 
@@ -933,7 +1218,7 @@ public string AutoValLog (string clip){
 		//PR tools
 		//Add user to PR: InvokeGitHubPRRequest -Method $Method -Type "assignees" -Data $User -Output StatusDescription
 		//Approve PR (needs work): InvokeGitHubPRRequest -PR $PR -Method Post -Type reviews
-		public string InvokeGitHubPRRequest (int PR, string Method = "GET",string Type = "labels",string Data = "",string Path = "issues",string Output = "StatusDescription",bool JSON = false) {
+		public string InvokeGitHubPRRequest (int PR, string Method = WebRequestMethods.Http.Get,string Type = "labels",string Data = "",string Path = "issues") {
 		//Method [ValidateSet("GET","DELETE","PATCH","POST","PUT")] 
 		//Type [ValidateSet("assignees","comments","commits","files","labels","reviews","")]
 		//Path [ValidateSet("issues","pulls")]
@@ -968,7 +1253,7 @@ public string AutoValLog (string clip){
 			Url = Url.Replace("/$","");
 			
 			string output_var;
-			if (Method == "GET") {
+			if (Method == WebRequestMethods.Http.Get) {
 				output_var = InvokeGitHubRequest(Url,Method);
 			} else {
 				string Body = ToJson(Response);
@@ -995,12 +1280,12 @@ public string AutoValLog (string clip){
 			Response.Add("event","APPROVE");
 			string Body = ToJson(Response);
 			
-			string out_var = InvokeGitHubRequest(Url,"Post",Body);
+			string out_var = InvokeGitHubRequest(Url,WebRequestMethods.Http.Post,Body);
 			return out_var;
 		}
 
 		public string AddGitHubReviewComment (int PR, string Comment,int? StartLine,int Line) {
-			dynamic Commit = FromJson(InvokeGitHubPRRequest(PR, "Get", "commits","","","content"));
+			dynamic Commit = FromJson(InvokeGitHubPRRequest(PR, WebRequestMethods.Http.Get, "commits","",""));
 			string CommitID = Commit["sha"];
 			string Filename = Commit["files"]["filename"];
 			string Side = "RIGHT";
@@ -1033,19 +1318,29 @@ public string AutoValLog (string clip){
 			return PRbuild;
 		}
 
-		public List<string> LineFromCommitFile(int PR, int LogNumber = 36, int Length = 0){
+		public string LineFromCommitFile(int PR, int LogNumber, string SearchString = "Specified hash doesn't match", int NumberOfLines = 0){
 			int PRbuild = ADOBuildFromPR(PR);
-			//int MatchOffset = (-1); 
-			//string SearchString = "Specified hash doesn't match"; 
-
-			string content = InvokeWebRequest(ADOMSBaseUrl+"/ed6a5dfa-6e7f-413b-842c-8305dd9e89e6/_apis/build/builds/"+PRbuild+"/logs/"+LogNumber);
-			string[] Log = content.Split('\n'); 
-			//string MatchLine = ((Log | Select-String -SimpleMatch SearchString).LineNumber + MatchOffset.Where(n => n > 0});
+			// Take the returned string,
+			string Content = InvokeWebRequest(ADOMSBaseUrl+"/ed6a5dfa-6e7f-413b-842c-8305dd9e89e6/_apis/build/builds/"+PRbuild+"/logs/"+LogNumber);
+		// slice by line breaks,
+			string[] SplitContent = Content.Split('\n'); 
 			
-			List<string> output = new List<string>();
-			//foreach (Match in MatchLine) {
-				//output += (Log.substring(Match..(Match+Length)));
-			//}
+			string output = "";
+			int StartLine = 0;
+			int EndLine = 0;
+			for (int i = 0; i < SplitContent.Length; i++) {
+		// find the string containing the SearchString,
+				if (SplitContent[i].Contains(SearchString)) {
+					StartLine = i;
+					EndLine = StartLine + NumberOfLines;
+				}
+		// gather it and the next Length lines,
+				if (StartLine <= i && i <= EndLine) {
+		// Join these into a single string by line breaks 
+					output += SplitContent[i] + Environment.NewLine;
+				}
+			}
+		//and return.
 			return output;
 		}
 
@@ -1062,7 +1357,7 @@ public string AutoValLog (string clip){
 			ReplyToPR(PR,string_joined,"Approve","Needs-Review");
 		}
 
-		public string ReplyToPR (int PR,string string_CannedMessage, string string_UserInput = "", string Policy = ""){
+		public string ReplyToPR (int PR,string string_CannedMessage, string string_UserInput = "", string Policy = "", string Body = ""){
 /*
 			Dictionary<string,object> PRContent = new Dictionary<string,object>();
 			PRContent = FromJson(InvokeGitHubPRRequest(PR,"","content"));
@@ -1071,17 +1366,20 @@ public string AutoValLog (string clip){
 			to_user = FromJson(from_mid);
 			string string_UserInput = to_user["login"].ToString();
 */
-			string Body = CannedMessage(string_CannedMessage,string_UserInput);
+			if (Body == "") {
+				Body = CannedMessage(string_CannedMessage,string_UserInput);
+			}
 			if (Policy != "") {
 				Body += "\n<!--\n[Policy] "+Policy+"\n-->";
 			}
-			return InvokeGitHubPRRequest(PR,"Post","comments",Body,"issues","StatusDescription");
+			return InvokeGitHubPRRequest(PR,WebRequestMethods.Http.Post,"comments",Body,"issues");
 		}
 
-		public bool CheckStandardPRComments (int PR) {
+		public bool CheckStandardPRComments (int PR,Dictionary<string,object> comments = null) {
 			bool out_bool = false;
-			Dictionary<string,object> comments = new Dictionary<string,object>();
-			comments = FromJson(InvokeGitHubPRRequest(PR,"GET","comments","","","content"));
+			if (comments == null) {
+				comments = FromJson(InvokeGitHubPRRequest(PR,WebRequestMethods.Http.Get,"comments","",""));
+			}
 			foreach (string StdComment in StandardPRComments) {
 				if (!comments.Keys.Any(key => key.Contains(StdComment))) {
 					out_bool = true;
@@ -1091,7 +1389,7 @@ public string AutoValLog (string clip){
 		}
 
 		public List<string> PRStateFromComments (int PR){
-			Dictionary<string,object>[] Comments = FromJson(InvokeGitHubPRRequest(PR, "comments","","","content")); //| select created_at,@{n="UserName";e={$_.user.login -replace "\[bot\]"}},body)
+			Dictionary<string,object>[] Comments = FromJson(InvokeGitHubPRRequest(PR,"comments","","","content")); //| select created_at,@{n="UserName";e={$_.user.login -replace "\[bot\]"}},body)
 			//Robot usernames
 			string Wingetbot = "wingetbot";
 			string AzurePipelines = "azure-pipelines";
@@ -1387,39 +1685,39 @@ public string AutoValLog (string clip){
 			}
 			if (Mode == "Approving") {
 				//#F0F0F0 or RGB 240, 240, 240
-				btn10.BackColor = ActiveButtonColor;//Bulk Approving
-				btn18.BackColor = DefaultButtonColor;//Individual Validations
-				btn11.BackColor = DefaultButtonColor;//IEDS
-				btn19.BackColor = DefaultButtonColor;//Idle
-				btn20.BackColor = DefaultButtonColor;//Config
+				btn10.BackColor = color_ActiveBack;//Bulk Approving
+				btn18.BackColor = color_DefaultBack;//Individual Validations
+				btn11.BackColor = color_DefaultBack;//IEDS
+				btn19.BackColor = color_DefaultBack;//Idle
+				btn20.BackColor = color_DefaultBack;//Config
 			} else if (Mode == "Validating") {
 				//#F0F0F0 or RGB 240, 240, 240
-				btn10.BackColor = DefaultButtonColor;//Bulk Approving
-				btn18.BackColor = ActiveButtonColor;//Individual Validations
-				btn11.BackColor = DefaultButtonColor;//IEDS
-				btn19.BackColor = DefaultButtonColor;//Idle
-				btn20.BackColor = DefaultButtonColor;//Config
+				btn10.BackColor = color_DefaultBack;//Bulk Approving
+				btn18.BackColor = color_ActiveBack;//Individual Validations
+				btn11.BackColor = color_DefaultBack;//IEDS
+				btn19.BackColor = color_DefaultBack;//Idle
+				btn20.BackColor = color_DefaultBack;//Config
 			} else if (Mode == "IEDS") {
 				//#F0F0F0 or RGB 240, 240, 240
-				btn10.BackColor = DefaultButtonColor;//Bulk Approving
-				btn18.BackColor = DefaultButtonColor;//Individual Validations
-				btn11.BackColor = ActiveButtonColor;//IEDS
-				btn19.BackColor = DefaultButtonColor;//Idle
-				btn20.BackColor = DefaultButtonColor;//Config
+				btn10.BackColor = color_DefaultBack;//Bulk Approving
+				btn18.BackColor = color_DefaultBack;//Individual Validations
+				btn11.BackColor = color_ActiveBack;//IEDS
+				btn19.BackColor = color_DefaultBack;//Idle
+				btn20.BackColor = color_DefaultBack;//Config
 			} else if (Mode == "Idle") {
 				//#F0F0F0 or RGB 240, 240, 240
-				btn10.BackColor = DefaultButtonColor;//Bulk Approving
-				btn18.BackColor = DefaultButtonColor;//Individual Validations
-				btn11.BackColor = DefaultButtonColor;//IEDS
-				btn19.BackColor = ActiveButtonColor;//Idle
-				btn20.BackColor = DefaultButtonColor;//Config
+				btn10.BackColor = color_DefaultBack;//Bulk Approving
+				btn18.BackColor = color_DefaultBack;//Individual Validations
+				btn11.BackColor = color_DefaultBack;//IEDS
+				btn19.BackColor = color_ActiveBack;//Idle
+				btn20.BackColor = color_DefaultBack;//Config
 			} else if (Mode == "Config") {
 				//#F0F0F0 or RGB 240, 240, 240
-				btn10.BackColor = DefaultButtonColor;//Bulk Approving
-				btn18.BackColor = DefaultButtonColor;//Individual Validations
-				btn11.BackColor = DefaultButtonColor;//IEDS
-				btn19.BackColor = DefaultButtonColor;//Idle
-				btn20.BackColor = ActiveButtonColor;//Config
+				btn10.BackColor = color_DefaultBack;//Bulk Approving
+				btn18.BackColor = color_DefaultBack;//Individual Validations
+				btn11.BackColor = color_DefaultBack;//IEDS
+				btn19.BackColor = color_DefaultBack;//Idle
+				btn20.BackColor = color_ActiveBack;//Config
 			} 
 			
 
@@ -1799,7 +2097,7 @@ public string UpdateArchInPR(int PR, string SearchTerm = "  Architecture: x86", 
 			YamlString = YamlString.Split(' ').Where(n => n.Contains(ContainsString)).FirstOrDefault(); // s.IndexOf(": ");
 			YamlString = YamlString.Split(':')[1];
 			YamlString = YamlString.Split('#')[0];
-			//YamlString = (YamlString.ToCharArray().Where(n => n -match "\\S"}).Join("");
+			//YamlString = (YamlString.ToCharArray().Where(n => n.Contains("\\S"}).Join("");
 			return YamlString;
 		}
 
@@ -2557,7 +2855,7 @@ using(Stream stream = Application.GetResourceStream(new Uri(imageUrl)).Stream)
 
 //Connective functions.		
 		public void Work_Search_Button_Click(object sender, EventArgs e) {
-			SearchGitHub("ToWork",true);
+			SearchGitHub("ToWork",1,0, false,false,true);
         }// end Approved_Button_Click
 		
         public void Squash_Button_Click(object sender, EventArgs e) {
@@ -2574,12 +2872,12 @@ using(Stream stream = Application.GetResourceStream(new Uri(imageUrl)).Stream)
         }// end Approved_Button_Click
 		
         public void Open_In_Browser_Button_Click(object sender, EventArgs e) {
-			SearchGitHub("Approval",true);
+			SearchGitHub("Approval",1,0, false,false,true);
         }// end Approved_Button_Click
 		
         public void Retry_Button_Click(object sender, EventArgs e) {
 			int PR = Int32.Parse(inputBox_PRNumber.Text.Replace("#",""));
-			string response_out = InvokeGitHubPRRequest(PR,"Post","comments","@wingetbot run","Silent");
+			string response_out = InvokeGitHubPRRequest(PR,WebRequestMethods.Http.Post,"comments","@wingetbot run","Silent");
 			AddPRToRecord(PR,"Retry");//[ValidateSet("Approved","Blocking","Feedback","Retry","Manual","Closed","Project","Squash","Waiver")]
 			outBox_val.AppendText(Environment.NewLine + "PR "+ PR + ": " + response_out);
 			}// end Approved_Button_Click
@@ -2615,7 +2913,7 @@ using(Stream stream = Application.GetResourceStream(new Uri(imageUrl)).Stream)
 			int PR = Int32.Parse(inputBox_PRNumber.Text.Replace("#",""));
 			string UserInput = inputBox_User.Text;
 			AddPRToRecord(PR,"Closed");//[ValidateSet("Approved","Blocking","Feedback","Retry","Manual","Closed","Project","Squash","Waiver")]
-			string response_out = InvokeGitHubPRRequest(PR,"Post","comments","Close with reason: "+UserInput+";");
+			string response_out = InvokeGitHubPRRequest(PR,WebRequestMethods.Http.Post,"comments","Close with reason: "+UserInput+";");
 			outBox_val.AppendText(Environment.NewLine + "PR "+ PR + ": " + response_out);
         }// end Closed_Button_Click
 		
@@ -2623,7 +2921,7 @@ using(Stream stream = Application.GetResourceStream(new Uri(imageUrl)).Stream)
 			int PR = Int32.Parse(inputBox_PRNumber.Text.Replace("#",""));
 			int UserInput = Int32.Parse(inputBox_User.Text.Replace("#",""));
 			AddPRToRecord(PR,"Closed");//[ValidateSet("Approved","Blocking","Feedback","Retry","Manual","Closed","Project","Squash","Waiver")]
-			string response_out = InvokeGitHubPRRequest(PR,"Post","comments","Close with reason: Duplicate of #"+UserInput+";");
+			string response_out = InvokeGitHubPRRequest(PR,WebRequestMethods.Http.Post,"comments","Close with reason: Duplicate of #"+UserInput+";");
 			outBox_val.AppendText(Environment.NewLine + "PR "+ PR + ": " + response_out);
         }// end Duplicate_Button_Click
 		
@@ -2664,7 +2962,7 @@ using(Stream stream = Application.GetResourceStream(new Uri(imageUrl)).Stream)
         public void Merge_Conflicts_Button_Click(object sender, EventArgs e) {
 			int PR = Int32.Parse(inputBox_PRNumber.Text.Replace("#",""));
 			AddPRToRecord(PR,"Closed");//[ValidateSet("Approved","Blocking","Feedback","Retry","Manual","Closed","Project","Squash","Waiver")]
-			string response_out = InvokeGitHubPRRequest(PR,"Post","comments","Close with reason: Merge Conflicts;");
+			string response_out = InvokeGitHubPRRequest(PR,WebRequestMethods.Http.Post,"comments","Close with reason: Merge Conflicts;");
 			outBox_val.AppendText(Environment.NewLine + "PR "+ PR + ": " + response_out);
         }// end Merge_Conflicts_Button_Click
 		
@@ -2683,10 +2981,10 @@ using(Stream stream = Application.GetResourceStream(new Uri(imageUrl)).Stream)
 
 			AddPRToRecord(PR,"Closed");//[ValidateSet("Approved","Blocking","Feedback","Retry","Manual","Closed","Project","Squash","Waiver")]
 			string Body = "URL: " + Url + Environment.NewLine + string_out + Environment.NewLine+Environment.NewLine+"(Automated message - build " + build + ")";
-			string response_out = InvokeGitHubPRRequest(PR,"Post","comments",Body);
+			string response_out = InvokeGitHubPRRequest(PR,WebRequestMethods.Http.Post,"comments",Body);
 			outBox_val.AppendText(Environment.NewLine + "PR "+ PR + ": " + response_out);
 
-				//if ($Body -match "Response status code does not indicate success") {	//string response_out = Get-GitHubPreset InstallerMissing -PR $PR 
+				//if ($Body.Contains("Response status code does not indicate success") {	//string response_out = Get-GitHubPreset InstallerMissing -PR $PR 
 				//} //Need this to only take action on new PRs, not removal PRs.
         }// end Check_Installer_Button_Click
 		
@@ -2748,7 +3046,8 @@ public string[] StandardPRComments = {"Validation Pipeline Badge",//Pipeline sta
 "No errors to post",//My automation - AutoValLog with no logs.
 "The package didn't pass a Defender or similar security scan",//My automation - DefenderFail.
 "Installer failed security check",//My automation - AutoValLog DefenderFail.
-"Sequence contains no elements"//New Sequence error.
+"Sequence contains no elements",//New Sequence error.
+"Missing Properties value based on version"//New property detection.
 };
 
 public string[] WordFilterList = {"accept_gdpr ", 
@@ -2822,7 +3121,7 @@ public string[] MagicLabels = {"Validation-Defender-Error", //0
 			string Body = "Test";//"@wingetbot waivers Add $Waiver"
 			
 			
-			response_in = InvokeGitHubPRRequest(PR, "GET",Type,Body);
+			response_in = InvokeGitHubPRRequest(PR, WebRequestMethods.Http.Get,Type,Body);
 			foreach (System.Collections.Generic.Dictionary<string,object> item in FromJson(response_in)) {
 				string myText; 
 				myText = System.String.Format("created_at={0}, id={1}",item["created_at"], item["id"]); 

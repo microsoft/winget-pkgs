@@ -1754,12 +1754,12 @@ Function Get-WorkSearch {
 				$PR = $FullPR.number
 				Get-TrackerProgress -PR $PR $MyInvocation.MyCommand $line $PRs.length
 				$line++
-				$Comments = (Invoke-GitHubPRRequest -PR $PR -Type comments -Output content)
 				if(($FullPR.title  -match "Remove") -OR 
 				($FullPR.title  -match "Delete") -OR 
 				($FullPR.title  -match "Automatic deletion")){
 					Get-GitHubPreset CheckInstaller -PR $PR
 				}
+				$Comments = (Invoke-GitHubPRRequest -PR $PR -Type comments -Output content)
 				if ($Preset -eq "Approval"){
 					if (Get-NonstandardPRComments -PR $PR -comments $Comments.body){
 						Open-PRInBrowser -PR $PR
@@ -2404,8 +2404,7 @@ Function Get-SearchGitHub {
 	$Review2 = $Review2 + "-label:Needs-Author-Feedback+"
 	$Review2 = $Review2 + "-label:Needs-Review+"
 	
-	$Workable =  "-" + $MMC
-	$Workable = $Workable + "-label:Validation-Merge-Conflict+" 
+	$Workable =  "-label:Validation-Merge-Conflict+" 
 	$Workable = $Workable + "-label:Unexpected-File+"
 	
 	#Composite settings
@@ -2440,11 +2439,6 @@ Function Get-SearchGitHub {
 			$Url = $Url + $Set2 #Blocking + Common + Review1 + Review2
 			$Url = $Url + $Workable
 			}
-		"Blocking" {
-			$Url = $Url + $nBI
-			$Url = $Url + $nIOI
-			$Url = $Url + $nHW
-		}
 		"Defender"{
 			$Url = $Url + $Defender
 		}
@@ -2686,11 +2680,13 @@ Function Get-AutoValLog {
 			$UserInput = $UserInput -notmatch "Could not create system restore point"
 			$UserInput = $UserInput -notmatch "Dest filename"
 			$UserInput = $UserInput -notmatch "ERROR: Signature Update failed"
+			$UserInput = $UserInput -notmatch "Exception(1) "
 			$UserInput = $UserInput -notmatch "Exception during executable launch operation System.InvalidOperationException: No process is associated with this object."
 			$UserInput = $UserInput -notmatch "Exit code`: 0"
 			$UserInput = $UserInput -notmatch "Installation failed with exit code -1978334972"
 			$UserInput = $UserInput -notmatch "ISWEBVIEW2INSTALLED"
 			$UserInput = $UserInput -notmatch "MpCmdRun"
+			$UserInput = $UserInput -notmatch "ResultException"
 			$UserInput = $UserInput -notmatch "SchedNetFx"
 			$UserInput = $UserInput -notmatch "Setting error JSON 1.0 fields"
 			$UserInput = $UserInput -notmatch "Terminating context"
@@ -4694,7 +4690,8 @@ $StandardPRComments = ("Validation Pipeline Badge",#Pipeline status
 "No errors to post",#My automation - AutoValLog with no logs.
 "The package didn't pass a Defender or similar security scan",#My automation - DefenderFail.
 "Installer failed security check",#My automation - AutoValLog DefenderFail.
-"Sequence contains no elements"#New Sequence error.
+"Sequence contains no elements",#New Sequence error.
+"Missing Properties value based on version"#New property detection.
 )
 
 #VM Window Management
