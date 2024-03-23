@@ -10,7 +10,7 @@
 #3.88.19 - A few bugfixes.
 #3.88.18 - Restore waiver and retry fucntionality. 
 
-$build = 871
+$build = 872
 $appName = "ManualValidationPipeline"
 Write-Host "$appName build: $build"
 $MainFolder = "C:\ManVal"
@@ -167,8 +167,8 @@ Function Get-TrackerVMRunTracker {
 
 		$clip = (Get-Clipboard)
 		If ($clip -match $ADOMSBaseUrl) {
-			Write-Output "Gathering Automated Validation Logs"
-			Get-AutoValLog
+			#Write-Output "Gathering Automated Validation Logs"
+			#Get-AutoValLog
 		} elseIf ($clip -match "Skip to content") {
 			if ($valMode -eq "Validating") {
 				Write-Output $valMode
@@ -176,8 +176,8 @@ Function Get-TrackerVMRunTracker {
 				$valMode | clip
 			}
 		} elseIf ($clip -match " Windows Package Manager") {#Package Manager Dashboard
-			Write-Output "Gathering PR Headings"
-			Get-PRNumber
+			#Write-Output "Gathering PR Headings"
+			#Get-PRNumber
 		} elseIf ($clip -match "^manifests`/") {
 			Write-Output "Opening manifest file"
 			$ManifestUrl = "$GitHubBaseUrl/tree/master/"+$clip
@@ -1754,11 +1754,11 @@ Function Get-WorkSearch {
 				$PR = $FullPR.number
 				Get-TrackerProgress -PR $PR $MyInvocation.MyCommand $line $PRs.length
 				$line++
-				if(($FullPR.title  -match "Remove") -OR 
-				($FullPR.title  -match "Delete") -OR 
-				($FullPR.title  -match "Automatic deletion")){
-					Get-GitHubPreset CheckInstaller -PR $PR
-				}
+				# if(($FullPR.title  -match "Remove") -OR 
+				# ($FullPR.title  -match "Delete") -OR 
+				# ($FullPR.title  -match "Automatic deletion")){
+					# Get-GitHubPreset CheckInstaller -PR $PR
+				# }
 				$Comments = (Invoke-GitHubPRRequest -PR $PR -Type comments -Output content)
 				if ($Preset -eq "Approval"){
 					if (Get-NonstandardPRComments -PR $PR -comments $Comments.body){
@@ -2680,7 +2680,7 @@ Function Get-AutoValLog {
 			$UserInput = $UserInput -notmatch "Could not create system restore point"
 			$UserInput = $UserInput -notmatch "Dest filename"
 			$UserInput = $UserInput -notmatch "ERROR: Signature Update failed"
-			$UserInput = $UserInput -notmatch "Exception(1) "
+			$UserInput = $UserInput -notmatch "tid(ce4) "
 			$UserInput = $UserInput -notmatch "Exception during executable launch operation System.InvalidOperationException: No process is associated with this object."
 			$UserInput = $UserInput -notmatch "Exit code`: 0"
 			$UserInput = $UserInput -notmatch "Installation failed with exit code -1978334972"

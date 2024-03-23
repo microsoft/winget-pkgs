@@ -2,21 +2,23 @@
 //Author: Stephen Gillie
 //Title: WinGet Approval Pipeline v3.-40.1
 //Created: 1/19/2024
-//Updated: 3/21/2024
+//Updated: 3/22/2024
 //Notes: Tool to streamline evaluating winget-pkgs PRs. 
 //Update log:
-//3.-38.0 - Port WorkSearch 75%.
+//3.-33.0 - Port CompleteTrackerVM 75%.
+//3.-33.0 - Port ImageVMStart.
+//3.-34.0 - Port RebuildStatus.
+//3.-35.0 - Port StopVM.
+//3.-36.0 - Port RevertVM.
+//3.-37.0 - Add GetVM as Get-VM equivalent, SetVMState as equivalent for Start-VM & Stop-VM, and GetLastSnapshot, ApplySnapshot, & RestoreVMCheckpoint.as equivalents for Restore-VMCheckpoint
+//3.-38.0 - Port WorkSearch.
 //3.-39.1 - Add RetryPR to centralize these lines.
-//3.-39.0 - Port LabelAction.
-//3.-40.2 - Complete porting LineFromCommitFile.
-//3.-40.1 - Complete porting PRStateFromComments.
 
 
 
 
 
-
-/*Contents: (Remaining functions to port or depreciate: 31)
+/*Contents: (Remaining functions to port or depreciate: 24)
 - Init vars
 - Boilerplate
 - UI top-of-box
@@ -27,9 +29,9 @@
 - Network tools
 - Validation Starts Here (6)
 - Manifests Etc (5)
-- VM Image Management (3)
-- VM Pipeline Management (5)
-- VM Status (1)
+- VM Image Management (2)
+- VM Pipeline Management (2)
+- VM Status
 - VM Versioning
 - VM Orchestration (2)
 - File Management
@@ -40,7 +42,7 @@
 - Etc (1)
 - PR Watcher Utility functions
 - Powershell equivalency (+8)
-- VM Window management (3)
+- VM Window management (1)
 - Misc data (+5)
 
 Et cetera:
@@ -48,6 +50,11 @@ Et cetera:
 - VM control buttons
 - Better way to display VM/Validation lists.
 - CLI switches such as --hourly-run
+
+Menus
+- Search
+- Close PR
+- Canned Replies
 */
 
 
@@ -55,35 +62,24 @@ Et cetera:
 
 
 /*
-Partial (7): 
+Partial (3): 
 CheckStandardPRComments needs work on data structures. 
-Get-TrackerVMWindowLoc
-Get-TrackerVMWindowSet
-Get-TrackerVMWindowArrange#Get-TrackerVMWindowSet, Get-TrackerVMWindowLoc
 AddValidationData
 WorkSearch
 
 #Todo:
 
 #Blocked:
+Get-PipelineVmDisgenerate#Remove-VM
 Get-ManifestListing#Find-WinGetPackage
 	Get-ListingDiff#Get-ManifestListing
 
-Get-TrackerVMRebuildStatus#Get-VM
-Get-TrackerVMRevert#Restore-VMCheckpoint
-Stop-TrackerVM#Stop-VM
-Complete-TrackerVM#Stop-TrackerVM
-
 Redo-Checkpoint#Checkpoint-VM, Remove-VMCheckpoint
-Get-ImageVMStop#Redo-Checkpoint, Stop-TrackerVM
-Get-ImageVMStart#Get-TrackerVMRevert, Start-VM
-Get-PipelineVmDisgenerate#Remove-VM, Stop-TrackerVM
+	Get-ImageVMStop#Redo-Checkpoint
+Get-ImageVMMove#Move-VMStorage, Rename-VM
 
-Get-ImageVMMove#Get-VM, Move-VMStorage, Rename-VM
-
-Get-PipelineVmGenerate#Get-TrackerVMRevert, Get-VM, Import-VM, Remove-VMCheckpoint, Rename-VM, Start-VM
-	Get-TrackerVMCycle#Complete-TrackerVM, Get-PipelineVmDisgenerate, Get-PipelineVmGenerate, Redo-Checkpoint
-	Get-TrackerVMValidate#Find-WinGetPackage, Get-PipelineVmGenerate,  Get-TrackerVMRevert,  Get-VM
+Get-PipelineVmGenerate#Import-VM, Remove-VMCheckpoint, Rename-VM
+	Get-TrackerVMValidate#Find-WinGetPackage, Get-PipelineVmGenerate
 		Get-TrackerVMValidateByID#Get-TrackerVMValidate
 		Get-TrackerVMValidateByConfig#Get-TrackerVMValidate
 		Get-TrackerVMValidateByArch#Get-TrackerVMValidate
@@ -93,8 +89,36 @@ Get-PipelineVmGenerate#Get-TrackerVMRevert, Get-VM, Import-VM, Remove-VMCheckpoi
 			Get-ManifestAutomation#Get-ManifestFile
 			Get-SingleFileAutomation#Get-ManifestFile, Get-ManifestListing
 			Get-RandomIEDS#Get-ManifestFile
-			Get-TrackerVMRunTracker#Get-RandomIEDS, Get-TrackerVMCycle, Get-TrackerVMValidate, Get-TrackerVMWindowArrange, Get-VM, Set-VM
+			Get-TrackerVMRunTracker#Get-RandomIEDS, Get-TrackerVMCycle, Get-TrackerVMValidate, Set-VM
 		Get-PRWatch#Find-WinGetPackage, Get-ListingDiff, Get-TrackerVMValidate
+	Get-TrackerVMCycle#Get-PipelineVmDisgenerate, Get-PipelineVmGenerate, Redo-Checkpoint
+
+Get-VM
+	.state
+	.CheckpointFileLocation
+	.Name
+	.MemoryDemand
+	.MemoryMaximum
+	.MemoryAssigned
+Set-VM
+	.MemoryMaximumBytes
+Import-VM
+	Path
+	Copy 
+	GenerateNewId 
+	VhdDestinationPath
+	VirtualMachinePath
+Rename-VM
+	Name
+	NewName
+Remove-VM
+	Force
+Move-VMStorage
+	DestinationStoragePath
+Checkpoint-VM
+	SnapshotName
+Remove-VMCheckpoint
+	CheckpointName
 
 */
 
@@ -192,8 +216,23 @@ namespace WinGetApprovalNamespace {
 		public bool TokenLoaded = false;
 		public int GitHubRateLimitDelay = 333;
 
-		public bool debuggingView = false;
-		JavaScriptSerializer serializer = new JavaScriptSerializer();//JSON
+		//JSON
+		JavaScriptSerializer serializer = new JavaScriptSerializer();
+
+		//WMI for VMs
+		public ManagementScope scope = new ManagementScope(@"root\virtualization\v2");//, null);
+		// Other server
+		// var connectionOptions = new ConnectionOptions(
+		// @"en-US",
+		// @"domain\user",
+		// @"password",
+		// null,
+		// ImpersonationLevel.Impersonate,
+		// AuthenticationLevel.Default,
+		// false,
+		// null,
+		// TimeSpan.FromSeconds(5);
+		//public ManagementScope scope = new ManagementScope(new ManagementPath { Server = "hostnameOrIpAddress", NamespacePath = @"root\virtualization\v2" }, connectionOptions);scope.Connect(); 
 
 		//ui
 		public RichTextBox outBox = new RichTextBox();
@@ -239,6 +278,7 @@ namespace WinGetApprovalNamespace {
 		//public List<string> history = new List<string>();
 		public int historyIndex = 0;//Depreciate
 		public string[] parsedHtml = new string[1];
+		public bool debuggingView = false;
 
 
 
@@ -281,8 +321,8 @@ namespace WinGetApprovalNamespace {
 			historyIndex++;
 			
 		if (DarkMode == 0) {
-			color_DefaultBack = Color.FromArgb(15,15,15);
-			color_DefaultText = Color.FromArgb(255,255,255);
+			color_DefaultBack = Color.FromArgb(33,33,33);
+			color_DefaultText = Color.FromArgb(200,200,200);
 			color_ActiveBack = Color.FromArgb(15,55,105);
 			color_InputBack = Color.FromArgb(0,0,0);
 		}
@@ -377,6 +417,62 @@ namespace WinGetApprovalNamespace {
 			Controls.Add(newLabel);
 		}
 
+		public void drawPanel(int startX, int startY, int sizeX, int sizeY){
+			Panel panel1 = new Panel();
+			TextBox textBox1 = new TextBox();
+			Label label1 = new Label();
+
+			// Initialize the Panel control.
+			panel1.Location = new Point(startX,startY);
+			panel1.Size = new Size(sizeX, sizeY);
+			// Set the Borderstyle for the Panel to three-dimensional.
+			//panel1.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+			//panel1.TabIndex = 0;
+			panel1.AutoScroll = true;
+			// Initialize the Label and TextBox controls.
+			label1.Location = new Point(12,16);
+			label1.Text = "label1";
+			label1.Size = new Size(104, 16);
+			textBox1.Location = new Point(16,320);
+			textBox1.Text = "";
+			textBox1.Size = new Size(152, 20);
+
+			// Add the Panel control to the form.
+			// Add the Label and TextBox controls to the Panel.
+			panel1.Controls.Add(label1);
+			panel1.Controls.Add(textBox1);
+/*
+*/
+			this.Controls.Add(panel1);
+		}// end drawPanel
+
+		public void drawMenuBar (){
+		this.Menu = new MainMenu();
+        MenuItem item = new MenuItem("File");
+        this.Menu.MenuItems.Add(item);
+            item.MenuItems.Add("Save", new EventHandler(Save_Click));
+            item.MenuItems.Add("Open", new EventHandler(Open_Click)); 
+            item.MenuItems.Add("Page debug", new EventHandler(Debugging_Click)); 
+        item = new MenuItem("Edit");
+        this.Menu.MenuItems.Add(item);
+            item.MenuItems.Add("Copy", new EventHandler(Copy_Click));
+            item.MenuItems.Add("Paste", new EventHandler(Paste_Click)); 
+        item = new MenuItem("View");
+        this.Menu.MenuItems.Add(item);
+            item.MenuItems.Add("WordWrap", new EventHandler(WordWrap_Click));
+        item = new MenuItem("Navigation");
+        this.Menu.MenuItems.Add(item);
+            item.MenuItems.Add("Back", new EventHandler(Navigate_Back));
+            item.MenuItems.Add("Forward", new EventHandler(Navigate_Forward));
+            item.MenuItems.Add("Show History", new EventHandler(Show_History));
+            //item.MenuItems.Add("Show Scroll Position", new EventHandler(GetScroll_Position));
+        item = new MenuItem("Help");
+        this.Menu.MenuItems.Add(item);
+            item.MenuItems.Add("About", new EventHandler(About_Click));
+	this.BackColor = color_DefaultBack;
+	this.ForeColor = color_DefaultText;
+	  }// end drawMenuBar
+
 		public void drawUrlBoxAndGoButton(){
 			int inc = 0;
 			int row0 = gridItemHeight*inc;inc++;
@@ -445,6 +541,8 @@ namespace WinGetApprovalNamespace {
 			
 
  	  }// end drawGoButton
+
+
 
 		public void OnResize(object sender, System.EventArgs e) {
 			//outBox.Height = ClientRectangle.Height - gridItemHeight;
@@ -559,11 +657,12 @@ string[] PresetList = {"Approval","ToWork"};
 				int PR = FullPR["number"];
 				//Get-TrackerProgress -PR $PR $MyInvocation.MyCommand line PRs.Length
 				line++;
-				if((FullPR["title"].Contains("Remove")) || 
-				(FullPR["title"].Contains("Delete")) || 
-				(FullPR["title"].Contains("Automatic deletion"))){
-					//Get-GitHubPreset CheckInstaller -PR $PR
-				}
+				//This part is too spammy, checking Last-Version-Remaining on every run (sometimes twice a day) for a week as the PR sits. 
+				// if((FullPR["title"].Contains("Remove")) || 
+				// (FullPR["title"].Contains("Delete")) || 
+				// (FullPR["title"].Contains("Automatic deletion"))){
+					// Get-GitHubPreset CheckInstaller -PR $PR
+				// }
 				dynamic Comments = InvokeGitHubPRRequest(PR,"comments");
 				if (Preset == "Approval"){
 					if (CheckStandardPRComments(PR,Comments)){
@@ -1577,7 +1676,14 @@ string[] PresetList = {"Approval","ToWork"};
 
 
 //VM Image Management
-//ImageVMStart
+		public void ImageVMStart(string OS = "Win10"){
+		//[ValidateSet("Win10","Win11")]
+			TestAdmin();
+			int VM = 0;
+			SetVMState(OS, 2);// ;
+			RevertVM(VM);//,OS
+			LaunchWindow(VM);//,OS
+		}
 //ImageVMStop
 //ImageVMMove
 
@@ -1607,9 +1713,35 @@ string[] PresetList = {"Approval","ToWork"};
 			newProcess.Start();
 		}
 
-//VMRevert
-//VMComplete
-//VMStop
+		public void RevertVM(int vm){
+			TestAdmin();
+			string VMName = "vm"+vm;
+			SetStatus(vm,"Restoring") ;
+			RestoreVMCheckpoint(VMName);
+		}
+
+		public void CompleteTrackerVM(int vm){
+			string VMFolder = MainFolder+"\\vm\\"+vm;
+			string filesFileName = VMFolder+"\\files.txt";
+			string VMName = "vm"+vm;
+			TestAdmin();
+			SetStatus(vm,"Completing");
+			var processes = Process.GetProcessesByName("vmconnect");
+			foreach (Process process in processes){
+				if (process.MainWindowTitle ==(VMName)) {
+				process.CloseMainWindow();
+				}
+			}
+			SetVMState("vm"+vm, 4);
+			RemoveItem(filesFileName);
+			SetStatus(vm,"Ready");
+		}
+
+		public void StopVM(int vm){
+			string VMName = "vm"+vm;
+			TestAdmin();
+			SetVMState(VMName, 3);
+		}
 
 
 
@@ -1658,7 +1790,18 @@ string[] PresetList = {"Approval","ToWork"};
 			}
 		}
 			
-//RebuildStatus
+/*public RebuildStatus {
+	Status = Get-VM.Where(n => n.name -notmatch "vm0"}|
+	Select-Object @{n="vm";e={$_.name}},
+	@{n="status";e={"Ready"}},
+	@{n="version";e={(GetVMVersion -OS "Win10")}},
+	@{n="OS";e={"Win10"}},
+	@{n="Package";e={""}},
+	@{n="PR";e={"1"}},
+	@{n="RAM";e={"0"}}
+	OutFile(StatusFile,Status);
+}
+*/
 
 		public void RefreshStatus() {
 			try {
@@ -1744,7 +1887,8 @@ string[] PresetList = {"Approval","ToWork"};
 			}
 			
 		}//end function 
-	
+
+
 
 
 
@@ -1788,8 +1932,6 @@ string[] PresetList = {"Approval","ToWork"};
 				}//end foreach FullVM
 			}//end if VMs
 		}//end function
-		
-
 
 
 
@@ -2217,7 +2359,6 @@ public void AddValidationData(string PackageIdentifier,string GitHubUserName = "
 			var processes = Process.GetProcessesByName(ProcessName);
 			foreach (Process process in processes){
 				process.CloseMainWindow();
-				//Stop-Process Process.CloseMainWindow(); or Process.Kill();
 			} 
 		}
 
@@ -2240,6 +2381,13 @@ public void AddValidationData(string PackageIdentifier,string GitHubUserName = "
 		//Create-Archive = ZipFile.CreateFromDirectory(dataPath, zipPath);
 		//Expand-Archive = ZipFile.ExtractToDirectory(zipPath, extractPath);
 		//Sort-Object = .OrderBy(n=>n).ToArray(); and -Unique = .Distinct(); Or Array.Sort(strArray); or List
+		
+		//Get-VM = GetVM("VMName");
+		//Start-VM = SetVMState("VMName", 2);
+		//Stop-VM = SetVMState("VMName", 4);
+		//Stop-VM -TurnOff = SetVMState("VMName", 3);
+		//Reboot-VM = SetVMState("VMName", 10);
+		//Reset-VM = SetVMState("VMName", 11);
 
 		//JSON
 		public dynamic FromJson(string string_input) {
@@ -2427,6 +2575,85 @@ public void AddValidationData(string PackageIdentifier,string GitHubUserName = "
 			}
 		}
 
+		//Hyper-V
+		public ManagementObject GetVM(string VMName) {
+			ObjectQuery query = new ObjectQuery(@"SELECT * FROM Msvm_ComputerSystem WHERE ElementName = '" + VMName + "'");
+			ManagementObjectSearcher searcher = new ManagementObjectSearcher(scope, query);
+			ManagementObjectCollection collection = searcher.Get();
+
+			ManagementObject vm = null;
+			foreach (ManagementObject obj in collection) {
+				vm = obj;
+				break;
+			}
+			return vm;
+		}
+		/*States: 
+		1: Other
+		2: Start-VM
+		3: Stop-VM -TurnOff
+		4: Stop-VM
+		5: ???
+		6: Offline
+		7: Test
+		8: Defer
+		9: Quiesce
+		10: Reboot
+		11: Reset
+		*/
+		public void SetVMState(string VMName, int state) {
+			ManagementObject vm = GetVM(VMName);
+			ManagementBaseObject inParams = vm.GetMethodParameters("RequestStateChange");
+			inParams["RequestedState"] = state;
+            ManagementBaseObject outParams = vm.InvokeMethod("RequestStateChange", inParams, null);
+		}
+
+        public ManagementObject GetLastSnapshot(string VMName = "") {
+			ManagementObject vm = GetVM(VMName);
+            ManagementObjectCollection settings = vm.GetRelated(
+                "Msvm_VirtualSystemSettingData",
+                "Msvm_MostCurrentSnapshotInBranch",
+                null,
+                null,
+                "Dependent",
+                "Antecedent",
+                false,
+                null);
+
+            ManagementObject virtualSystemsetting = null;
+            foreach (ManagementObject setting in settings)
+            {
+                //Console.WriteLine(setting.Path.Path);
+                //Console.WriteLine(setting["ElementName"]);
+                virtualSystemsetting = setting;
+            }
+            return virtualSystemsetting;
+        }
+
+		public uint ApplySnapshot(ManagementScope scope, ManagementObject snapshot) {
+			ObjectQuery query = new ObjectQuery(@"SELECT * FROM Msvm_VirtualSystemSnapshotService");
+			ManagementObjectSearcher searcher = new ManagementObjectSearcher(scope, query);
+			ManagementObjectCollection collection = searcher.Get();
+
+			ManagementObject snapshotService = null;
+			foreach (ManagementObject obj in collection) {
+				snapshotService = obj;
+				break;
+			}
+
+			var inParameters = snapshotService.GetMethodParameters("ApplySnapshot");
+			inParameters["Snapshot"] = snapshot.Path.Path;
+			var outParameters = snapshotService.InvokeMethod("ApplySnapshot", inParameters, null);
+			return (uint)outParameters["ReturnValue"];
+		}
+		 
+		 public void RestoreVMCheckpoint(string VMName) {
+			ManagementObject snapshot = GetLastSnapshot(VMName);
+			uint string_out = ApplySnapshot(scope, snapshot);
+		 }
+
+
+
 
 
 
@@ -2447,45 +2674,57 @@ public void AddValidationData(string PackageIdentifier,string GitHubUserName = "
 
 		public RECT rect;
 
-		public void  TrackerVMWindowLoc (int VM,ref RECT rect,IntPtr MWHandle) {
+		public void  WindowLoc (int vm,ref RECT rect) {
 			//Need to readd the logic that finds the mainwindowhandle from the VM number.
-			GetWindowRect(MWHandle,out rect);
+			var processes = Process.GetProcessesByName("vmconnect");
+			string VMName = "vm"+vm;
+			foreach (Process process in processes){
+				if (process.MainWindowTitle ==(VMName)) {
+					GetWindowRect(process.MainWindowHandle,out rect);
+				}
+			}
 		}
 
-		public void  TrackerVMWindowSet (int VM,int Left,int Top,int Right,int Bottom,IntPtr MWHandle) {
-			MoveWindow(MWHandle,Left,Top,Right,Bottom,true);
+		public void  WindowSet (int vm,int Left,int Top,int Right,int Bottom) {
+			var processes = Process.GetProcessesByName("vmconnect");
+			string VMName = "vm"+vm;
+			foreach (Process process in processes){
+				if (process.MainWindowTitle ==(VMName)) {
+					MoveWindow(process.MainWindowHandle,Left,Top,Right,Bottom,true);
+				}
+			}
 		}
 
-		public void  TrackerVMWindowArrange() {
+		public void  WindowArrange() {
 			Dictionary<string,object>[] GetStatus = FromCsv(GetContent(StatusFile));
 
-			var VMs = GetStatus.Where(n => (string)n["status"] != "Ready").Select(n => n["vm"]);
+			Dictionary<string,object>[] VMs = (Dictionary<string,object>[])GetStatus.Where(n => (string)n["status"] != "Ready").Select(n => n["vm"]);
 
 			if (VMs != null) {
-/*
-				RECT Base;
-				TrackerVMWindowSet(VMs[0],900,0,1029,860)
-				TrackerVMWindowLoc(VMs[0], ref Base)
-				
-				for (int n = 1;n < VMs.count;n++) {
-					Dictionary<string,object> VM = VMs[n]
-					
-					int Left = (Base.left - (100 * n))
-					int Top = (Base.top + (66 * n))
-					TrackerVMWindowSet(VM,Left,Top,1029,860)
+				int n = 0;
+				//for (int n = 1;n < VMs.Length;n++) {
+				foreach (Dictionary<string,object> FullVM in VMs){
+				RECT Base = new RECT();
+				int VM = (int)FullVM["vm"];
+				if (n == 0) {
+					WindowSet(VM,900,0,1029,860);
+					WindowLoc(VM, ref Base);
 				}
-*/
+					
+					int Left = (Base.Left - (100 * n));
+					int Top = (Base.Top + (66 * n));
+					WindowSet(VM,Left,Top,1029,860);
+				n++;
+				}
 			}
 
-/*
 				for (int VM = 0; VM < GetStatus.Length; VM++) {
 					try {
-						string_ram += GetStatus[VM]["RAM"]+" ";
+						string string_ram = GetStatus[VM]["RAM"]+" ";
 					} catch (Exception e) {
-						inputBox_VMRAM.Text = e.ToString();
+						//inputBox_VMRAM.Text = e.ToString();
 					}
 				}
-*/
 		}
 
 
@@ -2763,60 +3002,6 @@ using(Stream stream = Application.GetResourceStream(new Uri(imageUrl)).Stream)
 			myBrush.Dispose();
 		}
 		
-		public void drawPanel(int startX, int startY, int sizeX, int sizeY){
-			Panel panel1 = new Panel();
-			TextBox textBox1 = new TextBox();
-			Label label1 = new Label();
-
-			// Initialize the Panel control.
-			panel1.Location = new Point(startX,startY);
-			panel1.Size = new Size(sizeX, sizeY);
-			// Set the Borderstyle for the Panel to three-dimensional.
-			//panel1.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-			//panel1.TabIndex = 0;
-			panel1.AutoScroll = true;
-			// Initialize the Label and TextBox controls.
-			label1.Location = new Point(12,16);
-			label1.Text = "label1";
-			label1.Size = new Size(104, 16);
-			textBox1.Location = new Point(16,320);
-			textBox1.Text = "";
-			textBox1.Size = new Size(152, 20);
-
-			// Add the Panel control to the form.
-			// Add the Label and TextBox controls to the Panel.
-			panel1.Controls.Add(label1);
-			panel1.Controls.Add(textBox1);
-/*
-*/
-			this.Controls.Add(panel1);
-		}// end drawPanel
-
-		public void drawMenuBar (){
-		this.Menu = new MainMenu();
-        MenuItem item = new MenuItem("File");
-        this.Menu.MenuItems.Add(item);
-            item.MenuItems.Add("Save", new EventHandler(Save_Click));
-            item.MenuItems.Add("Open", new EventHandler(Open_Click)); 
-            item.MenuItems.Add("Page debug", new EventHandler(Debugging_Click)); 
-        item = new MenuItem("Edit");
-        this.Menu.MenuItems.Add(item);
-            item.MenuItems.Add("Copy", new EventHandler(Copy_Click));
-            item.MenuItems.Add("Paste", new EventHandler(Paste_Click)); 
-        item = new MenuItem("View");
-        this.Menu.MenuItems.Add(item);
-            item.MenuItems.Add("WordWrap", new EventHandler(WordWrap_Click));
-        item = new MenuItem("Navigation");
-        this.Menu.MenuItems.Add(item);
-            item.MenuItems.Add("Back", new EventHandler(Navigate_Back));
-            item.MenuItems.Add("Forward", new EventHandler(Navigate_Forward));
-            item.MenuItems.Add("Show History", new EventHandler(Show_History));
-            //item.MenuItems.Add("Show Scroll Position", new EventHandler(GetScroll_Position));
-        item = new MenuItem("Help");
-        this.Menu.MenuItems.Add(item);
-            item.MenuItems.Add("About", new EventHandler(About_Click));
-	  }// end drawMenuBar
-
 		//Menu 
 		public void Show_History(object sender, EventArgs e) {
 			string outString = "History - You are at: "+historyIndex+ Environment.NewLine;
@@ -3014,9 +3199,17 @@ using(Stream stream = Application.GetResourceStream(new Uri(imageUrl)).Stream)
         }// end Idle_Button_Click
 
         public void Config_Button_Click(object sender, EventArgs e) {
-			string Status = "Idle";
-			SetMode(Status);//[ValidateSet("Approving","Idle","IEDS","Validating")]
-			//outBox_val.AppendText(Environment.NewLine + "Status: "+Status);
+			//var vm = GetVM("vm674");
+            //ManagementObject snapshotSettingData = GetLastVirtualSystemSnapshot(vm);
+
+			//string Status = "Idle";
+			//SetMode(Status);//[ValidateSet("Approving","Idle","IEDS","Validating")]
+			//vm.SetPropertyValue("DS_displayName", "vm674-test");
+				
+			//RestoreVMCheckpoint("vm674");
+			//SetVMState("vm674",2);
+			//ToJson(vm)
+			outBox_val.AppendText(Environment.NewLine + "snapshotSettingData: ");
         }// end Config_Button_Click
 
 
@@ -3107,6 +3300,9 @@ public string[] MagicLabels = {"Validation-Defender-Error", //0
 
 
 /* Miscellany 
+double result = DateTime.Now.Subtract(DateTime.MinValue).TotalSeconds;
+
+
 		//SO: You can use the Distinct method to return an IEnumerable<T> of distinct items:
 		//var uniqueItems = yourList.Distinct();
 		//And if you need the sequence of unique items returned as a List<T>, you can add a call to ToList:
