@@ -1,7 +1,7 @@
-[Manifest Specification]:   doc/manifest/schema/1.6.0
-[versionSchema]:            doc/manifest/schema/1.6.0/version.md
-[defaultLocaleSchema]:      doc/manifest/schema/1.6.0/defaultLocale.md
-[installerSchema]:          doc/manifest/schema/1.6.0/installer.md
+[Manifest Specification]:   /manifest/schema/1.6.0
+[versionSchema]:            /manifest/schema/1.6.0/version.md
+[defaultLocaleSchema]:      /manifest/schema/1.6.0/defaultLocale.md
+[installerSchema]:          /manifest/schema/1.6.0/installer.md
 
 # Authoring Manifests
 
@@ -41,7 +41,7 @@ Manifests submitted to the Windows Package Manager Community Repository should b
 
 ## Creating your first manifest
 
-Once you have a package in mind that doesn't already exist in the repository, you can now start [creating your package manifest](https://docs.microsoft.com/en-us/windows/package-manager/package/manifest?tabs=minschema%2Cversion-example). We recommend using the [Windows Package Manager Manifest Creator (a.k.a Winget-Create)](https://github.com/microsoft/winget-create) to help you generate your manifest. Winget-Create is a command line tool that will prompt you for relevant metadata related to your package. Once you are done, Winget-Create will validate your manifest to verify that it is correct and allow you to submit your newly-created manifest directly to the winget-pkgs repository by linking your GitHub account. Alternatively, you can use the [YamlCreate.ps1 Script](Tools/YamlCreate.ps1). More information on using YamlCreate is found in the [script documentation](doc/tools/YamlCreate.md).
+Once you have a package in mind that doesn't already exist in the repository, you can now start [creating your package manifest](https://docs.microsoft.com/en-us/windows/package-manager/package/manifest?tabs=minschema%2Cversion-example). We recommend using the [Windows Package Manager Manifest Creator (a.k.a Winget-Create)](https://github.com/microsoft/winget-create) to help you generate your manifest. Winget-Create is a command line tool that will prompt you for relevant metadata related to your package. Once you are done, Winget-Create will validate your manifest to verify that it is correct and allow you to submit your newly-created manifest directly to the winget-pkgs repository by linking your GitHub account. Alternatively, you can use the [YamlCreate.ps1 Script](/Tools/YamlCreate.ps1). More information on using YamlCreate is found in the [script documentation](tools/YamlCreate.md).
 
 ## Installer Architectures
 If you are authoring a manifest yourself one of the important things to note related to installer types is architecture. In many cases the installer itself may be an x86 installer, but it will actually install the package for the architecture of the system. In these cases, the installer type in the manifest should indicate the architecture of the installed binaries. So in some cases the actual installer itself targets x86, but in fact it will install an x64 version of the package.
