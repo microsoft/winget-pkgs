@@ -37,7 +37,7 @@ For more details, see ["Submit packages to Windows Package Manager"](https://doc
 
 ### In Windows Sandbox
 
-You can use the [Sandbox Test](Tools/SandboxTest.ps1) PowerShell script for testing a manifest installation in [Windows Sandbox](https://docs.microsoft.com/windows/security/threat-protection/windows-sandbox/windows-sandbox-overview). The manifest will be also validated.
+You can use the [Sandbox Test](/Tools/SandboxTest.ps1) PowerShell script for testing a manifest installation in [Windows Sandbox](https://docs.microsoft.com/windows/security/threat-protection/windows-sandbox/windows-sandbox-overview). The manifest will be also validated.
 
 Just provide the path to manifest as parameter:
 
@@ -50,7 +50,7 @@ Just provide the path to manifest as parameter:
 To submit a package to this repository, you should follow these steps:
 
 1. Follow the [Contributing](#contributing) guidelines below.
-2. [Author](AUTHORING_MANIFESTS.md) a Manifest.
+2. [Author](Authoring.md) a Manifest.
 3. [Test](#test-your-manifest) your manifest.
 4. [Submit](#submit-your-pr) your pull request (PR).
 5. Respond to any feedback in your PR.
