@@ -96,6 +96,7 @@ Moderators are often the first to see and triage new issues, and so they have th
 * `Dependencies`
 * `DriverInstall`
 * `DSC`
+* `Error-Hash-Mismatch`
 * `Hardware`
 * `Help-Wanted`
 * `In-PR`
