@@ -4,7 +4,7 @@ The Windows Package Manager community repository is the location for manifests p
 
 ## Moderators
 
-In addition to Microsoft employees, several community members have been identified through their high-quality submissions, willingness to help others, and adherence to our [code of conduct](CODE_OF_CONDUCT.md).
+In addition to Microsoft employees, several community members have been identified through their high-quality submissions, willingness to help others, and adherence to our [code of conduct](/CODE_OF_CONDUCT.md).
 
 When we initially implemented moderation, we observed several objective criteria. These included the number of Pull Requests (PR)s made, the length of time they had been active in the project, and their interaction with others who submitted PRs.
 
