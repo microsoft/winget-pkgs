@@ -21,98 +21,98 @@ The singleton manifest format has been deprecated in the Windows Package Manager
 ### Singleton Manifest
 
 ```YAML
-PackageIdentifier:              	# The package unique identifier
-PackageVersion:                 	# The package version
-Channel:                        	# *Not implemented* distribution channel
-PackageLocale:                  	# The package meta-data locale
-Publisher:                      	# The publisher name
-PackageName:                    	# The package name
-License:                        	# The package license
-ShortDescription:               	# The short package description
-Description:                    	# Optional full package description
-Moniker:                        	# Optional most common package term
-Tags:                           	# Optional list of package terms
-Agreements:                     	# Optional package agreements
-  - AgreementLabel:             	# Optional agreement label
-    Agreement:                  	# Optional agreement text
-    AgreementUrl:               	# Optional agreement URL
-Documentations:                 	# Optional documentation
-  - DocumentLabel:              	# Optional documentation label
-    DocumentUrl:                	# Optional documentation URL
-ReleaseDate:                    	# Optional release date
-ReleaseNotes:                   	# Optional release notes
-ReleaseNotesUrl:                	# Optional release notes URL
-PurchaseUrl:                    	# Optional purchase URL
-InstallationNotes:              	# Optional notes displayed upon installation
-Installers:                     	# The package installer
-  - Architecture:               	# The architecture of the installer
-    InstallerLocale:            	# Optional locale of the installer
-    Platform:                   	# Optional installer supported operating system
-    MinimumOSVersion:           	# Optional installer minimum operating system version
-    InstallerType:              	# The installer type
-    InstallerUrl:               	# The installer URL
-    InstallerSha256:            	# The SHA256 hash of the installer
-    SignatureSha256:            	# Optional SHA256 hash of the MSIX signature
-    NestedInstallerType:					# The installer type when InstallerType is an archive type
-    NestedInstallerFiles:					# Details about the installers when InstallerType is an archive type
-      - RelativeFilePath:					# The relative path to the nested installer file
-        PortableCommandAlias:			# The command alias to be used for calling the package. Only applies when NestedInstallerType is 'portable'
-    Scope:                      	# Optional installer scope
-    InstallModes:               	# Optional installer modes
-    InstallerSwitches:          	# Optional installer switches
-      Silent:                   	# Optional installer switches for silent
-      SilentWithProgress:       	# Optional installer switches for silent with progress
-      Interactive:              	# Optional installer switches for interactive
-      InstallLocation:          	# Optional install location path
-      Log:                      	# Optional installer log file path
-      Upgrade:                  	# Optional installer switches for upgrade
-      Custom:                   	# Optional installer switches for custom behavior
-    UpgradeBehavior:            	# Optional upgrade method
-    Commands:                   	# Optional commands or aliases to run the package
-    Protocols:                  	# Optional list of protocols supported by the package
-    FileExtensions:             	# Optional list of file extensions supported by the package
-    Dependencies:               	# *Experimental* list of dependencies required by the package
-      - ExternalDependencies:   	# *Not implemented* list of external dependencies
-        PackageDependencies:    	# *Experimental* list of package dependencies
-        WindowsFeatures:        	# *Not implemented* list of Windows feature dependencies
-        WindowsLibraries:       	# *Not implemented* list of Windows library dependencies
-    PackageFamilyName:          	# Optional MSIX package family name
-    Capabilities:               	# Optional list of MSIX package capabilities
-    RestrictedCapabilities:     	# Optional list of MSIX package restricted capabilities
-    InstallerAbortsTerminal:    	# Optional indicator for packages that abort terminal
-    InstallLocationRequired:    	# Optional indicator for packages that require install location
-    RequireExplicitUpgrade:     	# Optional indicator for packages that upgrade themselves
-    ElevationRequirement:       	# Scope required to install package
-    UnsupportedOSArchitectures: 	# Optional architectures the package is not supported on
-    Markets:                    	# Optional markets the package is allowed to be installed
-    ExcludedMarkets:            	# Optional markets the package is not allowed to be installed
-    InstallerSuccessCodes:      	# Optional non-zero installer success codes
-    ExpectedReturnCodes:        	# Optional non-zero installer return codes
-      - InstallerReturnCode:     	# Optional non-zero installer return code
-        ReturnResponse:         	# Optional response for an expected return code
-        ReturnResponseUrl:      	# Optional response URL for an expected return code
-    ProductCode:                	# Optional product code of the installer
-    AppsAndFeaturesEntries:     	# Optional entries from the Add and Remove Programs (ARP) table
-      - DisplayName:            	# Optional program name shown in the ARP entry
-        DisplayVersion:         	# Optional version displayed in the ARP entry
-        Publisher:              	# Optional publisher displayed in the ARP entry
-        ProductCode:            	# Optional product code of the installer
-        UpgradeCode:            	# Optional upgrade code of the installer
-        InstallerType:          	# Optional installer type
-    UnsupportedArguments:       	# Optional list of Windows Package Manager Client arguments the installer does not support
-      - UnsupportedArgument:    	# Optional unsupported Windows Package Manager Client argument
-    DisplayInstallWarnings:     	# *Not implemented* Optional indicator for packages that are known to interfere with running application during install
-    InstallationMetadata:					# Optional metadata for deeper installation detection
-      - DefaultInstallLocation: 	# Optional default install location for the package
-        Files:										# Optional list of files installed by the package
-          - RelativeFilePath:   	# Optional relative path to the installed file
-            FileSha256:						# Optional Sha256 of the installed file
-            FileType:							# Optional installed file type. Treated as 'other' if not specified
-            InvocationParameter:	# Optional parameter for invocable files
-            DisplayName:					# Optional display name for invocable files
-		DownloadCommandProhibited:		# Optional indicator for packages which cannot be downloaded for offline installation
-ManifestType: singleton         	# The manifest type
-ManifestVersion: 1.6.0          	# The manifest syntax version
+PackageIdentifier:                 # The package unique identifier
+PackageVersion:                    # The package version
+Channel:                           # *Not implemented* distribution channel
+PackageLocale:                     # The package meta-data locale
+Publisher:                         # The publisher name
+PackageName:                       # The package name
+License:                           # The package license
+ShortDescription:                  # The short package description
+Description:                       # Optional full package description
+Moniker:                           # Optional most common package term
+Tags:                              # Optional list of package terms
+Agreements:                        # Optional package agreements
+  - AgreementLabel:                # Optional agreement label
+    Agreement:                     # Optional agreement text
+    AgreementUrl:                  # Optional agreement URL
+Documentations:                    # Optional documentation
+  - DocumentLabel:                 # Optional documentation label
+    DocumentUrl:                   # Optional documentation URL
+ReleaseDate:                       # Optional release date
+ReleaseNotes:                      # Optional release notes
+ReleaseNotesUrl:                   # Optional release notes URL
+PurchaseUrl:                       # Optional purchase URL
+InstallationNotes:                 # Optional notes displayed upon installation
+Installers:                        # The package installer
+  - Architecture:                  # The architecture of the installer
+    InstallerLocale:               # Optional locale of the installer
+    Platform:                      # Optional installer supported operating system
+    MinimumOSVersion:              # Optional installer minimum operating system version
+    InstallerType:                 # The installer type
+    InstallerUrl:                  # The installer URL
+    InstallerSha256:               # The SHA256 hash of the installer
+    SignatureSha256:               # Optional SHA256 hash of the MSIX signature
+    NestedInstallerType:           # The installer type when InstallerType is an archive type
+    NestedInstallerFiles:          # Details about the installers when InstallerType is an archive type
+      - RelativeFilePath:          # The relative path to the nested installer file
+        PortableCommandAlias:      # The command alias to be used for calling the package. Only applies when NestedInstallerType is 'portable'
+    Scope:                         # Optional installer scope
+    InstallModes:                  # Optional installer modes
+    InstallerSwitches:             # Optional installer switches
+      Silent:                      # Optional installer switches for silent
+      SilentWithProgress:          # Optional installer switches for silent with progress
+      Interactive:                 # Optional installer switches for interactive
+      InstallLocation:             # Optional install location path
+      Log:                         # Optional installer log file path
+      Upgrade:                     # Optional installer switches for upgrade
+      Custom:                      # Optional installer switches for custom behavior
+    UpgradeBehavior:               # Optional upgrade method
+    Commands:                      # Optional commands or aliases to run the package
+    Protocols:                     # Optional list of protocols supported by the package
+    FileExtensions:                # Optional list of file extensions supported by the package
+    Dependencies:                  # *Experimental* list of dependencies required by the package
+      - ExternalDependencies:      # *Not implemented* list of external dependencies
+        PackageDependencies:       # *Experimental* list of package dependencies
+        WindowsFeatures:           # *Not implemented* list of Windows feature dependencies
+        WindowsLibraries:          # *Not implemented* list of Windows library dependencies
+    PackageFamilyName:             # Optional MSIX package family name
+    Capabilities:                  # Optional list of MSIX package capabilities
+    RestrictedCapabilities:        # Optional list of MSIX package restricted capabilities
+    InstallerAbortsTerminal:       # Optional indicator for packages that abort terminal
+    InstallLocationRequired:       # Optional indicator for packages that require install location
+    RequireExplicitUpgrade:        # Optional indicator for packages that upgrade themselves
+    ElevationRequirement:          # Scope required to install package
+    UnsupportedOSArchitectures:    # Optional architectures the package is not supported on
+    Markets:                       # Optional markets the package is allowed to be installed
+    ExcludedMarkets:               # Optional markets the package is not allowed to be installed
+    InstallerSuccessCodes:         # Optional non-zero installer success codes
+    ExpectedReturnCodes:           # Optional non-zero installer return codes
+      - InstallerReturnCode:       # Optional non-zero installer return code
+        ReturnResponse:            # Optional response for an expected return code
+        ReturnResponseUrl:         # Optional response URL for an expected return code
+    ProductCode:                   # Optional product code of the installer
+    AppsAndFeaturesEntries:        # Optional entries from the Add and Remove Programs (ARP) table
+      - DisplayName:               # Optional program name shown in the ARP entry
+        DisplayVersion:            # Optional version displayed in the ARP entry
+        Publisher:                 # Optional publisher displayed in the ARP entry
+        ProductCode:               # Optional product code of the installer
+        UpgradeCode:               # Optional upgrade code of the installer
+        InstallerType:             # Optional installer type
+    UnsupportedArguments:          # Optional list of Windows Package Manager Client arguments the installer does not support
+      - UnsupportedArgument:       # Optional unsupported Windows Package Manager Client argument
+    DisplayInstallWarnings:        # *Not implemented* Optional indicator for packages that are known to interfere with running application during install
+    InstallationMetadata:          # Optional metadata for deeper installation detection
+      - DefaultInstallLocation:    # Optional default install location for the package
+        Files:                     # Optional list of files installed by the package
+          - RelativeFilePath:      # Optional relative path to the installed file
+            FileSha256:            # Optional Sha256 of the installed file
+            FileType:              # Optional installed file type. Treated as 'other' if not specified
+            InvocationParameter:   # Optional parameter for invocable files
+            DisplayName:           # Optional display name for invocable files
+    DownloadCommandProhibited:     # Optional indicator for packages which cannot be downloaded for offline installation
+ManifestType: singleton            # The manifest type
+ManifestVersion: 1.6.0             # The manifest syntax version
 ```
 
 ### [Singleton Minimal Example](#tab/minimal/)

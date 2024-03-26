@@ -13,6 +13,9 @@ trigger:
 
 pr: none
 
+variables:
+  Publish.SkipManifestIndexUpdate: $[coalesce(variables.SkipManifestIndexUpdate, 'False')]
+
 resources:
   repositories:
   - repository: 1ESPipelineTemplates
@@ -63,6 +66,7 @@ extends:
             MANIFEST_PUBLISH_COMPLETION_ENDPOINT: $(AzFuncManifestPublishCompletionEndpoint)
             PIPELINE_TASK_MESSAGE_QUEUE_ENDPOINT: $(AzFuncPipelineTaskMessageQueueEndPoint)
             RESTSOURCE_UPDATE_ENDPOINT: $(AzFuncRestSourceUpdateEndpoint)
+            PUBLISH_ENDPOINT: $(AzFuncCommitPipelinePublishEndpoint)
           inputs:
             script: 'winget_publish_setup.cmd'
             workingDirectory: scripts
@@ -81,6 +85,7 @@ extends:
             DIApplicationInsightKey: $(DIApplicationInsightKey)
             WinGet:AppConfig:Primary: $(AppConfigPrimary)
             WinGet:AppConfig:Secondary: $(AppConfigSecondary)
+            SYSTEM_ACCESSTOKEN: $(System.AccessToken)
 
       # Agentless phase. Depends on previous job. 
       - job: 'SignPackage'
@@ -116,45 +121,44 @@ extends:
               }
             waitForCompletion: "true"
 
-      # Agent phase. Depends on previous job.
+      # Agentless phase. Depends on previous job.
       - job: 'Publish'
+        pool: server
+        timeoutInMinutes: 1500
         displayName: 'Publish'
-        variables:
-          skipComponentGovernanceDetection: ${{ true }}
-          runCodesignValidationInjection: ${{ false }}
         dependsOn:
+          - 'CommitProcessing'
           - 'SignPackage'
-        timeoutInMinutes: 0
-        
+        condition: succeeded()
+        variables:
+          HostKeySecret: $[ dependencies.CommitProcessing.outputs['wingetsetup.hostkey']]
+          PublishEndpointSecret: $[ dependencies.CommitProcessing.outputs['wingetsetup.publishEndpoint']]
         steps:
 
-        # Downloads all the setup files and its dependencies.
-        - task: AzureCLI@1
-          displayName: 'Azure Setup'
-          inputs:
-            azureSubscription: '$(WinGet.Subscription)'
-            scriptLocation: inlineScript
-            inlineScript: 'az storage blob download-batch -d . --pattern * -s servicewrapper --output none'
-          env:
-            AZURE_STORAGE_CONNECTION_STRING: $(ValidationStorageAccountConnectionString)
-
-        # Validates integrity of pull request.
-        - task: CmdLine@2
+        - task: AzureFunction@1
           displayName: 'Publish'
           inputs:
-            script: 'WinGetSvcWrapper.exe publish --operationId %BUILD_BUILDNUMBER%'
-            failOnStderr: true
-          condition: succeeded()
-          env:
-            ValidationConnectionString: $(ValidationStorageAccountConnectionString)
-            ExecutionEnvironment: $(ExecutionEnvironment)
-            CacheConnectionString: $(CacheStorageAccountConnectionString)
-            DIApplicationInsightKey: $(DIApplicationInsightKey)
-            WinGet:AppConfig:Primary: $(AppConfigPrimary)
-            WinGet:AppConfig:Secondary: $(AppConfigSecondary)
-            CdnAzureServicesAuthConnectionString: $(AzureServicesAuthConnectionString)
-            CacheContainerName: $(CacheContainerName)
-            WinGet::SubscriptionId: $(WinGet.SubscriptionId)
+            function: '$(PublishEndpointSecret)'
+            key: '$(HostKeySecret)'
+            body: |
+              {
+              "operationId": "$(Build.BuildNumber)",
+              "BuildId": "$(Build.BuildId)",
+              "PlanUrl": "$(system.CollectionUri)",
+              "HubName": "$(system.HostType)",
+              "pipelineType": "CommitPipeline",
+              "ProjectId": "$(system.TeamProjectId)",
+              "PlanId": "$(system.PlanId)",
+              "JobId": "$(system.JobId)",
+              "TimelineId": "$(system.TimelineId)",
+              "TaskInstanceId": "$(system.TaskInstanceId)",
+              "AuthToken": "$(system.AccessToken)",
+              "BuildRepositoryId": "$(build.repository.id)",
+              "CommitTablePartitionKey": "$(CommitTablePartitionKey)",
+              "CommitTableRowKey": "$(CommitTableRowKey)",
+              "SkipManifestIndexUpdate": "$(Publish.SkipManifestIndexUpdate)"
+              }
+            waitForCompletion: "true"
 
       # Agentless phase. Depends on previous job. 
       - job: 'PublishToRestSource'
