@@ -7,15 +7,21 @@
         [switch] $IncludeLatest
     )
 
-    $webPage = Invoke-WebRequest "https://repology.org/project/$RepologyProjectName/versions" -UseBasicParsing
-    $vulnerableVersions = $webPage.links.Where({ $_ -match 'cves\?' }).href | ForEach-Object { $_.split('=')[-1] }
+    try {
+        $webPage = Invoke-WebRequest "https://repology.org/project/$RepologyProjectName/versions" -UseBasicParsing
+        $vulnerableVersions = $webPage.links.Where({ $_ -match 'cves\?' }).href | ForEach-Object { $_.split('=')[-1] }
 
-    $ManifestVersions = (Get-WinGetPackage $PackageIdentifier).AvailableVersions
-    $versions =  $ManifestVersions.Where({$_ -in $vulnerableVersions })
+        $ManifestVersions = (Get-WinGetPackage $PackageIdentifier).AvailableVersions
+    } catch {
+        Out-Null
+    }
+    if (!$vulnerableVersions -or !$ManifestVersions) { return $null }
+
+    $versions = $ManifestVersions.Where({ $_ -in $vulnerableVersions })
 
     # The latest will be omitted by default to prevent accidental removal
-    if ($IncludeLatest) { return $versions}
-    return $versions.Where({$_ -ne $ManifestVersions[0]})
+    if ($IncludeLatest) { return $versions }
+    return $versions.Where({ $_ -ne $ManifestVersions[0] })
 }
 
 function Get-RepologyWingetIds {
@@ -24,10 +30,15 @@ function Get-RepologyWingetIds {
         [string] $RepologyProjectName
     )
 
-    $webPage = Invoke-WebRequest "https://repology.org/project/$RepologyProjectName/versions" -UseBasicParsing
-    $wingetManifestPaths = $webPage.links.Where({$_.href -match 'winget-pkgs'}).href | Select-Object -Unique
+    try {
+        $webPage = Invoke-WebRequest "https://repology.org/project/$RepologyProjectName/versions" -UseBasicParsing | Out-Null
+        $wingetManifestPaths = $webPage.links.Where({ $_.href -match 'winget-pkgs' }).href | Select-Object -Unique
+    } catch {
+        Out-Null
+    }
+
     if (!$wingetManifestPaths) { return $null }
 
-    $wingetManifestPaths = $wingetManifestPaths -replace 'https://github.com/microsoft/winget-pkgs/tree/master/manifests/',''
-    return $wingetManifestPaths.ForEach({($_.Split('/') | Select-Object -SkipLast 1) -join '.'}) |Select-Object -Unique
+    $wingetManifestPaths = $wingetManifestPaths -replace 'https://github.com/microsoft/winget-pkgs/tree/master/manifests/', ''
+    return $wingetManifestPaths.ForEach({ ($_.Split('/') | Select-Object -SkipLast 1) -join '.' }) | Select-Object -Unique
 }
