@@ -40,5 +40,5 @@ function Get-RepologyWingetIds {
     if (!$wingetManifestPaths) { return $null }
 
     $wingetManifestPaths = $wingetManifestPaths -replace 'https://github.com/microsoft/winget-pkgs/tree/master/manifests/', ''
-    return $wingetManifestPaths.ForEach({ ($_.Split('/') | Select-Object -SkipLast 1) -join '.' }) | Select-Object -Unique
+    return $wingetManifestPaths.ForEach({ ($_.Split('/') | Select-Object -Skip 1 | Select-Object -SkipLast 1) -join '.' }) | Select-Object -Unique
 }
