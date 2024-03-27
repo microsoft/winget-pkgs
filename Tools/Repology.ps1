@@ -11,7 +11,7 @@
         $webPage = Invoke-WebRequest "https://repology.org/project/$RepologyProjectName/versions" -UseBasicParsing
         $vulnerableVersions = $webPage.links.Where({ $_ -match 'cves\?' }).href | ForEach-Object { $_.split('=')[-1] }
 
-        $ManifestVersions = (Get-WinGetPackage $PackageIdentifier).AvailableVersions
+        $ManifestVersions = (Find-WinGetPackage $PackageIdentifier).AvailableVersions
     } catch {
         Out-Null
     }
