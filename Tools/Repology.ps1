@@ -31,7 +31,7 @@ function Get-RepologyWingetIds {
     )
 
     try {
-        $webPage = Invoke-WebRequest "https://repology.org/project/$RepologyProjectName/versions" -UseBasicParsing | Out-Null
+        $webPage = Invoke-WebRequest "https://repology.org/project/$RepologyProjectName/versions" -UseBasicParsing
         $wingetManifestPaths = $webPage.links.Where({ $_.href -match 'winget-pkgs' }).href | Select-Object -Unique
     } catch {
         Out-Null
