@@ -10,7 +10,7 @@
 #3.88.19 - A few bugfixes.
 #3.88.18 - Restore waiver and retry fucntionality. 
 
-$build = 872
+$build = 875
 $appName = "ManualValidationPipeline"
 Write-Host "$appName build: $build"
 $MainFolder = "C:\ManVal"
@@ -99,7 +99,8 @@ $MagicLabels = "Validation-Defender-Error", #0
 "Validation-Retry", #29
 "Needs-Author-Feedback",#30
 "Policy-Test-2.7", #31
-"Manifest-Version-Error"#32
+"Manifest-Version-Error",#32
+"Last-Version-Remaining"#33
 
 #First tab
 Function Get-TrackerVMRunTracker {
@@ -149,7 +150,7 @@ Function Get-TrackerVMRunTracker {
 		Write-Host -f $timeClockColor (Get-HoursWorkedToday)
 		(Get-VM) | ForEach-Object {
 			if(($_.MemoryDemand / $_.MemoryMaximum) -ge 0.9){
-				set-vm -VMName $_.name -MemoryMaximumBytes "$(($_.MemoryMaximum / 1073741824)+2)GB"
+				Set-VM -VMName $_.name -MemoryMaximumBytes "$(($_.MemoryMaximum / 1073741824)+2)GB"
 			}
 		}
 		$status = Get-Status
@@ -1394,7 +1395,7 @@ Function Get-PRWatch {
 				$PRvMan = "P"
 				$Approve = "+"
 
-				$WinGetOutput = Find-WinGetPackage $PackageIdentifier | Where-Object {$_.id -eq $PackageIdentifier}
+				$WinGetOutput = Find-WinGetPackage $PackageIdentifier -MatchOption Equals
 				$ManifestVersion = $WinGetOutput.version
 				$ManifestVersionParams = ($ManifestVersion -split "[.]").count
 				$prVersionParams = ($prVersion -split "[.]").count
@@ -1447,7 +1448,7 @@ Function Get-PRWatch {
 						$matchColor = $invalidColor
 						$Body = "Hi @$Submitter,`n`n> This PR's version number $PRVersion has $PRVersionParams parameters (sets of numbers between dots - major, minor, etc), which is $greaterOrLessThan than the current manifest's version $($ManifestVersion), which has $ManifestVersionParams parameters.`n`nDoes this PR's version number **exactly** match the version reported in the `Apps & features` Settings page? (Feel free to attach a screenshot.)"
 						$Approve = "-!"
-						$Body = $Body + "`n`n(Automated response - build $build)`n<!--`n[Policy] Needs-Author-Feedback`n[Policy] Version-Parameter-Mismatch`n-->"
+						$Body = $Body + "`n`n(Automated response - build $build)`n<!--`n[Policy] $($MagicLabels[30])`n[Policy] Version-Parameter-Mismatch`n-->"
 						Invoke-GitHubPRRequest -PR $PR -Method Post -Type comments -Data $Body -Output Silent 
 						Add-PRToRecord -PR $PR -Action "Feedback" -Title $PRtitle
 					}
@@ -1576,7 +1577,7 @@ Function Get-PRWatch {
 							$matchColor = $cautionColor
 							$AnF = "-"
 							Reply-ToPR -PR $PR -CannedMessage AppsAndFeaturesNew -UserInput $Submitter -Policy $MagicLabels[30] -Silent
-							#Invoke-GitHubPRRequest -PR $PR -Method POST -Type comments -Data "[Policy] Needs-Author-Feedback"
+							#Invoke-GitHubPRRequest -PR $PR -Method POST -Type comments -Data "[Policy] $MagicLabels[30]"
 						} elseif (($ANFOld -eq $False) -and ($ANFCurrent -eq $False)) {
 							$AnF = "0"
 						} elseif (($ANFOld -eq $True) -and ($ANFCurrent -eq $True)) {
@@ -1639,7 +1640,7 @@ Function Get-PRWatch {
 					$NumVersions = ($WinGetOutput.AvailableVersions | sort).count
 					if (($prVersion -eq $ManifestVersion) -OR ($NumVersions -eq 1)) {
 						$matchColor = $invalidColor
-						Reply-ToPR -PR $PR -CannedMessage VersionCount -UserInput $Submitter -Silent -Policy "[Policy] Needs-Author-Feedback`n[Policy] Last-Version-Remaining" -Output Silent
+						Reply-ToPR -PR $PR -CannedMessage VersionCount -UserInput $Submitter -Silent -Policy "[Policy] $($MagicLabels[30])`n[Policy] $($MagicLabels[33])" -Output Silent
 						Add-PRToRecord -PR $PR -Action "Feedback" -Title $PRtitle
 						$NumVersions = "L"
 					}
@@ -1653,7 +1654,7 @@ Function Get-PRWatch {
 							$ListingDiff = "-!"
 							$matchColor = $cautionColor
 							Reply-ToPR -PR $PR -CannedMessage ListingDiff -UserInput $GLD -Silent
-							Invoke-GitHubPRRequest -PR $PR -Method POST -Type comments -Data "[Policy] Needs-Author-Feedback" -Output Silent
+							Invoke-GitHubPRRequest -PR $PR -Method POST -Type comments -Data "[Policy] $MagicLabels[30]" -Output Silent
 							Add-PRToRecord -PR $PR -Action "Feedback" -Title $PRtitle
 						}#end if GLD
 					}#end if null
@@ -1754,11 +1755,13 @@ Function Get-WorkSearch {
 				$PR = $FullPR.number
 				Get-TrackerProgress -PR $PR $MyInvocation.MyCommand $line $PRs.length
 				$line++
-				# if(($FullPR.title  -match "Remove") -OR 
-				# ($FullPR.title  -match "Delete") -OR 
-				# ($FullPR.title  -match "Automatic deletion")){
-					# Get-GitHubPreset CheckInstaller -PR $PR
-				# }
+				if ($MagicLabels[33] -notin $FullPR.labels) {
+					if (($FullPR.title  -match "Remove") -OR 
+					($FullPR.title  -match "Delete") -OR 
+					($FullPR.title  -match "Automatic deletion")){
+						Get-GitHubPreset CheckInstaller -PR $PR
+					}
+				}
 				$Comments = (Invoke-GitHubPRRequest -PR $PR -Type comments -Output content)
 				if ($Preset -eq "Approval"){
 					if (Get-NonstandardPRComments -PR $PR -comments $Comments.body){
@@ -1870,7 +1873,7 @@ Function Get-GitHubPreset {
 			"Feedback" {
 				Add-PRToRecord -PR $PR -Action $Preset
 				if ($UserInput) {
-					$out += Reply-ToPR -PR $PR -Body $UserInput -Policy "Needs-Author-Feedback"
+					$out += Reply-ToPR -PR $PR -Body $UserInput -Policy "$MagicLabels[30]"
 				} else {
 					Write-Output "-UserInput needed to use preset $preset"
 				}
@@ -2360,21 +2363,13 @@ Function Get-SearchGitHub {
 	$IEDSLabel = "label:Internal-Error-Dynamic-Scan+"
 	$nIEDS = "-"+$IEDSLabel
 	$IEM = "label:Internal-Error-Manifest+"
-	$nIOI = "-label:Interactive-Only-Installer+"
-	$MMC = "label:Manifest-Metadata-Consistency+"
-	$NA = "label:Needs-Attention+" 
-	$NAF = "label:Needs-Author-Feedback+" 
 	$nNSA = "-label:Internal-Error-NoSupportedArchitectures+"
 	$NotPass = "-label:Azure-Pipeline-Passed+" #Hasn't psased pipelines
-	$SortUp = "sort:updated-asc+"
 	$VC = "label:Validation-Completed+" #Completed
-	$VPM = "label:Version-Parameter-Mismatch+"
 	$nVC = "-"+$VC #Completed
 
 	$date = Get-Date (Get-Date).AddDays(-$Days) -Format "yyyy-MM-dd"
 	$Recent = "updated:>$($date)+" 
-	
-	#-assignee:vedantmgoyal2009 
 	
 	#Building block settings
 	$Blocking = $nHW
@@ -3509,7 +3504,7 @@ if ((`$WinGetLogs -match '\[FAIL\] Installer failed security check.') -OR
 			$fileContents = Get-Content "$runPath\$vm\manifest\Package.yaml"
 			if ($fileContents[-1] -ne "0") {
 				$fileContents[-1] = ($fileContents[-1] -split ".0")[0]+".0"
-				$fileContents | out-file $filePath
+				$fileContents | Out-File $filePath
 			}#end if fileContents		
 		}#end if Operation
 	}#end if NoFiles
@@ -3704,7 +3699,7 @@ Function Get-ManifestFile {
 Function Get-ManifestListing {
 	param(
 		$PackageIdentifier,
-		$Version = (Find-WinGetPackage $PackageIdentifier | Where-Object {$_.id -eq $PackageIdentifier}).version,
+		$Version = (Find-WinGetPackage $PackageIdentifier -MatchOption Equals).version,
 		$Path = ($PackageIdentifier -replace "[.]","/"),
 		$FirstLetter = ($PackageIdentifier[0].tostring().tolower()),
 		$Uri = "$GitHubApiBaseUrl/contents/manifests/$FirstLetter/$Path/$Version/",
@@ -4085,7 +4080,7 @@ Function Get-TrackerVMSetMode {
 		[ValidateSet("Approving","Idle","IEDS","Validating")]
 		$Status = "Validating"
 	)
-	$Status | out-file $TrackerModeFile
+	$Status | Out-File $TrackerModeFile -NoNewLine
 }
 
 Function Get-ConnectedVM {
@@ -4758,3 +4753,7 @@ public struct RECT {
 }
 
 "@
+
+
+
+#Index of each column name is where prev column ends and this one starts.

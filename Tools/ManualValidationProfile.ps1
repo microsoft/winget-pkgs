@@ -1,5 +1,5 @@
 $VM = 0
-$build = 132
+$build = 133
 $ipconfig = (ipconfig)
 $remoteIP = ([ipaddress](($ipconfig | select-string "Default Gateway") -split ": ")[1]).IPAddressToString
 #$remoteIP = ([ipaddress](($ipconfig[($ipconfig | select-string "vEthernet").LineNumber..$ipconfig.length] | select-string "IPv4 Address") -split ": ")[1]).IPAddressToString
@@ -46,7 +46,7 @@ Function Get-TrackerVMSetStatus {
 	if ($PR) {
 		($out | where {$_.vm -match $VM}).PR = $PR
 	}
-	$out | ConvertTo-Csv | Out-File $StatusFile
+	$out | ConvertTo-Csv -NoHeader | Out-File $StatusFile
 	Write-Host "Setting $vm $Package $PR state $Status"
 }
 
