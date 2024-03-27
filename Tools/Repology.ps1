@@ -17,3 +17,17 @@
     if ($IncludeLatest) { return $versions}
     return $versions.Where({$_ -ne $ManifestVersions[0]})
 }
+
+function Get-RepologyWingetIds {
+    Param(
+        [Parameter(Mandatory = $true, Position = 0)]
+        [string] $RepologyProjectName
+    )
+
+    $webPage = Invoke-WebRequest "https://repology.org/project/$RepologyProjectName/versions" -UseBasicParsing
+    $wingetManifestPaths = $webPage.links.Where({$_.href -match 'winget-pkgs'}).href | Select-Object -Unique
+    if (!$wingetManifestPaths) { return $null }
+
+    $wingetManifestPaths = $wingetManifestPaths -replace 'https://github.com/microsoft/winget-pkgs/tree/master/manifests/',''
+    return $wingetManifestPaths.ForEach({($_.Split('/') | Select-Object -SkipLast 1) -join '.'}) |Select-Object -Unique
+}
