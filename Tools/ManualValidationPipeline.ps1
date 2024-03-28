@@ -10,7 +10,7 @@
 #3.88.19 - A few bugfixes.
 #3.88.18 - Restore waiver and retry fucntionality. 
 
-$build = 875
+$build = 876
 $appName = "ManualValidationPipeline"
 Write-Host "$appName build: $build"
 $MainFolder = "C:\ManVal"
@@ -1546,7 +1546,7 @@ Function Get-PRWatch {
 
 				if ($WordFilterMatch) {
 					$WordFilter = "-!"
-					$Approved = "-!"
+					$Approve = "-!"
 					$matchColor = $invalidColor
 					Reply-ToPR -PR $PR -CannedMessage WordFilter -UserInput $WordFilterMatch -Silent
 				}
@@ -1636,7 +1636,7 @@ Function Get-PRWatch {
 				(($PRtitle -match "Automatic deletion") -OR 
 				($PRtitle -match "Delete") -OR 
 				($PRtitle -match "Remove"))) {#Removal PR
-					$Versions = 
+					#$Versions = 
 					$NumVersions = ($WinGetOutput.AvailableVersions | sort).count
 					if (($prVersion -eq $ManifestVersion) -OR ($NumVersions -eq 1)) {
 						$matchColor = $invalidColor
@@ -1729,9 +1729,9 @@ Function Get-PRWatch {
 
 				$oldclip = $PRtitle
 			}; #end if Compare-Object
-		}; #end if clip
+		}; #end if PRtitle
 		Start-Sleep 1
-	}; #end if PRtitle
+	}; #end while Count
 	$Count--
 }; #end function
 

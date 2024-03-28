@@ -1,43 +1,39 @@
 //Copyright 2022-2024 Microsoft Corporation
 //Author: Stephen Gillie
-//Title: WinGet Approval Pipeline v3.-17.0
+//Title: WinGet Approval Pipeline v3.-8.0
 //Created: 1/19/2024
-//Updated: 3/26/2024
+//Updated: 3/27/2024
 //Notes: Tool to streamline evaluating winget-pkgs PRs. 
 //Update log:
+//3.-8.0 - Port PRWatch.
+//3.-9.0 - Port ValidateManifest.
+//3.-10.0 - Port ListingDiff.
+//3.-11.0 - Port ManifestFile.
+//3.-12.0 - Port ManifestAutomation.
+//3.-13.0 - Port SingleFileAutomation.
+//3.-14.0 - Port ManifestListing.
+//3.-15.0 - Port RandomIEDS.
+//3.-16.0 - Port main body of ValidateManifest.
+//3.-17.2 - Depreciate numerous OPB holdover methods.
+//3.-17.1 - Bugfix to VM RAM display.
 //3.-17.0 - Create FindWinGetPackage as equivalent. Was scraping Find-WinGetPackage, but that stopped working after the app closed and reopened, so changed to scraping "winget search".
-//3.-18.0 - Port ImageVMMove.
-//3.-19.0 - Port GenerateVM.
-//3.-20.0 - Add MoveVMStorage, SetVMMemory, and ImportVM as equivalents.
-//3.-21.0 - Redistribute functions from buttons to menu items, and readd resizability.
-//3.-22.0 - Depreciate ValidateManifestBothArchAndScope to become menu item.
-//3.-23.0 - Depreciate ValidateManifestByScope to become menu item.
-//3.-24.0 - Depreciate ValidateManifestByArch to become menu item.
-//3.-25.0 - Depreciate ValidateManifestByConfig to become menu item.
-//3.-26.0 - Depreciate ValidateByID to become menu item.
-//3.-27.0 - Port RunTracker by integrating into RefreshStatus.
-//3.-28.0 - Port DisgenerateVM.
-//3.-29.1 - Centralize Cim searches for VM functions in GetCimService.
-//3.-29.0 - Port ImageVMStop.
-//3.-30.0 - Port RedoCheckpoint.
-//3.-31.0 - Add RenameVM, GetSnapshotService, CheckpointVM, RestoreVMSnapshot, and RemoveVMSnapshot as equivalents.
-//3.-32.0 - Port CompleteTrackerVM 75%.
-//3.-33.0 - Port ImageVMStart.
 
 
 
 
-/*Contents: (Remaining functions to port or depreciate: 8)
+
+
+/*Contents:
 - Init vars
 - Boilerplate
 - UI top-of-box
 	- Menu
-- Tabs (1)
-- Automation Tools (1)
+- Tabs
+- Automation Tools
 - PR tools
 - Network tools
-- Validation Starts Here (1)
-- Manifests Etc (5)
+- Validation Starts Here
+- Manifests Etc
 - VM Image Management
 - VM Pipeline Management
 - VM Status
@@ -57,35 +53,13 @@
 Et cetera:
 - PR counters on certain buttons - Approval-Ready, ToWork, Defender, IEDS
 - VM control buttons
-*/
 
-
-
-
-
-/*
-Partial (3): 
+Need work:
 CheckStandardPRComments 
 AddValidationData
 WorkSearch
-
-#Todo:
-Get-ManifestListing
-Get-TrackerVMValidate
-
-#Blocked:
-Get-ListingDiff#Get-ManifestListing
-	Get-PRWatch#Get-ListingDiff, Get-TrackerVMValidate
-Get-TrackerVMValidateByID#Get-TrackerVMValidate
-Get-TrackerVMValidateByConfig#Get-TrackerVMValidate
-Get-TrackerVMValidateByArch#Get-TrackerVMValidate
-Get-TrackerVMValidateByScope#Get-TrackerVMValidate
-Get-TrackerVMValidateBothArchAndScope#Get-TrackerVMValidate
-Get-ManifestFile#Get-TrackerVMValidate
-	Get-ManifestAutomation#Get-ManifestFile
-	Get-SingleFileAutomation#Get-ManifestFile, Get-ManifestListing
-	Get-RandomIEDS#Get-ManifestFile
-	Get-TrackerVMRunTracker#Get-RandomIEDS, Get-TrackerVMValidate
+ListingDiff
+ValidateManifest
 */
 
 
@@ -118,15 +92,16 @@ using System.Web.Script.Serialization;
 namespace WinGetApprovalNamespace {
     public class WinGetApprovalPipeline : Form {
 		//vars
-        public int build = 502;//Get-RebuildPipeApp	
+        public int build = 553;//Get-RebuildPipeApp	
 		public string appName = "WinGetApprovalPipeline";
 		public string appTitle = "WinGet Approval Pipeline - Build ";
 		public static string owner = "microsoft";
 		public static string repo = "winget-pkgs";
 
 		//public IPAddress ipconfig = (ipconfig);
-		//public IPAddress remoteIP = ([ipaddress](($ipconfig[($ipconfig | Select-String "vEthernet").LineNumber..$ipconfig.Length] | Select-String "IPv4 Address") -split ": ")[1]).IPAddressToString;
-		public static string RemoteMainFolder = "//$remoteIP/";
+		//public IPAddress remoteIP = ([ipaddress](($ipconfig[($ipconfig | Select-String "vEthernet").LineNumber..$ipconfig.Length] | Select-String "IPv4 Address") -split ": ")[1]).IPAddressToString
+		public static string remoteIP = "";
+		public static string RemoteMainFolder = "//"+remoteIP+"/";
 		public string SharedFolder = RemoteMainFolder+"/write";
 
 		public static string MainFolder = "C:\\ManVal";
@@ -188,7 +163,7 @@ namespace WinGetApprovalNamespace {
 
 		//WMI for VMs
 		public ManagementScope scope = new ManagementScope(@"root\virtualization\v2");//, null);
-		// Other server
+		// Other server's VMs
 		// var connectionOptions = new ConnectionOptions(
 		// @"en-US",
 		// @"domain\user",
@@ -231,6 +206,8 @@ namespace WinGetApprovalNamespace {
 		public Color color_DefaultText = Color.FromArgb(0,0,0);
 		public Color color_InputBack = Color.FromArgb(255,255,255);
 		public Color color_ActiveBack = Color.FromArgb(200,240,240);
+		
+		int table_vm_Row_Index = 0;
 
 		//Grid
 		public static int gridItemWidth = 70;
@@ -288,7 +265,8 @@ namespace WinGetApprovalNamespace {
 			//this.FormBorderStyle = FormBorderStyle.FixedSingle;
 			this.Resize += new System.EventHandler(this.OnResize);
 			this.AutoScroll = true;
-			this.Icon = Icon.ExtractAssociatedIcon(System.Reflection.Assembly.GetExecutingAssembly().Location);
+			Icon icon = Icon.ExtractAssociatedIcon("ManualValidationPipeline.ico");
+			this.Icon = icon;
 			Array.Resize(ref history, history.Length + 2);
 			history[historyIndex] = "about:blank";
 			historyIndex++;
@@ -365,7 +343,6 @@ namespace WinGetApprovalNamespace {
 			urlBox.ForeColor = color_DefaultText;
 			urlBox.Width = sizeX;
 			urlBox.Height = sizeY;
-			urlBox.KeyUp += urlBox_KeyUp;
 			Controls.Add(urlBox);
 		}
 		
@@ -389,35 +366,6 @@ namespace WinGetApprovalNamespace {
 			//newLabel.Size = new Size (label1.PreferredWidth, label1.PreferredHeight);
 			Controls.Add(newLabel);
 		}
-
-		public void drawPanel(int startX, int startY, int sizeX, int sizeY){
-			Panel panel1 = new Panel();
-			TextBox textBox1 = new TextBox();
-			Label label1 = new Label();
-
-			// Initialize the Panel control.
-			panel1.Location = new Point(startX,startY);
-			panel1.Size = new Size(sizeX, sizeY);
-			// Set the Borderstyle for the Panel to three-dimensional.
-			//panel1.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-			//panel1.TabIndex = 0;
-			panel1.AutoScroll = true;
-			// Initialize the Label and TextBox controls.
-			label1.Location = new Point(12,16);
-			label1.Text = "label1";
-			label1.Size = new Size(104, 16);
-			textBox1.Location = new Point(16,320);
-			textBox1.Text = "";
-			textBox1.Size = new Size(152, 20);
-
-			// Add the Panel control to the form.
-			// Add the Label and TextBox controls to the Panel.
-			panel1.Controls.Add(label1);
-			panel1.Controls.Add(textBox1);
-/*
-*/
-			this.Controls.Add(panel1);
-		}// end drawPanel
 
 		public void drawDataGrid(ref DataGridView dataGridView, int startX, int startY, int sizeX, int sizeY){
 			dataGridView = new DataGridView();
@@ -445,6 +393,7 @@ namespace WinGetApprovalNamespace {
 			dataGridView.EditMode = DataGridViewEditMode.EditProgrammatically;
 			dataGridView.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.DisplayedCellsExceptHeaders;
 			dataGridView.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+			dataGridView.AllowUserToDeleteRows = false;
 			dataGridView.RowHeadersVisible = false;
 			dataGridView.MultiSelect = false;
 			//dataGridView.Dock = DockStyle.Fill;
@@ -470,7 +419,7 @@ namespace WinGetApprovalNamespace {
 			toolTip.ReshowDelay = ReshowDelay;
 			// Force the ToolTip text to be displayed whether or not the form is active.
 			toolTip.ShowAlways = true;
-			  
+			 
 			// Set up the ToolTip text for the Button and Checkbox.
 			toolTip.SetToolTip(button, DisplayText);
 			//toolTip.SetToolTip(this.checkBox1, "My checkBox1");
@@ -537,6 +486,22 @@ namespace WinGetApprovalNamespace {
 				item.MenuItems.Add("Repo", new EventHandler(About_Click_Action));
 				item.MenuItems.Add("Full Approval Run", new EventHandler(Approval_Run_Search_Action));
 				item.MenuItems.Add("Full ToWork Run", new EventHandler(ToWork_Run_Search_Action));
+				
+			item = new MenuItem("VM Lifecycle");
+			this.Menu.MenuItems.Add(item);
+			submenu = new MenuItem("WIn10 Image VM");
+				item.MenuItems.Add(submenu);
+					submenu.MenuItems.Add("Start", new EventHandler(About_Click_Action)); 
+					submenu.MenuItems.Add("Stop", new EventHandler(About_Click_Action)); 
+					submenu.MenuItems.Add("Turn Off", new EventHandler(About_Click_Action)); 
+					submenu.MenuItems.Add("Attach New VM", new EventHandler(About_Click_Action)); 
+			submenu = new MenuItem("Win11 Image VM");
+				item.MenuItems.Add(submenu);
+					submenu.MenuItems.Add("Start", new EventHandler(About_Click_Action)); 
+					submenu.MenuItems.Add("Stop", new EventHandler(About_Click_Action)); 
+					submenu.MenuItems.Add("Turn Off", new EventHandler(About_Click_Action)); 
+					submenu.MenuItems.Add("Attach New VM", new EventHandler(About_Click_Action)); 
+				item.MenuItems.Add("Complete", new EventHandler(Misc_Action));
 
 			item = new MenuItem("Help");
 			this.Menu.MenuItems.Add(item);
@@ -579,42 +544,14 @@ namespace WinGetApprovalNamespace {
  			int col8 = gridItemWidth*inc;inc++;
  			int col9 = gridItemWidth*inc;inc++;
  			
-			drawDataGrid(ref dataGridView_vm, col0, row0, gridItemWidth*8, gridItemHeight*5);
-			dataGridView_vm.Anchor = AnchorStyles.Top | AnchorStyles.Bottom;
-					table_vm.Columns.Add("vm", typeof(string));
-					table_vm.Columns.Add("status", typeof(string));
-					table_vm.Columns.Add("version", typeof(int));
-					table_vm.Columns.Add("OS", typeof(string));
-					table_vm.Columns.Add("Package", typeof(string));
-					table_vm.Columns.Add("PR", typeof(int));
-					table_vm.Columns.Add("RAM", typeof(double));
-
-			//drawOutBox(ref outBox_vm, col0, row0, gridItemWidth*8,gridItemHeight*5, "", "outBox_vm");
-
-			//Make gridItemWidth*2 when AddWaiver is disabled.
- 			//drawButton(ref btn3, col8, row1, gridItemWidth, gridItemHeight, "Add Waiver", Add_Waiver_Action);
- 			// drawButton(ref btn3, col7, row0, gridItemWidth, gridItemHeight, "Approval Search", Approval_Search_Action);
- 			
-			// drawButton(ref btn27, col6, row1, gridItemWidth, gridItemHeight, "ToWork Search", ToWork_Search_Action); 
- 			//drawButton(ref btn5, col9, row1, gridItemWidth, gridItemHeight, "Approved", Approved_Action);
- 			//drawButton(ref btn4, col8, row2, gridItemWidth, gridItemHeight, "Retry", Retry_Action);
- 			//drawButton(ref btn7, col9, row2, gridItemWidth, gridItemHeight, "Manually Validated", Manually_Validated_Action);
- 			
- 			// drawButton(ref btn9, col6, row2, gridItemWidth, gridItemHeight, "Closed (disabled)", Closed_Action);
-			// drawButton(ref btn26, col7, row2, gridItemWidth, gridItemHeight, "Merge Conflicts", Merge_Conflicts_Action);
- 			// drawButton(ref btn14, col8, row2, gridItemWidth, gridItemHeight, "Duplicate", Duplicate_Action);
- 			//drawButton(ref btn13, col9, row3, gridItemWidth, gridItemHeight, "Check Installer", Check_Installer_Action);
- 			
-			// drawButton(ref btn24, col6, row3, gridItemWidth, gridItemHeight, "Needs PackageUrl", Needs_PackageUrl_Action);
- 			// drawButton(ref btn15, col7, row3, gridItemWidth, gridItemHeight, "Automation Block", Automation_Block_Action);
- 			// drawButton(ref btn16, col8, row3, gridItemWidth, gridItemHeight, "Installer Not Silent", Installer_Not_Silent_Action);
- 			// drawButton(ref btn17, col9, row3, gridItemWidth, gridItemHeight, "Installer Missing", Installer_Missing_Action);
-			
-			// drawButton(ref btn25, col6, row4, gridItemWidth, gridItemHeight, "Manifest One Per PR", One_Manifest_Per_PR_Action);
- 			// drawButton(ref btn6, col7, row4, gridItemWidth, gridItemHeight, "Driver Install", Driver_Install_Action);
- 			// drawButton(ref btn8, col8, row4, gridItemWidth, gridItemHeight, "Project", Project_File_Action);
-			// drawButton(ref btn2, col9, row4, gridItemWidth, gridItemHeight, "Squash", Squash_Action);
-			
+			table_vm.Columns.Add("vm", typeof(string));
+			table_vm.Columns.Add("status", typeof(string));
+			table_vm.Columns.Add("version", typeof(int));
+			table_vm.Columns.Add("OS", typeof(string));
+			table_vm.Columns.Add("Package", typeof(string));
+			table_vm.Columns.Add("PR", typeof(int));
+			table_vm.Columns.Add("RAM", typeof(double));
+		
 			drawLabel(ref label_VMRAM, col0, row5, gridItemWidth, gridItemHeight,"VM RAM:");
 			drawUrlBox(ref inputBox_VMRAM,col1, row5, gridItemWidth*2,gridItemHeight,"");//VM RAM display
 
@@ -625,7 +562,7 @@ namespace WinGetApprovalNamespace {
 			drawUrlBox(ref inputBox_PRNumber,col8, row5, gridItemWidth*2,gridItemHeight,"#000000");
 			
 			drawOutBox(ref outBox_val, col0, row6, this.ClientRectangle.Width,gridItemHeight*4, "", "outBox_val");
-			
+
  			drawButton(ref btn10, col0, row10, gridItemWidth, gridItemHeight, "Bulk Approving", Approving_Action);
 			drawToolTip(ref toolTip1, ref btn10, "Automatically approve PRs. (Caution - easy to accidentally approve, use with care.)");
 			drawButton(ref btn18, col1, row10, gridItemWidth, gridItemHeight, "Individual Validations", Validating_Action);
@@ -633,11 +570,13 @@ namespace WinGetApprovalNamespace {
  			drawButton(ref btn11, col2, row10, gridItemWidth, gridItemHeight, "Validate Rand IEDS", IEDS_Action);
 			drawToolTip(ref toolTip3, ref btn11, "Automatically start manifest for random IEDS in VM.");
 			drawButton(ref btn19, col3, row10, gridItemWidth, gridItemHeight, "Idle Mode", Idle_Action);
-			drawToolTip(ref toolTip4, ref btn19, "Do nothing.");
+			drawToolTip(ref toolTip4, ref btn19, "It does nothing.");
 			drawButton(ref btn20, col4, row10, gridItemWidth, gridItemHeight, "Config (disabled)", Config_Action);
 			
+			drawDataGrid(ref dataGridView_vm, col0, row0, gridItemWidth*8, gridItemHeight*5);
+			dataGridView_vm.Anchor = AnchorStyles.Top | AnchorStyles.Bottom;
 
- 	  }// end drawGoButton
+ 	 }// end drawGoButton
 
 		public void OnResize(object sender, System.EventArgs e) {
 			//VM and Validation windows adjust width with window.
@@ -669,8 +608,8 @@ namespace WinGetApprovalNamespace {
 		}
 
 		private void timer_Run(object sender, EventArgs e) {
+			UpdateTableVM();
 			RefreshStatus();
-
 		//Hourly Run functionality
 		bool HourLatch = false;
 		if (Int32.Parse(DateTime.Now.ToString("mm")) == 20) {
@@ -691,11 +630,9 @@ namespace WinGetApprovalNamespace {
 			if (Int32.Parse(DateTime.Now.ToString("mm")) == 20) {
 				string seconds = DateTime.Now.ToString("ss");
 				outBox_val.AppendText(Environment.NewLine + seconds);
-				int sleepTime = 60-Int32.Parse(seconds)*1000;
-				Thread.Sleep(sleepTime);//If it's still :20 after, sleep out the minute. 
+				Thread.Sleep((60-Int32.Parse(seconds))*1000);//If it's still :20 after, sleep out the minute. 
 			}
 		}
-		
 			//Update PR display
 			string clip = Clipboard.GetText();
 			Regex regex = new Regex("^[0-9]{6}$");
@@ -749,9 +686,456 @@ namespace WinGetApprovalNamespace {
 
 
 
-
 //Tabs
-//PRWatch
+	public void PRWatch(bool noNew, string Chromatic = "Default", string LogFile = ".\\PR.txt", string ReviewFile = ".\\Review.csv"){
+		string oldclip = "";
+		Dictionary<string,dynamic>[] AuthList = GetValidationData("authStrictness");
+		Dictionary<string,dynamic>[] AgreementsList = GetValidationData("AgreementUrl");
+		Dictionary<string,dynamic>[] ReviewList = FromCsv(GetContent(ReviewFile));
+		int Count = 30;
+		//$Host.UI.RawUI.WindowTitle = "PR Watcher"//I'm a PR Watcher, watchin PRs go by. 
+		SetMode("Approving");
+		//Write-Host "| Timestmp | $(Get-PadRight PR// 6) | $(Get-PadRight PackageIdentifier) | $(Get-PadRight PRVersion 15) | A | R | G | W | F | I | D | V | $(Get-PadRight ManifestVer 14) | OK |"
+		//Write-Host "| -------- | ----- | ------------------------------- | -------------- | - | - | - | - | - | - | - | - | ------------- | -- |"
+
+		while(Count > 0){
+			string clip = Clipboard.GetText();
+			string[] split_clip = clip.Split('\n');
+			string replace_clip = clip.Replace("'","").Replace("\"","");
+			string PRTitle = split_clip.Where(n => regex_hashPRRegexEnd.IsMatch(n)).FirstOrDefault();
+			int PR = Int32.Parse(PRTitle.Split('#')[1]);
+			if (PRTitle != null) {
+				if (PRTitle != oldclip) {
+					//(GetStatus() .Where(n => n["status"] == "ValidationCompleted"} | format-Table);//Drops completed VMs in the middle of the PR approval display.
+					string validColor = "green";
+					string invalidColor = "red";
+					string cautionColor = "yellow";
+	//Chromatic was here. 
+
+					bool noRecord = false;
+					string[] title = PRTitle.Split(':');
+					if (title.Length > 1) {
+						title = title[1].Split(' ');
+					} else {
+						title = title[0].Split(' ');
+					}
+					string Submitter = split_clip.Where(n => n.Contains("wants to merge")).FirstOrDefault().Split(' ')[0];
+					string InstallerType = YamlValue("InstallerType",clip);
+
+					//Split the title by spaces. Try extracting the version location as the next item after the word "version", and if that fails, use the 2nd to the last item, then 3rd to last, and 4th to last. for some reason almost everyone puts the version number as the last item, and GitHub appends the PR number.
+					int prVerLoc = 0;
+					for (int i = 0; i < title.Length; i++) {
+						if (title[i].Contains("version")) {
+							prVerLoc = i;
+						}
+					}
+					string PRVersion = null;
+					//Version is on the line before the line number, and this set indexes with 1 - but the following array indexes with 0, so the value is automatically transformed by the index mismatch.
+					try {
+						PRVersion = Version.Parse(YamlValue("PackageVersion",replace_clip)).ToString();
+					} catch {
+						try {
+							PRVersion = YamlValue("PackageVersion",replace_clip);
+						} catch {
+								try {
+							PRVersion = Version.Parse(YamlValue("PackageVersion",clip)).ToString();
+							} catch {
+								if (null != prVerLoc) {
+									try {
+										PRVersion = Version.Parse(title[prVerLoc]).ToString();
+									} catch {
+										PRVersion = title[prVerLoc];
+									}
+								} else {
+								//Otherwise we have to go hunting for the version number.
+									try {
+										PRVersion = Version.Parse(title[-1]).ToString();
+									} catch {
+										try {
+											PRVersion = Version.Parse(title[-2]).ToString();
+										} catch {
+											try {
+												PRVersion = Version.Parse(title[-3]).ToString();
+											} catch {
+												try {
+													PRVersion = Version.Parse(title[-4]).ToString();
+												} catch {
+													//if it's not a semantic version, guess that it's the 2nd to last, based on the above logic.
+													PRVersion = title[-2];
+												}
+											}
+										}
+									}; //end try
+								}; //end try
+							}; //end if null
+						}; //end try
+					}; //end try
+
+					//Get the PackageIdentifier and alert if it matches the auth list.
+					string PackageIdentifier = "";
+					try {
+						PackageIdentifier = YamlValue("PackageIdentifier",replace_clip);
+					} catch {
+						PackageIdentifier = replace_clip;
+					}
+					string matchColor = validColor;
+
+
+
+
+
+					//Write-Host -nonewline -f $matchColor "| $(Get-Date -format T) | $PR | $(Get-PadRight $PackageIdentifier) | "
+
+					//Variable effervescence
+					string prAuth = "+";
+					string Auth = "A";
+					string Review = "R";
+					string WordFilter = "W";
+					string AgreementAccept = "G";
+					string AnF = "F";
+					string InstVer = "I";
+					string string_ListingDiff = "D";
+					int NumVersions = 99;
+					string PRvMan = "P";
+					string Approve = "+";
+
+					Dictionary<string,dynamic>[] WinGetOutput = FromCsv(FindWinGetPackage(PackageIdentifier,true));
+					string ManifestVersion = WinGetOutput[0]["version"];
+					int ManifestVersionParams = ManifestVersion.Split('.').Length;
+					int PRVersionParams = PRVersion.Split('.').Length;
+
+
+					Dictionary<string,dynamic>[] AuthMatch = AuthList .Where(n => n["PackageIdentifier"].Contains(PackageIdentifier)).ToArray();//.Split('.'))[0..1].Join(".")}//Needs matching refactor. #PendingBugfix
+					string AuthAccount = "";
+					if (AuthMatch != null) {
+						AuthAccount = AuthMatch[0]["GitHubUserName"];
+					}
+					
+					if (null == WinGetOutput) {
+						PRvMan = "N";
+						matchColor = invalidColor;
+						Approve = "-!";
+						string Body = "";
+						if (noNew) {
+							noRecord = true;
+						} else {
+/*
+							if ($title[-1] -match $hashPRRegex) {
+								if ((Get-Command ValidateManifest).name) {
+									ValidateManifest -Silent -InspectNew;
+								} else {
+									Get-Sandbox ($title[-1] -replace"//","");
+								} //end if Get-Command;
+							} //end if title;
+						} //end if noNew;
+					} else if ($null != WinGetOutput) {
+						if (PRTitle -match " [.]") {
+						//if has spaces (4.4 .5 .220);
+							$Body = "Spaces detected in version number.";
+							$Body = $Body + "\n\n(Automated response - build $build)";
+							InvokeGitHubPRRequest(PR,"Post","comments",Body,"Silent");
+							matchColor = invalidColor;;
+							$prAuth = "-!";
+						}
+						if ((ManifestVersionParams != $PRVersionParams) && 
+						(PRTitle -notmatch "Automatic deletion") && 
+						(PRTitle -notmatch "Delete") && 
+						(PRTitle -notmatch "Remove") && 
+						($InstallerType -notmatch "portable") && 
+						(AuthAccount -cnotmatch $Submitter)) {
+*/
+							string greaterOrLessThan = "";
+							if (PRVersionParams < ManifestVersionParams) {
+								//if current manifest has more params (dots) than PR (2.3.4.500 to 2.3.4);
+								greaterOrLessThan = "less";
+							} else if (PRVersionParams > ManifestVersionParams) {
+								//if current manifest has fewer params (dots) than PR (2.14 to 2.14.3.222);
+								greaterOrLessThan = "greater";
+							}
+							matchColor = invalidColor;
+							Body = "Hi @"+Submitter+",\\n\\n> This PR's version number "+PRVersion+" has "+PRVersionParams+" parameters (sets of numbers between dots - major, minor, etc), which is "+greaterOrLessThan+" than the current manifest's version "+ManifestVersion+", which has "+ManifestVersionParams+" parameters.\\n\\nDoes this PR's version number **exactly** match the version reported in the \\Apps & features\\ Settings page? (Feel free to attach a screenshot.)";
+							Approve = "-!";
+							Body = Body + "\\n\\n(Automated response - build "+build+")\\n<!--\\n[Policy] Needs-Author-Feedback\\n[Policy] Version-Parameter-Mismatch\\n-->";
+							InvokeGitHubPRRequest(PR,"Post","comments",Body,"Silent");
+							AddPRToRecord(PR,"Feedback",PRTitle);
+						}
+					}
+					//Write-Host -nonewline -f matchColor "(Get-PadRight PRVersion.toString() 14) | "
+					matchColor = validColor;
+
+
+
+					if (AuthMatch != null) {
+						string strictness = AuthMatch[0]["authStrictness"].Distinct();
+						string matchVar = "";
+						matchColor = cautionColor;
+						if (AuthAccount == Submitter) {
+							matchVar = "matches";
+							Auth = "+";
+							matchColor = validColor;
+						} else {
+							matchVar = "does not match";
+							Auth = "-";
+							matchColor = invalidColor;
+						}
+
+						if (strictness == "must") {
+							Auth += "!";
+						}
+					}
+					if (Auth == "-!") {
+						GetPRApproval(clip,PR,PackageIdentifier);
+					}
+					//Write-Host -nonewline -f matchColor "Auth | "
+					matchColor = validColor;
+
+
+
+
+					
+					//Review file only alerts, doesn't block.
+					// Dictionary<string,dynamic>[] ReviewMatch = ReviewList.Where(n => n["PackageIdentifier"] == PackageIdentifier);// -match (PackageIdentifier.Split('.'))[0..1].Join(".")}
+					// string Review = "";
+					// if (ReviewMatch != null) {
+						// Review = ReviewMatch.Reason.Distinct();
+						// matchColor = cautionColor;
+					// }
+					//Write-Host -nonewline -f matchColor "Review | "
+					matchColor = validColor;
+
+
+
+				//In list, matches PR - explicit pass
+				//In list, PR has no Installer.yaml - implicit pass
+				//In list, missing from PR - block
+				//In list, mismatch from PR - block
+				//Not in list or PR - pass
+				//Not in list, in PR - alert and pass?
+				//Check previous version for omission - depend on wingetbot for now.
+				string AgreementUrlFromList = AgreementsList.Where(n => n["PackageIdentifier"] == PackageIdentifier).FirstOrDefault()["AgreementUrl"];
+				if (AgreementUrlFromList != null) {
+					string AgreementUrlFromClip = YamlValue("AgreementUrl",replace_clip);
+					if (AgreementUrlFromClip == AgreementUrlFromList) {
+						//Explicit Approve - URL is present and matches.
+						AgreementAccept = "+!";
+					} else {
+						//Explicit mismatch - URL is present and does not match, or URL is missing.
+						AgreementAccept = "-!";
+						ReplyToPR(PR,"AgreementMismatch",AgreementUrlFromList);
+					}
+				} else {
+					AgreementAccept = "+";
+					//Implicit Approve - your AgreementsUrl is in another file. Can't modify what isn't there. 
+				}
+					//Write-Host -nonewline -f matchColor "AgreementAccept | "
+					matchColor = validColor;
+
+
+
+
+
+
+
+
+				if ((!PRTitle.Contains("Automatic deletion")) && 
+				(!PRTitle.Contains("Delete")) && 
+				(!PRTitle.Contains("Remove")) &&
+				(!AgreementAccept.Contains("[+]"))) {
+
+				string[] WordFilterMatch = null;
+					foreach (string word in WordFilterList) {
+						//WordFilterMatch += Clip.Contains(word) -notmatch "Url" -notmatch "Agreement"
+					}
+
+					if (WordFilterMatch != null) {
+						WordFilter = "-!";
+						Approve = "-!";
+						matchColor = invalidColor;
+						ReplyToPR(PR,"WordFilter",WordFilterMatch.FirstOrDefault());
+					}
+				}
+					//Write-Host -nonewline -f matchColor "WordFilter | "
+					matchColor = validColor;
+
+
+
+
+
+					
+
+					if (null != WinGetOutput) {
+						if ((PRvMan != "N") && 
+						(!PRTitle.Contains("Automatic deletion")) && 
+						(!PRTitle.Contains("Delete")) && 
+						(!PRTitle.Contains("Remove"))) {
+							bool ANFOld = ManifestEntryCheck(PackageIdentifier, ManifestVersion);
+							bool ANFCurrent = clip.Contains("AppsAndFeaturesEntries");
+
+							if ((ANFOld == true) && (ANFCurrent == false)) {
+								matchColor = invalidColor;
+								AnF = "-";
+								ReplyToPR(PR,"AppsAndFeaturesMissing",Submitter,MagicLabels[30]);
+								AddPRToRecord(PR,"Feedback",PRTitle);
+							} else if ((ANFOld == false) && (ANFCurrent == true)) {
+								matchColor = cautionColor;
+								AnF = "-";
+								ReplyToPR(PR,"AppsAndFeaturesNew",Submitter,MagicLabels[30]);
+								//InvokeGitHubPRRequest(PR,"Post","comments","[Policy] Needs-Author-Feedback","Silent")
+							} else if ((ANFOld == false) && (ANFCurrent == false)) {
+								AnF = "0";
+							} else if ((ANFOld == true) && (ANFCurrent == true)) {
+								AnF = "1";
+							}
+						}
+					}
+					//Write-Host -nonewline -f matchColor "AnF | "
+					matchColor = validColor;
+
+
+
+
+
+						if ((PRvMan != "N") && 
+						(!PRTitle.Contains("Automatic deletion")) && 
+						(!PRTitle.Contains("Delete")) && 
+						(!PRTitle.Contains("Remove"))) {
+						try {
+							if (clip.Contains("InstallerUrl")) {
+								string InstallerUrl = YamlValue("InstallerUrl",clip);
+								////Write-Host "InstallerUrl: InstallerUrl installerMatches PRVersion: -PR PRVersion" -f "blue"
+								if (!(InstallerUrl.Contains(PRVersion))) {
+									//Matches when the dots are removed from semantec versions in the URL.
+									if (!(InstallerUrl.Contains(PRVersion.Replace(".","")))) {
+										matchColor = invalidColor;
+										InstVer = "-";
+									}
+								}
+							}
+						} catch {
+							matchColor = invalidColor;
+							InstVer = "-";
+						} //end try
+					} //end if PRvMan
+
+					try {
+						PRVersion = YamlValue("PackageVersion",clip);
+						if (PRVersion.Contains(" ")) {
+							matchColor = invalidColor;
+							InstVer = "-!";
+						}
+					}catch{
+						//null = (Get-Process) //This section intentionally left blank.
+					}
+
+					//Write-Host -nonewline -f matchColor "InstVer | "
+					matchColor = validColor;
+
+
+
+
+
+					if ((PRvMan != "N") && 
+					((PRTitle.Contains("Automatic deletion")) || 
+					(PRTitle.Contains("Delete")) || 
+					(PRTitle.Contains("Remove")))) {//Removal PR
+						//Versions = 
+						NumVersions = 0;//(WinGetOutput.AvailableVersions).count //Need to rework #PendingBugfix
+						if ((PRVersion == ManifestVersion) || (NumVersions == 1)) {
+							matchColor = invalidColor;
+							ReplyToPR(PR,"VersionCount",Submitter,"[Policy] Needs-Author-Feedback\n[Policy] Last-Version-Remaining");
+							AddPRToRecord(PR,"Feedback",PRTitle);
+							NumVersions = -1;
+						}
+					} else {//Addition PR
+						string GLD = "";//ListingDiff(clip .Where(n => n.SideIndicator == "<=")).installer.yaml //Ignores when a PR adds files that didn't exist before.
+						if (null != GLD) {
+							if (GLD == "Error") {
+								string_ListingDiff = "E";
+								matchColor = invalidColor;
+							} else {
+								string_ListingDiff = "-!";
+								matchColor = cautionColor;
+								ReplyToPR(PR,"ListingDiff",GLD);
+								InvokeGitHubPRRequest(PR,"Post","comments","[Policy] Needs-Author-Feedback","Silent");
+								AddPRToRecord(PR,"Feedback",PRTitle);
+							}//end if GLD
+						}//end if null
+					}//end if PRvMan
+					//Write-Host -nonewline -f $matchColor "$ListingDiff | "
+					//Write-Host -nonewline -f $matchColor "$NumVersions | "
+					matchColor = validColor;
+
+
+
+
+
+					if (PRvMan != "N") {
+						if (null == PRVersion || "" == PRVersion) {
+							noRecord = true;
+							PRvMan = "Error:PRVersion";
+							matchColor = invalidColor;
+						} else if (ManifestVersion == "Unknown") {
+							noRecord = true;
+							PRvMan = "Error:ManifestVersion";
+							matchColor = invalidColor;
+						} else if (ManifestVersion == null) {
+							noRecord = true;
+							PRvMan = "Error:ManifestVersion";//WinGetOutput;
+							matchColor = invalidColor;
+						} else if (Version.Parse(PRVersion) > Version.Parse(ManifestVersion)) {
+							PRvMan = ManifestVersion;
+						} else if (Version.Parse(PRVersion) < Version.Parse(ManifestVersion)) {
+							PRvMan = ManifestVersion;
+							matchColor = cautionColor;
+						} else if (Version.Parse(PRVersion) == Version.Parse(ManifestVersion)) {
+							PRvMan = "=";
+						} else {
+							noRecord = true;
+							PRvMan = "Error:ManifestVersion";//WinGetOutput;
+						}
+					}
+
+
+					if ((Approve == "-!") || 
+					(Auth == "-!") || 
+					(AnF == "-") || 
+					(InstVer == "-!") || 
+					(prAuth == "-!") || 
+					(string_ListingDiff == "-!") || 
+					(NumVersions == 1) || 
+					(NumVersions == -1) || 
+					(WordFilter == "-!") || 
+					(AgreementAccept == "-!") || 
+					(PRvMan == "N")) {
+					//|| (PRvMan -match "^Error")
+						matchColor = cautionColor;
+						Approve = "-!";
+						noRecord = true;
+					}
+
+					PRvMan = PadRight(PRvMan,14);
+					//Write-Host -nonewline -f matchColor "PRvMan | "
+					matchColor = validColor;
+
+
+
+
+
+					if (Approve == "+") {
+						ApprovePR(PR);
+						AddPRToRecord(PR,"Approved",PRTitle);
+					}
+
+					//Write-Host -nonewline -f $matchColor "$Approve | "
+					//Write-Host -f $matchColor ""
+
+					oldclip = PRTitle;
+				} //end if PRTitle
+			} //end if PRTitle
+			Thread.Sleep(1000);
+		} //end while Count
+		Count--;
+	} //end function
 
 		public void WorkSearch(string Preset, int Days = 7) {
 		// string[] PresetList = {"Approval","ToWork"};
@@ -907,8 +1291,8 @@ namespace WinGetApprovalNamespace {
 								if (UserInput.Contains("Sequence contains no elements")) {//Reindex fixes this.
 									ReplyToPR(PR,"SequenceNoElements");
 
-									string PRtitle = FromJson(InvokeGitHubPRRequest(PR,""))["title"];
-									if ((PRtitle.Contains("Automatic deletion")) || (PRtitle.Contains("Remove"))) {
+									string PRTitle = FromJson(InvokeGitHubPRRequest(PR,""))["title"];
+									if ((PRTitle.Contains("Automatic deletion")) || (PRTitle.Contains("Remove"))) {
 										ReplyToPR(PR,"","","Manually-Validated","This package installs and launches normally on a Windows 10 VM.");
 									}
 								}
@@ -1031,9 +1415,9 @@ namespace WinGetApprovalNamespace {
 							}
 						} else if (Label == MagicLabels[19]) {
 						} else if (Label == MagicLabels[20]) {
-							string PRtitle = FromJson(InvokeGitHubPRRequest(PR,""))["title"];
+							string PRTitle = FromJson(InvokeGitHubPRRequest(PR,""))["title"];
 							foreach (Dictionary<string,object> Waiver in GetValidationData("autoWaiverLabel")) {
-								if (PRtitle.Contains((string)Waiver["PackageIdentifier"])) {
+								if (PRTitle.Contains((string)Waiver["PackageIdentifier"])) {
 									AddWaiver(PR);
 								}
 							}
@@ -1235,7 +1619,6 @@ namespace WinGetApprovalNamespace {
 			}
 			//}
 		}
-
 //[ValidateSet("AgreementMismatch","AppFail","Approve","AutomationBlock","AutoValEnd","AppsAndFeaturesNew","AppsAndFeaturesMissing","DriverInstall","DefenderFail","HashFailRegen","InstallerFail","InstallerMissing","InstallerNotSilent","NormalInstall","InstallerUrlBad","ListingDiff","ManValEnd","ManifestVersion","NoCause","NoExe","NoRecentActivity","NotGoodFit","OneManifestPerPR","Only64bit","PackageFail","PackageUrl","Paths","PendingAttendedInstaller","PolicyWrapper","RemoveAsk","SequenceNoElements","Unattended","Unavailable","UrlBad","VersionCount","WhatIsIEDS","WordFilter")]
 		public string CannedMessage (string Message, string UserInput = "") {
 			string string_out = "";
@@ -1412,7 +1795,25 @@ namespace WinGetApprovalNamespace {
 			return string_out;
 		}
 
-//RandomIEDS
+		public void RandomIEDS(int VM = 0){
+			if (VM == 0) {
+				VM = NextFreeVM();
+			}
+			dynamic IEDSPRs = SearchGitHub("IEDS");
+			int PR = 0;//(IEDSPRs["number"].Where(n => !n.Contains(GetStatus())["pr"]} | Get-Random);
+			int File = 0;
+			string ManifestType = "";
+			string OldManifestType = "";
+			while (ManifestType != "version") {
+				string string_CommitFile = CommitFile(PR,File);
+				string PackageIdentifier = YamlValue("PackageIdentifier",string_CommitFile).Replace("\"","").Replace("'","");
+				//ManifestFile(VM,PR,string_CommitFile,PackageIdentifier);
+				OldManifestType = ManifestType;
+				ManifestType = YamlValue(ManifestType,string_CommitFile);
+				//if (OldManifestType == ManifestType) {break};
+				File++;
+			}	
+		}
 
 		public string RetryPR(int PR) {
 			AddPRToRecord(PR,"Retry");
@@ -1553,13 +1954,17 @@ namespace WinGetApprovalNamespace {
 			return output;
 		}
 
-		public void GetPRApproval(string Clip = ""){
+		public void GetPRApproval(string Clip = "",int PR = 0,string PackageIdentifier = ""){
 			if (Clip == "") {
 				Clip = Clipboard.GetText();
 			}
+			if (PR == 0) {
+				PR = Int32.Parse(inputBox_PRNumber.Text.Replace("#",""));
+			}
+			if (PackageIdentifier == "") {
+				PackageIdentifier = ((Clip.Split(':'))[1].Split(' ')[0]);
+			}
 			//Happens only during Bulk Approval, when manifest is in clipboard.
-			int PR = Int32.Parse(inputBox_PRNumber.Text.Replace("#",""));
-			string PackageIdentifier = ((Clip.Split(':'))[1].Split(' ')[0]);
 			string auth = GetValidationData("PackageIdentifier",PackageIdentifier,true)["GitHubUserName"];
 			List<string> Approver = auth.Split('/').Where(n => !n.Contains("(")).ToList();
 			string string_joined = string.Join("; @", Approver);
@@ -1691,6 +2096,7 @@ namespace WinGetApprovalNamespace {
 
 
 
+
 		//Network tools
 		//GET = Read; POST = Append; PUT = Write; DELETE = delete
 		public string InvokeGitHubRequest(string Url,string Method = WebRequestMethods.Http.Get,string Body = "",bool JSON = false){
@@ -1730,15 +2136,303 @@ namespace WinGetApprovalNamespace {
 
 
 //Validation Starts Here
-//ValidateManifest
+public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string PackageVersion = "", int PR = 0, string Arch = "",string Scope = "", string InstallerType = "",string OS = "",string Locale = "",bool InspectNew = false,bool notElevated = false,string MinimumOSVersion = "", string ManualDependency = "", bool NoFiles = false, string Operation = "Scan"){
+		if (VM == 0) {
+			VM = NextFreeVM(OS);//.Replace("vm","");
+		}
 
+		string clipInput = Clipboard.GetText();
+		// [ValidateSet("x86","x64","arm","arm32","arm64","neutral")]
+		// [ValidateSet("User","Machine")]
+		//PowerShell version passes forward Get-YamlVale's Get-Clipboard call, to get any MinimumOSVersion your clipboard. Because this is only supposed to be run during validation, when you've got the PR with manifest on your clipboard.
+		if (OS == "") {
+			try{
+				var version = YamlValue("MinimumOSVersion", MinimumOSVersion);
+				if (Version.Parse(version) >= Version.Parse("10.0.22000.0")){
+					OS = "Win11";
+				} else{
+					OS = "Win10";
+				}
+			} catch {
+				OS = "Win10";
+			}
+		}
+		
+		//[ValidateSet("Win10","Win11")]
+		//[ValidateSet("Configure","DevHomeConfig","Pin","Scan")]
+		int lowerIndex = clipInput.IndexOf("Do not share my personal information") -1;//This is the last visible string at the bottom of the Files page on GitHub. 
+		
+		string clip = clipInput.Substring(0,lowerIndex);
+		if (PackageIdentifier == "") {
+			PackageIdentifier = YamlValue("PackageIdentifier",clip).Replace("\"","").Replace("'","");
+		}
+		if (PackageVersion == "") {
+			PackageVersion = YamlValue("PackageVersion",clip).Replace("\"","").Replace("'","");
+		}
+		if (PR == 0) {
+			PR = PRNumber(clip,true).FirstOrDefault();
+		}
+		string RemoteFolder = "//"+remoteIP+"/ManVal/vm/"+VM.ToString();
+		string installerLine = "--manifest "+RemoteFolder+"/manifest";
+		string optionsLine = "";
+
+	/*Sections:
+	Construct WinGet args string and populate script variables.
+	- if Configure - skip all of this and just add the Configure file as the WinGet arg.
+	Construct the VM script from the script variables and output to commands file.
+	- if Configure - Construct a similar script and perform the same output.
+	Construct the manifest from the files in the clipboard.
+	- if NoFiles, skip.
+	Perform new package inspection.
+	- if not InspectNew, skip.
+	Revert selected VM and launch its window.
+	*/
+	
+	TestAdmin();
+	if (VM == 0){
+		//Write-Host "No available OS VMs";
+		GenerateVM(OS);
+		//break;
+		}
+	SetStatus(VM, "Prevalidation", PackageIdentifier,PR);
+	//($g.Properties | where {$_.name -eq "EnabledState"}).value != 2;
+	// if ((Get-VM "vm"+VM).state != "Running") {
+		SetVMState("vm"+VM, 2);
+	// };// }
+
+		string logLine = OS.ToString();
+		string nonElevatedShell = "";
+		string logExt = "log";
+		string VMFolder = MainFolder+"\\vm\\"+VM;
+		string manifestFolder = VMFolder+"\\manifest";
+		string CmdsFileName = VMFolder+"\\cmds.ps1";
+
+	if (Operation == "Configure") {
+			//Write-Host "Running Manual Config build $build on vmVM for ConfigureFile"
+		string wingetArgs = "configure -f "+RemoteFolder+"/manifest/config.yaml --accept-configuration-agreements --disable-interactivity";
+		Operation = "Configure";
+		InspectNew = false;
+	} else {
+		if (PackageIdentifier == "") {
+			//Write-Host "Bad PackageIdentifier: $PackageIdentifier"
+			//Break;
+			Clipboard.SetText(PackageIdentifier);
+		}
+			//Write-Host "Running Manual Validation build $build on vmVM for package $PackageIdentifier version $PackageVersion"
+		
+		if (PackageVersion != "") {
+			logExt = PackageVersion+"."+logExt;
+			logLine += "version "+PackageVersion+" ";
+		}
+		if (Locale != "") {
+			logExt = Locale+"."+logExt;
+			optionsLine += " --locale "+Locale+" ";
+			logLine += "locale "+Locale+" ";
+		}
+		if (Scope != "") {
+			logExt = Scope+"."+logExt;
+			optionsLine += " --scope "+Scope+" ";
+			logLine += "scope "+Scope+" ";
+		}
+		if (InstallerType != "") {
+			logExt = InstallerType+"."+logExt;
+			optionsLine += " --installer-type "+InstallerType+" ";
+			logLine += "InstallerType $"+InstallerType+" ";
+		}
+		string[] Archs = clip.Split(' ')
+		.Where(n => !n.Contains("arm"))
+		.Where(n => n.Contains("Architecture: ")).ToArray();
+		for (int i = 0; i < Archs.Length; i++) {
+			Archs[i] = (Archs[i].Split(':'))[1].Trim();
+		} 
+
+		string archDetect = "";
+		string archColor = "yellow";
+		if (Archs != null) {
+			if (Arch != null) {
+				archDetect = "Selected";
+			} else {
+				Arch = Archs[0];
+				archDetect = "Detected";
+			}
+			archColor = "red";
+		}
+		if (Arch != "") {
+			logExt = Arch+"."+logExt;
+				//Write-Host "archDetect Arch Arch of available architectures: Archs" -f archColor
+			logLine += Arch+" ";
+		}
+		string MDLog = "";
+		if (ManualDependency != "") {
+			MDLog = ManualDependency;
+				//Write-Host " = = = = Installing manual dependency $ManualDependency = = = = "
+			ManualDependency = "Out-Log 'Installing manual dependency "+MDLog+".';Start-Process 'winget' 'install "+MDLog+" --accept-package-agreements --ignore-local-archive-malware-scan' -wait\n";
+		}
+		if (notElevated  == true || clip.Contains("ElevationRequirement: elevationProhibited")) {
+				//Write-Host " = = = = Detecting de-elevation requirement = = = = "
+			nonElevatedShell = "if ([bool](([System.Security.Principal.WindowsIdentity]::GetCurrent()).groups -match 'S-1-5-32-544')){& explorer.exe 'C:\\Program Files\\PowerShell\\7\\pwsh.exe';Stop-Process (Get-Process WindowsTerminal).id}";
+			//if elevated, run^^ and exit, else run cmds.
+		}
+		string packageName = (PackageIdentifier.Split('.'))[1];
+		string wingetArgs = "install "+optionsLine+" "+installerLine+" --accept-package-agreements --ignore-local-archive-malware-scan";
+	}
+	string[] cmdsOut = null;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+		OutFile(CmdsFileName,string.Join("\n",cmdsOut));
+
+	if (NoFiles == false) {
+		//Extract multi-part manifest from clipboard and write to disk
+			//Write-Host "Removing previous manifest and adding current..."
+		string FilePath = "";
+		RemoveItem(manifestFolder,true);
+		if (Operation == "Configure") {
+			FilePath = manifestFolder+"\\config.yaml";
+			OutFile(FilePath,clipInput);
+		} else {
+			string[] Files = null;
+			Files[0] = "Package.installer.yaml";
+			string[] FileNames = clip.Split(' ').Where(n => n.Contains("[.]yaml")).ToArray();
+			for (int i = 0;i < FileNames.Length; i++){
+				string[] array_path = FileNames[i].Split('/');
+				FileNames[i] = (array_path)[array_path.Length];
+			}
+			string replace = FileNames[FileNames.Length].Replace(".yaml","");
+			for (int i = 0;i < FileNames.Length; i++){
+				Files[i] = FileNames[i].Replace(replace,"Package");
+			}
+			string[] split_clip = clip.Replace("@@","∞").Split('∞');
+			for (int i=0;i < Files.Length;i++) {
+				string File = Files[i];
+				string[] inputObj = split_clip[i*2].Split('\n');
+				
+				//[1..((inputObj| Select-String "ManifestVersion" -SimpleMatch).LineNumber -1)] 
+				//inputObj = inputObj.Where(n => n -notmatch "marked this conversation as resolved."}
+				//#PendingBugfix
+				FilePath = manifestFolder+"\\"+File;
+					//Write-Host "Writing $($inputObj.Length) lines to $FilePath"
+				OutFile(FilePath,inputObj);
+				//Bugfix to catch package identifier appended to last line of last file.
+				// string fileContents = GetContent(FilePath);
+				string[] fileContents = GetContent(FilePath).Split('\n');
+				if (fileContents[fileContents.Length].Contains(PackageIdentifier)) {
+					fileContents[fileContents.Length] = (fileContents[fileContents.Length].Replace("PackageIdentifier","∞").Split('∞'))[0];
+				}
+				string out_file = string.Join("\n",fileContents);
+				out_file.Replace("0New version: ","0").Replace("0New package: ","0").Replace("0Add version: ","0").Replace("0Add package: ","0").Replace("0Add ","0").Replace("0New ","0").Replace("0package: ","0");
+				OutFile(FilePath,out_file);
+			}
+			string[] entries = Directory.GetFileSystemEntries(manifestFolder, "*", SearchOption.AllDirectories);
+			int filecount = entries.Length;
+			string filedir = "ok";
+			string filecolor = "green";
+			if (filecount < 3) { filedir = "too low"; filecolor = "red";}
+			if (filecount > 3) { filedir = "high"; filecolor = "yellow";}
+			if (filecount > 10) { filedir = "too high"; filecolor = "red";}
+				//Write-Host -f $filecolor "File count $filecount is $filedir"
+			// if (filecount < 3) { break;}
+			string[] fileContents2 = GetContent(runPath+"\\"+VM+"\\manifest\\Package.yaml").Split('\n');
+			if (fileContents2[fileContents2.Length] != "0") {
+				//#PendingBugfix - Needs refactor - this is supposed to cut everything after the last 0 in the ManifestVersion, but this isn't always the last line. 
+				fileContents2[fileContents2.Length] = fileContents2[fileContents2.Length].Replace(".0","∞").Split('∞')[0]+".0";
+				OutFile(FilePath,fileContents2);
+			}//end if fileContents2		
+		}//end if Configure
+	}//end if NoFiles
+
+	if (InspectNew = true) {
+		Dictionary<string,dynamic>[] PackageResult = FromCsv(FindWinGetPackage(PackageIdentifier,true));
+			//Write-Host "Searching Winget for PackageIdentifier"
+		//Write-Host PackageResult
+		if (PackageResult == null) {//"No package found matching input criteria."
+			OpenAllURLs(clip);
+			System.Diagnostics.Process.Start("https://www.bing.com/search?q="+PackageIdentifier);
+			string a = PackageIdentifier.Split('.')[0];
+			string b = PackageIdentifier.Split('.')[1];
+			if (a != "") {
+					//Write-Host "Searching Winget for a"
+					//Dictionary<string,dynamic>[] result_a = FromCsv(FindWinGetPackage(a,true));
+					//Need to refactor these - they're meant to dump into console. 
+			}
+			if (b != "") {
+					//Write-Host "Searching Winget for b"
+					//Dictionary<string,dynamic>[] result_b = FromCsv(FindWinGetPackage(b,true));
+			}
+		}//end if PackageResult
+	}//end if InspectNew
+		//Write-Host "File operations complete, starting VM operations."
+	RevertVM(VM);
+	LaunchWindow(VM);
+}//end manifest
 
 
 
 
 //Manifests Etc - Section needs refactor badly
-//SingleFileAutomation
-//ManifestAutomation
+		public void SingleFileAutomation(int PR) {
+			string clip = Clipboard.GetText();
+			string PackageIdentifier = YamlValue("PackageIdentifier",clip);
+			string version = YamlValue("PackageVersion",clip).Replace("'","").Replace("\"","");
+			string[] listing = ManifestListing(PackageIdentifier);
+			int VM = ManifestFile(PR);
+			
+			for (int file = 0; file < listing.Length;file++) {
+				clip = FileFromGitHub(PackageIdentifier,version,listing[file]);
+				ManifestFile(PR, "", "", "", VM,clip);
+			}
+		}
+
+		public void ManifestAutomation(int VM = 0, int	 PR =0, string Arch = "", string OS = "", string Scope = ""){
+			if (VM == 0){
+				VM = NextFreeVM();//.Replace("vm","");
+			}
+			//Read-Host "Copy Installer file to clipboard, then press Enter to continue."
+			string clip = Clipboard.GetText();
+			ManifestFile(0,"","","",VM,clip);
+
+			//Read-Host "Copy defaultLocale file to clipboard, then press Enter to continue."
+			clip = Clipboard.GetText();
+			ManifestFile(0,"","","",VM,clip);
+
+			//Read-Host "Copy version file to clipboard, then press Enter to continue."
+			clip = Clipboard.GetText();
+			if (Arch != "") {
+				ManifestFile(0,Arch,"","",VM,clip);
+			} else if (OS != "") {
+				ManifestFile(0,"",OS,"",VM,clip);
+			} else if (Scope != "") {
+				ManifestFile(0,"","",Scope,VM,clip);
+			} else {
+				ManifestFile(PR,"","","",VM,clip);
+			}
+		}
 
 /*This function doesn't seem to be complete. 
 		public string ManifestOtherAutomation(bool Installer){
@@ -1753,9 +2447,94 @@ namespace WinGetApprovalNamespace {
 		}
 */
 
-//ManifestFile
-//ManifestListing
-//ListingDiff
+		public int ManifestFile(int PR = 0, string Arch = "", string OS = "", string Scope = "", int VM = 0, string clip = ""){
+			if (VM == 0){
+				VM = NextFreeVM();//.Replace("vm","");
+			}
+			if (clip == ""){
+				clip = Clipboard.GetText();
+			}
+			clip = SecondMatch(clip);
+			string FileName = "Package";
+			string PackageIdentifier = YamlValue("PackageIdentifier",clip).Replace("\"","").Replace("'","");
+			string manifestFolder = MainFolder+"\\vm\\"+VM+"\\manifest";
+			clip = string.Join("\n",clip.Split('\n').Where(n => !n.Contains("marked this conversation as resolved.")));
+
+			string string_YamlValue = YamlValue("ManifestType",clip);
+			if (string_YamlValue == "defaultLocale") {
+				string Locale = YamlValue("PackageLocale",clip);
+				FileName = FileName+".locale."+Locale;
+			} else if (string_YamlValue == "Locale") {
+				string Locale = YamlValue("PackageLocale",clip);
+				FileName = FileName+".locale."+Locale;
+			} else if (string_YamlValue == "installer") {
+				RemoveItem(manifestFolder,true);
+				FileName = FileName+".installer";
+			} else if (string_YamlValue == "version") {
+				if (Arch != "") {
+					ValidateManifest(VM, PackageIdentifier, "", PR, Arch,"", "","","",false,false,"", "", true);
+				} else if (OS != "") {
+					ValidateManifest(VM, PackageIdentifier, "", PR, "","", "",OS,"",false,false,"", "", true);
+				} else if (Scope != "") {
+					ValidateManifest(VM, PackageIdentifier, "", PR, "",Scope, "","","",false,false,"", "", true);
+				} else {
+					ValidateManifest(VM, PackageIdentifier, "", PR, "","", "","","",false,false,"", "", true);
+				}
+			}
+			string FilePath = manifestFolder+"\\"+FileName+".yaml";
+			//Write-Host "Writing (clip.Length) lines to FilePath"
+			clip = clip.Replace("0New version: ","0").Replace("0Add version: ","0").Replace("0Add ","0").Replace("0New ","0");
+			OutFile(FilePath,clip);
+			return VM;
+		}
+
+		public string[] ManifestListing(string PackageIdentifier,bool Versions = false){
+			string FirstLetter = PackageIdentifier.ToLower()[0].ToString();
+			string Path = PackageIdentifier.Replace(".","/");
+			string Version = FromCsv(FindWinGetPackage(PackageIdentifier,true))[0]["version"];
+			string Uri = GitHubApiBaseUrl+"/contents/manifests/"+FirstLetter+"/"+Path+"/"+Version+"/";
+			if (Versions) {
+				Uri = GitHubApiBaseUrl+"/contents/manifests/"+FirstLetter+"/"+Path+"/";
+			}
+			string[] string_out = null;
+			try{
+				string_out = FromJson(InvokeGitHubRequest(Uri))["name"];
+			} catch {
+				string_out[0] = "Error";
+			}
+			string_out = string.Join("\n",string_out).Replace(PackageIdentifier+".","").Split('\n');
+			return string_out;
+		}
+
+		public string ListingDiff(string string_PRManifest){
+			string PackageIdentifier = YamlValue("PackageIdentifier", string_PRManifest.Replace("\"",""));
+
+			//Get the lines from the PR manifest containing the filenames.
+			string[] split_PRManifest = string_PRManifest.Split('\n')
+			.Where(n => n.Contains(".yaml"))
+			.Where(n => n.Contains(PackageIdentifier)).ToArray();
+			//Go through these and snip the PackageIdentifier.
+			for (int i = 0; i < split_PRManifest.Length; i++) {
+				string[] mid_array = split_PRManifest[i].Replace(PackageIdentifier+".", "").Split('/');
+				split_PRManifest[i] = split_PRManifest[i].Replace(PackageIdentifier+".", "").Split('/')[mid_array.Length];
+			}
+
+			string returnables = "";
+			if (split_PRManifest.Length > 2){//If there are more than 2 files, so a full multi-part manifest and not just updating ReleaseNotes or ReleaseDate, etc. The other checks for this logic (not deletion PR,etc) are in the main Approval Watch method, so maybe this should join them.
+				string CurrentManifest = string.Join("\n",ManifestListing(PackageIdentifier));
+				//Gather the lines from the newest manifest in repo. Counterpart to the above section.
+				if (CurrentManifest == "Error") {
+					//If CurrentManifest didn't get any results, (no newest manifest = New package) compare that error with the file list in the PR. 
+					//returnables = diff CurrentManifest split_PRManifest;
+					//Need to rebuild in absence of Compare-Object.
+				} else {
+					//But if CurrentManifest did return something, return that. 
+					returnables = CurrentManifest;
+				}
+			}
+			return returnables;
+		}
+
 		public string OSFromVersion(string version) {
 			string string_out = "";
 			try{
@@ -1770,8 +2549,6 @@ namespace WinGetApprovalNamespace {
 			}
 			return string_out;
 		}
-
-
 
 
 
@@ -1841,7 +2618,6 @@ namespace WinGetApprovalNamespace {
 
 
 
-
 //VM Pipeline Management
 		public void GenerateVM(string OS = "Win10"){
 			int vm = GetContent(vmCounter)[0];
@@ -1870,9 +2646,9 @@ namespace WinGetApprovalNamespace {
 		}
 
 		public void DisgenerateVM(int vm){
-		 string destinationPath = "$imagesFolder\\"+vm+"\\";
-		 string VMFolder = MainFolder+"\\vm\\"+vm;
-		 string VMName = "vm"+vm;
+		string destinationPath = "$imagesFolder\\"+vm+"\\";
+		string VMFolder = MainFolder+"\\vm\\"+vm;
+		string VMName = "vm"+vm;
 			
 			TestAdmin();
 			SetStatus(vm,"Disgenerate");
@@ -2009,10 +2785,6 @@ namespace WinGetApprovalNamespace {
 */
 
 		public void RefreshStatus() {
-			UpdateTableVM();
-			dataGridView_vm.DataSource=table_vm;
-				
-
 			string Mode = "";
 			if (TestPath(TrackerModeFile) == "File") {
 				Mode = GetMode();
@@ -2055,44 +2827,46 @@ namespace WinGetApprovalNamespace {
 			} 
 			
 			if (TestPath(StatusFile) == "File") {
-				int VMRAM = 0;
-				string string_ram = "";
+				double VMRAM = 0;
 				Dictionary<string,object>[] GetStatus = FromCsv(GetContent(StatusFile));
-				for (int VM = 0; VM < GetStatus.Length; VM++) {
+				//Update RAM column and write
+				for (int VM = 0; VM < GetStatus.Length -1; VM++) {
+					//$_.RAM = Math.Round((Get-VM -Name ("vm"+$_.vm)).MemoryAssigned/1024/1024/1024,2)}
 					try {
-						string_ram += GetStatus[VM]["RAM"]+" ";
+						VMRAM += Convert.ToDouble(GetStatus[VM]["RAM"]);
 					} catch (Exception e) {
-						inputBox_VMRAM.Text = e.ToString();
-					}
-				}
-				string[] ram_split = string_ram.Split(' ');
-				for (int VM = 0; VM < ram_split.Length; VM++) {
-					try {
-					VMRAM += Int32.Parse(ram_split[VM]);
-					} catch (Exception e) {
-						inputBox_VMRAM.Text = e.ToString();
-					}
-				}
-				inputBox_VMRAM.Text = string_ram.ToString();
-			}
+						inputBox_VMRAM.Text = "VM"+VM+": "+e.ToString();
+					}//end try
+				}//end for VM
+				inputBox_VMRAM.Text = VMRAM.ToString();
+			}//end if TestPath
 		}//end function 
 
 		public void UpdateTableVM() {
 			try {
 				if (TestPath(StatusFile) == "File") {
-					table_vm.Clear();
+				   if (dataGridView_vm.SelectedCells.Count > 0) {//Record the selected row.
+						table_vm_Row_Index = dataGridView_vm.SelectedCells[0].RowIndex;
+					} else {
+						table_vm_Row_Index = 0;
+					}
+					table_vm.Clear();//Clear the table
 					dynamic Status = FromCsv(GetContent(StatusFile));
 					if (Status != null) {
 						for (int r = 1; r < Status.Length -1; r++){
-							var rowData = Status[r];
+							var rowData = Status[r];//Reload the table
 							table_vm.Rows.Add(rowData["vm"], rowData["status"], rowData["version"], rowData["OS"], rowData["Package"], rowData["PR"], rowData["RAM"]);
 						}//end for r
 					}//end if Status
+					dataGridView_vm.DataSource=table_vm;
+					dataGridView_vm.Rows[table_vm_Row_Index].Selected = true;//Reselect the row.
 				}//end if TestPath
 			} catch (Exception e){
-				outBox_val.AppendText(Environment.NewLine + "e: "+e);
-			}
-		}
+				outBox_val.AppendText(Environment.NewLine + "e: "+e);//Complain about your failures in the console proxy.
+			}//end try 
+		}//end function
+
+
 
 
 
@@ -2237,12 +3011,11 @@ namespace WinGetApprovalNamespace {
 
 
 
-
 		//File Management
 		public string SecondMatch(string clip, int depth = 1) {
 			string[] clipArray = clip.Split('\n');
 			List<string> sa_out = new List<string>();
-			//If $current and $prev don't match, return the $prev element, which is $depth lines below the $current line. Start at $clip[$depth] and go until the end - this starts $current at $clip[$depth], and $prev gets moved backwards to $clip[0] and moves through until $current is at the end of the array, $clip[$clip.Length], and $prev is $depth previous, at $clip[$clip.Length - $depth].
+			//If $current and $prev don't match, return the $prev element, which is $depth lines below the $current line. Start at clip[$depth] and go until the end - this starts $current at clip[$depth], and $prev gets moved backwards to clip[0] and moves through until $current is at the end of the array, clip[clip.Length], and $prev is $depth previous, at clip[clip.Length - $depth].
 			for (int depthUnit = depth;depthUnit < clip.Length; depthUnit++){
 				string current = clipArray[depthUnit].Split(':')[0];
 				string prevUnit = clipArray[depthUnit - depth];
@@ -2263,7 +3036,7 @@ namespace WinGetApprovalNamespace {
 		//RemoveFileifExist(FileName) = RemoveItem(FIleName);
 		//LoadFileIfExists(FileName) = GetContent(FIleName);
 
-		public string FileFromGitHub(string PackageIdentifier, int Version, string FileName = "installer.yaml") {
+		public string FileFromGitHub(string PackageIdentifier, string Version, string FileName = "installer.yaml") {
 			string Path = PackageIdentifier.Replace('.','/');
 			string FirstLetter = PackageIdentifier[0].ToString().ToLower();
 			string content = "";
@@ -2275,7 +3048,7 @@ namespace WinGetApprovalNamespace {
 			return content;
 		}
 
-		public bool ManifestEntryCheck(string PackageIdentifier, int Version, string Entry = "AppsAndFeaturesEntries"){
+		public bool ManifestEntryCheck(string PackageIdentifier, string Version, string Entry = "AppsAndFeaturesEntries"){
 			string content = FileFromGitHub(PackageIdentifier,Version);
 			string string_out = "";
 			string_out = string_out.Split('\n').Where(n => n.Contains(Entry)).FirstOrDefault(); // s.IndexOf(": ");
@@ -2292,17 +3065,17 @@ namespace WinGetApprovalNamespace {
 			return String;
 		}
 
-		public string CommitFile(int PR, string File, string url){
+		public string CommitFile(int PR, int File){
+			string url = "";
 			dynamic Commit = FromJson(InvokeGitHubPRRequest(PR,"commits","content"));
 			if (Commit["files"]["contents_url"].GetType() == "String") {
 				url = Commit["files"]["contents_url"];
 			} else {
-				url = Commit["files"]["contents_url"]["File"];
+				url = Commit["files"]["contents_url"][File];
 			}
 			dynamic EncodedFile = FromJson(InvokeGitHubRequest(url));
 			return DecodeGitHubFile(EncodedFile["content"]);
 		}
-
 
 
 
@@ -2476,7 +3249,6 @@ namespace WinGetApprovalNamespace {
 			}
 		}
 
-
 		public void AddValidationData(string PackageIdentifier,string GitHubUserName = "",string authStrictness = "",string authUpdateType = "",string autoWaiverLabel = "",string versionParamOverrideUserName = "",int versionParamOverridePR = 0,string code200OverrideUserName = "",int code200OverridePR = 0,int AgreementOverridePR = 0 ,string AgreementURL = "",string reviewText = ""){
 		//[ValidateSet("should","must")]
 		//[ValidateSet("auto","manual")]
@@ -2535,6 +3307,7 @@ namespace WinGetApprovalNamespace {
 			}
 			return string_out;
 		}
+
 
 
 
@@ -2836,7 +3609,7 @@ namespace WinGetApprovalNamespace {
 			var outParameters = snapshotService.InvokeMethod("ApplySnapshot", inParameters, null);
 			return (uint)outParameters["ReturnValue"];
 		}
-		 
+		
 		public uint CheckpointVM(string VMName) {
 			ManagementObject snapshot = GetLastSnapshot(VMName);
 			ManagementObject snapshotService = GetCimService("Msvm_VirtualSystemSnapshotService");
@@ -2846,7 +3619,7 @@ namespace WinGetApprovalNamespace {
 			var outParameters = snapshotService.InvokeMethod("CreateSnapshot", inParameters, null);
 			return (uint)outParameters["ReturnValue"];
 		}
-		 
+		
 		public uint RemoveVMSnapshot(string VMName) {
 			ManagementObject snapshot = GetLastSnapshot(VMName);
 			ManagementObject snapshotService = GetCimService("Msvm_VirtualSystemSnapshotService");
@@ -2856,7 +3629,7 @@ namespace WinGetApprovalNamespace {
 			var outParameters = snapshotService.InvokeMethod("DestroySnapshot ", inParameters, null);
 			return (uint)outParameters["ReturnValue"];
 		} 
-		 
+		
 		public void RenameVM(string CurrentName, string NewName) {
 			Process process = new Process();
 			string command = "Rename-VM -VM "+CurrentName+" -newName "+NewName;
@@ -2867,7 +3640,7 @@ namespace WinGetApprovalNamespace {
 			process.Start();
 			process.WaitForExit(); 
 		}
-		 
+		
 		public void MoveVMStorage(string VMName, string DestinationPath) {
 			Process process = new Process();
 			string command = "Move-VMStorage -VM "+VMName+" -DestinationStoragePath "+DestinationPath;
@@ -2878,7 +3651,7 @@ namespace WinGetApprovalNamespace {
 			process.Start();
 			process.WaitForExit(); 
 		}
-		 
+		
 		public void ImportVM(string CurrentPath, string DestinationPath) {
 			Process process = new Process();
 			string command = "Import-VM -Path " + CurrentPath + "  -Copy -GenerateNewId -VhdDestinationPath "+DestinationPath +" -VirtualMachinePath "+DestinationPath;
@@ -2900,6 +3673,7 @@ namespace WinGetApprovalNamespace {
 			process.Start();
 			process.WaitForExit(); 
 		}
+
 
 
 
@@ -2980,280 +3754,6 @@ namespace WinGetApprovalNamespace {
 
 
 
-		//Depreciate or bust
-        public void loadNewPage() {
-
-//Download HTML file
-//Parse HTML to Document variable
-//Write Document variable to page
-//Interpret Javascript to modify Document variable
-			//history.Add(inputBox_PRNumber.Text);
-			history[historyIndex] = inputBox_PRNumber.Text;
-			string imageUrl = "";
-			string pageSource = "";
-			displayLine = 0;
-			// Download website, stick source in pageSource
-			//InvokeWebRequest(ref pageSource, imageUrl, WebRequestMethods.Http.Get);
-
-			// Do some replacing
-			doSomeReplacing(ref pageSource);
-			
-			// Set form name to page title
-			try {
-			}catch{
-			}// end try 
-
-			
-			//favicon 
-			try {
-				// <link rel="shortcut icon" href="/favicon.ico" type="image/vnd.microsoft.icon">
-				//imageUrl = pageSource.Substring(pageSource.IndexOf("<link")+5, pageSource.IndexOf(">") - pageSource.IndexOf("<link"));
-				imageUrl = findIndexOf(pageSource,"<link",">",5,0);
-				//imageUrl = imageUrl.Substring(imageUrl.IndexOf("href=")+6, imageUrl.IndexOf('"') - imageUrl.IndexOf("href="));
-				imageUrl = findIndexOf(imageUrl,"href=","",6,0);
-				
-			}catch{
-				imageUrl = history[historyIndex] + "/favicon.ico";
-			}// end try 
-			try {
-/*
-using(Stream stream = Application.GetResourceStream(new Uri(imageUrl)).Stream)
-{
-    Icon myIcon = new System.Drawing.Icon(stream);
-}
-				WebClient client = new WebClient();
-				Stream stream = client.OpenRead(imageUrl);
-				stream.Flush();
-				stream.Close();
-				//this.Text += "Favicon: "+imageUrl;
-*/
-
-				WebRequest request = WebRequest.Create(imageUrl);
-				request.Method = WebRequestMethods.Http.Get;// WebRequestMethods.Http.Get;
-				//request.UserAgent = "WinGetApprovalPipeline";
-				WebResponse response = request.GetResponse();
-				Stream stream = response.GetResponseStream();
-				this.Icon = new Icon(stream);
-				//pictureBox1.Image = Bitmap.FromStream(stream);
-
-			}catch{
-				//this.Icon = Icon.ExtractAssociatedIcon(System.Reflection.Assembly.GetExecutingAssembly().Location);
-				//this.Text = "Favicon missing:"+imageUrl+" - " + this.Text;
-			}// end try 
-
-			// Split head & body 
-			//Goto <body then goto the next >
-			try {
-				//parsedHtml = pageSource.Substring(pageSource.IndexOf("<body"), pageSource.IndexOf("</body") - pageSource.IndexOf("<body")).Split('<');
-				parsedHtml = findIndexOf(pageSource,"<body","</body",0,0).Split('<');
-			}catch{
-				parsedHtml = pageSource.Split('<');
-			}; // end try 
-			drawPage(parsedHtml);
-        }// end loadNewPage
-
-		public string findIndexOf(string pageString,string startString,string endString,int startPlus,int endPlus){
-			return pageString.Substring(pageString.IndexOf(startString)+startPlus, pageString.IndexOf(endString) - pageString.IndexOf(startString)+endPlus);
-        }// end findIndexOf
-
-		public void drawPage(string[] parsedHtml){
-			//pagePanel.Paint += new PaintEventHandler(drawPanel);
-			string tag = "div";
-			//string buttonText = "";
-			
-			int werdStart = 0;
-			int werdSpace = 0;
-			int werdEnd = 0;
-			
-			
-			//Should delete outBox and make a new one? This is easier.
-			outBox.Height = ClientRectangle.Height - gridItemHeight;
-			outBox.Controls.Clear();
-			outBox.Text = "";
-			
-			foreach (string werd in parsedHtml){
-				outBox.Height += lineHeight; // 40? And add multples for word wrap?
-				string append = "";
-				werdSpace = 0;
-				
-				if (werd.IndexOf(">") >=0 ) {
-					werdStart = werd.IndexOf(">")+1;
-				} else {
-					werdStart = 0;
-				}
-				
-				if (werd.IndexOf("<") >=0 ) {
-					werdEnd = werd.IndexOf("<");
-				} else {
-					werdEnd = werd.Length;
-				}
-				
-				
-				if (werd.IndexOf(" ") >=0) {
-					werdSpace = werd.IndexOf(" ");
-					if (werdSpace >= werdStart) {//wordStart.index > wordSpace.index (larger is after)
-						try {
-							tag = werd.Substring(0,werdStart);
-						} catch {
-							tag = "werdIndex:" +werd.IndexOf(">")+ "-werdSpace:"+werdSpace;
-						}// end try
-					}
-					if (werdSpace <= werdStart) {//wordStart.index < wordSpace.index (smaller is before)
-						try {
-							tag = werd.Substring(0,werdSpace);
-						} catch {
-							tag = "werdIndex:" +werd.IndexOf(">")+ "-werdSpace:"+werdSpace;
-						}// end try
-					}
-				} else {//wordSpace.index = -1
-					try {
-						tag = werd.Substring(0,werdStart-1);
-					} catch {
-						tag = "werdIndex:" +werd.IndexOf(">")+ "-werdSpace:"+werdSpace;
-					}// end try
-				}// end if werd
-
-				outBox.SelectionColor = Color.Black;
-				append = werd.Substring(werdStart, werdEnd - werdStart);
-
-/*
-				try {
-					if (werdSpace == 0) {
-					} else {
-					}// end if werdStart
-
-				} catch {
-					tag = "werdIndex:" +werd.IndexOf(">")+ "-werdSpace:"+werdSpace;
-				}// end try
-*/
-
-			tagSwitch(ref append, werd, tag);
-				
-				if (append != "") {
-					outBox.AppendText(append);
-				}
-				
-			}// end foreach string
-			//this.Invalidate();
-        }// end drawPage
-
-		public void doSomeReplacing(ref string pageSource){
-			// Do some replacing
-			pageSource = pageSource.Replace("&lt;","<");
-			pageSource = pageSource.Replace("&gt;",">");
-			}
-
-		public void tagSwitch (ref string append, string werd, string tag) {
-			int itemX = 0;
-			int itemY = 0;
-			int itemWidth = 0;
-			int itemHeight = 0;
-				switch (tag) {
-					case "!--":
-						append = "";
-						break;
-					case "!DOCTYPE":
-						append = "";
-						break;
-					case "a":
-						//Parse out the link
-						string linkText = "";
-						if (werd.IndexOf("href=\"") >=0 ) {
-				//linkText = werd.Substring(werd.IndexOf("href"), werd.IndexOf("</body") - werd.IndexOf("<body"));
-				//linkText = findIndexOf(werd,"<body","</body",0,0);
-							linkText = werd.Substring(werd.IndexOf("href")+6,werd.Length-werd.IndexOf("href")-6);
-							linkText = linkText.Substring(0,linkText.IndexOf('"'));
-						} else if (werd.IndexOf("href='") >=0 ) {
-							linkText = werd.Substring(werd.IndexOf("href")+6,werd.Length-werd.IndexOf("href")-6);
-							linkText = linkText.Substring(0,linkText.IndexOf("'"));
-						} 
-						//Add the hostname if it's implied.
-						if (linkText.Substring(0,1) == "/") {
-							linkText = history[historyIndex] + linkText.Substring(1,linkText.Length-1);
-						};
-						//outBox.SelectionColor = Color.Blue;
-						//append = append + "<link = \"" + linkText + "\">";
-
-						//Add the link to the richtextbox.
-						LinkLabel link = new LinkLabel();
-						link.Text = append;
-						LinkLabel.Link data = new LinkLabel.Link();
-						data.LinkData = @linkText;
-						link.Links.Add(data);
-						link.AutoSize = true;
-						link.Location = this.outBox.GetPositionFromCharIndex(this.outBox.TextLength);
-						this.outBox.Controls.Add(link);
-						this.outBox.SelectionStart = this.outBox.TextLength;
-						
-						append = "";
-						itemX = this.outBox.GetPositionFromCharIndex(this.outBox.TextLength).X;
-						itemY = this.outBox.GetPositionFromCharIndex(this.outBox.TextLength).Y;
-						itemWidth = gridItemWidth;
-						itemHeight = gridItemHeight;
-						drawPanel(itemX, itemY, itemWidth, itemHeight);
-						
-						
-						
-						if (debuggingView) {
-						outBox.SelectionColor = Color.Black;
-						if (tag.IndexOf("/") <0) {
-							append = "Default - Tag: "+tag+" - werd: "+werd;
-						}
-						}
-						break;
-			}; // end switch
-		} // end tagSwitch
-		
-		public void urlBox_KeyUp(object sender, KeyEventArgs e) {
-    switch (e.KeyCode) {
-        case Keys.F5:
-			loadNewPage();
-			e.Handled = true;
-            break;
-        case Keys.Enter:
-			loadNewPage();
-			e.Handled = true;
-            break;
-    }
-}
-
-		protected override void OnPaint( PaintEventArgs e ) {
-
-			Graphics pageGraphics = outBox.CreateGraphics();
-			Bitmap myBitmap = new Bitmap(WindowWidth, WindowHeight);
-			outBox.DrawToBitmap(myBitmap, new Rectangle(0, 0, myBitmap.Width, myBitmap.Height));
-
-
-			//pageGraphics.DrawLine(Pens.Black, new Point(0, (outBox.Lines.Length + 1) * 10), new Point(500, (outBox.Lines.Length + 1) * 10));
-			if (displayLine == 1) {
-				//pageGraphics.Clear(outBox.BackColor);
-				DrawRect(WindowWidth/2, WindowHeight/2, gridItemHeight, gridItemWidth, ref pageGraphics);
-			}
-
-			pageGraphics.Dispose();
-		}
-		
-		//Draw Stuff
-		public void DrawString(string drawString, int x, int y, ref Graphics graphicsObj){
-			System.Drawing.Font drawFont = new System.Drawing.Font("Arial", 16);
-			System.Drawing.SolidBrush drawBrush = new System.Drawing.SolidBrush(System.Drawing.Color.Black);
-			System.Drawing.StringFormat drawFormat = new System.Drawing.StringFormat();
-			graphicsObj.DrawString(drawString, drawFont, drawBrush, x, y, drawFormat);
-			drawFont.Dispose();
-			drawBrush.Dispose();
-		}// end DrawString
-
-		public void DrawRect(int startX, int startY, int sizeX, int sizeY, ref Graphics graphicsObj){
-			System.Drawing.SolidBrush myBrush = new System.Drawing.SolidBrush(System.Drawing.Color.Red);
-			graphicsObj.FillRectangle(myBrush, new Rectangle(startX, startY, sizeX, sizeY));
-			myBrush.Dispose();
-		}
-		
-
-
-
-
-
 //Connective functions
 		//Searches
 		public void ToWork_Search_Action(object sender, EventArgs e) {
@@ -3266,8 +3766,8 @@ using(Stream stream = Application.GetResourceStream(new Uri(imageUrl)).Stream)
 		
         public void Add_Waiver_Action(object sender, EventArgs e) {
 			int PR = Int32.Parse(inputBox_PRNumber.Text.Replace("#",""));
-			string string_out = AddWaiver(PR);
-			outBox_val.AppendText(Environment.NewLine + "Waiver: "+PR + " "+ string_out);
+			dynamic string_out = FromJson(AddWaiver(PR));
+			outBox_val.AppendText(Environment.NewLine + "Waiver: "+PR + " "+ string_out["body"]);
 			//outBox_val.AppendText(Environment.NewLine + CannedMessage("AutoValEnd","testing testing 1..2..3."));
         }// end Approved_Action
 		
@@ -3278,15 +3778,14 @@ using(Stream stream = Application.GetResourceStream(new Uri(imageUrl)).Stream)
         public void Approval_Run_Search_Action(object sender, EventArgs e) {
 			WorkSearch("Approval");
         }// end Approved_Action
-		
 		//Close PR
         public void Closed_Action(object sender, EventArgs e) {
 			int PR = Int32.Parse(inputBox_PRNumber.Text.Replace("#",""));
 			string UserInput = inputBox_User.Text;
 			inputBox_User.Text = "";
 			AddPRToRecord(PR,"Closed");//[ValidateSet("Approved","Blocking","Feedback","Retry","Manual","Closed","Project","Squash","Waiver")]
-			string response_out = InvokeGitHubPRRequest(PR,WebRequestMethods.Http.Post,"comments","Close with reason: "+UserInput+";");
-			outBox_val.AppendText(Environment.NewLine + "PR "+ PR + ": " + response_out);
+			dynamic response_out = FromJson(InvokeGitHubPRRequest(PR,WebRequestMethods.Http.Post,"comments","Close with reason: "+UserInput+";"));
+			outBox_val.AppendText(Environment.NewLine + "PR "+ PR + ": " + response_out["body"]);
         }// end Closed_Action
 		
         public void Duplicate_Action(object sender, EventArgs e) {
@@ -3294,17 +3793,16 @@ using(Stream stream = Application.GetResourceStream(new Uri(imageUrl)).Stream)
 			int UserInput = Int32.Parse(inputBox_User.Text.Replace("#",""));
 			inputBox_User.Text = "";
 			AddPRToRecord(PR,"Closed");//[ValidateSet("Approved","Blocking","Feedback","Retry","Manual","Closed","Project","Squash","Waiver")]
-			string response_out = InvokeGitHubPRRequest(PR,WebRequestMethods.Http.Post,"comments","Close with reason: Duplicate of #"+UserInput+";");
-			outBox_val.AppendText(Environment.NewLine + "PR "+ PR + ": " + response_out);
+			dynamic response_out = FromJson(InvokeGitHubPRRequest(PR,WebRequestMethods.Http.Post,"comments","Close with reason: Duplicate of #"+UserInput+";"));
+			outBox_val.AppendText(Environment.NewLine + "PR "+ PR + ": " + response_out["body"]);
         }// end Duplicate_Action
 		
         public void Merge_Conflicts_Action(object sender, EventArgs e) {
 			int PR = Int32.Parse(inputBox_PRNumber.Text.Replace("#",""));
 			AddPRToRecord(PR,"Closed");//[ValidateSet("Approved","Blocking","Feedback","Retry","Manual","Closed","Project","Squash","Waiver")]
-			string response_out = InvokeGitHubPRRequest(PR,WebRequestMethods.Http.Post,"comments","Close with reason: Merge Conflicts;");
-			outBox_val.AppendText(Environment.NewLine + "PR "+ PR + ": " + response_out);
+			dynamic response_out = FromJson(InvokeGitHubPRRequest(PR,WebRequestMethods.Http.Post,"comments","Close with reason: Merge Conflicts;"));
+			outBox_val.AppendText(Environment.NewLine + "PR "+ PR + ": " + response_out["body"]);
         }// end Merge_Conflicts_Action
-		
 		//Canned Replies
         public void Automation_Block_Action(object sender, EventArgs e) {
 			int PR = Int32.Parse(inputBox_PRNumber.Text.Replace("#",""));
@@ -3346,8 +3844,7 @@ using(Stream stream = Application.GetResourceStream(new Uri(imageUrl)).Stream)
 			string response_out = ReplyToPR(PR,"OneManifestPerPR",MagicLabels[30]);
 			outBox_val.AppendText(Environment.NewLine + "PR "+ PR + ": " + response_out);
         }// end One_Manifest_Per_PR_Action
-		
-		//Misc
+				//Misc
         public void Check_Installer_Action(object sender, EventArgs e) {
 			int PR = Int32.Parse(inputBox_PRNumber.Text.Replace("#",""));
 			var Pull = FromJson(InvokeGitHubPRRequest(PR,"files"));
@@ -3380,28 +3877,17 @@ using(Stream stream = Application.GetResourceStream(new Uri(imageUrl)).Stream)
 			AboutText += "" + Environment.NewLine;
 			MessageBox.Show(AboutText);
 		} // end About_Click_Action
-
-		//Depreciate
-		public void TextBox_Link_Action (object sender, LinkLabelLinkClickedEventArgs e) {
-			Array.Resize(ref history, history.Length + 1);
-			historyIndex++;
-			history[historyIndex] = e.Link.LinkData.ToString();
-			// inputBox_PRNumber.Text = history[historyIndex];
-			loadNewPage();
-		} // end TextBox_Link_Action
-
 		//File
 		public void Save_Key_Click_Action(object sender, EventArgs e) {
 			// save
 					MessageBox.Show("You're saved");
 		}// end Save_Key_Click_Action
-
 		//Reporting
         public void Approved_Action(object sender, EventArgs e) {
 			int PR = Int32.Parse(inputBox_PRNumber.Text.Replace("#",""));
-			string response_out = ApprovePR(PR);
+			dynamic response_out = FromJson(ApprovePR(PR));
 			AddPRToRecord(PR,"Approved");//[ValidateSet("Approved","Blocking","Feedback","Retry","Manual","Closed","Project","Squash","Waiver")]
-			outBox_val.AppendText(Environment.NewLine + "PR "+ PR + ": " + response_out);
+			outBox_val.AppendText(Environment.NewLine + "PR "+ PR + ": " + response_out["state"]);
         }// end Approved_Action
 		
         public void Manually_Validated_Action(object sender, EventArgs e) {
@@ -3421,6 +3907,14 @@ using(Stream stream = Application.GetResourceStream(new Uri(imageUrl)).Stream)
 			int PR = Int32.Parse(inputBox_PRNumber.Text.Replace("#",""));
 			string response_out = RetryPR(PR);
 			outBox_val.AppendText(Environment.NewLine + "PR "+ PR + ": " + response_out);
+			}// end Approved_Action
+
+        public void Misc_Action(object sender, EventArgs e) {
+			//int PR = Int32.Parse(inputBox_PRNumber.Text.Replace("#",""));
+			//string response_out = ToJson(GetVM("vm679"));
+			string hostName = Dns.GetHostName();
+			string IP = Dns.GetHostEntry(hostName).AddressList[4].ToString();   
+			outBox_val.AppendText(Environment.NewLine + "IP: " + IP);
 			}// end Approved_Action
 
         public void Squash_Action(object sender, EventArgs e) {
@@ -3456,6 +3950,12 @@ using(Stream stream = Application.GetResourceStream(new Uri(imageUrl)).Stream)
 				OutFile(FilePath,fileOutput);
 				SetStatus(VM,"Revert");
 		}
+
+
+
+
+
+
 		//Modes
         public void Approving_Action(object sender, EventArgs e) {
 			string Status = "Approving";
