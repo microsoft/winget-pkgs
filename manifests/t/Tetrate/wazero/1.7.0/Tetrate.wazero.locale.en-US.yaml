@@ -1,0 +1,55 @@
+# Created with komac v2.1.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.6.0.schema.json
+
+PackageIdentifier: Tetrate.wazero
+PackageVersion: 1.7.0
+PackageLocale: en-US
+Publisher: Tetrate
+PublisherUrl: https://github.com/tetratelabs
+PublisherSupportUrl: https://github.com/tetratelabs/wazero/issues
+PackageName: wazero
+PackageUrl: https://wazero.io/
+License: Apache-2.0
+LicenseUrl: https://github.com/tetratelabs/wazero/blob/HEAD/LICENSE
+Copyright: Copyright 2023 Tetrate
+ShortDescription: wazero runs WebAssembly modules
+Description: wazero is a command line utility to run WebAssembly modules. Specifically, this runs .wasm files compiled with WASI or Go, and has zero platform dependencies.
+Moniker: wazero
+Tags:
+- tetrate
+- wasm
+- wazero
+- webassembly
+ReleaseNotes: |-
+  Welcome to wazero 1.7: the release that upgrades like a minor, but feels like a major!It's finally time for the long-awaited, final release of our brand new optimizing compiler. This is such a big deal that we are celebrating it at Wasm I/O 2024 with another round of wonderful lightning talks from wazero users like we did in 2023. In fact, even this release is being tagged during the event! Stay tuned on our usual channels to see the recording:- Follow the #wazero hashtag on Twitter
+  - Join the #wazero channel on the Gophers Slack
+  wazero optimizes machine code compiled from wasm
+  Translating Wasm bytecode into machine code can take multiple forms. An optimizing compiler performs multiple nontrivial transformations on the input code, ultimately producing more efficient ("optimized") code.In 1.7 we replaced our internal wasm compiler with an optimizing one. This means it is a drop-in: you don’t need to do anything to use it. If interested in compiler design, please read the docs, contributed by @evacchi.As for performance improvements, we have come to expect a run-time boost ranging from 10% to even 60%, with 30-40% being the average. Notably:- @ncruces' fork of coremark shows an improved score of 15265 vs 9591, i.e. about +60% on arm64 (Apple M1 Pro)
+  - mercari/grpc-federation improvements between 4-10% on their Wasm extensions to the Common Extension Language
+  - kubernetes-sigs/kube-scheduler-wasm-extension sees an average of >40% decrease on schedule lifecycle overhead
+  - @achille-roussel contributed some numbers on the Go standard library (GOOS=wasip1) showing at least 30% improvements on the syscall, compress/flate (gzip) and encoding/json packages, with peaks of 60% (especially in data throughput).
+  While a major improvement, we decided against calling this version 2.0. If we did, we would cause library dependency lockups due to go imports needing a ‘/v2’. We take backwards compatibility seriously, so couldn’t do that to you!As usual, @mathetake owns the lionshare of the contributions, with @evacchi helping along the way, especially on the new amd64 backend. Notably, @achille-roussel also contributed a performance improvement to the compiler (#2026) and @ncruces helped in many ways with testing and verifying the implementation, validating (among other things) against his library go-sqlite3.Note: an optimizing compiler does more work, so it takes longer. Production use of wazero should always compile wasm during initialization to avoid slowing down function runtime.Experimental: Wasm Threads Spec
+  The Wasm Threads spec introduces instructions to explicitly share memory between modules, and new operations for atomic memory access. Compilers may use this feature for concurrent threads of execution. For instance @anuraaga’s Go ports of protoc plugins needed atomic instruction support to compile to Wasm.1.7 concludes a long journey started with @anuraaga's first PR #1899  and continued with @mathetake occasionally tag-teaming, especially to support in the new compiler; @ncruces assisted with reviewing.You can enable Wasm Threads support by setting the corresponding flag:
+
+       // Threads support must be enabled explicitly in addition to standard V2 features.
+       cfg := wazero.NewRuntimeConfig().
+             WithCoreFeatures(api.CoreFeaturesV2 | experimental.CoreFeaturesThreads)
+
+  For a usage example see features_example_test.goExperimental: Snapshot/Restore
+  The Snapshot/Restore experimental feature saves the state of a wasm function and restores it later. This feature has been contributed by @anuraaga to implement exception handling in wasilibs/go-pgqueryYou can enable snapshot/restore by setting the context flag:
+
+       // Enable experimental snapshotting functionality by setting it to context. We use this
+       // context when invoking functions, indicating to wazero to enable it.
+       ctx = context.WithValue(ctx, experimental.EnableSnapshotterKey{}, struct{}{})
+
+  For a detailed example see experimental/checkpoint_example_test.go and for further details read PR #1808.Notably, the Thread Spec and Snapshot/Restore were originally developed as part of the wazerox friendly fork to support wasilibs. With both features making it into this release, @anuraaga could proceed with archiving wazerox: another win from wazero 1.7!Other changes
+  - Experimental support for GOOS=gojs has been dropped (@mathetake, #2027)
+  - @orsinium contributed a fix to a test (TestErrorBuilderGoRuntimeError, #2142)
+  - @karelbilek has started to extensively test our VFS implementation, contributed a tiny fix in #2100 and reported a few documentation issues.
+  Thanks everyone for making wazero awesomer and awesomer!
+ReleaseNotesUrl: https://github.com/tetratelabs/wazero/releases/tag/v1.7.0
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://wazero.io/docs/
+ManifestType: defaultLocale
+ManifestVersion: 1.6.0
