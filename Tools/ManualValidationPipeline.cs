@@ -92,7 +92,7 @@ using System.Web.Script.Serialization;
 namespace WinGetApprovalNamespace {
     public class WinGetApprovalPipeline : Form {
 		//vars
-        public int build = 553;//Get-RebuildPipeApp	
+        public int build = 554;//Get-RebuildPipeApp	
 		public string appName = "WinGetApprovalPipeline";
 		public string appTitle = "WinGet Approval Pipeline - Build ";
 		public static string owner = "microsoft";
@@ -153,7 +153,7 @@ namespace WinGetApprovalNamespace {
         public Regex regex_hashPRRegexEnd = new Regex(@string_hashPRRegexEnd);
         public Regex regex_colonPRRegex = new Regex(@string_colonPRRegex);
 		
-		public string file_GitHubToken = "C:\\Users\\Stephen.Gillie\\Documents\\PowerShell\\ght.txt";
+		public string file_GitHubToken = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + "\\Documents\\PowerShell\\ght.txt";
 		public string GitHubToken;
 		public bool TokenLoaded = false;
 		public int GitHubRateLimitDelay = 333;
