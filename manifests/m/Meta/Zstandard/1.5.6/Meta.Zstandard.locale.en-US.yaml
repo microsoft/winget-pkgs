@@ -1,0 +1,138 @@
+# Created with komac v2.1.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.6.0.schema.json
+
+PackageIdentifier: Meta.Zstandard
+PackageVersion: 1.5.6
+PackageLocale: en-US
+Publisher: Meta
+PublisherUrl: https://opensource.fb.com/
+PublisherSupportUrl: https://github.com/facebook/zstd/issues
+PackageName: Zstandard
+PackageUrl: https://github.com/facebook/zstd
+License: GPL-2.0
+LicenseUrl: https://github.com/facebook/zstd/blob/HEAD/LICENSE
+ShortDescription: Zstandard is a fast lossless compression algorithm, targeting real-time compression scenarios at zlib-level and better compression ratios. It's backed by a very fast entropy stage, provided by Huff0 and FSE library.
+Moniker: zstd
+ReleaseNotes: |-
+  This release highlights the deployment of Google Chrome 123, introducing zstd-encoding for Web traffic, introduced as a preferable option for compression of dynamic contents. With limited web server support for zstd-encoding due to its novelty, we are launching an updated Zstandard version to facilitate broader adoption.New stable parameter ZSTD_c_targetCBlockSize
+  Using zstd compression for large documents over the Internet, data is segmented into smaller blocks of up to 128 KB, for incremental updates. This is crucial for applications like Chrome that process parts of documents as they arrive. However, on slow or congested networks, there can be some brief unresponsiveness in the middle of a block transmission, delaying update. To mitigate such scenarios, libzstd introduces the new parameter ZSTD_c_targetCBlockSize, enabling the division of blocks into even smaller segments to enhance initial byte delivery speed. Activating this feature incurs a cost, both runtime (equivalent to -2% speed at level 8) and a slight compression efficiency decrease (<0.1%), but offers some interesting latency reduction, notably beneficial in areas with less powerful network infrastructure.Granular binary size selection
+  libzstd provides build customization, including options to compile only the compression or decompression modules, minimizing binary size. Enhanced in v1.5.6 (source), it now allows for even finer control by enabling selective inclusion or exclusion of specific components within these modules. This advancement aids applications needing precise binary size management.Miscellaneous Enhancements
+  This release includes various minor enhancements and bug fixes to enhance user experience. Key updates include an expanded list of recognized compressed file suffixes for the --exclude-compressed flag, improving efficiency by skipping presumed incompressible content. Furthermore, compatibility has been broadened to include additional chipsets (sparc64, ARM64EC, risc-v) and operating systems (QNX, AIX, Solaris, HP-UX).Change Log
+  api: Promote ZSTD_c_targetCBlockSize to Stable API by @felixhandte
+  api: new experimental ZSTD_d_maxBlockSize parameter, to reduce streaming decompression memory, by @terrelln
+  perf: improve performance of param ZSTD_c_targetCBlockSize, by @Cyan4973
+  perf: improved compression of arrays of integers at high compression, by @Cyan4973
+  lib: reduce binary size with selective built-time exclusion, by @felixhandte
+  lib: improved huffman speed on small data and linux kernel, by @terrelln
+  lib: accept dictionaries with partial literal tables, by @terrelln
+  lib: fix CCtx size estimation with external sequence producer, by @embg
+  lib: fix corner case decoder behaviors, by @Cyan4973 and @aimuz
+  lib: fix zdict prototype mismatch in static_only mode, by @ldv-alt
+  lib: fix several bugs in magicless-format decoding, by @embg
+  cli: add common compressed file types to --exclude-compressed by @daniellerozenblit (requested by @dcog989)
+  cli: fix mixing -c and -o commands with --rm, by @Cyan4973
+  cli: fix erroneous exclusion of hidden files with --output-dir-mirror by @felixhandte
+  cli: improved time accuracy on BSD, by @felixhandte
+  cli: better errors on argument parsing, by @KapJI
+  tests: better compatibility with older versions of grep, by @Cyan4973
+  tests: lorem ipsum generator as default content generator, by @Cyan4973
+  build: cmake improvements by @terrelln, @sighingnow, @gjasny, @JohanMabille, @Saverio976, @gruenich, @teo-tsirpanis
+  build: bazel support, by @jondo2010
+  build: fix cross-compiling for AArch64 with lld by @jcelerier
+  build: fix Apple platform compatibility, by @nidhijaju
+  build: fix Visual 2012 and lower compatibility, by @Cyan4973
+  build: improve win32 support, by @DimitriPapadopoulos
+  build: better C90 compliance for zlibWrapper, by @emaste
+  port: make: fat binaries on macos, by @mredig
+  port: ARM64EC compatibility for Windows, by @dunhor
+  port: QNX support by @klausholstjacobsen
+  port: MSYS2 and Cygwin makefile installation and test support, by @QBos07
+  port: risc-v support validation in CI, by @Cyan4973
+  port: sparc64 support validation in CI, by @Cyan4973
+  port: AIX compatibility, by @likema
+  port: HP-UX compatibility, by @likema
+  doc: Improved specification accuracy, by @elasota
+  bug: Fix and deprecate ZSTD_generateSequences (#3981), by @terrellnFull change list (auto-generated)
+  - Add win32 to windows-artifacts.yml by @Kim-SSi in #3600
+  - Fix mmap-dict help output by @daniellerozenblit in #3601
+  - [oss-fuzz] Fix simple_round_trip fuzzer with overlapping decompression by @terrelln in #3612
+  - Reduce streaming decompression memory by (128KB - blockSizeMax) by @terrelln in #3616
+  - removed travis & appveyor scripts by @Cyan4973 in #3621
+  - Add ZSTD_d_maxBlockSize parameter by @terrelln in #3617
+  - [doc] add decoder errata paragraph by @Cyan4973 in #3620
+  - add makefile entry to build fat binary on macos by @mredig in #3614
+  - Disable unused variable warning in msan configurations by @danlark1 in #3624
+  #3634
+  - Allow Build-Time Exclusion of Individual Compression Strategies by @felixhandte in #3623
+  - Get zstd working with ARM64EC on Windows by @dunhor in #3636
+  - minor : update streaming_compression example by @Cyan4973 in #3631
+  - Fix UBSAN issue (zero addition to NULL) by @terrelln in #3658
+  - Add options in Makefile to cmake by @sighingnow in #3657
+  - fix a minor inefficiency in compress_superblock by @Cyan4973 in #3668
+  - Fixed a bug in the educational decoder by @Cyan4973 in #3659
+  - changed LLU suffix into ULL for Visual 2012 and lower by @Cyan4973 in #3664
+  - fixed decoder behavior when nbSeqs==0 is encoded using 2 bytes by @Cyan4973 in #3669
+  - detect extraneous bytes in the Sequences section by @Cyan4973 in #3674
+  - Bitstream produces only zeroes after an overflow event by @Cyan4973 in #3676
+  - Update FreeBSD CI images to latest supported releases by @emaste in #3684
+  - Clean up a false error message in the LDM debug log by @embg in #3686
+  - Hide ASM symbols on Apple platforms by @nidhijaju in #3688
+  - Changed the decoding loop to detect more invalid cases of corruption sooner by @Cyan4973 in #3677
+  - Fix Intel Xcode builds with assembly by @gjasny in #3665
+  - Save one byte on the frame epilogue by @Coder-256 in #3700
+  - Update fileio.c: fix build failure with enabled LTO by @LocutusOfBorg in #3695
+  - fileio_asyncio: handle malloc fails in AIO_ReadPool_create by @void0red in #3704
+  - Fix typographical error in README.md by @nikohoffren in #3701
+  - Fixed typo by @alexsifivetw in #3712
+  - Improve dual license wording in README by @terrelln in #3718
+  - Unpoison Workspace Memory Before Custom-Free by @felixhandte in #3725
+  - added ZSTD_decompressDCtx() benchmark option to fullbench by @Cyan4973 in #3726
+  - No longer reject dictionaries with literals maxSymbolValue < 255 by @terrelln in #3731
+  - fix: ZSTD_BUILD_DECOMPRESSION message by @0o001 in #3728
+  - Updated Makefiles for full MSYS2 and Cygwin installation and testing … by @QBos07 in #3720
+  - Work around nullptr-with-nonzero-offset warning by @terrelln in #3738
+  - Fix & refactor Huffman repeat tables for dictionaries by @terrelln in #3737
+  - zdictlib: fix prototype mismatch by @ldv-alt in #3733
+  - Fixed zstd cmake shared build on windows by @JohanMabille in #3739
+  - Added qnx in the posix test section of platform.h by @klausholstjacobsen in #3745
+  - added some documentation on ZSTD_estimate*Size() variants by @Cyan4973 in #3755
+  - Improve macro guards for ZSTD_assertValidSequence by @terrelln in #3770
+  - Stop suppressing pointer-overflow UBSAN errors by @terrelln in #3776
+  - fix x32 tests on Github CI by @Cyan4973 in #3777
+  - Fix new typos found by codespell by @DimitriPapadopoulos in #3771
+  - Do not test WIN32, instead test _WIN32 by @DimitriPapadopoulos in #3772
+  - Fix a very small formatting typo in the lib/README.md file by @dloidolt in #3763
+  - Fix pzstd Makefile to allow setting DESTDIR and BINDIR separately by @paulmenzel in #3752
+  - Remove FlexArray pattern from ZSTDMT by @Cyan4973 in #3786
+  - solving flexArray issue #3785 in fse by @Cyan4973 in #3789
+  - Add doc on how to use it with cmake FetchContent by @Saverio976 in #3795
+  - Correct FSE probability bit consumption in specification by @elasota in #3806
+  - Add Bazel module instructions to README.md by @jondo2010 in #3812
+  - Clarify that a stream containing too many Huffman weights is invalid by @elasota in #3813
+  - [cmake] Require CMake version 3.5 or newer by @gruenich in #3807
+  - Three fixes for the Linux kernel by @terrelln in #3822
+  - [huf] Improve fast huffman decoding speed in linux kernel by @terrelln in #3826
+  - [huf] Improve fast C & ASM performance on small data by @terrelln in #3827
+  - update xxhash library to v0.8.2 by @Cyan4973 in #3820
+  - Modernize macros to use do { } while (0) by @terrelln in #3831
+  - Clarify that the presence of weight value 1 is required, and a lone implied 1 weight is invalid by @elasota in #3814
+  - Move offload API params into ZSTD_CCtx_params by @embg in #3839
+  - Update FreeBSD CI: drop 12.4 (nearly EOL) by @emaste in #3845
+  - Make offload API compatible with static CCtx by @embg in #3854
+  - zlibWrapper: convert to C89 / ANSI C by @emaste in #3846
+  - Fix a nullptr dereference in ZSTD_createCDict_advanced2() by @michoecho in #3847
+  - Cirrus-CI: Add FreeBSD 14 by @emaste in #3855
+  - CI: meson: use builtin handling for MSVC by @eli-schwartz in #3858
+  - cli: better errors on argument parsing by @KapJI in #3850
+  - Clarify that probability tables must not contain non-zero probabilities for invalid values by @elasota in #3817
+  - [x-compile] Fix cross-compiling for AArch64 with lld by @jcelerier in #3760
+  - playTests.sh does no longer needs grep -E by @Cyan4973 in #3865
+  - minor: playTests.sh more compatible with older versions of grep by @Cyan4973 in #3877
+  - disable Intel CET Compatibility tests by @Cyan4973 in #3884
+  - improve cmake test by @Cyan4973 in #3883
+  - add sparc64 compilation test by @Cyan4973 in #3886
+  - add a lorem ipsum generator by @Cyan4973 in #3890
+  - Update Dependency in Intel CET Test; Re-Enable Test by @felixhandte in #3893
+ReleaseNotesUrl: https://github.com/facebook/zstd/releases/tag/v1.5.6
+ManifestType: defaultLocale
+ManifestVersion: 1.6.0
