@@ -552,6 +552,7 @@ Function Get-InstallerFile {
     $_WebClient.DownloadFile($URI, $_OutFile)
   } catch {
     # Failed to download with the Delivery-Optimization User Agent, so try again with the WinINet User Agent
+    $_WebClient.Headers.Clear()
     $_WebClient.Headers.Add('User-Agent', $script:backupUserAgent)
     $_WebClient.DownloadFile($URI, $_OutFile)
   } finally {
