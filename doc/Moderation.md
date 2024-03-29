@@ -4,7 +4,7 @@ The Windows Package Manager community repository is the location for manifests p
 
 ## Moderators
 
-In addition to Microsoft employees, several community members have been identified through their high-quality submissions, willingness to help others, and adherence to our [code of conduct](CODE_OF_CONDUCT.md).
+In addition to Microsoft employees, several community members have been identified through their high-quality submissions, willingness to help others, and adherence to our [code of conduct](/CODE_OF_CONDUCT.md).
 
 When we initially implemented moderation, we observed several objective criteria. These included the number of Pull Requests (PR)s made, the length of time they had been active in the project, and their interaction with others who submitted PRs.
 
@@ -57,6 +57,12 @@ Occasionally the automatic validation runs into an issue which is transient, or 
 
 The bots which help keep the repository clean sometimes make mistakes or or sometimes a moderator misclicks and accidentally requests changes. This can add the `Needs-Author-Feedback` or `Needs-Attention` labels to pull requests that don't need them. Moderators can remove these labels without re-running the pipelines to allow for the PR to be re-reviewed and merged.
 
+### Removing Labels
+
+> Trigger: Comment `[Policy] Reset Labels` on a pull request or issue
+
+Sometimes a label is misapplied or needs to be removed to keep things clean. This trigger will remove all labels that moderators have access to as well as some non-blocking pipeline labels such as `Possible-Duplicate`. After using this trigger, the applicable labels should be re-added using the triggers below.
+
 ### Closing or Re-opening Pull Requests and Issues
 
 > Trigger: Comment `Close with reason: <reason>;` on a pull request or issue
@@ -81,16 +87,23 @@ When duplicate issues are raised, moderators are able to use this special variat
 Moderators are often the first to see and triage new issues, and so they have the ability to apply certain labels to pull requests and issues. Below is a list of labels that moderators can apply:
 
 * `Area-Bots`
+* `Area-Client`
 * `Area-External`
 * `Area-Matching`
+* `Area-Scope`
 * `Area-Validation-Pipeline`
 * `Blocking-Issue`
 * `Dependencies`
 * `DriverInstall`
+* `DSC`
+* `Error-Hash-Mismatch`
 * `Hardware`
+* `Help-Wanted`
+* `In-PR`
 * `Installer-Issue`
 * `Interactive-Only-Installer`
 * `Issue-Bug`
+* `Issue-Docs`
 * `Issue-Feature`
 * `Last-Version-Remaining`
 * `License-Blocks-Install`
@@ -100,13 +113,18 @@ Moderators are often the first to see and triage new issues, and so they have th
 * `Needs-Author-Feedback`
 * `Needs-CLA`
 * `Needs-Manual-Merge`
+* `Needs-Review`
 * `Network-Blocker`
+* `Package-Request`
 * `Package-Update`
 * `Portable-Archive`
+* `Portable-JAR`
 * `PSA`
 * `Scripted-Application`
-* `Windows-Features`
+* `Testing`
+* `Upgrade-Issue`
 * `Version-Parameter-Mismatch`
+* `Windows-Features`
 * `Zip-Binary`
 
 > [!NOTE]

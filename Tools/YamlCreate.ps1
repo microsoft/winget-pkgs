@@ -168,7 +168,7 @@ if ($Settings) {
   exit
 }
 
-$ScriptHeader = '# Created with YamlCreate.ps1 v2.4.0'
+$ScriptHeader = '# Created with YamlCreate.ps1 v2.4.1'
 $ManifestVersion = '1.6.0'
 $PSDefaultParameterValues = @{ '*:Encoding' = 'UTF8' }
 $Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
@@ -180,6 +180,12 @@ $callingCulture = [Threading.Thread]::CurrentThread.CurrentCulture
 if (-not ([System.Environment]::OSVersion.Platform -match 'Win')) { $env:TEMP = '/tmp/' }
 $wingetUpstream = 'https://github.com/microsoft/winget-pkgs.git'
 $RunHash = $(Get-FileHash -InputStream $([IO.MemoryStream]::new([byte[]][char[]]$(Get-Date).Ticks.ToString()))).Hash.Substring(0, 8)
+$script:UserAgent = 'Microsoft-Delivery-Optimization/10.1'
+
+$_wingetVersion = 1.0.0
+$_appInstallerVersion = (Get-AppxPackage Microsoft.DesktopAppInstaller).version
+if (Get-Command 'winget' -ErrorAction SilentlyContinue) { $_wingetVersion = (winget -v).TrimStart('v')}
+$script:backupUserAgent = "winget-cli WindowsPackageManager/$_wingetVersion DesktopAppInstaller/Microsoft.DesktopAppInstaller v$_appInstallerVersion"
 
 if ($ScriptSettings.EnableDeveloperOptions -eq $true -and $null -ne $ScriptSettings.OverrideManifestVersion) {
   $script:UsesPrerelease = $ScriptSettings.OverrideManifestVersion -gt $ManifestVersion
@@ -437,13 +443,21 @@ Function Test-Url {
   )
   try {
     $HTTP_Request = [System.Net.WebRequest]::Create($URL)
-    $HTTP_Request.UserAgent = 'Microsoft-Delivery-Optimization/10.1'
+    $HTTP_Request.UserAgent = $script:UserAgent
     $HTTP_Response = $HTTP_Request.GetResponse()
     $script:ResponseUri = $HTTP_Response.ResponseUri.AbsoluteUri
     $HTTP_Status = [int]$HTTP_Response.StatusCode
   } catch {
-    # Take no action here; If there is an exception, we will treat it like a 404
-    $HTTP_Status = 404
+    # Failed to download with the Delivery-Optimization User Agent, so try again with the WinINet User Agent
+    try {
+      $HTTP_Request = [System.Net.WebRequest]::Create($URL)
+      $HTTP_Request.UserAgent = $script:backupUserAgent
+      $HTTP_Response = $HTTP_Request.GetResponse()
+      $script:ResponseUri = $HTTP_Response.ResponseUri.AbsoluteUri
+      $HTTP_Status = [int]$HTTP_Response.StatusCode
+    } catch {
+      $HTTP_Status = 404
+    }
   }
   If ($null -eq $HTTP_Response) { $HTTP_Status = 404 }
   Else { $HTTP_Response.Close() }
@@ -529,14 +543,22 @@ Function Get-InstallerFile {
 
   # Create a new web client for downloading the file
   $_WebClient = [System.Net.WebClient]::new()
-  $_WebClient.Headers.Add('User-Agent', 'Microsoft-Delivery-Optimization/10.1')
+  $_WebClient.Headers.Add('User-Agent', $script:UserAgent)
   # If the system has a default proxy set, use it
   # Powershell Core will automatically use this, so it's only necessary for PS5
   if ($PSVersionTable.PSVersion.Major -lt 6) { $_WebClient.Proxy = [System.Net.WebProxy]::GetDefaultProxy() }
   # Download the file
-  $_WebClient.DownloadFile($URI, $_OutFile)
-  # Dispose of the web client to release the resources it uses
-  $_WebClient.Dispose()
+  try {
+    $_WebClient.DownloadFile($URI, $_OutFile)
+  } catch {
+    # Failed to download with the Delivery-Optimization User Agent, so try again with the WinINet User Agent
+    $_WebClient.Headers.Clear()
+    $_WebClient.Headers.Add('User-Agent', $script:backupUserAgent)
+    $_WebClient.DownloadFile($URI, $_OutFile)
+  } finally {
+    # Dispose of the web client to release the resources it uses
+    $_WebClient.Dispose()
+  }
 
   return $_OutFile
 }
