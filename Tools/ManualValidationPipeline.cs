@@ -93,7 +93,7 @@ using System.Web.Script.Serialization;
 namespace WinGetApprovalNamespace {
     public class WinGetApprovalPipeline : Form {
 		//vars
-        public int build = 592;//Get-RebuildPipeApp	
+        public int build = 597;//Get-RebuildPipeApp	
 		public string appName = "WinGetApprovalPipeline";
 		public string appTitle = "WinGet Approval Pipeline - Build ";
 		public static string owner = "microsoft";
@@ -419,30 +419,54 @@ namespace WinGetApprovalNamespace {
 			this.Menu = new MainMenu();
 			MenuItem item = new MenuItem("File");
 			this.Menu.MenuItems.Add(item);
-				item.MenuItems.Add("Specify key file location...", new EventHandler(Save_File_Action));
-				item.MenuItems.Add("Generate Daily Report", new EventHandler(About_Click_Action));
+				item.MenuItems.Add("Generate daily report", new EventHandler(About_Click_Action));
+
+			item = new MenuItem("VM Lifecycle");
+			this.Menu.MenuItems.Add(item);
+				item.MenuItems.Add("Complete VM", new EventHandler(Complete_VM_Image_Action));
+				item.MenuItems.Add("Relaunch window", new EventHandler(Launch_Window_Image_Action));
+			MenuItem submenu = new MenuItem("Update manifest");
+				item.MenuItems.Add(submenu);
+					submenu.MenuItems.Add("Add dependency (VS2015+)", new EventHandler(Add_Dependency_Disk_Action));
+					submenu.MenuItems.Add("Add installer switch", new EventHandler(Add_Installer_Switch_Action));
+			submenu = new MenuItem("WIn10 Image VM");
+				item.MenuItems.Add(submenu);
+					submenu.MenuItems.Add("Generate VM from image", new EventHandler(Generate_Win10_VM_Image_Action)); 
+					submenu.MenuItems.Add("Start", new EventHandler(Start_Win10_Image_Action)); 
+					submenu.MenuItems.Add("Relaunch window", new EventHandler(Launch_Win10_Window_Image_Action));
+					submenu.MenuItems.Add("Stop", new EventHandler(Stop_Win10_Image_Action)); 
+					submenu.MenuItems.Add("Turn off", new EventHandler(TurnOff_Win10_Image_Action)); 
+					submenu.MenuItems.Add("Attach new image VM", new EventHandler(Attach_Win10_Image_Action)); 
+			submenu = new MenuItem("Win11 Image VM");
+				item.MenuItems.Add(submenu);
+					submenu.MenuItems.Add("Generate VM from image", new EventHandler(Generate_Win11_VM_Image_Action)); 
+					submenu.MenuItems.Add("Start", new EventHandler(Start_Win11_Image_Action)); 
+					submenu.MenuItems.Add("Relaunch window", new EventHandler(Launch_Win11_Window_Image_Action));
+					submenu.MenuItems.Add("Stop", new EventHandler(Stop_Win11_Image_Action)); 
+					submenu.MenuItems.Add("Turn Off", new EventHandler(TurnOff_Win11_Image_Action)); 
+					submenu.MenuItems.Add("Attach new image VM", new EventHandler(Attach_Win11_Image_Action)); 
+				item.MenuItems.Add("Disgenerate VM", new EventHandler(Disgenerate_VM_Image_Action));
 
 			item = new MenuItem("Modify PR");
 			this.Menu.MenuItems.Add(item);
-			MenuItem submenu = new MenuItem("Validate PR");
+			submenu = new MenuItem("Validate PR");
 				item.MenuItems.Add(submenu);
-					submenu.MenuItems.Add("By ID", new EventHandler(About_Click_Action));
-					submenu.MenuItems.Add("By Config", new EventHandler(About_Click_Action));
+					submenu.MenuItems.Add("Regular Validation", new EventHandler(About_Click_Action));
+					submenu.MenuItems.Add("DSC Configure", new EventHandler(Validate_By_Configure_Action));
+					submenu.MenuItems.Add("By PackageIdentifier (ID)", new EventHandler(About_Click_Action));
 					submenu.MenuItems.Add("By Arch", new EventHandler(About_Click_Action));
 					submenu.MenuItems.Add("By Scope", new EventHandler(About_Click_Action));
 					submenu.MenuItems.Add("Both Arch and Scope", new EventHandler(About_Click_Action));
 				item.MenuItems.Add("Add Waiver", new EventHandler(Add_Waiver_Action));
+			submenu = new MenuItem("Update manifest");
+				item.MenuItems.Add(submenu);
+					submenu.MenuItems.Add("Add dependency (VS2015+)", new EventHandler(Add_Dependency_Repo_Action));
+					submenu.MenuItems.Add("Update hash (Specified hash doesn't match.)", new EventHandler(Update_Hash_Action));
+					submenu.MenuItems.Add("Update hash 2 (SHA256 in manifest)", new EventHandler(Update_Hash2_Action));
+					submenu.MenuItems.Add("Update arch", new EventHandler(Update_Arch_Action));
 				item.MenuItems.Add("Approve PR", new EventHandler(Approved_Action));
 				item.MenuItems.Add("Needs Author Feedback (reason)", new EventHandler(About_Click_Action));
-			submenu = new MenuItem("Canned Replies");
-				item.MenuItems.Add(submenu);
-					submenu.MenuItems.Add("Automation Block", new EventHandler(Automation_Block_Action));
-					submenu.MenuItems.Add("Check Installer", new EventHandler(Check_Installer_Action));
-					submenu.MenuItems.Add("Driver Install", new EventHandler(Driver_Install_Action));
-					submenu.MenuItems.Add("Installer Missing", new EventHandler(Installer_Missing_Action));
-					submenu.MenuItems.Add("Installer Not Silent", new EventHandler(Installer_Not_Silent_Action));
-					submenu.MenuItems.Add("Needs PackageUrl", new EventHandler(Needs_PackageUrl_Action));
-					submenu.MenuItems.Add("One Manifest Per PR", new EventHandler(One_Manifest_Per_PR_Action));
+				item.MenuItems.Add("Check installer", new EventHandler(Check_Installer_Action));
 				item.MenuItems.Add("Retry PR", new EventHandler(Retry_Action));
 				item.MenuItems.Add("Manual Validation complete", new EventHandler(Manually_Validated_Action));
 			submenu = new MenuItem("Close PR");
@@ -451,53 +475,18 @@ namespace WinGetApprovalNamespace {
 					submenu.MenuItems.Add("Merge Conflicts", new EventHandler(Merge_Conflicts_Action));
 					submenu.MenuItems.Add("Duplicate (dupe of)", new EventHandler(Duplicate_Action));
 				item.MenuItems.Add("Record as Project File", new EventHandler(Project_File_Action));
-				item.MenuItems.Add("Squash-Merge", new EventHandler(Squash_Action));
-
-			item = new MenuItem("Update Manifest");
-			this.Menu.MenuItems.Add(item);
-			submenu = new MenuItem("In Repo");
-				item.MenuItems.Add(submenu);
-					submenu.MenuItems.Add("Add Dependency (VS2015+)", new EventHandler(Add_Dependency_Repo_Action));
-					submenu.MenuItems.Add("Update Hash (Msg type 1)", new EventHandler(Update_Hash_Action));
-					submenu.MenuItems.Add("Update Hash 2 (Msg type 2)", new EventHandler(Update_Hash2_Action));
-					submenu.MenuItems.Add("Update Arch", new EventHandler(Update_Arch_Action));
-			submenu = new MenuItem("On Disk");
-				item.MenuItems.Add(submenu);
-					submenu.MenuItems.Add("Add Dependency (VS2015+)", new EventHandler(Add_Dependency_Disk_Action));
-					submenu.MenuItems.Add("Add Installer Switch", new EventHandler(Add_Installer_Switch_Action));
+				item.MenuItems.Add("Squash-merge", new EventHandler(Squash_Action));
 
 			item = new MenuItem("Open In Browser");
 			this.Menu.MenuItems.Add(item);
 				item.MenuItems.Add("Current PR", new EventHandler(Open_Current_PR_Action)); 
-				item.MenuItems.Add("All  PRs on Clipboard", new EventHandler(Open_AllUrls_Action)); 
-				item.MenuItems.Add("Approval Search", new EventHandler(Approval_Search_Action));
-				item.MenuItems.Add("ToWork Search", new EventHandler(ToWork_Search_Action)); 
-				item.MenuItems.Add("winget-pkgs Repo", new EventHandler(Open_Repo_Action));
+				item.MenuItems.Add("All PRs on clipboard", new EventHandler(Open_AllUrls_Action)); 
+				item.MenuItems.Add("Approval search", new EventHandler(Approval_Search_Action));
+				item.MenuItems.Add("ToWork search", new EventHandler(ToWork_Search_Action)); 
+				item.MenuItems.Add("WinGet-pkgs repo", new EventHandler(Open_Repo_Action));
 				item.MenuItems.Add("Full Approval Run", new EventHandler(Approval_Run_Search_Action));
 				item.MenuItems.Add("Full ToWork Run", new EventHandler(ToWork_Run_Search_Action));
 				
-			item = new MenuItem("VM Lifecycle");
-			this.Menu.MenuItems.Add(item);
-				item.MenuItems.Add("Complete VM", new EventHandler(Complete_VM_Image_Action));
-				item.MenuItems.Add("Relaunch Window", new EventHandler(Launch_Window_Image_Action));
-			submenu = new MenuItem("WIn10 Image VM");
-				item.MenuItems.Add(submenu);
-					submenu.MenuItems.Add("Generate Pipeline VM", new EventHandler(Generate_Win10_VM_Image_Action)); 
-					submenu.MenuItems.Add("Start", new EventHandler(Start_Win10_Image_Action)); 
-					submenu.MenuItems.Add("Relaunch Window", new EventHandler(Launch_Win10_Window_Image_Action));
-					submenu.MenuItems.Add("Stop", new EventHandler(Stop_Win10_Image_Action)); 
-					submenu.MenuItems.Add("Turn Off", new EventHandler(TurnOff_Win10_Image_Action)); 
-					submenu.MenuItems.Add("Attach New Image VM", new EventHandler(Attach_Win10_Image_Action)); 
-			submenu = new MenuItem("Win11 Image VM");
-				item.MenuItems.Add(submenu);
-					submenu.MenuItems.Add("Generate Pipeline VM", new EventHandler(Generate_Win11_VM_Image_Action)); 
-					submenu.MenuItems.Add("Start", new EventHandler(Start_Win11_Image_Action)); 
-					submenu.MenuItems.Add("Relaunch Window", new EventHandler(Launch_Win11_Window_Image_Action));
-					submenu.MenuItems.Add("Stop", new EventHandler(Stop_Win11_Image_Action)); 
-					submenu.MenuItems.Add("Turn Off", new EventHandler(TurnOff_Win11_Image_Action)); 
-					submenu.MenuItems.Add("Attach New Image VM", new EventHandler(Attach_Win11_Image_Action)); 
-				item.MenuItems.Add("Disgenerate VM", new EventHandler(Disgenerate_VM_Image_Action));
-
 			item = new MenuItem("Help");
 			this.Menu.MenuItems.Add(item);
 				item.MenuItems.Add("About", new EventHandler(About_Click_Action));				
@@ -546,15 +535,15 @@ namespace WinGetApprovalNamespace {
 			table_vm.Columns.Add("Package", typeof(string));
 			table_vm.Columns.Add("PR", typeof(int));
 			table_vm.Columns.Add("RAM", typeof(double));
-		
-			drawLabel(ref label_VMRAM, col0, row5, gridItemWidth, gridItemHeight,"VM RAM:");
-			drawUrlBox(ref inputBox_VMRAM,col1, row5, gridItemWidth*2,gridItemHeight,"");//VM RAM display
+
+			drawLabel(ref label_PRNumber, col0, row5, gridItemWidth, gridItemHeight,"Current PR:");
+			drawUrlBox(ref inputBox_PRNumber, col1, row5, gridItemWidth*2,gridItemHeight,"#000000");
 
 			drawLabel(ref label_User, col4, row5, gridItemWidth, gridItemHeight,"User Input:");
 			drawUrlBox(ref inputBox_User,col5, row5, gridItemWidth*2,gridItemHeight,"");//UserInput field 
-
-			drawLabel(ref label_PRNumber, col7, row5, gridItemWidth, gridItemHeight,"Current PR:");
-			drawUrlBox(ref inputBox_PRNumber,col8, row5, gridItemWidth*2,gridItemHeight,"#000000");
+		
+			drawLabel(ref label_VMRAM, col7, row5, gridItemWidth, gridItemHeight,"VM RAM:");
+			drawUrlBox(ref inputBox_VMRAM,col8, row5, gridItemWidth*2,gridItemHeight,"");//VM RAM display
 			
 			drawRichTextBox(ref outBox_val, col0, row6, this.ClientRectangle.Width,gridItemHeight*4, "", "outBox_val");
 
@@ -566,7 +555,6 @@ namespace WinGetApprovalNamespace {
 			drawToolTip(ref toolTip3, ref btn11, "Automatically start manifest for random IEDS in VM.");
 			drawButton(ref btn19, col3, row10, gridItemWidth, gridItemHeight, "Idle Mode", Idle_Action);
 			drawToolTip(ref toolTip4, ref btn19, "It does nothing.");
-			drawButton(ref btn20, col4, row10, gridItemWidth, gridItemHeight, "Config (disabled)", Config_Action);
 			
 			drawDataGrid(ref dataGridView_vm, col0, row0, gridItemWidth*8, gridItemHeight*5);
 			dataGridView_vm.Anchor = AnchorStyles.Top | AnchorStyles.Bottom;
@@ -574,27 +562,26 @@ namespace WinGetApprovalNamespace {
  	 }// end drawGoButton
 
 		public void OnResize(object sender, System.EventArgs e) {
-			//VM and Validation windows adjust width with window.
+			//Width - VM and Validation windows adjust with window.
 			dataGridView_vm.Width = ClientRectangle.Width;// - gridItemWidth*2;
 			outBox_val.Width = ClientRectangle.Width;
 
 			label_User.Left = ClientRectangle.Width/2 - gridItemWidth*2;//col4
 			inputBox_User.Left = ClientRectangle.Width/2 - gridItemWidth*1;//col5
-			inputBox_PRNumber.Left = ClientRectangle.Width - gridItemWidth*2;//col8
-			label_PRNumber.Left = ClientRectangle.Width - gridItemWidth*3;//col7
+			inputBox_VMRAM.Left = ClientRectangle.Width - gridItemWidth*2;//col8
+			label_VMRAM.Left = ClientRectangle.Width - gridItemWidth*3;//col7
 			
-			//Validation window adjust height with window.
+			//Height -Validation and mode buttons adjusts with window.
 			outBox_val.Height = ClientRectangle.Height - gridItemHeight*7;
 			btn10.Top = ClientRectangle.Height - gridItemHeight;
 			btn18.Top = ClientRectangle.Height - gridItemHeight;
 			btn11.Top = ClientRectangle.Height - gridItemHeight;
 			btn19.Top = ClientRectangle.Height - gridItemHeight;
-			btn20.Top = ClientRectangle.Height - gridItemHeight;
 			
 
 			//inputBox_PRNumber.Width = ClientRectangle.Width - gridItemWidth*2;
 		}
-
+		//Refresh display and buttons 
 		private void timer_Run(object sender, EventArgs e) {
 			UpdateTableVM();
 			RefreshStatus();
@@ -684,35 +671,30 @@ namespace WinGetApprovalNamespace {
 				btn18.BackColor = color_DefaultBack;//Individual Validations
 				btn11.BackColor = color_DefaultBack;//IEDS
 				btn19.BackColor = color_DefaultBack;//Idle
-				btn20.BackColor = color_DefaultBack;//Config
 			} else if (Mode == "Validating") {
 				//#F0F0F0 or RGB 240, 240, 240
 				btn10.BackColor = color_DefaultBack;//Bulk Approving
 				btn18.BackColor = color_ActiveBack;//Individual Validations
 				btn11.BackColor = color_DefaultBack;//IEDS
 				btn19.BackColor = color_DefaultBack;//Idle
-				btn20.BackColor = color_DefaultBack;//Config
 			} else if (Mode == "IEDS") {
 				//#F0F0F0 or RGB 240, 240, 240
 				btn10.BackColor = color_DefaultBack;//Bulk Approving
 				btn18.BackColor = color_DefaultBack;//Individual Validations
 				btn11.BackColor = color_ActiveBack;//IEDS
 				btn19.BackColor = color_DefaultBack;//Idle
-				btn20.BackColor = color_DefaultBack;//Config
 			} else if (Mode == "Idle") {
 				//#F0F0F0 or RGB 240, 240, 240
 				btn10.BackColor = color_DefaultBack;//Bulk Approving
 				btn18.BackColor = color_DefaultBack;//Individual Validations
 				btn11.BackColor = color_DefaultBack;//IEDS
 				btn19.BackColor = color_ActiveBack;//Idle
-				btn20.BackColor = color_DefaultBack;//Config
 			} else if (Mode == "Config") {
 				//#F0F0F0 or RGB 240, 240, 240
 				btn10.BackColor = color_DefaultBack;//Bulk Approving
 				btn18.BackColor = color_DefaultBack;//Individual Validations
 				btn11.BackColor = color_DefaultBack;//IEDS
 				btn19.BackColor = color_DefaultBack;//Idle
-				btn20.BackColor = color_ActiveBack;//Config
 			} 
 			
 			if (TestPath(StatusFile) == "File") {
@@ -1214,19 +1196,14 @@ namespace WinGetApprovalNamespace {
 		public void WorkSearch(string Preset, int Days = 7) {
 		// string[] PresetList = {"Approval","ToWork"};
 			// foreach (string Preset in PresetList) {
-				int Count= 30;
 				int Page = 1;
-				while (Count == 30) {
-					int line = 0;
 
 					dynamic[] PRs = SearchGitHub(Preset,Page,Days,false,true);
-					Count = PRs.Length; //if fewer than 30 PRs (1 page) are returned, then complete the loop and continue instead of starting another loop.
 					PRs = PRs.Where(n => n["labels"] != null).ToArray();//.Where(n => n["number"] -notin (Get-Status).pr} 
 					
 					foreach (dynamic FullPR in PRs) {
 						int PR = FullPR["number"];
 						//Get-TrackerProgress -PR $PR $MyInvocation.MyCommand line PRs.Length
-						line++;
 						//This part is too spammy, checking Last-Version-Remaining on every run (sometimes twice a day) for a week as the PR sits. 
 						if((FullPR["title"].Contains("Remove")) || 
 						(FullPR["title"].Contains("Delete")) || 
@@ -1260,8 +1237,6 @@ namespace WinGetApprovalNamespace {
 		*/
 						}//end if Preset
 					}//end foreach FullPR
-					Page++;
-				}//end While Count
 			// }//end foreach Preset
 		}//end Get-WorkSearch
 
@@ -2648,9 +2623,10 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 		public void ImageVMStart(string OS = "Win10"){
 		//[ValidateSet("Win10","Win11")]
 			int VM = 0;
+			RevertVM(VM, OS);//,OS
+			Thread.Sleep(3);
 			SetVMState(OS, 2);// ;
-			RevertVM(VM);//,OS
-			LaunchWindow(VM);//,OS
+			LaunchWindow(VM, OS);//,OS
 		}
 
 		public void ImageVMStop(string OS = "Win10"){
@@ -2706,17 +2682,19 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 
 //VM Pipeline Management
 		public void GenerateVM(string OS = "Win10"){
-			int vm = GetContent(vmCounter)[0];
+
+			string vmdata = GetContent(vmCounter);
+			int vm = Int32.Parse(vmdata.Replace("\n",""));
 			int version = GetVMVersion(OS);
 			string destinationPath = imagesFolder+"\\" + vm + "\\";
 			string VMFolder = MainFolder + "\\vm\\" + vm;
 			string newVmName = "vm" + vm;
 			//string startTime = (Get-Date)
-			OutFile(vmCounter,vm+1);
-			OutFile(StatusFile,"\"VM\",\"Generating\",\"$version\",\"OS\",\"\",\"1\",\"0\"",true);
+			OutFile(vmCounter,(vm + 1).ToString());
+			OutFile(StatusFile,"\"" + vm + "\",\"Generating\",\"" + version + "\",\"" + OS + "\",\"\",\"1\",\"0\"",true);
 			RemoveItem(destinationPath,true);
 			RemoveItem(VMFolder,true);
-			string path = imagesFolder+"\\OS-image\\Virtual Machines\\";
+			string path = imagesFolder+"\\"+OS+"-image\\Virtual Machines\\";
 			string VMImageFolder = Directory.GetFileSystemEntries(path, "*.vmcx", SearchOption.AllDirectories)[0];
 
 			//Write-Host "Takes about 120 seconds..."
@@ -2758,11 +2736,11 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 			RemoveItem(VMFolder);
 		}
 
-		public void LaunchWindow(int VM, string VMName = ""){
+		public void LaunchWindow(int VM = 0, string VMName = ""){
 			if (VMName == "") {
 				VMName = "vm"+VM;
 			}
-					var processes = Process.GetProcessesByName("vmconnect");
+			var processes = Process.GetProcessesByName("vmconnect");
 			foreach (Process process in processes){
 				if (process.MainWindowTitle.Contains(VMName)) {
 				process.CloseMainWindow();
@@ -2776,9 +2754,11 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 					// outBox_val.AppendText(Environment.NewLine + "VM " + ToJson(newProcess.StartInfo));
 
 
-		public void RevertVM(int vm){
-					string VMName = "vm"+vm;
-			SetStatus(vm,"Restoring") ;
+		public void RevertVM(int VM = 0, string VMName = ""){
+			if (VMName == "") {
+				VMName = "vm"+VM;
+			}
+			SetStatus(VM,"Restoring") ;
 			RestoreVMSnapshot(VMName);
 		}
 
@@ -3433,16 +3413,16 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 				string out_content = (string)content;
 			//From SO: File.WriteAllLines takes a sequence of strings - you've only got a single string. If you only want your file to contain that single string, just use File.WriteAllText.
 				if (Append == true) {
-					File.AppendAllText(path, out_content);//string
+					File.AppendAllText(path, out_content, Encoding.Unicode);//string
 				} else {
-					File.WriteAllText(path, out_content);//string
+					File.WriteAllText(path, out_content, Encoding.Unicode);//string
 				}
 			} else {
 				IEnumerable<string> out_content = (IEnumerable<string>)content;
 				if (Append == true) {
-					File.AppendAllLines(path, out_content);//IEnumerable<string>'
+					File.AppendAllLines(path, out_content, Encoding.Unicode);//IEnumerable<string>'
 				} else {
-					File.WriteAllLines(path, out_content);//string[]
+					File.WriteAllLines(path, out_content, Encoding.Unicode);//string[]
 				}				
 			}
 		}
@@ -3453,11 +3433,7 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 						path = path.Trim();
 					if (Directory.Exists(path)) {
 						string_out = "Directory";
-					} else if (new[] {"\\", "/"}.Any(x => path.EndsWith(x))){// if has trailing slash then it's a directory
-						string_out = "Directory";
 					} else if (File.Exists(path)) {
-						string_out = "File";
-					} else if (string.IsNullOrWhiteSpace(Path.GetExtension(path))) {// if has extension then its a file; directory otherwise
 						string_out = "File";
 					} else {// neither file nor directory exists. guess intention
 						string_out = "None";
@@ -3521,12 +3497,12 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 		}// end InvokeWebRequest	
 
 		public void RemoveItem(string Path,bool remake = false){
-			if (TestPath(Path) != "File") {
+			if (TestPath(Path) == "File") {
 				File.Delete(Path);
 				if (remake) {
 					File.Create(Path);
 				}
-			} else if (TestPath(Path) != "Directory") {
+			} else if (TestPath(Path) == "Directory") {
 				Directory.Delete(Path, true);
 				if (remake) {
 					Directory.CreateDirectory(Path);
@@ -3534,8 +3510,22 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 			}
 		}
 		//Hyper-V
-		public ManagementObject GetVM(string VMName) {
-			return GetCimService("Msvm_ComputerSystem WHERE ElementName = '" + VMName + "'");
+		public ManagementObject GetCimService(string ServiceName) {
+			string CImQuery = "SELECT * FROM "+ServiceName;
+			ObjectQuery QueryData = new ObjectQuery(@CImQuery);
+			ManagementObjectSearcher searcher = new ManagementObjectSearcher(scope, QueryData);
+			ManagementObjectCollection collection = searcher.Get();
+
+			ManagementObject CimService = null;
+			foreach (ManagementObject obj in collection) {
+				CimService = obj;
+				break;
+			}
+			return CimService;
+		}
+
+		public ManagementObject GetVM(string VMName, string ServiceName = "Msvm_ComputerSystem") {
+			return GetCimService(ServiceName + " WHERE ElementName = '" + VMName + "'");
 		}
 		/*States: 
 		1: Other
@@ -3579,28 +3569,13 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
                 null);
 
             ManagementObject virtualSystemsetting = null;
-            foreach (ManagementObject setting in settings)
-            {
+            foreach (ManagementObject setting in settings) {
                 //Console.WriteLine(setting.Path.Path);
                 //Console.WriteLine(setting["ElementName"]);
                 virtualSystemsetting = setting;
             }
             return virtualSystemsetting;
         }
-
-		public ManagementObject GetCimService(string ServiceName) {
-			string CImQuery = "SELECT * FROM "+ServiceName;
-			ObjectQuery QueryData = new ObjectQuery(@CImQuery);
-			ManagementObjectSearcher searcher = new ManagementObjectSearcher(scope, QueryData);
-			ManagementObjectCollection collection = searcher.Get();
-
-			ManagementObject CimService = null;
-			foreach (ManagementObject obj in collection) {
-				CimService = obj;
-				break;
-			}
-			return CimService;
-		}
 
 		public uint RestoreVMSnapshot(string VMName) {
 			ManagementObject snapshot = GetLastSnapshot(VMName);
@@ -3632,9 +3607,9 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 			return (uint)outParameters["ReturnValue"];
 		} 
 		
-		public void RenameVM(string CurrentName, string NewName) {
+		public void RenameVM(string VMName, string NewName) {
 			Process process = new Process();
-			string command = "Rename-VM -VM "+CurrentName+" -newName "+NewName;
+			string command = "Rename-VM -VM "+VMName+" -newName "+NewName;
 			process.StartInfo.Arguments = string.Format(command);
 			process.StartInfo.FileName = "PowerShell.EXE";
 			process.StartInfo.CreateNoWindow = true;
@@ -3779,7 +3754,7 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 		}// end Validate_By_ID_Action
 		
 
-		public void Validate_By_Config_Action(object sender, EventArgs e) {
+		public void Validate_By_Configure_Action(object sender, EventArgs e) {
 			ValidateManifest(0,"","",0,"","","","","",false,false,"","",false, "","Configure");
 		}// end Validate_By_ID_Action
 
@@ -3832,8 +3807,8 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 
         public void Retry_Action(object sender, EventArgs e) {
 			int PR = Int32.Parse(inputBox_PRNumber.Text.Replace("#",""));
-			string response_out = RetryPR(PR);
-			outBox_val.AppendText(Environment.NewLine + "PR "+ PR + ": " + response_out);
+			dynamic response_out = FromJson(RetryPR(PR));
+			outBox_val.AppendText(Environment.NewLine + "PR "+ PR + ": " + response_out["body"]);
 		}// end Approved_Action
 		
         public void Manually_Validated_Action(object sender, EventArgs e) {

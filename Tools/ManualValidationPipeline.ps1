@@ -1738,7 +1738,7 @@ Function Get-PRWatch {
 #Third tab
 Function Get-WorkSearch {
 	param(
-		$PresetList = @("Approval","ToWork"),
+		$PresetList = @("ToWork"),#Approval","
 		$Days = 7
 	)
 	Foreach ($Preset in $PresetList) {
