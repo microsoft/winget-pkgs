@@ -32,8 +32,8 @@
 	- Menu
 - Tabs
 - Automation Tools
-- PR tools
-- Network tools
+- PR Tools
+- Network Tools
 - Validation Starts Here
 - Manifests Etc
 - VM Image Management
@@ -42,12 +42,12 @@
 - VM Versioning
 - VM Orchestration
 - File Management
-- Inject into files on disk
 - Inject into PRs
+- Inject into files
 - Reporting
 - Clipboard
-- Etc
-- PR Watcher Utility functions
+- Et Cetera
+- Utility functions
 - Powershell equivalency (+23)
 - VM Window management
 - Misc data (+5)
@@ -67,8 +67,11 @@ ValidateManifest
 
 
 
-
-//Init vars
+//////////////////////////////////////////====================////////////////////////////////////////
+//////////////////////====================--------------------====================////////////////////
+//====================--------------------      Init vars     --------------------====================
+//////////////////////====================--------------------====================////////////////////
+//////////////////////////////////////////====================////////////////////////////////////////
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -93,7 +96,7 @@ using System.Web.Script.Serialization;
 namespace WinGetApprovalNamespace {
     public class WinGetApprovalPipeline : Form {
 		//vars
-        public int build = 597;//Get-RebuildPipeApp	
+        public int build = 598;//Get-RebuildPipeApp	
 		public string appName = "WinGetApprovalPipeline";
 		public string appTitle = "WinGet Approval Pipeline - Build ";
 		public static string owner = "microsoft";
@@ -164,20 +167,21 @@ namespace WinGetApprovalNamespace {
 		//JSON
 		JavaScriptSerializer serializer = new JavaScriptSerializer();
 
-		//WMI for VMs
+		//WMI for local VMs
 		public ManagementScope scope = new ManagementScope(@"root\virtualization\v2");//, null);
-		// Other server's VMs
-		// var connectionOptions = new ConnectionOptions(
-		// @"en-US",
-		// @"domain\user",
-		// @"password",
-		// null,
-		// ImpersonationLevel.Impersonate,
-		// AuthenticationLevel.Default,
-		// false,
-		// null,
-		// TimeSpan.FromSeconds(5);
-		//public ManagementScope scope = new ManagementScope(new ManagementPath { Server = "hostnameOrIpAddress", NamespacePath = @"root\virtualization\v2" }, connectionOptions);scope.Connect(); 
+		/* Remote VMs
+		var connectionOptions = new ConnectionOptions(
+		@"en-US",
+		@"domain\user",
+		@"password",
+		null,
+		ImpersonationLevel.Impersonate,
+		AuthenticationLevel.Default,
+		false,
+		null,
+		TimeSpan.FromSeconds(5);
+		public ManagementScope scope = new ManagementScope(new ManagementPath { Server = "hostnameOrIpAddress", NamespacePath = @"root\virtualization\v2" }, connectionOptions);scope.Connect(); 
+		*/
 
 		//ui
 		public RichTextBox outBox_val;
@@ -230,7 +234,11 @@ namespace WinGetApprovalNamespace {
 
 
 
-		//Boilerplate
+//////////////////////////////////////////====================////////////////////////////////////////
+//////////////////////====================--------------------====================////////////////////
+//====================--------------------    Boilerplate     --------------------====================
+//////////////////////====================--------------------====================////////////////////
+//////////////////////////////////////////====================////////////////////////////////////////
         [STAThread]
         static void Main() {
             Application.EnableVisualStyles();
@@ -281,8 +289,11 @@ namespace WinGetApprovalNamespace {
 
 
 
-
-		//UI top-of-box
+//////////////////////////////////////////====================////////////////////////////////////////
+//////////////////////====================--------------------====================////////////////////
+//====================--------------------   UI top-of-box    --------------------====================
+//////////////////////====================--------------------====================////////////////////
+//////////////////////////////////////////====================////////////////////////////////////////
 		public void drawButton(ref Button button, int pointX, int pointY, int sizeX, int sizeY,string buttonText, EventHandler buttonOnclick){
 			button = new Button();
 			button.Text = buttonText;
@@ -419,7 +430,7 @@ namespace WinGetApprovalNamespace {
 			this.Menu = new MainMenu();
 			MenuItem item = new MenuItem("File");
 			this.Menu.MenuItems.Add(item);
-				item.MenuItems.Add("Generate daily report", new EventHandler(About_Click_Action));
+				item.MenuItems.Add("(disabled) Generate daily report", new EventHandler(About_Click_Action));
 
 			item = new MenuItem("VM Lifecycle");
 			this.Menu.MenuItems.Add(item);
@@ -449,14 +460,14 @@ namespace WinGetApprovalNamespace {
 
 			item = new MenuItem("Modify PR");
 			this.Menu.MenuItems.Add(item);
-			submenu = new MenuItem("Validate PR");
+			submenu = new MenuItem("(disabled) Validate PR");
 				item.MenuItems.Add(submenu);
-					submenu.MenuItems.Add("Regular Validation", new EventHandler(About_Click_Action));
-					submenu.MenuItems.Add("DSC Configure", new EventHandler(Validate_By_Configure_Action));
-					submenu.MenuItems.Add("By PackageIdentifier (ID)", new EventHandler(About_Click_Action));
-					submenu.MenuItems.Add("By Arch", new EventHandler(About_Click_Action));
-					submenu.MenuItems.Add("By Scope", new EventHandler(About_Click_Action));
-					submenu.MenuItems.Add("Both Arch and Scope", new EventHandler(About_Click_Action));
+					submenu.MenuItems.Add("(disabled) Regular Validation", new EventHandler(About_Click_Action));
+					submenu.MenuItems.Add("(disabled) DSC Configure", new EventHandler(Validate_By_Configure_Action));
+					submenu.MenuItems.Add("(disabled) By PackageIdentifier (ID)", new EventHandler(About_Click_Action));
+					submenu.MenuItems.Add("(disabled) By Arch", new EventHandler(About_Click_Action));
+					submenu.MenuItems.Add("(disabled) By Scope", new EventHandler(About_Click_Action));
+					submenu.MenuItems.Add("(disabled) Both Arch and Scope", new EventHandler(About_Click_Action));
 				item.MenuItems.Add("Add Waiver", new EventHandler(Add_Waiver_Action));
 			submenu = new MenuItem("Update manifest");
 				item.MenuItems.Add(submenu);
@@ -465,7 +476,7 @@ namespace WinGetApprovalNamespace {
 					submenu.MenuItems.Add("Update hash 2 (SHA256 in manifest)", new EventHandler(Update_Hash2_Action));
 					submenu.MenuItems.Add("Update arch", new EventHandler(Update_Arch_Action));
 				item.MenuItems.Add("Approve PR", new EventHandler(Approved_Action));
-				item.MenuItems.Add("Needs Author Feedback (reason)", new EventHandler(About_Click_Action));
+				item.MenuItems.Add("(disabled) Needs Author Feedback (reason)", new EventHandler(About_Click_Action));
 				item.MenuItems.Add("Check installer", new EventHandler(Check_Installer_Action));
 				item.MenuItems.Add("Retry PR", new EventHandler(Retry_Action));
 				item.MenuItems.Add("Manual Validation complete", new EventHandler(Manually_Validated_Action));
@@ -480,12 +491,17 @@ namespace WinGetApprovalNamespace {
 			item = new MenuItem("Open In Browser");
 			this.Menu.MenuItems.Add(item);
 				item.MenuItems.Add("Current PR", new EventHandler(Open_Current_PR_Action)); 
-				item.MenuItems.Add("All PRs on clipboard", new EventHandler(Open_AllUrls_Action)); 
 				item.MenuItems.Add("Approval search", new EventHandler(Approval_Search_Action));
 				item.MenuItems.Add("ToWork search", new EventHandler(ToWork_Search_Action)); 
-				item.MenuItems.Add("WinGet-pkgs repo", new EventHandler(Open_Repo_Action));
-				item.MenuItems.Add("Full Approval Run", new EventHandler(Approval_Run_Search_Action));
-				item.MenuItems.Add("Full ToWork Run", new EventHandler(ToWork_Run_Search_Action));
+			submenu = new MenuItem("Open many tabs:");
+				item.MenuItems.Add(submenu);
+					submenu.MenuItems.Add("All PRs on clipboard", new EventHandler(Open_AllUrls_Action)); 
+					submenu.MenuItems.Add("Full Approval Run", new EventHandler(Approval_Run_Search_Action));
+					submenu.MenuItems.Add("Full ToWork Run", new EventHandler(ToWork_Run_Search_Action));
+					submenu.MenuItems.Add("(disabled) Start Of Day", new EventHandler(About_Click_Action));
+				item.MenuItems.Add("WinGet-pkgs Issues", new EventHandler(Open_Repo_Action));
+				item.MenuItems.Add("(disabled) WinGet-cli Issues", new EventHandler(About_Click_Action));
+				item.MenuItems.Add("(disabled) Notifications", new EventHandler(About_Click_Action));
 				
 			item = new MenuItem("Help");
 			this.Menu.MenuItems.Add(item);
@@ -742,7 +758,11 @@ namespace WinGetApprovalNamespace {
 
 
 
-//Tabs
+//////////////////////////////////////////====================////////////////////////////////////////
+//////////////////////====================--------------------====================////////////////////
+//====================--------------------        Tabs        --------------------====================
+//////////////////////====================--------------------====================////////////////////
+//////////////////////////////////////////====================////////////////////////////////////////
 		public void PRWatch(bool noNew, string Chromatic = "Default", string LogFile = ".\\PR.txt", string ReviewFile = ".\\Review.csv"){
 			string oldclip = "";
 			Dictionary<string,dynamic>[] AuthList = GetValidationData("authStrictness");
@@ -1262,7 +1282,11 @@ namespace WinGetApprovalNamespace {
 
 
 
-//Automation Tools
+//////////////////////////////////////////====================////////////////////////////////////////
+//////////////////////====================--------------------====================////////////////////
+//===================--------------------   Automation Tools  --------------------====================
+//////////////////////====================--------------------====================////////////////////
+//////////////////////////////////////////====================////////////////////////////////////////
 		public void LabelAction(int PR){
 		string[] PRLabels = FromJson(InvokeGitHubPRRequest(PR,"labels","content"))["name"];
 			//Write-Output "PR $PR has labels $PRLabels"
@@ -1890,8 +1914,11 @@ namespace WinGetApprovalNamespace {
 
 
 
-
-		//PR tools
+//////////////////////////////////////////====================////////////////////////////////////////
+//////////////////////====================--------------------====================////////////////////
+//====================--------------------      PR Tools      --------------------====================
+//////////////////////====================--------------------====================////////////////////
+//////////////////////////////////////////====================////////////////////////////////////////
 		//Add user to PR: InvokeGitHubPRRequest -Method $Method -Type "assignees" -Data $User -Output StatusDescription
 		//Approve PR (needs work): InvokeGitHubPRRequest -PR $PR -Method Post -Type reviews
 		public string InvokeGitHubPRRequest (int PR, string Method = WebRequestMethods.Http.Get,string Type = "labels",string Data = "",string Path = "issues") {
@@ -2167,9 +2194,12 @@ namespace WinGetApprovalNamespace {
 
 
 
-
-		//Network tools
-		//GET = Read; POST = Append; PUT = Write; DELETE = delete
+//////////////////////////////////////////====================////////////////////////////////////////
+//////////////////////====================--------------------====================////////////////////
+//===================--------------------     Network Tools   --------------------====================
+//////////////////////====================--------------------====================////////////////////
+//////////////////////////////////////////====================////////////////////////////////////////
+		//GET = Read; POST = Append; PUT = Overwrite; DELETE = delete
 		public string InvokeGitHubRequest(string Url,string Method = WebRequestMethods.Http.Get,string Body = ""){
 					string response_out = "";
 					//This wrapper function is a relic of the PowerShell version, and should be obviated during a refactor. The need it meets in the PowerShell version - inject authentication headers into web requests, is met here directly inside the InvokeWebRequest function below. But having it here during the port process (code portage) reduces the amount of work needed to port the other functions were written to use it.
@@ -2197,8 +2227,12 @@ namespace WinGetApprovalNamespace {
 
 
 
+//////////////////////////////////////////====================////////////////////////////////////////
+//////////////////////====================--------------------====================////////////////////
+//===================------------------- Validation Starts Here ------------------====================
+//////////////////////====================--------------------====================////////////////////
+//////////////////////////////////////////====================////////////////////////////////////////
 
-//Validation Starts Here
 public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string PackageVersion = "", int PR = 0, string Arch = "",string Scope = "", string InstallerType = "",string OS = "",string Locale = "",bool InspectNew = false,bool notElevated = false,string MinimumOSVersion = "", string ManualDependency = "", bool NoFiles = false, string installerLine = "", string Operation = "Scan"){
 		if (VM == 0) {
 			VM = NextFreeVM(OS);//.Replace("vm","");
@@ -2458,8 +2492,12 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 
 
 
-
-//Manifests Etc - Section needs refactor badly
+//////////////////////////////////////////====================////////////////////////////////////////
+//////////////////////====================--------------------====================////////////////////
+//===================--------------------    Manifests Etc    --------------------====================
+//////////////////////====================--------------------====================////////////////////
+//////////////////////////////////////////====================////////////////////////////////////////
+//Section needs refactor badly
 		public void SingleFileAutomation(int PR) {
 			string clip = Clipboard.GetText();
 			string PackageIdentifier = YamlValue("PackageIdentifier",clip);
@@ -2618,11 +2656,18 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 
 
 
-
-//VM Image Management
+//////////////////////////////////////////====================////////////////////////////////////////
+//////////////////////====================--------------------====================////////////////////
+//===================--------------------    VM Image Mgmt    --------------------====================
+//////////////////////====================--------------------====================////////////////////
+//////////////////////////////////////////====================////////////////////////////////////////
 		public void ImageVMStart(string OS = "Win10"){
 		//[ValidateSet("Win10","Win11")]
 			int VM = 0;
+			//RestoreVMSnapshot(VMName);
+			//Thread.Sleep(3);
+			//SetVMState(VMName,2);
+			
 			RevertVM(VM, OS);//,OS
 			Thread.Sleep(3);
 			SetVMState(OS, 2);// ;
@@ -2679,8 +2724,11 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 
 
 
-
-//VM Pipeline Management
+//////////////////////////////////////////====================////////////////////////////////////////
+//////////////////////====================--------------------====================////////////////////
+//===================--------------------   VM Pipeline Mgmt  --------------------====================
+//////////////////////====================--------------------====================////////////////////
+//////////////////////////////////////////====================////////////////////////////////////////
 		public void GenerateVM(string OS = "Win10"){
 
 			string vmdata = GetContent(vmCounter);
@@ -2751,8 +2799,6 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 			newProcess.StartInfo.Arguments = "localhost " + VMName;
 			newProcess.Start();
 		}
-					// outBox_val.AppendText(Environment.NewLine + "VM " + ToJson(newProcess.StartInfo));
-
 
 		public void RevertVM(int VM = 0, string VMName = ""){
 			if (VMName == "") {
@@ -2789,8 +2835,11 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 
 
 
-
-//VM Status
+//////////////////////////////////////////====================////////////////////////////////////////
+//////////////////////====================--------------------====================////////////////////
+//===================--------------------       VM Status     --------------------====================
+//////////////////////====================--------------------====================////////////////////
+//////////////////////////////////////////====================////////////////////////////////////////
 		public void SetStatus(int VM, string Status = "", string Package = "",int PR = 0){
 //[ValidateSet("AddVCRedist","Approved","CheckpointComplete","Checkpointing","CheckpointReady","Completing","Complete","Disgenerate","Generating","Installing","Prescan","Prevalidation","Ready","Rebooting","Regenerate","Restoring","Revert","Scanning","SendStatus","Setup","SetupComplete","Starting","Updating","ValidationCompleted")]
 			dynamic Records = FromCsv(GetContent(StatusFile));
@@ -2849,8 +2898,11 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 
 
 
-
-//VM Versioning
+//////////////////////////////////////////====================////////////////////////////////////////
+//////////////////////====================--------------------====================////////////////////
+//===================--------------------     VM Versioning   --------------------====================
+//////////////////////====================--------------------====================////////////////////
+//////////////////////////////////////////====================////////////////////////////////////////
 		public int GetVMVersion (string OS = "Win10") {
 			//[ValidateSet("Win10","Win11")][string]OS = "Win10",
 			int VMVersion;
@@ -2894,8 +2946,11 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 
 
 
-
-//VM Orchestration
+//////////////////////////////////////////====================////////////////////////////////////////
+//////////////////////====================--------------------====================////////////////////
+//===================--------------------   VM Orchestration  --------------------====================
+//////////////////////====================--------------------====================////////////////////
+//////////////////////////////////////////====================////////////////////////////////////////
 		public void VMCycle(){
 		Dictionary<string,object>[] VMs = FromCsv(GetContent(StatusFile));
 			foreach (Dictionary<string,object> VM in VMs) {
@@ -2988,8 +3043,11 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 
 
 
-
-		//File Management
+//////////////////////////////////////////====================////////////////////////////////////////
+//////////////////////====================--------------------====================////////////////////
+//===================--------------------   File Management   --------------------====================
+//////////////////////====================--------------------====================////////////////////
+//////////////////////////////////////////====================////////////////////////////////////////
 		public string SecondMatch(string clip, int depth = 1) {
 			string[] clipArray = clip.Split('\n');
 			List<string> sa_out = new List<string>();
@@ -3059,8 +3117,11 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 
 
 
-
-//Reporting
+//////////////////////////////////////////====================////////////////////////////////////////
+//////////////////////====================--------------------====================////////////////////
+//===================--------------------      Reporting      --------------------====================
+//////////////////////====================--------------------====================////////////////////
+//////////////////////////////////////////====================////////////////////////////////////////
 		public void AddPRToRecord(int PR, string Action, string Title = ""){
 		//[ValidateSet("Approved","Blocking","Feedback","Retry","Manual","Closed","Project","Squash","Waiver")]
 			Title = Title.Split('#')[0];
@@ -3124,8 +3185,11 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 
 
 
-
-//Clipboard
+//////////////////////////////////////////====================////////////////////////////////////////
+//////////////////////====================--------------------====================////////////////////
+//===================--------------------      Clipboard      --------------------====================
+//////////////////////====================--------------------====================////////////////////
+//////////////////////////////////////////====================////////////////////////////////////////
 		public int[] PRNumber(string clip, bool Hash = false){
 			string[] string_PRs = null;
 			if (Hash == true) {
@@ -3188,7 +3252,11 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 
 
 
-//Etc
+//////////////////////////////////////////====================////////////////////////////////////////
+//////////////////////====================--------------------====================////////////////////
+//===================--------------------      Et Cetera      --------------------====================
+//////////////////////====================--------------------====================////////////////////
+//////////////////////////////////////////====================////////////////////////////////////////
 		public bool TestAdmin() {
 			bool isAdmin = new WindowsPrincipal(WindowsIdentity.GetCurrent()).IsInRole(WindowsBuiltInRole.Administrator);
 			if (isAdmin == true) {
@@ -3259,8 +3327,11 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 
 
 
-
-//PR Watcher Utility functions
+//////////////////////////////////////////====================////////////////////////////////////////
+//////////////////////====================--------------------====================////////////////////
+//===================--------------------   Utility Functions  --------------------====================
+//////////////////////====================--------------------====================////////////////////
+//////////////////////////////////////////====================////////////////////////////////////////
 		public void Sandbox(string string_PRNumber){
 			int int_PRNumber = 0;
 			if (string_PRNumber[0] == '#') {
@@ -3290,7 +3361,11 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 
 
 
-
+//////////////////////////////////////////====================////////////////////////////////////////
+//////////////////////====================--------------------====================////////////////////
+//===================--------------------  PowerShell Equivs  --------------------====================
+//////////////////////====================--------------------====================////////////////////
+//////////////////////////////////////////====================////////////////////////////////////////
 /*Powershell functional equivalency imperatives
 		Get-Clipboard = Clipboard.GetText();
 		Get-Date = DateTime.Now.ToString("M/d/yyyy");
@@ -3655,8 +3730,11 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 
 
 
-
-		//VM Window Management
+//////////////////////////////////////////====================////////////////////////////////////////
+//////////////////////====================--------------------====================////////////////////
+//===================--------------------   Window Locations  --------------------====================
+//////////////////////====================--------------------====================////////////////////
+//////////////////////////////////////////====================////////////////////////////////////////
 		[DllImport("user32.dll")]
 		[return: MarshalAs(UnmanagedType.Bool)]
 		public static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);
@@ -3730,8 +3808,11 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 
 
 
-
-//Connective functions
+//////////////////////////////////////////====================////////////////////////////////////////
+//////////////////////====================--------------------====================////////////////////
+//===================--------------------    Event Handlers   --------------------====================
+//////////////////////====================--------------------====================////////////////////
+//////////////////////////////////////////====================////////////////////////////////////////
 		//File
 		public void Save_File_Action(object sender, EventArgs e) {
 			MessageBox.Show("You're saved");
@@ -3740,10 +3821,7 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 		public void Daily_Report_Action(object sender, EventArgs e) {
 			PRFullReport();
 		}// end Daily_Report_Action
-
-
-		//Modify PR
-		//Validate
+		//Modify PR - Validate
 		public void Validate_Manifest_Action(object sender, EventArgs e) {
 			ValidateManifest();
 		}// end Validate_Manifest_Action
@@ -3753,7 +3831,6 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 			ValidateManifest(0,PackageIdentifier,"",0,"","","","","",false,false,"","",false, "--id "+PackageIdentifier);
 		}// end Validate_By_ID_Action
 		
-
 		public void Validate_By_Configure_Action(object sender, EventArgs e) {
 			ValidateManifest(0,"","",0,"","","","","",false,false,"","",false, "","Configure");
 		}// end Validate_By_ID_Action
@@ -3817,7 +3894,7 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 			AddPRToRecord(PR,"Manual");//[ValidateSet("Approved","Blocking","Feedback","Retry","Manual","Closed","Project","Squash","Waiver")]
 			outBox_val.AppendText(Environment.NewLine + "PR "+ PR + ": " + response_out);
         }// end Manually_Validated_Action
-		//Close PR
+		//Modify PR - Close PR
         public void Closed_Action(object sender, EventArgs e) {
 			int PR = Int32.Parse(inputBox_PRNumber.Text.Replace("#",""));
 			string UserInput = inputBox_User.Text;
@@ -3854,10 +3931,7 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 			AddPRToRecord(PR,"Squash");//[ValidateSet("Approved","Blocking","Feedback","Retry","Manual","Closed","Project","Squash","Waiver")]
 			outBox_val.AppendText(Environment.NewLine + "PR "+ PR + ": " + "Squash");
         }// end Approved_Action
-	
-		
-		//Update Manifest
-		//In Repo
+		//Update Manifest - In Repo
 		public void Add_Dependency_Repo_Action (object sender, EventArgs e) {
 			string AboutText = "WinGet Approval Pipeline" + Environment.NewLine;
 			AboutText += "(c) 2024 Microsoft Corp" + Environment.NewLine;
@@ -3901,7 +3975,7 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 			AboutText += "" + Environment.NewLine;
 			MessageBox.Show(AboutText);
 		} // end Update_Arch_Action
-		//On Disk
+		//Update Manifest - On Disk
 		public void Add_Dependency_Disk_Action (object sender, EventArgs e) {
 			string AboutText = "WinGet Approval Pipeline" + Environment.NewLine;
 			AboutText += "(c) 2024 Microsoft Corp" + Environment.NewLine;
@@ -3923,8 +3997,6 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 			AboutText += "" + Environment.NewLine;
 			MessageBox.Show(AboutText);
 		} // end Add_Installer_Switch_Action
-
-
 		//Canned Replies
         public void Automation_Block_Action(object sender, EventArgs e) {
 			int PR = Int32.Parse(inputBox_PRNumber.Text.Replace("#",""));
@@ -3971,8 +4043,6 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 			string response_out = ReplyToPR(PR,"OneManifestPerPR",MagicLabels[30]);
 			outBox_val.AppendText(Environment.NewLine + "PR "+ PR + ": " + response_out);
         }// end One_Manifest_Per_PR_Action
-
-
 		//Open In Browser
         public void Open_Current_PR_Action(object sender, EventArgs e) {
 			int PR = Int32.Parse(inputBox_PRNumber.Text.Replace("#",""));
@@ -4012,10 +4082,7 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 		public void ToWork_Run_Search_Action(object sender, EventArgs e) {
 			WorkSearch("ToWork");
         }// end Approved_Action
-		
-		
-		//VM Lifecycle
-		//Win10
+		//VM Lifecycle - Win10
 		public void Generate_Win10_VM_Image_Action (object sender, EventArgs e) {
 			int VM = Convert.ToInt32(dataGridView_vm.SelectedRows[0].Cells["vm"].Value);
 			GenerateVM("Win10");
@@ -4040,7 +4107,7 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 		public void Attach_Win10_Image_Action (object sender, EventArgs e) {
 			ImageVMMove("Win10");
 		} // end Attach_Win10_Image_Action
-		//Win11
+		//VM Lifecycle - Win11
 		public void Generate_Win11_VM_Image_Action (object sender, EventArgs e) {
 			int VM = Convert.ToInt32(dataGridView_vm.SelectedRows[0].Cells["vm"].Value);
 			GenerateVM("Win11");
@@ -4066,7 +4133,6 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 			ImageVMMove("Win11");
 		} // end Attach_Win11_Image_Action
 		//VM Lifecycle
-
 		public void Disgenerate_VM_Image_Action (object sender, EventArgs e) {
 			int VM = Convert.ToInt32(dataGridView_vm.SelectedRows[0].Cells["vm"].Value);
 			DisgenerateVM(VM);
@@ -4081,9 +4147,6 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 			int VM = Convert.ToInt32(dataGridView_vm.SelectedRows[0].Cells["vm"].Value);
 			CompleteVM(VM);
 		} // end Complete_VM_Image_Action
-
-			// outBox_val.AppendText(Environment.NewLine + "VM " + VM);
-		
 		//Help
 		public void About_Click_Action (object sender, EventArgs e) {
 			// outBox_val.AppendText(Environment.NewLine + "PR "+ PR + ": " + response_out);
@@ -4100,7 +4163,54 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 
 
 
-//Inject into files on disk
+
+
+//////////////////////////////////////////====================////////////////////////////////////////
+//////////////////////====================--------------------====================////////////////////
+//===================--------------------   Inject into PRs   --------------------====================
+//////////////////////====================--------------------====================////////////////////
+//////////////////////////////////////////====================////////////////////////////////////////
+/*Inject into PRs
+public string AddDependencyToPR(int PR){
+	string Dependency = "Microsoft.VCRedist.2015+.x64",
+	string SearchString = "Installers:",
+	string LineNumbers = CommitFile(PR, string File, string url)   (Select-String SearchString).LineNumber),
+	string ReplaceString = "Dependencies:\n  PackageDependencies:\n   - PackageIdentifier: $Dependency\nInstallers:",
+	string comment = "\\\\\\suggestion\n$ReplaceString\n\\\\\\\n\n(Automated response - build $build.)"
+	string_out = ""
+	foreach ($Line in $LineNumbers) {
+		string_out += Add-GitHubReviewComment -PR $PR -Comment $comment -Line $Line -Policy "Needs-Author-Feedback"
+	}
+}
+public string UpdateHashInPR(int PR, string ManifestHash, string PackageHash, string LineNumbers = ((Get-CommitFile -PR $PR | Select-String ManifestHash).LineNumber), string ReplaceTerm = ("  InstallerSha256: $($PackageHash.toUpper())"), string comment = "\\\\\\suggestion\n$ReplaceString\n\\\\\\\n\n(Automated response - build $build.)"){
+	foreach ($Line in $LineNumbers) {
+		Add-GitHubReviewComment -PR $PR -Comment $comment -Line $Line -Policy "Needs-Author-Feedback"
+	}
+}
+
+public string UpdateHashInPR2(int PR, string clip, string SearchTerm = "Expected hash", string ManifestHash = (YamlValue $SearchTerm -Clip $Clip), string LineNumbers = ((Get-CommitFile -PR $PR | Select-String ManifestHash).LineNumber), string ReplaceTerm = "Actual hash", string PackageHash = ("  InstallerSha256: "+(YamlValue $ReplaceTerm -Clip $Clip).toUpper()), string comment = "\\\\\\suggestion\n$ReplaceString\n\\\\\\\n\n(Automated response - build $build.)"){
+	foreach ($Line in $LineNumbers) {
+		Add-GitHubReviewComment -PR $PR -Comment $comment -Line $Line -Policy "Needs-Author-Feedback"
+	}
+}
+
+public string UpdateArchInPR(int PR, string SearchTerm = "  Architecture: x86", string LineNumbers = ((Get-CommitFile -PR $PR | Select-String SearchTerm).LineNumber),string ReplaceTerm = (($SearchTerm.Split(": "))[1]),string ReplaceArch = (("x86","x64").Where(n => n -notmatch $ReplaceTerm}), string ReplaceString = ($SearchTerm.Replace($ReplaceTerm, string ReplaceArch), string comment = "\\\\\\suggestion\n$ReplaceString\n\\\\\\\n\n(Automated response - build $build.)")){
+[ValidateSet("x86","x64","arm","arm32","arm64","neutral")]
+	foreach ($Line in $LineNumbers) {
+		Add-GitHubReviewComment -PR $PR -Comment $comment -Line $Line -Policy "Needs-Author-Feedback"
+	}
+}
+*/		
+
+
+
+
+
+//////////////////////////////////////////====================////////////////////////////////////////
+//////////////////////====================--------------------====================////////////////////
+//===================--------------------  Inject into Files  --------------------====================
+//////////////////////====================--------------------====================////////////////////
+//////////////////////////////////////////====================////////////////////////////////////////
 		public void AddToValidationFile(int VM, string Dependency = "Microsoft.VCRedist.2015+.x64"){
 				string VMFolder = MainFolder+"\\vm\\"+VM;
 				string manifestFolder = VMFolder+"\\manifest";
@@ -4134,7 +4244,11 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 
 
 
-		//Modes
+//////////////////////////////////////////====================////////////////////////////////////////
+//////////////////////====================--------------------====================////////////////////
+//===================--------------------         Modes       --------------------====================
+//////////////////////====================--------------------====================////////////////////
+//////////////////////////////////////////====================////////////////////////////////////////
         public void Approving_Action(object sender, EventArgs e) {
 			string Status = "Approving";
 			SetMode(Status);//[ValidateSet("Approving","Idle","IEDS","Validating")]
@@ -4276,7 +4390,11 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 
 
 
-//Misc Data
+//////////////////////////////////////////====================////////////////////////////////////////
+//////////////////////====================--------------------====================////////////////////
+//===================--------------------       Misc Data     --------------------====================
+//////////////////////====================--------------------====================////////////////////
+//////////////////////////////////////////====================////////////////////////////////////////
 public string[] StandardPRComments = {"Validation Pipeline Badge",//Pipeline status
 "wingetbot run",//Run pipelines
 "azp run",//Run pipelines
@@ -4357,8 +4475,12 @@ public string[] MagicLabels = {"Validation-Defender-Error", //0
 
 
 
-
-/* Miscellany 
+//////////////////////////////////////////====================////////////////////////////////////////
+//////////////////////====================--------------------====================////////////////////
+//===================--------------------      Miscellany     --------------------====================
+//////////////////////====================--------------------====================////////////////////
+//////////////////////////////////////////====================////////////////////////////////////////
+/* 
 double result = DateTime.Now.Subtract(DateTime.MinValue).TotalSeconds;
 
 		//SO: You can use the Distinct method to return an IEnumerable<T> of distinct items:
