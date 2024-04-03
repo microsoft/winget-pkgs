@@ -1,25 +1,14 @@
 //Copyright 2022-2024 Microsoft Corporation
 //Author: Stephen Gillie
-//Title: WinGet Approval Pipeline v3.-7.0
+//Title: WinGet Approval Pipeline v3.-5.1
 //Created: 1/19/2024
-//Updated: 3/28/2024
+//Updated: 4/2/2024
 //Notes: Tool to streamline evaluating winget-pkgs PRs. 
 //Update log:
+//3.-5.1 - Rewrite a few other functions to use the FindWinGetVersion string output instead unfurling from a Dictionary<string,dynamic> array.
+//3.-5.0 - Rewrite FindWinGetPackage as FindWinGetVersion. Instead of returning a weath of matching package data objects, it only returns the latest version string when the PackageIdentifier is a caps-sensitive exact match. This simpler implementation meets the needs of this application while being much more reliable. 
+//3.-6.0 - Rewrite CheckPRStandardComments as PRHasNonstandardComments. 
 //3.-7.0 - Update menus and connect with event handlers.
-//3.-8.1 - Bugfix numerous features and depreciate many unused bits.
-//3.-8.0 - Port PRWatch.
-//3.-9.0 - Port ValidateManifest.
-//3.-10.0 - Port ListingDiff.
-//3.-11.0 - Port ManifestFile.
-//3.-12.0 - Port ManifestAutomation.
-//3.-13.0 - Port SingleFileAutomation.
-//3.-14.0 - Port ManifestListing.
-//3.-15.0 - Port RandomIEDS.
-//3.-16.0 - Port main body of ValidateManifest.
-//3.-17.2 - Depreciate numerous OPB holdover methods.
-//3.-17.1 - Bugfix to VM RAM display.
-//3.-17.0 - Create FindWinGetPackage as equivalent. Was scraping Find-WinGetPackage, but that stopped working after the app closed and reopened, so changed to scraping "winget search".
-
 
 
 
@@ -42,21 +31,21 @@
 - VM Versioning
 - VM Orchestration
 - File Management
-- Inject into PRs
-- Inject into files
 - Reporting
 - Clipboard
 - Et Cetera
 - Utility functions
-- Powershell equivalency (+23)
+- Powershell equivalency
 - VM Window management
-- Misc data (+5)
+- Event Handlers
+- Inject into PRs
+- Inject into files
+- Misc data
 
 Et cetera:
 - PR counters on certain buttons - Approval-Ready, ToWork, Defender, IEDS
 
 Need work:
-CheckStandardPRComments 
 AddValidationData
 WorkSearch
 ListingDiff
@@ -96,7 +85,7 @@ using System.Web.Script.Serialization;
 namespace WinGetApprovalNamespace {
     public class WinGetApprovalPipeline : Form {
 		//vars
-        public int build = 598;//Get-RebuildPipeApp	
+        public int build = 608;//Get-RebuildPipeApp	
 		public string appName = "WinGetApprovalPipeline";
 		public string appTitle = "WinGet Approval Pipeline - Build ";
 		public static string owner = "microsoft";
@@ -682,31 +671,26 @@ namespace WinGetApprovalNamespace {
 				Mode = GetMode();
 			}
 			if (Mode == "Approving") {
-				//#F0F0F0 or RGB 240, 240, 240
 				btn10.BackColor = color_ActiveBack;//Bulk Approving
 				btn18.BackColor = color_DefaultBack;//Individual Validations
 				btn11.BackColor = color_DefaultBack;//IEDS
 				btn19.BackColor = color_DefaultBack;//Idle
 			} else if (Mode == "Validating") {
-				//#F0F0F0 or RGB 240, 240, 240
 				btn10.BackColor = color_DefaultBack;//Bulk Approving
 				btn18.BackColor = color_ActiveBack;//Individual Validations
 				btn11.BackColor = color_DefaultBack;//IEDS
 				btn19.BackColor = color_DefaultBack;//Idle
 			} else if (Mode == "IEDS") {
-				//#F0F0F0 or RGB 240, 240, 240
 				btn10.BackColor = color_DefaultBack;//Bulk Approving
 				btn18.BackColor = color_DefaultBack;//Individual Validations
 				btn11.BackColor = color_ActiveBack;//IEDS
 				btn19.BackColor = color_DefaultBack;//Idle
 			} else if (Mode == "Idle") {
-				//#F0F0F0 or RGB 240, 240, 240
 				btn10.BackColor = color_DefaultBack;//Bulk Approving
 				btn18.BackColor = color_DefaultBack;//Individual Validations
 				btn11.BackColor = color_DefaultBack;//IEDS
 				btn19.BackColor = color_ActiveBack;//Idle
 			} else if (Mode == "Config") {
-				//#F0F0F0 or RGB 240, 240, 240
 				btn10.BackColor = color_DefaultBack;//Bulk Approving
 				btn18.BackColor = color_DefaultBack;//Individual Validations
 				btn11.BackColor = color_DefaultBack;//IEDS
@@ -875,8 +859,7 @@ namespace WinGetApprovalNamespace {
 						string PRvMan = "P";
 						string Approve = "+";
 
-						Dictionary<string,dynamic>[] WinGetOutput = FromCsv(FindWinGetPackage(PackageIdentifier,true));
-						string ManifestVersion = WinGetOutput[0]["version"];
+						string ManifestVersion = FindWinGetVersion(PackageIdentifier);
 						int ManifestVersionParams = ManifestVersion.Split('.').Length;
 						int PRVersionParams = PRVersion.Split('.').Length;
 
@@ -887,7 +870,7 @@ namespace WinGetApprovalNamespace {
 							AuthAccount = AuthMatch[0]["GitHubUserName"];
 						}
 						
-						if (null == WinGetOutput) {
+						if (null == ManifestVersion) {
 							PRvMan = "N";
 							matchColor = invalidColor;
 							Approve = "-!";
@@ -904,7 +887,7 @@ namespace WinGetApprovalNamespace {
 									} //end if Get-Command;
 								} //end if title;
 							} //end if noNew;
-						} else if ($null != WinGetOutput) {
+						} else if ($null != ManifestVersion) {
 							if (PRTitle -match " [.]") {
 							//if has spaces (4.4 .5 .220);
 								$Body = "Spaces detected in version number.";
@@ -1039,7 +1022,7 @@ namespace WinGetApprovalNamespace {
 
 						
 
-						if (null != WinGetOutput) {
+						if (null != ManifestVersion) {
 							if ((PRvMan != "N") && 
 							(!PRTitle.Contains("Automatic deletion")) && 
 							(!PRTitle.Contains("Delete")) && 
@@ -1156,7 +1139,7 @@ namespace WinGetApprovalNamespace {
 								matchColor = invalidColor;
 							} else if (ManifestVersion == null) {
 								noRecord = true;
-								PRvMan = "Error:ManifestVersion";//WinGetOutput;
+								PRvMan = "Error:ManifestVersion";
 								matchColor = invalidColor;
 							} else if (Version.Parse(PRVersion) > Version.Parse(ManifestVersion)) {
 								PRvMan = ManifestVersion;
@@ -1167,7 +1150,7 @@ namespace WinGetApprovalNamespace {
 								PRvMan = "=";
 							} else {
 								noRecord = true;
-								PRvMan = "Error:ManifestVersion";//WinGetOutput;
+								PRvMan = "Error:ManifestVersion";
 							}
 						}
 
@@ -1214,68 +1197,51 @@ namespace WinGetApprovalNamespace {
 		} //end function
 
 		public void WorkSearch(string Preset, int Days = 7) {
-		// string[] PresetList = {"Approval","ToWork"};
-			// foreach (string Preset in PresetList) {
-				int Page = 1;
-
-					dynamic[] PRs = SearchGitHub(Preset,Page,Days,false,true);
-					PRs = PRs.Where(n => n["labels"] != null).ToArray();//.Where(n => n["number"] -notin (Get-Status).pr} 
-					
-					foreach (dynamic FullPR in PRs) {
-						int PR = FullPR["number"];
-						//Get-TrackerProgress -PR $PR $MyInvocation.MyCommand line PRs.Length
-						//This part is too spammy, checking Last-Version-Remaining on every run (sometimes twice a day) for a week as the PR sits. 
-						if((FullPR["title"].Contains("Remove")) || 
-						(FullPR["title"].Contains("Delete")) || 
-						(FullPR["title"].Contains("Automatic deletion"))){
-							CheckInstaller(PR);
-						}
-						//dynamic[] Comments = FromJson(InvokeGitHubPRRequest(PR,WebRequestMethods.Http.Get,"comments"));
-						if (Preset == "Approval"){
-							if (CheckStandardPRComments(PR)){//,Comments
-								OpenPRInBrowser(PR);
-							} else {
-								OpenPRInBrowser(PR,true);
-							}
-						} else if (Preset == "Defender"){
-							LabelAction(PR);
-						} else {//ToWork etc
+			int Page = 1;
+			dynamic[] PRs = SearchGitHub(Preset,Page,Days,false,true);
+			PRs = PRs.Where(n => n["labels"] != null).ToArray();//.Where(n => n["number"] -notin (Get-Status).pr} 
+			
+			foreach (dynamic FullPR in PRs) {
+				int PR = FullPR["number"];
+				//Get-TrackerProgress -PR $PR $MyInvocation.MyCommand line PRs.Length
+				//line++;
+				//This part is too spammy, checking Last-Version-Remaining on every run (sometimes twice a day) for a week as the PR sits. I think this is fixed in the other version. #PendingBugfix
+				if((FullPR["title"].Contains("Remove")) || 
+				(FullPR["title"].Contains("Delete")) || 
+				(FullPR["title"].Contains("Automatic deletion"))){
+					CheckInstaller(PR);
+				}
+				//The other version populates Comments equivalent here, and hands this to both the PRHasNonstandardComments equivalent call, and the PRStateFromComments equivalent below. To halve the number of API calls by reducing redundant calls. This was facilitated by PowerShell's optional typing. 
+				//dynamic[] Comments = FromJson(InvokeGitHubPRRequest(PR,WebRequestMethods.Http.Get,"comments"));
+				if (Preset == "Approval"){
+					if (PRHasNonstandardComments(PR)){
+						OpenPRInBrowser(PR);
+					//One of these is faster to open, as though one code path has a huge inefficiency. Need more data on which.
+					} else {
+						OpenPRInBrowser(PR,true);
+					}
+				} else if (Preset == "Defender"){
+					LabelAction(PR);
+				} else {//ToWork etc
+				//Don't open the PR in browser if UserName (self) was the last commenter, or if it's in the Defender loop. 
 		/*
-							$Comments = ($Comments | select created_at,@{n="UserName";e={$_.user.login.Replace("\\[bot\\]")}},body)
-							State = (Get-PRStateFromComments -PR $PR -Comments $Comments)
-							$LastState = $State[-1]
-							if ($LastState.event == "DefenderFail") { 
-								Get-PRLabelAction -PR $PR
-							} else if ($LastState.event == "LabelAction") { 
-								Get-GitHubPreset -Preset LabelAction -PR $PR
-								OpenPRInBrowser(PR);
-							} else {
-								if ($Comments[-1].UserName != $GitHubUserName) {
-									OpenPRInBrowser(PR);
-								}
-							}//end if LastCommenter
+				$Comments = ($Comments | select created_at,@{n="UserName";e={$_.user.login.Replace("\\[bot\\]")}},body)
+				State = (Get-PRStateFromComments -PR $PR -Comments $Comments)
+				$LastState = $State[-1]
+				if ($LastState.event == "DefenderFail") { 
+					Get-PRLabelAction -PR $PR
+				} else if ($LastState.event == "LabelAction") { 
+					Get-GitHubPreset -Preset LabelAction -PR $PR
+					OpenPRInBrowser(PR);
+				} else {
+					if ($Comments[-1].UserName != $GitHubUserName) {
+						OpenPRInBrowser(PR);
+					}
+				}//end if LastCommenter
 		*/
-						}//end if Preset
-					}//end foreach FullPR
-			// }//end foreach Preset
+				}//end if Preset
+			}//end foreach FullPR
 		}//end Get-WorkSearch
-
-		public void CheckInstaller(int PR) {
-			dynamic Pull = FromJson(InvokeGitHubPRRequest(PR,WebRequestMethods.Http.Get,"files"));
-			string PullInstallerContents = DecodeGitHubFile(FromJson(InvokeGitHubRequest(Pull[0]["contents_url"]))["content"]);
-			string Url = YamlValue("InstallerUrl",PullInstallerContents);
-			string string_out = "";
-			try {
-				string_out = InvokeWebRequest(Url, "Head");//.StatusCode;
-			}catch (Exception err) {
-				string_out = err.Message;
-			}
-			string Body = "URL: "+Url+" \n"+string_out + "\n\n(Automated message - build "+build+")";
-			//If ($Body -match "Response status code does not indicate success") {
-				//string_out += Get-GitHubPreset InstallerMissing -PR $PR 
-			//} //Need this to only take action on new PRs, not removal PRs.
-			InvokeGitHubPRRequest(PR, WebRequestMethods.Http.Post, "comments", Body);
-		}
 
 
 
@@ -1796,7 +1762,7 @@ namespace WinGetApprovalNamespace {
 			return string_out;
 		}
 
-		public string AutoValLog (int PR){
+		public string AutoValLog(int PR){
 			//int PR = Int32.Parse(inputBox_PRNumber.Text.Replace("#",""));
 			//Download
 			//Unzip
@@ -1921,7 +1887,7 @@ namespace WinGetApprovalNamespace {
 //////////////////////////////////////////====================////////////////////////////////////////
 		//Add user to PR: InvokeGitHubPRRequest -Method $Method -Type "assignees" -Data $User -Output StatusDescription
 		//Approve PR (needs work): InvokeGitHubPRRequest -PR $PR -Method Post -Type reviews
-		public string InvokeGitHubPRRequest (int PR, string Method = WebRequestMethods.Http.Get,string Type = "labels",string Data = "",string Path = "issues") {
+		public string InvokeGitHubPRRequest(int PR, string Method = WebRequestMethods.Http.Get,string Type = "labels",string Data = "",string Path = "issues") {
 		//Method [ValidateSet("GET","DELETE","PATCH","POST","PUT")] 
 		//Type [ValidateSet("assignees","comments","commits","files","labels","reviews","")]
 		//Path [ValidateSet("issues","pulls")]
@@ -1987,7 +1953,7 @@ namespace WinGetApprovalNamespace {
 			return out_var;
 		}
 
-		public string AddGitHubReviewComment (int PR, string Comment,int? StartLine,int Line) {
+		public string AddGitHubReviewComment(int PR, string Comment,int? StartLine,int Line) {
 			dynamic Commit = FromJson(InvokeGitHubPRRequest(PR, WebRequestMethods.Http.Get, "commits"));
 			string CommitID = Commit["sha"];
 			string Filename = Commit["files"]["filename"];
@@ -2014,7 +1980,7 @@ namespace WinGetApprovalNamespace {
 			return string_out;//.StatusDescription;
 		}
 
-		public int ADOBuildFromPR (int PR) {
+		public int ADOBuildFromPR(int PR) {
 			dynamic content = FromJson(InvokeWebRequest(ADOMSBaseUrl+"/"+repo+"/_apis/build/builds?branchName=refs/pull/"+PR+"/merge&api-version=6.0"));
 			string href = content["value"][0]["_links"]["web"]["href"];
 			int PRbuild = Int32.Parse(href.Split('=')[1]);
@@ -2064,7 +2030,7 @@ namespace WinGetApprovalNamespace {
 			ReplyToPR(PR,string_joined,"Approve","Needs-Review");
 		}
 
-		public string ReplyToPR (int PR,string string_CannedMessage, string string_UserInput = "", string Policy = "", string Body = ""){
+		public string ReplyToPR(int PR,string string_CannedMessage, string string_UserInput = "", string Policy = "", string Body = ""){
 /*
 			Dictionary<string,object> PRContent = new Dictionary<string,object>();
 			PRContent = FromJson(InvokeGitHubPRRequest(PR,"","content"));
@@ -2082,25 +2048,33 @@ namespace WinGetApprovalNamespace {
 			return InvokeGitHubPRRequest(PR,WebRequestMethods.Http.Post,"comments",Body,"issues");
 		}
 
-		public bool CheckStandardPRComments (int PR) {
+		public bool PRHasNonstandardComments(int PR) {
+			//Check for any non-standard PR comments. Return true if any are non-standard, and false if none are non-standard.
+			List<string> list_comments = new List<string>();
 			bool out_bool = false;
-			dynamic comments = FromJson(InvokeGitHubPRRequest(PR,WebRequestMethods.Http.Get,"comments"));
-			dynamic Labels = FromJson(InvokeGitHubPRRequest(PR ,WebRequestMethods.Http.Get,"labels","","issues"));
-			string string_out = "";
-			if (comments == null) {
-			}
-			foreach (string StdComment in StandardPRComments) {
-				foreach (dynamic comment in comments) {
-				string commentname = comment["body"];
-					if (commentname.Contains(StdComment)) {
-						out_bool = true;
-					}
+			dynamic[] comments = FromJson(InvokeGitHubPRRequest(PR,WebRequestMethods.Http.Get,"comments"));
+			// dynamic Labels = FromJson(InvokeGitHubPRRequest(PR ,WebRequestMethods.Http.Get,"labels","","issues"));
+			
+			if (comments != null) {
+				for (int c = 0; c < comments.Length; c++) {
+					list_comments.Add(comments[c]["body"]);
 				}
+				foreach (string StdComment in StandardPRComments) {
+					foreach (string comment in list_comments) {
+						if (comment.Contains(StdComment)) {
+							list_comments = list_comments.Where(n => n != comment).ToList();
+						}
+					}
+				// outBox_val.AppendText(Environment.NewLine + "body " + c + ": " + ToJson(comment) + "\nout_bool: " + out_bool);
+				}
+			}
+			if (list_comments.Count > 0) {
+				out_bool = true;
 			}
 			return out_bool;
 		}
 
-		public List<string> PRStateFromComments (int PR){
+		public List<string> PRStateFromComments(int PR){
 			Dictionary<string,object>[] Comments = FromJson(InvokeGitHubPRRequest(PR,"comments","","","content")); //| select created_at,@{n="UserName";e={$_.user.login -replace "\[bot\]"}},body)
 			//Robot usernames
 			string Wingetbot = "wingetbot";
@@ -2221,6 +2195,63 @@ namespace WinGetApprovalNamespace {
 			}
 
 			return response_out;
+		}
+
+		public void CheckInstaller(int PR) {
+			dynamic Pull = FromJson(InvokeGitHubPRRequest(PR,WebRequestMethods.Http.Get,"files"));
+			string PullInstallerContents = DecodeGitHubFile(FromJson(InvokeGitHubRequest(Pull[0]["contents_url"]))["content"]);
+			string Url = YamlValue("InstallerUrl",PullInstallerContents);
+			string string_out = "";
+			try {
+				InvokeWebRequest(Url, "Head");//.StatusCode;
+				string_out = "Status code: 200"
+			}catch (Exception err) {
+				string_out = err.Message;
+			}
+			string Body = "URL: "+Url+" \n"+string_out + "\n\n(Automated message - build "+build+")";
+			//If ($Body -match "Response status code does not indicate success") {
+				//string_out += Get-GitHubPreset InstallerMissing -PR $PR 
+			//} //Need this to only take action on new PRs, not removal PRs.
+			InvokeGitHubPRRequest(PR, WebRequestMethods.Http.Post, "comments", Body);
+		}
+
+		public string FindWinGetVersion(string PackageIdentifier) {
+			string string_out = "";	
+			string command = "winget search " + PackageIdentifier + " --exact --disable-interactivity";
+
+
+			Process process = new Process();
+			StreamWriter StandardInput;
+			StreamReader StandardOut;
+			ProcessStartInfo processStartInfo = new ProcessStartInfo("PowerShell.exe");
+			processStartInfo.UseShellExecute = false;
+			processStartInfo.RedirectStandardInput = true;
+			processStartInfo.RedirectStandardOutput = true;
+			processStartInfo.RedirectStandardError = true;
+			processStartInfo.CreateNoWindow = true;
+			process.StartInfo = processStartInfo;
+			process.Start();
+
+			StandardInput = process.StandardInput;
+			StandardOut = process.StandardOutput;
+			StandardInput.AutoFlush = true;
+			StandardInput.WriteLine(command);
+			StandardInput.Close();
+			
+			string_out = StandardOut.ReadToEnd();
+			try {
+				string_out = string_out
+				.Split('\n')
+				.Where(n => !n.Contains("disable-interactivity"))
+				.Where(n => n.ToLower().Contains(PackageIdentifier.ToLower())).FirstOrDefault();
+				
+				int stringStart = string_out.IndexOf(PackageIdentifier);
+				string_out = string_out.Substring(stringStart);
+				string_out = string_out.Split(' ')[1];
+			} catch {
+				string_out = "No package found matching input criteria.";
+			}
+			return string_out;
 		}
 
 
@@ -2465,10 +2496,10 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 		}//end if Configure
 	}//end if NoFiles
 
-	if (InspectNew = true) {
-		Dictionary<string,dynamic>[] PackageResult = FromCsv(FindWinGetPackage(PackageIdentifier,true));
+	if (InspectNew == true) {
 			//Write-Host "Searching Winget for PackageIdentifier"
 		//Write-Host PackageResult
+		string PackageResult = FindWinGetVersion(PackageIdentifier);
 		if (PackageResult == null) {//"No package found matching input criteria."
 			OpenAllURLs(clip);
 			System.Diagnostics.Process.Start("https://www.bing.com/search?q="+PackageIdentifier);
@@ -2476,12 +2507,12 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 			string b = PackageIdentifier.Split('.')[1];
 			if (a != "") {
 					//Write-Host "Searching Winget for a"
-					//Dictionary<string,dynamic>[] result_a = FromCsv(FindWinGetPackage(a,true));
+					// string result_a = FindWinGetVersion(a);
 					//Need to refactor these - they're meant to dump into console. 
 			}
 			if (b != "") {
 					//Write-Host "Searching Winget for b"
-					//Dictionary<string,dynamic>[] result_b = FromCsv(FindWinGetPackage(b,true));
+					// string result_b = FindWinGetVersion(b);
 			}
 		}//end if PackageResult
 	}//end if InspectNew
@@ -2593,7 +2624,7 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 		public string[] ManifestListing(string PackageIdentifier,bool Versions = false){
 			string FirstLetter = PackageIdentifier.ToLower()[0].ToString();
 			string Path = PackageIdentifier.Replace(".","/");
-			string Version = FromCsv(FindWinGetPackage(PackageIdentifier,true))[0]["version"];
+			string Version = FindWinGetVersion(PackageIdentifier);
 			string Uri = GitHubApiBaseUrl+"/contents/manifests/"+FirstLetter+"/"+Path+"/"+Version+"/";
 			if (Versions) {
 				Uri = GitHubApiBaseUrl+"/contents/manifests/"+FirstLetter+"/"+Path+"/";
@@ -2914,7 +2945,7 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 			return VMVersion;
 		}
 
-		public void SetVMVersion (int Version, string OS = "Win10") {
+		public void SetVMVersion(int Version, string OS = "Win10") {
 			string VMData = GetContent(VMversion);
 			List<string> Line = VMData.Split('\n').ToList();
 			string Line2 = Line.Where(n => n.Contains(OS)).FirstOrDefault();
@@ -3235,6 +3266,7 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 				URL = GitHubBaseUrl+"/pull/"+PR+"/files";
 			}
 			System.Diagnostics.Process.Start(URL);
+			Thread.Sleep(GitHubRateLimitDelay)
 		}//end Function
 
 		public string YamlValue(string ContainsString, string YamlString){
@@ -3751,7 +3783,7 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 
 		public RECT rect;
 
-		public void  WindowLoc (int vm,ref RECT rect) {
+		public void  WindowLoc(int vm,ref RECT rect) {
 			//Need to readd the logic that finds the mainwindowhandle from the VM number.
 			var processes = Process.GetProcessesByName("vmconnect");
 			string VMName = "vm"+vm;
@@ -3762,7 +3794,7 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 			}
 		}
 
-		public void  WindowSet (int vm,int Left,int Top,int Right,int Bottom) {
+		public void  WindowSet(int vm,int Left,int Top,int Right,int Bottom) {
 			var processes = Process.GetProcessesByName("vmconnect");
 			string VMName = "vm"+vm;
 			foreach (Process process in processes){
@@ -4243,7 +4275,6 @@ public string UpdateArchInPR(int PR, string SearchTerm = "  Architecture: x86", 
 
 
 
-
 //////////////////////////////////////////====================////////////////////////////////////////
 //////////////////////====================--------------------====================////////////////////
 //===================--------------------         Modes       --------------------====================
@@ -4273,117 +4304,6 @@ public string UpdateArchInPR(int PR, string SearchTerm = "  Architecture: x86", 
 			//outBox_val.AppendText(Environment.NewLine + "Status: "+Status);
         }// end Idle_Action
 
-        public void Config_Action(object sender, EventArgs e) {
-			//var vm = GetVM("vm674");
-            //ManagementObject snapshotSettingData = GetLastVirtualSystemSnapshot(vm);
-
-			//string Status = "Idle";
-			//SetMode(Status);//[ValidateSet("Approving","Idle","IEDS","Validating")]
-			string mid_string = FindWinGetPackage(inputBox_User.Text);
-			Dictionary<string,dynamic>[] FindPkg = FromCsv(mid_string);
-			//outBox_val.AppendText(Environment.NewLine + "mid_string: " + mid_string);
-			
-			foreach (Dictionary<string,dynamic> package in FindPkg) {
-				if (package != null) {
-					try {
-						// outBox_val.AppendText(Environment.NewLine + "ToJson: " + ToJson(package));
-						outBox_val.AppendText(Environment.NewLine + "ID: " + package["Id"]+ " - Version: " + package["Version"]);
-					} catch (Exception err) {
-						// outBox_val.AppendText(Environment.NewLine + "err2: " + err);
-					}
-				} else {
-					//outBox_val.AppendText(Environment.NewLine + "null: " );
-				}
-			}
-						
-        }// end Config_Action
-
-		public string FindWinGetPackage(string PackageIdentifier,bool Equals = false) {
-
-			string string_out = "";	
-			string command = "winget search " + PackageIdentifier;
-			if (Equals == true) {
-				//command += " -MatchOption Equals";
-			}
-
-			Process process = new Process();
-			StreamWriter StandardInput;
-			StreamReader StandardOut;
-			//StreamReader StandardErr;
-			ProcessStartInfo processStartInfo = new ProcessStartInfo("PowerShell.exe");
-			processStartInfo.UseShellExecute = false;
-			processStartInfo.RedirectStandardInput = true;
-			processStartInfo.RedirectStandardOutput = true;
-			processStartInfo.RedirectStandardError = true;
-			processStartInfo.CreateNoWindow = true;
-			process.StartInfo = processStartInfo;
-			process.Start();
-
-			StandardInput = process.StandardInput;
-			StandardOut = process.StandardOutput;
-			StandardInput.AutoFlush = true;
-			StandardInput.WriteLine(command);
-			StandardInput.Close();
-			
-			string_out = StandardOut.ReadToEnd();
-			string[] strung_out = string_out
-			.Replace("'\r\n","\n")
-			.Replace("   - ","\n")
-			.Replace("   \\ ","\n")
-			.Replace("                                                                                                                        ","\n")
-			.Split('\n').Where(n => !n.Contains("PS C:\\"))
-			.Where(n => !n.Contains("Windows PowerShell"))
-			.Where(n => !n.Contains("Copyright (C) Microsoft Corporation"))
-			.Where(n => !n.Contains("Install the latest PowerShell"))
-			.Where(n => !n.Contains("----"))
-			.Where(n => n.Length > 1).ToArray();
-			//outBox_val.AppendText();
-			string nope = Environment.NewLine + "strung_out" +string.Join("\n",strung_out);
-				
-			int stringStart = string_out.IndexOf("Name");
-			int stringLength = string_out.IndexOf("Source") - string_out.IndexOf("Name");
-			
-			//string headerRow = strung_out.SubstringWhere(n => n.Contains("Source")).FirstOrDefault();
-			string headerRow = string_out.Substring(stringStart, stringLength+6);
-			// outBox_val.AppendText(Environment.NewLine + "headerRow: "+ headerRow);
-			int firstColumnStart = 0;
-			int secondColumnStart = 0;
-			int thirdColumnStart = 0;
-			try {
-				//Name,Id,Version,Source
-				//int zeroethColumnStart = 0;
-				if (headerRow != null) {
-					firstColumnStart = headerRow.IndexOf("Id");
-					secondColumnStart = headerRow.IndexOf("Version");
-					thirdColumnStart = headerRow.IndexOf("Source");
-			// outBox_val.AppendText(Environment.NewLine + "firstColumnStart: "+ firstColumnStart+ " secondColumnStart: "+ secondColumnStart+ " thirdColumnStart: "+ thirdColumnStart + " headerRow.Length: "+ headerRow.Length);
-				}
-			} catch (Exception err){
-			outBox_val.AppendText(Environment.NewLine + "err: "+ err);
-				// string_out = "";
-			}
-				string strung_in = "";
-					
-				//outBox_val.AppendText(Environment.NewLine + "Test Test Test");
-				foreach (string strung in strung_out) {
-					// outBox_val.AppendText(Environment.NewLine + "strung" + strung);
-					int firstLoc = (firstColumnStart - 0 -1);
-					int secondLoc = (secondColumnStart - firstColumnStart -1);
-					int thirdLoc = (thirdColumnStart - secondColumnStart -1);
-					int endLoc = (headerRow.Length - thirdColumnStart+1);
-
-					strung_in += strung.Substring(0,firstLoc).Trim();
-					strung_in += ",";
-					strung_in += strung.Substring(firstColumnStart,secondLoc).Trim();
-					strung_in += ",";
-					strung_in += strung.Substring(secondColumnStart,thirdLoc).Trim();
-					strung_in += ",";
-					strung_in += strung.Substring(thirdColumnStart,endLoc).Trim();
-					strung_in += "\n";
-				}
-				string_out = string.Join("\n",strung_in);
-		return string_out;
-		}
 
 
 
@@ -4470,6 +4390,8 @@ public string[] MagicLabels = {"Validation-Defender-Error", //0
 "Needs-Author-Feedback",//30
 "Policy-Test-2.3" //31
 };
+    }// end WinGetApprovalPipeline
+}// end WinGetApprovalNamespace
 
 
 
@@ -4514,7 +4436,7 @@ double result = DateTime.Now.Subtract(DateTime.MinValue).TotalSeconds;
 						outBox_val.AppendText(Environment.NewLine + "OS: " + Records[r]["OS"] + " - Version: " + Records[r]["Version"]);
 				}
 			}
-			string response_out = CheckStandardPRComments(PR).ToString();
+			string response_out = PRHasNonstandardComments(PR).ToString();
 			string_out = string_out.Split('\n').Where(n => n.Contains(Entry)).FirstOrDefault(); // s.IndexOf(": ");
 		//var data = data.Where(p => listOfProducts.Any(l => p.Name == l.Name)).ToList();
 		//var matchingKeys = dict.Where(kvp => kvp.Value == 2).Select(kvp => kvp.Key);
@@ -4545,12 +4467,6 @@ double result = DateTime.Now.Subtract(DateTime.MinValue).TotalSeconds;
 	}
 
 */
-
-
-    }// end WinGetApprovalPipeline
-}// end WinGetApprovalNamespace
-
-
 /* Original drawing
 ................................................................................................................................................................................................................................................
 WinGet Approver - Build 365
@@ -4567,7 +4483,7 @@ WinGet Approver - Build 365
 __________________________________________________________|_____________________________________________________________
 ....Approvals............................................................................................................................................................................................................................
 .................................................................................................................................................................................................................................................
-|.Timestp..|.PR#.......|.PackageIdentifier......................|.prVersion........|.A.|.R.|.W.|.F.|.I.|.D.|.V.|.ManifestVer.........|.OK.|..........................................
+|.Timestp..|.PR#.......|.PackageIdentifier......................|.PRVersion........|.A.|.R.|.W.|.F.|.I.|.D.|.V.|.ManifestVer.........|.OK.|..........................................
 |.15:18:10.|.138430.|.JetBrains.WebStorm.EAP..........|.241.11761.28..|.A.|.R.|.W.|.1.|.I.|.D.|.999.|.241.10840.2......|.OK.|..........................................
 |.15:18:18.|.138431.|.Fly-io.flyctl.................................|.0.1.148............|.A.|.R.|.W.|.0.|.I.|.D.|.999.|.0.1.147..............|.OK.|.........................................
 |.15:18:32.|.138435.|.JosephFinney.Text-Grab...........|.4.1.3.................|.A.|.R.|.W.|.0.|.I.|.D.|.999.|.4.1.0..................|.OK.|.........................................
@@ -4587,4 +4503,40 @@ ________________________________________________________________________________
 ......|___Fail____|......|___Block___|.....|__________|.....|__________|......|__________|......|__________|......|__________|.....|__________|.....
 ................................................................................................................................................................................................................................................
 ................................................................................................................................................................................................................................................
+*/
+/* A PR's journey through the WinGet pipeline system:
+- PR committed - manually or with a tool.
+- PR pulled into Automatic Validation Pipeline.
+  - On fail, add label.
+    - Pipeline errors - these often have the label Internal-Error or Internal-Error-Dynamic-Scan. The former are usually ephemeral and disappear on retry. The latter are sometimes ephemeral, and sometimes happen to a package on every run - it's far enough along that the package can be manually validated. Manual validation might still fail on one of the following errors, and has to manually update labels and comment in the PR similar to how the pipeline would. 
+    - PR and Manifest errors - these can often be remediated in PR, then retry and pass.
+	- Defender and scan errors - some can linger in the fail-and-remediation state ("Defender Loop") for an extended duration before passing. 
+	- Installer and application errors - these can sometimes be remediated in PR, by adding data such as switches or dependencies. If so, retry and pass.
+	- Legal and political issues - these can be hard blockers. Some might need the manifest schema to be updated with additional fields, and those fields populated with legal agreements, before the PR can pass. 
+	- Unfortunately, for some PRs, the next step is closure. The path to this step isn't always straightforward, and some linger here for an extended duration as well. Closed PRs can be reopened for a good reason. Feel free to ask. 
+  - On pass, continue.
+- SDL checks occur at some point. These don't take very long, unless you're waiting on the PR.
+- PR pends for community and moderator review. (Review "pool")
+  - On fail, add comment.
+    - Installer: Duplicate PRs, version mismatches between manifest and registry, different installer types.	
+    - Locale: Incorrect PackageName, ReleaseNotes not in locale's natural language, PackageUrl not leading to InstallerUrl, and other errata. 
+  - On pass, continue.
+- PR pends for moderator approval. (Approval pipeline)
+  - On fail, add comment.
+    - Auth fail - Package has Auth strictness of "must" and submitter isn't on the list. Ask someone who IS on the list for approval. 
+	- Version parameter fail - the number of version parameters (data between dots, such as major and minor version numbers) has changed. This is common for some developers, and an exception list is currently manually implemented. 	
+	- Version number contains spaces fail - this check needs to be reimplemented. It was meant to catch an automation bug adding spaces after the dots in PackageVersion numbers. 
+	- Review fail - PackageIdentifier has review notes blocking approval. Post them.
+	- Agreements fail - PackageIdentifier has EULA but PR is missing the AgreementsUrl. Post this.
+	- Words filter fail - Manifest contains words (such as "EULA") that are restricted, because they might indicate another check has failed or been skipped. Post about these. 
+	- AnF fail - missing the "AppsAndFeaturesEntries" entry but present in previous PR. This check needs to be updated. Usually only block on DisplayVersion, but also note if there are more than 3 of these missing. 
+	- InstallerUrl contains PackageVersion - Doesn't block but is informative. Should be rebuilt to include a vanity URL detector, and also detect if the InstallerUrl shows previous version.
+	- Files removed - if the PR has more than 2 files, and it's not a removal, check if the previous version had at least as many files. To prevent a PR from leaving out localization files from the previous version. 
+	- OR Last Version Remaining fail - If it's a removal, check if it's the highest version. If it is, ask if it's available from another location. 
+  - On pass, approve.
+- PR pends for publish pipeline.
+  - Publish converts repo to an XML database and compresses into MSIX.
+  - Uploads to storage location, refreshes CDN. 
+- Package is available to users. 
+(Goal is to make this have 1 remediation loop instead of 3.)
 */
