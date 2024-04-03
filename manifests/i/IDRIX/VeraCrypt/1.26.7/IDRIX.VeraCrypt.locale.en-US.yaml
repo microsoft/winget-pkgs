@@ -1,0 +1,112 @@
+# Created with komac v2.1.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.6.0.schema.json
+
+PackageIdentifier: IDRIX.VeraCrypt
+PackageVersion: 1.26.7
+PackageLocale: en-US
+Publisher: IDRIX
+PublisherUrl: https://www.idrix.fr/
+PublisherSupportUrl: https://github.com/veracrypt/VeraCrypt/issues
+Author: Mounir IDRASSI
+PackageName: VeraCrypt
+PackageUrl: https://veracrypt.fr/
+License: Apache 2.0
+LicenseUrl: https://github.com/veracrypt/VeraCrypt/blob/HEAD/License.txt
+Copyright: Copyright © 2013-2023 IDRIX. All rights reserved.
+CopyrightUrl: https://veracrypt.fr/en/Legal%20Information.html
+ShortDescription: VeraCrypt is a free open source disk encryption software for Windows, Mac OSX and Linux.
+Description: |-
+  VeraCrypt is a software for establishing and maintaining an on-the-fly-encrypted volume (data storage device). On-the-fly encryption means that data is automatically
+  encrypted right before it is saved and decrypted right after it is loaded, without any user intervention. No data stored on an encrypted volume can be read (decrypted)
+  without using the correct password/keyfile(s) or correct encryption keys. Entire file system is encrypted (e.g., file names, folder names, contents of every file,
+  free space, meta data, etc). Files can be copied to and from a mounted VeraCrypt volume just like they are copied to/from any normal disk (for example, by simple
+  drag-and-drop operations). Files are automatically being decrypted on the fly (in memory/RAM) while they are being read or copied from an encrypted VeraCrypt volume.
+  Similarly, files that are being written or copied to the VeraCrypt volume are automatically being encrypted on the fly (right before they are written to the disk) in RAM.
+  Note that this does not mean that the whole file that is to be encrypted/decrypted must be stored in RAM before it can be encrypted/decrypted. There are no extra memory
+  (RAM) requirements for VeraCrypt.
+Moniker: veracrypt
+Tags:
+- decryption
+- encryption
+- hdd
+- privacy
+- security
+- ssd
+Agreements:
+- AgreementLabel: End User License Agreement (EULA)
+  AgreementUrl: https://veracrypt.fr/en/VeraCrypt%20License.html
+ReleaseNotes: |-
+  Binaries for supported operating systems are also available at Sourceforge.Changes between 1.25.9 and 1.26.7 (1 October 2023) :
+  - All OSes:
+      - Security: Ensure that XTS primary key is different from the secondary key when creating volumes
+          - Issue unlikely to happen thanks to random generator properties but this check must be added to prevent attacks
+          - Reference: CCSS,NSA comment at page 3: https://csrc.nist.gov/csrc/media/Projects/crypto-publication-review-project/documents/initial-comments/sp800-38e-initial-public-comments-2021.pdf
+      - Remove TrueCrypt Mode support. Version 1.25.9 can be used to mount or convert TrueCrypt volumes.
+      - Complete removal of RIPEMD160 and GOST89 algorithms. Legacy volumes using any of them cannot be mounted by VeraCrypt anymore.
+      - Add support for BLAKE2s as new PRF algorithm for both system encryption and standard volumes.
+      - Introducing support for EMV banking smart cards as keyfiles for non-system volumes.
+          - No need for a separate PKCS#11 module configuration.
+          - Card PIN isn't required.
+          - Generates secure keyfile content from unique, encoded data present on the banking card.
+          - Supports all EMV standard-compliant banking cards.
+          - Can be enabled in settings (go to Settings->Security Tokens).
+          - Developed by a team of students from the Institut national des sciences appliquées de Rennes.
+          - More details about the team and the project are available at https://projets-info.insa-rennes.fr/projets/2022/VeraCrypt/index_en.html.
+      - When overwriting an existing file container during volume creation, add its current size to the available free space
+      - Add Corsican language support. Update several translations.
+      - Update documentation
+  - Windows:
+      - Officially, the minimum supported version is now Windows 10. VeraCrypt may still run on Windows 7 and Windows 8/8.1, but no active tests are done on these platforms.
+      - EFI Bootloader:
+          - Fix bug in PasswordTimeout value handling that caused it to be limited to 255 seconds.
+          - Rescue Disk: enhance "Boot Original Windows Loader" by using embedded backup of original Windows loader if it is missing from disk
+          - Addition of Blake2s and removal of RIPEMD160 & GOST89
+      - Enable memory protection by default. Add option under Performance/Driver Configuration to disable it if needed.
+          - Memory protection blocks non-admin processes from reading VeraCrypt memory
+          - It may block Screen Readers (Accessibility support) from reading VeraCrypt UI, in which case it can be disabled
+          - It can be disabled by setting registry value "VeraCryptEnableMemoryProtection" to 0 under HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\veracrypt
+      - Add process mitigation policy to prevent VeraCrypt from being injected by other processes
+      - Minor enhancements to RAM Encryption implementation
+      - Fix Secure Desktop issues under Windows 11 22H2
+      - Implement support for mounting partially encrypted system partitions.
+      - Fix false positive detection of new device insertion when Clear Encryption Keys option is enable (System Encryption case only)
+      - Better implementation of Fast Create when creating file containers that uses UAC to request required privilege if not already held
+      - Allow choosing Fast Create in Format Wizard UI when creating file containers
+      - Fix formatting issues during volume creation on some machines.
+      - Fix stall issue caused by Quick Format of large file containers
+      - Add dropdown menu to Mount button to allow mounting without using the cache.
+      - Possible workaround for logarithmic slowdown for Encrypt-In-Place on large volumes.
+      - Make Expander first check file existence before proceeding further
+      - Allow selecting size unit (KB/MB/GB) for generated keyfiles
+      - Display full list of supported cluster sizes for NTFS, ReFS and exFAT filesystems when creating volumes
+      - Support drag-n-drop of files and keyfiles in Expander.
+      - Implement translation of Expander UI
+      - Replace legacy file/dir selection APIs with modern IFileDialog interface for better Windows 11 compatibility
+      - Enhancements to dependency dlls safe loading, including delay loading.
+      - Remove recommendation of keyfiles files extensions and update documentation to mention risks of third-party file extensions.
+      - Add support for more language in the setup installer
+      - Update LZMA library to version 23.01
+      - Update libzip to version 1.10.1 and zlib to version 1.3.
+      - Linux:
+          - Fix bug in Random generator on Linux when used with Blake2s that was triggering a self test failure.
+          - Modify Random Generator on Linux to exactly match official documentation and the Windows implementation.
+          - Fix compatibility issues with Ubuntu 23.04.
+          - Fix assert messages displayed when using wxWidgets 3.1.6 and newer.
+          - Fix issues launching fsck on Linux.
+          - Fix privilege escalation prompts being ignored.
+          - Fix wrong size for hidden volume when selecting the option to use all free space.
+          - Fix failure to create hidden volume on a disk using CLI caused by wrong maximum size detection.
+          - Fix various issues when running in Text mode:
+              - Don't allow selecting exFAT/BTRFS filesytem if they are not present or not compatible with the created volume.
+              - Fix wrong dismount message displayed when mounting a volume.
+              - Hide PIM during entry and re-ask PIM when user entered a wrong value.
+              - Fix printing error when checking free space during volume creation in path doesn't exist.
+          - Use wxWidgets 3.2.2.1 for static builds (e.g. console only version)
+          - Fix compatibility of generic installers with old Linux distros
+          - Update help message to indicate that when cascading algorithms they must be separated by dash
+          - Better compatibility with building under Alpine Linux and musl libc
+      - macOS:
+          - Fix issue of VeraCrypt window becoming unusable in use cases involving multiple monitors and change in resolution.
+ReleaseNotesUrl: https://github.com/veracrypt/VeraCrypt/releases/tag/VeraCrypt_1.26.7
+ManifestType: defaultLocale
+ManifestVersion: 1.6.0
