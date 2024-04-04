@@ -245,7 +245,7 @@ namespace WinGetApprovalNamespace {
 
 			System.Windows.Forms.Timer timer = new System.Windows.Forms.Timer();
 			timer.Interval = (1 * 1000); // 10 secs
-			timer.Tick += new EventHandler(timer_Run);
+			timer.Tick += new EventHandler(timer_everysecond);
 			timer.Start();
 			
 			this.Text = appTitle + build;
@@ -399,8 +399,6 @@ namespace WinGetApprovalNamespace {
 		}// end drawDataGrid
 
 		public void drawToolTip(ref ToolTip toolTip, ref Button button, string DisplayText, int AutoPopDelay = 5000, int InitialDelay = 1000, int ReshowDelay = 500){
-	
-			// Create the ToolTip and associate with the Form container.
 			toolTip = new ToolTip();
 
 			// Set up the delays for the ToolTip.
@@ -532,7 +530,7 @@ namespace WinGetApprovalNamespace {
  			int col7 = gridItemWidth*inc;inc++;
  			int col8 = gridItemWidth*inc;inc++;
  			int col9 = gridItemWidth*inc;inc++;
- 			
+			
 			table_vm.Columns.Add("vm", typeof(string));
 			table_vm.Columns.Add("status", typeof(string));
 			table_vm.Columns.Add("version", typeof(int));
@@ -563,7 +561,7 @@ namespace WinGetApprovalNamespace {
 			
 			drawDataGrid(ref dataGridView_vm, col0, row0, gridItemWidth*8, gridItemHeight*5);
 			dataGridView_vm.Anchor = AnchorStyles.Top | AnchorStyles.Bottom;
-
+			
  	 }// end drawGoButton
 
 		public void OnResize(object sender, System.EventArgs e) {
@@ -582,12 +580,13 @@ namespace WinGetApprovalNamespace {
 			btn18.Top = ClientRectangle.Height - gridItemHeight;
 			btn11.Top = ClientRectangle.Height - gridItemHeight;
 			btn19.Top = ClientRectangle.Height - gridItemHeight;
+			//btn20.Top = ClientRectangle.Height - gridItemHeight;
 			
 
 			//inputBox_PRNumber.Width = ClientRectangle.Width - gridItemWidth*2;
 		}
 		//Refresh display and buttons 
-		private void timer_Run(object sender, EventArgs e) {
+		private void timer_everysecond(object sender, EventArgs e) {
 			UpdateTableVM();
 			RefreshStatus();
 			dataGridView_vm.AutoResizeColumns();            
@@ -595,26 +594,12 @@ namespace WinGetApprovalNamespace {
 
 		//Hourly Run functionality
 		bool HourLatch = false;
-		if (Int32.Parse(DateTime.Now.ToString("mm")) == 20) {
+		if (Int32.Parse(DateTime.Now.ToString("mm")) == 20 && Int32.Parse(DateTime.Now.ToString("mm")) == 00) {
 			HourLatch = true;
 		}
 		if (HourLatch) {
 			HourLatch = false;
-			Console.Beep(500,250);Console.Beep(500,250);Console.Beep(500,250); //Beep 3x to alert the PC user.
-			string[] PresetList = {"Defender","ToWork2"};
-			foreach (string Preset in PresetList) {
-				dynamic Results = SearchGitHub(Preset,1);
-				if (Results != null) {
-					//foreach (int Result in Results) {
-						// LabelAction(Result);
-					//}
-				}
-			}
-			if (Int32.Parse(DateTime.Now.ToString("mm")) == 20) {
-				string seconds = DateTime.Now.ToString("ss");
-				outBox_val.AppendText(Environment.NewLine + seconds);
-				Thread.Sleep((60-Int32.Parse(seconds))*1000);//If it's still :20 after, sleep out the minute. 
-			}
+			HourlyRun();
 		}
 			//Update PR display
 			string clip = Clipboard.GetText();
@@ -633,13 +618,11 @@ namespace WinGetApprovalNamespace {
 			regex = new Regex(@"^manifests/");
 			if (clip.Contains("Skip to content")) {
 				if (Mode == "Validating") {
-						outBox_val.AppendText(Environment.NewLine + Mode);
 					//ValidateManifest;
 					// Mode | clip
 				}
 			} else if (regex.IsMatch(clip)) {
 				Clipboard.SetText("open manifest");	
-				outBox_val.AppendText(Environment.NewLine + "> " + clip);
 				string ManifestUrl = GitHubBaseUrl+"/tree/master/"+clip;
 				System.Diagnostics.Process.Start(ManifestUrl);
 			}
@@ -663,6 +646,18 @@ namespace WinGetApprovalNamespace {
 			//WindowArrange();
 			//RotateVMs();
 			
+		}
+		
+		public void HourlyRun() {
+			Console.Beep(500,250);Console.Beep(500,250);Console.Beep(500,250); //Beep 3x to alert the PC user.
+			foreach (string Preset in HourlyRun_PresetList) {
+				dynamic Results = SearchGitHub(Preset,1);
+				if (Results != null) {
+					//foreach (int Result in Results) {
+						// LabelAction(Result);
+					//}
+				}
+			}
 		}
 
  		public void RefreshStatus() {
@@ -722,7 +717,7 @@ namespace WinGetApprovalNamespace {
 						table_vm_Row_Index = 0;
 					}
 					table_vm.Clear();//Clear the table
-					dynamic Status = FromCsv(GetContent(StatusFile));
+					dynamic Status = FromCsv(GetContent(StatusFile, true));
 					if (Status != null) {
 						for (int r = 1; r < Status.Length -1; r++){
 							var rowData = Status[r];//Reload the table
@@ -733,7 +728,6 @@ namespace WinGetApprovalNamespace {
 					dataGridView_vm.Rows[table_vm_Row_Index].Selected = true;//Reselect the row.
 				}//end if TestPath
 			} catch (Exception e){
-				outBox_val.AppendText(Environment.NewLine + "e: "+e);//Complain about your failures in the console proxy.
 			}//end try 
 		}//end function
 
@@ -1447,7 +1441,7 @@ namespace WinGetApprovalNamespace {
 								UserInput = LineFromCommitFile(PR,27,MagicStrings[1]);
 							}
 							if (UserInput.Contains("The pull request contains more than one manifest")) {
-								AddPRToRecord(PR,"Feedback");//[ValidateSet("Approved","Blocking","Feedback","Retry","Manual","Closed","Project","Squash","Waiver")]
+								AddPRToRecord(PR,"Feedback");
 								ReplyToPR(PR,"OneManifestPerPR",MagicLabels[30]);
 							}
 							if (UserInput == null) {
@@ -1675,7 +1669,7 @@ namespace WinGetApprovalNamespace {
 			}
 			//}
 		}
-//[ValidateSet("AgreementMismatch","AppFail","Approve","AutomationBlock","AutoValEnd","AppsAndFeaturesNew","AppsAndFeaturesMissing","DriverInstall","DefenderFail","HashFailRegen","InstallerFail","InstallerMissing","InstallerNotSilent","NormalInstall","InstallerUrlBad","ListingDiff","ManValEnd","ManifestVersion","NoCause","NoExe","NoRecentActivity","NotGoodFit","OneManifestPerPR","Only64bit","PackageFail","PackageUrl","Paths","PendingAttendedInstaller","PolicyWrapper","RemoveAsk","SequenceNoElements","Unattended","Unavailable","UrlBad","VersionCount","WhatIsIEDS","WordFilter")]
+//[Message options: ("AgreementMismatch","AppFail","Approve","AutomationBlock","AutoValEnd","AppsAndFeaturesNew","AppsAndFeaturesMissing","DriverInstall","DefenderFail","HashFailRegen","InstallerFail","InstallerMissing","InstallerNotSilent","NormalInstall","InstallerUrlBad","ListingDiff","ManValEnd","ManifestVersion","NoCause","NoExe","NoRecentActivity","NotGoodFit","OneManifestPerPR","Only64bit","PackageFail","PackageUrl","Paths","PendingAttendedInstaller","PolicyWrapper","RemoveAsk","SequenceNoElements","Unattended","Unavailable","UrlBad","VersionCount","WhatIsIEDS","WordFilter")]
 		public string CannedMessage (string Message, string UserInput = "") {
 			string string_out = "";
 			string Username = "@"+UserInput.Replace(" ","")+",";
@@ -1776,7 +1770,7 @@ namespace WinGetApprovalNamespace {
 
 				string Url =ADOMSBaseUrl+"/ed6a5dfa-6e7f-413b-842c-8305dd9e89e6/_apis/build/builds/" + BuildNumber + "/artifacts?artifactName=InstallationVerificationLogs&api-version=7.0&%24format=zip";
 				System.Diagnostics.Process.Start(Url);//This downloads to Windows default location, which has already been set to DestinationPath
-				Thread.Sleep(DownloadSeconds);//Sleep while download completes.
+				Thread.Sleep(DownloadSeconds*1000);//Sleep while download completes.
 
 				RemoveItem(LogPath);
 				using (FileStream compressedFileStream = File.Open(ZipPath, FileMode.Open)){
@@ -1871,11 +1865,6 @@ namespace WinGetApprovalNamespace {
 			}	
 		}
 
-		public string RetryPR(int PR) {
-			AddPRToRecord(PR,"Retry");
-			return InvokeGitHubPRRequest(PR,WebRequestMethods.Http.Post,"comments","@wingetbot run");
-		}
-
 
 
 
@@ -1951,6 +1940,11 @@ namespace WinGetApprovalNamespace {
 			
 			string out_var = InvokeGitHubRequest(Url,WebRequestMethods.Http.Post,Body);
 			return out_var;
+		}
+
+		public string RetryPR(int PR) {
+			AddPRToRecord(PR,"Retry");
+			return InvokeGitHubPRRequest(PR,WebRequestMethods.Http.Post,"comments","@wingetbot run");
 		}
 
 		public string AddGitHubReviewComment(int PR, string Comment,int? StartLine,int Line) {
@@ -2053,7 +2047,6 @@ namespace WinGetApprovalNamespace {
 			List<string> list_comments = new List<string>();
 			bool out_bool = false;
 			dynamic[] comments = FromJson(InvokeGitHubPRRequest(PR,WebRequestMethods.Http.Get,"comments"));
-			// dynamic Labels = FromJson(InvokeGitHubPRRequest(PR ,WebRequestMethods.Http.Get,"labels","","issues"));
 			
 			if (comments != null) {
 				for (int c = 0; c < comments.Length; c++) {
@@ -2065,7 +2058,6 @@ namespace WinGetApprovalNamespace {
 							list_comments = list_comments.Where(n => n != comment).ToList();
 						}
 					}
-				// outBox_val.AppendText(Environment.NewLine + "body " + c + ": " + ToJson(comment) + "\nout_bool: " + out_bool);
 				}
 			}
 			if (list_comments.Count > 0) {
@@ -2204,7 +2196,7 @@ namespace WinGetApprovalNamespace {
 			string string_out = "";
 			try {
 				InvokeWebRequest(Url, "Head");//.StatusCode;
-				string_out = "Status code: 200"
+				string_out = "Status code: 200";
 			}catch (Exception err) {
 				string_out = err.Message;
 			}
@@ -2529,7 +2521,7 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 //////////////////////====================--------------------====================////////////////////
 //////////////////////////////////////////====================////////////////////////////////////////
 //Section needs refactor badly
-		public void SingleFileAutomation(int PR) {
+		public void SingleFileAutomation(int PR) {//Put installer.yaml on your clipboard and run this, and it gets the other files from the latest manifest, then start validation.
 			string clip = Clipboard.GetText();
 			string PackageIdentifier = YamlValue("PackageIdentifier",clip);
 			string version = YamlValue("PackageVersion",clip).Replace("'","").Replace("\"","");
@@ -2542,7 +2534,7 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 			}
 		}
 
-		public void ManifestAutomation(int VM = 0, int	 PR =0, string Arch = "", string OS = "", string Scope = ""){
+		public void ManifestAutomation(int VM = 0, int	 PR =0, string Arch = "", string OS = "", string Scope = ""){//Put installler.yaml on your clipboard and run this, then put locale.yaml on your clipboard and press enter, then put the version (.yaml) on your clipboard and press enter, and it will start validation. 
 			if (VM == 0){
 				VM = NextFreeVM();//.Replace("vm","");
 			}
@@ -2567,20 +2559,7 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 			}
 		}
 
-/*This function doesn't seem to be complete. 
-		public string ManifestOtherAutomation(bool Installer){
-			string[] array_Title = Clipboard.GetText().Split(" version "); //Get PackageIdentifier?
-			string[] array_Version = array_Title[1].Split("#");
-			string PR = Version[1];
-			string string_Title = array_Title[0]
-			string string_Version = array_Version[0]
-			if ($Installer) {
-				$file = FileFromGitHub(Title,Version)
-			}
-		}
-*/
-
-		public int ManifestFile(int PR = 0, string Arch = "", string OS = "", string Scope = "", int VM = 0, string clip = ""){
+		public int ManifestFile(int PR = 0, string Arch = "", string OS = "", string Scope = "", int VM = 0, string clip = ""){//Gets next VM, pulls a flie from the clipboard and puts into the VM's manifest folder, then if it's the Version (.yaml) file, start the VM for validation.  
 			if (VM == 0){
 				VM = NextFreeVM();//.Replace("vm","");
 			}
@@ -3154,7 +3133,7 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 //////////////////////====================--------------------====================////////////////////
 //////////////////////////////////////////====================////////////////////////////////////////
 		public void AddPRToRecord(int PR, string Action, string Title = ""){
-		//[ValidateSet("Approved","Blocking","Feedback","Retry","Manual","Closed","Project","Squash","Waiver")]
+		//[ValidateSet("Approved", "Blocking", "Feedback", "Retry", "Manual", "Closed", "Project", "Squash", "Waiver")]
 			Title = Title.Split('#')[0];
 			string string_out = (PR+","+Action+","+Title + Environment.NewLine);
 			OutFile(LogFile, string_out, true);
@@ -3178,7 +3157,7 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 		}//end function
 
 		public dynamic PRFromRecord(string string_action){
-		//[ValidateSet("Approved","Blocking","Feedback","Retry","Manual","Closed","Project","Squash","Waiver")]
+		
 			PRPopulateRecord();
 			return FromCsv(GetContent(LogFile)).Where(n => n["Action"].Contains(string_action));
 		}
@@ -3265,8 +3244,8 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 			if (Files == true) {
 				URL = GitHubBaseUrl+"/pull/"+PR+"/files";
 			}
+			Thread.Sleep(GitHubRateLimitDelay);
 			System.Diagnostics.Process.Start(URL);
-			Thread.Sleep(GitHubRateLimitDelay)
 		}//end Function
 
 		public string YamlValue(string ContainsString, string YamlString){
@@ -3279,7 +3258,13 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 			return YamlString.Trim();
 		}
 
+		public int GetCurrentPR() {
+			return Int32.Parse(inputBox_PRNumber.Text.Replace("#",""));
+		}
 
+		public int GetSelectedVM() {
+			return Convert.ToInt32(dataGridView_vm.SelectedRows[0].Cells["vm"].Value);
+		}
 
 
 
@@ -3494,7 +3479,7 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 			return csv_out;
 		}
 		//File
-		public string GetContent(string Filename) {
+		public string GetContent(string Filename, bool NoErrorMessage = false) {
 			string string_out = "";
 			try {
 				// Open the text file using a stream reader.
@@ -3503,10 +3488,9 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 					string_out = sr.ReadToEnd();
 				}
 			} catch (IOException e) {
-				string Text = "GetContent - File could not be read:" + Environment.NewLine;
-				Text += Filename + Environment.NewLine;
-				Text += e.Message + Environment.NewLine;
-				MessageBox.Show(Text, "Error");
+				if (NoErrorMessage == false) {
+					MessageBox.Show(e.Message, "Error");
+				}
 			}
 			return string_out;
 		}
@@ -3597,7 +3581,6 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 					}
 					sr.Close();
 				} catch (Exception e) {
-					//MessageBox.Show("Wrong request!" + ex.Message, "Error");
 					response_out = "Response Error: " + e.Message;
 				}
 		return response_out;
@@ -3889,18 +3872,16 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 			ValidateManifest(0,"","",0,"x86","User");
 		}// end Validate_By_ID_Action
 		//Modify PR
-        public void Add_Waiver_Action(object sender, EventArgs e) {
-			int PR = Int32.Parse(inputBox_PRNumber.Text.Replace("#",""));
+		public void Add_Waiver_Action(object sender, EventArgs e) {
+			int PR = GetCurrentPR();
 			dynamic string_out = FromJson(AddWaiver(PR));
-			outBox_val.AppendText(Environment.NewLine + "Waiver: "+PR + " "+ string_out["body"]);
-			//outBox_val.AppendText(Environment.NewLine + CannedMessage("AutoValEnd","testing testing 1..2..3."));
+			AddPRToRecord(PR,"Waiver");
         }// end Approved_Action
 
 		public void Approved_Action(object sender, EventArgs e) {
-			int PR = Int32.Parse(inputBox_PRNumber.Text.Replace("#",""));
+			int PR = GetCurrentPR();
 			dynamic response_out = FromJson(ApprovePR(PR));
-			AddPRToRecord(PR,"Approved");//[ValidateSet("Approved","Blocking","Feedback","Retry","Manual","Closed","Project","Squash","Waiver")]
-			outBox_val.AppendText(Environment.NewLine + "PR "+ PR + ": " + response_out["state"]);
+			AddPRToRecord(PR,"Approved");
         }// end Approved_Action
 
         public void Needs_Author_Feedback_Action(object sender, EventArgs e) {
@@ -3915,53 +3896,47 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 		}// end Needs_Author_Feedback_Action
 
         public void Retry_Action(object sender, EventArgs e) {
-			int PR = Int32.Parse(inputBox_PRNumber.Text.Replace("#",""));
+			int PR = GetCurrentPR();
 			dynamic response_out = FromJson(RetryPR(PR));
-			outBox_val.AppendText(Environment.NewLine + "PR "+ PR + ": " + response_out["body"]);
+			AddPRToRecord(PR,"Retry");
 		}// end Approved_Action
 		
         public void Manually_Validated_Action(object sender, EventArgs e) {
-			int PR = Int32.Parse(inputBox_PRNumber.Text.Replace("#",""));
+			int PR = GetCurrentPR();
 			string response_out = ReplyToPR(PR,"InstallsNormally","Manually-Validated");
-			AddPRToRecord(PR,"Manual");//[ValidateSet("Approved","Blocking","Feedback","Retry","Manual","Closed","Project","Squash","Waiver")]
-			outBox_val.AppendText(Environment.NewLine + "PR "+ PR + ": " + response_out);
+			AddPRToRecord(PR,"Manual");
         }// end Manually_Validated_Action
 		//Modify PR - Close PR
         public void Closed_Action(object sender, EventArgs e) {
-			int PR = Int32.Parse(inputBox_PRNumber.Text.Replace("#",""));
+			int PR = GetCurrentPR();
 			string UserInput = inputBox_User.Text;
 			inputBox_User.Text = "";
-			AddPRToRecord(PR,"Closed");//[ValidateSet("Approved","Blocking","Feedback","Retry","Manual","Closed","Project","Squash","Waiver")]
-			dynamic response_out = FromJson(InvokeGitHubPRRequest(PR,WebRequestMethods.Http.Post,"comments","Close with reason: "+UserInput+";"));
-			outBox_val.AppendText(Environment.NewLine + "PR "+ PR + ": " + response_out["body"]);
+			AddPRToRecord(PR,"Closed");
+			InvokeGitHubPRRequest(PR,WebRequestMethods.Http.Post,"comments","Close with reason: "+UserInput+";");
         }// end Closed_Action
 		
         public void Duplicate_Action(object sender, EventArgs e) {
-			int PR = Int32.Parse(inputBox_PRNumber.Text.Replace("#",""));
+			int PR = GetCurrentPR();
 			int UserInput = Int32.Parse(inputBox_User.Text.Replace("#",""));
 			inputBox_User.Text = "";
-			AddPRToRecord(PR,"Closed");//[ValidateSet("Approved","Blocking","Feedback","Retry","Manual","Closed","Project","Squash","Waiver")]
+			AddPRToRecord(PR,"Closed");
 			dynamic response_out = FromJson(InvokeGitHubPRRequest(PR,WebRequestMethods.Http.Post,"comments","Close with reason: Duplicate of #"+UserInput+";"));
-			outBox_val.AppendText(Environment.NewLine + "PR "+ PR + ": " + response_out["body"]);
         }// end Duplicate_Action
 		
         public void Merge_Conflicts_Action(object sender, EventArgs e) {
-			int PR = Int32.Parse(inputBox_PRNumber.Text.Replace("#",""));
-			AddPRToRecord(PR,"Closed");//[ValidateSet("Approved","Blocking","Feedback","Retry","Manual","Closed","Project","Squash","Waiver")]
+			int PR = GetCurrentPR();
+			AddPRToRecord(PR,"Closed");
 			dynamic response_out = FromJson(InvokeGitHubPRRequest(PR,WebRequestMethods.Http.Post,"comments","Close with reason: Merge Conflicts;"));
-			outBox_val.AppendText(Environment.NewLine + "PR "+ PR + ": " + response_out["body"]);
         }// end Merge_Conflicts_Action
 		//Modify PR
         public void Project_File_Action(object sender, EventArgs e) {
-			int PR = Int32.Parse(inputBox_PRNumber.Text.Replace("#",""));
-			AddPRToRecord(PR,"Project");//[ValidateSet("Approved","Blocking","Feedback","Retry","Manual","Closed","Project","Squash","Waiver")]
-			outBox_val.AppendText(Environment.NewLine + "PR "+ PR + ": " + "Project");
+			int PR = GetCurrentPR();
+			AddPRToRecord(PR,"Project");
         }// end Project_File_Action
 
         public void Squash_Action(object sender, EventArgs e) {
-			int PR = Int32.Parse(inputBox_PRNumber.Text.Replace("#",""));
-			AddPRToRecord(PR,"Squash");//[ValidateSet("Approved","Blocking","Feedback","Retry","Manual","Closed","Project","Squash","Waiver")]
-			outBox_val.AppendText(Environment.NewLine + "PR "+ PR + ": " + "Squash");
+			int PR = GetCurrentPR();
+			AddPRToRecord(PR,"Squash");
         }// end Approved_Action
 		//Update Manifest - In Repo
 		public void Add_Dependency_Repo_Action (object sender, EventArgs e) {
@@ -4031,62 +4006,54 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 		} // end Add_Installer_Switch_Action
 		//Canned Replies
         public void Automation_Block_Action(object sender, EventArgs e) {
-			int PR = Int32.Parse(inputBox_PRNumber.Text.Replace("#",""));
-			AddPRToRecord(PR,"Blocking");//[ValidateSet("Approved","Blocking","Feedback","Retry","Manual","Closed","Project","Squash","Waiver")]
+			int PR = GetCurrentPR();
+			AddPRToRecord(PR,"Blocking");
 			string response_out = ReplyToPR(PR,"AutomationBlock","Network-Blocker");
-			outBox_val.AppendText(Environment.NewLine + "PR "+ PR + ": " + response_out);
 		}// end Automation_Block_Action
 
         public void Check_Installer_Action(object sender, EventArgs e) {
-			int PR = Int32.Parse(inputBox_PRNumber.Text.Replace("#",""));
+			int PR = GetCurrentPR();
 			CheckInstaller(PR);
         }// end Check_Installer_Action
 
         public void Driver_Install_Action(object sender, EventArgs e) {
-			int PR = Int32.Parse(inputBox_PRNumber.Text.Replace("#",""));
+			int PR = GetCurrentPR();
 			string response_out = ReplyToPR(PR,"DriverInstall","DriverInstall");
-			AddPRToRecord(PR,"Blocking");//[ValidateSet("Approved","Blocking","Feedback","Retry","Manual","Closed","Project","Squash","Waiver")]
-			outBox_val.AppendText(Environment.NewLine + "PR "+ PR + ": " + response_out);
+			AddPRToRecord(PR,"Blocking");
         }// end Driver_Install_Action
 		
         public void Installer_Missing_Action(object sender, EventArgs e) {
-			int PR = Int32.Parse(inputBox_PRNumber.Text.Replace("#",""));
-			AddPRToRecord(PR,"Feedback");//[ValidateSet("Approved","Blocking","Feedback","Retry","Manual","Closed","Project","Squash","Waiver")]
+			int PR = GetCurrentPR();
+			AddPRToRecord(PR,"Feedback");
 			string response_out = ReplyToPR(PR,"InstallerMissing",MagicLabels[30]);
-			outBox_val.AppendText(Environment.NewLine + "PR "+ PR + ": " + response_out);
         }// end Installer_Missing_Action
 		
         public void Installer_Not_Silent_Action(object sender, EventArgs e) {
-			int PR = Int32.Parse(inputBox_PRNumber.Text.Replace("#",""));
-			AddPRToRecord(PR,"Feedback");//[ValidateSet("Approved","Blocking","Feedback","Retry","Manual","Closed","Project","Squash","Waiver")]
+			int PR = GetCurrentPR();
+			AddPRToRecord(PR,"Feedback");
 			string response_out = ReplyToPR(PR,"InstallerNotSilent",MagicLabels[30]);
-			outBox_val.AppendText(Environment.NewLine + "PR "+ PR + ": " + response_out);
         }// end Installer_Not_Silent_Action
 		
         public void Needs_PackageUrl_Action(object sender, EventArgs e) {
-			//outBox_val.AppendText(Environment.NewLine + SearchGitHub("Approval")[0]["number"]);
-			Process[] processes = Process.GetProcesses(); 
-			outBox_val.AppendText(Environment.NewLine + processes[0]);
+			int PR = GetCurrentPR();
+			AddPRToRecord(PR,"Feedback");
+			string response_out = ReplyToPR(PR,"PackageUrl",MagicLabels[30]);
         }// end Needs_PackageUrl_Action
 		
         public void One_Manifest_Per_PR_Action(object sender, EventArgs e) {
-			int PR = Int32.Parse(inputBox_PRNumber.Text.Replace("#",""));
-			AddPRToRecord(PR,"Feedback");//[ValidateSet("Approved","Blocking","Feedback","Retry","Manual","Closed","Project","Squash","Waiver")]
+			int PR = GetCurrentPR();
+			AddPRToRecord(PR,"Feedback");
 			string response_out = ReplyToPR(PR,"OneManifestPerPR",MagicLabels[30]);
-			outBox_val.AppendText(Environment.NewLine + "PR "+ PR + ": " + response_out);
         }// end One_Manifest_Per_PR_Action
 		//Open In Browser
         public void Open_Current_PR_Action(object sender, EventArgs e) {
-			int PR = Int32.Parse(inputBox_PRNumber.Text.Replace("#",""));
+			int PR = GetCurrentPR();
 			OpenPRInBrowser(PR);
 			
 			}// end Approved_Action
 
         public void Open_AllUrls_Action(object sender, EventArgs e) {
-			// int PR = Int32.Parse(inputBox_PRNumber.Text.Replace("#",""));
 			string clip = Clipboard.GetText();
-			// string response_out = ToJson(GetVM("vm679"));
-			
 			foreach (int PR in PRNumber(clip,true)) {
 				OpenPRInBrowser(PR);
 				Thread.Sleep(GitHubRateLimitDelay);
@@ -4102,9 +4069,7 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
         }// end Approved_Action
 		
 		public void Open_Repo_Action(object sender, EventArgs e) {
-		// int PR = Int32.Parse(inputBox_PRNumber.Text.Replace("#",""));
-		System.Diagnostics.Process.Start(GitHubBaseUrl);
-		
+			System.Diagnostics.Process.Start(GitHubBaseUrl);
 		}// end Approved_Action
 		
         public void Approval_Run_Search_Action(object sender, EventArgs e) {
@@ -4116,7 +4081,6 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
         }// end Approved_Action
 		//VM Lifecycle - Win10
 		public void Generate_Win10_VM_Image_Action (object sender, EventArgs e) {
-			int VM = Convert.ToInt32(dataGridView_vm.SelectedRows[0].Cells["vm"].Value);
 			GenerateVM("Win10");
 		} // end Generate_VM_Image_Action
 
@@ -4141,7 +4105,6 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 		} // end Attach_Win10_Image_Action
 		//VM Lifecycle - Win11
 		public void Generate_Win11_VM_Image_Action (object sender, EventArgs e) {
-			int VM = Convert.ToInt32(dataGridView_vm.SelectedRows[0].Cells["vm"].Value);
 			GenerateVM("Win11");
 		} // end Generate_VM_Image_Action
 
@@ -4166,18 +4129,15 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 		} // end Attach_Win11_Image_Action
 		//VM Lifecycle
 		public void Disgenerate_VM_Image_Action (object sender, EventArgs e) {
-			int VM = Convert.ToInt32(dataGridView_vm.SelectedRows[0].Cells["vm"].Value);
-			DisgenerateVM(VM);
+			DisgenerateVM(GetSelectedVM());
 		} // end Disgenerate_VM_Image_Action
 
 		public void Launch_Window_Image_Action (object sender, EventArgs e) {
-			int VM = Convert.ToInt32(dataGridView_vm.SelectedRows[0].Cells["vm"].Value);
-			LaunchWindow(VM);
+			LaunchWindow(GetSelectedVM());
 		} // end Launch_Window_Image_Action
 
 		public void Complete_VM_Image_Action (object sender, EventArgs e) {
-			int VM = Convert.ToInt32(dataGridView_vm.SelectedRows[0].Cells["vm"].Value);
-			CompleteVM(VM);
+			CompleteVM(GetSelectedVM());
 		} // end Complete_VM_Image_Action
 		//Help
 		public void About_Click_Action (object sender, EventArgs e) {
@@ -4281,27 +4241,19 @@ public string UpdateArchInPR(int PR, string SearchTerm = "  Architecture: x86", 
 //////////////////////====================--------------------====================////////////////////
 //////////////////////////////////////////====================////////////////////////////////////////
         public void Approving_Action(object sender, EventArgs e) {
-			string Status = "Approving";
-			SetMode(Status);//[ValidateSet("Approving","Idle","IEDS","Validating")]
-			//outBox_val.AppendText(Environment.NewLine + "Status: "+Status);
+			SetMode("Approving");
         }// end Approving_Action
 		
         public void IEDS_Action(object sender, EventArgs e) {
-			string Status = "IEDS";
-			SetMode(Status);//[ValidateSet("Approving","Idle","IEDS","Validating")]
-			//outBox_val.AppendText(Environment.NewLine + "Status: "+Status);
+			SetMode("IEDS");
         }// end IEDS_Action
 		
         public void Validating_Action(object sender, EventArgs e) {
-			string Status = "Validating";
-			SetMode(Status);//[ValidateSet("Approving","Idle","IEDS","Validating")]
-			//outBox_val.AppendText(Environment.NewLine + "Status: "+Status);
+			SetMode("Validating");
         }// end Validating_Action
 		
         public void Idle_Action(object sender, EventArgs e) {
-			string Status = "Idle";
-			SetMode(Status);//[ValidateSet("Approving","Idle","IEDS","Validating")]
-			//outBox_val.AppendText(Environment.NewLine + "Status: "+Status);
+			SetMode("Idle");
         }// end Idle_Action
 
 
@@ -4315,84 +4267,92 @@ public string UpdateArchInPR(int PR, string SearchTerm = "  Architecture: x86", 
 //===================--------------------       Misc Data     --------------------====================
 //////////////////////====================--------------------====================////////////////////
 //////////////////////////////////////////====================////////////////////////////////////////
-public string[] StandardPRComments = {"Validation Pipeline Badge",//Pipeline status
-"wingetbot run",//Run pipelines
-"azp run",//Run pipelines
-"AzurePipelines run",//Run pipelines
-"Azure Pipelines successfully started running 1 pipeline",//Run confirmation
-"The check-in policies require a moderator to approve PRs from the community",//Validation complete 
-"microsoft-github-policy-service agree",//CLA acceptance
-"wingetbot waivers Add",//Any waivers
-"The pull request encountered an internal error and has been assigned to a developer to investigate",//IEDS or other error
-"Manifest Schema Version: 1.4.0 less than 1.5.0 for ID:",//Manifest depreciation for 1.4.0
-"This account is bot account and belongs to CoolPlayLin",//CoolPlayLin's automation
-"This account is automated by Github Actions and the source code was created by CoolPlayLin",//Exorcism0666's automation
-"Response status code does not indicate success",//My automation - removal PR where URL failed status check.
-"Automatic Validation ended with",//My automation - Validation output might be immaterial if unactioned.
-"Manual Validation ended with",//My automation - Validation output might be immaterial if unactioned.
-"No errors to post",//My automation - AutoValLog with no logs.
-"The package didn't pass a Defender or similar security scan",//My automation - DefenderFail.
-"Installer failed security check",//My automation - AutoValLog DefenderFail.
-"Sequence contains no elements",//New Sequence error.
-"Missing Properties value based on version"//New property detection.
-};
+		public string[] StandardPRComments = {
+			"Validation Pipeline Badge",//Pipeline status
+			"wingetbot run",//Run pipelines
+			"azp run",//Run pipelines
+			"AzurePipelines run",//Run pipelines
+			"Azure Pipelines successfully started running 1 pipeline",//Run confirmation
+			"The check-in policies require a moderator to approve PRs from the community",//Validation complete 
+			"microsoft-github-policy-service agree",//CLA acceptance
+			"wingetbot waivers Add",//Any waivers
+			"The pull request encountered an internal error and has been assigned to a developer to investigate",//IEDS or other error
+			"Manifest Schema Version: 1.4.0 less than 1.5.0 for ID:",//Manifest depreciation for 1.4.0
+			"This account is bot account and belongs to CoolPlayLin",//CoolPlayLin's automation
+			"This account is automated by Github Actions and the source code was created by CoolPlayLin",//Exorcism0666's automation
+			"Response status code does not indicate success",//My automation - removal PR where URL failed status check.
+			"Automatic Validation ended with",//My automation - Validation output might be immaterial if unactioned.
+			"Manual Validation ended with",//My automation - Validation output might be immaterial if unactioned.
+			"No errors to post",//My automation - AutoValLog with no logs.
+			"The package didn't pass a Defender or similar security scan",//My automation - DefenderFail.
+			"Installer failed security check",//My automation - AutoValLog DefenderFail.
+			"Sequence contains no elements",//New Sequence error.
+			"Missing Properties value based on version"//New property detection.
+		};
 
-public string[] WordFilterList = {"accept_gdpr ", 
-"accept-licenses", 
-"accept-license", 
-"eula",
-"downloadarchive.documentfoundation.org"
-};
+		public string[] WordFilterList = {
+			"accept_gdpr ", 
+			"accept-licenses", 
+			"accept-license", 
+			"eula",
+			"downloadarchive.documentfoundation.org"
+		};
 
-public string[] CountrySet = {"Default",
-"Warm","Cool","Random","Afghanistan","Albania","Algeria","American Samoa","Andorra","Angola","Anguilla","Antigua And Barbuda","Argentina","Armenia","Aruba","Australia","Austria","Azerbaijan","Bahamas","Bahrain","Bangladesh","Barbados","Belarus","Belgium","Belize","Benin","Bermuda","Bhutan","Bolivia","Bosnia And Herzegovina","Botswana","Bouvet Island","Brazil","Brunei Darussalam","Bulgaria","Burkina Faso","Burundi","Cabo Verde","Cambodia","Cameroon","Canada","Central African Republic","Chad","Chile","China","Colombia","Comoros","Cook Islands","Costa Rica","Croatia","Cuba","Curacao","Cyprus","Czechia","CÃ¶te D'Ivoire","Democratic Republic Of The Congo","Denmark","Djibouti","Dominica","Dominican Republic","Ecuador","Egypt","El Salvador","Equatorial Guinea","Eritrea","Estonia","Eswatini","Ethiopia","Fiji","Finland","France","French Polynesia","Gabon","Gambia","Georgia","Germany","Ghana","Greece","Grenada","Guatemala","Guinea","Guinea-Bissau","Guyana","Haiti","Holy See (Vatican City State)","Honduras","Hungary","Iceland","India","Indonesia","Iran","Iraq","Ireland","Israel","Italy","Jamaica","Japan","Jordan","Kazakhstan","Kenya","Kiribati","Kuwait","Kyrgyzstan","Laos","Latvia","Lebanon","Lesotho","Liberia","Libya","Liechtenstein","Lithuania","Luxembourg","Madagascar","Malawi","Malaysia","Maldives","Mali","Malta","Marshall Islands","Mauritania","Mauritius","Mexico","Micronesia","Moldova","Monaco","Mongolia","Montenegro","Morocco","Mozambique","Myanmar","Namibia","Nauru","Nepal","Netherlands","New Zealand","Nicaragua","Niger","Nigeria","Niue","Norfolk Island","North Korea","North Macedonia","Norway","Oman","Pakistan","Palau","Palestine","Panama","Papua New Guinea","Paraguay","Peru","Philippines","Pitcairn Islands","Poland","Portugal","Qatar","Republic Of The Congo","Romania","Russian Federation","Rwanda","Saint Kitts And Nevis","Saint Lucia","Saint Vincent And The Grenadines","Samoa","San Marino","Sao Tome And Principe","Saudi Arabia","Senegal","Serbia","Seychelles","Sierra Leone","Singapore","Slovakia","Slovenia","Solomon Islands","Somalia","South Africa","South Korea","South Sudan","Spain","Sri Lanka","Sudan","Suriname","Sweden","Switzerland","Syrian Arab Republic","Tajikistan","Tanzania"," United Republic Of","Thailand","Togo","Tonga","Trinidad And Tobago","Tunisia","Turkey","Turkmenistan","Tuvalu","Uganda","Ukraine","United Arab Emirates","United Kingdom","United States","Uruguay","Uzbekistan","Vanuatu","Venezuela","Vietnam","Yemen","Zambia","Zimbabwe","Ã…land Islands"
-};
+		public string[] CountrySet = {
+			"Default", "Warm", "Cool", "Random", "Afghanistan", "Albania", "Algeria", "American Samoa", "Andorra", "Angola", "Anguilla", "Antigua And Barbuda", "Argentina", "Armenia", "Aruba", "Australia", "Austria", "Azerbaijan", "Bahamas", "Bahrain", "Bangladesh", "Barbados", "Belarus", "Belgium", "Belize", "Benin", "Bermuda", "Bhutan", "Bolivia", "Bosnia And Herzegovina", "Botswana", "Bouvet Island", "Brazil", "Brunei Darussalam", "Bulgaria", "Burkina Faso", "Burundi", "Cabo Verde", "Cambodia", "Cameroon", "Canada", "Central African Republic", "Chad", "Chile", "China", "Colombia", "Comoros", "Cook Islands", "Costa Rica", "Croatia", "Cuba", "Curacao", "Cyprus", "Czechia", "CÃ¶te D'Ivoire", "Democratic Republic Of The Congo", "Denmark", "Djibouti", "Dominica", "Dominican Republic", "Ecuador", "Egypt", "El Salvador", "Equatorial Guinea", "Eritrea", "Estonia", "Eswatini", "Ethiopia", "Fiji", "Finland", "France", "French Polynesia", "Gabon", "Gambia", "Georgia", "Germany", "Ghana", "Greece", "Grenada", "Guatemala", "Guinea", "Guinea-Bissau", "Guyana", "Haiti", "Holy See (Vatican City State)", "Honduras", "Hungary", "Iceland", "India", "Indonesia", "Iran", "Iraq", "Ireland", "Israel", "Italy", "Jamaica", "Japan", "Jordan", "Kazakhstan", "Kenya", "Kiribati", "Kuwait", "Kyrgyzstan", "Laos", "Latvia", "Lebanon", "Lesotho", "Liberia", "Libya", "Liechtenstein", "Lithuania", "Luxembourg", "Madagascar", "Malawi", "Malaysia", "Maldives", "Mali", "Malta", "Marshall Islands", "Mauritania", "Mauritius", "Mexico", "Micronesia", "Moldova", "Monaco", "Mongolia", "Montenegro", "Morocco", "Mozambique", "Myanmar", "Namibia", "Nauru", "Nepal", "Netherlands", "New Zealand", "Nicaragua", "Niger", "Nigeria", "Niue", "Norfolk Island", "North Korea", "North Macedonia", "Norway", "Oman", "Pakistan", "Palau", "Palestine", "Panama", "Papua New Guinea", "Paraguay", "Peru", "Philippines", "Pitcairn Islands", "Poland", "Portugal", "Qatar", "Republic Of The Congo", "Romania", "Russian Federation", "Rwanda", "Saint Kitts And Nevis", "Saint Lucia", "Saint Vincent And The Grenadines", "Samoa", "San Marino", "Sao Tome And Principe", "Saudi Arabia", "Senegal", "Serbia", "Seychelles", "Sierra Leone", "Singapore", "Slovakia", "Slovenia", "Solomon Islands", "Somalia", "South Africa", "South Korea", "South Sudan", "Spain", "Sri Lanka", "Sudan", "Suriname", "Sweden", "Switzerland", "Syrian Arab Republic", "Tajikistan", "Tanzania", " United Republic Of", "Thailand", "Togo", "Tonga", "Trinidad And Tobago", "Tunisia", "Turkey", "Turkmenistan", "Tuvalu", "Uganda", "Ukraine", "United Arab Emirates", "United Kingdom", "United States", "Uruguay", "Uzbekistan", "Vanuatu", "Venezuela", "Vietnam", "Yemen", "Zambia", "Zimbabwe", "Ã…land Islands"
+		};
 
-public string[] MagicStrings = {"Installer Verification Analysis Context Information:", //0
-"[error] One or more errors occurred.", //1
-"[error] Manifest Error:", //2
-"BlockingDetectionFound", //3
-"Processing manifest", //4
-"SQL error or missing database", //5
-"Error occurred while downloading installer" //6
-};
+		public string[] MagicStrings = {
+			"Installer Verification Analysis Context Information:", //0
+			"[error] One or more errors occurred.", //1
+			"[error] Manifest Error:", //2
+			"BlockingDetectionFound", //3
+			"Processing manifest", //4
+			"SQL error or missing database", //5
+			"Error occurred while downloading installer" //6
+		};
 
-public string[] MagicLabels = {"Validation-Defender-Error", //0
-"Binary-Validation-Error", //1
-"Error-Analysis-Timeout", //2
-"Error-Hash-Mismatch", //3
-"Error-Installer-Availability", //4
-"Internal-Error", //5
-"Internal-Error-Dynamic-Scan", //6
-"Internal-Error-Manifest", //7
-"Internal-Error-URL", //8
-"Manifest-AppsAndFeaturesVersion-Error", //9
-"Manifest-Installer-Validation-Error", //10
-"Manifest-Validation-Error", //11
-"Possible-Duplicate", //12
-"PullRequest-Error", //13
-"URL-Validation-Error", //14
-"Validation-Domain", //15
-"Validation-Executable-Error", //16
-"Validation-Hash-Verification-Failed", //17
-"Validation-Missing-Dependency", //18
-"Validation-Merge-Conflict", //19
-"Validation-No-Executables", //20
-"Validation-Installation-Error", //21
-"Validation-Shell-Execute", //22
-"Validation-Unattended-Failed", //23
-"Policy-Test-1.2", //24
-"Policy-Test-2.3", //25
-"Validation-Completed", //26
-"Validation-Forbidden-URL-Error", //27
-"Validation-Unapproved-URL", //28
-"Validation-Retry", //29
-"Needs-Author-Feedback",//30
-"Policy-Test-2.3" //31
-};
+		public string[] MagicLabels = {
+			"Validation-Defender-Error", //0
+			"Binary-Validation-Error", //1
+			"Error-Analysis-Timeout", //2
+			"Error-Hash-Mismatch", //3
+			"Error-Installer-Availability", //4
+			"Internal-Error", //5
+			"Internal-Error-Dynamic-Scan", //6
+			"Internal-Error-Manifest", //7
+			"Internal-Error-URL", //8
+			"Manifest-AppsAndFeaturesVersion-Error", //9
+			"Manifest-Installer-Validation-Error", //10
+			"Manifest-Validation-Error", //11
+			"Possible-Duplicate", //12
+			"PullRequest-Error", //13
+			"URL-Validation-Error", //14
+			"Validation-Domain", //15
+			"Validation-Executable-Error", //16
+			"Validation-Hash-Verification-Failed", //17
+			"Validation-Missing-Dependency", //18
+			"Validation-Merge-Conflict", //19
+			"Validation-No-Executables", //20
+			"Validation-Installation-Error", //21
+			"Validation-Shell-Execute", //22
+			"Validation-Unattended-Failed", //23
+			"Policy-Test-1.2", //24
+			"Policy-Test-2.3", //25
+			"Validation-Completed", //26
+			"Validation-Forbidden-URL-Error", //27
+			"Validation-Unapproved-URL", //28
+			"Validation-Retry", //29
+			"Needs-Author-Feedback",//30
+			"Policy-Test-2.3" //31
+		};
+			
+		public string[] HourlyRun_PresetList = {
+			"Defender",
+			"ToWork2"
+		};
     }// end WinGetApprovalPipeline
 }// end WinGetApprovalNamespace
-
 
 
 
@@ -4402,71 +4362,6 @@ public string[] MagicLabels = {"Validation-Defender-Error", //0
 //===================--------------------      Miscellany     --------------------====================
 //////////////////////====================--------------------====================////////////////////
 //////////////////////////////////////////====================////////////////////////////////////////
-/* 
-double result = DateTime.Now.Subtract(DateTime.MinValue).TotalSeconds;
-
-		//SO: You can use the Distinct method to return an IEnumerable<T> of distinct items:
-		//var uniqueItems = yourList.Distinct();
-		//And if you need the sequence of unique items returned as a List<T>, you can add a call to ToList:
-		//var uniqueItemsList = yourList.Distinct().ToList();
-
-			string Path = "issues";
-			string Type = "comments";
-			int PR = Int32.Parse(inputBox_PRNumber.Text.Replace("#",""));
-			string Url = GitHubApiBaseUrl+"/"+Path+"/"+PR+"/"+Type;
-			string response_in = "";
-			string response_out = "";
-			string Body = "Test";//"@wingetbot waivers Add $Waiver"
-			
-			
-			response_in = InvokeGitHubPRRequest(PR, WebRequestMethods.Http.Get,Type,Body);
-			foreach (System.Collections.Generic.Dictionary<string,object> item in FromJson(response_in)) {
-				string myText; 
-				myText = System.String.Format("created_at={0}, id={1}",item["created_at"], item["id"]); 
-				response_out += "- response_list " + myText;//serializer.Serialize(item);
-			}
-
-			outBox_val.AppendText(Environment.NewLine + WebRequestMethods.Http.Get + " " +  Url + " - " + response_out);
-
-		if (TestPath(StatusFile) == "File") {
-				dynamic Records = FromCsv(GetContent(StatusFile));
-				//var Records = csv.GetRecords<class_VMVersion>();
-				outBox_val.AppendText(Environment.NewLine + "Records.Length: "+Records.Length);
-				for (int r = 1; r < Records.Length -1; r++){
-						outBox_val.AppendText(Environment.NewLine + "OS: " + Records[r]["OS"] + " - Version: " + Records[r]["Version"]);
-				}
-			}
-			string response_out = PRHasNonstandardComments(PR).ToString();
-			string_out = string_out.Split('\n').Where(n => n.Contains(Entry)).FirstOrDefault(); // s.IndexOf(": ");
-		//var data = data.Where(p => listOfProducts.Any(l => p.Name == l.Name)).ToList();
-		//var matchingKeys = dict.Where(kvp => kvp.Value == 2).Select(kvp => kvp.Key);
-
-
-		Minimize - OG OPB has UE on minimize bug.
-		public void picMinimize_Click(object sender, EventArgs e) 
-		{
-           try
-           {
-               panelUC.Visible = false;//change visible status of your form, etc.
-               this.WindowState = FormWindowState.Minimized; //minimize
-               minimizedFlag = true;//set a global flag
-           }
-           catch (Exception) {
-
-           }
-
-		} // This is the "expanded" style that I do not like. 
-
-		public void mainForm_Resize(object sender, EventArgs e) {
-          ; //check if form is minimized, and you know that this method is only called if and only if the form get a change in size, meaning somebody clicked in the taskbar on your application
-			if (minimizedFlag == true) {
-				panelUC.Visible = true;    ; //make your panel visible again! thats it
-				minimizedFlag = false;     ; //set flag back
-			}
-		}
-	}
-
-*/
 /* Original drawing
 ................................................................................................................................................................................................................................................
 WinGet Approver - Build 365
