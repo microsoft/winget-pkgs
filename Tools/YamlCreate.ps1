@@ -1,4 +1,4 @@
-[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingWriteHost', '', Justification = 'This script is not intended to have any outputs piped')]
+﻿[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingWriteHost', '', Justification = 'This script is not intended to have any outputs piped')]
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', 'Preserve', Justification = 'The variable is used in a conditional but ScriptAnalyser does not recognize the scope')]
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseSingularNouns', '', Scope = 'Function', Target = 'Read-AppsAndFeaturesEntries',
   Justification = 'Ths function is a wrapper which calls the singular Read-AppsAndFeaturesEntry as many times as necessary. It corresponds exactly to a pluralized manifest field')]
@@ -29,7 +29,7 @@
     https://github.com/microsoft/winget-pkgs/blob/master/Tools/YamlCreate.ps1
 #>
 
-﻿#Requires -Version 5
+#Requires -Version 5
 
 Param
 (
