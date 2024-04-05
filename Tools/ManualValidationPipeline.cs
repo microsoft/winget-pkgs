@@ -1,10 +1,11 @@
 //Copyright 2022-2024 Microsoft Corporation
 //Author: Stephen Gillie
-//Title: WinGet Approval Pipeline v3.-5.1
+//Title: WinGet Approval Pipeline v3.-5.2
 //Created: 1/19/2024
-//Updated: 4/2/2024
+//Updated: 4/4/2024
 //Notes: Tool to streamline evaluating winget-pkgs PRs. 
 //Update log:
+//3.-5.2 - Rewrite AutoValLog to use ZipFile.
 //3.-5.1 - Rewrite a few other functions to use the FindWinGetVersion string output instead unfurling from a Dictionary<string,dynamic> array.
 //3.-5.0 - Rewrite FindWinGetPackage as FindWinGetVersion. Instead of returning a weath of matching package data objects, it only returns the latest version string when the PackageIdentifier is a caps-sensitive exact match. This simpler implementation meets the needs of this application while being much more reliable. 
 //3.-6.0 - Rewrite CheckPRStandardComments as PRHasNonstandardComments. 
@@ -46,9 +47,7 @@ Et cetera:
 - PR counters on certain buttons - Approval-Ready, ToWork, Defender, IEDS
 
 Need work:
-AddValidationData
 WorkSearch
-ListingDiff
 ValidateManifest
 */
 
@@ -85,7 +84,7 @@ using System.Web.Script.Serialization;
 namespace WinGetApprovalNamespace {
     public class WinGetApprovalPipeline : Form {
 		//vars
-        public int build = 608;//Get-RebuildPipeApp	
+        public int build = 612;//Get-RebuildPipeApp	
 		public string appName = "WinGetApprovalPipeline";
 		public string appTitle = "WinGet Approval Pipeline - Build ";
 		public static string owner = "microsoft";
@@ -423,11 +422,7 @@ namespace WinGetApprovalNamespace {
 			this.Menu.MenuItems.Add(item);
 				item.MenuItems.Add("Complete VM", new EventHandler(Complete_VM_Image_Action));
 				item.MenuItems.Add("Relaunch window", new EventHandler(Launch_Window_Image_Action));
-			MenuItem submenu = new MenuItem("Update manifest");
-				item.MenuItems.Add(submenu);
-					submenu.MenuItems.Add("Add dependency (VS2015+)", new EventHandler(Add_Dependency_Disk_Action));
-					submenu.MenuItems.Add("Add installer switch", new EventHandler(Add_Installer_Switch_Action));
-			submenu = new MenuItem("WIn10 Image VM");
+			MenuItem submenu = new MenuItem("WIn10 Image VM");
 				item.MenuItems.Add(submenu);
 					submenu.MenuItems.Add("Generate VM from image", new EventHandler(Generate_Win10_VM_Image_Action)); 
 					submenu.MenuItems.Add("Start", new EventHandler(Start_Win10_Image_Action)); 
@@ -443,28 +438,45 @@ namespace WinGetApprovalNamespace {
 					submenu.MenuItems.Add("Stop", new EventHandler(Stop_Win11_Image_Action)); 
 					submenu.MenuItems.Add("Turn Off", new EventHandler(TurnOff_Win11_Image_Action)); 
 					submenu.MenuItems.Add("Attach new image VM", new EventHandler(Attach_Win11_Image_Action)); 
-				item.MenuItems.Add("Disgenerate VM", new EventHandler(Disgenerate_VM_Image_Action));
+				item.MenuItems.Add("Disgenerate selected VM", new EventHandler(Disgenerate_VM_Image_Action));
+
+			item = new MenuItem("Validate Manifest");
+			this.Menu.MenuItems.Add(item);
+				item.MenuItems.Add("(disabled) Regular Validation", new EventHandler(About_Click_Action));
+				item.MenuItems.Add("(disabled) DSC Configure", new EventHandler(Validate_By_Configure_Action));
+				item.MenuItems.Add("(disabled) By PackageIdentifier (ID)", new EventHandler(About_Click_Action));
+				item.MenuItems.Add("(disabled) By Arch", new EventHandler(About_Click_Action));
+				item.MenuItems.Add("(disabled) By Scope", new EventHandler(About_Click_Action));
+				item.MenuItems.Add("(disabled) Both Arch and Scope", new EventHandler(About_Click_Action));
+			submenu = new MenuItem("Generate manifest for selected VM");
+				item.MenuItems.Add(submenu);
+					submenu.MenuItems.Add("Manifest from clipboard", new EventHandler(About_Click_Action));
+					submenu.MenuItems.Add("Installer.yaml and the rest from GH", new EventHandler(About_Click_Action));
+			submenu = new MenuItem("Update manifest");
+				item.MenuItems.Add(submenu);
+					submenu.MenuItems.Add("Add dependency (VS2015+)", new EventHandler(Add_Dependency_Disk_Action));
+					submenu.MenuItems.Add("Add installer switch (/S)", new EventHandler(Add_Installer_Switch_Action));
 
 			item = new MenuItem("Modify PR");
 			this.Menu.MenuItems.Add(item);
-			submenu = new MenuItem("(disabled) Validate PR");
-				item.MenuItems.Add(submenu);
-					submenu.MenuItems.Add("(disabled) Regular Validation", new EventHandler(About_Click_Action));
-					submenu.MenuItems.Add("(disabled) DSC Configure", new EventHandler(Validate_By_Configure_Action));
-					submenu.MenuItems.Add("(disabled) By PackageIdentifier (ID)", new EventHandler(About_Click_Action));
-					submenu.MenuItems.Add("(disabled) By Arch", new EventHandler(About_Click_Action));
-					submenu.MenuItems.Add("(disabled) By Scope", new EventHandler(About_Click_Action));
-					submenu.MenuItems.Add("(disabled) Both Arch and Scope", new EventHandler(About_Click_Action));
-				item.MenuItems.Add("Add Waiver", new EventHandler(Add_Waiver_Action));
-			submenu = new MenuItem("Update manifest");
-				item.MenuItems.Add(submenu);
-					submenu.MenuItems.Add("Add dependency (VS2015+)", new EventHandler(Add_Dependency_Repo_Action));
-					submenu.MenuItems.Add("Update hash (Specified hash doesn't match.)", new EventHandler(Update_Hash_Action));
-					submenu.MenuItems.Add("Update hash 2 (SHA256 in manifest)", new EventHandler(Update_Hash2_Action));
-					submenu.MenuItems.Add("Update arch", new EventHandler(Update_Arch_Action));
+			item.MenuItems.Add("Add Waiver", new EventHandler(Add_Waiver_Action));
 				item.MenuItems.Add("Approve PR", new EventHandler(Approved_Action));
 				item.MenuItems.Add("(disabled) Needs Author Feedback (reason)", new EventHandler(About_Click_Action));
 				item.MenuItems.Add("Check installer", new EventHandler(Check_Installer_Action));
+			submenu = new MenuItem("Canned Replies");
+				item.MenuItems.Add(submenu);
+					submenu.MenuItems.Add("Automation block", new EventHandler(Automation_Block_Action));
+					submenu.MenuItems.Add("Driver install", new EventHandler(Driver_Install_Action));
+					submenu.MenuItems.Add("Installer missing", new EventHandler(Installer_Missing_Action));
+					submenu.MenuItems.Add("Installer not silent", new EventHandler(Installer_Not_Silent_Action));
+					submenu.MenuItems.Add("Needs PackageUrl", new EventHandler(Needs_PackageUrl_Action));
+					submenu.MenuItems.Add("One manifest per PR", new EventHandler(One_Manifest_Per_PR_Action));
+			submenu = new MenuItem("Update manifest");
+				item.MenuItems.Add(submenu);
+					submenu.MenuItems.Add("Add dependency (VS2015+)", new EventHandler(Add_Dependency_Repo_Action));
+					submenu.MenuItems.Add("Update hash 'Specified hash doesn't match.'", new EventHandler(Update_Hash_Action));
+					submenu.MenuItems.Add("Update hash 2 'SHA256 in manifest...'", new EventHandler(Update_Hash2_Action));
+					submenu.MenuItems.Add("Update architecture (x64)", new EventHandler(Update_Arch_Action));
 				item.MenuItems.Add("Retry PR", new EventHandler(Retry_Action));
 				item.MenuItems.Add("Manual Validation complete", new EventHandler(Manually_Validated_Action));
 			submenu = new MenuItem("Close PR");
@@ -473,11 +485,12 @@ namespace WinGetApprovalNamespace {
 					submenu.MenuItems.Add("Merge Conflicts", new EventHandler(Merge_Conflicts_Action));
 					submenu.MenuItems.Add("Duplicate (dupe of)", new EventHandler(Duplicate_Action));
 				item.MenuItems.Add("Record as Project File", new EventHandler(Project_File_Action));
-				item.MenuItems.Add("Squash-merge", new EventHandler(Squash_Action));
+				item.MenuItems.Add("Record as squash-merge", new EventHandler(Squash_Action));
 
 			item = new MenuItem("Open In Browser");
 			this.Menu.MenuItems.Add(item);
 				item.MenuItems.Add("Current PR", new EventHandler(Open_Current_PR_Action)); 
+				item.MenuItems.Add("PR for selected VM", new EventHandler(Open_Current_PR_Action)); 
 				item.MenuItems.Add("Approval search", new EventHandler(Approval_Search_Action));
 				item.MenuItems.Add("ToWork search", new EventHandler(ToWork_Search_Action)); 
 			submenu = new MenuItem("Open many tabs:");
@@ -489,7 +502,10 @@ namespace WinGetApprovalNamespace {
 				item.MenuItems.Add("WinGet-pkgs Issues", new EventHandler(Open_Repo_Action));
 				item.MenuItems.Add("(disabled) WinGet-cli Issues", new EventHandler(About_Click_Action));
 				item.MenuItems.Add("(disabled) Notifications", new EventHandler(About_Click_Action));
-				
+				item.MenuItems.Add("(disabled) Gitter chat", new EventHandler(About_Click_Action));
+				item.MenuItems.Add("(disabled) Pipeline status", new EventHandler(About_Click_Action));
+				item.MenuItems.Add("(disabled) Dashboard", new EventHandler(About_Click_Action));
+			
 			item = new MenuItem("Help");
 			this.Menu.MenuItems.Add(item);
 				item.MenuItems.Add("About", new EventHandler(About_Click_Action));				
@@ -594,7 +610,9 @@ namespace WinGetApprovalNamespace {
 
 		//Hourly Run functionality
 		bool HourLatch = false;
-		if (Int32.Parse(DateTime.Now.ToString("mm")) == 20 && Int32.Parse(DateTime.Now.ToString("mm")) == 00) {
+		if (Int32.Parse(DateTime.Now.ToString("mm")) == 20 
+		&& Int32.Parse(DateTime.Now.ToString("mm")) > 00
+		&& Int32.Parse(DateTime.Now.ToString("mm")) < 02) {
 			HourLatch = true;
 		}
 		if (HourLatch) {
@@ -1284,199 +1302,199 @@ namespace WinGetApprovalNamespace {
 							ReplyToPR(PR,"AutomationBlock","","Network-Blocker");
 						}
 					} else if (Label == MagicLabels[2]) {
-							UserInput = LineFromCommitFile(PR,36,MagicStrings[0],3);
-							if (UserInput == null) {
-								ReplyToPR(PR,"AutoValEnd",UserInput);
-							}
-							if (UserInput.Contains(MagicStrings[3])) {
-								AddPRToRecord(PR,"Blocking");
-								ReplyToPR(PR,"AutomationBlock","","Network-Blocker");
-							}
-						} else if (Label == MagicLabels[3]) {
-							UserInput = LineFromCommitFile(PR,36,MagicStrings[0],10);
-							if (UserInput == null) {
-								UserInput = LineFromCommitFile(PR,26,MagicStrings[0],10); 
-							}
-							if (UserInput == null) {
-								UserInput = LineFromCommitFile(PR,36,MagicStrings[0],10); 
-							}
-							if (UserInput == null) {
-								UserInput = LineFromCommitFile(PR,37,MagicStrings[0],10); 
-							}
-							if (UserInput == null) {
-								UserInput = LineFromCommitFile(PR,50,MagicStrings[0],10); 
-							}
-							if (UserInput == null) {
-								ReplyToPR(PR,"AutoValEnd",UserInput);
-								//Get-UpdateHashInPR2 -PR $PR -Clip UserInput
-							}
-						} else if (Label == MagicLabels[4]) { 
-							UserInput = LineFromCommitFile(PR,36,MagicStrings[6],5);
-							if (UserInput == null) {
-								ReplyToPR(PR,"AutoValEnd",UserInput);
-								CheckInstaller(PR);
-							}
-						} else if (Label == MagicLabels[5]) {
-							UserInput = LineFromCommitFile(PR,25,MagicStrings[1]);
-							if (UserInput == null) {
-								UserInput = LineFromCommitFile(PR,15,MagicStrings[1]);
-							}
-							if (UserInput == null) {
-								if (UserInput.Contains(MagicStrings[5])) {
-									RetryPR(PR);
-								}
-								ReplyToPR(PR,"AutoValEnd",UserInput);
-							}
-						} else if (Label == MagicLabels[6]) {
-							RetryPR(PR);
-						} else if (Label == MagicLabels[7]) {
-							UserInput = LineFromCommitFile(PR,15,MagicStrings[1]);
-							if (UserInput == null) {
-								UserInput = LineFromCommitFile(PR,25,MagicStrings[4],7);
-							}
-							if (UserInput == null) {
-								UserInput = LineFromCommitFile(PR,39,MagicStrings[4],7);
-							}
-							if (UserInput == null) {
-								if (UserInput.Contains("Sequence contains no elements")) {//Reindex fixes this.
-									ReplyToPR(PR,"SequenceNoElements");
-
-									string PRTitle = FromJson(InvokeGitHubPRRequest(PR,""))["title"];
-									if ((PRTitle.Contains("Automatic deletion")) || (PRTitle.Contains("Remove"))) {
-										ReplyToPR(PR,"","","Manually-Validated","This package installs and launches normally on a Windows 10 VM.");
-									}
-								}
-							}
-						} else if (Label == MagicLabels[8]) {
-							UserInput = LineFromCommitFile(PR,25,MagicStrings[1]);
-							if (UserInput == null) {
-								if (UserInput.Contains(MagicStrings[5])) {
-									RetryPR(PR);
-								}
-								ReplyToPR(PR,"AutoValEnd",UserInput);
-							}
-						} else if (Label == MagicLabels[9]) {
-							UserInput = LineFromCommitFile(PR,25,MagicStrings[2]);
-							if (UserInput == null) {
-								UserInput = LineFromCommitFile(PR,25,MagicStrings[1]);
-							}
-							if (UserInput == null) {
-								UserInput = LineFromCommitFile(PR,15,MagicStrings[2]);
-							}
-							if (UserInput == null) {
-								UserInput = LineFromCommitFile(PR,15,MagicStrings[1]);
-							}
-							if (UserInput == null) {
-								UserInput = LineFromCommitFile(PR,39,MagicStrings[2]);
-							}
-							if (UserInput == null) {
-								UserInput = LineFromCommitFile(PR,39,MagicStrings[1]);
-							}
-							if (UserInput == null) {
-								ReplyToPR(PR,"AutoValEnd",UserInput);
-							}
-						} else if (Label == MagicLabels[10]) {
-							UserInput = LineFromCommitFile(PR,25,MagicStrings[2]);
-							if (UserInput == null) {
-								UserInput = LineFromCommitFile(PR,25,MagicStrings[1]);
-							}
-							if (UserInput == null) {
-								UserInput = LineFromCommitFile(PR,31,MagicStrings[2]);
-							}
-							if (UserInput == null) {
-								UserInput = LineFromCommitFile(PR,31,MagicStrings[1]);
-							}
-							if (UserInput == null) {
-								UserInput = LineFromCommitFile(PR,44,MagicStrings[2]);
-							}
-							if (UserInput == null) {
-								UserInput = LineFromCommitFile(PR,44,MagicStrings[1]);
-							}
-							if (UserInput == null) {
-								UserInput = LineFromCommitFile(PR,15,MagicStrings[2]);
-							}
-							if (UserInput == null) {
-								UserInput = LineFromCommitFile(PR,15,MagicStrings[1]);
-							}
-							if (UserInput == null) {
-								ReplyToPR(PR,"AutoValEnd",UserInput);
-							}
-						} else if (Label == MagicLabels[11]) {//Manifest-Validation-Error
-							UserInput = LineFromCommitFile(PR,25,MagicStrings[2]);
-							if (null == UserInput) {
-								UserInput = LineFromCommitFile(PR,25,MagicStrings[1]);
-							}
-							if (null == UserInput) {
-								UserInput = LineFromCommitFile(PR,31,MagicStrings[2]);
-							}
-							if (null == UserInput) {
-								UserInput = LineFromCommitFile(PR,31,MagicStrings[1]);
-							}
-							if (null == UserInput) {
-								UserInput = LineFromCommitFile(PR,44,MagicStrings[2]);
-							}
-							if (null == UserInput) {
-								UserInput = LineFromCommitFile(PR,44,MagicStrings[1]);
-							}
-							if (null == UserInput) {
-								UserInput = LineFromCommitFile(PR,15,MagicStrings[2]);
-							}
-							if (null == UserInput) {
-								UserInput = LineFromCommitFile(PR,15,MagicStrings[1]);
-							}
-							if (null != UserInput) {
-								ReplyToPR(PR,"AutoValEnd",UserInput);
-							}
-						} else if (Label == MagicLabels[12]) {
-							//Get-GitHubPreset PossibleDuplicate -PR PR
-						} else if (Label == MagicLabels[13]) {
-							UserInput = LineFromCommitFile(PR,24,MagicStrings[1]);
-							if (UserInput == null) {
-								UserInput = LineFromCommitFile(PR,25,MagicStrings[1]);
-							}
-							if (UserInput == null) {
-								UserInput = LineFromCommitFile(PR,14,MagicStrings[1]);
-							}
-							if (UserInput == null) {
-								UserInput = LineFromCommitFile(PR,27,MagicStrings[1]);
-							}
-							if (UserInput.Contains("The pull request contains more than one manifest")) {
-								AddPRToRecord(PR,"Feedback");
-								ReplyToPR(PR,"OneManifestPerPR",MagicLabels[30]);
-							}
-							if (UserInput == null) {
-								ReplyToPR(PR,"AutoValEnd",UserInput);
-							}
-						} else if (Label == MagicLabels[14]) {
-							UserInput = LineFromCommitFile(PR,32,"Validation result: Failed");
+						UserInput = LineFromCommitFile(PR,36,MagicStrings[0],3);
+						if (UserInput != null) {
+							ReplyToPR(PR,"AutoValEnd",UserInput);
+						}
+						if (UserInput.Contains(MagicStrings[3])) {
+							AddPRToRecord(PR,"Blocking");
+							ReplyToPR(PR,"AutomationBlock","","Network-Blocker");
+						}
+					} else if (Label == MagicLabels[3]) {
+						UserInput = LineFromCommitFile(PR,36,MagicStrings[0],10);
+						if (UserInput == null) {
+							UserInput = LineFromCommitFile(PR,26,MagicStrings[0],10); 
+						}
+						if (UserInput == null) {
+							UserInput = LineFromCommitFile(PR,36,MagicStrings[0],10); 
+						}
+						if (UserInput == null) {
+							UserInput = LineFromCommitFile(PR,37,MagicStrings[0],10); 
+						}
+						if (UserInput == null) {
+							UserInput = LineFromCommitFile(PR,50,MagicStrings[0],10); 
+						}
+						if (UserInput != null) {
+							ReplyToPR(PR,"AutoValEnd",UserInput);
+							//Get-UpdateHashInPR2 -PR $PR -Clip UserInput
+						}
+					} else if (Label == MagicLabels[4]) { 
+						UserInput = LineFromCommitFile(PR,36,MagicStrings[6],5);
+						if (UserInput == null) {
+							ReplyToPR(PR,"AutoValEnd",UserInput);
 							CheckInstaller(PR);
-							if (UserInput == null) {
-								ReplyToPR(PR,"AutoValEnd",UserInput);
+						}
+					} else if (Label == MagicLabels[5]) {
+						UserInput = LineFromCommitFile(PR,25,MagicStrings[1]);
+						if (UserInput == null) {
+							UserInput = LineFromCommitFile(PR,15,MagicStrings[1]);
+						}
+						if (UserInput != null) {
+							if (UserInput.Contains(MagicStrings[5])) {
+								RetryPR(PR);
 							}
-						} else if (Label == MagicLabels[15]) {
-						} else if (Label == MagicLabels[16]) {
-							AutoValLog(PR);
-						} else if (Label == MagicLabels[17]) {
-							AutoValLog(PR);
-						} else if (Label == MagicLabels[18]) {
-							UserInput = LineFromCommitFile(PR,25,MagicStrings[1]);
-							if (UserInput == null) {
-								ReplyToPR(PR,"AutoValEnd",UserInput);
-							}
-						} else if (Label == MagicLabels[19]) {
-						} else if (Label == MagicLabels[20]) {
-							string PRTitle = FromJson(InvokeGitHubPRRequest(PR,""))["title"];
-							foreach (Dictionary<string,object> Waiver in GetValidationData("autoWaiverLabel")) {
-								if (PRTitle.Contains((string)Waiver["PackageIdentifier"])) {
-									AddWaiver(PR);
+							ReplyToPR(PR,"AutoValEnd",UserInput);
+						}
+					} else if (Label == MagicLabels[6]) {
+						RetryPR(PR);
+					} else if (Label == MagicLabels[7]) {
+						UserInput = LineFromCommitFile(PR,15,MagicStrings[1]);
+						if (UserInput == null) {
+							UserInput = LineFromCommitFile(PR,25,MagicStrings[4],7);
+						}
+						if (UserInput == null) {
+							UserInput = LineFromCommitFile(PR,39,MagicStrings[4],7);
+						}
+						if (UserInput != null) {
+							if (UserInput.Contains("Sequence contains no elements")) {//Reindex fixes this.
+								ReplyToPR(PR,"SequenceNoElements");
+								string PRTitle = FromJson(InvokeGitHubPRRequest(PR))["title"];
+								if ((PRTitle.Contains("Automatic deletion")) || (PRTitle.Contains("Remove"))) {
+
+									ReplyToPR(PR,"","","Manually-Validated","This package installs and launches normally on a Windows 10 VM.");
 								}
 							}
-						} else if (Label == MagicLabels[21]) {
-							AutoValLog(PR);
-						} else if (Label == MagicLabels[22]) {
-							AutoValLog(PR);
-						} else if (Label == MagicLabels[23]) {
-							AutoValLog(PR);
+						}
+					} else if (Label == MagicLabels[8]) {
+						UserInput = LineFromCommitFile(PR,25,MagicStrings[1]);
+						if (UserInput == null) {
+							if (UserInput.Contains(MagicStrings[5])) {
+								RetryPR(PR);
+							}
+							ReplyToPR(PR,"AutoValEnd",UserInput);
+						}
+					} else if (Label == MagicLabels[9]) {
+						UserInput = LineFromCommitFile(PR,25,MagicStrings[2]);
+						if (UserInput == null) {
+							UserInput = LineFromCommitFile(PR,25,MagicStrings[1]);
+						}
+						if (UserInput == null) {
+							UserInput = LineFromCommitFile(PR,15,MagicStrings[2]);
+						}
+						if (UserInput == null) {
+							UserInput = LineFromCommitFile(PR,15,MagicStrings[1]);
+						}
+						if (UserInput == null) {
+							UserInput = LineFromCommitFile(PR,39,MagicStrings[2]);
+						}
+						if (UserInput == null) {
+							UserInput = LineFromCommitFile(PR,39,MagicStrings[1]);
+						}
+						if (UserInput == null) {
+							ReplyToPR(PR,"AutoValEnd",UserInput);
+						}
+					} else if (Label == MagicLabels[10]) {
+						UserInput = LineFromCommitFile(PR,25,MagicStrings[2]);
+						if (UserInput == null) {
+							UserInput = LineFromCommitFile(PR,25,MagicStrings[1]);
+						}
+						if (UserInput == null) {
+							UserInput = LineFromCommitFile(PR,31,MagicStrings[2]);
+						}
+						if (UserInput == null) {
+							UserInput = LineFromCommitFile(PR,31,MagicStrings[1]);
+						}
+						if (UserInput == null) {
+							UserInput = LineFromCommitFile(PR,44,MagicStrings[2]);
+						}
+						if (UserInput == null) {
+							UserInput = LineFromCommitFile(PR,44,MagicStrings[1]);
+						}
+						if (UserInput == null) {
+							UserInput = LineFromCommitFile(PR,15,MagicStrings[2]);
+						}
+						if (UserInput == null) {
+							UserInput = LineFromCommitFile(PR,15,MagicStrings[1]);
+						}
+						if (UserInput == null) {
+							ReplyToPR(PR,"AutoValEnd",UserInput);
+						}
+					} else if (Label == MagicLabels[11]) {//Manifest-Validation-Error
+						UserInput = LineFromCommitFile(PR,25,MagicStrings[2]);
+						if (null == UserInput) {
+							UserInput = LineFromCommitFile(PR,25,MagicStrings[1]);
+						}
+						if (null == UserInput) {
+							UserInput = LineFromCommitFile(PR,31,MagicStrings[2]);
+						}
+						if (null == UserInput) {
+							UserInput = LineFromCommitFile(PR,31,MagicStrings[1]);
+						}
+						if (null == UserInput) {
+							UserInput = LineFromCommitFile(PR,44,MagicStrings[2]);
+						}
+						if (null == UserInput) {
+							UserInput = LineFromCommitFile(PR,44,MagicStrings[1]);
+						}
+						if (null == UserInput) {
+							UserInput = LineFromCommitFile(PR,15,MagicStrings[2]);
+						}
+						if (null == UserInput) {
+							UserInput = LineFromCommitFile(PR,15,MagicStrings[1]);
+						}
+						if (null != UserInput) {
+							ReplyToPR(PR,"AutoValEnd",UserInput);
+						}
+					} else if (Label == MagicLabels[12]) {
+						//Get-GitHubPreset PossibleDuplicate -PR PR
+					} else if (Label == MagicLabels[13]) {
+						UserInput = LineFromCommitFile(PR,24,MagicStrings[1]);
+						if (UserInput == null) {
+							UserInput = LineFromCommitFile(PR,25,MagicStrings[1]);
+						}
+						if (UserInput == null) {
+							UserInput = LineFromCommitFile(PR,14,MagicStrings[1]);
+						}
+						if (UserInput == null) {
+							UserInput = LineFromCommitFile(PR,27,MagicStrings[1]);
+						}
+						if (UserInput.Contains("The pull request contains more than one manifest")) {
+							AddPRToRecord(PR,"Feedback");
+							ReplyToPR(PR,"OneManifestPerPR",MagicLabels[30]);
+						}
+						if (UserInput == null) {
+							ReplyToPR(PR,"AutoValEnd",UserInput);
+						}
+					} else if (Label == MagicLabels[14]) {
+						UserInput = LineFromCommitFile(PR,32,"Validation result: Failed");
+						CheckInstaller(PR);
+						if (UserInput == null) {
+							ReplyToPR(PR,"AutoValEnd",UserInput);
+						}
+					} else if (Label == MagicLabels[15]) {
+					} else if (Label == MagicLabels[16]) {
+						AutoValLog(PR);
+					} else if (Label == MagicLabels[17]) {
+						AutoValLog(PR);
+					} else if (Label == MagicLabels[18]) {
+						UserInput = LineFromCommitFile(PR,25,MagicStrings[1]);
+						if (UserInput == null) {
+							ReplyToPR(PR,"AutoValEnd",UserInput);
+						}
+					} else if (Label == MagicLabels[19]) {
+					} else if (Label == MagicLabels[20]) {
+						string PRTitle = FromJson(InvokeGitHubPRRequest(PR,""))["title"];
+						foreach (Dictionary<string,object> Waiver in GetValidationData("autoWaiverLabel")) {
+							if (PRTitle.Contains((string)Waiver["PackageIdentifier"])) {
+								AddWaiver(PR);
+							}
+						}
+					} else if (Label == MagicLabels[21]) {
+						AutoValLog(PR);
+					} else if (Label == MagicLabels[22]) {
+						AutoValLog(PR);
+					} else if (Label == MagicLabels[23]) {
+						AutoValLog(PR);
 					}//end if Label
 				}//end foreach Label
 			}//end if Label
@@ -1773,13 +1791,7 @@ namespace WinGetApprovalNamespace {
 				Thread.Sleep(DownloadSeconds*1000);//Sleep while download completes.
 
 				RemoveItem(LogPath);
-				using (FileStream compressedFileStream = File.Open(ZipPath, FileMode.Open)){
-					using (FileStream outputFileStream = File.Create(DestinationPath)){
-						using (var decompressor = new DeflateStream(compressedFileStream, CompressionMode.Decompress)){
-							decompressor.CopyTo(outputFileStream);
-						}
-					}
-				}
+				ZipFile.ExtractToDirectory(ZipPath, DestinationPath);
 				RemoveItem(ZipPath);
 				List<string> UserInput = new List<string>();
 
@@ -1789,16 +1801,16 @@ namespace WinGetApprovalNamespace {
 							System.Diagnostics.Process.Start(file);
 						} //Open PNGs with default app.
 							string[] fileContents = GetContent(file).Split('\n');
-							UserInput.Concat(fileContents.Where(n => n.Contains("[[]FAIL[]]")).ToList());
-							UserInput.Concat(fileContents.Where(n => n.Contains("error")).ToList());
-							UserInput.Concat(fileContents.Where(n => n.Contains("exception")).ToList());
-							UserInput.Concat(fileContents.Where(n => n.Contains("exit code")).ToList());
-							UserInput.Concat(fileContents.Where(n => n.Contains("fail")).ToList());
-							UserInput.Concat(fileContents.Where(n => n.Contains("No suitable")).ToList());
-							UserInput.Concat(fileContents.Where(n => n.Contains("not supported")).ToList());//not supported by this processor type
+							UserInput.AddRange(fileContents.Where(n => n.Contains("[FAIL]")).ToList());
+							UserInput.AddRange(fileContents.Where(n => n.Contains("error")).ToList());
+							UserInput.AddRange(fileContents.Where(n => n.Contains("exception")).ToList());
+							UserInput.AddRange(fileContents.Where(n => n.Contains("exit code")).ToList());
+							UserInput.AddRange(fileContents.Where(n => n.Contains("fail")).ToList());
+							UserInput.AddRange(fileContents.Where(n => n.Contains("No suitable")).ToList());
+							UserInput.AddRange(fileContents.Where(n => n.Contains("not supported")).ToList());//not supported by this processor type
 							// UserInput += fileContents.Where(n => n.Contains("not applicable")).ToList());
-							UserInput.Concat(fileContents.Where(n => n.Contains("Unable to locate nested installer")).ToList());
-							UserInput.Concat(fileContents.Where(n => n.Contains("Windows cannot install package")).ToList());
+							UserInput.AddRange(fileContents.Where(n => n.Contains("Unable to locate nested installer")).ToList());
+							UserInput.AddRange(fileContents.Where(n => n.Contains("Windows cannot install package")).ToList());
 					}
 
 				if (UserInput != null) {
@@ -1831,16 +1843,19 @@ namespace WinGetApprovalNamespace {
 					UserInput = UserInput.Where(n => !n.Contains("with working directory \"D:TOOLS\".")).ToList();
 					UserInput = UserInput.Distinct().ToList();
 
-					string message = "Automatic Validation ended with:" + Environment.NewLine + string.Join(Environment.NewLine+"> ",UserInput) +Environment.NewLine +Environment.NewLine + "(Automated response - build "+build+".)";
+					string message = "Automatic Validation ended with:" + Environment.NewLine + Environment.NewLine + "> " + string.Join(Environment.NewLine+"> ",UserInput) +Environment.NewLine + Environment.NewLine + Environment.NewLine + "(Automated response - build "+build+".)";
 
-					string_out = ReplyToPR(PR,message);
+					// outBox_val.AppendText(Environment.NewLine + "PR " + PR + "message " + message);
+					string_out = ReplyToPR(PR,"",message);
 				} else {
-					string message = "Automatic Validation ended with:" + Environment.NewLine+"> No errors to post."+Environment.NewLine + Environment.NewLine +"(Automated response - build "+build+".)";
-					string_out = ReplyToPR(PR,message);
+					string message = "Automatic Validation ended with:" + Environment.NewLine + Environment.NewLine + "> No errors to post."+Environment.NewLine + Environment.NewLine + Environment.NewLine +"(Automated response - build "+build+".)";
+					// outBox_val.AppendText(Environment.NewLine + "PR " + PR + "message " + message);
+					string_out = ReplyToPR(PR,"",message);
 				}
 			} else {
-				string message = "Automatic Validation ended with:" + Environment.NewLine+"> ADO Build not found."+Environment.NewLine + Environment.NewLine +"(Automated response - build "+build+".)";
-				string_out = ReplyToPR(PR,message);
+				string message = "Automatic Validation ended with:" + Environment.NewLine + Environment.NewLine + "> ADO Build not found."+Environment.NewLine + Environment.NewLine +"(Automated response - build "+build+".)";
+				string_out = ReplyToPR(PR,"",message);
+				// outBox_val.AppendText(Environment.NewLine + "AutoValLog: " + Environment.NewLine + message);
 			}
 			return string_out;
 		}
@@ -2193,10 +2208,9 @@ namespace WinGetApprovalNamespace {
 			dynamic Pull = FromJson(InvokeGitHubPRRequest(PR,WebRequestMethods.Http.Get,"files"));
 			string PullInstallerContents = DecodeGitHubFile(FromJson(InvokeGitHubRequest(Pull[0]["contents_url"]))["content"]);
 			string Url = YamlValue("InstallerUrl",PullInstallerContents);
-			string string_out = "";
+			string string_out = "Status code: 200";
 			try {
 				InvokeWebRequest(Url, "Head");//.StatusCode;
-				string_out = "Status code: 200";
 			}catch (Exception err) {
 				string_out = err.Message;
 			}
@@ -2249,7 +2263,6 @@ namespace WinGetApprovalNamespace {
 
 
 
-
 //////////////////////////////////////////====================////////////////////////////////////////
 //////////////////////====================--------------------====================////////////////////
 //===================------------------- Validation Starts Here ------------------====================
@@ -2257,6 +2270,17 @@ namespace WinGetApprovalNamespace {
 //////////////////////////////////////////====================////////////////////////////////////////
 
 public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string PackageVersion = "", int PR = 0, string Arch = "",string Scope = "", string InstallerType = "",string OS = "",string Locale = "",bool InspectNew = false,bool notElevated = false,string MinimumOSVersion = "", string ManualDependency = "", bool NoFiles = false, string installerLine = "", string Operation = "Scan"){
+	/* Vaidation orchestration
+	Construct WinGet args string and populate script variables.
+	- if Configure - skip all of this and just add the Configure file as the WinGet arg.
+	Construct the VM script from the script variables and output to commands file.
+	- if Configure - Construct a similar script and perform the same output.
+	Construct the manifest from the files in the clipboard.
+	- if NoFiles, skip.
+	Perform new package inspection.
+	- if not InspectNew, skip.
+	Revert selected VM and launch its window.
+	*/
 		if (VM == 0) {
 			VM = NextFreeVM(OS);//.Replace("vm","");
 		}
@@ -2298,17 +2322,6 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 		}
 		string optionsLine = "";
 
-	/*Sections:
-	Construct WinGet args string and populate script variables.
-	- if Configure - skip all of this and just add the Configure file as the WinGet arg.
-	Construct the VM script from the script variables and output to commands file.
-	- if Configure - Construct a similar script and perform the same output.
-	Construct the manifest from the files in the clipboard.
-	- if NoFiles, skip.
-	Perform new package inspection.
-	- if not InspectNew, skip.
-	Revert selected VM and launch its window.
-	*/
 	
 	if (VM == 0){
 		//Write-Host "No available OS VMs";

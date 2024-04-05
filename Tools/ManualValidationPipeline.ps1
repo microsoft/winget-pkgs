@@ -32,7 +32,6 @@ $writeFolder = "$MainFolder\write" #Folder with write permissions
 $vmCounter = "$MainFolder\vmcounter.txt"
 $VMversion = "$MainFolder\VMversion.txt"
 $StatusFile = "$writeFolder\status.csv"
-$timecardfile = "$logsFolder\timecard.txt"
 $TrackerModeFile = "$logsFolder\trackermode.txt"
 $LogFile = "$MainFolder\misc\ApprovedPRs.txt"
 $PeriodicRunLog = "$MainFolder\misc\PeriodicRunLog.txt"
@@ -4337,48 +4336,6 @@ Function Add-DependencyToPR {
 	$out = ""
 	foreach ($Line in $LineNumbers) {
 		$out += Add-GitHubReviewComment -PR $PR -Comment $comment -Line $Line -Policy "Needs-Author-Feedback"
-	}
-}
-
-#Timeclock
-Function Get-TimeclockSet {
-	Param(
-		[ValidateSet("Start","Stop")][string]$mode = "Start",
-		$time = (Get-Date -Format s),
-		$timeStamp = (Get-Date $time -Format s)
-	)
-	if (Get-TimeRunning) { $mode = "Stop"}
-	$timeStamp + " "+ $mode >> $timecardfile
-}
-
-Function Get-Timeclock {
-	Param(
-	)
-	Get-Content $timecardfile | Select-Object @{n="Date";e={Get-Date ($_ -split " ")[0]}},@{n="State";e={($_ -split " ")[1]}}
-	#
-}
-
-Function Get-HoursWorkedToday {
-	Param(
-		$Today = (Get-Date).Day
-	)
-	[array]$time = (Get-Timeclock).date | Where-Object {(Get-Date $_.date).day -eq $Today} | ForEach-Object {($_ -split " ")[1]}
-	if (($time.count % 2) -eq 1) {
-		$time += (Get-Date -f T)
-	}
-	$aggregator = 0;
-	for ($incrementor=0;$incrementor -lt $time.count; $incrementor=$incrementor+2){
-		$aggregator += ( Get-Date $time[$incrementor+1]) - (Get-Date $time[$incrementor])
-		#Write-Host $aggregator
-	};
-	[math]::Round($aggregator.totalHours,2)
-}
-
-Function Get-TimeRunning {
-	if (((Get-Content $timecardfile)[-1] -split " ")[1] -eq "Start"){
-		$True
-	} else {
-		$False
 	}
 }
 
