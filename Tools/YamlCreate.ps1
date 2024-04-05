@@ -1,10 +1,35 @@
-﻿#Requires -Version 5
-[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingWriteHost', '', Justification = 'This script is not intended to have any outputs piped')]
+﻿[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingWriteHost', '', Justification = 'This script is not intended to have any outputs piped')]
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', 'Preserve', Justification = 'The variable is used in a conditional but ScriptAnalyser does not recognize the scope')]
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseSingularNouns', '', Scope = 'Function', Target = 'Read-AppsAndFeaturesEntries',
   Justification = 'Ths function is a wrapper which calls the singular Read-AppsAndFeaturesEntry as many times as necessary. It corresponds exactly to a pluralized manifest field')]
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseSingularNouns', '', Scope = 'Function', Target = '*Metadata',
   Justification = 'Metadata is used as a mass noun and is therefore singular in the cases used in this script')]
+
+<#
+.SYNOPSIS
+    WinGet Manifest creation helper script
+.DESCRIPTION
+    This file intends to help you generate a manifest for publishing
+    to the Windows Package Manager repository.
+
+    It'll attempt to download an installer from the user-provided URL to calculate
+    a checksum. That checksum and the rest of the input data will be compiled into
+    a set of .yaml files.
+    file.
+.EXAMPLE
+    PS C:\Projects\winget-pkgs> Get-Help .\Tools\YamlCreate.ps1 -Full
+    Show this script's help
+.EXAMPLE
+    PS C:\Projects\winget-pkgs> .\Tools\YamlCreate.ps1
+    Run the script to create a manifest file
+.NOTES
+    Please file an issue if you run into errors with this script:
+    https://github.com/microsoft/winget-pkgs/issues
+.LINK
+    https://github.com/microsoft/winget-pkgs/blob/master/Tools/YamlCreate.ps1
+#>
+
+#Requires -Version 5
 
 Param
 (
@@ -30,7 +55,7 @@ if ($help) {
   exit
 }
 
-# Custom menu prompt that listens for keypresses. Requires a prompt and array of entries at minimum. Entries preceeded with `*` are shown in green
+# Custom menu prompt that listens for key presses. Requires a prompt and array of entries at minimum. Entries preceeded with `*` are shown in green
 # Returns a console key value
 Function Invoke-KeypressMenu {
   Param
@@ -203,29 +228,6 @@ $SchemaUrls = @{
   locale        = if ($useDirectSchemaLink) { "https://raw.githubusercontent.com/microsoft/winget-cli/master/schemas/JSON/manifests/v$ManifestVersion/manifest.locale.$ManifestVersion.json" } else { "https://aka.ms/winget-manifest.locale.$ManifestVersion.schema.json" }
   installer     = if ($useDirectSchemaLink) { "https://raw.githubusercontent.com/microsoft/winget-cli/master/schemas/JSON/manifests/v$ManifestVersion/manifest.installer.$ManifestVersion.json" } else { "https://aka.ms/winget-manifest.installer.$ManifestVersion.schema.json" }
 }
-
-<#
-.SYNOPSIS
-    Winget Manifest creation helper script
-.DESCRIPTION
-    The intent of this file is to help you generate a manifest for publishing
-    to the Windows Package Manager repository.
-
-    It'll attempt to download an installer from the user-provided URL to calculate
-    a checksum. That checksum and the rest of the input data will be compiled in a
-    .YAML file.
-.EXAMPLE
-    PS C:\Projects\winget-pkgs> Get-Help .\Tools\YamlCreate.ps1 -Full
-    Show this script's help
-.EXAMPLE
-    PS C:\Projects\winget-pkgs> .\Tools\YamlCreate.ps1
-    Run the script to create a manifest file
-.NOTES
-    Please file an issue if you run into errors with this script:
-    https://github.com/microsoft/winget-pkgs/issues/
-.LINK
-    https://github.com/microsoft/winget-pkgs/blob/master/Tools/YamlCreate.ps1
-#>
 
 # Fetch Schema data from github for entry validation, key ordering, and automatic commenting
 try {
