@@ -5,11 +5,8 @@
 //Updated: 4/4/2024
 //Notes: Tool to streamline evaluating winget-pkgs PRs. 
 //Update log:
+//3.-5.3 - Rewrite NextFreeVM.
 //3.-5.2 - Rewrite AutoValLog to use ZipFile.
-//3.-5.1 - Rewrite a few other functions to use the FindWinGetVersion string output instead unfurling from a Dictionary<string,dynamic> array.
-//3.-5.0 - Rewrite FindWinGetPackage as FindWinGetVersion. Instead of returning a weath of matching package data objects, it only returns the latest version string when the PackageIdentifier is a caps-sensitive exact match. This simpler implementation meets the needs of this application while being much more reliable. 
-//3.-6.0 - Rewrite CheckPRStandardComments as PRHasNonstandardComments. 
-//3.-7.0 - Update menus and connect with event handlers.
 
 
 
@@ -84,7 +81,7 @@ using System.Web.Script.Serialization;
 namespace WinGetApprovalNamespace {
     public class WinGetApprovalPipeline : Form {
 		//vars
-        public int build = 612;//Get-RebuildPipeApp	
+        public int build = 633;//Get-RebuildPipeApp	
 		public string appName = "WinGetApprovalPipeline";
 		public string appTitle = "WinGet Approval Pipeline - Build ";
 		public static string owner = "microsoft";
@@ -136,7 +133,7 @@ namespace WinGetApprovalNamespace {
 		//public string SystemRAM = (Get-CimInstance Win32_PhysicalMemory | Measure-Object -Property capacity -Sum).sum /1gb;
 
 		public int displayLine = 0;
-
+		
 		public static string string_PRRegex = "[0-9]{5,6}";
 		public static string string_hashPRRegex = "[#]"+string_PRRegex;
 		public static string string_hashPRRegexEnd = string_hashPRRegex+"$";
@@ -442,16 +439,16 @@ namespace WinGetApprovalNamespace {
 
 			item = new MenuItem("Validate Manifest");
 			this.Menu.MenuItems.Add(item);
-				item.MenuItems.Add("(disabled) Regular Validation", new EventHandler(About_Click_Action));
-				item.MenuItems.Add("(disabled) DSC Configure", new EventHandler(Validate_By_Configure_Action));
-				item.MenuItems.Add("(disabled) By PackageIdentifier (ID)", new EventHandler(About_Click_Action));
-				item.MenuItems.Add("(disabled) By Arch", new EventHandler(About_Click_Action));
-				item.MenuItems.Add("(disabled) By Scope", new EventHandler(About_Click_Action));
-				item.MenuItems.Add("(disabled) Both Arch and Scope", new EventHandler(About_Click_Action));
+				item.MenuItems.Add("Regular Validation", new EventHandler(Validate_Manifest_Action));
+				item.MenuItems.Add("DSC Configure", new EventHandler(Validate_By_Configure_Action));
+				item.MenuItems.Add("By PackageIdentifier (ID)", new EventHandler(Validate_By_ID_Action));
+				item.MenuItems.Add("By Arch", new EventHandler(Validate_By_Arch_Action));
+				item.MenuItems.Add("By Scope", new EventHandler(Validate_By_Scope_Action));
+				item.MenuItems.Add("Both Arch and Scope", new EventHandler(Validate_By_Arch_And_Scope_Action));
 			submenu = new MenuItem("Generate manifest for selected VM");
 				item.MenuItems.Add(submenu);
-					submenu.MenuItems.Add("Manifest from clipboard", new EventHandler(About_Click_Action));
-					submenu.MenuItems.Add("Installer.yaml and the rest from GH", new EventHandler(About_Click_Action));
+					submenu.MenuItems.Add("Manifest from clipboard", new EventHandler(Manifest_From_Clipboard));
+					submenu.MenuItems.Add("Installer.yaml and the rest from GH", new EventHandler(Single_File_Automation_Action));
 			submenu = new MenuItem("Update manifest");
 				item.MenuItems.Add(submenu);
 					submenu.MenuItems.Add("Add dependency (VS2015+)", new EventHandler(Add_Dependency_Disk_Action));
@@ -461,7 +458,7 @@ namespace WinGetApprovalNamespace {
 			this.Menu.MenuItems.Add(item);
 			item.MenuItems.Add("Add Waiver", new EventHandler(Add_Waiver_Action));
 				item.MenuItems.Add("Approve PR", new EventHandler(Approved_Action));
-				item.MenuItems.Add("(disabled) Needs Author Feedback (reason)", new EventHandler(About_Click_Action));
+				item.MenuItems.Add("(disabled) Needs Author Feedback (reason)", new EventHandler(Needs_Author_Feedback_Action));
 				item.MenuItems.Add("Check installer", new EventHandler(Check_Installer_Action));
 			submenu = new MenuItem("Canned Replies");
 				item.MenuItems.Add(submenu);
@@ -490,7 +487,7 @@ namespace WinGetApprovalNamespace {
 			item = new MenuItem("Open In Browser");
 			this.Menu.MenuItems.Add(item);
 				item.MenuItems.Add("Current PR", new EventHandler(Open_Current_PR_Action)); 
-				item.MenuItems.Add("PR for selected VM", new EventHandler(Open_Current_PR_Action)); 
+				item.MenuItems.Add("PR for selected VM", new EventHandler(Open_PR_Selected_VM_Action)); 
 				item.MenuItems.Add("Approval search", new EventHandler(Approval_Search_Action));
 				item.MenuItems.Add("ToWork search", new EventHandler(ToWork_Search_Action)); 
 			submenu = new MenuItem("Open many tabs:");
@@ -498,13 +495,13 @@ namespace WinGetApprovalNamespace {
 					submenu.MenuItems.Add("All PRs on clipboard", new EventHandler(Open_AllUrls_Action)); 
 					submenu.MenuItems.Add("Full Approval Run", new EventHandler(Approval_Run_Search_Action));
 					submenu.MenuItems.Add("Full ToWork Run", new EventHandler(ToWork_Run_Search_Action));
-					submenu.MenuItems.Add("(disabled) Start Of Day", new EventHandler(About_Click_Action));
-				item.MenuItems.Add("WinGet-pkgs Issues", new EventHandler(Open_Repo_Action));
-				item.MenuItems.Add("(disabled) WinGet-cli Issues", new EventHandler(About_Click_Action));
-				item.MenuItems.Add("(disabled) Notifications", new EventHandler(About_Click_Action));
-				item.MenuItems.Add("(disabled) Gitter chat", new EventHandler(About_Click_Action));
-				item.MenuItems.Add("(disabled) Pipeline status", new EventHandler(About_Click_Action));
-				item.MenuItems.Add("(disabled) Dashboard", new EventHandler(About_Click_Action));
+					submenu.MenuItems.Add("(disabled) Start Of Day", new EventHandler(Start_Of_Day_Action));
+				item.MenuItems.Add("WinGet-pkgs repo", new EventHandler(Open_PKGS_Repo_Action));
+				item.MenuItems.Add("WinGet-cli repo", new EventHandler(Open_CLI_Repo_Action));
+				item.MenuItems.Add("Notifications mentions", new EventHandler(Open_Notifications_Action));
+				item.MenuItems.Add("Gitter chat", new EventHandler(Open_Gitter_Action));
+				item.MenuItems.Add("Pipeline status", new EventHandler(Open_Pipeline_Action));
+				item.MenuItems.Add("Dashboard", new EventHandler(Open_Dashboard_Action));
 			
 			item = new MenuItem("Help");
 			this.Menu.MenuItems.Add(item);
@@ -512,13 +509,6 @@ namespace WinGetApprovalNamespace {
 
 			this.BackColor = color_DefaultBack;
 			this.ForeColor = color_DefaultText;
-			//Preferences
-			//Window arrangement
-			//Advanced mode (no warnings!)
-			//Hourly Run
-			//Enable waivers
-			//Enable approvals
-			//Enable clipboard watching (manifests/)
 		}// end drawMenuBar
 
 		public void drawUrlBoxAndGoButton(){
@@ -596,10 +586,6 @@ namespace WinGetApprovalNamespace {
 			btn18.Top = ClientRectangle.Height - gridItemHeight;
 			btn11.Top = ClientRectangle.Height - gridItemHeight;
 			btn19.Top = ClientRectangle.Height - gridItemHeight;
-			//btn20.Top = ClientRectangle.Height - gridItemHeight;
-			
-
-			//inputBox_PRNumber.Width = ClientRectangle.Width - gridItemWidth*2;
 		}
 		//Refresh display and buttons 
 		private void timer_everysecond(object sender, EventArgs e) {
@@ -622,14 +608,13 @@ namespace WinGetApprovalNamespace {
 			//Update PR display
 			string clip = Clipboard.GetText();
 			Regex regex = new Regex("^[0-9]{6}$");
-			string[] clipSplit = clip.Replace("\r\n","\n").Replace("\n"," ").Replace("/"," ").Replace("#"," ").Split(' ');
+			string[] clipSplit = clip.Replace("\r\n","\n").Replace("\n"," ").Replace("/"," ").Replace("#"," ").Replace(";"," ").Split(' ');
 			string c = clipSplit.Where(n => regex.IsMatch(n)).FirstOrDefault();
 			if (null != c) {
 				if (regex.IsMatch(c)) {
 					inputBox_PRNumber.Text = "#"+c;
 				}
 			}
-			
 
 			string Mode = GetMode();
 			//Automatic clipboard actions
@@ -1846,15 +1831,15 @@ namespace WinGetApprovalNamespace {
 					string message = "Automatic Validation ended with:" + Environment.NewLine + Environment.NewLine + "> " + string.Join(Environment.NewLine+"> ",UserInput) +Environment.NewLine + Environment.NewLine + Environment.NewLine + "(Automated response - build "+build+".)";
 
 					// outBox_val.AppendText(Environment.NewLine + "PR " + PR + "message " + message);
-					string_out = ReplyToPR(PR,"",message);
+					string_out = ReplyToPR(PR,"", "", "", message);
 				} else {
 					string message = "Automatic Validation ended with:" + Environment.NewLine + Environment.NewLine + "> No errors to post."+Environment.NewLine + Environment.NewLine + Environment.NewLine +"(Automated response - build "+build+".)";
 					// outBox_val.AppendText(Environment.NewLine + "PR " + PR + "message " + message);
-					string_out = ReplyToPR(PR,"",message);
+					string_out = ReplyToPR(PR,"", "", "", message);
 				}
 			} else {
 				string message = "Automatic Validation ended with:" + Environment.NewLine + Environment.NewLine + "> ADO Build not found."+Environment.NewLine + Environment.NewLine +"(Automated response - build "+build+".)";
-				string_out = ReplyToPR(PR,"",message);
+				string_out = ReplyToPR(PR,"", "", "", message);
 				// outBox_val.AppendText(Environment.NewLine + "AutoValLog: " + Environment.NewLine + message);
 			}
 			return string_out;
@@ -2281,9 +2266,6 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 	- if not InspectNew, skip.
 	Revert selected VM and launch its window.
 	*/
-		if (VM == 0) {
-			VM = NextFreeVM(OS);//.Replace("vm","");
-		}
 
 		string clipInput = Clipboard.GetText();
 		// [ValidateSet("x86","x64","arm","arm32","arm64","neutral")]
@@ -2301,7 +2283,14 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 				OS = "Win10";
 			}
 		}
-		
+		if (VM == 0) {
+			VM = NextFreeVM(OS);//.Replace("vm","");
+		}
+		if (VM == 0){
+		//Write-Host "No available OS VMs";
+			GenerateVM(OS);
+		//break;
+		}
 		//[ValidateSet("Win10","Win11")]
 		//[ValidateSet("Configure","DevHomeConfig","Pin","Scan")]
 		int lowerIndex = clipInput.IndexOf("Do not share my personal information") -1;//This is the last visible string at the bottom of the Files page on GitHub. 
@@ -2322,16 +2311,12 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 		}
 		string optionsLine = "";
 
-	
-	if (VM == 0){
-		//Write-Host "No available OS VMs";
-		GenerateVM(OS);
-		//break;
-		}
+
+
 	SetStatus(VM, "Prevalidation", PackageIdentifier,PR);
 	//($g.Properties | where {$_.name -eq "EnabledState"}).value != 2;
 	// if ((Get-VM "vm"+VM).state != "Running") {
-		SetVMState("vm"+VM, 2);
+		// SetVMState("vm"+VM, 2);
 	// };// }
 
 		string logLine = OS.ToString();
@@ -2340,11 +2325,12 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 		string VMFolder = MainFolder+"\\vm\\"+VM;
 		string manifestFolder = VMFolder+"\\manifest";
 		string CmdsFileName = VMFolder+"\\cmds.ps1";
-
+		string packageName = "";
+		string wingetArgs = "";
+		
 	if (Operation == "Configure") {
 			//Write-Host "Running Manual Config build $build on vmVM for ConfigureFile"
-		string wingetArgs = "configure -f "+RemoteFolder+"/manifest/config.yaml --accept-configuration-agreements --disable-interactivity";
-		Operation = "Configure";
+		wingetArgs = "configure -f "+RemoteFolder+"/manifest/config.yaml --accept-configuration-agreements --disable-interactivity";
 		InspectNew = false;
 	} else {
 		if (PackageIdentifier == "") {
@@ -2402,15 +2388,13 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 				//Write-Host " = = = = Installing manual dependency $ManualDependency = = = = "
 			ManualDependency = "Out-Log 'Installing manual dependency "+MDLog+".';Start-Process 'winget' 'install "+MDLog+" --accept-package-agreements --ignore-local-archive-malware-scan' -wait\n";
 		}
-		if (notElevated  == true || clip.Contains("ElevationRequirement: elevationProhibited")) {
 				//Write-Host " = = = = Detecting de-elevation requirement = = = = "
-			nonElevatedShell = "if ([bool](([System.Security.Principal.WindowsIdentity]::GetCurrent()).groups -match 'S-1-5-32-544')){& explorer.exe 'C:\\Program Files\\PowerShell\\7\\pwsh.exe';Stop-Process (Get-Process WindowsTerminal).id}";
 			//if elevated, run^^ and exit, else run cmds.
-		}
-		string packageName = (PackageIdentifier.Split('.'))[1];
-		string wingetArgs = "install "+optionsLine+" "+installerLine+" --accept-package-agreements --ignore-local-archive-malware-scan";
+		packageName = (PackageIdentifier.Split('.'))[1];
+		wingetArgs = "install "+optionsLine+" "+installerLine+" --accept-package-agreements --ignore-local-archive-malware-scan";
 	}
 	string[] cmdsOut = null;
+/*
 
 
 
@@ -2441,6 +2425,7 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 
 
 		OutFile(CmdsFileName,string.Join("\n",cmdsOut));
+*/
 
 	if (NoFiles == false) {
 		//Extract multi-part manifest from clipboard and write to disk
@@ -2451,19 +2436,18 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 			FilePath = manifestFolder+"\\config.yaml";
 			OutFile(FilePath,clipInput);
 		} else {
-			string[] Files = null;
-			Files[0] = "Package.installer.yaml";
-			string[] FileNames = clip.Split(' ').Where(n => n.Contains("[.]yaml")).ToArray();
-			for (int i = 0;i < FileNames.Length; i++){
-				string[] array_path = FileNames[i].Split('/');
-				FileNames[i] = (array_path)[array_path.Length];
+			List<string> Files = new List<string>();
+			Files.Add("Package.installer.yaml");
+			string[] FileNames = clip.Replace("\n"," ").Replace("\r"," ").Split(' ').Where(n => n.Contains(".yaml")).ToArray();
+			for (int i = 0;i < FileNames.Length -1 ; i++){
+				FileNames[i] = FileNames[i].Split('/').Last();
 			}
-			string replace = FileNames[FileNames.Length].Replace(".yaml","");
-			for (int i = 0;i < FileNames.Length; i++){
-				Files[i] = FileNames[i].Replace(replace,"Package");
+			string replace = FileNames[FileNames.Length -1].Replace(".yaml","");
+			for (int i = 0;i < FileNames.Length -1; i++){
+				Files.Add(FileNames[i].Replace(replace,"Package"));
 			}
 			string[] split_clip = clip.Replace("@@","∞").Split('∞');
-			for (int i=0;i < Files.Length;i++) {
+			for (int i=0;i < Files.Count -1;i++) {
 				string File = Files[i];
 				string[] inputObj = split_clip[i*2].Split('\n');
 				
@@ -2476,8 +2460,9 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 				//Bugfix to catch package identifier appended to last line of last file.
 				// string fileContents = GetContent(FilePath);
 				string[] fileContents = GetContent(FilePath).Split('\n');
-				if (fileContents[fileContents.Length].Contains(PackageIdentifier)) {
-					fileContents[fileContents.Length] = (fileContents[fileContents.Length].Replace("PackageIdentifier","∞").Split('∞'))[0];
+				int fcLen = fileContents.Length -1;
+				if (fileContents[fcLen].Contains(PackageIdentifier)) {
+					fileContents[fcLen] = (fileContents[fcLen].Replace("PackageIdentifier","∞").Split('∞'))[0];
 				}
 				string out_file = string.Join("\n",fileContents);
 				out_file.Replace("0New version: ","0").Replace("0New package: ","0").Replace("0Add version: ","0").Replace("0Add package: ","0").Replace("0Add ","0").Replace("0New ","0").Replace("0package: ","0");
@@ -2485,17 +2470,18 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 			}
 			string[] entries = Directory.GetFileSystemEntries(manifestFolder, "*", SearchOption.AllDirectories);
 			int filecount = entries.Length;
-			string filedir = "ok";
-			string filecolor = "green";
-			if (filecount < 3) { filedir = "too low"; filecolor = "red";}
-			if (filecount > 3) { filedir = "high"; filecolor = "yellow";}
-			if (filecount > 10) { filedir = "too high"; filecolor = "red";}
+			// string filedir = "ok";
+			// string filecolor = "green";
+			// if (filecount < 3) { filedir = "too low"; filecolor = "red";}
+			// if (filecount > 3) { filedir = "high"; filecolor = "yellow";}
+			// if (filecount > 10) { filedir = "too high"; filecolor = "red";}
 				//Write-Host -f $filecolor "File count $filecount is $filedir"
 			// if (filecount < 3) { break;}
 			string[] fileContents2 = GetContent(runPath+"\\"+VM+"\\manifest\\Package.yaml").Split('\n');
-			if (fileContents2[fileContents2.Length] != "0") {
+			int fcLen2 = fileContents2.Length -1;
+			if (fileContents2[fcLen2] != "0") {
 				//#PendingBugfix - Needs refactor - this is supposed to cut everything after the last 0 in the ManifestVersion, but this isn't always the last line. 
-				fileContents2[fileContents2.Length] = fileContents2[fileContents2.Length].Replace(".0","∞").Split('∞')[0]+".0";
+				fileContents2[fcLen2] = fileContents2[fcLen2].Replace(".0","∞").Split('∞')[0]+".0";
 				OutFile(FilePath,fileContents2);
 			}//end if fileContents2		
 		}//end if Configure
@@ -2522,8 +2508,6 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 		}//end if PackageResult
 	}//end if InspectNew
 		//Write-Host "File operations complete, starting VM operations."
-	RevertVM(VM);
-	LaunchWindow(VM);
 }//end manifest
 
 
@@ -3031,24 +3015,20 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 
 		public int NextFreeVM(string OS = "Win10",string Status = "Ready") {
 	//[ValidateSet("Win10","Win11")]
-		int int_out = 0;
+		int VM = 0;
 		Random rnd = new Random(); 
-		Dictionary<string,object>[] GetStatus = FromCsv(GetContent(StatusFile));
-		var VMs = GetStatus.Where(n => (int)n["version"] < GetVMVersion(OS))
-		.Where(n => n["OS"] == OS)
-		.Where(n => n["status"] == Status);
-			if (VMs != null){
-				int counter = 0;
-				int rand_VM = rnd.Next(VMs.Count());
-				foreach (Dictionary<string,object> FullVM in VMs) {
-					counter++;
-					if (rand_VM == counter) {
-						int_out = (int)FullVM["vm"]; 
-					}
-				}//end foreach FullVM
-			}//end if VMs
+		dynamic VMs = FromCsv(GetContent(StatusFile));
+		List<int> VMList = new List<int>();
+		for (int r = 1; r < VMs.Length -1; r++){
+			dynamic FullVM = VMs[r];
+			if (FullVM["OS"] == OS && FullVM["status"] == Status ) {
+			//.Where(n => (int)n["version"] < GetVMVersion(OS))
+				VMList.Add(Convert.ToInt32(FullVM["vm"]));
+			}
+		}
+		int rand_VM = rnd.Next(VMList.Count -1);
 		
-		return int_out;
+		return VMList[rand_VM];
 		//Write-Host "No available $OS VMs"
 		}//end function
 
@@ -3511,7 +3491,7 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 		public void OutFile(string path, object content, bool Append = false) {
 			//From SO: Use "typeof" when you want to get the type at compilation time. Use "GetType" when you want to get the type at execution time. "is" returns true if an instance is in the inheritance tree.
 			if (TestPath(path) == "None") {
-				File.Create(path);
+				File.Create(path).Close();
 			}
 			if (content.GetType() == typeof(string)) {
 				string out_content = (string)content;
@@ -3849,249 +3829,15 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 		public void Daily_Report_Action(object sender, EventArgs e) {
 			PRFullReport();
 		}// end Daily_Report_Action
-		//Modify PR - Validate
-		public void Validate_Manifest_Action(object sender, EventArgs e) {
-			ValidateManifest();
-		}// end Validate_Manifest_Action
 
-		public void Validate_By_ID_Action(object sender, EventArgs e) {
-			string PackageIdentifier = inputBox_User.Text;
-			ValidateManifest(0,PackageIdentifier,"",0,"","","","","",false,false,"","",false, "--id "+PackageIdentifier);
-		}// end Validate_By_ID_Action
-		
-		public void Validate_By_Configure_Action(object sender, EventArgs e) {
-			ValidateManifest(0,"","",0,"","","","","",false,false,"","",false, "","Configure");
-		}// end Validate_By_ID_Action
+		//VM Lifecycle
+		public void Complete_VM_Image_Action (object sender, EventArgs e) {
+			CompleteVM(GetSelectedVM());
+		} // end Complete_VM_Image_Action
 
-		public void Validate_By_Arch_Action(object sender, EventArgs e) {
-			ValidateManifest(0,"","",0,"x64");
-			Thread.Sleep(2);
-			ValidateManifest(0,"","",0,"x86");
-		}// end Validate_By_ID_Action
-
-		public void Validate_By_Scope_Action(object sender, EventArgs e) {
-			ValidateManifest(0,"","",0,"","Machine");
-			Thread.Sleep(2);
-			ValidateManifest(0,"","",0,"","User");
-		}// end Validate_By_ID_Action
-
-		public void Validate_By_Arch_And_Scope_Action(object sender, EventArgs e) {
-			ValidateManifest(0,"","",0,"x64","Machine");
-			Thread.Sleep(2);
-			ValidateManifest(0,"","",0,"x86","Machine");
-			Thread.Sleep(2);
-			ValidateManifest(0,"","",0,"x64","User");
-			Thread.Sleep(2);
-			ValidateManifest(0,"","",0,"x86","User");
-		}// end Validate_By_ID_Action
-		//Modify PR
-		public void Add_Waiver_Action(object sender, EventArgs e) {
-			int PR = GetCurrentPR();
-			dynamic string_out = FromJson(AddWaiver(PR));
-			AddPRToRecord(PR,"Waiver");
-        }// end Approved_Action
-
-		public void Approved_Action(object sender, EventArgs e) {
-			int PR = GetCurrentPR();
-			dynamic response_out = FromJson(ApprovePR(PR));
-			AddPRToRecord(PR,"Approved");
-        }// end Approved_Action
-
-        public void Needs_Author_Feedback_Action(object sender, EventArgs e) {
-			string AboutText = "WinGet Approval Pipeline" + Environment.NewLine;
-			AboutText += "(c) 2024 Microsoft Corp" + Environment.NewLine;
-			AboutText += "" + Environment.NewLine;
-			AboutText += "Report bugs and request features:" + Environment.NewLine;
-			AboutText += "https://Github.com/winget-pkgs/issues/" + Environment.NewLine;
-			AboutText += "" + Environment.NewLine;
-			AboutText += "" + Environment.NewLine;
-			MessageBox.Show(AboutText);
-		}// end Needs_Author_Feedback_Action
-
-        public void Retry_Action(object sender, EventArgs e) {
-			int PR = GetCurrentPR();
-			dynamic response_out = FromJson(RetryPR(PR));
-			AddPRToRecord(PR,"Retry");
-		}// end Approved_Action
-		
-        public void Manually_Validated_Action(object sender, EventArgs e) {
-			int PR = GetCurrentPR();
-			string response_out = ReplyToPR(PR,"InstallsNormally","Manually-Validated");
-			AddPRToRecord(PR,"Manual");
-        }// end Manually_Validated_Action
-		//Modify PR - Close PR
-        public void Closed_Action(object sender, EventArgs e) {
-			int PR = GetCurrentPR();
-			string UserInput = inputBox_User.Text;
-			inputBox_User.Text = "";
-			AddPRToRecord(PR,"Closed");
-			InvokeGitHubPRRequest(PR,WebRequestMethods.Http.Post,"comments","Close with reason: "+UserInput+";");
-        }// end Closed_Action
-		
-        public void Duplicate_Action(object sender, EventArgs e) {
-			int PR = GetCurrentPR();
-			int UserInput = Int32.Parse(inputBox_User.Text.Replace("#",""));
-			inputBox_User.Text = "";
-			AddPRToRecord(PR,"Closed");
-			dynamic response_out = FromJson(InvokeGitHubPRRequest(PR,WebRequestMethods.Http.Post,"comments","Close with reason: Duplicate of #"+UserInput+";"));
-        }// end Duplicate_Action
-		
-        public void Merge_Conflicts_Action(object sender, EventArgs e) {
-			int PR = GetCurrentPR();
-			AddPRToRecord(PR,"Closed");
-			dynamic response_out = FromJson(InvokeGitHubPRRequest(PR,WebRequestMethods.Http.Post,"comments","Close with reason: Merge Conflicts;"));
-        }// end Merge_Conflicts_Action
-		//Modify PR
-        public void Project_File_Action(object sender, EventArgs e) {
-			int PR = GetCurrentPR();
-			AddPRToRecord(PR,"Project");
-        }// end Project_File_Action
-
-        public void Squash_Action(object sender, EventArgs e) {
-			int PR = GetCurrentPR();
-			AddPRToRecord(PR,"Squash");
-        }// end Approved_Action
-		//Update Manifest - In Repo
-		public void Add_Dependency_Repo_Action (object sender, EventArgs e) {
-			string AboutText = "WinGet Approval Pipeline" + Environment.NewLine;
-			AboutText += "(c) 2024 Microsoft Corp" + Environment.NewLine;
-			AboutText += "" + Environment.NewLine;
-			AboutText += "Report bugs and request features:" + Environment.NewLine;
-			AboutText += "https://Github.com/winget-pkgs/issues/" + Environment.NewLine;
-			AboutText += "" + Environment.NewLine;
-			AboutText += "" + Environment.NewLine;
-			MessageBox.Show(AboutText);
-		} // end Add_Dependency_Repo_Action
-		
-		public void Update_Hash_Action (object sender, EventArgs e) {
-			string AboutText = "WinGet Approval Pipeline" + Environment.NewLine;
-			AboutText += "(c) 2024 Microsoft Corp" + Environment.NewLine;
-			AboutText += "" + Environment.NewLine;
-			AboutText += "Report bugs and request features:" + Environment.NewLine;
-			AboutText += "https://Github.com/winget-pkgs/issues/" + Environment.NewLine;
-			AboutText += "" + Environment.NewLine;
-			AboutText += "" + Environment.NewLine;
-			MessageBox.Show(AboutText);
-		} // end Update_Hash_Action
-		
-		public void Update_Hash2_Action (object sender, EventArgs e) {
-			string AboutText = "WinGet Approval Pipeline" + Environment.NewLine;
-			AboutText += "(c) 2024 Microsoft Corp" + Environment.NewLine;
-			AboutText += "" + Environment.NewLine;
-			AboutText += "Report bugs and request features:" + Environment.NewLine;
-			AboutText += "https://Github.com/winget-pkgs/issues/" + Environment.NewLine;
-			AboutText += "" + Environment.NewLine;
-			AboutText += "" + Environment.NewLine;
-			MessageBox.Show(AboutText);
-		} // end Update_Hash2_Action
-		
-		public void Update_Arch_Action (object sender, EventArgs e) {
-			string AboutText = "WinGet Approval Pipeline" + Environment.NewLine;
-			AboutText += "(c) 2024 Microsoft Corp" + Environment.NewLine;
-			AboutText += "" + Environment.NewLine;
-			AboutText += "Report bugs and request features:" + Environment.NewLine;
-			AboutText += "https://Github.com/winget-pkgs/issues/" + Environment.NewLine;
-			AboutText += "" + Environment.NewLine;
-			AboutText += "" + Environment.NewLine;
-			MessageBox.Show(AboutText);
-		} // end Update_Arch_Action
-		//Update Manifest - On Disk
-		public void Add_Dependency_Disk_Action (object sender, EventArgs e) {
-			string AboutText = "WinGet Approval Pipeline" + Environment.NewLine;
-			AboutText += "(c) 2024 Microsoft Corp" + Environment.NewLine;
-			AboutText += "" + Environment.NewLine;
-			AboutText += "Report bugs and request features:" + Environment.NewLine;
-			AboutText += "https://Github.com/winget-pkgs/issues/" + Environment.NewLine;
-			AboutText += "" + Environment.NewLine;
-			AboutText += "" + Environment.NewLine;
-			MessageBox.Show(AboutText);
-		} // end Add_Dependency_Disk_Action
-		
-		public void Add_Installer_Switch_Action (object sender, EventArgs e) {
-			string AboutText = "WinGet Approval Pipeline" + Environment.NewLine;
-			AboutText += "(c) 2024 Microsoft Corp" + Environment.NewLine;
-			AboutText += "" + Environment.NewLine;
-			AboutText += "Report bugs and request features:" + Environment.NewLine;
-			AboutText += "https://Github.com/winget-pkgs/issues/" + Environment.NewLine;
-			AboutText += "" + Environment.NewLine;
-			AboutText += "" + Environment.NewLine;
-			MessageBox.Show(AboutText);
-		} // end Add_Installer_Switch_Action
-		//Canned Replies
-        public void Automation_Block_Action(object sender, EventArgs e) {
-			int PR = GetCurrentPR();
-			AddPRToRecord(PR,"Blocking");
-			string response_out = ReplyToPR(PR,"AutomationBlock","Network-Blocker");
-		}// end Automation_Block_Action
-
-        public void Check_Installer_Action(object sender, EventArgs e) {
-			int PR = GetCurrentPR();
-			CheckInstaller(PR);
-        }// end Check_Installer_Action
-
-        public void Driver_Install_Action(object sender, EventArgs e) {
-			int PR = GetCurrentPR();
-			string response_out = ReplyToPR(PR,"DriverInstall","DriverInstall");
-			AddPRToRecord(PR,"Blocking");
-        }// end Driver_Install_Action
-		
-        public void Installer_Missing_Action(object sender, EventArgs e) {
-			int PR = GetCurrentPR();
-			AddPRToRecord(PR,"Feedback");
-			string response_out = ReplyToPR(PR,"InstallerMissing",MagicLabels[30]);
-        }// end Installer_Missing_Action
-		
-        public void Installer_Not_Silent_Action(object sender, EventArgs e) {
-			int PR = GetCurrentPR();
-			AddPRToRecord(PR,"Feedback");
-			string response_out = ReplyToPR(PR,"InstallerNotSilent",MagicLabels[30]);
-        }// end Installer_Not_Silent_Action
-		
-        public void Needs_PackageUrl_Action(object sender, EventArgs e) {
-			int PR = GetCurrentPR();
-			AddPRToRecord(PR,"Feedback");
-			string response_out = ReplyToPR(PR,"PackageUrl",MagicLabels[30]);
-        }// end Needs_PackageUrl_Action
-		
-        public void One_Manifest_Per_PR_Action(object sender, EventArgs e) {
-			int PR = GetCurrentPR();
-			AddPRToRecord(PR,"Feedback");
-			string response_out = ReplyToPR(PR,"OneManifestPerPR",MagicLabels[30]);
-        }// end One_Manifest_Per_PR_Action
-		//Open In Browser
-        public void Open_Current_PR_Action(object sender, EventArgs e) {
-			int PR = GetCurrentPR();
-			OpenPRInBrowser(PR);
-			
-			}// end Approved_Action
-
-        public void Open_AllUrls_Action(object sender, EventArgs e) {
-			string clip = Clipboard.GetText();
-			foreach (int PR in PRNumber(clip,true)) {
-				OpenPRInBrowser(PR);
-				Thread.Sleep(GitHubRateLimitDelay);
-			}
-		}// end Approved_Action
-			
-        public void Approval_Search_Action(object sender, EventArgs e) {
-			SearchGitHub("Approval",1,0, false,false,true);
-        }// end Approved_Action
-		
-		public void ToWork_Search_Action(object sender, EventArgs e) {
-			SearchGitHub("ToWork",1,0, false,false,true);
-        }// end Approved_Action
-		
-		public void Open_Repo_Action(object sender, EventArgs e) {
-			System.Diagnostics.Process.Start(GitHubBaseUrl);
-		}// end Approved_Action
-		
-        public void Approval_Run_Search_Action(object sender, EventArgs e) {
-			WorkSearch("Approval");
-        }// end Approved_Action
-		
-		public void ToWork_Run_Search_Action(object sender, EventArgs e) {
-			WorkSearch("ToWork");
-        }// end Approved_Action
+		public void Launch_Window_Image_Action (object sender, EventArgs e) {
+			LaunchWindow(GetSelectedVM());
+		} // end Launch_Window_Image_Action
 		//VM Lifecycle - Win10
 		public void Generate_Win10_VM_Image_Action (object sender, EventArgs e) {
 			GenerateVM("Win10");
@@ -4145,16 +3891,315 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 			DisgenerateVM(GetSelectedVM());
 		} // end Disgenerate_VM_Image_Action
 
-		public void Launch_Window_Image_Action (object sender, EventArgs e) {
-			LaunchWindow(GetSelectedVM());
-		} // end Launch_Window_Image_Action
+		//Validate Manifest
+		public void Validate_Manifest_Action(object sender, EventArgs e) {
+			ValidateManifest();
+		}// end Validate_Manifest_Action
+		
+		public void Validate_By_Configure_Action(object sender, EventArgs e) {
+			ValidateManifest(0,"","",0,"","","","","",false,false,"","",false, "","Configure");
+		}// end Validate_By_ID_Action
 
-		public void Complete_VM_Image_Action (object sender, EventArgs e) {
-			CompleteVM(GetSelectedVM());
-		} // end Complete_VM_Image_Action
+		public void Validate_By_ID_Action(object sender, EventArgs e) {
+			string PackageIdentifier = inputBox_User.Text;
+			ValidateManifest(0,PackageIdentifier,"",0,"","","","","",false,false,"","",false, "--id "+PackageIdentifier);
+		}// end Validate_By_ID_Action
+
+		public void Validate_By_Arch_Action(object sender, EventArgs e) {
+			ValidateManifest(0,"","",0,"x64");
+			Thread.Sleep(2);
+			ValidateManifest(0,"","",0,"x86");
+		}// end Validate_By_ID_Action
+
+		public void Validate_By_Scope_Action(object sender, EventArgs e) {
+			ValidateManifest(0,"","",0,"","Machine");
+			Thread.Sleep(2);
+			ValidateManifest(0,"","",0,"","User");
+		}// end Validate_By_ID_Action
+
+		public void Validate_By_Arch_And_Scope_Action(object sender, EventArgs e) {
+			ValidateManifest(0,"","",0,"x64","Machine");
+			Thread.Sleep(2);
+			ValidateManifest(0,"","",0,"x86","Machine");
+			Thread.Sleep(2);
+			ValidateManifest(0,"","",0,"x64","User");
+			Thread.Sleep(2);
+			ValidateManifest(0,"","",0,"x86","User");
+		}// end Validate_By_ID_Action
+		//Generate manifest for selected VM
+		public void Manifest_From_Clipboard (object sender, EventArgs e) {
+			string AboutText = "WinGet Approval Pipeline" + Environment.NewLine;
+			AboutText += "(c) 2024 Microsoft Corp" + Environment.NewLine;
+			AboutText += "" + Environment.NewLine;
+			AboutText += "Report bugs and request features:" + Environment.NewLine;
+			AboutText += "https://Github.com/winget-pkgs/issues/" + Environment.NewLine;
+			AboutText += "" + Environment.NewLine;
+			AboutText += "" + Environment.NewLine;
+			MessageBox.Show(AboutText);
+		}// end Validate_By_ID_Action
+
+		public void Single_File_Automation_Action(object sender, EventArgs e) {
+			string AboutText = "WinGet Approval Pipeline" + Environment.NewLine;
+			AboutText += "(c) 2024 Microsoft Corp" + Environment.NewLine;
+			AboutText += "" + Environment.NewLine;
+			AboutText += "Report bugs and request features:" + Environment.NewLine;
+			AboutText += "https://Github.com/winget-pkgs/issues/" + Environment.NewLine;
+			AboutText += "" + Environment.NewLine;
+			AboutText += "" + Environment.NewLine;
+			MessageBox.Show(AboutText);
+		}// end Validate_By_ID_Action
+		//Update manifest
+		public void Add_Dependency_Disk_Action (object sender, EventArgs e) {
+			string AboutText = "WinGet Approval Pipeline" + Environment.NewLine;
+			AboutText += "(c) 2024 Microsoft Corp" + Environment.NewLine;
+			AboutText += "" + Environment.NewLine;
+			AboutText += "Report bugs and request features:" + Environment.NewLine;
+			AboutText += "https://Github.com/winget-pkgs/issues/" + Environment.NewLine;
+			AboutText += "" + Environment.NewLine;
+			AboutText += "" + Environment.NewLine;
+			MessageBox.Show(AboutText);
+		} // end Add_Dependency_Disk_Action
+		
+		public void Add_Installer_Switch_Action (object sender, EventArgs e) {
+			string AboutText = "WinGet Approval Pipeline" + Environment.NewLine;
+			AboutText += "(c) 2024 Microsoft Corp" + Environment.NewLine;
+			AboutText += "" + Environment.NewLine;
+			AboutText += "Report bugs and request features:" + Environment.NewLine;
+			AboutText += "https://Github.com/winget-pkgs/issues/" + Environment.NewLine;
+			AboutText += "" + Environment.NewLine;
+			AboutText += "" + Environment.NewLine;
+			MessageBox.Show(AboutText);
+		} // end Add_Installer_Switch_Action
+
+		//Modify PR
+		public void Add_Waiver_Action(object sender, EventArgs e) {
+			int PR = GetCurrentPR();
+			dynamic string_out = FromJson(AddWaiver(PR));
+			AddPRToRecord(PR,"Waiver");
+        }// end Approved_Action
+
+		public void Approved_Action(object sender, EventArgs e) {
+			int PR = GetCurrentPR();
+			dynamic response_out = FromJson(ApprovePR(PR));
+			AddPRToRecord(PR,"Approved");
+        }// end Approved_Action
+
+        public void Needs_Author_Feedback_Action(object sender, EventArgs e) {
+			string AboutText = "WinGet Approval Pipeline" + Environment.NewLine;
+			AboutText += "(c) 2024 Microsoft Corp" + Environment.NewLine;
+			AboutText += "" + Environment.NewLine;
+			AboutText += "Report bugs and request features:" + Environment.NewLine;
+			AboutText += "https://Github.com/winget-pkgs/issues/" + Environment.NewLine;
+			AboutText += "" + Environment.NewLine;
+			AboutText += "" + Environment.NewLine;
+			MessageBox.Show(AboutText);
+		}// end Needs_Author_Feedback_Action
+
+        public void Check_Installer_Action(object sender, EventArgs e) {
+			int PR = GetCurrentPR();
+			CheckInstaller(PR);
+        }// end Check_Installer_Action
+		//Modify PR - Canned Replies
+        public void Automation_Block_Action(object sender, EventArgs e) {
+			int PR = GetCurrentPR();
+			AddPRToRecord(PR,"Blocking");
+			string response_out = ReplyToPR(PR,"AutomationBlock","Network-Blocker");
+		}// end Automation_Block_Action
+
+        public void Driver_Install_Action(object sender, EventArgs e) {
+			int PR = GetCurrentPR();
+			string response_out = ReplyToPR(PR,"DriverInstall","DriverInstall");
+			AddPRToRecord(PR,"Blocking");
+        }// end Driver_Install_Action
+		
+        public void Installer_Missing_Action(object sender, EventArgs e) {
+			int PR = GetCurrentPR();
+			AddPRToRecord(PR,"Feedback");
+			string response_out = ReplyToPR(PR,"InstallerMissing",MagicLabels[30]);
+        }// end Installer_Missing_Action
+		
+        public void Installer_Not_Silent_Action(object sender, EventArgs e) {
+			int PR = GetCurrentPR();
+			AddPRToRecord(PR,"Feedback");
+			string response_out = ReplyToPR(PR,"InstallerNotSilent",MagicLabels[30]);
+        }// end Installer_Not_Silent_Action
+		
+        public void Needs_PackageUrl_Action(object sender, EventArgs e) {
+			int PR = GetCurrentPR();
+			AddPRToRecord(PR,"Feedback");
+			string response_out = ReplyToPR(PR,"PackageUrl",MagicLabels[30]);
+        }// end Needs_PackageUrl_Action
+		
+        public void One_Manifest_Per_PR_Action(object sender, EventArgs e) {
+			int PR = GetCurrentPR();
+			AddPRToRecord(PR,"Feedback");
+			string response_out = ReplyToPR(PR,"OneManifestPerPR",MagicLabels[30]);
+        }// end One_Manifest_Per_PR_Action
+		//Modify PR - Update Manifest
+		public void Add_Dependency_Repo_Action (object sender, EventArgs e) {
+			string AboutText = "WinGet Approval Pipeline" + Environment.NewLine;
+			AboutText += "(c) 2024 Microsoft Corp" + Environment.NewLine;
+			AboutText += "" + Environment.NewLine;
+			AboutText += "Report bugs and request features:" + Environment.NewLine;
+			AboutText += "https://Github.com/winget-pkgs/issues/" + Environment.NewLine;
+			AboutText += "" + Environment.NewLine;
+			AboutText += "" + Environment.NewLine;
+			MessageBox.Show(AboutText);
+		} // end Add_Dependency_Repo_Action
+		
+		public void Update_Hash_Action (object sender, EventArgs e) {
+			string AboutText = "WinGet Approval Pipeline" + Environment.NewLine;
+			AboutText += "(c) 2024 Microsoft Corp" + Environment.NewLine;
+			AboutText += "" + Environment.NewLine;
+			AboutText += "Report bugs and request features:" + Environment.NewLine;
+			AboutText += "https://Github.com/winget-pkgs/issues/" + Environment.NewLine;
+			AboutText += "" + Environment.NewLine;
+			AboutText += "" + Environment.NewLine;
+			MessageBox.Show(AboutText);
+		} // end Update_Hash_Action
+		
+		public void Update_Hash2_Action (object sender, EventArgs e) {
+			string AboutText = "WinGet Approval Pipeline" + Environment.NewLine;
+			AboutText += "(c) 2024 Microsoft Corp" + Environment.NewLine;
+			AboutText += "" + Environment.NewLine;
+			AboutText += "Report bugs and request features:" + Environment.NewLine;
+			AboutText += "https://Github.com/winget-pkgs/issues/" + Environment.NewLine;
+			AboutText += "" + Environment.NewLine;
+			AboutText += "" + Environment.NewLine;
+			MessageBox.Show(AboutText);
+		} // end Update_Hash2_Action
+		
+		public void Update_Arch_Action (object sender, EventArgs e) {
+			string AboutText = "WinGet Approval Pipeline" + Environment.NewLine;
+			AboutText += "(c) 2024 Microsoft Corp" + Environment.NewLine;
+			AboutText += "" + Environment.NewLine;
+			AboutText += "Report bugs and request features:" + Environment.NewLine;
+			AboutText += "https://Github.com/winget-pkgs/issues/" + Environment.NewLine;
+			AboutText += "" + Environment.NewLine;
+			AboutText += "" + Environment.NewLine;
+			MessageBox.Show(AboutText);
+		} // end Update_Arch_Action
+		//Modify PR
+        public void Retry_Action(object sender, EventArgs e) {
+			int PR = GetCurrentPR();
+			dynamic response_out = FromJson(RetryPR(PR));
+			AddPRToRecord(PR,"Retry");
+		}// end Approved_Action
+		
+        public void Manually_Validated_Action(object sender, EventArgs e) {
+			int PR = GetCurrentPR();
+			string response_out = ReplyToPR(PR,"InstallsNormally","Manually-Validated");
+			AddPRToRecord(PR,"Manual");
+        }// end Manually_Validated_Action
+		//Modify PR - Close PR
+        public void Closed_Action(object sender, EventArgs e) {
+			int PR = GetCurrentPR();
+			string UserInput = inputBox_User.Text;
+			inputBox_User.Text = "";
+			AddPRToRecord(PR,"Closed");
+			InvokeGitHubPRRequest(PR,WebRequestMethods.Http.Post,"comments","Close with reason: "+UserInput+";");
+        }// end Closed_Action
+		
+        public void Merge_Conflicts_Action(object sender, EventArgs e) {
+			int PR = GetCurrentPR();
+			AddPRToRecord(PR,"Closed");
+			dynamic response_out = FromJson(InvokeGitHubPRRequest(PR,WebRequestMethods.Http.Post,"comments","Close with reason: Merge Conflicts;"));
+        }// end Merge_Conflicts_Action
+		
+        public void Duplicate_Action(object sender, EventArgs e) {
+			int PR = GetCurrentPR();
+			int UserInput = Int32.Parse(inputBox_User.Text.Replace("#",""));
+			inputBox_User.Text = "";
+			AddPRToRecord(PR,"Closed");
+			dynamic response_out = FromJson(InvokeGitHubPRRequest(PR,WebRequestMethods.Http.Post,"comments","Close with reason: Duplicate of #"+UserInput+";"));
+        }// end Duplicate_Action
+		//Modify PR
+        public void Project_File_Action(object sender, EventArgs e) {
+			int PR = GetCurrentPR();
+			AddPRToRecord(PR,"Project");
+        }// end Project_File_Action
+
+        public void Squash_Action(object sender, EventArgs e) {
+			int PR = GetCurrentPR();
+			AddPRToRecord(PR,"Squash");
+        }// end Approved_Action
+
+		//Open In Browser
+        public void Open_Current_PR_Action(object sender, EventArgs e) {
+			int PR = GetCurrentPR();
+			OpenPRInBrowser(PR);
+			
+			}// end Approved_Action
+
+        public void Open_PR_Selected_VM_Action(object sender, EventArgs e) {
+			int PR = GetCurrentPR();
+			OpenPRInBrowser(PR);
+			
+			}// end Approved_Action
+			
+        public void Approval_Search_Action(object sender, EventArgs e) {
+			SearchGitHub("Approval",1,0, false,false,true);
+        }// end Approved_Action
+		
+		public void ToWork_Search_Action(object sender, EventArgs e) {
+			SearchGitHub("ToWork",1,0, false,false,true);
+        }// end Approved_Action
+		
+		public void Open_Repo_Action(object sender, EventArgs e) {
+			System.Diagnostics.Process.Start(GitHubBaseUrl);
+		}// end Approved_Action
+		//Open In Browser - Open many tabs:
+        public void Open_AllUrls_Action(object sender, EventArgs e) {
+			string clip = Clipboard.GetText();
+			foreach (int PR in PRNumber(clip,true)) {
+				OpenPRInBrowser(PR);
+				Thread.Sleep(GitHubRateLimitDelay);
+			}
+		}// end Approved_Action
+		
+        public void Approval_Run_Search_Action(object sender, EventArgs e) {
+			WorkSearch("Approval");
+        }// end Approved_Action
+		
+		public void ToWork_Run_Search_Action(object sender, EventArgs e) {
+			WorkSearch("ToWork");
+        }// end Approved_Action
+		
+		public void Start_Of_Day_Action(object sender, EventArgs e) {
+			System.Diagnostics.Process.Start("https://github.com/microsoft/winget-pkgs/issues");
+			System.Diagnostics.Process.Start("https://github.com/microsoft/winget-cli/issues");
+			System.Diagnostics.Process.Start("https://github.com/microsoft/winget-pkgs/labels/Needs-Manual-Merge");
+			System.Diagnostics.Process.Start("https://github.com/microsoft/winget-pkgs/pulls?q=is%3Apr+is%3Aopen+draft%3Afalse+label%3AValidation-Complete+label%3AModerator-Approved");
+			System.Diagnostics.Process.Start("https://github.com/microsoft/winget-pkgs/pulls?q=is%3Aopen+is%3Apr+draft%3Afalse+label%3ALast-Version-Remaining+");
+        }// end Approved_Action
+		//Open In Browser
+		public void Open_PKGS_Repo_Action(object sender, EventArgs e) {
+			System.Diagnostics.Process.Start(GitHubBaseUrl);
+		}// end Approved_Action
+
+		public void Open_CLI_Repo_Action(object sender, EventArgs e) {
+			System.Diagnostics.Process.Start("https://github.com/microsoft/winget-cli/");
+        }// end Approved_Action
+
+		public void Open_Notifications_Action(object sender, EventArgs e) {
+			System.Diagnostics.Process.Start("https://github.com/notifications?query=reason%3Amention");
+        }// end Approved_Action
+
+		public void Open_Gitter_Action(object sender, EventArgs e) {
+			System.Diagnostics.Process.Start("https://app.gitter.im/#/room/#Microsoft_winget-pkgs:gitter.im");
+        }// end Approved_Action
+
+		public void Open_Pipeline_Action(object sender, EventArgs e) {
+			System.Diagnostics.Process.Start("https://dev.azure.com/ms/winget-pkgs/_build");
+        }// end Approved_Action
+
+		public void Open_Dashboard_Action(object sender, EventArgs e) {
+			System.Diagnostics.Process.Start("https://stpkgmandashwesus2pme.z5.web.core.windows.net/");
+        }// end Approved_Action
+
+
 		//Help
 		public void About_Click_Action (object sender, EventArgs e) {
-			// outBox_val.AppendText(Environment.NewLine + "PR "+ PR + ": " + response_out);
 			string AboutText = "WinGet Approval Pipeline" + Environment.NewLine;
 			AboutText += "(c) 2024 Microsoft Corp" + Environment.NewLine;
 			AboutText += "" + Environment.NewLine;
