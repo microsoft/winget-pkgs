@@ -99,7 +99,7 @@ $MagicLabels = "Validation-Defender-Error", #0
 "Needs-Author-Feedback",#30
 "Policy-Test-2.7", #31
 "Manifest-Version-Error",#32
-"Last-Version-Remaining"#33
+"Highest-Version-Remaining"#33
 
 #First tab
 Function Get-TrackerVMRunTracker {
