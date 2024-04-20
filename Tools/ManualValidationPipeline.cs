@@ -145,7 +145,7 @@ using System.Web.Script.Serialization;
 namespace WinGetApprovalNamespace {
     public class WinGetApprovalPipeline : Form {
 		//vars
-        public int build = 672;//Get-RebuildPipeApp
+        public int build = 674;//Get-RebuildPipeApp
 		public string appName = "WinGetApprovalPipeline";
 		public string appTitle = "WinGet Approval Pipeline - Build ";
 		public static string owner = "microsoft";
@@ -1336,7 +1336,9 @@ namespace WinGetApprovalNamespace {
 		string[] PRLabels = FromJson(InvokeGitHubPRRequest(PR,"labels","content"))["name"];
 			//Write-Output "PR $PR has labels $PRLabels"
 			if (PRLabels.Any(n => MagicLabels[0].Contains(n))) {
-				List<string> PRState = PRStateFromComments(PR);
+				DataTable PRState = PRStateFromComments(PR);
+				string EightHoursAgo = DateTime.Now.AddHours(-8).ToString("M/d/yyyy");
+				string EighteenHoursAgo = DateTime.Now.AddHours(-18).ToString("M/d/yyyy");
 		/*
 				if (($PRState.Where(n => n.event == "PreValidation"})[-1].created_at < (Get-Date).AddHours(-8) && //Last Prevalidation was 8 hours ago.
 				($PRState.Where(n => n.event == "Running"})[-1].created_at < (Get-Date).AddHours(-18)) {  //Last Run was 18 hours ago.
@@ -2149,19 +2151,28 @@ namespace WinGetApprovalNamespace {
 			return out_bool;
 		}
 
-		public List<string> PRStateFromComments(int PR){
-			Dictionary<string,object>[] Comments = FromJson(InvokeGitHubPRRequest(PR,"comments","","","content")); //| select created_at,@{n="UserName";e={$_.user.login -replace "\[bot\]"}},body)
+		public DataTable PRStateFromComments(int PR){
+			dynamic[] Comments = FromJson(InvokeGitHubPRRequest(PR,WebRequestMethods.Http.Get,"comments")); //| select created_at,@{n="UserName";e={$_.user.login -replace "\[bot\]"}},body)
 			//Robot usernames
 			string Wingetbot = "wingetbot";
 			string AzurePipelines = "azure-pipelines";
 			string FabricBot = "microsoft-github-policy-service";
-			List<string> OverallState = new List<string>();
-			
-			foreach (Dictionary<string,object> Comment in Comments) {
+			outBox_val.AppendText(Environment.NewLine + "Comments: "+ Comments.Length);
+
+DataTable OverallState = new DataTable(); 
+OverallState.Columns.Add("UserName", typeof(string));
+OverallState.Columns.Add("body", typeof(string));
+OverallState.Columns.Add("created_at", typeof(DateTime));
+OverallState.Columns.Add("State", typeof(string));
+
+
+			foreach (dynamic Comment in Comments) {
+			outBox_val.AppendText(Environment.NewLine + "Comment "+ ToJson(Comment));
 				string State = "";
-				string UserName = (string)Comment["UserName"];
+				string UserName = (string)Comment["user"]["login"];
 				string body = (string)Comment["body"];
 				//DateTime created_at = TimeZoneInfo.ConvertTimeBySystemTimeZoneId((DateTime)Comment["created_at"], "Pacific Standard Time");
+			outBox_val.AppendText(Environment.NewLine + "State "+ State + "UserName "+ UserName + "body "+ body);
 
 				if (string.Equals(UserName, Wingetbot) && body.Contains("Service Badge")) {
 					State = "PreRun";
@@ -2233,7 +2244,12 @@ namespace WinGetApprovalNamespace {
 					State = "PublishSucceeded";
 				}
 				if (!string.Equals(State, "")) {
-					OverallState.Add(State); //| select @{n="event";e={State}},created_at;
+DataRow newRow = OverallState.NewRow();
+newRow["UserName"] = UserName;
+newRow["body"] = body;
+newRow["created_at"] = Comment["created_at"];
+newRow["State"] = State;
+OverallState.Rows.Add(newRow);
 				}
 			}
 			return OverallState;
@@ -3987,14 +4003,19 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
             return virtualSystemsetting;
         }
 
-		public uint RestoreVMSnapshot(string VMName) {
+		public void RestoreVMSnapshot(string VMName) {
+			try {
+				
 			ManagementObject snapshot = GetLastSnapshot(VMName);
 			ManagementObject snapshotService = GetCimService("Msvm_VirtualSystemSnapshotService");
 
 			var inParameters = snapshotService.GetMethodParameters("ApplySnapshot");
 			inParameters["Snapshot"] = snapshot.Path.Path;
 			var outParameters = snapshotService.InvokeMethod("ApplySnapshot", inParameters, null);
-			return (uint)outParameters["ReturnValue"];
+			//return (uint)outParameters["ReturnValue"];
+			} catch (Exception e) {
+				outBox_val.AppendText(Environment.NewLine + "e: " + e );
+			}
 		}
 		
 		public uint CheckpointVM(string VMName) {
@@ -4556,7 +4577,12 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 			MessageBox.Show(AboutText);
 		} // end About_Click_Action
 
+        public void Testing_Action(object sender, EventArgs e) {
 
+			int PR = GetCurrentPR();
+			string string_out = (PRStateFromComments(PR).ToString());
+			outBox_val.AppendText(Environment.NewLine + "Testing: " + string_out);
+		}// end Testing_Action
 
 
 
