@@ -1,0 +1,78 @@
+id: labelAdded.windowsFeatures
+name: GitOps.PullRequestIssueManagement
+description: Handlers when "WindowsFeatures" label is added
+owner:
+resource: repository
+disabled: false
+where:
+configuration:
+  resourceManagementConfiguration:
+    eventResponderTasks:
+      - description: >-
+          When the label "WindowsFeatures" is added to a pull request
+          * Add the PR specific reply notifying the issue author of a blocking issue
+          * Label the PR with Blocking-Issue
+          * Label with Needs-Author-Feedback
+          * Remove the Needs-Attention Label
+        if:
+          - payloadType: Pull_Request
+          - labelAdded:
+              label: WindowsFeatures
+        then:
+          - addReply:
+              reply: >-
+                Hello @${issueAuthor},
+
+
+                This package appears to have dependencies on one or more Windows Feature(s).
+
+
+                This PR is blocked until support for Windows Feature dependencies is implemented in:
+
+                * microsoft/winget-cli/issues/685
+
+
+                Be sure to add your 👍 to the issue to help raise the priority and avoid posting "Me too!" messages to respect those who have subscribed to the issue.
+
+
+                Template: msftbot/blockingIssue/windowsFeatureDependency
+          - addLabel:
+              label: Blocking-Issue
+          - addLabel:
+              label: Needs-Author-Feedback
+          - removeLabel:
+              label: Needs-Attention
+        # The policy service should trigger even when the label was added by the policy service
+        triggerOnOwnActions: true
+      - description: >-
+          When the label "WindowsFeatures" is added to an issue
+          * Add the issue specific reply notifying the issue author of a blocking issue
+          * Label the issue with Blocking-Issue
+        if:
+          - payloadType: Issues
+          - labelAdded:
+              label: WindowsFeatures
+        then:
+          - addReply:
+              reply: >-
+                Hello @${issueAuthor},
+
+
+                This package appears to have dependencies on one or more Windows Feature(s).
+
+
+                This package is blocked until support for Windows Feature dependencies is implemented in:
+
+                * microsoft/winget-cli/issues/685
+
+
+                Be sure to add your 👍 to the issue to help raise the priority and avoid posting "Me too!" messages to respect those who have subscribed to the issue.
+
+
+                Template: msftbot/blockingIssue/windowsFeatureDependency
+          - addLabel:
+              label: Blocking-Issue
+        # The policy service should trigger even when the label was added by the policy service
+        triggerOnOwnActions: true
+onFailure:
+onSuccess:
