@@ -562,6 +562,18 @@ namespace WinGetApprovalNamespace {
 				item.MenuItems.Add("Close: (User Input);", new EventHandler(Closed_Action));
 				item.MenuItems.Add("Close: Merge Conflicts;", new EventHandler(Merge_Conflicts_Action));
 				item.MenuItems.Add("Close: Duplicate of (User Input);", new EventHandler(Duplicate_Action));
+				// item.MenuItems.Add("Add Waiver", new EventHandler(Add_Waiver_Action));
+				// item.MenuItems.Add("(disabled) Needs Author Feedback (reason)", new EventHandler(Needs_Author_Feedback_Action));
+			// submenu = new MenuItem("Canned Replies");
+				// item.MenuItems.Add(submenu);
+					// submenu.MenuItems.Add("Automation block", new EventHandler(Automation_Block_Action));
+					// submenu.MenuItems.Add("Driver install", new EventHandler(Driver_Install_Action));
+					// submenu.MenuItems.Add("Installer missing", new EventHandler(Installer_Missing_Action));
+					// submenu.MenuItems.Add("Installer not silent", new EventHandler(Installer_Not_Silent_Action));
+					// submenu.MenuItems.Add("Needs PackageUrl", new EventHandler(Needs_PackageUrl_Action));
+					// submenu.MenuItems.Add("One manifest per PR", new EventHandler(One_Manifest_Per_PR_Action));
+				// item.MenuItems.Add("Record as Project File", new EventHandler(Project_File_Action));
+				// item.MenuItems.Add("Record as squash-merge", new EventHandler(Squash_Action));
 
 			item = new MenuItem("Open In Browser");
 			this.Menu.MenuItems.Add(item);
@@ -618,6 +630,8 @@ namespace WinGetApprovalNamespace {
  			int col7 = gridItemWidth*inc;inc++;
  			int col8 = gridItemWidth*inc;inc++;
  			int col9 = gridItemWidth*inc;inc++;
+ 
+			//drawStatusStrip(statusStrip1, toolStripStatusLabel1);
 			
 			table_vm.Columns.Add("vm", typeof(string));
 			table_vm.Columns.Add("status", typeof(string));
@@ -646,6 +660,7 @@ namespace WinGetApprovalNamespace {
 			drawToolTip(ref toolTip3, ref btn11, "Automatically start manifest for random IEDS in VM.");
 			drawButton(ref btn19, col3, row10, gridItemWidth, gridItemHeight, "Idle Mode", Idle_Action);
 			drawToolTip(ref toolTip4, ref btn19, "It does nothing.");
+			drawButton(ref btn20, col4, row10, gridItemWidth, gridItemHeight, "Testing button", Testing_Action);
 			
 			drawDataGrid(ref dataGridView_vm, col0, row0, gridItemWidth*8, gridItemHeight*5);
 			dataGridView_vm.Anchor = AnchorStyles.Top | AnchorStyles.Bottom;
@@ -668,6 +683,7 @@ namespace WinGetApprovalNamespace {
 			btn18.Top = ClientRectangle.Height - gridItemHeight;
 			btn11.Top = ClientRectangle.Height - gridItemHeight;
 			btn19.Top = ClientRectangle.Height - gridItemHeight;
+			btn20.Top = ClientRectangle.Height - gridItemHeight;
 		}
 		//Refresh display and buttons 
 		private void timer_everysecond(object sender, EventArgs e) {
@@ -686,6 +702,11 @@ namespace WinGetApprovalNamespace {
 		if (HourLatch) {
 			HourLatch = false;
 			HourlyRun();
+			// if (Int32.Parse(DateTime.Now.ToString("mm")) == 20) {
+				// string seconds = DateTime.Now.ToString("ss");
+				// outBox_val.AppendText(Environment.NewLine + seconds);
+				// Thread.Sleep((60-Int32.Parse(seconds))*1000);//If it's still :20 after, sleep out the minute. 
+			// }
 		}
 			//Update PR display
 			string clip = Clipboard.GetText();
@@ -1340,9 +1361,17 @@ namespace WinGetApprovalNamespace {
 				string EightHoursAgo = DateTime.Now.AddHours(-8).ToString("M/d/yyyy");
 				string EighteenHoursAgo = DateTime.Now.AddHours(-18).ToString("M/d/yyyy");
 		/*
-				if (($PRState.Where(n => n.event == "PreValidation"})[-1].created_at < (Get-Date).AddHours(-8) && //Last Prevalidation was 8 hours ago.
-				($PRState.Where(n => n.event == "Running"})[-1].created_at < (Get-Date).AddHours(-18)) {  //Last Run was 18 hours ago.
-					Get-GitHubPreset Retry -PR $PR
+				if (PRState.Where(n => n.Event == "PreValidation")[-1].created_at <  EightHoursAgo && //Last Prevalidation was 8 hours ago.
+				PRState.Where(n => n.Event == "Running")[-1].created_at < EighteenHoursAgo) {  //Last Run was 18 hours ago.
+					RetryPR(PR);
+DataTable dt = ...
+DataView dv = new DataView(dt);
+dv.RowFilter = "(EmpName != 'abc' or EmpName != 'xyz') and (EmpID = 5)"
+
+dt.where(e => {check something}).Select({select code here})
+var query =
+    contacts.SelectMany(
+        contact => orders.Where(order => order).Select(order )
 				}
 		*/
 			} else {
@@ -2157,6 +2186,7 @@ namespace WinGetApprovalNamespace {
 			string Wingetbot = "wingetbot";
 			string AzurePipelines = "azure-pipelines";
 			string FabricBot = "microsoft-github-policy-service";
+			// List<string> OverallState = new List<string>();
 			outBox_val.AppendText(Environment.NewLine + "Comments: "+ Comments.Length);
 
 DataTable OverallState = new DataTable(); 
@@ -2250,10 +2280,17 @@ newRow["body"] = body;
 newRow["created_at"] = Comment["created_at"];
 newRow["State"] = State;
 OverallState.Rows.Add(newRow);
+					// OverallState.Add(State); //| select @{n="event";e={State}},created_at;
 				}
 			}
 			return OverallState;
 		}
+
+/*
+vm = GetVM(VM);
+bool ConnectionStatus = vm.Scope.IsConnected;
+
+*/
 
 
 
@@ -2432,13 +2469,16 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 		string MDLog = "";
 		
 	if (Operation == "Configure") {
+			//Write-Host "Running Manual Config build "build" on vmVM for ConfigureFile"
 		wingetArgs = "configure -f "+RemoteFolder+"/manifest/config.yaml --accept-configuration-agreements --disable-interactivity";
 		InspectNew = false;
 	} else {
 		if (PackageIdentifier == "") {
+			//Write-Host "Bad PackageIdentifier: "PackageIdentifier""
 			//Break;
 			Clipboard.SetText(PackageIdentifier);
 		}
+			//Write-Host "Running Manual Validation build "build" on vmVM for package "PackageIdentifier" version $PackageVersion"
 		
 		if (PackageVersion != "") {
 			logExt = PackageVersion+"."+logExt;
@@ -3077,6 +3117,7 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 			string VMFolder = MainFolder + "\\vm\\" + vm;
 			string newVmName = "vm" + vm;
 			//string startTime = (Get-Date)
+					//Write-Host "Creating VM $newVmName version $version OS OS"
 			OutFile(vmCounter,(vm + 1).ToString());
 			OutFile(StatusFile,"\"" + vm + "\",\"Generating\",\"" + version + "\",\"" + OS + "\",\"\",\"1\",\"0\"",true);
 			RemoveItem(destinationPath,true);
@@ -3086,7 +3127,9 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 
 			//Write-Host "Takes about 120 seconds..."
 			ImportVM(VMImageFolder, destinationPath);
+			outBox_val.AppendText(Environment.NewLine + "newVmName "+ newVmName);
 			RenameVM(vm.ToString(),newVmName); //(Get-VM | Where-Object {($_.CheckpointFileLocation)+"\\" == $destinationPath}) newName $
+			outBox_val.AppendText(Environment.NewLine + "newVmName "+ newVmName);
 			SetVMState(newVmName, 2);// $
 			//Remove-VMCheckpoint -VMName $newVmName -Name "Backup"
 			RevertVM(vm);
@@ -3673,7 +3716,15 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 						}//end if row vm
 					}//end for r
 
+		/*
+			if (null == string_out) {0
+				string_out = ( "" | Select-Object "PackageIdentifier","GitHubUserName","authStrictness","authUpdateType","autoWaiverLabel","versionParamOverrideUserName","versionParamOverridePR","code200OverrideUserName","code200OverridePR","AgreementOverridePR","AgreementURL","reviewText")
+				string_out.PackageIdentifier = PackageIdentifier
+			}
 
+				data += string_out
+				data = data.OrderBy(o=>o["PackageIdentifier"]).ToArray();
+		*/
 				OutFile(DataFileName, ToCsv(data));
 		}
 
@@ -3889,6 +3940,11 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 				request.Accept = "application/vnd.github+json";
 				request.UserAgent = "WinGetApprovalPipeline";
 
+			 //Check Headers
+			 // for (int i=0; i < response.Headers.Count; ++i)  {
+				// outBox_val.AppendText(Environment.NewLine + "Header Name : " + response.Headers.Keys[i] + "Header value : " + response.Headers[i]);
+			 // }
+
 			try {
 				if ((Body == "") || (Method ==WebRequestMethods.Http.Get)) {
 				} else {
@@ -4048,6 +4104,35 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 			process.Start();
 			process.WaitForExit(); 
 		}
+			
+  public void RenameVM2(string VMName, string vmNewName) {
+	  
+            ManagementObject virtualSystemService = GetCimService("Msvm_VirtualSystemManagementService");
+            ManagementBaseObject inParams = virtualSystemService.GetMethodParameters("ModifyVirtualSystem");
+			ManagementObject vm = GetVM(VMName);
+			// ManagementBaseObject inParams = vm.GetMethodParameters("ModifyVirtualSystem");
+	
+            inParams["ComputerSystem"] = vm.Path.Path;
+            ManagementObject settingData  = null;
+            ManagementObjectCollection settingsData = vm.GetRelated( 
+																"Msvm_VirtualSystemSettingData",
+																 "Msvm_SettingsDefineState",
+																 null,
+																 null,
+																 "SettingData",
+																 "ManagedElement",
+																 false,
+																 null);
+
+            foreach (ManagementObject data in settingsData) {
+                settingData = data;
+            }
+            settingData["ElementName"] = vmNewName;
+            inParams["SystemsettingData"] = settingData.GetText(TextFormat.CimDtd20);
+            ManagementBaseObject outParams = virtualSystemService.InvokeMethod("ModifyVirtualSystem", inParams, null);
+            // ManagementBaseObject outParams = vm.InvokeMethod("RequestStateChange", inParams, null);
+
+        }
 		
 		public void MoveVMStorage(string VMName, string DestinationPath) {
 			Process process = new Process();
@@ -4063,13 +4148,16 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 		public void ImportVM(string CurrentPath, string DestinationPath) {
 			Process process = new Process();
 			string command = "Import-VM -Path " + CurrentPath + "  -Copy -GenerateNewId -VhdDestinationPath "+DestinationPath +" -VirtualMachinePath "+DestinationPath;
-			process.StartInfo.Arguments = string.Format(command);
 			process.StartInfo.FileName = "PowerShell.EXE";
+			process.StartInfo.Arguments = command;
 			process.StartInfo.CreateNoWindow = true;
 			process.StartInfo.UseShellExecute = false;
+			outBox_val.AppendText(Environment.NewLine + "ImportVM " + process.StartInfo.FileName);
 			process.Start();
+			outBox_val.AppendText(Environment.NewLine + "Start " + process.StartInfo.FileName);
 			process.WaitForExit(); 
-		}
+			outBox_val.AppendText(Environment.NewLine + "WaitForExit " + process.StartInfo.FileName);
+		} 
 
 		public void SetVMMemory(string VMName, int MemoryMaximumGB) {
 			Process process = new Process();
