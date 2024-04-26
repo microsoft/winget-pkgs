@@ -1,0 +1,84 @@
+# Created with YamlCreate.ps1 v2.2.9 $debug=AUSU.CRLF.5-1-19041-3031.Win32NT
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.4.0.schema.json
+
+PackageIdentifier: MHNexus.HxD
+PackageVersion: "2.5"
+PackageLocale: en-US
+Publisher: Maël Hörz
+PublisherUrl: https://mh-nexus.de/
+PublisherSupportUrl: https://forum.mh-nexus.de/viewforum.php?f=7
+# PrivacyUrl:
+Author: Maël Hörz
+PackageName: HxD Hex Editor
+PackageUrl: https://mh-nexus.de/en/hxd/
+License: Freeware
+LicenseUrl: https://mh-nexus.de/en/hxd/license.php
+Copyright: HxD Copyright© 2002-2020 by Maël Hörz
+CopyrightUrl: https://mh-nexus.de/en/hxd/license.php
+ShortDescription: Hex and Disk Editor
+Description: HxD is a carefully designed and fast hex editor which, additionally to raw disk editing and modifying of main memory (RAM), handles files of any size.
+Moniker: hxd
+Tags:
+- hex-editor
+- hex-viewer
+ReleaseNotes: |-
+  Hex editor: implement horizontal mouse wheel scrolling (including handling of Logitech driver bug)
+  Data inspector:
+  - New: added LEB128/ULEB128 types (variable width integer types used in WASM and dwarf debug information)
+  - New: introduce readonly type converters (to allow uniform error messages when attempting to change values, also for converter plugins)
+  - Enhancement: better error handling so that typical errors are caught and a more specific error message is given
+    - error message for plugin DLLs of wrong machine type (x86-32 vs. x86-64)
+  - Exporters:
+    - New: skip undefined or unreadable sections, such that Intel Hex and S-Record files can be created that have gaps
+    - New: source code exporter option to set the maximum text column or bytes per lines (= array elements per line)
+    - New: SRecord and IntelHex exporters can now have maximum of 250 and 255 bytes per line, respectively
+      - therefore there is also a new default block size/bytes per line setting for each of the exporters, which have a more common size of 32 (for both)
+      - allows user to select very large block sizes, yet default to a commonly used size
+  - Importers:
+    - New: Intel Hex and S-Record support undefined regions of arbitrary size, by creating undefined foldable regions, instead of creating zero filled blocks for them
+    - Enhancement: rewrite logic to allow for data records that are out of order (addresses aren’t strictly increasing), or overlapping, even when there are gaps of undefined data; previously this could lead to errors, or would only function without undefined data gaps
+    - Enhancement: Intel Hex and S-Record importers ignore leading and trailing whitespace in a line
+  - Checksums / digests:
+    - New: custom checksum
+      - can generate a checksum, with settable bitwidth for the checksum result, the checksum addends, and the endianness
+        - useful for various exotic formats, such as ROM files
+  - Search window:
+        Enhancement: added support for (U)Int24
+        use same code as datainspector to convert from string to integer
+        improved the naming of floating point and integer types (closer to data inspector)
+        searches for both signed and unsigned integers, choosing the right type depending on which fits best (negative numbers => negative type, positive numbers => unsigned type; this is ok, because the positive numbers in the signed type have the same encoding as in the unsigned type; this is a feature of two’s complement encoding of integers)
+  - Tool windows:
+    - New: menu items and shortcuts to activate and cycle through tool windows
+      - activates (and shows when hidden) either of: data inspector, checksums, or search results
+      - implements MRU logic for activation (like Alt+Tab in Windows)
+      - can be canceled (and originally activated tool window will be restored)
+      - can handle dockable panels, pagecontrols, and childs of those to handle and keep track of activation
+      - properly handles switching between back and forward cycling, by switching from Alt+F7 to Alt+Shift+F7, and interrupting cycling when pressing another shortcut
+      - extended shortcut handling of VCL/Delphi to handle repeated uses of two shortcuts as part of a shortcut sequence, to properly implement MRU handling, and canceling sequencing (which restores the originally activated tool window), or committing the last chosen tool window, as the activated one
+    - Global shortcut key Esc to focus editor window
+  - PasteFromClipboard:
+    - do not delete then insert data in pmOverwrite mode, instead, only overwrite
+    - also ensure selection/caret is restored, and therefore always begin a group if selection is available
+  - Extensive work to support undefined sections in hex editor that can be deleted, or overwritten, all with undo capability; concerned a lot of supporting internal data structures/algorithms
+    - allows for support in importing and exporting files with gaps (=undefined sections)
+      - allows for round-trip handling of Intel Hex or S-Record files
+  - Settings:
+    - Data type converters only store their friendly type names in the settings/INI file, when the user changes them
+      - this allows for updating those names from version to version, and having them appear automatically without resetting the data inspector in the options
+        - also useful for translating HxD, which read the names from the settings when not resetting them, making it appear the translation is not complete
+  - Fix: entering positive numbers for (U)Int64 results in an out of range error message
+  - Fix: Search window: “any” bitwidth does not accept positive integers >= 2^63 (since it was limited to signed numbers only, now supports unsigned ones, too)
+  - Fix: HxD would sometimes not detect it was installed (and not in portable mode), because of a case sensitive path comparison
+  - Fix: access violation when deleting sections (sections were fixed before, so this bug never triggered)
+  - Fix: custom checksum computation uses wrong step size to advance in the byte stream it processes; it would advance in steps of the final checksum’s bitwidths, instead of the addend’s bitwidth
+  - Fix: when overwriting one nibble (key press in hex column) in unaccessible data, set the other nibble to 0 automatically
+  - Fix: dockable panels could change fonts in docked and undocked/floating modes
+  - Fix: several type and pointer shorting issues, due to types not compatible with x64; they would cause hard to track bugs in the x64 version of HxD under certain versions/configurations of Win 10 (ensuring everything is allocated in memory above 4GiB, during testing, allowed to track them down)
+    - issues were in some own code, some third party code, and some Delphi RTL code (TRttiContext, TValue.Make)
+  - Various other small enhancements and minor fixes
+ReleaseNotesUrl: https://mh-nexus.de/en/hxd/changelog.php
+# PurchaseUrl:
+# InstallationNotes:
+# Documentations:
+ManifestType: defaultLocale
+ManifestVersion: 1.4.0

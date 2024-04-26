@@ -1,0 +1,103 @@
+# Created with YamlCreate.ps1 v2.2.12 by Dumplings $debug=QUSU.CRLF.7-4-0.Win32NT
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.5.0.schema.json
+
+PackageIdentifier: Python.Python.3.9
+PackageVersion: 3.9.13
+PackageLocale: en-US
+Publisher: Python Software Foundation
+PublisherUrl: https://www.python.org/
+PublisherSupportUrl: https://www.python.org/about/help/
+PrivacyUrl: https://www.python.org/privacy/
+Author: Python Software Foundation
+PackageName: Python 3.9
+PackageUrl: https://www.python.org/
+License: PSF-2.0
+LicenseUrl: https://docs.python.org/3/license.html
+Copyright: |-
+  Copyright (c) 2001-2022 Python Software Foundation. All Rights Reserved.
+  Copyright (c) 2000 BeOpen.com. All Rights Reserved.
+  Copyright (c) 1995-2001 Corporation for National Research Initiatives. All Rights Reserved.
+  Copyright (c) 1991-1995 Stichting Mathematisch Centrum, Amsterdam. All Rights Reserved.
+CopyrightUrl: https://www.python.org/about/legal/
+ShortDescription: Python is a programming language that lets you work more quickly and integrate your systems more effectively.
+# Description:
+Moniker: python3.9
+Tags:
+- language
+- programming
+- programming-language
+- python
+- python3
+- script
+ReleaseNotes: |-
+  Core and Builtins
+  - gh-92311: Fixed a bug where setting frame.f_lineno to jump over a list comprehension could misbehave or crash.
+  - gh-92112: Fix crash triggered by an evil custom mro() on a metaclass.
+  - gh-92036: Fix a crash in subinterpreters related to the garbage collector. When a subinterpreter is deleted, untrack all objects tracked by its GC. To prevent a crash in deallocator functions expecting objects to be tracked by the GC, leak a strong reference to these objects on purpose, so they are never deleted and their deallocator functions are not called. Patch by Victor Stinner.
+  - gh-91421: Fix a potential integer overflow in _Py_DecodeUTF8Ex.
+  - bpo-46775: Some Windows system error codes(>= 10000) are now mapped into the correct errno and may now raise a subclass of OSError. Patch by Dong-hee Na.
+  - bpo-46962: Classes and functions that unconditionally declared their docstrings ignoring the --without-doc-strings compilation flag no longer do so.
+    The classes affected are pickle.PickleBuffer, testcapi.RecursingInfinitelyError, and types.GenericAlias.
+    The functions affected are 24 methods in ctypes.
+    Patch by Oleg Iarygin.
+  - bpo-36819: Fix crashes in built-in encoders with error handlers that return position less or equal than the starting position of non-encodable characters.
+  Library
+  - gh-91581: utcfromtimestamp() no longer attempts to resolve fold in the pure Python implementation, since the fold is never 1 in UTC. In addition to being slightly faster in the common case, this also prevents some errors when the timestamp is close to datetime.min. Patch by Paul Ganssle.
+  - gh-92530: Fix an issue that occurred after interrupting threading.Condition.notify().
+  - gh-92049: Forbid pickling constants re._constants.SUCCESS etc. Previously, pickling did not fail, but the result could not be unpickled.
+  - bpo-47029: Always close the read end of the pipe used by multiprocessing.Queue after the last write of buffered data to the write end of the pipe to avoid BrokenPipeError at garbage collection and at multiprocessing.Queue.close() calls. Patch by Géry Ogam.
+  - gh-91910: Add missing f prefix to f-strings in error messages from the multiprocessing and asyncio modules.
+  - gh-91810: ElementTree method write() and function tostring() now use the text file’s encoding (“UTF-8” if not available) instead of locale encoding in XML declaration when encoding="unicode" is specified.
+  - gh-91832: Add required attribute to argparse.Action repr output.
+  - gh-91734: Fix OSS audio support on Solaris.
+  - gh-91700: Compilation of regular expression containing a conditional expression (?(group)...) now raises an appropriate re.error if the group number refers to not defined group. Previously an internal RuntimeError was raised.
+  - gh-91676: Fix unittest.IsolatedAsyncioTestCase to shutdown the per test event loop executor before returning from its run method so that a not yet stopped or garbage collected executor state does not persist beyond the test.
+  - gh-90568: Parsing \N escapes of Unicode Named Character Sequences in a regular expression raises now re.error instead of TypeError.
+  - gh-91595: Fix the comparison of character and integer inside Tools.gdb.libpython.write_repr(). Patch by Yu Liu.
+  - gh-90622: Worker processes for concurrent.futures.ProcessPoolExecutor are no longer spawned on demand (a feature added in 3.9) when the multiprocessing context start method is "fork" as that can lead to deadlocks in the child processes due to a fork happening while threads are running.
+  - gh-91575: Update case-insensitive matching in the re module to the latest Unicode version.
+  - gh-91581: Remove an unhandled error case in the C implementation of calls to datetime.fromtimestamp with no time zone (i.e. getting a local time from an epoch timestamp). This should have no user-facing effect other than giving a possibly more accurate error message when called with timestamps that fall on 10000-01-01 in the local time. Patch by Paul Ganssle.
+  - bpo-34480: Fix a bug where _markupbase raised an UnboundLocalError when an invalid keyword was found in marked section. Patch by Marek Suscak.
+  - bpo-27929: Fix asyncio.loop.sock_connect() to only resolve names for socket.AF_INET or socket.AF_INET6 families. Resolution may not make sense for other families, like socket.AF_BLUETOOTH and socket.AF_UNIX.
+  - bpo-43323: Fix errors in the email module if the charset itself contains undecodable/unencodable characters.
+  - bpo-46787: Fix concurrent.futures.ProcessPoolExecutor exception memory leak
+  - bpo-46415: Fix ipaddress.ip_{address,interface,network} raising TypeError instead of ValueError if given invalid tuple as address parameter.
+  - bpo-44911: IsolatedAsyncioTestCase will no longer throw an exception while cancelling leaked tasks. Patch by Bar Harel.
+  - bpo-44493: Add missing terminated NUL in sockaddr_un’s length
+    This was potentially observable when using non-abstract AF_UNIX datagram sockets to processes written in another programming language.
+  - bpo-42627: Fix incorrect parsing of Windows registry proxy settings
+  - bpo-36073: Raise ProgrammingError instead of segfaulting on recursive usage of cursors in sqlite3 converters. Patch by Sergey Fedoseev.
+  Documentation
+  - gh-91888: Add a new gh role to the documentation to link to GitHub issues.
+  - gh-91783: Document security issues concerning the use of the function shutil.unpack_archive()
+  - gh-91547: Remove “Undocumented modules” page.
+  - bpo-44347: Clarify the meaning of dirs_exist_ok, a kwarg of shutil.copytree().
+  - bpo-38668: Update the introduction to documentation for os.path to remove warnings that became irrelevant after the implementations of PEP 383 and PEP 529.
+  - bpo-47138: Pin Jinja to a version compatible with Sphinx version 2.4.4.
+  - bpo-46962: All docstrings in code snippets are now wrapped into PyDoc_STR() to follow the guideline of PEP 7’s Documentation Strings paragraph. Patch by Oleg Iarygin.
+  - bpo-26792: Improve the docstrings of runpy.run_module() and runpy.run_path(). Original patch by Andrew Brezovsky.
+  - bpo-45790: Adjust inaccurate phrasing in Defining Extension Types: Tutorial about the ob_base field and the macros used to access its contents.
+  - bpo-42340: Document that in some circumstances KeyboardInterrupt may cause the code to enter an inconsistent state. Provided a sample workaround to avoid it if needed.
+  - bpo-41233: Link the errnos referenced in Doc/library/exceptions.rst to their respective section in Doc/library/errno.rst, and vice versa. Previously this was only done for EINTR and InterruptedError. Patch by Yan “yyyyyyyan” Orestes.
+  - bpo-38056: Overhaul the Error Handlers documentation in codecs.
+  - bpo-13553: Document tkinter.Tk args.
+  Tests
+  - gh-91607: Fix test_concurrent_futures to test the correct multiprocessing start method context in several cases where the test logic mixed this up.
+  - bpo-47205: Skip test for sched_getaffinity() and sched_setaffinity() error case on FreeBSD.
+  - bpo-29890: Add tests for ipaddress.IPv4Interface and ipaddress.IPv6Interface construction with tuple arguments. Original patch and tests by louisom.
+  Build
+  - bpo-47103: Windows PGInstrument builds now copy a required DLL into the output directory, making it easier to run the profile stage of a PGO build.
+  Windows
+  - bpo-47194: Update zlib to v1.2.12 to resolve CVE-2018-25032.
+  - bpo-46785: Fix race condition between os.stat() and unlinking a file on Windows, by using errors codes returned by FindFirstFileW() when appropriate in win32_xstat_impl.
+  - bpo-40859: Update Windows build to use xz-5.2.5
+  Tools/Demos
+  - gh-91583: Fix regression in the code generated by Argument Clinic for functions with the defining_class parameter.
+ReleaseNotesUrl: https://docs.python.org/release/3.9.13/whatsnew/changelog.html
+# PurchaseUrl:
+# InstallationNotes:
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://www.python.org/doc/
+ManifestType: defaultLocale
+ManifestVersion: 1.5.0
