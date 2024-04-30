@@ -1,0 +1,101 @@
+# Created using wingetcreate 1.6.1.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.6.0.schema.json
+
+PackageIdentifier: mtkennerly.ludusavi
+PackageVersion: 0.23.0
+PackageLocale: en-US
+Publisher: mtkennerly
+PublisherUrl: https://github.com/mtkennerly
+PublisherSupportUrl: https://github.com/mtkennerly/ludusavi/issues
+Author: Matthew T. Kennerly
+PackageName: ludusavi
+PackageUrl: https://github.com/mtkennerly/ludusavi
+License: MIT
+LicenseUrl: https://github.com/mtkennerly/ludusavi/blob/master/LICENSE
+Copyright: Copyright (c) 2020 Matthew T. Kennerly (mtkennerly)
+CopyrightUrl: https://github.com/mtkennerly/ludusavi/blob/master/LICENSE
+ShortDescription: Backup tool for PC game saves
+Moniker: ludusavi
+ReleaseNotes: |-
+  * Added:
+    * CLI: The `wrap` command now supports some new arguments:
+      `--infer steam`, `--infer lutris`, and `--force` to skip confirmations
+    * GUI: File sizes are now displayed for each file and directory.
+      ([Contributed by JackSpagnoli](https://github.com/mtkennerly/ludusavi/pull/308))
+    * When a save fails to back up or restore, you can now see a specific error message per save.
+      Previously, this was only available in the log file.
+      For the GUI, you can hover over the "failed" badge to view the error.
+      Note that these errors are shown as-is for troubleshooting and may not be translated.
+    * You can now set aliases to display instead of the original name.
+      This does not affect the CLI when using `--api`.
+    * On Linux, for Steam roots that point to a Flatpak installation,
+      Ludusavi now checks `$XDG_DATA_HOME` and `$XDG_CONFIG_HOME`
+      inside of the Flatpak installation of Steam.
+    * Updated translations, including new in-progress translations for Traditional Chinese and Turkish.
+      (Thanks to contributors on the [Crowdin project](https://crowdin.com/project/ludusavi))
+  * Fixed:
+    * Ludusavi would crash when reading a non-UTF-8 mapping.yaml file.
+      This wouldn't normally happen, but could arise from external modifications.
+    * GUI: On Linux with Wayland, the app ID property was not being set,
+      which caused some issues like not showing the window icon and not grouping the window properly.
+      ([Contributed by ReillyBrogan](https://github.com/mtkennerly/ludusavi/pull/334))
+    * CLI: During slow processing (e.g., cloud upload or a game with huge saves),
+      the progress bar timer wouldn't update.
+    * GUI: After performing a cloud upload preview on the other screen,
+      the very next backup preview wouldn't do anything.
+    * GUI: You can now use undo/redo shortcuts for backup comments.
+    * CLI: The `wrap` command did not fail gracefully when the game launch commands were missing.
+    * CLI: Several commands did not resolve aliases.
+    * CLI: The `cloud` commands did not reject unknown game titles.
+    * If a game had more data that failed to back up than succeeded,
+      then the backup size would be reported incorrectly.
+  * Changed:
+    * The way Ludusavi parses file paths internally has been overhauled.
+      The majority of the observable behavior is the same,
+      but it is now more predictable and correct when parsing Linux-style paths on Windows and vice versa.
+
+      Some behavioral changes worth noting:
+
+      * You can now configure redirects that change Windows/Linux-style paths into the other format.
+        For example, if you configure a backup redirect from `C:\games` to `/opt/games`,
+        then the backup will contain references to `/opt/games`.
+        (Previously, `/opt/games` would turn into `C:/opt/games` when parsed on Windows,
+        and `C:\games` would turn into `./C_/games` when parsed on Linux.)
+      * On Windows, you can no longer write `/games` as an alias of `C:\games`.
+        These are now treated as distinct paths.
+        (Previously, on Windows, Linux-style paths were interpreted as `C:` paths.)
+      * If you try to restore Windows-style paths on Linux or vice versa,
+        it will now produce an error,
+        unless you've configured an applicable redirect.
+    * GUI: On Windows, the way Ludusavi hides its console in GUI mode has changed,
+      in order to avoid a new false positive from Windows Defender.
+
+      Instead of relaunching itself, Ludusavi now detaches the console from the current instance.
+      This reverts a change from v0.18.1,
+      but care has been taken to address the problems that originally led to that change.
+      If you do notice any issues related to this, please report them.
+    * GUI: Previously, when you changed settings, Ludusavi would save each change immediately.
+      It now waits for 1 second in case there is another change,
+      so that typing and other fast, successive edits are batched.
+    * CLI: Previously, the `restore` and `backups` (not `backup`) commands would return an error
+      if you specified a game that did not have any backups available to restore.
+      This was inconsistent with the `backup` command,
+      which would simply return empty data if there was nothing to back up.
+      Now, `restore` and `backups` will also return empty data if there are no backups.
+    * CLI: Some deprecated flags have been removed from the `backup` command:
+      `--merge`, `--no-merge`, `--update`, and `--try-update`.
+    * When synchronizing to the cloud after a backup,
+      Ludusavi now instructs Rclone to only check paths for games with updated saves.
+      This improves the cloud sync performance.
+    * The following are now configured as default arguments for Rclone:
+      `--fast-list --ignore-checksum`.
+      These should improve performance in most cases.
+      You can change or remove these on the "other" screen.
+    * GUI: During a backup or restore,
+      if the "synchronize automatically" cloud setting is enabled,
+      then the progress bar will display "cloud" instead of "scan" during the cloud operations.
+    * Differential backup names now end with "-diff".
+      This does not affect existing backups.
+ReleaseNotesUrl: https://github.com/mtkennerly/ludusavi/releases/tag/v0.23.0
+ManifestType: defaultLocale
+ManifestVersion: 1.6.0
