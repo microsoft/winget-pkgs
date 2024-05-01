@@ -47,7 +47,7 @@ Need work:
 1. HourlyRun (pending)
   - LabelAction (needs testing)
     - DefenderFail (pending)
-        PRStateFromComments (needs rewrite)
+      -  PRStateFromComments (needs rewrite)
     - ADOLog (needs testing)
 2. PR Watcher bulk approvals & RandomIEDS (pending)
   - Validation DataGridView needs a function to write to it. 
@@ -145,7 +145,7 @@ using System.Web.Script.Serialization;
 namespace WinGetApprovalNamespace {
     public class WinGetApprovalPipeline : Form {
 		//vars
-        public int build = 811;//Get-RebuildPipeApp
+        public int build = 879;//Get-RebuildPipeApp
 		public string appName = "WinGetApprovalPipeline";
 		public string appTitle = "WinGet Approval Pipeline - Build ";
 		public static string owner = "microsoft";
@@ -276,13 +276,13 @@ namespace WinGetApprovalNamespace {
 		public static int gridItemHeight = 45;
 
 		public int lineHeight = 14;
-		public int WindowWidth = gridItemWidth*10+20;
+		public int WindowWidth = gridItemWidth*13+20;
 		public int WindowHeight = gridItemHeight*12+20;
 		
 		//Fonts
 		string AppFont = "Calibri";
 		int AppFontSIze = 12;
-		int urlBoxFontSIze = 14;
+		int urlBoxFontSIze = 12;
 		string buttonFont = SystemFonts.MessageBoxFont.ToString();
 		int buttonFontSIze = 8;
 
@@ -511,10 +511,11 @@ namespace WinGetApprovalNamespace {
 				item.MenuItems.Add("(disabled) Specify key file location...", new EventHandler(Save_File_Action));
 				item.MenuItems.Add("(disabled) Generate daily report", new EventHandler(About_Click_Action));
 
-			item = new MenuItem("VM Lifecycle");
+			item = new MenuItem("Selected VM");
 			this.Menu.MenuItems.Add(item);
 				item.MenuItems.Add("Complete VM", new EventHandler(Complete_VM_Image_Action));
 				item.MenuItems.Add("Relaunch window", new EventHandler(Launch_Window_Image_Action));
+				item.MenuItems.Add("Open manifest folder", new EventHandler(Open_Folder_Image_Action));
 			MenuItem submenu = new MenuItem("WIn10 Image VM");
 				item.MenuItems.Add(submenu);
 					submenu.MenuItems.Add("Generate VM from image", new EventHandler(Generate_Win10_VM_Image_Action)); 
@@ -531,13 +532,13 @@ namespace WinGetApprovalNamespace {
 					submenu.MenuItems.Add("Stop", new EventHandler(Stop_Win11_Image_Action)); 
 					submenu.MenuItems.Add("Turn Off", new EventHandler(TurnOff_Win11_Image_Action)); 
 					submenu.MenuItems.Add("Attach new image VM", new EventHandler(Attach_Win11_Image_Action)); 
-				item.MenuItems.Add("Disgenerate selected VM", new EventHandler(Disgenerate_VM_Image_Action));
+				item.MenuItems.Add("Disgenerate VM", new EventHandler(Disgenerate_VM_Image_Action));
 
 			item = new MenuItem("Validate Manifest");
 			this.Menu.MenuItems.Add(item);
 				item.MenuItems.Add("Regular Validation", new EventHandler(Validate_Manifest_Action));
 				item.MenuItems.Add("DSC Configure", new EventHandler(Validate_By_Configure_Action));
-				item.MenuItems.Add("By PackageIdentifier (ID)", new EventHandler(Validate_By_ID_Action));
+				item.MenuItems.Add("By PackageIdentifier (User Input)", new EventHandler(Validate_By_ID_Action));
 				item.MenuItems.Add("By Arch", new EventHandler(Validate_By_Arch_Action));
 				item.MenuItems.Add("By Scope", new EventHandler(Validate_By_Scope_Action));
 				item.MenuItems.Add("Both Arch and Scope", new EventHandler(Validate_By_Arch_And_Scope_Action));
@@ -553,7 +554,7 @@ namespace WinGetApprovalNamespace {
 			item = new MenuItem("Modify PR");
 			this.Menu.MenuItems.Add(item);
 				item.MenuItems.Add("Approve PR", new EventHandler(Approved_Action));
-				item.MenuItems.Add("Label Action", new EventHandler(Needs_Author_Feedback_Action));
+				item.MenuItems.Add("Label Action", new EventHandler(Label_Action_Action));
 				item.MenuItems.Add("Check installer", new EventHandler(Check_Installer_Action));
 			submenu = new MenuItem("Update manifest");
 				item.MenuItems.Add(submenu);
@@ -583,22 +584,27 @@ namespace WinGetApprovalNamespace {
 			this.Menu.MenuItems.Add(item);
 				item.MenuItems.Add("Current PR", new EventHandler(Open_Current_PR_Action)); 
 				item.MenuItems.Add("PR for selected VM", new EventHandler(Open_PR_Selected_VM_Action)); 
-			submenu = new MenuItem("Resources:");
+			submenu = new MenuItem("Open many tabs:");
+				item.MenuItems.Add(submenu);
+					submenu.MenuItems.Add("All PRs on clipboard", new EventHandler(Open_AllUrls_Action)); 
+					submenu.MenuItems.Add("Full Approval Run", new EventHandler(Approval_Run_Search_Action));
+					submenu.MenuItems.Add("Full ToWork Run", new EventHandler(ToWork_Run_Search_Action));
+					submenu.MenuItems.Add("All Start Of Day", new EventHandler(Start_Of_Day_Action));
+					submenu.MenuItems.Add("All Resources", new EventHandler(All_Resources_Action));
+			submenu = new MenuItem("Start Of Day:");
+				item.MenuItems.Add(submenu);
+					submenu.MenuItems.Add("WinGet-pkgs repo", new EventHandler(Open_PKGS_Repo_Action));
+					submenu.MenuItems.Add("WinGet-cli repo", new EventHandler(Open_CLI_Repo_Action));			submenu = new MenuItem("Resources:");
 				item.MenuItems.Add(submenu);
 					submenu.MenuItems.Add("Gitter chat", new EventHandler(Open_Gitter_Action));
 					submenu.MenuItems.Add("Pipeline status", new EventHandler(Open_Pipeline_Action));
 					submenu.MenuItems.Add("Dashboard", new EventHandler(Open_Dashboard_Action));
 					submenu.MenuItems.Add("Notifications mentions", new EventHandler(Open_Notifications_Action));
 					submenu.MenuItems.Add("Approval search", new EventHandler(Approval_Search_Action));
+					submenu.MenuItems.Add("Defender search", new EventHandler(Defender_Search_Action)); 
 					submenu.MenuItems.Add("ToWork search", new EventHandler(ToWork_Search_Action)); 
-					submenu.MenuItems.Add("WinGet-pkgs repo", new EventHandler(Open_PKGS_Repo_Action));
-					submenu.MenuItems.Add("WinGet-cli repo", new EventHandler(Open_CLI_Repo_Action));
-			submenu = new MenuItem("Open many tabs:");
-				item.MenuItems.Add(submenu);
-					submenu.MenuItems.Add("All PRs on clipboard", new EventHandler(Open_AllUrls_Action)); 
-					submenu.MenuItems.Add("Full Approval Run", new EventHandler(Approval_Run_Search_Action));
-					submenu.MenuItems.Add("Full ToWork Run", new EventHandler(ToWork_Run_Search_Action));
-					submenu.MenuItems.Add("All Resources", new EventHandler(All_Resources_Action));
+				item.MenuItems.Add("Search GitHub for PRs (User Input)", new EventHandler(Pkgs_Search_Action)); 
+				item.MenuItems.Add("Approved PR selected below", new EventHandler(Open_SelectedApproved_Action)); 
 			
 			item = new MenuItem("Help");
 			this.Menu.MenuItems.Add(item);
@@ -634,6 +640,7 @@ namespace WinGetApprovalNamespace {
  			int col7 = gridItemWidth*inc;inc++;
  			int col8 = gridItemWidth*inc;inc++;
  			int col9 = gridItemWidth*inc;inc++;
+ 			int col10 = gridItemWidth*inc;inc++;
  
 			//drawStatusStrip(statusStrip1, toolStripStatusLabel1);
 			
@@ -644,7 +651,7 @@ namespace WinGetApprovalNamespace {
 			table_vm.Columns.Add("Package", typeof(string));
 			table_vm.Columns.Add("PR", typeof(int));
 			table_vm.Columns.Add("RAM", typeof(double));
-
+			
 			table_val.Columns.Add("Timestamp", typeof(string));
 			table_val.Columns.Add("PR", typeof(int));
 			table_val.Columns.Add("PackageIdentifier", typeof(string));
@@ -659,53 +666,57 @@ namespace WinGetApprovalNamespace {
 			table_val.Columns.Add("V", typeof(string));
 			table_val.Columns.Add("ManifestVer", typeof(string));
 			table_val.Columns.Add("OK", typeof(string));
-
-			drawDataGrid(ref dataGridView_vm, col0, row0, gridItemWidth*8, gridItemHeight*5);
-			dataGridView_vm.Anchor = AnchorStyles.Top | AnchorStyles.Bottom;
 			
-			drawLabel(ref label_PRNumber, col0, row5, gridItemWidth, gridItemHeight,"Current PR:");
-			drawUrlBox(ref inputBox_PRNumber, col1, row5, gridItemWidth*2,gridItemHeight,"#000000");
+			drawDataGrid(ref dataGridView_vm, col0, row0, gridItemWidth*7, gridItemHeight*5);
 			
-			drawLabel(ref label_User, col4, row5, gridItemWidth, gridItemHeight,"User Input:");
-			drawUrlBox(ref inputBox_User,col5, row5, gridItemWidth*2,gridItemHeight,"");//UserInput field 
+			drawLabel(ref label_PRNumber, col6, row0, gridItemWidth, gridItemHeight,"Current PR:");
+			drawUrlBox(ref inputBox_PRNumber, col7, row0, gridItemWidth*2,gridItemHeight,"#000000");
 			
-			drawLabel(ref label_VMRAM, col7, row5, gridItemWidth, gridItemHeight,"VM RAM:");
-			drawUrlBox(ref inputBox_VMRAM,col8, row5, gridItemWidth*2,gridItemHeight,"");//VM RAM display
+			drawLabel(ref label_User, col6, row1, gridItemWidth, gridItemHeight,"User Input:");
+			drawUrlBox(ref inputBox_User,col7, row1, gridItemWidth*2,gridItemHeight,"");//UserInput field 
 			
-			drawDataGrid(ref dataGridView_val, col0, row6, gridItemWidth*8, gridItemHeight*4);
+			drawLabel(ref label_VMRAM, col6, row2, gridItemWidth, gridItemHeight,"VM RAM:");
+			drawUrlBox(ref inputBox_VMRAM,col7, row2, gridItemWidth*2,gridItemHeight,"");//VM RAM display
+			
+			drawDataGrid(ref dataGridView_val, col0, row5, gridItemWidth*8, gridItemHeight*5);
 			//dataGridView_val.Anchor = AnchorStyles.Top | AnchorStyles.Bottom;
-			drawRichTextBox(ref outBox_msg, col6, row10, this.ClientRectangle.Width/3,gridItemHeight, "", "outBox_msg");
+			
+			drawRichTextBox(ref outBox_msg, col0, row10, this.ClientRectangle.Width,gridItemHeight, "", "outBox_msg");
 						
- 			drawButton(ref btn10, col0, row10, gridItemWidth, gridItemHeight, "Bulk Approving", Approving_Action);
+ 			drawButton(ref btn10, col6, row3, gridItemWidth, gridItemHeight, "Bulk Approving", Approving_Action);
 			drawToolTip(ref toolTip1, ref btn10, "Automatically approve PRs. (Caution - easy to accidentally approve, use with care.)");
-			drawButton(ref btn18, col1, row10, gridItemWidth, gridItemHeight, "Individual Validations", Validating_Action);
+			drawButton(ref btn18, col7, row3, gridItemWidth, gridItemHeight, "Individual Validations", Validating_Action);
 			drawToolTip(ref toolTip2, ref btn18, "Automatically start manifest in VM.");
- 			drawButton(ref btn11, col2, row10, gridItemWidth, gridItemHeight, "Validate Rand IEDS", IEDS_Action);
+ 			drawButton(ref btn11, col6, row4, gridItemWidth, gridItemHeight, "Validate Rand IEDS", IEDS_Action);
 			drawToolTip(ref toolTip3, ref btn11, "Automatically start manifest for random IEDS in VM.");
-			drawButton(ref btn19, col3, row10, gridItemWidth, gridItemHeight, "Idle Mode", Idle_Action);
+			drawButton(ref btn19, col7, row4, gridItemWidth, gridItemHeight, "Idle Mode", Idle_Action);
 			drawToolTip(ref toolTip4, ref btn19, "It does nothing.");
-			drawButton(ref btn20, col4, row10, gridItemWidth, gridItemHeight, "Testing button", Testing_Action);
+			drawButton(ref btn20, col8, row3, gridItemWidth, gridItemHeight, "Testing button", Testing_Action);
+			drawButton(ref btn21, col8, row4, gridItemWidth, gridItemHeight, "Testing button 2", Testing2_Action);
 			
  	 }// end drawGoButton
 
 		public void OnResize(object sender, System.EventArgs e) {
 			//Width - VM and Validation windows adjust with window.
-			dataGridView_vm.Width = ClientRectangle.Width;// - gridItemWidth*2;
+			dataGridView_vm.Width = ClientRectangle.Width - gridItemWidth*3;// - gridItemWidth*2;
 			dataGridView_val.Width = ClientRectangle.Width;// - gridItemWidth*2;
-			outBox_msg.Width = ClientRectangle.Width/3;
+			outBox_msg.Width = ClientRectangle.Width;
 
-			label_User.Left = ClientRectangle.Width/2 - gridItemWidth*2;//col4
-			inputBox_User.Left = ClientRectangle.Width/2 - gridItemWidth*1;//col5
+			inputBox_PRNumber.Left = ClientRectangle.Width - gridItemWidth*2;//col8
+			inputBox_User.Left = ClientRectangle.Width - gridItemWidth*2;//col8
 			inputBox_VMRAM.Left = ClientRectangle.Width - gridItemWidth*2;//col8
+			
+			label_PRNumber.Left = ClientRectangle.Width - gridItemWidth*3;//col7
+			label_User.Left = ClientRectangle.Width - gridItemWidth*3;//col7
 			label_VMRAM.Left = ClientRectangle.Width - gridItemWidth*3;//col7
 			
 			//Height -Validation and mode buttons adjusts with window.
-			//outBox_msg.Height = ClientRectangle.Height - gridItemHeight;
-			btn10.Top = ClientRectangle.Height - gridItemHeight;
-			btn18.Top = ClientRectangle.Height - gridItemHeight;
-			btn11.Top = ClientRectangle.Height - gridItemHeight;
-			btn19.Top = ClientRectangle.Height - gridItemHeight;
-			btn20.Top = ClientRectangle.Height - gridItemHeight;
+			btn10.Left = ClientRectangle.Width - gridItemWidth*3;//col7
+			btn11.Left = ClientRectangle.Width - gridItemWidth*3;//col7
+			btn18.Left = ClientRectangle.Width - gridItemWidth*2;//col8
+			btn19.Left = ClientRectangle.Width - gridItemWidth*2;//col8
+			btn20.Left = ClientRectangle.Width - gridItemWidth*1;//col9
+			btn21.Left = ClientRectangle.Width - gridItemWidth*1;//col9
 		}
 		//Refresh display and buttons 
 		private void timer_everysecond(object sender, EventArgs e) {
@@ -728,7 +739,6 @@ namespace WinGetApprovalNamespace {
 			HourlyRun();
 			// if (Int32.Parse(DateTime.Now.ToString("mm")) == 20) {
 				// string seconds = DateTime.Now.ToString("ss");
-				// outBox_msg.AppendText(Environment.NewLine + seconds);
 				// Thread.Sleep((60-Int32.Parse(seconds))*1000);//If it's still :20 after, sleep out the minute. 
 			// }
 		}
@@ -856,11 +866,36 @@ namespace WinGetApprovalNamespace {
 							table_vm.Rows.Add(rowData["vm"], rowData["status"], rowData["version"], rowData["OS"], rowData["Package"], rowData["PR"], rowData["RAM"]);
 						}//end for r
 					}//end if Status
-					dataGridView_val.DataSource=table_val;
 					dataGridView_vm.DataSource=table_vm;
 					dataGridView_vm.Rows[table_vm_Row_Index].Selected = true;//Reselect the row.
+
+					dataGridView_vm.Columns[0].AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells;//vm
+					dataGridView_vm.Columns[1].AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells;//status
+					dataGridView_vm.Columns[2].AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells;//version
+					dataGridView_vm.Columns[3].AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells;//OS
+					dataGridView_vm.Columns[4].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;//Package
+					dataGridView_vm.Columns[5].AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells;//PR
+					dataGridView_vm.Columns[6].AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells;//RAM
+
+										dataGridView_val.DataSource=table_val;
+					dataGridView_val.Columns[0].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;//Timestamp
+					dataGridView_val.Columns[1].AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells;//PR
+					dataGridView_val.Columns[2].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;//PackageIdentifier
+					dataGridView_val.Columns[3].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;//prVersion
+					dataGridView_val.Columns[4].AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells;//A
+					dataGridView_val.Columns[5].AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells;//R
+					dataGridView_val.Columns[6].AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells;//G
+					dataGridView_val.Columns[7].AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells;//W
+					dataGridView_val.Columns[8].AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells;//F
+					dataGridView_val.Columns[9].AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells;//I
+					dataGridView_val.Columns[10].AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells;//D
+					dataGridView_val.Columns[11].AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells;//V
+					dataGridView_val.Columns[12].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;//ManifestVer
+					dataGridView_val.Columns[13].AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells;//OK
+
 				}//end if TestPath
 			} catch (Exception e){
+				outBox_msg.AppendText(Environment.NewLine + "e: " + e );
 			}//end try 
 		}//end function
 
@@ -889,12 +924,8 @@ namespace WinGetApprovalNamespace {
 			if (PRTitle != "") {
 				if (PRTitle != oldclip) {
 					//(GetStatus() .Where(n => n["status"] == "ValidationCompleted"} | format-Table);//Drops completed VMs in the middle of the PR approval display.
-					string validColor = "green";//Depreciate me!
-					string invalidColor = "red";//Depreciate me!
-					string cautionColor = "yellow";//Depreciate me!
 					//Chromatic was here.
 					
-					bool noRecord = false;
 					string[] title = PRTitle.Split(':');
 					if (title.Length > 1) {
 						title = title[1].Split(' ');
@@ -912,47 +943,7 @@ namespace WinGetApprovalNamespace {
 						}
 					}
 
-					string PRVersion = "";
-					//Version is on the line before the line number, and this set indexes with 1 - but the following array indexes with 0, so the value is automatically transformed by the index mismatch.
-					try {
-						PRVersion = Version.Parse(YamlValue("PackageVersion",replace_clip)).ToString();
-					} catch {
-						try {
-							PRVersion = YamlValue("PackageVersion",replace_clip);
-						} catch {
-								try {
-							PRVersion = Version.Parse(YamlValue("PackageVersion",clip)).ToString();
-							} catch {
-								if (0 != prVerLoc) {
-									try {
-										PRVersion = Version.Parse(title[prVerLoc]).ToString();
-									} catch {
-										PRVersion = title[prVerLoc];
-									}
-								} else {
-								//Otherwise we have to go hunting for the version number.
-									try {
-										PRVersion = Version.Parse(title[-1]).ToString();
-									} catch {
-										try {
-											PRVersion = Version.Parse(title[-2]).ToString();
-										} catch {
-											try {
-												PRVersion = Version.Parse(title[-3]).ToString();
-											} catch {
-												try {
-													PRVersion = Version.Parse(title[-4]).ToString();
-												} catch {
-													//if it's not a semantic version, guess that it's the 2nd to last, based on the above logic.
-													PRVersion = title[-2];
-												}
-											}
-										}
-									}; //end try
-								}; //end try
-							}; //end if null
-						}; //end try
-					}; //end try
+					string PRVersion = YamlValue("PackageVersion",replace_clip);
 
 					//Get the PackageIdentifier and alert if it matches the auth list.
 					string PackageIdentifier = "";
@@ -968,8 +959,23 @@ namespace WinGetApprovalNamespace {
 
  					string Timestamp = DateTime.Now.ToString("h:mm:ss");
 					//Write-Host -nonewline -f $matchColor "| $(Get-Date -format T) | $PR | $(Get-PadRight "PackageIdentifier") | "
-					table_val.Rows.Add(Timestamp,PR, PackageIdentifier , "" , "" , "" , "" , "" , "" , "" , "" , "" , "" , "");
-					int LastRow = table_val.Rows.Count -1;
+					DataRow row = table_val.NewRow();
+					row[0] = Timestamp;
+					row[1] = PR;
+					row[2] =  PackageIdentifier;
+					row[3] =  "";
+					row[4] =  "";
+					row[5] =  "";
+					row[6] =  "";
+					row[7] =  "";
+					row[8] =  "";
+					row[9] =  "";
+					row[10] =  "";
+					row[11] =  "";
+					row[12] =  "";
+					row[13] =  "";
+					table_val.Rows.InsertAt(row,0);
+					int LastRow = 0;//table_val.Rows.Count -1;
 
 					//Variable effervescence
 					string prAuth = "+";
@@ -983,53 +989,60 @@ namespace WinGetApprovalNamespace {
 					int NumVersions = 99;
 					string PRvMan = "P";
 					string Approve = "+"; 
+					
+					string Body = "";
 
 					string ManifestVersion = FindWinGetVersion(PackageIdentifier);
-					outBox_msg.AppendText(Environment.NewLine + "PR: " + PR + " ManifestVersion: " + ManifestVersion);
 					int ManifestVersionParams = ManifestVersion.Split('.').Length;
 					int PRVersionParams = PRVersion.Split('.').Length;
 
-/* 
-					string AuthMatch = GetValidationData("PackageIdentifier",PackageIdentifier,true)[0]["authStrictness"];
+//"PackageIdentifier","gitHubUserName","authStrictness","authUpdateType","autoWaiverLabel","versionParamOverrideUserName","versionParamOverridePR","code200OverrideUserName","code200OverridePR","AgreementOverridePR","AgreementURL","reviewText"
+					string strictness = "";
+					try {
+						strictness = GetValidationData(PackageIdentifier,"authStrictness");
+					outBox_msg.AppendText(Environment.NewLine + "PR: " + PR + " strictness: " + strictness);
+					} catch {}
 					string AuthAccount = "";
-					if (AuthMatch != null) {
-						AuthAccount = GetValidationData("PackageIdentifier",PackageIdentifier,true)["GitHubUserName"];
+					if (strictness != null) {
+						try {
+							AuthAccount = GetValidationData(PackageIdentifier,"GitHubUserName");
+						} catch {}
 					}
-					if (null == ManifestVersion) {
+					if (ManifestVersion == "") {
 						PRvMan = "N";
-						matchColor = invalidColor;
+						// matchColor = invalidColor;
 						Approve = "-!";
-						string Body = "";
 						if (noNew) {
-							noRecord = true;
-						} else {
-*/
-/* Separate part
-							if ($title[-1] -match $hashPRRegex) {
-								if ((Get-Command ValidateManifest).name) {
-									ValidateManifest -Silent -InspectNew;
-								} else {
-									Get-Sandbox ($title[-1] -replace"//","");
-								} //end if Get-Command;
+							} else {
+
+							if (regex_hashPRRegex.IsMatch(title[title.Length -1])) {
+								// if ((Get-Command ValidateManifest).name) {
+									ValidateManifest();
+								// } else {
+									// Get-Sandbox ($title[-1] -replace"//","");
+								// } //end if Get-Command;
 							} //end if title;
 						} //end if noNew;
-					} else if ($null != ManifestVersion) {
+					} else if (null != ManifestVersion) {
+/* 						
 						if (PRTitle -match " [.]") {
-						//if has spaces (4.4 .5 .220);
+						// if has spaces (4.4 .5 .220);
 							$Body = "Spaces detected in version number.";
 							$Body = $Body + "\n\n(Automated response - build "build")";
 							InvokeGitHubPRRequest(PR,"Post","comments",Body,"Silent");
-							matchColor = invalidColor;;
+						//  matchColor = invalidColor;;
 							$prAuth = "-!";
 						}
-						if ((ManifestVersionParams != $PRVersionParams) && 
-						(PRTitle -notmatch "Automatic deletion") && 
-						(PRTitle -notmatch "Delete") && 
-						(PRTitle -notmatch "Remove") && 
-						($InstallerType -notmatch "portable") && 
-						(AuthAccount -cnotmatch $Submitter)) {
-*/
-/* Main part again
+						 */
+						 
+						 
+						if ((ManifestVersionParams != PRVersionParams) && 
+						(!PRTitle.Contains("Automatic deletion")) && 
+						(!PRTitle.Contains("Delete")) && 
+						(!PRTitle.Contains("Remove")) && 
+						(!InstallerType.Contains("portable")) && 
+						(AuthAccount != Submitter)) {
+
 							string greaterOrLessThan = "";
 							if (PRVersionParams < ManifestVersionParams) {
 								//if current manifest has more params (dots) than PR (2.3.4.500 to 2.3.4);
@@ -1038,33 +1051,33 @@ namespace WinGetApprovalNamespace {
 								//if current manifest has fewer params (dots) than PR (2.14 to 2.14.3.222);
 								greaterOrLessThan = "greater";
 							}
-							matchColor = invalidColor;
+							// matchColor = invalidColor;
 							Body = "Hi @"+Submitter+",\\n\\n> This PR's version number "+PRVersion+" has "+PRVersionParams+" parameters (sets of numbers between dots - major, minor, etc), which is "+greaterOrLessThan+" than the current manifest's version "+ManifestVersion+", which has "+ManifestVersionParams+" parameters.\\n\\nDoes this PR's version number **exactly** match the version reported in the \\Apps & features\\ Settings page? (Feel free to attach a screenshot.)";
 							Approve = "-!";
 							Body = Body + "\\n\\n(Automated response - build "+build+")\\n<!--\\n[Policy] Needs-Author-Feedback\\n[Policy] Version-Parameter-Mismatch\\n-->";
+					/* 
 							InvokeGitHubPRRequest(PR,"Post","comments",Body,"Silent");
 							AddPRToRecord(PR,"Feedback",PRTitle);
+					*/
+					outBox_msg.AppendText(Environment.NewLine + "PR: " + PR + " comments: " + Body);
 						}
 					}
-					*/
 					table_val.Rows[LastRow].SetField("PRVersion", PRVersion); 
-					/* 
-					matchColor = validColor;
+					//  matchColor = validColor;
 
 
 
-					if (AuthMatch != null) {
-						string strictness = AuthMatch[0]["authStrictness"].Distinct();
+					if (strictness != "") {
 						string matchVar = "";
-						matchColor = cautionColor;
+						// matchColor = cautionColor;
 						if (AuthAccount == Submitter) {
 							matchVar = "matches";
 							Auth = "+";
-							matchColor = validColor;
+							//  matchColor = validColor;
 						} else {
 							matchVar = "does not match";
 							Auth = "-";
-							matchColor = invalidColor;
+							// matchColor = invalidColor;
 						}
 
 						if (strictness == "must") {
@@ -1072,12 +1085,11 @@ namespace WinGetApprovalNamespace {
 						}
 					}
 					if (Auth == "-!") {
-						GetPRApproval(clip,PR,PackageIdentifier);
+						// GetPRApproval(clip,PR,PackageIdentifier);
+					outBox_msg.AppendText(Environment.NewLine + "PR: " + PR + " GetPRApproval");
 					}
-					*/
 					table_val.Rows[LastRow].SetField("A", Auth);
-					/* 
-					matchColor = validColor;
+					//  matchColor = validColor;
 
 
 
@@ -1091,10 +1103,8 @@ namespace WinGetApprovalNamespace {
 						// matchColor = cautionColor;
 					// }
 					//Write-Host -nonewline -f matchColor "Review | "
-					*/
 					table_val.Rows[LastRow].SetField("R", Review);
-					/* 
-					matchColor = validColor;
+					//  matchColor = validColor;
 
 
 
@@ -1105,7 +1115,8 @@ namespace WinGetApprovalNamespace {
 				//Not in list or PR - pass
 				//Not in list, in PR - alert and pass?
 				//Check previous version for omission - depend on wingetbot for now.
-				string AgreementUrlFromList = AgreementsList.Where(n => n["PackageIdentifier"] == PackageIdentifier).FirstOrDefault()["AgreementUrl"];
+/* 
+				string AgreementUrlFromList = "";//AgreementsList.Where(n => n["PackageIdentifier"] == PackageIdentifier).FirstOrDefault()["AgreementUrl"];
 				if (AgreementUrlFromList != null) {
 					string AgreementUrlFromClip = YamlValue("AgreementUrl",replace_clip);
 					if (AgreementUrlFromClip == AgreementUrlFromList) {
@@ -1114,16 +1125,15 @@ namespace WinGetApprovalNamespace {
 					} else {
 						//Explicit mismatch - URL is present and does not match, or URL is missing.
 						AgreementAccept = "-!";
-						ReplyToPR(PR,"AgreementMismatch",AgreementUrlFromList);
+						// ReplyToPR(PR,"AgreementMismatch",AgreementUrlFromList);
 					}
 				} else {
 					AgreementAccept = "+";
 					//Implicit Approve - your AgreementsUrl is in another file. Can't modify what isn't there. 
 				}
-					*/
+*/
 					table_val.Rows[LastRow].SetField("G", AgreementAccept);
-					/* 
-					matchColor = validColor;
+					//  matchColor = validColor;
 
 
 
@@ -1145,14 +1155,12 @@ namespace WinGetApprovalNamespace {
 					if (WordFilterMatch != null) {
 						WordFilter = "-!";
 						Approve = "-!";
-						matchColor = invalidColor;
+					//  matchColor = invalidColor;
 						ReplyToPR(PR,"WordFilter",WordFilterMatch.FirstOrDefault());
 					}
 				}
-					*/
 					table_val.Rows[LastRow].SetField("W", WordFilter);
-					/* 
-					matchColor = validColor;
+					//  matchColor = validColor;
 
 
 
@@ -1165,16 +1173,17 @@ namespace WinGetApprovalNamespace {
 						(!PRTitle.Contains("Automatic deletion")) && 
 						(!PRTitle.Contains("Delete")) && 
 						(!PRTitle.Contains("Remove"))) {
+/* 
 							bool ANFOld = ManifestEntryCheck(PackageIdentifier, ManifestVersion);
 							bool ANFCurrent = clip.Contains("AppsAndFeaturesEntries");
 
 							if ((ANFOld == true) && (ANFCurrent == false)) {
-								matchColor = invalidColor;
+							//  matchColor = invalidColor;
 								AnF = "-";
 								ReplyToPR(PR,"AppsAndFeaturesMissing",Submitter,MagicLabels[30]);
 								AddPRToRecord(PR,"Feedback",PRTitle);
 							} else if ((ANFOld == false) && (ANFCurrent == true)) {
-								matchColor = cautionColor;
+								// matchColor = cautionColor;
 								AnF = "-";
 								ReplyToPR(PR,"AppsAndFeaturesNew",Submitter,MagicLabels[30]);
 								//InvokeGitHubPRRequest(PR,"Post","comments","[Policy] Needs-Author-Feedback","Silent")
@@ -1183,12 +1192,11 @@ namespace WinGetApprovalNamespace {
 							} else if ((ANFOld == true) && (ANFCurrent == true)) {
 								AnF = "1";
 							}
+*/
 						}
 					}
-					*/
 					table_val.Rows[LastRow].SetField("F", AnF);
-					/* 
-					matchColor = validColor;
+					//  matchColor = validColor;
 
 
 
@@ -1205,13 +1213,13 @@ namespace WinGetApprovalNamespace {
 								if (!(InstallerUrl.Contains(PRVersion))) {
 									//Matches when the dots are removed from semantec versions in the URL.
 									if (!(InstallerUrl.Contains(PRVersion.Replace(".","")))) {
-										matchColor = invalidColor;
+										// matchColor = invalidColor;
 										InstVer = "-";
 									}
 								}
 							}
 						} catch {
-							matchColor = invalidColor;
+						//  matchColor = invalidColor;
 							InstVer = "-";
 						} //end try
 					} //end if PRvMan
@@ -1219,17 +1227,15 @@ namespace WinGetApprovalNamespace {
 					try {
 						PRVersion = YamlValue("PackageVersion",clip);
 						if (PRVersion.Contains(" ")) {
-							matchColor = invalidColor;
+							// matchColor = invalidColor;
 							InstVer = "-!";
 						}
 					}catch{
 						//null = (Get-Process) //This section intentionally left blank.
 					}
 
-					*/
 					table_val.Rows[LastRow].SetField("I", InstVer);
-					/* 
-					matchColor = validColor;
+					//  matchColor = validColor;
 
 
 
@@ -1242,9 +1248,11 @@ namespace WinGetApprovalNamespace {
 						//Versions = 
 						NumVersions = 0;//(WinGetOutput.AvailableVersions).count //Need to rework #PendingBugfix
 						if ((PRVersion == ManifestVersion) || (NumVersions == 1)) {
-							matchColor = invalidColor;
+						//  matchColor = invalidColor;
+/* 
 							ReplyToPR(PR,"VersionCount",Submitter,"[Policy] Needs-Author-Feedback\n[Policy] Highest-Version-Remaining");
 							AddPRToRecord(PR,"Feedback",PRTitle);
+*/
 							NumVersions = -1;
 						}
 					} else {//Addition PR
@@ -1252,52 +1260,47 @@ namespace WinGetApprovalNamespace {
 						if (null != GLD) {
 							if (GLD == "Error") {
 								string_ListingDiff = "E";
-								matchColor = invalidColor;
+							//  matchColor = invalidColor;
 							} else {
 								string_ListingDiff = "-!";
-								matchColor = cautionColor;
+								// matchColor = cautionColor;
+/* 
 								ReplyToPR(PR,"ListingDiff",GLD);
 								InvokeGitHubPRRequest(PR,"Post","comments","[Policy] Needs-Author-Feedback","Silent");
 								AddPRToRecord(PR,"Feedback",PRTitle);
+ */
 							}//end if GLD
 						}//end if null
 					}//end if PRvMan
-					*/
 					table_val.Rows[LastRow].SetField("D", string_ListingDiff);
 					table_val.Rows[LastRow].SetField("V", NumVersions);
-					/* 
-					matchColor = validColor;
+					//  matchColor = validColor;
 
 
 
 
+int comparison = String.Compare(PRVersion, ManifestVersion);
 
 					if (PRvMan != "N") {
 						if (null == PRVersion || "" == PRVersion) {
-							noRecord = true;
-							PRvMan = "Error:PRVersion";
-							matchColor = invalidColor;
+								PRvMan = "Error:PRVersion";
+						//  matchColor = invalidColor;
 						} else if (ManifestVersion == "Unknown") {
-							noRecord = true;
-							PRvMan = "Error:ManifestVersion";
-							matchColor = invalidColor;
+								PRvMan = "Error:ManifestVersion";
+						//  matchColor = invalidColor;
 						} else if (ManifestVersion == null) {
-							noRecord = true;
-							PRvMan = "Error:ManifestVersion";
-							matchColor = invalidColor;
-						} else if (Version.Parse(PRVersion) > Version.Parse(ManifestVersion)) {
+								PRvMan = "Error:ManifestVersion";
+						//  matchColor = invalidColor;
+						} else if (comparison < 0) {//PRVersion < ManifestVersion
 							PRvMan = ManifestVersion;
-						} else if (Version.Parse(PRVersion) < Version.Parse(ManifestVersion)) {
+						} else if (comparison > 0) {//PRVersion > ManifestVersion
 							PRvMan = ManifestVersion;
-							matchColor = cautionColor;
-						} else if (Version.Parse(PRVersion) == Version.Parse(ManifestVersion)) {
+						} else if (PRVersion == ManifestVersion) {
 							PRvMan = "=";
 						} else {
-							noRecord = true;
-							PRvMan = "Error:ManifestVersion";
+								PRvMan = "Error:ManifestVersion";
 						}
 					}
-
 
 					if ((Approve == "-!") || 
 					(Auth == "-!") || 
@@ -1311,29 +1314,27 @@ namespace WinGetApprovalNamespace {
 					(AgreementAccept == "-!") || 
 					(PRvMan == "N")) {
 					//|| (PRvMan -match "^Error")
-						matchColor = cautionColor;
+						// matchColor = cautionColor;
 						Approve = "-!";
-						noRecord = true;
 					}
 
 					PRvMan = PadRight(PRvMan,14);
-					*/
 					table_val.Rows[LastRow].SetField("ManifestVer", PRvMan);
-					/* 
-					matchColor = validColor;
+					//  matchColor = validColor;
 
 
 
 
 
+/* 
 					if (Approve == "+") {
 						ApprovePR(PR);
 						AddPRToRecord(PR,"Approved",PRTitle);
 					}
-
 */
-					table_val.Rows[LastRow].SetField("OK", Approve);
 
+					table_val.Rows[LastRow].SetField("OK", Approve);
+					dataGridView_val.FirstDisplayedScrollingRowIndex = 0;
 					oldclip = PRTitle;
 				} //end if PRTitle
 			} //end if PRTitle
@@ -1625,11 +1626,11 @@ var query =
 					} else if (Label == MagicLabels[19]) {
 					} else if (Label == MagicLabels[20]) {
 						string PRTitle = FromJson(InvokeGitHubPRRequest(PR,""))["title"];
-						foreach (Dictionary<string,object> Waiver in GetValidationData("autoWaiverLabel")) {
-							if (PRTitle.Contains((string)Waiver["PackageIdentifier"])) {
-								AddWaiver(PR);
-							}
-						}
+						// foreach (Dictionary<string,object> Waiver in GetValidationData("autoWaiverLabel")) {
+							// if (PRTitle.Contains((string)Waiver["PackageIdentifier"])) {
+								// AddWaiver(PR);
+							// }
+						// }
 					} else if (Label == MagicLabels[21]) {
 						AutoValLog(PR);
 					} else if (Label == MagicLabels[22]) {
@@ -1987,17 +1988,14 @@ var query =
 
 					string message = "Automatic Validation ended with:" + Environment.NewLine + Environment.NewLine + "> " + string.Join(Environment.NewLine+"> ",UserInput) +Environment.NewLine + Environment.NewLine + Environment.NewLine + "(Automated response - build "+build+".)";
 
-					// outBox_msg.AppendText(Environment.NewLine + "PR " + PR + "message " + message);
 					string_out = ReplyToPR(PR,"", "", "", message);
 				} else {
 					string message = "Automatic Validation ended with:" + Environment.NewLine + Environment.NewLine + "> No errors to post."+Environment.NewLine + Environment.NewLine + Environment.NewLine +"(Automated response - build "+build+".)";
-					// outBox_msg.AppendText(Environment.NewLine + "PR " + PR + "message " + message);
 					string_out = ReplyToPR(PR,"", "", "", message);
 				}
 			} else {
 				string message = "Automatic Validation ended with:" + Environment.NewLine + Environment.NewLine + "> ADO Build not found."+Environment.NewLine + Environment.NewLine +"(Automated response - build "+build+".)";
 				string_out = ReplyToPR(PR,"", "", "", message);
-				// outBox_msg.AppendText(Environment.NewLine + "AutoValLog: " + Environment.NewLine + message);
 			}
 			return string_out;
 		}
@@ -2230,7 +2228,7 @@ var query =
 			string AzurePipelines = "azure-pipelines";
 			string FabricBot = "microsoft-github-policy-service";
 			// List<string> OverallState = new List<string>();
-			outBox_msg.AppendText(Environment.NewLine + "Comments: "+ Comments.Length);
+			outBox_msg.AppendText(Environment.NewLine + "PRStateFromComments: "+ Comments.Length);
 
 DataTable OverallState = new DataTable(); 
 OverallState.Columns.Add("UserName", typeof(string));
@@ -2420,7 +2418,7 @@ bool ConnectionStatus = vm.Scope.IsConnected;
 				string_out = string_out.Substring(stringStart);
 				string_out = string_out.Split(' ')[1];
 			} catch {
-				string_out = "No package found matching input criteria.";
+				string_out = "";
 			}
 			return string_out;
 		}
@@ -3245,7 +3243,11 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 				process.CloseMainWindow();
 				}
 			}
-			SetVMState("vm"+vm, 4);
+try {
+			SetVMState("vm"+vm, 3);
+} catch {
+	outBox_msg.AppendText(Environment.NewLine + "SetVMState failed for VM: " + vm);
+}
 			RemoveItem(filesFileName);
 			SetStatus(vm,"Ready");
 		}
@@ -3726,14 +3728,16 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 			//Response["rate"] | select @{n="source";e={"Logged"}}, limit, used, remaining, @{n="reset";e={([System.DateTimeOffset]::FromUnixTimeSeconds(_.reset)).DateTime.AddHours(-8)}}
 		}
 
-		public dynamic GetValidationData(string Property, string Match = "",bool Exact = false){
-			if (Exact == true) {
-				return FromCsv(GetContent(DataFileName)).Where(n => n[Property] != null).Where(n => (string)n[Property] == Match).ToArray();
-			} else if (Match != ""){
-				return FromCsv(GetContent(DataFileName)).Where(n => n[Property] != null).Where(n => Match.Contains((string)n[Property])).ToArray();
-			} else {
-				return FromCsv(GetContent(DataFileName)).Where(n => n[Property] != null).ToArray();
-			}
+		public dynamic GetValidationData(string PackageIdentifier, string Property,bool ToDepreciate = false){
+			dynamic Records = FromCsv(GetContent(StatusFile));
+			string string_out = "";
+			for (int r = 1; r < Records.Length -1; r++){
+				var row = Records[r];
+				if (row["PackageIdentifier"] == PackageIdentifier) {
+					string_out += row[Property];
+				}//end if row vm
+			}//end for r
+			return string_out;
 		}
 
 		public void AddValidationData(string PackageIdentifier,string GitHubUserName = "",string authStrictness = "",string authUpdateType = "",string autoWaiverLabel = "",string versionParamOverrideUserName = "",int versionParamOverridePR = 0,string code200OverrideUserName = "",int code200OverridePR = 0,int AgreementOverridePR = 0 ,string AgreementURL = "",string reviewText = ""){
@@ -4318,6 +4322,11 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 		public void Launch_Window_Image_Action (object sender, EventArgs e) {
 			LaunchWindow(GetSelectedVM());
 		} // end Launch_Window_Image_Action
+
+		public void Open_Folder_Image_Action (object sender, EventArgs e) {
+			int VM = GetSelectedVM();
+			Process.Start("C:\\ManVal\\vm\\"+VM.ToString());
+		} // end Launch_Window_Image_Action
 		//VM Lifecycle - Win10
 		public void Generate_Win10_VM_Image_Action (object sender, EventArgs e) {
 			GenerateVM("Win10");
@@ -4456,11 +4465,42 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 			int PR = GetCurrentPR();
 			dynamic string_out = FromJson(AddWaiver(PR));
 			AddPRToRecord(PR,"Waiver");
-        }// end Approved_Action
+        }// end Add_Waiver_Action
+
+		public void Label_Action_Action(object sender, EventArgs e) {
+			string AboutText = "WinGet Approval Pipeline" + Environment.NewLine;
+			AboutText += "(c) 2024 Microsoft Corp" + Environment.NewLine;
+			AboutText += "" + Environment.NewLine;
+			AboutText += "Report bugs and request features:" + Environment.NewLine;
+			AboutText += "https://Github.com/winget-pkgs/issues/" + Environment.NewLine;
+			AboutText += "" + Environment.NewLine;
+			AboutText += "" + Environment.NewLine;
+			MessageBox.Show(AboutText);
+        }// end Label_Action_Action
 
 		public void Approved_Action(object sender, EventArgs e) {
 			int PR = GetCurrentPR();
-			dynamic response_out = FromJson(ApprovePR(PR));
+
+			string Timestamp = DateTime.Now.ToString("H:mm:ss");
+			DataRow row = table_val.NewRow();
+			row[0] = Timestamp;
+			row[1] = PR;
+			row[2] =  "";
+			row[3] =  "";
+			row[4] =  "A";
+			row[5] =  "R";
+			row[6] =  "G";
+			row[7] =  "W";
+			row[8] =  "F";
+			row[9] =  "I";
+			row[10] =  "D";
+			row[11] =  "V";
+			row[12] =  "";
+			row[13] =  "+";
+			table_val.Rows.InsertAt(row,0);
+
+			string response_out = FromJson(ApprovePR(PR))["state"];
+			table_val.Rows[0].SetField("OK", response_out); 
 			AddPRToRecord(PR,"Approved");
         }// end Approved_Action
 
@@ -4615,13 +4655,33 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 			OpenPRInBrowser(PR);
 		}// end Approved_Action
 			
+        public void Pkgs_Issues_Action(object sender, EventArgs e) {
+			System.Diagnostics.Process.Start("https://github.com/microsoft/winget-pkgs/issues");
+        }// end Approval_Search_Action
+		
+        public void Cli_Issues_Action(object sender, EventArgs e) {
+			System.Diagnostics.Process.Start("https://github.com/microsoft/winget-cli/issues");
+        }// end Approval_Search_Action
+		
+        public void Manual_Merge_Action(object sender, EventArgs e) {
+			System.Diagnostics.Process.Start("https://github.com/microsoft/winget-pkgs/labels/Needs-Manual-Merge");
+        }// end Approval_Search_Action
+		
+        public void Highest_Version_Remaining_Action(object sender, EventArgs e) {
+			System.Diagnostics.Process.Start("https://github.com/microsoft/winget-pkgs/pulls?q=is%3Aopen+is%3Apr+draft%3Afalse+label%3AHighest-Version-Remaining+");//HVR
+        }// end Approval_Search_Action
+		
         public void Approval_Search_Action(object sender, EventArgs e) {
 			SearchGitHub("Approval",1,0, false,false,true);
-        }// end Approved_Action
+        }// end Approval_Search_Action
+		
+		public void Defender_Search_Action(object sender, EventArgs e) {
+			SearchGitHub("Defender",1,0, false,false,true);
+        }// end Defender_Search_Action
 		
 		public void ToWork_Search_Action(object sender, EventArgs e) {
 			SearchGitHub("ToWork",1,0, false,false,true);
-        }// end Approved_Action
+        }// end ToWork_Search_Action
 		
 		public void Open_Repo_Action(object sender, EventArgs e) {
 			System.Diagnostics.Process.Start(GitHubBaseUrl);
@@ -4644,25 +4704,34 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
         }// end Approved_Action
 		
 		public void All_Resources_Action(object sender, EventArgs e) {
-			System.Diagnostics.Process.Start("https://app.gitter.im/#/room/#Microsoft_winget-pkgs:gitter.im");
-			System.Diagnostics.Process.Start("https://dev.azure.com/ms/winget-pkgs/_build");
-			System.Diagnostics.Process.Start("https://stpkgmandashwesus2pme.z5.web.core.windows.net/");
-			System.Diagnostics.Process.Start("https://github.com/notifications?query=reason%3Amention");
-	
+			System.Diagnostics.Process.Start("https://app.gitter.im/#/room/#Microsoft_winget-pkgs:gitter.im");//Gitter chat
+			System.Diagnostics.Process.Start("https://dev.azure.com/ms/winget-pkgs/_build");//Pipeline status
+			System.Diagnostics.Process.Start("https://stpkgmandashwesus2pme.z5.web.core.windows.net/");//Dashboard
+			SearchGitHub("Approval",1,0, false,false,true);//Approval search
+			SearchGitHub("ToWork",1,0, false,false,true);//ToWork search
+			System.Diagnostics.Process.Start("https://github.com/microsoft/winget-pkgs/pulls?q=is%3Aopen+is%3Apr+draft%3Afalse+-label%3ABlocking-Issue++label%3AValidation-Executable-Error+label%3AAzure-Pipeline-Passed+-label%3AValidation-Completed+-label%3AInternal-Error-Dynamic-Scan+-label%3AValidation-Defender-Error+-label%3AChanges-Requested+-label%3ADependencies+-label%3AHardware+-label%3AInternal-Error-Manifest+-label%3AInternal-Error-NoSupportedArchitectures+-label%3ALicense-Blocks-Install+-label%3ANeeds-CLA+-label%3ANetwork-Blocker+-label%3ANo-Recent-Activity+-label%3Aportable-jar+-label%3AReboot+-label%3AScripted-Application+-label%3AWindowsFeatures+-label%3Azip-binary");//APP-VEE
+			System.Diagnostics.Process.Start("https://github.com/microsoft/winget-pkgs/issues?q=is%3Aopen+assignee%3A"+GitHubUserName+"+-label%3AValidation-Completed+-label%3AValidation-Defender-Error+-label%3AError-Hash-Mismatch");//Assigned to user
+			System.Diagnostics.Process.Start("https://github.com/microsoft/winget-pkgs/pulls?q=is%3Apr+is%3Aopen+draft%3Afalse+label%3AValidation-Complete+label%3AModerator-Approved");//Squash-Ready
+			System.Diagnostics.Process.Start("https://github.com/microsoft/winget-pkgs/labels/Internal-Error-Dynamic-Scan");//IEDS
+			System.Diagnostics.Process.Start("https://github.com/microsoft/winget-pkgs/pulls?page=1&q=is%3Apr+is%3Aopen+draft%3Afalse+label%3AValidation-Completed+label%3ANeeds-Attention+-label%3ALast-Version-Remaining+-label%3AScripted-Application+-label%3Ahardware");//VCNA
+			System.Diagnostics.Process.Start("https://github.com/notifications?query=reason%3Amention");//Notifications mentions
+        }// end All_Resources_Action
+
+		public void Start_Of_Day_Action(object sender, EventArgs e) {
 			System.Diagnostics.Process.Start("https://github.com/microsoft/winget-pkgs/issues");
 			System.Diagnostics.Process.Start("https://github.com/microsoft/winget-cli/issues");
 			System.Diagnostics.Process.Start("https://github.com/microsoft/winget-pkgs/labels/Needs-Manual-Merge");
-			System.Diagnostics.Process.Start("https://github.com/microsoft/winget-pkgs/pulls?q=is%3Apr+is%3Aopen+draft%3Afalse+label%3AValidation-Complete+label%3AModerator-Approved");//Squash-Ready
-			System.Diagnostics.Process.Start("https://github.com/microsoft/winget-pkgs/pulls?q=is%3Aopen+is%3Apr+draft%3Afalse+label%3AHighest-Version-Remaining+");//LVR
-        }// end Approved_Action
+			System.Diagnostics.Process.Start("https://github.com/microsoft/winget-pkgs/pulls?q=is%3Aopen+is%3Apr+draft%3Afalse+label%3AHighest-Version-Remaining+");//HVR
+			SearchGitHub("Defender",1,0, false,false,true);
+        }// end Start_Of_Day_Action
 		//Open In Browser
 		public void Open_PKGS_Repo_Action(object sender, EventArgs e) {
 			System.Diagnostics.Process.Start(GitHubBaseUrl);
-		}// end Approved_Action
+		}// end Open_PKGS_Repo_Action
 
 		public void Open_CLI_Repo_Action(object sender, EventArgs e) {
 			System.Diagnostics.Process.Start("https://github.com/microsoft/winget-cli/");
-        }// end Approved_Action
+        }// end Open_CLI_Repo_Action
 
 		public void Open_Notifications_Action(object sender, EventArgs e) {
 			System.Diagnostics.Process.Start("https://github.com/notifications?query=reason%3Amention");
@@ -4679,6 +4748,17 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 		public void Open_Dashboard_Action(object sender, EventArgs e) {
 			System.Diagnostics.Process.Start("https://stpkgmandashwesus2pme.z5.web.core.windows.net/");
         }// end Approved_Action
+
+		public void Pkgs_Search_Action(object sender, EventArgs e) {
+			string UserInput = inputBox_User.Text;
+			inputBox_User.Text = "";
+			System.Diagnostics.Process.Start("https://github.com/search?q=repo%3Amicrosoft%2Fwinget-pkgs+"+UserInput+"&type=pullrequests");
+         }// end Pkgs_Search_Action
+
+		public void Open_SelectedApproved_Action(object sender, EventArgs e) {
+			int PR = Convert.ToInt32(dataGridView_val.SelectedRows[0].Cells["PR"].Value);
+			OpenPRInBrowser(PR);
+        }// end Open_SelectedApproved_Action
 
 
 		//Help
@@ -4707,6 +4787,10 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 			MessageBox.Show(AboutText);
 		} // end About_Click_Action
 
+
+
+
+
         public void Testing_Action(object sender, EventArgs e) {
 			// string string_out = (PRStateFromComments(PR).ToString());
  			// dynamic string_out = GetValidationData("PackageIdentifier", UserInput);
@@ -4715,6 +4799,17 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 			dynamic line = FromCsv(GetContent(DataFileName)).Where(n => (string)n["PackageIdentifier"] == (UserInput));
 			outBox_msg.AppendText(Environment.NewLine + "Testing: " + ToJson(line));
 		}// end Testing_Action
+
+        public void Testing2_Action(object sender, EventArgs e) {
+			// string string_out = (PRStateFromComments(PR).ToString());
+ 			// dynamic string_out = GetValidationData("PackageIdentifier", UserInput);
+			// dynamic string_out = FromCsv(GetContent(DataFileName)).Where(n => n[Property] != null).Where(n => (string)n[Property].Contains(Match);
+			string UserInput = inputBox_User.Text;
+			dynamic line = FromCsv(GetContent(DataFileName)).Where(n => (string)n["PackageIdentifier"] == (UserInput));
+			outBox_msg.AppendText(Environment.NewLine + "Testing2: " + ToJson(line));
+		}// end Testing_Action
+
+
 
 
 

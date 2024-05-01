@@ -10,7 +10,7 @@
 #3.88.19 - A few bugfixes.
 #3.88.18 - Restore waiver and retry fucntionality. 
 
-$build = 877
+$build = 878
 $appName = "ManualValidationPipeline"
 Write-Host "$appName build: $build"
 $MainFolder = "C:\ManVal"
@@ -37,6 +37,9 @@ $LogFile = "$MainFolder\misc\ApprovedPRs.txt"
 $PeriodicRunLog = "$MainFolder\misc\PeriodicRunLog.txt"
 $SharedErrorFile = "$writeFolder\err.txt"
 $DataFileName = "$ReposFolder\Tools\ManualValidationPipeline.csv"
+
+$ExitCodeFile = "$ReposFolder\Tools\ExitCodes.csv"
+$MsiErrorCodeFile = "$ReposFolder\Tools\MsiErrorCodes.csv"
 
 $Win10Folder = "$imagesFolder\Win10-Created031524-Original"
 $Win11Folder = "$imagesFolder\Win11-Created010424-Original"
@@ -2691,9 +2694,20 @@ Function Get-AutoValLog {
 			$UserInput = $UserInput -notmatch "with working directory 'D:\\TOOLS'."
 
 			$UserInput = $UserInput | Select-Object -Unique
-			$UserInput = "Automatic Validation ended with:`n"+($UserInput -join "`n> ")+"`n`n(Automated response - build $build.)"
+			$UserInput = "Automatic Validation ended with:`n"+($UserInput -join "`n> ")
 
+if ($UserInput -match "exit code") {
+	$ExitCodeTable = gc $ExitCodeFile | ConvertFrom-Csv
+	foreach ($ExitCode in $ExitCodeTable) {
+		if ($UserInput -match $ExitCode.code) {
+			$UserInput += "`n`nAutomated error analysis suggests $($ExitCode.code) may mean $($ExitCode.message)"
+		}
+	} 
+} 
+
+			$UserInput +="`n`n(Automated response - build $build.)"
 			$out = Reply-ToPR -PR $PR -Body $UserInput
+
 			if (!($Silent)) {
 				Write-Host "PR: $PR - $out"
 			}
