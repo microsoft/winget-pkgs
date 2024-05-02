@@ -10,7 +10,7 @@
 #3.88.19 - A few bugfixes.
 #3.88.18 - Restore waiver and retry fucntionality. 
 
-$build = 878
+$build = 880
 $appName = "ManualValidationPipeline"
 Write-Host "$appName build: $build"
 $MainFolder = "C:\ManVal"
@@ -2677,7 +2677,7 @@ Function Get-AutoValLog {
 			$UserInput = $UserInput -notmatch "Could not create system restore point"
 			$UserInput = $UserInput -notmatch "Dest filename"
 			$UserInput = $UserInput -notmatch "ERROR: Signature Update failed"
-			$UserInput = $UserInput -notmatch "tid(ce4) "
+			$UserInput = $UserInput -notmatch " 8A15005E "
 			$UserInput = $UserInput -notmatch "Exception during executable launch operation System.InvalidOperationException: No process is associated with this object."
 			$UserInput = $UserInput -notmatch "Exit code`: 0"
 			$UserInput = $UserInput -notmatch "Installation failed with exit code -1978334972"
@@ -4068,6 +4068,15 @@ Function Get-TrackerVMCycle {
 				$SharedError = $SharedError -replace "Exception(4) tid(f1c) 80072EE2     ",""
 				$SharedError = $SharedError -replace "tid(f1c)",""
 				$SharedError = $SharedError -replace "C:\\__w\\1\\s\\external\\pkg\\src\\AppInstallerCommonCore\\Downloader.cpp(185)\\WindowsPackageManager.dll!00007FFA008A37C9:",""
+
+if ($SharedError -match "exit code") {
+	$ExitCodeTable = gc $ExitCodeFile | ConvertFrom-Csv
+	foreach ($ExitCode in $ExitCodeTable) {
+		if ($SharedError -match $ExitCode.code) {
+			$SharedError += "`n`nAutomated error analysis suggests $($ExitCode.code) may mean $($ExitCode.message)"
+		}
+	} 
+} 
 				Reply-ToPR -PR $VM.PR -UserInput $SharedError -CannedMessage ManValEnd 
 				Get-TrackerVMSetStatus "Complete" $VM.vm
 				if (($SharedError -match "\[FAIL\] Installer failed security check.") -OR ($SharedError -match "Detected 1 Defender")) {

@@ -145,7 +145,7 @@ using System.Web.Script.Serialization;
 namespace WinGetApprovalNamespace {
     public class WinGetApprovalPipeline : Form {
 		//vars
-        public int build = 879;//Get-RebuildPipeApp
+        public int build = 881;//Get-RebuildPipeApp
 		public string appName = "WinGetApprovalPipeline";
 		public string appTitle = "WinGet Approval Pipeline - Build ";
 		public static string owner = "microsoft";
@@ -276,7 +276,7 @@ namespace WinGetApprovalNamespace {
 		public static int gridItemHeight = 45;
 
 		public int lineHeight = 14;
-		public int WindowWidth = gridItemWidth*13+20;
+		public int WindowWidth = gridItemWidth*15+20;
 		public int WindowHeight = gridItemHeight*12+20;
 		
 		//Fonts
@@ -878,10 +878,10 @@ namespace WinGetApprovalNamespace {
 					dataGridView_vm.Columns[6].AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells;//RAM
 
 										dataGridView_val.DataSource=table_val;
-					dataGridView_val.Columns[0].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;//Timestamp
+					dataGridView_val.Columns[0].AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCellsExceptHeader;//Timestamp
 					dataGridView_val.Columns[1].AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells;//PR
 					dataGridView_val.Columns[2].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;//PackageIdentifier
-					dataGridView_val.Columns[3].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;//prVersion
+					dataGridView_val.Columns[3].AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCellsExceptHeader;//prVersion
 					dataGridView_val.Columns[4].AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells;//A
 					dataGridView_val.Columns[5].AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells;//R
 					dataGridView_val.Columns[6].AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells;//G
@@ -890,8 +890,8 @@ namespace WinGetApprovalNamespace {
 					dataGridView_val.Columns[9].AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells;//I
 					dataGridView_val.Columns[10].AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells;//D
 					dataGridView_val.Columns[11].AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells;//V
-					dataGridView_val.Columns[12].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;//ManifestVer
-					dataGridView_val.Columns[13].AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells;//OK
+					dataGridView_val.Columns[12].AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCellsExceptHeader;//ManifestVer
+					dataGridView_val.Columns[13].AutoSizeMode = DataGridViewAutoSizeColumnMode.ColumnHeader;//OK
 
 				}//end if TestPath
 			} catch (Exception e){
@@ -1030,7 +1030,7 @@ namespace WinGetApprovalNamespace {
 							$Body = "Spaces detected in version number.";
 							$Body = $Body + "\n\n(Automated response - build "build")";
 							InvokeGitHubPRRequest(PR,"Post","comments",Body,"Silent");
-						//  matchColor = invalidColor;;
+						//  matchColor = invalidColor;
 							$prAuth = "-!";
 						}
 						 */
@@ -1059,7 +1059,7 @@ namespace WinGetApprovalNamespace {
 							InvokeGitHubPRRequest(PR,"Post","comments",Body,"Silent");
 							AddPRToRecord(PR,"Feedback",PRTitle);
 					*/
-					outBox_msg.AppendText(Environment.NewLine + "PR: " + PR + " comments: " + Body);
+					outBox_msg.AppendText(Environment.NewLine + "PR: " + PR + " comments");
 						}
 					}
 					table_val.Rows[LastRow].SetField("PRVersion", PRVersion); 
@@ -1244,9 +1244,8 @@ namespace WinGetApprovalNamespace {
 					if ((PRvMan != "N") && 
 					((PRTitle.Contains("Automatic deletion")) || 
 					(PRTitle.Contains("Delete")) || 
-					(PRTitle.Contains("Remove")))) {//Removal PR
-						//Versions = 
-						NumVersions = 0;//(WinGetOutput.AvailableVersions).count //Need to rework #PendingBugfix
+					(PRTitle.Contains("Remove")))) {//Removal PR - if highest version in repo.
+						NumVersions = FindWinGetTotalVersions(PackageIdentifier);//(WinGetOutput.AvailableVersions).count //Need to rework #PendingBugfix
 						if ((PRVersion == ManifestVersion) || (NumVersions == 1)) {
 						//  matchColor = invalidColor;
 /* 
@@ -1255,9 +1254,9 @@ namespace WinGetApprovalNamespace {
 */
 							NumVersions = -1;
 						}
-					} else {//Addition PR
+					} else {//Addition PR - has more files than repo.
 						string GLD = "";//ListingDiff(clip .Where(n => n.SideIndicator == "<=")).installer.yaml //Ignores when a PR adds files that didn't exist before.
-						if (null != GLD) {
+						if ("" != GLD) {
 							if (GLD == "Error") {
 								string_ListingDiff = "E";
 							//  matchColor = invalidColor;
@@ -2388,7 +2387,6 @@ bool ConnectionStatus = vm.Scope.IsConnected;
 			string string_out = "";	
 			string command = "winget search " + PackageIdentifier + " --exact --disable-interactivity";
 
-
 			Process process = new Process();
 			StreamWriter StandardInput;
 			StreamReader StandardOut;
@@ -2422,6 +2420,39 @@ bool ConnectionStatus = vm.Scope.IsConnected;
 			}
 			return string_out;
 		}
+		
+		public int FindWinGetTotalVersions(string PackageIdentifier) {
+			string string_out = "";	
+			string command = "(((winget search " + PackageIdentifier + " --exact --disable-interactivity --versions --disable-interactivity) -join ',' -split 'Version,-------,')[1] -split ',').count";
+
+			Process process = new Process();
+			StreamWriter StandardInput;
+			StreamReader StandardOut;
+			ProcessStartInfo processStartInfo = new ProcessStartInfo("PowerShell.exe");
+			processStartInfo.UseShellExecute = false;
+			processStartInfo.RedirectStandardInput = true;
+			processStartInfo.RedirectStandardOutput = true;
+			processStartInfo.RedirectStandardError = true;
+			processStartInfo.CreateNoWindow = true;
+			process.StartInfo = processStartInfo;
+			process.Start();
+
+			StandardInput = process.StandardInput;
+			StandardOut = process.StandardOutput;
+			StandardInput.AutoFlush = true;
+			StandardInput.WriteLine(command);
+			StandardInput.Close();
+			
+			string_out = StandardOut.ReadToEnd();
+			// outBox_msg.AppendText(Environment.NewLine + "Testing2: " + string_out); 
+			foreach (string string_in in string_out.Split('\n')) {
+				if (string_in.Length > 1 && string_in.Length < 4) {
+					string_out = string_in;
+				}
+			}
+			return Convert.ToInt32(string_out);
+		}
+
 
 
 
@@ -4805,8 +4836,9 @@ try {
  			// dynamic string_out = GetValidationData("PackageIdentifier", UserInput);
 			// dynamic string_out = FromCsv(GetContent(DataFileName)).Where(n => n[Property] != null).Where(n => (string)n[Property].Contains(Match);
 			string UserInput = inputBox_User.Text;
-			dynamic line = FromCsv(GetContent(DataFileName)).Where(n => (string)n["PackageIdentifier"] == (UserInput));
-			outBox_msg.AppendText(Environment.NewLine + "Testing2: " + ToJson(line));
+			int versions = FindWinGetTotalVersions(UserInput);
+			// dynamic line = FromCsv(GetContent(DataFileName)).Where(n => (string)n["PackageIdentifier"] == (UserInput));
+			outBox_msg.AppendText(Environment.NewLine + "Testing2: " + versions);
 		}// end Testing_Action
 
 
