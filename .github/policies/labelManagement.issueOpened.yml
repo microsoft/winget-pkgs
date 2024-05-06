@@ -115,6 +115,22 @@ configuration:
           - removeLabel:
               label: Issue-Bug
       - description: >-
+          When an issue is opened, if the content contains "A change to the package metadata"
+          * Add the Package-Metadata label
+          * Remove the Package-Update label
+        if:
+          - payloadType: Issues
+          - isAction:
+              action: Opened
+          - bodyContains:
+              pattern: A change to the package metadata
+              isRegex: false
+        then:
+          - addLabel:
+              label: Package-Metadata
+          - removeLabel:
+              label: Package-Update
+      - description: >-
           When a PR is opened/updated, if the content is in a project folder and user is not repo admin
           * Add Project-File label
         if:
