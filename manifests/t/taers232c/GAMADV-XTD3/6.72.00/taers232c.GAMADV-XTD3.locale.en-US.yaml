@@ -1,0 +1,120 @@
+# Created with YamlCreate.ps1 v2.3.4 Dumplings Mod $debug=QUSU.CRLF.7-4-1.Win32NT
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.6.0.schema.json
+
+PackageIdentifier: taers232c.GAMADV-XTD3
+PackageVersion: 6.72.00
+PackageLocale: en-US
+Publisher: Ross Scroggs - ross.scroggs@gmail.com
+PublisherUrl: https://github.com/taers232c
+PublisherSupportUrl: https://github.com/taers232c/GAMADV-XTD3/issues
+# PrivacyUrl:
+Author: taers232c
+PackageName: GAMADV-XTD3
+PackageUrl: https://github.com/taers232c/GAMADV-XTD3
+License: Apache-2.0
+# LicenseUrl:
+# Copyright:
+# CopyrightUrl:
+ShortDescription: GAMADV-XTD3 is a free, open source command line tool for Google Workspace (formerly G Suite) Administrators to manage domain and user settings quickly and easily.
+# Description:
+Moniker: gamadv
+# Tags:
+ReleaseNotes: |-
+  Scroll to bottom of page for installation/downloads
+  Latest updates
+  6. 72.00
+  Added commands to display drive file comments.
+  - See: https://github.com/taers232c/GAMADV-XTD3/wiki/Users-Drive-Comments
+  6. 71.18
+  Updated <CrOSFieldName> to include cpuinfo and backlightinfo.
+  6. 71.17
+  Added depth column to output of gam <UserTypeEntity> print diskusage <DriveFileEntity> that can be used to filter the depth of the folders displayed. Depth -1 is the top level folder, depth 0 are its immediate children, depth 2 are the children of depth 1 and so forth.
+  gam config csv_output_row_filter "depth:count<1" user organizer@domain.com  print diskusage teamdriveid <TeamDriveID>
+  6. 71.16
+  Updated gam <UserTypeEntity> create|update sendas <EmailAddress> ... replyto <EmailAddress> to allow uppercase letters in sendas <EmailAddress> and replyto <EmailAddress>.
+  6. 71.15
+  Updated gam create project to handle the following error:
+  ERROR: 403: permissionDenied - Authentication error: 7; Error Details: User not allowed to access GCP services.
+  This error occurs when the Google Workspace admin or GCP project manager email address used in the command is in an OU where Google Cloud Platform is not enabled in Apps/Additional Google services.
+  6. 71.14
+  Added a command to update a Gmail label's settings by specifying it's ID rather than it's name.
+  gam <UserTypeEntity> update labelid <LabelID> [name <String>]
+          [messagelistvisibility hide|show] [labellistvisibility hide|show|showifunread]
+          [backgroundcolor "<LabelColorHex>|<LabelBackgroundColorHex>|custom:<ColorHex>"]
+          [textcolor "<LabelColorHex>|<LabelTextColorHex>|custom:<ColorHex>"]
+  6. 71.13
+  Updated <UserMultiAttribute>.location.buildingid <String> to allow non-validated building IDs by specifying nv: at the beginning of <String>; e.g., nv:Building X' sets the building ID to Building X`.
+  6. 71.12
+  Added option showmimetype category <MimeTypeNameList> to gam <UserTypeEntity> print|show filecounts|filelist|filetree
+  <MimeTypeName> ::= application|audio|font|image|message|model|multipart|text|video
+  <MimeTypeNameList> ::= "<MimeTypeName>(,<MimeTypeName>)*"
+
+  gam user user@domain.com print filelist fields id,name,mimetype showmimetype prefixes audio,video
+  Fix bug in gam <UserTypeEntity> info|show sheet <DriveFileEntity> that caused a trap.
+  6. 71.11
+  Added option addcsvdata <FieldName> <String> to gam print cros that adds additional columns of data to the CSV file output. Typically, you would read CSV file of device IDs/serial numbers to generate a CSV file of results and copy data from the input CSV to the outout CSV.
+  6. 71.10
+  Reverted change made in 6.71.09 to gam <UserTypeEntity> print filelist when showmimetype and filepath|fullpath were both specified. The change improved the performance when showmimetype selected a small number of files; the information for just those files was downloaded and then additional API calls were made to construct the file paths. However, if a large number of files were selected, the additional APIs calls decreased performance.
+  Added option mimetypeinquery can be used when you expect the query to return a small number of files relative to the total number of files.
+  6. 71.09
+  Improved the performance of gam <UserTypeEntity> print filelist when showmimetype and filepath|fullpath are both specified.
+  6. 71.08
+  Added option oneitemperrow to 'gam print admins|adminroles` to have each of a roles privileges displayed on a separate row with all of the other admin/role fields. This produces a CSV file that can be used in subsequent commands without further script processing.
+  6. 71.07
+  Added command to upload changes to Google Docs.
+  - See: https://github.com/taers232c/GAMADV-XTD3/wiki/Users-Drive-Files-Manage#upload-changes-to-google-documents
+  6. 71.06
+  Added additional error handling to Gmail Client Side Encryption commands.
+  Added license product Education Endpoint Management
+  - ProductID - 101049
+  Added license SKU Endpoint Education Upgrade
+  - ProductID - 101049
+  - SKUID - 1010490001 | eeu
+  6. 71.05
+  Fixed a bug introduced in 6.71.00 that caused a trap in gam <UserTypeEntity> print filelist.
+  Added option tdfrom <EmailAddress> to <ToDriveAttribute> that causes GAM to use <EmailAddress> as the from address in all emails sent. By default, the from address is the Google Workspace Admin in gam oauth info.o
+  6. 71.04
+  Updated gam <UserTypeEntity> create|update cseidentity to accept either of the following key pair options:
+  - primarykeypairid <KeyPairID> - The configuration of a CSE identity that uses the same key pair for signing and encryption.
+  - signingkeypairid <KeyPairID> encryptionkeypairid <KeyPairID> - The configuration of a CSE identity that uses different key pairs for signing and encryption.
+  Updated CSV output row sorting to avoid a trap that occurred when a row was missing one of the sort fields.
+  6. 71.03
+  Added option tdalert <EmailAddress> to <ToDriveAttribute>. When a todrive file is created or updated, GAM will send notification emails to all tdalert <EmailAddress> users if tdnotify is true. <EmailAddress> must be valid within your Google Workspace.
+  6. 71.02
+  Added additional error handling to Gmail Client Side Encryption commands.
+  6. 71.01
+  Fixed bug in gam audit monitor create that caused a trap.
+  6. 71.00
+  Added csv_output_sort_headers string list variable to gam.cfg that causes GAM to sort CSV output rows by the column headers specified in the variable. The column headers are case insensitive and if column header does not appear in the CSV output, it is ignored.
+  Added sortheaders <StringList> to redirect csv <FileName> that has the same effect as above.
+  The sort keys specified in redirect csv ... sortheaders <StringList> take precedence over the values from gam.cfg.
+  Added option tdsubject <String> to <ToDriveAttribute> that causes GAM to use <String> as the subject in all emails sent. In <String>, #file# will, be replaced by the file title and #sheet# will be replaced by the sheet/tab title. By default, the subject is the file title.
+  Installation
+  If you are a first time Gam user:
+  - https://github.com/taers232c/GAMADV-XTD3/wiki/How-to-Install-Advanced-GAM
+  If you are updating your GAMADV-XTD3 version:
+  - https://github.com/taers232c/GAMADV-XTD3/wiki/How-to-Update-Advanced-GAM
+  If you are upgrading from standard Gam
+  - https://github.com/taers232c/GAMADV-XTD3/wiki/How-to-Upgrade-from-Standard-GAM
+  If you are upgrading from GAMADV-X or GAMADV-XTD
+  - https://github.com/taers232c/GAMADV-XTD3/wiki/How-to-Upgrade-from-GAMADV-X-or-GAMADV-XTD
+  sha256 hashes
+  bab2548c2209ee6c9d6d882c5359e3de752b21e557c817043125742aebf3947d  gamadv-xtd3-6.72.00-linux-arm64-glibc2.23.tar.xz
+  9159e20dd89fddc7a3d526ad2471816f47186b1bb1dfe98f2420f5d76f383e23  gamadv-xtd3-6.72.00-linux-arm64-glibc2.27.tar.xz
+  d9efba8f4a6db7ee3fc383ad7faf01ba1f875b67ce99edcddafd2081b2c72a9f  gamadv-xtd3-6.72.00-linux-arm64-glibc2.31.tar.xz
+  ce2bf5c2a81fd75cb3ab1cab67a16c10735beae3c2d5c8cdc328c9265d5aa5f5  gamadv-xtd3-6.72.00-linux-x86_64-glibc2.19.tar.xz
+  318d98035f90d9b5a0fa024223f69ec25fb9608da490cdc9691fc380bf0b814d  gamadv-xtd3-6.72.00-linux-x86_64-glibc2.23.tar.xz
+  7de81cfe513ac6d29cc9f6ad3844bc4cf5effd81bda94a6a0208114585b2b391  gamadv-xtd3-6.72.00-linux-x86_64-glibc2.27.tar.xz
+  74d24826a3568198c8b301ade9669171aa2a962e6a777e4d9e8be26bd6a1ffbf  gamadv-xtd3-6.72.00-linux-x86_64-glibc2.31.tar.xz
+  5032aacd45ad1ffcc04402abb4e5a3600fa219143b714f14355483b266cbf74e  gamadv-xtd3-6.72.00-linux-x86_64-glibc2.35.tar.xz
+  a29fc37433e34e1cca50b39644ff1b9898d51d9b09e0b9beaf0f71a6b6e26dd2  gamadv-xtd3-6.72.00-linux-x86_64-legacy.tar.xz
+  63bfba5427a7cdecb8e8c65aeed6ade3462ead85bae1fc25da63aa90fd38e22b  gamadv-xtd3-6.72.00-macos-arm64.tar.xz
+  283a7631c60dd5d7c7bc6dfd265790e421073648c722e2e828c9adbb146e32b4  gamadv-xtd3-6.72.00-macos-x86_64.tar.xz
+  7cff11086ac3ceb5fa228a0736d19b0d28a63c3eb3f4f2754d8c0d5626dd968e  gamadv-xtd3-6.72.00-windows-x86_64.msi
+  f7aa876c93cb96b3e73278f5e156f27f106ffd0b9573cc8d604cfd25d2e0138d  gamadv-xtd3-6.72.00-windows-x86_64.zip
+ReleaseNotesUrl: https://github.com/taers232c/GAMADV-XTD3/releases/tag/v6.72.00
+# PurchaseUrl:
+# InstallationNotes:
+# Documentations:
+ManifestType: defaultLocale
+ManifestVersion: 1.6.0
