@@ -1757,7 +1757,7 @@ Function Get-WorkSearch {
 				$PR = $FullPR.number
 				Get-TrackerProgress -PR $PR $MyInvocation.MyCommand $line $PRs.length
 				$line++
-				if ($MagicLabels[33] -notin $FullPR.labels) {
+				if ($MagicLabels[33] -notin $FullPR.labels.name) {
 					if (($FullPR.title  -match "Remove") -OR 
 					($FullPR.title  -match "Delete") -OR 
 					($FullPR.title  -match "Automatic deletion")){

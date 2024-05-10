@@ -145,7 +145,7 @@ using System.Web.Script.Serialization;
 namespace WinGetApprovalNamespace {
     public class WinGetApprovalPipeline : Form {
 		//vars
-        public int build = 881;//Get-RebuildPipeApp
+        public int build = 882;//Get-RebuildPipeApp
 		public string appName = "WinGetApprovalPipeline";
 		public string appTitle = "WinGet Approval Pipeline - Build ";
 		public static string owner = "microsoft";
@@ -193,7 +193,7 @@ namespace WinGetApprovalNamespace {
 
 		public string CheckpointName = "Validation";
 		public string VMUserName = "user"; //Set to the internal username you're using in your VMs.;
-		public string GitHubUserName = "stephengillie";
+		public string gitHubUserName = "stephengillie";
 		//public string SystemRAM = (Get-CimInstance Win32_PhysicalMemory | Measure-Object -Property capacity -Sum).sum /1gb;
 
 		public int displayLine = 0;
@@ -211,7 +211,8 @@ namespace WinGetApprovalNamespace {
 		public string file_GitHubToken = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + "\\Documents\\PowerShell\\ght.txt";
 		public string GitHubToken;
 		public bool TokenLoaded = false;
-		public int GitHubRateLimitDelay = 333;
+		public int GitHubRateLimitDelay = 333; // ms
+		public int HyperVRateLimitDelay = 3; // seconds
 
 		//JSON
 		JavaScriptSerializer serializer = new JavaScriptSerializer();
@@ -551,7 +552,7 @@ namespace WinGetApprovalNamespace {
 					submenu.MenuItems.Add("Add dependency (VS2015+)", new EventHandler(Add_Dependency_Disk_Action));
 					submenu.MenuItems.Add("Add installer switch (/S)", new EventHandler(Add_Installer_Switch_Action));
 
-			item = new MenuItem("Modify PR");
+			item = new MenuItem("Current PR");
 			this.Menu.MenuItems.Add(item);
 				item.MenuItems.Add("Approve PR", new EventHandler(Approved_Action));
 				item.MenuItems.Add("Label Action", new EventHandler(Label_Action_Action));
@@ -917,10 +918,6 @@ namespace WinGetApprovalNamespace {
 			PRTitle = split_clip.Where(n => regex_hashPRRegexEnd.IsMatch(n)).FirstOrDefault();
 			int PR = GetCurrentPR();
 
- 			// dynamic AuthList = GetValidationData("authStrictness");
-			// dynamic AgreementsList = GetValidationData("AgreementUrl");
-			// dynamic ReviewList = FromCsv(GetContent(ReviewFile));
-
 			if (PRTitle != "") {
 				if (PRTitle != oldclip) {
 					//(GetStatus() .Where(n => n["status"] == "ValidationCompleted"} | format-Table);//Drops completed VMs in the middle of the PR approval display.
@@ -998,14 +995,15 @@ namespace WinGetApprovalNamespace {
 
 //"PackageIdentifier","gitHubUserName","authStrictness","authUpdateType","autoWaiverLabel","versionParamOverrideUserName","versionParamOverridePR","code200OverrideUserName","code200OverridePR","AgreementOverridePR","AgreementURL","reviewText"
 					string strictness = "";
+					outBox_msg.AppendText(Environment.NewLine + "PR: " + PR );
 					try {
-						strictness = GetValidationData(PackageIdentifier,"authStrictness");
-					outBox_msg.AppendText(Environment.NewLine + "PR: " + PR + " strictness: " + strictness);
+			strictness = GetFileData(DataFileName,PackageIdentifier,"authStrictness");
 					} catch {}
 					string AuthAccount = "";
-					if (strictness != null) {
+					if (strictness != "") {
 						try {
-							AuthAccount = GetValidationData(PackageIdentifier,"GitHubUserName");
+			AuthAccount = GetFileData(DataFileName,PackageIdentifier,"gitHubUserName");
+					outBox_msg.AppendText(Environment.NewLine + "PR: " + PR + " AuthAccount: " + AuthAccount);
 						} catch {}
 					}
 					if (ManifestVersion == "") {
@@ -1115,9 +1113,12 @@ namespace WinGetApprovalNamespace {
 				//Not in list or PR - pass
 				//Not in list, in PR - alert and pass?
 				//Check previous version for omission - depend on wingetbot for now.
-/* 
-				string AgreementUrlFromList = "";//AgreementsList.Where(n => n["PackageIdentifier"] == PackageIdentifier).FirstOrDefault()["AgreementUrl"];
-				if (AgreementUrlFromList != null) {
+				string AgreementUrlFromList = "";
+					try {
+						AgreementUrlFromList = GetFileData(DataFileName,PackageIdentifier,"AgreementUrl");
+					outBox_msg.AppendText(Environment.NewLine + "PR: " + PR + " AgreementUrlFromList: " + AgreementUrlFromList);
+					} catch {}
+				if (AgreementUrlFromList != "") {
 					string AgreementUrlFromClip = YamlValue("AgreementUrl",replace_clip);
 					if (AgreementUrlFromClip == AgreementUrlFromList) {
 						//Explicit Approve - URL is present and matches.
@@ -1131,7 +1132,6 @@ namespace WinGetApprovalNamespace {
 					AgreementAccept = "+";
 					//Implicit Approve - your AgreementsUrl is in another file. Can't modify what isn't there. 
 				}
-*/
 					table_val.Rows[LastRow].SetField("G", AgreementAccept);
 					//  matchColor = validColor;
 
@@ -1147,9 +1147,11 @@ namespace WinGetApprovalNamespace {
 				(!PRTitle.Contains("Remove")) &&
 				(!AgreementAccept.Contains("[+]"))) {
 
-				string[] WordFilterMatch = null;
+				List<string> WordFilterMatch = null;
 					foreach (string word in WordFilterList) {
-						//WordFilterMatch += Clip.Contains(word) -notmatch "Url" -notmatch "Agreement"
+						if (clip.Contains(word)) {
+							WordFilterMatch.Add(word);
+						}
 					}
 
 					if (WordFilterMatch != null) {
@@ -1377,7 +1379,7 @@ int comparison = String.Compare(PRVersion, ManifestVersion);
 					Get-GitHubPreset -Preset LabelAction -PR $PR
 					OpenPRInBrowser(PR);
 				} else {
-					if ($Comments[-1].UserName != $GitHubUserName) {
+					if ($Comments[-1].UserName != $gitHubUserName) {
 						OpenPRInBrowser(PR);
 					}
 				}//end if LastCommenter
@@ -1625,7 +1627,7 @@ var query =
 					} else if (Label == MagicLabels[19]) {
 					} else if (Label == MagicLabels[20]) {
 						string PRTitle = FromJson(InvokeGitHubPRRequest(PR,""))["title"];
-						// foreach (Dictionary<string,object> Waiver in GetValidationData("autoWaiverLabel")) {
+						// foreach (Dictionary<string,object> Waiver in GetFileData(DataFileName,"autoWaiverLabel")) {
 							// if (PRTitle.Contains((string)Waiver["PackageIdentifier"])) {
 								// AddWaiver(PR);
 							// }
@@ -1718,7 +1720,7 @@ var query =
 			string nApproved = "-label:Moderator-Approved+";
 			string string_nBI = "-label:Blocking-Issue+";
 			string Defender = "label:"+MagicLabels[0]+"+";
-			string HaventWorked = "-commenter:"+GitHubUserName+"+";
+			string HaventWorked = "-commenter:"+gitHubUserName+"+";
 			string string_nHW = "-label:Hardware+";
 			string IEDSLabel = "label:Internal-Error-Dynamic-Scan+";
 			string nIEDS = "-"+IEDSLabel;
@@ -2172,7 +2174,7 @@ var query =
 				PackageIdentifier = ((Clip.Split(':'))[1].Split(' ')[0]);
 			}
 			//Happens only during Bulk Approval, when manifest is in clipboard.
-			string auth = GetValidationData("PackageIdentifier",PackageIdentifier,true)["GitHubUserName"];
+			string auth = GetFileData(DataFileName,PackageIdentifier,"gitHubUserName");
 			List<string> Approver = auth.Split('/').Where(n => !n.Contains("(")).ToList();
 			string string_joined = string.Join("; @", Approver);
 			ReplyToPR(PR,string_joined,"Approve","Needs-Review");
@@ -2259,16 +2261,16 @@ OverallState.Columns.Add("State", typeof(string));
 				if (string.Equals(UserName, FabricBot) && body.Contains("The check-in policies require a moderator to approve PRs from the community")) {
 					State = "PreApproval";
 				}
-				if (string.Equals(UserName, GitHubUserName) && body.Contains("The package didn't pass a Defender or similar security scan")) {
+				if (string.Equals(UserName, gitHubUserName) && body.Contains("The package didn't pass a Defender or similar security scan")) {
 					State = "DefenderFail";
 				}
-				if (string.Equals(UserName, GitHubUserName) && body.Contains("Status Code: 200")) {
+				if (string.Equals(UserName, gitHubUserName) && body.Contains("Status Code: 200")) {
 					State = "InstallerAvailable";
 				}
-				if (string.Equals(UserName, GitHubUserName) && body.Contains("Response status code does not indicate success")) {
+				if (string.Equals(UserName, gitHubUserName) && body.Contains("Response status code does not indicate success")) {
 					State = "InstallerRemoved";
 				}
-				if (string.Equals(UserName, GitHubUserName) && body.Contains("which is greater than the current manifest's version")) {
+				if (string.Equals(UserName, gitHubUserName) && body.Contains("which is greater than the current manifest's version")) {
 					State = "VersionParamMismatch";
 				}
 				if (string.Equals(UserName, FabricBot) && (
@@ -2283,13 +2285,13 @@ OverallState.Columns.Add("State", typeof(string));
 				if (string.Equals(UserName, FabricBot) && body.Contains("One or more of the installer URLs doesn't appear valid")) {
 					State = "DomainReview";
 				}
-				if (string.Equals(UserName, GitHubUserName) && body.Contains("Sequence contains no elements")) {
+				if (string.Equals(UserName, gitHubUserName) && body.Contains("Sequence contains no elements")) {
 					State = "SequenceError";
 				}
-				if (string.Equals(UserName, GitHubUserName) && body.Contains("This manifest has the highest version number for this package")) {
+				if (string.Equals(UserName, gitHubUserName) && body.Contains("This manifest has the highest version number for this package")) {
 					State = "HighestVersionRemoval";
 				}
-				if (string.Equals(UserName, GitHubUserName) && body.Contains("SQL error or missing database")) {
+				if (string.Equals(UserName, gitHubUserName) && body.Contains("SQL error or missing database")) {
 					State = "SQLMissingError";
 				}
 				if (string.Equals(UserName, FabricBot) && body.Contains("The package manager bot determined changes have been requested to your PR")) {
@@ -2298,10 +2300,10 @@ OverallState.Columns.Add("State", typeof(string));
 				if (string.Equals(UserName, FabricBot) && body.Contains("I am sorry to report that the Sha256 Hash does not match the installer")) {
 					State = "HashMismatch";
 				}
-				if (string.Equals(UserName, GitHubUserName) && body.Contains("Automatic Validation ended with:")) {
+				if (string.Equals(UserName, gitHubUserName) && body.Contains("Automatic Validation ended with:")) {
 					State = "AutoValEnd";
 				}
-				if (string.Equals(UserName, GitHubUserName) && body.Contains("Manual Validation ended with:")) {
+				if (string.Equals(UserName, gitHubUserName) && body.Contains("Manual Validation ended with:")) {
 					State = "ManValEnd";
 				}
 				if (string.Equals(UserName, AzurePipelines) && body.Contains("Pull request contains merge conflicts")) {
@@ -3759,8 +3761,8 @@ try {
 			//Response["rate"] | select @{n="source";e={"Logged"}}, limit, used, remaining, @{n="reset";e={([System.DateTimeOffset]::FromUnixTimeSeconds(_.reset)).DateTime.AddHours(-8)}}
 		}
 
-		public dynamic GetValidationData(string PackageIdentifier, string Property,bool ToDepreciate = false){
-			dynamic Records = FromCsv(GetContent(StatusFile));
+		public dynamic GetFileData(string Filename, string PackageIdentifier, string Property){
+			dynamic Records = FromCsv(GetContent(Filename));//StatusFile
 			string string_out = "";
 			for (int r = 1; r < Records.Length -1; r++){
 				var row = Records[r];
@@ -3771,7 +3773,7 @@ try {
 			return string_out;
 		}
 
-		public void AddValidationData(string PackageIdentifier,string GitHubUserName = "",string authStrictness = "",string authUpdateType = "",string autoWaiverLabel = "",string versionParamOverrideUserName = "",int versionParamOverridePR = 0,string code200OverrideUserName = "",int code200OverridePR = 0,int AgreementOverridePR = 0 ,string AgreementURL = "",string reviewText = ""){
+		public void AddValidationData(string PackageIdentifier,string gitHubUserName = "",string authStrictness = "",string authUpdateType = "",string autoWaiverLabel = "",string versionParamOverrideUserName = "",int versionParamOverridePR = 0,string code200OverrideUserName = "",int code200OverridePR = 0,int AgreementOverridePR = 0 ,string AgreementURL = "",string reviewText = ""){
 		//[ValidateSet("should","must")]
 		//[ValidateSet("auto","manual")]
 			
@@ -3781,7 +3783,7 @@ try {
 						var row = data[r];
 						
 						if (row["PackageIdentifier"] == PackageIdentifier) {
-							row["GitHubUserName"] = GitHubUserName;
+							row["gitHubUserName"] = gitHubUserName;
 							row["authStrictness"] = authStrictness;
 							row["authUpdateType"] = authUpdateType;
 							row["autoWaiverLabel"] = autoWaiverLabel;
@@ -3797,7 +3799,7 @@ try {
 
 		/*
 			if (null == string_out) {0
-				string_out = ( "" | Select-Object "PackageIdentifier","GitHubUserName","authStrictness","authUpdateType","autoWaiverLabel","versionParamOverrideUserName","versionParamOverridePR","code200OverrideUserName","code200OverridePR","AgreementOverridePR","AgreementURL","reviewText")
+				string_out = ( "" | Select-Object "PackageIdentifier","gitHubUserName","authStrictness","authUpdateType","autoWaiverLabel","versionParamOverrideUserName","versionParamOverridePR","code200OverrideUserName","code200OverridePR","AgreementOverridePR","AgreementURL","reviewText")
 				string_out.PackageIdentifier = PackageIdentifier
 			}
 
@@ -4422,28 +4424,29 @@ try {
 
 		public void Validate_By_ID_Action(object sender, EventArgs e) {
 			string PackageIdentifier = inputBox_User.Text;
+
 			ValidateManifest(0,PackageIdentifier,"",0,"","","","","",false,false,"","",false, "--id "+PackageIdentifier);
 		}// end Validate_By_ID_Action
 
 		public void Validate_By_Arch_Action(object sender, EventArgs e) {
 			ValidateManifest(0,"","",0,"x64");
-			Thread.Sleep(2);
+			Thread.Sleep(HyperVRateLimitDelay);
 			ValidateManifest(0,"","",0,"x86");
 		}// end Validate_By_ID_Action
 
 		public void Validate_By_Scope_Action(object sender, EventArgs e) {
 			ValidateManifest(0,"","",0,"","Machine");
-			Thread.Sleep(2);
+			Thread.Sleep(HyperVRateLimitDelay);
 			ValidateManifest(0,"","",0,"","User");
 		}// end Validate_By_ID_Action
 
 		public void Validate_By_Arch_And_Scope_Action(object sender, EventArgs e) {
 			ValidateManifest(0,"","",0,"x64","Machine");
-			Thread.Sleep(2);
+			Thread.Sleep(HyperVRateLimitDelay);
 			ValidateManifest(0,"","",0,"x86","Machine");
-			Thread.Sleep(2);
+			Thread.Sleep(HyperVRateLimitDelay);
 			ValidateManifest(0,"","",0,"x64","User");
-			Thread.Sleep(2);
+			Thread.Sleep(HyperVRateLimitDelay);
 			ValidateManifest(0,"","",0,"x86","User");
 		}// end Validate_By_ID_Action
 		//Generate manifest for selected VM
@@ -4741,7 +4744,7 @@ try {
 			SearchGitHub("Approval",1,0, false,false,true);//Approval search
 			SearchGitHub("ToWork",1,0, false,false,true);//ToWork search
 			System.Diagnostics.Process.Start("https://github.com/microsoft/winget-pkgs/pulls?q=is%3Aopen+is%3Apr+draft%3Afalse+-label%3ABlocking-Issue++label%3AValidation-Executable-Error+label%3AAzure-Pipeline-Passed+-label%3AValidation-Completed+-label%3AInternal-Error-Dynamic-Scan+-label%3AValidation-Defender-Error+-label%3AChanges-Requested+-label%3ADependencies+-label%3AHardware+-label%3AInternal-Error-Manifest+-label%3AInternal-Error-NoSupportedArchitectures+-label%3ALicense-Blocks-Install+-label%3ANeeds-CLA+-label%3ANetwork-Blocker+-label%3ANo-Recent-Activity+-label%3Aportable-jar+-label%3AReboot+-label%3AScripted-Application+-label%3AWindowsFeatures+-label%3Azip-binary");//APP-VEE
-			System.Diagnostics.Process.Start("https://github.com/microsoft/winget-pkgs/issues?q=is%3Aopen+assignee%3A"+GitHubUserName+"+-label%3AValidation-Completed+-label%3AValidation-Defender-Error+-label%3AError-Hash-Mismatch");//Assigned to user
+			System.Diagnostics.Process.Start("https://github.com/microsoft/winget-pkgs/issues?q=is%3Aopen+assignee%3A"+gitHubUserName+"+-label%3AValidation-Completed+-label%3AValidation-Defender-Error+-label%3AError-Hash-Mismatch");//Assigned to user
 			System.Diagnostics.Process.Start("https://github.com/microsoft/winget-pkgs/pulls?q=is%3Apr+is%3Aopen+draft%3Afalse+label%3AValidation-Complete+label%3AModerator-Approved");//Squash-Ready
 			System.Diagnostics.Process.Start("https://github.com/microsoft/winget-pkgs/labels/Internal-Error-Dynamic-Scan");//IEDS
 			System.Diagnostics.Process.Start("https://github.com/microsoft/winget-pkgs/pulls?page=1&q=is%3Apr+is%3Aopen+draft%3Afalse+label%3AValidation-Completed+label%3ANeeds-Attention+-label%3ALast-Version-Remaining+-label%3AScripted-Application+-label%3Ahardware");//VCNA
@@ -4824,7 +4827,6 @@ try {
 
         public void Testing_Action(object sender, EventArgs e) {
 			// string string_out = (PRStateFromComments(PR).ToString());
- 			// dynamic string_out = GetValidationData("PackageIdentifier", UserInput);
 			// dynamic string_out = FromCsv(GetContent(DataFileName)).Where(n => n[Property] != null).Where(n => (string)n[Property].Contains(Match);
 			string UserInput = inputBox_User.Text;
 			dynamic line = FromCsv(GetContent(DataFileName)).Where(n => (string)n["PackageIdentifier"] == (UserInput));
@@ -4832,9 +4834,6 @@ try {
 		}// end Testing_Action
 
         public void Testing2_Action(object sender, EventArgs e) {
-			// string string_out = (PRStateFromComments(PR).ToString());
- 			// dynamic string_out = GetValidationData("PackageIdentifier", UserInput);
-			// dynamic string_out = FromCsv(GetContent(DataFileName)).Where(n => n[Property] != null).Where(n => (string)n[Property].Contains(Match);
 			string UserInput = inputBox_User.Text;
 			int versions = FindWinGetTotalVersions(UserInput);
 			// dynamic line = FromCsv(GetContent(DataFileName)).Where(n => (string)n["PackageIdentifier"] == (UserInput));
