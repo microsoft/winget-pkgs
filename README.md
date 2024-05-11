@@ -1,4 +1,4 @@
-# Windows Package Manager Community Repository
+`# Windows Package Manager Community Repository
 
 [![Gitter](https://img.shields.io/gitter/room/Microsoft/winget-pkgs)](https://gitter.im/Microsoft/winget-pkgs)
 [![Validation Pipeline Badge](https://img.shields.io/endpoint?url=https://winget-pme.azurefd.net/api/GetServiceComponentStatusBadge?component=ValidationPipeline 'Validation Pipeline Badge')](https://dev.azure.com/ms/winget-pkgs/_build?definitionId=337)
