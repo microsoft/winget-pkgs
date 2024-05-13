@@ -1,0 +1,92 @@
+id: superModeratorTriggers
+name: GitOps.PullRequestIssueManagement
+description: |-
+  Defines additional permissions that can be given to "Super-Moderators"
+  Contractors, consultants, or other users explicitly authorized by Microsoft
+  can be given special permissions exceeding those of normal moderators by
+  adding them to this file.
+owner:
+resource: repository
+disabled: false
+where:
+configuration:
+  resourceManagementConfiguration:
+    eventResponderTasks:
+      - if:
+          # If the activity sender is any one of the super-moderators, has Admin permission on the repo, or has Write permissions on the repo. . .
+          - or:
+              - activitySenderHasPermission:
+                  permission: Admin
+              - activitySenderHasPermission:
+                  permission: Write
+              - isActivitySender:
+                  user: denelon
+                  issueAuthor: False
+              - isActivitySender:
+                  user: stephengillie
+                  issueAuthor: False
+        then:
+          # If the payload is an issue_Comment or a Pull_Request_Review_Comment
+          - if:
+              - or:
+                  - payloadType: Issue_Comment
+                  - payloadType: Pull_Request_Review_Comment
+            # Take different actions based on the comment pattern
+            then:
+              # Force-Merge
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[Ff]orce[\s-][Mm]erge'
+                      isRegex: True
+                  - isPullRequest
+                then:
+                  - removeLabel:
+                      label: Needs-Attention
+                  - removeLabel:
+                      label: Needs-Author-Feedback
+                  - approvePullRequest:
+                      comment: ""
+                  - addReply: >-
+                      A Microsoft-authorized representative is forcibly merging this PR
+
+
+                      Template: msftbot/microsoft/merge
+                  - enableAutoMerge:
+                      mergeMethod: Squash
+              # Manually-Validated
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[Mm]anually[\s-][Vv]alidated'
+                      isRegex: True
+                  - isPullRequest
+                then:
+                  - addReply:
+                      reply:  >-
+                        A Microsoft-authorized representative has manually validated this pull request to conform with the security requirements of this repository. This package may be exempt from additional pipeline runs.
+
+
+                        Template: msftbot/microsoft/validated
+                  - addLabel:
+                      label: Validation-Completed
+                  - removeLabel:
+                      label: Needs-Attention
+                  - removeLabel:
+                      label: Internal-Error-Dynamic-Scan
+              # Needs-Review
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[nN]eeds[\s-][rR]eview'
+                      isRegex: True
+                then:
+                  - addLabel:
+                      label: Needs-Review
+              # Validation-Defender-Error
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[vV]alidation[\s-][dD]efender[\s-][eE]rror'
+                      isRegex: True
+                then:
+                  - addLabel:
+                      label: Validation-Defender-Error
+onFailure:
+onSuccess:
