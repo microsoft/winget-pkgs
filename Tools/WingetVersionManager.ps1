@@ -17,7 +17,7 @@ if (!$Prerelease) {
 }
 
 if ($PSBoundParameters.Keys -contains 'Version') {
-    $releasesAPIResponse = @($releasesAPIResponse.Where({ $_.tag_name -match $('^v?'+[regex]::escape($Version))}))
+    $releasesAPIResponse = @($releasesAPIResponse.Where({ $_.tag_name -match $('^v?' + [regex]::escape($Version)) }))
 }
 
 if ($Latest) {
@@ -36,7 +36,7 @@ $msixFileUrl = $assets.Where({ $_.name -eq 'Microsoft.DesktopAppInstaller_8wekyb
 $releaseTag = $releasesAPIResponse[0].tag_name
 Write-Host "Found $releaseTag"
 
-if ($Clean){
+if ($Clean) {
     Get-AppxPackage 'Microsoft.DesktopAppInstaller' | Remove-AppxPackage
 }
 
@@ -57,7 +57,7 @@ foreach ($file in $existingFiles) {
         Write-Output 'Found file in local store. Skipping download'
     }
 }
-if (!$msixFile){
+if (!$msixFile) {
     $outputPath = Join-Path $versionFolder -ChildPath "winget_$releaseTag.msix"
     Write-Output "Downloading version $releaseTag to $outputPath"
     Invoke-WebRequest -Uri $msixFileUrl -OutFile $outputPath
@@ -65,8 +65,7 @@ if (!$msixFile){
     if ((Get-FileHash $file).Hash.ToLower() -ne $sha256) {
         Write-Output 'Download failed. Installer hashes do not match.'
         exit 1
-    }
-    else {
+    } else {
         $msixFile = $file
     }
 }
