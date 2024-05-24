@@ -105,7 +105,7 @@ Moderators are often the first to see and triage new issues, and so they have th
 * `Issue-Bug`
 * `Issue-Docs`
 * `Issue-Feature`
-* `Last-Version-Remaining`
+* `Highest-Version-Remaining`
 * `License-Blocks-Install`
 * `Manifest-Content-Incomplete`
 * `Moderator-Approved`
