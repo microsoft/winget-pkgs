@@ -1,0 +1,76 @@
+# Created with Komac v1.11.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.5.0.schema.json
+
+PackageIdentifier: gokcehan.lf
+PackageVersion: r31
+PackageLocale: en-US
+Publisher: Gökçehan Kara
+PublisherUrl: https://gokcehan.github.io
+PublisherSupportUrl: https://github.com/gokcehan/lf/issues
+Author: Gökçehan Kara
+PackageName: lf
+PackageUrl: https://github.com/gokcehan/lf
+License: MIT
+LicenseUrl: https://github.com/gokcehan/lf/blob/master/LICENSE
+Copyright: Copyright (c) 2016 Gökçehan Kara
+CopyrightUrl: https://github.com/gokcehan/lf/blob/master/LICENSE
+ShortDescription: lf (as in "list files") is a terminal file manager written in Go with a heavy inspiration from ranger file manager.
+Tags:
+- go
+- ranger
+- tui
+- vi
+- vim
+ReleaseNotes: |-
+  Changelog
+  - (Breaking) There has been some changes in the server protocol.
+    Make sure to kill the old server process when you update to avoid errors (i.e. lf -remote 'quit!').
+  - (Breaking) A new server command query is added to expose internal state to users (#1384) (by @joelim-work).
+    A new builtin command cmds is added to display the commands. The old builtin command jumps is now removed.
+    The builtin commands maps and cmaps now use the new server command.
+  - (Breaking) Environment variable exporting for files and options are not performed anymore while previewing and cleaning to avoid various issues with race conditions (#1354) (by @joelim-work).
+    Cleaning program should now instead receive an additional sixth argument for the next file path to be previewed to allow comparisons with the previous file path.
+    User options (i.e. user_{option}) are now exported whenever they are changed (#1418) (by @raslop).
+  - (Breaking) Command outputs are now exclusively attached to stderr to allow printing the last directory or selection to stdout (#1399 and #1402) (by @joelim-work).
+    Two new command line options -print-last-dir and -print-selection are added to print the last directory and selection to stdout.
+    The example script etc/lfcd.sh is updated to use -print-last-dir instead.
+    Other lfcd scripts are also likely to be updated in the future to use the new method (patches are welcome).
+  - (Breaking) The option ruler is now deprecated in favor of its replacement rulerfmt (#1386) (by @joelim-work).
+    The new rulerfmt option is more capable (i.e. displays option values, supports colors and attributes, and supports optional fields) and more consistent with the rest of our options.
+    See the documentation for more information.
+  - (New) Modifier keys (i.e. control, shift, alt) with special keys (e.g. arrows, enter) are now supported for most combinations (#1248) (by @joelim-work).
+  - (New) A new option borderfmt is added to configure colors for pane borders (#1251) (by @joelim-work).
+  - (New) New lf specific environment variables, LF_CONFIG_HOME on Windows and LF_CONFIG/DATA_HOME on Unix, are now supported to set the configuration directory (#1253) (by @alok-mishra).
+  - (New) Tilde (i.e. ~) expansion is performed during completion to be able to use expanded tilde paths as command arguments (#1246) (by @joelim-work).
+  - (New) A new option preserve is added to preserve attributes (i.e. mode and timestamps) while copying (#1026) (by @raslop).
+  - (New) The file etc/icons.example is updated for nerd-fonts v3.0.0 (#1271) (by @MunifTanjim).
+  - (New) A new builtin command clearmaps is added to clear all default keybindings except for read (i.e. :) and cmap keybindings to be able to :quit (#1286) (by @joelim-work).
+  - (New) A new option statfmt is added to configure the status line at the bottom (#1288) (by @joelim-work).
+  - (New) A new option truncatepct is added to determine the location of truncation from the beginning in terms of percentage (#1029) (by @raslop).
+  - (New) A new option dupfilefmt is added to configure the names of duplicate files while copying (#1315) (by @Limero).
+  - (New) Shell scripts etc/lf.nu and etc/lfcd.nu are added to the repository to allow completion and directory change with Nushell (#1341) (by @mauerlaeufer).
+  - (New) Sixels are now supported for previewing (#1211) (by @horriblename).
+    A new option sixel is added to enable this behavior.
+  - (New) A new configuration keyword setlocal is added to configure directory specific options (#1381) (by @gokcehan).
+  - (New) A new command line command cmd-delete-word-back (default a-backspace and a-backspace2) is added to use word boundaries when deleting a word backwards (#1409) (by @janpeterd).
+  - (Fix) Cursor positions in the directory should now be preserved after file operations that changes the directory (e.g. create or delete) (#1247) (by @joelim-work).
+  - (Fix) Option reverse should now respect to sort stability requirements (#1261) (by @joelim-work).
+  - (Fix) Backspace should not exit filter mode anymore (#1269) (by @jdujava).
+  - (Fix) Truncated double width characters should not cause misalignment for the file information (#1272) (by @joelim-work).
+  - (Fix) Piping shell commands should not refresh the preview anymore (#1281) (by @joelim-work).
+  - (Fix) Cursor position should now update properly after a terminal resize (#1290) (by @joelim-work).
+  - (Fix) Directories should now be reloaded properly after a delete operation (#1292) (by @joelim-work).
+  - (Fix) Executable file completion should not add entries to the log file anymore (#1307) (by @joelim-work).
+  - (Fix) Blank input lines are now allowed in piping shell commands (#1308) (by @joelim-work).
+  - (Fix) Shell commands arguments on Windows should now be quoted properly to fix various issues (#1309) (by @joelim-work).
+  - (Fix) Reloading in a symlink directory should not follow the symlink anymore (#1327) (by @joelim-work).
+  - (Fix) Command load should not flicker image previews anymore (#1335) (by @joelim-work).
+  - (Fix) Asynchronous shell commands should now trigger load automatically when they are finished (#1345) (by @joelim-work).
+  - (Fix) Changing the value of preview option should now clear image previews (#1350) (by @jdujava).
+  - (Fix) Cursor position in the status line at the bottom should now consider double width characters properly (#1348) (by @joelim-work).
+  - (Fix) Filenames should only be quoted for cmd on Windows to avoid quoting issues for powershell (#1371) (by @joelim-work).
+  - (Fix) Inaccessible files should now be included in the directory list and display their lstat errors in the status line at the bottom (#1382) (by @jantatje).
+  - (Fix) Command line command cmd-delete-word should now add the deleted text to the yank buffer (#1409) (by @janpeterd).
+ReleaseNotesUrl: https://github.com/gokcehan/lf/releases/tag/r31
+ManifestType: defaultLocale
+ManifestVersion: 1.5.0
