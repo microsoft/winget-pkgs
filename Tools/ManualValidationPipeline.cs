@@ -145,7 +145,7 @@ using System.Web.Script.Serialization;
 namespace WinGetApprovalNamespace {
     public class WinGetApprovalPipeline : Form {
 		//vars
-        public int build = 882;//Get-RebuildPipeApp
+        public int build = 899;//Get-RebuildPipeApp
 		public string appName = "WinGetApprovalPipeline";
 		public string appTitle = "WinGet Approval Pipeline - Build ";
 		public static string owner = "microsoft";
@@ -658,6 +658,7 @@ namespace WinGetApprovalNamespace {
 			table_val.Columns.Add("PackageIdentifier", typeof(string));
 			table_val.Columns.Add("prVersion", typeof(string));
 			table_val.Columns.Add("A", typeof(string));
+			table_val.Columns.Add("M", typeof(int));
 			table_val.Columns.Add("R", typeof(string));
 			table_val.Columns.Add("G", typeof(string));
 			table_val.Columns.Add("W", typeof(string));
@@ -837,6 +838,7 @@ namespace WinGetApprovalNamespace {
 			
 			if (TestPath(StatusFile) == "File") {
 				double VMRAM = 0;
+					try {
 				Dictionary<string,object>[] GetStatus = FromCsv(GetContent(StatusFile));
 				//Update RAM column and write
 				for (int VM = 0; VM < GetStatus.Length -1; VM++) {
@@ -847,6 +849,7 @@ namespace WinGetApprovalNamespace {
 						inputBox_VMRAM.Text = "VM"+VM+": "+e.ToString();
 					}//end try
 				}//end for VM
+				} catch {}
 				inputBox_VMRAM.Text = VMRAM.ToString();
 			}//end if TestPath
 		}//end function 
@@ -929,7 +932,10 @@ namespace WinGetApprovalNamespace {
 					} else {
 						title = title[0].Split(' ');
 					}
-					string Submitter = split_clip.Where(n => n.Contains("wants to merge")).FirstOrDefault().Split(' ')[0];
+					string Submitter = "";
+					try {
+						Submitter = split_clip.Where(n => n.Contains("wants to merge")).FirstOrDefault().Split(' ')[0];
+					} catch {}
 					string InstallerType = YamlValue("InstallerType",clip);
 
 					//Split the title by spaces. Try extracting the version location as the next item after the word "version", and if that fails, use the 2nd to the last item, then 3rd to last, and 4th to last. for some reason almost everyone puts the version number as the last item, and GitHub appends the PR number.
@@ -954,44 +960,54 @@ namespace WinGetApprovalNamespace {
 
 
 
- 					string Timestamp = DateTime.Now.ToString("h:mm:ss");
+ 					string Timestamp = DateTime.Now.ToString("H:mm:ss");
 					//Write-Host -nonewline -f $matchColor "| $(Get-Date -format T) | $PR | $(Get-PadRight "PackageIdentifier") | "
 					DataRow row = table_val.NewRow();
-					row[0] = Timestamp;
-					row[1] = PR;
-					row[2] =  PackageIdentifier;
-					row[3] =  "";
-					row[4] =  "";
-					row[5] =  "";
-					row[6] =  "";
-					row[7] =  "";
-					row[8] =  "";
-					row[9] =  "";
-					row[10] =  "";
-					row[11] =  "";
-					row[12] =  "";
-					row[13] =  "";
+					row[0] = Timestamp; //Timestamp
+					row[1] = PR; //PR (int)
+					row[2] =  PackageIdentifier; //PackageIdentifier
+					row[3] =  ""; //prVersion
+					row[4] =  ""; //A - Auth
+					row[5] =  0; //M (int) - Major version difference
+					row[6] =  ""; //R - Review file
+					row[7] =  ""; //G - aGreements
+					row[8] =  ""; //W - Word filter
+					row[9] =  ""; //F - apps and Features changed
+					row[10] =  ""; //I - InstallerUrl contains PackageVersion
+					row[11] =  ""; //D - PR has fewer files than manifest
+					row[12] =  ""; //V - Versions remaining
+					row[13] =  ""; //ManifestVer
+					row[14] =  ""; //OK
 					table_val.Rows.InsertAt(row,0);
 					int LastRow = 0;//table_val.Rows.Count -1;
+					table_val.Rows[LastRow].SetField("PRVersion", PRVersion); 
+
+			
+					string ManifestVersion = FindWinGetVersion(PackageIdentifier);
+					int PRMajorVersion = Convert.ToInt32(PRVersion.Split('.')[0]);
+					int ManifestMajorVersion = 0;
+					if (ManifestVersion != "") {
+			outBox_msg.AppendText(Environment.NewLine + "ManifestVersion.Split('.') " + ManifestVersion + " PRMajorVersion " + PRMajorVersion);
+						ManifestMajorVersion = Convert.ToInt32(ManifestVersion.Split('.')[0]);
+					}
+			outBox_msg.AppendText(Environment.NewLine + "I'm a PR " + PR + " Watcher, watchin PRs go by.");
+						
 
 					//Variable effervescence
 					string prAuth = "+";
 					string Auth = "A";
+					int VersionIncrease = PRMajorVersion - ManifestMajorVersion;//M
 					string Review = "R";
 					string AgreementAccept = "G";
 					string WordFilter = "W";
 					string AnF = "F";
 					string InstVer = "I";
 					string string_ListingDiff = "D";
-					int NumVersions = 99;
+					int NumVersions = FindWinGetTotalVersions(PackageIdentifier) ; 
 					string PRvMan = "P";
 					string Approve = "+"; 
 					
 					string Body = "";
-
-					string ManifestVersion = FindWinGetVersion(PackageIdentifier);
-					int ManifestVersionParams = ManifestVersion.Split('.').Length;
-					int PRVersionParams = PRVersion.Split('.').Length;
 
 //"PackageIdentifier","gitHubUserName","authStrictness","authUpdateType","autoWaiverLabel","versionParamOverrideUserName","versionParamOverridePR","code200OverrideUserName","code200OverridePR","AgreementOverridePR","AgreementURL","reviewText"
 					string strictness = "";
@@ -1022,19 +1038,11 @@ namespace WinGetApprovalNamespace {
 							} //end if title;
 						} //end if noNew;
 					} else if (null != ManifestVersion) {
-/* 						
-						if (PRTitle -match " [.]") {
-						// if has spaces (4.4 .5 .220);
-							$Body = "Spaces detected in version number.";
-							$Body = $Body + "\n\n(Automated response - build "build")";
-							InvokeGitHubPRRequest(PR,"Post","comments",Body,"Silent");
-						//  matchColor = invalidColor;
-							$prAuth = "-!";
-						}
-						 */
+
+
 						 
 						 
-						if ((ManifestVersionParams != PRVersionParams) && 
+						if ((Math.Abs(VersionIncrease) > 3) && 
 						(!PRTitle.Contains("Automatic deletion")) && 
 						(!PRTitle.Contains("Delete")) && 
 						(!PRTitle.Contains("Remove")) && 
@@ -1042,41 +1050,41 @@ namespace WinGetApprovalNamespace {
 						(AuthAccount != Submitter)) {
 
 							string greaterOrLessThan = "";
-							if (PRVersionParams < ManifestVersionParams) {
-								//if current manifest has more params (dots) than PR (2.3.4.500 to 2.3.4);
-								greaterOrLessThan = "less";
-							} else if (PRVersionParams > ManifestVersionParams) {
-								//if current manifest has fewer params (dots) than PR (2.14 to 2.14.3.222);
+								//if VersionIncrease equal = current major version
+							if (VersionIncrease < 0) {
+								//if VersionIncrease negative = old major version
 								greaterOrLessThan = "greater";
+							} else if (VersionIncrease > 0) {
+								//if VersionIncrease positive = new major version
+								greaterOrLessThan = "less";
 							}
-							// matchColor = invalidColor;
-							Body = "Hi @"+Submitter+",\\n\\n> This PR's version number "+PRVersion+" has "+PRVersionParams+" parameters (sets of numbers between dots - major, minor, etc), which is "+greaterOrLessThan+" than the current manifest's version "+ManifestVersion+", which has "+ManifestVersionParams+" parameters.\\n\\nDoes this PR's version number **exactly** match the version reported in the \\Apps & features\\ Settings page? (Feel free to attach a screenshot.)";
+							Body = "Hi @"+Submitter+",\\n\\n> This PR's version number "+PRVersion+" has major version"+PRMajorVersion+" while the current manifest has major version "+ManifestVersion+". This is a difference of " + Math.Abs(VersionIncrease) + "major versions. Is this intentional?";
 							Approve = "-!";
-							Body = Body + "\\n\\n(Automated response - build "+build+")\\n<!--\\n[Policy] Needs-Author-Feedback\\n[Policy] Version-Parameter-Mismatch\\n-->";
-					/* 
-							InvokeGitHubPRRequest(PR,"Post","comments",Body,"Silent");
+							Body = Body + "\\n\\n(Automated response - build "+build+")\\n<!--\\n[Policy] Needs-Author-Feedback\\n[Policy] Major-Version-Difference\\n-->";
+/* 
+ 							InvokeGitHubPRRequest(PR,"Post","comments",Body,"Silent");
 							AddPRToRecord(PR,"Feedback",PRTitle);
-					*/
 					outBox_msg.AppendText(Environment.NewLine + "PR: " + PR + " comments");
+					*/
 						}
 					}
-					table_val.Rows[LastRow].SetField("PRVersion", PRVersion); 
-					//  matchColor = validColor;
+					table_val.Rows[LastRow].SetField("M", VersionIncrease);
 
 
 
 					if (strictness != "") {
 						string matchVar = "";
-						// matchColor = cautionColor;
-						if (AuthAccount == Submitter) {
-							matchVar = "matches";
-							Auth = "+";
-							//  matchColor = validColor;
-						} else {
-							matchVar = "does not match";
-							Auth = "-";
-							// matchColor = invalidColor;
+							
+						foreach (string Account in AuthAccount.Split('/')) {
+							if (Account == Submitter) {
+								matchVar = "matches";
+								Auth = "+";
+							} else {
+								matchVar = "does not match";
+								Auth = "-";
+							}
 						}
+						outBox_msg.AppendText(Environment.NewLine + "PR: " + PR + " matchVar: "+ matchVar);
 
 						if (strictness == "must") {
 							Auth += "!";
@@ -1087,23 +1095,28 @@ namespace WinGetApprovalNamespace {
 					outBox_msg.AppendText(Environment.NewLine + "PR: " + PR + " GetPRApproval");
 					}
 					table_val.Rows[LastRow].SetField("A", Auth);
-					//  matchColor = validColor;
 
 
 
 
 					
 					//Review file only alerts, doesn't block.
-					// Dictionary<string,dynamic>[] ReviewMatch = ReviewList.Where(n => n["PackageIdentifier"] == PackageIdentifier);// -match (PackageIdentifier.Split('.'))[0..1].Join(".")}
-					// string Review = "";
-					// if (ReviewMatch != null) {
-						// Review = ReviewMatch.Reason.Distinct();
-						// matchColor = cautionColor;
-					// }
-					//Write-Host -nonewline -f matchColor "Review | "
+				string ReviewData = "";
+				try {
+					ReviewData = GetFileData(ReviewFile,PackageIdentifier,"Reason");
+					if (ReviewData != "") {
+					oldclip = PRTitle;
+						if (MessageBox.Show(PackageIdentifier + ": " + ReviewData + " - Should this still be approved?", "Question", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes) {
+							Approve = "+";
+							Review= "+";
+						} else {
+							Review= "-";
+							Approve = "-";
+							// MessageBox.Show("Nothing happens.");
+						}
+					}
+				} catch {}
 					table_val.Rows[LastRow].SetField("R", Review);
-					//  matchColor = validColor;
-
 
 
 				//In list, matches PR - explicit pass
@@ -1133,7 +1146,6 @@ namespace WinGetApprovalNamespace {
 					//Implicit Approve - your AgreementsUrl is in another file. Can't modify what isn't there. 
 				}
 					table_val.Rows[LastRow].SetField("G", AgreementAccept);
-					//  matchColor = validColor;
 
 
 
@@ -1145,10 +1157,12 @@ namespace WinGetApprovalNamespace {
 				if ((!PRTitle.Contains("Automatic deletion")) && 
 				(!PRTitle.Contains("Delete")) && 
 				(!PRTitle.Contains("Remove")) &&
-				(!AgreementAccept.Contains("[+]"))) {
+				(!AgreementAccept.Contains("+"))) {
+					outBox_msg.AppendText(Environment.NewLine + "WordFilter: " );
 
 				List<string> WordFilterMatch = null;
 					foreach (string word in WordFilterList) {
+						// if (clip.Contains(word) && !clip.Contains("Url") && !clip.Contains("Agreement")) {
 						if (clip.Contains(word)) {
 							WordFilterMatch.Add(word);
 						}
@@ -1157,14 +1171,42 @@ namespace WinGetApprovalNamespace {
 					if (WordFilterMatch != null) {
 						WordFilter = "-!";
 						Approve = "-!";
-					//  matchColor = invalidColor;
-						ReplyToPR(PR,"WordFilter",WordFilterMatch.FirstOrDefault());
+					outBox_msg.AppendText(Environment.NewLine + "WordFilter: " + WordFilterMatch.FirstOrDefault());
+						// ReplyToPR(PR,"WordFilter",WordFilterMatch.FirstOrDefault());
 					}
 				}
 					table_val.Rows[LastRow].SetField("W", WordFilter);
-					//  matchColor = validColor;
 
+/*
+Version Parameter Check - Removed
+A = Auth - Done
+M = Major version - Done
+R = Review - Done
+G = aGreement - Done
+F = apps and Features - disabled, needs revision
+W = Word filter - Done
+I = version number in InstallerUrl - Done
+D = Difference between file counts (PR removes files) - disabled, needs revision
+V = highest Version remaining - Done
+Manifest version in repo - Done
 
+New UEs
+154958 "2024.4.1.152"
+155049 "5.1.1.188"
+155051 "5.1.1.188"
+155060 "4.10.1"
+155507 "3.2.38.4985"
+
+string to number
+155006 ""14""
+155193 "7.5.30-Release.5179102"
+155266 "c6.76.06"
+155353 "1.1.20240415-1"
+155354 "1.1.20240415-1"
+155593 "v0.7.1"
+155642 "v577"
+155031 "v576"
+ */
 
 
 
@@ -1180,12 +1222,10 @@ namespace WinGetApprovalNamespace {
 							bool ANFCurrent = clip.Contains("AppsAndFeaturesEntries");
 
 							if ((ANFOld == true) && (ANFCurrent == false)) {
-							//  matchColor = invalidColor;
-								AnF = "-";
+										AnF = "-";
 								ReplyToPR(PR,"AppsAndFeaturesMissing",Submitter,MagicLabels[30]);
 								AddPRToRecord(PR,"Feedback",PRTitle);
 							} else if ((ANFOld == false) && (ANFCurrent == true)) {
-								// matchColor = cautionColor;
 								AnF = "-";
 								ReplyToPR(PR,"AppsAndFeaturesNew",Submitter,MagicLabels[30]);
 								//InvokeGitHubPRRequest(PR,"Post","comments","[Policy] Needs-Author-Feedback","Silent")
@@ -1198,7 +1238,6 @@ namespace WinGetApprovalNamespace {
 						}
 					}
 					table_val.Rows[LastRow].SetField("F", AnF);
-					//  matchColor = validColor;
 
 
 
@@ -1215,21 +1254,18 @@ namespace WinGetApprovalNamespace {
 								if (!(InstallerUrl.Contains(PRVersion))) {
 									//Matches when the dots are removed from semantec versions in the URL.
 									if (!(InstallerUrl.Contains(PRVersion.Replace(".","")))) {
-										// matchColor = invalidColor;
-										InstVer = "-";
+													InstVer = "-";
 									}
 								}
 							}
 						} catch {
-						//  matchColor = invalidColor;
-							InstVer = "-";
+								InstVer = "-";
 						} //end try
 					} //end if PRvMan
 
 					try {
 						PRVersion = YamlValue("PackageVersion",clip);
 						if (PRVersion.Contains(" ")) {
-							// matchColor = invalidColor;
 							InstVer = "-!";
 						}
 					}catch{
@@ -1237,7 +1273,6 @@ namespace WinGetApprovalNamespace {
 					}
 
 					table_val.Rows[LastRow].SetField("I", InstVer);
-					//  matchColor = validColor;
 
 
 
@@ -1247,10 +1282,8 @@ namespace WinGetApprovalNamespace {
 					((PRTitle.Contains("Automatic deletion")) || 
 					(PRTitle.Contains("Delete")) || 
 					(PRTitle.Contains("Remove")))) {//Removal PR - if highest version in repo.
-						NumVersions = FindWinGetTotalVersions(PackageIdentifier);//(WinGetOutput.AvailableVersions).count //Need to rework #PendingBugfix
 						if ((PRVersion == ManifestVersion) || (NumVersions == 1)) {
-						//  matchColor = invalidColor;
-/* 
+	/* 
 							ReplyToPR(PR,"VersionCount",Submitter,"[Policy] Needs-Author-Feedback\n[Policy] Highest-Version-Remaining");
 							AddPRToRecord(PR,"Feedback",PRTitle);
 */
@@ -1261,10 +1294,8 @@ namespace WinGetApprovalNamespace {
 						if ("" != GLD) {
 							if (GLD == "Error") {
 								string_ListingDiff = "E";
-							//  matchColor = invalidColor;
-							} else {
+									} else {
 								string_ListingDiff = "-!";
-								// matchColor = cautionColor;
 /* 
 								ReplyToPR(PR,"ListingDiff",GLD);
 								InvokeGitHubPRRequest(PR,"Post","comments","[Policy] Needs-Author-Feedback","Silent");
@@ -1275,7 +1306,6 @@ namespace WinGetApprovalNamespace {
 					}//end if PRvMan
 					table_val.Rows[LastRow].SetField("D", string_ListingDiff);
 					table_val.Rows[LastRow].SetField("V", NumVersions);
-					//  matchColor = validColor;
 
 
 
@@ -1285,14 +1315,11 @@ int comparison = String.Compare(PRVersion, ManifestVersion);
 					if (PRvMan != "N") {
 						if (null == PRVersion || "" == PRVersion) {
 								PRvMan = "Error:PRVersion";
-						//  matchColor = invalidColor;
-						} else if (ManifestVersion == "Unknown") {
+							} else if (ManifestVersion == "Unknown") {
 								PRvMan = "Error:ManifestVersion";
-						//  matchColor = invalidColor;
-						} else if (ManifestVersion == null) {
+							} else if (ManifestVersion == null) {
 								PRvMan = "Error:ManifestVersion";
-						//  matchColor = invalidColor;
-						} else if (comparison < 0) {//PRVersion < ManifestVersion
+							} else if (comparison < 0) {//PRVersion < ManifestVersion
 							PRvMan = ManifestVersion;
 						} else if (comparison > 0) {//PRVersion > ManifestVersion
 							PRvMan = ManifestVersion;
@@ -1309,19 +1336,17 @@ int comparison = String.Compare(PRVersion, ManifestVersion);
 					(InstVer == "-!") || 
 					(prAuth == "-!") || 
 					(string_ListingDiff == "-!") || 
-					(NumVersions == 1) || 
 					(NumVersions == -1) || 
 					(WordFilter == "-!") || 
+					(Review == "-") || 
 					(AgreementAccept == "-!") || 
 					(PRvMan == "N")) {
 					//|| (PRvMan -match "^Error")
-						// matchColor = cautionColor;
 						Approve = "-!";
 					}
 
-					PRvMan = PadRight(PRvMan,14);
+					//PRvMan = PadRight(PRvMan,14);
 					table_val.Rows[LastRow].SetField("ManifestVer", PRvMan);
-					//  matchColor = validColor;
 
 
 
@@ -2425,7 +2450,7 @@ bool ConnectionStatus = vm.Scope.IsConnected;
 		
 		public int FindWinGetTotalVersions(string PackageIdentifier) {
 			string string_out = "";	
-			string command = "(((winget search " + PackageIdentifier + " --exact --disable-interactivity --versions --disable-interactivity) -join ',' -split 'Version,-------,')[1] -split ',').count";
+			string command = "(((winget search " + PackageIdentifier + " --exact --disable-interactivity --versions --disable-interactivity) -join ',' -replace '-+,','' -split 'Version,')[1] -split ',').count";
 
 			Process process = new Process();
 			StreamWriter StandardInput;
@@ -2448,7 +2473,7 @@ bool ConnectionStatus = vm.Scope.IsConnected;
 			string_out = StandardOut.ReadToEnd();
 			// outBox_msg.AppendText(Environment.NewLine + "Testing2: " + string_out); 
 			foreach (string string_in in string_out.Split('\n')) {
-				if (string_in.Length > 1 && string_in.Length < 4) {
+				if (string_in.Length > 1 && string_in.Length < 5) {
 					string_out = string_in;
 				}
 			}
@@ -3761,7 +3786,7 @@ try {
 			//Response["rate"] | select @{n="source";e={"Logged"}}, limit, used, remaining, @{n="reset";e={([System.DateTimeOffset]::FromUnixTimeSeconds(_.reset)).DateTime.AddHours(-8)}}
 		}
 
-		public dynamic GetFileData(string Filename, string PackageIdentifier, string Property){
+		public string GetFileData(string Filename, string PackageIdentifier, string Property){
 			dynamic Records = FromCsv(GetContent(Filename));//StatusFile
 			string string_out = "";
 			for (int r = 1; r < Records.Length -1; r++){
@@ -4426,6 +4451,7 @@ try {
 			string PackageIdentifier = inputBox_User.Text;
 
 			ValidateManifest(0,PackageIdentifier,"",0,"","","","","",false,false,"","",false, "--id "+PackageIdentifier);
+//ValidateManifest(VM = 0,  PackageIdentifier = "",  PackageVersion = "",  PR = 0,  Arch = "", Scope = "",  InstallerType = "", OS = "", Locale = "", InspectNew = false, notElevated = false, MinimumOSVersion = "",  ManualDependency = "",  NoFiles = false,  installerLine = "",  Operation = "Scan")
 		}// end Validate_By_ID_Action
 
 		public void Validate_By_Arch_Action(object sender, EventArgs e) {
@@ -4522,19 +4548,20 @@ try {
 			row[2] =  "";
 			row[3] =  "";
 			row[4] =  "A";
-			row[5] =  "R";
-			row[6] =  "G";
-			row[7] =  "W";
-			row[8] =  "F";
-			row[9] =  "I";
-			row[10] =  "D";
-			row[11] =  "V";
-			row[12] =  "";
-			row[13] =  "+";
+			row[5] =  0;//M
+			row[6] =  "R";
+			row[7] =  "G";
+			row[8] =  "W";
+			row[9] =  "F";
+			row[10] =  "I";
+			row[11] =  "D";
+			row[12] =  "V";
+			row[13] =  "";
+			row[14] =  "+";
 			table_val.Rows.InsertAt(row,0);
 
 			string response_out = FromJson(ApprovePR(PR))["state"];
-			table_val.Rows[0].SetField("OK", response_out); 
+			table_val.Rows[0].SetField("OK", response_out[0]); 
 			AddPRToRecord(PR,"Approved");
         }// end Approved_Action
 
@@ -4827,6 +4854,7 @@ try {
 
         public void Testing_Action(object sender, EventArgs e) {
 			// string string_out = (PRStateFromComments(PR).ToString());
+ 			// dynamic string_out = GetFileData(DataFileName,"PackageIdentifier", UserInput);
 			// dynamic string_out = FromCsv(GetContent(DataFileName)).Where(n => n[Property] != null).Where(n => (string)n[Property].Contains(Match);
 			string UserInput = inputBox_User.Text;
 			dynamic line = FromCsv(GetContent(DataFileName)).Where(n => (string)n["PackageIdentifier"] == (UserInput));

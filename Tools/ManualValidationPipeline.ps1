@@ -10,7 +10,7 @@
 #3.88.19 - A few bugfixes.
 #3.88.18 - Restore waiver and retry fucntionality. 
 
-$build = 880
+$build = 882
 $appName = "ManualValidationPipeline"
 Write-Host "$appName build: $build"
 $MainFolder = "C:\ManVal"
@@ -1425,7 +1425,7 @@ Function Get-PRWatch {
 						}; #end if title
 					}; #end if noNew
 				} elseif ($null -ne $WinGetOutput) {
-					If ($PRtitle -match " [.]") {
+<# 					If ($PRtitle -match " [.]") {
 					#If has spaces (4.4 .5 .220)
 						$Body = "Spaces detected in version number."
 						$Body = $Body + "`n`n(Automated response - build $build)"
@@ -1454,10 +1454,10 @@ Function Get-PRWatch {
 						Invoke-GitHubPRRequest -PR $PR -Method Post -Type comments -Data $Body -Output Silent 
 						Add-PRToRecord -PR $PR -Action "Feedback" -Title $PRtitle
 					}
+ #>
 				}
 				Write-Host -nonewline -f $matchColor "$(Get-PadRight $PRVersion.toString() 14) | "
 				$matchColor = $validColor
-
 
 
 
@@ -1859,7 +1859,7 @@ Function Get-GitHubPreset {
 			}
 			"DefenderFail" {
 				Add-PRToRecord -PR $PR -Action "Blocking"
-				$out += Reply-ToPR -PR $PR -CannedMessage $Preset -Policy "Needs-Attention`n[Policy] $($MagicLabels[0])"
+				#$out += Reply-ToPR -PR $PR -CannedMessage $Preset -Policy "Needs-Attention`n[Policy] $($MagicLabels[0])"
 			}
 			"DriverInstall" {
 				Add-PRToRecord -PR $PR -Action "Blocking"
@@ -2680,6 +2680,7 @@ Function Get-AutoValLog {
 			$UserInput = $UserInput -notmatch " 8A15005E "
 			$UserInput = $UserInput -notmatch "Exception during executable launch operation System.InvalidOperationException: No process is associated with this object."
 			$UserInput = $UserInput -notmatch "Exit code`: 0"
+			$UserInput = $UserInput -notmatch "Failed to open available source: msstore"
 			$UserInput = $UserInput -notmatch "Installation failed with exit code -1978334972"
 			$UserInput = $UserInput -notmatch "ISWEBVIEW2INSTALLED"
 			$UserInput = $UserInput -notmatch "MpCmdRun"
