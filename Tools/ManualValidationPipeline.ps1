@@ -10,7 +10,7 @@
 #3.88.19 - A few bugfixes.
 #3.88.18 - Restore waiver and retry fucntionality. 
 
-$build = 882
+$build = 883
 $appName = "ManualValidationPipeline"
 Write-Host "$appName build: $build"
 $MainFolder = "C:\ManVal"
@@ -2616,7 +2616,7 @@ Function Get-AutoValLog {
 		[switch]$Force,
 		[switch]$Silent
 	)
-	$DownloadSeconds = 4;
+	$DownloadSeconds = 8;
 	$WaiverList = Get-ValidationData -Property autoWaiverLabel
 	#Get-Process *photosapp* | Stop-Process
 	$BuildNumber = Get-BuildFromPR -PR $PR 
@@ -2674,6 +2674,7 @@ Function Get-AutoValLog {
 			$UserInput = $UserInput -notmatch 'api-ms-win-core-errorhandling'
 			$UserInput = $UserInput -notmatch "2: 3: Error"
 			$UserInput = $UserInput -notmatch "because the current user does not have that package installed"
+			$UserInput = $UserInput -notmatch "Cannot create a file when that file already exists"
 			$UserInput = $UserInput -notmatch "Could not create system restore point"
 			$UserInput = $UserInput -notmatch "Dest filename"
 			$UserInput = $UserInput -notmatch "ERROR: Signature Update failed"

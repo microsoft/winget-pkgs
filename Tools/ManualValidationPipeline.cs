@@ -145,7 +145,7 @@ using System.Web.Script.Serialization;
 namespace WinGetApprovalNamespace {
     public class WinGetApprovalPipeline : Form {
 		//vars
-        public int build = 899;//Get-RebuildPipeApp
+        public int build = 901;//Get-RebuildPipeApp
 		public string appName = "WinGetApprovalPipeline";
 		public string appTitle = "WinGet Approval Pipeline - Build ";
 		public static string owner = "microsoft";
@@ -1177,66 +1177,64 @@ namespace WinGetApprovalNamespace {
 				}
 					table_val.Rows[LastRow].SetField("W", WordFilter);
 
-/*
-Version Parameter Check - Removed
-A = Auth - Done
-M = Major version - Done
-R = Review - Done
-G = aGreement - Done
-F = apps and Features - disabled, needs revision
-W = Word filter - Done
-I = version number in InstallerUrl - Done
-D = Difference between file counts (PR removes files) - disabled, needs revision
-V = highest Version remaining - Done
-Manifest version in repo - Done
 
-New UEs
-154958 "2024.4.1.152"
-155049 "5.1.1.188"
-155051 "5.1.1.188"
-155060 "4.10.1"
-155507 "3.2.38.4985"
-
-string to number
-155006 ""14""
-155193 "7.5.30-Release.5179102"
-155266 "c6.76.06"
-155353 "1.1.20240415-1"
-155354 "1.1.20240415-1"
-155593 "v0.7.1"
-155642 "v577"
-155031 "v576"
- */
 
 
 
 					
-
 					if (null != ManifestVersion) {
 						if ((PRvMan != "N") && 
 						(!PRTitle.Contains("Automatic deletion")) && 
 						(!PRTitle.Contains("Delete")) && 
 						(!PRTitle.Contains("Remove"))) {
-/* 
-							bool ANFOld = ManifestEntryCheck(PackageIdentifier, ManifestVersion);
-							bool ANFCurrent = clip.Contains("AppsAndFeaturesEntries");
+							/* 
+							DisplayName - maybe warn
+							DisplayVersion - Hard block
+							Publisher - maybe warn
+							ProductCode - maybe warn
+							UpgradeCode - maybe warn
+							InstallerType - maybe warn
+							 */
 
-							if ((ANFOld == true) && (ANFCurrent == false)) {
+							string replyType = "";
+							int entryType = 0;
+							
+							foreach (string Entry in AppsAndFeaturesEntriesList) {
+								if (Entry == "DisplayName") {
+								} else if (Entry == "DisplayVersion") {
+									entryType = 1;
+								} else if (Entry == "Publisher") {
+								} else if (Entry == "ProductCode") {
+								} else if (Entry == "UpgradeCode") {
+								}
+								
+								bool ANFOld = ManifestEntryCheck(PackageIdentifier, ManifestVersion, Entry);
+								bool ANFCurrent = clip.Contains(Entry);
+								if ((ANFOld == true) && (ANFCurrent == false)) {
+									if (entryType == 1) {
 										AnF = "-";
-								ReplyToPR(PR,"AppsAndFeaturesMissing",Submitter,MagicLabels[30]);
-								AddPRToRecord(PR,"Feedback",PRTitle);
-							} else if ((ANFOld == false) && (ANFCurrent == true)) {
-								AnF = "-";
-								ReplyToPR(PR,"AppsAndFeaturesNew",Submitter,MagicLabels[30]);
-								//InvokeGitHubPRRequest(PR,"Post","comments","[Policy] Needs-Author-Feedback","Silent")
-							} else if ((ANFOld == false) && (ANFCurrent == false)) {
-								AnF = "0";
-							} else if ((ANFOld == true) && (ANFCurrent == true)) {
-								AnF = "1";
+									}
+										replyType = "AppsAndFeaturesMissing";
+								} else if ((ANFOld == false) && (ANFCurrent == true)) {
+									if (entryType == 1) {
+										AnF = "-";
+									}
+									replyType = "AppsAndFeaturesNew";
+									//InvokeGitHubPRRequest(PR,"Post","comments","[Policy] Needs-Author-Feedback","Silent")
+								} else if ((ANFOld == false) && (ANFCurrent == false)) {
+									AnF = "0";
+								} else if ((ANFOld == true) && (ANFCurrent == true)) {
+									AnF = "1";
+								}//end if ANFOld
+							}//end foreach Entry
+							if (replyType != "") {
+								// ReplyToPR(PR,replyType,Submitter,MagicLabels[30]);
+								// AddPRToRecord(PR,"Feedback",PRTitle);
 							}
-*/
-						}
-					}
+							
+								
+						}//end if PRvMan
+					}//end if null
 					table_val.Rows[LastRow].SetField("F", AnF);
 
 
@@ -1275,7 +1273,40 @@ string to number
 					table_val.Rows[LastRow].SetField("I", InstVer);
 
 
+/*
+Version Parameter Check - Removed
+A = Auth - Done
+M = Major version - Done
+R = Review - Done
+G = aGreement - Done
+F = apps and Features - Done in an inefficient fashion that really should be rewritten soon.
+W = Word filter - Done
+I = version number in InstallerUrl - Done
+D = Difference between file counts (PR removes files) - disabled, needs revision
+V = highest Version remaining - Done
+Manifest version in repo - Done
 
+New UEs
+154958 "2024.4.1.152"
+155049 "5.1.1.188"
+155051 "5.1.1.188"
+155060 "4.10.1"
+155507 "3.2.38.4985"
+156171 (YamlValue)
+155850
+
+string to number
+155006 ""14""
+155193 "7.5.30-Release.5179102"
+155266 "c6.76.06"
+155353 "1.1.20240415-1"
+155354 "1.1.20240415-1"
+155593 "v0.7.1"
+155642 "v577"
+155031 "v576"
+155918 "v0.8.0-alpha1"
+156200 "V0"
+ */
 
 
 					if ((PRvMan != "N") && 
@@ -1827,6 +1858,7 @@ var query =
 				Url += Workable;
 			} else if (Preset == "Defender") {
 				Url += Defender;
+				Url += "sort:updated-asc+";
 			} else if (Preset == "IEDS") {
 				Url += IEDSLabel;
 				Url += string_nBI;
@@ -2993,10 +3025,10 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 			string clip = Clipboard.GetText();
 			string PackageIdentifier = YamlValue("PackageIdentifier",clip);
 			string version = YamlValue("PackageVersion",clip).Replace("'","").Replace("\"","");
-			string[] listing = ManifestListing(PackageIdentifier);
+			List<string> listing = ManifestListing(PackageIdentifier);
 			int VM = ManifestFile(PR);
 			
-			for (int file = 0; file < listing.Length;file++) {
+			for (int file = 0; file < listing.Count;file++) {
 				clip = FileFromGitHub(PackageIdentifier,version,listing[file]);
 				ManifestFile(PR, "", "", "", VM,clip);
 			}
@@ -3068,21 +3100,23 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 			return VM;
 		}
 
-		public string[] ManifestListing(string PackageIdentifier,bool Versions = false){
+		public List<string> ManifestListing(string PackageIdentifier){
+			List<string> string_out = null;
+			try{
 			string FirstLetter = PackageIdentifier.ToLower()[0].ToString();
 			string Path = PackageIdentifier.Replace(".","/");
 			string Version = FindWinGetVersion(PackageIdentifier);
 			string Uri = GitHubApiBaseUrl+"/contents/manifests/"+FirstLetter+"/"+Path+"/"+Version+"/";
-			if (Versions) {
-				Uri = GitHubApiBaseUrl+"/contents/manifests/"+FirstLetter+"/"+Path+"/";
-			}
-			string[] string_out = null;
-			try{
-				string_out = FromJson(InvokeGitHubRequest(Uri))["name"];
+				string_out = FromJson(InvokeGitHubRequest(Uri));
+				int n = 0;
+				foreach (dynamic line in string_out) {
+					string_out[n] = line["name"];
+					string_out[n] = string_out[n];
+					n++;
+				}
 			} catch {
-				string_out[0] = "Error";
+				string_out.Add("Error");
 			}
-			string_out = string.Join("\n",string_out).Replace(PackageIdentifier+".","").Split('\n');
 			return string_out;
 		}
 
@@ -3090,29 +3124,29 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 			string PackageIdentifier = YamlValue("PackageIdentifier", string_PRManifest.Replace("\"",""));
 
 			//Get the lines from the PR manifest containing the filenames.
-			string[] split_PRManifest = string_PRManifest.Split('\n')
+			string[] array_PRManifest = string_PRManifest.Split('\n')
 			.Where(n => n.Contains(".yaml"))
 			.Where(n => n.Contains(PackageIdentifier)).ToArray();
-			//Go through these and snip the PackageIdentifier.
-			for (int i = 0; i < split_PRManifest.Length; i++) {
-				string[] mid_array = split_PRManifest[i].Replace(PackageIdentifier+".", "").Split('/');
-				split_PRManifest[i] = split_PRManifest[i].Replace(PackageIdentifier+".", "").Split('/')[mid_array.Length];
+			//Go through these and snip the PackageIdentifier, split on slashes, and get the last one.
+			for (int i = 0; i < array_PRManifest.Length; i++) {
+				string[] swap_array = array_PRManifest[i].Replace(PackageIdentifier+".", "").Split('/');
+				array_PRManifest[i] = array_PRManifest[i].Replace(PackageIdentifier+".", "").Split('/')[swap_array.Length];
 			}
 
-			string returnables = "";
-			if (split_PRManifest.Length > 2){//If there are more than 2 files, so a full multi-part manifest and not just updating ReleaseNotes or ReleaseDate, etc. The other checks for this logic (not deletion PR,etc) are in the main Approval Watch method, so maybe this should join them.
+			string difference = "";
+			if (array_PRManifest.Length > 2){//If there are more than 2 files, so a full multi-part manifest and not just updating ReleaseNotes or ReleaseDate, etc. The other checks for this logic (not deletion PR,etc) are in the main Approval Watch method, so maybe this should join them.
 				string CurrentManifest = string.Join("\n",ManifestListing(PackageIdentifier));
 				//Gather the lines from the newest manifest in repo. Counterpart to the above section.
 				if (CurrentManifest == "Error") {
 					//If CurrentManifest didn't get any results, (no newest manifest = New package) compare that error with the file list in the PR. 
-					//returnables = diff CurrentManifest split_PRManifest;
+					// difference = diff CurrentManifest array_PRManifest.Length;
 					//Need to rebuild in absence of Compare-Object.
 				} else {
 					//But if CurrentManifest did return something, return that. 
-					returnables = CurrentManifest;
+					difference = CurrentManifest;
 				}
 			}
-			return returnables;
+			return difference;
 		}
 
 		public string OSFromVersion(string version) {
@@ -4863,9 +4897,9 @@ try {
 
         public void Testing2_Action(object sender, EventArgs e) {
 			string UserInput = inputBox_User.Text;
-			int versions = FindWinGetTotalVersions(UserInput);
+			List<string> versions = ManifestListing(UserInput);
 			// dynamic line = FromCsv(GetContent(DataFileName)).Where(n => (string)n["PackageIdentifier"] == (UserInput));
-			outBox_msg.AppendText(Environment.NewLine + "Testing2: " + versions);
+			outBox_msg.AppendText(Environment.NewLine + "Testing2: " + ToJson(versions));
 		}// end Testing_Action
 
 
@@ -5011,6 +5045,15 @@ public string UpdateArchInPR(int PR, string SearchTerm = "  Architecture: x86", 
 			"accept-license", 
 			"eula",
 			"downloadarchive.documentfoundation.org"
+		};
+
+		public string[] AppsAndFeaturesEntriesList = {
+			"DisplayName", 
+			"DisplayVersion", 
+			"Publisher", 
+			"ProductCode", 
+			"UpgradeCode", 
+			"InstallerType"
 		};
 
 		public string[] CountrySet = {
