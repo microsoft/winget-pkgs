@@ -1,6 +1,6 @@
-id: labelAdded.highestVersionRemaining
+id: labelAdded.highestVersionRemoval
 name: GitOps.PullRequestIssueManagement
-description: Handlers when "Highest-Version-Remaining" label is added
+description: Handlers when "Highest-Version-Removal" label is added
 owner:
 resource: repository
 disabled: false
@@ -9,27 +9,25 @@ configuration:
   resourceManagementConfiguration:
     eventResponderTasks:
       - description: >-
-          When the label "Highest-Version-Remaining" is added to a pull request
+          When the label "Highest-Version-Removal" is added to a pull request
           * Add a reply notifying the issue author
           * Assign to the author
           * Label with Needs-Author-Feedback
         if:
           - payloadType: Pull_Request
           - labelAdded:
-              label: Highest-Version-Remaining
+              label: Highest-Version-Removal
         then:
           - addReply:
               reply: >-
                 Hello @${issueAuthor},
 
 
-                This PR removes the last version of the package from the repository.
+                This PR removes the highest available version of the package from the repository.
 
+                Please provide the reason for removal to help our moderators understand the context.
 
-                Please check if the package requires an update or is available from another source.
-
-
-                Template: msftbot/highestVersionRemaining
+                Template: msftbot/highestVersionRemoval
           - assignTo:
               author: True
           - addLabel:
