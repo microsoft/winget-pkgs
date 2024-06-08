@@ -145,7 +145,7 @@ using System.Web.Script.Serialization;
 namespace WinGetApprovalNamespace {
     public class WinGetApprovalPipeline : Form {
 		//vars
-        public int build = 901;//Get-RebuildPipeApp
+        public int build = 907;//Get-RebuildPipeApp
 		public string appName = "WinGetApprovalPipeline";
 		public string appTitle = "WinGet Approval Pipeline - Build ";
 		public static string owner = "microsoft";
@@ -1197,37 +1197,47 @@ namespace WinGetApprovalNamespace {
 							 */
 
 							string replyType = "";
-							int entryType = 0;
+							AnF = "";
 							
 							foreach (string Entry in AppsAndFeaturesEntriesList) {
+								string replyString = "un";
+								int entryType = 0;
 								if (Entry == "DisplayName") {
+									replyString = "dn";
 								} else if (Entry == "DisplayVersion") {
-									entryType = 1;
-								} else if (Entry == "Publisher") {
+									replyString = "dv";
+									// entryType = 1;
+								// } else if (Entry == "InstallerType") {
+									// replyString = "it";
+								// } else if (Entry == "Publisher") {
+									// replyString = "pu";
 								} else if (Entry == "ProductCode") {
+									replyString = "pc";
 								} else if (Entry == "UpgradeCode") {
+									replyString = "uc";
 								}
-								
+
 								bool ANFOld = ManifestEntryCheck(PackageIdentifier, ManifestVersion, Entry);
 								bool ANFCurrent = clip.Contains(Entry);
 								if ((ANFOld == true) && (ANFCurrent == false)) {
 									if (entryType == 1) {
-										AnF = "-";
+										AnF = replyString+"O-";
 									}
 										replyType = "AppsAndFeaturesMissing";
 								} else if ((ANFOld == false) && (ANFCurrent == true)) {
 									if (entryType == 1) {
-										AnF = "-";
+										AnF = replyString+"C-";
 									}
 									replyType = "AppsAndFeaturesNew";
 									//InvokeGitHubPRRequest(PR,"Post","comments","[Policy] Needs-Author-Feedback","Silent")
 								} else if ((ANFOld == false) && (ANFCurrent == false)) {
-									AnF = "0";
+									AnF += replyString+"0";
 								} else if ((ANFOld == true) && (ANFCurrent == true)) {
-									AnF = "1";
+									AnF += replyString+"1";
 								}//end if ANFOld
 							}//end foreach Entry
 							if (replyType != "") {
+
 								// ReplyToPR(PR,replyType,Submitter,MagicLabels[30]);
 								// AddPRToRecord(PR,"Feedback",PRTitle);
 							}
@@ -1306,6 +1316,7 @@ string to number
 155031 "v576"
 155918 "v0.8.0-alpha1"
 156200 "V0"
+156550 "dev-2024-06"
  */
 
 
@@ -1315,25 +1326,21 @@ string to number
 					(PRTitle.Contains("Remove")))) {//Removal PR - if highest version in repo.
 						if ((PRVersion == ManifestVersion) || (NumVersions == 1)) {
 	/* 
-							ReplyToPR(PR,"VersionCount",Submitter,"[Policy] Needs-Author-Feedback\n[Policy] Highest-Version-Remaining");
+							ReplyToPR(PR,"VersionCount",Submitter,"[Policy] Needs-Author-Feedback\n[Policy] Highest-Version-Removal");
 							AddPRToRecord(PR,"Feedback",PRTitle);
 */
 							NumVersions = -1;
 						}
 					} else {//Addition PR - has more files than repo.
-						string GLD = "";//ListingDiff(clip .Where(n => n.SideIndicator == "<=")).installer.yaml //Ignores when a PR adds files that didn't exist before.
-						if ("" != GLD) {
-							if (GLD == "Error") {
-								string_ListingDiff = "E";
-									} else {
-								string_ListingDiff = "-!";
+						bool GLD =ListingDiff(clip);// //Ignores when a PR adds files that didn't exist before.
+						if (GLD == true) {
+							string_ListingDiff = "-!";
 /* 
 								ReplyToPR(PR,"ListingDiff",GLD);
 								InvokeGitHubPRRequest(PR,"Post","comments","[Policy] Needs-Author-Feedback","Silent");
 								AddPRToRecord(PR,"Feedback",PRTitle);
  */
-							}//end if GLD
-						}//end if null
+						}//end if GLD
 					}//end if PRvMan
 					table_val.Rows[LastRow].SetField("D", string_ListingDiff);
 					table_val.Rows[LastRow].SetField("V", NumVersions);
@@ -1406,7 +1413,7 @@ int comparison = String.Compare(PRVersion, ManifestVersion);
 				int PR = FullPR["number"];
 				//Get-TrackerProgress -PR $PR $MyInvocation.MyCommand line PRs.Length
 				//line++;
-				//This part is too spammy, checking Highest-Version-Remaining on every run (sometimes twice a day) for a week as the PR sits. I think this is fixed in the other version. #PendingBugfix
+				//This part is too spammy, checking Highest-Version-Removal on every run (sometimes twice a day) for a week as the PR sits. I think this is fixed in the other version. #PendingBugfix
 				if((FullPR["title"].Contains("Remove")) || 
 				(FullPR["title"].Contains("Delete")) || 
 				(FullPR["title"].Contains("Automatic deletion"))){
@@ -1824,7 +1831,7 @@ var query =
 			
 			string Workable = "-label:Validation-Merge-Conflict+";
 			Workable += "-label:Unexpected-File+";
-			Workable += "-label:Highest-Version-Remaining+";
+			Workable += "-label:Highest-Version-Removal+";
 			
 			//Composite settings;
 			string Set1 = Common + Review1;
@@ -1987,7 +1994,7 @@ var query =
 			int? BuildNumber = ADOBuildFromPR(PR);
 			if (BuildNumber != null) {
 
-				string Url =ADOMSBaseUrl+"/ed6a5dfa-6e7f-413b-842c-8305dd9e89e6/_apis/build/builds/" + BuildNumber + "/artifacts?artifactName=InstallationVerificationLogs&api-version=7.0&%24format=zip";
+				string Url =ADOMSBaseUrl+"/ed6a5dfa-6e7f-413b-842c-8305dd9e89e6/_apis/build/builds/" + BuildNumber + "/artifacts?artifactName=InstallationVerificationLogs&api-version=7.1&%24format=zip";
 				System.Diagnostics.Process.Start(Url);//This downloads to Windows default location, which has already been set to DestinationPath
 				Thread.Sleep(DownloadSeconds*1000);//Sleep while download completes.
 
@@ -3101,18 +3108,18 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 		}
 
 		public List<string> ManifestListing(string PackageIdentifier){
-			List<string> string_out = null;
+			List<string> string_out = new List<string>();
 			try{
-			string FirstLetter = PackageIdentifier.ToLower()[0].ToString();
-			string Path = PackageIdentifier.Replace(".","/");
-			string Version = FindWinGetVersion(PackageIdentifier);
-			string Uri = GitHubApiBaseUrl+"/contents/manifests/"+FirstLetter+"/"+Path+"/"+Version+"/";
-				string_out = FromJson(InvokeGitHubRequest(Uri));
+				string FirstLetter = PackageIdentifier.ToLower()[0].ToString();
+				string Path = PackageIdentifier.Replace(".","/");
+				string Version = FindWinGetVersion(PackageIdentifier);
+				string Uri = GitHubApiBaseUrl+"/contents/manifests/"+FirstLetter+"/"+Path+"/"+Version+"/";
+				dynamic FromGH = FromJson(InvokeGitHubRequest(Uri));
+				
 				int n = 0;
-				foreach (dynamic line in string_out) {
-					string_out[n] = line["name"];
-					string_out[n] = string_out[n];
+				foreach (dynamic line in FromGH) {
 					n++;
+					string_out.Add(line["name"]);
 				}
 			} catch {
 				string_out.Add("Error");
@@ -3120,7 +3127,7 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 			return string_out;
 		}
 
-		public string ListingDiff(string string_PRManifest){
+		public bool ListingDiff(string string_PRManifest){
 			string PackageIdentifier = YamlValue("PackageIdentifier", string_PRManifest.Replace("\"",""));
 
 			//Get the lines from the PR manifest containing the filenames.
@@ -3130,20 +3137,23 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 			//Go through these and snip the PackageIdentifier, split on slashes, and get the last one.
 			for (int i = 0; i < array_PRManifest.Length; i++) {
 				string[] swap_array = array_PRManifest[i].Replace(PackageIdentifier+".", "").Split('/');
-				array_PRManifest[i] = array_PRManifest[i].Replace(PackageIdentifier+".", "").Split('/')[swap_array.Length];
+				array_PRManifest[i] = array_PRManifest[i].Replace(PackageIdentifier+".", "").Split('/')[swap_array.Length - 1];
 			}
 
-			string difference = "";
+			bool difference = false;
 			if (array_PRManifest.Length > 2){//If there are more than 2 files, so a full multi-part manifest and not just updating ReleaseNotes or ReleaseDate, etc. The other checks for this logic (not deletion PR,etc) are in the main Approval Watch method, so maybe this should join them.
-				string CurrentManifest = string.Join("\n",ManifestListing(PackageIdentifier));
+				List<string> CurrentManifest = ManifestListing(PackageIdentifier);
+				// string CurrentManifest = string.Join("\n",ManifestListing(PackageIdentifier));
+				outBox_msg.AppendText(Environment.NewLine + "CurrentManifest: " + CurrentManifest);
 				//Gather the lines from the newest manifest in repo. Counterpart to the above section.
-				if (CurrentManifest == "Error") {
+				// if (CurrentManifest == "Error") {
 					//If CurrentManifest didn't get any results, (no newest manifest = New package) compare that error with the file list in the PR. 
 					// difference = diff CurrentManifest array_PRManifest.Length;
 					//Need to rebuild in absence of Compare-Object.
-				} else {
+				// } else {
 					//But if CurrentManifest did return something, return that. 
-					difference = CurrentManifest;
+				if (array_PRManifest.Length < CurrentManifest.Count){
+					difference = true;
 				}
 			}
 			return difference;
@@ -4763,7 +4773,7 @@ try {
         }// end Approval_Search_Action
 		
         public void Highest_Version_Remaining_Action(object sender, EventArgs e) {
-			System.Diagnostics.Process.Start("https://github.com/microsoft/winget-pkgs/pulls?q=is%3Aopen+is%3Apr+draft%3Afalse+label%3AHighest-Version-Remaining+");//HVR
+			System.Diagnostics.Process.Start("https://github.com/microsoft/winget-pkgs/pulls?q=is%3Aopen+is%3Apr+draft%3Afalse+label%3AHighest-Version-Removal+");//HVR
         }// end Approval_Search_Action
 		
         public void Approval_Search_Action(object sender, EventArgs e) {
@@ -4816,7 +4826,7 @@ try {
 			System.Diagnostics.Process.Start("https://github.com/microsoft/winget-pkgs/issues");
 			System.Diagnostics.Process.Start("https://github.com/microsoft/winget-cli/issues");
 			System.Diagnostics.Process.Start("https://github.com/microsoft/winget-pkgs/labels/Needs-Manual-Merge");
-			System.Diagnostics.Process.Start("https://github.com/microsoft/winget-pkgs/pulls?q=is%3Aopen+is%3Apr+draft%3Afalse+label%3AHighest-Version-Remaining+");//HVR
+			System.Diagnostics.Process.Start("https://github.com/microsoft/winget-pkgs/pulls?q=is%3Aopen+is%3Apr+draft%3Afalse+label%3AHighest-Version-Removal+");//HVR
 			SearchGitHub("Defender",1,0, false,false,true);
         }// end Start_Of_Day_Action
 		//Open In Browser
@@ -5050,10 +5060,10 @@ public string UpdateArchInPR(int PR, string SearchTerm = "  Architecture: x86", 
 		public string[] AppsAndFeaturesEntriesList = {
 			"DisplayName", 
 			"DisplayVersion", 
-			"Publisher", 
+			// "Publisher", 
 			"ProductCode", 
-			"UpgradeCode", 
-			"InstallerType"
+			"UpgradeCode" //, 
+			// "InstallerType"
 		};
 
 		public string[] CountrySet = {

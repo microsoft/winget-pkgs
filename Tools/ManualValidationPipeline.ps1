@@ -10,7 +10,7 @@
 #3.88.19 - A few bugfixes.
 #3.88.18 - Restore waiver and retry fucntionality. 
 
-$build = 883
+$build = 884
 $appName = "ManualValidationPipeline"
 Write-Host "$appName build: $build"
 $MainFolder = "C:\ManVal"
@@ -102,7 +102,7 @@ $MagicLabels = "Validation-Defender-Error", #0
 "Needs-Author-Feedback",#30
 "Policy-Test-2.7", #31
 "Manifest-Version-Error",#32
-"Highest-Version-Remaining"#33
+"Highest-Version-Removal"#33
 
 #First tab
 Function Get-TrackerVMRunTracker {
@@ -205,6 +205,7 @@ Function Get-PRWatch {
 		$LogFile = ".\PR.txt",
 		$ReviewFile = ".\Review.csv",
 		$oldclip = "",
+		$PrePipeline = $false,
 		$AuthList = (Get-ValidationData -Property authStrictness),
 		$AgreementsList = (Get-ValidationData -Property AgreementUrl),
 		$ReviewList = (Get-LoadFileIfExists $ReviewFile),
@@ -1721,9 +1722,11 @@ Function Get-PRWatch {
 
 
 
-				if ($Approve -eq "+") {
-					$Approve = Approve-PR -PR $PR
-					Add-PRToRecord -PR $PR -Action "Approved" -Title $PRtitle
+				if ($PrePipeline -eq $false) {
+					if ($Approve -eq "+") {
+						$Approve = Approve-PR -PR $PR
+						Add-PRToRecord -PR $PR -Action "Approved" -Title $PRtitle
+					}
 				}
 
 				Write-Host -nonewline -f $matchColor "$Approve | "
@@ -2623,7 +2626,7 @@ Function Get-AutoValLog {
 	if ($BuildNumber) {
 
 		#This downloads to Windows default location, which has already been set to $DestinationPath
-		Start-Process "$ADOMSBaseUrl/ed6a5dfa-6e7f-413b-842c-8305dd9e89e6/_apis/build/builds/$BuildNumber/artifacts?artifactName=InstallationVerificationLogs&api-version=7.0&%24format=zip"
+		Start-Process "$ADOMSBaseUrl/ed6a5dfa-6e7f-413b-842c-8305dd9e89e6/_apis/build/builds/$BuildNumber/artifacts?artifactName=InstallationVerificationLogs&api-version=7.1&%24format=zip"
 		Start-Sleep $DownloadSeconds;
 		if (!(Test-Path $ZipPath) -AND !$Force) {
 			Write-Host "No logs."
@@ -2698,7 +2701,7 @@ Function Get-AutoValLog {
 			$UserInput = $UserInput | Select-Object -Unique
 			$UserInput = "Automatic Validation ended with:`n"+($UserInput -join "`n> ")
 
-if ($UserInput -match "exit code") {
+if ($UserInput -match "exit code" -OR $UserInput -match "DeliveryOptimization error" -OR $UserInput -match "Error information") {
 	$ExitCodeTable = gc $ExitCodeFile | ConvertFrom-Csv
 	foreach ($ExitCode in $ExitCodeTable) {
 		if ($UserInput -match $ExitCode.code) {
