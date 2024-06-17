@@ -10,7 +10,7 @@
 #3.88.19 - A few bugfixes.
 #3.88.18 - Restore waiver and retry fucntionality. 
 
-$build = 884
+$build = 885
 $appName = "ManualValidationPipeline"
 Write-Host "$appName build: $build"
 $MainFolder = "C:\ManVal"
@@ -1945,7 +1945,7 @@ Function Get-GitHubPreset {
 				$out += Reply-ToPR -PR $PR -Body "Reset approval workflow." -Policy "Reset Feedback `n[Policy] Validation Completed `n[Policy] Approved"			}
 			"Retry" {
 				Add-PRToRecord -PR $PR -Action $Preset
-				$out += Invoke-GitHubPRRequest -PR $PR -Type comments -Output StatusDescription -Method POST -Data "@wingetbot run"
+				$out += Invoke-GitHubPRRequest -PR $PR -Type comments -Output StatusDescription -Method POST -Data "/azp run"
 			}
 			"Squash" {
 				Add-PRToRecord -PR $PR -Action $Preset
@@ -2880,7 +2880,7 @@ Function Add-GitHubReviewComment {
 Function Get-BuildFromPR {
 	param(
 		$PR,
-		$content = ((Invoke-WebRequest "$ADOMSBaseUrl/$Repo/_apis/build/builds?branchName=refs/pull/$PR/merge&api-version=6.0").content | ConvertFrom-Json),
+		$content = ((Invoke-WebRequest "$ADOMSBaseUrl/$Repo/_apis/build/builds?branchName=refs/pull/$PR/merge&api-version=7.1").content | ConvertFrom-Json),
 		$href = ($content.value[0]._links.web.href),
 		$PRbuild = (($href -split "=")[1])
 	)

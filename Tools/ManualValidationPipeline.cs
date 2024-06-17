@@ -145,7 +145,7 @@ using System.Web.Script.Serialization;
 namespace WinGetApprovalNamespace {
     public class WinGetApprovalPipeline : Form {
 		//vars
-        public int build = 907;//Get-RebuildPipeApp
+        public int build = 908;//Get-RebuildPipeApp
 		public string appName = "WinGetApprovalPipeline";
 		public string appTitle = "WinGet Approval Pipeline - Build ";
 		public static string owner = "microsoft";
@@ -563,7 +563,7 @@ namespace WinGetApprovalNamespace {
 					submenu.MenuItems.Add("Update hash 'Specified hash doesn't match.'", new EventHandler(Update_Hash_Action));
 					submenu.MenuItems.Add("Update hash 2 'SHA256 in manifest...'", new EventHandler(Update_Hash2_Action));
 					submenu.MenuItems.Add("Update architecture (x64)", new EventHandler(Update_Arch_Action));
-				item.MenuItems.Add("@wingetbot run", new EventHandler(Retry_Action));
+				item.MenuItems.Add("/azp run", new EventHandler(Retry_Action));
 				item.MenuItems.Add("Installs Normally in VM", new EventHandler(Manually_Validated_Action));
 				item.MenuItems.Add("Close: (User Input);", new EventHandler(Closed_Action));
 				item.MenuItems.Add("Close: Merge Conflicts;", new EventHandler(Merge_Conflicts_Action));
@@ -1317,6 +1317,9 @@ string to number
 155918 "v0.8.0-alpha1"
 156200 "V0"
 156550 "dev-2024-06"
+
+Returned array instead of string
+157466
  */
 
 
@@ -2164,7 +2167,7 @@ var query =
 
 		public string RetryPR(int PR) {
 			AddPRToRecord(PR,"Retry");
-			return InvokeGitHubPRRequest(PR,WebRequestMethods.Http.Post,"comments","@wingetbot run");
+			return InvokeGitHubPRRequest(PR,WebRequestMethods.Http.Post,"comments","/azp run");
 		}
 
 		public string AddGitHubReviewComment(int PR, string Comment,int? StartLine,int Line) {
