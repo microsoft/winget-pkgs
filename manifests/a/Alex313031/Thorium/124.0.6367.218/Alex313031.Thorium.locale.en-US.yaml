@@ -1,0 +1,48 @@
+# Created with YamlCreate.ps1 v2.4.1 Dumplings Mod $debug=QUSU.CRLF.7-4-2.Win32NT
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.6.0.schema.json
+
+PackageIdentifier: Alex313031.Thorium
+PackageVersion: 124.0.6367.218
+PackageLocale: en-US
+Publisher: The Thorium Authors
+PublisherUrl: https://thorium.rocks/
+PublisherSupportUrl: https://github.com/Alex313031/Thorium-Win/issues
+# PrivacyUrl:
+Author: Alex313031
+PackageName: Thorium
+PackageUrl: https://thorium.rocks/
+License: BSD-3-Clause
+LicenseUrl: https://github.com/Alex313031/Thorium-Win/blob/HEAD/LICENSE
+Copyright: Copyright 2024 The Thorium Authors. All rights reserved.
+# CopyrightUrl:
+ShortDescription: Chromium fork for Linux, Windows, macOS, Android, and Raspberry Pi named after radioactive element No. 90.
+# Description:
+Moniker: thorium
+Tags:
+- browser
+- chromium
+- internet
+- web
+- webpage
+ReleaseNotes: |-
+  M124
+  - AC3/E-AC3 Audio support restored. It was disabled in the last couple of versions due to ffmpeg changes. Dolby Atmos audio is also restored. Note that for ARM/ARM64 builds, it is still disabled, due to incompatibilities with how Chromium loads the libffmpeg library.
+  - WebRTC (used for real-time communication like video chats, i.e. Zoom, for example) can now use H.265/HEVC (recent upstream Chromium feature) on devices without hardware decoding support (Thorium feature). This is good because H.265 compression means that you will have less stuttery streams if you are on a bandwidth limited connection.
+  - Fingerprinting protection patch added. Note this isn't a safety blanket, and doesn't mean Thorium will remove all types of fingerprint tracking it just makes it better than normal Chromium/Chrome. I would like to expand on this in the next version by adding a setting to enable the Global Privacy Control header, alongside the "Do Not Track" setting, which is also enabled by default in Thorium.
+  - Added flag to enable/disable Side Panel Journeys, which can be annoying. chrome://flags#side-panel-journeys
+  - Added flag to enable/disable showing the built in internal extensions that are normally hidden. They are now hidden by default (like in normal Chromium), but can be re-enabled with chrome://flags#show-component-extension-options. I did this because I was getting too many issues with people wondering what they are, why they couldn't be removed, and if they were a security concern. These extensions are built in to every Chromium browser. Disabling them would remove support for the Web Store, viewing PDFs, and integrating with Google Hangouts. I added a patch from UnGoogled Chromium a while back to un-hide them, but it has led to more confusion than it is worth. Since most people don't care, they are now hidden again, but the flag is for people who want to inspect or debug them, or just want the transparency of showing all extensions that are loaded in the browser.
+  - The Side Panel Chrome Customization feature now works even if Chrome Refresh 2023 UI is disabled (Thorium has it disabled by default). However, fixing this this led to an unforeseen minor issue, that I didn't catch until everything was already built. Even if Chrome Refresh 2023 is enabled with the chrome://flags/#chrome-refresh-2023 and chrome://flags/#customize-chrome-side-panel flags as mentioned in the M123 release, it still won't actually work unless you also pass the --disable-features=CustomizeChromeSidePanelNoChromeRefresh2023 flag. Since I didn't catch this until afterward, there is no GUI flag available on the chrome://flags page. You will need to specify it manually on the commandline, either from the terminal, or to make it permanent, by editing the shortcut (on Windows), or editing /usr/bin/thorium-browser (on Linux). Next release will fix this.
+  - The entire browser now respects Gamma/Alpha settings that the user has set for the display (Windows only for now). It is unknown how this will play with Thorium's JPEG-XL support. Feedback requested.
+  - New commandline flag to disable the custom Thorium DNS config. Normally, Thorium uses two patches, to make DNS queries more privacy respecting, and to use DNS over HTTPS (DoH) by default, which is more secure and can't be intercepted by "man in the middle" attackers. However, this was breaking some people's configurations, especially when they had manually set DNS options in the OS, or were using external third party apps that change DNS settings (like VPN services). So, if you pass the --disable-thorium-dns-config flag on the commandline, Thorium will use the default Chromium DNS configuration. You can make it permanent using the same steps as above. I will also make this a GUI flag in the next release.
+  - 32 Bit Linux is now supported, however I am not going to be regularly building binaries. But it is at least supported at the source code level again. There is an M123 release available. Note that Ubuntu 16.04 is not supported.
+  - FTP support restored! Chromium and Firefox both removed all support for ftp:// URLs back in 2021. This has always annoyed me, because alot of ftp servers are still around, and alot of old software is only downloadable from ftp servers. In addition, tools like wget and curl wont download from them by default. This made it really convoluted to download files from an ftp website, usually making the user have to download a third party app. FTP means "File Transfer Protocol", and it was used heavily on the web for serving download directories to people (Microsoft used to host updates on an ftp site, for example). Learn more about it Here.
+    It is enabled by default, but can also be disabled by the restored flag chrome://flags/#enable-ftp. There are two minor bugs though. First, favicons don't work, so when you are on an ftp site, the tab will show the "dino" icon usually used when a site is not reachable. Second, directly clicking links doesn't work, and will instead land you on an "about:blank#blocked" page. To go to an ftp site, right click the link, and select "Copy link address", and then open a new tab, paste the link in the address bar, and press enter. I hope to resolve these in the next version. This makes Thorium the only modern browser that supports FTP anymore. Thorium also now registers as an FTP URL handler with the OS, but I have not tested if opening an ftp url in an external app will cause Thorium to open it correctly, or land you on that "about:blank#blocked" page. Feedback is requested. Thanks to @win32ss for modernizing some of the code, since obviously stuff has changed alot in the Chromium repo since 2021. I took his patches, and adapted/fixed them to work on the M124 Chromium revision(s).
+  - I enabled a feature that is normally disabled, that allows you to configure more options for PWA (Progressive Web App) windows. See the settings while in a PWA to see the extra options.
+  - Global Media Controls (this little icon in the top bar > ) can be disabled again. I had enabled a feature that updates the UI on ChromiumOS/ThoriumOS, but it had the unforeseen effect of force-enabling it on other platforms.
+  - Major vulnerability CVE-2024-4671 is fixed in this version.
+ReleaseNotesUrl: https://github.com/Alex313031/Thorium-Win/releases/tag/M124.0.6367.218
+# PurchaseUrl:
+# InstallationNotes:
+# Documentations:
+ManifestType: defaultLocale
+ManifestVersion: 1.6.0
