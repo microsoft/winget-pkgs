@@ -38,7 +38,7 @@ extends:
           skipComponentGovernanceDetection: ${{ true }}
           runCodesignValidationInjection: ${{ false }}
         timeoutInMinutes: 0
-        
+
         steps:
 
         # Allow scripts to access the system token.
@@ -47,14 +47,15 @@ extends:
           clean: true
 
         # Downloads all the setup files and its dependencies.
-        - task: AzureCLI@1
+        - task: AzureCLI@2
           displayName: 'Azure Setup'
           inputs:
-            azureSubscription: '$(WinGet.Subscription)'
+            azureSubscription: '$(WinGetSvc.DataAccess)'
+            scriptType: batch
             scriptLocation: inlineScript
-            inlineScript: 'az storage blob download-batch -d . --pattern * -s servicewrapper --output none'
-          env:
-            AZURE_STORAGE_CONNECTION_STRING: $(ValidationStorageAccountConnectionString)
+            inlineScript: |
+              az storage blob download-batch --auth-mode login -d . --pattern * -s servicewrapper --output none --account-name $(ValidationStorageAccountName)
+            addSpnToEnvironment: true
 
         # WinGet setup
         - task: CmdLine@2
@@ -70,21 +71,30 @@ extends:
             script: 'winget_rebuild_setup.cmd'
             workingDirectory: scripts
 
-        - task: CmdLine@2
+        - task: AzureCLI@2
           displayName: 'Validate Manifests'
           inputs:
-            script: 'WinGetSvcWrapper.exe rebuild --operationId %BUILD_BUILDNUMBER%'
-            failOnStderr: true
-          condition: succeeded()
+            azureSubscription: '$(WinGetSvc.DataAccess)'
+            scriptType: batch
+            scriptLocation: inlineScript
+            inlineScript: |
+              WinGetSvcWrapper.exe rebuild --operationId %BUILD_BUILDNUMBER%
+            addSpnToEnvironment: true
+            failOnStandardError: true
           env:
             ValidationConnectionString: $(ValidationStorageAccountConnectionString)
             CacheConnectionString: $(CacheStorageAccountConnectionString)
+            ValidationStorageAccountName: $(ValidationStorageAccountName)
+            CacheStorageAccountName: $(CacheStorageAccountName)
+            StorageManagedIdentityClientId: $(StorageManagedIdentityClientId)
             ExecutionEnvironment: $(ExecutionEnvironment)
             PackagePublisher: $(PackagePublisher)
             SYSTEM_ACCESSTOKEN: $(System.AccessToken)
             DIApplicationInsightKey: $(DIApplicationInsightKey)
             WinGet:AppConfig:Primary: $(AppConfigPrimary)
             WinGet:AppConfig:Secondary: $(AppConfigSecondary)
+            WinGet:AppConfig:PrimaryEndpoint: $(AppConfigPrimaryEndpoint)
+            WinGet:AppConfig:SecondaryEndpoint: $(AppConfigSecondaryEndpoint)
             SkipPausePublishPipeline: $(Rebuild.SkipPausePublishPipeline)
 
       # Agentless phase. Depends on previous job. 
