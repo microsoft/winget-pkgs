@@ -145,7 +145,7 @@ using System.Web.Script.Serialization;
 namespace WinGetApprovalNamespace {
     public class WinGetApprovalPipeline : Form {
 		//vars
-        public int build = 908;//Get-RebuildPipeApp
+        public int build = 911;//Get-RebuildPipeApp
 		public string appName = "WinGetApprovalPipeline";
 		public string appTitle = "WinGet Approval Pipeline - Build ";
 		public static string owner = "microsoft";
@@ -554,7 +554,9 @@ namespace WinGetApprovalNamespace {
 
 			item = new MenuItem("Current PR");
 			this.Menu.MenuItems.Add(item);
-				item.MenuItems.Add("Approve PR", new EventHandler(Approved_Action));
+			submenu = new MenuItem("Approve PR");
+				item.MenuItems.Add(submenu);
+					submenu.MenuItems.Add("Approve PR", new EventHandler(Approved_Action));
 				item.MenuItems.Add("Label Action", new EventHandler(Label_Action_Action));
 				item.MenuItems.Add("Check installer", new EventHandler(Check_Installer_Action));
 			submenu = new MenuItem("Update manifest");
@@ -1329,7 +1331,7 @@ Returned array instead of string
 					(PRTitle.Contains("Remove")))) {//Removal PR - if highest version in repo.
 						if ((PRVersion == ManifestVersion) || (NumVersions == 1)) {
 	/* 
-							ReplyToPR(PR,"VersionCount",Submitter,"[Policy] Needs-Author-Feedback\n[Policy] Highest-Version-Removal");
+							ReplyToPR(PR,"VersionCount",Submitter,"[Policy] Needs-Author-Feedback\n[Policy] Highest-Version-Remaining");
 							AddPRToRecord(PR,"Feedback",PRTitle);
 */
 							NumVersions = -1;
@@ -1416,7 +1418,7 @@ int comparison = String.Compare(PRVersion, ManifestVersion);
 				int PR = FullPR["number"];
 				//Get-TrackerProgress -PR $PR $MyInvocation.MyCommand line PRs.Length
 				//line++;
-				//This part is too spammy, checking Highest-Version-Removal on every run (sometimes twice a day) for a week as the PR sits. I think this is fixed in the other version. #PendingBugfix
+				//This part is too spammy, checking Highest-Version-Remaining on every run (sometimes twice a day) for a week as the PR sits. I think this is fixed in the other version. #PendingBugfix
 				if((FullPR["title"].Contains("Remove")) || 
 				(FullPR["title"].Contains("Delete")) || 
 				(FullPR["title"].Contains("Automatic deletion"))){
@@ -1834,10 +1836,10 @@ var query =
 			
 			string Workable = "-label:Validation-Merge-Conflict+";
 			Workable += "-label:Unexpected-File+";
-			Workable += "-label:Highest-Version-Removal+";
+			Workable += "-label:Highest-Version-Remaining+";
 			
 			//Composite settings;
-			string Set1 = Common + Review1;
+			string Set1 = Blocking + Common + Review1;
 			string Set2 = Set1 + Review2;
 			Url += Base;
 			
@@ -4776,7 +4778,7 @@ try {
         }// end Approval_Search_Action
 		
         public void Highest_Version_Remaining_Action(object sender, EventArgs e) {
-			System.Diagnostics.Process.Start("https://github.com/microsoft/winget-pkgs/pulls?q=is%3Aopen+is%3Apr+draft%3Afalse+label%3AHighest-Version-Removal+");//HVR
+			System.Diagnostics.Process.Start("https://github.com/microsoft/winget-pkgs/pulls?q=is%3Aopen+is%3Apr+draft%3Afalse+label%3AHighest-Version-Remaining+");//HVR
         }// end Approval_Search_Action
 		
         public void Approval_Search_Action(object sender, EventArgs e) {
@@ -4819,7 +4821,7 @@ try {
 			SearchGitHub("ToWork",1,0, false,false,true);//ToWork search
 			System.Diagnostics.Process.Start("https://github.com/microsoft/winget-pkgs/pulls?q=is%3Aopen+is%3Apr+draft%3Afalse+-label%3ABlocking-Issue++label%3AValidation-Executable-Error+label%3AAzure-Pipeline-Passed+-label%3AValidation-Completed+-label%3AInternal-Error-Dynamic-Scan+-label%3AValidation-Defender-Error+-label%3AChanges-Requested+-label%3ADependencies+-label%3AHardware+-label%3AInternal-Error-Manifest+-label%3AInternal-Error-NoSupportedArchitectures+-label%3ALicense-Blocks-Install+-label%3ANeeds-CLA+-label%3ANetwork-Blocker+-label%3ANo-Recent-Activity+-label%3Aportable-jar+-label%3AReboot+-label%3AScripted-Application+-label%3AWindowsFeatures+-label%3Azip-binary");//APP-VEE
 			System.Diagnostics.Process.Start("https://github.com/microsoft/winget-pkgs/issues?q=is%3Aopen+assignee%3A"+gitHubUserName+"+-label%3AValidation-Completed+-label%3AValidation-Defender-Error+-label%3AError-Hash-Mismatch");//Assigned to user
-			System.Diagnostics.Process.Start("https://github.com/microsoft/winget-pkgs/pulls?q=is%3Apr+is%3Aopen+draft%3Afalse+label%3AValidation-Complete+label%3AModerator-Approved");//Squash-Ready
+			System.Diagnostics.Process.Start("https://github.com/microsoft/winget-pkgs/pulls?q=is%3Apr+is%3Aopen+-is%3Adraft+label%3Amoderator-approved+label%3AValidation-Completed+-label%3ANeeds-CLA+-label%3ANeeds-Attention+-label%3ANeeds-Author-Feedback++-label%3ABlocking-Issue+");//Squash-Ready
 			System.Diagnostics.Process.Start("https://github.com/microsoft/winget-pkgs/labels/Internal-Error-Dynamic-Scan");//IEDS
 			System.Diagnostics.Process.Start("https://github.com/microsoft/winget-pkgs/pulls?page=1&q=is%3Apr+is%3Aopen+draft%3Afalse+label%3AValidation-Completed+label%3ANeeds-Attention+-label%3ALast-Version-Remaining+-label%3AScripted-Application+-label%3Ahardware");//VCNA
 			System.Diagnostics.Process.Start("https://github.com/notifications?query=reason%3Amention");//Notifications mentions
@@ -4829,7 +4831,7 @@ try {
 			System.Diagnostics.Process.Start("https://github.com/microsoft/winget-pkgs/issues");
 			System.Diagnostics.Process.Start("https://github.com/microsoft/winget-cli/issues");
 			System.Diagnostics.Process.Start("https://github.com/microsoft/winget-pkgs/labels/Needs-Manual-Merge");
-			System.Diagnostics.Process.Start("https://github.com/microsoft/winget-pkgs/pulls?q=is%3Aopen+is%3Apr+draft%3Afalse+label%3AHighest-Version-Removal+");//HVR
+			System.Diagnostics.Process.Start("https://github.com/microsoft/winget-pkgs/pulls?q=is%3Aopen+is%3Apr+draft%3Afalse+label%3AHighest-Version-Remaining+");//HVR
 			SearchGitHub("Defender",1,0, false,false,true);
         }// end Start_Of_Day_Action
 		//Open In Browser

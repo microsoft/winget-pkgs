@@ -10,7 +10,7 @@
 #3.88.19 - A few bugfixes.
 #3.88.18 - Restore waiver and retry fucntionality. 
 
-$build = 885
+$build = 886
 $appName = "ManualValidationPipeline"
 Write-Host "$appName build: $build"
 $MainFolder = "C:\ManVal"
@@ -102,7 +102,7 @@ $MagicLabels = "Validation-Defender-Error", #0
 "Needs-Author-Feedback",#30
 "Policy-Test-2.7", #31
 "Manifest-Version-Error",#32
-"Highest-Version-Removal"#33
+"Highest-Version-Remaining"#33
 
 #First tab
 Function Get-TrackerVMRunTracker {
@@ -2652,6 +2652,7 @@ Function Get-AutoValLog {
 					$_ -match 'No suitable' -OR 
 					$_ -match 'not supported' -OR #not supported by this processor type
 					#$_ -match 'not applicable' -OR 
+					$_ -match 'unwanted' -OR #PUA
 					$_ -match 'Unable to locate nested installer' -OR
 					$_ -match 'Windows cannot install package' 
 				}
