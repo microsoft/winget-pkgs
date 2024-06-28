@@ -22,6 +22,7 @@ $ErrorActionPreference = 'Stop'
 
 $useNuGetForMicrosoftUIXaml = $false
 $mapFolder = (Resolve-Path -Path $MapFolder).Path
+$geoID = (Get-WinHomeLocation).GeoID
 
 if (-Not (Test-Path -Path $mapFolder -PathType Container)) {
   Write-Error -Category InvalidArgument -Message 'The provided MapFolder is not a folder.'
@@ -305,6 +306,7 @@ winget settings --Enable LocalManifestFiles
 winget settings --Enable LocalArchiveMalwareScanOverride
 copy -Path $settingsPathInSandbox -Destination C:\Users\WDAGUtilityAccount\AppData\Local\Packages\Microsoft.DesktopAppInstaller_8wekyb3d8bbwe\LocalState\settings.json
 `$originalARP = Get-ARPTable
+Set-WinHomeLocation -GeoID $geoID
 Write-Host @'
 
 
