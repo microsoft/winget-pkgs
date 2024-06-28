@@ -309,7 +309,6 @@ copy -Path $settingsPathInSandbox -Destination C:\Users\WDAGUtilityAccount\AppDa
 Set-WinHomeLocation -GeoID $geoID
 Write-Host @'
 
-
 --> Installing the Manifest $manifestFileName
 
 '@
@@ -326,7 +325,6 @@ Write-Host @'
 --> Comparing ARP Entries
 '@
 (Compare-Object (Get-ARPTable) `$originalARP -Property DisplayName,DisplayVersion,Publisher,ProductCode,Scope)| Select-Object -Property * -ExcludeProperty SideIndicator | Format-Table
-
 "@
 }
 
@@ -347,10 +345,6 @@ $Script
 
 "@
 }
-
-$bootstrapPs1Content += @'
-Write-Host
-'@
 
 $bootstrapPs1FileName = 'Bootstrap.ps1'
 $bootstrapPs1Content | Out-File (Join-Path -Path $tempFolder -ChildPath $bootstrapPs1FileName)
