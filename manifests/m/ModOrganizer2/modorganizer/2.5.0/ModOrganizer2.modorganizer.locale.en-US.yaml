@@ -1,0 +1,177 @@
+# Created using wingetcreate 1.5.7.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.5.0.schema.json
+
+PackageIdentifier: ModOrganizer2.modorganizer
+PackageVersion: 2.5.0
+PackageLocale: en-US
+Publisher: ModOrganizer2
+PublisherUrl: https://github.com/ModOrganizer2
+PublisherSupportUrl: https://github.com/ModOrganizer2/modorganizer/issues
+PackageName: Mod Organizer
+PackageUrl: https://github.com/ModOrganizer2/modorganizer
+License: GPL-3.0
+LicenseUrl: https://github.com/ModOrganizer2/modorganizer/blob/master/LICENSE
+ShortDescription: An open source mod manager for various PC games.
+Moniker: mo2
+Tags:
+- mod-loader
+- mod-organizer
+- mods
+ReleaseNotes: |-
+  Windows 10 1809+ or Windows 11 are now required due to the upgrade to Qt 6 and Python 3.11.
+
+  Unfortunately, MO2 cannot support Windows Store / Gamepass versions of supported games. The virtual filesystem is simply incompatible with the way the games are packaged.
+
+  For version 2.5.0, the installer will wipe any third party plugins as very few from 2.4.4 will be compatible with 2.5.0. If you've already installed a 2.5.0 beta build, I'd recommend simply overwriting the files using the archive download.
+
+  For older MO2 versions, a clean install is highly recommended if you do not use the installer as leftover files from 2.4.4 can and will break parts of 2.5.0 in addition to leaving old, extraneous files in the MO2 directory. You can migrate old portable instances by copying the mods, downloads, profiles, overwrite directories and modorganizer.ini file to the new install. If you use any third party game plugins, it is highly recommended to wait for an update before loading those instances.
+
+  Category Revamp
+  The default categories and Nexus category mappings are no longer hard-coded. When you create a new instance or load an older instance, you will be prompted to import and map the Nexus categories. You should be able to preserve your old categories if you had custom categories configured or use the old default mappings.
+
+  The updated category editor has a new interface to import the Nexus categories. These categories can be mapped to your custom Mod Organizer categories or imported. Importing the categories can replace or merge with your existing category setup.
+
+  In addition, you can automatically reassign categories based on your Nexus mappings using the right-click context menu or through the modlist dropdown action menu. For users updating from older versions, we can only map the category if you still have downloads with Nexus metadata available. As you install or update new mods, the Nexus category ID will be saved to the mod info as well. Mods without a valid mapping should be left untouched.
+
+  Finally, when you install a download from the download pane, missing mappings will trigger a prompt to update your Nexus mappings. You can also disable this feature entirely. This can be changed at any time from the Settings pane.
+
+  Python Plugin Updates
+  Python and Qt have both been updated to newer versions and Boost Python has been replaced with pybind11. These changes necessitate that most Python plugins be updated to be compatible with 2.5.0. On the other hand, you can now use Python 3.11.x features.
+
+  Basic Games
+  The basic games game support plugin system has had multiple updates to add and improve support for various game platforms, including EA Games, EPIC Games, and more. There are new utilities you can use to build more robust game plugin support with Python.
+
+  Game Support
+  Starfield
+  Starfield has full support with some general caveats. This includes save parsing, archive extraction and packing, plugin management, automatic archive invalidation, INI-enabled plugin and archive detection. This support virtualizes both the My Games Data directory and the game Data directory. This provides maximum mod support with minimal work needed by the end user. MO2 will create the Data directory in My Games, but due to the nature of the virtual filesystem, no files will actually we written to or read from this directory. This also allows SFSE plugins to be correctly loaded from the game Data directory.
+
+  Caveats
+  Plugin management is only possible by using the Plugins.txt Enabler mod. This can be loaded either with SFSE or an ASI loader. If you use the ASI loader you may want to disable this check. You must also remove any sTestFile entries from your game INI files.
+  BSA Packer currently does not support the newer Starfield archive formats and will pack files in the Fallout 4 BA2 format. This appears to work just fine and we will update to use the Starfield archive formats as soon as we can.
+  The BSA extractor has some trouble with archives containing numerous directories. Most archives are fine but you may experience extreme load times with the meshes / geometries base game archives due to them containing hundreds of thousands of individual directories.
+  Due to the nature of the game engine, only ESM files have relatively decent support and using another plugin type will generate warnings to describe the issues with using those plugins.
+  All Starfield diagnostic warnings can be disabled.
+  LOOT sorting is currently disabled by default as the LOOT team has decided that the issues with the engine make sorting too problematic. You can enable sorting in the Starfield settings. This could be useful if a future libloot / LOOT update allows sorting and can be hotfixed in MO2.
+  Bethesda
+  Skyrim SE
+  GOG / EPIC Games support
+  'Platform' and 'grass' added to valid mod directories
+  Update Creation Kit Steam ID
+  Skyrim LE
+  Fix for save location parsing using local Windows codepage settings
+  Do not create loadorder.txt in profile
+  Skyrim VR
+  Remove light plugin support flag
+  Do not create loadorder.txt in profile
+  Fallout 4
+  Update Creation Kit Steam ID
+  Do not create loadorder.txt in profile
+  'NetScriptFramework' added to valid mod directories, 'cdx' and 'csg' to valid file extensions
+  Fallout 4 VR
+  Remove light plugin support flag
+  Fallout NV / TTW
+  EPIC Games / GOG Support
+  Updated mod directories
+  Extended INI parsing
+  Oblivion / Morrowind
+  Do not create loadorder.txt in profile
+  Enderal / SE
+  GOG support
+  LOOT sorting support
+  Nehrim
+  LOOT sorting support
+  Cyberpunk 2077
+  Fairly robust Cyperpunk support has been added by ZashIn. This can be somewhat complex to set up and it is highly recommended to read the wiki.
+
+  Other Games
+  Thanks to all contributors!
+
+  New
+  Control
+  Yu-Gi-Oh! Master Duel
+  Monster Hunter: Rise
+  Sekiro: Shadows Die Twice
+  The Sims 4
+  Train Simulator 20xx
+  Valkyria Chronicles
+  Updated
+  Black & White 2
+  Blade & Sorcery
+  Subnautica
+  Subnautica: Below Zero
+  Valheim
+  Vampire - The Masquerade: Bloodlines
+  Technical Updates
+  MO2 Plugins
+  IPluginGame
+  Added getSupportURL, secondaryDataDirectories, enabledPlugins
+  IPluginList
+  Added hasMasterExtension, hasLightExtension, isMasterFlagged, isLightFlagged, isOverlayFlagged, hasNoRecords
+  IModRepositoryBridge
+  Added gameInfoAvailable
+  Other
+  Notify mod installation to plugins after directory structure is ready
+  Allow loading plugins from subdirectories
+  Bethesda Plugins
+  Fix primary plugin priority / load order
+  Enforce order of plugin masters
+  Enforce plugin sorting rules during refresh
+  Add master and overlay flagged plugins to plugin counter
+  Added overlay flag detection for Starfield (underlined in plugin list)
+  Add display for dummy / recordless plugin files (strikethrough in plugin list)
+  Only italicize light-flagged plugins (previously all masters were italicized as well as bolded)
+  Add 'none' option for plugin load order mechanism (used by Starfield if we do not detect criteria for working management)
+  Translations
+  Fix missing translations in several areas, such as tutorial names
+  New and updated languages
+  Tutorials
+  Various tutorial fixes
+  Updated tutorial text for clarity, outdated info
+  Add ability to exit tutorial
+  Other
+  Username censoring tweaks
+  Some BBCode fixes
+  Toggle to show whitespace in INI and other text editors
+  Download pane now includes time estimate
+  Improved download speed calculation
+  Add ability to virtualize secondary game data locations
+  Improvements to reduce errors caused by index issues when downloading and installing mods
+  Threaded callback for UI refresh events
+  Add Nexus game info API request
+  Trigger UI refresh after closing settings pane
+  Added Starfield theme by Trosski and other theme updates
+  Add command line parameter to download a direct file URL (Eddoursul)
+  Qt no longer natively reads DDS files and the mod info image viewer will not display them
+  Texture stream BA2s now correctly unpack cubemap textures
+  Support was added for a few additional DDS formats used by Starfield
+  BSA / BA2 preview now uses BSATK to load archive data
+  BSA Packer now shows a progress dialog during packing and will correctly skip empty archives for FO4 and Starfield
+  Dependency Updates
+  Qt 5.15.2 -> 6.5.0
+  Python 3.8.7 -> 3.11.5
+  PyQt 5.15.2 -> 6.5.3
+  libloot (LOOT) 0.17.1 -> 0.22.1
+  7zip 19.00 -> 23.01
+  boost 1.75.0 -> 1.83.0
+  boost python -> pybind11 2.11.1
+  fmt 7.1.3 -> 8.1.1
+  lz4 1.9.3 -> 1.9.4
+  OpenSSL 1.1.1i -> 3.1.2
+  bzip2 1.0.6 -> 1.0.8
+  sip 5.5.0 -> 6.7.12
+  spdlog 1.8.2 -> 1.10.0
+  zlib 1.2.12 -> 1.3
+  Known issues
+  Download Issues
+  There are still occasionally issues with index errors, we plan to resolve the remaining issues in 2.5.1
+  There can occasionally be 'failed to communicate' errors when downloading from Nexus
+  Often the download will still start regardless and this can be ignored
+  If not, usually just triggering the download again will continue normally
+  Other
+  There are a few graphical issues due to Qt 6, particularly when using themes
+  Some dialogs have strangely colored text which changes when you mouse over it
+  Some icons can be doubled with a slight offset
+  Archive files with a lot of directories can take a very long time to load for BSATK, this is typically only an issue for the Starfield meshes / geometries archives
+ReleaseNotesUrl: https://github.com/ModOrganizer2/modorganizer/releases/tag/v2.5.0
+ManifestType: defaultLocale
+ManifestVersion: 1.5.0

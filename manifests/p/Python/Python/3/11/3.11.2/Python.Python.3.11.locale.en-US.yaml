@@ -1,5 +1,5 @@
-# Created using wingetcreate 1.2.5.0
-# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.4.0.schema.json
+# Created with YamlCreate.ps1 v2.2.12 by Dumplings $debug=QUSU.CRLF.7-4-0.Win32NT
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.5.0.schema.json
 
 PackageIdentifier: Python.Python.3.11
 PackageVersion: 3.11.2
@@ -14,13 +14,14 @@ PackageUrl: https://www.python.org/
 License: PSF-2.0
 LicenseUrl: https://docs.python.org/3/license.html
 Copyright: |-
-  Copyright (c) 2001-2022 Python Software Foundation. All Rights Reserved.
+  Copyright (c) 2001-2023 Python Software Foundation. All Rights Reserved.
   Copyright (c) 2000 BeOpen.com. All Rights Reserved.
   Copyright (c) 1995-2001 Corporation for National Research Initiatives. All Rights Reserved.
   Copyright (c) 1991-1995 Stichting Mathematisch Centrum, Amsterdam. All Rights Reserved.
 CopyrightUrl: https://www.python.org/about/legal/
 ShortDescription: Python is a programming language that lets you work more quickly and integrate your systems more effectively.
-Moniker: python3
+# Description:
+Moniker: python3.11
 Tags:
 - language
 - programming
@@ -28,9 +29,91 @@ Tags:
 - python
 - python3
 - script
-ReleaseNotesUrl: https://docs.python.org/release/3.11.1/whatsnew/changelog.html
+ReleaseNotes: |-
+  Core and Builtins
+  - gh-92173: Fix the defs and kwdefs arguments to PyEval_EvalCodeEx() and a reference leak in that function.
+  - gh-101400: Fix wrong lineno in exception message on continue or break which are not in a loop. Patch by Dong-hee Na.
+  - gh-101372: Fix is_normalized() to properly handle the UCD 3.2.0 cases. Patch by Dong-hee Na.
+  - gh-101046: Fix a possible memory leak in the parser when raising MemoryError. Patch by Pablo Galindo
+  - gh-101037: Fix potential memory underallocation issue for instances of int subclasses with value zero.
+  - gh-100942: Fixed segfault in property.getter/setter/deleter that occurred when a property subclass overrode the __new__ method to return a non-property instance.
+  - gh-100892: Fix race while iterating over thread states in clearing threading.local. Patch by Kumar Aditya.
+  - gh-100776: Fix misleading default value in input()’s __text_signature__.
+  - gh-100637: Fix int.__sizeof__() calculation to include the 1 element ob_digit array for 0 and False.
+  - gh-100649: Update the native_thread_id field of PyThreadState after fork.
+  - gh-100374: Fix incorrect result and delay in socket.getfqdn(). Patch by Dominic Socular.
+  - gh-99110: Initialize frame->previous in frameobject.c to fix a segmentation fault when accessing frames created by PyFrame_New().
+  - gh-100050: Honor existing errors obtained when searching for mismatching parentheses in the tokenizer. Patch by Pablo Galindo
+  - bpo-32782: ctypes arrays of length 0 now report a correct itemsize when a memoryview is constructed from them, rather than always giving a value of 0.
+  Library
+  - gh-101541: [Enum] - fix psuedo-flag creation
+  - gh-101326: Fix regression when passing None as second or third argument to FutureIter.throw.
+  - gh-100795: Avoid potential unexpected freeaddrinfo call (double free) in socket when when a libc getaddrinfo() implementation leaves garbage in an output pointer when returning an error. Original patch by Sergey G. Brester.
+  - gh-101143: Remove unused references to TimerHandle in asyncio.base_events.BaseEventLoop._add_callback.
+  - gh-101144: Make zipfile.Path.open() and zipfile.Path.read_text() also accept encoding as a positional argument. This was the behavior in Python 3.9 and earlier. 3.10 introduced a regression where supplying it as a positional argument would lead to a TypeError.
+  - gh-101015: Fix typing.get_type_hints() on '*tuple[...]' and *tuple[...]. It must not drop the Unpack part.
+  - gh-100573: Fix a Windows asyncio bug with named pipes where a client doing os.stat() on the pipe would cause an error in the server that disabled serving future requests.
+  - gh-100805: Modify random.choice() implementation to once again work with NumPy arrays.
+  - gh-90104: Avoid RecursionError on repr if a dataclass field definition has a cyclic reference.
+  - gh-100750: pass encoding kwarg to subprocess in platform
+  - gh-100689: Fix crash in pyexpat by statically allocating PyExpat_CAPI capsule.
+  - gh-100740: Fix unittest.mock.Mock not respecting the spec for attribute names prefixed with assert.
+  - gh-86508: Fix asyncio.open_connection() to skip binding to local addresses of different family. Patch by Kumar Aditya.
+  - gh-100287: Fix the interaction of unittest.mock.seal() with unittest.mock.AsyncMock.
+  - gh-100474: http.server now checks that an index page is actually a regular file before trying to serve it. This avoids issues with directories named index.html.
+  - gh-100160: Remove any deprecation warnings in asyncio.get_event_loop(). They are deferred to Python 3.12.
+  - gh-96290: Fix handling of partial and invalid UNC drives in ntpath.splitdrive(), and in ntpath.normpath() on non-Windows systems. Paths such as ‘\server’ and ‘\’ are now considered by splitdrive() to contain only a drive, and consequently are not modified by normpath() on non-Windows systems. The behaviour of normpath() on Windows systems is unaffected, as native OS APIs are used. Patch by Eryk Sun, with contributions by Barney Gale.
+  - gh-78878: Fix crash when creating an instance of _ctypes.CField.
+  - gh-99952: Fix a reference undercounting issue in ctypes.Structure with from_param() results larger than a C pointer.
+  - gh-100133: Fix regression in asyncio where a subprocess would sometimes lose data received from pipe.
+  - gh-100098: Fix tuple subclasses being cast to tuple when used as enum values.
+  - gh-98778: Update HTTPError to be initialized properly, even if the fp is None. Patch by Dong-hee Na.
+  - gh-83035: Fix inspect.getsource() handling of decorator calls with nested parentheses.
+  - gh-99576: Fix .save() method for LWPCookieJar and MozillaCookieJar: saved file was not truncated on repeated save.
+  - gh-99433: Fix doctest failure on types.MethodWrapperType in modules.
+  - gh-99240: Fix double-free bug in Argument Clinic str_converter by extracting memory clean up to a new post_parsing section.
+  - gh-64490: Fix refcount error when arguments are packed to tuple in Argument Clinic.
+  - gh-85267: Several improvements to inspect.signature()’s handling of __text_signature. - Fixes a case where inspect.signature() dropped parameters - Fixes a case where inspect.signature() raised tokenize.TokenError - Allows inspect.signature() to understand defaults involving binary operations of constants - inspect.signature() is documented as only raising TypeError or ValueError, but sometimes raised RuntimeError. These cases now raise ValueError - Removed a dead code path
+  - gh-95882: Fix a 3.11 regression in asynccontextmanager(), which caused it to propagate exceptions with incorrect tracebacks and fix a 3.11 regression in contextmanager(), which caused it to propagate exceptions with incorrect tracebacks for StopIteration.
+  - bpo-44817: Ignore WinError 53 (ERROR_BAD_NETPATH), 65 (ERROR_NETWORK_ACCESS_DENIED) and 161 (ERROR_BAD_PATHNAME) when using ntpath.realpath().
+  - bpo-40447: Accept os.PathLike (such as pathlib.Path) in the stripdir arguments of compileall.compile_file() and compileall.compile_dir().
+  - bpo-36880: Fix a reference counting issue when a ctypes callback with return type py_object returns None, which could cause crashes.
+  Documentation
+  - gh-100616: Document existing attr parameter to curses.window.vline() function in curses.
+  - gh-100472: Remove claim in documentation that the stripdir, prependdir and limit_sl_dest parameters of compileall.compile_dir() and compileall.compile_file() could be bytes.
+  - gh-99931: Use sphinxext-opengraph to generate OpenGraph metadata.
+  Tests
+  - gh-101334: test_tarfile has been updated to pass when run as a high UID.
+  - gh-100454: Start running SSL tests with OpenSSL 3.1.0-beta1.
+  - gh-96002: Add functional test for Argument Clinic.
+  Build
+  - gh-101522: Allow overriding Windows dependencies versions and paths using MSBuild properties.
+  Windows
+  - gh-101543: Ensure the install path in the registry is only used when the standard library hasn’t been located in any other way.
+  - gh-101467: The py.exe launcher now correctly filters when only a single runtime is installed. It also correctly handles prefix matches on tags so that -3.1 does not match 3.11, but would still match 3.1-32.
+  - gh-101135: Restore ability to launch older 32-bit versions from the py.exe launcher when both 32-bit and 64-bit installs of the same version are available.
+  - gh-82052: Fixed an issue where writing more than 32K of Unicode output to the console screen in one go can result in mojibake.
+  - gh-100320: Ensures the PythonPath registry key from an install is used when launching from a different copy of Python that relies on an existing install to provide a copy of its modules and standard library.
+  - gh-100247: Restores support for the py.exe launcher finding shebang commands in its configuration file using the full command name.
+  - gh-100180: Update Windows installer to OpenSSL 1.1.1s
+  - bpo-43984: winreg.SetValueEx() now leaves the target value untouched in the case of conversion errors. Previously, -1 would be written in case of such errors.
+  macOS
+  - gh-100180: Update macOS installer to OpenSSL 1.1.1s
+  Tools/Demos
+  - bpo-45256: Fix a bug that caused an AttributeError to be raised in python-gdb.py when py-locals is used without a frame.
+  - gh-100342: Add missing NULL check for possible allocation failure in *args parsing in Argument Clinic.
+  - gh-64490: Argument Clinic varargs bugfixes
+    - Fix out-of-bounds error in _PyArg_UnpackKeywordsWithVararg().
+    - Fix incorrect check which allowed more than one varargs in clinic.py.
+    - Fix miscalculation of noptargs in generated code.
+    - Do not generate noptargs when there is a vararg argument and no optional argument.
+  C API
+  - gh-99240: In argument parsing, after deallocating newly allocated memory, reset its pointer to NULL.
+ReleaseNotesUrl: https://docs.python.org/release/3.11.2/whatsnew/changelog.html
+# PurchaseUrl:
+# InstallationNotes:
 Documentations:
 - DocumentLabel: Documentation
   DocumentUrl: https://www.python.org/doc/
 ManifestType: defaultLocale
-ManifestVersion: 1.4.0
+ManifestVersion: 1.5.0
