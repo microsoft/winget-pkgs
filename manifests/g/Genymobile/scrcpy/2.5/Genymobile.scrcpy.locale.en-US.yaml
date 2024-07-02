@@ -1,0 +1,85 @@
+# Created with AutoPublish using komac v2.3.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.6.0.schema.json
+
+PackageIdentifier: Genymobile.scrcpy
+PackageVersion: '2.5'
+PackageLocale: en-US
+Publisher: Genymobile
+PublisherUrl: https://github.com/Genymobile
+PublisherSupportUrl: https://github.com/Genymobile/scrcpy/issues
+Author: Genymobile
+PackageName: scrcpy
+PackageUrl: https://github.com/Genymobile/scrcpy
+License: Apache-2.0
+LicenseUrl: https://github.com/Genymobile/scrcpy/blob/HEAD/LICENSE
+Copyright: Apache License Version 2.0
+CopyrightUrl: https://raw.githubusercontent.com/Genymobile/scrcpy/master/LICENSE
+ShortDescription: Display and control your Android device
+Description: |-
+  This application provides display and control of Android devices connected via USB or over TCP/IP.
+  It does not require any root access.
+Moniker: scrcpy
+Tags:
+- android
+- control
+- device
+- display
+ReleaseNotes: |-
+  To receive a notification on new releases, click on Watch > Custom > Releases on the top.
+  scrcpy v2.5Changes since v2.4:
+  - Add scrcpy window without video playback (#4727, #4793, #4868)
+  - Add a shortcut to pause/unpause display (#1632, #4748)
+  - Forward mouse hover events (#2743, #3070, #5039)
+  - Add option to configure mouse bindings (#5022)
+  - Forward all clicks by default for UHID/AOA (#5022)
+  - Simplify shortcut modifiers (#4741)
+  - Fix rotation shortcut for Android 14 (#4740, #4841)
+  - Fix YUV conversion for full color range (#4756)
+  - Fix camera sizes listing on some devices (#4852)
+  - Fix thread leak on Windows (#4973)
+  - Upgrade FFmpeg to 7.0.1 in Windows releases
+  - Upgrade SDL to 2.30.4 in Windows releases
+  - Upgrade platform-tools (adb) to 35.0.0 in Windows releases
+  - Various technical fixes
+
+  Highlights
+  Control-only
+  By default, scrcpy now always opens a window (unless --no-window is passed), even without video stream (#4868).In particular, this gives the possibility to solely control the device without screen mirroring:
+  scrcpy --no-video --no-audio
+
+  windowIn that case, UHID mouse mode is used by default. It works both over USB and wirelessly.This is different from OTG mode, which does not require USB debugging at all. Here, the standard mode is used but with the possibility to disable video playback.Pause/unpause display
+  New shortcuts allow to pause (MOD+z) and unpause MOD+Shift+z the display (#4748).It only impacts rendering, the device is still captured, the video stream transmitted to the device, and recorded if recording is enabled.This can be useful for example during a presentation, to temporarily move to a different app on the device without showing the content.Mouse hover
+  Initially, mouse motion (hover) events were not forwarded to the device when no mouse button was pressed. The reason was that at the time (6 years ago), these events had absolutely no impact on the devices I tested.But on newer Android versions and newer apps, mouse hover events trigger animations and highlight items. So this new release forwards hover events, with a new option --no-mouse-hover to disable them.Mouse bindings
+  By default, mouse secondary clicks triggers shortcuts:
+  - right click: BACK
+  - middle click: HOME
+  - 4th click: APP_SWITCH
+  - 5th click: expand notification panel
+  An option --forward-all-clicks had been added some time ago to forward all clicks to the device instead.This release replaces --forward-all-clicks by a more flexible option --mouse-bind=xxxx. The argument must be exactly 4 characters, one for each secondary click:
+  --mouse-bind=xxxx
+               ^^^^
+               ||||
+               ||| `- 5th click
+               || `-- 4th click
+               | `--- middle click
+                `---- right click
+
+  Each character must be one of the following:
+  - +: forward the click to the device
+  - -: ignore the click
+  - b: trigger shortcut BACK (or turn screen on if off)
+  - h: trigger shortcut HOME
+  - s: trigger shortcut APP_SWITCH
+  - n: trigger shortcut "expand notification panel"
+  For example:
+  scrcpy --mouse-bind=bhsn  # the default mode
+  scrcpy --mouse-bind=++++  # forward all clicks (default for AOA/UHID)
+  scrcpy --mouse-bind=++bh  # forward right and middle clicks,
+                            # use 4th and 5th for BACK and HOME
+
+  With UHID and AOA mouse modes (when the mouse cursor appears on the device), all clicks are now forwarded by default (but the behavior can be changed using --mouse-bind).
+  - Twitter: @scrcpy_app
+  - Reddit: r/scrcpy
+ReleaseNotesUrl: https://github.com/Genymobile/scrcpy/releases/tag/v2.5
+ManifestType: defaultLocale
+ManifestVersion: 1.6.0
