@@ -9,6 +9,6 @@ Manifests
 - [ ] Have you tested your manifest locally with `winget install --manifest <path>`?
 - [ ] Does your manifest conform to the [1.6 schema](https://github.com/microsoft/winget-pkgs/tree/master/doc/manifest/schema/1.6.0)?
 
-Note: `<path>` is the name of the directory containing the manifest you're submitting.
+Note: `<path>` is the directory's name containing the manifest you're submitting.
 
 ---
