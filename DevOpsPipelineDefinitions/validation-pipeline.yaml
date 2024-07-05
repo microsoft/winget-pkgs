@@ -40,18 +40,19 @@ extends:
           skipComponentGovernanceDetection: ${{ true }}
           runCodesignValidationInjection: ${{ false }}
         timeoutInMinutes: 0
-        
+
         steps:
 
         # Downloads all the setup files and its dependencies.
-        - task: AzureCLI@1
+        - task: AzureCLI@2
           displayName: 'Azure Setup'
           inputs:
-            azureSubscription: '$(WinGet.Subscription)'
+            azureSubscription: '$(WinGetSvc.DataAccess)'
+            scriptType: batch
             scriptLocation: inlineScript
-            inlineScript: 'az storage blob download-batch -d . --pattern * -s servicewrapper --output none'
-          env:
-            AZURE_STORAGE_CONNECTION_STRING: $(ValidationStorageAccountConnectionString)
+            inlineScript: |
+              az storage blob download-batch --auth-mode login -d . --pattern * -s servicewrapper --output none --account-name $(ValidationStorageAccountName)
+            addSpnToEnvironment: true
 
         - task: CmdLine@2
           name: 'wingetsetup'
@@ -73,33 +74,51 @@ extends:
             workingDirectory: scripts
 
         # Validates integrity of pull request.
-        - task: CmdLine@2
+        - task: AzureCLI@2
           displayName: 'Validate Pull Request'
           inputs:
-            script: 'WinGetSvcWrapper.exe process-pr --operationId %BUILD_BUILDNUMBER%'
-            failOnStderr: true
-          condition: succeeded()
+            azureSubscription: '$(WinGetSvc.DataAccess)'
+            scriptType: batch
+            scriptLocation: inlineScript
+            inlineScript: |
+              WinGetSvcWrapper.exe process-pr --operationId %BUILD_BUILDNUMBER%
+            addSpnToEnvironment: true
+            failOnStandardError: true
           env:
             ValidationConnectionString: $(ValidationStorageAccountConnectionString)
+            ValidationStorageAccountName: $(ValidationStorageAccountName)
+            StorageManagedIdentityClientId: $(StorageManagedIdentityClientId)
+            GithubRepository: $(GithubRepository)
             GithubServiceAccountToken: $(GithubServiceAccountToken)
             ExecutionEnvironment: $(ExecutionEnvironment)
             DIApplicationInsightKey: $(DIApplicationInsightKey)
             WinGet:AppConfig:Primary: $(AppConfigPrimary)
             WinGet:AppConfig:Secondary: $(AppConfigSecondary)
+            WinGet:AppConfig:PrimaryEndpoint: $(AppConfigPrimaryEndpoint)
+            WinGet:AppConfig:SecondaryEndpoint: $(AppConfigSecondaryEndpoint)
 
         # Validates manifest integrity.
-        - task: CmdLine@2
+        - task: AzureCLI@2
           displayName: 'Validate Manifest'
           inputs:
-            script: 'WinGetSvcWrapper.exe validate-manifests --operationId %BUILD_BUILDNUMBER%'
-            failOnStderr: true
-          condition: succeeded()
+            azureSubscription: '$(WinGetSvc.DataAccess)'
+            scriptType: batch
+            scriptLocation: inlineScript
+            inlineScript: |
+              WinGetSvcWrapper.exe validate-manifests --operationId %BUILD_BUILDNUMBER%
+            addSpnToEnvironment: true
+            failOnStandardError: true
           env:
             ValidationConnectionString: $(ValidationStorageAccountConnectionString)
             CacheConnectionString: $(CacheStorageAccountConnectionString)
+            ValidationStorageAccountName: $(ValidationStorageAccountName)
+            CacheStorageAccountName: $(CacheStorageAccountName)
+            StorageManagedIdentityClientId: $(StorageManagedIdentityClientId)
             DIApplicationInsightKey: $(DIApplicationInsightKey)
             WinGet:AppConfig:Primary: $(AppConfigPrimary)
             WinGet:AppConfig:Secondary: $(AppConfigSecondary)
+            WinGet:AppConfig:PrimaryEndpoint: $(AppConfigPrimaryEndpoint)
+            WinGet:AppConfig:SecondaryEndpoint: $(AppConfigSecondaryEndpoint)
 
       # Agentless phase. Depends on previous job.
       - job: 'ContentValidation'
