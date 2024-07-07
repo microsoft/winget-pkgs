@@ -1,0 +1,21 @@
+name: Sync Fork with Upstream
+
+on:
+  schedule:
+    - cron: '3 3 */3 * *'
+  workflow_dispatch:
+
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    if: github.repository != 'microsoft/winget-pkgs'
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        ref: master
+        sparse-checkout: .
+    - name: Sync Fork
+      run: |
+        gh repo sync ${{ github.repository }} --branch master --force
+
