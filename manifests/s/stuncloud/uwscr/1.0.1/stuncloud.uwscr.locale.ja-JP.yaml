@@ -1,0 +1,104 @@
+# Created with komac v2.2.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.6.0.schema.json
+
+PackageIdentifier: stuncloud.uwscr
+PackageVersion: 1.0.1
+PackageLocale: ja-JP
+Publisher: stuncloud
+PublisherUrl: https://github.com/stuncloud/
+PublisherSupportUrl: https://github.com/stuncloud/UWSCR/issues
+Author: stuncloud
+PackageName: UWSCR
+PackageUrl: https://github.com/stuncloud/UWSCR/
+License: MIT
+LicenseUrl: https://github.com/stuncloud/UWSCR/blob/HEAD/LICENSE
+ShortDescription: UWSC互換スクリプト実行ツール
+Moniker: uwsc
+ReleaseNotes: |-
+  [!IMPORTANT]
+  このバージョンには破壊的変更が含まれますファイルの自動クローズ機能がオプション(F_AUTOCLOSE)になりました
+  これにより原則fcloseを呼ばない限りファイルに変更が反映されなくなりました
+  従来のバージョンで以下のような記述をしていた場合は修正が必要になります
+
+  // 1.0.1未満であればhoge.txtに「ほげほげ」が書き込まれていたが
+  // 1.0.1以降では明示的にファイルクローズを行わない限りファイルへの書き込みは行われない
+  fput(fopen("hoge.txt", F_WRITE), "ほげほげ")
+
+  自動クローズを利用する場合以下のように記述してください
+
+  fput(fopen("hoge.txt", F_WRITE or F_AUTOCLOSE), "ほげほげ")
+  //                                ^^^^^^^^^^^
+
+
+  [!WARNING]
+  ACC系の動作に不具合があります
+  このバージョンでは対応できないため、可能であればAPIやUIAを利用してください
+  該当issue: #152 #153 #156
+  新規
+  - Language Server
+      - Semantic Tokensによる組み込み関数・定数の名前のハイライト
+  - ダミーコメント
+      - //- の記述は無視されます
+
+  // //- はUWSCではコメントだがUWSCRでは無視される
+
+  print 1
+  //- print 2
+  print 3 //- + 5
+
+  // 結果:UWSC
+  // 1
+  // 3
+
+  // 結果:UWSCR
+  // 1
+  // 2
+  // 8
+
+
+  変更
+  - GUIのデフォルトフォントサイズの初期値を変更 (#151 の修正に伴い初期値が大きくなりすぎたため)
+      - 設定の初期値を以下に変更
+
+      "default_font": {
+        "name": "Yu Gothic UI",
+        "size": 12
+      },
+
+
+      - フォント作成のデフォルト値を設定の初期値とした
+  - スクリプト実行の--ast付与時に--continueがない場合でも解析エラーを出力するようにした
+  - def_dllの解析を改善
+      - 半角スペース入りのパスにも対応した
+  バグ修正
+  - balloonのマウスカーソルが砂時計になる問題の対策
+  - Acc::from_point で得られる IAccessible が子である場合を考慮していなかった
+  - #145 exitexitの終了コードを省略すると解析エラーになる場合があった
+  - #146 chkclrがMORG_CLIENT適用時に不正な動作をしていた
+  - #147 chkimgでCHKIMG_NO_GRAY適用時に.jpgまたは.bmpファイルを読み込むとエラーになっていた
+  - #148, #149 文字列リテラル内での行連結に対応
+  - #150 chknumの引数がi32として扱われていたのでf64にした
+  - #151 フォントを作成する際に指定サイズからピクセルを算出するようにした
+  - #154 配列の添字として数値変換可能な値を使用可能にした
+  - #155 以下の問題を修正
+      - splitで受けた文字列の長さが0の場合にサイズ1の配列を返していた
+      - 左辺がEMPTYの減算で右辺をそのまま返していた
+  - #157 fopenにF_AUTOCLOSEを追加
+  - #158 evalが引数を受けられなかった問題を修正
+  - #160 def_dll行の直後に文を書くと同一行エラーになっていた
+  - #165 getitemのACC系が取得できていなかった問題を修正
+  ビルド環境
+  |             ツール             |          バージョン           |
+  |--------------------------------|-------------------------------|
+  | OS                             | Windows 10 22H2               |
+  | Visual Studio Build Tools 2019 | 16.11.15                      |
+  | Rust Edition                   | 2021                          |
+  | cargo                          | 1.77.2 (e52e36006 2024-03-26) |
+  | rustc                          | 1.77.2 (25ef9e3d8 2024-04-09) |
+  | opencv                         | 4.6.0                         |
+  | cmake                          | 3.25.1                        |
+  | llvm                           | 15.0.6                        |
+  | Sphinx                         | 5.2.3                         |
+ReleaseNotesUrl: https://github.com/stuncloud/UWSCR/releases/tag/1.0.1
+ManifestType: defaultLocale
+ManifestVersion: 1.6.0
