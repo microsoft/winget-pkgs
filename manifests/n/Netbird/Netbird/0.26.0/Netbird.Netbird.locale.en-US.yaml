@@ -1,0 +1,98 @@
+# Created with komac v2.2.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.6.0.schema.json
+
+PackageIdentifier: Netbird.Netbird
+PackageVersion: 0.26.0
+PackageLocale: en-US
+Publisher: Netbird
+PublisherUrl: https://netbird.io/
+PackageName: Netbird
+PackageUrl: https://github.com/netbirdio/netbird
+License: BSD-3-Clause
+LicenseUrl: https://github.com/netbirdio/netbird/blob/HEAD/LICENSE
+Copyright: Wiretrustee UG
+CopyrightUrl: https://netbird.io/terms
+ShortDescription: Connect your devices into a single secure private WireGuard®-based mesh network with SSO/MFA and simple access controls.
+Description: NetBird combines a configuration-free peer-to-peer private network and a centralized access control system in a single platform, making it easy to create secure private networks for your organization or home.
+Moniker: netbird
+Tags:
+- golang
+- mesh
+- mesh-networks
+- nat-traversal
+- netbird
+- vpn
+- wireguard
+- wireguard-vpn
+- wiretrustee
+- zero-trust-network-access
+ReleaseNotes: |-
+  Release notes
+  These release notes summarize what happened in the previous 0.25 release and what happened with the 0.26 release. There are cool new features and long-awaited enhancements that we want to share.New features
+  Dashboard V2 is here
+  Our redesigned management dashboard is here. It's faster, more responsive, and has a new look. It's also more intuitive and easier to use. The new dashboard is available to all cloud users and new self-hosted deployments; for existing self-hosted deployments, you can switch between the old and new dashboards at any time by updating the docker image from wiretrustee/dashboard to netbirdio/dashboard:latest.Checkout these screenshots:
+  Peer's view
+  Access control
+  DNS Nameservers
+  Posture checks
+  We are introducing a new feature called posture checks. This feature allows you to define a set of conditions a device must meet before connecting to the network. For example, you can require that a device has a specific version of a NetBird or Operating system. In this release, we are introducing the first version of this feature, and we are looking forward to your feedback.It includes 3 types of checks:
+  OS version
+
+  NetBird version
+
+  Geo Location
+  For self-hosted users: The geo-location check won't work without the databases, and we are working on automated download support for it, which will be released very soon.
+  Check out more at: https://docs.netbird.io/how-to/manage-posture-checksNetStack mode
+  We are introducing a new running mode called NetStack. In this mode, NetBird enables secure connectivity and access from serverless functions like AWS lambda and Azure Functions to cloud or on-premises servers, containers, databases, and other internal resources. See more at https://docs.netbird.io/how-to/netbird-on-faasRosenpass integration
+  We are introducing an experimental integration with Rosenpass, which provides a quantum-resistant pre-shared key rotation mechanism. Learn more at: https://docs.netbird.io/how-to/enable-post-quantum-cryptographyBehavioral changes:
+  Deprecation of JSON store engine
+  With this release, we are marking the JSON file store engine as deprecated. New installations will be using SQLite store by default. This change will allow us to support robust relational engines like Postgres.We plan to keep support for JSON file store engine until v0.28.0, and we will update the community if the plan changes.To migrate from JSON to SQLite, please follow the guide here: https://docs.netbird.io/selfhosted/sqlite-store#migrating-from-json-store-to-sq-lite-storeSSH server disabled by default on new installations
+  We have disabled the SSH server on the client side by default for new installations. You can enable it by adding the flag --allow-server-ssh to the NetBird client. Existing installations are unaffected by this change and require you to disable SSH if you don't need it.To enable SSH:
+
+  netbird down
+  netbird up --allow-server-ssh
+
+  To disable SSH
+
+  netbird down
+  netbird up --allow-server-ssh=false
+
+  Shout-out to @charnesp for this contribution.GUI client support is coming soon.
+  Upgrade step for management version < 0.15.3
+  As part of our deprecation of Rules in favor of Policies, the users with management on version < v0.15.3
+  should first upgrade their systems to v0.25.9,
+  run management to properly migrate rules to policies and upgrade to 0.26.0+.Enhancements:
+  JWT group-based access control (self-hosted only)
+  We have added support for group-based access control in the JWT token. Now, you can define a group in the JWT token and use it to control access to the network. Cloud users have a similar feature available with IDP sync.Access NetBird settings in Windows RDP connections
+  In 0.25.3, we fixed an issue that prevented users from updating the NetBird settings in Windows RDP connections. Now, you can update the settings in the RDP connection settings.Control client auto-connection when starting
+  The ability to control whether the client should automatically connect when the daemon is starting, after an operating system boot, or after netbird service restart, now if you want to disable the default connection, you can run the following steps:To disable auto-connect:
+
+  netbird down
+  netbird up --disable-auto-connect
+
+  To enable auto-connect:
+
+  netbird down
+  netbird up --disable-auto-connect=false
+
+  Shout-out to @oskardotglobal for this contribution.GUI client support is coming soon.
+  What's Changed
+  - Allow adding 3 nameserver addresses (#1588)
+  - Remove Account.Rules from Store engines (#1528)
+  - Add initial support of device posture checks (#1540)
+  - feat: add --disable-auto-connectflag to prevent auto connection after daemon service start (#1161)
+  - Disable SSH server by default on client side and add the flag --allow-server-ssh to enable it (#1508)
+  - Extend system meta (#1598)
+  - Make SQLite default for new installations (#1529)
+  - Fix misassigned peer metadata (#1600)
+  - Mark new peer meta fields required in OpenAPI spec (#1604)
+  - Add posture checks metrics report (#1603)
+  - Fix copying posture checks definitions (#1605)
+  - Add permissive mode to rosenpass (#1599)
+  Big thanks to our community contributors
+  - @charnesp made their first contribution in (#1508)
+  - @oskardotglobal made another contribution in (#1161)
+  Full Changelog: https://github.com/netbirdio/netbird/compare/v0.25.9...v0.26.0
+ReleaseNotesUrl: https://github.com/netbirdio/netbird/releases/tag/v0.26.0
+ManifestType: defaultLocale
+ManifestVersion: 1.6.0

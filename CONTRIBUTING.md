@@ -73,7 +73,7 @@ If you don't have any additional info/context to add but would like to indicate 
 
 ## Authoring manifests
 
-Authoring a manifest is not intended to be a painful experience. We have been working to make it easier. Sometimes this is to our own detriment. Please take the time to read our guidance on [authoring manifests](AUTHORING_MANIFESTS.md). This will save everyone time, and it will reduce the frustration of other Windows users who are just trying to get their job done, or have some fun.
+Authoring a manifest is not intended to be a painful experience. We have been working to make it easier. Sometimes this is to our own detriment. Please take the time to read our guidance on [authoring manifests](/doc/Authoring.md). This will save everyone time, and it will reduce the frustration of other Windows users who are just trying to get their job done, or have some fun.
 
 ## Contributing fixes / features
 
@@ -122,7 +122,7 @@ Once you've discussed your proposed feature/fix/etc. with a team member, and you
 5. Work on your changes.
 6. Build and see if it works.
 
- # Contribution guidelines 
+ # Contribution guidelines
 Welcome to [winget-pkgs]! We're thrilled that you'd like to contribute. Your help is essential for making it better.
 
 ## Getting Started
