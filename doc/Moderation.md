@@ -99,13 +99,14 @@ Moderators are often the first to see and triage new issues, and so they have th
 * `Error-Hash-Mismatch`
 * `Hardware`
 * `Help-Wanted`
+* `Highest-Version-Removal`
 * `In-PR`
 * `Installer-Issue`
 * `Interactive-Only-Installer`
 * `Issue-Bug`
 * `Issue-Docs`
 * `Issue-Feature`
-* `Last-Version-Remaining`
+* `Last-Version-Removal`
 * `License-Blocks-Install`
 * `Manifest-Content-Incomplete`
 * `Moderator-Approved`
