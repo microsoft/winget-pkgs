@@ -1,0 +1,43 @@
+# Created with komac v2.1.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.6.0.schema.json
+
+PackageIdentifier: JustArchiNET.ArchiSteamFarm
+PackageVersion: 6.0.0.3
+PackageLocale: en-US
+Publisher: JustArchi.net
+PublisherUrl: https://justarchi.net/
+PublisherSupportUrl: https://github.com/JustArchiNET/ArchiSteamFarm/issues
+Author: https://github.com/JustArchiNET/ArchiSteamFarm/graphs/contributors
+PackageName: ArchiSteamFarm
+PackageUrl: https://github.com/JustArchiNET/ArchiSteamFarm
+License: Apache-2.0
+LicenseUrl: https://github.com/JustArchiNET/ArchiSteamFarm/blob/HEAD/LICENSE.txt
+ShortDescription: ASF is a C# application with primary purpose of farming Steam cards from multiple accounts simultaneously.
+Description: |-
+  ASF is a C# application with primary purpose of farming Steam cards from multiple accounts simultaneously.
+  Unlike Idle Master which works only for one account at given time, while requiring Steam client running in the background and launching additional processes imitating "game playing" status, ASF doesn't require any Steam client running in the background, doesn't launch any additional processes and is made to handle unlimited Steam accounts at once.
+  In addition to that, it's meant to be run on servers or other desktop-less machines, and features full cross-OS support, which makes it possible to launch on any operating system with .
+  NET Core runtime, such as Windows, Linux and macOS.
+  ASF is possible thanks to gigantic amount of work done in marvelous SteamKit2 library.
+Moniker: ASF
+Tags:
+- automation
+- c-sharp
+- cli
+- cli-app
+- crowdin
+- csharp
+- linux
+- steam
+- steam-account
+- steam-api
+- steam-cards
+- steam-client
+- steam-games
+- steam-network
+- steambot
+- steamkit2
+ReleaseNotes: "Changelog\nChanges since V5.5.3.4:- [!] ASF V6 comes with modern System.Text.Json replacement of previously used since the very first ASF version, Newtonsoft.Json library. This is core foundation that ASF is based on - while it should be mostly transparent for end-users, it's breaking change for existing ASF plugins, and it also has far bigger scope than usual in terms of ASF codebase, hence V6 major version bump. If you're plugin creator, you can find notes below for technical details in regards to upgrade (@JustArchi #3145 #3061).\n- Latest ASF-ui with new features, improvements and bugfixes (@MrBurrBurr).\n- Updated localization provided by our community (@JustArchi-ArchiBot).\n- Usual amount of other core improvements, optimizations and bugfixes (@JustArchi).\nChanges for plugin creators:- V6 upgrade version may require more changes than usual, especially in regards to breaking changes that are not outright visible during compilation, as well as extensive testing.\n- OnASFInit() and OnBotInitModules() found in IASF and IBotModules plugin interfaces have changed the signature of additionalConfigProperties from JToken to JsonElement. If you're not using additional config props, change in signature is sufficient, otherwise, you'll need to correct existing usage a bit to the new API.\n- Apart from above, you should search for every Newtonsoft.Json reference in your code, and correct it as per instructions below.\n- Remove <PackageReference Include=\"Newtonsoft.Json\"> reference in all your csproj files - there is no need for any other additional custom dependency for JSON parsing anymore. ASF uses STJ exclusively now, which means that your Newtonsoft attributes, if any, are ignored anyway - this is why code that compiles, but doesn't use STJ, might not serialize/deserialize properly in V6 (if using ASF integration such as ArchiWebHandler, WebBrowser, SerializableFile or anything else that ASF provides to you).\n- Drop using Newtonsoft.Json from each of your cs files, those files will need a correction.\n- Replace every [JsonProperty] you have with [JsonInclude] from System.Text.Json namespace.\n- If your [JsonProperty] included custom property name, like [JsonProperty(\"custom\")], add additional attribute, [JsonPropertyName(\"custom\")].\n- If your [JsonProperty] was always required, like [JsonProperty(Required = Required.Always)], add additional attribute, [JsonRequired].\n- If your [JsonProperty] used disallowed nulls, like [JsonProperty(Required = Required.DisallowNull)], then either:\n- \n    - If it's a struct (e.g. DateTime), nullable class (e.g. object?), or otherwise null-allowed property (including System.Nullable<T>, e.g. DateTime?), don't add additional attribute, leave it as it is.\n- \n    - Only if it's non-nullable class (e.g. object) and you expect to always have a value there (extra bulletproofing against \"Prop\": null), add additional [JsonDisallowNull] attribute.\n- If your property was { get; }-only before, make it { get; private init; } instead.\n- If your field was readonly before, drop readonly and make it  { get; private init; } instead.\n- If your property was static before, drop it, STJ doesn't serialize those, even if they're same for every instance.\n- If you're using custom parameterless constructor, including internal/private one i.e. private MyClass() { }, ensure it's annotated with [JsonConstructor] - this wasn't required before in Newtonsoft, but it's mandatory in STJ now.\n- If you've used [JsonExtensionData], use the same attribute from STJ, add additional [JsonInclude] and correct JToken to JsonElement - also remember about { get; private init; }.\n- If you've used JsonConvert before, use ToJsonObject<T>(), ToJsonText() (and in rare occurances, ToJsonElement()) helper methods from ASF namespace. You can also use standard JsonSerializer, but then you should always include custom JsonUtilities.DefaultJsonSerialierOptions from ASF namespace, which add support for otherwise missing STJ features, such as [JsonDisallowNull] attribute, custom Guid formats or ShouldSerializeXYZ() conditional methods - everything we needed ourselves in ASF.\nDepending on how big your plugin is and what it does, you most likely won't have as much work as it might seem like from our notes above - we've included comprehensive guide to aid you with upgrade, but it's expected that majority of plugin developers will be fine just changing [JsonProperty] to [JsonInclude], and maybe adding [JsonPropertyName] on top of it.Like you, we also needed to adapt all of our existing ASF code to STJ - this is why you can find a lot of examples of expected/required changes in our commit  feel free to use it as a reference in regards to notes above, and if you need help, remember you can always reach us through usual support channels, especially #dev-plugins on our Discord server.\nSupport\nASF is available for free, this release was made possible thanks to the people that decided to support the project. If you're grateful for what we're doing, please consider a donation. Developing ASF requires massive amount of time and knowledge, especially when it comes to Steam (and its problems). Even $1 is highly appreciated and shows that you care. Thank you!GitHub sponsor Crypto donate PayPal.me donate PayPal donate Revolut donate Steam donate"
+ReleaseNotesUrl: https://github.com/JustArchiNET/ArchiSteamFarm/releases/tag/6.0.0.3
+ManifestType: defaultLocale
+ManifestVersion: 1.6.0
