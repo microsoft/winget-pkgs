@@ -488,8 +488,8 @@ ManifestVersion: 1.6.0
  This key represents any dependencies required to install or run the package.
 
  > [!IMPORTANT]
- Dependencies are referenced by their package identifier and must come from the same source.
-> 
+ External Dependencies are not supported. Package dependencies are referenced by their package identifier and must come from the same source. Windows Features may require a reboot before they are enabled. Windows Libraries are not supported.
+
  > [!NOTE]
  This key may be present in the root of the manifest as the default value for all installer nodes. This key may also be present in an individual installer node as well. If this key is in the manifest root and in an installer node, the value in the installer node will apply.
 </details>
