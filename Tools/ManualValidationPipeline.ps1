@@ -10,7 +10,7 @@
 #3.88.19 - A few bugfixes.
 #3.88.18 - Restore waiver and retry fucntionality. 
 
-$build = 886
+$build = 887
 $appName = "ManualValidationPipeline"
 Write-Host "$appName build: $build"
 $MainFolder = "C:\ManVal"
@@ -1398,7 +1398,7 @@ Function Get-PRWatch {
 				$PRvMan = "P"
 				$Approve = "+"
 
-				$WinGetOutput = Find-WinGetPackage $PackageIdentifier -MatchOption Equals
+				$WinGetOutput = Find-WinGetPackage $PackageIdentifier | where {$_.id -eq $PackageIdentifier}
 				$ManifestVersion = $WinGetOutput.version
 				$ManifestVersionParams = ($ManifestVersion -split "[.]").count
 				$prVersionParams = ($prVersion -split "[.]").count
@@ -2654,7 +2654,8 @@ Function Get-AutoValLog {
 					#$_ -match 'not applicable' -OR 
 					$_ -match 'unwanted' -OR #PUA
 					$_ -match 'Unable to locate nested installer' -OR
-					$_ -match 'Windows cannot install package' 
+					$_ -match 'space' -OR
+					$_ -match 'cannot install' 
 				}
 			}
 		) -split "`n" | Select-Object -Unique;
@@ -2676,17 +2677,16 @@ Function Get-AutoValLog {
 			$UserInput = $UserInput -notmatch '``Windows Error Reporting``'
 			$UserInput = $UserInput -notmatch "--- End of inner exception stack trace ---"
 			$UserInput = $UserInput -notmatch 'api-ms-win-core-errorhandling'
+			$UserInput = $UserInput -notmatch "appropriate application package"
 			$UserInput = $UserInput -notmatch "2: 3: Error"
 			$UserInput = $UserInput -notmatch "because the current user does not have that package installed"
 			$UserInput = $UserInput -notmatch "Cannot create a file when that file already exists"
 			$UserInput = $UserInput -notmatch "Could not create system restore point"
 			$UserInput = $UserInput -notmatch "Dest filename"
 			$UserInput = $UserInput -notmatch "ERROR: Signature Update failed"
-			$UserInput = $UserInput -notmatch " 8A15005E "
 			$UserInput = $UserInput -notmatch "Exception during executable launch operation System.InvalidOperationException: No process is associated with this object."
 			$UserInput = $UserInput -notmatch "Exit code`: 0"
 			$UserInput = $UserInput -notmatch "Failed to open available source: msstore"
-			$UserInput = $UserInput -notmatch "Installation failed with exit code -1978334972"
 			$UserInput = $UserInput -notmatch "ISWEBVIEW2INSTALLED"
 			$UserInput = $UserInput -notmatch "MpCmdRun"
 			$UserInput = $UserInput -notmatch "ResultException"
@@ -4647,7 +4647,7 @@ Function Get-PadRight {
 	$out
 }
 
-$WordFilterList = "accept_gdpr ", "accept-licenses", "accept-license","eula","downloadarchive.documentfoundation.org"
+$WordFilterList = "accept_gdpr ", "accept-licenses", "accept-license","eula","downloadarchive.documentfoundation.org","paypal"
 
 $CountrySet = "Default","Warm","Cool","Random","Afghanistan","Albania","Algeria","American Samoa","Andorra","Angola","Anguilla","Antigua And Barbuda","Argentina","Armenia","Aruba","Australia","Austria","Azerbaijan","Bahamas","Bahrain","Bangladesh","Barbados","Belarus","Belgium","Belize","Benin","Bermuda","Bhutan","Bolivia","Bosnia And Herzegovina","Botswana","Bouvet Island","Brazil","Brunei Darussalam","Bulgaria","Burkina Faso","Burundi","Cabo Verde","Cambodia","Cameroon","Canada","Central African Republic","Chad","Chile","China","Colombia","Comoros","Cook Islands","Costa Rica","Croatia","Cuba","Curacao","Cyprus","Czechia","CÃ¶te D'Ivoire","Democratic Republic Of The Congo","Denmark","Djibouti","Dominica","Dominican Republic","Ecuador","Egypt","El Salvador","Equatorial Guinea","Eritrea","Estonia","Eswatini","Ethiopia","Fiji","Finland","France","French Polynesia","Gabon","Gambia","Georgia","Germany","Ghana","Greece","Grenada","Guatemala","Guinea","Guinea-Bissau","Guyana","Haiti","Holy See (Vatican City State)","Honduras","Hungary","Iceland","India","Indonesia","Iran","Iraq","Ireland","Israel","Italy","Jamaica","Japan","Jordan","Kazakhstan","Kenya","Kiribati","Kuwait","Kyrgyzstan","Laos","Latvia","Lebanon","Lesotho","Liberia","Libya","Liechtenstein","Lithuania","Luxembourg","Madagascar","Malawi","Malaysia","Maldives","Mali","Malta","Marshall Islands","Mauritania","Mauritius","Mexico","Micronesia","Moldova","Monaco","Mongolia","Montenegro","Morocco","Mozambique","Myanmar","Namibia","Nauru","Nepal","Netherlands","New Zealand","Nicaragua","Niger","Nigeria","Niue","Norfolk Island","North Korea","North Macedonia","Norway","Oman","Pakistan","Palau","Palestine","Panama","Papua New Guinea","Paraguay","Peru","Philippines","Pitcairn Islands","Poland","Portugal","Qatar","Republic Of The Congo","Romania","Russian Federation","Rwanda","Saint Kitts And Nevis","Saint Lucia","Saint Vincent And The Grenadines","Samoa","San Marino","Sao Tome And Principe","Saudi Arabia","Senegal","Serbia","Seychelles","Sierra Leone","Singapore","Slovakia","Slovenia","Solomon Islands","Somalia","South Africa","South Korea","South Sudan","Spain","Sri Lanka","Sudan","Suriname","Sweden","Switzerland","Syrian Arab Republic","Tajikistan","Tanzania"," United Republic Of","Thailand","Togo","Tonga","Trinidad And Tobago","Tunisia","Turkey","Turkmenistan","Tuvalu","Uganda","Ukraine","United Arab Emirates","United Kingdom","United States","Uruguay","Uzbekistan","Vanuatu","Venezuela","Vietnam","Yemen","Zambia","Zimbabwe","Ã…land Islands"
 

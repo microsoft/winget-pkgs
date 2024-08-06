@@ -145,7 +145,7 @@ using System.Web.Script.Serialization;
 namespace WinGetApprovalNamespace {
     public class WinGetApprovalPipeline : Form {
 		//vars
-        public int build = 911;//Get-RebuildPipeApp
+        public int build = 912;//Get-RebuildPipeApp
 		public string appName = "WinGetApprovalPipeline";
 		public string appTitle = "WinGet Approval Pipeline - Build ";
 		public static string owner = "microsoft";
@@ -569,6 +569,7 @@ namespace WinGetApprovalNamespace {
 				item.MenuItems.Add("Installs Normally in VM", new EventHandler(Manually_Validated_Action));
 				item.MenuItems.Add("Close: (User Input);", new EventHandler(Closed_Action));
 				item.MenuItems.Add("Close: Merge Conflicts;", new EventHandler(Merge_Conflicts_Action));
+				item.MenuItems.Add("Close: Package still available;", new EventHandler(Package_Available_Action));
 				item.MenuItems.Add("Close: Duplicate of (User Input);", new EventHandler(Duplicate_Action));
 				// item.MenuItems.Add("Add Waiver", new EventHandler(Add_Waiver_Action));
 				// item.MenuItems.Add("(disabled) Needs Author Feedback (reason)", new EventHandler(Needs_Author_Feedback_Action));
@@ -4736,6 +4737,12 @@ try {
 			dynamic response_out = FromJson(InvokeGitHubPRRequest(PR,WebRequestMethods.Http.Post,"comments","Close with reason: Merge Conflicts;"));
         }// end Merge_Conflicts_Action
 		
+        public void Package_Available_Action(object sender, EventArgs e) {
+			int PR = GetCurrentPR();
+			AddPRToRecord(PR,"Closed");
+			dynamic response_out = FromJson(InvokeGitHubPRRequest(PR,WebRequestMethods.Http.Post,"comments","Close with reason: Package still available;"));
+        }// end Package_Available_Action
+		
         public void Duplicate_Action(object sender, EventArgs e) {
 			int PR = GetCurrentPR();
 			int UserInput = Int32.Parse(inputBox_User.Text.Replace("#",""));
@@ -5059,7 +5066,8 @@ public string UpdateArchInPR(int PR, string SearchTerm = "  Architecture: x86", 
 			"accept-licenses", 
 			"accept-license", 
 			"eula",
-			"downloadarchive.documentfoundation.org"
+			"downloadarchive.documentfoundation.org",
+			"paypal"
 		};
 
 		public string[] AppsAndFeaturesEntriesList = {
