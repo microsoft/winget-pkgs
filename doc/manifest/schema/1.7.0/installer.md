@@ -47,7 +47,7 @@ Installers:                        # The list of package installers
       Log:                         # Optional installer log file path
       Upgrade:                     # Optional installer switches for upgrade
       Custom:                      # Optional installer switches for custom behavior
-			Repair:											 # Optional installer switches to use when repairing the package installation
+      Repair:                      # Optional installer switches to use when repairing the package installation
     UpgradeBehavior:               # Optional upgrade method
     Commands:                      # Optional commands or aliases to run the package
     Protocols:                     # Optional list of protocols supported by the package
@@ -93,7 +93,7 @@ Installers:                        # The list of package installers
             InvocationParameter:   # Optional parameter for invocable files
             DisplayName:           # Optional display name for invocable files
     DownloadCommandProhibited:     # Optional indicator for packages which cannot be downloaded for offline installation
-		RepairBehavior:								 # Optional repair method to use with 'winget repair`
+    RepairBehavior:                # Optional repair method to use with 'winget repair`
 ManifestType: installer            # The manifest type
 ManifestVersion: 1.7.0             # The manifest syntax version
 ```
