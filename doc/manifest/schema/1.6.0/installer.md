@@ -51,10 +51,10 @@ Installers:                        # The list of package installers
     Commands:                      # Optional commands or aliases to run the package
     Protocols:                     # Optional list of protocols supported by the package
     FileExtensions:                # Optional list of file extensions supported by the package
-    Dependencies:                  # *Experimental* list of dependencies required by the package
+    Dependencies:                  # Optional list of dependencies required by the package
       - ExternalDependencies:      # *Not implemented* list of external dependencies
-        PackageDependencies:       # *Experimental* list of package dependencies
-        WindowsFeatures:           # *Not implemented* list of Windows feature dependencies
+        PackageDependencies:       # Optional list of package dependencies
+        WindowsFeatures:           # Optional list of Windows feature dependencies
         WindowsLibraries:          # *Not implemented* list of Windows library dependencies
     PackageFamilyName:             # Optional MSIX package family name
     Capabilities:                  # Optional list of MSIX package capabilities
@@ -488,7 +488,7 @@ ManifestVersion: 1.6.0
  This key represents any dependencies required to install or run the package.
 
  > [!IMPORTANT]
- The Windows Package Manager does not support any behavior related to dependencies.
+ External Dependencies are not supported. Package dependencies are referenced by their package identifier and must come from the same source. Windows Features may require a reboot before they are enabled. Windows Libraries are not supported.
 
  > [!NOTE]
  This key may be present in the root of the manifest as the default value for all installer nodes. This key may also be present in an individual installer node as well. If this key is in the manifest root and in an installer node, the value in the installer node will apply.
@@ -502,7 +502,7 @@ ManifestVersion: 1.6.0
  This key represents any external dependencies required to install or run the package.
 
  > [!IMPORTANT]
- The Windows Package Manager does not support any behavior related to dependencies.
+ The Windows Package Manager does not support any behavior related to external dependencies.
 </details>
 
 <details>
@@ -513,7 +513,7 @@ ManifestVersion: 1.6.0
  This key represents any packages from the same source required to install or run the package.
 
  > [!IMPORTANT]
- The Windows Package Manager does not support any behavior related to dependencies.
+Dependencies are referenced by their package identifier and must come from the same source.
 </details>
 
 <details>
@@ -522,9 +522,6 @@ ManifestVersion: 1.6.0
  **Optional Field**
 
  This key represents any Windows features required to install or run the package.
-
- > [!IMPORTANT]
- The Windows Package Manager does not support any behavior related to dependencies.
 </details>
 
 <details>
@@ -535,7 +532,7 @@ ManifestVersion: 1.6.0
  This key represents any Windows libraries required to install or run the package.
 
  > [!IMPORTANT]
- The Windows Package Manager does not support any behavior related to dependencies.
+ The Windows Package Manager does not support any behavior related to Windows Libraries.
 </details>
 
 <details>
