@@ -21,79 +21,79 @@ All Windows Package Manager manifests in the Microsoft community repository are 
 ### Installer Manifest
 
 ```YAML
-PackageIdentifier:              	# The package unique identifier
-PackageVersion:                 	# The package version
-Channel:                        	# *Not implemented* distribution channel
-Installers:                     	# The list of package installers
-  - Architecture:               	# The architecture of the installer
-    InstallerLocale:            	# Optional locale of the installer
-    Platform:                   	# Optional installer supported operating system
-    MinimumOSVersion:           	# Optional installer minimum operating system version
-    InstallerType:              	# The installer type
-    InstallerUrl:               	# The installer URL
-    InstallerSha256:            	# The SHA256 hash of the installer
-    SignatureSha256:            	# Optional SHA256 hash of the MSIX signature
-    NestedInstallerType:					# The installer type when InstallerType is an archive type
-    NestedInstallerFiles:					# Details about the installers when InstallerType is an archive type
-      - RelativeFilePath:					# The relative path to the nested installer file
-        PortableCommandAlias:			# Optional command alias to be used for calling the package. Only applies when NestedInstallerType is 'portable'
-    Scope:                      	# Optional installer scope
-    InstallModes:              		# Optional installer modes
-    InstallerSwitches:         	 	# Optional installer switches
-      Silent:                   	# Optional installer switches for silent
-      SilentWithProgress:       	# Optional installer switches for silent with progress
-      Interactive:              	# Optional installer switches for interactive
-      InstallLocation:          	# Optional install location path
-      Log:                      	# Optional installer log file path
-      Upgrade:                  	# Optional installer switches for upgrade
-      Custom:                   	# Optional installer switches for custom behavior
-    UpgradeBehavior:            	# Optional upgrade method
-    Commands:                   	# Optional commands or aliases to run the package
-    Protocols:                  	# Optional list of protocols supported by the package
-    FileExtensions:             	# Optional list of file extensions supported by the package
-    Dependencies:               	# *Experimental* list of dependencies required by the package
-      - ExternalDependencies:   	# *Not implemented* list of external dependencies
-        PackageDependencies:    	# *Experimental* list of package dependencies
-        WindowsFeatures:        	# *Not implemented* list of Windows feature dependencies
-        WindowsLibraries:       	# *Not implemented* list of Windows library dependencies
-    PackageFamilyName:          	# Optional MSIX package family name
-    Capabilities:               	# Optional list of MSIX package capabilities
-    RestrictedCapabilities:     	# Optional list of MSIX package restricted capabilities
-    InstallerAbortsTerminal:    	# Optional indicator for packages that abort terminal
-    InstallLocationRequired:    	# Optional indicator for packages that require install location
-    RequireExplicitUpgrade:     	# Optional indicator for packages that upgrade themselves
-    ElevationRequirement:       	# Optional scope required to install package
-    UnsupportedOSArchitectures: 	# Optional architectures the package is not supported on
-    Markets:                    	# Optional markets the package is allowed to be installed
-    ExcludedMarkets:            	# Optional markets the package is not allowed to be installed
-    InstallerSuccessCodes:      	# Optional non-zero installer success codes
-    ExpectedReturnCodes:        	# Optional non-zero installer return codes
-      - InstallerReturnCode:     	# Optional non-zero installer return code
-        ReturnResponse:         	# Optional response for an expected return code
-        ReturnResponseUrl:      	# Optional response URL for an expected return code
-    ProductCode:                	# Optional product code of the installer
-    AppsAndFeaturesEntries:     	# Optional entries from the Add and Remove Programs (ARP) table
-      - DisplayName:            	# Optional program name shown in the ARP entry
-        DisplayVersion:         	# Optional version displayed in the ARP entry
-        Publisher:              	# Optional publisher displayed in the ARP entry
-        ProductCode:            	# Optional product code of the installer
-        UpgradeCode:            	# Optional upgrade code of the installer
-        InstallerType:          	# Optional installer type
-    UnsupportedArguments:       	# Optional list of Windows Package Manager Client arguments the installer does not support
-      - UnsupportedArgument:    	# Optional unsupported Windows Package Manager Client argument
-    DisplayInstallWarnings:     	# *Not implemented* Optional indicator for packages that are known to interfere with running application during install
-    ReleaseDate:                	# Optional release date
-    InstallationMetadata:					# Optional metadata for deeper installation detection
-      - DefaultInstallLocation: 	# Optional default install location for the package
-        Files:										# Optional list of files installed by the package
-          - RelativeFilePath:   	# Optional relative path to the installed file
-            FileSha256:						# Optional Sha256 of the installed file
-            FileType:							# Optional installed file type. Treated as 'other' if not specified
-            InvocationParameter:	# Optional parameter for invocable files
-            DisplayName:					# Optional display name for invocable files
-		DownloadCommandProhibited:		# Optional indicator for packages which cannot be downloaded for offline installation
-ManifestType: installer         	# The manifest type
-ManifestVersion: 1.6.0          	# The manifest syntax version
+PackageIdentifier:                 # The package unique identifier
+PackageVersion:                    # The package version
+Channel:                           # *Not implemented* distribution channel
+Installers:                        # The list of package installers
+  - Architecture:                  # The architecture of the installer
+    InstallerLocale:               # Optional locale of the installer
+    Platform:                      # Optional installer supported operating system
+    MinimumOSVersion:              # Optional installer minimum operating system version
+    InstallerType:                 # The installer type
+    InstallerUrl:                  # The installer URL
+    InstallerSha256:               # The SHA256 hash of the installer
+    SignatureSha256:               # Optional SHA256 hash of the MSIX signature
+    NestedInstallerType:           # The installer type when InstallerType is an archive type
+    NestedInstallerFiles:          # Details about the installers when InstallerType is an archive type
+      - RelativeFilePath:          # The relative path to the nested installer file
+        PortableCommandAlias:      # Optional command alias to be used for calling the package. Only applies when NestedInstallerType is 'portable'
+    Scope:                         # Optional installer scope
+    InstallModes:                  # Optional installer modes
+    InstallerSwitches:             # Optional installer switches
+      Silent:                      # Optional installer switches for silent
+      SilentWithProgress:          # Optional installer switches for silent with progress
+      Interactive:                 # Optional installer switches for interactive
+      InstallLocation:             # Optional install location path
+      Log:                         # Optional installer log file path
+      Upgrade:                     # Optional installer switches for upgrade
+      Custom:                      # Optional installer switches for custom behavior
+    UpgradeBehavior:               # Optional upgrade method
+    Commands:                      # Optional commands or aliases to run the package
+    Protocols:                     # Optional list of protocols supported by the package
+    FileExtensions:                # Optional list of file extensions supported by the package
+    Dependencies:                  # Optional list of dependencies required by the package
+      - ExternalDependencies:      # *Not implemented* list of external dependencies
+        PackageDependencies:       # Optional list of package dependencies
+        WindowsFeatures:           # Optional list of Windows feature dependencies
+        WindowsLibraries:          # *Not implemented* list of Windows library dependencies
+    PackageFamilyName:             # Optional MSIX package family name
+    Capabilities:                  # Optional list of MSIX package capabilities
+    RestrictedCapabilities:        # Optional list of MSIX package restricted capabilities
+    InstallerAbortsTerminal:       # Optional indicator for packages that abort terminal
+    InstallLocationRequired:       # Optional indicator for packages that require install location
+    RequireExplicitUpgrade:        # Optional indicator for packages that upgrade themselves
+    ElevationRequirement:          # Optional scope required to install package
+    UnsupportedOSArchitectures:    # Optional architectures the package is not supported on
+    Markets:                       # Optional markets the package is allowed to be installed
+    ExcludedMarkets:               # Optional markets the package is not allowed to be installed
+    InstallerSuccessCodes:         # Optional non-zero installer success codes
+    ExpectedReturnCodes:           # Optional non-zero installer return codes
+      - InstallerReturnCode:       # Optional non-zero installer return code
+        ReturnResponse:            # Optional response for an expected return code
+        ReturnResponseUrl:         # Optional response URL for an expected return code
+    ProductCode:                   # Optional product code of the installer
+    AppsAndFeaturesEntries:        # Optional entries from the Add and Remove Programs (ARP) table
+      - DisplayName:               # Optional program name shown in the ARP entry
+        DisplayVersion:            # Optional version displayed in the ARP entry
+        Publisher:                 # Optional publisher displayed in the ARP entry
+        ProductCode:               # Optional product code of the installer
+        UpgradeCode:               # Optional upgrade code of the installer
+        InstallerType:             # Optional installer type
+    UnsupportedArguments:          # Optional list of Windows Package Manager Client arguments the installer does not support
+      - UnsupportedArgument:       # Optional unsupported Windows Package Manager Client argument
+    DisplayInstallWarnings:        # *Not implemented* Optional indicator for packages that are known to interfere with running application during install
+    ReleaseDate:                   # Optional release date
+    InstallationMetadata:          # Optional metadata for deeper installation detection
+      - DefaultInstallLocation:    # Optional default install location for the package
+        Files:                     # Optional list of files installed by the package
+          - RelativeFilePath:      # Optional relative path to the installed file
+            FileSha256:            # Optional Sha256 of the installed file
+            FileType:              # Optional installed file type. Treated as 'other' if not specified
+            InvocationParameter:   # Optional parameter for invocable files
+            DisplayName:           # Optional display name for invocable files
+    DownloadCommandProhibited:     # Optional indicator for packages which cannot be downloaded for offline installation
+ManifestType: installer            # The manifest type
+ManifestVersion: 1.6.0             # The manifest syntax version
 ```
 
 ### Installer Minimal Example
@@ -488,7 +488,7 @@ ManifestVersion: 1.6.0
  This key represents any dependencies required to install or run the package.
 
  > [!IMPORTANT]
- The Windows Package Manager does not support any behavior related to dependencies.
+ External Dependencies are not supported. Package dependencies are referenced by their package identifier and must come from the same source. Windows Features may require a reboot before they are enabled. Windows Libraries are not supported.
 
  > [!NOTE]
  This key may be present in the root of the manifest as the default value for all installer nodes. This key may also be present in an individual installer node as well. If this key is in the manifest root and in an installer node, the value in the installer node will apply.
@@ -502,7 +502,7 @@ ManifestVersion: 1.6.0
  This key represents any external dependencies required to install or run the package.
 
  > [!IMPORTANT]
- The Windows Package Manager does not support any behavior related to dependencies.
+ The Windows Package Manager does not support any behavior related to external dependencies.
 </details>
 
 <details>
@@ -513,7 +513,7 @@ ManifestVersion: 1.6.0
  This key represents any packages from the same source required to install or run the package.
 
  > [!IMPORTANT]
- The Windows Package Manager does not support any behavior related to dependencies.
+Dependencies are referenced by their package identifier and must come from the same source.
 </details>
 
 <details>
@@ -522,9 +522,6 @@ ManifestVersion: 1.6.0
  **Optional Field**
 
  This key represents any Windows features required to install or run the package.
-
- > [!IMPORTANT]
- The Windows Package Manager does not support any behavior related to dependencies.
 </details>
 
 <details>
@@ -535,7 +532,7 @@ ManifestVersion: 1.6.0
  This key represents any Windows libraries required to install or run the package.
 
  > [!IMPORTANT]
- The Windows Package Manager does not support any behavior related to dependencies.
+ The Windows Package Manager does not support any behavior related to Windows Libraries.
 </details>
 
 <details>
