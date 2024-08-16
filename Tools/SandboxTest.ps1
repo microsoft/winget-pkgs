@@ -83,7 +83,19 @@ New-Item $tempFolder -ItemType Directory -ErrorAction SilentlyContinue | Out-Nul
 $WebClient = New-Object System.Net.WebClient
 
 function Get-Release {
-  $releasesAPIResponse = Invoke-RestMethod 'https://api.github.com/repos/microsoft/winget-cli/releases?per_page=100'
+  # TODO: Further improvements
+  # Sending authorized requests with GitHub CLI (aka. `gh.exe`) is much more convenient than using `Invoke-RestMethod`.
+  # It would be better integrate this script with GitHub CLI, since developers do not need creating and configuring PAT manually.
+  if ($env:GITHUB_TOKEN && $env:GITHUB_TOKEN.StartsWith('ghp_')) {
+      # Authenticate to GitHub REST API with a PAT, can get a higher rate limit.
+      # This can go some way to avoiding "API rate limit exeeded" error.
+      $SecureToken = ConvertTo-SecureString "$env:GITHUB_TOKEN" -AsPlainText
+      $releasesAPIResponse = Invoke-RestMethod -Authentication Bearer -Token $SecureToken 'https://api.github.com/repos/microsoft/winget-cli/releases?per_page=100'
+    }
+    else {
+      Write-Warning -Message 'Unauthorized request! You may encounter "API rate limit exeeded" error ...'
+      $releasesAPIResponse = Invoke-RestMethod 'https://api.github.com/repos/microsoft/winget-cli/releases?per_page=100'
+    }
   if (!$script:Prerelease) {
     $releasesAPIResponse = $releasesAPIResponse.Where({ !$_.prerelease })
   }
