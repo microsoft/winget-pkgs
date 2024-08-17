@@ -86,14 +86,33 @@ function Get-Release {
   # TODO: Further improvements
   # Sending authorized requests with GitHub CLI (aka. `gh.exe`) is much more convenient than using `Invoke-RestMethod`.
   # It would be better integrate this script with GitHub CLI, since developers do not need creating and configuring PAT manually.
+
+  # First query an endpoint to see if credentials are valid.
+  $isValidCredential = $false
+  $requestParameters = @{
+    Uri = 'https://api.github.com/octocat'
+  }
+  if ($env:GITHUB_TOKEN) {
+    $requestParameters.Add('Authentication', 'Bearer')
+    $requestParameters.Add('Token', $(ConvertTo-SecureString "$env:GITHUB_TOKEN" -AsPlainText))
+    $isValidCredential = ([Int16](Invoke-WebRequest @requestParameters).Headers["X-RateLimit-Limit"][0]) -eq 60
+  }
+
+  # Query version information of microsoft/winget-cli
   $requestParameters = @{
     Uri = 'https://api.github.com/repos/microsoft/winget-cli/releases?per_page=100'
   }
-  if ($env:GITHUB_TOKEN && $env:GITHUB_TOKEN.StartsWith('ghp_')) {
+  if ($isValidCredential) {
+    # See https://docs.github.com/zh/rest/using-the-rest-api/rate-limits-for-the-rest-api?apiVersion=2022-11-28#primary-rate-limit-for-unauthenticated-users
+    Write-Host "WARNING: You may encounter 'API rate limit exeeded' error! Please consider adding `GITHUB_TOKEN` to your environment variable."
+  }
+  else {
+    # Authorized users have much higher limits, to 5,000 or even 15,000.
     $requestParameters.Add('Authentication', 'Bearer')
     $requestParameters.Add('Token', $(ConvertTo-SecureString "$env:GITHUB_TOKEN" -AsPlainText))
   }
-  $releasesAPIResponse = Invoke-RestMethod @requestParameters  if (!$script:Prerelease) {
+  $releasesAPIResponse = Invoke-RestMethod @requestParameters
+  if (!$script:Prerelease) {
     $releasesAPIResponse = $releasesAPIResponse.Where({ !$_.prerelease })
   }
   if (![String]::IsNullOrWhiteSpace($script:WinGetVersion)) {
