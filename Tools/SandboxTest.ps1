@@ -83,19 +83,20 @@ New-Item $tempFolder -ItemType Directory -ErrorAction SilentlyContinue | Out-Nul
 $WebClient = New-Object System.Net.WebClient
 
 function Get-Release {
-  # TODO: Further improvements
-  # Sending authorized requests with GitHub CLI (aka. `gh.exe`) is much more convenient than using `Invoke-RestMethod`.
-  # It would be better integrate this script with GitHub CLI, since developers do not need creating and configuring PAT manually.
+  $isValidCredential = $false
 
   # First query an endpoint to see if credentials are valid.
-  $isValidCredential = $false
   $requestParameters = @{
     Uri = 'https://api.github.com/rate_limit'
   }
+  if (Get-Command 'gh' -ErrorAction SilentlyContinue) {
+    # Check if GitHub CLI is available. Always prefer using its GitHub OAuth `gho_` token.
+    $env:GITHUB_TOKEN = (gh auth token)
+  }
   if ($env:GITHUB_TOKEN) {
     $requestParameters.Add('Authentication', 'Bearer')
-    $requestParameters.Add('Token', $(ConvertTo-SecureString "$env:GITHUB_TOKEN" -AsPlainText))
-    $isValidCredential = (ConvertFrom-Json (Invoke-WebRequest @requestParameters).Headers["X-RateLimit-Limit"]).resources.core.limit -ne 60
+    $requestParameters.Add('Token', (ConvertTo-SecureString "$env:GITHUB_TOKEN" -AsPlainText))
+    $isValidCredential = (Invoke-WebRequest @requestParameters | ConvertFrom-Json).resources.core.limit -ne 60
   }
 
   # Query version information of microsoft/winget-cli
