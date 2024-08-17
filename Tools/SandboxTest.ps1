@@ -90,12 +90,12 @@ function Get-Release {
   # First query an endpoint to see if credentials are valid.
   $isValidCredential = $false
   $requestParameters = @{
-    Uri = 'https://api.github.com/octocat'
+    Uri = 'https://api.github.com/rate_limit'
   }
   if ($env:GITHUB_TOKEN) {
     $requestParameters.Add('Authentication', 'Bearer')
     $requestParameters.Add('Token', $(ConvertTo-SecureString "$env:GITHUB_TOKEN" -AsPlainText))
-    $isValidCredential = ([Int16](Invoke-WebRequest @requestParameters).Headers["X-RateLimit-Limit"][0]) -eq 60
+    $isValidCredential = (ConvertFrom-Json (Invoke-WebRequest @requestParameters).Headers["X-RateLimit-Limit"]).resources.core.limit -ne 60
   }
 
   # Query version information of microsoft/winget-cli
