@@ -111,10 +111,13 @@ function Test-GitHubToken {
 
 function Get-ReleasesResponse {
   if (Get-Command 'gh' -ErrorAction SilentlyContinue) {
-    # This assumes gh auth status returns a 0 Exit Code and the user is logged in
-    return $(gh api repos/microsoft/winget-cli/releases --paginate | ConvertFrom-Json)
+    # If the user is logged in, use the gh cli for getting the information
+    if ($(gh auth status>$null; $?)) {
+      return $(gh api repos/microsoft/winget-cli/releases --paginate | ConvertFrom-Json)
+    }
   }
 
+  # If the user is not logged in the API will be queried directly
   $requestParameters = @{
     Uri = 'https://api.github.com/repos/microsoft/winget-cli/releases?per_page=100'
   }
