@@ -112,7 +112,7 @@ function Test-GitHubToken {
 function Get-ReleasesResponse {
   if (Get-Command 'gh' -ErrorAction SilentlyContinue) {
     # If the user is logged in, use the gh cli for getting the information
-    if ($(gh auth status>$null; $?)) {
+    if ($(gh auth status >$null; $?)) {
       return $(gh api repos/microsoft/winget-cli/releases --paginate | ConvertFrom-Json)
     }
   }
