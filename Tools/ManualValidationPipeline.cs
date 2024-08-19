@@ -145,7 +145,7 @@ using System.Web.Script.Serialization;
 namespace WinGetApprovalNamespace {
     public class WinGetApprovalPipeline : Form {
 		//vars
-        public int build = 912;//Get-RebuildPipeApp
+        public int build = 914;//Get-RebuildPipeApp
 		public string appName = "WinGetApprovalPipeline";
 		public string appTitle = "WinGet Approval Pipeline - Build ";
 		public static string owner = "microsoft";
@@ -570,6 +570,7 @@ namespace WinGetApprovalNamespace {
 				item.MenuItems.Add("Close: (User Input);", new EventHandler(Closed_Action));
 				item.MenuItems.Add("Close: Merge Conflicts;", new EventHandler(Merge_Conflicts_Action));
 				item.MenuItems.Add("Close: Package still available;", new EventHandler(Package_Available_Action));
+				item.MenuItems.Add("Close: Regen with new hash;", new EventHandler(Regen_Hash_Action));
 				item.MenuItems.Add("Close: Duplicate of (User Input);", new EventHandler(Duplicate_Action));
 				// item.MenuItems.Add("Add Waiver", new EventHandler(Add_Waiver_Action));
 				// item.MenuItems.Add("(disabled) Needs Author Feedback (reason)", new EventHandler(Needs_Author_Feedback_Action));
@@ -1332,7 +1333,7 @@ Returned array instead of string
 					(PRTitle.Contains("Remove")))) {//Removal PR - if highest version in repo.
 						if ((PRVersion == ManifestVersion) || (NumVersions == 1)) {
 	/* 
-							ReplyToPR(PR,"VersionCount",Submitter,"[Policy] Needs-Author-Feedback\n[Policy] Highest-Version-Remaining");
+							ReplyToPR(PR,"VersionCount",Submitter,"[Policy] Needs-Author-Feedback\n[Policy] Highest-Version-Removal");
 							AddPRToRecord(PR,"Feedback",PRTitle);
 */
 							NumVersions = -1;
@@ -1419,7 +1420,7 @@ int comparison = String.Compare(PRVersion, ManifestVersion);
 				int PR = FullPR["number"];
 				//Get-TrackerProgress -PR $PR $MyInvocation.MyCommand line PRs.Length
 				//line++;
-				//This part is too spammy, checking Highest-Version-Remaining on every run (sometimes twice a day) for a week as the PR sits. I think this is fixed in the other version. #PendingBugfix
+				//This part is too spammy, checking Highest-Version-Removal on every run (sometimes twice a day) for a week as the PR sits. I think this is fixed in the other version. #PendingBugfix
 				if((FullPR["title"].Contains("Remove")) || 
 				(FullPR["title"].Contains("Delete")) || 
 				(FullPR["title"].Contains("Automatic deletion"))){
@@ -1837,7 +1838,7 @@ var query =
 			
 			string Workable = "-label:Validation-Merge-Conflict+";
 			Workable += "-label:Unexpected-File+";
-			Workable += "-label:Highest-Version-Remaining+";
+			Workable += "-label:Highest-Version-Removal+";
 			
 			//Composite settings;
 			string Set1 = Blocking + Common + Review1;
@@ -4743,6 +4744,12 @@ try {
 			dynamic response_out = FromJson(InvokeGitHubPRRequest(PR,WebRequestMethods.Http.Post,"comments","Close with reason: Package still available;"));
         }// end Package_Available_Action
 		
+        public void Regen_Hash_Action(object sender, EventArgs e) {
+			int PR = GetCurrentPR();
+			AddPRToRecord(PR,"Closed");
+			dynamic response_out = FromJson(InvokeGitHubPRRequest(PR,WebRequestMethods.Http.Post,"comments","Close with reason: Regenerate with new hash, and the newest version number.;"));
+        }// end Package_Available_Action
+		
         public void Duplicate_Action(object sender, EventArgs e) {
 			int PR = GetCurrentPR();
 			int UserInput = Int32.Parse(inputBox_User.Text.Replace("#",""));
@@ -4785,7 +4792,7 @@ try {
         }// end Approval_Search_Action
 		
         public void Highest_Version_Remaining_Action(object sender, EventArgs e) {
-			System.Diagnostics.Process.Start("https://github.com/microsoft/winget-pkgs/pulls?q=is%3Aopen+is%3Apr+draft%3Afalse+label%3AHighest-Version-Remaining+");//HVR
+			System.Diagnostics.Process.Start("https://github.com/microsoft/winget-pkgs/pulls?q=is%3Aopen+is%3Apr+draft%3Afalse+label%3AHighest-Version-Removal+");//HVR
         }// end Approval_Search_Action
 		
         public void Approval_Search_Action(object sender, EventArgs e) {
@@ -4838,7 +4845,7 @@ try {
 			System.Diagnostics.Process.Start("https://github.com/microsoft/winget-pkgs/issues");
 			System.Diagnostics.Process.Start("https://github.com/microsoft/winget-cli/issues");
 			System.Diagnostics.Process.Start("https://github.com/microsoft/winget-pkgs/labels/Needs-Manual-Merge");
-			System.Diagnostics.Process.Start("https://github.com/microsoft/winget-pkgs/pulls?q=is%3Aopen+is%3Apr+draft%3Afalse+label%3AHighest-Version-Remaining+");//HVR
+			System.Diagnostics.Process.Start("https://github.com/microsoft/winget-pkgs/pulls?q=is%3Aopen+is%3Apr+draft%3Afalse+label%3AHighest-Version-Removal+");//HVR
 			SearchGitHub("Defender",1,0, false,false,true);
         }// end Start_Of_Day_Action
 		//Open In Browser
