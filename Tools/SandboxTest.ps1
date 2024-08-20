@@ -83,36 +83,44 @@ New-Item $tempFolder -ItemType Directory -ErrorAction SilentlyContinue | Out-Nul
 $WebClient = New-Object System.Net.WebClient
 
 function Get-Release {
-  $isValidCredential = $false
-
-  # First query an endpoint to see if credentials are valid.
-  $requestParameters = @{
-    Uri = 'https://api.github.com/rate_limit'
-  }
   if (Get-Command 'gh' -ErrorAction SilentlyContinue) {
-    # Check if GitHub CLI is available. Always prefer using its GitHub OAuth `gho_` token.
-    $env:GITHUB_TOKEN = (gh auth token)
+    # Check if GitHub CLI is available. Use `gh api` to query release information.
+    $releasesAPIResponse = gh api repos/microsoft/winget-cli/releases --paginate | ConvertFrom-Json
   }
-  if ($env:GITHUB_TOKEN) {
+  elseif ($env:GITHUB_TOKEN) {
+    <# Perform authenticated requests with `irm`. #>
+
+    # Get rate limits with current token.
+    $requestParameters = @{
+      Uri = 'https://api.github.com/rate_limit'
+    }
     $requestParameters.Add('Authentication', 'Bearer')
     $requestParameters.Add('Token', (ConvertTo-SecureString "$env:GITHUB_TOKEN" -AsPlainText))
-    $isValidCredential = (Invoke-WebRequest @requestParameters | ConvertFrom-Json).resources.core.limit -ne 60
-  }
 
-  # Query version information of microsoft/winget-cli
-  $requestParameters = @{
-    Uri = 'https://api.github.com/repos/microsoft/winget-cli/releases?per_page=100'
-  }
-  if ($isValidCredential) {
-    # See https://docs.github.com/zh/rest/using-the-rest-api/rate-limits-for-the-rest-api?apiVersion=2022-11-28#primary-rate-limit-for-unauthenticated-users
-    Write-Host "WARNING: You may encounter 'API rate limit exeeded' error! Please consider adding `GITHUB_TOKEN` to your environment variable."
-  }
-  else {
-    # Authorized users have much higher limits, to 5,000 or even 15,000.
+    if ((Invoke-RestMethod @requestParameters | ConvertFrom-Json).resources.core.limit -ne 60) {
+      # Invalid token.
+      # See https://docs.github.com/zh/rest/using-the-rest-api/rate-limits-for-the-rest-api?apiVersion=2022-11-28#primary-rate-limit-for-unauthenticated-users
+      Write-Warning 'WARNING: Invalid token! You may encounter "API rate limit exeeded" error!'
+    }
+
+    # Query version information of microsoft/winget-cli
+    $requestParameters = @{
+      Uri = 'https://api.github.com/repos/microsoft/winget-cli/releases?per_page=100'
+    }
+
     $requestParameters.Add('Authentication', 'Bearer')
     $requestParameters.Add('Token', $(ConvertTo-SecureString "$env:GITHUB_TOKEN" -AsPlainText))
+
+    $releasesAPIResponse = Invoke-RestMethod @requestParameters
   }
-  $releasesAPIResponse = Invoke-RestMethod @requestParameters
+  else {
+    <# Use original Powershell `Invoke-WebRequest` and `Invoke-RestMethod` without authentication. #>
+
+    Write-Warning 'WARNING: $env.GITHUB_TOKEN not set! You may encounter "API rate limit exeeded" error!'
+    Write-Warning "TIPS: Please consider adding GITHUB_TOKEN to your environment variable."
+
+    $releasesAPIResponse = Invoke-RestMethod -Uri 'https://api.github.com/repos/microsoft/winget-cli/releases?per_page=100'
+  }
   if (!$script:Prerelease) {
     $releasesAPIResponse = $releasesAPIResponse.Where({ !$_.prerelease })
   }
@@ -210,8 +218,7 @@ foreach ($dependency in $dependencies) {
       }
       $WebClient.DownloadFile($dependency.url, $dependency.SaveTo)
 
-    }
-    catch {
+    } catch {
       # If the download failed, remove the item so the sandbox can fall-back to using the PowerShell module
       Remove-Item $dependency.SaveTo -Force | Out-Null
     }
