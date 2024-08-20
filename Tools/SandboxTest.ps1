@@ -127,7 +127,7 @@ function Get-ReleasesResponse {
     $requestParameters.Add('Token', $(ConvertTo-SecureString "$env:GITHUB_TOKEN" -AsPlainText))
   } else {
     # See https://docs.github.com/zh/rest/using-the-rest-api/rate-limits-for-the-rest-api?apiVersion=2022-11-28#primary-rate-limit-for-unauthenticated-users
-    Write-Host "WARNING: You may encounter 'API rate limit exeeded' error! Please consider adding `GITHUB_TOKEN` to your environment variable."
+    Write-Host "WARNING: You may encounter 'API rate limit exceeded' error! Please consider adding `GITHUB_TOKEN` to your environment variable."
   }
 
   return Invoke-RestMethod @requestParameters
