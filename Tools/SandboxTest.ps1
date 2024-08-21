@@ -116,7 +116,7 @@ function Get-Release {
   else {
     <# Use original Powershell `Invoke-WebRequest` and `Invoke-RestMethod` without authentication. #>
 
-    Write-Warning 'WARNING: $env.GITHUB_TOKEN not set! You may encounter "API rate limit exeeded" error!'
+    Write-Warning 'WARNING: $env.GITHUB_TOKEN not set! You may encounter "API rate limit exceeded" error!'
     Write-Warning "TIPS: Please consider adding GITHUB_TOKEN to your environment variable."
 
     $releasesAPIResponse = Invoke-RestMethod -Uri 'https://api.github.com/repos/microsoft/winget-cli/releases?per_page=100'
