@@ -82,8 +82,59 @@ New-Item $tempFolder -ItemType Directory -ErrorAction SilentlyContinue | Out-Nul
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 $WebClient = New-Object System.Net.WebClient
 
+function Test-GitHubToken {
+  # If a GitHub Token is present, check if it is valid.
+  # If it is valid, use it for the API requests
+  if ($null -ne $script:IsValidGitHubToken) {
+    # If the token has already been validated in this run, it doesn't need to be re-validated
+    # This assumes the token is not changing while the script is executing
+    return $script:IsValidGitHubToken
+  }
+
+  if (!$env:GITHUB_TOKEN) {
+    # If the environment variable doesn't exist, there is no token to validate
+    # Don't query the API at all in this case
+    $script:IsValidGitHubToken = $false
+    return $script:IsValidGitHubToken
+  }
+
+  # The rate limit for authorized users is usually much higher than 60
+  $requestParameters = @{
+    Uri            = 'https://api.github.com/rate_limit'
+    Authentication = 'Bearer'
+    Token          = $(ConvertTo-SecureString "$env:GITHUB_TOKEN" -AsPlainText)
+  }
+
+  $script:IsValidGitHubToken = (Invoke-RestMethod @requestParameters).resources.core.limit -gt 60
+  return $script:IsValidGitHubToken
+}
+
+function Get-ReleasesResponse {
+  if (Get-Command 'gh' -ErrorAction SilentlyContinue) {
+    # If the user is logged in, use the gh cli for getting the information
+    if ($(gh auth status >$null; $?)) {
+      return $(gh api repos/microsoft/winget-cli/releases --paginate | ConvertFrom-Json)
+    }
+  }
+
+  # If the user is not logged in the API will be queried directly
+  $requestParameters = @{
+    Uri = 'https://api.github.com/repos/microsoft/winget-cli/releases?per_page=100'
+  }
+
+  if (Test-GitHubToken) {
+    $requestParameters.Add('Authentication', 'Bearer')
+    $requestParameters.Add('Token', $(ConvertTo-SecureString "$env:GITHUB_TOKEN" -AsPlainText))
+  } else {
+    # See https://docs.github.com/zh/rest/using-the-rest-api/rate-limits-for-the-rest-api?apiVersion=2022-11-28#primary-rate-limit-for-unauthenticated-users
+    Write-Host "WARNING: You may encounter 'API rate limit exceeded' error! Please consider adding `GITHUB_TOKEN` to your environment variable."
+  }
+
+  return Invoke-RestMethod @requestParameters
+}
+
 function Get-Release {
-  $releasesAPIResponse = Invoke-RestMethod 'https://api.github.com/repos/microsoft/winget-cli/releases?per_page=100'
+  $releasesAPIResponse = Get-ReleasesResponse
   if (!$script:Prerelease) {
     $releasesAPIResponse = $releasesAPIResponse.Where({ !$_.prerelease })
   }
