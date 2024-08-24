@@ -1,0 +1,75 @@
+# Created with YamlCreate.ps1 v2.4.1 Dumplings Mod $debug=QUSU.CRLF.7-4-2.Win32NT
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.6.0.schema.json
+
+PackageIdentifier: Ollama.Ollama
+PackageVersion: 0.1.39
+PackageLocale: en-US
+Publisher: Ollama
+PublisherUrl: https://ollama.com/
+PublisherSupportUrl: https://github.com/ollama/ollama/issues
+# PrivacyUrl:
+# Author:
+PackageName: Ollama
+PackageUrl: https://ollama.com/
+License: MIT
+LicenseUrl: https://github.com/ollama/ollama/blob/main/LICENSE
+Copyright: Copyright (c) Ollama
+# CopyrightUrl:
+ShortDescription: Get up and running with large language models locally.
+# Description:
+# Moniker:
+Tags:
+- llama
+- llama2
+- llm
+- llms
+- mistral
+ReleaseNotes: |-
+  New models
+  - Cohere Aya 23: A new state-of-the-art, multilingual LLM covering 23 different languages.
+  - Mistral 7B 0.3: A new version of Mistral 7B with initial support for function calling.
+  - Phi-3 Medium: a 14B parameters, lightweight, state-of-the-art open model by Microsoft.
+  - Phi-3 Mini 128K and Phi-3 Medium 128K: versions of the Phi-3 models that support a context window size of 128K
+  - Granite code: A family of open foundation models by IBM for Code Intelligence
+  Llama 3 import
+  It is now possible to import and quantize Llama 3 and its finetunes from Safetensors format to Ollama.
+  First, clone a Hugging Face repo with a Safetensors model:
+  git clone https://huggingface.co/meta-llama/Meta-Llama-3-8B-Instruct
+  cd Meta-Llama-3-8B-Instruct
+  Next, create a Modelfile:
+  FROM .
+
+  TEMPLATE """{{ if .System }}<|start_header_id|>system<|end_header_id|>
+
+  {{ .System }}<|eot_id|>{{ end }}{{ if .Prompt }}<|start_header_id|>user<|end_header_id|>
+
+  {{ .Prompt }}<|eot_id|>{{ end }}<|start_header_id|>assistant<|end_header_id|>
+
+  {{ .Response }}<|eot_id|>"""
+
+  PARAMETER stop <|start_header_id|>
+  PARAMETER stop <|end_header_id|>
+  PARAMETER stop <|eot_id|>
+  Then, create and quantize a model:
+  ollama create --quantize q4_0 -f Modelfile my-llama3
+  ollama run my-llama3
+  What's Changed
+  - Fixed issues where wide characters such as Chinese, Korean, Japanese and Russian languages.
+  - Added new OLLAMA_NOHISTORY=1 environment variable that can be set to disable history when using ollama run
+  - New experimental OLLAMA_FLASH_ATTENTION=1 flag for ollama serve that improves token generation speed on Apple Silicon Macs and NVIDIA graphics cards
+  - Fixed error that would occur on Windows running ollama create -f Modelfile
+  - ollama create can now create models from I-Quant GGUF files
+  - Fixed EOF errors when resuming downloads via ollama pull
+  - Added a Ctrl+W shortcut to ollama run
+  New Contributors
+  - @rapmd73 made their first contribution in https://github.com/ollama/ollama/pull/4467
+  - @sammcj made their first contribution in https://github.com/ollama/ollama/pull/4120
+  - @likejazz made their first contribution in https://github.com/ollama/ollama/pull/4535
+ReleaseNotesUrl: https://github.com/ollama/ollama/releases/tag/v0.1.39
+# PurchaseUrl:
+# InstallationNotes:
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://github.com/ollama/ollama/tree/main/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.6.0
