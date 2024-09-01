@@ -17,6 +17,27 @@ Copyright: © 2002 – 2022 Moritz Bunkus
 ShortDescription: MKVToolNix is a set of tools to create, alter and inspect Matroska files under Linux, other Unices and Windows.
 Tags:
 - mkv
+ReleaseNotes: |-
+  New features and enhancements
+  - mkvmerge: AV1 parser: the variable-width OBU size field will be re-written with minimal length if it's encoded longer than necessary.
+  - mkvmerge: when splitting is active the program will output the timestamps actually used for making the decision when to split. If GUI mode is active, a specially formatted line #GUI#splitting_before_timestamp <timestamp> is output as well. Lines prefixed with#GUI# are suitable for machine parsing, won't be translated and are guaranteed not to change in format. Implements #3421.
+  - MKVToolNix GUI: multiplexer: when dragging & dropping directories to the "attachments" tab, the files contained in those directories will be attached. Implements #3410.
+  - MKVToolNix GUI: info tool: added information about the file (directory, size, modification timestamp) at the top of each tab. Implements #3407.
+
+  Bug fixes
+  - mkvmerge: AV1 parser: fixed the parser completely aborting when parsing the OBU size field fails due to there not being enough data to parse. Instead the parser will remember the last known-good position & restart from there after more data is available. Fixes #3431.
+  - mkvmerge: HDMV PGS subtitles: reverted the change that implemented a heuristic for detecting bogus timestamps & attempting to fix them. This was done to fix #3268. Unfortunately this affected valid subtitle files with intentional huge gaps in timestamps, e.g. forced subtitle tracks. The heuristic has simply been removed, fixing #3392.
+  - mkvmerge: Matroska reader: fixed reading files with EBML Void elements before the Matroska Segment element.
+  - mkvmerge: fixed reversed attachment selection: --attachments !4 would not copy any attachment instead of all attachments but the one with ID 4. Fixes #3427.
+  - mkvextract: IETF BCP 47/RFC 5646 language tags: mkvextract will now use & prefer IETF BCP 47 track language elements if they're present. Only affects the VobSub & USF subtitle extraction.
+  - mkvpropedit, MKVToolNix GUI's chapter & header editors: updated the list of deprecated Matroska elements. The applications will no longer try to write those elements, even if they're found in the file to be modified. The programs will no longer abort with error messages such as assertion "false" failed. Fixes #3416.
+  - mkvpropedit, MKVToolNix GUI's chapter & header editors: when the Matroska version numbers stored in the EBML Head element are updated, the updated EBML Head element might be smaller than the existing one. In that case the programs used to shrink the EBML Head & write a small EBML Void element between the updated EBML Head & the following element, usually a Matroska Segment element. This isn't widely supported by programs including MKVToolNix itself, causing them to declare such files as invalid. The programs will now create the EBML Void element inside the EBML Head element, making them a level 1 element instead of a level 0 element. Fixes #3355.
+  - mkvpropedit, MKVToolNix GUI's chapter & header editors: often the programs have to relocate the Master elements in which the modifications were done. In that case the Seek Head elements must also be updated to reflect to the Master elements' new positions. If a file contained a Seek Head element at the start already and if that Seek Head was too small to contain the updated positions, the programs would end up in an endless loop trying to write data to the end, creating ever-growing files. This is now handled properly by voiding this too-small Seek Head & finding a proper space for a new one instead. Fixes #3338.
+  - MKVToolNix GUI: header editor: fixed pixelated icons on higher display scaling values. Fixes #3420.
+
+  Build system changes
+  - bug fix: libFLAC detection is now done via pkg-config, and the corresponding compiler flags are honored. Fixes static compilation with newer versions of libFLAC with MXE where a compiler definition is required to signal that it libFLAC wasn't built as a DLL.
+ReleaseNotesUrl: https://mkvtoolnix.download/doc/NEWS.md
 Documentations:
 - DocumentLabel: Documentation
   DocumentUrl: https://mkvtoolnix.download/docs.html

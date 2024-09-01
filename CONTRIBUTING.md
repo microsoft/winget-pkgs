@@ -73,7 +73,7 @@ If you don't have any additional info/context to add but would like to indicate 
 
 ## Authoring manifests
 
-Authoring a manifest is not intended to be a painful experience. We have been working to make it easier. Sometimes this is to our own detriment. Please take the time to read our guidance on [authoring manifests](AUTHORING_MANIFESTS.md). This will save everyone time, and it will reduce the frustration of other Windows users who are just trying to get their job done, or have some fun.
+Authoring a manifest is not intended to be a painful experience. We have been working to make it easier. Sometimes this is to our own detriment. Please take the time to read our guidance on [authoring manifests](/doc/Authoring.md). This will save everyone time, and it will reduce the frustration of other Windows users who are just trying to get their job done, or have some fun.
 
 ## Contributing fixes / features
 
@@ -115,21 +115,67 @@ Once you've discussed your proposed feature/fix/etc. with a team member, and you
 
 1. Fork the repository if you haven't already.
 2. Clone your fork locally.
-> NOTE: Using a shallow clone can significantly speed up the initial clone command.Pass `--depth=1` to git if you do not need any history in your local repo.
+> [!NOTE]
+> Using a shallow clone can significantly speed up the initial clone command.Pass `--depth=1` to git if you do not need any history in your local repo.
 3. Create & push a feature branch.
 4. Create a [Draft Pull Request (PR)](https://github.blog/2019-02-14-introducing-draft-pull-requests/).
 5. Work on your changes.
 6. Build and see if it works.
 
+ # Contribution guidelines
+Welcome to [winget-pkgs]! We're thrilled that you'd like to contribute. Your help is essential for making it better.
+
+## Getting Started
+
+Before you start contributing, please make sure you have read and understood our [Code of Conduct](CODE_OF_CONDUCT.md).
+
+### Fork the Repository
+
+First, fork the [repository](https://github.com/microsoft/winget-pkgs) to your own GitHub account. This will create a copy of the project under your account.
+
+
+### Clone the Repository
+```
+git clone https://github.com/microsoft/winget-pkgs
+```
+### Navigate to the project directory 📁
+```
+cd winget-pkgs
+```
+Create a new branch for your feature or bug fix:
+```
+ git checkout -b feature-branch
+ ```
+
+Make your changes and commit them:
+```
+git add .
+git commit -m "Description of your changes"
+```
+Push your changes to your fork:
+```
+git push origin feature-branch
+```
+Finally Click on Create Pull request to contribute on this repository.
+
 ### Testing
 
-Testing is a key component in the development workflow.
+Testing is a key component in the development workflow. The PR Template asks if you have tested your manifest locally, but what does this mean? When testing your manifest, this is what you should be looking for -
+
+* Manifests should be tested to ensure applications can install unattended
+* Manifests should be tested to ensure application version matches the Package Version, or that AppsAndFeaturesEntries are included if necessary
+* Manifests should be tested to ensure application publisher matches the defaultLocale Publisher, or that AppsAndFeaturesEntries are included if necessary
+* Manifests should be tested to ensure application name matches the defaultLocale PackageName, or that AppsAndFeaturesEntries are included if necessary
+
+After enabling the setting for local manifests (`winget settings --enable LocalManifestFiles`), manifests can be tested locally with `winget install --manifest <path>`.
+If your system supports Windows Sandbox, you can also use the [SandboxTest.ps1 Script](https://github.com/microsoft/winget-pkgs/blob/master/doc/tools/SandboxTest.md) to test the manifest in the Windows Sandbox. This is the preferred method, as it ensures the package doesn't require any dependencies to install.
 
 ### Code Review
 
 When you'd like the team to take a look, (even if the work is not yet fully-complete), mark the Draft PR as 'Ready For Review' so that the team can review your work and provide comments, suggestions, and request changes. It may take several cycles, but the end result will be solid, testable, conformant code that is safe for us to merge.
 
-> ⚠ Remember: **changes you make may affect both the Windows Package Manager and the schema support implemented in our validation pipelines!** Because of this, we will treat community PR's with the same level of scrutiny and rigor as commits submitted to the official Windows source by team members and partners.
+> [!IMPORTANT]
+> Remember - **changes you make may affect both the Windows Package Manager and the schema support implemented in our validation pipelines!** Because of this, we will treat community PR's with the same level of scrutiny and rigor as commits submitted to the official Windows source by team members and partners.
 
 ### Merge
 

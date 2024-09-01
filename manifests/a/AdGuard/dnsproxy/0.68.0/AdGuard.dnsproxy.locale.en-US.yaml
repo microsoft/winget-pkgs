@@ -1,0 +1,38 @@
+# Created with komac v2.2.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.6.0.schema.json
+
+PackageIdentifier: AdGuard.dnsproxy
+PackageVersion: 0.68.0
+PackageLocale: en-US
+Publisher: AdGuard
+PublisherUrl: https://adguard.com/
+PublisherSupportUrl: https://github.com/AdguardTeam/dnsproxy/issues
+PackageName: DNS Proxy
+PackageUrl: https://github.com/AdguardTeam/dnsproxy
+License: Apache-2.0
+LicenseUrl: https://github.com/AdguardTeam/dnsproxy/blob/HEAD/LICENSE
+ShortDescription: Simple DNS proxy with DoH, DoT, DoQ and DNSCrypt support
+Tags:
+- dns
+- dns-over-https
+- dns-over-quic
+- dns-over-tls
+- dnscrypt
+- golang
+- open-source
+- proxy
+ReleaseNotes: |-
+  Added
+  - The field proxy.Config.PrivateSubnets used to determine if the address of a client or the address requested via PTR is considered private.  The netutil.IsLocallyServed is used by default.
+  - The field proxy.Config.UsePrivateRDNS controls if the requests considered private should be resolved via proxy.Config.PrivateRDNSUpstreamConfig.  Such requests answered with NXDOMAIN otherwise.
+  - The field proxy.DNSContext.IsPrivateClient which determines if the client's address is considered private.
+  - The field proxy.DNSContext.RequestedPrivateRDNS containing the prefix parsed from a requested ARPA domain, if the request itself is PTR for a private address and came from a private client.
+  - The proxy.ValidatePrivateConfig function to validate if an proxy.UpstreamConfig may be used for private RDNS.
+  Changed
+  - PTR requests for domains containing DNS64 prefixes are now answered with NXDOMAIN if proxy.Config.UseDNS64 is set to true, but proxy.Config.UsePrivateRDNS is not.
+  - Fallback servers aren't used for the aforementioned requests, as well as for all private RDNS requests.
+  - All the private RDNS requests coming from external (non-private) client are now answered with NXDOMAIN before proxy.RequestHandler.
+  - proxy.New now requires proxy.Config.PrivateRDNSUpstreamConfig to be valid as per proxy.ValidatePrivateConfig if proxy.Config.UsePrivateRDNS is set to true.
+ReleaseNotesUrl: https://github.com/AdguardTeam/dnsproxy/releases/tag/v0.68.0
+ManifestType: defaultLocale
+ManifestVersion: 1.6.0

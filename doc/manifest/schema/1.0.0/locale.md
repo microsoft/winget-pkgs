@@ -18,19 +18,18 @@ PackageIdentifier:            # The package unique identifier
 PackageVersion:               # The package version
 PackageLocale:                # The package meta-data locale
 Publisher:                    # Optional publisher name
-PublisherURL:                 # Optional publisher home page
+PublisherUrl:                 # Optional publisher home page
 PublisherSupportUrl:          # Optional publisher support page
 PrivacyUrl:                   # Optional publisher privacy page
 Author:                       # Optional author
 PackageName:                  # Optional package name
 PackageUrl:                   # Optional package home page
 License:                      # Optional package license
-LicenseUrl:                   # Optional package home page
+LicenseUrl:                   # Optional package license page
 Copyright:                    # Optional package copyright
 CopyrightUrl:                 # Optional package copyright page
 ShortDescription:             # Optional short package description
 Description:                  # Optional full package description
-Moniker:                      # Optional most common package term
 Tags:                         # Optional list of package terms
 Agreement:                    # Optional package agreements
   - AgreementLabel:           # Optional agreement label
@@ -193,16 +192,6 @@ ManifestVersion: 1.0.0        # The manifest syntax version
   This key represents the full or long description for a package. It is *not* currently used in the Windows Package Manager.
 
   >Note: This was included for future integration with the Microsoft Store source to provide the ability to display the full package description.
- </details>
-
-<details>
-  <summary><b>Moniker</b> - The most common package term</summary>
-
-  **Optional Field**
-
-  This key represents the most common term users would search for when installing or upgrading a package. If only one package uses this moniker, then the [install], [list] and [upgrade] command may match with this package.
-
-  >Note:Moniker is the third property evaluated when searching for a matching package.
  </details>
 
 <details>
