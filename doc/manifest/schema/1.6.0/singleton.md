@@ -71,10 +71,10 @@ Installers:                        # The package installer
     Commands:                      # Optional commands or aliases to run the package
     Protocols:                     # Optional list of protocols supported by the package
     FileExtensions:                # Optional list of file extensions supported by the package
-    Dependencies:                  # *Experimental* list of dependencies required by the package
+    Dependencies:                  # Optional list of dependencies required by the package
       - ExternalDependencies:      # *Not implemented* list of external dependencies
-        PackageDependencies:       # *Experimental* list of package dependencies
-        WindowsFeatures:           # *Not implemented* list of Windows feature dependencies
+        PackageDependencies:       # Optional list of package dependencies
+        WindowsFeatures:           # Optional list of Windows feature dependencies
         WindowsLibraries:          # *Not implemented* list of Windows library dependencies
     PackageFamilyName:             # Optional MSIX package family name
     Capabilities:                  # Optional list of MSIX package capabilities
