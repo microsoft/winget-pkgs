@@ -4,6 +4,8 @@
 [semantic version]:                         https://semver.org
 [`winget upgrade`]:                         https://docs.microsoft.com/windows/package-manager/winget/upgrade
 [App capability declarations]:              https://docs.microsoft.com/windows/uwp/packaging/app-capability-declarations
+[product code]:                             https://learn.microsoft.com/en-us/windows/win32/msi/product-codes
+[upgrade code]:                             https://learn.microsoft.com/en-us/windows/win32/msi/using-an-upgradecode
 [MSIX]:                                     https://docs.microsoft.com/windows/msix/overview
 [MSI]:                                      https://docs.microsoft.com/windows/win32/msi/windows-installer-portal
 [Inno]:                                     https://jrsoftware.org/isinfo.php
@@ -700,7 +702,7 @@ Dependencies are referenced by their package identifier and must come from the s
 
  **Optional Field**
 
- This key represents the product code specified in an MSI installer. This value is used to assist with matching packages from a source to the program installed in Windows via Add / Remove Programs for list, and upgrade behavior.
+ This key represents the [product code] specified in an MSI installer. This value is used to assist with matching packages from a source to the program installed in Windows via Add / Remove Programs for list, and upgrade behavior.
 
  > [!NOTE]
  This key may be present in the root of the manifest as the default value for all installer nodes. This key may also be present in an individual installer node as well. If this key is in the manifest root and in an installer node, the value in the installer node will apply.
@@ -745,7 +747,7 @@ Dependencies are referenced by their package identifier and must come from the s
 
  **Optional Field**
 
- This key represents the product code for a package. It is used to help correlate installed packages with manifests in configured sources.
+ This key represents the [product code] for a package. It is used to help correlate installed packages with manifests in configured sources.
 
  > [!NOTE]
  This key is displayed twice for completeness. When AppsAndFeaturesEntries are specified, the ProductCode should be placed both within the installer and the AppsAndFeaturesEntries
@@ -756,7 +758,7 @@ Dependencies are referenced by their package identifier and must come from the s
 
  **Optional Field**
 
- This key represents the upgrade code for a package. It is used to help correlate installed packages with manifests in configured sources.
+ This key represents the [upgrade code] for a package. It is used to help correlate installed packages with manifests in configured sources.
 </details>
 
 <details>
