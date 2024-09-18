@@ -6,6 +6,7 @@
 [App capability declarations]:              https://docs.microsoft.com/windows/uwp/packaging/app-capability-declarations
 [product code]:                             https://learn.microsoft.com/en-us/windows/win32/msi/product-codes
 [upgrade code]:                             https://learn.microsoft.com/en-us/windows/win32/msi/using-an-upgradecode
+[uninstall-registry]:                       https://learn.microsoft.com/en-us/windows/win32/msi/uninstall-registry-key
 [MSIX]:                                     https://docs.microsoft.com/windows/msix/overview
 [MSI]:                                      https://docs.microsoft.com/windows/win32/msi/windows-installer-portal
 [Inno]:                                     https://jrsoftware.org/isinfo.php
@@ -734,7 +735,7 @@ Dependencies are referenced by their package identifier and must come from the s
 
  **Optional Field**
 
- This key represents the package name as displayed in Windows Apps & Features. It is used to help correlate installed packages with manifests in configured sources.
+ This key represents the package name as displayed in Windows Apps & Features. This is the value of the `DisplayName` subkey for the package in the [Windows registry][uninstall-registry]. It is used to help correlate installed packages with manifests in configured sources.
 </details>
 
 <details>
@@ -742,7 +743,7 @@ Dependencies are referenced by their package identifier and must come from the s
 
  **Optional Field**
 
- This key represents the package version as displayed in Windows Apps & Features. It is used to help correlate installed packages with manifests in configured sources.
+ This key represents the package version as displayed in Windows Apps & Features. This is the value of the `DisplayVersion` subkey for the package in the [Windows registry][uninstall-registry]. It is used to help correlate installed packages with manifests in configured sources.
 
  > Note: When the PackageVersion and DisplayVersion are the same, the DisplayVersion should be omitted from the AppsAndFeaturesEntries
 </details>
@@ -752,7 +753,7 @@ Dependencies are referenced by their package identifier and must come from the s
 
  **Optional Field**
 
- This key represents the Publisher reported in the Windows registry. It is used to help correlate installed packages with manifests in configured sources.
+ This key represents the package publisher as displayed in Windows Apps & Features. This is the value of the `Publisher` subkey for the package in the [Windows registry][uninstall-registry]. It is used to help correlate installed packages with manifests in configured sources.
 </details>
 
 <details>
