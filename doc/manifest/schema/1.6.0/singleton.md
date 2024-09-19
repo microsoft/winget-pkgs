@@ -260,7 +260,7 @@ ManifestVersion: 1.6.0
 
   **Optional Field**
 
-  This key represents the release date for a package.
+  This key represents the release date for a package, in RFC 3339 / ISO 8601 format, i.e. "YYYY-MM-DD".
 </details>
 
 <details>
