@@ -466,7 +466,7 @@ ManifestVersion: 1.6.0
 
  **Optional Field**
 
- This key represents any protocols supported by the package. The Windows Package Manager does not support any behavior related to protocols handled by a package.
+ This key represents any protocols (i.e. URI schemes) supported by the package. For example: `["ftp", "ldap"]`. Entries shouldn't have trailing colons. The Windows Package Manager does not support any behavior related to protocols handled by a package.
 
  > [!NOTE]
  This key may be present in the root of the manifest as the default value for all installer nodes. This key may also be present in an individual installer node as well. If this key is in the manifest root and in an installer node, the value in the installer node will apply.
@@ -477,7 +477,7 @@ ManifestVersion: 1.6.0
 
  **Optional Field**
 
- This key represents any file extensions supported by the package. The Windows Package Manager does not support any behavior related to the file extensions supported by the package.
+ This key represents any file extensions supported by the package. For example: `["html", "jpg"]`. Entries shouldn't have leading dots. The Windows Package Manager does not support any behavior related to the file extensions supported by the package.
 
  > [!NOTE]
  This key may be present in the root of the manifest as the default value for all installer nodes. This key may also be present in an individual installer node as well. If this key is in the manifest root and in an installer node, the value in the installer node will apply.
