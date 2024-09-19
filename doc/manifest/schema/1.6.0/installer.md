@@ -4,6 +4,7 @@
 [semantic version]:                         https://semver.org
 [`winget upgrade`]:                         https://docs.microsoft.com/windows/package-manager/winget/upgrade
 [App capability declarations]:              https://docs.microsoft.com/windows/uwp/packaging/app-capability-declarations
+[package family name]:                      https://learn.microsoft.com/en-us/windows/apps/desktop/modernize/package-identity-overview#package-family-name
 [product code]:                             https://learn.microsoft.com/en-us/windows/win32/msi/product-codes
 [upgrade code]:                             https://learn.microsoft.com/en-us/windows/win32/msi/using-an-upgradecode
 [uninstall-registry]:                       https://learn.microsoft.com/en-us/windows/win32/msi/uninstall-registry-key
@@ -543,7 +544,7 @@ Dependencies are referenced by their package identifier and must come from the s
 
  **Optional Field**
 
- This key represents the package family name specified in an MSIX installer. This value is used to assist with matching packages from a source to the program installed in Windows via Add / Remove Programs for list, and upgrade behavior.
+ This key represents the [package family name] specified in an MSIX installer. This value is used to assist with matching packages from a source to the program installed in Windows via Add / Remove Programs for list, and upgrade behavior.
 
  > [!NOTE]
  This key may be present in the root of the manifest as the default value for all installer nodes. This key may also be present in an individual installer node as well. If this key is in the manifest root and in an installer node, the value in the installer node will apply.
