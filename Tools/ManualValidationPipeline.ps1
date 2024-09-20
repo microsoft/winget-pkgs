@@ -10,7 +10,7 @@
 #3.88.19 - A few bugfixes.
 #3.88.18 - Restore waiver and retry fucntionality. 
 
-$build = 887
+$build = 896
 $appName = "ManualValidationPipeline"
 Write-Host "$appName build: $build"
 $MainFolder = "C:\ManVal"
@@ -41,13 +41,14 @@ $DataFileName = "$ReposFolder\Tools\ManualValidationPipeline.csv"
 $ExitCodeFile = "$ReposFolder\Tools\ExitCodes.csv"
 $MsiErrorCodeFile = "$ReposFolder\Tools\MsiErrorCodes.csv"
 
-$Win10Folder = "$imagesFolder\Win10-Created031524-Original"
+$Win10Folder = "$imagesFolder\Win10-Created091724-Original"
 $Win11Folder = "$imagesFolder\Win11-Created010424-Original"
 
 $GitHubBaseUrl = "https://github.com/$Owner/$Repo"
 $GitHubContentBaseUrl = "https://raw.githubusercontent.com//$Owner/$Repo"
 $GitHubApiBaseUrl = "https://api.github.com/repos/$Owner/$Repo"
-$ADOMSBaseUrl = "https://dev.azure.com/ms"
+$ADOMSBaseUrl = "https://dev.azure.com/shine-oss"
+$ADOMSGUID = "8b78618a-7973-49d8-9174-4360829d979b"
 
 $CheckpointName = "Validation"
 $VMUserName = "user" #Set to the internal username you're using in your VMs.
@@ -1569,7 +1570,7 @@ Function Get-PRWatch {
 					($PRtitle -notmatch "Delete") -AND 
 					($PRtitle -notmatch "Remove")) {
 						$ANFOld = Get-ManifestEntryCheck -PackageIdentifier $PackageIdentifier -Version $ManifestVersion
-						$ANFCurrent = [bool]($clip | Select-String "AppsAndFeaturesEntries")
+						$ANFCurrent = [bool]($clip | Select-String "DisplayVersion")
 
 						if (($ANFOld -eq $True) -and ($ANFCurrent -eq $False)) {
 							$matchColor = $invalidColor
@@ -1850,7 +1851,7 @@ Function Get-GitHubPreset {
 				$out = $out += Invoke-GitHubPRRequest -PR $PR -Method Post -Type comments -Data $Body -Output StatusDescription 
 			}
 			"Completed" {
-				$out += Reply-ToPR -PR $PR -Body "This package installs and launches normally on a Windows 10 VM." -Policy "Manually-Validated"
+				$out += Reply-ToPR -PR $PR -Body "This package installs and launches normally in a Windows 10 VM." -Policy "Manually-Validated"
 			}
 			"Closed" {
 				if ($UserInput) {
@@ -1945,7 +1946,7 @@ Function Get-GitHubPreset {
 				$out += Reply-ToPR -PR $PR -Body "Reset approval workflow." -Policy "Reset Feedback `n[Policy] Validation Completed `n[Policy] Approved"			}
 			"Retry" {
 				Add-PRToRecord -PR $PR -Action $Preset
-				$out += Invoke-GitHubPRRequest -PR $PR -Type comments -Output StatusDescription -Method POST -Data "/azp run"
+				$out += Invoke-GitHubPRRequest -PR $PR -Type comments -Output StatusDescription -Method POST -Data "@wingetbot run"
 			}
 			"Squash" {
 				Add-PRToRecord -PR $PR -Action $Preset
@@ -2404,8 +2405,17 @@ Function Get-SearchGitHub {
 	$Review2 = $Review2 + "-label:Needs-Author-Feedback+"
 	$Review2 = $Review2 + "-label:Needs-Review+"
 	
-	$Workable =  "-label:Validation-Merge-Conflict+" 
-	$Workable = $Workable + "-label:Unexpected-File+"
+	$Approvable =  "-label:Validation-Merge-Conflict+" 
+	$Approvable = $Approvable + "-label:Unexpected-File+"
+	
+	$Workable = "-label:Highest-Version-Removal+";
+	$Workable += "-label:Manifest-Version-Error+";
+	$Workable += "-label:Validation-Certificate-Root+";
+	$Workable += "-label:Binary-Validation-Error+";
+	$Workable += "-label:Validation-Merge-Conflict+";
+	$Workable += "-label:Validation-SmartScreen-Error+";
+	$Workable += "-label:Unexpected-File+";
+
 	
 	#Composite settings
 	$Set1 = $Blocking + $Common + $Review1
@@ -2437,7 +2447,7 @@ Function Get-SearchGitHub {
 		"Approval"{
 			$Url = $Url + $Cna
 			$Url = $Url + $Set2 #Blocking + Common + Review1 + Review2
-			$Url = $Url + $Workable
+			$Url = $Url + $Approvable
 			}
 		"Defender"{
 			$Url = $Url + $Defender
@@ -2452,6 +2462,7 @@ Function Get-SearchGitHub {
 		"ToWork"{
 			$Url = $Url + $Set1 #Blocking + Common + Review1
 			$Url = $Url + "-"+$Defender
+			$Url = $Url + $Workable
 		}
 		"ToWork2"{
 			$Url = $Url + $HaventWorked
@@ -2485,13 +2496,13 @@ Function Get-CannedMessage {
 	[string]$Username = "@"+$UserInput.replace(" ","")+","
 	switch ($Response) {
 		"AgreementMismatch" {
-			$out = "Hi $Username`n`nThis package uses Agreements, but this PR's AgreementsUrl doesn't match the AgreementsUrl on file."
+			$out = "Hi $Username`n`nThis package uses Agreements, but this manifest's AgreementsUrl doesn't match the AgreementsUrl on file."
 		}
 		"AppsAndFeaturesNew" {
-			$out = "Hi $Username`n`nThis manifest adds Apps and Features entries that aren't present in previous PR versions. These entries should be added to the previous versions, or removed from this version."
+			$out = "Hi $Username`n`nThis manifest adds a `DisplayVersion` to the `AppsAndFeaturesEntries` that isn't present in previous manifest versions. This entry should be added to the previous versions, or removed from this version."
 		}
 		"AppsAndFeaturesMissing" {
-			$out = "Hi $Username`n`nThis manifest removes Apps and Features entries that are present in previous PR versions. These entries should be added to this version, to maintain version matching, and prevent the 'upgrade always available' situation with this package."
+			$out = "Hi $Username`n`nThis manifest removes the `DisplayVersion` from the `AppsAndFeaturesEntries`, which is present in previous manifest versions. This entry should be added to this version, to maintain version matching, and prevent the 'upgrade always available' situation with this package."
 		}
 		"AppFail" {
 			$out = "Hi $Username`n`nThe application installed normally, but gave an error instead of launching:`n"
@@ -2548,7 +2559,7 @@ Function Get-CannedMessage {
 			$out = "Hi $Username`n`nUnfortunately, this package might not be a good fit for inclusion into the WinGet public manifests. Please consider using a local manifest (`WinGet install --manifest C:\path\to\manifest\files\`) for local installations. "
 		}
 		"NormalInstall" {
-			$out = "This package installs and launches normally on a Windows 10 VM."
+			$out = "This package installs and launches normally in a Windows 10 VM."
 		}
 		"OneManifestPerPR" {
 			$out = "Hi $Username`n`nWe have a limit of 1 manifest change, addition, or removal per PR. This PR modifies more than one PR. Can these changes be spread across multiple PRs?"
@@ -2624,9 +2635,8 @@ Function Get-AutoValLog {
 	#Get-Process *photosapp* | Stop-Process
 	$BuildNumber = Get-BuildFromPR -PR $PR 
 	if ($BuildNumber) {
-
 		#This downloads to Windows default location, which has already been set to $DestinationPath
-		Start-Process "$ADOMSBaseUrl/ed6a5dfa-6e7f-413b-842c-8305dd9e89e6/_apis/build/builds/$BuildNumber/artifacts?artifactName=InstallationVerificationLogs&api-version=7.1&%24format=zip"
+		Start-Process "$ADOMSBaseUrl/$ADOMSGUID/_apis/build/builds/$BuildNumber/artifacts?artifactName=InstallationVerificationLogs&api-version=7.1&%24format=zip"
 		Start-Sleep $DownloadSeconds;
 		if (!(Test-Path $ZipPath) -AND !$Force) {
 			Write-Host "No logs."
@@ -2649,6 +2659,7 @@ Function Get-AutoValLog {
 					$_ -match 'exception' -OR 
 					$_ -match 'exit code' -OR 
 					$_ -match 'fail' -OR 
+					$_ -match 'manual review' -OR 
 					$_ -match 'No suitable' -OR 
 					$_ -match 'not supported' -OR #not supported by this processor type
 					#$_ -match 'not applicable' -OR 
@@ -2673,10 +2684,11 @@ Function Get-AutoValLog {
 				Open-PRInBrowser -PR $PR
 			}
 
-			$UserInput = $UserInput -notmatch ' success or error status`: 0'
-			$UserInput = $UserInput -notmatch '``Windows Error Reporting``'
+			$UserInput = $UserInput -notmatch " success or error status`: 0"
+			$UserInput = $UserInput -notmatch "``Windows Error Reporting``"
 			$UserInput = $UserInput -notmatch "--- End of inner exception stack trace ---"
-			$UserInput = $UserInput -notmatch 'api-ms-win-core-errorhandling'
+			$UserInput = $UserInput -notmatch "AppInstallerRepositoryCore"
+			$UserInput = $UserInput -notmatch "api-ms-win-core-errorhandling"
 			$UserInput = $UserInput -notmatch "appropriate application package"
 			$UserInput = $UserInput -notmatch "2: 3: Error"
 			$UserInput = $UserInput -notmatch "because the current user does not have that package installed"
@@ -2693,7 +2705,7 @@ Function Get-AutoValLog {
 			$UserInput = $UserInput -notmatch "SchedNetFx"
 			$UserInput = $UserInput -notmatch "Setting error JSON 1.0 fields"
 			$UserInput = $UserInput -notmatch "Terminating context"
-			$UserInput = $UserInput -notmatch 'The FileSystemWatcher has detected an error '
+			$UserInput = $UserInput -notmatch "The FileSystemWatcher has detected an error "
 			$UserInput = $UserInput -notmatch "The process cannot access the file because it is being used by another process"
 			$UserInput = $UserInput -notmatch "ThrowIfExceptional"
 			$UserInput = $UserInput -notmatch "Windows Installer installed the product"
@@ -2702,14 +2714,14 @@ Function Get-AutoValLog {
 			$UserInput = $UserInput | Select-Object -Unique
 			$UserInput = "Automatic Validation ended with:`n"+($UserInput -join "`n> ")
 
-if ($UserInput -match "exit code" -OR $UserInput -match "DeliveryOptimization error" -OR $UserInput -match "Error information") {
-	$ExitCodeTable = gc $ExitCodeFile | ConvertFrom-Csv
-	foreach ($ExitCode in $ExitCodeTable) {
-		if ($UserInput -match $ExitCode.code) {
-			$UserInput += "`n`nAutomated error analysis suggests $($ExitCode.code) may mean $($ExitCode.message)"
-		}
-	} 
-} 
+			if ($UserInput -match "exit code" -OR $UserInput -match "DeliveryOptimization error" -OR $UserInput -match "Error information") {
+				$ExitCodeTable = gc $ExitCodeFile | ConvertFrom-Csv
+				foreach ($ExitCode in $ExitCodeTable) {
+					if ($UserInput -match $ExitCode.code) {
+						$UserInput += "`n`nAutomated error analysis suggests $($ExitCode.code) may mean $($ExitCode.message)"
+					}
+				} 
+			} 
 
 			$UserInput +="`n`n(Automated response - build $build.)"
 			$out = Reply-ToPR -PR $PR -Body $UserInput
@@ -2881,7 +2893,7 @@ Function Add-GitHubReviewComment {
 Function Get-BuildFromPR {
 	param(
 		$PR,
-		$content = ((Invoke-WebRequest "$ADOMSBaseUrl/$Repo/_apis/build/builds?branchName=refs/pull/$PR/merge&api-version=7.1").content | ConvertFrom-Json),
+		$content = ((Invoke-WebRequest "$ADOMSBaseUrl/$Repo/_apis/build/builds?branchName=refs/pull/$PR/merge&api-version=7.1" -ProgressAction SilentlyContinue).content | ConvertFrom-Json),
 		$href = ($content.value[0]._links.web.href),
 		$PRbuild = (($href -split "=")[1])
 	)
@@ -2894,7 +2906,7 @@ Function Get-LineFromCommitFile {
 		$PRbuild = (Get-BuildFromPR -PR $PR),
 		$LogNumber = (36),
 		$SearchString = "Specified hash doesn't match",
-		$content = (Invoke-WebRequest "$ADOMSBaseUrl/ed6a5dfa-6e7f-413b-842c-8305dd9e89e6/_apis/build/builds/$PRbuild/logs/$LogNumber").content,
+		$content = (Invoke-WebRequest "$ADOMSBaseUrl/$ADOMSGUID/_apis/build/builds/$PRbuild/logs/$LogNumber" -ProgressAction SilentlyContinue).content,
 		$Log = ($content -join "" -split "`n"),
 		$MatchOffset = (-1),
 		$MatchLine = (($Log | Select-String -SimpleMatch $SearchString).LineNumber + $MatchOffset | where {$_ -gt 0}),
@@ -3052,13 +3064,13 @@ Function Invoke-GitHubRequest {
 	)
 	if ($Body) {
 		try {
-			$out = (Invoke-WebRequest -Method $Method -Uri $Uri -Headers $Headers -Body $Body -ContentType application/json)
+			$out = (Invoke-WebRequest -Method $Method -Uri $Uri -Headers $Headers -Body $Body -ContentType application/json -ProgressAction SilentlyContinue)
 		} catch {
 			Write-Output ("Error: $($error[0].ToString()) - Url $Url - Body: $Body")
 		}
 	} else {
 		try {
-			$out = (Invoke-WebRequest -Method $Method -Uri $Uri -Headers $Headers)
+			$out = (Invoke-WebRequest -Method $Method -Uri $Uri -Headers $Headers -ProgressAction SilentlyContinue)
 		} catch {
 			Write-Output ("Error: $($error[0].ToString()) - Url $Url - Body: $Body")
 		}
@@ -3077,7 +3089,7 @@ Function Invoke-GitHubRequest {
 Function Check-PRInstallerStatusInnerWrapper {
 	param(
 		$Url,
-		$Code = (Invoke-WebRequest $Url -Method Head -ErrorAction SilentlyContinue).StatusCode
+		$Code = (Invoke-WebRequest $Url -Method Head -ErrorAction SilentlyContinue -ProgressAction SilentlyContinue).StatusCode
 	)
 	return $Code
 }
@@ -4226,7 +4238,7 @@ Function Get-ManifestEntryCheck {
 	param(
 		$PackageIdentifier,
 		$Version,
-		$Entry = "AppsAndFeaturesEntries"
+		$Entry = "DisplayVersion"
 	)
 	$content = Get-FileFromGitHub $PackageIdentifier $Version
 	$out = ($content | Where-Object {$_ -match $Entry})
@@ -4551,7 +4563,7 @@ Function Get-GitHubRateLimit {
 	)
 	(Get-Date)
 	#Time, as a number, constantly increases. 
-	$Response = Invoke-WebRequest -Uri $Url
+	$Response = Invoke-WebRequest -Uri $Url -ProgressAction SilentlyContinue
 	$Content = $Response.content | ConvertFrom-Json;
 	#Write-Output "Headers:"
 	#$Response.Headers
@@ -4672,7 +4684,8 @@ $StandardPRComments = ("Validation Pipeline Badge",#Pipeline status
 "The package didn't pass a Defender or similar security scan",#My automation - DefenderFail.
 "Installer failed security check",#My automation - AutoValLog DefenderFail.
 "Sequence contains no elements",#New Sequence error.
-"Missing Properties value based on version"#New property detection.
+"Missing Properties value based on version",#New property detection.
+"Azure Pipelines could not run because the pipeline triggers exclude this branch/path"#Pipeline error.
 )
 
 #VM Window Management

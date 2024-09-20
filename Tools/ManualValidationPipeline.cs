@@ -145,7 +145,7 @@ using System.Web.Script.Serialization;
 namespace WinGetApprovalNamespace {
     public class WinGetApprovalPipeline : Form {
 		//vars
-        public int build = 914;//Get-RebuildPipeApp
+        public int build = 923;//Get-RebuildPipeApp
 		public string appName = "WinGetApprovalPipeline";
 		public string appTitle = "WinGet Approval Pipeline - Build ";
 		public static string owner = "microsoft";
@@ -184,7 +184,7 @@ namespace WinGetApprovalNamespace {
 		public static string GitHubBaseUrl = "https://github.com/"+owner+"/"+repo;
 		public static string GitHubContentBaseUrl = "https://raw.githubusercontent.com/"+owner+"/"+repo;
 		public static string GitHubApiBaseUrl = "https://api.github.com/repos/"+owner+"/"+repo;
-		public string ADOMSBaseUrl = "https://dev.azure.com/ms";
+		public string ADOMSBaseUrl = "https://dev.azure.com/shine-oss";
 		
 		//ADOLogs - should be refactored to be in-memory.
 		public static string DestinationPath = MainFolder+"\\Installers";
@@ -565,13 +565,17 @@ namespace WinGetApprovalNamespace {
 					submenu.MenuItems.Add("Update hash 'Specified hash doesn't match.'", new EventHandler(Update_Hash_Action));
 					submenu.MenuItems.Add("Update hash 2 'SHA256 in manifest...'", new EventHandler(Update_Hash2_Action));
 					submenu.MenuItems.Add("Update architecture (x64)", new EventHandler(Update_Arch_Action));
-				item.MenuItems.Add("/azp run", new EventHandler(Retry_Action));
+				item.MenuItems.Add("@wingetbot run", new EventHandler(Retry_Action));
 				item.MenuItems.Add("Installs Normally in VM", new EventHandler(Manually_Validated_Action));
-				item.MenuItems.Add("Close: (User Input);", new EventHandler(Closed_Action));
-				item.MenuItems.Add("Close: Merge Conflicts;", new EventHandler(Merge_Conflicts_Action));
-				item.MenuItems.Add("Close: Package still available;", new EventHandler(Package_Available_Action));
-				item.MenuItems.Add("Close: Regen with new hash;", new EventHandler(Regen_Hash_Action));
-				item.MenuItems.Add("Close: Duplicate of (User Input);", new EventHandler(Duplicate_Action));
+			submenu = new MenuItem("Wingetbot Close");
+				item.MenuItems.Add(submenu);
+					submenu.MenuItems.Add("Close: Merge Conflicts;", new EventHandler(Merge_Conflicts_Action));
+					submenu.MenuItems.Add("Close: Regen with new hash;", new EventHandler(Regen_Hash_Action));
+			submenu = new MenuItem("Regular Close");
+				item.MenuItems.Add(submenu);
+					submenu.MenuItems.Add("Close: (User Input);", new EventHandler(Closed_Action));
+					submenu.MenuItems.Add("Close: Package still available;", new EventHandler(Package_Available_Action));
+					submenu.MenuItems.Add("Close: Duplicate of (User Input);", new EventHandler(Duplicate_Action));
 				// item.MenuItems.Add("Add Waiver", new EventHandler(Add_Waiver_Action));
 				// item.MenuItems.Add("(disabled) Needs Author Feedback (reason)", new EventHandler(Needs_Author_Feedback_Action));
 			// submenu = new MenuItem("Canned Replies");
@@ -1573,8 +1577,7 @@ var query =
 								ReplyToPR(PR,"SequenceNoElements");
 								string PRTitle = FromJson(InvokeGitHubPRRequest(PR))["title"];
 								if ((PRTitle.Contains("Automatic deletion")) || (PRTitle.Contains("Remove"))) {
-
-									ReplyToPR(PR,"","","Manually-Validated","This package installs and launches normally on a Windows 10 VM.");
+									ReplyToPR(PR,"InstallsNormally","","Manually-Validated");
 								}
 							}
 						}
@@ -1836,10 +1839,14 @@ var query =
 			Review2 += "-"+string_NAF;
 			Review2 += "-label:Needs-Review+";
 			
-			string Workable = "-label:Validation-Merge-Conflict+";
+			string Workable = "-label:Highest-Version-Removal+";
+			Workable += "-label:Manifest-Version-Error+";
+			Workable += "-label:Validation-Certificate-Root+";
+			Workable += "-label:Binary-Validation-Error+";
+			Workable += "-label:Validation-Merge-Conflict+";
+			Workable += "-label:Validation-SmartScreen-Error+";
 			Workable += "-label:Unexpected-File+";
-			Workable += "-label:Highest-Version-Removal+";
-			
+	
 			//Composite settings;
 			string Set1 = Blocking + Common + Review1;
 			string Set2 = Set1 + Review2;
@@ -1870,6 +1877,7 @@ var query =
 				Url += Cna;
 				Url += Set2; //Blocking + Common + Review1 + Review2;
 				Url += Workable;
+				Url += " sort:created-asc";
 			} else if (Preset == "Defender") {
 				Url += Defender;
 				Url += "sort:updated-asc+";
@@ -1911,9 +1919,9 @@ var query =
 			if (Message == "AgreementMismatch"){
 				string_out = greeting  + "This package uses Agreements, but this PR's AgreementsUrl doesn't match the AgreementsUrl on file.";
 			} else if (Message == "AppsAndFeaturesNew"){
-				string_out = greeting + "This manifest adds Apps and Features entries that aren't present in previous PR versions. These entries should be added to the previous versions, or removed from this version.";
+				string_out = greeting + "This manifest adds Apps and Features entries that aren't present in previous PR versions. This entry should be added to the previous versions, or removed from this version.";
 			} else if (Message == "AppsAndFeaturesMissing"){
-				string_out = greeting + "This manifest removes Apps and Features entries that are present in previous PR versions. These entries should be added to this version, to maintain version matching, and prevent the 'upgrade always available' situation with this package.";
+				string_out = greeting + "This manifest removes Apps and Features entries that are present in previous PR versions. This entry should be added to this version, to maintain version matching, and prevent the 'upgrade always available' situation with this package.";
 			} else if (Message == "AppFail"){
 				string_out = greeting + "The application installed normally, but gave an error instead of launching:" + Environment.NewLine;
 			} else if (Message == "Approve"){
@@ -1937,7 +1945,7 @@ var query =
 			} else if (Message == "InstallerNotSilent"){
 				string_out = greeting + "The installation isn't unattended. Is there an installer switch to have the package install silently?";
 			} else if (Message == "InstallsNormally"){
-				string_out = greeting + "This package installs and launches normally on a Windows 10 VM.";
+				string_out = "This package installs and launches normally in a Windows 10 VM.";
 			} else if (Message == "ListingDiff"){
 				string_out = "This PR omits these files that are present in the current manifest:" + Environment.NewLine + "> " + UserInput;
 			} else if (Message == "ManifestVersion"){
@@ -1953,7 +1961,7 @@ var query =
 			} else if (Message == "NotGoodFit"){
 				string_out = greeting + "Unfortunately, this package might not be a good fit for inclusion into the WinGet public manifests. Please consider using a local manifest (\\WinGet install --manifest C:\\path\\to\\manifest\\files\\) for local installations. ";
 			} else if (Message == "NormalInstall"){
-				string_out = "This package installs and launches normally on a Windows 10 VM.";
+				string_out = "This package installs and launches normally in a Windows 10 VM.";
 			} else if (Message == "OneManifestPerPR"){
 				string_out = greeting + "We have a limit of 1 manifest change, addition, or removal per PR. This PR modifies more than one PR. Can these changes be spread across multiple PRs?";
 			} else if (Message == "Only64bit"){
@@ -2171,7 +2179,7 @@ var query =
 
 		public string RetryPR(int PR) {
 			AddPRToRecord(PR,"Retry");
-			return InvokeGitHubPRRequest(PR,WebRequestMethods.Http.Post,"comments","/azp run");
+			return InvokeGitHubPRRequest(PR,WebRequestMethods.Http.Post,"comments","@wingetbot run");
 		}
 
 		public string AddGitHubReviewComment(int PR, string Comment,int? StartLine,int Line) {
@@ -4720,7 +4728,7 @@ try {
 		
         public void Manually_Validated_Action(object sender, EventArgs e) {
 			int PR = GetCurrentPR();
-			string response_out = ReplyToPR(PR,"InstallsNormally","Manually-Validated");
+			string response_out = ReplyToPR(PR,"InstallsNormally","","Manually-Validated");
 			AddPRToRecord(PR,"Manual");
         }// end Manually_Validated_Action
 		//Modify PR - Close PR
@@ -5065,7 +5073,8 @@ public string UpdateArchInPR(int PR, string SearchTerm = "  Architecture: x86", 
 			"The package didn't pass a Defender or similar security scan",//My automation - DefenderFail.
 			"Installer failed security check",//My automation - AutoValLog DefenderFail.
 			"Sequence contains no elements",//New Sequence error.
-			"Missing Properties value based on version"//New property detection.
+			"Missing Properties value based on version",//New property detection.
+			"Azure Pipelines could not run because the pipeline triggers exclude this branch/path"//Pipeline error.
 		};
 
 		public string[] WordFilterList = {
