@@ -22,6 +22,7 @@ $ErrorActionPreference = 'Stop'
 
 $useNuGetForMicrosoftUIXaml = $false
 $mapFolder = (Resolve-Path -Path $MapFolder).Path
+$geoID = (Get-WinHomeLocation).GeoID
 
 if (-Not (Test-Path -Path $mapFolder -PathType Container)) {
   Write-Error -Category InvalidArgument -Message 'The provided MapFolder is not a folder.'
@@ -305,8 +306,8 @@ winget settings --Enable LocalManifestFiles
 winget settings --Enable LocalArchiveMalwareScanOverride
 copy -Path $settingsPathInSandbox -Destination C:\Users\WDAGUtilityAccount\AppData\Local\Packages\Microsoft.DesktopAppInstaller_8wekyb3d8bbwe\LocalState\settings.json
 `$originalARP = Get-ARPTable
+Set-WinHomeLocation -GeoID $geoID
 Write-Host @'
-
 
 --> Installing the Manifest $manifestFileName
 
@@ -324,7 +325,6 @@ Write-Host @'
 --> Comparing ARP Entries
 '@
 (Compare-Object (Get-ARPTable) `$originalARP -Property DisplayName,DisplayVersion,Publisher,ProductCode,Scope)| Select-Object -Property * -ExcludeProperty SideIndicator | Format-Table
-
 "@
 }
 
@@ -345,10 +345,6 @@ $Script
 
 "@
 }
-
-$bootstrapPs1Content += @'
-Write-Host
-'@
 
 $bootstrapPs1FileName = 'Bootstrap.ps1'
 $bootstrapPs1Content | Out-File (Join-Path -Path $tempFolder -ChildPath $bootstrapPs1FileName)
