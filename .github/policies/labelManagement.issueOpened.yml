@@ -169,5 +169,26 @@ configuration:
         then:
           - addLabel:
               label: Author-Not-Authorized
+      - description: >-
+          When a PR is opened/updated, if no files are modified
+          * Close the issue
+          * Add a comment
+        if:
+          - payloadType: Pull_Request
+          - isOpen
+          - not:
+              filesMatchPattern:
+                pattern: ^.+ # Matches one or more characters starting at the beginning of the string
+        then:
+          - addReply:
+              reply: >-
+                Hello @${issueAuthor},
+
+
+                This pull request does not update any files. Please review your commit history and resubmit.
+
+
+                Template: msftbot/validationError/pullRequest/noContent
+          - closePullRequest
 onFailure:
 onSuccess:
