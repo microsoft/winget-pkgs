@@ -82,7 +82,7 @@ $dependenciesByManifest = $manifestsWithPackageDependencies | ForEach-Object {
     $YamlContent = $_ | Get-Content | ConvertFrom-Yaml
     return @{
         Package      = $YamlContent.PackageIdentifier
-        Version      = $YamlContent.Version
+        Version      = $YamlContent.PackageVersion
         Dependencies = $YamlContent.Dependencies.PackageDependencies
     }
 }
