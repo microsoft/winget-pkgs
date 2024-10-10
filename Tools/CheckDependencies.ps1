@@ -108,6 +108,7 @@ Write-Verbose 'Filtering out dependencies which have been found. . .'
 $unmetDependencies = $dependenciesWithStatus.Where({ !($_.Exists) })
 Write-Verbose "$($unmetDependencies.Count) dependencies were not found"
 Write-Output $unmetDependencies.Identifier
+if ($unmetDependencies) { exit 1 }
 
 class UnmetDependencyException : Exception {
     UnmetDependencyException([string] $message) : base($message) {}
