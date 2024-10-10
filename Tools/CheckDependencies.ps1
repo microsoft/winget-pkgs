@@ -23,7 +23,7 @@
 
 [CmdletBinding()]
 param (
-    # No Parameters
+    [switch] $Offline
 )
 
 $ProgressPreference = 'SilentlyContinue'
@@ -90,9 +90,14 @@ Write-Verbose 'Filtering out dependency Package Identifiers. . .'
 $dependencyIdentifiers = $dependenciesByManifest.Dependencies | ForEach-Object { $_.PackageIdentifier } | Select-Object -Unique
 Write-Verbose "Found $($dependencyIdentifiers.Count) unique dependencies"
 Write-Verbose 'Checking for the existence of dependencies. . .'
+if ($Offline) { Write-Verbose 'Offline mode selected. Local manifests names will be used instead of querying the WinGet source' }
 $dependenciesWithStatus = $dependencyIdentifiers | ForEach-Object {
     Write-Debug "Checking for $_"
-    $exists = $null -ne $(Find-WinGetPackage -Id $_ -MatchOption Equals)
+    if ($Offline) {
+        $exists = $null -ne $($installerManifests.Name -cmatch [regex]::Escape($_))
+    } else {
+        $exists = $null -ne $(Find-WinGetPackage -Id $_ -MatchOption Equals)
+    }
     Write-Debug "winget search result: $($exists)"
     return @{
         Identifier = $_
