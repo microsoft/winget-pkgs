@@ -1,24 +1,19 @@
 ﻿<#
 .SYNOPSIS
-    Checks for monikers to be unique and each package to have a singular moniker
+    Sets the moniker for a single package
 .DESCRIPTION
-    This script intends to help ensure that all monikers in the repository are
-    unique to a single package identifier and that each package identifire has
-    only a single moniker.
-
-    It will parse through each of the manifest files and then iterate over each
-    moniker and each package to check for uniqueness.
+    This script will update the moniker for all versions of a package identifier
 .EXAMPLE
-    PS C:\Projects\winget-pkgs> Get-Help .\Tools\CheckMonikers.ps1 -Full
+    PS C:\Projects\winget-pkgs> Get-Help .\Tools\SetPackageMoniker.ps1 -Full
     Show this script's help
 .EXAMPLE
-    PS C:\Projects\winget-pkgs> .\Tools\CheckMonikers.ps1
-    Run the script to output potential issues with Monikers
+    PS C:\Projects\winget-pkgs> .\Tools\SetPackageMoniker.ps1 Google.Chrome chrome
+    Set the identifier of Google.Chrome to 'chrome'
 .NOTES
     Please file an issue if you run into errors with this script:
     https://github.com/microsoft/winget-pkgs/issues
 .LINK
-    https://github.com/microsoft/winget-pkgs/blob/master/Tools/CheckMonikers.ps1
+    https://github.com/microsoft/winget-pkgs/blob/master/Tools/SetPackageMoniker.ps1
 #>
 #Requires -Version 5
 
