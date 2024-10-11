@@ -1,0 +1,88 @@
+# Created with YamlCreate.ps1 v2.4.1 Dumplings Mod $debug=QUSU.CRLF.7-4-5.Win32NT
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.6.0.schema.json
+
+PackageIdentifier: Hugo.Hugo
+PackageVersion: 0.134.0
+PackageLocale: en-US
+Publisher: The Hugo Authors
+PublisherUrl: https://gohugo.io/
+PublisherSupportUrl: https://discourse.gohugo.io/
+# PrivacyUrl:
+# Author:
+PackageName: Hugo
+PackageUrl: https://gohugo.io/
+License: Apache-2.0
+LicenseUrl: https://github.com/gohugoio/hugo/blob/HEAD/LICENSE
+Copyright: Copyright 2024 The Hugo Authors.
+# CopyrightUrl:
+ShortDescription: The world’s fastest framework for building websites
+Description: |-
+  Hugo is one of the most popular open-source static site generators.
+  With its amazing speed and flexibility, Hugo makes building websites fun again.
+# Moniker:
+Tags:
+- blog
+- blog-engine
+- cms
+- content-management-system
+- documentation
+- documentation-tool
+- static-site
+- static-site-generator
+ReleaseNotes: |-
+  Hugo v0.134.0 brings render hooks for tables, ContentWithoutSummary, scoped content render and Obsidian style callout alerts.
+  ContentWithoutSummary and scoped content render
+  This release finally brings a Page.ContentWithoutSummary method. This has been a long sought after method where the use case is obvious: Render the summary with a more button that renders the ... content without summary. To enable this we have reimplemented the content summary handling in Hugo. This consolidates the 3 summary types (auto, manual and frontmatter) – they are now all HTML. This is a slightly breaking change (manual was plain text before), but the new behaviour should be much less confusing and easier to handle in the templates. If you want plain text, pipe it into plainify: {{ .Summary | plainify }}.
+  Before this release there was one instance of .Content for a given page, it was e.g. not possible to render a page's content slightly different (e.g. different heading levels) on the list pages or the home page. This release anables that with a new Page.Markup with an optional scope argument.
+  In the list template you would do something like this:
+  {{ range .Pages | first 5 }}
+    {{ with .Markup "list" }}
+       {{ with .Render }}
+         <div>
+             <li>{{ .Summary }}</li>
+             <li>{{ .ContentWithoutSummary }}</li>
+             <li>{{ .WordCount }}</li>
+             <li>etc ...</li>
+         </div>
+       {{ end }}
+    {{ end }}
+  {{ end }}
+  You can think of the custom scope list as a cache key: Multiple invocations on the same page with the same scope will give the same return value. You can now pass down some data or configuration to in .Page.Store to the templates that render this markup (shortcodes, render hooks), or you can use the new global hugo.Context.MarkupScope function made for this purpose:
+  {{ if eq hugo.Context.MarkupScope "list" }}
+    {{/* Render some list markup. */}}
+  {{ else }}
+    {{/* default */}}
+  {{ end }}
+  Render hooks for tables
+  This has been a long sought after feature. Now you can have full control over how you render your Markdown tables with table render hooks.
+  Obsidian style callout alerts
+  Hugo v0.133.0 added blockquote render hooks with GitHub styled alerts. We have since then gotten some feedback about extended alert syntax in Obsidian, and in Hugo v0.134.0 we now support both.
+  Bug fixes
+  - github: Try to fix "no space left on device" on MacOS 96afea4ac @bep
+  - Fix deprecation warning for resources.ToCSS 8fb933550 @deining
+  - output: Fix docshelper template lookup order for AMP pages 1ecd0596a @jmooring #12797
+  Improvements
+  - markup/goldmark/blockquotes: Improve some tests 504a23184 @bep
+  - Add support for Obsidian type blockquote alerts e651d2980 @bep #12805 #12801
+  - Rename hstring.RenderedHTML => hstring.HTML 469124823 @bep
+  - Make all renderhook Text methods return template.HTML 6d97ee711 @bep
+  - Add Markdown render hooks for tables f738669a4 @bep #9316 #12811
+  - create/skeletons: Clean up lang attribute in base template b63f24adc @jmooring
+  - tpl/resources: Improve resources.Concat error message a3684c836 @jmooring #7428
+  - tpl: Trim whitespace from google_analytics.html 53a8de21b @chalin
+  - Add Page.Contents with scope support 37609262d @bep #8680 #12761 #12778 #716
+  - hugolib: Add a test for overriding _internal templates 371246de2 @bep
+  Dependency Updates
+  - deps: Upgrade github.com/bep/golibsass v1.1.1 => v1.2.0 2b5c335e9 @bep #12649
+  - build(deps): bump github.com/evanw/esbuild from 0.23.0 to 0.23.1 12a28ef77 @dependabot[bot]
+  - build(deps): bump github.com/pelletier/go-toml/v2 from 2.2.2 to 2.2.3 4ded32d07 @dependabot[bot]
+  Documentation
+  - Update Dockerfile ae3815898 @offgrid88
+ReleaseNotesUrl: https://github.com/gohugoio/hugo/releases/tag/v0.134.0
+# PurchaseUrl:
+# InstallationNotes:
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://gohugo.io/documentation
+ManifestType: defaultLocale
+ManifestVersion: 1.6.0
