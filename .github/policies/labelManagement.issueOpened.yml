@@ -206,36 +206,5 @@ configuration:
         then:
           - addLabel:
               label: Author-Not-Authorized
-      - description: >-
-          When a PR is opened/updated, if
-          * The files are in /manifests
-          * The files match *.yaml
-          * The files do not match *.installer.yaml
-          * The files do no match *.locale.yaml
-          Then
-          * Add label Manifest-Singleton-Deprecated
-        disabled: true
-        if:
-          - payloadType: Pull_Request
-          - isOpen
-          - or:
-              - isAction:
-                  action: Opened
-              - isAction:
-                  action: Synchronize
-          - not:
-              filesMatchPattern: # has at least one file
-                pattern: ^$
-          - filesMatchPattern:
-                pattern: ^manifests\/.*\.yaml  # matches manifests/*.yaml
-          - not:
-              filesMatchPattern:
-                pattern: ^manifests\/.*\.installer\.yaml # matches manifests/*.installer.yaml
-          - not:
-              filesMatchPattern:
-                pattern: ^manifests\/.*\.locale\..*\.yaml # matches manifests/*.locale.*.yaml
-        then:
-          - addLabel:
-              label: Manifest-Singleton-Deprecated
 onFailure:
 onSuccess:
