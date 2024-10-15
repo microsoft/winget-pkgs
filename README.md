@@ -21,11 +21,6 @@ Please check the [overview](doc/README.md) for detailed topics. Common topics fo
 * [Requesting a new package](doc/Issues.md#Request-a-New-Package)
 * [Requesting a new package version](doc/Issues.md#Request-a-New-Package-Version)
 
-## Repology
-[Repology](https://repology.org/), the packaging hub monitors package repositories comparing package versions and other information.
-
-[![Repository status](https://repology.org/badge/repository-big/winget.svg)](https://repology.org/repository/winget)
-
 # Contributing
 
 This project welcomes contributions and suggestions. Most contributions require you to agree to a Contributor License Agreement (CLA) declaring that you have the right to, and do, grant us the rights to use your contribution. For details, visit https://cla.opensource.microsoft.com.
