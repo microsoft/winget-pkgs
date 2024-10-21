@@ -1,0 +1,108 @@
+# Created with YamlCreate.ps1 v2.4.1 Dumplings Mod $debug=QUSU.CRLF.7-4-5.Win32NT
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.6.0.schema.json
+
+PackageIdentifier: JesseDuffield.lazygit
+PackageVersion: 0.44.0
+PackageLocale: en-US
+Publisher: Jesse Duffield
+PublisherUrl: https://github.com/jesseduffield
+PublisherSupportUrl: https://github.com/jesseduffield/lazygit/issues
+# PrivacyUrl:
+Author: Jesse Duffield
+PackageName: lazygit
+PackageUrl: https://github.com/jesseduffield/lazygit
+License: MIT
+LicenseUrl: https://github.com/jesseduffield/lazygit/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2018 Jesse Duffield
+CopyrightUrl: https://raw.githubusercontent.com/jesseduffield/lazygit/master/LICENSE
+ShortDescription: Simple terminal UI for git commands.
+# Description:
+Moniker: lazygit
+Tags:
+- cli
+- cross-platform
+- git
+- git-client
+- open-source
+- terminal-app
+ReleaseNotes: |-
+  What's Changed
+  Lots of great changes in this release. Thanks to everybody who contributed!
+  Enhancements 🔥
+  - Per-repo config files (and reloading of edited config files) by @stefanhaller in https://github.com/jesseduffield/lazygit/pull/3787
+    - In addition to the global config file you can now create repo-specific config files in <repo>/.git/lazygit.yml. Settings in these files override settings in the global config file. In addition, files called .lazygit.yml in any of the parent directories of a repo will also be loaded; this can be useful if you have settings that you want to apply to a group of repositories.
+    - We now also automatically apply (most) config changes without the need to restart lazygit
+  - Easily view diff across range of commits by @stefanhaller in https://github.com/jesseduffield/lazygit/pull/3869
+    - If you select a range of commits, we now show the diff across the range (inclusive). This makes it easy to see the total changes across a number of commits. Likewise, if you press enter when a range of commits are selected, we will show the changed files for the range.
+  https://github.com/user-attachments/assets/6646c78b-5770-41c1-93b9-5442d32404de
+  - Support hyperlinks from pagers by @stefanhaller in https://github.com/jesseduffield/lazygit/pull/3825
+    - If you're using delta as a pager (which I highly recommend trying), you can now click on line numbers to go to that line in your editor
+    git:
+        paging:
+          colorArg: always
+      	    pager: delta --paging=never --hyperlinks --line-numbers
+    If you're using vscode, use the following config:
+    git:
+        paging:
+          colorArg: always
+      	    pager: delta --paging=never --hyperlinks --line-numbers  --hyperlinks-file-link-format="vscode://file/{path}:{line}"
+  https://github.com/user-attachments/assets/75fef6c4-d437-4595-ab00-b8990215cfed
+  - Switch to Files panel after popping/applying a stash by @stefanhaller in https://github.com/jesseduffield/lazygit/pull/3888
+    - This is a nice quality of life improvement. You generally want to go straight to the files panel after you pop or apply from the stash
+  - Ask to auto-stage unstaged files when continuing a rebase after resolving conflicts by @stefanhaller in https://github.com/jesseduffield/lazygit/pull/3879
+    - Another quality of life improvement: often you resolve some conflicts, then make another couple changes, then in lazygit you say to continue and you get an error saying there are unstaged changes. Now instead of showing an error, lazygit asks if you want to stage those changes and continue.
+  - Offer autostash option when creating new branch by @brandondong in https://github.com/jesseduffield/lazygit/pull/3871
+    - Another great quality of life improvement
+  - Allow using shell aliases in interactive custom commands by @stefanhaller in https://github.com/jesseduffield/lazygit/pull/3793
+  - Switch tabs with panel jump keys by @stefanhaller in https://github.com/jesseduffield/lazygit/pull/3794
+    - If you've already been using the number keys (1-5) for jumping to specific side panels, you'll be pleased to know that you can now also use those keys for jumping to tabs within a side panel. E.g. to go to the reflog panel, you can now press 4 to jump to the commits panel, then 4 again to go to the reflog tab.
+  - Rename "Custom Command" to "Shell Command" by @stefanhaller in https://github.com/jesseduffield/lazygit/pull/3800
+    - There are two ways of invoking a 'custom' command in Lazygit: first by pre-defining a command in your config, and second by pressing ':' and typing in the command directly. We referred to both of these as 'custom commands' which was confusing. We now refer to the second approach as invoking a 'shell command'.
+  - Improve template placeholders for custom commands by @stefanhaller in https://github.com/jesseduffield/lazygit/pull/3809
+    - Now you can use SelectedCommit to refer to the selected commit regardless of which commits panel you're in (local commits, reflog, etc)
+    - Likewise, you can use SelectedPath whether you're in the files panel or the commit-files panel.
+  - feat(custom command): support multiple contexts within one command by @yam-liu in https://github.com/jesseduffield/lazygit/pull/3784
+    - You can now use a comma-separated list of contexts for which a custom command can be invoked. For example:
+    customCommands:
+        - description: 'Add empty commit'
+          key: 'E'
+          context: 'commits,files'
+  - Improve mouse support for commit message panel by @stefanhaller in https://github.com/jesseduffield/lazygit/pull/3836
+  - Make auto-staging resolved conflicts optional by @stefanhaller in https://github.com/jesseduffield/lazygit/pull/3870
+    - If you set git.autoStageResolvedConflicts to false in your config, lazygit will no longer auto-stage files in which you've resolved merge conflicts.
+  - Allow using </> and ,/. in sticky range select mode in patch explorer by @stefanhaller in https://github.com/jesseduffield/lazygit/pull/3837
+  - Add Zed editor support to editorPreset by @susl in https://github.com/jesseduffield/lazygit/pull/3886
+  Fixes 🔧
+  - Allow GPG reword for last commit by @Neko-Box-Coder in https://github.com/jesseduffield/lazygit/pull/3815
+  - Don't exit app when GetRepoPaths call fails during startup by @ppoum in https://github.com/jesseduffield/lazygit/pull/3779
+  - Fix lack of icon when extension isn't lowercase by @hasecilu in https://github.com/jesseduffield/lazygit/pull/3810
+  - Fix redraw bug (stale content) in commits view by @stefanhaller in https://github.com/jesseduffield/lazygit/pull/3783
+  - Fix line coloring when using the delta pager by @stefanhaller in https://github.com/jesseduffield/lazygit/pull/3820
+  - Fix pressing escape after clicking in diff view by @stefanhaller in https://github.com/jesseduffield/lazygit/pull/3828
+  - Fix fast-forward issue caused by a conflicting tag name @Neko-Box-Coder in https://github.com/jesseduffield/lazygit/pull/3807
+  - Fix range select -> stage failure when deleted file is already staged by @brandondong in https://github.com/jesseduffield/lazygit/pull/3631
+  - Scroll views up if needed to show all their content by @stefanhaller in https://github.com/jesseduffield/lazygit/pull/3839
+  - Fix crash when filtering commits by @stefanhaller in https://github.com/jesseduffield/lazygit/pull/3838
+  - Fix cancelled autostash resulting in stuck inline status by @brandondong in https://github.com/jesseduffield/lazygit/pull/3860
+  - Don't allow opening a menu while the search or filter prompt is open by @stefanhaller in https://github.com/jesseduffield/lazygit/pull/3878
+  Maintenance ⚙️
+  - Reapply "Check for fixup commits on CI" by @stefanhaller in https://github.com/jesseduffield/lazygit/pull/3745
+  - Some cleanups for APIs related to contexts by @stefanhaller in https://github.com/jesseduffield/lazygit/pull/3808
+  - Improve fixup commits script by @jesseduffield in https://github.com/jesseduffield/lazygit/pull/3853
+  - Fix linter warnings by @stefanhaller in https://github.com/jesseduffield/lazygit/pull/3854
+  - Add codespell support (config, workflow to detect/not fix) and make it fix few typos by @yarikoptic in https://github.com/jesseduffield/lazygit/pull/3751
+  - Get rid of a lot of error return values by @stefanhaller in https://github.com/jesseduffield/lazygit/pull/3890
+  - Add a readme file for the JSON files in pkg/i18n/translations by @stefanhaller in https://github.com/jesseduffield/lazygit/pull/3781
+  New Contributors
+  - @yam-liu made their first contribution in https://github.com/jesseduffield/lazygit/pull/3784
+  - @ppoum made their first contribution in https://github.com/jesseduffield/lazygit/pull/3779
+  - @Neko-Box-Coder made their first contribution in https://github.com/jesseduffield/lazygit/pull/3815
+  - @yarikoptic made their first contribution in https://github.com/jesseduffield/lazygit/pull/3751
+  - @susl made their first contribution in https://github.com/jesseduffield/lazygit/pull/3886
+  Full Changelog: https://github.com/jesseduffield/lazygit/compare/v0.43.1...v0.44.0
+ReleaseNotesUrl: https://github.com/jesseduffield/lazygit/releases/tag/v0.44.0
+# PurchaseUrl:
+# InstallationNotes:
+# Documentations:
+ManifestType: defaultLocale
+ManifestVersion: 1.6.0

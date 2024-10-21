@@ -1,0 +1,69 @@
+# Created with komac v2.5.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.6.0.schema.json
+
+PackageIdentifier: sxyazi.yazi
+PackageVersion: 0.3.2
+PackageLocale: en-US
+Publisher: sxyazi
+PublisherUrl: https://github.com/sxyazi
+PublisherSupportUrl: https://github.com/sxyazi/yazi/issues
+PackageName: Yazi
+License: MIT
+LicenseUrl: https://github.com/sxyazi/yazi/blob/HEAD/LICENSE
+ShortDescription: Blazing fast terminal file manager written in Rust, based on async I/O
+Tags:
+- android
+- asyncio
+- cli
+- concurrency
+- file-explorer
+- file-manager
+- helix
+- linux
+- macos
+- productivity
+- rust
+- terminal
+- tui
+- vim
+- windows
+- yazi
+ReleaseNotes: |-
+  This version introduces two eagerly awaited new features: a brand-new confirm component, and word wrapping.Brand-new confirm component
+  #1167 (thanks to @thelamb) introduces a brand-new confirm component that handles various confirmations (like trashing files, deleting files, overwriting files, and exit confirmations). The goal is to provide a safer and more efficient user experience:
+  - Safer: Now, when you trash, delete, or overwrite files, it'll show a list of affected files for a second confirmation, instead of just the number of files like before.
+  - More efficient: Confirmation now only requires pressing Enter once, instead of typing "y" and then pressing Enter. This should be a nice quality-of-life improvement.
+  Word wrapping
+  #1159 (thanks to @mskvsk and @ArtyomArtamonov) adds a new wrap option under [preview], which can be set to "no" or "yes". When set to "yes", word wrapping is enabled:
+  # ~/.config/yazi/yazi.toml
+  [preview]
+  wrap = "yes"
+
+  Image preview performance optimization
+  I've been working on optimizing Yazi's image preview speed, and with multi-threading, preloading, and a built-in image decoder, it should already be the fastest among all terminal file managers.However, I noticed some lag during fast scrolling and realized that at this point, the performance bottleneck isn't Yazi itself, but rather the terminal. When users scroll quickly, Yazi processes the images at a very high speed and sends them to the terminal, but the terminal can't keep up with processing them in time, which gives the impression of lag. In reality, it's not Yazi that's lagging, but the terminal.#1512 introduces a new image_delay configuration option to address this issue. When previewing images, it will wait at least image_delay milliseconds before starting to send the decoded image data to the terminal.This gives the terminal a breather and creates the perception that the file list is still scrolling smoothly. Additionally, this can reduce the CPU overhead caused by immediate image decoding during fast scrolling, thereby extending battery life.Before:
+  Now:
+  New --dir option for the create command
+  The create command is designed to support creating both files and directories (with / or \ at the end to indicate a directory).However, this isn't user-friendly for those who need to create many directories but few files, as they always have to type / or \.#1505 (thanks to @abstrakct) introduces a new --dir option that explicitly specifies creating directories without needing to type / or \ every time.What's Changed
+  - fix: overlong single-line text containing escape sequences was not being properly escaped by @sxyazi in #1497
+  - fix: upgrade ansi-to-tui to 5.0.0-rc.1 to resolve ratatui version conflict by @sxyazi in #1499
+  - feat: add --dir option to create command by @abstrakct in #1505
+  - feat: add ext() method to Url userdata by @sxyazi in #1528
+  - feat: new confirm component by @thelamb in #1167
+  - chore: set MACOSX_DEPLOYMENT_TARGE to 10.11 to make the binary compatible with old macOS by @hronro in #1532
+  - fix: use a different cache directory for each user to avoid permission issues by @sxyazi in #1541
+  - fix: wait till mimetype is resolved to avoid flickering by @sxyazi in #1542
+  - docs: add links to all terminal emulators by @nyurik in #1538
+  - feat: make the builtin code previewer handle invalid carriage return chars and binary streams better by @sxyazi in #1550
+  - perf: only scan the first 1024 bytes to detect if it's binary, apply \r fixes only to content within the visible range, avoid unnecessary allocations during natural sorting by @sxyazi in #1551
+  - feat: word wrapping in builtin code preview by @ArtyomArtamonov in #1159
+  - fix: filter out the which candidates that overlap with longer key chords by @sxyazi in #1562
+  - fix: DECSET and DECRQM tmux passthrough by @sxyazi in #1564
+  New Contributors
+  - @abstrakct made their first contribution in #1505
+  - @hronro made their first contribution in #1532
+  - @nyurik made their first contribution in #1538
+  - @ArtyomArtamonov made their first contribution in #1159
+  Full Changelog: https://github.com/sxyazi/yazi/compare/v0.3.1...v0.3.2
+ReleaseNotesUrl: https://github.com/sxyazi/yazi/releases/tag/v0.3.2
+ManifestType: defaultLocale
+ManifestVersion: 1.6.0
