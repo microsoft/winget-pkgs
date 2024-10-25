@@ -1,0 +1,65 @@
+# Created with AutoPublish using komac v2.4.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.6.0.schema.json
+
+PackageIdentifier: Genymobile.scrcpy
+PackageVersion: '2.6'
+PackageLocale: en-US
+Publisher: Genymobile
+PublisherUrl: https://github.com/Genymobile
+PublisherSupportUrl: https://github.com/Genymobile/scrcpy/issues
+Author: Genymobile
+PackageName: scrcpy
+PackageUrl: https://github.com/Genymobile/scrcpy
+License: Apache-2.0
+LicenseUrl: https://github.com/Genymobile/scrcpy/blob/HEAD/LICENSE
+Copyright: Apache License Version 2.0
+CopyrightUrl: https://raw.githubusercontent.com/Genymobile/scrcpy/master/LICENSE
+ShortDescription: Display and control your Android device
+Description: |-
+  This application provides display and control of Android devices connected via USB or over TCP/IP.
+  It does not require any root access.
+Moniker: scrcpy
+Tags:
+- android
+- control
+- device
+- display
+ReleaseNotes: |-
+  To receive a notification on new releases, click on Watch > Custom > Releases on the top.
+  scrcpy v2.6Changes since v2.5:
+  - Add audio playback capture method (#4380, #5102)
+  - Add audio duplication feature (#3875, #4380, #5102)
+  - Add mouse secondary bindings with Shift+click (#5055, #5076)
+  - Rework mouse events (#5067, #5076)
+  - Fix "turn screen off" for Honor devices (#4823, #4943, #5109)
+  - Add clipboard workaround for Honor devices (#4822, #5073)
+  - Always apply device workarounds (#4922, #5140, #5148, #5154)
+  - Fix missing initialization (#5057, #5058)
+  - Do not report error on device disconnected (#5044)
+  - Upgrade SDL to 2.30.5 in Windows releases
+  - Various technical fixes
+
+  Highlights
+  Audio mirroring
+  Audio forwarding was introduced in scrcpy 2.0. Until now, when audio was captured by scrcpy, it was necessarily disabled on the device.This release introduces a new audio capture method, which (optionally) supports audio duplication, to keep playing audio on the device. It is exposed as an alternative audio source named playback (in addition to output, the default, and mic).
+  scrcpy --audio-source=playback               # do not play on the device
+  scrcpy --audio-source=playback --audio-dup   # keep playing on the device
+
+  For convenience, --audio-dup automatically selects the playback audio source. Therefore, to mirror audio rather than forward, this is sufficient:
+  scrcpy --audio-dup
+
+  However, this playback capture has some drawbacks:
+  - it requires Android 13 (rather than Android 11),
+  - Android apps can opt-out, in which case they are not captured.
+  See documentation, #4380, #5102.Secondary mouse bindings
+  By default, with SDK mouse:
+  - right-click triggers BACK (or POWER on)
+  - middle-click triggers HOME
+  - the 4th click triggers APP_SWITCH
+  - the 5th click expands the notification panel
+  It was also possible to forward the clicks to the device instead, by using the --mouse-bind=xxxx option introduced in the previous version (2.5). But that way, we had to choose at startup whether a button triggered a shortcut or a click.This release introduces a new set of secondary bindings via Shift+click, so that both are possible at runtime.By default, a simple click triggers the shortcuts, and Shift+click forwards the click to the device.In AOA and UHID mouse modes, the default bindings are reversed: all clicks are forwarded by default, and pressing Shift gives access to the shortcuts (since the cursor is handled on the device side, it makes more sense to forward all mouse buttons by default in these modes).All these mouse bindings can be configured, check the documentation.See #5076.
+  - Twitter: @scrcpy_app
+  - Reddit: r/scrcpy
+ReleaseNotesUrl: https://github.com/Genymobile/scrcpy/releases/tag/v2.6
+ManifestType: defaultLocale
+ManifestVersion: 1.6.0
