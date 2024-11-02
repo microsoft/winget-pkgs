@@ -104,6 +104,7 @@ function Get-Release {
   return @{
     shaFileUrl     = $assets.Where({ $_.name -eq 'Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.txt' }).browser_download_url
     msixFileUrl    = $assets.Where({ $_.name -eq 'Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.msixbundle' }).browser_download_url
+    dependenciesUrl = $assets.Where({ $_.name -eq 'DesktopAppInstaller_Dependencies.zip' }).browser_download_url
     releaseTag     = $releasesAPIResponse[0].tag_name
     shaFileContent = $(Get-Content $shaFile.FullName)
   }
@@ -117,6 +118,7 @@ $latestRelease = Get-Release
 $versionTag = $latestRelease.releaseTag
 $desktopAppInstaller = @{
   url    = $latestRelease.msixFileUrl
+  dependenciesUrl = $latestRelease.dependenciesUrl
   hash   = $latestRelease.shaFileContent
   SaveTo = $(Join-Path $env:LOCALAPPDATA -ChildPath "Packages\Microsoft.DesktopAppInstaller_8wekyb3d8bbwe\bin\$versionTag\Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.msixbundle")
 }
@@ -127,6 +129,11 @@ $vcLibsUwp = @{
   url    = 'https://aka.ms/Microsoft.VCLibs.x64.14.00.Desktop.appx'
   hash   = 'B56A9101F706F9D95F815F5B7FA6EFBAC972E86573D378B96A07CFF5540C5961'
   SaveTo = $(Join-Path $tempFolder -ChildPath 'Microsoft.VCLibs.x64.14.00.Desktop.appx')
+}
+$dependencies_inRelease = @{
+  url = $desktopAppInstaller.dependenciesUrl
+  hash = $null # https://github.com/microsoft/winget-cli/issues/4938
+  SaveTo = Join-Path $(Split-Path $desktopAppInstaller.SaveTo) -ChildPath 'DesktopAppInstaller_Dependencies.zip'
 }
 $uiLibsUwp_2_7 = @{
   url    = 'https://github.com/microsoft/microsoft-ui-xaml/releases/download/v2.7.3/Microsoft.UI.Xaml.2.7.x64.appx'
@@ -143,11 +150,26 @@ $uiLibs_nuget = @{
   hash   = '6B62BD3C277F55518C3738121B77585AC5E171C154936EC58D87268BBAE91736'
   SaveTo = $(Join-Path $tempFolder -ChildPath 'Microsoft.UI.Xaml.2.8.zip')
 }
+$uiLibsUwp = @{}
 
-$dependencies = @($desktopAppInstaller, $vcLibsUwp, $uiLibsUwp_2_7, $uiLibsUwp_2_8)
+$dependencies = @($desktopAppInstaller)
 
 if ($useNuGetForMicrosoftUIXaml) {
   $dependencies += $uiLibs_nuget
+}
+
+Write-Output $versionTag
+
+if ([System.Version]$versionTag.Trim('v') -ge [System.Version]'1.9.25180') {
+  # As of WinGet 1.9.25180, VCLibs no longer publishes to the public URL and must be downloaded from the WinGet release
+  $dependencies += $dependencies_inRelease
+  $script:dependencySource = 'InRelease'
+} else {
+  $dependencies += $vcLibsUwp
+   # As of WinGet 1.7.10582, the dependency on uiLibsUwP was bumped from version 2.7.3 to version 2.8.6
+  $uiLibsUwp += ([System.Version]$versionTag.Trim('v') -ge [System.Version]'1.7.10582') ? $uiLibsUwp_2_8 : $uiLibsUwp_2_7
+  $dependencies += $uiLibsUwp
+  $script:dependencySource = 'Legacy'
 }
 
 # Clean temp directory
@@ -167,12 +189,22 @@ foreach ($dependency in $dependencies) {
   $dependency.pathInSandbox = Join-Path -Path $desktopInSandbox -ChildPath (Join-Path -Path $tempFolderName -ChildPath $(Split-Path $dependency.SaveTo -Leaf))
 
   # Only download if the file does not exist, or its hash does not match.
-  if (-Not ((Test-Path -Path $dependency.SaveTo) -And $dependency.hash -eq $(Get-FileHash $dependency.SaveTo).Hash)) {
+  $downloadFile = $true
+  if (Test-Path -Path $dependency.SaveTo) {
+    # If we have a hash for the file, it needs to be validated
+    if (!$dependency.hash) {
+      $downloadFile = $dependency.hash -ne $(Get-FileHash $dependency.SaveTo).Hash
+    } else {
+      # There is no hash to validate against, but the file exists, try using the existing file
+      $downloadFile = $false
+    }
+  }
+
+  if ($downloadFile) {
     Write-Host @"
     - Downloading:
       $($dependency.url)
 "@
-
     try {
       # If the directory doesn't already exist, create it
       $saveDirectory = Split-Path $dependency.SaveTo
@@ -185,7 +217,7 @@ foreach ($dependency in $dependencies) {
       # If the download failed, remove the item so the sandbox can fall-back to using the PowerShell module
       Remove-Item $dependency.SaveTo -Force | Out-Null
     }
-    if (-not ($dependency.hash -eq $(Get-FileHash $dependency.SaveTo).Hash)) {
+    if ($dependency.hash -and ($dependency.hash -ne $(Get-FileHash $dependency.SaveTo).Hash)) {
       # If the hash didn't match, remove the item so the sandbox can fall-back to using the PowerShell module
       Write-Host -ForegroundColor Red '      Dependency hash does not match the downloaded file'
       Write-Host -ForegroundColor Red '      Please open an issue referencing this error at https://bit.ly/WinGet-SandboxTest-Needs-Update'
@@ -197,6 +229,10 @@ foreach ($dependency in $dependencies) {
 
 # Copy the version of winget to the sandbox test folder
 Copy-Item -Path $desktopAppInstaller.SaveTo -Destination (Join-Path -Path $tempFolder -ChildPath (Split-Path $desktopAppInstaller.SaveTo -Leaf))
+# If the dependencies are being used from the zip file provided with the CLI release, copy the file to the sandbox test folder
+if ($script:dependencySource -eq 'InRelease') {
+  Copy-Item -Path $dependencies_inRelease.SaveTo -Destination (Join-Path -Path $tempFolder -ChildPath (Split-Path $dependencies_inRelease.SaveTo -Leaf))
+}
 
 # Create Bootstrap settings
 # Experimental features can be enabled for forward compatibility with PR's
@@ -205,8 +241,7 @@ $bootstrapSettingsContent['$schema'] = 'https://aka.ms/winget-settings.schema.js
 $bootstrapSettingsContent['logging'] = @{level = 'verbose' }
 if ($EnableExperimentalFeatures) {
   $bootstrapSettingsContent['experimentalFeatures'] = @{
-    dependencies     = $true
-    openLogsArgument = $true
+    fonts     = $true
   }
 }
 
@@ -259,10 +294,15 @@ Write-Host @'
 --> Installing WinGet
 '@
 `$ProgressPreference = 'SilentlyContinue'
+
 try {
-  Add-AppxPackage -Path '$($vcLibsUwp.pathInSandbox)' -ErrorAction Stop
-  Add-AppxPackage -Path '$($uiLibsUwp_2_7.pathInSandbox)' -ErrorAction Stop
-  Add-AppxPackage -Path '$($uiLibsUwp_2_8.pathInSandbox)' -ErrorAction Stop
+  if ($dependencySource -eq 'InRelease') {
+    Expand-Archive -Path '$($dependencies_inRelease.pathInSandbox)' -DestinationPath C:\Users\WDAGUtilityAccount\Downloads\Dependencies -ErrorAction SilentlyContinue
+    Get-ChildItem C:\Users\WDAGUtilityAccount\Downloads\Dependencies\x64 -Filter *.appx | Add-AppxPackage
+  } else {
+    Add-AppxPackage -Path '$($vcLibsUwp.pathInSandbox)' -ErrorAction Stop
+    Add-AppxPackage -Path '$($uiLibsUwp.pathInSandbox)' -ErrorAction Stop
+  }
   Add-AppxPackage -Path '$($desktopAppInstaller.pathInSandbox)' -ErrorAction Stop
 } catch {
   Write-Host -ForegroundColor Red 'Could not install from cached packages. Falling back to Repair-WinGetPackageManager cmdlet'
