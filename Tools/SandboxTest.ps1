@@ -158,21 +158,20 @@ if ($useNuGetForMicrosoftUIXaml) {
   $dependencies += $uiLibs_nuget
 }
 
-Write-Output $versionTag
-
-if ([System.Version]$versionTag.Trim('v') -ge [System.Version]'1.9.25180') {
+$compareVersion = $versionTag -replace '(^v)|(-preview$)'
+if ([System.Version]$compareVersion -ge [System.Version]'1.9.25180') {
   # As of WinGet 1.9.25180, VCLibs no longer publishes to the public URL and must be downloaded from the WinGet release
   $dependencies += $dependencies_inRelease
   $script:dependencySource = 'InRelease'
 } else {
   $dependencies += $vcLibsUwp
-   # As of WinGet 1.7.10582, the dependency on uiLibsUwP was bumped from version 2.7.3 to version 2.8.6
-  $uiLibsUwp += ([System.Version]$versionTag.Trim('v') -ge [System.Version]'1.7.10582') ? $uiLibsUwp_2_8 : $uiLibsUwp_2_7
+  # As of WinGet 1.7.10514 (https://github.com/microsoft/winget-cli/pull/4218), the dependency on uiLibsUwP was bumped from version 2.7.3 to version 2.8.6
+  $uiLibsUwp += ([System.Version]$compareVersion -ge [System.Version]'1.7.10514') ? $uiLibsUwp_2_8 : $uiLibsUwp_2_7
   $dependencies += $uiLibsUwp
   $script:dependencySource = 'Legacy'
 }
 
-# Clean temp directory
+# Clean temp directory except for the dependencies
 Get-ChildItem $tempFolder -Recurse -Exclude $($(Split-Path $dependencies.SaveTo -Leaf) -replace '\.([^\.]+)$', '.*') | Remove-Item -Force -Recurse
 
 if (-Not [String]::IsNullOrWhiteSpace($Manifest)) {
@@ -192,10 +191,12 @@ foreach ($dependency in $dependencies) {
   $downloadFile = $true
   if (Test-Path -Path $dependency.SaveTo) {
     # If we have a hash for the file, it needs to be validated
-    if (!$dependency.hash) {
+    if ($dependency.hash) {
       $downloadFile = $dependency.hash -ne $(Get-FileHash $dependency.SaveTo).Hash
     } else {
       # There is no hash to validate against, but the file exists, try using the existing file
+      # This is only meant for DesktopAppInstaller_Dependencies.zip right now, which does not have a hash
+      # https://github.com/microsoft/winget-cli/issues/4938
       $downloadFile = $false
     }
   }
@@ -296,7 +297,7 @@ Write-Host @'
 `$ProgressPreference = 'SilentlyContinue'
 
 try {
-  if ($dependencySource -eq 'InRelease') {
+  if ('$($dependencySource)' -eq 'InRelease') {
     Expand-Archive -Path '$($dependencies_inRelease.pathInSandbox)' -DestinationPath C:\Users\WDAGUtilityAccount\Downloads\Dependencies -ErrorAction SilentlyContinue
     Get-ChildItem C:\Users\WDAGUtilityAccount\Downloads\Dependencies\x64 -Filter *.appx | Add-AppxPackage
   } else {
