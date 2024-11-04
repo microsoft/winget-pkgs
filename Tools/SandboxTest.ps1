@@ -309,7 +309,7 @@ if (!$SkipManifestValidation -and ![String]::IsNullOrWhiteSpace($Manifest)) {
         }
     }
 }
-exit 0
+
 # Get the details for the version of WinGet that was requested
 Write-Verbose "Fetching release details from $script:ReleasesApiUrl; Filters: {Prerelease=$script:Prerelease; Version~=$script:WinGetVersion}"
 $script:WinGetReleaseDetails = Get-Release
