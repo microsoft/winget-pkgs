@@ -429,6 +429,10 @@ foreach ($dependency in $script:AppInstallerDependencies) {
     }
 }
 
+# Kill the active running sandbox, if it exists, otherwise the test data folder can't be removed
+Stop-NamedProcess -ProcessName 'WindowsSandboxClient'
+Start-Sleep -Milliseconds 2500 # Wait for the lock on the file to be released
+
 # Remove the test data folder if it exists. We will rebuild it with new test data
 Write-Verbose "Cleaning up previous test data"
 Invoke-FileCleanup -FilePaths $script:TestDataFolder
@@ -483,7 +487,7 @@ Write-Host @'
 --> Installing WinGet
 '@
 `$ProgressPreference = 'SilentlyContinue'
-
+Write-Host `$pwd
 try {
     Get-ChildItem -Filter '*.zip' | Expand-Archive
     Get-ChildItem -Recurse -Filter '*.appx' | Where-Object {`$_.FullName -match 'x64'} | Add-AppxPackage -ErrorAction Stop
@@ -523,6 +527,7 @@ winget settings --Enable LocalArchiveMalwareScanOverride
 Get-ChildItem -Filter 'settings.json' | Copy-Item -Destination C:\Users\WDAGUtilityAccount\AppData\Local\Packages\Microsoft.DesktopAppInstaller_8wekyb3d8bbwe\LocalState\settings.json
 Set-WinHomeLocation -GeoID $($script:HostGeoID)
 
+Write-Host `$pwd
 `$manifestFolder = (Get-ChildItem -Directory).Where({Get-ChildItem $_ -Filter '*.yaml'}).FullName | Select-Object -First 1
 if (`$manifestFolder) {
     Write-Host @'
@@ -604,9 +609,6 @@ $Script
 "@
 }
 
-
-# Kill the active running sandbox, if it exists
-Stop-NamedProcess -ProcessName 'WindowsSandboxClient'
 WindowsSandbox $script:ConfigurationFile
 
 # Clean up temporary files and properly dispose of objects
