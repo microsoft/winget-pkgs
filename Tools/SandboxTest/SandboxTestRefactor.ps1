@@ -1,13 +1,16 @@
 ﻿### Exit Codes:
-# 0 = Success
-# 1 = Error fetching GitHub release
+# -1 = Sandbox is not enabled
+#  0 = Success
+#  1 = Error fetching GitHub release
+#  2 = Unable to kill a running process
+#  3 = WinGet is not installed
+#  4 = Manifest validation error
 ###
 
-
-
+[CmdletBinding()]
 Param(
     # Manifest
-    [Parameter(Position = 0, HelpMessage = 'The Manifest to install in the Sandbox.')]
+    [Parameter(Mandatory = $true, Position = 0, HelpMessage = 'The Manifest to install in the Sandbox.')]
     [ValidateScript({
             if (-Not (Test-Path -Path $_)) { throw "$_ does not exist" }
             return $true
@@ -35,16 +38,20 @@ Param(
     [switch] $EnableExperimentalFeatures
 )
 
-
-#Region Constants
+enum DependencySources {
+    InRelease
+    Legacy
+}
 
 # Script Behaviors
 $ProgressPreference = 'SilentlyContinue'
 $ErrorActionPreference = 'Stop'
+if ($PSBoundParameters.Keys -notcontains 'InformationAction') { $InformationPreference = 'Continue' } # If the user didn't explicitly set an InformationAction, Override their preference
 $script:UseNuGetForMicrosoftUIXaml = $false
 $script:ScriptName = 'SandboxTest'
 $script:AppInstallerPFN = 'Microsoft.DesktopAppInstaller_8wekyb3d8bbwe'
 $script:ReleasesApiUrl = 'https://api.github.com/repos/microsoft/winget-cli/releases?per_page=100'
+$script:DependencySource = [DependencySources]::InRelease
 
 # File Names
 $script:AppInstallerShaFileName = $script:AppInstallerPFN + '.txt'
@@ -53,28 +60,30 @@ $script:VcLibsAppxFileName = 'Microsoft.VCLibs.Desktop.appx' # This does not mat
 $script:UiLibsAppxFileName = 'Microsoft.UI.Xaml.appx' # This does not match the published file name, but is used for ease of mapping in the Sandbox
 $script:UiLibsZipFileName = 'Microsoft.UI.Xaml.zip' # This does not match the published file name, but is used for ease of mapping in the Sandbox
 $script:DependenciesZipFileName = 'DesktopAppInstaller_Dependencies.zip'
-$script:DependenciesShaFileName = 'DesktopAppInstaller_Dependencies.txt' # TODO: https://github.com/microsoft/winget-cli/issues/4938
+$script:DependenciesShaFileName = 'DesktopAppInstaller_Dependencies.txt'
 $script:WinGetSettingsFileName = 'settings.json'
+$script:SandboxConfigurationFileName = $script:ScriptName + '.wsb'
 
-# DownloadUrls
+# Download Urls
 $script:VcLibsDownloadUrl = 'https://aka.ms/Microsoft.VCLibs.x64.14.00.Desktop.appx'
 $script:UiLibsDownloadUrl_v2_7 = 'https://github.com/microsoft/microsoft-ui-xaml/releases/download/v2.7.3/Microsoft.UI.Xaml.2.7.x64.appx'
 $script:UiLibsDownloadUrl_v2_8 = 'https://github.com/microsoft/microsoft-ui-xaml/releases/download/v2.8.6/Microsoft.UI.Xaml.2.8.x64.appx'
-$script:UiLibsDownloadUrl_NuGet = 'https://www.nuget.org/api/v2/package/Microsoft.UI.Xaml/2.8.6'
+$script:UiLibsDownloadUrl_NuGet = 'https://globalcdn.nuget.org/packages/microsoft.ui.xaml.2.8.6.nupkg?packageVersion=2.8.6'
 
 # Expected Hashes
 $script:VcLibsHash = 'B56A9101F706F9D95F815F5B7FA6EFBAC972E86573D378B96A07CFF5540C5961'
 $script:UiLibsHash_v2_7 = '8CE30D92ABEC6522BEB2544E7B716983F5CBA50751B580D89A36048BF4D90316'
-$script:UiLibsHash_v2_8 = '249D2AFB41CC009494841372BTeD6DD2DF46F87386D535DDF8D9F32C97226D2E46'
+$script:UiLibsHash_v2_8 = '249D2AFB41CC009494841372BD6DD2DF46F87386D535DDF8D9F32C97226D2E46'
 $script:UiLibsHash_NuGet = '6B62BD3C277F55518C3738121B77585AC5E171C154936EC58D87268BBAE91736'
 
 # File Paths
 $script:AppInstallerDataFolder = Join-Path -Path $env:LOCALAPPDATA -ChildPath 'Packages' -AdditionalChildPath $script:AppInstallerPFN
 # $script:TestDataFolder = Join-Path -Path $script:AppInstallerDataFolder -ChildPath $script:ScriptName
-$script:TestDataFolder = 'C:\git\winget-pkgs\Tools\SandboxTest\Test\'
+$script:TestDataFolder = 'C:\git\winget-pkgs\Tools\SandboxTest\DataFolder\'
 $script:PrimaryMappedFolder = (Resolve-Path -Path $MapFolder).Path
-$script:SandboxDesktipFolder = 'C:\Users\WDAGUtilityAccount\Desktop'
-$script:DependenciesCacheFolder = Join-Path -Path $script:AppInstallerDataFolder -ChildPath ($script:ScriptName + 'Dependencies')
+$script:SandboxDesktopFolder = 'C:\Users\WDAGUtilityAccount\Desktop'
+# $script:DependenciesCacheFolder = Join-Path -Path $script:AppInstallerDataFolder -ChildPath ($script:ScriptName + 'Dependencies')
+$script:DependenciesCacheFolder = 'C:\git\winget-pkgs\Tools\SandboxTest\DependenciesCache\'
 
 # Settings for writing the WSB file
 $script:XmlSettings = New-Object System.Xml.XmlWriterSettings
@@ -86,19 +95,8 @@ $script:HostGeoID = (Get-WinHomeLocation).GeoID
 # Misc
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 $script:WebClient = New-Object System.Net.WebClient
-
-#EndRegion Constants
-
-#Region Variables
 $script:CleanupPaths = @()
 
-# This gets set to either the v2.7, v2.8, or NuGet download URL
-$script:UiLibsDownloadUrl = ''
-# This gets set to the expected hash of the dependencies zip file for the specific version of WinGet the user requested
-$script:AppInstallerMsixHash = ''
-# This gets set to the expected hash of the dependencies zip for the specific version of WinGet the user requested
-# This is not currently implemented due to https://github.com/microsoft/winget-cli/issues/4938
-$script:DependenciesZipHash = ''
 # The experimental features get updated later based on a switch that is set
 $script:SandboxWinGetSettings = @{
     '$schema'            = 'https://aka.ms/winget-settings.schema.json'
@@ -110,10 +108,6 @@ $script:SandboxWinGetSettings = @{
     }
 }
 
-#EndRegion Variables
-
-#Region Functions
-
 ####
 # Description: Ensures that a folder is present. Creates it if it does not exist
 # Inputs: Path to folder
@@ -121,13 +115,13 @@ $script:SandboxWinGetSettings = @{
 ####
 function Initialize-Folder {
     param (
+        [Parameter(Mandatory = $true)]
         [String] $FolderPath
     )
-    Write-Debug "Initializing folder at $FolderPath"
     $FolderPath = [System.Io.Path]::GetFullPath($FolderPath) # Normalize the path just in case the separation characters weren't quite right, or dot notation was used
     if (Test-Path -Path $FolderPath -PathType Container) { return $true } # The path exists and is a folder
     if (Test-Path -Path $FolderPath) { return $false } # The path exists but was not a folder
-
+    Write-Debug "Initializing folder at $FolderPath"
     $directorySeparator = [System.IO.Path]::DirectorySeparatorChar
 
     # Build the path up one part at a time. This is safer than using the `-Force` parameter on New-Item to create the directory
@@ -164,26 +158,40 @@ function Get-Release {
 ####
 function Get-RemoteContent {
     param (
+        [Parameter(Mandatory = $true)]
+        [AllowEmptyString()]
         [String] $URL,
-        [String] $Path = '',
+        [String] $OutputPath = '',
         [switch] $Raw
     )
     Write-Debug "Attempting to fetch content from $URL"
     # Check if the URL is valid before trying to download
-    $response = [String]::IsNullOrWhiteSpace($URL) ? @{StatusCode = 400} : $(Invoke-WebRequest -Uri $URL -Method Head -ErrorAction SilentlyContinue) # If the URL is null, return a status code of 400
+    $response = [String]::IsNullOrWhiteSpace($URL) ? @{StatusCode = 400 } : $(Invoke-WebRequest -Uri $URL -Method Head -ErrorAction SilentlyContinue) # If the URL is null, return a status code of 400
     if ($response.StatusCode -ne 200) {
         Write-Debug "Fetching remote content from $URL returned status code $($response.StatusCode)"
         return $null
     }
-    $localFile = $Path ? [System.IO.FileInfo]::new($Path) : $(New-TemporaryFile) # If a path was specified, store it at that path; Otherwise use the temp folder
+    $localFile = $OutputPath ? [System.IO.FileInfo]::new($OutputPath) : $(New-TemporaryFile) # If a path was specified, store it at that path; Otherwise use the temp folder
     Write-Debug "Remote content will be stored at $($localFile.FullName)"
     $script:CleanupPaths += $Raw ? @($localFile.FullName) : @() # Mark the file for cleanup when the script ends if the raw data was requested
-    $script:WebClient.DownloadFile($URL, $localFile.FullName)
+    try {
+        $script:WebClient.DownloadFile($URL, $localFile.FullName)
+    }
+    catch {
+        # If the download fails, write a zero-byte file anyways
+        $null | Out-File $localFile.FullName
+    }
     return $Raw ? $(Get-Content -Path $localFile.FullName) : $localFile # If the raw content was requested, return the content, otherwise, return the FileInfo object
 }
 
+####
+# Description: Removes files and folders from the file system
+# Inputs: List of paths to remove
+# Outputs: None
+####
 function Invoke-FileCleanup {
     param (
+        [Parameter(Mandatory = $true)]
         [String[]] $FilePaths
     )
     foreach ($path in $FilePaths) {
@@ -193,10 +201,100 @@ function Invoke-FileCleanup {
     }
 }
 
-#EndRegion Functions
+####
+# Description: Stops a process and waits for it to terminate
+# Inputs: ProcessName, TimeoutSeconds
+# Outputs: None
+####
+function Stop-NamedProcess {
+    param (
+        [Parameter(Mandatory = $true)]
+        [String] $ProcessName,
+        [int] $TimeoutMilliseconds = 30000 # Default to 30 seconds
+    )
+    $process = Get-Process -Name $ProcessName -ErrorAction SilentlyContinue
+    if (!$process) { return } # Process was not running
+
+    # Stop The Process
+    Write-Verbose "Attempting to stop $ProcessName"
+    $process | Stop-Process
+
+    $elapsedTime = 0
+    $waitMilliseconds = 500
+    $processStillRunning = $true
+    # Wait for the process to terminate
+    do {
+        Write-Debug "$ProcessName is still running after $($elapsedTime/1000) seconds"
+        Start-Sleep -Milliseconds $waitMilliseconds  # Wait before checking again
+        $elapsedTime += $waitMilliseconds
+        $processStillRunning = Get-Process -Name $processName -ErrorAction SilentlyContinue
+    } while ($processStillRunning -and $elapsedTime -lt $timeoutSeconds)
+
+    if ($processStillRunning) {
+        Write-Error "Unable to terminate running process: $ProcessName"
+        exit 2
+    }
+}
+
+####
+# Description: Ensures that a file has the expected checksum
+# Inputs: Expected Checksum, Path to file, Hashing algorithm
+# Outputs: Boolean
+####
+function Test-FileChecksum {
+    param (
+        [Parameter(Mandatory = $true)]
+        [String] $ExpectedChecksum,
+        [Parameter(Mandatory = $true)]
+        [String] $Path,
+        [Parameter()]
+        [String] $Algorithm = 'SHA256'
+    )
+
+    # Get the hash of the file that is currently at the expected location for the dependency; This can be $null
+    $currentHash = (Get-FileHash -Path $Path -Algorithm $Algorithm -ErrorAction SilentlyContinue).Hash
+    return ($currentHash -eq $ExpectedChecksum)
+}
 
 #### Start of main script ####
 
+# Check if Windows Sandbox is enabled
+if (-Not (Get-Command 'WindowsSandbox' -ErrorAction SilentlyContinue)) {
+    Write-Error -Category NotInstalled -Message @'
+Windows Sandbox does not seem to be available. Check the following URL for prerequisites and further details:
+https://docs.microsoft.com/windows/security/threat-protection/windows-sandbox/windows-sandbox-overview
+
+You can run the following command in an elevated PowerShell for enabling Windows Sandbox:
+$ Enable-WindowsOptionalFeature -Online -FeatureName 'Containers-DisposableClientVM'
+'@
+    exit -1
+}
+
+# Validate the provided manifest
+if (!$SkipManifestValidation) {
+    # Check that WinGet is Installed
+    if (!(Get-Command 'winget.exe' -ErrorAction SilentlyContinue)) {
+        Write-Error "WinGet is not installed. Manifest cannot be validated"
+        exit 3
+    }
+    Write-Information "--> Validating Manifest"
+    $validateCommandOutput = winget.exe validate $Manifest
+    switch ($LASTEXITCODE) {
+        '-1978335191' {
+            Write-Output ($validateCommandOutput | Select-Object -Skip 1) # Skip the first line
+            Write-Error 'Manifest validation failed'
+            exit 4
+        }
+        '-1978335192' {
+            Write-Output ($validateCommandOutput | Select-Object -Skip 1) # Skip the first line
+            Write-Warning "Manifest validation succeeded with warnings"
+            Start-Sleep -Seconds 5 # Allow the user 5 seconds to read the warnings before moving on
+        }
+        Default {
+            Write-Output @($validateCommandOutput)'' # On the success, print an empty line after the command output
+        }
+    }
+}
 
 # Get the details for the version of WinGet that was requested
 Write-Verbose "Fetching release details from $script:ReleasesApiUrl; Filters: {Prerelease=$script:Prerelease; Version~=$script:WinGetVersion}"
@@ -216,10 +314,6 @@ $script:AppInstallerMsixShaDownloadUrl = $script:WinGetReleaseDetails.assets.Whe
 $script:AppInstallerMsixDownloadUrl = $script:WinGetReleaseDetails.assets.Where({ $_.name -eq $script:AppInstallerMsixFileName }).browser_download_url
 $script:DependenciesShaDownloadUrl = $script:WinGetReleaseDetails.assets.Where({ $_.name -eq $script:DependenciesShaFileName }).browser_download_url # This is expected to be null until the completion of https://github.com/microsoft/winget-cli/issues/4938
 $script:DependenciesZipDownloadUrl = $script:WinGetReleaseDetails.assets.Where({ $_.name -eq $script:DependenciesZipFileName }).browser_download_url
-
-
-$script:AppInstallerReleaseTag = $script:WinGetReleaseDetails.tag_name
-$script:AppInstallerParsedVersion = [System.Version]($script:AppInstallerReleaseTag -replace '(^v)|(-preview$)')
 Write-Debug @"
 
     AppInstallerMsixShaDownloadUrl = $script:AppInstallerMsixShaDownloadUrl
@@ -228,7 +322,12 @@ Write-Debug @"
     DependenciesZipDownloadUrl = $script:DependenciesZipDownloadUrl
 "@
 
+# Parse out the version
+$script:AppInstallerReleaseTag = $script:WinGetReleaseDetails.tag_name
+$script:AppInstallerParsedVersion = [System.Version]($script:AppInstallerReleaseTag -replace '(^v)|(-preview$)')
+Write-Debug "Using Release version $script:AppinstallerReleaseTag ($script:AppInstallerParsedVersion)"
 
+# Get the hashes for the files that change with each release version
 Write-Verbose "Fetching file hash information"
 $script:AppInstallerMsixHash = Get-RemoteContent -URL $script:AppInstallerMsixShaDownloadUrl -Raw
 $script:DependenciesZipHash = Get-RemoteContent -URL $script:DependenciesShaDownloadUrl -Raw
@@ -238,6 +337,96 @@ Write-Debug @"
     DependenciesZipHash = $script:DependenciesZipHash
 "@
 
+# Set the folder for the files that change with each release version
+$script:AppInstallerReleaseAssetsFolder = Join-Path $script:AppInstallerDataFolder -ChildPath 'bin' -AdditionalChildPath $script:AppInstallerReleaseTag
+
+# Build the dependency information
+$script:AppInstallerDependencies = @()
+if ($script:AppInstallerParsedVersion -ge [System.Version]'1.9.25180') {
+    # As of WinGet 1.9.25180, VCLibs no longer publishes to the public URL and must be downloaded from the WinGet release
+    # Add the Zip file from the release to the dependencies
+    Write-Debug "Adding $script:DependenciesZipFileName to dependency list"
+    $script:AppInstallerDependencies += @{
+        DownloadUrl = $script:DependenciesZipDownloadUrl
+        Checksum    = $script:DependenciesZipHash
+        Algorithm   = 'SHA256'
+        SaveTo      = (Join-Path -Path $script:AppInstallerReleaseAssetsFolder -ChildPath $script:DependenciesZipFileName)
+    }
+}
+else {
+    $script:DependencySource = [DependencySources]::Legacy
+    # Add the VCLibs to the dependencies
+    Write-Debug "Adding VCLibs UWP to dependency list"
+    $script:AppInstallerDependencies += @{
+        DownloadUrl = $script:VcLibsDownloadUrl
+        Checksum    = $script:VcLibsHash
+        Algorithm   = 'SHA256'
+        SaveTo      = (Join-Path -Path $script:DependenciesCacheFolder -ChildPath $script:VcLibsAppxFileName)
+    }
+    if ($script:UseNuGetForMicrosoftUIXaml) {
+        # Add the NuGet file to the dependencies
+        Write-Debug "Adding Microsoft.UI.Xaml (NuGet) to dependency list"
+        $script:AppInstallerDependencies += @{
+            DownloadUrl = $script:UiLibsDownloadUrl_NuGet
+            Checksum    = $script:UiLibsHash_NuGet
+            Algorithm   = 'SHA256'
+            SaveTo      = (Join-Path -Path $script:DependenciesCacheFolder -ChildPath $script:UiLibsZipFileName)
+        }
+    }
+    # As of WinGet 1.7.10514 (https://github.com/microsoft/winget-cli/pull/4218), the dependency on uiLibsUwP was bumped from version 2.7.3 to version 2.8.6
+    elseif ($script:AppInstallerParsedVersion -lt [System.Version]'1.7.10514') {
+        # Add Xaml 2.7 to the dependencies
+        Write-Debug "Adding Microsoft.UI.Xaml (v2.7) to dependency list"
+        $script:AppInstallerDependencies += @{
+            DownloadUrl = $script:UiLibsDownloadUrl_v2_7
+            Checksum    = $script:UiLibsHash_v2_7
+            Algorithm   = 'SHA256'
+            SaveTo      = (Join-Path -Path $script:DependenciesCacheFolder -ChildPath $script:UiLibsAppxFileName)
+        }
+    }
+    else {
+        # Add Xaml 2.8 to the dependencies
+        Write-Debug "Adding Microsoft.UI.Xaml (v2.8) to dependency list"
+        $script:AppInstallerDependencies += @{
+            DownloadUrl = $script:UiLibsDownloadUrl_v2_8
+            Checksum    = $script:UiLibsHash_v2_8
+            Algorithm   = 'SHA256'
+            SaveTo      = (Join-Path -Path $script:DependenciesCacheFolder -ChildPath $script:UiLibsAppxFileName)
+        }
+    }
+}
+
+# Add WinGet as a dependency for itself
+# This seems weird, but it's the easiest way to ensure that it is downloaded and has the right hash
+Write-Debug "Adding $script:AppInstallerMsixFileName ($script:AppInstallerReleaseTag) to dependency list"
+$script:AppInstallerDependencies += @{
+    DownloadUrl = $script:AppInstallerMsixDownloadUrl
+    Checksum    = $script:AppInstallerMsixHash
+    Algorithm   = 'SHA256'
+    SaveTo      = (Join-Path -Path $script:AppInstallerReleaseAssetsFolder -ChildPath $script:AppInstallerMsixFileName)
+}
+
+# Process the dependency list
+Write-Information "--> Checking Dependencies"
+foreach ($dependency in $script:AppInstallerDependencies) {
+    # If the hash doesn't match, the dependency needs to be re-downloaded
+    # If the file doesn't exist on the system, the hashes will not match since $null != ''
+    Write-Verbose "Checking the hash of $($dependency.SaveTo)"
+    if (!(Test-FileChecksum -ExpectedChecksum $dependency.Checksum -Path $dependency.SaveTo -Algorithm $dependency.Algorithm)) {
+        if (!(Initialize-Folder $($dependency.SaveTo | Split-Path))) { throw "Could not create folder for caching $($dependency.DownloadUrl)" } # The folder needs to be present, otherwise the WebClient request will fail
+        Write-Information "  - Downloading $($dependency.DownloadUrl)"
+        Get-RemoteContent -URL $dependency.DownloadUrl -OutputPath $dependency.SaveTo -ErrorAction SilentlyContinue | Out-Null
+    }
+
+    # If the hash didn't match, remove the item so the sandbox can fall-back to using the PowerShell module
+    if (!(Test-FileChecksum -ExpectedChecksum $dependency.Checksum -Path $dependency.SaveTo -Algorithm $dependency.Algorithm)) {
+        Write-Debug "Hashes did not match; Expected $($dependency.Checksum), Received $((Get-FileHash $dependency.SaveTo -Algorithm $dependency.Algorithm -ErrorAction Continue).Hash)"
+        Remove-Item $dependency.SaveTo -Force | Out-Null
+        # Continue on these errors because the PowerShell module will be used instead
+        Write-Error 'Dependency hash does not match the downloaded file' -ErrorAction Continue
+        Write-Error 'Please open an issue referencing this error at https://bit.ly/WinGet-SandboxTest-Needs-Update' -ErrorAction Continue
+    }
+}
 
 # Remove the test data folder if it exists. We will rebuild it with new test data
 Invoke-FileCleanup -FilePaths $script:TestDataFolder
@@ -246,7 +435,41 @@ Invoke-FileCleanup -FilePaths $script:TestDataFolder
 if (!(Initialize-Folder $script:TestDataFolder)) { throw 'Could not create folder for mapping files into the sandbox' }
 if (!(Initialize-Folder $script:DependenciesCacheFolder)) { throw 'Could not create folder for caching dependencies' }
 
-Invoke-FileCleanup -FilePaths $script:CleanupPaths
-return $script:AppInstallerMsixHash
+# Set Experimental Features to be Enabled, If requested
+if ($EnableExperimentalFeatures) {
+    Write-Debug "Setting Experimental Features to Enabled"
+    $experimentalFeatures = @($script:SandboxWinGetSettings.experimentalFeatures.Keys)
+    foreach ($feature in $experimentalFeatures) {
+        $script:SandboxWinGetSettings.experimentalFeatures[$feature] = $true
+    }
+}
 
-# Write the settings file to the
+# Copy Files to the TestDataFolder that will be mapped into sandbox
+Copy-Item -Path $Manifest -Destination $script:TestDataFolder -Recurse
+$script:SandboxWinGetSettings | ConvertTo-Json | Out-File -FilePath (Join-Path -Path $script:TestDataFolder -ChildPath $script:WinGetSettingsFileName) -Encoding ascii
+foreach ($dependency in $script:AppInstallerDependencies) { Copy-Item -Path $dependency.SaveTo -Destination $script:TestDataFolder }
+
+# Create the bootstrap.ps1
+
+# Create the WSB file
+$_WSB = New-Object System.Xml.XmlDocument
+# Create the root "Configuration" object
+$_Configuration = $_WSB.CreateElement("Configuration")
+$_WSB.AppendChild($_Configuration)
+# Create the Logon Command
+$_LogonCommand = $_WSB.CreateElement("LogonCommand")
+$_LogonCommand.SetAttribute("Command", "PowerShell Start-Process PowerShell -WindowStyle Maximized -ArgumentList '-ExecutionPolicy Bypass -NoExit -NoLogo")
+$_Configuration.AppendChild($_LogonCommand)
+$writer = [System.Xml.XmlWriter]::Create('C:\git\winget-pkgs\Tools\SandboxTest\sandboxtest.wsb', $script:XmlSettings)
+
+$_WSB.WriteTo($writer)
+$writer.Close()
+
+# Kill the active running sandbox, if it exists
+Write-Information "--> Closing Windows Sandbox"
+Stop-NamedProcess -ProcessName 'WindowsSandboxClient'
+
+# Clean up temporary files and properly dispose of objects
+# TODO: Move this to a function and call it before every exit
+Invoke-FileCleanup -FilePaths $script:CleanupPaths
+$script:WebClient.Dispose()
