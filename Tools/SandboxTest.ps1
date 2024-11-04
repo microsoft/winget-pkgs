@@ -46,22 +46,18 @@ enum DependencySources {
 
 # Script Behaviors
 $ProgressPreference = 'SilentlyContinue'
-$ErrorActionPreference = 'Stop'
+$ErrorActionPreference = 'Stop' # This gets overriden most places, but is set explicitly here to help catch errors
 if ($PSBoundParameters.Keys -notcontains 'InformationAction') { $InformationPreference = 'Continue' } # If the user didn't explicitly set an InformationAction, Override their preference
 $script:UseNuGetForMicrosoftUIXaml = $false
 $script:ScriptName = 'SandboxTest'
 $script:AppInstallerPFN = 'Microsoft.DesktopAppInstaller_8wekyb3d8bbwe'
+$script:DependenciesBaseName = 'DesktopAppInstaller_Dependencies'
 $script:ReleasesApiUrl = 'https://api.github.com/repos/microsoft/winget-cli/releases?per_page=100'
 $script:DependencySource = [DependencySources]::InRelease
 
 # File Names
-$script:AppInstallerShaFileName = "$script:AppInstallerPFN.txt" # This should exactly match the name of the file in the CLI GitHub Release
 $script:AppInstallerMsixFileName = "$script:AppInstallerPFN.msixbundle" # This should exactly match the name of the file in the CLI GitHub Release
-$script:DependenciesZipFileName = 'DesktopAppInstaller_Dependencies.zip' # This should exactly match the name of the file in the CLI GitHub Release
-$script:DependenciesShaFileName = 'DesktopAppInstaller_Dependencies.txt' # This should exactly match the name of the file in the CLI GitHub Release
-$script:VcLibsAppxFileName = 'Microsoft.VCLibs.Desktop.x64.appx' # This does not match the published file name, but is used for ease of mapping in the Sandbox
-$script:UiLibsAppxFileName = 'Microsoft.UI.Xaml.x64.appx' # This does not match the published file name, but is used for ease of mapping in the Sandbox
-$script:UiLibsZipFileName = 'Microsoft.UI.Xaml.zip' # This does not match the published file name, but is used for ease of mapping in the Sandbox
+$script:DependenciesZipFileName = "$script:DependenciesBaseName.zip" # This should exactly match the name of the file in the CLI GitHub Release
 
 # Download Urls
 $script:VcLibsDownloadUrl = 'https://aka.ms/Microsoft.VCLibs.x64.14.00.Desktop.appx'
@@ -219,6 +215,7 @@ function Invoke-FileCleanup {
 # Outputs: None
 ####
 function Stop-NamedProcess {
+    [CmdletBinding(SupportsShouldProcess)]
     param (
         [Parameter(Mandatory = $true)]
         [String] $ProcessName,
@@ -229,7 +226,7 @@ function Stop-NamedProcess {
 
     # Stop The Process
     Write-Information "--> Stopping $ProcessName"
-    $process | Stop-Process
+    if ($PSCmdlet.ShouldProcess($process)) { $process | Stop-Process -WhatIf:$WhatIfPreference }
 
     $elapsedTime = 0
     $waitMilliseconds = 500
@@ -324,9 +321,9 @@ if (!$script:WinGetReleaseDetails.assets) {
 
 Write-Verbose "Parsing Release Information"
 # Parse the needed URLs out of the release. It is entirely possible that these could end up being $null
-$script:AppInstallerMsixShaDownloadUrl = $script:WinGetReleaseDetails.assets.Where({ $_.name -eq $script:AppInstallerShaFileName }).browser_download_url
+$script:AppInstallerMsixShaDownloadUrl = $script:WinGetReleaseDetails.assets.Where({ $_.name -eq "$script:AppInstallerPFN.txt" }).browser_download_url
 $script:AppInstallerMsixDownloadUrl = $script:WinGetReleaseDetails.assets.Where({ $_.name -eq $script:AppInstallerMsixFileName }).browser_download_url
-$script:DependenciesShaDownloadUrl = $script:WinGetReleaseDetails.assets.Where({ $_.name -eq $script:DependenciesShaFileName }).browser_download_url
+$script:DependenciesShaDownloadUrl = $script:WinGetReleaseDetails.assets.Where({ $_.name -eq "$script:DependenciesBaseName.txt" }).browser_download_url
 $script:DependenciesZipDownloadUrl = $script:WinGetReleaseDetails.assets.Where({ $_.name -eq $script:DependenciesZipFileName }).browser_download_url
 Write-Debug @"
 
@@ -376,7 +373,7 @@ else {
         DownloadUrl = $script:VcLibsDownloadUrl
         Checksum    = $script:VcLibsHash
         Algorithm   = 'SHA256'
-        SaveTo      = (Join-Path -Path $script:DependenciesCacheFolder -ChildPath $script:VcLibsAppxFileName)
+        SaveTo      = (Join-Path -Path $script:DependenciesCacheFolder -ChildPath 'Microsoft.VCLibs.Desktop.x64.appx')
     }
     if ($script:UseNuGetForMicrosoftUIXaml) {
         # Add the NuGet file to the dependencies
@@ -385,7 +382,7 @@ else {
             DownloadUrl = $script:UiLibsDownloadUrl_NuGet
             Checksum    = $script:UiLibsHash_NuGet
             Algorithm   = 'SHA256'
-            SaveTo      = (Join-Path -Path $script:DependenciesCacheFolder -ChildPath $script:UiLibsZipFileName)
+            SaveTo      = (Join-Path -Path $script:DependenciesCacheFolder -ChildPath 'Microsoft.UI.Xaml.zip')
         }
     }
     # As of WinGet 1.7.10514 (https://github.com/microsoft/winget-cli/pull/4218), the dependency on uiLibsUwP was bumped from version 2.7.3 to version 2.8.6
@@ -396,7 +393,7 @@ else {
             DownloadUrl = $script:UiLibsDownloadUrl_v2_7
             Checksum    = $script:UiLibsHash_v2_7
             Algorithm   = 'SHA256'
-            SaveTo      = (Join-Path -Path $script:DependenciesCacheFolder -ChildPath $script:UiLibsAppxFileName)
+            SaveTo      = (Join-Path -Path $script:DependenciesCacheFolder -ChildPath 'Microsoft.UI.Xaml.2.7.x64.appx')
         }
     }
     else {
@@ -406,7 +403,7 @@ else {
             DownloadUrl = $script:UiLibsDownloadUrl_v2_8
             Checksum    = $script:UiLibsHash_v2_8
             Algorithm   = 'SHA256'
-            SaveTo      = (Join-Path -Path $script:DependenciesCacheFolder -ChildPath $script:UiLibsAppxFileName)
+            SaveTo      = (Join-Path -Path $script:DependenciesCacheFolder -ChildPath 'Microsoft.UI.Xaml.2.8.x64.appx')
         }
     }
 }
@@ -425,7 +422,7 @@ $script:AppInstallerDependencies += @{
 Write-Information "--> Checking Dependencies"
 foreach ($dependency in $script:AppInstallerDependencies) {
     # On a clean install, remove the existing files
-    if ($Clean) { Remove-Item -Path $dependency.SaveTo -Force -ErrorAction SilentlyContinue }
+    if ($Clean) { Invoke-FileCleanup -FilePaths $dependency.SaveTo }
 
     # If the hash doesn't match, the dependency needs to be re-downloaded
     # If the file doesn't exist on the system, the hashes will not match since $null != ''
@@ -619,7 +616,7 @@ if (-Not [String]::IsNullOrWhiteSpace($Manifest)) {
 }
 
 if (-Not [String]::IsNullOrWhiteSpace($Script)) {
-    Write-Host @"
+    Write-Information @"
       - Running the following script: {
 $Script
 }
