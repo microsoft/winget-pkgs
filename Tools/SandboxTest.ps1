@@ -200,8 +200,11 @@ function Get-RemoteContent {
 function Invoke-FileCleanup {
     param (
         [Parameter(Mandatory = $true)]
+        [AllowEmptyString()]
+        [AllowEmptyCollection()]
         [String[]] $FilePaths
     )
+    if (!$FilePaths) { return }
     foreach ($path in $FilePaths) {
         Write-Debug "Removing $path"
         if (Test-Path $path) { Remove-Item -Path $path -Recurse }
@@ -292,21 +295,21 @@ if (!$SkipManifestValidation -and ![String]::IsNullOrWhiteSpace($Manifest)) {
     $validateCommandOutput = winget.exe validate $Manifest
     switch ($LASTEXITCODE) {
         '-1978335191' {
-            Write-Output ($validateCommandOutput | Select-Object -Skip 1) # Skip the first line
+            ($validateCommandOutput | Select-Object -Skip 1 -SkipLast 1) | Write-Information # Skip the first line and the empty last line
             Write-Error -Category ParserError 'Manifest validation failed' -ErrorAction Continue
             Invoke-CleanExit -ExitCode 4
         }
         '-1978335192' {
-            Write-Output ($validateCommandOutput | Select-Object -Skip 1) # Skip the first line
+            ($validateCommandOutput | Select-Object -Skip 1 -SkipLast 1) | Write-Information # Skip the first line and the empty last line
             Write-Warning "Manifest validation succeeded with warnings"
             Start-Sleep -Seconds 5 # Allow the user 5 seconds to read the warnings before moving on
         }
         Default {
-            Write-Output @($validateCommandOutput)'' # On the success, print an empty line after the command output
+            $validateCommandOutput.Trim() | Write-Information # On the success, print an empty line after the command output
         }
     }
 }
-
+exit 0
 # Get the details for the version of WinGet that was requested
 Write-Verbose "Fetching release details from $script:ReleasesApiUrl; Filters: {Prerelease=$script:Prerelease; Version~=$script:WinGetVersion}"
 $script:WinGetReleaseDetails = Get-Release
@@ -445,7 +448,7 @@ foreach ($dependency in $script:AppInstallerDependencies) {
 
 # Kill the active running sandbox, if it exists, otherwise the test data folder can't be removed
 Stop-NamedProcess -ProcessName 'WindowsSandboxClient'
-Start-Sleep -Milliseconds 3500 # Wait for the lock on the file to be released
+Start-Sleep -Milliseconds 5000 # Wait for the lock on the file to be released
 
 # Remove the test data folder if it exists. We will rebuild it with new test data
 Write-Verbose "Cleaning up previous test data"
