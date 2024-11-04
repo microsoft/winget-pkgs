@@ -113,6 +113,7 @@ function Invoke-CleanExit {
     )
     Invoke-FileCleanup -FilePaths $script:CleanupPaths
     $script:WebClient.Dispose()
+    Write-Debug "Exiting ($ExitCode)"
     exit $ExitCode
 }
 
@@ -510,6 +511,7 @@ Write-Host @'
 try {
     Get-ChildItem -Filter '*.zip' | Expand-Archive
     Get-ChildItem -Recurse -Filter '*.appx' | Where-Object {`$_.FullName -match 'x64'} | Add-AppxPackage -ErrorAction Stop
+    # This path is set explicitly instead of using Get-ChildItem as an error prevention measure
     Add-AppxPackage './$($script:AppInstallerPFN).msixbundle' -ErrorAction Stop
 } catch {
   Write-Host -ForegroundColor Red 'Could not install from cached packages. Falling back to Repair-WinGetPackageManager cmdlet'
@@ -573,7 +575,7 @@ if (`$manifestFolder) {
 if (`$BoundParameterScript) {
     Write-Host @'
 
-    --> Running the following script: {
+--> Running the following script: {
 `$(Get-Content -Path `$BoundParameterScript.FullName)
 }
 
