@@ -35,7 +35,8 @@ Param(
     # Switches
     [switch] $SkipManifestValidation,
     [switch] $Prerelease,
-    [switch] $EnableExperimentalFeatures
+    [switch] $EnableExperimentalFeatures,
+    [switch] $Clean
 )
 
 enum DependencySources {
@@ -79,10 +80,9 @@ $script:UiLibsHash_NuGet = '6B62BD3C277F55518C3738121B77585AC5E171C154936EC58D87
 
 # File Paths
 $script:AppInstallerDataFolder = Join-Path -Path $env:LOCALAPPDATA -ChildPath 'Packages' -AdditionalChildPath $script:AppInstallerPFN
-# $script:DependenciesCacheFolder = Join-Path -Path $script:AppInstallerDataFolder -ChildPath ($script:ScriptName + 'Dependencies')
-$script:DependenciesCacheFolder = 'C:\git\winget-pkgs\Tools\SandboxTest\DependenciesCache\'
-# $script:TestDataFolder = Join-Path -Path $script:AppInstallerDataFolder -ChildPath $script:ScriptName
-$script:TestDataFolder = 'C:\git\winget-pkgs\Tools\SandboxTest\DataFolder\'
+$script:DependenciesCacheFolder = Join-Path -Path $script:AppInstallerDataFolder -ChildPath ($script:ScriptName + 'Dependencies')
+$script:DependenciesCacheFoder = 'C:\git\winget-pkgs\Tools\SandboxTest\DependenciesCache\'
+$script:TestDataFolder = Join-Path -Path $script:AppInstallerDataFolder -ChildPath $script:ScriptName
 $script:PrimaryMappedFolder = (Resolve-Path -Path $MapFolder).Path
 $script:ConfigurationFile = Join-Path -Path $script:TestDataFolder -ChildPath $script:SandboxConfigurationFileName
 $script:BootstrapFile = Join-Path -Path $script:TestDataFolder -ChildPath $script:SandboxBootstrapScriptName
@@ -415,6 +415,9 @@ $script:AppInstallerDependencies += @{
 # Process the dependency list
 Write-Information "--> Checking Dependencies"
 foreach ($dependency in $script:AppInstallerDependencies) {
+    # On a clean install, remove the existing files
+    if ($Clean) { Remove-Item -Path $dependency.SaveTo -Force -ErrorAction SilentlyContinue }
+
     # If the hash doesn't match, the dependency needs to be re-downloaded
     # If the file doesn't exist on the system, the hashes will not match since $null != ''
     Write-Verbose "Checking the hash of $($dependency.SaveTo)"
@@ -451,16 +454,12 @@ if ($EnableExperimentalFeatures) {
 }
 
 # Copy Files to the TestDataFolder that will be mapped into sandbox
-Copy-Item -Path $Manifest -Destination $script:TestDataFolder -Recurse
+Copy-Item -Path $Manifest -Destination $script:TestDataFolder -Recurse -ErrorAction SilentlyContinue
 $script:SandboxWinGetSettings | ConvertTo-Json | Out-File -FilePath (Join-Path -Path $script:TestDataFolder -ChildPath $script:WinGetSettingsFileName) -Encoding ascii
-foreach ($dependency in $script:AppInstallerDependencies) { Copy-Item -Path $dependency.SaveTo -Destination $script:TestDataFolder }
+foreach ($dependency in $script:AppInstallerDependencies) { Copy-Item -Path $dependency.SaveTo -Destination $script:TestDataFolder -ErrorAction SilentlyContinue }
 
 # Create the bootstrap.ps1
-$script:BootstrapFileContent = @"
-"@
-
-$script:BootstrapFileContent += @"
-
+@"
 function Update-EnvironmentVariables {
     foreach(`$level in "Machine","User") {
         [Environment]::GetEnvironmentVariables(`$level).GetEnumerator() | % {
@@ -489,7 +488,7 @@ Write-Host @'
 try {
     Get-ChildItem -Filter '*.zip' | Expand-Archive
     Get-ChildItem -Recurse -Filter '*.appx' | Where-Object {`$_.FullName -match 'x64'} | Add-AppxPackage -ErrorAction Stop
-    Get-ChildItem -Filter '*.msixbundle' | Add-AppxPackage -ErrorAction Stop
+    Add-AppxPackage './$($script:AppInstallerPFN).msixbundle' -ErrorAction Stop
 } catch {
   Write-Host -ForegroundColor Red 'Could not install from cached packages. Falling back to Repair-WinGetPackageManager cmdlet'
   try {
@@ -503,11 +502,11 @@ try {
       throw "Microsoft.Winget.Client was not found. Check that the Windows Package Manager PowerShell module was installed correctly."
     }
   }
-  Repair-WinGetPackageManager -Version $($script:AppInstallerReleaseTag))
+  Repair-WinGetPackageManager -Version $($script:AppInstallerReleaseTag)
 }
 
 Write-Host @'
---> Disabling safety warning when running installer
+--> Disabling safety warning when running installers
 '@
 New-Item -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Policies\Associations' | Out-Null
 New-ItemProperty -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Policies\Associations' -Name 'ModRiskFileTypes' -Type 'String' -Value '.bat;.exe;.reg;.vbs;.chm;.msi;.js;.cmd' | Out-Null
@@ -532,7 +531,7 @@ if (`$manifestFolder) {
     --> Installing the Manifest $manifestFileName
 
 '@
-    winget install -m `$manifestFolder --accept-package-agreements --verbose-logs --ignore-local-archive-malware-scan --dependency-source winget $WinGetOptions)
+    winget install -m `$manifestFolder --accept-package-agreements --verbose-logs --ignore-local-archive-malware-scan --dependency-source winget $WinGetOptions
 
     Write-Host @'
 
@@ -547,12 +546,8 @@ if (`$manifestFolder) {
     (Compare-Object (Get-ARPTable) `$originalARP -Property DisplayName,DisplayVersion,Publisher,ProductCode,Scope)| Select-Object -Property * -ExcludeProperty SideIndicator | Format-Table
 }
 
-
-
 Pop-Location
-"@
-
-"" | Out-File -FilePath $script:BootstrapFile
+"@ | Out-File -FilePath $script:BootstrapFile
 
 # Create the WSB file
 # Although this could be done using the native XML processor, it's easier to just write the content directly as a string
