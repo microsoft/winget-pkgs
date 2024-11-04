@@ -475,10 +475,12 @@ foreach ($dependency in $script:AppInstallerDependencies) { Copy-Item -Path $dep
 
 # Create a script file from the script parameter
 if (-Not [String]::IsNullOrWhiteSpace($Script)) {
+    Write-Verbose "Creating script file from 'Script' argument"
     $Script | Out-File -Path (Join-Path $script:TestDataFolder -ChildPath 'BoundParameterScript.ps1')
 }
 
 # Create the bootstrapping script
+Write-Verbose "Creating the script for bootstrapping the sandbox"
 @"
 function Update-EnvironmentVariables {
     foreach(`$level in "Machine","User") {
@@ -584,6 +586,7 @@ Pop-Location
 
 # Create the WSB file
 # Although this could be done using the native XML processor, it's easier to just write the content directly as a string
+Write-Verbose "Creating WSB file for launching the sandbox"
 @"
 <Configuration>
   <Networking>Enable</Networking>
@@ -626,5 +629,6 @@ $Script
 "@
 }
 
+Write-Verbose "Invoking the sandbox using $script:ConfigurationFile"
 WindowsSandbox $script:ConfigurationFile
 Invoke-CleanExit -ExitCode 0
