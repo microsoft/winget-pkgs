@@ -110,6 +110,21 @@ $script:SandboxWinGetSettings = @{
 # Inputs: Path to folder
 # Outputs: Boolean. True if path exists or was created; False if otherwise
 ####
+function Invoke-CleanExit {
+    param (
+        [Parameter(Mandatory = $true)]
+        [int] $ExitCode
+    )
+    Invoke-FileCleanup -FilePaths $script:CleanupPaths
+    $script:WebClient.Dispose()
+    exit $ExitCode
+}
+
+####
+# Description: Ensures that a folder is present. Creates it if it does not exist
+# Inputs: Path to folder
+# Outputs: Boolean. True if path exists or was created; False if otherwise
+####
 function Initialize-Folder {
     param (
         [Parameter(Mandatory = $true)]
@@ -230,8 +245,8 @@ function Stop-NamedProcess {
     } while ($processStillRunning -and $elapsedTime -lt $TimeoutMilliseconds)
 
     if ($processStillRunning) {
-        Write-Error "Unable to terminate running process: $ProcessName"
-        exit 2
+        Write-Error -Category OperationTimeout "Unable to terminate running process: $ProcessName" -ErrorAction Continue
+        Invoke-CleanExit -ExitCode 2
     }
 }
 
@@ -259,30 +274,30 @@ function Test-FileChecksum {
 
 # Check if Windows Sandbox is enabled
 if (-Not (Get-Command 'WindowsSandbox' -ErrorAction SilentlyContinue)) {
-    Write-Error -Category NotInstalled -Message @'
+    Write-Error -ErrorAction Continue -Category NotInstalled -Message @'
 Windows Sandbox does not seem to be available. Check the following URL for prerequisites and further details:
 https://docs.microsoft.com/windows/security/threat-protection/windows-sandbox/windows-sandbox-overview
 
 You can run the following command in an elevated PowerShell for enabling Windows Sandbox:
 $ Enable-WindowsOptionalFeature -Online -FeatureName 'Containers-DisposableClientVM'
 '@
-    exit -1
+    Invoke-CleanExit -ExitCode -1
 }
 
 # Validate the provided manifest
 if (!$SkipManifestValidation -and ![String]::IsNullOrWhiteSpace($Manifest)) {
     # Check that WinGet is Installed
     if (!(Get-Command 'winget.exe' -ErrorAction SilentlyContinue)) {
-        Write-Error "WinGet is not installed. Manifest cannot be validated"
-        exit 3
+        Write-Error -Category NotInstalled "WinGet is not installed. Manifest cannot be validated" -ErrorAction Continue
+        Invoke-CleanExit -ExitCode 3
     }
     Write-Information "--> Validating Manifest"
     $validateCommandOutput = winget.exe validate $Manifest
     switch ($LASTEXITCODE) {
         '-1978335191' {
             Write-Output ($validateCommandOutput | Select-Object -Skip 1) # Skip the first line
-            Write-Error 'Manifest validation failed'
-            exit 4
+            Write-Error -Category ParserError 'Manifest validation failed' -ErrorAction Continue
+            Invoke-CleanExit -ExitCode 4
         }
         '-1978335192' {
             Write-Output ($validateCommandOutput | Select-Object -Skip 1) # Skip the first line
@@ -299,12 +314,12 @@ if (!$SkipManifestValidation -and ![String]::IsNullOrWhiteSpace($Manifest)) {
 Write-Verbose "Fetching release details from $script:ReleasesApiUrl; Filters: {Prerelease=$script:Prerelease; Version~=$script:WinGetVersion}"
 $script:WinGetReleaseDetails = Get-Release
 if (!$script:WinGetReleaseDetails) {
-    Write-Error 'No WinGet releases found matching criteria'
-    exit 1
+    Write-Error -Category ObjectNotFound 'No WinGet releases found matching criteria' -ErrorAction Continue
+    Invoke-CleanExit -ExitCode 1
 }
 if (!$script:WinGetReleaseDetails.assets) {
-    Write-Error 'Could not fetch WinGet CLI release assets'
-    exit 1
+    Write-Error -Category ResourceUnavailable 'Could not fetch WinGet CLI release assets' -ErrorAction Continue
+    Invoke-CleanExit -ExitCode 1
 }
 
 Write-Verbose "Parsing Release Information"
@@ -426,8 +441,8 @@ foreach ($dependency in $script:AppInstallerDependencies) {
         Write-Debug "Hashes did not match; Expected $($dependency.Checksum), Received $((Get-FileHash $dependency.SaveTo -Algorithm $dependency.Algorithm -ErrorAction Continue).Hash)"
         Remove-Item $dependency.SaveTo -Force | Out-Null
         # Continue on these errors because the PowerShell module will be used instead
-        Write-Error 'Dependency hash does not match the downloaded file' -ErrorAction Continue
-        Write-Error 'Please open an issue referencing this error at https://bit.ly/WinGet-SandboxTest-Needs-Update' -ErrorAction Continue
+        Write-Error -Category SecurityError 'Dependency hash does not match the downloaded file' -ErrorAction Continue
+        Write-Error -Category SecurityError 'Please open an issue referencing this error at https://bit.ly/WinGet-SandboxTest-Needs-Update' -ErrorAction Continue
     }
 }
 
@@ -612,8 +627,4 @@ $Script
 }
 
 WindowsSandbox $script:ConfigurationFile
-
-# Clean up temporary files and properly dispose of objects
-# TODO: Move this to a function and call it before every exit
-Invoke-FileCleanup -FilePaths $script:CleanupPaths
-$script:WebClient.Dispose()
+Invoke-CleanExit -ExitCode 0
