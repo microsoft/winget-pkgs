@@ -102,9 +102,9 @@ $script:SandboxWinGetSettings = @{
 }
 
 ####
-# Description: Ensures that a folder is present. Creates it if it does not exist
-# Inputs: Path to folder
-# Outputs: Boolean. True if path exists or was created; False if otherwise
+# Description: Cleans up resources used by the script and then exits
+# Inputs: Exit code
+# Outputs: None
 ####
 function Invoke-CleanExit {
     param (
