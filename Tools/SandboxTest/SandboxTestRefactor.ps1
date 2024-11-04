@@ -221,11 +221,13 @@ function Stop-NamedProcess {
     $processStillRunning = $true
     # Wait for the process to terminate
     do {
-        Write-Debug "$ProcessName is still running after $($elapsedTime/1000) seconds"
-        Start-Sleep -Milliseconds $waitMilliseconds  # Wait before checking again
-        $elapsedTime += $waitMilliseconds
         $processStillRunning = Get-Process -Name $processName -ErrorAction SilentlyContinue
-    } while ($processStillRunning -and $elapsedTime -lt $timeoutSeconds)
+        if ($processStillRunning) {
+            Write-Debug "$ProcessName is still running after $($elapsedTime/1000) seconds"
+            Start-Sleep -Milliseconds $waitMilliseconds  # Wait before checking again
+            $elapsedTime += $waitMilliseconds
+        }
+    } while ($processStillRunning -and $elapsedTime -lt $TimeoutMilliseconds)
 
     if ($processStillRunning) {
         Write-Error "Unable to terminate running process: $ProcessName"
@@ -431,7 +433,7 @@ foreach ($dependency in $script:AppInstallerDependencies) {
 
 # Kill the active running sandbox, if it exists, otherwise the test data folder can't be removed
 Stop-NamedProcess -ProcessName 'WindowsSandboxClient'
-Start-Sleep -Milliseconds 2500 # Wait for the lock on the file to be released
+Start-Sleep -Milliseconds 3500 # Wait for the lock on the file to be released
 
 # Remove the test data folder if it exists. We will rebuild it with new test data
 Write-Verbose "Cleaning up previous test data"
@@ -487,7 +489,7 @@ Write-Host @'
 --> Installing WinGet
 '@
 `$ProgressPreference = 'SilentlyContinue'
-Write-Host `$pwd
+
 try {
     Get-ChildItem -Filter '*.zip' | Expand-Archive
     Get-ChildItem -Recurse -Filter '*.appx' | Where-Object {`$_.FullName -match 'x64'} | Add-AppxPackage -ErrorAction Stop
@@ -527,25 +529,25 @@ winget settings --Enable LocalArchiveMalwareScanOverride
 Get-ChildItem -Filter 'settings.json' | Copy-Item -Destination C:\Users\WDAGUtilityAccount\AppData\Local\Packages\Microsoft.DesktopAppInstaller_8wekyb3d8bbwe\LocalState\settings.json
 Set-WinHomeLocation -GeoID $($script:HostGeoID)
 
-Write-Host `$pwd
-`$manifestFolder = (Get-ChildItem -Directory).Where({Get-ChildItem $_ -Filter '*.yaml'}).FullName | Select-Object -First 1
+`$manifestFolder = (Get-ChildItem `$pwd -Directory).Where({Get-ChildItem `$_ -Filter '*.yaml'}).FullName | Select-Object -First 1
 if (`$manifestFolder) {
-    Write-Host @'
+    Write-Host @"
 
-    --> Installing the Manifest $manifestFileName
+--> Installing the Manifest `$(`$manifestFolder | Split-Path -Leaf)
 
-'@
+`"@
+    `$originalARP = Get-ARPTable
     winget install -m `$manifestFolder --accept-package-agreements --verbose-logs --ignore-local-archive-malware-scan --dependency-source winget $WinGetOptions
 
     Write-Host @'
 
-    --> Refreshing environment variables
+--> Refreshing environment variables
 '@
     Update-EnvironmentVariables
 
     Write-Host @'
 
-    --> Comparing ARP Entries
+--> Comparing ARP Entries
 '@
     (Compare-Object (Get-ARPTable) `$originalARP -Property DisplayName,DisplayVersion,Publisher,ProductCode,Scope)| Select-Object -Property * -ExcludeProperty SideIndicator | Format-Table
 }
