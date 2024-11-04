@@ -55,16 +55,13 @@ $script:ReleasesApiUrl = 'https://api.github.com/repos/microsoft/winget-cli/rele
 $script:DependencySource = [DependencySources]::InRelease
 
 # File Names
-$script:AppInstallerShaFileName = $script:AppInstallerPFN + '.txt'
-$script:AppInstallerMsixFileName = $script:AppInstallerPFN + '.msixbundle'
+$script:AppInstallerShaFileName = "$script:AppInstallerPFN.txt" # This should exactly match the name of the file in the CLI GitHub Release
+$script:AppInstallerMsixFileName = "$script:AppInstallerPFN.msixbundle" # This should exactly match the name of the file in the CLI GitHub Release
+$script:DependenciesZipFileName = 'DesktopAppInstaller_Dependencies.zip' # This should exactly match the name of the file in the CLI GitHub Release
+$script:DependenciesShaFileName = 'DesktopAppInstaller_Dependencies.txt' # This should exactly match the name of the file in the CLI GitHub Release
 $script:VcLibsAppxFileName = 'Microsoft.VCLibs.Desktop.x64.appx' # This does not match the published file name, but is used for ease of mapping in the Sandbox
 $script:UiLibsAppxFileName = 'Microsoft.UI.Xaml.x64.appx' # This does not match the published file name, but is used for ease of mapping in the Sandbox
 $script:UiLibsZipFileName = 'Microsoft.UI.Xaml.zip' # This does not match the published file name, but is used for ease of mapping in the Sandbox
-$script:DependenciesZipFileName = 'DesktopAppInstaller_Dependencies.zip'
-$script:DependenciesShaFileName = 'DesktopAppInstaller_Dependencies.txt'
-$script:WinGetSettingsFileName = 'settings.json'
-$script:SandboxConfigurationFileName = $script:ScriptName + '.wsb'
-$script:SandboxBootstrapScriptName = $script:ScriptName + '.ps1'
 
 # Download Urls
 $script:VcLibsDownloadUrl = 'https://aka.ms/Microsoft.VCLibs.x64.14.00.Desktop.appx'
@@ -80,22 +77,16 @@ $script:UiLibsHash_NuGet = '6B62BD3C277F55518C3738121B77585AC5E171C154936EC58D87
 
 # File Paths
 $script:AppInstallerDataFolder = Join-Path -Path $env:LOCALAPPDATA -ChildPath 'Packages' -AdditionalChildPath $script:AppInstallerPFN
-$script:DependenciesCacheFolder = Join-Path -Path $script:AppInstallerDataFolder -ChildPath ($script:ScriptName + 'Dependencies')
-$script:DependenciesCacheFoder = 'C:\git\winget-pkgs\Tools\SandboxTest\DependenciesCache\'
+$script:DependenciesCacheFolder = Join-Path -Path $script:AppInstallerDataFolder -ChildPath "$script:ScriptName.Dependencies"
 $script:TestDataFolder = Join-Path -Path $script:AppInstallerDataFolder -ChildPath $script:ScriptName
 $script:PrimaryMappedFolder = (Resolve-Path -Path $MapFolder).Path
-$script:ConfigurationFile = Join-Path -Path $script:TestDataFolder -ChildPath $script:SandboxConfigurationFileName
-$script:BootstrapFile = Join-Path -Path $script:TestDataFolder -ChildPath $script:SandboxBootstrapScriptName
-
-# Settings for writing the WSB file
-$script:XmlSettings = New-Object System.Xml.XmlWriterSettings
-$script:XmlSettings.Indent = $true
+$script:ConfigurationFile = Join-Path -Path $script:TestDataFolder -ChildPath "$script:ScriptName.wsb"
 
 # Sandbox Settings
 $script:SandboxDesktopFolder = 'C:\Users\WDAGUtilityAccount\Desktop'
 $script:SandboxWorkingDirectory = Join-Path -Path $script:SandboxDesktopFolder -ChildPath $($script:PrimaryMappedFolder | Split-Path -Leaf)
 $script:SandboxTestDataFolder = Join-Path -Path $script:SandboxDesktopFolder -ChildPath $($script:TestDataFolder | Split-Path -Leaf)
-$script:SandboxBootstrapFile = Join-Path -Path $script:SandboxTestDataFolder -ChildPath $script:SandboxBootstrapScriptName
+$script:SandboxBootstrapFile = Join-Path -Path $script:SandboxTestDataFolder -ChildPath "$script:ScriptName.ps1"
 $script:HostGeoID = (Get-WinHomeLocation).GeoID
 
 # Misc
@@ -347,6 +338,7 @@ Write-Debug @"
 $script:AppInstallerReleaseAssetsFolder = Join-Path $script:AppInstallerDataFolder -ChildPath 'bin' -AdditionalChildPath $script:AppInstallerReleaseTag
 
 # Build the dependency information
+Write-Verbose "Building Dependency List"
 $script:AppInstallerDependencies = @()
 if ($script:AppInstallerParsedVersion -ge [System.Version]'1.9.25180') {
     # As of WinGet 1.9.25180, VCLibs no longer publishes to the public URL and must be downloaded from the WinGet release
@@ -438,6 +430,7 @@ foreach ($dependency in $script:AppInstallerDependencies) {
 }
 
 # Remove the test data folder if it exists. We will rebuild it with new test data
+Write-Verbose "Cleaning up previous test data"
 Invoke-FileCleanup -FilePaths $script:TestDataFolder
 
 # Create the paths if they don't exist
@@ -454,11 +447,17 @@ if ($EnableExperimentalFeatures) {
 }
 
 # Copy Files to the TestDataFolder that will be mapped into sandbox
+Write-Verbose "Copying assets into $script:TestDataFolder"
 Copy-Item -Path $Manifest -Destination $script:TestDataFolder -Recurse -ErrorAction SilentlyContinue
-$script:SandboxWinGetSettings | ConvertTo-Json | Out-File -FilePath (Join-Path -Path $script:TestDataFolder -ChildPath $script:WinGetSettingsFileName) -Encoding ascii
+$script:SandboxWinGetSettings | ConvertTo-Json | Out-File -FilePath (Join-Path -Path $script:TestDataFolder -ChildPath 'settings.json') -Encoding ascii
 foreach ($dependency in $script:AppInstallerDependencies) { Copy-Item -Path $dependency.SaveTo -Destination $script:TestDataFolder -ErrorAction SilentlyContinue }
 
-# Create the bootstrap.ps1
+# Create a script file from the script parameter
+if (-Not [String]::IsNullOrWhiteSpace($Script)) {
+    $Script | Out-File -Path (Join-Path $script:TestDataFolder -ChildPath 'BoundParameterScript.ps1')
+}
+
+# Create the bootstrapping script
 @"
 function Update-EnvironmentVariables {
     foreach(`$level in "Machine","User") {
@@ -521,7 +520,7 @@ Write-Host @'
 '@
 winget settings --Enable LocalManifestFiles
 winget settings --Enable LocalArchiveMalwareScanOverride
-Get-ChildItem -Filter '$($script:WinGetSettingsFileName)' | Copy-Item -Destination C:\Users\WDAGUtilityAccount\AppData\Local\Packages\Microsoft.DesktopAppInstaller_8wekyb3d8bbwe\LocalState\settings.json
+Get-ChildItem -Filter 'settings.json' | Copy-Item -Destination C:\Users\WDAGUtilityAccount\AppData\Local\Packages\Microsoft.DesktopAppInstaller_8wekyb3d8bbwe\LocalState\settings.json
 Set-WinHomeLocation -GeoID $($script:HostGeoID)
 
 `$manifestFolder = (Get-ChildItem -Directory).Where({Get-ChildItem $_ -Filter '*.yaml'}).FullName | Select-Object -First 1
@@ -546,13 +545,26 @@ if (`$manifestFolder) {
     (Compare-Object (Get-ARPTable) `$originalARP -Property DisplayName,DisplayVersion,Publisher,ProductCode,Scope)| Select-Object -Property * -ExcludeProperty SideIndicator | Format-Table
 }
 
+`$BoundParameterScript = Get-ChildItem -Filter 'BoundParameterScript.ps1'
+if (`$BoundParameterScript) {
+    Write-Host @'
+
+    --> Running the following script: {
+`$(Get-Content -Path `$BoundParameterScript.FullName)
+}
+
+'@
+& `$BoundParameterScript.FullName
+}
+
 Pop-Location
-"@ | Out-File -FilePath $script:BootstrapFile
+"@ | Out-File -FilePath $(Join-Path -Path $script:TestDataFolder -ChildPath "$script:ScriptName.ps1")
 
 # Create the WSB file
 # Although this could be done using the native XML processor, it's easier to just write the content directly as a string
 @"
 <Configuration>
+  <Networking>Enable</Networking>
   <MappedFolders>
     <MappedFolder>
       <HostFolder>$($script:TestDataFolder)</HostFolder>
@@ -584,9 +596,18 @@ if (-Not [String]::IsNullOrWhiteSpace($Manifest)) {
 "@
 }
 
+if (-Not [String]::IsNullOrWhiteSpace($Script)) {
+    Write-Host @"
+      - Running the following script: {
+$Script
+}
+"@
+}
+
 
 # Kill the active running sandbox, if it exists
 Stop-NamedProcess -ProcessName 'WindowsSandboxClient'
+WindowsSandbox $script:ConfigurationFile
 
 # Clean up temporary files and properly dispose of objects
 # TODO: Move this to a function and call it before every exit
