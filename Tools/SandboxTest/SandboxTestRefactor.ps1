@@ -10,7 +10,7 @@
 [CmdletBinding()]
 Param(
     # Manifest
-    [Parameter(Mandatory = $true, Position = 0, HelpMessage = 'The Manifest to install in the Sandbox.')]
+    [Parameter(Position = 0, HelpMessage = 'The Manifest to install in the Sandbox.')]
     [ValidateScript({
             if (-Not (Test-Path -Path $_)) { throw "$_ does not exist" }
             return $true
@@ -56,13 +56,14 @@ $script:DependencySource = [DependencySources]::InRelease
 # File Names
 $script:AppInstallerShaFileName = $script:AppInstallerPFN + '.txt'
 $script:AppInstallerMsixFileName = $script:AppInstallerPFN + '.msixbundle'
-$script:VcLibsAppxFileName = 'Microsoft.VCLibs.Desktop.appx' # This does not match the published file name, but is used for ease of mapping in the Sandbox
-$script:UiLibsAppxFileName = 'Microsoft.UI.Xaml.appx' # This does not match the published file name, but is used for ease of mapping in the Sandbox
+$script:VcLibsAppxFileName = 'Microsoft.VCLibs.Desktop.x64.appx' # This does not match the published file name, but is used for ease of mapping in the Sandbox
+$script:UiLibsAppxFileName = 'Microsoft.UI.Xaml.x64.appx' # This does not match the published file name, but is used for ease of mapping in the Sandbox
 $script:UiLibsZipFileName = 'Microsoft.UI.Xaml.zip' # This does not match the published file name, but is used for ease of mapping in the Sandbox
 $script:DependenciesZipFileName = 'DesktopAppInstaller_Dependencies.zip'
 $script:DependenciesShaFileName = 'DesktopAppInstaller_Dependencies.txt'
 $script:WinGetSettingsFileName = 'settings.json'
 $script:SandboxConfigurationFileName = $script:ScriptName + '.wsb'
+$script:SandboxBootstrapScriptName = $script:ScriptName + '.ps1'
 
 # Download Urls
 $script:VcLibsDownloadUrl = 'https://aka.ms/Microsoft.VCLibs.x64.14.00.Desktop.appx'
@@ -78,18 +79,23 @@ $script:UiLibsHash_NuGet = '6B62BD3C277F55518C3738121B77585AC5E171C154936EC58D87
 
 # File Paths
 $script:AppInstallerDataFolder = Join-Path -Path $env:LOCALAPPDATA -ChildPath 'Packages' -AdditionalChildPath $script:AppInstallerPFN
+# $script:DependenciesCacheFolder = Join-Path -Path $script:AppInstallerDataFolder -ChildPath ($script:ScriptName + 'Dependencies')
+$script:DependenciesCacheFolder = 'C:\git\winget-pkgs\Tools\SandboxTest\DependenciesCache\'
 # $script:TestDataFolder = Join-Path -Path $script:AppInstallerDataFolder -ChildPath $script:ScriptName
 $script:TestDataFolder = 'C:\git\winget-pkgs\Tools\SandboxTest\DataFolder\'
 $script:PrimaryMappedFolder = (Resolve-Path -Path $MapFolder).Path
-$script:SandboxDesktopFolder = 'C:\Users\WDAGUtilityAccount\Desktop'
-# $script:DependenciesCacheFolder = Join-Path -Path $script:AppInstallerDataFolder -ChildPath ($script:ScriptName + 'Dependencies')
-$script:DependenciesCacheFolder = 'C:\git\winget-pkgs\Tools\SandboxTest\DependenciesCache\'
+$script:ConfigurationFile = Join-Path -Path $script:TestDataFolder -ChildPath $script:SandboxConfigurationFileName
+$script:BootstrapFile = Join-Path -Path $script:TestDataFolder -ChildPath $script:SandboxBootstrapScriptName
 
 # Settings for writing the WSB file
 $script:XmlSettings = New-Object System.Xml.XmlWriterSettings
 $script:XmlSettings.Indent = $true
 
 # Sandbox Settings
+$script:SandboxDesktopFolder = 'C:\Users\WDAGUtilityAccount\Desktop'
+$script:SandboxWorkingDirectory = Join-Path -Path $script:SandboxDesktopFolder -ChildPath $($script:PrimaryMappedFolder | Split-Path -Leaf)
+$script:SandboxTestDataFolder = Join-Path -Path $script:SandboxDesktopFolder -ChildPath $($script:TestDataFolder | Split-Path -Leaf)
+$script:SandboxBootstrapFile = Join-Path -Path $script:SandboxTestDataFolder -ChildPath $script:SandboxBootstrapScriptName
 $script:HostGeoID = (Get-WinHomeLocation).GeoID
 
 # Misc
@@ -216,7 +222,7 @@ function Stop-NamedProcess {
     if (!$process) { return } # Process was not running
 
     # Stop The Process
-    Write-Verbose "Attempting to stop $ProcessName"
+    Write-Information "--> Stopping $ProcessName"
     $process | Stop-Process
 
     $elapsedTime = 0
@@ -271,7 +277,7 @@ $ Enable-WindowsOptionalFeature -Online -FeatureName 'Containers-DisposableClien
 }
 
 # Validate the provided manifest
-if (!$SkipManifestValidation) {
+if (!$SkipManifestValidation -and ![String]::IsNullOrWhiteSpace($Manifest)) {
     # Check that WinGet is Installed
     if (!(Get-Command 'winget.exe' -ErrorAction SilentlyContinue)) {
         Write-Error "WinGet is not installed. Manifest cannot be validated"
@@ -312,7 +318,7 @@ Write-Verbose "Parsing Release Information"
 # Parse the needed URLs out of the release. It is entirely possible that these could end up being $null
 $script:AppInstallerMsixShaDownloadUrl = $script:WinGetReleaseDetails.assets.Where({ $_.name -eq $script:AppInstallerShaFileName }).browser_download_url
 $script:AppInstallerMsixDownloadUrl = $script:WinGetReleaseDetails.assets.Where({ $_.name -eq $script:AppInstallerMsixFileName }).browser_download_url
-$script:DependenciesShaDownloadUrl = $script:WinGetReleaseDetails.assets.Where({ $_.name -eq $script:DependenciesShaFileName }).browser_download_url # This is expected to be null until the completion of https://github.com/microsoft/winget-cli/issues/4938
+$script:DependenciesShaDownloadUrl = $script:WinGetReleaseDetails.assets.Where({ $_.name -eq $script:DependenciesShaFileName }).browser_download_url
 $script:DependenciesZipDownloadUrl = $script:WinGetReleaseDetails.assets.Where({ $_.name -eq $script:DependenciesZipFileName }).browser_download_url
 Write-Debug @"
 
@@ -450,23 +456,141 @@ $script:SandboxWinGetSettings | ConvertTo-Json | Out-File -FilePath (Join-Path -
 foreach ($dependency in $script:AppInstallerDependencies) { Copy-Item -Path $dependency.SaveTo -Destination $script:TestDataFolder }
 
 # Create the bootstrap.ps1
+$script:BootstrapFileContent = @"
+"@
+
+$script:BootstrapFileContent += @"
+
+function Update-EnvironmentVariables {
+    foreach(`$level in "Machine","User") {
+        [Environment]::GetEnvironmentVariables(`$level).GetEnumerator() | % {
+            # For Path variables, append the new values, if they're not already in there
+            if(`$_.Name -match '^Path$') {
+                `$_.Value = (`$((Get-Content "Env:`$(`$_.Name)") + ";`$(`$_.Value)") -split ';' | Select -unique) -join ';'
+            }
+          `$_
+        } | Set-Content -Path { "Env:`$(`$_.Name)" }
+    }
+}
+
+function Get-ARPTable {
+    `$registry_paths = @('HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*','HKLM:\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*', 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*', 'HKCU:\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*')
+    return Get-ItemProperty `$registry_paths -ErrorAction SilentlyContinue |
+        Where-Object { `$_.DisplayName -and (-not `$_.SystemComponent -or `$_.SystemComponent -ne 1 ) } |
+        Select-Object DisplayName, DisplayVersion, Publisher, @{N='ProductCode'; E={`$_.PSChildName}}, @{N='Scope'; E={if(`$_.PSDrive.Name -eq 'HKCU') {'User'} else {'Machine'}}}
+}
+
+Push-Location $($script:SandboxTestDataFolder)
+Write-Host @'
+--> Installing WinGet
+'@
+`$ProgressPreference = 'SilentlyContinue'
+
+try {
+    Get-ChildItem -Filter '*.zip' | Expand-Archive
+    Get-ChildItem -Recurse -Filter '*.appx' | Where-Object {`$_.FullName -match 'x64'} | Add-AppxPackage -ErrorAction Stop
+    Get-ChildItem -Filter '*.msixbundle' | Add-AppxPackage -ErrorAction Stop
+} catch {
+  Write-Host -ForegroundColor Red 'Could not install from cached packages. Falling back to Repair-WinGetPackageManager cmdlet'
+  try {
+    Install-PackageProvider -Name NuGet -Force | Out-Null
+    Install-Module -Name Microsoft.WinGet.Client -Force -Repository PSGallery | Out-Null
+  } catch {
+    throw "Microsoft.Winget.Client was not installed successfully"
+  } finally {
+    # Check to be sure it acutally installed
+    if (-not(Get-Module -ListAvailable -Name Microsoft.Winget.Client)) {
+      throw "Microsoft.Winget.Client was not found. Check that the Windows Package Manager PowerShell module was installed correctly."
+    }
+  }
+  Repair-WinGetPackageManager -Version $($script:AppInstallerReleaseTag))
+}
+
+Write-Host @'
+--> Disabling safety warning when running installer
+'@
+New-Item -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Policies\Associations' | Out-Null
+New-ItemProperty -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Policies\Associations' -Name 'ModRiskFileTypes' -Type 'String' -Value '.bat;.exe;.reg;.vbs;.chm;.msi;.js;.cmd' | Out-Null
+
+Write-Host @'
+Tip: you can type 'Update-EnvironmentVariables' to update your environment variables, such as after installing a new software.
+'@
+
+Write-Host @'
+
+--> Configuring Winget
+'@
+winget settings --Enable LocalManifestFiles
+winget settings --Enable LocalArchiveMalwareScanOverride
+Get-ChildItem -Filter '$($script:WinGetSettingsFileName)' | Copy-Item -Destination C:\Users\WDAGUtilityAccount\AppData\Local\Packages\Microsoft.DesktopAppInstaller_8wekyb3d8bbwe\LocalState\settings.json
+Set-WinHomeLocation -GeoID $($script:HostGeoID)
+
+`$manifestFolder = (Get-ChildItem -Directory).Where({Get-ChildItem $_ -Filter '*.yaml'}).FullName | Select-Object -First 1
+if (`$manifestFolder) {
+    Write-Host @'
+
+    --> Installing the Manifest $manifestFileName
+
+'@
+    winget install -m `$manifestFolder --accept-package-agreements --verbose-logs --ignore-local-archive-malware-scan --dependency-source winget $WinGetOptions)
+
+    Write-Host @'
+
+    --> Refreshing environment variables
+'@
+    Update-EnvironmentVariables
+
+    Write-Host @'
+
+    --> Comparing ARP Entries
+'@
+    (Compare-Object (Get-ARPTable) `$originalARP -Property DisplayName,DisplayVersion,Publisher,ProductCode,Scope)| Select-Object -Property * -ExcludeProperty SideIndicator | Format-Table
+}
+
+
+
+Pop-Location
+"@
+
+"" | Out-File -FilePath $script:BootstrapFile
 
 # Create the WSB file
-$_WSB = New-Object System.Xml.XmlDocument
-# Create the root "Configuration" object
-$_Configuration = $_WSB.CreateElement("Configuration")
-$_WSB.AppendChild($_Configuration)
-# Create the Logon Command
-$_LogonCommand = $_WSB.CreateElement("LogonCommand")
-$_LogonCommand.SetAttribute("Command", "PowerShell Start-Process PowerShell -WindowStyle Maximized -ArgumentList '-ExecutionPolicy Bypass -NoExit -NoLogo")
-$_Configuration.AppendChild($_LogonCommand)
-$writer = [System.Xml.XmlWriter]::Create('C:\git\winget-pkgs\Tools\SandboxTest\sandboxtest.wsb', $script:XmlSettings)
+# Although this could be done using the native XML processor, it's easier to just write the content directly as a string
+@"
+<Configuration>
+  <MappedFolders>
+    <MappedFolder>
+      <HostFolder>$($script:TestDataFolder)</HostFolder>
+    </MappedFolder>
+    <MappedFolder>
+      <HostFolder>$($script:PrimaryMappedFolder)</HostFolder>
+    </MappedFolder>
+  </MappedFolders>
+  <LogonCommand>
+  <Command>PowerShell Start-Process PowerShell -WindowStyle Maximized -WorkingDirectory '$($script:SandboxWorkingDirectory)' -ArgumentList '-ExecutionPolicy Bypass -NoExit -NoLogo -File $($script:SandboxBootstrapFile)'</Command>
+  </LogonCommand>
+</Configuration>
+"@ | Out-File -FilePath $script:ConfigurationFile
 
-$_WSB.WriteTo($writer)
-$writer.Close()
+Write-Information @"
+--> Starting Windows Sandbox, and:
+    - Mounting the following directories:
+      - $($script:TestDataFolder) as read-and-write
+      - $($script:PrimaryMappedFolder) as read-and-write
+    - Installing WinGet
+    - Configuring Winget
+"@
+
+if (-Not [String]::IsNullOrWhiteSpace($Manifest)) {
+    Write-Information @"
+      - Installing the Manifest $(Split-Path $Manifest -Leaf)
+      - Refreshing environment variables
+      - Comparing ARP Entries
+"@
+}
+
 
 # Kill the active running sandbox, if it exists
-Write-Information "--> Closing Windows Sandbox"
 Stop-NamedProcess -ProcessName 'WindowsSandboxClient'
 
 # Clean up temporary files and properly dispose of objects
