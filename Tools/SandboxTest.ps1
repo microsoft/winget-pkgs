@@ -55,6 +55,7 @@ $script:AppInstallerPFN = 'Microsoft.DesktopAppInstaller_8wekyb3d8bbwe'
 $script:DependenciesBaseName = 'DesktopAppInstaller_Dependencies'
 $script:ReleasesApiUrl = 'https://api.github.com/repos/microsoft/winget-cli/releases?per_page=100'
 $script:DependencySource = [DependencySources]::InRelease
+$script:UsePowerShellModuleForInstall = $true
 
 # File Names
 $script:AppInstallerMsixFileName = "$script:AppInstallerPFN.msixbundle" # This should exactly match the name of the file in the CLI GitHub Release
@@ -423,6 +424,13 @@ $script:AppInstallerDependencies += @{
     SaveTo      = (Join-Path -Path $script:AppInstallerReleaseAssetsFolder -ChildPath $script:AppInstallerMsixFileName)
 }
 
+# If the PowerShell Module will be used, destroy the dependency list that was just created
+# This is cleaner than adding if statements everywhere to try and handle this flag.
+# Since the time it takes to build the dependency tree is minimal, don't worry about performance yet
+if ($script:UsePowerShellModuleForInstall) {
+    $script:AppInstallerDependencies = @()
+}
+
 # Process the dependency list
 Write-Information "--> Checking Dependencies"
 foreach ($dependency in $script:AppInstallerDependencies) {
@@ -440,11 +448,13 @@ foreach ($dependency in $script:AppInstallerDependencies) {
 
     # If the hash didn't match, remove the item so the sandbox can fall-back to using the PowerShell module
     if (!(Test-FileChecksum -ExpectedChecksum $dependency.Checksum -Path $dependency.SaveTo -Algorithm $dependency.Algorithm)) {
+        $script:UsePowerShellModuleForInstall = $true
         Write-Debug "Hashes did not match; Expected $($dependency.Checksum), Received $((Get-FileHash $dependency.SaveTo -Algorithm $dependency.Algorithm -ErrorAction Continue).Hash)"
         Remove-Item $dependency.SaveTo -Force | Out-Null
         # Continue on these errors because the PowerShell module will be used instead
         Write-Error -Category SecurityError 'Dependency hash does not match the downloaded file' -ErrorAction Continue
         Write-Error -Category SecurityError 'Please open an issue referencing this error at https://bit.ly/WinGet-SandboxTest-Needs-Update' -ErrorAction Continue
+        break # Skip processing further dependencies, since the PowerShell Module will be used
     }
 }
 
@@ -510,6 +520,7 @@ Write-Host @'
 `$ProgressPreference = 'SilentlyContinue'
 
 try {
+    if ($([int]$script:UsePowerShellModuleForInstall)) { throw } # Using exceptions for control logic is generally not preferred, but is done here to keep things clean and readable
     Get-ChildItem -Filter '*.zip' | Expand-Archive
     Get-ChildItem -Recurse -Filter '*.appx' | Where-Object {`$_.FullName -match 'x64'} | Add-AppxPackage -ErrorAction Stop
     # This path is set explicitly instead of using Get-ChildItem as an error prevention measure
