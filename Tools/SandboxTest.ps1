@@ -55,7 +55,7 @@ $script:AppInstallerPFN = 'Microsoft.DesktopAppInstaller_8wekyb3d8bbwe'
 $script:DependenciesBaseName = 'DesktopAppInstaller_Dependencies'
 $script:ReleasesApiUrl = 'https://api.github.com/repos/microsoft/winget-cli/releases?per_page=100'
 $script:DependencySource = [DependencySources]::InRelease
-$script:UsePowerShellModuleForInstall = $true
+$script:UsePowerShellModuleForInstall = $false
 
 # File Names
 $script:AppInstallerMsixFileName = "$script:AppInstallerPFN.msixbundle" # This should exactly match the name of the file in the CLI GitHub Release
