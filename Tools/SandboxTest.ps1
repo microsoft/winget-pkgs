@@ -48,7 +48,7 @@ enum DependencySources {
 $ProgressPreference = 'SilentlyContinue'
 $ErrorActionPreference = 'Stop' # This gets overriden most places, but is set explicitly here to help catch errors
 if ($PSBoundParameters.Keys -notcontains 'InformationAction') { $InformationPreference = 'Continue' } # If the user didn't explicitly set an InformationAction, Override their preference
-$OnMappedFolderWarning = ($PSBoundParameters.Keys -contains 'WarningAction') ? $PSBoundParameters.WarningAction : 'Inquire'
+$script:OnMappedFolderWarning = ($PSBoundParameters.Keys -contains 'WarningAction') ? $PSBoundParameters.WarningAction : 'Inquire'
 $script:UseNuGetForMicrosoftUIXaml = $false
 $script:ScriptName = 'SandboxTest'
 $script:AppInstallerPFN = 'Microsoft.DesktopAppInstaller_8wekyb3d8bbwe'
@@ -611,7 +611,7 @@ if ($script:PrimaryMappedFolder -notmatch 'winget-pkgs') {
     Write-Warning @"
 The mapped folder does not appear to be within the winget-pkgs repository path.
 This will give read-and-write access to $($script:PrimaryMappedFolder) within the sandbox
-"@ -WarningAction $OnMappedFolderWarning
+"@ -WarningAction $script:OnMappedFolderWarning
 }
 
 Write-Information @"
