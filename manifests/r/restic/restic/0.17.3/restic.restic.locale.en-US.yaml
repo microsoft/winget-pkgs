@@ -1,0 +1,51 @@
+# Created with WinGet Updater using komac v2.6.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.6.0.schema.json
+
+PackageIdentifier: restic.restic
+PackageVersion: 0.17.3
+PackageLocale: en-US
+Publisher: restic
+PublisherUrl: https://github.com/restic
+PublisherSupportUrl: https://github.com/restic/restic/issues
+Author: Alexander Neumann
+PackageName: restic
+PackageUrl: https://github.com/restic/restic
+License: BSD-2-Clause
+LicenseUrl: https://github.com/restic/restic/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2014, Alexander Neumann <alexander@bumpern.de>
+CopyrightUrl: https://github.com/restic/restic/raw/master/LICENSE
+ShortDescription: Fast, secure, efficient backup program
+Description: |-
+  restic is a backup program that is fast, efficient and secure. It supports the three major operating
+  systems (Linux, macOS, Windows) and a few smaller ones (FreeBSD, OpenBSD).
+Moniker: restic
+Tags:
+- backup
+- dedupe
+- deduplication
+- go
+- restic
+- secure-by-default
+ReleaseNotes: |-
+  Changelog for restic 0.17.3 (2024-11-08)
+  The following sections list the changes in restic 0.17.3 relevant to restic users. The changes are ordered by importance.Summary
+  - Fix #4971: Fix unusable mount on macOS Sonoma
+  - Fix #5003: Fix metadata errors during backup of removable disks on Windows
+  - Fix #5101: Do not retry load/list operation if SFTP connection is broken
+  - Fix #5107: Fix metadata error on Windows for backups using VSS
+  - Enh #5096: Allow prune --dry-run without lock
+  Details
+  - Bugfix #4971: Fix unusable mount on macOS SonomaOn macOS Sonoma when using FUSE-T, it was not possible to access files in a mounted repository. This issue is now resolved.#4971 #5048
+  - Bugfix #5003: Fix metadata errors during backup of removable disks on WindowsSince restic 0.17.0, backing up removable disks on Windows could report errors with retrieving metadata like shown below.
+  error: incomplete metadata for d:\filename: get named security info failed with: Access is denied.
+
+  This has now been fixed.#5003 #5123 https://forum.restic.net/t/backing-up-a-folder-from-a-veracrypt-volume-brings-up-errors-since-restic-v17-0/8444
+  - Bugfix #5101: Do not retry load/list operation if SFTP connection is brokenWhen using restic with the SFTP backend, backend operations that load a file or list files were retried even if the SFTP connection was broken. This has now been fixed.#5101 https://forum.restic.net/t/restic-hanging-on-backup/8559
+  - Bugfix #5107: Fix metadata error on Windows for backups using VSSSince restic 0.17.2, when creating a backup on Windows using --use-fs-snapshot, restic would report an error like the following:
+  error: incomplete metadata for C:\: get EA failed while opening file handle for path \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopyXX\, with: The process cannot access the file because it is being used by another process.
+
+  This has now been fixed by correctly handling paths that refer to volume shadow copy snapshots.#5107 #5110 #5112
+  - Enhancement #5096: Allow prune --dry-run without lockThe prune --dry-run --no-lock now allows performing a dry-run without locking the repository. Note that if the repository is modified concurrently, prune may return inaccurate statistics or errors.#5096
+ReleaseNotesUrl: https://github.com/restic/restic/releases/tag/v0.17.3
+ManifestType: defaultLocale
+ManifestVersion: 1.6.0
