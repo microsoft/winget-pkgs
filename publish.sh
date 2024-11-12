@@ -14,13 +14,20 @@ then
     exit 1
 fi
 
+# Check if a release date was provided
+if [ -z "$3" ]
+then
+    echo "Please provide a release date as an argument."
+    exit 1
+fi
+
 # Old version
 old_version="$1"
 
 # New version
 new_version="$2"
 
-# Release date (optional)
+# Release date
 release_date="$3"
 
 # Fetch
@@ -72,7 +79,7 @@ rm temp_file
 git add .
 
 # Commit and push
-git commit -a -m "Submitting studio-cli version $old_version"
+git commit -a -m "Submitting studio-cli version $new_version"
 
 # Create a new branch with the name of the new version
 git checkout -b $new_version
@@ -80,4 +87,4 @@ git checkout -b $new_version
 # Push the new branch to the remote
 git push origin $new_version
 
-echo "Done!!"
+echo "Done!"
