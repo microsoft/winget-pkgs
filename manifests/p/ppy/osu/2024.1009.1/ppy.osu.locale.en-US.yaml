@@ -25,23 +25,176 @@ Tags:
 - osu
 - rhythm
 ReleaseNotes: |-
-  Beatmap Listing
-  - Fix artist / title searches not working as expected (ppy/osu#29745 by @Ianlucht)
+  Code Quality
+    Remove poorly-fitted "legacy combo counter" abstraction (#29838 by @bdach)
+    Update framework (#29848 by @peppy)
+    Make all difficulty calculators use GetMaxCombo function (#29962 by @Givikap120)
+    Fix reflection-related iOS crashes (#29992 by @smoogipoo)
+    Fix iOS CI build (#30019 by @smoogipoo)
+    Fix usage of locked context without locking (#30074 by @peppy)
+    Fix broken star rating on Random mod (#30021 by @bdach)
+    Fix several breakages with migration operation (#30151 by @bdach)
+  Daily Challenge
+    Play daily challenge animation when arriving from the notification (#29770 by @Ianlucht)
+    Add Total Participation stat to users profile Daily Challenge Tooltip (#29714 by @Crystallized21)
+    image
+    Exclude restricted users from daily challenge-related queries (ppy/osu-server-spectator#243 by @bdach)
+  Difficulty
+    Refactoring: SpeedEvaluator refactoring (#29294 by @Givikap120)
+    Refactoring: Merged multipliers that do the same thing (#29293 by @Givikap120)
+    Refactoring: Removing DEFAULT_DIFFICULTY_MULTIPLIER from OsuStrainSkill (#29291 by @Givikap120)
+    Uncap speed OD-accuracy scaling (#30088 by @stanriders)
+    A small fix to make accuracy scaling on low ODs a bit more harsh
+    Various speed distance difficulty calculation changes (#29980 by @tsunyoku)
+    Make diffcalc workflow recreate comment on completion (#30132 by @smoogipoo)
+    Implement a bunch of rhythm difficulty calculation fixes (#28871 by @stanriders)
+    Slight aim skill multiplier rebalance (#29998 by @tsunyoku)
+    Include sliders in accuracy pp if slider head accuracy is in use (#27063 by @tsunyoku)
+    Save master state when running diffcalc workflow (#30135 by @smoogipoo)
+    Remove combo scaling from Aim and Speed from osu! performance calculation (#16280 by @apollo-dw)
+    Statistical accuracy PP and difficulty scaling for the osu!taiko ruleset (#20963 by @Natelytle)
+    Bump difficulty calculator versions (#30139 by @bdach)
+    In order for the new star difficulty to be shown to users on the next release.
   Editor
-  - Fix scroll speed slider defaulting to 0.01 (ppy/osu#29759 by @Bruno5430)
+    Make editor flip, rotate, and scale tools revolve around the grid center (#26311 by @OliBomby)
+    Changes how the Ctrl+H and Ctrl+J flip mechanic works. It now takes into account the origin and rotation of the grid to flip around that axis. This makes it easy to map symmetric patterns which are off-angle or not around the center of the playfield.
+
+    Also the Ctrl+R rotation tool uses the grid origin as the center of the playfield.
+    The precision scale tool uses the grid origin as the center of the playfield and uses the grid rotation for axis constrained scaling (for scaling only along the X or Y axis)
+
+    Fix scaling sliders ignoring the scale origin (#29942 by @minetoblend)
+    Makes sure that when scaling sliders with the scale box, they are scaled relatively to the scale origin instead of the slider head.
+
+    Freeze select box buttons position on press (#29950 by @minetoblend)
+    Will freeze the position of the SelectBox buttons in place when one of the buttons was clicked until the clicked button is no longer hovered. This ensures that buttons can be pressed repeatedly without having to reposition the mouse on every click.
+
+    Especially when rotating the selection by 90 degrees, the buttons moving around on each press was a major pain point for me since I often wanna rotate by 180 degrees and just wanna double click the button for that.
+
+    Support scaling around center when scaling with select box (#29949 by @minetoblend)
+    Will scale around the center when pressing alt while scaling things with the select box.
+
+    Add to existing selection when dragging with control pressed (#29918 by @bdach)
+
+    Add button to centre editor grid to current hit object (#30069 by @peppy)
+
+    Add hotkey hints to editor menus (#29691 by @bdach)
+
+    Redesign editor setup screen with new "form" controls (#30099 by @bdach)
+    Also contains some assorted drive-by fixes. See commit messages for details.
+
+    Move setup screen background preview to appropriate form control (#30109 by @bdach)
+
+    When adding a new combo colour, use the last colour as a starting point (#30110 by @peppy)
+    Also opens the popover automatically because you always want to edit it.
+
+    Smaller changes
+      Fix timing points being blocked by buttons in the editor (#29766 by @SchiavoAnto)
+      Fix slider end drag marker being in incorrect position for stacked sliders (#29893 by @bdach)
+      Fix occasional crash when changing samples of hitobjects (#29933 by @bdach)
+      Refactor placement blueprints to not be limited to hit objects (#29986 by @OliBomby)
+      This makes it possible to make placement tools which add something other than a hit object.
+      Fix argon volume-aware hitsounds not correctly playing immediately after object placement (#29970 by @bdach)
+      Use minimum enclosing circle as selection centre for scale and rotate (#29938 by @OliBomby)
+      Ensure selection is preserved when moving selected objects between osu!mania columns (#29899 by @bdach)
+      Ensure sliders are snapped when changing path types (#30063 by @bdach)
+      Fix various distance snap grid weirdness around unsnapped objects (#30062 by @bdach)
+      Fix editor timestamp URLs not working when they contain a space (#30024 by @peppy)
+      Initialise colours section with default combo colours if none present (#30108 by @bdach)
+      Fix improper handling of decimal separator in "form" number boxes / sliders (#30113 by @bdach)
+      Only allow seek to next/previous object via keybinding if there is no selection (#29860 by @bdach)
+      Fixes a key bind conflict.
+      Fix "Center on selected object" button not changing grid coordinates (#30134 by @bdach)
+      Add grid placement tool (#26313 by @OliBomby)
+      Adds the 'Grid' placement tool to the left tool box. Hover it for details on how to use (there's a few different ways you can make use of this powerful tool).
+    
+  Framework
+    Fix typo in CompositeDrawable (ppy/osu-framework#6372 by @Nebula-Developer)
+    Remove closure allocations in VeldridStagingTexturePool (ppy/osu-framework#6373 by @smoogipoo)
+    Update SDL3-CS (ppy/osu-framework#6374 by @hwsmm)
+    Expose LocalisationManager.GetLocalisedString() as public (ppy/osu-framework#6377 by @bdach)
+    Fix DecouplingFramedClock retaining old lastSeekFailed (ppy/osu-framework#6378 by @hwsmm)
+    Fix iOS CI build (ppy/osu-framework#6379 by @smoogipoo)
+    Rollback iOS workload to last known working version (ppy/osu-framework#6384 by @smoogipoo)
+    Expose slider bar commit method as virtual (ppy/osu-framework#6383 by @bdach)
+    Add NineSliceSprite (ppy/osu-framework#6380 by @minetoblend)
   Gameplay
-  - Fix stall when attempting to import replay after hitting nothing (ppy/osu#29715 by @bdach)
+    Add progress tooltip for ArgonSongProgressBar (#30078 by @CloneWith)
+
+    Smaller changes
+      Implement beat-synchronized animation in skip overlay (#29925 by @nekupaw)
+      Fix score being cloned in async method causing random errors (again) (#29966 by @bdach)
+      Continue displaying storyboard even if fully dimmed in specific circumstances (#29967 by @bdach)
+      Avoid client updates (and update notifications) from appearing in more gameplay cases (#30073 by @peppy)
+  Gameplay (osu!)
+    Fix several issues in interactions between playfield-altering mods and the replay analysis feature (#29841 by @bdach)
+  Gameplay (osu!catch)
+    Fix osu!catch fruit rotation animation being applied too late (#29894 by @peppy)
+  Now Playing
+    Shuffle playback order in global playlist by default (#29917 by @bdach)
+  Performance
+    Update shader preloader with missing shader usages (#30018 by @peppy)
+    Fix difficulty settings sliders attempting to reprocess all hitobjects on every instantaneous change (#30114 by @bdach)
   Platform
-  Fix game not running on earlier macOS versions (ppy/osu-framework#6370 by @smoogipoo)
-  Fix file associations breaking with new updater (ppy/osu#29743 by @smallketchup82)
+    Rollback iOS workload to last known working version (#30121 by @smoogipoo)
+    We can build iOS again, yay!
+
+    Smaller changes
+      Differentiate osu!lazer app name in windows menus (#29822 by @smallketchup82)
+      Fix restart notifications appearing every 30 minutes in some cases (#29787 by @peppy)
+      Completely disable Velopack when using an external updater (#29805 by @smallketchup82)
+      Add beatmap icon to windows beatmap files (#29812 by @smallketchup82)
+      Update velopack and switch to using async version of WaitExitThenApplyUpdates (#29997 by @peppy)
+      Hide iOS home indicator by default (ppy/osu-framework#6385 by @smoogipoo)
+      We already did this, but it stopped working after a recent change.
   Results
-  Fix collections dropdown overflowing in the results screen (ppy/osu#29742 by @SchiavoAnto)
+    Fix statistics update not being shown on results screen if it arrives too fast (#29985 by @bdach)
+  Skinning
+    Add colour customisation to layout editor (#29936 by @u4vh3)
+      Allows you to change colour for:
+
+      Argon wedge piece
+      Box element
+      Default and argon song progress
+      Font adjustable components
+    Smaller changes
+      Improve flexibility of skin layout editor player avatar (#29930 by @peppy)
+      I've also made this handle resizing better, so now you can have non-square avatar displays.
   Song Select
-  Fix beatmap difficulties not being split out on first load (ppy/osu#29762 by @peppy)
+    Fix selection being dropped when changing carousel sort mode from difficulty sort (#29786 by @bdach)
+    Back-populate missing ranked/submitted dates using new local metadata cache (#29862 by @bdach)
+    Fix occasional song select crash when entering gameplay (#29916 by @peppy)
+    Fix rate change hotkeys sometimes losing track of adjust pitch setting (#30056 by @bdach)
+  Spectator
+    Fix judgement counter not showing correct counts when spectating user mid-play (#29914 by @peppy)
+    Smaller changes
+      Use cache for beatmap lookups on spectate screen (#29968 by @bdach)
+  UI
+    Remove opacity from old style dropdown menus (#29912 by @peppy)
+      These aren't used in many places, but we've since moved away from opacity in UI elements like this, so let's just nuke it here for legibility.
+    Increase chat font size again (#30095 by @peppy)
+      I don't think we can use size 12 without it being SemiBold. And yes this is reverting a recent change I made, but I wasn't too sure about the change at the time.
+    Smaller changes
+      Implement "form" check box control (#29712 by @bdach)
+      Implement "form" slider bar control (#29897 by @bdach)
+      Implement "form" dropdown control (#29972 by @bdach)
+      Redesign directory & file selector (#29983 by @bdach)
+      Implement "form" file picker (#30005 by @bdach)
+      Add basic hover states for file selector elements (#30017 by @peppy)
+      Fix searching by clicking title/artist in beatmap overlay not following original language setting (#29913 by @Joehuu)
+      Mod customisation header color (#29704 by @Fabep)
+      Updated the mod customization header color to be based on the state rather than only hover.
+      Fix text in FormFileSelector bleeding through the border (#30040 by @EVAST9919)
+      Properly disable comment box on things that cannot be commented on (#30058 by @bdach)
+      Update localisations (ppy/osu-resources#341 by @peppy)
+      Implement "form" colour palette control (#30098 by @bdach)
+      Change textbox deletion animation easing to closer match gravity (ppy/osu-framework#6381 by @peppy)
+      Just noticed in passing that it looks kinda wrong as it stands.
+      Do not add checkbox padding to the left of menu items if no item actually needs it (#30101 by @bdach)
+      Fix delete dialogs having generic "Caution" header text (#30133 by @peppy)
   New Contributors
-  - @Bruno5430 made their first contribution in #29759
-  - @SchiavoAnto made their first contribution in #29742
-  - @Ianlucht made their first contribution in #29745
+    @Crystallized21 made their first contribution in #29714
+    @nekupaw made their first contribution in #29925
+    @u4vh3 made their first contribution in #29936
   Full Changelog: https://github.com/ppy/osu/compare/2024.906.2...2024.1009.1
 ReleaseNotesUrl: https://github.com/ppy/osu/releases/tag/2024.1009.1
 Documentations:
