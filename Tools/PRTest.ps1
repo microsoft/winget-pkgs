@@ -9,7 +9,11 @@ Param(
     [Switch] $KeepBranch = $false,
     [Switch] $Prerelease = $false,
     [Switch] $EnableExperimentalFeatures = $false,
-    [string] $WinGetVersion = $null
+    [string] $WinGetVersion = $null,
+    [string] $WinGetOptions,
+    [scriptblock] $Script = $null,
+    [string] $MapFolder = $pwd,
+    [switch] $Clean
 )
 
 $PullRequest = $PullRequest.TrimStart('#')
@@ -51,6 +55,10 @@ $params = @{
     Prerelease                 = $Prerelease
     EnableExperimentalFeatures = $EnableExperimentalFeatures
     WinGetVersion              = $WinGetVersion
+    WinGetOptions              = $WinGetOptions
+    Script                     = $Script
+    MapFolder                  = $MapFolder
+    Clean                      = $Clean
 }
 & $sandboxTestPath @params
 
