@@ -56,6 +56,7 @@ $script:DependenciesBaseName = 'DesktopAppInstaller_Dependencies'
 $script:ReleasesApiUrl = 'https://api.github.com/repos/microsoft/winget-cli/releases?per_page=100'
 $script:DependencySource = [DependencySources]::InRelease
 $script:UsePowerShellModuleForInstall = $false
+$script:CachedTokenExpiration = 30 # Days
 
 # File Names
 $script:AppInstallerMsixFileName = "$script:AppInstallerPFN.msixbundle" # This should exactly match the name of the file in the CLI GitHub Release
@@ -75,6 +76,7 @@ $script:UiLibsHash_NuGet = '6B62BD3C277F55518C3738121B77585AC5E171C154936EC58D87
 
 # File Paths
 $script:AppInstallerDataFolder = Join-Path -Path $env:LOCALAPPDATA -ChildPath 'Packages' -AdditionalChildPath $script:AppInstallerPFN
+$script:TokenValidationCache = Join-Path -Path $script:AppInstallerDataFolder -ChildPath 'TokenValidationCache'
 $script:DependenciesCacheFolder = Join-Path -Path $script:AppInstallerDataFolder -ChildPath "$script:ScriptName.Dependencies"
 $script:TestDataFolder = Join-Path -Path $script:AppInstallerDataFolder -ChildPath $script:ScriptName
 $script:PrimaryMappedFolder = (Resolve-Path -Path $MapFolder).Path
@@ -273,6 +275,116 @@ function Test-FileChecksum {
     return ($currentHash -eq $ExpectedChecksum)
 }
 
+####
+# Description: Checks that a provided GitHub token is valid
+# Inputs: Token
+# Outputs: Boolean
+# Notes:
+#   This function hashes the provided GitHub token. If the provided token is valid, a file is added to the token cache with
+#   the name of the hashed token and the token expiration date. To avoid making unneccesarry calls to the GitHub APIs, this
+#   function checks the token cache for the existence of the file. If the file is older than 30 days, it is removed and the
+#   token is re-checked. If the file has content, the date is checked to see if the token is expired. This can't catch every
+#   edge case, but it should catch a majority of the use cases.
+####
+function Test-GithubToken {
+    param (
+        [Parameter(Mandatory = $true)]
+        [AllowEmptyString()]
+        [String] $Token
+    )
+
+    # If the token is empty, there is no way that it can be valid
+    if ([string]::IsNullOrWhiteSpace($Token)) { return $false }
+
+    Write-Verbose 'Hashing GitHub Token'
+    $_memoryStream = [System.IO.MemoryStream]::new()
+    $_streamWriter = [System.IO.StreamWriter]::new($_memoryStream)
+    $_streamWriter.Write($Token)
+    $_streamWriter.Flush()
+    $_memoryStream.Position = 0
+
+    $tokenHash = Get-FileHash -InputStream $_memoryStream | Select-Object -ExpandProperty Hash
+
+    # Dispose of the reader and writer for hashing the token to ensure they cannot be accessed outside of the intended scope
+    Write-Debug 'Disposing of hashing components'
+    $_streamWriter.DisposeAsync()
+    $_memoryStream.DisposeAsync()
+
+    # Check for the cached token file
+    $cachedToken = Get-ChildItem -Path $script:TokenValidationCache -Name $tokenHash -ErrorAction SilentlyContinue
+
+    if ($cachedToken) {
+        Write-Verbose 'Token was found in the cache'
+        # Check the age of the cached file
+        $cachedTokenAge = (Get-Date) - $cachedToken.LastWriteTime | Select-Object -ExpandProperty TotalDays
+        $cachedTokenAge = [Math]::Round($cachedTokenAge, 2) # We don't need all the precision the system provides
+        Write-Debug "Token has been in the cache for $cachedTokenAge days"
+        $cacheIsExpired = $cachedTokenAge -ge $script:CachedTokenExpiration
+
+        if (!$cacheIsExpired) {
+            # Check the content of the cached file in case the actual token expiration is known
+            Write-Verbose 'Attempting to fetch token expiration from cache'
+            $cachedTokenContent = Get-Content $cachedToken
+            if ([string]::IsNullOrWhiteSpace($cachedTokenContent)) {
+                Write-Debug 'Cached token had no content. It may be set to never expire'
+                return $true
+            } # The token is not outdated, and the actual expiration is not known
+
+            # Since Github adds ` UTC` at the end, it needs to be stripped off. Trim is safe here since the last character should always be a digit
+            $cachedTokenForParsing = $cachedTokenContent.TrimEnd(' UTC')
+            $cachedExpirationDate = [System.DateTime]::MinValue
+            if (!([System.DateTime]::TryParse($cachedTokenForParsing, [ref]$cachedExpirationDate))) {
+                Write-Debug 'The cached token contained content, but it could not be parsed as a date'
+                return $true # If the date can't be parsed, assume the token is valid
+            }
+
+            $tokenExpirationDays = $cachedExpirationDate - (Get-Date) | Select-Object -ExpandProperty TotalDays
+            if ($tokenExpirationDays -gt 0) {
+                Write-Verbose "The cached token contained content. It should expire in $tokenExpirationDays days"
+                return $true
+            }
+
+            Write-Verbose "The cached token contained content, but the token expired $([Math]::Abs($tokenExpirationDays)) days ago"
+            Invoke-FileCleanup -FilePaths $cachedToken.FullName
+            return $false
+        }
+        else {
+            Write-Verbose "Cached token is older than $script:CachedTokenExpiration days. It will be re-validated"
+            Invoke-FileCleanup -FilePaths $cachedToken.FullName
+        }
+    }
+    else {
+        Write-Verbose 'Token was not found in the cache'
+    }
+
+    # To get here either the token was not in the cache or it was expired and needs to be re-validated
+
+    $requestParameters = @{
+        Uri            = 'https://api.github.com/rate_limit'
+        Authentication = 'Bearer'
+        Token          = $(ConvertTo-SecureString "$env:GITHUB_TOKEN" -AsPlainText)
+    }
+
+    Write-Verbose "Checking Token against $($requestParameters.Uri)"
+    $apiResponse = Invoke-WebRequest @requestParameters # This will return an exception if the token is not valid; It is intentionally not caught
+    $rateLimit = $apiResponse.Headers['X-RateLimit-Limit']
+    $tokenExpiration = $apiResponse.Headers['github-authentication-token-expiration'] # This could be null if the token is set to never expire
+    Write-Debug "API responded with Rate Limit ($rateLimit) and Expiration ($tokenExpiration)"
+
+    if (!$rateLimit) { return $false } # Something went horribly wrong, and the rate limit isn't known. Assume the token is not valide
+    if ($rateLimit -le 60) {
+        # Authenticated users typically have a limit that is much higher than 60
+        Write-Warning "You may encounter 'API rate limit exceeded' errors! Please consider adding `GITHUB_TOKEN` to your environment variables"
+        return $false
+    }
+
+    Write-Verbose 'Token validated successfully. Adding to cache'
+    $tokenPath = Join-Path -Path $script:TokenValidationCache -ChildPath $tokenHash
+    New-Item -ItemType File -Path $tokenPath -Value $tokenExpiration
+    Write-Debug "Token <$tokenHash> added to cache with content <$tokenExpiration>"
+    return $true
+}
+
 #### Start of main script ####
 
 # Check if Windows Sandbox is enabled
@@ -291,10 +403,10 @@ $ Enable-WindowsOptionalFeature -Online -FeatureName 'Containers-DisposableClien
 if (!$SkipManifestValidation -and ![String]::IsNullOrWhiteSpace($Manifest)) {
     # Check that WinGet is Installed
     if (!(Get-Command 'winget.exe' -ErrorAction SilentlyContinue)) {
-        Write-Error -Category NotInstalled "WinGet is not installed. Manifest cannot be validated" -ErrorAction Continue
+        Write-Error -Category NotInstalled 'WinGet is not installed. Manifest cannot be validated' -ErrorAction Continue
         Invoke-CleanExit -ExitCode 3
     }
-    Write-Information "--> Validating Manifest"
+    Write-Information '--> Validating Manifest'
     $validateCommandOutput = winget.exe validate $Manifest
     switch ($LASTEXITCODE) {
         '-1978335191' {
@@ -304,7 +416,7 @@ if (!$SkipManifestValidation -and ![String]::IsNullOrWhiteSpace($Manifest)) {
         }
         '-1978335192' {
             ($validateCommandOutput | Select-Object -Skip 1 -SkipLast 1) | Write-Information # Skip the first line and the empty last line
-            Write-Warning "Manifest validation succeeded with warnings"
+            Write-Warning 'Manifest validation succeeded with warnings'
             Start-Sleep -Seconds 5 # Allow the user 5 seconds to read the warnings before moving on
         }
         Default {
@@ -325,7 +437,7 @@ if (!$script:WinGetReleaseDetails.assets) {
     Invoke-CleanExit -ExitCode 1
 }
 
-Write-Verbose "Parsing Release Information"
+Write-Verbose 'Parsing Release Information'
 # Parse the needed URLs out of the release. It is entirely possible that these could end up being $null
 $script:AppInstallerMsixShaDownloadUrl = $script:WinGetReleaseDetails.assets.Where({ $_.name -eq "$script:AppInstallerPFN.txt" }).browser_download_url
 $script:AppInstallerMsixDownloadUrl = $script:WinGetReleaseDetails.assets.Where({ $_.name -eq $script:AppInstallerMsixFileName }).browser_download_url
@@ -345,7 +457,7 @@ $script:AppInstallerParsedVersion = [System.Version]($script:AppInstallerRelease
 Write-Debug "Using Release version $script:AppinstallerReleaseTag ($script:AppInstallerParsedVersion)"
 
 # Get the hashes for the files that change with each release version
-Write-Verbose "Fetching file hash information"
+Write-Verbose 'Fetching file hash information'
 $script:AppInstallerMsixHash = Get-RemoteContent -URL $script:AppInstallerMsixShaDownloadUrl -Raw
 $script:DependenciesZipHash = Get-RemoteContent -URL $script:DependenciesShaDownloadUrl -Raw
 Write-Debug @"
@@ -358,7 +470,7 @@ Write-Debug @"
 $script:AppInstallerReleaseAssetsFolder = Join-Path $script:AppInstallerDataFolder -ChildPath 'bin' -AdditionalChildPath $script:AppInstallerReleaseTag
 
 # Build the dependency information
-Write-Verbose "Building Dependency List"
+Write-Verbose 'Building Dependency List'
 $script:AppInstallerDependencies = @()
 if ($script:AppInstallerParsedVersion -ge [System.Version]'1.9.25180') {
     # As of WinGet 1.9.25180, VCLibs no longer publishes to the public URL and must be downloaded from the WinGet release
@@ -374,7 +486,7 @@ if ($script:AppInstallerParsedVersion -ge [System.Version]'1.9.25180') {
 else {
     $script:DependencySource = [DependencySources]::Legacy
     # Add the VCLibs to the dependencies
-    Write-Debug "Adding VCLibs UWP to dependency list"
+    Write-Debug 'Adding VCLibs UWP to dependency list'
     $script:AppInstallerDependencies += @{
         DownloadUrl = $script:VcLibsDownloadUrl
         Checksum    = $script:VcLibsHash
@@ -383,7 +495,7 @@ else {
     }
     if ($script:UseNuGetForMicrosoftUIXaml) {
         # Add the NuGet file to the dependencies
-        Write-Debug "Adding Microsoft.UI.Xaml (NuGet) to dependency list"
+        Write-Debug 'Adding Microsoft.UI.Xaml (NuGet) to dependency list'
         $script:AppInstallerDependencies += @{
             DownloadUrl = $script:UiLibsDownloadUrl_NuGet
             Checksum    = $script:UiLibsHash_NuGet
@@ -394,7 +506,7 @@ else {
     # As of WinGet 1.7.10514 (https://github.com/microsoft/winget-cli/pull/4218), the dependency on uiLibsUwP was bumped from version 2.7.3 to version 2.8.6
     elseif ($script:AppInstallerParsedVersion -lt [System.Version]'1.7.10514') {
         # Add Xaml 2.7 to the dependencies
-        Write-Debug "Adding Microsoft.UI.Xaml (v2.7) to dependency list"
+        Write-Debug 'Adding Microsoft.UI.Xaml (v2.7) to dependency list'
         $script:AppInstallerDependencies += @{
             DownloadUrl = $script:UiLibsDownloadUrl_v2_7
             Checksum    = $script:UiLibsHash_v2_7
@@ -404,7 +516,7 @@ else {
     }
     else {
         # Add Xaml 2.8 to the dependencies
-        Write-Debug "Adding Microsoft.UI.Xaml (v2.8) to dependency list"
+        Write-Debug 'Adding Microsoft.UI.Xaml (v2.8) to dependency list'
         $script:AppInstallerDependencies += @{
             DownloadUrl = $script:UiLibsDownloadUrl_v2_8
             Checksum    = $script:UiLibsHash_v2_8
@@ -432,7 +544,7 @@ if ($script:UsePowerShellModuleForInstall) {
 }
 
 # Process the dependency list
-Write-Information "--> Checking Dependencies"
+Write-Information '--> Checking Dependencies'
 foreach ($dependency in $script:AppInstallerDependencies) {
     # On a clean install, remove the existing files
     if ($Clean) { Invoke-FileCleanup -FilePaths $dependency.SaveTo }
@@ -463,7 +575,7 @@ Stop-NamedProcess -ProcessName 'WindowsSandboxClient'
 Start-Sleep -Milliseconds 5000 # Wait for the lock on the file to be released
 
 # Remove the test data folder if it exists. We will rebuild it with new test data
-Write-Verbose "Cleaning up previous test data"
+Write-Verbose 'Cleaning up previous test data'
 Invoke-FileCleanup -FilePaths $script:TestDataFolder
 
 # Create the paths if they don't exist
@@ -472,7 +584,7 @@ if (!(Initialize-Folder $script:DependenciesCacheFolder)) { throw 'Could not cre
 
 # Set Experimental Features to be Enabled, If requested
 if ($EnableExperimentalFeatures) {
-    Write-Debug "Setting Experimental Features to Enabled"
+    Write-Debug 'Setting Experimental Features to Enabled'
     $experimentalFeatures = @($script:SandboxWinGetSettings.experimentalFeatures.Keys)
     foreach ($feature in $experimentalFeatures) {
         $script:SandboxWinGetSettings.experimentalFeatures[$feature] = $true
@@ -492,7 +604,7 @@ if (-Not [String]::IsNullOrWhiteSpace($Script)) {
 }
 
 # Create the bootstrapping script
-Write-Verbose "Creating the script for bootstrapping the sandbox"
+Write-Verbose 'Creating the script for bootstrapping the sandbox'
 @"
 function Update-EnvironmentVariables {
     foreach(`$level in "Machine","User") {
@@ -600,7 +712,7 @@ Pop-Location
 
 # Create the WSB file
 # Although this could be done using the native XML processor, it's easier to just write the content directly as a string
-Write-Verbose "Creating WSB file for launching the sandbox"
+Write-Verbose 'Creating WSB file for launching the sandbox'
 @"
 <Configuration>
   <Networking>Enable</Networking>
