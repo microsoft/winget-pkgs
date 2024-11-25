@@ -311,7 +311,8 @@ function Test-GithubToken {
     $_memoryStream.DisposeAsync()
 
     # Check for the cached token file
-    $cachedToken = Get-ChildItem -Path $script:TokenValidationCache -Name $tokenHash -ErrorAction SilentlyContinue
+    Initialize-Folder -FolderPath $script:TokenValidationCache
+    $cachedToken = Get-ChildItem -Path $script:TokenValidationCache -Filter $tokenHash -ErrorAction SilentlyContinue
 
     if ($cachedToken) {
         Write-Verbose 'Token was found in the cache'
@@ -320,49 +321,50 @@ function Test-GithubToken {
         $cachedTokenAge = [Math]::Round($cachedTokenAge, 2) # We don't need all the precision the system provides
         Write-Debug "Token has been in the cache for $cachedTokenAge days"
         $cacheIsExpired = $cachedTokenAge -ge $script:CachedTokenExpiration
+        $cachedTokenContent = Get-Content $cachedToken
+        $cachedTokenIsEmpty = [string]::IsNullOrWhiteSpace($cachedTokenContent)
 
-        if (!$cacheIsExpired) {
+        # It is possible for a token to be both empty and expired. Since these are debug and verbose messages, showing both doesn't hurt
+        if ($cachedTokenIsEmpty) { Write-Debug 'Cached token had no content. It will be re-validated' }
+        if ($cacheIsExpired) { Write-Verbose "Cached token is older than $script:CachedTokenExpiration days. It will be re-validated" }
+
+        if (!$cacheIsExpired -and !$cachedTokenIsEmpty) {
             # Check the content of the cached file in case the actual token expiration is known
             Write-Verbose 'Attempting to fetch token expiration from cache'
-            $cachedTokenContent = Get-Content $cachedToken
-            if ([string]::IsNullOrWhiteSpace($cachedTokenContent)) {
-                Write-Debug 'Cached token had no content. It may be set to never expire'
-                return $true
-            } # The token is not outdated, and the actual expiration is not known
-
             # Since Github adds ` UTC` at the end, it needs to be stripped off. Trim is safe here since the last character should always be a digit
-            $cachedTokenForParsing = $cachedTokenContent.TrimEnd(' UTC')
+            $cachedExpirationForParsing = $cachedTokenContent.TrimEnd(' UTC')
             $cachedExpirationDate = [System.DateTime]::MinValue
-            if (!([System.DateTime]::TryParse($cachedTokenForParsing, [ref]$cachedExpirationDate))) {
-                Write-Debug 'The cached token contained content, but it could not be parsed as a date'
-                return $true # If the date can't be parsed, assume the token is valid
-            }
+            [System.DateTime]::TryParse($cachedExpirationForParsing, [ref]$cachedExpirationDate)
 
             $tokenExpirationDays = $cachedExpirationDate - (Get-Date) | Select-Object -ExpandProperty TotalDays
+
             if ($tokenExpirationDays -gt 0) {
                 Write-Verbose "The cached token contained content. It should expire in $tokenExpirationDays days"
                 return $true
             }
-
-            Write-Verbose "The cached token contained content, but the token expired $([Math]::Abs($tokenExpirationDays)) days ago"
-            Invoke-FileCleanup -FilePaths $cachedToken.FullName
-            return $false
-        }
-        else {
-            Write-Verbose "Cached token is older than $script:CachedTokenExpiration days. It will be re-validated"
-            Invoke-FileCleanup -FilePaths $cachedToken.FullName
+            # If the parsing failed, the expiration should still be at the minimum value
+            elseif ($cachedExpirationDate -eq [System.DateTime]::MinValue) {
+                Write-Debug 'The cached token contained content, but it could not be parsed as a date. It will be re-validated'
+                Invoke-FileCleanup -FilePaths $cachedToken.FullName
+                # Do not return anything, since the token will need to be re-validated
+            }
+            else {
+                Write-Verbose "The cached token contained content, but the token expired $([Math]::Abs($tokenExpirationDays)) days ago"
+                Invoke-FileCleanup -FilePaths $cachedToken.FullName
+                return $false
+            }
         }
     }
     else {
         Write-Verbose 'Token was not found in the cache'
     }
 
-    # To get here either the token was not in the cache or it was expired and needs to be re-validated
+    # To get here either the token was not in the cache or it needs to be re-validated
 
     $requestParameters = @{
         Uri            = 'https://api.github.com/rate_limit'
         Authentication = 'Bearer'
-        Token          = $(ConvertTo-SecureString "$env:GITHUB_TOKEN" -AsPlainText)
+        Token          = $(ConvertTo-SecureString "$Token" -AsPlainText)
     }
 
     Write-Verbose "Checking Token against $($requestParameters.Uri)"
@@ -379,8 +381,9 @@ function Test-GithubToken {
     }
 
     Write-Verbose 'Token validated successfully. Adding to cache'
-    $tokenPath = Join-Path -Path $script:TokenValidationCache -ChildPath $tokenHash
-    New-Item -ItemType File -Path $tokenPath -Value $tokenExpiration
+    # If the token doesn't expire, write a special value to the file
+    if ([string]::IsNullOrWhiteSpace($tokenExpiration)) { $tokenExpiration = [System.DateTime]::MaxValue }
+    New-Item -ItemType File -Path $script:TokenValidationCache -Name $tokenHash -Value $tokenExpiration
     Write-Debug "Token <$tokenHash> added to cache with content <$tokenExpiration>"
     return $true
 }
