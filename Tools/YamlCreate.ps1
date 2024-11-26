@@ -1,4 +1,4 @@
-﻿<#
+<#
 .SYNOPSIS
     WinGet Manifest creation helper script
 .DESCRIPTION
@@ -2753,9 +2753,6 @@ if (($script:Option -eq 'MovePackageIdentifier')) {
         if (Test-String $NewMoniker -Not -IsNull) {
           Get-ChildItem -Path $DestinationFolder -Filter "*$NewPackageIdentifier*" -Recurse | ForEach-Object { [System.IO.File]::WriteAllLines($_.FullName, $((Get-Content -Path $_.FullName -Raw).TrimEnd() -replace 'Moniker:.*', "Moniker: $NewMoniker"), $Utf8NoBomEncoding) }
         }
-        # Update manifest version
-        Get-ChildItem -Path $DestinationFolder -Filter "*$NewPackageIdentifier*" -Recurse | ForEach-Object { [System.IO.File]::WriteAllLines($_.FullName, $((Get-Content -Path $_.FullName -Raw).TrimEnd() -replace '1\.\d+\.0\.schema', "1.6.0.schema"), $Utf8NoBomEncoding) }
-        Get-ChildItem -Path $DestinationFolder -Filter "*$NewPackageIdentifier*" -Recurse | ForEach-Object { [System.IO.File]::WriteAllLines($_.FullName, $((Get-Content -Path $_.FullName -Raw).TrimEnd() -replace 'ManifestVersion: 1\.\d+\.0', "ManifestVersion: 1.6.0"), $Utf8NoBomEncoding) }
 
         # Create and push to a new branch
         git switch -d upstream/master -q
