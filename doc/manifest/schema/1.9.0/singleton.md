@@ -113,6 +113,7 @@ Installers:                        # The package installer
             DisplayName:           # Optional display name for invocable files
     DownloadCommandProhibited:     # Optional indicator for packages which cannot be downloaded for offline installation
     RepairBehavior:                # Optional repair method to use with 'winget repair`
+    ArchiveBinariesDependOnPath:   # Optional indication to add the install location directly to PATH. Only applies to an archive containing portable packages
 ManifestType: singleton            # The manifest type
 ManifestVersion: 1.9.0             # The manifest syntax version
 ```
@@ -941,6 +942,14 @@ NOTE: The DisplayInstallWarnings behavior is not implemented in the Windows Pack
   **Optional Field**
 
   This field controls what method is used to repair existing installations of packages. Specifying `modify` will use the ModifyPath string from the package's ARP data, `uninstaller` will use the Uninstall string from the package's ARP data, and `installer` will download and run the installer. In each case, the `Repair` value from `InstallerSwitches` will be added as an argument when invoking the command to repair the package.
+</details>
+
+<details>
+  <summary><b>ArchiveBinariesDependOnPath</b> - Optional indication to add the install location directly to PATH. Only applies to an archive containing portable packages</summary>
+
+  **Optional Field**
+
+  This field controls the behavior of environment variables when installing portable packages from an archive (i.e `zip`). Specifying `true` will add the install location directly to the `PATH` environment variable. Specifying `false` or leaving the value unset will use the default behavior of adding a symlink to the `links` folder, if supported, or adding the install location directly to `PATH` if symlinks are not supported.
 </details>
 
 <details>
