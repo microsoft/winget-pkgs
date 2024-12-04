@@ -321,7 +321,7 @@ function Test-GithubToken {
         $cachedTokenAge = [Math]::Round($cachedTokenAge, 2) # We don't need all the precision the system provides
         Write-Debug "Token has been in the cache for $cachedTokenAge days"
         $cacheIsExpired = $cachedTokenAge -ge $script:CachedTokenExpiration
-        $cachedTokenContent = Get-Content $cachedToken
+        $cachedTokenContent = (Get-Content $cachedToken -Raw).Trim() # Ensure any trailing whitespace is ignored
         $cachedTokenIsEmpty = [string]::IsNullOrWhiteSpace($cachedTokenContent)
 
         # It is possible for a token to be both empty and expired. Since these are debug and verbose messages, showing both doesn't hurt
@@ -369,12 +369,13 @@ function Test-GithubToken {
 
     Write-Verbose "Checking Token against $($requestParameters.Uri)"
     $apiResponse = Invoke-WebRequest @requestParameters # This will return an exception if the token is not valid; It is intentionally not caught
-    $rateLimit = $apiResponse.Headers['X-RateLimit-Limit']
-    $tokenExpiration = $apiResponse.Headers['github-authentication-token-expiration'] # This could be null if the token is set to never expire
+    # The headers can sometimes be a single string, or an array of strings. Cast them into an array anyways just for safety
+    $rateLimit = @($apiResponse.Headers['X-RateLimit-Limit'])
+    $tokenExpiration = @($apiResponse.Headers['github-authentication-token-expiration']) # This could be null if the token is set to never expire
     Write-Debug "API responded with Rate Limit ($rateLimit) and Expiration ($tokenExpiration)"
 
-    if (!$rateLimit) { return $false } # Something went horribly wrong, and the rate limit isn't known. Assume the token is not valide
-    if ($rateLimit -le 60) {
+    if (!$rateLimit) { return $false } # Something went horribly wrong, and the rate limit isn't known. Assume the token is not valid
+    if ($rateLimit[0] -le 60) {
         # Authenticated users typically have a limit that is much higher than 60
         Write-Warning "You may encounter 'API rate limit exceeded' errors! Please consider adding `GITHUB_TOKEN` to your environment variables"
         return $false
@@ -382,7 +383,9 @@ function Test-GithubToken {
 
     Write-Verbose 'Token validated successfully. Adding to cache'
     # If the token doesn't expire, write a special value to the file
-    if ([string]::IsNullOrWhiteSpace($tokenExpiration)) { $tokenExpiration = [System.DateTime]::MaxValue }
+    if (!$tokenExpiration -or [string]::IsNullOrWhiteSpace($tokenExpiration[0])) { $tokenExpiration = @([System.DateTime]::MaxValue) }
+    # When datetime objects are converted to string, they have extra whitespace that should be trimmed off
+    $tokenExpiration = $tokenExpiration[0].ToString().Trim()
     New-Item -ItemType File -Path $script:TokenValidationCache -Name $tokenHash -Value $tokenExpiration
     Write-Debug "Token <$tokenHash> added to cache with content <$tokenExpiration>"
     return $true
