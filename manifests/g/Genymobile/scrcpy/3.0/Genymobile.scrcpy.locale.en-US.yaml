@@ -1,0 +1,126 @@
+# Created with komac v2.7.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.6.0.schema.json
+
+PackageIdentifier: Genymobile.scrcpy
+PackageVersion: '3.0'
+PackageLocale: en-US
+Publisher: Genymobile
+PublisherUrl: https://github.com/Genymobile
+PublisherSupportUrl: https://github.com/Genymobile/scrcpy/issues
+Author: Genymobile
+PackageName: scrcpy
+PackageUrl: https://github.com/Genymobile/scrcpy
+License: Apache-2.0
+LicenseUrl: https://github.com/Genymobile/scrcpy/blob/HEAD/LICENSE
+Copyright: Apache License Version 2.0
+CopyrightUrl: https://raw.githubusercontent.com/Genymobile/scrcpy/master/LICENSE
+ShortDescription: Display and control your Android device
+Description: |-
+  This application provides display and control of Android devices connected via USB or over TCP/IP.
+  It does not require any root access.
+Moniker: scrcpy
+Tags:
+- android
+- control
+- device
+- display
+ReleaseNotes: |-
+  To receive a notification when a new release is available, click on Watch > Custom > Releases at the top.
+  scrcpy v3.0Changes since v2.7:
+  - Add virtual display feature (#5370, #5506, #1887, #4528, #5137)
+  - Launch Android app on start (#5370)
+  - Add OpenGL filters (#5455)
+  - Add --capture-orientation to replace --lock-video-orientation
+  (which was broken on Android 14) (#4011, #4426, #5455)
+  - Fix --crop on Android 14 (#4162, #5387, #5455)
+  - Handle virtual display rotation (#5428, #5455)
+  - Add --angle to apply a custom rotation (#4135, #4345, #4658, #5455)
+  - Add --screen-off-timeout (#5447)
+  - Adapt "turn screen off" for Android 15 (#3927, #5418)
+  - Add shortcut Ctrl+Shift+click-and-move for horizontal tilt (#5317)
+  - Add shortcut MOD+Shift+r to reset video capture/encoding (#5432)
+  - Forward Alt and Super with SDK Keyboard (#5318, #5322)
+  - Add more details to --list-encoders output (#5416)
+  - Add option to disable virtual display system decorations (#5494)
+  - Fix --time-limit overflow on Windows (#5355)
+  - Fix "does not match caller's uid 2000" error (#4639, #5476)
+  - Accept filenames containing ':' when recording (#5487, #5499)
+  - Disable mouse by default if no video playback (#5410)
+  - Rename --display-buffer to --video-buffer (#5403, #5420)
+  - Listen to display changed events (#5415, #161, #1918, #4152, #5362)
+  - Adapt server debugging for Android >= 11 (#5346, #5466)
+  - Upgrade FFmpeg to 7.1 (#5332)
+  - Upgrade SDL to 2.30.9
+  - Upgrade platform-tools (adb) to 35.0.2
+  - Build releases via GitHub Actions (#5306, #4490)
+  - Release static builds for Linux and macOS (#5515, #1733, #3235, #4489, #5327)
+  - Various technical fixes
+
+  Highlights
+  Virtual display
+  By default, scrcpy mirrors the device screen.With this new feature (#5370), it is now possible to mirror a new virtual display, with a custom size:
+  scrcpy --new-display=1920x1080
+  scrcpy --new-display=1920x1080/420  # force 420 dpi
+  scrcpy --new-display         # use the main display size and density
+  scrcpy --new-display=/240    # use the main display size and 240 dpi
+
+  On some devices, a launcher is available in the virtual display.When no launcher is available, the virtual display is empty. In that case, you must start an Android app.For example:
+  scrcpy --new-display=1920x1080 --start-app=org.videolan.vlc
+
+  To list the Android apps installed on the device:
+  scrcpy --list-apps
+
+  For convenience, you can also select an app by its name using a ? prefix:
+  scrcpy --start-app=?firefox
+
+  However, retrieving app names may take some time (sometimes several seconds), so passing the package name is recommended.On-device OpenGL filters
+  Scrcpy can now transform the captured video stream before encoding by applying OpenGL filters directly on the device. This has made it possible to fix several issues and implement new features, as described below (more details in #5455).Crop
+  The --crop option was broken for devices running Android >= 14 (#4162). It has been reimplemented using OpenGL filters internally.Its usage remains the same:
+  scrcpy --crop=800:600:100:100
+
+  It now also works for camera and virtual displays.Capture orientation
+  The --lock-video-orientation option was broken for devices running Android >= 14 (#4011).It has been replaced by a more general option --capture-orientation, implemented using OpenGL filters:
+  scrcpy --capture-orientation=0
+  scrcpy --capture-orientation=90       # 90° clockwise
+  scrcpy --capture-orientation=180      # 180°
+  scrcpy --capture-orientation=270      # 270° clockwise
+  scrcpy --capture-orientation=flip0    # hflip
+  scrcpy --capture-orientation=flip90   # hflip + 90° clockwise
+  scrcpy --capture-orientation=flip180  # hflip + 180°
+  scrcpy --capture-orientation=flip270  # hflip + 270° clockwise
+
+  The capture orientation can be locked by using a @ prefix, so that a physical device rotation does not change the captured video orientation:
+  scrcpy --capture-orientation=@         # locked to the initial orientation
+  scrcpy --capture-orientation=@0        # locked to 0°
+  scrcpy --capture-orientation=@90       # locked to 90° clockwise
+  scrcpy --capture-orientation=@180      # locked to 180°
+  scrcpy --capture-orientation=@270      # locked to 270° clockwise
+  scrcpy --capture-orientation=@flip0    # locked to hflip
+  scrcpy --capture-orientation=@flip90   # locked to hflip + 90° clockwise
+  scrcpy --capture-orientation=@flip180  # locked to hflip + 180°
+  scrcpy --capture-orientation=@flip270  # locked to hflip + 270° clockwise
+
+  Now, it also works for camera (fixing #4426) and virtual displays.Custom rotation
+  A new option --angle allows to rotate the content by a custom angle. Combined with --crop, this is especially useful for mirroring the Meta Quest 3 (#4135, #4345, #4658).Virtual display rotation
+  The new virtual display feature initially could not rotate. The rotation has been implemented using OpenGL filters.(That is what triggered the development of OpenGL filters.)Like previously, the current app can be rotated by MOD+r (shortcuts).Screen off timeout
+  The existing option --stay-awake only keeps the device awake *while it is plugged in, meaning it typically does not work over TCP/IP.A new option, --screen-off-timeout, modifies the screen-off timeout setting while scrcpy is running and restores it on exit:
+  scrcpy --screen-off-timeout=300  # 300 seconds (5 minutes)
+
+  Static builds
+  For convenience, static builds are now provided for Linux and macOS (#5515).More targets might be added in the future.This is still experimental for now, so if you encounter problems, please report them.Features you might have missed
+  If you haven't tried scrcpy in a while, here are some features introduced in the 2.x versions that you might have missed (check the release notes to each version for more details):
+  - scrcpy 2.7: gamepad support
+  - scrcpy 2.6: audio duplication
+  - scrcpy 2.5: control-only & mouse improvements
+  - scrcpy 2.4: UHID keyboard and mouse
+  - scrcpy 2.3: camera support improvements
+  - scrcpy 2.2: camera capture
+  - scrcpy 2.1: microphone capture
+  - scrcpy 2.0: audio forwarding
+
+  - BlueSky: @scrcpy.bsky.social
+  - Twitter: @scrcpy_app
+  - Reddit: r/scrcpy
+ReleaseNotesUrl: https://github.com/Genymobile/scrcpy/releases/tag/v3.0
+ManifestType: defaultLocale
+ManifestVersion: 1.6.0
