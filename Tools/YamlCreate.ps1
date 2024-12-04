@@ -190,8 +190,8 @@ if ($Settings) {
   exit
 }
 
-$ScriptHeader = '# Created with YamlCreate.ps1 v2.4.1'
-$ManifestVersion = '1.6.0'
+$ScriptHeader = '# Created with YamlCreate.ps1 v2.4.2'
+$ManifestVersion = '1.9.0'
 $PSDefaultParameterValues = @{ '*:Encoding' = 'UTF8' }
 $Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
 $ofs = ', '
