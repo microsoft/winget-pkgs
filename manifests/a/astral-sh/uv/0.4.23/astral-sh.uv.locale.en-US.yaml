@@ -1,0 +1,113 @@
+# Created with komac v2.6.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.6.0.schema.json
+
+PackageIdentifier: astral-sh.uv
+PackageVersion: 0.4.23
+PackageLocale: en-US
+Publisher: Astral
+PublisherUrl: https://github.com/astral-sh/uv
+PublisherSupportUrl: https://github.com/astral-sh/uv/issues
+Author: uv contributors
+PackageName: uv
+PackageUrl: https://github.com/astral-sh/uv
+License: Apache-2.0
+LicenseUrl: https://github.com/astral-sh/uv/blob/main/LICENSE-MIT
+Copyright: Copyright (c) 2023 Astral Software Inc.
+CopyrightUrl: https://github.com/astral-sh/uv/blob/main/LICENSE-MIT
+ShortDescription: An extremely fast Python package installer and resolver, written in Rust.
+Description: An extremely fast Python package installer and resolver, written in Rust. Designed as a drop-in replacement for common pip and pip-tools workflows.
+Moniker: uv
+Tags:
+- python
+- uv
+ReleaseNotes: |-
+  Release Notes
+  This release introduces a revamped system for defining package indexes, as an alternative to the existing pip-style
+  --index-url and --extra-index-url configuration options.You can now define named indexes in your pyproject.toml file using the [[tool.uv.index]] table:
+  [[tool.uv.index]]
+  name = "pytorch"
+  url = "https://download.pytorch.org/whl/cpu"
+
+  Packages can be pinned to a specific index via tool.uv.sources, to ensure that a given package is installed from the
+  correct index. For example, to ensure that torch is always installed from the pytorch index:
+  [tool.uv.sources]
+  torch = { index = "pytorch" }
+
+  [[tool.uv.index]]
+  name = "pytorch"
+  url = "https://download.pytorch.org/whl/cpu"
+
+  Indexes can also be marked as explicit = true to prevent packages from being installed from that index
+  unless explicitly pinned. For example, to ensure that torch is installed from the pytorch index, but all other
+  packages are installed from the default index:
+  [tool.uv.sources]
+  torch = { index = "pytorch" }
+
+  [[tool.uv.index]]
+  name = "pytorch"
+  url = "https://download.pytorch.org/whl/cpu"
+  explicit = true
+
+  To define an additional index outside a pyproject.toml file, use the --index command-line argument
+  (or the UV_INDEX environment variable); to replace the default index (PyPI), use the --default-index command-line
+  argument (or UV_DEFAULT_INDEX).These changes are entirely backwards-compatible with the deprecated --index-url and --extra-index-url options,
+  which continue to work as before.See the Index documentation for more.Enhancements
+  - Add index URLs when provided via uv add --index or --default-index (#7746)
+  - Add support for named and explicit indexes (#7481)
+  - Add templates for popular build backends (#7857)
+  - Allow multiple pinned indexes in tool.uv.sources (#7769)
+  - Allow users to incorporate Git tags into dynamic cache keys (#8259)
+  - Pin named indexes in uv add (#7747)
+  - Respect named --index and --default-index values in tool.uv.sources (#7910)
+  - Update to latest PubGrub version (#8245)
+  - Enable environment variable authentication for named indexes (#7741)
+  - Avoid showing lower-bound warning outside of explicit lock and sync (#8234)
+  - Improve logging during lock errors (#8258)
+  - Improve styling of requires-python warnings (#8240)
+  - Show hint in resolution failure on Forbidden (403) or Unauthorized (401) (#8264)
+  - Update to latest cargo-dist version (includes new installer features) (#8270)
+  - Warn when patch version in requires-python is implicitly 0 (#7959)
+  - Add more context on client errors during range requests (#8285)
+  Bug fixes
+  - Avoid writing duplicate index URLs with --emit-index-url (#8226)
+  - Fix error leading to out-of-bound panic in uv-pep508 (#8282)
+  - Fix managed distributions of free-threaded Python on Windows (#8268)
+  - Fix selection of free-threaded interpreters during default Python discovery (#8239)
+  - Ignore sources in build requirements for non-source trees (#8235)
+  - Invalid cache when adding lower bound to lockfile (#8230)
+  - Respect index priority when storing credentials (#8256)
+  - Respect relative paths in uv build sources (#8237)
+  - Narrow what the pip3. logic drops from entry points. (#8273)
+  Documentation
+  - Add some additional notes to --index-url docs (#8267)
+  - Add upgrade note to README (#7937)
+  - Remove note that "only a single source may be defined for each dependency" (#8243)
+  Install uv 0.4.23
+  Install prebuilt binaries via shell script
+  curl --proto '=https' --tlsv1.2 -LsSf https://github.com/astral-sh/uv/releases/download/0.4.23/uv-installer.sh | sh
+
+  Install prebuilt binaries via powershell script
+  powershell -ExecutionPolicy ByPass -c "irm https://github.com/astral-sh/uv/releases/download/0.4.23/uv-installer.ps1 | iex"
+
+  Download uv 0.4.23
+  |  File  | Platform | Checksum |
+  |--------|----------|----------|
+  | uv-aarch64-apple-darwin.tar.gz | Apple Silicon macOS | checksum |
+  | uv-x86_64-apple-darwin.tar.gz | Intel macOS | checksum |
+  | uv-i686-pc-windows-msvc.zip | x86 Windows | checksum |
+  | uv-x86_64-pc-windows-msvc.zip | x64 Windows | checksum |
+  | uv-aarch64-unknown-linux-gnu.tar.gz | ARM64 Linux | checksum |
+  | uv-i686-unknown-linux-gnu.tar.gz | x86 Linux | checksum |
+  | uv-powerpc64-unknown-linux-gnu.tar.gz | PPC64 Linux | checksum |
+  | uv-powerpc64le-unknown-linux-gnu.tar.gz | PPC64LE Linux | checksum |
+  | uv-s390x-unknown-linux-gnu.tar.gz | S390x Linux | checksum |
+  | uv-x86_64-unknown-linux-gnu.tar.gz | x64 Linux | checksum |
+  | uv-armv7-unknown-linux-gnueabihf.tar.gz | ARMv7 Linux | checksum |
+  | uv-aarch64-unknown-linux-musl.tar.gz | ARM64 MUSL Linux | checksum |
+  | uv-i686-unknown-linux-musl.tar.gz | x86 MUSL Linux | checksum |
+  | uv-x86_64-unknown-linux-musl.tar.gz | x64 MUSL Linux | checksum |
+  | uv-arm-unknown-linux-musleabihf.tar.gz | ARMv6 MUSL Linux (Hardfloat) | checksum |
+  | uv-armv7-unknown-linux-musleabihf.tar.gz | ARMv7 MUSL Linux | checksum |
+ReleaseNotesUrl: https://github.com/astral-sh/uv/releases/tag/0.4.23
+ManifestType: defaultLocale
+ManifestVersion: 1.6.0
