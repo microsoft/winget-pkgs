@@ -46,7 +46,7 @@ enum DependencySources {
 
 # Script Behaviors
 $ProgressPreference = 'SilentlyContinue'
-$ErrorActionPreference = 'Stop' # This gets overriden most places, but is set explicitly here to help catch errors
+$ErrorActionPreference = 'Stop' # This gets overridden most places, but is set explicitly here to help catch errors
 if ($PSBoundParameters.Keys -notcontains 'InformationAction') { $InformationPreference = 'Continue' } # If the user didn't explicitly set an InformationAction, Override their preference
 $script:OnMappedFolderWarning = ($PSBoundParameters.Keys -contains 'WarningAction') ? $PSBoundParameters.WarningAction : 'Inquire'
 $script:UseNuGetForMicrosoftUIXaml = $false
@@ -281,7 +281,7 @@ function Test-FileChecksum {
 # Outputs: Boolean
 # Notes:
 #   This function hashes the provided GitHub token. If the provided token is valid, a file is added to the token cache with
-#   the name of the hashed token and the token expiration date. To avoid making unneccesarry calls to the GitHub APIs, this
+#   the name of the hashed token and the token expiration date. To avoid making unnecessary calls to the GitHub APIs, this
 #   function checks the token cache for the existence of the file. If the file is older than 30 days, it is removed and the
 #   token is re-checked. If the file has content, the date is checked to see if the token is expired. This can't catch every
 #   edge case, but it should catch a majority of the use cases.
@@ -307,11 +307,11 @@ function Test-GithubToken {
 
     # Dispose of the reader and writer for hashing the token to ensure they cannot be accessed outside of the intended scope
     Write-Debug 'Disposing of hashing components'
-    $_streamWriter.DisposeAsync()
-    $_memoryStream.DisposeAsync()
+    $_streamWriter.DisposeAsync() 1> $null
+    $_memoryStream.DisposeAsync() 1> $null
 
     # Check for the cached token file
-    Initialize-Folder -FolderPath $script:TokenValidationCache
+    Initialize-Folder -FolderPath $script:TokenValidationCache | Out-Null
     $cachedToken = Get-ChildItem -Path $script:TokenValidationCache -Filter $tokenHash -ErrorAction SilentlyContinue
 
     if ($cachedToken) {
@@ -337,6 +337,11 @@ function Test-GithubToken {
             [System.DateTime]::TryParse($cachedExpirationForParsing, [ref]$cachedExpirationDate)
 
             $tokenExpirationDays = $cachedExpirationDate - (Get-Date) | Select-Object -ExpandProperty TotalDays
+
+            if ($cachedExpirationForParsing -eq [System.DateTime]::MaxValue.ToLongDateString().Trim()) {
+                Write-Verbose "The cached token contained content. It is set to never expire"
+                return $true
+            }
 
             if ($tokenExpirationDays -gt 0) {
                 Write-Verbose "The cached token contained content. It should expire in $tokenExpirationDays days"
@@ -375,7 +380,7 @@ function Test-GithubToken {
     Write-Debug "API responded with Rate Limit ($rateLimit) and Expiration ($tokenExpiration)"
 
     if (!$rateLimit) { return $false } # Something went horribly wrong, and the rate limit isn't known. Assume the token is not valid
-    if ($rateLimit[0] -le 60) {
+    if ([int]$rateLimit[0] -le 60) {
         # Authenticated users typically have a limit that is much higher than 60
         Write-Warning "You may encounter 'API rate limit exceeded' errors! Please consider adding `GITHUB_TOKEN` to your environment variables"
         return $false
@@ -385,8 +390,8 @@ function Test-GithubToken {
     # If the token doesn't expire, write a special value to the file
     if (!$tokenExpiration -or [string]::IsNullOrWhiteSpace($tokenExpiration[0])) { $tokenExpiration = @([System.DateTime]::MaxValue) }
     # When datetime objects are converted to string, they have extra whitespace that should be trimmed off
-    $tokenExpiration = $tokenExpiration[0].ToString().Trim()
-    New-Item -ItemType File -Path $script:TokenValidationCache -Name $tokenHash -Value $tokenExpiration
+    $tokenExpiration = $tokenExpiration[0].ToLongDateString().Trim()
+    New-Item -ItemType File -Path $script:TokenValidationCache -Name $tokenHash -Value $tokenExpiration | Out-Null
     Write-Debug "Token <$tokenHash> added to cache with content <$tokenExpiration>"
     return $true
 }
