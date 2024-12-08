@@ -269,8 +269,8 @@ function Test-FileChecksum {
     )
 
     # Get the hash of the file that is currently at the expected location for the dependency; This can be $null
-    $currentHash = (Get-FileHash -Path $Path -Algorithm $Algorithm -ErrorAction SilentlyContinue).Hash
-    return ($currentHash -eq $ExpectedChecksum)
+    $currentHash = Get-FileHash -Path $Path -Algorithm $Algorithm -ErrorAction SilentlyContinue
+    return ($currentHash -and $currentHash.Hash -eq $ExpectedChecksum)
 }
 
 #### Start of main script ####
