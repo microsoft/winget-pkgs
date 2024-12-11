@@ -1027,7 +1027,9 @@ Function Read-NestedInstaller {
           }
           switch ( Invoke-KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString']) {
             'Y' { $_Installer['ArchiveBinariesDependOnPath'] = $true }
-            default { $_Installer['ArchiveBinariesDependOnPath'] = $false }
+
+            # Not required to explicitly set as CLI defaults to false
+            default { }
           }
         }
       }
