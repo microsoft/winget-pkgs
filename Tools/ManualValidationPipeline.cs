@@ -209,6 +209,7 @@ namespace WinGetApprovalNamespace {
         public Regex regex_colonPRRegex = new Regex(@string_colonPRRegex);
 		
 		public string file_GitHubToken = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + "\\Documents\\PowerShell\\ght.txt";
+		//public string file_GitHubToken = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + "\\Documents\\PowerShell\\ght.txt";
 		public string GitHubToken;
 		public bool TokenLoaded = false;
 		public int GitHubRateLimitDelay = 333; // ms
@@ -516,7 +517,7 @@ namespace WinGetApprovalNamespace {
 			this.Menu.MenuItems.Add(item);
 				item.MenuItems.Add("Complete VM", new EventHandler(Complete_VM_Image_Action));
 				item.MenuItems.Add("Relaunch window", new EventHandler(Launch_Window_Image_Action));
-				item.MenuItems.Add("Open manifest folder", new EventHandler(Open_Folder_Image_Action));
+				item.MenuItems.Add("Open VM folder", new EventHandler(Open_Folder_Image_Action));
 			MenuItem submenu = new MenuItem("WIn10 Image VM");
 				item.MenuItems.Add(submenu);
 					submenu.MenuItems.Add("Generate VM from image", new EventHandler(Generate_Win10_VM_Image_Action)); 

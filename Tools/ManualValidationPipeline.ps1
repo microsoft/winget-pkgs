@@ -10,7 +10,7 @@
 #3.88.19 - A few bugfixes.
 #3.88.18 - Restore waiver and retry fucntionality. 
 
-$build = 896
+$build = 931
 $appName = "ManualValidationPipeline"
 Write-Host "$appName build: $build"
 $MainFolder = "C:\ManVal"
@@ -33,6 +33,7 @@ $vmCounter = "$MainFolder\vmcounter.txt"
 $VMversion = "$MainFolder\VMversion.txt"
 $StatusFile = "$writeFolder\status.csv"
 $TrackerModeFile = "$logsFolder\trackermode.txt"
+$RemoteTrackerModeFile = "$RemoteMainFolder\ManVal\logs\trackermode.txt"
 $LogFile = "$MainFolder\misc\ApprovedPRs.txt"
 $PeriodicRunLog = "$MainFolder\misc\PeriodicRunLog.txt"
 $SharedErrorFile = "$writeFolder\err.txt"
@@ -41,8 +42,8 @@ $DataFileName = "$ReposFolder\Tools\ManualValidationPipeline.csv"
 $ExitCodeFile = "$ReposFolder\Tools\ExitCodes.csv"
 $MsiErrorCodeFile = "$ReposFolder\Tools\MsiErrorCodes.csv"
 
-$Win10Folder = "$imagesFolder\Win10-Created091724-Original"
-$Win11Folder = "$imagesFolder\Win11-Created010424-Original"
+$Win10Folder = "$imagesFolder\Win10-Created112024-Original"
+$Win11Folder = "$imagesFolder\Win11-Created121824-Original"
 
 $GitHubBaseUrl = "https://github.com/$Owner/$Repo"
 $GitHubContentBaseUrl = "https://raw.githubusercontent.com//$Owner/$Repo"
@@ -210,7 +211,8 @@ Function Get-PRWatch {
 		$AuthList = (Get-ValidationData -Property authStrictness),
 		$AgreementsList = (Get-ValidationData -Property AgreementUrl),
 		$ReviewList = (Get-LoadFileIfExists $ReviewFile),
-		$Count = 30
+		$Count = 30,
+		$clip = (Get-Clipboard)
 	)
 	$Host.UI.RawUI.WindowTitle = "PR Watcher"#I'm a PR Watcher, watchin PRs go by. 
 	if ((Get-Command Get-TrackerVMSetMode).name) {Get-TrackerVMSetMode "Approving"}
@@ -1563,7 +1565,7 @@ Function Get-PRWatch {
 
 
 				
-
+<# 
 				if ($null -ne $WinGetOutput) {
 					if (($PRvMan -ne "N") -AND 
 					($PRtitle -notmatch "Automatic deletion") -AND 
@@ -1589,9 +1591,9 @@ Function Get-PRWatch {
 						}
 					}
 				}
+ #>
 				Write-Host -nonewline -f $matchColor "$AnF | "
 				$matchColor = $validColor
-
 
 
 
@@ -2260,74 +2262,77 @@ Function Add-Waiver {
 	$PR,
 	$Labels = ((Invoke-GitHubPRRequest -PR $PR -Type "labels" -Output content -JSON).name)
 	)
+	#$actions = "Manual","Waiver","Approved"
+	$actions = "Manual","Manual","Approved"
 	Foreach ($Label in $Labels) {
 		$Waiver = ""
 		Switch ($Label) {
 			$MagicLabels[2] {
 				Get-GitHubPreset -Preset Completed -PR $PR
-				Add-PRToRecord -PR $PR -Action "Manual"
+				Add-PRToRecord -PR $PR -Action $actions[0]
 				$Waiver = $Label
 			}
 			$MagicLabels[31] {
-				Add-PRToRecord -PR $PR -Action "Waiver"
+				Add-PRToRecord -PR $PR -Action $actions[0]
 				$Waiver = $Label
 			}
 			$MagicLabels[24] {
-				Add-PRToRecord -PR $PR -Action "Waiver"
+				Add-PRToRecord -PR $PR -Action $actions[0]
 				$Waiver = $Label
 			}
 			$MagicLabels[25] {
-				Add-PRToRecord -PR $PR -Action "Waiver"
+				Add-PRToRecord -PR $PR -Action $actions[0]
 				$Waiver = $Label
 			}
 			$MagicLabels[26] {
 				Get-GitHubPreset -Preset Approved -PR $PR
+				Add-PRToRecord -PR $PR -Action $actions[2]
 			}
 			$MagicLabels[15] {
-				Add-PRToRecord -PR $PR -Action "Waiver"
+				Add-PRToRecord -PR $PR -Action $actions[0]
 				$Waiver = $Label
 			}
 			$MagicLabels[16] {
-				Add-PRToRecord -PR $PR -Action "Waiver"
+				Add-PRToRecord -PR $PR -Action $actions[0]
 				$Waiver = $Label
 			}
 			$MagicLabels[27] {
-				Add-PRToRecord -PR $PR -Action "Waiver"
+				Add-PRToRecord -PR $PR -Action $actions[1]
 				$Waiver = $Label
 			}
 			$MagicLabels[21] {
-				Add-PRToRecord -PR $PR -Action "Waiver"
+				Add-PRToRecord -PR $PR -Action $actions[1]
 				$Waiver = $Label
 			}
 			$MagicLabels[20] {
-				Add-PRToRecord -PR $PR -Action "Waiver"
+				Add-PRToRecord -PR $PR -Action $actions[1]
 				$Waiver = $Label
 			}
 			$MagicLabels[22] {
-				Add-PRToRecord -PR $PR -Action "Waiver"
+				Add-PRToRecord -PR $PR -Action $actions[1]
 				$Waiver = $Label
 			}
 			$MagicLabels[23] {
-				Add-PRToRecord -PR $PR -Action "Waiver"
+				Add-PRToRecord -PR $PR -Action $actions[1]
 				$Waiver = $Label
 			}
 			$MagicLabels[28] {
-				Add-PRToRecord -PR $PR -Action "Waiver"
+				Add-PRToRecord -PR $PR -Action $actions[1]
 				$Waiver = $Label
 			}
 			$MagicLabels[29] {
 				Get-GitHubPreset -Preset Completed -PR $PR
 				#Invoke-GitHubPRRequest -PR $PR -Method POST -Type labels -Data "Retry-1"
-				Add-PRToRecord -PR $PR -Action "Manual"
+				Add-PRToRecord -PR $PR -Action $actions[0]
 			}
 			$MagicLabels[6] {
 				Get-GitHubPreset -Preset Completed -PR $PR
 				#Invoke-GitHubPRRequest -PR $PR -Method POST -Type labels -Data "Retry-1"
-				Add-PRToRecord -PR $PR -Action "Manual"
+				Add-PRToRecord -PR $PR -Action $actions[0]
 			}
 		}
 		if ($Waiver -ne "") {
-			$out = Invoke-GitHubPRRequest -PR $PR -Type comments -Output StatusDescription -Method POST -Data "@wingetbot waivers Add $Waiver"
+			$out = Get-CompletePR -PR $PR 
 			Write-Output $out
 		}; #end if Waiver
 	}; #end Foreach Label
@@ -2335,7 +2340,7 @@ Function Add-Waiver {
 
 Function Get-SearchGitHub {
 	param(
-		[ValidateSet("Approval","Blocking","Defender","IEDS","ToWork","ToWork2")][string]$Preset = "Approval",
+		[ValidateSet("Approval","Blocking","Defender","IEDS","ToWork","ToWork2","ToWork3")][string]$Preset = "Approval",
 		[Switch]$Browser,
 		$Url = "https://api.github.com/search/issues?page=$Page&q=",
 		$Author, #wingetbot
@@ -2371,6 +2376,7 @@ Function Get-SearchGitHub {
 	$IEM = "label:Internal-Error-Manifest+"
 	$nNSA = "-label:Internal-Error-NoSupportedArchitectures+"
 	$NotPass = "-label:Azure-Pipeline-Passed+" #Hasn't psased pipelines
+	$sortAsc = "sort:created-asc+";
 	$VC = "label:Validation-Completed+" #Completed
 	$nVC = "-"+$VC #Completed
 
@@ -2406,72 +2412,113 @@ Function Get-SearchGitHub {
 	$Review2 = $Review2 + "-label:Needs-Review+"
 	
 	$Approvable =  "-label:Validation-Merge-Conflict+" 
-	$Approvable = $Approvable + "-label:Unexpected-File+"
+	$Approvable += "-label:Manifest-Version-Error+";
+	$Approvable += "-label:Unexpected-File+";
+	$Workable += "-label:Validation-Merge-Conflict+";
 	
 	$Workable = "-label:Highest-Version-Removal+";
-	$Workable += "-label:Manifest-Version-Error+";
 	$Workable += "-label:Validation-Certificate-Root+";
 	$Workable += "-label:Binary-Validation-Error+";
-	$Workable += "-label:Validation-Merge-Conflict+";
 	$Workable += "-label:Validation-SmartScreen-Error+";
 	$Workable += "-label:Unexpected-File+";
 
+	$PolicyTests = "-label:Policy-Test-1.1+";
+	$PolicyTests += "-label:Policy-Test-1.2+";
+	$PolicyTests += "-label:Policy-Test-1.3+";
+	$PolicyTests += "-label:Policy-Test-1.4+";
+	$PolicyTests += "-label:Policy-Test-1.5+";
+	$PolicyTests += "-label:Policy-Test-1.6+";
+	$PolicyTests += "-label:Policy-Test-1.7+";
+	$PolicyTests += "-label:Policy-Test-1.8+";
+	$PolicyTests += "-label:Policy-Test-1.9+";
+	$PolicyTests += "-label:Policy-Test-1.10+";
+	$PolicyTests += "-label:Policy-Test-2.1+";
+	$PolicyTests += "-label:Policy-Test-2.2+";
+	$PolicyTests += "-label:Policy-Test-2.3+";
+	$PolicyTests += "-label:Policy-Test-2.4+";
+	$PolicyTests += "-label:Policy-Test-2.5+";
+	$PolicyTests += "-label:Policy-Test-2.6+";
+	$PolicyTests += "-label:Policy-Test-2.7+";
+	$PolicyTests += "-label:Policy-Test-2.8+";
+	$PolicyTests += "-label:Policy-Test-2.9+";
+	$PolicyTests += "-label:Policy-Test-2.10+";
+	$PolicyTests += "-label:Policy-Test-2.11+";
+	$PolicyTests += "-label:Policy-Test-2.12+";
+	
+	$Automatable = "-label:WSL+";
+	$Automatable += "-label:Author-Not-Authorized+";
+	$Automatable += "-label:Hardware+";
+	$Automatable += "-label:Manifest-Validation-Error+";
+	$Automatable += "-label:Error-Hash-Mismatch+";
+	$Automatable += "-label:Manifest-AppsAndFeaturesVersion-Error+";
+	$Automatable += "-label:Error-Installer-Availability+";
+	$Automatable += "-label:Validation-Domain+";
+	$Automatable += "-label:Validation-Completed+";
 	
 	#Composite settings
 	$Set1 = $Blocking + $Common + $Review1
 	$Set2 = $Set1 + $Review2
-
-	$Url = $Url + $Base
+	$Url += $Base
 	if ($Author) {
-		$Url = $Url + "author:$($Author)+"
+		$Url += "author:$($Author)+"
 	}
 	if ($Commenter) {
-		$Url = $Url + "commenter:$($Commenter)+"
+		$Url += "commenter:$($Commenter)+"
 	}
 	if ($Days) {
-		$Url = $Url + $Recent
+		$Url += $Recent
 	}
 	if ($IEDS) {
-		$Url = $Url + $nIEDS
+		$Url += $nIEDS
 	}
 	if ($Label) {
-		$Url = $Url + "label:$(Label)+"
+		$Url += "label:$(Label)+"
 	}
 	if ($NotWorked) {
-		$Url = $Url + $HaventWorked
+		$Url += $HaventWorked
 	}
 	if ($Title) {
-		$Url = $Url + "$Title in:title"
+		$Url += "$Title in:title"
 	}
 	switch ($Preset) {
 		"Approval"{
-			$Url = $Url + $Cna
-			$Url = $Url + $Set2 #Blocking + Common + Review1 + Review2
-			$Url = $Url + $Approvable
+			$Url += $Cna
+			$Url += $Set2 #Blocking + Common + Review1 + Review2
+			$Url += $Approvable
+			$Url += $Workable;
+			$Url += $sortAsc;
 			}
 		"Defender"{
-			$Url = $Url + $Defender
+			$Url += $Defender
+			$Url += $sortAsc;
 		}
 		"IEDS" {
-			$Url = $Url + $IEDSLabel
-			$Url = $Url + $nBI
-			$Url = $Url + $Blocking
-			$Url = $Url + $NotPass
-			$Url = $Url + $nVC
+			$Url += $IEDSLabel
+			$Url += $nBI
+			$Url += $Blocking
+			$Url += $NotPass
+			$Url += $nVC
 		}
 		"ToWork"{
-			$Url = $Url + $Set1 #Blocking + Common + Review1
-			$Url = $Url + "-"+$Defender
-			$Url = $Url + $Workable
+			$Url += $Set1 #Blocking + Common + Review1
+			$Url += $Workable;
+			#$Url += $Workable
 		}
 		"ToWork2"{
-			$Url = $Url + $HaventWorked
-			$Url = $Url + "-"+$Defender
-			$Url = $Url + $Set1 #Blocking + Common + Review1
-			$Url = $Url + $nVC
+			$Url += $HaventWorked
+			$Url += "-"+$Defender
+			$Url += $Set1 #Blocking + Common + Review1
+			$Url += $nVC
+		}
+		"ToWork3"{
+			$Url += $Set1 #Blocking + Common + Review1
+			$Url += $HaventWorked ;
+			$Url += $Workable;
+			$Url += $Automatable;
+			$Url += $PolicyTests;
+			$Url += $sortAsc;
 		}
 	}
-
 
 	if ($Browser) {
 		Start-Process $Url
@@ -2618,6 +2665,7 @@ Function Get-CannedMessage {
 }
 
 Function Get-AutoValLog {
+<#
 	#Needs $GitHubToken to be set up in your -PR $PROFILE or somewhere more secure. Needs permissions: workflow,
 	param(
 		$clip = (Get-Clipboard),
@@ -2749,12 +2797,14 @@ Function Get-AutoValLog {
 			Write-Host "PR: $PR - $out - Build not found."
 		}
 	}
+#>
 }
 
 Function Get-RandomIEDS {
 	param(
 		$VM = (Get-NextFreeVM),
-		$IEDSPRs =(Get-SearchGitHub -Preset IEDS),
+		#$IEDSPRs =(Get-SearchGitHub -Preset IEDS),
+		$IEDSPRs =(Get-SearchGitHub -Preset ToWork3),
 		$PR = ($IEDSPRs.number | where {$_ -notin (Get-Status).pr} | Get-Random),
 		$File = 0,
 		$ManifestType = "",
@@ -2855,6 +2905,54 @@ Function Approve-PR {
 
 	$out = Invoke-GitHubRequest -Method Post -Uri $uri -Body $Body 
 	$out.StatusDescription
+}
+
+Function Get-PRRange ([int]$firstPR,[int]$lastPR,[string]$Body,[string]$Preset) {
+	$line = 0;$firstPR..$lastPR | %{
+	if ($Preset -eq "closed") {
+		Get-GitHubPreset -Preset $Preset -PR $_ -UserInput $Body
+	} else {
+		Reply-ToPR -PR $_ -Body $Body;
+		Get-GitHubPreset -Preset $Preset -PR $_
+	}
+	Get-TrackerProgress -PR $_ $MyInvocation.MyCommand $line ($lastPR - $firstPR);$line++
+}}
+
+Function Get-AllPRsOnClipboardPreset ([string]$Body,[string]$Preset) {
+	$line = 0;
+	((Get-Clipboard) -split "`n" -split " " | select-string "#") -replace "#","" | %{
+	if ($Preset -eq "closed") {
+		Get-GitHubPreset -Preset $Preset -PR $_ -UserInput $Body
+	} else {
+		Reply-ToPR -PR $_ -Body $Body;
+		Get-GitHubPreset -Preset $Preset -PR $_
+	}
+	Get-TrackerProgress -PR $_ $MyInvocation.MyCommand $line ($lastPR - $firstPR);$line++
+}}
+
+Function Get-RemovePRLabel {
+	param(
+	[int]$PR,
+	[string]$LabelName
+	)
+	Invoke-GitHubRequest -Uri "$GitHubApiBaseUrl/issues/$PR/labels/$LabelName" -Method DELETE
+}
+
+function Get-CompletePR ([int]$PR){
+	$labels = (invoke-GitHubPRRequest -PR $PR -Type labels -Method GET -Output Content).name | 
+	where {$_ -notmatch "Azure-Pipeline-Passed"} |
+	where {$_ -notmatch "Manifest-Metadata-Consistency"} |
+	where {$_ -notmatch "Moderator-Approved"} | 
+	where {$_ -notmatch "New-Manifest"} |
+	where {$_ -notmatch "New-Package"} |
+	where {$_ -notmatch "Possible-Duplicate"} |
+	where {$_ -notmatch "Retry-1"} |
+	where {$_ -notmatch "Validation-Completed"}  
+	foreach ($label in $labels) {
+		Get-Removeprlabel -PR $PR -Label $label
+	}
+	$out = Invoke-GitHubPRRequest -PR $PR -Method POST -Type labels -Data "Validation-Completed"
+	return $out
 }
 
 Function Add-GitHubReviewComment {
@@ -3315,6 +3413,15 @@ Function Out-ErrorData (`$errArray,[string]`$serviceName,`$errorName='errors') {
 	Out-Log `"Detected `$(`$errArray.count) `$serviceName `$(`$errorName): `"
 	`$errArray | ForEach-Object {Out-Log `$_ 'red'}
 };
+Function Get-TrackerProgress {
+	param(
+		`$File,
+		`$Activity,
+		`$Incrementor,
+		`$Length,
+		`$Percent = [math]::round(`$Incrementor / `$length*100,2)
+	)
+};
 Get-TrackerVMSetStatus 'Installing'
 Out-Log ' = = = = Starting Manual Validation pipeline build $build on VM $vm $PackageIdentifier $logLine = = = = '
 
@@ -3391,17 +3498,20 @@ if (Test-Path $RemoteFolder\files.txt) {#If we have a list of files to run - a r
 	`$files1 = (
 		Get-ChildItem c:\ -File -Recurse -ErrorAction Ignore -Force | 
 		Where-Object {`$_.CreationTime -gt `$InstallStart} | 
-		Where-Object {`$_.CreationTime -lt `$InstallEnd}
+		Where-Object {`$_.CreationTime -lt `$InstallEnd} | 
+		%{`$line++;Get-TrackerProgress `$_ `"lnk`" `$line `$line;return `$_}
 	).FullName
 	`$files2 = (
 		Get-ChildItem c:\ -File -Recurse -ErrorAction Ignore -Force | 
 		Where-Object {`$_.LastAccessTIme -gt `$InstallStart} | 
-		Where-Object {`$_.LastAccessTIme -lt `$InstallEnd}
+		Where-Object {`$_.CreationTime -lt `$InstallEnd} | 
+		%{`$line++;Get-TrackerProgress `$_ `"lnk`" `$line `$line;return `$_}
 	).FullName
 	`$files3 = (
 		Get-ChildItem c:\ -File -Recurse -ErrorAction Ignore -Force | 
 		Where-Object {`$_.LastWriteTIme -gt `$InstallStart} | 
-		Where-Object {`$_.LastWriteTIme -lt `$InstallEnd}
+		Where-Object {`$_.CreationTime -lt `$InstallEnd} | 
+		%{`$line++;Get-TrackerProgress `$_ `"lnk`" `$line `$line;return `$_}
 	).FullName
 	`$files = `$files1 + `$files2 + `$files3 | Select-Object -Unique
 }
@@ -3472,6 +3582,9 @@ if ((`$WinGetLogs -match '\[FAIL\] Installer failed security check.') -OR
 	Send-SharedError -clip `$DefenderThreat
 	Out-Log `" = = = = Failing Manual Validation pipeline build $build on VM $vm for $PackageIdentifier $logLine in `$(((Get-Date) -`$TimeStart).TotalSeconds) seconds. = = = = `"
 	Get-TrackerVMSetStatus 'SendStatus'
+} elseif ((gc $RemoteTrackerModeFile) -eq 'IEDS') {
+	Out-Log `" = = = = Auto-Completing Manual Validation pipeline build $build on VM $vm for $PackageIdentifier $logLine in `$(((Get-Date) -`$TimeStart).TotalSeconds) seconds. = = = = `"
+	Get-TrackerVMSetStatus 'Approved'
 } else {
 	Start-Process PowerShell
 	Out-Log `" = = = = Completing Manual Validation pipeline build $build on VM $vm for $PackageIdentifier $logLine in `$(((Get-Date) -`$TimeStart).TotalSeconds) seconds. = = = = `"
@@ -4430,7 +4543,7 @@ Function Get-PRReportFromRecord {
 		if (!($Title)) {
 			$Title = (Invoke-GitHubPRRequest -PR $PR -Type "" -Output content -JSON).title
 		}
-		Get-TrackerProgress -PR $PR $MyInvocation.MyCommand $line $Record.length
+		Get-TrackerProgress -PR $PR ("$($MyInvocation.MyCommand) $Action") $line $Record.length
 		$out += "$Title #$PR`n";
 	}
 	if ($NoClip) {
