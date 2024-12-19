@@ -90,6 +90,8 @@ Moderators are often the first to see and triage new issues, and so they have th
 * `Area-Client`
 * `Area-External`
 * `Area-Matching`
+* `Area-Publish-Pipeline`
+* `Area-Rebuild-Pipeline`
 * `Area-Scope`
 * `Area-Validation-Pipeline`
 * `Blocking-Issue`
@@ -97,11 +99,15 @@ Moderators are often the first to see and triage new issues, and so they have th
 * `DriverInstall`
 * `DSC`
 * `Error-Hash-Mismatch`
+* `Error-Installer-Availability`
 * `Hardware`
 * `Help-Wanted`
 * `Highest-Version-Removal`
+* `Icon`
 * `In-PR`
+* `Installer-Error`
 * `Installer-Issue`
+* `Interactive-Only-Download`
 * `Interactive-Only-Installer`
 * `Issue-Bug`
 * `Issue-Docs`
@@ -109,6 +115,7 @@ Moderators are often the first to see and triage new issues, and so they have th
 * `Last-Version-Removal`
 * `License-Blocks-Install`
 * `Manifest-Content-Incomplete`
+* `Manifest-Singleton-Deprecated`
 * `Moderator-Approved`
 * `Needs-Attention`
 * `Needs-Author-Feedback`

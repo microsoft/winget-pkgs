@@ -190,8 +190,8 @@ if ($Settings) {
   exit
 }
 
-$ScriptHeader = '# Created with YamlCreate.ps1 v2.4.1'
-$ManifestVersion = '1.6.0'
+$ScriptHeader = '# Created with YamlCreate.ps1 v2.4.3'
+$ManifestVersion = '1.9.0'
 $PSDefaultParameterValues = @{ '*:Encoding' = 'UTF8' }
 $Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
 $ofs = ', '
@@ -206,7 +206,7 @@ $script:UserAgent = 'Microsoft-Delivery-Optimization/10.1'
 
 $_wingetVersion = 1.0.0
 $_appInstallerVersion = (Get-AppxPackage Microsoft.DesktopAppInstaller).version
-if (Get-Command 'winget' -ErrorAction SilentlyContinue) { $_wingetVersion = (winget -v).TrimStart('v')}
+if (Get-Command 'winget' -ErrorAction SilentlyContinue) { $_wingetVersion = (winget -v).TrimStart('v') }
 $script:backupUserAgent = "winget-cli WindowsPackageManager/$_wingetVersion DesktopAppInstaller/Microsoft.DesktopAppInstaller v$_appInstallerVersion"
 
 if ($ScriptSettings.EnableDeveloperOptions -eq $true -and $null -ne $ScriptSettings.OverrideManifestVersion) {
@@ -1013,6 +1013,24 @@ Function Read-NestedInstaller {
         switch ( Invoke-KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString']) {
           'Y' { $AnotherNestedInstaller = $true }
           default { $AnotherNestedInstaller = $false }
+        }
+
+        if (!$AnotherNestedInstaller -and $script:Option -eq 'New') {
+          # Prompt to see if the package depends on binaries being in the path
+          $_menu = @{
+            entries       = @(
+              '[Y] Yes'
+              '*[N] No'
+            )
+            Prompt        = 'Does this executable depend on DLLs or other files that are not available through Symlink?'
+            DefaultString = 'N'
+          }
+          switch ( Invoke-KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString']) {
+            'Y' { $_Installer['ArchiveBinariesDependOnPath'] = $true }
+
+            # Not required to explicitly set as CLI defaults to false
+            default { }
+          }
         }
       }
       $_NestedInstallerFiles += $_InstallerFile
@@ -2082,13 +2100,12 @@ Function Read-PRBody {
   $PrBodyContent = Get-Content $args[0]
   ForEach ($_line in $PrBodyContent) {
     # | Where-Object { $_ -like '-*[ ]*' }))
-    if ($_line -like '-*[ ]*' )
-    {
+    if ($_line -like '-*[ ]*' ) {
       $_showMenu = $true
       switch -Wildcard ( $_line ) {
         '*CLA*' {
           if ($ScriptSettings.SignedCLA -eq 'true') {
-            $PrBodyContent = $PrBodyContent.Replace($_line,$_line.Replace('[ ]','[x]'))
+            $PrBodyContent = $PrBodyContent.Replace($_line, $_line.Replace('[ ]', '[x]'))
             $_showMenu = $false
           } else {
             $_menu = @{
@@ -2113,7 +2130,7 @@ Function Read-PRBody {
 
         '*winget validate*' {
           if ($? -and $(Get-Command 'winget' -ErrorAction SilentlyContinue)) {
-            $PrBodyContent = $PrBodyContent.Replace($_line,$_line.Replace('[ ]','[x]'))
+            $PrBodyContent = $PrBodyContent.Replace($_line, $_line.Replace('[ ]', '[x]'))
             $_showMenu = $false
           } elseif ($script:Option -ne 'RemoveManifest') {
             $_menu = @{
@@ -2130,7 +2147,7 @@ Function Read-PRBody {
 
         '*tested your manifest*' {
           if ($script:SandboxTest -eq '0') {
-            $PrBodyContent = $PrBodyContent.Replace($_line,$_line.Replace('[ ]','[x]'))
+            $PrBodyContent = $PrBodyContent.Replace($_line, $_line.Replace('[ ]', '[x]'))
             $_showMenu = $false
           } elseif ($script:Option -ne 'RemoveManifest') {
             $_menu = @{
@@ -2161,7 +2178,7 @@ Function Read-PRBody {
         }
 
         '*only modifies one*' {
-          $PrBodyContent = $PrBodyContent.Replace($_line,$_line.Replace('[ ]','[x]'))
+          $PrBodyContent = $PrBodyContent.Replace($_line, $_line.Replace('[ ]', '[x]'))
           $_showMenu = $false
         }
 
@@ -2183,7 +2200,7 @@ Function Read-PRBody {
 
       if ($_showMenu) {
         switch ( Invoke-KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString'] -HelpText $_menu['HelpText'] -HelpTextColor $_menu['HelpTextColor']) {
-          'Y' { $PrBodyContent = $PrBodyContent.Replace($_line,$_line.Replace('[ ]','[x]')) }
+          'Y' { $PrBodyContent = $PrBodyContent.Replace($_line, $_line.Replace('[ ]', '[x]')) }
           default { }
         }
       }
@@ -2199,7 +2216,7 @@ Function Read-PRBody {
   switch ( Invoke-KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString']) {
     'Y' {
       $_line = ($PrBodyContent | Select-String 'linked issue').Line
-      if ($_line) { $PrBodyContent = $PrBodyContent.Replace($_line,$_line.Replace('[ ]','[x]')) }
+      if ($_line) { $PrBodyContent = $PrBodyContent.Replace($_line, $_line.Replace('[ ]', '[x]')) }
 
       # If there were issues resolved by the PR, request user to enter them
       Write-Host

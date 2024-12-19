@@ -1,7 +1,7 @@
-[Manifest Specification]:   manifest/schema/1.6.0
-[versionSchema]:            manifest/schema/1.6.0/version.md
-[defaultLocaleSchema]:      manifest/schema/1.6.0/defaultLocale.md
-[installerSchema]:          manifest/schema/1.6.0/installer.md
+[Manifest Specification]:   manifest/schema/1.9.0
+[versionSchema]:            manifest/schema/1.9.0/version.md
+[defaultLocaleSchema]:      manifest/schema/1.9.0/defaultLocale.md
+[installerSchema]:          manifest/schema/1.9.0/installer.md
 
 # Authoring Manifests
 
@@ -126,15 +126,25 @@ For more information on how to specify `AppsAndFeaturesEntries` and what the ava
 
 Inherently, all versions are strings. Whether a publisher uses a date code, a commit hash, or some other crazy format they are all saved as string values in the Windows Registry. In fact, a sematic version is just a string with a certain format. To convert these strings into versions and sort them, WinGet goes through the following process.
 
-1. Split the string at each `.`, discarding the `.`
-2. Create a new `Part` from each of the split sections
+> [!IMPORTANT]
+> Step 1 of the below process only occurs in WinGet version 1.9.1763-preview or newer
+> If you are using an older version of WinGet, version preambles may not be handled correctly
+
+1. If there is a digit before the first `.` or there is no `.`, trim off all leading non-digit characters.
+   Examples:
+    * `v1.0.1` becomes `1.0.1`
+    * `version 12` becomes `12`
+2. Split the string at each `.`, discarding the `.`
+3. Create a new `Part` from each of the split sections
     * A `Part` consists of two components - an `integer`, and a `string`
-	* To create a `Part`, numeric characters are parsed from the start of the section and used to create the `integer`. Once a non-numeric character is encountered, the remainder of the section is considered the `string`
+	* To create a `Part`, whitespace characters are first trimmed from the start and end of the section
+	* Then, numeric characters are parsed from the start of the section and used to create the `integer`.
+	* Once a non-numeric character is encountered, the remainder of the section is considered the `string`
 	* Example: If the section is `2024Mar15`, then `2024 → integer` and `Mar15 → string`
-3. Compare the two parts created from the first section of the `Version`.
+4. Compare the two parts created from the first section of the `Version`.
 	* If the two parts are not equal, whichever `Part` is larger corresponds to the larger version
 	* See below for an explanation on how parts are compared
-4. If the two parts are equal, repeat step 3 with each consecutive pair of parts
+5. If the two parts are equal, repeat step 3 with each consecutive pair of parts
 	* If both versions have no more parts, they are equal
 	* If one version has more parts and the other does not, pad the shorter version with an additional `0` as needed
 
@@ -156,5 +166,5 @@ When comparing one `Part` to another, WinGet goes through the following process.
 | 1.2.0 | 1.2 | Equal | `Version B` will be padded with zeros to match the same number of `Parts` as `Version A` |
 | 1.2 | 1.2-rc | `Version A` | The `-rc` causes `Version B` to have a `string` in the second `Part` where `Version A` does not |
 | 1.2.3 | 1.2.4-rc | `Version B` | The `integer` on the third `Part` is larger for `Version B` |
-| v1.2 | 1.1 | `Version B` | The leading `v` causes the `integer` for `Version A` to be `0`, which is less than `1` |
+| v1.2 | 1.1 | `Version A` | The leading `v` will be trimmed off of `Version A`, and `1.2` is a higher version than `1.1` due to integer comparison in the second `Part` |
 | 1.2.3a | 1.2.3b | `Version B` | `b` is lexicographically greater than `a` |
