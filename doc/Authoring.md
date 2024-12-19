@@ -11,7 +11,7 @@ First, we want to say thank you. Your contribution is highly valued. And we appr
 
 ### What is a manifest?
 
-Manifests are the YAML files in this repository containing the metadata used by the Windows Package Manager to install and upgrade software on Windows 10. There are thousands of these files partitioned under the [manifests](/manifests) directory. We've had to partition the directory structure so you don't have to scroll as much in the GitHub.com site when you are looking for a manifest.
+Manifests are the YAML files in this repository containing the metadata used by the Windows Package Manager to install and upgrade software on Windows 10. There are thousands of these files partitioned under the [manifests](../manifests/) directory. We've had to partition the directory structure so you don't have to scroll as much in the GitHub.com site when you are looking for a manifest.
 
 ### What is a package?
 
@@ -41,9 +41,10 @@ Manifests submitted to the Windows Package Manager Community Repository should b
 
 ## Creating your first manifest
 
-Once you have a package in mind that doesn't already exist in the repository, you can now start [creating your package manifest](https://docs.microsoft.com/en-us/windows/package-manager/package/manifest?tabs=minschema%2Cversion-example). We recommend using the [Windows Package Manager Manifest Creator (a.k.a Winget-Create)](https://github.com/microsoft/winget-create) to help you generate your manifest. Winget-Create is a command line tool that will prompt you for relevant metadata related to your package. Once you are done, Winget-Create will validate your manifest to verify that it is correct and allow you to submit your newly-created manifest directly to the winget-pkgs repository by linking your GitHub account. Alternatively, you can use the [YamlCreate.ps1 Script](/Tools/YamlCreate.ps1). More information on using YamlCreate is found in the [script documentation](tools/YamlCreate.md).
+Once you have a package in mind that doesn't already exist in the repository, you can now start [creating your package manifest](https://docs.microsoft.com/en-us/windows/package-manager/package/manifest?tabs=minschema%2Cversion-example). We recommend using the [Windows Package Manager Manifest Creator (a.k.a Winget-Create)](https://github.com/microsoft/winget-create) to help you generate your manifest. Winget-Create is a command line tool that will prompt you for relevant metadata related to your package. Once you are done, Winget-Create will validate your manifest to verify that it is correct and allow you to submit your newly-created manifest directly to the winget-pkgs repository by linking your GitHub account. Alternatively, you can use the [YamlCreate.ps1 Script](../Tools/YamlCreate.ps1). More information on using YamlCreate is found in the [script documentation](tools/YamlCreate.md).
 
 ## Installer Architectures
+
 If you are authoring a manifest yourself one of the important things to note related to installer types is architecture. In many cases the installer itself may be an x86 installer, but it will actually install the package for the architecture of the system. In these cases, the installer type in the manifest should indicate the architecture of the installed binaries. So in some cases the actual installer itself targets x86, but in fact it will install an x64 version of the package.
 
 
@@ -114,13 +115,13 @@ There are a few typical use cases when `AppsAndFeaturesEntries` should be specif
 
     There are many ways that publishers choose to version their software. This leads to some cases where the way WinGet sorts versions will not work properly. Some examples include packages that only use commit hashes for their releases, packages which prefix the version number with a string, or packages using date versioning of DD-MM-YYYY.
 
-	When this happens, `PackageVersion` should be set to something which is sortable by WinGet and `DisplayVersion` should be set to the value the installer writes to the registry. For more information, see the section on [Version Sorting in WinGet](/doc/Authoring.md#version-sorting-in-winget)
+	When this happens, `PackageVersion` should be set to something which is sortable by WinGet and `DisplayVersion` should be set to the value the installer writes to the registry. For more information, see the section on [Version Sorting in WinGet](../doc/Authoring.md#version-sorting-in-winget)
 
 4. The `InstallerType` of the installer which writes the registry keys does not match the `InstallerType` of the manifest
 
     In some cases an EXE installer may call an embedded MSI which writes data to the registry in a different format. While the `InstallerType` may be correctly identified in the manifest, the WinGet CLI will detect the registry entries as being from an MSI and return an error that the installation technology does not match when running `winget upgrade`. This requires the `InstallerType` to be specified in `AppsAndFeaturesEntries`
 
-For more information on how to specify `AppsAndFeaturesEntries` and what the available metadata fields are, please see the [Manifest Specification](/doc/manifest).
+For more information on how to specify `AppsAndFeaturesEntries` and what the available metadata fields are, please see the [Manifest Specification](../doc/manifest/).
 
 ## Version Sorting in WinGet
 
