@@ -13,7 +13,6 @@ The community repository will often delay support for new schema versions until 
 * [1.6.0 (deprecated)](schema/1.6.0/README.md)
 * [1.5.0 (deprecated)](schema/1.5.0/README.md)
 * [1.4.0 (deprecated)](schema/1.4.0/README.md)
-* [1.3.0 (deprecated)](schema/1.3.0/README.md)
 * [1.2.0 (deprecated)](schema/1.2.0/README.md)
 * [1.1.0 (deprecated)](schema/1.1.0/README.md)
 * [1.0.0 (deprecated)](schema/1.0.0/README.md)
