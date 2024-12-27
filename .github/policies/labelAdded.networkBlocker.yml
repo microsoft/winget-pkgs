@@ -1,0 +1,40 @@
+id: labelAdded.networkBlocker
+name: GitOps.PullRequestIssueManagement
+description: Handlers when "Network-Blocker" label is added
+owner:
+resource: repository
+disabled: false
+where:
+configuration:
+  resourceManagementConfiguration:
+    eventResponderTasks:
+      - description: >-
+          When the label "Network-Blocker" is added to a pull request
+          * Add the PR specific reply notifying the issue author
+          * Assign to the Author
+          * Label with Blocking-Issue
+          * Label with Needs-Author-Feedback
+        if:
+          - payloadType: Pull_Request
+          - labelAdded:
+              label: Network-Blocker
+        then:
+          - addReply:
+              reply: >-
+                Hello @${issueAuthor},
+
+
+                The URLs provided were not reachable by the validation pipelines. This may be due to the publisher blocking the IP ranges used during validation or some other network blocker. This PR cannot be validated until the publisher adds WinGet to an allow list or removes the issue blocking the network connection. Please reach out to the publisher regarding this issue.
+
+
+                Template: msftbot/validationError/urls/networkBlocker
+          - assignTo:
+              author: True
+          - addLabel:
+              label: Blocking-Issue
+          - addLabel:
+              label: Needs-Author-Feedback
+        # The policy service should trigger even when the label was added by the policy service
+        triggerOnOwnActions: true
+onFailure:
+onSuccess:

@@ -11,21 +11,13 @@ configuration:
       - description: Enable Auto Merge when the "Validation-Completed" label is present
         if:
           - payloadType: Pull_Request
-          - hasLabel:
-              label: Validation-Completed
+          - or:
+            - labelAdded:
+                label: Validation-Completed
+            - hasLabel:
+                label: Validation-Completed
         then:
           - enableAutoMerge:
               mergeMethod: Squash
-      - description: Disable Auto Merge when the "Validation-Completed" label is not present
-        if:
-          - payloadType: Pull_Request
-          - or:
-              - labelRemoved:
-                  label: Validation-Completed
-              - not:
-                  hasLabel:
-                    label: Validation-Completed
-        then:
-          - disableAutoMerge
 onFailure:
 onSuccess:

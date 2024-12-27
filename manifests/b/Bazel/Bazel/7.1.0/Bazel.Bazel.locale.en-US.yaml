@@ -1,0 +1,64 @@
+# Created with komac v2.1.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.6.0.schema.json
+
+PackageIdentifier: Bazel.Bazel
+PackageVersion: 7.1.0
+PackageLocale: en-US
+Publisher: Bazel
+PublisherUrl: https://github.com/bazelbuild
+PackageName: Bazel
+License: Apache-2.0
+LicenseUrl: https://github.com/bazelbuild/bazel/blob/HEAD/LICENSE
+ShortDescription: a fast, scalable, multi-language and extensible build system
+Tags:
+- bazel
+- build
+- build-system
+- correct
+- fast
+- multi-language
+- scalable
+- test
+ReleaseNotes: |-
+  [!NOTE]
+  If you are looking for rolling releases, please visit this page.
+  Release 7.1.0 (2024-03-11)
+  Baseline:  8f4b11520f9ac7f24018b3a53c8a228aeae71876Bazel 7.1.0 is a minor LTS release. It is fully backward compatible with Bazel 7.0 and contains selected changes by the Bazel community and Google engineers.Configurability
+  - genrule now supports setting stamp = -1 to request conditional stamping (based on the value of the build's --stamp flag). (#21512)
+  External Deps
+  - Added a flag --enable_workspace (defaults to True) that allows the user to completely disable WORKSPACE logic when turned off. We plan to change the default to False with Bazel 8. (#20365)
+  - Added new repo rule and module extension APIs to watch arbitrary files or directory trees: (#21435)
+      - New methods repository_ctx.watch() and module_ctx.watch() allow changes to a path to trigger a refetch/re-evaluation of the repo/extension.
+      - Several methods such as repository_ctx.read() and repository_ctx.template() gain a new watch parameter to allow them to watch for changes to the path in question.
+      - path.readdir() now watches for changes under the directory by default.
+      - New method repository_ctx.watch_tree() allows changes to anything transitively under a directory tree to trigger a repo refetch.
+  - Added path.is_dir to detect whether a path points to a directory.
+  - Added a new method repository_ctx.getenv, which allows Starlark repository rules to declare environment variable dependencies during the fetch, instead of upfront using repository_rule.environ. (#20944)
+  - The flag --experimental_worker_for_repo_fetching now defaults to auto, which uses virtual threads from JDK 21 if it's available. This eliminates restarts during repo fetching. (#21082)
+  - The new bazel mod tidy subcommand automatically updates use_repo calls in the MODULE.bazel file for extensions that use module_ctx.extension_metadata. (#21265)
+  - bazel mod dump_repo_mapping <canonical repo name>... returns the repository mappings of the given repositories in NDJSON. This information can be used by IDEs and Starlark language servers to resolve labels with --enable_bzlmod. (#21023)
+  - Added init_submodules attribute to git_override. Registries now support the git_repository type in source.json. (#21036)
+  - Bazel's Bash completion can now complete external repository labels when using --enable_bzlmod. (#21149)
+  - Fixed bazel fetch by replacing query with cquery as underlying implementation (#21567, #13847).
+  - The scheme for generating canonical repository names has changed to improve cacheability of actions across dependency version updates. Note that canonical names are not considered to be public API and can change at any time. See https://bazel.build/external/module#repository_names_and_strict_deps for advice on how to avoid hardcoding canonical repository names. (#21316)
+  - Various methods and fields related to labels and repos are deprecated in favor of new options with clearer naming and intent. The deprecated APIs can be disabled by setting --noincompatible_enable_deprecated_label_apis. (#20977)
+      - native.repository_name() is deprecated in favor of the new native.repo_name().
+      - Label.workspace_name is deprecated in favor of the new Label.repo_name.
+      - Label.relative() is deprecated in favor of the new Label.same_package_label() alongside the existing native.package_relative_label() and Label().
+  Performance
+  - Make Bazel's RAM estimate container aware (#20644)
+      - On Linux, Bazel's RAM estimate for the host machine is now aware of container resource limits.
+      - On macOS, Bazel no longer consistently overestimates the total RAM by ~5% (1024^2/1000^2).
+      - On Windows, Bazel's RAM estimate is now generally more accurate as it is no longer influenced by JVM heuristics.
+  - Added a new --experimental_execution_log_compact_file flag to produce an execution log in a leaner format and with less runtime overhead. The //src/tools/execlog:converter tool may be used to convert it into one of the preexisting --execution_log_{json,binary}_file formats.
+  - Reduced the execution phase overhead for actions that create tree artifacts with a very large number of files (tens or hundreds of thousands).
+  - Made sandboxing and sandboxed workers faster. This is achieved by deleting files asynchronously, reusing runfiles, reducing copying and not stashing unnecessary tmp directories.
+  Python
+  - Fixed --incompatible_python_disallow_native_rules to work with targets at the top level (e.g. "//:foo") (#17773)
+  - rules_python version increased from 0.4.0 to 0.22.1 in bazel_tools builtin module.
+  Remote Execution
+  - Bazel now respects expires from Credential Helpers. (#21429)
+  Acknowledgements:This release contains contributions from many people at Google, as well as Alessandro Patti, Artem V. Navrotskiy, Brentley Jones, Cameron Martin, Christian Scott, Cristin Donoso, David Ostrovsky, Ed Schouten, Fabian Meumertzheim, Gunnar Wagenknecht, Jordan Mele, Keith Smiley, Nikhil Kalige, Patrick Balestra, Rahul Butani, Ryan Beasley, Son Luong Ngoc, Sushain Cherivirala, thesayyn, Viktor Kustov, Yannic Bonenberger.Notice: Bazel installers contain binaries licensed under the GPLv2 with Classpath exception. Those installers should always be redistributed along with the source code.Some versions of Bazel contain a bundled version of OpenJDK. The license of the bundled OpenJDK and other open-source components can be displayed by running the command bazel license. The vendor and version information of the bundled OpenJDK can be displayed by running the command bazel info java-runtime. The binaries and source-code of the bundled OpenJDK can be downloaded from our mirror server.Security: All our binaries are signed with our public key 3D5919B448457EE0.
+ReleaseNotesUrl: https://github.com/bazelbuild/bazel/releases/tag/7.1.0
+ManifestType: defaultLocale
+ManifestVersion: 1.6.0
