@@ -145,7 +145,7 @@ using System.Web.Script.Serialization;
 namespace WinGetApprovalNamespace {
     public class WinGetApprovalPipeline : Form {
 		//vars
-        public int build = 923;//Get-RebuildPipeApp
+        public int build = 924;//Get-RebuildPipeApp
 		public string appName = "WinGetApprovalPipeline";
 		public string appTitle = "WinGet Approval Pipeline - Build ";
 		public static string owner = "microsoft";
@@ -1798,6 +1798,7 @@ var query =
 			string string_nHW = "-label:Hardware+";
 			string IEDSLabel = "label:Internal-Error-Dynamic-Scan+";
 			string nIEDS = "-"+IEDSLabel;
+			string nMMC = "-label:Manifest-Metadata-Consistency+";
 			string string_IEM = "label:Internal-Error-Manifest+";
 			string string_NA = "label:Needs-Attention+";
 			string string_NAF = "label:Needs-Author-Feedback+";
@@ -1840,6 +1841,10 @@ var query =
 			Review2 += "-"+string_NAF;
 			Review2 += "-label:Needs-Review+";
 			
+			string Approvable =  "-label:Validation-Merge-Conflict+" ;
+			Approvable += "-label:Manifest-Version-Error+";
+			Approvable += "-label:Unexpected-File+";
+	
 			string Workable = "-label:Highest-Version-Removal+";
 			Workable += "-label:Manifest-Version-Error+";
 			Workable += "-label:Validation-Certificate-Root+";
@@ -1877,6 +1882,8 @@ var query =
 			if (Preset == "Approval") {
 				Url += Cna;
 				Url += Set2; //Blocking + Common + Review1 + Review2;
+				Url += Approvable;
+				Url += nMMC;
 				Url += Workable;
 				Url += " sort:created-asc";
 			} else if (Preset == "Defender") {

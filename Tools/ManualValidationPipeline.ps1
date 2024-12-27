@@ -120,7 +120,7 @@ Function Get-TrackerVMRunTracker {
 			[console]::beep(500,250);[console]::beep(500,250);[console]::beep(500,250) #Beep 3x to alert the PC user.
 			$PresetList = ("Defender","ToWork2")
 			$Host.UI.RawUI.WindowTitle = "Periodic Run"
-			(Get-SearchGitHub -Preset IEDS).number | Get-Random |%{Get-PRLabelAction $_} #Restart an IEDS PR
+			#(Get-SearchGitHub -Preset IEDS).number | Get-Random |%{Get-PRLabelAction $_} #Restart an IEDS PR
 			foreach ($Preset in $PresetList) {
 				$Results = (Get-SearchGitHub -Preset $Preset -Days 1)
 				Write-Output "$(Get-Date -Format T) Starting $Preset with $($Results.length) Results"
@@ -2373,6 +2373,7 @@ Function Get-SearchGitHub {
 	$nHW = "-label:Hardware+"
 	$IEDSLabel = "label:Internal-Error-Dynamic-Scan+"
 	$nIEDS = "-"+$IEDSLabel
+	$nMMC = "-label:Manifest-Metadata-Consistency+"
 	$IEM = "label:Internal-Error-Manifest+"
 	$nNSA = "-label:Internal-Error-NoSupportedArchitectures+"
 	$NotPass = "-label:Azure-Pipeline-Passed+" #Hasn't psased pipelines
@@ -2414,8 +2415,8 @@ Function Get-SearchGitHub {
 	$Approvable =  "-label:Validation-Merge-Conflict+" 
 	$Approvable += "-label:Manifest-Version-Error+";
 	$Approvable += "-label:Unexpected-File+";
-	$Workable += "-label:Validation-Merge-Conflict+";
 	
+	$Workable += "-label:Validation-Merge-Conflict+";
 	$Workable = "-label:Highest-Version-Removal+";
 	$Workable += "-label:Validation-Certificate-Root+";
 	$Workable += "-label:Binary-Validation-Error+";
@@ -2446,6 +2447,12 @@ Function Get-SearchGitHub {
 	$PolicyTests += "-label:Policy-Test-2.12+";
 	
 	$Automatable = "-label:WSL+";
+	$Automatable += "-label:URL-Validation-Error+";
+	$Automatable += "-label:Validation-Unapproved-URL+";
+	$Automatable += "-label:Validation-Open-Url-Failed+";
+	$Automatable += "-label:Validation-Forbidden-URL-Error+";
+	$Automatable += "-label:Validation-HTTP-Error+";
+	$Automatable += "-label:Validation-404-Error+";
 	$Automatable += "-label:Author-Not-Authorized+";
 	$Automatable += "-label:Hardware+";
 	$Automatable += "-label:Manifest-Validation-Error+";
@@ -2485,6 +2492,7 @@ Function Get-SearchGitHub {
 			$Url += $Cna
 			$Url += $Set2 #Blocking + Common + Review1 + Review2
 			$Url += $Approvable
+			$Url += $nMMC;
 			$Url += $Workable;
 			$Url += $sortAsc;
 			}
@@ -2512,7 +2520,7 @@ Function Get-SearchGitHub {
 		}
 		"ToWork3"{
 			$Url += $Set1 #Blocking + Common + Review1
-			$Url += $HaventWorked ;
+			#$Url += $HaventWorked ;
 			$Url += $Workable;
 			$Url += $Automatable;
 			$Url += $PolicyTests;
@@ -2810,6 +2818,13 @@ Function Get-RandomIEDS {
 		$ManifestType = "",
 		$OldManifestType = ""
 	)
+	
+$PRState = Get-PRStateFromComments $PR
+if (($PRState | where {$_.event -eq "PreValidation"})[-1].created_at -lt (Get-Date).AddHours(-8) -AND #Last Prevalidation was 8 hours ago.
+($PRState | where {$_.event -eq "Running"})[-1].created_at -lt (Get-Date).AddHours(-18)) {  #Last Run was 18 hours ago.
+	Get-GitHubPreset Retry -PR $PR
+}
+
 	While ($ManifestType -ne "version") {
 		$CommitFile = Get-CommitFile -PR $PR -File $File
 		$PackageIdentifier = ((Get-YamlValue -StringName "PackageIdentifier" $CommitFile) -replace '"',''-replace "'",'')
