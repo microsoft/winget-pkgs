@@ -1,4 +1,26 @@
-﻿#Requires -Version 5
+﻿<#
+.SYNOPSIS
+    WinGet Manifest creation helper script
+.DESCRIPTION
+    This file intends to help you generate a manifest for publishing
+    to the Windows Package Manager repository.
+
+    It'll attempt to download an installer from the user-provided URL to calculate
+    a checksum. That checksum and the rest of the input data will be compiled into
+    a set of .YAML files.
+.EXAMPLE
+    PS C:\Projects\winget-pkgs> Get-Help .\Tools\YamlCreate.ps1 -Full
+    Show this script's help
+.EXAMPLE
+    PS C:\Projects\winget-pkgs> .\Tools\YamlCreate.ps1
+    Run the script to create a manifest file
+.NOTES
+    Please file an issue if you run into errors with this script:
+    https://github.com/microsoft/winget-pkgs/issues
+.LINK
+    https://github.com/microsoft/winget-pkgs/blob/master/Tools/YamlCreate.ps1
+#>
+#Requires -Version 5
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingWriteHost', '', Justification = 'This script is not intended to have any outputs piped')]
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', 'Preserve', Justification = 'The variable is used in a conditional but ScriptAnalyser does not recognize the scope')]
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseSingularNouns', '', Scope = 'Function', Target = 'Read-AppsAndFeaturesEntries',
@@ -30,7 +52,7 @@ if ($help) {
   exit
 }
 
-# Custom menu prompt that listens for keypresses. Requires a prompt and array of entries at minimum. Entries preceeded with `*` are shown in green
+# Custom menu prompt that listens for key presses. Requires a prompt and array of entries at minimum. Entries preceeded with `*` are shown in green
 # Returns a console key value
 Function Invoke-KeypressMenu {
   Param
@@ -168,8 +190,8 @@ if ($Settings) {
   exit
 }
 
-$ScriptHeader = '# Created with YamlCreate.ps1 v2.3.5'
-$ManifestVersion = '1.6.0'
+$ScriptHeader = '# Created with YamlCreate.ps1 v2.4.3'
+$ManifestVersion = '1.9.0'
 $PSDefaultParameterValues = @{ '*:Encoding' = 'UTF8' }
 $Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
 $ofs = ', '
@@ -180,6 +202,12 @@ $callingCulture = [Threading.Thread]::CurrentThread.CurrentCulture
 if (-not ([System.Environment]::OSVersion.Platform -match 'Win')) { $env:TEMP = '/tmp/' }
 $wingetUpstream = 'https://github.com/microsoft/winget-pkgs.git'
 $RunHash = $(Get-FileHash -InputStream $([IO.MemoryStream]::new([byte[]][char[]]$(Get-Date).Ticks.ToString()))).Hash.Substring(0, 8)
+$script:UserAgent = 'Microsoft-Delivery-Optimization/10.1'
+
+$_wingetVersion = 1.0.0
+$_appInstallerVersion = (Get-AppxPackage Microsoft.DesktopAppInstaller).version
+if (Get-Command 'winget' -ErrorAction SilentlyContinue) { $_wingetVersion = (winget -v).TrimStart('v') }
+$script:backupUserAgent = "winget-cli WindowsPackageManager/$_wingetVersion DesktopAppInstaller/Microsoft.DesktopAppInstaller v$_appInstallerVersion"
 
 if ($ScriptSettings.EnableDeveloperOptions -eq $true -and $null -ne $ScriptSettings.OverrideManifestVersion) {
   $script:UsesPrerelease = $ScriptSettings.OverrideManifestVersion -gt $ManifestVersion
@@ -197,29 +225,6 @@ $SchemaUrls = @{
   locale        = if ($useDirectSchemaLink) { "https://raw.githubusercontent.com/microsoft/winget-cli/master/schemas/JSON/manifests/v$ManifestVersion/manifest.locale.$ManifestVersion.json" } else { "https://aka.ms/winget-manifest.locale.$ManifestVersion.schema.json" }
   installer     = if ($useDirectSchemaLink) { "https://raw.githubusercontent.com/microsoft/winget-cli/master/schemas/JSON/manifests/v$ManifestVersion/manifest.installer.$ManifestVersion.json" } else { "https://aka.ms/winget-manifest.installer.$ManifestVersion.schema.json" }
 }
-
-<#
-.SYNOPSIS
-    Winget Manifest creation helper script
-.DESCRIPTION
-    The intent of this file is to help you generate a manifest for publishing
-    to the Windows Package Manager repository.
-
-    It'll attempt to download an installer from the user-provided URL to calculate
-    a checksum. That checksum and the rest of the input data will be compiled in a
-    .YAML file.
-.EXAMPLE
-    PS C:\Projects\winget-pkgs> Get-Help .\Tools\YamlCreate.ps1 -Full
-    Show this script's help
-.EXAMPLE
-    PS C:\Projects\winget-pkgs> .\Tools\YamlCreate.ps1
-    Run the script to create a manifest file
-.NOTES
-    Please file an issue if you run into errors with this script:
-    https://github.com/microsoft/winget-pkgs/issues/
-.LINK
-    https://github.com/microsoft/winget-pkgs/blob/master/Tools/YamlCreate.ps1
-#>
 
 # Fetch Schema data from github for entry validation, key ordering, and automatic commenting
 try {
@@ -437,13 +442,21 @@ Function Test-Url {
   )
   try {
     $HTTP_Request = [System.Net.WebRequest]::Create($URL)
-    $HTTP_Request.UserAgent = 'Microsoft-Delivery-Optimization/10.1'
+    $HTTP_Request.UserAgent = $script:UserAgent
     $HTTP_Response = $HTTP_Request.GetResponse()
     $script:ResponseUri = $HTTP_Response.ResponseUri.AbsoluteUri
     $HTTP_Status = [int]$HTTP_Response.StatusCode
   } catch {
-    # Take no action here; If there is an exception, we will treat it like a 404
-    $HTTP_Status = 404
+    # Failed to download with the Delivery-Optimization User Agent, so try again with the WinINet User Agent
+    try {
+      $HTTP_Request = [System.Net.WebRequest]::Create($URL)
+      $HTTP_Request.UserAgent = $script:backupUserAgent
+      $HTTP_Response = $HTTP_Request.GetResponse()
+      $script:ResponseUri = $HTTP_Response.ResponseUri.AbsoluteUri
+      $HTTP_Status = [int]$HTTP_Response.StatusCode
+    } catch {
+      $HTTP_Status = 404
+    }
   }
   If ($null -eq $HTTP_Response) { $HTTP_Status = 404 }
   Else { $HTTP_Response.Close() }
@@ -529,14 +542,22 @@ Function Get-InstallerFile {
 
   # Create a new web client for downloading the file
   $_WebClient = [System.Net.WebClient]::new()
-  $_WebClient.Headers.Add('User-Agent', 'Microsoft-Delivery-Optimization/10.1')
+  $_WebClient.Headers.Add('User-Agent', $script:UserAgent)
   # If the system has a default proxy set, use it
   # Powershell Core will automatically use this, so it's only necessary for PS5
   if ($PSVersionTable.PSVersion.Major -lt 6) { $_WebClient.Proxy = [System.Net.WebProxy]::GetDefaultProxy() }
   # Download the file
-  $_WebClient.DownloadFile($URI, $_OutFile)
-  # Dispose of the web client to release the resources it uses
-  $_WebClient.Dispose()
+  try {
+    $_WebClient.DownloadFile($URI, $_OutFile)
+  } catch {
+    # Failed to download with the Delivery-Optimization User Agent, so try again with the WinINet User Agent
+    $_WebClient.Headers.Clear()
+    $_WebClient.Headers.Add('User-Agent', $script:backupUserAgent)
+    $_WebClient.DownloadFile($URI, $_OutFile)
+  } finally {
+    # Dispose of the web client to release the resources it uses
+    $_WebClient.Dispose()
+  }
 
   return $_OutFile
 }
@@ -992,6 +1013,24 @@ Function Read-NestedInstaller {
         switch ( Invoke-KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString']) {
           'Y' { $AnotherNestedInstaller = $true }
           default { $AnotherNestedInstaller = $false }
+        }
+
+        if (!$AnotherNestedInstaller -and $script:Option -eq 'New') {
+          # Prompt to see if the package depends on binaries being in the path
+          $_menu = @{
+            entries       = @(
+              '[Y] Yes'
+              '*[N] No'
+            )
+            Prompt        = 'Does this executable depend on DLLs or other files that are not available through Symlink?'
+            DefaultString = 'N'
+          }
+          switch ( Invoke-KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString']) {
+            'Y' { $_Installer['ArchiveBinariesDependOnPath'] = $true }
+
+            # Not required to explicitly set as CLI defaults to false
+            default { }
+          }
         }
       }
       $_NestedInstallerFiles += $_InstallerFile
@@ -2059,106 +2098,111 @@ Function Read-LocaleMetadata {
 # Uses this template and responses to create a PR
 Function Read-PRBody {
   $PrBodyContent = Get-Content $args[0]
-  ForEach ($_line in ($PrBodyContent | Where-Object { $_ -like '-*[ ]*' })) {
-    $_showMenu = $true
-    switch -Wildcard ( $_line ) {
-      '*CLA*' {
-        if ($ScriptSettings.SignedCLA -eq 'true') {
-          $PrBodyContentReply += @($_line.Replace('[ ]', '[X]'))
-          $_showMenu = $false
-        } else {
+  ForEach ($_line in $PrBodyContent) {
+    # | Where-Object { $_ -like '-*[ ]*' }))
+    if ($_line -like '-*[ ]*' ) {
+      $_showMenu = $true
+      switch -Wildcard ( $_line ) {
+        '*CLA*' {
+          if ($ScriptSettings.SignedCLA -eq 'true') {
+            $PrBodyContent = $PrBodyContent.Replace($_line, $_line.Replace('[ ]', '[x]'))
+            $_showMenu = $false
+          } else {
+            $_menu = @{
+              Prompt        = 'Have you signed the Contributor License Agreement (CLA)?'
+              Entries       = @('[Y] Yes'; '*[N] No')
+              HelpText      = 'Reference Link: https://cla.opensource.microsoft.com/microsoft/winget-pkgs'
+              HelpTextColor = ''
+              DefaultString = 'N'
+            }
+          }
+        }
+
+        '*open `[pull requests`]*' {
           $_menu = @{
-            Prompt        = 'Have you signed the Contributor License Agreement (CLA)?'
+            Prompt        = "Have you checked that there aren't other open pull requests for the same manifest update/change?"
             Entries       = @('[Y] Yes'; '*[N] No')
-            HelpText      = 'Reference Link: https://cla.opensource.microsoft.com/microsoft/winget-pkgs'
+            HelpText      = 'Reference Link: https://github.com/microsoft/winget-pkgs/pulls'
+            HelpTextColor = ''
+            DefaultString = 'N'
+          }
+        }
+
+        '*winget validate*' {
+          if ($? -and $(Get-Command 'winget' -ErrorAction SilentlyContinue)) {
+            $PrBodyContent = $PrBodyContent.Replace($_line, $_line.Replace('[ ]', '[x]'))
+            $_showMenu = $false
+          } elseif ($script:Option -ne 'RemoveManifest') {
+            $_menu = @{
+              Prompt        = "Have you validated your manifest locally with 'winget validate --manifest <path>'?"
+              Entries       = @('[Y] Yes'; '*[N] No')
+              HelpText      = 'Automatic manifest validation failed. Check your manifest and try again'
+              HelpTextColor = 'Red'
+              DefaultString = 'N'
+            }
+          } else {
+            $_showMenu = $false
+          }
+        }
+
+        '*tested your manifest*' {
+          if ($script:SandboxTest -eq '0') {
+            $PrBodyContent = $PrBodyContent.Replace($_line, $_line.Replace('[ ]', '[x]'))
+            $_showMenu = $false
+          } elseif ($script:Option -ne 'RemoveManifest') {
+            $_menu = @{
+              Prompt        = "Have you tested your manifest locally with 'winget install --manifest <path>'?"
+              Entries       = @('[Y] Yes'; '*[N] No')
+              HelpText      = 'You did not test your Manifest in Windows Sandbox previously.'
+              HelpTextColor = 'Red'
+              DefaultString = 'N'
+            }
+          } else {
+            $_showMenu = $false
+          }
+        }
+
+        '*schema*' {
+          if ($script:Option -ne 'RemoveManifest') {
+            $_Match = ($_line | Select-String -Pattern 'https://+.+(?=\))').Matches.Value
+            $_menu = @{
+              Prompt        = $_line.TrimStart('- [ ]') -replace '\[|\]|\(.+\)', ''
+              Entries       = @('[Y] Yes'; '*[N] No')
+              HelpText      = "Reference Link: $_Match"
+              HelpTextColor = ''
+              DefaultString = 'N'
+            }
+          } else {
+            $_showMenu = $false
+          }
+        }
+
+        '*only modifies one*' {
+          $PrBodyContent = $PrBodyContent.Replace($_line, $_line.Replace('[ ]', '[x]'))
+          $_showMenu = $false
+        }
+
+        '*linked issue*' {
+          # Linked issues is handled as a separate prompt below so that the issue numbers can be gathered
+          $_showMenu = $false
+        }
+
+        Default {
+          $_menu = @{
+            Prompt        = $_line.TrimStart('- [ ]')
+            Entries       = @('[Y] Yes'; '*[N] No')
+            HelpText      = ''
             HelpTextColor = ''
             DefaultString = 'N'
           }
         }
       }
 
-      '*open `[pull requests`]*' {
-        $_menu = @{
-          Prompt        = "Have you checked that there aren't other open pull requests for the same manifest update/change?"
-          Entries       = @('[Y] Yes'; '*[N] No')
-          HelpText      = 'Reference Link: https://github.com/microsoft/winget-pkgs/pulls'
-          HelpTextColor = ''
-          DefaultString = 'N'
+      if ($_showMenu) {
+        switch ( Invoke-KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString'] -HelpText $_menu['HelpText'] -HelpTextColor $_menu['HelpTextColor']) {
+          'Y' { $PrBodyContent = $PrBodyContent.Replace($_line, $_line.Replace('[ ]', '[x]')) }
+          default { }
         }
-      }
-
-      '*winget validate*' {
-        if ($? -and $(Get-Command 'winget' -ErrorAction SilentlyContinue)) {
-          $PrBodyContentReply += @($_line.Replace('[ ]', '[X]'))
-          $_showMenu = $false
-        } elseif ($script:Option -ne 'RemoveManifest') {
-          $_menu = @{
-            Prompt        = "Have you validated your manifest locally with 'winget validate --manifest <path>'?"
-            Entries       = @('[Y] Yes'; '*[N] No')
-            HelpText      = 'Automatic manifest validation failed. Check your manifest and try again'
-            HelpTextColor = 'Red'
-            DefaultString = 'N'
-          }
-        } else {
-          $_showMenu = $false
-          $PrBodyContentReply += @($_line)
-        }
-      }
-
-      '*tested your manifest*' {
-        if ($script:SandboxTest -eq '0') {
-          $PrBodyContentReply += @($_line.Replace('[ ]', '[X]'))
-          $_showMenu = $false
-        } elseif ($script:Option -ne 'RemoveManifest') {
-          $_menu = @{
-            Prompt        = "Have you tested your manifest locally with 'winget install --manifest <path>'?"
-            Entries       = @('[Y] Yes'; '*[N] No')
-            HelpText      = 'You did not test your Manifest in Windows Sandbox previously.'
-            HelpTextColor = 'Red'
-            DefaultString = 'N'
-          }
-        } else {
-          $_showMenu = $false
-          $PrBodyContentReply += @($_line)
-        }
-      }
-
-      '*schema*' {
-        if ($script:Option -ne 'RemoveManifest') {
-          $_Match = ($_line | Select-String -Pattern 'https://+.+(?=\))').Matches.Value
-          $_menu = @{
-            Prompt        = $_line.TrimStart('- [ ]') -replace '\[|\]|\(.+\)', ''
-            Entries       = @('[Y] Yes'; '*[N] No')
-            HelpText      = "Reference Link: $_Match"
-            HelpTextColor = ''
-            DefaultString = 'N'
-          }
-        } else {
-          $_showMenu = $false
-          $PrBodyContentReply += @($_line)
-        }
-      }
-
-      '*only modifies one*' {
-        $PrBodyContentReply += @($_line.Replace('[ ]', '[X]'))
-        $_showMenu = $false
-      }
-
-      Default {
-        $_menu = @{
-          Prompt        = $_line.TrimStart('- [ ]')
-          Entries       = @('[Y] Yes'; '*[N] No')
-          HelpText      = ''
-          HelpTextColor = ''
-          DefaultString = 'N'
-        }
-      }
-    }
-
-    if ($_showMenu) {
-      switch ( Invoke-KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString'] -HelpText $_menu['HelpText'] -HelpTextColor $_menu['HelpTextColor']) {
-        'Y' { $PrBodyContentReply += @($_line.Replace('[ ]', '[X]')) }
-        default { $PrBodyContentReply += @($_line) }
       }
     }
   }
@@ -2171,11 +2215,14 @@ Function Read-PRBody {
   }
   switch ( Invoke-KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString']) {
     'Y' {
+      $_line = ($PrBodyContent | Select-String 'linked issue').Line
+      if ($_line) { $PrBodyContent = $PrBodyContent.Replace($_line, $_line.Replace('[ ]', '[x]')) }
+
       # If there were issues resolved by the PR, request user to enter them
       Write-Host
       Write-Host "Enter issue number. For example`: 21983, 43509"
       $ResolvedIssues = Read-Host -Prompt 'Resolved Issues' | UniqueItems
-      $PrBodyContentReply += @('')
+      $PrBodyContent += @('')
 
       # Validate each of the issues entered by checking the URL to ensure it returns a 200 status code
       Foreach ($i in ($ResolvedIssues.Split(',').Trim())) {
@@ -2199,7 +2246,7 @@ Function Read-PRBody {
             Write-Host -ForegroundColor 'Red' "Invalid Issue: $i"
             continue
           }
-          $PrBodyContentReply += @("Resolves $i")
+          $PrBodyContent += @("Resolves $i")
         } else {
           $_checkedURL = "https://github.com/microsoft/winget-pkgs/issues/$i"
           $_responseCode = Test-Url $_checkedURL
@@ -2207,7 +2254,7 @@ Function Read-PRBody {
             Write-Host -ForegroundColor 'Red' "Invalid Issue: $i"
             continue
           }
-          $PrBodyContentReply += @("* Resolves #$i")
+          $PrBodyContent += @("* Resolves #$i")
         }
       }
     }
@@ -2216,11 +2263,11 @@ Function Read-PRBody {
 
   # If we are removing a manifest, we need to include the reason
   if ($CommitType -eq 'Remove') {
-    $PrBodyContentReply = @("## $($script:RemovalReason)"; '') + $PrBodyContentReply
+    $PrBodyContent = @("## $($script:RemovalReason)"; '') + $PrBodyContent
   }
 
   # Write the PR using a temporary file
-  Set-Content -Path PrBodyFile -Value $PrBodyContentReply | Out-Null
+  Set-Content -Path PrBodyFile -Value $PrBodyContent | Out-Null
   gh pr create --body-file PrBodyFile -f
   Remove-Item PrBodyFile
 }

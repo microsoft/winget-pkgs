@@ -1,0 +1,133 @@
+# Created with komac v2.2.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
+
+PackageIdentifier: ppy.osu
+PackageVersion: 2024.625.0
+PackageLocale: en-US
+Publisher: ppy Pty Ltd
+PublisherUrl: https://github.com/ppy
+PublisherSupportUrl: https://github.com/ppy/osu/issues
+PackageName: osu!
+PackageUrl: https://github.com/ppy/osu
+License: MIT
+LicenseUrl: https://github.com/ppy/osu/raw/master/LICENCE
+Copyright: Copyright (c) 2024 ppy Pty Ltd
+CopyrightUrl: https://github.com/ppy/osu/raw/master/LICENCE
+ShortDescription: rhythm is just a *click* away!
+Description: |-
+  A free-to-win rhythm game. Rhythm is just a click away!
+
+  This is the future – and final – iteration of the osu! game client which marks the beginning of an open era! Currently
+  known by and released under the release codename "lazer". As in sharper than cutting-edge.
+Tags:
+- beatmap-parser
+- game
+- osu
+- rhythm
+ReleaseNotes: |-
+  Editor
+  Fix changing slider path segment type not being undoable (ppy/osu#26423 by @B3nn1)
+  Add precise scaling control to osu! editor (ppy/osu#28309 by @OliBomby)
+  This adds the scale popover tool from osu!stable to lazer. I tried to mimic the original functionality as closely as possible, and in some aspects improve it.The default hotkey for the scaling tool which is Ctrl+E (to avoid conflicts with the skin layout editor).The maximum value of the scale slider is determined based on the current choice of origin and axis. The maximum value will always be the maximum scaling value that still keeps the scaling objects on screen.This also slightly changes how the rotation popover works. Now it will automatically select the text in the textbox input, so the user can instantly type the value they want after opening the tool.osu Game Rulesets Osu Tests_EcLev87sNtFix legacy osu!mania note body animation not resetting sometimes (ppy/osu#28339 by @bdach)
+  Add ability to change position, spacing, and rotation of the positional snap grid in the editor (ppy/osu#26309 by @OliBomby)
+  Allow flip operations in mania editor (ppy/osu#28421 by @bdach)
+  Fix stack leniency not applying immediately after change (ppy/osu#28441 by @bdach)
+  Fix changing key count in editor not immediately updating (ppy/osu#28445 by @bdach)
+  Allow modifying hold note start/end time via mania composer playfield (ppy/osu#28458 by @bdach)
+  Move timeline toggle controls to "view" menu (ppy/osu#28505 by @bdach)
+  osu_2024-06-17_10-26-02| master | | |
+  | :-: | :-: | :-: |
+  | osu_2024-06-17_10-24-16 | osu_2024-06-17_10-24-57 | osu_2024-06-17_10-25-54 || editor playfield scale | gameplay playfield scale |
+  | :-: | :-: |
+  | osu_2024-06-17_10-31-38 | osu_2024-06-17_10-31-34 |Reduce editor opacity of several editor components when hovering over composer (ppy/osu#28507 by @bdach)
+  Add support for editing per-node hitsounds on sliders (ppy/osu#23443 by @OliBomby)
+  osu Game Rulesets Osu Tests_y2uv5bNj0BDisplay breaks on editor timeline & allow manually adjusting their duration (ppy/osu#28523 by @bdach)
+  Add automatic generation of breaks in editor (ppy/osu#28528 by @bdach)
+  Breaks are automatically inserted between objects if there is ample time to do so, namely there must be at least:- 200ms between the last object before break and the break's start
+  - 650ms for the break itself
+  - 2 beat lengths between the break's end and the first object after break. This is a departure from stable wherein this was ruleset- and AR-dependent (by way of using preempt time), but in talking with the NAT it looked like most didn't know the specifics of how that worked so I decided I'd just use something simpler. This also probably works better for something like mania wherein the "preempt time" is largely user-settings-dependent (scroll speed).
+  Breaks that have been manually adjusted are not moved by the automatic regeneration on changes, unless they would break gameplay (by having an object's duration intersect a break), in which case they are forcibly removed. This manual adjustment tracking state is dodgy at best (will not work properly with undo/redo, because this info is not and should not be serialised out by the legacy beatmap encoder, which means that the manual tracking will be dropped upon undo), but it is what it is. That subsystem needs to get replaced by something else at some point anyway.Fix osu!taiko playfield not updating after changing scroll speed (ppy/osu#28444 by @bdach)
+  Smaller changes
+  - Refactor scale handling in editor to facilitate reuse (ppy/osu#26643 by @OliBomby)
+  - Fix path blueprint becoming de-synced from slider path size (ppy/osu#28288 by @Hecatia-Lapislazuli)
+  - Fix editor not saving when textbox is focused during exit procedure (ppy/osu#26717 by @peppy)
+  - Fix for nearly straight sliders causing a crash (ppy/osu#28297 by @Hecatia-Lapislazuli)
+  - Fix performance overhead from ternary state bindable callbacks when selection is changing (ppy/osu#28387 by @bdach)
+  - Disallow running save-related operations concurrently (ppy/osu#28420 by @bdach)
+  - Fix crash on drag selection via timeline while placement is active (ppy/osu#28478 by @bdach)
+  Framework
+  - Fix incorrect assertion and possible nullref (ppy/osu-framework#6293 by @smoogipoo)
+  - Bring back SDL2 by default, lock SDL3 behind environment variable (ppy/osu-framework#6292 by @smoogipoo)
+  - Update Veldrid (ppy/osu-framework#6295 by @smoogipoo)
+  - Update SDL3-CS (ppy/osu-framework#6296 by @bdach)
+  - Add a way to make Drawable clicks not change focus (ppy/osu-framework#6297 by @smoogipoo)
+  - Add back support for opening dropdown by setting internal states (ppy/osu-framework#6298 by @smoogipoo)
+  - Update framework (ppy/osu#28286 by @peppy)
+  - Fix test failures due to crosstalk via static AppSettings.SaveReplays (ppy/osu-server-spectator#236 by @bdach)
+  - Refactor KeyCombination.ContainsKey() and .ContainsKeyPermissive() for better extensibility (ppy/osu-framework#6229 by @Susko3)
+  - Add back SDL2BatteryInfo for desktop platforms (ppy/osu#28294 by @Susko3)
+  - Unify logging to use ASP.NET default console logger (ppy/osu-server-spectator#215 by @bdach)
+  - Fix IL3000 warning on Android (ppy/osu-framework#6300 by @Susko3)
+  - Show storyboard element path in Draw Visualiser (ppy/osu#28305 by @EVAST9919)
+  - Fix crash when dropdown is removed from hierarchy during select (ppy/osu-framework#6302 by @smoogipoo)
+  - Compute total score without mods during standardised score conversion (ppy/osu#28277 by @bdach)
+  - Fix GameHost.Collect() being called twice on android (ppy/osu-framework#6272 by @Susko3)
+  - Update framework (ppy/osu#28338 by @peppy)
+  - Always compute slider ball rotation based on tangent (ppy/osu#28343 by @Hecatia-Lapislazuli)
+      - Calculates the rotation based on an approximation of the tangent at a given point on the slider's path, rather than calculating it based on the previous position in the map.
+  - Fix KeyCombination.IsPressed() tripping assertions when empty  (ppy/osu-framework#6304 by @bdach)
+  - Mark FindClosestParent<T>() callers as possibly null-returning (ppy/osu-framework#6303 by @bdach)
+  - Avoid ChatAckRequest failures flooding console in OsuGameTestScenes (ppy/osu#28357 by @peppy)
+  - Remove OS username from log headers (ppy/osu-framework#6306 by @sineplusx)
+  - Fix unable to drag-scroll on collections right-click menu (ppy/osu#28371 by @smoogipoo)
+  - Update localisations (ppy/osu-resources#325 by @peppy)
+  - Fix AssemblyRulesetStore not marking rulesets as available (ppy/osu#28380 by @peppy)
+  - Fix occasional test failures on new menu content tests (ppy/osu#28383 by @peppy)
+  - Make shader setter in SpriteText protected (ppy/osu-framework#6307 by @EVAST9919)
+  - Disable primary constructor related inspections (ppy/osu#28388 by @bdach)
+  - Move new screen footer to OsuGame and add temporary SongSelectV2 screen (ppy/osu#28185 by @frenzibyte)
+  - Fix auto picking maps on zero ban rounds (ppy/osu#28436 by @omkelderman)
+  - Use more descriptive HitObject names for debugger displays (ppy/osu#28465 by @smoogipoo)
+  - Fix excessive applause audio balancing in result screen (ppy/osu#28475 by @Joppe27)
+  - Ignore "editlist" when decoding mp4/mov videos (ppy/osu-framework#6311 by @bdach)
+      - This would cause storyboard videos to not play back the same way stable (and most other video players) plays them back.
+  - Disable the automatic offset adjustment button if the offset of the previous play was 0 (ppy/osu#28481 by @shiumano)
+  - Replace audio effect BindableList by Add/Remove methods (ppy/osu-framework#6310 by @smoogipoo)
+  - Annotate ControlPoint and Mod for AOT trimming support (ppy/osu#28503 by @smoogipoo)
+  - Update framework (ppy/osu#28518 by @bdach)
+  - Update localisations (ppy/osu-resources#326 by @peppy)
+  - Fix typo in ScoreProcessor (ppy/osu#28540 by @ssz7-ch2)
+  Gameplay
+  Add skinnable rank display (ppy/osu#24475 by @nanashi-1)
+  Screenshot from 2023-08-08 11-43-59Implement basic pass and fail storyboard layer support (ppy/osu#28480 by @bdach)
+  Smaller changes
+  - Enforce difficulty setting limits during decode (ppy/osu#28200 by @Hecatia-Lapislazuli)
+      - Fixes some edge case beatmaps not working as expected.
+  - Fix cinema mod not hiding playfield skin layer (ppy/osu#28332 by @peppy)
+  - Handle replay frames with negative time delta appropriately (ppy/osu#24138 by @tybug)
+      - This may fix some longstanding "lazer playback doesn't match stable" issues.
+  - Fix "Argon" accuracy counter layout when under 10% and wireframe off (ppy/osu#28443 by @ColdVolcano)
+  Gameplay (osu!)
+  Add ranked support for "Traceable" mod (ppy/osu#28285 by @tsunyoku)
+  Make judgements follow hitcircles and enable them in magnetised, repel and depth (ppy/osu#27977 by @DavidBeh)
+  Makes judgements appear based on the DrawableHitobjects position instead of the Hitobjects position which is not updated by mods moving single Hitobjects.  They move with hitobjects as long as the drawables are alive, so they move with the shadow of hits and stay on misses.Judgements are now enabled for magnetised, repel and depth.Account for osu! circle radius when drawing playfield border (ppy/osu#28504 by @bdach)
+  | before | after |
+  | :-: | :-: |
+  | osu_2024-06-17_09-11-12 | osu_2024-06-17_09-12-17 |
+  | osu_2024-06-17_09-11-06 | osu_2024-06-17_09-12-12 |Adjust behaviour of hit animations toggle to match user expectations (ppy/osu#28537 by @bdach)
+  This adjusts the animation to match stable almost perfectly. Which is what users have asked for.Smaller changes
+  - Use countdown resume overlay for autopilot (ppy/osu#28359 by @smoogipoo)
+  Gameplay (osu!catch)
+  - Remove rounding of slider velocity multiplier on juice streams (ppy/osu#28337 by @bdach)
+  - Change osu!catch no-fail penalty to match osu! (ppy/osu#28353 by @Givikap120)
+  Gameplay (osu!mania)
+  Fix missing texture on extremely long hold notes (ppy/osu#28466 by @smoogipoo)
+  Gameplay (osu!taiko)
+  Add osu!taiko Constant Speed mod (ppy/osu#27341 by @Hiviexd)
+  This also makes constant scroll speed look much more accurate in the editor.Implement relax mod for taiko (ppy/osu#28472 by @bdach)
+ReleaseNotesUrl: https://github.com/ppy/osu/releases/tag/2024.625.0
+Documentations:
+- DocumentLabel: Upgrading to lazer
+  DocumentUrl: https://osu.ppy.sh/wiki/en/Help_centre/Upgrading_to_lazer
+ManifestType: defaultLocale
+ManifestVersion: 1.9.0

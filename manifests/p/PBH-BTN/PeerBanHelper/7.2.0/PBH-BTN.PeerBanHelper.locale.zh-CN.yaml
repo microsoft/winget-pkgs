@@ -1,0 +1,105 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.9.0.schema.json
+
+PackageIdentifier: PBH-BTN.PeerBanHelper
+PackageVersion: 7.2.0
+PackageLocale: zh-CN
+Publisher: PBH-BTN Community
+PublisherUrl: https://github.com/PBH-BTN
+PublisherSupportUrl: https://github.com/PBH-BTN/PeerBanHelper/issues
+PackageName: PeerBanHelper
+PackageUrl: https://github.com/PBH-BTN/PeerBanHelper
+License: GPL-3.0
+LicenseUrl: https://github.com/PBH-BTN/PeerBanHelper/blob/HEAD/LICENSE
+ShortDescription: 自动封禁不受欢迎、吸血和异常的 BT 客户端，并支持自定义规则。
+Tags:
+- bt
+- 种子
+ReleaseNotes: |-
+  与往常一样，我们持续更新 PeerBanHelper 以改进反吸血能力，并持续改进用户体验。
+  v7.2.0 是一次次要更新，本次升级涉及配置文件重要变更，请在继续之前备份 data/config 文件夹内的文件。
+  旧版本生命周期提醒
+  由于旧版本中存在的内存泄漏和在线 API 等问题，我们将很快放弃 v7.1.5 版本前的 PeerBanHelper 版本的在线支持。
+  如果您仍在使用 v7.1.5 之前的版本，则建议您在 2025 年 1 月 1 日前完成版本升级，更新到最低 v7.1.5 或者更高的 v7.2.0 版本。 在该日期后，我们将逐步停止旧版本 PeerBanHelper 的在线 API 支持，包括但不限于 GeoIP 库更新和 BTN 网络等服务。 在线 API 停止对旧版本的支持后，旧版本 PeerBanHelper 将无法更新 GeoIP，且也将无法从 BTN 网络获取新的云端规则。 同时由于上面提到的内存泄漏问题，旧版本 PeerBanHelper 可能频繁面临因内存泄漏产生的崩溃问题（在此之前我们通过控制规则数量减缓旧版本的崩溃问题）。
+  建议您总是保持运行最新版本 PeerBanHelper 以获取重要错误修复和功能更新。
+  反吸血算法改进
+  改进了对 BEP-0021 Extension for partial seeds 规范的支持，现在能够对下列情况做出正确的过量下载/进度回退的反吸血判定：
+  - 种子处于下载状态，部分文件没有完整下载
+  - 用户/Peer 在 “内容” 选项卡中只选择了部分文件下载，而不是整个完整的 torrent (BEP-0021)
+  - 下载过程中出现错误，导致下载停止，进入了仅上传状态（如 I/O 错误，或者在下载 torrent 过程中磁盘空间不足）
+  现在 PeerBanHelper 的进度反作弊能够正确处理上面列出的情况。 @paulzzh
+  Deluge 用户需要更新适配器
+  通知渠道管理
+  现在可在 WebUI 上管理通知推送渠道。当出现警告或者错误的高等级信息时（如：上传量达到每日告警阈值；PBH 内存不足等），您将会收到通知推送。 @Gaojianli
+
+  可显示/隐藏的图表项
+  现在图表页面可选择显示或者隐藏特定的图表。@Gaojianli
+
+  PeerBanHelper Labs
+  欢迎来到 PeerBanHelper 实验室！我们有时会对 PeerBanHelper 的一些功能做出实验性的更改。这些实验正在进行中，有的则可能被放弃。我们希望其中的多数会获得您的反馈意见，得以改进，并最终成为 PeerBanHelper 的一部分。PeerBanHelper 实验室的作用就在于此。
+  每个实验推出时都会随机的在一部分用户的 PeerBanHelper 上启用，以便获得新功能的反馈。但如果新功能的对您造成了困扰/或者想要提前尝鲜测试，您也可以随时在 “实验室” 菜单中手动开启关闭实验项目。@Ghost-chu @Gaojianli
+
+  install4j 自动更新支持
+  被大家心心念念的 Windows/Linux 平台的 install4j 自动更新的支持现已到来。对使用安装程序安装的 PeerBanHelper，在本次更新后将会添加自动更新功能。每次启动 PeerBanHelper 时，更新程序会在后台检查并下载更新，并在下一次启动时安装新的更新。
+  您也可以通过开始菜单中新增的 “PeerBanHelper 检查更新” 程序来手动检查更新：
+
+  对于非 install4j 安装程序安装的 PeerBanHelper：
+  - Docker：可使用 WatchTower 自动更新
+  - 群晖套件：继续由群晖的套件中心提供更新
+  - .deb 包：由用户自行管理更新
+  @Ghost-chu
+  更新日志
+  现在可以直接在前端查看新版本的更新日志 @Gaojianli
+  （实验性功能）IPFS/IPNS 规则订阅支持
+  [!NOTE] 这是一个实验性功能，不建议普通用户使用
+  作为 #622 的一部分，本次 v7.2 版本中新增了 IPFS/IPNS 去中心化网络支持。IPFS（星际文件系统） 是一个类似 BitTorrent 的完全去中心化点到点超媒体传输协议，而 IPNS 则充当 IPFS 网络中的 DNS。
+  要使用 IPFS/IPNS 规则订阅，则需要部署 Kubo IPFS 客户端，在实验室中启用 IPFS 实验并在 config.yml 手动启用和配置。配置完成后，您就可以使用 IPFS 和 IPNS 协议地址来添加订阅。
+  您可以在配置文件中修改 Kubo RPC 地址为您自行安装的 Kubo IPFS 客户端，或者使用新的 docker-compose.yml 部署，将会自动配置 IPFS 客户端。
+  - 对于 IPFS 来说，你需要使用 ipfs://CID 格式的 URL，但缺点是每个文件被提交到 IPFS 后都无法再次被修改
+  - 您也可以使用 IPNS，IPNS 是可修改的，并可以指向任意 CID，格式为 ipns://ID，你可以在 IPFS Desktop 中将不同的文件发布到同一个 IPNS 上来完成更新操作
+  同时，PeerBanHelper 也会每隔 1 个小时（可修改）将自身的 Banlist 发布到 IPFS 和 IPNS 上，IPNS 地址可在 IPFS 客户端上看到。如果您的 IPFS 客户端连接了多个 PeerBanHelper 客户端，则您可以通过后缀（安装 ID）来识别不同的 PeerBanHelper 客户端。
+
+  使用 IPFS 网络可以做到人人都能创建合订阅规则，且无需购买服务器。使用的人越多，则帮助你一起分发规则的人也越多。 @Ghost-chu
+  DEB 安装包改进
+  感谢 @Anuskuss。本次更新后，使用 DEB 安装包安装 PeerBanHepler 的用户将会将数据文件和 PBH 主程序安装到更合适的位置。本次更新也同时改进了日志记录功能。#732
+  PBH Plus 许可证更改
+  在过去只有在爱发电上捐赠我们的用户可以使用 PBH Plus 的捐赠功能，但我们认为这可能有悖于非营利软件的定义。因此在 v7.2 版本中，我们添加了一个 “我不想捐赠” 的按钮，允许直接激活 PBH Plus 许可证而无需捐赠。
+  通过这种方式激活的 PBH Plus 许可证在功能上与捐赠用户的许可证完全相同，但有效期只有 15 天，且不会显示捐赠感谢信息。当许可证到期后，您可以重复相同步骤，再次点击 “我不想捐赠” 创建新的循环许可证。
+
+  尽管如此，PBH-BTN 仍在维护多个需要持续投入的基础设施，如 BTN 和公共 BitTorrent Tracker。
+  如果 PeerBanHelper 确实有帮到您，我们仍然希望您能够考虑捐赠此项目。
+  错误修复
+  - 修复了 BTN、检查间隔 等配置项在 WebUI 调整设置后重载配置不生效的问题 @Ghost-chu
+  - 修复了新安装首次启动时清理任务报告 SQL 错误的问题 @Ghost-chu
+  - 修复端口占用时，弹出的提示没有显示被占用的端口号的问题 @Ghost-chu
+  性能优化
+  - 改进了加载 BTN 规则时产生的内存尖峰，避免极端情况下可能导致 OOM 的问题 @Ghost-chu
+  - 改进了例外列表 IP 判断的性能和内存占用 @Ghost-chu
+  用户体验优化
+  - 安装向导结束时，添加 “启动 PeerBanHelper” 复选框 @Ghost-chu
+  - 连接到 qBittorrent 下载器时，在首次登陆时自动关闭需要关闭的 “允许同一 IP 地址的多重连接” 开关 @Ghost-chu
+  文档修正
+  - 修正了多个文档中的拼写错误 @CreeperAWA
+  BTN / Sparkle 改进
+  Sparkle BTN 改进
+  自上一个版本发布以来，我们对 Sparkle BTN 做了大量的改进，以提升其分析精确度和分析性能。
+  - BTN 对提交的数据进行分析时，现在按照时间块进行切分来统计数据，以避免短时间内同一 Peer 触发多个 BTN 客户端，导致连续上报被立刻标记为不可信的问题
+  - 将统计时间区间从 45 天缩短到 14 天。由于动态 IP 地址的特性，一个 IP 很少能够被同一个用户持续使用超过 7 天。对于普通用户来说，这改善了误封禁的问题；对于数据中心 IP 来说，因为其 IP 一直没有变化，因此这个调整不会对其产生影响；对于动态吸血 IP 来说，它们遵循与普通用户一样的 IP 轮换规则，因此 IP 被污染抛弃后，BTN 现在可以加快过期速度，释放原先的 IP 地址
+  - 与 Sparkle Tracker 联动
+  Sparkle Tracker 改进
+  - 大幅改进了 Sparkle Tracker 的性能，解决了因繁重的 Tracker 任务导致的多次 Sparkle 程序宕机、崩溃和数据库服务器宕机的问题
+  - 现在支持与 Sparkle BTN 服务交叉联动，BTN 现在能够分析 Sparkle Tracker 的数据以生成反吸血 IP 地址规则
+  - 后期将进一步深度集成两者，以便聚合分析数据
+  [!NOTE] 小提示：如果您是种子发布者，您可以将 Sparkle Tracker (https://sparkle.ghostchu-services.top/announce) 加入到您的种子中，这可以诱导恶意 Peer 连接到 Sparkle Tracker 以便 Sparkle BTN 进行特征分析。 同时，Sparkle Tracker 也是一个公共 BitTorrent Tracker，可以提供正常的 Tracker 服务。
+  回退支持
+  v7.2.0 是一次次要更新，因此支持版本回退。目前支持的回退路径为回退到最低 v7.1.5。
+  您可通过还原 v7.1.5 的 data/config 中的文件备份后，重新安装 v7.1.5 版本以降级到 v7.1.5。
+  Docker
+  DockerHub: ghostchu/peerbanhelper:v7.2.0
+  阿里云国内镜像加速：registry.cn-hangzhou.aliyuncs.com/ghostchu/peerbanhelper:v7.2.0
+ReleaseNotesUrl: https://github.com/PBH-BTN/PeerBanHelper/releases/tag/v7.2.0
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/PBH-BTN/PeerBanHelper/wiki
+ManifestType: locale
+ManifestVersion: 1.9.0
