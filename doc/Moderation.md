@@ -131,6 +131,7 @@ Moderators are often the first to see and triage new issues, and so they have th
 * `Scripted-Application`
 * `Testing`
 * `Upgrade-Issue`
+* `Validation-Skip-Automations`
 * `Version-Parameter-Mismatch`
 * `Windows-Features`
 * `Zip-Binary`
