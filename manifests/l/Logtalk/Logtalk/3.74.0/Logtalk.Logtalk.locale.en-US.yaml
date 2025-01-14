@@ -1,0 +1,110 @@
+# Created with YamlCreate.ps1 v2.3.1 Dumplings Mod $debug=QUSU.CRLF.7-4-1.Win32NT
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.5.0.schema.json
+
+PackageIdentifier: Logtalk.Logtalk
+PackageVersion: 3.74.0
+PackageLocale: en-US
+Publisher: Logtalk.org
+PublisherUrl: https://logtalk.org/
+PublisherSupportUrl: https://logtalk.org/support.html
+# PrivacyUrl:
+Author: Paulo Moura
+PackageName: Logtalk
+PackageUrl: https://logtalk.org/
+License: Apache-2.0
+LicenseUrl: https://github.com/LogtalkDotOrg/logtalk3/blob/master/LICENSE.txt
+Copyright: Copyright 1998-2024 Paulo Moura <pmoura@logtalk.org>
+CopyrightUrl: https://github.com/LogtalkDotOrg/logtalk3/blob/master/NOTICE.txt
+ShortDescription: Declarative object-oriented logic programming language
+Description: Logtalk is a declarative object-oriented logic programming language that extends and leverages the Prolog language with modern code encapsulation and code reuse mechanisms while also providing improved predicate semantics.
+# Moniker:
+Tags:
+- language
+- logic
+- programming
+- prolog
+ReleaseNotes: |-
+  Logtalk compiler and runtime
+  - CHANGED: Printing of linter warnings about to the use of unsound control constructs in grammar rules to be controlled by the grammar_rules flag instead of the suspicious_calls flag. Also changed the format of warning message.
+  - CHANGED: The implementation of the context/1 built-in method and the implementation of the threaded_call/2 and threaded_once/2 built-in predicates to throw uninstantiation_error(Term) errors instead of type_error(var, Term) errors.
+  - CHANGED: The implementation of the threaded_peek/1-2 built-in predicate to throw an exception when there is no thread proving the goal argument.
+  - CHANGED: The implementation of the threaded/1 built-in predicate to not abort execution when the argument is a disjunction of goals if one of them throws an exception while there are still thread goals running.
+  - IMPROVED: The implementation of the threaded/1 built-in predicate to support calls where the argument is only bound at runtime.
+  - IMPROVED: The implementation of the threaded/1 built-in predicate to use a dedicated message queue per call. This prevents unlikely but still possible leaks of individual thread results between calls that could cause unexpected failures.
+  - IMPROVED: The implementation of the threaded_engine_create/3 predicate to use a single mutex.
+  - IMPROVED: The implementation of the threaded_cancel/1 predicate.
+  - IMPROVED: Error checking of the threaded_exit/1-2 and threaded_peek/1-2 predicates.
+  - IMPROVED: Linter warnings for if-then-else and soft-cut control constructs.
+  - FIXED: Compilation of synchronized/1 directives in categories to not depend on the Prolog with_mutex/2 built-in predicate implicitly creating mutexes.
+  - FIXED: Compilation of phrase/2-3 goals where the first argument is a (::)/1-2 or (^^)/2 control construct with a variable grammar rule body argument would result in a compilation infinite loop. Thanks to Yurii Rashkovskii for the bug report.
+  - FIXED: Regression where a compiler error when a source file term is not callable would be delegated to the backend.
+  Prolog adapter and integration files
+  - UPDATED: The LVM adapter file to set the engines and threads flags depending on the availability of the required built-in predicates.
+  - FIXED: The SWI-Prolog swihooks.pl file to allow calls to the threaded/1 built-in predicate in user to actually use multi-threading by preventing module-qualification of the predicate argument.
+  Documentation
+  - IMPROVED: Handbook documentation of built-in meta-non-terminals and meta-predicates.
+  - IMPROVED: Handbook documentation on grammar rules.
+  - IMPROVED: Handbook documentation on dynamic predicates and the create_object/4 built-in predicate.
+  - IMPROVED: Handbook documentation of the threaded/1 built-in predicate.
+  - IMPROVED: Handbook documentation of the meta_predicate/1 directive.
+  - FIXED: Handbook description of the if/1 conditional compilation directive.
+  - FIXED: Documentation of the context/1 built-in execution context method.
+  - FIXED: Documentation of the threaded_exit/1-2 exceptions.
+  Library
+  - CHANGED: The type library object to to throw uninstantiation_error(Term) error instead of type_error(var, Term) error when checking the var type.
+  - CHANGED: Deleted deprecated library/genint.lgt file, replaced by the genint library.
+  - ADDED: Library listing supporting listing of object dynamic predicates clauses. This library replaces the old non-documented listing category.
+  - ADDED: Library recorded_database to help porting legacy Prolog code.
+  - UPDATED: The os::file_exists/1 predicate for YAP.
+  - FIXED: The json library to avoid unnecessary escaping of slashes when encoding a string. Thanks to Yurii Rashkovskii for the bug report.
+  - FIXED: The json library ignoring the selected JSON object representation when generating JSON output. Thanks to Yurii Rashkovskii for the bug report.
+  - FIXED: The json library domain error when trying to generate JSON output from an invalid JSON representation.
+  - FIXED: Description of the hierarchies library.
+  - FIXED: Compatibility of the types library with XSB due to the missing implementation of the de facto standard gcd/2 arithmetic function.
+  - FIXED: Two linter warnings when loading the os library using the CxProlog backend.
+  Tools
+  - CHANGED: Recent versions of both Texinfo and Sphinx broke index search in the Handbook and APIs documentation when using the help::handbook/1 and help::apis/1 predicates. The argument is now interpreted as a starting node instead of a search string.
+  - CHANGED: Default output directory for the diagrams tool to ./dot_dias.
+  - UPDATED: The update_svg_diagrams.* scripts for the new diagrams tool default output directory.
+  - UPDATED: The lgtunit tool to report unbound test options.
+  - UPDATED: The lgtunit tool xUnit.net v2 XML format output to include the assemblies and assembly tags start-rtf and finish-rtf attributes.
+  - UPDATED: The tutor tool for the refactoring of the linter warnings on the use of unsound control constructs in grammar rules.
+  - FIXED: Syntax error in the logtalk_tester.ps1 script.
+  Ports
+  - IMPROVED: Portability of the fcube port by using less problematic operator names. This allows the port to run with LVM and SICStus Prolog.
+  Examples
+  - CHANGED: The haunted_wasteland, scratchcards, and trebuchet examples providing solutions for selected Advent of Code 2023 problems to comply with this event legal requirements by linking (instead of copying) to the problem descriptions and removing test files that are not samples found in the problem descriptions.
+  - UPDATED: The errors example for the linter warnings on the use of unsound control constructs in grammar rules, redefined operators, and suspicious tests in conditionals.
+  - UPDATED: The ebench example for an upcoming LVM version.
+  - UPDATED: Several multi-threading example tests to use explicit assertions.
+  - UPDATED: The mtbatch example to use the format and os libraries.
+  - UPDATED: Simplified the functions and mtbatch multi-threading examples, accounting for the changes to the threaded/1 built-in predicate.
+  - FIXED: The emetas example definition of the best_of/3 predicate to destroy the threaded engine after computing the answer.
+  Tests
+  - ADDED: Additional tests for the multi-threading built-in predicates.
+  - ADDED: Additional tests for the format/2-3 de facto standard predicates (~Ng, ~NG, ~|, ~N|, and ~N+ control sequences).
+  IDEs, text editors, and syntax highlighters support
+  - REMOVED: The old and deprecated VSCode support in favor of the "Logtalk for VSCode" extension available from the VSCode Marketplace.
+  - UPDATED: The syntax highlighting test files to include the built-in non-terminals.
+  - UPDATED: EditorConfig support for the .logtalk and .prolog file name extensions.
+  - UPDATED: Ace support for compatibility with its current version (v1.32.2).
+  - UPDATED: Rouge support for compatibility with recent versions.
+  - FIXED: Ace support highlight of 0'Char and 0'\Char numbers.
+  - FIXED: GtkSourceView support error with escaped characters highlighting.
+  - FIXED: Merge upstream changes for the Kate text editor support.
+  - FIXED: Merge upstream changes for the Pygments syntax highlighter support.
+  - FIXED: SubEthaEdit 4.x/5.x syntax highlight for the threaded_cancel/1 built-in predicate.
+  - FIXED: Vim support highlight of 0'Char and 0'\Char numbers.
+  Installers and installation scripts
+  - UPDATED: The install.sh manual installation script to inform the user about the INFOPATH environment variable.
+  - FIXED: The Bash shell embedding scripts to actually use the default settings file when no -s option is passed.
+ReleaseNotesUrl: https://github.com/LogtalkDotOrg/logtalk3/blob/master/RELEASE_NOTES.md#3740---january-31-2024
+# PurchaseUrl:
+# InstallationNotes:
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://logtalk.org/documentation.html
+- DocumentLabel: Guides
+  DocumentUrl: https://logtalk.org/guides.html
+ManifestType: defaultLocale
+ManifestVersion: 1.5.0

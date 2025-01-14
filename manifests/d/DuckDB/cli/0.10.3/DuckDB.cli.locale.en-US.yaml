@@ -1,0 +1,154 @@
+# Created with komac v2.2.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.6.0.schema.json
+
+PackageIdentifier: DuckDB.cli
+PackageVersion: 0.10.3
+PackageLocale: en-US
+Publisher: DuckDB
+PublisherUrl: https://www.duckdb.org/
+PublisherSupportUrl: https://github.com/duckdb/duckdb/issues
+Author: Stichting DuckDB Foundation
+PackageName: DuckDB CLI
+PackageUrl: https://github.com/duckdb/duckdb
+License: MIT
+LicenseUrl: https://github.com/duckdb/duckdb/blob/HEAD/LICENSE
+Copyright: Copyright (c) Stichting DuckDB Foundation
+CopyrightUrl: https://github.com/duckdb/duckdb/blob/master/LICENSE
+ShortDescription: DuckDB is an in-process SQL OLAP Database Management System
+Description: |-
+  DuckDB is a high-performance analytical database system.
+  It is designed to be fast, reliable and easy to use.
+  DuckDB provides a rich SQL dialect, with support far beyond basic SQL.
+Moniker: duckdb-cli
+Tags:
+- analytics
+- database
+- embedded-database
+- olap
+- sql
+ReleaseNotes: |-
+  This is a bug fix release for various issues discovered after we released 0.10.2. There are no new major features, just bug fixes. Database files created by DuckDB v0.10.* or v0.9.* can be read by DuckDB v0.10.3.Highlights
+  Even though this is "only" a bug fix release, there have been some major areas of work that warrant a separate mention:- We have added a feature to update extensions using the UPDATE EXTENSIONS syntax #11677
+  - There have been some serious internal improvements around checkpointing, most notably, checkpoints can run while other connections are reading, and no longer block new connections while checkpointing #11918. Also, FORCE CHECKPOINT  no longer actively cancels transactions, it now waits until it can checkpoint #12061
+  - DuckDB now has native support to load data from HuggingFace using the hf:// prefix #11831
+  - We have slightly changed NULL casting behaviour with the MAP type #11745
+  - The Java JDBC driver has been moved to its own repo:  #11873
+  - DuckDB now cleanly compiles with -Wconversion and all conversions are actually being checked #11716, #11673
+  What's Changed
+  - Add setting to control the maximum swap space by @Tishj in #10978
+  - [Python][Dev] Dynamically generate the Connection wrapper methods by @Tishj in #11202
+  - Fixes duckdb wasm by @carlopi in #11688
+  - Checked conversions between signed and unsigned integers by @hannes in #11673
+  - Bump Julia to v0.10.2 by @Mytherin in #11700
+  - Minor improvements to sql_reduce script by @Mytherin in #11701
+  - Properly avoid build-time dependency on Python by @carlopi in #11713
+  - Test dockerized compilation in Alpine:latest and Ubuntu:20.04 by @carlopi in #11708
+  - [COPY CSV] Enable TIMESTAMP_TZ formats by @Tishj in #11711
+  - Full conversion warnings / checks by @hannes in #11716
+  - [Safety] Add safety checks to shared_ptr access by @Tishj in #11696
+  - Remove bound_defaults from BoundCreateTableInfo by @Mytherin in #11721
+  - Improve mkdir error reporting by @Mytherin in #11723
+  - [Dev] Fix failing CI in Python SQLLogicTest Runner by @Tishj in #11724
+  - More docker tests, fix compilation up to C++23 standard by @carlopi in #11725
+  - Upload staging: from 'git describe --tags' to 'git log -1' by @carlopi in #11715
+  - Internal #1848: Window Progress by @hawkfish in #11702
+  - Remove BoundConstraint from the TableCatalogEntry by @Mytherin in #11735
+  - Implicit Cast for any Date/Timestamp by @pdet in #11733
+  - feat: rewrite which_secret() into a table function by @stephaniewang526 in #11726
+  - [Map] Rework MAP creation method behavior when input is NULL by @Tishj in #11730
+  - [Dev] Always use SQLStatement->Copy() when ALTERNATIVE_VERIFY is defined by @Tishj in #11732
+  - Reconstruct Error Messages for Flush Cast by @pdet in #11736
+  - Getting Rid of Value.TryCast in the CSV Sniffer by @pdet in #11717
+  - Fix Join order optimizer so that plan generation is always via the most current entry in the DP table. by @Tmonster in #11719
+  - fix(py): support DuckDBPyType#children for array and enum by @Mause in #11754
+  - Consider not null values when doing export database by @pdet in #11679
+  - Add missing space in error message by @szarnyasg in #11759
+  - Allow to build python packages without c++ sources by @carlopi in #11758
+  - No Mark to Semi join conversion in statistics propagation by @Tmonster in #11596
+  - Hive partitioned write: lazy partitioning initialization by @Mytherin in #11765
+  - Hive partitioning: avoid calling CreateDirectories for every flush, instead create the directory for a partition only when that partition is instantiated by @Mytherin in #11777
+  - [Parquet] Support reading the non-standard NULL ConvertedType by @Tishj in #11774
+  - Only store CSV Errors if we are doing rejects table, otherwise just ignore it. by @pdet in #11763
+  - CI: Add job for 'expected behavior' label by @szarnyasg in #11784
+  - Move recursive_query_csv.test to slow test by @pdet in #11770
+  - [StatementVerifier] Fix up issues in ToString implementations of classes derived from SQLStatement by @Tishj in #11625
+  - Hive partitioning: make OVERWRITE_OR_IGNORE remove files on local file systems by @Mytherin in #11787
+  - [ODBC] Add ODBC Test for Database Reconnection and Data Persistence by @maiadegraaf in #11783
+  - Correctly parse dollar-quoted strings in sqlite3_complete and linenoise by @Mytherin in #11789
+  - Add a configurable compression_level parameter to the parquet writer by @Mytherin in #11791
+  - Close file after file lock failure by @awitten1 in #11795
+  - Python: Add missing options to write_parquet by @jzavala-gonzalez in #11790
+  - [PythonDev] Fix up failing tests in CI by @Tishj in #11801
+  - Fix static bitpacking_width_t FindMinimumBitWidth(T *values, idx_t count) in class BitpackingPrimitives by @Lloyd-Pottiger in #11757
+  - Add note on CMAKE_BUILD_PARALLEL_LEVEL by @mlafeldt in #11808
+  - Elaborate on internal errors by @szarnyasg in #11816
+  - Fix #11756: Don't throw exception on CREATE UNIQUE INDEX IF NOT EXISTS if index already exists by @ewencp in #11821
+  - Python CI fixes: skip two tests by @carlopi in #11818
+  - Fix #11798 - lateral join parameters should not be visible in views by @Mytherin in #11825
+  - Fix #11804: make sure json_type can check null by @lnkuiper in #11807
+  - Fixing performance regression in [u]hugeint cast by @hannes in #11829
+  - [Dev] ClientContextWrapper yak shaving by @Tishj in #11830
+  - [Python] Add checkpoint method, improve shutdown experience by @Tishj in #11810
+  - [Benchmark] Enable benchmarking result collection by @Tishj in #11529
+  - [DependencyManager] Create dependencies between foreign key tables and primary key tables. by @Tishj in #11524
+  - [Python] Synchronize defaults of DuckDBPyRelation method fetch_df_chunk by @Tishj in #11834
+  - Internal #1888 TIMETZ Collation Keys by @hawkfish in #11861
+  - Removing old code that used to check if a buffer was the last buffer from the file handler by @pdet in #11846
+  - Use ToSQLString() in ConstantFilter for escaped filter output by @rcurtin in #11797
+  - [StatementVerifier] Add ToString for every remaining SQLStatement, is pure virtual now by @Tishj in #11788
+  - Pushdown Tables Types to CSV Scanner  by @pdet in #11792
+  - [Python Dev] Fix shift between requirements-dev.txt and pyproject.toml before-test section by @Tishj in #11863
+  - Join order optimizer asan bug Follow up by @Tmonster in #11794
+  - BugFix: Introducing Introducing Delim Joins and Delim_Get(s) should respect positionally by @Tmonster in #11812
+  - Provide the native OID of PG type in pg_type by @goldmedal in #11746
+  - Move JDBC (Java) Driver to Separate Repo by @hannes in #11873
+  - Link Java client in issue template by @szarnyasg in #11877
+  - Change specificity of sniffed types to check time related types earlier by @pdet in #11878
+  - fix complex top n test case for constant vector verification by @Tmonster in #11882
+  - [Dev] Merge overloads for HUGEINT cast functions by @Tishj in #11879
+  - Make " default for quote and " default for escape by @pdet in #11880
+  - Set secret directory to a test directory when running sqllogictest by @Mytherin in #11885
+  - Bugfixes by @lnkuiper in #11785
+  - [Map] Rework interaction (entries, keys, values, extract) of NULL MAPs by @Tishj in #11745
+  - Add case when expression for grouping sets when collations are used. by @Tmonster in #11884
+  - Internal #11892: Interval Quarter Keyword by @hawkfish in #11898
+  - HTTP Logging by @lnkuiper in #11771
+  - [Dev] Use strings in the SQLLogicTest REQUIRE calls so they are visible with -s by @Tishj in #11714
+  - [Dev] Fix a SerializationException on CopyInfo by @Tishj in #11902
+  - MultiFileReader refactor by @samansmink in #11806
+  - Allow checkpoints to run while other connections are reading, and no longer block new connections while checkpointing by @Mytherin in #11918
+  - Allow converting TIMETZ to Arrow by @LoganDark in #11906
+  - Issue #11894: MIN/MAX_BY DECIMAL Casting by @hawkfish in #11912
+  - Issue #1917: WinNode 22 Compilation by @hawkfish in #11913
+  - [Relation] Add MaterializedRelation by @Tishj in #11835
+  - Enable purging of BufferPool pages based on time-since-last-unpinned by @jkub in #11441
+  - Correctly render duckbox for empty results by @Mytherin in #11920
+  - Always store transactions that had errors during the commit phase by @Mytherin in #11929
+  - More anonymous struct zapping in RE2 by @hannes in #11956
+  - Add the corrupt block location to the exception by @Vegetable26 in #11966
+  - Fix assertion in bitpacking by @nickgerrets in #11955
+  - [Python] Add CoalesceOperator to Python Expression API. by @Tishj in #11941
+  - CMake: Handle git failures on invalid inputs better by @carlopi in #11951
+  - Internal #2005: DISTINCT ORDER BY by @hawkfish in #11967
+  - Fix overlooked function argument rename that leads to seg faults. by @smonkewitz in #11969
+  - [Nightly] Block size test fixes by @taniabogatsch in #11972
+  - Optimizing InsertionSort by reducing the size of the comparison by @gitccl in #11964
+  - [Python] Keep referenced Python objects alive by @Tishj in #11761
+  - Move mysql_scanner into main duckdb CI by @carlopi in #11999
+  - Fix CURRENT_SETTING with a NULL string arg by @gitccl in #12015
+  - Issue #12009: APPROX_QUANTILE NULL List by @hawkfish in #12014
+  - Issue #12003: TIMESTAMP Stack Overflow by @hawkfish in #12012
+  - fix extension load error message grammar by @softprops in #11994
+  - [Python] Fix InternalException from scanning Polars DF with no columns by @Tishj in #11982
+  - Issue #11959: TIMESTAMPTZ >= DATE by @hawkfish in #11987
+  - More fixes for RE2 to pass CRAN tests by @hannes in #11978
+  - chore: update exception message by @stephaniewang526 in #11965
+  - Issue #12005: RESERVOIR_QUANTILE DECIMAL Binding by @hawkfish in #12013
+  - [Python] Grab the GIL in the destructor of PyFilesystem by @Tishj in #11980
+  - [Python] Make the NumPy module optional, not throwing if it's not installed by @Tishj in #11981
+  - Add support for HuggingFace to httpfs by @samansmink in #11831
+  - [Fix] lambda binding in ALTER TABLE statements by @taniabogatsch in #11976
+  - Distinguish between exact and case insensitive matching JSON keys in json_structure by @lnkuiper in #11948
+ReleaseNotesUrl: https://github.com/duckdb/duckdb/releases/tag/v0.10.3
+ManifestType: defaultLocale
+ManifestVersion: 1.6.0

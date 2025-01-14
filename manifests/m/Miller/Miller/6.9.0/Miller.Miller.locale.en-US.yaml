@@ -1,0 +1,95 @@
+# Created with Komac v1.11.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.5.0.schema.json
+
+PackageIdentifier: Miller.Miller
+PackageVersion: 6.9.0
+PackageLocale: en-US
+Publisher: John Kerl
+PublisherUrl: https://github.com/johnkerl
+PublisherSupportUrl: https://github.com/johnkerl/miller/issues
+Author: John Kerl
+PackageName: Miller
+PackageUrl: https://github.com/johnkerl/miller
+License: BSD-2-Clause
+LicenseUrl: https://github.com/johnkerl/miller/blob/main/LICENSE.txt
+CopyrightUrl: https://raw.githubusercontent.com/johnkerl/miller/master/LICENSE.txt
+ShortDescription: Miller is like awk, sed, cut, join, and sort for name-indexed data such as CSV, TSV, and tabular JSON
+Description: |-
+  Miller is like awk, sed, cut, join, and sort for name-indexed data such as CSV, TSV, and tabular JSON. You get to work with your data using named fields, without needing to count positional column indices.
+
+  This is something the Unix toolkit always could have done, and arguably always should have done. It operates on key-value-pair data while the familiar Unix tools operate on integer-indexed fields: if the natural data structure for the latter is the array, then Miller’s natural data structure is the insertion-ordered hash map. This encompasses a variety of data formats, including but not limited to the familiar CSV, TSV, and JSON. (Miller can handle positionally-indexed data as a special case.)
+
+  ## Features
+
+  - Miller is multi-purpose: it’s useful for data cleaning, data reduction, statistical reporting, devops, system administration, log-file processing, format conversion, and database-query post-processing.
+  - You can use Miller to snarf and munge log-file data, including selecting out relevant substreams, then produce CSV format and load that into all-in-memory/data-frame utilities for further statistical and/or graphical processing.
+  - Miller complements data-analysis tools such as R, pandas, etc.: you can use Miller to clean and prepare your data. While you can do basic statistics entirely in Miller, its streaming-data feature and single-pass algorithms enable you to reduce very large data sets.
+  - Miller complements SQL databases: you can slice, dice, and reformat data on the client side on its way into or out of a database. (Examples here and here). You can also reap some of the benefits of databases for quick, setup-free one-off tasks when you just need to query some data in disk files in a hurry.
+  - Miller also goes beyond the classic Unix tools by stepping fully into our modern, no-SQL world: its essential record-heterogeneity property allows Miller to operate on data where records with different schema (field names) are interleaved.
+  - Miller is streaming: most operations need only a single record in memory at a time, rather than ingesting all input before producing any output. For those operations which require deeper retention (sort, tac, stats1), Miller retains only as much data as needed. This means that whenever functionally possible, you can operate on files which are larger than your system’s available RAM, and you can use Miller in tail -f contexts.
+  - Miller is pipe-friendly and interoperates with the Unix toolkit
+  - Miller’s I/O formats include tabular pretty-printing, positionally indexed (Unix-toolkit style), CSV, JSON, and others
+  - Miller does conversion between formats
+  - Miller’s processing is format-aware: e.g. CSV sort and tac keep header lines first
+  - Miller has high-throughput performance on par with the Unix toolkit
+  - Not unlike jq (for JSON), Miller is written in portable, modern C, with zero runtime dependencies. You can download or compile a single binary, scp it to a faraway machine, and expect it to work.
+Moniker: miller
+ReleaseNotes: |-
+  - Add DSL functions for integer nanoseconds since the epoch by @johnkerl in #1326
+  - Add %N and %O for strfntime by @johnkerl in #1334
+  - Add %s format specifier for strftime by @johnkerl in #1335
+  - Requested on issue #1152 by @derekmahar
+  - See also https://miller.readthedocs.io/en/6.9.0/reference-dsl-builtin-functions/index.html#time-functions
+  - New DSL functions for summary stats over arrays / maps by @johnkerl in #1364
+  - Requested on issue #1345 by @janxkoci
+  - See also https://miller.readthedocs.io/en/6.9.0/reference-dsl-builtin-functions/index.html#stats-functions
+  - Filename options for split by @sloanlance in #1366
+  - Requested on issue #1365 by @sloanlance
+  - Fatal-on-data-error mlr -x option by @johnkerl in #1373
+  - See also https://miller.readthedocs.io/en/6.9.0/reference-dsl-errors/#handling-for-data-errors
+  - Requested on issue #1106 by @honzajde
+  - New sub, gsub, and ssub verbs by @johnkerl in #1361, requested by @janxkoci on #1356.
+    See also:
+  - https://miller.readthedocs.io/en/6.9.0/reference-verbs/#sub
+  - https://miller.readthedocs.io/en/6.9.0/reference-verbs/#gsub
+  - https://miller.readthedocs.io/en/6.9.0/reference-verbs/#ssub
+  - New contains DSL function by @johnkerl in #1374
+  - https://miller.readthedocs.io/en/6.9.0/reference-dsl-builtin-functions/index.html#contains
+  - Support ZSTD compression in-process by @johnkerl in #1360, from issue #1342 by @aborruso
+  - See also https://miller.readthedocs.io/en/6.9.0/reference-main-compressed-data/
+  - Support comments in mlr -s files by @johnkerl in #1359, from issue #1343 by @janxkoci
+  - Add empty-key check to mlr check by @johnkerl in #1330, from issue #1050 by @aborruso
+  Bug fixes
+  - Do wildcard globbing on Windows by @johnkerl in #1362, from issue #1341 by @coolbq
+  - Treat empty like absent in + - * by @johnkerl in #1371, from issue #1001 by @Poshi
+  - Can't use ${field_name} if it contains UTF-8 characters also encodeable as Latin-1 by @johnkerl in #1363, from issue #1358 by @clemente
+  - Typofix in uif/uof percentiles by @johnkerl in #1375
+  Documentation updates
+  - Update readthedocs notes in the how-to-release page by @johnkerl in #1308
+  - Fix mlr grep docs re OFS/OPS by @johnkerl in #1309
+  - Update Fedora link by @bkmgit in #1339
+  - Small typos in documentation of mlr nest by @johnkerl in #1352, from issue #1350 by @kusalananda
+  Internal
+  - Update 2015-era Python sketch to Python 3 by @johnkerl in #1372
+  - Remove redundant nil check by @Juneezee in #1367
+  - Bump actions/checkout from 3.5.2 to 3.5.3 by @dependabot in #1319
+  - Bump github/codeql-action from 2.3.6 to 2.13.4 by @dependabot in #1318
+  - Bump golang.org/x/term from 0.8.0 to 0.9.0 by @dependabot in #1321
+  - Bump goreleaser/goreleaser-action from 4.2.0 to 4.3.0 by @dependabot in #1320
+  - Bump golang.org/x/text from 0.9.0 to 0.10.0 by @dependabot in #1322
+  - Bump golang.org/x/text from 0.10.0 to 0.11.0 by @dependabot in #1337
+  - Bump golang.org/x/sys from 0.9.0 to 0.10.0 by @dependabot in #1336
+  - Bump golang.org/x/term from 0.9.0 to 0.10.0 by @dependabot in #1338
+  - Bump golang.org/x/sys from 0.10.0 to 0.11.0 by @dependabot in #1347
+  - Bump golang.org/x/text from 0.11.0 to 0.12.0 by @dependabot in #1349
+  - Bump actions/setup-go from 4.0.1 to 4.1.0 by @dependabot in #1351
+  - Bump goreleaser/goreleaser-action from 4.3.0 to 4.4.0 by @dependabot in #1354
+  - Bump golang.org/x/term from 0.10.0 to 0.11.0 by @dependabot in #1348
+  - Bump actions/checkout from 3.5.3 to 3.6.0 by @dependabot in #1369
+  New Contributors
+  - @bkmgit made their first contribution in #1339
+  - @Juneezee made their first contribution in #1367
+  - @sloanlance made their first contribution in #1366
+ReleaseNotesUrl: https://github.com/johnkerl/miller/releases/tag/v6.9.0
+ManifestType: defaultLocale
+ManifestVersion: 1.5.0

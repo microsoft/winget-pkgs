@@ -1,0 +1,49 @@
+# Created with komac v2.1.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.6.0.schema.json
+
+PackageIdentifier: DoltHub.Dolt
+PackageVersion: 1.34.1
+PackageLocale: en-US
+Publisher: DoltHub
+PublisherUrl: https://github.com/dolthub/dolt
+PublisherSupportUrl: https://github.com/dolthub/dolt/issues
+Author: DoltHub
+PackageName: Dolt
+PackageUrl: https://www.dolthub.com/
+License: Apache-2.0
+LicenseUrl: https://github.com/dolthub/dolt/blob/HEAD/LICENSE
+CopyrightUrl: https://raw.githubusercontent.com/dolthub/dolt/master/LICENSE
+ShortDescription: Dolt is a SQL database that you can fork, clone, branch, merge, push and pull just like a git repository.
+Description: |-
+  Dolt is a SQL database that you can fork, clone, branch, merge, push and pull just like a git repository.
+  Connect to Dolt just like any MySQL database to run queries or update the data using SQL commands.
+  Use the command line interface to import CSV files, commit your changes, push them to a remote, or merge your teammate's changes.
+Moniker: dolt
+Tags:
+- cli
+- data
+- git-for-data
+- versioning
+ReleaseNotes: |-
+  Merged PRs
+  dolt
+  - 7494: Fix windows file paths for dropping databases
+  We have to convert windows file path separators to unix ones, when removing them from singleton cache.
+  Additionally, unskips some bats tests
+  Fixes #7492
+  - 7490: Bug fix: IndexedDoltTable didn't fully implement DoltTable's interface
+  IndexedDoltTable wasn't fully compatible with DoltTable's interface, which was causing some queries to execute incorrectly due to using the wrong field indexes. This only happened with queries where the table was used in a read-only context (such as an AS OF query), since in a read-write context WritableIndexedDoltTable is used, which is composed of a WritableDoltTable, so fully inherits the interface. IndexedDoltTable is now consistent with that, and is now composed of a DoltTable instance. This enables the GMS code in assignExecIndexes to use the correct, limited schema of the secondary index and to apply the correct field indexes.
+  Fixes: #7488
+  - 7486: Shallow Clone
+  Add the --depth flag to the dolt_clone stored procedure and the dolt cli
+  This is possibly an MVP, as it's kind of impossible to test everything this touches. The guiding principle was to not break the code for any fully cloned repository.
+  There currently remain 7 problems to address in this code. They are each marked with "NM4"
+  - 7482: go: sqle/cluster: When in standby mode, take the epoch of the primary.
+  When in detected_broken_config, become standby if we see a higher numbered primary.
+  Closed Issues
+  - 7492: Creation of a database with a name identical to a recently dropped-and-dolt_purge_dropped_database() database fails on Windows
+  - 7488: Field index bug with AS OF query and secondary index
+  - 7098: decimal result scale does not match MySQL
+ReleaseNotesUrl: https://github.com/dolthub/dolt/releases/tag/v1.34.1
+ManifestType: defaultLocale
+ManifestVersion: 1.6.0
