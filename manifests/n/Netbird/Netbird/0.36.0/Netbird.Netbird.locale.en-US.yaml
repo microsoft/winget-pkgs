@@ -1,0 +1,103 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
+
+PackageIdentifier: Netbird.Netbird
+PackageVersion: 0.36.0
+PackageLocale: en-US
+Publisher: Wiretrustee UG (haftungsbeschreankt)
+PublisherUrl: https://netbird.io/
+PublisherSupportUrl: https://github.com/netbirdio/netbird/issues
+PrivacyUrl: https://netbird.io/privacy
+Author: Wiretrustee UG (haftungsbeschreankt)
+PackageName: Netbird
+PackageUrl: https://netbird.io/
+License: BSD-3-Clause
+LicenseUrl: https://github.com/netbirdio/netbird/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2024 Wiretrustee UG (haftungsbeschränkt) & AUTHORS
+CopyrightUrl: https://netbird.io/terms
+ShortDescription: Connect your devices into a secure WireGuard®-based overlay network with SSO, MFA and granular access controls.
+Description: |-
+  NetBird combines a configuration-free peer-to-peer private network and a centralized access control system in a single platform, making it easy to create secure private networks for your organization or home.
+  Connect. NetBird creates a WireGuard-based overlay network that automatically connects your machines over an encrypted tunnel, leaving behind the hassle of opening ports, complex firewall rules, VPN gateways, and so forth.
+  Secure. NetBird enables secure remote access by applying granular access policies while allowing you to manage them intuitively from a single place. Works universally on any infrastructure.
+Moniker: netbird
+Tags:
+- network
+- security
+- vpn
+- wireguard
+ReleaseNotes: |-
+  Release notes
+  This release introduces initial support to QUIC as a protocol for relay servers, MySQL support for store, and rootless container support for the client running Netstack mode. We also added support for disabling system flags in the client, and optional ZITADEL PAT configuration in the management service among other enhancements and bug fixes.
+  New features
+  QUIC Protocol Support
+  Added initial support for the QUIC protocol in the client and relay server, improving connection reliability and performance. For self-hosted admins that want to try this out, you should ensure that the relay server has TLS certificates configured and that the main listening port is available in both, TCP and UDP.
+  Rootless Container Support
+  Implemented rootless container support for the client running in Netstack mode, enabling secure and compatible operation without requiring privileged permissions or Linux capabilities.
+  You can use the images netbirdio/netbird:rootless-latest or netbirdio/netbird:0.36.0-rootless for this mode.
+  Learn more about how to enable Netstack mode in the documentation.
+  MySQL Support
+  Added MySQL support for the management service, allowing users to store data in a MySQL database. This feature is particularly useful for organizations that prefer MySQL as their database backend.
+  If you want to start a new deployment with MySQL, you can use the environment variable NETBIRD_STORE_CONFIG_ENGINE=mysql and NETBIRD_STORE_ENGINE_MYSQL_DSN="<username>:<password>@tcp(127.0.0.1:3306)/<database>" in the setup.env file.
+  We are counting on your feedback and community contributions to improve documentation for this support.
+  Enhancements
+  New system flags to disable a few features on the client side
+  We are introducing a set of new flags that allow users to disable specific features on the client side. This is particularly useful for users who wants more control over their system configurations.
+  The new flags are available with the netbird up command, see the flags below:
+  --disable-client-routes           Disable client routes. If enabled, the client won't process client routes received from the management service.
+        --disable-dns                     Disable DNS. If enabled, the client won't configure DNS settings.
+        --disable-firewall                Disable firewall configuration. If enabled, the client won't modify firewall rules.
+        --disable-server-routes           Disable server routes. If enabled, the client won't act as a router for server routes received from the management service.
+  Optional ZITADEL PAT Configuration
+  Enabled optional configuration of a Personal Access Token (PAT) for ZITADEL in the management service, enhancing authentication options for users who want to use ZITADEL as their identity provider.
+  To configure the ZITADEL PAT, you can use the environment variable NETBIRD_IDP_MGMT_EXTRA_PAT=<secret> in the setup.env file.
+  What's Changed
+  - [misc] separate integration and benchmark test workflows #3147
+  - [misc] remove outdated readme header #3151
+  - [misc] upgrade go to 1.23 in devcontainer #3160
+  - [misc] add missing relay to docker-compose.yml.tmpl.traefik #3163
+  - [misc] Skip docker step when fork PR #3175
+  - [misc] Fix gvisor.dev/gvisor commit #3179
+  - [relay] Handle IPv6 addresses in X-Real-IP header on relay service #3085
+  - [relay] Code cleaning in message marshalling #3074
+  - [relay] Set InitialPacketSize to the maximum allowable value #3188
+  - [client] Enable network map persistence by default #3152
+  - [client] Add rootless container and fix client routes in netstack mode #3150
+  - [client] Add disable system flags #3153
+  - [client] Prevent local routes in status from being overridden by updates #3166
+  - [client] Don't fail on v6 ops when disabled via kernel params #3165
+  - [client] Update fyne to v2.5.3 #3155
+  - [client] client: make /var/lib/netbird paths configurable #3084
+  - [client] Support non-openresolv for DNS on Linux #3176
+  - [client] Allow ssh server on freebsd #3170
+  - [client] Disable DNS host manager for netstack mode #3183
+  - [client] Fix a panic on shutdown if dns host manager failed to initialize #3182
+  - [client] add serial, product model, product manufacturer for Android #2958
+  - [client] Add QUIC support #2962
+  - [client] Remove outbound chains #3157
+  - [client] Add block lan access flag for routers #3171
+  - [client] Flush macOS DNS cache after changes #3185
+  - [client] Report client system flags to management server on login #3187
+  - [management] Add integration test for the setup-keys API endpoints #2936
+  - [management] exclude self from network map if self is routing peer #3142
+  - [management] add users benchmark #3141
+  - [management] add peers benchmark #3143
+  - [management] Add MySQL Support #3108
+  - [management] Add support for disabling resources and routing peers in networks #3154
+  - [management] Send relay credentials with turn updates #3164
+  - [Management] Send peer network map when SSH status is toggled #3172
+  - [management] adjust benchmark #3168
+  - [Management] Enable new network resources and routers by default #3174
+  - [management] enable optional zitadel configuration of a PAT #3159
+  - [management] fix groups delete and resource create and update error response #3189
+  New Contributors
+  - @si458 made their first contribution in #3160
+  - @jameshilliard made their first contribution in #3179
+  Full Changelog: https://github.com/netbirdio/netbird/compare/v0.35.2...v0.36.0
+ReleaseNotesUrl: https://github.com/netbirdio/netbird/releases/tag/v0.36.0
+PurchaseUrl: https://netbird.io/pricing
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://docs.netbird.io/
+ManifestType: defaultLocale
+ManifestVersion: 1.9.0
