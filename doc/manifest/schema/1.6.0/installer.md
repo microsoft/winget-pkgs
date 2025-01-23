@@ -13,7 +13,7 @@
 [Inno]:                                     https://jrsoftware.org/isinfo.php
 [Nullsoft]:                                 https://sourceforge.net/projects/nsis
 [WiX]:                                      https://wixtoolset.org
-[Burn]:                                     https://wixtoolset.org/documentation/manual/v3/bundle
+[Burn]:                                     https://wixtoolset.org/docs/v3/bundle/
 
 # Windows Package Manager
 ## Manifest Schema v1.6.0 Installer File

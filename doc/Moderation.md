@@ -4,7 +4,7 @@ The Windows Package Manager community repository is the location for manifests p
 
 ## Moderators
 
-In addition to Microsoft employees, several community members have been identified through their high-quality submissions, willingness to help others, and adherence to our [code of conduct](/CODE_OF_CONDUCT.md).
+In addition to Microsoft employees, several community members have been identified through their high-quality submissions, willingness to help others, and adherence to our [code of conduct](../CODE_OF_CONDUCT.md).
 
 When we initially implemented moderation, we observed several objective criteria. These included the number of Pull Requests (PR)s made, the length of time they had been active in the project, and their interaction with others who submitted PRs.
 
@@ -90,6 +90,8 @@ Moderators are often the first to see and triage new issues, and so they have th
 * `Area-Client`
 * `Area-External`
 * `Area-Matching`
+* `Area-Publish-Pipeline`
+* `Area-Rebuild-Pipeline`
 * `Area-Scope`
 * `Area-Validation-Pipeline`
 * `Blocking-Issue`
@@ -97,11 +99,15 @@ Moderators are often the first to see and triage new issues, and so they have th
 * `DriverInstall`
 * `DSC`
 * `Error-Hash-Mismatch`
+* `Error-Installer-Availability`
 * `Hardware`
 * `Help-Wanted`
 * `Highest-Version-Removal`
+* `Icon`
 * `In-PR`
+* `Installer-Error`
 * `Installer-Issue`
+* `Interactive-Only-Download`
 * `Interactive-Only-Installer`
 * `Issue-Bug`
 * `Issue-Docs`
@@ -109,6 +115,7 @@ Moderators are often the first to see and triage new issues, and so they have th
 * `Last-Version-Removal`
 * `License-Blocks-Install`
 * `Manifest-Content-Incomplete`
+* `Manifest-Singleton-Deprecated`
 * `Moderator-Approved`
 * `Needs-Attention`
 * `Needs-Author-Feedback`
@@ -124,6 +131,7 @@ Moderators are often the first to see and triage new issues, and so they have th
 * `Scripted-Application`
 * `Testing`
 * `Upgrade-Issue`
+* `Validation-Skip-Automations`
 * `Version-Parameter-Mismatch`
 * `Windows-Features`
 * `Zip-Binary`

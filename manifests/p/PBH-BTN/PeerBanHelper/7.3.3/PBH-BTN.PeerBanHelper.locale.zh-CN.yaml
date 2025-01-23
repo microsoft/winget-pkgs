@@ -1,0 +1,83 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.9.0.schema.json
+
+PackageIdentifier: PBH-BTN.PeerBanHelper
+PackageVersion: 7.3.3
+PackageLocale: zh-CN
+Publisher: PBH-BTN Community
+PublisherUrl: https://github.com/PBH-BTN
+PublisherSupportUrl: https://github.com/PBH-BTN/PeerBanHelper/issues
+PackageName: PeerBanHelper
+PackageUrl: https://github.com/PBH-BTN/PeerBanHelper
+License: GPL-3.0
+LicenseUrl: https://github.com/PBH-BTN/PeerBanHelper/blob/HEAD/LICENSE
+ShortDescription: 自动封禁不受欢迎、吸血和异常的 BT 客户端，并支持自定义规则。
+Tags:
+- bt
+- 种子
+ReleaseNotes: |-
+  提前祝各位新年快乐～在接下来的春节假期和元宵佳节期间，PBH-BTN 将暂停一段时间的开发、技术支持工作。除非有严重错误，我们在未来一段时间内都不会发布的新的正式版本。
+  享受假期，快乐过年！下次见！
+
+  [!NOTE] 对使用 BiglyBT 下载器的用户：PeerBanHelper 自本版本起需要 PBH-Adapter-BiglyBT 的 1.2.9 或者更高版本，请升级您的适配器插件版本。当版本过低时，WebUI 将显示 “需要采取行动” 提示，并在升级之前无法正常工作。有关 PBH-Adapter-BiglyBT 的相关更改，请参见对应的版本发行说明。
+  错误修复
+  - 修复 NoGUI 模式下，日志队列发生内存泄漏的问题，可能导致长时间运行崩溃的问题 @Ghost-chu
+  - 修复 BitComet 下载器的 “忽略私有种子” 功能不起作用的问题 @Ghost-chu
+  - 修复 BTN 提交历史记录能力在遇到单次提交超过 10,000 条的时候会导致除最近 10,000 条的数据外剩余数据被丢弃的问题。现在将会正确的进行分批提交，并丢弃 30 天前的历史数据 @Ghost-chu
+  - [WebUI] 修复更新日志在特定情况下内容区域背景颜色异常导致内容不可读的问题 @Gaojianli
+  改进
+  - 降低提交历史记录时每批提交的数量（从 10,000 降低到 5,000），超过 5,000 的数据将拆分到下一个请求以降低生成提交数据时的 RAM 使用 @Ghost-chu
+  - 优化 GUI 日志记录速度过快时的内存占用峰值问题 @Ghost-chu
+  - 此前需要修改启动命令 -D 添加的自定义 Flags 现在支持通过环境变量传递 @Ghost-chu
+    - 如果过去的自定义 Flag 包含符号 . 或 -，则替换为 _
+    - 所有 ASCII 字符均大写
+  安全改进
+  - 现在不再暴露 WebAPI 端点列表到 /route-view @Ghost-chu
+  - 现在将通过检查 User-Agent 的方式，屏蔽下列网络空间测绘引擎的请求，避免 PeerBanHelper 被如下测绘引擎或者端口扫描工具的端口扫描探测： @Ghost-chu
+    - Censys
+    - Shodan
+    - ZoomEye
+    - ThreatBook
+    - FOFA
+    - zmap (默认配置时)
+    - nmap (默认配置时)
+    - 所有以上 User-Agent 的请求都将返回 404 not found 提示信息和 404 状态码
+  BTN 更改
+  - 协议版本号从 8 提升到 10 以对应协议更新 @Ghost-chu
+  实验室功能
+  - 使用已知数据填充缺失的记录 @Ghost-chu
+    - 使用上一个已知的数据记录填充查询的流量记录的空白条目以尝试修复流量统计不准确的问题。但当查询范围开头也无数据时，此功能不生效。需要手动开启实验。
+  数据收集范围更改披露
+  @Ghost-chu
+  PeerBanHelper 严格遵守和执行 PeerBanHelper 隐私政策，并确保用户的知情权。当我们在隐私政策或者收集的内容范围作出更改时，将通过公告等形式向您告知。
+  以下是有关本次更新中 “BTN 网络” 收集数据的更改告知以及其用途说明：
+  影响范围：PeerBanHelper v7.3.3 或更高版本，且使用了由 PBH-BTN 官方维护的 Sparkle BTN 的 BTN 实例 (btn-prod.ghostchu-services.top, sparkle.ghostchu-services.top, btn-dev.ghostchu-services.top, sparkle.ghostchu.com) 并且打开了 设置-基础设置-BTN-启用提交 开关的用户
+  新增收集的数据列表如下所示：
+  1. [新增] is_private_torrent
+  作用： 指示一个 torrent_identifier 对应的是否是一个私有种子
+  适用范围： 提交封禁列表和提交历史记录，包括之前的数据（如果被再次更新）
+  收集条件： 当对应下载器未启用 “忽略私有种子” 开关或者下载器不支持 “忽略私有种子”，并且连接到了 Sparkle BTN 实例，且打开了“启用提交”开关，并且产生了下列数据的情况下，新的数据可能会被收集 数据用途： 帮助 BTN 服务端程序识别对应 torrent_identifier 的 “私有种子” 类型，以便单独处理可能由 PT 站点等私有种子产生的数据，例如用于分析和统计用途。 收集的数据能够：
+  1. 能够识别一条数据是否由一个私有种子产生
+  收集的数据无法：
+  1. 无法在未提前得知 info_hash 的情况下推断数据对应的 info_hash 是什么，参见 BTN-Spec info_hash 匿名化哈希算法
+  2. 无法推断出对应的数据是否来自某个具体的 Tracker
+  数据示例：
+  - is_private_torrent = true // 指示本条数据由一个私有种子产生
+  - is_private_torrent = false // 指示本条数据由一个公共种子产生
+  术语解释：
+  1. torrent_identifier: 使用 BTN-Spec info_hash 匿名化哈希算法 将一个种子的 info_hash 转换为的匿名哈希值，以便在无需得知种子的实际 info_hash 的匿名情况下识别两个 torrent_identifier 对应的是否是同一个实际种子的技术
+  2. 提交封禁列表：向 BTN 提交自 PBH 启动/上次提交以来的新增封禁记录的过程 技术资料
+  3. 提交历史记录：向 BTN 提交自上次提交以来的新增 Peer 活动连接记录的过程 技术资料
+  4. 私有种子：由 BEP-0027 Private Torrents 中定义的一种种子类型，通常被 PT 站使用
+  未实装的功能
+  以下功能因时间因素未在本版本中适配前端界面，但仍可通过 WebAPI 调用：
+  1. 批量替换下载器的种子的 Trackers (暂仅支持 qBittorrent, Transmission, BiglyBT)
+  Docker
+  DockerHub: ghostchu/peerbanhelper:v7.3.3
+  阿里云国内镜像加速：registry.cn-hangzhou.aliyuncs.com/ghostchu/peerbanhelper:v7.3.3
+ReleaseNotesUrl: https://github.com/PBH-BTN/PeerBanHelper/releases/tag/v7.3.3
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/PBH-BTN/PeerBanHelper/wiki
+ManifestType: locale
+ManifestVersion: 1.9.0
