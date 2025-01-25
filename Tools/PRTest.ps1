@@ -34,7 +34,7 @@ if (-Not (Get-Command 'git' -ErrorAction 'SilentlyContinue')) {
     return
 }
 
-gh pr checkout $PullRequest $(if (!$KeepBranch) { '--detach' }) -f | Out-Null
+gh pr checkout $PullRequest $(if (!$KeepBranch) { '--detach' }) -f -R $repositoryRoot | Out-Null
 
 if ($LASTEXITCODE -ne 0) {
     Write-Host "There was an error checking out the PR. Make sure you're logged into GitHub via 'gh auth login' and come back here!" -ForegroundColor Red
