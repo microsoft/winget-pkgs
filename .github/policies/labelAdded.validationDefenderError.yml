@@ -11,7 +11,9 @@ configuration:
       - description: >-
           When the label "Validation-Defender-Error" is added to a pull request
           * Add the PR specific reply notifying the issue author
-          * Close the PR
+          * Assign to the Author
+          * Label with Needs-Author-Feedback
+          * Remove the Needs-Attention Label
         if:
           - payloadType: Pull_Request
           - labelAdded:
@@ -22,14 +24,28 @@ configuration:
                 Hello @${issueAuthor},
 
 
-                The package manager bot was blocked from installing one of the installers listed in the url field, and cannot continue. 
+                The package manager bot was blocked from installing one of the installers listed in the url field, and cannot continue.
 
 
-                The application included in this pull request failed to pass the [Installers Scan](https://docs.microsoft.com/en-us/windows/package-manager/package/winget-validation) test. This test is designed to ensure that the application installs on all environments without warnings. For more details on this error, see [Defender errors](https://learn.microsoft.com/en-us/windows/package-manager/package/repository#error-labels). Please check to ensure the installer URL is correct and update the URL and the Hash if a change is made.
+                The application included in this pull request failed to pass the [Installers Scan](https://docs.microsoft.com/en-us/windows/package-manager/package/winget-validation) test. This test is designed to ensure that the application installs on all environments without warnings.
+
+
+                Please check to ensure the installer URL is correct and update the URL and the Hash if a change is made.
+
+
+                If the package is mistakenly flagged as malware, you can [submit the installer(s) to the Microsoft Defender team for analysis](https://www.microsoft.com/en-us/wdsi/filesubmission).
+
+
+                For more details on this error, see [Defender errors](https://learn.microsoft.com/en-us/windows/package-manager/package/repository#error-labels).
 
 
                 Template: msftbot/validationError/installers/validationDefender
-          - closeIssue
+          - assignTo:
+              author: True
+          - addLabel:
+              label: Needs-Author-Feedback
+          - removeLabel:
+              label: Needs-Attention # This will automatically assign the ICM Users
         # The policy service should trigger even when the label was added by the policy service
         triggerOnOwnActions: true
 onFailure:
