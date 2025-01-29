@@ -1,0 +1,44 @@
+# Created with komac v2.8.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
+
+PackageIdentifier: YggdrasilNetwork.Yggdrasil
+PackageVersion: 0.5.9
+PackageLocale: en-US
+Publisher: github.com/yggdrasil-network
+PublisherUrl: https://yggdrasil-network.github.io/
+PublisherSupportUrl: https://github.com/yggdrasil-network/yggdrasil-go/issues
+PackageName: Yggdrasil Network
+PackageUrl: https://github.com/yggdrasil-network/yggdrasil-go
+License: LGPLv3
+LicenseUrl: https://github.com/yggdrasil-network/yggdrasil-go/blob/HEAD/LICENSE
+ShortDescription: The Yggdrasil network is a decentralized, peer-to-peer network that aims to create a more resilient and private internet infrastructure.
+Tags:
+- decentralized
+- e2e-encryption
+- ipv6
+- mesh
+- mesh-networks
+- routing-algorithm
+- routing-mesh
+- spanning-tree
+ReleaseNotes: |-
+  Added
+  - New command line option -user for changing the process UID/GID
+  Changed
+  - The routing algorithm has been updated with RTT-aware link costing, which should prefer lower latency links over higher latency links where possible
+      - The calculated cost is an average of the link RTT, but newly established links are costed higher to begin with, such that unstable peerings can be avoided
+      - Link costs are only used where multiple next-hops are available and will be ignored if there is only one loop-free path to the destination
+      - This is protocol-compatible with existing v0.5.x nodes but will have the best results when peering with nodes that are also running the latest version
+      - The getPeers endpoint will now report the calculated link cost for each given peer
+  - Upgrade dependencies
+  Fixed
+  - Multicast discovery should now work again when building Yggdrasil as an Android framework
+  - Multicast discovery will now correctly ignore interfaces that are not marked as running
+  - Ephemeral links, such as those added by multicast, will no longer try to reconnect in a fast loop, fixing a high CPU issue
+  - The TUN interface will no longer stop working when hitting a segment read error from vectorised reads
+  - The AllowedPublicKeys option will once again no longer apply to multicast peerings, as was originally intended
+  - A potential panic when shutting down peering links has been fixed
+  - A redundant system call for setting MTU on OpenBSD has been removed
+ReleaseNotesUrl: https://github.com/yggdrasil-network/yggdrasil-go/releases/tag/v0.5.9
+ManifestType: defaultLocale
+ManifestVersion: 1.9.0
