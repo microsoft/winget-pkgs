@@ -18,10 +18,9 @@ Our intent was not to introduce a numbers game for others to achieve and automat
 | **[@KevinLaMS](https://github.com/KevinLaMS)** 			| **[@KaranKad](https://github.com/KaranKad)** |
 | **[@msftrubengu](https://github.com/msftrubengu)** 		| **[@mdanish-kh](https://github.com/mdanish-kh)** |
 | **[@ranm-msft](https://github.com/ranm-msft)** 			| **[@OfficialEsco](https://github.com/OfficialEsco)** |
-| **[@ryfu-msft](https://github.com/ryfu-msft)** 			| **[@quhxl](https://github.com/quhxl)** |
-| **[@stephengillie](https://github.com/stephengillie)** 	| **[@russellbanks](https://github.com/russellbanks)** |
-| **[@yao-msft](https://github.com/yao-msft)** 				| **[@Trenly](https://github.com/Trenly)** |
-| **[@zachcarp](https://github.com/zachcarp)** 				| |
+| **[@stephengillie](https://github.com/stephengillie)** 	| **[@quhxl](https://github.com/quhxl)** |
+| **[@yao-msft](https://github.com/yao-msft)** 				| **[@russellbanks](https://github.com/russellbanks)** |
+| | **[@Trenly](https://github.com/Trenly)** |
 
 ## Expectations
 
