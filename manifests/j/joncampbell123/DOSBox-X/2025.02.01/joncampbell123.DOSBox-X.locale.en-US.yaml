@@ -1,0 +1,154 @@
+# Created using wingetcreate 1.9.4.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
+
+PackageIdentifier: joncampbell123.DOSBox-X
+PackageVersion: 2025.02.01
+PackageLocale: en-US
+Publisher: joncampbell123 [DOSBox-X Team]
+PublisherUrl: https://dosbox-x.com/
+PublisherSupportUrl: https://dosbox-x.com/wiki
+Author: John Campbell
+PackageName: DOSBox-X
+PackageUrl: https://github.com/joncampbell123/dosbox-x
+License: GPL-2.0
+LicenseUrl: https://raw.githubusercontent.com/joncampbell123/dosbox-x/master/COPYING
+Copyright: Copyright 2011-2025 The DOSBox-X Team
+CopyrightUrl: https://raw.githubusercontent.com/joncampbell123/dosbox-x/master/COPYING
+ShortDescription: DOSBox-X is an open-source DOS emulator for running DOS games and applications.
+Description: |-
+  DOSBox-X emulates a PC necessary for running many DOS games and applications that simply cannot be run on modern PCs and operating systems, similar to DOSBox.
+  However, while the main focus of DOSBox is for running DOS games, DOSBox-X goes much further than this.
+  Started as a fork of the DOSBox project, it retains compatibility with the wide base of DOS games and DOS gaming DOSBox was designed for.
+  But it is also a platform for running DOS applications, including emulating the environments to run Windows 3.x, 9x and ME and software written for those versions of Windows.
+  By adding official support for Windows 95, 98, ME emulation and acceleration, we hope that those old Windows games and applications could be enjoyed or used once more.
+  Moreover, DOSBox-X adds support for DOS/V and NEC PC-98 emulations so that you can play DOS/V and PC-98 games with it.
+Moniker: dosbox-x
+Tags:
+- dos
+- dosbox
+- emulator
+ReleaseNotes: |-
+  2025.02.01
+  - Added new experimental dosbox.conf option that turns off the
+    A20 gate automatically if loading a COM/EXE file to a memory
+    location below 64KB. Option is off by default. This is intended
+    for the startup routines of programs that assume 8086 wraparound
+    to prevent them from crashing (joncampbell123).
+  - Bump tinyfiledialogs to v3.19.1 (maron2000)
+  - Fix VGA render-on-demand bug that causes all screen updates to
+    stop working if something changes video state without changing
+    any other attribute (width, height, frame rate, etc.). In
+    PC-98 mode this bug could be triggered by leaving the text
+    layer open while switching off the graphics layer when the
+    graphics layer is in 256-color PEGC mode. Fix for KOARMADA.EXE
+    when exiting back to the DOS prompt. (joncampbell123).
+  - In PC-98 mode, add I/O port 43Bh which guest applications can
+    then read to determine whether the 15MB "memory hole" is open.
+    The guest can use this bit to determine whether the PEGC 256-color
+    framebuffer is available at that location, or whether that is
+    just plain system memory. Added for homebrew PC-9821 project
+    KOARMADA.EXE which uses that bit to determine how to talk to
+    the framebuffer. (joncampbell123).
+  - Fix keyboard ISR in PC-98 mode to assume there is data waiting
+    from the keyboard I/O ports (then check the status for more).
+    The reason is that CWSDPMI.EXE for PC-98 has a keyboard ISR
+    of it's own that reads the scan code first (which clears the
+    "data available" bit) before then passing control to the
+    real-mode keyboard ISR. If our keyboard ISR first checks for
+    status in that case it will never see any keyboard data and
+    keyboard input will never register to the guest while running
+    under CWSDPMI (joncampbell123).
+  - Fix BIOS POST location (F000:FFF0) JMP instruction in PC-98 mode
+    so that the segment value of the JMP instruction matches a
+    specific value that the DJGPP C runtime checks for to detect
+    PC-98. (joncampbell123). 
+  - Stop serving IBM PC-specific CWSDPMI.EXE in NEC PC-98 mode.
+    It happens to work unless any interrupt or exception happens.
+    Instead, provide an alternate common version of CWSDPMI.EXE
+    that was patched to support PC-98 machines when machine=pc98
+    (joncampbell123).
+  - Add support for ucrt64 builds (maron2000)
+  - DOS CTRL+C handling: Remove NULL vector check because built-in
+    COMMAND.COM long ago was fixed to provide a CTRL+C vector. Fix
+    code to use a different value for the C++ exception so that it
+    cannot be confused for any other common signal in the emulator
+    (joncampbell123).
+  - Remove DOSBox Integration Device VGA "self capture",
+    which was never used much anyway, as part of cleanup (joncampbell123).
+  - x86 paging: Remove unused non-"full TLB" code. (joncampbell123).
+  - Use mmap() to allocate system memory if available. This is
+    for future work that may involve something that requires
+    page-aligned allocation, such as KVM support in Linux (joncampbell123).
+  - VGA cleanup, organization (joncampbell123).
+  - Fixed regression of specifying DBCS fontx file was ignored. (maron2000)
+  - Fixed mistakes in adding double quotes to filenames to pass to IMGMOUNT
+    command, and syntax errors in showing a message dialog box. (maron2000)
+  - Fixed bug where bios memSize was not set when using TTF. (maitchison)
+  - Fixed CMS was always disabled regardless of config settings. (xrip)
+  - Switch off TTF mode in text modes not working in TTF mode. (maron2000)
+  - Gravis Ultrasound: Add dosbox.conf option that when enabled,
+    prints a warning to the log file every time the guest pokes
+    data into GUS RAM beyond the 1MB supported by the card,
+    in order to better identify errant Demoscene code and/or
+    any bugs in new tracker code currently in development. (joncampbell123)
+  - VGA: Fix buffer overrun that can occur with 4bpp planar
+    16-color modes if the guest writes beyond the first 2MB
+    of video RAM. The planar support code also copies the 3rd
+    bitplane to a font RAM array used in EGA/VGA text mode.
+    This font RAM array is only 512KB, therefore in planar
+    memory space, writes beyond (2MB/4) = 512KB cause corruption
+    of emulator state and possibly crashes. Solve the issue
+    therefore by not copying to font RAM beyond 512KB. (joncampbell123)
+  - VESA BIOS support: Fix VGA draw and bank switching code
+    to ensure that the guest cannot write outside video RAM
+    limits, and fix VBE bank switching code to consider 4bpp
+    planar SVGA modes properly. (joncampbell123)
+  - VESA BIOS support: Fix scan line and page calculations related
+    to 4bpp planar 16-color SVGA modes. (joncampbell123)
+  - VESA BIOS support: Fix 24bpp RGB bugs related to VBE calls
+    that control scan line length and display panning/scrolling.
+    Now VBETEST can test 24bpp panning without potentially giving
+    the user an epileptic seizure, and there are no more overlong
+    scanlines. (joncampbell123)
+  - VESA BIOS support: Correct mode information for SVGA text modes (joncampbell123)
+  - VESA BIOS support: Like real Pentium-era hardware, do not
+    list 4bpp planar 16-color modes as having a linear framebuffer.
+    Most SVGA cards only support planar VGA memory within the
+    standard VGA A0000-BFFFFh region and do not support the same
+    up in the linear framebuffer area. (joncampbell123)
+  - Save state support: Let the option to control whether or not
+    compression is applied, apply to the ZIP compression. If you
+    turn off compression, the ZIP file uses "store" mode instead,
+    otherwise compresses as normal. (joncampbell123)
+  - It turns out that for whatever reason, the savestate code was
+    compressing the state twice. Once by itself, and then again when
+    writing to the ZIP archive. Furthermore, storing the original
+    length at the end of the compressed data using size_t is a big
+    problem. Remove the extra compression/decompression and let the
+    ZIP file support do the compression. Save states from now on
+    will be marked as "No compression" for at least some backwards
+    compatibility. (joncampbell123)
+  - Volume label cleanup and fixes. Do not pad labels with white spaces. (maron2000)
+  - Some NEC PC-98 games that support MIDI through MPU-401 like to use
+    Roland GS-specific SysEx messages to control master volume and
+    reset the MIDI synth, instead of standard messages. These games
+    were known in DOSBox-X to have problems with MIDI stuck notes and
+    hanging notes for this reason. Added code to recognize Roland GS
+    reset SysEx and reissue it as standard MIDI reset, to resolve that.
+    Added code to Fluidsynth MIDI support to recognize the Roland GS
+    master volume SysEx commands and apply it to the output, which
+    allows these games to "fade out" the MIDI properly. PC-98 games
+    should no longer have hanging/stuck MIDI notes (joncampbell123).
+  - Fix VESA BIOS modelist mistake that marked all "high definition"
+    modes as modes to round bytes per line up to a power of 2 (joncampbell123)
+  - Fix memory size register determination for S3 Virge/VX (clbianco)
+  - Fixed a Y2038 bug by replacing Int32x32To64 with regular multiplication.
+    (CookiePLMonster)
+  - Fixed pasting Bell code (0x07) from clipboard was ignored. (maron2000)
+  - Fixed a segfault crash when pasting the content of clipboard is empty 
+    or consists of invalid characters only. (maron2000)
+  - Fixed crash when trying to access MOUNTed empty physical CD/Floppy
+    drives. (maron2000)
+ReleaseNotesUrl: https://github.com/joncampbell123/dosbox-x/releases/tag/dosbox-x-v2025.02.01
+ManifestType: defaultLocale
+ManifestVersion: 1.9.0
