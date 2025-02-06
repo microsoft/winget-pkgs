@@ -1,0 +1,63 @@
+# Created with WinGet Updater using komac v2.6.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.6.0.schema.json
+
+PackageIdentifier: HydrusNetwork.HydrusNetwork
+PackageVersion: '608'
+PackageLocale: en-US
+Publisher: Hydrus Network
+PublisherUrl: https://github.com/hydrusnetwork/hydrus
+PublisherSupportUrl: https://github.com/hydrusnetwork/hydrus/issues
+PrivacyUrl: https://hydrusnetwork.github.io/hydrus/privacy.html
+Author: Hydrus Network
+PackageName: Hydrus Network
+PackageUrl: https://github.com/hydrusnetwork/hydrus
+License: WTFPL
+LicenseUrl: https://github.com/hydrusnetwork/hydrus/blob/HEAD/license.txt
+Copyright: Copyright (C) 2010 by Kris Craig
+CopyrightUrl: https://github.com/hydrusnetwork/hydrus/blob/master/license.txt
+ShortDescription: A personal booru-style media tagger that can import files and tags from your hard drive and popular websites. Content can be shared with other users via user-run servers.
+Description: |-
+  The hydrus network client is an application written for Anon and other internet-fluent media nerds who have large image/swf/webm collections.
+  It browses with tags instead of folders, a little like a booru on your desktop. Advanced users can share tags and files anonymously through custom servers that any user may run.
+  Everything is free and privacy is the first concern. Executable releases are available for Windows, Linux, and macOS.
+  The program is in python, so you can also run it straight from the source code.
+Moniker: hydrus-network
+Tags:
+- booru
+- cross-platform
+- image-database
+ReleaseNotes: |-
+  mpv
+  - my ill-fated mpv-choking error hook, which tries to catch when MPV is having a 100% CPU event and unloads the file in a big fuss, and which has unfortunately caused a whole bunch of false positives, is now flipped on its head. instead of catching all instances of the log output and trying to exclude 'oh that's fine' cases, the hook now precisely targets files that go irrevocably 100% CPU on loop, specifically by recognising files that reload too frequently in one second for their duration (e.g. a normal vid looping twenty times in one second). mpv will be back to being juddery sometimes, but whatever, that's better than what I was doing
+  - the new 'DEBUG CAREFUL: Allow "too many events queued" files' checkbox no longer does anything and is removed
+  - also, the mpv emergency dump-out code is back to being per mpv player. previously it would unload all players the client was managing
+  - my mpv player now uses a little less CPU when mouse-drag-seeking
+  misc
+  - I am changing the tag sort logic such that if you group by namespace, the namespace order stays as it is, no matter the underling asc/desc order of the actual sort. in simple english, this means that creator tags stay at the top whether you say 'most first' or 'fewest first'. we had success with the 'namespace (user)' just recently, and after talking about it with some guys, I think I agree that doing a full reverse of the whole list is not useful, and it isn't, fundamentally, what grouping is. let's try it like this, see how we like it
+  - the various multi-column lists across the program, which generally set their minimum and initial height by a 'num rows' suggestion, now do so pixel-perfect in most cases, no matter the style (it was previously ok on windowsvista, with a bit of fuzzy padding, but on Fusion it was either too tall or short due to font height estimate stuff). the downloader and watcher lists, which dynamically size according to contents, also do so unerringly. I find this very slightly eerie tbh so I might add a couple pixels of whitespace on the end so your brain knows there isn't more to scroll. let's try it like this for a few weeks and see how it feels
+  - added --pause_network_traffic launch parameter to the client, which hits network->pause->all new network traffic before the network engine initialises, to help debug when pending subscriptions or initial-session downloaders go crazy
+  - in 'manage tag siblings/parents', if you import from a clipboard/txt that includes a a->a loop-pair, the dialog now yells at you
+  - as a little hack, I added ctrl+shift+c to the taglist to say 'copy tags with parents' the default ctrl+c does not include the parents
+  - removed a duplicate and blank entry for 'EXPERIMENTAL: Image path for thumbnail panel...' in options->thumbnails, whoops
+  - I added a little safety code to the import folder, trying to catch a possible infinite loop we have seen. import folders now also take regular short breaks to give other threads like garbage collection a guaranteed moment to step in
+  - fixed a bad buffer truncation calculation in the native video viewer
+  build/jpeg-xl stuff
+  - in help->about, moved the Jpeg-XL and HEIF(/AVIF) support lines to the second tab, and together
+  - if your client does not have Jpeg-XL support, the import error is now stated when you hit help->about. if you are on macOS, you probably do not have Jpeg-XL support yet, and the solution, whether on App or from source, is to run brew install jpeg-xl in the terminal, which is now also said in this message (issue #1670)
+  - added a small note to the installing help docs to say Apple Silicon users should consider running from source. the App is Intel for the time being, and running from source will give you a much more pleasant experience all around
+  boring code cleanup
+  - refactored the ProcessContentUpdates megacall and its friends to a new 'content updates' database module
+  - refactored the duplicates file search stuff down to a new database module
+  - and refactored the 'set duplicates' call down to a new database module
+  - about 110KB of code is thus cleared out of the ClientDB monolith, which is down to 500KB, and we are ready to plug the duplicates auto-resolution module in as it now has scope on the various calls it needs
+  - fleshed out the duplicates db module's master id definitions
+  - cleaned up how I refer to file duration across the program. all the convenient-to-change duration or frame durations have a unified nomenclature and always say if they are in seconds or milliseconds
+  duplicates auto-resolution
+  - the final difficult duplicates auto-resolution database problem (fast incremental duplicate pairs search) is solved. outside of at-scale testing and final integration, the database side of this is now complete. now just need to to figure out a daemon and a preview panel
+ReleaseNotesUrl: https://github.com/hydrusnetwork/hydrus/releases/tag/v608
+PurchaseUrl: https://hydrusnetwork.github.io/hydrus/support.html
+Documentations:
+- DocumentLabel: FAQ
+  DocumentUrl: https://hydrusnetwork.github.io/hydrus/faq.html
+ManifestType: defaultLocale
+ManifestVersion: 1.6.0
