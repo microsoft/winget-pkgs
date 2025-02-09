@@ -12,16 +12,18 @@ Our intent was not to introduce a numbers game for others to achieve and automat
 
 | Windows Package Manager Administrators | Community Moderators |
 | :---: | :---: |
-| **[@denelon](https://github.com/denelon)** 				| **[@ImJoakim](https://github.com/ImJoakim)** |
-| **[@hackean-msft](https://github.com/hackean-msft)** 		| **[@ItzLevvie](https://github.com/ItzLevvie)** |
-| **[@JohnMcPMS](https://github.com/JohnMcPMS)**			| **[@jedieaston](https://github.com/jedieaston)** |
-| **[@KevinLaMS](https://github.com/KevinLaMS)** 			| **[@KaranKad](https://github.com/KaranKad)** |
-| **[@msftrubengu](https://github.com/msftrubengu)** 		| **[@mdanish-kh](https://github.com/mdanish-kh)** |
-| **[@ranm-msft](https://github.com/ranm-msft)** 			| **[@OfficialEsco](https://github.com/OfficialEsco)** |
-| **[@ryfu-msft](https://github.com/ryfu-msft)** 			| **[@quhxl](https://github.com/quhxl)** |
-| **[@stephengillie](https://github.com/stephengillie)** 	| **[@russellbanks](https://github.com/russellbanks)** |
-| **[@yao-msft](https://github.com/yao-msft)** 				| **[@Trenly](https://github.com/Trenly)** |
-| **[@zachcarp](https://github.com/zachcarp)** 				| |
+| **[@AmelBawa-msft](https://github.com/AmelBawa-msft)**        | **[@ImJoakim](https://github.com/ImJoakim)** |
+| **[@denelon](https://github.com/denelon)**                    | **[@ItzLevvie](https://github.com/ItzLevvie)** |
+| **[@florelis](https://github.com/florelis)**                  | **[@jedieaston](https://github.com/jedieaston)** |
+| **[@hackean-msft](https://github.com/hackean-msft)**          | **[@KaranKad](https://github.com/KaranKad)** |
+| **[@JohnMcPMS](https://github.com/JohnMcPMS)**                | **[@mdanish-kh](https://github.com/mdanish-kh)** |
+| **[@KevinLaMS](https://github.com/KevinLaMS)**                | **[@OfficialEsco](https://github.com/OfficialEsco)** |
+| **[@Madhusudhan-MSFT](https://github.com/Madhusudhan-MSFT)**  | **[@quhxl](https://github.com/quhxl)** |
+| **[@msftrubengu](https://github.com/msftrubengu)**            | **[@russellbanks](https://github.com/russellbanks)** |
+| **[@ranm-msft](https://github.com/ranm-msft)**                | **[@Trenly](https://github.com/Trenly)** |
+| **[@RDMacLachlan](https://github.com/RDMacLachlan)**          | |
+| **[@stephengillie](https://github.com/stephengillie)**        | |
+| **[@yao-msft](https://github.com/yao-msft)**                  | |
 
 ## Expectations
 
