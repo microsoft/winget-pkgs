@@ -295,8 +295,19 @@ if (!$SkipManifestValidation -and ![String]::IsNullOrWhiteSpace($Manifest)) {
         Invoke-CleanExit -ExitCode 3
     }
     Write-Information "--> Validating Manifest"
-    $validateCommandOutput = winget.exe validate $Manifest
-    switch ($LASTEXITCODE) {
+    $validateCommandOutput = 
+        & {
+            # Store current output encoding setting
+            $prevOutEnc = [Console]::OutputEncoding
+            # Set [Console]::OutputEncoding to UTF-8 since winget uses UTF-8 for output
+            [Console]::OutputEncoding = $OutputEncoding = [System.Text.Utf8Encoding]::new()
+
+            winget.exe validate $Manifest
+
+            # Reset the encoding to the previous values
+            [Console]::OutputEncoding = $prevOutEnc
+        }    
+        switch ($LASTEXITCODE) {
         '-1978335191' {
             ($validateCommandOutput | Select-Object -Skip 1 -SkipLast 1) | Write-Information # Skip the first line and the empty last line
             Write-Error -Category ParserError 'Manifest validation failed' -ErrorAction Continue
