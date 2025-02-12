@@ -1,4 +1,4 @@
-#Copyright 2022-2024 Microsoft Corporation
+#Copyright 2022-2025 Microsoft Corporation
 #Author: Stephen Gillie
 #Title: Manual Validation Pipeline v3.88.21
 #Created: 10/19/2022
@@ -10,7 +10,7 @@
 #3.88.19 - A few bugfixes.
 #3.88.18 - Restore waiver and retry fucntionality. 
 
-$build = 931
+$build = 979
 $appName = "ManualValidationPipeline"
 Write-Host "$appName build: $build"
 $MainFolder = "C:\ManVal"
@@ -41,6 +41,7 @@ $DataFileName = "$ReposFolder\Tools\ManualValidationPipeline.csv"
 
 $ExitCodeFile = "$ReposFolder\Tools\ExitCodes.csv"
 $MsiErrorCodeFile = "$ReposFolder\Tools\MsiErrorCodes.csv"
+$AutowaiverFile = "$ReposFolder\Tools\Autowaiver.csv"
 
 $Win10Folder = "$imagesFolder\Win10-Created112024-Original"
 $Win11Folder = "$imagesFolder\Win11-Created121824-Original"
@@ -69,7 +70,12 @@ $MagicStrings = "Installer Verification Analysis Context Information:", #0
 "BlockingDetectionFound", #3
 "Processing manifest", #4
 "SQL error or missing database", #5
-"Error occurred while downloading installer" #6
+"Error occurred while downloading installer", #6
+"Specified hash doesn't match", #7
+"[error] Manifest is invalid", #8
+"Result: Failed",  #9
+"[error] Manifest Warning:",#10
+"[error] Manifest:"#11
 
 $MagicLabels = "Validation-Defender-Error", #0
 "Binary-Validation-Error", #1
@@ -104,7 +110,9 @@ $MagicLabels = "Validation-Defender-Error", #0
 "Needs-Author-Feedback",#30
 "Policy-Test-2.7", #31
 "Manifest-Version-Error",#32
-"Highest-Version-Remaining"#33
+"Highest-Version-Remaining", #33
+"Last-Version-Removal", #34
+"Highest-Version-Removal"#35
 
 #First tab
 Function Get-TrackerVMRunTracker {
@@ -118,17 +126,25 @@ Function Get-TrackerVMRunTracker {
 		if ($HourLatch) {#Hourly Run functionality
 			$HourLatch = $False
 			[console]::beep(500,250);[console]::beep(500,250);[console]::beep(500,250) #Beep 3x to alert the PC user.
-			$PresetList = ("Defender","ToWork2")
+			$PresetList = ("Defender","LVR","HVR","ToWork2")
 			$Host.UI.RawUI.WindowTitle = "Periodic Run"
 			#(Get-SearchGitHub -Preset IEDS).number | Get-Random |%{Get-PRLabelAction $_} #Restart an IEDS PR
 			foreach ($Preset in $PresetList) {
-				$Results = (Get-SearchGitHub -Preset $Preset -Days 1)
+				$Results = (Get-SearchGitHub -Preset $Preset)
 				Write-Output "$(Get-Date -Format T) Starting $Preset with $($Results.length) Results"
 				if ($Results) {
 					$Results.number |%{Get-PRLabelAction $_}
 				}
 				Write-Output "$(Get-Date -Format T) Completing $Preset with $($Results.length) Results"
 			}
+			$MMCNumber = (Get-SearchGitHub -Preset MMC).number 
+			Write-Output "$(Get-Date -Format T) Starting MMC with $($MMCNumber.length) Results"
+			$MMCNumber | %{Get-VerifyMMC -PR $_ }
+			Write-Output "$(Get-Date -Format T) Completing MMC with $($MMCNumber.length) Results"
+			$AutowaiverNumbers = (get-searchGitHub -Preset Autowaiver).number 
+			Write-Output "$(Get-Date -Format T) Starting Autowaiver with $($AutowaiverNumbers.length) Results"
+			$AutowaiverNumbers| %{Get-Autowaiver -pr $_}
+			Write-Output "$(Get-Date -Format T) Completing Autowaiver with $($AutowaiverNumbers.length) Results"
 			sleep (60-(get-date -f ss))#Sleep out the minute.
 		}
 		
@@ -1500,12 +1516,12 @@ Function Get-PRWatch {
 
 
 
-				$ReviewMatch = $ReviewList | Where-Object {$_.PackageIdentifier -match (($PackageIdentifier -split "[.]")[0..1] -join ".")}
-
+				$ReviewMatch = $ReviewList | Where-Object {$_.PackageIdentifier -match $PackageIdentifier }
 				if ($ReviewMatch) {
 					$Review = $ReviewMatch.Reason | Sort-Object -Unique
 					$matchColor = $cautionColor
 				}
+
 				Write-Host -nonewline -f $matchColor "$Review | "
 				$matchColor = $validColor
 
@@ -1565,32 +1581,35 @@ Function Get-PRWatch {
 
 
 				
-<# 
 				if ($null -ne $WinGetOutput) {
 					if (($PRvMan -ne "N") -AND 
 					($PRtitle -notmatch "Automatic deletion") -AND 
 					($PRtitle -notmatch "Delete") -AND 
 					($PRtitle -notmatch "Remove")) {
-						$ANFOld = Get-ManifestEntryCheck -PackageIdentifier $PackageIdentifier -Version $ManifestVersion
-						$ANFCurrent = [bool]($clip | Select-String "DisplayVersion")
+						$DisplayVersion = Get-YamlValue DisplayVersion -clip $clip
+						$DeveloperIsAuthor = (((Get-YamlValue PackageIdentifier -clip $clip) -split ".") -eq $Submitter)
+						$InstallerMatch = ($InstallerUrl -split "/") -match $Submitter
 
-						if (($ANFOld -eq $True) -and ($ANFCurrent -eq $False)) {
-							$matchColor = $invalidColor
-							$AnF = "-"
-							Reply-ToPR -PR $PR -CannedMessage AppsAndFeaturesMissing -UserInput $Submitter -Policy $MagicLabels[30] -Silent
-							Add-PRToRecord -PR $PR -Action "Feedback" -Title $PRtitle
-						} elseif (($ANFOld -eq $False) -and ($ANFCurrent -eq $True)) {
-							$matchColor = $cautionColor
-							$AnF = "-"
-							Reply-ToPR -PR $PR -CannedMessage AppsAndFeaturesNew -UserInput $Submitter -Policy $MagicLabels[30] -Silent
-							#Invoke-GitHubPRRequest -PR $PR -Method POST -Type comments -Data "[Policy] $MagicLabels[30]"
-						} elseif (($ANFOld -eq $False) -and ($ANFCurrent -eq $False)) {
-							$AnF = "0"
-						} elseif (($ANFOld -eq $True) -and ($ANFCurrent -eq $True)) {
-							$AnF = "1"
+						if ($DisplayVersion) {
+							if ($DisplayVersion -eq $prVersion) {
+								$matchColor = $invalidColor
+								$AnF = "-"
+								Reply-ToPR -PR $PR -CannedMessage AppsAndFeaturesMatch -UserInput $Submitter -Policy $MagicLabels[30] -Silent
+								Add-PRToRecord -PR $PR -Action "Feedback" -Title $PRtitle
+							}
 						}
+						
+						# if (!($DeveloperIsAuthor)) {
+							# if ($InstallerMatch) {
+								# $matchColor = $invalidColor
+								# $AnF = "-"
+								# Reply-ToPR -PR $PR -CannedMessage InstallerMatchesSubmitter -UserInput $Submitter -Policy $MagicLabels[30] -Silent
+								# Add-PRToRecord -PR $PR -Action "Feedback" -Title $PRtitle
+							# }
+						# }
 					}
 				}
+<# 
  #>
 				Write-Host -nonewline -f $matchColor "$AnF | "
 				$matchColor = $validColor
@@ -1705,6 +1724,7 @@ Function Get-PRWatch {
 				($AnF -eq "-") -or 
 				($InstVer -eq "-!") -or 
 				($prAuth -eq "-!") -or 
+				($Review -ne "R") -or 
 				($ListingDiff -eq "-!") -or 
 				($NumVersions -eq 1) -or 
 				($NumVersions -eq "L") -or 
@@ -1764,9 +1784,9 @@ Function Get-WorkSearch {
 				Get-TrackerProgress -PR $PR $MyInvocation.MyCommand $line $PRs.length
 				$line++
 				if ($MagicLabels[33] -notin $FullPR.labels.name) {
-					if (($FullPR.title  -match "Remove") -OR 
-					($FullPR.title  -match "Delete") -OR 
-					($FullPR.title  -match "Automatic deletion")){
+					if (($FullPR.title -match "Remove") -OR 
+					($FullPR.title -match "Delete") -OR 
+					($FullPR.title -match "Automatic deletion")){
 						Get-GitHubPreset CheckInstaller -PR $PR
 					}
 				}
@@ -1804,7 +1824,7 @@ Function Get-WorkSearch {
 #Automation tools
 Function Get-GitHubPreset {
 	param(
-		[ValidateSet("Approved","AutomationBlock","BadPR","Blocking","CheckInstaller","Closed","Completed","DefenderFail","DriverInstall","Duplicate","Feedback","IdleMode","IEDSMode","InstallerNotSilent","InstallerMissing","LabelAction","ManuallyValidated","MergeConflicts","NetworkBlocker","OneManifestPerPR","PackageUrl","Paths","PossibleDuplicate","Project","RestrictedSubmitter","ResetApproval","Retry","Squash","Timeclock","Validating","VedantResetPR","WorkSearch","Waiver")][string]$Preset,
+		[ValidateSet("Approved","AutomationBlock","BadPR","Blocking","CheckInstaller","Closed","Completed","DefenderFail","DriverInstall","Duplicate","Feedback","IdleMode","IEDSMode","InstallerNotSilent","InstallerMissing","LabelAction","ManuallyValidated","MergeConflicts","NetworkBlocker","OneManifestPerPR","PRNoYamlFiles","PackageUrl","Paths","PossibleDuplicate","Project","RestrictedSubmitter","ResetApproval","Retry","Squash","Timeclock","Validating","VedantResetPR","WorkSearch","Waiver")][string]$Preset,
 		$PR = (Get-Clipboard),
 		$CannedMessage = $Preset,
 		$UserInput,
@@ -1918,7 +1938,11 @@ Function Get-GitHubPreset {
 			}
 			"OneManifestPerPR" {
 				Add-PRToRecord -PR $PR -Action "Feedback"
-				$out += Reply-ToPR -PR $PR -CannedMessage $Preset  -Policy $MagicLabels[30]
+				$out += Reply-ToPR -PR $PR -CannedMessage $Preset -Policy $MagicLabels[30]
+			}
+			"PRNoYamlFiles" {
+				Add-PRToRecord -PR $PR -Action "Feedback"
+				$out += Reply-ToPR -PR $PR -CannedMessage $Preset -Policy $MagicLabels[30]
 			}
 			"PackageUrl" {
 				Add-PRToRecord -PR $PR -Action "Feedback"
@@ -1982,8 +2006,8 @@ Function Get-PRLabelAction { #Soothing label action.
 	Write-Output "PR $PR has labels $PRLabels"
 	if ($PRLabels -contains $MagicLabels[0]) {
 		$PRState = Get-PRStateFromComments $PR
-		if (($PRState | where {$_.event -eq "PreValidation"})[-1].created_at -lt (Get-Date).AddHours(-8) -AND #Last Prevalidation was 8 hours ago.
-		($PRState | where {$_.event -eq "Running"})[-1].created_at -lt (Get-Date).AddHours(-18)) {  #Last Run was 18 hours ago.
+		if (($PRState | where {$_.event -eq "PreValidation"})[-1].created_at -lt (Get-Date).AddHours(-8)) {# -AND #Last Prevalidation was 8 hours ago.
+		#($PRState | where {$_.event -eq "AutoValEnd"})[-1].created_at -lt (Get-Date).AddHours(-12)) { #Last Run was 18 hours ago.
 			Get-GitHubPreset Retry -PR $PR
 		}
 	} else {
@@ -1991,28 +2015,28 @@ Function Get-PRLabelAction { #Soothing label action.
 		Foreach ($Label in $PRLabels) {
 			Switch ($Label) {
 				$MagicLabels[1] {
-					$UserInput = Get-LineFromCommitFile -PR $PR -SearchString $MagicStrings[0] -length 10
-					if ("" -eq $UserInput) {
-						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 41 -SearchString $MagicStrings[0] -length 10
+					$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 53 -SearchString $MagicStrings[0] -length 5
+					if ($null -eq $UserInput) {
+						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 30 -SearchString $MagicStrings[0] -length 5
 					}
-					if ("" -eq $UserInput) {
-						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 50 -SearchString $MagicStrings[0] -length 10
+					if ($null -eq $UserInput) {
+						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 25 -SearchString $MagicStrings[0] -length 5
 					}
-					if ("" -eq $UserInput) {
-						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 26 -SearchString $MagicStrings[0] -length 10
+					if ($null -eq $UserInput) {
+						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 27 -SearchString $MagicStrings[0] -length 5
 					}
-					if ("" -eq $UserInput) {
-						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 34 -SearchString $MagicStrings[0] -length 10
+					if ($null -eq $UserInput) {
+						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 34 -SearchString $MagicStrings[0] -length 5
 					}
 					if ($UserInput) {
 						Reply-ToPR -PR $PR -UserInput $UserInput -CannedMessage AutoValEnd
 					}
 					if ($UserInput -match $MagicStrings[3]) {
-						Get-GitHubPreset -PR $PR -Preset AutomationBlock
+						#Get-GitHubPreset -PR $PR -Preset AutomationBlock
 					}
 				}
 				$MagicLabels[2] {
-					$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 36 -SearchString $MagicStrings[0] -length 3
+					$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 36 -SearchString $MagicStrings[0] -length 4
 					if ($UserInput) {
 						Reply-ToPR -PR $PR -UserInput $UserInput -CannedMessage AutoValEnd
 					}
@@ -2021,26 +2045,23 @@ Function Get-PRLabelAction { #Soothing label action.
 					}
 				}
 				$MagicLabels[3] {
-					$UserInput = Get-LineFromCommitFile -PR $PR -SearchString $MagicStrings[0] -Length 10
-					if ("" -eq $UserInput) {
-						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 26 -SearchString $MagicStrings[0] -Length 10 
+					$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 53 -SearchString $MagicStrings[0] -Length 10
+					if ($null -eq $UserInput) {
+						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 25 -SearchString $MagicStrings[0] -Length 10 
 					}
-					if ("" -eq $UserInput) {
-						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 36 -SearchString $MagicStrings[0] -Length 10 
+					if ($null -eq $UserInput) {
+						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 41 -SearchString $MagicStrings[0] -Length 10 
 					}
-					if ("" -eq $UserInput) {
-						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 37 -SearchString $MagicStrings[0] -Length 10 
-					}
-					if ("" -eq $UserInput) {
-						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 50 -SearchString $MagicStrings[0] -Length 10 
-					}
-					if ("" -ne $UserInput) {
+					if ($UserInput) {
 						Reply-ToPR -PR $PR -UserInput $UserInput -CannedMessage AutoValEnd
 						Get-UpdateHashInPR2 -PR $PR -Clip $UserInput
 					}
 				}
 				$MagicLabels[4] { 
-					$UserInput = Get-LineFromCommitFile -PR $PR -SearchString $MagicStrings[6] -length 5
+					$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 53 -SearchString $MagicStrings[6] -length 5
+					if ($null -eq $UserInput) {
+						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 25 -SearchString $MagicStrings[0] -Length 10 
+					}
 					if ($UserInput) {
 						Reply-ToPR -PR $PR -UserInput $UserInput -CannedMessage AutoValEnd
 						Get-GitHubPreset -PR $PR -Preset CheckInstaller
@@ -2090,75 +2111,36 @@ Function Get-PRLabelAction { #Soothing label action.
 					}
 				}
 				$MagicLabels[9] {
-					$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 25 -SearchString $MagicStrings[2]
+					$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 14 -SearchString $MagicStrings[2]
 					if ($null -match $UserInput) {
-						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 25 -SearchString $MagicStrings[1]
-					}
-					if ($null -match $UserInput) {
-						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 15 -SearchString $MagicStrings[2]
-					}
-					if ($null -match $UserInput) {
-						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 15 -SearchString $MagicStrings[1]
-					}
-					if ($null -match $UserInput) {
-						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 39 -SearchString $MagicStrings[2]
-					}
-					if ($null -match $UserInput) {
-						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 39 -SearchString $MagicStrings[1]
+						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 14 -SearchString $MagicStrings[1]
+					}					if ($null -match $UserInput) {
+						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 42 -SearchString $MagicStrings[2]
+					}					if ($null -match $UserInput) {
+						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 42 -SearchString $MagicStrings[1]
 					}
 					if ($UserInput) {
 						Reply-ToPR -PR $PR -UserInput $UserInput -CannedMessage AutoValEnd
 					}
 				}
 				$MagicLabels[10] {
-					$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 25 -SearchString $MagicStrings[2]
-					if ("" -eq $UserInput) {
-						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 25 -SearchString $MagicStrings[1]
-					}
-					if ("" -eq $UserInput) {
-						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 31 -SearchString $MagicStrings[2]
-					}
-					if ("" -eq $UserInput) {
-						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 31 -SearchString $MagicStrings[1]
-					}
-					if ("" -eq $UserInput) {
-						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 44 -SearchString $MagicStrings[2]
-					}
-					if ("" -eq $UserInput) {
-						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 44 -SearchString $MagicStrings[1]
-					}
-					if ("" -eq $UserInput) {
-						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 15 -SearchString $MagicStrings[2]
-					}
-					if ("" -eq $UserInput) {
-						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 15 -SearchString $MagicStrings[1]
+					$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 42 -SearchString $MagicStrings[2]
+					if ($null -eq $UserInput) {
+						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 42 -SearchString $MagicStrings[1]
 					}
 					if ($UserInput) {
 						Reply-ToPR -PR $PR -UserInput $UserInput -CannedMessage AutoValEnd
 					}
 				}
 				$MagicLabels[11] {#Manifest-Validation-Error
-					$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 25 -SearchString $MagicStrings[2]
-					if ($null -eq $UserInput) {
-						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 25 -SearchString $MagicStrings[1]
-					}
-					if ($null -eq $UserInput) {
-						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 31 -SearchString $MagicStrings[2]
-					}
-					if ($null -eq $UserInput) {
-						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 31 -SearchString $MagicStrings[1]
-					}
-					if ($null -eq $UserInput) {
-						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 44 -SearchString $MagicStrings[2]
-					}
-					if ($null -eq $UserInput) {
-						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 44 -SearchString $MagicStrings[1]
-					}
-					if ($null -eq $UserInput) {
-						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 15 -SearchString $MagicStrings[2]
-					}
-					if ($null -eq $UserInput) {
-						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 15 -SearchString $MagicStrings[1]
+					$MagicLogs11 = 42,39,14
+					$MagicString11 = 8,2,10,11
+					Foreach ($Log in $MagicLogs11) {
+						$n = 0;
+						while ($null -eq $UserInput) {
+							$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber $Log -SearchString $MagicStrings[$MagicString11[$n]]
+							$n++
+						}
 					}
 					if ($null -ne $UserInput) {
 						Reply-ToPR -PR $PR -UserInput $UserInput -CannedMessage AutoValEnd
@@ -2168,9 +2150,9 @@ Function Get-PRLabelAction { #Soothing label action.
 					Get-GitHubPreset PossibleDuplicate -PR $PR
 				}
 				$MagicLabels[13] {
-					$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 24 -SearchString $MagicStrings[1]
+					$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 41 -SearchString $MagicStrings[9] -MatchOffset 0
 					if ($null -match $UserInput) {
-						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 25 -SearchString $MagicStrings[1]
+						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 13 -SearchString $MagicStrings[9] -MatchOffset 0
 					}
 					if ($null -match $UserInput) {
 						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 14 -SearchString $MagicStrings[1]
@@ -2180,6 +2162,9 @@ Function Get-PRLabelAction { #Soothing label action.
 					}
 					if ($UserInput -match "The pull request contains more than one manifest") {
 						Get-GitHubPreset -Preset OneManifestPerPR -PR $PR
+					}
+					if ($UserInput -match "The pull request doesn't include any manifest files yaml") {
+						Get-GitHubPreset -Preset PRNoYamlFiles -PR $PR
 					}
 					if ($UserInput) {
 						Reply-ToPR -PR $PR -UserInput $UserInput -CannedMessage AutoValEnd
@@ -2226,31 +2211,22 @@ Function Get-PRLabelAction { #Soothing label action.
 					Get-AutoValLog -PR $PR
 				}
 				$MagicLabels[32] {
-					$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 25 -SearchString $MagicStrings[2]
+					$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 42 -SearchString $MagicStrings[2]
 					if ($null -eq $UserInput) {
-						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 25 -SearchString $MagicStrings[1]
-					}
-					if ($null -eq $UserInput) {
-						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 31 -SearchString $MagicStrings[2]
-					}
-					if ($null -eq $UserInput) {
-						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 31 -SearchString $MagicStrings[1]
-					}
-					if ($null -eq $UserInput) {
-						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 44 -SearchString $MagicStrings[2]
-					}
-					if ($null -eq $UserInput) {
-						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 44 -SearchString $MagicStrings[1]
-					}
-					if ($null -eq $UserInput) {
-						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 15 -SearchString $MagicStrings[2]
-					}
-					if ($null -eq $UserInput) {
-						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 15 -SearchString $MagicStrings[1]
+						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 42 -SearchString $MagicStrings[1]
 					}
 					if ($null -ne $UserInput) {
 						Reply-ToPR -PR $PR -UserInput $UserInput -CannedMessage AutoValEnd
 					}
+				}
+				$MagicLabels[33] {
+					Approve-PR -PR $PR
+				}
+				$MagicLabels[34] {
+					Approve-PR -PR $PR
+				}
+				$MagicLabels[35] {
+					Approve-PR -PR $PR
 				}
 			}#end Switch Label
 		}#end Foreach Label
@@ -2340,7 +2316,7 @@ Function Add-Waiver {
 
 Function Get-SearchGitHub {
 	param(
-		[ValidateSet("Approval","Blocking","Defender","IEDS","ToWork","ToWork2","ToWork3")][string]$Preset = "Approval",
+		[ValidateSet("Approval","Autowaiver","Blocking","Defender","HVR","IEDS","LVR","MMC","ToWork","ToWork2","ToWork3")][string]$Preset = "Approval",
 		[Switch]$Browser,
 		$Url = "https://api.github.com/search/issues?page=$Page&q=",
 		$Author, #wingetbot
@@ -2372,15 +2348,23 @@ Function Get-SearchGitHub {
 	$HaventWorked = "-commenter:$($GitHubUserName)+"
 	$nHW = "-label:Hardware+"
 	$IEDSLabel = "label:Internal-Error-Dynamic-Scan+"
+	$LVR = "label:"+$MagicLabels[34]+"+"
+	$HVR = "label:"+$MagicLabels[35]+"+"
 	$nIEDS = "-"+$IEDSLabel
-	$nMMC = "-label:Manifest-Metadata-Consistency+"
+	$VSA = "-label:Validation-Skip-Automations+"
+	$MMC = "label:Manifest-Metadata-Consistency+"
+	$nMMC = "-"+$MMC
 	$IEM = "label:Internal-Error-Manifest+"
 	$nNSA = "-label:Internal-Error-NoSupportedArchitectures+"
 	$NotPass = "-label:Azure-Pipeline-Passed+" #Hasn't psased pipelines
 	$sortAsc = "sort:created-asc+";
 	$VC = "label:Validation-Completed+" #Completed
 	$nVC = "-"+$VC #Completed
-
+	$NA = "label:Needs-Attention+";
+	$NAF = "label:Needs-Author-Feedback+";
+	$VD += "label:Validation-Domain+";
+	$nIOD += "-label%3AInteractive-Only-Download+";
+	$nIOI += "-label%3AInteractive-Only-Installer+";
 	$date = Get-Date (Get-Date).AddDays(-$Days) -Format "yyyy-MM-dd"
 	$Recent = "updated:>$($date)+" 
 	
@@ -2408,18 +2392,21 @@ Function Get-SearchGitHub {
 	$Review1 = $Review1 + "-label:Needs-CLA+"
 	$Review1 = $Review1+ "-label:No-Recent-Activity+"
 
-	$Review2 = "-label:Needs-Attention+"
-	$Review2 = $Review2 + "-label:Needs-Author-Feedback+"
+	$Review2 = "-label:$NA+"
+	$Review2 = $Review2 + "-label:$NAF+"
 	$Review2 = $Review2 + "-label:Needs-Review+"
 	
-	$Approvable =  "-label:Validation-Merge-Conflict+" 
+	$Approvable = "-label:Validation-Merge-Conflict+" 
 	$Approvable += "-label:Manifest-Version-Error+";
+	$Approvable += "-label:"+$MagicLabels[10]+"+";#MVE
+	$Approvable += "-label:"+$MagicLabels[11]+"+";#MVE
 	$Approvable += "-label:Unexpected-File+";
 	
+	$Workable += "-label:"+$MagicLabels[34]+"+";#LVR
+	$Workable += "-label:"+$MagicLabels[35]+"+";#HVR
 	$Workable += "-label:Validation-Merge-Conflict+";
-	$Workable = "-label:Highest-Version-Removal+";
 	$Workable += "-label:Validation-Certificate-Root+";
-	$Workable += "-label:Binary-Validation-Error+";
+	$Workable += "-label:"+$MagicLabels[1]+"+";#BVE
 	$Workable += "-label:Validation-SmartScreen-Error+";
 	$Workable += "-label:Unexpected-File+";
 
@@ -2455,11 +2442,12 @@ Function Get-SearchGitHub {
 	$Automatable += "-label:Validation-404-Error+";
 	$Automatable += "-label:Author-Not-Authorized+";
 	$Automatable += "-label:Hardware+";
-	$Automatable += "-label:Manifest-Validation-Error+";
-	$Automatable += "-label:Error-Hash-Mismatch+";
+	$Automatable += "-label:PullRequest-Error+";
+	$Automatable = "label:"+$MagicLabels[11]+"+"
+	$Automatable = "label:"+$MagicLabels[3]+"+"
 	$Automatable += "-label:Manifest-AppsAndFeaturesVersion-Error+";
 	$Automatable += "-label:Error-Installer-Availability+";
-	$Automatable += "-label:Validation-Domain+";
+	$Automatable += "-"+$VD;
 	$Automatable += "-label:Validation-Completed+";
 	
 	#Composite settings
@@ -2495,9 +2483,28 @@ Function Get-SearchGitHub {
 			$Url += $nMMC;
 			$Url += $Workable;
 			$Url += $sortAsc;
-			}
+		}
 		"Defender"{
 			$Url += $Defender
+			$Url += $sortAsc;
+		}
+		"Autowaiver"{
+			$Url += $Set1
+			$Url += $Workable
+			$Url += $nIEDS 
+			$Url += $nVC
+			$Url += "-label:"+$MagicLabels[3]+"+";#EHM
+			$Url += "-label:"+$MagicLabels[10]+"+";#MVE
+			$Url += "-label:"+$MagicLabels[11]+"+";#MVE
+			$Url += "-label:"+$MagicLabels[16]+"+";#VEE
+			$Url += "-label:"+$MagicLabels[20]+"+";#VNE
+			$Url += "-label:"+$MagicLabels[21]+"+";#VIE
+			$Url += "-label:"+$MagicLabels[22]+"+";#VSE
+			$Url += "-label:"+$MagicLabels[23]+"+";#VUF
+			$Url += "-label:Manifest-AppsAndFeaturesVersion-Error+";
+			$Url += $nBI
+			$Url += $nIOD
+			$Url += $nIOI
 			$Url += $sortAsc;
 		}
 		"IEDS" {
@@ -2506,6 +2513,21 @@ Function Get-SearchGitHub {
 			$Url += $Blocking
 			$Url += $NotPass
 			$Url += $nVC
+		}
+		"HVR"{
+			$date = Get-Date (Get-Date).AddDays(-7) -Format "yyyy-MM-dd"
+			$createdDate = "created:<$($date)+" 
+			$Url += $createdDate;
+			$Url += $HVR;
+		}
+		"LVR"{
+			$date = Get-Date (Get-Date).AddDays(-7) -Format "yyyy-MM-dd"
+			$createdDate = "created:<$($date)+" 
+			$Url += $createdDate;
+			$Url += $LVR;
+		}
+		"MMC"{
+			$Url += $MMC;
 		}
 		"ToWork"{
 			$Url += $Set1 #Blocking + Common + Review1
@@ -2525,6 +2547,7 @@ Function Get-SearchGitHub {
 			$Url += $Automatable;
 			$Url += $PolicyTests;
 			$Url += $sortAsc;
+			$Url += $VSA;
 		}
 	}
 
@@ -2542,7 +2565,7 @@ Function Get-SearchGitHub {
 
 Function Get-CannedMessage {
 	param(
-		[ValidateSet("AgreementMismatch","AppFail","Approve","AutomationBlock","AutoValEnd","AppsAndFeaturesNew","AppsAndFeaturesMissing","DriverInstall","DefenderFail","HashFailRegen","InstallerFail","InstallerMissing","InstallerNotSilent","NormalInstall","InstallerUrlBad","ListingDiff","ManValEnd","ManifestVersion","NoCause","NoExe","NoRecentActivity","NotGoodFit","OneManifestPerPR","Only64bit","PackageFail","PackageUrl","Paths","PendingAttendedInstaller","PolicyWrapper","RemoveAsk","SequenceNoElements","Unattended","Unavailable","UrlBad","VersionCount","WhatIsIEDS","WordFilter")]
+		[ValidateSet("AgreementMismatch","AppFail","Approve","AutomationBlock","AutoValEnd","AppsAndFeaturesNew","AppsAndFeaturesMissing","AppsAndFeaturesMatch","DriverInstall","DefenderFail","HashFailRegen","InstallerFail","InstallerMatchesSubmitter","InstallerMissing","InstallerNotSilent","NormalInstall","InstallerUrlBad","ListingDiff","ManValEnd","ManifestVersion","NoCause","NoExe","NoRecentActivity","NotGoodFit","OneManifestPerPR","Only64bit","PackageFail","PackageUrl","Paths","PendingAttendedInstaller","PolicyWrapper","PRNoYamlFiles","RemoveAsk","SequenceNoElements","Unattended","Unavailable","UrlBad","VersionCount","WhatIsIEDS","WordFilter")]
 		[string]$Response,
 		$UserInput=(Get-Clipboard),
 		[switch]$NoClip,
@@ -2559,6 +2582,9 @@ Function Get-CannedMessage {
 		"AppsAndFeaturesMissing" {
 			$out = "Hi $Username`n`nThis manifest removes the `DisplayVersion` from the `AppsAndFeaturesEntries`, which is present in previous manifest versions. This entry should be added to this version, to maintain version matching, and prevent the 'upgrade always available' situation with this package."
 		}
+		"AppsAndFeaturesMatch" {
+			$out = "Hi $Username`n`nThis manifest uses the same values for `DisplayVersion` and `PackageVersion`. This is not recommended, and the `DisplayVersion` should be removed."
+		}
 		"AppFail" {
 			$out = "Hi $Username`n`nThe application installed normally, but gave an error instead of launching:`n"
 		}
@@ -2572,6 +2598,15 @@ Function Get-CannedMessage {
 			$out = "This might be due to user-agent throttling."
 		}
 		"AutoValEnd" {
+			$UserInput = $UserInput | Select-Object -Unique
+			if ($UserInput -match "exit code" -OR $UserInput -match "DeliveryOptimization error" -OR $UserInput -match "Error information") {
+				$ExitCodeTable = gc $ExitCodeFile | ConvertFrom-Csv
+				foreach ($ExitCode in $ExitCodeTable) {
+					if ($UserInput -match $ExitCode.code) {
+						$UserInput += "`n`nAutomated error analysis suggests $($ExitCode.code) may mean $($ExitCode.message)"
+					}
+				} 
+			} 
 			$out = "Automatic Validation ended with:`n> $UserInput"
 		}
 		"DriverInstall" {
@@ -2586,6 +2621,9 @@ Function Get-CannedMessage {
 		"InstallerFail" {
 			$out = "Hi $Username`n`nThe installer did not complete:`n"
 		}
+		"InstallerMatchesSubmitter" {
+			$out = "Submitter username detected in InstallerUrl, but not in PackageIdentifier. Verify not a forked repository."
+		}
 		"InstallerMissing" {
 			$out = "Hi $Username`n`nHas the installer been removed?"
 		}
@@ -2599,6 +2637,15 @@ Function Get-CannedMessage {
 			$out = "Hi $Username`n`nWe don't often see the `1.0.0` manifest version anymore. Would it be possible to upgrade this to the [1.5.0]($GitHubBaseUrl/tree/master/doc/manifest/schema/1.5.0) version, possibly through a tool such as [WinGetCreate](https://learn.microsoft.com/en-us/windows/package-manager/package/manifest?tabs=minschema%2Cversion-example), [YAMLCreate]($GitHubBaseUrl/blob/master/Tools/YamlCreate.ps1), or [Komac](https://github.com/russellbanks/Komac)? "
 		}
 		"ManValEnd" {
+			$UserInput = $UserInput | Select-Object -Unique
+			if ($UserInput -match "exit code" -OR $UserInput -match "DeliveryOptimization error" -OR $UserInput -match "Error information") {
+				$ExitCodeTable = gc $ExitCodeFile | ConvertFrom-Csv
+				foreach ($ExitCode in $ExitCodeTable) {
+					if ($UserInput -match $ExitCode.code) {
+						$UserInput += "`n`nAutomated error analysis suggests $($ExitCode.code) may mean $($ExitCode.message)"
+					}
+				} 
+			} 
 			$out = "Manual Validation ended with:`n> $UserInput"
 		}
 		"NoCause" {
@@ -2637,6 +2684,9 @@ Function Get-CannedMessage {
 		"PolicyWrapper" {
 			$out = "<!--`n[Policy] $UserInput`n-->"
 		}
+		"PRNoYamlFiles" {
+			$out = "Hi $Username`n`nThis error means that this PR diff Master had no output. In other words, it's like a merge conflict.`n>  The pull request doesn't include any manifest files yaml."
+		}
 		"RemoveAsk" {
 			$out = "Hi $Username`n`nThis package installer is still available. Why should it be removed?"
 		}
@@ -2674,6 +2724,7 @@ Function Get-CannedMessage {
 
 Function Get-AutoValLog {
 <#
+#>
 	#Needs $GitHubToken to be set up in your -PR $PROFILE or somewhere more secure. Needs permissions: workflow,
 	param(
 		$clip = (Get-Clipboard),
@@ -2687,6 +2738,7 @@ Function Get-AutoValLog {
 		[switch]$Silent
 	)
 	$DownloadSeconds = 8;
+	$LowerOps = $true;
 	$WaiverList = Get-ValidationData -Property autoWaiverLabel
 	#Get-Process *photosapp* | Stop-Process
 	$BuildNumber = Get-BuildFromPR -PR $PR 
@@ -2730,6 +2782,7 @@ Function Get-AutoValLog {
 
 		if ($UserInput -ne "") {
 			if (($UserInput -match "\[FAIL\] Installer failed security check.") -OR ($UserInput -match "Operation did not complete successfully because the file contains a virus or potentially unwanted software")) {
+				$LowerOps = $false
 				Get-GitHubPreset -Preset DefenderFail -PR $PR
 			}
 			if ($UserInput -match "SQL error or missing database") {
@@ -2768,28 +2821,32 @@ Function Get-AutoValLog {
 			$UserInput = $UserInput -notmatch "with working directory 'D:\\TOOLS'."
 
 			$UserInput = $UserInput | Select-Object -Unique
-			$UserInput = "Automatic Validation ended with:`n"+($UserInput -join "`n> ")
 
-			if ($UserInput -match "exit code" -OR $UserInput -match "DeliveryOptimization error" -OR $UserInput -match "Error information") {
-				$ExitCodeTable = gc $ExitCodeFile | ConvertFrom-Csv
-				foreach ($ExitCode in $ExitCodeTable) {
-					if ($UserInput -match $ExitCode.code) {
-						$UserInput += "`n`nAutomated error analysis suggests $($ExitCode.code) may mean $($ExitCode.message)"
+			$out = Reply-ToPR -PR $PR -UserInput $UserInput -CannedMessage AutoValEnd
+
+			$UserInput = $UserInput -replace "-",""
+
+			if ($LowerOps -eq $true) {
+				if(($UserInput -split "`n" ) -match "No suitable installer found for manifest") {
+					Get-RandomIEDS -PR $PR
+				}
+				$exitregex = "exit code: [0-9]{0,3}$"
+				$exitregex2 = "exit code: [0-9]{4,}$"
+				if(!(($UserInput -split "`n" ) -match $exitregex2)) { #4 digits bad
+					if(($UserInput -split "`n" ) -match $exitregex) { #1-3 digits good
+						Get-CompletePR -PR $PR
 					}
-				} 
-			} 
-
-			$UserInput +="`n`n(Automated response - build $build.)"
-			$out = Reply-ToPR -PR $PR -Body $UserInput
-
+				}
+			}
+				
 			if (!($Silent)) {
 				Write-Host "PR: $PR - $out"
 			}
 		} else {
-			$UserInput = "Automatic Validation ended with:`n> No errors to post.`n`n(Automated response - build $build.)"
-			$out = Reply-ToPR -PR $PR -Body $UserInput
+			$out = Reply-ToPR -PR $PR -UserInput $UserInput -CannedMessage AutoValEnd
 			if (!($Silent)) {
 				Write-Host "PR: $PR - $out - No errors to post."
+				Get-CompletePR -PR $PR
 			}
 			$Title = ((Invoke-GitHubPRRequest -PR $PR -Type "" -Output content -JSON).title);
 			foreach ($Waiver in $WaiverList) {
@@ -2800,19 +2857,17 @@ Function Get-AutoValLog {
 		}
 	} else {
 		if (!($Silent)) {
-			$UserInput = "Automatic Validation ended with:`n> ADO Build not found.`n`n(Automated response - build $build.)"
-			$out = Reply-ToPR -PR $PR -Body $UserInput
+			$out = Reply-ToPR -PR $PR -UserInput $UserInput -CannedMessage AutoValEnd
 			Write-Host "PR: $PR - $out - Build not found."
 		}
 	}
-#>
 }
 
 Function Get-RandomIEDS {
 	param(
 		$VM = (Get-NextFreeVM),
-		#$IEDSPRs =(Get-SearchGitHub -Preset IEDS),
-		$IEDSPRs =(Get-SearchGitHub -Preset ToWork3),
+		$IEDSPRs =(Get-SearchGitHub -Preset IEDS),
+		#$IEDSPRs =(Get-SearchGitHub -Preset ToWork3),
 		$PR = ($IEDSPRs.number | where {$_ -notin (Get-Status).pr} | Get-Random),
 		$File = 0,
 		$ManifestType = "",
@@ -2821,7 +2876,7 @@ Function Get-RandomIEDS {
 	
 $PRState = Get-PRStateFromComments $PR
 if (($PRState | where {$_.event -eq "PreValidation"})[-1].created_at -lt (Get-Date).AddHours(-8) -AND #Last Prevalidation was 8 hours ago.
-($PRState | where {$_.event -eq "Running"})[-1].created_at -lt (Get-Date).AddHours(-18)) {  #Last Run was 18 hours ago.
+($PRState | where {$_.event -eq "Running"})[-1].created_at -lt (Get-Date).AddHours(-18)) { #Last Run was 18 hours ago.
 	Get-GitHubPreset Retry -PR $PR
 }
 
@@ -2922,6 +2977,17 @@ Function Approve-PR {
 	$out.StatusDescription
 }
 
+Function Get-ApproveBySearch {
+	Param(
+		[Parameter(mandatory=$True)][string]$Author,
+		$Preset = "ToWork",
+		$MatchText = 'Standardize formatting',
+		$Results = (Get-SearchGitHub -Author $Author -Preset $Preset -NoLabels)
+	)
+	$Results = $Results | ? {$_.user.login -eq $Author -and $_.title -match $MatchText -and $_.labels.name -notcontains 'Moderator-Approved'};
+	$Results.number | % { write-host "$_ - " -nonewline;Approve-PR $_ };
+}
+
 Function Get-PRRange ([int]$firstPR,[int]$lastPR,[string]$Body,[string]$Preset) {
 	$line = 0;$firstPR..$lastPR | %{
 	if ($Preset -eq "closed") {
@@ -2945,12 +3011,20 @@ Function Get-AllPRsOnClipboardPreset ([string]$Body,[string]$Preset) {
 	Get-TrackerProgress -PR $_ $MyInvocation.MyCommand $line ($lastPR - $firstPR);$line++
 }}
 
+Function Get-AddPRLabel {
+	param(
+	[int]$PR,
+	[string]$LabelName
+	)
+	Invoke-GitHubPRRequest -PR $PR -Method POST -Type labels -Data $LabelName
+}
+
 Function Get-RemovePRLabel {
 	param(
 	[int]$PR,
 	[string]$LabelName
 	)
-	Invoke-GitHubRequest -Uri "$GitHubApiBaseUrl/issues/$PR/labels/$LabelName" -Method DELETE
+	(Invoke-GitHubRequest -Uri "$GitHubApiBaseUrl/issues/$PR/labels/$LabelName" -Method DELETE).StatusDescription
 }
 
 function Get-CompletePR ([int]$PR){
@@ -2962,12 +3036,44 @@ function Get-CompletePR ([int]$PR){
 	where {$_ -notmatch "New-Package"} |
 	where {$_ -notmatch "Possible-Duplicate"} |
 	where {$_ -notmatch "Retry-1"} |
-	where {$_ -notmatch "Validation-Completed"}  
+	where {$_ -notmatch "Validation-Completed"} 
 	foreach ($label in $labels) {
 		Get-Removeprlabel -PR $PR -Label $label
 	}
 	$out = Invoke-GitHubPRRequest -PR $PR -Method POST -Type labels -Data "Validation-Completed"
 	return $out
+}
+
+function Get-PushMePRYou {
+	Param(
+		$Author = "Trenly",
+		$MatchString = "Standardize formatting"
+	)
+	while($true){
+		$Preset = "Approval"
+		write-host "$($Preset): $(get-date)";
+		$a = @();
+		$a = Get-SearchGitHub -Author $Author -Preset $Preset -NoLabels;
+		$a = $a | ? {$_.user.login -eq $Author -and $_.title -match $MatchString -and $_.labels.name -notcontains 'Moderator-Approved'};
+		$a.number | % { 
+			write-host "$_ - " -nonewline;
+			Approve-PR $_ 
+		};
+
+		$Preset = "ToWork"
+		write-host "$($Preset): $(get-date)";
+		$a = @();
+		$a = Get-SearchGitHub -Author $Author -Preset $Preset -NoLabels;
+		$a = $a | ? {$_.user.login -eq $Author -and $_.title -match $MatchString -and $_.labels.name -notcontains 'Moderator-Approved'};
+		$a.number | % { 
+			write-host "$_ - " -nonewline;
+			Approve-PR $_ 
+		};
+
+		$Preset = "Complete"
+		write-host "$($Preset): $(get-date)";
+		sleep 300
+	}
 }
 
 Function Add-GitHubReviewComment {
@@ -3022,12 +3128,12 @@ Function Get-LineFromCommitFile {
 		$content = (Invoke-WebRequest "$ADOMSBaseUrl/$ADOMSGUID/_apis/build/builds/$PRbuild/logs/$LogNumber" -ProgressAction SilentlyContinue).content,
 		$Log = ($content -join "" -split "`n"),
 		$MatchOffset = (-1),
-		$MatchLine = (($Log | Select-String -SimpleMatch $SearchString).LineNumber + $MatchOffset | where {$_ -gt 0}),
+		$MatchLine = (($Log | Select-String -SimpleMatch $SearchString).LineNumber | where {$_ -gt 0}),
 		$Length = 0,
 		$output = @()
 	)
 	foreach ($Match in $MatchLine) {
-		$output += ($Log[$Match..($Match+$Length)])
+		$output += ($Log[($Match + $MatchOffset)..($Match+$Length + $MatchOffset)])
 	}
 	return $output
 }
@@ -3117,8 +3223,8 @@ Function Get-PRStateFromComments {
 		if (($Comment.UserName -eq $FabricBot) -AND (
 		($Comment.body -match "The package manager bot determined there was an issue with one of the installers listed in the url field") -OR #URL error
 		($Comment.body -match "The package manager bot determined there was an issue with installing the application correctly") -OR #Validation-Installation-Error
-		($Comment.body -match "The pull request encountered an internal error and has been assigned to a developer to investigate") -OR  #Internal-Error
-		($Comment.body -match "this application failed to install without user input")  -OR #Validation-Unattended-Failed
+		($Comment.body -match "The pull request encountered an internal error and has been assigned to a developer to investigate") -OR #Internal-Error
+		($Comment.body -match "this application failed to install without user input") -OR #Validation-Unattended-Failed
 		($Comment.body -match "Please verify the manifest file is compliant with the package manager") #Manifest-Validation-Error
 		)) {
 			$State = "LabelAction"
@@ -3161,6 +3267,36 @@ Function Get-PRStateFromComments {
 		}
 	}
 	Return $out
+}
+
+Function Get-Autowaiver {
+	param(
+		[int]$PR = (Get-PRNumber $clip -Hash),
+		$AutowaiverData = (gc $AutowaiverFile | convertfrom-csv),
+		$PRData = (get-commitFile -PR $PR),
+		$PackageIdentifier = (Get-YamlValue -StringName PackageIdentifier -clip $PRData),
+		$WaiverData = ($AutowaiverData | ?{$_.PackageIdentifier -match $PackageIdentifier}),
+		$PackageValue = (Get-YamlValue -StringName $WaiverData.WaiverKey -clip $PRData)
+	)
+	if ($WaiverData) {
+		if ($PackageValue -match $WaiverData.waivervalue) {
+			Get-RemovePRLabel -PR $PR -LabelName $WaiverData.WaiverLabel
+			Get-RemovePRLabel -PR $pr -LabelName "Needs-Author-Feedback"
+			Get-RemovePRLabel -PR $pr -LabelName "Needs-Attention"
+			Get-AddPRLabel -PR $PR -LabelName Validation-Completed
+		}
+	}
+}
+
+Function Get-VerifyMMC {
+	param(
+		[int]$PR = (Get-PRNumber $clip -Hash)
+	)
+	$Comments = (Invoke-GitHubPRRequest -PR $PR -Type comments -Output content | select created_at,@{n="UserName";e={$_.user.login -replace "\[bot\]"}},body)
+	$MissingProperties = ($Comments.body | ? {$_ -match "=== manifests"}) -split "`n" | ?{ $_ -notmatch "=== manifests" -AND $_ -notmatch "Missing Properties" -AND $_ -notmatch "Icons" -AND $_ -notmatch "ReleaseNotes" -AND $_ -notmatch "ReleaseNotesUrl" -AND $_ -notmatch "ReleaseDate"}
+	if (!$MissingProperties) {
+		Get-RemovePRLabel -PR $PR -LabelName Manifest-Metadata-Consistency
+	}
 }
 
 #Network tools
@@ -4210,11 +4346,10 @@ Function Get-TrackerVMCycle {
 				$SharedError = $SharedError -replace " (caller: 00007FFA008A5769)",""
 				$SharedError = $SharedError -replace " (caller: 00007FFA008AA79F)",""
 				$SharedError = $SharedError -replace "Exception(1) tid(f1c) 80D02002",""
-				$SharedError = $SharedError -replace "Exception(2) tid(f1c) 80072EE2     ",""
-				$SharedError = $SharedError -replace "Exception(4) tid(f1c) 80072EE2     ",""
+				$SharedError = $SharedError -replace "Exception(2) tid(f1c) 80072EE2 ",""
+				$SharedError = $SharedError -replace "Exception(4) tid(f1c) 80072EE2 ",""
 				$SharedError = $SharedError -replace "tid(f1c)",""
 				$SharedError = $SharedError -replace "C:\\__w\\1\\s\\external\\pkg\\src\\AppInstallerCommonCore\\Downloader.cpp(185)\\WindowsPackageManager.dll!00007FFA008A37C9:",""
-
 if ($SharedError -match "exit code") {
 	$ExitCodeTable = gc $ExitCodeFile | ConvertFrom-Csv
 	foreach ($ExitCode in $ExitCodeTable) {
@@ -4223,11 +4358,11 @@ if ($SharedError -match "exit code") {
 		}
 	} 
 } 
-				Reply-ToPR -PR $VM.PR -UserInput $SharedError -CannedMessage ManValEnd 
-				Get-TrackerVMSetStatus "Complete" $VM.vm
 				if (($SharedError -match "\[FAIL\] Installer failed security check.") -OR ($SharedError -match "Detected 1 Defender")) {
-					Get-GitHubPreset -Preset DefenderFail -PR $VM.PR 
+					$SharedError += "`n`n<!-- [Policy] Validation-Defender-Error -->"
 				}
+					Reply-ToPR -PR $VM.PR -UserInput $SharedError -CannedMessage ManValEnd 
+				Get-TrackerVMSetStatus "Complete" $VM.vm
 			}
 			default {
 				#Write-Host "Complete"
@@ -4253,7 +4388,7 @@ Function Get-TrackerVMSetMode {
 
 Function Get-ConnectedVM {
 	Test-Admin
-	(Get-Process *vmconnect*) | Select-Object id, @{n="VM";e={ForEach-Object{$_.mainwindowtitle[0..4] -join ""}}}
+	(Get-Process *vmconnect*) | Select-Object id, @{n="VM";e={ForEach-Object{$_.mainwindowtitle[0..5] -join ""}}}
 }
 
 Function Get-NextFreeVM {
@@ -4412,7 +4547,7 @@ Function Add-ToValidationFile {
 		$Selector = "Installers:",
 		$offset = 1,
 		$lineNo = (($fileContents| Select-String $Selector -List).LineNumber -$offset),
-		$fileInsert = "Dependencies:`n  PackageDependencies:`n     - PackageIdentifier: $Dependency",
+		$fileInsert = "Dependencies:`n PackageDependencies:`n - PackageIdentifier: $Dependency",
 		$fileOutput = ($fileContents[0..($lineNo -1)]+$fileInsert+$fileContents[$lineNo..($fileContents.length)])
 	)
 		Write-Host "Writing $($fileContents.length) lines to $FilePath"
@@ -4443,7 +4578,7 @@ Function Add-InstallerSwitch {
 		$Data = '/s' #or -s
 		}
 	}
-	$fileInsert = "  InstallerSwitches:`n    Silent: $Data"
+	$fileInsert = " InstallerSwitches:`n Silent: $Data"
 	Add-ToValidationFile $vm -Selector $Selector -fileInsert $fileInsert #-Force
 }
 
@@ -4453,7 +4588,7 @@ Function Get-UpdateHashInPR {
 		$ManifestHash,
 		$PackageHash,
 		$LineNumbers = ((Get-CommitFile -PR $PR | Select-String $ManifestHash).LineNumber),
-		$ReplaceTerm = ("  InstallerSha256: $($PackageHash.toUpper())"),
+		$ReplaceString = ("  InstallerSha256: $($PackageHash.toUpper())"),
 		$comment = "``````suggestion`n$ReplaceString`n```````n`n(Automated response - build $build.)"
 	)
 	foreach ($Line in $LineNumbers) {
@@ -4469,7 +4604,7 @@ Function Get-UpdateHashInPR2 {
 		$ManifestHash = (Get-YamlValue $SearchTerm -Clip $Clip),
 		$LineNumbers = ((Get-CommitFile -PR $PR | Select-String $ManifestHash).LineNumber),
 		$ReplaceTerm = "Actual hash",
-		$PackageHash = ("  InstallerSha256: "+(Get-YamlValue $ReplaceTerm -Clip $Clip).toUpper()),
+		$ReplaceString = (" InstallerSha256: "+(Get-YamlValue $ReplaceTerm -Clip $Clip).toUpper()),
 		$comment = "``````suggestion`n$ReplaceString`n```````n`n(Automated response - build $build.)"
 	)
 	foreach ($Line in $LineNumbers) {
@@ -4480,7 +4615,7 @@ Function Get-UpdateHashInPR2 {
 Function Get-UpdateArchInPR {
 	param(
 		$PR,
-		$SearchTerm = "  Architecture: x86",
+		$SearchTerm = " Architecture: x86",
 		$LineNumbers = ((Get-CommitFile -PR $PR | Select-String $SearchTerm).LineNumber),
 		[string]$ReplaceTerm = (($SearchTerm -split ": ")[1]),
 		[ValidateSet("x86","x64","arm","arm32","arm64","neutral")]
@@ -4499,7 +4634,7 @@ Function Add-DependencyToPR {
 		$Dependency = "Microsoft.VCRedist.2015+.x64",
 		$SearchString = "Installers:",
 		$LineNumbers = ((Get-CommitFile -PR $PR | Select-String $SearchString).LineNumber),
-		$ReplaceString = "Dependencies:`n  PackageDependencies:`n   - PackageIdentifier: $Dependency`nInstallers:",
+		$ReplaceString = "Dependencies:`n PackageDependencies:`n - PackageIdentifier: $Dependency`nInstallers:",
 		$comment = "``````suggestion`n$ReplaceString`n```````n`n(Automated response - build $build.)"
 	)
 	$out = ""

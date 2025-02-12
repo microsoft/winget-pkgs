@@ -1,4 +1,4 @@
-//Copyright 2022-2024 Microsoft Corporation
+//Copyright 2022-2025 Microsoft Corporation
 //Author: Stephen Gillie
 //Title: WinGet Approval Pipeline v3.-4.0
 //Created: 1/19/2024
@@ -145,7 +145,7 @@ using System.Web.Script.Serialization;
 namespace WinGetApprovalNamespace {
     public class WinGetApprovalPipeline : Form {
 		//vars
-        public int build = 924;//Get-RebuildPipeApp
+        public int build = 926;//Get-RebuildPipeApp
 		public string appName = "WinGetApprovalPipeline";
 		public string appTitle = "WinGet Approval Pipeline - Build ";
 		public static string owner = "microsoft";
@@ -558,16 +558,20 @@ namespace WinGetApprovalNamespace {
 			submenu = new MenuItem("Approve PR");
 				item.MenuItems.Add(submenu);
 					submenu.MenuItems.Add("Approve PR", new EventHandler(Approved_Action));
-				item.MenuItems.Add("Label Action", new EventHandler(Label_Action_Action));
-				item.MenuItems.Add("Check installer", new EventHandler(Check_Installer_Action));
+			submenu = new MenuItem("Update PR");
+				item.MenuItems.Add(submenu);
+					submenu.MenuItems.Add("@wingetbot run", new EventHandler(Retry_Action));
+					submenu.MenuItems.Add("Label Action", new EventHandler(Label_Action_Action));
+					submenu.MenuItems.Add("Check installer", new EventHandler(Check_Installer_Action));
 			submenu = new MenuItem("Update manifest");
 				item.MenuItems.Add(submenu);
 					submenu.MenuItems.Add("Add dependency (VS2015+)", new EventHandler(Add_Dependency_Repo_Action));
 					submenu.MenuItems.Add("Update hash 'Specified hash doesn't match.'", new EventHandler(Update_Hash_Action));
 					submenu.MenuItems.Add("Update hash 2 'SHA256 in manifest...'", new EventHandler(Update_Hash2_Action));
 					submenu.MenuItems.Add("Update architecture (x64)", new EventHandler(Update_Arch_Action));
-				item.MenuItems.Add("@wingetbot run", new EventHandler(Retry_Action));
-				item.MenuItems.Add("Installs Normally in VM", new EventHandler(Manually_Validated_Action));
+			submenu = new MenuItem("Complete PR");
+				item.MenuItems.Add(submenu);
+				submenu.MenuItems.Add("Installs Normally in VM", new EventHandler(Manually_Validated_Action));
 			submenu = new MenuItem("Wingetbot Close");
 				item.MenuItems.Add(submenu);
 					submenu.MenuItems.Add("Close: Merge Conflicts;", new EventHandler(Merge_Conflicts_Action));
@@ -678,8 +682,11 @@ namespace WinGetApprovalNamespace {
 			table_val.Columns.Add("ManifestVer", typeof(string));
 			table_val.Columns.Add("OK", typeof(string));
 			
-			drawDataGrid(ref dataGridView_vm, col0, row0, gridItemWidth*7, gridItemHeight*5);
+			foreach (DataGridViewColumn column in dataGridView_vm.Columns){
+				column.SortMode = DataGridViewColumnSortMode.NotSortable;
+			}
 			
+			drawDataGrid(ref dataGridView_vm, col0, row0, gridItemWidth*7, gridItemHeight*5);
 			drawLabel(ref label_PRNumber, col6, row0, gridItemWidth, gridItemHeight,"Current PR:");
 			drawUrlBox(ref inputBox_PRNumber, col7, row0, gridItemWidth*2,gridItemHeight,"#000000");
 			
@@ -4278,7 +4285,7 @@ try {
 			process.WaitForExit(); 
 		}
 			
-  public void RenameVM2(string VMName, string vmNewName) {
+		public void RenameVM2(string VMName, string vmNewName) {
 	  
             ManagementObject virtualSystemService = GetCimService("Msvm_VirtualSystemManagementService");
             ManagementBaseObject inParams = virtualSystemService.GetMethodParameters("ModifyVirtualSystem");
