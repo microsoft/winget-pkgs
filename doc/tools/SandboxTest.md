@@ -24,26 +24,31 @@ The following optional arguments are supported:
 ### Examples
 
 Test manifest on the latest stable release of WinGet
+
 ```raw
 .\SandboxTest.ps1 <path-to-manifest>
 ```
 
 Test manifest on the latest preview release of WinGet
+
 ```raw
 .\SandboxTest.ps1 <path-to-manifest> -Prerelease
 ```
 
 Test manifest on a specified version of WinGet
+
 ```raw
 .\SandboxTest.ps1 <path-to-manifest> -WinGetVersion 1.4.2011 -Prerelease -Script {Write-Host 'The script has finished'}
 ```
 
 Install a package from the repository in Sandbox 
+
 ```raw
 .\SandboxTest.ps1 -WinGetVersion 1.5 -Script {winget install <PackageIdentifier> --accept-source-agreements}
 ```
 
 # System Requirements
+
 In order to use the SandboxTest script, you must have Windows Sandbox enabled. The Windows Sandbox has the following system requirements -
 * Windows 10 Pro, Enterprise or Education build 18305 or Windows 11 (Windows Sandbox is currently not supported on Windows Home edition)
 * AMD64 architecture
@@ -55,4 +60,5 @@ In order to use the SandboxTest script, you must have Windows Sandbox enabled. T
 To enable the sandbox, open PowerShell and run the command `Enable-WindowsOptionalFeature -FeatureName "Containers-DisposableClientVM" -All -Online`. Once the command completes, restart your computer to finish the installation.
 
 # References to SandboxTest.ps1
-The SandboxTest script has been integrated as part of the toolset here in the winget-pkgs repository. The [YamlCreate Script](/doc/tools/YamlCreate.md) uses SandboxTest to test the creation of new manifests when they are created. The [PRTest Script](/Tools/PRTest.ps1) also uses SandboxTest as a dependency to test manifests which have been submitted to the repository in PRs.
+
+The SandboxTest script has been integrated as part of the toolset here in the winget-pkgs repository. The [YamlCreate Script](../../Tools/YamlCreate.ps1) uses SandboxTest to test the creation of new manifests when they are created. The [PRTest Script](../../Tools/PRTest.ps1) also uses SandboxTest as a dependency to test manifests which have been submitted to the repository in PRs.
