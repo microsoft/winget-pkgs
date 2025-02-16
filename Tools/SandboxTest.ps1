@@ -32,6 +32,10 @@ Param(
     # WinGetOptions
     [Parameter(HelpMessage = 'Additional options for WinGet')]
     [string] $WinGetOptions,
+    # GitHubToken
+    [Parameter(HelpMessage = 'Token for GitHub API Requests')]
+    # It is possible that the environment variable may not exist, in which case this may be null
+    [string] $GitHubToken = $env:GITHUB_TOKEN,
     # Switches
     [switch] $SkipManifestValidation,
     [switch] $Prerelease,
@@ -149,11 +153,37 @@ function Initialize-Folder {
 
 ####
 # Description: Gets the details for a specific WinGet CLI release
-# Inputs: None
+# Inputs: Nullable GitHub API Token
 # Outputs: Nullable Object containing GitHub release details
 ####
 function Get-Release {
-    $releasesAPIResponse = Invoke-RestMethod $script:ReleasesApiUrl
+    param (
+        [Parameter()]
+        [AllowEmptyString()]
+        [String] $GitHubToken
+    )
+
+    # Build up the API request parameters here so the authentication can be added if the user's token is valid
+    $requestParameters = @{
+        Uri = $script:ReleasesApiUrl
+    }
+
+    if (Test-GithubToken -Token $GitHubToken) {
+        # The validation function will return True only if the provided token is valid
+        Write-Verbose 'Adding Bearer Token Authentication to Releases API Request'
+        $requestParameters.Add('Authentication', 'Bearer')
+        $requestParameters.Add('Token', $(ConvertTo-SecureString $GitHubToken -AsPlainText))
+    }
+    else {
+        # No token was provided or the token has expired
+        # If an invalid token was provided, an exception will have been thrown before this code is reached
+        Write-Warning @"
+A valid GitHub token was not provided. You may encounter API rate limits.
+Please consider using the `-GitHubToken` option or adding the `GITHUB_TOKEN` environment variable.
+"@
+    }
+
+    $releasesAPIResponse = Invoke-RestMethod @requestParameters
     if (!$script:Prerelease) {
         $releasesAPIResponse = $releasesAPIResponse.Where({ !$_.prerelease })
     }
@@ -325,7 +355,7 @@ function Test-GithubToken {
         $cachedTokenIsEmpty = [string]::IsNullOrWhiteSpace($cachedTokenContent)
 
         # It is possible for a token to be both empty and expired. Since these are debug and verbose messages, showing both doesn't hurt
-        if ($cachedTokenIsEmpty) { Write-Debug 'Cached token had no content. It will be re-validated' }
+        if ($cachedTokenIsEmpty) { Write-Verbose 'Cached token had no content. It will be re-validated' }
         if ($cacheIsExpired) { Write-Verbose "Cached token is older than $script:CachedTokenExpiration days. It will be re-validated" }
 
         if (!$cacheIsExpired -and !$cachedTokenIsEmpty) {
@@ -349,13 +379,14 @@ function Test-GithubToken {
             }
             # If the parsing failed, the expiration should still be at the minimum value
             elseif ($cachedExpirationDate -eq [System.DateTime]::MinValue) {
-                Write-Debug 'The cached token contained content, but it could not be parsed as a date. It will be re-validated'
+                Write-Verbose 'The cached token contained content, but it could not be parsed as a date. It will be re-validated'
                 Invoke-FileCleanup -FilePaths $cachedToken.FullName
                 # Do not return anything, since the token will need to be re-validated
             }
             else {
                 Write-Verbose "The cached token contained content, but the token expired $([Math]::Abs($tokenExpirationDays)) days ago"
-                Invoke-FileCleanup -FilePaths $cachedToken.FullName
+                # Leave the cached token so that it doesn't throw script exceptions in the future
+                # Invoke-FileCleanup -FilePaths $cachedToken.FullName
                 return $false
             }
         }
@@ -382,7 +413,6 @@ function Test-GithubToken {
     if (!$rateLimit) { return $false } # Something went horribly wrong, and the rate limit isn't known. Assume the token is not valid
     if ([int]$rateLimit[0] -le 60) {
         # Authenticated users typically have a limit that is much higher than 60
-        Write-Warning "You may encounter 'API rate limit exceeded' errors! Please consider adding `GITHUB_TOKEN` to your environment variables"
         return $false
     }
 
@@ -449,7 +479,7 @@ if (!$SkipManifestValidation -and ![String]::IsNullOrWhiteSpace($Manifest)) {
 
 # Get the details for the version of WinGet that was requested
 Write-Verbose "Fetching release details from $script:ReleasesApiUrl; Filters: {Prerelease=$script:Prerelease; Version~=$script:WinGetVersion}"
-$script:WinGetReleaseDetails = Get-Release
+$script:WinGetReleaseDetails = Get-Release -GitHubToken $script:GitHubToken
 if (!$script:WinGetReleaseDetails) {
     Write-Error -Category ObjectNotFound 'No WinGet releases found matching criteria' -ErrorAction Continue
     Invoke-CleanExit -ExitCode 1
