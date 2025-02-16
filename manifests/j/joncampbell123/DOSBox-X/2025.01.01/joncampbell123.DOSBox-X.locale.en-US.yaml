@@ -1,0 +1,171 @@
+# Created with YamlCreate.ps1 v2.4.3 $debug=AUSU.CRLF.7-4-6.Win32NT
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
+
+PackageIdentifier: joncampbell123.DOSBox-X
+PackageVersion: 2025.01.01
+PackageLocale: en-US
+Publisher: joncampbell123 [DOSBox-X Team]
+PublisherUrl: https://dosbox-x.com/
+PublisherSupportUrl: https://dosbox-x.com/wiki
+# PrivacyUrl:
+Author: John Campbell
+PackageName: DOSBox-X
+PackageUrl: https://github.com/joncampbell123/dosbox-x
+License: GPL-2.0
+LicenseUrl: https://raw.githubusercontent.com/joncampbell123/dosbox-x/master/COPYING
+# Copyright:
+CopyrightUrl: https://raw.githubusercontent.com/joncampbell123/dosbox-x/master/COPYING
+ShortDescription: DOSBox-X is an open-source DOS emulator for running DOS games and applications.
+Description: |-
+  DOSBox-X emulates a PC necessary for running many DOS games and applications that simply cannot be run on modern PCs and operating systems, similar to DOSBox.
+  However, while the main focus of DOSBox is for running DOS games, DOSBox-X goes much further than this.
+  Started as a fork of the DOSBox project, it retains compatibility with the wide base of DOS games and DOS gaming DOSBox was designed for.
+  But it is also a platform for running DOS applications, including emulating the environments to run Windows 3.x, 9x and ME and software written for those versions of Windows.
+  By adding official support for Windows 95, 98, ME emulation and acceleration, we hope that those old Windows games and applications could be enjoyed or used once more.
+  Moreover, DOSBox-X adds support for DOS/V and NEC PC-98 emulations so that you can play DOS/V and PC-98 games with it.
+Moniker: dosbox-x
+Tags:
+- dos
+- dos-emulator
+- dosbox
+ReleaseNotes: |-
+  2025.01.01
+  - Fix bug that prevented the Configuration GUI from saving to dosbox.conf
+    the last Windows 3.1 theme you applied using the dropdown menu.
+    (joncampbell123).
+  - Add option to apply vmemdelay to SVGA and linear framebuffer
+    modes (such as VESA BIOS modes), which reduces emulator performance
+    for those modes, but allows you to emulate slower SVGA cards.
+    Due to how some machine types are emulated, this option also enables
+    vmemdelay to affect the PC-98 linear framebuffer, Tandy & PCjr
+    video modes, as well as MDA/Hercules. (joncampbell123).
+  - Add workaround to CPU reset logic that allows it to work correctly
+    even with dynamic core. Previously, if the guest reset the system,
+    the emulator would crash with an error message about an uncaught
+    C++ exception because C++ exception handling doesn't work with
+    dynamically generated code. (joncampbell123).
+  - Correct CPUID family/model/brand values for cputype=pentium_iii.
+    Add CPUID level 2, which returns "processor configuration
+    descriptors", and return documented Pentium III values. Apparently
+    Windows XP really REALLY cares about these configuration
+    descriptors and will hang in-kernel in an infinite loop at bootup
+    without these apparently really important values. This change
+    makes it possible to boot Windows XP with Pentium III emulation.
+    (joncampbell123).
+  - Allow values of memsize to represent 4GB or more of RAM. Up to
+    1TB, if Pentium PSE extensions are enabled, the memalias setting
+    is 40, and "enable pse=pse40" in the conf file. Memalias maximum
+    is now 40, instead of 32. Add code to provide that memory above
+    the 4GB address mark when PSE is in use by the guest OS. Added
+    dosbox.conf option to specify a memory file. When specified, all
+    guest memory is memory-mapped from a file on disk, rather than
+    allocated from host memory or host swap file. To avoid consuming
+    too much RAM on the host, a memory file is REQUIRED to emulate
+    memory at or above 4GB. For best performance with the memory file,
+    make sure the filesystem you place it on supports sparse files,
+    including Linux ext4 and Windows NTFS. (joncampbell123).
+  - Fix EGA machine type to determine whether CGA RGBI or EGA RrGgBb
+    display is active by vsync polarity, instead of the length of
+    htotal. Several online references state that vsync is negative
+    for 350-line modes, including 350-line to an MDA monitor. This
+    also allows the "enhanced" EGA 320x200 modes in Rambo III to display
+    colors correctly. (joncampbell123).
+  - Dynamic x86 core: Reflect STI instruction to normal core so that
+    the 1-instruction delay is correctly emulated. This makes it
+    possible to run Windows XP or Server 2003 with dynamic core and
+    SYSENTER/SYSEXIT emulation without random BSODs (joncampbell123).
+  - Fix default code page. Instead of assuming 437 at all times, use
+    437 for all IBM PC compatible modes and 932 for PC-98 emulation.
+    (joncampbell123).
+  - Normal core: Fix STI emulation to enforce the 1-instruction delay
+    by forcing the normal core to execute another instruction right
+    away without providing any opportunity for interrupt processing.
+    This does not break Peret Em Heru, Keen games, and it seems to fix
+    the random BSOD issues with Windows XP and Windows Server 2003
+    when emulating a Pentium II that supports SYSENTER/SYSEXIT. I'm
+    not clear on why this fix prevents them from crashing, but there
+    you go. (joncampbell123).
+  - Keyboard emulation: Fix PCjr key delay to match IBM documentation
+    stating how long it takes to transmit one scan code, which is
+    obviously much slower than normal to accomodate the slow CPU and
+    the optical nature of the transmission. This is needed in order
+    for emulation to correctly send Fn+key combinations. At normal
+    key delay, the guest will miss scan codes and function keys will
+    not be reliable. (joncampbell123).
+  - Keyboard emulation: The 83-keyboard scan codes work differently on
+    the PCjr keyboard because half of them are only accessible by holding
+    the Fn key. The keyboard only sends the base key scan code and the Fn
+    key scan code and the BIOS is expected to convert that to the normal
+    83-key scan codes expected by DOS software. The problem is some games
+    like "Agent USA" for PCjr are written to directly handle scan codes
+    through IRQ 1 (the fact that PCjr handles keyboard via NMI and reflects
+    to INT 9 is ignored here). Fix this by sending scan codes that emulate
+    holding Fn and pressing the appropriate key. Agent USA expects the
+    user to press F1 by holding Fn and pressing "1". (joncampbell123).
+  - Revise VGA doublescan mode, vs bit 7 of the Max scanline register, to
+    correct how VGA doublescans 200-line modes. Revise EGA/VGA text code
+    to divide line by 2 in rendering to match double scanned scanlines,
+    so that the "graphical" text of "After the War" can render properly
+    for machine=vgaonly. (joncampbell123).
+  - INT 10: If machine=ega, check the EGA switches on INT 10h modeset.
+    Some games force the EGA BIOS to use CGA 200-line text modes by
+    modifying those bits and then setting the mode ("After the War").
+    (joncampbell123).
+  - INT 10: Fix "load font" functions to correctly recompute video
+    display end for machine=vgaonly and machine=ega. (joncampbell123).
+  - INT 10: Like any other 200-line 16-color graphics mode, 200-line
+    VGA text mode needs to program the AC and VGA palette using the
+    CGA RGBI-type palette, not the EGA 64-color type palette. (joncampbell123).
+  - CPU: Disallow clearing PE bit from LMSW by default, always.
+    You can still allow it through dosbox.conf. It turns out that
+    x86 CPUs never allowed you to clear it that way, even from the
+    Pentium up, even though Intel documentation beyond the 386 never
+    mentions it again. This fixes problems with DOS extenders and
+    VCPI, particularly DOS4GW which for some reason with VCPI likes
+    to try to clear the PE bit when switching to VM86 even though
+    it clearly understands it's not supposed to be able to clear it.
+    (joncampbell123).
+  - VCPI: It turns out the VCPI server GDT selectors are expected to
+    be 32-bit, because the protected mode VCPI entry point is expected
+    to be called as if 32-bit far pointer. Correct VCPI entry point
+    to return using RETF, not IRETD, which solves crashing issues with
+    DOS extenders. For the first time, DOS extenders are working with
+    the DOSBox-X built-in implementation of VCPI and most DOS games
+    run fine now with it. (joncampbell123).
+  - VCPI: Add code to INT 2Fh handler regarding Windows startup/shutdown
+    messages to fill in DS:SI. If EMM386 and VCPI emulation is active
+    and running the DOS machine in virtual 8086 mode, give Windows the
+    proper callback procedure to allow Windows to switch off VCPI vm86
+    mode on startup and turn it back on during shutdown. (joncampbell123).
+  - BIOS "POST" screen: Change BIOS logo to PNG format. To avoid having
+    to render a PNG in roughly 10 different video modes, add code to
+    VGA draw code to allow a BIOS logo "overlay" to be rendered
+    independent of the video mode. Depending on machine type load one
+    of four PNG files from disk or from inside DOSBox-X itself.
+    PNG requirements: 224x224 or smaller, bit depth of 8bpp or less,
+    color palette (not grayscale), no alpha channel, and must not be
+    interlaced. For best compatibility, use less than 64 colors, or
+    perhaps just 16 colors. Much like the Windows 95 LOGO.SYS, you can
+    change the logo to your taste by placing specifically named PNG
+    files in the same directory as your dosbox.conf or current working
+    directory. Have fun. Note that this addition requires that you
+    compile DOSBox-X with libpng enabled. (joncampbell123).
+  - Added dosbox.conf option to specify BIOS logo file. (joncampbell123).
+  - Added dosbox.conf option to specify a text message, up to 3 lines,
+    at the bottom of the screen during BIOS POST screen. (joncampbell123).
+  - Fix color glitches in EGA, Tandy, Hercules mode on macOS SDL2 build 
+    (output=opengl)(maron2000)
+  - Add int33 mickey threshold option (Fixes Ultima Underworld) (jpernst)
+  - Fix configure.ac (disable-screenshot option) (maron2000) 
+  - Fixed codepage switching when loading language file in Traditional
+    Chinese (maron2000)
+  - Fixed display of some Chinese characters (Traditional Chinese)(maron2000)
+  - Fixed garbled text and menubar on reset (maron2000)
+  - Fixed codepage switching when a language file was loaded (maron2000)
+  - sdlmain: Fixed crashing if no config files are found. (skitt)
+ReleaseNotesUrl: https://github.com/joncampbell123/dosbox-x/releases/tag/dosbox-x-v2025.01.01
+# PurchaseUrl:
+# InstallationNotes:
+# Documentations:
+ManifestType: defaultLocale
+ManifestVersion: 1.9.0
