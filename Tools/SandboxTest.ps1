@@ -364,7 +364,8 @@ function Test-GithubToken {
             # Since Github adds ` UTC` at the end, it needs to be stripped off. Trim is safe here since the last character should always be a digit
             $cachedExpirationForParsing = $cachedTokenContent.TrimEnd(' UTC')
             $cachedExpirationDate = [System.DateTime]::MinValue
-            [System.DateTime]::TryParse($cachedExpirationForParsing, [ref]$cachedExpirationDate)
+            # Pipe to Out-Null so that it doesn't get captured in the return output
+            [System.DateTime]::TryParse($cachedExpirationForParsing, [ref]$cachedExpirationDate) | Out-Null
 
             $tokenExpirationDays = $cachedExpirationDate - (Get-Date) | Select-Object -ExpandProperty TotalDays
 
