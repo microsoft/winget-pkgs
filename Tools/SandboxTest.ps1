@@ -426,7 +426,7 @@ function Test-GithubToken {
     # If the token doesn't expire, write a special value to the file
     if (!$tokenExpiration -or [string]::IsNullOrWhiteSpace($tokenExpiration[0])) { $tokenExpiration = @([System.DateTime]::MaxValue) }
     # When datetime objects are converted to string, they have extra whitespace that should be trimmed off
-    $tokenExpiration = $tokenExpiration[0].ToLongDateString().Trim()
+    $tokenExpiration = [DateTime]::Parse($tokenExpiration[0]).ToLongDateString().Trim()
     New-Item -ItemType File -Path $script:TokenValidationCache -Name $tokenHash -Value $tokenExpiration | Out-Null
     Write-Debug "Token <$tokenHash> added to cache with content <$tokenExpiration>"
     return $true
