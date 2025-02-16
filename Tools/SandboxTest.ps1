@@ -390,6 +390,11 @@ function Test-GithubToken {
                 return $false
             }
         }
+        else {
+            # Either the token was empty, or the cached token is expired. Remove the cached token so that re-validation
+            # of the token will update the date the token was cached if it is still valid
+            Invoke-FileCleanup -FilePaths $cachedToken.FullName
+        }
     }
     else {
         Write-Verbose 'Token was not found in the cache'
