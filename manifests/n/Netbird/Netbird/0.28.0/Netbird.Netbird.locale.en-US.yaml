@@ -1,0 +1,93 @@
+# Created with komac v2.2.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.6.0.schema.json
+
+PackageIdentifier: Netbird.Netbird
+PackageVersion: 0.28.0
+PackageLocale: en-US
+Publisher: Netbird
+PublisherUrl: https://netbird.io/
+PackageName: Netbird
+PackageUrl: https://github.com/netbirdio/netbird
+License: BSD-3-Clause
+LicenseUrl: https://github.com/netbirdio/netbird/blob/HEAD/LICENSE
+Copyright: Wiretrustee UG
+CopyrightUrl: https://netbird.io/terms
+ShortDescription: Connect your devices into a single secure private WireGuard®-based mesh network with SSO/MFA and simple access controls.
+Description: NetBird combines a configuration-free peer-to-peer private network and a centralized access control system in a single platform, making it easy to create secure private networks for your organization or home.
+Moniker: netbird
+Tags:
+- golang
+- mesh
+- mesh-networks
+- nat-traversal
+- netbird
+- vpn
+- wireguard
+- wireguard-vpn
+- wiretrustee
+- zero-trust-network-access
+ReleaseNotes: |-
+  Release notes
+  This release brings support to new and exiting features like DNS routes, enhancements that simplify site-2-site configurations, bug fixes and a deprecation notice.We are deprecating FileStore engine support and users should update their backup scripts as this new version will automatically migrate the data to the new SQLite engine.
+  New features
+  DNS routes
+  This new functionality enables NetBird users to configure routes using domain names instead of IP ranges. This enhancement is particularly beneficial for routing traffic to load balancers, managed databases, and maintaining security for restricted sites behind CDNs with ease and precision.Learn more at DNS routesProcess posture check
+  Process posture check is a new feature that allows users to define a set of processes that must be running on a device before connecting to the network. This feature is useful when you want to control access based on the processes running on a device. For example, you can disable a connection to a routing peer when a specific process is not running.Learn more at Process checkInitial support of FreeBSD
+  We are happy to present an experimental support release for the FreeBSD operating system. This feature, made possible by a valuable community contribution from member @skillcoder, aims to introduce early functionality for FreeBSD. Please note that this version is still in its initial stages and may contain bugs or incomplete elements.Official builded binaries are coming in the next releases.
+  Enhancements:
+  Network monitor is enable by default for new Windows and macOS clients
+  The network monitor watches for changes on the peers' network interfaces and restarts the connection when necessary. This is useful when roaming between networks where your default gateway changes frequently.  Existing Windows, macOS and Linux users can enable this feature by adding the -N flag to the netbird up command:
+
+  netbird down
+  netbird up -N
+
+  Use 0.0.0.0/0 as source for network routes firewall rules
+  Previously routing peers would add the NetBird address as source in the network routes firewall rules, making site-2-site configurations more complex since administrators would need to add new firewall rules to connect their internal networks via a pair of routing peers. With this enhancement, the routing peers will use 0.0.0.0/0 as source in the network routes firewall rules, simplifying the configuration process by leaving only internal routers to be configured.Add GUI client configuration options
+  We have added new configuration options to the client UI to allow users to configure the client without the need to edit the configuration file or CLI commands. This enhancement is particularly useful for users who prefer to use the client UI to configure the client.Systray:
+
+  Advanced settings window:
+  Deprecations:
+  FileStore engine support removed
+  The FileStore engine support has been deprecated in this release. When upgrading to 0.28.0, the service will automatically migrate the data to the new SQLite engine.
+  Users that backup the store.json file directly should update their scripts to use the new SQLite store file store.db.If you prefer to evaluate performance prior upgrading to 0.28.0, please review the manual migrations steps from the Management SQLite store page.What's Changed
+  - Add FindExistingPostureCheck (#2075)
+  - Fix PKCE auth html (#2079)
+  - Improve login performance (#2061)
+  - Fill the UI version info in system meta on Android (#2077)
+  - Prevent using expired ctx when sending metrics (#2088)
+  - Ignore candidates whose IP falls into a routed network (#2084)
+  - Add missing openid scope when requesting JWT token in Zitadel (#2089)
+  - Remove unused variables from peer conn (#2074)
+  - Respect env for debug and routes sub commands (#2026)
+  - Do not use SO_MARK in case of netstack mode. (#2104)
+  - Use forked go-netroute (#2115)
+  - Add basic signal metrics (#2107)
+  - Optimize JWT Group Sync (#2108)
+  - Prevent building test code for client (#2125)
+  - Deprecate FileStore engine support (#2119)
+  - compile client under freebsd (#1620)
+  - Add DNS routes (#1943)
+  - Add process posture check (#1693)
+  - Fix checkFileAndProcess function on FreeBSD (#2128)
+  - Enable network monitoring for Windows and macOS clients (#2126)
+  - Add freebsd test workflow (#2127)
+  - fix network monitor ref check (#2133)
+  - Allow candidates on local routes if more specific than vpn routes (#2097)
+  - Trim new line char from Android version (#2147)
+  - Fix capacity of slice (#2148)
+  - Fix store migration on empty string (#2149)
+  - Use any as source for the firewall for routed networks (#2134)
+  - Update configuration options for client UI (#2139)
+  - Process routes before peers (#2105)
+  - Remove whitespace at the end of a line (#2152)
+  Big thanks to our community contributors
+  - @glaeqen made their first contribution in (#2089)
+  - @Yxnt made their first contribution in (#2152)
+  - @Evgenii made their first contribution in (#1620)
+  - @juliaroesschen made their first contribution in netbirdio/docs#198
+  - @scudelletti made their first contribution in netbirdio/docs#194
+  - @vladislav-kuznetsov-newhomesmate made their first contribution in netbirdio/docs#189
+  Full Changelog: https://github.com/netbirdio/netbird/compare/v0.27.10...v0.28.0
+ReleaseNotesUrl: https://github.com/netbirdio/netbird/releases/tag/v0.28.0
+ManifestType: defaultLocale
+ManifestVersion: 1.6.0

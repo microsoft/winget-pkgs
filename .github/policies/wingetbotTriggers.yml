@@ -28,6 +28,9 @@ configuration:
               issueAuthor: False
           - filesMatchPattern:
               pattern: DevOpsPipelineDefinitions/*
+          - not: # This checks to ensure the PR is not empty. If it is empty, it would be treated as a match for the above condition
+              filesMatchPattern:
+                pattern: ^$
           - isOpen
         then:
           - approvePullRequest:
@@ -93,6 +96,9 @@ configuration:
           - not: # If it already has been labeled needing attention, don't re-trigger
               hasLabel:
                 label: Needs-Attention
+          - not: # If a moderator reset the feedback, don't re-trigger
+              hasLabel:
+                label: Azure-Pipeline-Passed
         then:
           - addLabel:
               label: Needs-Attention # This will automatically assign the ICM Users

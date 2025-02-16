@@ -1,0 +1,83 @@
+# Created with YamlCreate.ps1 v2.4.3 $debug=AUSU.CRLF.7-4-6.Win32NT
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
+
+PackageIdentifier: SUSE.RancherDesktop
+PackageVersion: 1.12.3
+PackageLocale: en-US
+Publisher: SUSE
+PublisherUrl: https://github.com/rancher-sandbox/rancher-desktop
+PublisherSupportUrl: https://github.com/rancher-sandbox/rancher-desktop/issues
+# PrivacyUrl:
+Author: rancher-sandbox
+PackageName: Rancher Desktop
+PackageUrl: https://rancherdesktop.io/
+License: Apache-2.0
+LicenseUrl: https://github.com/rancher-sandbox/rancher-desktop/blob/HEAD/LICENSE
+# Copyright:
+CopyrightUrl: https://github.com/rancher-sandbox/rancher-desktop/blob/main/LICENSE
+ShortDescription: Kubernetes and container management to the desktop.
+Description: |-
+  Rancher Desktop is an open-source project to bring Kubernetes and container management to the desktop.
+  Windows, macOS and Linux versions of Rancher Desktop are available for download, though do note that the Linux version is considered a tech preview.
+Moniker: rancher-desktop
+Tags:
+- k3s
+- nerdctl
+- rancher
+ReleaseNotes: |-
+  This is the 1.12.3 release of Rancher Desktop, an open source desktop application to bring Kubernetes and container management to Mac, Windows, and Linux.⚠️ Warning ⚠️
+  Do NOT use the experimental virtiofs mount type (on Linux and macOS). We have experienced catastrophic data loss with this mount option on Linux (the $HOME directory on the host was wiped out), and have seen a single bug report on Lima claiming a similar experience on macOS. We are not aware of a direct incidence with Rancher Desktop on macOS, but Lima is the underlying technology managing the VM and volume mounts.Due to the catastrophic failure mode we urge everyone to NOT use this option.We will temporarily remove this setting in the 1.13.0 release until the issue is understood and fixed.Installers
+  - Windows
+  - macOS x86_64
+  - macOS aarch64
+  - Linux install notes
+  What has changed in 1.12.3
+  The 1.12.3 patch release updates runc to version 1.1.12, buildkitd to 0.12.5, and nerdctl to 1.7.3 to fix a number of CVEs:- CVE-2024-21626 Several container breakouts due to internally leaked fds (high)
+  - CVE-2024-23650 Possible panic when incorrect parameters sent from frontend (moderate)
+  - CVE-2024-23651 Possible race condition with accessing subpaths from cache mounts (high)
+  - CVE-2024-23652 Possible host system access from mount stub cleaner (high)
+  - CVE-2024-23653 Interactive containers API does not validate entitlements check (high)
+  All these CVEs can only be exploited if the user is using malicious input in the container build process or is running container images that have already been compromised.The following CVE is not fixed in this patch release because there is no upstream release for moby 23.* that includes the fix yet:- CVE-2024-24557 Classic builder cache poisoning (moderate)
+  Note that Rancher Desktop is only affected by this CVE if the user explicitly opts out of Buildkit to use the legacy/classic builder (sets DOCKER_BUILDKIT=0). It does not apply to the default configuration.What has changed in 1.12.2
+  The 1.12.2 patch release fixes a single issue on macOS and Linux where the shell profile (e.g. ~/.bash_profile) could be deleted (#6281). This was due to a race condition, after either a fresh install or a factory-reset, which would display the first-run dialog. When this dialog was closed (accepted) quickly, the file could be overwritten with truncated content.There are no changes (except for the version number bump) on Windows.What has changed in 1.12.1
+  The 1.12.1 patch release fixes a single memory corruption issue on Windows for importing CA certificates (#6308). There are no changes (except for the version number bump) on macOS and Linux.Release notes for 1.12.0
+  Notable Features & Changes
+  Windows WSL Installation
+  For Windows users that have previously overridden the WSL installation check, please use WSLINSTALLED instead of WSLKERNELINSTALLED.Windows tunnelling networking mode is no longer experimental
+  It has feature parity with the legacy networking mode and will become the default setting for new installations (and factory reset) in the 1.13 release. We expect to remove the legacy networking support in 1.14.macOS builds for aarch64 are now native binaries
+  The VM code has always been platform-native, but the UI used to require Rosetta because it was still an x86_64 binary. Now everything except for kuberlr and the kubectl versions managed by it are aarch64 binaries. The problem with kuberlr and kubectl is that there are no native binaries available from upstream for older Kubernetes versions.macOS socket_vmnet networking is no longer experimental
+  socket_vmnet is a replacement for vde_vmnet, which is deprecated upstream. It was never supported in VZ emulation mode, so Rancher Desktop already uses socket_vmnet in VZ mode when admin access is enabled.socket_vmnet will become the default for QEMU as well in the 1.13 release; in 1.14, vde_vmnet will be removed.Deployment Profiles
+  This release now requires deployment profiles to have an explicit version field (which is 10, as of release 1.11.0).The version of rdctl that ships with this release will have the version field in any generated deployment files. However, this means that existing files will either need to be regenerated or manually edited in place.- For Linux, add "version": 10, at the very start of the JSON-formatted deployment file immediately after
+  the initial open brace {.
+  - For macOS, add <key>Version</key><integer>10</integer> after the initial <dict> tag.
+  - For Windows, add a DWORD value named version with value 10 (hexadecimal a) at the top level of each profile that needs updating.
+  Important Bug Fixes
+  Snapshots
+  Improvements and fixes regarding executing multiple application actions while a snapshot is undergoing a management activity (#5846, #5848, #5849, and #5854).Known Issues
+  Apple M3 CPUs
+  Apple M3 CPUs are not supported (yet) by QEMU. Please use VZ emulation instead (#5943).Snapshots
+  There is a known issue with the Snapshot Cancel operation in the UI. It is possible that the operation can no longer be cancelled when the button is pressed. In that case, the operation may succeed but the UI will still claim that it has been cancelled (#6159).Windows Networking
+  There is a known issue with the new network not including all aliased domains (#5239).Container Dashboard
+  There are known issues with the Container Dashboard when using the nerdctl container engine; one is that the "Started" field shows an inaccurate time for containers starting up. The dashboard also has an issue updating when container states have changed or new containers are introduced (#6191, #6189, #5877, and #5775).Provisioning Scripts - Windows
+  The location for provisioning scripts on Windows has changed from %AppData%\rancher-desktop\provisioning to %LocalAppData%\rancher-desktop\provisioning. The files are not automatically migrated when Rancher Desktop is updated, so they must be manually moved or copied to the new location.9p - Linux OS
+  There is a known issue with some Linux distributions and using the experimental mount type 9p (#4943).Extensions Install - Allowed Images
+  When using the Allowed Images feature and also specifying extensions in a deployment profile, the extension images must be included in both lists (#4920).Updates to Bundled Utilities
+  - helm 3.12.3 → 3.13.3
+  - docker 24.0.6 → 24.0.7
+  - docker-buildx 0.11.2 → 0.12.0
+  - docker-compose 2.22.0 → 2.23.3
+  - docker-credential-ecr-login 0.7.1 → 0.7.1
+  - nerdctl 1.6.2 → 1.7.1
+  - moby/buildkit 0.12.3 → 0.12.4
+  - trivy 0.46.0 → 0.46.0
+  Connect with the developers
+  - The issue queue
+  - Rancher Users Slack in the #rancher-desktop channel
+  Changelog
+  The full version changelog, from v1.12.0, can be found using GitHub compare and the details of the release can be found in the v1.12.0 milestone.
+ReleaseNotesUrl: https://github.com/rancher-sandbox/rancher-desktop/releases/tag/v1.12.3
+# PurchaseUrl:
+# InstallationNotes:
+# Documentations:
+ManifestType: defaultLocale
+ManifestVersion: 1.9.0
