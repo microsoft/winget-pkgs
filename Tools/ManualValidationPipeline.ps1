@@ -10,7 +10,7 @@
 #3.88.19 - A few bugfixes.
 #3.88.18 - Restore waiver and retry fucntionality. 
 
-$build = 979
+$build = 980
 $appName = "ManualValidationPipeline"
 Write-Host "$appName build: $build"
 $MainFolder = "C:\ManVal"
@@ -1763,6 +1763,25 @@ Function Get-PRWatch {
 	$Count--
 }; #end function
 
+Function Get-RunPRWatchAutomation {
+	param(
+	$SleepDuration = 10
+	)
+	while($true){
+		$Preset = "Approval"
+		write-host "$($Preset): $(get-date)";
+		$a = get-searchGitHub -Preset $Preset
+		$a | %{
+			write-output "$($_.number) - $($_.title)";
+			Get-PRManifest -pr $_.number | clip; 
+			sleep $SleepDuration
+		}
+		$Preset = "Complete"
+		write-host "$($Preset): $(get-date)";
+		sleep 300
+	}
+}
+
 #Third tab
 Function Get-WorkSearch {
 	param(
@@ -2392,14 +2411,15 @@ Function Get-SearchGitHub {
 	$Review1 = $Review1 + "-label:Needs-CLA+"
 	$Review1 = $Review1+ "-label:No-Recent-Activity+"
 
-	$Review2 = "-label:$NA+"
-	$Review2 = $Review2 + "-label:$NAF+"
+	$Review2 = "-"+$NA
+	$Review2 = $Review2 + "-"+$NAF
 	$Review2 = $Review2 + "-label:Needs-Review+"
 	
 	$Approvable = "-label:Validation-Merge-Conflict+" 
 	$Approvable += "-label:Manifest-Version-Error+";
-	$Approvable += "-label:"+$MagicLabels[10]+"+";#MVE
+	$Approvable += "-label:"+$MagicLabels[10]+"+";#MIVE
 	$Approvable += "-label:"+$MagicLabels[11]+"+";#MVE
+	$Approvable += "-label:"+$MagicLabels[12]+"+";#PossDupe
 	$Approvable += "-label:Unexpected-File+";
 	
 	$Workable += "-label:"+$MagicLabels[34]+"+";#LVR
@@ -2480,8 +2500,8 @@ Function Get-SearchGitHub {
 			$Url += $Cna
 			$Url += $Set2 #Blocking + Common + Review1 + Review2
 			$Url += $Approvable
-			$Url += $nMMC;
 			$Url += $Workable;
+			$Url += $nMMC;
 			$Url += $sortAsc;
 		}
 		"Defender"{
@@ -2874,11 +2894,11 @@ Function Get-RandomIEDS {
 		$OldManifestType = ""
 	)
 	
-$PRState = Get-PRStateFromComments $PR
-if (($PRState | where {$_.event -eq "PreValidation"})[-1].created_at -lt (Get-Date).AddHours(-8) -AND #Last Prevalidation was 8 hours ago.
-($PRState | where {$_.event -eq "Running"})[-1].created_at -lt (Get-Date).AddHours(-18)) { #Last Run was 18 hours ago.
-	Get-GitHubPreset Retry -PR $PR
-}
+	$PRState = Get-PRStateFromComments $PR
+	if (($PRState | where {$_.event -eq "PreValidation"})[-1].created_at -lt (Get-Date).AddHours(-8) -AND #Last Prevalidation was 8 hours ago.
+	($PRState | where {$_.event -eq "Running"})[-1].created_at -lt (Get-Date).AddHours(-18)) { #Last Run was 18 hours ago.
+		Get-GitHubPreset Manual -PR $PR
+	}
 
 	While ($ManifestType -ne "version") {
 		$CommitFile = Get-CommitFile -PR $PR -File $File
@@ -2891,6 +2911,76 @@ if (($PRState | where {$_.event -eq "PreValidation"})[-1].created_at -lt (Get-Da
 	}	
 }
 
+Function Get-PRManifest {
+	param(
+		$PR,
+		$File = 0,
+		$ManifestType = "",
+		$OldManifestType = "",
+		$FooterHeader = "`n@@ -0,0 +0,0 @@`n"
+	)
+	
+	$CommitFile = Get-CommitFile -PR $PR -File $File
+	$PackageIdentifier = ((Get-YamlValue -StringName "PackageIdentifier" $CommitFile) -replace '"',''-replace "'",'')
+	$PackageVersion = ((Get-YamlValue -StringName "PackageVersion" $CommitFile) -replace '"',''-replace "'",'')
+	$out= "$PackageIdentifier version $PackageVersion #$PR`n"
+	$out += $FooterHeader
+	$out += ($CommitFile -join "`n")
+	$out += $FooterHeader
+	return $out
+}
+
+Function Get-PRManifest2 {
+	param(
+		[int]$PR,
+		$File = 0,
+		$ManifestType = "",
+		$OldManifestType = "",
+		$FooterHeader = "`n@@ -0,0 +0,0 @@`n"
+	)
+
+	$out = ""
+	$PackageIdentifier = ""
+	$PackageVersion = ""
+	While ($ManifestType -ne "version") {
+		$CommitFile = Get-CommitFile -PR $PR -File $File
+		# $CommitFile = $CommitFile -split "`n"
+		$OldManifestType = $ManifestType
+		$ManifestType = Get-YamlValue ManifestType -clip $CommitFile
+		Write-Output "Querying $PR $ManifestType"
+		$PackageIdentifier = ((Get-YamlValue -StringName "PackageIdentifier" $CommitFile) -replace '"',''-replace "'",'')
+		$PackageVersion = ((Get-YamlValue -StringName "PackageVersion" $CommitFile) -replace '"',''-replace "'",'')
+		$Locale = (Get-YamlValue -StringName "PackageLocale" $CommitFile) 
+
+		$FileName = "manifests/m/idk/$PackageIdentifier"
+		switch ($ManifestType) {
+			"defaultLocale" {
+				$FileName += ".locale.$Locale"
+			}
+			"Locale" {
+				$FileName += ".locale.$Locale"
+			}
+			"installer" {
+				$FileName += ".installer"
+			}
+			"version" {
+				#This space intentionally left blank.
+			}
+		}
+
+		$out += "`n`n"+ $FileName + ".yaml`n`n"
+		$out += $FooterHeader
+		if ($OldManifestType -eq $ManifestType) {break}
+		$out += ($CommitFile -join "`n")
+		$File++
+
+
+	}	
+	$Title = "$PackageIdentifier version $PackageVersion #$PR"
+	$out = $Title + "`n" +"`n" +$out
+	$out = $out -join "`n"
+	return $out
+}
 #PR tools
 #Add user to PR: Invoke-GitHubPRRequest -Method $Method -Type "assignees" -Data $User -Output StatusDescription
 #Approve PR (needs work): Invoke-GitHubPRRequest -PR $PR -Method Post -Type reviews
