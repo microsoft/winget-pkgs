@@ -1,7 +1,7 @@
-[Manifest Specification]:   manifest/schema/1.6.0
-[versionSchema]:            manifest/schema/1.6.0/version.md
-[defaultLocaleSchema]:      manifest/schema/1.6.0/defaultLocale.md
-[installerSchema]:          manifest/schema/1.6.0/installer.md
+[Manifest Specification]:   manifest/schema/1.9.0
+[versionSchema]:            manifest/schema/1.9.0/version.md
+[defaultLocaleSchema]:      manifest/schema/1.9.0/defaultLocale.md
+[installerSchema]:          manifest/schema/1.9.0/installer.md
 
 # Authoring Manifests
 
@@ -11,7 +11,7 @@ First, we want to say thank you. Your contribution is highly valued. And we appr
 
 ### What is a manifest?
 
-Manifests are the YAML files in this repository containing the metadata used by the Windows Package Manager to install and upgrade software on Windows 10. There are thousands of these files partitioned under the [manifests](/manifests) directory. We've had to partition the directory structure so you don't have to scroll as much in the GitHub.com site when you are looking for a manifest.
+Manifests are the YAML files in this repository containing the metadata used by the Windows Package Manager to install and upgrade software on Windows 10. There are thousands of these files partitioned under the [manifests](../manifests/) directory. We've had to partition the directory structure so you don't have to scroll as much in the GitHub.com site when you are looking for a manifest.
 
 ### What is a package?
 
@@ -41,9 +41,10 @@ Manifests submitted to the Windows Package Manager Community Repository should b
 
 ## Creating your first manifest
 
-Once you have a package in mind that doesn't already exist in the repository, you can now start [creating your package manifest](https://docs.microsoft.com/en-us/windows/package-manager/package/manifest?tabs=minschema%2Cversion-example). We recommend using the [Windows Package Manager Manifest Creator (a.k.a Winget-Create)](https://github.com/microsoft/winget-create) to help you generate your manifest. Winget-Create is a command line tool that will prompt you for relevant metadata related to your package. Once you are done, Winget-Create will validate your manifest to verify that it is correct and allow you to submit your newly-created manifest directly to the winget-pkgs repository by linking your GitHub account. Alternatively, you can use the [YamlCreate.ps1 Script](/Tools/YamlCreate.ps1). More information on using YamlCreate is found in the [script documentation](tools/YamlCreate.md).
+Once you have a package in mind that doesn't already exist in the repository, you can now start [creating your package manifest](https://docs.microsoft.com/en-us/windows/package-manager/package/manifest?tabs=minschema%2Cversion-example). We recommend using the [Windows Package Manager Manifest Creator (a.k.a Winget-Create)](https://github.com/microsoft/winget-create) to help you generate your manifest. Winget-Create is a command line tool that will prompt you for relevant metadata related to your package. Once you are done, Winget-Create will validate your manifest to verify that it is correct and allow you to submit your newly-created manifest directly to the winget-pkgs repository by linking your GitHub account. Alternatively, you can use the [YamlCreate.ps1 Script](../Tools/YamlCreate.ps1). More information on using YamlCreate is found in the [script documentation](tools/YamlCreate.md).
 
 ## Installer Architectures
+
 If you are authoring a manifest yourself one of the important things to note related to installer types is architecture. In many cases the installer itself may be an x86 installer, but it will actually install the package for the architecture of the system. In these cases, the installer type in the manifest should indicate the architecture of the installed binaries. So in some cases the actual installer itself targets x86, but in fact it will install an x64 version of the package.
 
 
@@ -114,27 +115,37 @@ There are a few typical use cases when `AppsAndFeaturesEntries` should be specif
 
     There are many ways that publishers choose to version their software. This leads to some cases where the way WinGet sorts versions will not work properly. Some examples include packages that only use commit hashes for their releases, packages which prefix the version number with a string, or packages using date versioning of DD-MM-YYYY.
 
-	When this happens, `PackageVersion` should be set to something which is sortable by WinGet and `DisplayVersion` should be set to the value the installer writes to the registry. For more information, see the section on [Version Sorting in WinGet](/doc/Authoring.md#version-sorting-in-winget)
+	When this happens, `PackageVersion` should be set to something which is sortable by WinGet and `DisplayVersion` should be set to the value the installer writes to the registry. For more information, see the section on [Version Sorting in WinGet](../doc/Authoring.md#version-sorting-in-winget)
 
 4. The `InstallerType` of the installer which writes the registry keys does not match the `InstallerType` of the manifest
 
     In some cases an EXE installer may call an embedded MSI which writes data to the registry in a different format. While the `InstallerType` may be correctly identified in the manifest, the WinGet CLI will detect the registry entries as being from an MSI and return an error that the installation technology does not match when running `winget upgrade`. This requires the `InstallerType` to be specified in `AppsAndFeaturesEntries`
 
-For more information on how to specify `AppsAndFeaturesEntries` and what the available metadata fields are, please see the [Manifest Specification](/doc/manifest).
+For more information on how to specify `AppsAndFeaturesEntries` and what the available metadata fields are, please see the [Manifest Specification](../doc/manifest/).
 
 ## Version Sorting in WinGet
 
 Inherently, all versions are strings. Whether a publisher uses a date code, a commit hash, or some other crazy format they are all saved as string values in the Windows Registry. In fact, a sematic version is just a string with a certain format. To convert these strings into versions and sort them, WinGet goes through the following process.
 
-1. Split the string at each `.`, discarding the `.`
-2. Create a new `Part` from each of the split sections
+> [!IMPORTANT]
+> Step 1 of the below process only occurs in WinGet version 1.9.1763-preview or newer
+> If you are using an older version of WinGet, version preambles may not be handled correctly
+
+1. If there is a digit before the first `.` or there is no `.`, trim off all leading non-digit characters.
+   Examples:
+    * `v1.0.1` becomes `1.0.1`
+    * `version 12` becomes `12`
+2. Split the string at each `.`, discarding the `.`
+3. Create a new `Part` from each of the split sections
     * A `Part` consists of two components - an `integer`, and a `string`
-	* To create a `Part`, numeric characters are parsed from the start of the section and used to create the `integer`. Once a non-numeric character is encountered, the remainder of the section is considered the `string`
+	* To create a `Part`, whitespace characters are first trimmed from the start and end of the section
+	* Then, numeric characters are parsed from the start of the section and used to create the `integer`.
+	* Once a non-numeric character is encountered, the remainder of the section is considered the `string`
 	* Example: If the section is `2024Mar15`, then `2024 → integer` and `Mar15 → string`
-3. Compare the two parts created from the first section of the `Version`.
+4. Compare the two parts created from the first section of the `Version`.
 	* If the two parts are not equal, whichever `Part` is larger corresponds to the larger version
 	* See below for an explanation on how parts are compared
-4. If the two parts are equal, repeat step 3 with each consecutive pair of parts
+5. If the two parts are equal, repeat step 3 with each consecutive pair of parts
 	* If both versions have no more parts, they are equal
 	* If one version has more parts and the other does not, pad the shorter version with an additional `0` as needed
 
@@ -156,5 +167,5 @@ When comparing one `Part` to another, WinGet goes through the following process.
 | 1.2.0 | 1.2 | Equal | `Version B` will be padded with zeros to match the same number of `Parts` as `Version A` |
 | 1.2 | 1.2-rc | `Version A` | The `-rc` causes `Version B` to have a `string` in the second `Part` where `Version A` does not |
 | 1.2.3 | 1.2.4-rc | `Version B` | The `integer` on the third `Part` is larger for `Version B` |
-| v1.2 | 1.1 | `Version B` | The leading `v` causes the `integer` for `Version A` to be `0`, which is less than `1` |
+| v1.2 | 1.1 | `Version A` | The leading `v` will be trimmed off of `Version A`, and `1.2` is a higher version than `1.1` due to integer comparison in the second `Part` |
 | 1.2.3a | 1.2.3b | `Version B` | `b` is lexicographically greater than `a` |
