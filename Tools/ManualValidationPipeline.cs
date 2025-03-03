@@ -2,14 +2,9 @@
 //Author: Stephen Gillie
 //Title: WinGet Approval Pipeline v3.-4.0
 //Created: 1/19/2024
-//Updated: 4/4/2024
+//Updated: 3/3/2025
 //Notes: Tool to streamline evaluating winget-pkgs PRs. 
-//Update log:
-//3.-4.0 - Rewrite ValidateManifest.
-//3.-5.4 - Add GetVMPowerState.
-//3.-5.4 - Rewrite InvokeWebRequest HEAD response to give back the status code.
-//3.-5.3 - Rewrite NextFreeVM.
-//3.-5.2 - Rewrite AutoValLog to use ZipFile.
+
 
 
 
@@ -145,7 +140,7 @@ using System.Web.Script.Serialization;
 namespace WinGetApprovalNamespace {
     public class WinGetApprovalPipeline : Form {
 		//vars
-        public int build = 926;//Get-RebuildPipeApp
+        public int build = 927;//Get-RebuildPipeApp
 		public string appName = "WinGetApprovalPipeline";
 		public string appTitle = "WinGet Approval Pipeline - Build ";
 		public static string owner = "microsoft";
@@ -4069,16 +4064,16 @@ try {
 				string out_content = (string)content;
 			//From SO: File.WriteAllLines takes a sequence of strings - you've only got a single string. If you only want your file to contain that single string, just use File.WriteAllText.
 				if (Append == true) {
-					File.AppendAllText(path, out_content, Encoding.Unicode);//string
+					File.AppendAllText(path, out_content, Encoding.ASCII);//string
 				} else {
-					File.WriteAllText(path, out_content, Encoding.Unicode);//string
+					File.WriteAllText(path, out_content, Encoding.ASCII);//string
 				}
 			} else {
 				IEnumerable<string> out_content = (IEnumerable<string>)content;
 				if (Append == true) {
-					File.AppendAllLines(path, out_content, Encoding.Unicode);//IEnumerable<string>'
+					File.AppendAllLines(path, out_content, Encoding.ASCII);//IEnumerable<string>'
 				} else {
-					File.WriteAllLines(path, out_content, Encoding.Unicode);//string[]
+					File.WriteAllLines(path, out_content, Encoding.ASCII);//string[]
 				}				
 			}
 		}
