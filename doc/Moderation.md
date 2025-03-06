@@ -4,7 +4,7 @@ The Windows Package Manager community repository is the location for manifests p
 
 ## Moderators
 
-In addition to Microsoft employees, several community members have been identified through their high-quality submissions, willingness to help others, and adherence to our [code of conduct](/CODE_OF_CONDUCT.md).
+In addition to Microsoft employees, several community members have been identified through their high-quality submissions, willingness to help others, and adherence to our [code of conduct](../CODE_OF_CONDUCT.md).
 
 When we initially implemented moderation, we observed several objective criteria. These included the number of Pull Requests (PR)s made, the length of time they had been active in the project, and their interaction with others who submitted PRs.
 
@@ -12,16 +12,18 @@ Our intent was not to introduce a numbers game for others to achieve and automat
 
 | Windows Package Manager Administrators | Community Moderators |
 | :---: | :---: |
-| **[@denelon](https://github.com/denelon)** 				| **[@ImJoakim](https://github.com/ImJoakim)** |
-| **[@hackean-msft](https://github.com/hackean-msft)** 		| **[@ItzLevvie](https://github.com/ItzLevvie)** |
-| **[@JohnMcPMS](https://github.com/JohnMcPMS)**			| **[@jedieaston](https://github.com/jedieaston)** |
-| **[@KevinLaMS](https://github.com/KevinLaMS)** 			| **[@KaranKad](https://github.com/KaranKad)** |
-| **[@msftrubengu](https://github.com/msftrubengu)** 		| **[@mdanish-kh](https://github.com/mdanish-kh)** |
-| **[@ranm-msft](https://github.com/ranm-msft)** 			| **[@OfficialEsco](https://github.com/OfficialEsco)** |
-| **[@ryfu-msft](https://github.com/ryfu-msft)** 			| **[@quhxl](https://github.com/quhxl)** |
-| **[@stephengillie](https://github.com/stephengillie)** 	| **[@russellbanks](https://github.com/russellbanks)** |
-| **[@yao-msft](https://github.com/yao-msft)** 				| **[@Trenly](https://github.com/Trenly)** |
-| **[@zachcarp](https://github.com/zachcarp)** 				| |
+| **[@AmelBawa-msft](https://github.com/AmelBawa-msft)**        | **[@ImJoakim](https://github.com/ImJoakim)** |
+| **[@denelon](https://github.com/denelon)**                    | **[@ItzLevvie](https://github.com/ItzLevvie)** |
+| **[@florelis](https://github.com/florelis)**                  | **[@jedieaston](https://github.com/jedieaston)** |
+| **[@hackean-msft](https://github.com/hackean-msft)**          | **[@KaranKad](https://github.com/KaranKad)** |
+| **[@JohnMcPMS](https://github.com/JohnMcPMS)**                | **[@mdanish-kh](https://github.com/mdanish-kh)** |
+| **[@KevinLaMS](https://github.com/KevinLaMS)**                | **[@OfficialEsco](https://github.com/OfficialEsco)** |
+| **[@Madhusudhan-MSFT](https://github.com/Madhusudhan-MSFT)**  | **[@quhxl](https://github.com/quhxl)** |
+| **[@msftrubengu](https://github.com/msftrubengu)**            | **[@russellbanks](https://github.com/russellbanks)** |
+| **[@ranm-msft](https://github.com/ranm-msft)**                | **[@Trenly](https://github.com/Trenly)** |
+| **[@RDMacLachlan](https://github.com/RDMacLachlan)**          | |
+| **[@stephengillie](https://github.com/stephengillie)**        | |
+| **[@yao-msft](https://github.com/yao-msft)**                  | |
 
 ## Expectations
 
@@ -90,6 +92,8 @@ Moderators are often the first to see and triage new issues, and so they have th
 * `Area-Client`
 * `Area-External`
 * `Area-Matching`
+* `Area-Publish-Pipeline`
+* `Area-Rebuild-Pipeline`
 * `Area-Scope`
 * `Area-Validation-Pipeline`
 * `Blocking-Issue`
@@ -97,11 +101,15 @@ Moderators are often the first to see and triage new issues, and so they have th
 * `DriverInstall`
 * `DSC`
 * `Error-Hash-Mismatch`
+* `Error-Installer-Availability`
 * `Hardware`
 * `Help-Wanted`
 * `Highest-Version-Removal`
+* `Icon`
 * `In-PR`
+* `Installer-Error`
 * `Installer-Issue`
+* `Interactive-Only-Download`
 * `Interactive-Only-Installer`
 * `Issue-Bug`
 * `Issue-Docs`
@@ -109,6 +117,7 @@ Moderators are often the first to see and triage new issues, and so they have th
 * `Last-Version-Removal`
 * `License-Blocks-Install`
 * `Manifest-Content-Incomplete`
+* `Manifest-Singleton-Deprecated`
 * `Moderator-Approved`
 * `Needs-Attention`
 * `Needs-Author-Feedback`
@@ -124,6 +133,7 @@ Moderators are often the first to see and triage new issues, and so they have th
 * `Scripted-Application`
 * `Testing`
 * `Upgrade-Issue`
+* `Validation-Skip-Automations`
 * `Version-Parameter-Mismatch`
 * `Windows-Features`
 * `Zip-Binary`

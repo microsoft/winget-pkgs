@@ -65,10 +65,8 @@ extends:
             SCAN_ENDPOINT: $(AzFuncScanEndpoint)
             INSTALLATION_ENDPOINT: $(AzFuncInstallationVerificationEndpoint)
             LABEL_ENDPOINT: $(AzFuncSetLabelOnPullRequestEndpoint)
-            CLEANUP_ENDPOINT: $(AzFuncCleanupEndpoint)
             LABEL_KEY: $(AzureFunctionLabelKey)
             CATALOG_CONTENT_VERIFICATION_ENDPOINT: $(AzFuncCatalogContentVerificationEndpoint)
-            MISSING_MANIFEST_FIELDS_VERIFICATION_ENDPOINT: $(AzFuncMissingManifestFieldsVerificationEndpoint)
           inputs:
             script: 'winget_validation_setup.cmd'
             workingDirectory: scripts
@@ -87,12 +85,10 @@ extends:
           env:
             ValidationStorageAccountName: $(ValidationStorageAccountName)
             StorageManagedIdentityClientId: $(StorageManagedIdentityClientId)
-            GithubRepository: $(GithubRepository)
-            GithubServiceAccountToken: $(GithubServiceAccountToken)
-            ExecutionEnvironment: $(ExecutionEnvironment)
-            DIApplicationInsightKey: $(DIApplicationInsightKey)
             WinGet:AppConfig:PrimaryEndpoint: $(AppConfigPrimaryEndpoint)
             WinGet:AppConfig:SecondaryEndpoint: $(AppConfigSecondaryEndpoint)
+            DIApplicationInsightKey: $(DIApplicationInsightKey)
+            ExecutionEnvironment: $(WinGetSvc.ExecutionEnvironment)
 
         # Validates manifest integrity.
         - task: AzureCLI@2
@@ -109,9 +105,10 @@ extends:
             ValidationStorageAccountName: $(ValidationStorageAccountName)
             CacheStorageAccountName: $(CacheStorageAccountName)
             StorageManagedIdentityClientId: $(StorageManagedIdentityClientId)
-            DIApplicationInsightKey: $(DIApplicationInsightKey)
             WinGet:AppConfig:PrimaryEndpoint: $(AppConfigPrimaryEndpoint)
             WinGet:AppConfig:SecondaryEndpoint: $(AppConfigSecondaryEndpoint)
+            DIApplicationInsightKey: $(DIApplicationInsightKey)
+            ExecutionEnvironment: $(WinGetSvc.ExecutionEnvironment)
 
       # Agentless phase. Depends on previous job.
       - job: 'ContentValidation'
@@ -136,15 +133,18 @@ extends:
             body: |
               {
               "operationId": "$(Build.BuildNumber)",
-              "BuildId": "$(Build.BuildId)",
-              "PlanUrl": "$(system.CollectionUri)",
-              "HubName": "$(system.HostType)",
-              "ProjectId": "$(system.TeamProjectId)",
-              "PlanId": "$(system.PlanId)", 
-              "JobId": "$(system.JobId)", 
-              "TimelineId": "$(system.TimelineId)", 
-              "TaskInstanceId": "$(system.TaskInstanceId)",
-              "AuthToken": "$(system.AccessToken)"
+              "buildId": "$(Build.BuildId)",
+              "planUrl": "$(system.CollectionUri)",
+              "hubName": "$(system.HostType)",
+              "projectId": "$(system.TeamProjectId)",
+              "planId": "$(system.PlanId)", 
+              "jobId": "$(system.JobId)", 
+              "timelineId": "$(system.TimelineId)", 
+              "taskInstanceId": "$(system.TaskInstanceId)",
+              "authToken": "$(system.AccessToken)",
+              "repository": "$(build.repository.id)",
+              "pipelineType": "ValidationPipeline",
+              "pullRequestNumber": "$(System.PullRequest.PullRequestNumber)"
               }
             waitForCompletion: "true"
 
@@ -157,15 +157,18 @@ extends:
             body: |
               {
               "operationId": "$(Build.BuildNumber)",
-              "BuildId": "$(Build.BuildId)",
-              "PlanUrl": "$(system.CollectionUri)",
-              "HubName": "$(system.HostType)",
-              "ProjectId": "$(system.TeamProjectId)",
-              "PlanId": "$(system.PlanId)", 
-              "JobId": "$(system.JobId)", 
-              "TimelineId": "$(system.TimelineId)", 
-              "TaskInstanceId": "$(system.TaskInstanceId)",
-              "AuthToken": "$(system.AccessToken)"
+              "buildId": "$(Build.BuildId)",
+              "planUrl": "$(system.CollectionUri)",
+              "hubName": "$(system.HostType)",
+              "projectId": "$(system.TeamProjectId)",
+              "planId": "$(system.PlanId)", 
+              "jobId": "$(system.JobId)", 
+              "timelineId": "$(system.TimelineId)", 
+              "taskInstanceId": "$(system.TaskInstanceId)",
+              "authToken": "$(system.AccessToken)",
+              "repository": "$(build.repository.id)",
+              "pipelineType": "ValidationPipeline",
+              "pullRequestNumber": "$(System.PullRequest.PullRequestNumber)"
               }
             waitForCompletion: "true"
 
@@ -178,15 +181,18 @@ extends:
             body: |
               {
               "operationId": "$(Build.BuildNumber)",
-              "BuildId": "$(Build.BuildId)",
-              "PlanUrl": "$(system.CollectionUri)",
-              "HubName": "$(system.HostType)",
-              "ProjectId": "$(system.TeamProjectId)",
-              "PlanId": "$(system.PlanId)", 
-              "JobId": "$(system.JobId)", 
-              "TimelineId": "$(system.TimelineId)", 
-              "TaskInstanceId": "$(system.TaskInstanceId)",
-              "AuthToken": "$(system.AccessToken)"
+              "buildId": "$(Build.BuildId)",
+              "planUrl": "$(system.CollectionUri)",
+              "hubName": "$(system.HostType)",
+              "projectId": "$(system.TeamProjectId)",
+              "planId": "$(system.PlanId)", 
+              "jobId": "$(system.JobId)", 
+              "timelineId": "$(system.TimelineId)", 
+              "taskInstanceId": "$(system.TaskInstanceId)",
+              "authToken": "$(system.AccessToken)",
+              "repository": "$(build.repository.id)",
+              "pipelineType": "ValidationPipeline",
+              "pullRequestNumber": "$(System.PullRequest.PullRequestNumber)"
               }
             waitForCompletion: "true"
 
@@ -213,15 +219,18 @@ extends:
             body: |
               {
               "operationId": "$(Build.BuildNumber)",
-              "BuildId": "$(Build.BuildId)",
-              "PlanUrl": "$(system.CollectionUri)",
-              "HubName": "$(system.HostType)",
-              "ProjectId": "$(system.TeamProjectId)",
-              "PlanId": "$(system.PlanId)", 
-              "JobId": "$(system.JobId)", 
-              "TimelineId": "$(system.TimelineId)", 
-              "TaskInstanceId": "$(system.TaskInstanceId)",
-              "AuthToken": "$(system.AccessToken)"
+              "buildId": "$(Build.BuildId)",
+              "planUrl": "$(system.CollectionUri)",
+              "hubName": "$(system.HostType)",
+              "projectId": "$(system.TeamProjectId)",
+              "planId": "$(system.PlanId)", 
+              "jobId": "$(system.JobId)", 
+              "timelineId": "$(system.TimelineId)", 
+              "taskInstanceId": "$(system.TaskInstanceId)",
+              "authToken": "$(system.AccessToken)",
+              "repository": "$(build.repository.id)",
+              "pipelineType": "ValidationPipeline",
+              "pullRequestNumber": "$(System.PullRequest.PullRequestNumber)"
               }
             waitForCompletion: "true"
 
@@ -234,15 +243,18 @@ extends:
             body: |
               {
               "operationId": "$(Build.BuildNumber)",
-              "BuildId": "$(Build.BuildId)",
-              "PlanUrl": "$(system.CollectionUri)",
-              "HubName": "$(system.HostType)",
-              "ProjectId": "$(system.TeamProjectId)",
-              "PlanId": "$(system.PlanId)", 
-              "JobId": "$(system.JobId)", 
-              "TimelineId": "$(system.TimelineId)", 
-              "TaskInstanceId": "$(system.TaskInstanceId)",
-              "AuthToken": "$(system.AccessToken)"
+              "buildId": "$(Build.BuildId)",
+              "planUrl": "$(system.CollectionUri)",
+              "hubName": "$(system.HostType)",
+              "projectId": "$(system.TeamProjectId)",
+              "planId": "$(system.PlanId)", 
+              "jobId": "$(system.JobId)", 
+              "timelineId": "$(system.TimelineId)", 
+              "taskInstanceId": "$(system.TaskInstanceId)",
+              "authToken": "$(system.AccessToken)",
+              "repository": "$(build.repository.id)",
+              "pipelineType": "ValidationPipeline",
+              "pullRequestNumber": "$(System.PullRequest.PullRequestNumber)"
               }
             waitForCompletion: "true"
 
@@ -269,15 +281,18 @@ extends:
             body: |
               {
               "operationId": "$(Build.BuildNumber)",
-              "BuildId": "$(Build.BuildId)",
-              "PlanUrl": "$(system.CollectionUri)",
-              "HubName": "$(system.HostType)",
-              "ProjectId": "$(system.TeamProjectId)",
-              "PlanId": "$(system.PlanId)", 
-              "JobId": "$(system.JobId)", 
-              "TimelineId": "$(system.TimelineId)", 
-              "TaskInstanceId": "$(system.TaskInstanceId)",
-              "AuthToken": "$(system.AccessToken)"
+              "buildId": "$(Build.BuildId)",
+              "planUrl": "$(system.CollectionUri)",
+              "hubName": "$(system.HostType)",
+              "projectId": "$(system.TeamProjectId)",
+              "planId": "$(system.PlanId)", 
+              "jobId": "$(system.JobId)", 
+              "timelineId": "$(system.TimelineId)", 
+              "taskInstanceId": "$(system.TaskInstanceId)",
+              "authToken": "$(system.AccessToken)",
+              "repository": "$(build.repository.id)",
+              "pipelineType": "ValidationPipeline",
+              "pullRequestNumber": "$(System.PullRequest.PullRequestNumber)"
               }
             waitForCompletion: "true"
 
@@ -295,51 +310,28 @@ extends:
           HostKeySecret: $[ dependencies.FileValidation.outputs['wingetsetup.hostkey']]
           LabelKeySecret : $[ dependencies.FileValidation.outputs['wingetsetup.labelkey']]
           LabelEndpointSecret: $[ dependencies.FileValidation.outputs['wingetsetup.labelEndpoint']]
-          RepositoryId: $[ dependencies.FileValidation.outputs['wingetsetup.repoId']]
-          CleanupEndpointSecret: $[ dependencies.filevalidation.outputs['wingetsetup.cleanupEndpoint']]
         steps:
 
         # Set label in GitHub PullRequest.
         - task: AzureFunction@1
           displayName: 'Set Label'
-          condition: eq(variables['WinGet.RepositoryType'], 'GitHub')
           inputs:
             function: '$(LabelEndpointSecret)'
             key: '$(LabelKeySecret)'
             body: |
               {
               "operationId": "$(Build.BuildNumber)",
-              "PlanUrl": "$(system.CollectionUri)",
-              "BuildId": "$(Build.BuildId)",
-              "HubName": "$(system.HostType)",
-              "ProjectId": "$(system.TeamProjectId)",
-              "PlanId": "$(system.PlanId)", 
-              "JobId": "$(system.JobId)", 
-              "TimelineId": "$(system.TimelineId)", 
-              "TaskInstanceId": "$(system.TaskInstanceId)",
-              "AuthToken": "$(system.AccessToken)",
-              "BuildRepositoryId": "$(RepositoryId)",
-              "PullRequestNumber": "$(System.PullRequest.PullRequestNumber)",
-              }
-            waitForCompletion: "true"
-
-        # Cleanup resources.
-        - task: AzureFunction@1
-          displayName: 'Validation cleanup'
-          inputs:
-            function: '$(CleanupEndpointSecret)'
-            key: '$(HostKeySecret)'
-            body: |
-              {
-              "operationId": "$(Build.BuildNumber)",
-              "PlanUrl": "$(system.CollectionUri)",
-              "BuildId": "$(Build.BuildId)",
-              "HubName": "$(system.HostType)",
-              "ProjectId": "$(system.TeamProjectId)",
-              "PlanId": "$(system.PlanId)", 
-              "JobId": "$(system.JobId)", 
-              "TimelineId": "$(system.TimelineId)", 
-              "TaskInstanceId": "$(system.TaskInstanceId)",
-              "AuthToken": "$(system.AccessToken)"
+              "buildId": "$(Build.BuildId)",
+              "planUrl": "$(system.CollectionUri)",
+              "hubName": "$(system.HostType)",
+              "projectId": "$(system.TeamProjectId)",
+              "planId": "$(system.PlanId)", 
+              "jobId": "$(system.JobId)", 
+              "timelineId": "$(system.TimelineId)", 
+              "taskInstanceId": "$(system.TaskInstanceId)",
+              "authToken": "$(system.AccessToken)",
+              "repository": "$(build.repository.id)",
+              "pipelineType": "ValidationPipeline",
+              "pullRequestNumber": "$(System.PullRequest.PullRequestNumber)"
               }
             waitForCompletion: "true"
