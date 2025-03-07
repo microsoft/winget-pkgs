@@ -6,7 +6,7 @@
 #Notes: Utilities to streamline evaluating 3rd party PRs.
 
 
-$build = 989
+$build = 992
 $appName = "ManualValidationPipeline"
 Write-Host "$appName build: $build"
 $MainFolder = "C:\ManVal"
@@ -117,7 +117,7 @@ Function Get-TrackerVMRunTracker {
 	while ($True) {
 		$Host.UI.RawUI.WindowTitle = "Orchestration"
 		#Run once an hour at ~20 after.
-		if (([int](get-date -f mm) -eq 20)) {
+		if (([int](get-date -f mm) -eq 20) -OR ([int](get-date -f mm) -eq 50)) {
 			$HourLatch = $True
 		}
 		if ($HourLatch) {#Hourly Run functionality
@@ -125,12 +125,25 @@ Function Get-TrackerVMRunTracker {
 			[console]::beep(500,250);[console]::beep(500,250);[console]::beep(500,250) #Beep 3x to alert the PC user.
 			$Host.UI.RawUI.WindowTitle = "Periodic Run"
 			
-			$PresetList = ("Autowaiver","Defender","Duplicate","HVR","LVR","MMC","ToWork2","VCMA")
+			#Check for yesterday's report and create if missing. 
+			$Month = (Get-Culture).DateTimeFormat.GetMonthName((Get-Date).Month)
+			$Yesterday = (get-date).AddDays(-1)
+			$ReportName = "$logsFolder\$Month\$(get-date $Yesterday -f MMddyy)-Report.txt"
+			if (!(gci $ReportName)) {Get-PRFullReport} 
+			
+			$PresetList = ("Autowaiver","Defender","Duplicate","HVR","LVR","MMC","ToWork2","Approval2","VCMA")
 			foreach ($Preset in $PresetList) {
 				$Results = (Get-SearchGitHub -Preset $Preset).number
 				Write-Output "$(Get-Date -Format T) Starting $Preset with $($Results.length) Results"
 				if ($Results) {
 					switch ($Preset) {
+						"Approval2" {
+							$Results| %{
+								write-output "$(get-date): $_";
+								Get-PRManifest -pr $_ | clip; 
+								sleep 5
+							}
+						}
 						"Autowaiver" {
 							$Results| %{Get-Autowaiver -PR $_}
 						}
@@ -151,10 +164,7 @@ Function Get-TrackerVMRunTracker {
 			Write-Output "$(Get-Date -Format T) Starting trenly with ??? Results"
 			get-pushMePRYou -Author trenly -matchString "Standardize formatting" 
 			Write-Output "$(Get-Date -Format T) Completing trenly with ??? Results"
-			Write-Output "$(Get-Date -Format T) Starting RunPRWatchAutomation with ??? Results"
-			 Get-RunPRWatchAutomation -SleepDuration 4
-			Write-Output "$(Get-Date -Format T) Completing RunPRWatchAutomation with ??? Results"
-			if (([int](get-date -f mm) -eq 20)) {
+			if (([int](get-date -f mm) -eq 20) -OR ([int](get-date -f mm) -eq 50)) {
 				sleep (60-(get-date -f ss))#Sleep out the minute.
 			}
 		}
@@ -1792,18 +1802,17 @@ Function Get-PRWatch {
 
 Function Get-RunPRWatchAutomation {
 	param(
-	$SleepDuration = 10
+		$SleepDuration = 5,
+		$Preset = "Approval2",
+		$Results = (Get-SearchGitHub -Preset $Preset).number
 	)
-	$Preset = "Approval"
-	write-output "$(get-date): $Preset";
-	$a = get-searchGitHub -Preset $Preset
-	$a | %{
-		write-output "$(get-date): $($_.number) - $($_.title)";
-		Get-PRManifest -pr $_.number | clip; 
+	Write-Output "$(Get-Date -Format T) Starting $Preset with $($Results.length) Results"
+	$Results| %{
+		write-output "$(Get-Date): $_";
+		Get-PRManifest -PR $_ | clip; 
 		sleep $SleepDuration
 	}
-	$Preset = "Complete"
-	write-output "$(get-date): $Preset";
+	Write-Output "$(Get-Date -Format T) Completing $Preset with $($Results.length) Results"
 }
 
 #Third tab
@@ -1928,7 +1937,7 @@ Function Get-GitHubPreset {
 			}
 			"DefenderFail" {
 				Add-PRToRecord -PR $PR -Action "Blocking"
-				#$out += Reply-ToPR -PR $PR -CannedMessage $Preset -Policy "Needs-Attention`n[Policy] $($MagicLabels[0])"
+				$out += Reply-ToPR -PR $PR -CannedMessage $Preset -Policy "Needs-Attention`n[Policy] $($MagicLabels[0])"
 			}
 			"DriverInstall" {
 				Add-PRToRecord -PR $PR -Action "Blocking"
@@ -2105,10 +2114,13 @@ Function Get-PRLabelAction { #Soothing label action.
 						Get-UpdateHashInPR2 -PR $PR -Clip $UserInput
 					}
 				}
-				$MagicLabels[4] { 
+				$MagicLabels[4] { #EIA
 					$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 53 -SearchString $MagicStrings[6] -length 5
 					if ($null -eq $UserInput) {
 						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 25 -SearchString $MagicStrings[0] -Length 10 
+					}
+					if ($null -eq $UserInput) {
+						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 57 -SearchString $MagicStrings[0] -Length 10 
 					}
 					if ($UserInput) {
 						Reply-ToPR -PR $PR -UserInput $UserInput -CannedMessage AutoValEnd
@@ -2188,13 +2200,16 @@ Function Get-PRLabelAction { #Soothing label action.
 				$MagicLabels[12] {#Duplicate
 					Get-DuplicateCheck -PR $PR
 				}
-				$MagicLabels[13] {
+				$MagicLabels[13] {#PR Err
 					$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 41 -SearchString $MagicStrings[9] -MatchOffset 0
 					if ($null -match $UserInput) {
 						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 13 -SearchString $MagicStrings[9] -MatchOffset 0
 					}
 					if ($null -match $UserInput) {
 						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 33 -SearchString $MagicStrings[9] -MatchOffset 0
+					}
+					if ($null -match $UserInput) {
+						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 45 -SearchString $MagicStrings[9] -MatchOffset 0
 					}
 					$LogSet = 14,27
 					$StringSet = 1
@@ -2390,7 +2405,7 @@ Function Add-Waiver {
 
 Function Get-SearchGitHub {
 	param(
-		[ValidateSet("Approval","Autowaiver","Blocking","Defender","Duplicate","HVR","IEDS","LVR","MMC","None","ToWork","ToWork2","ToWork3","VCMA")][string]$Preset = "Approval",
+		[ValidateSet("Approval","Approval2","Autowaiver","Blocking","Defender","Duplicate","HVR","IEDS","LVR","MMC","None","ToWork","ToWork2","ToWork3","VCMA")][string]$Preset = "Approval",
 		[Switch]$Browser,
 		$Url = "https://api.github.com/search/issues?page=$Page&q=",
 		$Author, #wingetbot
@@ -2421,6 +2436,7 @@ Function Get-SearchGitHub {
 	$nBI = "-label:Blocking-Issue+"
 	$Defender = "label:"+$MagicLabels[0]+"+"
 	$HaventWorked = "-commenter:$($GitHubUserName)+"
+	$nNP = "-label:New-Package+"
 	$nHW = "-label:Hardware+"
 	$IEDSLabel = "label:Internal-Error-Dynamic-Scan+"
 	$LVR = "label:"+$MagicLabels[34]+"+"
@@ -2560,6 +2576,14 @@ Function Get-SearchGitHub {
 			$Url += $Workable;
 			$Url += $nMMC;
 		}
+		"Approval2"{
+			$Url += $Cna
+			$Url += $nNP
+			$Url += $Set2 #Blocking + Common + Review1 + Review2
+			$Url += $Approvable
+			$Url += $Workable;
+			$Url += $nMMC;
+		}
 		"Defender"{
 			$Url += $Defender
 		}
@@ -2629,6 +2653,9 @@ Function Get-SearchGitHub {
 			$Url += $VSA;
 		}
 		"VCMA"{
+			$date = Get-Date (Get-Date).AddHours(-1) -Format "yyyy-MM-dd"
+			$createdDate = "created:<$($date)+" 
+			$Url += $createdDate;
 			$Url += $Approved
 			$Url += $VC
 			$Url += $Set2 #Blocking + Common + Review1 + Review2
@@ -2802,8 +2829,19 @@ Function Get-AutomatedErrorAnalysis {
 	if ($UserInput -match "exit code" -OR $UserInput -match "DeliveryOptimization error" -OR $UserInput -match "Error information") {
 		$ExitCodeTable = gc $ExitCodeFile | ConvertFrom-Csv
 		foreach ($ExitCode in $ExitCodeTable) {
-			if ($UserInput -match $ExitCode.code) {
-				$UserInput += "`n`nAutomated error analysis suggests $($ExitCode.code) may mean $($ExitCode.message)"
+			if (($UserInput -match $ExitCode.code)  -OR ($UserInput -match $ExitCode.Dec)  -OR ($UserInput -match $ExitCode.InvDec) ) {
+				#$UserInput += "`n`nAutomated error analysis suggests $($ExitCode.code) may mean $($ExitCode.message)"
+				$UserInput += "`n`n"+'Automated error analysis suggests `'+$ExitCode.Code+'`'
+				if ($ExitCode.Dec) {
+					$UserInput += ' (`'+$ExitCode.Dec+'`) '
+				}
+				if ($ExitCode.InvDec) {
+					$UserInput += ' (`'+$ExitCode.InvDec+'`) '
+				}
+				if ($ExitCode.Token) {
+					$UserInput += ' may translate to token `'+$ExitCode.Token+'`, and'
+				}
+				$UserInput += ' may indicate "'+$ExitCode.Message+'"'
 			}
 		} 
 	} 
@@ -2811,8 +2849,6 @@ Function Get-AutomatedErrorAnalysis {
 }
 
 Function Get-AutoValLog {
-<#
-#>
 	#Needs $GitHubToken to be set up in your -PR $PROFILE or somewhere more secure. Needs permissions: workflow,
 	param(
 		$clip = (Get-Clipboard),
@@ -3038,7 +3074,7 @@ Function Get-PRManifest2 {
 			}
 		}
 
-		$out += "`n`n"+ $FileName + ".yaml`n`n"
+		$out += "`n`n"+ $FileName + ".yaml`n`n"
 		$out += $FooterHeader
 		if ($OldManifestType -eq $ManifestType) {break}
 		$out += ($CommitFile -join "`n")
@@ -4919,11 +4955,13 @@ Function Get-PRReportFromRecord {
 }
 
 Function Get-PRFullReport {
-	$ReportName = "$logsFolder\$(get-date -f MMddyy)-Report.txt"
-	"Feedback","Blocking","Waiver","Retry","Manual","Closed","Project","Squash","Approved" | %{
-	"$_`n" | Out-File $ReportName -Append;
-	Get-PRReportFromRecord $_ -NoClip | Out-File $ReportName -Append
+	$Month = (Get-Culture).DateTimeFormat.GetMonthName((Get-Date).Month)
+	$ReportName = "$logsFolder\$Month\$(get-date -f MMddyy)-Report.txt"
+	$HeaderList = ("Feedback","Blocking","Waiver","Retry","Manual","Closed","Project","Squash","Approved")
+	$HeaderList | %{
+		Get-PRReportFromRecord $_ -NoClip | Out-File $ReportName -Append
 	}
+	$HeaderList | Out-File $ReportName -Append;
 }
 
 #Clipboard
