@@ -1,0 +1,105 @@
+# Created with WinGet Releaser using komac v2.10.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
+
+PackageIdentifier: sxyazi.yazi
+PackageVersion: 25.2.7
+PackageLocale: en-US
+Publisher: sxyazi
+PublisherUrl: https://github.com/sxyazi
+PublisherSupportUrl: https://github.com/sxyazi/yazi/issues
+PackageName: Yazi
+PackageUrl: https://github.com/sxyazi/yazi
+License: MIT
+LicenseUrl: https://github.com/sxyazi/yazi/blob/HEAD/LICENSE
+ShortDescription: Blazing fast terminal file manager written in Rust, based on async I/O
+Tags:
+- android
+- asyncio
+- cli
+- concurrency
+- file-explorer
+- file-manager
+- helix
+- linux
+- macos
+- productivity
+- rust
+- terminal
+- tui
+- vim
+- windows
+- yazi
+ReleaseNotes: |-
+  Deprecated
+  - ya.md5() has been deprecated in favor of the new ya.hash(), in #2168
+  - The plugin entry file init.lua has been deprecated in favor of the new main.lua, in #2168
+  - arrow -99999999 and arrow 99999999 have been deprecated in favor of the new arrow top and arrow bot, in #2294
+  - The --args option in the plugin command has been deprecated in favor of a new 2nd positional parameter, in #2299
+  - The numeric return value of the preloader has been deprecated in favor of a new boolean return value, in #2253
+  The mount.yazi Plugin
+  For a long time, I've been receiving requests from users for a mount manager, but never had the time to finish it. But now — it's here!
+  mount.yazi provides disk mount, unmount, and eject functionality:
+  404254109-c6f780ab-458b-420f-85cf-2fc45fcfe3a2.mp4
+  Done in #2199.
+  Simplification of shell and plugin commands
+  With #2298, you can now write shell scripts directly after -- (end of options marker). Everything after -- will be treated as raw text, so no more escaping is required, greatly simplifying the writing of complex commands.
+  For example, previously, a simple echo "hello 'world'" would look like this:
+  [[manager.prepend_keymap]]
+  on  = "<C-e>"
+  run = '''
+    shell --block 'echo "hello '\''world'\''"'
+  '''
+  This resulted in nested quotes, which was error-prone and unintuitive.
+  Now, you can directly include the entire shell script as plain text after -- without any escaping:
+  [[manager.prepend_keymap]]
+  on  = "<C-e>"
+  run = '''
+    shell --block -- echo "hello 'world'"
+  '''
+  Similarly, with #2299, the plugin command usage has been simplified as well. For instance:
+  [[manager.prepend_keymap]]
+  on  = "<C-e>"
+  run = "plugin search --args='\'hello world\''"
+  Can now be written as:
+  [[manager.prepend_keymap]]
+  on  = "<C-e>"
+  run = "plugin search -- 'hello world'"
+  Replace Mode and Vim Motions (W, E, B, ^, _) for Inputs
+  The Input component now supports replace mode and several new Vim motions, including:
+  - W: Move forward to the start of the next WORD
+  - E: Move forward to the end of the current or next WORD
+  - B: Move back to the start of the current or previous WORD
+  - ^: Move to the first non-whitespace character
+  - _: Move to the first non-whitespace character
+  Thanks to @dxrcy for the work in #2143!
+  Package Manager Enhancements
+  The package manager now supports the following new features:
+  - ya pack -d to delete a package (thanks @MrAsler, #2181)
+  - Support for adding and removing multiple packages with a single command (thanks @evpeople, #2257)
+  Support Local tmux Image Preview Over SSH
+  Now, when you start tmux locally, connect to a remote SSH session, and run Yazi on the remote host, you'll get image preview support out of the box.
+  Done in #2229.
+  New @since Plugin Annotation to Specify the Minimum Supported Yazi Version
+  You can now optionally specify the minimum supported Yazi version in your plugin:
+  --- @since 25.2.7
+  return {
+    entry = function() end
+  }
+  If specified, and the user's Yazi version is lower than the given version, they will receive an error message preventing the plugin from running accidentally.
+  Done in #2290
+  New ya.confirm() API
+  The new ya.confirm() API allows you to show a confirmation prompt to the user:
+  local answer = ya.confirm {
+    pos = { "center", w = 40, h = 10 },
+    title = "Test",
+    content = "Hello, World!",
+  }
+  You can also apply a UI element to the title and content to customize the appearance:
+  local answer = ya.confirm {
+    pos = { "center", w = 40, h = 10 },
+    title = ui.Line("Test"):fg("yellow"):bold(),
+    content = ui.Text("Hello, World!"):bg("red"):fg("#ffffff"),
+  }
+ReleaseNotesUrl: https://github.com/sxyazi/yazi/releases/tag/v25.2.7
+ManifestType: defaultLocale
+ManifestVersion: 1.9.0
