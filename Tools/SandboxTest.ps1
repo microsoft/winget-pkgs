@@ -157,6 +157,9 @@ function Initialize-Folder {
 # Outputs: Nullable Object containing GitHub release details
 ####
 function Get-Release {
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingConvertToSecureStringWithPlainText', '',
+        Justification='The standard workflow that users use with other applications requires the use of plaintext GitHub Access Tokens')]
+
     param (
         [Parameter()]
         [AllowEmptyString()]
@@ -317,6 +320,9 @@ function Test-FileChecksum {
 #   edge case, but it should catch a majority of the use cases.
 ####
 function Test-GithubToken {
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingConvertToSecureStringWithPlainText', '',
+        Justification='The standard workflow that users use with other applications requires the use of plaintext GitHub Access Tokens')]
+
     param (
         [Parameter(Mandatory = $true)]
         [AllowEmptyString()]
