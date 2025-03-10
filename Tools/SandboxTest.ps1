@@ -32,10 +32,6 @@ Param(
     # WinGetOptions
     [Parameter(HelpMessage = 'Additional options for WinGet')]
     [string] $WinGetOptions,
-    # GitHubToken
-    [Parameter(HelpMessage = 'Token for GitHub API Requests')]
-    # It is possible that the environment variable may not exist, in which case this may be null
-    [string] $GitHubToken = $env:GITHUB_TOKEN,
     # Switches
     [switch] $SkipManifestValidation,
     [switch] $Prerelease,
@@ -97,6 +93,10 @@ $script:HostGeoID = (Get-WinHomeLocation).GeoID
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 $script:WebClient = New-Object System.Net.WebClient
 $script:CleanupPaths = @()
+
+# Removed the `-GitHubToken`parameter, always use environment variable
+# It is possible that the environment variable may not exist, in which case this may be null
+$script:GitHubToken = $env:WINGET_PKGS_GITHUB_TOKEN
 
 # The experimental features get updated later based on a switch that is set
 $script:SandboxWinGetSettings = @{
