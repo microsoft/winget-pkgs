@@ -19,7 +19,7 @@ The following optional arguments are supported:
 | **-MapFolder** | The folder to map in Sandbox. Default is the current directory |
 | **-WinGetVersion** | Specify version of WinGet to use in Sandbox |
 | **-WinGetOptions** | Additional Options to be passed at the end of the `winget install` command |
-| **-GitHubToken** | The GitHub token to be used for making requests to GitHub APIs |
+| **-GitHubToken** | This option has been removed. Use the environment variable `WINGET_PKGS_GITHUB_TOKEN` instead |
 | **-SkipManifestValidation** | Skip `winget validate -m <manifest>` if you have already validated the manifest |
 | **-Prerelease** | Allow preview release versions of WinGet |
 | **-EnableExperimentalFeatures** | Enable WinGet experimental features |
