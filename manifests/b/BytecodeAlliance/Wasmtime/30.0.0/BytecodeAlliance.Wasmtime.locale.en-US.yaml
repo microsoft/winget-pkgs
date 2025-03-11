@@ -1,0 +1,56 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
+
+PackageIdentifier: BytecodeAlliance.Wasmtime
+PackageVersion: 30.0.0
+PackageLocale: en-US
+Publisher: Crane Station
+PublisherUrl: https://bytecodealliance.org/
+PublisherSupportUrl: https://github.com/bytecodealliance/wasmtime/issues
+Author: Bytecode Alliance
+PackageName: Wasmtime
+PackageUrl: https://wasmtime.dev/
+License: Apache-2.0
+LicenseUrl: https://github.com/bytecodealliance/wasmtime/blob/main/LICENSE
+ShortDescription: A fast and secure runtime for WebAssembly
+Tags:
+- wasm
+- webassembly
+ReleaseNotes: |-
+  Added
+  - New wasmtime-wasi-io crate provides a #![no_std] wasi:io implementation, factored out of wasmtime-wasi. Users of wasmtime-wasi don't have to depend on this new crate. #10036
+  - Wasmtime's interpreter, Pulley, is now complete and has been listed as tier 2. #9897 #9884 #9943 #9944 #9983 #9966 #9935 #10034 #10057 #10095
+  - Wasmtime's CI now checks that the repository builds for aarch64-apple-ios. Note that no tests are run for this target, so it's still tier 3. #9888
+  - Winch's support for AArch64 and simd on x64 have continued to progress well. Winch additionally now fully supports the threads WebAssembly proposal. #9889 #9970 #9950 #9987 #9990 #9959 #10008 #10028 #10029 #10023 #10042 #10050 #10039 #10082 #10092 #10109 #10148 #10147
+  - The memory64 WebAssembly feature is now enabled by default. This WebAssembly proposal is now considered a tier 1 feature. #9937 #10159
+  - Wasmtime's full test suite and CI now includes 32-bit platforms such as x86 and armv7 Linux. These platforms have been added to tier 3 status and use Pulley as their execution backend. #10025
+  - Initial experimental support for WASIp3 and async features of the Component Model have started to land. These features are not yet ready for general-purpose use. #10044 #10047 #10083 #10103
+  - The wasmtime CLI now supports using a TOML configuration file via --config in addition to CLI options. #9811 #10132
+  - Initial support for a new assembler on x64 has been added. #10110 #10178
+  Changed
+  - wasmtime-wasi split the WasiView trait into IoView and WasiView, and wasmtime-wasi-http re-uses IoView in WasiHttpView. Details on porting for embedders in PR. #10016
+  - wasmtime-wasi renamed some exported types and traits. Embedders which use Pollable, InputStream, OutputStream, Subscribe, HostInputStream, HostOutputStream, PollableFuture, or ClosureFuture from that crate will need to rename those imports to their new names, describe in PR. #10036
+  - Components using a 64-bit linear memory should never have worked before, but they're now rejected earlier in the validation process. #9952
+  - Module validation is now deterministic in the face of multiple errors. #9947
+  - Wasmtime's minimum supported version of Rust is now 1.82.0. #9956
+  - Cranelift will now deduplicate trap[n]z instructions. #10004
+  - The --emit-clif option to wasmtime compile now emits post-optimization CLIF. #10011
+  - The signals-based-traps Cargo feature has been removed in favor of auto-detection of available features based on the #[cfg] directives available for the target platform. #9941
+  - The async_stack_zeroing configuration knob now covers all stack allocations, not just those from the pooling allocator. #10027
+  - Wasmtime should work-by-default on more platforms, even those where Cranelift has no support for the architecture. This is done by ensuring some architecture and platform-specific bits are removed on unknown platforms (and Pulley is used instead). #10107
+  - Wasmtime now compiles on platforms missing 64-bit atomics. #10134
+  Fixed
+  - Fixed a missing case for Ref::matches_ty should return true. #9985
+  - A bug with using the single_pass register allocation algorithm on x64/s390x has been fixed by refactoring how branches are represented. #10086 #10087
+  - A bug with argument extensions on riscv64 has been fixed. #10069
+  - The PartialEq implementation for RegisteredType has been fixed. #10091
+  - The output of component::bindgen! now works with #![no_std] crates. #10105
+  - Fix wasmtime wast when combined with --fuel. #10121
+  - The wat feature of the C API is now plumbed correctly in a few more locations. #10124
+  - Spurious wake-ups in blocking_* methods of InputStream and OutputStream have been fixed. #10113
+ReleaseNotesUrl: https://github.com/bytecodealliance/wasmtime/blob/release-30.0.0/RELEASES.md#3000
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://docs.wasmtime.dev/
+ManifestType: defaultLocale
+ManifestVersion: 1.9.0
