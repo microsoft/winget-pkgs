@@ -367,7 +367,7 @@ function Test-GithubToken {
         if (!$cacheIsExpired -and !$cachedTokenIsEmpty) {
             # Check the content of the cached file in case the actual token expiration is known
             Write-Verbose 'Attempting to fetch token expiration from cache'
-            # Since Github adds ` UTC` at the end, it needs to be stripped off. Trim is safe here since the last character should always be a digit
+            # Since Github adds ` UTC` at the end, it needs to be stripped off. Trim is safe here since the last character should always be a digit or AM/PM
             $cachedExpirationForParsing = $cachedTokenContent.TrimEnd(' UTC')
             $cachedExpirationDate = [System.DateTime]::MinValue
             # Pipe to Out-Null so that it doesn't get captured in the return output
@@ -419,7 +419,7 @@ function Test-GithubToken {
     $apiResponse = Invoke-WebRequest @requestParameters # This will return an exception if the token is not valid; It is intentionally not caught
     # The headers can sometimes be a single string, or an array of strings. Cast them into an array anyways just for safety
     $rateLimit = @($apiResponse.Headers['X-RateLimit-Limit'])
-    $tokenExpiration = @($apiResponse.Headers['github-authentication-token-expiration']) # This could be null if the token is set to never expire
+    $tokenExpiration = @($apiResponse.Headers['github-authentication-token-expiration']) # This could be null if the token is set to never expire.
     Write-Debug "API responded with Rate Limit ($rateLimit) and Expiration ($tokenExpiration)"
 
     if (!$rateLimit) { return $false } # Something went horribly wrong, and the rate limit isn't known. Assume the token is not valid
@@ -429,10 +429,25 @@ function Test-GithubToken {
     }
 
     Write-Verbose 'Token validated successfully. Adding to cache'
+    # Trim off any non-digit characters from the end
+    # Strip off the array wrapper since it is no longer needed
+    $tokenExpiration = $tokenExpiration[0] -replace '[^0-9]+$',''
     # If the token doesn't expire, write a special value to the file
-    if (!$tokenExpiration -or [string]::IsNullOrWhiteSpace($tokenExpiration[0])) { $tokenExpiration = @([System.DateTime]::MaxValue) }
-    # When datetime objects are converted to string, they have extra whitespace that should be trimmed off
-    $tokenExpiration = [DateTime]::Parse($tokenExpiration[0]).ToLongDateString().Trim()
+    if (!$tokenExpiration -or [string]::IsNullOrWhiteSpace($tokenExpiration)) {
+        Write-Debug "Token expiration was empty, setting it to maximum"
+        $tokenExpiration = [System.DateTime]::MaxValue
+    }
+    # Try parsing the value to a datetime before storing it
+    if ([DateTime]::TryParse($tokenExpiration,[ref]$tokenExpiration)) {
+        Write-Debug "Token expiration successfully parsed as DateTime ($tokenExpiration)"
+    } else {
+        # TryParse Failed
+        Write-Warning "Could not parse expiration date as a DateTime object. It will be set to the minimum value"
+        $tokenExpiration = [System.DateTime]::MinValue
+    }
+    # Explicitly convert to a string here to avoid implicit casting
+    $tokenExpiration = $tokenExpiration.ToString()
+    # Write the value to the cache
     New-Item -ItemType File -Path $script:TokenValidationCache -Name $tokenHash -Value $tokenExpiration | Out-Null
     Write-Debug "Token <$tokenHash> added to cache with content <$tokenExpiration>"
     return $true
