@@ -374,6 +374,7 @@ function Test-GithubToken {
             [System.DateTime]::TryParse($cachedExpirationForParsing, [ref]$cachedExpirationDate) | Out-Null
 
             $tokenExpirationDays = $cachedExpirationDate - (Get-Date) | Select-Object -ExpandProperty TotalDays
+            $tokenExpirationDays = [Math]::Round($tokenExpirationDays, 2) # We don't need all the precision the system provides
 
             if ($cachedExpirationForParsing -eq [System.DateTime]::MaxValue.ToLongDateString().Trim()) {
                 Write-Verbose "The cached token contained content. It is set to never expire"
