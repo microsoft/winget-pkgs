@@ -182,7 +182,7 @@ function Get-Release {
         # If an invalid token was provided, an exception will have been thrown before this code is reached
         Write-Warning @"
 A valid GitHub token was not provided. You may encounter API rate limits.
-Please consider using the `-GitHubToken` option or adding the `GITHUB_TOKEN` environment variable.
+Please consider adding your token using the `WINGET_PKGS_GITHUB_TOKEN` environment variable.
 "@
     }
 
