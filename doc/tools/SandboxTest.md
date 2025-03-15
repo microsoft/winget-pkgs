@@ -13,13 +13,17 @@ To test a manifest, simply call the script with the full path to the manifest as
 The following optional arguments are supported:
 
 | Argument | Description |
-|-------------|-------------|  
+|-------------|-------------|
+| **-Manifest** | The path to the manifest to install in the Sandbox |
 | **-Script** | Post-installation script to run in the Sandbox |
 | **-MapFolder** | The folder to map in Sandbox. Default is the current directory |
 | **-WinGetVersion** | Specify version of WinGet to use in Sandbox |
+| **-WinGetOptions** | Additional Options to be passed at the end of the `winget install` command |
+| **-GitHubToken** | This option has been removed. Use the environment variable `WINGET_PKGS_GITHUB_TOKEN` instead |
+| **-SkipManifestValidation** | Skip `winget validate -m <manifest>` if you have already validated the manifest |
 | **-Prerelease** | Allow preview release versions of WinGet |
 | **-EnableExperimentalFeatures** | Enable WinGet experimental features |
-| **-SkipManifestValidation** | Skip `winget validate -m <manifest>` if you have already validated the manifest |
+| **-Clean** | Forces a re-download of WinGet and all of its dependencies |
 
 ### Examples
 
@@ -41,10 +45,10 @@ Test manifest on a specified version of WinGet
 .\SandboxTest.ps1 <path-to-manifest> -WinGetVersion 1.4.2011 -Prerelease -Script {Write-Host 'The script has finished'}
 ```
 
-Install a package from the repository in Sandbox 
+Install a package from the repository in Sandbox
 
 ```raw
-.\SandboxTest.ps1 -WinGetVersion 1.5 -Script {winget install <PackageIdentifier> --accept-source-agreements}
+.\SandboxTest.ps1 -WinGetVersion 1.7 -Script {winget install <PackageIdentifier> --accept-source-agreements}
 ```
 
 # System Requirements
