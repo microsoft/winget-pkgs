@@ -91,7 +91,7 @@ $script:HostGeoID = (Get-WinHomeLocation).GeoID
 
 # Misc
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-$script:WebClient = New-Object System.Net.WebClient
+$script:HttpClient = New-Object System.Net.Http.HttpClient
 $script:CleanupPaths = @()
 
 # Removed the `-GitHubToken`parameter, always use environment variable
@@ -120,7 +120,7 @@ function Invoke-CleanExit {
         [int] $ExitCode
     )
     Invoke-FileCleanup -FilePaths $script:CleanupPaths
-    $script:WebClient.Dispose()
+    $script:HttpClient.Dispose()
     Write-Debug "Exiting ($ExitCode)"
     exit $ExitCode
 }
@@ -221,7 +221,8 @@ function Get-RemoteContent {
     Write-Debug "Remote content will be stored at $($localFile.FullName)"
     $script:CleanupPaths += $Raw ? @($localFile.FullName) : @() # Mark the file for cleanup when the script ends if the raw data was requested
     try {
-        $script:WebClient.DownloadFile($URL, $localFile.FullName)
+        $downloadTask = $script:HttpClient.GetByteArrayAsync($URL)
+        [System.IO.File]::WriteAllBytes($localfile.FullName, $downloadTask.Result)
     }
     catch {
         # If the download fails, write a zero-byte file anyways
