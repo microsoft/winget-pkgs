@@ -17,6 +17,7 @@ Param(
 
 # Virtual Terminal
 filter Initialize-VirtualTerminalSequence {
+    # https://learn.microsoft.com/en-us/windows/console/console-virtual-terminal-sequences
     if ($script:vtSupported) {
         return "$([char]0x001B)[${_}m"
     }
