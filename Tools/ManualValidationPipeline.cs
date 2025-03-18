@@ -140,7 +140,7 @@ using System.Web.Script.Serialization;
 namespace WinGetApprovalNamespace {
     public class WinGetApprovalPipeline : Form {
 		//vars
-        public int build = 927;//Get-RebuildPipeApp
+        public int build = 929;//Get-RebuildPipeApp
 		public string appName = "WinGetApprovalPipeline";
 		public string appTitle = "WinGet Approval Pipeline - Build ";
 		public static string owner = "microsoft";
@@ -659,6 +659,7 @@ namespace WinGetApprovalNamespace {
 			table_vm.Columns.Add("OS", typeof(string));
 			table_vm.Columns.Add("Package", typeof(string));
 			table_vm.Columns.Add("PR", typeof(int));
+			table_vm.Columns.Add("Mode", typeof(string));
 			table_vm.Columns.Add("RAM", typeof(double));
 			
 			table_val.Columns.Add("Timestamp", typeof(string));
@@ -878,7 +879,7 @@ namespace WinGetApprovalNamespace {
 					if (Status != null) {
 						for (int r = 1; r < Status.Length -1; r++){
 							var rowData = Status[r];//Reload the table
-							table_vm.Rows.Add(rowData["vm"], rowData["status"], rowData["version"], rowData["OS"], rowData["Package"], rowData["PR"], rowData["RAM"]);
+							table_vm.Rows.Add(rowData["vm"], rowData["status"], rowData["version"], rowData["OS"], rowData["Package"], rowData["PR"], rowData["Mode"], rowData["RAM"]);
 						}//end for r
 					}//end if Status
 					dataGridView_vm.DataSource=table_vm;
@@ -3367,16 +3368,16 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 			var processes = Process.GetProcessesByName("vmconnect");
 			foreach (Process process in processes){
 				if (process.MainWindowTitle.Contains(VMName)) {
-				process.CloseMainWindow();
+					process.CloseMainWindow();
 				}
 			}
-try {
-			SetVMState("vm"+vm, 3);
-} catch {
-	outBox_msg.AppendText(Environment.NewLine + "SetVMState failed for VM: " + vm);
-}
+			try {
+				SetVMState("vm"+vm, 3);
+			} catch {
+				outBox_msg.AppendText(Environment.NewLine + "SetVMState failed for VM: " + vm);
+			}
 			RemoveItem(filesFileName);
-			SetStatus(vm,"Ready");
+			SetStatus(vm,"Ready","",0,"Ready");
 		}
 
 		public void StopVM(int vm,string VMName = ""){
@@ -3395,7 +3396,7 @@ try {
 //===================--------------------       VM Status     --------------------====================
 //////////////////////====================--------------------====================////////////////////
 //////////////////////////////////////////====================////////////////////////////////////////
-		public void SetStatus(int VM, string Status = "", string Package = "",int PR = 0){
+		public void SetStatus(int VM, string Status = "", string Package = "",int PR = 0,string Mode = ""){
 //[ValidateSet("AddVCRedist","Approved","CheckpointComplete","Checkpointing","CheckpointReady","Completing","Complete","Disgenerate","Generating","Installing","Prescan","Prevalidation","Ready","Rebooting","Regenerate","Restoring","Revert","Scanning","SendStatus","Setup","SetupComplete","Starting","Updating","ValidationCompleted")]
 			dynamic Records = FromCsv(GetContent(StatusFile));
 			for (int r = 1; r < Records.Length -1; r++){
@@ -3406,6 +3407,9 @@ try {
 					}
 					if (Package != "") {
 						row["Package"] = Package;
+					}
+					if (Mode != "") {
+						row["Mode"] = Mode;
 					}
 					if (PR != 0) {
 						row["PR"] = PR;
