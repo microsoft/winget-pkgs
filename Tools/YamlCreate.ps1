@@ -1635,8 +1635,6 @@ Function Read-InstallerMetadataValue {
 # If a key does not exist, it sets the value to a special character to be removed / commented later
 # Returns the result as a new object
 Function Restore-YamlKeyOrder {
-  [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', 'InputObject', Justification = 'The variable is used inside a conditional but ScriptAnalyser does not recognize the scope')]
-  [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', 'NoComments', Justification = 'The variable is used inside a conditional but ScriptAnalyser does not recognize the scope')]
   Param
   (
     [Parameter(Mandatory = $true, Position = 0)]
