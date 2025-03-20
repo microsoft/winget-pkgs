@@ -1,0 +1,40 @@
+name: PSScriptAnalyzer
+
+on:
+  pull_request_target:
+    branches:
+      - master
+    paths:
+      - "**/*.ps1"
+  push:
+    paths:
+      - "**/*.ps1"
+
+permissions:
+  contents: read # Needed to check out the code
+  pull-requests: read # Needed to read pull request details
+
+jobs:
+  analyze:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Install PSScriptAnalyzer
+        run: |
+          Install-Module -Name PSScriptAnalyzer -Force -SkipPublisherCheck -Scope CurrentUser
+      - name: Run PSScriptAnalyzer
+        run: |
+          # Run PSScriptAnalyzer on all PowerShell scripts
+          $results = Get-ChildItem -Recurse -Filter *.ps1 | Invoke-ScriptAnalyzer
+          if ($results) {
+            Write-Output $results | Format-List -GroupBy ScriptName
+          }
+
+          # If errors are found, exit with a non-zero exit code to fail the job
+          if ($results.where({$_.Severity -eq 'Error'})) {
+            Write-Host "Found script issues (errors)."
+            exit 1  # Exit with a non-zero status to fail the job
+          } else {
+            Write-Host "No blocking detections."
+          }

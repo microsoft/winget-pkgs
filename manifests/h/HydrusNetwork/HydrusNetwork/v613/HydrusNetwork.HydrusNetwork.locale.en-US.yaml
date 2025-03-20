@@ -1,0 +1,67 @@
+# Created with komac v2.11.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
+
+PackageIdentifier: HydrusNetwork.HydrusNetwork
+PackageVersion: v613
+PackageLocale: en-US
+Publisher: Hydrus Network
+PublisherUrl: https://github.com/hydrusnetwork/hydrus
+PublisherSupportUrl: https://github.com/hydrusnetwork/hydrus/issues
+PrivacyUrl: https://hydrusnetwork.github.io/hydrus/privacy.html
+Author: Hydrus Network
+PackageName: Hydrus Network
+PackageUrl: https://github.com/hydrusnetwork/hydrus
+License: WTFPL
+LicenseUrl: https://github.com/hydrusnetwork/hydrus/blob/HEAD/license.txt
+Copyright: Copyright (C) 2011 Hydrus Developer
+CopyrightUrl: https://github.com/hydrusnetwork/hydrus/blob/master/license.txt
+ShortDescription: A personal booru-style media tagger that can import files and tags from your hard drive and popular websites. Content can be shared with other users via user-run servers.
+Description: |-
+  The hydrus network client is an application written for Anon and other internet-fluent media nerds who have large image/swf/webm collections.
+  It browses with tags instead of folders, a little like a booru on your desktop. Advanced users can share tags and files anonymously through custom servers that any user may run.
+  Everything is free and privacy is the first concern. Executable releases are available for Windows, Linux, and macOS.
+  The program is in python, so you can also run it straight from the source code.
+Moniker: hydrus-network
+Tags:
+- booru
+- cross-platform
+- image-database
+ReleaseNotes: |-
+  misc
+  - I think I have fixed the crazy flickering dialog resize bug where if you resize certain dialogs shorter or thinner than their parents, they might flicker throughout your resize motion between the size you are moving to and the height/width of the parent. there's still some occasional flicker due to some other legacy fuzzy padding hacks, but things are better
+  - fixed some bad grammar for the namespace hide/show options in options->tag presentation, and split the non-namespace rendering settings out to their own box
+  - when files are imported, any existing 'media result' object for the file is now properly updated with the new file modified time. you usually wouldn't notice this, because the media result typically isn't loaded until after import when we need to show it on screen, but in advanced cases where you were re-importing previously deleted files you are looking at or doing Client API work where you did a URL lookup before deciding to import, and the media result object from the URL lookup was still in memory, the 'media result' was not getting the timestamp and subsequent inspections or edits of the modified timestamp were failing as a result until the media result had a chance to decay out of its cache and be reloaded from disk
+  - made some ratings update and sort code more safe against ratings service deletions
+  - url classes now allow 'keep extra parameters for server' if you have an API/Redirect URL Converter. I think the reasons for this originally being prohibited were only a fear, not anything grounded, but let's see how it goes
+  system predicate for advanced tag search
+  - after talking about it with people recently and having some good ideas, I decided to just push and try to knock this out. it is pretty clever and may have bugs, so let me know how it goes
+  - added a new system:tag (advanced) predicate, which does sophisticated tag searches. you enter a tag as raw text and can then--
+    - specify which tag service it should search on, if different to the current tag context
+    - specify if it should include siblings or just be the raw tag on the 'storage' domain
+    - specify whether you should search current, deleted, pending, or petitioned mappings
+    - specify if the file should or should not have the tag mapping
+  - I ran out of time to implement system predicate parsing, but I planned the pred's label to support this and will try to get it done next week
+  - searches that include unified or deleted file domains or any other crazy stuff may take a very long time to return, but the underlying tag search code in hydrus is pretty robust, and extending it to the newer domains all just came together, so I think everything works. it should respond quickly to the cancel search button if it takes too long
+  duplicates auto-resolution
+  - I had more success than expected with the new preview panel and I think we are now about two weeks away from the initial user test of this system
+  - the edit duplicates auto-resolution rule dialog now has a live preview panel. it loads the pairs of a rule's search and then does the comparator/selector test to determine which pairs pass or fail, showing you the counts at each stage
+  - the panel also shows the pass/fail thumbnail pairs with some new 'thumbnail table' widgets I wrote. these load thumbnails asynchronously and should scale up to thousands of pairs no prob. I am really happy with how it worked out, as this was the thing I was dreading would take weeks of rewrites, but I figured something out. it is ugly, as always, but it works
+  - every time you show the panel page, it checks if the rule has changed. if search has changed, it re-runs the whole search, and if only the selector has changed, it just does a re-test
+  - next week I'll add the ability to launch a particular pair into a standard Media Viewer so you can 'look closer' on the preview, and then I'll be doing final integration and testing. we are on the home stretch now!
+  - if you are an advanced user and you've poked around the duplicates auto-resolution UI previously, you might like to check out the preview panel this week on the default jpg vs png rule--does it all seem to load up sensible results, even though you can't zoom in yet? any errors? I'm guessing that loading thousands of pairs is going to be super slow, so what would be a good number to sample--256?
+  boring cleanup
+  - reworked the client thumbnail cache to work on the simpler and lower-lever MediaResult rather than the UI-level Media
+  - fixed a couple areas where file maintenance jobs were being scheduled using the Media object
+  - fixed some old areas within file maintenance where media objects had the wrong name
+  - reworked and cleaned the main GetThumbnailPath RegenThumbnail file routines to similarly only work and talk about MediaResult
+  - fixed a dumb typo in the as-yet-enabled MetadataConditional edit-panel
+  - updated the faq with answers for why I work alone, do weekly releases, and use weird versioning
+  - fixed a couple places where I had accidental /n in some label text lol, thanks to the user who pointed this out
+ReleaseNotesUrl: https://github.com/hydrusnetwork/hydrus/releases/tag/v613
+PurchaseUrl: https://hydrusnetwork.github.io/hydrus/support.html
+Documentations:
+- DocumentLabel: FAQ
+  DocumentUrl: https://hydrusnetwork.github.io/hydrus/faq.html
+ManifestType: defaultLocale
+ManifestVersion: 1.9.0
+
