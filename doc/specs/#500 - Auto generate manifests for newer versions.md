@@ -47,7 +47,7 @@ The proposed automation will automatically open pull requests (PRs) for new vers
 }
 ```
 
-The above JSON defines automation metadata and will be stored in a `.auto_updates.yaml` file alongside `.validation` files.
+The above JSON defines automation metadata and will be stored in a `.auto_updates.json` file alongside `.validation` files.
 
 ### Automation Workflow
 
