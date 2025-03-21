@@ -6,7 +6,7 @@
 #Notes: Utilities to streamline evaluating 3rd party PRs.
 
 
-$build = 1009
+$build = 1011
 $appName = "ManualValidationPipeline"
 Write-Host "$appName build: $build"
 $MainFolder = "C:\ManVal"
@@ -38,6 +38,7 @@ $DataFileName = "$ReposFolder\Tools\ManualValidationPipeline.csv"
 $ExitCodeFile = "$ReposFolder\Tools\ExitCodes.csv"
 $MsiErrorCodeFile = "$ReposFolder\Tools\MsiErrorCodes.csv"
 $AutowaiverFile = "$ReposFolder\Tools\Autowaiver.csv"
+$PRQueueFile = "C:\manval\misc\PRQueue.txt"
 
 $Win10Folder = "$imagesFolder\Win10-Created112024-Original"
 $Win11Folder = "$imagesFolder\Win11-Created121824-Original"
@@ -53,13 +54,16 @@ $VMUserName = "user" #Set to the internal username you're using in your VMs.
 $GitHubUserName = "stephengillie"
 $SystemRAM = (Get-CimInstance Win32_PhysicalMemory | Measure-Object -Property capacity -Sum).sum /1gb
 $Host.UI.RawUI.WindowTitle = "Utility"
-$GitHubRateLimitDelay = 0.33 #seconds
+$GitHubRateLimitDelay = 0.25 #seconds
 
 $PRRegex = "[0-9]{5,6}"
 $hashPRRegex = "[#]"+$PRRegex
 $hashPRRegexEnd = $hashPRRegex+"$"
 $colonPRRegex = $PRRegex+"[:]"
 
+#region Data
+
+#$MagicStrings = @{}
 $MagicStrings = "Installer Verification Analysis Context Information:", #0
 "[error] One or more errors occurred.", #1
 "[error] Manifest Error:", #2
@@ -73,43 +77,92 @@ $MagicStrings = "Installer Verification Analysis Context Information:", #0
 "[error] Manifest Warning:",#10
 "[error] Manifest:"#11
 
-$MagicLabels = "Validation-Defender-Error", #0
-"Binary-Validation-Error", #1
-"Error-Analysis-Timeout", #2
-"Error-Hash-Mismatch", #3
-"Error-Installer-Availability", #4
-"Internal-Error", #5
-"Internal-Error-Dynamic-Scan", #6
-"Internal-Error-Manifest", #7
-"Internal-Error-URL", #8
-"Manifest-AppsAndFeaturesVersion-Error", #9
-"Manifest-Installer-Validation-Error", #10
-"Manifest-Validation-Error", #11
-"Possible-Duplicate", #12
-"PullRequest-Error", #13
-"URL-Validation-Error", #14
-"Validation-Domain", #15
-"Validation-Executable-Error", #16
-"Validation-Hash-Verification-Failed", #17
-"Validation-Missing-Dependency", #18
-"Validation-Merge-Conflict", #19
-"Validation-No-Executables", #20
-"Validation-Installation-Error", #21
-"Validation-Shell-Execute", #22
-"Validation-Unattended-Failed", #23
-"Policy-Test-1.2", #24
-"Policy-Test-2.3", #25
-"Validation-Completed", #26
-"Validation-Forbidden-URL-Error", #27
-"Validation-Unapproved-URL", #28
-"Validation-Retry", #29
-"Needs-Author-Feedback",#30
-"Policy-Test-2.7", #31
-"Manifest-Version-Error",#32
-"Highest-Version-Remaining", #33
-"Last-Version-Removal", #34
-"Highest-Version-Removal",#35
-"Manifest-Metadata-Consistency"#36
+$Actions = @{}
+$Actions.Approved = "Approved"
+$Actions.Blocking = "Blocking"
+$Actions.Feedback = "Feedback"
+$Actions.Retry = "Retry"
+$Actions.Manual = "Manual"
+$Actions.Closed = "Closed"
+$Actions.Project = "Project"
+$Actions.Squash = "Squash"
+$Actions.Waiver = "Waiver"
+
+$Labels = @{}
+$Labels.403 = "Validation-Forbidden-URL-Error"
+$Labels.404 = "Validation-404-Error"
+$Labels.AGR = "Agreements"
+$Labels.APP = "Azure-Pipeline-Passed"
+$Labels.ANA = "Author-Not-Authorized"
+$Labels.ANF = "Manifest-AppsAndFeaturesVersion-Error"
+$Labels.BI = "Blocking-Issue"
+$Labels.BVE = "Binary-Validation-Error"
+$Labels.CR = "Changes-Requested"
+$Labels.CLA = "Needs-CLA"
+$Labels.DI = "DriverInstall"
+$Labels.EAT = "Error-Analysis-Timeout"
+$Labels.EHM = "Error-Hash-Mismatch"
+$Labels.EIA = "Error-Installer-Availability"
+$Labels.HVF = "Validation-Hash-Verification-Failed"
+$Labels.HVL = "Highest-Version-Remaining"
+$Labels.HVR = "Highest-Version-Removal"
+$Labels.HW = "Hardware"
+$Labels.IE = "Internal-Error"
+$Labels.IEDS = "Internal-Error-Dynamic-Scan"
+$Labels.IEM = "Internal-Error-Manifest"
+$Labels.IEU = "Internal-Error-URL"
+$Labels.IOD = "Interactive-Only-Download"
+$Labels.IOI = "3AInteractive-Only-Installer"
+$Labels.LVR = "Last-Version-Removal"
+$Labels.LBI = "License-Blocks-Install"
+$Labels.MA = "Moderator-Approved"
+$Labels.MIVE = "Manifest-Installer-Validation-Error"
+$Labels.MMC = "Manifest-Metadata-Consistency"
+$Labels.MVE = "Manifest-Validation-Error"
+$Labels.MV = "Manually-Validated"
+$Labels.NA = "Needs-Attention"
+$Labels.NAF = "Needs-Author-Feedback"
+$Labels.NB = "Network-Blocker"
+$Labels.NM = "New-Manifest"
+$Labels.NP = "New-Package"
+$Labels.NR = "Needs-Review"
+$Labels.NSA = "Internal-Error-NoSupportedArchitectures"
+$Labels.NMM = "Needs-Manual-Merge"
+$Labels.NRA = "No-Recent-Activity"
+$Labels.NP = "New-Package"
+$Labels.PF = "Project-File"
+$Labels.RB = "Reboot"
+$Labels.RET = "Retry-1"
+$Labels.SA = "Scripted-Application"
+$Labels.OUF = "Validation-Open-Url-Failed"
+$Labels.PD = "Possible-Duplicate"
+$Labels.PRE = "PullRequest-Error"
+$Labels.PT12 = "Policy-Test-1.2"
+$Labels.PT23 = "Policy-Test-2.3"
+$Labels.PT27 = "Policy-Test-2.7"
+$Labels.UVE = "URL-Validation-Error"
+$Labels.UF = "Unexpected-File"
+$Labels.VC = "Validation-Completed"
+$Labels.VCR = "Validation-Certificate-Root"
+$Labels.VD = "Validation-Domain"
+$Labels.VDE = "Validation-Defender-Error"
+$Labels.VEE = "Validation-Executable-Error"
+$Labels.VER = "Manifest-Version-Error"
+$Labels.VHE = "Validation-HTTP-Error"
+$Labels.VIE = "Validation-Installation-Error"
+$Labels.VMC = "Validation-Merge-Conflict"
+$Labels.VMD = "Validation-Missing-Dependency"
+$Labels.VNE = "Validation-No-Executables"
+$Labels.VR = "Validation-Retry"
+$Labels.VSA = "Validation-Skip-Automations"
+$Labels.VSE = "Validation-Shell-Execute"
+$Labels.VSS = "Validation-SmartScreen-Error"
+$Labels.VUF = "Validation-Unattended-Failed"
+$Labels.VUU = "Validation-Unapproved-URL"
+
+
+
+#endregion
 
 #First tab
 Function Get-TrackerVMRunTracker {
@@ -154,7 +207,7 @@ Function Get-TrackerVMRunTracker {
 							$Results| %{Get-Autowaiver -PR $_}
 						}
 						"VCMA" {
-							$Results| %{Get-MergePR -PR $_}
+							$Results| %{Approve-PR -PR $_;Get-MergePR -PR $_}
 						}
 						Default {
 							$Results | %{Get-PRLabelAction -PR $_ }
@@ -193,8 +246,10 @@ Function Get-TrackerVMRunTracker {
 		if (Get-TimeRunning) {
 			$timeClockColor = "green"
 		}
+		$PRQueueCount = Get-PRQueueCount
 		Write-Host -nonewline "Build: $build - Hours worked: "
-		Write-Host -f $timeClockColor (Get-HoursWorkedToday)
+		Write-Host -nonewline -f $timeClockColor (Get-HoursWorkedToday)
+		Write-Host  " - PRs in queue: $PRQueueCount"
 		(Get-VM) | ForEach-Object {
 			if(($_.MemoryDemand / $_.MemoryMaximum) -ge 0.9){
 				Set-VM -VMName $_.name -MemoryMaximumBytes "$(($_.MemoryMaximum / 1073741824)+2)GB"
@@ -208,8 +263,18 @@ Function Get-TrackerVMRunTracker {
 
 		if ($valMode -eq "IEDS") {
 			if ((Get-ArraySum (Get-Status).RAM) -lt ($SystemRAM*.42)) {
-			Write-Output $valMode
+				Write-Output $valMode
 				Get-RandomIEDS
+			}
+		}
+
+		if ($PRQueueCount -gt 0) {
+			if ((Get-ArraySum (Get-Status).RAM) -lt ($SystemRAM*.42)) {
+				$PR = Get-PopPRQueue
+				if ($null -ne $PR) {
+					Write-Output "Running $PR from queue."
+					Get-RandomIEDS -PR $PR
+				}
 			}
 		}
 
@@ -231,6 +296,10 @@ Function Get-TrackerVMRunTracker {
 			$ManifestUrl = "$GitHubBaseUrl/tree/master/"+$clip
 			$ManifestUrl | clip
 			start-process ($ManifestUrl)
+		}
+		$MozillaThunderbird = (Get-Status | ? {$_.Package -match "Mozilla.Thunderbird"} ).vm 
+		if ($null -ne $MozillaThunderbird) {
+			$MozillaThunderbird | %{Get-TrackerVMSetStatus -Status Complete -VM $_}
 		}
 		if (Get-ConnectedVM) {
 			#Get-TrackerVMResetStatus
@@ -1604,8 +1673,8 @@ Function Get-PRWatch {
 								$matchColor = $invalidColor
 								$AnF = "-"
 								if (!$WhatIf) {
-									Reply-ToPR -PR $PR -CannedMessage AppsAndFeaturesMatch -UserInput $Submitter -Policy $MagicLabels[30] -Silent
-									Add-PRToRecord -PR $PR -Action "Feedback" -Title $PRtitle
+									Reply-ToPR -PR $PR -CannedMessage AppsAndFeaturesMatch -UserInput $Submitter -Policy $Labels.NAF -Silent
+									Add-PRToRecord -PR $PR -Action $Actions.Feedback -Title $PRtitle
 								}
 							}
 						}
@@ -1614,8 +1683,8 @@ Function Get-PRWatch {
 							# if ($InstallerMatch) {
 								# $matchColor = $invalidColor
 								# $AnF = "-"
-								# Reply-ToPR -PR $PR -CannedMessage InstallerMatchesSubmitter -UserInput $Submitter -Policy $MagicLabels[30] -Silent
-								# Add-PRToRecord -PR $PR -Action "Feedback" -Title $PRtitle
+								# Reply-ToPR -PR $PR -CannedMessage InstallerMatchesSubmitter -UserInput $Submitter -Policy $Labels.NAF -Silent
+								# Add-PRToRecord -PR $PR -Action $Actions.Feedback -Title $PRtitle
 							# }
 						# }
 					}
@@ -1677,8 +1746,8 @@ Function Get-PRWatch {
 					if (($prVersion -eq $ManifestVersion) -OR ($NumVersions -eq 1)) {
 						$matchColor = $invalidColor
 						if (!$WhatIf) {
-							Reply-ToPR -PR $PR -CannedMessage VersionCount -UserInput $Submitter -Silent -Policy "[Policy] $($MagicLabels[30])`n[Policy] $($MagicLabels[33])" -Output Silent
-							Add-PRToRecord -PR $PR -Action "Feedback" -Title $PRtitle
+							Reply-ToPR -PR $PR -CannedMessage VersionCount -UserInput $Submitter -Silent -Policy "[Policy] $($Labels.NAF)`n[Policy] $($Labels.HVL)" -Output Silent
+							Add-PRToRecord -PR $PR -Action $Actions.Feedback -Title $PRtitle
 							$NumVersions = "L"
 						}
 					}
@@ -1693,8 +1762,8 @@ Function Get-PRWatch {
 							$matchColor = $cautionColor
 							if (!$WhatIf) {
 								Reply-ToPR -PR $PR -CannedMessage ListingDiff -UserInput $GLD -Silent
-								Invoke-GitHubPRRequest -PR $PR -Method POST -Type comments -Data "[Policy] $MagicLabels[30]" -Output Silent
-								Add-PRToRecord -PR $PR -Action "Feedback" -Title $PRtitle
+								Invoke-GitHubPRRequest -PR $PR -Method POST -Type comments -Data "[Policy] $Labels.NAF" -Output Silent
+								Add-PRToRecord -PR $PR -Action $Actions.Feedback -Title $PRtitle
 							}#if Whatif
 						}#end if GLD
 					}#end if null
@@ -1767,12 +1836,12 @@ Function Get-PRWatch {
 					if ($Approve -eq "+") {
 						if (!$WhatIf) {
 							$Approve = Approve-PR -PR $PR
-							Add-PRToRecord -PR $PR -Action "Approved" -Title $PRtitle
+							Add-PRToRecord -PR $PR -Action $Actions.Approved -Title $PRtitle
 						}
 					}
 				}
 
-				Write-Host -nonewline -f $matchColor "$Approve | "
+				Write-Host -nonewline -f $matchColor "$($Actions.Approved) | "
 				Write-Host -f $matchColor ""
 
 				$oldclip = $PRtitle
@@ -1818,7 +1887,7 @@ Function Get-WorkSearch {
 				$PR = $FullPR.number
 				Get-TrackerProgress -PR $PR $MyInvocation.MyCommand $line $PRs.length
 				$line++
-				if ($MagicLabels[33] -notin $FullPR.labels.name) {
+				if ($Labels.HVL -notin $FullPR.labels.name) {
 					if (($FullPR.title -match "Remove") -OR 
 					($FullPR.title -match "Delete") -OR 
 					($FullPR.title -match "Automatic deletion")){
@@ -1879,17 +1948,17 @@ Function Get-GitHubPreset {
 
 	if (($PR.ToString().length -eq 6) -OR $Force) {
 		Switch ($Preset) {
-			"Approved" {
+			$Actions.Approved {
 				$out += Approve-PR -PR $PR; 
 				Add-PRToRecord -PR $PR -Action $Preset
 			}
 			"AutomationBlock" {
-				Add-PRToRecord -PR $PR -Action "Blocking"
-				$out += Reply-ToPR -PR $PR -CannedMessage AutomationBlock -Policy "Network-Blocker"
+				Add-PRToRecord -PR $PR -Action $Actions.Blocking
+				$out += Reply-ToPR -PR $PR -CannedMessage AutomationBlock -Policy $Labels.NB 
 			}
-			"Blocking" {
-				Add-PRToRecord -PR $PR -Action "Blocking"
-				$out += Invoke-GitHubPRRequest -PR $PR -Method POST -Type comments -Data "[Policy] Blocking-Issue"
+			$Actions.Blocking {
+				Add-PRToRecord -PR $PR -Action $Actions.Blocking
+				$out += Invoke-GitHubPRRequest -PR $PR -Method POST -Type comments -Data "[Policy] $($Labels.NB)"
 			}
 			"CheckInstaller" {
 				$Pull = (Invoke-GitHubPRRequest -PR $PR -Type files -Output content -JSON)
@@ -1909,9 +1978,9 @@ Function Get-GitHubPreset {
 				$out = $out += Invoke-GitHubPRRequest -PR $PR -Method Post -Type comments -Data $Body -Output StatusDescription 
 			}
 			"Completed" {
-				$out += Reply-ToPR -PR $PR -Body "This package installs and launches normally in a Windows 10 VM." -Policy "Manually-Validated"
+				$out += Reply-ToPR -PR $PR -Body "This package installs and launches normally in a Windows 10 VM." -Policy $Labels.MV
 			}
-			"Closed" {
+			$Actions.Closed {
 				if ($UserInput) {
 					Add-PRToRecord -PR $PR -Action $Preset
 					$out += Invoke-GitHubPRRequest -PR $PR -Type comments -Output StatusDescription -Method POST -Data "Close with reason: $UserInput;"
@@ -1920,13 +1989,13 @@ Function Get-GitHubPreset {
 				}
 			}
 			"DefenderFail" {
-				Add-PRToRecord -PR $PR -Action "Blocking"
+				Add-PRToRecord -PR $PR -Action $Actions.Blocking
 				$out += Get-CannedMessage -Response DefenderFail -NoClip -NotAutomated
-				#$out += Reply-ToPR -PR $PR -CannedMessage $Preset -Policy "Needs-Attention`n[Policy] $($MagicLabels[0])"
+				#$out += Reply-ToPR -PR $PR -CannedMessage $Preset -Policy "Needs-Attention`n[Policy] $($Labels.VDE)"
 			}
 			"DriverInstall" {
-				Add-PRToRecord -PR $PR -Action "Blocking"
-				$out += Reply-ToPR -PR $PR -CannedMessage $Preset -Policy "DriverInstall"
+				Add-PRToRecord -PR $PR -Action $Actions.Blocking
+				$out += Reply-ToPR -PR $PR -CannedMessage $Preset -Policy $Labels.DI
 			}
 			"Duplicate" {
 				if ($UserInput -match "[0-9]{5,6}") {
@@ -1935,10 +2004,10 @@ Function Get-GitHubPreset {
 					Write-Output "-UserInput PRNumber needed to close as duplicate."
 				}
 			}
-			"Feedback" {
+			$Actions.Feedback {
 				Add-PRToRecord -PR $PR -Action $Preset
 				if ($UserInput) {
-					$out += Reply-ToPR -PR $PR -Body $UserInput -Policy "$MagicLabels[30]"
+					$out += Reply-ToPR -PR $PR -Body $UserInput -Policy $Labels.NAF
 				} else {
 					Write-Output "-UserInput needed to use preset $preset"
 				}
@@ -1954,18 +2023,18 @@ Function Get-GitHubPreset {
 				Get-TrackerVMSetMode Idle
 			}
 			"InstallerNotSilent" {
-				Add-PRToRecord -PR $PR -Action "Feedback"
-				$out += Reply-ToPR -PR $PR -CannedMessage $Preset -Policy $MagicLabels[30]
+				Add-PRToRecord -PR $PR -Action $Actions.Feedback
+				$out += Reply-ToPR -PR $PR -CannedMessage $Preset -Policy $Labels.NAF
 			}
 			"InstallerMissing" {
-				Add-PRToRecord -PR $PR -Action "Feedback"
-				$out += Reply-ToPR -PR $PR -CannedMessage $Preset -Policy $MagicLabels[30]
+				Add-PRToRecord -PR $PR -Action $Actions.Feedback
+				$out += Reply-ToPR -PR $PR -CannedMessage $Preset -Policy $Labels.NAF
 			}
 			"LabelAction" {
 				Get-PRLabelAction -PR $PR
 			}
 			"ManuallyValidated" {
-				$out += Reply-ToPR -PR $PR -Body "Completing validation." -Policy "Manually-Validated"
+				$out += Reply-ToPR -PR $PR -Body "Completing validation." -Policy $Labels.MV 
 			}
 			"MergeConflicts" {
 				Get-GitHubPreset -Preset Closed -PR $PR -UserInput "Merge Conflicts"
@@ -1974,21 +2043,21 @@ Function Get-GitHubPreset {
 				Write-Output "Use AutomationBlock instead."
 			}
 			"NoInstallerChange" {
-				$out += Reply-ToPR -PR $PR -Body "This PR doesn't modify any of the `InstallerUrl` nor `InstallerSha256` fields." -Policy "Manually-Validated"
+				$out += Reply-ToPR -PR $PR -Body "This PR doesn't modify any of the `InstallerUrl` nor `InstallerSha256` fields." -Policy $Labels.MV 
 			}
 			"OneManifestPerPR" {
-				Add-PRToRecord -PR $PR -Action "Feedback"
-				$out += Reply-ToPR -PR $PR -CannedMessage $Preset -Policy $MagicLabels[30]
-				Get-AddPRLabel -PR $PR -Label "Blocking-Issue"
+				Add-PRToRecord -PR $PR -Action $Actions.Feedback
+				$out += Reply-ToPR -PR $PR -CannedMessage $Preset -Policy $Labels.NAF
+				Get-AddPRLabel -PR $PR -Label $Labels.BI
 			}
 			"PRNoYamlFiles" {
-				Add-PRToRecord -PR $PR -Action "Feedback"
-				$out += Reply-ToPR -PR $PR -CannedMessage $Preset -Policy $MagicLabels[30]
+				Add-PRToRecord -PR $PR -Action $Actions.Feedback
+				$out += Reply-ToPR -PR $PR -CannedMessage $Preset -Policy $Labels.NAF
 				Get-GitHubPreset -Preset MergeConflicts -PR $PR 
 			}
 			"PackageUrl" {
-				Add-PRToRecord -PR $PR -Action "Feedback"
-				$out += Reply-ToPR -PR $PR -CannedMessage $Preset -Policy $MagicLabels[30]
+				Add-PRToRecord -PR $PR -Action $Actions.Feedback
+				$out += Reply-ToPR -PR $PR -CannedMessage $Preset -Policy $Labels.NAF
 			}
 			"PossibleDuplicate" {
 				$Pull = (Invoke-GitHubPRRequest -PR $PR -Type files -Output content -JSON)
@@ -2000,7 +2069,7 @@ Function Get-GitHubPreset {
 				$UserInput = $out | where {$_ -match "http"} | where {$_ -notmatch "json"} 
 				if ($UserInput) {
 					$UserInput = "InstallerUrl contains Manifest version instead of PR version:`n"+$UserInput + "`n`n(Automated message - build $build)"
-					$out += Reply-ToPR -PR $PR -Body $UserInput -Policy $MagicLabels[30]
+					$out += Reply-ToPR -PR $PR -Body $UserInput -Policy $Labels.NAF
 					Add-PRToRecord -PR $PR -Action Feedback
 				}
 			}
@@ -2011,7 +2080,7 @@ Function Get-GitHubPreset {
 				Get-GitHubPreset -Preset Closed -PR $PR -UserInput "Restricted Submitter"
 			}
 			"ResetApproval" {
-				$out += Reply-ToPR -PR $PR -Body "Reset approval workflow." -Policy "Reset Feedback `n[Policy] Validation Completed `n[Policy] Approved"			}
+				$out += Reply-ToPR -PR $PR -Body "Reset approval workflow." -Policy "Reset Feedback `n[Policy] $($Labels.VC) `n[Policy] $($Actions.Approved)"			}
 			"Retry" {
 				Add-PRToRecord -PR $PR -Action $Preset
 				$out += Get-RetryPR -PR $PR
@@ -2046,7 +2115,7 @@ Function Get-PRLabelAction { #Soothing label action.
 	$PRLabels = ((Invoke-GitHubPRRequest -PR $PR -Type labels -Output content -JSON).name)
 	)
 	Write-Output "PR $PR has labels $PRLabels"
-	if ($PRLabels -contains $MagicLabels[0]) {
+	if ($PRLabels -contains $Labels.VDE) {
 		$PRState = Get-PRStateFromComments $PR
 		if (($PRState | where {$_.event -eq "PreValidation"})[-1].created_at -lt (Get-Date).AddHours(-8)) {# -AND #Last Prevalidation was 8 hours ago.
 		#($PRState | where {$_.event -eq "AutoValEnd"})[-1].created_at -lt (Get-Date).AddHours(-12)) { #Last Run was 18 hours ago.
@@ -2056,10 +2125,10 @@ Function Get-PRLabelAction { #Soothing label action.
 		
 		Foreach ($Label in ($PRLabels -split " ")) {
 			Switch -wildcard ($Label) {
-				$MagicLabels[1] {#BVE
+				$Labels.BVE {
 					$LogSet = 53,30,25,27,34,57
 					$StringSet = 0
-					$UserInput = Get-LogFromCommitFile -LogNumbers $LogSet -StringNumbers $StringSet -length 5
+					$UserInput = Get-LogFromCommitFile -PR $PR -LogNumbers $LogSet -StringNumbers $StringSet -length 5
 					if ($null -ne $UserInput) {
 						Reply-ToPR -PR $PR -UserInput $UserInput -CannedMessage AutoValEnd
 					}
@@ -2067,7 +2136,7 @@ Function Get-PRLabelAction { #Soothing label action.
 						#Get-GitHubPreset -PR $PR -Preset AutomationBlock
 					}
 				}
-				$MagicLabels[2] {
+				$Labels.EAT {
 					$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 36 -SearchString $MagicStrings[0] -length 4
 					if ($UserInput) {
 						Reply-ToPR -PR $PR -UserInput $UserInput -CannedMessage AutoValEnd
@@ -2076,7 +2145,7 @@ Function Get-PRLabelAction { #Soothing label action.
 						Get-GitHubPreset -PR $PR -Preset AutomationBlock
 					}
 				}
-				$MagicLabels[3] {#EHM
+				$Labels.EHM {
 					$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 53 -SearchString $MagicStrings[0] -Length 10
 					if ($null -eq $UserInput) {
 						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 25 -SearchString $MagicStrings[0] -Length 10 
@@ -2092,7 +2161,7 @@ Function Get-PRLabelAction { #Soothing label action.
 						Get-UpdateHashInPR2 -PR $PR -Clip $UserInput
 					}
 				}
-				$MagicLabels[4] {#EIA
+				$Labels.EIA {
 					$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 53 -SearchString $MagicStrings[6] -length 5
 					if ($null -eq $UserInput) {
 						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 25 -SearchString $MagicStrings[0] -Length 10 
@@ -2106,7 +2175,7 @@ Function Get-PRLabelAction { #Soothing label action.
 						Get-GitHubPreset -PR $PR -Preset CheckInstaller
 					}
 				}
-				$MagicLabels[5] {
+				$Labels.IE {
 					$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 25 -SearchString $MagicStrings[1]
 					if ($null -match $UserInput) {
 						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 15 -SearchString $MagicStrings[1]
@@ -2118,10 +2187,10 @@ Function Get-PRLabelAction { #Soothing label action.
 						Reply-ToPR -PR $PR -UserInput $UserInput -CannedMessage AutoValEnd
 					}
 				}
-				$MagicLabels[6] {
+				$Labels.IEDS {
 					Get-GitHubPreset Retry -PR $PR
 				}
-				$MagicLabels[7] {#IEM
+				$Labels.IEM {
 					$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 15 -SearchString $MagicStrings[1]
 					if ($null -match $UserInput) {
 						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 25 -SearchString $MagicStrings[4] -length 7
@@ -2131,6 +2200,9 @@ Function Get-PRLabelAction { #Soothing label action.
 					}
 					if ($null -match $UserInput) {
 						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 42 -SearchString $MagicStrings[9] -MatchOffset -3 -Length 4
+					}
+					if ($null -match $UserInput) {
+						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 46 -SearchString $MagicStrings[9] -MatchOffset -3 -Length 4
 					}
 					if ($UserInput) {
 						Reply-ToPR -PR $PR -UserInput $UserInput -CannedMessage AutoValEnd
@@ -2143,7 +2215,7 @@ Function Get-PRLabelAction { #Soothing label action.
 						}
 					}
 				}
-				$MagicLabels[8] {
+				$Labels.IEU {
 					$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 25 -SearchString $MagicStrings[1]
 					if ($UserInput) {
 						if ($MagicStrings[5] -in $UserInput) {
@@ -2152,34 +2224,34 @@ Function Get-PRLabelAction { #Soothing label action.
 						Reply-ToPR -PR $PR -UserInput $UserInput -CannedMessage AutoValEnd
 					}
 				}
-				$MagicLabels[9] {#MAFVE
+				$Labels.ANF {
 					$LogSet = 14,42,46
 					$StringSet = 1,2
-					$UserInput = Get-LogFromCommitFile -LogNumbers $LogSet -StringNumbers $StringSet
+					$UserInput = Get-LogFromCommitFile -PR $PR -LogNumbers $LogSet -StringNumbers $StringSet
 					if ($null -ne $UserInput) {
 						Reply-ToPR -PR $PR -UserInput $UserInput -CannedMessage AutoValEnd
 					}
 				}
-				$MagicLabels[10] {
+				$Labels.MIVE {
 					$LogSet = 42,43
 					$StringSet = 1,2
-					$UserInput = Get-LogFromCommitFile -LogNumbers $LogSet -StringNumbers $StringSet
+					$UserInput = Get-LogFromCommitFile -PR $PR -LogNumbers $LogSet -StringNumbers $StringSet
 					if ($null -ne $UserInput) {
 						Reply-ToPR -PR $PR -UserInput $UserInput -CannedMessage AutoValEnd
 					}
 				}
-				$MagicLabels[11] {#Manifest-Validation-Error
+				$Labels.MVE {
 					$LogSet = 42,39,14,34,23,46
 					$StringSet = 8,2,10,11
-					$UserInput = Get-LogFromCommitFile -LogNumbers $LogSet -StringNumbers $StringSet
+					$UserInput = Get-LogFromCommitFile -PR $PR -LogNumbers $LogSet -StringNumbers $StringSet
 					if ($null -ne $UserInput) {
 						Reply-ToPR -PR $PR -UserInput $UserInput -CannedMessage AutoValEnd
 					}
 				}
-				$MagicLabels[12] {#Duplicate
+				$Labels.PD {
 					Get-DuplicateCheck -PR $PR
 				}
-				$MagicLabels[13] {#PR Err
+				$Labels.PRE {
 					$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 41 -SearchString $MagicStrings[9] -MatchOffset 0
 					if ($null -match $UserInput) {
 						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 13 -SearchString $MagicStrings[9] -MatchOffset 0
@@ -2192,7 +2264,7 @@ Function Get-PRLabelAction { #Soothing label action.
 					}
 					$LogSet = 14,27
 					$StringSet = 1
-					$UserInput += Get-LogFromCommitFile -LogNumbers $LogSet -StringNumbers $StringSet
+					$UserInput += Get-LogFromCommitFile -PR $PR -LogNumbers $LogSet -StringNumbers $StringSet
 
 					if ($UserInput -match "The pull request contains more than one manifest") {
 						Get-GitHubPreset -Preset OneManifestPerPR -PR $PR
@@ -2204,7 +2276,7 @@ Function Get-PRLabelAction { #Soothing label action.
 						Reply-ToPR -PR $PR -UserInput $UserInput -CannedMessage AutoValEnd
 					}
 				}
-				$MagicLabels[14] {#UVF
+				$Labels.UVE {
 					$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 32 -SearchString "Validation result: Failed"
 					Get-GitHubPreset -PR $PR -Preset CheckInstaller
 					if ($UserInput) {
@@ -2212,24 +2284,24 @@ Function Get-PRLabelAction { #Soothing label action.
 					}
 					Get-Autowaiver -PR $PR
 				}
-				$MagicLabels[15] {#VD
+				$Labels.VD {
 					Get-Autowaiver -PR $PR
 				}
-				$MagicLabels[16] {
+				$Labels.VEE {
 					Get-AutoValLog -PR $PR
 				}
-				$MagicLabels[17] {
+				$Labels.HVF {
 					Get-AutoValLog -PR $PR
 				}
-				$MagicLabels[18] {
+				$Labels.VMD {
 					$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 25 -SearchString $MagicStrings[1]
 					if ($UserInput) {
 						Reply-ToPR -PR $PR -UserInput $UserInput -CannedMessage AutoValEnd
 					}
 				}
-				$MagicLabels[19] {
+				$Labels.VMC {
 				}
-				$MagicLabels[20] {#VNE
+				$Labels.VNE {
  					Get-Autowaiver -PR $PR
 <#
  					$Title = ((Invoke-GitHubPRRequest -PR $PR -Type "" -Output content -JSON).title);
@@ -2240,25 +2312,31 @@ Function Get-PRLabelAction { #Soothing label action.
 					}
  #>
 				}
-				$MagicLabels[21] {#VIE
+				$Labels.VIE {
 					Get-AutoValLog -PR $PR
 					Get-Autowaiver -PR $PR
 				}
-				$MagicLabels[22] {
+				$Labels.VSE {
 					Get-AutoValLog -PR $PR
 				}
-				$MagicLabels[23] {
+				$Labels.VUF {
 					Get-AutoValLog -PR $PR
 				}
-				$MagicLabels[26] {#VC
+				$Labels.VC {
 				}
-				$MagicLabels[27] {#VFUE
+				$Labels.403 {
+					$LogSet = 53,23,55,21
+					$StringSet = 9
+					$UserInput = Get-LogFromCommitFile -PR $PR -LogNumbers $LogSet -StringNumbers $StringSet
+					if ($UserInput) {
+						Reply-ToPR -PR $PR -UserInput $UserInput -CannedMessage AutoValEnd
+					}
 					Get-Autowaiver -PR $PR
 				}
-				$MagicLabels[28] {#VUU
+				$Labels.VUE {
 					Get-Autowaiver -PR $PR
 				}
-				$MagicLabels[32] {
+				$Labels.MVE {
 					$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 42 -SearchString $MagicStrings[2]
 					if ($null -eq $UserInput) {
 						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 42 -SearchString $MagicStrings[1]
@@ -2267,20 +2345,29 @@ Function Get-PRLabelAction { #Soothing label action.
 						Reply-ToPR -PR $PR -UserInput $UserInput -CannedMessage AutoValEnd
 					}
 				}
-				$MagicLabels[33] {
+				$Labels.HVL {
 					Approve-PR -PR $PR
 				}
-				$MagicLabels[34] {
+				$Labels.LVR {
 					Approve-PR -PR $PR
 				}
-				$MagicLabels[35] {
+				$Labels.HVR {
 					Approve-PR -PR $PR
 				}
-				$MagicLabels[36] {#MMC
+				$Labels.MMC {
 					Get-VerifyMMC -PR $PR
+				}
+				$Labels.NP {
+					if ($PRLabels -notmatch $Labels.MA) {
+						Add-PRToQueue -PR $PR
+					}
+				}
+				$Labels.NMM {
+					Approve-PR -PR $_;
+					Get-MergePR -PR $_
 				}
 				"Policy-Test-*" {
-					Get-VerifyMMC -PR $PR
+					Get-Autowaiver -PR $PR
 				}
 			}#end Switch Label
 		}#end Foreach Label
@@ -2289,6 +2376,7 @@ Function Get-PRLabelAction { #Soothing label action.
 
 Function Get-LogFromCommitFile {
 	param(
+	$PR,
 	$LogNumbers,
 	$StringNumbers,
 	$Length
@@ -2315,65 +2403,65 @@ Function Add-Waiver {
 	Foreach ($Label in $Labels) {
 		$Waiver = ""
 		Switch ($Label) {
-			$MagicLabels[2] {
+			$Labels.EAT {
 				Get-GitHubPreset -Preset Completed -PR $PR
 				Add-PRToRecord -PR $PR -Action $actions[0]
 				$Waiver = $Label
 			}
-			$MagicLabels[31] {
+			$Labels.PT27 {
 				Add-PRToRecord -PR $PR -Action $actions[0]
 				$Waiver = $Label
 			}
-			$MagicLabels[24] {
+			$Labels.PT12 {
 				Add-PRToRecord -PR $PR -Action $actions[0]
 				$Waiver = $Label
 			}
-			$MagicLabels[25] {
+			$Labels.PT23 {
 				Add-PRToRecord -PR $PR -Action $actions[0]
 				$Waiver = $Label
 			}
-			$MagicLabels[26] {
+			$Labels.VC {
 				Get-GitHubPreset -Preset Approved -PR $PR
 				Add-PRToRecord -PR $PR -Action $actions[2]
 			}
-			$MagicLabels[15] {
+			$Labels.VD {
 				Add-PRToRecord -PR $PR -Action $actions[0]
 				$Waiver = $Label
 			}
-			$MagicLabels[16] {
+			$Labels.VEE {
 				Add-PRToRecord -PR $PR -Action $actions[0]
 				$Waiver = $Label
 			}
-			$MagicLabels[27] {
+			$Labels.403 {
 				Add-PRToRecord -PR $PR -Action $actions[1]
 				$Waiver = $Label
 			}
-			$MagicLabels[21] {
+			$Labels.VIE {
 				Add-PRToRecord -PR $PR -Action $actions[1]
 				$Waiver = $Label
 			}
-			$MagicLabels[20] {
+			$Labels.VNE {
 				Add-PRToRecord -PR $PR -Action $actions[1]
 				$Waiver = $Label
 			}
-			$MagicLabels[22] {
+			$Labels.VSE {
 				Add-PRToRecord -PR $PR -Action $actions[1]
 				$Waiver = $Label
 			}
-			$MagicLabels[23] {
+			$Labels.VUF {
 				Add-PRToRecord -PR $PR -Action $actions[1]
 				$Waiver = $Label
 			}
-			$MagicLabels[28] {
+			$Labels.VUE {
 				Add-PRToRecord -PR $PR -Action $actions[1]
 				$Waiver = $Label
 			}
-			$MagicLabels[29] {
+			$Labels.VR {
 				Get-GitHubPreset -Preset Completed -PR $PR
 				#Invoke-GitHubPRRequest -PR $PR -Method POST -Type labels -Data "Retry-1"
 				Add-PRToRecord -PR $PR -Action $actions[0]
 			}
-			$MagicLabels[6] {
+			$Labels.IEDS {
 				Get-GitHubPreset -Preset Completed -PR $PR
 				#Invoke-GitHubPRRequest -PR $PR -Method POST -Type labels -Data "Retry-1"
 				Add-PRToRecord -PR $PR -Action $actions[0]
@@ -2386,6 +2474,7 @@ Function Add-Waiver {
 	}; #end Foreach Label
 }; #end Add-Waiver
 
+#| ? {!(($_.labels.name -match "Moderator-Approved") -AND ($_.labels.name -match "Needs-Attention"))}
 Function Get-SearchGitHub {
 	param(
 		[ValidateSet("Approval","Approval2","Autowaiver","Blocking","Defender","Duplicate","HVR","IEDS","LVR","MMC","None","ToWork","ToWork2","ToWork3","VCMA")][string]$Preset = "Approval",
@@ -2409,52 +2498,50 @@ Function Get-SearchGitHub {
 	$Base = "repo:$Owner/$Repo+"
 	$Base = $Base + "is:pr+"
 	if (!($AllowClosedPRs)) {
-		$Base = $Base + "is:open+"
+		$Base +=  "is:open+"
 	}
-	$Base = $Base + "draft:false+"
+	$Base +=  "draft:false+"
+	$Base +=  "sort:created-asc+"
 
 	#Smaller blocks
-	$Approved = "label:Moderator-Approved+"
+	$Approved = "label:$($Labels.MA)+"
 	$nApproved = "-"+$Approved
 	$nBI = "-label:Blocking-Issue+"
-	$Defender = "label:"+$MagicLabels[0]+"+"
+	$Defender = "label:$($Labels.VDE)+"
 	$HaventWorked = "-commenter:$($GitHubUserName)+"
-	$nNP = "-label:New-Package+"
+	$nNP = "label:$($Labels.NP)+"
 	$nHW = "-label:Hardware+"
-	$IEDSLabel = "label:Internal-Error-Dynamic-Scan+"
-	$LVR = "label:"+$MagicLabels[34]+"+"
-	$HVR = "label:"+$MagicLabels[35]+"+"
+	$IEDSLabel = "label:$($Labels.IEDS)+"
+	$LVR = "label:$($Labels.LVR)+"
+	$HVR = "label:$($Labels.HVR)+"
 	$nIEDS = "-"+$IEDSLabel
-	$VSA = "-label:Validation-Skip-Automations+"
-	$MMC = "label:Manifest-Metadata-Consistency+"
+	$VSA = "label:$($Labels.VSA)+"
+	$MMC = "label:$($Labels.MMC)+"
 	$nMMC = "-"+$MMC
-	$IEM = "label:Internal-Error-Manifest+"
-	$nNSA = "-label:Internal-Error-NoSupportedArchitectures+"
-	$NotPass = "-label:Azure-Pipeline-Passed+" #Hasn't psased pipelines
-	$sortAsc = "sort:created-asc+";
-	$VC = "label:Validation-Completed+" #Completed
-	$nVC = "-"+$VC #Completed
-	$NA = "label:Needs-Attention+";
-	$NAF = "label:Needs-Author-Feedback+";
-	$VD += "label:Validation-Domain+";
-	$nNRA = "-label:No-Recent-Activity+"
-	$nIOD += "-label%3AInteractive-Only-Download+";
-	$nIOI += "-label%3AInteractive-Only-Installer+";
+	$IEM = "label:$($Labels.IEM)+"
+	$nNSA = "-label:$($Labels.NSA)+"
+	$NotPass = "-label:$($Labels.APP)+"#Hasn't psased pipelines
+	$VC = "label:$($Labels.VC)+"#Completed
+	$nVC = "-"+$VC #Not Completed
+	$NA = "label:$($Labels.NA)+"
+	$NAF = "label:$($Labels.NAF)+"
+	$VD = "label:$($Labels.VD)+"
+	$nNRA = "-label:$($Labels.NRA)+"
+	$nNRA = "-label:$($Labels.IOD)+"
+	$nNRA = "-label:$($Labels.IOI)+"
 	$date = Get-Date (Get-Date).AddDays(-$Days) -Format "yyyy-MM-dd"
 	$Recent = "updated:>$($date)+" 
 	
 	#Building block settings
 	$Blocking = $nHW
-	$Blocking = $Blocking + $nNSA
-	$Blocking = $Blocking + "-label:DriverInstall+"
-	$Blocking = $Blocking + "-label:Agreements+"
-	$Blocking = $Blocking + "-label:License-Blocks-Install+"
-	$Blocking = $Blocking + "-label:Network-Blocker+"
-	$Blocking = $Blocking + "-label:portable-archive+"
-	$Blocking = $Blocking + "-label:Project-File+"
-	$Blocking = $Blocking + "-label:Reboot+"
-	$Blocking = $Blocking + "-label:Scripted-Application+"
-	$Blocking = $Blocking + "-label:zip-binary+"
+	$Blocking += $nNSA
+	$Blocking += "-label:$($Labels.AGR)+"
+	$Blocking += "-label:$($Labels.DI)+"
+	$Blocking += "-label:$($Labels.LBI)+"
+	$Blocking += "-label:$($Labels.NB)+"
+	$Blocking += "-label:$($Labels.PF)+"
+	$Blocking += "-label:$($Labels.RB)+"
+	$Blocking += "-label:$($Labels.SA)+"
 	
 	$Common = $nBI
 	$Common = $Common + "-"+$IEM
@@ -2463,31 +2550,30 @@ Function Get-SearchGitHub {
 	$Cna = $VC
 	$Cna = $Cna+ $nApproved
 	
-	$Review1 = "-label:Changes-Requested+" 
-	$Review1 = $Review1 + "-label:Needs-CLA+"
-	$Review1 = $Review1+ $nNRA
+	$Review1 = "-label:$($Labels.CR)+"
+	$Review1 += "-label:$($Labels.CLA)+"
+	$Review1 += $nNRA
 
 	$Review2 = "-"+$NA
 	$Review2 = $Review2 + "-"+$NAF
-	$Review2 = $Review2 + "-label:Needs-Review+"
+	$Review2 = $Review2 + "-label:$($Labels.NR)+"
 	
-	$Approvable = "-label:Validation-Merge-Conflict+" 
-	$Approvable += "-label:Manifest-Version-Error+";
-	$Approvable += "-label:"+$MagicLabels[10]+"+";#MIVE
-	$Approvable += "-label:"+$MagicLabels[11]+"+";#MVE
-	$Approvable += "-label:"+$MagicLabels[12]+"+";#PossDupe
-	$Approvable += "-label:Unexpected-File+";
+	$Approvable = "-label:$($Labels.VMC)+"
+	$Approvable += "-label:$($Labels.VER)+"
+	$Approvable += "-label:$($Labels.MIVE)+"
+	$Approvable += "-label:$($Labels.PD)+"
+	$Approvable += "-label:$($Labels.UF)+"
 	
-	$Workable += "-label:"+$MagicLabels[34]+"+";#LVR
-	$Workable += "-label:"+$MagicLabels[35]+"+";#HVR
-	$Workable += "-label:Validation-Merge-Conflict+";
-	$Workable += "-label:Validation-Certificate-Root+";
-	$Workable += "-label:"+$MagicLabels[1]+"+";#BVE
-	$Workable += "-label:Validation-SmartScreen-Error+";
-	$Workable += "-label:Unexpected-File+";
+	$Workable += "-label:$($Labels.LVR)+"
+	$Workable += "-label:$($Labels.HVR)+"
+	$Workable += "-label:$($Labels.VMC)+"
+	$Workable += "-label:$($Labels.BVE)+"
+	$Workable += "-label:$($Labels.UF)+"
+	$Workable += "-label:$($Labels.VCR)+"
+	$Workable += "-label:$($Labels.VSS)+"
 
 	$PolicyTests = "-label:Policy-Test-1.1+";
-	$PolicyTests += "-label:Policy-Test-1.2+";
+	$PolicyTests += "-label:$($Labels.PT12)+"
 	$PolicyTests += "-label:Policy-Test-1.3+";
 	$PolicyTests += "-label:Policy-Test-1.4+";
 	$PolicyTests += "-label:Policy-Test-1.5+";
@@ -2498,11 +2584,11 @@ Function Get-SearchGitHub {
 	$PolicyTests += "-label:Policy-Test-1.10+";
 	$PolicyTests += "-label:Policy-Test-2.1+";
 	$PolicyTests += "-label:Policy-Test-2.2+";
-	$PolicyTests += "-label:Policy-Test-2.3+";
+	$PolicyTests += "-label:$($Labels.PT23)+"
 	$PolicyTests += "-label:Policy-Test-2.4+";
 	$PolicyTests += "-label:Policy-Test-2.5+";
 	$PolicyTests += "-label:Policy-Test-2.6+";
-	$PolicyTests += "-label:Policy-Test-2.7+";
+	$PolicyTests += "-label:$($Labels.PT27)+"
 	$PolicyTests += "-label:Policy-Test-2.8+";
 	$PolicyTests += "-label:Policy-Test-2.9+";
 	$PolicyTests += "-label:Policy-Test-2.10+";
@@ -2510,21 +2596,21 @@ Function Get-SearchGitHub {
 	$PolicyTests += "-label:Policy-Test-2.12+";
 	
 	$Automatable = "-label:WSL+";
-	$Automatable += "-label:URL-Validation-Error+";
-	$Automatable += "-label:"+$MagicLabels[28]+"+"
-	$Automatable += "-label:Validation-Open-Url-Failed+";
-	$Automatable += "-label:Validation-Forbidden-URL-Error+";
-	$Automatable += "-label:Validation-HTTP-Error+";
-	$Automatable += "-label:Validation-404-Error+";
-	$Automatable += "-label:Author-Not-Authorized+";
-	$Automatable += "-label:Hardware+";
-	$Automatable += "-label:"+$MagicLabels[13]+"+"
-	$Automatable += "label:"+$MagicLabels[11]+"+"
-	$Automatable += "label:"+$MagicLabels[3]+"+"
-	$Automatable += "-label:Manifest-AppsAndFeaturesVersion-Error+";
-	$Automatable += "-label:Error-Installer-Availability+";
+	$Automatable = "-label:$($Labels.UVE)+"
+	$Automatable = "-label:$($Labels.VUE)+"
+	$Automatable = "-label:$($Labels.OUF)+"
+	$Automatable = "-label:$($Labels.VHE)+"
+	$Automatable = "-label:$($Labels.403)+"
+	$Automatable = "-label:$($Labels.404)+"
+	$Automatable = "-label:$($Labels.ANA)+"
+	$Automatable = "-label:$($Labels.HW)+"
+	$Automatable = "-label:$($Labels.PRE)+"
+	$Automatable = "-label:$($Labels.MVE)+"
+	$Automatable = "-label:$($Labels.EHM)+"
+	$Automatable = "-label:$($Labels.ANF)+"
+	$Automatable = "-label:$($Labels.EIA)+"
+	$Automatable = "-label:$($Labels.VC)+"
 	$Automatable += "-"+$VD;
-	$Automatable += "-label:Validation-Completed+";
 	
 	#Composite settings
 	$Set1 = $Blocking + $Common + $Review1
@@ -2571,7 +2657,7 @@ Function Get-SearchGitHub {
 			$Url += $Defender
 		}
 		"Duplicate"{	
-			$Url += "label:"+$MagicLabels[12]+"+";#dupe
+			$Url += "label:"+$Labels.PD+"+";#dupe
 			$Url += $nNRA
 		}
 		"Autowaiver"{
@@ -2579,15 +2665,15 @@ Function Get-SearchGitHub {
 			$Url += $Workable
 			$Url += $nIEDS 
 			$Url += $nVC
-			$Url += "-label:"+$MagicLabels[3]+"+";#EHM
-			$Url += "-label:"+$MagicLabels[10]+"+";#MVE
-			$Url += "-label:"+$MagicLabels[11]+"+";#MVE
-			$Url += "-label:"+$MagicLabels[16]+"+";#VEE
-			$Url += "-label:"+$MagicLabels[20]+"+";#VNE
-			$Url += "-label:"+$MagicLabels[21]+"+";#VIE
-			$Url += "-label:"+$MagicLabels[22]+"+";#VSE
-			$Url += "-label:"+$MagicLabels[23]+"+";#VUF
-			$Url += "-label:Manifest-AppsAndFeaturesVersion-Error+";
+			$Url += "label:$($Labels.EHM)+"
+			$Url += "label:$($Labels.MIVE)+"
+			$Url += "label:$($Labels.MVE)+"
+			$Url += "label:$($Labels.VEE)+"
+			$Url += "label:$($Labels.VNE)+"
+			$Url += "label:$($Labels.VIE)+"
+			$Url += "label:$($Labels.VSE)+"
+			$Url += "label:$($Labels.VUF)+"
+			$Url += "label:$($Labels.ANF)+"
 			$Url += $nBI
 			$Url += $nIOD
 			$Url += $nIOI
@@ -2647,7 +2733,6 @@ Function Get-SearchGitHub {
 			$Url += $nMMC;
 		}
 	}
-	$Url += $sortAsc;
 
 	if ($Browser) {
 		Start-Process $Url
@@ -2939,9 +3024,9 @@ Function Get-AutoValLog {
 				if($SplitInput -match "No suitable installer found for manifest" -OR
 				$SplitInput -match "Caught std::exception: bad allocation") {
 					if ($WhatIf) {
-						Write-Host "WhatIf: Get-RandomIEDS -PR $PR"
+						Write-Host "WhatIf: Add-PRToQueue -PR $PR"
 					} else {
-						Get-RandomIEDS -PR $PR
+						Add-PRToQueue -PR $PR
 					}
 				}
 				$exitregex = "exit code: [0-9]{0,3}$"
@@ -3253,18 +3338,19 @@ Function Get-RemovePRLabel {
 
 function Get-CompletePR ([int]$PR){
 	$labels = (invoke-GitHubPRRequest -PR $PR -Type labels -Method GET -Output Content).name | 
-	where {$_ -notmatch "Azure-Pipeline-Passed"} |
-	where {$_ -notmatch "Manifest-Metadata-Consistency"} |
-	where {$_ -notmatch "Moderator-Approved"} | 
-	where {$_ -notmatch "New-Manifest"} |
-	where {$_ -notmatch "New-Package"} |
-	where {$_ -notmatch "Possible-Duplicate"} |
-	where {$_ -notmatch "Retry-1"} |
-	where {$_ -notmatch "Validation-Completed"} 
+	where {$_ -notmatch $Labels.APP} |
+	where {$_ -notmatch $Labels.MMC} |
+	where {$_ -notmatch $Labels.MA} | 
+	where {$_ -notmatch $Labels.NM} | 
+	where {$_ -notmatch $Labels.NP} | 
+	where {$_ -notmatch $Labels.PD} | 
+	where {$_ -notmatch $Labels.RET} | 
+	where {$_ -notmatch $Labels.VC}  
+
 	foreach ($label in $labels) {
 		Get-Removeprlabel -PR $PR -Label $label
 	}
-	$out = Invoke-GitHubPRRequest -PR $PR -Method POST -Type labels -Data "Validation-Completed"
+	$out = Invoke-GitHubPRRequest -PR $PR -Method POST -Type labels -Data $Labels.VC
 	return $out
 }
 
@@ -3279,8 +3365,15 @@ Function Get-MergePR {
 	} else {
 		$sha = $sha[$ShaNumber]
 	}
-
-	invoke-GitHubrequest -Uri "https://api.github.com/repos/microsoft/winget-pkgs/pulls/$pr/merge" -Method PUT -Body "{`"merge_method`":`"squash`",`"sha`":`"$sha`"}"
+	
+	$Data = Invoke-GitHubrequest -Uri "https://api.github.com/repos/microsoft/winget-pkgs/pulls/$pr/merge" -Method PUT -Body "{`"merge_method`":`"squash`",`"sha`":`"$sha`"}"
+	if ($Data.Content) {
+		$Data.Content
+	} else {
+		$data
+		#($Data[1..$Data.length] | convertfrom-json).message
+	}
+	
 	Add-PRToRecord -PR $PR -Action Squash
 	#invoke-GitHubprRequest -PR $PR -Method PUT -Type merge -Data "{`"merge_method`":`"squash`",`"sha`":`"$sha`"}"
 }
@@ -3384,7 +3477,7 @@ Function Get-PRApproval {
 		$Approver = (($auth -split "/" | Where-Object {$_ -notmatch "\("}) -join ", @"),
 		[switch]$DemoMode
 	)
-	Reply-ToPR -PR $PR -UserInput $Approver -CannedMessage Approve -Policy "Needs-Review"
+	Reply-ToPR -PR $PR -UserInput $Approver -CannedMessage Approve -Policy $Labels.NR
 }
 
 Function Reply-ToPR {
@@ -3514,6 +3607,7 @@ Function Get-Autowaiver {
 		$PackageIdentifier = (Get-YamlValue -StringName PackageIdentifier -clip $PRData),
 		$WaiverData = ($AutowaiverData | ?{$_.PackageIdentifier -match $PackageIdentifier})
 	)
+	Add-PRToRecord -PR $PR -Action $Actions.Waiver
 	if ($WaiverData) {
 		foreach ($Waiver in $WaiverData) {
 			try {
@@ -3552,7 +3646,7 @@ Function Get-DuplicateCheck {
 		[int]$PR 
 	)
 	$PRLabels = ((Invoke-GitHubPRRequest -PR $PR -Type "labels" -Output content -JSON).name)
-	if ($PRLabels -match "Validation-Completed") { #If this PR is VC
+	if ($PRLabels -match $Labels.VC) { #If this PR is VC
 		$Comments = (Invoke-GitHubPRRequest -PR $PR -Type comments -Output content)
 		$otherPR = $Comments.body | ? {$_ -match "Found duplicate pull request"} 
 		$otherPR = $otherPR -split "`n"
@@ -3560,7 +3654,7 @@ Function Get-DuplicateCheck {
 		$otherPRLabels = ((Invoke-GitHubPRRequest -PR $otherPR -Type "labels" -Output content -JSON).name)
 		[int]$mainPR = 0
 		[int]$dupePR = 0
-		if ($otherPRLabels -match "Validation-Completed") { #If other is VC, close the lower number as other.
+		if ($otherPRLabels -match $Labels.VC) { #If other is VC, close the lower number as other.
 			if ($otherPRLabels -match "Moderator-Approved") { #If other is VCMA, close this.
 				$mainPR = $otherPR
 				$dupePR = $PR
@@ -3574,7 +3668,7 @@ Function Get-DuplicateCheck {
 		}# end if Validation-Completed
 		if ($dupePR -gt 0) { 
 			Get-GitHubPreset -Preset Duplicate -PR $dupePR -UserInput $mainPR
-			Get-RemovePRLabel -PR $mainPR -Label "Possible-Duplicate"
+			Get-RemovePRLabel -PR $mainPR -Label $Labels.PD
 		}# end if dupePR
 	}# end if mainPRLabels
 }# end function
@@ -3668,20 +3762,15 @@ Function Get-TrackerVMValidate {
 		#Break;
 		}
 	$PackageMode = "Existing"
-	write-host "PackageMode $PackageMode 1"
 	$LabelList = (Invoke-GitHubPRRequest -PR $PR -Type labels -Output Content).name
 	
-	write-host "LabelList $LabelList"
 	if ($LabelList -match "New-Package") {
 		$PackageMode = "New"
-		write-host "PackageMode $PackageMode 2"
 	}
 	if ($Silent) {
 		Get-TrackerVMSetStatus "Prevalidation" $vm $PackageIdentifier -PR $PR -Mode $PackageMode -Silent
-		write-host "PackageMode $PackageMode 3"
 	} else {
 		Get-TrackerVMSetStatus "Prevalidation" $vm $PackageIdentifier -PR $PR -Mode $PackageMode
-		write-host "PackageMode $PackageMode 4"
 	}
 	if ((Get-VM "vm$vm").state -ne "Running") {Start-VM "vm$vm"}
 
@@ -4925,7 +5014,7 @@ Function Get-UpdateHashInPR {
 		$comment = "``````suggestion`n$ReplaceString`n```````n`n(Automated response - build $build.)"
 	)
 	foreach ($Line in $LineNumbers) {
-		Add-GitHubReviewComment -PR $PR -Comment $comment -Line $Line -Policy "Needs-Author-Feedback"
+		Add-GitHubReviewComment -PR $PR -Comment $comment -Line $Line -Action $Labels.NAF
 	}
 }
 
@@ -4941,7 +5030,7 @@ Function Get-UpdateHashInPR2 {
 		$comment = "``````suggestion`n$ReplaceString`n```````n`n(Automated response - build $build.)"
 	)
 	foreach ($Line in $LineNumbers) {
-		Add-GitHubReviewComment -PR $PR -Comment $comment -Line $Line -Policy "Needs-Author-Feedback"
+		Add-GitHubReviewComment -PR $PR -Comment $comment -Line $Line -Action $Labels.NAF
 	}
 }
 
@@ -4957,7 +5046,7 @@ Function Get-UpdateArchInPR {
 		$comment = "``````suggestion`n$ReplaceString`n```````n`n(Automated response - build $build.)"
 	)
 	foreach ($Line in $LineNumbers) {
-		Add-GitHubReviewComment -PR $PR -Comment $comment -Line $Line -Policy "Needs-Author-Feedback"
+		Add-GitHubReviewComment -PR $PR -Comment $comment -Line $Line -Action $Labels.NAF
 	}
 }
 
@@ -4972,8 +5061,30 @@ Function Add-DependencyToPR {
 	)
 	$out = ""
 	foreach ($Line in $LineNumbers) {
-		$out += Add-GitHubReviewComment -PR $PR -Comment $comment -Line $Line -Policy "Needs-Author-Feedback"
+		$out += Add-GitHubReviewComment -PR $PR -Comment $comment -Line $Line -Action $Labels.NAF
 	}
+}
+
+#PR Queue
+Function Add-PRToQueue {
+	param(
+		$PR
+	)
+	$PR | Out-File $PRQueueFile -Append
+}
+
+Function Get-PopPRQueue {
+	$PRQueue = gc $PRQueueFile
+	$PRQueue = $PRQueue -split "`n"
+	$out = $PRQueue[0]
+	$PRQueue = $PRQueue[1..$PRQueue.length]
+	$PRQueue | Out-File $PRQueueFile 
+	return $out
+}
+
+Function Get-PRQueueCount {
+	$count = ((gc $PRQueueFile) -split "`n").count
+	return $count
 }
 
 #Reporting
@@ -5043,7 +5154,7 @@ Function Get-PRFullReport {
 		$Month = (Get-Culture).DateTimeFormat.GetMonthName((Get-Date).Month),
 		$Today = (get-date -f MMddyy),
 		$ReportName = "$logsFolder\$Month\$Today-Report.txt",
-		$HeaderList = ("Feedback","Blocking","Waiver","Retry","Manual","Closed","Project","Squash","Approved")
+		$HeaderList = ($Actions.Feedback,"Blocking","Waiver","Retry","Manual","Closed","Project","Squash","Approved")
 	)
 	Write-Host "Generating report for $Today"
 	$HeaderList | %{
