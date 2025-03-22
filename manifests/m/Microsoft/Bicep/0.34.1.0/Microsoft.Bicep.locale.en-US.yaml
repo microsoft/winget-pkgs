@@ -1,0 +1,77 @@
+# Created with komac v2.11.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
+
+PackageIdentifier: Microsoft.Bicep
+PackageVersion: 0.34.1.0
+PackageLocale: en-US
+Publisher: Microsoft Corporation
+PublisherUrl: https://github.com/Azure/bicep
+PublisherSupportUrl: https://github.com/Azure/bicep/issues
+Author: Azure
+PackageName: Bicep CLI
+PackageUrl: https://github.com/Azure/bicep
+License: MIT
+LicenseUrl: https://github.com/Azure/bicep/blob/HEAD/LICENSE
+Copyright: Copyright (c) Microsoft Corporation.
+CopyrightUrl: https://raw.githubusercontent.com/Azure/bicep/main/LICENSE
+ShortDescription: Bicep is a Domain Specific Language (DSL) for deploying Azure resources declaratively. It aims to drastically simplify the authoring experience with a cleaner syntax and better support for modularity and code re-use.
+Moniker: bicep
+Tags:
+- arm-templates
+- azure
+- bicep
+- bicep-cli
+ReleaseNotes: |-
+  Highlights
+  - Optional Module Names GA (#16518)
+    module storage 'storageaccount.bicep' = {
+    // no need to specify a name here!
+      scope: rg
+      params: {
+        location: location
+        sku: skuProd
+      }
+    }
+  - Experimental support for typed variables (#16451) using the feature flag "typedVariables"
+    // an optional type can be added to a variable declaration statement.
+    // current syntax
+    var foo = 'hello'
+    // with optional type
+    var foo string = 'hello'
+  - Resource Derived Types GA (#16517)
+    param storageSkuName resourceInput<'Microsoft.Storage/storageAccounts@2024-01-01'>.sku.name
+    output storageEndpoints resourceOutput<'Microsoft.Storage/storageAccounts@2024-01-01'>.properties.primaryEndpoints = ...
+  - ACR Private Module Completions (#16051)
+  - Add Notepad++ Bicep Syntax Highlighting Information (#16506) - thanks @richardsondev !
+  Bug Fixes and Features
+  - secure-secrets-in-params: Flag insecure references to secure params (#16251)
+  - Add code action to suggest multi-line strings (#16296)
+  - Handle decompilation of variable-defined API version correctly (#16384)
+  - Support dark + light mode in the Bicep playground (#16388)
+  - Support for validating inputs in deploy pane (#16442)
+  - Add the --pattern CLI argument for faster batch operations on multiple files (#16456)
+    # build all .bicep files under current path
+    bicep build --pattern './**/*.bicep'
+    # build all .bicepparam files under current path
+    bicep build-params --pattern './**/*.bicepparam'
+    # format all .bicep files under current path
+    bicep format --pattern './**/*.bicep*'
+    # lint all .bicep files under current path
+    bicep lint --pattern './**/*.bicep'
+    # restore modules for all .bicep files under current path
+    bicep restore --pattern './**/*.bicep'
+  - Fix for completions inside object (#16558)
+  - Imported functions invoked in .bicepparam files can refer to variables from their source template (#16322)
+  - Emit an info-level diagnostic on safe access of undeclared property (#16327)
+  - Forward base-type errors when accessing type properties (#16394)
+  - Allow duplicated resources (by name) if at most one is unconditional (#15909)
+  - Index from end operator ([^]) (#16104)
+    param foo string[]
+    var lastElement = foo[^1]
+    var secondLastElement = foo[^2]
+  - Partially parse function calls with no closing paren (#16508)
+  - Fix 13606, stuck in ext-src loop (#16381)
+ReleaseNotesUrl: https://github.com/Azure/bicep/releases/tag/v0.34.1
+ManifestType: defaultLocale
+ManifestVersion: 1.9.0
+
