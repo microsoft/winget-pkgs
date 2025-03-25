@@ -10,6 +10,22 @@ InstallModes:
 InstallerSwitches:
   Silent: /silent /install
   SilentWithProgress: /silent /install
+# The installer hides the ARP entry by setting SystemComponent to 1 when installing in system mode,
+# making WinGet unable to detect the installed package.
+# If this package is required by another package, WinGet will always try to install it.
+# Depending on that package, the installer may be run in user mode, which would fail if it's already installed in system mode.
+# The InstallerSuccessCodes is set to mitigate this issue.
+InstallerSuccessCodes:
+- -2147219416
+ExpectedReturnCodes:
+- InstallerReturnCode: -2147219440
+  ReturnResponse: cancelledByUser
+# - InstallerReturnCode: -2147219416
+#   ReturnResponse: alreadyInstalled
+- InstallerReturnCode: -2147218431
+  ReturnResponse: invalidParameter # Unexpected parameter
+- InstallerReturnCode: -2147024809
+  ReturnResponse: invalidParameter # Malformed parameter
 ProductCode: Microsoft EdgeWebView
 Installers:
 - Architecture: x86
