@@ -1,0 +1,45 @@
+# Created with komac v2.11.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
+
+PackageIdentifier: simulot.immich-go
+PackageVersion: 0.24.5
+PackageLocale: en-US
+Publisher: simulot
+PublisherUrl: https://github.com/simulot
+PublisherSupportUrl: https://github.com/simulot/immich-go/issues
+PackageName: immich-go
+PackageUrl: https://github.com/simulot/immich-go
+License: AGPL-3.0
+LicenseUrl: https://github.com/simulot/immich-go/blob/HEAD/LICENSE
+ShortDescription: An alternative to the immich-CLI command that doesn't depend on nodejs installation.
+Description: Immich-Go is an open-source tool designed to streamline uploading large photo collections to your self-hosted Immich server. It doesn't require NodeJS or Docker for installation. This makes it easy to get started, even for those less familiar with technical environments.
+Tags:
+- golang
+- google
+- immich
+- immich-cli
+- photos
+- takeout
+ReleaseNotes: |-
+  This release aims to resolve the persistent Internal Server Error issue. Using user logs, I have identified the following causes for these errors:
+  Motion Picture Movie Errors
+  The MVIMG*.jpg file contains an embedded MP4 used by Immich for moving images. For compatibility, smartphones also create a MP4 file. Immich extracts the embedded MP4 file and stores it. When the MP4 is uploaded, Immich detects it as a duplicate, occasionally causing a server-side error during metadata updates by Immich-go. This error halted Immich-go.
+  This issue is resolved by ignoring MVIM*.MP4 files.
+  Duplicated Files with Different Names
+  Immich-go does not detect multiple copies of the same file with different names. It attempts to upload each copy, and Immich identifies the duplication. This scenario was not properly handled by Immich-go, leading to repeated tagging attempts. Although not critical, this sometimes results in an internal error, leaving some photos untagged.
+  A temporary patch has been applied to address this issue while awaiting a more robust solution.
+  Next Steps
+  I am awaiting user reports confirming the problem's resolution. If errors persist, please run Immich-go with the options --log-level=DEBUG --api-trace. Additionally, set the immich's environment variable IMMICH-LOG-LEVEL to debug (read more here).
+  Thank you for your support.
+  - 2500+ ⭐
+  - 34K+ downloads
+  Changelog
+  - a55850b feat: add status constants for asset management created, duplicate, replaced
+  - c25529d feat: add test cases and sample data for handling duplicate files during upload
+  - ef09237 feat: update upload and replace asset functions to return duplicate status and avoid tagging assets several time fixes: #784
+  - 40b01f6 fix: change error log to warning when UI mode initialization fails
+  - 68730fb fix: ignore MVIMG files to prevent upload errors Fixes #786
+ReleaseNotesUrl: https://github.com/simulot/immich-go/releases/tag/v0.24.5
+ManifestType: defaultLocale
+ManifestVersion: 1.9.0
+
