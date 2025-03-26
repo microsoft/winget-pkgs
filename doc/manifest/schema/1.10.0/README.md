@@ -56,14 +56,13 @@ Provide as many fields as possible. The more meta-data you provide the better th
 
 The length of strings in this specification should be limited to 100 characters before a line break.
 
-## Summary of Changes from 1.6.0
+## Summary of Changes from 1.9.0
 
 ### [Version](version.md)
 * No Changes
 ### [Default Locale](defaultLocale.md)
 * No Changes
 ### [Installer](installer.md)
-* Added `InstallerSwitches > Repair`
-* Added `RepairBehavior` and `Installer > RepairBehavior`
+* Added `Authentication` and `Installer > RepairBehavior`
 ### [Locale](locale.md)
 * No Changes
