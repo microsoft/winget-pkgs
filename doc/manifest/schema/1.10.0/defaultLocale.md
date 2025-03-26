@@ -46,7 +46,7 @@ ReleaseNotesUrl:              # Optional release notes URL
 PurchaseUrl:                  # Optional purchase URL
 InstallationNotes:            # Optional notes displayed upon installation
 ManifestType: defaultLocale   # The manifest type
-ManifestVersion: 1.10.0        # The manifest syntax version
+ManifestVersion: 1.10.0       # The manifest syntax version
 ```
 
 ## Fields
