@@ -1,0 +1,113 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
+
+PackageIdentifier: Ollama.Ollama
+PackageVersion: 0.5.0
+PackageLocale: en-US
+Publisher: Ollama
+PublisherUrl: https://ollama.com/
+PublisherSupportUrl: https://github.com/ollama/ollama/issues
+PackageName: Ollama
+PackageUrl: https://ollama.com/
+License: MIT
+LicenseUrl: https://github.com/ollama/ollama/blob/main/LICENSE
+Copyright: Copyright (c) Ollama
+ShortDescription: Get up and running with large language models locally.
+Tags:
+- llama
+- llama2
+- llm
+- llms
+- mistral
+ReleaseNotes: |-
+  Structured outputs
+  Ollama now supports structured outputs, making it possible to constrain a model's output to a specific format defined by a JSON schema. The Ollama Python and JavaScript libraries have been updated to support structured outputs, together with Ollama's OpenAI-compatible API endpoints.
+  REST API
+  To use structured outputs in Ollama's generate or chat APIs, provide a JSON schema object in the format parameter:
+  curl -X POST http://localhost:11434/api/chat -H "Content-Type: application/json" -d '{
+    "model": "llama3.1",
+    "messages": [{"role": "user", "content": "Tell me about Canada."}],
+    "stream": false,
+    "format": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "capital": {
+          "type": "string"
+        },
+        "languages": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "name",
+        "capital",
+        "languages"
+      ]
+    }
+  }'
+  Python library
+  Using the Ollama Python library, pass in the schema as a JSON object to the format parameter as either dict or use Pydantic (recommended) to serialize the schema using model_json_schema().
+  from ollama import chat
+  from pydantic import BaseModel
+
+  class Country(BaseModel):
+    name: str
+    capital: str
+    languages: list[str]
+
+  response = chat(
+    messages=[
+      {
+        'role': 'user',
+        'content': 'Tell me about Canada.',
+      }
+    ],
+    model='llama3.1',
+    format=Country.model_json_schema(),
+  )
+
+  country = Country.model_validate_json(response.message.content)
+  print(country)
+  JavaScript library
+  Using the Ollama JavaScript library, pass in the schema as a JSON object to the format parameter as either object or use Zod (recommended) to serialize the schema using zodToJsonSchema():
+  import ollama from 'ollama';
+  import { z } from 'zod';
+  import { zodToJsonSchema } from 'zod-to-json-schema';
+
+  const Country = z.object({
+      name: z.string(),
+      capital: z.string(),
+      languages: z.array(z.string()),
+  });
+
+  const response = await ollama.chat({
+      model: 'llama3.1',
+      messages: [{ role: 'user', content: 'Tell me about Canada.' }],
+      format: zodToJsonSchema(Country),
+  });
+
+  const country = Country.parse(JSON.parse(response.message.content));
+  console.log(country);
+  What's Changed
+  - Fixed error importing model vocabulary files
+  - Experimental: new flag to set KV cache quantization to 4-bit (q4_0), 8-bit (q8_0) or 16-bit (f16). This reduces VRAM requirements for longer context windows.
+    - To enable for all models, use OLLAMA_FLASH_ATTENTION=1 OLLAMA_KV_CACHE_TYPE=q4_0 ollama serve
+    - Note: in the future flash attention will be enabled by default where available, with kv cache quantization available on a per-model basis
+    - Thank you @sammcj for the contribution in in https://github.com/ollama/ollama/pull/7926
+  New Contributors
+  - @dmayboroda made their first contribution in https://github.com/ollama/ollama/pull/7906
+  - @Geometrein made their first contribution in https://github.com/ollama/ollama/pull/7908
+  - @owboson made their first contribution in https://github.com/ollama/ollama/pull/7693
+  Full Changelog: https://github.com/ollama/ollama/compare/v0.4.7...v0.5.0
+ReleaseNotesUrl: https://github.com/ollama/ollama/releases/tag/v0.5.0
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://github.com/ollama/ollama/tree/main/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.9.0

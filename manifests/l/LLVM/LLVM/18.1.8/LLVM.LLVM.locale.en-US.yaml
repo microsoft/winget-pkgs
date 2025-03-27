@@ -1,5 +1,5 @@
-# Created with YamlCreate.ps1 v2.4.1 Dumplings Mod $debug=QUSU.CRLF.7-4-3.Win32NT
-# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.6.0.schema.json
+# Created with YamlCreate.ps1 v2.4.3 $debug=AUSU.CRLF.7-4-6.Win32NT
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
 
 PackageIdentifier: LLVM.LLVM
 PackageVersion: 18.1.8
@@ -30,30 +30,16 @@ Tags:
 - objective-c
 - toolchain
 ReleaseNotes: |-
-  This was a smaller release and contains a bunch of fixes all over the source tree:
-  - Tobias Hieta: Revert “[runtimes] Add missing test dependencies to check-all (#72955)” (6009708b4367)
-  - Brad Smith: [Driver] Enable __float128 support on X86 on FreeBSD / NetBSD (#72788) (04caadc61fa2)
-  - Georgios Eleftheriou: eliminate python SyntaxWarnings from check-all output. (e919a83f96fe)
-  - Owen Pan: [clang-format] Fix crashes in AlignArrayOfStructures (#72520) (f6c231c15ec8)
-  - Tulio Magno Quites Machado Filho: [clang] Fix sorting module headers (#73146) (f74f3e6f58d3)
-  - Lang Hames: [JITLink][aarch32] Change writeRegister’s return type to void. (7e30ce9528d9)
-  - Brad Smith: [CMake] Support building shared library for NetBSD (03373fd9cb6c)
-  - Tom Stellard: workflows/release-binaries: Do a preliminary build to fill ccache (#72576) (21af3b62b632)
-  - Shao-Ce SUN: Add RV64 constraint to SRLIW (#69416) (201faeca595e)
-  - Tom Stellard: [runtimes] Add missing test dependencies to check-all (#72955) (e957e6dcb29d)
-  - Owen Pan: [clang-format] Fix a bug in aligning comments above PPDirective (#72791) (f8575ff46f89)
-  - Nathan Ridge: [clangd] Avoid null result in FindRecordTypeAt() (a71237b9f67f)
-  - Tobias Hieta: Bump version to 17.0.6 (308c816de5a4)
-  - Utkarsh Saxena: remove tests from bad merge (442401f7c0ca)
-  - Utkarsh Saxena: Use the correct namespace for looking up matching operator!= (#68922) (76c7e0e1e2d1)
-  - Ilya Biryukov: [libc++] Use correct size for deallocation of arrays in shared_ptr (#68233) (b5cbb35408a3)
-  - Arthur Eubanks: Revert “Reland [clang] Canonicalize system headers in dependency file when -canonical-prefixes” (#71697) (e6de86cb9ef8)
-  - YAMAMOTO Takashi: [clang][WebAssembly] Link crt1 even in case of -shared (bb66d8f8f73b)
-ReleaseNotesUrl: https://discourse.llvm.org/t/llvm-17-0-6-released/75281
+  - This release fixes a bug in libc++ with -fsized-deallocation:
+    - Users who don’t use a custom allocator in std::string and don’t enable sized deallocation (which is off by default in Clang 18) will not be affected. This is expected to be the vast majority of users.
+    - Users who don’t use a custom allocator in std::string but are enabling sized deallocation (e.g. with -fsized-deallocation) will notice that operator delete(void*, size_t) is now being passed the correct
+      size. This likely has no impact if they were not customizing operator delete.
+    - Users who use a custom allocator in std::string will notice that they now get passed the correct allocation size upon deallocation.
+ReleaseNotesUrl: https://discourse.llvm.org/t/18-1-8-released/79725
 # PurchaseUrl:
 # InstallationNotes:
 Documentations:
 - DocumentLabel: Documentation
   DocumentUrl: https://llvm.org/docs
 ManifestType: defaultLocale
-ManifestVersion: 1.6.0
+ManifestVersion: 1.9.0

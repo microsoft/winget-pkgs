@@ -1,0 +1,126 @@
+# Created with YamlCreate.ps1 v2.4.1 Dumplings Mod $debug=QUSU.CRLF.7-4-5.Win32NT
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.6.0.schema.json
+
+PackageIdentifier: SpecialK.SpecialK
+PackageVersion: 24.11.1.1
+PackageLocale: en-US
+Publisher: The Special K Group
+PublisherUrl: https://special-k.info/
+PublisherSupportUrl: https://github.com/SpecialKO/SpecialK/issues
+PrivacyUrl: https://wiki.special-k.info/Privacy
+# Author:
+PackageName: Special K
+PackageUrl: https://special-k.info/
+License: GPL-3.0
+LicenseUrl: https://github.com/SpecialKO/SpecialK/blob/HEAD/LICENSE
+Copyright: Copyleft 2019-2024
+# CopyrightUrl:
+ShortDescription: The Swiss Army Knife of PC Gaming
+Description: Lovingly referred to as the Swiss Army Knife of PC gaming, Special K does a bit of everything. It is best known for fixing and enhancing graphics, its many detailed performance analysis and correction mods, and a constantly growing palette of tools that solve a wide variety of issues affecting PC games.
+Moniker: specialk
+Tags:
+- framerate-fixer
+- game
+- game-modding
+- gaming
+- hdr
+- hooking
+- injection
+- latency-analysis
+- mod
+- reverse-engineering
+ReleaseNotes: |-
+  Below are the highlights between v 24.10.26.2 - v 24.11.1.1:
+
+   + Fixed changes to SK_WindowManager::StyleHasBorder (...) in 24.10.24.4
+       that were causing added window borders to Baldur's Gate 3 when set to
+         Borderless in-game.
+   + Add new fallback for WMAITX support testing on CPUs with CPUIDs that
+       claim the instruction is unsupported... just run the instruction and
+         see if it generates and Illegal Instruction exception or not, lol.
+   + Allow Multitasking-on-Top to be used without Global Injection service,
+       but turn off certain functionality that cannot work reliably without.
+   + Handle window position changes that occur without showing up a game's
+       window message queue.
+   + Cleanup various RawInput handling code.
+   + Improved/made obsolete mouse anti-warp for games that move their cursor
+       to the center of the screen to implement mouselook (stupid devs...).
+   + Remove old compatibility hack for ReShade that was changing Flip Model
+       SwapChains to Flip Sequential. ReShade works with Flip Discard now.
+   + Added option block screensaver activation on controller input (default)
+   + Added option to have Special K disable all game handling of screensavers,
+       and fully manage it based on its own configurable rules.
+
+      >> Without this option, SK adds additional blocking rules, but respects
+           the game's own attempts to block screensaver activation.
+
+      * Many games unconditionally block screensaver, and you may not want
+          that behavior if you have alt-tab to work a different application
+            and then go AFK while the game continues running.
+   + Changed screensaver activation prevention to use the Windows-defined timeout
+       interval and factor in gamepad input, since Windows only uses KB&M.
+   + Added a message when the system screensaver activates explaining how to
+       configure screensaver prevention.
+   + Default screensaver policy has been changed to "Game Default".
+   + Always use the fully qualified path when looking up NVIDIA driver profiles
+       for the current game in order to avoid creating duplicates.
+   + Fix bug in Ys X where it may attempt to create 0x0 textures when its window
+       is minimized and then crash.
+   + Add explicit overrides for many of the most important SDL input settings
+
+      ( -1 = No Override, 0 = Off, 1 = On )
+
+      * Refer to SDL_hints.h for details on each,
+
+        "FullPlayStationBluetoothSupport" is a combination of
+          SDL_JOYSTICK_HIDAPI_PS4_RUMBLE and SDL_JOYSTICK_HIDAPI_PS5_RUMBLE...
+
+        This setting is controversial, it will allow rumble and haptics over
+          Bluetooth, but will cause your gamepad to become incompatible with
+            games that use DirectInput until powered off and back on...
+
+        ^ If that sounds familiar, it is the entire reason ValvePlug was created.
+
+     *** Unlike the Steam Client, SDL never enables those things without consent,
+           and that means rumble may be missing from many games that use SDL.
+   + Allow SDL to use DirectInput gamepads at sanity level 1
+   + Improve Vulkan/DXGI Layer detection for NVIDIA drivers to handle cases
+       where vulkan-1.dll is calling DXGI directly instead of nvoglv{32|64}.
+   + Turn Multitasking-on-Top off by default again, because at levels aggressive
+       enough to work, some windows will not be raised above the game.
+   + Make sure SK always calls the real ShowWindow (...) instead of its hook.
+   + Handle undocumented special cases SWP_NOCLIENTMOVE and SWP_NOCLIENTSIZE,
+       to fix problems with Sonic Generations
+   + Added support for minimizing/restoring borderless games by pressing the
+       normal Windows keybinds to do so (Win+Down / Win+Up).
+   + Avoid unnecessary window position and border style API calls when no actual
+       change is required.
+   + Allow WS_ICONIC window style to be set if borderless override is not on.
+   + Add WS_EX_WINDOWEDGE to list of extended window styles that have borders.
+   + Fixed ReShade Plug-In selection UI not correctly turning Compatibility Mode
+       off (necessary for some ReShade Add-Ons to work).
+   + HDR Remastered tooltip now ONLY counts memory for remastered RenderTargets
+       and Unordered Access Views that are -still- in memory, and values decrease
+         as a game unloads remastered resources.
+
+      * It now accurately measures extra VRAM used by having remasters enabled.
+
+   + Remastered D3D11 RenderTargets and Unordered Access Views now have names
+       describing the type of resource, a unique ID and the original Surface
+         format before SK upgraded it to R16[G16[B16A16]]_{FLOAT|UNORM}.
+
+      * Names appear in debug logs and the Render Mod Tools (Live RenderTargets).
+
+   + Fixed SKIF not being able to disable GFE notifications due to disabled code
+   + Increase delay between first drawing an achievement unlock popup and taking
+       screenshot, so that statistics such as unlock time reliably appear.
+# ReleaseNotesUrl:
+# PurchaseUrl:
+# InstallationNotes:
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://wiki.special-k.info/
+- DocumentLabel: FAQ
+  DocumentUrl: https://wiki.special-k.info/FAQ
+ManifestType: defaultLocale
+ManifestVersion: 1.6.0
