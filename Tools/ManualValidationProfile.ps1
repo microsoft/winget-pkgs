@@ -1,5 +1,5 @@
 $VM = 0
-$build = 133
+$build = 134
 $ipconfig = (ipconfig)
 $remoteIP = ([ipaddress](($ipconfig | select-string "Default Gateway") -split ": ")[1]).IPAddressToString
 #$remoteIP = ([ipaddress](($ipconfig[($ipconfig | select-string "vEthernet").LineNumber..$ipconfig.length] | select-string "IPv4 Address") -split ": ")[1]).IPAddressToString
@@ -78,11 +78,8 @@ Function Get-TrackerVMStatus{
 #Clear event logs.
 
 # Commands
-#Get-TrackerVMRunValidation
-Get-NetAdapter|Disable-NetAdapter;Get-NetAdapter|Enable-NetAdapter;sleep 5;Import-Module $Profile -Force;Import-Module $Profile -Force;cls;Write-Host "VM$VM with remoteIP $remoteIP version $build"
+#Get-NetAdapter|Disable-NetAdapter;Get-NetAdapter|Enable-NetAdapter;sleep 30;Import-Module $Profile -Force;Import-Module $Profile -Force;cls;Write-Host "VM$VM with remoteIP $remoteIP version $build";Get-TrackerVMSetStatus CheckpointReady;$n = 15;$t = $n;while ($n -gt 0) {$n--;$r = $t - $n;Write-Progress -Activity "Process latch" -Status "Seconds remaining: $r/$t" -PercentComplete ((1-$n/$t)*100);sleep 1};Write-Host "Waiting for Network...";Get-TrackerVMRunValidation
 
-# Copy command then exit and checkpoint. 
-Import-Module $Profile -force; Get-TrackerVMSetStatus CheckpointReady;exit
 
 # Reset display window
 $vm = 0;notepad $profile;cls;Write-Host "VM$VM with remoteIP $remoteIP version $build"
