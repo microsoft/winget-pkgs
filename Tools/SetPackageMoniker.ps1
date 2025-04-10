@@ -87,7 +87,7 @@ if (Test-Path -Path "$PSScriptRoot\..\manifests") {
     $ManifestsFolder = (Resolve-Path '.\').Path
 }
 
-$ManifestsFolder = Join-Path $ManifestsFolder $PackageIdentifier.ToLower()[0] $PackageIdentifier.Split('.')
+$ManifestsFolder = Join-Path -Path $ManifestsFolder -ChildPath $PackageIdentifier.ToLower()[0] -AdditionalChildPath $PackageIdentifier.Split('.')
 
 Write-Verbose "Fetching list of manifests from $ManifestsFolder . . ."
 $localeManifests = Get-ChildItem $ManifestsFolder -Recurse -Filter "$PackageIdentifier.locale.*.yaml"

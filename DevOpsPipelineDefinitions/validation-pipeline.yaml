@@ -1,7 +1,10 @@
 # Validation pipeline for manifest on pull requests.
+variables:
+  WinGetSvc.PullRequestNumber: $[coalesce(variables.WinGetPullRequestNumber, variables['System.PullRequest.PullRequestNumber'])]
+  WinGetSvc.OperationId: $[coalesce(variables.WinGetOperationId, variables['Build.BuildNumber'])]
 
 # Name of the run
-name: '$(Build.DefinitionName)-$(Build.DefinitionVersion)-$(System.PullRequest.PullRequestNumber)-$(Date:yyyyMMdd)-$(Rev:r)'
+name: '$(Build.DefinitionName)-$(Build.DefinitionVersion)-$(WinGetSvc.PullRequestNumber)-$(Date:yyyyMMdd)-$(Rev:r)'
 
 trigger: none
 pr:
@@ -42,6 +45,8 @@ extends:
         timeoutInMinutes: 0
 
         steps:
+        - checkout: self
+          persistCredentials: true
 
         # Downloads all the setup files and its dependencies.
         - task: AzureCLI@2
@@ -65,10 +70,8 @@ extends:
             SCAN_ENDPOINT: $(AzFuncScanEndpoint)
             INSTALLATION_ENDPOINT: $(AzFuncInstallationVerificationEndpoint)
             LABEL_ENDPOINT: $(AzFuncSetLabelOnPullRequestEndpoint)
-            CLEANUP_ENDPOINT: $(AzFuncCleanupEndpoint)
             LABEL_KEY: $(AzureFunctionLabelKey)
             CATALOG_CONTENT_VERIFICATION_ENDPOINT: $(AzFuncCatalogContentVerificationEndpoint)
-            MISSING_MANIFEST_FIELDS_VERIFICATION_ENDPOINT: $(AzFuncMissingManifestFieldsVerificationEndpoint)
           inputs:
             script: 'winget_validation_setup.cmd'
             workingDirectory: scripts
@@ -81,18 +84,16 @@ extends:
             scriptType: batch
             scriptLocation: inlineScript
             inlineScript: |
-              WinGetSvcWrapper.exe process-pr --operationId %BUILD_BUILDNUMBER%
+              WinGetSvcWrapper.exe process-pr --operationId %WINGETSVC_OPERATIONID%
             addSpnToEnvironment: true
             failOnStandardError: true
           env:
             ValidationStorageAccountName: $(ValidationStorageAccountName)
             StorageManagedIdentityClientId: $(StorageManagedIdentityClientId)
-            GithubRepository: $(GithubRepository)
-            GithubServiceAccountToken: $(GithubServiceAccountToken)
-            ExecutionEnvironment: $(ExecutionEnvironment)
-            DIApplicationInsightKey: $(DIApplicationInsightKey)
             WinGet:AppConfig:PrimaryEndpoint: $(AppConfigPrimaryEndpoint)
             WinGet:AppConfig:SecondaryEndpoint: $(AppConfigSecondaryEndpoint)
+            DIApplicationInsightKey: $(DIApplicationInsightKey)
+            ExecutionEnvironment: $(WinGetSvc.ExecutionEnvironment)
 
         # Validates manifest integrity.
         - task: AzureCLI@2
@@ -102,17 +103,17 @@ extends:
             scriptType: batch
             scriptLocation: inlineScript
             inlineScript: |
-              WinGetSvcWrapper.exe validate-manifests --operationId %BUILD_BUILDNUMBER%
+              WinGetSvcWrapper.exe validate-manifests --operationId %WINGETSVC_OPERATIONID%
             addSpnToEnvironment: true
             failOnStandardError: true
           env:
             ValidationStorageAccountName: $(ValidationStorageAccountName)
             CacheStorageAccountName: $(CacheStorageAccountName)
             StorageManagedIdentityClientId: $(StorageManagedIdentityClientId)
-            DIApplicationInsightKey: $(DIApplicationInsightKey)
-            ExecutionEnvironment: $(ExecutionEnvironment)
             WinGet:AppConfig:PrimaryEndpoint: $(AppConfigPrimaryEndpoint)
             WinGet:AppConfig:SecondaryEndpoint: $(AppConfigSecondaryEndpoint)
+            DIApplicationInsightKey: $(DIApplicationInsightKey)
+            ExecutionEnvironment: $(WinGetSvc.ExecutionEnvironment)
 
       # Agentless phase. Depends on previous job.
       - job: 'ContentValidation'
@@ -125,7 +126,7 @@ extends:
           HostKeySecret: $[ dependencies.FileValidation.outputs['wingetsetup.hostkey']]
           SmartScreenEndpointSecret: $[ dependencies.FileValidation.outputs['wingetsetup.smartScreenEndpoint']]
           DomainUrlValidationEndpointSecret: $[ dependencies.FileValidation.outputs['wingetsetup.domainUrlValidationEndpoint']]
-          ManiestPolicyEndpointSecret: $[ dependencies.FileValidation.outputs['wingetsetup.manifestPolicyEndpoint']]
+          ManifestPolicyEndpointSecret: $[ dependencies.FileValidation.outputs['wingetsetup.manifestPolicyEndpoint']]
         steps:
 
         # Scans all the urls from manifest contents.
@@ -136,19 +137,20 @@ extends:
             key: '$(HostKeySecret)'
             body: |
               {
-              "operationId": "$(Build.BuildNumber)",
+              "operationId": "$(WinGetSvc.OperationId)",
               "buildId": "$(Build.BuildId)",
               "planUrl": "$(system.CollectionUri)",
               "hubName": "$(system.HostType)",
               "projectId": "$(system.TeamProjectId)",
-              "planId": "$(system.PlanId)", 
-              "jobId": "$(system.JobId)", 
-              "timelineId": "$(system.TimelineId)", 
+              "planId": "$(system.PlanId)",
+              "jobId": "$(system.JobId)",
+              "timelineId": "$(system.TimelineId)",
               "taskInstanceId": "$(system.TaskInstanceId)",
               "authToken": "$(system.AccessToken)",
               "repository": "$(build.repository.id)",
               "pipelineType": "ValidationPipeline",
-              "pullRequestNumber": "$(System.PullRequest.PullRequestNumber)"
+              "pullRequestNumber": "$(WinGetSvc.PullRequestNumber)",
+              "buildSourceBranch": "$(build.SourceBranch)"
               }
             waitForCompletion: "true"
 
@@ -160,19 +162,20 @@ extends:
             key: '$(HostKeySecret)'
             body: |
               {
-              "operationId": "$(Build.BuildNumber)",
+              "operationId": "$(WinGetSvc.OperationId)",
               "buildId": "$(Build.BuildId)",
               "planUrl": "$(system.CollectionUri)",
               "hubName": "$(system.HostType)",
               "projectId": "$(system.TeamProjectId)",
-              "planId": "$(system.PlanId)", 
-              "jobId": "$(system.JobId)", 
-              "timelineId": "$(system.TimelineId)", 
+              "planId": "$(system.PlanId)",
+              "jobId": "$(system.JobId)",
+              "timelineId": "$(system.TimelineId)",
               "taskInstanceId": "$(system.TaskInstanceId)",
               "authToken": "$(system.AccessToken)",
               "repository": "$(build.repository.id)",
               "pipelineType": "ValidationPipeline",
-              "pullRequestNumber": "$(System.PullRequest.PullRequestNumber)"
+              "pullRequestNumber": "$(WinGetSvc.PullRequestNumber)",
+              "buildSourceBranch": "$(build.SourceBranch)"
               }
             waitForCompletion: "true"
 
@@ -180,23 +183,24 @@ extends:
         - task: AzureFunction@1
           displayName: 'Manifest Policy Validation'
           inputs:
-            function: '$(ManiestPolicyEndpointSecret)'
+            function: '$(ManifestPolicyEndpointSecret)'
             key: '$(HostKeySecret)'
             body: |
               {
-              "operationId": "$(Build.BuildNumber)",
+              "operationId": "$(WinGetSvc.OperationId)",
               "buildId": "$(Build.BuildId)",
               "planUrl": "$(system.CollectionUri)",
               "hubName": "$(system.HostType)",
               "projectId": "$(system.TeamProjectId)",
-              "planId": "$(system.PlanId)", 
-              "jobId": "$(system.JobId)", 
-              "timelineId": "$(system.TimelineId)", 
+              "planId": "$(system.PlanId)",
+              "jobId": "$(system.JobId)",
+              "timelineId": "$(system.TimelineId)",
               "taskInstanceId": "$(system.TaskInstanceId)",
               "authToken": "$(system.AccessToken)",
               "repository": "$(build.repository.id)",
               "pipelineType": "ValidationPipeline",
-              "pullRequestNumber": "$(System.PullRequest.PullRequestNumber)"
+              "pullRequestNumber": "$(WinGetSvc.PullRequestNumber)",
+              "buildSourceBranch": "$(build.SourceBranch)"
               }
             waitForCompletion: "true"
 
@@ -222,19 +226,20 @@ extends:
             key: '$(HostKeySecret)'
             body: |
               {
-              "operationId": "$(Build.BuildNumber)",
+              "operationId": "$(WinGetSvc.OperationId)",
               "buildId": "$(Build.BuildId)",
               "planUrl": "$(system.CollectionUri)",
               "hubName": "$(system.HostType)",
               "projectId": "$(system.TeamProjectId)",
-              "planId": "$(system.PlanId)", 
-              "jobId": "$(system.JobId)", 
-              "timelineId": "$(system.TimelineId)", 
+              "planId": "$(system.PlanId)",
+              "jobId": "$(system.JobId)",
+              "timelineId": "$(system.TimelineId)",
               "taskInstanceId": "$(system.TaskInstanceId)",
               "authToken": "$(system.AccessToken)",
               "repository": "$(build.repository.id)",
               "pipelineType": "ValidationPipeline",
-              "pullRequestNumber": "$(System.PullRequest.PullRequestNumber)"
+              "pullRequestNumber": "$(WinGetSvc.PullRequestNumber)",
+              "buildSourceBranch": "$(build.SourceBranch)"
               }
             waitForCompletion: "true"
 
@@ -246,19 +251,20 @@ extends:
             key: '$(HostKeySecret)'
             body: |
               {
-              "operationId": "$(Build.BuildNumber)",
+              "operationId": "$(WinGetSvc.OperationId)",
               "buildId": "$(Build.BuildId)",
               "planUrl": "$(system.CollectionUri)",
               "hubName": "$(system.HostType)",
               "projectId": "$(system.TeamProjectId)",
-              "planId": "$(system.PlanId)", 
-              "jobId": "$(system.JobId)", 
-              "timelineId": "$(system.TimelineId)", 
+              "planId": "$(system.PlanId)",
+              "jobId": "$(system.JobId)",
+              "timelineId": "$(system.TimelineId)",
               "taskInstanceId": "$(system.TaskInstanceId)",
               "authToken": "$(system.AccessToken)",
               "repository": "$(build.repository.id)",
               "pipelineType": "ValidationPipeline",
-              "pullRequestNumber": "$(System.PullRequest.PullRequestNumber)"
+              "pullRequestNumber": "$(WinGetSvc.PullRequestNumber)",
+              "buildSourceBranch": "$(build.SourceBranch)"
               }
             waitForCompletion: "true"
 
@@ -284,19 +290,20 @@ extends:
             key: '$(HostKeySecret)'
             body: |
               {
-              "operationId": "$(Build.BuildNumber)",
+              "operationId": "$(WinGetSvc.OperationId)",
               "buildId": "$(Build.BuildId)",
               "planUrl": "$(system.CollectionUri)",
               "hubName": "$(system.HostType)",
               "projectId": "$(system.TeamProjectId)",
-              "planId": "$(system.PlanId)", 
-              "jobId": "$(system.JobId)", 
-              "timelineId": "$(system.TimelineId)", 
+              "planId": "$(system.PlanId)",
+              "jobId": "$(system.JobId)",
+              "timelineId": "$(system.TimelineId)",
               "taskInstanceId": "$(system.TaskInstanceId)",
               "authToken": "$(system.AccessToken)",
               "repository": "$(build.repository.id)",
               "pipelineType": "ValidationPipeline",
-              "pullRequestNumber": "$(System.PullRequest.PullRequestNumber)"
+              "pullRequestNumber": "$(WinGetSvc.PullRequestNumber)",
+              "buildSourceBranch": "$(build.SourceBranch)"
               }
             waitForCompletion: "true"
 
@@ -314,54 +321,29 @@ extends:
           HostKeySecret: $[ dependencies.FileValidation.outputs['wingetsetup.hostkey']]
           LabelKeySecret : $[ dependencies.FileValidation.outputs['wingetsetup.labelkey']]
           LabelEndpointSecret: $[ dependencies.FileValidation.outputs['wingetsetup.labelEndpoint']]
-          CleanupEndpointSecret: $[ dependencies.filevalidation.outputs['wingetsetup.cleanupEndpoint']]
         steps:
 
         # Set label in GitHub PullRequest.
         - task: AzureFunction@1
           displayName: 'Set Label'
-          condition: eq(variables['WinGet.RepositoryType'], 'GitHub')
           inputs:
             function: '$(LabelEndpointSecret)'
             key: '$(LabelKeySecret)'
             body: |
               {
-              "operationId": "$(Build.BuildNumber)",
+              "operationId": "$(WinGetSvc.OperationId)",
               "buildId": "$(Build.BuildId)",
               "planUrl": "$(system.CollectionUri)",
               "hubName": "$(system.HostType)",
               "projectId": "$(system.TeamProjectId)",
-              "planId": "$(system.PlanId)", 
-              "jobId": "$(system.JobId)", 
-              "timelineId": "$(system.TimelineId)", 
+              "planId": "$(system.PlanId)",
+              "jobId": "$(system.JobId)",
+              "timelineId": "$(system.TimelineId)",
               "taskInstanceId": "$(system.TaskInstanceId)",
               "authToken": "$(system.AccessToken)",
               "repository": "$(build.repository.id)",
               "pipelineType": "ValidationPipeline",
-              "pullRequestNumber": "$(System.PullRequest.PullRequestNumber)"
-              }
-            waitForCompletion: "true"
-
-        # Cleanup resources.
-        - task: AzureFunction@1
-          displayName: 'Validation cleanup'
-          inputs:
-            function: '$(CleanupEndpointSecret)'
-            key: '$(HostKeySecret)'
-            body: |
-              {
-              "operationId": "$(Build.BuildNumber)",
-              "buildId": "$(Build.BuildId)",
-              "planUrl": "$(system.CollectionUri)",
-              "hubName": "$(system.HostType)",
-              "projectId": "$(system.TeamProjectId)",
-              "planId": "$(system.PlanId)", 
-              "jobId": "$(system.JobId)", 
-              "timelineId": "$(system.TimelineId)", 
-              "taskInstanceId": "$(system.TaskInstanceId)",
-              "authToken": "$(system.AccessToken)",
-              "repository": "$(build.repository.id)",
-              "pipelineType": "ValidationPipeline",
-              "pullRequestNumber": "$(System.PullRequest.PullRequestNumber)",
+              "pullRequestNumber": "$(WinGetSvc.PullRequestNumber)",
+              "buildSourceBranch": "$(build.SourceBranch)"
               }
             waitForCompletion: "true"

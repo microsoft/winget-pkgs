@@ -1,0 +1,107 @@
+# Created with YamlCreate.ps1 v2.4.4 $debug=QUSU.CRLF.7-5-0.Win32NT
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
+
+PackageIdentifier: BaldurKarlsson.RenderDoc
+PackageVersion: 1.37.0
+PackageLocale: en-US
+Publisher: Baldur Karlsson
+PublisherUrl: https://renderdoc.org/
+PublisherSupportUrl: https://github.com/baldurk/renderdoc/issues
+# PrivacyUrl:
+Author: Baldur Karlsson
+PackageName: RenderDoc
+PackageUrl: https://renderdoc.org/
+License: MIT
+LicenseUrl: https://github.com/baldurk/renderdoc/blob/HEAD/LICENSE.md
+Copyright: Copyright © Baldur Karlsson 2025
+# CopyrightUrl:
+ShortDescription: A stand-alone graphics debugging tool
+Description: RenderDoc is a free MIT licensed stand-alone graphics debugger that allows quick and easy single-frame capture and detailed introspection of any application using Vulkan, D3D11, OpenGL & OpenGL ES or D3D12 across Windows, Linux, Android, or Nintendo Switch™.
+Moniker: renderdoc
+Tags:
+- debug
+- debugger
+- debugging
+- debugging-tool
+- graphics
+- rendering
+ReleaseNotes: |-
+  This version contains primarily bugfixes after v1.36, but also includes some improvements and additional functionality support.
+  As always binary builds with installers, zips and tarballs are available on renderdoc.org.
+  Note
+  In this release RenderDoc now is able to decode an undocumented previously unknown DXBC blob chunk which contains embedded shader source information when building with separate PDBs. If you were previously compiling shaders with -Qembed_source_in_debug to ensure shader source was available for RenderDoc this is no longer necessary and you may want to remove that flag to reduce the size of the separate PDBs.
+  Python API changes
+  - ReplayOutput.SetDimensions has been removed. This was only valid for headless windows, you should recreate the window directly.
+  Features/Improvements
+  - UI: Python extension registration has more error checking and is more robust to syntax errors during register/unregister functions.
+  - UI: Try to preserve selected pipeline stage when switching between mesh and normal draws.
+  - D3D12: Bitfield declarations are reflected from DXIL metadata for structure types.
+  - D3D12: Add handling of undocumented chunk in DXBC containers that can include source code files.
+  - D3D12: Improve detection of code scopes during DXIL shader debugging.
+  - D3D12: Improve handling of debug info mapping source variables to information in DXIL.
+  - D3D12: Do limited parse of DXBC container to determine state object entry points.
+  - D3D12: Improve display of root buffer structured buffers.
+  - Vulkan: Improved capture memory overhead for cases of many images aliased in one location with only a small number used.
+  - Vulkan: Optimise repeated name-setting of objects to not record every name.
+  - Vulkan: Improve speed of processing printf messages for large shaders.
+  - Vulkan: Ignore certain WSI-only extensions for replay compatibility as they are unused.
+  - Vulkan: Preserve selected stage where possible when switching between mesh-shader and normal draws.
+  - Vulkan: Implement capture and replay support for a number of extensions (not including shader debugging):
+    - VK_KHR_shader_quad_control
+    - VK_KHR_shader_maximal_reconvergence
+    - VK_KHR_shader_expect_assume
+    - VK_KHR_shader_float_controls2
+    - VK_KHR_shader_subgroup_rotate
+    - VK_KHR_ray_tracing_position_fetch
+    - VK_KHR_ray_tracing_maintenance1
+  Bugfixes
+  - All: Fix expansion of pre-processed shader debug source when #line directives are self-referential to a file.
+  - All: Fix installer to hopefully work out of the box on windows 11 where vbscript has been disabled.
+  - All: Fix remote-replay of integer textures which require a format-remap.
+  - Linux: Fix a potential crash on startup accessing invalid memory.
+  - Linux: Fix vkconfig not being correctly identified and warned about in some cases.
+  - Linux: Fix failure to properly launch program if it contained r-xp in the binary path.
+  - Linux: Fix a potential use-after-destroy with replay loop window.
+  - UI: Fix the mesh viewer arcball/flycam controls getting out of sync when reloading captures.
+  - UI: When exporting matrices in CSV, add quotes around the multiple lines.
+  - GL: Add extra checking for MultiDraw functions to protect against crashes due to bad application data.
+  - GLES: Fix an out of bounds write for non-standard ASTC dimensions.
+  - D3D: Work around old fxc version bug with MSAA per-sample loads.
+  - D3D: Prefer loading a new fxc version over an old fxc version, even if it means loading two into the same process.
+  - D3D: Fix debugging of DXBC shaders in cases where the input signature is packed with multiple integer SV semantics such as SV_InstanceID and SV_PrimitiveID.
+  - D3D11: Fix output targets being considered as used incorrectly and shown in pipeline state as if an error.
+  - D3D12: Fix a case when debugging shaders where control flow was not identified correctly.
+  - D3D12: Display the index-buffer strip cut value in the pipeline state view.
+  - D3D12: Fix shader debugging when writing to UAVs on elements that go out of bounds on only some components.
+  - D3D12: Fix a crash debugging a shader with an unbound SRV.
+  - D3D12: Recalculate offsets for UAV structures manually to ignore incorrect offsets provided in DXIL reflection data.
+  - D3D12: Fix shader debugging with shaders containing anonymous structs.
+  - D3D12: Fix shader debugging with non-square temporary matrices.
+  - D3D12: Fix tracking of sparse page tables not working in mip tails with wrapping binds.
+  - D3D12: Fix a case where an empty d3d12sdklayers.dll would be attempted to be loaded if it wasn't available during capture.
+  - D3D12: Fix a crash if an AS is specified with geometry with a vertex stride of 0.
+  - D3D12: Fix a potential crash if ASs are built on a compute-only command buffer.
+  - D3D12: Fix disassembly of constant buffers with a single scalar type.
+  - D3D12: Fix debugging of shaders with SM6.6 direct heap access for buffers.
+  - D3D12 & Vulkan: Fix handling of overlapping and nested GPU address ranges with aliased resources.
+  - Vulkan: Work around AMD driver bug in vkGetAccelerationStructureBuildSizesKHR.
+  - Vulkan: Mark mesh shaders using task payloads as unsupported for debugging.
+  - Vulkan: Don't emit performance counter queries for events on compute/transfer queues.
+  - Vulkan: Fix fossilize serialisation of mutable descriptors.
+  - Vulkan: Fix handling of swapchains for Android devices that report an absurd minimum number of swapchain images.
+  - Vulkan: Fix case where swapchain resizing could cause cascading errors and lead to a GPU crash/hang.
+  - Vulkan: Fix a crash when RT is enabled and allocating memory on multiple threads.
+  - Vulkan: Fix a crash freeing memory on multiple threads.
+  - Vulkan: Fix adding duplicate structs to pNext chain when capturing a program that uses BDA capture/replay.
+  - Vulkan: Display task and mesh shaders correctly when used with graphics pipeline libraries.
+  - Vulkan: Fix a crash when loading captures that include waiting resolves of AS queries.
+ReleaseNotesUrl: https://github.com/baldurk/renderdoc/releases/v1.37
+# PurchaseUrl:
+# InstallationNotes:
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://renderdoc.org/docs/index.html
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/baldurk/renderdoc/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.9.0
