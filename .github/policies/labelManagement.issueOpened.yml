@@ -33,13 +33,16 @@ configuration:
 
                 Template: msftbot/validationError/pullRequest/noContent
           - closePullRequest
-      - description: Add CodeFlow link to new PRs
+      - description: Add CodeFlow link and Pipeline Status to new PRs
         if:
           - payloadType: Pull_Request
           - isAction:
               action: Opened
         then:
           - addCodeFlowLink
+          - addReply:
+              reply: >-
+                [![Validation Pipeline Badge](https://img.shields.io/endpoint?url=https://winget-validation-pme-f8gqfjhzacawbecy.z01.azurefd.net/api/GetServiceComponentStatusBadge?component=ValidationPipeline "Validation Pipeline Badge")](https://dev.azure.com/shine-oss/winget-pkgs/_build?definitionId=14)&nbsp;[![Publish Pipeline Badge](https://img.shields.io/endpoint?url=https://winget-validation-pme-f8gqfjhzacawbecy.z01.azurefd.net/api/GetServiceComponentStatusBadge?component=PublishPipeline "Publish Pipeline Badge")](https://dev.azure.com/shine-oss/winget-pkgs/_build?definitionId=12)
           # If the user is a first-time contributor, add the Needs-CLA Label
           - if:
               - activitySenderHasAssociation:
