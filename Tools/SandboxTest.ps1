@@ -1,4 +1,5 @@
-﻿### Exit Codes:
+﻿#Requires -version 7
+### Exit Codes:
 # -1 = Sandbox is not enabled
 #  0 = Success
 #  1 = Error fetching GitHub release
