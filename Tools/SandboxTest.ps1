@@ -48,7 +48,11 @@ enum DependencySources {
 $ProgressPreference = 'SilentlyContinue'
 $ErrorActionPreference = 'Stop' # This gets overridden most places, but is set explicitly here to help catch errors
 if ($PSBoundParameters.Keys -notcontains 'InformationAction') { $InformationPreference = 'Continue' } # If the user didn't explicitly set an InformationAction, Override their preference
-$script:OnMappedFolderWarning = ($PSBoundParameters.Keys -contains 'WarningAction') ? $PSBoundParameters.WarningAction : 'Inquire'
+if ($PSBoundParameters.Keys -contains 'WarningAction') {
+    $script:OnMappedFolderWarning = $PSBoundParameters.WarningAction
+} else {
+    $script:OnMappedFolderWarning = 'Inquire'
+}
 $script:UseNuGetForMicrosoftUIXaml = $false
 $script:ScriptName = 'SandboxTest'
 $script:AppInstallerPFN = 'Microsoft.DesktopAppInstaller_8wekyb3d8bbwe'
@@ -75,7 +79,7 @@ $script:UiLibsHash_v2_8 = '249D2AFB41CC009494841372BD6DD2DF46F87386D535DDF8D9F32
 $script:UiLibsHash_NuGet = '6B62BD3C277F55518C3738121B77585AC5E171C154936EC58D87268BBAE91736'
 
 # File Paths
-$script:AppInstallerDataFolder = Join-Path -Path $env:LOCALAPPDATA -ChildPath 'Packages' -AdditionalChildPath $script:AppInstallerPFN
+$script:AppInstallerDataFolder = Join-Path -Path (Join-Path -Path $env:LOCALAPPDATA -ChildPath 'Packages') -ChildPath $script:AppInstallerPFN
 $script:TokenValidationCache = Join-Path -Path $script:AppInstallerDataFolder -ChildPath 'TokenValidationCache'
 $script:DependenciesCacheFolder = Join-Path -Path $script:AppInstallerDataFolder -ChildPath "$script:ScriptName.Dependencies"
 $script:TestDataFolder = Join-Path -Path $script:AppInstallerDataFolder -ChildPath $script:ScriptName
@@ -91,6 +95,9 @@ $script:HostGeoID = (Get-WinHomeLocation).GeoID
 
 # Misc
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+
+# Ensure the System.Net.Http assembly is loaded
+Add-Type -AssemblyName System.Net.Http
 $script:HttpClient = New-Object System.Net.Http.HttpClient
 $script:CleanupPaths = @()
 
@@ -212,14 +219,29 @@ function Get-RemoteContent {
     )
     Write-Debug "Attempting to fetch content from $URL"
     # Check if the URL is valid before trying to download
-    $response = [String]::IsNullOrWhiteSpace($URL) ? @{StatusCode = 400 } : $(Invoke-WebRequest -Uri $URL -Method Head -ErrorAction SilentlyContinue) # If the URL is null, return a status code of 400
+    # If the URL is null, return a status code of 400
+    if ([String]::IsNullOrWhiteSpace($URL)) {
+        $response = @{ StatusCode = 400 }
+    } else {
+        $response = Invoke-WebRequest -Uri $URL -Method Head -ErrorAction SilentlyContinue
+    }
     if ($response.StatusCode -ne 200) {
         Write-Debug "Fetching remote content from $URL returned status code $($response.StatusCode)"
         return $null
     }
-    $localFile = $OutputPath ? [System.IO.FileInfo]::new($OutputPath) : $(New-TemporaryFile) # If a path was specified, store it at that path; Otherwise use the temp folder
+    # If a path was specified, store it at that path; Otherwise use the temp folder
+    if ($OutputPath) {
+        $localFile = [System.IO.FileInfo]::new($OutputPath)
+    } else {
+        $localFile = New-TemporaryFile
+    }
     Write-Debug "Remote content will be stored at $($localFile.FullName)"
-    $script:CleanupPaths += $Raw ? @($localFile.FullName) : @() # Mark the file for cleanup when the script ends if the raw data was requested
+    # Mark the file for cleanup when the script ends if the raw data was requested
+    if ($Raw) {
+        $script:CleanupPaths += @($localFile.FullName)
+    } else {
+        $script:CleanupPaths += @()
+    }
     try {
         $downloadTask = $script:HttpClient.GetByteArrayAsync($URL)
         [System.IO.File]::WriteAllBytes($localfile.FullName, $downloadTask.Result)
@@ -228,7 +250,12 @@ function Get-RemoteContent {
         # If the download fails, write a zero-byte file anyways
         $null | Out-File $localFile.FullName
     }
-    return $Raw ? $(Get-Content -Path $localFile.FullName) : $localFile # If the raw content was requested, return the content, otherwise, return the FileInfo object
+    # If the raw content was requested, return the content, otherwise, return the FileInfo object
+    if ($Raw) {
+        return Get-Content -Path $localFile.FullName
+    } else {
+        return $localFile
+    }
 }
 
 ####
@@ -491,17 +518,24 @@ if (!$SkipManifestValidation -and ![String]::IsNullOrWhiteSpace($Manifest)) {
         }
         switch ($LASTEXITCODE) {
         '-1978335191' {
-            ($validateCommandOutput | Select-Object -Skip 1 -SkipLast 1) | Write-Information # Skip the first line and the empty last line
+            # Skip the first line and the empty last line
+            $validateCommandOutput | Select-Object -Skip 1 -SkipLast 1 | ForEach-Object {
+                Write-Information $_
+            }
+
             Write-Error -Category ParserError 'Manifest validation failed' -ErrorAction Continue
             Invoke-CleanExit -ExitCode 4
         }
         '-1978335192' {
-            ($validateCommandOutput | Select-Object -Skip 1 -SkipLast 1) | Write-Information # Skip the first line and the empty last line
+            # Skip the first line and the empty last line
+            $validateCommandOutput | Select-Object -Skip 1 -SkipLast 1 | ForEach-Object {
+                Write-Information $_
+            }
             Write-Warning 'Manifest validation succeeded with warnings'
             Start-Sleep -Seconds 5 # Allow the user 5 seconds to read the warnings before moving on
         }
         Default {
-            $validateCommandOutput.Trim() | Write-Information # On the success, print an empty line after the command output
+            Write-Information $validateCommandOutput.Trim() # On the success, print an empty line after the command output
         }
     }
 }
@@ -548,7 +582,7 @@ Write-Debug @"
 "@
 
 # Set the folder for the files that change with each release version
-$script:AppInstallerReleaseAssetsFolder = Join-Path $script:AppInstallerDataFolder -ChildPath 'bin' -AdditionalChildPath $script:AppInstallerReleaseTag
+$script:AppInstallerReleaseAssetsFolder = Join-Path -Path (Join-Path -Path $script:AppInstallerDataFolder -ChildPath 'bin') -ChildPath $script:AppInstallerReleaseTag
 
 # Build the dependency information
 Write-Verbose 'Building Dependency List'
