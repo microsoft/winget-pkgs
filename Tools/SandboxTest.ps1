@@ -239,8 +239,6 @@ function Get-RemoteContent {
     # Mark the file for cleanup when the script ends if the raw data was requested
     if ($Raw) {
         $script:CleanupPaths += @($localFile.FullName)
-    } else {
-        $script:CleanupPaths += @()
     }
     try {
         $downloadTask = $script:HttpClient.GetByteArrayAsync($URL)
