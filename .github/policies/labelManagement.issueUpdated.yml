@@ -42,8 +42,6 @@ configuration:
               label: Validation-Completed
           - hasLabel:
               label: Moderator-Approved
-          - hasLabel:
-              label: Azure-Pipeline-Passed
           - and:
               - not:
                   hasLabel:
@@ -51,6 +49,9 @@ configuration:
               - not:
                   hasLabel:
                     label: Needs-Author-Feedback
+              - not:
+                  hasLabel:
+                    label: Changes-Requested
         then:
           - enableAutoMerge:
               mergeMethod: Squash
@@ -77,6 +78,9 @@ configuration:
               - not:
                   hasLabel:
                     label: Needs-Author-Feedback
+              - not:
+                  hasLabel:
+                    label: Changes-Requested
         then:
           - enableAutoMerge:
               mergeMethod: Squash
@@ -112,6 +116,9 @@ configuration:
               - not:
                   hasLabel:
                     label: Needs-Attention
+              - not:
+                  hasLabel:
+                    label: Changes-Requested
         then:
           - approvePullRequest:
               comment: ""
@@ -139,10 +146,6 @@ configuration:
           - labelSync:
               pattern: Hardware
           - labelSync:
-              pattern: Dependencies
-          - labelSync:
-              pattern: zip-binary
-          - labelSync:
               pattern: Area-External
           - labelSync:
               pattern: Installer-Issue
@@ -150,16 +153,16 @@ configuration:
               pattern: Interactive-Only-Installer
           - inPrLabel:
               label: In-PR
-      - description: Remove "Help-Wanted" label when an issue goes into PR
+      - description: Remove "Help-Wanted" and "Needs-Triage" labels when an issue goes into PR
         if:
           - payloadType: Issues
           - labelAdded:
               label: In-PR
-          - hasLabel:
-              label: Help-Wanted
         then:
           - removeLabel:
               label: Help-Wanted
+          - removeLabel:
+              label: Needs-Triage
         # The policy service should trigger even when the update was initiated by the policy service
         triggerOnOwnActions: true
       - description: Retry validation one time on pull requests that have the Internal-Error-Dynamic-Scan label
@@ -198,9 +201,7 @@ configuration:
       - description: >-
           When changes are requested on a pull request
           * Disable automerge
-          * Add a reply notifying the issue author
-          * Assign to the author
-          * Label with Needs-Author-Feedback
+          * Label with Changes-Requested
         if:
           - payloadType: Pull_Request_Review
           - isAction:
@@ -209,19 +210,8 @@ configuration:
               reviewState: Changes_requested
         then:
           - disableAutoMerge
-          - addReply:
-              reply: >-
-                Hello @${issueAuthor},
-
-
-                The package manager bot determined changes have been requested to your PR.
-
-
-                Template: msftbot/changesRequested
-          - assignTo:
-              author: True
           - addLabel:
-              label: Needs-Author-Feedback
+              label: Changes-Requested
       - description: >-
           If static analysis has timed out, and the retry has timed out
           * Add a reply notifying the issue author
@@ -251,73 +241,75 @@ configuration:
               action: Synchronize
         then:
           - removeLabel:
-              label: Validation-Completed
-          - removeLabel:
               label: Azure-Pipeline-Passed
-          - removeLabel:
-              label: Validation-Hash-Verification-Failed
-          - removeLabel:
-              label: Manifest-Version-Error
-          - removeLabel:
-              label: Manifest-Dependencies-Error
-          - removeLabel:
-              label: PullRequest-Error
-          - removeLabel:
-              label: Manifest-Validation-Error
-          - removeLabel:
-              label: Manifest-Installer-Validation-Error
-          - removeLabel:
-              label: URL-Validation-Error
           - removeLabel:
               label: Binary-Validation-Error
           - removeLabel:
-              label: Error-Analysis-Timeout
+              label: Blocking-Issue
           - removeLabel:
-              label: Error-Installer-Availability
+              label: Changes-Requested
+          - removeLabel:
+              label: EULA-Install
+          - removeLabel:
+              label: Error-Analysis-Timeout
           - removeLabel:
               label: Error-Hash-Mismatch
           - removeLabel:
+              label: Error-Installer-Availability
+          - removeLabel:
               label: Internal-Error
-          - removeLabel:
-              label: Internal-Error-PR
-          - removeLabel:
-              label: Internal-Error-Manifest
-          - removeLabel:
-              label: Internal-Error-URL
           - removeLabel:
               label: Internal-Error-Domain
           - removeLabel:
-              label: Internal-Error-Keyword-Policy
-          - removeLabel:
-              label: Internal-Error-Static-Scan
-          - removeLabel:
               label: Internal-Error-Dynamic-Scan
           - removeLabel:
-              label: Validation-Installation-Error
+              label: Internal-Error-Keyword-Policy
+          - removeLabel:
+              label: Internal-Error-Manifest
           - removeLabel:
               label: Internal-Error-NoArchitectures
           - removeLabel:
               label: Internal-Error-NoSupportedArchitectures
           - removeLabel:
-              label: Validation-Executable-Error
+              label: Internal-Error-PR
           - removeLabel:
-              label: Validation-Defender-Error
+              label: Internal-Error-Static-Scan
           - removeLabel:
-              label: Validation-Unapproved-URL
+              label: Internal-Error-URL
           - removeLabel:
-              label: Validation-Domain
-          - removeLabel:
-              label: Blocking-Issue
-          - removeLabel:
-              label: Needs-SmartScreen-Investigation
-          - removeLabel:
-              label: Needs-Attention
-          - removeLabel:
-              label: EULA-Install
+              label: Last-Version-Remaining
           - removeLabel:
               label: MSFT-Verified
           - removeLabel:
-              label: Validation-Unattended-Failed
+              label: Manifest-AppsAndFeaturesVersion-Error
+          - removeLabel:
+              label: Manifest-Content-Incomplete
+          - removeLabel:
+              label: Manifest-Dependencies-Error
+          - removeLabel:
+              label: Manifest-Installer-Validation-Error
+          - removeLabel:
+              label: Manifest-Metadata-Consistency
+          - removeLabel:
+              label: Manifest-Path-Error
+          - removeLabel:
+              label: Manifest-Validation-Error
+          - removeLabel:
+              label: Manifest-Version-Deprecated
+          - removeLabel:
+              label: Manifest-Version-Error
+          - removeLabel:
+              label: Moderator-Approved
+          - removeLabel:
+              label: Needs-Attention
+          - removeLabel:
+              label: Needs-Author-Feedback
+          - removeLabel:
+              label: Needs-SmartScreen-Investigation
+          - removeLabel:
+              label: New-Manifest
+          - removeLabel:
+              label: New-Package
           - removeLabel:
               label: Policy-Test-1.1.A
           - removeLabel:
@@ -349,33 +341,56 @@ configuration:
           - removeLabel:
               label: Policy-Test-2.9
           - removeLabel:
-              label: Validation-No-Executables
+              label: PullRequest-Error
           - removeLabel:
-              label: Needs-Author-Feedback
-          - removeLabel:
-              label: Moderator-Approved
+              label: URL-Validation-Error
           - removeLabel:
               label: Unexpected-File
           - removeLabel:
+              label: Validation-Completed
+          - removeLabel:
+              label: Validation-Defender-Error
+          - removeLabel:
+              label: Validation-Domain
+          - removeLabel:
+              label: Validation-Executable-Error
+          - removeLabel:
+              label: Validation-Forbidden-URL-Error
+          - removeLabel:
+              label: Validation-Hash-Verification-Failed
+          - removeLabel:
+              label: Validation-Installation-Error
+          - removeLabel:
+              label: Validation-Line-Endings-Error
+          - removeLabel:
               label: Validation-Merge-Conflict
           - removeLabel:
-              label: Manifest-AppsAndFeaturesVersion-Error
+              label: Validation-Missing-Dependency
+          - removeLabel:
+              label: Validation-No-Executables
+          - removeLabel:
+              label: Validation-Open-Url-Failed
           - removeLabel:
               label: Validation-Shell-Execute
           - removeLabel:
-              label: Manifest-Content-Incomplete
+              label: Validation-Skip-Automations
           - removeLabel:
-              label: Validation-Open-Url-Failed
+              label: Validation-Unapproved-URL
+          - removeLabel:
+              label: Validation-Unattended-Failed
+          - removeLabel:
+              label: Version-Parameter-Mismatch
       - description: Remove status labels when a PR is re-run
         if:
           - payloadType: Issue_Comment
+          - isOpen
           - or:
               - commentContains:
-                  pattern: '\/[a|A][z|Z][p|P] [r|R][u|U][n|N]'
-                  isRegex: True
+                  pattern: 'Validation Pipeline Run'
+                  isRegex: false
               - commentContains:
-                  pattern: '\/[a|A][z|Z][u|U][r|R][e|E][p|P][i|I][p|P][e|E][l|L][i|I][n|N][e|E][s|S] [r|R][u|U][n|N]'
-                  isRegex: True
+                  pattern: '@[Ww]ingetbot\s[Rr]un'
+                  isRegex: true
           - not:
               isActivitySender:
                 user: microsoft-github-policy-service[bot]
@@ -385,77 +400,84 @@ configuration:
                   permission: Admin
               - activitySenderHasPermission:
                   permission: Write
+              - isActivitySender:
+                  user: stephengillie
+              - isActivitySender:
+                  user: ImJoakim
+              - isActivitySender:
+                  user: ItzLevvie
+              - isActivitySender:
+                  user: jedieaston
+              - isActivitySender:
+                  user: KaranKad
+              - isActivitySender:
+                  user: OfficialEsco
+              - isActivitySender:
+                  user: quhxl
+              - isActivitySender:
+                  user: Trenly
+              - isActivitySender:
+                  user: mdanish-kh
+              - isActivitySender:
+                  user: russellbanks
         then:
+          # Don't remove Changes-Requested here because it is just a re-run, no new commits have been added
           - removeLabel:
-              label: Validation-Completed
+              label: Author-Not-Authorized
           - removeLabel:
               label: Azure-Pipeline-Passed
           - removeLabel:
-              label: Validation-Hash-Verification-Failed
-          - removeLabel:
-              label: Validation-Merge-Conflict
-          - removeLabel:
-              label: PullRequest-Error
-          - removeLabel:
-              label: Manifest-Version-Error
-          - removeLabel:
-              label: Manifest-Dependencies-Error
-          - removeLabel:
-              label: Manifest-Validation-Error
-          - removeLabel:
-              label: Manifest-Installer-Validation-Error
-          - removeLabel:
-              label: URL-Validation-Error
-          - removeLabel:
               label: Binary-Validation-Error
+          - removeLabel:
+              label: Blocking-Issue
+          - removeLabel:
+              label: EULA-Install
           - removeLabel:
               label: Error-Analysis-Timeout
           - removeLabel:
-              label: Error-Installer-Availability
-          - removeLabel:
               label: Error-Hash-Mismatch
+          - removeLabel:
+              label: Error-Installer-Availability
           - removeLabel:
               label: Internal-Error
           - removeLabel:
-              label: Internal-Error-PR
-          - removeLabel:
-              label: Internal-Error-Manifest
-          - removeLabel:
-              label: Internal-Error-URL
-          - removeLabel:
               label: Internal-Error-Domain
-          - removeLabel:
-              label: Internal-Error-Keyword-Policy
-          - removeLabel:
-              label: Internal-Error-Static-Scan
           - removeLabel:
               label: Internal-Error-Dynamic-Scan
           - removeLabel:
-              label: Validation-Installation-Error
+              label: Internal-Error-Keyword-Policy
+          - removeLabel:
+              label: Internal-Error-Manifest
           - removeLabel:
               label: Internal-Error-NoArchitectures
           - removeLabel:
               label: Internal-Error-NoSupportedArchitectures
           - removeLabel:
-              label: Validation-Executable-Error
+              label: Internal-Error-PR
           - removeLabel:
-              label: Validation-Defender-Error
+              label: Internal-Error-Static-Scan
           - removeLabel:
-              label: Validation-Unapproved-URL
-          - removeLabel:
-              label: Validation-Domain
-          - removeLabel:
-              label: Blocking-Issue
-          - removeLabel:
-              label: Needs-SmartScreen-Investigation
-          - removeLabel:
-              label: Needs-Attention
-          - removeLabel:
-              label: EULA-Install
+              label: Internal-Error-URL
           - removeLabel:
               label: MSFT-Verified
           - removeLabel:
-              label: Validation-Unattended-Failed
+              label: Manifest-AppsAndFeaturesVersion-Error
+          - removeLabel:
+              label: Manifest-Dependencies-Error
+          - removeLabel:
+              label: Manifest-Installer-Validation-Error
+          - removeLabel:
+              label: Manifest-Path-Error
+          - removeLabel:
+              label: Manifest-Validation-Error
+          - removeLabel:
+              label: Manifest-Version-Error
+          - removeLabel:
+              label: Needs-Attention
+          - removeLabel:
+              label: Needs-Author-Feedback
+          - removeLabel:
+              label: Needs-SmartScreen-Investigation
           - removeLabel:
               label: Policy-Test-1.1.A
           - removeLabel:
@@ -487,18 +509,40 @@ configuration:
           - removeLabel:
               label: Policy-Test-2.9
           - removeLabel:
-              label: Validation-No-Executables
+              label: Possible-Duplicate
           - removeLabel:
-              label: Needs-Author-Feedback
+              label: Project-File
+          - removeLabel:
+              label: PullRequest-Error
+          - removeLabel:
+              label: URL-Validation-Error
           - removeLabel:
               label: Unexpected-File
           - removeLabel:
-              label: Manifest-AppsAndFeaturesVersion-Error
+              label: Validation-Completed
           - removeLabel:
-              label: Validation-Shell-Execute
+              label: Validation-Defender-Error
+          - removeLabel:
+              label: Validation-Domain
+          - removeLabel:
+              label: Validation-Executable-Error
+          - removeLabel:
+              label: Validation-Hash-Verification-Failed
+          - removeLabel:
+              label: Validation-Installation-Error
+          - removeLabel:
+              label: Validation-Merge-Conflict
+          - removeLabel:
+              label: Validation-Missing-Dependency
+          - removeLabel:
+              label: Validation-No-Executables
           - removeLabel:
               label: Validation-Open-Url-Failed
           - removeLabel:
-              label: Possible-Duplicate
+              label: Validation-Shell-Execute
+          - removeLabel:
+              label: Validation-Unapproved-URL
+          - removeLabel:
+              label: Validation-Unattended-Failed
 onFailure:
 onSuccess:
