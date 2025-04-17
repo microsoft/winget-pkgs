@@ -1,0 +1,65 @@
+# Created with WinGet Updater using komac v2.11.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
+
+PackageIdentifier: DoltHub.Dolt
+PackageVersion: 1.51.3
+PackageLocale: en-US
+Publisher: DoltHub
+PublisherUrl: https://github.com/dolthub/dolt
+PublisherSupportUrl: https://github.com/dolthub/dolt/issues
+Author: DoltHub
+PackageName: Dolt
+PackageUrl: https://www.dolthub.com/
+License: Apache-2.0
+LicenseUrl: https://github.com/dolthub/dolt/blob/HEAD/LICENSE
+CopyrightUrl: https://raw.githubusercontent.com/dolthub/dolt/master/LICENSE
+ShortDescription: Dolt is a SQL database that you can fork, clone, branch, merge, push and pull just like a git repository.
+Description: |-
+  Dolt is a SQL database that you can fork, clone, branch, merge, push and pull just like a git repository.
+  Connect to Dolt just like any MySQL database to run queries or update the data using SQL commands.
+  Use the command line interface to import CSV files, commit your changes, push them to a remote, or merge your teammate's changes.
+Moniker: dolt
+Tags:
+- cli
+- data
+- git-for-data
+- versioning
+ReleaseNotes: |-
+  Merged PRs
+  dolt
+  - 9100: Consistently use pointer receivers for TextStorage methods.
+    For structs that are exclusively used in interfaces, there's no reason to not use pointer receivers instead of value receivers. Using value receivers can cause the struct to be copied every time the method is invoked.
+    Pointer receivers are also more correct here: copying the struct means that changes to the ImmutableValue field (such as setting its Buf field in ImmutableValue.GetBytes) won't be saved when the method exits, defeating the caching of values loaded from storage.
+  - 9098: Add support for SSL connections to a source MySQL server
+    Allows a replica Dolt sql-server to connect to a MySQL source via SSL when the SOURCE_SSL configuration parameter is supplied.
+    Depends on: dolthub/go-mysql-server#2930
+  - 9097: Prevent unnecessary bytes <-> string conversions and unnecessary allocations when converying to bytes.
+  - 9095: Add the archive --purge flag to clean up table files
+    The dolt archive command is extra safe, and doesn't cleanup table files is converts. The --purge flag will delete table files after the conversion is done.
+  - 9085: Adding new copy-tags command
+  go-mysql-server
+  - 2932: Optimize ConvertToBytes by avoiding unnecessary string <-> bytes conversions and copies.
+    ConvertToBytes is a commonly called function to get the string representation of a value. However, it has some unnecessary allocations where a child function allocates a byte buffer, only for the result to be copied into the buffer provided by the parent function. In other places we needlessly round-trip between string and []byte.
+    This PR improves performance by removing some of these unneeded copies. In places where ConvertToBytes calls a function that allocates a buffer (instead of using the buffer that ConvertToBytes can provide), we can optimize by using the returned value without copying it again.
+    Dolt shows a 7% improvement in the types_table_scan benchmark.
+    We can potentially do even better by allowing these child functions to take a buffer, removing the need for an extra allocation.
+  - 2930: Add support for SSL connections to a source MySQL server
+    Adds GMS support for the SOURCE_SSL MySQL replication configuration param.
+  - 2928: implement stddev_pop(), stddev_samp(), var_pop(), var_samp(), and aliases
+    This PR implements STD() and VARIANCE() and its aliases.
+    docs: https://dev.mysql.com/doc/refman/8.4/en/aggregate-functions.html#function_std
+    syntax: dolthub/vitess#409
+    fixes: #9088
+  - 2926: Provide a SchemaFormatter interface to complement the SqlParser interface
+    Dolt uses functions in the sql package to create and then parse CREATE TABLE statements as part of the merge process. Therefore, we need the ability to create these statements for other dialects, just as we do for MySQL.
+    This PR also exposes a Noop auth method for the same use case.
+  vitess
+  - 409: add var_samp to keywords
+  - 408: Add support for SOURCE_SSL replication option
+  - 407: remove incorrect continue statement which skips handling connection
+    Caught in PR.
+  Closed Issues
+  - 9088: Request for STDEV_POP() (and aliases) and VAR_POP() (and alias)
+ReleaseNotesUrl: https://github.com/dolthub/dolt/releases/tag/v1.51.3
+ManifestType: defaultLocale
+ManifestVersion: 1.9.0

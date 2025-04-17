@@ -1,0 +1,184 @@
+PackageIdentifier: jj-vcs.jj
+PackageVersion: 0.26.0
+PackageLocale: en-US
+Publisher: jj-vcs
+PublisherUrl: https://github.com/jj-vcs
+PublisherSupportUrl: https://github.com/jj-vcs/jj/issues
+PackageName: jj
+PackageUrl: https://github.com/jj-vcs/jj
+License: Apache License 2.0
+LicenseUrl: https://github.com/jj-vcs/jj/blob/HEAD/LICENSE
+ShortDescription: A Git-compatible VCS that is both simple and powerful
+Description: A Git-compatible VCS that is both simple and powerful
+Moniker: Jujutsu
+Tags:
+- git
+- cli
+- mercurial
+- vcs
+Documentations:
+- DocumentLabel: Homepage
+  DocumentUrl: https://jj-vcs.github.io/jj/
+ManifestType: defaultLocale
+ManifestVersion: 1.9.0
+ReleaseNotes: |
+  About
+  - jj is a Git-compatible version control system that is both simple and powerful. See the installation instructions to get started.
+  Release highlights
+  - Improved Git push/fetch compatibility by spawning an external `git` process.
+  - This can be enabled by the `git.subprocess=true` config knob, and will be the
+  - default in a future release.
+  - `jj log` can now show cryptographic commit signatures. The output can be
+  - controlled by the `ui.show-cryptographic-signatures=true` config knob.
+  Breaking changes
+  - `jj abandon` now deletes bookmarks pointing to the revisions to be abandoned.
+  - Use `--retain-bookmarks` to move bookmarks backwards. If deleted bookmarks
+  - were tracking remote bookmarks, the associated bookmarks (or branches) will be
+  - deleted from the remote on `jj git push --all`.
+    #3505
+  - `jj init --git` and `jj init --git-repo` have been removed. They were
+  - deprecated in early 2024. Use `jj git init` instead.
+  - The following deprecated commands have been removed:
+  - `jj cat` is replaced by `jj file show`.
+  - `jj chmod` is replaced by `jj file chmod`.
+  - `jj files` is replaced by `jj file list`.
+  - The deprecated `-l` short alias for `--limit` in `jj log`, `jj op log`
+  - and `jj obslog` has been removed. The `-n` short alias can be used instead.
+  - The deprecated `--siblings` options for `jj split` has been removed.
+    `jj split --parallel` can be used instead.
+  - The deprecated `fix.tool-command` config option has been removed.
+  - In colocated repos, the Git index now contains the changes from all parents
+  - of the working copy instead of just the first parent (`HEAD`). 2-sided
+  - conflicts from the merged parents are now added to the Git index as conflicts
+  - as well.
+  - The following change introduced in 0.25.0 is reverted:
+  - `jj config list` now prints inline tables `{ key = value, .. }` literally.
+  - Inner items of inline tables are no longer merged across configuration
+  - files.
+  - `jj resolve` will now attempt to resolve all conflicted files instead of
+  - resolving the first conflicted file. To resolve a single file, pass a file
+  - path to `jj resolve`.
+  - `jj util mangen` is replaced with `jj util install-man-pages`, which can
+  - install man pages for all `jj` subcommands to a given path.
+  - In `jj config list` template, `value` is now typed as `ConfigValue`, not as
+    `String` serialized in TOML syntax.
+  - `jj git remote add`/`set-url` now converts relative Git remote path to
+  - absolute path.
+  - `jj log`/`op log` now applies `-n`/`--limit` *before* the items are reversed.
+  - Rationale: It's more useful to see the N most recent commits/operations, and
+  - is more performant. The old behavior can be achieved by `jj log .. | head`.
+    #5403
+  - Upgraded `scm-record` from v0.4.0 to v0.5.0. See release notes at
+    <https://github.com/arxanas/scm-record/releases/tag/v0.5.0>.
+  - The builtin pager is switched to
+  - streampager. It can handle large
+  - inputs better and can be configured.
+  - Conflicts materialized in the working copy before `jj 0.19.0` may no longer
+  - be parsed correctly. If you are using version 0.18.0 or earlier, check out a
+  - non-conflicted commit before upgrading to prevent issues.
+  Deprecations
+  New features
+  - `jj git {push,clone,fetch}` can now spawn an external `git` subprocess, via
+  - the `git.subprocess = true` config knob. This provides an alternative that,
+  - when turned on, fixes SSH bugs when interacting with Git remotes due to
+     `libgit2`s limitations #4979.
+  - `jj describe` now accepts `--edit`.
+  - `jj evolog` and `jj op log` now accept `--reversed`.
+  - `jj restore` now supports `-i`/`--interactive` selection.
+  - `jj file list` now supports templating.
+  - There is a new `builtin_op_log_oneline` template alias you can pass to `jj op
+  - log -T` for a more compact output. You can use `format_operation_oneline` and
+    `format_snapshot_operation_oneline` to customize parts of it.
+  - New template function `config(name)` to access to configuration variable from
+  - template.
+  - New template function `pad_centered()` to center content within a minimum
+  - width.
+  - Templater now supports `list.filter(|x| ..)` method.
+  - The `diff` commit template keyword now supports custom formatting via
+    `diff.files()`. For example, `diff.files().map(|e| e.path().display())` prints
+  - changed file paths.
+  - The `diff.stat()` template method now provides methods to get summary values.
+  - `jj log` can now show cryptographic commit signatures. The output can be
+  - controlled by the `ui.show-cryptographic-signatures=true` config knob. The
+  - signature template can be customized using
+    `format_detailed_cryptographic_signature(signature)` and
+    `format_short_cryptographic_signature(signature)`.
+  - New `git.sign-on-push` config option to automatically sign commits which are
+  - being pushed to a Git remote.
+  - New `git.push-new-bookmarks` config option to push new bookmarks without
+    `--allow-new`.
+  - `jj status` now shows untracked files when they reside directly under a
+  - tracked directory. There's still an issue that files under untracked
+  - directories aren't listed. #5389
+  - New `merge-tools.<TOOL>.diff-expected-exit-codes` config option to suppress
+  - warnings from tools exiting with non-zero exit codes.
+  - New `fix.tools.TOOL.enabled` config option to enable/disable tools. This is
+  - useful for defining disabled tools in user configuration that can be enabled
+  - in individual repositories with one config setting.
+  - Added `--into` flag to `jj restore`, similarly to `jj squash` and `jj
+  - absorb`. It is equivalent to `--to`, but `--into` is the recommended name.
+  - Italic text is now supported. You can set e.g. `color.error = { fg = "red",
+  - italic = true }` in your config.
+  - New `author_name`/`author_email`/`committer_name`/`committer_email(pattern)`
+  - revset functions to match either name or email field explicitly.
+  - New `subject(pattern)` revset function that matches first line of commit
+  - descriptions.
+  - Conditional configuration now supports `--when.commands` to change
+  - configuration based on subcommand.
+  - The Jujutsu documentation site now publishes a schema for the official
+  - configuration file, which can be integrated into your editor for autocomplete,
+  - inline errors, and more.
+  - Please see the documentation for more
+  - on this.
+  Fixed bugs
+  - `jj git fetch` with multiple remotes will now fetch from all remotes before
+  - importing refs into the jj repo. This fixes a race condition where the
+  - treatment of a commit that is found in multiple fetch remotes depended on the
+  - order the remotes were specified.
+  - Fixed diff selection by external tools with `jj split`/`commit -i FILESETS`.
+    #5252
+  - Conditional configuration now applies when initializing new repository.
+    #5144
+  - `[diff.<format>]` configuration now applies to `.diff().<format>()` commit
+  - template methods.
+  - Conflicts at the end of files which don't end with a newline character are
+  - now materialized in a way that can be parsed correctly.
+    #3968
+  - Bookmark and remote names written by `jj git clone` to
+    `revset-aliases.'trunk()'` are now escaped if necessary.
+    #5359
+  Contributors
+  - Thanks to the people who made this release happen!
+  - Angel Ezquerra (@AngelEzquerra)
+  - Antoine Martin (@alarsyo)
+  - Anton Bulakh (@necauqua)
+  - Austin Seipp (@thoughtpolice)
+  - Baltasar Dinis (@bsdinis)
+  - Benjamin Tan (@bnjmnt4n)
+  - blinry (@blinry)
+  - Bryce Berger (@bryceberger)
+  - Charlie-83 (@Charlie-83)
+  - Christian Stoitner (@cstoitner)
+  - Evan Martin (@evmar)
+  - George Christou (@gechr)
+  - Ilya Grigoriev (@ilyagr)
+  - Jakob Hellermann (@jakobhellermann)
+  - JDSeiler (@JDSeiler)
+  - Jonathan Frere (@MrJohz)
+  - Jonathan Gilchrist (@jgilchrist)
+  - Josh Steadmon (@steadmon)
+  - Martin von Zweigbergk (@martinvonz)
+  - Matt Kulukundis (@fowles)
+  - Ollivier Robert (@keltia)
+  - Philip Metzger (@PhilipMetzger)
+  - Philipp Albrecht (@pylbrecht)
+  - Robert Jackson (@rwjblue)
+  - Samuel Tardieu (@samueltardieu)
+  - Scott Taylor (@scott2000)
+  - Stephen Jennings (@jennings)
+  - Valentin Gatien-Baron (@v-gb)
+  - Vincent Ging Ho Yim (@cenviity)
+  - Waleed Khan (@arxanas)
+  - Yuya Nishihara (@yuja)
+ReleaseNotesUrl: https://github.com/jj-vcs/jj/releases/tag/v0.26.0
+

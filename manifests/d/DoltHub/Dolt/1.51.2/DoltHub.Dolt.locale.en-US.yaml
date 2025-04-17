@@ -1,0 +1,90 @@
+# Created with WinGet Updater using komac v2.11.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
+
+PackageIdentifier: DoltHub.Dolt
+PackageVersion: 1.51.2
+PackageLocale: en-US
+Publisher: DoltHub
+PublisherUrl: https://github.com/dolthub/dolt
+PublisherSupportUrl: https://github.com/dolthub/dolt/issues
+Author: DoltHub
+PackageName: Dolt
+PackageUrl: https://www.dolthub.com/
+License: Apache-2.0
+LicenseUrl: https://github.com/dolthub/dolt/blob/HEAD/LICENSE
+CopyrightUrl: https://raw.githubusercontent.com/dolthub/dolt/master/LICENSE
+ShortDescription: Dolt is a SQL database that you can fork, clone, branch, merge, push and pull just like a git repository.
+Description: |-
+  Dolt is a SQL database that you can fork, clone, branch, merge, push and pull just like a git repository.
+  Connect to Dolt just like any MySQL database to run queries or update the data using SQL commands.
+  Use the command line interface to import CSV files, commit your changes, push them to a remote, or merge your teammate's changes.
+Moniker: dolt
+Tags:
+- cli
+- data
+- git-for-data
+- versioning
+ReleaseNotes: |-
+  Merged PRs
+  dolt
+  - 9089: refactor: use the built-in max/min to simplify the code
+    Contribution: #9044
+  - 9084: [no release notes] Handle NULL adaptive values
+    NULL Adaptive values weren't being properly handled in all codepaths. Some operations during tuple building (such as trying to move them out of band) caused a panic. This fixes that and adds tests.
+  - 9083: Support for non-MySQL query elements during merge
+    During the merge operation, Dolt creates a CREATE TABLE statement for the table being merged, parses it, and uses that information during the merge. This PR allows this process to work with a non-MySQL dialect.
+  - 9075: Don't alter branch head outside of transactions when amending a commit
+    Fixes: #9072
+  - 9071: Fix typo mistake of commmitted
+    Thanks to @jbampton
+  - 9067: go: sqle/dprocedures: Implement operational inspection hook, dolt_thread_dump stored procedure.
+  - 9066: go/store/nbs: Add info level logging for a store conjoin.
+  - 9044: refactor: use the built-in max/min to simplify the code
+    Use the built-in max/min from the standard library in Go 1.21 to simplify the code. https://pkg.go.dev/builtin@go1.21.0#max
+  - 9013: Add Adaptive Inline encoding
+    Adaptive Inline encoding refers to values that can be stored either inline in a table, or out-of-band in external storage. Postgres calls them TOAST (The Oversized-Attribute Storage Technique) types.
+    This PR adds two new encoding types: one for toasted TEXT columns and one for toasted BLOB columns.
+    The important parts of this PR are:
+    - The new encoding values StringToastEnc and BytesToastEnc
+    - The ToastValue type: this type has methods for creating and inspecting TOAST values.
+    - The changes to prolly.PutField and prolly.GetField to handle writing reading and writing these encodings to tuples
+    - The changes to TupleBuilder, which choose an inline or outlined representation for each value with a TOAST encoding. It prefers to store these values inline, but selectively outlines columns in a deterministic way if the length of the tuple would otherwise exceed a threshold. (Currently 2KB, not currently configurable.)
+      It is not currently possible to use these encodings in Dolt proper. For testing purposes, a variable schema.UseToastTypes has been added. Setting this variable to true will cause Dolt to use these toast encodings for TEXT and BLOB columns instead of the normal address encodings.
+  go-mysql-server
+  - 2927: Converting a nil value should return nil, not panic.
+    Most uses of convertValue checked if the input was nil, but Binary.Eval didn't.
+    NULL should always be converted to NULL, so we can just put the check there.
+  - 2926: Provide a SchemaFormatter interface to complement the SqlParser interface
+    Dolt uses functions in the sql package to create and then parse CREATE TABLE statements as part of the merge process. Therefore, we need the ability to create these statements for other dialects, just as we do for MySQL.
+    This PR also exposes a Noop auth method for the same use case.
+  - 2924: fix ifnull typing
+    fixes #9076
+  - 2923: fix AND optimization
+    This PR fixes AND optimizations where TRUE & x -> x.
+    Probably should've seen this coming given our bug fix with OR here,
+    fixes: #9074
+  - 2921: fix not equal conversions
+    fixes: #9052
+  - 2913: insert trigger bugs
+    fixes: #9039
+    Inserts nested inside triggers is a special case that we have minimal testing for. Some of the things that were broken before:
+    - we did not prepend nodes inside trigger->insert blocks, so new columns were not accessible / the index offsets estimated based on prepending trigger rows were invalid
+    - subqueries inside trigger->insert that have no outer visibility did not make exceptions for trigger rows, which act like lateral rows
+    - prepending rules are flaky and mistakenly prepended in-between project->project nodes
+  - 2893: Add Wrapper values
+    This PR adds support for Wrapper values, a new type of value that the storage layer can provide to the engine. This is a generalization of the existing JsonWrapper interface, but is not limited to JSON values.
+    Wrapper types are useful because they can represent a value in storage without needing to fully deserialize that value for the engine. The primary use case is for "out-of-band" storage values, such as large BLOB or TEXT values that aren't stored directly in tables.
+    The Wrapper interface has the following methods:
+    Unwrap/UnwrapAny - These methods both deserialize the wrapped value and return it. UnwrapAny returns an interface{}, while Unwrap has a parameterized return type. The implementation is encouraged to cache this value.
+    IsExactLength - Returns true if the size of the value can be known without deserializing it.
+    MaxByteLength - The length of the value in bytes. If IsExactLength is true, this is the exact length of the value. Otherwise, it's an upper bound on the length of the value, determined by the schema of the table the value was read from.
+    Compare - Some Wrapper implementations may be able to compare wrapped values without needing to deserialize them. This method returns a boolean indicating whether or not this "short-circuit" comparison is possible, and an int indicating the result of the comparison.
+  Closed Issues
+  - 9072: Potential concurrency Issue with call dolt_commit('--amend')
+  - 9076: Unexpected type conversion in IFNULL
+  - 9074: Incorrect optimization of AND operation in expression in WHERE clause
+  - 9052: Incorrect optimization of OR operation in expression in WHERE clause
+  - 9039: Trigger LEFT_JOIN indexing error
+ReleaseNotesUrl: https://github.com/dolthub/dolt/releases/tag/v1.51.2
+ManifestType: defaultLocale
+ManifestVersion: 1.9.0
