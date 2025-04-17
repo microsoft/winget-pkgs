@@ -1,0 +1,135 @@
+# Created with YamlCreate.ps1 v2.4.3 $debug=AUSU.CRLF.7-4-6.Win32NT
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
+
+PackageIdentifier: joncampbell123.DOSBox-X
+PackageVersion: 2024.10.01
+PackageLocale: en-US
+Publisher: joncampbell123 [DOSBox-X Team]
+PublisherUrl: https://dosbox-x.com/
+PublisherSupportUrl: https://dosbox-x.com/wiki
+# PrivacyUrl:
+Author: John Campbell
+PackageName: DOSBox-X
+PackageUrl: https://github.com/joncampbell123/dosbox-x
+License: GPL-2.0
+LicenseUrl: https://raw.githubusercontent.com/joncampbell123/dosbox-x/master/COPYING
+# Copyright:
+CopyrightUrl: https://raw.githubusercontent.com/joncampbell123/dosbox-x/master/COPYING
+ShortDescription: DOSBox-X is an open-source DOS emulator for running DOS games and applications.
+Description: |-
+  DOSBox-X emulates a PC necessary for running many DOS games and applications that simply cannot be run on modern PCs and operating systems, similar to DOSBox.
+  However, while the main focus of DOSBox is for running DOS games, DOSBox-X goes much further than this.
+  Started as a fork of the DOSBox project, it retains compatibility with the wide base of DOS games and DOS gaming DOSBox was designed for.
+  But it is also a platform for running DOS applications, including emulating the environments to run Windows 3.x, 9x and ME and software written for those versions of Windows.
+  By adding official support for Windows 95, 98, ME emulation and acceleration, we hope that those old Windows games and applications could be enjoyed or used once more.
+  Moreover, DOSBox-X adds support for DOS/V and NEC PC-98 emulations so that you can play DOS/V and PC-98 games with it.
+Moniker: dosbox-x
+Tags:
+- dos
+- dos-emulator
+- dosbox
+ReleaseNotes: |-
+  2024.10.01
+  - Allow the ".inst" extension for CUE sheets. (Allofich)
+  - Add SET /FIRST, a DOSBox-X extension, that takes the specified
+  variable if it exists and moves it to the front of the environment
+  block. (joncampbell123).
+  - SET command processing has been cleaned up and streamlined.
+  Added /ERASE command line switch to clear the environment
+  block (DOSBox-X extension). (joncampbell123).
+  - VESA BIOS: Add new option to adjust reported linear framebuffer
+  address by a specific number of pixels. This is needed by
+  "Out of Control" by Contract which for whatever reason,
+  will always draw to the LFB base minus 128 bytes. This option
+  makes it possible to correct the demo graphics. (joncampbell123).
+  - Gravis Ultrasound: Officially, registers 0x0-0xF, the voice
+  control registers, are documented to have a 0x0-0xF write and
+  0x80-0x8F read alias. Unofficially, according to the behavior
+  of 1997 demo "Out of Control" by Contract, all GUS registers
+  have a N and (N+0x80) alias, or at least register 0x4C, and
+  you can read them back from either index. Or else the demo
+  fails to detect the GUS. So add this alias, but only if
+  enabled in dosbox.conf. Real hardware testing is required to
+  know if the actual GUS behaves this way and which versions.
+  (joncampbell123).
+  - Move the INT 3 default vector to well within the initial 16
+  bytes of the DOS kernel, away from the List of Lists and SFT.
+  The previous placement caused certain versions of Windows 3.2
+  (yes, the Chinese version) to crash on startup. (joncampbell123).
+  - When using the running program to name screenshots and such,
+  filter out all invalid characters so that Windows users can
+  take snapshots even if junk characters are there (joncampbell123).
+  - DOS FAT driver: If INT 13h reports disk change, adapt floppy
+  disk geometry to new disk image according to media byte. This
+  allows DS_BLISS to present it's 720K fake floppy even if the
+  user initially mounted a 1.44MB floppy to drive A: (joncampbell123).
+  - INT 10 mode list: Add "pitch" parameter. If nonzero, the value
+  (in pixels) is how to program the pixels per scanline when
+  setting the mode.
+  - VESAMOED: Add -pitch option to control the pitch (pixels per
+  scanline). The intent is to work around DOS games that assume
+  nonstandard pixels per scanline by allowing the VESA BIOS mode
+  to use a different one. For example, Line Wars II has an S3
+  acceleration mode that uses 800x600, but for whatever reason,
+  assumes the video mode is 1024 pixels per scanline, and will
+  render garbled graphics if that is not the case. (joncampbell123).
+  - S3 emulation: Follow S3 Trio64 documentation and mask the Linear
+  Window Position bits according to the size of the memory. You
+  can only place it on a multiple of the memory size. This silences
+  warnings caused by Line Wars II which appears to modify only the
+  upper byte but not the lower when modifying this register, which
+  then leaves 0xA0 in the lower half. That lower half would be
+  ignored for 1MB or larger video memory sizes. (joncampbell123).
+  - S3 XGA emulation: Add XGA acceleration for 4bpp packed 16-color
+  SVGA modes. A CAD package has S3 support drivers that use the
+  16-color 4bpp packed modes and expects XGA acceleration to work.
+  (joncampbell123).
+  - Add "-o int13" option to IMGMOUNT to direct the FAT driver to do
+  all disk I/O through INT 13h instead of directly. This is intended
+  for certain demoscene productions that apparently like to make
+  files appear out of thin air by intercepting INT 13h floppy disk
+  I/O and then asking MS-DOS to run something from it. Hack for
+  "DS_BLISS" demo. (joncampbell123).
+  - Fixed crash when a language file is loaded on a Windows host with
+  US keyboard (maron2000)
+  - Added Added sharp-bilinear Direct3D shader (RibShark)
+  - Pass output dimensions to Direct3D shaders (RibShark)
+  - Fixed BPB of floppy images made by IMGMAKE command (maron2000)
+  - Fixed timestamp of volume label changed by LABEL command (maron2000)
+  - Fixed pathname issues when mounting differencial VHD images (maxpat78)
+  - Corrected relative/absolute track offset in subchannel data for
+  CD-ROM images (RibShark).
+  - Fixed particular dead keys were not working to input characters
+  with diacritics (maron2000).
+  - Enabled "Edit and Continue" option for debug builds of Visual Studio
+  Intel builds (aybe).
+  - Updated libchdr to latest (treloret).
+  - Fixed icon in Gnome dock bar (FredBezies).
+  - add option "[dos] automount drive directories" for Windows builds,
+  this will mount existing drive directories from C to Y drive (aybe).
+  - fix off-center and off-screen window after entering the
+  configuration tool while using TTF output mode (aybe).
+  - add menu item for centering window "Video/Center window" (aybe).
+  - Fixed update-version-number script to patch all *.iss files, not
+  just the specific one it did before, to ensure future releases have
+  correct version numbers. (joncampbell123).
+  - Updated Nuked-OPL3 code to nukeykt/Nuked-OPL3@cfedb09 (StevenSYS)
+  - Updated SDL2 library to 2.30.4 (maron2000)
+  - Fixed TTF mode didn't change to graphic mode when machine = Hercules
+  (maron2000)
+  - Configuration tool: (aybe)
+      - more Windows 3.1 look'n'feel (themes w/ host dark mode detection)
+      - enhance main window layout, it is now visible in its entirety
+      - fix layout issues, off by one in rectangle drawing functions
+      - fix 'list iterators incompatible' when pressing the Tab key
+      - properties/help: sorted alphabetically, mouse wheel scrollable
+      - remove few rendundant labels, adjust names of some others
+      - retain 'show advanced options' state throughout session
+  - SVN r4483: Fix compilation in Visual Studio 2008 (Allofich)
+  - DOSBox Staging: Decouple CMS and OPL emulations (Allofich)
+ReleaseNotesUrl: https://github.com/joncampbell123/dosbox-x/releases/tag/dosbox-x-v2024.10.01
+# PurchaseUrl:
+# InstallationNotes:
+# Documentations:
+ManifestType: defaultLocale
+ManifestVersion: 1.9.0

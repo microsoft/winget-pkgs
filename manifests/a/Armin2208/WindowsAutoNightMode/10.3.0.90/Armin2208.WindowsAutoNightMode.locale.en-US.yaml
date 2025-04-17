@@ -1,5 +1,5 @@
-# Created with YamlCreate.ps1 v2.2.0 using InputObject 🤖 $debug=QUSU.CRLF..7-2-7
-# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.2.0.schema.json
+# Created with YamlCreate.ps1 v2.4.3 $debug=AUSU.CRLF.7-4-6.Win32NT
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
 
 PackageIdentifier: Armin2208.WindowsAutoNightMode
 PackageVersion: 10.3.0.90
@@ -7,7 +7,7 @@ PackageLocale: en-US
 Publisher: Armin Osaj & Samuel Schiegg
 PublisherUrl: https://github.com/AutoDarkMode
 PublisherSupportUrl: https://github.com/AutoDarkMode/Windows-Auto-Night-Mode/issues
-# PrivacyUrl:
+PrivacyUrl: https://github.com/AutoDarkMode/Windows-Auto-Night-Mode/blob/master/PRIVACY.md
 Author: Armin2208
 PackageName: Auto Dark Mode
 PackageUrl: https://github.com/AutoDarkMode/Windows-Auto-Night-Mode
@@ -16,7 +16,13 @@ LicenseUrl: https://raw.githubusercontent.com/AutoDarkMode/Windows-Auto-Night-Mo
 # Copyright:
 CopyrightUrl: https://raw.githubusercontent.com/AutoDarkMode/Windows-Auto-Night-Mode/master/LICENSE
 ShortDescription: Automatically switches between the dark and light theme of Windows 10 and Windows 11.
-Description: Automatically switches between the dark and light theme of Windows 10 and Windows 11. Auto Dark Mode helps you to be more productive. Because you shouldn't care about changing Windows settings several times a day. As soon as the sun goes down, we'll take care of everything for you. Because a simple design change would be too boring, Auto Dark Mode is packed with useful functions. For example, we can also change your desktop wallpaper.
+Description: |-
+  Automatically switches between the dark and light theme of Windows 10 and Windows 11.
+  Auto Dark Mode helps you to be more productive.
+  Because you shouldn't care about changing Windows settings several times a day.
+  As soon as the sun goes down, we'll take care of everything for you.
+  Because a simple design change would be too boring, Auto Dark Mode is packed with useful functions.
+  For example, we can also change your desktop wallpaper.
 # Moniker:
 Tags:
 - dark-theme
@@ -25,11 +31,81 @@ Tags:
 - theme-switch
 - wallpaper-changer
 - wpf
-# Agreements:
-# ReleaseNotes:
+ReleaseNotes: |-
+  New Features
+  - Use Windows Night Light as source for your light and dark switch times.
+    You can of course still configure an offset in ADM (#489, @thebigsmileXD)!
+  - Pause automatic theme switching once (postpones until next sunrise / sunset time dynamically) (#439).
+  - Pause automatic theme switching for a short amount of time (#204, #439).
+  - Managed theme switch postponing via the UI on the time page:
+  - Pause and resume theme switching via the UI on the Time page.
+  - See which modules are holding up a theme switch and for how long (if they have an expiry time).
+  - Show a notification and delay or postpone this action interactively: (#439, #204, #441).
+  - Before an automatic theme switch is applied and the theme needs to be updated.
+  - When auto dark mode is started.
+  - New hotkeys:
+  - Turn on/off automatic theme switching.
+  - Pause theme switching until next sunrise/sunset.
+  - Toggle themes between light and dark using a single hotkey.
+    If you switch to a theme that doesn't match the time, we will auto-pause theme switching and notify you.
+  - New context menu options in the notification area / tray that provide the same functionality as the hotkeys.
+  - Toggle colorization for title bars and window borders for Windows 10 (does work on Windows 11 for some windows, but not all).
+  - Ignore certain options like background, cursors and sounds when using the Windows theme mode (#103, #492, @namazso).
+  Improvements
+  - Uses an additional, more modern theme switching method that supports more options and makes ADM more reliable (Huge thanks to @namazso for the awesome contribution)!
+  - Proper support for in-lockscreen theme switching.
+    Windows 11 will switch as soon as you unlock your PC, Windows 10 will switch themes during the lockscreen.
+  - Clicking on the tray icon when the app is minimized will now instantly bring it to the front.
+  - Many stability improvements for theme state synchronization that include but aren't limited to:
+  - More reliable wallpaper retrieval from an existing custom theme (for support with third party wallpaper tools),
+  - Better detection when an unsaved Windows theme is used.
+  - Improve potential wallpaper flickering by reducing the number of required synchronization calls.
+  - More robust detection of the currently active windows theme.
+  - Single monitor and multi monitor wallpapers as well as solid color are now being retrieved when the wallpaper picker is enabled and when Auto Dark Mode starts for a smoother wallpaper switching experience with our own picker.
+  - The context menu in the tray now supports dark mode.
+  - The wallpaper page now requests a theme refresh when the setting is toggled on, which results in a slightly better user experience.
+  - We redesigned the personalization page to look a bit more modern.
+  - Added information text when pressing the copy button on the about page.
+  - Notification area icon and hover text shows if auto theme switching is paused or disabled (#560)
+  Fixes
+  - Fixed an issue where ADM stopped working with builds older than 19044 (#508).
+  - Fixed an issue on Windows 10 that caused multi users to experience missed theme switches on a user account when they were currently logged into another.
+    You can toggle support for this on or off in the settings menu (#544).
+  - Fixed an issue where the Windows default themes were not correctly synchronized.
+  - Fixed an issue where custom theme synchronization was dependent on the system language and would only work correctly in English.
+  - Fixed an issue where activated slideshows in the source theme would cause the wallpaper picker to fail setting wallpapers.
+  - Fixed an issue where solid color backgrounds failed to synchronize (#547).
+  - Fixed multiple issues where incorrect theme paths were being retrieved, causing either too much or too little theme synchronizations and applications.
+  - Fixed an issue on Windows 10 where the "Restore themes when changed externally" setting would cause excessive theme updates by rate limiting the updates.
+  - Fixed an issue where the updater would parse whitelisted files with case-sensitivity.
+  - Fixed an issue where the theme picker page was always forcing a theme refresh when it loads, even when the setting is disabled.
+  Changes
+  - ADM now makes an unmanaged copy of every theme when windows theme mode is enabled. This improves theme switching reliability on Windows 11 22H2 and should not affect the experience for users of other versions.
+  - Moved Help button to the bottom navbar entries (#557, #549, thanks @PtrStruct).
+  - Allow modules to run before or after theme synchronization.
+  - New SwitchEvent: Api.
+    It is meant for calls that shouldn't invoke user notifications.
+    The event is currently used when themes are set via the shell.
+  - The update button can now be pressed multiple times.
+  - System resume events can no longer be turned off.
+    They are mandatory for ensuring that theme switching is working at all times.
+  - Use legacy theme switching for builds older Win10 21H1.
+  - UI uses Mica for 22H2 and newer.
+  Translation Updates
+  - NEW: Greek translation (@MariosMpalas).
+  - Update Japanese translation (@maboroshin).
+  - Update Turkish translation (@cmhrky).
+  - Update Spanish translation (@DanielSevillano)
+  - Update Bahasa Indonesia translation (@pc-v2)
+  - Update Vietnamese translation (@KhoiCanDev)
+  - Update Spanish translation (@DanielSevillano, @alealclag).
+  - Update Italian translation (@albertopasqualetto).
+  - Update Ukrainian translation (@MykhaiIo).
+  - Update Czech translation (@drcryo)
+  - Wording & typo fixes (@tooomm)
 ReleaseNotesUrl: https://github.com/AutoDarkMode/Windows-Auto-Night-Mode/releases/tag/10.3.0.90
 # PurchaseUrl:
 # InstallationNotes:
 # Documentations:
 ManifestType: defaultLocale
-ManifestVersion: 1.2.0
+ManifestVersion: 1.9.0

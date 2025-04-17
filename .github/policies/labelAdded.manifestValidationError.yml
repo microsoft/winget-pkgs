@@ -1,0 +1,51 @@
+id: labelAdded.manifestValidationError
+name: GitOps.PullRequestIssueManagement
+description: Handlers when "Manifest-Validation-Error" label is added
+owner:
+resource: repository
+disabled: false
+where:
+configuration:
+  resourceManagementConfiguration:
+    eventResponderTasks:
+      - description: >-
+          When the label "Manifest-Validation-Error" is added to a pull request
+          * Add the PR specific reply notifying the issue author
+          * Assign to the Author
+          * Label with Needs-Author-Feedback
+          * Remove the Needs-Attention Label
+        if:
+          - payloadType: Pull_Request
+          - labelAdded:
+              label: Manifest-Validation-Error
+        then:
+          - addReply:
+              reply: >-
+                Hello @${issueAuthor},
+
+
+                Please verify the manifest file is compliant with the package manager [1.10.0 manifest specification](https://github.com/microsoft/winget-pkgs/tree/master/doc/manifest/schema/1.10.0).
+
+
+                Make sure the ID is of the form publisher.appname and that the folder structure is manifests\partition\publisher\appname\version.
+
+                > Note: The path and "PackageIdentifier" are case sensitive.
+
+
+                Be sure to use a tool like [VSCode](code.visualstudio.com) to make sure the manifest YAML syntax is correct. You can also validate your manifest using the `winget validate` command.
+
+
+                For details on the specific error, see the details link below in the build pipeline.
+
+
+                Template: msftbot/validationError/manifest/content
+          - assignTo:
+              author: True
+          - addLabel:
+              label: Needs-Author-Feedback
+          - removeLabel:
+              label: Needs-Attention
+        # The policy service should trigger even when the label was added by the policy service
+        triggerOnOwnActions: true
+onFailure:
+onSuccess:

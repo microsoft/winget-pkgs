@@ -1,33 +1,46 @@
-name: "New Package (Request/Submission)"
+name: "➕ New Package Request"
 description: Suggest a package for submission (this does not mean you have to implement it)
 labels: ["Help-Wanted","Package-Request"]
 title: "[Package Request]: "
 body:
-  - type: markdown
+  - type: dropdown
+    id: submitter
     attributes:
-      value: |
-        ### Important - Please read
-        > At this time installers must either be MSIX, MSI or .exe application installers.
-        > Compressed .zip files, and fonts are not currently supported.
+      label: How can we help?
+      # description: Are you requesting someone else to add the package, or do you need help adding the package yourself?
+      multiple: false
+      options:
+        - I would like someone else to build the manifest.
+        - I would like help so I can submit the manifest.
+    validations:
+      required: false
   - type: checkboxes
     attributes:
-      label: Package Requested
+      label: Please read and ensure the following
+      description: |
+        WinGet only supports certain installer types. Please validate the installer may be supported before submitting your request.
+        - The installer is at least one of the following:
+          ```
+          - A standalone MSIX, APPX, MSI, or .EXE installer
+          - A portable .EXE application
+          - A standalone installer or a portable application inside of a .ZIP file
+          ```
+        - The installer is not:
+          ```
+          - A script such as a .PS1, .BAT, or .SH file
+          - Compressed as a .TAR, .GZ, .7z, or .RAR
+          ```
       options:
-        - label: I would like someone else to build the manifest.
-        - label: I would like help so I can submit the manifest.
-        - label: I have performed a search and couldn't find this package.
-        - label: I have checked that the installer for this package is not contained in a .zip file
-        - label: I think there is a new version available and I have provided the URL.
+        - label: The installer meets the above requirements
+          required: true
   - type: textarea
     attributes:
       label: Please provide the following information
       description: If you can provide the following information, it will be easy for us to add the package to the repository.
       value: |
+        Download Page Url:
         Publisher:
-        Publisher Url:
         Package Name:
         Description:
         Package Version:
-        Installer URL:
-
-        Current Package Identifier (for new versions):
+        Installer Url:

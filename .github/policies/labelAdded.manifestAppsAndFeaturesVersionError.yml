@@ -1,0 +1,40 @@
+id: labelAdded.manifestAppsAndFeaturesVersionError
+name: GitOps.PullRequestIssueManagement
+description: Handlers when "Manifest-AppsAndFeaturesVersion-Error" label is added
+owner:
+resource: repository
+disabled: false
+where:
+configuration:
+  resourceManagementConfiguration:
+    eventResponderTasks:
+      - description: >-
+          When the label "Manifest-AppsAndFeaturesVersion-Error" is added to a pull request
+          * Add the PR specific reply notifying the issue author
+          * Assign to the Author
+          * Label with Needs-Author-Feedback
+          * Remove the Needs-Attention Label
+        if:
+          - payloadType: Pull_Request
+          - labelAdded:
+              label: Manifest-AppsAndFeaturesVersion-Error
+        then:
+          - addReply:
+              reply: >-
+                ${issueAuthor},
+
+
+                During validation one or more entries for "AppsAndFeatures" did not match what was detected during validation. Please make the appropriate changes to the manifest.
+
+
+                Template: msftbot/validationError/manifest/arpEntries
+          - assignTo:
+              author: True
+          - addLabel:
+              label: Needs-Author-Feedback
+          - removeLabel:
+              label: Needs-Attention
+        # The policy service should trigger even when the label was added by the policy service
+        triggerOnOwnActions: true
+onFailure:
+onSuccess:

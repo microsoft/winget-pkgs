@@ -1,6 +1,6 @@
 [JSON schema]:                                      https://github.com/microsoft/winget-cli/blob/master/schemas/JSON/manifests/v1.0.0/manifest.defaultLocale.1.0.0.json
 [YAML]:                                             https://yaml.org/spec/
-[Manifest Specification]:                           https://github.com/microsoft/winget-cli/blob/master/doc/ManifestSpecv1.0.md
+[Manifest Specification]:                           https://github.com/microsoft/winget-pkgs/blob/master/doc/manifest/README.md
 [semantic version]:                                 https://semver.org
 [Available languages for Windows]:                  https://docs.microsoft.com/windows-hardware/manufacture/desktop/available-language-packs-for-windows
 [Default Input Profiles Input Locales in Windows]:  https://docs.microsoft.com/windows-hardware/manufacture/desktop/default-input-locales-for-windows-language-packs

@@ -1,28 +1,114 @@
-# Created with YamlCreate.ps1 v2.0.3 $debug=QUSU.7-2-0
-# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.1.0.schema.json
+# Created with YamlCreate.ps1 v2.2.5 $debug=QUSU.CRLF.7-3-4.Win32NT
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.4.0.schema.json
 
 PackageIdentifier: Logtalk.Logtalk
 PackageVersion: 3.52.0
 PackageLocale: en-US
 Publisher: Logtalk.org
-PublisherUrl: https://logtalk.org
+PublisherUrl: https://logtalk.org/
 PublisherSupportUrl: https://logtalk.org/support.html
-# PrivacyUrl: 
-Author: Logtalk.org
+# PrivacyUrl:
+Author: Paulo Moura
 PackageName: Logtalk
-PackageUrl: https://logtalk.org
-License: Apache License 2.0
-LicenseUrl: https://raw.githubusercontent.com/LogtalkDotOrg/logtalk3/master/LICENSE.txt
-Copyright: Copyright 1998-2021 Paulo Moura pmoura@logtalk.org
-CopyrightUrl: https://raw.githubusercontent.com/LogtalkDotOrg/logtalk3/master/LICENSE.txt
+PackageUrl: https://logtalk.org/
+License: Apache-2.0
+LicenseUrl: https://github.com/LogtalkDotOrg/logtalk3/blob/master/LICENSE.txt
+Copyright: Copyright 1998-2021 Paulo Moura <pmoura@logtalk.org>
+CopyrightUrl: https://github.com/LogtalkDotOrg/logtalk3/blob/master/NOTICE.txt
 ShortDescription: Declarative object-oriented logic programming language
 Description: Logtalk is a declarative object-oriented logic programming language that extends and leverages the Prolog language with modern code encapsulation and code reuse mechanisms while also providing improved predicate semantics.
-# Moniker: 
+# Moniker:
 Tags:
+- language
 - logic
+- programming
 - prolog
-# Agreements: 
-# ReleaseNotes: 
-# ReleaseNotesUrl: 
+# Agreements:
+ReleaseNotes: |-
+  Logtalk compiler and runtime
+  - CHANGED: A partial list of terminals in the first argument of a grammar rule body to generate an instantiation error as per the standardization proposal.
+  - IMPROVED: Generalized the linter checks for is/2 and (=:=)/2 goals to cases where the expression arguments are not ground but their type can be inferred.
+  - FIXED: Processing of conditional compilation directives in included files.
+  - FIXED: Duplicated linter warnings for some DEC-10 Prolog I/O predicates.
+  - FIXED: The pack library paths to always end with a slash.
+  - FIXED: Explicit messages to the user pseudo-object when the predicate being called is a meta-predicate.
+  - FIXED: Avoid a warning when embedding Logtalk due to the definition of the forward/1 predicate in the user pseudo-object.
+
+  Prolog adapter and integration files
+  - UPDATED: The LVM adapter file to require version 2.0.0 or later.
+  - UPDATED: The Trealla Prolog adapter file to require version 1.16.6 or later.
+  - UPDATED: The Tau Prolog adapter file to require version 0.3.1 or later.
+  - FIXED: The Trealla Prolog integration script to support "-- Arguments" passed by other scripts (e.g. logtalk_tester script) that call it.
+  - FIXED: The GNU Prolog adapter file to allow the consult/1 built-in predicate to be called from within objects and categories without requiring overriding its meta-predicate template.
+  - FIXED: The YAP adapter file definition of the internal predicate '$lgt_load_prolog_file'/1.
+
+  Documentation
+  - ADDED: Section on creating and using virtual environments to the packs tool documentation.
+  - IMPROVED: Documentation of the logtalk built-in object trace_event/2 and debug_handler/2 predicates.
+  - IMPROVED: Man pages of the integration scripts.
+  - IMPROVED: Documentation on using the lgtunit tool QuickCheck support.
+  - UPDATED: The documentation of the logtalk_library_path/2 predicate for the logtalk_packs library alias.
+  - UPDATED: The settings-sample.lgt with sample code for defining the new logtalk_packs library alias.
+  - FIXED: The update_html_docs.sh and update_svg_diagrams.sh scripts to work with all supported backends.
+
+  Library
+  - FIXED: The type library object type-checking for the list, chars, and codes types to always throw instantiation errors whenever the term being checked is a partial list. Before, a type error would be throw if the term was a partial list but not a variable.
+  - ADDED: Library format that abstracts how the different backends make available the de facto standard format/2-3 predicates.
+  - ADDED: Library dif that abstracts how the different backends make available the dif/2 predicate when implemented.
+  - ADDED: Parametric object object_wrapper_hook/1 to the hook_objects library.
+  - ADDED: Partial support for XSB to the coroutining library.
+  - ADDED: Additional tests for the coroutining library.
+  - ADDED: Predicate copy_file/2 to the os library.
+  - IMPROVED: Performance of the arbitrary library tests.
+
+  Tools
+  - CHANGED: The diagrams tool dot graph language export now uses the generic Monospace font name and output SVG files using the dot command -Gfontnames=svg option to avoid issues with text overflowing boxes.
+  - CHANGED: The debugger tool loader file to also load the dump_trace object.
+  - CHANGED: The packs tool save/1 and restore/1-2 predicates to save and restore pinning status.
+  - CHANGED: The packs tool registries object predicate defined/3 to defined/4.
+  - CHANGED: The packs tool lint/1-2 predicates to fail when specification errors are detected.
+  - ADDED: Predicates text_output_contents/1-3 and binary_output_contents/1-2 to the lgtunit tool.
+  - ADDED: Support for defining, saving, and restoring a simple form of packs virtual environments.
+  - ADDED: Support for defining the packs tool directory used to store packs and registries using the logtalk_packs library alias (which can be defined e.g. in a settings file).
+  - ADDED: Predicates logtalk_packs/0-1, readme/1, delete/0, pin/0, unpin/0, uninstall/0, and reset/0 to the packs tool.
+  - IMPROVED: The packs tool to handle all dependency relations including range dependencies.
+  - IMPROVED: The packs tool to print a warning if the pack being installed or updated requires a different backend from the one running the tool.
+  - UPDATED: The packs::clean/0 predicate to not leave empty directories behind.
+  - FIXED: The packs tool packs::dependents/1-3 predicates to avoid duplicated results.
+  - FIXED: The packs tool registries::add/3 predicate to delete a registry prior to re-adding it when using the force(true) option to prevent a git cloning failure.
+  - FIXED: The packs tool registries::clean/0 predicate to delete all registry archives instead of only of those registries that are defined.
+  - FIXED: The packs tool logtalk_packs/1 predicate to return a path using the backend internal format instead of the operating-system format.
+  - FIXED: Workaround packs tool portability issue with Ciao Prolog due to this system lack of supported for standard multifile predicate semantics.
+  - FIXED: Adding a registry or installing a pack from a local archive using a URL with non-escaped spaces.
+  - FIXED: Bug in the packs tool registries::defined/4 predicate report on how a registry is installed which could return directory for registries defined via archives.
+  - FIXED: A packs tool typo in the identifier for the Trealla Prolog backend.
+  - FIXED: Missing tutor tool explanation for non-tail recursive non-terminal definitions.
+  - FIXED: The debugger tool dump_trace utility object to ensure that it's always compiled in non-debug mode.
+
+  Examples
+  - CHANGED: The books example to avoid test failures due to irrelevant float printing issues.
+  - UPDATED: The coinduction example tests to use explicit assertions.
+  - UPDATED: The errors example to illustrate the generalized linter checks.
+  - UPDATED: The figures example to use the new dif library instead of the coroutining library to allow running with some more backend Prolog systems.
+
+  Tests
+  - ADDED: Tests for the valid syntaxes of the Prolog standard dynamic/1, discontiguous/1, meta_predicate/1, multifile/1, and op/3 directives.
+  - ADDED: Tests for the Prolog standard discontiguous/1, ensure_loaded/1, include/1, initialization/1, multifile/1, and op/3 directives.
+  - ADDED: Tests for the Prolog standard compound term syntax.
+  - ADDED: Additional tests for the writeq/2 predicate for atoms that require quoting to be input back correctly.
+  - ADDED: Tests for the write_term/3 predicate for writing of compound terms with (,)/2 arguments.
+  - ADDED: Additional test for the ::/2 message-sending control construct.
+  - ADDED: Additional test for the use_module/2 Logtalk directive.
+  - ADDED: Tests for the Logtalk predicate_property/2 method to check for predicate declaration and definition term position properties.
+  - ADDED: Tests for the de facto standard format/2-3 predicates for using the back-quote character for specifying a table fill character in format strings.
+  - UPDATED: Tests for the de facto standard format/2-3 predicates to also check format strings specified using a list of character codes or a list of characters.
+ReleaseNotesUrl: https://github.com/LogtalkDotOrg/logtalk3/blob/master/RELEASE_NOTES.md#3520---december-7-2021
+# PurchaseUrl:
+# InstallationNotes:
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://logtalk.org/documentation.html
+- DocumentLabel: Guides
+  DocumentUrl: https://logtalk.org/guides.html
 ManifestType: defaultLocale
-ManifestVersion: 1.1.0
+ManifestVersion: 1.4.0

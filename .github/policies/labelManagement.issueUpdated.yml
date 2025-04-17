@@ -1,0 +1,548 @@
+id: labelManagement.issueUpdated
+name: GitOps.PullRequestIssueManagement
+description: >-
+  Handlers for when an issue is updated and not closed
+  This primarily includes handlers for comments, reviews, and re-runs
+owner:
+resource: repository
+disabled: false
+where:
+configuration:
+  resourceManagementConfiguration:
+    eventResponderTasks:
+      - description: Remove "No-Recent-Activity" when a pull request or issue is updated
+        if:
+          - or:
+              - payloadType: Pull_Request
+              - payloadType: Pull_Request_Review
+              - payloadType: Pull_Request_Review_Comment
+              - payloadType: Issue_Comment
+              - payloadType: Issues
+          - not:
+              isAction:
+                action: Closed
+          - hasLabel:
+              label: No-Recent-Activity
+        then:
+          - removeLabel:
+              label: No-Recent-Activity
+        # The policy service should not trigger itself here, or else the label would be removed immediately after being added
+        triggerOnOwnActions: False
+      - description: Try re-enabling automerge on every PR event for packages
+        if:
+          - or:
+              - payloadType: Pull_Request
+              - payloadType: Pull_Request_Review
+              - payloadType: Pull_Request_Review_Comment
+              - payloadType: Issue_Comment
+          - not:
+              isAction:
+                action: Closed
+          - hasLabel:
+              label: Validation-Completed
+          - hasLabel:
+              label: Moderator-Approved
+          - and:
+              - not:
+                  hasLabel:
+                    label: Needs-Attention
+              - not:
+                  hasLabel:
+                    label: Needs-Author-Feedback
+              - not:
+                  hasLabel:
+                    label: Changes-Requested
+        then:
+          - enableAutoMerge:
+              mergeMethod: Squash
+        # The policy service should trigger even when the update was initiated by the policy service
+        triggerOnOwnActions: true
+      - description: Try re-enabling automerge on every PR event for Validation-Metadata
+        if:
+          - or:
+              - payloadType: Pull_Request
+              - payloadType: Pull_Request_Review
+              - payloadType: Pull_Request_Review_Comment
+              - payloadType: Issue_Comment
+          - not:
+              isAction:
+                action: Closed
+          - hasLabel:
+              label: Validation-Completed
+          - hasLabel:
+              label: Validation-Metadata
+          - and:
+              - not:
+                  hasLabel:
+                    label: Needs-Attention
+              - not:
+                  hasLabel:
+                    label: Needs-Author-Feedback
+              - not:
+                  hasLabel:
+                    label: Changes-Requested
+        then:
+          - enableAutoMerge:
+              mergeMethod: Squash
+        # The policy service should trigger even when the update was initiated by the policy service
+        triggerOnOwnActions: true
+      - description: Clean email replies on every comment
+        if:
+          - payloadType: Issue_Comment
+        then:
+          - cleanEmailReply
+      - description: Approve pull requests that have completed validation and have been approved by a moderator
+        if:
+          - payloadType: Pull_Request
+          - or:
+              - and:
+                  - hasLabel:
+                      label: Validation-Completed
+                  - labelAdded:
+                      label: Moderator-Approved
+              - and:
+                  - labelAdded:
+                      label: Validation-Completed
+                  - hasLabel:
+                      label: Moderator-Approved
+          - isOpen
+          - and:
+              - not:
+                  hasLabel:
+                    label: Blocking-Issue
+              - not:
+                  hasLabel:
+                    label: Needs-Author-Feedback
+              - not:
+                  hasLabel:
+                    label: Needs-Attention
+              - not:
+                  hasLabel:
+                    label: Changes-Requested
+        then:
+          - approvePullRequest:
+              comment: ""
+          - addReply: >-
+              Hello ${issueAuthor},
+
+              Validation has completed.
+
+
+              Template: msftbot/validationCompleted
+        # The policy service should trigger even when the update was initiated by the policy service
+        triggerOnOwnActions: true
+      - description: Sync labels with issues on all pull request events
+        if:
+          - or:
+              - payloadType: Pull_Request
+              - payloadType: Pull_Request_Review
+              - payloadType: Pull_Request_Review_Comment
+          - not:
+              isAction:
+                action: Closed
+        then:
+          - labelSync:
+              pattern: Blocking-Issue
+          - labelSync:
+              pattern: Hardware
+          - labelSync:
+              pattern: Area-External
+          - labelSync:
+              pattern: Installer-Issue
+          - labelSync:
+              pattern: Interactive-Only-Installer
+          - inPrLabel:
+              label: In-PR
+      - description: Remove "Help-Wanted" and "Needs-Triage" labels when an issue goes into PR
+        if:
+          - payloadType: Issues
+          - labelAdded:
+              label: In-PR
+        then:
+          - removeLabel:
+              label: Help-Wanted
+          - removeLabel:
+              label: Needs-Triage
+        # The policy service should trigger even when the update was initiated by the policy service
+        triggerOnOwnActions: true
+      - description: Retry validation one time on pull requests that have the Internal-Error-Dynamic-Scan label
+        if:
+          - payloadType: Pull_Request
+          - hasLabel:
+              label: Internal-Error-Dynamic-Scan
+          - not:
+              hasLabel:
+                label: Retry-1
+        then:
+          - addLabel:
+              label: Retry-1
+          - reopenIssue
+      - description: >-
+          If an author responds to an issue which needs author feedback
+          * Remove the Needs-Author-Feedback Label
+          * Add the Needs-Attention Label
+        if:
+          - or:
+              - payloadType: Pull_Request_Review
+              - payloadType: Pull_Request_Review_Comment
+              - payloadType: Issue_Comment
+          - isActivitySender:
+              issueAuthor: True
+          - hasLabel:
+              label: Needs-Author-Feedback
+          - not:
+              isAction:
+                action: Synchronize
+        then:
+          - removeLabel:
+              label: Needs-Author-Feedback
+          - addLabel:
+              label: Needs-Attention # This will automatically assign the ICM Users
+      - description: >-
+          When changes are requested on a pull request
+          * Disable automerge
+          * Label with Changes-Requested
+        if:
+          - payloadType: Pull_Request_Review
+          - isAction:
+              action: Submitted
+          - isReviewState:
+              reviewState: Changes_requested
+        then:
+          - disableAutoMerge
+          - addLabel:
+              label: Changes-Requested
+      - description: >-
+          If static analysis has timed out, and the retry has timed out
+          * Add a reply notifying the issue author
+          * Label with Needs-Attention
+        if:
+          - payloadType: Pull_Request
+          - hasLabel:
+              label: Timeout-Retry
+          - hasLabel:
+              label: Error-Analysis-Timeout
+        then:
+          - addReply:
+              reply: >-
+                Hello ${issueAuthor},
+
+
+                Static analysis has timed out. The PR has been assigned to a developer to investigate.
+
+
+                Template: msftbot/validationError/staticAnalysis
+          - addLabel:
+              label: Needs-Attention # This will automatically assign the ICM Users
+      - description: Remove status labels when a PR is synchronized (new commits pushed)
+        if:
+          - payloadType: Pull_Request
+          - isAction:
+              action: Synchronize
+        then:
+          - removeLabel:
+              label: Azure-Pipeline-Passed
+          - removeLabel:
+              label: Binary-Validation-Error
+          - removeLabel:
+              label: Blocking-Issue
+          - removeLabel:
+              label: Changes-Requested
+          - removeLabel:
+              label: EULA-Install
+          - removeLabel:
+              label: Error-Analysis-Timeout
+          - removeLabel:
+              label: Error-Hash-Mismatch
+          - removeLabel:
+              label: Error-Installer-Availability
+          - removeLabel:
+              label: Internal-Error
+          - removeLabel:
+              label: Internal-Error-Domain
+          - removeLabel:
+              label: Internal-Error-Dynamic-Scan
+          - removeLabel:
+              label: Internal-Error-Keyword-Policy
+          - removeLabel:
+              label: Internal-Error-Manifest
+          - removeLabel:
+              label: Internal-Error-NoArchitectures
+          - removeLabel:
+              label: Internal-Error-NoSupportedArchitectures
+          - removeLabel:
+              label: Internal-Error-PR
+          - removeLabel:
+              label: Internal-Error-Static-Scan
+          - removeLabel:
+              label: Internal-Error-URL
+          - removeLabel:
+              label: Last-Version-Remaining
+          - removeLabel:
+              label: MSFT-Verified
+          - removeLabel:
+              label: Manifest-AppsAndFeaturesVersion-Error
+          - removeLabel:
+              label: Manifest-Content-Incomplete
+          - removeLabel:
+              label: Manifest-Dependencies-Error
+          - removeLabel:
+              label: Manifest-Installer-Validation-Error
+          - removeLabel:
+              label: Manifest-Metadata-Consistency
+          - removeLabel:
+              label: Manifest-Path-Error
+          - removeLabel:
+              label: Manifest-Validation-Error
+          - removeLabel:
+              label: Manifest-Version-Deprecated
+          - removeLabel:
+              label: Manifest-Version-Error
+          - removeLabel:
+              label: Moderator-Approved
+          - removeLabel:
+              label: Needs-Attention
+          - removeLabel:
+              label: Needs-Author-Feedback
+          - removeLabel:
+              label: Needs-SmartScreen-Investigation
+          - removeLabel:
+              label: New-Manifest
+          - removeLabel:
+              label: New-Package
+          - removeLabel:
+              label: Policy-Test-1.1.A
+          - removeLabel:
+              label: Policy-Test-1.1.B
+          - removeLabel:
+              label: Policy-Test-1.2
+          - removeLabel:
+              label: Policy-Test-1.5
+          - removeLabel:
+              label: Policy-Test-1.8
+          - removeLabel:
+              label: Policy-Test-2.10
+          - removeLabel:
+              label: Policy-Test-2.2.A
+          - removeLabel:
+              label: Policy-Test-2.2.B
+          - removeLabel:
+              label: Policy-Test-2.3
+          - removeLabel:
+              label: Policy-Test-2.4
+          - removeLabel:
+              label: Policy-Test-2.5
+          - removeLabel:
+              label: Policy-Test-2.6
+          - removeLabel:
+              label: Policy-Test-2.7
+          - removeLabel:
+              label: Policy-Test-2.8
+          - removeLabel:
+              label: Policy-Test-2.9
+          - removeLabel:
+              label: PullRequest-Error
+          - removeLabel:
+              label: URL-Validation-Error
+          - removeLabel:
+              label: Unexpected-File
+          - removeLabel:
+              label: Validation-Completed
+          - removeLabel:
+              label: Validation-Defender-Error
+          - removeLabel:
+              label: Validation-Domain
+          - removeLabel:
+              label: Validation-Executable-Error
+          - removeLabel:
+              label: Validation-Forbidden-URL-Error
+          - removeLabel:
+              label: Validation-Hash-Verification-Failed
+          - removeLabel:
+              label: Validation-Installation-Error
+          - removeLabel:
+              label: Validation-Line-Endings-Error
+          - removeLabel:
+              label: Validation-Merge-Conflict
+          - removeLabel:
+              label: Validation-Missing-Dependency
+          - removeLabel:
+              label: Validation-No-Executables
+          - removeLabel:
+              label: Validation-Open-Url-Failed
+          - removeLabel:
+              label: Validation-Shell-Execute
+          - removeLabel:
+              label: Validation-Skip-Automations
+          - removeLabel:
+              label: Validation-Unapproved-URL
+          - removeLabel:
+              label: Validation-Unattended-Failed
+          - removeLabel:
+              label: Version-Parameter-Mismatch
+      - description: Remove status labels when a PR is re-run
+        if:
+          - payloadType: Issue_Comment
+          - isOpen
+          - or:
+              - commentContains:
+                  pattern: 'Validation Pipeline Run'
+                  isRegex: false
+              - commentContains:
+                  pattern: '@[Ww]ingetbot\s[Rr]un'
+                  isRegex: true
+          - not:
+              isActivitySender:
+                user: microsoft-github-policy-service[bot]
+                issueAuthor: False
+          - or:
+              - activitySenderHasPermission:
+                  permission: Admin
+              - activitySenderHasPermission:
+                  permission: Write
+              - isActivitySender:
+                  user: stephengillie
+              - isActivitySender:
+                  user: ImJoakim
+              - isActivitySender:
+                  user: ItzLevvie
+              - isActivitySender:
+                  user: jedieaston
+              - isActivitySender:
+                  user: KaranKad
+              - isActivitySender:
+                  user: OfficialEsco
+              - isActivitySender:
+                  user: quhxl
+              - isActivitySender:
+                  user: Trenly
+              - isActivitySender:
+                  user: mdanish-kh
+              - isActivitySender:
+                  user: russellbanks
+        then:
+          # Don't remove Changes-Requested here because it is just a re-run, no new commits have been added
+          - removeLabel:
+              label: Author-Not-Authorized
+          - removeLabel:
+              label: Azure-Pipeline-Passed
+          - removeLabel:
+              label: Binary-Validation-Error
+          - removeLabel:
+              label: Blocking-Issue
+          - removeLabel:
+              label: EULA-Install
+          - removeLabel:
+              label: Error-Analysis-Timeout
+          - removeLabel:
+              label: Error-Hash-Mismatch
+          - removeLabel:
+              label: Error-Installer-Availability
+          - removeLabel:
+              label: Internal-Error
+          - removeLabel:
+              label: Internal-Error-Domain
+          - removeLabel:
+              label: Internal-Error-Dynamic-Scan
+          - removeLabel:
+              label: Internal-Error-Keyword-Policy
+          - removeLabel:
+              label: Internal-Error-Manifest
+          - removeLabel:
+              label: Internal-Error-NoArchitectures
+          - removeLabel:
+              label: Internal-Error-NoSupportedArchitectures
+          - removeLabel:
+              label: Internal-Error-PR
+          - removeLabel:
+              label: Internal-Error-Static-Scan
+          - removeLabel:
+              label: Internal-Error-URL
+          - removeLabel:
+              label: MSFT-Verified
+          - removeLabel:
+              label: Manifest-AppsAndFeaturesVersion-Error
+          - removeLabel:
+              label: Manifest-Dependencies-Error
+          - removeLabel:
+              label: Manifest-Installer-Validation-Error
+          - removeLabel:
+              label: Manifest-Path-Error
+          - removeLabel:
+              label: Manifest-Validation-Error
+          - removeLabel:
+              label: Manifest-Version-Error
+          - removeLabel:
+              label: Needs-Attention
+          - removeLabel:
+              label: Needs-Author-Feedback
+          - removeLabel:
+              label: Needs-SmartScreen-Investigation
+          - removeLabel:
+              label: Policy-Test-1.1.A
+          - removeLabel:
+              label: Policy-Test-1.1.B
+          - removeLabel:
+              label: Policy-Test-1.2
+          - removeLabel:
+              label: Policy-Test-1.5
+          - removeLabel:
+              label: Policy-Test-1.8
+          - removeLabel:
+              label: Policy-Test-2.10
+          - removeLabel:
+              label: Policy-Test-2.2.A
+          - removeLabel:
+              label: Policy-Test-2.2.B
+          - removeLabel:
+              label: Policy-Test-2.3
+          - removeLabel:
+              label: Policy-Test-2.4
+          - removeLabel:
+              label: Policy-Test-2.5
+          - removeLabel:
+              label: Policy-Test-2.6
+          - removeLabel:
+              label: Policy-Test-2.7
+          - removeLabel:
+              label: Policy-Test-2.8
+          - removeLabel:
+              label: Policy-Test-2.9
+          - removeLabel:
+              label: Possible-Duplicate
+          - removeLabel:
+              label: Project-File
+          - removeLabel:
+              label: PullRequest-Error
+          - removeLabel:
+              label: URL-Validation-Error
+          - removeLabel:
+              label: Unexpected-File
+          - removeLabel:
+              label: Validation-Completed
+          - removeLabel:
+              label: Validation-Defender-Error
+          - removeLabel:
+              label: Validation-Domain
+          - removeLabel:
+              label: Validation-Executable-Error
+          - removeLabel:
+              label: Validation-Hash-Verification-Failed
+          - removeLabel:
+              label: Validation-Installation-Error
+          - removeLabel:
+              label: Validation-Merge-Conflict
+          - removeLabel:
+              label: Validation-Missing-Dependency
+          - removeLabel:
+              label: Validation-No-Executables
+          - removeLabel:
+              label: Validation-Open-Url-Failed
+          - removeLabel:
+              label: Validation-Shell-Execute
+          - removeLabel:
+              label: Validation-Unapproved-URL
+          - removeLabel:
+              label: Validation-Unattended-Failed
+onFailure:
+onSuccess:

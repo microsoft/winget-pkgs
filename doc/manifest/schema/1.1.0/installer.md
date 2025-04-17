@@ -9,7 +9,7 @@
 [Inno]:                                     https://jrsoftware.org/isinfo.php
 [Nullsoft]:                                 https://sourceforge.net/projects/nsis
 [WiX]:                                      https://wixtoolset.org
-[Burn]:                                     https://wixtoolset.org/documentation/manual/v3/bundle
+[Burn]:                                     https://wixtoolset.org/docs/v3/bundle/
 
 # Windows Package Manager
 ## Manifest Schema v1.1.0 Installer File
@@ -63,7 +63,7 @@ Installers:                     # The list of package installers
     ExcludedMarkets:            # Optional markets the package is not allowed to be installed
     InstallerSuccessCodes:      # Optional non-zero installer success codes
     ExpectedReturnCodes:        # Optional non-zero installer return codes
-      - ExpectedReturnCode:     # Optional non-zero installer return code
+      - InstallerReturnCode:     # Optional non-zero installer return code
         ReturnResponse:         # Optional response for an expected return code
     ProductCode:                # Optional product code of the installer
     AppsAndFeaturesEntries:     # *Not implemented* Optional entries from the Add and Remove Programs (ARP) table
@@ -564,7 +564,7 @@ ManifestVersion: 1.1.0
 </details>
 
 <details>
- <summary><b>ExpectedReturnCode</b> - The non-zero installer exit code other than known default values by the Windows Package Manager.</summary>
+ <summary><b>InstallerReturnCode</b> - The non-zero installer exit code other than known default values by the Windows Package Manager.</summary>
 
  **Optional Field**
 

@@ -8,7 +8,7 @@
 [Inno]:                                     https://jrsoftware.org/isinfo.php
 [Nullsoft]:                                 https://sourceforge.net/projects/nsis
 [WiX]:                                      https://wixtoolset.org
-[Burn]:                                     https://wixtoolset.org/documentation/manual/v3/bundle
+[Burn]:                                     https://wixtoolset.org/docs/v3/bundle/
 [Windows Package Manager Manifest Creator]: https://github.com/microsoft/winget-create
 [App capability declarations]:              https://docs.microsoft.com/windows/uwp/packaging/app-capability-declarations
 
@@ -78,7 +78,7 @@ Installers:                     # The package installer
     ExcludedMarkets:            # Optional markets the package is not allowed to be installed
     InstallerSuccessCodes:      # Optional non-zero installer success codes
     ExpectedReturnCodes:        # Optional non-zero installer return codes
-      - ExpectedReturnCode:     # Optional non-zero installer return code
+      - InstallerReturnCode:     # Optional non-zero installer return code
         ReturnResponse:         # Optional response for an expected return code
     ProductCode:                # Optional product code of the installer
     AppsAndFeaturesEntries:     # *Not implemented* Optional entries from the Add and Remove Programs (ARP) table
@@ -638,7 +638,7 @@ ManifestVersion: 1.1.0
 </details>
 
 <details>
- <summary><b>ExpectedReturnCode</b> - The non-zero installer exit code other than known default values by the Windows Package Manager.</summary>
+ <summary><b>InstallerReturnCode</b> - The non-zero installer exit code other than known default values by the Windows Package Manager.</summary>
 
  **Optional Field**
 
@@ -650,7 +650,7 @@ ManifestVersion: 1.1.0
 
  **Optional Field**
 
- This key represents a return response to display when an installer returns an expected return code. MSIX and MSI packages have well known return codes. This is primarily intended for executable installers that have custom or unique return coes that can be mapped to a return response.
+ This key represents a return response to display when an installer returns an expected return code. MSIX and MSI packages have well known return codes. This is primarily intended for executable installers that have custom or unique return codes that can be mapped to a return response.
 
  >Note: An enumerated list of values in the JSON schema must be specified for consistency of user experience.
 </details>
