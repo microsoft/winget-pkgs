@@ -6,72 +6,89 @@ name: '$(Build.DefinitionName)-$(Build.DefinitionVersion)-$(Date:yyyyMMdd)-$(Rev
 trigger: none
 pr: none
 
-jobs:
+resources:
+  repositories:
+  - repository: 1ESPipelineTemplates
+    type: git
+    name: 1ESPipelineTemplates/1ESPipelineTemplates
+    ref: refs/tags/release
+extends:
+  template: v1/1ES.Official.PipelineTemplate.yml@1ESPipelineTemplates
+  parameters:
+    pool:
+      name: Azure-Pipelines-1ESPT-ExDShared
+      image: windows-2022
+      os: windows
+    customBuildTags:
+    - ES365AIMigrationTooling
 
-# Agent phase.
-- job: 'Rebuild'
-  displayName: 'Start Rebuild'
-  pool:
-    vmImage: 'windows-latest'
-  variables:
-    skipComponentGovernanceDetection: ${{ true }}
-    runCodesignValidationInjection: ${{ false }}
-  timeoutInMinutes: 0
-  steps:
+    stages:
+    - stage: WinGetSvc_Rest_Rebuild
+      jobs:
+      # Agent phase.
+      - job: 'Rebuild'
+        displayName: 'Start Rebuild'
+        variables:
+          skipComponentGovernanceDetection: ${{ true }}
+          runCodesignValidationInjection: ${{ false }}
+        timeoutInMinutes: 0
+        steps:
 
-  # Allow scripts to access the system token.
-  - checkout: none
-    persistCredentials: true
+        # Allow scripts to access the system token.
+        - checkout: none
+          persistCredentials: true
 
-  # Downloads all the setup files and its dependencies.
-  - task: AzureCLI@1
-    displayName: 'Azure Setup'
-    inputs:
-      azureSubscription: '$(WinGet.Subscription)'
-      scriptLocation: inlineScript
-      inlineScript: 'az storage blob download-batch -d . --pattern * -s servicewrapper --output none'
-    env:
-      AZURE_STORAGE_CONNECTION_STRING: $(ValidationStorageAccountConnectionString)
+        # Downloads all the setup files and its dependencies.
+        - task: AzureCLI@1
+          displayName: 'Azure Setup'
+          inputs:
+            azureSubscription: '$(WinGet.Subscription)'
+            scriptLocation: inlineScript
+            inlineScript: 'az storage blob download-batch -d . --pattern * -s servicewrapper --output none'
+          env:
+            AZURE_STORAGE_CONNECTION_STRING: $(ValidationStorageAccountConnectionString)
 
-  # WinGet setup
-  - script: 'winget_rebuild_setup.cmd'
-    name: 'wingetsetup'
-    displayName: 'WinGet Setup'
-    workingDirectory: scripts
-    env:
-      HOST_KEY: $(AzureFunctionHostKey)
-      RESTSOURCE_REBUILD_ENDPOINT: $(AzFuncRestSourceRebuildEndpoint)
+        # WinGet setup
+        - task: CmdLine@2
+          name: 'wingetsetup'
+          displayName: 'WinGet Setup'
+          env:
+            HOST_KEY: $(AzureFunctionHostKey)
+            RESTSOURCE_REBUILD_ENDPOINT: $(AzFuncRestSourceRebuildEndpoint)
+          inputs:
+            script: 'winget_rebuild_setup.cmd'
+            workingDirectory: scripts
 
-# Agentless phase. Depends on previous job.
-- job: 'PublishToRestSource'
-  pool: server
-  timeoutInMinutes: 1500
-  displayName: 'Publish to rest source'
-  dependsOn:
-    - 'Rebuild'
-  variables:
-    HostKeySecret: $[ dependencies.Rebuild.outputs['wingetsetup.hostkey']]
-    RestSourceRebuildEndpointSecret: $[ dependencies.Rebuild.outputs['wingetsetup.restsourceRebuildEndpoint']]
-  steps:
+      # Agentless phase. Depends on previous job.
+      - job: 'PublishToRestSource'
+        pool: server
+        timeoutInMinutes: 1500
+        displayName: 'Publish to rest source'
+        dependsOn:
+          - 'Rebuild'
+        variables:
+          HostKeySecret: $[ dependencies.Rebuild.outputs['wingetsetup.hostkey']]
+          RestSourceRebuildEndpointSecret: $[ dependencies.Rebuild.outputs['wingetsetup.restsourceRebuildEndpoint']]
+        steps:
 
-  # Rebuild Rest source.
-  - task: AzureFunction@1
-    displayName: 'Publish to rest source'
-    inputs:
-      function: '$(RestSourceRebuildEndpointSecret)'
-      key: '$(HostKeySecret)'
-      body: |
-        {
-        "operationId": "$(Build.BuildNumber)",
-        "BuildId": "$(Build.BuildId)",
-        "PlanUrl": "$(system.CollectionUri)",
-        "HubName": "$(system.HostType)",
-        "pipelineType": "RebuildPipeline",
-        "ProjectId": "$(system.TeamProjectId)",
-        "PlanId": "$(system.PlanId)", 
-        "JobId": "$(system.JobId)", 
-        "TimelineId": "$(system.TimelineId)", 
-        "TaskInstanceId": "$(system.TaskInstanceId)",
-        "AuthToken": "$(system.AccessToken)"
-        }
-      waitForCompletion: "true"
+        # Rebuild Rest source.
+        - task: AzureFunction@1
+          displayName: 'Publish to rest source'
+          inputs:
+            function: '$(RestSourceRebuildEndpointSecret)'
+            key: '$(HostKeySecret)'
+            body: |
+              {
+              "operationId": "$(Build.BuildNumber)",
+              "buildId": "$(Build.BuildId)",
+              "planUrl": "$(system.CollectionUri)",
+              "hubName": "$(system.HostType)",
+              "pipelineType": "RebuildPipeline",
+              "projectId": "$(system.TeamProjectId)",
+              "planId": "$(system.PlanId)", 
+              "jobId": "$(system.JobId)", 
+              "timelineId": "$(system.TimelineId)", 
+              "taskInstanceId": "$(system.TaskInstanceId)",
+              "authToken": "$(system.AccessToken)"
+              }
+            waitForCompletion: "true"
