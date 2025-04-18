@@ -6,7 +6,7 @@
 #Notes: Utilities to streamline evaluating 3rd party PRs.
 
 
-$build = 1034
+$build = 1045
 $appName = "ManualValidationPipeline"
 Write-Host "$appName build: $build"
 $MainFolder = "C:\ManVal"
@@ -63,8 +63,20 @@ $hashPRRegex = "[#]"+$PRRegex
 $hashPRRegexEnd = $hashPRRegex+"$"
 $colonPRRegex = $PRRegex+"[:]"
 
+
+<#
+$package = "clang-uml"
+$a = Get-ARPTable |where {$_.DisplayName -match $package}
+$a.displayversion
+$b = &"C:\Program Files\clang-uml\bin\clang-uml.exe" "--version"
+$a.DisplayVersion -match $b
+$a.DisplayVersion -match $b -join " "
+$b -match $a.DisplayVersion
+#>
+
 #region Data
-[array]$DisplayVersionExceptionList = "Netbird.Netbird"
+[array]$DisplayVersionExceptionList = "Netbird.Netbird",
+"ppy.osu"
 
 #$MagicStrings = @{}
 [array]$MagicStrings = "Installer Verification Analysis Context Information:", #0
@@ -170,7 +182,7 @@ $PushMePRWho = "Author,MatchString`nspectopo,Mozilla.Firefox`ntrenly,Standardize
 
 $QueueInputs = "No suitable installer found for manifest", #0
 "Caught std::exception: bad allocation", #1
-"Possibly due to a missing dependency, such as"#2
+"exit code: -1073741515"#2
 
 #endregion
 
@@ -307,10 +319,10 @@ Function Get-TrackerVMRunTracker {
 			$ManifestUrl | clip
 			start-process ($ManifestUrl)
 		}
-		$MozillaThunderbird = (Get-Status | ? {$_.Package -match "Mozilla.Thunderbird"} ).vm 
-		if ($null -ne $MozillaThunderbird) {
-			$MozillaThunderbird | %{Get-TrackerVMSetStatus -Status Complete -VM $_}
-		}
+		# $MozillaThunderbird = (Get-Status | ? {$_.Package -match "Mozilla.Thunderbird"} ).vm 
+		# if ($null -ne $MozillaThunderbird) {
+			# $MozillaThunderbird | %{Get-TrackerVMSetStatus -Status Complete -VM $_}
+		# }
 		if (Get-ConnectedVM) {
 			#Get-TrackerVMResetStatus
 		} else {
@@ -1925,6 +1937,9 @@ Function Get-WorkSearch {
 						Open-PRInBrowser -PR $PR
 					} else {
 						if ($Comments[-1].UserName -ne $GitHubUserName) {
+							if ($LastState.event -eq "PreValidation") { 
+								Get-GitHubPreset -Preset LabelAction -PR $PR
+							}
 							Open-PRInBrowser -PR $PR
 						}
 					}#end if LastCommenter
@@ -2977,23 +2992,23 @@ Function Get-AutoValLog {
 	#Get-Process *photosapp* | Stop-Process
 	$BuildNumber = Get-BuildFromPR -PR $PR 
 	if ($BuildNumber) {
-		#This downloads to Windows default location, which has already been set to $DestinationPath
-		Start-Process "$ADOMSBaseUrl/$ADOMSGUID/_apis/build/builds/$BuildNumber/artifacts?artifactName=InstallationVerificationLogs&api-version=7.1&%24format=zip"
-		if ($WhatIf) {
-			write-host "$ADOMSBaseUrl/$ADOMSGUID/_apis/build/builds/$BuildNumber/artifacts?artifactName=InstallationVerificationLogs&api-version=7.1&%24format=zip"
-		}
-		Start-Sleep $DownloadSeconds;
-		if (!(Test-Path $ZipPath) -AND !$Force) {
-			$UserInput = "No logs."
-			$out = Reply-ToPR -PR $PR -UserInput $UserInput -CannedMessage AutoValEnd
-			Write-Host $UserInput
-			Break;
-		}
 		$FileList = $null
 		[int]$BackoffSeconds = 0
 		
 		while ($FileList -eq $null) {
 			try {
+				#This downloads to Windows default location, which has already been set to $DestinationPath
+				Start-Process "$ADOMSBaseUrl/$ADOMSGUID/_apis/build/builds/$BuildNumber/artifacts?artifactName=InstallationVerificationLogs&api-version=7.1&%24format=zip"
+				if ($WhatIf) {
+					write-host "$ADOMSBaseUrl/$ADOMSGUID/_apis/build/builds/$BuildNumber/artifacts?artifactName=InstallationVerificationLogs&api-version=7.1&%24format=zip"
+				}
+				Start-Sleep $DownloadSeconds;
+				if (!(Test-Path $ZipPath) -AND !$Force) {
+					$UserInput = "No logs."
+					$out = Reply-ToPR -PR $PR -UserInput $UserInput -CannedMessage AutoValEnd
+					Write-Host $UserInput
+					Break;
+				}
 				Remove-Item $LogPath -Recurse -ErrorAction Ignore
 				Expand-Archive $ZipPath -DestinationPath $DestinationPath;
 				Remove-Item $ZipPath
@@ -3017,6 +3032,7 @@ Function Get-AutoValLog {
 		foreach ($File in $filelist) {
 			if ($File -match "png") {
 				Start-Process $File
+				$UserInput += "Image detected.`n"
 			} #Open PNGs with default app.
 			$UserInput += (Get-Content $File) -split "`n"
 		}
@@ -3040,8 +3056,9 @@ Function Get-AutoValLog {
 		}
 		$UserInput = $UserInput -split "`n" | Select-Object -Unique;
 		$UserInput = $UserInput -replace "Standard error: ",$null
+		$UserReplace = $UserInput -replace "\\","\\" -replace "\[","\["-replace "\]","\]"-replace "\*","\*"-replace "\+","\+"
 
-		if ($null -ne $UserInput) {
+		if ($null -notmatch ($UserReplace)) {
 			if (($UserInput -match "Installer failed security check") -OR ($UserInput -match "Operation did not complete successfully because the file contains a virus or potentially unwanted software")) {
 				$LowerOps = $false
 				$UserInput = Get-AutomatedErrorAnalysis $UserInput
@@ -3080,8 +3097,11 @@ Function Get-AutoValLog {
 			$UserInput = $UserInput -notmatch "The process cannot access the file because it is being used by another process"
 			$UserInput = $UserInput -notmatch "ThrowIfExceptional"
 			$UserInput = $UserInput -notmatch "Windows Installer installed the product"
-			$UserInput = $UserInput -notmatch "with working directory 'D:\\TOOLS'."
+			$UserInput = $UserInput -notmatch "with working directory 'D"
+		}
+		$UserReplace = $UserInput -replace "\\","\\" -replace "\[","\["-replace "\]","\]"-replace "\*","\*"-replace "\+","\+"
 
+		if ($null -notmatch ($UserReplace)) {
 			$UserInput = $UserInput | Select-Object -Unique
 
 			if ($WhatIf) {
@@ -3094,11 +3114,14 @@ Function Get-AutoValLog {
 
 			if ($LowerOps -eq $true) {
 				$SplitInput = ($UserInput -split "`n" )
-				if($SplitInput -match (($QueueInputs) -join " ")) {
-					if ($WhatIf) {
-						Write-Host "WhatIf: Add-PRToQueue -PR $PR"
-					} else {
-						Add-PRToQueue -PR $PR
+				foreach ($input in $QueueInputs) {
+					if($SplitInput -match $input) {
+						if ($WhatIf) {
+							Write-Host "WhatIf: Add-PRToQueue -PR $PR"
+						} else {
+							Add-PRToQueue -PR $PR
+						}
+						
 					}
 				}
 				$exitregex = "exit code: [0-9]{0,3}$"
@@ -3462,8 +3485,11 @@ Function Get-MergePR {
 		#($Data[1..$Data.length] | convertfrom-json).message
 	}
 	
+	$Comments = (Invoke-GitHubPRRequest -PR $PR -Type comments -Output content)
 	if ($out -match "Error") {
-		Reply-ToPR -PR $PR -UserInput $out -CannedMessage MergeFail
+		if ($Comments[-1].UserName -ne $GitHubUserName) {
+			Reply-ToPR -PR $PR -UserInput $out -CannedMessage MergeFail
+		}
 	}
 	$out
 	
@@ -3740,8 +3766,8 @@ Function Get-Autowaiver {
 		$PackageIdentifier = (Get-YamlValue -StringName PackageIdentifier -clip $PRData),
 		$WaiverData = ($AutowaiverData | ?{$_.PackageIdentifier -match $PackageIdentifier})
 	)
-	Add-PRToRecord -PR $PR -Action $Actions.Waiver
 	if ($WaiverData) {
+		Add-PRToRecord -PR $PR -Action $Actions.Waiver
 		foreach ($Waiver in $WaiverData) {
 			try {
 				$PackageValue = (Get-YamlValue -StringName $Waiver.ManifestKey -clip $PRData)
@@ -4325,6 +4351,9 @@ if ((`$WinGetLogs -match '\[FAIL\] Installer failed security check.') -OR
 			if ($fileContents[-1] -ne "0") {
 				$fileContents[-1] = ($fileContents[-1] -split ".0")[0]+".0"
 				$fileContents | Out-File $filePath
+				$fileContents = Get-Content "$runPath\$vm\manifest\Package.yaml"
+				$fileContents -replace "1..0","1.10.0"
+				$fileContents | Out-File $filePath
 			}#end if fileContents		
 		}#end if Operation
 	}#end if NoFiles
@@ -4896,9 +4925,8 @@ Function Get-TrackerVMCycle {
 				Get-PipelineVmGenerate -OS $VM.os
 			}
 			"SendStatus" {
-				$SharedError = (Get-Content $SharedErrorFile) -join "`n"
-				$SharedError = $SharedError -replace "`r","`n" 
-				$SharedError = $SharedError -replace "`n","`n> " 
+				$SharedError = (Get-Content $SharedErrorFile) -split "`n"
+				$SharedError = $SharedError -replace "`r","" 
 				$SharedError = $SharedError -replace " (caller: 00007FFA008A5769)",""
 				$SharedError = $SharedError -replace " (caller: 00007FFA008AA79F)",""
 				$SharedError = $SharedError -replace "Exception(1)",""
@@ -4906,6 +4934,7 @@ Function Get-TrackerVMCycle {
 				$SharedError = $SharedError -replace "Exception(4)",""
 				$SharedError = $SharedError -replace "tid(f1c)",""
 				$SharedError = $SharedError -replace "C:\\__w\\1\\s\\external\\pkg\\src\\AppInstallerCommonCore\\Downloader.cpp(185)\\WindowsPackageManager.dll!00007FFA008A37C9:",""
+				$SharedError = ("`n> ") + ($SharedError -join "`n> ") 
 				$SharedError = Get-AutomatedErrorAnalysis $SharedError
 				if ((($SharedError -join " ") -match "Installer failed security check") -OR (($SharedError -join " ") -match "Detected 1 Defender")) {
 					Get-AddPRLabel -PR $PR -LabelName $Labels.VDE
