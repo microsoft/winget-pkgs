@@ -1,0 +1,70 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
+
+PackageIdentifier: Alex313031.Thorium
+PackageVersion: 130.0.6723.174
+PackageLocale: en-US
+Publisher: The Thorium Authors
+PublisherUrl: https://thorium.rocks/
+PublisherSupportUrl: https://github.com/Alex313031/Thorium-Win/issues
+Author: Alex313031
+PackageName: Thorium
+PackageUrl: https://thorium.rocks/
+License: BSD-3-Clause
+LicenseUrl: https://github.com/Alex313031/Thorium-Win/blob/HEAD/LICENSE
+Copyright: Copyright 2024 The Thorium Authors. All rights reserved.
+ShortDescription: Chromium fork for Linux, Windows, macOS, Android, and Raspberry Pi named after radioactive element No. 90.
+Moniker: thorium
+Tags:
+- browser
+- chromium
+- internet
+- web
+- webpage
+ReleaseNotes: |-
+  M130
+  This release took a long time (3+ months!) to get out because of a new full time job, and the fact that Windows builds are still crashing. Windows builds are still delayed until I can figure it out. Might need to procure the help of some upstream Chromium devs that are nice enough to help me for free. Me and @midzer decided it would be a good idea to go ahead and release the Linux builds, which are working perfectly, even though we can't release for other platforms yet. UPDATE: Good news, I finally fixed the Windows crash, and MacOS builds are working again! So get ready for M130 for all the other platforms within the next day!
+  This is one of the complaints from the community that has always been valid, I am one man doing 95% of the coding work, so I can't keep it as up to date as a whole team or corporation can (@gz83 and @midzer occasionally help with coding, but mostly just make Windows and MacOS builds, and help with maintenance tasks).
+  If you are very concerned about Thorium not always being on the latest Chromium, then perhaps use another browser, or only use Thorium for specific tasks like JPEG-XL or viewing FTP sites. I use it all day, everyday, for work and pleasure, on all my various computers/old phones, since 2021 when I started the project. I've never gotten hacked, or gotten malware. That isn't to say that some zero-day, that they may have patched in a minor revision that Thorium hasn't been updated to yet, couldn't leave Thorium more vulnerable than Google Chrome for instance. It is just that usually, it would have to be a targeted attack, and running this build based on Chromium M130, rather than M132 (the latest), isn't going to turn your computer into some sort of virus magnet all of a sudden. Basically all I am saying is that the complaints and reasoning are very valid, but perhaps some of ya'll are getting a little too afraid and/or heated about it. (People getting mad at me on Reddit, or spamming my email with links to new zero days that have been found in Chromium).
+
+  New explainer document (with pictures!) about Cr23 and Th24 UI stuff: >> TH24.md
+  More Th24 fixes/updates include:
+  - More Chrome Labs items like "Middle Click Scroll"
+  - Tab Search button alignment is fixed. On Linux/MacOS it is also restored to the original rounded shape. On Windows, it is restored to the old style of being a window control button, like the minimize/maximize/close buttons.
+  - Colors are Restored! I originally didn't want to do this, but it turned out to be relatively easy. The old, non Cr23 colors had more contrast, and were more neutral so they blended better with different OSes styling. In addition, the "Customize Thorium" side panel now has the old color options on top of the existing new ones. See explainer document for pictures.
+  - Top bar icon sizes were slightly increased, to make them look better with the old UI.
+  - Omnibox suggestion row button radius was fixed
+  - Downloads page (chrome://downloads/) duplicate close button on previously downloaded items was fixed.
+  - Toggle button styling were restored. See explainer document for pictures.
+  - Dialog box sizing was restored. See explainer document for pictures.
+  - Sharing hub button was restored on the right side of the omnibox, where the bookmark button is, along with the original icon.
+  - Bookmarks folder icon restored for Linux now too (originally I just restored the Windows one).
+  - Bookmarks bar overflow button and "All Bookmarks" button alignment fixed.
+  - Omnibox left-hand-side separator is restored, as well as the color of the icon.
+  - Original new tab button and tab search button icons restored
+  - Unmaximized window frame grab handle height fixed in Th24
+  - Menu arrows restored to pre-Cr23 icons.
+
+  - Global Privacy Control patch added! This makes Thorium one of the few Chromium based browsers to have it. Cromite and Brave have it, but I'm not aware of any others. You can test that it is working in Thorium by visiting https://global-privacy-control.glitch.me/. The setting is a toggle right below the "Do Not Track" toggle. Both are enabled by default in Thorium for the obvious privacy benefits. You can read more about it and toggle it on and off at chrome://settings/cookies.
+  - When the chrome://flags#rectangular-tabs I added in M128 is enabled, now the new tab button and tab search button will also have a rectangular appearance as well.
+  - New command line flag --reader-mode to start Thorium with reader mode turned on for all sites.
+  - Menu show delay time for menus and items was turned down to 0 milliseconds for all platforms. I hate artificial delays added to the UI of applications just to make it match the OS. Heck, I don't like it on the OS either, so I tweak the registry on Windows, or make a GNOME config on Ubuntu to do the same thing but for the whole OS.
+  - New file handler icons for Windows & MacOS. I might add some for Linux next release too.
+  - New menu items when right clicking a video
+  - Hardware acceleration issues with AMD GPUs on Linux fixed by reverting a status flag I had modified back to the way upstream Chromium had it.
+  - Bookmark bar separator colors fixed.
+  - Bug where the disable-thorium-icons flag was not working for the home button is fixed.
+  - Fixed fullscreen mode of the Dino game (called "Arcade Mode") at chrome://dino/. This is actually an upstream bug, so it is broken in Chrome/Chromium still as well! I also made a pull request upstream with the fix, but noone has looked at it yet. So for now Thorium is the only Chromium based browser with a working Arcade Mode of the dino game. So make sure when you are slacking off at work, you choose Thorium for jumping over stuff with a T-Rex! When my fix is (hopefully) accepted upstream, I will let ya'll know lol. The commit that broke it is Here for anyone interested.
+  - Text contrast increased for better readability in dark mode.
+  - Side panel grab handle size reduced because it's simply too big.
+  - Building for a given SIMD level is much easier now, for example an AVX2 or AVX512 or custom build. I did a major code refactor for the compiler optimizations of Thorium, and it can now be controlled through build args rather than source code. See Here for more info. (Only of interest to those building it for themselves).
+  - New debugging tool for USERS (not just devs). Backstory: Chromium/Thorium can be built with is_debug = true, but these builds are large, very slow, and not suitable for public release. They are normally only used internally by me and the builders @midzer and @gz83 , but they have one thing I wished I had by default: Verbose Logging. Well, now we do, even in non-debug builds! Set the new environment variable THORIUM_DEBUG=1 (or THORIUM_DEBUG=true) (for info on how to set an environment variables, see Here), and when running Thorium from the command line, it will respect them, and cause it to log to console with the same verbosity as a debug build normally would. This means it will show verbose info, non fatal errors and warnings (normally only fatal errors and certain warnings are shown). It will also show any output from the devtools console of the current tab, even if devtools isn't open! Basically this will let you gather a verbose log to send to me in a GitHub issue if I ask for it or if you already know that it's relevant to the bug at hand. It could also be useful for web devs since they can view the devtools console output without it being open.
+  - Security on Linux improved slightly by disallowing loading .so libraries from anywhere outside the directory the thorium binary resides in, or system library directories.
+  - Downloads bubble menu width increased to allow long filenames to be read easier.
+  - Close confirmation flag fixed.
+  I have also added a new flag to the Chrome Labs i.e. Thorium Experiments button (as well as the chrome://flags page of course), that controls a new feature that may become default in a later release. I am particularly proud of this new feature code-wise, as it was not easy to implement like one would think. Anyway, it is a new top bar button! Enabling chrome://flags#restore-tab-button will add a new little separator and button to the left side of the top bar, beside the home button (or reload button, if you have the home button turned off). Clicking it simply opens the last closed tab or window. Successive presses will open the 2nd last closed tab/window, etc. similar to Ctrl + Shift + T, just with a button instead of a keyboard shortcut for people who like to use their mouse.
+  Note: If you have turned on the "Disable Download Bubble" flag, you will need to turn it on again because the name and internal variable (which is why you have to set it again) has been changed to "Restore Download Shelf" & chrome://flags#download-shelf
+  Note 2: A full scale, C++ auto-updater that is directly integrated into the browser is in the works, instead of the kinda not so great https://github.com/Alex313031/thorium-winupdater. One that behaves just like Google Chrome's one, except without any enterprise policy or LTS Channel stuff. Although I do want to write it so that it detects what type of build you are running (i.e. AVX or SSE3) and downloads the appropriate version in the background to the system's TEMP folder. That way all you have to do to change from one version to the other, is download the installer for it manually, and from then on, it would auto-update to whatever version you preferred.
+ReleaseNotesUrl: https://github.com/Alex313031/Thorium-Win/releases/tag/M130.0.6723.174
+ManifestType: defaultLocale
+ManifestVersion: 1.9.0

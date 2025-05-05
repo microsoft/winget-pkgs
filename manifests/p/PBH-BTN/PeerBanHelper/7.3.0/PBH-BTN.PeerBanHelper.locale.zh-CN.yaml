@@ -1,0 +1,162 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.9.0.schema.json
+
+PackageIdentifier: PBH-BTN.PeerBanHelper
+PackageVersion: 7.3.0
+PackageLocale: zh-CN
+Publisher: PBH-BTN Community
+PublisherUrl: https://github.com/PBH-BTN
+PublisherSupportUrl: https://github.com/PBH-BTN/PeerBanHelper/issues
+PackageName: PeerBanHelper
+PackageUrl: https://github.com/PBH-BTN/PeerBanHelper
+License: GPL-3.0
+LicenseUrl: https://github.com/PBH-BTN/PeerBanHelper/blob/HEAD/LICENSE
+ShortDescription: 自动封禁不受欢迎、吸血和异常的 BT 客户端，并支持自定义规则。
+Tags:
+- bt
+- 种子
+ReleaseNotes: |-
+  2024 第四季度用户调研问卷正在收集，有任何建议意见吗，欢迎告诉我们：https://github.com/PBH-BTN/PeerBanHelper/issues/856
+  新功能
+  - 暂停下载器 #833 @Ghost-chu @Gaojianli
+    - 用户可以暂停一个或多个下载器，被暂停的下载器仍然在列表中可见，但不再参与任何检查
+  - 全局暂停 @Ghost-chu @Gaojianli
+    - 可以暂时停止 PBH 的检测任务，暂停期间不再检查和封禁 Peers
+  - IP 地址反向域名解析黑名单模块 #834 @Ghost-chu @Gaojianli
+    - 用户可以封禁 IP 地址反向解析为主机名（注意：是 IP 的主机名，而非 DDNS 或者普通域名的解析），与 PeerId/ClientName 相同使用 JSON 引擎匹配
+    - 分为 JDK 实现和 dnsjava 实现，dnsjava 实现需要在 PBH Lab 中启用实验，否则默认使用 JDK 实现
+    - JDK 实现在绝大部分 IP 上似乎都无法正常工作
+  - SQLite 数据库自动增量、全量 VACUUM #843 #844 @Ghost-chu
+    - 解决了 SQLite 数据库即使删除旧数据后仍然随着时间推移体积膨胀的问题
+    - VACUUM 前将进行数据库备份操作，备份会在 VACUUM 操作成功后删除
+    - 每次事务完成后都会增量 VACUUM，但完全 VACUUM 只会每 60 天在 PBH 启动时进行
+  - 新增 BTN 获取配置文件失败原因，可查看获取配置文件出错时的服务器响应 @Ghost-chu @Gaojianli
+  - 新增解封全部 IP 地址按钮 腾讯问卷#17358863#67 @Ghost-chu @Gaojianli
+  - 现在订阅规则支持读取注释作为封禁原因之一 腾讯问卷#17358863#89 @Ghost-chu @paulzzh
+  优化
+  - 改进封禁列表的搜索体验 #618 @Ghost-chu @Gaojianli
+  - 封禁时如果订阅规则提供了对应 IP 地址的注释行，将显示注释上的信息，而不是仅仅提示命中订阅规则 @Ghost-chu @paulzzh
+    - 此更新也加入了对行尾注释的支持
+  - 封禁规则现在改善了其可读性
+  错误修复
+  - 修复 AvaitorScript 脚本引擎配置初始化过晚，导致 BTN 下发的脚本无法使用 AV 脚本引擎的部分功能 @Ghost-chu
+  - 更新 Tor Exit Node 规则订阅链接，旧的似乎已经不再更新 #845 @Ghost-chu @thrive7776
+  - 修复从较旧版本升级到 v7.2+ 时，telegram 推送配置的 chat-id 没有正确迁移到 chatId 的问题 @Ghost-chu
+  - 解决 统计-图表 界面不会刷新 #829，现在不支持刷新的页面不再显示刷新按钮 @Gaojianli
+  - 修复捐赠页面倒计时在快速开关后可能被破坏的问题 @Gaojianli
+  - 修复日志界面的“自动滚动到最新”选项不会滚动到最新日志条目的问题 #847 @Gaojianli
+  - 修复安装器在某些情况下不会检测程序运行状态导致安装时卡住的问题，现在安装前将先运行上个版本的卸载程序 #718 @Ghost-chu
+  - 修复解封 IP 地址的时候，ProgressCheatBlocker 的持久化数据和内存数据没有正确归零的问题 @Ghost-chu
+  - 修复了 BTN 模块在配置文件重载后有时会显示 “已加载 0 个能力” 并停止工作的问题 @Ghost-chu
+  其它更改
+  - Peer 是否已握手现在由各个下载器实现自行管理以更快更精准的判断 Peer 的握手状态 @Ghost-chu
+  Sparkle BTN 更新
+  - 改善程序和数据库性能、优化分析过程，解决引发 Sparkle 两周停机的多项性能和网络瓶颈。之前暂停停止的 Peers 提交、过量下载分析和客户端发现功能现在恢复正常运行 @Ghost-chu
+  - 用户应用程序页新增 “创建时间” 列，并按创建顺序倒序排序；新增 “状态” 列，指示 UserApplication 的封禁状态 @Ghost-chu
+  - 新增个人资料页，显示账号基本信息（头像、昵称、电子邮件地址、帐号状态）以及账号积分信息 @Ghost-chu
+  - 新增积分系统和积分（Bytes），用以衡量用户在 Sparkle BTN 上做出的贡献 @Ghost-chu
+  - 新增 BTN 网络统计仪表盘，可登录 BTN 后在首页查看或者 点此跳转 @Ghost-chu
+    - 可以自由选择时间区间以查看不同时间段的 BTN 网络整体状态，但大部分数据仅保留 30 天或者更短
+    - 可查看封禁网段排行榜，以快速对比 IP 段之间的恶意活动强度
+    - 新增 GeoIP 排行榜，分析不同地区的恶意活动强度
+    - 新增封禁趋势图，帮助快速了解不同时段封禁的趋势，可通过 “封禁计数、封禁唯一 IP 数、会话数、GeoIP 地区、客户端名称” 等多个维度分析目前的恶意活动
+    - 新增网络类型跟踪，可根据运营商和所属网络类型分析当前 BTN 网络上的恶意活动
+    - 新增全球网络概览图，以便可视化查看不同国家/地区的恶意活动强度
+    - 新增 Sparkle BTN 实时日志，按时间倒序查看、或者根据特定字段过滤最近的 Sparkle BTN 提交数据
+    - 新增 Sparkle BTN 审计图表，可查看 BTN 上用户活动（仅部分审计操作对普通用户开放）
+  - 改进 BTN-Collected-Rules 规则生成模块 @Ghost-chu
+    - Tracker 分析、不受信任 IP 地址和过量下载三大模块支持透明度更新
+      - 在每个被封禁的 IP 地址上方的注释行中现在详细显示 Peer 特征、不信任投票数和 BTN 网络统计的过量下载数据信息
+  Sparkle Tracker 更新
+  - 现在由 @Gaojianli 创建的新的 PBH-BTN/Trunker 替代
+  PBH-BTN/Trunker 是一个使用 Golang 编写的高性能 BitTorrent HTTP Tracker 程序（不支持其它协议是刻意的）。其设计目标是使用尽可能少的 CPU 和网络资源处理 Tracker 服务器面临的高并发问题，同时收集和存储 Peer 特征数据以供 BTN 网络程序分析使用。
+  在不启用持久化的情况下，可以作为普通的 Tracker 程序使用。支持 Unix Domain Socket 以降低 CPU 网络软中断压力。
+  Trunker 运行高效且经过生产环境的压力验证，欢迎试用。
+  您也可以使用由 PBH-BTN 维护的 Trunker 实例，由此实例收集的数据会用于 BTN 分析。如果您是种子发布者，欢迎将其添加到 Tracker 列表中：
+  https://sparkle.ghostchu-services.top/announce
+  BTN-Collected-Rules 更改
+  新增规则
+  在 Sparkle BTN 完成更新后，我们对过去 6 个月的累积数据进行了分析，并创建了多个新规则，欢迎订阅它们或者用作参考：
+  - 新规则：cevskxsnm-10-idc.txt （推荐订阅）某 IDC 刷流机房 IP 地址（静态公网 IP），IP 段完美符合其官网宣传的所有机房的地理位置分布，通过 IP 段和主机名确认关联，伪装特征为 qBittorrent/4.6.7，代表 IP 地址段：101.69.63.0/24。通过主机名确认至少有 82 台机器运行刷流程序，每台机器分配多张由于法律原因，更多证明信息和公司名称不对外公布。
+  - 新规则：poonisxq-10.txt （用于参考）某电影分发的小微企业的边缘节点 IP 地址（动静混合），公司域名 ICP 备案于 24 年 8 月份完成，并在备案完成的 2 周内出现刷流 Peer（由 BTN 客户端发现模块记录）。通过 PeerID、主机名、部署的服务程序确认存在关联。特征为 Rain 0.0.0，代表 IP 段：185.107.45.0/24。由于法律原因，更多证明信息和公司名称不对外公布。
+  - 新规则：gopeeddev.txt（用于参考）Gopeed dev 的节点 IP 地址（静态公网 IP），通过 IP 段和主机名确认存在关联。代表 IP 段：218.91.255.0/24。目前所有者不明。
+  - 新规则：aria2c.txt（用于参考）使用 aria2 特征刷流的 IP 地址（动静混合），特征 aria2/1.37.0，代表 IP 段：114.227.158.0/24。目前所有者不明。
+  您无需修改 PBH 的配置，所有新的规则都会合并到 all.txt 中。
+  现有规则更改
+  - Tracker 分析、不受信任 IP 地址和过量下载三大模块支持透明度更新
+    - 在每个被封禁的 IP 地址上方的注释行中现在详细显示 Peer 特征、不信任投票数和 BTN 网络统计的过量下载数据信息
+  - multi-dial.txt 规则清理
+    - 清理了一部分过期、无效、重复和不值得再按段封禁的规则
+  尾言
+  在本次问卷调查中，我们收到了很多伙伴们的建设性建议。其中一部分建议已在本次更新中加入 PeerBanHelper 中，但仍有部分留言由于系统限制无法回复。我们在此统一对这些问题进行回答：
+  - 土豆不能熟
+    - 我们已经采取了一系列措施改进服务器的稳定性，本周以来 Sparkle 的服务稳定性已经显著提升，会在未来持续优化
+  - 江苏南通 ip 的 Gopeed dev 无法封禁，一直提示已在封禁列表，但始终无法封禁，希望可以改进
+    - 经过测试无法复现这个问题
+  - 误封好严重，建议添加一个能力开关或者到一定的上传量再封禁
+    - 本次更新也对规则进行了一次性里，可以看看误封情况是否有所好转
+  - 封禁列表支持按条件搜索
+    - 本次更新已新增了对封禁列表的任意搜索功能，可搜索任意字段的任意内容
+  - 如果使用的存储设备为 flash 设备，最好内置读写计数，帮助用户评估磨损情况
+    - 读写是不可控的，并且由于目前有内存缓存功能，实际上读写次数不会太多了
+  - 同 ip 端口不同种子合并下载上传总量统计
+    - 底层代码限制，短时间内是搞不了了
+  - 加入根据封禁原因筛选封禁记录的功能
+    - 封禁日志由于底层代码限制，搜索功能受限，我们还在寻找解决方案
+  - 目前已经非常满意，如果可能希望减少资源占用
+    - 其实大部分时候内存 PBH 并没有在使用，但是 JVM 更倾向于先申请这些内存以备不时之需。本次更新已调低了这部分阈值，但由于 JVM 的设计，它可能还是很会倾向于申请一些内存自己囤着
+  - 建议 BTN 的前端恢复装修前的封禁记录查询，并加上历史记录查询、图表（如各个地区各个客户端的封禁量柱状图折线图之类的）等比较直观的数据查看方式 另外，建议 PBH 加上对 BTN 各个能力的自定义开关（ClientName 封禁、PeerID 封禁这些）避免误封，最近在下海盗湾的种子时有很多用 libtorrent 名字的客户端连上来，然后立刻被 PBH 封了：(
+    - 我们已在本版本改善了一部分的误封情况，数据查看和图表已推出新的 Sparkle Dashboard 作为过渡方案
+  - 1. 封禁名单 或 封禁日志 能用更多的方式筛选（客户端、封禁原因等） 2. 能在 PBH 客户端管理 BTN 启用的能力，实现只上报数据，而不使用 BTN 下发的规则。原因有：我不想屏蔽掉 Transmission 4.0.6 客户端；我想知道 peer 被屏蔽的原因（而不仅仅因为该 peer 在 ip 封禁列表中）
+    - 1. 封禁列表已在本版本中得到优化 2. 此功能可以在设置中禁用使用云端规则，而不会影响提交数据
+  - 如果可行，希望可以减少对 SSD 的写入量。
+    - 已经有内存缓存了～并不是暴力 I/O 的 SSD 捏
+  - 希望能支持 Aria2
+    - 得 aria2 自己努力才行，它根本无法封禁 IP 地址，而且作者明确不想加 blocklist 功能
+  - PeerBanHelper：希望在 Linux 端的 RPM 包中引入全局配置目录，便于升级时不会覆盖部分自定义参数。 Sparkle（BTN 网络）：希望提供自建 BTN 网络的相关文档和软件包/代码包，并希望可以实现 BTN 网络节点联盟的构想，实现超级节点向边缘节点定期分发规则和封禁数据以及边缘节点向超级节点的数据上报功能，降低目前单中心处理能力不足导致的功能受限的影响。 PS：我这边有双路 AMD 9754 1TB 内存的服务器，应该处理性能不成问题？
+    - 1. 更改数据目录：-Dpbh.datadir=/path/to/data 单独更改配置目录：-Dpbh.configdir=/path/to/config 单独更改日志目录：-Dpbh.logsdir=/path/to/logs
+    - 暂不考虑网络节点联盟问题
+    - 谢谢，我们暂不接受服务器捐赠。根据隐私政策所述，我们不得将数据提供给第三方，使用他人捐赠服务器实质上还是将数据传输给了第三方
+  - 建议开发一键解封 ip
+    - 本版已添加 “解封全部 IP 地址” 功能，点击即可解封封禁列表的所有 IP 地址，感谢您的建议
+  - pbh 可以说对我相当有帮助，我一开始本着分享原则，能不给上传限速就不限，导致上传带宽天天被占满，以至于没法正常上网。用了 pbh 上传从 20m 降到平均几百 k，我才知道以前基本全是给吸血上传。不过因为我不是非常了解屏蔽的原理，其实我有时候还是有些担心会误封一些真正下载人的账号，请问这部分是否可以根据违反规则情况给每个封禁 IP 分级，来使用户更加了解其是否具有较大危害？
+    - 谢谢，建议已收到。我们会考虑根据动态分数计算来封禁 IP，但是涉及到底层代码修改，短期内暂时不会看到这个功能
+    - Sparkle BTN 内部已经是如此工作了，现在新增的封禁原因备注也有望改善封禁透明度问题
+  - 可能要对 libertorrent 的规则做一些调整，现在这样全杀不太好。还有对做种上传的应该存在误封
+    - 我们正在对 libtorrent 的情况展开调查，在调查完成前我们施加了一个临时的措施。在情况明了后就会做出更进一步的举措
+  - 为开发团队的大量付出致敬。 与恶意吸血客户端的斗争还在继续。希望各个被全量封禁的地区能尽快恢复正常。
+    - 谢谢，我们已解除了这部分地区的一部分 IP 地址；但由于部分 IP 段仍然疯狂进行恶意活动，仍有大量 IP 段未得到解封
+  - github 更新不便，BTN 链接不便
+    - 我们会考虑添加国内分发源，BTN 现在提交数据已经是国内 CDN 了，但是页面浏览可能会被 302 到全球节点，我们会考虑改善这个问题
+  - peer id、client name 规则提供注释，说明是哪款软件 提供白名单规则，例如：只允许 XX 的 peer 连接
+    - 感谢建议，已添加
+  - 超量下载（进度回退）再智能一些
+    - 它已经是不跑 AI 大模型的情况下比较智能的状态了
+  - 能否优化一下 peerbanhelper 长期运行的表现？我的 peerbanhelper 是跑在旧电脑改造的服务器上的，但是经常不过几天 pbh 就完全卡死不能工作，不管是 gui mode 还是控制台模式，都是一样的结果。希望能加以改进，我相信 pbh 还是有很多需求是长期稳定运行的。除此之外，这个软件非常完美，就是这个问题让人很难受。
+    - 请升级版本，不要继续使用 6.x 了
+  - PeerBanHelper 应取得更加广泛的运用才可以更好得从用户端遏制 PCDN 的猖獗，但是现阶段对于配置 PeerBanHelper 和 Sparkle（BTN 网络）的门槛依旧较高，不适合吸纳更加广泛的用户加入进来。
+    - 谢谢，我们会在有空闲的时候优化用户体验
+  - 内存占用过高 peerbanhelper 0.08% 787.4MiB / 15.54GiB
+    - 你升级了吗？
+  - 增加复制 webui 链接到剪贴板的功能，我不希望我的密码直接暴露在浏览器的历史记录里
+    - 你可以使用随机密码的，登陆一次就记住了
+    - 试试看浏览器的一个传奇功能：网页收藏夹
+  - 希望 btn 服务器能更加稳定，不要经常无法连接
+    - Powered by GLaDOS (Potato Edition)，它已经很努力了
+  - 希望可以推出季度報告等方式介紹最近的封鎖效果，總是覺得好像效果不太好但又不肯定 RAM 和 CPU 的佔用未至於影響使用，但確實有點偏高，希望可以改善。
+    - 已经有图表了
+    - 封禁效果取决于所有人共同的努力，考虑加入 BTN 网络帮助一起改善封禁效果吧
+  转眼又是新的一年，转眼 PeerBanHelper 就快要一周年啦（2 月 7 日）。
+  时间飞逝，希望有 PeerBanHelper 陪伴下，今年也会是快乐 BT 的一年。提前拜个早年，2025 新年快乐～
+  已知问题
+  - 封禁备注为空、奇怪的文本
+    - BTN-Collected-Rules 仍未完成改造，属于正常现象
+  Docker
+  DockerHub: ghostchu/peerbanhelper:v7.3.0
+  阿里云国内镜像加速：registry.cn-hangzhou.aliyuncs.com/ghostchu/peerbanhelper:v7.3.0
+ReleaseNotesUrl: https://github.com/PBH-BTN/PeerBanHelper/releases/tag/v7.3.0
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/PBH-BTN/PeerBanHelper/wiki
+ManifestType: locale
+ManifestVersion: 1.9.0
