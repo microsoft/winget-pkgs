@@ -1,0 +1,61 @@
+name: Test WinGet Installation
+on:
+  pull_request:
+
+jobs:
+  test_installation:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Test Installation
+        shell: pwsh
+        run: |
+          # Find installer manifest
+          $manifestDir = "manifests/t/thomasschafer/scooter/0.5.0"
+          $installerManifest = Get-ChildItem -Path $manifestDir -Filter "*.installer.json" | Select-Object -First 1
+
+          Write-Host "Found installer manifest: $($installerManifest.FullName)"
+
+          # Parse installer manifest
+          $installerJson = Get-Content -Path $installerManifest.FullName | ConvertFrom-Json
+          $installerUrl = $installerJson.Installers[0].InstallerUrl
+          $nestedFiles = $installerJson.NestedInstallerFiles
+
+          Write-Host "Installer URL: $installerUrl"
+          Write-Host "Nested Files: $($nestedFiles | ConvertTo-Json)"
+
+          # Download and extract the installer
+          $tempDir = Join-Path -Path $env:TEMP -ChildPath "scooter-test"
+          New-Item -ItemType Directory -Path $tempDir -Force | Out-Null
+          $zipPath = Join-Path -Path $tempDir -ChildPath "scooter.zip"
+
+          Write-Host "Downloading installer..."
+          Invoke-WebRequest -Uri $installerUrl -OutFile $zipPath
+
+          Write-Host "Extracting installer..."
+          Expand-Archive -Path $zipPath -DestinationPath $tempDir -Force
+
+          # Check contents
+          Write-Host "Extracted contents:"
+          Get-ChildItem -Path $tempDir -Recurse | ForEach-Object {
+              Write-Host " - $($_.FullName)"
+          }
+
+          # Test executable
+          $exePath = Join-Path -Path $tempDir -ChildPath $nestedFiles[0].RelativeFilePath
+
+          if (Test-Path $exePath) {
+              Write-Host "Testing executable: $exePath"
+              $version = & $exePath --version
+              Write-Host "Version: $version"
+
+              Write-Host "Testing help command..."
+              & $exePath --help
+
+              Write-Host "Installation test passed!"
+          } else {
+              Write-Error "Could not find executable at $exePath"
+              exit 1
+          }
