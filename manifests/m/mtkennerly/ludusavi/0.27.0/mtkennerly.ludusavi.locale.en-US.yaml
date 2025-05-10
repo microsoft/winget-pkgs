@@ -1,0 +1,62 @@
+# Created using wingetcreate 1.6.1.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.6.0.schema.json
+
+PackageIdentifier: mtkennerly.ludusavi
+PackageVersion: 0.27.0
+PackageLocale: en-US
+Publisher: mtkennerly
+PublisherUrl: https://github.com/mtkennerly
+PublisherSupportUrl: https://github.com/mtkennerly/ludusavi/issues
+Author: Matthew T. Kennerly
+PackageName: ludusavi
+PackageUrl: https://github.com/mtkennerly/ludusavi
+License: MIT
+LicenseUrl: https://github.com/mtkennerly/ludusavi/blob/master/LICENSE
+Copyright: Copyright (c) 2020 Matthew T. Kennerly (mtkennerly)
+CopyrightUrl: https://github.com/mtkennerly/ludusavi/blob/master/LICENSE
+ShortDescription: Backup tool for PC game saves
+Moniker: ludusavi
+ReleaseNotes: |-
+  * Added:
+    * Support for installing via [cargo-binstall](https://github.com/cargo-bins/cargo-binstall).
+  * Changed:
+    * Windows registry backups are now saved as `*.reg` files instead of `*.yaml`.
+      Existing backups will not be affected.
+    * On Linux, Ludusavi previously reported its application ID as just `ludusavi`,
+      which meant the desktop file should be named `ludusavi.desktop` to show the right icon.
+      However, that name does not follow the Freedesktop.org `desktop-entry` specification.
+
+      To better conform, Ludusavi now reports its ID as `com.mtkennerly.ludusavi`
+      (except for Flatpak, which will use `com.github.mtkennerly.ludusavi` for legacy reasons).
+      If you need to preserve the original behavior,
+      you can set `LUDUSAVI_LINUX_APP_ID=ludusavi` in your environment variables.
+
+      ([Prototyped by OlegAckbar](https://github.com/mtkennerly/ludusavi/pull/417))
+    * Dialogs (folder picker and `wrap --gui` prompts) now use GTK on Linux.
+      The previous system relied on Zenity/KDialog,
+      which could behave poorly depending on the version or in a Flatpak context.
+    * The standalone Mac release is now compiled on Mac OS 13 instead of Mac OS 12
+      because of [a change by GitHub](https://github.com/actions/runner-images/issues/10721).
+    * Updated translations.
+      (Thanks to contributors on the [Crowdin project](https://crowdin.com/project/ludusavi))
+  * Fixed:
+    * The registry format change also resolved an issue where very large (over 100 MB)
+      `registry.yaml` files could be slow to read and consume a lot of extra memory,
+      whereas the same data in `.reg` format can be loaded without issue.
+    * When set to only keep 1 full backup and 0 differential backups using the simple format,
+      Ludusavi keeps the existing backup in place and just adds/removes any changed files.
+      However, after removing obsolete files, Ludusavi could leave empty directories behind.
+      Now, Ludusavi will clean these up as well after creating a new backup for a game.
+    * GUI: After a backup, if a file were removed,
+      its change status wouldn't immediately refresh.
+    * GUI: When performing a multi-game scan with a filter active,
+      the visible games would be backed up or restored even if they were disabled.
+    * GUI: When performing a multi-game scan on the restore screen with a filter active,
+      the scan would exclude games that were disabled for backup rather than disabled for restore.
+    * Ludusavi would try to scan games (custom or from secondary manifest) with a blank title.
+      In the GUI, they would be omitted from the results,
+      while on the CLI, they would be reported without a title.
+      Now such games are ignored when scanning.
+ReleaseNotesUrl: https://github.com/mtkennerly/ludusavi/releases/tag/v0.27.0
+ManifestType: defaultLocale
+ManifestVersion: 1.6.0

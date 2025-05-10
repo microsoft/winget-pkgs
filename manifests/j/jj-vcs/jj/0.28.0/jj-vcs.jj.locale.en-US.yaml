@@ -1,0 +1,157 @@
+# Created using wingetcreate 1.9.4.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
+
+PackageIdentifier: jj-vcs.jj
+PackageVersion: 0.28.0
+PackageLocale: en-US
+Publisher: jj-vcs
+PublisherUrl: https://github.com/jj-vcs
+PublisherSupportUrl: https://github.com/jj-vcs/jj/issues
+PackageName: jj
+PackageUrl: https://github.com/jj-vcs/jj
+License: Apache License 2.0
+LicenseUrl: https://github.com/jj-vcs/jj/blob/HEAD/LICENSE
+ShortDescription: A Git-compatible VCS that is both simple and powerful
+Description: A Git-compatible VCS that is both simple and powerful
+Moniker: Jujutsu
+Tags:
+- git
+- cli
+- mercurial
+- vcs
+ReleaseNotes: |2-
+    > [!WARNING]
+    > `jj-cli` has not yet been published to https://crates.io; see https://github.com/jj-vcs/jj/issues/6223.
+    >
+    > Things are still in flux, so the plan may change, but most likely we'll release a new minor version in a bit, possibly a few days.
+
+  About
+    jj is a Git-compatible version control system that is both simple and powerful. See the installation instructions to get started.
+
+  Release highlights
+  - jj's configuration can now be split into multiple files more easily.
+  - `jj resolve` now accepts built-in tools `:ours` and `:theirs`.
+  - In colocated repos, newly-created files will now appear in `git diff`.
+  - A long-standing bug relating to empty files in the built-in diff editor was
+    fixed. #3702
+
+  Breaking changes
+  - The minimum supported Rust version (MSRV) is now 1.84.0.
+  - The `git.push-branch-prefix` config has been removed in favor of
+    `git.push-bookmark-prefix`.
+  - `jj abandon` no longer supports `--summary` to suppress the list of abandoned
+    commits. The list won't show more than 10 commits to not clutter the console.
+  - `jj unsquash` has been removed in favor of `jj squash` and
+    `jj diffedit --restore-descendants`.
+  - The `jj untrack` subcommand has been removed in favor of `jj file untrack`.
+  - The following deprecated revset functions have been removed:
+  - `branches()`, `remote_branches()`, `tracked_remote_branches()`, and
+    `untracked_remote_branches()`, which were renamed to "bookmarks".
+  - `file()` and `conflict()`, which were renamed to plural forms.
+  - `files(x, y, ..)` with multiple patterns. Use `files(x|y|..)` instead.
+  - The following deprecated template functions have been removed:
+  - `branches()`, `local_branches()`, and `remote_branches()`, which were
+    renamed to "bookmarks".
+  - The flags `--all` and `--tracked` on `jj git push` by themself do not cause
+    deleted bookmarks to be pushed anymore, as an additional safety measure. They
+    can now be combined with `--deleted` instead.
+
+  Deprecations
+  - `core.watchman.register_snapshot_trigger` has been renamed to `core.watchman.register-snapshot-trigger` for consistency with other configuration options.
+  - `jj backout` is deprecated in favor of `jj revert`.
+
+  New features
+  - `jj sign` can now sign with PKCS#12 certificates through the `gpgsm` backend.
+  - `jj sign` will automatically use the gpg key associated with the author's email
+    in the absence of a `signing.key` configuration.
+  - Multiple user configs are now supported and are loaded in the following precedence order:
+  - `$HOME/.jjconfig.toml`
+  - `$XDG_CONFIG_HOME/jj/config.toml`
+  - `$XDG_CONFIG_HOME/jj/conf.d/*.toml`
+  - The `JJ_CONFIG` environment variable can now contain multiple paths separated
+    by a colon (or semicolon on Windows).
+  - The command `jj config list` now supports showing the origin of each variable
+    via the `builtin_config_list_detailed` template.
+  - `jj config {edit,set,unset}` now prompt when multiple config files are found.
+  - `jj diff -r` now allows multiple revisions (as long as there are no gaps in
+    the revset), such as `jj diff -r 'mutable()'`.
+  - `jj git push` now accepts a `--named NAME=REVISION` argument to create a named
+    bookmark and immediately push it.
+  - The 'how to resolve conflicts' hint that is shown when conflicts appear can
+    be hidden by setting `hints.resolving-conflicts = false`.
+  - `jj op diff` and `jj op log --op-diff` now show changes to which commits
+    correspond to working copies.
+  - `jj op log -d` is now an alias for `jj op log --op-diff`.
+  - `jj bookmark move --to/--from` can now be abbreviated to `jj bookmark move -t/-f`
+  - `jj bookmark list` now supports `--sort` option. Similar to `git branch --sort`.
+    See `jj bookmark list --help` for more details.
+  - A new command `jj revert` is added, which is similar to `jj backout` but
+    adds the `--destination`, `--insert-after`, and `--insert-before` options to
+    customize the location of reverted commits.
+  - A new command `jj git root` is added, which prints the location of the Git
+    directory of a repository using the Git backend.
+  - In colocated repos, any files that jj considers added in the working copy will
+    now show up in `git diff` (as if you had run `git add --intent-to-add` on
+    them).
+  - Reversing colors is now supported. For example, to highlight words by
+    reversing colors rather than underlining, you can set
+    `colors."diff token"={ underline = false, reverse = true }` in your config.
+  - Added `revsets.log-graph-prioritize`, which can be used to configure
+    which branch in the `jj log` graph is displayed on the left instead of `@`
+    (e.g. `coalesce(description("megamerge\n"), trunk())`)
+  - `jj resolve` now accepts new built-in merge tools `:ours` and `:theirs`.
+    These merge tools accept side #1 and side #2 of the conflict respectively.
+
+  Fixed bugs
+  - `jj log -p --stat` now shows diff stats as well as the default color-words/git
+    diff output. #5986
+  - The built-in diff editor now correctly handles deleted files.
+    #3702
+  - The built-in diff editor now correctly retains the executable bit on newly
+    added files when splitting. #3846
+  - `jj config set`/`--config` value parsing rule is relaxed in a way that
+    unquoted apostrophes are allowed.
+    #5748
+  - `jj fix` could previously create new conflicts when a descendant of a fixed
+    revision was already correctly formatted.
+
+  Contributors
+    Thanks to the people who made this release happen!
+  - Aleksey Kuznetsov (@zummenix)
+  - Anton Älgmyr (@algmyr)
+  - Austin Seipp (@thoughtpolice)
+  - Baltasar Dinis (@bsdinis)
+  - Benjamin Tan (@bnjmnt4n)
+  - Brandon Hall (@tenkabuto)
+  - Caleb White (@calebdw)
+  - Daniel Luz (@mernen)
+  - David Rieber (@drieber)
+  - demize (@demize)
+  - Emily (@emilazy)
+  - Evan Mesterhazy (@emesterhazy)
+  - Fedor Sheremetyev (@sheremetyev)
+  - George Christou (@gechr)
+  - Ilya Grigoriev (@ilyagr)
+  - Jakob Hellermann (@jakobhellermann)
+  - Jo Liss (@joliss)
+  - Joachim Desroches (@jedesroches)
+  - Johannes Altmanninger (@krobelus)
+  - Jonathan Gilchrist (@jgilchrist)
+  - Kenyon Ralph (@kenyon)
+  - Lucas Garron (@lgarron)
+  - Martin von Zweigbergk (@martinvonz)
+  - Nick Pupko (@npupko)
+  - Philip Metzger (@PhilipMetzger)
+  - Raphael Borun Das Gupta (@das-g)
+  - Remo Senekowitsch (@senekor)
+  - Robin Stocker (@robinst)
+  - Scott Taylor (@scott2000)
+  - Siva Mahadevan (@svmhdvn)
+  - Vincent Ging Ho Yim (@cenviity)
+  - Yuya Nishihara (@yuja)
+ReleaseNotesUrl: https://github.com/jj-vcs/jj/releases/tag/v0.28.0
+Documentations:
+- DocumentLabel: Homepage
+  DocumentUrl: https://jj-vcs.github.io/jj/
+ManifestType: defaultLocale
+ManifestVersion: 1.9.0

@@ -50,9 +50,9 @@ Just provide the path to manifest as parameter:
 
 To submit a package to this repository, you should follow these steps:
 
-1. Follow the [Contributing](#contributing) guidelines below.
+1. Follow the [Contributing](../CONTRIBUTING.md) guidelines.
 2. [Author](Authoring.md) a Manifest.
-3. [Test](#test-your-manifest) your manifest.
+3. [Test](#testing-a-manifest) your manifest.
 4. [Submit](#submit-your-pr) your pull request (PR).
 5. Respond to any feedback in your PR.
 
