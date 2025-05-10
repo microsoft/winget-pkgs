@@ -1,0 +1,42 @@
+id: scheduledSearch.closeAreaExternal
+name: GitOps.PullRequestIssueManagement
+description: Close stale pull requests marked with "Blocking-Issue"
+owner:
+resource: repository
+disabled: false
+where:
+configuration:
+  resourceManagementConfiguration:
+    scheduledSearches:
+      - description: >-
+          Search for PR where -
+          * Pull Request is Open
+          * Pull request has the label Blocking-Issue
+          * Has not had activity in the last 15 days
+
+          Then -
+          * Add reply notifying author
+          * Close the PR
+        frequencies:
+          - hourly:
+              hour: 24
+        filters:
+          - isPullRequest
+          - isOpen
+          - hasLabel:
+              label: Blocking-Issue
+          - noActivitySince:
+              days: 15
+        actions:
+          - addReply:
+                reply: >-
+                  Hello @${issueAuthor},
+
+
+                  Thank you for your contribution. This Pull Request has been identified as being blocked by a known issue. Since there has been no recent activity on this PR, it will be automatically closed. Please re-submit your PR with the necessary changes once the blocking issue is resolved. If an issue has not been linked, please tag whomever added the Blocking-Issue label for additional information.
+
+
+                  Template: msftbot/noRecentActivity/blockingIssue
+          - closeIssue
+onFailure:
+onSuccess:
