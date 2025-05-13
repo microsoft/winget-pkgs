@@ -1,50 +1,63 @@
 # Troubleshooting Errors
 
-Many of the issues can be caught before submitting your PR, if you follow these steps:
-1) Validate the manifest file by running ```winget validate <path-to-the-manifest>```
-2) Install the manifest on your local machine. This will verify the Sha256 Hash and check whether the application is able to install silently (without any human interaction) or not. You can do this by running: ```winget install --manifest <path-to-the-manifest>``` or ```winget install -m <path-to-the-manifest>```
+Many issues can be caught before submitting your PR by following these steps:
+1. **Validate the manifest file**:
+   Run:
+   ```winget validate <path-to-the-manifest>```
 
-Once those steps pass, here are some troubleshooting tips:
+2. **Install the manifest locally**:
+   This verifies the Sha256 Hash and checks if the application installs silently (without human interaction). Run:
+   ```winget install --manifest <path-to-the-manifest>```
+   or
+   ```winget install -m <path-to-the-manifest>```
+
+If these steps pass, here are some troubleshooting tips:
+
 
 ## Manifest-Validation-Error
 
-Manifest validation errors indicate that there is a problem with the manifest file. Many of the issues can be caught before submitting your PR, when you validate the manifests before submission:  ```winget validate <path-to-the-manifest>```
+Manifest validation errors indicate a problem with the manifest file. Validate the manifests before submission:
+```winget validate <path-to-the-manifest>```
 
-For documentation on the manifest specification, please see the [manifest schema](manifest/README.md)
+For documentation on the manifest specification, see the [manifest schema](manifest/README.md).
 
-Here are some common mistakes not discovered by the winget validation.
+### Common Mistakes:
+1. **Publisher folder and application name folder**:
+   Ensure they match the `PackageIdentifier` of the manifest.
+2. **Typos in the filename**:
+   Filenames must match the `PackageIdentifier`.
 
-1) Check the publisher folder and application name folder.
-2) Check for typos in the filename.
-
-Both of them should match the `PackageIdentifier` of the manifest.
 > [!IMPORTANT]
-`PackageIdentifier` is case-sensitive and so the path of the manifest and filename.
+`PackageIdentifier` is case-sensitive, as are the manifest path and filename.
 
-PackageIdentifier: `<publisher>.<name>`
-
-Manifest Path: `<first-letter-of-the-publisher>\<publisher>\<name>\<version>`
-
-Filenames:
-- For singleton manifest: `<publisher>.<name>.yaml`
-- For multi-manifests
+- **PackageIdentifier**: `<publisher>.<name>`
+- **Manifest Path**: `<first-letter-of-the-publisher>\<publisher>\<name>\<version>`
+- **Filenames**:
   - Installer: `<PackageIdentifier>.installer.yaml`
   - Locale: `<PackageIdentifier>.locale.<language-code>.yaml`
   - Version: `<PackageIdentifier>.yaml`
 
 ## Binary-Validation-Error
 
-Binary validation errors indicate that the installer failed static analysis.
+Binary validation errors indicate the installer failed static analysis.
 
-Here are some common causes for the Binary-Validation-Error label:
-1) The Sha256 HASH in the manifest does not match the HASH of the installer. Run ```winget hash <installer>``` to generate the hash.
-2) The URL is not valid. Make sure the URL to the installer is publicly available and valid.
-3) The installer has been identified as malware. If the installer is detected as malware, you can submit the installer to the defender team for [analysis](https://docs.microsoft.com/windows/security/threat-protection/windows-defender-antivirus/antivirus-false-positives-negatives#submit-a-file-to-microsoft-for-analysis) as a potential false positive.
+### Common Causes:
+1. **Sha256 HASH mismatch**:
+   Run:
+   ```winget hash <installer>```
+   to generate the correct hash.
+2. **Invalid URL**:
+   Ensure the installer URL is publicly available and valid.
+3. **Malware detection**:
+   If the installer is flagged as malware, submit it to the defender team for [analysis](https://docs.microsoft.com/windows/security/threat-protection/windows-defender-antivirus/antivirus-false-positives-negatives#submit-a-file-to-microsoft-for-analysis) as a potential false positive.
+
 
 ## SmartScreen-Validation-Error
 
-Windows Defender SmartScreen validation errors indicate that the URL you provided has a bad reputation.
+Windows Defender SmartScreen validation errors indicate the URL provided has a bad reputation.
+
 
 ## Internal-Error
 
-Internal-Errors indicate there was an error hit by the service. Microsoft will investigate these and pursue a fix. For a list of known issues, see our repository [issues](https://github.com/microsoft/winget-pkgs/issues)
+Internal errors indicate a service issue. Microsoft will investigate and pursue a fix.
+For a list of known issues, see our repository [issues](https://github.com/microsoft/winget-pkgs/issues).
