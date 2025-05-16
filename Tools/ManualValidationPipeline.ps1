@@ -6,7 +6,7 @@
 #Notes: Utilities to streamline evaluating 3rd party PRs.
 
 
-$build = 1045
+$build = 1055
 $appName = "ManualValidationPipeline"
 Write-Host "$appName build: $build"
 $MainFolder = "C:\ManVal"
@@ -91,7 +91,8 @@ $b -match $a.DisplayVersion
 "Result: Failed",  #9
 "[error] Manifest Warning:",#10
 "[error] Manifest:",#11
-"Exception Message"#12
+"Exception Message",#12
+"[error] "#13
 
 $Actions = @{}
 $Actions.Approved = "Approved"
@@ -105,17 +106,18 @@ $Actions.Squash = "Squash"
 $Actions.Waiver = "Waiver"
 
 $Labels = @{}
+
 $Labels.403 = "Validation-Forbidden-URL-Error"
 $Labels.404 = "Validation-404-Error"
 $Labels.AGR = "Agreements"
-$Labels.APP = "Azure-Pipeline-Passed"
 $Labels.ANA = "Author-Not-Authorized"
 $Labels.ANF = "Manifest-AppsAndFeaturesVersion-Error"
+$Labels.APP = "Azure-Pipeline-Passed"
 $Labels.BI = "Blocking-Issue"
 $Labels.BMM = "Bulk-Modify-Metadata"
 $Labels.BVE = "Binary-Validation-Error"
-$Labels.CR = "Changes-Requested"
 $Labels.CLA = "Needs-CLA"
+$Labels.CR = "Changes-Requested"
 $Labels.DI = "DriverInstall"
 $Labels.EAT = "Error-Analysis-Timeout"
 $Labels.EHM = "Error-Hash-Mismatch"
@@ -130,35 +132,34 @@ $Labels.IEM = "Internal-Error-Manifest"
 $Labels.IEU = "Internal-Error-URL"
 $Labels.IOD = "Interactive-Only-Download"
 $Labels.IOI = "3AInteractive-Only-Installer"
-$Labels.LVR = "Last-Version-Removal"
 $Labels.LBI = "License-Blocks-Install"
+$Labels.LVR = "Last-Version-Removal"
 $Labels.MA = "Moderator-Approved"
 $Labels.MIVE = "Manifest-Installer-Validation-Error"
 $Labels.MMC = "Manifest-Metadata-Consistency"
-$Labels.MVE = "Manifest-Validation-Error"
 $Labels.MV = "Manually-Validated"
+$Labels.MVE = "Manifest-Validation-Error"
 $Labels.NA = "Needs-Attention"
 $Labels.NAF = "Needs-Author-Feedback"
 $Labels.NB = "Network-Blocker"
 $Labels.NM = "New-Manifest"
+$Labels.NMM = "Needs-Manual-Merge"
 $Labels.NP = "New-Package"
 $Labels.NR = "Needs-Review"
-$Labels.NSA = "Internal-Error-NoSupportedArchitectures"
-$Labels.NMM = "Needs-Manual-Merge"
 $Labels.NRA = "No-Recent-Activity"
-$Labels.NP = "New-Package"
-$Labels.PF = "Project-File"
-$Labels.RB = "Reboot"
-$Labels.RET = "Retry-1"
-$Labels.SA = "Scripted-Application"
+$Labels.NSA = "Internal-Error-NoSupportedArchitectures"
 $Labels.OUF = "Validation-Open-Url-Failed"
 $Labels.PD = "Possible-Duplicate"
+$Labels.PF = "Project-File"
 $Labels.PRE = "PullRequest-Error"
 $Labels.PT12 = "Policy-Test-1.2"
 $Labels.PT23 = "Policy-Test-2.3"
 $Labels.PT27 = "Policy-Test-2.7"
-$Labels.UVE = "URL-Validation-Error"
+$Labels.RB = "Reboot"
+$Labels.RET = "Retry-1"
+$Labels.SA = "Scripted-Application"
 $Labels.UF = "Unexpected-File"
+$Labels.UVE = "URL-Validation-Error"
 $Labels.VC = "Validation-Completed"
 $Labels.VCR = "Validation-Certificate-Root"
 $Labels.VD = "Validation-Domain"
@@ -182,7 +183,8 @@ $PushMePRWho = "Author,MatchString`nspectopo,Mozilla.Firefox`ntrenly,Standardize
 
 $QueueInputs = "No suitable installer found for manifest", #0
 "Caught std::exception: bad allocation", #1
-"exit code: -1073741515"#2
+"exit code: -1073741515",#2
+"exit code: -1978335216"#3
 
 #endregion
 
@@ -202,52 +204,8 @@ Function Get-TrackerVMRunTracker {
 			$HourLatch = $False
 		}
 		if ($HourLatch) {#Hourly Run functionality
+			Get-ScheduledRun 
 			$HourLatch = $False
-			[console]::beep(500,250);[console]::beep(500,250);[console]::beep(500,250) #Beep 3x to alert the PC user.
-			$Host.UI.RawUI.WindowTitle = "Periodic Run"
-			
-			#Check for yesterday's report and create if missing. 
-			$Month = (Get-Culture).DateTimeFormat.GetMonthName((Get-Date).Month)
-			$Yesterday = (get-date).AddDays(-1)
-			$YesterdayFormatted = (get-date $Yesterday -f MMddyy)
-			$ReportName = "$logsFolder\$Month\$YesterdayFormatted-Report.txt"
-			if (Get-Content $ReportName -ErrorAction SilentlyContinue) {
-				Write-Host "Report for $YesterdayFormatted found."
-			} else {
-				Write-Host "Report for $YesterdayFormatted not found."
-				Get-PRFullReport -Today $YesterdayFormatted
-			} 
-			
-			$PresetList = ("Defender","Duplicate","HVR","LVR","MMC","ToWork3","Approval2","VCMA")
-			foreach ($Preset in $PresetList) {
-				$Results = (Get-SearchGitHub -Preset $Preset -nBMM).number
-				Write-Output "$(Get-Date -Format T) Starting $Preset with $($Results.length) Results"
-				if ($Results) {
-					switch ($Preset) {
-						"Approval2" {
-							$Results| %{
-								write-output "$(get-date): $_";
-								Get-PRManifest -pr $_ | clip; 
-								sleep 5
-							}
-						}
-						"VCMA" {
-							$Results| %{Approve-PR -PR $_;Get-MergePR -PR $_}
-						}
-						Default {
-							$Results | %{Get-PRLabelAction -PR $_ }
-						}
-					}#end switch Preset
-				}#end if Results12
-				Write-Output "$(Get-Date -Format T) Completing $Preset with $($Results.length) Results"
-			}#End for preset
-			
-			Write-Output "$(Get-Date -Format T) Starting PushMePRYou with ??? Results"
-			$PushMePRWho | %{write-host $_.Author;Get-PushMePRYou -Author $_.Author -MatchString $_.MatchString}
-			Write-Output "$(Get-Date -Format T) Completing PushMePRYou with ??? Results"
-			if (([int](get-date -f mm) -eq 20) -OR ([int](get-date -f mm) -eq 50)) {
-				sleep (60-(get-date -f ss))#Sleep out the minute.
-			}
 		}
 		
 		Clear-Host
@@ -256,6 +214,8 @@ Function Get-TrackerVMRunTracker {
 		$VMRAM = Get-ArraySum $GetStatus.RAM
 		$ramColor = "green"
 		$valMode = Get-TrackerMode
+
+(Get-Status).vm | %{$path = "C:\ManVal\vm\$_\manifest\Package.yaml";(gc $path) -replace "ManifestVersion: 1..0$","ManifestVersion: 1.10.0" | out-file $path}
 
 		if ($VMRAM -gt ($SystemRAM*0.5)) {
 			$ramColor = "red"
@@ -330,7 +290,7 @@ Function Get-TrackerVMRunTracker {
 		}
 		Start-Sleep 5;
 	}
-	Write-Progress -Completed
+	#Write-Progress -Completed
 }
 
 #Second tab
@@ -352,8 +312,8 @@ Function Get-PRWatch {
 	$Host.UI.RawUI.WindowTitle = "PR Watcher"#I'm a PR Watcher, watchin PRs go by. 
 	#if ((Get-Command Get-TrackerVMSetMode).name) {Get-TrackerVMSetMode "Approving"}
 
-	Write-Host "| Timestmp | $(Get-PadRight PR# 6) | $(Get-PadRight PackageIdentifier) | $(Get-PadRight prVersion 15) | A | R | G | W | F | I | D | V | $(Get-PadRight ManifestVer 14) | OK |"
-	Write-Host "| -------- | ----- | ------------------------------- | -------------- | - | - | - | - | - | - | - | - | ------------- | -- |"
+	Write-Host " | Timestmp | $(Get-PadRight PR# 6) | $(Get-PadRight PackageIdentifier) | $(Get-PadRight prVersion 15) | A | R | G | W | F | I | D | V | $(Get-PadRight ManifestVer 14) | OK |"
+	Write-Host " | -------- | ----- | ------------------------------- | -------------- | - | - | - | - | - | - | - | - | ------------- | -- |"
 
 	while($True -gt 0){
 		$clip = (Get-Clipboard)
@@ -1521,7 +1481,7 @@ Function Get-PRWatch {
 
 
 
-				Write-Host -nonewline -f $matchColor "| $(Get-Date -Format T) | $PR | $(Get-PadRight $PackageIdentifier) | "
+				Write-Host -nonewline -f $matchColor " | $(Get-Date -Format T) | $PR | $(Get-PadRight $PackageIdentifier) | "
 
 				#Variable effervescence
 				$prAuth = "+"
@@ -1558,7 +1518,7 @@ Function Get-PRWatch {
 						Add-PRToQueue -PR $PR
 						# if ($title[-1] -match $hashPRRegex) {
 							# if ((Get-Command Get-TrackerVMValidate).name) {
-								Add-ToPRQueue -PR $PR
+								#Add-PRToQueue -PR $PR
 								# Get-TrackerVMValidate -Silent -InspectNew
 							# } else {
 								# Get-Sandbox ($title[-1] -replace"#","")
@@ -1884,7 +1844,7 @@ Function Get-RunPRWatchAutomation {
 		$Results = (Get-SearchGitHub -Preset $Preset).number
 	)
 	Write-Output "$(Get-Date -Format T) Starting $Preset with $($Results.length) Results"
-	$Results| %{
+	$Results | %{
 		write-output "$(Get-Date): $_";
 		Get-PRManifest -PR $_ | clip; 
 		sleep $SleepDuration
@@ -2207,6 +2167,9 @@ Function Get-PRLabelAction { #Soothing label action.
 					if ($null -eq $UserInput) {
 						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 57 -SearchString $MagicStrings[0] -Length 10 
 					}
+					if ($null -eq $UserInput) {
+						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 42 -SearchString $MagicStrings[0] -Length 10 
+					}
 					if ($UserInput) {
 						$UserInput = Get-AutomatedErrorAnalysis $UserInput
 						Reply-ToPR -PR $PR -UserInput $UserInput -CannedMessage AutoValEnd
@@ -2237,6 +2200,9 @@ Function Get-PRLabelAction { #Soothing label action.
 				}
 				$Labels.IEM {
 					$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 15 -SearchString $MagicStrings[1]
+					if ($null -match $UserInput) {
+						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 30 -SearchString $MagicStrings[13]
+					}
 					if ($null -match $UserInput) {
 						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 25 -SearchString $MagicStrings[4] -length 7
 					}
@@ -2304,7 +2270,7 @@ Function Get-PRLabelAction { #Soothing label action.
 					Get-MergePR -PR $PR
 				}
 				$Labels.NP {
-					if ($PRLabels -notmatch $Labels.MA) {
+					if ((($PRLabels -join " ") -notmatch $Labels.MA)) {
 						Add-PRToQueue -PR $PR
 					}
 				}
@@ -2345,6 +2311,7 @@ Function Get-PRLabelAction { #Soothing label action.
 				}
 				$Labels.VEE {
 					Get-AutoValLog -PR $PR
+					Add-PRToQueue -PR $PR
 				}
 				$Labels.VIE {
 					Get-AutoValLog -PR $PR
@@ -2371,9 +2338,11 @@ Function Get-PRLabelAction { #Soothing label action.
 				}
 				$Labels.VSE {
 					Get-AutoValLog -PR $PR
+					Add-PRToQueue -PR $PR
 				}
 				$Labels.VUF {
 					Get-AutoValLog -PR $PR
+					Add-PRToQueue -PR $PR
 				}
 				$Labels.VUE {
 					Get-Autowaiver -PR $PR
@@ -2387,6 +2356,66 @@ Function Get-PRLabelAction { #Soothing label action.
 			}#end Switch Label
 		}#end Foreach Label
 	}#end if PRLabels
+}
+
+Function Get-ScheduledRun {
+		[console]::beep(500,250);[console]::beep(500,250);[console]::beep(500,250) #Beep 3x to alert the PC user.
+		$Host.UI.RawUI.WindowTitle = "Periodic Run"
+		
+		#Check for yesterday's report and create if missing. 
+		$Month = (Get-Culture).DateTimeFormat.GetMonthName((Get-Date).Month)
+		$Yesterday = (get-date).AddDays(-1)
+		$YesterdayFormatted = (get-date $Yesterday -f MMddyy)
+		$ReportName = "$logsFolder\$Month\$YesterdayFormatted-Report.txt"
+		if (Get-Content $ReportName -ErrorAction SilentlyContinue) {
+			Write-Host "Report for $YesterdayFormatted found."
+		} else {
+			Write-Host "Report for $YesterdayFormatted not found."
+			Get-PRFullReport -Today $YesterdayFormatted
+		} 
+		
+		$PresetList = ("Defender","Duplicate","HVR","IEDS","LVR","MMC","NMM","ToWork3","Approval","Approval2","VCMA")
+		foreach ($Preset in $PresetList) {
+			$Results = (Get-SearchGitHub -Preset $Preset -nBMM).number
+			Write-Output "$(Get-Date -Format T) Starting $Preset with $($Results.length) Results"
+			if ($Results) {
+				switch ($Preset) {
+					"Approval" {
+						$Results = (Get-SearchGitHub Approval -NewPackages).number 
+						$Results | %{Add-PRToQueue -PR $_}
+					}
+					"Approval2" {
+						$Results | %{
+							write-output "$(get-date): $_";
+							Get-PRManifest -pr $_ | clip; 
+							sleep 5
+						}
+					}
+					"IEDS" {
+						$Results | %{Add-PRToQueue -PR $_}
+					}
+					"VCMA" {
+						$GitHubResults = Get-SearchGitHub VCMA
+						$AnHourAgo = (get-date).AddHours(-1)
+						$Results = ($GitHubResults | where {[TimeZone]::CurrentTimeZone.ToLocalTime($_.updated_at) -lt $AnHourAgo}).number 
+						#Time, as a number, is always increasing. So the past is always less than the present, which is always less than the future.
+						$Results | %{Approve-PR -PR $_;Get-MergePR -PR $_}
+					}
+					Default {
+						$Results | %{Get-PRLabelAction -PR $_ }
+					}
+				}#end switch Preset
+			}#end if Results12
+			Write-Output "$(Get-Date -Format T) Completing $Preset with $($Results.length) Results"
+		}#End for preset
+		
+		
+		Write-Output "$(Get-Date -Format T) Starting PushMePRYou with $($PushMePRWho.count) Results"
+		$PushMePRWho | %{write-host $_.Author;Get-PushMePRYou -Author $_.Author -MatchString $_.MatchString}
+		Write-Output "$(Get-Date -Format T) Completing PushMePRYou with $($PushMePRWho.count) Results"
+		if (([int](get-date -f mm) -eq 20) -OR ([int](get-date -f mm) -eq 50)) {
+			sleep (60-(get-date -f ss))#Sleep out the minute.
+		}
 }
 
 Function Get-LogFromCommitFile {
@@ -2518,6 +2547,7 @@ Function Get-SearchGitHub {
 		$Page = 1,
 		[int]$Days,
 		[Switch]$BMM,
+		[Switch]$NewPackages,
 		[Switch]$nBMM,
 		[Switch]$IEDS,
 		[Switch]$NotWorked,
@@ -2672,8 +2702,11 @@ Function Get-SearchGitHub {
 	if ($NotWorked) {
 		$Url += $HaventWorked
 	}
+	if ($NewPackages) {
+		$Url += "label:New-Package+"
+	}
 	if ($Title) {
-		$Url += "$Title in:title"
+		$Url += "$Title in:title+"
 	}
 	if ($BMM) {
 		$Url += "label:$($Labels.BMM)+"
@@ -2769,8 +2802,8 @@ Function Get-SearchGitHub {
 			$Url += $nNA
 		}
 		"VCMA"{
-			$date = Get-Date (Get-Date).AddHours(-1) -Format "yyyy-MM-dd"
-			$createdDate = "created:<$($date)+" 
+			#$date = Get-Date (Get-Date).AddHours(-1) -Format "yyyy-MM-dd"
+			#$createdDate = "created:<$($date)+" 
 			$Url += $createdDate;
 			$Url += $Approved
 			$Url += $VC
@@ -2912,7 +2945,7 @@ Function Get-CannedMessage {
 			$out = "Hi $Username`n`nThis package installer is still available. Why should it be removed?"
 		}
 		"SequenceNoElements" {
-			$out = "> Sequence contains no elements`n`n - $GitHubBaseUrl/issues/133371"
+			$out = "> Sequence contains no elements`n`n - This error means that this PR diff Master had no output. In other words, it's like a merge conflict."
 		}
 		"Unavailable" {
 			$out = "Hi $Username`n`nThe installer isn't available from the publisher's website:"
@@ -2986,200 +3019,205 @@ Function Get-AutoValLog {
 		[switch]$Silent,
 		$notes = ""
 	)
-	$DownloadSeconds = 8;
-	$LowerOps = $true;
-	$WaiverList = Get-ValidationData -Property AutoWaiverLabel
-	#Get-Process *photosapp* | Stop-Process
-	$BuildNumber = Get-BuildFromPR -PR $PR 
-	if ($BuildNumber) {
-		$FileList = $null
-		[int]$BackoffSeconds = 0
-		
-		while ($FileList -eq $null) {
-			try {
-				#This downloads to Windows default location, which has already been set to $DestinationPath
-				Start-Process "$ADOMSBaseUrl/$ADOMSGUID/_apis/build/builds/$BuildNumber/artifacts?artifactName=InstallationVerificationLogs&api-version=7.1&%24format=zip"
-				if ($WhatIf) {
-					write-host "$ADOMSBaseUrl/$ADOMSGUID/_apis/build/builds/$BuildNumber/artifacts?artifactName=InstallationVerificationLogs&api-version=7.1&%24format=zip"
-				}
-				Start-Sleep $DownloadSeconds;
-				if (!(Test-Path $ZipPath) -AND !$Force) {
-					$UserInput = "No logs."
-					$out = Reply-ToPR -PR $PR -UserInput $UserInput -CannedMessage AutoValEnd
-					Write-Host $UserInput
-					Break;
-				}
-				Remove-Item $LogPath -Recurse -ErrorAction Ignore
-				Expand-Archive $ZipPath -DestinationPath $DestinationPath;
-				Remove-Item $ZipPath
-				if ($CleanoutDirectory) {
-					Get-ChildItem $DestinationPath | Remove-Item -Recurse
-				}
-				$FileList = (Get-ChildItem $LogPath).FullName
-			} catch {
-				if ($BackoffSeconds -gt 60) {
-					$UserInput = "Build $BuildNumber not found."
-					Continue;
-				}
-				$AddSeconds = Get-Random -min 1 -max 5
-				$BackoffSeconds += $AddSeconds
-				Write-Host "Can't access $DestinationPath or a subfolder. Backing off another $AddSeconds seconds, for $BackoffSeconds total seconds."
-				sleep $BackoffSeconds
-			}
-		}
-		
-		[Array]$UserInput = $null
-		foreach ($File in $filelist) {
-			if ($File -match "png") {
-				Start-Process $File
-				$UserInput += "Image detected.`n"
-			} #Open PNGs with default app.
-			$UserInput += (Get-Content $File) -split "`n"
-		}
-		$UserInput = $UserInput | Where-Object {
-			$_ -match '[[]FAIL[]]' -OR 
-			$_ -match 'error' -OR 
-			$_ -match 'exception' -OR 
-			$_ -match 'exit code' -OR 
-			$_ -match 'fail' -OR 
-			$_ -match 'manual review' -OR 
-			$_ -match 'No suitable' -OR 
-			$_ -match 'not supported' -OR #not supported by this processor type
-			#$_ -match 'not applicable' -OR 
-			$_ -match 'unwanted' -OR #PUA
-			$_ -match 'Unable to locate nested installer' -OR
-			$_ -match 'space' -OR
-			$_ -match 'cannot install' 
-		}
-		if ($WhatIf) {
-			write-host "File $file - UserInput $UserInput Length $($UserInput.Length)"
-		}
-		$UserInput = $UserInput -split "`n" | Select-Object -Unique;
-		$UserInput = $UserInput -replace "Standard error: ",$null
-		$UserReplace = $UserInput -replace "\\","\\" -replace "\[","\["-replace "\]","\]"-replace "\*","\*"-replace "\+","\+"
-
-		if ($null -notmatch ($UserReplace)) {
-			if (($UserInput -match "Installer failed security check") -OR ($UserInput -match "Operation did not complete successfully because the file contains a virus or potentially unwanted software")) {
-				$LowerOps = $false
-				$UserInput = Get-AutomatedErrorAnalysis $UserInput
-				write-host "DefenderFail - UserInput $UserInput"
-			}
-			if ($UserInput -match "SQL error or missing database") {
-				Get-GitHubPreset Retry -PR $PR
-					if (!($Silent)) {
-						Write-Output "PR $PR - SQL error or missing database"
+		$PRState = Get-PRStateFromComments $PR
+		if ((!($PRState | where {$_.event -eq "AutoValEnd"})) -OR (($PRState | where {$_.event -eq "PreValidation"})[-1].created_at -gt ($PRState | where {$_.event -eq "AutoValEnd"})[-1].created_at)) { #Last Prevalidation was 8 hours ago.
+			$DownloadSeconds = 8;
+			$LowerOps = $true;
+			$WaiverList = Get-ValidationData -Property AutoWaiverLabel
+			#Get-Process *photosapp* | Stop-Process
+			$BuildNumber = Get-BuildFromPR -PR $PR 
+	
+		if ($BuildNumber -gt 0) {
+			$FileList = $null
+			[int]$BackoffSeconds = 0
+			
+			while ($FileList -eq $null) {
+				try {
+					#This downloads to Windows default location, which has already been set to $DestinationPath
+					Start-Process "$ADOMSBaseUrl/$ADOMSGUID/_apis/build/builds/$BuildNumber/artifacts?artifactName=InstallationVerificationLogs&api-version=7.1&%24format=zip"
+					if ($WhatIf) {
+						write-host "$ADOMSBaseUrl/$ADOMSGUID/_apis/build/builds/$BuildNumber/artifacts?artifactName=InstallationVerificationLogs&api-version=7.1&%24format=zip"
 					}
-				Open-PRInBrowser -PR $PR
+					Start-Sleep $DownloadSeconds;
+					if (!(Test-Path $ZipPath) -AND !$Force) {
+						$UserInput = "No logs."
+						$out = Reply-ToPR -PR $PR -UserInput $UserInput -CannedMessage AutoValEnd
+						Write-Host $UserInput
+						Break;
+					}
+					Remove-Item $LogPath -Recurse -ErrorAction Ignore
+					Expand-Archive $ZipPath -DestinationPath $DestinationPath;
+					Remove-Item $ZipPath
+					if ($CleanoutDirectory) {
+						Get-ChildItem $DestinationPath | Remove-Item -Recurse
+					}
+					$FileList = (Get-ChildItem $LogPath).FullName
+				} catch {
+					if ($BackoffSeconds -gt 60) {
+						$UserInput = "Build $BuildNumber not found."
+						Continue;
+					}
+					$AddSeconds = Get-Random -min 1 -max 5
+					$BackoffSeconds += $AddSeconds
+					Write-Host "Can't access $DestinationPath or a subfolder. Backing off another $AddSeconds seconds, for $BackoffSeconds total seconds."
+					sleep $BackoffSeconds
+				}
 			}
-
-			$UserInput = $UserInput -split "`n"
-			$UserInput = $UserInput -notmatch " success or error status`: 0"
-			$UserInput = $UserInput -notmatch "``Windows Error Reporting``"
-			$UserInput = $UserInput -notmatch "--- End of inner exception stack trace ---"
-			$UserInput = $UserInput -notmatch "AppInstallerRepositoryCore"
-			$UserInput = $UserInput -notmatch "api-ms-win-core-errorhandling"
-			$UserInput = $UserInput -notmatch "appropriate application package"
-			$UserInput = $UserInput -notmatch "2: 3: Error"
-			$UserInput = $UserInput -notmatch "because the current user does not have that package installed"
-			$UserInput = $UserInput -notmatch "Cannot create a file when that file already exists"
-			$UserInput = $UserInput -notmatch "Could not create system restore point"
-			$UserInput = $UserInput -notmatch "Dest filename"
-			$UserInput = $UserInput -notmatch "ERROR: Signature Update failed"
-			$UserInput = $UserInput -notmatch "Exception during executable launch operation System.InvalidOperationException: No process is associated with this object."
-			$UserInput = $UserInput -notmatch "Exit code`: 0"
-			$UserInput = $UserInput -notmatch "Failed to open available source: msstore"
-			$UserInput = $UserInput -notmatch "ISWEBVIEW2INSTALLED"
-			$UserInput = $UserInput -notmatch "MpCmdRun"
-			$UserInput = $UserInput -notmatch "ResultException"
-			$UserInput = $UserInput -notmatch "SchedNetFx"
-			$UserInput = $UserInput -notmatch "Setting error JSON 1.0 fields"
-			$UserInput = $UserInput -notmatch "Terminating context"
-			$UserInput = $UserInput -notmatch "The process cannot access the file because it is being used by another process"
-			$UserInput = $UserInput -notmatch "ThrowIfExceptional"
-			$UserInput = $UserInput -notmatch "Windows Installer installed the product"
-			$UserInput = $UserInput -notmatch "with working directory 'D"
-		}
-		$UserReplace = $UserInput -replace "\\","\\" -replace "\[","\["-replace "\]","\]"-replace "\*","\*"-replace "\+","\+"
-
-		if ($null -notmatch ($UserReplace)) {
-			$UserInput = $UserInput | Select-Object -Unique
-
+			
+			[Array]$UserInput = $null
+			foreach ($File in $filelist) {
+				if ($File -match "png") {
+					Start-Process $File
+					$UserInput += "Image detected.`n"
+				} #Open PNGs with default app.
+				$UserInput += (Get-Content $File) -split "`n"
+			}
+			$UserInput = $UserInput | Where-Object {
+				$_ -match '[[]FAIL[]]' -OR 
+				$_ -match 'error' -OR 
+				$_ -match 'exception' -OR 
+				$_ -match 'exit code' -OR 
+				$_ -match 'fail' -OR 
+				$_ -match 'manual review' -OR 
+				$_ -match 'No suitable' -OR 
+				$_ -match 'not supported' -OR #not supported by this processor type
+				#$_ -match 'not applicable' -OR 
+				$_ -match 'unwanted' -OR #PUA
+				$_ -match 'Unable to locate nested installer' -OR
+				$_ -match 'space' -OR
+				$_ -match 'cannot install' 
+			}
 			if ($WhatIf) {
-				Write-Host "WhatIf: Reply-ToPR (A) -PR $PR -UserInput $UserInput -CannedMessage AutoValEnd"
-			} else {
-				$out = Reply-ToPR -PR $PR -UserInput $UserInput -CannedMessage AutoValEnd
+				write-host "File $file - UserInput $UserInput Length $($UserInput.Length)"
 			}
+			$UserInput = $UserInput -split "`n" | Select-Object -Unique;
+			$UserInput = $UserInput -replace "Standard error: ",$null
+			$UserReplace = $UserInput -replace "\\","\\" -replace "\[","\["-replace "\]","\]"-replace "\*","\*"-replace "\+","\+"
 
-			$UserInput = $UserInput -replace "-",$null
+			if ($null -notmatch ($UserReplace)) {
+				if (($UserInput -match "Installer failed security check") -OR ($UserInput -match "Operation did not complete successfully because the file contains a virus or potentially unwanted software")) {
+					$LowerOps = $false
+					$UserInput = Get-AutomatedErrorAnalysis $UserInput
+					write-host "DefenderFail - UserInput $UserInput"
+				}
+				if ($UserInput -match "SQL error or missing database") {
+					Get-GitHubPreset Retry -PR $PR
+						if (!($Silent)) {
+							Write-Output "PR $PR - SQL error or missing database"
+						}
+					Open-PRInBrowser -PR $PR
+				}
 
-			if ($LowerOps -eq $true) {
-				$SplitInput = ($UserInput -split "`n" )
-				foreach ($input in $QueueInputs) {
-					if($SplitInput -match $input) {
-						if ($WhatIf) {
-							Write-Host "WhatIf: Add-PRToQueue -PR $PR"
-						} else {
-							Add-PRToQueue -PR $PR
-						}
-						
-					}
-				}
-				$exitregex = "exit code: [0-9]{0,3}$"
-				$exitregex2 = "exit code: [0-9]{4,}$"
-				if(!(($UserInput -split "`n" ) -match $exitregex2)) { #4 digits bad
-					if(($UserInput -split "`n" ) -match $exitregex) { #1-3 digits good
-						if ($WhatIf) {
-							Write-Host "WhatIf: Get-CompletePR -PR $PR"
-						} else {
-							Get-CompletePR -PR $PR
-						}
-					}
-				}
-			}#end If LowerOps
-				
-			if (!($Silent)) {
+				$UserInput = $UserInput -split "`n"
+				$UserInput = $UserInput -notmatch " success or error status`: 0"
+				$UserInput = $UserInput -notmatch "``Windows Error Reporting``"
+				$UserInput = $UserInput -notmatch "--- End of inner exception stack trace ---"
+				$UserInput = $UserInput -notmatch "AppInstallerRepositoryCore"
+				$UserInput = $UserInput -notmatch "api-ms-win-core-errorhandling"
+				$UserInput = $UserInput -notmatch "appropriate application package"
+				$UserInput = $UserInput -notmatch "2: 3: Error"
+				$UserInput = $UserInput -notmatch "because the current user does not have that package installed"
+				$UserInput = $UserInput -notmatch "Cannot create a file when that file already exists"
+				$UserInput = $UserInput -notmatch "Could not create system restore point"
+				$UserInput = $UserInput -notmatch "Dest filename"
+				$UserInput = $UserInput -notmatch "ERROR: Signature Update failed"
+				$UserInput = $UserInput -notmatch "Exception during executable launch operation System.InvalidOperationException: No process is associated with this object."
+				$UserInput = $UserInput -notmatch "Exit code`: 0"
+				$UserInput = $UserInput -notmatch "Failed to open available source: msstore"
+				$UserInput = $UserInput -notmatch "ISWEBVIEW2INSTALLED"
+				$UserInput = $UserInput -notmatch "MpCmdRun"
+				$UserInput = $UserInput -notmatch "ResultException"
+				$UserInput = $UserInput -notmatch "SchedNetFx"
+				$UserInput = $UserInput -notmatch "Setting error JSON 1.0 fields"
+				$UserInput = $UserInput -notmatch "Terminating context"
+				$UserInput = $UserInput -notmatch "The process cannot access the file because it is being used by another process"
+				$UserInput = $UserInput -notmatch "The FileSystemWatcher has detected an error System.IO.ErrorEventArgs"
+				$UserInput = $UserInput -notmatch "ThrowIfExceptional"
+				$UserInput = $UserInput -notmatch "Windows Installer installed the product"
+				$UserInput = $UserInput -notmatch "with working directory 'D"
+			}
+			$UserReplace = $UserInput -replace "\\","\\" -replace "\[","\["-replace "\]","\]"-replace "\*","\*"-replace "\+","\+"
+
+			if ($null -notmatch ($UserReplace)) {
+				$UserInput = $UserInput | Select-Object -Unique
+
 				if ($WhatIf) {
-					Write-Host "WhatIf: Write-Host 'PR: $PR - $out'"
+					Write-Host "WhatIf: Reply-ToPR (A) -PR $PR -UserInput $UserInput -CannedMessage AutoValEnd"
 				} else {
-					Write-Host "PR: $PR - $out"
+					$out = Reply-ToPR -PR $PR -UserInput $UserInput -CannedMessage AutoValEnd
+				}
+
+				$UserInput = $UserInput -replace "-",$null
+
+				if ($LowerOps -eq $true) {
+					$SplitInput = ($UserInput -split "`n" )
+					foreach ($input in $QueueInputs) {
+						if($SplitInput -match $input) {
+							if ($WhatIf) {
+								Write-Host "WhatIf: Add-PRToQueue -PR $PR"
+							} else {
+								Add-PRToQueue -PR $PR
+							}
+							
+						}
+					}
+					$exitregex = "exit code: [0-9]{0,3}$"
+					$exitregex2 = "exit code: [0-9]{4,}$"
+					if(!(($UserInput -split "`n" ) -match $exitregex2)) { #4 digits bad
+						if(($UserInput -split "`n" ) -match $exitregex) { #1-3 digits good
+							if ($WhatIf) {
+								Write-Host "WhatIf: Get-CompletePR -PR $PR"
+							} else {
+								Get-CompletePR -PR $PR
+							}
+						}
+					}
+				}#end If LowerOps
+					
+				if (!($Silent)) {
+					if ($WhatIf) {
+						Write-Host "WhatIf: Write-Host 'PR: $PR - $out'"
+					} else {
+						Write-Host "PR: $PR - $out"
+					}
+				}
+			} else {
+				$UserInput = "No errors to post."
+				$Title = ((Invoke-GitHubPRRequest -PR $PR -Type "" -Output content -JSON).title);
+				if ($WhatIf) {
+					Write-Host "WhatIf: Reply-ToPR (B) -PR $PR -UserInput $UserInput -CannedMessage AutoValEnd"
+					Write-Host "WhatIf: Get-CompletePR -PR $PR"
+					Write-Host "WhatIf: Get-GitHubPreset -PR $PR Waiver"
+				} else {
+					$out = Reply-ToPR -PR $PR -UserInput $UserInput -CannedMessage AutoValEnd
+					Get-CompletePR -PR $PR
+					foreach ($Waiver in $WaiverList) {
+						if ($Title -match $Waiver.PackageIdentifier) {
+							Get-GitHubPreset -PR $PR Waiver
+						}#end if title
+					}#end foreach waiver
 				}
 			}
 		} else {
-			$UserInput = "No errors to post."
-			$Title = ((Invoke-GitHubPRRequest -PR $PR -Type "" -Output content -JSON).title);
-			if ($WhatIf) {
-				Write-Host "WhatIf: Reply-ToPR (B) -PR $PR -UserInput $UserInput -CannedMessage AutoValEnd"
-				Write-Host "WhatIf: Get-CompletePR -PR $PR"
-				Write-Host "WhatIf: Get-GitHubPreset -PR $PR Waiver"
-			} else {
+			if (!($Silent)) {
+				if ($WhatIf) {
+					Write-Host "WhatIf: Reply-ToPR (C) -PR $PR -UserInput $UserInput -CannedMessage AutoValEnd"
+					Write-Host "WhatIf: UserInput Length $($UserInput.Length)"
+				} else {
+					$out = Reply-ToPR -PR $PR -UserInput $UserInput -CannedMessage AutoValEnd
+				}
+				if ($WhatIf) {
+					Write-Host "WhatIf: Reply-ToPR (D) -PR $PR -UserInput $UserInput -CannedMessage AutoValEnd"
+				} else {
+					$out = Reply-ToPR -PR $PR -UserInput $UserInput -CannedMessage AutoValEnd
+				}
+				$UserInput = "Build $BuildNumber not found."
+				Write-Host $UserInput
 				$out = Reply-ToPR -PR $PR -UserInput $UserInput -CannedMessage AutoValEnd
-				Get-CompletePR -PR $PR
-				foreach ($Waiver in $WaiverList) {
-					if ($Title -match $Waiver.PackageIdentifier) {
-						Get-GitHubPreset -PR $PR Waiver
-					}#end if title
-				}#end foreach waiver
 			}
 		}
-	} else {
-		if (!($Silent)) {
-			if ($WhatIf) {
-				Write-Host "WhatIf: Reply-ToPR (C) -PR $PR -UserInput $UserInput -CannedMessage AutoValEnd"
-				Write-Host "WhatIf: UserInput Length $($UserInput.Length)"
-			} else {
-				$out = Reply-ToPR -PR $PR -UserInput $UserInput -CannedMessage AutoValEnd
-			}
-			if ($WhatIf) {
-				Write-Host "WhatIf: Reply-ToPR (D) -PR $PR -UserInput $UserInput -CannedMessage AutoValEnd"
-			} else {
-				$out = Reply-ToPR -PR $PR -UserInput $UserInput -CannedMessage AutoValEnd
-			}
-			$UserInput = "Build $BuildNumber not found."
-			Write-Host $UserInput
-			$out = Reply-ToPR -PR $PR -UserInput $UserInput -CannedMessage AutoValEnd
-		}
+		return $out 
 	}
-	return $out 
 }
 
 Function Get-RandomIEDS {
@@ -3374,6 +3412,7 @@ Function Approve-PR {
 
 	$out = Invoke-GitHubRequest -Method Post -Uri $uri -Body $Body 
 	$out.StatusDescription
+	Get-AddPRLabel -PR $PR -LabelName $Labels.MA
 }
 
 Function Get-ApproveBySearch {
@@ -3412,7 +3451,7 @@ Function Get-AllPRsOnClipboard {
 
 Function Get-AllPRsOnClipboardPreset ([string]$Body,[string]$Preset) {
 	$line = 0;
-	Get-AllPRsOnClipboard| %{
+	Get-AllPRsOnClipboard | %{
 		if ($Preset) {
 			if ($Preset -eq "closed") {
 				Get-GitHubPreset -Preset $Preset -PR $_ -UserInput $Body
@@ -3746,7 +3785,7 @@ Function Get-AddToAutowaiver {
 	$NewLine = "" | select "PackageIdentifier","ManifestValue","ManifestKey","RemoveLabel"
 	$NewLine.PackageIdentifier = $PackageIdentifier
 	$NewLine.RemoveLabel = $RemoveLabel
-	if ($RemoveLabel -eq $Labels.VD) {
+	if (($RemoveLabel -eq $Labels.VD) -or ($RemoveLabel -eq $Labels.VUU)) {
 		$NewLine.ManifestValue = ((Get-YamlValue -StringName InstallerUrl -clip $PRData) -split "/")[2]
 		$NewLine.ManifestKey = "InstallerUrl"
 	} else {
@@ -3924,7 +3963,7 @@ Function Get-TrackerVMValidate {
 	$PackageMode = "Existing"
 	$LabelList = (Invoke-GitHubPRRequest -PR $PR -Type labels -Output Content).name
 	
-	if ($LabelList -match "New-Package") {
+	if ($null -eq (Find-WinGetPackage $PackageIdentifier)) {
 		$PackageMode = "New"
 	}
 	$PostInstallPause = ""
@@ -3981,7 +4020,7 @@ Function Get-TrackerVMValidate {
 			$optionsLine += " --installer-type $InstallerType "
 			$logLine += "InstallerType $InstallerType "
 		}
-		$Archs = ($clip | Select-String -notmatch "arm"| Select-String "Architecture: " )|ForEach-Object{($_ -split ": ")[1]} 
+		$Archs = ($clip | Select-String -notmatch "arm" | Select-String "Architecture: " )|ForEach-Object{($_ -split ": ")[1]} 
 		$archDetect = ""
 		$archColor = "yellow"
 		if ($Archs) {
@@ -4259,7 +4298,7 @@ Get-Process mip | Stop-Process
 Get-Process powershell | where {`$_.id -ne `$PID} | Stop-Process
 Get-Process explorer | where {`$_.id -ne `$explorerPid} | Stop-Process
 
-Get-process | Where-Object { `$_.mainwindowtitle -ne '' -and `$_.processname -notmatch '$packageName' -and `$_.processname -ne 'powershell' -and `$_.processname -ne 'WindowsTerminal' -and `$_.processname -ne 'csrss' -and `$_.processname -ne 'dwm'}| Stop-Process
+Get-process | Where-Object { `$_.mainwindowtitle -ne '' -and `$_.processname -notmatch '$packageName' -and `$_.processname -ne 'powershell' -and `$_.processname -ne 'WindowsTerminal' -and `$_.processname -ne 'csrss' -and `$_.processname -ne 'dwm'} | Stop-Process
 #Get-Process | Where-Object {`$_.id -notmatch `$PID -and `$_.id -notmatch `$explorerPid -and `$_.processname -notmatch `$packageName -and `$_.processname -ne 'csrss' -and `$_.processname -ne 'dwm'} | Stop-Process
 
 `$WinGetLogs = ((Get-ChildItem `$WinGetLogFolder).fullname | ForEach-Object {Get-Content `$_ |Where-Object {`$_ -match '[[]FAIL[]]' -OR `$_ -match 'failed' -OR `$_ -match 'error' -OR `$_ -match 'does not match'}})
@@ -4324,7 +4363,7 @@ if ((`$WinGetLogs -match '\[FAIL\] Installer failed security check.') -OR
 			for ($i=0;$i -lt $Files.length;$i++) {
 				$File = $Files[$i]
 				$inputObj = $clip[$i*2] -split "`n"
-				$inputObj = $inputObj[1..(($inputObj| Select-String "ManifestVersion" -SimpleMatch).LineNumber -1)] | Where-Object {$_ -notmatch "marked this conversation as resolved."}
+				$inputObj = $inputObj[1..(($inputObj | Select-String "ManifestVersion" -SimpleMatch).LineNumber -1)] | Where-Object {$_ -notmatch "marked this conversation as resolved."}
 				$FilePath = "$manifestFolder\$File"
 				if (!($Silent)) {
 					Write-Host "Writing $($inputObj.length) lines to $FilePath"
@@ -4507,8 +4546,6 @@ ManifestType: version
 ManifestVersion: $ManifestVersion"
 	
 }
-
-
 
 Function Get-ManifestFile {
 	param(
@@ -4984,7 +5021,7 @@ Function Get-NextFreeVM {
 	try {
 		$out_status = Get-Status 
 		$out_status = $out_status | Where-Object {$_.OS -eq $OS}
-		$out_status = ($out_status| Where-Object {$_.version -eq (Get-TrackerVMVersion -OS $OS)}| Where-Object {$_.status -eq $Status}).vm
+		$out_status = ($out_status | Where-Object {$_.version -eq (Get-TrackerVMVersion -OS $OS)} | Where-Object {$_.status -eq $Status}).vm
 		$out_status = $out_status |Get-Random -ErrorAction SilentlyContinue
 		return $out_status;
 	} catch {
@@ -5166,7 +5203,7 @@ Function Add-ToValidationFile {
 		$fileContents = (Get-Content $FilePath),
 		$Selector = "Installers:",
 		$offset = 1,
-		$lineNo = (($fileContents| Select-String $Selector -List).LineNumber -$offset),
+		$lineNo = (($fileContents | Select-String $Selector -List).LineNumber -$offset),
 		$fileInsert = "Dependencies:`n PackageDependencies:`n - PackageIdentifier: $Dependency",
 		$fileOutput = ($fileContents[0..($lineNo -1)]+$fileInsert+$fileContents[$lineNo..($fileContents.length)])
 	)
@@ -5376,7 +5413,7 @@ Function Get-PRNumber {
 		$out = ($out -split " " | Select-String $hashPRRegex) -replace '#','' | Sort-Object -unique
 		$NoClip = $True
 	} else {
-		$out = $out | Select-String $hashPRRegexEnd| Sort-Object -descending
+		$out = $out | Select-String $hashPRRegexEnd | Sort-Object -descending
 	}
 
 	if ($NoClip) {
@@ -5536,7 +5573,7 @@ Function Add-ValidationData {
 		$out.AgreementOverridePR = $AgreementOverridePR
 		$out.reviewText = $reviewText
 		$data += $out
-		$data | sort PackageIdentifier | ConvertTo-Csv| Out-File $DataFileName 
+		$data | sort PackageIdentifier | ConvertTo-Csv | Out-File $DataFileName 
 }
 
 #PR Watcher Utility functions
