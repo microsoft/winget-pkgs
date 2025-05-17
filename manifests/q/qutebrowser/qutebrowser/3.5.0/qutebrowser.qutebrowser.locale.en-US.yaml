@@ -1,0 +1,52 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: qutebrowser.qutebrowser
+PackageVersion: 3.5.0
+PackageLocale: en-US
+Publisher: qutebrowser.org
+PublisherUrl: https://www.qutebrowser.org/
+PublisherSupportUrl: https://www.qutebrowser.org/doc/help/
+PackageName: qutebrowser
+PackageUrl: https://www.qutebrowser.org/
+License: GPL-3.0
+LicenseUrl: https://github.com/qutebrowser/qutebrowser/blob/HEAD/LICENSE
+Copyright: Copyright 2013-2024 Florian Bruhin (The Compiler)
+ShortDescription: A keyboard-focused browser with a minimal GUI.
+Description: |-
+  qutebrowser is a keyboard-focused browser with a minimal GUI. It’s based on Python and Qt and free software, licensed under the GPL.
+  It was inspired by other browsers/addons like dwb and Vimperator/Pentadactyl.
+Tags:
+- browser
+- vim
+- web
+- webpage
+ReleaseNotes: |-
+  Changed
+  - Windows/macOS releases are now built with Qt 6.9.0
+    - Based on Chromium 130.0.6723.192
+    - Security fixes up to Chromium 133.0.6943.141
+  - The content.headers.user_agent setting now has a new {upstream_browser_version_short} template field, which is the upstream/Chromium version but shortened to only major version.
+  - The default user agent now uses the shortened Chromium version and doesn’t expose the QtWebEngine/... part anymore, thus making it equal to the corresponding Chromium user agent. This increases compatibilty due to various overzealous "security" products used by a variety of websites that block QtWebEngine, presumably as a bot (known issues existed with Whatsapp Web, UPS, Digitec Galaxus).
+  - Changed features in userscripts:
+    - qute-bitwarden now passes your password to the subprocess in an environment variable when unlocking your vault, instead of as a command line argument. (#7781)
+  - New -D no-system-pdfjs debug flag to ignore system-wide PDF.js installations for testing.
+  - Polyfill for missing URL.parse with PDF.js v5 and QtWebEngine < 6.9. Note this is a "best effort" fix and you should be using the "older browsers" ("legacy") build of PDF.js instead.
+  Removed
+  - The ua-slack site-specific quirk, as things seem to work better nowadays without a quirk needed.
+  - The ua-whatsapp site-specific quirk, as it’s unneeded with the default UA change described above.
+  Fixed
+  - Crash when trying to use the DocumentPictureInPicture JS API, such as done by the new Google Workspaces Huddle feature. The API is unsupported by QtWebEngine and now correctly disabled on the JS side. (#8449)
+  - Crash when a buggy notification presenter returns a duplicate ID (now an error is shown instead).
+  - Crashes when running :tab-move or :yank title at startup, before a tab is available.
+  - Crash with input.insert_mode.auto_load, when closing a new tab quickly after opening it, but before it was fully loaded. (#3895, #8400)
+  - Workaround for microphone/camera permissions not being requested with QtWebEngine 6.9.0 on Google Meet, Zoom, or other pages using the new <permission> element. (#8539)
+  - Resolved issues in userscripts:
+    - qute-bitwarden will now prompt a re-login if its cached session has been invalidated since last used. (#8456)
+    - qute-bitwarden, -lastpass and -pass now avoid a DeprecationWarning from the upcoming 6.0 release of tldextract
+ReleaseNotesUrl: https://www.qutebrowser.org/doc/changelog.html#v3.5.0
+Documentations:
+- DocumentLabel: FAQ
+  DocumentUrl: https://www.qutebrowser.org/doc/faq.html
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0
