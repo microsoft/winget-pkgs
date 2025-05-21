@@ -2374,7 +2374,7 @@ Function Get-ScheduledRun {
 			Get-PRFullReport -Today $YesterdayFormatted
 		} 
 		
-		$PresetList = ("Defender","Duplicate","HVR","IEDS","LVR","MMC","NMM","ToWork3","Approval","Approval2","VCMA")
+		$PresetList = ("Defender","Domain","Duplicate","HVR","IEDS","LVR","MMC","NMM","ToWork3","Approval","Approval2","VCMA")
 		foreach ($Preset in $PresetList) {
 			$Results = (Get-SearchGitHub -Preset $Preset -nBMM).number
 			Write-Output "$(Get-Date -Format T) Starting $Preset with $($Results.length) Results"
@@ -2536,7 +2536,7 @@ Function Add-Waiver {
 
 Function Get-SearchGitHub {
 	param(
-		[ValidateSet("Approval","Approval2","Autowaiver","Blocking","Defender","Duplicate","HVR","IEDS","LVR","MMC","NMM","None","ToWork","ToWork2","ToWork3","VCMA")][string]$Preset = "Approval",
+		[ValidateSet("Approval","Approval2","Autowaiver","Blocking","Defender","Domain","Duplicate","HVR","IEDS","LVR","MMC","NMM","None","ToWork","ToWork2","ToWork3","VCMA")][string]$Preset = "Approval",
 		[Switch]$Browser,
 		$Url = "https://api.github.com/search/issues?page=$Page&q=",
 		$Author, #wingetbot
@@ -2732,6 +2732,9 @@ Function Get-SearchGitHub {
 		}
 		"Defender"{
 			$Url += $Defender
+		}
+		"Domain"{
+			$Url += "label:$($Labels.VD)+"
 		}
 		"Duplicate"{	
 			$Url += "label:"+$Labels.PD+"+";#dupe
@@ -3959,7 +3962,10 @@ Function Get-TrackerVMValidate {
 		Write-Host "No available $OS VMs";
 		Get-PipelineVmGenerate -OS $OS;
 		#Break;
-		}
+	}
+	#Check if PR is open
+	#Check for MA label
+	
 	$PackageMode = "Existing"
 	$LabelList = (Invoke-GitHubPRRequest -PR $PR -Type labels -Output Content).name
 	
@@ -4810,7 +4816,7 @@ Function Stop-TrackerVM {
 #VM Status
 Function Get-TrackerVMSetStatus {
 	param(
-		[ValidateSet("AddVCRedist","Approved","CheckpointComplete","Checkpointing","CheckpointReady","Completing","Complete","Disgenerate","Generating","Installing","Prescan","Prevalidation","Ready","Rebooting","Regenerate","Restoring","Revert","Scanning","SendStatus","Setup","SetupComplete","Starting","Updating","ValidationCompleted")]
+		[ValidateSet("AddVCRedist","Approved","CheckpointComplete","Checkpointing","CheckpointReady","Completing","Complete","Disgenerate","Generating","Installing","Prescan","Prevalidation","Ready","Rebooting","Regenerate","Restoring","Revert","Scanning","SendStatus","SendStatus-Approved","SendStatus-Complete","Setup","SetupComplete","Starting","Updating","ValidationCompleted")]
 		$Status = "Complete",
 		[Parameter(mandatory=$True)]$VM,
 		[string]$Package,
@@ -4854,7 +4860,7 @@ Function Write-Status {
 Function Get-Status {
 	param(
 		[int]$vm,
-		[ValidateSet("AddVCRedist","Approved","CheckpointComplete","Checkpointing","CheckpointReady","Completing","Complete","Disgenerate","Generating","Installing","Prescan","Prevalidation","Ready","Rebooting","Regenerate","Restoring","Revert","Scanning","SendStatus","Setup","SetupComplete","Starting","Updating","ValidationCompleted")]
+		[ValidateSet("AddVCRedist","Approved","CheckpointComplete","Checkpointing","CheckpointReady","Completing","Complete","Disgenerate","Generating","Installing","Prescan","Prevalidation","Ready","Rebooting","Regenerate","Restoring","Revert","Scanning","SendStatus","SendStatus-Approved","SendStatus-Complete","Setup","SetupComplete","Starting","Updating","ValidationCompleted")]
 		$Status,
 		[ValidateSet("Win10","Win11")][string]$OS,
 		$out = (Get-Content $StatusFile | ConvertFrom-Csv)
@@ -4961,23 +4967,14 @@ Function Get-TrackerVMCycle {
 				Get-PipelineVmDisgenerate $VM.vm
 				Get-PipelineVmGenerate -OS $VM.os
 			}
+			"SendStatus-Complete" {
+				Get-SendStatus -Status "Complete"
+			}
+			"SendStatus-Approved" {
+				Get-SendStatus -Status "Approved"
+			}
 			"SendStatus" {
-				$SharedError = (Get-Content $SharedErrorFile) -split "`n"
-				$SharedError = $SharedError -replace "`r","" 
-				$SharedError = $SharedError -replace " (caller: 00007FFA008A5769)",""
-				$SharedError = $SharedError -replace " (caller: 00007FFA008AA79F)",""
-				$SharedError = $SharedError -replace "Exception(1)",""
-				$SharedError = $SharedError -replace "Exception(2)",""
-				$SharedError = $SharedError -replace "Exception(4)",""
-				$SharedError = $SharedError -replace "tid(f1c)",""
-				$SharedError = $SharedError -replace "C:\\__w\\1\\s\\external\\pkg\\src\\AppInstallerCommonCore\\Downloader.cpp(185)\\WindowsPackageManager.dll!00007FFA008A37C9:",""
-				$SharedError = ("`n> ") + ($SharedError -join "`n> ") 
-				$SharedError = Get-AutomatedErrorAnalysis $SharedError
-				if ((($SharedError -join " ") -match "Installer failed security check") -OR (($SharedError -join " ") -match "Detected 1 Defender")) {
-					Get-AddPRLabel -PR $PR -LabelName $Labels.VDE
-				}
-				Reply-ToPR -PR $VM.PR -UserInput $SharedError -CannedMessage ManValEnd 
-				Get-TrackerVMSetStatus "Complete" $VM.vm
+				Get-SendStatus -Status "Feedback"
 			}
 			"ValidationCompleted" {
 				# if ($VM.Mode -eq "Existing") {
@@ -5062,6 +5059,31 @@ Function Get-SecondMatch {
 		$clip[-$depthUnit]
 	}
 }
+
+Function Get-SendStatus {
+	Param(
+		$PR,
+		[ValidateSet("AddVCRedist","Approved","CheckpointComplete","Checkpointing","CheckpointReady","Completing","Complete","Disgenerate","Generating","Installing","Prescan","Prevalidation","Ready","Rebooting","Regenerate","Restoring","Revert","Scanning","SendStatus","SendStatus-Approved","SendStatus-Complete","Setup","SetupComplete","Starting","Updating","ValidationCompleted")]
+		$Status = "Complete",
+		$SharedError = ((Get-Content $SharedErrorFile) -split "`n")
+	)
+	$SharedError = $SharedError -replace "`r","" 
+	$SharedError = $SharedError -replace " (caller: 00007FFA008A5769)",""
+	$SharedError = $SharedError -replace " (caller: 00007FFA008AA79F)",""
+	$SharedError = $SharedError -replace "Exception(1)",""
+	$SharedError = $SharedError -replace "Exception(2)",""
+	$SharedError = $SharedError -replace "Exception(4)",""
+	$SharedError = $SharedError -replace "tid(f1c)",""
+	$SharedError = $SharedError -replace "C:\\__w\\1\\s\\external\\pkg\\src\\AppInstallerCommonCore\\Downloader.cpp(185)\\WindowsPackageManager.dll!00007FFA008A37C9:",""
+	$SharedError = ("`n> ") + ($SharedError -join "`n> ") 
+	$SharedError = Get-AutomatedErrorAnalysis $SharedError
+	if ((($SharedError -join " ") -match "Installer failed security check") -OR (($SharedError -join " ") -match "Detected 1 Defender")) {
+		Get-AddPRLabel -PR $PR -LabelName $Labels.VDE
+	}
+	Reply-ToPR -PR $VM.PR -UserInput $SharedError -CannedMessage ManValEnd 
+	Get-TrackerVMSetStatus $Status $VM.vm
+}
+
 
 Function Get-TrackerVMRotateLog {
 	$logYesterDate = (Get-Date -f dd) - 1
