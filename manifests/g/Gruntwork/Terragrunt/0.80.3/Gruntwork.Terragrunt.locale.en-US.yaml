@@ -1,0 +1,63 @@
+# Created with komac v2.11.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
+
+PackageIdentifier: Gruntwork.Terragrunt
+PackageVersion: 0.80.3
+PackageLocale: en-US
+Publisher: Gruntwork
+PublisherUrl: https://terragrunt.gruntwork.io/
+PublisherSupportUrl: https://terragrunt.gruntwork.io/docs/community/support
+PrivacyUrl: https://gruntwork.io/legal/privacy-policy
+PackageName: Terragrunt
+PackageUrl: https://github.com/gruntwork-io/terragrunt/releases/tag/v0.68.9
+License: MIT
+LicenseUrl: https://github.com/gruntwork-io/terragrunt/blob/HEAD/LICENSE.txt
+Copyright: © 2024 Gruntwork, Inc. All rights reserved.
+ShortDescription: Terragrunt is a thin wrapper for Terraform that provides extra tools for keeping your Terraform configurations DRY, working with multiple Terraform modules, and managing remote state.
+Description: Terragrunt is a thin wrapper for Terraform that provides extra tools for keeping your Terraform configurations DRY, working with multiple Terraform modules, and managing remote state.
+Tags:
+- IaC
+- Infrastructure as Code
+- Terraform
+- Terraform Wrapper
+- terragrunt
+ReleaseNotes: |-
+  🏎️ Performance Improvements
+  Significant performance improvements for run --all
+  The performance of run --all has been improved in two significant ways:
+  1. Performance for named includes has improved.
+     Backwards compatibility for bare includes required that Terragrunt do some inefficient work internally to handle both named includes and bare includes by doing an in-memory rewrite of Terragrunt configurations. An optimization has been introduced to avoid this behavior when users use named includes. This optimization does not extend to users that are using bare includes.
+     Users are advised to avoid using bare includes whenever possible for maximum performance. A strict control has been introduced to enforce usage of named includes.
+     In a future minor release, a warning will be emitted, instructing users to stop using bare includes. Maintainers will avoid breaking support for bare includes until at least 2.0.
+     For more information on how to benefit from this optimization, see the migration guide.
+  2. The check for OpenTofu/Terraform code has been optimized.
+     To provide helpful error messages when users don't have OpenTofu/Terraform code for Terragrunt to run, Terragrunt checks for the presence of OpenTofu/Terraform configuration files (e.g. *.tf, *.tofu). This check has been optimized to improve performance.
+  In a micro-benchmark on an M3 Max, using the BenchmarkManyEmptyTerragruntInits benchmark, which tests the performance of a Terragrunt run --all init across 1000 inits, the following performance gains were released:
+  - 42% speed improvement.
+  - 43% memory reduction.
+  More optimizations of this sort are planned for future releases.
+  Size reduction of compiled binaries
+  The size of compiled binaries will be reduced due to the stripping of debug symbols from the final executable. As an example, this drops the size of the compiled Linux AMD64 binary from 99MB to 70MB.
+  This can be a small improvement to download times for environments where Terragrunt is downloaded frequently.
+  🐛 Bug Fixes
+  Fixed -detailed-exitcode behavior in run --all
+  An unintended side-effect of addressing a different bug for Terragrunt’s handling of the -detailed-exitcode flag in OpenTofu/Terraform in retries was that any run in a run --all could override the exit code of the entire run --all.
+  This has been fixed. The exit code of the run --all -- plan -detailed-exitcode command will now properly aggregate exit codes from all runs in a run --all, only reseting the exit code for an individual unit if it properly recovers after a retry.
+  What's Changed
+  - fix: Reverting to defer on cleanup for docs test by @yhakbar in #4344
+  - fix: Get way more aggressive with cleanup by @yhakbar in #4342
+  - fix: Removing unnecessary input on flake dispatch by @yhakbar in #4337
+  - fix: Setting of right exit code in case of -detailed-exitcode by @denis256 in #4357
+  - fix: Adjusting tf check so that it's easier to update by @yhakbar in #4360
+  - fix: Fixing discrepancy between Jekyll docs and Starlight docs for validate by @yhakbar in #4359
+  - perf: Adding optimized tf code check by @yhakbar in #4339
+  - perf: Deprecating bare includes by @yhakbar in #4340
+  - docs: Documenting deprecation of bare includes by @yhakbar in #4346
+  - chore: Reduced size of produced executable by @denis256 in #4341
+  Full Changelog: v0.80.2...v0.80.3
+ReleaseNotesUrl: https://github.com/gruntwork-io/terragrunt/releases/tag/v0.80.3
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/gruntwork-io/terragrunt/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.9.0
