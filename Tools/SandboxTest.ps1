@@ -36,8 +36,7 @@ Param(
     [switch] $SkipManifestValidation,
     [switch] $Prerelease,
     [switch] $EnableExperimentalFeatures,
-    [switch] $Clean,
-    [string] $Proxy = $null
+    [switch] $Clean
 )
 
 enum DependencySources {
@@ -93,12 +92,6 @@ $script:SandboxWorkingDirectory = Join-Path -Path $script:SandboxDesktopFolder -
 $script:SandboxTestDataFolder = Join-Path -Path $script:SandboxDesktopFolder -ChildPath $($script:TestDataFolder | Split-Path -Leaf)
 $script:SandboxBootstrapFile = Join-Path -Path $script:SandboxTestDataFolder -ChildPath "$script:ScriptName.ps1"
 $script:HostGeoID = (Get-WinHomeLocation).GeoID
-# Use quater of the physical memory size for the sandbox, for increasing performance.
-$script:PrefferMemorySize = ((Get-WmiObject Win32_PhysicalMemory).Capacity | Measure-Object Capacity -Sum).Sum / (1MB) / 4
-if ($script:PrefferMemorySize -le 2048) {
-    # Physical memory is TOO small! Set the minimum to 2GB.
-    $script:PrefferMemorySize = 2048 # Minimum of 2GB
-}
 
 # Misc
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
@@ -107,17 +100,6 @@ if ($script:PrefferMemorySize -le 2048) {
 Add-Type -AssemblyName System.Net.Http
 $script:HttpClient = New-Object System.Net.Http.HttpClient
 $script:CleanupPaths = @()
-
-# Network behavior
-$script:RegistryPath = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Internet Settings"
-if (!$Proxy) {
-    # Try inspect the system-level proxy settings by visiting GitHub RESTful API Endpoint and extract proxy settings from it.
-    # This is a bit of a hack, but it works for most cases.
-    Write-Verbose 'No Proxy specified! Trying to get the system-level proxy settings.'
-    $proxyInfo = [System.Net.WebRequest]::GetSystemWebProxy().GetProxy('https://api.github.com/')
-    $Proxy = $proxyInfo.Scheme + "://" + $proxyInfo.Host + ':' + $proxyInfo.Port
-}
-Write-Information "Using Proxy: $Proxy"
 
 # Removed the `-GitHubToken`parameter, always use environment variable
 # It is possible that the environment variable may not exist, in which case this may be null
@@ -183,7 +165,7 @@ function Initialize-Folder {
 ####
 function Get-Release {
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingConvertToSecureStringWithPlainText', '',
-        Justification = 'The standard workflow that users use with other applications requires the use of plaintext GitHub Access Tokens')]
+        Justification='The standard workflow that users use with other applications requires the use of plaintext GitHub Access Tokens')]
 
     param (
         [Parameter()]
@@ -201,7 +183,8 @@ function Get-Release {
         Write-Verbose 'Adding Bearer Token Authentication to Releases API Request'
         $requestParameters.Add('Authentication', 'Bearer')
         $requestParameters.Add('Token', $(ConvertTo-SecureString $GitHubToken -AsPlainText))
-    } else {
+    }
+    else {
         # No token was provided or the token has expired
         # If an invalid token was provided, an exception will have been thrown before this code is reached
         Write-Warning @"
@@ -210,7 +193,7 @@ Please consider adding your token using the `WINGET_PKGS_GITHUB_TOKEN` environme
 "@
     }
 
-    $releasesAPIResponse = Invoke-RestMethod -Proxy $Proxy @requestParameters
+    $releasesAPIResponse = Invoke-RestMethod @requestParameters
     if (!$script:Prerelease) {
         $releasesAPIResponse = $releasesAPIResponse.Where({ !$_.prerelease })
     }
@@ -236,12 +219,11 @@ function Get-RemoteContent {
     )
     Write-Debug "Attempting to fetch content from $URL"
     # Check if the URL is valid before trying to download
-    # Check if URL is empty
+    # If the URL is null, return a status code of 400
     if ([String]::IsNullOrWhiteSpace($URL)) {
         $response = @{ StatusCode = 400 }
     } else {
-        # Try to fetch headers from the URL
-        $response = Invoke-WebRequest -Proxy $Proxy -Uri $URL -Method Head -ErrorAction SilentlyContinue
+        $response = Invoke-WebRequest -Uri $URL -Method Head -ErrorAction SilentlyContinue
     }
     if ($response.StatusCode -ne 200) {
         Write-Debug "Fetching remote content from $URL returned status code $($response.StatusCode)"
@@ -257,13 +239,12 @@ function Get-RemoteContent {
     # Mark the file for cleanup when the script ends if the raw data was requested
     if ($Raw) {
         $script:CleanupPaths += @($localFile.FullName)
-    } else {
-        $script:CleanupPaths += @()
     }
     try {
         $downloadTask = $script:HttpClient.GetByteArrayAsync($URL)
         [System.IO.File]::WriteAllBytes($localfile.FullName, $downloadTask.Result)
-    } catch {
+    }
+    catch {
         # If the download fails, write a zero-byte file anyways
         $null | Out-File $localFile.FullName
     }
@@ -366,7 +347,7 @@ function Test-FileChecksum {
 ####
 function Test-GithubToken {
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingConvertToSecureStringWithPlainText', '',
-        Justification = 'The standard workflow that users use with other applications requires the use of plaintext GitHub Access Tokens')]
+        Justification='The standard workflow that users use with other applications requires the use of plaintext GitHub Access Tokens')]
 
     param (
         [Parameter(Mandatory = $true)]
@@ -435,18 +416,21 @@ function Test-GithubToken {
                 Write-Verbose 'The cached token contained content, but it could not be parsed as a date. It will be re-validated'
                 Invoke-FileCleanup -FilePaths $cachedToken.FullName
                 # Do not return anything, since the token will need to be re-validated
-            } else {
+            }
+            else {
                 Write-Verbose "The cached token contained content, but the token expired $([Math]::Abs($tokenExpirationDays)) days ago"
                 # Leave the cached token so that it doesn't throw script exceptions in the future
                 # Invoke-FileCleanup -FilePaths $cachedToken.FullName
                 return $false
             }
-        } else {
+        }
+        else {
             # Either the token was empty, or the cached token is expired. Remove the cached token so that re-validation
             # of the token will update the date the token was cached if it is still valid
             Invoke-FileCleanup -FilePaths $cachedToken.FullName
         }
-    } else {
+    }
+    else {
         Write-Verbose 'Token was not found in the cache'
     }
 
@@ -459,7 +443,7 @@ function Test-GithubToken {
     }
 
     Write-Verbose "Checking Token against $($requestParameters.Uri)"
-    $apiResponse = Invoke-WebRequest -Proxy $Proxy @requestParameters # This will return an exception if the token is not valid; It is intentionally not caught
+    $apiResponse = Invoke-WebRequest @requestParameters # This will return an exception if the token is not valid; It is intentionally not caught
     # The headers can sometimes be a single string, or an array of strings. Cast them into an array anyways just for safety
     $rateLimit = @($apiResponse.Headers['X-RateLimit-Limit'])
     $tokenExpiration = @($apiResponse.Headers['github-authentication-token-expiration']) # This could be null if the token is set to never expire.
@@ -474,14 +458,14 @@ function Test-GithubToken {
     Write-Verbose 'Token validated successfully. Adding to cache'
     # Trim off any non-digit characters from the end
     # Strip off the array wrapper since it is no longer needed
-    $tokenExpiration = $tokenExpiration[0] -replace '[^0-9]+$', ''
+    $tokenExpiration = $tokenExpiration[0] -replace '[^0-9]+$',''
     # If the token doesn't expire, write a special value to the file
     if (!$tokenExpiration -or [string]::IsNullOrWhiteSpace($tokenExpiration)) {
         Write-Debug "Token expiration was empty, setting it to maximum"
         $tokenExpiration = [System.DateTime]::MaxValue
     }
     # Try parsing the value to a datetime before storing it
-    if ([DateTime]::TryParse($tokenExpiration, [ref]$tokenExpiration)) {
+    if ([DateTime]::TryParse($tokenExpiration,[ref]$tokenExpiration)) {
         Write-Debug "Token expiration successfully parsed as DateTime ($tokenExpiration)"
     } else {
         # TryParse Failed
@@ -519,18 +503,18 @@ if (!$SkipManifestValidation -and ![String]::IsNullOrWhiteSpace($Manifest)) {
     }
     Write-Information "--> Validating Manifest"
     $validateCommandOutput =
-    & {
-        # Store current output encoding setting
-        $prevOutEnc = [Console]::OutputEncoding
-        # Set [Console]::OutputEncoding to UTF-8 since winget uses UTF-8 for output
-        [Console]::OutputEncoding = $OutputEncoding = [System.Text.Utf8Encoding]::new()
+        & {
+            # Store current output encoding setting
+            $prevOutEnc = [Console]::OutputEncoding
+            # Set [Console]::OutputEncoding to UTF-8 since winget uses UTF-8 for output
+            [Console]::OutputEncoding = $OutputEncoding = [System.Text.Utf8Encoding]::new()
 
-        winget.exe validate $Manifest
+            winget.exe validate $Manifest
 
-        # Reset the encoding to the previous values
-        [Console]::OutputEncoding = $prevOutEnc
-    }
-    switch ($LASTEXITCODE) {
+            # Reset the encoding to the previous values
+            [Console]::OutputEncoding = $prevOutEnc
+        }
+        switch ($LASTEXITCODE) {
         '-1978335191' {
             # Skip the first line and the empty last line
             $validateCommandOutput | Select-Object -Skip 1 -SkipLast 1 | ForEach-Object {
@@ -549,7 +533,7 @@ if (!$SkipManifestValidation -and ![String]::IsNullOrWhiteSpace($Manifest)) {
             Start-Sleep -Seconds 5 # Allow the user 5 seconds to read the warnings before moving on
         }
         Default {
-            $validateCommandOutput | Format-List # On the success, print an empty line after the command output
+            Write-Information $validateCommandOutput.Trim() # On the success, print an empty line after the command output
         }
     }
 }
@@ -611,7 +595,8 @@ if ($script:AppInstallerParsedVersion -ge [System.Version]'1.9.25180') {
         Algorithm   = 'SHA256'
         SaveTo      = (Join-Path -Path $script:AppInstallerReleaseAssetsFolder -ChildPath $script:DependenciesZipFileName)
     }
-} else {
+}
+else {
     $script:DependencySource = [DependencySources]::Legacy
     # Add the VCLibs to the dependencies
     Write-Debug 'Adding VCLibs UWP to dependency list'
@@ -641,7 +626,8 @@ if ($script:AppInstallerParsedVersion -ge [System.Version]'1.9.25180') {
             Algorithm   = 'SHA256'
             SaveTo      = (Join-Path -Path $script:DependenciesCacheFolder -ChildPath 'Microsoft.UI.Xaml.2.7.x64.appx')
         }
-    } else {
+    }
+    else {
         # Add Xaml 2.8 to the dependencies
         Write-Debug 'Adding Microsoft.UI.Xaml (v2.8) to dependency list'
         $script:AppInstallerDependencies += @{
@@ -753,22 +739,6 @@ function Get-ARPTable {
         Select-Object DisplayName, DisplayVersion, Publisher, @{N='ProductCode'; E={`$_.PSChildName}}, @{N='Scope'; E={if(`$_.PSDrive.Name -eq 'HKCU') {'User'} else {'Machine'}}}
 }
 
-Write-Host @'
---> Injecting proxy settings from the host
-    --> Injecting with WinHTTP
-'@
-netsh winhttp set proxy "$Proxy" "<local>,*.local,*.cn"
-Write-Host @'
-    --> Injecting with Windows Registry
-'@
-New-Item -Path "$script:RegistryPath" -ErrorAction SilentlyContinue | Out-Null
-Set-ItemProperty -Path "$script:RegistryPath" -Name ProxyEnable -Value 1 -Type DWord | Out-Null
-Set-ItemProperty -Path "$script:RegistryPath" -Name ProxyServer -Value "$Proxy" -Type String | Out-Null
-Set-ItemProperty -Path "$script:RegistryPath" -Name ProxyOverride -Value "<local>,*.local,*.cn" -Type String | Out-Null
-Get-ItemProperty -Path "$script:RegistryPath" |
-    Select-Object -Property ProxyEnable, ProxyServer, ProxyOverride |
-    Format-List
-
 Push-Location $($script:SandboxTestDataFolder)
 Write-Host @'
 --> Installing WinGet
@@ -813,8 +783,6 @@ Write-Host @'
 '@
 winget settings --Enable LocalManifestFiles
 winget settings --Enable LocalArchiveMalwareScanOverride
-winget settings --Enable ProxyCommandLineOptions
-winget settings set DefaultProxy $Proxy
 Get-ChildItem -Filter 'settings.json' | Copy-Item -Destination C:\Users\WDAGUtilityAccount\AppData\Local\Packages\Microsoft.DesktopAppInstaller_8wekyb3d8bbwe\LocalState\settings.json
 Set-WinHomeLocation -GeoID $($script:HostGeoID)
 
@@ -871,9 +839,8 @@ Write-Verbose 'Creating WSB file for launching the sandbox'
     </MappedFolder>
   </MappedFolders>
   <LogonCommand>
-    <Command>PowerShell Start-Process PowerShell -WindowStyle Maximized -WorkingDirectory '$($script:SandboxWorkingDirectory)' -ArgumentList '-ExecutionPolicy Bypass -NoExit -NoLogo -File $($script:SandboxBootstrapFile)'</Command>
+  <Command>PowerShell Start-Process PowerShell -WindowStyle Maximized -WorkingDirectory '$($script:SandboxWorkingDirectory)' -ArgumentList '-ExecutionPolicy Bypass -NoExit -NoLogo -File $($script:SandboxBootstrapFile)'</Command>
   </LogonCommand>
-  <memoryInMB>$script:PrefferMemorySize</memoryInMB>
 </Configuration>
 "@ | Out-File -FilePath $script:ConfigurationFile
 
