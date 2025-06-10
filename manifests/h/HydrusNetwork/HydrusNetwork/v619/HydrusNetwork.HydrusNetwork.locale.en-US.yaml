@@ -1,0 +1,81 @@
+# Created with komac v2.11.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
+
+PackageIdentifier: HydrusNetwork.HydrusNetwork
+PackageVersion: v619
+PackageLocale: en-US
+Publisher: Hydrus Network
+PublisherUrl: https://github.com/hydrusnetwork/hydrus
+PublisherSupportUrl: https://github.com/hydrusnetwork/hydrus/issues
+PrivacyUrl: https://hydrusnetwork.github.io/hydrus/privacy.html
+Author: Hydrus Network
+PackageName: Hydrus Network
+PackageUrl: https://github.com/hydrusnetwork/hydrus
+License: WTFPL
+LicenseUrl: https://github.com/hydrusnetwork/hydrus/blob/HEAD/license.txt
+Copyright: Copyright (C) 2011 Hydrus Developer
+CopyrightUrl: https://github.com/hydrusnetwork/hydrus/blob/master/license.txt
+ShortDescription: A personal booru-style media tagger that can import files and tags from your hard drive and popular websites. Content can be shared with other users via user-run servers.
+Description: |-
+  The hydrus network client is an application written for Anon and other internet-fluent media nerds who have large image/swf/webm collections.
+  It browses with tags instead of folders, a little like a booru on your desktop. Advanced users can share tags and files anonymously through custom servers that any user may run.
+  Everything is free and privacy is the first concern. Executable releases are available for Windows, Linux, and macOS.
+  The program is in python, so you can also run it straight from the source code.
+Moniker: hydrus-network
+Tags:
+- booru
+- cross-platform
+- image-database
+ReleaseNotes: |-
+  cleaner tags
+  - updated the tag filter to exclude many weird unicode characters. all sorts of Control Characters, right-to-left formatting, zero-width spaces, surrogates, and more is now all removed. Zero-Width characters ZWNJ and ZWJ are allowed unless the rest of the tag is only in extended-latin. the hangul filler character is allowed if the tag includes other hangul syllable or jamo. there is no perfect solution here, but a bunch of mis-parses and other garbage is cleaned up with this (issue #1709)
+  - your client will clean its tags on update. this will take about twenty minutes if you sync with the PTR. you will probably ~30,000+ bad tags--don't worry about it too much, and everything is logged if you are super interested in the saga of ç¿«∪ç¸-legacy-decode-jank, ( ͡° ͜ʖ ͡°)-that-includes-a-hidden-Byte-Order-Mark, and a relatively common normaltag[ZWNJ] that's probably either an IME input mistake or some HTML parsing error from years ago
+  - I've been fairly aggressive here, so if I have broken something you do want to input, or something that requires temporary invalid status via an IME, let me know. rest assured, however, that everyone's favourite compound emojis such as 👨‍👩‍👧‍👦 should still work
+  linux build
+  - the Linux build failed last week because I missed notifications about the Ubuntu 20.04 runner being retired. sorry for the trouble! this has happened before, so I am going to keep a better check on retiring runner news in future
+  - the Linux build is now generated on the 22.04 runner. there are some .so file differences, but it seems to all boot ok, and in one case it actually fixed a previously broken mpv load. also, a normal extract-update seems to have worked in our tests, so we don't think a clean install is strictly needed. You might like to do a clean install anyway, just to be neat: https://hydrusnetwork.github.io/hydrus/getting_started_installing.html#clean_installs
+  misc
+  - AVIF rendering is fixed. I confidently wrote some code last week that said 'when Pillow updates to 1.21.1, don't load the recently deprecated AVIF support from our external plugin any more because Pillow will now have it natively', and then the Pillow update happened last week and they decided not to bundle in AVIF in their convenient wheel because it bloated their files. I have undone my version check, frozen the plugin at its current version to keep support, and will check this manually on the actual version of Pillow in future before I switch over again. sorry for the trouble! (issue #1714)
+  - added a new Tell original search page to select exit media when closing the media viewer checkbox to options->media viewer (default on). this lets you turn off the behaviour where your exit media is selected in the thumbgrid when you exit a media viewer (issue #1712)
+  - the default value for When maintenance physically deletes files, wait this many ms between each delete: in files and trash is now 600ms, up from 250ms. if you are set to the old default of 250, the update will bump you up. furthermore, the widget in files and trash is now a rich time delta widget rather than just a ms integer spinner
+  - the 'are you sure you want to exit the program, these pages say they are not done' yes/no dialog now spawns with yes disabled for 1.2 seconds, just like the archive/delete filter confirmation, enough to jolt you out of an autopilot enter press
+  default downloaders
+  - the safebooru parser is more careful about fetching valid associable source urls. it was previously juxtaposing the safebooru domain with non-https-having garbage
+  - added a thread parser for holotower
+  - deleted some parsers and url classes for long-defunct sites
+  sidecar sorting
+  - sidecar objects no longer do a hardcoded sort of their strings before the export step. if you set a different sort via the 'processing' step's string processor, that's directly what will export to the destination
+  - all new sidecar objects now start with a--and all existing sidecar objects will update to get a new--processing step that does 'human text sort (asc)'. thus, all sidecars should continue behaving pretty much as they were before, but if you don't want that, you can now edit it!
+  actual vs ideal tags
+  - the right-click tag menu that shows current parents and siblings now shows the ideal tag display space, rather than the actual. the difference between these two is the ideal is what your settings say whereas the actual is what the client currently has calculated as per tags->sibling/parent sync->review current sync. this guy was previously showing the actual calc, which was revealing confusing interim technical states after the preferences changed. I am not sure if this change is correct or helpful and suspect I'll need some better UI around here to quickly detect and explain a discrepancy
+  - updated the /add_tags/get_siblings_and_parents help to discuss that it fetches actual rather than ideal tags
+  duplicates auto-resolution
+  - the duplicates auto-resolution UI is all enabled, and I've un-hidden the 'add rule' button. have fun with this new tech, but don't go crazy yet. I think pixel-duplicate pairs are now easy to solve if you have firm preferences about keeping exif etc..
+  - finished off a comparison rule for duplicates auto-resolution that tests things like 'A has more than 2x the num pixels as B'. it can test size, width, height, num_pixels, duration, and num_frames and supports equals, not equals, greater than, less than, approx equal (percentage or absolute), and you can set a coefficient (A has more than 2x filesize of B) and/or an absolute delta (A has more than 200 px more height than B)
+  - added two hardcoded comparison rules for 'A and B have the same/differing filetypes'. nice and simple way to ensure you are or aren't comparing like to like in a rule
+  - the one-file comparators can now do exif, icc profile, and human-readable metadata tests
+  - the 'add suggested rules' button now has three choices--the original pixel-duplicates jpeg/png one, and pixel-perfect pairs - keep EXIF or ICC data (eliminate pixel duplicate pairs of the same filetype where only one has Exif/ICC data) and pixel-perfect pairs - eliminate bloat, (eliminate pixel duplicate pairs of the same filetype where neither have EXIF/ICC data but one is smaller than the other)
+  - the 'action' column in the duplicates auto-resolution preview panels now tooltips to the full text. if this becomes like 100 tags and several URLs, you can now read it!
+  - although we can now poke at the easiest dupe pairs, I think we are still missing a puzzle piece to differentiate alternates from duplicates programatically, even on 'exact-match' searches. we either need cleverer and higher-resolution phashes or a comparison rule that does hardcoded pixel inspection and allows for 'A is > 99.7% pixel-similar to B' in some semantically rich way so we can automatically differentiate jpeg artifacts from banners or watermarks or even colour-only costume changes. while better and perhaps colour-sensitive phashes may come one day, I am going to go for this pixel comparison tech. this will add render CPU cost to each pair decision, which is going to add some bumps to this whole workflow, particularly the preview window, but I suspected we'd have to do this so I've mostly built for it
+  boring duplicates auto-resolution
+  - wrote unit tests for the new system predicate media-result-extraction system for the types it can currently extract
+  - wrote unit tests for the new relative pair file info comparator
+  - wrote unit tests for the new hardcoded filetype comparator
+  - wrote unit tests for the new one-file comparator capabilities
+  - the number test widget now emits value-changed signals
+  - fixed an issue where many system pred stubs, until now only appearing temporarily, would not serialise
+  - fixed an issue with the duplicates auto-resolution preview panel where the 'pass' list was not ordering correct for rules beyond the pixel dupe test rule
+  - fixed an issue where the duplicates auto-resolution dialog would not allow you to add more than one new rule per dialog session
+  - brushed up the auto-resolution help a bit
+  boring cleanup
+  - moved the 'human text sort' stuff from HydrusData to HydrusText, and improved its sort reliability when strings differ on order of int/str
+  - merged the generic tag sort code into the human text sort system, since they were both doing the same thing. cleaned up some bad old ideas along the way
+  - fixed some bad old tag processing when generating thumbnail banners and the file has more than two tags of a particular namespace and at least one tag includes non-number data
+  - a bunch of places that have some text beside a widget, e.g. the 'show whole chains' checkbox in 'manage tag parents', now copy the tooltip from the widget itself to the text
+ReleaseNotesUrl: https://github.com/hydrusnetwork/hydrus/releases/tag/v619
+PurchaseUrl: https://hydrusnetwork.github.io/hydrus/support.html
+Documentations:
+- DocumentLabel: FAQ
+  DocumentUrl: https://hydrusnetwork.github.io/hydrus/faq.html
+ManifestType: defaultLocale
+ManifestVersion: 1.9.0

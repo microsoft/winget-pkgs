@@ -1,0 +1,88 @@
+# Created with WinGet Updater using komac v2.11.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
+
+PackageIdentifier: goplus.gop
+PackageVersion: 1.3.9
+PackageLocale: en-US
+Publisher: goplus
+PublisherUrl: https://github.com/goplus/gop
+PublisherSupportUrl: https://github.com/goplus/gop/issues/new
+PackageName: goplus
+PackageUrl: https://goplus.org/
+License: Apache-2.0
+LicenseUrl: https://github.com/goplus/gop/blob/HEAD/LICENSE
+ShortDescription: The Go+ Programming Language
+Description: |
+  The Go+ programming language is designed for engineering, STEM education, and data science.
+  - For engineering: working in the simplest language that can be mastered by children.
+  - For STEM education: studying an engineering language that can be used for work in the future.
+  - For data science: communicating with engineers in the same language.
+Moniker: goplus
+Tags:
+- compiler
+- data science
+- education
+- engineering
+- go
+- golang
+- gop
+- goplus
+- interpreter
+- language
+- programming
+ReleaseNotes: |-
+  What's Changed
+  documents:
+  - TPL: Text Processing Language by @xushiwei in #2260
+  - Domian Text Literal by @xushiwei in #2261
+  libraries:
+  - tpl/matcher: remove IsList by @xushiwei in #2248
+  - tpl: ListOp by @xushiwei in #2253
+  features:
+  - classfile: Main may have return type by @xushiwei in #2266
+  changes:
+  - classfile: fix name conflict of multi projects by @xushiwei in #2258
+  - classfile: getGameClass fix by @xushiwei in #2269
+  - classfile: prepare multiple work classes by @xushiwei in #2276
+  - classfile: remove outdated stuff by @xushiwei in #2277
+  - classfile: multiple work classes by @xushiwei in #2278
+  - classfile: spriteFeatures fix by @xushiwei in #2279
+  - classfile preloadGopFile: ensure game type is loaded by @xushiwei in #2280
+  - classfile gmxProjMain: nil if no work by @xushiwei in #2281
+  - cl: fix generic func alias for pkg by @visualfc in #2263
+  - tool: importer check pkgpath by @visualfc in #2251
+  - tool: PkgHash skip check by @visualfc in #2259
+  - rm dep of golang.org/x/tools by @xushiwei in #2285
+  - mv Diff => qiniu/x/test.Diff by @xushiwei in #2274
+  - cltest: SpxFromDir by @xushiwei in #2275
+  deps:
+  - build(deps): bump github.com/fsnotify/fsnotify from 1.8.0 to 1.9.0 by @dependabot in #2252
+  - build(deps): bump github.com/goplus/mod 0.15.1 by @dependabot in #2283
+  - build(deps): bump github.com/qiniu/x from 1.13.13 to 1.13.16 by @dependabot in #2271
+  - github.com/qiniu/x v1.13.13 by @xushiwei in #2268
+  ci & tools:
+  - make: support Go1.24 by @visualfc in #2249
+  - make: go.work for go1.24 by @visualfc in #2250
+  - go1.24 by @xushiwei in #2286
+  Important Updates in v1.3 (vs. v1.2)
+  Documentation:
+  - Improved Go+ Mini Spec documentation. Go+ Mini Spec is a carefully designed language specification that represents the essence of Go+: providing a minimal but Turing-complete syntax set, while also representing the best practices of Go+ programming.
+  - Auto-generated documentation for Go+ builtin functions. Go+'s builtin functions are far more extensive than Go's, which simplifies the expression of common tasks. Additionally, Go+'s basic types also have methods. For example, the string type has built-in common string operations. Among them, "123".int converts a string to an integer type; "get_table_name".split("_") splits a string into a list ["get", "table", "name"].
+  Language Features:
+  - Goodbye to append, new syntax for adding elements to a list: the <- operator. The familiar a = append(a, v1, v2, ..., vN) for Go programmers now becomes the more intuitive a <- v1, v2, ..., vN. Connecting two lists is similar: previously a = append(a, b...), now a <- b....
+  - Introduced for .. in to replace the previous for .. <-, making it more consistent with mainstream languages. The old for .. <- will still be supported, but after formatting the code with gop fmt, it will automatically convert <- to in.
+  - Introduced numeric literals with units, such as 1s for 1 second. This allows us to use wait 0.5s instead of the previously verbose wait 0.5*time.Second, making the semantics more intuitive. It's worth noting that the meaning of numeric constants with units varies depending on the type of data. For example, in wait 1m, because the parameter is a time type, 1m means 1 minute. In step 1m, where the parameter type is distance, 1m means 1 meter.
+  - Support for users to choose their own Go compiler, which can be specified in go.mod. Go+ currently supports the following Go compilers: go (Go's official compiler), llgo (maintained by the Go+ team), and tinygo (a Go compiler specifically for embedded environments). Currently, Go+ defaults to using go, but will default to llgo in the future. To initialize a module using llgo, simply execute the command gop mod init -llgo mymodule.
+  - Support for importing C/C++ and Python libraries. Go+'s support for importing C/C++ and Python libraries is achieved through LLGo. Currently, the support for C/C++ libraries is quite mature, and we will provide automated tools to cover mainstream C/C++ libraries, eliminating the need for users to manually migrate C/C++ libraries to the Go world as with cgo. Go+'s support for Python libraries is still experimental and will be a focus in future versions of Go+.
+  - Wasm support. Go+'s support for Wasm is achieved through LLGo. Wasm generated by LLGo will be smaller in size than Wasm compiled by the official Go compiler, and it still supports generating Wasm files when using cgo (the official Go compiler doesn't support Wasm when using cgo).
+  - Built-in clone support for classfiles, making object cloning operations more efficient. Possible application scenarios: creating Handler instances for each new connection in a web framework. Before clone support, we typically needed to implement object cloning through the reflect mechanism, which not only made the code obscure but also introduced significant performance overhead.
+  - Support for Domain Text Literals.
+  Built-in Functions:
+  - Added the built-in function type as a replacement for reflect.TypeOf, used to view the type of an object.
+  - Added the Capitalize method to string and []string types, used to capitalize the first letter of a string. For example: "hello".capitalize will result in the string "Hello", and ["hello", "world", "!"].capitalize will result in ["Hello", "World", "!"]. Converting a C-style variable x := "get_table_name" to camel case "GetTableName" only requires x.split("_").capitalize.join("").
+  Standard Libraries:
+  - gop/tpl: a grammar-based language similar to EBNF (Extended Backus-Naur Form) that seamlessly integrates with Go+. It provides a more readable and maintainable approach to text processing while offering capabilities beyond what regular expressions can achieve. TPL is similar to yacc and bison. However, it's not a standalone tool but a domain text literal embedded in the Go+ language.
+  Full Changelog: v1.3.8...v1.3.9
+ReleaseNotesUrl: https://github.com/goplus/gop/releases/tag/v1.3.9
+ManifestType: defaultLocale
+ManifestVersion: 1.9.0
