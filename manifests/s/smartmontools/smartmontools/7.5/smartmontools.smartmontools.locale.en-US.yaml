@@ -1,0 +1,112 @@
+# Created with komac v2.11.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
+
+PackageIdentifier: smartmontools.smartmontools
+PackageVersion: '7.5'
+PackageLocale: en-US
+Publisher: smartmontools.org
+PublisherUrl: https://www.smartmontools.org/
+PublisherSupportUrl: https://www.smartmontools.org/wiki/TocDoc
+Author: Bruce Allen, Christian Franke, Gabriele Pohl
+PackageName: smartmontools
+PackageUrl: https://sourceforge.net/projects/smartmontools
+License: GPL-2.0
+LicenseUrl: https://sourceforge.net/p/smartmontools/code/HEAD/tree/tags/RELEASE_7_4/smartmontools/COPYING
+Copyright: Copyright (C) 1989, 1991 Free Software Foundation, Inc.
+CopyrightUrl: https://sourceforge.net/p/smartmontools/code/HEAD/tree/tags/RELEASE_7_4/smartmontools/COPYING
+ShortDescription: smartmontools contains utility programs (smartctl, smartd) to control/monitor storage systems using the Self-Monitoring, Analysis and Reporting Technology System (S.M.A.R.T.) built into most modern ATA and SCSI disks. It is derived from smartsuite.
+Description: |-
+  The smartmontools package contains two utility programs (smartctl and smartd) to control and monitor storage systems using the Self-Monitoring, Analysis and Reporting Technology System (SMART) built into most modern ATA/SATA, SCSI/SAS and NVMe disks.
+  In many cases, these utilities will provide advanced warning of disk degradation and failure.
+  Smartmontools was originally derived from the Linux ​smartsuite package and actually supports ATA/SATA, SCSI/SAS and NVMe disks and also SCSI/SAS tape devices.
+  It should run on any modern Linux, FreeBSD, NetBSD, OpenBSD, Darwin (macOS), Solaris, Windows, Cygwin, OS/2, eComStation or QNX system.
+  Smartmontools can also be run from one of many different Live CDs/DVDs.
+Moniker: smartmontools
+Tags:
+- disk-monitoring
+- disk-utility
+- s.m.a.r.t
+- smartctl
+- smartd
+ReleaseNotes: |-
+  - CI and release builds are now reproducible if same SOURCE_DATE_EPOCH,
+    build recipes and toolchains are used.
+  - smartctl -j -A: New JSON value 'endurance_used' (ATA/SCSI/NVMe).
+  - smartctl -j -A: New JSON value 'spare_available' (ATA/NVMe).
+  - smartctl -j -i: Re-added the JSON value 'model_name' also for SCSI
+    devices (regression).
+  - smartctl -j -c: NVMe support.
+  - smartctl -j -n ...: New JSON values 'power_mode.*' (ATA only).
+  - smartctl -H -A: Support for NVMe SMART/Health Information per
+    namespace.
+  - smartctl -i: ATA ACS-6 updates.
+  - smartctl -x: No longer includes -g wcreorder.
+  - smartctl -x, -l scterc: No longer returns exit status 4 if SCT ERC
+    is not supported by the device.
+  - smartctl -l error: No longer prints bogus ATA error log entries if
+    the error index is nonzero but the error count is zero.
+  - smartctl -l ssd: Fixed corruption of the output of the SCSI Format
+    Status log page.
+  - smartctl -l ssd: Now detects 'no format since manufacture' from the
+    SCSI Format Status log page.
+  - smartctl -l farm: Fixed the unit of 'Write Power On' time.
+  - smartctl -l farm: Fixed the byte order of ATA 'Assembly Date'.
+  - smartctl -l farm: Fixed a possible segfault.
+  - smartctl -l farm -q noserial: Suppresses serial and WWN also from FARM.
+  - smartctl -l farm -T permissive: Overrides false negative FARM support
+    check for rebranded drives.
+  - smartctl -t TEST: Fixed self-tests of single namespace NVMe devices.
+  - smartd -A: NVMe attribute log support.
+  - smartd: Ignores NSID in duplicate check of single namespace devices.
+  - smartd: No longer issues LOG_CRIT warnings for 'Set Feature' related
+    NVMe error information log entries.
+  - smartd: No longer hangs on systems with large file descriptor limits.
+  - smartd: No longer logs invalid "old test ... not run" messages if
+    staggered self-tests are used.
+  - smartd.conf -l selftest[sts] -s ...: NVMe self-test support.
+  - smartd.conf -H MASK: Ability to ignore specific bits of NVMe
+    SMART/Health value 'Critical Warning'.
+  - smartd.conf -p: Checks NVMe SMART/Health value 'Available Spare'.
+  - smartd.conf -u [-f]: Checks NVMe SMART/Health values 'Percentage Used'
+    and 'Media and Data Integrity Errors'.
+  - smartd.conf -W ...: No longer includes individual sensors in NVMe
+    temperature check as some devices report other values there.
+  - ATA: Device type -d jmb39x-q2,N for another JMB39x protocol variant
+    used by QNAP-TR002 NAS devices.
+  - SCSI: Fixed range checks of mode page offset and VPD inquiry.
+  - SCSI: Fixed buffer overflow parsing of VPD page.
+  - SCSI: Fixed handling of multiple designators in VPD page.
+  - USB/NVMe: -d sntjmicron no longer triggers USB resets on queries of
+    the self-test log.
+  - USB/NVMe: -d sntasmedia now supports log pages > 512 bytes.
+  - USB/NVMe/SAT: New experimental NVMe/SAT autodetection options
+    -d snt*/sat.
+  - Fixed segfault on missing option argument on systems using musl libc.
+  - HDD, SSD and USB additions to drive database.
+  - automake < 1.13 are no longer supported.
+  - Custom make rules are now silenced if make V=0 is used.
+  - Enhanced makefile targets dist-* to create reproducible source
+    tarballs if SOURCE_DATE_EPOCH is set.
+  - The makefile no longer uses GNU make specific syntax elements
+    (exception: reproducible builds for macOS).
+  - Dropped support for platforms without sigaction().
+  - configure: Now also detects MidnightBSD.
+  - configure: Dropped option --with-signal-func.
+  - configure: Default for --with-nvme-devicescan is now 'yes' also on
+    NetBSD.
+  - Version information is now also set if build from GH R/O mirror.
+  - Linux: smartd.service now avoids a warning about an unset environment
+    variable.
+  - Linux: Dropped autodetection of deprecated device type -d marvell.
+  - macOS: Support for reproducible builds of the DMG image.
+  - OpenBSD: NVMe support.
+  - Windows: Increased WMI timeout.
+  - Windows: Support for reproducible builds of the installer.
+  - Windows: Uninstaller is no longer damaged if the installer is signed.
+  - Windows update-smartd-drivedb.ps1: Fixed call of gpg.exe if it
+    appears more than once in the PATH.
+  - Windows update-smartd-drivedb.ps1 -Verbose: Now also prints the
+    download command.
+ReleaseNotesUrl: https://github.com/smartmontools/smartmontools/releases/tag/RELEASE_7_5
+ManifestType: defaultLocale
+ManifestVersion: 1.9.0
