@@ -27,6 +27,8 @@
   Justification = 'Ths function is a wrapper which calls the singular Read-AppsAndFeaturesEntry as many times as necessary. It corresponds exactly to a pluralized manifest field')]
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseSingularNouns', '', Scope = 'Function', Target = '*Metadata',
   Justification = 'Metadata is used as a mass noun and is therefore singular in the cases used in this script')]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseSingularNouns', '', Scope = 'Function', Target = 'Get-OffsetBytes',
+  Justification = 'Ths function both consumes and outputs an array of bytes. The pluralized name is required to adequately describe the functions purpose')]
 
 Param
 (
@@ -708,19 +710,19 @@ function Get-PESectionTable {
 
   # Parse out information from the header
   $COFFHeaderBytes = Get-OffsetBytes -ByteArray $RawBytes -Offset $($PESignatureOffset + $PESignatureSize) -Length $COFFHeaderSize
-  $MachineTypeBytes = Get-OffsetBytes -ByteArray $COFFHeaderBytes -Offset 0 -Length 2
+  # $MachineTypeBytes = Get-OffsetBytes -ByteArray $COFFHeaderBytes -Offset 0 -Length 2
   $NumberOfSectionsBytes = Get-OffsetBytes -ByteArray $COFFHeaderBytes -Offset 2 -Length 2
-  $TimeDateStampBytes = Get-OffsetBytes -ByteArray $COFFHeaderBytes -Offset 4 -Length 4
-  $PointerToSymbolTableBytes = Get-OffsetBytes -ByteArray $COFFHeaderBytes -Offset 8 -Length 4
-  $NumberOfSymbolsBytes = Get-OffsetBytes -ByteArray $COFFHeaderBytes -Offset 12 -Length 4
+  # $TimeDateStampBytes = Get-OffsetBytes -ByteArray $COFFHeaderBytes -Offset 4 -Length 4
+  # $PointerToSymbolTableBytes = Get-OffsetBytes -ByteArray $COFFHeaderBytes -Offset 8 -Length 4
+  # $NumberOfSymbolsBytes = Get-OffsetBytes -ByteArray $COFFHeaderBytes -Offset 12 -Length 4
   $SizeOfOptionalHeaderBytes = Get-OffsetBytes -ByteArray $COFFHeaderBytes -Offset 16 -Length 2
-  $HeaderCharacteristicsBytes = Get-OffsetBytes -ByteArray $COFFHeaderBytes -Offset 18 -Length 2
+  # $HeaderCharacteristicsBytes = Get-OffsetBytes -ByteArray $COFFHeaderBytes -Offset 18 -Length 2
 
   # Convert the data into real numbers
   $NumberOfSections = [BitConverter]::ToInt16($NumberOfSectionsBytes, 0)
-  $TimeDateStamp = [BitConverter]::ToInt32($TimeDateStampBytes, 0)
-  $SymbolTableOffset = [BitConverter]::ToInt32($PointerToSymbolTableBytes, 0)
-  $NumberOfSymbols = [BitConverter]::ToInt32($NumberOfSymbolsBytes, 0)
+  # $TimeDateStamp = [BitConverter]::ToInt32($TimeDateStampBytes, 0)
+  # $SymbolTableOffset = [BitConverter]::ToInt32($PointerToSymbolTableBytes, 0)
+  # $NumberOfSymbols = [BitConverter]::ToInt32($NumberOfSymbolsBytes, 0)
   $OptionalHeaderSize = [BitConverter]::ToInt16($SizeOfOptionalHeaderBytes, 0)
 
   # Read the section table from the file
