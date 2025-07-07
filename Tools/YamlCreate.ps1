@@ -904,6 +904,7 @@ function Test-IsNullsoft {
   $PresumedHeaderBytes = Get-OffsetBytes -ByteArray $RawBytes -Offset 4 -Length 4 -LittleEndian $true
 
   # DEADBEEF -or- DEADBEED
+  # https://sourceforge.net/p/nsis/code/HEAD/tree/NSIS/branches/WIN64/Source/exehead/fileform.h#l222
   if (!(Compare-Object -ReferenceObject $([byte[]](222, 173, 190, 239)) -DifferenceObject $PresumedHeaderBytes)) { return $true }
   if (!(Compare-Object -ReferenceObject $([byte[]](222, 173, 190, 237)) -DifferenceObject $PresumedHeaderBytes)) { return $true }
   return $false
@@ -922,6 +923,7 @@ function Test-IsInno {
   )
 
   $Resources = Get-Win32ModuleResource -Path $Path -ResourceType -DontLoadResource -ErrorAction SilentlyContinue
+  # https://github.com/jrsoftware/issrc/blob/main/Projects/Src/Shared.Struct.pas#L417
   if ($Resources.Name -contains '#11111') { return $true } # If the resource name is #11111, it is an Inno installer
   return $false
 }
@@ -940,6 +942,7 @@ function Test-IsBurn {
 
   $SectionTable = Get-PESectionTable -Path $Path
   if (!$SectionTable) { return $false } # If the section table is null, it is not an EXE and therefore not Burn
+  # https://github.com/wixtoolset/wix/blob/main/src/burn/engine/inc/engine.h#L8
   if ($SectionTable.SectionName -contains '.wixburn') { return $true }
   return $false
 }
