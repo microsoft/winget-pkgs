@@ -86,13 +86,13 @@ extends:
             ValidationStorageAccountName: $(ValidationStorageAccountName)
             CacheStorageAccountName: $(CacheStorageAccountName)
             StorageManagedIdentityClientId: $(StorageManagedIdentityClientId)
-            ExecutionEnvironment: $(ExecutionEnvironment)
-            PackagePublisher: $(PackagePublisher)
-            DIApplicationInsightKey: $(DIApplicationInsightKey)
             WinGet:AppConfig:PrimaryEndpoint: $(AppConfigPrimaryEndpoint)
             WinGet:AppConfig:SecondaryEndpoint: $(AppConfigSecondaryEndpoint)
-            SYSTEM_ACCESSTOKEN: $(System.AccessToken)
+            DIApplicationInsightKey: $(DIApplicationInsightKey)
             GithubServiceAccountToken: $(GithubServiceAccountToken)
+            PackagePublisher: $(PackagePublisher)
+            SYSTEM_ACCESSTOKEN: $(System.AccessToken)
+            ExecutionEnvironment: $(WinGetSvc.ExecutionEnvironment)
 
       # Agentless phase. Depends on previous job. 
       - job: 'SignPackage'
@@ -115,16 +115,14 @@ extends:
             body: |
               {
               "operationId": "$(Build.BuildNumber)",
-              "BuildId": "$(Build.BuildId)",
-              "PlanUrl": "$(system.CollectionUri)",
-              "HubName": "$(system.HostType)",
+              "buildId": "$(Build.BuildId)",
+              "projectId": "$(system.TeamProjectId)",
+              "planId": "$(system.PlanId)", 
+              "jobId": "$(system.JobId)", 
+              "timelineId": "$(system.TimelineId)", 
+              "taskInstanceId": "$(system.TaskInstanceId)",
+              "repository": "$(build.repository.id)",
               "pipelineType": "CommitPipeline",
-              "ProjectId": "$(system.TeamProjectId)",
-              "PlanId": "$(system.PlanId)", 
-              "JobId": "$(system.JobId)", 
-              "TimelineId": "$(system.TimelineId)", 
-              "TaskInstanceId": "$(system.TaskInstanceId)",
-              "AuthToken": "$(system.AccessToken)"
               }
             waitForCompletion: "true"
 
@@ -150,20 +148,17 @@ extends:
             body: |
               {
               "operationId": "$(Build.BuildNumber)",
-              "BuildId": "$(Build.BuildId)",
-              "PlanUrl": "$(system.CollectionUri)",
-              "HubName": "$(system.HostType)",
+              "buildId": "$(Build.BuildId)",
               "pipelineType": "CommitPipeline",
-              "ProjectId": "$(system.TeamProjectId)",
-              "PlanId": "$(system.PlanId)",
-              "JobId": "$(system.JobId)",
-              "TimelineId": "$(system.TimelineId)",
-              "TaskInstanceId": "$(system.TaskInstanceId)",
-              "AuthToken": "$(system.AccessToken)",
-              "BuildRepositoryId": "$(build.repository.id)",
-              "CommitTablePartitionKey": "$(CommitTablePartitionKey)",
-              "CommitTableRowKey": "$(CommitTableRowKey)",
-              "SkipManifestIndexUpdate": "$(Publish.SkipManifestIndexUpdate)"
+              "projectId": "$(system.TeamProjectId)",
+              "planId": "$(system.PlanId)",
+              "jobId": "$(system.JobId)",
+              "timelineId": "$(system.TimelineId)",
+              "taskInstanceId": "$(system.TaskInstanceId)",
+              "buildRepositoryId": "$(build.repository.id)",
+              "commitTablePartitionKey": "$(CommitTablePartitionKey)",
+              "commitTableRowKey": "$(CommitTableRowKey)",
+              "skipManifestIndexUpdate": "$(Publish.SkipManifestIndexUpdate)"
               }
             waitForCompletion: "true"
 
@@ -189,16 +184,14 @@ extends:
             body: |
               {
               "operationId": "$(Build.BuildNumber)",
-              "BuildId": "$(Build.BuildId)",
-              "PlanUrl": "$(system.CollectionUri)",
-              "HubName": "$(system.HostType)",
+              "buildId": "$(Build.BuildId)",
               "pipelineType": "CommitPipeline",
-              "ProjectId": "$(system.TeamProjectId)",
-              "PlanId": "$(system.PlanId)", 
-              "JobId": "$(system.JobId)", 
-              "TimelineId": "$(system.TimelineId)", 
-              "TaskInstanceId": "$(system.TaskInstanceId)",
-              "AuthToken": "$(system.AccessToken)"
+              "projectId": "$(system.TeamProjectId)",
+              "planId": "$(system.PlanId)", 
+              "jobId": "$(system.JobId)", 
+              "timelineId": "$(system.TimelineId)", 
+              "taskInstanceId": "$(system.TaskInstanceId)",
+              "authToken": "$(system.AccessToken)"
               }
             waitForCompletion: "true"
 
@@ -227,18 +220,15 @@ extends:
             body: |
               {
               "operationId": "$(Build.BuildNumber)",
-              "BuildId": "$(Build.BuildId)",
-              "PlanUrl": "$(system.CollectionUri)",
-              "HubName": "$(system.HostType)",
+              "buildId": "$(Build.BuildId)",
               "pipelineType": "CommitPipeline",
-              "ProjectId": "$(system.TeamProjectId)",
-              "PlanId": "$(system.PlanId)", 
-              "JobId": "$(system.JobId)", 
-              "TimelineId": "$(system.TimelineId)", 
-              "TaskInstanceId": "$(system.TaskInstanceId)",
-              "AuthToken": "$(system.AccessToken)",
-              "BuildRepositoryId": "$(build.repository.id)",
-              "TaskIdentifier": "WaiverCommit"
+              "projectId": "$(system.TeamProjectId)",
+              "planId": "$(system.PlanId)", 
+              "jobId": "$(system.JobId)", 
+              "timelineId": "$(system.TimelineId)", 
+              "taskInstanceId": "$(system.TaskInstanceId)",
+              "buildRepositoryId": "$(build.repository.id)",
+              "taskIdentifier": "WaiverCommit"
               }
             waitForCompletion: "true"
 
@@ -250,17 +240,14 @@ extends:
             body: |
               {
               "operationId": "$(Build.BuildNumber)",
-              "BuildId": "$(Build.BuildId)",
-              "PlanUrl": "$(system.CollectionUri)",
-              "HubName": "$(system.HostType)",
+              "buildId": "$(Build.BuildId)",
               "pipelineType": "CommitPipeline",
-              "ProjectId": "$(system.TeamProjectId)",
-              "PlanId": "$(system.PlanId)", 
-              "JobId": "$(system.JobId)", 
-              "TimelineId": "$(system.TimelineId)", 
-              "TaskInstanceId": "$(system.TaskInstanceId)",
-              "AuthToken": "$(system.AccessToken)",
-              "BuildRepositoryId": "$(build.repository.id)"
+              "projectId": "$(system.TeamProjectId)",
+              "planId": "$(system.PlanId)", 
+              "jobId": "$(system.JobId)", 
+              "timelineId": "$(system.TimelineId)", 
+              "taskInstanceId": "$(system.TaskInstanceId)",
+              "buildRepositoryId": "$(build.repository.id)"
               }
             waitForCompletion: "true"
 
@@ -273,16 +260,13 @@ extends:
             body: |
               {
               "operationId": "$(Build.BuildNumber)",
-              "BuildId": "$(Build.BuildId)",
-              "PlanUrl": "$(system.CollectionUri)",
-              "HubName": "$(system.HostType)",
+              "buildId": "$(Build.BuildId)",
               "pipelineType": "CommitPipeline",
-              "ProjectId": "$(system.TeamProjectId)",
-              "PlanId": "$(system.PlanId)", 
-              "JobId": "$(system.JobId)", 
-              "TimelineId": "$(system.TimelineId)", 
-              "TaskInstanceId": "$(system.TaskInstanceId)",
-              "AuthToken": "$(system.AccessToken)",
-              "BuildRepositoryId": "$(build.repository.id)"
+              "projectId": "$(system.TeamProjectId)",
+              "planId": "$(system.PlanId)", 
+              "jobId": "$(system.JobId)", 
+              "timelineId": "$(system.TimelineId)", 
+              "taskInstanceId": "$(system.TaskInstanceId)",
+              "buildRepositoryId": "$(build.repository.id)"
               }
             waitForCompletion: "true"
