@@ -762,7 +762,7 @@ function Get-PESectionTable {
     # Build the object
     $SectionEntry = [PSCustomObject]@{
       SectionName                 = $SectionName
-      SecitonNameBytes            = $SectionNameBytes
+      SectionNameBytes            = $SectionNameBytes
       VirtualSize                 = $VirtualSize
       VirtualAddressOffset        = $VirtualAddressOffset
       SizeOfRawData               = $SizeOfRawData
