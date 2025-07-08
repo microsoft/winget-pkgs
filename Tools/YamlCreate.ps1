@@ -694,7 +694,7 @@ function Get-PESectionTable {
   # The first 64 bytes of the file contain the DOS header. The first two bytes are the "MZ" signature, and the 60th byte contains the offset to the PE header.
   $DOSHeader = Get-Content -Path $Path -AsByteStream -TotalCount 64 -WarningAction 'SilentlyContinue'
   $MZSignature = Get-OffsetBytes -ByteArray $DOSHeader -Offset 0 -Length 2
-  if (Compare-Object -ReferenceObject $([byte[]](77, 90)) -DifferenceObject $MZSignature ) { return $null } # The MZ signature is invalid
+  if (Compare-Object -ReferenceObject $([byte[]](0x4D, 0x5A)) -DifferenceObject $MZSignature ) { return $null } # The MZ signature is invalid
   $PESignatureOffsetBytes = Get-OffsetBytes -ByteArray $DOSHeader -Offset 60 -Length 4
   $PESignatureOffset = [BitConverter]::ToInt32($PESignatureOffsetBytes, 0)
 
@@ -706,7 +706,7 @@ function Get-PESectionTable {
   # Read 24 bytes past the PE header offset to get the PE Signature and COFF header
   $RawBytes = Get-Content -Path $Path -AsByteStream -TotalCount $($PESignatureOffset + $PESignatureSize + $COFFHeaderSize) -WarningAction 'SilentlyContinue'
   $PESignature = Get-OffsetBytes -ByteArray $RawBytes -Offset $PESignatureOffset -Length $PESignatureSize
-  if (Compare-Object -ReferenceObject $([byte[]](80, 69, 0, 0)) -DifferenceObject $PESignature ) { return $null } # The PE header is invalid if it is not 'PE\0\0'
+  if (Compare-Object -ReferenceObject $([byte[]](0x50, 0x45, 0x00, 0x00)) -DifferenceObject $PESignature ) { return $null } # The PE header is invalid if it is not 'PE\0\0'
 
   # Parse out information from the header
   $COFFHeaderBytes = Get-OffsetBytes -ByteArray $RawBytes -Offset $($PESignatureOffset + $PESignatureSize) -Length $COFFHeaderSize
@@ -798,7 +798,7 @@ function Test-IsZip {
   # It isn't worth setting up a FileStream and BinaryReader here since only the first 4 bytes are being checked
   # https://pkware.cachefly.net/webdocs/casestudies/APPNOTE.TXT section 4.3.7
   $ZipHeader = Get-Content -Path $Path -AsByteStream -TotalCount 4 -WarningAction 'SilentlyContinue'
-  return $null -eq $(Compare-Object -ReferenceObject $([byte[]](80, 75, 3, 4)) -DifferenceObject $ZipHeader)
+  return $null -eq $(Compare-Object -ReferenceObject $([byte[]](0x50, 0x4B, 0x03, 0x04)) -DifferenceObject $ZipHeader)
 }
 
 ####
@@ -905,8 +905,8 @@ function Test-IsNullsoft {
 
   # DEADBEEF -or- DEADBEED
   # https://sourceforge.net/p/nsis/code/HEAD/tree/NSIS/branches/WIN64/Source/exehead/fileform.h#l222
-  if (!(Compare-Object -ReferenceObject $([byte[]](222, 173, 190, 239)) -DifferenceObject $PresumedHeaderBytes)) { return $true }
-  if (!(Compare-Object -ReferenceObject $([byte[]](222, 173, 190, 237)) -DifferenceObject $PresumedHeaderBytes)) { return $true }
+  if (!(Compare-Object -ReferenceObject $([byte[]](0xDE, 0xAD, 0xBE, 0xEF)) -DifferenceObject $PresumedHeaderBytes)) { return $true }
+  if (!(Compare-Object -ReferenceObject $([byte[]](0xDE, 0xAD, 0xBE, 0xED)) -DifferenceObject $PresumedHeaderBytes)) { return $true }
   return $false
 }
 
