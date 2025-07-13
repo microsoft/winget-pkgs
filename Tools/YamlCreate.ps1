@@ -27,6 +27,8 @@
   Justification = 'Ths function is a wrapper which calls the singular Read-AppsAndFeaturesEntry as many times as necessary. It corresponds exactly to a pluralized manifest field')]
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseSingularNouns', '', Scope = 'Function', Target = '*Metadata',
   Justification = 'Metadata is used as a mass noun and is therefore singular in the cases used in this script')]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseSingularNouns', '', Scope = 'Function', Target = 'Get-OffsetBytes',
+  Justification = 'Ths function both consumes and outputs an array of bytes. The pluralized name is required to adequately describe the functions purpose')]
 
 Param
 (
@@ -159,21 +161,67 @@ if (Get-Command 'git' -ErrorAction SilentlyContinue) {
   }
 }
 
-# Installs `powershell-yaml` as a dependency for parsing yaml content
-if (-not(Get-Module -ListAvailable -Name powershell-yaml)) {
-  try {
-    Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force
-    Install-Module -Name powershell-yaml -Force -Repository PSGallery -Scope CurrentUser
-  } catch {
-    # If there was an exception while installing powershell-yaml, pass it as an InternalException for further debugging
-    throw [UnmetDependencyException]::new("'powershell-yaml' unable to be installed successfully", $_.Exception)
-  } finally {
-    # Double check that it was installed properly
-    if (-not(Get-Module -ListAvailable -Name powershell-yaml)) {
-      throw [UnmetDependencyException]::new("'powershell-yaml' is not found")
+####
+# Description: Ensures a PowerShell module is installed
+# Inputs: PowerShell Module Name
+# Outputs: None
+####
+function Initialize-Module {
+  param (
+    [Parameter(Mandatory = $true)]
+    [String] $Name,
+    [Parameter(Mandatory = $false)]
+    [String[]] $Cmdlet,
+    [Parameter(Mandatory = $false)]
+    [String[]] $Function
+  )
+
+  $NuGetVersion = (Get-PackageProvider).Where({ $_.Name -ceq 'NuGet' }).Version
+  $installedModules = Get-Module -ListAvailable -Name $Name
+
+  # Ensure NuGet is installed and up to date
+  # If the NuGet Package Provider is not installed, the version will be null, which will satisfy the conditional
+  if ($NuGetVersion -lt $script:NuGetMinimumVersion) {
+    try {
+      Write-Debug 'NuGet Package Provider was not found, it will be installed'
+      # This might fail if the user is not an administrator, so catch the errors
+      Install-PackageProvider -Name NuGet -MinimumVersion $script:NuGetMinimumVersion.ToString() -Force -Scope CurrentUser
+    } catch {
+      Write-Error 'Could not install the NuGet package provider which is required to install script dependencies.' -ErrorAction Continue
+      Write-Error "You may be able to resolve this by running: Install-PackageProvider -Name NuGet -MinimumVersion $($script:NuGetMinimumVersion.ToString())"
     }
   }
+
+  Write-Verbose "Ensuring PowerShell module '$Name' is installed"
+  if ($installedModules) {
+    # If the module is installed, attempt to upgrade it
+    Write-Debug "Found $Name in installed modules"
+  } else {
+    # If the module is not installed, attempt to install it
+    try {
+      Install-Module -Name $Name -Force -Repository PSGallery -Scope CurrentUser
+    } catch {
+      Write-Error "$Name was unable to be installed successfully"
+    }
+  }
+  # Verify the module is installed and present
+  try {
+    if (!(Get-Module -Name $Name)) {
+      $importParameters = @{Name = $Name; Scope = 'Local' } # Force the module to be imported into the local scope to avoid changing the global scope
+      if ($PSBoundParameters.ContainsKey('Cmdlet')) { $importParameters['Cmdlet'] = $Cmdlet }
+      if ($PSBoundParameters.ContainsKey('Function')) { $importParameters['Function'] = $Function }
+
+      Import-Module @importParameters
+    }
+  } catch {
+    Write-Error "$Name was found in available modules, but could not be imported"
+  }
 }
+
+$script:NuGetMinimumVersion = [System.Version]::Parse('2.8.5.201')
+Initialize-Module -Name 'powershell-yaml' # Used for parsing YAML files
+Initialize-Module -Name 'MSI' -Cmdlet @('Get-MSITable'; 'Get-MSIProperty') # Used for fetching MSI Properties
+Initialize-Module -Name 'NtObjectManager' -Function @('Get-Win32ModuleResource'; 'Get-Win32ModuleManifest') # Used for checking installer type inno
 
 # Set settings directory on basis of Operating System
 $script:SettingsPath = Join-Path $(if ([System.Environment]::OSVersion.Platform -match 'Win') { $env:LOCALAPPDATA } else { $env:HOME + '/.config' } ) -ChildPath 'YamlCreate'
@@ -190,7 +238,7 @@ if ($Settings) {
   exit
 }
 
-$ScriptHeader = '# Created with YamlCreate.ps1 v2.4.6'
+$ScriptHeader = '# Created with YamlCreate.ps1 v2.4.7'
 $ManifestVersion = '1.10.0'
 $PSDefaultParameterValues = @{ '*:Encoding' = 'UTF8' }
 $Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
@@ -203,6 +251,7 @@ if (-not ([System.Environment]::OSVersion.Platform -match 'Win')) { $env:TEMP = 
 $wingetUpstream = 'https://github.com/microsoft/winget-pkgs.git'
 $RunHash = $(Get-FileHash -InputStream $([IO.MemoryStream]::new([byte[]][char[]]$(Get-Date).Ticks.ToString()))).Hash.Substring(0, 8)
 $script:UserAgent = 'Microsoft-Delivery-Optimization/10.1'
+$script:CleanupPaths = @()
 
 $_wingetVersion = 1.0.0
 $_appInstallerVersion = (Get-AppxPackage Microsoft.DesktopAppInstaller).version
@@ -334,6 +383,26 @@ if ($remoteUpstreamUrl -and $remoteUpstreamUrl -ne $wingetUpstream) {
   git remote add upstream $wingetUpstream
 }
 
+####
+# Description: Removes files and folders from the file system
+# Inputs: List of paths to remove
+# Outputs: None
+####
+function Invoke-FileCleanup {
+  param (
+    [Parameter(Mandatory = $true)]
+    [AllowEmptyString()]
+    [AllowEmptyCollection()]
+    [String[]] $FilePaths
+  )
+  if (!$FilePaths) { return }
+  foreach ($path in $FilePaths) {
+    Write-Debug "Removing $path"
+    if (Test-Path $path) { Remove-Item -Path $path -Recurse }
+    else { Write-Warning "Could not remove $path as it does not exist" }
+  }
+}
+
 # Since this script changes the UI Calling Culture, a clean exit should set it back to the user preference
 # If the remote upstream was changed, that should also be set back
 Function Invoke-CleanExit {
@@ -341,6 +410,8 @@ Function Invoke-CleanExit {
   if ($remoteUpstreamUrl -and $remoteUpstreamUrl -ne $wingetUpstream) {
     git remote set-url upstream $remoteUpstreamUrl
   }
+
+  Invoke-FileCleanup -FilePaths $script:CleanupPaths
 
   Write-Host
   [Threading.Thread]::CurrentThread.CurrentUICulture = $callingUICulture
@@ -562,215 +633,6 @@ Function Get-InstallerFile {
   return $_OutFile
 }
 
-Function Get-MSIProperty {
-  Param
-  (
-    [Parameter(Mandatory = $true)]
-    [string] $MSIPath,
-    [Parameter(Mandatory = $true)]
-    [string] $Parameter
-  )
-  try {
-    $windowsInstaller = New-Object -com WindowsInstaller.Installer
-    $database = $windowsInstaller.GetType().InvokeMember('OpenDatabase', 'InvokeMethod', $null, $windowsInstaller, @($MSIPath, 0))
-    $view = $database.GetType().InvokeMember('OpenView', 'InvokeMethod', $null, $database, ("SELECT Value FROM Property WHERE Property = '$Parameter'"))
-    $view.GetType().InvokeMember('Execute', 'InvokeMethod', $null, $view, $null)
-    $record = $view.GetType().InvokeMember('Fetch', 'InvokeMethod', $null, $view, $null)
-    $outputObject = $($record.GetType().InvokeMember('StringData', 'GetProperty', $null, $record, 1))
-    $view.GetType().InvokeMember('Close', 'InvokeMethod', $null, $view, $null)
-    [System.Runtime.InteropServices.Marshal]::FinalReleaseComObject($view)
-    [System.Runtime.InteropServices.Marshal]::FinalReleaseComObject($database)
-    [System.Runtime.InteropServices.Marshal]::FinalReleaseComObject($windowsInstaller)
-    [System.GC]::Collect()
-    [System.GC]::WaitForPendingFinalizers()
-    return $outputObject
-  } catch {
-    Write-Error -Message $_.ToString()
-    break
-  }
-}
-
-Function Get-ItemMetadata {
-  Param
-  (
-    [Parameter(Mandatory = $true)]
-    [string] $FilePath
-  )
-  try {
-    $MetaDataObject = [ordered] @{}
-    $FileInformation = (Get-Item $FilePath)
-    $ShellApplication = New-Object -ComObject Shell.Application
-    $ShellFolder = $ShellApplication.Namespace($FileInformation.Directory.FullName)
-    $ShellFile = $ShellFolder.ParseName($FileInformation.Name)
-    $MetaDataProperties = [ordered] @{}
-    0..400 | ForEach-Object -Process {
-      $DataValue = $ShellFolder.GetDetailsOf($null, $_)
-      $PropertyValue = (Get-Culture).TextInfo.ToTitleCase($DataValue.Trim()).Replace(' ', '')
-      if ($PropertyValue -ne '') {
-        $MetaDataProperties["$_"] = $PropertyValue
-      }
-    }
-    foreach ($Key in $MetaDataProperties.Keys) {
-      $Property = $MetaDataProperties[$Key]
-      $Value = $ShellFolder.GetDetailsOf($ShellFile, [int] $Key)
-      if ($Property -in 'Attributes', 'Folder', 'Type', 'SpaceFree', 'TotalSize', 'SpaceUsed') {
-        continue
-      }
-      If (($null -ne $Value) -and ($Value -ne '')) {
-        $MetaDataObject["$Property"] = $Value
-      }
-    }
-    [void][System.Runtime.InteropServices.Marshal]::FinalReleaseComObject($ShellFile)
-    [void][System.Runtime.InteropServices.Marshal]::FinalReleaseComObject($ShellFolder)
-    [void][System.Runtime.InteropServices.Marshal]::FinalReleaseComObject($ShellApplication)
-    [System.GC]::Collect()
-    [System.GC]::WaitForPendingFinalizers()
-    return $MetaDataObject
-  } catch {
-    Write-Error -Message $_.ToString()
-    break
-  }
-}
-
-function Get-Property ($Object, $PropertyName, [object[]]$ArgumentList) {
-  return $Object.GetType().InvokeMember($PropertyName, 'Public, Instance, GetProperty', $null, $Object, $ArgumentList)
-}
-
-Function Get-MsiDatabase {
-  Param
-  (
-    [Parameter(Mandatory = $true)]
-    [string] $FilePath
-  )
-  Write-Host -ForegroundColor 'Yellow' 'Reading Installer Database. This may take some time. . .'
-  $windowsInstaller = New-Object -com WindowsInstaller.Installer
-  $MSI = $windowsInstaller.OpenDatabase($FilePath, 0)
-  $_TablesView = $MSI.OpenView('select * from _Tables')
-  $_TablesView.Execute()
-  $_Database = @{}
-  do {
-    $_Table = $_TablesView.Fetch()
-    if ($_Table) {
-      $_TableName = Get-Property -Object $_Table -PropertyName StringData -ArgumentList 1
-      $_Database["$_TableName"] = @{}
-    }
-  } while ($_Table)
-  [void][System.Runtime.InteropServices.Marshal]::FinalReleaseComObject($_TablesView)
-  foreach ($_Table in $_Database.Keys) {
-    # Write-Host $_Table
-    $_ItemView = $MSI.OpenView("select * from $_Table")
-    $_ItemView.Execute()
-    do {
-      $_Item = $_ItemView.Fetch()
-      if ($_Item) {
-        $_ItemValue = $null
-        $_ItemName = Get-Property -Object $_Item -PropertyName StringData -ArgumentList 1
-        if ($_Table -eq 'Property') { $_ItemValue = Get-Property -Object $_Item -PropertyName StringData -ArgumentList 2 -ErrorAction SilentlyContinue }
-        $_Database.$_Table["$_ItemName"] = $_ItemValue
-      }
-    } while ($_Item)
-    [void][System.Runtime.InteropServices.Marshal]::FinalReleaseComObject($_ItemView)
-  }
-  [void][System.Runtime.InteropServices.Marshal]::FinalReleaseComObject($MSI)
-  [void][System.Runtime.InteropServices.Marshal]::FinalReleaseComObject($windowsInstaller)
-  Write-Host -ForegroundColor 'Yellow' 'Closing Installer Database. . .'
-  return $_Database
-}
-
-Function Test-IsWix {
-  Param
-  (
-    [Parameter(Mandatory = $true)]
-    [object] $Database,
-    [Parameter(Mandatory = $true)]
-    [object] $MetaDataObject
-  )
-  # If any of the table names match wix
-  if ($Database.Keys -match 'wix') { return $true }
-  # If any of the keys in the property table match wix
-  if ($Database.Property.Keys.Where({ $_ -match 'wix' })) { return $true }
-  # If the CreatedBy value matches wix
-  if ($MetaDataObject.ProgramName -match 'wix') { return $true }
-  # If the CreatedBy value matches xml
-  if ($MetaDataObject.ProgramName -match 'xml') { return $true }
-  return $false
-}
-
-Function Get-ExeType {
-  Param
-  (
-    [Parameter(Mandatory = $true)]
-    [String] $Path
-  )
-
-  $nsis = @(
-    77; 90; -112; 0; 3; 0; 0; 0; 4; 0; 0; 0; -1; -1; 0; 0;
-    -72; 0; 0; 0; 0; 0; 0; 0; 64; 0; 0; 0; 0; 0; 0; 0; 0; 0;
-    0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0;
-    0; 0; 0; 0; 0; 0; -40; 0; 0; 0; 14; 31; -70; 14; 0; -76;
-    9; -51; 33; -72; 1; 76; -51; 33; 84; 104; 105; 115;
-    32; 112; 114; 111; 103; 114; 97; 109; 32; 99; 97;
-    110; 110; 111; 116; 32; 98; 101; 32; 114; 117; 110;
-    32; 105; 110; 32; 68; 79; 83; 32; 109; 111; 100;
-    101; 46; 13; 13; 10; 36; 0; 0; 0; 0; 0; 0; 0; -83; 49;
-    8; -127; -23; 80; 102; -46; -23; 80; 102; -46; -23;
-    80; 102; -46; 42; 95; 57; -46; -21; 80; 102; -46;
-    -23; 80; 103; -46; 76; 80; 102; -46; 42; 95; 59; -46;
-    -26; 80; 102; -46; -67; 115; 86; -46; -29; 80; 102;
-    -46; 46; 86; 96; -46; -24; 80; 102; -46; 82; 105; 99;
-    104; -23; 80; 102; -46; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0;
-    0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 80; 69; 0; 0; 76;
-    1; 5; 0
-  )
-
-  $inno = @(
-    77; 90; 80; 0; 2; 0; 0; 0; 4; 0; 15; 0; 255; 255; 0; 0;
-    184; 0; 0; 0; 0; 0; 0; 0; 64; 0; 26; 0; 0; 0; 0; 0; 0; 0;
-    0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0;
-    0; 0; 0; 0; 0; 0; 0; 1; 0; 0; 186; 16; 0; 14; 31; 180; 9;
-    205; 33; 184; 1; 76; 205; 33; 144; 144; 84; 104; 105;
-    115; 32; 112; 114; 111; 103; 114; 97; 109; 32; 109;
-    117; 115; 116; 32; 98; 101; 32; 114; 117; 110; 32;
-    117; 110; 100; 101; 114; 32; 87; 105; 110; 51; 50;
-    13; 10; 36; 55; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0;
-    0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0;
-    0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0;
-    0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0;
-    0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0;
-    0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0;
-    0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0;
-    0; 0; 80; 69; 0; 0; 76; 1; 10; 0)
-
-  $burn = @(46; 119; 105; 120; 98; 117; 114; 110)
-
-  $exeType = $null
-
-  $fileStream = New-Object -TypeName System.IO.FileStream -ArgumentList ($Path, [System.IO.FileMode]::Open, [System.IO.FileAccess]::Read)
-  $reader = New-Object -TypeName System.IO.BinaryReader -ArgumentList $fileStream
-  $bytes = $reader.ReadBytes(264)
-
-  if (($bytes[0..223] -join '') -eq ($nsis -join '')) { $exeType = 'nullsoft' }
-  elseif (($bytes -join '') -eq ($inno -join '')) { $exeType = 'inno' }
-  # The burn header can appear before a certain point in the binary. Check to see if it's present in the first 264 bytes read
-  elseif (($bytes -join '') -match ($burn -join '')) { $exeType = 'burn' }
-  # If the burn header isn't present in the first 264 bytes, scan through the rest of the binary
-  elseif ($ScriptSettings.IdentifyBurnInstallers -eq 'true') {
-    $rollingBytes = $bytes[ - $burn.Length..-1]
-    for ($i = 265; $i -lt ($fileStream.Length, 524280 | Measure-Object -Minimum).Minimum; $i++) {
-      $rollingBytes = $rollingBytes[1..$rollingBytes.Length]
-      $rollingBytes += $reader.ReadByte()
-      if (($rollingBytes -join '') -match ($burn -join '')) {
-        $exeType = 'burn'
-        break
-      }
-    }
-  }
-
-  $reader.Dispose()
-  $fileStream.Dispose()
-  return $exeType
-}
-
 Function Get-UserSavePreference {
   switch ($ScriptSettings.SaveToTemporaryFolder) {
     'always' { $_Preference = '0' }
@@ -793,34 +655,346 @@ Function Get-UserSavePreference {
   return $_Preference
 }
 
-Function Get-PathInstallerType {
-  Param
-  (
-    [Parameter(Mandatory = $true, Position = 0)]
-    [string] $Path
+####
+# Description: Gets the specified bytes from a byte array
+# Inputs: Array of Bytes, Integer offset, Integer Length
+# Outputs: Array of bytes
+####
+function Get-OffsetBytes {
+  param (
+    [Parameter(Mandatory = $true)]
+    [byte[]] $ByteArray,
+    [Parameter(Mandatory = $true)]
+    [int] $Offset,
+    [Parameter(Mandatory = $true)]
+    [int] $Length,
+    [Parameter(Mandatory = $false)]
+    [bool] $LittleEndian = $false # Bool instead of a switch for use with other functions
   )
 
-  if ($Path -match '\.msix(bundle){0,1}$') { return 'msix' }
-  if ($Path -match '\.msi$') {
-    if ([System.Environment]::OSVersion.Platform -match 'Unix') {
-      $ObjectDatabase = @{}
-      $ObjectMetadata = @{
-        ProgramName = $(([string](file $script:dest) | Select-String -Pattern 'Creating Application.+,').Matches.Value)
-      }
-    } else {
-      $ObjectMetadata = Get-ItemMetadata $Path
-      $ObjectDatabase = Get-MsiDatabase $Path
-    }
+  if ($Offset -gt $ByteArray.Length) { return @() } # Prevent null exceptions
+  $Start = if ($LittleEndian) { $Offset + $Length - 1 } else { $Offset }
+  $End = if ($LittleEndian) { $Offset } else { $Offset + $Length - 1 }
+  return $ByteArray[$Start..$End]
+}
 
-    if (Test-IsWix -Database $ObjectDatabase -MetaDataObject $ObjectMetadata ) {
-      return 'wix'
+####
+# Description: Gets the PE Section Table of a file
+# Inputs: Path to File
+# Outputs: Array of Object if valid PE file, null otherwise
+####
+function Get-PESectionTable {
+  # TODO: Switch to using FileReader to be able to seek through the file instead of reading from the start
+  param
+  (
+    [Parameter(Mandatory = $true)]
+    [String] $Path
+  )
+  # https://learn.microsoft.com/en-us/windows/win32/debug/pe-format
+  # The first 64 bytes of the file contain the DOS header. The first two bytes are the "MZ" signature, and the 60th byte contains the offset to the PE header.
+  $DOSHeader = Get-Content -Path $Path -AsByteStream -TotalCount 64 -WarningAction 'SilentlyContinue'
+  $MZSignature = Get-OffsetBytes -ByteArray $DOSHeader -Offset 0 -Length 2
+  if (Compare-Object -ReferenceObject $([byte[]](0x4D, 0x5A)) -DifferenceObject $MZSignature ) { return $null } # The MZ signature is invalid
+  $PESignatureOffsetBytes = Get-OffsetBytes -ByteArray $DOSHeader -Offset 60 -Length 4
+  $PESignatureOffset = [BitConverter]::ToInt32($PESignatureOffsetBytes, 0)
+
+  # These are known sizes
+  $PESignatureSize = 4 # Bytes
+  $COFFHeaderSize = 20 # Bytes
+  $SectionTableEntrySize = 40 # Bytes
+
+  # Read 24 bytes past the PE header offset to get the PE Signature and COFF header
+  $RawBytes = Get-Content -Path $Path -AsByteStream -TotalCount $($PESignatureOffset + $PESignatureSize + $COFFHeaderSize) -WarningAction 'SilentlyContinue'
+  $PESignature = Get-OffsetBytes -ByteArray $RawBytes -Offset $PESignatureOffset -Length $PESignatureSize
+  if (Compare-Object -ReferenceObject $([byte[]](0x50, 0x45, 0x00, 0x00)) -DifferenceObject $PESignature ) { return $null } # The PE header is invalid if it is not 'PE\0\0'
+
+  # Parse out information from the header
+  $COFFHeaderBytes = Get-OffsetBytes -ByteArray $RawBytes -Offset $($PESignatureOffset + $PESignatureSize) -Length $COFFHeaderSize
+  # $MachineTypeBytes = Get-OffsetBytes -ByteArray $COFFHeaderBytes -Offset 0 -Length 2
+  $NumberOfSectionsBytes = Get-OffsetBytes -ByteArray $COFFHeaderBytes -Offset 2 -Length 2
+  # $TimeDateStampBytes = Get-OffsetBytes -ByteArray $COFFHeaderBytes -Offset 4 -Length 4
+  # $PointerToSymbolTableBytes = Get-OffsetBytes -ByteArray $COFFHeaderBytes -Offset 8 -Length 4
+  # $NumberOfSymbolsBytes = Get-OffsetBytes -ByteArray $COFFHeaderBytes -Offset 12 -Length 4
+  $SizeOfOptionalHeaderBytes = Get-OffsetBytes -ByteArray $COFFHeaderBytes -Offset 16 -Length 2
+  # $HeaderCharacteristicsBytes = Get-OffsetBytes -ByteArray $COFFHeaderBytes -Offset 18 -Length 2
+
+  # Convert the data into real numbers
+  $NumberOfSections = [BitConverter]::ToInt16($NumberOfSectionsBytes, 0)
+  # $TimeDateStamp = [BitConverter]::ToInt32($TimeDateStampBytes, 0)
+  # $SymbolTableOffset = [BitConverter]::ToInt32($PointerToSymbolTableBytes, 0)
+  # $NumberOfSymbols = [BitConverter]::ToInt32($NumberOfSymbolsBytes, 0)
+  $OptionalHeaderSize = [BitConverter]::ToInt16($SizeOfOptionalHeaderBytes, 0)
+
+  # Read the section table from the file
+  $SectionTableStart = $PESignatureOffset + $PESignatureSize + $COFFHeaderSize + $OptionalHeaderSize
+  $SectionTableLength = $NumberOfSections * $SectionTableEntrySize
+  $RawBytes = Get-Content -Path $Path -AsByteStream -TotalCount $($SectionTableStart + $SectionTableLength) -WarningAction 'SilentlyContinue'
+  $SectionTableContents = Get-OffsetBytes -ByteArray $RawBytes -Offset $SectionTableStart -Length $SectionTableLength
+
+  $SectionData = @();
+  # Parse each of the sections
+  foreach ($Section in 0..$($NumberOfSections - 1)) {
+    $SectionTableEntry = Get-OffsetBytes -ByteArray $SectionTableContents -Offset ($Section * $SectionTableEntrySize) -Length $SectionTableEntrySize
+
+    # Get the raw bytes
+    $SectionNameBytes = Get-OffsetBytes -ByteArray $SectionTableEntry -Offset 0 -Length 8
+    $VirtualSizeBytes = Get-OffsetBytes -ByteArray $SectionTableEntry -Offset 8 -Length 4
+    $VirtualAddressBytes = Get-OffsetBytes -ByteArray $SectionTableEntry -Offset 12 -Length 4
+    $SizeOfRawDataBytes = Get-OffsetBytes -ByteArray $SectionTableEntry -Offset 16 -Length 4
+    $PointerToRawDataBytes = Get-OffsetBytes -ByteArray $SectionTableEntry -Offset 20 -Length 4
+    $PointerToRelocationsBytes = Get-OffsetBytes -ByteArray $SectionTableEntry -Offset 24 -Length 4
+    $PointerToLineNumbersBytes = Get-OffsetBytes -ByteArray $SectionTableEntry -Offset 28 -Length 4
+    $NumberOfRelocationsBytes = Get-OffsetBytes -ByteArray $SectionTableEntry -Offset 32 -Length 2
+    $NumberOfLineNumbersBytes = Get-OffsetBytes -ByteArray $SectionTableEntry -Offset 34 -Length 2
+    $SectionCharacteristicsBytes = Get-OffsetBytes -ByteArray $SectionTableEntry -Offset 36 -Length 4
+
+    # Convert the data into real values
+    $SectionName = [Text.Encoding]::UTF8.GetString($SectionNameBytes)
+    $VirtualSize = [BitConverter]::ToInt32($VirtualSizeBytes, 0)
+    $VirtualAddressOffset = [BitConverter]::ToInt32($VirtualAddressBytes, 0)
+    $SizeOfRawData = [BitConverter]::ToInt32($SizeOfRawDataBytes, 0)
+    $RawDataOffset = [BitConverter]::ToInt32($PointerToRawDataBytes, 0)
+    $RelocationsOffset = [BitConverter]::ToInt32($PointerToRelocationsBytes, 0)
+    $LineNumbersOffset = [BitConverter]::ToInt32($PointerToLineNumbersBytes, 0)
+    $NumberOfRelocations = [BitConverter]::ToInt16($NumberOfRelocationsBytes, 0)
+    $NumberOfLineNumbers = [BitConverter]::ToInt16($NumberOfLineNumbersBytes, 0)
+
+    # Build the object
+    $SectionEntry = [PSCustomObject]@{
+      SectionName                 = $SectionName
+      SectionNameBytes            = $SectionNameBytes
+      VirtualSize                 = $VirtualSize
+      VirtualAddressOffset        = $VirtualAddressOffset
+      SizeOfRawData               = $SizeOfRawData
+      RawDataOffset               = $RawDataOffset
+      RelocationsOffset           = $RelocationsOffset
+      LineNumbersOffset           = $LineNumbersOffset
+      NumberOfRelocations         = $NumberOfRelocations
+      NumberOfLineNumbers         = $NumberOfLineNumbers
+      SectionCharacteristicsBytes = $SectionCharacteristicsBytes
     }
-    return 'msi'
+    # Add the section to the output
+    $SectionData += $SectionEntry
   }
-  if ($Path -match '\.appx(bundle){0,1}$') { return 'appx' }
-  if ($Path -match '\.zip$') { return 'zip' }
-  if ($Path -match '\.exe$') { return Get-ExeType($Path) }
 
+  return $SectionData
+}
+
+####
+# Description: Checks if a file is a Zip archive
+# Inputs: Path to File
+# Outputs: Boolean. True if file is a zip file, false otherwise
+# Note: This function does not differentiate between other Zipped installer types. Any specific types like MSIX still result in an Zip file.
+#       Use this function with care, as it may return overly broad results.
+####
+function Test-IsZip {
+  param
+  (
+    [Parameter(Mandatory = $true)]
+    [String] $Path
+  )
+
+  # The first 4 bytes of zip files are the same.
+  # It isn't worth setting up a FileStream and BinaryReader here since only the first 4 bytes are being checked
+  # https://pkware.cachefly.net/webdocs/casestudies/APPNOTE.TXT section 4.3.7
+  $ZipHeader = Get-Content -Path $Path -AsByteStream -TotalCount 4 -WarningAction 'SilentlyContinue'
+  return $null -eq $(Compare-Object -ReferenceObject $([byte[]](0x50, 0x4B, 0x03, 0x04)) -DifferenceObject $ZipHeader)
+}
+
+####
+# Description: Checks if a file is an MSIX or APPX archive
+# Inputs: Path to File
+# Outputs: Boolean. True if file is a MSIX or APPX file, false otherwise
+####
+function Test-IsMsix {
+  param
+  (
+    [Parameter(Mandatory = $true)]
+    [String] $Path
+  )
+  if (!(Test-IsZip -Path $Path)) { return $false } # MSIX are really just a special type of Zip file
+  Write-Debug 'Extracting file contents as a zip archive'
+  $FileObject = Get-Item -Path $Path
+  $temporaryFilePath = Join-Path -Path $env:TEMP -ChildPath "$($FileObject.BaseName).zip" # Expand-Archive only works if the file is a zip file
+  $expandedArchivePath = Join-Path -Path $env:TEMP -ChildPath $(New-Guid)
+  Copy-Item -Path $Path -Destination $temporaryFilePath
+  Expand-Archive -Path $temporaryFilePath -DestinationPath $expandedArchivePath
+  Write-Debug 'Marking extracted files for cleanup'
+  $script:CleanupPaths += @($temporaryFilePath; $expandedArchivePath)
+
+  # There are a few different indicators that a package can be installed with MSIX technology, look for any of these file names
+  $msixIndicators = @('AppxSignature.p7x'; 'AppxManifest.xml'; 'AppxBundleManifest.xml', 'AppxBlockMap.xml')
+  foreach ($filename in $msixIndicators) {
+    if (Get-ChildItem -Path $expandedArchivePath -Recurse -Depth 3 -Filter $filename) { return $true } # If any of the files is found, it is an msix
+  }
+  return $false
+}
+
+####
+# Description: Checks if a file is an MSI installer
+# Inputs: Path to File
+# Outputs: Boolean. True if file is an MSI installer, false otherwise
+# Note: This function does not differentiate between MSI installer types. Any specific packagers like WIX still result in an MSI installer.
+#       Use this function with care, as it may return overly broad results.
+####
+function Test-IsMsi {
+  param
+  (
+    [Parameter(Mandatory = $true)]
+    [String] $Path
+  )
+
+  $MsiTables = Get-MSITable -Path $Path -ErrorAction SilentlyContinue
+  if ($MsiTables) { return $true }
+  # If the table names can't be parsed, it is not an MSI
+  return $false
+}
+
+####
+# Description: Checks if a file is a WIX installer
+# Inputs: Path to File
+# Outputs: Boolean. True if file is a WIX installer, false otherwise
+####
+function Test-IsWix {
+  param
+  (
+    [Parameter(Mandatory = $true)]
+    [String] $Path
+  )
+
+  $MsiTables = Get-MSITable -Path $Path -ErrorAction SilentlyContinue
+  if (!$MsiTables) { return $false } # If the table names can't be parsed, it is not an MSI and cannot be WIX
+  if ($MsiTables.Where({ $_.Table -match 'wix' })) { return $true } # If any of the table names match wix
+  if (Get-MSIProperty -Path $Path -Property '*wix*' -ErrorAction SilentlyContinue) { return $true } # If any of the keys in the property table match wix
+  # TODO: Also Check the Metadata of the file
+}
+
+####
+# Description: Checks if a file is a Nullsoft installer
+# Inputs: Path to File
+# Outputs: Boolean. True if file is a Nullsoft installer, false otherwise
+####
+function Test-IsNullsoft {
+  param
+  (
+    [Parameter(Mandatory = $true)]
+    [String] $Path
+  )
+  $SectionTable = Get-PESectionTable -Path $Path
+  if (!$SectionTable) { return $false } # If the section table is null, it is not an EXE and therefore not nullsoft
+  $LastSection = $SectionTable | Sort-Object -Property RawDataOffset -Descending | Select-Object -First 1
+  $PEOverlayOffset = $LastSection.RawDataOffset + $LastSection.SizeOfRawData
+
+  try {
+    # Set up a file reader
+    $fileStream = [System.IO.FileStream]::new($Path, [System.IO.FileMode]::Open, [System.IO.FileAccess]::Read)
+    $binaryReader = [System.IO.BinaryReader]::new($fileStream)
+    # Read 8 bytes after the offset
+    $fileStream.Seek($PEOverlayOffset, [System.IO.SeekOrigin]::Begin) | Out-Null
+    $RawBytes = $binaryReader.ReadBytes(8)
+  } catch {
+    # Set to null as a precaution
+    $RawBytes = $null
+  } finally {
+    if ($binaryReader) { $binaryReader.Close() }
+    if ($fileStream) { $fileStream.Close() }
+  }
+  if (!$RawBytes) { return $false } # The bytes couldn't be read
+  # From the first 8 bytes, get the Nullsoft header bytes
+  $PresumedHeaderBytes = Get-OffsetBytes -ByteArray $RawBytes -Offset 4 -Length 4 -LittleEndian $true
+
+  # DEADBEEF -or- DEADBEED
+  # https://sourceforge.net/p/nsis/code/HEAD/tree/NSIS/branches/WIN64/Source/exehead/fileform.h#l222
+  if (!(Compare-Object -ReferenceObject $([byte[]](0xDE, 0xAD, 0xBE, 0xEF)) -DifferenceObject $PresumedHeaderBytes)) { return $true }
+  if (!(Compare-Object -ReferenceObject $([byte[]](0xDE, 0xAD, 0xBE, 0xED)) -DifferenceObject $PresumedHeaderBytes)) { return $true }
+  return $false
+}
+
+####
+# Description: Checks if a file is an Inno installer
+# Inputs: Path to File
+# Outputs: Boolean. True if file is an Inno installer, false otherwise
+####
+function Test-IsInno {
+  param
+  (
+    [Parameter(Mandatory = $true)]
+    [String] $Path
+  )
+
+  $Resources = Get-Win32ModuleResource -Path $Path -DontLoadResource -ErrorAction SilentlyContinue
+  # https://github.com/jrsoftware/issrc/blob/main/Projects/Src/Shared.Struct.pas#L417
+  if ($Resources.Name.Value -contains '#11111') { return $true } # If the resource name is #11111, it is an Inno installer
+  return $false
+}
+
+####
+# Description: Checks if a file is a Burn installer
+# Inputs: Path to File
+# Outputs: Boolean. True if file is an Burn installer, false otherwise
+####
+function Test-IsBurn {
+  param
+  (
+    [Parameter(Mandatory = $true)]
+    [String] $Path
+  )
+
+  $SectionTable = Get-PESectionTable -Path $Path
+  if (!$SectionTable) { return $false } # If the section table is null, it is not an EXE and therefore not Burn
+  # https://github.com/wixtoolset/wix/blob/main/src/burn/engine/inc/engine.h#L8
+  if ($SectionTable.SectionName -contains '.wixburn') { return $true }
+  return $false
+}
+
+####
+# Description: Checks if a file is a font which WinGet can install
+# Inputs: Path to File
+# Outputs: Boolean. True if file is a supported font, false otherwise
+# Note: Supported font formats are TTF, TTC, and OTF
+####
+function Test-IsFont {
+  param
+  (
+    [Parameter(Mandatory = $true)]
+    [String] $Path
+  )
+
+  # https://learn.microsoft.com/en-us/typography/opentype/spec/otff#organization-of-an-opentype-font
+  $TrueTypeFontSignature = [byte[]](0x00, 0x01, 0x00, 0x00) # The first 4 bytes of a TTF file
+  $OpenTypeFontSignature = [byte[]](0x4F, 0x54, 0x54, 0x4F) # The first 4 bytes of an OTF file
+  # https://learn.microsoft.com/en-us/typography/opentype/spec/otff#ttc-header
+  $TrueTypeCollectionSignature = [byte[]](0x74, 0x74, 0x63, 0x66) # The first 4 bytes of a TTC file
+
+  $FontSignatures = @(
+    $TrueTypeFontSignature,
+    $OpenTypeFontSignature,
+    $TrueTypeCollectionSignature
+  )
+
+  # It isn't worth setting up a FileStream and BinaryReader here since only the first 4 bytes are being checked
+  $FontHeader = Get-Content -Path $Path -AsByteStream -TotalCount 4 -WarningAction 'SilentlyContinue'
+  return $($FontSignatures | ForEach-Object { !(Compare-Object -ReferenceObject $_ -DifferenceObject $FontHeader) }) -contains $true # If any of the signatures match, it is a font
+
+}
+
+
+Function Get-PathInstallerType {
+  param
+  (
+    [Parameter(Mandatory = $true)]
+    [String] $Path
+  )
+
+  # Ordering is important here due to the specificity achievable by each of the detection methods
+  # if (Test-IsFont -Path $Path) { return 'font' } # Font detection is not implemented yet
+  if (Test-IsWix -Path $Path) { return 'wix' }
+  if (Test-IsMsi -Path $Path) { return 'msi' }
+  if (Test-IsMsix -Path $Path) { return 'msix' }
+  if (Test-IsZip -Path $Path) { return 'zip' }
+  if (Test-IsNullsoft -Path $Path) { return 'nullsoft' }
+  if (Test-IsInno -Path $Path) { return 'inno' }
+  if (Test-IsBurn -Path $Path) { return 'burn' }
   return $null
 }
 
@@ -1187,7 +1361,7 @@ Function Read-InstallerEntry {
       Get-UriScope -URI $_Installer['InstallerUrl'] -OutVariable _ | Out-Null
       if ($_) { $_Installer['Scope'] = $_ | Select-Object -First 1 }
       if ([System.Environment]::OSVersion.Platform -match 'Win' -and ($script:dest).EndsWith('.msi')) {
-        $ProductCode = ([string](Get-MSIProperty -MSIPath $script:dest -Parameter 'ProductCode') | Select-String -Pattern '{[A-Z0-9]{8}-([A-Z0-9]{4}-){3}[A-Z0-9]{12}}').Matches.Value
+        $ProductCode = ([string](Get-MSIProperty -Path $script:dest -Property 'ProductCode') | Select-String -Pattern '{[A-Z0-9]{8}-([A-Z0-9]{4}-){3}[A-Z0-9]{12}}').Matches.Value
       } elseif ([System.Environment]::OSVersion.Platform -match 'Unix' -and (Get-Item $script:dest).Name.EndsWith('.msi')) {
         $ProductCode = ([string](file $script:dest) | Select-String -Pattern '{[A-Z0-9]{8}-([A-Z0-9]{4}-){3}[A-Z0-9]{12}}').Matches.Value
       }
@@ -1554,7 +1728,7 @@ Function Read-QuickInstallerEntry {
       # If a new product code doesn't exist, and the installer isn't an `.exe` file, remove the product code if it exists
       $MSIProductCode = $null
       if ([System.Environment]::OSVersion.Platform -match 'Win' -and ($script:dest).EndsWith('.msi')) {
-        $MSIProductCode = ([string](Get-MSIProperty -MSIPath $script:dest -Parameter 'ProductCode') | Select-String -Pattern '{[A-Z0-9]{8}-([A-Z0-9]{4}-){3}[A-Z0-9]{12}}').Matches.Value
+        $MSIProductCode = ([string](Get-MSIProperty -Path $script:dest -Property 'ProductCode') | Select-String -Pattern '{[A-Z0-9]{8}-([A-Z0-9]{4}-){3}[A-Z0-9]{12}}').Matches.Value
       } elseif ([System.Environment]::OSVersion.Platform -match 'Unix' -and (Get-Item $script:dest).Name.EndsWith('.msi')) {
         $MSIProductCode = ([string](file $script:dest) | Select-String -Pattern '{[A-Z0-9]{8}-([A-Z0-9]{4}-){3}[A-Z0-9]{12}}').Matches.Value
       }
@@ -3152,7 +3326,7 @@ Switch ($script:Option) {
       # If a new product code doesn't exist, and the installer isn't an `.exe` file, remove the product code if it exists
       $MSIProductCode = $null
       if ([System.Environment]::OSVersion.Platform -match 'Win' -and ($script:dest).EndsWith('.msi')) {
-        $MSIProductCode = ([string](Get-MSIProperty -MSIPath $script:dest -Parameter 'ProductCode') | Select-String -Pattern '{[A-Z0-9]{8}-([A-Z0-9]{4}-){3}[A-Z0-9]{12}}').Matches.Value
+        $MSIProductCode = ([string](Get-MSIProperty -Path $script:dest -Property 'ProductCode') | Select-String -Pattern '{[A-Z0-9]{8}-([A-Z0-9]{4}-){3}[A-Z0-9]{12}}').Matches.Value
       } elseif ([System.Environment]::OSVersion.Platform -match 'Unix' -and (Get-Item $script:dest).Name.EndsWith('.msi')) {
         $MSIProductCode = ([string](file $script:dest) | Select-String -Pattern '{[A-Z0-9]{8}-([A-Z0-9]{4}-){3}[A-Z0-9]{12}}').Matches.Value
       }

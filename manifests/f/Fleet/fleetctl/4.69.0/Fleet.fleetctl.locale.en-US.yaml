@@ -1,0 +1,100 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: Fleet.fleetctl
+PackageVersion: 4.69.0
+PackageLocale: en-US
+Publisher: Fleet Device Management Inc.
+PublisherUrl: https://fleetdm.com/
+PublisherSupportUrl: https://github.com/fleetdm/fleet/issues
+PrivacyUrl: https://fleetdm.com/legal/privacy
+Author: Fleet Device Management Inc.
+PackageName: fleetctl
+PackageUrl: https://github.com/fleetdm/fleet
+License: MIT
+LicenseUrl: https://github.com/fleetdm/fleet/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2020-present Fleet Device Management Inc
+ShortDescription: A command line interface (CLI) tool for managing Fleet from the command line.
+Description: |-
+  fleetctl (pronounced "Fleet control") is a command line interface (CLI) tool for managing Fleet from the command line. fleetctl enables a GitOps workflow with Fleet.
+  fleetctl also provides a quick way to work with all the data exposed by Fleet without having to use the Fleet UI or work directly with the Fleet API.
+Tags:
+- fleet
+ReleaseNotes: |-
+  Security Engineers
+  - Added vulnerability detection via OVAL for Ubuntu 24.10 and 25.04.
+  - Added ability to sync end user's IdP information with Microsoft Entra ID using SCIM protocol.
+  - Added ability to sync end user's IdP information with Authentik using SCIM protocol.
+  - Updated Windows 11 Enterprise CIS policies to version 4.0.
+  - Added new Detail Query 'luks_verify' used to verify if the stored LUKS key is valid.
+  - Added additional checks to vulnerability feed validation to prevent deploying an un-enriched NVD feed.
+  - Added SHA256 hash of Mac applications to signature information in host software response.
+  - Added FLEET_AUTH_SSO_SESSION_VALIDITY_PERIOD environment variable for overriding how long end users have to complete SSO.
+  - Added ability to execute scripts on up to 5,000 hosts at a time using filters.
+  - Added ability to run a script on all hosts that match the current set of supported filters.
+  - Added a new API GET /scripts/batch/summary/:batch_execution_id endpoint for retrieving a summary of the current state of a batch script execution.
+  - Added the endpoint POST /api/v1/fleet/configuration_profiles/resend/batch to resend a profile to all hosts that satisfy the filter.
+  - Added a starter library that is automatically applied to all new Fleet instances during setup.
+  IT Admins
+  - Added ability to execute scripts on up to 5,000 hosts at a time using filters.
+  - Added ability to run a script on all hosts that match the current set of supported filters.
+  - Added a new API GET /scripts/batch/summary/:batch_execution_id endpoint for retrieving a summary of the current state of a batch script execution.
+  - Added the endpoint POST /api/v1/fleet/configuration_profiles/resend/batch to resend a profile to all hosts that satisfy the filter.
+  - Added ability to uninstall software via Self-service tab of My device.
+  - Added a starter library that is automatically applied to all new Fleet instances during setup.
+  - Added FLEET_MDM_SSO_RATE_LIMIT_PER_MINUTE environment variable to allow increasing MDM SSO endpoint rate limit from 10 per minute. When supplied, this parameter also splits MDM SSO into its own rate limit bucket (default is shared with login endpoints).
+  - Added ability to sync end user's IdP information with Microsoft Entra ID using SCIM protocol.
+  - Added ability to sync end user's IdP information with Authentik using SCIM protocol.
+  - Updated Apple MDM enrollment to skip webview popup when end user authentication is disabled.
+  - Added SHA256 hash of Mac applications to signature information in host software response.
+  - Added UI to filter hosts by config profile status.
+  - Added UI for seeing custom profile status and to batch resend to hosts its failed on.
+  - Added filtering for hosts endpoints by MFM config profile and status.
+  - Added immediate cancellation of profile delivery when a profile is deleted; if it had already been installed then its removal will be pending.
+  - Added ability to turn off MDM for iPhone and iPad hosts on the hosts details page.
+  - Added ability for gitops mode to add a custom package on the software page to then copy/paste the YAML needed for packages that cannot be referenced with a URL.
+  Other improvements and bug fixes
+  - Fixed issue where SSO settings, SMTP settings, Features and MDM end-user authentication settings would not be cleared if they were omitted from YAML files used in a GitOps run.
+  GITOPS USERS: If you have these settings configured via the Fleet web application and you use GitOps to manage your configuration, be sure settings are present in your global YAML settings file before your next GitOps run.
+  - Added Neon to the list of platforms that are detected as Linux distributions.
+  - Updated scripts so that editing will now cancel queued executions.
+  - Warn users of consequences when updating script contents.
+  - Improved effectiveness of app-wide text-truncation-into-tooltip functionality.
+  - Prevented misleading UI when a saved script's contents have changed by only showing a run script activity's script contents if the script run was ad-hoc.
+  - Stopped policy automations from running on macOS hosts until after setup experience finishes so that Fleet doesn't attempt to install software twice.
+  - Added tooltip informing users a test email will be sent when SMTP settings are changed.
+  - Added copyable SHA256 hash to the software details page.
+  - Added device user API error state to replace generic Fleet UI error state in Fleet desktop.
+  - Revised PKG custom package parsing to pick the correct app name and bundle ID in more instances.
+  - Ensured consistent failing policies and total issues counts on the host details page by re-calculating these counts every time the API receives a request for that host.
+  - Allowed Fleet secret environment variables for the MacOS setup script.
+  - Validated uploaded bootstrap package to ensure that it is a Distribution package since that is required by Apple's InstallEnterpriseApplication MDM command.
+  - Modified the Windows MDM detection query to more accurately detect existing MDM enrollment details on hosts with multiple enrollments.
+  - Created consistent UI for the copy button of an input field.
+  - Updated the notes for the disk_info table to clarify usage in ChromeOS.
+  - Fixed an issue where the cursor on the SQL editor would sometimes become misaliged.
+  - Fixed slight style issues with the user menu.
+  - Fixed an issue where adding/updating a manual label had inconsistent results when multiple hosts shared a serial number.
+  - Fixed reading disk encryption key not showing up in host activities.
+  - Fixed a bug where a host that was wiped and re-enrolled without deleting the corresponding host row in Fleet had its old Google Chrome profiles (and other osquery-based data) showing for about an hour.
+  - Fixed an issue in the database migrations released in 4.68.0 where Apple devices with UDID values longer than 36 characters would cause a failure in the migration process; the host_uuid column for tables added by that migration has been increased to accommodate these longer UDID values.
+  - Fixed issue with GitOps command that prevented non-managed labels to be deleted if used by software installations.
+  - Fixed several corner cases with Apple DDM profile verification, including a migration to clear out "remove" operations with invalid status.
+  - Fixed a bug that caused a 500 error when searching for non-existent Fleet-maintained apps.
+  - Fixed a bug where global observers could access the "delete query" UX on the queries table.
+  - Fixed parsing of some MSI installer names.
+  - Fixed a bug where deleting an upcoming activity did not ensure the upcoming activities queue made progress in some cases.
+  - Fixed a CIS query (Ensure Show Full Website Address in Safari Is Enabled).
+  Fleet's agent
+  The following version of Fleet's agent (fleetd) support the latest changes to Fleet:
+  1. orbit-v1.43.0
+  2. fleet-desktop-v1.43.0 (included with Orbit)
+  3. fleetd-chrome-v1.3.2
+  While newer versions of fleetd still function with older versions of the Fleet server (and vice versa), Fleet does not actively test these scenarios and some newer features won't be available.
+ReleaseNotesUrl: https://github.com/fleetdm/fleet/releases/tag/fleet-v4.69.0
+PurchaseUrl: https://fleetdm.com/pricing
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://fleetdm.com/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0
