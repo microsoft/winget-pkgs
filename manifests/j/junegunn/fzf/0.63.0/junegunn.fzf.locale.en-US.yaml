@@ -1,0 +1,79 @@
+# Created with WinGet Releaser using komac v2.12.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: junegunn.fzf
+PackageVersion: 0.63.0
+PackageLocale: en-US
+Publisher: Junegunn Choi
+PublisherUrl: https://github.com/junegunn
+PublisherSupportUrl: https://github.com/junegunn/fzf/issues
+Author: Junegunn Choi
+PackageName: fzf
+PackageUrl: https://github.com/junegunn/fzf
+License: MIT
+LicenseUrl: https://github.com/junegunn/fzf/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2013-2023 Junegunn Choi
+CopyrightUrl: https://github.com/junegunn/fzf/blob/master/LICENSE
+ShortDescription: A general-purpose command-line fuzzy finder
+Tags:
+- cli
+- go
+ReleaseNotes: |-
+  Release highlights: https://junegunn.github.io/fzf/releases/0.63.0/
+  - Added footer. The default border style for footer is line, which draws a single separator line.
+    fzf --reverse --footer "fzf: friend zone forever"
+    - Options
+      - --footer[=STRING]
+      - --footer-border[=STYLE]
+      - --footer-label=LABEL
+      - --footer-label-pos=COL[:bottom]
+    - Colors
+      - footer
+      - footer-bg
+      - footer-border
+      - footer-label
+    - Actions
+      - change-footer
+      - transform-footer
+      - bg-transform-footer
+      - change-footer-label
+      - transform-footer-label
+      - bg-transform-footer-label
+  - line border style is now allowed for all types of border except for --list-border.
+    fzf --height 50% --style full:line --preview 'cat {}' \
+        --bind 'focus:bg-transform-header(file {})+bg-transform-footer(wc {})'
+  - Added {*} placeholder flag that evaluates to all matched items.
+    seq 10000 | fzf --preview "awk '{sum += \$1} END {print sum}' {*f}"
+    - Use this with caution, as it can make fzf sluggish for large lists.
+  - Added asynchronous transform actions with bg- prefix that run asynchronously in the background, along with bg-cancel action to cancel currently running bg-transform actions.
+    # Implement popup that disappears after 1 second
+    #   * Use footer as the popup
+    #   * Use `bell` to ring the terminal bell
+    #   * Use `bg-transform-footer` to clear the footer after 1 second
+    #   * Use `bg-cancel` to cancel currently running background transform actions
+    fzf --multi --list-border \
+        --bind 'enter:execute-silent(echo -n {+} | pbcopy)+bell' \
+        --bind 'enter:+transform-footer(echo Copied {} to clipboard)' \
+        --bind 'enter:+bg-cancel+bg-transform-footer(sleep 1)'
+    # It's okay for the commands to take a little while because they run in the background
+    GETTER='curl -s http://metaphorpsum.com/sentences/1'
+    fzf --style full --border --preview : \
+        --bind "focus:bg-transform-header:$GETTER" \
+        --bind "focus:+bg-transform-footer:$GETTER" \
+        --bind "focus:+bg-transform-border-label:$GETTER" \
+        --bind "focus:+bg-transform-preview-label:$GETTER" \
+        --bind "focus:+bg-transform-input-label:$GETTER" \
+        --bind "focus:+bg-transform-list-label:$GETTER" \
+        --bind "focus:+bg-transform-header-label:$GETTER" \
+        --bind "focus:+bg-transform-footer-label:$GETTER" \
+        --bind "focus:+bg-transform-ghost:$GETTER" \
+        --bind "focus:+bg-transform-prompt:$GETTER"
+  - Added support for full-line background color in the list section
+    for i in $(seq 16 255); do
+      echo -e "\x1b[48;5;${i}m\x1b[0Khello"
+    done | fzf --ansi
+  - SSH completion enhancements by @akinomyoga
+  - Bug fixes and improvements
+ReleaseNotesUrl: https://github.com/junegunn/fzf/releases/tag/v0.63.0
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

@@ -1,0 +1,57 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: Basilisk.Basilisk
+PackageVersion: 52.9.2025.04.23
+PackageLocale: en-US
+Publisher: Basilisk Development Team
+PublisherUrl: https://www.basilisk-browser.org/
+PublisherSupportUrl: https://www.basilisk-browser.org/contact.html
+PrivacyUrl: https://www.basilisk-browser.org/privacy.html
+PackageName: Basilisk
+PackageUrl: https://www.basilisk-browser.org/download.html
+License: MPL-2.0
+LicenseUrl: https://www.mozilla.org/MPL/2.0
+Copyright: Copyright ©2022-Present The Basilisk Development Team. All rights reserved.
+ShortDescription: A XUL-based web-browser built on top of the Unified XUL Platform (UXP). This browser is a close twin to pre-Servo Firefox in how it operates.
+Description: Basilisk is a free and Open Source XUL-based web browser, featuring the well-known Firefox-style interface and operation. It is based on the Goanna layout and rendering engine (a fork of Gecko) and builds on the Unified XUL Platform (UXP), which in turn is a fork of the Mozilla code base without Servo or Rust.
+Tags:
+- browser
+- internet
+- web
+- web-browser
+- webpage
+- xul
+ReleaseNotes: |-
+  This is a development, bugfix, stability, and security release.
+  - Implemented CSS two-location color stop logic. This allows for two-location color stops (`color x% y%`) in gradients, which is shorthand for `color x%, color y%` where both colors are equal.
+  - Our minimum GCC version requirement to build is now 9.1.
+  - Improved channel handling when CSP blocks network redirects.
+  - Implemented several fixes for CORS preflight requests.
+  - Added explicit whitelisting from CSP content loading of javascript: scheme URLs.
+  - Updated the ffvpx library to 6.0.1, this time preventing video color range regressions. An update to 6.0 was previously backed out in 33.5.0.
+  - Updated the JPEG-XL library to 0.11.1 to pick up several fixes and improve decoding compatibility of jxl files.
+  - Updated the SQLite library to 3.49.1.
+  - Fixed a spec compliance issue with DOMRect and DOMQuad returning 0 if NaN was present. We now return NaN in that case, per spec.
+  - Fixed a spec compliance issue with NTLM authentication. We now compute Channel Binding Hashes using the certificate signature's hash algorithm, per spec.
+    Note that particularly weak algorithms are not used and SHA256 will be used as a minimum, instead, in those cases.
+  - Fixed a buildability issue on Mac with XCode 16.3.
+  - Added some additional safety checking to SharedArrayBuffers.
+  - Added some additional safety checking to XSLT compilation and transformation.
+  - Windows only: Added a preference widget.windows.follow_shortcuts_on_file_open to control how Windows File Open dialogs handle shortcut links. See implementation notes.
+  - Simplified some WASM code generation in the Ion JIT compiler.
+  - Fixed a crash in loading external resource maps.
+  - Disabled potentially unsafe attempts at recovering JIT operations.
+  - Fixed some minor linking issues in about:rights.
+  - Updated the embedded emoji font to fix incorrect display of some of the wheelchair emoji.
+  - Built on UXP commit: d892468fd0
+  - Security issues addressed: CVE-2025-1934 (DiD), CVE-2025-3028 (DiD), and and CVE-2025-3033 (see implementation notes)..
+  Implementation notes
+  - Windows only: This version introduces a new (numeric) preference to control how the "Open File" dialogs handle shortcut links in the file system.
+    A low-severity security issue (CVE-2025-3033) was found that in some specific circumstances could allow a malicious actor to convince a user to upload an unintended file from their file system with a specially-crafted shortcut file. To mitigate this, a special flag can be passed to File Open dialogs which prevent the dialogs from parsing shortcut links and navigating to target files and folders based on the shortcut file contents. This can be controlled with the newly-added preference. Since this flag, when set, also prevents users from navigating "through" shortcuts to folders (from e.g. the desktop) and would instead open/attach/upload the shortcut file itself, this would be disruptive to many users' workflows. Considering the major usability drawback and the low-severity nature of the security issue (which would require considerable social engineering to pull off), Basilisk, at least for the time being or until a better solution is found, will continue allowing the following of shortcuts and navigating through them to target folders and files in File Open dialogs. If you are overly cautious, you may want to set this preference to the value 0 which always prevents shortcut parsing and following. For everyone else, just a warning to please stay safe and never follow strange sequences of instructions from strangers that you don't exactly know what they do (and never take their explanations at face value).
+ReleaseNotesUrl: https://www.basilisk-browser.org/releasenotes.html
+Documentations:
+- DocumentLabel: FAQ
+  DocumentUrl: https://www.basilisk-browser.org/faq.html
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0
