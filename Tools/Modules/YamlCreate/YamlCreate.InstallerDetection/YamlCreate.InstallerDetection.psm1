@@ -1,4 +1,46 @@
 ﻿####
+# Description: Returns the values from the Properties menu of a file
+# Inputs: Path to file
+# Outputs: Dictonary of properties
+####
+function Get-FileMetadata {
+    param (
+        [Parameter(Mandatory = $true)]
+        [string]$FilePath
+    )
+
+    if (-not (Test-Path $FilePath)) {
+        Write-Error "File not found: $FilePath"
+        return
+    }
+
+    $shell = New-Object -ComObject Shell.Application
+    $folder = $shell.Namespace((Split-Path $FilePath))
+    $file = $folder.ParseName((Split-Path $FilePath -Leaf))
+
+    [PSCustomObject] $metadata = @{}
+
+    for ($i = 0; $i -lt 400; $i++) {
+        $key = $folder.GetDetailsOf($folder.Items, $i)
+        $value = $folder.GetDetailsOf($file, $i)
+
+        if ($key -and $value) {
+            $metadata[$key] = $value
+        }
+    }
+
+    # Clean up COM objects
+    [System.Runtime.Interopservices.Marshal]::ReleaseComObject($file) | Out-Null
+    [System.Runtime.Interopservices.Marshal]::ReleaseComObject($folder) | Out-Null
+    [System.Runtime.Interopservices.Marshal]::ReleaseComObject($shell) | Out-Null
+
+    return $metadata
+}
+
+
+
+
+####
 # Description: Gets the specified bytes from a byte array
 # Inputs: Array of Bytes, Integer offset, Integer Length
 # Outputs: Array of bytes
@@ -214,7 +256,16 @@ function Test-IsWix {
     if (!$MsiTables) { return $false } # If the table names can't be parsed, it is not an MSI and cannot be WIX
     if ($MsiTables.Where({ $_.Table -match 'wix' })) { return $true } # If any of the table names match wix
     if (Get-MSIProperty -Path $Path -Property '*wix*' -ErrorAction SilentlyContinue) { return $true } # If any of the keys in the property table match wix
-    # TODO: Also Check the Metadata of the file
+
+    # If we reach here, the metadata has to be checked to see if it is a WIX installer
+    $FileMetadata = Get-FileMetadata -FilePath $Path
+
+    # Check the created by program name matches WIX or XML, it is likely a WIX installer
+    if ($FileMetadata.'Program Name' -match 'WIX|XML') {
+        return $true
+    }
+
+    return $false # If none of the checks matched, it is not a WIX installer
 }
 
 ####

@@ -223,8 +223,6 @@ Initialize-Module -Name 'powershell-yaml' # Used for parsing YAML files
 Initialize-Module -Name 'MSI' -Cmdlet @('Get-MSITable'; 'Get-MSIProperty') # Used for fetching MSI Properties
 Initialize-Module -Name 'NtObjectManager' -Function @('Get-Win32ModuleResource'; 'Get-Win32ModuleManifest') # Used for checking installer type inno
 
-Import-Module -Name 'YamlCreate' -Scope Global -Force -ErrorAction 'Stop' # Parent module that loads the rest of the modules required for the script
-
 # Set settings directory on basis of Operating System
 $script:SettingsPath = Join-Path $(if ([System.Environment]::OSVersion.Platform -match 'Win') { $env:LOCALAPPDATA } else { $env:HOME + '/.config' } ) -ChildPath 'YamlCreate'
 # Check for settings directory and create it if none exists
@@ -256,7 +254,11 @@ $script:UserAgent = 'Microsoft-Delivery-Optimization/10.1'
 $script:CleanupPaths = @()
 
 $script:OriginalPSModulePath = $env:PSModulePath
+Write-Debug 'Setting up module paths for YamlCreate'
+Write-Debug "Adding $(Join-Path -Path $PSScriptRoot -ChildPath 'Modules') to PSModulePath"
 $env:PSModulePath = $env:PSModulePath + ';' + (Join-Path -Path $PSScriptRoot -ChildPath 'Modules') # Add the local modules to the PSModulePath
+
+Import-Module -Name 'YamlCreate' -Scope Global -Force -ErrorAction 'Stop' # Parent module that loads the rest of the modules required for the script
 
 $_wingetVersion = 1.0.0
 $_appInstallerVersion = (Get-AppxPackage Microsoft.DesktopAppInstaller).version
