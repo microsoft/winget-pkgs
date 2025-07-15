@@ -37,9 +37,6 @@ function Get-FileMetadata {
     return $metadata
 }
 
-
-
-
 ####
 # Description: Gets the specified bytes from a byte array
 # Inputs: Array of Bytes, Integer offset, Integer Length
