@@ -27,8 +27,6 @@
   Justification = 'Ths function is a wrapper which calls the singular Read-AppsAndFeaturesEntry as many times as necessary. It corresponds exactly to a pluralized manifest field')]
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseSingularNouns', '', Scope = 'Function', Target = '*Metadata',
   Justification = 'Metadata is used as a mass noun and is therefore singular in the cases used in this script')]
-[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseSingularNouns', '', Scope = 'Function', Target = 'Get-OffsetBytes',
-  Justification = 'Ths function both consumes and outputs an array of bytes. The pluralized name is required to adequately describe the functions purpose')]
 
 Param
 (
