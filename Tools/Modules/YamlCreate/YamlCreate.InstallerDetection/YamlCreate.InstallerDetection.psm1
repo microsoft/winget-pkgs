@@ -261,7 +261,7 @@ function Test-IsWix {
     $FileMetadata = Get-FileMetadata -FilePath $Path
 
     # Check the created by program name matches WIX or XML, it is likely a WIX installer
-    if ($FileMetadata.'Program Name' -match 'WIX|XML') {
+    if ($FileMetadata.ContainsKey('Program Name') -and $FileMetadata.'Program Name' -match 'WIX|XML') {
         return $true
     }
 
