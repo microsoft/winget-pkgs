@@ -1,5 +1,5 @@
 $VM = 0
-$build = 134
+$build = 137
 $ipconfig = (ipconfig)
 $remoteIP = ([ipaddress](($ipconfig | select-string "Default Gateway") -split ": ")[1]).IPAddressToString
 #$remoteIP = ([ipaddress](($ipconfig[($ipconfig | select-string "vEthernet").LineNumber..$ipconfig.length] | select-string "IPv4 Address") -split ": ")[1]).IPAddressToString
@@ -22,16 +22,35 @@ if ($VM -eq 0) {
 
 Function Send-SharedError {
 	param(
+		[switch]$Approved,
 		$Clip = (Get-Clipboard)
 	)
 	Write-Host "Writing $($Clip.length) lines."
-	$Clip | Out-File "$writeFolder\err.txt"
-	Get-TrackerVMSetStatus "SendStatus"
+	$Clip -join "`n" | Out-File "$writeFolder\err.txt"
+	if ($Approved) {
+		Get-TrackerVMSetStatus "SendStatus-Approved"
+	}
+	Get-TrackerVMSetStatus "SendStatus-Complete"
+}
+
+function Get-ARPTable {
+	Param(
+	$DisplayName
+	)
+	#SandboxTest.ps1 copypasta - https://github.com/microsoft/winget-pkgs/blob/01d110895592f8775f7a3e9c1e4b50a8bd3dc698/Tools/SandboxTest.ps1#L703
+    $registry_paths = @('HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*','HKLM:\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*', 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*', 'HKCU:\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*')
+    $out = Get-ItemProperty $registry_paths -ErrorAction SilentlyContinue |
+        Where-Object { $_.DisplayName -and (-not $_.SystemComponent -or $_.SystemComponent -ne 1 ) } |
+        Select-Object DisplayName, DisplayVersion, Publisher, @{N='ProductCode'; E={$_.PSChildName}}, @{N='Scope'; E={if($_.PSDrive.Name -eq 'HKCU') {'User'} else {'Machine'}}}
+		if ($DisplayName) {
+			$out = $out | where {$_.DisplayName -match $DisplayName}
+		}
+	return  $out
 }
 
 Function Get-TrackerVMSetStatus {
 	param(
-		[ValidateSet("AddVCRedist","Approved","CheckpointComplete","Checkpointing","CheckpointReady","Completing","Complete","Disgenerate","Generating","Installing","Prescan","Prevalidation","Ready","Rebooting","Regenerate","Restoring","Revert","Scanning","SendStatus","Setup","SetupComplete","Starting","Updating","ValidationCompleted")]
+		[ValidateSet("AddVCRedist","Approved","CheckpointComplete","Checkpointing","CheckpointReady","Completing","Complete","Disgenerate","Generating","Installing","Prescan","Prevalidation","Ready","Rebooting","Regenerate","Restoring","Revert","Scanning","SendStatus","SendStatus-Approved","SendStatus-Complete","Setup","SetupComplete","Starting","Updating","ValidationCompleted")]
 		$Status = "Complete",
 		[string]$Package,
 		[int]$PR
@@ -46,7 +65,7 @@ Function Get-TrackerVMSetStatus {
 	if ($PR) {
 		($out | where {$_.vm -match $VM}).PR = $PR
 	}
-	$out | ConvertTo-Csv -NoHeader | Out-File $StatusFile
+	$out | ConvertTo-Csv -NoTypeInformation | Out-File $StatusFile
 	Write-Host "Setting $vm $Package $PR state $Status"
 }
 
@@ -60,13 +79,14 @@ Function Get-TrackerVMRunValidation {
 
 Function Get-TrackerVMStatus{
 	param(
-		[int]$vm,
+		[int]$vmNum,
 		[ValidateSet("AddVCRedist","Approved","CheckpointComplete","Checkpointing","CheckpointReady","Completing","Complete","Disgenerate","Generating","Installing","Prescan","Prevalidation","Ready","Rebooting","Regenerate","Restoring","Revert","Scanning","SendStatus","Setup","SetupComplete","Starting","Updating","ValidationCompleted")]
 		$Status,
+		$Option = "status",
 		$out = (Get-Content $StatusFile | ConvertFrom-Csv | where {$_.status -notmatch "ImagePark"})
 	)
-	if ($vm) {
-		$out = ($out | where {$_.vm -eq $vm}).status
+	if ($vmNum) {
+		$out = ($out | where {$_.vm -eq $vmNum}).$Option
 	}
 	if ($Status) {
 		$out = ($out | where {$_.status -eq $Status}).vm	
@@ -75,9 +95,19 @@ Function Get-TrackerVMStatus{
 }
 
 <#
+Registry:
+$a = gci HKLM:SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall | Get-ItemProperty | select DisplayName,DisplayVersion
+$a += gci HKLM:SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall | Get-ItemProperty | select DisplayName,DisplayVersion
+$a | where {$_.displayname} | sort displayname -Unique
+
 #Clear event logs.
 
 # Commands
+$n = 15;$t = $n;while ($n -gt 0) {$n--;$r = $t - $n;Write-Progress -Activity "Build latch" -Status "Seconds remaining: $r/$t" -PercentComplete ((1-$n/$t)*100);sleep 1};
+Get-NetAdapter|Disable-NetAdapter;Get-NetAdapter|Enable-NetAdapter;sleep 30;Import-Module $Profile -Force;Import-Module $Profile -Force;cls;Write-Host "VM$VM with remoteIP $remoteIP version $build";
+Get-TrackerVMSetStatus CheckpointReady;
+$n = 15;$t = $n;while ($n -gt 0) {$n--;$r = $t - $n;Write-Progress -Activity "Run latch" -Status "Seconds remaining: $r/$t" -PercentComplete ((1-$n/$t)*100);sleep 1};
+Get-TrackerVMRunValidation
 #Get-NetAdapter|Disable-NetAdapter;Get-NetAdapter|Enable-NetAdapter;sleep 30;Import-Module $Profile -Force;Import-Module $Profile -Force;cls;Write-Host "VM$VM with remoteIP $remoteIP version $build";Get-TrackerVMSetStatus CheckpointReady;$n = 15;$t = $n;while ($n -gt 0) {$n--;$r = $t - $n;Write-Progress -Activity "Process latch" -Status "Seconds remaining: $r/$t" -PercentComplete ((1-$n/$t)*100);sleep 1};Write-Host "Waiting for Network...";Get-TrackerVMRunValidation
 
 
@@ -122,4 +152,8 @@ ImageVMStop
 - Wait for image to cool
 PipelineVMGenerate
 - VM is in system.
+
+gci HKLM:SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall
+gci HKLM:SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall
+
 #>

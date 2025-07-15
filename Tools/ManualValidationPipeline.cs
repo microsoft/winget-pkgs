@@ -140,7 +140,7 @@ using System.Web.Script.Serialization;
 namespace WinGetApprovalNamespace {
     public class WinGetApprovalPipeline : Form {
 		//vars
-        public int build = 929;//Get-RebuildPipeApp
+        public int build = 931;//Get-RebuildPipeApp
 		public string appName = "WinGetApprovalPipeline";
 		public string appTitle = "WinGet Approval Pipeline - Build ";
 		public static string owner = "microsoft";
@@ -173,7 +173,7 @@ namespace WinGetApprovalNamespace {
 		public string DataFileName = ReposFolder+"\\Tools\\ManualValidationPipeline.csv";
 
 		public static string imagesFolder = MainFolder+"\\Images"; //VM Images folder;
-		public string Win10Folder = imagesFolder+"\\Win10-Created010424-Original";
+		public string Win10Folder = imagesFolder+"\\Win10-Created053025-Original";
 		public string Win11Folder = imagesFolder+"\\Win11-Created010424-Original";
 
 		public static string GitHubBaseUrl = "https://github.com/"+owner+"/"+repo;
@@ -570,6 +570,7 @@ namespace WinGetApprovalNamespace {
 			submenu = new MenuItem("Wingetbot Close");
 				item.MenuItems.Add(submenu);
 					submenu.MenuItems.Add("Close: Merge Conflicts;", new EventHandler(Merge_Conflicts_Action));
+					submenu.MenuItems.Add("Close: Version Already Exists;", new EventHandler(Version_Already_Exiss_Action));
 					submenu.MenuItems.Add("Close: Regen with new hash;", new EventHandler(Regen_Hash_Action));
 			submenu = new MenuItem("Regular Close");
 				item.MenuItems.Add(submenu);
@@ -3383,8 +3384,10 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 		public void StopVM(int vm,string VMName = ""){
 			if (VMName == "") {
 				VMName = "vm"+vm;
+			} else {
+				VMName = vm;
 			}
-			SetVMState(VMName, 3);
+			F(VMName, 3);
 		}
 
 
@@ -4759,6 +4762,12 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 			AddPRToRecord(PR,"Closed");
 			dynamic response_out = FromJson(InvokeGitHubPRRequest(PR,WebRequestMethods.Http.Post,"comments","Close with reason: Merge Conflicts;"));
         }// end Merge_Conflicts_Action
+		
+        public void Version_Already_Exiss_Action(object sender, EventArgs e) {
+			int PR = GetCurrentPR();
+			AddPRToRecord(PR,"Closed");
+			dynamic response_out = FromJson(InvokeGitHubPRRequest(PR,WebRequestMethods.Http.Post,"comments","Close with reason: Version already exists;"));
+        }// end Version_Already_Exiss_Action
 		
         public void Package_Available_Action(object sender, EventArgs e) {
 			int PR = GetCurrentPR();
