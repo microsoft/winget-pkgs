@@ -491,25 +491,6 @@ Function Get-EffectiveInstallerType {
   return $Installer.NestedInstallerType
 }
 
-# Takes an array of strings and an array of colors then writes one line of text composed of each string being its respective color
-Function Write-MulticolorLine {
-  Param
-  (
-    [Parameter(Mandatory = $true, Position = 0)]
-    [string[]] $TextStrings,
-    [Parameter(Mandatory = $true, Position = 1)]
-    [string[]] $Colors
-  )
-  If ($TextStrings.Count -ne $Colors.Count) {
-    throw [System.ArgumentException]::new('Invalid Function Parameters. Arguments must be of equal length')
-  }
-  $_index = 0
-  Foreach ($String in $TextStrings) {
-    Write-Host -ForegroundColor $Colors[$_index] -NoNewline $String
-    $_index++
-  }
-}
-
 # Checks a URL and returns the status code received from the URL
 Function Test-Url {
   Param
@@ -2465,15 +2446,18 @@ if (!$script:UsingAdvancedOption) {
   if ($Mode -in 1..6) {
     $UserChoice = $Mode
   } else {
-    Write-Host -ForegroundColor 'Yellow' "Select Mode:`n"
-    Write-MulticolorLine '  [', '1', "] New Manifest or Package Version`n" 'DarkCyan', 'White', 'DarkCyan'
-    Write-MulticolorLine '  [', '2', '] Quick Update Package Version ', "(Note: Must be used only when previous version`'s metadata is complete.)`n" 'DarkCyan', 'White', 'DarkCyan', 'Green'
-    Write-MulticolorLine '  [', '3', "] Update Package Metadata`n" 'DarkCyan', 'White', 'DarkCyan'
-    Write-MulticolorLine '  [', '4', "] New Locale`n" 'DarkCyan', 'White', 'DarkCyan'
-    Write-MulticolorLine '  [', '5', "] Remove a manifest`n" 'DarkCyan', 'White', 'DarkCyan'
-    Write-MulticolorLine '  [', '6', "] Move package to a new identifier`n" 'DarkCyan', 'White', 'DarkCyan'
-    Write-MulticolorLine '  [', 'Q', ']', " Any key to quit`n" 'DarkCyan', 'White', 'DarkCyan', 'Red'
-    Write-MulticolorLine "`nSelection: " 'White'
+    Write-Host @"
+${vtForegroundYellow} Select Mode:
+  ${vtForegroundCyan}[${vtForegroundWhite}1${vtForegroundCyan}] New Manifest or Package Version
+  ${vtForegroundCyan}[${vtForegroundWhite}2${vtForegroundCyan}] Quick Update Package Version
+  ${vtForegroundCyan}[${vtForegroundWhite}3${vtForegroundCyan}] Update Package Metadata ${vtForegroundGreen}(Note: Must be used only when previous version's metadata is complete.)
+  ${vtForegroundCyan}[${vtForegroundWhite}4${vtForegroundCyan}] New Locale
+  ${vtForegroundCyan}[${vtForegroundWhite}5${vtForegroundCyan}] Remove a manifest
+  ${vtForegroundCyan}[${vtForegroundWhite}6${vtForegroundCyan}] Move package to a new identifier
+  ${vtForegroundCyan}[${vtForegroundWhite}Q${vtForegroundCyan}] ${vtForegroundRed}Any key to quit
+  ${vtForegroundDefault}
+"@
+    Write-Host "Selection: " -NoNewLine
 
     # Listen for keypress and set operation mode based on keypress
     $Keys = @{
