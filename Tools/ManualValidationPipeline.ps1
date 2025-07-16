@@ -6,7 +6,7 @@
 #Notes: Utilities to streamline evaluating 3rd party PRs.
 
 
-$build = 1083
+$build = 1085
 $appName = "ManualValidationPipeline"
 Write-Host "$appName build: $build"
 $MainFolder = "C:\ManVal"
@@ -2140,7 +2140,7 @@ Function Get-PRLabelAction { #Soothing label action.
 					}
 				}
 				$Labels.EAT {
-					$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 36 -SearchString $MagicStrings[0] -length 4
+					$UserInput = Get-LineFromBuildResult -PR $PR -LogNumber 36 -SearchString $MagicStrings[0] -length 4
 					if ($UserInput) {
 						Reply-ToPR -PR $PR -UserInput $UserInput -CannedMessage AutoValEnd
 					}
@@ -2149,28 +2149,31 @@ Function Get-PRLabelAction { #Soothing label action.
 					}
 				}
 				$Labels.EHM {
-					write-host "a"
-					$UserInput = Get-LogFromCommitFile -PR $PR -LogNumbers $LogSet -StringNumbers $StringSet -Length $LengthSet
-					write-host "b"
-					if ($null -ne $UserInput) {
-					write-host "c"
+					$UserInput = Get-LineFromBuildResult -PR $PR -LogNumber 44 -SearchString $MagicStrings[7] -length 3
+					if ($UserInput) {
 						Reply-ToPR -PR $PR -UserInput $UserInput -CannedMessage AutoValEnd
-					write-host "d"
-						Get-UpdateHashInPR2 -PR $PR -Clip $UserInput
-					write-host "e"
-					}
-					write-host "f"
+					}					# write-host "a"
+					# $UserInput = Get-LogFromCommitFile -PR $PR -LogNumbers $LogSet -StringNumbers $StringSet -Length $LengthSet
+					# write-host "b"
+					# if ($null -ne $UserInput) {
+					# write-host "c"
+						# Reply-ToPR -PR $PR -UserInput $UserInput -CannedMessage AutoValEnd
+					# write-host "d"
+						# Get-UpdateHashInPR2 -PR $PR -Clip $UserInput
+					# write-host "e"
+					# }
+					# write-host "f"
 				}
 				$Labels.EIA {
-					$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 53 -SearchString $MagicStrings[6] -length 5
+					$UserInput = Get-LineFromBuildResult -PR $PR -LogNumber 53 -SearchString $MagicStrings[6] -length 5
 					if ($null -eq $UserInput) {
-						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 25 -SearchString $MagicStrings[0] -Length 10 
+						$UserInput = Get-LineFromBuildResult -PR $PR -LogNumber 25 -SearchString $MagicStrings[0] -Length 10 
 					}
 					if ($null -eq $UserInput) {
-						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 57 -SearchString $MagicStrings[0] -Length 10 
+						$UserInput = Get-LineFromBuildResult -PR $PR -LogNumber 57 -SearchString $MagicStrings[0] -Length 10 
 					}
 					if ($null -eq $UserInput) {
-						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 42 -SearchString $MagicStrings[0] -Length 10 
+						$UserInput = Get-LineFromBuildResult -PR $PR -LogNumber 42 -SearchString $MagicStrings[0] -Length 10 
 					}
 					if ($UserInput) {
 						$UserInput = Get-AutomatedErrorAnalysis $UserInput
@@ -2201,24 +2204,24 @@ Function Get-PRLabelAction { #Soothing label action.
 					Add-PRToQueue -PR $PR
 				}
 				$Labels.IEM {
-					$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 15 -SearchString $MagicStrings[1]
+					$UserInput = Get-LineFromBuildResult -PR $PR -LogNumber 15 -SearchString $MagicStrings[1]
 					if ($null -match $UserInput) {
-						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 30 -SearchString $MagicStrings[13]
+						$UserInput = Get-LineFromBuildResult -PR $PR -LogNumber 30 -SearchString $MagicStrings[13]
 					}
 					if ($null -match $UserInput) {
-						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 25 -SearchString $MagicStrings[4] -length 7
+						$UserInput = Get-LineFromBuildResult -PR $PR -LogNumber 25 -SearchString $MagicStrings[4] -length 7
 					}
 					if ($null -match $UserInput) {
-						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 39 -SearchString $MagicStrings[4] -length 7
+						$UserInput = Get-LineFromBuildResult -PR $PR -LogNumber 39 -SearchString $MagicStrings[4] -length 7
 					}
 					if ($null -match $UserInput) {
-						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 42 -SearchString $MagicStrings[9] -MatchOffset -3 -Length 4
+						$UserInput = Get-LineFromBuildResult -PR $PR -LogNumber 42 -SearchString $MagicStrings[9] -MatchOffset -3 -Length 4
 					}
 					if ($null -match $UserInput) {
-						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 46 -SearchString $MagicStrings[9] -MatchOffset -3 -Length 4
+						$UserInput = Get-LineFromBuildResult -PR $PR -LogNumber 46 -SearchString $MagicStrings[9] -MatchOffset -3 -Length 4
 					}
 					if ($null -match $UserInput) {
-						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 47 -SearchString $MagicStrings[9] -MatchOffset -3 -Length 4
+						$UserInput = Get-LineFromBuildResult -PR $PR -LogNumber 47 -SearchString $MagicStrings[9] -MatchOffset -3 -Length 4
 					}
 					if ($UserInput) {
 						Reply-ToPR -PR $PR -UserInput $UserInput -CannedMessage AutoValEnd
@@ -2232,7 +2235,7 @@ Function Get-PRLabelAction { #Soothing label action.
 					}
 				}
 				$Labels.IEU {
-					$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 25 -SearchString $MagicStrings[1]
+					$UserInput = Get-LineFromBuildResult -PR $PR -LogNumber 25 -SearchString $MagicStrings[1]
 					if ($UserInput) {
 						if ($MagicStrings[5] -in $UserInput) {
 							Get-GitHubPreset -PR $PR Retry
@@ -2259,9 +2262,9 @@ Function Get-PRLabelAction { #Soothing label action.
 					}
 				}
 				$Labels.MVE {
-					$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 42 -SearchString $MagicStrings[2]
+					$UserInput = Get-LineFromBuildResult -PR $PR -LogNumber 42 -SearchString $MagicStrings[2]
 					if ($null -eq $UserInput) {
-						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 42 -SearchString $MagicStrings[1]
+						$UserInput = Get-LineFromBuildResult -PR $PR -LogNumber 42 -SearchString $MagicStrings[1]
 					}
 					if ($null -ne $UserInput) {
 						Reply-ToPR -PR $PR -UserInput $UserInput -CannedMessage AutoValEnd
@@ -2281,10 +2284,10 @@ Function Get-PRLabelAction { #Soothing label action.
 				}
 				$Labels.PRE {
 					if ($null -match $UserInput) {
-						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 47 -SearchString $MagicStrings[12] -Length 2
+						$UserInput = Get-LineFromBuildResult -PR $PR -LogNumber 47 -SearchString $MagicStrings[12] -Length 2
 					}
 					if ($null -match $UserInput) {
-						$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 33 -SearchString $MagicStrings[12] -Length 2
+						$UserInput = Get-LineFromBuildResult -PR $PR -LogNumber 33 -SearchString $MagicStrings[12] -Length 2
 					}
 					$UserInput += Get-LogFromCommitFile -PR $PR -LogNumbers $LogSet -StringNumbers $StringSet
 
@@ -2299,7 +2302,7 @@ Function Get-PRLabelAction { #Soothing label action.
 					}
 				}
 				$Labels.UVE {
-					$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 32 -SearchString "Validation result: Failed"
+					$UserInput = Get-LineFromBuildResult -PR $PR -LogNumber 32 -SearchString "Validation result: Failed"
 					Get-GitHubPreset -PR $PR -Preset CheckInstaller
 					if ($UserInput) {
 						Reply-ToPR -PR $PR -UserInput $UserInput -CannedMessage AutoValEnd
@@ -2320,7 +2323,7 @@ Function Get-PRLabelAction { #Soothing label action.
 					Get-Autowaiver -PR $PR
 				}
 				$Labels.VMD {
-					$UserInput = Get-LineFromCommitFile -PR $PR -LogNumber 25 -SearchString $MagicStrings[1]
+					$UserInput = Get-LineFromBuildResult -PR $PR -LogNumber 25 -SearchString $MagicStrings[1]
 					if ($UserInput) {
 						Reply-ToPR -PR $PR -UserInput $UserInput -CannedMessage AutoValEnd
 					}
@@ -2428,11 +2431,11 @@ Function Get-StaleVMCheck {
 	$CheckVMStatus = ($VMStatus | where {$_.status -ne "Ready"})
 	Write-Output "$(Get-Date -Format T) Starting stale VM check with $($CheckVMStatus.count) Results"
 	foreach ($vm in $CheckVMStatus) {
-		$PRState = Invoke-GitHubPRRequest -PR $vm.pr -Type "" -Output Content;
+		$PRState = Invoke-GitHubPRRequest -PR $VM.pr -Type "" -Output Content;
 		$PRLabels = ((Invoke-GitHubPRRequest -PR $PR -Type "labels" -Output content -JSON).name)
 		if (($PRState.state -ne "open") -OR
 			(($PRLabels -join " ") -match $Labels.CR)){
-			Get-TrackerVMSetStatus -Status Complete -VM $vm.vm
+			Get-TrackerVMSetStatus -Status Complete -VM $VM.vm
 		}
 	}
 	Write-Output "$(Get-Date -Format T) Completing stale VM check with $($CheckVMStatus.count) Results"
@@ -2457,9 +2460,9 @@ Function Get-LogFromCommitFile {
 			}
 			try {
 				if ($WhatIf) {
-					write-host "Get-LineFromCommitFile -PR $PR -LogNumber $Log -SearchString $($MagicStrings[$StringNumbers[$n]]) -Length $Length"
+					write-host "Get-LineFromBuildResult -PR $PR -LogNumber $Log -SearchString $($MagicStrings[$StringNumbers[$n]]) -Length $Length"
 				} else {
-					$UserInput += Get-LineFromCommitFile -PR $PR -LogNumber $Log -SearchString $MagicStrings[$StringNumbers[$n]] -Length $Length
+					$UserInput += Get-LineFromBuildResult -PR $PR -LogNumber $Log -SearchString $MagicStrings[$StringNumbers[$n]] -Length $Length
 				}
 			} catch {}
 			$n++
@@ -2886,6 +2889,7 @@ Function Get-CannedMessage {
 			$out = "This might be due to user-agent throttling."
 		}
 		"AutoValEnd" {
+			$UserInput = $UserInput -join "`n"
 			$UserInput = "Automatic Validation ended with:`n```````n $UserInput`n```````n"
 			$out = Get-AutomatedErrorAnalysis $UserInput
 		}
@@ -2917,6 +2921,7 @@ Function Get-CannedMessage {
 			$out = "Hi $Username`n`nWe don't often see the `1.0.0` manifest version anymore. Would it be possible to upgrade this to the [1.5.0]($GitHubBaseUrl/tree/master/doc/manifest/schema/1.5.0) version, possibly through a tool such as [WinGetCreate](https://learn.microsoft.com/en-us/windows/package-manager/package/manifest?tabs=minschema%2Cversion-example), [YAMLCreate]($GitHubBaseUrl/blob/master/Tools/YamlCreate.ps1), or [Komac](https://github.com/russellbanks/Komac)? "
 		}
 		"ManValEnd" {
+			$UserInput = $UserInput -join "`n"
 			$UserInput = "Manual Validation ended with:`n```````n$UserInput`n```````n"
 			$out = Get-AutomatedErrorAnalysis $UserInput
 		}
@@ -3090,10 +3095,6 @@ Function Get-AutoValLog {
 			
 			[Array]$UserInput = $null
 			foreach ($File in $filelist) {
-				#if ($File -match "png") {
-				#	Start-Process $File
-				#	$UserInput += "Image detected.`n"
-				#} #Open PNGs with default app.
 				$UserInput += (Get-Content $File) -split "`n"
 			}
 			$UserInput = $UserInput | Where-Object {
@@ -3112,7 +3113,7 @@ Function Get-AutoValLog {
 				$_ -match 'cannot install' 
 			}
 			if ($WhatIf) {
-				write-host "File $file - UserInput $UserInput Length $($UserInput.Length)"
+				write-host "File $File - UserInput $UserInput Length $($UserInput.Length)"
 			}
 			$UserInput = $UserInput -split "`n" | Select-Object -Unique;
 			$UserInput = $UserInput -replace "Standard error: ",$null
@@ -3165,13 +3166,13 @@ Function Get-AutoValLog {
 			if ($null -notmatch ($UserReplace)) {
 				$UserInput = $UserInput | Select-Object -Unique
 
+				$UserInput = $UserInput -replace "-",$null
 				if ($WhatIf) {
 					Write-Host "WhatIf: Reply-ToPR (A) -PR $PR -UserInput $UserInput -CannedMessage AutoValEnd"
 				} else {
-					$out = Reply-ToPR -PR $PR -UserInput ($UserInput -join "`n") -CannedMessage AutoValEnd
+					$out = Reply-ToPR -PR $PR -UserInput $UserInput -CannedMessage AutoValEnd
 				}
 
-				$UserInput = $UserInput -replace "-",$null
 
 				if ($LowerOps -eq $true) {
 					$SplitInput = ($UserInput -split "`n" )
@@ -3574,7 +3575,7 @@ Function Get-BuildFromPR {
 	return $PRbuild
 }
 
-Function Get-LineFromCommitFile {
+Function Get-LineFromBuildResult {
 	param(
 		$PR,
 		$PRbuild = (Get-BuildFromPR -PR $PR),
@@ -3793,7 +3794,7 @@ Function Get-VerifyMMC {
 		[int]$PR = (Get-PRNumber $clip -Hash)
 	)
 	$Comments = (Invoke-GitHubPRRequest -PR $PR -Type comments -Output content | select created_at,@{n="UserName";e={$_.user.login -replace "\[bot\]"}},body)
-	$MissingProperties = ($Comments.body | ? {$_ -match "=== manifests"}) -split "`n" | ?{ $_ -notmatch "=== manifests" -AND
+	[array]$MissingProperties = ($Comments.body | ? {$_ -match "=== manifests"}) -split "`n" | ?{ $_ -notmatch "=== manifests" -AND
 	 $_ -notmatch "Missing Properties" -AND
 	 $_ -notmatch "Icons" -AND
 	 $_ -notmatch "Platform" -AND
@@ -3946,11 +3947,11 @@ Function Get-TrackerVMValidate {
 			$PostInstallPause = "Read-Host 'Install complete, press ENTER to continue...'"
 		}
 		if ($Silent) {
-			Get-TrackerVMSetStatus "Prevalidation" $vm $PackageIdentifier -PR $PR -Mode $PackageMode -Silent
+			Get-TrackerVMSetStatus "Prevalidation" $VM $PackageIdentifier -PR $PR -Mode $PackageMode -Silent
 		} else {
-			Get-TrackerVMSetStatus "Prevalidation" $vm $PackageIdentifier -PR $PR -Mode $PackageMode
+			Get-TrackerVMSetStatus "Prevalidation" $VM $PackageIdentifier -PR $PR -Mode $PackageMode
 		}
-		if ((Get-VM "vm$vm").state -ne "Running") {Start-VM "vm$vm"}
+		if ((Get-VM "vm$VM").state -ne "Running") {Start-VM "vm$VM"}
 
 			$logLine = "$OS "
 			$nonElevatedShell = ""
@@ -3961,7 +3962,7 @@ Function Get-TrackerVMValidate {
 
 		if ($Operation -eq "Configure") {
 			if (!($Silent)) {
-				Write-Host "Running Manual Config build $build on vm$vm for ConfigureFile"
+				Write-Host "Running Manual Config build $build on vm$VM for ConfigureFile"
 			}
 			$wingetArgs = "configure -f $RemoteFolder/manifest/config.yaml --accept-configuration-agreements --disable-interactivity"
 			$Operation = "Configure"
@@ -3973,7 +3974,7 @@ Function Get-TrackerVMValidate {
 				$PackageIdentifier | clip
 			}
 			if (!($Silent)) {
-				Write-Host "Running Manual Validation build $build on vm$vm for package $PackageIdentifier version $PackageVersion"
+				Write-Host "Running Manual Validation build $build on vm$VM for package $PackageIdentifier version $PackageVersion"
 			}
 			
 			if ($PackageVersion) {
@@ -4061,7 +4062,7 @@ Function Get-TrackerVMValidate {
 		`$errArray | ForEach-Object {Out-Log `$_ 'red'}
 	};
 	Get-TrackerVMSetStatus 'Installing'
-	Out-Log ' = = = = Starting Manual Validation pipeline build $build on VM $vm Configure file $logLine = = = = '
+	Out-Log ' = = = = Starting Manual Validation pipeline build $build on VM $VM Configure file $logLine = = = = '
 
 	Out-Log 'Pre-testing log cleanup.'
 	Out-Log 'Clearing PowerShell errors.'
@@ -4087,7 +4088,7 @@ Function Get-TrackerVMValidate {
 	Out-ErrorData `$Error 'PowerShell'
 	Out-ErrorData (Get-EventLog Application -EntryType Error -after `$TimeStart -ErrorAction Ignore).Message 'Application Log'
 
-	Out-Log `" = = = = Failing Manual Validation pipeline build $build on VM $vm for Configure file $logLine in `$(((Get-Date) -`$TimeStart).TotalSeconds) seconds. = = = = `"
+	Out-Log `" = = = = Failing Manual Validation pipeline build $build on VM $VM for Configure file $logLine in `$(((Get-Date) -`$TimeStart).TotalSeconds) seconds. = = = = `"
 	Get-TrackerVMSetStatus 'ValidationCompleted'
 		Break;
 	}
@@ -4103,7 +4104,7 @@ Function Get-TrackerVMValidate {
 	Out-ErrorData (Get-EventLog Application -EntryType Error -after `$TimeStart -ErrorAction Ignore).Message 'Application Log'
 	Out-ErrorData `$DefenderThreat `"Defender (with signature version `$((Get-MpComputerStatus).QuickScanSignatureVersion))`"
 
-	Out-Log `" = = = = Completing Manual Validation pipeline build $build on VM $vm for Configure file $logLine in `$(((Get-Date) -`$TimeStart).TotalSeconds) seconds. = = = = `"
+	Out-Log `" = = = = Completing Manual Validation pipeline build $build on VM $VM for Configure file $logLine in `$(((Get-Date) -`$TimeStart).TotalSeconds) seconds. = = = = `"
 	Get-TrackerVMSetStatus 'ValidationCompleted'
 
 	"
@@ -4134,7 +4135,7 @@ Function Get-TrackerVMValidate {
 		)
 	};
 	Get-TrackerVMSetStatus 'Installing'
-	Out-Log ' = = = = Starting Manual Validation pipeline build $build on VM $vm $PackageIdentifier $logLine = = = = '
+	Out-Log ' = = = = Starting Manual Validation pipeline build $build on VM $VM $PackageIdentifier $logLine = = = = '
 
 	Out-Log 'Pre-testing log cleanup.'
 	Out-Log 'Upgrading installed applications.'
@@ -4183,7 +4184,7 @@ Function Get-TrackerVMValidate {
 	Out-ErrorData (Get-EventLog Application -EntryType Error -after `$TimeStart -ErrorAction Ignore).Message 'Application Log'
 	Out-ErrorData `$DefenderThreat `"Defender (with signature version `$((Get-MpComputerStatus).QuickScanSignatureVersion))`"
 
-	Out-Log `" = = = = Failing Manual Validation pipeline build $build on VM $vm for $PackageIdentifier $logLine in `$(((Get-Date) -`$TimeStart).TotalSeconds) seconds. = = = = `"
+	Out-Log `" = = = = Failing Manual Validation pipeline build $build on VM $VM for $PackageIdentifier $logLine in `$(((Get-Date) -`$TimeStart).TotalSeconds) seconds. = = = = `"
 
 	if ((`$WinGetLogs -match '\[FAIL\] Installer failed security check.') -OR 
 	(`$WinGetLogs -match '80190194 Not found') -OR 
@@ -4290,21 +4291,21 @@ Function Get-TrackerVMValidate {
 	(`$WinGetLogs -match 'Package hash verification failed') -OR 
 	(`$WinGetLogs -match 'Operation did not complete successfully because the file contains a virus or potentially unwanted software')){
 		Send-SharedError -clip `$WinGetLogs
-		Out-Log `" = = = = Failing Manual Validation pipeline build $build on VM $vm for $PackageIdentifier $logLine in `$(((Get-Date) -`$TimeStart).TotalSeconds) seconds. = = = = `"
+		Out-Log `" = = = = Failing Manual Validation pipeline build $build on VM $VM for $PackageIdentifier $logLine in `$(((Get-Date) -`$TimeStart).TotalSeconds) seconds. = = = = `"
 		Get-TrackerVMSetStatus 'SendStatus'
 	} elseif (`$DefenderThreat) {
 		Send-SharedError -clip `$DefenderThreat
-		Out-Log `" = = = = Failing Manual Validation pipeline build $build on VM $vm for $PackageIdentifier $logLine in `$(((Get-Date) -`$TimeStart).TotalSeconds) seconds. = = = = `"
+		Out-Log `" = = = = Failing Manual Validation pipeline build $build on VM $VM for $PackageIdentifier $logLine in `$(((Get-Date) -`$TimeStart).TotalSeconds) seconds. = = = = `"
 		Get-TrackerVMSetStatus 'SendStatus'
 	} elseif ((Get-Content $RemoteTrackerModeFile) -eq 'IEDS') {
-		Out-Log `" = = = = Auto-Completing Manual Validation pipeline build $build on VM $vm for $PackageIdentifier $logLine in `$(((Get-Date) -`$TimeStart).TotalSeconds) seconds. = = = = `"
+		Out-Log `" = = = = Auto-Completing Manual Validation pipeline build $build on VM $VM for $PackageIdentifier $logLine in `$(((Get-Date) -`$TimeStart).TotalSeconds) seconds. = = = = `"
 		Get-TrackerVMSetStatus 'Approved'
 	} elseif ((Get-TrackerVMStatus | where {`$_.vm -match `$vm}).Mode -eq 'Existing') {
-		Out-Log `" = = = = Auto-Completing Manual Validation pipeline build $build on VM $vm for $PackageIdentifier $logLine in `$(((Get-Date) -`$TimeStart).TotalSeconds) seconds. = = = = `"
+		Out-Log `" = = = = Auto-Completing Manual Validation pipeline build $build on VM $VM for $PackageIdentifier $logLine in `$(((Get-Date) -`$TimeStart).TotalSeconds) seconds. = = = = `"
 		Get-TrackerVMSetStatus 'Approved'
 	} else {
 		Start-Process PowerShell
-		Out-Log `" = = = = Completing Manual Validation pipeline build $build on VM $vm for $PackageIdentifier $logLine in `$(((Get-Date) -`$TimeStart).TotalSeconds) seconds. = = = = `"
+		Out-Log `" = = = = Completing Manual Validation pipeline build $build on VM $VM for $PackageIdentifier $logLine in `$(((Get-Date) -`$TimeStart).TotalSeconds) seconds. = = = = `"
 		Get-TrackerVMSetStatus 'ValidationCompleted'
 	}
 
@@ -4400,8 +4401,8 @@ Function Get-TrackerVMValidate {
 		if (!($Silent)) {
 			Write-Host "File operations complete, starting VM operations."
 		}
-		Get-TrackerVMRevert $vm -Silent
-		Get-TrackerVMLaunchWindow $vm
+		Get-TrackerVMRevert $VM -Silent
+		Get-TrackerVMLaunchWindow $VM
 	}
 }
 
@@ -4459,25 +4460,25 @@ Function Get-SingleFileAutomation {
 		$PackageIdentifier = (Get-YamlValue PackageIdentifier -clip $clip),
 		$version = ((Get-YamlValue PackageVersion -clip $clip) -replace "'","" -replace '"',""), 
 		$listing = (Get-ManifestListing $PackageIdentifier),
-		$vm = (Get-ManifestFile -clip $clip)[-1]
+		$VM = (Get-ManifestFile -clip $clip)[-1]
 	)
 	
-	for ($file = 0; $file -lt $listing.length;$file++) {
-		Get-ManifestFile $vm -clip (Get-FileFromGitHub -PackageIdentifier $PackageIdentifier -Version $version -FileName $listing[$file]) -PR $PR
+	for ($File = 0; $File -lt $listing.length;$File++) {
+		Get-ManifestFile $VM -clip (Get-FileFromGitHub -PackageIdentifier $PackageIdentifier -Version $version -FileName $listing[$File]) -PR $PR
 	}
 }
 
 Function Get-InstallerFileAutomation {
 	Param(
 		$PR = (Get-Clipboard),
-		$InstallerFile = (get-commitFile -pr $PR -MatchName "")
+		$InstallerFile = (Get-CommitFile -PR $PR -MatchName "")
 	)
 	Get-SingleFileAutomation -PR $pr -clip $InstallerFile
 }
 
 Function Get-ManifestAutomation {
 	param(
-		$vm = (Get-NextFreeVM),
+		$VM = (Get-NextFreeVM),
 		$PR =0,
 		$Arch,
 		$OS,
@@ -4486,22 +4487,22 @@ Function Get-ManifestAutomation {
 
 	#Read-Host "Copy Installer file to clipboard, then press Enter to continue."
 	(Get-Clipboard) -join "" | clip;
-	$null = Get-ManifestFile $vm
+	$null = Get-ManifestFile $VM
 
 	Read-Host "Copy defaultLocale file to clipboard, then press Enter to continue."
 	(Get-Clipboard) -join "" | clip;
-	$null = Get-ManifestFile $vm
+	$null = Get-ManifestFile $VM
 
 	Read-Host "Copy version file to clipboard, then press Enter to continue."
 	(Get-Clipboard) -join "" | clip;
 	if ($Arch) {
-		$null = Get-ManifestFile $vm -Arch $Arch
+		$null = Get-ManifestFile $VM -Arch $Arch
 	} elseif ($OS) {
-		$null = Get-ManifestFile $vm -OS $OS
+		$null = Get-ManifestFile $VM -OS $OS
 	} elseif ($Scope) {
-		$null = Get-ManifestFile $vm -Scope $Scope
+		$null = Get-ManifestFile $VM -Scope $Scope
 	} else {
-		$null = Get-ManifestFile $vm -PR $PR
+		$null = Get-ManifestFile $VM -PR $PR
 	}
 }
 
@@ -4516,7 +4517,7 @@ Function Get-ManifestOtherAutomation {
 	$Title = $Title[0]
 	$Version = $Version[0]
 	if ($Installer) {
-		$file = (Get-FileFromGitHub $Title $Version)
+		$File = (Get-FileFromGitHub $Title $Version)
 	}
 }
 
@@ -4564,13 +4565,13 @@ Function Get-ManifestFile {
 		}
 		"version" {
 			if ($Arch) {
-				Get-TrackerVMValidate -vm $vm -NoFiles -Arch $Arch -PR $PR -PackageIdentifier $PackageIdentifier
+				Get-TrackerVMValidate -vm $VM -NoFiles -Arch $Arch -PR $PR -PackageIdentifier $PackageIdentifier
 			} elseif ($OS) {
-				Get-TrackerVMValidate -vm $vm -NoFiles -OS $OS -PR $PR -PackageIdentifier $PackageIdentifier
+				Get-TrackerVMValidate -vm $VM -NoFiles -OS $OS -PR $PR -PackageIdentifier $PackageIdentifier
 			} elseif ($Scope) {
-				Get-TrackerVMValidate -vm $vm -NoFiles -Scope $Scope -PR $PR -PackageIdentifier $PackageIdentifier
+				Get-TrackerVMValidate -vm $VM -NoFiles -Scope $Scope -PR $PR -PackageIdentifier $PackageIdentifier
 			} else {
-				Get-TrackerVMValidate -vm $vm -NoFiles -PR $PR -PackageIdentifier $PackageIdentifier
+				Get-TrackerVMValidate -vm $VM -NoFiles -PR $PR -PackageIdentifier $PackageIdentifier
 			}
 		}
 		Default {
@@ -4581,7 +4582,7 @@ Function Get-ManifestFile {
 	$FilePath = "$manifestFolder\$FileName.yaml"
 	Write-Output "Writing $($clip.length) lines to $FilePath"
 	$clip -replace "0New version: ","0" -replace "0Add version: ","0" -replace "0Add ","0" -replace "0New ","0" | Out-File $FilePath -Encoding unicode
-	return $vm
+	return $VM
 }
 
 Function Get-ManifestListing {
@@ -4638,7 +4639,7 @@ Function Get-PipelineVmGenerate {
 		[int]$version = (Get-TrackerVMVersion -OS $OS),
 		$destinationPath = "$imagesFolder\$vm\",
 		$VMFolder = "$MainFolder\vm\$vm",
-		$newVmName = "vm$vm",
+		$newVmName = "vm$VM",
 		$startTime = (Get-Date)
 	)
 	Test-Admin
@@ -4654,8 +4655,8 @@ Function Get-PipelineVmGenerate {
 	Rename-VM (Get-VM | Where-Object {($_.CheckpointFileLocation)+"\" -eq $destinationPath}) -NewName $newVmName
 	Start-VM $newVmName
 	Remove-VMCheckpoint -VMName $newVmName -Name "Backup"
-	Get-TrackerVMRevert $vm
-	Get-TrackerVMLaunchWindow $vm
+	Get-TrackerVMRevert $VM
+	Get-TrackerVMLaunchWindow $VM
 	Write-Host "Took $(((Get-Date)-$startTime).TotalSeconds) seconds..."
 }
 
@@ -4664,12 +4665,12 @@ Function Get-PipelineVmDisgenerate {
 		[Parameter(mandatory=$True)][int]$vm,
 		$destinationPath = "$imagesFolder\$vm\",
 		$VMFolder = "$MainFolder\vm\$vm",
-		$vmName = "vm$vm"
+		$vmName = "vm$VM"
 	)
 	Test-Admin
-	Get-TrackerVMSetStatus 'Disgenerate' $vm
+	Get-TrackerVMSetStatus 'Disgenerate' $VM
 	Get-ConnectedVM | Where-Object {$_.vm -match $VMName} | ForEach-Object {Stop-Process -id $_.id}
-	Stop-TrackerVM $vm
+	Stop-TrackerVM $VM
 	Remove-VM -Name $vmName -Force
 
 	$out = Get-Status
@@ -4692,10 +4693,10 @@ Function Get-ImageVMStart {
 		[ValidateSet("Win10","Win11")][string]$OS = "Win10"
 	)
 	Test-Admin
-	$vm = 0
+	$VM = 0
 	Start-VM $OS;
-	Get-TrackerVMRevert $vm $OS;
-	Get-TrackerVMLaunchWindow $vm $OS
+	Get-TrackerVMRevert $VM $OS;
+	Get-TrackerVMLaunchWindow $VM $OS
 }
 
 Function Get-ImageVMStop {
@@ -4703,7 +4704,7 @@ Function Get-ImageVMStop {
 		[ValidateSet("Win10","Win11")][string]$OS = "Win10"
 	)
 	Test-Admin
-	$vm = 0
+	$VM = 0
 	$OriginalLoc = ""
 	switch ($OS) {
 		"Win10" {
@@ -4718,8 +4719,8 @@ Function Get-ImageVMStop {
 	Write-Host "Writing $OS version $version"
 	Get-TrackerVMSetVersion -Version $Version -OS $OS
 	Stop-Process -id ((Get-ConnectedVM)|Where-Object {$_.VM -match "$OS"}).id -ErrorAction Ignore
-	Redo-Checkpoint $vm $OS;
-	Stop-TrackerVM $vm $OS;
+	Redo-Checkpoint $VM $OS;
+	Stop-TrackerVM $VM $OS;
 	Write-Host "Letting VM cool..."
 	Start-Sleep 30;
 	Robocopy.exe $OriginalLoc $ImageLoc -mir
@@ -4740,16 +4741,16 @@ Function Get-ImageVMMove {
 			$CurrentVMName = "Windows 11 dev environment"
 		}
 	}
-	$vm = Get-VM | where {$_.Name -match $CurrentVMName}
-	Move-VMStorage -VM $vm -DestinationStoragePath $newLoc
-	Rename-VM -VM $vm -NewName $OS
+	$VM = Get-VM | where {$_.Name -match $CurrentVMName}
+	Move-VMStorage -VM $VM -DestinationStoragePath $newLoc
+	Rename-VM -VM $VM -NewName $OS
 }
 
 #VM Pipeline Management
 Function Get-TrackerVMLaunchWindow {
 	param(
 		[Parameter(mandatory=$True)][int]$vm,
-		$VMName = "vm$vm"
+		$VMName = "vm$VM"
 	)
 	Test-Admin
 	Get-ConnectedVM | Where-Object {$_.vm -match $VMName} | ForEach-Object {Stop-Process -id $_.id}
@@ -4759,14 +4760,14 @@ Function Get-TrackerVMLaunchWindow {
 Function Get-TrackerVMRevert {
 	param(
 		[Parameter(mandatory=$True)][int]$vm,
-		$VMName = "vm$vm",
+		$VMName = "vm$VM",
 		[Switch]$Silent
 	)
 	Test-Admin
 	if ($Silent) {
-		Get-TrackerVMSetStatus "Restoring" $vm -Silent
+		Get-TrackerVMSetStatus "Restoring" $VM -Silent
 	} else {
-		Get-TrackerVMSetStatus "Restoring" $vm
+		Get-TrackerVMSetStatus "Restoring" $VM
 	}
 	Restore-VMCheckpoint -Name $CheckpointName -VMName $VMName -Confirm:$False
 }
@@ -4778,17 +4779,17 @@ Function Complete-TrackerVM {
 		$filesFileName = "$VMFolder\files.txt"
 	)
 	Test-Admin
-	Get-TrackerVMSetStatus "Completing" $vm
-	Stop-Process -id ((Get-ConnectedVM)|Where-Object {$_.VM -match "vm$vm"}).id -ErrorAction Ignore
-	Stop-TrackerVM $vm
+	Get-TrackerVMSetStatus "Completing" $VM
+	Stop-Process -id ((Get-ConnectedVM)|Where-Object {$_.VM -match "vm$VM"}).id -ErrorAction Ignore
+	Stop-TrackerVM $VM
 	Get-RemoveFileIfExist $filesFileName
-	Get-TrackerVMSetStatus "Ready" $vm " " 1 "Ready"
+	Get-TrackerVMSetStatus "Ready" $VM " " 1 "Ready"
 }
 
 Function Stop-TrackerVM {
 	param(
 		[Parameter(mandatory=$True)][int]$vm,
-		$VMName = "vm$vm"
+		$VMName = "vm$VM"
 	)
 	Test-Admin
 	Stop-VM $VMName -TurnOff
@@ -4823,7 +4824,7 @@ Function Get-TrackerVMSetStatus {
 		Write-Status $out -Silent
 	} else {
 		Write-Status $out
-		Write-Host "Setting $vm $Package $PR state $Status"
+		Write-Host "Setting $VM $Package $PR state $Status"
 	}
 }
 
@@ -5011,13 +5012,13 @@ Function Get-NextFreeVM {
 Function Redo-Checkpoint {
 	param(
 		[Parameter(mandatory=$True)][int]$vm,
-		$VMName = "vm$vm"
+		$VMName = "vm$VM"
 	)
 	Test-Admin
-	Get-TrackerVMSetStatus "Checkpointing" $vm
+	Get-TrackerVMSetStatus "Checkpointing" $VM
 	Remove-VMCheckpoint -Name $CheckpointName -VMName $VMName
 	Checkpoint-VM -SnapshotName $CheckpointName -VMName $VMName
-	Get-TrackerVMSetStatus "Complete" $vm
+	Get-TrackerVMSetStatus "Complete" $VM
 }
 
 #File Management
@@ -5212,7 +5213,7 @@ Function Add-InstallerSwitch {
 		}
 	}
 	$fileInsert = " InstallerSwitches:`n Silent: $Data"
-	Add-ToValidationFile $vm -Selector $Selector -fileInsert $fileInsert #-Force
+	Add-ToValidationFile $VM -Selector $Selector -fileInsert $fileInsert #-Force
 }
 
 Function Get-UpdateHashInPR {
@@ -5629,7 +5630,7 @@ Function Get-TrackerVMWindowLoc {
 		$VM,
 		$Rectangle = (New-Object RECT),
 		$VMProcesses = (Get-Process vmconnect),
-		$MWHandle = ($VMProcesses | where {$_.MainWindowTitle -match "vm$vm"}).MainWindowHandle
+		$MWHandle = ($VMProcesses | where {$_.MainWindowTitle -match "vm$VM"}).MainWindowHandle
 	)
 	[window]::GetWindowRect($MWHandle,[ref]$Rectangle)
 	Return $Rectangle
@@ -5643,7 +5644,7 @@ Function Get-TrackerVMWindowSet {
 		$Right,
 		$Bottom,
 		$VMProcesses = (Get-Process vmconnect),
-		$MWHandle = ($VMProcesses | where {$_.MainWindowTitle -match "vm$vm"}).MainWindowHandle
+		$MWHandle = ($VMProcesses | where {$_.MainWindowTitle -match "vm$VM"}).MainWindowHandle
 	)
 	$null = [window]::MoveWindow($MWHandle,$Left,$Top,$Right,$Bottom,$True)
 }
