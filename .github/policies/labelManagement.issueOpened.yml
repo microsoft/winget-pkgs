@@ -212,5 +212,32 @@ configuration:
         then:
           - addLabel:
               label: Author-Not-Authorized
+      - description: >-
+          When a PR is opened/updated, if a change is made under the fonts directory and user is not repo admin
+          * Add Author-Not-Authorized label
+          * Add a reply to the author
+        if:
+          - payloadType: Pull_Request
+          - isOpen
+          - not:
+              filesMatchPattern:
+                pattern: ^$
+          - filesMatchPattern:
+                pattern: ^fonts[\/\\].*
+          - not:
+              activitySenderHasPermission:
+                permission: Admin
+        then:
+          - addReply:
+              reply: >-
+                Hello ${issueAuthor},
+
+
+                It appears you are making a change under the 'fonts' directory. The community repository currently does not accept contributions to the fonts directory.
+
+
+                Template: msftbot/authorNotAuthorized/fonts
+          - addLabel:
+              label: Author-Not-Authorized
 onFailure:
 onSuccess:
