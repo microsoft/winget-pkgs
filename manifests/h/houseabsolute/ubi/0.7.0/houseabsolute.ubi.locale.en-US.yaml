@@ -1,0 +1,44 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: houseabsolute.ubi
+PackageVersion: 0.7.0
+PackageLocale: en-US
+Publisher: A house for code
+PublisherUrl: https://github.com/houseabsolute
+PublisherSupportUrl: https://github.com/houseabsolute/ubi/issues
+PackageName: ubi
+PackageUrl: https://github.com/houseabsolute/ubi
+License: Apache-2.0 or MIT
+Copyright: Copyright (c) 2022 David Rolsky
+ShortDescription: The Universal Binary Installer
+Description: |-
+  UBI is a universal binary installer library and CLI tool.
+  When I say "universal", I mean it downloads binaries from GitHub or GitLab releases.
+  When I say "binary", I mean it handles single-file executables like those created by most Go and Rust projects.
+  When I say "installer", I mean it plops the binary wherever you tell it to.
+  And finally, when I say "UBI", I don't mean "universal basic income", but that'd be nice too.
+Tags:
+- binary
+- download
+- executable
+- install
+- portable
+ReleaseNotes: |-
+  - Added a new --matching-regex CLI flag and UbiBuilder::matching_regex method. This regex is
+    matched against potential release filenames before attempting to find a release with a matching
+    OS, architecture, etc. This is useful for doing things like filtering for a single tool when a
+    project releases multiple tools in a single GitHub release. PR by @yjoer (Yeoh Joer). GH #122.
+  - The logic for determining whether or not to include a top-level directory when --extract-all is
+    passed has been fixed. Previously, if the directory where the archive was extracted into was not
+    empty, then when ubi checked for whether it should ignore a top-level directory in the archive,
+    it would see these files, and never ignore the top-level directory. Now it extracts the archive
+    into a temp directory and checks that. This makes the behavior of --extract-all more
+    predictable, and it means you can use to, for example, extract an archive into an existing tree,
+    like ~/.local, that contains ~/.local/bin, ~/.local/share, etc. Reported by @jinnatar (Jinna
+    Kiisuo). GH #106.
+  - Changed dependency declarations to mostly eliminate default features, which removed quite a few
+    transitive dependencies.
+ReleaseNotesUrl: https://github.com/houseabsolute/ubi/releases/tag/v0.7.0
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

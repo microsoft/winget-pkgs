@@ -25,7 +25,7 @@ configuration:
         then:
           - addReply:
               reply: >-
-                Hello @${issueAuthor},
+                Hello ${issueAuthor},
 
 
                 This pull request does not update any files. Please review your commit history and resubmit.
@@ -78,7 +78,7 @@ configuration:
         then:
           - addReply:
               reply: >-
-                Hello @${issueAuthor},
+                Hello ${issueAuthor},
 
 
                 Sorry we cannot process ${number} because you are changing validation-pipeline.yaml. Please remove that file from your PR. If you would like to discuss changes to validation-pipeline.yml, please file an issue.
@@ -117,7 +117,7 @@ configuration:
         then:
           - addReply:
               reply: >-
-                Hello @${issueAuthor},
+                Hello ${issueAuthor},
 
 
                 It looks like this pull request is missing the manifests folder. For example: manifests\<first letter of the publisher in lower-case>\<publisher>\<application>\<version>\*.yaml
@@ -210,6 +210,33 @@ configuration:
               activitySenderHasPermission:
                 permission: Admin
         then:
+          - addLabel:
+              label: Author-Not-Authorized
+      - description: >-
+          When a PR is opened/updated, if a change is made under the fonts directory and user is not repo admin
+          * Add Author-Not-Authorized label
+          * Add a reply to the author
+        if:
+          - payloadType: Pull_Request
+          - isOpen
+          - not:
+              filesMatchPattern:
+                pattern: ^$
+          - filesMatchPattern:
+                pattern: ^fonts[\/\\].*
+          - not:
+              activitySenderHasPermission:
+                permission: Admin
+        then:
+          - addReply:
+              reply: >-
+                Hello ${issueAuthor},
+
+
+                It appears you are making a change under the 'fonts' directory. The community repository currently does not accept contributions to the fonts directory.
+
+
+                Template: msftbot/authorNotAuthorized/fonts
           - addLabel:
               label: Author-Not-Authorized
 onFailure:

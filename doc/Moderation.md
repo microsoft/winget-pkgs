@@ -10,20 +10,34 @@ When we initially implemented moderation, we observed several objective criteria
 
 Our intent was not to introduce a numbers game for others to achieve and automatically become a moderator. Our goal from now on is to ensure the community is sufficiently supported by individuals who have the technical knowledge and a proven track record of success. Becoming a moderator is like becoming a [Microsoft Most Valuable Professional](https://mvp.microsoft.com/en-us/Pages/what-it-takes-to-be-an-mvp). There isn't a set formula. We're looking at what individual contributors are doing, and how they are doing it. If the need arises to add additional moderators, nominations may come from one of the core team members or an existing moderator. We will publicly disclose the nomination in a discussion. If the nominee agrees to the requirements in this document, they may be awarded the status of moderator.
 
-| Windows Package Manager Administrators | Community Moderators |
-| :---: | :---: |
-| **[@AmelBawa-msft](https://github.com/AmelBawa-msft)**        | **[@ImJoakim](https://github.com/ImJoakim)** |
-| **[@denelon](https://github.com/denelon)**                    | **[@ItzLevvie](https://github.com/ItzLevvie)** |
-| **[@florelis](https://github.com/florelis)**                  | **[@jedieaston](https://github.com/jedieaston)** |
-| **[@hackean-msft](https://github.com/hackean-msft)**          | **[@KaranKad](https://github.com/KaranKad)** |
-| **[@JohnMcPMS](https://github.com/JohnMcPMS)**                | **[@mdanish-kh](https://github.com/mdanish-kh)** |
-| **[@KevinLaMS](https://github.com/KevinLaMS)**                | **[@OfficialEsco](https://github.com/OfficialEsco)** |
-| **[@Madhusudhan-MSFT](https://github.com/Madhusudhan-MSFT)**  | **[@quhxl](https://github.com/quhxl)** |
-| **[@msftrubengu](https://github.com/msftrubengu)**            | **[@russellbanks](https://github.com/russellbanks)** |
-| **[@ranm-msft](https://github.com/ranm-msft)**                | **[@Trenly](https://github.com/Trenly)** |
-| **[@RDMacLachlan](https://github.com/RDMacLachlan)**          | |
-| **[@stephengillie](https://github.com/stephengillie)**        | |
-| **[@yao-msft](https://github.com/yao-msft)**                  | |
+| Windows Package Manager Administrators |
+| ------------------------------------- |
+| **[@AmelBawa-msft](https://github.com/AmelBawa-msft)** |
+| **[@denelon](https://github.com/denelon)** |
+| **[@dkbennett](https://github.com/dkbennett)** |
+| **[@erinpwoo](https://github.com/erinpwoo)** |
+| **[@florelis](https://github.com/florelis)** |
+| **[@hackean-msft](https://github.com/hackean-msft)** |
+| **[@JohnMcPMS](https://github.com/JohnMcPMS)** |
+| **[@KevinLaMS](https://github.com/KevinLaMS)** |
+| **[@Madhusudhan-MSFT](https://github.com/Madhusudhan-MSFT)** |
+| **[@msftrubengu](https://github.com/msftrubengu)** |
+| **[@ranm-msft](https://github.com/ranm-msft)** |
+| **[@RDMacLachlan](https://github.com/RDMacLachlan)** |
+| **[@stephengillie](https://github.com/stephengillie)** |
+| **[@yao-msft](https://github.com/yao-msft)** |
+
+| Community Moderators |
+| -------------------- |
+| **[@ImJoakim](https://github.com/ImJoakim)** |
+| **[@ItzLevvie](https://github.com/ItzLevvie)** |
+| **[@jedieaston](https://github.com/jedieeaston)** |
+| **[@KaranKad](https://github.com/KaranKaD)** |
+| **[@mdanish-kh](https://github.com/mdanish-kh)** |
+| **[@OfficialEsco](https://github.com/OfficialEsco)** |
+| **[@quhxl](https://github.com/quhxl)** |
+| **[@russellbanks](https://github.com/russellbanks)** |
+| **[@Trenly](https://github.com/Trenly)** |
 
 ## Expectations
 

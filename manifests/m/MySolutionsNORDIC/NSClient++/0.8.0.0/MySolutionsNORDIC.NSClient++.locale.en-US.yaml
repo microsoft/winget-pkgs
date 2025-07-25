@@ -1,0 +1,82 @@
+# Created with YamlCreate.ps1 v2.4.6 $debug=NVS1.CRLF.7-5-1.Win32NT
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: MySolutionsNORDIC.NSClient++
+PackageVersion: 0.8.0.0
+PackageLocale: en-US
+Publisher: MySolutions NORDIC
+PublisherUrl: https://medin.name/
+PublisherSupportUrl: https://github.com/mickem/nscp/issues
+# PrivacyUrl:
+Author: My Computer Solutions NORDIC KB
+PackageName: NSClient++
+PackageUrl: https://nsclient.org/
+License: GPL-2.0
+LicenseUrl: https://github.com/mickem/nscp/blob/HEAD/COPYING
+Copyright: Copyright (C) 2025 - Michael Medin
+# CopyrightUrl:
+ShortDescription: A fully fledged monitoring agent which can be used with many monitoring tools.
+Description: |-
+  NSClient++ (nscp) aims to be a simple yet powerful and secure monitoring daemon. It was built for Nagios/Icinga, but nothing in the daemon is Nagios/Icinga specific and it can be used in many other scenarios where you want to receive/distribute check metrics.
+  The daemon has 3 main functions:
+  - Allow a remote machine (monitoring server) to request commands to be run on this machine (the monitored machine) which return the status of the machine.
+  - Submit the same results to a remote (monitoring server).
+  - Take action and perform tasks.
+Moniker: nscp
+Tags:
+- icinga
+- naemon
+- nagios
+ReleaseNotes: |-
+  What's Changed
+  Sensitive keys
+  Added the ability to mark keys as sensitive which can then be configured to be stored in credential manager.
+  Meaning you now have a way to keep secrets and passwords out of the config file.
+  To enable this you simply enable credential manager:
+  [/settings]
+  use credential manager = true
+
+  And re-save the config file:
+  nscp settings --update
+
+  Now this is not quite as simple in the real world.
+  Credential manager is per-user meaning that if you run NSClient++ as Local System you have to run nscp settings --update as the local system user.
+  A quick way to achieve this is to use PsExec:
+  PsExec -i -s "c:\program files\nsclient++\nscp" settings --update
+
+  After running this in your config file all passwords will be replaced by:
+  [/settings/default] password = $CRED$; Se credential manager: NSClient++-/settings/default.password
+
+  This is not the default as it is difficult to integrate with the installer.
+  To revert this back you simply change the parameter and update again:
+  PsExec -i -s "c:\program files\nsclient++\nscp" settings --path /settings --key "use credential manager" --set false
+  PsExec -i -s "c:\program files\nsclient++\nscp" settings --update
+
+  Modern TLS Support for remote settings
+  Remote settings via https (TLS) has been improved to now support TLS 1.3 as well as certificate validation.
+  This is configure in boot.ini (NOT nsclient.ini as that's the file loaded remotely).
+  [tls] version=1.3
+  verify mode=none
+
+  To enable certificate validation instead use the following config (where ca.pem contains the CA used to issue the server certificate):
+  [tls] version=1.3
+  verify mode=peer ca=c:\program files\NSClient++\security\ca.pem
+
+  This can be used with the installer as well by setting TLS_VERIFY_MODE=peer TLS_CA=c:\my-ca.pem:
+  msiexec /i c:\tmp\NSCP-0.8.0-x64.msi CONFIGURATION_TYPE=https://my-server.com/nsclient.ini TLS_VERIFY_MODE=peer TLS_CA=c:\tmp\ca.pem
+
+  A guide to securing NSClient++
+  I have also started to write a guide on how to secure NSClient++.
+  This is a work in progress but for now contains information on options for securing passwords in the config file.
+  Change log
+  - Added sensitive config by @mickem in #938
+  - Added tls13 client by @mickem in #939
+  Full Changelog: https://github.com/mickem/nscp/compare/0.7.0...0.8.0
+ReleaseNotesUrl: https://github.com/mickem/nscp/releases/tag/0.8.0
+# PurchaseUrl:
+# InstallationNotes:
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://nsclient.org/docs/
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0
