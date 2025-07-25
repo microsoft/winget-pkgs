@@ -1,0 +1,62 @@
+# Created with komac v2.11.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
+
+PackageIdentifier: Gitleaks.Gitleaks
+PackageVersion: 8.26.0
+PackageLocale: en-US
+Publisher: Gitleaks LLC
+PublisherUrl: https://gitleaks.io/
+PublisherSupportUrl: https://github.com/gitleaks/gitleaks/issues
+Author: Zachary Rice
+PackageName: Gitleaks
+PackageUrl: https://github.com/gitleaks/gitleaks
+License: MIT
+LicenseUrl: https://github.com/gitleaks/gitleaks/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2019 Zachary Rice
+CopyrightUrl: https://github.com/gitleaks/gitleaks/blob/master/LICENSE
+ShortDescription: Protect and discover secrets using Gitleaks
+Description: |-
+  Gitleaks is a SAST tool for detecting and preventing hardcoded secrets like passwords, api keys,
+  and tokens in git repos. Gitleaks is an easy-to-use, all-in-one solution for detecting secrets,
+  past or present, in your code.
+Moniker: gitleaks
+Tags:
+- devsecops
+- git
+- gitleaks
+- go
+- golang
+- hacktoberfest
+- secret
+- security
+- security-tools
+ReleaseNotes: |-
+  Changelog
+  - 78eebac Percent/URL Decoding Support (#1831)
+  - 6f967ca fix(kubernetes): remove slow element from pat (#1848)
+  - 88f56d3 feat: identify slow file (#1479)
+  - 9609928 rm 1password detect test since we test it in cfg gen
+  - 23cb69f feat(rules): Add 1Password secret key detection (#1834)
+  Calling this one @bplaxco's release as he introduced a really clever method for mixed decoding without sacrificing too much performance. As I stated in his PR, I think he's either a wizard or some time traveling AI. Dude is wicked smaht
+  Anyways, Gitleaks now supports the following decoders: hex, percent(url enconding), and b64. It's relatively straight forward to add a new decoder so if you're motivated, community contributions are welcomed!
+  Here's an example:
+  ~/code/gitleaks-org/gitleaks (master) cat decode.txt
+  text below
+  aGVsbG8sIHdvcmxkIQ%3D%3D%0A
+  text above
+  ~/code/gitleaks-org/gitleaks (master) ./gitleaks dir decode.txt --max-decode-depth=2 --log-level=debug
+      ○
+      │╲
+      │ ○
+      ○ ░
+      ░    gitleaks
+  4:08PM DBG using stdlib regex engine
+  4:08PM DBG unable to load gitleaks config from decode.txt/.gitleaks.toml since --source=decode.txt is a file, using default config
+  4:08PM DBG found .gitleaksignore file: .gitleaksignore
+  4:08PM DBG segment found: original=[29,38] pos=[29,38]: "%3D%3D%0A" -> "==\n"
+  4:08PM DBG segment found: original=[11,38] pos=[11,31]: "aGVsbG8sIHdvcmxkIQ==" -> "hello, world!"
+  4:08PM INF scanned ~50 bytes (50 bytes) in 1.5ms
+  4:08PM INF no leaks found
+ReleaseNotesUrl: https://github.com/gitleaks/gitleaks/releases/tag/v8.26.0
+ManifestType: defaultLocale
+ManifestVersion: 1.9.0

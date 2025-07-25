@@ -1,0 +1,79 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
+
+PackageIdentifier: Myriad-Dreamin.Tinymist
+PackageVersion: 0.13.8
+PackageLocale: en-US
+Publisher: Myriad-Dreamin
+PublisherUrl: https://github.com/Myriad-Dreamin
+PublisherSupportUrl: https://github.com/Myriad-Dreamin/tinymist/issues
+PackageName: Tinymist
+PackageUrl: https://github.com/Myriad-Dreamin/tinymist
+License: Apache-2.0
+LicenseUrl: https://github.com/Myriad-Dreamin/tinymist/blob/HEAD/LICENSE
+Copyright: Copyright 2025 Myriad Dreamin, Nathan Varner
+ShortDescription: An integrated language service for Typst.
+Description: |-
+  Tinymist [ˈtaɪni mɪst] is an integrated language service for Typst [taɪpst]. You can also call it "微霭" [wēi ǎi] in Chinese.
+  It contains:
+  - an analyzing library for Typst, see tinymist-query.
+  - a CLI for Typst, see tinymist.
+    - which provides a language server for Typst, see Language Features.
+    - which provides a preview server for Typst, see Preview Feature.
+  - a VSCode extension for Typst, see Tinymist VSCode Extension.
+ReleaseNotes: |-
+  We has provided more ways of previewing documents for editors having poor lsp support.
+  - Default Preview: The editors supporting lsp commands, e.g. neovim and helix, can use tinymist.startDefaultPreview to start a browsing preview server directly.
+  - Background Preview: The editors not supporting lsp commands can use the background preview feature to start a preview server in background. You can bind a shortcut editor to open the preview in browser.
+  See the Issue: Preview feature for all editors for unimplemented features.
+  Completion
+  - (Fix) More rules to forbidden arg completion in https://github.com/Myriad-Dreamin/tinymist/pull/1493
+    - It were completing arguments from #align[]| or #align()[]|
+  - (Fix) Don't check context type if parent is a block in https://github.com/Myriad-Dreamin/tinymist/pull/1494
+    - It were completing arguments from #align[|], #align([|]), or #align({|})
+  - (Fix) Forbid some bad cases of dot access in https://github.com/Myriad-Dreamin/tinymist/pull/1497
+    - It were issuing postfix completion from $.|$ or $ .| $
+  - Detecting explicit completion from vscode in https://github.com/Myriad-Dreamin/tinymist/pull/1496
+    - Requesting completion about $|$ or $abs(a)|$ took no effect.
+  Full Changelog: https://github.com/Myriad-Dreamin/tinymist/compare/v0.13.6...v0.13.8
+
+  v0.13.6
+  - Provided tinymist documentation in PDF format in https://github.com/Myriad-Dreamin/tinymist/pull/1485
+  Compiler
+  - (Fix) Getting task options from configuration in https://github.com/Myriad-Dreamin/tinymist/pull/1449
+  - (Fix) Displaying ProjectInsId without quoting in https://github.com/Myriad-Dreamin/tinymist/pull/1476
+    - This made document summary not working.
+  - (Perf) Parallelizing and synchronously waiting font loading in https://github.com/Myriad-Dreamin/tinymist/pull/1470
+  Code Analysis
+  - (Fix) Identifying chained dot access when matching atomic expression in markup mode in https://github.com/Myriad-Dreamin/tinymist/pull/1488 and https://github.com/Myriad-Dreamin/tinymist/pull/1489
+    - When completing #a.b.|, the second . was viewed as a text dot and failed to trigger the field completion. It now reparses correctly.
+  - Made file type recognition by file extension case-insensitive in https://github.com/Myriad-Dreamin/tinymist/pull/1472
+    - For example, IMAGE.PNG is recognized as an image file now.
+  Editor
+  - (Fix) Combining VS Code language specific default settings into one block by @0risc in https://github.com/Myriad-Dreamin/tinymist/pull/1462
+  Completion
+  - (Fix) Skipping argument completion when the cursor is on the right parenthesis in https://github.com/Myriad-Dreamin/tinymist/pull/1480
+  - (Fix) Distinguished content value from content type in https://github.com/Myriad-Dreamin/tinymist/pull/1482
+    - math.op("+") was wrongly inferred as an element function (type), instead of a value having the element type.
+  - Adjusting range of label and reference completions in https://github.com/Myriad-Dreamin/tinymist/pull/1443 and https://github.com/Myriad-Dreamin/tinymist/pull/1444
+    - It becomes more sensible when you request completions from anywhere on the labels or references.
+  - Unifying and improving function and method completion in https://github.com/Myriad-Dreamin/tinymist/pull/1478
+    - The was affecting show outline.entry. It was completing e| as entry() instead of entry.
+  - Skip completion of types having no constructors or scopes in https://github.com/Myriad-Dreamin/tinymist/pull/1481
+    - For example, content is not completed.
+  - Completing std module in https://github.com/Myriad-Dreamin/tinymist/pull/1483
+    - std is in neither global scope nor math scope, so we have to handle it manually.
+  - Accepting arbitrary expressions in show rules in https://github.com/Myriad-Dreamin/tinymist/pull/1484
+    - For example, show: s| now can be completed as show: std|, and so that further completed as show: std.scale(..). It was not working because modules were filtered out as not a valid show transform function.
+  Preview
+  - Added support to run preview server in background in https://github.com/Myriad-Dreamin/tinymist/pull/1233
+  - Added tinymist.startDefaultPreview and revised documentation about preview in https://github.com/Myriad-Dreamin/tinymist/pull/1448
+  Misc
+  - Updated bug report and feature request template in https://github.com/Myriad-Dreamin/tinymist/pull/1454, https://github.com/Myriad-Dreamin/tinymist/pull/1455, https://github.com/Myriad-Dreamin/tinymist/pull/1456, https://github.com/Myriad-Dreamin/tinymist/pull/1457, and https://github.com/Myriad-Dreamin/tinymist/pull/1458
+  - Logging update_by_map to debug zed configuration in https://github.com/Myriad-Dreamin/tinymist/pull/1474
+ReleaseNotesUrl: https://github.com/Myriad-Dreamin/tinymist/releases/tag/v0.13.8
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://myriad-dreamin.github.io/tinymist/
+ManifestType: defaultLocale
+ManifestVersion: 1.9.0

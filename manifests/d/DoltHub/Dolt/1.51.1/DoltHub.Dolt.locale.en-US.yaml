@@ -1,0 +1,143 @@
+# Created with WinGet Updater using komac v2.11.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
+
+PackageIdentifier: DoltHub.Dolt
+PackageVersion: 1.51.1
+PackageLocale: en-US
+Publisher: DoltHub
+PublisherUrl: https://github.com/dolthub/dolt
+PublisherSupportUrl: https://github.com/dolthub/dolt/issues
+Author: DoltHub
+PackageName: Dolt
+PackageUrl: https://www.dolthub.com/
+License: Apache-2.0
+LicenseUrl: https://github.com/dolthub/dolt/blob/HEAD/LICENSE
+CopyrightUrl: https://raw.githubusercontent.com/dolthub/dolt/master/LICENSE
+ShortDescription: Dolt is a SQL database that you can fork, clone, branch, merge, push and pull just like a git repository.
+Description: |-
+  Dolt is a SQL database that you can fork, clone, branch, merge, push and pull just like a git repository.
+  Connect to Dolt just like any MySQL database to run queries or update the data using SQL commands.
+  Use the command line interface to import CSV files, commit your changes, push them to a remote, or merge your teammate's changes.
+Moniker: dolt
+Tags:
+- cli
+- data
+- git-for-data
+- versioning
+ReleaseNotes: |-
+  Merged PRs
+  dolt
+  - 9063: Normalize AUTO_INCREMENT values in tables.
+    When the AUTO_INCREMENT field is unset, the value of the next AUTO_INCREMENT column defaults to 1. Thus, setting it to 0 and 1 produce identical behavior.
+    By normalizing the value as its written, we ensure that both operations produce the same table hash as if the value was unset.
+  - 9061: Bug fix for doltgres range iter
+  - 9059: go: cmd/dolt: commands/sql: Fix the displayed query time in interactive mode after a query completes.
+    The migration to subcontexts of the Queryist sql.Context meant that we lost the default setting of the query start time. Restore it in the sql command implementation itself.
+  - 9050: go,integration-tests/{bats,go-sql-server-driver}: Implement GC sesssion lifecycle validation at the storage layer. Enable checks for bats and go sql server integration tests.
+    This makes *NomsBlockStore check the incoming Context object to ensure that it itself has been invovled in the appropriate GC lifecycle callbacks.
+    It fixes a problem with statspro.AnalyzeTable, where the GC lifecycle callbacks happened more than once for a single session.
+    It fixes some callsites to appropriately make the GC lifecycle callbacks, including LateBindingQueryist opening one session command for the whole lifetime of the returned sql.Context.
+  - 9047: go: utils/publishrelease/buildpgobinaries.sh: Bump optcross to pick up new dolthub_toolchains changes.
+  - 9041: go: store/datas/pull: Error handling improvements. Target an approximate file size instead of a number of chunks when uploading files.
+    Our old heuristic was to cut a file and start uploading it when it reached a fixed number of chunks. We chose that number of chunks as just (1<<30 / 4096), which is the average chunk size the chunker targets. But the chunk targets pre-compressed sizes. So file uploads which were hitting the target could vary a lot in size. It's better to just track how many bytes we've written so far and cut it when (approximately) appropriate. This is still best effort and only approximately.
+    Also improves error handling and structured concurrency a bit. Moves a number of goroutines up to the top-level errgroup in Pull(). Avoids creating – and thus potentially leaking – goroutines in NewPuller(), deferring them until Pull actually gets called. Gets rid of an unnecessary request-response thread structure in the implementation of PullChunkFetcher.
+  - 9032: integration-tests/go-sql-server-driver: Move max-connections testing to go-sql-server-driver.
+  - 9029: go: Add some GC lifecycle callbacks to commands which use a local SqlEngine.
+  - 9023: go: mvdata: Improve dump, import and export so that these commands create a single SqlEngine over their lifetime.
+    Pass the SqlEngine along and reuse it in the operations where we dump table contents, parse import schemas, etc.
+  - 8965: Root Objects
+    Counterpart to Doltgres PR:
+    - dolthub/doltgresql#1265
+  go-mysql-server
+  - 2921: fix not equal conversions
+    fixes: #9052
+  - 2920: fix negative integer limits
+    In golang, the negation of the minimum int8, int16, int32, int64 is the same.
+    fix: #9053
+  - 2919: fix double negatives
+    We can't apply NOT(NOT(expr)) -> expr optimization if there will be a type conversion involved.
+    This PR also fixes bad test involving current timestamps.
+    fixes: #9054
+  - 2918: more precision fixes for unix_timestamp
+    Changes:
+    - have datetime_type equality to also compare precision
+    - retain precision for date and datetime types in a table
+      fixes: #9025
+  - 2916: prevent panics in replacePkSort
+    Not sure how to reproduce this, but this should make the code more safe.
+    fixes: dolthub/go-mysql-server#2915
+  - 2914: bump: dolthub/go-icu-regex
+  - 2912: Support for negative bool values
+    Fixes #9036
+  - 2911: check group by ordinal range
+    This PR adds an error check when attempting to group by a column index that is out of range.
+    fixes: #9037
+  Closed Issues
+  - 9052: Incorrect optimization of operation in expression in WHERE clause
+  - 9053: Incorrect negation of minimum signed integer
+  - 9035: NULL in GROUP BY column is interpreted as 1
+  - 9054: Double negation is treated as original value in WHERE clause
+  - 9025: unix_timestamp's precision should keep with parameter
+  - 9051: Dolthub commit changes history loads forever
+  - 9037: Unexpected crash when using GROUP BY with non-column position
+  - 2915: Panic when calling min/max (without a Primary Key?)
+  Performance
+  ─────────────────────┬─────┬─────┬────────
+  Read Tests           │MySQL│Dolt │Multiple
+  ─────────────────────┼─────┼─────┼────────
+  covering_index_scan  │1.93 │0.67 │0.35
+  ─────────────────────┼─────┼─────┼────────
+  groupby_scan         │13.46│17.95│1.33
+  ─────────────────────┼─────┼─────┼────────
+  index_join           │1.47 │2.43 │1.65
+  ─────────────────────┼─────┼─────┼────────
+  index_join_scan      │1.44 │1.44 │1.0
+  ─────────────────────┼─────┼─────┼────────
+  index_scan           │34.95│30.81│0.88
+  ─────────────────────┼─────┼─────┼────────
+  oltp_point_select    │0.18 │0.27 │1.5
+  ─────────────────────┼─────┼─────┼────────
+  oltp_read_only       │3.49 │5.28 │1.51
+  ─────────────────────┼─────┼─────┼────────
+  select_random_points │0.34 │0.61 │1.79
+  ─────────────────────┼─────┼─────┼────────
+  select_random_ranges │0.37 │0.62 │1.68
+  ─────────────────────┼─────┼─────┼────────
+  table_scan           │34.95│31.37│0.9
+  ─────────────────────┼─────┼─────┼────────
+  types_table_scan     │75.82│116.8│1.54
+  ─────────────────────┼─────┼─────┼────────
+  reads_mean_multiplier│     │     │1.28
+  ─────────────────────┴─────┴─────┴────────
+  ──────────────────────┬─────┬─────┬────────
+  Write Tests           │MySQL│Dolt │Multiple
+  ──────────────────────┼─────┼─────┼────────
+  oltp_delete_insert    │8.9  │6.32 │0.71
+  ──────────────────────┼─────┼─────┼────────
+  oltp_insert           │4.1  │3.13 │0.76
+  ──────────────────────┼─────┼─────┼────────
+  oltp_read_write       │9.06 │11.65│1.29
+  ──────────────────────┼─────┼─────┼────────
+  oltp_update_index     │4.18 │3.19 │0.76
+  ──────────────────────┼─────┼─────┼────────
+  oltp_update_non_index │4.18 │3.13 │0.75
+  ──────────────────────┼─────┼─────┼────────
+  oltp_write_only       │5.77 │6.32 │1.1
+  ──────────────────────┼─────┼─────┼────────
+  types_delete_insert   │8.43 │6.67 │0.79
+  ──────────────────────┼─────┼─────┼────────
+  writes_mean_multiplier│     │     │0.88
+  ──────────────────────┴─────┴─────┴────────
+  ───────────────────┬─────┬─────┬────────
+  TPC-C TPS Tests    │MySQL│Dolt │Multiple
+  ───────────────────┼─────┼─────┼────────
+  tpcc-scale-factor-1│96.16│39.18│2.45
+  ───────────────────┼─────┼─────┼────────
+  tpcc_tps_multiplier│     │     │2.45
+  ───────────────────┴─────┴─────┴────────
+  ─────────────────────┬────
+  Overall Mean Multiple│1.54
+  ─────────────────────┴────
+ReleaseNotesUrl: https://github.com/dolthub/dolt/releases/tag/v1.51.1
+ManifestType: defaultLocale
+ManifestVersion: 1.9.0

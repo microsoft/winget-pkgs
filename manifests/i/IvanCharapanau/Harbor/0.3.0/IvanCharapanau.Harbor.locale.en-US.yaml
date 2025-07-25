@@ -1,0 +1,49 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
+
+PackageIdentifier: IvanCharapanau.Harbor
+PackageVersion: 0.3.0
+PackageLocale: en-US
+Publisher: harbor
+PublisherUrl: https://av.codes/
+PublisherSupportUrl: https://github.com/av/harbor/issues
+Author: Ivan Charapanau
+PackageName: Harbor
+PackageUrl: https://github.com/av/harbor
+License: Apache-2.0
+LicenseUrl: https://github.com/av/harbor/blob/HEAD/LICENSE
+ShortDescription: Effortlessly run LLM backends, APIs, frontends, and services with one command.
+Description: Harbor is a containerized LLM toolkit that allows you to run LLMs and additional services. It consists of a CLI and a companion App that allows you to manage and run AI services with ease.
+Tags:
+- ai
+- large-language-model
+- llm
+- ollama
+ReleaseNotes: |-
+  v0.3.0 - Routines, Traefik, Latent Scope
+  Routines
+
+  We now have more than 200 compose files and docker compose itself is being slow merging them (upwards of ~5s even on my powerful dev machine). In order to overcome this we move the core logic that powers the (now legacy) version of the CLI into dedicated routines. v0.3.0 is also a step towards having a native Harbor CLI in the future.
+  New routines setup is based on the distroless flavor of Deno. In typical Harbor fashion you don't need to install anything, only to pay the disk space tax (~150Mb in this instance). Harbor will cache the dependencies and everything needed after the first cold start. PyPi, Native, and NPM installation paths will continue to function in the same way as previously. Deno was chosen over Bun, Node.js, Python because it brings the most value within these 150Mb with a path towards native binaries in the future and much more. Additionally, Harbor was already using Deno for some lightweight automation. I did experiments with Rust and Go and despite the better end binaries - the cost of creating and maintaining a CLI there is much higher, so choosing Deno means more time to update and improve the project.
+  You can return to the legacy behavior by setting a config option:
+  harbor config set legacy_cli true
+  Traefik
+  Harbor now includes traefik as its reverse HTTP Proxy. Automatic configuration is now limited to a local deployment, however it can be reconfigured as needed manually - see the service wiki for more details.
+  Latent Scope
+
+  One of the tools that leave you with a "woah". Allows exploring the given dataset representation in latent space.
+  Misc
+  - perplexideez - fixed usage without access to modern compose
+  - release script seeds programmatic files
+  - seed-cdi - EOF fixes
+  - seed-traefik - dev script to create .x.traefik. cross-files for related services
+  - boost - revised r0 module
+  - qrgen - fixed build (affects harbor qr, harbor tunnel)
+
+  New Contributors
+  - @heronsouzamarques made their first contribution in https://github.com/av/harbor/pull/134 💪
+  - @Tien-Cheng helped restoring the qrgen functionality in https://github.com/av/harbor/pull/137
+  Full Changelog: https://github.com/av/harbor/compare/v0.2.28...v0.3.0
+ReleaseNotesUrl: https://github.com/av/harbor/releases/tag/v0.3.0
+ManifestType: defaultLocale
+ManifestVersion: 1.9.0
