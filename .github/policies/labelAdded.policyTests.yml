@@ -1,0 +1,63 @@
+id: labelAdded.policyTests
+name: GitOps.PullRequestIssueManagement
+description: Handlers when "Policy-Test-*" label is added
+owner:
+resource: repository
+disabled: false
+where:
+configuration:
+  resourceManagementConfiguration:
+    eventResponderTasks:
+      - description: >-
+          When a label "Policy-Test-*" is added to a pull request
+          * Add the PR specific reply notifying the author of repository policies
+        if:
+          - payloadType: Pull_Request
+          - or:
+            - labelAdded:
+                label: Policy-Test-1.1.A
+            - labelAdded:
+                label: Policy-Test-1.1.B
+            - labelAdded:
+                label: Policy-Test-1.2
+            - labelAdded:
+                label: Policy-Test-1.5
+            - labelAdded:
+                label: Policy-Test-1.8
+            - labelAdded:
+                label: Policy-Test-2.2.A
+            - labelAdded:
+                label: Policy-Test-2.2.B
+            - labelAdded:
+                label: Policy-Test-2.3
+            - labelAdded:
+                label: Policy-Test-2.4
+            - labelAdded:
+                label: Policy-Test-2.5
+            - labelAdded:
+                label: Policy-Test-2.6
+            - labelAdded:
+                label: Policy-Test-2.7
+            - labelAdded:
+                label: Policy-Test-2.8
+            - labelAdded:
+                label: Policy-Test-2.9
+            - labelAdded:
+                label: Policy-Test-2.10
+        then:
+          - addReply:
+              reply: >-
+                Hello ${issueAuthor},
+
+
+                The validation process has concluded that this pull request needs to go through a manual review by a [repository admin](https://github.com/microsoft/winget-pkgs/blob/master/doc/Moderation.md#moderators) to ensure compliance with repository policies.
+
+
+                For more information, please refer to the [Windows Package Manager repository policies](https://learn.microsoft.com/windows/package-manager/package/windows-package-manager-policies).
+
+
+                Template: msftbot/policyTest
+        # The policy service should trigger even when the label was added by the policy service
+        triggerOnOwnActions: true
+onFailure:
+onSuccess:
