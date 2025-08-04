@@ -1,0 +1,146 @@
+# Created with komac v2.12.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: CueLang.Cue
+PackageVersion: 0.14.0
+PackageLocale: en-US
+Publisher: Cue
+PublisherUrl: https://github.com/cue-lang
+PublisherSupportUrl: https://github.com/cue-lang/cue/issues
+PackageName: Cue
+PackageUrl: https://github.com/cue-lang/cue
+License: Apache-2.0
+LicenseUrl: https://github.com/cue-lang/cue/blob/HEAD/LICENSE
+ShortDescription: |-
+  CUE is an open source data constraint language which aims to simplify tasks
+  involving defining and using data.
+Tags:
+- configuration
+- data
+- kubernetes
+- validation
+ReleaseNotes: |-
+  This release brings significant performance improvements, three language changes, and initial support for Kubernetes CRDs.
+  Changes which may break some users are marked below with: ⚠️
+  Evaluator
+  Performance
+  A particularly slow part of the new closedness algorithm has been rewritten for speed, resulting in improvements of up to 10x in wall times for some projects.
+  Significant progress has been made to the new evaluator's memory usage; a few large projects experiencing high memory usage on v0.13 now see reductions of up to 80%.
+  Various other optimizations and performance bug fixes have been made to the new evaluator, yielding speed-ups of 5-20% on a variety of CUE projects.
+  error builtin
+  A new error builtin is added to the language, which allows users to create custom error values with a specified message.
+  Don't simplify validators into concrete values
+  A new CUE_EXPERIMENT=keepvalidators experiment is introduced, already on by default, which prevents validators from being simplified into concrete values.
+  X == Y and == X
+  Firstly, there were several bug fixes related to ==. Most notably, [int] == [int] incorrectly resolved to true. It now correctly resolves to an error.
+  All other changes are enabled using the @experiment(structcmp) file-level attribute.
+  Enabling this experiment allows all CUE values to be compared for equality. This includes comparing structs.
+  The same experiment also allows a unary == to enforce that a value is a specific concrete value.
+  Other changes
+  ⚠️ The file embedding experiment can no longer be disabled via CUE_EXPERIMENT=embed=0, having been introduced in CUE v0.10.0.
+  File embedding is now enabled when using the cue/cuecontext or cue/load APIs; earlier versions could not expose it via the Go API due to an import cycle.
+  ⚠️ The topological field sorting experiment can no longer be disabled via CUE_EXPERIMENT=toposort=0, having been introduced in CUE v0.11.0.
+  ⚠️ CUE_EXPERIMENT=cmdreferencepkg, introduced in v0.13.0 to require referencing tool packages to declare cue cmd tasks, is now on by default.
+  The new closedness algorithm has been adjusted to fix a number of "field not allowed" bugs, particularly in the form of regressions compared to the old evaluator.
+  A particularly slow part of the new closedness algorithm has been optimized, resulting in improvements of up to 10x in wall times for some projects.
+  cmd/cue
+  ⚠️ cue def --strict jsonschema:, deprecated in favor of cue def jsonschema+strict: in v0.11.0, is no longer supported.
+  Two bugs have been fixed in the new cue trim algorithm where disjunctions could incorrectly select defaults or be treated as ambiguous.
+  Encodings
+  cue get crd introduces support for extracting Kubernetes Custom Resource Definitions (CRDs) as CUE definitions; see cue help get crd.
+  The new encoding/jsonschema.ExtractCRDs Go API exposes the extractor used by cue get crd.
+  The JSON Schema decoder has gained support for dependencies, bringing the pass rate for the official JSON Schema test suite up from 79% to 81%.
+  Go API
+  cue/load now provides module information via the new Instance.ModuleFile field.
+  ⚠️ In order to support the above change, the mod/modfile.File.Format method has been moved to the function mod/modfile.Format: an API-breaking change but necessary to avoid a cyclic package dependency.
+  cue/parser gains a new Config API, which allows other packages like cue/load to properly apply the right parser options such as the CUE language version.
+  ⚠️ In order to support the above change, the cue/parser.Config.ParseFile and cue/build.ParseFile signatures have now changed (incompatibly) to add a parser.Config argument, enabling the CUE language version to be passed through.
+  Fix an issue where cue.Value.Decode did not work with *math/big.Float types.
+  Full list of changes since v0.13.0
+  - internal/core/adt: inline combinedFlags helpers by @mpvl in dffc5ce
+  - internal/core/adt: refactor combinedFlags from bit-packed uint32 to struct by @mpvl in f44480d
+  - ai: specify use of git codereview by @mpvl in f34d9a5
+  - ai: allow certain tools unconditionally by @mpvl in 80473ca
+  - internal/core/adt: revert the top-level parallelism of EvalV{1,2} tests by @mvdan in 6c32704
+  - internal/core/adt: silence tests once again by @mvdan in 4f388b1
+  - cue/load: buffer non-regular input files like we do for "-" by @mvdan in fbb4840
+  - internal/ci: make the writing of files reusable by @mvdan in 649bb67
+  - internal/ci: place input parameters inside an #in struct by @mvdan in 92d4bab
+  - cmd/cue: add testscript for issue 4009 by @mvdan in fb631bd
+  - ai: adjustments to code by @mpvl in 4bdc446
+  - ai: initial Claude.md by @mpvl in 5530af0
+  - cue/token: add []byte content to token.File by @cuematthew in 3e50617
+  - internal/ci/base: add helpers for OS + Go version matrices by @mvdan in f5ad0d3
+  - tools/trim: only consider defaults when we're not ignoring the conjunct by @cuematthew in b95b211
+  - internal/encoding/yaml: properly report disjunction errors by @kilpkonn in c7cc1a8
+  - pkg/encoding: add test cases for disjunction errors with Validate by @kilpkonn in 5189932
+  - lsp/fscache: Force parsing mode to always be ParseComments by @cuematthew in 741955c
+  - internal/core/adt: clear close check by @mpvl in d8451da
+  - internal/core/adt: exclude more cases for adding defID by @mpvl in b12697e
+  - internal/core/adt: add tests for Issue 4000 by @mpvl in b20058e
+  - internal/core/adt: fix panic on remnant notifications by @mpvl in faecce4
+  - internal/core/adt: add cycle detection by @mpvl in 0740c0a
+  - internal/core/adt: remove requirement type by @mpvl in f0f4cee
+  - internal/core/adt: update tests by @mpvl in 83f3c87
+  - internal/lsp: Move much of our own code to internal/lsp by @cuematthew in 6d10132
+  - internal/ci: add base steps for the common Go checks and staticcheck by @mvdan in a79c3d8
+  - internal/ci: include more useful string values in base by @mvdan in a78e432
+  - internal/ci: split Linux runners into "small" and "large" by @mvdan in 6d3530b
+  - internal/ci: allow gerritHubHostname to be overridden by @myitcv in 5cc6d81
+  - internal/core/adt: new data structure for reqSets by @mpvl in 3f23e12
+  - internal/core/adt: add generation tracking to closedness info by @mpvl in 5077511
+  - internal/core/adt: add generation tracking to prevent stale context usage by @mpvl in 19e2c74
+  - tools/flow: avoid looking like we're using go run for real by @mvdan in 5f4bd37
+  - update dependencies for v0.14.0-rc.1 by @mvdan in 0c84f96
+  - cue/stats: remove unused CloseIDElems counter by @mpvl in 930a98b
+  - internal/core/adt: fix notification CloseInfo by @mpvl in 0ccf38c
+  - cmd/cue/cmd: add tests for 3981 by @mpvl in 840ff27
+  - internal/core/adt: add tests for 3981 by @mpvl in 78e1a11
+  - internal/core/adt: ToDataAll rewrite by @mpvl in 2804f1d
+  - internal/ci: allow additional cache modes by @jpluscplusm in 9afca73
+  - encoding/jsonschema: implement dependencies by @rogpeppe in 9620eae
+  - internal/cmd/cue-ast: use cue/load with SkipImports=true by @mvdan in 45ab65e
+  - gopls/cache: add test for imports of non-ambiguous non-default modules by @cuematthew in e4cdcd3
+  - internal/core/adt: remove CloseIDElems counter by @mpvl in 9033834
+  - internal/core/adt: add counters before rewrite by @mpvl in c8256cd
+  - internal/core/adt: hoist loop by @mpvl in 24cc414
+  - internal/core/adt: change signature by @mpvl in 5ee4254
+  - internal/core/adt: remove replaceID.add field by @mpvl in d987d88
+  - gopls/cache: rework normalizeImportPath by @cuematthew in f309265
+  - internal/ci: start publishing the module by @mvdan in 05a3d64
+  - internal/ci: carve out into a separate module to be published by @mvdan in 17177e9
+  - internal/ci: do a little bit more for trybot jobs in the base package by @mvdan in 1004c32
+  - internal/ci: apply the top-level githubactions.#Workflow schema by @mvdan in d9aaac0
+  - gopls/cache: ignore imports of stdlib by @cuematthew in eac9728
+  - internal/core/adt: revert CL 1208898 for evalv2 by @mvdan in 1789dd4
+  - tools/trim: Work harder to discover disjunction branches by @cuematthew in 7f38bb8
+  - internal/golangorgx: remove the unused tools/facts package by @mvdan in 60c36a5
+  - internal/golangorgx/vendoring: remove by @mvdan in 4d66634
+  - cmd/cue/cmd: speed up use of sleeps to test concurrent commands by @mvdan in 13461f1
+  - internal/ci: rename "ubuntu" runner to "linux" by @mvdan in 8250c1f
+  - internal/golangorgx: delete unused and Go-specific packages by @mvdan in dbed9a3
+  - internal/golangorgx: remove unused gopls/util packages by @mvdan in 9ca9609
+  - internal/gopls: rewrite gopls/cuelsp by @cuematthew in a23afdf
+  - gopls/lsprpc: Adjust gopls to cuelsp and simplify by @cuematthew in ca86fb0
+  - internal/gopls: remove unnecessary old command alias by @cuematthew in 4752c04
+  - internal/gopls: renaming of gopls to cuelsp by @cuematthew in 8935ee3
+  - internal/gopls: delete a lot of code by @cuematthew in 3fb3043
+  - all: make some txtar table tests parallel by @mvdan in 2d182a5
+  - internal/golangorgx: remove gopls re-vendoring script by @mvdan in 3114a2f
+  - update all direct dependencies by @mvdan in 2df1b5a
+  - internal/core/adt: filter notifications by @mpvl in 971ee4f
+  - internal/core/adt: keep track of notification counts by @mpvl in 18b7df0
+  - internal/core/adt: run evaluator tests in parallel by @mvdan in 991e549
+  - internal/pkg: fix a race when contexts concurrently load std imports by @mvdan in 79798ca
+  - internal/core/adt: clean up orphaned arcs by @mpvl in a397974
+  - internal/core/adt: mark inlined nodes for cleanup by @mpvl in e92f16e
+  - internal/core/adt: prune parent processing by @mpvl in 1b7a71c
+  - internal/core/adt: trigger more diffs in stats by @mpvl in f389502
+  - internal/core/adt: clean up use of Vertex.state by @mpvl in fb4f507
+  - internal/core/adt: basic memory management for evalv3 by @mpvl in 4ebd05f
+  - internal/core/adt: check for nil state in parent disjunction by @mpvl in 4638be0
+  - internal/core/adt: delay processing of pattern constraints by @mpvl in ab40e7f
+  - internal/core/adt: handle equal disjuncts by @mpvl in 654008d
+ReleaseNotesUrl: https://github.com/cue-lang/cue/releases/tag/v0.14.0
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0
