@@ -1,0 +1,130 @@
+# Created with WinGet Updater using komac v2.11.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
+
+PackageIdentifier: DoltHub.Dolt
+PackageVersion: 1.52.2
+PackageLocale: en-US
+Publisher: DoltHub
+PublisherUrl: https://github.com/dolthub/dolt
+PublisherSupportUrl: https://github.com/dolthub/dolt/issues
+Author: DoltHub
+PackageName: Dolt
+PackageUrl: https://www.dolthub.com/
+License: Apache-2.0
+LicenseUrl: https://github.com/dolthub/dolt/blob/HEAD/LICENSE
+CopyrightUrl: https://raw.githubusercontent.com/dolthub/dolt/master/LICENSE
+ShortDescription: Dolt is a SQL database that you can fork, clone, branch, merge, push and pull just like a git repository.
+Description: |-
+  Dolt is a SQL database that you can fork, clone, branch, merge, push and pull just like a git repository.
+  Connect to Dolt just like any MySQL database to run queries or update the data using SQL commands.
+  Use the command line interface to import CSV files, commit your changes, push them to a remote, or merge your teammate's changes.
+Moniker: dolt
+Tags:
+- cli
+- data
+- git-for-data
+- versioning
+ReleaseNotes: |-
+  Merged PRs
+  dolt
+  - 9144: Bug fix: allow dropping tables with FK constraints
+    Fixes: #9014
+  - 9141: Add a smoke test for server-side cursor support
+    Adds smoke test coverage for server-side cursor support. Motivated by the customer issue linked below with corrupted results from SHOW COLLATION; while using DBVisualizer when a server-side cursor is in use.
+    A run without the fix from GMS shows how this new test fails when the bug from the customer is triggered.
+    Depends on: dolthub/go-mysql-server#2952
+    Related to: #9125
+  - 9135: go/store/nbs: conjoiner.go,store.go: Make conjoin asynchronous.
+  - 9106: Stats NBS gc safety
+    This PR modifies doGC to stop statistics before running, and restart statistics afterwards. An earlier version of this PR threaded cancellations through the session management interface, but that created headaches for invalidating looping stats sessions.
+    For more background, stats jobs were previously partitioned into sections that allow GC to finalize before stats finishes. The nature of this partitioning creates a dependency chain between reading the histogram chunk level of an index, and jobs that read those individual chunk subtrees. The problem is that those jobs create a read-dependency that is broken when GC deletes chunks. The nature of the partitioning means the only way to avoid the interruption is to (1) stall GC for a longer period of time, (2) check chunk integrity before every subcommands, or (3) invalidate the stats session.
+    Additionally, this fixes the long flush issue where queries would stall on writing up to 65k stats rows to disk. We limit pending stats changes to 64, which upper bounds the cost of any single flush in a way that meshes with current rate-limiting methodology.
+  - 9046: [dfunctions] dolt_join_cost prints full join memo
+    gms side: dolthub/go-mysql-server#2917
+    tmp2/test-branch*> select dolt_join_cost('select * from uv, xy where u = x') as cost;
+    +---------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+    | cost                                                                                                                                                                      |
+    +---------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+    | memo:                                                                                                                                                                     |
+    | ├── G1: (tablescan: uv 0.0)*                                                                                                                                              |
+    | ├── G2: (tablescan: xy 0.0)*                                                                                                                                              |
+    | └── G3: (hashjoin 1 2 8.0) (hashjoin 2 1 8.0) (mergejoin 1 2 4.1) (mergejoin 2 1 4.1) (lookupjoin 1 2 6.6) (lookupjoin 2 1 6.6) (innerjoin 2 1 5.0)* (innerjoin 1 2 5.0)* |
+    |                                                                                                                                                                           |
+    +---------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+  go-mysql-server
+  - 2952: Only release buffer when a server-side cursor is not in use
+    We added an optimization to release a row's memory after sending it over the channel, but for a server-side cursor, there is another layer of spooling involved, so it's not safe to release the row memory yet. This changes that optimization to only release the row's memory when we are not using a server-side cursor.
+    Testing this server-side cursor behavior requires a little extra work. go-sql-driver/mysql does not support server-side cursors, so we can't test this directly in our Go code. I've opened #9141 with changes to our Java MySQL Connector/J integration tests to add some simple smoke tests for server-side cursors that triggers the same behavior as the customer reported issue below.
+    Fixes: #9125
+  - 2951: update mysql version
+    fixes: dolthub/go-mysql-server#2950
+  vitess
+  - 413: Add support for RETURNING to UPDATE and INSERT nodes
+  - 412: allow trim, cast, and position as nonkeywords
+    This PR adds makes it so that TRIM, CAST and POSITION are usable as table and column names without backquotes.
+    fixes: #9123
+  Closed Issues
+  - 9125: Errors serializing data when cursors are in use
+  - 9014: Dolt merge fails when schema change drops multiple referenced tables
+  - 9133: coalesce() unescaping json with new lines
+  - 2950: Update MySQL version to 8.0.31 so that Django recognizes support for INTERSECT and EXCEPT?
+  Performance
+  ─────────────────────┬─────┬──────┬────────
+  Read Tests           │MySQL│Dolt  │Multiple
+  ─────────────────────┼─────┼──────┼────────
+  covering_index_scan  │1.86 │0.65  │0.35
+  ─────────────────────┼─────┼──────┼────────
+  groupby_scan         │13.22│17.63 │1.33
+  ─────────────────────┼─────┼──────┼────────
+  index_join           │1.44 │2.39  │1.66
+  ─────────────────────┼─────┼──────┼────────
+  index_join_scan      │1.44 │1.42  │0.99
+  ─────────────────────┼─────┼──────┼────────
+  index_scan           │34.33│30.81 │0.9
+  ─────────────────────┼─────┼──────┼────────
+  oltp_point_select    │0.18 │0.26  │1.44
+  ─────────────────────┼─────┼──────┼────────
+  oltp_read_only       │3.43 │5.18  │1.51
+  ─────────────────────┼─────┼──────┼────────
+  select_random_points │0.33 │0.6   │1.82
+  ─────────────────────┼─────┼──────┼────────
+  select_random_ranges │0.37 │0.62  │1.68
+  ─────────────────────┼─────┼──────┼────────
+  table_scan           │34.95│31.94 │0.91
+  ─────────────────────┼─────┼──────┼────────
+  types_table_scan     │74.46│130.13│1.75
+  ─────────────────────┼─────┼──────┼────────
+  reads_mean_multiplier│     │      │1.3
+  ─────────────────────┴─────┴──────┴────────
+  ──────────────────────┬─────┬─────┬────────
+  Write Tests           │MySQL│Dolt │Multiple
+  ──────────────────────┼─────┼─────┼────────
+  oltp_delete_insert    │8.9  │6.32 │0.71
+  ──────────────────────┼─────┼─────┼────────
+  oltp_insert           │4.03 │3.07 │0.76
+  ──────────────────────┼─────┼─────┼────────
+  oltp_read_write       │8.9  │11.45│1.29
+  ──────────────────────┼─────┼─────┼────────
+  oltp_update_index     │4.18 │3.13 │0.75
+  ──────────────────────┼─────┼─────┼────────
+  oltp_update_non_index │4.18 │3.07 │0.73
+  ──────────────────────┼─────┼─────┼────────
+  oltp_write_only       │5.67 │6.32 │1.11
+  ──────────────────────┼─────┼─────┼────────
+  types_delete_insert   │8.28 │6.67 │0.81
+  ──────────────────────┼─────┼─────┼────────
+  writes_mean_multiplier│     │     │0.88
+  ──────────────────────┴─────┴─────┴────────
+  ───────────────────┬─────┬─────┬────────
+  TPC-C TPS Tests    │MySQL│Dolt │Multiple
+  ───────────────────┼─────┼─────┼────────
+  tpcc-scale-factor-1│97.68│39.49│2.47
+  ───────────────────┼─────┼─────┼────────
+  tpcc_tps_multiplier│     │     │2.47
+  ───────────────────┴─────┴─────┴────────
+  ─────────────────────┬────
+  Overall Mean Multiple│1.55
+  ─────────────────────┴────
+ReleaseNotesUrl: https://github.com/dolthub/dolt/releases/tag/v1.52.2
+ManifestType: defaultLocale
+ManifestVersion: 1.9.0

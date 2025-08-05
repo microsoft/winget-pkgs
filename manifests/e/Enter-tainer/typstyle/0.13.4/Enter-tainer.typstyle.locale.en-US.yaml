@@ -1,0 +1,84 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: Enter-tainer.typstyle
+PackageVersion: 0.13.4
+PackageLocale: en-US
+Publisher: Wenzhuo Liu
+PublisherUrl: https://mgt.moe/
+PublisherSupportUrl: https://github.com/Enter-tainer/typstyle/issues
+Author: Wenzhuo Liu
+PackageName: typstyle
+PackageUrl: https://enter-tainer.github.io/typstyle/
+License: Apache-2.0
+LicenseUrl: https://github.com/Enter-tainer/typstyle/blob/HEAD/LICENSE
+Copyright: Copyright © 2023 - 2024 Typstyle Contributors
+ShortDescription: Beautiful and reliable typst code formatter
+Tags:
+- typst
+ReleaseNotes: |-
+  - Feature: typstyle cli now enables import sorting by default. You can disable it with --no-reorder-import-items flag.
+  - Feature: typstyle now supports --wrap-text flag to wrap texts in the markup. It is considered as experimental and may not work in all cases. Please report any issues you encounter.
+    For example, this code:
+    Let's say you have a long text that needs to be wrapped in the markup. This is a very long sentence that needs to be wrapped in the markup. It should be wrapped in the markup.
+    Will be formatted as following when column width is 80 and --wrap-text is enabled:
+    Let's say you have a long text that needs to be wrapped in the markup. This is a
+    very long sentence that needs to be wrapped in the markup. It should be wrapped
+    in the markup.
+  - Feature: typstyle now tries to align &s in math equations, even if the cells are multiline. Currently it it works in most cases, except the following:
+    - Has multiline Str or Raw descendants.
+    - Not following a linebreak when in MathDelimited or Args.
+    - Across args of functions such as cases.
+    For example, this code:
+    $
+    F_n &= sum_(i=1)^n i^2 & n > 0 \
+    a &< b+1 & forall b < 1
+    $
+    Will be formatted as:
+    $
+      F_n & = sum_(i=1)^n i^2 &        n > 0 \
+        a & < b+1             & forall b < 1 \
+    $
+  - Feature: typstyle now generate more compact result when formatting complex function calls. Similar to what rustfmt does, when the only argument is combinable, it will be put in the same line as the function call. When the last argument is blocky, it will also be put in the same line if possible.
+    For example, this code:
+    #figure(
+      fletcher.diagram(
+        node-outset: .5em,
+        node-stroke: .075em,
+
+        node(
+          (+1,0,),
+          [variable],
+          radius: 3em,
+        ), // test
+      ))
+    Will be formatted as:
+    #figure(fletcher.diagram(
+      node-outset: .5em,
+      node-stroke: .075em,
+
+      node((+1, 0), [variable], radius: 3em), // test
+    ))
+    For another example, this code:
+    #set page(
+      margin: 0.5in,
+      footer: context {
+        if counter(page).display() == "2" {
+          [test]
+        } else {
+          []
+        }
+      }
+    )
+    Will be formatted as:
+    #set page(margin: 0.5in, footer: context {
+      if counter(page).display() == "2" {
+        [test]
+      } else {
+        []
+      }
+    })
+    Due to the limitations of the currently used pretty engine, there is still room for improvement in some cases.
+ReleaseNotesUrl: https://github.com/Enter-tainer/typstyle/releases/tag/v0.13.4
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

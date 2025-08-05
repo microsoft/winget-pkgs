@@ -1,0 +1,54 @@
+# Created with komac v2.12.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: Gruntwork.Terragrunt
+PackageVersion: 0.82.4
+PackageLocale: en-US
+Publisher: Gruntwork
+PublisherUrl: https://terragrunt.gruntwork.io/
+PublisherSupportUrl: https://terragrunt.gruntwork.io/docs/community/support
+PrivacyUrl: https://gruntwork.io/legal/privacy-policy
+PackageName: Terragrunt
+PackageUrl: https://github.com/gruntwork-io/terragrunt/releases/tag/v0.68.9
+License: MIT
+LicenseUrl: https://github.com/gruntwork-io/terragrunt/blob/HEAD/LICENSE.txt
+Copyright: © 2024 Gruntwork, Inc. All rights reserved.
+ShortDescription: Terragrunt is a thin wrapper for Terraform that provides extra tools for keeping your Terraform configurations DRY, working with multiple Terraform modules, and managing remote state.
+Description: Terragrunt is a thin wrapper for Terraform that provides extra tools for keeping your Terraform configurations DRY, working with multiple Terraform modules, and managing remote state.
+Tags:
+- IaC
+- Infrastructure as Code
+- Terraform
+- Terraform Wrapper
+- terragrunt
+ReleaseNotes: |-
+  ✨ New Features
+  Support for OpenTofu 1.10 Native S3 Locking
+  The remote_state S3 backend now integrates natively with the OpenTofu 1.10 feature of state locking via S3 without the usage of DynamoDB using the new use_lockfile attribute.
+  # Configure OpenTofu/Terraform state to be stored in S3 with native S3 locking instead of DynamoDB.
+  # This uses S3 object conditional writes for state locking, which requires OpenTofu >= 1.10.
+  remote_state {
+    backend = "s3"
+    config = {
+      bucket       = "my-tofu-state"
+      key          = "${path_relative_to_include()}/tofu.tfstate"
+      region       = "us-east-1"
+      encrypt      = true
+      use_lockfile = true
+    }
+  }
+  In previous releases, if users wanted to integrate with this OpenTofu feature, they would have to use the generate attribute, which opts users out of more advanced features of Terragrunt remote state management like automatic provisioning of state resources.
+  By using the native attribute in config, users can retain the benefits of automatic backend bootstrapping in addition to native integration with the new OpenTofu feature.
+  You can learn more about backend configurations in the HCL docs.
+  What's Changed
+  - feat: Adding support for native state locking by @yhakbar in #4485
+  - fix: resolve failing CAS & DAG tests by @wakeful in #4480
+  - fix: Use a constant for min version of tofu for auto provider cache dir by @yhakbar in #4479
+  - chore: update external dependencies by @wakeful in #4486
+  Full Changelog: v0.82.3...v0.82.4
+ReleaseNotesUrl: https://github.com/gruntwork-io/terragrunt/releases/tag/v0.82.4
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/gruntwork-io/terragrunt/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

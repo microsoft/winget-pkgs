@@ -1,0 +1,122 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: IbrahimDursun.jjui
+PackageVersion: 0.9.0
+PackageLocale: en-US
+Publisher: Ibrahim Dursun
+PublisherUrl: https://idursun.com/
+PublisherSupportUrl: https://github.com/idursun/jjui/issues
+Author: Ibrahim Dursun
+PackageName: Jujutsu UI
+PackageUrl: https://github.com/idursun/jjui
+License: MIT
+LicenseUrl: https://github.com/idursun/jjui/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2025 ibrahim dursun
+ShortDescription: Jujutsu UI (jjui) is a Text User Interface (TUI) designed for interacting with the Jujutsu version control system.
+Moniker: jjui
+Tags:
+- jj
+ReleaseNotes: |-
+  Breaking changes
+  💥 preview.extra_args configuration option is removed in favour of preview commands (see below).
+  This change allows far more customisation opportunities than what extra_args offered.
+  💥 ui.highlight_dark and ui.highlight_light configuration options are removed
+  These have been replaced by the new theming system for more granular control over the UI's appearance.
+  Migration: You can now set "selected" = { bg = "your colour" } under [ui.colors] table in your config.toml or by creating a custom theme. See the new "Theme Support" feature below for details.
+  New Features
+  🎉 Theme support
+  You now have granular control over the application's appearance with a new theming system.
+  - Load Custom Themes: Create your own .toml theme files and enable them with the ui.theme setting in your config.
+  - Easy Overrides: Quickly tweak any colour from your loaded theme directly in your main config.toml under the [ui.colors] section.
+  - Detailed Styling: Themes use selectors to target specific UI elements (like selected, border, or revisions title), allowing you to customise everything from text colours and styles to backgrounds.
+  Selected revision styled with italic and underline:
+  A complete theme example:
+  Read Themes page in the wiki for detailed information.
+  See discussion.
+  🎉 Leader key support
+  This release introduces a "Leader key" feature, inspired by Vim's <Leader> and Emacs' hydra. It acts as a prefix key (default: \) to navigate a tree of custom, mnemonic keymaps for your personal workflows.
+  - Create Custom Shortcuts: Define key sequences in your config.toml under the [leader] table to execute any action possible in the UI.
+  - Nested & Context-Aware: Keymaps can be nested (e.g., \na for "new after") and can be configured to appear only in specific contexts, such as when a revision is selected.
+  - How it works: Press the leader key (\), then navigate the help menu with single-character key presses to trigger your custom command sequences.
+  This allows for powerful, user-defined workflows, such as editing a file from a specific revision or saving the current revset as an alias, directly from the UI.
+  Read Leader-Key page in the wiki for detailed information
+  🎉 Execute shell and jj commands directly from jjui
+  You can now execute jj and shell commands directly from the TUI.
+  - : Run interactive jj commands. jjui will suspend, and the command will run directly in your terminal (e.g., : restore -i). You will return to jjui when the command finishes.
+  - $ Run any shell command without leaving jjui. (e.g., \(man jj or\) htop)
+  Context-aware placeholders like $file and $change_id are supported in your commands.
+  🎉 Inline describe
+  You can now edit the description of a revision by pressing enter. This will load the description into an inline editor. You can accept the changes by pressing alt+enter or ctrl+S.
+  🎉 New shortcuts for menu items
+  You can now press the assigned shortcut to invoke an item in git, bookmarks and custom commands menus.
+  For example:
+  - bmm: will choose and invoke bookmarks move 'main'
+  - gpa: will choose git push --all
+  - gpc: will choose git push --change
+  - etc
+  🎉 Interactive jj duplicate
+  You can now duplicate one or more revisions directly from the UI.
+  - Select the revision(s) you want to copy and press y (the default key) to enter "duplicate mode".
+  - Choose a Destination: Navigate to the target revision where you want to place the copy.
+  - Fine-tune Placement: The UI provides a live preview of the operation. Use sub-keys to control the exact placement:
+    - a: Place the copy after the target revision.
+    - b: Place the copy before the target revision.
+    - d: Place the copy onto the target revision (i.e., --destination).
+  - Confirm: Press Enter to execute the command.
+  Minor Changes
+  Introduced preview commands per item type
+  You can now define separate commands to show the contents of the selected item in the preview window.
+  The following are the default commands.
+  [preview]
+  revision_command = ["show", "--color", "always", "-r", "$change_id"]
+  oplog_command = ["op", "show", "$operation_id", "--color", "always"]
+  file_command = ["diff", "--color", "always", "-r", "$change_id", "$file"]
+  For example; I changed oplog_command to the following to see the tree at the selected op log entry.
+  [preview]
+  oplog_command = ["log", "--at-operation", "$operation_id", "--color", "always"]
+  Improvements to custom commands
+  - Custom commands can now change the revset. For example, the following custom command will filter the view to only show descendants of the selected revision.
+  [custom_commands]
+  "show after revisions" = { key = ["M"], revset = "::$change_id" }
+  - You can now use $revset place holder in your custom commands. Previously it was limited to $change_id, $operation_id and $file.
+  New CLI argument
+  - Added support for --period or -p can be passed to override the auto_refresh_interval configuration. This can be handy when working with large repositories. (e.g. jjui --period 30) #148
+  - Added support for --limit argument which is the equivalent of jj log --limit.
+  New items in the git menu
+  - Added git push --change
+  Set bookmark
+  - B will now auto complete the movable bookmarks when typing. This change makes it easy if you want to move a bookmark just by typing the name of it.
+  Details view
+  - Details view stays open after restore or absorb command is applied.
+  K jumps to child revision
+  Similar to the J (jump to parent), now you can use K to move the child revision.
+  Fixes
+  - Fixed: File names with spaces or back slashes caused errors on Windows. #164
+  - Fixed: Diff view was not showing the output of files that had CRLF line endings.
+  - Fixed: J movement was not working if the change id's were upper case.
+  What's Changed
+  - go mod tidy & go fmt by @ilyagr in https://github.com/idursun/jjui/pull/161
+  - ci: run go fmt and go mod tidy in CI by @ilyagr in https://github.com/idursun/jjui/pull/162
+  - feat: add --period/-p CLI option by @ilyagr in https://github.com/idursun/jjui/pull/165
+  - feat(git): add UI and test support for 'git push --change ' by @vic in https://github.com/idursun/jjui/pull/171
+  - feat: Inline description editor by @idursun in https://github.com/idursun/jjui/pull/174
+  - feat(leader): add Leader (vim/spacemacs) like commands. by @vic in https://github.com/idursun/jjui/pull/179
+  - add predefined shortcuts to certain menu items in git, bookmarks and custom commands by @idursun in https://github.com/idursun/jjui/pull/180
+  - feat: custom styling by @idursun in https://github.com/idursun/jjui/pull/183
+  - feat(exec): Exec key : one-shot interactive jj commands. by @vic in https://github.com/idursun/jjui/pull/182
+  - fix(exec_shell): Dont replace context values but set env. by @vic in https://github.com/idursun/jjui/pull/186
+  - test: fix flaky test by @idursun in https://github.com/idursun/jjui/pull/185
+  - Style revisions, evolog and oplog by @idursun in https://github.com/idursun/jjui/pull/189
+  - feat(leader): Allow leader entries to specify context requirements. by @vic in https://github.com/idursun/jjui/pull/190
+  - fix(revisions): Using J should work on uppercase templated change_id by @vic in https://github.com/idursun/jjui/pull/193
+  - Use os.Getwd for getting the current dir by @ilyagr in https://github.com/idursun/jjui/pull/196
+  - feat(status): Add editing history according to input mode. by @vic in https://github.com/idursun/jjui/pull/197
+  - feat(revisions): K jumps to revision first child. by @vic in https://github.com/idursun/jjui/pull/199
+  Full Changelog: https://github.com/idursun/jjui/compare/v0.8.12...v0.9.0
+ReleaseNotesUrl: https://github.com/idursun/jjui/releases/tag/v0.9.0
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/idursun/jjui/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

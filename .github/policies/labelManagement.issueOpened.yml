@@ -25,7 +25,7 @@ configuration:
         then:
           - addReply:
               reply: >-
-                Hello @${issueAuthor},
+                Hello ${issueAuthor},
 
 
                 This pull request does not update any files. Please review your commit history and resubmit.
@@ -33,13 +33,16 @@ configuration:
 
                 Template: msftbot/validationError/pullRequest/noContent
           - closePullRequest
-      - description: Add CodeFlow link to new PRs
+      - description: Add CodeFlow link and Pipeline Status to new PRs
         if:
           - payloadType: Pull_Request
           - isAction:
               action: Opened
         then:
           - addCodeFlowLink
+          - addReply:
+              reply: >-
+                [![Validation Pipeline Badge](https://img.shields.io/endpoint?url=https://winget-validation-pme-f8gqfjhzacawbecy.z01.azurefd.net/api/GetServiceComponentStatusBadge?component=ValidationPipeline "Validation Pipeline Badge")](https://dev.azure.com/shine-oss/winget-pkgs/_build?definitionId=14)&nbsp;[![Publish Pipeline Badge](https://img.shields.io/endpoint?url=https://winget-validation-pme-f8gqfjhzacawbecy.z01.azurefd.net/api/GetServiceComponentStatusBadge?component=PublishPipeline "Publish Pipeline Badge")](https://dev.azure.com/shine-oss/winget-pkgs/_build?definitionId=12)
           # If the user is a first-time contributor, add the Needs-CLA Label
           - if:
               - activitySenderHasAssociation:
@@ -75,7 +78,7 @@ configuration:
         then:
           - addReply:
               reply: >-
-                Hello @${issueAuthor},
+                Hello ${issueAuthor},
 
 
                 Sorry we cannot process ${number} because you are changing validation-pipeline.yaml. Please remove that file from your PR. If you would like to discuss changes to validation-pipeline.yml, please file an issue.
@@ -106,12 +109,15 @@ configuration:
           - not:
               filesMatchPattern:
                 pattern: ^.configurations/.*
+          - not:
+              filesMatchPattern:
+                pattern: ^.github/.*
           - filesMatchPattern:
               pattern: ^.*\.yaml
         then:
           - addReply:
               reply: >-
-                Hello @${issueAuthor},
+                Hello ${issueAuthor},
 
 
                 It looks like this pull request is missing the manifests folder. For example: manifests\<first letter of the publisher in lower-case>\<publisher>\<application>\<version>\*.yaml
@@ -204,6 +210,33 @@ configuration:
               activitySenderHasPermission:
                 permission: Admin
         then:
+          - addLabel:
+              label: Author-Not-Authorized
+      - description: >-
+          When a PR is opened/updated, if a change is made under the fonts directory and user is not repo admin
+          * Add Author-Not-Authorized label
+          * Add a reply to the author
+        if:
+          - payloadType: Pull_Request
+          - isOpen
+          - not:
+              filesMatchPattern:
+                pattern: ^$
+          - filesMatchPattern:
+                pattern: ^fonts[\/\\].*
+          - not:
+              activitySenderHasPermission:
+                permission: Admin
+        then:
+          - addReply:
+              reply: >-
+                Hello ${issueAuthor},
+
+
+                It appears you are making a change under the 'fonts' directory. The community repository currently does not accept contributions to the fonts directory.
+
+
+                Template: msftbot/authorNotAuthorized/fonts
           - addLabel:
               label: Author-Not-Authorized
 onFailure:
