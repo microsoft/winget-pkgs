@@ -1,0 +1,82 @@
+# Created with komac v2.11.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
+
+PackageIdentifier: Gruntwork.Terragrunt
+PackageVersion: 0.81.0
+PackageLocale: en-US
+Publisher: Gruntwork
+PublisherUrl: https://terragrunt.gruntwork.io/
+PublisherSupportUrl: https://terragrunt.gruntwork.io/docs/community/support
+PrivacyUrl: https://gruntwork.io/legal/privacy-policy
+PackageName: Terragrunt
+PackageUrl: https://github.com/gruntwork-io/terragrunt/releases/tag/v0.68.9
+License: MIT
+LicenseUrl: https://github.com/gruntwork-io/terragrunt/blob/HEAD/LICENSE.txt
+Copyright: © 2024 Gruntwork, Inc. All rights reserved.
+ShortDescription: Terragrunt is a thin wrapper for Terraform that provides extra tools for keeping your Terraform configurations DRY, working with multiple Terraform modules, and managing remote state.
+Description: Terragrunt is a thin wrapper for Terraform that provides extra tools for keeping your Terraform configurations DRY, working with multiple Terraform modules, and managing remote state.
+Tags:
+- IaC
+- Infrastructure as Code
+- Terraform
+- Terraform Wrapper
+- terragrunt
+ReleaseNotes: |-
+  🛠️ Breaking Changes
+  Bare Includes Deprecated
+  Use of bare includes (include configuration blocks without a label) are now deprecated.
+  For example:
+  include {
+      path = find_in_parent_folders("root.hcl")
+  }
+  Will now result in a deprecation warning, while the following usage of an include with a label added won't:
+  include "root" {
+      path = find_in_parent_folders("root.hcl")
+  }
+  Using labeled includes result in better performance, as backwards compatibility requires that Terragrunt does additional work during configuration processing. You are advised to update your bare includes to use labels as early as possible.
+  Note that although this deprecation won't be an immediate breaking change. It will be a breaking change in the future. To opt-in to this breaking change today, you can use the bare-include strict control to mandate usage of the modern, labelled include. Doing so will ensure that you and your teammates are leveraging the most performant version of the configuration block.
+  Backwards compatibility is guaranteed to remain present for this functionality until at least Terragrunt 2.0.
+  Logging Moved from Terragrunt Options
+  If you depend on Terragrunt as a Golang library, you'll want to take note that this release introduces a breaking change to public functions in multiple packages to adjust how the logger is passed. The Terragrunt logger is no longer a member of the TerragruntOptions struct in the options package, and is instead passed explicitly as an argument to functions that need the logger.
+  For example, the signature for the RunCommand function in the shell package changed from this:
+  func RunCommand(ctx context.Context, opts *options.TerragruntOptions, command string, args ...string) error
+  To this:
+  func RunCommand(ctx context.Context, l log.Logger, opts *options.TerragruntOptions, command string, args ...string) error
+  You maybe need to manually construct a logger to pass into public functions you are calling in Terragrunt packages as a consequence.
+  ✨ New Features
+  Added constraint_check HCL Function
+  A new HCL function, constraint_check, has been added to Terragrunt.
+  This HCL function allows you to drive logic in your configurations based on constraints checked against arbitrary semantic versions.
+  For example:
+  feature "module_version" {
+    default = "1.2.3"
+  }
+  locals {
+    module_version       = feature.module_version.value
+    needs_v2_adjustments = constraint_check(local.module_version, ">= 2.0.0")
+  }
+  terraform {
+    source = "github.com/my-org/my-module.git//?ref=v${local.module_version}"
+  }
+  inputs = !local.needs_v2_adjustments ? {
+    old_module_input_name = "old_module_input_value"
+  } : {
+    new_module_input_name = "new_module_input_value"
+  }
+  Using this function, you can alter the behavior of units when particular OpenTofu/Terraform module versions are used, including changing inputs or altering error handling.
+  What's Changed
+  - feat: Add constraint_check HCL function by @james03160927 in #4376
+  - feat: Added license check by @denis256 in #4368
+  - fix: Always run CI on push by @yhakbar in #4372
+  - fix: Fixing reference to relative_path_to_include by @yhakbar in #4371
+  - perf: Moving logger out of opts by @yhakbar in #4367
+  - chore: Deprecating bare includes by @yhakbar in #4375
+  - build(deps): Updated Opentelemetry dependencies to 1.36.0 by @denis256 in #4370
+  - docs: Documenting constraint_check by @yhakbar in #4384
+  Full Changelog: v0.80.4...v0.80.5
+ReleaseNotesUrl: https://github.com/gruntwork-io/terragrunt/releases/tag/v0.81.0
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/gruntwork-io/terragrunt/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.9.0

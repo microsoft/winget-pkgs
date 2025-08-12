@@ -1,0 +1,122 @@
+# Created with komac v2.12.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: Gitleaks.Gitleaks
+PackageVersion: 8.28.0
+PackageLocale: en-US
+Publisher: Gitleaks LLC
+PublisherUrl: https://gitleaks.io/
+PublisherSupportUrl: https://github.com/gitleaks/gitleaks/issues
+Author: Zachary Rice
+PackageName: Gitleaks
+PackageUrl: https://github.com/gitleaks/gitleaks
+License: MIT
+LicenseUrl: https://github.com/gitleaks/gitleaks/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2019 Zachary Rice
+CopyrightUrl: https://github.com/gitleaks/gitleaks/blob/master/LICENSE
+ShortDescription: Protect and discover secrets using Gitleaks
+Description: |-
+  Gitleaks is a SAST tool for detecting and preventing hardcoded secrets like passwords, api keys,
+  and tokens in git repos. Gitleaks is an easy-to-use, all-in-one solution for detecting secrets,
+  past or present, in your code.
+Moniker: gitleaks
+Tags:
+- devsecops
+- git
+- gitleaks
+- go
+- golang
+- hacktoberfest
+- secret
+- security
+- security-tools
+ReleaseNotes: |-
+  Changelog
+  - 4fb4382 cant count
+  - b1c9c7e Composite rules (#1905)
+  - 72977e4 feat: add Anthropic API key detection (#1910)
+  - 7b02c98 fix(git): handle port (#1912)
+  - 2a7bcff dont prematurely calculate fragment newlines (#1909)
+  - bd79c3e feat(allowlist): promote optimizations (#1908)
+  - 7fb4eda Fix: CVEs on go and go crypto (#1868)
+  - a044b81 feat: add artifactory reference token and api key detection (#1906)
+  - bf380d4 silly
+  - f487f85 Update gitleaks.yml
+  - 958f55a add just like that, no leaks
+  Optimizations
+  #1909 waits to find newlines until a match. This ends up saving a boat load of time since before we were finding newlines for every fragment regardless if a rule matched or not.
+  #1908 promoted @rgmz excellent stopword optimization
+  Composite Rules (Multi-part or required Rules) #1905
+  In v8.28.0 Gitleaks introduced composite rules, which are made up of a single "primary" rule and one or more auxiliary or required rules. To create a composite rule, add a [[rules.required]] table to the primary rule specifying an id and optionally withinLines and/or withinColumns proximity constraints. A fragment is a chunk of content that Gitleaks processes at once (typically a file, part of a file, or git diff), and proximity matching instructs the primary rule to only report a finding if the auxiliary required rules also find matches within the specified area of the fragment.
+  Proximity matching: Using the withinLines and withinColumns fields instructs the primary rule to only report a finding if the auxiliary required rules also find matches within the specified proximity. You can set:
+  - withinLines: N - required findings must be within N lines (vertically)
+  - withinColumns: N - required findings must be within N characters (horizontally)
+  - Both - creates a rectangular search area (both constraints must be satisfied)
+  - Neither - fragment-level matching (required findings can be anywhere in the same fragment)
+  Here are diagrams illustrating each proximity behavior:
+  p = primary captured secret
+  a = auxiliary (required) captured secret
+  fragment = section of data gitleaks is looking at
+      *Fragment-level proximity*
+      Any required finding in the fragment
+            ┌────────┐
+     ┌──────┤fragment├─────┐
+     │      └──────┬─┤     │ ┌───────┐
+     │             │a│◀────┼─│✓ MATCH│
+     │          ┌─┐└─┘     │ └───────┘
+     │┌─┐       │p│        │
+     ││a│    ┌─┐└─┘        │ ┌───────┐
+     │└─┘    │a│◀──────────┼─│✓ MATCH│
+     └─▲─────┴─┴───────────┘ └───────┘
+       │    ┌───────┐
+       └────│✓ MATCH│
+            └───────┘
+     *Column bounded proximity*
+     `withinColumns = 3`
+            ┌────────┐
+     ┌────┬─┤fragment├─┬───┐
+     │      └──────┬─┤     │ ┌───────────┐
+     │    │        │a│◀┼───┼─│+1C ✓ MATCH│
+     │          ┌─┐└─┘     │ └───────────┘
+     │┌─┐ │     │p│    │   │
+  ┌──▶│a│  ┌─┐  └─┘        │ ┌───────────┐
+  │  │└─┘ ││a│◀────────┼───┼─│-2C ✓ MATCH│
+  │  │       ┘             │ └───────────┘
+  │  └── -3C ───0C─── +3C ─┘
+  │  ┌─────────┐
+  │  │ -4C ✗ NO│
+  └──│  MATCH  │
+     └─────────┘
+     *Line bounded proximity*
+     `withinLines = 4`
+           ┌────────┐
+     ┌─────┤fragment├─────┐
+    +4L─ ─ ┴────────┘─ ─ ─│
+     │                    │
+     │              ┌─┐   │ ┌────────────┐
+     │         ┌─┐  │a│◀──┼─│+1L ✓ MATCH │
+     0L  ┌─┐   │p│  └─┘   │ ├────────────┤
+     │   │a│◀──┴─┴────────┼─│-1L ✓ MATCH │
+     │   └─┘              │ └────────────┘
+     │                    │ ┌─────────┐
+    -4L─ ─ ─ ─ ─ ─ ─ ─┌─┐─│ │-5L ✗ NO │
+     │                │a│◀┼─│  MATCH  │
+     └────────────────┴─┴─┘ └─────────┘
+     *Line and column bounded proximity*
+     `withinLines = 4`
+     `withinColumns = 3`
+           ┌────────┐
+     ┌─────┤fragment├─────┐
+    +4L   ┌└────────┴ ┐   │
+     │            ┌─┐     │ ┌───────────────┐
+     │    │       │a│◀┼───┼─│+2L/+1C ✓ MATCH│
+     │         ┌─┐└─┘     │ └───────────────┘
+     0L   │    │p│    │   │
+     │         └─┘        │
+     │    │           │   │ ┌────────────┐
+    -4L    ─ ─ ─ ─ ─ ─┌─┐ │ │-5L/+3C ✗ NO│
+     │                │a│◀┼─│   MATCH    │
+     └───-3C────0L───+3C┴─┘ └────────────┘
+ReleaseNotesUrl: https://github.com/gitleaks/gitleaks/releases/tag/v8.28.0
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

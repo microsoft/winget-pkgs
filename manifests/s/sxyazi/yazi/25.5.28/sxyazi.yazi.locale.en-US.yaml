@@ -1,0 +1,172 @@
+# Created with WinGet Releaser using komac v2.11.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
+
+PackageIdentifier: sxyazi.yazi
+PackageVersion: 25.5.28
+PackageLocale: en-US
+Publisher: sxyazi
+PublisherUrl: https://github.com/sxyazi
+PublisherSupportUrl: https://github.com/sxyazi/yazi/issues
+PackageName: Yazi
+PackageUrl: https://github.com/sxyazi/yazi
+License: MIT
+LicenseUrl: https://github.com/sxyazi/yazi/blob/HEAD/LICENSE
+ShortDescription: Blazing fast terminal file manager written in Rust, based on async I/O
+Tags:
+- android
+- asyncio
+- cli
+- concurrency
+- file-explorer
+- file-manager
+- helix
+- linux
+- macos
+- productivity
+- rust
+- terminal
+- tui
+- vim
+- windows
+- yazi
+ReleaseNotes: |-
+  Breaking Changes
+  - [manager] is deprecated. #2803
+  - tab_width is removed since no longer need to set it manually. #2745
+  - tab_active and tab_inactive are moved under the new [tabs] section. #2745
+  Deprecated
+  - ya.mgr_emit(), ya.app_emit() and ya.input_emit() are deprecated. #2653
+  - ya.preview_widgets() is deprecated. #2706
+  - Command:args() is deprecated. #2752
+  - The ya pack subcommand is deprecated. #2770
+  - LEFT, CENTER, RIGHT on ui.Line, ui.Text are deprecated. #2802
+  - NONE, TOP, RIGHT, BOTTOM, LEFT, ALL on ui.Bar, ui.Border are deprecated. #2802
+  - WRAP_NO, WRAP, WRAP_TRIM on ui.Text are deprecated. #2802
+  Redesign Tabs
+  #2745 decouples tabs from the header into an independent tab bar component to enhance UX:
+  - A standalone single-line component increases the available space for displaying tabs.
+  - Tab titles are displayed by default to increase recognizability.
+  - Supports switching tabs via mouse for easier navigation.
+  The new tab bar is only shown when there is more than one tab, ensuring no space is wasted for users who don't use tabs.
+  442474569-5ac79095-9a4a-444e-894a-e6ee0e992815.mp4
+  Calculate Real-Time Directory Size in Spotter
+  #2695 adds directory sizes to the folder spotter. The size is computed dynamically in real time and asynchronously, which means:
+  - Every time a user clicks <Tab> on a directory, the latest size is calculated.
+  - For large directories, real-time changes in size are reported to the user, with "(?)" appended at the end to indicate that the calculation is in progress.
+  - If the user closes the spotter or switches directories using the left/right arrow keys, any ongoing calculations will be canceled to avoid wasting resources.
+  Also, the computed directory size will be updated in the file list:
+  - If the user sets linemode = size, the latest size will be shown on the right of the file line.
+  - If the user sets sort_by = size, the file list will be sorted by the latest sizes (if necessary).
+  438794791-568ca1b2-5858-4f38-a053-a099dffa3b1c.mp4
+  9x Faster Sixel Image Preview
+  #2707 replaces the existing neural network quantization algorithm with Wu's Color Quantizer, which offers better performance while maintaining comparable quality.
+  Old implementation (neural network via color_quant, with default sixel_fraction = 20) – average 189.5763999ms:
+  time: 190.025ms
+  time: 191.054417ms
+  time: 187.696792ms
+  time: 188.060791ms
+  time: 189.381958ms
+  time: 191.618042ms
+  time: 192.383125ms
+  time: 190.511291ms
+  time: 187.8395ms
+  time: 187.193083ms
+  New implementation (Wu - sRGB via quantette) – average 20.9199916ms:
+  time: 21.226458ms
+  time: 20.719542ms
+  time: 21.207583ms
+  time: 20.815875ms
+  time: 21.071291ms
+  time: 21.273459ms
+  time: 20.811792ms
+  time: 20.723166ms
+  time: 20.52675ms
+  time: 20.824ms
+  Double Directory Size Calculation Speed
+  #2683 greatly improves directory computation performance by dividing the task into chunks and reusing existing threads. Directory sorting and file trashing will be observably twice as fast.
+  Run the benchmark script against a 10.16GB folder 5 times in release mode:
+  Old: elapsed 759.877791ms
+  New: elapsed 364.802583ms
+  Old: elapsed 734.5155ms
+  New: elapsed 360.103375ms
+  Old: elapsed 734.124167ms
+  New: elapsed 365.662458ms
+  Old: elapsed 733.27325ms
+  New: elapsed 365.694042ms
+  Old: elapsed 743.394875ms
+  New: elapsed 364.455083ms
+  Input Component Now Supports Password Mode
+  With #2675, a new obscure = true option is available:
+  local value = ya.input {
+    title = "Password:",
+    obscure = true,
+    position = { "center", w = 50 },
+  }
+  screenshot-002319.mp4
+  Truncate Long Items in the File List
+  #2754, #2759, and #2778 add truncation support for long filenames in the file list and archive preview, and display file extensions at the end, ensuring that even if a filename is truncated, you can still know what file type it is by its extension.
+  screenshot-002518.mp4
+  Improved Built-In Previewers
+  - The video previewer now supports displaying embedded video covers, #2640
+  - The magick previewer will respect the user's image_alloc and image_bound settings, to limit its maximum resource usage, #2602, thanks to @ze0987
+  - The video previewer will respect the user's max_width setting, #2560, thanks to @ze0987
+  Improve Path Auto-Completion Results
+  The auto-completion results for interactive cd (key: g => <Space>) will now more closely match the user's input keywords.
+  Done in #2765
+  What's Changed
+  - fix: reverse the mixing order of theme and flavor configuration by @sxyazi in #2594
+  - feat: limit memory usage for previewing large images by @ze0987 in #2602
+  - fix: respect the user's max_width setting for the built-in video previewer by @ze0987 in #2560
+  - feat: allow custom exit code with quit --code by @Nicholas42 in #2609
+  - fix: ensure state synchronization even when the package update fails midway by @sxyazi in #2613
+  - fix: do not change revision when package deployment fails by @sxyazi in #2627
+  - feat: copy-on-write support for field caching by @sxyazi in #2629
+  - feat: fall back to CSI 16 t when PowerShell OpenSSH returns a fake terminal size by @sxyazi in #2636
+  - feat: support embedded cover for video preview by @sxyazi in #2640
+  - fix: lazily update files to avoid triggering issues dependent on sort order by @sxyazi in #2643
+  - feat: new ya.emit() API by @sxyazi in #2653
+  - feat: fine-grained peek and watch by @sxyazi in #2655
+  - feat: new --no-dummy option for reveal command by @sxyazi in #2664
+  - feat: obscure input component for inputting passwords by @sxyazi in #2675
+  - feat: increase the maximum allowed value of sixel_fraction to 30 by @sxyazi in #2682
+  - perf: double directory size calculation speed by @sxyazi in #2683
+  - feat: new fs.calc_size() API by @sxyazi in #2691
+  - feat: promote Id to a first-class type by @sxyazi in #2692
+  - feat: calculate real-time directory size in spotter by @sxyazi in #2695
+  - feat: checks in ya pub and ya emit subcommands to verify receiver exists and has necessary abilities by @sxyazi in #2696
+  - feat: add s and S keybinds in the input component by @hankertrix in #2678
+  - fix: no title is set when starts the first time by @sxyazi in #2700
+  - refactor: move tty to the new yazi-term crate by @sxyazi in #2701
+  - feat: show error when image preview fails by @sxyazi in #2706
+  - feat!: 9x faster Sixel image preview by @sxyazi in #2707
+  - fix: reset the cursor position with arrow() after deleting files by @sxyazi in #2708
+  - fix: ya pub-to 0 checks if any peer is able to receive the message by @mikavilpas in #2697
+  - feat: add --hovered to the copy command by @hankertrix in #2709
+  - fix: missing a hover event after cd by @sxyazi in #2719
+  - fix: detach background and orphan processes from the controlling terminal with setsid() by @sxyazi in #2723
+  - fix: avoid tmux interfering with kitty graphical sequences by @sxyazi in #2734
+  - fix: windows-sys missing a Win32_Security feature by @Kreijstal in #2728
+  - feat: make ui.Line renderable by @sxyazi in #2743
+  - feat!: redesign tabs by @sxyazi in #2745
+  - refactor: deprecate the Command:args() method by @sxyazi in #2752
+  - perf: avoid unnecessary memory allocation in ya.truncate() by @sxyazi in #2753
+  - fix: icon rules mixing by @sxyazi in #2755
+  - feat: show file extension for truncated file list items by @sxyazi in #2759
+  - perf: remove intermediate variables in natural sorting algorithm to avoid unnecessary allocation by @sxyazi in #2764
+  - feat: improve path auto-completion results by @sxyazi in #2765
+  - fix: always try to create state directory before draining DDS data by @sxyazi in #2769
+  - feat: truncate long paths in archive preview file list by @sxyazi in #2778
+  - feat: add a / to the interactive cd auto-completion candidates by @ineu in #2777
+  - feat: make custom tab bar easier by @sxyazi in #2782
+  - fix: update rust-onig to v6.5.1 for GCC 15 compatibility by @sxyazi in #2794
+  - feat: new ui.Align, ui.Wrap, and ui.Edge by @sxyazi in #2802
+  - refactor!: deprecate [manager] in favor of [mgr] by @sxyazi in #2803
+  - chore: bump version to 25.5.28 by @sxyazi in #2804
+  New Contributors
+  - @Nicholas42 made their first contribution in #2609
+  - @Kreijstal made their first contribution in #2728
+  - @ineu made their first contribution in #2777
+  Full Changelog: v25.4.8...v25.5.28
+ReleaseNotesUrl: https://github.com/sxyazi/yazi/releases/tag/v25.5.28
+ManifestType: defaultLocale
+ManifestVersion: 1.9.0

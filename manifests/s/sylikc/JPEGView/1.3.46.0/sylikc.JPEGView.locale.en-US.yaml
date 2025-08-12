@@ -1,5 +1,5 @@
-# Created using wingetcreate 1.5.7.0
-# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.5.0.schema.json
+# Created with YamlCreate.ps1 v2.4.6 $debug=AUSU.CRLF.7-5-2.Win32NT
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
 
 PackageIdentifier: sylikc.JPEGView
 PackageVersion: 1.3.46.0
@@ -7,33 +7,132 @@ PackageLocale: en-US
 Publisher: Kevin M (sylikc)
 PublisherUrl: https://github.com/sylikc/
 PublisherSupportUrl: https://github.com/sylikc/jpegview/issues
-Author: Kevin M (sylikc)
+# PrivacyUrl:
+Author: |-
+  David Kleiner
+  Kevin M (sylikc)
 PackageName: JPEGView
 PackageUrl: https://github.com/sylikc/jpegview
-License: GPLv2
-LicenseUrl: https://github.com/sylikc/jpegview/blob/master/LICENSE.txt
+License: GPL-2.0
+LicenseUrl: https://github.com/sylikc/jpegview/blob/HEAD/LICENSE.txt
 Copyright: |-
-  Copyright (C) 2020-2023 Kevin M (sylikc) <https://github.com/sylikc>
-  Copyright (C) 2006-2018 David Kleiner (dkleiner) <https://sourceforge.net/u/dkleiner/profile/>
-CopyrightUrl: https://github.com/sylikc/jpegview/blob/master/LICENSE.txt
-ShortDescription: JPEGView is a lean, fast and highly configurable viewer/editor for JPEG, BMP, PNG, WEBP, TGA, GIF, JXL, HEIC, HEIF, AVIF and TIFF images with a minimal GUI. Basic on-the-fly image processing is provided.
+  Copyright 2006-2018 David Kleiner
+  Copyright 2020-2023 Kevin M (sylikc)
+# CopyrightUrl:
+ShortDescription: Fork of JPEGView by David Kleiner - fast and highly configurable viewer/editor for images with a minimal GUI. Basic on-the-fly image processing is provided.
+Description: |-
+  JPEGView is a lean, fast and highly configurable image viewer/editor with a minimal GUI.
+
+  Formats Supported
+  JPEGView has built-in support the following formats:
+  - Popular: JPEG, GIF
+  - Lossless: BMP, PNG, TIFF, PSD
+  - Web: WEBP, JXL, HEIF/HEIC, AVIF
+  - Legacy: TGA, WDP, HDP, JXR
+  - Camera RAW formats:
+    - Adobe (DNG), Canon (CRW, CR2, CR3), Nikon (NEF, NRW), Sony (ARW, SR2)
+    - Olympus (ORF), Panasonic (RW2), Fujifilm (RAF)
+    - Sigma (X3F), Pentax (PEF), Minolta (MRW), Kodak (KDC, DCR)
+    - A full list is available here: LibRaw supported cameras
+  Many additional formats are supported by Windows Imaging Component (WIC)
+
+  Basic Image Editor
+  Basic on-the-fly image processing is provided - allowing adjusting typical parameters:
+  - sharpness
+  - color balance
+  - rotation
+  - perspective
+  - contrast
+  - local under-exposure/over-exposure
+
+  Other Features
+  - Small and fast, uses AVX2/SSE2 and up to 4 CPU cores
+  - High quality resampling filter, preserving sharpness of images
+  - Basic image processing tools can be applied realtime during viewing
+  - Movie/Slideshow mode - to play folder of JPEGs as movie
 Moniker: jpegview
 Tags:
-- editor
-- foss
 - image
-- images
-- image-editor
-- image-processing
-- image-viewer
-- image-viewers
-- open-source
 - photo
-- photos
-- photo-editor
 - picture
+- reader
 - viewer
-- viewers
+ReleaseNotes: |-
+  I wanted to make a special thanks to qbnu for coding the new formats support, along with optimizations and improvements to existing formats!
+  (Minor version incremented to reflect the many changes between this and the previous release. It's tempting to keep "waiting for the next feature to be done" before releasing...)
+  New features:
+  - Add support for modern RAW image formats with LibRaw, ex: CR3 (ICC profiles are supported)
+    PR #211, thanks qbnu
+  - Add basic support for PSD (Adobe Photoshop Document)
+    - Color modes supported: Grayscale, RGB, CMYK, Multichannel, Duotone, Lab
+    - 8-bit depth PSDs only
+    - Compression modes supported: Raw/Uncompressed, RLE
+      (See PR for detailed supported/unsupported breakdown)
+      PR #233, thanks qbnu
+  - Add support for reading EXIF data from JXL, HEIF, AVIF, WebP and PNG files
+    PR #213, thanks qbnu
+  - Misc EXIF Metadata fixes:
+    - GPS info parsed from RAW metadata
+    - GPS coordinates in degrees+decimal minutes will now be converted to degrees+minutes+seconds
+    - Altitudes below sea level will now show negative
+    - Metadata will be shown for either RAW or JPEG, with RAW taking precedence
+      PR #211, thanks qbnu
+  - RAW metadata's acquisition date shown in window title
+    PR #242, thanks qbnu
+  - Add multithreading when decoding with libavif and reduced memory usage
+    Up to ~20% decoding speed improvement
+    PR #204, thanks qbnu
+  - Optimize JXL and HEIF RGBA -> BGRA conversion
+    Speed up ~25% for JXL and ~150% for HEIF
+    PR #234, thanks qbnu
+  - New INI file setting: WindowBorderlessOnStartup
+    On startup, set JPEGView window to borderless mode (title bar hidden)
+  - New INI file setting: WindowAlwaysOnTopOnStartup
+    On startup, set JPEGView window to be always on top
+  Bugs fixed:
+  - Adjust animation frame times to appear closer to their actual values
+    Accounts for time spent processing frame. (Minimum frame time is 10ms due to technical limitations)
+    PR #205, thanks qbnu
+    Changed behavior:
+  - INI Option: UseEmbeddedColorProfiles=true can be used without losing Animated PNG support
+    ICC profiles are not supported for Animated PNG
+    PR #202, thanks qbnu
+  - Renamed INI Option: OverrideOriginalFileWithoutSaveDialog -> OverwriteOriginalFileWithoutSaveDialog
+  - Renamed INI Option: TrimWithoutPromptLosslessJPEG -> CropWithoutPromptLosslessJPEG
+  Other changes:
+  - Updated to library versions:
+    - libavif 1.0.1
+    - libde265 1.0.12
+    - libjxl 5d20fbe
+    - libpng 1.6.40
+    - libwebp 1.3.2 (Fixes CVE-2023-4863)
+    - zlib 1.3
+      PR #235, thanks qbnu
+  - Official scoop.sh support in bucket extras/jpegview-fork
+    PR #223, thanks Tim Martin
+  Localization updates:
+  - New language: sl Slovenian, thanks Jadran Rudec
+  - New language: tr Turkish, thanks Kaya Zeren
+  - New language: bg Bulgarian, thanks Ivan Georgiev
+  - New translation: sr Serbian, thanks Ljuba Cirovic
+  - New translation: hu Hungarian, thanks József Ujvári
+  - New translation: fi Finnish, thanks Kari Eveli
+  - New translation: sk Slovak, thanks Marián Hikaník
+  - New translation: ta Tamil, thanks Nirmal G.
+  - Updated Japanese translation, thanks maboroshin
+  - Updated Korean translation, thanks VenusGirl
+  - Updated Russian translation, thanks Dmitry Yerokhin
+  - Updated Chinese (Taiwan) translation, by converting chs -> cht
+  - Updated French translation, thanks Ronan Plantec
+  - Updated Greek translation, thanks Michalis
+  - Updated Polish translation, thanks Marcin Czerwien
+  - Rename INI option: bel -> be (official ISO 639-1 naming)
+  - Rename language: Belorussian to Belarusian (official naming)
 ReleaseNotesUrl: https://github.com/sylikc/jpegview/releases/tag/v1.3.46
+# PurchaseUrl:
+# InstallationNotes:
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/sylikc/jpegview/wiki
 ManifestType: defaultLocale
-ManifestVersion: 1.5.0
+ManifestVersion: 1.10.0

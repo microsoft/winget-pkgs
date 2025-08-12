@@ -1,0 +1,70 @@
+# Created with komac v2.11.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
+
+PackageIdentifier: errata-ai.Vale
+PackageVersion: 3.12.0
+PackageLocale: en-US
+Publisher: errata.ai
+PublisherUrl: https://vale.sh/
+PublisherSupportUrl: https://github.com/errata-ai/vale/issues
+PackageName: Vale
+PackageUrl: https://vale.sh/
+License: MIT
+LicenseUrl: https://github.com/errata-ai/vale/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2016 Joseph Kato
+CopyrightUrl: https://github.com/errata-ai/vale/blob/v2/LICENSE
+ShortDescription: A syntax-aware linter for prose built with speed and extensibility in mind.
+Moniker: vale
+Tags:
+- linter
+- linting
+- nlp
+- vale
+ReleaseNotes: |-
+  🚀 New Feature: Views – Targeted Linting for Structured (YAML, JSON, TOML) and Source Code Files
+  We’re introducing Views, a new way to define custom, structured representations of your files—giving you fine-grained control over what gets linted and how.
+  Views allow you to extract specific content from structured data (like YAML, JSON, or TOML) and source code and apply scoped linting rules to just those sections.
+  🔍 What’s a View?
+  A View is a user-defined configuration that transforms a file into a set of named scopes. This enables you to lint only relevant parts of a file—such as metadata descriptions, comments, or docstrings—without affecting the rest.
+  Here's an example using an OpenAPI file:
+  openapi: 3.0.0
+  info:
+    title: sample API
+    description: Optional multiline or single-line description in [CommonMark](http://commonmark.org/help/) or HTML.
+    version: 0.1.9
+  servers:
+    - url: http://api.example.com/v1
+      description: Optional server description, e.g. Main (production) serrver
+    - url: http://staging-api.example.com
+      description: |
+        Optional server description, e.g.
+        Internal staging serrver for testing
+    - url: http://api.example.com/v2
+      description: Optional server description, e.g. Main (production) serrver
+  And here's a View that extracts title, description, and each server's description:
+  # config/views/OpenAPI.yml
+  engine: dasel
+  scopes:
+    - name: title
+      expr: info.title
+    - expr: info.description
+      type: md
+    - expr: servers.all().description
+      type: md
+  type: md indicates that the description values are formatted are Markdown. We enable this be using the View key in our .vale.ini:
+  StylesPath = ../../styles
+  MinAlertLevel = suggestion
+  [API.yml]
+  BasedOnStyles = Vale
+  View = OpenAPI
+  See the documentation for more information.
+  Changelog
+  - 44c18b3 test: add more cases
+  - 8ab88af refactor: blueprint -> view
+  - 3a996da fix: remove erroneous "+1"
+  - fdaa335 chore(deps): bump golang.org/x/net from 0.36.0 to 0.38.0 (#996)
+ReleaseNotesUrl: https://github.com/errata-ai/vale/releases/tag/v3.12.0
+Documentations:
+- DocumentUrl: https://vale.sh/docs/
+ManifestType: defaultLocale
+ManifestVersion: 1.9.0
