@@ -1,0 +1,189 @@
+# Created with komac v2.12.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: BiomeJS.Biome
+PackageVersion: 2.1.4
+PackageLocale: en-US
+Publisher: BiomeJS
+PublisherUrl: https://biomejs.dev/
+PublisherSupportUrl: https://github.com/biomejs/biome/issues
+Author: Biome Developers and Contributors
+PackageName: Biome
+PackageUrl: https://biomejs.dev/
+License: Apache-2.0
+Copyright: Copyright (c) 2023-present Biome Developers and Contributors
+ShortDescription: Biome is a toolchain for web projects, aimed at providing functionalities to maintain them. It offers a formatter and linter, usable via CLI and LSP.
+Moniker: biome
+Tags:
+- css
+- formatter
+- javascript
+- json
+- jsx
+- linter
+- static-code-analysis
+- typescript
+- web
+ReleaseNotes: |-
+  2.1.4
+  Patch Changes
+  - #7121 b9642ab Thanks @arendjr! - Fixed #7111: Imported symbols using aliases are now correctly recognised.
+  - #7103 80515ec Thanks @omasakun! - Fixed #6933 and #6994.
+    When the values of private member assignment expressions, increment expressions, etc. are used, those private members are no longer marked as unused.
+  - #6887 0cc38f5 Thanks @ptkagori! - Added the noQwikUseVisibleTask rule to Qwik.
+    This rule is intended for use in Qwik applications to warn about the use of useVisibleTask$() functions which require careful consideration before use.
+    Invalid:
+    useVisibleTask$(() => {
+      console.log("Component is visible");
+    });
+    Valid:
+    useTask$(() => {
+      console.log("Task executed");
+    });
+  - #7084 50ca155 Thanks @ematipico! - Added the new nursery rule noUnnecessararyConditions, which detects whenever some conditions don't
+    change during the life cycle of the program, and truthy or false, hence deemed redundant.
+    For example, the following snippets will trigger the rule:
+    // Always truthy literal conditions
+    if (true) {
+      console.log("always runs");
+    }
+    // Unnecessary condition on constrained string type
+    function foo(arg: "bar" | "baz") {
+      if (arg) {
+        // This check is unnecessary
+      }
+    }
+  - #6887 0cc38f5 Thanks @ptkagori! - Added the useImageSize rule to Biome.
+    The useImageSize rule enforces the use of width and height attributes on <img> elements for performance reasons. This rule is intended to prevent layout shifts and improve Core Web Vitals by ensuring images have explicit dimensions.
+    Invalid:
+    <img src="/image.png" />
+    <img src="https://example.com/image.png" />
+    <img src="/image.png" width="200" />
+    <img src="/image.png" height="200" />
+    Valid:
+    <img width="200" height="600" src="/static/images/portrait-01.webp" />
+    <img width="100" height="100" src="https://example.com/image.png" />
+  - #6887 0cc38f5 Thanks @ptkagori! - Added the useAnchorHref rule to Biome.
+    The useAnchorHref rule enforces the presence of an href attribute on <a> elements in JSX. This rule is intended to ensure that anchor elements are always valid and accessible.
+    Invalid:
+    <a>Link</a>
+    <a target="_blank">External</a>
+    Valid:
+    <a href="/home">Home</a>
+    <a href="https://example.com" target="_blank">
+      External
+    </a>
+  - #7100 29fcb05 Thanks @Jayllyz! - Added the rule noNonNullAssertedOptionalChain.
+    This rule prevents the use of non-null assertions (!) immediately after optional chaining expressions (?.). Optional chaining is designed to safely handle nullable values by returning undefined when the chain encounters null or undefined. Using a non-null assertion defeats this purpose and can lead to runtime errors.
+    // Invalid - non-null assertion after optional chaining
+    obj?.prop!;
+    obj?.method()!;
+    obj?.[key]!;
+    obj?.prop!;
+    // Valid - proper optional chaining usage
+    obj?.prop;
+    obj?.method();
+    obj?.prop ?? defaultValue;
+    obj!.prop?.method();
+  - #7129 9f4538a Thanks @drwpow! - Removed option, combobox, listbox roles from useSemanticElements suggestions
+  - #7106 236deaa Thanks @arendjr! - Fixed #6985: Inference of return types no longer mistakenly picks up return types of nested functions.
+  - #7102 d3118c6 Thanks @omasakun! - Fixed #7101: noUnusedPrivateClassMembers now handles members declared as part of constructor arguments:
+    1. If a class member defined in a constructor argument is only used within the constructor, it removes the private modifier and makes it a plain method argument.
+    2. If it is not used at all, it will prefix it with an underscore, similar to noUnusedFunctionParameter.
+  - #7104 5395297 Thanks @harxki! - Reverting to prevent regressions around ref handling
+  - #7143 1a6933a Thanks @siketyan! - Fixed #6799: The noImportCycles rule now ignores type-only imports if the new ignoreTypes option is enabled (enabled by default).
+    > [!WARNING]
+    > Breaking Change: The noImportCycles rule no longer detects import cycles that include one or more type-only imports by default.
+    > To keep the old behaviour, you can turn off the ignoreTypes option explicitly:
+    >
+    > {
+    >   "linter": {
+    >     "rules": {
+    >       "nursery": {
+    >         "noImportCycles": {
+    >           "options": {
+    >             "ignoreTypes": false
+    >           }
+    >         }
+    >       }
+    >     }
+    >   }
+    > }
+  - #7099 6cc84cb Thanks @arendjr! - Fixed #7062: Biome now correctly considers extended configs when determining the mode for the scanner.
+  - #6887 0cc38f5 Thanks @ptkagori! - Added the useQwikClasslist rule to Biome.
+    This rule is intended for use in Qwik applications to encourage the use of the built-in class prop (which accepts a string, object, or array) instead of the classnames utility library.
+    Invalid:
+    <div class={classnames({ active: true, disabled: false })} />
+    Valid:
+    <div classlist={{ active: true, disabled: false }} />
+  - #7019 57c15e6 Thanks @fireairforce! - Added support in the JS parser for import source(a stage3 proposal). The syntax looks like:
+    import source foo from "<specifier>";
+  - #7053 655049e Thanks @jakeleventhal! - Added the useConsistentTypeDefinitions rule.
+    This rule enforces consistent usage of either interface or type for object type definitions in TypeScript.
+    The rule accepts an option to specify the preferred style:
+    - interface (default): Prefer using interface for object type definitions
+    - type: Prefer using type for object type definitions
+    Examples:
+    // With default option (interface)
+    // ❌ Invalid
+    type Point = { x: number; y: number };
+    // ✅ Valid
+    interface Point {
+      x: number;
+      y: number;
+    }
+    // With option { style: "type" }
+    // ❌ Invalid
+    interface Point {
+      x: number;
+      y: number;
+    }
+    // ✅ Valid
+    type Point = { x: number; y: number };
+    The rule will automatically fix simple cases where conversion is straightforward.
+  What's Changed
+  - ci: use faster runners on Windows by @ematipico in #7041
+  - chore: use own semver parser by @ematipico in #7061
+  - docs(analyze): about "Services" by @dyc3 in #7058
+  - feat(parse/tailwind): start implementing lexer/parser by @dyc3 in #6986
+  - feat(qwik): add few new lint rules by @ptkagori in #6887
+  - chore: add Claude sub-agents by @ematipico in #7066
+  - feat(format/html): implement suppression comments by @dyc3 in #5356
+  - feat: add tailwind domain by @dyc3 in #6972
+  - chore(lint): add version to the released rules by @siketyan in #7087
+  - chore(deps): update rust:1.88.0 docker digest to af306cf by @renovate[bot] in #7042
+  - chore(deps): update rust crate serde_json to 1.0.142 by @renovate[bot] in #7089
+  - chore(deps): update @biomejs packages by @renovate[bot] in #7091
+  - chore(deps): update dependency @types/node to v22.17.0 by @renovate[bot] in #7092
+  - chore(deps): update dependency eslint to v9.32.0 by @renovate[bot] in #7093
+  - chore(deps): update github-actions by @renovate[bot] in #7094
+  - chore(deps): update rust crate tokio to 1.47.1 by @renovate[bot] in #7096
+  - feat(analyze/js): added rule for @typescript-eslint/consistent-type-definitions by @jakeleventhal in #7053
+  - fix(core): consider extended configs for scan kind by @arendjr in #7099
+  - feat(analyse/js): add noNonNullAssertedOptionalChain rule by @Jayllyz in #7100
+  - fix(core): return type inference no longer picks up nested returns by @arendjr in #7106
+  - fix(lint/noUnusedPrivateClassMembers): improve member usage check by @omasakun in #7103
+  - fix(lint/noUnusedPrivateClassMembers): handle class members declared in constructor parameters correctly by @omasakun in #7102
+  - chore: setup autofix.ci workflow by @arendjr in #7113
+  - revert: "fix(lint/noUnassignedVariables): handle JSX ref attribute ass… by @harxki in #7104
+  - feat(lint): rule noUnnecessaryConditions by @ematipico in #7084
+  - chore: add CodeRabbit config by @arendjr in #7114
+  - ci: use faster runners on depot by @siketyan in #7115
+  - feat(parser): support import source by @fireairforce in #7019
+  - chore: apply CodeRabbit nits by @arendjr in #7116
+  - fix(core): resolve aliased imports by @arendjr in #7121
+  - fix: remove option, combobox, listbox from semantic element suggestions by @drwpow in #7129
+  - feat(analyze/js): add noVueDataObjectDeclaration by @amousa11 in #6574
+  - feat(lint): add ignoreTypes option to the noImportCycles rule by @siketyan in #7143
+  - ci: release by @github-actions[bot] in #7069
+  New Contributors
+  - @jakeleventhal made their first contribution in #7053
+  - @omasakun made their first contribution in #7103
+  - @amousa11 made their first contribution in #6574
+  Full Changelog: https://github.com/biomejs/biome/compare/@biomejs/biome@2.1.3...@biomejs/biome@2.1.4
+ReleaseNotesUrl: https://github.com/biomejs/biome/releases/tag/@biomejs/biome@2.1.4
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://biomejs.dev/guides/getting-started/
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0
