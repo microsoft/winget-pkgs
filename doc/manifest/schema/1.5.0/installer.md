@@ -9,13 +9,14 @@
 [Inno]:                                     https://jrsoftware.org/isinfo.php
 [Nullsoft]:                                 https://sourceforge.net/projects/nsis
 [WiX]:                                      https://wixtoolset.org
-[Burn]:                                     https://wixtoolset.org/documentation/manual/v3/bundle
+[Burn]:                                     https://wixtoolset.org/docs/v3/bundle/
 
 # Windows Package Manager
 ## Manifest Schema v1.5.0 Installer File
 All Windows Package Manager manifests in the Microsoft community repository are submitted using [YAML] syntax. A [JSON schema] is provided to aid authoring these files in editors, and in the other tooling related to the Windows Package Manager. This document provides detailed information regarding the usage of the YAML keys in the installer file for multi-file manifests.
 
->Note: The 1.5 manifest schema was released with the Windows Package Manager 1.5. Any fields marked *Not implemented* are not supported in the 1.5 client, but may be supported in a 1.6-preview client.
+> [!IMPORTANT]
+ The 1.5 manifest schema was released with the Windows Package Manager 1.5. Any fields marked *Not implemented* are not supported in the 1.5 client, but may be supported in a 1.6-preview client.
 
 ### Installer Manifest
 
@@ -160,7 +161,8 @@ ManifestVersion: 1.5.0
 
  The Windows Package Manager client uses this version to determine if an upgrade for a package is available. In some cases, packages may be released with a marketing driven version, and that causes trouble with the [`winget upgrade`] command.
 
- >Note: The current best practice is to use the value reported in Add / Remove Programs when this version of the package is installed. In some cases, packages do not report a version resulting in an upgrade loop or other unwanted behavior. This practice may seem contrary to using semantic versioning, but it provides the best end to end experience for customers. It will take time for publishers and ISVs to migrate to semantic versioning, and some may intentionally choose to preserve other versioning schemes. In these cases, it is best practice to include the "AppsAndFeaturesEntries" section for each installer.
+ > [!NOTE]
+ The current best practice is to use the value reported in Add / Remove Programs when this version of the package is installed. In some cases, packages do not report a version resulting in an upgrade loop or other unwanted behavior. This practice may seem contrary to using semantic versioning, but it provides the best end to end experience for customers. It will take time for publishers and ISVs to migrate to semantic versioning, and some may intentionally choose to preserve other versioning schemes. In these cases, it is best practice to include the "AppsAndFeaturesEntries" section for each installer.
 </details>
 
 <details>
@@ -170,7 +172,8 @@ ManifestVersion: 1.5.0
 
  This key represents the distribution channel for a package. Examples may include "stable" or "beta".
 
- >Note: This key is included for future use. The Windows Package Manager currently does not have any behavior associated with this key. The intent behind this key is to help disambiguate the different channels for packages lacking support for side by side installation. Some packages support having more than one package channel available on a system simultaneously; in this case it is better to use unique packages rather than channels. This key is intended to ensure the proper channel for a package is used during install and upgrade scenarios.
+ > [!NOTE]
+ This key is included for future use. The Windows Package Manager currently does not have any behavior associated with this key. The intent behind this key is to help disambiguate the different channels for packages lacking support for side by side installation. Some packages support having more than one package channel available on a system simultaneously; in this case it is better to use unique packages rather than channels. This key is intended to ensure the proper channel for a package is used during install and upgrade scenarios.
 </details>
 
 <details>
@@ -180,7 +183,8 @@ ManifestVersion: 1.5.0
 
  The key represents an installer for a package.
 
- >Note: Many of the keys related to installers may either be at the root level of the manifest, or included in an installer. Any values provided at the root level and not specified in an installer will be inherited.
+ > [!IMPORTANT]
+ Many of the keys related to installers may either be at the root level of the manifest, or included in an installer. Any values provided at the root level and not specified in an installer will be inherited.
 </details>
 
 <details>
@@ -206,7 +210,8 @@ ManifestVersion: 1.5.0
 
  This key represents the locale for an installer *not* the package meta-data. Some installers are compiled with locale or language specific properties. If this key is present, it is used to represent the package locale for an installer.
 
- >Note: This key may be present in the root of the manifest as the default value for all installer nodes. This key may also be present in an individual installer node as well. If this key is in the manifest root and in an installer node, the value in the installer node will apply.
+ > [!NOTE]
+ This key may be present in the root of the manifest as the default value for all installer nodes. This key may also be present in an individual installer node as well. If this key is in the manifest root and in an installer node, the value in the installer node will apply.
 </details>
 
 <details>
@@ -216,7 +221,8 @@ ManifestVersion: 1.5.0
 
  This key represents the Windows platform targeted by the installer. The Windows Package Manager currently supports "Windows.Desktop" and "Windows.Universal". The Windows Package Manager client currently has no behavior associated with this property. It was added for future looking scenarios.
 
- >Note: This key may be present in the root of the manifest as the default value for all installer nodes. This key may also be present in an individual installer node as well. If this key is in the manifest root and in an installer node, the value in the installer node will apply.
+ > [!NOTE]
+ This key may be present in the root of the manifest as the default value for all installer nodes. This key may also be present in an individual installer node as well. If this key is in the manifest root and in an installer node, the value in the installer node will apply.
 </details>
 
 <details>
@@ -226,7 +232,8 @@ ManifestVersion: 1.5.0
 
  This key represents the minimum version of the Windows operating system supported by the package.
 
- >Note: This key may be present in the root of the manifest as the default value for all installer nodes. This key may also be present in an individual installer node as well. If this key is in the manifest root and in an installer node, the value in the installer node will apply.
+ > [!NOTE]
+ This key may be present in the root of the manifest as the default value for all installer nodes. This key may also be present in an individual installer node as well. If this key is in the manifest root and in an installer node, the value in the installer node will apply.
 </details>
 
 <details>
@@ -236,11 +243,14 @@ ManifestVersion: 1.5.0
 
  This key represents the installer type for the package. The Windows Package Manager supports [MSIX], [MSI], and executable installers. Some well known formats ([Inno], [Nullsoft], [WiX], and [Burn]) provide standard sets of installer switches to provide different installer experiences. Portable packages are supported as of Windows Package Manager 1.3. Zip packages are supported as of Windows Package Manager 1.5.
 
- >Note: The Windows Package Manager defaults to the install mode providing install progress. A best practice is to determine if one of the supported installer technologies was used to build an installer with the .exe file extension. The [Windows Package Manager Manifest Creator] tool can be used to determine if one of the known tools was used to build an installer with the .exe file extension.
+ > [!IMPORTANT]
+ The Windows Package Manager 1.5 does not support loose executables with the .com file extension directly. Progressive Web Applications (PWAs) and fonts are also not supported.
 
- >Note: The Windows Package Manager 1.5 does not support loose executables with the .com file extension directly. Progressive Web Applications (PWAs) and fonts are also not supported.
+ > [!NOTE]
+ The Windows Package Manager defaults to the install mode providing install progress. A best practice is to determine if one of the supported installer technologies was used to build an installer with the .exe file extension. The [Windows Package Manager Manifest Creator] tool can be used to determine if one of the known tools was used to build an installer with the .exe file extension.
 
- >Note: This key may be present in the root of the manifest as the default value for all installer nodes. This key may also be present in an individual installer node as well. If this key is in the manifest root and in an installer node, the value in the installer node will apply.
+ > [!NOTE]
+ This key may be present in the root of the manifest as the default value for all installer nodes. This key may also be present in an individual installer node as well. If this key is in the manifest root and in an installer node, the value in the installer node will apply.
 </details>
 
 <details>
@@ -258,7 +268,8 @@ ManifestVersion: 1.5.0
 
  This key represents the SHA 256 hash for the installer. It is used to confirm the installer has not been modified. The Windows Package Manager will compare the hash in the manifest with the calculated hash of the installer after it has been downloaded.
 
- >Note:  The [Windows Package Manager Manifest Creator] can be used to determine the SHA 256 of the installer. The `winget hash &lt;pathToInstaller&gt;` command can also be used to determine the SHA 256 of the installer.
+ > [!NOTE]
+ The [Windows Package Manager Manifest Creator] can be used to determine the SHA 256 of the installer. The `winget hash &lt;pathToInstaller&gt;` command can also be used to determine the SHA 256 of the installer.
 </details>
 
 <details>
@@ -268,7 +279,8 @@ ManifestVersion: 1.5.0
 
  This key represents the signature file (AppxSignature.p7x) inside an MSIX installer. It is used to provide streaming install for MSIX packages.
 
- >Note: MSIX installers must be signed to be included in the Microsoft community package repository. If the installer is an MSIX this signature should be included in the manifest. The [Windows Package Manager Manifest Creator] can be used to determine the signature SHA 256. The `winget hash <pathToInstaller> --msix` command can also be used to determine the signature SHA 256.
+ > [!IMPORTANT]
+ MSIX installers must be signed to be included in the Microsoft community package repository. If the installer is an MSIX this signature should be included in the manifest. The [Windows Package Manager Manifest Creator] can be used to determine the signature SHA 256. The `winget hash <pathToInstaller> --msix` command can also be used to determine the signature SHA 256.
 </details>
 
 <details>
@@ -286,7 +298,8 @@ ManifestVersion: 1.5.0
 
  This key is a list of all the installers to be executed within an archive.
 
- > Note: This field can only contain one nested installer file unless the NestedInstallerType is 'portable'
+ > [!IMPORTANT]
+ This field can only contain one nested installer file unless the NestedInstallerType is 'portable'
 </details>
 
 <details>
@@ -304,7 +317,8 @@ ManifestVersion: 1.5.0
 
  The alias which is added to the PATH for calling the package from the command line.
 
- > Note: This field is only valid when NestedInstallerType is 'portable'
+ > [!IMPORTANT]
+ This field is only valid when NestedInstallerType is 'portable'
 </details>
 
 <details>
@@ -314,7 +328,8 @@ ManifestVersion: 1.5.0
 
  This key represents the scope the package is installed under. The two configurations are "user" and "machine". Some installers support only one of these scopes while others support both via arguments passed to the installer using "InstallerSwitches".
 
- >Note: This key may be present in the root of the manifest as the default value for all installer nodes. This key may also be present in an individual installer node as well. If this key is in the manifest root and in an installer node, the value in the installer node will apply.
+ > [!NOTE]
+ This key may be present in the root of the manifest as the default value for all installer nodes. This key may also be present in an individual installer node as well. If this key is in the manifest root and in an installer node, the value in the installer node will apply.
 </details>
 
 <details>
@@ -324,9 +339,11 @@ ManifestVersion: 1.5.0
 
  This key represents the install modes supported by the installer. The Microsoft community package repository requires a package support "silent" and "silent with progress". The Windows Package Manager also supports "interactive" installers. The Windows Package Manager client does not have any behavior associated with this key.
 
- >Note: Some installers will attempt to install missing dependencies. If these dependencies require user interaction, the package will not be allowed into the Microsoft community package repository.
+ > [!IMPORTANT]
+ Some installers will attempt to install missing dependencies. If these dependencies require user interaction, the package will not be allowed into the Microsoft community package repository.
 
- >Note: This key may be present in the root of the manifest as the default value for all installer nodes. This key may also be present in an individual installer node as well. If this key is in the manifest root and in an installer node, the value in the installer node will apply.
+ > [!NOTE]
+ This key may be present in the root of the manifest as the default value for all installer nodes. This key may also be present in an individual installer node as well. If this key is in the manifest root and in an installer node, the value in the installer node will apply.
 </details>
 
 <details>
@@ -348,9 +365,11 @@ ManifestVersion: 1.5.0
 
  This key represents switches passed to the installer to provide a silent install experience. These would be used when the command `winget install <package> --silent` is executed.
 
- >Note: When the Windows Package Manager installs a package using the "silent" install mode, any custom switches will also be passed to the installer. If a user applies override switches via command line via the Windows Package Manager, none of the switches from the manifest will be passed to the installer.
+ > [!NOTE]
+ When the Windows Package Manager installs a package using the "silent" install mode, any custom switches will also be passed to the installer. If a user applies override switches via command line via the Windows Package Manager, none of the switches from the manifest will be passed to the installer.
 
- >Note: This key may be present in the root of the manifest as the default value for all installer nodes. This key may also be present in an individual installer node as well. If this key is in the manifest root and in an installer node, the value in the installer node will apply.
+ > [!NOTE]
+ This key may be present in the root of the manifest as the default value for all installer nodes. This key may also be present in an individual installer node as well. If this key is in the manifest root and in an installer node, the value in the installer node will apply.
 </details>
 
 <details>
@@ -360,7 +379,8 @@ ManifestVersion: 1.5.0
 
  This key represents switches passed to the installer to provide a silent with progress install experience. This is intended to allow a progress indication to the user, and the indication may come from an installer UI dialogue, but it must not require user interaction to complete. The Windows Package Manager currently defaults to this install experience.
 
- >Note: When the Windows Package Manager installs a package using the "silent with progress" install mode, any custom switches will also be passed to the installer. If a user applies override switches via command line via the Windows Package Manager, none of the switches from the manifest will be passed to the installer.
+ > [!NOTE]
+ When the Windows Package Manager installs a package using the "silent with progress" install mode, any custom switches will also be passed to the installer. If a user applies override switches via command line via the Windows Package Manager, none of the switches from the manifest will be passed to the installer.
 </details>
 
 <details>
@@ -370,7 +390,8 @@ ManifestVersion: 1.5.0
 
  This key represents switches passed to the installer to provide an interactive install experience. This is intended to allow a user to interact with the installer. These would be used when the command `winget install <package> --interactive` is executed.
 
- >Note: When the Windows Package Manager installs a package using the "interactive" install mode, any custom switches will also be passed to the installer. If a user applies override switches via command line via the Windows Package Manager, none of the switches from the manifest will be passed to the installer.
+ > [!NOTE]
+ When the Windows Package Manager installs a package using the "interactive" install mode, any custom switches will also be passed to the installer. If a user applies override switches via command line via the Windows Package Manager, none of the switches from the manifest will be passed to the installer.
 </details>
 
 <details>
@@ -396,7 +417,8 @@ ManifestVersion: 1.5.0
 
  This key represents the switches to be passed to the installer during an upgrade. This will happen only if the upgrade behavior is "install".
 
- >Note: If a user applies override switches via command line via the Windows Package Manager, none of the switches from the manifest will be passed to the installer.
+ > [!NOTE]
+ If a user applies override switches via command line via the Windows Package Manager, none of the switches from the manifest will be passed to the installer.
 </details>
 
 <details>
@@ -406,7 +428,8 @@ ManifestVersion: 1.5.0
 
  This key represents any switches the Windows Package Manager will pass to the installer in addition to "Silent", "SilentWithProgress", and "Interactive".
 
- >Note: If a user applies override switches via command line via the Windows Package Manager, none of the switches from the manifest will be passed to the installer.
+ > [!NOTE]
+ If a user applies override switches via command line via the Windows Package Manager, none of the switches from the manifest will be passed to the installer.
 </details>
 
 <details>
@@ -416,7 +439,8 @@ ManifestVersion: 1.5.0
 
  This key represents what the Windows Package Manager should do regarding the currently installed package during a package upgrade. If the package should be uninstalled first, the "uninstallPrevious" value should be specified.
 
- >Note: This key may be present in the root of the manifest as the default value for all installer nodes. This key may also be present in an individual installer node as well. If this key is in the manifest root and in an installer node, the value in the installer node will apply.
+ > [!NOTE]
+ This key may be present in the root of the manifest as the default value for all installer nodes. This key may also be present in an individual installer node as well. If this key is in the manifest root and in an installer node, the value in the installer node will apply.
 </details>
 
 <details>
@@ -426,9 +450,11 @@ ManifestVersion: 1.5.0
 
  This key represents any commands or aliases used to execute the package after it has been installed.
 
- >Note: The Windows Package Manager does not update the path during the install workflow. In those cases, the user may need to restart their shell or terminal before the command will execute the newly installed package. The Windows Package Manager does not support any behavior related to commands or aliases.
+ > [!IMPORTANT]
+ The Windows Package Manager does not update the path during the install workflow. In those cases, the user may need to restart their shell or terminal before the command will execute the newly installed package. The Windows Package Manager does not support any behavior related to commands or aliases.
 
- >Note: This key may be present in the root of the manifest as the default value for all installer nodes. This key may also be present in an individual installer node as well. If this key is in the manifest root and in an installer node, the value in the installer node will apply.
+ > [!NOTE]
+ This key may be present in the root of the manifest as the default value for all installer nodes. This key may also be present in an individual installer node as well. If this key is in the manifest root and in an installer node, the value in the installer node will apply.
 </details>
 
 <details>
@@ -438,7 +464,8 @@ ManifestVersion: 1.5.0
 
  This key represents any protocols supported by the package. The Windows Package Manager does not support any behavior related to protocols handled by a package.
 
- >Note: This key may be present in the root of the manifest as the default value for all installer nodes. This key may also be present in an individual installer node as well. If this key is in the manifest root and in an installer node, the value in the installer node will apply.
+ > [!NOTE]
+ This key may be present in the root of the manifest as the default value for all installer nodes. This key may also be present in an individual installer node as well. If this key is in the manifest root and in an installer node, the value in the installer node will apply.
 </details>
 
 <details>
@@ -448,7 +475,8 @@ ManifestVersion: 1.5.0
 
  This key represents any file extensions supported by the package. The Windows Package Manager does not support any behavior related to the file extensions supported by the package.
 
- >Note: This key may be present in the root of the manifest as the default value for all installer nodes. This key may also be present in an individual installer node as well. If this key is in the manifest root and in an installer node, the value in the installer node will apply.
+ > [!NOTE]
+ This key may be present in the root of the manifest as the default value for all installer nodes. This key may also be present in an individual installer node as well. If this key is in the manifest root and in an installer node, the value in the installer node will apply.
 </details>
 
 <details>
@@ -458,9 +486,11 @@ ManifestVersion: 1.5.0
 
  This key represents any dependencies required to install or run the package.
 
- >Note: The Windows Package Manager does not support any behavior related to dependencies.
+ > [!IMPORTANT]
+ The Windows Package Manager does not support any behavior related to dependencies.
 
- >Note: This key may be present in the root of the manifest as the default value for all installer nodes. This key may also be present in an individual installer node as well. If this key is in the manifest root and in an installer node, the value in the installer node will apply.
+ > [!NOTE]
+ This key may be present in the root of the manifest as the default value for all installer nodes. This key may also be present in an individual installer node as well. If this key is in the manifest root and in an installer node, the value in the installer node will apply.
 </details>
 
 <details>
@@ -470,7 +500,8 @@ ManifestVersion: 1.5.0
 
  This key represents any external dependencies required to install or run the package.
 
- >Note: The Windows Package Manager does not support any behavior related to dependencies.
+ > [!IMPORTANT]
+ The Windows Package Manager does not support any behavior related to dependencies.
 </details>
 
 <details>
@@ -480,7 +511,8 @@ ManifestVersion: 1.5.0
 
  This key represents any packages from the same source required to install or run the package.
 
- >Note: The Windows Package Manager does not support any behavior related to dependencies.
+ > [!IMPORTANT]
+ The Windows Package Manager does not support any behavior related to dependencies.
 </details>
 
 <details>
@@ -490,7 +522,8 @@ ManifestVersion: 1.5.0
 
  This key represents any Windows features required to install or run the package.
 
- >Note: The Windows Package Manager does not support any behavior related to dependencies.
+ > [!IMPORTANT]
+ The Windows Package Manager does not support any behavior related to dependencies.
 </details>
 
 <details>
@@ -500,7 +533,8 @@ ManifestVersion: 1.5.0
 
  This key represents any Windows libraries required to install or run the package.
 
- >Note: The Windows Package Manager does not support any behavior related to dependencies.
+ > [!IMPORTANT]
+ The Windows Package Manager does not support any behavior related to dependencies.
 </details>
 
 <details>
@@ -510,7 +544,8 @@ ManifestVersion: 1.5.0
 
  This key represents the package family name specified in an MSIX installer. This value is used to assist with matching packages from a source to the program installed in Windows via Add / Remove Programs for list, and upgrade behavior.
 
- >Note: This key may be present in the root of the manifest as the default value for all installer nodes. This key may also be present in an individual installer node as well. If this key is in the manifest root and in an installer node, the value in the installer node will apply.
+ > [!NOTE]
+ This key may be present in the root of the manifest as the default value for all installer nodes. This key may also be present in an individual installer node as well. If this key is in the manifest root and in an installer node, the value in the installer node will apply.
 </details>
 
 <details>
@@ -520,7 +555,8 @@ ManifestVersion: 1.5.0
 
  This key represents the capabilities provided by an MSIX package. More information is available for [App capability declarations]
 
- >Note: This key may be present in the root of the manifest as the default value for all installer nodes. This key may also be present in an individual installer node as well. If this key is in the manifest root and in an installer node, the value in the installer node will apply.
+ > [!NOTE]
+ This key may be present in the root of the manifest as the default value for all installer nodes. This key may also be present in an individual installer node as well. If this key is in the manifest root and in an installer node, the value in the installer node will apply.
 </details>
 
 <details>
@@ -530,7 +566,8 @@ ManifestVersion: 1.5.0
 
  This key represents the restricted capabilities provided by an MSIX package. More information is available for [App capability declarations]
 
- >Note: This key may be present in the root of the manifest as the default value for all installer nodes. This key may also be present in an individual installer node as well. If this key is in the manifest root and in an installer node, the value in the installer node will apply.
+ > [!NOTE]
+ This key may be present in the root of the manifest as the default value for all installer nodes. This key may also be present in an individual installer node as well. If this key is in the manifest root and in an installer node, the value in the installer node will apply.
 </details>
 
 <details>
@@ -540,7 +577,8 @@ ManifestVersion: 1.5.0
 
  This key represents the behavior associated with installers that abort the terminal. This most often occurs when a user is performing an upgrade of the running terminal.
 
- >Note: Windows Terminal no longer causes this to occur as the MSIX install behavior from the Windows Package Manager is deferred registration.
+ > [!NOTE]
+ Windows Terminal no longer causes this to occur as the MSIX install behavior from the Windows Package Manager is deferred registration.
 </details>
 
 <details>
@@ -586,7 +624,8 @@ ManifestVersion: 1.5.0
 
   This key represents any markets a package may be installed in.
 
-  >Note: If a market is listed in both this key and the ExcludedMarkets key, the market will be excluded. Both keys are present to reduce the need to list the larger set of markets.
+  > [!IMPORTANT]
+  If a market is listed in both this key and the ExcludedMarkets key, the market will be excluded. Both keys are present to reduce the need to list the larger set of markets.
 </details>
 
 <details>
@@ -596,7 +635,8 @@ ManifestVersion: 1.5.0
 
   This key represents any markets a package may not be installed in.
 
-  >Note: If a market is listed in both this key and the Markets key, the market will be excluded. Both keys are present to reduce the need to list the larger set of markets.
+  > [!IMPORTANT]
+  If a market is listed in both this key and the Markets key, the market will be excluded. Both keys are present to reduce the need to list the larger set of markets.
 </details>
 
 <details>
@@ -606,9 +646,11 @@ ManifestVersion: 1.5.0
 
  This key represents any status codes returned by the installer representing a success condition other than zero.
 
- >Note: Some return codes indicate a reboot is suggested or required. The Windows Package Manager does not support the reboot behavior currently. Some installers will force a reboot, and the Windows Package Manager does not currently suppress reboot behavior.
+ > [!IMPORTANT]
+ Some return codes indicate a reboot is suggested or required. The Windows Package Manager does not support the reboot behavior currently. Some installers will force a reboot, and the Windows Package Manager does not currently suppress reboot behavior.
 
- >Note: This key may be present in the root of the manifest as the default value for all installer nodes. This key may also be present in an individual installer node as well. If this key is in the manifest root and in an installer node, the value in the installer node will apply.
+ > [!NOTE]
+ This key may be present in the root of the manifest as the default value for all installer nodes. This key may also be present in an individual installer node as well. If this key is in the manifest root and in an installer node, the value in the installer node will apply.
 </details>
 
 <details>
@@ -618,9 +660,11 @@ ManifestVersion: 1.5.0
 
  This key represents any status codes returned by the installer representing a condition other than zero.
 
- >Note: Some return codes indicate a reboot is suggested or required. The Windows Package Manager does not support the reboot behavior currently. Some installers will force a reboot, and the Windows Package Manager does not currently suppress reboot behavior.
+ > [!IMPORTANT]
+ Some return codes indicate a reboot is suggested or required. The Windows Package Manager does not support the reboot behavior currently. Some installers will force a reboot, and the Windows Package Manager does not currently suppress reboot behavior.
 
- >Note: This key may be present in the root of the manifest as the default value for all installer nodes. This key may also be present in an individual installer node as well. If this key is in the manifest root and in an installer node, the value in the installer node will apply.
+ > [!NOTE]
+ This key may be present in the root of the manifest as the default value for all installer nodes. This key may also be present in an individual installer node as well. If this key is in the manifest root and in an installer node, the value in the installer node will apply.
 </details>
 
 <details>
@@ -638,7 +682,8 @@ ManifestVersion: 1.5.0
 
  This key represents a return response to display when an installer returns an expected return code. MSIX and MSI packages have well known return codes. This is primarily intended for executable installers that have custom or unique return codes that can be mapped to a return response.
 
- >Note: An enumerated list of values in the JSON schema must be specified for consistency of user experience.
+ > [!NOTE]
+ An enumerated list of values in the JSON schema must be specified for consistency of user experience.
 </details>
 
 <details>
@@ -648,7 +693,8 @@ ManifestVersion: 1.5.0
 
  This key represents a return response URL to display when an installer returns an expected return code. MSIX and MSI packages have well known return codes. This is primarily intended for executable installers that have custom or unique return codes that can be mapped to a return response.
 
- >Note: An enumerated list of values in the JSON schema must be specified for consistency of user experience.
+ > [!NOTE]
+ An enumerated list of values in the JSON schema must be specified for consistency of user experience.
 </details>
 
 <details>
@@ -658,7 +704,8 @@ ManifestVersion: 1.5.0
 
  This key represents the product code specified in an MSI installer. This value is used to assist with matching packages from a source to the program installed in Windows via Add / Remove Programs for list, and upgrade behavior.
 
- >Note: This key may be present in the root of the manifest as the default value for all installer nodes. This key may also be present in an individual installer node as well. If this key is in the manifest root and in an installer node, the value in the installer node will apply.
+ > [!NOTE]
+ This key may be present in the root of the manifest as the default value for all installer nodes. This key may also be present in an individual installer node as well. If this key is in the manifest root and in an installer node, the value in the installer node will apply.
 </details>
 
 <details>
@@ -702,7 +749,8 @@ ManifestVersion: 1.5.0
 
  This key represents the product code for a package. It is used to help correlate installed packages with manifests in configured sources.
 
- >Note: This key is displayed twice for completeness. When AppsAndFeaturesEntries are specified, the ProductCode should be placed both within the installer and the AppsAndFeaturesEntries
+ > [!NOTE]
+ This key is displayed twice for completeness. When AppsAndFeaturesEntries are specified, the ProductCode should be placed both within the installer and the AppsAndFeaturesEntries
 </details>
 
 <details>
@@ -720,7 +768,8 @@ ManifestVersion: 1.5.0
 
  This key represents the installer type for the package. It is used to help correlate installed packages with manifests in configured sources. In some cases, an installer is an .exe based installer, but contains an MSI installer. This key will help the Windows Package Manager understand if upgrading an MSI should be performed when it is contained in an .exe installer.
 
- >Note: This key is displayed twice for completeness. When AppsAndFeaturesEntries are specified, the InstallerType should be placed within the installer only, unless the AppsAndFeaturesEntries represent a different InstallerType
+ > [!NOTE]
+ This key is displayed twice for completeness. When AppsAndFeaturesEntries are specified, the InstallerType should be placed within the installer only, unless the AppsAndFeaturesEntries represent a different InstallerType
 </details>
 
 <details>
@@ -739,7 +788,8 @@ ManifestVersion: 1.5.0
 
 This key represents whether a warning message is displayed to the user prior to install or upgrade if the package is known to interfere with any running applications.
 
->Note: The DisplayInstallWarnings behavior is not implemented in the Windows Package Manager 1.5 client.
+> [!NOTE]
+The DisplayInstallWarnings behavior is not implemented in the Windows Package Manager 1.5 client.
 </details>
 
 <details>

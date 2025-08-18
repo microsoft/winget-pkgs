@@ -1,0 +1,46 @@
+# Created with WinGet Updater using komac v2.11.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
+
+PackageIdentifier: sbt.sbt
+PackageVersion: 1.11.0
+PackageLocale: en-US
+Publisher: Lightbend, Inc.
+PublisherUrl: https://www.lightbend.com/
+PublisherSupportUrl: https://www.scala-sbt.org/support.html
+PrivacyUrl: https://www.lightbend.com/legal/privacy?_ga=2.106952203.969622968.1639120972-1490489665.1639120972
+PackageName: sbt
+PackageUrl: https://www.scala-sbt.org/
+License: Apache-2.0
+LicenseUrl: https://github.com/sbt/sbt/blob/HEAD/LICENSE
+ShortDescription: A build tool for Scala, Java, and more
+Moniker: sbt
+Tags:
+- admin
+- functional
+- java
+- language
+- programming
+- sbt
+- scala
+ReleaseNotes: |-
+  Central Repository publishing
+  The Central Repository (aka Maven Central) has long been the pillar of the JVM ecosystem including Scala. The mechanism to publish libraries to the Central has been hosted by Sonatype as OSS Repository Hosting (OSSRH) via HTTP PUT, but in March it was announced that the endpoint will be sunset in June 2025 in favor of the Central Portal at https://central.sonatype.com/.
+  sbt 1.11.0 implements a built-in support to publish to Central Repository via the Central Portal. To publish to the Central Portal, first set ThisBuild / publishTo setting to the localStaging repository:
+  ThisBuild / publishTo := {
+    val centralSnapshots = "https://central.sonatype.com/repository/maven-snapshots/"
+    if (isSnapshot.value) Some("central-snapshots" at centralSnapshots)
+    else localStaging.value
+  }
+  Add credentials to the host central.sonatype.com using the generated user token user name and password. When you're ready to publish, call publishSigned task (available via sbt-pgp). At this point, the JARs and POM files will be staged to your local target/sona-staging directory.
+  Next, call sonaUpload to upload to the Central Portal and manually release the bundle, or call sonaRelease to upload and automatically release to the Central Repository.
+  This was contributed by @eed3si9n in #8126. The feature was inspired by sbt-sonatype workflow pioneered by Taro Saito, and sonatype-central-client spearheaded by David Doyle at Lumidion.
+  Other updates
+  - fix: Avoid printing "copying runtime jar" etc to stdout by @eed3si9n in #8081
+  - fix: Fix incremental test (testQuick) with companion objects by @eed3si9n in #8087
+  Full Changelog: v1.10.11...v1.11.0
+ReleaseNotesUrl: https://github.com/sbt/sbt/releases/tag/v1.11.0
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/sbt/sbt/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.9.0

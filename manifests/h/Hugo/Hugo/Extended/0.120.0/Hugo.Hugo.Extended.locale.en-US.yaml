@@ -1,0 +1,134 @@
+# Created with YamlCreate.ps1 v2.2.10 $debug=QUSU.CRLF.7-3-9.Win32NT
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.5.0.schema.json
+
+PackageIdentifier: Hugo.Hugo.Extended
+PackageVersion: 0.120.0
+PackageLocale: en-US
+Publisher: The Hugo Authors
+PublisherUrl: https://gohugo.io/
+PublisherSupportUrl: https://discourse.gohugo.io/
+# PrivacyUrl:
+Author: The Hugo Authors
+PackageName: Hugo (Extended)
+PackageUrl: https://gohugo.io/
+License: Apache-2.0
+LicenseUrl: https://gohugo.io/about/license/
+Copyright: Copyright 2023 The Hugo Authors.
+# CopyrightUrl:
+ShortDescription: The world’s fastest framework for building websites (with WebP encoding and Sass transpiling support)
+Description: |-
+  Hugo is one of the most popular open-source static site generators. With its amazing speed and flexibility, Hugo makes building websites fun again.
+  Hugo is available in two flavors: standard and extended. With the extended flavor you can:
+  - Encode WebP images (decoding is also available in the standard build)
+  - Transpile Sass to CSS using the embedded LibSass transpiler
+# Moniker:
+Tags:
+- blog
+- blog-engine
+- cms
+- content-management-system
+- documentation
+- documentation-tool
+- static-site
+- static-site-generator
+ReleaseNotes: |-
+  This is a full dependency refresh and a couple of new cool features:
+  A new Padding image filter, and a new debug.Timer template func. The new debug.Timer is useful for finding performance bottle necks in templates:
+
+  {{ $timer := debug.Timer "slowTemplate" }}
+  // ...
+  {{ $timer.Stop }}
+
+  If you then run hugo --logLevel info you should see timer info logged at the end of the build. You can have as many timers as you want and if you don't stop them, they will be stopped at the end of build.
+  Hugo now also builds release binaries for Solaris now that a long-living issue in the upstream ƒsnotify library has been fixed, thanks to @nshalman.
+
+  Notes
+  - The enableEmoji flag now only works for Markdown content. This is unfortunate, but the old solution has some known issues and it was too hard to make it work properly as a general thing across all formats. See #11598
+  - site.DisqusShortname is deprecated 2eca1b3
+  - site.GoogleAnalytics is deprecated a692278
+  - site.Author is deprecated d4016dd
+  - site.Social is deprecated 4910312
+  Also, we have changed the string type for some of the fields and methods:
+  - .Fragments.ToHTML not returns template.HTML
+  - $resource.Data.Integrity now returns a string and not a template.HTMLAttr
+  - delimit now returns a string and not a template.HTML See #10876 #11502.
+  - the URL functions now returns a string, see #11536
+  - The paginator Pager now returns a string.
+  - site.BaseURL now returns a string.
+  The above should both solve some issues and make the above types more useful and easer to reason about. But if you use the delimit function to process HTML and see some unexpected escaping after this release, e.g.:
+
+  {{ $s := slice "<i>foo</i>" }}
+  {{ delimit $s "," }}
+
+  Then you need to mark the type with safeHTML:
+
+  {{ $s := slice "<i>foo</i>" }}
+  {{ delimit $s "," | safeHTML }}
+
+  Bug fixes
+  - create/skeletons: Fix menu template acf01bf @jmooring #11519
+  - Fix so hugo get -u updates transitively de4e466 @razonyang
+  - tpl/tplimpl: Fix dropped error 6251626 @alrs
+  - tpl/collections: Fix and deprecate echoParams 75f56b4 @jmooring #11498
+
+  Improvements
+  - Add Solaris build 7f8ab74 @bep #3500
+  - Make site.BaseURL and $pager.URL a string b6a7568 @bep
+  - commands/new: Remove format flag from new content cmd 27b22cd @jmooring #11462
+  - hugolib: Display correct markup identifier in error message a2488b1 @jmooring #11538
+  - livereloadinject: Save some allocations 8f60c0c @bep
+  - livereloadinject: Use more robust injection method 9dc6080 @DominoPivot
+  - tpl/urls: Return strings from URL functions a349aaf @jmooring #11511
+  - transform/livereloadinject: Add benchmark b8fbd4a @bep
+  - Revert "modules: Throttle the "downloading modules …" log entries" 28d8446 @bep
+  - Revert "modules: Adjust the log throttle logic a little" eb5fd31 @bep
+  - resources/images: Create padding image filter 3ed28e4 @jmooring #11599
+  - markup/goldmark: Update the CJK extension to allow specifying line break styles db14238 @henry0312
+  - modules: Adjust the log throttle logic a little 3f64b5a @bep
+  - modules: Throttle the "downloading modules …" log entries 6690409 @bep
+  - tpl/collections: Make delimit return a string e54139c @bep #10876 #11502
+  - Revise the deprecation logging 71fd79a @bep
+  - Remove rest of the now unused emoji code c4a530f @bep #11598
+  - markdown: Pass emoji codes to yuin/goldmark-emoji 272484f @jmooring #7332 #11587 #11598
+  - watcher/filenotify: Remove redundant duplicated comments c23a0c4 @alexandear
+  - tpl/debug: Add average and median to timer output 46bdc03 @bep
+  - tpl/debug: Add debug.Timer 5160c7e @bep #11580
+  - Add some convenient integration test helpers fd38171 @bep
+  - hugolib: Deprecate .Site.DisqusShortname 2eca1b3 @jmooring
+  - hugolib: Deprecate .Site.GoogleAnalytics a692278 @jmooring
+  - tpl/tplimpl: Deprecate .Site.Author usage in RSS template d4016dd @jmooring
+  - tpl/tplimpl: Deprecate .Site.Social usage with internal templates 4910312 @jmooring
+  - markup/tableofcontents: Return template.HTML from .Fragments.ToHTML 1b5f78b @jmooring #11545
+  - commands: Update message displayed when running CLI from GUI 5993afa @jmooring #11525
+  - common/hugo: Add hugo.IsServer and hugo.IsDevelopment d1b4458 @jmooring #11510
+  - all: Format files with gofmt 274852b @alexandear
+  - magefile: Update isGoLatest to check for Go 1.21 37a2d5e @abdullah-alaadine
+  - resources/integrity: Return string instead of template.HTMLAttr 4c95389 @jmooring #11513
+  - tpl/lang: Formally deprecate lang.NumFmt 46da0b7 @jmooring
+
+  Dependency Updates
+  - build(deps): bump github.com/fsnotify/fsnotify from 1.6.0 to 1.7.0 59bcc09 @dependabot[bot]
+  - build(deps): bump github.com/google/go-cmp from 0.5.9 to 0.6.0 e26ba75 @dependabot[bot]
+  - build(deps): bump github.com/alecthomas/chroma/v2 from 2.9.1 to 2.10.0 bcf07fa @dependabot[bot]
+  - build(deps): bump golang.org/x/tools from 0.13.0 to 0.14.0 e2b2092 @dependabot[bot]
+  - build(deps): bump github.com/tdewolff/minify/v2 from 2.12.9 to 2.20.0 f4df7b8 @dependabot[bot]
+  - build(deps): bump github.com/mattn/go-isatty from 0.0.19 to 0.0.20 3d9bd40 @dependabot[bot]
+  - build(deps): bump golang.org/x/image from 0.12.0 to 0.13.0 5f5e55a @dependabot[bot]
+  - build(deps): bump golang.org/x/net from 0.15.0 to 0.17.0 8c61fd2 @dependabot[bot]
+  - build(deps): bump github.com/evanw/esbuild from 0.19.3 to 0.19.5 d3145e4 @dependabot[bot]
+  - build(deps): bump github.com/spf13/afero from 1.9.5 to 1.10.0 743a1da @dependabot[bot]
+  - build(deps): bump github.com/bep/logg from 0.2.0 to 0.3.0 123901b @dependabot[bot]
+  - deps: Update github.com/tdewolff/minify/v2 v2.12.7 => v2.12.9 d5d0f42 @jmooring #11533
+
+  Documentation
+  - docs: Regen docshelper 29b6e13 @bep
+  - docs: Regenerate docshelper d3d4ab4 @bep
+  - Update README.md 3af8bde @bep
+ReleaseNotesUrl: https://github.com/gohugoio/hugo/releases/tag/v0.120.0
+# PurchaseUrl:
+# InstallationNotes:
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://gohugo.io/documentation/
+ManifestType: defaultLocale
+ManifestVersion: 1.5.0

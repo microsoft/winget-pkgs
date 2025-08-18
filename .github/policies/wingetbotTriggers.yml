@@ -28,6 +28,9 @@ configuration:
               issueAuthor: False
           - filesMatchPattern:
               pattern: DevOpsPipelineDefinitions/*
+          - not: # This checks to ensure the PR is not empty. If it is empty, it would be treated as a match for the above condition
+              filesMatchPattern:
+                pattern: ^$
           - isOpen
         then:
           - approvePullRequest:
@@ -67,5 +70,41 @@ configuration:
               label: Validation-Completed
           - approvePullRequest:
               comment: "This looks like an automatic waiver. You should be all set!"
+      - description: Close automatic waiver PRs when "Validation-Merge-Conflict" label is added
+        if:
+          - payloadType: Pull_Request
+          - isActivitySender:
+              user: wingetbot
+          - isOpen
+          - labelAdded:
+              label: Validation-Merge-Conflict
+          - filesMatchPattern:
+                pattern: ^.*\.validation
+          - not:
+              filesMatchPattern:
+                pattern: ^.*\.yaml
+        then:
+          - closeIssue
+      - description: >-
+          If a pull request is assigned to wingetbot
+          * Assign the ICM users
+        if:
+          - isPullRequest
+          - isOpen
+          - isAssignedToUser:
+              user: wingetbot
+          - not: # If it already has been labeled needing attention, don't re-trigger
+              hasLabel:
+                label: Needs-Attention
+          - not: # If a moderator reset the feedback, don't re-trigger
+              hasLabel:
+                label: Azure-Pipeline-Passed
+        then:
+          - addLabel:
+              label: Needs-Attention # This will automatically assign the ICM Users
+          - removeLabel:
+              label: Needs-Author-Feedback
+        # The policy service should trigger even when the assignment was made by the policy service
+        triggerOnOwnActions: true
 onFailure:
 onSuccess:

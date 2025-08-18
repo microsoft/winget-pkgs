@@ -1,0 +1,115 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: TareqImbasher.NetPad.vNext
+PackageVersion: 0.9.0
+PackageLocale: en-US
+Publisher: Tareq Imbasher
+PublisherUrl: https://github.com/tareqimbasher
+PublisherSupportUrl: https://github.com/tareqimbasher/NetPad/issues
+Author: Tareq Imbasher
+PackageName: NetPad vNext
+PackageUrl: https://github.com/tareqimbasher/NetPad
+License: MIT
+LicenseUrl: https://github.com/tareqimbasher/NetPad/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2024 Tareq Imbasher
+ShortDescription: A cross-platform C# editor and playground.
+Description: |-
+  NetPad is a C# playground that lets you run C# code instantly, without the hassle of creating and managing projects. Open NetPad, start coding, hit Run, and see your output immediately. It's that simple.
+  - Prototyping and Testing: Quickly prototype and test code snippets before incorporating them into your projects.
+  - Data Visualization: Visualize data interactively for better insights and analysis.
+  - Database Queries: Query databases using LINQ or SQL effortlessly.
+  - Learn and Experiment: Experiment with new C# features or start learning C# in an intuitive and accessible environment.
+  - Utility Scripts: Create and save your own utility or administration scripts for repeated use.
+Tags:
+- .net
+- c#
+- code
+- coding
+- csharp
+- develop
+- development
+- dotnet
+- editor
+- playground
+- programming
+ReleaseNotes: |-
+  Its been a while since the last release; war affects us all unfortunately.
+  Until now, packaging binaries for every supported platform was done manually. It was slow, error-prone and just no fun at all. We now have automated CD pipelines that makes it much easier. The plan is to have a more frequent release cycle. There are a lot of new improvements coming—stay tuned.
+  If you like NetPad, please star the repo 🌟!
+  What's New 🚀
+  Database Connection Query Speed
+  A main focus of this release was improving the user experience when running scripts with database connections (#196).
+  Prior to this release, scripts targeting a connection were slow to start, mainly due to Entity Framework's long startup
+  time. A new execution model was introduced so that this cost is only paid on the first run of a script, later runs will
+  be much faster even if your code changes.
+  How script execution works in NetPad
+  To improve performance and enable advanced features, NetPad uses a background process called script-host. This process is launched once, per script, and reused across multiple script runs, reducing startup time after the first execution.
+  The script-host also enables features like in-memory caching (introduced in this release) and lazy-loading of navigation properties in Dump output (coming in the next version).
+  The script-host process is automatically restarted in certain situations, including:
+  1. When you manually stop a running script.
+  2. When the .NET SDK version or selected database connection for a script changes.
+  3. When dependencies are modified—for example, after re-scaffolding a database connection.
+  In these cases, the next script run may take longer to start, but subsequent runs will be much faster.
+  Utility Helper
+  A handy new Util class is now available (#166) to enhance your scripting experience with built-in helpers for
+  dumping data, caching, environment access, and more.
+  See the Util wiki page.
+  Caching
+  The Util class has an in-memory Cache property that can be used to store data and then access it in later script
+  runs. Example:
+  var albums = Util.Cache.GetOrAdd("albums", () => Albums.ToArray());
+  var albums = await Util.Cache.GetOrAddAsync("albums", () => await Albums.ToArrayAsync());
+  MemCache Pane
+  A new pane called MemCache will now appear on the right side of the interface, displaying the values you've cached
+  in code. Clicking an item in this pane will dump it to the output pane. Hover over an item to see more info.
+  User Interface
+  Various UI improvements for better usability, clearer visuals, and more intuitive interactions across the app.
+  - The Save icon now shows an indicator when a script has unsaved changes, and is disabled when not needed.
+  - The Namespaces pane textbox has improved styling and a new icon.
+  - The selected editor tab is now more visually distinct.
+  - Icon colors have been subtly refined for better consistency.
+  - Pane dividers now show clearer drag handles on hover.
+  - The Scripts Explorer displays the number of scripts in each folder.
+  - You can now switch the layout direction of the Explorer pane.
+  - Status messages in the status bar can be dismissed with a right-click.
+  - Minor styling update to the "References" link in the editor.
+  - Two new menu items have been added to improve navigation and accessibility:
+    - Tools — A new top-level menu with some utilities and tools.
+    - Help > Wiki — A new submenu item that opens NetPad's wiki pages for quick access to documentation.
+  Status Visibility
+  Script status is now easier to see at a glance. Editor tabs display a colored line that indicates when a script is
+  running or stopping, helping you quickly spot active scripts across tabs.
+  I'm experimenting with this subtle visual cue and would love your feedback—would you prefer something more prominent,
+  like a colored status bar? Let me know what feels right to you.
+  The status bar at the bottom of the window also provides clearer, more informative messages about script activity.
+  Additionally, the timer on the far left has been improved: it now more accurately reflects the actual execution time
+  of your script, excluding setup overhead that was previously included.
+  Others
+  - Improved reliability of the "Stop Script" mechanism.
+  - Wrapped long documentation text in IntelliSense popups for better readability.
+  - New installations now default to colorful icons (Settings > General > Icon Theme).
+  - Updated and expanded several Wiki pages.
+  Fixes 🐛
+  - Fixes #280: Disappearing output when switching tabs.
+  - Fixes #287: Private NuGet sources breaking script execution.
+  - Fixes #296: Issue loading referenced assemblies.
+  - Fixes #301: User input textbox blocking output.
+  - Fixes for NetPad vNext not running on some setups.
+  - Reduce the instances where OmniSharp fails to provide syntax highlighting and intellisense.
+  - Fix syntax highlighting styles of dumped code strings.
+  - Fix some zoom menu items.
+  - Captures current code when user clicks Run to prevent further code edits from affecting current run.
+  - Other minor fixes and optimizations.
+  Support ❤️
+  If you're enjoying NetPad and would like to support open-source, please consider sponsoring the project, it really
+  helps! Also don't forget to star the repo if you haven't already, thank you!
+  A special thanks to all my sponsors. Your support is greatly appreciated and helps keep this project growing!
+
+  Full Changelog: https://github.com/tareqimbasher/NetPad/compare/v0.8.0...v0.9.0
+ReleaseNotesUrl: https://github.com/tareqimbasher/NetPad/releases/tag/v0.9.0
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/tareqimbasher/NetPad/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

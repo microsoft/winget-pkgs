@@ -1,0 +1,92 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
+
+PackageIdentifier: StackExchange.DNSControl
+PackageVersion: 4.15.4
+PackageLocale: en-US
+Publisher: Stack Exchange, Inc.
+PublisherUrl: https://stackoverflow.com/
+PublisherSupportUrl: https://github.com/StackExchange/dnscontrol/issues
+PrivacyUrl: https://stackoverflow.com/legal/privacy-policy
+Author: Stack Exchange, Inc.
+PackageName: DNSControl
+PackageUrl: https://dnscontrol.org/
+License: MIT
+LicenseUrl: https://github.com/StackExchange/dnscontrol/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2024 Stack Overflow
+ShortDescription: Infrastructure as code for DNS!
+Description: DNSControl is an opinionated platform for seamlessly managing your DNS configuration across any number of DNS hosts, both in the cloud or in your own infrastructure. It manages all of the domains for the Stack Overflow network, and can do the same for you!
+Moniker: dnscontrol
+Tags:
+- dns
+ReleaseNotes: |-
+  Hello DNSControl fans!
+  Tons of great contributions this time!
+  Global features:
+  - The most visible change is that preview will create missing zones at a provider. Disable this with --populate-on-preview=false.
+  - PTR fans will appreciate that magic PTRs now support RFC4183-style names.
+  - Plus many documentation improvements, code fixes, and smaller bugs fixed.
+  Provider improvements:
+  - CLOUDFLARE: TTL=300 hasn't been special for a long time. Now our code reflects that.
+  - CNR adds ALIAS support, better error checking, and is significantly faster in general.
+  - GCLOUD is now more resilient as it will attempt a one retry on 502 errors.
+  - HEXONET: Add error handling for MX and SRV record priority
+  - INWX now supports SRV "." targets
+  - POWERDNS fixes preview/push of non-existent zones.
+  - ROUTE53 now supports HTTPS, SSHFP, SVCB, and TLSA record types.
+  - TRANSIP is a lot faster and supports rate-limiting.
+  On the code side: Many warnings from golangci-lint have been fixed; a ZoneCache primitive has been added which will make it easier for providers to safely cache the list of zones at a provider (currently in use by CLOUDFLAREAPI and HETZNER; we'll convert other providers in the future).
+  This is a community project and we couldn't do it without all our contributors! This release has PRs from 10 people. Thanks! We couldn't do it without you!
+  Tom
+  REMINDER: "ppreview" and "ppush" are going away in Release v4.16 (the next release!). See https://github.com/StackExchange/dnscontrol/issues/3142
+  Changelog
+  Major features:
+  - ab00797f89b598a391a428e24f2a05332ed109a3: FEATURE: Extend PTR magic handling to support RFC4183 names (#3364) (@tomhughes)
+  Provider-specific changes:
+  - 0d5b3c22b72db6a9e01630937409c5e45f82f8b3: CLOUDFLARE: adopt ZoneCache (#3373) (@das7pad)
+  - 355643988ef90ed71becb1e42f4f976b01e39a02: CLOUDFLAREAPI: No longer treat TTL=300 as special (#3368) (@tlimoncelli)
+  - a3d6c51c7f400220797bae79397de8e778e3268d: CNR: Add support for ALIAS record type (#3360) (@AsifNawaz-cnic)
+  - a631c5bfdd5a46cbf4046232b3ad8858949c6794: CNR: Initial Performance improvement; golint review (#3391) (@KaiSchwarz-cnic)
+  - c348e354ff7f4ee6c996490e3236594e4b6f60a5: GCLOUD: CICD: Skip the pager1201 integration test (#3383) (@tlimoncelli)
+  - f666af8714267efe0b931b6f84565fea1341d919: GCLOUD: Re-try on 502 errors (#3376) (@tlimoncelli)
+  - 67db0e287da5818757e042a9cc4818db2fda2b4d: GCLOUD: remove (irrelevant) slow test (#3384) (@tlimoncelli)
+  - 2ef23621b5fbf0652a4eb5c7c86fba56444e3644: HETZNER: adopt ZoneCache (#3372) (@das7pad)
+  - b5b2873c62da62b6cdd820e61b7c23668aa93da3: HEXONET: Add error handling for MX and SRV record priority parsing (#3355) (@AsifNawaz-cnic)
+  - 4956d3d068eb9923eef191795ac6959bfc4ff6e6: HEXONET: Skip unneeded test to speed up CICD (#3348) (@tlimoncelli)
+  - 1a1a4bf00d7d6402471525f4d0d8676e3b689ec1: INWX: Enable SRV to have "." target (#3380) (@tlimoncelli)
+  - 89c65b6683f5752a5435ac2d9dfc66da5ccb76b8: INWX: Permit "." target for SRV records (#3377) (@tlimoncelli)
+  - d13cf0fc523247999ef09a8425e919381daaceea: POWERDNS: fix preview/push of a non-existent zone (#3338) (@Veratil)
+  - cc366d4306a2c1d5cf961b25b96a97517107005f: ROUTE53: Add HTTPS, SSHFP, SVCB, and TLSA record types (#3316) (@bdd)
+  - 8a2cf1f670a6564e2244b31513918aeed0aa4edb: TRANSIP: Change to zone-based updates to dramatically improve speed of updates (#3362) (@blackshadev)
+  - 5cfb9073a20026294159d91f69156a52125515bc: TRANSIP: Pause when rate-limited (#3378) (@tlimoncelli)
+  Documentation:
+  - 519e4f82e115ea5de4a42ecc1414212026200178: DOCS: Provider URI redirect (#3307) (@cafferata)
+  - f9718852ced1b308cf96d1f13591c3ac8f72948c: DOCS: Rackspace Cloud DNS provider request (#3322) (@cafferata)
+  CI/CD:
+  - 16159f303c196e1242309373b338d30389b3b51f: Build(deps): Bump actions/upload-artifact from 4.5.0 to 4.6.0 (#3356) (@dependabot[bot])
+  - 9e88b6a801e49260f1615469396cc8d9ed0371cc: CICD: Make pager tests more visible (#3387) (@tlimoncelli)
+  - fc2c5069202fb8d2e1eb70aba5dde103afc16022: CICD: Warn user if -provider does not match profiles.json:TYPE (#3375) (@tlimoncelli)
+  Other changes and improvements:
+  - 556926a2f75e5cfa31ef45c555217e29044e6591: BUG: Create zones ahead of gathering data (#3337) (@das7pad)
+  - 5dbe5e84c914e5a6e437dba1e4116d63e6492d8f: CHORE: Fix lint warnings from golangci-lint (#3311) (@tlimoncelli)
+  - 1742e65f39bcf4f9476ec01d2a4e5d72d3be23c4: CHORE: Rename -provider to -profile within the GitHub integration tests. (@cafferata)
+  - 533c7e0946b326814dcdefbca9ac3b741383fc27: CHORE: Rename -provider to -profile within the documentation. (@cafferata)
+  - e8bf7c71d4df5ee48d9edbc608ad5663f91d88fa: CHORE: Rename -provider to -profile within the integration tests. (@cafferata)
+  - b87fb500b7075becde727e036dad0aad6a88def2: CHORE: Rename providers.json to profiles.json within the documentation. (@cafferata)
+  - 59afd10bb4931d818803108f4d765c727616365f: CHORE: Rename providers.json to profiles.json within the integration tests. (@cafferata)
+  - e1c9785159df631a1991f5d8b2569e0d6b5c45a9: CHORE: Update dependencies (#3385) (@tlimoncelli)
+  - 5c9b17039e05cbdb66d2aa954e6dbdfbc0b007c0: FEAT: Add ZoneCache primitive (#3365) (@das7pad)
+  - 2461f3dc50314325a3b66d3eb3e3122caf143e08: REFACTOR: prettysort should unify FQDN to "@" earlier (#3323) (@tlimoncelli)
+  - 692633845a16008e78e964458edc31a00d7005c0: TESTING: Improve AXFRDDNS integration tests (#3317) (@hnrgrgr)
+  Deprecation warnings
+  [!WARNING]
+  - REV() will switch from RFC2317 to RFC4183 in v5.0. This is a breaking change. Warnings are output if your configuration is affected. No date has been announced for v5.0. See https://docs.dnscontrol.org/language-reference/top-level-functions/revcompat
+  - MSDNS maintainer needed! Without a new volunteer, this DNS provider will lose support after April 2025. See https://github.com/StackExchange/dnscontrol/issues/2878
+  - NAMEDOTCOM and SOFTLAYER need maintainers! These providers have no maintainer. Maintainers respond to PRs and fix bugs in a timely manner, and try to stay on top of protocol changes.
+  - get-certs/ACME support is frozen and will be removed without notice between now and July 2025. It has been unsupported since December 2022. If you don't use this feature, do not start. If you do use this feature, migrate ASAP. See discussion in issues/1400
+ReleaseNotesUrl: https://github.com/StackExchange/dnscontrol/releases/tag/v4.15.4
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://docs.dnscontrol.org/
+ManifestType: defaultLocale
+ManifestVersion: 1.9.0

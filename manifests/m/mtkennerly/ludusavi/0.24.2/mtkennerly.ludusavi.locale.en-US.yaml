@@ -1,0 +1,53 @@
+# Created using wingetcreate 1.6.1.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.6.0.schema.json
+
+PackageIdentifier: mtkennerly.ludusavi
+PackageVersion: 0.24.2
+PackageLocale: en-US
+Publisher: mtkennerly
+PublisherUrl: https://github.com/mtkennerly
+PublisherSupportUrl: https://github.com/mtkennerly/ludusavi/issues
+Author: Matthew T. Kennerly
+PackageName: ludusavi
+PackageUrl: https://github.com/mtkennerly/ludusavi
+License: MIT
+LicenseUrl: https://github.com/mtkennerly/ludusavi/blob/master/LICENSE
+Copyright: Copyright (c) 2020 Matthew T. Kennerly (mtkennerly)
+CopyrightUrl: https://github.com/mtkennerly/ludusavi/blob/master/LICENSE
+ShortDescription: Backup tool for PC game saves
+Moniker: ludusavi
+ReleaseNotes: |-
+  * Fixed:
+    * When multi-backup was enabled and Ludusavi backed up a game for the first time,
+      it would first insert an empty backup in that game's `mapping.yaml`
+      and then insert the real backup after.
+      This behavior was meant for updating old backups from before multi-backup was added,
+      but it was mistakenly being applied to brand new backups as well.
+
+      Ludusavi will automatically detect and fix this.
+      If the empty backup has a differential backup associated,
+      then the oldest differential backup will replace the empty full backup.
+      Otherwise, Ludusavi will remove the entry for the empty backup.
+
+      **If you use Ludusavi's cloud sync feature,**
+      please run a preview in restore mode,
+      which will automatically fix any of these incorrect initial backups,
+      and then perform a full cloud upload on the "other" screen.
+    * For Lutris roots, after reading `pga.db`,
+      Ludusavi did not properly combine that data with the data from the `games/*.yml` files.
+      ([Verified by nihaals](https://github.com/mtkennerly/ludusavi/pull/359))
+    * Ludusavi assumed that a Lutris root would contain both `games/` and `pga.db` together.
+      That's true for new installations of Lutris,
+      but older/existing installations would store them separately
+      (e.g., `~/.config/lutris/games` and `~/.local/share/lutris/pga.db`).
+      To fix this, you can now specify a different `pga.db` path explicitly.
+      In some cases, Ludusavi can prompt you to update the root automatically.
+    * CLI: The `find` command's `--steam-id` and `--gog-id` options
+      only considered primary IDs from the manifest.
+      They will now also consider secondary IDs (e.g., for DLC or different editions).
+  * Changed:
+    * Updated translations.
+      (Thanks to contributors on the [Crowdin project](https://crowdin.com/project/ludusavi))
+ReleaseNotesUrl: https://github.com/mtkennerly/ludusavi/releases/tag/v0.24.2
+ManifestType: defaultLocale
+ManifestVersion: 1.6.0

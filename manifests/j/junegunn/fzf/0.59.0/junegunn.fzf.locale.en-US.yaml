@@ -1,0 +1,113 @@
+# Created with WinGet Releaser using komac v2.9.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
+
+PackageIdentifier: junegunn.fzf
+PackageVersion: 0.59.0
+PackageLocale: en-US
+Publisher: Junegunn Choi
+PublisherUrl: https://github.com/junegunn
+PublisherSupportUrl: https://github.com/junegunn/fzf/issues
+Author: Junegunn Choi
+PackageName: fzf
+PackageUrl: https://github.com/junegunn/fzf
+License: MIT
+LicenseUrl: https://github.com/junegunn/fzf/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2013-2023 Junegunn Choi
+CopyrightUrl: https://github.com/junegunn/fzf/blob/master/LICENSE
+ShortDescription: A general-purpose command-line fuzzy finder
+Tags:
+- cli
+- go
+ReleaseNotes: |-
+  Release highlights: https://junegunn.github.io/fzf/releases/0.59.0/
+  - Prioritizing file name matches (#4192)
+      - Added a new tiebreak option pathname for prioritizing file name matches
+      - --scheme=path now sets --tiebreak=pathname,length
+      - fzf will automatically choose path scheme
+          - when the input is a TTY device, where fzf would start its built-in walker or run $FZF_DEFAULT_COMMAND which is usually a command for listing files,
+          - but not when reload or transform action is bound to start event, because in that case, fzf can't be sure of the input type.
+  - Added --header-lines-border to display header from --header-lines with a separate border
+  # Use --header-lines-border to separate two headers
+  ps -ef | fzf --style full --layout reverse --header-lines 1 \
+               --bind 'ctrl-r:reload(ps -ef)' --header 'Press CTRL-R to reload' \
+               --header-lines-border bottom --no-list-border
+
+
+  - click-header event now sets $FZF_CLICK_HEADER_WORD and $FZF_CLICK_HEADER_NTH. You can use them to implement a clickable header for changing the search scope using the new transform-nth action.
+  # Click on the header line to limit search scope
+  ps -ef | fzf --style full --layout reverse --header-lines 1 \
+               --header-lines-border bottom --no-list-border \
+               --color fg:dim,nth:regular \
+               --bind 'click-header:transform-nth(
+                         echo $FZF_CLICK_HEADER_NTH
+                       )+transform-prompt(
+                         echo "$FZF_CLICK_HEADER_WORD> "
+                       )'
+
+      - $FZF_KEY was updated to expose the type of the click. e.g. click, ctrl-click, etc. You can use it to implement a more sophisticated behavior.
+      - kill completion for bash and zsh were updated to use this feature
+  - Added --no-input option to completely disable and hide the input section
+  # Click header to trigger search
+  fzf --header '[src] [test]' --no-input --layout reverse \
+      --header-border bottom --input-border \
+      --bind 'click-header:transform-search:echo ${FZF_CLICK_HEADER_WORD:1:-1}'
+
+  # Vim-like mode switch
+  fzf --layout reverse-list --no-input \
+      --bind 'j:down,k:up,/:show-input+unbind(j,k,/)' \
+      --bind 'enter,esc,ctrl-c:transform:
+        if [[ $FZF_INPUT_STATE = enabled ]]; then
+          echo "rebind(j,k,/)+hide-input"
+        elif [[ $FZF_KEY = enter ]]; then
+          echo accept
+        else
+          echo abort
+        fi
+      '
+
+      - You can later show the input section using show-input or toggle-input action, and hide it again using hide-input, or toggle-input.
+  - Extended {q} placeholder to support ranges. e.g. {q:1}, {q:2..}, etc.
+  - Added search(...) and transform-search(...) action to trigger an fzf search with an arbitrary query string. This can be used to extend the search syntax of fzf. In the following example, fzf will use the first word of the query to trigger ripgrep search, and use the rest of the query to perform fzf search within the result.
+  export TEMP=$(mktemp -u)
+  trap 'rm -f "$TEMP"' EXIT
+
+  TRANSFORMER='
+    rg_pat={q:1}      # The first word is passed to ripgrep
+    fzf_pat={q:2..}   # The rest are passed to fzf
+
+    if ! [[ -r "$TEMP" ]] || [[ $rg_pat != $(cat "$TEMP") ]]; then
+      echo "$rg_pat" > "$TEMP"
+      printf "reload:sleep 0.1; rg --column --line-number --no-heading --color=always --smart-case %q || true" "$rg_pat"
+    fi
+    echo "+search:$fzf_pat"
+  '
+  fzf --ansi --disabled \
+    --with-shell 'bash -c' \
+    --bind "start,change:transform:$TRANSFORMER"
+
+
+  - You can now bind actions to multiple keys and events at once by writing a comma-separated list of keys and events before the colon
+  # Load 'ps -ef' output on start and reload it on CTRL-R
+  fzf --bind 'start,ctrl-r:reload:ps -ef'
+
+
+  - --min-height option now takes a number followed by +, which tells fzf to show at least that many items in the list section. The default value is now changed to 10+.
+  # You will only see the input section which takes 3 lines
+  fzf --style=full --height 1% --min-height 3
+
+  # You will see 3 items in the list section
+  fzf --style full --height 1% --min-height 3+
+
+      - Shell integration scripts were updated to use --min-height 20+ by default
+  - --header-lines will be displayed at the top in reverse-list layout
+  - Added bell action to ring the terminal bell
+  # Press CTRL-Y to copy the current line to the clipboard and ring the bell
+  fzf --bind 'ctrl-y:execute-silent(echo -n {} | pbcopy)+bell'
+
+
+  - Added toggle-bind action
+  - Bug fixes and improvements
+  - Fixed fish script to support fish 3.1.2 or later (@bitraid)
+ReleaseNotesUrl: https://github.com/junegunn/fzf/releases/tag/v0.59.0
+ManifestType: defaultLocale
+ManifestVersion: 1.9.0

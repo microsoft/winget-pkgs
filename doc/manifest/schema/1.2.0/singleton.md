@@ -8,7 +8,7 @@
 [Inno]:                                     https://jrsoftware.org/isinfo.php
 [Nullsoft]:                                 https://sourceforge.net/projects/nsis
 [WiX]:                                      https://wixtoolset.org
-[Burn]:                                     https://wixtoolset.org/documentation/manual/v3/bundle
+[Burn]:                                     https://wixtoolset.org/docs/v3/bundle/
 [Windows Package Manager Manifest Creator]: https://github.com/microsoft/winget-create
 [App capability declarations]:              https://docs.microsoft.com/windows/uwp/packaging/app-capability-declarations
 
