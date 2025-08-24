@@ -1,0 +1,98 @@
+# Created with komac v2.12.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: BiomeJS.Biome
+PackageVersion: 2.2.2
+PackageLocale: en-US
+Publisher: BiomeJS
+PublisherUrl: https://biomejs.dev/
+PublisherSupportUrl: https://github.com/biomejs/biome/issues
+Author: Biome Developers and Contributors
+PackageName: Biome
+PackageUrl: https://biomejs.dev/
+License: Apache-2.0
+Copyright: Copyright (c) 2023-present Biome Developers and Contributors
+ShortDescription: Biome is a toolchain for web projects, aimed at providing functionalities to maintain them. It offers a formatter and linter, usable via CLI and LSP.
+Moniker: biome
+Tags:
+- css
+- formatter
+- javascript
+- json
+- jsx
+- linter
+- static-code-analysis
+- typescript
+- web
+ReleaseNotes: |-
+  2.2.2
+  Patch Changes
+  - #7266 b270bb5 Thanks @ematipico! - Fixed an issue where Biome got stuck when analyzing some files. This is usually caused by a bug in the inference engine. Now Biome has some guards in place in case the number of types grows too much, and if that happens, a diagnostic is emitted and the inference is halted.
+  - #7281 6436180 Thanks @ematipico! - Fixed an issue where the function scanProject wouldn't work as expected.
+  - #7285 1511d0c Thanks @rriski! - Partially fixed #6782: JSX node kinds are now supported in GritQL AST nodes.
+  - #7249 dff85c0 Thanks @ematipico! - Fixed #748, where Biome Language Server didn't show the unsafe fixes when requesting the quick fixes. Now all LSP editors will show also opt-in, unsafe fixes.
+  - #7266 b270bb5 Thanks @ematipico! - Fixed #7020: Resolved an issue with analysing types of static member expressions involving unions. If the object type was a union that referenced nested unions, it would trigger an infinite loop as it tried to keep expanding nested unions, and the set of types would grow indefinitely.
+  - #7209 679b70e Thanks @patrickshipe! - Resolved an overcorrection in useImportExtensions when importing explicit index files.
+    Imports that explicitly reference an index file are now preserved and no longer rewritten to nested index paths.
+    Example
+    // Before
+    -      import "./sub/index";
+    +      import "./sub/index/index.js";
+    // After
+    -      import "./sub/index";
+    +      import "./sub/index.js";
+  - #7270 953f9c6 Thanks @arendjr! - Fixed #6172: Resolved an issue with inferring types for rest parameters. This issue caused rest-parameter types to be incorrect, and in some cases caused extreme performance regressions in files that contained many methods with rest-parameter definitions.
+  - #7234 b7aa111 Thanks @JeetuSuthar! - Fixed #7233: The useIndexOf rule now correctly suggests using indexOf() instead of findIndex().
+    The diagnostic message was incorrectly recommending Array#findIndex() over Array#indexOf(), when it should recommend the opposite for simple equality checks.
+  - #7283 0b07f45 Thanks @ematipico! - Fixed #7236. Now Biome correctly migrates JSONC configuration files when they are passed using --config-path.
+  - #7239 1d643d8 Thanks @minht11! - Fixed an issue where Svelte globals ($state and so on) were not properly recognized inside .svelte.test.ts/js and .svelte.spec.ts/js files.
+  - #7264 62fdbc8 Thanks @ematipico! - Fixed a regression where when using --log-kind-pretty wasn't working anymore as expected.
+  - #7244 660031b Thanks @JeetuSuthar! - Fixed #7225: The noExtraBooleanCast rule now preserves parentheses when removing Boolean calls inside negations.
+    // Before
+    !Boolean(b0 && b1);
+    // After
+    !(b0 && b1); // instead of !b0 && b1
+  - #7298 46a8e93 Thanks @unvalley! - Fixed #6695: useNamingConvention now correctly reports TypeScript parameter properties with modifiers.
+    Previously, constructor parameter properties with modifiers like private or readonly were not checked against naming conventions. These properties are now treated consistently with regular class properties.
+  What's Changed
+  - perf: determine folders more efficiently by @arendjr in #7220
+  - chore: use divan for module graph benchmarks by @arendjr in #7231
+  - chore: add repository dispatch to kick off docker image build on release by @stathis-alexander in #7235
+  - fix: correct error message in useIndexOf rule by @JeetuSuthar in #7234
+  - fix(changelog): correct dead links in 2.2 by @Jayllyz in #7243
+  - chore: fix image sponsor by @ematipico in #7250
+  - docs: fix CHANGELOG to reflect operatorLinebreak by @blfpd in #7253
+  - chore(deps): update github-actions by @renovate[bot] in #7251
+  - chore(deps): update rust:1.89.0-bookworm docker digest to e090f7b by @renovate[bot] in #7252
+  - chore(deps): update rust:1.89.0-bullseye docker digest to 5b0defc - autoclosed by @renovate[bot] in #7254
+  - chore(deps): update dependency @changesets/cli to v2.29.6 by @renovate[bot] in #7255
+  - fix(lsp): unsafe fixes when pulling code actions by @ematipico in #7249
+  - feat(linter): auto add Svelte globals for .svelte.test/spec files by @minht11 in #7239
+  - fix(cli): pretty logger by @ematipico in #7264
+  - fix(core): resolve issue with rest params in type inference by @arendjr in #7270
+  - chore: remove duplicated fixture by @arendjr in #7273
+  - fix(linter): fix useImportExtensions handling of index files by @patrickshipe in #7209
+  - chore: unduplicate branch by @arendjr in #7274
+  - docs(lint): improve noUndeclaredDependencies by @ematipico in #7272
+  - fix(wasm): scanProject being stuck by @ematipico in #7281
+  - fix(semantic): missing references in namespaces by @ematipico in #7282
+  - fix(module_graph): limit flattening to hardcoded value by @ematipico in #7266
+  - fix(migrate): jsonc configuration files by @ematipico in #7283
+  - feat(grit): add JSX node name mappings for GritQL patterns by @rriski in #7285
+  - fix(noExtraBooleanCast): preserve parentheses to maintain operator precedence by @JeetuSuthar in #7244
+  - fix(lint/useNamingConvention): detects ts property parameter with modifier by @unvalley in #7298
+  - ci: release by @github-actions[bot] in #7238
+  - ci: release by @github-actions[bot] in #7303
+  New Contributors
+  - @stathis-alexander made their first contribution in #7235
+  - @JeetuSuthar made their first contribution in #7234
+  - @blfpd made their first contribution in #7253
+  - @patrickshipe made their first contribution in #7209
+  - @rriski made their first contribution in #7285
+  Full Changelog: https://github.com/biomejs/biome/compare/@biomejs/biome@2.2.0...@biomejs/biome@2.2.2
+ReleaseNotesUrl: https://github.com/biomejs/biome/releases/tag/@biomejs/biome@2.2.2
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://biomejs.dev/guides/getting-started/
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0
