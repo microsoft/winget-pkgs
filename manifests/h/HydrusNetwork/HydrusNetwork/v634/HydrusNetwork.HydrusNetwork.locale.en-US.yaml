@@ -1,0 +1,67 @@
+# Created with komac v2.12.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: HydrusNetwork.HydrusNetwork
+PackageVersion: v634
+PackageLocale: en-US
+Publisher: Hydrus Network
+PublisherUrl: https://github.com/hydrusnetwork/hydrus
+PublisherSupportUrl: https://github.com/hydrusnetwork/hydrus/issues
+PrivacyUrl: https://hydrusnetwork.github.io/hydrus/privacy.html
+Author: Hydrus Network
+PackageName: Hydrus Network
+PackageUrl: https://github.com/hydrusnetwork/hydrus
+License: WTFPL
+LicenseUrl: https://github.com/hydrusnetwork/hydrus/blob/HEAD/license.txt
+Copyright: Copyright (C) 2011 Hydrus Developer
+CopyrightUrl: https://github.com/hydrusnetwork/hydrus/blob/master/license.txt
+ShortDescription: A personal booru-style media tagger that can import files and tags from your hard drive and popular websites. Content can be shared with other users via user-run servers.
+Description: |-
+  The hydrus network client is an application written for Anon and other internet-fluent media nerds who have large image/swf/webm collections.
+  It browses with tags instead of folders, a little like a booru on your desktop. Advanced users can share tags and files anonymously through custom servers that any user may run.
+  Everything is free and privacy is the first concern. Executable releases are available for Windows, Linux, and macOS.
+  The program is in python, so you can also run it straight from the source code.
+Moniker: hydrus-network
+Tags:
+- booru
+- cross-platform
+- image-database
+ReleaseNotes: |-
+  hotfix
+  - I screwed up with a couple of bad typos in v633, and a couple bad bits of logic in the previous two weeks, so I ended up fixing it on Saturday and putting out a v633a hotfix. the full problems were--
+  - export folders doing work (issue #1775)
+  - setting forced filetypes
+  - the 'repair missing locations' pre-boot dialog
+  - the migrate files dialog when a path did not exist
+  - some weird webms
+  - sorry for the trouble and hassle--it looks like I just had some bad weeks recently and this just slipped through linting and my tests. I particularly regret export folders, since that isn't some super rare system, and I have written some a nicer unit tests to ensure they don't get hit by another stupid mistake like this
+  inc/dec ratings
+  - thanks to a user, inc/dec ratings now grow to be as wide as they need to! this affects numbers over 999. their size options are now based on height rather than width (issue #1759)
+  duplicates
+  - if the two 'jpeg quality' statements have the same label, e.g. 'high quality vs high quality', the score is now 0. previously, if the behind the scenes quality scores were 728 vs 731, it'd colour green and give points, which was confusing and over-confident
+  - last week's ugly 'group mode' checkbox in the duplicates sidebar is now a scrollable menu button
+  duplicates auto-resolution
+  - the deny list is now available in a new tab in the 'review rule' panel, beside the 'actions taken' tab. it'll show the n most recent denied pairs, and you can undo specific pairs, which puts them back in the search queue
+  - tracking denied timestamps is new tech, so all existing denied pairs will get fake timestamps of 'now minus a few ms' on update
+  - the review panel now auto-updates the 'actioned' or 'denied' lists after you do actions or denies in the queue panel and then switch tabs
+  ui
+  - I cleaned up some hacky sizing flags and minimum width calculations and several UI areas can now compress to a smaller space. this particularly affects the normal page sidebar--you should be able to make most quite a bit thinner, although for something with a multi-column list you'll need to manually shrink the columns yourself to get it to go down (issue #1769)
+  - almost all of the icons across the program (atm basically everything except what is drawn to thumbnails and the top-right hover) are now loaded name.svg first, name.png second. I do not use any svgs yet, but I am planning a migration, and this 'try to load an svg if it exists' is a base for testing. users who have been playing around with custom icons using the new db/static system are invited to put some svg icons in there and see what happens. as I do this migration, we are going to have to figure out a new sizing system based on visual units like current font size character height, rather than the fixed old (16x16) raster stuff
+  - a new debug->gui actions->reload icon cache forces the pixmap and icon caches to reload from disk, including your static dir stuff. it'll only affect new widgets though
+  boring stuff
+  - harmonised mismatched status text vs progress gauge display across the program. when you have a popup or similar that says 'working jobs: 3/5', this now means that three jobs are complete and it is working on the fourth. the progress gauge underneath will, similarly, now be at 60%. I accidentally showed 100% progress on the last job with the subscription query progress bar last week and noticed how off it looked, and when I looked at how I did it across the program, I noticed I was ad-hoc all over the place. I tried making it so '3/5' meant the third job was being worked on and having the gauge still be 40%, but I wasn't totally happy. everything now runs on the same system of 'report num_done' when there is both text and a gauge. I am open to revisiting it, perhaps just in certain places where the grammar is now odd; let me know how you find it
+  - progress labels no longer say x/y when x is greater than y--they'll now cap at y/y. a couple of odd situations, like uploading pending content while new content is coming in, could cause this--now it'll just cap at 100% for a little extra bit
+  - made the 'get free disk space for this path' checks safe for all possible disk errors
+  - wrote some unit tests for the new auto-resolution deny timestamp and rescind stuff
+  - reworded some 'declined' text in auto-resolution to all be a clear singular 'denied'
+  - replaced my old mock calls and dev requirements.txt stuff with unittest.mock--this stuff has been built into python for ages now
+  - as a test, migrated one of my unit tests to use mock instead of some hacky db wrapper stuff I do; strong success
+  macos news
+  - the Github 'runner' that we use to make the macOS build is being retired soon. I played around with the newer 'macos-14' runner, which finally leaps us from Intel to Apple Silicon, and had some but not total success. the main App is going to be moving to Apple Silicon, but I think we'll be able to offer an Intel compatibility version too. there's still stuff to figure out, but I hope for a public test soon
+ReleaseNotesUrl: https://github.com/hydrusnetwork/hydrus/releases/tag/v634
+PurchaseUrl: https://hydrusnetwork.github.io/hydrus/support.html
+Documentations:
+- DocumentLabel: FAQ
+  DocumentUrl: https://hydrusnetwork.github.io/hydrus/faq.html
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0
