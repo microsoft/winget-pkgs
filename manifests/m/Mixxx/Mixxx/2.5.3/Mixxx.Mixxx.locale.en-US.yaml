@@ -1,0 +1,57 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: Mixxx.Mixxx
+PackageVersion: 2.5.3
+PackageLocale: en-US
+Publisher: Mixxx Project
+PublisherUrl: https://mixxx.org/
+PublisherSupportUrl: https://mixxx.org/support/
+PrivacyUrl: https://mixxx.org/privacy-policy/
+PackageName: Mixxx
+PackageUrl: https://mixxx.org/download/
+License: GPL-2.0-or-later
+LicenseUrl: https://github.com/mixxxdj/mixxx/blob/HEAD/LICENSE
+Copyright: Copyright (C) 2001-2024 Mixxx Development Team
+ShortDescription: Free and open source DJ software for Windows, macOS, and Linux
+Description: |-
+  Mixxx integrates the tools DJs need to perform creative live mixes with digital music files.
+  Whether you are a new DJ with just a laptop or an experienced turntablist, Mixxx can support your style and techniques of mixing.
+Moniker: mixxx
+Tags:
+- dj
+- mixing
+ReleaseNotes: |-
+  Mixxx 2.5.3 Release Announcement: Back to School, back to DVS.
+  We're proud to announce a new stable release of Mixxx: version 2.5.3, this version not only contains updates and fixes for some issues reported by users, but it also contains improvements to the Digital Vinyl System (DVS) support. These improvements are the result of some bright new insights of developers spinning the wheel instead of sunbathing. Since these improvements drastically improve the vinyl experience, we have chosen to backport 1 it to the 2.5 series instead of integrating it in future alpha & beta versions.
+  Have a nice Mixxx.
+  Digital Vinyl System - Timecode System.
+  An introduction to Digital Vinyl Systems and timecode can be found in this article on the site of Digital DJ Tips, and in our own news archive: How Does Timecode Vinyl Actually Work? (Pt. 1), How Does Timecode Vinyl Actually Work? (Pt. 2) and How Does Timecode Vinyl Actually Work? (Pt. 3).
+  Mixxx plays the song by following the signal on the timecode media, which gets internally converted to actual timeframes. So the DJ controls the playback of the digital music by manipulating vinyl or CDs.
+  In order to create a vinyl-like feeling, the song needs to follow the signal as closely as possible (low latency, fast responsiveness) for e.g. scratching or backspins. There is no 'standard' signal - each manufacturer uses its own code. One thing all manufacturers have in common is that the code is modulated onto a sine wave. The code is used for absolute positions e.g. after needle drops, but it is not suitable to handle pitch (e.g. the playback speed) or playback direction. For this the sine wave needs to be processed by a filter that detects phase differences and converts it into pitch information.
+  Mixxx has integrated the xwax library for timecode support, which uses an Alpha-Beta Filter for pitch detection. This filter provides a good feeling during scratching, but isn't able to provide a stable pitch during normal playback. In PR #15194 developers have replaced the Alpha-Beta Filter with a more advanced Kalman-Filter equivalent.
+  Kalman-Filters have many application as GPS navigation and weather forecast models. In Mixxx the Kalman-Filter uses a probabilistic model of the vinyl movements to predict the velocity, very similar to the Alpha-Beta Filter. This predicted speed is compared with the noisy crackling input signal. The deviation 2 is fed back into the filter and slightly alters its internal state for the next prediction.
+  If the vinyl is, say, spinning at 33 1/3 r/min, that value is used as the initial assumption on which the next prediction is based. If the next measurement returns 40 r/min, the value is not fully trusted, because such a high acceleration is unlikely. This measurement will be used with a low trust. However, if the following measurements detect 40 r/min as well, the filter gradually adjusts to approximate 40 r/min in further predictions.
+  By using this model, Mixxx is able to properly and more accurately represent e.g. the pitch control slider on the turntable or CD-player.
+  Another improvement has been made to the measurements which are fed to the Kalman filter PR #15217. The current model only takes rough measurements of the position on the sine wave. Furthermore these measurements work on the assumption to always be correct. A new check was added to detect if measurements were skipped or larger than assumed. This improves backspins where the deviation of estimation and measurement suddenly become very high.
+  These changes are major improvements for all DVS users. Too good to wait for Mixxx 2.6.
+  Get all Mixxx-ed up and join our testing-force for more upcoming features.
+  Controller Mappings
+  Mappings were updated for
+  - Icon P1-Nano MIDI 1
+  - Traktor Kontrol S4 Mk3
+  - Traktor Kontrol S3
+  - Numark NS6II
+  2.5.3 Changelog
+  More fixes have been included to keep everything stable, up and running. The complete changelog can be found here
+
+  1. Back porting is integrating new work into previous releases in order to let those releases profit from the new development. ↩
+  2. The Deviation in Kalman filters is called Innovation. ↩
+ReleaseNotesUrl: https://mixxx.org/news/2025-09-03-mixxx-2_5_3-released
+Documentations:
+- DocumentLabel: Manual
+  DocumentUrl: https://manual.mixxx.org/
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/mixxxdj/mixxx/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0
