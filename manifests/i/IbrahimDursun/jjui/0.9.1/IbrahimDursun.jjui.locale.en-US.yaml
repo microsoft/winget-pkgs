@@ -1,0 +1,125 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: IbrahimDursun.jjui
+PackageVersion: 0.9.1
+PackageLocale: en-US
+Publisher: Ibrahim Dursun
+PublisherUrl: https://idursun.com/
+PublisherSupportUrl: https://github.com/idursun/jjui/issues
+Author: Ibrahim Dursun
+PackageName: Jujutsu UI
+PackageUrl: https://github.com/idursun/jjui
+License: MIT
+LicenseUrl: https://github.com/idursun/jjui/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2025 ibrahim dursun
+ShortDescription: Jujutsu UI (jjui) is a Text User Interface (TUI) designed for interacting with the Jujutsu version control system.
+Moniker: jjui
+Tags:
+- jj
+ReleaseNotes: |-
+  This was supposed to be a maintenance release but it is packed with new features thanks to all the contributors!
+  Phew, another release which was supposed to be a minor maintenance release but to be honest, I didn't much other than implementing flash messages and lane tracing.
+  All the remaining features are implemented by contributors: @vic @zerowidth @penryu Thanks!
+  New Features
+  🎉 Flash messages
+  jjui now shows the output of the commands as flash messages. Success messages disappear after 4 seconds, and failure messages stay sticky and can be dismissed with esc.
+  🎉 Fuzzy file search
+  Pressing ctrl+t opens up the fuzzy file search. Choosing one file from the list will change the revset to show all changes made to that file. #203
+  Additionally, when the fuzzy file search is open, you can use ctrl+t again to turn on preview mode to see the contents of the file and the changes made to the file.
+  🎉 Ace jump
+  Similar to how vim's ace jump works, pressing f will highlight the first character of each change id (only non-hidden, non-conflicting, and non-root) or each commit id and typing the letters until an unambigous revision is found will jump the cursor to that revision.
+  🎉 (experimental) Lane tracing
+  This is an experimental feature and currently disabled by default, but you can enable it with the following configuration:
+  [ui.tracer]
+  enabled = true
+  When tracing is enabled, lanes that the currently selected revision in are highlighted and out of lane revisions are fainted.
+  🎉 Restore from evolog
+  While in the evolog view, you can now press r to restore the selected evolog into the target revision you select.
+  The operation will run equivalent of the following command:
+  jj restore --from <selected evolog commit id> --into <selected target revision change id> --restore-descendants
+  As a result of this new functionality, evolog key bindings turned into a table with the following defaults:
+  [keys.evolog]
+    mode = ["v"]
+    diff = ["d"]
+    restore = ["r"]
+  🎉 Preview window at the bottom of the UI
+  Pressing shift+p will move the preview window to the bottom of the screen. This can be made the default position with the following configuration:
+  [ui.preview]
+  show_at_bottom = true
+  🎉 Force apply
+  Performing an operation on an immutable revision returned an error in jjui. Now you can use alt+enter to force the command to ignore immutable revisions. (i.e. add --ignore-immutable argument)
+  Default key binding configuration is like the following:
+  [keys]
+  force_apply = ["alt+enter"]
+  🎉 Log batching
+  Log batching will only load the first 50 revisions and load the next chunk if you scroll past the 50th revision. Previously, jjui loaded the whole logs before it displayed the revisions. This new method should reduce the start up times greatly if you are working with large repositories. It almost has no effect if you are working with small repositories.
+  This has been an experimental feature for a while, turned off by default, behind the experimental_log_batching_enabled configuration option.
+  In this release it is turned on by default, but the configuration location has been moved to the following and you can still turn it off if you like:
+  [revisions]
+  log_batching = false
+  Minor Changes
+  Light and Dark theme syntax
+  Theme configuration now allows choosing different themes for light and dark themes.
+  [ui.theme]
+  light = "my-light-theme"
+  dark = "my-dark-theme"
+  Previous syntax is still supported, which will set light and dark to be the same value.
+  [ui]
+  theme = "my-theme"
+  Conflict markers in details view
+  Details view now show conflict markers next to the conflicted files.
+  Make default log format and revset configurable
+  jjui reads and uses the default revset and the log format as they are configured in jj.
+  You can now override these values with the following configuration:
+  [revisions]
+  template = 'builtin_log_compact' # overrides jj's templates.log
+  revset = ""  # overrides jj's revsets.log
+  Confirmation dialogs show menu option shortcuts in the status bar
+  Previously, you needed to know pressing y for yes and n for no. These shortcuts now are displayed in the status bar.
+  New placeholders for commands
+  The following new place holders are added:
+  - $commit_id
+  - $checked_commit_ids
+  - $checked_files
+  Stats
+  70 files changed with 4,120 additions and 841 deletions, in 90 commits by 4 contributors.
+  What's Changed
+  - fix(details): Quote file paths when changing revset from details. by @vic in https://github.com/idursun/jjui/pull/204
+  - feat: add command outputs as (auto-expiring) flash messages by @idursun in https://github.com/idursun/jjui/pull/206
+  - feat(loader): Support JJUI_CONFIG_DIR environment var. by @vic in https://github.com/idursun/jjui/pull/207
+  - feat(fuzzy_files): add ctrl+t fuzzy-file search. by @vic in https://github.com/idursun/jjui/pull/203
+  - Dark and light theme support by @zerowidth in https://github.com/idursun/jjui/pull/201
+  - feat(exec): add fuzzy search on command history by @vic in https://github.com/idursun/jjui/pull/210
+  - Add github issue templates. by @vic in https://github.com/idursun/jjui/pull/213
+  - feat(details): show conflicted files by @idursun in https://github.com/idursun/jjui/pull/215
+  - feat(docs): Deploy to gh-pages. by @vic in https://github.com/idursun/jjui/pull/214
+  - enhance fuzzy-file live preview. add contextual help and open file in editor by @vic in https://github.com/idursun/jjui/pull/220
+  - fix(find_file): Make keys customizable on jjui config. by @vic in https://github.com/idursun/jjui/pull/224
+  - fix(commands): don't create snapshots when only querying current state. by @vic in https://github.com/idursun/jjui/pull/225
+  - feat(revisions): Ace jump to revision. f key on revisions view. by @vic in https://github.com/idursun/jjui/pull/226
+  - fix(preview): Limit preview resize to range 5% up to 95%. by @vic in https://github.com/idursun/jjui/pull/234
+  - feat(commands): Add $commit_id context placeholder. by @vic in https://github.com/idursun/jjui/pull/233
+  - feat(revisions): Move to revision parent when toggle selection. by @vic in https://github.com/idursun/jjui/pull/232
+  - fix(ace_jump): Correctly handle highligting for ambigous change_ids. by @vic in https://github.com/idursun/jjui/pull/231
+  - fix(ace_jump): Allow jump only to revisions visible on screen by @vic in https://github.com/idursun/jjui/pull/230
+  - feat(preview): Allow showing preview at bottom (config and toggle-key) by @vic in https://github.com/idursun/jjui/pull/238
+  - fix(preview): Add P to help menu. by @vic in https://github.com/idursun/jjui/pull/239
+  - chore(issue_template): Add implementation proposal template. by @vic in https://github.com/idursun/jjui/pull/242
+  - fix(jj_exec): Tab key must only accept-suggestion if there are matches. by @vic in https://github.com/idursun/jjui/pull/245
+  - feat(evolog): Restore descendants from selected evolog revision. by @vic in https://github.com/idursun/jjui/pull/236
+  - feat(placeholders): Add $checked_files and $checked_commit_ids. by @vic in https://github.com/idursun/jjui/pull/246
+  - feat(revert): Revert operation (R) with interactive target selection by @vic in https://github.com/idursun/jjui/pull/247
+  - feat: make log format and revset configurable by @penryu in https://github.com/idursun/jjui/pull/252
+  - feat(force_apply): keybinds for using --ignore-immutabe. by @vic in https://github.com/idursun/jjui/pull/255
+  - feat(confirmation): Show key-bindings on confirmation dialog. by @vic in https://github.com/idursun/jjui/pull/256
+  New Contributors
+  - @zerowidth made their first contribution in https://github.com/idursun/jjui/pull/201
+  - @penryu made their first contribution in https://github.com/idursun/jjui/pull/252
+  Full Changelog: https://github.com/idursun/jjui/compare/v0.9.0...v0.9.1
+ReleaseNotesUrl: https://github.com/idursun/jjui/releases/tag/v0.9.1
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/idursun/jjui/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

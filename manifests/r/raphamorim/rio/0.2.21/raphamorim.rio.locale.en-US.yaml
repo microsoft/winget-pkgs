@@ -1,0 +1,152 @@
+# Created with komac v2.12.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: raphamorim.rio
+PackageVersion: 0.2.21
+PackageLocale: en-US
+Publisher: Raphael Amorim
+PublisherUrl: https://github.com/raphamorim/rio
+PublisherSupportUrl: https://github.com/raphamorim/rio/issues
+Author: Raphael Amorim
+PackageName: Rio
+PackageUrl: https://github.com/raphamorim/rio
+License: MIT
+LicenseUrl: https://github.com/raphamorim/rio/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2022-present Raphael Amorim
+CopyrightUrl: https://raw.githubusercontent.com/raphamorim/rio/main/LICENSE
+ShortDescription: Rio terminal is a hardware-accelerated GPU terminal emulator, focusing to run in desktops and browsers.
+Description: |-
+  Rio terminal is a hardware-accelerated GPU terminal emulator, focusing to run in desktops and browsers.
+  The supported platforms currently consist of BSD, Linux, MacOS and Windows.
+Moniker: rio
+Tags:
+- cross-platform
+- terminal
+- terminal-emulators
+ReleaseNotes: |-
+  Note: v0.2.21 introduces a new rendering architecture per terminal damage system, and it may contain bugs. Any issue please report 🙏
+  Changelog
+  - Breaking: navigation.use-current-directory has been renamed to navigation.current-working-directory.
+  Performance Optimizations
+  - Major: Implemented efficient CVDisplayLink-based VSync synchronization for macOS
+    - Perfect frame timing aligned with display hardware refresh cycles
+    - Eliminates screen tearing and stuttering through hardware VSync synchronization
+    - Adaptive refresh rate support: automatically handles 60Hz, 120Hz, ProMotion displays
+    - Multi-display support: adapts when windows move between displays with different refresh rates
+    - Grand Central Dispatch (GCD) integration for thread-safe cross-thread communication
+    - Smart rendering: Only renders when content actually changes using dirty flag system
+    - Power efficient: skips unnecessary redraws when content is static, reducing CPU usage
+    - Professional rendering quality with smooth, tear-free visual updates
+    - CVDisplayLink runs on dedicated background thread, never blocking UI operations
+  - macOS VSync Optimization: Disabled redundant software-based vsync calculations on macOS
+    - CVDisplayLink already provides hardware-synchronized VSync timing
+    - Eliminates unnecessary frame timing calculations and monitor refresh rate queries
+    - Reduces CPU overhead and improves rendering performance
+    - Software vsync logic remains active on other platforms for compatibility
+  - Major: Implemented a new text run caching system replacing line-based caching
+    - Up to 96% reduction in text shaping overhead for repeated content
+    - Individual text runs (words, operators, keywords) cached and reused across frames
+    - 256-bucket hash table with LRU eviction for optimal memory usage
+  - Cache Warming: Pre-populate cache with 100+ common terminal patterns on startup
+    - Programming keywords: const, let, function, class, import, export, etc.
+    - Indentation patterns: 4/8/12/16 spaces, single/double/triple tabs
+    - Shell commands: ls, cd, git, npm, cargo, sudo, etc.
+    - Operators & punctuation: =, ==, =>, ();, {}, [], etc.
+    - File extensions: .js, .ts, .rs, .py, .json, .md, etc.
+    - Error/log patterns: Error:, [INFO], FAILED, SUCCESS, etc.
+    - Immediate cache hits eliminate cold start shaping delays
+  - SIMD-Optimized Whitespace Detection: Multi-tier optimization for indentation processing
+    - AVX2: 32 bytes per instruction (x86-64 with AVX2 support)
+    - SSE2: 16 bytes per instruction (x86-64 with SSE2 support)
+    - NEON: 16 bytes per instruction (ARM64/aarch64)
+    - Optimized scalar: 8-byte chunks (universal fallback)
+    - Up to 32x performance improvement for long indentation sequences
+    - Critical for Python, nested JavaScript/TypeScript, YAML, and heavily indented code
+  - Memory Pool for Vertices: High-performance vertex buffer pooling system
+    - Size-categorized pools: Small (64), Medium (256), Large (1024), XLarge (4096) vertices
+    - Zero allocation overhead through buffer reuse across frames
+    - LRU management with automatic cleanup when pools reach capacity
+    - Thread-safe concurrent access with performance monitoring
+    - Eliminates GC pressure and improves frame rate consistency
+  - Background Font Operations: Non-blocking font management
+    - Font data release and cleanup in dedicated background thread
+    - System font scanning and preloading without blocking main thread
+    - Prevents frame rate drops during font operations
+  - Occlusion-Based Rendering: Skip rendering for occluded windows/tabs
+    - Automatically detects when windows are completely hidden by other windows
+    - Skips rendering for occluded windows to save GPU resources and improve performance
+    - Renders one frame when window becomes visible again to ensure display is updated
+    - Configurable via [renderer] disable-occluded-render = true (enabled by default)
+    - Significantly improves performance when running multiple tabs or windows
+  Other Improvements
+  - Optimize the character cluster cache for wide space characters.
+  - New font atlas, more efficient.
+  - Implemented around 75% Memory Reduction: Text glyphs now use R8 (1 byte) instead of RGBA (4 bytes).
+  - IME Cursor Positioning: Added configurable IME cursor positioning based on terminal cell coordinates
+    - IME input popups now appear precisely at the cursor position
+    - Improves input experience for CJK languages (Chinese, Japanese, Korean)
+    - Configurable via [keyboard] ime-cursor-positioning = true (enabled by default)
+  - Shift+Click Selection: Added Shift+click support for expanding text selections
+    - Shift+clicking now extends the current selection to the clicked cell
+    - Provides standard terminal selection behavior expected by users
+    - Regular clicking without Shift still clears selection and starts new one as before
+  - CLI accepts relative paths for working directory CLI argument: When invoking rio from other terminals using rio --working-dir=<path>, a relative path is now correctly processed
+  Bug Fixes
+  - Cursor Damage Tracking: Fixed cursor rendering issues after clear command and during rapid typing
+    - Replaced complex point-based damage tracking with simplified line-based approach
+    - Eliminates edge cases where cursor updates were missed during fast typing sequences
+    - Improved reliability by always damaging entire lines instead of tracking column ranges
+    - Aligns with modern terminal design principles for more robust damage calculation
+  - Selection Rendering: Fixed selection highlight not appearing on first render
+    - Selection changes now properly trigger damage tracking and rendering
+    - Optimized selection damage to only redraw affected lines for better performance
+    - Selection highlights now appear immediately when making selections
+  - Text Selection: Fixed selection behavior during input and paste operations
+    - Selection properly clears when typing or pasting text (both bracketed and regular paste)
+    - Selection coordinates remain stable during viewport scrolling (following Alacritty's approach)
+    - Prevents selection from being lost unexpectedly during normal terminal usage
+  - Auto-scroll on Input: Fixed issue where typing after scrolling up wouldn't automatically scroll to bottom
+    - Now properly scrolls to bottom for both keyboard input and IME/paste operations
+    - Ensures cursor remains visible when typing new content
+  - Scroll Performance: Improved scrolling performance by optimizing render event handling
+    - Moved scroll display offset update before mouse cursor dirty event
+    - Removed redundant render calls during scroll operations
+    - Implemented centralized damage-based rendering in event loop for better performance
+  - macOS IME Improvements: Fixed emoji input and IME stability issues
+    - Resolved IMKCFRunLoopWakeUpReliable errors when using emoji picker
+    - Improved coordinate validation and error handling for IME positioning
+    - Better handling of direct Unicode input (emoji picker, character viewer)
+    - Added throttling to prevent excessive IME coordinate updates
+  - Documentation: Added comprehensive manual pages (man pages) for Unix-like systems
+    - man rio - Main Rio terminal manual page with command-line options
+    - man 5 rio - Complete configuration file format documentation
+    - man 5 rio-bindings - Key bindings reference and customization guide
+    - Available in extra/man/ directory with build instructions
+  - Terminfo Compatibility: Improved terminal compatibility by adding xterm-rio terminfo entry
+    - Added xterm-rio as primary terminfo entry with rio as alias for better application compatibility
+    - Applications that look for "xterm-" prefixed terminals (like termwiz-based apps) now work correctly
+    - Maintains TERM=rio environment variable for consistency with terminal identity
+    - Fixes crashes with applications like gitu and other termwiz-based terminal programs
+    - Follows same pattern as other modern terminals (Alacritty, Ghostty) for maximum compatibility
+  Technical Details
+  The performance optimizations in this release represent a significant architectural improvement to Rio's text rendering pipeline:
+  - Text Run Caching: Replaces line-based caching with individual text run caching. Each unique text sequence (word, operator, keyword) is shaped once and reused across all occurrences.
+  - SIMD Implementation: Platform-adaptive SIMD instructions automatically detect and use the best available CPU features (AVX2 > SSE2 > NEON > optimized scalar) for maximum performance across different architectures.
+  - Memory Management: The vertex pool system uses size-categorized buffers with LRU eviction, eliminating allocation overhead while preventing memory bloat.
+  - Cache Strategy: Two-level caching (render data + text runs) with 256-bucket hash table using FxHasher for optimal lookup performance.
+  - Compatibility: All optimizations maintain full backward compatibility with existing Rio APIs and configurations.
+  These changes are particularly beneficial for:
+  - Programming workflows with repetitive code patterns
+  - Terminal sessions with heavy indentation (Python, nested JS/TS, YAML)
+  - Long-running sessions where cache warming provides sustained performance benefits
+  - Systems with limited memory where reduced allocation overhead improves overall responsiveness
+  Bug Fixes
+  - Backspace Key Compatibility: Fixed backspace key not working properly in vim when TERM=xterm-256color
+    - Changed backspace key bindings to send BS (0x08) instead of DEL (0x7F)
+    - Updated Rio terminfo and termcap entries to match actual key behavior
+    - Updated XTGETTCAP response to return ^H for kbs capability
+    - Ensures compatibility with applications expecting xterm-256color backspace behavior
+    - Fixes issue where vim would display ^? instead of performing backspace operation
+ReleaseNotesUrl: https://github.com/raphamorim/rio/releases/tag/v0.2.21
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0
