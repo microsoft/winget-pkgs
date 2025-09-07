@@ -89,6 +89,7 @@ extends:
             failOnStandardError: true
           env:
             ValidationStorageAccountName: $(ValidationStorageAccountName)
+            CacheStorageAccountName: $(CacheStorageAccountName)
             StorageManagedIdentityClientId: $(StorageManagedIdentityClientId)
             WinGet:AppConfig:PrimaryEndpoint: $(AppConfigPrimaryEndpoint)
             WinGet:AppConfig:SecondaryEndpoint: $(AppConfigSecondaryEndpoint)
@@ -139,14 +140,11 @@ extends:
               {
               "operationId": "$(WinGetSvc.OperationId)",
               "buildId": "$(Build.BuildId)",
-              "planUrl": "$(system.CollectionUri)",
-              "hubName": "$(system.HostType)",
               "projectId": "$(system.TeamProjectId)",
               "planId": "$(system.PlanId)",
               "jobId": "$(system.JobId)",
               "timelineId": "$(system.TimelineId)",
               "taskInstanceId": "$(system.TaskInstanceId)",
-              "authToken": "$(system.AccessToken)",
               "repository": "$(build.repository.id)",
               "pipelineType": "ValidationPipeline",
               "pullRequestNumber": "$(WinGetSvc.PullRequestNumber)",
@@ -164,14 +162,11 @@ extends:
               {
               "operationId": "$(WinGetSvc.OperationId)",
               "buildId": "$(Build.BuildId)",
-              "planUrl": "$(system.CollectionUri)",
-              "hubName": "$(system.HostType)",
               "projectId": "$(system.TeamProjectId)",
               "planId": "$(system.PlanId)",
               "jobId": "$(system.JobId)",
               "timelineId": "$(system.TimelineId)",
               "taskInstanceId": "$(system.TaskInstanceId)",
-              "authToken": "$(system.AccessToken)",
               "repository": "$(build.repository.id)",
               "pipelineType": "ValidationPipeline",
               "pullRequestNumber": "$(WinGetSvc.PullRequestNumber)",
@@ -189,14 +184,46 @@ extends:
               {
               "operationId": "$(WinGetSvc.OperationId)",
               "buildId": "$(Build.BuildId)",
-              "planUrl": "$(system.CollectionUri)",
-              "hubName": "$(system.HostType)",
               "projectId": "$(system.TeamProjectId)",
               "planId": "$(system.PlanId)",
               "jobId": "$(system.JobId)",
               "timelineId": "$(system.TimelineId)",
               "taskInstanceId": "$(system.TaskInstanceId)",
-              "authToken": "$(system.AccessToken)",
+              "repository": "$(build.repository.id)",
+              "pipelineType": "ValidationPipeline",
+              "pullRequestNumber": "$(WinGetSvc.PullRequestNumber)",
+              "buildSourceBranch": "$(build.SourceBranch)"
+              }
+            waitForCompletion: "true"
+
+      # Agentless phase. Depends on previous job.
+      - job: 'CatalogContentVerification'
+        pool: server
+        displayName: 'Catalog Content Verification'
+        timeoutInMinutes: 1500
+        dependsOn:
+          - 'FileValidation'
+          - 'ContentValidation'
+        variables:
+          HostKeySecret: $[ dependencies.FileValidation.outputs['wingetsetup.hostkey']]
+          CatalogContentVerificationEndpointSecret: $[ dependencies.FileValidation.outputs['wingetsetup.catalogContentVerificationEndpoint']]
+        steps:
+
+        # Catalog content verification
+        - task: AzureFunction@1
+          displayName: 'Catalog Content Verification'
+          inputs:
+            function: '$(CatalogContentVerificationEndpointSecret)'
+            key: '$(HostKeySecret)'
+            body: |
+              {
+              "operationId": "$(WinGetSvc.OperationId)",
+              "buildId": "$(Build.BuildId)",
+              "projectId": "$(system.TeamProjectId)",
+              "planId": "$(system.PlanId)",
+              "jobId": "$(system.JobId)",
+              "timelineId": "$(system.TimelineId)",
+              "taskInstanceId": "$(system.TaskInstanceId)",
               "repository": "$(build.repository.id)",
               "pipelineType": "ValidationPipeline",
               "pullRequestNumber": "$(WinGetSvc.PullRequestNumber)",
@@ -212,6 +239,7 @@ extends:
         dependsOn:
           - 'FileValidation'
           - 'ContentValidation'
+          - 'CatalogContentVerification' 
         variables:
           HostKeySecret: $[ dependencies.FileValidation.outputs['wingetsetup.hostkey']]
           ScanEndpointSecret: $[ dependencies.FileValidation.outputs['wingetsetup.scanEndpoint']]
@@ -228,14 +256,11 @@ extends:
               {
               "operationId": "$(WinGetSvc.OperationId)",
               "buildId": "$(Build.BuildId)",
-              "planUrl": "$(system.CollectionUri)",
-              "hubName": "$(system.HostType)",
               "projectId": "$(system.TeamProjectId)",
               "planId": "$(system.PlanId)",
               "jobId": "$(system.JobId)",
               "timelineId": "$(system.TimelineId)",
               "taskInstanceId": "$(system.TaskInstanceId)",
-              "authToken": "$(system.AccessToken)",
               "repository": "$(build.repository.id)",
               "pipelineType": "ValidationPipeline",
               "pullRequestNumber": "$(WinGetSvc.PullRequestNumber)",
@@ -253,53 +278,11 @@ extends:
               {
               "operationId": "$(WinGetSvc.OperationId)",
               "buildId": "$(Build.BuildId)",
-              "planUrl": "$(system.CollectionUri)",
-              "hubName": "$(system.HostType)",
               "projectId": "$(system.TeamProjectId)",
               "planId": "$(system.PlanId)",
               "jobId": "$(system.JobId)",
               "timelineId": "$(system.TimelineId)",
               "taskInstanceId": "$(system.TaskInstanceId)",
-              "authToken": "$(system.AccessToken)",
-              "repository": "$(build.repository.id)",
-              "pipelineType": "ValidationPipeline",
-              "pullRequestNumber": "$(WinGetSvc.PullRequestNumber)",
-              "buildSourceBranch": "$(build.SourceBranch)"
-              }
-            waitForCompletion: "true"
-
-      # Agentless phase. Depends on previous job.
-      - job: 'CatalogContentVerification'
-        pool: server
-        displayName: 'Catalog Content Verification'
-        timeoutInMinutes: 1500
-        dependsOn:
-          - 'FileValidation'
-          - 'ContentValidation'
-          - 'InstallerValidation'
-        variables:
-          HostKeySecret: $[ dependencies.FileValidation.outputs['wingetsetup.hostkey']]
-          CatalogContentVerificationEndpointSecret: $[ dependencies.FileValidation.outputs['wingetsetup.catalogContentVerificationEndpoint']]
-        steps:
-
-        # Catalog content verification
-        - task: AzureFunction@1
-          displayName: 'Catalog Content Verification'
-          inputs:
-            function: '$(CatalogContentVerificationEndpointSecret)'
-            key: '$(HostKeySecret)'
-            body: |
-              {
-              "operationId": "$(WinGetSvc.OperationId)",
-              "buildId": "$(Build.BuildId)",
-              "planUrl": "$(system.CollectionUri)",
-              "hubName": "$(system.HostType)",
-              "projectId": "$(system.TeamProjectId)",
-              "planId": "$(system.PlanId)",
-              "jobId": "$(system.JobId)",
-              "timelineId": "$(system.TimelineId)",
-              "taskInstanceId": "$(system.TaskInstanceId)",
-              "authToken": "$(system.AccessToken)",
               "repository": "$(build.repository.id)",
               "pipelineType": "ValidationPipeline",
               "pullRequestNumber": "$(WinGetSvc.PullRequestNumber)",
@@ -314,8 +297,8 @@ extends:
         dependsOn:
           - 'FileValidation'
           - 'ContentValidation'
-          - 'InstallerValidation'
           - 'CatalogContentVerification'
+          - 'InstallerValidation'
         condition: succeededOrFailed()
         variables:
           HostKeySecret: $[ dependencies.FileValidation.outputs['wingetsetup.hostkey']]
@@ -333,14 +316,11 @@ extends:
               {
               "operationId": "$(WinGetSvc.OperationId)",
               "buildId": "$(Build.BuildId)",
-              "planUrl": "$(system.CollectionUri)",
-              "hubName": "$(system.HostType)",
               "projectId": "$(system.TeamProjectId)",
               "planId": "$(system.PlanId)",
               "jobId": "$(system.JobId)",
               "timelineId": "$(system.TimelineId)",
               "taskInstanceId": "$(system.TaskInstanceId)",
-              "authToken": "$(system.AccessToken)",
               "repository": "$(build.repository.id)",
               "pipelineType": "ValidationPipeline",
               "pullRequestNumber": "$(WinGetSvc.PullRequestNumber)",

@@ -116,14 +116,11 @@ extends:
               {
               "operationId": "$(Build.BuildNumber)",
               "buildId": "$(Build.BuildId)",
-              "planUrl": "$(system.CollectionUri)",
-              "hubName": "$(system.HostType)",
               "projectId": "$(system.TeamProjectId)",
               "planId": "$(system.PlanId)", 
               "jobId": "$(system.JobId)", 
               "timelineId": "$(system.TimelineId)", 
               "taskInstanceId": "$(system.TaskInstanceId)",
-              "authToken": "$(system.AccessToken)",
               "repository": "$(build.repository.id)",
               "pipelineType": "CommitPipeline",
               }
@@ -152,54 +149,16 @@ extends:
               {
               "operationId": "$(Build.BuildNumber)",
               "buildId": "$(Build.BuildId)",
-              "planUrl": "$(system.CollectionUri)",
-              "hubName": "$(system.HostType)",
               "pipelineType": "CommitPipeline",
               "projectId": "$(system.TeamProjectId)",
               "planId": "$(system.PlanId)",
               "jobId": "$(system.JobId)",
               "timelineId": "$(system.TimelineId)",
               "taskInstanceId": "$(system.TaskInstanceId)",
-              "authToken": "$(system.AccessToken)",
               "buildRepositoryId": "$(build.repository.id)",
               "commitTablePartitionKey": "$(CommitTablePartitionKey)",
               "commitTableRowKey": "$(CommitTableRowKey)",
               "skipManifestIndexUpdate": "$(Publish.SkipManifestIndexUpdate)"
-              }
-            waitForCompletion: "true"
-
-      # Agentless phase. Depends on previous job. 
-      - job: 'PublishToRestSource'
-        pool: server
-        timeoutInMinutes: 1500
-        displayName: 'Publish to rest source'
-        dependsOn:
-          - 'CommitProcessing'
-          - 'Publish'
-        variables:
-          HostKeySecret: $[ dependencies.CommitProcessing.outputs['wingetsetup.hostkey']]
-          RestSourceUpdateEndpointSecret: $[ dependencies.CommitProcessing.outputs['wingetsetup.restsourceUpdateEndpoint']]
-        steps:
-
-        # Publish updates to rest source
-        - task: AzureFunction@1
-          displayName: 'Publishing to rest source'
-          inputs:
-            function: '$(RestSourceUpdateEndpointSecret)'
-            key: '$(HostKeySecret)'
-            body: |
-              {
-              "operationId": "$(Build.BuildNumber)",
-              "buildId": "$(Build.BuildId)",
-              "planUrl": "$(system.CollectionUri)",
-              "hubName": "$(system.HostType)",
-              "pipelineType": "CommitPipeline",
-              "projectId": "$(system.TeamProjectId)",
-              "planId": "$(system.PlanId)", 
-              "jobId": "$(system.JobId)", 
-              "timelineId": "$(system.TimelineId)", 
-              "taskInstanceId": "$(system.TaskInstanceId)",
-              "authToken": "$(system.AccessToken)"
               }
             waitForCompletion: "true"
 
@@ -211,7 +170,6 @@ extends:
         dependsOn:
           - 'CommitProcessing'
           - 'Publish'
-          - 'PublishToRestSource'
         condition: and(succeeded(), ne(variables['Source.SkipPostPublish'], 'true'))
         variables:
           HostKeySecret: $[ dependencies.CommitProcessing.outputs['wingetsetup.hostkey']]
@@ -229,15 +187,12 @@ extends:
               {
               "operationId": "$(Build.BuildNumber)",
               "buildId": "$(Build.BuildId)",
-              "planUrl": "$(system.CollectionUri)",
-              "hubName": "$(system.HostType)",
               "pipelineType": "CommitPipeline",
               "projectId": "$(system.TeamProjectId)",
               "planId": "$(system.PlanId)", 
               "jobId": "$(system.JobId)", 
               "timelineId": "$(system.TimelineId)", 
               "taskInstanceId": "$(system.TaskInstanceId)",
-              "authToken": "$(system.AccessToken)",
               "buildRepositoryId": "$(build.repository.id)",
               "taskIdentifier": "WaiverCommit"
               }
@@ -252,15 +207,12 @@ extends:
               {
               "operationId": "$(Build.BuildNumber)",
               "buildId": "$(Build.BuildId)",
-              "planUrl": "$(system.CollectionUri)",
-              "hubName": "$(system.HostType)",
               "pipelineType": "CommitPipeline",
               "projectId": "$(system.TeamProjectId)",
               "planId": "$(system.PlanId)", 
               "jobId": "$(system.JobId)", 
               "timelineId": "$(system.TimelineId)", 
               "taskInstanceId": "$(system.TaskInstanceId)",
-              "authToken": "$(system.AccessToken)",
               "buildRepositoryId": "$(build.repository.id)"
               }
             waitForCompletion: "true"
@@ -275,15 +227,12 @@ extends:
               {
               "operationId": "$(Build.BuildNumber)",
               "buildId": "$(Build.BuildId)",
-              "planUrl": "$(system.CollectionUri)",
-              "hubName": "$(system.HostType)",
               "pipelineType": "CommitPipeline",
               "projectId": "$(system.TeamProjectId)",
               "planId": "$(system.PlanId)", 
               "jobId": "$(system.JobId)", 
               "timelineId": "$(system.TimelineId)", 
               "taskInstanceId": "$(system.TaskInstanceId)",
-              "authToken": "$(system.AccessToken)",
               "buildRepositoryId": "$(build.repository.id)"
               }
             waitForCompletion: "true"

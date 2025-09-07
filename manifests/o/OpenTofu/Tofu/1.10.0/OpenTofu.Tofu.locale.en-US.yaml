@@ -1,0 +1,80 @@
+# Created with komac v2.12.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: OpenTofu.Tofu
+PackageVersion: 1.10.0
+PackageLocale: en-US
+Publisher: The Linux Foundation
+PublisherUrl: https://opentofu.org/
+PublisherSupportUrl: https://github.com/opentofu/opentofu/issues
+PackageName: OpenTofu
+PackageUrl: https://github.com/opentofu/opentofu
+License: MPL-2.0
+LicenseUrl: https://github.com/opentofu/opentofu/blob/HEAD/LICENSE
+Copyright: Copyright (c) The Linux Foundation
+CopyrightUrl: https://github.com/opentofu/opentofu/blob/main/LICENSE
+ShortDescription: OpenTofu lets you declaratively manage your cloud infrastructure.
+Moniker: tofu
+ReleaseNotes: |-
+  OpenTofu 1.10.0
+  We're thrilled to announce the release of OpenTofu 1.10.0, our most comprehensive update yet! This release represents months of dedicated work from our community, introducing some fantastic features that will improve how OpenTofu users manage and distribute infrastructure as code.
+  Highlights
+  This release cycle introduces major new capabilities and integrations:
+  OCI Registry Support
+  Full integration with OCI registries for both provider and module distribution, valuable for organizations with private infrastructure-as-code components, air-gapped environments, or enhanced security requirements.
+  # Configure OCI registry mirrors in your CLI configuration:
+  provider_installation {
+    oci_mirror {
+      repository_template = "example.com/opentofu-providers/${namespace}/${type}"
+      include             = ["registry.opentofu.org/*/*"]
+    }
+  }
+  # Use OCI modules directly in your configuration:
+  module "vpc" {
+    source = "oci://example.com/modules/vpc/aws"
+  }
+  Native S3 Locking
+  Simplify your infrastructure by using S3's conditional writes capability for state locking, eliminating the need for a separate DynamoDB table.
+  terraform {
+    backend "s3" {
+      bucket       = "tofu-state-backend"
+      key          = "statefile"
+      region       = "us-east-1"
+      use_lockfile = true  # Enable native S3 locking
+    }
+  }
+  OpenTelemetry Tracing
+  Gain insights into OpenTofu operations with experimental OpenTelemetry tracing, completely local and under your control.
+  # Launch a tracing backend like Jaeger
+  docker run -d --name jaeger \
+    -p 16686:16686 -p 4317:4317 \
+    jaegertracing/jaeger:2.5.0
+  # Configure OpenTofu to use OpenTelemetry
+  export OTEL_TRACES_EXPORTER=otlp
+  export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317
+  export OTEL_EXPORTER_OTLP_INSECURE=true
+  # Run your operations and view traces at http://localhost:16686
+  tofu init
+  Resource Management with Target Files
+  Manage complex deployments more easily with the new -target-file and -exclude-file options, allowing version-controlled resource targeting patterns.
+  # Create a targets.txt file
+  # Critical infrastructure components
+  module.networking.aws_vpc.main
+  module.networking.aws_subnet.public[*]
+  # Apply only those resources
+  tofu apply -target-file=targets.txt
+  # Similarly, create an excludes.txt file to skip certain resources
+  tofu plan -exclude-file=excludes.txt
+  Compatibility Notes
+  - Linux: Requires kernel version 3.2 or later
+  - macOS: Requires macOS 11 Big Sur or later
+  - The ghcr.io/opentofu/opentofu image is no longer supported as a base image
+  - Windows: Symbolic links and junctions are now handled differently
+  - The PostgreSQL backend in OpenTofu 1.10 should not be used alongside older versions
+  Reference
+  - Full Changelog
+  - GitHub Comparison: v1.9.0...v1.10.0
+  - Blog Post
+ReleaseNotesUrl: https://github.com/opentofu/opentofu/releases/tag/v1.10.0
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0
