@@ -163,39 +163,6 @@ extends:
             waitForCompletion: "true"
 
       # Agentless phase. Depends on previous job. 
-      - job: 'PublishToRestSource'
-        pool: server
-        timeoutInMinutes: 1500
-        displayName: 'Publish to rest source'
-        dependsOn:
-          - 'CommitProcessing'
-          - 'Publish'
-        variables:
-          HostKeySecret: $[ dependencies.CommitProcessing.outputs['wingetsetup.hostkey']]
-          RestSourceUpdateEndpointSecret: $[ dependencies.CommitProcessing.outputs['wingetsetup.restsourceUpdateEndpoint']]
-        steps:
-
-        # Publish updates to rest source
-        - task: AzureFunction@1
-          displayName: 'Publishing to rest source'
-          inputs:
-            function: '$(RestSourceUpdateEndpointSecret)'
-            key: '$(HostKeySecret)'
-            body: |
-              {
-              "operationId": "$(Build.BuildNumber)",
-              "buildId": "$(Build.BuildId)",
-              "pipelineType": "CommitPipeline",
-              "projectId": "$(system.TeamProjectId)",
-              "planId": "$(system.PlanId)", 
-              "jobId": "$(system.JobId)", 
-              "timelineId": "$(system.TimelineId)", 
-              "taskInstanceId": "$(system.TaskInstanceId)",
-              "authToken": "$(system.AccessToken)"
-              }
-            waitForCompletion: "true"
-
-      # Agentless phase. Depends on previous job. 
       - job: 'PostPublish'
         pool: server
         timeoutInMinutes: 1500
@@ -203,7 +170,6 @@ extends:
         dependsOn:
           - 'CommitProcessing'
           - 'Publish'
-          - 'PublishToRestSource'
         condition: and(succeeded(), ne(variables['Source.SkipPostPublish'], 'true'))
         variables:
           HostKeySecret: $[ dependencies.CommitProcessing.outputs['wingetsetup.hostkey']]
