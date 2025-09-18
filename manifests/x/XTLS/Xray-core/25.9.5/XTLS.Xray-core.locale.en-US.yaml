@@ -1,0 +1,105 @@
+# Created with komac v2.12.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: XTLS.Xray-core
+PackageVersion: 25.9.5
+PackageLocale: en-US
+Publisher: XTLS
+PublisherUrl: https://xtls.github.io/
+PublisherSupportUrl: https://github.com/XTLS/Xray-core/issues
+Author: XTLS
+PackageName: Xray-core
+PackageUrl: https://xtls.github.io/
+License: MPL-2.0
+LicenseUrl: https://github.com/XTLS/Xray-core/blob/HEAD/LICENSE
+Copyright: Mozilla Public License Version 2.0
+CopyrightUrl: https://github.com/XTLS/Xray-core/blob/main/LICENSE
+ShortDescription: Xray, Penetrates Everything.
+Description: Xray, Penetrates Everything. Also the best v2ray-core, with XTLS support. Fully compatible configuration.
+Moniker: xray
+Tags:
+- clash
+- network
+- proxy
+- v2ray
+- vpn
+- xray
+ReleaseNotes: |-
+  VLESS protocol: Add lightweight, Post-Quantum ML-KEM-768-based PFS 1-RTT / anti-replay 0-RTT AEAD Encryption #5067
+  compare
+  Xray-core v25.9.5 未来已来，本次重点更新内容：
+  过̶于̶先̶进̶的̶ VLESS Post-Quantum Encryption：
+  - 抗量子的密钥交换与身份认证、前向安全、客户端配置安全、0-RTT
+  - 无需对时、完美的重放防护、无需多次尝试解密以确定用户、无需额外 AEAD length 故性能更优
+  - 建议开 XTLS 避免二次加解密（native/xorpub 可自动 ReadV/Splice），可再叠上 XHTTP、WS 等传输层，详见 #5067
+  适̶合̶机̶场̶的̶ VLESS Route：
+  - 允许在分享给客户端的 UUID 中自定义第 7、8 个字节
+  - 服务端路由设置 vleesRoute 以匹配它们、分流不同出口，详见 https://xtls.github.io/config/routing.html#ruleobject
+  利̶好̶ ̶i̶O̶S̶ ̶的̶ 客户端性能提升：
+  - Tunnel/Socks/HTTP 入站去掉了 pipe 及其内置缓存，Xray-core 运行效率更高、占用内存更少，详见 #5067 (comment)
+  Xray-core v25.9.5 相较于 v25.8.31：
+  - 修复了延迟问题 fd54b10 、用户流量统计问题 d20397c
+  - VLESS 入站也去掉了 pipe 及其内置缓存 #5076
+  - 新增了 ./xray vlessenc 指令 #5078
+  - 以及其它的一些修复与改进
+  VLESS NFT
+  VLESS NFT 自成一个系列，每个图片都不同且只有一个，你可以选择自己喜欢的图片来收藏，先到先得
+  https://opensea.io/collection/vless 首发放出了二十个不同的 VLESS NFT 图片
+  本次还放出了两个稀缺的 Project X NFT，如果你有余力，请支持一下：https://opensea.io/assets/ethereum/0x5ee362866001613093361eb8569d59c4141b76d1/1
+  该版本升级了一些依赖，并使用 Go 1.25.1 拉满 inline 编译，已 tag v1.250905.0，感谢所有贡献者，详见下方 change log
+  What's Changed
+  - API: Fix user online map remain 1 after connection dropped by @LjhAUMEM in #4982
+  - feat(api): update timestamp for existing IPs in AddIP instead of skipping by @LjhAUMEM in #4989
+  - Router: Add localIP and localPort; Add sourceIP as an alias of source by @patterniha in #4992
+  - Freedom: Add maxSplit fragment option; Add applyTo noises option by @patterniha in #4998
+  - Refine must2 and apply NewAesGcm() to all usage by @Fangliding in #5011
+  - Chore: Migrate to Go 1.25 by @Fangliding in #5024
+  - common/buf/multi_buffer.go: Fix Compact() by @Fangliding @patterniha in #5015
+  - XHTTP client: Fix edge-case issue for packet-up mode by @Fangliding in #5020
+  - Outbound: Add targetStrategy; Fix mux does not close link.Reader; Fix origin does not work on UDP; Add logs by @patterniha in #5006
+  - VLESS inbound: Add option to set default flow by @Jolymmiles in #5023
+  - Build: Use more aggressive inlining for higher efficiency by @KobeArthurScofield in #5026
+  - Direct/Freedom config: Add targetStrategy as an alias of domainStrategy; Routing config: Remove domainMatcher, "linear" and type by @patterniha in #5027
+  - DNS outbound: Set "reject" as the default value for nonIPQuery by @RPRX in de23e51
+  - VLESS practice: Use user-sent VLESS UUID's last byte as vlessRoute for routing rules by @RPRX in 105b306
+  - Wireguard inbound: Fix context sharing problem by @yuhan6665 in #4988
+  - XTLS Vision inbound: Use user-sent VLESS UUID for NewTrafficState() by @RPRX in 5464862
+  - VLESS practice: Use user-sent VLESS UUID's 7th<<8 | 8th bytes as vlessRoute instead by @RPRX in 7f300db
+  - Issues template: Refine requirements by @Fangliding in 573300b
+  - Chore: Optimize .gitignore by @Skh-web6982 in #5029
+  - Some refines related to direct/freedom and targetStrategy; More intelligent "useIP"/"ForceIP", enhance "origin" functionality by @patterniha in #5030
+  - Commands: Add -outpbfile for convert pb by @KobeArthurScofield in #5048
+  - common/signal/timer.go: Refator to use sync.Once by @Fangliding in #5052
+  - WireGuard outbound: Fix close closed by @Fangliding in #5054
+  - checkSystemNetwork(): Use c.root-servers.net by @xqzr in #5059
+  - Test_parseResponse(t *testing.T): Use dns.google for IPv6 by @xqzr in #5060
+  - VLESS protocol: Add lightweight, Post-Quantum ML-KEM-768-based PFS 1-RTT / anti-replay 0-RTT AEAD Encryption by @RPRX in #5067
+  - README.md: Update Donation & NFTs by @RPRX in 702d2c0
+  - Update github.com/xtls/reality to 20250828044527 by @RPRX in 12b077f
+  - Socks/HTTP inbound: Fix unexpected rawConn copy by @Fangliding in #5041
+  - First step of upcoming refactor for Xray-core: Add TimeoutWrapperReader; Use DispatchLink() in Tunnel/Socks/HTTP inbounds by @RPRX in 56a45ad
+  - VLESS Encryption: Re-add automatically ChaCha20-Poly1305 by @RPRX in 82ea7a3
+  - Trojan-UoT & UDP-nameserver: Fix forgotten release buffer; UDP dispatcher: Simplified and optimized by @patterniha in #5050
+  - Trojan UoT: Fix memory/goroutine leak by @patterniha in #5064
+  - common/buf/buffer.go: Replace copy zero with clear() by @Fangliding @SkrideOne in #5071
+  - Commands/run: Try all suffixes for default config by @RPRX in a31842f
+  - Chore: Fix tests by @RPRX in fbb0ecf
+  - VLESS Encryption: Add customizable 1-RTT padding parameters; Decrease memory using; Chores by @RPRX @wwqgtxx in e8b02cd
+  - VLESS Encryption: Switch to "probability-from-to" format for customizable 1-RTT padding parameters by @RPRX in 6768a22
+  - TimeoutWrapperReader: Fix latency issue by @RPRX in fd54b10
+  - VLESS Encryption: Server checks one specific zero-bit in the peer-sent X25519 public key in relays by @RPRX in 4c6fd94
+  - Direct/Freedom outbound: Use proxy.IsRAWTransport(conn) by @yuhan6665 in #5074
+  - XTLS Vision: Refactor code to use DispatchLink() in VLESS inbound by @yuhan6665 in #5076
+  - proxy/proxy.go: IsRAWTransport() -> IsRAWTransportWithoutSecurity() by @RPRX in e943de5
+  - VLESS Encryption: Randomize seconds in ticket and simplify expiration mechanism by @RPRX in 19f8907
+  - DispatchLink(): Fix user stats by @RPRX in d20397c
+  - VLESS Encryption: Improve server-side tickets' expiration mechanism by @RPRX in cbade89
+  - Commands: Add vlessenc (generate complete json pair directly) by @Fangliding @RPRX in #5078
+  - DNS outbound: Fix some issues by @patterniha in #5081
+  New Contributors
+  - @LjhAUMEM made their first contribution in #4982
+  - @Skh-web6982 made their first contribution in #5029
+  Full Changelog: v25.8.3...v25.9.5
+ReleaseNotesUrl: https://github.com/XTLS/Xray-core/releases/tag/v25.9.5
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

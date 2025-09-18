@@ -1,0 +1,163 @@
+# Created with komac v2.12.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: Kubernetes.clusterctl
+PackageVersion: 1.11.0
+PackageLocale: en-US
+Publisher: Kubernetes SIGs
+PublisherUrl: https://kubernetes.io/
+PublisherSupportUrl: https://github.com/kubernetes-sigs/cluster-api/issues
+PackageName: clusterctl
+PackageUrl: https://cluster-api.sigs.k8s.io/
+License: Apache-2.0
+LicenseUrl: https://github.com/kubernetes-sigs/cluster-api/blob/HEAD/LICENSE
+Copyright: Copyright 2024 The Kubernetes Authors.
+ShortDescription: The clusterctl CLI tool handles the lifecycle of a Cluster API management cluster.
+Description: The clusterctl CLI tool handles the lifecycle of a Cluster API management cluster.
+Moniker: clusterctl
+Tags:
+- cluster
+- container
+- docker
+- k8s
+- kubernetes
+ReleaseNotes: |-
+  👌 Kubernetes version support
+  - Management Cluster: v1.30.x -> v1.33.x
+  - Workload Cluster: v1.28.x -> v1.33.x
+  More information about version support can be found here
+  Highlights
+  - Bumped to Go 1.24, controller-runtime v0.21, k8s.io/* v0.33, controller-gen v0.18 (also moved to sigs.k8s.io/randfill) (#12191)
+  - v1beta2 API version has been introduced and considering the awesome amount of improvements it marks an important
+    step in the journey towards graduating our API to v1.
+    - Accordingly there is now a new v1beta2 version of our contract for providers.
+    - Improve status:
+      - The transition to the new K8s aligned conditions using metav1.Conditions types and the new condition semantic
+        has been completed.
+      - Replica counters are now consistent with new conditions and across all resources; new replica counters have been added at cluster level.
+      - Semantic of contract fields in status have been improved and are now consistent across all resources.
+      - The confusing FailureReason and FailureMessage fields have been dropped.
+    - Support CC across namespaces: API changes planned for this feature have been implemented.
+    - Improve object references:
+      - Unnecessary fields have been dropped from object reference.
+      - Object references are now GitOps friendly (API version is not overwritten anymore by controllers).
+    - KubeadmConfig and KubeadmControlPlane APIs have been aligned with kubeadm v1beta4 API.
+      - Additionally, fields inferred from top level objects have been removed, thus getting rid of a common source of confusion/issues.
+  - Compliance with K8s API guidelines:
+    - Thanks to the adoption of the KAL linter compliance with K8s API guidelines has been greatly improved.
+    - All Duration fields are now represented as *int32 fields with units being part of the field name.
+    - All bool fields have been changed to *bool to preserve user intent.
+    - Extensive work has been done to ensure required and optional is explicitly set in the API, and that
+      both serialization and validation works accordingly:
+      - Stop rendering empty structs (review of all occurrences of omitempty and introduction of omitzero)
+      - Do not allow "" when it is not semantically different from value not set (either you have to provide a non-empty string value or not set the field at all).
+      - Do not allow 0 when it is not semantically different from value not set (either you have to provide a non-0 int value or not set the field at all).
+      - Do not allow {} when it is not semantically different from value not set (either you have to set at least one property in the object or not set the field at all).
+      - Do not allow [] when it is not semantically different from value not set (either you have to set at least one item in the list or not set the field at all).
+      - Ensure validation for all enum types.
+    - Missing list markers have been added for SSA.
+    - Drop unnecessary pointers:
+      - After fixing required and optional according to K8s API guidelines, extensive work has been done to
+        drop unnecessary pointers thus improving the usability of the API's Go structs.
+    - Avoid embedding structs: Coupling between API types has been reduced by reducing the usage of embedded structs.
+    - Extensive work has been done to improve consistency across all resources, e.g.:
+      - Fields for Machine deletion are under a new deletion struct in all resources.
+      - Settings about rollout have been logically grouped in all resources.
+      - Settings about health checks and remediation have been logically grouped in all resources.
+    - Missing validations have been added where required.
+    - Tech debt has been reduced by dropping deprecated fields.
+  - ClusterClass: Fix continuous reconciles because of apiVersion differences in Cluster topology controller (#12341)
+  - KCP/CABPK: Add CertificateValidityPeriod and CACertificateValidityPeriod to KubeadmConfig (#12335)
+  - KCP: Fix timeout handling in GetAPIServerCertificateExpiry and DialContext (#12554)
+  - Machine: fallback to InfraMachine providerID during deletion if Machine providerID is not set (#11985)
+  - Runtime SDK:
+    - Optimize size of Runtime Hook requests (#12462)
+    - Add mTLS support to Runtime Extension server and client (#12517)
+  - Improved e2e test coverage, e.g.:
+    - additional checks that resourceVersion stays stable after tests and that conditions are healthy (#12546 #12111)
+    - test coverage for scaling from/to 0 with CAPD & cluster-autoscaler (#12572)
+  - New providers in clusterctl: Scaleway (#12357), cdk8s (#12332)
+  See Cluster API v1.10 compared to v1.11 for more details
+  Notes for workload cluster upgrade to Kubernetes v1.34 with KCP
+  - Context: Kubernetes/kubeadm <=> etcd compatibility:
+    - kubeadm v1.33 only supports etcd v3.5 for Kubernetes v1.33
+    - kubeadm v1.34 only supports etcd v3.6 for Kubernetes v1.34
+  - The upgrade to etcd v3.6 requires etcd >= v3.5.20 (https://etcd.io/blog/2025/upgrade_from_3.5_to_3.6_issue/)
+  - Accordingly, when upgrading from Kubernetes v1.33 to v1.34:
+    - ensure etcd >= v3.5.20 is used with Kubernetes v1.33 before the upgrade
+    - upgrade to Kubernetes v1.34 and etcd v3.6 at the same time
+  Deprecation and Removals Warning
+  - Cluster: Remove deprecated index ByClusterClassName, ClusterByClusterClassClassName and ClusterClassNameField (#12269)
+  - ClusterClass: Remove deprecated ClusterVariable.definitionFrom field (#12202)
+  - ClusterClass: Remove deprecated Cluster.spec.topology.rolloutAfter field (#12268)
+  - ClusterClass: Remove deprecated ClusterCacheTracker and corresponding types (#12270)
+  - clusterctl: Remove deprecated clusterctl alpha topology plan command (#12283)
+  - ClusterResourceSet: Remove deprecated ClusterResourceSetBinding.DeleteBinding method (#12267)
+  - MachineDeployment: Removed deprecated revisionHistory (#12274)
+  - MachineDeployment: Remove deprecated spec.progressDeadlineSeconds (#12232)
+  - KCP/CABPK: Remove deprecated KubeadmConfig useExperimentalRetryJoin (#12234)
+  - API: Deprecate v1alpha1 & v1beta1 API packages (#12254)
+  Changes since v1.10.0
+  📈 Overview
+  - 360 new commits merged
+  - 88 breaking changes ⚠️
+  - 29 feature additions ✨
+  - 50 bugs fixed 🐛
+  📝 Proposals
+  - Core: Update autoscaling from zero enhancement proposal with support for platform-aware autoscale from zero (#11962)
+  ⚠️ Breaking Changes
+  - API: Add additional MinProperties & MinItems validation across multiple APIs (#12538)
+  - API: Add CAPD v1beta2 types (#12226)
+  - API: Add Minimum=0 marker to all MinReadySeconds fields (#12474)
+  - API: Add omitempty to required string without zero value (#12548)
+  - API: Add omitzero on struct without zero value (#12550)
+  - API: Add v1beta2 types (#12037)
+  - API: Align Spec fields to optionalfields API conventions (#12431)
+  - API: Align Status fields to optionalfields API conventions (#12435)
+  - API: Change .status.replicas fields to pointer + omitempty (#12250)
+  - API: Change all *metav1.Time fields to metav1.Time (#12518)
+  - API: Change bool to *bool for all API types (#12436)
+  - API: Change type of *string fields with invalid zero value to string (#12429)
+  - API: Change type of int32 fields with valid zero value to *int32 (#12424)
+  - API/Conditions: add V1Beta1 suffix and remove V1Beta2 suffix from condition types and reasons in v1beta2 packages (#12091)
+  - API: Drop unnecessary fields from contract-versioned object references (#12356)
+  - API: Fix required fields linter findings (#12558)
+  - API: Improve Cluster CRD Go type (#12489)
+  - API: Migrate API to use *Seconds instead of metav1.Duration fields (#12327)
+  - API: Move APIs to ./api (#12262)
+  - API/Partially revert: Remove DefaulterRemoveUnknownOrOmitableFields mutating webhook option (#12290)
+  - API: Promote v1beta2 conditions (#12066)
+  - API: Remove DefaulterRemoveUnknownOrOmitableFields mutating webhook option (#12231)
+  - API: Remove IPFamily from public APIs (move to CAPD/kind util) (#12215)
+  - API: Remove pointers from ClusterClass and Cluster healthCheck fields (#12525)
+  - API: Remove pointers from remaining pointer struct fields (#12545)
+  - API: Rename namingStrategy => naming, machineNamingStrategy => machineNaming (#12524)
+  - API: Restructure strategy fields (#12506)
+  - CABPK: Align KubeadmConfig to kubeadm v1beta4 types (#12282)
+  - CAPD: Align CAPD conversion to conversion of other providers (#12481)
+  - CAPD/Conditions: add V1Beta1 suffix and remove V1Beta2 suffix from condition types and reasons in CAPD v1beta2 packages (#12393)
+  - CAPD: Implement v1beta2 contract in CAPD (#12409)
+  - CAPD: Keep using v1beta1 condition in CAPD Docker backend (#12450)
+  - CAPD: Promote v1beta2 condition in CAPD (#12362)
+  - CAPD: Stop using v1beta1 status in CAPD controllers (#12438)
+  - CAPD: Update example manifests (#12480)
+  - Cluster: Remove deprecated index ByClusterClassName, ClusterByClusterClassClassName and ClusterClassNameField (#12269)
+  - ClusterClass: Drop unnecessary fields from ClusterClass template references (#12358)
+  - ClusterClass: Move infrastructure namingStrategy field in ClusterClass (#12216)
+  - ClusterClass: Remove ClusterVariable.DefinitionFrom field (#12202)
+  - ClusterClass: Remove DefaulterRemoveUnknownOrOmitableFields mutating webhook option (again) (#12404)
+  - ClusterClass: Remove deprecated Cluster.spec.topology.rolloutAfter field (#12268)
+  - ClusterClass: Remove deprecated ClusterCacheTracker and corresponding types (#12270)
+  - ClusterClass: Rename deprecated ClusterClass Metadata fields to DeprecatedV1Beta1Metadata (#12273)
+  - ClusterClass: Rename runtime extension fields in ClusterClass ExternalPatchDefinition (#12281)
+  - ClusterClass: Restructure classRef field in Cluster.spec.topology (#12235)
+  - clusterctl: Clusterctl describe defaults to v1beta2 (#12369)
+  - clusterctl: Remove clusterctl alpha topology plan (#12283)
+  - ClusterResourceSet: Change ClusterResourceSetBinding Bindings field from []*ResourceSetBinding to []ResourceSetBinding (#12476)
+  - ClusterResourceSet: Make clusterName field in ClusterResourceSetBinding required (#12276)
+ReleaseNotesUrl: https://github.com/kubernetes-sigs/cluster-api/releases/tag/v1.11.0
+Documentations:
+- DocumentLabel: User Guide
+  DocumentUrl: https://cluster-api.sigs.k8s.io/user/quick-start
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0
