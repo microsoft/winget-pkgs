@@ -1,0 +1,99 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: Fleet.fleetctl
+PackageVersion: 4.73.0
+PackageLocale: en-US
+Publisher: Fleet Device Management Inc.
+PublisherUrl: https://fleetdm.com/
+PublisherSupportUrl: https://github.com/fleetdm/fleet/issues
+PrivacyUrl: https://fleetdm.com/legal/privacy
+Author: Fleet Device Management Inc.
+PackageName: fleetctl
+PackageUrl: https://github.com/fleetdm/fleet
+License: MIT
+LicenseUrl: https://github.com/fleetdm/fleet/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2020-present Fleet Device Management Inc
+ShortDescription: A command line interface (CLI) tool for managing Fleet from the command line.
+Description: |-
+  fleetctl (pronounced "Fleet control") is a command line interface (CLI) tool for managing Fleet from the command line. fleetctl enables a GitOps workflow with Fleet.
+  fleetctl also provides a quick way to work with all the data exposed by Fleet without having to use the Fleet UI or work directly with the Fleet API.
+Tags:
+- fleet
+ReleaseNotes: |-
+  Security Engineers
+  - Added new detail query, only executed if TPM PIN enforcement is required, for determining whether a BitLocker PIN is set.
+  - Added host identity certificate renewal support for TPM-backed certificates (Linux-only). When a certificate is within 180 days of expiration, orbit will automatically renew it using proof-of-possession with the existing certificate's private key.
+  - Added new global activity created when a new disk encryption key is escrowed.
+  - Added issuer and issued cells to the host details and my device page certificates table.
+  - Allowed filtering host and team software by minimum and maximum CVSS score in the Fleet UI.
+  - Updated UI to display kernel vulnerabilities in the operating system details page for Linux systems.
+  - Updated macOS 13 CIS policies to align with CIS Benchmark v3.1.0 (from v3.0.0).
+  - Updated macOS 14 CIS policies to align with CIS Benchmark v2.1.0 (from v2.0.0).
+  - Updated macOS 15 CIS policies to align with CIS Benchmark v1.1.0 (from v1.0.0).
+  - Updated Fleet's certificate ingestion to accept non-standard country codes of longer than 2 characters. In addition, updated ingestion of other fields to truncate long values and log an error instead of failing.
+  IT Admins
+  - Added API endpoints for adding, deleting and listing secret variables.
+  - Added ability to add and delete custom variables in the UI.
+  - Added APIendpoints to get and list batch scripts.
+  - Added cron job to launch scheduled batch scripts.
+  - Added API endpoint to cancel scheduled batch script run.
+  - Added the ability to cancel batch script runs directly from the UI summary modal.
+  - Added ability to schedule batch script runs in advance to the "Run scripts" modal.
+  - Added the ability to filter the hosts list to those hosts that were incompatible with the script in a batch run.
+  - Added side navigation on the Controls > Scripts page, with the previous Scripts page content under the "Library" tab and a new "Batch progress" tab containing details about started, scheduled, and finished scripts.
+  - Added batch execution IDs to script run activities.
+  - Added IdP SSO authentication to the BYOD mobile devices enrollment if that option is enabled for the team.
+  - Allowed overriding install/uninstall scripts, and specifying pre-install queries and post-install scripts, for Fleet-maintained apps in GitOps.
+  - Added support of $FLEET_VAR_HOST_UUID in Windows MDM configuration profiles.
+  - Added additional logging information for Windows MDM discovery endpoint when errors occur.
+  - Added support for last opened time for Linux software (DEB & RPM packages).
+    - NOTE: Package will need to be updated out-of-band once, because the pre-removal script from previously-generated packages is called upon an upgrade. The old pre-removal script stopped Orbit unconditionally. fleet-osquery can safely be updated through the Software page only after a new package generated with this version of fleetctl has been installed through other means.
+  - Added indication of whether software on a host was never opened, vs. being a software type where last opened time collection is not supported.
+  - Added automatic install policies into host software responses.
+  - Updated fleetctl api to now support sending data in the body of non-GET requests using the -F flag. (Thanks @fuhry!)
+  Other improvements and bug fixes
+  - Added permissions to OS updates page so that only global admins and the team admin can see the page.
+  - Cleared label membership when label platform changes (via GitOps).
+  - Improved public IP extraction for Fleet Desktop requests.
+  - Marked DDM profiles as failed if response comes back with Unknown Declaration Type error, and improve upload validation for declaration type.
+  - Modified PUT /api/v1/fleet/spec/secret_variables endpoint to only accept secret variables with uppercase letters, numbers and underscores.
+  - Updated software inventory so that when multiple version of a software are installed the last used timestamp for each version is properly returned.
+  - Revised stale vulnerabilities deletion (for false positive cleanup) to clear vulnerabilities touched before the current vulnerabilities run, instead of using a hard-coded threshold based on how often the vulns cron runs.
+  - Removed unintended broken sort on Fleet Desktop > Software > type column.
+  - Validated Gitops mode URL on frontend and backend.
+  - Updated to not log an error if EULA is missing for the /setup_experience/eula/metadata endpoint.
+  - Loosened validation during GitOps dry runs for software installer install/uninstall scripts that contain Fleet secrets.
+  - Added missing checks for invalid values before trying to store them in DB.
+  - Updated styles for turn on MDM info banner button.
+  - Updated so that DEB and RPM packages generated by fleetctl package to now be safe to upgrade in-band through the Software page.
+  - Updated so that individual script executions from batch jobs are now hidden from the global feed.
+  - Updated to attest the signed Windows Orbit binary instead of the unsigned one.
+  - Updated both Fleet desktop and osquery for macOS and Windows artifacts to attest the binaries inside archives.
+  - Made sure that if disk encryption is enabled and a TPM PIN is required, the user is able to set a TPM PIN protector.
+  - Removed DeferForceAtUserLoginMaxBypassAttempts from FileVault profile, to use default value of 0 to indicate the FileVault enforcement can not be deferred on next login.
+  - Updated go to 1.24.6.
+  - Fixed cases where the uninstall script population job introduced in Fleet 4.57.0 would attempt to extract package IDs on software that we don't generate uninstall scripts for, causing errors in logs and retries of the job.
+  - Fixed potential panic in error handler when Redis is down.
+  - Fixed a potential race condition issue, where a host might get released because no profiles has been sent for installation before releasing the device, by checking the currently installed profiles against what is expected.
+  - Fixed invalid rate limiting applied on Fleet Desktop requests for which a public IP could not be determined.
+  - Fixed VPP token dropdown to allow user to choose "All teams" selection.
+  - Fixed an issue where Windows configuration profiles fails to validate due to escaping data sequence with <![CDATA[...]]> and profile verifier not stripping this away.
+  - Fixed an issue where a host could be stuck with a "Unlock Pending" label even if the unlock script was canceled.
+  - Fixed 5XX errors on /api/v1/fleet/calendar/webhook/* endpoint due to missing authorization checks.
+  - Fixed server panic when listing software titles for "All teams" with page that contains a software title with a policy automation in "No team".
+  - Fixed operating system icons from bleeding into software icons.
+  Fleet-maintained app updates and vulnerability fixes are applied, whether or not you upgrade.
+  Fleet's agent
+  The following version of Fleet's agent (fleetd) support the latest changes to Fleet:
+  1. orbit-v1.47.2
+  2. fleet-desktop-v1.47.2 (included with Orbit)
+  3. fleetd-chrome-v1.3.3
+  While newer versions of fleetd still function with older versions of the Fleet server (and vice versa), Fleet does not actively test these scenarios and some newer features won't be available.
+ReleaseNotesUrl: https://github.com/fleetdm/fleet/releases/tag/fleet-v4.73.0
+PurchaseUrl: https://fleetdm.com/pricing
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://fleetdm.com/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

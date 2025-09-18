@@ -1,0 +1,156 @@
+# Created with komac v2.12.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: BiomeJS.Biome
+PackageVersion: 2.2.3
+PackageLocale: en-US
+Publisher: BiomeJS
+PublisherUrl: https://biomejs.dev/
+PublisherSupportUrl: https://github.com/biomejs/biome/issues
+Author: Biome Developers and Contributors
+PackageName: Biome
+PackageUrl: https://biomejs.dev/
+License: Apache-2.0
+Copyright: Copyright (c) 2023-present Biome Developers and Contributors
+ShortDescription: Biome is a toolchain for web projects, aimed at providing functionalities to maintain them. It offers a formatter and linter, usable via CLI and LSP.
+Moniker: biome
+Tags:
+- css
+- formatter
+- javascript
+- json
+- jsx
+- linter
+- static-code-analysis
+- typescript
+- web
+ReleaseNotes: |-
+  2.2.3
+  Patch Changes
+  - #7353 4d2b719 Thanks @JeetuSuthar! - Fixed #7340: The linter now allows the navigation property for view-transition in CSS.
+    Previously, the linter incorrectly flagged navigation: auto as an unknown property. This fix adds navigation to the list of known CSS properties, following the CSS View Transitions spec.
+  - #7275 560de1b Thanks @arendjr! - Fixed #7268: Files that are explicitly passed as CLI arguments are now correctly ignored if they reside in an ignored folder.
+  - #7358 963a246 Thanks @ematipico! - Fixed #7085, now the rule noDescendingSpecificity correctly calculates the specificity of selectors when they are included inside a media query.
+  - #7387 923674d Thanks @qraqras! - Fixed #7381, now the useOptionalChain rule recognizes optional chaining using Yoda expressions (e.g., undefined !== foo && foo.bar).
+  - #7316 f9636d5 Thanks @Conaclos! - Fixed #7289. The rule useImportType now inlines import type into import { type } when the style option is set to inlineType.
+    Example:
+    import type { T } from "mod";
+    // becomes
+    import { type T } from "mod";
+  - #7350 bb4d407 Thanks @siketyan! - Fixed #7261: two characters ・ (KATAKANA MIDDLE DOT, U+30FB) and ･ (HALFWIDTH KATAKANA MIDDLE DOT, U+FF65) are no longer considered as valid characters in identifiers. Property keys containing these character(s) are now preserved as string literals.
+  - #7377 811f47b Thanks @ematipico! - Fixed a bug where the Biome Language Server didn't correctly compute the diagnostics of a monorepo setting, caused by an incorrect handling of the project status.
+  - #7245 fad34b9 Thanks @kedevked! - Added the new lint rule useConsistentArrowReturn.
+    This rule enforces a consistent return style for arrow functions.
+    Invalid
+    const f = () => {
+      return 1;
+    };
+    This rule is a port of ESLint's arrow-body-style rule.
+  - #7370 e8032dd Thanks @fireairforce! - Support dynamic import defer and import source. The syntax looks like:
+    import.source("foo");
+    import.source("x", { with: { attr: "val" } });
+    import.defer("foo");
+    import.defer("x", { with: { attr: "val" } });
+  - #7369 b1f8cbd Thanks @siketyan! - Range suppressions are now supported for Grit plugins.
+    For JavaScript, you can suppress a plugin as follows:
+    // biome-ignore-start lint/plugin/preferObjectSpread: reason
+    Object.assign({ foo: "bar" }, baz);
+    // biome-ignore-end lint/plugin/preferObjectSpread: reason
+    For CSS, you can suppress a plugin as follows:
+    body {
+      /* biome-ignore-start lint/plugin/useLowercaseColors: reason */
+      color: #fff;
+      /* biome-ignore-end lint/plugin/useLowercaseColors: reason */
+    }
+  - #7384 099507e Thanks @ematipico! - Reduced the severity of certain diagnostics emitted when Biome deserializes the configuration files.
+    Now these diagnostics are emitted as Information severity, which means that they won't interfere when running commands with --error-on-warnings
+  - #7302 2af2380 Thanks @unvalley! - Fixed #7301: useReadonlyClassProperties now correctly skips JavaScript files.
+  - #7288 94d85f8 Thanks @ThiefMaster! - Fixed #7286. Files are now formatted with JSX behavior when javascript.parser.jsxEverywhere is explicitly set.
+    Previously, this flag was only used for parsing, but not for formatting, which resulted in incorrect formatting of conditional expressions when JSX syntax is used in .js files.
+  - #7311 62154b9 Thanks @qraqras! - Added the new nursery rule noUselessCatchBinding. This rule disallows unnecessary catch bindings.
+    try {
+        // Do something
+    - } catch (unused) {}
+    + } catch {}
+  - #7349 45c1dfe Thanks @ematipico! - Fixed #4298. Biome now correctly formats CSS declarations when it contains one single value:
+    .bar {
+    -  --123456789012345678901234567890: var(--1234567890123456789012345678901234567);
+    +  --123456789012345678901234567890: var(
+    +    --1234567890123456789012345678901234567
+    +  );
+    }
+  - #7295 7638e84 Thanks @ematipico! - Fixed #7130. Removed the emission of a false-positive diagnostic. Biome no longer emits the following diagnostic:
+    lib/main.ts:1:5 suppressions/unused ━━━━━━━━━━━━━━━━━━━━━━━━━
+      ⚠ Suppression comment has no effect because the tool is not enabled.
+      > 1 │ /** biome-ignore-all assist/source/organizeImports: For the lib root file, we don't want to organize exports */
+          │     ^^^^^^^^^^^^^^^^
+  - #7377 811f47b Thanks @ematipico! - Fixed #7371 where the Biome Language Server didn't correctly recompute the diagnostics when updating a nested configuration file.
+  - #7348 ac27fc5 Thanks @ematipico! - Fixed #7079. Now the rule useSemanticElements doesn't trigger components and custom elements.
+  - #7389 ab06a7e Thanks @Conaclos! - Fixed #7344. useNamingConvention no longer reports interfaces defined in global declarations.
+    Interfaces declared in global declarations augment existing interfaces.
+    Thus, they must be ignored.
+    In the following example, useNamingConvention reported HTMLElement.
+    It is now ignored.
+    export {};
+    declare global {
+      interface HTMLElement {
+        foo(): void;
+      }
+    }
+  - #7315 4a2bd2f Thanks @vladimir-ivanov! - Fixed #7310: useReadonlyClassProperties correctly handles nested assignments, avoiding false positives when a class property is assigned within another assignment expression.
+    Example of code that previously triggered a false positive but is now correctly ignored:
+    class test {
+      private thing: number = 0; // incorrectly flagged
+      public incrementThing(): void {
+        const temp = { x: 0 };
+        temp.x = this.thing++;
+      }
+    }
+  What's Changed
+  - fix(lint/useReadonlyClassProperties): skip rule for JavaScript files by @unvalley in #7302
+  - feat(biome-js-analyzer): adds class member analyzer to extract mutated properties in a class by @vladimir-ivanov in #7015
+  - fix(analyzer): remove unhelpful diagnostic by @ematipico in #7295
+  - fix(useImportType): inline import type into import { type } when style=inlineType by @Conaclos in #7316
+  - fix(noDuplicateObjectKeys): correct grammatical error in JSON diagnostic message by @JeetuSuthar in #7317
+  - chore(deps): update github-actions by @renovate[bot] in #7319
+  - chore(deps): update dependency @types/node to v22.17.2 by @renovate[bot] in #7318
+  - chore(deps): update rust crate anyhow to 1.0.99 by @renovate[bot] in #7321
+  - chore(deps): update rust crate cfg-if to 1.0.3 by @renovate[bot] in #7322
+  - fix: simplify parens check in exponentiation expression handling by @cqh963852 in #7341
+  - feat: execute JS plugin in the Boa engine by @siketyan in #7300
+  - fix(format): honor jsxEverywhere setting in variant-specific formatter rules by @ThiefMaster in #7288
+  - fix(biome-js-analyze): add tests for useReadonlyClassProperties by @vladimir-ivanov in #7315
+  - fix(useSemanticElements): exclude components and custom elements by @ematipico in #7348
+  - fix(css/formatter): formatting of single value lists by @ematipico in #7349
+  - fix(formatter): patch ID_Continue to omit U+30FB and U+FF65 added in Unicode 15.1 by @siketyan in #7350
+  - fix(css): allow navigation property for view-transition (fixes #7340) by @JeetuSuthar in #7353
+  - chore(deps): update rust crate tracing-subscriber to v0.3.20 [security] by @renovate[bot] in #7365
+  - fix(noDescendingSpecificity): compute nested selectors by @ematipico in #7358
+  - feat(biome_js_analyze): add noUselessCatchBinding by @qraqras in #7311
+  - feat(parser): support dynamic import defer and import source expr by @fireairforce in #7370
+  - fix(lsp): internal project handling by @ematipico in #7377
+  - fix: biome diagnostic about schema by @ematipico in #7384
+  - feat(lint/vue): implement useVueMultiWordComponentNames by @dyc3 in #7373
+  - fix(useNamingConvention): ignore interfaces in global declarations by @Conaclos in #7389
+  - fix(useOptionalChain): support Yoda expressions by @qraqras in #7387
+  - fix(core): improve inference with conditionals by @arendjr in #7393
+  - refactor(analyze): integrate plugin as a syntax visitor by @siketyan in #7369
+  - feat(biome_js_analyze): add UseConsistentArrowReturn rule by @kedevked in #7245
+  - fix(cli): files in ignored folders are now correctly ignored by @arendjr in #7275
+  - docs: safety of useSortedKeys by @Sjlver in #6112
+  - chore: add new bronze sponsor by @ematipico in #7397
+  - chore(rules_check): add multi file lint rule checking by @ryan-m-walker in #7399
+  - ci: release by @github-actions[bot] in #7306
+  New Contributors
+  - @ThiefMaster made their first contribution in #7288
+  - @qraqras made their first contribution in #7311
+  - @kedevked made their first contribution in #7245
+  - @Sjlver made their first contribution in #6112
+  - @ryan-m-walker made their first contribution in #7399
+  Full Changelog: https://github.com/biomejs/biome/compare/@biomejs/biome@2.2.2...@biomejs/biome@v2.2.3
+ReleaseNotesUrl: https://github.com/biomejs/biome/releases/tag/@biomejs/biome@2.2.3
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://biomejs.dev/guides/getting-started/
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0
