@@ -1,0 +1,69 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: Google.DartSDK
+PackageVersion: 3.9.0
+PackageLocale: en-US
+Publisher: Google
+PublisherUrl: https://www.google.com/
+PublisherSupportUrl: https://dart.dev/community
+PrivacyUrl: https://policies.google.com/privacy
+Author: Google LLC
+PackageName: Dart SDK
+PackageUrl: https://dart.dev/
+License: BSD-3-Clause
+LicenseUrl: https://github.com/dart-lang/sdk/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2024, the Dart project authors.
+CopyrightUrl: https://github.com/dart-lang/sdk/blob/HEAD/PATENT_GRANT
+ShortDescription: A set of tools and libraries for the Dart programming language.
+Tags:
+- dart
+- flutter
+ReleaseNotes: |-
+  Released on: 2025-08-13
+  Language
+  Dart 3.9 assumes null safety when computing type promotion, reachability, and definite assignment. This makes these features produce more accurate results for modern Dart programs. As a result of this change, more dead_code warnings may be produced. To take advantage of these improvements, set your package's SDK constraint lower bound to 3.9 or greater (sdk: '^3.9.0').
+  Tools
+  Analyzer
+  - The dart command-line tool commands that use the analysis server now run the AOT-compiled analysis server snapshot. These include dart analyze, dart fix, and dart language-server.
+    There is no functional difference when using the AOT-compiled analysis server snapshot. But various tests indicate that there is a significant speedup in the time to analyze a project.
+    In case of an incompatibility with the AOT-compiled snapshot, a --no-use-aot-snapshot flag may be passed to these commands. (Please file an issue with the appropriate project if you find that you need to use this flag! It will be removed in the future.) This flag directs the tool to revert to the old behavior, using the JIT-compiled analysis server snapshot. To direct the Dart Code plugin for VS Code to pass this flag, use the dart.analyzerAdditionalArgs setting. To direct the Dart IntelliJ plugin to pass this flag, use the dart.server.additional.arguments registry property, similar to these steps.
+  - Add the switch_on_type lint rule.
+  - Add the unnecessary_unawaited lint rule.
+  - Add an assist to convert a field formal parameter to a normal parameter.
+  Dart build
+  - Breaking change of feature in preview: dart build -f exe <target> is now dart build cli --target=<target>. See dart build cli --help for more info.
+  Dart Development Compiler (dartdevc)
+  - Outstanding async code now checks and cancels itself after a hot restart if it was started in a different generation of the application before the restart. This includes outstanding Futures created by calling JSPromise.toDart from thedart:js_interop and the underlying the dart:js_util helper promiseToFuture. Dart callbacks will not be run, but callbacks on the JavaScript side will still be executed.
+  - Fixed a soundness issue that allowed direct invocation of the value returned from a getter without any runtime checks when the getter's return type was a generic type argument instantiated as dynamic or Function.
+    A getter defined as:
+    class Container<T> {
+      T get value => _value;
+      ...
+    }
+    Could trigger the issue with a direct invocation:
+    Container<dynamic>().value('Invocation with missing runtime checks!');
+  Dart native compiler
+  Added cross-compilation support for target architectures of arm (ARM32) and riscv64 (RV64GC) when the target OS is Linux.
+  Pub
+  - Git dependencies can now be version-solved based on git tags.
+    Use a tag_pattern in the descriptor and a version constraint, and all commits matching the pattern will be considered during resolution. For example:
+    dependencies:
+      my_dependency:
+        git:
+          url: https://github.com/example/my_dependency
+          tag_pattern: v{{version}}
+        version: ^2.0.1
+  - Starting from language version 3.9 the flutter constraint upper bound is now respected in your root package. For example:
+    name: my_app
+    environment:
+      sdk: ^3.9.0
+      flutter: 3.33.0
+    Results in dart pub get failing if invoked with a version of the Flutter SDK different from 3.33.0.
+    The upper bound of the flutter constraint is still ignored in packages used as dependencies. See https://github.com/flutter/flutter/issues/95472 for details.
+ReleaseNotesUrl: https://github.com/dart-lang/sdk/blob/HEAD/CHANGELOG.md#390
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://dart.dev/guides
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0
