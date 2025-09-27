@@ -1,0 +1,87 @@
+# Created with komac v2.13.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: Gruntwork.Terragrunt
+PackageVersion: 0.88.0
+PackageLocale: en-US
+Publisher: Gruntwork
+PublisherUrl: https://terragrunt.gruntwork.io/
+PublisherSupportUrl: https://terragrunt.gruntwork.io/docs/community/support
+PrivacyUrl: https://gruntwork.io/legal/privacy-policy
+PackageName: Terragrunt
+PackageUrl: https://github.com/gruntwork-io/terragrunt/releases/tag/v0.68.9
+License: MIT
+LicenseUrl: https://github.com/gruntwork-io/terragrunt/blob/HEAD/LICENSE.txt
+Copyright: © 2024 Gruntwork, Inc. All rights reserved.
+ShortDescription: Terragrunt is a thin wrapper for Terraform that provides extra tools for keeping your Terraform configurations DRY, working with multiple Terraform modules, and managing remote state.
+Description: Terragrunt is a thin wrapper for Terraform that provides extra tools for keeping your Terraform configurations DRY, working with multiple Terraform modules, and managing remote state.
+Tags:
+- IaC
+- Infrastructure as Code
+- Terraform
+- Terraform Wrapper
+- terragrunt
+ReleaseNotes: |-
+  🛠️ Breaking Changes
+  Default Command Forwarding Removed
+  Terragrunt no longer forwards unknown top‑level commands to OpenTofu by default.
+  Invoking an unknown command now fails with guidance to use the explicit run form.
+  This is the next step in the removal of deprecated features in Terragrunt on the road to Terragrunt 1.0, with more to follow. Read the CLI Redesign migration guide for guidance on adapting to future breaking changes.
+  For a full list of deprecated features that will be removed prior to the release of Terragrunt 1.0, see the removal schedule.
+  ❌ Old Behavior (Deprecated)
+  terragrunt workspace ls
+  terragrunt graph
+  ✅ New Behavior
+  terragrunt run -- workspace ls
+  terragrunt run -- graph
+  🔧 Migration Guide
+  Keep using shortcuts for common commands:
+  terragrunt plan
+  terragrunt apply
+  Replace usage of any OpenTofu/Terraform command that isn’t a supported shortcut with explicit usage of the run command:
+  terragrunt workspace ls => terragrunt run -- workspace ls
+  terragrunt graph => terragrunt run -- graph
+  When mixing Terragrunt and OpenTofu flags, separate them with --:
+  terragrunt run -- apply -auto-approve
+  terragrunt run -- output -json
+  terragrunt run --all -- plan -var foo=bar
+  Command-specific flags must be used after their commands
+  As part of the changes to remove the deprecated behavior of forwarding unknown commands to OpenTofu by default, users can no longer treat flags as global flags unless they are in-fact global flags.
+  For example, the following will still work:
+  terragrunt --log-level debug plan
+  terragrunt --no-color plan
+  But the following will no longer be supported:
+  terragrunt --provider-cache run --all plan
+  Instead, you must supply flags after the commands they are used by:
+  terragrunt run --all --provider-cache plan
+  Flag Scope Changes (backend + feature flags)
+  Backend migration and feature-related flags are now command-scoped and should appear after the relevant subcommand.
+  These flags are accepted on run, backend, scaffold, find, and list
+  Affected flags:
+  - backend-bootstrap
+  - backend-require-bootstrap
+  - disable-bucket-update
+  - feature key=value
+  ❌ Old Behavior (Deprecated)
+  Command-specific flags could be set anywhere in the arguments for a command:
+  terragrunt --backend-bootstrap backend delete --all
+  terragrunt --feature stage=true plan
+  ✅ New Behavior
+  Place flags after the respective command they control:
+  terragrunt backend bootstrap --backend-bootstrap
+  terragrunt plan --feature stage=true
+  terragrunt find --feature stage=true
+  🔧 Migration Guide
+  Move these flags to follow the subcommand they apply to
+  terragrunt --feature stage=true plan => terragrunt plan --feature stage=true
+  What's Changed
+  - chore: Removal of command forwarding by default by @denis256 in #4871
+  - docs: Fixed contact form toggle bug by @karlcarstensen in #4885
+  - docs: Terragrunt Scale Initial Checkout Page by @karlcarstensen in #4866
+  Full Changelog: v0.87.7...v0.88.0
+ReleaseNotesUrl: https://github.com/gruntwork-io/terragrunt/releases/tag/v0.88.0
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/gruntwork-io/terragrunt/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0
