@@ -1,0 +1,681 @@
+id: moderatorTriggers
+name: GitOps.PullRequestIssueManagement
+description: Defines the users and permissions for the moderators
+owner:
+resource: repository
+disabled: false
+where:
+configuration:
+  resourceManagementConfiguration:
+    eventResponderTasks:
+      - if:
+          # If the activity sender is any one of the moderators, has Admin permission on the repo, or has Write permissions on the repo. . .
+          - or:
+              - activitySenderHasPermission:
+                  permission: Admin
+              - activitySenderHasPermission:
+                  permission: Write
+              - isActivitySender:
+                  user: stephengillie
+                  issueAuthor: False
+              - isActivitySender:
+                  user: ImJoakim
+                  issueAuthor: False
+              - isActivitySender:
+                  user: ItzLevvie
+                  issueAuthor: False
+              - isActivitySender:
+                  user: jedieaston
+                  issueAuthor: False
+              - isActivitySender:
+                  user: KaranKad
+                  issueAuthor: False
+              - isActivitySender:
+                  user: OfficialEsco
+                  issueAuthor: False
+              - isActivitySender:
+                  user: quhxl
+                  issueAuthor: False
+              - isActivitySender:
+                  user: Trenly
+                  issueAuthor: False
+              - isActivitySender:
+                  user: mdanish-kh
+                  issueAuthor: False
+              - isActivitySender:
+                  user: russellbanks
+                  issueAuthor: False
+        then:
+          # If the payload is an issue_Comment or a Pull_Request_Review_Comment
+          - if:
+              - or:
+                  - payloadType: Issue_Comment
+                  - payloadType: Pull_Request_Review_Comment
+            # Remove the Needs-Triage label
+            # Take different actions based on the comment pattern
+            then:
+              - removeLabel:
+                  label: Needs-Triage
+              # Area-Bots
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[aA]rea[\s-][bB]ots'
+                      isRegex: True
+                then:
+                  - addLabel:
+                      label: Area-Bots
+              # Area-Client
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[aA]rea[\s-][cC]lient'
+                      isRegex: True
+                then:
+                  - addLabel:
+                      label: Area-Client
+              # Area-External
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[aA]rea[\s-][eE]xternal'
+                      isRegex: True
+                then:
+                  - addLabel:
+                      label: Area-External
+              # Area-Manifest
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[aA]rea[\s-][mM]anifest'
+                      isRegex: True
+                then:
+                  - addLabel:
+                      label: Area-Manifest
+              # Area-Matching
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[aA]rea[\s-][mM]atching'
+                      isRegex: True
+                then:
+                  - addLabel:
+                      label: Area-Matching
+              # Area-Publish-Pipeline
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[aA]rea[\s-][Pp]ublish(ing)?[\s-][pP]ipeline'
+                      isRegex: True
+                then:
+                  - addLabel:
+                      label: Area-Publish-Pipeline
+              # Area-Rebuild-Pipeline
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[aA]rea[\s-][Rr]ebuild[\s-][pP]ipeline'
+                      isRegex: True
+                then:
+                  - addLabel:
+                      label: Area-Rebuild-Pipeline
+              # Area-Scope
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[aA]rea[\s-][sS]cope'
+                      isRegex: True
+                then:
+                  - addLabel:
+                      label: Area-Scope
+              # Area-Validation-Pipeline
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[aA]rea[\s-][vV]alidation[\s-][pP]ipeline'
+                      isRegex: True
+                then:
+                  - addLabel:
+                      label: Area-Validation-Pipeline
+              # Blocking-Issue
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[bB]locking[\s-][iI]ssue'
+                      isRegex: True
+                then:
+                  - removeLabel:
+                      label: Needs-Author-Feedback
+                  - removeLabel:
+                      label: Needs-Attention
+                  - addLabel:
+                      label: Blocking-Issue
+              # Dependencies
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[dD]ependencies'
+                      isRegex: True
+                then:
+                  - addLabel:
+                      label: Dependencies
+              # DriverInstall
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[Dd]river[\s-][Ii]nstall'
+                      isRegex: True
+                then:
+                  - addLabel:
+                      label: DriverInstall
+              # DSC
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[Dd][Ss][Cc]'
+                      isRegex: True
+                then:
+                  - addLabel:
+                      label: DSC
+              # Error-Hash-Mismatch
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[eE]rror[\s-][hH]ash[\s-][mM]ismatch'
+                      isRegex: True
+                then:
+                  - addLabel:
+                      label: Error-Hash-Mismatch
+              # Error-Installer-Availability
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[Ee]rror[\s-][Ii]nstaller[\s-][Aa]vailability'
+                      isRegex: True
+                then:
+                  - addLabel:
+                      label: Error-Installer-Availability
+              # Hardware
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[hH]ardware'
+                      isRegex: True
+                then:
+                  - addLabel:
+                      label: Hardware
+              # Help-Wanted
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[hH]elp[\s-][wW]anted'
+                      isRegex: True
+                then:
+                  - addLabel:
+                      label: Help-Wanted
+              # Highest-Version-Removal
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[Hh]ighest[\s-][Vv]ersion([\s-][Rr]emoval)?'
+                      isRegex: True
+                then:
+                  - addLabel:
+                      label: Highest-Version-Removal
+              # Icon
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[Ii]con'
+                      isRegex: True
+                then:
+                  - addLabel:
+                      label: Icon
+              # In-PR
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[Ii]n[\s-][Pp][Rr]'
+                      isRegex: True
+                then:
+                  - addLabel:
+                      label: In-PR
+              # Installer-Error
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[iI]nstaller[\s-][Ee]rror'
+                      isRegex: True
+                then:
+                  - addLabel:
+                      label: Installer-Error
+              # Installer-Issue
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[iI]nstaller[\s-][iI]ssue'
+                      isRegex: True
+                then:
+                  - addLabel:
+                      label: Installer-Issue
+                  - addLabel:
+                      label: Area-External
+              # Interactive-Only-Download
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[iI]nteractive[\s-][oO]nly[\s-][Dd]ownload'
+                      isRegex: True
+                then:
+                  - addLabel:
+                      label: Interactive-Only-Download
+              # Interactive-Only-Installer
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[iI]nteractive[\s-][oO]nly[\s-][iI]nstaller'
+                      isRegex: True
+                then:
+                  - addLabel:
+                      label: Interactive-Only-Installer
+              # Issue-Bug
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[iI]ssue[\s-][bB]ug'
+                      isRegex: True
+                then:
+                  - addLabel:
+                      label: Issue-Bug
+              # Issue-Docs
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[iI]ssue[\s-][dD]ocs'
+                      isRegex: True
+                then:
+                  - addLabel:
+                      label: Issue-Docs
+              # Issue-Feature
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[iI]ssue[\s-][fF]eature'
+                      isRegex: True
+                then:
+                  - addLabel:
+                      label: Issue-Feature
+              # Last-Version-Removal
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[Ll]ast[\s-][Vv]ersion([\s-][Rr]emoval)?'
+                      isRegex: True
+                then:
+                  - addLabel:
+                      label: Last-Version-Removal
+              # License-Blocks-Install
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[Ll]icense[\s-][Bb]locks([\s-][Ii]nstall)?'
+                      isRegex: True
+                then:
+                  - addLabel:
+                      label: License-Blocks-Install
+              # Manifest-Content-Incomplete
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+([Mm]anifest[\s-])?[Cc]ontent[\s-][Ii]ncomplete'
+                      isRegex: True
+                then:
+                  - addLabel:
+                      label: Manifest-Content-Incomplete
+              # Manifest-Singleton-Deprecated
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+([Mm]anifest[\s-])?[Ss]ingleton[\s-][Dd]eprecated'
+                      isRegex: True
+                then:
+                  - addLabel:
+                      label: Manifest-Singleton-Deprecated
+              # Moderator-Approved
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[mM]oderator[\s-][Aa]pproved'
+                      isRegex: True
+                then:
+                  - addLabel:
+                      label: Moderator-Approved
+              # Needs-Attention
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[Nn]eeds[\s-][Aa]ttention'
+                      isRegex: True
+                then:
+                  - addLabel:
+                      label: Needs-Attention
+                  - addReply:
+                      reply: >-
+                        Your pull request requires attention from a repository administrator. It has been assigned to a developer for review.
+
+
+                        Template: msftbot/manualReview
+              # Needs-Author-Feedback
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[Nn]eeds[\s-][Aa]uthor[\s-][fF]eedback'
+                      isRegex: True
+                then:
+                  - addLabel:
+                      label: Needs-Author-Feedback
+              # Needs-CLA
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[Nn]eeds[\s-][Cc][Ll][Aa]'
+                      isRegex: True
+                then:
+                  - addLabel:
+                      label: Needs-CLA
+              # Needs-Manual-Merge
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[Nn]eeds[\s-][Mm]anual[\s-][mM]erge'
+                      isRegex: True
+                then:
+                  - addLabel:
+                      label: Needs-Manual-Merge
+              # Needs-Review
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[Nn]eeds[\s-][Rr]eview'
+                      isRegex: True
+                then:
+                  - addLabel:
+                      label: Needs-Review
+              # Network-Blocker
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[Nn]etwork[\s-][Bb]lock(?:er|ed)'
+                      isRegex: True
+                then:
+                  - addLabel:
+                      label: Network-Blocker
+              # Package-Metadata
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[pP]ackage[\s-][mM]etadata'
+                      isRegex: True
+                then:
+                  - addLabel:
+                      label: Package-Metadata
+              # Package-Request
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[pP]ackage[\s-][rR]equest'
+                      isRegex: True
+                then:
+                  - addLabel:
+                      label: Package-Request
+              # Package-Update
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[pP]ackage[\s-][uU]pdate'
+                      isRegex: True
+                then:
+                  - addLabel:
+                      label: Package-Update
+              # portable-archive
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[pP]ortable[\s-][aA]rchive'
+                      isRegex: True
+                then:
+                  - addLabel:
+                      label: portable-archive
+              # portable-jar
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[pP]ortable[\s-][jJ][aA][rR]'
+                      isRegex: True
+                then:
+                  - addLabel:
+                      label: portable-jar
+              # PSA
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[Pp][Ss][Aa]'
+                      isRegex: True
+                then:
+                  - addLabel:
+                      label: Public-Service-Announcement
+              # Scripted-Application
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[Ss]cript(ed)?[\s-][Aa]pplication'
+                      isRegex: True
+                then:
+                  - addLabel:
+                      label: Scripted-Application
+              # Testing
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[tT]est(ing)?'
+                      isRegex: True
+                then:
+                  - addLabel:
+                      label: Testing
+              # Upgrade-Issue
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[uU]pgrade[\s-][iI]ssue'
+                      isRegex: True
+                then:
+                  - addLabel:
+                      label: Upgrade-Issue
+              # Validation-Skip-Automations
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[vV]alidation[\s-][sS]kip[\s-][aA]utomations'
+                      isRegex: True
+                then:
+                  - addLabel:
+                      label: Validation-Skip-Automations
+              # Version-Parameter-Mismatch
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[vV]ersion[\s-][pP]arameter[\s-][mM]ismatch'
+                      isRegex: True
+                then:
+                  - addLabel:
+                      label: Version-Parameter-Mismatch
+              # Windows Features
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[wW]indows[\s-]?[fF]eature(s)?'
+                      isRegex: True
+                then:
+                  - addLabel:
+                      label: WindowsFeatures
+              # Zip-Binary
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[zZ]ip[\s-][bB]inary'
+                      isRegex: True
+                then:
+                  - addLabel:
+                      label: zip-binary
+              # Unblocked
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[uU]nblocked'
+                      isRegex: True
+                then:
+                  - removeLabel:
+                      label: Blocking-Issue
+              # Reset-Feedback
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[rR]eset\s+[fF]eedback'
+                      isRegex: True
+                then:
+                  - removeLabel:
+                      label: Needs-Author-Feedback
+                  - removeLabel:
+                      label: Needs-Attention
+                  - removeLabel:
+                      label: Moderator-Approved
+                  - removeLabel:
+                      label: Changes-Requested
+              # Reset-Labels
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[rR]eset[\s-]+[lL]abels'
+                      isRegex: True
+                then:
+                  - removeLabel:
+                      label: Area-Bots
+                  - removeLabel:
+                      label: Area-Client
+                  - removeLabel:
+                      label: Area-External
+                  - removeLabel:
+                      label: Area-Manifest
+                  - removeLabel:
+                      label: Area-Matching
+                  - removeLabel:
+                      label: Area-Publish-Pipeline
+                  - removeLabel:
+                      label: Area-Rebuild-Pipeline
+                  - removeLabel:
+                      label: Area-Scope
+                  - removeLabel:
+                      label: Area-Validation-Pipeline
+                  - removeLabel:
+                      label: Blocked-InstallerType
+                  - removeLabel:
+                      label: Blocking-Issue
+                  - removeLabel:
+                      label: Changes-Requested
+                  - removeLabel:
+                      label: Dependencies
+                  - removeLabel:
+                      label: DriverInstall
+                  - removeLabel:
+                      label: DSC
+                  - removeLabel:
+                      label: Error-Hash-Mismatch
+                  - removeLabel:
+                      label: Error-Installer-Availability
+                  - removeLabel:
+                      label: Hardware
+                  - removeLabel:
+                      label: Help-Wanted
+                  - removeLabel:
+                      label: Highest-Version-Removal
+                  - removeLabel:
+                      label: Icon
+                  - removeLabel:
+                      label: In-PR
+                  - removeLabel:
+                      label: Installer-Error
+                  - removeLabel:
+                      label: Installer-Issue
+                  - removeLabel:
+                      label: Interactive-Only-Download
+                  - removeLabel:
+                      label: Interactive-Only-Installer
+                  - removeLabel:
+                      label: Issue-Bug
+                  - removeLabel:
+                      label: Issue-Docs
+                  - removeLabel:
+                      label: Issue-Feature
+                  - removeLabel:
+                      label: Last-Version-Removal
+                  - removeLabel:
+                      label: License-Blocks-Install
+                  - removeLabel:
+                      label: Manifest-Content-Incomplete
+                  - removeLabel:
+                      label: Manifest-Metadata-Consistency
+                  - removeLabel:
+                      label: Manifest-Singleton-Deprecated
+                  - removeLabel:
+                      label: Manifest-Version-Deprecated
+                  - removeLabel:
+                      label: Moderator-Approved
+                  - removeLabel:
+                      label: Needs-Attention
+                  - removeLabel:
+                      label: Needs-Author-Feedback
+                  - removeLabel:
+                      label: Needs-CLA
+                  - removeLabel:
+                      label: Needs-Manual-Merge
+                  - removeLabel:
+                      label: Needs-Review
+                  - removeLabel:
+                      label: Network-Blocker
+                  - removeLabel:
+                      label: Package-Request
+                  - removeLabel:
+                      label: Package-Update
+                  - removeLabel:
+                      label: portable-archive
+                  - removeLabel:
+                      label: portable-jar
+                  - removeLabel:
+                      label: Possible-Duplicate
+                  - removeLabel:
+                      label: Project-File
+                  - removeLabel:
+                      label: Public-Service-Announcement
+                  - removeLabel:
+                      label: Scripted-Application
+                  - removeLabel:
+                      label: Testing
+                  - removeLabel:
+                      label: Upgrade-Always-Available
+                  - removeLabel:
+                      label: Upgrade-Issue
+                  - removeLabel:
+                      label: Validation-Skip-Automations
+                  - removeLabel:
+                      label: WindowsFeatures
+                  - removeLabel:
+                      label: zip-binary
+                  ## TODO: Dismiss All Pull Request Reviews
+              # Duplicate of #
+              - if:
+                  - commentContains:
+                      pattern: Duplicate\s+of\s+\#?\s*\d+
+                      isRegex: True
+                then:
+                  - addReply:
+                      reply: >-
+                        Hello ${issueAuthor},
+
+
+                        We've identified this as a duplicate of another issue or PR that already exists. This specific instance is being closed in favor of the linked issue. Please add your 👍 to the other issue to raise its priority. Thanks for your contribution!
+
+
+                        Template: msftbot/duplicate/closed
+                  - closeIssue
+                  - removeLabel:
+                      label: Needs-Triage
+                  - removeLabel:
+                      label: Needs-Attention
+                  - removeLabel:
+                      label: Needs-Feedback-Hub
+                  - removeLabel:
+                      label: Needs-Author-Feedback
+                  - addLabel:
+                      label: Resolution-Duplicate
+              # Close with reason <>;
+              - if:
+                  - commentContains:
+                      pattern: "[cC]lose\\s+[wW]ith\\s+[rR]eason\\s*:[\\w\\s\\-\\(\\)\\[\\]\\{\\}\\\\\\/.+=@\\#$%&^*`~|'\",<>?]*(?=;)"
+                      isRegex: True
+                then:
+                  - closeIssue
+                  - removeLabel:
+                      label: Needs-Triage
+                  - removeLabel:
+                      label: Needs-Attention
+                  - removeLabel:
+                      label: Needs-Feedback-Hub
+                  - removeLabel:
+                      label: Needs-Author-Feedback
+              # Reopen with reason <>;
+              - if:
+                  - commentContains:
+                      pattern: "[rR]eopen\\s+[wW]ith\\s+[rR]eason\\s*:[\\w\\s\\-\\(\\)\\[\\]\\{\\}\\\\\\/.+=@\\#$%&^*`~|'\",<>?]*(?=;)"
+                      isRegex: True
+                then:
+                  - reopenIssue
+                  - removeLabel:
+                      label: Resolution-Duplicate
+                  - removeLabel:
+                      label: No-Recent-Activity
+          # If the payload is a Pull_Request_Review and an approval, add the Moderator-Approved label
+          - if:
+              - payloadType: Pull_Request_Review
+              - isReviewState:
+                  reviewState: Approved
+            then:
+              - addLabel:
+                  label: Moderator-Approved
+onFailure:
+onSuccess:

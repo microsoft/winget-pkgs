@@ -1,0 +1,90 @@
+# Created with WinGet Updater using komac v2.11.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
+
+PackageIdentifier: krzys-h.UndertaleModTool
+PackageVersion: 0.8.0.0
+PackageLocale: en-US
+Publisher: krzys-h
+PublisherUrl: https://github.com/UnderminersTeam
+PublisherSupportUrl: https://github.com/krzys-h/UndertaleModTool/issues
+PackageName: UndertaleModTool
+PackageUrl: https://github.com/UnderminersTeam/UndertaleModTool
+License: GPL-3.0
+LicenseUrl: https://github.com/UnderminersTeam/UndertaleModTool/blob/HEAD/LICENSE.txt
+ShortDescription: 'The most complete tool for modding, decompiling and unpacking Undertale (and other Game Maker: Studio games!)'
+Tags:
+- decompiler
+- deltarune
+- editor
+- game-maker
+- game-maker-studio
+- game-maker-studio-2
+- gamemaker
+- gml
+- undertale
+- unpacker
+ReleaseNotes: |-
+  This is the 0.8.0.0 UndertaleModTool release, for 64-bit Windows. Downloads can be found at the bottom of this release.
+  ("UTMT_CLI" is the command-line interface version with no GUI, supported for Windows, Ubuntu, and macOS.)
+  Changelog
+  Added
+  - Integrated the new Underanalyzer decompiler and compiler by @colinator27 in #1862 and #2056.
+    - This is a complete replacement of the previous compiler and decompiler used by UndertaleModTool, adding support for most of the latest GameMaker features, and fixing most of the control flow bugs.
+    - A new GML compiler/decompiler settings menu has been added to the settings window.
+    - All of the major GameMaker 2.3+ syntax is now supported, with the exception of accessors and some certain function calls combined with arrays (which both have alternative syntax for now).
+    - The compiler now supports enums and macros. Sometimes, the decompiler can produce enums as well.
+    - All previous code corrections have been removed, as they are no longer necessary.
+    - The decompiled code cache feature (for search operations, primarily) has been removed, as the new decompiler is significantly faster.
+    - To configure asset (and enum/macro) resolution for games that require it, new JSON configuration files have been added under a directory named GameSpecificData.
+  - Added new room editor controls by @AwfulNasty and @CST1229 in #1489 and #2064.
+    - Mouse middle button can now be used to pan the room canvas.
+    - After selecting an object, clicking and dragging near its edge allows it to be scaled (shift or ctrl can be used for higher precision).
+    - Control key now functions as a removal of any grid snapping.
+    - Pressing X/Y will flip the xscale/yscale of the selected object.
+    - Ctrl+V pasting now snaps the paste to the grid, unless Ctrl+Shift+V is used.
+    - Instance layers can now automatically be created if necessary (when dragging in object instances).
+  - Added new scripts: ImportGraphicsAdvanced.csx and ExportSpritesAsGIF.csx by @CST1229 in #2067.
+    - ImportGraphicsAdvanced.csx allows for more fine-tuned sprite import settings via a GUI, as well as GIF and sprite strip import.
+  - Added remove buttons for object actions, global initialization scripts, and sprite collision masks by @CST1229 in #2070.
+  - Added a setting to remember UndertaleModTool's window state/position when the program is closed by @luizzeroxis in #2088.
+  - Added more builtin GML functions for use in the compiler by @CST1229 in #2093.
+  - Added GameMaker 2024.8 support by @Dobby233Liu in #1937.
+  - Added GameMaker 2024.11 support by @Dobby233Liu in #2013.
+  - Added GameMaker 2024.13 support by @colinator27 in #2105.
+  - (Note: Latest GameMaker support is primarily for saving/loading; some other features may be missing or broken. Let us know of any problems.)
+    - (Warning for 2024.11+: Not all scripts may be compatible with the unused asset removal feature in GameMaker, and non-bundled scripts especially, as they have not been upgraded.)
+    - (Warning for 2024.13+: The first room in the game will have a new instance ID list which is not accessible from the UI, and may fall out of sync. None of the new features are accessible from the UI, either.)
+  Changed
+  - Improved zoom in the room editor by @luizzeroxis in #2060.
+  - ImportGraphics.csx and ImportGraphicsAdvanced.csx will now trim texture page items by @CST1229 in #2083.
+    - In addition to this, the scripts have been updated to support modern GameMaker collision mask formats. This means that collision masks will no longer generate unnecessarily for rectangle-shaped collisions (non-precise) in GameMaker 2022.9+, and that collision masks will generate at the size of the bounding box for GameMaker 2024.6+.
+    - Some related behavior (such as altering an existing sprite's width/height) has been changed. Let us know if there's any unexpected import behavior or bugs.
+  - Font editor now uses a gap of 2 pixels rather than 1 by @GFOXSH in #2057.
+  - Profile mode, while still existing for this release, has had its scope slightly reduced. It now has no effect whatsoever when disabled, and scripts will not work as well with it anymore.
+    - (If things go well, a new project system will be on the way to eventually obsolete profile mode.)
+  - The system used for file associations has been rewritten to act less frequently, and also prompt the user on first startup for whether it should be enabled. A corresponding setting has been added for it as well.
+  Fixed
+  - Legacy tile Source X/Y can now properly be negative by @crystallizedsparkle in #2037.
+  - Several room editor crashes to do with legacy tiles have been fixed.
+  - Another TouchControlsEnabler script fix by @NC-devC in #2058.
+  - Fix CLI file output when replacing larger older file by @Skirlez in #2063.
+  - A large number of GML-related issues have been resolved via the integration of the Underanalyzer compiler and decompiler.
+  Other Technical Changes
+  - GML code compilation & decompilation APIs have been entirely replaced to account for Underanalyzer, and to improve things in general. Scripts relying on the old APIs will need to be refactored in order to work in this version.
+  - Magick.NET (ImageMagick) library has undergone a major version upgrade with breaking changes. Scripts relying on it may need to be refactored in order to work in this version.
+  - The base class for lists in UndertaleModLib has been changed to a generic observable list by @colinator27 in #2072.
+  - Correction to XML API documentation for Tile.ObjectDefinition and Tile.spriteMode by @misternebula in #2104.
+  - Settings window has been refactored by @luizzeroxis in #2107.
+  - Various optimizations have been made across UndertaleModLib in an effort to speed up save/load times and reduce memory usage.
+  - Saving/loading data files through UndertaleModLib should now be thread-safe (most global static variables have been removed), enabling tests to be performed in parallel.
+    - Most other operations between two or more loaded data files should also be thread-safe, when not performed within the same data file context.
+  New Contributors
+  - @ChronoVortex made their first contribution in #1919
+  - @crystallizedsparkle made their first contribution in #2037
+  - @GFOXSH made their first contribution in #2057
+  - @AwfulNasty made their first contribution in #1489
+  - @misternebula made their first contribution in #2104
+  Full Changelog: 0.7.0.0...0.8.0.0
+ReleaseNotesUrl: https://github.com/UnderminersTeam/UndertaleModTool/releases/tag/0.8.0.0
+ManifestType: defaultLocale
+ManifestVersion: 1.9.0

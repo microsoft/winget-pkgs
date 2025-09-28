@@ -1,0 +1,43 @@
+id: labelAdded.urlValidationError
+name: GitOps.PullRequestIssueManagement
+description: Handlers when "URL-Validation-Error" label is added
+owner:
+resource: repository
+disabled: false
+where:
+configuration:
+  resourceManagementConfiguration:
+    eventResponderTasks:
+      - description: >-
+          When the label "URL-Validation-Error" is added to a pull request
+          * Add the PR specific reply notifying the issue author
+          * Assign to the Author
+          * Label with Needs-Author-Feedback
+          * Remove the Needs-Attention Label
+          * Remove the Azure-Pipeline-Passed Label
+        if:
+          - payloadType: Pull_Request
+          - labelAdded:
+              label: URL-Validation-Error
+        then:
+          - addReply:
+              reply: >-
+                Hello ${issueAuthor},
+
+
+                The package manager bot determined there was an issue with some of the URLs included in the manifest file. Please check the pull request for more details and make sure the urls are correct.
+
+
+                Template: msftbot/validationError/urls/smartScreen
+          - assignTo:
+              author: True
+          - addLabel:
+              label: Needs-Author-Feedback
+          - removeLabel:
+              label: Needs-Attention
+          - removeLabel:
+              label: Azure-Pipeline-Passed
+        # The policy service should trigger even when the label was added by the policy service
+        triggerOnOwnActions: true
+onFailure:
+onSuccess:

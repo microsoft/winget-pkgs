@@ -1,0 +1,23 @@
+id: automergeTriggers
+name: GitOps.PullRequestIssueManagement
+description: Handles enabling / disabling automerge
+owner:
+resource: repository
+disabled: false
+where:
+configuration:
+  resourceManagementConfiguration:
+    eventResponderTasks:
+      - description: Enable Auto Merge when the "Validation-Completed" label is present
+        if:
+          - payloadType: Pull_Request
+          - or:
+            - labelAdded:
+                label: Validation-Completed
+            - hasLabel:
+                label: Validation-Completed
+        then:
+          - enableAutoMerge:
+              mergeMethod: Squash
+onFailure:
+onSuccess:

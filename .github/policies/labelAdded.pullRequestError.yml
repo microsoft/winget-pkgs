@@ -1,0 +1,48 @@
+id: labelAdded.pullRequestError
+name: GitOps.PullRequestIssueManagement
+description: Handlers when "PullRequest-Error" label is added
+owner:
+resource: repository
+disabled: false
+where:
+configuration:
+  resourceManagementConfiguration:
+    eventResponderTasks:
+      - description: >-
+          When the label "PullRequest-Error" is added to a pull request
+          * Add a reply notifying the issue author
+          * Assign to the author
+          * Label with Needs-Author-Feedback
+        if:
+          - payloadType: Pull_Request
+          - labelAdded:
+              label: PullRequest-Error
+        then:
+          - addReply:
+              reply: >-
+                Hello ${issueAuthor},
+
+
+                The package manager bot determined there was an issue with the pull request. Make sure the manifest files are under the manifests\partition\publisher\appname\version directory and only one package version is being modified in your PR. The partition of the path must be the first letter of the publisher in lower-case.
+
+
+                Example:
+
+                Path: manifests / m / Microsoft / WindowsTerminal / 1.6.10571.0 / WindowsTerminal.yaml
+
+
+                For details on the error, see the details link below in the build pipeline.
+
+
+                You may also try the [Windows Package Manager Manifest Creator](https://github.com/microsoft/winget-create)
+
+
+                Template: msftbot/validationError/pullRequest
+          - assignTo:
+              author: True
+          - addLabel:
+              label: Needs-Author-Feedback
+        # The policy service should trigger even when the label was added by the policy service
+        triggerOnOwnActions: true
+onFailure:
+onSuccess:

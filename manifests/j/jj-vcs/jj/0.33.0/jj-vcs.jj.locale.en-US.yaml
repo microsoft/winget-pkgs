@@ -1,0 +1,145 @@
+# Created with komac v2.12.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: jj-vcs.jj
+PackageVersion: 0.33.0
+PackageLocale: en-US
+Publisher: jj-vcs
+PublisherUrl: https://github.com/jj-vcs
+PublisherSupportUrl: https://github.com/jj-vcs/jj/issues
+PackageName: jj
+PackageUrl: https://github.com/jj-vcs/jj
+License: Apache-2.0
+LicenseUrl: https://github.com/jj-vcs/jj/blob/HEAD/LICENSE
+ShortDescription: A Git-compatible VCS that is both simple and powerful
+Description: A Git-compatible VCS that is both simple and powerful
+Moniker: Jujutsu
+Tags:
+- cli
+- git
+- mercurial
+- vcs
+ReleaseNotes: |-
+  About
+  jj is a Git-compatible version control system that is both simple and powerful. See
+  the installation instructions to get started.
+  Release highlights
+  - jj undo is now sequential: invoking it multiple times in sequence
+    repeatedly undoes actions in the operation log. Previously, jj undo would
+    only undo the most recent operation in the operation log. As a result, a new
+    jj redo command has been added.
+  - Experimental support for improving query performance over filesets and file
+    queries (like jj log path/to/file.txt) has been added. This is not enabled
+    by default. To enable this, you must use the jj debug index-changed-paths
+    command.
+  Breaking changes
+  - jj evolog templates now accept CommitEvolutionEntry as context type. To
+    get Commit properties, use commit.<method>(). To customize the default
+    output, set templates.evolog instead of templates.log.
+  - jj op show now uses templates.op_show configuration for its default template
+    instead of templates.op_log.
+  - The deprecated config option git.auto-local-branch has been removed. Use
+    git.auto-local-bookmark instead.
+  - The deprecated Signature.username() template method has been removed. Use
+    Signature.email().local() instead.
+  - The deprecated --config-toml flag has been removed. Use
+    --config=NAME=VALUE or --config-file=PATH instead.
+  - jj undo can now undo multiple operations progressively by calling it
+    repeatedly, whereas previously, running jj undo twice was previously a no-op
+    (it only undid the last change).
+  - jj git fetch will now only fetch the refspec patterns configured on remotes
+    when the --bookmark option is omitted. Only simple refspec patterns are
+    currently supported, and anything else (like refspecs which rename branches)
+    will be ignored.
+  - The conflict label used for coloring log graph nodes was renamed to
+    conflicted.
+  Deprecations
+  - The on-disk index format has changed. jj will write index files in both old
+    and new formats, so old jj versions should be able to read these index
+    files. This compatibility layer will be removed in a future release.
+  - jj op undo is deprecated in favor of jj op revert. (jj undo is still
+    available, but with new semantics. See also the breaking changes above.)
+  - The argument <operation> of jj undo is deprecated in favor of
+    jj op revert <operation>.
+  - The --what flag on jj undo is deprecated. Consider using
+    jj op restore --what instead.
+  New features
+  - The new command jj redo can progressively redo operations that were
+    previously undone by multiple calls to jj undo.
+  - Templates now support any() and all() methods on lists to check whether
+    any or all elements satisfy a predicate. Example: parents.any(|c| c.mine())
+    returns true if any parent commit is authored by the user.
+  - Add experimental support for indexing changed paths, which will speed up jj log PATH query, jj file annotate, etc. The changed-path index can be
+    enabled by jj debug index-changed-paths command. Indexing may take tens of
+    minutes depending on the number of merge commits. The indexing command UI is
+    subject to change. #4674
+  - jj config list now supports -T'json(self) ++ "\n"' serialization output.
+  - jj file show now accepts -T/--template option to insert file metadata.
+  - The template language now allows arbitrary whitespace between any operators.
+  - The new configuration option git.colocate=boolean controls whether or not
+    Git repositories are colocated by default.
+  - Both jj git clone and jj git init now take a --no-colocate flag to
+    disable colocation (in case git.colocate is set to true.)
+  - jj git remote add and jj git clone now support --fetch-tags to control
+    when tags are fetched for all subsequent fetches.
+  - jj git fetch now supports --tracked to fetch only tracked bookmarks.
+  - jj diff --stat now shows the change in size to binary files.
+  - jj interdiff, jj evolog -p, and jj op log -p now show diff of commit
+    descriptions.
+  - jj log and jj op log output can now be anonymized with the
+    builtin_log_redacted and builtin_op_log_redacted templates.
+  - jj git init now checks for an upstream remote in addition to origin when
+    setting the repository-level trunk() alias. The upstream remote takes
+    precedence over origin if both exist.
+  - Add the jj metaedit command, which modifies a revision's metadata. This can
+    be used to generate a new change-id, which may help resolve some divergences.
+    It also has options to modify author name, email and timestamp, as well as to
+    modify committer timestamp.
+  - Filesets now support case-insensitive glob patterns with the glob-i:,
+    cwd-glob-i:, and root-glob-i: pattern kinds. For example, glob-i:"*.rs"
+    will match both file.rs and FILE.RS.
+  - jj op show now accepts -T/--template option to customize the operation
+    output using template expressions, similar to jj op log. Also added
+    --no-op-diff flag to suppress the operation diff.
+  - A nearly identical string pattern system as revsets is now supported in the
+    template language, and is exposed as string.match(pattern).
+  Fixed bugs
+  - jj git clone now correctly fetches all tags, unless --fetch-tags is
+    explicitly specified, in which case the specified option will apply for both
+    the initial clone and subsequent fetches.
+  - Operation and working-copy state files are now synchronized to disk on save.
+    This will mitigate data corruption on system crash.
+    #4423
+  Packaging changes
+  - The test suite no longer optionally uses Taplo CLI or jq, and packagers can
+    remove them as dependencies if present.
+  Contributors
+  - Austin Seipp (@thoughtpolice)
+  - Benjamin Tan (@bnjmnt4n)
+  - Christian Hufnagel (@OvidiusCicero)
+  - Clément (@drawbu)
+  - Daniel Luz (@mernen)
+  - Emily (@emilazy)
+  - Evan Martin (@evmar)
+  - Gaëtan Lehmann (@glehmann)
+  - George Christou (@gechr)
+  - Graham Christensen (@grahamc)
+  - Hegui Dai (@Natural-selection1)
+  - Ian Wrzesinski (@isuffix)
+  - Ilya Grigoriev (@ilyagr)
+  - Isaac Corbrey (@icorbrey)
+  - Ivan Petkov (@ipetkov)
+  - Joaquín Triñanes (@JoaquinTrinanes)
+  - Kaiyi Li (@06393993)
+  - Martin von Zweigbergk (@martinvonz)
+  - Nigthknight (@nigthknight)
+  - Nikhil Marathe (@nikhilm)
+  - Remo Senekowitsch (@senekor)
+  - Tijs-B (@Tijs-B)
+  - Yuya Nishihara (@yuja)
+ReleaseNotesUrl: https://github.com/jj-vcs/jj/releases/tag/v0.33.0
+Documentations:
+- DocumentLabel: Homepage
+  DocumentUrl: https://jj-vcs.github.io/jj/
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

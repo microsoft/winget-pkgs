@@ -1,0 +1,147 @@
+# Created with YamlCreate.ps1 v2.4.1 $debug=NVS1.CRLF.7-4-2.Win32NT
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.6.0.schema.json
+
+PackageIdentifier: Ccache.Ccache
+PackageVersion: "4.10"
+PackageLocale: en-US
+Publisher: Joel Rosdahl
+PublisherUrl: https://ccache.dev/
+PublisherSupportUrl: https://github.com/ccache/ccache/discussions
+# PrivacyUrl:
+Author: Joel Rosdahl, Andrew “Tridge” Tridgell, and Ccache Contributors
+PackageName: Ccache
+PackageUrl: https://github.com/ccache/ccache
+License: GPL-3.0
+LicenseUrl: https://ccache.dev/license.html
+# Copyright:
+# CopyrightUrl:
+ShortDescription: Ccache is a compiler cache. It speeds up recompilation by caching previous compilations and detecting when the same compilation is being done again.
+Description: Ccache is a compiler cache. It speeds up recompilation by caching previous compilations and detecting when the same compilation is being done again. Ccache is free software, released under the GNU General Public License version 3 or later.
+Moniker: ccache
+Tags:
+- c
+- c++
+- ccache
+- compilation
+- cross-platform
+- open-source
+- optimization
+- speedup
+ReleaseNotes: |-
+  New features and improvements
+    - Added support for GCC option `-fcallgraph-info`.
+      [contributed by Raihaan Shouhell]
+
+    - Added support for GCC option `-fprofile-update`.
+      [contributed by Raihaan Shouhell]
+
+    - Added support for GCC option `-fdump-ipa-clones`.
+      [contributed by Jiri Slaby]
+
+    - Added support for the MSVC `/Yc` option (precompiled header).
+      [contributed by Clemens Wasser, Thomas Ferrand and Silver Zachara]
+
+    - Added support for the MSVC `/Tc<path>` and `/Tp<path>` options (specifying source code type).
+      [contributed by Joel Rosdahl]
+
+    - Added an experimental inode cache implementation for Windows. This speeds up ccache a lot when many headers are included, both for cache hits and cache misses.
+
+    > NOTE:
+    > This feature is currently disabled by default, but interested Windows users are encouraged to try it out by setting [inode_cache = true](https://ccache.dev/manual/4.10.html#config_inode_cache).
+
+      [contributed by Thomas Ferrand]
+
+    - Added knowledge of Xcode option `-ivfsstatcache`.
+      [contributed by Joel Rosdahl]
+
+    - Added support for Apple Clang option `-Xpreprocessor -fopenmp` in direct mode.
+      [contributed by Joel Rosdahl]
+
+    - Added knowledge of Emscripten option `--em-config`.
+      [contributed by Byoungchan Lee]
+
+    - Reduced the risk of false positive direct mode hits.
+      [contributed by Joel Rosdahl]
+
+    - Clear direct mode manifest on recache.
+      [contributed by Joel Rosdahl]
+
+    - Optimized file reading on Windows.
+      [contributed by Clemens Wasser]
+
+    - Optimized file copying performed when [hard linking](https://ccache.dev/manual/4.10.html#config_hard_link) or [file cloning](https://ccache.dev/manual/4.9.html#config_file_clone) is enabled.
+      [contributed by Raihaan Shouhell]
+
+    - Use `posix_spawn(3)` for executing compiler check commands.
+      [contributed by Brendan Shanks]
+
+    - The [prefix_command](https://ccache.dev/manual/4.10.html#config_prefix_command) and [prefix_command_cpp](https://ccache.dev/manual/4.10.html#config_prefix_command_cpp) configuration options now allow any prefix, not only programs that exist in `PATH`. This means that prefix_command now can be a program with arguments.
+      [contributed by Joel Rosdahl]
+
+    - Added a new `incbin` [sloppiness](https://ccache.dev/manual/4.10.html#config_sloppiness) value for ignoring presence of `.incbin` directives in the source code.
+      [contributed by Raihaan Shouhell]
+
+    - Added a `--print-log-stats` option that prints a machine-parsable variant of `--show-log-stats`.
+      [contributed Kaspar Schleiser]
+
+    - Added a `--format` option for selecting JSON or tab format for `--print-stats` and `--print-log-stats`.
+      [contributed Kaspar Schleiser]
+
+    - Added a `--print-version` option for printing ccache version in machine-parsable format.
+      [contributed by Silver Zachara]
+
+    - The `--inspect` option now retains access time (atime) of the inspected file if possible.
+      [contributed by Joel Rosdahl]
+
+  Bug fixes
+    - Fixed reading of files larger than 2^31 bytes on some systems where this was a problem.
+      [contributed by Joel Rosdahl]
+
+    - Improved handling of large files on 32-bit systems.
+      [contributed by Joel Rosdahl]
+
+    - Nonexistent include files are allowed in preprocessor mode again, fixing regression in ccache 4.9.1.
+      [contributed by Joel Rosdahl]
+
+    - The Clang `-fdiagnostics-color` option is now handled again, fixing regression in ccache 4.6.2.
+      [contributed by Joel Rosdahl]
+
+    - Fixed assertion failure on Windows mapped network drives.
+      [contributed by Joel Rosdahl]
+
+    - Fixed handling of MSVC options `/Fp` and `/Yu`.
+      [contributed by Silver Zachara]
+
+    - Fixed lock file implementation on MSYS2.
+      [contributed by an anonymous user]
+
+    - The “apparent real path” of the object file is now added to the input hash when using `-fprofile-arcs` to avoid false positive hits in some scenarios.
+      [contributed by Joel Rosdahl]
+
+    - When generating profiling information, [run_second_cpp](https://ccache.dev/manual/4.10.html#config_) is now forced to true so that the coverage report won’t refer to a temporary preprocessed file.
+      [contributed by Joel Rosdahl]
+
+  Build improvements
+    - Improved handling of ccache dependencies. A new `DEPS` CMake variable selects how software library dependencies should be located or retrieved, replacing the old `HIREDIS_FROM_INTERNET`, `ZSTD_FROM_INTERNET` and `OFFLINE` variables. Options are `AUTO` (the default) for automatically downloading missing dependencies, `DOWNLOAD` for always downloading and `LOCAL` for never downloading. See [Software library dependencies](https://github.com/ccache/ccache/blob/v4.10/doc/INSTALL.md#software-library-dependencies) for details.
+      [contributed by Joel Rosdahl]
+
+    - Added support for using a local installation of BLAKE3, cpp-httplib, nonstd-span and tl-expected instead of linking to bundled copies.
+      [contributed by Joel Rosdahl]
+
+    - Removed bundled copies of doctest, fmt, getopt_long and xxhash.
+      [contributed by Joel Rosdahl]
+
+    - Changed to use the Windows BLAKE3 implementation when building on MSYS2.
+      [contributed by Joel Rosdahl]
+
+  Documentation improvements
+    - Improved documentation of “gcno_cwd sloppiness”.
+      [contributed by Joel Rosdahl]
+ReleaseNotesUrl: https://ccache.dev/releasenotes.html#_ccache_4_10
+# PurchaseUrl:
+# InstallationNotes:
+Documentations:
+- DocumentLabel: Ccache Manual
+  DocumentUrl: https://ccache.dev/manual/4.10.html
+ManifestType: defaultLocale
+ManifestVersion: 1.6.0

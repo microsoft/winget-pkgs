@@ -1,0 +1,243 @@
+id: labelManagement.issueOpened
+name: GitOps.PullRequestIssueManagement
+description: Handlers for when an issue is first opened
+owner:
+resource: repository
+disabled: false
+where:
+configuration:
+  resourceManagementConfiguration:
+    eventResponderTasks:
+      - description: >-
+          When a PR is opened/updated, if no files are modified
+          * Close the issue
+          * Add a comment
+        if:
+          - payloadType: Pull_Request
+          - isOpen
+          - or:
+              - isAction:
+                  action: Opened
+              - isAction:
+                  action: Synchronize
+          - filesMatchPattern:
+                pattern: ^$
+        then:
+          - addReply:
+              reply: >-
+                Hello ${issueAuthor},
+
+
+                This pull request does not update any files. Please review your commit history and resubmit.
+
+
+                Template: msftbot/validationError/pullRequest/noContent
+          - closePullRequest
+      - description: Add CodeFlow link and Pipeline Status to new PRs
+        if:
+          - payloadType: Pull_Request
+          - isAction:
+              action: Opened
+        then:
+          - addCodeFlowLink
+          - addReply:
+              reply: >-
+                [![Validation Pipeline Badge](https://img.shields.io/endpoint?url=https://winget-validation-pme-f8gqfjhzacawbecy.z01.azurefd.net/api/GetServiceComponentStatusBadge?component=ValidationPipeline "Validation Pipeline Badge")](https://dev.azure.com/shine-oss/winget-pkgs/_build?definitionId=14)&nbsp;[![Publish Pipeline Badge](https://img.shields.io/endpoint?url=https://winget-validation-pme-f8gqfjhzacawbecy.z01.azurefd.net/api/GetServiceComponentStatusBadge?component=PublishPipeline "Publish Pipeline Badge")](https://dev.azure.com/shine-oss/winget-pkgs/_build?definitionId=12)
+          # If the user is a first-time contributor, add the Needs-CLA Label
+          - if:
+              - activitySenderHasAssociation:
+                  association: FIRST_TIME_CONTRIBUTOR
+            then:
+              - addLabel:
+                  label: Needs-CLA
+      - description: Add Needs-Triage to new issues
+        if:
+          - payloadType: Issues
+          - isAction:
+              action: Opened
+        then:
+          - addLabel:
+              label: Needs-Triage
+      - description: >-
+          When a pull request is opened, if the files match DevOpsPipelineDefinitions/*
+          * Add a message to the author
+          * Assign to the author
+          * Add the "Needs-Author-Feedback" label
+        if:
+          - payloadType: Pull_Request
+          - filesMatchPattern:
+              pattern: DevOpsPipelineDefinitions/*
+          - not:
+              filesMatchPattern:
+                pattern: ^$
+          - or:
+              - activitySenderHasPermission:
+                  permission: Read
+              - activitySenderHasPermission:
+                  permission: None
+        then:
+          - addReply:
+              reply: >-
+                Hello ${issueAuthor},
+
+
+                Sorry we cannot process ${number} because you are changing validation-pipeline.yaml. Please remove that file from your PR. If you would like to discuss changes to validation-pipeline.yml, please file an issue.
+
+
+                Template: msftbot/pipelineModified
+          - assignTo:
+              author: True
+          - addLabel:
+              label: Needs-Author-Feedback
+      - description: >-
+          When a pull request is opened, if the files are Yaml files, are not in the Manifests folder, and are not in DevOpsPipelineDefinitions
+          * Add a message to the author
+          * Assign to the author
+          * Add the "Needs-Author-Feedback" label
+          * Add the "Manifest-Path-Error" label
+        if:
+          - payloadType: Pull_Request
+          - not:
+              filesMatchPattern:
+                pattern: ^$
+          - not:
+              filesMatchPattern:
+                pattern: ^manifests/*
+          - not:
+              filesMatchPattern:
+                pattern: DevOpsPipelineDefinitions
+          - not:
+              filesMatchPattern:
+                pattern: ^.configurations/.*
+          - not:
+              filesMatchPattern:
+                pattern: ^.github/.*
+          - filesMatchPattern:
+              pattern: ^.*\.yaml
+        then:
+          - addReply:
+              reply: >-
+                Hello ${issueAuthor},
+
+
+                It looks like this pull request is missing the manifests folder. For example: manifests\<first letter of the publisher in lower-case>\<publisher>\<application>\<version>\*.yaml
+
+
+                Please review the path of your manifest file and resubmit.
+
+
+                Template: msftbot/validationError/manifest/missingManifestsFolder
+          - assignTo:
+              author: True
+          - addLabel:
+              label: Needs-Author-Feedback
+          - addLabel:
+              label: Manifest-Path-Error
+      - description: >-
+          When an issue is opened, if the content contains "Hash Mismatch" or "Hash does not match" (case insensitive)
+          * Add the Package-Update label
+          * Add the Error-Hash-Mismatch label
+        if:
+          - payloadType: Issues
+          - isAction:
+              action: Opened
+          - bodyContains:
+              pattern: (?i)hash[\s-](mismatch|does\snot\smatch)
+              isRegex: True
+        then:
+          - addLabel:
+              label: Package-Update
+          - addLabel:
+              label: Error-Hash-Mismatch # It's okay to add this label to issues since the labelAdded.errorHashMismatch triggers only respond to PRs
+          - removeLabel:
+              label: Issue-Bug
+      - description: >-
+          When an issue is opened, if the content contains "A change to the package metadata"
+          * Add the Package-Metadata label
+          * Remove the Package-Update label
+        if:
+          - payloadType: Issues
+          - isAction:
+              action: Opened
+          - bodyContains:
+              pattern: A change to the package metadata
+              isRegex: false
+        then:
+          - addLabel:
+              label: Package-Metadata
+          - removeLabel:
+              label: Package-Update
+      - description: >-
+          When a PR is opened/updated, if the content is in a project folder and user is not repo admin
+          * Add Project-File label
+        if:
+          - payloadType: Pull_Request
+          - isOpen
+          - not:
+              filesMatchPattern:
+                pattern: ^$
+          - or:
+            - filesMatchPattern:
+                pattern: ^.github\\.*
+            - filesMatchPattern:
+                pattern: ^.configurations\\.*
+            - filesMatchPattern:
+                pattern: ^.vscode\\.*
+            - filesMatchPattern:
+                pattern: ^doc\\.*
+            - filesMatchPattern:
+                pattern: ^Tools\\.*
+            - filesMatchPattern:
+                pattern: ^.*\.md$
+          - not:
+              activitySenderHasPermission:
+                permission: Admin
+        then:
+          - addLabel:
+              label: Project-File
+      - description: >-
+          When a PR is opened/updated, if the content contains .validation and user is not repo admin
+          * Add Author-Not-Authorized label
+        if:
+          - payloadType: Pull_Request
+          - isOpen
+          - not:
+              filesMatchPattern:
+                pattern: ^$
+          - filesMatchPattern:
+                pattern: ^.*\.validation
+          - not:
+              activitySenderHasPermission:
+                permission: Admin
+        then:
+          - addLabel:
+              label: Author-Not-Authorized
+      - description: >-
+          When a PR is opened/updated, if a change is made under the fonts directory and user is not repo admin
+          * Add Author-Not-Authorized label
+          * Add a reply to the author
+        if:
+          - payloadType: Pull_Request
+          - isOpen
+          - not:
+              filesMatchPattern:
+                pattern: ^$
+          - filesMatchPattern:
+                pattern: ^fonts[\/\\].*
+          - not:
+              activitySenderHasPermission:
+                permission: Admin
+        then:
+          - addReply:
+              reply: >-
+                Hello ${issueAuthor},
+
+
+                It appears you are making a change under the 'fonts' directory. The community repository currently does not accept contributions to the fonts directory.
+
+
+                Template: msftbot/authorNotAuthorized/fonts
+          - addLabel:
+              label: Author-Not-Authorized
+onFailure:
+onSuccess:

@@ -1,0 +1,43 @@
+id: labelAdded.manifestVersionDeprecated
+name: GitOps.PullRequestIssueManagement
+description: Handlers when "Manifest-Version-Deprecated" label is added
+owner:
+resource: repository
+disabled: false
+where:
+configuration:
+  resourceManagementConfiguration:
+    eventResponderTasks:
+      - description: >-
+          When the label "Manifest-Version-Deprecated" is added to a pull request
+          * Add the PR specific reply notifying the issue author
+          * Assign to the Author
+          * Label with Needs-Author-Feedback
+          * Remove the Needs-Attention Label
+        if:
+          - payloadType: Pull_Request
+          - labelAdded:
+              label: Manifest-Version-Deprecated
+        then:
+          - addReply:
+              reply: >-
+                Hello ${issueAuthor},
+
+
+                The package manager bot determined that the Manifest Version used in your submission has been deprecated in this repository. Please update your submission to use a newer manifest version. If you have used a tool like [WingetCreate](https://github.com/microsoft/winget-create) or [YamlCreate](https://github.com/microsoft/winget-pkgs/blob/master/doc/tools/YamlCreate.md), you may need to update to the latest version of the tool.
+
+
+                For details on the specific error, see the details link below in the build pipeline.
+
+
+                Template: msftbot/validationError/manifest/version/deprecated
+          - assignTo:
+              author: True
+          - addLabel:
+              label: Needs-Author-Feedback
+          - removeLabel:
+              label: Needs-Attention
+        # The policy service should trigger even when the label was added by the policy service
+        triggerOnOwnActions: true
+onFailure:
+onSuccess:

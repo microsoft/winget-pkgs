@@ -1,0 +1,197 @@
+# Created with YamlCreate.ps1 v2.4.3 $debug=AUSU.CRLF.7-4-6.Win32NT
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
+
+PackageIdentifier: GnuPG.Gpg4win
+PackageVersion: 4.2.0
+PackageLocale: en-US
+Publisher: The Gpg4win Project
+PublisherUrl: https://www.gpg4win.org
+PublisherSupportUrl: https://www.gpg4win.org/support.html
+PrivacyUrl: https://www.gpg4win.org/privacy-policy.html
+Author: The Gpg4win Project
+PackageName: Gpg4win
+PackageUrl: https://www.gpg4win.org/index.html
+License: GNU General Public License (GNU GPL)
+LicenseUrl: https://www.gpg4win.org/license.html
+Copyright: Copyright (C) 2019 g10 Code GmbH
+CopyrightUrl: https://www.gpg4win.org/license.html
+ShortDescription: Gpg4win - a secure solution for file and email encryption.
+Description: Gpg4win enables users to securely transport emails and files with the help of encryption and digital signatures. Encryption protects the contents against an unwanted party reading it. Digital signatures make sure that it was not modified and comes from a specific sender.
+Moniker: gpg4win
+Tags:
+- cryptology
+ReleaseNotes: |
+  Included Gpg4win components in version 4.2.0 are:
+
+      GnuPG:          2.4.3
+      Kleopatra:      3.1.28
+      Okular:         23.07.70-patched
+      GpgOL:          2.5.8
+      GpgEX:          1.0.9
+      Kompendium DE:  4.0.1
+      Compendium EN:  3.0.0
+
+
+  New in Gpg4win version 4.2.0 (2023-07-14)
+  -----------------------------------------
+
+  --- General ---
+
+  - Okular (GnuPG Edition): Gpg4win has been extended with the popular
+    Okular PDF Viewer.  Although our Okular version is currently considered
+    experimental and therefore not installed by default, this provides the
+    ability to legally sign and verify documents with the S/MIME certificates
+    and smart cards GnuPG supports.
+    The GnuPG Edition of Okular is optimized to be lightweight and to provide
+    as little attack surface as possible. It does not support any active
+    content like JavaScript or media files in PDF documents. It should
+    therefore be more suitable in high security environments than other
+    PDF readers.
+
+    See: https://www.gpg4win.org/version4.2.html
+
+  - GnuPG: The new component "keyboxd" is now enabled by default for new users
+    of Gpg4win. keyboxd stores certificates (public keys) in an sqlite
+    database and keeps it in memory.  The resulting performance improvement
+    can be quite large especially for users with large keyrings.
+
+    Adventuresome users can enable it manually:
+    Select all certificates in Kleopatra and export them with a right click.
+    Add a file %APPDATA%\gnupg\common.conf with the contents
+    "use-keyboxd" (without the quote marks), then restart Kleopatra and
+    import your certificates again.
+
+    As usual we caution to make a backup of the %APPDATA%\gnupg directory
+    before modifying files in there.
+
+    To switch back to the old behavior, add a "#" character in front of
+    the "use-keyboxd" and restart Kleopatra. Where applicable you have to
+    export the certificate before and import them again after the restart.
+
+  - mkportable has been removed. Please see:
+    https://wiki.gnupg.org/Gpg4win/PortableVersion
+    on how to create a portable version of Gpg4win.
+
+  --- Features ---
+
+  - Kleopatra: Folder encryption and decryption (gpgtar) has been completely
+    reworked so that it now has roughly the same performance as on the
+    command line. The new architecture also allows for further performance
+    improvements in the future and is much more robust.  And solves several
+    issues.  [T5478 T6488 T6499 et.al.]
+
+  - Kleopatra: The progress indicator now also works for very large data
+    files. [T6534]
+
+  - Kleopatra: It is now possible to rename the output file, if a file
+    with the same name already exists, instead of just overwriting or
+    canceling. [T6372]
+
+  - Kleopatra: It is now offered to delete the secret key on the computer
+    after it was successfully transferred to a smart card. [T5836]
+
+  - Kleopatra: Added warnings when your certificate or other certificates
+    in your keyring are about to expire.  The warnings are configurable
+    and should allow a smoother switch to a new or extended certificate.
+    [T6452]
+
+  - Kleopatra: The Notepad now also uses the last chosen certificates for
+    signing and self-encryption as default.
+    The values are shared with file encryption.[T6415]
+
+  - Kleopatra: The startup time of Kleopatra has been slightly improved.
+    [T6259]
+
+  - Kleopatra: The certificate selection input and dropdown fields are now
+    alphabetically sorted. [T6492, T6514]
+
+  - Kleopatra: Backed up subkeys can now be restored through the UI even when
+    they were used from a smart card in between. [T3456, T3391]
+
+  - Kleopatra: For certifications of public keys it is now possible to
+    configure a default validity period. [T6452]
+
+  - Kleopatra: When extending the validity period of a certificate,
+    the default for new ones is now preset. [T6479]
+
+  - Kleopatra: The default validity of new certificates is now three years
+    instead of two. This can be changed through configuration. [T2701]
+
+  - GpgOL: Now offers to create a OpenPGP certificate, if none with
+    signing capability exists and only signing is requested. [T5869]
+
+  - GnuPG: The PKCS#12 (.p12 files) parser has been rewritten to increase
+    compatibility with other PKCS#12 implementations. [T6536]
+
+  - GnuPG: S/MIME certificate listings have been sped up on Windows.
+    [rG08ff55bd44]
+
+  - GnuPG: A new option "ADSK" has been added to signal the intention that
+    messages should be encrypted to multiple subkeys.
+    [T6395, https://gnupg.org/blog/20230321-adsk.html]
+
+  - GnuPG: There are now more compressed formats detected for which GnuPG then
+    automatically disables its builtin compression. This can result in
+    significant speed ups. [T6332]
+
+  --- Bug fixes ---
+
+  - Kleopatra: An accidental timeout when creating checksum files has been
+    removed. This could result in empty or incomplete checksum files. [T6573]
+
+  - Kleopatra: The validity period of all subkeys is now extended
+    even if the primary key was already expired.
+    This fixes the case where seemingly extended keys were no
+    longer usable for encryption. [T6473]
+
+  - Kleopatra: A rare occurrence, where encryption only keys would be offered
+    as signing keys, has been fixed. [T6456]
+
+  - Kleopatra: Some obsolete configuration options have been removed.
+    [T6326 T6327]
+
+  - Kleopatra: The button "What's this" in the right upper corner has
+    been removed, since it was only used in very few places. [T6318]
+
+  - Kleopatra: Canceling file operations now reliably cancels the underlying
+    backend operations, too. [T6524]
+
+  - Kleopatra: A number of encoding problems when displaying output from the
+    backend have been solved. [T5960]
+
+  - Kleopatra: A cause for longer loading time of the certificate list at
+    startup was fixed. [T6261]
+
+  - Kleopatra: Selecting cancel when exporting a secret subkey now properly
+    cancels instead of creating a file without the secret part. [T5755]
+
+  - Kleopatra: When importing secret keys you do not want to mark as your own,
+    it is no longer asked multiple times if it is your own key. [T6474]
+
+  - GnuPG/Kleopatra: Error handling for permission and write errors has
+    been improved across the board. [T6528]
+
+  - GpgOL: An issue has been fixed where crypto mails would show up empty
+    if text/plain display was preferred. [T6357]
+
+  - GpgOL: Fixed a crash that occurred when encrypting a mail with an
+    attachment without a file name. [T6546]
+
+  - GpgOL: Category and flag changes now work again if the mail is
+    not displayed in a decrypted state when they are made. [T4127]
+
+  - GpgOL: Added safeguards against a plain text leak back to the server
+    in a specific unusual configuration. (dd3ff839)
+
+  - GnuPG: For a full list of the backend changes between GnuPG 2.4.0 in
+    Gpg4win-4.1.0 and GnuPG 2.4.3 in Gpg4win-4.2.0 please see:
+
+    2.4.1: https://lists.gnupg.org/pipermail/gnupg-announce/2023q2/000478.html
+    2.4.2: https://lists.gnupg.org/pipermail/gnupg-announce/2023q2/000479.html
+    2.4.3: https://lists.gnupg.org/pipermail/gnupg-announce/2023q3/000480.html
+ReleaseNotesUrl: https://files.gpg4win.org/README-4.2.0.en.txt
+# PurchaseUrl:
+# InstallationNotes:
+# Documentations:
+ManifestType: defaultLocale
+ManifestVersion: 1.9.0

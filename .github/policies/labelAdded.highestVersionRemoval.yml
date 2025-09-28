@@ -1,0 +1,43 @@
+id: labelAdded.highestVersionRemoval
+name: GitOps.PullRequestIssueManagement
+description: Handlers when "Highest-Version-Removal" label is added
+owner:
+resource: repository
+disabled: false
+where:
+configuration:
+  resourceManagementConfiguration:
+    eventResponderTasks:
+      - description: >-
+          When the label "Highest-Version-Removal" is added to a pull request
+          * Add a reply notifying the issue author
+          * Assign to the author
+          * Label with Needs-Author-Feedback
+        if:
+          - payloadType: Pull_Request
+          - labelAdded:
+              label: Highest-Version-Removal
+        then:
+          - addReply:
+              reply: >-
+                Hello ${issueAuthor},
+
+
+                This PR removes the highest available version of the package from the repository.
+
+
+                Please provide the reason for removal to help our moderators understand the context.
+
+
+                (This might be in error if the version is switching from semantic to string, or string to semantic.)
+
+
+                Template: msftbot/highestVersionRemoval
+          - assignTo:
+              author: True
+          - addLabel:
+              label: Needs-Author-Feedback
+        # The policy service should trigger even when the label was added by the policy service
+        triggerOnOwnActions: true
+onFailure:
+onSuccess:

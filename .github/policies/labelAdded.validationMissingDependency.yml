@@ -1,0 +1,46 @@
+id: labelAdded.validationMissingDependency
+name: GitOps.PullRequestIssueManagement
+description: Handlers when "Validation-Missing-Dependency" label is added
+owner:
+resource: repository
+disabled: false
+where:
+configuration:
+  resourceManagementConfiguration:
+    eventResponderTasks:
+      - description: >-
+          When the label "Validation-Missing-Dependency" is added to a pull request
+          * Add a reply notifying the issue author
+          * Assign to the author
+          * Label with Needs-Author-Feedback
+          * Label with Dependencies
+          * Remove Azure-Pipeline-Passed label
+          * Remove Needs-Attention label
+        if:
+          - payloadType: Pull_Request
+          - labelAdded:
+              label: Validation-Missing-Dependency
+        then:
+          - addReply:
+              reply: >-
+                Hello ${issueAuthor},
+
+
+                The validation pipeline could not locate a specified dependency. Please review the spelling and check whether the dependency is associated with a different identifier.
+
+
+                Template: msftbot/validationError/missingDependency
+          - assignTo:
+              author: True
+          - addLabel:
+              label: Needs-Author-Feedback
+          - addLabel:
+              label: Dependencies
+          - removeLabel:
+              label: Azure-Pipeline-Passed
+          - removeLabel:
+              label: Needs-Attention
+        # The policy service should trigger even when the label was added by the policy service
+        triggerOnOwnActions: true
+onFailure:
+onSuccess:
