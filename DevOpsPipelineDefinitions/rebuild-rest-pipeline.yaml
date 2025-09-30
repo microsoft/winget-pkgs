@@ -38,19 +38,6 @@ extends:
         - checkout: none
           persistCredentials: true
 
-        - powershell: |
-            Start-Process msiexec -ArgumentList ' /x {37CCEB8D-306A-4DB4-B25B-7608A093D184} /qn' -NoNewWindow -Wait
-          displayName: "Uninstall Azure CLI"
-
-        - powershell: |
-            Invoke-WebRequest -Uri "https://azurecliprod.blob.core.windows.net/msi/azure-cli-2.76.0-x64.msi" -OutFile "azure-cli-2.76.0.msi"
-            Start-Process msiexec -ArgumentList '/i "azure-cli-2.76.0.msi" /quiet /norestart' -NoNewWindow -Wait
-          displayName: "Install Azure CLI 2.76.0"
-
-        - script: |
-            az version
-          displayName: "Check Azure CLI version"
-
         # Downloads all the setup files and its dependencies.
         - task: AzureCLI@1
           displayName: 'Azure Setup'
