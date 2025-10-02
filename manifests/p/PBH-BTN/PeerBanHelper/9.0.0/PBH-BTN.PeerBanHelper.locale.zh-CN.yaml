@@ -1,0 +1,89 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.10.0.schema.json
+
+PackageIdentifier: PBH-BTN.PeerBanHelper
+PackageVersion: 9.0.0
+PackageLocale: zh-CN
+Publisher: PBH-BTN Community
+PublisherUrl: https://github.com/PBH-BTN
+PublisherSupportUrl: https://github.com/PBH-BTN/PeerBanHelper/issues
+PackageName: PeerBanHelper
+PackageUrl: https://github.com/PBH-BTN/PeerBanHelper
+License: GPL-3.0
+LicenseUrl: https://github.com/PBH-BTN/PeerBanHelper/blob/HEAD/LICENSE
+ShortDescription: 自动封禁不受欢迎、吸血和异常的 BT 客户端，并支持自定义规则。
+Tags:
+- bt
+- 种子
+ReleaseNotes: |-
+  新功能
+  【实验室】AutoSTUN
+  @Gaojianli @Ghost-chu @paulzzh @azicen @KagurazakaNyaa
+  为无公网地址的私网 NAT1 用户提供自动化 NAT 打洞功能，简化穿透流程。
+  AutoSTUN 可以在 NAT 出口的 IP 地址上打开一个端口，以获得近似公网的连接性，并提高任务的下载/上传速度。
+  支持的下载器：qBittorrent, Transmission, BiglyBT, BitComet v2.16 或更高版本
+  PeerBanHelper 不受通过 AutoSTUN 创建的连接的用户空间转发带来的原始 IP 地址丢失的影响，将能够自动还原其正确的 IP 地址信息。同时还能够直接阻断被封禁的 IP 请求隧道入口的连接尝试。
+  另外，PBH 还提供了一个简洁、直观的连接状态表，以便快速了解通过隧道的连接的统计和 GeoIP 信息。
+  AutoSTUN 配置 隧道状态 连接表
+
+  根据所使用的操作系统不同，PeerBanHelper 会在 io_uring, epoll, kqueue, nio 中自动选择性能最好的连接处理接口。
+  对于使用 Docker 的用户，要使用此功能，PeerBanHelper 必须运行在 host 网络驱动模式下。
+  为确保功能正常工作，建议启用光猫、路由器上的 UPnP 服务，并配置 DMZ。
+  拒绝服务攻击保护模块
+  @Ghost-chu @Gaojianli
+  新的功能模块能够帮助下载器识别占用连接池的无效连接，并断开它们。如果一个 Peer 连接到下载器握手后不进行任何响应，则在一段时间后 PeerBanHelper 将短暂封禁它们来断开其连接，以释放有限的连接池资源，避免连接池耗尽下载器无法连接其它 Peer，或者耗尽 ISP 的最大连接数限制导致断网。
+  这是一个实验性质的模块，默认处于禁用状态。若要使其生效，请启用对应模块并重新启动 PeerBanHelper。
+  同时有关此问题的新的议题也已在 libtorrent 的仓库中打开：https://github.com/arvidn/libtorrent/issues/8023 。
+  仪表盘活动种子翻新
+  @Ghost-chu
+  我们对仪表盘上的活动种子模态框进行了翻新，以便更加直观的显示 IP 地址的 GeoIP 信息。
+  旧界面 新界面
+
+  WebUI 标签卡回归
+  @Ghost-chu
+  现在在 Swing UI 上引入由 SWT 驱动的 SWT WebView，该功能曾作为 SWT UI 的一部分被一同移除，在完成技术改造后再次回归，并且将 SWT WebView 扩展到了 Windows x86_64、macOS Intel 和 macOS Apple Silicon。
+  现在 UI 将由 Swing 和 SWT 混合驱动。
+
+  破坏性重要内部更改
+  - 封禁内核改进，现在支持封禁列表中 CIDR 格式的地址段 @Ghost-chu @KagurazakaNyaa
+    - Transmission、BiglyBT、BitComet 现在均已提供原生 CIDR 地址的支持，将传递 CIDR 地址以提高这些平台上的封禁性能
+    - 封禁项自动合并 CIDR 的功能将在未来版本提供、现阶段 CIDR 封禁只能通过 API 手动插入到封禁列表中。我们将持续收集有关反馈
+    - qBittorrent 的原生 CIDR 支持现在正由 @KagurazakaNyaa 在 https://github.com/qbittorrent/qBittorrent/pull/23157 上推进，在有关补丁合并后我们也将提供 qBittorrent 的原生 CIDR 支持
+    - 插件可能需要更新适配新的更改
+  - 平台默认 docker-compose 行为现在使用 network_mode: host 以使 AutoSTUN 模块正常工作，这可能会破坏一些有自定义 compose 设置的用户的使用，特别是 ports 字段现在将不再起效 @Ghost-chu
+    - 曾使用 172.x.x.x 网关地址的在本次更新后可能无法连接到下载器，出现此情况则可能需要将下载器 IP 更新为 127.0.0.1
+    - Synology DSM 上是使用 SPK 套件的用户将由 PeerBanHelper 在更新配置文件时自动更新相关地址，但仍需登录检查是否更新正确有效
+  - 修改了 PeerBanHelper#queryIPDB 的有关方法，可能破坏插件和部分脚本的兼容性。建议用户尽快迁移到 ipdbManager @Ghost-chu
+  错误修复
+  - 修复 IPDB 下载失败时、错误消息被吞的问题 @Ghost-chu
+  - 修复 WebUI 的意外请求尝试时可能被计算为失败登录的问题 @Ghost-chu @XiaoXice
+  - 修复查看日志功能的 WebSocket 参数可能连续追加的问题 @copilot
+  - 修复空间测绘引擎服务隐藏功能未正常工作的问题 @Ghost-chu
+  - 修复无 Token 时可能调用两次 token 的问题 @XiaoXice
+  - 修复 AWTTrayIcon 偶发的崩溃问题 @paulzzh
+  - 修复 PeerFlags 反向解析时部分字段解析错误的问题 @Ghost-chu
+  - 修复下载的 MMDB 文件损坏时仍然替换本地文件导致 IPDB 初始化失败的问题 @Ghost-chu
+  - 修复 PortMapper 在网络中无 UPnP-IGD 设备可用时，每次调用都会重新扫描 UPnP 设备的问题 @Ghost-chu
+  优化
+  - 优化全量封禁列表应用性能 @Ghost-chu
+  - 现在使用 ZGC 作为默认垃圾收集器，无需再设置 -Xmx 和 -Xms 等内存设置，PeerBanHelper 的内存配置现在将与操作系统和 Docker 容器设置自动融合调整 @Ghost-chu
+  - 优化了 BanList 模块的性能，现在检查 IP 是否处于已封禁状态的性能大幅提高，AutoRangeBan 的性能也随之得到改善 @Ghost-chu
+    - 由于存储数据结构的改变，升级到此版本后，封禁列表将清空
+  - 改进了封禁列表对 IPV6 地址不同变体的搜索体验 @Ghost-chu
+  实验室
+  - 新实验！异步 IPDB 加载。启用实验后 IPDB 文件下载和加载都将在异步线程完成，避免阻塞启动过程 @Ghost-chu
+  - 新实验！异步全量封禁列表应用。启用实验后全量封禁列表应用不再阻塞启动过程，而是在异步线程上完成 @Ghost-chu
+  安全性改进
+  - 现在只信任来自本地回环和局域网的 XFF 头，以避免 Fail2ban 绕过 @Ghost-chu
+  - Fail2ban 现在对 IPV6 地址实施封禁时，封禁 /50 而非 /60 @Ghost-chu
+  Docker
+  DockerHub: ghostchu/peerbanhelper:v9.0.0
+  阿里云国内镜像加速：registry.cn-hangzhou.aliyuncs.com/ghostchu/peerbanhelper:v9.0.0
+
+  部署教程 | 常见问题 | 如何设置下载器
+ReleaseNotesUrl: https://github.com/PBH-BTN/PeerBanHelper/releases/tag/v9.0.0
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/PBH-BTN/PeerBanHelper/wiki
+ManifestType: locale
+ManifestVersion: 1.10.0

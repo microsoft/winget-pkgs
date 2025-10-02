@@ -1,0 +1,80 @@
+# Created with komac v2.13.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: GrafanaLabs.Alloy
+PackageVersion: 1.11.0
+PackageLocale: en-US
+Publisher: Grafana Labs
+PublisherUrl: https://grafana.com/
+PublisherSupportUrl: https://grafana.com/help/
+PrivacyUrl: https://grafana.com/legal/privacy-policy/
+Author: Grafana Labs
+PackageName: Alloy
+PackageUrl: https://github.com/grafana/alloy
+License: Apache-2.0
+LicenseUrl: https://github.com/grafana/alloy/blob/HEAD/LICENSE
+ShortDescription: Grafana Alloy
+Description: OpenTelemetry Collector distribution with programmable pipelines.
+Moniker: alloy
+Tags:
+- alloy
+- collector
+- opentelemetry
+- otel
+ReleaseNotes: |-
+  Notable changes:
+  Breaking changes
+  - Prometheus dependency had a major version upgrade from v2.55.1 to v3.4.2. (@thampiotr)
+    - The . pattern in regular expressions in PromQL matches newline characters now. With this change a regular expressions like .* matches strings that include \n. This applies to matchers in queries and relabel configs in Prometheus and Loki components.
+    - The enable_http2 in prometheus.remote_write component's endpoints has been changed to false by default. Previously, in Prometheus v2 the remote write http client would default to use http2. In order to parallelize multiple remote write queues across multiple sockets its preferable to not default to http2. If you prefer to use http2 for remote write you must now set enable_http2 to true in your prometheus.remote_write endpoints configuration section.
+    - The experimental CLI flag --feature.prometheus.metric-validation-scheme has been deprecated and has no effect. You can configure the metric validation scheme individually for each prometheus.scrape component.
+    - Log message format has changed for some of the prometheus.* components as part of the upgrade to Prometheus v3.
+    - The values of the le label of classic histograms and the quantile label of summaries are now normalized upon ingestion. In previous Alloy versions, that used Prometheus v2, the value of these labels depended on the scrape protocol (protobuf vs text format) in some situations. This led to label values changing based on the scrape protocol. E.g. a metric exposed as my_classic_hist{le="1"} would be ingested as my_classic_hist{le="1"} via the text format, but as my_classic_hist{le="1.0"} via protobuf. This changed the identity of the metric and caused problems when querying the metric. In current Alloy release, which uses Prometheus v3, these label values will always be normalized to a float like representation. I.e. the above example will always result in my_classic_hist{le="1.0"} being ingested into Prometheus, no matter via which protocol. The effect of this change is that alerts, recording rules and dashboards that directly reference label values as whole numbers such as le="1" will stop working.
+      The recommended way to deal with this change is to fix references to integer le and quantile label values, but otherwise do nothing and accept that some queries that span the transition time will produce inaccurate or unexpected results.
+    See the upstream Prometheus v3 migration guide for more details.
+  - prometheus.exporter.windows dependency has been updated to v0.31.1. (@dehaansa)
+    - There are various renamed metrics and two removed collectors (cs, logon).
+  - scrape_native_histograms attribute for prometheus.scrape is now set to false, whereas in previous versions of Alloy it would default to true. This means that it is no longer enough to just configure scrape_protocols to start with PrometheusProto to scrape native histograms - scrape_native_histograms has to be enabled. If scrape_native_histograms is enabled, scrape_protocols will automatically be configured correctly for you to include PrometheusProto. If you configure it explicitly, Alloy will validate that PrometheusProto is in the scrape_protocols list.
+  - Add otel_attrs_to_hec_metadata configuration block to otelcol.exporter.splunkhec to match otelcol.receiver.splunkhec. (@cgetzen)
+  - [otelcol.processor.batch] Two arguments have different default values. (@ptodev)
+    - send_batch_size is now set to 2000 by default. It used to be 8192.
+    - send_batch_max_size is now set to 3000 by default. It used to be 0.
+    - This helps prevent issues with ingestion of batches that are too large.
+  - OpenTelemetry Collector dependencies upgraded from v0.128.0 to v0.134.0. (@ptodev)
+    - The otelcol.receiver.opencensus component has been deprecated and will be removed in a future release, use otelcol.receiver.otelp instead.
+    - [otelcol.exporter.*] The deprecated blocking argument in the sending_queue block has been removed.
+      Use block_on_overflow instead.
+    - [otelcol.receiver.kafka, otelcol.exporter.kafka]: Removed the broker_addr argument from the aws_msk block.
+      Also removed the SASL/AWS_MSK_IAM authentication mechanism.
+    - [otelcol.exporter.splunkhec] The batcher block is deprecated and will be removed in a future release. Use the queue block instead.
+    - [otelcol.exporter.loadbalancing] Use a linear probe to decrease variance caused by hash collisions, which was causing a non-uniform distribution of loadbalancing.
+    - [otelcol.connector.servicegraph] The database_name_attribute argument has been removed.
+    - [otelcol.connector.spanmetrics] Adds a default maximum number of exemplars within the metric export interval.
+    - [otelcol.processor.tail_sampling] Add a new block_on_overflow config attribute.
+  Features
+  - Add the otelcol.receiver.fluentforward receiver to receive logs via Fluent Forward Protocol. (@rucciva)
+  - Add the prometheus.enrich component to enrich metrics using labels from discovery.* components. (@ArkovKonstantin)
+  - Add node_filter configuration block to loki.source.podlogs component to enable node-based filtering for pod discovery. When enabled, only pods running on the specified node will be discovered and monitored, significantly reducing API server load and network traffic in DaemonSet deployments. (@QuentinBisson)
+  - (Experimental) Additions to experimental database_observability.mysql component:
+    - query_sample collector now supports auto-enabling the necessary setup_consumers settings (@cristiangreco)
+    - query_sample collector is now compatible with mysql less than 8.0.28 (@cristiangreco)
+    - include server_id label on log entries (@matthewnolf)
+    - support receiving targets argument and relabel those to include server_id (@matthewnolf)
+    - updated the config blocks and documentation (@cristiangreco)
+  - (Experimental) Additions to experimental database_observability.postgres component:
+    - add query_tables collector for postgres (@matthewnolf)
+    - add cloud_provider.aws configuration that enables optionally supplying the ARN of the database under observation. The ARN is appended to metric samples as labels for easier filtering and grouping of resources.
+    - add query_sample collector for postgres (@gaantunes)
+    - add schema_table collector for postgres (@fridgepoet)
+    - include server_id label on logs and metrics (@matthewnolf)
+  - Add otelcol.receiver.googlecloudpubsub community component to receive metrics, traces, and logs from Google Cloud Pub/Sub subscription. (@eraac)
+  - (Experimental) Add a honor_metadata configuration argument to the prometheus.scrape component.
+    When set to true, it will propagate metric metadata to downstream components.
+  - Add a flag to pyroscope.ebpf alloy configuration to set the off-cpu profiling threshold. (@luweglarz)
+  - Add encoding.url_encode and encoding.url_decode std lib functions. (@kalleep)
+ReleaseNotesUrl: https://github.com/grafana/alloy/releases/tag/v1.11.0
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://grafana.com/docs/alloy
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

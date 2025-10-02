@@ -1,55 +1,65 @@
-[Manifest Specification]:   manifest/schema/1.6.0
-[versionSchema]:            manifest/schema/1.6.0/version.md
-[defaultLocaleSchema]:      manifest/schema/1.6.0/defaultLocale.md
-[installerSchema]:          manifest/schema/1.6.0/installer.md
+[Manifest Specification]:   manifest/schema/1.10.0
+[versionSchema]:            manifest/schema/1.10.0/version.md
+[defaultLocaleSchema]:      manifest/schema/1.10.0/defaultLocale.md
+[installerSchema]:          manifest/schema/1.10.0/installer.md
 
 # Authoring Manifests
 
-First, we want to say thank you. Your contribution is highly valued. And we appreciate the time you have taken to get here and read this document. Let's start out with a few definitions to help you understand our vocabulary.
+First, we want to say thank you. Your contribution is highly valued, and we appreciate the time you have taken to get here and read this document. Let's start with a few definitions to help you understand our vocabulary.
 
 ## Definitions
 
 ### What is a manifest?
 
-Manifests are the YAML files in this repository containing the metadata used by the Windows Package Manager to install and upgrade software on Windows 10. There are thousands of these files partitioned under the [manifests](/manifests) directory. We've had to partition the directory structure so you don't have to scroll as much in the GitHub.com site when you are looking for a manifest.
+Manifests are YAML files in this repository containing metadata used by the Windows Package Manager to install and upgrade software on Windows. These files are organized under the [manifests](../manifests/) directory. The directory structure is partitioned to make navigation easier on GitHub.
 
 ### What is a package?
 
-Think of a package as an application or a program. We use a "PackageIdentifier" to represent a unique package. These are generally in the form of `Publisher.Package`. Sometimes you might see additional values separated by a second period. We will explain why a little bit later.
+A package refers to an application or program. Each package is uniquely identified by a "PackageIdentifier," typically in the format `Publisher.Package`. Additional segments may appear, separated by periods, for specific cases.
 
 ### What is a version?
 
-Package versions are associated with a specific release. In some cases you will see a perfectly formed [semantic](https://semver.org) version number, and in other cases you might see something different. These may be date driven, or they might have other characters with some package specific meaning. The YAML key for a package version is "PackageVersion".
+Package versions correspond to specific releases. These may follow [semantic versioning](https://semver.org) or other formats, such as date-based versions. The YAML key for a package version is "PackageVersion."
 
 ## Understanding the directory structure
 
-Once you have determined the "PackageIdentifier" and the "PackageVersion" it is possible to know the proper location for the manifest. We will use Microsoft Windows Terminal version 1.6.10571.0 for our example.
+The directory structure for a manifest is determined by the "PackageIdentifier" and "PackageVersion." For example, the directory for Microsoft Windows Terminal version 1.6.10571.0 would be:
 
 `manifests / m / Microsoft / WindowsTerminal / 1.6.10571.0`
 
-The partition directory is determined by taking the first letter from the "PackageIdentifier" in lower case. The next directory must match the first segment of the "PackageIdentifier" (case sensitive) up to the first period. This pattern continues until a directory has been created for each section of the "PackageIdentifier" (case sensitive) separated by a period. The last directory must match the "PackageVersion".
+- The first directory is the lowercase first letter of the "PackageIdentifier."
+- Subsequent directories match each segment of the "PackageIdentifier" (case-sensitive).
+- The final directory matches the "PackageVersion"
 
 ## First steps
 
-Before you invest the time to generate and submit a manifest, you should check to see if the package already exists. Start out with `winget search <package>`. If that doesn't yield anything, try a quick search using the search box in the top left corner of GitHub for the package "In this repository". If you still don't find anything, finally check to see if there is already a [PR](https://github.com/microsoft/winget-pkgs/pulls) for the package by putting the package in the filters box, and be sure to remove the "is:pr is:open" filters.
+Before creating and submitting a manifest, check if the package already exists:
+1. Run `winget search <package>` in your terminal.
+2. Search for the package in this repository using GitHub's search box.
+3. Check for existing [pull requests](https://github.com/microsoft/winget-pkgs/pulls) related to the package.
 
 ## What next?
 
-You should take a look at our [Manifest Specification]. Don't worry. If this is starting to look too complicated you can create a new Issue and select [Package Request/Submission 👀](https://github.com/microsoft/winget-pkgs/issues/new/choose).
+Review the [Manifest Specification]. If the process seems complex, you can create a new issue and select [Package Request/Submission 👀](https://github.com/microsoft/winget-pkgs/issues/new/choose).
 
-Manifests submitted to the Windows Package Manager Community Repository should be submitted as a multi-file manifest. The minimum required files are a [version][versionSchema] file, a [defaultLocale][defaultLocaleSchema] file and an [installer][installerSchema] file.
+Manifests submitted to this repository should be multi-file manifests. The minimum required files are:
+- A [version][versionSchema] file
+- A [defaultLocale][defaultLocaleSchema] file
+- An [installer][installerSchema] file
 
 ## Creating your first manifest
 
-Once you have a package in mind that doesn't already exist in the repository, you can now start [creating your package manifest](https://docs.microsoft.com/en-us/windows/package-manager/package/manifest?tabs=minschema%2Cversion-example). We recommend using the [Windows Package Manager Manifest Creator (a.k.a Winget-Create)](https://github.com/microsoft/winget-create) to help you generate your manifest. Winget-Create is a command line tool that will prompt you for relevant metadata related to your package. Once you are done, Winget-Create will validate your manifest to verify that it is correct and allow you to submit your newly-created manifest directly to the winget-pkgs repository by linking your GitHub account. Alternatively, you can use the [YamlCreate.ps1 Script](/Tools/YamlCreate.ps1). More information on using YamlCreate is found in the [script documentation](tools/YamlCreate.md).
+If the package doesn't already exist, start [creating your package manifest](https://docs.microsoft.com/en-us/windows/package-manager/package/manifest?tabs=minschema%2Cversion-example). We recommend using the [Windows Package Manager Manifest Creator (Winget-Create)](https://github.com/microsoft/winget-create), a command-line tool that guides you through the process and validates your manifest.
+
+Alternatively, you can use the [YamlCreate.ps1 Script](../Tools/YamlCreate.ps1). See the [script documentation](tools/YamlCreate.md) for details.
 
 ## Installer Architectures
-If you are authoring a manifest yourself one of the important things to note related to installer types is architecture. In many cases the installer itself may be an x86 installer, but it will actually install the package for the architecture of the system. In these cases, the installer type in the manifest should indicate the architecture of the installed binaries. So in some cases the actual installer itself targets x86, but in fact it will install an x64 version of the package.
 
+When specifying installer types, ensure the architecture reflects the installed binaries, not just the installer itself. For example, an x86 installer that installs x64 binaries should have its architecture set to x64.
 
 ### How do I install Winget-Create?
 
-You can either [download the latest release of Winget-Create](https://github.com/microsoft/winget-create/releases) from its GitHub repository or use **Winget** to install it for you by running the following command:
+Download the latest release from the [Winget-Create GitHub repository](https://github.com/microsoft/winget-create/releases) or install it using Winget:
 
 ```powershell
 winget install wingetcreate
@@ -57,18 +67,17 @@ winget install wingetcreate
 
 ### Creating your manifest with Winget-Create
 
-Now that you have Winget-Create installed onto your machine, you are ready to generate your first manifest by running the [New command](https://github.com/microsoft/winget-create/blob/main/doc/new.md). To do so, simply run the following command in your terminal:
+After installing Winget-Create, generate your first manifest by running:
 
 ```powershell
 wingetcreate new <Installer URL(s)>
 ```
 
-There are many other commands available in Winget-Create to help you [update existing manifests](https://github.com/microsoft/winget-create/blob/main/doc/update.md) or [submit new manifests](https://github.com/microsoft/winget-create/blob/main/doc/submit.md). Feel free to try it out!
-
+Explore other commands for [updating existing manifests](https://github.com/microsoft/winget-create/blob/main/doc/update.md) or [submitting new manifests](https://github.com/microsoft/winget-create/blob/main/doc/submit.md).
 
 ## Validation
 
-If you decide to create or edit your manifest by manually editing the YAML, it is important to make sure that you are validating your manifest. You can do this by running the [validate command](https://aka.ms/winget-command-validate) from **Winget** which will tell you if your manifest is valid, or which parts need to be fixed:
+If you manually edit the YAML, validate your manifest using the following command:
 
 ```powershell
 winget validate --manifest <Path to manifest>
@@ -76,15 +85,20 @@ winget validate --manifest <Path to manifest>
 
 ## Testing
 
-It is important to test your manifest before submission to ensure it meets the repository's quality standards. While it isn't possible to describe everything that we check for when reviewing contributions, testing your manifest helps keep the quality of contributions high and increases the chance of your contribution being accepted.
+Test your manifest before submission to ensure it meets quality standards:
+- Verify the application installs unattended.
+- Ensure the application version matches the "PackageVersion" or includes `AppsAndFeaturesEntries` if necessary.
+- Confirm the application publisher matches the defaultLocale "Publisher" or includes `AppsAndFeaturesEntries` if necessary.
+- Check that the application name matches the defaultLocale "PackageName" or includes `AppsAndFeaturesEntries` if necessary.
 
-* Manifests should be tested to ensure applications can install unattended
-* Manifests should be tested to ensure application version matches the Package Version, or that AppsAndFeaturesEntries are included if necessary
-* Manifests should be tested to ensure application publisher matches the defaultLocale Publisher, or that AppsAndFeaturesEntries are included if necessary
-* Manifests should be tested to ensure application name matches the defaultLocale PackageName, or that AppsAndFeaturesEntries are included if necessary
+Enable local manifest testing with:
 
-After enabling the setting for local manifests (`winget settings --enable LocalManifestFiles`), manifests can be tested locally with `winget install --manifest <path>`.
-If your system supports Windows Sandbox, you can also use the [SandboxTest.ps1 Script](https://github.com/microsoft/winget-pkgs/blob/master/doc/tools/SandboxTest.md) to test the manifest in the Windows Sandbox. This is the preferred method, as it ensures the package doesn't require any dependencies to install.
+```powershell
+winget settings --enable LocalManifestFiles
+winget install --manifest <path>
+```
+
+For a more isolated test, use the [SandboxTest.ps1 Script](https://github.com/microsoft/winget-pkgs/blob/master/doc/tools/SandboxTest.md) to test in Windows Sandbox.
 
 ## Advanced Authoring
 
@@ -114,13 +128,13 @@ There are a few typical use cases when `AppsAndFeaturesEntries` should be specif
 
     There are many ways that publishers choose to version their software. This leads to some cases where the way WinGet sorts versions will not work properly. Some examples include packages that only use commit hashes for their releases, packages which prefix the version number with a string, or packages using date versioning of DD-MM-YYYY.
 
-	When this happens, `PackageVersion` should be set to something which is sortable by WinGet and `DisplayVersion` should be set to the value the installer writes to the registry. For more information, see the section on [Version Sorting in WinGet](/doc/Authoring.md#version-sorting-in-winget)
+	When this happens, `PackageVersion` should be set to something which is sortable by WinGet and `DisplayVersion` should be set to the value the installer writes to the registry. For more information, see the section on [Version Sorting in WinGet](../doc/Authoring.md#version-sorting-in-winget)
 
 4. The `InstallerType` of the installer which writes the registry keys does not match the `InstallerType` of the manifest
 
     In some cases an EXE installer may call an embedded MSI which writes data to the registry in a different format. While the `InstallerType` may be correctly identified in the manifest, the WinGet CLI will detect the registry entries as being from an MSI and return an error that the installation technology does not match when running `winget upgrade`. This requires the `InstallerType` to be specified in `AppsAndFeaturesEntries`
 
-For more information on how to specify `AppsAndFeaturesEntries` and what the available metadata fields are, please see the [Manifest Specification](/doc/manifest).
+For more information on how to specify `AppsAndFeaturesEntries` and what the available metadata fields are, please see the [Manifest Specification](../doc/manifest/).
 
 ## Version Sorting in WinGet
 

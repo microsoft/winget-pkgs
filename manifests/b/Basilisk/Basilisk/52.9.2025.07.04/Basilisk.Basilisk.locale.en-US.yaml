@@ -1,0 +1,68 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: Basilisk.Basilisk
+PackageVersion: 52.9.2025.07.04
+PackageLocale: en-US
+Publisher: Basilisk Development Team
+PublisherUrl: https://www.basilisk-browser.org/
+PublisherSupportUrl: https://www.basilisk-browser.org/contact.html
+PrivacyUrl: https://www.basilisk-browser.org/privacy.html
+PackageName: Basilisk
+PackageUrl: https://www.basilisk-browser.org/download.html
+License: MPL-2.0
+LicenseUrl: https://www.mozilla.org/MPL/2.0
+Copyright: Copyright ©2022-Present The Basilisk Development Team. All rights reserved.
+ShortDescription: A XUL-based web-browser built on top of the Unified XUL Platform (UXP). This browser is a close twin to pre-Servo Firefox in how it operates.
+Description: Basilisk is a free and Open Source XUL-based web browser, featuring the well-known Firefox-style interface and operation. It is based on the Goanna layout and rendering engine (a fork of Gecko) and builds on the Unified XUL Platform (UXP), which in turn is a fork of the Mozilla code base without Servo or Rust.
+Tags:
+- browser
+- internet
+- web
+- web-browser
+- webpage
+- xul
+ReleaseNotes: |-
+  This is a major development, bugfix and security release.
+  - Basilisk now includes all non-ubiquitous image and media types in the navigation Accept: header, as discussed in the relevant whatwg fetch spec issue.
+  - Implemented .toJSON() for DOMRect, DOMPoint and DOMMatrix.
+  - Added a base implementation of the SVGGeometryElement API. This is currently limited to .pathLength, getTotalLength() and getPointAtLength(distance)for SVG paths.
+  - Added a base-64/character validity grammar check for CSP nonces.
+  - Enabled JPEG-XL support unconditionally.
+  - Improved desktop ARM media capabilities.
+  - Improved our handling of CSP checks (multiple improvements surrounding loading principal checks).
+  - Added several Mac-specific file types to be treated as executables.
+  - Updated the emoji font to Unicode 16.0.0.
+  - Updated SQLite library to 3.50.1.
+  - Updated NSS to 3.90.7.1 to fix some issues with some sites due to prior root certificate updates.
+  - Updated code dealing with internal URL rewrites for Youtube.
+  - Changed the Firefox compatibility mode version to 128.
+  - Changed how .click() on <A> elements is handled. See implementation notes.
+  - Changed DOMMatrix's rotate() and rotateSelf() functions to accept 3D rotation instead of 2D, per spec.
+  - Changed CSS parameter animation to round values instead of truncating them, per spec.
+    This affects all integer properties (e.g. z-order) and font-stretching.
+  - Changed HTML element attribute parsing to additionally escape < and > characters, per spec.
+  - Fixed a regression in XUL <tree> elements where column selection would omit the first-defined column.
+  - Fixed a minor issue in DOMSVGPoint finity checks.
+  - Fixed some minor platform issues and updated Mac SDK checks.
+  - Fixed an issue when device contrast values would be unset in Mac or Windows+DirectWrite.
+  - Fixed an issue in the "Copy as curl" feature which could potentially mangle URLs.
+  - Fixed an issue with FontFaceSet loading.
+  - Removed support for very old libavcodec versions (before v58).
+  - Removed the CSP referrer directive as it's no longer in the spec.
+  - Removed preloading of a number of media libraries on Windows. See implementation notes.
+  - Removed the allowance of <A> in image maps. Only <area> is now supported.
+  - Removed several obsolete and unused preferences from about:config.
+  - Removed obsolete NPN preferences and calls. NPN has long since been replaced by ALPN.
+  - Removed obsolete SVGZoomEvent interface and handlers.
+  - Built on UXP commit: e52eaa961c
+  - Security issues addressed: CVE-2025-6429, CVE-2025-6424 (DiD) and CVE-2025-6426.
+  Implementation notes
+  - Normally, when a script issues a simulated click on an element, that click is issued on the document the element is in. Unfortunately there has been a perceived bug in mainstream browsers where this didn't happen on anchors (<A>, hyperlinks) and the browser would navigate even if that anchor was not actually in a web page document (i.e. just created as a reference in scripting). This was eventually made an accepted behaviour in the specification as an exception, describing this bug as expected behavior. Basilisk has now changed how it handles .click() events on anchors to follow this behavior. This primarily impacts some select "download button" behavior on the web where this behavior quirk for anchors is relied on.
+  - Previously, Basilisk would preload a number of media .dll files into the browser, causing resource use even if there was no media to be decoded or played back in the browsing session yet. This was primarily done in inherited Mozilla code for EME to work. Since we don't support in-browser DRM, this preloading is wholly unnecessary and has been removed.
+ReleaseNotesUrl: https://www.basilisk-browser.org/releasenotes.html
+Documentations:
+- DocumentLabel: FAQ
+  DocumentUrl: https://www.basilisk-browser.org/faq.html
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0
