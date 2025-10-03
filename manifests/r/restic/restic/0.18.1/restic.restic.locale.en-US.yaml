@@ -1,0 +1,74 @@
+# Modified with Sundry.
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: restic.restic
+PackageVersion: 0.18.1
+PackageLocale: en-US
+Publisher: restic
+PublisherUrl: https://github.com/restic
+PublisherSupportUrl: https://github.com/restic/restic/issues
+Author: Alexander Neumann
+PackageName: restic
+PackageUrl: https://github.com/restic/restic
+License: BSD-2-Clause
+LicenseUrl: https://github.com/restic/restic/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2014, Alexander Neumann <alexander@bumpern.de>
+CopyrightUrl: https://github.com/restic/restic/raw/master/LICENSE
+ShortDescription: Fast, secure, efficient backup program
+Description: |-
+  restic is a backup program that is fast, efficient and secure. It supports the three major operating
+  systems (Linux, macOS, Windows) and a few smaller ones (FreeBSD, OpenBSD).
+Moniker: restic
+Tags:
+  - backup
+  - dedupe
+  - deduplication
+  - go
+  - restic
+  - secure-by-default
+ReleaseNotes: |-
+  Changelog for restic 0.18.1 (2025-09-21)
+  The following sections list the changes in restic 0.18.1 relevant to restic users. The changes are ordered by importance.
+  Summary
+  - Fix #5324: Correctly handle backup --stdin-filename with directory paths
+  - Fix #5325: Accept RESTIC_HOST environment variable in forget command
+  - Fix #5342: Ignore "chmod not supported" errors when writing files
+  - Fix #5344: Ignore EOPNOTSUPP errors for extended attributes
+  - Fix #5421: Fix rare crash if directory is removed during backup
+  - Fix #5429: Stop retrying uploads when rest-server runs out of space
+  - Fix #5467: Improve handling of download retries in check command
+  Details
+  - Bugfix #5324: Correctly handle backup --stdin-filename with directory paths
+    In restic 0.18.0, the backup command failed if a filename that includes at least a directory was passed to --stdin-filename. For example, --stdin-filename /foo/bar resulted in the following error:
+    Fatal: unable to save snapshot: open /foo: no such file or directory
+    This has now been fixed.
+    #5324 #5356
+  - Bugfix #5325: Accept RESTIC_HOST environment variable in forget command
+    The forget command did not use the host name from the RESTIC_HOST environment variable when filtering snapshots. This has now been fixed.
+    #5325 #5327
+  - Bugfix #5342: Ignore "chmod not supported" errors when writing files
+    Restic 0.18.0 introduced a bug that caused chmod xxx: operation not supported errors to appear when writing to a local file repository that did not support chmod (like CIFS or WebDAV mounted via FUSE). Restic now ignores those errors.
+    #5342
+  - Bugfix #5344: Ignore EOPNOTSUPP errors for extended attributes
+    Restic 0.18.0 added extended attribute support for NetBSD 10+, but not all NetBSD filesystems support extended attributes. Other BSD systems can likewise return EOPNOTSUPP, so restic now ignores these errors.
+    #5344
+  - Bugfix #5421: Fix rare crash if directory is removed during backup
+    In restic 0.18.0, the backup command could crash if a directory was removed between reading its metadata and listing its directory content. This has now been fixed.
+    #5421
+  - Bugfix #5429: Stop retrying uploads when rest-server runs out of space
+    When rest-server returns a 507 Insufficient Storage error, it indicates that no more storage capacity is available. Restic now correctly stops retrying uploads in this case.
+    #5429 #5452
+  - Bugfix #5467: Improve handling of download retries in check command
+    In very rare cases, the check command could unnecessarily report repository damage if the backend returned incomplete, corrupted data on the first download try which is afterwards resolved by a download retry.
+    This could result in an error output like the following:
+    Load(<data/34567890ab>, 33918928, 0) returned error, retrying after 871.35598ms: readFull: unexpected EOF
+    Load(<data/34567890ab>, 33918928, 0) operation successful after 1 retries
+    check successful on second attempt, original error pack 34567890ab[...] contains 6 errors: [blob 12345678[...]: decrypting blob <data/12345678> from 34567890 failed: ciphertext verification failed ...]
+    [...]
+    Fatal: repository contains errors
+    This fix only applies to a very specific case where the log shows operation successful after 1 retries followed by a check successful on second attempt, original error that only reports ciphertext verification failed errors in the pack file. If any other errors are reported in the pack file, then the repository still has to be considered as damaged.
+    Now, only the check result of the last download retry is reported as intended.
+    #5467 #5495
+ReleaseNotesUrl: https://github.com/restic/restic/releases/tag/v0.18.1
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0
