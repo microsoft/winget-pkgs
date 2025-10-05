@@ -1,0 +1,108 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: sjzar.Chatlog
+PackageVersion: 0.0.25
+PackageLocale: en-US
+Publisher: Sarv
+PublisherUrl: https://github.com/sjzar
+PublisherSupportUrl: https://github.com/sjzar/chatlog/issues
+PackageName: Chatlog
+PackageUrl: https://github.com/sjzar/chatlog
+License: Apache-2.0
+LicenseUrl: https://github.com/sjzar/chatlog/blob/HEAD/LICENSE
+ShortDescription: A chat history tool helping users easily utilize their chat data
+Description: |-
+  A chat history tool helping users easily utilize their chat data
+  Features:
+  - Retrieve chat data from local database files
+  - Supports Windows / macOS systems
+  - Compatible with WeChat versions 3.x / 4.0
+  - Offers Terminal UI interface & command-line tool
+  - Provides HTTP API service, enabling queries for chat history, contacts, group chats, recent conversations, and more
+  - Supports MCP SSE protocol for seamless integration with MCP-compatible AI assistants
+  - Handles multimedia messages, including decryption of images and voice files
+  - Features automatic data decryption to simplify usage
+  - Supports multi-account management, allowing switching between different accounts
+Tags:
+- ai
+- large-language-model
+- llm
+- wechat
+ReleaseNotes: |-
+  What's Changed
+  - Fix data_key assignment in cmd_decrypt.go by @zhangkaihua88 in https://github.com/sjzar/chatlog/pull/224
+  - feat(webhook): add message webhook feature by @sjzar in https://github.com/sjzar/chatlog/pull/225
+  New Contributors
+  - @zhangkaihua88 made their first contribution in https://github.com/sjzar/chatlog/pull/224
+  Full Changelog: https://github.com/sjzar/chatlog/compare/v0.0.24...v0.0.25
+  Changelog
+  - d7c730d426d6951299635346836bef55569e8cb0 feat(webhook): add message webhook feature (#225)
+  - aee9a53dc3a7499b01ed9a89c42ced324932ac57 Fix data_key assignment in cmd_decrypt.go (#224)
+  Webhook Usage
+  新增 Webhook 功能，当收到特定新消息时，可以通过 HTTP POST 请求将消息推送到指定的 URL。
+  回调功能需要与自动解密功能配合使用，在 macOS v4 本机启动服务的情况下测试，从发送消息到收到回调请求约 13 秒。
+  简单说明下 Webhook 如何使用，详细文档后续补充。
+  0. 回调配置
+  使用 TUI 模式的话，在 $HOME/.chatlog/chatlog.json 配置文件中，新增 webhook 配置。
+  （Windows 用户的配置文件在 %USERPROFILE%/.chatlog/chatlog.json)
+  {
+    "history": [],
+    "last_account": "wxuser_x",
+    "webhook": {
+      "host": "localhost:5030",                   # 消息中的图片、文件等 URL host
+      "items": [
+        {
+          "url": "http://localhost:8080/webhook", # 必填，webhook 请求的 URL，可配置为 n8n 等 webhook 入口
+          "talker": "wxid_123",                   # 必填，需要监控的私聊、群聊名称
+          "sender": "",                           # 选填，消息发送者
+          "keyword": ""                           # 选填，关键词
+        }
+      ]
+    }
+  }
+  使用 server 模式的话，可以通过 CHATLOG_WEBHOOK 环境变量进行设置。
+  # 方案 1
+  CHATLOG_WEBHOOK='{"host":"localhost:5030","items":[{"url":"http://localhost:8080/proxy","talker":"wxid_123","sender":"","keyword":""}]}'
+
+  # 方案 2（任选一种）
+  CHATLOG_WEBHOOK_HOST="localhost:5030"
+  CHATLOG_WEBHOOK_ITEMS='[{"url":"http://localhost:8080/proxy","talker":"wxid_123","sender":"","keyword":""}]'
+  1. 测试效果
+  启动 chatlog 并开启自动解密功能，测试回调效果
+  POST /webhook HTTP/1.1
+  Host: localhost:8080
+  Accept-Encoding: gzip
+  Content-Length: 386
+  Content-Type: application/json
+  User-Agent: Go-http-client/1.1
+
+  Body:
+  {
+    "keyword": "",
+    "lastTime": "2025-08-27 00:00:00",
+    "length": 1,
+    "messages": [
+      {
+        "seq": 1756225000000,
+        "time": "2025-08-27T00:00:00+08:00",
+        "talker": "wxid_123",
+        "talkerName": "",
+        "isChatRoom": false,
+        "sender": "wxid_123",
+        "senderName": "Name",
+        "isSelf": false,
+        "type": 1,
+        "subType": 0,
+        "content": "测试消息",
+        "contents": {
+          "host": "localhost:5030"
+        }
+      }
+    ],
+    "sender": "",
+    "talker": "wxid_123"
+  }
+ReleaseNotesUrl: https://github.com/sjzar/chatlog/releases/tag/v0.0.25
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

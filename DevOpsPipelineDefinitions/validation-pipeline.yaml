@@ -45,8 +45,30 @@ extends:
         timeoutInMinutes: 0
 
         steps:
+        # Allow scripts to access the system token.
+        # Fetch all history.
+        # Don't fetch tags.
         - checkout: self
           persistCredentials: true
+          clean: true
+          fetchDepth: 0
+          fetchTags: false
+
+        # Roll back agent to 2.76, see issue https://github.com/Azure/azure-cli/issues/32088#issuecomment-3283886207
+        # NOTE: Remove the next 3 steps once issue is fixed.
+        - powershell: |
+            Start-Process msiexec -ArgumentList ' /x {37CCEB8D-306A-4DB4-B25B-7608A093D184} /qn' -NoNewWindow -Wait
+          displayName: "Uninstall Azure CLI"
+
+        - powershell: |
+            Invoke-WebRequest -Uri "https://azurecliprod.blob.core.windows.net/msi/azure-cli-2.76.0-x64.msi" -OutFile "azure-cli-2.76.0.msi"
+            Start-Process msiexec -ArgumentList '/i "azure-cli-2.76.0.msi" /quiet /norestart' -NoNewWindow -Wait
+          displayName: "Install Azure CLI 2.76.0"
+          workingDirectory: $(Agent.TempDirectory)
+
+        - script: |
+            az version
+          displayName: "Check Azure CLI version"
 
         # Downloads all the setup files and its dependencies.
         - task: AzureCLI@2
@@ -197,6 +219,41 @@ extends:
             waitForCompletion: "true"
 
       # Agentless phase. Depends on previous job.
+      - job: 'CatalogContentVerification'
+        pool: server
+        displayName: 'Catalog Content Verification'
+        timeoutInMinutes: 1500
+        dependsOn:
+          - 'FileValidation'
+          - 'ContentValidation'
+        variables:
+          HostKeySecret: $[ dependencies.FileValidation.outputs['wingetsetup.hostkey']]
+          CatalogContentVerificationEndpointSecret: $[ dependencies.FileValidation.outputs['wingetsetup.catalogContentVerificationEndpoint']]
+        steps:
+
+        # Catalog content verification
+        - task: AzureFunction@1
+          displayName: 'Catalog Content Verification'
+          inputs:
+            function: '$(CatalogContentVerificationEndpointSecret)'
+            key: '$(HostKeySecret)'
+            body: |
+              {
+              "operationId": "$(WinGetSvc.OperationId)",
+              "buildId": "$(Build.BuildId)",
+              "projectId": "$(system.TeamProjectId)",
+              "planId": "$(system.PlanId)",
+              "jobId": "$(system.JobId)",
+              "timelineId": "$(system.TimelineId)",
+              "taskInstanceId": "$(system.TaskInstanceId)",
+              "repository": "$(build.repository.id)",
+              "pipelineType": "ValidationPipeline",
+              "pullRequestNumber": "$(WinGetSvc.PullRequestNumber)",
+              "buildSourceBranch": "$(build.SourceBranch)"
+              }
+            waitForCompletion: "true"
+
+      # Agentless phase. Depends on previous job.
       - job: 'InstallerValidation'
         pool: server
         displayName: 'Installer Validation'
@@ -204,6 +261,7 @@ extends:
         dependsOn:
           - 'FileValidation'
           - 'ContentValidation'
+          - 'CatalogContentVerification' 
         variables:
           HostKeySecret: $[ dependencies.FileValidation.outputs['wingetsetup.hostkey']]
           ScanEndpointSecret: $[ dependencies.FileValidation.outputs['wingetsetup.scanEndpoint']]
@@ -254,42 +312,6 @@ extends:
               }
             waitForCompletion: "true"
 
-      # Agentless phase. Depends on previous job.
-      - job: 'CatalogContentVerification'
-        pool: server
-        displayName: 'Catalog Content Verification'
-        timeoutInMinutes: 1500
-        dependsOn:
-          - 'FileValidation'
-          - 'ContentValidation'
-          - 'InstallerValidation'
-        variables:
-          HostKeySecret: $[ dependencies.FileValidation.outputs['wingetsetup.hostkey']]
-          CatalogContentVerificationEndpointSecret: $[ dependencies.FileValidation.outputs['wingetsetup.catalogContentVerificationEndpoint']]
-        steps:
-
-        # Catalog content verification
-        - task: AzureFunction@1
-          displayName: 'Catalog Content Verification'
-          inputs:
-            function: '$(CatalogContentVerificationEndpointSecret)'
-            key: '$(HostKeySecret)'
-            body: |
-              {
-              "operationId": "$(WinGetSvc.OperationId)",
-              "buildId": "$(Build.BuildId)",
-              "projectId": "$(system.TeamProjectId)",
-              "planId": "$(system.PlanId)",
-              "jobId": "$(system.JobId)",
-              "timelineId": "$(system.TimelineId)",
-              "taskInstanceId": "$(system.TaskInstanceId)",
-              "repository": "$(build.repository.id)",
-              "pipelineType": "ValidationPipeline",
-              "pullRequestNumber": "$(WinGetSvc.PullRequestNumber)",
-              "buildSourceBranch": "$(build.SourceBranch)"
-              }
-            waitForCompletion: "true"
-
       # Agentless phase. Runs even if previous jobs failed. 
       - job: 'postvalidation'
         pool: server
@@ -297,8 +319,8 @@ extends:
         dependsOn:
           - 'FileValidation'
           - 'ContentValidation'
-          - 'InstallerValidation'
           - 'CatalogContentVerification'
+          - 'InstallerValidation'
         condition: succeededOrFailed()
         variables:
           HostKeySecret: $[ dependencies.FileValidation.outputs['wingetsetup.hostkey']]
