@@ -1,0 +1,150 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: Databricks.SparkODBCDriver
+PackageVersion: 2.9.2
+PackageLocale: en-US
+Publisher: Simba Technologies Inc.
+PublisherUrl: https://www.databricks.com/
+PublisherSupportUrl: https://www.databricks.com/company/contact
+PrivacyUrl: https://www.databricks.com/legal/privacynotice
+Author: Simba Technologies Inc.
+PackageName: Simba Spark ODBC Driver
+PackageUrl: https://www.databricks.com/spark/odbc-drivers-download
+License: Proprietary
+LicenseUrl: https://www.databricks.com/jdbc-odbc-driver-license
+Copyright: Copyright © 2024 insightsoftware. All rights reserved.
+CopyrightUrl: https://www.databricks.com/jdbc-odbc-driver-license
+ShortDescription: Simba Apache Spark ODBC Connector for direct SQL and HiveQL access to Apache Hadoop/Spark distributions.
+Description: The Simba Apache Spark ODBC Connector is used for direct SQL and HiveQL access to Apache Hadoop / Spark distributions, enabling Business Intelligence (BI), analytics, and reporting on Hadoop-based data. The connector efficiently transforms an application’s SQL query into the equivalent form in HiveQL, which is a subset of SQL-92. If an application is Spark-aware, then the connector is configurable to pass the query through to the database for processing. The connector interrogates Spark to obtain schema information to present to a SQL-based application. Queries, including joins, are translated from SQL to HiveQL
+Tags:
+- databricks
+- odbc
+- spark
+ReleaseNotes: |-
+  Enhancements & New Features
+
+   * [SPARKO-1408] Process Name as Default UserAgentEntry
+
+     The driver will now use the process name as the UserAgentEntry if
+     the UserAgentEntry is not set.
+
+   * [SPARKO-1472] Upgraded LTS support
+
+     The driver now uses LTS versions 11.3 through 15.4. For supported versions,
+     see the Installation and Configuration Guide.
+
+   * [SPARKO-1482][05221097] Databricks domains support
+
+     The driver now supports cloud.databricks.us and cloud.databricks.mil
+     domains.
+
+   * [SPARKO-1325][SPARKO-1435] Timestamp_NTZ support
+
+     The driver now recognizes timestamp_ntz columns in the following data
+     source tables:
+     - SQLGetTypeInfo (SQL_ALL_TYPES) now lists timestamp_ntz as an available
+     type.
+     - SQLGetTypeInfo (SQL_TIMESTAMP) now lists timestamp_ntz as one of the
+     types that map to SQL timestamps.
+     - SQLColumns now identifies timestamp_ntz columns correctly.
+     - If UseNativeQuery is set to 0, SQLColAttribute (SQL_DESC_TYPE_NAME)
+     identifies timestamp_ntz columns correctly.
+
+   * [SPARKO-1384][SPARKO-1405][SPARKO-1411] CRL cache support
+
+     On Windows, the driver supports the CRL cache when UseSystemTruststore is
+     enabled (set to 1).
+
+   * [SPARKO-1399][SPARKO-1417] Updated third-party libraries
+
+     The connector now uses the following third-party libraries:
+     - OpenSSL 3.0.16 (previously 3.0.15)
+     - libcURL 8.12.1 (previously 8.11.0)
+     - Expat 2.7.1 (previously 2.6.3)
+
+   * [SPARKO-1404] VOID type support
+
+     The driver now supports VOID columns and lists them correctly in
+     SQLGetColumns calls.
+
+   * [SPARKO-1419][SPARKO-1420] OAuth Token exchange support
+
+     The driver now supports OAuth Token exchange feature for IDP different
+     from the host. In these cases, OAuth access token (including BYOT) will be
+     exchanged for a Databricks in-house access token. For more information, see
+     the Installation and Configuration Guide.
+
+   * [SPARKO-1474] Upgraded Windows Server support
+
+     The connector now supports Windows Server 2025. For a list of supported
+     versions, see the Installation and Configuration Guide.
+
+  Resolved Issues
+  The following issues have been resolved in Simba Apache Spark ODBC Connector
+  2.9.2.
+
+   * [SPARKO-1516][SPARKO-1518] A memory leak is resolved.
+
+  Known Issues
+  The following are known issues that you may encounter due to limitations in
+  the data source, the connector, or an application.
+
+   * [SPARKO-1404] When querying tables that contain VOID columns, the server
+     returns an error.
+
+   * [SPARKO-1101] When the Auth_AccessToken line length is longer than the
+     maximum limit of 1000, the connector returns an authentication error. For
+     more information, see the Installation and Configuration Guide.
+
+   * [SPARKO-879] When connecting to a server that supports multiple catalogs,
+     the connector no longer reports the catalog for schemas and tables as
+     SPARK.
+
+     The Spark server now reports the catalog.
+
+   * [SPARKO-670] In some cases, when retrieving timestamp data, the connector
+     returns an error.
+
+     In some cases, when connecting to certain distributions of
+     Apache Spark, the connector returns the following error: "Conversion from
+     number to string failed due to undersized character buffer". This issue
+     affects versions 2.6.12 to 2.6.14 of the Spark ODBC connector.
+
+     As a workaround, set EnableArrow=0 in the connection string or DSN.
+
+   * [SPARKO-620] Issue with date and timestamp before the beginning of the
+     Gregorian calendar when connecting to Spark 2.4.4 or later, or versions
+     previous to 3.0, with Arrow result set serialization.
+
+     When using Spark 2.4.4 or later, or versions previous to Spark 3.0, DATE
+     and TIMESTAMP data before October 15, 1582 may be returned incorrectly if
+     the server supports serializing query results using Apache Arrow. This
+     issue should not impact most distributions of Apache Spark.
+
+     To confirm if your distribution of Spark 2.4.4 or later has been impacted
+     by this issue, you can execute the following query:
+
+     SELECT DATE '1581-10-14'
+
+     If the result returned by the connector is 1581-10-24, then you are
+     impacted by the issue. In this case, if your data set contains date and/or
+     timestamp data earlier than October 15, 1582, you can work around this
+     issue by adding EnableArrow=0 in your DSN or connection string to disable
+     the Arrow result set serialization feature.
+
+   * When retrieving data from a BINARY column, a ClassCastException error
+     occurs.
+
+     In Spark 1.6.3 or earlier, the server sometimes returns a
+     ClassCastException error when attempting to retrieve data from a BINARY
+     column.
+
+     This issue is fixed as of Spark 2.0.0.
+
+     For more information, see the JIRA issue posted by Apache named "When
+     column type is binary, select occurs ClassCastException in Beeline" at
+     https://issues.apache.org/jira/browse/SPARK-12143.
+ReleaseNotesUrl: https://databricks-bi-artifacts.s3.us-east-2.amazonaws.com/simbaspark-drivers/odbc/2.9.2/docs/release-notes.txt
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0
