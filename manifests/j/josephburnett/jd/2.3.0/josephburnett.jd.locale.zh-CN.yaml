@@ -1,0 +1,61 @@
+# Created with Sundry.
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.10.0.schema.json
+
+PackageIdentifier: josephburnett.jd
+PackageVersion: 2.3.0
+PackageLocale: zh-CN
+Publisher: Joseph Burnett
+PublisherUrl: https://github.com/josephburnett
+PublisherSupportUrl: https://github.com/josephburnett/jd/issues
+Author: Joseph Burnett
+PackageName: JSON diff and patch
+PackageUrl: https://github.com/josephburnett/jd
+License: MIT
+LicenseUrl: https://github.com/josephburnett/jd/blob/master/LICENSE
+Copyright: Copyright (c) 2016 Joseph Burnett
+CopyrightUrl: https://github.com/josephburnett/jd/blob/master/LICENSE
+ShortDescription: JSON 差异比较和修补。
+Description: >
+  jd 是一个命令行工具和 Go 库，用于对 JSON 和 YAML 值进行差异比较和修补。
+  它支持原生的 jd 格式（类似于统一格式），以及 JSON 合并修补（RFC 7386）和 JSON 修补的子集（RFC 6902）。
+  可以在 http://play.jd-tool.io/ 上试用。
+Tags:
+  - diff
+  - json
+  - patch
+  - yaml
+  - 差异
+  - 比较
+ReleaseNotes: |-
+  # 路径选项（PathOptions）
+  本次发布引入了 PathOptions，这是一个强大的新功能，可实现对 JSON/YAML 数据不同部分的精确比较控制。PathOptions 允许你为数据结构中的特定路径应用不同的比较语义，从而实现对差异行为的细粒度控制。
+
+  主要特性：
+  - 有针对性的比较选项：使用语法 `{"@":["path","to","target"],"^":[options]}`，为特定路径应用 SET、MULTISET、精度或 setkeys 等选项
+  - 路径隔离：选项仅影响其指定路径，不会全局泄漏，允许你在同一次比较中混合使用不同的比较语义
+  - 增强的数组分派：修复了 路径选项 针对空路径（根级别）未正确应用于数组分派的关键错误
+  - 全面的文档：完整的 v2 Diff Language 指南，包含新的 EBNF 语法、PathOption 集成示例，以及更新后的 CLI 帮助，展示了标志等价用法
+  - 广泛的测试覆盖：新增 24 个测试用例，展示 PathOption 在各种数据结构和边界情况中的功能
+
+  示例：
+  ### 仅对特定数组应用 SET 语义，其他数组仍为列表：
+
+  jd -opts='[{"@":["tags"],"^":["SET"]}]' a.json b.json
+
+  ### 多个路径选项，分别应用不同语义
+
+  jd -opts='[{"@":["items"],"^":["SET"]}, {"@":["price"],"^":[{"precision":0.01}]}]' a.json b.json
+
+  本次发布在保持完全向后兼容的同时，新增了强大的能力，适用于复杂的差异控制场景。
+
+  # 变更内容
+  - 修复 unicode 彩色差异显示。by @roberthoenig in #93
+  - 补充缺失的右括号 by @mohammadrezaataeii in #98
+
+  # 新贡献者
+  - @mohammadrezaataeii 在 #98 中做出了首次贡献
+
+  完整更新日志：https://github.com/josephburnett/jd/compare/v2.2.7...v2.3.0
+ReleaseNotesUrl: https://github.com/josephburnett/jd/releases/tag/v2.3.0
+ManifestType: locale
+ManifestVersion: 1.10.0
