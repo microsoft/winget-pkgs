@@ -1,0 +1,102 @@
+# Created with komac v2.13.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: Syncthing.Syncthing
+PackageVersion: 2.0.9
+PackageLocale: en-US
+Publisher: The Syncthing Authors
+PublisherUrl: https://syncthing.net/
+PublisherSupportUrl: https://forum.syncthing.net/
+PrivacyUrl: https://docs.syncthing.net/users/security
+Author: The Syncthing Foundation
+PackageName: Syncthing
+PackageUrl: https://github.com/syncthing/syncthing
+License: MPL-2.0
+LicenseUrl: https://github.com/syncthing/syncthing/blob/HEAD/LICENSE
+Copyright: Copyright © 2014-2025 the Syncthing Authors.
+ShortDescription: Open Source Continuous File Synchronization
+Description: |-
+  Syncthing is a continuous file synchronization program.
+  It synchronizes files between two or more computers in real time, safely protected from prying eyes.
+  Your data is your data alone and you deserve to choose where it is stored,
+  whether it is shared with some third party, and how it's transmitted over the internet.
+Moniker: syncthing
+Tags:
+- cli
+- continuous
+- file
+- file-synchronization
+- file-transfer
+- go
+- open
+- open-source
+- p2p
+- peer-to-peer
+- private
+- secure
+- synchronization
+ReleaseNotes: |-
+  Major changes in 2.0
+  - Database backend switched from LevelDB to SQLite. There is a migration on
+    first launch which can be lengthy for larger setups. The new database is
+    easier to understand and maintain and, hopefully, less buggy.
+  - The logging format has changed to use structured log entries (a message
+    plus several key-value pairs). Additionally, we can now control the log
+    level per package, and a new log level WARNING has been inserted between
+    INFO and ERROR (which was previously known as WARNING...). The INFO level
+    has become more verbose, indicating the sync actions taken by Syncthing. A
+    new command line flag --log-level sets the default log level for all
+    packages, and the STTRACE environment variable and GUI has been updated
+    to set log levels per package. The --verbose and --logflags command
+    line options have been removed and will be ignored if given.
+  - Deleted items are no longer kept forever in the database, instead they are
+    forgotten after fifteen months. If your use case require deletes to take
+    effect after more than a fifteen month delay, set the
+    --db-delete-retention-interval command line option or corresponding
+    environment variable to zero, or a longer time interval of your choosing.
+  - Modernised command line options parsing. Old single-dash long options are
+    no longer supported, e.g. -home must be given as --home. Some options
+    have been renamed, others have become subcommands. All serve options are
+    now also accepted as environment variables. See syncthing --help and
+    syncthing serve --help for details.
+  - Rolling hash detection of shifted data is no longer supported as this
+    effectively never helped. Instead, scanning and syncing is faster and more
+    efficient without it.
+  - A "default folder" is no longer created on first startup.
+  - Multiple connections are now used by default between v2 devices. The new
+    default value is to use three connections: one for index metadata and two
+    for data exchange.
+  - The following platforms unfortunately no longer get prebuilt binaries for
+    download at syncthing.net and on GitHub, due to complexities related to
+    cross compilation with SQLite:
+    - dragonfly/amd64
+    - solaris/amd64
+    - linux/ppc64
+    - netbsd/*
+    - openbsd/386 and openbsd/arm
+    - windows/arm
+  - The handling of conflict resolution involving deleted files has changed. A
+    delete can now be the winning outcome of conflict resolution, resulting in
+    the deleted file being moved to a conflict copy.
+  This release is also available as:
+  - APT repository: https://apt.syncthing.net/
+  - Docker image: docker.io/syncthing/syncthing:2.0.9 or ghcr.io/syncthing/syncthing:2.0.9
+    ({docker,ghcr}.io/syncthing/syncthing:2 to follow just the major version)
+  What's Changed
+  Fixes
+  - fix(sqlite): add _txlock=immediate to modernc implementation by @calmh in #10384
+  - fix(api): limit size of allowed authentication request by @calmh in #10386
+  Other
+  - chore(ursrv): update regex patterns for Syncthing-Fork entries by @Catfriend1 in #10380
+  - chore: clean up migrated database by @calmh in #10381
+  - chore(sqlite): use normalised tables for file names and versions by @calmh in #10383
+  - chore(model): slightly deflake TestRecvOnlyRevertOwnID by @calmh in #10390
+  Full Changelog: v2.0.8...v2.0.9
+ReleaseNotesUrl: https://github.com/syncthing/syncthing/releases/tag/v2.0.9
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://docs.syncthing.net/
+- DocumentLabel: Security
+  DocumentUrl: https://syncthing.net/security/
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

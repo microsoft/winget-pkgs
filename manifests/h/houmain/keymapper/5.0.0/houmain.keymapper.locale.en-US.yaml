@@ -1,0 +1,61 @@
+# Created with komac v2.12.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: houmain.keymapper
+PackageVersion: 5.0.0
+PackageLocale: en-US
+Publisher: Albert Kalchmair
+PublisherUrl: https://github.com/houmain
+PublisherSupportUrl: https://github.com/houmain/keymapper/issues
+PackageName: keymapper
+PackageUrl: https://github.com/houmain/keymapper
+License: GPL-3.0
+LicenseUrl: https://github.com/houmain/keymapper/blob/HEAD/LICENSE
+ShortDescription: A cross-platform context-aware key remapper
+Tags:
+- context-awareness
+- cross-platform
+- gnome-shell-extension
+- keyboard-layout
+- keyboard-shortcuts
+- keymapper
+- wayland
+ReleaseNotes: |-
+  The reason for the major version number increment is mainly because of the changed behavior of ;. Up until 4.9 it was documented to start comments like #. Otherwise all configurations should work like before.
+  Added
+  - Allow to separate multiple mappings on one line with ;. This is useful for macros which generate multiple mappings. e.g.:
+    swap = $0 >> $1 ; $1 >> $0
+    swap[Y, Z]
+  - Allow to add mappings for inputs which are released. e.g.:
+    # trigger when A is released
+    !A >> B
+    # trigger when B is released while A is held
+    A{!B} >> C
+    # trigger when B is released while A is NOT held
+    !A !B >> C
+  - Toggling virtual keys can also have immediate effects. Using them as modifiers is toggling them twice:
+    # toggle Virtual1 before and after pressing B
+    # this effectively maps D to A B C
+    Virtual1 >> A ^ C
+    D >> Virtual1{B}
+    # {} may also be empty. This maps C to A B
+    Virtual2 >> B
+    Virtual1 >> A Virtual2{}
+    C >> Virtual1{}
+  - Automatically replace Virtual with an unused virtual key. e.g.:
+    # assign different virtual keys to VimMode and CapsWord
+    VimMode = Virtual
+    CapsWord = Virtual
+  - Added keymapperctl operation --notify for showing notifications (#282). e.g.:
+    notify = $(keymapperctl --notify "$0")
+    F1 >> notify["Test"]
+  - Added toggle-active directive, which allows to set a sequence that de-/activates keymapper (#283). e.g.:
+    @toggle-active ScrollLock
+  - Added include-optional directive, which includes a file but does not fail when file does not exist.
+  Fixed
+  - Fixed suppressed modifiers getting reapplied (#291).
+  - Fixed loading config from "%HOME%\.config\keymapper" on Windows (#292).
+  - Properly releasing keys when UAC prompt appeared on Windows.
+ReleaseNotesUrl: https://github.com/houmain/keymapper/releases/tag/5.0.0
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0
