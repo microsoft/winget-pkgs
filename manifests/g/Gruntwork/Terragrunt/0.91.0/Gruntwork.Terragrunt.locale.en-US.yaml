@@ -1,0 +1,53 @@
+# Created with komac v2.13.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: Gruntwork.Terragrunt
+PackageVersion: 0.91.0
+PackageLocale: en-US
+Publisher: Gruntwork
+PublisherUrl: https://terragrunt.gruntwork.io/
+PublisherSupportUrl: https://terragrunt.gruntwork.io/docs/community/support
+PrivacyUrl: https://gruntwork.io/legal/privacy-policy
+PackageName: Terragrunt
+PackageUrl: https://github.com/gruntwork-io/terragrunt/releases/tag/v0.68.9
+License: MIT
+LicenseUrl: https://github.com/gruntwork-io/terragrunt/blob/HEAD/LICENSE.txt
+Copyright: © 2024 Gruntwork, Inc. All rights reserved.
+ShortDescription: Terragrunt is a thin wrapper for Terraform that provides extra tools for keeping your Terraform configurations DRY, working with multiple Terraform modules, and managing remote state.
+Description: Terragrunt is a thin wrapper for Terraform that provides extra tools for keeping your Terraform configurations DRY, working with multiple Terraform modules, and managing remote state.
+Tags:
+- IaC
+- Infrastructure as Code
+- Terraform
+- Terraform Wrapper
+- terragrunt
+ReleaseNotes: |-
+  Removal of behavior where inputs are read from dependencies
+  🛠️ Breaking Changes
+  Removal of behavior where inputs are read from dependencies
+  Terragrunt no longer exposes dependency inputs as accessible values.
+  This change improves performance and simplifies dependency handling by removing a feature that significantly slowed configuration parsing due to a requirement for recursive parsing of dependencies of dependencies for every dependent.
+  If your configurations currently access dependency inputs like this:
+  dependency "foo" {
+    config_path = "../foo"
+  }
+  inputs = {
+    my_input = dependency.foo.inputs.an_input_from_foo
+  }
+  You’ll need to update them to reference outputs instead:
+  dependency "foo" {
+    config_path = "../foo"
+  }
+  inputs = {
+    my_input = dependency.foo.outputs.an_output_from_foo
+  }
+  Accessing outputs remains the supported and recommended way to share data between modules.
+  What's Changed
+  - feat: removal of behavior where inputs are read from dependencies by @denis256 in #4960
+  Full Changelog: v0.90.2...v0.91.0
+ReleaseNotesUrl: https://github.com/gruntwork-io/terragrunt/releases/tag/v0.91.0
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/gruntwork-io/terragrunt/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0
