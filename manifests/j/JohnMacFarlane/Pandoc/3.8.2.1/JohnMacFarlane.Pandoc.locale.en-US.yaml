@@ -22,42 +22,39 @@ Tags:
 - markdown
 - pandoc
 ReleaseNotes: |-
-    I'm pleased to announce the release of pandoc 3.8.2,
+    I'm pleased to announce the release of pandoc 3.8.2.1,
     available in the usual places:
     Binary packages & changelog:
-    https://github.com/jgm/pandoc/releases/tag/3.8.2
+    https://github.com/jgm/pandoc/releases/tag/3.8.2.1
     Source & API documentation:
-    http://hackage.haskell.org/package/pandoc-3.8.2
-    This release fixes a regression in the typst template (since 3.8), which caused links to be omitted.
-    It also adds a new default Markdown extension, `table_attributes`, which allows attributes to be added to tables by putting them after the caption.
-    API change: Add `Ext_table_attributes` constructor to Extension.
+    http://hackage.haskell.org/package/pandoc-3.8.2.1
+    This is primarily a bug-fix release. There are no API changes.
+    The main motivation for the release is to fix a serious performance
+    regression with --citeproc and the default CSL style,
+    chicago-author-date.csl. This style was recently revised in a way that
+    took much longer for citeproc to parse. This version of pandoc is
+    built with citeproc 0.11, which fixes the performance regression.
+    One new feature (added by Albert Krewinkel) is that the Org reader now
+    parses parameter lists on unknown blocks, and also supports dynamic
+    blocks.
+    Thanks to all who contributed, especially new contributors
+    Emmanuel Ferdman, FoxChillz, mourino, and priiduonu.
     Of special note:
-        - Markdown reader/writer: implement new `table_attributes` extension
-        (#10884). When `table_attributes` is enabled (as it is by default for
-        pandoc's Markdown), attributes can be attached to a table by
-        including them at the end of the caption. Previously the writer
-        would emit an identifier in this position, but the reader didn't
-        handle it. Now arbitrary attributes are allowed, and they work in
-        both the reader and writer.
-       - Typst writer: don't add superfluous semicolons (#11196).
-        Previously we added semicolons after inline commands not
-        followed by spaces, but mainly this was to deal with one issue:
-        the presence of a semicolon after an inline command, which
-        would be swallowed as a command separator (#9252).
-        This commits adopts an approach that should avoid so many
-        superfluous semicolons: it escapes semicolons that might come
-        right after a command.
-      - Typst template: fix 3.8 regression in which links disappear
-        (#11194). A template change in 3.8 added a show rule for links which
-        causes them to disappear except in special cases.
-      - Text.Pandoc.Parsing: rewrite `oneOfStrings` more efficiently.
-      - LaTeX writer: Fix strikeout in links (#11192, Tuong Nguyen Manh).
-        As in #1294 `\url` and `\href` need to be protected
-        inside an mbox for `soul` commands.
-      - Text.Pandoc.Extensions: Add `Ext_table_attributes` constructor for
-        `Extension` [API change].
-      * Use released texmath 0.13.0.1.
-      * Update FSF contact information in COPYING (#11183, Bensun Muite).
+    - HTML reader: allow blank space between open and close `iframe`.
+    - RTF reader: improve hyperlink parsing (#11211).
+    - Org reader:
+      - Parse parameter lists on unknown blocks (#11188, Albert Krewinkel). The reader tries to parse the rest of the opening line of a block, e.g., `#+begin_myblock …`, as a parameters list. It first assumes that the parameters are in lisp-style (`:key value`), then alternatively tries to read python-style key-value pairs (`key=value`) and falls back to reading the entire remaining line as a single `parameter` attribute.
+      - Add support for dynamic blocks.
+    - Docx writer: properly handle nested comment spans (#8189, #6959, mourino).
+    - RST writer: Don’t use simple tables with RowSpans (#11214, Tuong Nguyen Manh).
+    - Typst writer: Escape open paren after non-space (#11210). This fixes an issue that occurs if an open paren comes right after e.g. `#strong[test]`.
+    - Typst template: ensure that title block is properly centered (#11221).
+    - LaTeX writer/template: small fix for unnumbered tables for compatibility with older LaTeX installations (#11201). Thanks to @priiduonu for the solution.
+    - MANUAL.txt: Fixed missing backtick (#11209, FoxChillz).
+    - Correct anchor references to `pandoc.text` module documentation (#11111, Emmanuel Ferdman).
+    - Fixed golden test regeneration in Docx reader test.
+    - Allow unicode-data 0.8.
+    - Use citeproc 0.11. This fixes a significant performance regression in pandoc 3.8, which was due to a rewrite of the default chicago-author-date.csl file. Performance with `--citeproc` is now on par with what we had in pandoc 3.7, even with the revised Chicago styles.
 
       - MANUAL.txt: remove some redundancy (#11178, Reuben Thomas).
 ReleaseNotesUrl: https://github.com/jgm/pandoc/releases/tag/3.8.2
