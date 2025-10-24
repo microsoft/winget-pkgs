@@ -1,0 +1,164 @@
+# Created with komac v2.13.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: Typst.Typst
+PackageVersion: 0.14.0
+PackageLocale: en-US
+Publisher: Typst GmbH
+PublisherUrl: https://typst.app/
+PublisherSupportUrl: https://github.com/typst/typst/issues
+PrivacyUrl: https://typst.app/privacy
+Author: Typst GmbH
+PackageName: Typst
+PackageUrl: https://typst.app/
+License: Apache-2.0
+LicenseUrl: https://github.com/typst/typst/blob/HEAD/LICENSE
+ShortDescription: A new markup-based typesetting system that is powerful and easy to learn.
+Description: |-
+  Typst is a new markup-based typesetting system that is designed to be as powerful as LaTeX while being much easier to learn and use. Typst has:
+  - Built-in markup for the most common formatting tasks
+  - Flexible functions for everything else
+  - A tightly integrated scripting system
+  - Math typesetting, bibliography management, and more
+  - Fast compile times thanks to incremental compilation
+  - Friendly error messages in case something goes wrong
+Tags:
+- markup
+- typesetting
+ReleaseNotes: |-
+  Read the announcement blog post
+  View changelog with links into the documentation on typst.app/docs
+  Highlights
+  - Typst now produces accessible PDFs out of the box, with opt-in support for stricter checks and conformance to PDF/UA-1
+  - Typst now supports all PDF/A standards
+  - PDFs can now be used as images (thanks to @LaurenzV)
+  - Added support for character-level justification (can significantly improve the appearance of justified text)
+  - Added support for many more built-in elements in HTML export
+  - Added typed HTML API (e.g. html.div) with individually typed attributes
+  - Added support for multiple headers and subheaders in tables
+  - Added title element for displaying the document title
+  - Added frac.style property for producing skewed and inline fractions
+  PDF export
+  PDF export was fully rewritten to use the new krilla library, fixing various bugs and enabling many improvements. Known fixes are listed below, but there will likely be other changes in how the output behaves. If you spot any regressions, please report them on GitHub. (Thanks to @LaurenzV for creating krilla!)
+  - Typst now produces accessible PDFs out of the box. Such documents are suitable for consumption in a wide range of circumstances. That not only includes consumption by people with permanent or temporary disabilities, but also by those with different devices or preferences.
+    - Typst PDFs are now tagged by default. Tags are rich metadata that PDF viewers can use to make the document consumable in other ways than visually (e.g., through a screen reader).
+    - In addition, Typst can now emit documents conforming to the PDF/UA-1 standard. (PDF/UA-2 is not yet supported, but planned.)
+    - There is an increasing amount of existing and upcoming legislation requiring documents to be accessible, for instance, the European Accessibility Act and the Americans with Disabilities Act.
+    - For more details on all of this, read the new Accessibility Guide.
+  - Typst now supports all PDF/A standards: PDF/A-1b, PDF/A-1a, PDF/A-2b, PDF/A-2u, PDF/A-2a, PDF/A-3b, PDF/A-3u, PDF/A-3a, PDF/A-4, PDF/A-4f, and PDF/A-4e. See the expanded PDF/A documentation for guidance on how to select a suitable standard.
+  - Typst now supports the PDF versions 1.4, 1.5, 1.6, and 2.0 in addition to PDF 1.7. See the relevant section of the PDF documentation for details.
+  - Added pdf.artifact function for marking content as not semantically meaningful
+  - Added experimental pdf.header-cell, pdf.data-cell, and pdf.table-summary functions for enhancing accessibility of documents with complex tables. These functions are guarded by the a11y-extras feature. They do not have a final interface and will be removed in the future, either through integration into table functions or through full removal.
+  - PDF heading bookmarks now contain the heading's numbering
+  - Attachments
+    - Renamed pdf.embed to pdf.attach (the old name will remain as a deprecated alias until Typst 0.15)
+    - The mime property of pdf.attach is now checked for syntactical correctness (Minor breaking change)
+    - Fixed parsing of the data argument of pdf.attach
+    - Attachments now smartly determine whether they should be compressed
+  - Text extraction (i.e. copy paste)
+    - Now works correctly even when multiple different characters result in the same glyph
+    - Spaces between words at which a natural line break occurred are now correctly retained for text extraction
+    - Fixed mapping of hyphenation artifacts to Unicode text
+  - Images
+    - CMYK images now work properly in PDF export
+    - Improved export of text in SVG images with a filter
+    - Improved compatibility of SVG images with Quartz rendering engine (the engine used in Apple Preview)
+    - Improved handling of SVG images with high group nesting depth
+  - Fixed a bug with text in patterns
+  - Fixed gradients with transparency
+  HTML export
+  - Added support for many more built-in elements (the Model category is now fully covered)
+    - The image element
+    - The footnote and footnote.entry element
+    - The outline and outline.entry element
+    - The bibliography element
+    - The smartquote element
+    - The sub and super elements
+    - The underline, overline, strike, and highlight elements
+    - The smallcaps element
+    - The lower and upper functions
+  - Added typed HTML API (e.g. html.div) with individually typed attributes
+    - For example, to generate a video element you can now write #html.video(width: 400, src: "sunrise.mp4") instead of #html.elem("video", attrs: (width: "400", src: "sunrise.mp4")). Note how the width attribute takes an integer instead of a string.
+  - Added support for intra-doc link targets
+  - The raw element
+    - Added syntax highlighting support
+    - Block-level raw elements now emit both a <code> and a <pre> tag
+    - The language tag of raw elements is now preserved as a data-lang attribute on the <code> tag
+  - The authors and keywords properties of the document function now yield corresponding HTML <meta> tags
+  - The html.elem function now supports custom HTML element names
+  - Improved encoding of html.frame
+  - Empty attributes are now encoded with shorthand syntax (e.g. <div hidden></div>)
+  - Zero-sized horizontal weak spacing (h(0pt, weak: true)) does not cause a "was ignored during HTML export" warning anymore, so it can be used to destruct surrounding spaces without producing any output, as in paged export
+  - Fixed encoding of <pre> and <textarea> elements that start with a newline
+  - Fixed encoding of raw text elements
+  - Fixed sizing of html.frame
+  - Fixed measure in HTML export
+  - Fixed nested html.frames
+  - Fixed that a box without a body was ignored in HTML export
+  - Fixed encoding of whitespace in HTML
+  SVG export
+  - Added support for COLR-flavored color glyphs
+  - Reduced amount of <g> grouping elements that are generated
+  PNG export
+  - Fixed crash when text size is negative
+  Visualize
+  - Added support for using PDFs as images using the new hayro library. PDFs will be embedded directly in PDF export, rasterized in PNG export, and turned into SVGs in SVG and HTML export. (Thanks to @LaurenzV for creating hayro!)
+  - Added support for WebP images
+  - Various minor improvements for SVG images (see the resvg 0.44 and 0.45 changelogs)
+  - SVG images can now refer to external image files
+  - Clip paths are now properly anti-aliased
+  - Fixed gradients on curves where the last segment is curve.line
+  - Fixed stroke cap handling of shapes with partial strokes
+  - Fixed corner radius handling of shapes with partial strokes
+  - Fixed crash when sampling across two coinciding gradient stops
+  Layout
+  - Added opt-in support for character-level justification in addition to word-level justification, configured via the new par.justification-limits property. This is an impactful microtypographical technique that can significantly improve the appearance of justified text.
+  - Fixed wrong linebreak opportunities related to object replacement characters
+  - Fixed an issue where a breakable block would still produce an empty segment even if nothing fit into the first segment, leading to various undesirable behaviors in combination with fills, strokes, and stickiness
+  - Fixed crash with set rule for column or rowspan on a grid cell
+  - Fixed CJK-Latin-spacing at manual line breaks and at sub- and superscript boundaries
+  Math
+  - Added frac.style property with new options for skewed and inline fractions
+  - Added math.equation.alt property for setting an alternative description for an equation
+  - Text handling
+    - A single equation can now use multiple fonts
+    - Glyph layout in math now uses proper text shaping, leading to better handling of more complex Unicode features
+    - Generated characters in an equation (e.g. the √ produced by sqrt) can now be targeted by text show rules
+    - Added scr function for roundhand script font style
+    - Added dotless parameter to accent (typically for rendering a dotless accented i or j)
+    - Script-style glyphs are now preferred at reduced math sizes
+    - Fixed text.stroke in math
+    - Broken glyph assemblies are now prevented even when font data is incorrect
+  - Layout
+    - Fixed a bug with vertical accent positioning
+    - Fixed positioning of bottom accents
+    - Fixed a bug with layout of roots
+    - Improved layout of vec and cases, making it consistent with mat
+    - Removed linebreak opportunity before closing bracket in inline math
+  - An augment line can now exist at the start and end of a matrix, not only in between columns and rows
+  - Shorthands and multi-character numbers do not bind more tightly than fractions anymore in cases like $x>=(y)/z$ (Minor breaking change)
+  - Named arguments passed to symbols used as function now raise an error instead of being silently ignored (Minor breaking change)
+  - The mid element does not force the "large" math class upon its contents anymore and instead defaults to "relation"
+  - Fixed error in math parsing when .. isn't followed by anything
+  - Fixed the default math class of ⅋, ⎰, ⟅, ⎱, ⟆, ⟇, and ،
+  Thanks to @mkorje for his work on math!
+  Model
+  - Tables
+    - Added support for multiple headers and subheaders in tables
+    - Table headers now force a rowbreak, i.e. an incomplete row before a header will not be filled with cells after the header
+    - Fixed a bug where headers and footers could accidentally expand to contain non-header cells
+  - Added title element for displaying the document title
+  - Added figure.alt property for setting an alternative description for a figure
+  - Link hit boxes for text are now vertically a bit larger to avoid issues with automatic link detection in PDF viewers
+  - The link function will now produce an error when passed an empty string as a URL (Minor breaking change)
+  - The value of the number argument of enum.item now takes auto instead of none for automatic numbering (Minor breaking change)
+  - Improved spacing of nested tight lists
+  - Fixed that quotes: false was ignored for inline-level quotes
+  - Fixed hanging indent for centered, numbered headings
+  - Fixed footnote.entry show rules breaking links from footnote to entry
+ReleaseNotesUrl: https://github.com/typst/typst/releases/tag/v0.14.0
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://typst.app/docs/
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0
