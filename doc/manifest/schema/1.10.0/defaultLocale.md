@@ -222,7 +222,7 @@ ManifestVersion: 1.10.0       # The manifest syntax version
 
   This key represents other common term users would search for when looking for packages. Tags should be pertinent to what a user might search for when looking for a specific package.
 
-  A maximum of 16 tags can be added.
+  A maximum of 16 tags can be added. A tag can at most be 40 characters long.
 
   NOTE:	The best practice is to present these terms in all lower case with hyphens rather than spaces.
 </details>
