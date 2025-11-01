@@ -188,7 +188,7 @@ ManifestVersion: 1.10.0        # The manifest syntax version
 
   This key represents the description for a package. It is intended for use in `winget show` to help a user understand what the package is.
 
-	The value must be at least 3 characters long, and at most 256 characters long.
+  The value must be at least 3 characters long, and at most 256 characters long.
 
   NOTE:	This should be something descriptive about what the package does, and it should not simply state something like "&lt;package name&gt; installer" or "&lt;package name&gt; setup".
  </details>
@@ -210,7 +210,7 @@ ManifestVersion: 1.10.0        # The manifest syntax version
 
   This key represents other common term users would search for when looking for packages.
 
-	A maximum of 16 tags can be added. A tag can at most be 40 characters long.
+  A maximum of 16 tags can be added. A tag can at most be 40 characters long.
 
   NOTE:	The best practice is to present these terms in all lower case with hyphens rather than spaces.
  </details>
