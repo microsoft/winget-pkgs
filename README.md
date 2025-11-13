@@ -34,3 +34,5 @@ See the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq
 contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments. More information is available in our [Contributing document](CONTRIBUTING.md).
 
 To avoid doubt, you may not make any Submissions linking to third-party materials if such Submission is prohibited by the applicable third party and/or otherwise violates such third party's rights.
+
+
