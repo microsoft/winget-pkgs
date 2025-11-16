@@ -1,0 +1,146 @@
+# Created with komac v2.13.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: BiomeJS.Biome
+PackageVersion: 2.3.4
+PackageLocale: en-US
+Publisher: BiomeJS
+PublisherUrl: https://biomejs.dev/
+PublisherSupportUrl: https://github.com/biomejs/biome/issues
+Author: Biome Developers and Contributors
+PackageName: Biome
+PackageUrl: https://biomejs.dev/
+License: Apache-2.0
+Copyright: Copyright (c) 2023-present Biome Developers and Contributors
+ShortDescription: Biome is a toolchain for web projects, aimed at providing functionalities to maintain them. It offers a formatter and linter, usable via CLI and LSP.
+Moniker: biome
+Tags:
+- css
+- formatter
+- javascript
+- json
+- jsx
+- linter
+- static-code-analysis
+- typescript
+- web
+ReleaseNotes: |-
+  2.3.4
+  Patch Changes
+  - #7989 4855c4a Thanks @alissonlauffer! - Fixed a regression in Astro frontmatter parsing where comments inside quoted strings were incorrectly detected as actual comments. This caused the parser to prematurely terminate frontmatter parsing when encountering strings like const test = "//";.
+    For example, the following Astro frontmatter now parses correctly:
+    ---
+    const test = "// not a real comment";
+    ---
+  - #7968 0b28f5f Thanks @denbezrukov! - Refactored formatter to use strict Token element for better performance. The new Token variant is optimized for static, ASCII-only text (keywords, operators, punctuation) with the following constraints:
+    - ASCII only (no Unicode characters)
+    - No newlines (\n, \r)
+    - No tab characters (\t)
+    This enables faster printing and fitting logic by using bulk string operations (push_str, len()) instead of character-by-character iteration with Unicode width calculations.
+  - #7941 19b8280 Thanks @Conaclos! - Fixed #7943. Rules' options are now properly merged with the inherited options from a shared configuration.
+    This means that you can now override a specific option from a rule without resetting the other options to their default.
+    Given the following shared configuration:
+    {
+      "linter": {
+        "rules": {
+          "style": {
+            "useNamingConvention": {
+              "level": "on",
+              "options": {
+                "strictCase": false,
+                "conventions": [
+                  {
+                    "selector": { "kind": "variable", "scope": "global" },
+                    "formats": ["CONSTANT_CASE"]
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+    And the user configuration that extends this shared configuration:
+    {
+      "extends": ["shared.json"],
+      "linter": {
+        "rules": {
+          "style": {
+            "useNamingConvention": {
+              "level": "on",
+              "options": { "strictCase": true }
+            }
+          }
+        }
+      }
+    }
+    The obtained merged configuration is now as follows:
+    {
+      "extends": ["shared.json"],
+      "linter": {
+        "rules": {
+          "style": {
+            "useNamingConvention": {
+              "level": "on",
+              "options": {
+                "strictCase": true,
+                "conventions": [
+                  {
+                    "selector": { "kind": "variable", "scope": "global" },
+                    "formats": ["CONSTANT_CASE"]
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  - #7969 425963d Thanks @ematipico! - Added support for the Svelte syntax {@debug}. The Biome HTML parser is now able to parse and format the blocks:
+    -{@debug     foo,bar,    something}
+    +{@debug foo, bar, something}
+  - #7986 3256f82 Thanks @lisiur! - Fixed #7981. Now Biome correctly detects and parses lang='tsx' and lang='jsx' languages when used inside in .vue files, when .experimentalFullSupportEnabled is enabled.
+  - #7921 547c2da Thanks @dyc3! - Fixed #7854: The CSS parser, with tailwindDirectives enabled, will now parse @source inline("underline");.
+  - #7856 c9e20c3 Thanks @Netail! - Added the nursery rule noContinue. Disallowing the usage of the continue statement, structured control flow statements such as if should be used instead.
+    Invalid:
+    let sum = 0,
+      i;
+    for (i = 0; i < 10; i++) {
+      if (i >= 5) {
+        continue;
+      }
+      sum += i;
+    }
+    Valid:
+    let sum = 0,
+      i;
+    for (i = 0; i < 10; i++) {
+      if (i < 5) {
+        sum += i;
+      }
+    }
+  What's Changed
+  - fix(parse/css): parse tailwind @source inline(...) by @dyc3 in #7921
+  - feat(html): implement {@debug} parsing by @ematipico in #7969
+  - fix(parse/tailwind): fix lexing variants that start with numbers by @dyc3 in #7966
+  - feat(lint): implement noContinue by @Netail in #7856
+  - fix(config): implement Merge for rules' options by @Conaclos in #7941
+  - chore: add graphite as bronze sponsor by @dyc3 in #7974
+  - chore: graphql tests options by @Netail in #7979
+  - refactor(formatter): introduce Token element by @denbezrukov in #7968
+  - fix(ROME_CHANGELOG.md): grammar and typo error by @WuMingDao in #7992
+  - chore(parser): increase size of SyntaxKindSet bitfield by @ryan-m-walker in #7994
+  - fix(RELEASES.md): grammar and typo error by @WuMingDao in #7993
+  - fix(html): fix comment detection in Astro frontmatter by @alissonlauffer in #7989
+  - feat: support html.experimentalFullSupportEnabled for vue with jsx/tsx script by @lisiur in #7986
+  - ci: release by @github-actions[bot] in #7965
+  New Contributors
+  - @WuMingDao made their first contribution in #7992
+  - @lisiur made their first contribution in #7986
+  Full Changelog: https://github.com/biomejs/biome/compare/@biomejs/biome@2.3.3...@biomejs/biome@2.3.4
+ReleaseNotesUrl: https://github.com/biomejs/biome/releases/tag/@biomejs/biome@2.3.4
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://biomejs.dev/guides/getting-started/
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0
