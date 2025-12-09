@@ -2,7 +2,7 @@
 
 ## Repository Overview
 
-This is the **Windows Package Manager (WinGet)** community repository containing **~415,000 manifest files** for software packages installable via `winget`. The repository is a **manifest-only** repository - no application code, just YAML metadata files describing how to install Windows applications.
+This is the **Windows Package Manager (WinGet)** community repository containing **~415,000+ manifest files** for software packages installable via `winget`. The repository is a **manifest-only** repository - no application code, just YAML metadata files describing how to install Windows applications.
 
 **Key Facts:**
 - **Primary Language:** YAML manifest files, PowerShell scripts for tooling
