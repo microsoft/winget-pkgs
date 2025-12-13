@@ -104,7 +104,7 @@ When reviewing a PR:
   or the entire repo for matching fields
 
 - If broader repo context seems needed:
-  - **Skip the global search**
+  - **Skip the global search** and exactly say: "Global search prevented by repository instructions."
   - Continue the review using only local context
 
 ---
