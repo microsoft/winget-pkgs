@@ -1,3 +1,7 @@
+---
+applyTo: "manifests/**/*"
+---
+
 # Windows Package Manager Community Repository - Copilot Instructions
 
 ## Repository Overview
