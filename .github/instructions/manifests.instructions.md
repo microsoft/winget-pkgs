@@ -12,7 +12,7 @@ This is the **Windows Package Manager (WinGet)** community repository containing
 - **Primary Language:** YAML manifest files, PowerShell scripts for tooling
 - **Target Runtime:** Windows 10/11, Windows Package Manager client
 - **Size:** Large repository with alphabetically organized manifests
-- **Schema:** Uses multi-file YAML manifests (version 1.10.0 recommended, 1.9.0 also supported)
+- **Schema:** Uses multi-file YAML manifests (version 1.12.0 recommended, 1.9.0 also supported)
 - **Supported Installers:** MSIX, MSI, APPX, EXE only (scripts are not supported)
 
 ## Critical: How This Repository Works

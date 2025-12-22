@@ -10,11 +10,13 @@ WinGet supports the following installer types:
 - **MSIX**
 - **MSI**
 - **Exe-based installers**
+- **Fonts**
 
 These installer types may also be nested within the `.zip` (compressed) installer type.
 **Scripts are expressly disallowed as installers.** Examples include:
 - Batch files (`.bat`)
 - PowerShell scripts (`.ps1`)
+- Font files (`.ttf`)
 
 ## Installer Behaviors
 Packages submitted to the community repository must install without requiring user interaction. The default installation mechanism in WinGet is **"silent with progress"**, which means:
@@ -39,3 +41,8 @@ WinGet supports a singleton manifest type, but it is prohibited in the community
 
 ## Manifest URLs
 The URLs in manifests should come from official sources/publishers for packages. In particular any URLs for installers need to be discoverable on the publishers website. In many cases the URLs for installers come from a CDN, and HTTP redirects are used to find the "final" url for installers. Some software is delivered via a "vanity" URL and publishers replace the binaries which will cause a hash mismatch until a new version of the manifest is published. The preference for WinGet manifests is to use unique URLs per version of a package to avoid the hash-mismatch errors.
+
+## Manifest Root Policy
+This repository has two manifest root folders, `manifests` and `fonts` with InstallerType policy enforcement as follows:
+- `manifests` - InstallerType and NestedInstallerType `font` is not allowed.
+- `fonts` - InstallerType `font` and `zip` are the only permitted InstallerTypes, and `font` is the only permitted NestedInstallerType.
