@@ -237,7 +237,7 @@ if ($Settings) {
 }
 
 $ScriptHeader = '# Created with YamlCreate.ps1 v2.5.0'
-$ManifestVersion = '1.10.0'
+$ManifestVersion = 'latest'
 $PSDefaultParameterValues = @{ '*:Encoding' = 'UTF8' }
 $Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
 $ofs = ', '
@@ -274,10 +274,10 @@ $useDirectSchemaLink = if ($env:GITHUB_ACTIONS -eq $true) {
   (Invoke-WebRequest "https://aka.ms/winget-manifest.version.$ManifestVersion.schema.json" -UseBasicParsing).Content -match '<!doctype html>'
 }
 $SchemaUrls = @{
-  version       = if ($useDirectSchemaLink) { "https://raw.githubusercontent.com/microsoft/winget-cli/master/schemas/JSON/manifests/v$ManifestVersion/manifest.version.$ManifestVersion.json" } else { "https://aka.ms/winget-manifest.version.$ManifestVersion.schema.json" }
-  defaultLocale = if ($useDirectSchemaLink) { "https://raw.githubusercontent.com/microsoft/winget-cli/master/schemas/JSON/manifests/v$ManifestVersion/manifest.defaultLocale.$ManifestVersion.json" } else { "https://aka.ms/winget-manifest.defaultLocale.$ManifestVersion.schema.json" }
-  locale        = if ($useDirectSchemaLink) { "https://raw.githubusercontent.com/microsoft/winget-cli/master/schemas/JSON/manifests/v$ManifestVersion/manifest.locale.$ManifestVersion.json" } else { "https://aka.ms/winget-manifest.locale.$ManifestVersion.schema.json" }
-  installer     = if ($useDirectSchemaLink) { "https://raw.githubusercontent.com/microsoft/winget-cli/master/schemas/JSON/manifests/v$ManifestVersion/manifest.installer.$ManifestVersion.json" } else { "https://aka.ms/winget-manifest.installer.$ManifestVersion.schema.json" }
+  version       = if ($useDirectSchemaLink) { "https://raw.githubusercontent.com/microsoft/winget-cli/master/schemas/JSON/manifests/$ManifestVersion/manifest.version.$ManifestVersion.json" } else { "https://aka.ms/winget-manifest.version.$ManifestVersion.schema.json" }
+  defaultLocale = if ($useDirectSchemaLink) { "https://raw.githubusercontent.com/microsoft/winget-cli/master/schemas/JSON/manifests/$ManifestVersion/manifest.defaultLocale.$ManifestVersion.json" } else { "https://aka.ms/winget-manifest.defaultLocale.$ManifestVersion.schema.json" }
+  locale        = if ($useDirectSchemaLink) { "https://raw.githubusercontent.com/microsoft/winget-cli/master/schemas/JSON/manifests/$ManifestVersion/manifest.locale.$ManifestVersion.json" } else { "https://aka.ms/winget-manifest.locale.$ManifestVersion.schema.json" }
+  installer     = if ($useDirectSchemaLink) { "https://raw.githubusercontent.com/microsoft/winget-cli/master/schemas/JSON/manifests/$ManifestVersion/manifest.installer.$ManifestVersion.json" } else { "https://aka.ms/winget-manifest.installer.$ManifestVersion.schema.json" }
 }
 
 # Fetch Schema data from github for entry validation, key ordering, and automatic commenting
@@ -2435,6 +2435,13 @@ if (Test-Path -Path "$PSScriptRoot\..\manifests") {
   $ManifestsFolder = (Resolve-Path '.\').Path
 }
 
+# Set the root folder where new font manifests should be created
+if (Test-Path -Path "$PSScriptRoot\..\fonts") {
+  $FontsFolder = (Resolve-Path "$PSScriptRoot\..\fonts").Path
+} else {
+  $FontsFolder = (Resolve-Path '.\').Path
+}
+
 # Initialize the return value to be a success
 $script:_returnValue = [ReturnValue]::new(200)
 
@@ -2695,6 +2702,7 @@ if ($ScriptSettings.ContinueWithExistingPRs -ne 'always' -and $script:Option -ne
 
 # Set the folder for the specific package and version
 $script:AppFolder = Join-Path $ManifestsFolder -ChildPath $PackageIdentifier.ToLower().Chars(0) | Join-Path -ChildPath $PackageIdentifierFolder | Join-Path -ChildPath $PackageVersion
+$script:FontFolder = Join-Path $FontsFolder -ChildPath $PackageIdentifier.ToLower().Chars(0) | Join-Path -ChildPath $PackageIdentifierFolder | Join-Path -ChildPath $PackageVersion
 
 # If the user selected `NewLocale` or `EditMetadata` the version *MUST* already exist in the folder structure
 if ($script:Option -in @('NewLocale'; 'EditMetadata'; 'RemoveManifest')) {
@@ -2702,6 +2710,12 @@ if ($script:Option -in @('NewLocale'; 'EditMetadata'; 'RemoveManifest')) {
   if (Test-Path -Path "$AppFolder\..\$PackageVersion") {
     $script:OldManifests = Get-ChildItem -Path "$AppFolder\..\$PackageVersion"
     $LastVersion = $PackageVersion
+  }
+  elseif (Test-Path -Path "$FontFolder\..\$PackageVersion") {
+    $script:OldManifests = Get-ChildItem -Path "$FontFolder\..\$PackageVersion"
+    $LastVersion = $PackageVersion
+    # Intentionally override AppFolder here to ensure the rest of the script works as expected
+    $script:AppFolder = $script:FontFolder
   }
   # If the old manifests could not be found, request a new version
   while (-not ($OldManifests.Name -like "$PackageIdentifier*.yaml")) {
@@ -2713,17 +2727,22 @@ if ($script:Option -in @('NewLocale'; 'EditMetadata'; 'RemoveManifest')) {
     }
     if (Test-Path -Path "$AppFolder\..\$PromptVersion") {
       $script:OldManifests = Get-ChildItem -Path "$AppFolder\..\$PromptVersion"
+      $script:AppFolder = Join-Path (Split-Path $AppFolder) -ChildPath $LastVersion
+    }
+    elseif (Test-Path -Path "$FontsFolder\..\$PromptVersion") {
+      $script:OldManifests = Get-ChildItem -Path "$FontsFolder\..\$PromptVersion"
+      # Intentionally use AppFolder here to ensure the rest of the script works as expected
+      $script:AppFolder = Join-Path (Split-Path $FontsFolder) -ChildPath $LastVersion
     }
     # If a new version is entered, we need to be sure to update the folder for writing manifests
     $LastVersion = $PromptVersion
-    $script:AppFolder = Join-Path (Split-Path $AppFolder) -ChildPath $LastVersion
     $script:PackageVersion = $LastVersion
   }
 }
 
 # If the user selected `QuickUpdateVersion`, the old manifests must exist
 # If the user selected `New`, the old manifest type is specified as none
-if (-not (Test-Path -Path "$AppFolder\..")) {
+if (-not (Test-Path -Path "$AppFolder\..") -and -not (Test-Path -Path "$FontsFolder\..")) {
   if ($script:Option -in @('QuickUpdateVersion', 'Auto')) {
     Write-Host -ForegroundColor Red 'This option requires manifest of previous version of the package. If you want to create a new package, please select Option 1.'
     Invoke-CleanExit
