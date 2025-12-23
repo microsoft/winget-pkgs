@@ -236,8 +236,8 @@ if ($Settings) {
   exit
 }
 
-$ScriptHeader = '# Created with YamlCreate.ps1 v2.6.0'
-$ManifestVersion = '1.10.0'
+$ScriptHeader = '# Created with YamlCreate.ps1 v2.7.0'
+$ManifestVersion = '1.12.0'
 $PSDefaultParameterValues = @{ '*:Encoding' = 'UTF8' }
 $Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
 $ofs = ', '
@@ -885,6 +885,7 @@ Function Read-NestedInstaller {
     } until (!$AnotherNestedInstaller)
     $_Installer['NestedInstallerFiles'] = $_NestedInstallerFiles
   }
+  Write-Host
   return $_Installer
 }
 
