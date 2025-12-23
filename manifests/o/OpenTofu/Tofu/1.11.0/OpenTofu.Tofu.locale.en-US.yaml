@@ -1,0 +1,66 @@
+# Created with komac v2.14.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: OpenTofu.Tofu
+PackageVersion: 1.11.0
+PackageLocale: en-US
+Publisher: The Linux Foundation
+PublisherUrl: https://opentofu.org/
+PublisherSupportUrl: https://github.com/opentofu/opentofu/issues
+PackageName: OpenTofu
+PackageUrl: https://github.com/opentofu/opentofu
+License: MPL-2.0
+LicenseUrl: https://github.com/opentofu/opentofu/blob/HEAD/LICENSE
+Copyright: Copyright (c) The Linux Foundation
+CopyrightUrl: https://github.com/opentofu/opentofu/blob/main/LICENSE
+ShortDescription: OpenTofu lets you declaratively manage your cloud infrastructure.
+Moniker: tofu
+ReleaseNotes: |-
+  OpenTofu 1.11.0
+  We're proud to announce that OpenTofu 1.11.0 is now officially available! 🎉
+  Highlights
+  This release cycle introduces major new capabilities and integrations:
+  Ephemeral Values and Write Only Attributes
+  Ephemeral resources allow you to work with confidential data, temporary credentials, and transient infrastructure without persisting them to your state.
+  ephemeral "aws_secretsmanager_random_password" "password" {
+  }
+  resource "kubernetes_secret_v1" "credentials" {
+    metadata {
+      name = "admin"
+      namespace = "my-app"
+    }
+    data_wo = {
+      username = "admin"
+      password = ephemeral.aws_secretsmanager_random_password.password.random_password
+    }
+    data_wo_revision = 1
+    type = "kubernetes.io/basic-auth"
+  }
+  The enabled Meta-Argument
+  If you want to conditionally deploy a resource, you no longer have to use count = var.create_my_resource ? 1 : 0, you can now add the new enabled meta-argument to your resource to conditionally deploy it.
+  resource "aws_instance" "web" {
+    ami           = "ami-12345"
+    instance_type = "t3.micro"
+    lifecycle {
+      enabled = var.create_instance  # Simple boolean condition
+    }
+  }
+  Compatibility Notes
+  - macOS: Requires macOS 12 Monterey or later
+  - Azure Backend (azurerm):
+    - The endpoint and ARM_ENDPOINT configuration options are no longer supported
+    - The msi_endpoint and ARM_MSI_ENDPOINT options are no longer supported
+    - The environment and metadata_host arguments are now mutually exclusive
+  - issensitive() Function: Now correctly returns unknown results when evaluating unknown values. Code that previously relied on the incorrect behavior may need updates.
+  - Testing with Mocks: Mock values generated during testing now strictly adhere to provider schemas. Test configurations with invalid mock values will need to be corrected.
+  - S3 Module Installation: When installing module packages from Amazon S3 buckets using S3 source addresses OpenTofu will use the same credentials as the AWS CLI and SDK.
+  - TLS and SSH Security:
+    - SHA-1 signatures are no longer accepted for TLS or SSH connections
+    - SSH certificates must comply with the draft-miller-ssh-cert-03 specification
+  Reference
+  - Full Changelog
+  - Blog Post
+  Thank you for your continued support and testing of the OpenTofu project!
+ReleaseNotesUrl: https://github.com/opentofu/opentofu/releases/tag/v1.11.0
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

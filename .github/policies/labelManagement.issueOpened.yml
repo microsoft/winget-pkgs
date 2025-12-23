@@ -105,6 +105,9 @@ configuration:
                 pattern: ^manifests/*
           - not:
               filesMatchPattern:
+                pattern: ^fonts/*
+          - not:
+              filesMatchPattern:
                 pattern: DevOpsPipelineDefinitions
           - not:
               filesMatchPattern:
@@ -196,7 +199,7 @@ configuration:
           - addLabel:
               label: Project-File
       - description: >-
-          When a PR is opened/updated, if the content contains .validation and user is not repo admin
+          When a PR is opened/updated, if the content contains .validation and user is not repo admin or authorized bot
           * Add Author-Not-Authorized label
         if:
           - payloadType: Pull_Request
@@ -209,6 +212,9 @@ configuration:
           - not:
               activitySenderHasPermission:
                 permission: Admin
+          - not:
+              isActivitySender:
+                user: wingetbot
         then:
           - addLabel:
               label: Author-Not-Authorized
@@ -227,6 +233,18 @@ configuration:
           - not:
               activitySenderHasPermission:
                 permission: Admin
+          - not:
+              isActivitySender:
+                user: dkbennett
+          - not:
+              isActivitySender:
+                user: denelon
+          - not:
+              isActivitySender:
+                user: Trenly
+          - not:
+              isActivitySender:
+                user: mdanish-kh
         then:
           - addReply:
               reply: >-
