@@ -10,13 +10,12 @@ WinGet supports the following installer types:
 - **MSIX**
 - **MSI**
 - **Exe-based installers**
-- **Fonts**
+- **Font files**
 
 These installer types may also be nested within the `.zip` (compressed) installer type.
 **Scripts are expressly disallowed as installers.** Examples include:
 - Batch files (`.bat`)
 - PowerShell scripts (`.ps1`)
-- Font files (`.ttf`)
 
 ## Installer Behaviors
 Packages submitted to the community repository must install without requiring user interaction. The default installation mechanism in WinGet is **"silent with progress"**, which means:
