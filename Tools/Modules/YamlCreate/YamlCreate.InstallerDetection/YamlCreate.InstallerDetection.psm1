@@ -387,7 +387,7 @@ function Resolve-InstallerType {
     )
 
     # Ordering is important here due to the specificity achievable by each of the detection methods
-    # if (Test-IsFont -Path $Path) { return 'font' } # Font detection is not implemented yet
+    if (Test-IsFont -Path $Path) { return 'font' }
     if (Test-IsWix -Path $Path) { return 'wix' }
     if (Test-IsMsi -Path $Path) { return 'msi' }
     if (Test-IsMsix -Path $Path) { return 'msix' }
