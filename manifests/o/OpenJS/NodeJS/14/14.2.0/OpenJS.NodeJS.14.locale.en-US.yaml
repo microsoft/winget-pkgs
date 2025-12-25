@@ -1,0 +1,176 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: OpenJS.NodeJS.14
+PackageVersion: 14.2.0
+PackageLocale: en-US
+Publisher: Node.js Foundation
+PublisherUrl: https://openjsf.org/
+PublisherSupportUrl: https://github.com/nodejs/node/blob/v14.2.0/.github/SUPPORT.md
+PrivacyUrl: https://privacy-policy.openjsf.org/
+Author: OpenJS Foundation
+PackageName: Node.js 14
+PackageUrl: https://nodejs.org/
+License: MIT
+LicenseUrl: https://github.com/nodejs/node/blob/v14.2.0/LICENSE
+Copyright: Copyright Node.js contributors. All rights reserved.
+CopyrightUrl: https://trademark-policy.openjsf.org/
+ShortDescription: Run JavaScript Everywhere
+Description: Node.js® is a free, open-source, cross-platform JavaScript runtime environment that lets developers create servers, web apps, command line tools and scripts.
+Moniker: nodejs-14
+Tags:
+- coding
+- cross-platform
+- develop
+- development
+- environment
+- javascript
+- js
+- node
+- npm
+- programming
+- runtime
+- v8
+ReleaseNotes: |-
+  Notable Changes
+  Track function calls with assert.CallTracker (experimental)
+  assert.CallTracker is a new experimental API that allows to track and later
+  verify the number of times a function was called. This works by creating a
+  CallTracker object and using its calls method to create wrapper functions
+  that will count each time they are called. Then the verify method can be used
+  to assert that the expected number of calls happened:
+  const assert = require('assert');
+
+  const tracker = new assert.CallTracker();
+
+  function func() {}
+  // callsfunc() must be called exactly twice before tracker.verify().
+  const callsfunc = tracker.calls(func, 2);
+  callsfunc();
+  callsfunc();
+
+  function otherFunc() {}
+  // The second parameter defaults to `1`.
+  const callsotherFunc = tracker.calls(otherFunc);
+  callsotherFunc();
+
+  // Calls tracker.verify() and verifies if all tracker.calls() functions have
+  // been called the right number of times.
+  process.on('exit', () => {
+    tracker.verify();
+  });
+  Additionally, tracker.report() will return an array which contains information
+  about the errors, if there are any:
+  const assert = require('assert');
+
+  const tracker = new assert.CallTracker();
+
+  function func() {}
+  const callsfunc = tracker.calls(func);
+
+  console.log(tracker.report());
+  /*
+  [
+    {
+      message: 'Expected the func function to be executed 1 time(s) but was executed 0 time(s).',
+      actual: 0,
+      expected: 1,
+      operator: 'func',
+      stack: Error
+          ...
+    }
+  ]
+  */
+  Contributed by ConorDavenport - #31982.
+  Console groupIndentation option
+  The Console constructor (require('console').Console) now supports different group indentations.
+  This is useful in case you want different grouping width than 2 spaces.
+  const { Console } = require('console');
+  const customConsole = new Console({
+    stdout: process.stdout,
+    stderr: process.stderr,
+    groupIndentation: 10
+  });
+
+  customConsole.log('foo');
+  // 'foo'
+  customConsole.group();
+  customConsole.log('foo');
+  //           'foo'
+  Contributed by rickyes - #32964.
+  Commits
+  Semver-minor commits
+  - [c87ed21fdf] - (SEMVER-MINOR) assert: port common.mustCall() to assert (ConorDavenport) #31982
+  - [c49e3ea20c] - (SEMVER-MINOR) console: support console constructor groupIndentation option (rickyes) #32964
+  - [bc9e413dae] - (SEMVER-MINOR) worker: add stack size resource limit option (Anna Henningsen) #33085
+  Semver-patch commits
+  - [f62d92b900] - build: add --error-on-warn configure flag (Daniel Bevenius) #32685
+  - [db293c47dd] - cluster: fix error on worker disconnect/destroy (Santiago Gimeno) #32793
+  - [83e165bf88] - crypto: check DiffieHellman p and g params (Ben Noordhuis) #32739
+  - [e07cca6af6] - crypto: generator must be int32 in DiffieHellman() (Ben Noordhuis) #32739
+  - [637442fec9] - crypto: key size must be int32 in DiffieHellman() (Ben Noordhuis) #32739
+  - [c5a4534d5c] - deps: V8: backport e29c62b74854 (Anna Henningsen) #33125
+  - [8325c29e92] - deps: update to uvwasi 0.0.8 (Colin Ihrig) #33078
+  - [2174159598] - esm: improve commonjs hint on module not found (Daniele Belardi) #31906
+  - [74b0e8c3a8] - http: ensure client request emits close (Robert Nagy) #33178
+  - [a4ec01c55b] - http: simplify sending header (Robert Nagy) #33200
+  - [451993ea94] - http: set default timeout in agent keepSocketAlive (Owen Smith) #33127
+  - [3cb1713a59] - http2,doc: minor fixes (Alba Mendez) #28044
+  - [eab4be1b93] - lib: cosmetic change to builtinLibs list for maintainability (James M Snell) #33106
+  - [542da430ff] - lib: fix validateport error message when allowZero is false (rickyes) #32861
+  - [5eccf1e9ad] - module: no type module resolver side effects (Guy Bedford) #33086
+  - [466213d726] - n-api: simplify uv_idle wrangling (Ben Noordhuis) #32997
+  - [ed45b51642] - path: fix comment grammar (thecodrr) #32942
+  - [bb2d2f6e0e] - src: remove unused v8 Message namespace (Adrian Estrada) #33180
+  - [de643bc325] - src: use unique_ptr for CachedData in ContextifyScript::New (Anna Henningsen) #33113
+  - [f61928ba35] - src: return undefined when validation err == 0 (James M Snell) #33107
+  - [f4e5ab14da] - src: crypto::UseSNIContext to use BaseObjectPtr (James M Snell) #33107
+  - [541ea035bf] - src: separate out NgLibMemoryManagerBase (James M Snell) #33104
+  - [10a87c81cf] - src: remove unnecessary fully qualified names (rickyes) #33077
+  - [45032a39e8] - stream: fix stream.finished on Duplex (Robert Nagy) #33133
+  - [4cfa7e0716] - stream: simplify Readable push/unshift logic (himself65) #32899
+  - [bc40ed31b3] - stream: add null check in Readable.from (Pranshu Srivastava) #32873
+  - [b183d0a18a] - stream: let Duplex re-use Writable properties (Robert Nagy) #33079
+  - [ec24577406] - v8: use AliasedBuffers for passing heap statistics around (Joyee Cheung) #32929
+  - [d39254ada6] - vm: fix vm.measureMemory() and introduce execution option (Joyee Cheung) #32988
+  - [4423304ac4] - vm: throw error when duplicated exportNames in SyntheticModule (himself65) #32810
+  - [3866dc1311] - wasi: use free() to release preopen array (Anna Henningsen) #33110
+  - [d7d9960d38] - wasi: update start() behavior to match spec (Colin Ihrig) #33073
+  - [8d5ac1bbf0] - wasi: rename __wasi_unstable_reactor_start() (Colin Ihrig) #33073
+  - [c6d632a72a] - worker: unify custom error creation (Anna Henningsen) #33084
+  Documentation commits
+  - [6925b358f9] - doc: mark assert.CallTracker experimental (Ruben Bridgewater) #33124
+  - [413f5d3581] - doc: add missing deprecation not (Robert Nagy) #33203
+  - [7893bde07e] - doc: fix a typo in crypto.generateKeyPairSync() (himself65) #33187
+  - [d02ced8af6] - doc: add util.types.isArrayBufferView() (Kevin Locke) #33092
+  - [36d50027af] - doc: clarify when not to run CI on docs (Juan José Arboleda) #33101
+  - [a99013718c] - doc: fix the spelling error in stream.md (白一梓) #31561
+  - [23962191c1] - doc: correct Nodejs to Node.js spelling (Nick Schonning) #33088
+  - [de15edcfc0] - doc: improve worker pool example (Ranjan Purbey) #33082
+  - [289a5c8dfb] - doc: some grammar fixes (Chris Holland) #33081
+  - [82e459d9af] - doc: don't check links in tmp dirs (Ben Noordhuis) #32996
+  - [c5a2f9a02a] - doc: fix markdown parsing on doc/api/os.md (Juan José Arboleda) #33067
+  Other commits
+  - [60ebbc4386] - test: update c8 ignore comment (Benjamin Coe) #33151
+  - [e276524fcc] - test: skip memory usage tests when ASAN is enabled (Anna Henningsen) #33129
+  - [89ed7a5862] - test: move test-process-title to sequential (Anna Henningsen) #33150
+  - [af7da46d9b] - test: fix out-of-bound reads from invalid sizeof usage (Anna Henningsen) #33115
+  - [9ccb6b2e8c] - test: add missing calls to napi_async_destroy (Anna Henningsen) #33114
+  - [3c2f608a8d] - test: correct typo in test name (Colin Ihrig) #33083
+  - [92c7e0620f] - test: check args on SourceTextModule cachedData (Juan José Arboleda) #32956
+  - [f79ef96fea] - test: mark test flaky on freebsd (Sam Roberts) #32849
+  - [aced1f5d70] - test: flaky test-stdout-close-catch on freebsd (Sam Roberts) #32849
+  - [6734cc43df] - tools: bump remark-preset-lint-node to 1.15.0 (Rich Trott) #33157
+  - [a87d371014] - tools: fix redundant-move warning in inspector (Daniel Bevenius) #32685
+  - [12426f59f5] - tools: update remark-preset-lint-node@1.14.0 (Rich Trott) #33072
+  - [8c40ffc329] - tools: update broken types in type parser (Colin Ihrig) #33068
+ReleaseNotesUrl: https://github.com/nodejs/node/releases/tag/v14.2.0
+Documentations:
+- DocumentLabel: Learn
+  DocumentUrl: https://nodejs.org/learn/
+- DocumentLabel: Documentation
+  DocumentUrl: https://nodejs.org/docs/v14.2.0/api/
+- DocumentLabel: About
+  DocumentUrl: https://nodejs.org/about/
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0
