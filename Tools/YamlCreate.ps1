@@ -236,7 +236,7 @@ if ($Settings) {
   exit
 }
 
-$ScriptHeader = '# Created with YamlCreate.ps1 v2.7.0'
+$ScriptHeader = '# Created with YamlCreate.ps1 v2.7.1'
 $ManifestVersion = '1.12.0'
 $PSDefaultParameterValues = @{ '*:Encoding' = 'UTF8' }
 $Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
@@ -632,6 +632,33 @@ Function Get-InstallerFile {
   }
 
   return $_OutFile
+}
+
+Function SafeRemovePath {
+  Param(
+    [Parameter(Mandatory=$true, Position=0)]
+    [string] $Path,
+    [int] $Retries = 6,
+    [int] $DelayMs = 250
+  )
+
+  if (-not (Test-Path -LiteralPath $Path)) { return }
+
+  for ($i = 0; $i -lt $Retries; $i++) {
+    try {
+      Remove-Item -LiteralPath $Path -Force -ErrorAction Stop
+      return
+    } catch [System.IO.IOException] {
+      [GC]::Collect()
+      [GC]::WaitForPendingFinalizers()
+      Start-Sleep -Milliseconds $DelayMs
+      $DelayMs = [Math]::Min(5000, $DelayMs * 2)
+    } catch {
+      throw
+    }
+  }
+
+  Write-Warning "Could not remove file '$Path' after $Retries attempts; it may be in use by another process."
 }
 
 Function Get-UserSavePreference {
@@ -1439,7 +1466,7 @@ Function Read-QuickInstallerEntry {
         }
       }
       # Remove the downloaded files
-      Remove-Item -Path $script:dest
+      SafeRemovePath $script:dest
       Write-Host -ForegroundColor 'Green' "Installer updated!`n"
     }
 
@@ -3084,7 +3111,7 @@ Switch ($script:Option) {
         }
       }
       # Remove the downloaded files
-      Remove-Item -Path $script:dest
+      SafeRemovePath $script:dest
       $_NewInstallers += Restore-YamlKeyOrder $_Installer $InstallerEntryProperties -NoComments
     }
     # Write the new manifests
