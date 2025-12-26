@@ -1466,7 +1466,7 @@ Function Read-QuickInstallerEntry {
         }
       }
       # Remove the downloaded files
-      SafeRemovePath $script:dest
+      SafeRemovePath -Path $script:dest
       Write-Host -ForegroundColor 'Green' "Installer updated!`n"
     }
 
@@ -3111,7 +3111,7 @@ Switch ($script:Option) {
         }
       }
       # Remove the downloaded files
-      SafeRemovePath $script:dest
+      SafeRemovePath -Path $script:dest
       $_NewInstallers += Restore-YamlKeyOrder $_Installer $InstallerEntryProperties -NoComments
     }
     # Write the new manifests
