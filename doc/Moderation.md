@@ -32,7 +32,7 @@ Our intent was not to introduce a numbers game for others to achieve and automat
 | **[@ImJoakim](https://github.com/ImJoakim)** |
 | **[@ItzLevvie](https://github.com/ItzLevvie)** |
 | **[@jedieaston](https://github.com/jedieaston)** |
-| **[@KaranKad](https://github.com/KaranKaD)** |
+| **[@KaranKad](https://github.com/KaranKad)** |
 | **[@mdanish-kh](https://github.com/mdanish-kh)** |
 | **[@OfficialEsco](https://github.com/OfficialEsco)** |
 | **[@quhxl](https://github.com/quhxl)** |
