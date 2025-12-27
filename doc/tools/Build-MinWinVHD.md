@@ -19,8 +19,6 @@ This script creates a dynamically sized VHDX, initializes GPT partitions (EFI + 
 
 ## Parameters
 
-## Parameters
-
 | Argument | Description | Required | Default |
 |------------------------------|-----------------------------------------------------------------------------|:--------:|:-------:|
 | **-IsoDrive** | Drive letter where the Windows ISO is mounted (string). Example: D:. | true | — |
@@ -87,3 +85,12 @@ cd <path-to-repo>\Tools
 - If the ISO is not mounted as a drive letter, use `Mount-DiskImage -ImagePath "C:\path\to\Win11.iso"` and then run `Get-Volume` or check Explorer to find the assigned drive letter.
 - If `dism /Apply-Image` fails, verify the `-ImageIndex` value, and confirm whether the image file is `install.wim` or `install.esd`.
 - If Hyper-V VM creation fails, verify the `Hyper-V` Windows feature is enabled and that you are running elevated PowerShell.
+
+## Using with other VM Providers
+
+- The produced VHDX (`C:\MinWin11.vhdx`) can be used with other hypervisors, but many providers require a different disk format; convert the VHDX to the format your provider expects before attaching.
+- QEMU/KVM: convert to `qcow2` with `qemu-img convert -O qcow2`.
+- VMware: convert to `vmdk` with `qemu-img convert -O vmdk` (or use VMware tools if available).
+- VirtualBox: use `VBoxManage clonemedium disk --format VDI` or convert with `qemu-img` to `vdi`/`vmdk` as needed.
+- Before converting, ensure the VHDX is dismounted and not in use. After conversion, attach the converted disk to a VM configured for UEFI/GPT (Gen2/EFI) and the appropriate disk controller.
+- Expect to install or enable guest additions/tools for the target hypervisor and verify drivers (network, storage) inside the guest; hardware differences may require small post-boot fixes.
