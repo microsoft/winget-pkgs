@@ -1,0 +1,60 @@
+# Created with WinGet Releaser using komac v2.14.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: max-sixty.worktrunk
+PackageVersion: v0.6.0
+PackageLocale: en-US
+Publisher: max-sixty
+PublisherUrl: https://github.com/max-sixty
+PublisherSupportUrl: https://github.com/max-sixty/worktrunk/issues
+PackageName: worktrunk
+PackageUrl: https://github.com/max-sixty/worktrunk
+License: MIT OR Apache-2.0
+ShortDescription: A Git worktree manager for trunk-based development
+Description: |-
+  worktrunk (wt) is a Git worktree manager designed for trunk-based development workflows.
+  It simplifies creating, switching between, and managing Git worktrees, making it easy to
+  work on multiple features or branches simultaneously without the overhead of stashing
+  or switching branches in a single working directory.
+Tags:
+- cli
+- git
+- git-worktree
+- rust
+- terminal
+- worktree
+ReleaseNotes: |-
+  Release Notes
+  Improved
+  - Single-width Unicode symbols: Replaced emojis (🔄, ✅, ❌) with single-width Unicode symbols (◎, ✓, ✗, ▲, ↳, ○, ❯) for better terminal compatibility and consistent alignment.
+  - Output system overhaul: Clean separation of output channels (data→stdout, status→stderr, directives→file) means piping works with shell integration active. wt list --format=json | jq and wt switch feature | tee log.txt both work correctly. Background processes use process_group(0) instead of nohup for more reliable detachment.
+  - Trailing arguments for --execute: wt switch --execute now accepts arguments after --, enabling shell aliases like alias wsc='wt switch --create -x claude' then wsc feature -- 'implement login'.
+  - hash_port template filter: {{ branch | hash_port }} hashes the branch name to a deterministic port number (10000-19999), useful for running dev servers without port conflicts.
+  - sanitize template filter: {{ branch | sanitize }} explicitly replaces / and \ with - for filesystem-safe paths. (Breaking: {{ branch }} now provides raw branch names. Update templates that use {{ branch }} in filesystem paths to use {{ branch | sanitize }} instead)
+  - Log directory in state output: wt config state logs and wt config state get now show the log directory path under a LOG FILES heading.
+  - Actionable error hints: Error messages now include hints about what command to run next.
+  - Unified directory change output: wt remove now shows "Switched to worktree for {branch} @ {path}" matching wt switch format.
+  - Consistent "already up to date" formatting: Standardized message wording and styling across commands.
+  Fixed
+  - wt step rebase with merge commits: Fixed incorrect "Already up-to-date" when a branch has merge commits from merging target into itself.
+  Documentation
+  - Local CI workflow: Added "Local CI" section to wt merge --help explaining how pre-merge hooks enable faster iteration.
+  - Colored command reference: Web docs now preserve ANSI colors in command reference output.
+  - Clarified terminology: Help text uses "default branch" instead of hardcoded "main".
+  Download worktrunk 0.6.0
+  ────────────────────────────────────────────────┬───────────────────┬─────────────
+  File                                            │Platform           │Checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-aarch64-apple-darwin.tar.xz           │Apple Silicon macOS│checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-x86_64-apple-darwin.tar.xz            │Intel macOS        │checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-x86_64-pc-windows-msvc.zip            │x64 Windows        │checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-aarch64-unknown-linux-musl.tar.xz     │ARM64 MUSL Linux   │checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-x86_64-unknown-linux-musl.tar.xz      │x64 MUSL Linux     │checksum
+  ────────────────────────────────────────────────┴───────────────────┴─────────────
+ReleaseNotesUrl: https://github.com/max-sixty/worktrunk/releases/tag/v0.6.0
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0
