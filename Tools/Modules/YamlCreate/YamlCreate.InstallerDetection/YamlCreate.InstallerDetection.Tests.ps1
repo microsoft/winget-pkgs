@@ -11,14 +11,14 @@ BeforeAll {
             return $null
         }
     }
-    
+
     if (-not (Get-Command Get-MSIProperty -ErrorAction SilentlyContinue)) {
         function Global:Get-MSIProperty {
             param([string]$Path, [string]$Property)
             return $null
         }
     }
-    
+
     if (-not (Get-Command Get-Win32ModuleResource -ErrorAction SilentlyContinue)) {
         function Global:Get-Win32ModuleResource {
             param([string]$Path, [switch]$DontLoadResource)
@@ -48,7 +48,7 @@ Describe 'YamlCreate.InstallerDetection Module' {
                 'Test-IsFont'
                 'Resolve-InstallerType'
             )
-            
+
             foreach ($Function in $ExpectedFunctions) {
                 $ExportedFunctions | Should -Contain $Function
             }
