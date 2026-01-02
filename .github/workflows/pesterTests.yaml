@@ -1,0 +1,51 @@
+name: Pester Tests
+
+on:
+  pull_request_target:
+    branches:
+      - master
+    paths:
+      - "**/*.ps1"
+      - "**/*.psm1"
+      - "**/*.psd1"
+  push:
+    paths:
+      - "**/*.ps1"
+      - "**/*.psm1"
+      - "**/*.psd1"
+
+permissions:
+  contents: read # Needed to check out the code
+  pull-requests: read # Needed to read pull request details
+
+jobs:
+  test:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Install Pester
+        run: |
+          # Pester 5.x is already included in Windows runners, but ensure latest version
+          Install-Module -Name Pester -Force -SkipPublisherCheck -Scope CurrentUser -MinimumVersion 5.0.0
+      - name: Run Pester Tests
+        run: |
+          # Find and run all Pester test files
+          $testFiles = Get-ChildItem -Recurse -Filter *.Tests.ps1
+          if ($testFiles) {
+            Write-Host "Found $($testFiles.Count) test file(s)"
+            foreach ($testFile in $testFiles) {
+              Write-Host "Running tests in: $($testFile.FullName)"
+            }
+
+            # Run all tests
+            $config = New-PesterConfiguration
+            $config.Run.Path = $testFiles.FullName
+            $config.Run.Exit = $true
+            $config.Output.Verbosity = 'Detailed'
+            $config.TestResult.Enabled = $true
+            
+            Invoke-Pester -Configuration $config
+          } else {
+            Write-Host "No Pester test files found."
+          }
