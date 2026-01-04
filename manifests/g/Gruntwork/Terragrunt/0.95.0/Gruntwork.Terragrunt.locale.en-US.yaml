@@ -1,0 +1,86 @@
+# Created with komac v2.14.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: Gruntwork.Terragrunt
+PackageVersion: 0.95.0
+PackageLocale: en-US
+Publisher: Gruntwork
+PublisherUrl: https://terragrunt.gruntwork.io/
+PublisherSupportUrl: https://terragrunt.gruntwork.io/docs/community/support
+PrivacyUrl: https://gruntwork.io/legal/privacy-policy
+PackageName: Terragrunt
+PackageUrl: https://github.com/gruntwork-io/terragrunt/releases/tag/v0.68.9
+License: MIT
+LicenseUrl: https://github.com/gruntwork-io/terragrunt/blob/HEAD/LICENSE.txt
+Copyright: © 2024 Gruntwork, Inc. All rights reserved.
+ShortDescription: Terragrunt is a thin wrapper for Terraform that provides extra tools for keeping your Terraform configurations DRY, working with multiple Terraform modules, and managing remote state.
+Description: Terragrunt is a thin wrapper for Terraform that provides extra tools for keeping your Terraform configurations DRY, working with multiple Terraform modules, and managing remote state.
+Tags:
+- IaC
+- Infrastructure as Code
+- Terraform
+- Terraform Wrapper
+- terragrunt
+ReleaseNotes: |-
+  🛠️ Breaking Changes
+  The --queue-exclude-external flag has been deprecated
+  Previously, Terragrunt would automatically pull in external dependencies (dependencies outside the current working directory when running terragrunt run --all) into the run queue.
+  To prevent this behavior, users had to manually supply the --queue-exclude-external flag. This has caused significant confusion and unexpected behavior for users over the duration of it’s existence in the Terragrunt CLI. To prevent this unexpected behavior for users and follow the principle of least surprise, this flag has been deprecated and its behavior is now the default in Terragrunt.
+  To explicitly request inclusion of external dependencies in the run queue, use the —queue-include-external flag.
+  ⚙️ Process Updates
+  OpenTofu 1.11.x added to compatibility matrix
+  We are now continuously testing against OpenTofu 1.11.1 in our Continuous Integration testing, and have updated the compatibility matrix to reflect that.
+  🧪 Updated Experiments
+  The filter-flag experiment now supports Git-based expressions
+  The --filter flag can now be used to filter units based on changes in Git history (remember that you must use the filter-flag experiment to try this).
+  # Compare between two references
+  terragrunt find --filter '[main...HEAD]'
+  # Shorthand: compare reference to HEAD
+  terragrunt find --filter '[main]'
+  # Compare between specific commits
+  terragrunt find --filter '[abc123...def456]'
+  # Compare between tags
+  terragrunt find --filter '[v1.0.0...v2.0.0]'
+  # Compare using relative references
+  terragrunt find --filter '[HEAD~1...HEAD]'
+  # Compare between branches
+  terragrunt find --filter '[feature-branch...main]'
+  For more information, see the dedicated documentation on Git-Based Filtering.
+  🐛 Bug Fixes
+  Units now properly flush stdout in run --all
+  A regression in unit stdout flushing caused stdout for unit logs to hang pending resolution of run --all runs. This regression has been fixed to ensure that logs are streamed in real time again.
+  Queue entries now properly run, even if dependent units are excluded
+  A bug in run queue optimization made it so that excluding the dependent of a unit within a multi-unit run queue would incorrectly exclude the dependency unit from the run queue. This bug has been resolved, and units are now properly included, even if their dependents are excluded.
+  Provider cache server only contacts relevant registries
+  The provider cache server was incorrectly establishing a connection with multiple registries even though only one registry for a given IaC tool run by Terragrunt. For users with network-restricted environments, this could cause problems. Terragrunt will now only contact the relevant registry for a given IaC tool unless users explicitly request for usage of multiple registries.
+  📖 Documentation Updates
+  Provider cache server no longer documented as experimental
+  The Provider Cache Server has been used in production by a good portion of the Terragrunt community based on voluntary community reporting. The need for the feature is also mitigated by advances in OpenTofu that makes the Automatic Provider Cache Dir the default solution all Terragrunt users using OpenTofu ≥ v1.10.0.
+  As such, the Provider Cache Server has been promoted to a generally available feature that is exclusively opt-in for users that cannot benefit from the Automatic Provider Cache Dir feature, or are better served by the Provider Cache Server due to scale or platform limitations.
+  What's Changed
+  - feat: Adding --filter Git support by @denis256 in #5166
+  - feat: Adding --filter-allow-destroy flag by @yhakbar in #5210
+  - fix: filter git improvements by @denis256 in #5184
+  - fix: Remove outdated Bun/Node locking by @yhakbar in #5186
+  - fix: unit output flushing by @denis256 in #5193
+  - fix: Only call necessary registries based on OpenTofu/Terraform usage by @yhakbar in #5196
+  - fix: Ensure queue entries are still marked as ready if they have dependencies/dependents that are excluded by @yhakbar in #5194
+  - fix: Temporarily skipping TestAwsDocsTerralithToTerragruntGuide until we get a new release by @yhakbar in #5208
+  - fix: runner pool external dependencies inclusion fix by @denis256 in #5199
+  - docs: Nav revisions by @karlcarstensen in #5172
+  - docs: Updating documentation around the provider cache server by @yhakbar in #5190
+  - docs: Documenting stacks limitations by @yhakbar in #5188
+  - docs: Adding new ambassador by @karlcarstensen in #5211
+  - docs: Documenting --filter Git support by @yhakbar in #5108
+  - chore: Adding --queue-exclude-dir / --filter equivalence test by @yhakbar in #5078
+  - chore: Upgrade to Opentofu 1.11 by @denis256 in #5214
+  - build(deps): bump actions/checkout from 5 to 6 by @dependabot[bot] in #5141
+  - build(deps): bump DavidAnson/markdownlint-cli2-action from 20 to 21 by @dependabot[bot] in #5140
+  - build(deps): bump mikepenz/action-junit-report from 5 to 6 by @dependabot[bot] in #5046
+  Full Changelog: v0.94.0...v0.95.0
+ReleaseNotesUrl: https://github.com/gruntwork-io/terragrunt/releases/tag/v0.95.0
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/gruntwork-io/terragrunt/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0
