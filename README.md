@@ -10,7 +10,7 @@
 This repository contains the manifest files for the **Windows Package Manager** default source. You are highly encouraged to submit manifests for your favorite application.
 
 > [!IMPORTANT]
-> At this time installers must be MSIX, MSI, APPX, or .exe application installers. Script-based installers and fonts are not currently supported.
+> At this time installers must be MSIX, MSI, APPX, MSIXBundle, APPXBundle, or .exe application installers. Script-based installers and fonts are not currently supported.
 
 The **Windows Package Manager** is an [open source client](https://github.com/microsoft/winget-cli) designed for command-line usage. If you are interested in exploring private repositories offering private WinGet package hosting, see [private repositories](doc/private/README.md).
 
