@@ -9,6 +9,9 @@ Manifests submitted to the community repository are subject to [moderation](Mode
 WinGet supports the following installer types:
 - **MSIX**
 - **MSI**
+- **AppX**
+- **MSIXBundle**
+- **AppXBundle**
 - **Exe-based installers**
 
 These installer types may also be nested within the `.zip` (compressed) installer type.
