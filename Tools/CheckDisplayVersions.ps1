@@ -116,7 +116,7 @@ $versionsWithOverlap = $versionsWithOverlap.Where({ $_ })
 Write-Verbose "Found $($versionsWithOverlap.count) DisplayVersions with multiple packages"
 
 if ($versionsWithOverlap.Count -gt 0) {
-    Write-Output $versionsWithOverlap | Format-Table -Wrap
+    $versionsWithOverlap | Format-Table -Wrap
     exit 1
 }
 
