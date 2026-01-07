@@ -1,6 +1,6 @@
 Checklist for Pull Requests
 - [ ] Have you signed the [Contributor License Agreement](https://cla.opensource.microsoft.com/microsoft/winget-pkgs)?
-- [ ] Is there a linked Issue?  If so, fill in the issue number below.
+- [ ] Is there a linked Issue?  If so, fill in the Issue number below.
    <!-- Example: Resolves #328283 -->
   - Resolves #[Issue Number]
 
