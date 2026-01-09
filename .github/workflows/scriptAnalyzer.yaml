@@ -6,9 +6,11 @@ on:
       - master
     paths:
       - "**/*.ps1"
+      - "**/*.psm1"
   push:
     paths:
       - "**/*.ps1"
+      - "**/*.psm1"
 
 permissions:
   contents: read # Needed to check out the code
@@ -26,7 +28,8 @@ jobs:
       - name: Run PSScriptAnalyzer
         run: |
           # Run PSScriptAnalyzer on all PowerShell scripts
-          $results = Get-ChildItem -Recurse -Filter *.ps1 | Invoke-ScriptAnalyzer
+          $results = @(Get-ChildItem -Recurse -Filter *.ps1 | Invoke-ScriptAnalyzer)
+          $results += @(Get-ChildItem -Recurse -Filter *.psm1 | Invoke-ScriptAnalyzer)
           if ($results) {
             Write-Output $results | Format-List -GroupBy ScriptName
           }

@@ -236,7 +236,7 @@ if ($Settings) {
   exit
 }
 
-$ScriptHeader = '# Created with YamlCreate.ps1 v2.7.0'
+$ScriptHeader = '# Created with YamlCreate.ps1 v2.7.1'
 $ManifestVersion = '1.12.0'
 $PSDefaultParameterValues = @{ '*:Encoding' = 'UTF8' }
 $Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
@@ -632,6 +632,33 @@ Function Get-InstallerFile {
   }
 
   return $_OutFile
+}
+
+Function SafeRemovePath {
+  Param(
+    [Parameter(Mandatory=$true, Position=0)]
+    [string] $Path,
+    [int] $Retries = 6,
+    [int] $DelayMs = 250
+  )
+
+  if (-not (Test-Path -LiteralPath $Path)) { return }
+
+  for ($i = 0; $i -lt $Retries; $i++) {
+    try {
+      Remove-Item -LiteralPath $Path -Force -ErrorAction Stop
+      return
+    } catch [System.IO.IOException] {
+      [GC]::Collect()
+      [GC]::WaitForPendingFinalizers()
+      Start-Sleep -Milliseconds $DelayMs
+      $DelayMs = [Math]::Min(5000, $DelayMs * 2)
+    } catch {
+      throw
+    }
+  }
+
+  Write-Warning "Could not remove file '$Path' after $Retries attempts; it may be in use by another process."
 }
 
 Function Get-UserSavePreference {
@@ -1036,7 +1063,7 @@ Function Read-InstallerEntry {
       Get-UriScope -URI $_Installer['InstallerUrl'] -OutVariable _ | Out-Null
       if ($_) { $_Installer['Scope'] = $_ | Select-Object -First 1 }
       if ([System.Environment]::OSVersion.Platform -match 'Win' -and ($script:dest).EndsWith('.msi')) {
-        $ProductCode = ([string](Get-MSIProperty -Path $script:dest -Property 'ProductCode') | Select-String -Pattern '{[A-Z0-9]{8}-([A-Z0-9]{4}-){3}[A-Z0-9]{12}}').Matches.Value
+        $ProductCode = [string](Get-MSIProperty -Path $script:dest -Property 'ProductCode').Value
       } elseif ([System.Environment]::OSVersion.Platform -match 'Unix' -and (Get-Item $script:dest).Name.EndsWith('.msi')) {
         $ProductCode = ([string](file $script:dest) | Select-String -Pattern '{[A-Z0-9]{8}-([A-Z0-9]{4}-){3}[A-Z0-9]{12}}').Matches.Value
       }
@@ -1408,7 +1435,7 @@ Function Read-QuickInstallerEntry {
       # If a new product code doesn't exist, and the installer isn't an `.exe` file, remove the product code if it exists
       $MSIProductCode = $null
       if ([System.Environment]::OSVersion.Platform -match 'Win' -and ($script:dest).EndsWith('.msi')) {
-        $MSIProductCode = ([string](Get-MSIProperty -Path $script:dest -Property 'ProductCode') | Select-String -Pattern '{[A-Z0-9]{8}-([A-Z0-9]{4}-){3}[A-Z0-9]{12}}').Matches.Value
+        $MSIProductCode = [string](Get-MSIProperty -Path $script:dest -Property 'ProductCode').Value
       } elseif ([System.Environment]::OSVersion.Platform -match 'Unix' -and (Get-Item $script:dest).Name.EndsWith('.msi')) {
         $MSIProductCode = ([string](file $script:dest) | Select-String -Pattern '{[A-Z0-9]{8}-([A-Z0-9]{4}-){3}[A-Z0-9]{12}}').Matches.Value
       }
@@ -1439,7 +1466,7 @@ Function Read-QuickInstallerEntry {
         }
       }
       # Remove the downloaded files
-      Remove-Item -Path $script:dest
+      SafeRemovePath -Path $script:dest
       Write-Host -ForegroundColor 'Green' "Installer updated!`n"
     }
 
@@ -3052,7 +3079,7 @@ Switch ($script:Option) {
       # If a new product code doesn't exist, and the installer isn't an `.exe` file, remove the product code if it exists
       $MSIProductCode = $null
       if ([System.Environment]::OSVersion.Platform -match 'Win' -and ($script:dest).EndsWith('.msi')) {
-        $MSIProductCode = ([string](Get-MSIProperty -Path $script:dest -Property 'ProductCode') | Select-String -Pattern '{[A-Z0-9]{8}-([A-Z0-9]{4}-){3}[A-Z0-9]{12}}').Matches.Value
+        $MSIProductCode = [string](Get-MSIProperty -Path $script:dest -Property 'ProductCode').Value
       } elseif ([System.Environment]::OSVersion.Platform -match 'Unix' -and (Get-Item $script:dest).Name.EndsWith('.msi')) {
         $MSIProductCode = ([string](file $script:dest) | Select-String -Pattern '{[A-Z0-9]{8}-([A-Z0-9]{4}-){3}[A-Z0-9]{12}}').Matches.Value
       }
@@ -3084,7 +3111,7 @@ Switch ($script:Option) {
         }
       }
       # Remove the downloaded files
-      Remove-Item -Path $script:dest
+      SafeRemovePath -Path $script:dest
       $_NewInstallers += Restore-YamlKeyOrder $_Installer $InstallerEntryProperties -NoComments
     }
     # Write the new manifests
