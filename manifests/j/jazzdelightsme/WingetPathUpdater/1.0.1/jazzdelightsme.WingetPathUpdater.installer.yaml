@@ -1,0 +1,24 @@
+# Created with komac v2.14.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.10.0.schema.json
+
+PackageIdentifier: jazzdelightsme.WingetPathUpdater
+PackageVersion: 1.0.1
+InstallerType: exe
+Scope: machine
+InstallModes:
+- interactive
+- silent
+- silentWithProgress
+InstallerSwitches:
+  Silent: -NoProfile -ExecutionPolicy Bypass -Command . { try { [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor [Net.SecurityProtocolType]::Tls12 ; iex \"& { $(iwr -UseBasicParsing https://raw.githubusercontent.com/jazzdelightsme/WingetPathUpdater/v1.2/WingetPathUpdaterInstall.ps1) } -Silent $args\" ; exit $LastExitCode } catch { Write-Error $_ ; $_ | fl * -Force | Out-String | sc $env:TEMP\WingetPathUpdaterFailure2.txt ; start-sleep -seconds 15 ; exit -3 } }
+  SilentWithProgress: -NoProfile -ExecutionPolicy Bypass -Command . { try { [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor [Net.SecurityProtocolType]::Tls12 ; iex \"& { $(iwr -UseBasicParsing https://raw.githubusercontent.com/jazzdelightsme/WingetPathUpdater/v1.2/WingetPathUpdaterInstall.ps1) } -SilentWithProgress $args\" ; exit $LastExitCode } catch { Write-Error $_ ; $_ | fl * -Force | Out-String | sc $env:TEMP\WingetPathUpdaterFailure2.txt ; start-sleep -seconds 15 ; exit -3 } }
+  Interactive: -NoProfile -ExecutionPolicy Bypass -Command . { try { [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor [Net.SecurityProtocolType]::Tls12 ; iex \"& { $(iwr -UseBasicParsing https://raw.githubusercontent.com/jazzdelightsme/WingetPathUpdater/v1.2/WingetPathUpdaterInstall.ps1) } -Interactive $args\" ; exit $LastExitCode } catch { Write-Error $_ ; $_ | fl * -Force | Out-String | sc $env:TEMP\WingetPathUpdaterFailure2.txt ; start-sleep -seconds 15 ; exit -3 } }
+  Log: -LogPath <LOGPATH>
+ReleaseDate: 2026-01-09
+ElevationRequirement: elevationRequired
+Installers:
+- Architecture: x64
+  InstallerUrl: https://github.com/jazzdelightsme/PowershellStub/releases/download/v1.0.1/PowershellStub.exe
+  InstallerSha256: 9DC077F702A107A4A68FFC90413F264D03FEC3446244452811B932373CD19D9A
+ManifestType: installer
+ManifestVersion: 1.10.0
