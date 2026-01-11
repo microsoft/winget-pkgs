@@ -1,0 +1,60 @@
+# Created with komac v2.14.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: zizmor.zizmor
+PackageVersion: 1.20.0
+PackageLocale: en-US
+Publisher: William Woodruff
+PublisherUrl: https://zizmor.sh/
+PublisherSupportUrl: https://github.com/zizmorcore/zizmor/issues
+Author: William Woodruff
+PackageName: zizmor
+PackageUrl: https://zizmor.sh/
+License: MIT
+LicenseUrl: https://github.com/zizmorcore/zizmor/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2024 William Woodruff <william @ yossarian.net>
+CopyrightUrl: https://github.com/zizmorcore/zizmor/blob/HEAD/LICENSE
+ShortDescription: Static analysis for GitHub Actions.
+Description: |-
+  zizmor is a static analysis tool for GitHub Actions.
+
+  It can find many common security issues in typical GitHub Actions CI/CD setups, including:
+  - Template injection vulnerabilities, leading to attacker-controlled code execution
+  - Accidental credential persistence and leakage
+  - Excessive permission scopes and credential grants to runners
+  - Impostor commits and confusable git references
+  - ...and much more!
+Tags:
+- github-actions
+- security
+- security-tools
+- static-analysis
+ReleaseNotes: |-
+  Enhancements 🌱🔗
+  - The excessive-permissions audit is now aware of the artifact-metadata and models permissions (#1461)
+  - The cache-poisoning audit is now aware of the ramsey/composer-install action (#1489)
+  - The unpinned-images audit is now significantly more precise in the presence of matrix references, e.g. image: ${{ matrix.image }} (#1482)
+  Changes ⚠️🔗
+  - The default policy for the unpinned-uses audit has changed from allowing ref-pinning for first-party actions (those under actions/* and similar) to requiring hash-pinning. This makes the default policy more strict, as well as more consistent across the actions ecosystem.
+    Users who with to retain the old (permissive policy) for first-party actions may configure it explicitly in their zizmor.yml:
+  zizmor.yml
+  rules:
+    unpinned-uses:
+      config:
+        policies:
+          actions/*: ref-pin
+          github/*: ref-pin
+          dependabot/*: ref-pin
+  Bug Fixes 🐛🔗
+  - The dependabot-cooldown audit no longer flags missing cooldowns on ecosystems that don't (yet) support cooldowns, such as opentofu (#1480)
+  - Fixed a false positive in the cache-poisoning audit where zizmor would treat empty strings (e.g. cache: '') as enabling rather than disabling caching (#1482)
+  - Fixed two gaps in the use-trusted-publishing audit's detection of common yarn publishing commands (#1495)
+  Miscellaneous 🛠🔗
+  - zizmor's configuration now has an official JSON schema that will be available via SchemaStore soon!
+    Many thanks to @kiwamizamurai for implementing this improvement!
+ReleaseNotesUrl: https://github.com/zizmorcore/zizmor/releases/tag/v1.20.0
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://docs.zizmor.sh/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
