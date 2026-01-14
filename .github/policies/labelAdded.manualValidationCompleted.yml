@@ -1,0 +1,38 @@
+id: labelAdded.manualValidationCompleted
+name: GitOps.PullRequestIssueManagement
+description: Handlers when "Manual-Validation-Completed" label is added
+owner:
+resource: repository
+disabled: false
+where:
+configuration:
+  resourceManagementConfiguration:
+    eventResponderTasks:
+      - description: >-
+          When the label "Manual-Validation-Completed" is added to a pull request
+          * Add the PR specific reply notifying the issue author
+          * Remove the Internal-Error-Dynamic-Scan label
+          * Remove the Validation-No-Executables label
+          * Remove the Validation-Executable-Error label
+        if:
+          - payloadType: Pull_Request
+          - labelAdded:
+              label: Manual-Validation-Completed
+        then:
+          - addReply:
+              reply: >-
+                This pull request has been marked as "Manual-Validation-Completed".
+                A microsoft employee still needs to review and approve the changes before it can be merged.
+
+
+                Template: msftbot/microsoft/mvpValidated
+          - removeLabel:
+              label: Internal-Error-Dynamic-Scan
+          - removeLabel:
+              label: Validation-No-Executables
+          - removeLabel:
+              label: Validation-Executable-Error
+        # The policy service should trigger even when the label was added by the policy service
+        triggerOnOwnActions: true
+onFailure:
+onSuccess:
