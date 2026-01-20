@@ -1,0 +1,79 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.9.0.schema.json
+
+PackageIdentifier: PBH-BTN.PeerBanHelper
+PackageVersion: 7.4.0
+PackageLocale: zh-CN
+Publisher: PBH-BTN Community
+PublisherUrl: https://github.com/PBH-BTN
+PublisherSupportUrl: https://github.com/PBH-BTN/PeerBanHelper/issues
+PackageName: PeerBanHelper
+PackageUrl: https://github.com/PBH-BTN/PeerBanHelper
+License: GPL-3.0
+LicenseUrl: https://github.com/PBH-BTN/PeerBanHelper/blob/HEAD/LICENSE
+ShortDescription: 自动封禁不受欢迎、吸血和异常的 BT 客户端，并支持自定义规则。
+Tags:
+- bt
+- 种子
+ReleaseNotes: |-
+  新增功能
+  新的发行平台
+  新增对不受支持的平台 Linux x86 (32-bit) 和 Linux arm32-vfp-hflt (树莓派系列) 的 install4j 打包安装程序。
+  由于上游 OpenJDK 提供商已不再提供 Windows x86 的构建，32 位 Windows 不再本次更新的范围内。
+  在不受支持的平台上运行时，窗口标题将显示 ⚠不受支持的平台，且在首次运行时会收到一次性的警报信息和通知中心信息。
+  此决定的初衷是减少报废边缘的电子垃圾（以及添加对树莓派的支持），并不代表我们对 32 位硬软件的兼容态度的转变，更不会尝试兼容 Java 8。
+  (实验性) 低内存模式
+  新增 “低内存模式” 启动方式，特点如下：
+  - 最多使用 168MB 的堆内存（标准模式为 512MB）
+  - 禁用 GUI 和 CEF 功能
+  - 大幅减小内存缓存，加速缓存逐出
+  - 适用于轻量用户，例如运行在树莓派上
+  计算机的世界鱼和熊掌不可兼得，低内存模式也有如下缺点：
+  - CPU 消耗会明显提升
+  - 磁盘 I/O 明显变得更加频繁，且 I/O 任务更重，对于闪存芯片可能加快磨损速度
+  - PeerBanHelper 性能可能降低，且可能变得不稳定
+  - 不适合多个下载器或者大量活动做种任务、Peers 的用户
+  如果发现问题，欢迎在 Issue Tracker 中反馈。
+  (实验性) 封禁日志事务写入
+  实验室新增实验 “启用事务批量写入封禁历史记录”，启用后原本分为多步的写入过程将被合并为一个事务。在大量和频繁的封禁场景下可有效降低随机磁盘 I/O。
+  如果发现问题，欢迎在 Issue Tracker 中反馈。
+  开关参数
+  引入全新开关参数系统，可以通过启动参数、参数文件和环境变量控制 PeerBanHelper 的内部开关。这些开关可能对打包发布者产生重要意义。具体改动请参见 PACKAGING.md 描述文件。
+  JCEF 支持
+  JCEF 支持随 install4j 安装程序引入，且可在安装阶段禁用。启用 JCEF 支持后，PeerBanHelper 会根据平台动态下载安装 CEF 框架。一旦 JCEF 可用，PeerBanHelper 会在 GUI 窗口内新增一个 “WebUI 控制台” 选项卡，以供用户在不打开浏览器的情况下访问 WebUI 更改设置。
+
+  在开发、快照、测试版本的 PeerBanHelper 上会额外启用 DevTools，可通过在 WebUI 控制台页面内按 F12 打开。
+  可通过传入参数、开关参数和标志文件禁用。JCEF 调试参数可通过向 PeerBanHelper 直接传参输入。
+  改进的 GUI 界面
+  新增主题：
+  - macOS 主题：一套更符合 macOS 设计美学的 FlatLaf 主题，在 macOS 系统上会自动启用
+  - Insider 主题：在开发、快照、测试版本的 PeerBanHelper 上会自动启用，以便在反馈错误时根据截图快速确认使用的版本类型
+  新增 “关于->开发人员与社区贡献者……” 菜单，以表彰对 PeerBanHelper 做出重要贡献的人们。
+  新增 ---DEBUG--- 菜单，仅在开发、快照、测试版本的 PeerBanHelper 上显示以供测试小组的测试用户对部分功能进行调试。部分功能需要管理员权限。
+  进行下载操作时，现在有一个新的对话框显示下载进度。
+
+  用户体验改进
+  - 当 PeerBanHelper 检测到下载器上的传入连接来自内部地址时导致封禁无法工作时（例如 NAT 配置异常），发送告警信息提醒用户下载器的网络驱动程序可能被错误的配置为了 bridge 模式。此提示信息已同步到 PBH 文档。
+  - [WebUI] BTN 配置失败时，显示提示浮窗引导用户查看 BTN 配置文档页面。
+  错误修复
+  - 尝试修复在查询 IP 地址详情信息的时候，部分操作耗时可能过长的问题 #889
+  - 修复封禁列表过大时，IP 地址传递没有去重的问题导致请求体过大的问题 #938
+  - [WebUI] 修复了多个错误
+  发行更改
+  新的架构支持
+  - Linux x86 (32-bit)
+  - Linux arm32-vfp-hflt (Raspberry Pi 5 之前的旧版设备)
+  (实验性)发行渠道
+  新增 .torrent 种子文件发行方式，当与 Github 连接质量不佳时，可通过 .torrent 文件下载 PeerBanHelper 的版本文件。
+  可在此订阅 RSS Feed 更新：peerbanhelper-torrent-updates
+  Docker
+  DockerHub: ghostchu/peerbanhelper:v7.4.0
+  阿里云国内镜像加速：registry.cn-hangzhou.aliyuncs.com/ghostchu/peerbanhelper:v7.4.0
+
+  部署教程 | 常见问题 | 如何设置下载器
+ReleaseNotesUrl: https://github.com/PBH-BTN/PeerBanHelper/releases/tag/v7.4.0
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/PBH-BTN/PeerBanHelper/wiki
+ManifestType: locale
+ManifestVersion: 1.9.0

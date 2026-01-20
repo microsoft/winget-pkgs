@@ -123,8 +123,6 @@ configuration:
           - approvePullRequest:
               comment: ""
           - addReply: >-
-              Hello ${issueAuthor},
-
               Validation has completed.
 
 
@@ -225,9 +223,6 @@ configuration:
         then:
           - addReply:
               reply: >-
-                Hello ${issueAuthor},
-
-
                 Static analysis has timed out. The PR has been assigned to a developer to investigate.
 
 
@@ -244,6 +239,8 @@ configuration:
               label: Azure-Pipeline-Passed
           - removeLabel:
               label: Binary-Validation-Error
+          - removeLabel:
+              label: Blocked-InstallerType
           - removeLabel:
               label: Blocking-Issue
           - removeLabel:
@@ -298,6 +295,8 @@ configuration:
               label: Manifest-Version-Deprecated
           - removeLabel:
               label: Manifest-Version-Error
+          - removeLabel:
+              label: Manual-Validation-Completed
           - removeLabel:
               label: Moderator-Approved
           - removeLabel:
@@ -373,6 +372,8 @@ configuration:
           - removeLabel:
               label: Validation-Shell-Execute
           - removeLabel:
+              label: Validation-Skip-Automations
+          - removeLabel:
               label: Validation-Unapproved-URL
           - removeLabel:
               label: Validation-Unattended-Failed
@@ -381,13 +382,14 @@ configuration:
       - description: Remove status labels when a PR is re-run
         if:
           - payloadType: Issue_Comment
+          - isOpen
           - or:
               - commentContains:
-                  pattern: '\/[a|A][z|Z][p|P] [r|R][u|U][n|N]'
-                  isRegex: True
+                  pattern: 'Validation Pipeline Run'
+                  isRegex: false
               - commentContains:
-                  pattern: '\/[a|A][z|Z][u|U][r|R][e|E][p|P][i|I][p|P][e|E][l|L][i|I][n|N][e|E][s|S] [r|R][u|U][n|N]'
-                  isRegex: True
+                  pattern: '@[Ww]ingetbot\s[Rr]un'
+                  isRegex: true
           - not:
               isActivitySender:
                 user: microsoft-github-policy-service[bot]
@@ -397,14 +399,37 @@ configuration:
                   permission: Admin
               - activitySenderHasPermission:
                   permission: Write
+              - isActivitySender:
+                  user: stephengillie
+              - isActivitySender:
+                  user: ImJoakim
+              - isActivitySender:
+                  user: ItzLevvie
+              - isActivitySender:
+                  user: jedieaston
+              - isActivitySender:
+                  user: KaranKad
+              - isActivitySender:
+                  user: OfficialEsco
+              - isActivitySender:
+                  user: quhxl
+              - isActivitySender:
+                  user: Trenly
+              - isActivitySender:
+                  user: mdanish-kh
+              - isActivitySender:
+                  user: russellbanks
         then:
           # Don't remove Changes-Requested here because it is just a re-run, no new commits have been added
+          # Don't remove Manual-Validation-Completed here because it is just a re-run, no new commits have been added
           - removeLabel:
               label: Author-Not-Authorized
           - removeLabel:
               label: Azure-Pipeline-Passed
           - removeLabel:
               label: Binary-Validation-Error
+          - removeLabel:
+              label: Blocked-InstallerType
           - removeLabel:
               label: Blocking-Issue
           - removeLabel:
@@ -456,6 +481,10 @@ configuration:
           - removeLabel:
               label: Needs-SmartScreen-Investigation
           - removeLabel:
+              label: New-Manifest
+          - removeLabel:
+              label: New-Package
+          - removeLabel:
               label: Policy-Test-1.1.A
           - removeLabel:
               label: Policy-Test-1.1.B
@@ -503,6 +532,8 @@ configuration:
               label: Validation-Domain
           - removeLabel:
               label: Validation-Executable-Error
+          - removeLabel:
+              label: Validation-Forbidden-URL-Error
           - removeLabel:
               label: Validation-Hash-Verification-Failed
           - removeLabel:

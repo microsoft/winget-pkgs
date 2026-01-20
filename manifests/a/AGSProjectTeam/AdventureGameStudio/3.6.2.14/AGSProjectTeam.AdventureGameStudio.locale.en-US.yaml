@@ -1,0 +1,73 @@
+# Created with komac v2.12.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: AGSProjectTeam.AdventureGameStudio
+PackageVersion: 3.6.2.14
+PackageLocale: en-US
+Publisher: AGS Project Team
+PublisherUrl: https://www.adventuregamestudio.co.uk/
+PublisherSupportUrl: https://www.adventuregamestudio.co.uk/site/community
+Author: AGSProjectTeam
+PackageName: Adventure Game Studio
+PackageUrl: https://github.com/adventuregamestudio/ags
+License: Artistic License 2.0
+LicenseUrl: https://github.com/adventuregamestudio/ags/blob/HEAD/License.txt
+Copyright: Copyright (c) 1999-2011 Chris Jones and 2011-2024 various contributors.
+CopyrightUrl: https://github.com/adventuregamestudio/ags/blob/master/Copyright.txt
+ShortDescription: Adventure Game Studio (AGS) provides the tools to make your own adventure, for free!
+Moniker: ags
+ReleaseNotes: |-
+  This is a 3.6.2 Patch 4.
+  Editor:
+  - Make Font's OutlineFont property provide a drop-down list with fonts.
+  - Restrict Room's BackgroundAnimationDelay property to a range of 0-255 (engine's limitation).
+  - Fixed Character's animating preview not updating if a View is being edited at the same time.
+  - Fixed Font preview scrolling too far down, and sometimes causing some letters to cut off.
+  - Fixed View Editor reacting to shortcuts such as F or Delete when the input focus is set to a selected Frame's properties.
+  - Fixed Editor reporting "the script name in use" errors for Room Objects and Hotspots that don't have any script name set.
+  - Fixed Editor Preferences resetting Android JDK and SDK path if one was typed or pasted directly into the text box rather than selected using a Folder browse dialog.
+  - Fixed Editor displaying an "unhandled exception" if an older file cannot be deleted while rebuilding the game. Should be recording such error and display as a regular message box or in the output panel.
+  Engine:
+  - Returned "Linear" filter for Software renderer. It was temporarily cut during development of version 3.6.0, but we forgot to bring it back.
+  - Do not enable "infinite FPS mode" if game script calls SetGameSpeed with a value 1000 or higher.
+    The problem is that the script API does not have any means to turn this mode off, so game will be stuck in "maxed FPS". The remaining method is Ctrl+E hotkey used to toggle "infinite FPS" if the game is run with "--fps" command line argument.
+  - Do not apply disabled effect on a Button which runs a blocking animation. Also do not hide its parent GUI if game options tells that GUIs should be hidden when the interface is disabled.
+  - Changes to the current room's masks will now be remembered in game saves.
+    (This only refers to he current room; the mask changes are still reset when player leaves the room, just like the changes to room backgrounds.)
+  - Dynamically update debug overlay with a room mask on it if a room mask is being drawn upon.
+  - Do not quit if failed to run PlaySilentMIDI(), log a warning instead.
+  - Do not try animating a cursor if the assigned view is invalid or contains no frames in loop 0.
+  - Don't log warnings for File.Exists and Game.GetSaveSlotDescription when a file was not found, as these functions are meant to test a file existence.
+  - Fixed engine's general misbehavior occuring if any Character, GUI or AudioClip does not have any ScriptName assigned.
+  - Fixed "Box Out" room transition not using a color set with SetFadeColor() when running with a Software renderer (this behavior was implemented in 3.6.2).
+  - Fixed room background animation running too fast if the BackgroundAnimationDelay was set to a value > 127.
+  - Fixed Character.FaceDirection() and similar commands not resetting idle state.
+  - Fixed Character.WalkStraight for games with legacy "low-res" coordinates setting.
+  - Fixed severe performance drop when dialog options are displayed (regression in 3.6.2).
+  - Fixed dialog options were rendering twice per game frame (this did not cause any graphical glitches, but could cause extra performance issues).
+  - Fixed that room objects may not get drawn during dialog options if they are started right at entering the room, and running game loops is disabled when options are shown.
+  - Fixed video playback in Software renderer mode displaying frames in a wrong order.
+  - Fixed PlayVideo() does not clear the screen before playing a video in Software render mode, which could result in having traces of previous scene staying on screen.
+  - Fixed a DynamicSprite not updated on screen after CopyTransparencyMask() call (except when running with a Software renderer).
+  - Fixed that disabled Buttons may not have their looks updated if GUI disabled style was changed in script ("OPT_WHENGUIDISABLED").
+  - Fixed wrong text color used for a speech with "Sierra with background" style when no GUI is assigned as a text window and speech is displayed in a standard box.
+  - Fixed automatic font outline could miss some pixels around the first and last letter of the text string if the font's glyphs contain pixels with negative offsets.
+  - Fixed Overlays with the matching z-order not always sorted in the order of their creation (regression in 3.6.2).
+  - Fixed SeekMIDIPosition() and GetMIDIPosition() crashing the game if a "silent MIDI" is playing.
+  - Fixed NumPad key presses doubling up when NumLock is on in a "old key-handling mode".
+  - Fixed Wait(0) call still suspending the game until the next update, should exit instantly.
+  - Fixed WaitInput() with infinite timeout suspending forever in a skipped cutscene.
+  - Fixed wrong palette used when loading secondary 8-bit backgrounds in a 16/32-bit game.
+  - Fixed that "unhandled_event" would be called only starting with the second object interaction if that object has a function name assigned for that interaction, but the actual function is not found in script.
+  - Fixed that "interface_click" not getting called if a GUI click event's function is missing in a designated script module, but is present elsewhere (although that function will be never run).
+  - Fixed mouse clicks could stop working after a call to a InventoryScreen() function, if player character does not have any items.
+  - Fixed Software renderer could potentially crash when the sprite cache reaches its limit and there's an overlay displayed on screen.
+  - Fixed a "division by zero" crash occuring when the engine is precaching a View without frames.
+  Compatibility:
+  - If PlayVideo() is used to play a non-OGV file, then engine will lookup to a OGV file of the same name to play instead. This is made to let game authors or players of old games to convert wmv/avi video assets to ogv without recompiling game scripts.
+  - Fixed loading games made by v2.56 editor which contain custom properties.
+  Plugins:
+  - Fixed a crash in AGSBlend plugin, occuring if DrawSprite function was called with transparency parameter = 100 (fully transparent).
+ReleaseNotesUrl: https://github.com/adventuregamestudio/ags/releases/tag/v3.6.2.14
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

@@ -1,0 +1,121 @@
+# Created using wingetcreate 1.9.3.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
+
+PackageIdentifier: jj-vcs.jj
+PackageVersion: 0.25.0
+PackageLocale: en-US
+Publisher: jj-vcs
+PublisherUrl: https://github.com/jj-vcs
+PublisherSupportUrl: https://github.com/jj-vcs/jj/issues
+PackageName: jj
+PackageUrl: https://github.com/jj-vcs/jj
+License: Apache License 2.0
+LicenseUrl: https://api.github.com/licenses/apache-2.0
+ShortDescription: A Git-compatible VCS that is both simple and powerful
+Description: A Git-compatible VCS that is both simple and powerful
+Moniker: Jujutsu
+Tags:
+- git
+- cli
+- mercurial
+- vcs
+ReleaseNotes: |2-
+      About
+      - jj is a Git-compatible version control system that is both simple and powerful. See the installation instructions to get started.
+      Release highlights
+      - It's the holidays, and this release was overall pretty quiet, without many major
+      - changes. Two select improvements:
+      - Improvements to configuration management, including support for [conditional
+      - variables](https://jj-vcs.github.io/jj/v0.25.0/config#conditional-variables) in config files.
+      - Large files in the working copy will no longer cause commands to fail; instead
+      - the large files will remain intact but untracked in the working copy.
+      Breaking changes
+      - Configuration variables are no longer "stringly" typed. For example, `true` is
+      - not converted to a string `"true"`, and vice versa.
+      - The following configuration variables are now parsed strictly:
+        `colors.<labels>`, `git.abandon-unreachable-commits`,
+        `git.auto-local-bookmark`, `git.push-bookmark-prefix`, `revsets.log`,
+        `revsets.short-prefixes` `signing.backend`, `operation.hostname`,
+        `operation.username`, `ui.allow-init-native`, `ui.color`,
+        `ui.default-description`, `ui.progress-indicator`, `ui.quiet`, `user.email`,
+        `user.name`
+      - `jj config list` now prints inline tables `{ key = value, .. }` literally.
+      - Inner items of inline tables are no longer merged across configuration files.
+      - See the table syntax documentation for details.
+      - `jj config edit --user` now opens a file even if `$JJ_CONFIG` points to a
+      - directory. If there are multiple config files, the command will fail.
+      - `jj config set` no longer accepts a bare string value that looks like a TOML
+      - expression. For example, `jj config set NAME '[foo]'` must be quoted as `jj
+      - config set NAME '"[foo]"'`.
+      - The deprecated `[alias]` config section is no longer respected. Move command
+      - aliases to the `[aliases]` section.
+      - `jj absorb` now abandons the source commit if it becomes empty and has no
+      - description.
+      Deprecations
+      - `--config-toml=TOML` is deprecated in favor of `--config=NAME=VALUE` and
+        `--config-file=PATH`.
+      - The `Signature.username()` template method is deprecated for
+        `Signature().email().local()`.
+      New features
+      - `jj` command no longer fails due to new working-copy files larger than the
+        `snapshot.max-new-file-size` config option. It will print a warning and large
+      - files will be left untracked.
+      - Configuration files now support conditional variables.
+      - New command options `--config=NAME=VALUE` and `--config-file=PATH` to set
+      - string value without quoting and to load additional configuration from files.
+      - Templates now support the `>=`, `>`, `<=`, and `<` relational operators for
+        `Integer` types.
+      - A new Email template type is added. `Signature.email()` now returns an Email
+      - template type instead of a String.
+      - Adds a new template alias `commit_timestamp(commit)` which defaults to the
+      - committer date.
+      - Conflict markers are now allowed to be longer than 7 characters, allowing
+      - conflicts to be materialized and parsed correctly in files which already
+      - contain lines that look like conflict markers.
+      - New `$marker_length` variable to allow merge tools to support longer conflict
+      - markers (equivalent to "%L" for Git merge drivers).
+      - `jj describe` now accepts a `JJ: ignore-rest` line that ignores everything
+      - below it, similar to a "scissor line" in git. When editing multiple commits,
+      - only ignore until the next `JJ: describe` line.
+      Fixed bugs
+      - The `$NO_COLOR` environment variable must now be non-empty to be respected.
+      - Fixed incompatible rendering of empty hunks in git/unified diffs. #5049
+      - Fixed performance of progress bar rendering when fetching from Git remote. #5057
+      - `jj config path --user` no longer creates new file at the default config path.
+      - On Windows, workspace paths (printed by `jj root`) no longer use UNC-style
+        `\\?\` paths unless necessary.
+      - On Windows, `jj git clone` now converts local Git remote path to
+      - slash-separated path.
+      - `jj resolve` no longer removes the executable bit on resolved files when using
+      - an external merge tool.
+      Contributors
+      - Thanks to the people who made this release happen!
+      - Alex Stefanov (@umnikos)
+      - Anton Älgmyr (@algmyr)
+      - Austin Seipp (@thoughtpolice)
+      - Benjamin Tan (@bnjmnt4n)
+      - Bryce Berger (@bryceberger)
+      - Daniel Ploch (@torquestomp)
+      - David Crespo (@david-crespo)
+      - George Tsiamasiotis (@gtsiam)
+      - Jochen Kupperschmidt (@homeworkprod)
+      - Keane Nguyen (@keanemind)
+      - Martin von Zweigbergk (@martinvonz)
+      - Matt Kulukundis (@fowles)
+      - Milo Moisson (@mrnossiom)
+      - petricavalry (@petricavalry)
+      - Philip Metzger (@PhilipMetzger)
+      - Remo Senekowitsch (@senekor)
+      - Scott Taylor (@scott2000)
+      - Shane Sveller (@shanesveller)
+      - Stephen Jennings (@jennings)
+      - Tim Janik (@tim-janik)
+      - Vamsi Avula (@avamsi)
+      - Waleed Khan (@arxanas)
+      - Yuya Nishihara (@yuja)
+ReleaseNotesUrl: https://github.com/jj-vcs/jj/releases/tag/v0.25.0
+Documentations:
+- DocumentLabel: Homepage
+  DocumentUrl: https://jj-vcs.github.io/jj/
+ManifestType: defaultLocale
+ManifestVersion: 1.9.0

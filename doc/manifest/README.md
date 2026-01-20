@@ -8,6 +8,7 @@ As new releases of the WinGet client are developed with new features and functio
 The community repository will often delay support for new schema versions until enough devices have been updated so customers can benefit from the newly added manifest keys. Please use the recommended schema version mentioned in the PR template.
 
 ## Manifest Schema Versions
+* [1.10.0](schema/1.10.0/README.md)
 * [1.9.0](schema/1.9.0/README.md)
 * [1.7.0](schema/1.7.0/README.md)
 * [1.6.0 (deprecated)](schema/1.6.0/README.md)
