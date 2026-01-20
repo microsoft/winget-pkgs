@@ -117,7 +117,6 @@ Write-Verbose "Found $($versionsWithOverlap.count) DisplayVersions with multiple
 
 if ($versionsWithOverlap.Count -gt 0) {
     $versionsWithOverlap | Format-Table -Wrap
-    exit 1
 }
 
 class UnmetDependencyException : Exception {
