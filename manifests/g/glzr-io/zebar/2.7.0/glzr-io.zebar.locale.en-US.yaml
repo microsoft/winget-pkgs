@@ -1,0 +1,64 @@
+# Created with WinGet Updater using komac v2.6.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.6.0.schema.json
+
+PackageIdentifier: glzr-io.zebar
+PackageVersion: 2.7.0
+PackageLocale: en-US
+Publisher: Glzr Software Pte. Ltd.
+PublisherUrl: https://github.com/glzr-io
+PublisherSupportUrl: https://github.com/glzr-io/zebar/issues
+Author: glzr.io
+PackageName: Zebar
+PackageUrl: https://github.com/glzr-io/zebar
+License: GPL-3.0
+LicenseUrl: https://github.com/glzr-io/zebar/blob/HEAD/LICENSE.md
+ShortDescription: Zebar creates cross-platform taskbars, desktop widgets, and popups.
+Description: Zebar is a tool for creating customizable and cross-platform taskbars, desktop widgets, and popups.
+Moniker: zebar
+Tags:
+- bar
+- desktop
+- dock
+- linux
+- macos
+- ricing
+- statusbar
+- taskbar
+- unixporn
+- widget
+- windows
+ReleaseNotes: |-
+  🎉 New features
+  Offline support (#141)
+  Zebar already works totally fine without an internet connections, but the current starter configs make web requests for their assets (e.g. CSS files, fonts, etc.). These requests will now be cached so that they don't have to be re-fetched on the next launch (also improving performance!). The default caching duration is 1 week and can be configured in the widget's settings.Since some requests should not be cached, there's also a way to add rules for URL's that match a given regex. For example, if you make a fetch for stock market data or social feeds, you'd likely want to cache it for less time than something like a font file.cachingRunning shell commands (#160)
+  It’s now possible to run shell commands! This means you can now launch programs and scripts programmatically. There’s 2 new API’s:
+  - shellExec - Executes a program and waits till exit. Returns its stdout, stderr, and exit status.
+  - shellSpawn - Executes a program without waiting for exit. Allows for interaction with the spawned process (e.g. listening to stdout/stderr, writing to stdin, and killing the process).
+  import * as zebar from 'zebar';
+
+  const curl = await zebar.shellExec('curl', 'https://www.google.com');
+  console.log(curl.stdout);
+
+  const ping = await zebar.shellSpawn('ping', '127.0.0.1 -n 10 -w 3000');
+  ping.onStdout(output => console.log('stdout', output));
+  ping.onStderr(output => console.log('stderr', output));
+  ping.onExit(output => console.log('exit', output));
+
+  // Interacting with the spawned process:
+  ping.write('hello world!');
+  ping.kill();
+
+  Since shell commands can run destructive actions, there’s a UI to configure which commands a widget is allowed to run. This is mainly for the sake of an upcoming feature (see below!), so that if a widget is shared with others, they can check what shell privileges it uses.shellOther features
+  - Add pause button to with-glazewm starter config (#180).
+  - Make the text in the starter examples non-selectable (#176).
+  🐛 Bug fixes
+  - Export audio provider TypeScript types.
+  📘 Docs improvements
+  - Add docs for media provider functions.
+  - Add docs for isPaused to glazewm provider (#182).
+  Upcoming feature: community/marketplace 🚀
+  Currently in development is a new community/marketplace feature where you can download and run widgets that other people submit. Widgets would be uploadable through a community GitHub repo. And then through the settings UI, there will be a tab where all widgets are listed and instantly downloadable.If you have ideas/feedback on the feature, drop a message in the #zebar-chat channel on Discord!
+  Big thanks to @HolbyFPV, @michidk, and @veryard for contributing to this release 💛/ @lars-berger
+ReleaseNotesUrl: https://github.com/glzr-io/zebar/releases/tag/v2.7.0
+ManifestType: defaultLocale
+ManifestVersion: 1.6.0

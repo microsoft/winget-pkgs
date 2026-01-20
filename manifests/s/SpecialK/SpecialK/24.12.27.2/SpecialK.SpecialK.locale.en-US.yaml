@@ -1,0 +1,101 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
+
+PackageIdentifier: SpecialK.SpecialK
+PackageVersion: 24.12.27.2
+PackageLocale: en-US
+Publisher: The Special K Group
+PublisherUrl: https://special-k.info/
+PublisherSupportUrl: https://github.com/SpecialKO/SpecialK/issues
+PrivacyUrl: https://wiki.special-k.info/Privacy
+PackageName: Special K
+PackageUrl: https://special-k.info/
+License: GPL-3.0
+LicenseUrl: https://github.com/SpecialKO/SpecialK/blob/HEAD/LICENSE
+Copyright: Copyleft 2019-2024
+ShortDescription: The Swiss Army Knife of PC Gaming
+Description: Lovingly referred to as the Swiss Army Knife of PC gaming, Special K does a bit of everything. It is best known for fixing and enhancing graphics, its many detailed performance analysis and correction mods, and a constantly growing palette of tools that solve a wide variety of issues affecting PC games.
+Moniker: specialk
+Tags:
+- framerate-fixer
+- game
+- game-modding
+- gaming
+- hdr
+- hooking
+- injection
+- latency-analysis
+- mod
+- reverse-engineering
+ReleaseNotes: |-
+  Below are the highlights between v 24.12.20.2 - v 24.12.27.2:
+
+    + Fixed recent change that would cause the control panel to crash in Steam games
+       if Steam cloud is disabled or SteamAPI integration is turned off.
+   + Revert scheduler changes related to Sleep (0) behavior in 24.12.15 that cause
+       Silent Hill 2 to crash.
+   + Fixed CPU affinity mask potentially overflowing and not working in 32-bit.
+
+  [ReShade Stuff]
+
+   + When ReShade is used as dxgi.dll in D3D12 games, SK no longer gives warnings
+       about compatibility problems.
+   + Avoid using explicitly constructed ReShade effect runtimes as much as
+       possible when SK is not running in Hookless ReShade (compatibility) mode,
+         to avoid confusing AddOns that think these are normal ReShade runtimes.
+   + Added checks to detect ReShade's incorrectly reported D3D11 immediate device
+       context reference counts that may cause deadlock during game exit or when
+         temporary D3D11 devices are constructed and destroyed (ie. overlay init)
+
+   + Avoid destroying the SwapChain that Special K creates during initialization
+       to setup D3D11 hooks, because poorly written ReShade addons may crash.
+   + Create an IDXGIFactory2 rather than IDXGIFactory when initializing hooks to
+       avoid complications from ReShade calling QueryInterface to upgrade an
+         interface that SK has not yet wrapped.
+   + Fixed potential deadlock in RenoDX mods, the ones that do not check for
+       nullptr before dereferencing ptrs will simply have to crash until fixed.
+
+  [QoL Stuff]
+
+   + Automatically apply anti-cheat bypass to all Hoyo games according to their
+       digital certificate, so I no longer have to manually do this when they
+         release a new game.
+   + The option to disable the Steam overlay's rendering now also blocks it from
+       installing input hooks, making it finally inert.
+   + Fixed absent custom resolutions caused by a typo in the Display menu a few
+       years ago...
+   + Restored missing audio devices in the list of pairable display/audio output
+       mappings, lost about a month ago.
+
+  [Optimization]
+
+   + Lowered CPU overhead in D3D11 games related to third-party overlay color
+       correction shader replacement when an HDR display is attached.
+      >> State tracking for them will only occur during Present (...) calls now.
+   + Further reduce performance overhead in D3D11 across the board for CPU-bound
+       scenarios in games that make a lot of draw calls.
+   + Optimized Get/SetMute to avoid constructing a temporary ISimpleAudioVolume
+       COM object every time it is called.
+   + Reduced performance overhead of the Steam and battery management sections of
+       the control panel (battery overhead applies to framepacing widget too...)
+   + Ignore D3D11DeviceContext Set*Resource state tracking unless the render mod
+       tools window is open.
+   + Added internal settings to control D3D11 state tracking for map/unmap and
+       set shader resources API calls, and disabled them for a few high overhead
+         games.
+   + Optimized D3D11 state tracker to ignore set shader calls, and draw calls unless
+       specific combinations of render mods that actually need them are active.
+   + Optimized shader tracker to avoid clearing active RTV cache at the end-of-frame
+       unless render mod tools window is open.
+   + Optimized timer queries used by SK's shader profiler and HDR widget to suspend
+       while render mod toolkit / HDR widget are not active.
+   + Optimized D3D11 Stateblock Restore code to bypass invoking SK's state tracking
+       hooks.
+   + Optimized control panel's end-of-frame input polling and cursor status checks.
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://wiki.special-k.info/
+- DocumentLabel: FAQ
+  DocumentUrl: https://wiki.special-k.info/FAQ
+ManifestType: defaultLocale
+ManifestVersion: 1.9.0

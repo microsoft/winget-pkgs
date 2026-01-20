@@ -1,0 +1,66 @@
+# Created with komac v2.12.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: Fastfetch-cli.Fastfetch
+PackageVersion: 2.52.0
+PackageLocale: en-US
+Publisher: fastfetch-cli
+PublisherUrl: https://github.com/fastfetch-cli
+PublisherSupportUrl: https://github.com/fastfetch-cli/fastfetch/issues
+PackageName: fastfetch
+PackageUrl: https://github.com/fastfetch-cli/fastfetch
+License: MIT
+LicenseUrl: https://github.com/fastfetch-cli/fastfetch/blob/HEAD/LICENSE
+ShortDescription: Like neofetch, but much faster because written mostly in C.
+Tags:
+- cli
+- command-line
+- cross-platform
+- fastfetch
+- fetch
+- hardware
+- neofetch
+- screenfetch
+- terminal
+ReleaseNotes: |-
+  This release added guidance for transitioning to JSON config when module-specific CLI flags are found. It should have been added in v2.50 but people are complaining about it. Late is still better than never.
+  $ fastfetch --weather-location 'your location'
+  Error: Unsupported module option: --weather-location
+         Support of module options has been removed. Please add the flag to the JSON config instead.
+         Example (demonstration only): `{ "modules": [ { "type": "weather", "location": "your location" } ] }`
+         See <https://github.com/fastfetch-cli/fastfetch/wiki/Configuration> for more information.
+  Worth noting that the recommendation is not always correct. For example
+  $ fastfetch --colors-block-range-start 0
+  Error: Unsupported module option: --colors-block-range-start
+         Support of module options has been removed. Please add the flag to the JSON config instead.
+         Example (demonstration only): `{ "modules": [ { "type": "colors", "blockRangeStart": "0" } ] }` # wrong, should be "block": { "range": [0] }
+         See <https://github.com/fastfetch-cli/fastfetch/wiki/Configuration> for more information.
+  Fastfetch has no idea about what the flag is, it simply converts the flag to camelCase.
+  Changes:
+  - New optional build dependencies on Android
+    - main: chafa dbus glib imagemagick libelf libxcb libxrandr pulseaudio zlib
+    - x11: dconf (Optional)
+  - Dependency on libxfconf is removed. XFCE related detection now uses libdbus instead (Linux)
+  - The default format of Display module is updated to {width}x{height} @ {scale-factor}x in {inch}", {refresh-rate} Hz
+    - Replaced scaled resolution with scale factor for shorter text and avoiding potential confusion.
+  Bugfixes:
+  - Fixes linking on 32-bit Android (#1939)
+  - Skips network interfaces without IPs unless MAC address is requested (#1949, LocalIP)
+  - Fixes unexpected padding when setting logo.width with chafa logos (#1947, Logo)
+    - Regression from v2.51.0
+  - Improves Wallpaper detection on XFCE4 (Wallpaper, Linux)
+  - Ignores process Relay(xxx) when detecting terminal on WSL2 (Terminal, Linux)
+  Features:
+  - Enables X11-related info (i.e., WM/DE) detection on Android (Global, Android)
+    - This requires many dependencies. See above.
+  - Adds scale factors detection for X11 (Display, Linux)
+    - X11 doesn't natively report scale factor as Wayland does. Instead, Fastfetch tries to detect Xft.dpi (DPI used by X FreeType for scaling fonts), which is usually set by the WM when DPI scaling is enabled.
+    - It's not always accurate. For example, XFCE4 has a separate config for text scaling, which is unaffected by the global DPI scaling setting.
+  - Adds display.fraction.trailingZeros: [always|never] option for fraction formatting
+    - The default value of display.fraction.ndigits is changed from -1 (unlimited) to 2 for usability.
+    - Used for displaying scale factor in Display module mentioned above, alongside other places for printing raw fraction numbers.
+  - Adds CPU name detection support for IA64 (CPU, Linux)
+  - Support Btrfs allocation profile detection (#1941, Btrfs, Linux)
+ReleaseNotesUrl: https://github.com/fastfetch-cli/fastfetch/releases/tag/2.52.0
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

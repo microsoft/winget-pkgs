@@ -1,0 +1,156 @@
+# Created with komac v2.13.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: DDEVFoundation.DDEV
+PackageVersion: 1.24.9
+PackageLocale: en-US
+Publisher: DDEV Foundation
+PublisherUrl: https://github.com/ddev
+PublisherSupportUrl: https://github.com/ddev/ddev/issues
+PackageName: DDEV
+PackageUrl: https://github.com/ddev/ddev
+License: Apache-2.0
+LicenseUrl: https://github.com/ddev/ddev/blob/HEAD/LICENSE
+ShortDescription: Docker-based local PHP+Node.js web development environments
+Tags:
+- backdrop
+- craftcms
+- ddev
+- development
+- docker
+- drupal
+- laravel
+- linux
+- local-development
+- macos
+- magento
+- magento2
+- mariadb
+- moodle
+- nodejs
+- php
+ReleaseNotes: |-
+  Installation
+  See the installation instructions for details, but it's easy:
+  - macOS: brew install ddev/ddev/ddev or just brew upgrade ddev.
+  - Linux: Use sudo apt-get update && sudo apt-get install --only-upgrade ddev, see apt/yum installation
+  - Windows and WSL2: Download the ddev_windows_amd64_installer.v1.24.9.exe; you can run it for install or upgrade.
+  - Consider ddev delete images or ddev delete images --all after upgrading to free up disk space used by previous Docker image versions. This does no harm.
+  - Consider ddev config --auto to update your projects to current configuration.
+  Highlights
+  - Support for PHP 8.5.0 RC 3 (note: some extensions are not yet available: apcu, imagick, memcached, redis, uploadprogress, xdebug, xhprof, xmlrpc, yaml)
+  - Support for PostgreSQL 18
+  - Automatic HTTP/S communication between DDEV projects - no need to manually configure external_links
+  - Option to omit project names in .ddev/config.yaml by default with ddev config global --omit-project-name-by-default=true - useful when working with multiple Git worktrees
+  - Auto-discovery of PLATFORM_PROJECT and PLATFORM_ENVIRONMENT from existing config for Upsun Flex and Upsun Fixed (Platform.sh) provider integrations
+  Features
+  - New ddev utility diagnose command for quick diagnostics on your DDEV installation and current project
+  - New ddev add-on search command, thanks to @AkibaAT
+  - New ddev xdebug info command to display xdebug_info() output
+  - Customize ddev describe output using the x-ddev.describe-* extensions - useful for add-ons
+  - Change ddev ssh shell using the x-ddev.ssh-shell extension - useful for add-ons
+  - New --user/-u flag for ddev exec and ddev ssh
+  - exec hooks now support the user field
+  - New pre-share and post-share hooks. This can help change the required URL for ddev share in CMSs like WordPress and Magento2.
+  - PostgreSQL connection support in ddev heidisql, thanks to @raphaelportmann
+  - Show failed container logs on project start by running DDEV_DEBUG=true ddev start
+  - Enhanced composer_root support for app type detection in CakePHP, Craft CMS, Laravel, Magento 2, Shopware 6, and Symfony, thanks to @vanWittlaer for initial PR for Shopware 6
+  - Silence warnings about custom configuration files in the .ddev directory by adding #ddev-silent-no-warn to the file. Documentation
+  Bug Fixes
+  - PostgreSQL now runs as container user (mirrored from host user) instead of postgres:postgres
+  - ddev describe now works with stopped or broken containers
+  - Improved support for DDEV_* environment variables in PHP-based add-ons
+  - APP_DEFAULT_LOCALE is no longer overridden in CakePHP, thanks to @tyler36
+  - Removed hardcoded --server-id=0 parameter from MySQL/MariaDB startup, thanks to @cyppe
+  - Fixed docker-compose warnings on ddev start when project root .env file contains dollar signs
+  - ddev add-on get now retries without authentication on invalid GitHub token
+  - Debug and verbose output now suppressed when using --json-output/-j flag
+  - Non-interactive mode now forced in non-tty environments
+  - Improved container username sanitization with better fallback handling
+  - Fixed blackfire-php installation for older PHP versions
+  - Fixed bug with broken label in Mutagen volume when path to Docker socket is too long
+  - Fixed intermittent hang in ddev auth ssh when SSH key is password-protected
+  - Fixed hang in ddev start on macOS when temp directory permissions are broken after macOS upgrade (fixed in docker-compose)
+  Internal Improvements
+  - PHP 8.1 no longer preinstalled in ddev/ddev-webserver to reduce image size
+  - Native ARM builder now used for building DDEV Docker images, thanks to @AkibaAT
+  - ddev utility is now the primary command (ddev debug moved to alias)
+  - Healthcheck added to ddev/ddev-xhgui image
+  - Linux tests now run separately instead of in matrix, allowing single test restarts on failure
+  - Improved support for CI=true in GitHub Actions
+  - Vite setup documentation migrated into DDEV docs, thanks to @mandrasch for continuous support on the blog article
+  - Improved quickstarts code block formatting to resolve copy/paste issues in some terminals
+  - Added docker-buildx dependency for AUR installation
+  - Internet detection now uses one.one.one.one instead of test.ddev.site
+  - Replaced GITHUB_OWNER with DDEV_GITHUB_OWNER in https://ddev.com/install.sh
+  - Switched to lightweight debian-12 image for GitHub Codespaces
+  - Removed Gitpod configuration (service is no longer available)
+  Minor Updates
+  - PHP 8.3.27, 8.4.14, and 8.5.0 RC 3
+  - Docker Compose v2.40.3
+  - Updated quickstart for Moodle 5.1
+  What's Changed
+  - build(aur): add docker-buildx dependency by @stasadev in #7637
+  - docs: Merge AI instruction files AGENTS.md CLAUDE.md copilot-instructions.md, symlink, fixes #7632 [skip ci] by @rfay in #7644
+  - docs(faq): remove traefik config when changing project's name, for #7638 by @ara303 in #7639
+  - chore(deps): update vendor to current, fixes #7624 by @rfay in #7643
+  - fix(upsun): upsun should resume paused environment at start [skip buildkite] by @rfay in #7650
+  - feat(docker): auto HTTP/S communication via network aliases instead of external_links by @stasadev in #7642
+  - test: fix TestNetworkAliases, fixes #7657 by @stasadev in #7658
+  - feat: enhance PHP addon environment with DockerEnv() integration by @rfay in #7651
+  - test(buildkite): group log output by --- RUN by @rfay in #7645
+  - feat: Update AGENTS.md to reference organization-wide patterns by @rfay in #7659
+  - fix(cakephp): do not override APP_DEFAULT_LOCALE by @tyler36 in #7653
+  - fix(hack-postgres): hack postgres client since postgresql-client:18 is misbehaving, for #7661 by @rfay in #7663
+  - fix(postgres): uninstall postgresql-client with its dependencies, for #7663 by @stasadev in #7665
+  - docs: platform.sh->upsun name changes, fixes #7654 by @rfay in #7673
+  - feat(warnings): Allow silencing warnings about custom config files, for #7638 by @rfay in #7660
+  - feat(test-ddev): add more distro info and default shell to ddev debug test by @rfay in #7666
+  - feat(postgres): Support postgres:18, fixes #7661 by @rfay in #7662
+  - feat: add ddev add-on search subcommand, fixes #7491 by @AkibaAT in #7554
+  - feat(db): remove the hardcoded --server-id=0 parameter from MySQL startup, fixes #6768 by @cyppe in #7608
+  - chore(buildkite): add DDEV_GITHUB_TOKEN for DDEV_RUN_GET_TESTS and don't run tests on skip by @stasadev in #7680
+  - build(image): use native arm builder for building docker images, fixes #7539 by @AkibaAT in #7553
+  - fix(postgres): normalize path on Windows, fixes #7679 by @stasadev in #7682
+  - feat: update ddev debug test to emphasize global ddev dir [skip ci] by @rfay in #7684
+  - feat: use 'ddev utility' instead of 'ddev debug', fixes #7683 by @rfay in #7685
+  - docs(moodle): update moodle quickstart to have composer_root in root, fixes #7692 [skip buildkite] by @rfay in #7693
+  - fix: disable .env parsing for docker-compose pull, fixes #7671 by @stasadev in #7687
+  - chore: remove contributors.yml and use latest golangci-lint by @rfay in #7699
+  - fix: don't use GITHUB_OWNER variable for install_ddev.sh, fixes ddev/github-action-setup-ddev#54 by @stasadev in #7695
+  - fix: show if DDEV_GITHUB_TOKEN was used in download requests, add DDEV_GLOBAL_DIR env, skip add-on tests without token, fixes #7641 by @rfay in #7686
+  - fix: start container only after attach in ddev auth ssh, fixes #7664 by @stasadev in #7681
+  - feat(dockercheck): improve ddev ut dockercheck, fixes #7672 by @rfay in #7690
+  - fix: improve MOTD and sponsorship message controls, fixes #7468, fixes #7676, fixes #6918 by @rfay in #7691
+  - fix: ddev debug test shouldn't leave dead ddev-utilities containers [skip ci] by @rfay in #7701
+  - refactor(add-ons): exclude archived repositories by @stasadev in #7705
+  - test: npmjs.com no longer allows unchallenged curl [skip buildkite] by @rfay in #7706
+  - docs(macos): bump system requirements by @stasadev in #7729
+  - fix(codespaces): use lightweight debian-12 image, for #7294 [skip buildkite] by @stasadev in #7713
+  - fix(github): retry without auth on invalid GitHub token, fixes #7641 by @stasadev in #7717
+  - fix(mutagen): use fixed length for com.ddev.volume-signature label, fixes #7710 by @stasadev in #7712
+  - docs: add commands for preparing DDEV to work offline by @stasadev in #7726
+  - docs: fix a little custom command annotations code example by @TravisCarden in #7711
+  - feat(heidisql): allow postgres connections, fixes #7675 by @raphaelportmann in #7677
+  - docs: explicitly mention setting system managed nvm version, for #6013 by @JshGrn in #7733
+  - refactor: remove Gitpod configuration and build infrastructure by @rfay in #7716
+  - test: try to make TestMutagenSimple slightly more reliable by @rfay in #7732
+  - feat(debug): show web/db container logs on error by @stasadev in #7736
+  - feat(xdebug): add xdebug_info() to ddev xdebug info, fixes #7715 by @rfay in #7721
+  - refactor: move util.GetContainerUIDGid to dockerutil.GetContainerUser by @stasadev in #7734
+  - refactor: simplify db volume chown, use WarningOnce by @stasadev in #7735
+  - fix: don't output debug or verbose in middle of doing json by @rfay in #7739
+  - feat(projectname): Allow defaulting to not setting name in config.yaml, fixes #7648 by @rfay in #7719
+  - ci(github-runner): use jlumbroso/free-disk-space action for cleanup by @stasadev in #7744
+  - docs: Update postgres:18 in configuration documentation by @rfay in #7748
+  - style: add dark mode support for images/ddev-logo.svg by @stasadev in #7752
+  - fix: Add healthcheck to xhgui image to resolve TestCmdXhgui intermittent failures by @rfay in #7745
+  - ci: run Linux tests separately, not in matrix by @stasadev in #7746
+  - feat(debug): show logs on error for all containers, for #7736 by @stasadev in #7751
+  - test: Fix TestConfigValidate for TYPO3 [skip buildkite] by @rfay in #7750
+  - feat: enable non-interactive mode for CI or non-tty environments by @stasadev in #7743
+  - test(apache-fpm): don't run tests with TYPO3, for #7750 by @stasadev in #7755
+  - ci: sort golang imports by @stasadev in #7756
+ReleaseNotesUrl: https://github.com/ddev/ddev/releases/tag/v1.24.9
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

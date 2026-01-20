@@ -10,8 +10,7 @@ configuration:
     eventResponderTasks:
       - description: >-
           When the label "zip-binary" is added to a pull request
-          * Add the PR specific reply notifying the issue author of a blocking issue
-          * Label the PR with Blocking-Issue
+          * Add the PR specific reply notifying the issue author of how to update their PR
           * Label with Needs-Author-Feedback
           * Remove the Needs-Attention Label
         if:
@@ -21,57 +20,22 @@ configuration:
         then:
           - addReply:
               reply: >-
-                Hello @${issueAuthor},
+                Hello ${issueAuthor},
 
 
-                This package appears to depend on .dlls that aren't available via symlink.
-
-
-                This PR is blocked until support for zipped binaries is implemented in:
+                This package appears to depend on .dlls that aren't available via symlink. Support for this form of zipped binaries was implemented in:
 
                 * microsoft/winget-cli/issues/2711
 
 
-                Be sure to add your 👍 to the issue to help raise the priority and avoid posting "Me too!" messages to respect those who have subscribed to the issue.
+                To ensure this package works correctly for all users, the property `ArchiveBinariesDependOnPath` must be set to `true` at either the installer level or root level in the installer manifest. Additionally, your manifest will need to conform to the [1.10.0 manifest specification](https://github.com/microsoft/winget-pkgs/tree/master/doc/manifest/schema/1.10.0). Please update your PR accordingly.
 
 
                 Template: msftbot/blockingIssue/zipBinary
-          - addLabel:
-              label: Blocking-Issue
           - addLabel:
               label: Needs-Author-Feedback
           - removeLabel:
               label: Needs-Attention
-        # The policy service should trigger even when the label was added by the policy service
-        triggerOnOwnActions: true
-      - description: >-
-          When the label "zip-binary" is added to an issue
-          * Add the issue specific reply notifying the issue author of a blocking issue
-          * Label the issue with Blocking-Issue
-        if:
-          - payloadType: Issues
-          - labelAdded:
-              label: zip-binary
-        then:
-          - addReply:
-              reply: >-
-                Hello @${issueAuthor},
-
-
-                This package appears to depend on .dlls that aren't available via symlink.
-
-
-                This package is blocked until support for zipped binaries is implemented in:
-
-                * microsoft/winget-cli/issues/2711
-
-
-                Be sure to add your 👍 to the issue to help raise the priority and avoid posting "Me too!" messages to respect those who have subscribed to the issue.
-
-
-                Template: msftbot/blockingIssue/zipBinary
-          - addLabel:
-              label: Blocking-Issue
         # The policy service should trigger even when the label was added by the policy service
         triggerOnOwnActions: true
 onFailure:

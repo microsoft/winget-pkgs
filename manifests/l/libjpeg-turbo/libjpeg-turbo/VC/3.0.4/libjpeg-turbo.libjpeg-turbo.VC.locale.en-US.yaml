@@ -1,0 +1,41 @@
+# Created with YamlCreate.ps1 v2.4.1 Dumplings Mod $debug=QUSU.CRLF.7-4-5.Win32NT
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.6.0.schema.json
+
+PackageIdentifier: libjpeg-turbo.libjpeg-turbo.VC
+PackageVersion: 3.0.4
+PackageLocale: en-US
+Publisher: libjpeg-turbo
+PublisherUrl: https://libjpeg-turbo.org/
+PublisherSupportUrl: https://github.com/libjpeg-turbo/libjpeg-turbo/issues
+# PrivacyUrl:
+Author: Darrell Commander
+PackageName: libjpeg-turbo SDK for Visual C++
+PackageUrl: https://libjpeg-turbo.org/
+License: IJG license, Modified (3-clause) BSD License and zlib License
+LicenseUrl: https://github.com/libjpeg-turbo/libjpeg-turbo/blob/main/LICENSE.md
+Copyright: Copyright (C)2009-2024 D. R. Commander. All Rights Reserved.
+# CopyrightUrl:
+ShortDescription: SIMD-accelerated libjpeg-compatible JPEG codec library
+Description: libjpeg-turbo is a JPEG image codec that uses SIMD instructions (MMX, SSE2, NEON, AltiVec) to accelerate baseline JPEG compression and decompression on x86, x86-64, ARM, and PowerPC systems. On such systems, libjpeg-turbo is generally 2-6x as fast as libjpeg, all else being equal. On other types of systems, libjpeg-turbo can still outperform libjpeg by a significant amount, by virtue of its highly-optimized Huffman coding routines. In many cases, the performance of libjpeg-turbo rivals that of proprietary high-speed JPEG codecs.
+# Moniker:
+Tags:
+- jpeg
+- libjpeg
+ReleaseNotes: |-
+  Significant changes relative to 3.0.3:
+  1. Fixed an issue whereby the CPU usage of the default marker processor in the decompressor grew exponentially with the number of markers. This caused an unreasonable slow-down in jpeg_read_header() if an application called jpeg_save_markers() to save markers of a particular type and then attempted to decompress a JPEG image containing an excessive number of markers of that type.
+  2. Hardened the default marker processor in the decompressor to guard against an issue (exposed by 3.0 beta2[6]) whereby attempting to decompress a specially-crafted malformed JPEG image (specifically an image with a complete 12-bit-per-sample Start Of Frame segment followed by an incomplete 8-bit-per-sample Start Of Frame segment) using buffered-image mode and input prefetching caused a segfault if the fill_input_buffer() method in the calling application's custom source manager incorrectly returned FALSE in response to a prematurely-terminated JPEG data stream.
+  3. Fixed an issue in cjpeg whereby, when generating a 12-bit-per-sample or 16-bit-per-sample lossless JPEG image, specifying a point transform value greater than 7 resulted in an error ("Invalid progressive/lossless parameters") unless the -precision option was specified before the -lossless option.
+  4. Fixed a regression introduced by 3.0.3[3] that made it impossible for calling applications to generate 12-bit-per-sample arithmetic-coded lossy JPEG images using the TurboJPEG API.
+  5. Fixed an error ("Destination buffer is not large enough") that occurred when attempting to generate a full-color lossless JPEG image using the TurboJPEG Java API's byte[] TJCompressor.compress() method if the value of TJ.PARAM_SUBSAMP was not TJ.SAMP_444.
+  6. Fixed a segfault in djpeg that occurred if a negative width was specified with the -crop option. Since the cropping region width was read into an unsigned 32-bit integer, a negative width was interpreted as a very large value. With certain negative width and positive left boundary values, the bounds checks in djpeg and jpeg_crop_scanline() overflowed and did not detect the out-of-bounds width, which caused a buffer overrun in the upsampling or color conversion routine. Both bounds checks now use 64-bit integers to guard against overflow, and djpeg now checks for negative numbers when it parses the crop specification from the command line.
+  7. Fixed an issue whereby the TurboJPEG lossless transformation function and methods checked the specified cropping region against the source image dimensions and level of chrominance subsampling rather than the destination image dimensions and level of chrominance subsampling, which caused some cropping regions to be unduly rejected when performing 90-degree rotation, 270-degree rotation, transposition, transverse transposition, or grayscale conversion.
+  8. Fixed an issue whereby the TurboJPEG lossless transformation function and methods did not honor TJXOPT_COPYNONE/TJTransform.OPT_COPYNONE unless it was specified for all lossless transforms.
+ReleaseNotesUrl: https://github.com/libjpeg-turbo/libjpeg-turbo/releases/tag/3.0.4
+# PurchaseUrl:
+# InstallationNotes:
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://libjpeg-turbo.org/Documentation/Documentation
+ManifestType: defaultLocale
+ManifestVersion: 1.6.0

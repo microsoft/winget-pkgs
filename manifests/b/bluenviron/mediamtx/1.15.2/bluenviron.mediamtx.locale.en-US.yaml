@@ -1,0 +1,91 @@
+# Created with komac v2.13.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: bluenviron.mediamtx
+PackageVersion: 1.15.2
+PackageLocale: en-US
+Publisher: bluenviron
+PublisherUrl: https://github.com/bluenviron
+PublisherSupportUrl: https://github.com/bluenviron/mediamtx/issues
+Author: aler9
+PackageName: mediamtx
+PackageUrl: https://github.com/bluenviron/mediamtx
+License: MIT
+LicenseUrl: https://github.com/bluenviron/mediamtx/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2019 aler9
+CopyrightUrl: https://github.com/bluenviron/mediamtx/blob/main/LICENSE
+ShortDescription: |-
+  Ready-to-use SRT / WebRTC / RTSP / RTMP / LL-HLS media server and media proxy that allows to read,
+  publish, proxy, record and playback video and audio streams.
+Description: |-
+  MediaMTX is a ready-to-use and zero-dependency real-time media server and media proxy that allows
+  to publish, read, proxy, record and playback video and audio streams. It has been conceived as a
+  "media router" that routes media streams from one end to the other.
+Tags:
+- go
+- golang
+- hls
+- media-server
+- obs-studio
+- rtcp
+- rtmp
+- rtmp-proxy
+- rtmp-server
+- rtp
+- rtsp
+- rtsp-proxy
+- rtsp-relay
+- rtsp-server
+- streaming
+- webrtc
+ReleaseNotes: |-
+  Fixes and improvements
+  General
+  - add self-upgrader (#3501) (#5035) this allows to upgrade MediaMTX to latest version by running ./mediamtx --upgrade
+  - on Windows, do not look for configuration in linux paths (#5036)
+  - do not include recorder and HLS muxer in sent bytes (#4380) (#5039) in API (/paths/list, /paths/get) and metrics (paths_bytes_sent), the amount of sent bytes was increased even in case of writes to the recorder and HLS muxer, which are not generating network traffic. This fixes the issue.
+  - add read and write timeouts in HTTP servers (#5056) this prevents zombie connections from piling up.
+  - estimate absolute timestamp more precisely (#5078) When the absolute timestamp of incoming frames was not available, it was filled with the current timestamp, which is influenced by latency over time. This mechanism is replaced by an algorithm that detects when latency is the lowest, stores the current timestamp and uses it as reference throughout the rest of the stream.
+  - prevent estimated absolute timestamp from drifting too much (#5080)
+  - recorder: reset fMP4 sequence number during segment switch (#5082) It's useless to make sequence numbers unique across the entire stream.
+  - replace incoming absolute timestamps of any source (#5081) Absolute timestamps are used to generate recording segments, so users should not be able to change them, unless explicitly allowed. Parameter useAbsoluteTimestamp allowed to re-enable absolute timestamps with RTSP and WebRTC, now it is extended to all protocols.
+  - recorder: write additional infos inside segments (#5083) write stream ID, segment number, DTS, NTP in a dedicated box. This allows to improve the merge algorithm in the playback server.
+  - playback: improve segment merging algorithm (#5084) * merge segments only if they belong to the same stream and are consecutive. * compute DTS without using NTP timestamp, increasing robustness against NTP fluctuations.
+  API
+  - add /info endpoint (#945) (#5045)
+  RTSP
+  - Fix: invalid SDP: sdp: invalid syntax c=IN (bluenviron/gortsplib#906)
+  - server: add idle timeout (bluenviron/gortsplib#912) this prevents idle connections and sessions from stacking up.
+  HLS
+  - improve web page performance (#5062) load hls.js in parallel with the page.
+  WebRTC
+  - fix clippy audio when reading Opus (#3878) (#5047) Opus timestamp is now recomputed from scratch.
+  - fix packet corruption when reading G711 (#5048) when a reader is reading a G711 track, stream units are modified globally, affecting every other reader. This fixes the issue.
+  Dependencies
+  - code.cloudfoundry.org/bytefmt updated from v0.52.0 to v0.54.0
+  - github.com/MicahParks/keyfunc/v3 updated from v3.6.2 to v3.7.0
+  - github.com/bluenviron/gortsplib/v5 updated from v5.0.1 to v5.1.0
+  - github.com/bluenviron/mediacommon/v2 updated from v2.4.3 to v2.5.0
+  - github.com/go-git/go-git/v5 updated from v5.16.2 to v5.16.3
+  - github.com/matthewhartstonge/argon2 updated from v1.4.0 to v1.4.1
+  - github.com/pion/interceptor updated from v0.1.40 to v0.1.41
+  - github.com/pion/rtp updated from v1.8.22 to v1.8.23
+  - golang.org/x/crypto updated from v0.42.0 to v0.43.0
+  - golang.org/x/sys updated from v0.36.0 to v0.37.0
+  - golang.org/x/term updated from v0.35.0 to v0.36.0
+  - github.com/pion/srtp/v3 updated from v3.0.7 to v3.0.8
+  - github.com/quic-go/quic-go updated from v0.54.0 to v0.54.1
+  - golang.org/x/net updated from v0.44.0 to v0.46.0
+  - golang.org/x/text updated from v0.29.0 to v0.30.0
+  - github.com/Masterminds/semver/v3 v3.4.0 added
+  - github.com/minio/selfupdate v0.6.0 added
+  - aead.dev/minisign v0.2.0 added
+  Security
+  Binaries are compiled from source through the Release workflow without human intervention, preventing any external interference.
+  You can verify that binaries have been produced by the workflow by using GitHub Attestations:
+  ls mediamtx_* | xargs -L1 gh attestation verify --repo bluenviron/mediamtx
+  You can verify checksums of binaries by downloading checksums.sha256 and running:
+  cat checksums.sha256 | grep "$(ls mediamtx_*)" | sha256sum --check
+ReleaseNotesUrl: https://github.com/bluenviron/mediamtx/releases/tag/v1.15.2
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0
