@@ -236,8 +236,8 @@ if ($Settings) {
   exit
 }
 
-$ScriptHeader = '# Created with YamlCreate.ps1 v2.5.0'
-$ManifestVersion = '1.10.0'
+$ScriptHeader = '# Created with YamlCreate.ps1 v2.7.1'
+$ManifestVersion = '1.12.0'
 $PSDefaultParameterValues = @{ '*:Encoding' = 'UTF8' }
 $Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
 $ofs = ', '
@@ -273,11 +273,18 @@ $useDirectSchemaLink = if ($env:GITHUB_ACTIONS -eq $true) {
 } else {
   (Invoke-WebRequest "https://aka.ms/winget-manifest.version.$ManifestVersion.schema.json" -UseBasicParsing).Content -match '<!doctype html>'
 }
+
+if ($ManifestVersion -ne 'latest') {
+  $FullManifestVersion = "v$ManifestVersion"
+} else {
+  $FullManifestVersion = $ManifestVersion
+}
+
 $SchemaUrls = @{
-  version       = if ($useDirectSchemaLink) { "https://raw.githubusercontent.com/microsoft/winget-cli/master/schemas/JSON/manifests/v$ManifestVersion/manifest.version.$ManifestVersion.json" } else { "https://aka.ms/winget-manifest.version.$ManifestVersion.schema.json" }
-  defaultLocale = if ($useDirectSchemaLink) { "https://raw.githubusercontent.com/microsoft/winget-cli/master/schemas/JSON/manifests/v$ManifestVersion/manifest.defaultLocale.$ManifestVersion.json" } else { "https://aka.ms/winget-manifest.defaultLocale.$ManifestVersion.schema.json" }
-  locale        = if ($useDirectSchemaLink) { "https://raw.githubusercontent.com/microsoft/winget-cli/master/schemas/JSON/manifests/v$ManifestVersion/manifest.locale.$ManifestVersion.json" } else { "https://aka.ms/winget-manifest.locale.$ManifestVersion.schema.json" }
-  installer     = if ($useDirectSchemaLink) { "https://raw.githubusercontent.com/microsoft/winget-cli/master/schemas/JSON/manifests/v$ManifestVersion/manifest.installer.$ManifestVersion.json" } else { "https://aka.ms/winget-manifest.installer.$ManifestVersion.schema.json" }
+  version       = if ($useDirectSchemaLink) { "https://raw.githubusercontent.com/microsoft/winget-cli/master/schemas/JSON/manifests/$FullManifestVersion/manifest.version.$ManifestVersion.json" } else { "https://aka.ms/winget-manifest.version.$ManifestVersion.schema.json" }
+  defaultLocale = if ($useDirectSchemaLink) { "https://raw.githubusercontent.com/microsoft/winget-cli/master/schemas/JSON/manifests/$FullManifestVersion/manifest.defaultLocale.$ManifestVersion.json" } else { "https://aka.ms/winget-manifest.defaultLocale.$ManifestVersion.schema.json" }
+  locale        = if ($useDirectSchemaLink) { "https://raw.githubusercontent.com/microsoft/winget-cli/master/schemas/JSON/manifests/$FullManifestVersion/manifest.locale.$ManifestVersion.json" } else { "https://aka.ms/winget-manifest.locale.$ManifestVersion.schema.json" }
+  installer     = if ($useDirectSchemaLink) { "https://raw.githubusercontent.com/microsoft/winget-cli/master/schemas/JSON/manifests/$FullManifestVersion/manifest.installer.$ManifestVersion.json" } else { "https://aka.ms/winget-manifest.installer.$ManifestVersion.schema.json" }
 }
 
 # Fetch Schema data from github for entry validation, key ordering, and automatic commenting
@@ -292,6 +299,13 @@ try {
   $InstallerEntryProperties = (ConvertTo-Yaml $InstallerSchema.definitions.Installer.properties | ConvertFrom-Yaml -Ordered).Keys
   $InstallerDependencyProperties = (ConvertTo-Yaml $InstallerSchema.definitions.Dependencies.properties | ConvertFrom-Yaml -Ordered).Keys
   $AppsAndFeaturesEntryProperties = (ConvertTo-Yaml $InstallerSchema.definitions.AppsAndFeaturesEntry.properties | ConvertFrom-Yaml -Ordered).Keys
+
+  # Update the manifest version in case `latest` was specified
+  $ManifestVersion = $VersionSchema.properties.ManifestVersion.default
+  # Update the schema URLs to reflect the correct version for use in the manifest header
+  @($SchemaUrls.Keys) | ForEach-Object {
+    $SchemaUrls[$_] = "https://aka.ms/winget-manifest.$_.$ManifestVersion.schema.json"
+  }
 } catch {
   # Here we want to pass the exception as an inner exception for debugging if necessary
   throw [System.Net.WebException]::new('Manifest schemas could not be downloaded. Try running the script again', $_.Exception)
@@ -620,6 +634,33 @@ Function Get-InstallerFile {
   return $_OutFile
 }
 
+Function SafeRemovePath {
+  Param(
+    [Parameter(Mandatory=$true, Position=0)]
+    [string] $Path,
+    [int] $Retries = 6,
+    [int] $DelayMs = 250
+  )
+
+  if (-not (Test-Path -LiteralPath $Path)) { return }
+
+  for ($i = 0; $i -lt $Retries; $i++) {
+    try {
+      Remove-Item -LiteralPath $Path -Force -ErrorAction Stop
+      return
+    } catch [System.IO.IOException] {
+      [GC]::Collect()
+      [GC]::WaitForPendingFinalizers()
+      Start-Sleep -Milliseconds $DelayMs
+      $DelayMs = [Math]::Min(5000, $DelayMs * 2)
+    } catch {
+      throw
+    }
+  }
+
+  Write-Warning "Could not remove file '$Path' after $Retries attempts; it may be in use by another process."
+}
+
 Function Get-UserSavePreference {
   switch ($ScriptSettings.SaveToTemporaryFolder) {
     'always' { $_Preference = '0' }
@@ -851,10 +892,27 @@ Function Read-NestedInstaller {
           }
         }
       }
+
+      if ($_EffectiveType -eq 'font') {
+        # Prompt to see if multiple entries are needed
+        $_menu = @{
+          entries       = @(
+            '[Y] Yes'
+            '*[N] No'
+          )
+          Prompt        = 'Do you want to create another font entry?'
+          DefaultString = 'N'
+        }
+        switch ( Invoke-KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString']) {
+          'Y' { $AnotherNestedInstaller = $true }
+          default { $AnotherNestedInstaller = $false }
+        }
+      }
       $_NestedInstallerFiles += $_InstallerFile
     } until (!$AnotherNestedInstaller)
     $_Installer['NestedInstallerFiles'] = $_NestedInstallerFiles
   }
+  Write-Host
   return $_Installer
 }
 
@@ -1005,7 +1063,7 @@ Function Read-InstallerEntry {
       Get-UriScope -URI $_Installer['InstallerUrl'] -OutVariable _ | Out-Null
       if ($_) { $_Installer['Scope'] = $_ | Select-Object -First 1 }
       if ([System.Environment]::OSVersion.Platform -match 'Win' -and ($script:dest).EndsWith('.msi')) {
-        $ProductCode = ([string](Get-MSIProperty -Path $script:dest -Property 'ProductCode') | Select-String -Pattern '{[A-Z0-9]{8}-([A-Z0-9]{4}-){3}[A-Z0-9]{12}}').Matches.Value
+        $ProductCode = [string](Get-MSIProperty -Path $script:dest -Property 'ProductCode').Value
       } elseif ([System.Environment]::OSVersion.Platform -match 'Unix' -and (Get-Item $script:dest).Name.EndsWith('.msi')) {
         $ProductCode = ([string](file $script:dest) | Select-String -Pattern '{[A-Z0-9]{8}-([A-Z0-9]{4}-){3}[A-Z0-9]{12}}').Matches.Value
       }
@@ -1307,6 +1365,11 @@ Function Read-InstallerEntry {
   if ($AnotherInstaller -eq '0') {
     Write-Host; Read-InstallerEntry
   }
+
+  # If the app folder is in manifests and the installer type is font, change the app folder to point at fonts
+  if ($script:AppFolder -match 'manifests' -and (Get-EffectiveInstallerType $_Installer) -eq 'font') {
+    $script:AppFolder = $script:AppFolder -replace 'manifests', 'fonts'
+  }
 }
 
 # Prompts user for Installer Values using the `Quick Update` Method
@@ -1372,7 +1435,7 @@ Function Read-QuickInstallerEntry {
       # If a new product code doesn't exist, and the installer isn't an `.exe` file, remove the product code if it exists
       $MSIProductCode = $null
       if ([System.Environment]::OSVersion.Platform -match 'Win' -and ($script:dest).EndsWith('.msi')) {
-        $MSIProductCode = ([string](Get-MSIProperty -Path $script:dest -Property 'ProductCode') | Select-String -Pattern '{[A-Z0-9]{8}-([A-Z0-9]{4}-){3}[A-Z0-9]{12}}').Matches.Value
+        $MSIProductCode = [string](Get-MSIProperty -Path $script:dest -Property 'ProductCode').Value
       } elseif ([System.Environment]::OSVersion.Platform -match 'Unix' -and (Get-Item $script:dest).Name.EndsWith('.msi')) {
         $MSIProductCode = ([string](file $script:dest) | Select-String -Pattern '{[A-Z0-9]{8}-([A-Z0-9]{4}-){3}[A-Z0-9]{12}}').Matches.Value
       }
@@ -1403,7 +1466,7 @@ Function Read-QuickInstallerEntry {
         }
       }
       # Remove the downloaded files
-      Remove-Item -Path $script:dest
+      SafeRemovePath -Path $script:dest
       Write-Host -ForegroundColor 'Green' "Installer updated!`n"
     }
 
@@ -2435,6 +2498,13 @@ if (Test-Path -Path "$PSScriptRoot\..\manifests") {
   $ManifestsFolder = (Resolve-Path '.\').Path
 }
 
+# Set the root folder where new font manifests should be created
+if (Test-Path -Path "$PSScriptRoot\..\fonts") {
+  $FontsFolder = (Resolve-Path "$PSScriptRoot\..\fonts").Path
+} else {
+  $FontsFolder = (Resolve-Path '.\').Path
+}
+
 # Initialize the return value to be a success
 $script:_returnValue = [ReturnValue]::new(200)
 
@@ -2695,6 +2765,33 @@ if ($ScriptSettings.ContinueWithExistingPRs -ne 'always' -and $script:Option -ne
 
 # Set the folder for the specific package and version
 $script:AppFolder = Join-Path $ManifestsFolder -ChildPath $PackageIdentifier.ToLower().Chars(0) | Join-Path -ChildPath $PackageIdentifierFolder | Join-Path -ChildPath $PackageVersion
+$script:FontFolder = Join-Path $FontsFolder -ChildPath $PackageIdentifier.ToLower().Chars(0) | Join-Path -ChildPath $PackageIdentifierFolder | Join-Path -ChildPath $PackageVersion
+
+# Attempt to see if the old package exists in the manifests folder, font folder, or both
+$script:DestinationFolder = $null;
+if (Test-Path -Path (Split-Path $script:AppFolder)) {
+  $script:DestinationFolder = $script:AppFolder
+}
+if (Test-Path -Path (Split-Path $script:FontFolder)) {
+  if ($script:DestinationFolder) {
+    $script:DestinationFolder = @($script:DestinationFolder; $script:FontFolder)
+  } else {
+    $script:DestinationFolder = $script:FontFolder
+  }
+}
+if ($script:DestinationFolder -and $script:DestinationFolder.Count -gt 1) {
+  $_menu = @{
+    entries       = @('[1] Manifests Folder'; '[2] Fonts Folder')
+    Prompt        = 'The package exists in both the manifests and fonts folder. Which folder do you want to use?'
+    DefaultString = '1'
+  }
+  switch ( Invoke-KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString'] ) {
+    '1' { $script:AppFolder = $script:AppFolder }
+    '2' { $script:AppFolder = $script:FontFolder }
+  }
+} elseif ($script:DestinationFolder -and $script:DestinationFolder.Count -eq 1) {
+  $script:AppFolder = $script:DestinationFolder
+}
 
 # If the user selected `NewLocale` or `EditMetadata` the version *MUST* already exist in the folder structure
 if ($script:Option -in @('NewLocale'; 'EditMetadata'; 'RemoveManifest')) {
@@ -2702,6 +2799,11 @@ if ($script:Option -in @('NewLocale'; 'EditMetadata'; 'RemoveManifest')) {
   if (Test-Path -Path "$AppFolder\..\$PackageVersion") {
     $script:OldManifests = Get-ChildItem -Path "$AppFolder\..\$PackageVersion"
     $LastVersion = $PackageVersion
+  } elseif (Test-Path -Path "$FontFolder\..\$PackageVersion") {
+    $script:OldManifests = Get-ChildItem -Path "$FontFolder\..\$PackageVersion"
+    $LastVersion = $PackageVersion
+    # Intentionally override AppFolder here to ensure the rest of the script works as expected
+    $script:AppFolder = $script:FontFolder
   }
   # If the old manifests could not be found, request a new version
   while (-not ($OldManifests.Name -like "$PackageIdentifier*.yaml")) {
@@ -2713,17 +2815,21 @@ if ($script:Option -in @('NewLocale'; 'EditMetadata'; 'RemoveManifest')) {
     }
     if (Test-Path -Path "$AppFolder\..\$PromptVersion") {
       $script:OldManifests = Get-ChildItem -Path "$AppFolder\..\$PromptVersion"
+      $script:AppFolder = Join-Path (Split-Path $AppFolder) -ChildPath $LastVersion
+    } elseif (Test-Path -Path "$FontFolder\..\$PromptVersion") {
+      $script:OldManifests = Get-ChildItem -Path "$FontFolder\..\$PromptVersion"
+      # Intentionally use AppFolder here to ensure the rest of the script works as expected
+      $script:AppFolder = Join-Path (Split-Path $FontFolder) -ChildPath $LastVersion
     }
     # If a new version is entered, we need to be sure to update the folder for writing manifests
     $LastVersion = $PromptVersion
-    $script:AppFolder = Join-Path (Split-Path $AppFolder) -ChildPath $LastVersion
     $script:PackageVersion = $LastVersion
   }
 }
 
 # If the user selected `QuickUpdateVersion`, the old manifests must exist
 # If the user selected `New`, the old manifest type is specified as none
-if (-not (Test-Path -Path "$AppFolder\..")) {
+if (-not (Test-Path -Path "$AppFolder\..") -and -not (Test-Path -Path "$FontFolder\..")) {
   if ($script:Option -in @('QuickUpdateVersion', 'Auto')) {
     Write-Host -ForegroundColor Red 'This option requires manifest of previous version of the package. If you want to create a new package, please select Option 1.'
     Invoke-CleanExit
@@ -2973,7 +3079,7 @@ Switch ($script:Option) {
       # If a new product code doesn't exist, and the installer isn't an `.exe` file, remove the product code if it exists
       $MSIProductCode = $null
       if ([System.Environment]::OSVersion.Platform -match 'Win' -and ($script:dest).EndsWith('.msi')) {
-        $MSIProductCode = ([string](Get-MSIProperty -Path $script:dest -Property 'ProductCode') | Select-String -Pattern '{[A-Z0-9]{8}-([A-Z0-9]{4}-){3}[A-Z0-9]{12}}').Matches.Value
+        $MSIProductCode = [string](Get-MSIProperty -Path $script:dest -Property 'ProductCode').Value
       } elseif ([System.Environment]::OSVersion.Platform -match 'Unix' -and (Get-Item $script:dest).Name.EndsWith('.msi')) {
         $MSIProductCode = ([string](file $script:dest) | Select-String -Pattern '{[A-Z0-9]{8}-([A-Z0-9]{4}-){3}[A-Z0-9]{12}}').Matches.Value
       }
@@ -3005,7 +3111,7 @@ Switch ($script:Option) {
         }
       }
       # Remove the downloaded files
-      Remove-Item -Path $script:dest
+      SafeRemovePath -Path $script:dest
       $_NewInstallers += Restore-YamlKeyOrder $_Installer $InstallerEntryProperties -NoComments
     }
     # Write the new manifests

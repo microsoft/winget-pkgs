@@ -1,6 +1,8 @@
 Checklist for Pull Requests
 - [ ] Have you signed the [Contributor License Agreement](https://cla.opensource.microsoft.com/microsoft/winget-pkgs)?
-- [ ] Is there a linked Issue?
+- [ ] Is there a linked Issue?  If so, fill in the Issue number below.
+   <!-- Example: Resolves #328283 -->
+  - Resolves #[Issue Number]
 
 Manifests
 - [ ] Have you checked that there aren't other open [pull requests](https://github.com/microsoft/winget-pkgs/pulls) for the same manifest update/change?
