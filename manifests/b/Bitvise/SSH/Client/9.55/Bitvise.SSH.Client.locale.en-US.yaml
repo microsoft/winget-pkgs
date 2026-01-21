@@ -1,0 +1,66 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: Bitvise.SSH.Client
+PackageVersion: "9.55"
+PackageLocale: en-US
+Publisher: Bitvise Limited
+PublisherUrl: https://bitvise.com/
+PublisherSupportUrl: https://bitvise.com/contact
+PrivacyUrl: https://bitvise.com/privacy-policy
+Author: Bitvise Limited
+PackageName: Bitvise SSH Client
+PackageUrl: https://bitvise.com/ssh-client
+License: Freeware
+LicenseUrl: https://bitvise.com/ssh-client-license
+Copyright: Copyright (C) 2000-2026 by Bitvise Limited.
+CopyrightUrl: https://bitvise.com/terms-of-use
+ShortDescription: Free SSH file transfer, terminal and tunneling
+Description: |-
+  Our SSH client supports all desktop and server versions of Windows, 32-bit and 64-bit, from Windows XP SP3 and Windows Server 2003, up to the most recent – Windows 11 and Windows Server 2025.
+  Our client is free for use of all types, including in organizations.
+  Our SSH and SFTP client for Windows incorporates:
+  - One of the most advanced graphical SFTP clients.
+  - Single-click Remote Desktop forwarding.
+  - State-of-the-art terminal emulation with support for the bvterm, xterm, and vt100 protocols.
+  - Support for corporation-wide single sign-on using SSPI (GSSAPI) Kerberos 5 and NTLM user authentication, as well as Kerberos 5 host authentication.
+  - Support for ECDSA, RSA and DSA public key authentication with comprehensive user keypair management.
+  - Encryption and security: Provides state-of-the-art encryption and security suitable as part of a standards-compliant solution meeting the requirements of PCI, HIPAA, or FIPS 140-2 validation.
+  - SSH jump proxy: Connect to a final destination SSH or SFTP server by connecting through an SSH jump server. In the graphical SSH Client, this is configured in Proxy settings, on the Login tab.
+  - Obfuscated SSH with an optional keyword. When supported and enabled in both the client and server, obfuscation makes it more difficult for an observer to detect that the protocol being used is SSH. (Protocol; OpenSSH patches)
+  - Powerful SSH port forwarding capabilities, including dynamic forwarding through integrated SOCKS and HTTP CONNECT proxy.
+  - Powerful command-line parameters which make the SSH client highly customizable and suitable for use in specific situations and controlled environments.
+  - SFTP drive mapping: Access files on an SFTP server as if they were local, from any Windows application.
+  - An FTP-to-SFTP bridge allowing you to connect to an SFTP server using legacy FTP applications.
+  - An advanced, scriptable command-line SFTP client, sftpc.
+  - A scriptable command-line remote execution client, sexec, and a command-line terminal console client, stermc.
+  - A scriptable command-line tunneling client, stnlc, with support for static port forwarding rules, dynamic SOCKS-based tunneling, and FTP-to-SFTP bridge.
+  - Our .NET SSH library, FlowSshNet, with example PowerShell scripts showing how to use the SSH library for file transfer and remote program execution from PowerShell.
+  - Bitvise SSH Server remote administration features.
+  Bitvise software does not contain ads, install product bundles or collect user data for sale. We are 100% supported by users who license our software. Thank you!
+Moniker: bitvisessh
+Tags:
+- bvterm
+- file
+- file-transfer
+- forwarding
+- remote-desktop-forwarding
+- sftp
+- ssh
+- terminal
+- tunneling
+- vt100
+- xterm
+Agreements:
+- AgreementLabel: End User License Agreement (EULA)
+  AgreementUrl: https://bitvise.com/ssh-client-license
+ReleaseNotes: |-
+  - Graphical SFTP:
+    - In previous 9.5x versions, when using dark mode, the SFTP window would hang if file icons were not yet available in the Windows Explorer icon cache.
+      For the technically inclined: this is an interesting interaction between the Windows function SHGetFileInfoW, which is used to retrieve file icons; and the Windows List View control, in particular when it's set to a transparent background style: LVS_EX_TRANSPARENTBKGND.
+      If a file icon is not yet cached by Windows, SHGetFileInfoW starts a nested message loop. This is so that the application can remain responsive during a potential extended adventure in search of the icon. In the case of the SSH Client, this nested message loop occurred in the middle of a List View paint cycle, because the List View requested an icon, and this is what caused the SSH Client to call SHGetFileInfoW. During the nested message loop, a new paint cycle is started, which is its purpose - maintaining UI responsiveness. Although List View is already in a paint cycle, the reentrant paint usually works, as long as the application has not set a transparent background. If it has, then the List View does not support reentrant paint with transparency, aborts the paint, and schedules a new paint. The new paint is scheduled in the nested message loop, which continues indefinitely until it's drained. This causes an infinite cycle of attempted and aborted paints between List View and SHGetFileInfoW.
+      Microsoft appears to be aware of such issues: current documentation warns that calling SHGetFileInfoW on the UI thread may cause the UI to stop responding. The SSH Client got away with this for 20 years. With version 9.55, we are replacing this with a cache component which calls SHGetFileInfoW on a background thread. As a tradeoff, this causes uncached icons to appear slightly later, when they are loaded.
+      Suggestion to Microsoft: Since you're already recommending applications to call SHGetFileInfoW on a background thread, just remove the nested message loop functionality from SHGetFileInfoW. It seems to be a misfeature which can cause a variety of problems. For example, stack overflow seems possible if SHGetFileInfoW keeps being called from the nested message loop again.
+ReleaseNotesUrl: https://www.bitvise.com/ssh-client-version-history-9-5#955
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0
