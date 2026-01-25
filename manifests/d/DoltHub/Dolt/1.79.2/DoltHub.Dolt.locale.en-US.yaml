@@ -1,0 +1,105 @@
+# Created with WinGet Updater using komac v2.14.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: DoltHub.Dolt
+PackageVersion: 1.79.2
+PackageLocale: en-US
+Publisher: DoltHub
+PublisherUrl: https://github.com/dolthub/dolt
+PublisherSupportUrl: https://github.com/dolthub/dolt/issues
+Author: DoltHub
+PackageName: Dolt
+PackageUrl: https://www.dolthub.com/
+License: Apache-2.0
+LicenseUrl: https://github.com/dolthub/dolt/blob/HEAD/LICENSE
+CopyrightUrl: https://raw.githubusercontent.com/dolthub/dolt/master/LICENSE
+ShortDescription: Dolt is a SQL database that you can fork, clone, branch, merge, push and pull just like a git repository.
+Description: |-
+  Dolt is a SQL database that you can fork, clone, branch, merge, push and pull just like a git repository.
+  Connect to Dolt just like any MySQL database to run queries or update the data using SQL commands.
+  Use the command line interface to import CSV files, commit your changes, push them to a remote, or merge your teammate's changes.
+Moniker: dolt
+Tags:
+- cli
+- data
+- git-for-data
+- versioning
+ReleaseNotes: |-
+  Merged PRs
+  dolt
+  - 10248: Return nil lookupMapping if type conversion is not in range for lookup key
+    fixes #10233
+    Not checking if a value is in the converted range was causing us to use incorrect keys. For example, if the literal -87840 was used as a key for a boolean/tinyint column, it would get converted to -128 and match rows with -128, even though that's not the same value.
+    This change checks for if a conversion is InRange, and if it's not, it returns a nil lookupMapping. The nil lookupMapping will then return false when *lookupMapping.valid() is called.
+    Test added in dolthub/go-mysql-server#3357
+  - 10247: use pointer for TupleComparator
+    This PR changes the DefaultTupelComparator to be a pointer receiver, and changes FixedAccess to only use half the number of indices.
+  - 10237: avoid map in GetFieldValue
+    Some of the runtime is taken up by mapaccess, which isn't necessary; this PR gets rid of it.
+  - 10228: Add support for merge --ff--only
+    Fixes: #10151
+  - 10220: bug fix: stop including all root objects when getting tables on the search path
+    In Doltgres, SHOW TABLES was returning table names as well as other root object names, like sequence names. This PR changes the TablesOnSearchPath function to stop returning the other root object names.
+    Related to:
+    dolthub/doltgresql#1743
+  go-mysql-server
+  - 3358: condense time.Time library calls
+    Instead of calling Year(), Month(), Day(), Hours(), Minutes(), and Seconds() individually, just use time.Date() and time.Clock().
+    Benchmarks: #10249 (comment)
+  - 3356: Return boolean literal when simplifying AND and OR filters
+    fixes #10243
+    Previously, if one of the children of an AND or OR expression was a literal that evaluated to false or true (respectively), we would return the child. However, this caused a typing issue since AND and OR are booleans while its children can be of any type. Take the expression 19 or 's' for example; the left child 19 evaluates to true, making the expression true every time, but returning the left child 19 as a simplification would be incorrect since we would want the expression to simplify to a boolean true, not the number 19.
+    Now, instead of returning the child that determines the result of an AND or OR expression, we return the boolean value that the expression results to.
+  - 3355: Do not use nullable columns as null filter when converting antijoins to left joins
+    fixes #10234
+    When converting an antijoin to a left join, it is normally okay to use a nullable GetField in a null filter. However, we cannot do so if GetField is both nullable and part identifying an expression's parent during InspectExpr so we have to be extra safe by not allowing nullable GetFields in null filters at all.
+  - 3352: Use concurrency in groupby compute
+    Splits up the compute in groupByGroupingIter into two threads:
+    1. That reads rows off disk into a sql.Row buffer
+    2. That processes each row and updates the aggregation buffer
+       Benchmarks: #10232 (comment)
+  - 3350: Updated IsNullable for all functions to match Eval output
+    fixes #10161
+  - 3349: Add User Variable discards and fix per-row field to column indices for LOAD DATA
+    LOAD DATA has been ingesting user variable related fields into the rows used to evaluate set expressions. This fix resolves this issue, and as a result adds the feature to use user variables to discard fields from a parsed file line.
+    Default initialization of expressions has also been updated to follow MySQL's "zero value" behavior for non-nullable columns.
+  - 3348: avoid heap allocs in transform.Inspect and transform.InspectExpr
+    Changes:
+    - transform.Inspect switches on UnaryNode and BinaryNode to avoid heap allocations from node.Children()
+    - transform.InspectExpr switches on UnaryExpression and BinaryExpression to avoid heap allocations from expression.Children()
+    - remove UnaryExpression implementation from unaryAggBase and some functions that can return multiple children.
+      Benchmarks: #10222 (comment)
+  - 3347: Customizable filter walk for costed index scan
+    This is to support Doltgres, which has extra nodes in its expression trees in some cases.
+  - 3345: various analyzer and planbuilder optimizations
+    Changes:
+    - rewrote convertInt to call strings library fewer times
+    - use casting to detect rounding in index builder
+    - separate code for InspectExpr()
+    - simplify isEvaluable into single pass
+    - replace more Sprintf with simple string concatenation
+    - have iScanAnd count children as they are added
+      benchmarks: #10210 (comment)
+  - 3343: Check if key is convertible before memoizing lookup join
+    fixes #10186
+    Numeric types cannot be used as keys for String type columns due to the way the types convert. For example, a String with a value "i" is equivalent to 0; however, 0 converts to "0" as a String and therefore cannot be used as key to index to "i".
+    Doltgres companion PR dolthub/doltgresql#2121
+  - 3342: Set SubqueryAlias.OuterScopeVisibility to true if inside trigger scope
+    Fixes #10175
+    Trigger scopes were being included when determining exec indexes for SubqueryAlias child nodes but were not actually passed down to child iterators during rowexec (code). As a result, we were getting index out of bounds errors since the trigger scopes were not included in the parent row.
+    Since there's no easy way to separate the trigger scope columns out from the rest of the parent row during rowexec, it was easier to just mark SubqueryAlias.OuterScopeVisibility inside triggers to true. I think it technically does make sense here because the trigger scope is an outer scope that the SubqueryAlias does have visibility of, but I added a TODO comment in case this is incorrect.
+  Closed Issues
+  - 10233: Lookup Join returns incorrect result due to out-of-range key conversion
+  - 10250: LookupJoin not getting picked when join order hint is applied
+  - 10246: Unexpected LEFT JOIN Result
+  - 10243: Unexpected Anti Join Result
+  - 10234: Unexpected Anti Join Result
+  - 10151: Support merge --ff-only flag
+  - 10099: Audit IsNullable for functions and expressions
+  - 10161: Audit IsNullable for all functions
+  - 9974: support JSON diff function
+  - 10186: Unexpected Result Under Hint
+  - 10180: Performance regression in queries with multiple JOINs between versions 1.76.6 and 1.78.5
+ReleaseNotesUrl: https://github.com/dolthub/dolt/releases/tag/v1.79.2
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0
