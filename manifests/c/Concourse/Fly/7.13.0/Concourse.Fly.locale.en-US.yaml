@@ -1,0 +1,143 @@
+# Created with WinGet Updater using komac v2.10.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
+
+PackageIdentifier: Concourse.Fly
+PackageVersion: 7.13.0
+PackageLocale: en-US
+Publisher: Concourse
+PublisherUrl: https://github.com/concourse
+PublisherSupportUrl: https://github.com/concourse/concourse/issues
+PackageName: Concourse Fly
+PackageUrl: https://github.com/concourse/concourse
+License: Apache-2.0
+LicenseUrl: https://github.com/concourse/concourse/blob/HEAD/LICENSE.md
+ShortDescription: Concourse CI/CD manager and controller
+Tags:
+- ci
+- ci-cd
+- concourse
+- continuous-delivery
+- continuous-integration
+- elm
+- go
+- hacktoberfest
+- pipelines
+ReleaseNotes: |-
+  🚨 Breaking Changes
+  - Remove CONCOURSE_POSTGRES_BINARY_PARAMETERS flag (#9068) @taylorsilva ^{🔗}
+    - BREAKING: Removed the CONCOURSE_POSTGRES_BINARY_PARAMETERS flag. This was a lib/pq specific flag. We are now using Pgx as our Postgresql driver, therefore this flag is no longer relevant. If you are using PgBouncer we recommend being on the latest version (v1.24.0) which now supports prepared statements by default, though any version >1.21.0 may also work. This flag has been removed from both the Helm chart and Bosh release.
+  ✈️ Features
+  - Building with Go 1.24.0 (#9074) @taylorsilva ^{🔗}
+  - go-concourse:connection client prints response body to the end user (#9011) @aliculPix4D ^{🔗}
+  - improve the error message given to the end user when setting the pipeline (#9012) @aliculPix4D ^{🔗}
+  - Log policy checker error messages (#9013) @aliculPix4D ^{🔗}
+    - Log detailed OPA error messages in web nodes logs and show a friendlier error message to the end user
+  - Introduce privileged-mode (#9017) @A1kmm ^{🔗}
+    - Added a new --containerd-privileged-mode/CONCOURSE_CONTAINERD_PRIVILEGED_MODE option to the worker, which accepts full (default, original behaviour), fuse-only (privileged: true tasks can use tools like buildah and podman, but can't escape if user namespaces are used to run the worker), ignore (privileged: true tasks have no extra access compared to privileged: false tasks)
+  - pgx Migration (Removing lib/pq) (#9066) @taylorsilva ^{🔗}
+    - Replace lib/pq with pgx as the Postgresql driver.
+      - PgBouncer users: The Pgx driver docs state that its out-of-the-box configuration does not support PgBouncer, but recent discussion indicates that may not be the case if you're using PgBouncer >1.21.0. The recent 1.24.0 release also says prepared statement support is on by default, so this may be a non-issue if you're on the most recent version of PgBouncer.
+  - atc: exec: ignore task input/output paths that reference parent directories (#9078) @taylorsilva ^{🔗}
+    - Task inputs and outputs can be placed using absolute or relative paths inside task containers now. This was changed back in v7.5.0 (#6597) but never properly announced. Paths that reference parent directories (../) will be treated as relative paths and no parent directory traversal will occur.
+  - worker runtime: concurrent process killing (#9084) @analytically ^{🔗}
+    - Worker runtime: make process killing concurrent for faster container cleanup
+  - worker runtime: make container deletion more robust (#9090) @taylorsilva ^{🔗}
+    - Make container deletion more robust by continuing to delete a container even if we get errors related to reading the containers /etc/host file
+  - Mount /sys/fs/cgroup as cgroup2 type if supported (#9094) @mariash ^{🔗}
+    - Enable cgroupv2 support for the Guardian runtime by mounting /sys/fs/cgroup as cgroup2 type if supported. Requires Garden v1.67.0 or greater
+  - fly: improve performance of fly watch (#9097) @analytically ^{🔗}
+  - Add --team flag to clear-resource-cache command (#9106) @IvanChalukov ^{🔗}
+  - Add --team flag to containers command (#9107) @IvanChalukov ^{🔗}
+    - Added --team flag to fly command containers. Use:
+      fly -t ci containers --team custom-team
+  - Support custom pipeline background image styling (#9117) @analytically ^{🔗}
+    - Add background_filter option for pipeline background images which takes in string of CSS filters. Defaults to the current filters opacity(30%) grayscale(100%)
+  - runtime: Seccomp update (#9173) @taylorsilva ^{🔗}
+    - Update seccomp profile to be in sync with Docker/Containerd's default profiles
+  - CF API v3 is now supported by our fork of Dex which will ensure CF Auth does not break when the CF v2 API is officially gone. Work done by @Kump3r @IvanChalukov in concourse/dex#148
+  - Add support for Strict-Transport-Security header (#9076) @taylorsilva ^{🔗}
+    - Add CONCOURSE_STRICT_TRANSPORT_SECURITY to the web command which allows an operator to set the Strict-Transport-Security header
+  - Add ESC key shortcut to hide keyboard help (#9111) @analytically ^{🔗}
+    - Can use the Escape key to close the Help menu in the Web UI
+  🐞 Bug Fixes
+  - make sure to drop item from secret cache after default duration if calculated duration is equal or less than 0 (#9049) @carlo-blohm ^{🔗}
+    - Fix a bug in credential caching where a secret would be cached forever
+  - 8529/fix chrome login (#9051) @taylorsilva ^{🔗}
+    - Have fly handle preflight requests from Chromium browsers. Users will no longer get a "your token could not be sent to fly" error if they login to fly using a Chormium browser
+  - Properly close process IO (#9061) @taylorsilva ^{🔗}
+    - Fix a bug where builds could not be aborted because the underlying process had a lock on stdout that Concourse would wait for the process to release. If the underlying process never released it then Concourse would wait forever and the build would never be aborted.
+  - fix the policy-checker-handler logger session name (#9081) @aliculPix4D ^{🔗}
+  - Fix bug in maxValidFromFile using hardcoded path (#9082) @analytically ^{🔗}
+  - Use github.com/google/uuid to generate UUIDv4 (#9083) @taylorsilva ^{🔗}
+    - Use github.com/google/uuid to generate UUID's (v4). The previous library incorrectly implemented UUID generation and would sometimes generate the same UUID twice. Therefore it was possible for two containers or volumes to be created with the same UUID. The second container/volume would fail to create due to the UUID collision.
+  - atc: Various small fixes (#9092) @taylorsilva ^{🔗}
+    - Fix unbounded goroutine creation in resource scanner (lidar)
+    - Fix potential race condition in Tracker.IterateInterpolatedCreds
+    - Optimize SequenceGenerator using atomic types
+    - Fix error message in container placement strategy. Previously an unknown placement strategy would result in an error which showed the successfully parsed part of the chain. Now the error will show the unknown strategy that was passed in.
+    - Fix: redirect var source diffs to output writer & improve nil handling
+  - CI: only run baggageclaimcmd test on linux (#9093) @taylorsilva ^{🔗}
+  - Gracefully recover from containerd TaskNotFound errors (#9100) @taylorsilva ^{🔗}
+    - Gracefully recover from task retrieval: no running task found errors
+  - Fix --team flag in order-pipelines command (#9102) @IvanChalukov ^{🔗}
+    - Fix order-pipelines command with --team Option
+  - web: avoid duplicate in-memory checks (#9103) @taylorsilva ^{🔗}
+  - Fix: Preserve existing browser session during fly login (#9109) @IvanChalukov ^{🔗}
+    - Fix: Corrected CSRF token header format for proper validation.
+  - Fix fish shell completion generation (#9113) @analytically ^{🔗}
+  🤷 Miscellaneous
+  - fix(deps): update all dependencies (#8985) @renovate ^{🔗}
+  - fix(deps): update javasript (#8996) @renovate ^{🔗}
+  - Correct policy-checker test suite names (#9009) @aliculPix4D ^{🔗}
+  - Split go-concourse client tests (#9010) @aliculPix4D ^{🔗}
+  - merging main back into master (#9022) @taylorsilva ^{🔗}
+  - Revert "bump go dependencies" (#9024) @taylorsilva ^{🔗}
+  - fix: topgun k8s container limits test supports cgroups v1 and v2 (#9028) @Spimtav ^{🔗}
+  - Rebase master onto release 7.12.x (#9037) @drich10 ^{🔗}
+  - fix(deps): update all dependencies (#9038) @drich10 ^{🔗}
+  - fix(deps): update module golang.org/x/crypto to v0.31.0 [security] (#9039) @renovate ^{🔗}
+  - Rebase master 7.12 (#9040) @drich10 ^{🔗}
+  - Update renovate config (#9043) @drich10 ^{🔗}
+  - Disable garden renovate update (#9044) @drich10 ^{🔗}
+  - fix(deps): update all dependencies (#9045) @renovate ^{🔗}
+  - Bump Dex and other dependencies (#9059) @taylorsilva ^{🔗}
+    - Bumped our fork of Dex to v2.41.1 of upstream Dex
+  - Run svgo -r against all SVG's. (#9069) @analytically ^{🔗}
+    - Ran all SVG's through CLI tool svgo to reduce the size of all SVG's
+  - Update gzhttp library (#9070) @analytically ^{🔗}
+    - Replace the unmaintained NYTimes/gziphandler with klauspost/compress giving a performance boost to all HTTP endpoints
+  - Fix double locking in volume promise (#9071) @analytically ^{🔗}
+    - Fix a bug in baggageclaim where we would try to get the same lock twice
+  - Use filepath.Walkdir (#9072) @analytically ^{🔗}
+    - Use the faster filepath.WalkDir() to traverse directories
+  - baggageclaim: Fix StreamIn dir handling and response body leak (#9077) @analytically ^{🔗}
+    - Better error reporting when Baggageclaim fails to stream in volumes
+  - Only pass PrivilegedMode to baggageclaim for linux workers (#9079) @taylorsilva ^{🔗}
+  - Update module github.com/go-jose/go-jose/v3 to v3.0.4 [SECURITY] (#9087) @renovate ^{🔗}
+  - Replace min/max helpers with built-in min/max (#9089) @Juneezee ^{🔗}
+  - web: Small refactors (#9096) @analytically ^{🔗}
+    - Remove unused query from GetPendingBuilds()
+    - Add context aware functions to DB connection logger for more consistent logging from DB functions
+    - Improve template asset caching when developing the web frontend
+  - web: Update frontend graphics dependencies (#9098) @analytically ^{🔗}
+    - Upgrade clipboard.js to v2.0.11
+    - Upgrade Graphviz from v2.47.1 to v12.2.1
+    - Upgrade D3js from v3.5.5 to v7
+    - Added title attribute to CLI download icons
+    - Updated PWA manifest and icons
+    - Updated Material Design Icons to 7.4.47
+  - worker: split linux and non-linux features (#9101) @taylorsilva ^{🔗}
+  - worker: fix baggageclaim tests on windows (#9104) @taylorsilva ^{🔗}
+  - feat: increase footer hide delay from 4 to 8 seconds (#9108) @analytically ^{🔗}
+    - Web footer timeout has been increased from 4 seconds to 8 seconds
+  - chore: modernize Go code (#9110) @analytically ^{🔗}
+  - Use math/rand/v2 (#9114) @analytically ^{🔗}
+  - Improve lock handling in NotificationsBus (#9115) @analytically ^{🔗}
+  - Remove 'set_pipeline' experimental warnings (#9121) @analytically ^{🔗}
+    - Removed "experimental" warnings from the set_pipeline step
+  - Remove unused 'visited' field from varsTracker struct (#9126) @analytically ^{🔗}
+  - fix(deps): update module github.com/containerd/containerd to v1.7.27 [security] (#9135) @renovate ^{🔗}
+  - Pre release deps update (#9149) @taylorsilva ^{🔗}
+ReleaseNotesUrl: https://github.com/concourse/concourse/releases/tag/v7.13.0
+ManifestType: defaultLocale
+ManifestVersion: 1.9.0

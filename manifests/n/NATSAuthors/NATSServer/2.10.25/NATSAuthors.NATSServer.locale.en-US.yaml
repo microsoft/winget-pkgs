@@ -1,0 +1,71 @@
+# Created with komac v2.11.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
+
+PackageIdentifier: NATSAuthors.NATSServer
+PackageVersion: 2.10.25
+PackageLocale: en-US
+Publisher: NATS Authors
+PublisherUrl: https://github.com/nats-io
+PublisherSupportUrl: https://github.com/nats-io/nats-server/issues
+PackageName: NATS Server
+PackageUrl: https://github.com/nats-io/nats-server
+License: Apache-2.0
+LicenseUrl: https://github.com/nats-io/nats-server/blob/HEAD/LICENSE
+ShortDescription: High-Performance server for NATS.io, the cloud and edge native messaging system.
+Tags:
+- cloud
+- cloud-computing
+- cloud-native
+- distributed-systems
+- go
+- golang
+- message-bus
+- message-queue
+- messaging
+- microservices-architecture
+- nats-server
+ReleaseNotes: |-
+  Changelog
+  Refer to the 2.10 Upgrade Guide for backwards compatibility notes with 2.9.x.
+  Go Version
+  - 1.23.5 (#6379)
+  Dependencies
+  - golang.org/x/sys v0.29.0 (#6323)
+  - golang.org/x/time v0.9.0 (#6324)
+  - golang.org/x/crypto v0.32.0 (#6367)
+  Improved
+  JetStream
+  - Raft groups will no longer snapshot too often in some situations, improving performance (#6277)
+  - Optimistically perform stream and consumer snapshots on a normal shutdown (#6279)
+  - The stream snapshot interval has been removed, now relying on the compaction minimum, which improves performance (#6289)
+  - Raft groups will no longer report current while they are paused with pending commits (#6317)
+  - Unnecessary client info fields have been removed from stream and consumer assignment proposals, API advisories and stream snapshot/restore advisories (#6326, #6338)
+  - Reduced lock contention between the JetStream lock and Raft group locks (#6335)
+  - Advisories will only be encoded and sent when there is interest, reducing CPU usage (#6341)
+  - Consumers with inactivity thresholds will now start less clean-up goroutines, which can reduce load on the goroutine scheduler (#6344)
+  - Consumer cleanup goroutines will now stop faster when the server shuts down (#6351)
+  Fixed
+  JetStream
+  - Subject state consistency with some message removal patterns (#6226)
+  - A performance issue has been fixed when updating the per-subject state (#6235)
+  - Fixed consistency issues with detecting partial writes in the filestore (#6283)
+  - A race condition between removing peers and updating replica counts has been fixed (#6316)
+  - Pre-acks for a sequence are now removed when the message is removed, correcting a potential memory leak (#6325)
+  - Metalayer snapshot errors are now surfaced correctly (#6361)
+  - Healthchecks no longer re-evaluate stream and consumer assignments, avoiding some streams and consumers being unexpectedly recreated shortly after a deletion (#6362)
+  - Clients should no longer timeout on a retried ack with the AckAll policy after a server restart (#6392)
+  - Replicated consumers should no longer get stuck after leader changes due to incorrect accounting (#6387)
+  - Consumers will now correctly handle the case where messages queued for delivery have been removed, fixing a delivery slowdown (#6387, #6399)
+  - The API in-flight metric has been fixed so that it does not drift after the queue has been dropped (#6373)
+  - Handles for temporary files are now closed correctly if compression errors occur (#6390) — Thanks to @deem0n for the contribution!
+  - JetStream will now shut down correctly when detecting that the store directory underlying filesystem has become read-only (#6292) — Thanks to @souravagrawal for the contribution!
+  Leafnodes
+  - Fixed an interest propagation issue that could occur when the hub has a user with subscribe permissions on a literal subject (#6291)
+  - Fixed a bug where all queue interest across leafnodes could be dropped over gateways in a supercluster deployment after a leafnode connection drops (#6377)
+  Tests
+  - A number of unit tests have been improved (#6150, #6278, #6297, #6300, #6343, #6329, #6330, #6331, #6331, #6334, #6364)
+  Complete Changes
+  v2.10.24...v2.10.25
+ReleaseNotesUrl: https://github.com/nats-io/nats-server/releases/tag/v2.10.25
+ManifestType: defaultLocale
+ManifestVersion: 1.9.0

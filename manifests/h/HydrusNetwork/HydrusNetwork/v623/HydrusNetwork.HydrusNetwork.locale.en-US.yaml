@@ -1,0 +1,74 @@
+# Created with komac v2.11.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
+
+PackageIdentifier: HydrusNetwork.HydrusNetwork
+PackageVersion: v623
+PackageLocale: en-US
+Publisher: Hydrus Network
+PublisherUrl: https://github.com/hydrusnetwork/hydrus
+PublisherSupportUrl: https://github.com/hydrusnetwork/hydrus/issues
+PrivacyUrl: https://hydrusnetwork.github.io/hydrus/privacy.html
+Author: Hydrus Network
+PackageName: Hydrus Network
+PackageUrl: https://github.com/hydrusnetwork/hydrus
+License: WTFPL
+LicenseUrl: https://github.com/hydrusnetwork/hydrus/blob/HEAD/license.txt
+Copyright: Copyright (C) 2011 Hydrus Developer
+CopyrightUrl: https://github.com/hydrusnetwork/hydrus/blob/master/license.txt
+ShortDescription: A personal booru-style media tagger that can import files and tags from your hard drive and popular websites. Content can be shared with other users via user-run servers.
+Description: |-
+  The hydrus network client is an application written for Anon and other internet-fluent media nerds who have large image/swf/webm collections.
+  It browses with tags instead of folders, a little like a booru on your desktop. Advanced users can share tags and files anonymously through custom servers that any user may run.
+  Everything is free and privacy is the first concern. Executable releases are available for Windows, Linux, and macOS.
+  The program is in python, so you can also run it straight from the source code.
+Moniker: hydrus-network
+Tags:
+- booru
+- cross-platform
+- image-database
+ReleaseNotes: |-
+  Future Build
+  Advanced users: there is a 'Future Build' this week: https://github.com/hydrusnetwork/hydrus/releases/tag/v623-future-01
+  I am particularly interested in feedback from Win 10 users.
+  misc
+  - thanks to a user, we have a new Paper_Dark stylesheet. it has many custom svg assets that will redraw checkboxes and so on
+  - the client now tries to adjust for timezone when it parses a modified date from a server response. some downloaders will now get a more precise 'modified date' for their domains
+  - fixed a typo bug that was causing existing 'set numerical or inc/dec rating' commands to fail to initialise in the shortcut panel on edit (staying as the default 'simple command, archive file')
+  - a new DEBUG: Activate Main GUI when closing the media viewer checkbox under options->media viewer, default fa!se, lets you force an "activate" call on the Main GUI (bringing it to the front and setting keyboard focus) on any media viewer close
+  - the core hydrus server/client api response object now better tries to clear out ongoing file downloads when the connection is disconnected early. if you noticed in Hydrus Web or similar that scrubbing through a bunch of big videos one after another could get laggy, let me know if it is any better now
+  duplicates
+  - all duplicate filters now have the 'A and B are visual duplicates' comparison statement. this is a custom algorthim that inspects the images and attempts to differentiate resizes/re-encodes from recolours/alternates. please rely on it as you do normal duplicate filtering of images from now on, and if it produces any false positives, I'd love to see the files!
+  - I improved this 'A and B are visual duplicates' algorithm after our test. overall it went very well, with only a couple false positives found. thank you for your feedback, everyone. I improved the 'skewness' test to reduce the number of false negatives, and I added a new special test to catch the false positives submitted. further, I have softened the 'no' result texts and categorised the 'yes' results into three clear 'very probably'/'definitely'/'perfectly' lines so you can better recognise edge cases. when this test is integrated into the auto-resolution system, I will default to just definitely/perfectly results to start
+  - fixed the bug in auto-resolution where when you edited a rule, its labels would sometimes would not update in the main duplicates page review list (the rule was working fine, and opening a new duplicates page would show the rule correct). this was a bug in the list update code itself when dealing with a special case of very similar objects. I don't think anywhere else in the program was affected, but it is sorted now
+  - the right-hand duplicates hover window should be less jittery as it lays out the new asynchronously loading comparison statements. in a couple of cases, the buttons were getting squashed and snapping to different sizes on window resize and so on--should be better now
+  AVIF note
+  - some AVIF files may have weird rotation since the recent shift to pillow-avif-plugn. sorry for the trouble! there is no easy fix here. since Pillow proper will hopefully be getting native AVIF support in 11.3 sometime in July, I am delaying doing a hacky fix here until we see how 'real' Pillow handles this issue (issue #1728)
+  - due to some recent definition reshuffling, new AVIF files were accidentally not being scanned for icc profiles, exif data, or human-readable metadata. I've turned these flags back on for now, and when we are settled into happy stable Pillow land and know it is all working right, I'll schedule a full rescan for all existing AVIFs
+  pngs with gamma/chromaticity info
+  - my new gamma/chromaticity png correction code now uses much less memory--somewhere around one twelfth and one sixteenth of what it did. sorry about the decompression bombs on loading certain large (>4k) pngs! it still runs a little slow, so there is more work to do here
+  - fixed a divide by zero error when a png provides invalid gamma/chromaticity info
+  - I dumped a ton of time into trying to convert this info to an ICC Profile, as GIMP and Qt are able to do, but I couldn't quite figure out how they did some whitepoint and colourspace translations. I expect to revisit this, since if we could merge all colourspace conversions to one fast and low-memory pipeline, that's better than me maintaining a dozen math hacks. if you are an enterprising programmer with ICC Profile experience who wants to help out, please feel free to check my work under the new HydrusImageICCProfiles.py, and the Dequanitze caller in HydrusImageNormalisation.py--what's the correct translation/value for the wtpt and chad ICC Profile tags, and how should the rgbXYZ and rgbRTC tags be modified from the original gamma and chromaticity stuff?
+  better file maintenance jobs cascade
+  - this was happening in patches before, but it is now formalised--
+  - if the exif status of a file changes during file maintenance, this now auto-triggers a file metadata call to check for rotation changes
+  - if the previously understood appearance of a file changes in file metadata, has icc profile, or has transparency file maintenance, this now triggers a thumbnail regen, a pixel hash regen, and perceptual hash regen
+  - if a thumb is regenned in file maintenance, this now triggers a blurhash regen
+  - when files are told they have new display data because of file maintenance, the image cache and image tiles cache now explicitly remove all data related to the files so they can be quickly regenned if looked at currently or in the near future (this was spotty before)
+  boring cleanup
+  - bit of type cleaning in my List code (my IDE updated and new linting rules went bananas)
+  - cleaned up several dozen type defs, mostly QEvent stuff, that turned up in project linting
+  - fixed up numpy array type hints across the program
+  - fixed a unit test that had a very small chance of failing with some improved setup code
+  future build
+  - there's a future build this week for Windows and Linux. they both have important changes, but both ran for me and neither needed a clean install when upgrading from v622. I think this will run on a reasonably updated version of Windows 10, but we are now pushing this so that's the top concern. if you are an advanced user and would like to help me test, please check it out
+  - the changes are--
+  - Windows and Linux: moved from python 3.11 to python 3.12
+  - Windows and Linux: moved from PySide6 (Qt) 6.7.3 to 6.8.2.1
+  - Windows: moved from windows-2019 runner to windows-2022 (2019 runner is being retired next month)
+ReleaseNotesUrl: https://github.com/hydrusnetwork/hydrus/releases/tag/v623
+PurchaseUrl: https://hydrusnetwork.github.io/hydrus/support.html
+Documentations:
+- DocumentLabel: FAQ
+  DocumentUrl: https://hydrusnetwork.github.io/hydrus/faq.html
+ManifestType: defaultLocale
+ManifestVersion: 1.9.0

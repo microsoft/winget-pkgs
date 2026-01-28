@@ -1,0 +1,51 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: MoonchildProductions.PaleMoon
+PackageVersion: 33.8.1
+PackageLocale: en-US
+Publisher: Moonchild Productions
+PublisherUrl: https://www.palemoon.org/
+PublisherSupportUrl: https://www.palemoon.org/contact/
+PrivacyUrl: https://www.palemoon.org/policies/privacy.shtml
+Author: Moonchild Productions
+PackageName: Pale Moon
+PackageUrl: https://www.palemoon.org/download.shtml
+License: MPL-2.0
+LicenseUrl: https://www.mozilla.org/MPL/2.0
+Copyright: Copyright © 2009-2025 Moonchild Productions - All rights reserved
+CopyrightUrl: https://www.palemoon.org/policies/usercontent.shtml
+ShortDescription: The best browser with fast site rendering, advanced privacy, a sleek design and innovative features.
+Description: |-
+  Pale Moon is an Open Source, Goanna-based web browser available for Microsoft Windows and Linux (with other operating systems in development), focusing on efficiency and ease of use.
+  Pale Moon offers you a browsing experience in a browser completely built from its own, independently developed source that has been forked off from Firefox/Mozilla code a number of years ago, with carefully selected features and optimizations to improve the browser's stability and user experience, while offering full customization and a growing collection of extensions and themes to make the browser truly your own.
+Moniker: palemoon
+Tags:
+- browser
+- gecko
+- internet
+- web
+- web-browser
+- webpage
+ReleaseNotes: |-
+  This is a bugfix and security release.
+
+  Changes/fixes:
+  - Pale Moon no longer accepts nameless cookies. See implementation notes.
+  - Improved the "copy as curl" command in devtools further, partially rolling back the DiD changes in previous versions since we aren't offering cross-platform commands and it caused potential issues with overzealous escaping.
+  - Fixed a potential use-after-free scenario in the CSS parser.
+  - Fixed uninitialized use of fontconfig scenarios for Linux/GTK.
+  - Adjusted CSP URI reporting to more closely match the current spec and common browser behavior.
+  - Fixed a potential crash in font handling.
+  - Adjusted the size of WASM compiled table size limits to match V8/Gecko.
+  - Increased restrictions on the types of data loads <object> elements are allowed to trigger, to match the fetch spec more closely.
+  - Fixed build issues for PPC architectures.
+  - Security issues addressed: CVE-2025-8031, CVE-2025-8028 (DiD), CVE-2025-8037 (and related), CVE-2025-8029, and several others that do not have a CVE number.
+  Implementation notes:
+  - From this version forward we no longer accept nameless cookies. If a cookie has no name and starts with an equal sign, it is outright rejected. If a cookie consists only of a string with no equal sign, it is interpreted as a valueless cookie with the name set to the string. This departs from our inherited Mozilla behavior where this was previously treated as a nameless cookie with the string as the value.
+    RFC 6265 forbids cookies without an equal sign (§5.2 step 2), but browsers accept them anyway for web compatibility reasons (poor web design). Moreover, §5.2 step 5 explicitly forbids nameless cookies.
+    Valueless names also make more sense in web context: Set-cookie: itself supports secure and httponly as valueless attributes, and HTML supports valueless attributes as well.
+    Our new behavior therefore makes more logical sense, is closer to the spec and general principles, aligns with webkit/Safari and solves a whole class of potential sec bugs like CVE-2025-8037. Apologies if this causes web compat issues, but it's the sane thing to do when encountering non-compliant cookies.
+ReleaseNotesUrl: https://www.palemoon.org/releasenotes.shtml
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

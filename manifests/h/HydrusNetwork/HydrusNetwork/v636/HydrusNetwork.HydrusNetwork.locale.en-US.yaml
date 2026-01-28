@@ -1,0 +1,81 @@
+# Created with komac v2.12.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: HydrusNetwork.HydrusNetwork
+PackageVersion: v636
+PackageLocale: en-US
+Publisher: Hydrus Network
+PublisherUrl: https://github.com/hydrusnetwork/hydrus
+PublisherSupportUrl: https://github.com/hydrusnetwork/hydrus/issues
+PrivacyUrl: https://hydrusnetwork.github.io/hydrus/privacy.html
+Author: Hydrus Network
+PackageName: Hydrus Network
+PackageUrl: https://github.com/hydrusnetwork/hydrus
+License: WTFPL
+LicenseUrl: https://github.com/hydrusnetwork/hydrus/blob/HEAD/license.txt
+Copyright: Copyright (C) 2011 Hydrus Developer
+CopyrightUrl: https://github.com/hydrusnetwork/hydrus/blob/master/license.txt
+ShortDescription: A personal booru-style media tagger that can import files and tags from your hard drive and popular websites. Content can be shared with other users via user-run servers.
+Description: |-
+  The hydrus network client is an application written for Anon and other internet-fluent media nerds who have large image/swf/webm collections.
+  It browses with tags instead of folders, a little like a booru on your desktop. Advanced users can share tags and files anonymously through custom servers that any user may run.
+  Everything is free and privacy is the first concern. Executable releases are available for Windows, Linux, and macOS.
+  The program is in python, so you can also run it straight from the source code.
+Moniker: hydrus-network
+Tags:
+- booru
+- cross-platform
+- image-database
+ReleaseNotes: |-
+  multi-domain URL Classes
+  - URL Classes now support multiple domains! you can set multiple fixed domains like example.com/example.net and multiple regex rules like example\.[^\.]+. if a given URL matches any of the patterns, the URL Class can now match
+  - in the URL Class edit panel, there's now a 'domain' box panel for it all. by default, you'll start in a simple mode with a single text input for a single domain, but you can flip to an advanced mode that shows two add/edit/delete lists for the underlying fixed and regex rules
+  - the 'match subdomains' and 'keep matched subdomains' checkboxes are also moved into this panel
+  - two new 'test'/'normalised' text boxes let you enter a test domain to see if your current rules match it, and what it will normalise to (think subdomains) according to everything set
+  - if you are a downloader creator, please play with this, but I'll say don't go crazy yet. I feel good about it all, but this is new ground so I don't know if there's something we haven't thought of. also obviously be careful with the regex stuff. learn the difference between . and \. or you might end up matching more than you think!
+  - I believe this tech is fundamentally cool though, and if you know a new site uses a particular content engine you already have support for (e.g. some specific booru), then just adding its domain to the list for the file and gallery page URL Classes should essentially activate the downloader for that whole site. only thing you'd need for a full downloader would be a new GUG. no new parser example urls or any of that stuff needed. as a little test on my dev machine, I was able to merge the e621, e6ai, and e926 URL Classes with minimum fuss in about two minutes and nothing broke!!
+  - in terms of layout and bells and whistles, I think we might want some import/export copy/paste stuff here, let me know how it works for you IRL. the lists were already huge, so I didn't wrap them in nice labels saying 'these are the raw domains' and 'these are the regex rules', but I think I may need to pretty it up. I also added collapse/expand arrows to the three main static boxes in the edit URL Class panel, so I hope that helps if you are dealing with twenty domains or something
+  - if you have an URL in the media viewer top-right menu that matches a URL Class more complicated than just one fixed domain, it now says the domain of the URL after the name of the URL Class. e.g. 'coolbooru post (somecoolbooru.com)', so you know what's going on
+  unfortunate macOS App news
+  - this is the last macOS App I will be putting out, and there will not be a Silicon App from me. I am sorry!
+  - Github are retiring the old macos-13 runner (intel) that we have been using, and for the past few weeks I've been trying to build both Intel and Silicon builds on the macos-14 runner. unfortunately, I could not get the retroactive Intel one to build, and Silicon Apps have special signing requirements. I bashed my head at the signing problem, and I was very hopeful I'd have a 'future build' test this week, but unfortunately I ran up against a hard technical barrier and I do not have the time and macOS expertise to properly overcome it. I also suspect the self-signed hole we had hoped to fit through will be closed in the not so distant future. we've been coasting on a very hacky App structure for a long time, and it would need a couple full passes to work in the new system, so I simply had to call it. even if that overhaul worked out, we'd still be locked to older Python 3.10 due to pyoxidizer and looking at asking users to override Gatekeeper quarantine
+  - thus, I now recommend that all macOS users run from source going forward. although it is a small one-time headache to set up, it'll run much better than the old Intel App, which was likely being Rosetta'd to your newer machines. I have brushed up the 'running from source' help and written a small specific section for you here: https://hydrusnetwork.github.io/hydrus/running_from_source.html#migrating_from_an_existing_install
+  - all the help is updated to talk about there being no App build now; let me know if I missed anything
+  - let me know how you get on and if you have any trouble getting a source release going. I regret the sudden halt here, and while I understand there are still a few weeks of Github macos-13 brownout if we are desperate to get an App out, the writing is on the wall, so best to start on migrations now. I'll put reminder banners on the release posts for the next four weeks
+  - it is possible that another user will figure out their own an App solution in future, perhaps with PyInstaller instead of pyoxidizer, but it shalln't be me!
+  B is not better
+  - a subtle bug caused auto-resolution rules with the action "B is better" to swap the AB to BA when pairs were in the 'pending a decision' queue in semi-automatic mode. I believe they were fine in automatic mode
+  - I have decided the maintenance debt for this command not justified, and it mostly just serves to confuse everyone, so it is removed from duplicates auto-resolution. I also removed it from the API docs (it'll still work there, and it seems to work well, but it isn't documented any more and I recommend anyone using it migrate carefully to use 'A is better' instead)
+  - in future I will add a 'swap A and B' button to the auto-resolution comparators tab so if you did set everything up wrong, it is still recoverable without frustrating the overall pipeline
+  - on update, all auto-resolution rules set to 'B is better' will pause and reset to 'A is better', and you'll get a popup about the situation
+  - thank you very much to the user who tested and reported this. it was unwise of me to throw this action in the mix, and another good example of KISS
+  greyscale jpeg duplicate info
+  - in the duplicate filter, I now detect when jpegs are truly greyscale (i.e. actually 8 bits per pixel), and report that in the subsampling label. previously, greyscale were registering as 'unknown'. if either file is greyscale, the subsampling score is now 0
+  - the jpeg quality value is also adjusted for a greyscale image. they were reporting as slightly higher quality than they should have been when compared to an RGB equivalent. let me know how this works out IRL, though. I may need to tune it more
+  - the jpeg subsampling and quality comparison lines now have nicer tooltips explaining what they are
+  epub covers
+  - thanks to a user who waded through some ugly xml, we can now produce thumbnails for EPUB files! should work for any EPUB 3 file that actually has a thumb
+  - I extended this to support EPUB 2 and some other broken files. I'll be interested in any examples that you think do have a cover but still don't have one in hydrus
+  - all existing EPUB files will be scheduled for a thumb regen on update
+  client api
+  - fixed a 500-causing typo in /add_files/generate_hashes/ for filetypes with a perceptual hash (issue #1783)
+  - added unit tests for both the path and bytes versions of this call so this won't happen again
+  boring stuff
+  - the new retry svg icon has a brighter green arrow that stands out better in darkmode--thanks for letting me know
+  - after a user mentioned it, I optimised my new svg icons' filesize (with scour), and will continue to do so
+  - I rejigged the buttons in the duplicates page sidebar 'preparation' tab. my new rule is generally that cog buttons go on the right, as part of the thing they modify
+  - I may have fixed the alignment of the gallery downloader sidebar cog icon button in crazier stylesheets. if you still get the problem, let me know
+  - if a user runs into the 'It seems an entire batch of pairs were unable to be displayed.' duplicate filter error, all the pertinent rows are now printed to the log
+  - improved a little keyboard focus stuff on some small dialogs
+  - fixed an unstable list menu call that could cause trouble if the list was closed and deleted before the menu could show
+  - moved the 80KB-odd of URL Class UI code to a new ClientGUIURLClass file
+  - wrote some code to better handle and report critical hash definition errors during forced file maintenance
+  - network jobs that are expecting HTML/JSON no longer error out if they exceed 100MB. such jobs now spool to a temp file after 10MB. good luck to the guy with the larger-than 100MB JSON files
+  - when hydrus tries to import an expected HTML/JSON that doesn't seem to parse correct (just in case it is actually some raw file redirect), the copy from the network job to the import file temp location source is a smarter, low-memory stream. other work is still going to stay stuck in memory, however, so we'll see how it shakes out
+ReleaseNotesUrl: https://github.com/hydrusnetwork/hydrus/releases/tag/v636
+PurchaseUrl: https://hydrusnetwork.github.io/hydrus/support.html
+Documentations:
+- DocumentLabel: FAQ
+  DocumentUrl: https://hydrusnetwork.github.io/hydrus/faq.html
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

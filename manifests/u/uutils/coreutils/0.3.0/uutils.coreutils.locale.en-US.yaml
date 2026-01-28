@@ -1,0 +1,211 @@
+# Created with komac v2.13.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: uutils.coreutils
+PackageVersion: 0.3.0
+PackageLocale: en-US
+Publisher: uutils
+PublisherUrl: https://github.com/uutils
+PublisherSupportUrl: https://github.com/uutils/coreutils/issues
+Author: uutils
+PackageName: coreutils
+PackageUrl: https://github.com/uutils/coreutils
+License: MIT
+LicenseUrl: https://github.com/uutils/coreutils/blob/HEAD/LICENSE
+Copyright: Copyright (c) uutils developers
+CopyrightUrl: https://github.com/uutils/coreutils/blob/main/LICENSE
+ShortDescription: Cross-platform Rust rewrite of the GNU coreutils
+Tags:
+- busybox
+- command-line-tool
+- coreutils
+- cross-platform
+- gnu-coreutils
+- rust
+ReleaseNotes: |-
+  📦 Rust Coreutils 0.3.0 Release:
+  We are happy to announce the release of Rust Coreutils 0.3.0 — our latest milestone bringing significant performance improvements, enhanced compatibility, and robust testing infrastructure!
+  Highlights:
+  - Performance Improvements
+    Compared to GNU:
+    - base64 is 1.20x faster
+    - expand is 1.80x faster
+    - unexpand is 1.50x faster
+    - nl is 1.57x faster
+    - sort is 3.72x faster for regular sorting and 1.46x faster for numeric sorting
+    - fold is 1.19x faster through optimization
+    - uniq -c: 1.13x faster
+  - Comprehensive Benchmarking Infrastructure
+    - Integrated CodSpeed for continuous performance monitoring
+    - Added benchmarks for 15+ utilities including sort, ls, uniq, du, base64, and more
+    - Performance regression detection in CI
+  - Safe Directory Traversal
+    - Implemented secure traversal using openat/unlinkat for rm, du, chmod, and chgrp
+    - Enhanced security through the nix crate instead of unsafe libc calls
+  - Enhanced GNU Compatibility
+    - 532 passing tests (83.91% compatibility) with comprehensive test suite expansion
+    - Improved error handling and behavior matching across utilities
+    - Better Unicode and non-UTF8 path support
+  - Developer Experience Improvements
+    - Moved documentation and completion generation out of binaries for faster builds
+    - Enhanced CI with parallel benchmark compilation
+    - Improved Makefile support for various build configurations
+  - Contributions: This release was made possible by the dedication of 36 contributors, including 25 newcomers.
+  GNU Test Suite Compatibility:
+  Note: Test result changes are primarily due to upgrading our reference from GNU coreutils 9.7 to 9.8, which introduced 16 new tests and updated existing test expectations.
+  ──────┬─────┬─────┬─────────────────────┬─────────────┬─────────────┬───────────────────────
+  Result│0.2.0│0.3.0│Change 0.2.0 to 0.3.0│% Total 0.2.0│% Total 0.3.0│% Change 0.2.0 to 0.3.0
+  ──────┼─────┼─────┼─────────────────────┼─────────────┼─────────────┼───────────────────────
+  Pass  │538  │532  │-6                   │87.06%       │83.91%       │-3.15%
+  ──────┼─────┼─────┼─────────────────────┼─────────────┼─────────────┼───────────────────────
+  Skip  │27   │33   │+6                   │4.37%        │5.20%        │+0.83%
+  ──────┼─────┼─────┼─────────────────────┼─────────────┼─────────────┼───────────────────────
+  Fail  │52   │68   │+16                  │8.42%        │10.73%       │+2.31%
+  ──────┼─────┼─────┼─────────────────────┼─────────────┼─────────────┼───────────────────────
+  Error │1    │1    │0                    │0.16%        │0.16%        │0%
+  ──────┼─────┼─────┼─────────────────────┼─────────────┼─────────────┼───────────────────────
+  Total │618  │634  │+16 (new tests)      │             │             │
+  ──────┴─────┴─────┴─────────────────────┴─────────────┴─────────────┴───────────────────────
+  GNU testsuite evolution
+  Call to Action:
+  🌍 Help us translate - Contribute translations at Weblate
+  🚀 Sponsor us on GitHub to accelerate development: github.com/sponsors/uutils
+  🔗 Download the latest release: https://uutils.github.io
+  What's Changed
+  base64
+  - Input reuse on base64 by @ThePseudo in #8587
+  - Add benchmark for base64 by @ThePseudo in #8768
+  basenc
+  - basenc: implement --base58 encoding option by @AnarchistHoneybun in #8751
+  - base58: it wasn't working properly with long input by @sylvestre in #8818
+  chgrp
+  - safe traversal: adjust chmod & chgrp to use it by @sylvestre in #8632
+  chmod
+  - safe traversal: adjust chmod & chgrp to use it by @sylvestre in #8632
+  cksum
+  - cksum: improve performance (Closes: #8573) by @RenjiSann in #8643
+  cp
+  - cp: fix Ioctl casting for ppc64 (Closes: #8161) by @maxfilov in #8637
+  - Replace casting to Ioctl with a const from libc by @maxfilov in #8641
+  - cp: fix recursive cp fails on files with trailing backslashes by @Anonymous-AAA in #8747
+  - feat(cp): optimize directory copy by caching file checks and refactoring calls by @mattsu2020 in #8805
+  - cp: fix crash on -T/--no-preserve-target by @Alonely0 in #8864
+  - cp: show relative path of source file with -vr by @Ada-Armstrong in #8887
+  - cp: display symlink creation with --verbose by @Ada-Armstrong in #8899
+  - docs: add benchmarking guidelines for cp by @mattsu2020 in #8807
+  csplit
+  - csplit: create final empty file with --suppress-matched to match GNU (fixes #7286) by @naoNao89 in #8655
+  date
+  - date: use --reference=file to display the file modification time by @yuankunzhang in #8630
+  - date: consolidate date parsing logic by @yuankunzhang in #8629
+  - date: implement --resolution flag by @Banzobotic in #8686
+  - date: follow GNU pure-number -d semantics by @naoNao89 in #8907
+  df
+  - df: follow symlinks by @bakanovskii in #8763
+  - df: add tracing zero and rounding by @bakanovskii in #8685
+  - df: treat env var with zero block size same as invalid by @Ada-Armstrong in #8932
+  - tests(df): Fix test_total to avoid whitespace parsing issues by @naoNao89 in #8799
+  dirname
+  - Fix dirname handling of paths ending in /. by @naoNao89 in #8911
+  du
+  - Adjust rm & du to use safe traversal (openat, unlinkat, etc) by @sylvestre in #8517
+  - du: some small refactorings by @cakebaker in #8631
+  - du: add benchmark by @sylvestre in #8774
+  - du: ignore env zero blocksize by @Ada-Armstrong in #8961
+  expand
+  - expand: add a benchmark by @sylvestre in #8800
+  - expand: improve the performances - 1.80 faster than GNU by @sylvestre in #8803
+  expr
+  - expr: fix some multibyte issues by @sylvestre in #8606
+  fold
+  - fold: add a benchmark by @sylvestre in #8801
+  - fold: improve the performances - now same as GNU by @sylvestre in #8804
+  hashsum
+  - hashsum: fix help text to show actual utility name by @AnarchistHoneybun in #8650
+  - hashsum: remove the usage of the mut by @sylvestre in #8692
+  - Patch to add hashsum symlinks with tests by @tpowa in #8647
+  - hashsum: improve hashsum using 32KiB bufreader by @psvri in #8869
+  hostname
+  - hostname: fix -d flag by @bakanovskii in #8657
+  - Build {host,u}name on Windows by @oech3 in #8950
+  id
+  - id: added '-a' argument by @erammos in #8733
+  install
+  - tests/install/install-Z-selinux: fix selinux for install by @sylvestre in #8307
+  ln
+  - Fix ln -f handling when source and destination are the same entry by @mattsu2020 in #8838
+  - Allow to replace ln -fs and hardlink on Windows by default by @oech3 in #8810
+  ls
+  - ls: Lazily obtain FileType, eagerly obtain Metadata when Metadata is available by @kimono-koans in #8753
+  - ls: remove unnecessary getgrgid handling for Redox OS by @Connor-GH in #8779
+  - ls: add some benchmarks by @sylvestre in #8738
+  - ls: Implement -f flag to disable sorting and enable -a by @naoNao89 in #8824
+  - ls: fix zero block size handling to match GNU ls by @yrakcaz in #8928
+  - tests(ls): Add GNU-compat TIME_STYLE tests (#4627) by @naoNao89 in #8796
+  mv
+  - mv: support moving source to a symlink directory by @yuankunzhang in #8589
+  - mv: improve the verbose mode to make tests/mv/mv-special-1.sh pass by @sylvestre in #8521
+  nl
+  - nl: add a benchmark by @sylvestre in #8808
+  - nl: improve the performances by @sylvestre in #8811
+  nohup
+  - test(nohup): improve coverage for fd replacement and error paths by @naoNao89 in #8920
+  numfmt
+  - numfmt: add benchmark by @sylvestre in #8726
+  od
+  - od: fix options after filename issue by @Anonymous-AAA in #8624
+  - od: add support for -S by @sylvestre in #8849
+  - od: fix incomplete test & apply small refactorings to tests by @cakebaker in #8941
+  pinky
+  - pinky: fix time format by @bakanovskii in #8666
+  - pinky: add --lookup flag by @bakanovskii in #8669
+  - pinky: move unit test away from the integration tests by @cakebaker in #8671
+  ptx
+  - fix(ptx): Remove extra space before truncation marker and add a related test by @Misakait in #8784
+  - fix(ptx): Correct various output formatting bugs by @Misakait in #8787
+  - fix(ptx): Correct reference format for stdin by @Misakait in #8806
+  - fix(ptx): Align text wrapping behavior with GNU in traditional mode by @Misakait in #8820
+  realpath
+  - realpath: implement -E by @sylvestre in #8757
+  rm
+  - Adjust rm & du to use safe traversal (openat, unlinkat, etc) by @sylvestre in #8517
+  - rm: add the --progress option like with cp & mv by @sylvestre in #8567
+  seq
+  - seq: support non-utf8 for --separator & --terminator by @cakebaker in #8681
+  - clippy: move unexpected_cfgs to workspace lints & fix warnings in seq by @cakebaker in #8859
+  sort
+  - sort: add benchmark by @sylvestre in #8735
+  - sort: adapt error message to pass sort-files0-from by @cakebaker in #8748
+  - sort: also declare sort_locale_bench as benchmark by @sylvestre in #8780
+  - sort: add a bench for long line by @sylvestre in #8886
+  - sort: fix newline handling across large and/or multiple files by @jacob-greenfield in #8746
+  - Reduce variance in sort benchmarks by reusing temp file by @naoNao89 in #8939
+  - feat(sort): auto-tune buffer sizing from available memory by @mattsu2020 in #8959
+  - Improve sort buffer sizing heuristics and honor explicit --buffer-size (#8833)
+  stat
+  - stat: fix mount point handling for non-UTF8 paths by @dekuu5 in #8538
+  - stat: fix %N symlink to be single quote instead of double quote by @dekuu5 in #8791
+  - Include subsecond precision in stat atime/ctime by @gaul in #8903
+  stdbuf
+  - stdbuf: fix a publish issue by @sylvestre in #8566
+  stty
+  - move stty to UNIX_PROGS by @oech3 in #8925
+  tail
+  - Add tests/tail/overlay-headers to the intermittent list by @sylvestre in #8736
+  tee
+  - tests(tee): Add GNU-compat write-error and broken-pipe tests (#4627) by @naoNao89 in #8797
+  timeout
+  - tests/timeout: remove unnecessary stderr check for test_kill_subprocess by @elliotwesoff in #8845
+  touch
+  - touch: adapt expected error message in test by @cakebaker in #8599
+  - touch: simplify some tests by using new_ucmd!() by @cakebaker in #8602
+  - Remove additional touch when feat_common_core is required by @zdiff in #8598
+  - GNUmakefile: move du & touch to PROGS by @cakebaker in #8926
+  tsort
+  - tsort: write a benchmark by @sylvestre in #8712
+  - Remove extra lookups and memory allocations from tsort graph construction by @Nekrolm in #8694
+  unexpand
+  - unexpand: add a benchmark by @sylvestre in #8813
+ReleaseNotesUrl: https://github.com/uutils/coreutils/releases/tag/0.3.0
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

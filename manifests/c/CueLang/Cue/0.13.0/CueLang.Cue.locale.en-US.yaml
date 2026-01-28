@@ -1,0 +1,122 @@
+# Created with komac v2.11.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
+
+PackageIdentifier: CueLang.Cue
+PackageVersion: 0.13.0
+PackageLocale: en-US
+Publisher: Cue
+PublisherUrl: https://github.com/cue-lang
+PublisherSupportUrl: https://github.com/cue-lang/cue/issues
+PackageName: Cue
+PackageUrl: https://github.com/cue-lang/cue
+License: Apache-2.0
+LicenseUrl: https://github.com/cue-lang/cue/blob/HEAD/LICENSE
+ShortDescription: |-
+  CUE is an open source data constraint language which aims to simplify tasks
+  involving defining and using data.
+Tags:
+- configuration
+- data
+- kubernetes
+- validation
+ReleaseNotes: |-
+  This release finally enables the new evaluator by default -- the culmination of over a year's worth of work!
+  It also packs in lots of new features, such as support for absolute module packages, dozens of JSON Schema improvements, and a new experimental XML encoding.
+  Changes which may break some users are marked below with: ⚠️
+  Evaluator
+  The new evaluator first introduced in v0.9.0 via CUE_EXPERIMENT=evalv3 is now enabled by default! There are no remaining substantial regressions in our test suite, and the Unity corpus is almost entirely working now. Given that the new evaluator fixes dozens of bugs for many users, and is already significantly faster for the majority of CUE users, we believe it is time to turn it on by default.
+  We will continue to track any remaining issues for the new evaluator via the evalv3 label. If you encounter any regressions, please file a bug report. You can also revert to the old evaluator to temporarily work around bugs via CUE_EXPERIMENT=evalv3=0. See this FAQ page for more information.
+  We aim to resolve many of these remaining bugs in an upcoming v0.13.1 bugfix release.
+  An entirely new algorithm for cue trim and tools/trim has been implemented for evalv3, which resolves all known bugs when trimming CUE.
+  Closedness in evalv3 has been revisited to match the semantics of evalv2 much more closely, while at the same time reducing its overhead for larger configurations. This fixes most "field not allowed" regressions and improves the performance of some configurations by up to 5x. As a result, CUE_DEBUG=openinline is now removed as it is unnecessary.
+  Performance work for the new evaluator is ongoing; a number of changes in this release led to performance improvements of between 5% and 80% for a variety of projects. For more details, see Marcel's performance update last month.
+  ⚠️ The new topological sort algorithm for field ordering has been tweaked to avoid becoming too slow in some cases. This may result in some ordering changes, but we expect them to be relatively small. See the change for more details.
+  The parser now correctly allows keywords as required field labels, such as if!: _, fixing a discrepancy with the spec.
+  Filenames beginning with a dot can now be embedded as long as the glob pattern uses an explicit dot, such as @embed(glob="dir/.data_*.json").
+  ⚠️ @embed(glob="pattern...") directives whose file globbing results in zero files now result in an error, to avoid situations where a glob pattern silently stops working as intended.
+  cmd/cue
+  Initial support for absolute packages is introduced, which allow specifying a remote package at a particular version such as cue export foo.com/data@v1.2.3 or cue vet foo.com/schema@v1.2.3 -d '#schema' data.yaml without requiring a CUE module file locally.
+  The cue help filetypes logic, written itself in CUE, no longer requires using the evaluator to parse CLI arguments or load CUE packages. This results in significant speed-ups when using the CLI with many inputs.
+  The new cue refactor imports command rewrites import paths, making it easy to migrate between module locations and major versions.
+  The new cue mod mirror command copies modules from one registry to another.
+  cue mod tidy now preserves the top-level custom field as intended.
+  Hidden files, and files with build tags, should now be correctly filtered when loading a single CUE package.
+  cue get go should no longer attempt to import types from the Go standard library as CUE, which caused errors.
+  cue get go no longer fails on Go strings containing certain character escape sequences or non-UTF8 bytes.
+  cue get go now interprets Go fields with the new json:",omitzero" struct tag as CUE optional fields.
+  cue cmd now fails if no tasks were actually defined, to avoid situations where a user is misled into thinking a task was defined when it was not.
+  Encodings
+  The XML "Koala" encoding proposed in February is now available via an experimental implementation. Try it out via the CLI like cue export xml+koala: data.xml, or via its Go API.
+  The encoding/jsonschema package gains better support for Kubernetes schemas (CRDs and the core API) although these improvements are as yet only available via the Go API.
+  ⚠️ The JSON Schema decoder now imports schema descriptions as CUE doc comments, which required a change to encoding/jsonschema.Config.DefineSchema.
+  Empty YAML files are now decoded as *null | _ rather than null, allowing them to be unified with struct schemas as if they were an empty struct.
+  cue exp gengotypes now allows control over how to generate optional CUE fields via e.g. @(,optional=nullable), where the default now is not to use pointers.
+  ⚠️ cue exp gengotypes tweaks how it parses @(,type=) options to support composite types such as slices and maps. Note that this means package paths with slashes must be quoted now.
+  Builtins
+  ⚠️ The uuid.ToString function is removed, given that it never did anything useful and could mislead users into thinking it did.
+  tool/http gained a followRedirects option to let the user disable HTTP redirection.
+  Go API
+  ⚠️ CUE_EXPERIMENT=decodeint64 can no longer be disabled as we consider the experiment finished, having been introduced in CUE v0.11.0.
+  ⚠️ The long-deprecated cue.Runtime methods Parse, FromExpr, CompileFile, and CompileExpr are now removed.
+  cuecontext.EvalDefault still pointed to the old evaluator; it now correctly points to the new evaluator, and follows the CUE_EXPERIMENT=evalv3 flag just like cmd/cue and the rest of the Go API.
+  Mirroring cuecontext.EvalExperiment, the new cuecontext.EvalStable constant is added to track the latest stable version of the evaluator.
+  module.SplitPathVersion and module.ParseImportPath have been deprecated in favor of cue/ast.SplitPackageVersion and cue/ast.ParseImportPath package to consolidate the API.
+  The new mod/modfile.File.ModuleForImportPath function allows resolving a module and default major version for a package without consulting a registry.
+  The new mod/modregistry.Client.Mirror method implements the logic behind the new cue mod mirror command.
+  The new mod/module.Version.Compare method is added in favor of module.Sort, which is now deprecated.
+  Full list of changes since v0.12.0
+  - internal/ci: bump the pinned Go version for releases by @mvdan in 5ca3b8f
+  - internal/encoding/yaml: drop use of kr/pretty in a test by @mvdan in e769e47
+  - internal/core/adt: prevent superfluous circular reference by @mpvl in 9418bb0
+  - internal/core/adt: add tests for Issue 3941 by @mpvl in 938d270
+  - encoding/json: clarify how to encode a cue.Value to JSON by @mvdan in 3bc5784
+  - internal/core/adt: allow sharing of lets by @mpvl in 9a44314
+  - internal/core/adt: add tests for Issue 3938 by @mpvl in 3045a88
+  - internal/core/adt: treat for loop values as non-cyclic by @mpvl in e15f6e4
+  - internal/core/adt: relax inline cycles by @mpvl in 4a4d9ef
+  - internal/core/adt: disable setting Inline for evalv3 by @mpvl in 406f64c
+  - internal/core/adt: add tests for 3903 by @mpvl in eb61a84
+  - internal/core/adt: rewrite comprehension structs for disjuncts by @mpvl in 7a0906e
+  - internal/core/adt: dereference overlay by @mpvl in 894205c
+  - internal/core/adt: add tests for Issue 3935 by @mpvl in 1a2e80e
+  - cue/testdata: add a regression test for #3570 by @mvdan in 5a99880
+  - internal/core/adt: mark conjunct for incomplete disjunct by @mpvl in a3db8b8
+  - internal/core/adt: add tests for 3934 by @mpvl in d9bfe59
+  - pkg/encoding/json: fix validator by @mpvl in 17caa72
+  - pkg/encoding/json: add tests for issue 3932 by @mpvl in 5d863b6
+  - cue: fix path representation for shared nodes by @mpvl in af81550
+  - internal/core/adt: partial revert of fixes for 3919 by @mpvl in e12d544
+  - internal/core/adt: add tests for 3931 by @mpvl in cff2d7e
+  - cue/format: port format tests to cuetxtar by @mvdan in 8f841ee
+  - cmd/cue: stop creating cue.mod/pkg and cue.mod/usr in cue mod init by @mvdan in 8946dc9
+  - cue/build: standardise on using the Context's loader by @cuematthew in 0a71cae
+  - cmd/cue: add CUE_EXPERIMENT=cmdreferencepkg by @mvdan in 5548932
+  - pkg: make $id in tasks a reference to a hidden field by @mvdan in 1c27bdb
+  - cmd/cue: add testscript showing input unmarshal behavior with cue cmd by @mvdan in eebcefc
+  - internal/core/adt: fix disjunction state management by @mpvl in e145a14
+  - internal/core/adt: add tests for Issue 3925 and 3905 by @mpvl in 38357b7
+  - Revert "internal/core/adt: carry over enclosing scope" by @mvdan in a6daeb9
+  - cue/testdata: add test cases for #3924 by @mvdan in 2740b68
+  - internal/core/adt: avoid finalizing too early by @mpvl in f87800d
+  - internal/core/adt: add tests for issue 3919 by @mpvl in 47c9e99
+  - internal/filetypes: remove version from TODO by @rogpeppe in c456d08
+  - cmd/cue: document that embedding is limited to files in the same module by @mvdan in 3559578
+  - cmd/cue: update which experiments are on by default by @mvdan in cfe1783
+  - cue/load: make MultiplePackageError support relative dir paths by @mvdan in a8f9383
+  - cmd/cue: test the "found packages $X and $Y in $DIR" error message by @mvdan in 4f3a215
+  - internal/core/adt: fix some embedding issues with closedness by @mpvl in 2597621
+  - internal/core/adt: add tests for 3921 by @mpvl in b3caad3
+  - internal/encoding/gotypes: handle cyclic types out of the box by @mvdan in 61e0d7f
+  - cmd/cue: don't use os.Getwd at init time by @mvdan in e7d687f
+  - internal/core/adt: carry over enclosing scope by @mpvl in 7de64e8
+  - internal/core/adt: add tests for 3920 by @mpvl in 0f26957
+  - encoding/jsonschema: fix x-kubernetes-group-version-kind by @rogpeppe in 9752c3a
+  - internal/core/adt: update environment for disjunctions by @mpvl in e231c49
+  - internal/core/adt: add tests for issue 3891 by @mpvl in bb2204f
+  - all: cue fmt by @mvdan in 5c33e24
+  - internal/golangorgx: cuelsp: load cue by @cuematthew in 8ca0f5b
+  - internal/golangorgx: cuelsp: remove Go-specific analysis by @cuematthew in b9acd04
+  - internal/core/adt: handle vertices properly for comprehensions spanning disjunctions by @mpvl in 56a915b
+ReleaseNotesUrl: https://github.com/cue-lang/cue/releases/tag/v0.13.0
+ManifestType: defaultLocale
+ManifestVersion: 1.9.0

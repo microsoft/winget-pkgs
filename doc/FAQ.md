@@ -23,11 +23,11 @@ Getting started is the hard part. There are several tools which we recommend for
 
 First is the [Windows Package Manager Manifest Creator (a.k.a Winget-Create)](https://github.com/microsoft/winget-create). Winget-Create is a command line tool that will prompt you for relevant metadata related to your package. Once you are done, Winget-Create will validate your manifest to verify that it is correct and allow you to submit your newly-created manifest directly to the winget-pkgs repository by linking your GitHub account.
 
-Second is the [YamlCreate PowerShell Script](/Tools/YamlCreate.ps1). This tool is great for those who are technically inclined and understand the basics of forking, cloning, and commits. YamlCreate iterates much faster than Winget-Create but has largely the same functionality. More information on YamlCreate can be found in the [Script Documentation](tools/YamlCreate.md).
+Second is the [YamlCreate PowerShell Script](../Tools/YamlCreate.ps1). This tool is great for those who are technically inclined and understand the basics of forking, cloning, and commits. YamlCreate iterates much faster than Winget-Create but has largely the same functionality. More information on YamlCreate can be found in the [Script Documentation](tools/YamlCreate.md).
 
 Need more information? Take a look at the document on [Authoring Manifests](Authoring.md) and the [Microsoft Documentation Site](https://docs.microsoft.com/windows/package-manager/package/manifest).
 ## **How do I get the AppsAndFeaturesEntries for an installer?**
-The best way to get the AppsAndFeaturesEntries, or the ARP Entries, for an installer is to run the installer inside of the [Windows Sandbox](https://docs.microsoft.com/windows/security/threat-protection/windows-sandbox/windows-sandbox-overview). Instructions on how to enable the sandbox can be found at the link above, or in the [SandboxTest PowerShell Script Documentation](tools/SandboxTest.md). The [SandboxTest PowerShell Script](/Tools/SandboxTest.ps1) is a great way to get the AppsAndFeaturesEntries for a manifest you have already created. The SandboxTest Script will validate and test the manifest by downloading and installing the package in the Sandbox and comparing the ARP Entries before and after the installation. For the technically savvy, @jedieaston has created an [Add-ARPEntries Script](https://github.com/jedieaston/Add-ARPEntries) which uses Docker to populate the AppsAndFeaturesEntries for an existing manifest. Please note, however, that only the ARP Entry for the *Primary Component* should be added when a package installs multiple components.
+The best way to get the AppsAndFeaturesEntries, or the ARP Entries, for an installer is to run the installer inside of the [Windows Sandbox](https://docs.microsoft.com/windows/security/threat-protection/windows-sandbox/windows-sandbox-overview). Instructions on how to enable the sandbox can be found at the link above, or in the [SandboxTest PowerShell Script Documentation](tools/SandboxTest.md). The [SandboxTest PowerShell Script](../Tools/SandboxTest.ps1) is a great way to get the AppsAndFeaturesEntries for a manifest you have already created. The SandboxTest Script will validate and test the manifest by downloading and installing the package in the Sandbox and comparing the ARP Entries before and after the installation. For the technically savvy, @jedieaston has created an [Add-ARPEntries Script](https://github.com/jedieaston/Add-ARPEntries) which uses Docker to populate the AppsAndFeaturesEntries for an existing manifest. Please note, however, that only the ARP Entry for the *Primary Component* should be added when a package installs multiple components.
 ## **What should I do if a package is being published by a new publisher?**
 The best practice for this is to create a situation where the package automatically switches to the new publisher using the ARP Entries for the package. To do this, two copies of the package must be added to the repository - one under the original package identifier and one under a new package identifier for the new publisher. This will cause anyone on a package published by the old publisher to be updated to the new version, at which point the ARP Entries will cause the Windows Package Manager to match the package to the new publisher and all future updates will be taken from the new package identifier.
 
@@ -38,15 +38,37 @@ For the package version added under the new package identifier, the metadata sho
 *Additional Notes*:
 While this is currently the best practice, this may change in the future with the implementation of [microsoft/winget-cli#1899](https://github.com/microsoft/winget-cli/issues/1899) and [microsoft/winget-cli#1900](https://github.com/microsoft/winget-cli/issues/1900). The origination of this best practice can be found [here](https://github.com/microsoft/winget-pkgs/issues/66937#issuecomment-1190154419)
 ## **How long do packages take to be published?**
-The answer to this question depends on multiple factors. First, the pull request approval. When submitting a package to the repository, your pull request will go through a series of automated checks in the validation pipeline. You will see labels applied to your pull request based on the results of the validation. Secondly, all pull requests must be reviewed and approved by one of our [community moderators](Moderation.md). Finally, the pull request must be merged and pass through the publishing pipeline. Once the publishing pipeline has succeeded for your pull request, you will see a comment and a label indicating this status.
+The time it takes for a package to be published depends on several factors:
 
-After your PR is approved and merged, the changes are *generally* published within one hour. If you are not seeing the changes published after your pull request has been merged, check the [WinGetSvc-Publish Pipeline](https://dev.azure.com/ms/winget-pkgs/_build?definitionId=338) for errors. If the pipeline is erroring, please check to see if any [issues](https://github.com/microsoft/winget-pkgs/issues) have been opened regarding the failures and create a [new issue](https://github.com/microsoft/winget-pkgs/issues/new) if there isn't one already.
+1. **Pull Request Approval**: When you submit a package to the repository, your pull request undergoes automated validation checks. Labels will be applied to indicate the results of these checks.
+
+2. **Community Moderator Review**: All pull requests must be reviewed and approved by one of our [community moderators](Moderation.md).
+
+3. **Publishing Pipeline**: After approval and merging, the pull request passes through the publishing pipeline. Once successful, you will see a comment and label indicating the status.
+
+Typically, changes are published within one hour after the pull request is merged. If you don't see the changes published, check the [WinGetSvc-Publish Pipeline](https://dev.azure.com/shine-oss/winget-pkgs/_build?definitionId=12) for errors. If there are issues, verify if any [existing issues](https://github.com/microsoft/winget-pkgs/issues) have been reported. If not, create a [new issue](https://github.com/microsoft/winget-pkgs/issues/new).
 ## **What does this label on my PR mean?**
 During the automated validation process, labels are added to pull requests to help the bots that manage the repository and the status of open requests. All of these labels are described in more detail on the [Microsoft Documentation Site](https://docs.microsoft.com/windows/package-manager/package/winget-validation#pull-request-labels)
 ## **Why does a package have the version "Unknown"?**
-When a package has the version "Unknown" it means that Windows Package Manager has detected that the package is installed, but the publisher is not providing Windows with the version of the package. If you are using Windows Package Manager v1.2, these packages will always be re-installed when running `winget upgrade`; however, as of Windows Package Manager v1.3, packages with unknown version are excluded from upgrade by default, but can be included by using the switch `--include-unknown`. If a package you use frequently has an unknown version, we recommend reaching out to the publisher of the application and asking them to set the `DisplayVersion` registry key in their installer.
+A package version is marked as "Unknown" when the Windows Package Manager detects the package as installed but the publisher has not provided the version information in the `DisplayVersion` registry key.
+
+### Behavior in Different Versions:
+- **Windows Package Manager v1.2**: Packages with an unknown version are always re-installed when running `winget upgrade`.
+- **Windows Package Manager v1.3 and later**: These packages are excluded from upgrades by default but can be included using the `--include-unknown` switch.
+
+### Recommendation:
+Contact the application's publisher and request them to set the `DisplayVersion` registry key in their installer if you frequently use a package with an unknown version.
+
 ## **My applications keep upgrading even when up to date!**
-There are two primary causes for packages to continually update. Most commonly, this is due to a package having an unknown version, although this has been fixed in Windows Package Manager v1.3. The second reason packages may continually update is due to there being multiple versions of the same application on your system. This is referred to as a side-by-side installation. The best examples of this are the Visual C++ Redistributables and the .NET Desktop Runtimes. Each of these packages can have multiple versions installed side-by-side and often multiple versions are required for other applications to run correctly. Because there are versions installed which are not the latest version, the Windows Package Manager believes they need to be upgraded and will attempt to upgrade them; however, these upgrades often install side-by-side also, causing the upgrade loop to continue. Future work is planned to resolve this issue, and is being tracked through [microsoft/winget-cli#2345](https://github.com/microsoft/winget-cli/issues/2345) and [microsoft/winget-cli#1413](https://github.com/microsoft/winget-cli/issues/1413)
+Applications may continually upgrade due to the following reasons:
+
+1. **Unknown Version**: Packages with an unknown version may trigger upgrades. This issue was resolved in Windows Package Manager v1.3.
+2. **Side-by-Side Installations**: Multiple versions of the same application (e.g., Visual C++ Redistributables, .NET Desktop Runtimes) can coexist. The Windows Package Manager may attempt to upgrade older versions, causing a loop if the upgrades also install side-by-side.
+
+### Future Work:
+Efforts to resolve these issues are being tracked in:
+- [microsoft/winget-cli#2345](https://github.com/microsoft/winget-cli/issues/2345)
+- [microsoft/winget-cli#1413](https://github.com/microsoft/winget-cli/issues/1413)
 ## **How can I use PowerShell to parse the output from winget?**
 The Windows Package Manager is still in development and does not yet support emitting rich data objects as output. There are a few issues tracking this feature request. Please add your thumbs up to these issues as the reactions are used to help prioritize which features are implemented next.
 * [Add Native PowerShell Support - microsoft/winget-cli#221](https://github.com/microsoft/winget-cli/issues/221)
@@ -54,7 +76,13 @@ The Windows Package Manager is still in development and does not yet support emi
 
 Also, take a look at the [discussions](https://github.com/microsoft/winget-cli/discussions/categories/powershell) based around PowerShell support!
 ## Why do WinGet and AppInstaller have different versions?
-Simply put, the two applications have different versions because they are two separate pieces of software. Even though WinGet is included with the AppInstaller package it is fundamentally different. A change to WinGet that may require an increment of the major version would not necessarily be a breaking change in AppInstaller.
+
+WinGet and AppInstaller are two distinct pieces of software, even though WinGet is included as part of the AppInstaller package. Their versioning differs because:
+
+1. **Separate Software**: Changes to WinGet, such as a major version increment, may not necessarily impact AppInstaller or require a version change for it.
+2. **Independent Updates**: Each application can evolve independently, with updates and features specific to their respective functionalities.
+
+This separation ensures that updates to one do not unintentionally disrupt the other.
 ## How do I know the packages in the Community Repository are safe?
 While not all the details can be made public, the general approach is a defense in depth.
 
@@ -62,4 +90,15 @@ All new manifests are first scanned to be sure the manifest has the correct synt
 
 The last automated check is a content validation to ensure that the package description and other metadata fields don’t violate one of the policies in place such as those against excessively profane language or adult content. There are additional manual checks in place, as each submission requires moderator approval before it can be merged. This gives an extra opportunity for moderators to check for the installation of any potentially unwanted applications, applications which change settings unexpectedly, and to ensure the installation truly works as expected.
 ## How do portable applications get “Installed”?
-WinGet does something special here and takes the same actions an installer would. It downloads the application files and moves them into an install directory. Then, WinGet creates the registry entries which make it show up as an installed application. Finally, the application is added to the PATH environment variable, so any CLI applications just work. There are some interesting quirks, where the way an application is added to PATH depends upon the environment WinGet is running in. If developer mode is enabled or WinGet was run from administrative context, a links directory will be created and added to the PATH; if neither of those are true, the full path to the installation folder will be added instead.
+
+WinGet performs several steps to "install" portable applications, mimicking the behavior of traditional installers:
+
+1. **Download and Move Files**: The application files are downloaded and moved into an installation directory.
+2. **Registry Entries**: Registry entries are created to make the application appear as an installed program.
+3. **PATH Environment Variable**: The application is added to the PATH environment variable, enabling CLI applications to work seamlessly.
+
+### PATH Behavior:
+- **Developer Mode Enabled or Administrative Context**: A links directory is created and added to the PATH.
+- **Otherwise**: The full path to the installation folder is added to the PATH.
+
+These steps ensure that portable applications integrate smoothly into the system.
