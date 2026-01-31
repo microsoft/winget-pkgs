@@ -1,0 +1,62 @@
+# Created with YamlCreate.ps1 v2.2.0 $debug=QUS2.CRLF.7-2-7.Win32NT
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.2.0.schema.json
+
+PackageIdentifier: MoritzBunkus.MKVToolNix
+PackageVersion: 58.0.0
+PackageLocale: en-US
+Publisher: Moritz Bunkus
+PublisherUrl: https://www.bunkus.org/
+PublisherSupportUrl: https://mkvtoolnix.download/community.html
+PrivacyUrl: https://mkvtoolnix.download/privacy-policy.html
+Author: Moritz Bunkus
+PackageName: MKVToolNix
+PackageUrl: https://mkvtoolnix.download/
+License: GPL-2.0
+LicenseUrl: https://gitlab.com/mbunkus/mkvtoolnix/-/blob/main/COPYING
+Copyright: © 2002 – 2021 Moritz Bunkus
+# CopyrightUrl:
+ShortDescription: MKVToolNix is a set of tools to create, alter and inspect Matroska files under Linux, other Unices and Windows.
+# Description:
+# Moniker:
+Tags:
+- mkv
+# Agreements:
+ReleaseNotes: |-
+  New features and enhancements
+  - mkvmerge, MKVToolNix GUI's multiplexer: the handling of the "default track" flag has been changed to match the recent changes to the Matroska specifications. The new semantics are that if it is set, it is supposed to signal to the player that this track is eligible for being played by default, potentially taking other factors such as user preferences regarding languages into account.  This implies that more than one track of each type can have this flag set. For example, a Blu-ray disc with three audio tracks might have the main audio in both English and Japanese, whereas the third audio track contains the director's comments. In such a case the first two tracks should have the "default track" flag set, the third one shouldn't.  Earlier mkvmerge was enforcing that only one track of each type could have the flag set. This restriction has been removed, both in mkvmerge and in the GUI's multiplexer.  mkvpropedit and the GUI's header editor are unaffected as they've always allowed to set the flag on as many tracks as the user wanted.
+  - mkvmerge: AVC/H.264 & HEVC/H.265 identification: added the stream's pixel dimensions (AVC only; were present for HEVC already) & default duration. Implements #3116.
+  - mkvmerge, mkvextract: HEVC/H.265: added support for reading single-layer Dolby Vision from Annex B type bitstreams (elementary streams, MPEG transport streams). Patch by quietvoid. Implements #3113.
+  - mkvinfo: the option -X/--full-hexdump now affects all binary elements, not just the frame data in SimpleBlock and BlockGroup elements.
+  - MKVToolNix GUI: multiplexer: the "delay" and "sync" options can now be used for chapters in source files, too. Implements #3129.
+  - MKVToolNix GUI: when moving list entries up & down with the optional buttons or the keyboard shortcuts (instead of using drag & drop), the GUI ensures that the top-most selected entry remains visible after the move. Implements #3123.
+  - MKVToolNix GUI: added an option in the preference to use legacy MIME types for font attachments instead of the current standard ones (e.g. 'application/x-truetype-font' instead of 'font/sfnt' and 'font/ttf').
+
+  Bug fixes
+  - build system: fixed filtering out optimization options when compiling the file iso639_language_list.cpp (before only numeric optimization levels were filtered out and only if it wasn't the last option in the list of flags). See #3105 for context.
+  - build system: when libmagic was detected via pkg-config, MKVToolNix was actually compiled without support for libmagic due to a preprocessor symbol not being defined.
+  - mkvmerge: MP4 reader: fixed an issue with timestamps overflowing when the file's or the track's time scale is large. Fixes #3124.
+  - mkvmerge, mkvextract: fixed key frame handling for BlockGroup elements with a forward reference but no backward references. Patches by Tom Yan.
+  - mkvmerge, mkvpropedit, MKVToolNix GUI's chapter editor: the programs will no longer omit writing mandatory elements set to their default value if other elements of the same type are present in the same master. This affects mostly the "chapter language" element which may occur multiple times within the same "chapter display" master. If it does occur multiple times and one of them is set to "English" (which is that element's default value), that element will now be written, too. Part of the fix of #3120.
+  - mkvmerge, mkvpropedit, MKVToolNix GUI's chapter editor: when parsing chapter files IETF & legacy language elements as well as legacy country elements will now be properly generated depending on which exist already, especially when there's more than one language and/or country element in a "chapter display" element. Part of the fix of #3120.
+  - mkvmerge, mkvpropedit, MKVToolNix GUI's chapter editor: fixed reading OGM-style chapter files with timestamps that don't have exactly three decimal places. Any number of decimal places between one and nine is now supported for nanosecond precision. Fixes #3121.
+  - MKVToolNix GUI: chapter editor: added/fixed support for "chapter display" elements with multiple languages or countries. Part of the fix of #3120.
+
+  Build system changes
+  - Qt 6: added support for building with Qt 6. configure will look for Qt 6 first and only continue looking for Qt 5 if Qt 6 isn't found or disabled via --disable-qt6.  Qt 6 detection works by first looking for the qmake6 binary. Its location can be specified with the --with-qmake6=… option.  All other Qt 6 related facts (such as compiler & linker flags or the position of the other required tools such as lconvert, moc, rcc and uic) will be derived from the output generated by qmake6.  Note that at this point Qt 6 is not yet supported for the cross-compilation build to Windows, nor is a static Qt 6 build supported yet.  Note that the command line options --enable-static-qt, --with-qt-pkg-config-modules and --without-qt-pkg-config only apply to the Qt 5 and have no effect on Qt 6.
+  - Qt 5: the options for specifying the position of the tools (--with-moc=…, --with-rcc=… and --with-uic=…) have been removed. Their position will now be derived from the output generated by qmake.
+  - configure: completely disabling the GUI now requires passing both --disable-qt6 and --disable-qt options.
+  - Boost's multi-precision library is now required.
+  - Boost v1.66 or newer is now required.
+
+  Other changes
+  - The Windows build is now using an updated version of the file/magic library for MIME type detection of attachments. This affects fonts whose MIME types will now be the current standard MIME types (e.g. font/sfnt or font/ttf for TrueType fonts). As this might pose problematic with older players that only support the legacy MIME type (e.g. application/x-truetype-font), a new option was added in the GUI's preferences to use the legacy MIME types instead of the current standard ones. This is off by default. Builds for other operating systems have already been using newer versions of the file/magic library for a long time.
+ReleaseNotesUrl: https://mkvtoolnix.download/doc/NEWS.md
+# PurchaseUrl:
+# InstallationNotes:
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://mkvtoolnix.download/docs.html
+- DocumentLabel: FAQ
+  DocumentUrl: https://gitlab.com/mbunkus/mkvtoolnix/-/wikis/FAQ
+ManifestType: defaultLocale
+ManifestVersion: 1.2.0

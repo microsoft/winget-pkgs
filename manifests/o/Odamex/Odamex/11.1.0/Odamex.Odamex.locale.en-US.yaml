@@ -1,0 +1,121 @@
+# Created with komac v2.12.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: Odamex.Odamex
+PackageVersion: 11.1.0
+PackageLocale: en-US
+Publisher: Odamex
+PublisherUrl: https://odamex.net/
+PublisherSupportUrl: https://github.com/odamex/odamex/issues
+PrivacyUrl: https://odamex.net/privacy
+PackageName: Odamex
+PackageUrl: https://odamex.net/
+License: GPL-2.0
+LicenseUrl: https://github.com/odamex/odamex/blob/HEAD/LICENSE
+ShortDescription: Multiplayer-oriented source port for Doom
+Tags:
+- doom
+- game
+- multiplayer
+ReleaseNotes: |-
+  🚀 Odamex 11.1 is here!
+  While technically a minor release, this update brings some major improvements — and we couldn’t have done it without our amazing contributors.
+  🎶 One of the standout additions is OPL3 Synth emulation, courtesy of PR contributor @jpernst. This long-requested feature (over a decade in the making!) now brings classic-sounding MIDI music right into Odamex — and it feels right at home. This is now the default midi synth for Linux platforms.
+  🛠️ Additional thanks go to:
+  - @ceski-1 for fixing long-standing SNDINFO issues
+  - @chewi for improving our build system with support for system FLTK 1.4
+  - @cmbernard333 for contributing Dockerfile and docker-compose support for odasrv
+  - @Acts19quiz and all our dedicated community members for relentless playtesting, bug-hunting, and feedback
+  🙌 We’d also like to give a warm official welcome to @electricbrass, who joins the Odamex team! Their contributions have already been enormous, and we’re incredibly lucky to have them on board.
+  🌟 And of course, continued thanks to @bcahue for his ongoing work and leadership across the project.
+  🔮 Looking ahead:
+  Our next release is expected to be Odamex 12.0.0, which will include full DSDHACKED support and compatibility with most ID24 features. That means you can look forward to running WADs like Eviternity 2, Legacy of Rust, and new versions of Odamex Horde in the very near future!
+  Special recognition goes to @cmbernard333 for the monumental effort over the past year in implementing DSDHACKED support.
+  If you spot any of these contributors in the Odamex Discord, be sure to thank them — their hard work continues to push Odamex forward!
+  For a full list of changes, check out the list below:
+  Added
+  - Client Improvements
+    - Support for ADLMIDI OPL3 Synth emulation. Thanks so much to @jpernst!
+      - LIBADLMIDI is now the default midi backend of Linux
+      - Includes multiple patch sets for speed vs. accuracy
+      - Full OPL panning option
+      - Choose from 1 to 8 OPL simultaneous OPL chips
+      - Packaged with classic Doom and Doom 2 OPL instruments, as well as the improved DMXOPL3 set
+    - Quality of Life Additions
+      - New linear horizontal sky scaling added to display options menu (no more stretched moons!)
+      - Automagically spynext in all cases when out of lives
+      - Add last player hype messages and sounds for Survival Co-op, Survival Horde, LMS, and CTF with lives
+      - Place downloaded wads, netdemos, and screenshots into subfolders
+        - Add cl_screenshotdir and cl_netdemodir CVARs to define non-default subfolders
+      - Fix exec search paths, while also adding -cfgdir argument
+    - Client Front-End
+      - Add search bar to PWAD select GUI
+  - Modding Additions
+    - Improved MAPINFO support
+      - Added support for MAPINFO AddDefaultMap
+      - Added support for noinfighting, totalinfighting, and normalinfighting in MAPINFO map and skill definitions
+    - SNDINFO ambient sound support. Thanks @ceski-1!
+  - Compatibility Updates
+    - Add co_mbfphys cvar to enable MBF's movement code
+    - Allow more control over maplist lastmap parameter, accomodating situations where there may be several last maps
+  - General
+    - Some errors now include stack trace information for easier debugging
+  Changed
+  - General code cleanup and modernization
+    - Notably affects fmtlib usage, std::filesystem integration, and removal of calls to functions now deprecated on macOS
+  - Quality of Life Additions
+    - Added callvote lives
+    - Allow changing FOV in single player modes without first setting sv_allowfov
+    - The heights of torches when co_realactorheight is enabled now match those used by GZDoom
+    - Increase CTF flag height to 48 units from 16 units
+  - Server Administration
+    - Numerous updates to the included sample configurations
+    - Add Sigil 2 to all official wads config
+  Fixed
+  - Modding and Mapping Fixes
+    - Fix MBF21 ammo per shot behavior to match DSDA, Woof, and Eternity while preserving compatibility with ZDoom's ammo use
+    - Sky transfers ignore vertical offsets on first rendered frame
+    - Allow null metadata in ID24 json lumps
+    - Fixed ID24 interlevel map displaying incorrectly
+    - Fixed MBF21 projectile offsets not being immediately updated
+    - Fix Eviternity arachnotron firing sound being silent
+    - Fix trick Rocket Jump maps use to not allow damage under 1hp
+    - Fixed bottom of Doom episode 1 sky rendering incorrectly
+    - Dehacked strings now properly changed on the server
+    - Fix HOMs when trying to do sky hack with flatmapped skies
+    - Fix ENTERANIM animations displaying over exiting screen
+  - General Client and Server Fixes
+    - Crosshair health color feature now correctly updates in Horde mode
+    - New math to properly center crosshairs on the screen
+    - Fixed Odamex missing IWADs on non-Windows OSes due to case sensitivity issues
+    - Fixed the quit message never changing
+    - Fixed monsters becoming stuck where an Archvile resurrected them and co_realactorheight is enabled
+    - Reset automap custom thing colors when executing resetcustomcolors
+    - Broadcast changes to floor or ceiling flats to all other clients
+    - Fix addmap and insertmap commands to not add odamex.wad to entry lists if maplist is empty
+      - Crash Fixes
+    - Crash when calling WI_CalcWidth
+    - Fix crash when displaying certain messages on Linux
+    - Fix actor translucency not being modified when clearing or setting MF_TRANSLUCENT
+    - Fixed crash that would occur when setting the angle of Hexen format DPushers
+    - Fixed renderer crash caused by some transparent textures
+    - Fix incorrect memory tag when loading a map with vanilla nodes
+  Build/Compiler Additions/Changes/Fixes
+  - Overall improvements to the release pipeline
+    - Build and release a Flatpak file as part of the build pipeline!
+      - Odamex is now available as a verified app on Flathub!
+    - Library updates
+      - Upgrade JsonCPP
+      - Update libpng
+      - Update zlib
+      - Update bundled SDL_mixer for Windows build to 2.8.1
+    - CMAKE Improvements
+      - Allow building the client with the bundled JsonCPP
+      - Allow building the server with the bundled zlib
+    - Windows installer now removes leftover DLLs from older versions that prevented Odamex 11.0.0 from launching on some systems.
+  - Allow building against the system FLTK 1.4 library. Thanks @chewi!
+  - Included Dockerfile and docker-compose file for odasrv. Thanks @cmbernard333!
+  - Fixed compilation error on older versions of clang
+ReleaseNotesUrl: https://github.com/odamex/odamex/releases/tag/11.1.0
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

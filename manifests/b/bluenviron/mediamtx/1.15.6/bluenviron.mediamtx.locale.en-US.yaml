@@ -1,0 +1,88 @@
+# Created with komac v2.14.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: bluenviron.mediamtx
+PackageVersion: 1.15.6
+PackageLocale: en-US
+Publisher: bluenviron
+PublisherUrl: https://github.com/bluenviron
+PublisherSupportUrl: https://github.com/bluenviron/mediamtx/issues
+Author: aler9
+PackageName: mediamtx
+PackageUrl: https://github.com/bluenviron/mediamtx
+License: MIT
+LicenseUrl: https://github.com/bluenviron/mediamtx/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2019 aler9
+CopyrightUrl: https://github.com/bluenviron/mediamtx/blob/main/LICENSE
+ShortDescription: |-
+  Ready-to-use SRT / WebRTC / RTSP / RTMP / LL-HLS media server and media proxy that allows to read,
+  publish, proxy, record and playback video and audio streams.
+Description: |-
+  MediaMTX is a ready-to-use and zero-dependency real-time media server and media proxy that allows
+  to publish, read, proxy, record and playback video and audio streams. It has been conceived as a
+  "media router" that routes media streams from one end to the other.
+Tags:
+- go
+- golang
+- hls
+- media-server
+- obs-studio
+- rtcp
+- rtmp
+- rtmp-proxy
+- rtmp-server
+- rtp
+- rtsp
+- rtsp-proxy
+- rtsp-relay
+- rtsp-server
+- streaming
+- webrtc
+ReleaseNotes: |-
+  Fixes and improvements
+  General
+  - add structured logging (#5219)
+  - fix 1-minute offset when recording a H264 WebRTC track (#5275) (#5278)
+  - disable syslog logging on macOS (#5005) (#5295)
+  - set syslog priority and do not write level and date to syslog (#4923) (#5296) When writing log entries to syslog, pass the level (WARN, INFO, etc) directly to syslog. Avoid writing level and date. This provides a better integration and allows to use syslog search tools.
+  RTSP
+  - avoid setupping back channels (#5074) (#5289)
+  - Support URI format sent by HappyTime ONVIF and RTSP clients during (bluenviron/gortsplib#964)
+  - fix medias wrongly marked as back channels (#5074) (bluenviron/gortsplib#970) Some cameras mark medias as back channels even though they are not. Try to detect this by checking whether in full the SDP there are both back channels and standard channels, unmarking back channels otherwise.
+  - when there are back channels, add recvonly attribute to standard channels (bluenviron/gortsplib#971)
+  SRT
+  - fix broken connections in case of high latency (#3756) (#5282) When listening and accepting an incoming connection request, the response might be received by the peer with some delay due to latency. This causes the peer to send a second connection request, that is not detected as duplicate because the first connection request has already been removed from the map that is used to check for duplicates (connReqs), so it is treated as a brand new connection request, breaking the first connection. This patch fixes the issue by introducing another map (connByPeer) that is used to check whether a connection request is associated to an already-accepted connection.
+  Dependencies
+  - code.cloudfoundry.org/bytefmt updated from v0.58.0 to v0.59.0
+  - github.com/bluenviron/gortmplib updated from v0.1.2 to v0.2.0
+  - github.com/bluenviron/gortsplib/v5 updated from v5.2.1 to v5.2.2
+  - github.com/bluenviron/mediacommon/v2 updated from v2.5.3 to v2.6.0
+  - github.com/matthewhartstonge/argon2 updated from v1.4.3 to v1.4.4
+  - github.com/pion/ice/v4 updated from v4.0.13 to v4.1.0
+  - github.com/pion/rtp updated from v1.8.26 to v1.9.0
+  - github.com/pion/sdp/v3 updated from v3.0.16 to v3.0.17
+  - github.com/pion/webrtc/v4 updated from v4.1.7 to v4.2.1
+  - golang.org/x/crypto updated from v0.45.0 to v0.46.0
+  - golang.org/x/sys updated from v0.38.0 to v0.39.0
+  - golang.org/x/term updated from v0.37.0 to v0.38.0
+  - github.com/pion/dtls/v3 updated from v3.0.8 to v3.0.9
+  - github.com/pion/sctp updated from v1.8.41 to v1.9.0
+  - github.com/pion/stun/v3 updated from v3.0.1 to v3.0.2
+  - github.com/quic-go/qpack updated from v0.5.1 to v0.6.0
+  - github.com/quic-go/quic-go updated from v0.54.1 to v0.57.0
+  - go.uber.org/mock removed
+  - golang.org/x/mod removed
+  - golang.org/x/net updated from v0.47.0 to v0.48.0
+  - golang.org/x/sync removed
+  - golang.org/x/text updated from v0.31.0 to v0.32.0
+  - golang.org/x/time updated from v0.9.0 to v0.12.0
+  - golang.org/x/tools removed
+  Security
+  Binaries are compiled from source through the Release workflow without human intervention, preventing any external interference.
+  You can verify that binaries have been produced by the workflow by using GitHub Attestations:
+  ls mediamtx_* | xargs -L1 gh attestation verify --repo bluenviron/mediamtx
+  You can verify checksums of binaries by downloading checksums.sha256 and running:
+  cat checksums.sha256 | grep "$(ls mediamtx_*)" | sha256sum --check
+ReleaseNotesUrl: https://github.com/bluenviron/mediamtx/releases/tag/v1.15.6
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

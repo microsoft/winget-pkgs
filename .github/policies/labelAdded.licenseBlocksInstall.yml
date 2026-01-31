@@ -1,0 +1,72 @@
+id: labelAdded.licenseBlocksInstall
+name: GitOps.PullRequestIssueManagement
+description: Handlers when "License-Blocks-Install" label is added
+owner:
+resource: repository
+disabled: false
+where:
+configuration:
+  resourceManagementConfiguration:
+    eventResponderTasks:
+      - description: >-
+          When the label "License-Blocks-Install" is added to a pull request
+          * Add the PR specific reply notifying the issue author of a blocking issue
+          * Label the PR with Blocking-Issue
+          * Label with Needs-Author-Feedback
+          * Remove the Needs-Attention Label
+        if:
+          - payloadType: Pull_Request
+          - labelAdded:
+              label: License-Blocks-Install
+        then:
+          - addReply:
+              reply: >-
+                Hello ${issueAuthor},
+
+
+                This package appears to require user to accept a license agreement before installation.
+
+
+                This PR is blocked until support for agreements is added to the community repository.
+
+                * See microsoft/winget-pkgs/issues/131328
+
+
+                Template: msftbot/blockingIssue/licenseBlocksInstall
+          - addLabel:
+              label: Blocking-Issue
+          - addLabel:
+              label: Needs-Author-Feedback
+          - removeLabel:
+              label: Needs-Attention
+        # The policy service should trigger even when the label was added by the policy service
+        triggerOnOwnActions: true
+      - description: >-
+          When the label "License-Blocks-Install" is added to an issue
+          * Add the issue specific reply notifying the issue author of a blocking issue
+          * Label the issue with Blocking-Issue
+        if:
+          - payloadType: Issues
+          - labelAdded:
+              label: License-Blocks-Install
+        then:
+          - addReply:
+              reply: >-
+                Hello ${issueAuthor},
+
+
+                This package appears to require user to accept a license agreement before installation.
+
+
+                This issue is blocked until support for agreements is added to the community repository.
+
+                * See microsoft/winget-pkgs/issues/131328
+
+
+                Template: msftbot/blockingIssue/licenseBlocksInstall
+          - addLabel:
+              label: Blocking-Issue
+        # The policy service should trigger even when the label was added by the policy service
+        triggerOnOwnActions: true
+onFailure:
+onSuccess:

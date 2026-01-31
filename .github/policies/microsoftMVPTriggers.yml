@@ -1,0 +1,38 @@
+id: microsoftMVPTriggers
+name: GitOps.PullRequestIssueManagement
+description: Defines the users and permissions available to Microsoft MVPs
+owner:
+resource: repository
+disabled: false
+where:
+configuration:
+  resourceManagementConfiguration:
+    eventResponderTasks:
+      - if:
+          # If the activity sender is a microsoft MVP and not the issue author
+          - or:
+              - isActivitySender:
+                  user: Trenly
+                  issueAuthor: False
+              - isActivitySender:
+                  user: mdanish-kh
+                  issueAuthor: False
+        then:
+          # If the payload is an issue_Comment or a Pull_Request_Review_Comment
+          - if:
+              - or:
+                  - payloadType: Issue_Comment
+                  - payloadType: Pull_Request_Review_Comment
+            # Remove the Needs-Triage label
+            # Take different actions based on the comment pattern
+            then:
+              # Manual-Validation-Completed
+              - if:
+                  - commentContains:
+                      pattern: '\[[Pp]olicy\]\s+[mM]anual[\s-][vV]alidation[\s-][cC]ompleted'
+                      isRegex: True
+                then:
+                  - addLabel:
+                      label: Manual-Validation-Completed
+onFailure:
+onSuccess:

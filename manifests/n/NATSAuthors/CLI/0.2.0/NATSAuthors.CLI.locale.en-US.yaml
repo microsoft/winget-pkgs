@@ -1,0 +1,157 @@
+# Created with WinGet Updater using komac v2.10.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
+
+PackageIdentifier: NATSAuthors.CLI
+PackageVersion: 0.2.0
+PackageLocale: en-US
+Publisher: NATS Authors
+PublisherUrl: https://github.com/nats-io
+PublisherSupportUrl: https://github.com/nats-io/natscli/issues
+PackageName: NATS Command Line Interface
+PackageUrl: https://github.com/nats-io/natscli
+License: Apache-2.0
+LicenseUrl: https://github.com/nats-io/natscli/blob/HEAD/LICENSE
+ShortDescription: A command line utility to interact with and manage NATS.
+ReleaseNotes: |-
+  Major New Features
+  Decentralized Authentication Management
+  We have introduced some of the functionality from nsc and nk into the new nats auth command. The aim is not to support every feature nsc has but to identify the key features most users use and bring those into the nats command.
+  This is an initial release and we're seeking feedback around missing features users feel are key and around the general interaction model.
+  Please see AUTH.md for a testing guide.
+  Configuration Scaffolding
+  To complement nats auth and to help new users we introduced a new configuration generation feature set in nats server generate. This tool will guide users through interactive questions to solve goal orientated outcomes such as generating local Docker Compose development Super Clusters or connecting to Synadia Cloud using a Leafnode.
+  The tool supports sharing bundles without performing new releases of the nats command and again we'd love feature requests on scaffolding you'd like to see here.
+  Major nats bench rewrite
+  The nats bench command has seen a major rewrite splitting it into seperate commands with options grouped around specific goals rather than all in one huge set of flags.
+  Real time graphs
+  We've added numerous graph features to the tooling that allow you to see traffic rates on specific subjects, in and out of streams and consumers and more.
+  See:
+  - nats sub --graph
+  - nats stream graph
+  - nats consumer graph
+  - nats server graph
+  nats top
+  We've incorporated the nats-top command as a new sub command and made it work over NATS network rather than HTTP for consistency with all the other nats administration commands.
+  Enhancements
+  General
+  - Support switching to the previous context using nats ctx previous
+  - Temporary files that might be edited now use the correct extension to assist editors with syntax highlighting
+  - Supports TLS First in Contexts and general connection options via --tlsfirst
+  - A context may now be unsellected using nats context unselect
+  - Support loading TLS files from the Windows Certificate Store
+  - Adds a new nats server watch command that can passively observe a NATS Cluster
+  - Support compressing KV buckets
+  - Support compressing Object Store buckets
+  - Supports building for the s390x Architecture
+  - Supports subscribing to multiple subjects in nats sub
+  - Support options like --js-domain in nats sub
+  - Support encrypting and decrypting data using xkeys via nats auth nk seal and nats auth nk unseal
+  - Support interactive, guided, Server configuration generation using nats server generate
+  - Various utility flags for nats sub: --subjects-only, --timestamp and --delta-time
+  - Name MQTT connections by MQTTClient ID instead of Name
+  - Major rewrite of the nats bench command for better UX
+  - Adds new nats sub --graph options to interactively draw subject traffic rates
+  - Various commands that parse the EDITOR environment variable now supports arguments in the supplied command
+  - Improved color aware progress bars
+  - Subjects now support template parsing in nats pub and nats req
+  - The --translate flag on nats sub now supports the --dump flag
+  Operations
+  - Adds nats server check credential that can monitor credential expiry and more
+  - Support filtering connections using an expression language on nats server report connections --filter
+  - Support filtering connections by username using nats server report connections --username
+  - Support filtering connections by state using nats server report connections --state
+  - Support filtering closed connections by reason using nats server report connections --state closed --closed-reason
+  - New bar graph based views for CPU and Memory in nats server report cpu and nats server report mem
+  - Adds a new nats server check consumer to validate various aspects of Consumers as a health check
+  - Allow Replicas to be changed when performing Stream restores
+  - Adds a new nats auth command that can manage nkeys and has a subset of nsc features
+  - Adds a new nats top command incorporating features previously found in nats-top
+  - Adds an initial cluster connections balancer in nats server cluster balance
+  - Support tracing message flow through complex cluster toplogies using nats trace (Requires NATS Server 2.11)
+  - The chunks size used by nats stream backup can now be adjusted to assist connections over slow transports or VPNs
+  - New Stream and Consumer metadata based thresholds monitoring features
+  - Support requesting cpu profiles
+  - Additional details shown about Slow Consumers in nats server list
+  - Renders JetStream API Pending counts in various reports
+  - Adds a new nats server graph command that can graph various aspects of running NATS Servers
+  - nats server check consumer supports Pinned Consumers
+  - Adds a new Cluster report in nats server report cluster
+  - Adds a new Super-Cluster report in nats server report gateways
+  - Adds a new Health report in nats server report health
+  - Adds a new Leafnode report in nats server report leafs
+  - Support placing Stream and Consumer leaders on a specific host in nats stream cluster down and nats consumer cluster down (Requires NATS Server 2.11)
+  - Supports rendering a hash (digest) of the running configuration in nats server info (Requires NATS Server 2.11)
+  - The nats event command can now read a Stream full of events with the new --stream and --since flags
+  - Adds a new nats server check request that can health check services
+  - Adds an option to influence expected server counts in all nats server report commands
+  JetStream
+  - Support interactive editing of Consumer configuration using the -i flag
+  - nats pub is now JetStream aware with the new --jetstream flag
+  - Support setting Consumer limits on Streams
+  - Support parsing subject filters as a comma seperated list in nats consumer add
+  - Raft group details are now shown in Stream and Consumer info
+  - Report on tiered storage reservations in nats account info
+  - Support --nak in nats consumer next
+  - Renders Consumer Limits in nats stream info
+  - Support nats stream view for WorkQueue streams with Direct Get enabled
+  - Support editing Inactive Threshold in nats consumer edit
+  - Support unprompted cluster step-downs using --force
+  - New nats stream graph and nats consumer graph commands to view real time traffic statistics for Streamd and Consumers
+  - Adds a new nats consumer find command used for searching using various filters and limiters for Consumers
+  - Improve nats consumer list to behave more like nats stream list
+  - Report JetStream limits in nats server info (Requires NATS Server 2.11)
+  - Support Pausing and Resuming consumers (Requires NATS Server 2.11)
+  - Support the concept of JetStream API levels based on ADR-44 and use that to ensure safer operations for those requiring NATS Server 2.11 and newer
+  - Support Pinned Consumers as per ADR-42 (Requires NATS Server 2.11)
+  - Support balancing leaderships for Streams and Consumers using nats stream balance and nats consumer balance (Requires NATS Server 2.11)
+  - Supports configuring Per Message TTL features for Streams (Requires NATS Server 2.11)
+  - KV Buckets can now be edited using nats kv edit
+  - Additional options were added to nats kv watch
+  Bug Fixes
+  - Numerous UX and rendering improvements
+  - When reporting on super clusters warn about route asymmetry per cluster rather than per super cluster
+  - Correctly calculate server RTTs in nats rtt command and support --trace
+  - Use the correct name spaces for Prometheus monitoring output
+  - Correctly handle single subject filter consumers
+  - Memory usage improvements for nats server report connections
+  - Do not prompt for Backoff on AckNone policy
+  - Fix listing Object Store names using --names
+  - Fix incorrect JetStream store dir when using $XDG_DATA_HOME in nats server run
+  - Fix handling of --top in nats server report accounts
+  - Do not handle Flow Control headers when not communicating with JetStream
+  - Do not alert about no meta leader in standalone servers
+  - Improved sorting for nats sub --report-subjects
+  - Improve paging of Connz requests in various reports
+  - Various progress bar related bug fixes
+  - Be less interactive when using --defaults in nats stream add
+  - Consumer max_waiting should not be editable
+  - Fix overriding JetStream Domain when Contexts are used
+  - The nats kv and nats obj commands now support Domains and API Prefixes
+  New Contributors
+  - @piotrpio made their first contribution in #866
+  - @LautaroJayat made their first contribution in #951
+  - @erhhung made their first contribution in #963
+  - @johnweldon made their first contribution in #974
+  - @samuelattwood made their first contribution in #986
+  - @MauriceVanVeen made their first contribution in #1000
+  - @zakk616 made their first contribution in #1025
+  - @jordan-rash made their first contribution in #1031
+  - @yeqown made their first contribution in #1039
+  - @mprimi made their first contribution in #1028
+  - @Zambito1 made their first contribution in #1066
+  - @martinpales made their first contribution in #1076
+  - @roeschter made their first contribution in #1080
+  - @djcarpe made their first contribution in #1082
+  - @stmcginnis made their first contribution in #1086
+  - @bannatech made their first contribution in #1091
+  - @ReubenMathew made their first contribution in #1096
+  - @ploubser made their first contribution in #1128
+  - @giacomoquinalia made their first contribution in #1138
+  - @joeriddles made their first contribution in #1174
+  - @alexbozhenko made their first contribution in #1190
+  - @GaMoCh made their first contribution in #1227
+  - @kroepke made their first contribution in #1240
+  Full Changelog: v0.1.1...v0.2.0
+ReleaseNotesUrl: https://github.com/nats-io/natscli/releases/tag/v0.2.0
+ManifestType: defaultLocale
+ManifestVersion: 1.9.0

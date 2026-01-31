@@ -1,0 +1,163 @@
+id: flaggedPackages
+name: GitOps.PullRequestIssueManagement
+description: Add keywords to this file to restrict packages that have been removed from the repository for a reason
+owner:
+resource: repository
+disabled: false
+where:
+configuration:
+  resourceManagementConfiguration:
+    eventResponderTasks:
+      - if:
+          - payloadType: Pull_Request
+          - isAction:
+              action: Opened
+          - or:
+              # Filezilla Client/Server
+              - titleContains:
+                  pattern: Filezilla
+                  isRegex: False
+              - bodyContains:
+                  pattern: Filezilla
+                  isRegex: False
+              # CheatEngine
+              - titleContains:
+                  pattern: CheatEngine
+                  isRegex: False
+              - bodyContains:
+                  pattern: CheatEngine
+                  isRegex: False
+              # GitCredentialManager
+              - titleContains:
+                  pattern: GitCredentialManager
+                  isRegex: False
+              - bodyContains:
+                  pattern: GitCredentialManager
+                  isRegex: False
+              # ranpha.LavFiltersMegamix
+              - titleContains:
+                  pattern: ranhpa
+                  isRegex: False
+              - bodyContains:
+                  pattern: ranhpa
+                  isRegex: False
+              - titleContains:
+                  pattern: LavFiltersMegamix
+                  isRegex: False
+              - bodyContains:
+                  pattern: LavFiltersMegamix
+                  isRegex: False
+              # Mariocube
+              - titleContains:
+                  pattern: Mariocube
+                  isRegex: False
+              - bodyContains:
+                  pattern: Mariocube
+                  isRegex: False
+              # IvanG.BrowserTamer
+              - and:
+                - titleContains:
+                    pattern: IvanG
+                    isRegex: False
+                - titleContains:
+                    pattern: BrowserTamer
+              - and:
+                - bodyContains:
+                    pattern: IvanG
+                    isRegex: False
+                - bodyContains:
+                    pattern: BrowserTamer
+              # alonguid.BrowserTamer
+              - and:
+                - titleContains:
+                    pattern: aloneguid
+                    isRegex: False
+                - titleContains:
+                    pattern: BrowserTamer
+              - and:
+                - bodyContains:
+                    pattern: aloneguid
+                    isRegex: False
+                - bodyContains:
+                    pattern: BrowserTamer
+              # FFXIVTeamcraft.FFXIVTeamcraft
+              - and:
+                - titleContains:
+                    pattern: FFXIV
+                - titleContains:
+                    pattern: Teamcraft
+              - and:
+                - bodyContains:
+                    pattern: FFXIV
+                - bodyContains:
+                    pattern: Teamcraft
+              # ArtifexSoftware.GhostScript
+              - and:
+                - titleContains:
+                    pattern: ArtifexSoftware
+                    isRegex: False
+                - titleContains:
+                    pattern: GhostScript
+              # PuloversMacroCreator
+              - titleContains:
+                  pattern: PuloversMacroCreator
+                  isRegex: False
+              - bodyContains:
+                  pattern: PuloversMacroCreator
+                  isRegex: False
+              # ALVR.ALVR
+              - titleContains:
+                  pattern: ALVR
+                  isRegex: False
+              - bodyContains:
+                  pattern: ALVR
+                  isRegex: False
+              # 3Kontakt.3Kontakt
+              - titleContains:
+                  pattern: 3Kontakt
+                  isRegex: False
+              - bodyContains:
+                  pattern: 3Kontakt
+                  isRegex: False
+        then:
+          - addLabel:
+              label: Package-Flagged
+          - addReply:
+              reply: >-
+                ${issueAuthor},
+
+
+                The package in your PR appears to be flagged. See the table below for more information. If it is not clear why you are seeing this message, please open a [new issue](https://github.com/microsoft/winget-pkgs/issues/new) inquiring about the status of the package.
+
+                | Package Name                     | Block Reason                                                                                                                                                                             | Reference                   |
+
+                | -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------- |
+
+                | Filezilla Client                 | Redistribution not allowed by license                                                                                                                                                    | #78578                      |
+
+                | Filezilla Server                 | Redistribution not allowed by license                                                                                                                                                    | #78578                      |
+
+                | CheatEngine                      | Installs PUA                                                                                                                                                                             | #61767                      |
+
+                | Git GitCredentialManager         | Publisher has requested removal                                                                                                                                                          | #100542                     |
+
+                | Ranpha LavFiltersMegamix         | Package is known to be an unofficial redistribution which hijacks the official package                                                                                                   | #95155                      |
+
+                | Mariocube - Any                  | Publisher is known to distribute packages unofficially with misrepresentation of origin                                                                                                  | #109796 / #103191 (comment) |
+
+                | aloneguid (Ivan G) Browser Tamer | Publisher has requested removal                                                                                                                                                          | #115266 (comment)           |
+
+                | FFXIV Teamcraft                  | Publisher has requested removal                                                                                                                                                          | #115369                     |
+
+                | ArtifexSoftware GhostScript      | Several versions of this package (<= 10.01.2) are affected by a critical security vulnerability. New PRs require attention to ensure that those versions are not added back to the repo. | #122294                     |
+
+                | Pulovers Macro Creator           | Installs PUA                                                                                                                                                                             | #123889                     |
+
+                | ALVR                             | Publisher has requested removal                                                                                                                                                          | #125124                     |
+
+                | 3Kontakt                         | Publisher has requested removal  (Multiple brands by multiple vendors, may cause conflicts)                                                                                              | #269259                     |
+
+
+                Template: msftbot/validationError/packageFlagged
+onFailure:
+onSuccess:

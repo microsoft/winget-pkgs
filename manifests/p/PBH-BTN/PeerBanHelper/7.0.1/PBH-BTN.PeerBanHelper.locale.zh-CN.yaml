@@ -1,0 +1,66 @@
+# Created with YamlCreate.ps1 v2.4.1 Dumplings Mod $debug=QUSU.CRLF.7-4-5.Win32NT
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.6.0.schema.json
+
+PackageIdentifier: PBH-BTN.PeerBanHelper
+PackageVersion: 7.0.1
+PackageLocale: zh-CN
+Publisher: PBH-BTN Community
+PublisherUrl: https://github.com/PBH-BTN
+PublisherSupportUrl: https://github.com/PBH-BTN/PeerBanHelper/issues
+# PrivacyUrl:
+# Author:
+PackageName: PeerBanHelper
+PackageUrl: https://github.com/PBH-BTN/PeerBanHelper
+License: GPL-3.0
+LicenseUrl: https://github.com/PBH-BTN/PeerBanHelper/blob/HEAD/LICENSE
+# Copyright:
+# CopyrightUrl:
+ShortDescription: 自动封禁不受欢迎、吸血和异常的 BT 客户端，并支持自定义规则。
+# Description:
+# Moniker:
+Tags:
+- bt
+- 种子
+ReleaseNotes: |-
+  这是 7.0.0 的累积错误修复。
+  重要安全提示
+  qBittorrent <= 5.0.0 版本出现安全漏洞（影响自 2010 年以来，14 年间发布的所有版本）。攻击者可以通过 RSS 订阅源，或者通过中间人劫持攻击 Python 下载、GeoIP 库更新和检查更新等模块进行远程代码执行（RCE）从而获取权限并控制整台计算机。请考虑升级到 5.0.1 或者更高版本。
+  建议的操作： 更新 qBittorrent 下载器到 5.0.1 或者更改版本
+  注：当前 5.0.1 版本可能存在内存泄漏。
+  临时缓解措施： 1) 不要添加不可信的 RSS 订阅源，或者暂时禁用 RSS 订阅功能；2) 确保上网环境安全，避免被中间人劫持攻击 3) 不要使用高权限账户（如：管理员或 root）运行 qBittorrent，对于 Linux 用户，考虑在 Docker 的非特权容器中运行 qBittorrent
+  如果您的 qBittorrent 运行在高价值设备上（如存储重要数据的 NAS）： 建议您使用 Docker 部署 qBittorrent，考虑到 qBittorrent 在过去多个版本的安全方面的表现来说，不能说很差，只能说几乎完全没有安全性可言。对 qBittorrent 做隔离是相当必要的操作。如果您的 NAS 主机系统被提权控制，快照保护和定期备份程序都可能面临失效的风险。你设置的文件系统快照在系统本身被拿下的情况下，很可能无法发挥作用。
+  原文：https://cyberinsider.com/rce-vulnerability-in-qbittorrents-ssl-handling-patched-after-14-years/
+  BTN 网络威胁提示
+  一般来说，我们不会在发行注记中发布 BTN 网络威胁信息，但由于相关地区的威胁以惊人的速度扩展，并且我们的云端规则无法很好的覆盖这些 IP 地址（前后缀都在随机更改），因此我们决定在发行注记中提及这一情况。
+  我们观察到最近 7 天，大连市出现大量异常连接记录，以一己之力追上海南省网的滥用情况。
+  恶意吸血者同时使用大量 IPV4 和 IPV6 地址，并通过频繁重拨、多拨更换 IPV6 前缀，并配合软件手段随机 IPV6 后缀，且客户端名称通常为 Transmission 2.94 或者 Transmission 3.00。相关样本与我们此前在海南省网发现的 Transmission 2.94 样本非常相似。但由于没有更多信息，我们暂时无法确认此样本的原始来源。
+  由于网络 IP 规则的局限性和时延性，我们推荐您通过 PBH 内置的 “城市” 规则选项卡，创建下列城市的黑名单规则（相关规则已经尽可能细化以避免影响其他正常地区）：
+  - 辽宁省 大连市 沙河口区
+  - 辽宁省 大连市 中山区
+  - 福建省 宁德市 古田县
+  - 福建省 莆田市 涵江区
+  - 海南省 海口市
+  操作示例如下：
+
+  对于其它吸血行为并不那么泛滥的地区，我们将继续通过 BTN 和 IP 规则维护 IP 列表。在后续版本中我们将持续改进各种反吸血模块和技术，并重点改进云端反吸血的能力。
+  请注意：使用 6.x.x 的版本的用户在添加上述规则后重启可能丢失更改，请升级到最低 7.0.0 版本。
+  错误修复
+  - [重要] 修复自 v6 版本以来，IP 订阅规则更新时缓存未被正确清除的问题，这会影响封禁效率和质量，并可能导致部分 IP 在一段时间内无法得到封禁 @Ghost-chu
+  - 修复通过 WebUI 修改连锁封禁时，IPV6 前缀长度被错误限制在 32 的问题 @cddjr (首次贡献)
+  - 修复正式版本提示当前为快照构建的问题 @Ghost-chu
+  - 修复 WebUI 中 PCB 前缀数值的范围大小限制丢失的问题 @paulzzh
+  - 修复 WebUI 表格内容有时出现偏移的问题 @SaikiCode (首次贡献) @Gaojianli
+  - 修复 WebUI 的封禁列表出现跳变的问题 @SaikiCode
+  更改
+  - WebUI 微调 @Gaojianli
+  - 自动打包 Portable 包，无需人工干预 @paulzzh
+  Docker
+  DockerHub: ghostchu/peerbanhelper:v7.0.1 阿里云国内镜像加速：registry.cn-hangzhou.aliyuncs.com/ghostchu/peerbanhelper:v7.0.1
+ReleaseNotesUrl: https://github.com/PBH-BTN/PeerBanHelper/releases/tag/v7.0.1
+# PurchaseUrl:
+# InstallationNotes:
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/PBH-BTN/PeerBanHelper/wiki
+ManifestType: locale
+ManifestVersion: 1.6.0

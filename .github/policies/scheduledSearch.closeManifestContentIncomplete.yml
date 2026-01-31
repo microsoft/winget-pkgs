@@ -1,0 +1,32 @@
+id: scheduledSearch.closeManifestContentIncomplete
+name: GitOps.PullRequestIssueManagement
+description: Close stale pull requests marked with "Manifest-Content-Incomplete"
+owner:
+resource: repository
+disabled: false
+where:
+configuration:
+  resourceManagementConfiguration:
+    scheduledSearches:
+      - description: >-
+          Search for PR where -
+          * Pull Request is Open
+          * Pull request has the label Manifest-Content-Incomplete
+          * Has not had activity in the last 5 days
+
+          Then -
+          * Close the PR
+        frequencies:
+          - hourly:
+              hour: 12
+        filters:
+          - isPullRequest
+          - isOpen
+          - hasLabel:
+              label: Manifest-Content-Incomplete
+          - noActivitySince:
+              days: 5
+        actions:
+          - closeIssue
+onFailure:
+onSuccess:

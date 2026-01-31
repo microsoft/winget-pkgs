@@ -1,0 +1,59 @@
+# Created with YamlCreate.ps1 v2.2.4 $debug=NVS0.CRLF.5-1-19041-2673.Win32NT
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.4.0.schema.json
+
+PackageIdentifier: mtkennerly.ludusavi
+PackageVersion: 0.16.0
+PackageLocale: en-US
+Publisher: mtkennerly
+PublisherUrl: https://github.com/mtkennerly
+PublisherSupportUrl: https://github.com/mtkennerly/ludusavi/issues
+# PrivacyUrl:
+Author: Matthew T. Kennerly
+PackageName: ludusavi
+PackageUrl: https://github.com/mtkennerly/ludusavi
+License: MIT
+LicenseUrl: https://github.com/mtkennerly/ludusavi/blob/master/LICENSE
+Copyright: Copyright (c) 2020 Matthew T. Kennerly (mtkennerly)
+CopyrightUrl: https://github.com/mtkennerly/ludusavi/blob/master/LICENSE
+ShortDescription: Backup tool for PC game saves
+# Description:
+Moniker: ludusavi
+# Tags:
+# Agreements:
+ReleaseNotes: |-
+  Added:
+    Registry values are now listed individually, not just keys. This also means you can exclude specific values from the backup.
+    Registry backups now include binary values.
+    Registry backups now handle alternatives to HKEY_LOCAL_MACHINE\SOFTWARE. For example, when Ludusavi tries to find HKEY_LOCAL_MACHINE\SOFTWARE\example, it will now also look for:
+      HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\example
+      HKEY_CURRENT_USER\Software\Classes\VirtualStore\MACHINE\SOFTWARE\example
+      HKEY_CURRENT_USER\Software\Classes\VirtualStore\MACHINE\SOFTWARE\Wow6432Node\example
+    GUI: In restore mode, you can create a comment on each backup. You can use this to keep track of how each backup reflects your game progress.
+    GUI: You can now reorder custom games, roots, redirects, and ignored paths/registry.
+    CLI: manifest show command.
+    CLI: --compression-level option for the backup command.
+    Updated translations, including new/partial translations for Dutch, French, Russian, and Ukrainian. (Thanks to contributors on the Crowdin project)
+    A translation for Japanese has also been added, but it only has experimental support because of a technical limitation. You can enable it by editing the config file directly with language code ja-JP,
+  Fixed:
+  	  When a save file failed to be backed up, Ludusavi would still record that file in the backup's mapping.yaml. Because of this, when Ludusavi would later check whether a new backup was needed, it would assume that the failed file had been backed up previously. Now, failed files are not recorded in mapping.yaml, so subsequent scans will detect that they still need to be backed up.
+  	  Heroic Wine/Proton prefixes containing a pfx subfolder were not detected.
+  	  Along with any explicit installDir entries in the manifest, Ludusavi tries to find each game's install directory based on that game's title. However, if that title was not valid as a folder name, then Ludusavi would never find it. Now, Ludusavi will ignore characters like : and ? that cannot appear in folder names.
+  	  For native Linux games installed with the Heroic launcher, the <storeUserId> path placeholder is now handled in order to detect more saves. (Contributed by sluedecke)
+  	  Ludusavi currently cannot back up registry keys whose names contain a forward slash. This limitation still exists, but now such keys are no longer listed incorrectly as two separate keys. This was only a display issue, because such keys were not included in the backup regardless.
+  	  GUI: If some saves failed to back up, then the scan buttons would stay deactivated, and you would have to reopen the program in order to do another scan.
+  	  GUI: If a game had a new registry value inside of a key that also contained other keys, then the game would be flagged as changed, but not the key with the new value. Now that values are listed individually, you can tell what changed.
+  	  GUI: Scrollbar position on the other screen overlapped some content.
+  	  GUI: Scroll position is once again preserved when switching between screens.
+  	  GUI: Some inconsistent element sizes and spacing.
+  Changed:
+  	  GUI: Moved roots to the other screen.
+  	  GUI: Thanks to updates in Iced:
+  	    Text fields now have a blinking cursor.
+  	    Text fields now support shift+click to select text.
+  	  Thanks to updates in steamlocate, the titles of Steam shortcuts for non-Steam games are now looked up case-insensitively.
+ReleaseNotesUrl: https://github.com/mtkennerly/ludusavi/releases/tag/v0.16.0
+# PurchaseUrl:
+# InstallationNotes:
+# Documentations:
+ManifestType: defaultLocale
+ManifestVersion: 1.4.0
