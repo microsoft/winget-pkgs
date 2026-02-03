@@ -1,0 +1,122 @@
+# Created with komac v2.15.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Gruntwork.Terragrunt
+PackageVersion: 0.99.0
+PackageLocale: en-US
+Publisher: Gruntwork
+PublisherUrl: https://terragrunt.gruntwork.io/
+PublisherSupportUrl: https://terragrunt.gruntwork.io/docs/community/support
+PrivacyUrl: https://gruntwork.io/legal/privacy-policy
+PackageName: Terragrunt
+PackageUrl: https://github.com/gruntwork-io/terragrunt/releases/tag/v0.68.9
+License: MIT
+LicenseUrl: https://github.com/gruntwork-io/terragrunt/blob/HEAD/LICENSE.txt
+Copyright: © 2024 Gruntwork, Inc. All rights reserved.
+ShortDescription: Terragrunt is a thin wrapper for Terraform that provides extra tools for keeping your Terraform configurations DRY, working with multiple Terraform modules, and managing remote state.
+Description: Terragrunt is a thin wrapper for Terraform that provides extra tools for keeping your Terraform configurations DRY, working with multiple Terraform modules, and managing remote state.
+Tags:
+- IaC
+- Infrastructure as Code
+- Terraform
+- Terraform Wrapper
+- terragrunt
+ReleaseNotes: |-
+  🛠️ Breaking Changes
+  Undocumented behavior removed
+  We have removed several undocumented features that served as temporary stop-gaps to facilitate experimentation.
+  The following environment variables no longer affect Terragrunt behavior:
+  - TERRAGRUNT_TEMP_QUOTE_NULL
+  - TMP_UNDOCUMENTED_REPORT_PADDER
+  - TMP_UNDOCUMENTED_REPORT_UNIT_COLORIZE
+  - TMP_UNDOCUMENTED_COLORIZE_DEFAULT_SUMMARY_PADDING
+  Internal tflint deprecated
+  Terragrunt has been shipping with a version of tflint compiled into the binary to allow for more convenient usage without installing tflint directly. However due to the adoption of a BUSL license in tflint, the version included in Terragrunt was frozen.
+  We have now deprecated use of the internal tflint hook, and will be fully removing it in the future. We still do work to integrate with tflint; Including automatically running tflint init and passing through variables. For now using the internal version will only emit a warning, and you can opt in to the future behavior today in one of two ways:
+  - The legacy-internal-tflint strict control (recommended)
+  - Adding the --terragrunt-external-tflint flag to your hook usage (this also works in previous versions of Terragrunt); this flag is stripped prior to running the external tflint. Example:
+    terraform {
+        before_hook "tflint" {
+        commands = ["apply", "plan"]
+        execute = ["tflint", "--terragrunt-external-tflint", "--minimum-failure-severity=error", "--config", "custom.tflint.hcl"]
+      }
+    }
+  ✨ New Features
+  Depth control for dependency traversal
+  Graph-based expressions in the --filter flag now support limiting the depth of graph traversal they perform when discovering units. You can now append/prepend a number to the end of a graph expression ellipsis to control how deep in graph traversal Terragrunt will look for dependents/dependencies.
+  e.g.
+  # Find 'service' and only its direct dependencies (1 level deep)
+  terragrunt find --filter 'service...1'
+  # Find 'vpc' and only components that directly depend on it (1 level)
+  terragrunt find --filter '1...vpc'
+  # Find 'db' with 2 levels of dependencies and 1 level of dependents
+  terragrunt find --filter '1...db...2'
+  This should result in significant performance and usability improvements for users with large dependency graphs.
+  Special thanks to @sofianedjerbi for contributing this feature!
+  Run report schema extended
+  The run report has been extended to include the Ref, Cmd and Args fields when relevant to a run.
+  - The Ref field will be populated for runs performed in Git worktrees due to their discovery from a Git-based expression in a filter.
+  - The Cmd field will contain the sub command of OpenTofu/Terraform executed in a run (e.g. plan , apply) and the Args field will contain the arguments passed to that subcommand (e.g. -auto-approve, -destroy). These can differ between runs when using Git-based expressions, as additions or modifications of units between Git references can result in a plan or apply, whereas removal of units can result in plan -destroy or apply -destroy .
+  🧪 Experiments Updated
+  IaC Engines Updated to use v0.1.0 of terragrunt-engine-go
+  The iac-engine experiment has been updated to use v0.1.0 of the terragrunt-engine-go library.
+  Given that this is still experimental functionality, no effort has been made to maintain backwards compatibility with existing engines. If you are currently using the OpenTofu engine, you will need to upgrade to v0.1.0 of the engine. The Terraform engine will be updated in the near future.
+  This update pulls in changes to the protobuf schema used in communication between Terragrunt and IaC engines to give engines the ability to log messages in Terragrunt and reduces the overall size of messages passed to Terragrunt for stdout/stderr messages.
+  ⚙️ Process Updates
+  Curl to Bash script available
+  In addition to all the other installation mechanisms available to install Terragrunt, a convenient curl to bash script has been added to minimize the friction in installing and getting started with Terragrunt, and removing any dependency on third party tools if you don’t want to use them.
+  curl -sL https://terragrunt.gruntwork.io/install | bash
+  The installation can be customized, with full customization options available via the --help flag.
+  curl -sL https://terragrunt.gruntwork.io/install | bash -s -- --help
+  In addition to providing this script, the ASDF plugin for Terragrunt has been updated to automatically perform signature verification on an opt-out basis for any version of Terragrunt equal or newer to v0.98.0. The Terragrunt entry in the Aqua registry has been updated to do the same, meaning mise users will automatically benefit from this as well.
+  If you don’t want to use the curl to bash script, or any of the other distribution methods available, the instructions for performing signature verification manually have been updated in the installation documentation as well.
+  📖 Documentation Updates
+  OpenTofu/Terraform compatibility matrix now available as API
+  In addition to providing a compatibility matrix in the Supported Versions documentation, compatibility verification is also available via an API endpoint here:
+  https://terragrunt.gruntwork.io/api/v1/compatibility
+  See the compatibility API documentation for more details, including availability of query string parameters for filtering responses.
+  JSON schema for --auth-provider-cmd published
+  A JSON schema has been published for the schema expected for the stdout of commands invoked using --auth-provider-cmd. You can access the schema here.
+  You can use tools like this JSON schema validator or other simple utilities to programmatically validate that the stdout of JSON responses in your commands invoked by --auth-provider-cmd obey the expected schema.
+  🐛 Bug Fixes
+  Exit Codes for run --all more consistent
+  Fixed an issue where run --all incorrectly returned a 0 exit code when individual units failed.
+  Automatic retry for provider queries
+  To address intermittent errors in queries to the OpenTofu/Terraform provider registries, we expanded the automatic retry logic to include timeouts from provider registries.
+  What's Changed
+  - feat(filter): add depth control for dependency traversal by @sofianedjerbi in #5268
+  - feat: Using updated v0.1.0 version of terragrunt-engine-go by @yhakbar in #5381
+  - feat: Extending report schema by @yhakbar in #5401
+  - fix: Update error messages to deduplicate by @Resonance1584 in #5375
+  - fix: Addressing empty mark as read by @yhakbar in #5387
+  - fix: Fixing exit codes for run --all by @yhakbar in #5385
+  - fix: Adding auto-retry for provider queries by @yhakbar in #5395
+  - fix: Fixing TestTUIFinalModel flake by @yhakbar in #5410
+  - fix: Removing unnecessary schema validation by @yhakbar in #5416
+  - process: install script for Terragrunt by @denis256 in #5364
+  - docs: compatibility API by @denis256 in #5383
+  - docs: Updates to LP by @karlcarstensen in #5391
+  - docs: Fixing Discord link in README by @yhakbar in #5403
+  - docs: New ambassador by @karlcarstensen in #5406
+  - docs: Fix docs build by @ThisGuyCodes in #5415
+  - docs: filter depth control by @sofianedjerbi in #5382
+  - chore: Adding --provider-auth-cmd schema by @yhakbar in #5405
+  - chore: Upgrade golangci-lint to v2.8.0 by @yhakbar in #5365
+  - chore: Removing runfn package by @yhakbar in #5359
+  - chore: Removing undocumented behavior by @yhakbar in #5396
+  - chore: Adding red test for HTTP backend encryption failing by @yhakbar in #5393
+  - chore: improve test error message by @ThisGuyCodes in #5408
+  - chore: Improving test speed by @yhakbar in #5399
+  - chore: Committing lockfiles by @yhakbar in #5404
+  - chore: add internal-tflint strict control by @ThisGuyCodes in #5361
+  - chore: Ensuring go mod cache in addition to go cache by @yhakbar in #5411
+  New Contributors
+  - @sofianedjerbi made their first contribution in #5268
+  - @blacksmith-sh[bot] made their first contribution in #5388
+  Full Changelog: v0.98.0...v0.99.0
+ReleaseNotesUrl: https://github.com/gruntwork-io/terragrunt/releases/tag/v0.99.0
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/gruntwork-io/terragrunt/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

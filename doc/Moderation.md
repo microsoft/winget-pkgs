@@ -31,13 +31,50 @@ Our intent was not to introduce a numbers game for others to achieve and automat
 | -------------------- |
 | **[@ImJoakim](https://github.com/ImJoakim)** |
 | **[@ItzLevvie](https://github.com/ItzLevvie)** |
-| **[@jedieaston](https://github.com/jedieeaston)** |
-| **[@KaranKad](https://github.com/KaranKaD)** |
+| **[@jedieaston](https://github.com/jedieaston)** |
+| **[@KaranKad](https://github.com/KaranKad)** |
 | **[@mdanish-kh](https://github.com/mdanish-kh)** |
 | **[@OfficialEsco](https://github.com/OfficialEsco)** |
 | **[@quhxl](https://github.com/quhxl)** |
 | **[@russellbanks](https://github.com/russellbanks)** |
 | **[@Trenly](https://github.com/Trenly)** |
+
+# Information for Contributors
+
+Sometimes contributors may request assistance from moderators in order to take action on issues or pull requests. This section is designed to help contributors know how best to contact moderators.
+
+## Before You Request Assistance
+
+Before requesting assistance, please work through these recommendations first:
+
+1. Wait. Sometimes moderators are busy or working on pressing matters. If you're an infrequent contributor, your pull request is subject to greater scrutiny than frequent contributors. Please be patient, but reach out if your pull request is outstanding for more than 24 hours.
+2. If you've submitted a pull request and it hasn't been approved, review any comments and labels to ensure no action or information is outstanding from you.
+3. If you're helping on an existing package (new version, change, etc), consider contacting any regular package maintainer and ask for their assistance. They may be able to help vouch for your issue/pull request or help explain why it's stuck.
+
+In spite of the above, if the issue or pull request is urgent (i.e. critical security vulnerability, breaking change, etc.), it's better to ask first so that help can be added immediately while you work through the above questions.
+
+## Where to Request Assistance
+
+### GitHub Mentions
+
+For infrequent contributors, GitHub @mentions are likely the easiest way to get attention. As there are many moderators in the project, the best way to know who to tag is to check [recently closed pull requests](https://github.com/microsoft/winget-pkgs/pulls?q=is%3Apr+is%3Aclosed+label%3AModerator-Approved) and see which moderator(s) have closed recent pull requests. This is a generally indicative of which moderator(s) are active and able to assist.
+
+Please ensure when you mention a moderator to include a clear and concise note of what action you are requesting. Please only mention a maximum of two moderators at a time to prevent miscommunications.
+
+### Matrix Room
+
+> [!NOTE]
+> Use of Matrix requires user discretion as it is a federated communication system. Any privacy policies, software EULAs, user content agreements, etc the user agrees to are unrelated to the winget-pkgs repository and the winget project. Users joining the Microsoft_winget-pkgs room are required to abide by the [code of conduct](../CODE_OF_CONDUCT.md)
+
+For frequent contributors, there is a Matrix room where many moderators regularly participate. For quick requests (e.g. "Could someone please check out PR#####?") which are addressed to the entire room rather than specific moderators, this is a better option than GitHub Mentions.
+
+Any significant technical discussions should be posted on GitHub comments so that conversations and troubleshooting can be available to the community, search engines, etc.
+
+[Gitter.im (Homeserver) Link](https://gitter.im/Microsoft/winget-pkgs)
+
+Matrix Room Alias (for all other homeservers): `#Microsoft_winget-pkgs:gitter.im`
+
+# Information For Moderators
 
 ## Expectations
 

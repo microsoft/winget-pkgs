@@ -1,0 +1,69 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: Dynare.Dynare
+PackageVersion: "6.5"
+PackageLocale: en-US
+Publisher: Dynare Team
+PublisherUrl: https://www.dynare.org/
+PublisherSupportUrl: https://www.dynare.org/contact/
+PackageName: Dynare
+PackageUrl: https://www.dynare.org/
+License: GPL-3.0-or-later
+LicenseUrl: https://www.gnu.org/licenses/gpl-3.0.html
+Copyright: © 1996–2025 Dynare Team.
+ShortDescription: A software platform for handling a wide class of economic models.
+Description: |-
+  Dynare is a software platform for handling a wide class of economic models, in particular dynamic stochastic general equilibrium (DSGE) and overlapping generations (OLG) models. The models solved by Dynare include those relying on the rational expectations hypothesis, wherein agents form their expectations about the future in a way consistent with the model. But Dynare is also able to handle models where expectations are formed differently: on one extreme, models where agents perfectly anticipate the future; on the other extreme, models where agents have limited rationality or imperfect knowledge of the state of the economy and, hence, form their expectations through a learning process. In terms of types of agents, models solved by Dynare can incorporate consumers, productive firms, governments, monetary authorities, investors and financial intermediaries. Some degree of heterogeneity can be achieved by including several distinct classes of agents in each of the aforementioned agent categories.
+  Dynare offers a user-friendly and intuitive way of describing these models. It is able to perform simulations of the model given a calibration of the model parameters and is also able to estimate these parameters given a dataset. In practice, the user will write a text file containing the list of model variables, the dynamic equations linking these variables together, the computing tasks to be performed and the desired graphical or numerical outputs.
+  A large panel of applied mathematics and computer science techniques are internally employed by Dynare: multivariate nonlinear solving and optimization, matrix factorizations, local functional approximation, Kalman filters and smoothers, MCMC techniques for Bayesian estimation, graph algorithms, optimal control, etc. References to the literature can be found here.
+  Various public bodies (central banks, ministries of economy and finance, international organisations) and some private financial institutions use Dynare for performing policy analysis exercises and as a support tool for forecasting exercises. In the academic world, Dynare is used for research and teaching purposes in postgraduate macroeconomics courses.
+Tags:
+- econometrics
+- economics
+- finance
+- mathematics
+- modeling
+ReleaseNotes: |-
+  We are pleased to announce the release of Dynare 6.5.
+  This maintenance release fixes various bugs.
+  The Windows, macOS, MATLAB Online and source packages are available for download at the Dynare website.
+  This release is compatible with MATLAB versions ranging from 9.5 (R2018b) to 25.2 (R2025b), and with GNU Octave versions ranging from 7.1.0 to 10.3.0 (NB: the Windows package requires version 10.3.0 specifically).
+  Here is a list of the problems identified in version 6.4 and that have been fixed in version 6.5:
+  - Several issues in the nonlinear solver, used in e.g. numerical steady state computations, were fixed:
+    - it only directly accepted initial values equal to the solution if the Jacobian contained NaN or Inf; otherwise, the numerical solver was uselessly started
+    - it erroneously accepted initial guesses with complex values when randomizing the starting point
+    - it erroneously accepted initial guesses that contained Inf
+  - Optimization would, in rare cases, erroneously apply an infinite penalty function value
+  - In rare cases, the multivariate diffuse Kalman filter/smoother (kalman_algo=3) did not correctly exit the diffuse stage
+  - The following problems with the estimation command were fixed:
+    - the point forecasts triggered by the forecast option did not take shock uncertainty into account
+    - the keep_kalman_algo_if_singularity_is_detected option did not work as advertised (option will be removed in Dynare 7)
+    - the EndTemperature suboption of the mode_compute=10 option (“simpsa”) was broken
+    - the mh_posterior_mode_estimation option was broken in conjunction with the method_of_moments command
+    - the nodecomposition option did not suppress all variance decompositions
+    - the posterior_sampling_method='slice' option did not save all files in the correct folder
+    - the mh_recover option did not work correctly in conjunction with the posterior_sampling_method='slice' and posterior_sampler_options=('save_tmp_file', 1) options
+    - the results of mode-finding were not correctly stored in oo_.posterior_mode for shock and measurement error correlations
+  - The following problems with non-linear filters were fixed:
+    - the manual incorrectly stated that 1,000 instead of 5,000 particles was the default
+    - the estimation command did not allow the pruning option to be set for higher-order estimation
+    - combining options filter_algorithm=cpf and proposal_approximation=montecarlo of the estimation command returned incorrect results
+    - the suboptions 'unscented_beta' and 'unscented_kappa' of the particle_filter_options option of the estimation command did not accept values of 0
+    - the filter_algorithm=gf and filter_algorithm=gmf options of the estimation command did not correctly handle correlated measurement error
+  - The confidence bands of classical forecasts had incorrect coverage
+  - Several issues with the forecast command used with exogenous deterministic variables (declared with the varexo_det command) were fixed:
+    - without measurement errors, it would store the upper bound of the confidence interval in the HPDinf field and the lower bound in the HPDsup field
+    - with multiple measurement errors it would crash if not all observables were requested as outputs
+    - it would assign the output to the wrong variable names if a variable list was specified after the command
+  - The discretionary_policy command did not accept the planner_discount_latex_name option, contrary to what the documentation says
+  - The outfile option of the smoother2histval command would produce an incorrect file on models with two lags or more, leading to incorrect results when loading that file with the histval_file command
+  - OccBin would occasionally crash upon encountering invalid parameter vectors
+  - The example1_reporting.mod example file was broken
+  As a reminder, the list of new features introduced in versions 6.x can be found in the release notes for 6.0.
+ReleaseNotesUrl: https://www.dynare.org/new-dynare-release/dynare-6.5-released/
+Documentations:
+- DocumentLabel: Reference Manual
+  DocumentUrl: https://www.dynare.org/manual/
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

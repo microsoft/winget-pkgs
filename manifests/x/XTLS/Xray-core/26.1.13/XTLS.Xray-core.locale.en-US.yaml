@@ -1,0 +1,108 @@
+# Created with komac v2.14.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: XTLS.Xray-core
+PackageVersion: 26.1.13
+PackageLocale: en-US
+Publisher: XTLS
+PublisherUrl: https://xtls.github.io/
+PublisherSupportUrl: https://github.com/XTLS/Xray-core/issues
+Author: XTLS
+PackageName: Xray-core
+PackageUrl: https://xtls.github.io/
+License: MPL-2.0
+LicenseUrl: https://github.com/XTLS/Xray-core/blob/HEAD/LICENSE
+Copyright: Mozilla Public License Version 2.0
+CopyrightUrl: https://github.com/XTLS/Xray-core/blob/main/LICENSE
+ShortDescription: Xray, Penetrates Everything.
+Description: Xray, Penetrates Everything. Also the best v2ray-core, with XTLS support. Fully compatible configuration.
+Moniker: xray
+Tags:
+- clash
+- network
+- proxy
+- v2ray
+- vpn
+- xray
+ReleaseNotes: |-
+  Proxy: Add TUN inbound for Windows & Linux, including Android #5464 #5509 & Proxy: Add Hysteria outbound & transport (version 2, udphop) and Salamander udpmask #5508
+  新年好！2026 第一版 Xray-core 重点更新内容：
+  1. 新增 TUN 入站（Windows、Linux、Android）#5464 ，默认 UDP FullCone 与 XUDP UoT Migration #5509
+  2. 新增 process 路由规则（Windows、Linux），匹配进程名/绝对路径/文件夹，支持任何入站 #5496
+  3. 新增 Hysteria 出站、Hysteria 2 传输层（支持端口跳跃）、Salamander 伪装层，完整配置示例详见 #5508
+  4. 新增“最终伪装层”概念 https://t.me/projectXtls/1354 ，比 TLS/QUIC 更底层，下一步计划 #5508 (comment)
+  5. TLS 客户端使用 pinnedPeerCertSha256 取代原有的两项 pinned 参数 #5154 #5532
+  6. REALITY 客户端收到目标网站的真证书时打印出更加明确的警报（potential MITM or redirection）#5427
+  7. 进一步降低了 Xray-core 启动时的峰值内存占用 #5480 #5488 ，利好 iOS 客户端，下一步计划 #5505
+  为了使用 TUN，配置文件需要以下修改，以 Windows 为例：
+  1. 配置文件加一个 "tun" 入站，无需 settings，加一个 "direct" 作为默认出站
+  2. 为所有出站设置 sockopt "interface": "WLAN" 或 "以太网" 防止出站回流 Xray-core
+  3. 设置 routing 比如 "process": ["NatTypeTester.exe"] 导向代理协议出站
+  4. 浏览器会有 QUIC，注意设置路由 block UDP/443，或为 sniffing 启用 "quic"
+  TUN 尚未支持“自动修改系统路由表”，目前需要手动设置：
+  5. 以管理员权限启动 Xray-core，静置数秒等 Windows 自动为 TUN 分配 IP
+  6. 执行 ipconfig 与 route print 查看 Xray TUN 的 IPv4 地址与 interface ID
+  7. 以管理员权限执行 route add 0.0.0.0 mask 0.0.0.0 *.*.*.* if ** 新增系统路由
+  感谢 @Owersun @yuhan6665 @Fangliding @KobeArthurScofield @RPRX 为支持 TUN 所作出的贡献！
+  @Meo597 将 https://xtls.github.io/ 升级至了 VitePress，本次更新内容也会陆续更新至文档中
+  由于伊朗目前完全断网，致力于内存优化的贡献者 @hossinasaadi 已有几天没有上线，期待他的回归
+  Sponsors
+  Remnawave
+  Happ
+  Sponsor Xray-core
+  Donation & NFTs
+  Collect a Project X NFT to support the development of Project X!
+  Project X NFT
+  - TRX(Tron)/USDT/USDC: TNrDh5VSfwd4RPrwsohr6poyNTfFefNYan
+  - TON: UQApeV-u2gm43aC1uP76xAC1m6vCylstaN1gpfBmre_5IyTH
+  - BTC: 1JpqcziZZuqv3QQJhZGNGBVdCBrGgkL6cT
+  - XMR: 4ABHQZ3yJZkBnLoqiKvb3f8eqUnX4iMPb6wdant5ZLGQELctcerceSGEfJnoCk6nnyRZm73wrwSgvZ2WmjYLng6R7sR67nq
+  - SOL/USDT/USDC: 3x5NuXHzB5APG6vRinPZcsUv5ukWUY1tBGRSJiEJWtZa
+  - ETH/USDT/USDC: 0xDc3Fe44F0f25D13CACb1C4896CD0D321df3146Ee
+  - Project X NFT: https://opensea.io/item/ethereum/0x5ee362866001613093361eb8569d59c4141b76d1/1
+  - VLESS NFT: https://opensea.io/collection/vless
+  - REALITY NFT: https://opensea.io/item/ethereum/0x5ee362866001613093361eb8569d59c4141b76d1/2
+  - Related links: VLESS Post-Quantum Encryption, XHTTP: Beyond REALITY, Announcement of NFTs by Project X
+  该版本升级了一些依赖，并使用 Go 1.25.5 拉满 inline 编译，已 tag v1.260113.0，感谢所有贡献者，详见下方 change log
+  What's Changed
+  - Chore: Remove all double gonet import by @Fangliding in #5402
+  - Wireguard: Decouple server endpoint DNS from address option by @Meo597 in #5417
+  - VLESS inbound: Print invalid UUID string by @xtlsee @RPRX in #5426
+  - REALITY client: Clearer log when receiving real certificate by @ari-ahm @RPRX in #5427
+  - TLS ECH: Increase DOH timeout by @patterniha @Fangliding in #5455
+  - Tunnel/Dokodemo: Fix stats conn unwrap by @Fangliding in #5440
+  - DomainMatcher: Prevent illegal rules from causing core startup failures by @Meo597 in #5430
+  - common/uuid: fix panic when parsing 32-len invalid UUID string. by @ari-ahm in #5468
+  - API: Add GetAllOnlineUsers RPC to StatsService for retrieving online users by @mr1cloud in #5080
+  - Geofiles: Implement mmap in filesystem to reduce ram usage by @hossinasaadi in #5480
+  - Remove redundant stats in mux and bridge dispatcher by @yuhan6665 in #5466
+  - XHTTP server: Fix ScStreamUpServerSecs' non-default value by @fanymagnet in #5486
+  - Routing config: Add processName by @Fangliding in #5489
+  - README.md: Re-add 3X-UI to Web Panels by @RPRX in b38a412
+  - Routing: Reduce peak memory usage by @hossinasaadi in #5488
+  - DNS: Fix parse domain and geoip by @hossinasaadi in #5499
+  - README.md: Add TX-UI to Web Panels by @Incognito-Coder in #4981
+  - transport/pipe/impl.go: Remove runtime.Gosched() in WriteMultiBuffer() by @Fangliding in #5467
+  - Routing config: Replace processName with process (full-name/abs-path/abs-folder) by @Fangliding in #5496
+  - GitHub Actions: Add wintun.dll into Windows zips; Workflow refinement by @KobeArthurScofield in #5501
+  - Proxy: Add TUN inbound for Windows & Linux, including Android by @Owersun @yuhan6665 in #5464
+  - Tests: Improve geosite & geoip tests by @hossinasaadi in #5502
+  - TLS config: Add pinnedPeerCertSha256; Remove pinnedPeerCertificateChainSha256 and pinnedPeerCertificatePublicKeySha256 by @Fangliding @RPRX in #5154
+  - DNS: Check err for UDP dns.PackMessage(req.msg) by @Fangliding in #5512
+  - TUN inbound: Implement UDP FullCone NAT by @RPRX @Fangliding @Owersun in #5509
+  - TUN inbound: Fix log, CanSpliceCopy, tag, sniffing, and port config issues by @RPRX in #5522
+  - TUN inbound: Make udp_fullcone pure side effect free udp connection by @Owersun @RPRX in #5526
+  - Upgrade gVisor to latest version v0.0.0-20260109181451-4be7c433dae2 by @Owersun in #5527
+  - Proxy: Add Hysteria outbound & transport (version 2, udphop) and Salamander udpmask by @LjhAUMEM in #5508
+  - TUN inbound: Close connection when handling is done by @Owersun in #5531
+  - TLS client: Verify leaf cert (name, time) when pinning self-signed CA by @Fangliding in #5532
+  New Contributors
+  - @xtlsee made their first contribution in #5426
+  - @ari-ahm made their first contribution in #5427
+  - @fanymagnet made their first contribution in #5486
+  - @Incognito-Coder made their first contribution in #4981
+  - @Owersun made their first contribution in #5464
+  Full Changelog: v25.12.8...v26.1.13
+ReleaseNotesUrl: https://github.com/XTLS/Xray-core/releases/tag/v26.1.13
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

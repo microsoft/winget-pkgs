@@ -1,0 +1,36 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: houseabsolute.ubi
+PackageVersion: 0.8.4
+PackageLocale: en-US
+Publisher: A house for code
+PublisherUrl: https://github.com/houseabsolute
+PublisherSupportUrl: https://github.com/houseabsolute/ubi/issues
+PackageName: ubi
+PackageUrl: https://github.com/houseabsolute/ubi
+License: Apache-2.0 or MIT
+Copyright: Copyright (c) 2025 David Rolsky
+ShortDescription: The Universal Binary Installer
+Description: |-
+  UBI is a universal binary installer library and CLI tool.
+  When I say "universal", I mean it downloads binaries from GitHub or GitLab releases.
+  When I say "binary", I mean it handles single-file executables like those created by most Go and Rust projects.
+  When I say "installer", I mean it plops the binary wherever you tell it to.
+  And finally, when I say "UBI", I don't mean "universal basic income", but that'd be nice too.
+Tags:
+- binary
+- download
+- executable
+- install
+- portable
+ReleaseNotes: |-
+  - This is the same as 0.8.3, but I had to publish this with a new tag because of a failed experiment with using GitHub's new immutable releases feature.
+  - Fixed a bug where ubi would pick an asset with 64 in the name when trying to pick the best match on a 64-bit platform. This could include things like project-Linux-1.64.0.tgz, where the 64 is part of the version. Now it uses a pickier regex that looks for actual CPU architecture names, like x86-64 or arm64.
+  - Made it possible to use ubi on Android.
+  - Added linuxstatic as a string to look for when checking for Linux asset names. Apparently, the yao tool produces assets with this string in the name (why the hate for dashes, I ask?). Reported by @egnor (Daniel Egnor). GH #142.
+  - Improved libc matching. Previously, this only checked for literal substrings like -gnu or -musl. This meant that an asset name with dashes, like foo_linux_musl.tar.gz, would not be matched. Now this uses regexes to better match the libc name. Reported by @egnor (Daniel Egnor). GH #142.
+  - When on a platform with musl as its libc, ubi will now prefer an asset with an explicit indication that it was compiled with musl over an asset with no libc indication in the name. In other words, it will prefer project-linux-x86-64-musl.tar.gz over project-linux-x86-64.tar.gz. Suggested by @egnor (Daniel Egnor). GH #142.
+ReleaseNotesUrl: https://github.com/houseabsolute/ubi/releases/tag/v0.8.4
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0
