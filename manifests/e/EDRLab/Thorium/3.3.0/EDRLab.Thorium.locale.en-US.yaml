@@ -1,0 +1,79 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: EDRLab.Thorium
+PackageVersion: 3.3.0
+PackageLocale: en-US
+Publisher: EDRLab
+PublisherUrl: https://www.edrlab.org/
+PublisherSupportUrl: https://github.com/edrlab/thorium-reader/issues
+PrivacyUrl: https://www.edrlab.org/legal-information/
+PackageName: Thorium
+PackageUrl: https://www.edrlab.org/software/thorium-reader/
+License: BSD-3-Clause
+LicenseUrl: https://github.com/edrlab/thorium-reader/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2025, EDRLab
+CopyrightUrl: https://www.edrlab.org/legal-information/
+ShortDescription: A cross platform desktop reading app, based on the Readium Desktop toolkit
+Description: |-
+  Thorium Reader is the EPUB reader of choice for Windows 10 and 11, MacOS and Linux.
+  This EDRLab application is in constant development and aims at becoming a reference for accessing EPUB 3 publications in reflow or fixed-layout format, audiobooks and visual narratives, PDF documents and DAISY 2.02 and 3 accessible ebooks, LCP protected or not.
+  It is localised in a large set of languages, each version offering new locales.
+  Massive efforts are also made to make Thorium Reader highly accessible for visually impaired and dyslexic people.
+Tags:
+- ebook
+- ebook-reader
+- epub
+- reader
+ReleaseNotes: |-
+  Summary
+  Version 3.3.0 was released on 09 December 2025.
+
+  THIS RELEASE FIXES A CRITICAL SECURITY BUG. There is no known exploit in the wild, but the risk does exist and must be taken seriously. It is therefore extremely recommended to update Thorium Desktop reader and to stop using previous releases. The bugfix will not be "backported" to earlier versions.
+  This is a high-severity vulnerability in the sense that a successful attack would require no user interaction other than opening and reading an EPUB file containing malicious Javascript (for example by double-clicking on the EPUB from the file explorer, or by clicking on a web link associated with Thorium Desktop reader). If such hypothetical attack occured, it would likely be silent and hard to detect.
+  The security hole would allow malicious Javascript to escape the web browser sandbox and to run programs on the victim's computer. This type of attack is known as RCE "Remote Code Execution", which could potentially result in personal information being exfiltrated, backdoors being installed, files being deleted, etc.
+  The security hole was first discovered by Thorium Desktop developers, immediately followed by a wider audit of the potential attack surface across the application's software stack. This led to further security fixes listed in the itemized changelog below.
+  The vulnerability was also reported by security researchers who provided an example script to demonstrate the method. This will be documented and the reporters will be credited for their input. A detailed technical report will be published and kept up-to-date directly in the source code repository. Maintainers of Thorium Desktop forks will be strongly encouraged to integrate fixes in their own codebase.
+  Note that when EPUB publications are distributed by trusted publishers, it is unlikely that users might fall victims of such malicious EPUBs / Javascript. However, many e-books are distributed via alternative channels that could be targeted by ill-intentioned actors to exploit the vulnerabilities present in older Thorium Desktop releases. For this reason, it is strongly recommended to update the application.
+
+  This release includes the following (notable) new features, improvements and bug fixes:
+  - Upgraded to Electron v38
+  - Updated translations
+  - New feature: "customization profiles". This offers an alternative to forking the Thorium Desktop codebase, via a plugin mechanism that declaratively expresses modifications to "vanilla" Thorium Desktop reader (color themes, bundled publications and feeds, application logo, etc.).
+  - Fix: more performant filesystem persistence of "notes" (annotations and bookmarks) via a dedicated SQLite database, backward compatibility with the JSON format of older versions of the application (this currently causes a delay when the software closes, but this will be fixed in a near-future revision)
+  - Fix: improved integration of OPDS with the local bookshelf, ability to navigate to the downloaded publication.
+  - Fix: HTML tables that are constrained by the viewport height now take into account the zoom / font size.
+  - Fix: pages.xml pagemap support, handling of encrypted resources (does not crash XML parser anymore)
+  - Fix: page list GUI was crashing because of missing link title (page break name).
+  - Fix(internationalization): locale-dependent date display.
+  - Fix(OPDS): filter buy/borrow/subscribe links based on supported content type.
+  - Fix(OPDS): authentication NONCE and ID handled identically, i.e. both present triggers the match check, any missing means that the check is skipped.
+  - Fix(PDF): persistent user configuration for zoom level, layout, etc.
+  - Feature(PDF): 2-page spread with even/odd user-configurable option.
+  - Feature(TTS): faster speech rates are now available.
+  - Fix(LCP): persisted hashed passphrase was not resolved correctly when importing from OPDS feeds due to lack of license provider information. Also fixed asynchronous filesystem input/output which was causing race conditions.
+  - Fix(TTS): readaloud voice selection was broken when no language was specified in the HTML markup.
+  - Fix(filesystem): cross-platform file naming rules / filename sanitization, was slugification which is for URLs and eliminates useful information (affects OPDS temporary file download, annotations and bookmarks notes export, publication save-as).
+  - Fix(notes): annotations and bookmark import/export, handling of CSSSelector and ProgressionSelector.
+  - Fix(OPDS): improved user interface, better catalog navigation experience.
+  - Feature(OPDS): added login/logout button in catalog entries.
+  - Fix(accessibility): screen reader detection was resulting in false positives because of keyboard utility apps (for example) so now assisitive technology continues to be automatically detected but users must explicitely activate support in global application settings.
+  - Fix(regression): password-protected PDF files are now supported again (Mozilla PDF.js integration).
+  - Fix(supply chain security): NPM packages now checked via Socket Firewall more regularly to verify direct and transitive dependencies. Also disabled package.json NPM install pre/post scripts execution to protect developer environments.
+  - Fix(security): Electron Fuses cookie encrypt-on-write (Chromium store) and ASAR integrity check (Windows and Mac, no Linux support)
+  - Fix(security): stricter permissions for notifications, clipboard, fullscreen, etc. in HTML webview renderer.
+  - Fix(security): HTTP requests safeguard fence with isURL utility which explicitly prevents non-HTTP(S) links.
+  - Fix(security): some type of hyperlink activation was causing the external web browser to open (keyboard modifiers).
+  - Fix(security): stricter Electron webview partionning to manage individual browsing sessions.
+  - Fix(security): disabled Javascript entirely in PDF files (Mozilla PDF.js integration).
+  - Fix(security): additional downstream safeguards to prevent filesystem access above root folder for protocol handlers of ReadiumCSS and PDF.js (URL syntax is already implicitly normalised upstream to prevent ../../ backpaths, but better include some explicit redundancy)
+  - Fix(security): serve publication UUID to webview instead of base64-encoded filesystem path in order to avoid leaking user home folder name in scripted contexts such as EPUB HTML documents (window.location).
+  - Fix(security): more secure extraction of PDF cover images, via an Electron sandboxed webview and a context-isolated preload script.
+  - Fix(security): OPDS feed authentication now defaults to the user's installed web browser instead of the internal webview (which remains available as a less-secure alternative fallback authentication flow, just in case operating-system integration of OPDS callback URL from external web browser into Thorium Desktop does not work as intended).
+  - Fix(security): added redundant safeguards for Electron shell.openExternal() in application code, to prevent injection of unwanted behaviour from third-party content (e.g. publication metadata).
+ReleaseNotesUrl: https://github.com/edrlab/thorium-reader/releases/tag/v3.3.0
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/edrlab/thorium-reader/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

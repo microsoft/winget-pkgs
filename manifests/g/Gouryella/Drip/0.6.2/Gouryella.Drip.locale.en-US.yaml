@@ -1,0 +1,68 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Gouryella.Drip
+PackageVersion: 0.6.2
+PackageLocale: en-US
+Publisher: Gouryella
+PublisherUrl: https://github.com/Gouryella
+PublisherSupportUrl: https://github.com/Gouryella/drip/issues
+PackageName: Drip
+PackageUrl: https://github.com/Gouryella/drip
+License: BSD-3-Clause
+LicenseUrl: https://github.com/Gouryella/drip/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026, Gouryella
+ShortDescription: Self-hosted tunneling solution to expose localhost securely - unlimited bandwidth, no third-party servers
+Tags:
+- ethernet
+- intranet
+- network
+- network-switch
+- switch
+ReleaseNotes: |-
+  Overview
+  This release introduces IP-based access control functionality for HTTP, HTTPS, and TCP tunnels, allowing users to restrict access based on client IP addresses using whitelist and blacklist rules.
+  New Features
+  IP Access Control
+  - Whitelist/Blacklist Support: Configure allowed and denied IP addresses for tunnel access
+  - CIDR Range Support: Both --allow-ip and --deny-ip flags support CIDR notation (e.g., 192.168.0.0/16, 10.0.0.0/8)
+  - Single IP Support: Individual IP addresses are also supported (automatically converted to /32 for IPv4, /128 for IPv6)
+  - Multi-tunnel Support: IP access control works across HTTP, HTTPS, and TCP tunnels
+  Usage Examples:
+  # Allow only specific IP ranges
+  drip http --allow-ip 192.168.1.0/24,10.0.0.0/8
+
+  # Deny specific IPs or ranges
+  drip tcp --deny-ip 1.2.3.4,192.168.0.0/16
+
+  # Combine allow and deny rules
+  drip https --allow-ip 10.0.0.0/8 --deny-ip 10.0.1.0/24
+  Access Control Rules:
+  1. If IP is in deny list → reject
+  2. If whitelist is configured and IP is not in whitelist → reject
+  3. Otherwise → allow
+  Improvements
+  Server Configuration Validation
+  - Added Validate method to ServerConfig for validating port ranges, domain format, and TCP port ranges
+  - Configuration is now validated before server startup to catch errors early
+  - More detailed error messages help users correctly configure server addresses
+  Security Enhancements
+  - Trusted Proxy Headers: X-Forwarded-For and X-Real-IP headers are now only trusted when requests originate from private/loopback networks
+  - Private Network Definitions: Added RFC 1918 and other private network range definitions for proxy header validation
+  Connection Handling Optimizations
+  - Improved channel naming in TCP connections for better code readability
+  - Enhanced data copying mechanism with context cancellation support to prevent resource leaks
+  - Added JSON serialization error handling in TCP connections to prevent data loss
+  Bug Fixes
+  - Fixed CIDR parsing in deny list - previously CIDR ranges like 192.168.0.0/16 were silently ignored
+  - Fixed context handling logic in pipe callbacks
+  - Optimized error handling mechanism for data connection responses
+  What's Changed
+  - feat/ip access control by @Gouryella in https://github.com/Gouryella/drip/pull/14
+  Full Changelog: https://github.com/Gouryella/drip/compare/v0.6.1...v0.6.2
+  What's Changed
+  - feat/ip access control by @Gouryella in https://github.com/Gouryella/drip/pull/14
+  Full Changelog: https://github.com/Gouryella/drip/compare/v0.6.1...v0.6.2
+ReleaseNotesUrl: https://github.com/Gouryella/drip/releases/tag/v0.6.2
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

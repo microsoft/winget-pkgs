@@ -1,0 +1,99 @@
+# Created with komac v2.14.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: CumulusMX.CumulusMX
+PackageVersion: 4.6.0
+PackageLocale: en-US
+Publisher: Cumulus MX
+PublisherUrl: https://cumulus.hosiene.co.uk/index.php
+PublisherSupportUrl: https://github.com/cumulusmx/CumulusMX/issues
+PackageName: Cumulus MX
+PackageUrl: https://github.com/cumulusmx/CumulusMX
+License: GPL-3.0
+LicenseUrl: https://github.com/cumulusmx/CumulusMX/blob/main/LICENSE
+ShortDescription: The Cumulus MX weather program
+ReleaseNotes: |-
+  New
+  - Adds support the Ecowitt WH45/46 CO₂ sensor values on the HTTP API
+  - Adds support for the Ecowitt WN20 battery status monitoring
+  - Adds RSSI value (if available) to the Ecowitt sensor list logging
+  - A new Alarm for Cumulus MX general errors, triggered every time something is written to the Recent Errors log, and cleared when the log is cleared
+  - Adds Soil Moisture upload to Met Office WOW for stations that report the moisture level as a percentage
+  - Snow values added to the websitedataT.json file
+  - Cumulus MX now handles Windows shutdown/restart and console window closure gracefully
+  - EARLY DAYS support for Cumulus MX general localisation of the Dashboard interface. The implementation details may change depending on feedback or tuning etc.
+    - AI2 is excluded for now
+    - The HTML and scripts strings are in /locales/dashboard/
+      - There is one strings file per language
+    - The settings strings are in /locales/dashboard/json/{language}
+      - There is a folder per language, and a language strings files for each settings file
+    - Change the display language in Program Settings > Culture Overrides > Display Language. Only those languages with translation files will be selectable
+  - New option to force the am/pm time designators to lower case. See Program Settings > Culture Overrides > AM/PM Format
+  - The MySQL settings now has an advanced section where you can force the SSL mode and the TLS versions to use for connections
+  - Month web tags <#MonthTempAvg>, <#MonthRainfall>, <#MonthDryDays>, <#MonthWetDays> will now accept a relative month parameter r=-N or relmon=-N as an alternative to a specific year and month
+    Where: 0 = current month, -1 = last month etc.
+  - Year web tags <#YearTempAvg> and <#AnnualRainfall> will now accept a relative year parameter r=-N or relyear=-N as an alternative to a specific year
+  - Add lightning data input to JSON Data Station
+  Changed
+  - All dashboard and default web site graph data files now use true UTC time stamps
+    - Previously they were "pseudo-UTC" to force the graphs to display the station times rather the viewers time zone
+    - Highcharts version used by the dashboard and default web site updated to v12.3.0 to support this
+    - The charts will now render correctly at DST changes
+    - IMPORTANT: You must upload the latest versions of the default web site pages and scripts files to support this change
+    - IMPORTANT: If you have your own versions of Highcharts scripts, then the relevant change is from:
+       {
+              time: {
+                      useUTC: true
+              }
+       }
+      To (substituting your stations time zone):
+       {
+              time: {
+                      timezone: 'Europe/London'
+              }
+       }
+    - You must also use a version of Highcharts later than v11.2.0 - Cumulus MX now uses v12.3.0
+  - There is a new option in Station Settings > General Settings > Location to manually change the time zone used in the charts
+  - Added Davis Cloud API UUID option to the Configuration Wizard
+  - Add a retry to downloading Ecowitt SD card files on error or if returned file is empty
+  - The FTP log files have changed naming convention (to work better with the new version of NLog)
+    - The latest file (if more than one), will be one with the highest value for NN for today: ftp-<logtype>_YYYY-MM-DD_NN.log
+    - You will need to manually delete any old log files that use the old naming convention of:
+      ftp-realtime-N.log or ftp-interval-N.log
+  - CreateMissing updated to v2.1.0 to fix the daily rainfall calculation on rain counter reset at rollover, and add support for evapotranspiration calculation
+  - Improvements in the Cumulus MX shutdown process - it should now be much faster
+  - The JSON and Tempest stations now use the same Sea Level Pressure calculation as all other stations
+  - All logging to log files is now asynchronous. This means a change to log file naming scheme for the main MX diagnostics
+    - The latest log file will always have filename: MxDiags.log
+    - Archiving:
+      - Archived files will have the date/time appended: MxDiags-YYMMDD-HHMMSS.log eg. MxDiags-250726-115412.log
+      - Archiving occurs when log files have exceeded 12MB in size
+      - Archiving also occurs when you start Cumulus MX, the existing MxDiags.log will be renamed to a timestamped filename
+      - The timestamp on archived files is the time of the last entry in the file, not the first
+    - The maximum log file size has been decreased to 12MB, but the number of archives retained increased to 20
+    - You may notice the logged event times only increment every 16ms, this is an efficiency thing!
+  - Logging of JSON responses from the Ecowitt Local HTTP API now compacts the output by removing line feeds and tabs from the text
+  - Improvements to the dashboard Select-a-Period graphing
+    - This now uses the meteorological day you have defined, and the pm2.5/ pm10 values are now pulled from the log files rather than the time restricted recent data
+  - Adds a default User-Agent header to all HTTP requests of "CumulusMX/4.6.0.4107" - or whatever the current version/build is
+  - The dashboard charts now honour the time format setting in Program Settings > Culture Over-rides
+    - The new default for the charts is to display in the web browsers TZ settings format
+  - The system uptime is now obtained differently; this allows the removal of the System.Diagnostics.PerformanceCounter package
+  - The Dashboard screen now fully reflects your time presentation choices in Cumulus
+  - The MySQL updates now use a single persistent connection rather than reconnecting for each upload
+  - A minor change to an error message format in upload.php
+  - Ecowitt SD card catch-up data now has the timestamp for each interval rounded to the SD card logging interval (Ecowitt do not create the log entries according to clock time)
+  Fixed
+  - Bug in Ecowitt.API ApplyHistoricData: AQI = Nullable object must have a value
+  - AirLink log files being one comma short if only an indoor AirLink is in use
+  - Unlike the other log files, the monthly log file name generator did not have the check to remove "dots" from the yyyyMM date part of the filename
+  - Ecowitt HTTP API station not triggering the firmware alarm when new firmware available
+  - Handling of cached MySQL statements that are in error because of bad syntax or reference errors
+  - An error in the Ecowitt SD card log file handling that removed the corresponding Allsensors log file from the processing list if the primary file did not contain any dates in the required range
+  - Ecowitt historic catch-up from SD card was not setting the DataDateTime variable
+  - Ecowitt Cloud station decoding of CO₂ 24-hour PM values
+  - Ecowitt Cloud station 24-hour CO₂ PM values are now "kludged" from the 24-hour AQI values supplied by Ecowitt
+  - JSON Data Station not saving the MQTT server name
+ReleaseNotesUrl: https://github.com/cumulusmx/CumulusMX/releases/tag/b4120
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

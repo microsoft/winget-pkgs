@@ -1,0 +1,138 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: version-fox.vfox
+PackageVersion: 1.0.0
+PackageLocale: en-US
+Publisher: Han Li
+PublisherUrl: https://vfox.dev/
+PublisherSupportUrl: https://github.com/version-fox/vfox/issues
+PackageName: vfox
+PackageUrl: https://vfox.dev/
+License: Apache-2.0
+LicenseUrl: https://github.com/version-fox/vfox/blob/HEAD/LICENSE
+Copyright: Copyright 2026 Han Li. All rights reserved.
+ShortDescription: The Multiple SDK Version Manager
+Description: |-
+  If you switch between development projects which expect different environments, specifically different runtime versions or ambient libraries, or you are tired of all kinds of cumbersome environment configurations, vfox is the ideal choice for you.
+  vfox is a cross-platform, extensible version manager. It supports native Windows, and of course Unix-like! With it, you can quickly install and switch different environment.
+  It saves all tool version information in a file named .tool-versions, so you can share this information in your project to ensure that everyone on your team is using the same tool versions.
+  Traditional work requires multiple cli version managers, each with its own API, configuration files, and implementation (e.g., $PATH operations, shims, environment variables, etc.). vfox provides a single interactive way and configuration file to simplify the development workflow and can be extended to all tools and runtime environments through a simple plugin interface.
+Tags:
+- asdf
+- develop
+- development
+- lua
+- nodejs
+- sdk-manager
+- version-manager
+ReleaseNotes: |-
+  🎉 What's Changed in v1.0.0
+  🎉 Core Improvement: Solving the Temporary Directory Problem
+  Problem Background
+  Prior to v1.0.0, regardless of whether using session, global, or project scope, all SDKs would be stored in temporary directories. This caused the previously configured version information to become invalid immediately when the shell was closed, resulting in "directory not found" errors in virtual environments and CI/CD workflows.
+  v1.0.0 Solution
+  This version completely separates the behavior of the three scopes, adopting a more rational management strategy:
+  📍 Project Scope (Project-level)
+  - Automatically generates .vfox/sdks/<sdk> symlinks in the current project directory
+  - Adds the project path to PATH for project isolation
+  - Optional parameter: --unlink to disable this behavior (not recommended)
+  - Recommendation: Add the generated .vfox/ directory to .gitignore
+  ⏱️ Session Scope (Session-level)
+  - Maintains original behavior, SDKs stored in temporary directories
+  - Bound to shell lifecycle, automatically cleaned up when shell closes
+  🌍 Global Scope (Global)
+  - Generates permanent symlinks under ~/.vfox/sdks/<sdk>
+  - Points to actual SDK version directories
+  - Remains effective across shell sessions
+  Priority Rules
+  Priority is controlled by the PATH environment variable, from highest to lowest as follows:
+  #Project > Session > Global > System
+  $PWD/.vfox/sdks/nodejs/bin:~/.vfox/tmp/<pid>/nodejs/bin:~/.vfox/sdks/nodejs/bin:/usr/bin:...
+  For detailed usage, please refer to documentation
+  Additional Features
+  New Configuration Format Support
+  - Introduces vfox.toml and .vfox.toml new configuration formats for a clearer configuration experience
+  - Fully backward compatible with legacy .tool-versions format for smooth migration
+  Multi-user Support
+  - Support for multi-user scenarios with independent configuration spaces for each user
+  - Global configuration and SDK installation support, simplifying unified management in team environments
+  Exec Command
+  - New exec command allows executing arbitrary commands with specified SDK versions
+  - Seamlessly integrates with CI/CD pipelines and VSCode
+  - Usage example: vfox x nodejs@20 -- node -v
+  🎉 核心改进：解决临时目录问题
+  问题背景
+  在 v1.0.0 之前，无论使用 session、global 还是 project 作用域，所有 SDK 都会存储在临时目录中。这导致当 shell 关闭后，之前配置的版本信息立即失效，造成虚拟环境和 CI 流程中出现"目录不存在"的错误。
+  v1.0.0 方案
+  本版本将三个作用域的行为彻底拆分，采用更加合理的管理策略：
+  📍 Project 作用域（项目级）
+  - 在当前项目目录下自动生成 .vfox/sdks/<sdk> 软链
+  - 将项目路径加入 PATH，实现项目隔离
+  - 可选参数：--unlink 禁用此行为（不推荐）
+  - 建议：将生成的 .vfox/ 目录添加到 .gitignore
+  ⏱️ Session 作用域（会话级）
+  - 保持原有行为，SDK 存储在临时目录中
+  - 与 shell 生命周期绑定，关闭 shell 自动清理
+  🌍 Global 作用域（全局）
+  - 在 ~/.vfox/sdks/<sdk> 下生成永久软链
+  - 指向实际的 SDK 版本目录
+  - 跨 shell 会话保持有效
+  优先级规则
+  通过 PATH 环境变量控制优先级，从高到低依次为：
+  #Project > Session > Global > System
+  $PWD/.vfox/sdks/nodejs/bin:~/.vfox/tmp/<pid>/nodejs/bin:~/.vfox/sdks/nodejs/bin:/usr/bin:...
+  具体用法请参考文档
+  其他功能
+  新配置格式支持
+  - 引入 vfox.toml 和 .vfox.toml 新配置格式，提供更清晰的配置体验
+  - 完全兼容旧版 .tool-versions 格式，确保平滑迁移
+  多用户支持
+  - 支持多用户场景，每个用户拥有独立配置空间
+  - 支持全局配置和 SDK 安装，便于团队环境统一管理
+  Exec 命令
+  - 新增 exec 命令，允许在指定 SDK 版本下执行任意命令
+  - 完美支持 CI/CD 流程和 VSCode 集成
+  - 用法示例：vfox x nodejs@20 -- node -v
+  Changelog
+  🚀 New Features
+  - 3bbb6649200e92ef92f6f2a5ff69843b5f4eed22: feat: divide the shim directory into three layers and add it to the $PATH (@aooohan)
+  - 48d020ca46c1ef9f78acea0353122a662eed9013: feat: improve CreateDirSymlink to use FILE_FLAG_OPEN_REPARSE_POINT (@aooohan)
+  - 50d8a8489d9184073309c90d83602c33d4ca4ade: feat: put .vfox/ into .gitignore if exists. (@aooohan)
+  - 619915d312fbbd99b9b170176b6dcd21d6ee9a45: feat: support @latest tag for install and use command (@aooohan)
+  - 2468c924899fc1b801c5ba14e942d2ff1a787bb1: feat: support exec command for CI or IDE (@aooohan)
+  - 4fbe31f3715d7b8ca465373ec8d7b087a0c6d051: feat: support vfox.toml configuration format. (@aooohan)
+  - 6032a910990251208674a14ae08aec85ad683bf4: feat: support share configuration (@aooohan)
+  - 4351c2b72eb6903fb04cd98681a846d559dca2fc: feat: support shared root installed (@aooohan)
+  - ed4001fe38917e5cae8213e586b4042c535f5fd8: feat: swallow 'v' letter in version while installing (@aooohan)
+  🐛 Bug Fixes
+  - 0e1ce5e9fd9235a285413e4f3170b5780637bb46: fix: Use YYYYMMDD as the temporary path prefix instead of a timestamp. (@aooohan)
+  - 18a008dc67e599035ddf3a2a7119f1c08d0915cd: fix: compatible with old vfox home directory name. (@aooohan)
+  - addfad5bc7c9d6d46b219960c193a52ff3ca843b: fix: correct cache for Available Hook (@aooohan)
+  - b4dc1956a93d14bdb57213f934a463f983570f6c: fix: correct preUse behavior (@aooohan)
+  - 5e7e763b741f53f36f0d30cd09f3b4af0f8b6565: fix: panic when Windows username contains non-ASCII characters (#594) (@Copilot)
+  - e2769514c1b0b637170ca87d4355f6d0e45a9b2f: fix: put absolutely path of project scope into PATH. (@aooohan)
+  - 60f374758075693bc4fd16e3085f3039981fc4a7: fix: windows junction (@aooohan)
+  ♻️ Refactoring
+  - a6cdae33bc86b7a445bc2e4802fcb78ea8432660: refactor: activate command (@aooohan)
+  - 9b8930b07aa104c983b99eff13589bad2758325b: refactor: env command (@aooohan)
+  - 54bb382192b1d9cacf0f47b5b51039a826acbaec: refactor: use command && add --unlink arg for project scope (@aooohan)
+  - b46b1fc40bd369f51b476abcc035014146a4194c: refactor: restructuring package level (@aooohan)
+  - 05217f7277dc157a5d65dd8fc8b1c10602306750: refactor: use vfox.toml instead of '.tool-versions' (@aooohan)
+  Other Changes
+  - 0c9f83739e51c50443536c5543a2deb21b974455: infra: use directory level symlink as base solution. (@aooohan)
+  - 802660799e7f1636960a10d49542e9161c1129e5: release v1.0.0 🎉🎉🎉 (@github-actions[bot])
+
+  Full Changelog: https://github.com/version-fox/vfox/compare/v0.10.0...v1.0.0
+  Installation
+  See installation guide for more details.
+  Thanks
+  Thanks to all contributors who made this release possible! 🎉
+ReleaseNotesUrl: https://github.com/version-fox/vfox/releases/tag/v1.0.0
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://vfox.dev/guides/intro.html
+- DocumentLabel: FAQ
+  DocumentUrl: https://vfox.dev/guides/faq.html
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

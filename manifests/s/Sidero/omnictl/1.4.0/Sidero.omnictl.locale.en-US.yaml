@@ -1,0 +1,178 @@
+# Created with WinGet Updater using komac v2.14.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: Sidero.omnictl
+PackageVersion: 1.4.0
+PackageLocale: en-US
+Publisher: Sidero Labs
+PublisherUrl: https://github.com/siderolabs/omni
+PublisherSupportUrl: https://github.com/siderolabs/omni/issues
+PrivacyUrl: https://www.siderolabs.com/privacy-policy/
+Author: Sidero Labs
+PackageName: omnictl
+PackageUrl: https://github.com/siderolabs/omni
+License: Mozilla Public License Version 2.0
+LicenseUrl: https://github.com/siderolabs/omni/blob/HEAD/LICENSE
+ShortDescription: A command line tool for communicating with Omni
+Moniker: omnictl
+Tags:
+- k8s
+- kubernetes
+- omni
+- talos
+ReleaseNotes: |-
+  Omni 1.4.0 (2025-12-16)
+  Welcome to the v1.4.0 release of Omni!
+  Please try out the release binaries and report any issues at
+  https://github.com/siderolabs/omni/issues.
+  Urgent Upgrade Notes (No, really, you MUST read this before you upgrade)
+  This release consolidates Discovery service state, Audit logs, Machine logs, and Secondary resources into a single SQLite storage backend.
+  1. New Required Flag
+  You must set the new --sqlite-storage-path (or .storage.sqlite.path) flag. There is no default value, and Omni will not start without it.
+  2. Audit Logging Changes
+  A new flag --audit-log-enabled (or .logs.audit.enabled) has been introduced to explicitly enable or disable audit logging.
+  - Default: true.
+  - Change: Previously, audit logging was implicitly enabled only when the path was set. Now, it is enabled by default.
+  3. Automatic Migration
+  Omni will automatically migrate your existing data (BoltDB, file-based logs) to the new SQLite database on the first startup. To ensure this happens correctly, simply add the new SQLite flag and leave your existing storage flags in place for the first run.
+  Once the migration is complete, you are free to remove the deprecated flags listed below. If they remain, they will be ignored and eventually dropped in future versions.
+  4. Deprecated Flags (Kept for Migration)
+  The following flags (and config keys) are deprecated and kept solely to facilitate the automatic migration:
+  - --audit-log-dir (.logs.audit.path)
+  - --secondary-storage-path (.storage.secondary.path)
+  - --machine-log-storage-path (.logs.machine.storage.path)
+  - --machine-log-storage-enabled (.logs.machine.storage.enabled)
+  - --embedded-discovery-service-snapshot-path (.services.embeddedDiscoveryService.snapshotsPath)
+  - --machine-log-buffer-capacity (.logs.machine.bufferInitialCapacity)
+  - --machine-log-buffer-max-capacity (.logs.machine.bufferMaxCapacity)
+  - --machine-log-buffer-safe-gap (.logs.machine.bufferSafetyGap)
+  - --machine-log-num-compressed-chunks (.logs.machine.storage.numCompressedChunks)
+  5. Removed Flags
+  The following flags have been removed and are no longer supported:
+  - --machine-log-storage-flush-period (.logs.machine.storage.flushPeriod)
+  - --machine-log-storage-flush-jitter (.logs.machine.storage.flushJitter)
+  Support for OIDC Providers without Email Verified Claim
+  Enabled support for OIDC providers, such as Azure, that do not provide the email_verified claim during authentication.
+  Dynamic SAML Label Role Updates
+  Added support for dynamically updating SAML label roles on every login via the new update_on_each_login field.
+  Machine Class Logic Updates
+  Added support for locks, node deletion, and restore operations when using machine classes.
+  Virtual Resources for Platform Information
+  Platform and SBC information is now pulled from Talos machinery and presented as virtual resources:
+  MetalPlatformConfig, CloudPlatformConfig, and SBCConfig. They support Get and List operations.
+  Automated CLI Install Options
+  Automated installation options have been added to the CLI section of the homepage, supplementing the existing manual options.
+  OIDC Warning for Kubeconfig Download
+  A warning toast is now displayed when downloading kubeconfig to inform users that the OIDC plugin is required before using the file with kubectl.
+  UI/UX Improvements
+  Various UI improvements including pre-selecting the correct binary for the user's platform, truncating long items in the ongoing tasks list,
+  hiding JSON schema descriptions behind tooltips, and standardizing link styling.
+  Force Deletion of Infra Provider Resources
+  Added the ability to force-delete MachineRequests and InfraMachines managed by Infra providers.
+  This allows for the cleanup of resources and finalizers even if the underlying provider is unresponsive or deleted.
+  Prevent Talos Minor Version Downgrades
+  Omni now prevents downgrading the Talos minor version below the initial version used to create the cluster.
+  This safeguard prevents machine configurations from entering a broken state due to unsupported features in older versions.
+  Contributors
+  - Edward Sammut Alessi
+  - Utku Ozdemir
+  - Artem Chernyshev
+  - Oguz Kilcan
+  - Andrey Smirnov
+  - Tim Jones
+  - Hector Monsalve
+  - Orzelius
+  - Pranav Patil
+  - Spencer Smith
+  - lkc8fe
+  Changes
+  117 commits
+  - bebe9e90 release(v1.4.0): prepare release
+  - e128fc3f fix: get rid of the exception in the UI when editing labels
+  - 49611b2f release(v1.4.0-beta.1): prepare release
+  - 914c8c0b feat: add min-commit flag for omni
+  - dc351150 chore: update http/2 tunneling text
+  - 9bf690ef refactor: do SQLite migrations unconditionally, rework the config flags
+  - 2f2ec76f fix: improve kubeconfig error handling for non-existent clusters
+  - 2182a175 chore(installation-media): update talos version stories mocks
+  - a78b1498 feat(installation-media): use join token label when selecting a token
+  - ba403f92 feat(installation-media): add machine user labels to installation media wizard
+  - eb978782 feat(installation-media): add http2 wireguard tunnel to installation media wizard
+  - 728000c7 refactor: extract ClusterMachineConfigStatusController into a module
+  - d6f0433e feat: offer more talosctl versions to download in omni
+  - 4d11b75e feat: return schematic yml when creating installation media
+  - 95a54ecb refactor(frontend): add a helper for getting talosctl downloads
+  - 7b3ffa2a release(v1.4.0-beta.0): prepare release
+  - d31f7f86 fix: stop referencing deprecated field on frontend storybook
+  - d68562f5 feat: add labels to talos version metric
+  - 2dd0daac fix(frontend): change incorrect copy toast message
+  - e886bb76 feat: store discovery service state in SQLite
+  - fbfbb453 fix: do not filter out rc releases to from pre-release talos versions
+  - e27cf264 chore: rekres
+  - 09ef0432 fix(frontend): prevent an error when downloading support bundle
+  - c654237b feat(frontend): show a warning toast about oidc when downloading kubeconfig
+  - 6eea2cab feat(frontend): add automated install options for cli
+  - 75cc7778 fix(installation-media): check min_version for providers
+  - 50b2546f feat(installation-media): support talos 1.12.0 bootloader section
+  - d9c06640 chore(installation-media): rename external args to extra args
+  - 6ee38310 feat(installation-media): implement external args step
+  - dd0bdb63 feat: store audit logs in sqlite
+  - bc2a5a99 chore: prepare omni with talos v1.12.0-beta.1
+  - 24ed384a fix(installation-media): only list architectures supported by providers
+  - 64e19ed6 fix(installation-media): correct doc links for sbc & cloud steps
+  - 9826116e fix(installation-media): adjust secureboot support check
+  - ba2e77cc fix: change stripe button to billing
+  - 60cb92a1 feat: prevent downgrading talos minor version below initial version
+  - 60dac9d5 feat(frontend): hide descriptions in json schema behind tooltip
+  - b9a3e4ee chore(frontend): fix monaco-editor worker on dev server
+  - f0646a67 feat(frontend): change default config patch for talos 1.12
+  - 31d5a1b6 refactor(installation-media): get cloud providers and sbcs from api
+  - 672a1c42 refactor(frontend): create composables for resource list & get
+  - 2804426b feat: store machine logs in sqlite
+  - 741a86f2 fix(frontend): fix backup interval clamping
+  - 2e2be883 refactor(frontend): wait for signing keys instead of throwing
+  - 5e8ef874 feat: allow passing extra parameters to sqlite conn string
+  - 448fb645 fix: trim whitespaces from the initial label keys and values
+  - 59f4fff1 fix: properly filter the machines which were already added to a cluster
+  - d3a9c663 fix(frontend): update csp for userpilot and refactor init logic
+  - 20c8c3ab feat(frontend): preselect the correct binary for the user's platform where possible
+  - 297415de feat(frontend): truncate items inside ongoing tasks list
+  - 9d30ff55 chore: bump dependencies
+  - edb1603c fix(frontend): prevent logout dropdown menu from shrinking
+  - 5610e71d refactor(frontend): refactor Tooltip to use reka-ui Tooltip
+  - c2ab8ab9 refactor(frontend): replace popper with tooltip in PatchEdit
+  - cc99091a refactor(frontend): replace popper with tooltip + popover in MachineSetPicker
+  - 7f6be055 refactor(frontend): replace popper with tooltip in TButtonGroup
+  - e91711a2 refactor(frontend): refactor TActionsBox with reka-ui
+  - a96bd3de fix: restore monaco-editor styles by enabling unsafe-inline
+  - 7b944d08 fix(frontend): constrain sidebar to a fixed size
+  - 8b5c29b3 feat: support locks,node delete and restore when using machine classes
+  - bc01ae0d feat: pull platforms and SBC information from Talos machinery
+  - 133fa156 fix(frontend): add nonce to apexcharts and add csp to dev
+  - 2a690593 chore: rewrite MachineSetNodeController as QController
+  - 23a3594e fix(frontend): sort talosctl versions correctly and select correct default
+  - 997e4601 feat(frontend): style all regular links with primary
+  - 6ca43f37 test: pick UKI and non-UKI machines correctly
+  - 19a6cd12 feat(installation-media): implement system extensions step
+  - 52360252 fix: do not clear schematic meta values for non-UKI machines
+  - b284d491 refactor: use template instead of bytes replace for nonce
+  - 78050045 fix: add nonce for userpilot scripts
+  - 4bcaea1e feat: centralize Schematic ID computation
+  - 7397f148 feat(installation-media): implement cloud provider + sbc steps
+  - f6ac435b fix: do not allow downloading deprecated Talos versions in the UI
+  - 29296971 feat: support dynamically updating SAML label roles
+  - b3fd95cd refactor(frontend): change RadioGroup to use slots for options
+  - bb879bf6 refactor(frontend): refactor pods list and add stories
+  - 75f70e4d feat: allow force-deletion of machine requests
+  - 3e3f5134 feat(installation-media): add machine architecture step
+  - e3ef4daa fix: correct handling extra outputs for cleanup controller
+  - e1eaf649 refactor(frontend): switch from openpgp to webcrypto
+  - e9ac4a8a fix(frontend): keep use_embedded_discovery_service state when scaling
+  - 519b46d6 fix: make exposed services also support plain keys
+  - a973a7a3 fix: fix typos across the project
+  - 61d09f81 chore(frontend): update dependencies
+  - db97e092 chore: bump Kubernetes version to 1.34.2
+  - cecb9695 chore: rekres
+ReleaseNotesUrl: https://github.com/siderolabs/omni/releases/tag/v1.4.0
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0
