@@ -113,12 +113,10 @@ $versionsWithOverlap = $allPackages | ForEach-Object {
     }
 }
 $versionsWithOverlap = $versionsWithOverlap.Where({ $_ })
-Write-Verbose "Found $($versionsWithOverlap.count) monikers with multiple packages"
-
+Write-Verbose "Found $($versionsWithOverlap.count) DisplayVersions with multiple packages"
 
 if ($versionsWithOverlap.Count -gt 0) {
-    Write-Output $versionsWithOverlap
-    exit 1
+    $versionsWithOverlap | Format-Table -Wrap
 }
 
 class UnmetDependencyException : Exception {
