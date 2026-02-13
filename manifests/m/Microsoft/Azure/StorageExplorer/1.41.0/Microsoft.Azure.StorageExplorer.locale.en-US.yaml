@@ -1,0 +1,74 @@
+# Created with komac v2.15.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Microsoft.Azure.StorageExplorer
+PackageVersion: 1.41.0
+PackageLocale: en-US
+Publisher: Microsoft Corporation
+PublisherUrl: https://opensource.microsoft.com/
+PublisherSupportUrl: https://github.com/microsoft/AzureStorageExplorer/issues
+Author: Microsoft
+PackageName: Microsoft Azure Storage Explorer
+PackageUrl: https://azure.microsoft.com/en-us/features/storage-explorer
+License: CC-BY-4.0
+LicenseUrl: https://github.com/microsoft/AzureStorageExplorer/blob/HEAD/LICENSE
+ShortDescription: Free tool to easily manage your Azure cloud storage resources anywhere, from Windows, macOS, or Linux.
+Moniker: storageexplorer
+Tags:
+- azure
+- azure-storage-explorer
+- azurestorageexplorer
+- explorer
+- storage
+- storage-explorer
+ReleaseNotes: |-
+  January 2026 (Version 1.41.0, build 20260130.7)
+  Welcome to Storage Explorer version 1.41.0. This version completes support for NFS files and brings improvements to Azurite container support.
+  For a detailed list of all issues closed, visit our Issues page.
+  NFS File Share Support
+  This version of Storage Explorer includes AzCopy 10.31, which enhances support for NFS file shares. In addition to features introduced in version 1.40.0, you can now:
+  - Transfer files and directories between NFS and SMB file shares.
+  - Preserve symlinks when transferring files (symlinks remain percent encoded when downloaded, see #8841).
+  - View POSIX properties for files and directories in the Properties dialog.
+  Azurite Instances in Docker and Podman Containers
+  Version 1.36.0 introduced support for automatically detecting and connecting to Azurite instances running in local Docker containers. Version 1.41.0 extends this support to include Podman containers.
+  Configuring Azurite Communication Channels
+  To add support for both Docker and Podman, Storage Explorer now detects Azurite containers differently. Instead of invoking the Docker or Podman CLI, Storage Explorer communicates directly with the Docker and Podman engines via their named pipes (Windows) or Unix domain sockets (Linux and macOS).
+  By default, Storage Explorer looks in the following locations for these communication channels:
+  ────────┬──────────────────────────────
+  Platform│Locations
+  ────────┼──────────────────────────────
+  Windows │\\.pipe\docker_engine
+  ────────┼──────────────────────────────
+          │\\.pipe\podman-machine-default
+  ────────┼──────────────────────────────
+  macOS   │/var/run/docker.sock
+  ────────┼──────────────────────────────
+  Linux   │/var/run/docker.sock
+  ────────┼──────────────────────────────
+          │~/.docker/run/docker.sock
+  ────────┴──────────────────────────────
+  For custom setups, you can add or modify locations using the new Azurite Communication Channels setting (services.storageAccounts.containerSocketPaths).
+  Linux Snap Support
+  For Linux snap users, the Docker snap dependency has been removed. You no longer need to have the Docker snap installed for this feature to work.
+  The snap sandbox environment prevents Storage Explorer from accessing system files. You can work around this by opening a socket that forwards communications to the Docker or Podman engine using socat:
+  1. Verify the location of the container engine socket (for example, /var/run/docker.sock).
+  2. Create a forwarding socket within an accessible location, such as your home directory:
+     socat UNIX-LISTEN:$HOME/docker.sock,fork UNIX-CONNECT:/var/run/docker.sock &
+  3. Launch Storage Explorer.
+  4. Modify the Azurite Communication Channels setting to include the absolute path to the forwarding socket (in this case, /home/<username>/docker.sock).
+  5. Refresh the Emulators & Attached node.
+  Note:
+  - The forwarding socket must be opened in a location that Storage Explorer can access, such as your home directory.
+  - The forwarding socket must not be a hidden file (that is, its name can't start with a dot).
+  - You must enter an absolute path to the forwarding socket for the Azurite Communication Channels setting. You can't use expanding shell characters, such as "~".
+  - If you terminate the background process launched by socat, Storage Explorer won't be able to communicate with the container engines to find Azurite instances.
+  Improvements for Managing Custom Environments
+  If you sign in to a custom Azure environment, it's now easier to configure essential environment properties. In addition to the ARM management endpoint, you can also specify audience endpoints, the Microsoft Graph endpoint, and the Azure Service Management (ASM) endpoint. These values are optional and can be autofilled.
+  Electron 39
+  Storage Explorer now uses Electron 39. You can learn more from the Electron blog.
+  Known Issues
+  If you have installed the Linux snap for the first time, there is a known issue where Storage Explorer may not remember new attachments or proxy credential updates. You can work around these issues by closing and relaunching Storage Explorer. For more information, see #8652 and #8902.
+ReleaseNotesUrl: https://github.com/microsoft/AzureStorageExplorer/releases/tag/v1.41.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
