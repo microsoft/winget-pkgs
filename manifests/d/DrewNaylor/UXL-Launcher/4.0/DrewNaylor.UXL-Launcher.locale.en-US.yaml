@@ -1,0 +1,91 @@
+# Created with komac v2.15.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: DrewNaylor.UXL-Launcher
+PackageVersion: '4.0'
+PackageLocale: en-US
+Publisher: Drew Naylor
+PublisherUrl: https://github.com/DrewNaylor
+PublisherSupportUrl: https://github.com/DrewNaylor/UXL-Launcher/issues
+PackageName: UXL Launcher
+PackageUrl: https://github.com/DrewNaylor/UXL-Launcher/
+License: Apache-2.0
+LicenseUrl: https://github.com/DrewNaylor/UXL-Launcher/blob/HEAD/LICENSE.txt
+ShortDescription: DrewNaylor.UXL-Launcher
+Description: An app launcher meant to launch Microsoft Office 2010, 2013, 2016, 2019 desktop software/apps, including ones from Office 365. Not associated with Microsoft and Microsoft does not endorse this software. You may need to run winget as an administrator to install this package due to issues where Inno Setup doesn't properly ask for UAC when installing with winget. Not associated with Inno Setup.
+Moniker: uxl-launcher
+Tags:
+- gui
+- launcher
+- office
+- tool
+- utility
+ReleaseNotes: |-
+  UXL Launcher Version 4.0 Stable Changelog
+  Released on 10/20/2020 (MM/DD/YYYY).
+  Only three months after version 3.3, UXL Launcher Version 4.0 is ready for its stable release. Kinda funny how both times there was only a three-month gap between versions, the next version ended up being a major version number increase. In case you're wondering what happened to version 3.4, this is that version, just with a major version number increase since it felt better that way. Anything planned for 4.0 has been pushed back to 5.0. If you'd like, you can read more on my blog.
+  Before I get into the main paragraph, this version fixes a security vulnerability where the officeDriveLocation could be set to something like https://google.com/search?q=, which would result in the user being sent to a Google search for whichever app they clicked on, or worse. This is now fixed, and I highly recommend updating to this version. Two weeks ago I released a 3.3.1 update so that people using a stable version could have this fix, but now that this one is out, that one isn't as important. While most people probably wouldn't run into that issue, it's still something that needs to be solved as the config file the app ships with could be modified too; it's not just the one in LocalAppData that's a concern.
+  This time, other than that security fix, the main focus was on re-arranging stuff in the Options window so that the options that probably would be used the most are easier to access. Many controls in the Options window had their text changed to be more specific with what they're for, as well. With the end of support for Office 2010, the defaults have been updated to be Office 2019 with 64-bit Office on 64-bit Windows (or 32-bit Office on 32-bit Windows), as Microsoft now recommends 64-bit Office with Office 2019. Besides that, there are a few other new features and changes that may be of interest. Please be sure to read the Readme included with this version of UXL Launcher or online as it has important info. Also refer to the System Requirements.
+  If you're reading this in Notepad or another text editor, it displays best in Word Wrap view. Click on Format>Word Wrap on the top bar. Notepad++ users will find it under View>Word Wrap. Word Wrap is automatically done if viewing on GitHub or on the website.
+  Hashes
+  You can use Windows PowerShell to confirm the hash of the main UXL Launcher EXE file by running
+  Get-FileHash .\UXL-Launcher.exe -Algorithm SHA256 in the folder you extracted the archive to and comparing the output to my sum listed below. HowToGeek has a nice article on this, but the Windows section is a bit further down on the page.
+  7-Zip also has a way to check file hashes in the CRC SHA dropdown in the file context menu. This project is not associated with 7-Zip.
+  To check the hash for other files, replace UXL-Launcher.exe with the appropriate file.
+  SHA-256 sum for "UXL-Launcher.exe" in the archive:
+  5BA5EDB9BD1FF1DA5D104C0410B4F0F2D568ADA2C434FFA43BD7E5A14C43E7FF
+  SHA-256 sum for "lib\libscrollswitchtabs.dll" in the archive:
+  423A65849280D1F9665AD03094DD8648482E889CD4FA0F7AA4CA7AE8F087C7A7
+  SHA-256 sum for "UXL-Launcher.exe.config" in the archive:
+  6893BB5389DA7FFB63961CA35B4C7892B627181894F20950D93149277114CB7D
+  SHA-256 sum for "UXL-Launcher_v4.0-Stable.exe" (the installer attached to this release):
+  146D47925B1DBD7F73D413F38906EE1C4E9E011718FA60CF10C89061FF2FA9E4
+  Added
+  - New theme: ProDark (issue #185)
+    - Description: Dark theme meant to resemble Office 2019's "Black" theme. The colors may not match exactly as they were eyeballed from the colors used in Word 2019. This theme is not associated with Microsoft, and Microsoft Office is a copyright and trademark/registered trademark of Microsoft Corporation in the United States and other countries.
+    - This is the new default dark theme used when matching the Windows 10 theme settings (see below).
+  - You can now choose which dark theme UXL Launcher uses when set to match the Windows 10 theme settings by changing the Dark theme for system theme matching dropdown under Tools>Options>Theme (previously Personalization). (issue #186, pull request #192)
+    - Current choices are Maudern, ProDark, and TenDark. Anything else will be set to ProDark and will not be displayed in the Options window dropdown, unlike the theme list dropdown.
+    - PortableThemeEngine also gained this feature and was bumped to version 2.1, while the built-in theme engine was bumped to version 1.04. No other theme engine changes are in this version, so themes won't have to change their theme engine runtime version numbers if people don't want to, but I did anyway.
+    - If you want to specify the dark theme for system theme matching when using PortableThemeEngine, you'd set libportablethemeengine.ThemeEngine.DarkThemeForSystemThemeMatching to one of the options above. Anything not in that list will be set to ProDark. Once the dark theme is applied, the property will automatically be reset to ProDark in case you want to go back to the default dark theme in the same session without specifying it again.
+    - PortableThemeEngineDebugger may be of use to people who want to experiment with this feature, though you'll have to build it yourself as a binary isn't provided.
+  - Tabs in the Options and About windows can now be switched between using the mouse scroll wheel. This functionality is provided by libscrollswitchtabs, part of the drews-libs project.
+  - In case you decline migrating settings on the first startup of an application upgrade, you can now migrate them at any time using the Migrate settings button under Tools>Options...>Maintenance. (issue #178)
+    - NB: This will overwrite your current settings, so use caution.
+    - It'll only work if you're running the program from the same place as the previous version.
+    - This feature may be useful for people using the Zip file version as, by default, that one doesn't ask to migrate settings on first startup even if there's a UXL_Launcher folder in LocalAppData. It'll have to be extracted to the same place to work as the previous list item states, though.
+    - After migrating, the app will restart automatically.
+  - Any time a setting requires an application restart (for now, only turning on or off the theme engine), a messagebox will pop up asking the user if they want to restart now. (issue #177)
+    - If this message is declined, it won't pop up again during that session even if the theme engine is turned on or off multiple times in that session.
+    - Description from the commit:
+    Allow the user to restart the application if the theme engine is turned on or off. This'll prevent the "test settings"
+    messagebox from showing up if they do restart, but that's intended since there could be other things that would
+    influence the results at a later point. If the user clicks "No", they won't be bothered to restart for the rest of the
+    session.
+  Changed
+  - Many of the controls in the Options window have been moved around (some across tabs) and had their text changed to better explain what they do. See pull request #190 for more details.
+    - Switched the tabs for Bypass configured location and the Office drive location (now simply Root drive path) (issue #73)
+    - Instead of requiring users to type in the drive letter they installed Office to, they can now select it from a dropdown of all drives that are "ready".
+      - If they change the drive letter manually in the config file, it'll show up in the list, but changing it to something else and saving settings will get rid of it.
+      - Please be aware that this means arbitrary drive letters can no longer be placed into the drive letter box as only drives Windows determines as "ready" are available. This is what was originally intended, so it's no big loss.
+      - Arbitrary drive letters can still be used by modifying the config file, but if the location is unavailable, a warning label will show up below the dropdown.
+      - If you plug in a drive after opening the Options window, you can click the Refresh button next to the dropdown to have it show up in the dropdown as long as it's ready. (issue #191)
+    - Controls and groupboxes have been resized and repositioned so they look better. One major example of this is on the Theme tab, where the theme details textbox has been moved to the right side and the checkboxes and other controls have been moved to the left side.
+    - The theme details textbox is now slightly taller.
+    - Now the Enable Office 365/Click-to-Run Compatibility checkbox is hidden if Office 2019 is selected, since it's irrelevant for that version.
+    - Tab text update:
+      - General has been renamed to Versions + Compatibility.
+      - Advanced has been renamed to Root Path.
+      - Personalization has been renamed to Theme as mentioned above.
+      - More details for the first two items (issue #183)
+    - Enable Office 365/Click-to-Run Compatibility checkbox has been changed to Enable Office 365/Click-to-Run Compatibility [line break] (Always enabled for Office 2019 and above)
+    - Since 64-bit Office is the default for Office 2019 when downloaded from the Office website, there were changes in the Root Path tab:
+      - 64-bit Windows is now Program Files (x86): 32-bit Office on 64-bit Windows
+      - 32-bit Windows is now Program Files: 64-bit Office on 64-bit Windows, [line break] 32-bit Office on 32-bit Windows, or 32-bit Office 2013 from Office 365
+      - Program Files: 64-bit... is the new default, since 64-bit Office is now the default download as mentioned above.
+      - The description and recommended selection labels have been updated to accommodate this change.
+      - Due to Microsoft recommending 64-bit Office 2019 by default when downloading from Office.com, the setting cpuIsSixtyFourBit now defaults to False instead of True. The name would have been changed, but that doesn't allow for easily migrating settings between versions.
+      - More details (issue #184)
+ReleaseNotesUrl: https://github.com/DrewNaylor/UXL-Launcher/releases/tag/v4.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
