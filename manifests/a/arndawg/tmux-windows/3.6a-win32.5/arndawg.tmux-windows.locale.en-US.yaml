@@ -1,0 +1,52 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: arndawg.tmux-windows
+PackageVersion: 3.6a-win32.5
+PackageLocale: en-US
+Publisher: arndawg
+PublisherUrl: https://github.com/arndawg
+PublisherSupportUrl: https://github.com/arndawg/tmux-windows/issues
+Author: arndawg
+PackageName: tmux-windows
+PackageUrl: https://github.com/arndawg/tmux-windows
+License: ISC
+LicenseUrl: https://github.com/arndawg/tmux-windows/blob/master/COPYING
+ShortDescription: Terminal multiplexer for Windows, ported from tmux using ConPTY
+Description: |-
+  A native Windows port of tmux, the terminal multiplexer. Split your terminal
+  into multiple panes, create persistent sessions that survive disconnects, and
+  detach/reattach workflows — all natively on Windows 10+.
+
+  Built with ConPTY for full pseudo-terminal support and Windows Named Pipes for
+  secure, kernel-enforced IPC. Works in Windows Terminal, VS Code terminal, and
+  any VT-capable console host. Builds with MSVC, no Cygwin or WSL required.
+ReleaseNotes: |-
+  Terminal Rendering Fixes
+
+  Fixes two visual rendering issues on Windows: the status bar rendering in
+  black-and-white instead of the default green, and the status bar misaligning
+  after reattach when the pane contained long lines that wrapped past the
+  terminal width.
+
+  Status Bar Color Fix:
+  - Implement tparm() conditional and comparison operators in win32-compat.c
+  - The setab/setaf terminfo format strings use conditionals to select between
+    8-color, 16-color, and 256-color escape sequences
+  - Without these operators, color output was garbled and the status bar
+    rendered black-and-white instead of the default green
+
+  Wrapped-Line Redraw Fix:
+  - Disable the wrapped-line cursor optimization on Windows in tty-draw.c
+  - ConPTY xenl (delayed wrap) behavior differs from Unix terminals, causing
+    cursor position desync after writing to the last column
+  - Forces explicit CUP positioning for every line, guaranteeing correct
+    status bar alignment after reattach with wrapped content
+Tags:
+- cli
+- terminal
+- multiplexer
+- tmux
+- conpty
+ReleaseNotesUrl: https://github.com/arndawg/tmux-windows/releases/tag/v3.6a-win32.5
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0
