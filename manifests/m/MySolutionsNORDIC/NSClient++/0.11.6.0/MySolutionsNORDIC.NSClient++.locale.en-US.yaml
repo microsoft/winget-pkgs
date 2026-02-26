@@ -1,0 +1,106 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: MySolutionsNORDIC.NSClient++
+PackageVersion: 0.11.6.0
+PackageLocale: en-US
+Publisher: MySolutions NORDIC
+PublisherUrl: https://medin.name/
+PublisherSupportUrl: https://github.com/mickem/nscp/issues
+Author: My Computer Solutions NORDIC KB
+PackageName: NSClient++
+PackageUrl: https://nsclient.org/
+License: GPL-2.0
+LicenseUrl: https://github.com/mickem/nscp/blob/HEAD/COPYING
+Copyright: Copyright (C) 2026 - Michael Medin
+ShortDescription: A fully fledged monitoring agent which can be used with many monitoring tools.
+Description: |-
+  NSClient++ (nscp) aims to be a simple yet powerful and secure monitoring daemon. It was built for Nagios/Icinga, but nothing in the daemon is Nagios/Icinga specific and it can be used in many other scenarios where you want to receive/distribute check metrics.
+  The daemon has 3 main functions:
+  - Allow a remote machine (monitoring server) to request commands to be run on this machine (the monitored machine) which return the status of the machine.
+  - Submit the same results to a remote (monitoring server).
+  - Take action and perform tasks.
+Moniker: nscp
+Tags:
+- icinga
+- naemon
+- nagios
+ReleaseNotes: |-
+  What's Changed
+  Adds new check_nsclientclient. Which is a stand-alone application you can use to connect to and interact with NSClient.
+  This new client can run:
+  - Run queries/checks
+  - Change configuration
+  - Show logs
+  - Load/unload modules
+    It also have an interactive client you can use which is aimed as a replacement for "test mode".
+  To connect to NSClient you need to have the web server enabled and then you can login with the same username and password as you use in the web-ui:
+  $ check_nsclient nsclient auth login --password PASSWORD --ca %LOCALAPPDATA%\mkcert\rootCA.pem
+  Successfully logged in
+  Credentials are securely stored in store in credential manager.
+  The reason there is a nsclient command line option is that soon this will also support NRPE and other protocols as well becoming a universal monitoring tool.
+  After this you can show logs:
+  $ check_nsclient nsclient logs list
+  ╭───────┬──────────────────────┬─────────────────────────────────────────────────────────────────╮
+  │ level │ date                 │ message                                                         │
+  ├───────┼──────────────────────┼─────────────────────────────────────────────────────────────────┤
+  │ debug │ 2026-Jan-11 12:36:26 │ NSClient++ 0.4.0 2026-01-11 x64 booting...                      │
+  │ debug │ 2026-Jan-11 12:36:26 │ Booted settings subsystem...                                    │
+  │ debug │ 2026-Jan-11 12:36:26 │ Archiving crash dumps in: C:\src\build\nscp/crash-dumps         │
+  │ debug │ 2026-Jan-11 12:36:26 │ Found: CheckExternalScripts                                     │
+  │ debug │ 2026-Jan-11 12:36:26 │ Found: CheckSystem                                              │
+  │ debug │ 2026-Jan-11 12:36:26 │ Found: Checkhelpers                                             │
+  │ debug │ 2026-Jan-11 12:36:26 │ Found: LuaScript                                                │
+  │ debug │ 2026-Jan-11 12:36:26 │ Found: NRPEServer                                               │
+  │ debug │ 2026-Jan-11 12:36:26 │ Found: WEBServer                                                │
+  ╰───────┴──────────────────────┴─────────────────────────────────────────────────────────────────╯
+  Or to load and enable a module you can:
+  $ check_nsclient nsclient modules use CheckHelpers
+  Successfully loaded and enable module CheckHelpers
+  Or you can execute queries:
+  $ check_nsclient nsclient queries execute-nagios check_cpu
+  OK: CPU load is ok.|'total 5m'=10%;80;90 'total 1m'=10%;80;90 'total 5s'=7%;80;90
+  As well as launch the new interactive client:
+  check_nsclient nsclient client
+  The client is included in the installer or it can be downloaded separately below as check_nsclient
+  One benefit of this client is that it can output everything as text, json, yaml or csv making it easy too integrate in any system:
+  $ check_nsclient --output json nsclient queries execute check_cpu
+  {
+    "command": "check_cpu",
+    "lines": [
+      {
+        "message": "OK: CPU load is ok.",
+        "perf": {
+          "total 1m": {
+            "value": 12.0,
+            "unit": "%",
+            "warning": 80.0,
+            "critical": 90.0,
+          },
+          "total 5s": {
+            "value": 21.0,
+            "unit": "%",
+            "warning": 80.0,
+            "critical": 90.0,
+          },
+          "total 5m": {
+            "value": 11.0,
+            "unit": "%",
+            "warning": 80.0,
+            "critical": 90.0,
+          }
+        }
+      }
+    ],
+    "result": 0
+  }
+  Other changes in this version:
+  - Tokens for the WEB UI now expire after 8 hours.
+  - Some missing python scripts have been added to the installer
+  Full Changelog: https://github.com/mickem/nscp/compare/0.11.5...0.11.6
+ReleaseNotesUrl: https://github.com/mickem/nscp/releases/tag/0.11.6
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://nsclient.org/docs/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

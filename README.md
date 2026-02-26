@@ -10,7 +10,7 @@
 This repository contains the manifest files for the **Windows Package Manager** default source. You are highly encouraged to submit manifests for your favorite application.
 
 > [!IMPORTANT]
-> At this time installers must be MSIX, MSI, APPX, or .exe application installers. Script-based installers and fonts are not currently supported.
+> At this time installers must be MSIX, MSI, APPX, MSIXBundle, APPXBundle, or .exe application installers. Script-based installers and fonts are not currently supported.
 
 The **Windows Package Manager** is an [open source client](https://github.com/microsoft/winget-cli) designed for command-line usage. If you are interested in exploring private repositories offering private WinGet package hosting, see [private repositories](doc/private/README.md).
 
@@ -22,11 +22,6 @@ Please check the [overview](doc/README.md) for detailed topics. Common topics fo
 * [Submitting a manifest](doc/README.md#submitting-a-manifest)
 * [Requesting a new package](doc/Issues.md#Request-a-New-Package)
 * [Requesting a new package version](doc/Issues.md#Request-a-New-Package-Version)
-
-## Repology
-[Repology](https://repology.org/), the packaging hub monitors package repositories comparing package versions and other information.
-
-[![Repository status](https://repology.org/badge/repository-big/winget.svg)](https://repology.org/repository/winget)
 
 # Contributing
 

@@ -45,6 +45,31 @@ extends:
 
         steps:
 
+        # Allow scripts to access the system token.
+        # Fetch all history
+        # Don't fetch tags.
+        - checkout: self
+          clean: true
+          persistCredentials: true
+          fetchDepth: 0
+          fetchTags: false
+
+        # Roll back agent to 2.76, see issue https://github.com/Azure/azure-cli/issues/32088#issuecomment-3283886207
+        # NOTE: Remove the next 3 steps once issue is fixed.
+        - powershell: |
+            Start-Process msiexec -ArgumentList ' /x {37CCEB8D-306A-4DB4-B25B-7608A093D184} /qn' -NoNewWindow -Wait
+          displayName: "Uninstall Azure CLI"
+
+        - powershell: |
+            Invoke-WebRequest -Uri "https://azurecliprod.blob.core.windows.net/msi/azure-cli-2.76.0-x64.msi" -OutFile "azure-cli-2.76.0.msi"
+            Start-Process msiexec -ArgumentList '/i "azure-cli-2.76.0.msi" /quiet /norestart' -NoNewWindow -Wait
+          displayName: "Install Azure CLI 2.76.0"
+          workingDirectory: $(Agent.TempDirectory)
+
+        - script: |
+            az version
+          displayName: "Check Azure CLI version"
+
         # Downloads all the setup files and its dependencies.
         - task: AzureCLI@2
           displayName: 'Azure Setup'
@@ -156,42 +181,10 @@ extends:
               "timelineId": "$(system.TimelineId)",
               "taskInstanceId": "$(system.TaskInstanceId)",
               "buildRepositoryId": "$(build.repository.id)",
+              "containerName": "$(CacheContainerName)",
               "commitTablePartitionKey": "$(CommitTablePartitionKey)",
               "commitTableRowKey": "$(CommitTableRowKey)",
               "skipManifestIndexUpdate": "$(Publish.SkipManifestIndexUpdate)"
-              }
-            waitForCompletion: "true"
-
-      # Agentless phase. Depends on previous job. 
-      - job: 'PublishToRestSource'
-        pool: server
-        timeoutInMinutes: 1500
-        displayName: 'Publish to rest source'
-        dependsOn:
-          - 'CommitProcessing'
-          - 'Publish'
-        variables:
-          HostKeySecret: $[ dependencies.CommitProcessing.outputs['wingetsetup.hostkey']]
-          RestSourceUpdateEndpointSecret: $[ dependencies.CommitProcessing.outputs['wingetsetup.restsourceUpdateEndpoint']]
-        steps:
-
-        # Publish updates to rest source
-        - task: AzureFunction@1
-          displayName: 'Publishing to rest source'
-          inputs:
-            function: '$(RestSourceUpdateEndpointSecret)'
-            key: '$(HostKeySecret)'
-            body: |
-              {
-              "operationId": "$(Build.BuildNumber)",
-              "buildId": "$(Build.BuildId)",
-              "pipelineType": "CommitPipeline",
-              "projectId": "$(system.TeamProjectId)",
-              "planId": "$(system.PlanId)", 
-              "jobId": "$(system.JobId)", 
-              "timelineId": "$(system.TimelineId)", 
-              "taskInstanceId": "$(system.TaskInstanceId)",
-              "authToken": "$(system.AccessToken)"
               }
             waitForCompletion: "true"
 
@@ -203,7 +196,6 @@ extends:
         dependsOn:
           - 'CommitProcessing'
           - 'Publish'
-          - 'PublishToRestSource'
         condition: and(succeeded(), ne(variables['Source.SkipPostPublish'], 'true'))
         variables:
           HostKeySecret: $[ dependencies.CommitProcessing.outputs['wingetsetup.hostkey']]

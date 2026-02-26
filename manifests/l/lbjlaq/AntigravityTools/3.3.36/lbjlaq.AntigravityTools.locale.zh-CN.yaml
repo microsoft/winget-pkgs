@@ -1,0 +1,43 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: lbjlaq.AntigravityTools
+PackageVersion: 3.3.36
+PackageLocale: zh-CN
+Publisher: lbjlaq
+PublisherUrl: https://github.com/lbjlaq
+PublisherSupportUrl: https://github.com/lbjlaq/Antigravity-Manager/issues
+PackageName: Antigravity Tools
+PackageUrl: https://github.com/lbjlaq/Antigravity-Manager
+License: CC-BY-NC-SA-4.0
+LicenseUrl: https://github.com/lbjlaq/Antigravity-Manager/blob/HEAD/LICENSE
+ShortDescription: 专业的 Antigravity 账号管理与切换工具。为 Antigravity 提供一键无缝账号切换功能。
+Description: |-
+  Antigravity Tools 是一个专为开发者和 AI 爱好者设计的全功能桌面应用。它将多账号管理、协议转换和智能请求调度完美结合，为您提供一个稳定、极速且成本低廉的 本地 AI 中转站。
+  通过本应用，您可以将常见的 Web 端 Session (Google/Anthropic) 转化为标准化的 API 接口，彻底消除不同厂商间的协议鸿沟。
+ReleaseNotes: |-
+  Claude 协议核心稳定性修复：
+  修复 "回复 OK" 死循环 (History Poisoning Fix):
+  问题根源：修复了 is_warmup_request 检测逻辑中的严重缺陷。旧逻辑会扫描最近 10 条历史消息，一旦历史记录中包含任何一条 "Warmup" 消息（无论是用户发送还是后台心跳残留），系统就会误判所有后续的用户输入（如 "continue"）为 Warmup 请求并强制回复 "OK"。
+  修复内容：将检测范围限制为仅检查最新的一条消息。现在只有当前请求确实是 Warmup 心跳时才会被拦截，彻底解决了用户在多轮对话中被 "OK" 卡死的问题。
+  影响范围：极大提升了 Claude Code CLI 及 Cherry Studio 等客户端在长时间会话下的可用性。
+  彻底修复 Cache Control 注入 (Fix Issue #744):
+  问题根源：Claude 客户端在 Thinking 块中注入了非标准的 cache_control: {"type": "ephemeral"} 字段，导致 Google API 返回 Extra inputs are not permitted 400 错误。
+  修复内容：实现了全局递归清理函数 clean_cache_control_from_messages，并将其集成到 Anthropic (z.ai) 转发路径中，确保在发送给上游 API 前彻底移除所有 cache_control 字段。
+  智能预热逻辑修复 (Fix Issue #760):
+  问题根源：修复了自动预热调度器中的一段遗留代码，该代码错误地将 gemini-2.5-flash 的配额状态强制映射给 gemini-3-flash。
+  现象：这会导致当 gemini-2.5-flash 仍有额度（如 100%）但 gemini-3-flash 已耗尽（0%）时，系统误判 gemini-3-flash 也为满额并触发预热，造成“无额度却预热”的幽灵请求。
+  修复内容：移除了所有硬编码的 2.5 → 3 映射逻辑。现在的预热调度器严格检查每个模型自身的配额百分比，只有当该模型实测为 100% 时才会触发预热。
+  移除 Gemini 2.5 Pro 模型 (Fix Issue #766):
+  原因：鉴于 gemini-2.5-pro 模型的可靠性问题，已将其从支持列表中移除。
+  迁移：所有 gpt-4 系列别名（如 gpt-4, gpt-4o）已重新映射至 gemini-2.5-flash，确保服务连续性。
+  影响：之前通过别名使用 gemini-2.5-pro 的用户将自动路由至 gemini-2.5-flash。前端不再显示该模型。
+  CLI 同步安全与备份增强 (Fix Issue #756 & #765):
+  智能备份与还原：引入了自动备份机制。在执行同步覆盖前，系统会自动将用户现有的配置文件备份为 .antigravity.bak。“恢复”功能现已升级，能智能检测备份文件，并优先提供“恢复原有配置”选项，而非单一的重置默认。
+  操作二次确认：为“立即同步配置”操作增加了二次确认弹窗，有效防止误触导致本地个性化配置（如登录态）丢失。
+  CLI 检测增强：优化了 macOS 平台下的 CLI（如 Claude Code）检测逻辑。即使二进制文件不在系统 PATH 中，只要存在于标准安装路径，也能被正确识别并调用。
+  Windows 控制台闪烁修复 (PR #769, 感谢 @i-smile)
+  Auth UI 状态显示修复 (PR #769, 感谢 @i-smile)
+ReleaseNotesUrl: https://github.com/lbjlaq/Antigravity-Manager/releases/tag/v3.3.36
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

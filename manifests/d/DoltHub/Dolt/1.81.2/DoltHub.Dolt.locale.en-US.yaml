@@ -1,0 +1,113 @@
+# Created with WinGet Updater using komac v2.15.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: DoltHub.Dolt
+PackageVersion: 1.81.2
+PackageLocale: en-US
+Publisher: DoltHub
+PublisherUrl: https://github.com/dolthub/dolt
+PublisherSupportUrl: https://github.com/dolthub/dolt/issues
+Author: DoltHub
+PackageName: Dolt
+PackageUrl: https://www.dolthub.com/
+License: Apache-2.0
+LicenseUrl: https://github.com/dolthub/dolt/blob/HEAD/LICENSE
+CopyrightUrl: https://raw.githubusercontent.com/dolthub/dolt/master/LICENSE
+ShortDescription: Dolt is a SQL database that you can fork, clone, branch, merge, push and pull just like a git repository.
+Description: |-
+  Dolt is a SQL database that you can fork, clone, branch, merge, push and pull just like a git repository.
+  Connect to Dolt just like any MySQL database to run queries or update the data using SQL commands.
+  Use the command line interface to import CSV files, commit your changes, push them to a remote, or merge your teammate's changes.
+Moniker: dolt
+Tags:
+- cli
+- data
+- git-for-data
+- versioning
+ReleaseNotes: |-
+  Merged PRs
+  dolt
+  - 10357: Prevent temporary table name collisions
+    fixes #10353
+    MySQL allows creating temporary tables with the same names as existing non-temporary tables and creating non-temporary tables with the same names as existing temporary tables. However, temporary tables cannot have the same name as other temporary tables.
+    Our previous implementation seemed to have assumed temporary tables with the same names were allowed. Each session had a map of db names to an array of tables, and new temporary tables were added to the end of the array, without checking if there was a table with an existing name. When fetching or dropping a temporary table, we iterated through the array and returned/dropped the first table with a matching name; this meant even though we allowed temporary tables with the same name, we only ever operated on whichever one was created first.
+    Since temporary tables with the same names are actually not allowed, the array of temporary tables was replaced with a name-to-table map to make fetching a temporary table with GetTemporaryTable faster. This also makes DropTemporaryTable faster. This does make GetAllTemporaryTables slower since we now have to iterate over the mappings to create an array for temporary tables, but GetAllTemporaryTables doesn't seem to be called as frequently as GetTemporaryTable.
+  - 10349: Remove requirement for -i in dolt_rebase
+    Hold over from the original impl of rebase now addressed!
+  - 10274: dolt stash apply
+    Adds #10131
+    Adds dolt stash apply. Functions similar to drop and pop in usage: accepts no argument for most recent stash, or int or stash@{int} for non-top stashes. i.e. dolt stash apply 2 or dolt stash apply stash@{2}.
+  - 10227: #5862: Add ignore system table
+    Summary
+    Adds a new dolt_status_ignored system table that extends dolt_status functionality by including an ignored column to identify which unstaged tables match patterns defined in dolt_ignore. This provides a SQL interface equivalent to dolt status --ignored.
+    Changes
+    New System Table
+    dolt_status_ignored - Same schema as dolt_status plus an ignored column:
+    - table_name (text): Name of the table
+    - staged (boolean): Whether the table is staged
+    - status (text): Status of the table (e.g., "new table", "modified", "conflict")
+    - ignored (boolean): Whether the table matches a dolt_ignore pattern
+    Implementation Details
+    The implementation started with logic similar to status_table.go and was then refactored to share common code between both tables while adding the ignore-checking functionality.
+    go/libraries/doltcore/doltdb/system_table.go
+    - Added StatusIgnoredTableName constant
+    - Registered table in GeneratedSystemTableNames() and DoltGeneratedTableNames
+      go/libraries/doltcore/sqle/database.go
+    - Added switch case for StatusIgnoredTableName in getTableInsensitiveWithRoot()
+    - Extracted getStatusTableRootsProvider() helper to eliminate duplicate logic between dolt_status and dolt_status_ignored switch cases
+      go/libraries/doltcore/sqle/dtables/status_table.go
+    - Added getStatusRowsData() function using existing statusTableRow struct to share status collection logic between both tables
+    - Refactored newStatusItr() to use shared function
+      go/libraries/doltcore/sqle/dtables/status_ignored_table.go (new file)
+    - Implements StatusIgnoredTable and StatusIgnoredItr
+    - Uses shared getStatusRowsData() from status_table.go
+    - Uses adapter pattern via DoltTableAdapterRegistry similar to StatusTable
+    - Adds ignore-checking logic via helper functions:
+    - getIgnorePatterns(): Fetches patterns from dolt_ignore
+    - buildUnstagedTableNameSet(): Creates set for quick lookup
+    - checkIfIgnored(): Checks if table matches ignore pattern (returns error on failure)
+    Behavior
+    - Unstaged tables: ignored=1 if table name matches a pattern in dolt_ignore, ignored=0 otherwise
+    - Staged tables: Always ignored=0 (staging overrides ignore patterns, matching git behavior)
+    - Constraint violations, merge conflicts, schema conflicts: Always ignored=0
+    Tests
+    BATS integration tests
+    integration-tests/bats/system-tables.bats:
+    - Basic functionality: Verifies ignored column correctly identifies ignored tables while non-ignored tables have ignored=0
+    - Staged tables: Confirms staged tables always have ignored=0 regardless of ignore patterns
+    - System table visibility: Ensures table appears in dolt ls --system
+      integration-tests/bats/ls.bats:
+    - Updated "ls: --system shows system tables" to include dolt_status_ignored (27 tables instead of 26)
+    Go enginetests
+    go/libraries/doltcore/sqle/enginetest/dolt_queries.go:
+    Closes #5862
+  go-mysql-server
+  - 3395: fewer strings.ToLower calls in gatherTableAlias
+    benchmarks: #10355 (comment)
+  - 3393: add transform.InspectWithOpaque function
+    This changes transform.Inspect to not apply the helper function on children of sql.OpaqueNodes.
+    Additionally, it adds a transform.InspectWithOpaque that does.
+    This is to match transform.Node and transform.NodeWithOpaque.
+    There are still some inconsistencies between the different transform helper functions:
+    - transform.Node:
+    - post order (applies to node.Children then node)
+    - no way to break out early
+    - transform.Inspect:
+    - pre order (applies to node then node.Children)
+    - can break out early (only on all or none of children)
+    - return true to continue
+    - transform.InspectExpr:
+    - post order (applies to expr.Children then expr)
+    - can break out early, including stopping during children
+    - return false to continue
+  - 3389: remove convertLeftAndRight
+    This PR removes c.convertLeftAndRight, which avoids calls to c.Left().Type() and c.Right().Type().
+    Not entirely sure why receiver methods would impact performance this much, but benchmarks say so.
+    Benchmarks: #10342 (comment)
+  Closed Issues
+  - 10353: Dolt needs to error out when creating duplicate temporary table.
+  - 5862: Add alternative to dolt_status system table that includes tables ignored by system_ignore
+  - 10345: SERIAL type alias creates signed BIGINT instead of unsigned
+ReleaseNotesUrl: https://github.com/dolthub/dolt/releases/tag/v1.81.2
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

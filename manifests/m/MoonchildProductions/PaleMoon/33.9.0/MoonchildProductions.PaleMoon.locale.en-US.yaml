@@ -1,0 +1,73 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: MoonchildProductions.PaleMoon
+PackageVersion: 33.9.0
+PackageLocale: en-US
+Publisher: Moonchild Productions
+PublisherUrl: https://www.palemoon.org/
+PublisherSupportUrl: https://www.palemoon.org/contact/
+PrivacyUrl: https://www.palemoon.org/policies/privacy.shtml
+Author: Moonchild Productions
+PackageName: Pale Moon
+PackageUrl: https://www.palemoon.org/download.shtml
+License: MPL-2.0
+LicenseUrl: https://www.mozilla.org/MPL/2.0
+Copyright: Copyright © 2009-2025 Moonchild Productions - All rights reserved
+CopyrightUrl: https://www.palemoon.org/policies/usercontent.shtml
+ShortDescription: The best browser with fast site rendering, advanced privacy, a sleek design and innovative features.
+Description: |-
+  Pale Moon is an Open Source, Goanna-based web browser available for Microsoft Windows and Linux (with other operating systems in development), focusing on efficiency and ease of use.
+  Pale Moon offers you a browsing experience in a browser completely built from its own, independently developed source that has been forked off from Firefox/Mozilla code a number of years ago, with carefully selected features and optimizations to improve the browser's stability and user experience, while offering full customization and a growing collection of extensions and themes to make the browser truly your own.
+Moniker: palemoon
+Tags:
+- browser
+- gecko
+- internet
+- web
+- web-browser
+- webpage
+ReleaseNotes: |-
+  This is a mjor development, bugfix and security release, focusing primarily on improving web compatibility.
+  Special thanks to the students from the University of the Philippines Los Baños for their work on improving CSS in the platform over the summer!
+
+  New features:
+  - Implemented the CSS4 revert keyword.
+  - Implemented the clip keyword for overflow. See implementation notes.
+  - Implemented axis-shorthand parsing of overflow. This should fix some issues with areas being unscrollable on the web.
+  - Implemented CSS color-mix (RGB and HSL color spaces only).
+  - Implemented CSS @supports(selector(<complex selector>)) syntax.
+  - Implemented CSS Cascade Layers @layer support.
+  - Implemented support for CSS clip-path:<geometry-box> without actually supplying a clip path to use. See implementation notes.
+  - Implemented overflow-inline and overflow-block CSS properties.
+  - Implemented the :autofill CSS pseudo-class. Auto-filled fields will now also be styled by default to indicate autofilling/password manager recall has occurred.
+  - Implemented the :focus-visible CSS pseudo-class.
+  - Implemented the prefers-reduced-motion CSS media query. See implementation notes.
+  - Implemented a minimal version of the visualViewport web API. See implementation notes.
+  Changes/fixes:
+  - Un-prefixed CSS -moz-user-select and aligned with the user-select CSS4 spec.
+  - Un-prefixed CSS -moz-read-only and -moz-read-write pseudo-classes.
+  - Improved the handling of X-Content-Type-Options: nosniff to align more with the spec and expected behavior on the web.
+  - Added support for FFmpeg 7.0/libavcodec 61.
+  - Fixed a bug where sub-properties of CSS border-image would not update when the value they inherit from changes.
+  - Fixed a bug where scrollbar-width was incorrectly treated as an inherited property.
+  - Fixed an issue where screen/pixel color depth could potentially be mis-reported on Linux.
+  - Fixed a potential issue with fontconfig on Linux. We now explicitly initialize fontconfig on startup.
+  - Fixed various issues with vpx on PowerPC architectures.
+  - Fixed issues when building ffvpx on architectures without assembly support.
+  - Fixed a memory safety issue in two-position gradient color-stops code.
+  - Changed the way @import rules are processed. They will now be processed in the order of appearance in the importing stylesheet.
+  - Changed how TypedArray constructors handle initialization values, aligning with the ECMAScript spec. See implementation notes.
+  - Changed how Cache-control HTTP headers are parsed if multiple headers are present in a response.
+  - Made additional improvements to "Copy as cURL" devtools command.
+  - Security issues addressed: CVE-2025-10536 and CVE-2025-10533 DiD.
+  Implementation notes:
+  - The clip keyword allows you to specify overflow behavior that acts like a "passe-partout". This means any overflow will be hidden and content unscrollable.
+    Important note: we have strictly followed the standard specification here which may result in issues on some websites if they do not explicitly specify overflow behavior in both axes when using clip as a keyword. clip, per the specification, results in unscrollable hidden content. If the other axis is unset, it will result in visible overflow that is also unscrollable (no scrollbar or mousewheel scrolling). Other browsers may default to scrollable visible overflow, instead. If you are a webmaster, please double-check if you are specifying overflow correctly when you are using clip. Because some of clip's behavior may be unintuitive at first glance, it serves well to always be explicit in both directions what kind of overflow behavior is desired.
+  - Pale Moon now supports specifying a CSS clip-path with just a geometry box (e.g. border-box) without defining a path. This should fix some websites displaying fully blank pages due to webmasters relying on implied "border-following" clipping when specifying a clip-path this way. Previously, this would result in everything being clipped (which used to be the explicit behaviour when no path definition was provided).
+  - The CSS media query prefers-reduced-motion can be used by webmasters to provide alternative styling of web pages when users indicate that they prefer web pages with less visual motion (e.g. for accessibility considerations for people with vestibular motion disorders). Pale Moon users can indicate this preference with a new option in the browser (Preferences -> Advanced -> tab "General" -> "Prefer reduced visual motion" under Accessibility). Please note that this option doesn't change how the browser itself handles e.g. animations or CSS; it is up to the webmaster to make use of this CSS feature to cater to visitors with this preference indicator.
+  - We now support a minimal implementation of the visualViewport web API. This API provides webmasters with indicators how much of the visible web pages should be considered "fully visible" to users. This API is primarily designed to cater to mobile traffic where browsers may be impaired by e.g. a camera notch in the screen. Since this isn't a concern on desktop, we always return a fixed (0,0) value for origin and offset. For other parts of the API, we give back the width/height of the root scrollframe of web content, while for scale we pass forward our dpp resolution (usually 1.0).
+  - TypedArray constructors can be passed initialization values to indicate the initial size of the array to create. According to the specced behavior, we should accept most values (anything accepted by ToIndex), even those that make no sense (e.g. a string or undefined). This has now been changed to align with that spec and we no longer throw an error in those cases, and simply return a 0-length typed array instead.
+ReleaseNotesUrl: https://www.palemoon.org/releasenotes.shtml
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

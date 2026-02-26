@@ -1,0 +1,162 @@
+# Created with komac v2.14.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: BiomeJS.Biome
+PackageVersion: 2.3.8
+PackageLocale: en-US
+Publisher: BiomeJS
+PublisherUrl: https://biomejs.dev/
+PublisherSupportUrl: https://github.com/biomejs/biome/issues
+Author: Biome Developers and Contributors
+PackageName: Biome
+PackageUrl: https://biomejs.dev/
+License: Apache-2.0
+Copyright: Copyright (c) 2023-present Biome Developers and Contributors
+ShortDescription: Biome is a toolchain for web projects, aimed at providing functionalities to maintain them. It offers a formatter and linter, usable via CLI and LSP.
+Moniker: biome
+Tags:
+- css
+- formatter
+- javascript
+- json
+- jsx
+- linter
+- static-code-analysis
+- typescript
+- web
+ReleaseNotes: |-
+  2.3.8
+  Patch Changes
+  - #8188 4ca088c Thanks @ematipico! - Fixed #7390, where Biome couldn't apply the correct configuration passed via --config-path.
+    If you have multiple root configuration files, running any command with --config-path will now apply the chosen configuration file.
+  - #8171 79adaea Thanks @dibashthapa! - Added the new rule noLeakedRender. This rule helps prevent potential leaks when rendering components that use binary expressions or ternaries.
+    For example, the following code triggers the rule because the component would render 0:
+    const Component = () => {
+      const count = 0;
+      return <div>{count && <span>Count: {count}</span>}</div>;
+    };
+  - #8116 b537918 Thanks @Netail! - Added the nursery rule noDuplicatedSpreadProps. Disallow JSX prop spreading the same identifier multiple times.
+    Invalid:
+    <div {...props} something="else" {...props} />
+  - #8256 f1e4696 Thanks @cormacrelf! - Fixed a bug where logs were discarded (the kind from --log-level=info etc.). This is a regression introduced after an internal refactor that wasn't adequately tested.
+  - #8226 3f19b52 Thanks @dyc3! - Fixed #8222: The HTML parser, with Vue directives enabled, can now parse v-slot shorthand syntax, e.g. <template #foo>.
+  - #8007 182ecdc Thanks @brandonmcconnell! - Added support for dollar-sign-prefixed filenames in the useFilenamingConvention rule.
+    Biome now allows filenames starting with the dollar-sign (e.g. $postId.tsx) by default to support naming conventions used by frameworks such as TanStack Start for file-based-routing.
+  - #8218 91484d1 Thanks @hirokiokada77! - Added the noMultiStr rule, which disallows creating multiline strings by escaping newlines.
+    Invalid:
+    const foo =
+      "Line 1\n\
+    Line 2";
+    Valid:
+    const foo = "Line 1\nLine 2";
+    const bar = `Line 1
+    Line 2`;
+  - #8225 98ca2ae Thanks @ongyuxing! - Fixed #7806: Prefer breaking after the assignment operator for conditional types with generic parameters to match Prettier.
+    -type True = unknown extends Type<
+    -  "many",
+    -  "generic",
+    -  "parameters",
+    -  "one",
+    -  "two",
+    -  "three"
+    ->
+    -  ? true
+    -  : false;
+    +type True =
+    +  unknown extends Type<"many", "generic", "parameters", "one", "two", "three">
+    +    ? true
+    +    : false;
+  - #6765 23f7855 Thanks @emilyinure! - Fixed #6569: Allow files to export from themselves with noImportCycles.
+    This means the following is now allowed:
+    // example.js
+    export function example() {
+      return 1;
+    }
+    // Re-exports all named exports from the current module under a single namespace
+    // and then imports the namespace from the current module.
+    // Allows for encapsulating functions/variables into a namespace instead
+    // of using a static class.
+    export * as Example from "./example.js";
+    import { Example } from "./example.js";
+  - #8214 68c052e Thanks @hirokiokada77! - Added the noEqualsToNull rule, which enforces the use of === and !== for comparison with null instead of == or !=.
+    Invalid:
+    foo == null;
+    foo != null;
+    Valid:
+    foo === null;
+    foo !== null;
+  - #8219 793bb9a Thanks @dyc3! - Fixed #8190: The HTML parser will now parse Vue event handlers that contain : correctly, e.g. @update:modelValue="onUpdate".
+  - #8259 4a9139b Thanks @hirokiokada77! - Fixed #8254: The noParameterAssign rule with propertyAssignment: "deny" was incorrectly reporting an error when a function parameter was used on the right-hand side of an assignment to a local variable's property.
+    The rule should only flag assignments that modify the parameter binding or its properties (L-value), not the use of its value.
+    Valid:
+    (input) => {
+      const local = { property: 0 };
+      local.property = input;
+    };
+  - #8201 cd2edd7 Thanks @Netail! - Added the nursery rule noTernary. Disallow ternary operators.
+    Invalid:
+    const foo = isBar ? baz : qux;
+  - #8172 de98933 Thanks @JeremyMoeglich! - Fixed #8145: handling of large hex literals, which previously caused both false positives and false negatives.
+    This affects noPrecisionLoss and noConstantMathMinMaxClamp.
+  - #8210 7b44e9e Thanks @Netail! - Corrected rule source reference. biome migrate eslint should do a bit better detecting rules in your eslint configurations.
+  - #8213 e430555 Thanks @ruidosujeira! - Fixed #8209: Recognized formatting capability when either range or on-type formatting is supported, not only full-file formatting. This ensures editors and the language server correctly detect formatting support in files like JSONC.
+  - #8202 6f49d95 Thanks @hirokiokada77! - Fixed #8079: Properly handle name and value metavariables for JsxAttribute GritQL queries.
+    The following biome search command no longer throws an error:
+    biome search 'JsxAttribute($name, $value) as $attr where { $name <: "style" }'
+  - #8276 f7e836f Thanks @hirokiokada77! - Added the noProto rule, which disallows the use of the __proto__ property for getting or setting the prototype of an object.
+    Invalid:
+    obj.__proto__ = a;
+    const b = obj.__proto__;
+    Valid:
+    const a = Object.getPrototypeOf(obj);
+    Object.setPrototypeOf(obj, b);
+  What's Changed
+  - fix(noImportCycles): prevent flagging on single file import cycling by @emilyinure in #6765
+  - chore: fix changeset by @ematipico in #8191
+  - ci: breakdown wasm CI build by @ematipico in #8187
+  - chore: disable docstrings in coderabbit by @Netail in #8203
+  - feat(js_analyze): implement noTernary by @Netail in #8201
+  - docs: missing references by @Netail in #8207
+  - fix(biome_grit_patterns): properly handle name and value metavariables for JsxAttribute GritQL queries by @hirokiokada77 in #8202
+  - feat(lint): added new rule no-leaked-render from eslint-react by @dibashthapa in #8171
+  - fix(noPrecisionLoss): correctly handle large hex literals by @JeremyMoeglich in #8172
+  - docs: qwik no-react-props rule reference by @Netail in #8210
+  - docs(noSecrets): properly document entropyThreshold option by @dyc3 in #8211
+  - feat(use_filenaming_convention): add support for $ prefix by @brandonmcconnell in #8007
+  - feat(biome_js_analyze): implement noEqualsToNull rule by @hirokiokada77 in #8214
+  - fix: recognize format_range and format_on_type as Format capabilities… by @ruidosujeira in #8213
+  - feat(biome_js_analyze): implement noMultiStr rule by @hirokiokada77 in #8218
+  - feat(js_biome_analyze): implement noDuplicatedSpreadProps by @Netail in #8116
+  - chore: improve the wording of the no_descending_specificity rule by @ashnewmanjones in #8220
+  - fix(cli): make config-path absolute by @ematipico in #8188
+  - docs: clarify doc comments for ISO validation functions by @hirokiokada77 in #8227
+  - chore(deps): update github-actions by @renovate[bot] in #8230
+  - chore(deps): update rust crate indexmap to 2.12.1 by @renovate[bot] in #8236
+  - chore(deps): update rust:1.91.1-bullseye docker digest to 4886b15 by @renovate[bot] in #8235
+  - chore(deps): update rust:1.91.1-bookworm docker digest to 8fed34f by @renovate[bot] in #8231
+  - chore(deps): update github-actions (major) by @renovate[bot] in #8238
+  - fix(parse/html/vue): fix lexing of event handlers with : in them by @dyc3 in #8219
+  - feat(parse/html/vue): parse v-slot shorthand syntax by @dyc3 in #8226
+  - ci: fix regression in benchmark workflows by @ematipico in #8244
+  - fix(formatter): align conditional type formatting with Prettier by @ongyuxing in #8225
+  - fix(cli): revert some of PR #7531 to re-enable logging by @cormacrelf in #8256
+  - fix(noParameterAssign): prevent false positive when parameter is used as R-value by @hirokiokada77 in #8259
+  - ci: restore WASM build in release by @ematipico in #8264
+  - chore: add flags to regex literals by @arendjr in #8279
+  - feat(biome_js_analyze): implement noProto rule by @hirokiokada77 in #8276
+  - chore(test infra): record parsing errors for analyze crates by @dyc3 in #8268
+  - ci: release by @github-actions[bot] in #8263
+  - chore: refactor global type system to accommodate further extensions by @tidefield in #8253
+  New Contributors
+  - @JeremyMoeglich made their first contribution in #8172
+  - @brandonmcconnell made their first contribution in #8007
+  - @ruidosujeira made their first contribution in #8213
+  - @ongyuxing made their first contribution in #8225
+  - @cormacrelf made their first contribution in #8256
+  Full Changelog: https://github.com/biomejs/biome/compare/@biomejs/biome@2.3.7...@biomejs/biome@2.3.8
+ReleaseNotesUrl: https://github.com/biomejs/biome/releases/tag/@biomejs/biome@2.3.8
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://biomejs.dev/guides/getting-started/
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0
