@@ -1,0 +1,272 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
+
+PackageIdentifier: Drrakendu78.UniCreate
+PackageVersion: 1.0.4
+PackageLocale: en-US
+Publisher: Drrakendu78
+PublisherUrl: https://github.com/drrakendu78
+PrivacyUrl: https://github.com/drrakendu78/UniCreate/blob/master/PRIVACY.md
+Author: Drrakendu78
+PackageName: UniCreate
+PackageUrl: https://github.com/drrakendu78/UniCreate
+License: MIT
+LicenseUrl: https://github.com/drrakendu78/UniCreate/blob/master/LICENSE
+ShortDescription: The modern WinGet manifest creator — Create and submit packages to winget-pkgs with a beautiful GUI
+Description: The modern WinGet manifest creator — Create and submit packages to winget-pkgs with a beautiful GUI
+Tags:
+- desktop-app
+- gui
+- manifest
+- open-source
+- package-manager
+- react
+- rust
+- tauri
+- typescript
+- windows
+- winget
+- winget-pkgs
+ReleaseNotes: |-
+  # UniCreate - Patch Notes v1.0.4
+  
+  Date: 2026-02-22
+  Release tag: `v1.0.4`
+  Repository: `drrakendu78/UniCreate`
+  
+  ## Highlights
+  
+  - Fixed Connect button modal flashing and immediately closing.
+  - Major security hardening across the entire Rust backend (SSRF, path traversal, input validation, CSP, timeouts).
+  - Auth token now passed to all GitHub API calls (5000 req/h vs 60 unauthenticated).
+  - Clear rate limit error messages instead of silent "not found".
+  - Per-user submission history isolation (each GitHub account sees only its own data).
+  - Metadata auto-fill now works for drag & drop local files (GitHub URLs).
+  - Profile repos (`username/username`) excluded from New Package repo list.
+  - Extracted React hooks for better code organization.
+  - Removed dead code and unused imports.
+  
+  ## Bug fixes
+  
+  ### 1) Connect button modal flash fix
+  - The auth modal was appearing and immediately closing due to a `useEffect` triggering on initial render.
+  - Added `flowStarted` guard state to only close the modal after the device flow has actually started.
+  - Cancel/X buttons properly reset the `flowStarted` state.
+  
+  Impacted file:
+  - `src/components/ProfileButton.tsx`
+  
+  ## Security hardening
+  
+  ### 2) SSRF protection
+  - All HTTP downloads now enforce HTTPS-only.
+  - Added `is_private_host()` blocklist covering:
+    - IPv4: `localhost`, `127.0.0.1`, `0.0.0.0`, `10.x`, `172.16-31.x`, `192.168.x`, `169.254.x`, `.local`, `.internal`
+    - IPv6: `::1`, `::0`, `fe80::`, `fc00::/fd00::`, IPv4-mapped (`::ffff:127.*`, `::ffff:10.*`, etc.)
+  - Post-redirect URL is re-validated (scheme + host) to prevent redirect-based SSRF.
+  - Download file size capped at 2 GB to prevent resource exhaustion.
+  
+  Impacted file:
+  - `src-tauri/src/hash.rs`
+  
+  ### 3) Path traversal protection
+  - `hash_local_file`: file path is `canonicalize()`d before use.
+  - Extension whitelist enforced (`.exe`, `.msi`, `.msix`, `.msixbundle`, `.appx`, `.zip`).
+  - `download_and_hash`: file name from `Content-Disposition` is stripped to basename via `Path::file_name()` and special characters are replaced.
+  - `save_yaml_files` in `lib.rs`: validates file names (no `/`, `\`, `..`), enforces `.yaml` extension, and checks canonicalized path stays within output directory.
+  
+  Impacted files:
+  - `src-tauri/src/hash.rs`
+  - `src-tauri/src/lib.rs`
+  
+  ### 4) Input validation
+  - Added `validate_package_id()`: 1-128 chars, alphanumeric + `.` `-` `_`, no `..`, at least 2 segments.
+  - Added `validate_version()`: 1-64 chars, no `/` `\` `..`, alphanumeric + `.` `-` `_` `+`.
+  - Added `validate_github_name()`: 1-100 chars, alphanumeric + `-` `_` `.`.
+  - Applied to all Tauri commands: `submit_manifest`, `fetch_existing_manifest`, `check_package_exists`, `fetch_repo_metadata`, `fetch_repo_releases`, `save_yaml_files`.
+  
+  Impacted files:
+  - `src-tauri/src/github.rs`
+  - `src-tauri/src/lib.rs`
+  
+  ### 5) HTTP client hardening
+  - All `reqwest::Client::new()` replaced with `http_client()` factory.
+  - Global timeouts: 30s request, 10s connect.
+  - Download client: 300s timeout, max 5 redirects.
+  
+  Impacted file:
+  - `src-tauri/src/github.rs`
+  
+  ### 6) CSP restriction
+  - Content Security Policy changed from `https://*` wildcard to strict whitelist:
+    - `connect-src`: `api.github.com`, `github.com`, `avatars.githubusercontent.com`
+    - `img-src`: `self`, `asset:`, `avatars.githubusercontent.com`
+  
+  Impacted file:
+  - `src-tauri/tauri.conf.json`
+  
+  ### 7) Release URL validation
+  - Download URLs from GitHub release assets are now validated to ensure they point to trusted GitHub domains (`github.com`, `objects.githubusercontent.com`) before being exposed to the frontend.
+  - Self-update download URLs go through the same validation.
+  
+  Impacted file:
+  - `src-tauri/src/github.rs`
+  
+  ### 8) Branch name collision prevention
+  - `submit_manifest` now appends a Unix timestamp to the branch name to prevent collisions when resubmitting the same package+version.
+  
+  Impacted file:
+  - `src-tauri/src/github.rs`
+  
+  ### 9) Error message sanitization
+  - Removed raw GitHub API response bodies from user-facing error messages to prevent information leakage.
+  - Applies to: `start_device_flow`, `fetch_unicreate_recent_prs`, and OAuth error catch-all in `poll_device_flow`.
+  
+  Impacted file:
+  - `src-tauri/src/github.rs`
+  
+  ### 10) Strict GitHub URL parsing
+  - `parse_github_url` and `parse_github_pr_url` now use strict equality (`== "github.com"`) instead of `contains("github.com")` to prevent bypass via crafted domains (e.g. `evil-github.com`).
+  
+  Impacted file:
+  - `src-tauri/src/github.rs`
+  
+  ### 11) Tag & version validation in API URLs
+  - Release tags in `fetch_repo_metadata` are validated (no `/`, `\`, `..`, `?`, `#`, `%`, max 128 chars) before being used in API URL construction.
+  - `latest_version` from winget-pkgs API response is validated via `validate_version()` before being used in URL paths.
+  
+  Impacted file:
+  - `src-tauri/src/github.rs`
+  
+  ### 12) Fetched content size limits
+  - YAML files fetched from GitHub API (base64 decoded) are capped at 512 KB to prevent memory exhaustion.
+  - Locale files fetched from winget-pkgs are capped at 20 per package.
+  
+  Impacted file:
+  - `src-tauri/src/github.rs`
+  
+  ### 13) Safe file name filter
+  - All file names from GitHub API responses are validated with a `safe_name` filter rejecting `/`, `\`, `..`, `?`, `#`, and `%` characters to prevent path traversal and percent-encoding bypass.
+  
+  Impacted file:
+  - `src-tauri/src/github.rs`
+  
+  ### 14) Updater file name validation
+  - `start_silent_update`: the `preferred_name` parameter is validated (no `-` prefix for arg injection, no null bytes, max 255 chars) before being passed as a CLI argument to the updater process.
+  - Download URL file name is sanitized via `safe_file_name()` which replaces dangerous characters.
+  
+  Impacted file:
+  - `src-tauri/src/github.rs`
+  
+  ### 15) Username validation before search query
+  - `fetch_unicreate_recent_prs` validates `user.login` via `validate_github_name` before using it in the GitHub search query, preventing query injection.
+  
+  Impacted file:
+  - `src-tauri/src/github.rs`
+  
+  ## Bug fixes (continued)
+  
+  ### 22) GitHub API rate limit — auth token propagation
+  - All GitHub API calls (`fetch_repo_metadata`, `fetch_existing_manifest`, `check_package_exists`) now accept and forward the user's auth token.
+  - Authenticated requests get 5000 req/h instead of 60, preventing silent failures.
+  - Rust backend now uses `build_headers_optional(token)` for optionally authenticated requests.
+  
+  Impacted files:
+  - `src-tauri/src/github.rs`
+  - `src-tauri/src/lib.rs`
+  - `src/pages/StepInstaller.tsx`
+  - `src/pages/StepMetadata.tsx`
+  - `src/pages/Home.tsx`
+  
+  ### 23) Rate limit error detection
+  - `fetch_existing_manifest` and `check_package_exists` now check HTTP status before parsing JSON.
+  - 403/429 responses return a clear "GitHub API rate limit exceeded" message instead of misleading "not found".
+  - 404 returns "Package not found", other errors return "GitHub API error (HTTP xxx)".
+  
+  Impacted file:
+  - `src-tauri/src/github.rs`
+  
+  ### 24) Metadata auto-fill for drag & drop local files
+  - `handleAddFromLocal` now fetches GitHub repo metadata when the URL contains "github.com/".
+  - In update mode: fills version, release notes, release notes URL.
+  - In new package mode: fills publisher, package name, description, tags, etc.
+  
+  Impacted file:
+  - `src/pages/StepInstaller.tsx`
+  
+  ### 25) "New Package" always resets manifest
+  - `handleNew` now always calls `reset()` instead of resuming drafts, preventing stale data carry-over.
+  - "Update Package" button also resets before switching mode.
+  
+  Impacted file:
+  - `src/pages/Home.tsx`
+  
+  ### 26) Per-user submission history
+  - History store rewritten with `users: Record<string, UserHistory>` keyed by GitHub username.
+  - `activeUser` synced from auth session in `App.tsx`.
+  - When no user is connected, all history fields return empty arrays (no data leakage).
+  - All write operations (`addSubmission`, `removeSubmission`, `mergeRecoveredSubmissions`, `clearHistory`) are no-ops when no user is active.
+  - Only the `users` map is persisted; computed fields are refreshed on login.
+  
+  Impacted files:
+  - `src/stores/history-store.ts`
+  - `src/App.tsx`
+  
+  ## Improvements
+  
+  ### 16) Rate/size limits on IPC commands
+  - YAML file count capped at 10 per operation (`save_yaml_files`, `submit_manifest`).
+  - YAML file content capped at 512 KB per file.
+  - PR URL list capped at 20 in `fetch_pr_statuses`.
+  - `save_yaml_files`: `package_id` capped at 128 chars, `version` capped at 64 chars.
+  
+  Impacted files:
+  - `src-tauri/src/lib.rs`
+  - `src-tauri/src/github.rs`
+  
+  ### 17) Temp file race condition fix
+  - MSIX temp files now use a unique nanosecond-based name to prevent collisions.
+  - Files are opened with `create_new(true)` to prevent symlink following.
+  
+  Impacted file:
+  - `src-tauri/src/hash.rs`
+  
+  ### 18) Owner/repo validation in fetch_pr_statuses
+  - Added `validate_github_name` check on owner and repo extracted from PR URLs, consistent with all other GitHub API calls.
+  
+  Impacted file:
+  - `src-tauri/src/github.rs`
+  
+  ### 19) Profile repos excluded from New Package
+  - Repos where `name == owner.login` (profile repos) are now filtered out from the user repos list, since they never have releases.
+  
+  Impacted file:
+  - `src-tauri/src/github.rs`
+  
+  ### 20) Code cleanup
+  - Extracted `useDeviceFlow` and `useUserRepos` custom hooks from inline component logic.
+  - Removed dead code and unused imports across multiple files.
+  - Moved `ProfileButton` to its own component file.
+  
+  Impacted files:
+  - `src/hooks/useDeviceFlow.ts`
+  - `src/hooks/useUserRepos.ts`
+  - `src/components/ProfileButton.tsx`
+  
+  ### 21) Version bump
+  - App version updated to `1.0.4`.
+  
+  Impacted files:
+  - `package.json`
+  - `src-tauri/Cargo.toml`
+  - `src-tauri/tauri.conf.json`
+  
+  ## Checksums (SHA-256)
+  
+  | File | SHA-256 |
+  |------|---------|
+  | `UniCreate_1.0.4_x64-setup.exe` | `2336574e0161724a6276b50cd9ca7fbf3e69a30455309dcff5ef11d5d63310ae` |
+  | `UniCreate_1.0.4_x64_en-US.msi` | `c7a43390f50a7b9c291471429aae8912f3d8b039089a81b6e530f0b069ce9aa0` |
+  | `UniCreate_1.0.4_x64-portable.exe` | `f5cea50d3825a679b0a8d688e74a3e8a0b40e1df9b5fedb32008aed959b458d7` |
+ReleaseNotesUrl: https://github.com/drrakendu78/UniCreate/releases/tag/v1.0.4
+ManifestType: defaultLocale
+ManifestVersion: 1.9.0
