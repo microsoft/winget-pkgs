@@ -1,0 +1,79 @@
+# Created with YamlCreate.ps1 v2.7.1 $debug=NVS1.CRLF.7-5-4.Win32NT
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.12.0.schema.json
+
+PackageIdentifier: MicroClaw.MicroClaw
+PackageVersion: 0.0.126
+PackageLocale: zh-CN
+# Publisher:
+# PublisherUrl:
+# PublisherSupportUrl:
+# PrivacyUrl:
+# Author:
+# PackageName:
+# PackageUrl:
+# License:
+# LicenseUrl:
+# Copyright:
+# CopyrightUrl:
+ShortDescription: 一个驻留在你聊天中的自主 AI 助手，灵感来自 nanoclaw，并融入了其部分设计理念。使用 Rust 构建
+Description: |-
+  MicroClaw 是一个使用 Rust 编写的聊天机器人，可将大语言模型（LLM）与聊天集成，并支持智能体式的工具执行。它能够运行 Shell 命令、读写和编辑文件、搜索代码库、浏览网页、安排任务，并在不同对话之间保持持久记忆。MicroClaw 是 nanoclaw（TypeScript 版本）的 Rust 重写版本，具备更多功能，并采用单二进制文件部署模式。
+
+  是什么让它与众不同
+  - 具备工具执行能力的智能体循环，而不仅是一次性 API 调用
+  - 可直接在聊天中访问完整的文件系统与 Shell 工具
+  - 由 AGENTS.md 文件支持的长期记忆机制
+  - 内置调度器，支持定时（cron）和一次性任务
+  - 群组聊天跟进功能：读取上次回复以来的所有消息
+  - 多聊天权限模型（control_chat_ids），实现跨聊天会话的工具授权
+  - 智能体技能系统，附带预置技能（包括 macOS 的 Apple 笔记/提醒事项/日历助手）
+  - 通过 SOUL.md 文件自定义个性（全局 + 每个聊天独立设置）
+
+  工作原理
+  聊天消息
+      |
+      v
+  存入 SQLite --> 加载聊天历史 + 记忆
+                       |
+                       v
+                 LLM API（带工具）
+                       |
+                  stop_reason?
+                 /            \
+            end_turn        tool_use
+               |               |
+               v               v
+           发送回复        执行工具(s)
+                              |
+                              v
+                        将结果反馈给 LLM（循环）
+  MicroClaw 对每条消息都会进入一个智能体循环。LLM 可调用工具，检查结果，继续调用更多工具，并在回应前完成多步骤任务的推理。为保障安全，循环受 MAX_TOOL_ITERATIONS 参数限制。
+
+  核心功能
+  - 智能体式工具调用（bash、文件读写、glob、grep）
+  - 网络搜索、内容获取与浏览器自动化
+  - 支持 cron 表达式的任务调度
+  - 在任务进行中发送中间消息以更新进度
+  - 持久化记忆（全局 + 每聊天独立）
+  - 通过 SOUL.md 自定义个性
+  - 对话归档（压缩前自动归档，或通过 /archive 手动归档）
+  - 在工具执行期间持续显示“正在输入”提示
+# Moniker:
+Tags:
+- 人工智能
+- 大语言模型
+- 智能体
+- 聊天机器人
+- 自主智能
+- 龙虾
+# ReleaseNotes:
+# ReleaseNotesUrl:
+# PurchaseUrl:
+# InstallationNotes:
+Documentations:
+- DocumentLabel: 文档
+  DocumentUrl: https://microclaw.ai/docs/overview
+- DocumentLabel: 快速开始
+  DocumentUrl: https://microclaw.ai/docs/quickstart
+ManifestType: locale
+ManifestVersion: 1.12.0
