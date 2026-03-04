@@ -1,0 +1,69 @@
+# Created with komac v2.14.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: Gruntwork.Terragrunt
+PackageVersion: 0.96.1
+PackageLocale: en-US
+Publisher: Gruntwork
+PublisherUrl: https://terragrunt.gruntwork.io/
+PublisherSupportUrl: https://terragrunt.gruntwork.io/docs/community/support
+PrivacyUrl: https://gruntwork.io/legal/privacy-policy
+PackageName: Terragrunt
+PackageUrl: https://github.com/gruntwork-io/terragrunt/releases/tag/v0.68.9
+License: MIT
+LicenseUrl: https://github.com/gruntwork-io/terragrunt/blob/HEAD/LICENSE.txt
+Copyright: © 2024 Gruntwork, Inc. All rights reserved.
+ShortDescription: Terragrunt is a thin wrapper for Terraform that provides extra tools for keeping your Terraform configurations DRY, working with multiple Terraform modules, and managing remote state.
+Description: Terragrunt is a thin wrapper for Terraform that provides extra tools for keeping your Terraform configurations DRY, working with multiple Terraform modules, and managing remote state.
+Tags:
+- IaC
+- Infrastructure as Code
+- Terraform
+- Terraform Wrapper
+- terragrunt
+ReleaseNotes: |-
+  🧪 Experiments Updated
+  The --filter-affected flag has more robust determination of the default branch in a Git repository
+  The --filter-affected flag will now use Git plumbing to interrogate the default branch as considered by the remote repository before falling back to interrogating local configurations for determination of a default branch (remember that you must use the filter-flag experiment to try this out).
+  # This is checked first
+  $ git rev-parse --abbrev-ref origin/HEAD
+  # Followed by this
+  $ git ls-remote --symref origin HEAD
+  # Followed with this
+  $ git config init.defaultBranch
+  # If none of the above succeed, the default branch is assumed to be `main`.
+  Git-based filter expressions now warn users when using local state
+  Usage of --filter Git-based expressions in combination with local state will now emit a warning, recommending usage of remote states (remember that you must use the filter-flag experiment to try this out).
+  $ terragrunt run --all --filter '[HEAD~1...HEAD]' -- plan
+  09:30:38.017 WARN   One or more units discovered using Git-based filter expressions (e.g. [HEAD~1...HEAD]) do not have a remote_state configuration. This may result in unexpected outcomes, such as outputs for dependencies returning empty. It is strongly recommended to use remote state when working with Git-based filter expressions.
+  See the warning at the bottom of Git-based expressions documentation for more information.
+  OpenTelemetry traces added for filter evaluation
+  Filter evaluation now emits OpenTelemetry spans and metrics, including filter resolution details, evaluation duration, and filtering scope. This helps teams analyze performance and pinpoint bottlenecks in filtering with large Terragrunt repositories.
+  filter-otel-traces
+  🐛 Bug Fixes
+  Path-based filters targeting external paths fixed
+  A bug in the parsing of path-based filter expressions in the --filter flag of the filter-flag experiment prevented parsing of path-based filters for external paths (e.g. --filter ../external-dir). This bug has been fixed.
+  HTTPS Git CAS URLs fixed
+  A bug in the parsing of source URLs with forced usage of the Git protocol (e.g. git::https://github.com/acme/catalog) prevented using the cas experiment with HTTPS Git URLs with forced usage of the Git protocol. This bug has been fixed.
+  Regression of support for root terragrunt.hcl fixed
+  A bug in the processing of --queue-exclude-dir resulted in prefix based matching of non-glob expressions in --queue-exclude-dir values. This broke backwards compatibility for users with a root terragrunt.hcl file instead of a differently named file for the root include (e.g. root.hcl). This bug has been fixed.
+  Note that you are still advised to migrate away from using a root terragrunt.hcl as soon as possible for your team. We will maintain backwards compatibility until at least 2.0, however.
+  What's Changed
+  - feat: add opentelemtry integration in filter flag by @denis256 in #5247
+  - feat: Adding warnings for local state usage with Git-based expressions by @yhakbar in #5245
+  - feat: Use more robust default branch detection in Git-based expressions by @yhakbar in #5243
+  - fix: Fixing parsing of external filters by @yhakbar in #5238
+  - fix: Fixing HTTPS CAS URLs by @yhakbar in #5240
+  - fix: Fixing warnings for how to reproduce tofu runs by @yhakbar in #5246
+  - fix: Fixing regression with support for include of root terragrunt.hcl by @yhakbar in #5249
+  - chore: Verify --queue-include-external isn't necessary when using the --filter flag by @yhakbar in #5216
+  - chore: Verify --filter results in minimal parsing by @yhakbar in #5229
+  - chore: Dropping util.JoinPath by @yhakbar in #5219
+  - docs: Cleaning up some docs by @yhakbar in #5239
+  Full Changelog: v0.96.0...v0.96.1
+ReleaseNotesUrl: https://github.com/gruntwork-io/terragrunt/releases/tag/v0.96.1
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/gruntwork-io/terragrunt/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0
