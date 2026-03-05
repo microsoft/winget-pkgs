@@ -1,0 +1,51 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: lbjlaq.AntigravityTools
+PackageVersion: 4.1.28
+PackageLocale: zh-CN
+Publisher: lbjlaq
+PublisherUrl: https://github.com/lbjlaq
+PublisherSupportUrl: https://github.com/lbjlaq/Antigravity-Manager/issues
+PackageName: Antigravity Tools
+PackageUrl: https://github.com/lbjlaq/Antigravity-Manager
+License: CC-BY-NC-SA-4.0
+LicenseUrl: https://github.com/lbjlaq/Antigravity-Manager/blob/HEAD/LICENSE
+ShortDescription: 专业的 Antigravity 账号管理与切换工具。为 Antigravity 提供一键无缝账号切换功能。
+Description: |-
+  Antigravity Tools 是一个专为开发者和 AI 爱好者设计的全功能桌面应用。它将多账号管理、协议转换和智能请求调度完美结合，为您提供一个稳定、极速且成本低廉的 本地 AI 中转站。
+  通过本应用，您可以将常见的 Web 端 Session (Google/Anthropic) 转化为标准化的 API 接口，彻底消除不同厂商间的协议鸿沟。
+ReleaseNotes: |-
+  - [重要提醒] 谷歌风控与第三方工具使用风险：
+    - 由于谷歌加强风控，第三方工具会违反服务条款而被暂停使用 Antigravity、Gemini CLI 或 Gemini Code Assist。
+    - 使用第三方软件、工具或服务访问 Antigravity、Gemini CLI 或 Gemini Code Assist（例如，使用 OpenClaw 和 Antigravity OAuth）违反了适用的条款和政策。此类行为可能导致您的帐户被暂停或终止。
+    - 申诉链接：如果您认为帐户被误封，请通过 此链接 进行申诉。
+    - [后续规划] 关于未来版本更迭：
+      - 我们计划在后续推送新版本，届时可能会将“账号切换”与“反代代理”功能解耦为独立的模块或工具。
+      - 由于作者近期工作繁忙，发布可能会有延迟，感谢理解。
+      - 欢迎关注公众号 Ctrler 或 TG 频道 获取最新动态。
+    - 请谨慎使用本项目。
+  - [核心修复] 全系列模型限流锁定修复 (Fix Issue #2209):
+    - 统一归一化逻辑：修复了 Claude 和 Gemini 系列模型在发生 429 (Too Many Requests) 错误时，由于限流 Key 未归一化导致负载均衡器无法识别锁定状态的问题。
+    - 熔断器联动增强：确保即使在禁用"额度保护"的情况下，内置熔断器也能通过归一化后的模型 ID（如 claude, gemini-3-flash 等）精确拦截已耗尽账号，消除 90s 的无效等待。
+  - [核心修复] Gemini 系列模型 adaptive 模式下错误注入 thinkingLevel 导致 400 报错 (Fix Issue #2208):
+    - 根因定位：4.1.27 引入的自适应识别逻辑将 gemini-3.1-pro-high / gemini-3.1-pro-low 等 Gemini 系列模型误判为支持 thinkingLevel，而 thinkingLevel 是 Vertex AI Claude 原生协议专有参数，Gemini 系列底层走 v1internal 协议，仅接受 thinkingBudget，导致请求被 Google API 拒绝并返回 400 INVALID_ARGUMENT。
+    - 条件收窄：将注入 thinkingLevel 的触发条件从 contains("gemini-3") 修正为 contains("claude")，确保 thinkingLevel 仅在 Claude 协议路径下注入，Gemini 系列模型在 adaptive 模式下统一回落到安全的 thinkingBudget: 24576。
+    - 零附带损伤：OpenAI 协议与 Gemini 原生协议路径本身无此问题，本次修复仅针对 Claude 协议映射器，影响范围最小。
+  - [核心修复] 修复 Claude Code 4.1.27+ 联网搜索 (Internal Tool) 失效问题 (Issue #2224):
+    - 混合工具支持：克服了 Gemini v1internal API 对 googleSearch 与自定义 functionDeclarations 同时使用的限制。
+    - 智能感知注入：重构了工具注入引擎，实现在 Gemini 2.0+ 和 3.0 系列模型上自动同时开启内置搜索与自定义开发者工具。
+    - 多协议对齐：本次修复同步覆盖了 OpenAI 和 Gemini Native 协议，确保全协议栈在高性能模型下的联网能力一致性。
+    - 后向兼容：针对旧版 Gemini 1.5 模型保留了自动排他转换逻辑，规避 400 错误。
+  - [核心修复] gemini-3-flash / gemini-3.1-flash 函数调用时缺少 thought_signature 导致 400 报错 (Fix Issue #2167):
+    - 根因定位：三个协议映射器（OpenAI / Claude / Gemini 原生）的模型识别逻辑均未将 gemini-3-flash 系列纳入 "thinking 模型" 范畴，致使在首次函数调用（无 Session 签名缓存）时，thoughtSignature 字段未被注入，Google v1internal API 返回 400 INVALID_ARGUMENT。
+    - OpenAI 协议：新增 is_gemini_flash_thinking 判断变量，在 functionCall 构建阶段，当 Session 缓存为空时自动注入哨兵值 skip_thought_signature_validator。
+    - Claude 协议：将 gemini-3-flash / gemini-3.1-flash 加入 target_model_supports_thinking 识别列表；无签名时 flash 模型不再强制禁用 thinking，改为依赖现有哨兵注入路径（build_contents L1249-1256），保留模型思考能力。
+    - Gemini 原生协议：在 wrap_request 的 functionCall 处理块中，当 Session 缓存为空时对 flash 模型补充哨兵 fallback，覆盖首次调用场景。
+    - 零附带损伤：flash 模型不触发 thinkingConfig 注入逻辑，不影响非思考类请求的正常路径；顺带修复了 test_wrap_request_with_signature 单元测试中 session_id 参数位置错误的既有 Bug。
+  - [核心修复] Token 统计时区偏差修复 (Fix Issue #2214):
+    - 自动时区贴合：将 Token 统计的基准时间从标准时间 (UTC) 切换为系统本地时间 (Local Time)。
+    - 全球多时区支持：引入了 SQLite 'localtime' 转换机制。无论用户身处全球何处，统计图表的时间轴都将自动与其系统时钟对齐，彻底解决了北京时间或其他非 UTC 时区下的数据错位问题。
+ReleaseNotesUrl: https://github.com/lbjlaq/Antigravity-Manager/releases/tag/v4.1.28
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

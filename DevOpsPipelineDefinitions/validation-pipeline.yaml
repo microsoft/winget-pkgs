@@ -94,6 +94,7 @@ extends:
             LABEL_ENDPOINT: $(AzFuncSetLabelOnPullRequestEndpoint)
             LABEL_KEY: $(AzureFunctionLabelKey)
             CATALOG_CONTENT_VERIFICATION_ENDPOINT: $(AzFuncCatalogContentVerificationEndpoint)
+            INSTALLER_METADATA_VALIDATION_ENDPOINT: $(AzFuncInstallerMetadataValidationEndpoint)
           inputs:
             script: 'winget_validation_setup.cmd'
             workingDirectory: scripts
@@ -266,6 +267,7 @@ extends:
           HostKeySecret: $[ dependencies.FileValidation.outputs['wingetsetup.hostkey']]
           ScanEndpointSecret: $[ dependencies.FileValidation.outputs['wingetsetup.scanEndpoint']]
           InstallationEndpointSecret: $[ dependencies.FileValidation.outputs['wingetsetup.installationEndpoint']]
+          InstallerMetadataValidationEndpointSecret: $[ dependencies.FileValidation.outputs['wingetsetup.installerMetadataValidationEndpoint']]
         steps:
 
         # Scan installers in manifests.
@@ -295,6 +297,28 @@ extends:
           displayName: 'Installation Validation'
           inputs:
             function: '$(InstallationEndpointSecret)'
+            key: '$(HostKeySecret)'
+            body: |
+              {
+              "operationId": "$(WinGetSvc.OperationId)",
+              "buildId": "$(Build.BuildId)",
+              "projectId": "$(system.TeamProjectId)",
+              "planId": "$(system.PlanId)",
+              "jobId": "$(system.JobId)",
+              "timelineId": "$(system.TimelineId)",
+              "taskInstanceId": "$(system.TaskInstanceId)",
+              "repository": "$(build.repository.id)",
+              "pipelineType": "ValidationPipeline",
+              "pullRequestNumber": "$(WinGetSvc.PullRequestNumber)",
+              "buildSourceBranch": "$(build.SourceBranch)"
+              }
+            waitForCompletion: "true"
+
+        # Validation Installer Metadata such as ARP Correlation.
+        - task: AzureFunction@1
+          displayName: 'Installer Metadata Validation'
+          inputs:
+            function: '$(InstallerMetadataValidationEndpointSecret)'
             key: '$(HostKeySecret)'
             body: |
               {

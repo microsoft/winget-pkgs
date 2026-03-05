@@ -1,0 +1,65 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Bitvise.SSH.Server
+PackageVersion: "9.59"
+PackageLocale: en-US
+Publisher: Bitvise Limited
+PublisherUrl: https://bitvise.com/
+PublisherSupportUrl: https://bitvise.com/contact
+PrivacyUrl: https://bitvise.com/privacy-policy
+Author: Bitvise Limited
+PackageName: Bitvise SSH Server
+PackageUrl: https://bitvise.com/ssh-server
+License: Proprietary
+LicenseUrl: https://bitvise.com/ssh-server-license
+Copyright: Copyright (C) 2000-2026 by Bitvise Limited.
+CopyrightUrl: https://bitvise.com/terms-of-use
+ShortDescription: Secure file transfer and terminal shell access for Windows
+Description: |-
+  Our SSH server supports all desktop and server versions of Windows, 32-bit and 64-bit, from Windows XP SP3 and Windows Server 2003, up to the most recent – Windows 11 and Windows Server 2025.
+  Bitvise SSH Server includes the following:
+  - SFTP server: Secure file transfer using SFTP - compatible with a wide variety of clients
+  - SCP server: Secure file transfer using SCP - compatible with command line and graphical clients
+  - FTPS server: Secure file transfer using FTP over TLS/SSL - compatible with secure FTPS clients
+  - SSH server: Secure remote access via console - vt100, xterm and bvterm are supported
+  - Secure remote access via GUI - Remote Desktop or WinVNC required
+  - Secure, effortless Git integration
+  - Secure TCP/IP connection tunneling (port forwarding)
+Moniker: bitvisesshserver
+Tags:
+- sftp
+- ssh
+- sshd
+Agreements:
+- AgreementLabel: End User License Agreement (EULA)
+  AgreementUrl: https://bitvise.com/ssh-server-license
+ReleaseNotes: |-
+  - Installation and startup:
+    - The SSH Server installer still requires administrative rights for installation, but can now be run without administrative rights for help with command-line parameters.
+    - In previous 8.xx and 9.xx versions, the SSH Server used low-level techniques to improve memory allocation performance on servers that handle many concurrent connections. The improvement is significant, and has worked well for 7+ years. However, after recent Windows updates and hotfixes, some users reported the SSH Server would no longer start, and attempts to reinstall would fail with STATUS_DLL_INIT_FAILED (0xC0000142).
+      The low-level techniques are inherently sensitive to changes in Windows. We are now seeing these as a surprise with Windows updates and hotfixes. To avoid issues, the SSH Server now disables this low-level functionality by default, but still uses other measures to improve memory allocation performance.
+      Most users will not notice a performance difference. Servers that handle hundreds of concurrent connections may notice a longer service shutdown. In most cases, this is preferable to the SSH Server not starting after a Windows update.
+      Most users are not affected by this issue. Users who wish to maximize memory allocation performance can re-enable this by creating two plain text files in the SSH Server installation directory. Name the files BvAlloc32.cfg and BvAlloc64.cfg. In each file, enter a single line:
+      Hook=yes
+      This restores the default behavior of previous versions.
+    - The SSH Server installation now includes a small process startup debugger. The installer will use it automatically for diagnostics in case of STATUS_DLL_INIT_FAILED, which has other possible causes.
+  - Logging:
+    - In all previous versions, the SSH Server would fail to log events to the Windows Event Log if the size of the event exceeded the ReportEventW per-string limit (31,839 characters). The SSH Server now truncates overly long events. This in particular affects the I_SERVICE_CONFIG_DESCRIPTION event, which can be very large.
+      In versions before 9.51, Windows Event Log failures were silently ignored. In 9.5x versions, such failures are logged in the SSH Server's textual log files, and displayed in the SSH Server Control Panel.
+    - The SSH Server now logs an additional I_SERVICE_STOPPING event when initiating service shutdown.
+  - File transfer:
+    - For virtual filesystem mount points of type Another SFTP server, version 9.32 introduced handling to strip or reduce file open block flags sent by the client if the block flags include SSH_FXF_BLOCK_ADVISORY, if the other SFTP server does not support them. This introduced an issue where the SFTP channel would close abruptly if the other SFTP server does not send the supported2 extension. This is now fixed. Most notably, this would happen if the other server is OpenSSH.
+      Independently of SSH Server version, it is possible to avoid this issue by configuring the SSH Server to always strip block flags for the affected mount point. This can be done using mount point settings:
+      File sharing behavior: Force File sharing for uploads: Read, Write, Delete File sharing for downloads: Read, Write, Delete
+ReleaseNotesUrl: https://www.bitvise.com/ssh-server-version-history-9-5#959
+PurchaseUrl: https://bitvise.com/ssh-server-pricing
+Documentations:
+- DocumentLabel: Printable Documentation
+  DocumentUrl: https://bitvise.com/printable-docs/ssh-server-doc-printable
+- DocumentLabel: Users' Guide
+  DocumentUrl: https://bitvise.com/ssh-server-users-guide
+- DocumentLabel: FAQ
+  DocumentUrl: https://bitvise.com/ssh-server-usage-faq
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

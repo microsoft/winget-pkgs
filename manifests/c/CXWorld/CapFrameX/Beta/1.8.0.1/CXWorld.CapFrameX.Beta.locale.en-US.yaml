@@ -1,0 +1,142 @@
+# Created with komac v2.14.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: CXWorld.CapFrameX.Beta
+PackageVersion: 1.8.0.1
+PackageLocale: en-US
+Publisher: CXWorld
+PublisherUrl: https://www.capframex.com/
+PublisherSupportUrl: https://www.capframex.com/support
+PrivacyUrl: https://www.capframex.com/privacy
+Author: CapFrameX Team
+PackageName: CapFrameX Beta
+PackageUrl: https://github.com/CXWorld/CapFrameX
+License: MIT
+LicenseUrl: https://github.com/CXWorld/CapFrameX/blob/HEAD/LICENSE
+ShortDescription: Frametime capture and analysis tool
+Description: Frametimes capture and analysis tool based on Intel's PresentMon. Overlay provided by Rivatuner Statistics Server.
+Moniker: capframex-beta
+Tags:
+- analysis-tool
+- benchmark
+- benchmarking
+- fps
+- frametime
+- rivatuner
+ReleaseNotes: |-
+  Release Notes
+  Enhancements & New Features
+  - Support Intel Panther Lake voltage sensors
+  - Added model IDs for Intel Arrow Lake-S Refresh (reserved)
+  - Added model IDs for Intel Core Ultra 300 Series (reserved)
+  - Full working portable mode
+  - Check for .NET 9 and Visual C++ Redistributables on app start
+  Bugfixes
+  - Overlay group control
+  Platform & Infrastructure
+  - Updated several Nuget packages
+  Runtime Requirements
+  - .NET 9 is now required for full feature support and optimal stability. Download here.
+  CapFrameX Portable Mode
+  CapFrameX now supports a portable mode that allows the application to run entirely from a single folder without writing to system directories. This is useful for running from USB drives, network shares, or keeping multiple isolated installations.
+  How It Works
+  Portable mode is activated by placing a portable.json file in the same directory as the CapFrameX executable. When the application starts, it checks for this file and redirects all data storage to paths relative to the application directory.
+  Key Features
+  - Self-contained: All configuration, captures, screenshots, and logs are stored relative to the application folder
+  - No registry modifications: The application doesn't write to the Windows registry in portable mode
+  - No system folder usage: Bypasses %AppData% and Documents folders entirely
+  - Configurable paths: All storage paths can be customized via portable.json
+  portable.json Configuration
+  Create a portable.json file in the CapFrameX application directory with the following structure:
+  {
+    "portable": true,
+    "paths": {
+      "config": "./Portable/Config",
+      "captures": "./Portable/Captures",
+      "screenshots": "./Portable/Screenshots",
+      "logs": "./Portable/Logs",
+      "cloud": "./Portable/Captures/Cloud"
+    }
+  }
+  Configuration Options
+  ─────────────────┬────────────────────────────────────────────────────────────────────────────────┬─────────────────────────
+  Property         │Description                                                                     │Default
+  ─────────────────┼────────────────────────────────────────────────────────────────────────────────┼─────────────────────────
+  portable         │Enables portable mode when true                                                 │true
+  ─────────────────┼────────────────────────────────────────────────────────────────────────────────┼─────────────────────────
+  paths.config     │Configuration files (AppSettings.json, overlay configs, sensor config, UI state)│./Portable/Config
+  ─────────────────┼────────────────────────────────────────────────────────────────────────────────┼─────────────────────────
+  paths.captures   │Capture recordings                                                              │./Portable/Captures
+  ─────────────────┼────────────────────────────────────────────────────────────────────────────────┼─────────────────────────
+  paths.screenshots│Screenshot storage                                                              │./Portable/Screenshots
+  ─────────────────┼────────────────────────────────────────────────────────────────────────────────┼─────────────────────────
+  paths.logs       │Log files                                                                       │./Portable/Logs
+  ─────────────────┼────────────────────────────────────────────────────────────────────────────────┼─────────────────────────
+  paths.cloud      │Cloud download directory                                                        │./Portable/Captures/Cloud
+  ─────────────────┴────────────────────────────────────────────────────────────────────────────────┴─────────────────────────
+  All paths are relative to the application directory. You can use ./ or .\ prefix, or just the folder name.
+  Requirements
+  When running in portable mode, the following dependencies must be installed on the system:
+  - .NET 9.0 Desktop Runtime (x64) - Download
+  - Visual C++ 2015-2022 Redistributable (x64) - Download
+  The application will check for these dependencies on startup and display a message if any are missing.
+  Creating a Portable Distribution
+  1. Copy the CapFrameX application files to a folder
+  2. Create a portable.json file with the configuration above
+  3. (Optional) Pre-create the Portable subdirectory with: Config, Captures, Screenshots, Logs
+  4. The application is now portable and can be moved to any location
+  Behavior Differences
+  ─────────────────────────────────────┬─────────────────────────────────┬──────────────────────
+  Feature                              │Installed Mode                   │Portable Mode
+  ─────────────────────────────────────┼─────────────────────────────────┼──────────────────────
+  Config storage                       │%AppData%\CapFrameX\Configuration│./Portable/Config
+  ─────────────────────────────────────┼─────────────────────────────────┼──────────────────────
+  Captures storage                     │Documents\CapFrameX\Captures     │./Portable/Captures
+  ─────────────────────────────────────┼─────────────────────────────────┼──────────────────────
+  Screenshots                          │Documents\CapFrameX\Screenshots  │./Portable/Screenshots
+  ─────────────────────────────────────┼─────────────────────────────────┼──────────────────────
+  Logs                                 │%AppData%\CapFrameX\Logs         │./Portable/Logs
+  ─────────────────────────────────────┼─────────────────────────────────┼──────────────────────
+  UI state (window size, column widths)│%LocalAppData%\Jot               │./Portable/Config
+  ─────────────────────────────────────┼─────────────────────────────────┼──────────────────────
+  Window title                         │"CapFrameX"                      │"CapFrameX Portable"
+  ─────────────────────────────────────┼─────────────────────────────────┼──────────────────────
+  Config migration                     │Migrates old settings            │Skipped
+  ─────────────────────────────────────┼─────────────────────────────────┼──────────────────────
+  Start with Windows                   │Available                        │Disabled
+  ─────────────────────────────────────┴─────────────────────────────────┴──────────────────────
+  Notes
+  - Settings configured in portable mode are stored in the portable config folder and won't affect or be affected by an installed version
+  - The portable.json file must be valid JSON; if parsing fails, the application falls back to installed mode
+  - Directories are automatically created if they don't exist
+  Troubleshooting & Known Issues
+  The following tips address the most common issues reported by users and can help resolve stability, overlay, and capture-related problems efficiently. We recommend working through them in order if you encounter unexpected behavior.
+  1. Ensure you are running the latest version
+     If you experience application crashes or unstable behavior, verify that you have installed CapFrameX v1.7.9 or newer. Many known issues have been resolved in this patch. If you were previously using version 1.7.7, we recommend uninstalling CapFrameX before installing the new version.
+  2. Reset application settings
+     In some cases, corrupted or outdated configuration files may cause problems. Deleting
+     %appdata%/CapFrameX/Configuration/AppSettings.json
+     will reset CapFrameX to its default settings and often resolves startup or UI-related issues.
+  3. Reset overlay configuration files
+     If overlay-related problems persist, try deleting the overlay configuration files located at
+     %appdata%/CapFrameX/Configuration/OverlayEntryConfiguration_(0/1/2).json.
+     These files will be recreated automatically on the next application start.
+  4. Restore missing or zero-value overlay entries
+     When overlay entries are missing or display constant zero values, open the Overlay tab and use the Reset button to restore all overlay entries to a valid default state.
+  5. Fix incorrect overlay entry order
+     If the order of overlay entries appears inconsistent or unintentionally rearranged, use the Sort button in the Overlay tab to restore a clean and logical ordering.
+  6. Resolve frametime anomalies after updates
+     In rare cases, existing background capture processes can interfere with CapFrameX after an update. If you encounter frametime issues, close all running PresentMon processes before installing or launching CapFrameX v1.7.9 release or v1.8.0 beta.
+  7. Avoid conflicts with other monitoring tools
+     Applications such as HWiNFO or AIDA64 that implement their own FPS or frametime metrics may conflict with CapFrameX’s capture service, as they also rely on PresentMon-based mechanisms. Disabling overlapping FPS or frametime monitoring features in those tools is strongly recommended when using CapFrameX.
+  Known Limitations
+  - PC latency metric may return invalid values (NaN) under specific conditions.
+  BENCHLAB Service
+  When using BENCHLAB service, unzip the folder in a suitable installation folder like C:\Benchlab Service or D:\Tools, then run the .bat script as admin. Don't install the service from the Download folder. Install latest .NET 9 runtime. Download here.
+ReleaseNotesUrl: https://github.com/CXWorld/CapFrameX/releases/tag/v1.8.0_beta
+InstallationNotes: If you are using a network drive as your capture directory and having problems connecting to it on autostart, you might want to download this additional zip file (https://cxblobs.blob.core.windows.net/releases/Autostart%20using%20network%20drives.zip) too and read the info inside it.
+Documentations:
+- DocumentLabel: README for CapFrameX
+  DocumentUrl: https://github.com/CXWorld/CapFrameX/blob/master/README.md
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

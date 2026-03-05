@@ -1,0 +1,47 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: lbjlaq.AntigravityTools
+PackageVersion: 4.1.12
+PackageLocale: zh-CN
+Publisher: lbjlaq
+PublisherUrl: https://github.com/lbjlaq
+PublisherSupportUrl: https://github.com/lbjlaq/Antigravity-Manager/issues
+PackageName: Antigravity Tools
+PackageUrl: https://github.com/lbjlaq/Antigravity-Manager
+License: CC-BY-NC-SA-4.0
+LicenseUrl: https://github.com/lbjlaq/Antigravity-Manager/blob/HEAD/LICENSE
+ShortDescription: 专业的 Antigravity 账号管理与切换工具。为 Antigravity 提供一键无缝账号切换功能。
+Description: |-
+  Antigravity Tools 是一个专为开发者和 AI 爱好者设计的全功能桌面应用。它将多账号管理、协议转换和智能请求调度完美结合，为您提供一个稳定、极速且成本低廉的 本地 AI 中转站。
+  通过本应用，您可以将常见的 Web 端 Session (Google/Anthropic) 转化为标准化的 API 接口，彻底消除不同厂商间的协议鸿沟。
+ReleaseNotes: |-
+  - [核心功能] OpenCode CLI 深度集成 (PR #1739):
+    - 自动探测：新增了对 OpenCode CLI 的自动检测与环境变量配置同步支持。
+    - 一键同步：支持通过“外部 Providers”卡片将 Antigravity 的配置无缝注入到 OpenCode CLI 环境，实现零配置接入。
+  - [核心修复] Claude Opus 思考预算自动注入 (PR #1747):
+    - 预算修正：修复了 Opus 模型在自动启用思考模式时，未能正确注入默认思考预算 (Thinking Budget) 的问题，防止因预算缺失导致的上游错误。
+  - [核心优化] Claude Opus 4.6 Thinking 全面升级 (Issue #1741, #1742, #1743):
+    - 模型迭代：正式引入 claude-opus-4-6-thinking 支持，提供更强大的推理能力。
+    - 无感迁移：实现了从 claude-opus-4.5 / claude-opus-4 到 4.6 的自动重定向，旧版配置无需修改即可直接享受新模型。
+  - [核心修复] 账户索引自动修复机制 (PR #1755):
+    - 容错增强：修复了在部分极端情况下（如文件损坏）账户索引无法自动重建的问题。现在系统会在检测到索引异常时自动触发自我修复流程，确保账号数据安全可用。
+  - [核心修复] 修复 IP 黑名单删除与时区问题 (PR #1748):
+    - 参数修正：修复了 IP 黑名单删除接口因参数命名风格 (snake_case vs camelCase) 不匹配导致的删除失败问题。
+    - 逻辑修复：修正了清除黑名单时传递了错误参数 (ip_pattern 而非 id) 的问题。
+    - 时区校准：修复了宵禁时间 (Curfew) 判断逻辑，强制使用北京时间 (UTC+8)，解决了服务器本地时区非 UTC+8 时的判断偏差。
+    - 拒绝对齐：优化了令牌拒绝响应，返回 403 状态码及 JSON 错误详情，对齐了统一错误响应标准。
+  - [核心功能] 新增迷你视图模式 (Mini View Mode) (PR #1750):
+    - 便捷访问：新增迷你窗口模式，支持双向切换。该模式常驻桌面顶层，提供精简的快捷操作入口，方便用户即时查看状态与监控信息。
+  - [核心修复] Gemini 协议 400 错误自愈 (PR #1756):
+    - Token 补全：修复了在 Gemini 原生协议下调用持续思考模型（如 Claude Opus 4.6 Thinking）时，因 maxOutputTokens 小于 thinkingBudget 导致的 400 报错。现在系统会自动补全并对齐 Token 限制，确保请求合规。
+  - [核心修复] 修复 macOS 下 bun 全局安装的路径识别 (PR #1765):
+    - 路径增强：新增对 ~/.bun/bin 及全局安装路径的探测，解决了 bun 用户无法自动同步 Claude CLI 配置的问题。
+  - [核心优化] 修复 Logo 文本在小容器下的换行与显示 (PR #1766):
+    - 显示优化：使用 Tailwind CSS 容器查询逻辑优化了 Logo 文本的显示与隐藏切换，防止在容器空间不足时发生文字换行。
+  - [核心修复] Google Cloud Code API 404 重试与账号轮换 (PR #1775):
+    - 智能重试：针对 Google Cloud Code API 返回的 404 错误（常见于分阶段发布或权限差异场景），新增自动重试与账号轮换机制。系统将以 300ms 短延迟进行重试，并自动切换到下一个可用账号。
+    - 短周期避让：对 404 错误实施 5 秒软锁定（区别于其他服务端错误的 8 秒），在保护账号的同时最大程度减少用户等待时间。
+ReleaseNotesUrl: https://github.com/lbjlaq/Antigravity-Manager/releases/tag/v4.1.12
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
