@@ -26,33 +26,19 @@ Tags:
 - editor
 - programming
 ReleaseNotes: |-
-  New Spec Workflows, Hunk-Based Edits, Task Hooks, and MCP Prompts
-  This release introduces new spec workflows that let you design features architecture-first and fix bugs with structured root cause analysis. Supervised mode now lets you review changes at the hunk level for precise control. New hook triggers automate work around spec tasks, and MCP servers can now surface prompts, templates, and elicitation support directly in chat.
-  Design-First Feature Specs
-  A new Design-First workflow lets you start a feature spec from technical architecture instead of requirements. Provide a high-level or low-level design, pseudocode, or system diagram and Kiro derives feasible requirements from it. This is ideal when you have strict non-functional constraints, an existing design to port, or want to think through the architecture before defining user-facing behavior. Learn more ->
-  Bugfix Specs
-  Specs now include a dedicated Bugfix workflow. Describe the issue you're seeing and Kiro walks you through root cause analysis, fix design, and regression prevention. The result is a `bugfix.md` that captures current behavior, expected behavior, and what must remain unchanged, giving the agent clear guardrails before it writes a single line of code. Learn more ->
-  Hunk-Based Review in Supervised Mode
-  Supervised mode now presents file changes as individual hunks instead of full-file diffs. Each hunk is a logical group of related lines that you can independently accept, reject, or discuss with inline chat. You can also accept changes at the file level or accept all changes at once. This gives you precise control over exactly which parts of a change to keep. Learn more ->
-  Pre and Post Task Execution Hooks
-  Two new hook triggers let you automate work around spec task execution. Pre Task Execution fires before a task begins, so you can run setup scripts or validate prerequisites. Post Task Execution fires after a task completes, letting you run tests, linting, or notify external systems automatically. Combine these with the existing hook actions to build end-to-end automation around your spec workflows. Learn more ->
-  MCP Prompts, Resource Templates, and Elicitation
-  MCP servers can now provide prompts and resource templates that appear in the context provider (#) menu in chat. Select a prompt to insert pre-built instructions, or fill in a resource template's parameters to pull in specific content as context. During tool execution, servers can also request additional input from you through elicitation. Kiro supports elicitation so servers can request the information they need without interrupting your workflow. Learn more ->
+  This patch adds a context usage banner and fixes chat reliability issues including session history loss, supervised mode and more.
   Improvements
-  - Skills and steering: Skills and auto-included steering files can now be activated from slash commands in chat
-  - Conversation export: Sub-agent executions are now included when exporting a conversation
-  - Hook creation UI: New Save and Clear buttons in the hook creation form, plus manual hook creation flow and recursive folder expansion for hook detection
-  - Hook panel: Delete hooks directly from the context menu in the hooks explorer
-  - Hook time limits: runCommand hooks now support configurable time limits
-  - Terminal input detection: Kiro detects when a terminal command is waiting for user input and shows a warning in the UI
-  - Code tool: Improved syntax validation, auto-repair, and tighter fuzzy matching for more reliable code edits
-  - Spec continue button: A continue button in the spec navbar lets you advance through spec phases without switching context
-  - Spec preview: Floating preview button overlay for markdown spec files
-  - Web fetch: Improved content-type handling for broader compatibility with fetched pages.
-  - Markdown rendering: Improved markdown streaming in chat
+  - Context usage: Kiro now shows a breakdown of context usage so you can see what's consuming your model's context window. A warning appears when any single category (such as MCP tools or steering files) exceeds 30% of available context. The estimate is model-aware and updates in real time as MCP servers connect.
+  - Terminal focus control: The terminal panel no longer steals focus when the agent runs commands
   Fixes
-
-  Patches
+  - Fixed session history loss on window reload and when closing multiple windows
+  - Applied a critical Chromium security patch (CVE-2026-2441)
+  - Fixed a race condition with supervised mode silently falling back to autopilot
+  - Fixed the spec explorer not refreshing when a new spec is created
+  - Fixed the show terminal option for long-running processes
+  - Standardized bugfix spec documents terminology (Fault Condition --> Bug Condition)
+  - Fixed subagents skipping spec tasks or marking them complete prematurely
+  - Fixed context selection shortcuts. Cmd+Shift+L (Ctrl+Shift+L on Windows/Linux) now correctly adds selected content to a new session, while Cmd+L (Ctrl+L) adds it to the active chat.
 ReleaseNotesUrl: https://kiro.dev/changelog/ide/0-10/
 PurchaseUrl: https://kiro.dev/pricing/
 Documentations:
