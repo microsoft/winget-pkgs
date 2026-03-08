@@ -1,0 +1,127 @@
+# Created with komac v2.13.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: BiomeJS.Biome
+PackageVersion: 2.3.7
+PackageLocale: en-US
+Publisher: BiomeJS
+PublisherUrl: https://biomejs.dev/
+PublisherSupportUrl: https://github.com/biomejs/biome/issues
+Author: Biome Developers and Contributors
+PackageName: Biome
+PackageUrl: https://biomejs.dev/
+License: Apache-2.0
+Copyright: Copyright (c) 2023-present Biome Developers and Contributors
+ShortDescription: Biome is a toolchain for web projects, aimed at providing functionalities to maintain them. It offers a formatter and linter, usable via CLI and LSP.
+Moniker: biome
+Tags:
+- css
+- formatter
+- javascript
+- json
+- jsx
+- linter
+- static-code-analysis
+- typescript
+- web
+ReleaseNotes: |-
+  2.3.7
+  Patch Changes
+  - #8169 7fdcec8 Thanks @arendjr! - Fixed #7999: Correctly place await after leading comment in auto-fix action from noFloatingPromises rule.
+  - #8157 12d5b42 Thanks @Conaclos! - Fixed #8148. noInvalidUseBeforeDeclaration no longer reports some valid use before declarations.
+    The following code is no longer reported as invalid:
+    class classA {
+      C = C;
+    }
+    const C = 0;
+  - #8178 6ba4157 Thanks @dyc3! - Fixed #8174, where the HTML parser would parse 2 directives as a single directive because it would not reject whitespace in Vue directives. This would cause the formatter to erroneously merge the 2 directives into one, resulting in broken code.
+    - <Component v-else:property="123" />
+    + <Component v-else :property="123" />
+  - #8088 0eb08e8 Thanks @db295! - Fixed #7876: The noUnusedImports rule now ignores imports that are used by @linkcode and @linkplain (previously supported @link and @see).
+    The following code will no longer be a false positive:
+    import type { a } from "a"
+    /**
+     * {@linkcode a}
+     */
+    function func() {}
+  - #8119 8d64655 Thanks @ematipico! - Improved the detection of the rule noUnnecessaryConditions. Now the rule isn't triggered for variables that are mutated inside a module.
+    This logic deviates from the original rule, hence noUnnecessaryConditions is now marked as "inspired".
+    In the following example, hey starts as false, but then it's assigned to a string. The rule isn't triggered inside the if check.
+    let hey = false;
+    function test() {
+      hey = "string";
+    }
+    if (hey) {
+    }
+  - #8149 e0a02bf Thanks @Netail! - Fixed #8144: Improve noSyncScripts, ignore script tags with type="module" as these are always non-blocking.
+  - #8182 e9f068e Thanks @hirokiokada77! - Fixed #7877: Range suppressions now handle suppressed categories properly.
+    Valid:
+    // biome-ignore-start lint: explanation
+    const foo = 1;
+    // biome-ignore-end lint: explanation
+  - #8111 bf1a836 Thanks @ryan-m-walker! - Added support for parsing and formatting the CSS if function.
+    Example
+    .basic-style {
+      color: if(style(--scheme: dark): #eeeeee; else: #000000;);
+    }
+  - #8173 7fc07c1 Thanks @ematipico! - Fixed #8138 by reverting an internal refactor that caused a regression to the rule noUnusedPrivateClassMembers.
+  - #8119 8d64655 Thanks @ematipico! - Improved the type inference engine, by resolving types for variables that are assigned to multiple values.
+  - #8158 fb1458b Thanks @dyc3! - Added the useVueValidVText lint rule to enforce valid v-text directives. The rule reports when v-text has an argument, has modifiers, or is missing a value.
+    Invalid:
+    <div v-text />
+    <!-- missing value -->
+    <div v-text:aaa="foo" />
+    <!-- has argument -->
+    <div v-text.bbb="foo" />
+    <!-- has modifier -->
+  - #8158 fb1458b Thanks @dyc3! - Fixed useVueValidVHtml so that it will now flag empty strings, e.g. v-html=""
+  - #7078 bb7a15c Thanks @emilyinure! - Fixed #6675: Now only flags
+    noAccumulatingSpread on Object.assign when a new object is being allocated on
+    each iteration. Before, all cases using Object.assign with reduce parameters
+    were warned despite not making new allocations.
+    The following code will no longer be a false positive:
+    foo.reduce((acc, bar) => Object.assign(acc, bar), {});
+    The following cases which do make new allocations will continue to warn:
+    foo.reduce((acc, bar) => Object.assign({}, acc, bar), {});
+  - #8175 0c8349e Thanks @ryan-m-walker! - Fixed CSS formatting of dimension units to use correct casing for Q, Hz and kHz.
+    Before:
+    .cssUnits {
+      a: 1Q;
+      b: 1Hz;
+      c: 1kHz;
+    }
+    After:
+    .cssUnits {
+      a: 1Q;
+      b: 1Hz;
+      c: 1kHz;
+    }
+  What's Changed
+  - chore: remove gold sponsor by @ematipico in #8135
+  - fix: next namespace by @Netail in #8142
+  - fix(schema): domains and feature kind by @ematipico in #8147
+  - docs(lint/html): fix some html rule docs that mess up markdown rendering on the website by @dyc3 in #8154
+  - fix(noInvalidUseBeforeDeclaration): ignore valid use before declarations by @Conaclos in #8157
+  - fix: noSyncScripts type="module" by @Netail in #8149
+  - feat(css): add support for parsing and formatting the CSS if function by @ryan-m-walker in #8111
+  - chore: add regex globals by @arendjr in #8166
+  - ci: triggers for github merge queue by @dyc3 in #8168
+  - fix: correctly place await after comment by @arendjr in #8169
+  - fix(noUnusedImports): parse also linkcode, and not only link by @db295 in #8088
+  - fix(inference): improved inference for assignment types by @ematipico in #8119
+  - feat(lint/html/vue): add useVueValidVText by @dyc3 in #8158
+  - fix(css): updating formatting of non-lowercase CSS dimension units by @ryan-m-walker in #8175
+  - fix(parse/html/vue): reject whitespace before vue directive arguments by @dyc3 in #8178
+  - fix(biome_analyze): handle suppressed categories properly for range suppressions by @hirokiokada77 in #8182
+  - fix: only flag object assign in accumulators, if it is allocating a new object for each iter by @emilyinure in #7078
+  - fix: revert #7684 by @ematipico in #8173
+  - ci: release by @github-actions[bot] in #8161
+  New Contributors
+  - @db295 made their first contribution in #8088
+  Full Changelog: https://github.com/biomejs/biome/compare/@biomejs/biome@2.3.6...@biomejs/biome@2.3.7
+ReleaseNotesUrl: https://github.com/biomejs/biome/releases/tag/@biomejs/biome@2.3.7
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://biomejs.dev/guides/getting-started/
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

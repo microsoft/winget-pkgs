@@ -1,0 +1,152 @@
+# Created with komac v2.11.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
+
+PackageIdentifier: RockinChaos.Shiru
+PackageVersion: 6.3.0
+PackageLocale: en-US
+Publisher: RockinChaos
+PublisherUrl: https://github.com/RockinChaos/Shiru
+PublisherSupportUrl: https://github.com/RockinChaos/Shiru/issues
+Author: RockinChaos
+PackageName: Shiru
+PackageUrl: https://github.com/RockinChaos/Shiru
+License: GPL-3.0
+LicenseUrl: https://github.com/RockinChaos/Shiru/blob/HEAD/LICENSE
+Copyright: Copyright © 2025 RockinChaos
+ShortDescription: Manage your personal media library, organize your collection, and stream your content in real time, no waiting required!
+Description: |-
+  A pure JS BitTorrent streaming environment, with a built-in list manager.
+  Imagine qBit + Taiga + MPV, all in a single package, but streamed real-time.
+  Completely ad free with no tracking/data collection.
+  Unlike qBit's sequential approach, seeking into data that hasn't been downloaded yet will prioritise downloading that data, instead of simply closing MPV.
+Tags:
+- anime
+- streaming
+- torrent
+ReleaseNotes: |-
+  - feat: adding local files for playback
+    - In the torrent manager, you can now use the upload button to add local media files as a private torrent for local playback. These are copied to the cache under the shiru-local folder.
+    - Selecting more than one file will create a batch.
+    - The file picker also supports .torrent files to stage them for download.
+    - Added a copy magnet link button in the torrent details.
+  - feat: overhaul history navigation with sidebar support
+    - Complete rewrite of the navigation/history system to unify back/forward behavior.
+    - Adds full desktop support through clickable sidebar buttons.
+    - Parent page/view restoration now ensures consistent UX without unexpected closures.
+    - Fixes bad navigation behavior on Android with anime details view changes.
+  - feat: macOS x64 codecs
+    - The universal build now supports codecs on x64 and arm64.
+  - feat: show my anime
+    - Alt-clicking (right click or tap and hold) the hide my anime button in the search will now show only your anime.
+    - Useful for only showing your anime on the airing schedule page.
+  - feat: new app icon
+    - Another big thanks to Ashtaka on Discord for designing the icon and logo.
+  - fix: handle missing subtitle style blocks
+    - The subtitle parser occasionally received headers without any style blocks, causing the track to not appear at all.
+  - fix: aggressive title matching
+    - Fixes certain series not being labeled Dual Audio.
+  - fix: show multi-header release in episode list
+    - Multi-Header releases like "May I Ask for One Final Thing?" will now show properly in the Episode List.
+    - Dubs are also now considered for this, overriding any sub dates, as a dubbed episode wouldn't release before the sub.
+  - fix: broken preview trailers
+    - Trailers that are auto-played in preview cards will no longer show errors; if they fail, it will fall back to the banner image.
+    - Fixes an edge case with trailers not functioning unless the cache is cleared.
+    - Trailers now load faster.
+    - Muting and unmuting the trailer from the preview card no longer restarts the trailer.
+    - Preview Card banner and trailer are now 16:9 ratio.
+  - fix: zero episode air date
+    - Fixes "Dusk Beyond the End of the World" showing 1 episode ahead as already released due to the presence of the zero episode.
+    - Fixes detecting the description of zero episodes.
+  - fix: zero episode behavior
+    - Torrent details now properly show zero episodes.
+    - The previous episode button is now visible in the player when playing episode 1.
+    - Clicking the watch button now plays the correct episode.
+  - fix: showing duplicate or array resolution
+    - Torrent cards were showing duplicate resolutions or multiple, but didn't get their own badge.
+  - fix: Android drag scroll
+    - Prevents interactable touch elements from triggering drag scroll.
+  - fix: infinite scroll
+    - Search page scrolling is now more consistent.
+    - If you scroll to the bottom before the current batch query loads, it will automatically load the next batch after the current batch resolves.
+  - fix: auto file select on rss feeds
+    - Fixed RSS feeds incorrectly prompting for torrent selection when Auto-File Select was disabled.
+  - fix: subtitles missing cjk glyphs
+    - Noto Sans will now be used as the default font for subtitles whenever there are missing glyphs in the provided subtitle attachments.
+  - fix: exclude trailers
+    - Fixes trailers incorrectly being in the playable files list.
+  - fix: focus preview cards
+    - Improves the expected reactivity of preview cards, whether they should be shown or not, based on certain events..
+  - fix: don't always verify OVA match
+    - Verification when resolving OVA media will now fail if the file name is missing OVA or if the file name has OVA and the media is not an OVA.
+  - fix: missing NCED and NCOP
+    - Can't filter these out unless it's actually specified as an anime_type.
+  - fix: start at the lowest unwatched id
+    - Lowest unwatched was previously determined based on the format of the series, which would result in weird issues like OVA being before the main series.
+    - We now get the lowest media id as ids are typically sequential.
+  - fix: preserve episode and season when failing to resolve
+    - Ensure files that initially failed to resolve keep their known episode and season values instead of relying on torrent name parsing, preventing misdetections like "1080p" as an episode number.
+  - fix: failing to detect playable episodes
+    - Series that are releasing but do not have an air date for the next episode would end up failing to detect how many episodes have already aired.
+  - fix: check media status
+    - Check if the media is marked as finished before stating X episode hasn't released.
+  - fix: show episodes for movies
+    - If a movie has multiple episodes, they will now be detailed rather than listing each as "Movie".
+  - fix: replace timestamp-like chapter names
+    - Better to use a placeholder than a confusing timestamp.
+  - fix: resolving My Gift Lvl 9999 Unlimited Gacha
+    - Resolves issues with release groups using the Mugen Gacha synonym.
+  - fix: resolving Mr. Ginpachi's Zany Class
+    - Was primarily an issue with subbed release groups using an incorrect Romaji title.
+  - fix: resolving Mobile Suit Zeta Gundam
+    - Some release groups used Z instead of Zeta for shorthand.
+  - fix: Resolving Ranma 1/2 season 2
+  - fix: resolving My Hero Academia FINAL SEASON
+  - fix: Android dragging home sections
+  - fix: ui reactivity
+  - fix: miniplayer scaling
+  - fix: fade in/out animations
+  - fix: webpack warnings
+  - fix: undefined media in file manager
+  - fix: focusing hidden elements
+  - fix: episode card title truncation
+  - fix: don't prompt unresolved media
+  - chore: move WebTorrent out of renderer
+    - Primarily impacts desktop, improving stability and performance, especially when seeding large torrents.
+    - Removed IPC override on Android, opting for a preload instead.
+    - Removed a large chunk of IPC calls, opting for cleaner inter-process messaging.
+    - Fixes issues with torrents hanging and WebTorrent crashing.
+    - Fixes extremely long buffering on Android.
+    - Fixes stuttering when loading a video.
+    - Changed torrent debug behavior, separated the torrent worker debug from WebTorrent debug.
+  - chore: improve WebTorrent stability
+    - Introduces better cleanup and hash checking for existing torrents.
+  - chore: better extension error handling
+    - Fixes local extension testing using the path.
+    - Now a lot harder for extensions to break.
+  - chore: brighten amoled skeletons
+    - It was extremely hard to see when the screen brightness was low on mobile.
+  - chore: make trailers load dynamically
+    - Trailers are now verified they can be played before showing a trailer button in the anime details.
+  - chore: hide toasts when fullscreen
+    - Hides toasts while in fullscreen to avoid breaking immersion.
+  - chore: bump to electron v39.1.2
+    - Fixes a lot of Linux issues, including the native title bar.
+    - Improves overall app stability.
+    - Removed release group exclusions from desktop.
+  - chore: deprecate flags
+    - Unfortunately, Chromium has disabled Windows-like smooth scrolling, so we can no longer rely on these for scroll behavior.
+  - chore: implement batch guesses
+    - If the detected hash for a series doesn't have an associated episode (unplayed batch), assume it is very likely accurate as the desired series.
+  - chore: show buffering when unplayable
+    - Instead of viewing a black screen wondering why nothing is happening, it will now be evident by the buffering until playback is fully ready.
+  - chore: improve torrent card terms
+    - Adds some missing terms and improves the cleaning of the displayed file name.
+  - chore: rework progress sorting
+    - Sorting by 'Your Progress' will now sort by distance to completion rather than by how many episodes you watched.
+  - chore: better credits regex
+  - chore: silence extension update rate limit errors
+  - chore: bump to node v22.20
+  - chore: update deps
+ReleaseNotesUrl: https://github.com/RockinChaos/Shiru/releases/tag/v6.3.0
+ManifestType: defaultLocale
+ManifestVersion: 1.9.0
