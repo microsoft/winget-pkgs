@@ -1,0 +1,72 @@
+# Created with YamlCreate.ps1 v2.4.3 $debug=AUSU.CRLF.7-4-6.Win32NT
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
+
+PackageIdentifier: RedHat.Podman
+PackageVersion: 4.0.3
+PackageLocale: en-US
+Publisher: Red Hat Inc.
+PublisherUrl: https://podman.io/
+# PublisherSupportUrl: https://podman.io/community/
+# PrivacyUrl:
+Author: Red Hat Inc.
+PackageName: Podman
+PackageUrl: https://podman.io/
+License: Apache-2.0
+LicenseUrl: https://github.com/containers/podman/blob/main/LICENSE
+# Copyright:
+# CopyrightUrl:
+ShortDescription: A daemonless container engine for developing, managing, and running OCI Containers
+Description: Podman is a daemonless, open source, Linux native tool designed to make it easy to find, run, build, share and deploy applications using Open Containers Initiative (OCI) Containers and Container Images. Podman provides a command line interface (CLI) familiar to anyone who has used the Docker Container Engine. Most users can simply alias Docker to Podman (alias docker=podman) without any problems. Similar to other common Container Engines (Docker, CRI-O, containerd), Podman relies on an OCI compliant Container Runtime (runc, crun, runv, etc) to interface with the operating system and create the running containers. This makes the running containers created by Podman nearly indistinguishable from those created by any other common container engine.
+# Moniker:
+Tags:
+- container
+- docker
+- image
+- pod
+ReleaseNotes: |-
+  Security
+  - This release fixes CVE-2022-27649, where containers run by Podman would have excess inheritable capabilities set.
+
+  Changes
+  - The `podman machine rm --force` command will now remove running machines as well (such machines are shut down first, then removed) (#13448).
+  - When a `podman machine` VM is started that is using a too-old VM image, it will now start in a reduced functionality mode, and provide instructions on how to recreate it (previously, VMs were effectively unusable) (#13510).
+
+  Bugfixes
+  - Fixed a bug where devices added to containers by the `--device` option to `podman run` and `podman create` would not be accessible within the container.
+  - Fixed a bug where Podman would refuse to create containers when the working directory in the container was a symlink (#13346).
+  - Fixed a bug where pods would be created with cgroups even if cgroups were disabled in `containers.conf` (#13411).
+  - Fixed a bug where the `podman play kube` command would produce confusing errors if invalid YAML with duplicated container named was passed (#13332).
+  - Fixed a bug where the `podman machine rm` command would not remove the Podman API socket on the host that was associated with the VM.
+  - Fixed a bug where the remote Podman client was unable to properly resize the TTYs of containers on non-Linux OSes.
+  - Fixed a bug where rootless Podman could hang indefinitely when starting containers on systems with IPv6 disabled (#13388).
+  - Fixed a bug where the `podman version` command could sometimes print excess blank lines as part of its output.
+  - Fixed a bug where the `podman generate systemd` command would sometimes generate systemd services with names beginning with a hyphen (#13272).
+  - Fixed a bug where locally building the pause image could fail if the current directory contained a `.dockerignore` file (#13529).
+  - Fixed a bug where root containers in VMs created by `podman machine` could not bind ports to specific IPs on the host (#13543).
+  - Fixed a bug where the storage utilization percentages displayed by `podman system df` were incorrect (#13516).
+  - Fixed a bug where the CPU utilization percentages displayed by `podman stats` were incorrect (#13597).
+  - Fixed a bug where containers created with the `--no-healthcheck` option would still display healthcheck status in `podman inspect` (#13578).
+  - Fixed a bug where the `podman pod rm` command could print a warning about a missing cgroup (#13382).
+  - Fixed a bug where the `podman exec` command could sometimes print a `timed out waiting for file` error after the process in the container exited (#13227).
+  - Fixed a bug where virtual machines created by `podman machine` were not tolerant of changes to the path to the qemu binary on the host (#13394).
+  - Fixed a bug where the remote Podman client's `podman build` command did not properly handle the context directory if a Containerfile was manually specified using `-f` (#13293).
+  - Fixed a bug where Podman would not properly detect the use of `systemd` as PID 1 in a container when the entrypoint was prefixed with `/bin/sh -c` (#13324).
+  - Fixed a bug where rootless Podman could, on systems that do not use `systemd` as init, print a warning message about the rootless network namespace (#13703).
+  - Fixed a bug where the default systemd unit file for `podman system service` did not delegate all cgroup controllers, resulting in `podman info` queries against the remote API returning incorrect cgroup controllers (#13710).
+  - Fixed a bug where the `slirp4netns` port forwarder for rootless Podman would only publish the first port of a range (#13643).
+
+  API
+  - Fixed a bug where the Compat Create API for containers did not properly handle permissions for tmpfs mounts (#13108).
+
+  Misc
+  - The static binary for Linux is now built with CGo disabled to avoid panics due to a Golang bug (#13557).
+  - Updated Buildah to v1.24.3
+  - Updated the containers/storage library to v1.38.3
+  - Updated the containers/image library to v5.19.2
+  - Updated the containers/common library to v0.47.5
+ReleaseNotesUrl: https://github.com/containers/podman/releases/tag/v4.0.3
+# PurchaseUrl:
+# InstallationNotes:
+# Documentations:
+ManifestType: defaultLocale
+ManifestVersion: 1.9.0

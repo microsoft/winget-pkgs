@@ -1,0 +1,75 @@
+# Created with komac v2.12.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: HydrusNetwork.HydrusNetwork
+PackageVersion: v630
+PackageLocale: en-US
+Publisher: Hydrus Network
+PublisherUrl: https://github.com/hydrusnetwork/hydrus
+PublisherSupportUrl: https://github.com/hydrusnetwork/hydrus/issues
+PrivacyUrl: https://hydrusnetwork.github.io/hydrus/privacy.html
+Author: Hydrus Network
+PackageName: Hydrus Network
+PackageUrl: https://github.com/hydrusnetwork/hydrus
+License: WTFPL
+LicenseUrl: https://github.com/hydrusnetwork/hydrus/blob/HEAD/license.txt
+Copyright: Copyright (C) 2011 Hydrus Developer
+CopyrightUrl: https://github.com/hydrusnetwork/hydrus/blob/master/license.txt
+ShortDescription: A personal booru-style media tagger that can import files and tags from your hard drive and popular websites. Content can be shared with other users via user-run servers.
+Description: |-
+  The hydrus network client is an application written for Anon and other internet-fluent media nerds who have large image/swf/webm collections.
+  It browses with tags instead of folders, a little like a booru on your desktop. Advanced users can share tags and files anonymously through custom servers that any user may run.
+  Everything is free and privacy is the first concern. Executable releases are available for Windows, Linux, and macOS.
+  The program is in python, so you can also run it straight from the source code.
+Moniker: hydrus-network
+Tags:
+- booru
+- cross-platform
+- image-database
+ReleaseNotes: |-
+  Linux laggy mpv issue
+  - I've been chasing down a Linux specific problem recently where mpv would lag out for a second when trying to transition media when it was near to the end of the media. it seemed to be some re-loop buffering issue but I couldn't figure it out. the recent failed 'TEST: stop mpv before transition' was a shot at this
+  - I figured out that it was caused by the audio normalisation pass triggered by the af=lavfi=[loudnorm=I=-16:TP=-3:LRA=4] line in the default mpv.conf. audio stuff like this has caused Linux other problems before. it is now commented out for all new users
+  - If you are a Linux user, please go to your db dir and check your mpv.conf. edit that line out if it exists.
+  - I am going to play with af=dynaudnorm, which is supposedly far less CPU intensive. feel free to try your own things too and let me know what works, and we'll figure out better defaults!
+  misc
+  - if you have wanted to map shift+tab to a shortcut and it hasn't worked, please try it again! hydrus now recognises 'backtab', which it seems some/many situations produce on a shift+tab input. it'll likely say 'shift+backtab', but whatever--it'll catch something stable now
+  - fixed some weird logic with the 're-focus original search page' and 'tell original search page to select exit media' options that trigger on media viewer close under options->media viewer->window. they now work independently
+  - when you upload tag data to a tag repository, the prepare routine now checks that the tags are valid (no crazy/broken characters, etc..). if not, it abandons the job and tells you how to fix invalid tags
+  - fixed some mouse autohide behaviour in the media viewer when various dialogs are open. child windows are detected more reliably and various 'I should unhide now' events fire properly
+  - added a note to options->media playback about the mpv.conf in the db dir--this basically wasn't documented anywhere, previously--adding that this file is reloaded on every options dialog ok
+  - I confidently attempted to rework the 'add folder' button in the 'import files' window to be an 'add folders' button, allowing directory multi-select, and I was stunned to discover this is simply not doable in a multiplat way using stock path-picker dialogs. I feel like I am going crazy and will revisit this
+  - wrote a guide and to-do list for migrating from one OS to another under https://hydrusnetwork.github.io/hydrus/database_migration.html#to_new_OS
+  default downloaders
+  - thanks to a user, the pixiv downloader now fetches a 'series' and 'chapter' tag for those paged manga works that have that data set. I wonder if the 'series' here is more akin to what we'd call 'title', but I'm not familiar enough with pixiv to know what is more common, so let me know how it shakes out IRL
+  more export filename rules
+  - if you are on non-Windows but an export directory filesystem is "ntfs", "exfat", "vfat", "msdos", "fat", "fat32", "cifs" (almost always ntfs underlying), "smbfs", "fuseblk" or any of those but prepended with "fuse.", ntfs naming rules (no colons, shorter filename limits etc...) are now applied (was formerly just "ntfs" or "exfat")
+  - a checkbox under options->exporting now allows you to always apply ntfs naming rules. use if you have an NFS share that is NTFS underlying, or you are subdir-translating from an export dir that is non-ntfs to a mountpoint that is
+  - when an export filename pattern includes subdirectory generation, the subdirs' max length is now determined by the max path characters allowed for this system and the pre-existing prefix directory length, while leaving a reasonable numbers of characters for the actual filename. they'll squeeze down to fit all normal situations (previously windows subdirs were hacked to a 64 char limit)
+  - filenames and dirnames are now sanitised as they are elided. everything is done through one clean combined call, so there are fewer chances for surprises here
+  - some eliding and sanitising rules are more failsafe in edge cases. instead of raising an exception, you'll get 'empty' or 'truncated'
+  - two new optional integer values are added to options->exporting, for overriding max path length and clipping max dirname length. check the tooltips for more info, but this is basically to test ntfs-extended modes that have their own limits. caveat emptor
+  - I updated the unit tests here to cover the changes
+  duplicates
+  - the manual duplicate filter's pair fetch routine has been rewritten using the new low-latency fast-cancel tech I developed for auto-resolution. it should be able to fetch pairs to work on a good bit faster in all cases, and the worst case for difficult searches is much better. when it is loading new pairs, you get a running status update on the background of the filter media viewer
+  - the pairs it loads follow a smarter decision logic, showing you more from the same group while saving you more time
+  - the pairs are now sorted, hopefully with bigger files first, and the same file over and over. let me know what you think of it! I'll be adding options here, but it is tricky!
+  - when the duplicate filter commits work, it now does so more asynchronously. if working a mid-filter commit, the UI no longer locks and the background now updates with status text showing progress of the commit; if happening when you close out the filter, it now happens in the background but will make a popup with status if it takes longer than a second to complete. the timing of the 'refresh dupe numbers' call that hits the sidebar is better aligned to refresh once all this work is flushed
+  - the default duplicate filter batch size is reduced from 250 to 100
+  - auto-resolution rules that have pending approve/deny items now say their status is 'queued' (previously 'done'). maybe 'ready' or another word is better--let me know if you can think of one. 'awaiting approval' feels too long
+  duplicate filter boring/advanced stuff
+  - the manual duplicate filter's pair fetch database routine no longer does any shaping of the pair queue. it previously tried to auto-filter certain pairs that would be implicated by previous decisions and tried to first give you pairs with certain properties, but the implementation was never too clean and it was often simply confusing on the front end. the UI level now takes full responsibility for this
+  - the manual duplicate filter is more careful about which pairs it will auto-skip, and in many cases this will let you process an entire group--alternates and all--in one run, rather than that situation where you get lots of bitty '1/2', '1/1' micro-batches at the end of a particular search. now, rather than insisting that every batch commit only include pairs of unique files, it now tracks which files are mergees by the current batch decisions and auto-skips those. so, it might present to you (A, B), and if you say A is a better duplicate than B (causing B to be merged into A), it can still present you with (A, C), but if (B, D) or (E, B) is pending, you still won't see them (since B is no longer a king, and the proper pair, which will be recalculated after the commit, is (A, D) or (A, E). in reality though, (A, D) and (A, E) are probably already in the queue due to transitive similarity, so if we can sort them together, we'll probably clear everything in one batch)
+  - I played around with different types of pair sort for the manual filter. this gets complicated in a couple of ways and what I thought would be useful often had a clear downside in my test data. for now, duplicate filter pairs will explicitly come by largest max filesize first, with largest min filesize as secondary sort. you'll see a lot more of the same big file matched up against other files, in descending order, and fewer low quality files matched against other low quality. let me know how it goes with IRL data, and I will add explicit options here so we can test more stuff. I tried a 'show me the most/least similar first' approach, but what that actually means beyond sorting by the discovered search distance is unclear--I can try for ~1.0 pair filesize ratio, but this seems to flood me with alternates first, which is not ideal for decision logic. if we want clear duplicates first, maybe we want to have the highest file ratio first? this max filesize first seems like a 'least worst' for now at least
+  - I am planning a checkbox that will let you focus on entire potential groups one at a time (seeing the same basic files over and over until there are no potentials that 'look like that' any more), which may itself benefit from an exact sort
+  - there's a third sort question about whether you want the same reliable order of pairs on every launch, continuing where you left off, or if you want to jump about a bit. today's low-latency fetch tech will fetch the same stuff over and over unless the numbers get big and/or refreshed. this question will be more important when I do the grouping, so I think this'll be another checkbox
+  - I updated the Client API help to talk about kings and /manage_file_relationships/get_potential_pairs given the modern tech that has been rolling out this year and this week. all my duplicates stuff now always returns kings, so you don't have to bother about that so much any more, and the filter now presents you with a raw batch that is simpler and cleaner but you may want to institute your own auto-skip tests as I have. it isn't a big deal, and you may already have something similar, but I've figured out, I think, simple and optimal rules, so please check it out yourself
+  - I wrote a class to handle the 'potential duplicate pairs and their distances' list that is thrown around in all the new dupe fetch code, both up and down the pipeline and in the fragmentary fetch slices. this class now handles the iterating, randomising, block popping, distance sorting, and now potential-group-mapping-and-filtering jobs internally and in one location
+  other boring stuff
+ReleaseNotesUrl: https://github.com/hydrusnetwork/hydrus/releases/tag/v630
+PurchaseUrl: https://hydrusnetwork.github.io/hydrus/support.html
+Documentations:
+- DocumentLabel: FAQ
+  DocumentUrl: https://hydrusnetwork.github.io/hydrus/faq.html
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

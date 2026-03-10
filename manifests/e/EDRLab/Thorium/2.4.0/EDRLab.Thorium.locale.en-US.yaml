@@ -1,0 +1,74 @@
+# Created with YamlCreate.ps1 v2.4.3 $debug=AUSU.CRLF.7-4-6.Win32NT
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
+
+PackageIdentifier: EDRLab.Thorium
+PackageVersion: 2.4.0
+PackageLocale: en-US
+Publisher: EDRLab
+PublisherUrl: https://github.com/edrlab/thorium-reader
+PublisherSupportUrl: https://github.com/edrlab/thorium-reader/issues
+# PrivacyUrl:
+Author: EDRLab
+PackageName: Thorium
+PackageUrl: https://github.com/edrlab/thorium-reader
+License: BSD-3-Clause
+LicenseUrl: https://github.com/edrlab/thorium-reader/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2022 EDRLab
+CopyrightUrl: https://raw.githubusercontent.com/edrlab/thorium-reader/develop/LICENSE
+ShortDescription: A cross platform desktop reading app, based on the Readium Desktop toolkit
+# Description:
+# Moniker:
+Tags:
+- electron
+- epub
+- epub-reader
+- epub3
+- lcp
+- opds
+- opds-feed
+- react
+- reader
+- redux
+- typescript
+ReleaseNotes: |-
+  Summary
+  Version 2.4.0 was released on 20 March 2024.Total DownloadsThis release includes the following (notable) new features, improvements and bug fixes:- New user interface locales: Slovenian/Slovenščina, and Danish/Dansk (Thorium is now translated in 25 languages). Also updated the Portuguese (Portugal) and Swedish translations (many thanks to the contributors!). Also fixed a bug with the variants of Chinese (traditional vs. simplified) and Portuguese (Portugal vs. Brazil) related to the "about Thorium" XHTML files which failed to load due to lowercase filenames vs. mixed-case language code.
+  - Fixed RTL Right-To-Left (Arabic, Hebrew, Japanese in Vertical Writing Mode, etc.) support in the footer bar (interactive reading progression control) and history buttons.
+  - Support for Japanese vertical writing mode, right-to-left direction. New option to disable RTL inversion in the user interface (several clusters of previous/next controls, play/pause button, interactive reading progression bar). New option to visually hide Ruby superscript, which (by the way) is automatically ignored during text search in order to avoid breaking character sequences inside the baseline Ruby script. Special handling of WBR Word Break Opportunities, in order to implement word-level spacing (note that character-level is now also available, using ReadiumCSS). New font families / typeface options specifically for Japanese language, not shipped in Thorium but automatically prioritised if the fonts are available in the operating system (just as before, the user can select any system font by specifying its name, but this is a different feature which exposes known typefaces that are commonly used on the web as "sensible" defaults for Japanese script, in sans-serif and serif variants for vertical and horizontal writing modes). Compatibility with the TTS readaloud and EPUB Media Overlays features (synchronised text + audio), except "simplified / captions" mode which continues to display text in horizontal writing mode. Ruby superscript / ancilliary content is automatically skipped during TTS (a future version of Thorium will need to flexibly cater for different user experiences by differentiating skippability of page breaks, image descriptions, alternative text for MathML, Ruby superscript, etc.). Improved handling of Japanese publications and documents that do not declare vertical/horizontal writing direction or that incorrectly specify RTL/LTR in the usual expected places (e.g. HTML or BODY elements, package OPF XML). Also added more robust support for publications that declare top-level page-progresion-direction RTL/LTR in the package OPF XML but change direction in some spine item HTML documents (hybrid modes).
+  - Fixed a number of bugs in TTS readaloud and EPUB Media Overlays which were causing the playback position to jump back to the beginning of the document (for example, when clicking on images without audio).
+  - Added the possibility to use TTS readaloud with EPUB publications that have Media Overlays (pre-recorded audio), by clicking the play button while holding the SHIFT+ALT key modifiers which is a common keyboard combo already used for several "alt" functionality in Thorium.
+  - Implemented support for text paragraphs that span across page boundaries when displaying documents in paginated mode with single or two page spreads. Now, bookmarks and other reading locations that accurately select character ranges are restored correctly (before the fix, the containing paragraph HTML element would be designated, causing a confusing shift to the previous page).
+  - Added handling of diacritics (accented characters) in the "find text" / "search" feature. Essentially, characters like "e" "è" "é" "ë" "ê" etc. are considered equivalent in both the query string and the targeted document text. Also implemented basic transliteration of some common ligatures (for example "egg" in French: Œuf vs. œuf vs. oeuf). More improvements are expected as we gather feedback from users in certain locales, such as with modern German language which features several commonly-used character equivalencies.
+  - Fixed text search bug related to CDATA in HTML and SVG fragments (e.g. <style> contents)
+  - Significantly improved text highlighting engine which now computes polygons and renders SVG instead of relying on basic HTML + CSS rectangular shapes. This core functionality is used in the "TTS" feature (yellow background for sentences, orange underline for words), in the "find" feature (green background and pink for the active search result) and in the upcoming "annotations" feature (all of which can reliably be used concurrently, as the drawing operations are not desctructive on the HTML/SVG DOM). Currently, 4 different types of highlights are implemented: solid translucent area background, area outline, line-by-line underline and strikethrough. Highlights are lightweight affordances that can overlap and be interacted with using the mouse / tracking device cursor, while allowing for text selection underneath. Highlights can be selectively grouped, either rendered inline (default) or displayed on the periphery of the document content in the form of non-obstructive margin indicators which are also interactive (cursor hover, click). The highlighting engine works with reflowable documents in paginated mode (single or two page spreads), in scrolling viewport, with fixed-layout documents at any zoom level, in right-to-left direction (margin indicators on the right hand side), in left-to-right (margin indicators left-aligned), in vertical writing mode (margin indicators at the top). The highlighting implementation caters for special cases such as Japanese Ruby superscript. The actual "annotations" feature is incomplete at this stage (planned for the next major release Thorium v3.0), but text highlighting text is currently exposed as a hidden feature, available only in developer builds.
+  - Added support for proof-of-concept sign language EPUB3 Media Overlays (text synchronised with video instead of audio). The prototype features a detachable video frame which can be resized and moved outside of Thorium's window, in order to avoid obscuring the document text during synchronised playback.
+  - Under the hood, Thorium now ships the latest Electron v29 which bundles Chromium v122 and NodeJS v20. This brings a range of improvements (performance, accessibility, operating system integration, etc.).
+  - Behind the scenes, React 18 is now used to render Thorium's user interface. Also fixed unnecessary re-renders (small performance improvement gains).
+  - Apple Silicon native ARM64 (aarch64) builds of Thorium are now available for optimal performance on Mac hardware (M1, M2, M3, etc.). The builds for Intel x64 / x86_64 / amd64 architecture will continue to be available in the foreseable future.
+  - Added a developer convenience: Linux Docker to build Thorium from MacOS Arm64 and Intel64 hardware.
+  - Fixed a keyboard shortcut bug which occasionally caused failures to activate after alt-tabbing into other system windows (other applications).
+  - Fixed handling of hyperlinks during audio playback.
+  - Fixed TTS continuous playback across document boundaries (now matches EPUB Media Overlays behaviour, for better UX consistency).
+  - Fixed an occasional Redux state diff crash (RFC lib) with large documents.
+  - Internal changes in preparation for a significant GUI refactoring which will improve styling, colour themes, etc. (PostCSS deprecation, introduction of SASS toolchain, new UI libraries for popup modals, etc.)
+  - Fixed Windows filesystem bug (forbidden characters), improved "save as" file selector used for exporting publications.
+  - Fixed occasional OPDS authentication bug, and display of navigation history / trail.
+  - Fixed missing APIAPP authentication request header (grant_type=password)
+  Download checksum / hash verification
+  - Thorium-2.4.0.dmg is code-signed by an official EDRLab certificate, and it is notarised by Apple servers. The SHA512 is:
+      - HEX: 96fc3b5a7bd821108aa1ad2f32ebeb8c76521799a813bc50feedee93ad4fa613ebe2d2262a9ad3ea93f37920dc65e802ee5e8d0c15be1f236cfcb4112f0cc982
+      - BASE64: lvw7WnvYIRCKoa0vMuvrjHZSF5moE7xQ/u3uk61PphPr4tImKprT6pPzeSDcZegC7l6NDBW+HyNs/LQRLwzJgg==
+      - Verification: create a file named Thorium-2.4.0.dmg.sha512 next to the downloaded file Thorium-2.4.0.dmg, edit the new file Thorium-2.4.0.dmg.sha512 and write this exact line of text inside it: 96fc3b5a7bd821108aa1ad2f32ebeb8c76521799a813bc50feedee93ad4fa613ebe2d2262a9ad3ea93f37920dc65e802ee5e8d0c15be1f236cfcb4112f0cc982 Thorium-2.4.0.dmg, then run the command line shasum -a 512 -c Thorium-2.4.0.dmg.sha512 (=> Thorium-2.4.0.dmg: OK)
+  - Thorium-2.4.0-arm64.dmg is code-signed by an official EDRLab certificate, and it is notarised by Apple servers. The SHA512 is:
+      - HEX: 8df49bce46136e3c01becb757852087bae2c1dd8b992d3d871dc9917255c02f5339ba76be9ad07b12def9c71b65c26515c22bc02f3c5e63ebcfe5f7f6d20027c
+      - BASE64: jfSbzkYTbjwBvst1eFIIe64sHdi5ktPYcdyZFyVcAvUzm6dr6a0HsS3vnHG2XCZRXCK8AvPF5j68/l9/bSACfA==
+      - Verification: create a file named Thorium-2.4.0-arm64.dmg.sha512 next to the downloaded file Thorium-2.4.0-arm64.dmg, edit the new file Thorium-2.4.0-arm64.dmg.sha512 and write this exact line of text inside it: 8df49bce46136e3c01becb757852087bae2c1dd8b992d3d871dc9917255c02f5339ba76be9ad07b12def9c71b65c26515c22bc02f3c5e63ebcfe5f7f6d20027c Thorium-2.4.0-arm64.dmg, then run the command line shasum -a 512 -c Thorium-2.4.0-arm64.dmg.sha512 (=> Thorium-2.4.0-arm64.dmg: OK)
+  - Thorium.Setup.2.4.0.exe is code-signed by an official EDRLab certificate (the version distributed via the Microsoft Store is also code-signed, albeit via EDRLab's Microsoft account). The SHA512 is:
+      - HEX: cf21e179414e30b07fe9b7e3cc2d773f42b5e0fd80c5598dff3d588dec0bff62840d484491428d0fa97a4bc36b97100a56ad330ab8a3acefc24588fe9455d7d1
+      - BASE64: zyHheUFOMLB/6bfjzC13P0K14P2AxVmN/z1YjewL/2KEDUhEkUKND6l6S8NrlxAKVq0zCrijrO/CRYj+lFXX0Q==
+ReleaseNotesUrl: https://github.com/edrlab/thorium-reader/releases/tag/v2.4.0
+# PurchaseUrl:
+# InstallationNotes:
+# Documentations:
+ManifestType: defaultLocale
+ManifestVersion: 1.9.0

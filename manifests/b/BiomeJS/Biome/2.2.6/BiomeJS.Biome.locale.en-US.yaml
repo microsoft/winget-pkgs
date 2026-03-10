@@ -1,0 +1,142 @@
+# Created with komac v2.13.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: BiomeJS.Biome
+PackageVersion: 2.2.6
+PackageLocale: en-US
+Publisher: BiomeJS
+PublisherUrl: https://biomejs.dev/
+PublisherSupportUrl: https://github.com/biomejs/biome/issues
+Author: Biome Developers and Contributors
+PackageName: Biome
+PackageUrl: https://biomejs.dev/
+License: Apache-2.0
+Copyright: Copyright (c) 2023-present Biome Developers and Contributors
+ShortDescription: Biome is a toolchain for web projects, aimed at providing functionalities to maintain them. It offers a formatter and linter, usable via CLI and LSP.
+Moniker: biome
+Tags:
+- css
+- formatter
+- javascript
+- json
+- jsx
+- linter
+- static-code-analysis
+- typescript
+- web
+ReleaseNotes: |-
+  2.2.6
+  Patch Changes
+  - #7071 a8e7301 Thanks @ptkagori! - Added the useQwikMethodUsage lint rule for the Qwik domain.
+    This rule validates Qwik hook usage. Identifiers matching useXxx must be called only within serialisable reactive contexts (for example, inside component$, route loaders/actions, or within other Qwik hooks), preventing common Qwik antipatterns.
+    Invalid:
+    // Top-level hook call is invalid.
+    const state = useStore({ count: 0 });
+    function helper() {
+      // Calling a hook in a non-reactive function is invalid.
+      const loc = useLocation();
+    }
+    Valid:
+    component$(() => {
+      const state = useStore({ count: 0 }); // OK inside component$.
+      return <div>{state.count}</div>;
+    });
+    const handler = $(() => {
+      const loc = useLocation(); // OK inside a $-wrapped closure.
+      console.log(loc.params);
+    });
+  - #7685 52071f5 Thanks @denbezrukov! - Fixed #6981: The NoUnknownPseudoClass rule no longer reports local pseudo-classes when CSS Modules are used.
+  - #7640 899f7b2 Thanks @arendjr! - Fixed #7638: useImportExtensions no longer emits diagnostics on valid import paths that end with a query or hash.
+    Example
+    // This no longer warns if `index.css` exists:
+    import style from "../theme/index.css?inline";
+  - #7071 a8e7301 Thanks @ptkagori! - Added the useQwikValidLexicalScope rule to the Qwik domain.
+    This rule helps you avoid common bugs in Qwik components by checking that your variables and functions are declared in the correct place.
+    Invalid:
+    // Invalid: state defined outside the component's lexical scope.
+    let state = useStore({ count: 0 });
+    const Component = component$(() => {
+      return (
+        <button onClick$={() => state.count++}>Invalid: {state.count}</button>
+      );
+    });
+    Valid:
+    // Valid: state initialised within the component's lexical scope and captured by the event.
+    const Component = component$(() => {
+      const state = useStore({ count: 0 });
+      return <button onClick$={() => state.count++}>Valid: {state.count}</button>;
+    });
+  - #7620 5beb1ee Thanks @Netail! - Added the rule useDeprecatedDate, which makes a deprecation date required for the graphql @deprecated directive.
+    Invalid
+    query {
+      member @deprecated(reason: "Use `members` instead") {
+        id
+      }
+    }
+    Valid
+    query {
+      member
+        @deprecated(reason: "Use `members` instead", deletionDate: "2099-12-25") {
+        id
+      }
+    }
+  - #7709 d6da4d5 Thanks @siketyan! - Fixed #7704: The useExhaustiveDependencies rule now correctly adds an object dependency when its method is called within the closure.
+    For example:
+    function Component(props) {
+      useEffect(() => {
+        props.foo();
+      }, []);
+    }
+    will now be fixed to:
+    function Component(props) {
+      useEffect(() => {
+        props.foo();
+      }, [props]);
+    }
+  - #7624 309ae41 Thanks @lucasweng! - Fixed #7595: noUselessEscapeInString no longer reports $\{ escape in template literals.
+  - #7665 29e4229 Thanks @ryan-m-walker! - Fixed #7619: Added support for parsing the CSS :state() pseudo-class.
+    custom-selector:state(checked) {
+    }
+  - #7608 41df59b Thanks @ritoban23! - Fixed #7604: the useMaxParams rule now highlights parameter lists instead of entire function bodies. This provides more precise error highlighting. Previously, the entire function was highlighted; now only the parameter list is highlighted, such as (a, b, c, d, e, f, g, h).
+  - #7643 459a6ac Thanks @daivinhtran! - Fixed #7580: Include plugin in summary report
+  What's Changed
+  - chore: add .zed to gitignore by @daivinhtran in #7634
+  - fix(lint/noUselessEscapeInString): avoid false positive for ${ escape in template literals by @lucasweng in #7624
+  - fix(lint): only highlight function names in useMaxParams rule by @ritoban23 in #7608
+  - docs: add Polish translation of Biome README by @SzymCode in #7630
+  - fix(linter): useImportExtensions handles queries and hashes by @arendjr in #7640
+  - ci: breakdown benchmarks by @ematipico in #7641
+  - chore: upgrade to rust 1.90.0 by @ematipico in #7642
+  - fix(css_parser): add support for parsing :state() (#7619) by @ryan-m-walker in #7665
+  - fix(cli): include plugin rule in summary report by @daivinhtran in #7643
+  - feat(qwik): add useQwikMethodUsage & useQwikValidLexicalScope by @ptkagori in #7071
+  - fix: replace domains polyfill.io to Cloudflare by @You-saku in #7678
+  - feat(biome_graphql_analyze): implement useDeprecatedDate by @Netail in #7620
+  - chore(deps): update dependency @types/node to v22.18.8 by @renovate[bot] in #7686
+  - chore(deps): update github-actions by @renovate[bot] in #7687
+  - chore(deps): update rust crate regex to 1.11.3 by @renovate[bot] in #7689
+  - chore(deps): update rust crate quote to 1.0.41 by @renovate[bot] in #7688
+  - chore(deps): update dependency eslint to v9.37.0 by @renovate[bot] in #7691
+  - chore(deps): update rust crate serde to 1.0.228 by @renovate[bot] in #7690
+  - fix(css_analyze): handle CSS Modules pseudo-class 'local' in NoUnknownPseudoClass rule (#6981) by @denbezrukov in #7685
+  - chore(deps): update pnpm to v10.18.0 by @renovate[bot] in #7693
+  - chore(deps): update taiki-e/install-action action to v2.62.21 by @renovate[bot] in #7692
+  - chore(deps): update rust crate camino to 1.2.1 by @renovate[bot] in #7694
+  - fix(deps): update rust crates by @renovate[bot] in #7562
+  - fix(lint/useExhaustiveDependencies): correct fix for method calls by @siketyan in #7709
+  - chore(deps): update dependency @types/node to v22.18.10 by @renovate[bot] in #7738
+  - chore(deps): update rust crate libc to 0.2.177 by @renovate[bot] in #7740
+  - chore(deps): update rust crate ureq to 3.1.2 - autoclosed by @renovate[bot] in #7741
+  - ci: release by @github-actions[bot] in #7637
+  - chore(deps): update github-actions by @renovate[bot] in #7736
+  New Contributors
+  - @ritoban23 made their first contribution in #7608
+  - @SzymCode made their first contribution in #7630
+  - @You-saku made their first contribution in #7678
+  Full Changelog: https://github.com/biomejs/biome/compare/@biomejs/biome@2.2.5...@biomejs/biome@2.2.6
+ReleaseNotesUrl: https://github.com/biomejs/biome/releases/tag/@biomejs/biome@2.2.6
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://biomejs.dev/guides/getting-started/
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

@@ -1,0 +1,75 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: Microsoft.PIX
+PackageVersion: "2509.25"
+PackageLocale: en-US
+Publisher: Microsoft Corporation
+PublisherUrl: https://www.microsoft.com/
+PublisherSupportUrl: https://devblogs.microsoft.com/pix/support-2/
+PrivacyUrl: https://privacy.microsoft.com/privacystatement
+Author: Microsoft Corporation
+PackageName: Microsoft PIX
+PackageUrl: https://devblogs.microsoft.com/pix/
+License: Proprietary
+Copyright: Copyright (c) Microsoft Corporation. All rights reserved.
+CopyrightUrl: https://www.microsoft.com/legal/intellectualproperty/trademarks
+ShortDescription: Performance tuning and debugging for DirectX 12 games on Windows
+Moniker: pix
+Tags:
+- d3d12
+- dxr
+ReleaseNotes: |-
+  Today we released PIX version 2509.25, which can be downloaded here. This release includes everything in the previous 2507.11 release, plus:
+  - A compatibility fix to make PIX work on Windows 11 24H2 or 25H2 with KB5065789 (KB released 24 Sept 2025)
+  - An updated AMD plugin with better data accuracy and new hardware support (including ROG Xbox Ally devices)
+  - Support for new features in today’s DirectX Agility SDK release
+  - Misc bug fixes + improvements
+  Patch Tuesday Compatibility Fix
+  TL;DR: If you are hitting errors where PIX says that it can’t enable experimental features, then please update to PIX 2509.25 and try again.
+  More details: Windows 11 update KB5065789, initially released as a preview on 9/24/2025, updates the system32 copy of D3D12Core.dll to be roughly the same as DirectX Agility SDK 616.1. That new Agility SDK introduced a breaking change to the D3D12EnableExperimentalFeatures() API: it is no longer valid to call that API in a non-preview Agility SDK. Unfortunately PIX builds prior to 2509.25 unconditionally try to turn on some experimental features, so they hit errors after KB5065789 is installed. This is fixed in PIX 2509.25 and later.
+  Updated AMD Plugin
+  This release includes a new AMD plugin, which exposes hardware-specific functionality such as counter data inside PIX. The new plugin includes:
+  1. Support for new devices, including the ROG Xbox Ally and ROG Xbox Ally X devices
+  2. Greatly improved accuracy of counter and occupancy data on the GPU Capture timeline, on all AMD devices
+  Many thanks to our partners at AMD for their work and support!
+  Support for new Agility SDK Features
+  Today the DirectX team released DirectX Agility SDK version 618. This primarily includes support for new Advanced Shader Delivery (ASD) tooling. This tooling is independent of PIX, so today’s PIX build doesn’t include new corresponding functionality. However, PIX is fully compatible with all new Advanced Shader Delivery APIs, and in the future we will add PIX features to make it easier to integrate ASD into your application – such as showing ASD cache misses in Timing Captures. Stayed tuned to this blog for more updates in the coming months!
+  Agility SDK 618 also promotes several features out of preview, and today’s PIX release includes full support for them. These features include:
+  - Application-Specific Driver State
+  - Recreate-At-GPUVA
+  - Tight Alignment
+  The first two features were added to D3D specifically to improve capture/replay accuracy in tools like PIX:
+  - Application-Specific Driver State: this captures an opaque blob from the driver that represents any app-specific settings or workarounds enabled by the driver. PIX then passes this blob back to the driver at replay-time, so that the driver can apply the same settings or workarounds. This improves capture/replay reliability on many drivers.
+  - Recreate-At-GPUVA: during playback, this feature lets PIX recreate buffers at exactly the same GPUVA as they used at capture time. This means that features that use GPU buffers that contain GPUVAs, such as ExecuteIndirect argument buffers or DXR Shader Tables, can be replayed more easily and accurately.
+  These features are turned off by default in PIX, but they can be enabled via the Settings page. They will be turned on by default in a future version of PIX.
+  Misc Bug Fixes + Improvements
+  GPU Captures (capture time)
+  - Fix capture-time crash when buffer is created in UAV state but without the ALLOW_UAV flag
+  - Fix capture-time issue with deadlock during resource destruction
+  GPU Captures (replay time)
+  - Show DiscardResource() resources in Pipeline View and Resource History
+  - Event List: Fix scroll resetting after first expansion of a PIX event
+  - Shader debugger: enable viewing of typedefed values
+  - Custom visualizers: support multiple CBVs from a single resource
+  - DXR Invocations: fix issue when shaders with different global root signature are used in same state object
+  - Timeline: add ability to remove counter lane from context menu
+  - Timeline: add shortcut for zoom to selected range
+  - Acceleration Structure viewer: add some camera options to the Camera panel, not just the toolbar
+  - State view: Fix “D3D12_STENCIL_OP_DECR” display (was showing as INCR)
+  - Settings: add option to disable HLSL colorization
+  - Settings: fix broken Diff Tool option
+  - Settings: fix MaxGpuCaptureFrameCount slider
+  Timing Captures
+  - Timing Captures: fix cputimes virtual table execution and stall calculations
+  - Timing Captures: fix sporadic crash when opening a capture
+  Misc
+  - Fix maximized window getting cut off with taskbar on some PCs
+  - Don’t immediately close PIX when Alt+F4 is hit, if there are unsaved documents
+  - Launch page: align recents page to the left, instead of center
+ReleaseNotesUrl: https://devblogs.microsoft.com/pix/pix-2509-25/
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://devblogs.microsoft.com/pix/documentation/
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

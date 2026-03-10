@@ -1,0 +1,40 @@
+id: labelAdded.validationSmartScreen
+name: GitOps.PullRequestIssueManagement
+description: Handlers when "Validation-SmartScreen" label is added
+owner:
+resource: repository
+disabled: false
+where:
+configuration:
+  resourceManagementConfiguration:
+    eventResponderTasks:
+      - description: >-
+          When the label "Validation-SmartScreen" is added to a pull request
+          * Add a reply notifying the issue author
+          * Label with Needs-Attention
+          * Label with Needs-SmartScreen-Investigation
+        if:
+          - payloadType: Pull_Request
+          - labelAdded:
+              label: Validation-SmartScreen
+        then:
+          - addReply:
+              reply: >-
+                Hello ${issueAuthor},
+
+
+                During installation testing, this app triggered a Microsoft Defender SmartScreen error.
+
+
+                We are notifying WDNotify@microsoft.com for investigation.
+
+
+                Template: msftbot/validationError/smartScreen
+          - addLabel:
+              label: Needs-Attention # This will automatically assign the ICM Users
+          - addLabel:
+              label: Needs-SmartScreen-Investigation
+        # The policy service should trigger even when the label was added by the policy service
+        triggerOnOwnActions: true
+onFailure:
+onSuccess:

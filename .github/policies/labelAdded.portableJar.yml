@@ -1,0 +1,78 @@
+id: labelAdded.portableJar
+name: GitOps.PullRequestIssueManagement
+description: Handlers when "portable-jar" label is added
+owner:
+resource: repository
+disabled: false
+where:
+configuration:
+  resourceManagementConfiguration:
+    eventResponderTasks:
+      - description: >-
+          When the label "portable-jar" is added to a pull request
+          * Add the PR specific reply notifying the issue author of a blocking issue
+          * Label the PR with Blocking-Issue
+          * Label with Needs-Author-Feedback
+          * Remove the Needs-Attention Label
+        if:
+          - payloadType: Pull_Request
+          - labelAdded:
+              label: portable-jar
+        then:
+          - addReply:
+              reply: >-
+                Hello ${issueAuthor},
+
+
+                This package appears to require support for non-EXE files packaged inside an archive.
+
+
+                This PR is blocked until support for non-EXE formats is implemented in:
+
+                * microsoft/winget-cli/issues/5083
+
+
+                Be sure to add your 👍 to the issue to help raise the priority and avoid posting "Me too!" messages to respect those who have subscribed to the issue.
+
+
+                Template: msftbot/blockingIssue/nonExeArchiveSupport
+          - addLabel:
+              label: Blocking-Issue
+          - addLabel:
+              label: Needs-Author-Feedback
+          - removeLabel:
+              label: Needs-Attention
+        # The policy service should trigger even when the label was added by the policy service
+        triggerOnOwnActions: true
+      - description: >-
+          When the label "portable-jar" is added to an issue
+          * Add the issue specific reply notifying the issue author of a blocking issue
+          * Label the issue with Blocking-Issue
+        if:
+          - payloadType: Issues
+          - labelAdded:
+              label: portable-jar
+        then:
+          - addReply:
+              reply: >-
+                Hello ${issueAuthor},
+
+
+                This package appears to require support for non-EXE files packaged inside an archive.
+
+
+                This issue is blocked until support for non-EXE formats is implemented in:
+
+                * microsoft/winget-cli/issues/5083
+
+
+                Be sure to add your 👍 to the issue to help raise the priority and avoid posting "Me too!" messages to respect those who have subscribed to the issue.
+
+
+                Template: msftbot/blockingIssue/nonExeArchiveSupport
+          - addLabel:
+              label: Blocking-Issue
+        # The policy service should trigger even when the label was added by the policy service
+        triggerOnOwnActions: true
+onFailure:
+onSuccess:

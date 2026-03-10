@@ -1,0 +1,150 @@
+# Created with komac v2.11.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
+
+PackageIdentifier: DDEVFoundation.DDEV
+PackageVersion: 1.24.5
+PackageLocale: en-US
+Publisher: DDEV Foundation
+PublisherUrl: https://github.com/ddev
+PublisherSupportUrl: https://github.com/ddev/ddev/issues
+PackageName: DDEV
+PackageUrl: https://github.com/ddev/ddev
+License: Apache-2.0
+LicenseUrl: https://github.com/ddev/ddev/blob/HEAD/LICENSE
+ShortDescription: Docker-based local PHP+Node.js web development environments
+Tags:
+- backdrop
+- craftcms
+- ddev
+- development
+- docker
+- drupal
+- laravel
+- linux
+- local-development
+- macos
+- magento
+- magento2
+- mariadb
+- moodle
+- nodejs
+- php
+ReleaseNotes: |-
+  Installation
+  See the installation instructions for details, but it's easy:
+  - macOS: brew install ddev/ddev/ddev or just brew upgrade ddev.
+  - Linux or WSL2: Use apt install ddev or apt upgrade ddev see apt/yum installation
+  - Traditional Windows: Use choco upgrade -y ddev, or download the ddev_windows_installer below.
+  - Consider ddev delete images or ddev delete images --all after upgrading to free up disk space used by previous docker image versions. This does no harm.
+  - Consider ddev config --auto to update your projects to current configuration.
+  Highlights
+  - Improved (experimental) support for WSL2 "Mirrored" Networking. Fixed port waiting timeouts (thanks to @marvinhinz) and added automatic Xdebug connection configuration.
+    If you're using Windows WSL2 with "Mirrored" Networking, set the experimental hostAddressLoopback=true feature.
+  - Resolved "unknown" state caused by PhpStorm's use of docker-compose run for one-off containers. The DDEV Integration plugin will no longer fail in this case. Edge cases with Node remain; see JetBrains issue WEB-64513.
+  - VPN or Proxy configuration with DDEV? A dedicated Special Network Configurations docs page is now available.
+  - Want to learn more about DDEV? AI-generated insights available at ddev/ddev | DeepWiki.
+  Features
+  - Downloaded Mutagen and docker-compose binaries now pass SHA checksum verification with retry logic.
+  - New environment variables: DDEV_PRIMARY_URL_PORT, DDEV_PRIMARY_URL_WITHOUT_PORT, and DDEV_SCHEME. Thanks to @AkibaAT.
+  - DDEV_APPROOT variable available in the web container. Thanks to @shelane.
+  - Support for prepend.Dockerfile* files for multi-stage Docker builds. Thanks to @hanoii.
+  - Improved output of ddev add-on get and added warning exit code. Thanks to @hanoii.
+  - WordPress --path is now added automatically to ddev wp when docroot is set. Thanks to @pfructuoso from www.nazaries.com.
+  - Craft CMS settings now reside in .ddev/.env.web; .env is no longer managed by DDEV.
+  - Added shell completion for the --service (-s) flag in ddev exec, ddev logs, ddev ssh, ddev debug rebuild.
+  Bug Fixes
+  - Remove redundant media stanzas from nginx.conf. Thanks to @barbieswimcrew.
+  - ddev xhgui launch now correctly respects non-default ports. Thanks to @PierrePaul.
+  - Avoid overriding WP_ENVIRONMENT_TYPE for WordPress.
+  - ddev config now works with non-default project names in config.*.yaml.
+  - Prevent PhpStorm's debug integration from triggering stdin-related connections. Thanks to @AkibaAT.
+  - PostgreSQL exports now use fast checkpoints to avoid prolonged backup blockages. Thanks to @AkibaAT.
+  - ddev_version_constraint now supports wildcards like 1.24.x and comparison operators like > 1.24.5.
+  - Fixed broken HTTP/HTTPS port resolution. Thanks to @AkibaAT.
+  Deprecations
+  - ddev composer create is deprecated. Use ddev composer create-project.
+  - ddev debug capabilities is deprecated. Use ddev_version_constraint for project and add-on checks.
+  Minor Updates
+  - PHP 8.3.21 and 8.4.7.
+  - docker-compose v2.36.0.
+  - Chocolatey removed from automated Windows installation scripts. Thanks to @colans.
+  - Magento 2 quickstart now uses OpenSearch. Drupal CMS quickstart improved. Thanks to @rpkoller.
+  - Updated Craft CMS quickstart. Thanks to @timkelty.
+  - ddev start checks for an index.* file in docroot and warns if missing (403 errors in browser).
+  - Pimcore quickstart now requires a license due to upstream license change.
+  What's Changed
+  - docs: Add missing sequelace command link to database-management.md by @TravisCarden in #7184
+  - docs: add tip on using per-project API tokens for hosting providers, fixes #7177 by @stasadev in #7183
+  - fix: ignore curl error in Dockerfile.test for ddev debug test by @stasadev in #7186
+  - fix: don't wait for one-off containers from PhpStorm, fixes #7146 by @stasadev in #7148
+  - fix: add timeout for netutil::IsPortActive check for WSL2 with "mirrored networking mode" as opposed to default "NAT mode", fixes #6245 by @marvinhinz in #7166
+  - fix: nginx.conf should let index.php handle 404 errors for media files by @barbieswimcrew in #7050
+  - docs: Explain corp vpn and proxy, fixup FAQ, fixes #7048 by @rfay in #7061
+  - build: stop installing chocolatey, fixes #6636, fixes #6344 [skip buildkite] by @colans in #7049
+  - fix: XHGui launch command support custom ports, fixes #7181 by @PierrePaul in #7182
+  - test: fix for magento2 quickstart and bats test, fixes #7191 by @rpkoller in #7192
+  - docs: fix minor typo in the Grav quickstart by @jgonyea in #7197
+  - refactor: move WP_ENVIRONMENT_TYPE to the docs, fixes #7178 by @stasadev in #7179
+  - fix: make ddev config work with project name from config.*.yaml, fixes #7060 by @stasadev in #7062
+  - docs: Improve buildkite windows setup script run [skip buildkite] by @rfay in #7200
+  - fix: make sure mutagen agents file is fresh on upgrade, add shasum testing, test shasum for mutagen+docker-compose by @rfay in #7077
+  - test: make the drupal cms bats test a bit more robust and trustworthy by @rpkoller in #7203
+  - feat: add DDEV_APPROOT variable to web container and updates documentation, fixes #7198 by @shelane in #7199
+  - build: switch to official percona release for xtrabackup, fixes #6963 by @rfay in #7207
+  - fix: disable xdebug trigger for xdebug and xhprof status checks, fixes #6191, fixes ddev/ddev-intellij-plugin#414 by @AkibaAT in #7216
+  - fix: Use fast checkpoint during postgresql backup, fixes #7098 by @AkibaAT in #7219
+  - feat: add new envs DDEV_PRIMARY_URL_PORT, DDEV_PRIMARY_URL_WITHOUT_PORT and DDEV_SCHEME, fixes #7214 by @AkibaAT in #7218
+  - feat: support prepend.Dockerfile* files for multi-stage builds by @hanoii in #7071
+  - fix: Improve the output of ArrayToReadableOutput by @rfay in #7222
+  - docs: Improvements to Zscaler instructions, fixes #7209, fixes #7211 [skip buildkite] by @rfay in #7212
+  - test: Add TestUploadDirs to verify upload_dirs, fixes #7109 by @rfay in #7224
+  - feat: add success message for xhgui on and off, fixes #7202 by @rpkoller in #7205
+  - refactor: Hide ddev debug capabilities, fixes #7174 by @rfay in #7227
+  - refactor: check for docroot/index.* on start, fixes #7157 by @rfay in #7228
+  - build: bump actions/setup-python from 5.5.0 to 5.6.0 by @dependabot in #7240
+  - docs: use ddev composer create-project everywhere, fixes #6920 by @rfay in #7231
+  - refactor: Add retries to util.Download(), both the SHASUM and the target file by @rfay in #7234
+  - build: Use some artifacts that we control building windows installer (nsis), fixes #7086 by @rfay in #7229
+  - test: add timeout to buildkite maintenance, fixes #7176 by @rfay in #7226
+  - docs: wrap quotes around commands that use the caret symbol by @nmangold in #7237
+  - docs: Remove --no-interaction from Pimcore, disable test, fixes #7243 by @rfay in #7245
+  - fix: support TYPO3 v14 nginx configuration, fixes #6944 by @rfay in #7230
+  - build: Reject the use of drud/ddev/ddev homebrew recipe by @rfay in #7244
+  - build: bump golangci/golangci-lint-action from 7 to 8 by @dependabot in #7264
+  - fix: add BASE_IMAGE arg before everything else, for #7071 by @hanoii in #7258
+  - fix: allow status code 429 for linkspector by @stasadev in #7270
+  - fix: WSL2 install script should wait longer for DDEV Windows installer to complete [skip ci] by @rfay in #7269
+  - refactor: Make DownloadFile() retry logic more robust, improve curling in Makefile by @rfay in #7252
+  - fix: correct warning output formatting (Drupal) and don't try to do exec when not running by @stasadev in #7247
+  - fix: set XDEBUG_MODE=off for ddev composer create-project, fixes ddev/ddev-intellij-plugin#414 by @stasadev in #7260
+  - build: remove <1.24 constraint for go, for #7057 by @stasadev in #7187
+  - fix: support '>,x,X,*' comparisons and extended conditions in version constraint, fixes #7266 by @stasadev in #7268
+  - fix: add warning about duplicate usage for global commands, for #6293 by @stasadev in #7238
+  - feat: update xhgui config, add link to upstream file by @stasadev in #7262
+  - docs: Update Shopware quickstart with "shopware/production" instead of "shopware/production:^v6.5" by @bangdinhnfq in #7253
+  - refactor: improve ddev add-on get output, add warning exit code annotation by @hanoii in #7263
+  - fix: Add path to docroot in wp parameters when not set, fixes #7241 by @pfructuoso in #7242
+  - fix: replace broken http and https port lookup, fixes #7246 by @AkibaAT in #7259
+  - docs: add ddev.com, addon registry, last commit, DeepWiki badges to README.md by @stasadev in #7285
+  - fix: make xdebug work with WSL2 mirrored mode, fixes #7272 by @rfay in #7277
+  - refactor: Use .ddev/.env.web for Craft CMS DDEV settings, fixes #7233 by @rfay in #7236
+  - build: add make go-mod-update by @stasadev in #7288
+  - build: bump docker-compose to v2.36.0 by @stasadev in #7289
+  - docs: use composer create-project in Magento 2 quickstart, for #7231 by @stasadev in #7292
+  - docs: update Craft CMS quickstart, for #7236 by @timkelty in #7274
+  - feat: restart only specified service in ddev debug rebuild by @stasadev in #7284
+  - build: bump images to v1.24.5 for release, fixes #7250 by @stasadev in #7291
+  - feat: add shell completion for --service (-s) flag by @stasadev in #7283
+  New Contributors
+  - @marvinhinz made their first contribution in #7166
+  - @barbieswimcrew made their first contribution in #7050
+  - @colans made their first contribution in #7049
+  - @jgonyea made their first contribution in #7197
+  - @AkibaAT made their first contribution in #7216
+  - @nmangold made their first contribution in #7237
+  - @bangdinhnfq made their first contribution in #7253
+  - @pfructuoso made their first contribution in #7242
+  Full Changelog: v1.24.4...v1.24.5
+ReleaseNotesUrl: https://github.com/ddev/ddev/releases/tag/v1.24.5
+ManifestType: defaultLocale
+ManifestVersion: 1.9.0

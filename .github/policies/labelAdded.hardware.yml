@@ -1,0 +1,82 @@
+id: labelAdded.hardware
+name: GitOps.PullRequestIssueManagement
+description: Handlers when "Hardware" label is added
+owner:
+resource: repository
+disabled: false
+where:
+configuration:
+  resourceManagementConfiguration:
+    eventResponderTasks:
+      - description: >-
+          When the label "Hardware" is added to a pull request
+          * Add the PR specific reply notifying the issue author of a blocking issue
+          * Label the PR with Blocking-Issue
+          * Remove the Needs-Author-Feedback Label
+          * Remove the Needs-Attention Label
+          * Close the PR
+        if:
+          - payloadType: Pull_Request
+          - labelAdded:
+              label: Hardware
+        then:
+          - addReply:
+              reply: >-
+                Hello ${issueAuthor},
+
+
+                This package appears to require specific hardware.
+
+
+                Support for specific hardware is not planned at this time. For more information please review the issue below.
+
+                * microsoft/winget-pkgs/issues/199504
+
+
+                Be sure to add your 👍 to the issue to help raise the priority and avoid posting "Me too!" messages to respect those who have subscribed to the issue, in the event it is re-opened in the future.
+
+
+                Template: msftbot/blockingIssue/hardwareDependency
+          - addLabel:
+              label: Blocking-Issue
+          - removeLabel:
+              label: Needs-Author-Feedback
+          - removeLabel:
+              label: Needs-Attention
+          - closePullRequest
+        # The policy service should trigger even when the label was added by the policy service
+        triggerOnOwnActions: true
+      - description: >-
+          When the label "Hardware" is added to an issue
+          * Add the issue specific reply notifying the issue author of a blocking issue
+          * Label the issue with Blocking-Issue
+          * Close the issue
+        if:
+          - payloadType: Issues
+          - labelAdded:
+              label: Hardware
+        then:
+          - addReply:
+              reply: >-
+                Hello ${issueAuthor},
+
+
+                This package appears to require specific hardware.
+
+
+                Support for specific hardware is not planned at this time. For more information please review the issue below.
+
+                * microsoft/winget-pkgs/issues/199504
+
+
+                Be sure to add your 👍 to the issue to help raise the priority and avoid posting "Me too!" messages to respect those who have subscribed to the issue, in the event it is re-opened in the future.
+
+
+                Template: msftbot/blockingIssue/hardwareDependency
+          - addLabel:
+              label: Blocking-Issue
+          - closeIssue
+        # The policy service should trigger even when the label was added by the policy service
+        triggerOnOwnActions: true
+onFailure:
+onSuccess:

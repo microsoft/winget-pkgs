@@ -1,0 +1,98 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
+
+PackageIdentifier: StackExchange.DNSControl
+PackageVersion: 4.15.0
+PackageLocale: en-US
+Publisher: Stack Exchange, Inc.
+PublisherUrl: https://stackoverflow.com/
+PublisherSupportUrl: https://github.com/StackExchange/dnscontrol/issues
+PrivacyUrl: https://stackoverflow.com/legal/privacy-policy
+Author: Stack Exchange, Inc.
+PackageName: DNSControl
+PackageUrl: https://dnscontrol.org/
+License: MIT
+LicenseUrl: https://github.com/StackExchange/dnscontrol/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2024 Stack Overflow
+ShortDescription: Infrastructure as code for DNS!
+Description: DNSControl is an opinionated platform for seamlessly managing your DNS configuration across any number of DNS hosts, both in the cloud or in your own infrastructure. It manages all of the domains for the Stack Overflow network, and can do the same for you!
+Moniker: dnscontrol
+Tags:
+- dns
+ReleaseNotes: |-
+  Greetings and happy holidays, DNSControl fans!
+  Santa (or the super-natural gift-delivery being of your choice) has graced us with THREE big, new, exciting, features, plus a ton of other fixes and improvements.
+  BIG NEWS # 1: The last line of a D() statement can now have a comma!
+  In the past, leaving off the last comma would give an error:
+  D("example.com", REG_NONE, DnsProvider(DSP_EXAMPLE),
+      A("test", "1.2.3.4")              <<< look, Ma!  No comma!
+  END);
+  ### version 4.14.x:
+  $ dnscontrol check
+  executing dnsconfig.js: (anonymous): Line 183:25 Unexpected token )
+
+  ### version 4.15.0:
+  $ dnscontrol check
+  No errors.
+  Best of all we got this feature simply by upgrading to the newest version of the JavaScript interpreter we use (https://github.com/robertkrimen/otto). In the latest release @linuxerwang (who has probably never heard of our project) submitted this enhancement in https://github.com/robertkrimen/otto/pull/520 and we all benefit.
+  This affects all kinds of JavaScript lists, not just D() statements.
+  Thanks, Santa! .... I mean @linuxerwang!
+  BIG NEWS # 2: The default for --cmode is now concurrent.
+  This means your preview will run many times faster because all the domains are collected concurrently. Some people have reported runtimes are reduced 50-75%.
+  This change was announced months ago in https://github.com/StackExchange/dnscontrol/issues/3142 plus dnscontrol printed warnings since v4.14.0.
+  The following providers added concurrency support in this release: CLOUDNS, CNR, DIGITALOCEAN, GANDI_V5, HETZNER, NAMECHEAP, NETLIFY
+  Providers that already support concurrency include: AZURE_DNS, CLOUDFLAREAPI, CSCGLOBAL, DESEC, GCLOUD, NS1, ROUTE53, TRANSIP.
+  This code is a bit new. If you find a bug, use --cmode=none to disable concurrency. (and file a bug report!)
+  BIG NEWS # 3: Notifications can now be sent using Shouterr
+  Notifications are now handled by the Shouterr package. Shouterr supports every chat system I've heard of, plus plenty of other systems. In the future Shouterr will become the standard way to send notifications and other methods will be deprecated. How to set up notifications is documented at https://docs.dnscontrol.org/advanced-features/notifications.
+  Other new features worth mentioning:
+  - NEW PROVIDER: CentralNic Reseller (CNR) - formerly RRPProxy (#3203) (@AsifNawaz-cnic)
+  - PORKBUN: handles retries/ratelimits better, and now also supports CAA.
+  - The get-zones subcommand is more reliable, which probably also makes preview more reliable.
+  Thanks to everyone for their contributions! This is a community-driven project and we couldn't do it without all your PRs, reviews, and other support!
+  Stay safe! See you in the new year!
+  - -Tom
+  Here's the details:
+  Changelog
+  Major features:
+  - b2ee265578dad749297d960839c5861f10cfda01: NEW PROVIDER: CentralNic Reseller (CNR) - formerly RRPProxy (#3203) (@AsifNawaz-cnic)
+  Provider-specific changes:
+  - 9d42930120aad369a0559e32eeb8bba4035a3815: CLOUDNS: enable concurrent access (#3232) (@hmoffatt)
+  - 0b85cf2fe2d1bc8e1982bd93bedb59c54d85d341: CNR Provider: Review CI / Docs / Capabilities (add NAPTR, SSHFP) (#3241) (@tlimoncelli)
+  - 006a434fc6801823d61b07e2566987455f442a7f: CNR: Disable pager101 integration test (#3226) (@tlimoncelli)
+  - 2eeeb7651222c6bdf2a80c832c8ae7fd1326a28e: DIGITALOCEAN: Enable cmode concurrent (#3207) (@willpower232)
+  - 52c9bad62e34ca4d060803e7e1cbc18df17a9c54: GANDI: Enable cmode concurrent (#3201) (@tlimoncelli)
+  - 5d625e81ea097c5fc15ac244514127e83da2aa28: HETZNER: enable concurrency capability (#3234) (@das7pad)
+  - 87fcb273c8318a715daa3591d4ad417179cf6fc5: NAMECHEAP: Enable cmode concurrent (#3202) (@tlimoncelli)
+  - d29c1cf5cd494ea3752136b624d088927e0cf073: NETLIFY: Enable cmode concurrent (#3205) (@willpower232)
+  - de6afe2506ca93f0fc251fb9321221214897112f: PORKBUN: increase req interval and retry on 503 (#3228) (@imlonghao)
+  - 5d8e711a532ee8f26caf2405f99d10505d8cf2cb: PORKBUN: support CAA (#3200) (@imlonghao)
+  Documentation:
+  - a6308edd52f3d6b0699fabb6c40a397bc42c76a1: DOCS: Add instructions for increasing the timeout on integration tests (#3233) (@hmoffatt)
+  CI/CD:
+  - 25652e0cb012e49ac9685bf91233b7a8100e311e: Build(deps): Bump actions/cache from 4.1.2 to 4.2.0 (#3229) (@dependabot[bot])
+  - cc0058b3a2617af2169e629f0dca0532fb1dc210: Build(deps): Bump alpine from beefdbd to 1e42bbe (#3208) (@dependabot[bot])
+  - be48b6e72f962d158a1ebba00984c6432a3ad6e7: Build(deps): Bump github.com/oracle/oci-go-sdk/v65 from 65.78.0 to 65.79.0 (#3210) (@dependabot[bot])
+  - 701cc691dac5680444a3ba4174b22335937795a7: Build(deps): Bump golang.org/x/crypto from 0.30.0 to 0.31.0 (#3240) (@dependabot[bot])
+  Dependencies:
+  - 52f62421c589a5ec470ce18be533d3366096d66c: CHORE: Update deps (#3230) (@tlimoncelli)
+  - 9588a9162a61a664cd537011fbe1124f85a19cc6: CHORE: Update deps (#3237) (@tlimoncelli)
+  - bbaf08342eecc93a479091873e1b17b6537a508f: update deps (#3214) (@tlimoncelli)
+  Other changes and improvements:
+  - e774e2d08de7c05eeeb315281e6fca219263d4a7: Add notifications with Shoutrr (#3215) (@hmoffatt)
+  - 9bb9f16e7f5bd7e046027e5d377289284495a4a8: BUG: Errors while listing zones do not propagate through the system (#2474) (#3216) (@hmoffatt)
+  - 9df5a25715bba98381b9e5442d5d6b5765f2ccef: CHORE: Linting corrections (#3236) (@tlimoncelli)
+  - 9357743ee926872f4607f9a63e3dea2c25c2beb5: CHORE: Remediate staticcheck warnings (#3231) (@tlimoncelli)
+  - e2cf8863262312c26f01c1d679ace267fb428d63: DEFAULT CHANGE: --cmode now defaults to concurrent (#3238) (@tlimoncelli)
+  Deprecation warnings
+  [!WARNING]
+  - REV() will switch from RFC2317 to RFC4183 in v5.0. This is a breaking change. Warnings are output if your configuration is affected. No date has been announced for v5.0. See https://docs.dnscontrol.org/language-reference/top-level-functions/revcompat
+  - MSDNS maintainer needed! Without a new volunteer, this DNS provider will lose support after April 2025. See https://github.com/StackExchange/dnscontrol/issues/2878
+  - NAMEDOTCOM and SOFTLAYER need maintainers! These providers have no maintainer. Maintainers respond to PRs and fix bugs in a timely manner, and try to stay on top of protocol changes.
+  - get-certs/ACME support is frozen and will be removed without notice between now and July 2025. It has been unsupported since December 2022. If you don't use this feature, do not start. If you do use this feature, migrate ASAP. See discussion in issues/1400
+ReleaseNotesUrl: https://github.com/StackExchange/dnscontrol/releases/tag/v4.15.0
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://docs.dnscontrol.org/
+ManifestType: defaultLocale
+ManifestVersion: 1.9.0

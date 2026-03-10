@@ -1,0 +1,134 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: Huawei.Cangjie
+PackageVersion: 1.0.4
+PackageLocale: zh-CN
+Publisher: Huawei Technologies Co., Ltd.
+PublisherUrl: https://cangjie-lang.cn/
+PrivacyUrl: https://cangjie-lang.cn/pages/privacy
+Author: Huawei Technologies Co., Ltd.
+PackageName: Cangjie
+PackageUrl: https://cangjie-lang.cn/download
+License: Apache-2.0
+LicenseUrl: https://gitcode.com/Cangjie/cangjie_build/blob/dev/LICENSE
+Copyright: Copyright Huawei Technologies Co., Ltd. 2022-2025. All rights reserved.
+ShortDescription: 面向全场景智能的新一代编程语言
+Description: 仓颉编程语言是一款面向全场景智能的新一代编程语言，主打原生智能化、天生全场景、高性能、强安全。主要应用于鸿蒙原生应用及服务应用等场景中，为开发者提供良好的编程体验。
+Tags:
+- harmonyos
+- oniro
+- openharmony
+- 编程
+- 编程语言
+- 语言
+- 鸿蒙
+ReleaseNotes: |-
+  0. 版本介绍
+  本版本为 Cangjie 语言 LTS 1.0.0 版本的更新版本(LTS 版本定义及维护周期详见仓颉社区版本生命周期管理规范，版本号为 Cangjie 1.0.4，主要解决部分发现的 Bug，以及对某些功能进行优化。版本包含了仓颉应用开发必须的能力，包括编译器，运行时，标准库，和工具链。欢迎各位开发者使用，如有任何问题，欢迎在 Cangjie 社区提出 issue，我们会第一时间处理。以下介绍本版本相比 LTS 1.0.3 版本的更新。
+  1. 语言特性
+  无特性新增。
+  2. 编译器
+  本版本仅修复问题，无特性新增。修复问题如下：
+  -【issue-105】let 变量在 lambda 中被赋值了两次，未编译报错
+  -【issue-2591】当同一个包不同文件中存在同名私有函数时，无法编译
+  -【issue-2533】项目 cjpm build -g 编译失败，cjpm test --coverage 编译崩溃，报错 Error Code: 13
+  -【issue-2565】【缺陷】Option 作为返回值时，当 T 为 Array，ArrayList 时，多层 API 调用时返回值不对
+  3. 运行时
+  本版本仅修复问题，无特性新增。修复问题如下：
+  -【issue-2395】新项目 MacOS26 报 SG_READ_ONLY 缺失，修复 MacOS26 编译失败问题
+  -【issue-2649】在运行 GC 场景中，长时间压测情况下，偶现 cangjie 进程卡死现象问题解决
+  4. 标准库
+  本版本仅修复问题，无特性新增。修复问题如下：
+  -【issue-2242】修复在 Timer 的定时任务中调用 cancel()时后不能以预期的方式取消的问题
+  -【issue-2408】修复 TreeMap 和 TreeSet 中出现同一 key 值多次出现的问题
+  5. 工具链
+  1 IDE 插件
+  本版本仅修复问题，无特性新增。修复问题如下：
+  -【issue-1961】codeArts 编译错误信息的中文内容显示为
+  -【issue-6】codeArts 编译错误信息的中文内容显示为乱码
+  2 cjpm
+  新增支持 lto-combined 功能，详情请参见工具指南。
+  本版本修复问题如下：
+  -【issue-2373】优化 cjpm init 报错信息
+  -【issue-2650】tr5-2 交叉编译场景下，cjpm 宏包依赖出现错误
+  3 cjdb
+  无变化。
+  4 cjfmt
+  本版本仅修复问题，无特性新增：修复问题如下：
+  -【issue-2385】cjfmt 文档缺少 cangjie-format.toml 配置的介绍
+  5 cjlint
+  本版本仅修复问题，无特性新增：修复问题如下：
+  -【issue-2433】cjlint 的 G.VAR.02 规则误报，预期无警告
+  6 cjcov
+  无变化。
+  7 cjprof
+  无变化。
+  8 cjtrace-recover
+  无变化。
+  6. 遗留问题
+  windows 下编译 cjpm test 报错
+  【问题现象】windows 下编译 cjpm test，提示找不到 openssl 相关的动态库错误。
+  【规避措施】手动增加 cjpm test 时的-L 地址。
+  在 lanbda body 体内修改 lambda 参数，编译崩溃
+  【问题现象】在 lambda body 体内误修改 lambda 参数，可能会导致 ICE，ErrorCode 为 12。
+  【规避措施】不要错误的在 lambda body 体内修改 lambda 参数
+  调用被扩展的接口函数的部分场景会导致运行时崩溃的问题
+  【问题现象】当存在一个泛型类 A 扩展了某个泛型接口 I，且存在另一个非泛型类 B 继承了实例化版本的类 A，将 B 的实例赋值给 I 类型变量且调用接口 I 函数时可能导致运行时崩溃。 样例：
+  interface I<T> {
+      func foo() {}
+  }
+
+  open class A<T> {}
+  extend<T> A<T> <: I<T> {}
+
+  class B <: A<Int64> {}
+
+  main() {
+      let i: I<Int64> = B()
+      i.foo() // 此处调用会发生运行阶段崩溃
+      return 0
+  }
+  【规避措施】 方案一：若类 A 定义在本包，可以不使用扩展，通过 A 直接继承接口 I 以规避该问题。 规避样例：
+  interface I<T> {
+      func foo() {}
+  }
+  open class A<T> <: I<T> {} // 使 A 继承 I
+  open class B <: A<Int64> {}
+
+  main() {
+      let i: I<Int64> = B()
+      i.foo()
+      return 0
+  }
+  方案二：若类 A 是导入自其它包，可以将类 B 定义为泛型类以规避该问题。 规避样例：
+  import pkgA.A
+
+  interface I<T> {
+      func foo() {}
+  }
+  extend<T> A<T> <: I<T> {}
+
+  open class B<T> <: A<T> {} // 将类 B 定义为泛型类
+
+  main() {
+      let i: I<Int64> = B<Int64>()
+      i.foo()
+      return 0
+  }
+  7. 文档变更说明
+  开发指南
+  - 程序结构章节新增说明：函数和 lambda 中的静态成员变量赋值，编译器无法判断函数或者 lambda 是否会被执行，因此采用保守策略，即编译报错。
+  - 普通 try 表达式中新增说明：当在 try 块中可能发生内存溢出错误时，应避免在 catch 或 finally 块中执行任何内存分配操作，以免再次触发溢出并导致未定义行为。一旦检测到内存溢出，建议在 catch 块中立即终止程序（例如调用 exit 函数），以确保系统稳定性并防止进一步错误。
+  - 新增编译选项--compile-as-exe 相关内容。
+  标准库 API
+  - 无变化。
+  工具指南
+  - 格式化工具 cjfmt 章节新增说明：CANGJIE_HOME 环境下的默认格式化工具配置文件路径为 CANGJIE_HOME/tools/config。
+  - cjpm 工具中的模块配置文件说明增加支持工程级 LTO 相关说明。
+ReleaseNotesUrl: https://cangjie-lang.cn/docs?url=/1.0.4/release_notes.html
+Documentations:
+- DocumentLabel: 文档
+  DocumentUrl: https://cangjie-lang.cn/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

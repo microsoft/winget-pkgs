@@ -1,0 +1,79 @@
+# Created with YamlCreate.ps1 v2.4.1 Dumplings Mod $debug=QUSU.CRLF.7-4-5.Win32NT
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.6.0.schema.json
+
+PackageIdentifier: PBH-BTN.PeerBanHelper
+PackageVersion: 7.1.2
+PackageLocale: zh-CN
+Publisher: PBH-BTN Community
+PublisherUrl: https://github.com/PBH-BTN
+PublisherSupportUrl: https://github.com/PBH-BTN/PeerBanHelper/issues
+# PrivacyUrl:
+# Author:
+PackageName: PeerBanHelper
+PackageUrl: https://github.com/PBH-BTN/PeerBanHelper
+License: GPL-3.0
+LicenseUrl: https://github.com/PBH-BTN/PeerBanHelper/blob/HEAD/LICENSE
+# Copyright:
+# CopyrightUrl:
+ShortDescription: 自动封禁不受欢迎、吸血和异常的 BT 客户端，并支持自定义规则。
+# Description:
+# Moniker:
+Tags:
+- bt
+- 种子
+ReleaseNotes: |-
+  错误修复
+  - 修复进度反作弊检查在 qBittorrent 上对 “部分做种（Partial Seeds）” 的种子进行检查时未使用正确的总大小计算导致可能错误封禁 Peers 的问题 @maoruishan (first-time contributor)
+  - 修复 IP 列表查询的 IP 地址不显示总流量统计数据的问题 @Ghost-chu
+  - [WebUI] 修复 WebUI 的若干问题 @Ghost-chu @Gaojianli
+    - 封禁名单现在忽略 “Peer 快速测试” 的封禁记录
+    - 修复 IP 列表不输入任何内容就点击搜索按钮引发错误的问题
+    - 修复 Dashboard 下载器刷新的时候出现骨架屏的问题
+    - 修复流量统计图表 Y 轴刻度显示不全的问题
+    - 修复自动刷新图标进入刷新旋转动画时，会带飞悬浮信息框
+    - 新增一个控制按钮以控制新日志条目插入时页面跳动的问题
+  Docker
+  DockerHub: ghostchu/peerbanhelper:v7.1.2 阿里云国内镜像加速：registry.cn-hangzhou.aliyuncs.com/ghostchu/peerbanhelper:v7.1.2
+  注：有许多小伙伴询问是否可以使用 latest 标签，是可以使用的，只是如果你使用了镜像站，则 latest 标签可能不是最新的版本。
+
+  7. 1.1
+  错误修复
+  - 修复流量统计图表在 7.1.0 被破坏的问题 @Ghost-chu @paulzzh
+  - 修复 httpd 可能在 IPDB 未下载完成之前就启动的问题 @Ghost-chu
+  - 修复 IPDB 下载超时时有时不会切换备用源的问题 @Ghost-chu
+  - 修复在非 zh-CN 的系统语言下，界面文本显示异常 @Ghost-chu
+
+  7. 1.0
+  [!CAUTION] 本版包含重要安全修复，不管出于任何理由，您都应该更新到此修复版本。
+  关键安全性修复
+  -【重要】修复了因错误使用 ORM 框架导致潜在 SQL 注入的问题 @Ghost-chu @paulzzh
+    - 恶意攻击者可通过在查询参数中插入 SQL 片段，执行任意 SQL 查询
+  -【重要】修复了登录接口的 POST 登陆方式没有覆盖暴力破解防护的问题 @Ghost-chu
+    - 恶意攻击者可能对登录接口发起暴力破解穷举 WebUI Token 以获取 WebUI 访问权限，并间接获取连接的下载器的 WebUI 权限
+  - 添加了 robots.txt 并拒绝任何搜索引擎索引并避免在搜索引擎中暴露，但依然可能被 Censys 等网络空间测绘引擎发现，建议使用防火墙保护 @Ghost-chu
+    - 如果 PBH 部署在二级目录下，请自行管理 robots.txt
+  - 仅在登录阶段传递 Token，避免明文 WebUI Token 泄露
+  新功能
+  - 图表数据现在支持分下载器查看 @Gaojianli @Ghost-chu @paulzzh
+  - WebUI 现在支持自定义脚本编辑 @Gaojianli @Ghost-chu
+    - 通过编程的方式构建自己的反吸血逻辑
+    - 只有在局域网内直接访问 WebUI 才能添加和编辑脚本；通过互联网或者反向代理访问时，仅能查看脚本，不可添加修改编辑
+    - 安全警告：自定义脚本可执行任意代码，请仅添加来自可信来源的脚本
+  -【重要】BTN 新增 “脚本规则” 规则类型，PeerBanHelper 现在可接收来自 BTN 服务器下发的脚本以提升基于云的检测防护能力，提高封禁的灵活和精确性 @Ghost-chu
+    - 需要手动在 “设置->基础设置->BTN” 开启 “启用脚本执行” 开关，此功能才会生效。请仅在可信 BTN 服务器上启用此功能。
+  - WebUI 现在可以进行堆内存转储 @Gaojianli
+  - BTN 能力列表页面现在可查看云端规则数量和规则版本号 @Gaojianli @Ghost-chu
+  - 其它用户体验改善
+  错误修复
+  -【重要】优化了 IPMatcher 的 CPU 和内存占用，解决了困扰已久的规则过多时内存溢出的问题并大幅缩短了匹配 IP 时的 CPU 占用和匹配耗时，现在空载内存仅需要 92MB（GUI） @Ghost-chu @paulzzh
+    - 请注意：自 2024/11/06 后，旧版本（< 7.1.0） PBH 可能由于 IP 屏蔽列表的增长而耗尽内存，为了保证正常运行，请升级版本或者更改其最大堆内存
+  - 修复了当添加支持完整 PeerID 的下载器（如：BiglyBT/Azureus/Vuze、BitComet 或者 Deluge）时，查看 PeerID 饼图时完全不可读的问题 @Ghost-chu
+  - Windows GUI 的打开 WebUI 按钮现在能够自动填充 token 登录 WebUI
+ReleaseNotesUrl: https://github.com/PBH-BTN/PeerBanHelper/releases/tag/v7.1.2
+# PurchaseUrl:
+# InstallationNotes:
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/PBH-BTN/PeerBanHelper/wiki
+ManifestType: locale
+ManifestVersion: 1.6.0

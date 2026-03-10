@@ -1,0 +1,71 @@
+# Created with komac v2.11.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
+
+PackageIdentifier: Gruntwork.Terragrunt
+PackageVersion: 0.80.2
+PackageLocale: en-US
+Publisher: Gruntwork
+PublisherUrl: https://terragrunt.gruntwork.io/
+PublisherSupportUrl: https://terragrunt.gruntwork.io/docs/community/support
+PrivacyUrl: https://gruntwork.io/legal/privacy-policy
+PackageName: Terragrunt
+PackageUrl: https://github.com/gruntwork-io/terragrunt/releases/tag/v0.68.9
+License: MIT
+LicenseUrl: https://github.com/gruntwork-io/terragrunt/blob/HEAD/LICENSE.txt
+Copyright: © 2024 Gruntwork, Inc. All rights reserved.
+ShortDescription: Terragrunt is a thin wrapper for Terraform that provides extra tools for keeping your Terraform configurations DRY, working with multiple Terraform modules, and managing remote state.
+Description: Terragrunt is a thin wrapper for Terraform that provides extra tools for keeping your Terraform configurations DRY, working with multiple Terraform modules, and managing remote state.
+Tags:
+- IaC
+- Infrastructure as Code
+- Terraform
+- Terraform Wrapper
+- terragrunt
+ReleaseNotes: |-
+  ✨ New Features
+  find adds support for --include
+  The find command now supports the --include flag to allow for fine grained control over the discovery of units that include other partial configurations.
+  e.g.
+  $ terragrunt find --include --format=json | jq
+  [
+    {
+      "type": "unit",
+      "path": "bar",
+      "include": {
+        "cloud": "cloud.hcl"
+      }
+    },
+    {
+      "type": "unit",
+      "path": "foo"
+    }
+  ]
+  Combining the flag with tools like jq allows for simple discovery of configurations that include other partial configurations.
+  $ terragrunt find --include --format=json | jq '[.[] | select(.include.cloud == "cloud.hcl")]'
+  [
+    {
+      "type": "unit",
+      "path": "bar",
+      "include": {
+        "cloud": "cloud.hcl"
+      }
+    }
+  ]
+  🐛 Bug Fixes
+  --tf-path now correctly overrides terraform_binary
+  A bug in the precedence logic for Terragrunt configuration parsing resulted in the CLI flag --tf-path from being ignored when the terraform_binary attribute was set.
+  Terragrunt will now correctly respect the terraform_binary attribute when set, and allow --tf-path to override the value when it is set.
+  What's Changed
+  - feat: Adding basic benchmarks by @yhakbar in #4325
+  - feat: Add support for displaying include configurations in the terragrunt find command by @james03160927 in #4330
+  - feat: Adding flake test by @yhakbar in #4334
+  - fix: Fixing usage of --tf-path by @yhakbar in #4332
+  - fix: Cleaning up addition of --include on find by @yhakbar in #4335
+  - chore: migrated to golangci-lint v2 by @denis256 in #4333
+  Full Changelog: v0.80.1...v0.80.2
+ReleaseNotesUrl: https://github.com/gruntwork-io/terragrunt/releases/tag/v0.80.2
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/gruntwork-io/terragrunt/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.9.0

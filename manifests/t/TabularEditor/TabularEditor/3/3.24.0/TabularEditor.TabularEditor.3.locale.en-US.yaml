@@ -1,0 +1,73 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: TabularEditor.TabularEditor.3
+PackageVersion: 3.24.0
+PackageLocale: en-US
+Publisher: Tabular Editor ApS
+PublisherUrl: https://tabulareditor.com/
+PublisherSupportUrl: https://github.com/TabularEditor/TabularEditor3/issues
+PrivacyUrl: https://tabulareditor.com/privacy-policy
+Author: Tabular Editor ApS
+PackageName: Tabular Editor 3
+PackageUrl: https://tabulareditor.com/downloads
+License: Proprietary
+LicenseUrl: https://tabulareditor.com/license-terms
+Copyright: © 2025 Tabular Editor ApS
+CopyrightUrl: https://tabulareditor.com/license-terms
+ShortDescription: A tool that lets you easily manipulate and manage measures, calculated columns, display folders, perspectives and translations in Analysis Services Tabular and Power BI Sematic Models.
+Tags:
+- dax
+- power-bi
+- powerbi
+ReleaseNotes: |-
+  New in 3.24.0
+  Check out our release blog to get a brief overview of the most important updates in this release.
+  DAX Package Manager
+  Find and install DAX packages for Power BI with a single click! This new feature integrates with https://daxlib.org, which serves as an open gallery of community-authored reusable packages of DAX code (in the form of DAX User-Defined Functions). Dozens of packages and hundreds of UDFs are already available, with more coming every day. Learn more.
+  Organize UDFs by namespaces
+  The concept of "namespace" doesn't exist in DAX, yet the recommendation is to name UDFs in such a way that ambiguities are avoided and that the origin of the UDF is clear. For example DaxLib.Convert.CelsiusToFahrenheit (using '.' as namespace separators). In this update, we show UDFs hierarchically by their namespace in the TOM Explorer, making it easier to manage and navigate multiple such UDFs. There's a toggle button just above the TOM Explorer, if you prefer to see a flat list of UDFs instead.
+  This feature also adds a "Namespace" property to UDFs, allowing you to customize the namespace of each UDF individually, without changing the name. Think of it as Display Folders for UDFs. This is useful, for example if you want to batch rename (F2) multiple UDFs to get rid of the namespaces in their names, but you still want to keep them nicely organized in the TOM Explorer. Learn more.
+  Note
+  This organizational feature in Tabular Editor doesn't affect DAX code - function calls remain the same regardless of namespace organization.
+  Improvements in 3.24.0
+  - Updated the Microsoft.AnalysisServices client library to v. 19.106.1, which includes fixes to TMDL serialization issues, among other improvements.
+  - Updated the Dax.Vpax library to v. 1.11.0, which adds support for calendars and UDFs, among other improvements.
+  - UDFs now have the Batch Rename option (F2) in the context menu. This is useful if you want to rename multiple UDFs at once, e.g. to add or remove a common prefix or suffix, or to change the "namespace" of multiple UDFs at once.
+  - UDFs and Calendar objects can now be dragged in to C# scripts and DAX code editors just like other objects (measures, columns, etc.).
+  - Substantial improvements have been made to our DAX editors support for Visual Calculations. This is relevant when editing UDFs or DAX Queries. For example, we no longer show false error messages when using a Visual Calculation function in a UDF, as long as no model objects are referenced in that UDF or any UDF it calls. The auto-complete will now also suggest Visual Calculation functions and visual column references when appropriate. Axis keywords (ROWS, COLUMNS) are now also properly supported in Visual Calculations.
+  - We added a Show/hide calendars toggle button next to the Show/hide partitions button above the TOM Explorer. The button is only shown when working on a model at Compatibility Level 1701 or higher.
+  - We now show a warning in the tooltip of any week-based DAX time intelligence functions, if the current model does not contain a calendar with weekly granularity (without which these functions will not work).
+  - The Pivot Grid Field List can now be toggled on or off using the dedicated button in the Pivot Grid toolbar.
+  - Saved Pivot Grids now retain the settings for Show empty values on columns and Show empty values on rows.
+  - Our C# editor now has auto-complete support for UDFs and Calendars on the Selected object. For example, you can now type Selected.Calendars to get a list of the currently selected calendars in the TOM Explorer.
+  - You can now export TMDL scripts for multiple objects at once, by multi-selecting objects in the TOM Explorer, right-click and choosing and choosing Export script > TMDL > To clipboard / To file from the context menu.
+  - Tabular Editor now lets you open .pbism files, which are commonly found in Power BI Project folders.
+  - Added a Fix Expression Editor to the BPA Rules Editor, which allows you to write BPA fix rules directly inside the Editor.
+  Bugfixes in 3.24.0
+  - Fixed bugs related to dragging/dropping objects in the TOM Explorer, and also show a warning message when a drag/drop operation fails.
+  - When connecting to models in PBI Desktop (September 2025 or newer), you should now (again) be able to perform refresh operations from within TE3.
+  - Fixed a bug where Calendars would appear next to measures/columns of a table, instead of inside the "Calendars" collection in the TOM Explorer.
+  - Our Semantic Analyzer will no longer show a false error when using certain UDF parameter type hints in combinations that are valid, for example: (a: TABLE EXPR) => .... For more details, see #1492.
+  - UDFs no longer show false error messages when column references cannot be immediately resolved. For example, an UDF defined as (t) => SUMX(t, [SomeColumn]) will no longer show an error on [SomeColumn], as the expression may be valid when the UDF is called with a table that contains a column named SomeColumn.
+  - Using UDF expression parameters in calls to LOOKUPVALUE or GROUPBY no longer results in false errors from the Semantic Analyzer.
+  - The Semantic Analyzer now correctly deals with DAX variables that shadow outer variables (or UDF parameters) with identical names (e.g. (a) => VAR a = <expression> ...)
+  - When creating a Calendar Column Association, we no longer show the "Unknown" time unit in the dropdown, as this is not a valid option anyway.
+  - Fixed a bug where processing-related buttons ("Clear completed", "Clear All", "Cancel", "Pause") remained active when switching between models, instead of being properly disabled for the new model.
+  - Fixed an issue that could cause the application to freeze when modifying a PivotGrid during its refresh process. To prevent this, context menu actions have been removed and some PivotGrid toolbar items are now disabled while the PivotGrid is refreshing.
+  - Fixed a bug where we showed false warnings about constant expressions when using CALCULATE in conjunction with parameterless functions such as SELECTEDMEASURE., see #1495.
+  - Fixed a regression from 3.23.0 where users would see an "Unhandled exception" when opening a DAX Optimizer analysis report for a specific object.
+  - UDFs will now be properly formatted when calling the FormatDax method through a C# script. See #1500.
+  - Allow x64 version to be installed on ARM machines again.
+  - Don't suggest adding the table name in front of visual columns (code action DI004), as only simple column references are supported in Visual Calculations.
+  - Search results are now properly cleared when the document in which the hit was found, is closed. This would previously cause an unhandled exception when double-clicking on a search result from a closed document.
+  - Keywords consisting of multiple words (for example ASC BLANKS FIRST in the ORDERBY function), and axis keywords for visual calculations (ROWS, COLUMNS) are now formatted correctly.
+ReleaseNotesUrl: https://docs.tabulareditor.com/te3/other/release-notes/3_24_0.html
+PurchaseUrl: https://tabulareditor.com/pricing
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://docs.tabulareditor.com/
+- DocumentLabel: Learn
+  DocumentUrl: https://tabulareditor.com/learn
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

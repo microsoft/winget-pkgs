@@ -1,0 +1,218 @@
+# Created with komac v2.12.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: BiomeJS.Biome
+PackageVersion: 2.2.0
+PackageLocale: en-US
+Publisher: BiomeJS
+PublisherUrl: https://biomejs.dev/
+PublisherSupportUrl: https://github.com/biomejs/biome/issues
+Author: Biome Developers and Contributors
+PackageName: Biome
+PackageUrl: https://biomejs.dev/
+License: Apache-2.0
+Copyright: Copyright (c) 2023-present Biome Developers and Contributors
+ShortDescription: Biome is a toolchain for web projects, aimed at providing functionalities to maintain them. It offers a formatter and linter, usable via CLI and LSP.
+Moniker: biome
+Tags:
+- css
+- formatter
+- javascript
+- json
+- jsx
+- linter
+- static-code-analysis
+- typescript
+- web
+ReleaseNotes: |-
+  2.2.0
+  Minor Changes
+  - #5506 1f8755b Thanks @sakai-ast! - The noRestrictedImports rule has been enhanced with a new patterns option. This option allows for more flexible and powerful import restrictions using gitignore-style patterns.
+    You can now define patterns to restrict entire groups of modules. For example, you can disallow imports from any path under import-foo/ except for import-foo/baz.
+    {
+      "options": {
+        "patterns": [
+          {
+            "group": ["import-foo/*", "!import-foo/baz"],
+            "message": "import-foo is deprecated, except for modules in import-foo/baz."
+          }
+        ]
+      }
+    }
+    Invalid examples
+    import foo from "import-foo/foo";
+    import bar from "import-foo/bar";
+    Valid examples
+    import baz from "import-foo/baz";
+    Additionally, the patterns option introduces importNamePattern to restrict specific import names using regular expressions.
+    The following example restricts the import names that match x , y or z letters from modules under import-foo/.
+    {
+      "options": {
+        "patterns": [
+          {
+            "group": ["import-foo/*"],
+            "importNamePattern": "[xyz]"
+          }
+        ]
+      }
+    }
+    Invalid examples
+    import { x } from "import-foo/foo";
+    Valid examples
+    import { foo } from "import-foo/foo";
+    Furthermore, you can use the invertImportNamePattern boolean option to reverse this logic. When set to true, only the import names that match the importNamePattern will be allowed. The following configuration only allows the import names that match x , y or z letters from modules under import-foo/.
+    {
+      "options": {
+        "patterns": [
+          {
+            "group": ["import-foo/*"],
+            "importNamePattern": "[xyz]",
+            "invertImportNamePattern": true
+          }
+        ]
+      }
+    }
+    Invalid examples
+    import { foo } from "import-foo/foo";
+    Valid examples
+    import { x } from "import-foo/foo";
+  - #6506 90c5d6b Thanks @nazarhussain! - Allow customization of the sort order for different sorting actions. These actions now support a sort option:
+    - assist/source/useSortedKeys now has a sortOrder option
+    - assist/source/useSortedAttributes now has a sortOrder option
+    - assist/source/organizeImports now has an identifierOrder option
+    For each of these options, the supported values are the same:
+    1. natural. Compares two strings using a natural ASCII order. Uppercase letters come first (e.g. A < a < B < b) and number are compared in a human way (e.g. 9 < 10). This is the default value.
+    2. lexicographic. Strings are ordered lexicographically by their byte values. This orders Unicode code points based on their positions in the code charts. This is not necessarily the same as “alphabetical” order, which varies by language and locale.
+  - #7159 df3afdf Thanks @ematipico! - Added the new rule useBiomeIgnoreFolder. Since v2.2, Biome correctly prevents the indexing and crawling of folders.
+    However, the correct pattern has changed. This rule attempts to detect incorrect usage, and promote the new pattern:
+    // biome.json
+    {
+      "files": {
+        "includes": [
+    -      "!dist/**",
+    -      "!**/fixtures/**",
+    +      "!dist",
+    +      "!**/fixtures",
+        ]
+      }
+    }
+  - #6989 85b1128 Thanks @arendjr! - Fixed minor inconsistencies in how files.includes was being handled.
+    Previously, Biome sometimes failed to properly ignore the contents of a folder if you didn't specify the /** at the end of a glob pattern. This was unfortunate, because it meant we still had to traverse the folder and then apply the glob to every entry inside it.
+    This is no longer an issue and we now recommend to ignore folders without using the /** suffix.
+  - #7118 a78e878 Thanks @avshalomt2! - Added support for .graphqls files. Biome can now format and lint GraphQL files that have the extension .graphqls
+  - #6159 f02a296 Thanks @bavalpey! - Added a new option to Biome's JavaScript formatter, javascript.formatter.operatorLinebreak, to configure whether long lines should be broken before or after binary operators.
+    For example, the following configuration:
+    {
+      formatter: {
+        javascript: {
+          operatorLinebreak: "before", // defaults to "after"
+        },
+      },
+    }
+    Will cause this JavaScript file:
+    const VERY_LONG_CONDITION_1234123412341234123412341234 = false;
+    if (
+      VERY_LONG_CONDITION_1234123412341234123412341234 &&
+      VERY_LONG_CONDITION_1234123412341234123412341234 &&
+      VERY_LONG_CONDITION_1234123412341234123412341234 &&
+      VERY_LONG_CONDITION_1234123412341234123412341234
+    ) {
+      console.log("DONE");
+    }
+    to be formatted like this:
+    const VERY_LONG_CONDITION_1234123412341234123412341234 = false;
+    if (
+      VERY_LONG_CONDITION_1234123412341234123412341234 &&
+      VERY_LONG_CONDITION_1234123412341234123412341234 &&
+      VERY_LONG_CONDITION_1234123412341234123412341234 &&
+      VERY_LONG_CONDITION_1234123412341234123412341234
+    ) {
+      console.log("DONE");
+    }
+  - #7137 a653a0f Thanks @ematipico! - Promoted multiple lint rules from nursery to stable groups and renamed several rules for consistency.
+    Promoted rules
+    The following rules have been promoted from nursery to stable groups:
+    CSS
+    - Promoted noImportantStyles to the complexity group.
+    - Promoted noUnknownAtRules to the suspicious group.
+    GraphQL
+    - Promoted useGraphqlNamedOperations to the correctness group.
+    - Promoted useGraphqlNamingConvention to the style group.
+    JavaScript/TypeScript
+    - Promoted noExcessiveLinesPerFunction to the complexity group.
+    - Promoted noImplicitCoercions to the complexity group.
+    - Promoted useIndexOf to the complexity group.
+    - Promoted noGlobalDirnameFilename to the correctness group.
+    - Promoted noNestedComponentDefinitions to the correctness group.
+    - Promoted noProcessGlobal to the correctness group.
+    - Promoted noReactPropAssignments to the correctness group.
+    - Promoted noRestrictedElements to the correctness group.
+    - Promoted noSolidDestructuredProps to the correctness group.
+    - Promoted useJsonImportAttributes to the correctness group.
+    - Promoted useParseIntRadix to the correctness group.
+    - Promoted useSingleJsDocAsterisk to the correctness group.
+    - Promoted useUniqueElementIds to the correctness group.
+    - Promoted noAwaitInLoops to the performance group.
+    - Promoted noUnwantedPolyfillio to the performance group.
+    - Promoted useGoogleFontPreconnect to the performance group.
+    - Promoted useSolidForComponent to the performance group.
+    - Promoted noMagicNumbers to the style group.
+    - Promoted useConsistentObjectDefinitions to the style group.
+    - Promoted useExportsLast to the style group.
+    - Promoted useGroupedAccessorPairs to the style group.
+    - Promoted useNumericSeparators to the style group.
+    - Promoted useObjectSpread to the style group.
+    - Promoted useReadonlyClassProperties to the style group.
+    - Promoted useSymbolDescription to the style group.
+    - Promoted useUnifiedTypeSignatures to the style group.
+    - Promoted noBitwiseOperators to the suspicious group.
+    - Promoted noConstantBinaryExpressions to the suspicious group.
+    - Promoted noTsIgnore to the suspicious group.
+    - Promoted noUnassignedVariables to the suspicious group.
+    - Promoted noUselessRegexBackrefs to the suspicious group.
+    - Promoted noUselessStringEscapes to the suspicious group.
+    - Promoted useConsistentIterableCallbackReturnValues to the suspicious group.
+    - Promoted useStaticResponseMethods to the suspicious group.
+    Renamed rules
+    The following rules have been renamed during promotion. The migration tool will automatically update your configuration:
+    - Renamed noAwaitInLoop to noAwaitInLoops.
+    - Renamed noConstantBinaryExpression to noConstantBinaryExpressions.
+    - Renamed noDestructuredProps to noSolidDestructuredProps.
+    - Renamed noImplicitCoercion to noImplicitCoercions.
+    - Renamed noReactPropAssign to noReactPropAssignments.
+    - Renamed noUnknownAtRule to noUnknownAtRules.
+    - Renamed noUselessBackrefInRegex to noUselessRegexBackrefs.
+    - Renamed useAdjacentGetterSetter to useGroupedAccessorPairs.
+    - Renamed useConsistentObjectDefinition to useConsistentObjectDefinitions.
+    - Renamed useConsistentResponse to useStaticResponseMethods.
+    - Renamed useForComponent to useSolidForComponent.
+    - Renamed useJsonImportAttribute to useJsonImportAttributes.
+    - Renamed useNamedOperation to useGraphqlNamedOperations.
+    - Renamed useNamingConvention to useGraphqlNamingConvention.
+    - Renamed useUnifiedTypeSignature to useUnifiedTypeSignatures.
+    Configuration files using the old rule names will need to be updated. Use the migration tool to automatically update your configuration:
+    biome migrate --write
+  - #7159 df3afdf Thanks @ematipico! - Added the new rule noBiomeFirstException. This rule prevents the incorrect usage of patterns inside files.includes.
+    This rule catches if the first element of the array contains !. This mistake will cause Biome to analyze no files:
+    // biome.json
+    {
+      files: {
+        includes: ["!dist/**"], // this is an error
+      },
+    }
+  - #6923 0589f08 Thanks @ptkagori! - Added Qwik Domain to Biome
+    This release introduces Qwik domain support in Biome, enabling Qwik developers to use Biome as a linter and formatter for their projects.
+    - Added the Qwik domain infrastructure to Biome.
+    - Enabled the following rules for Qwik:
+      - useJsxKeyInIterable
+      - noReactSpecificProps
+  - #6989 85b1128 Thanks @arendjr! - Fixed #6965: Implemented smarter scanner for project rules.
+    Previously, if project rules were enabled, Biome's scanner would scan all dependencies regardless of whether they were used by/reachable from source files or not. While this worked for a first version, it was far from optimal.
+    The new scanner first scans everything listed under the files.includes setting, and then descends into the dependencies that were discovered there, including transitive dependencies. This has three main advantages:
+    - Dependencies that are not reachable from your source files don't get indexed.
+ReleaseNotesUrl: https://github.com/biomejs/biome/releases/tag/@biomejs/biome@2.2.0
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://biomejs.dev/guides/getting-started/
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

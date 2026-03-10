@@ -1,0 +1,52 @@
+id: labelAdded.validationUnattendedFailed
+name: GitOps.PullRequestIssueManagement
+description: Handlers when "Validation-Unattended-Failed" label is added
+owner:
+resource: repository
+disabled: false
+where:
+configuration:
+  resourceManagementConfiguration:
+    eventResponderTasks:
+      - description: >-
+          When the label "Validation-Unattended-Failed" is added to a pull request
+          * Add a reply notifying the issue author
+          * Assign to the author
+          * Label with Needs-Author-Feedback
+          * Remove Azure-Pipeline-Passed label
+          * Remove Needs-Attention label
+        if:
+          - payloadType: Pull_Request
+          - labelAdded:
+              label: Validation-Unattended-Failed
+        then:
+          - addReply:
+              reply: >-
+                Hello ${issueAuthor},
+
+
+                During installation testing, this application failed to install without user input. Did you forget to add Silent or SilentWithProgress switches?
+
+
+                This can also happen when a dependency is missing. You can test based on the [documentation](https://github.com/microsoft/winget-pkgs/blob/master/doc/README.md#testing-a-manifest).
+
+
+                Please investigate a fix and resubmit the Pull Request.
+
+
+                You may also try using the [Windows Package Manager Manifest Creator](https://github.com/microsoft/winget-create) to determine the proper installer type. If the installer type is MSIX, MSI, or a known installer technology like NullSoft, Inno, etc. the wingetcreate tool can detect them and the winget client will know what switches to pass. If it's a .exe installer of an unknown type, you will need to search to determine the proper switches for Silent and SilentWithProgress.
+
+
+                Template: msftbot/validationError/installation/unattended
+          - removeLabel:
+              label: Azure-Pipeline-Passed
+          - assignTo:
+              author: True
+          - removeLabel:
+              label: Needs-Attention
+          - addLabel:
+              label: Needs-Author-Feedback
+        # The policy service should trigger even when the label was added by the policy service
+        triggerOnOwnActions: true
+onFailure:
+onSuccess:

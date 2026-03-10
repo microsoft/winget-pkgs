@@ -1,0 +1,91 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: BaldurKarlsson.RenderDoc
+PackageVersion: 1.40.0
+PackageLocale: en-US
+Publisher: Baldur Karlsson
+PublisherUrl: https://renderdoc.org/
+PublisherSupportUrl: https://github.com/baldurk/renderdoc/issues
+Author: Baldur Karlsson
+PackageName: RenderDoc
+PackageUrl: https://renderdoc.org/
+License: MIT
+LicenseUrl: https://github.com/baldurk/renderdoc/blob/HEAD/LICENSE.md
+Copyright: Copyright © Baldur Karlsson 2025
+ShortDescription: A stand-alone graphics debugging tool
+Description: RenderDoc is a free MIT licensed stand-alone graphics debugger that allows quick and easy single-frame capture and detailed introspection of any application using Vulkan, D3D11, OpenGL & OpenGL ES or D3D12 across Windows, Linux, Android, or Nintendo Switch™.
+Moniker: renderdoc
+Tags:
+- debug
+- debugger
+- debugging
+- debugging-tool
+- graphics
+- rendering
+ReleaseNotes: |-
+  This release adds support for some new Vulkan extensions, including VK_EXT_descriptor_buffer, as well as Vulkan 1.4. It contains some other quality of life improvements and the usual bug fixes. NOTE: currently AMD's official drivers contain a bug that will likely cause any captures using VK_EXT_descriptor_buffer to fail. This can't be worked around on RenderDoc's side and requires a driver fix.
+  As an update to previous releases, note that the latest nvidia drivers now support raytracing pipeline capture and replay so will function in RenderDoc.
+  As always binary builds with installers, zips and tarballs are available on renderdoc.org.
+  Python API changes
+  - ShaderDirectAccess.category has been changed to ShaderDirectAccess.type which is a DescriptorType. The category if needed can be determined via CategoryForDescriptorType.
+  - VKDescriptorSet.descriptorSetResourceId may be unset now if a capture is using descriptor buffers.
+  Features/Improvements
+  - All: Fix compilation of application API header with pedantic C mode.
+  - UI: Added the ability to cancel a download in progress.
+  - UI: Display an explicit note for resource usage when the resource is not tracked, rather than showing an empty panel.
+  - D3D: More clearly display read-only DSVs in the pipeline state.
+  - D3D12: Root signature viewer shows space + register for root parameters.
+  - Vulkan: Add support for NonSemantic.DebugBreak as a breakpoint, however on most current drivers this instruction causes an unconditional GPU crash so is not useful for debugging.
+  - Vulkan: Add support for core version 1.4 and the following extensions:
+    - VK_EXT_descriptor_buffer
+    - VK_KHR_surface_maintenance1
+    - VK_KHR_swapchain_maintenance1
+    - VK_EXT_host_image_copy
+    - VK_KHR_map_memory2
+    - VK_KHR_shader_bfloat16
+    - VK_KHR_unified_image_layouts
+    - VK_EXT/KHR_present_mode_fifo_latest_ready
+    - VK_KHR_present_id/wait2
+    - VK_KHR_maintenance6 to VK_KHR_maintenance9
+    - VK_EXT_pipeline_robustness
+    - VK_EXT_pipeline_protected_access
+  Bugfixes
+  - UI: Fix a potential rare crash while closing a capture.
+  - UI: Fix a hang when editing some shaders with complex #include trees.
+  - UI: Fix a problem where raw binary buffer exports would be truncated wrongly when exporting from a large offset into a buffer.
+  - Python: Fix a bug when creating a CaptureViewer implementation in python where only some methods are overridden.
+  - Linux: Follow symlinks when loading python extension folders.
+  - Android: Fix a potential race condition during applications that start very quickly.
+  - D3D: Fix a potential crash when debugging DXBC shaders that use groupshared memory with arrays of large stride.
+  - D3D: Fix an error debugging a pixel shader if it contains inputs which are not written by the vertex shader.
+  - D3D11: Fix handling of zero-sized constant buffer bindings not being correctly truncated to have no data.
+  - D3D11: Fix a crash when calling Unmap() a buffer in a captured frame when the Map() happened in a previous frame.
+  - D3D12: Fix a crash when processing callstacks that refer to namespaces.
+  - D3D12: Fix root constant updates inside a ExecuteIndirect not properly inheriting values from previous updates before the ExecuteIndirect.
+  - D3D12: Fix a potential GPU crash when selecting a draw in an ExecuteIndirect that updates root constants and uses bindless resources.
+  - D3D12: Ensure pixel history shows the proper blended results for multiple fragments per pixel in the same draw when displaying the Tex After
+  - D3D12: Fix a potential crash if ExecuteIndirect is called with MaxCommandCount == 0.
+  - D3D12: Fix a GPU crash if an ExecuteIndirect's argument buffer fails to patch when using a count buffer.
+  - D3D12: Fix wrong results being displayed for bindless usage on sub-draws in an ExecuteIndirect after the first.
+  - D3D12: Fix a crash on load when ExecuteIndirect is run on a compute command buffer.
+  - Vulkan: Fix a potential crash if a descriptor array is accessed out-of-bounds by a shader.
+  - Vulkan: Fix a potential rare crash with window display.
+  - Vulkan: Add a missing sample shading feature check for internal shader creation.
+  - Vulkan: Fix detection of scalar block layout where it is only necessary due to misalignment of vectors in a structure array.
+  - Vulkan: Add workaround for nvidia driver bug with capture/replay of BDA buffers.
+  - Vulkan: Fix a crash when editing SPIR-V that doesn't declare types early enough for certain integers.
+  - Vulkan: Fix a crash fetching mesh output data on Vulkan devices that support only a small number of buffers.
+  - Vulkan: Disable reporting of extensions like VK_EXT_fragment_density_map2 if their dependency parent extension is not reported.
+  - Vulkan: Fix a potential crash when displaying mesh output data if the index buffer is read out of bounds.
+  - GL: Treat zink as a different platform for the purpose of vendor checks.
+  - GLES: Fix handling of emulated image copies with formats that are not color renderable.
+  - GLES: Fix handling of emulated image copies for D16 images.
+ReleaseNotesUrl: https://github.com/baldurk/renderdoc/releases/tag/v1.40
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://renderdoc.org/docs/index.html
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/baldurk/renderdoc/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

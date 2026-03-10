@@ -1,0 +1,44 @@
+id: labelAdded.validationDomain
+name: GitOps.PullRequestIssueManagement
+description: Handlers when "Validation-Domain" label is added
+owner:
+resource: repository
+disabled: false
+where:
+configuration:
+  resourceManagementConfiguration:
+    eventResponderTasks:
+      - description: >-
+          When the label "Validation-Domain" is added to a pull request
+          * Add the PR specific reply notifying the issue author
+          * Assign to the Author
+          * Assign to the Primary and Secondary ICM Users [See labelManagement.assignIcmUsers.yml]
+          * Label with Needs-Author-Feedback
+        if:
+          - payloadType: Pull_Request
+          - labelAdded:
+              label: Validation-Domain
+        then:
+          - addReply:
+              reply: >-
+                Hello ${issueAuthor},
+
+
+                One or more of the installer URLs doesn't appear valid.
+
+
+                This may happen for sites with policies prohibiting distribution or use by third parties.
+
+
+                This may happen for URLs pointing to domains that do not align with the publisher domain or package domain. If you could provide supporting evidence from the publisher that the URLs for the installer are correct, that would help us to validate and approve this PR.
+
+
+                Template: msftbot/validationError/urls/domain
+          - assignTo:
+              author: True
+          - addLabel:
+              label: Needs-Author-Feedback
+        # The policy service should trigger even when the label was added by the policy service
+        triggerOnOwnActions: true
+onFailure:
+onSuccess:

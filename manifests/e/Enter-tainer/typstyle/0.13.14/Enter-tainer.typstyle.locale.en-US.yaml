@@ -1,0 +1,72 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: Enter-tainer.typstyle
+PackageVersion: 0.13.14
+PackageLocale: en-US
+Publisher: Wenzhuo Liu
+PublisherUrl: https://mgt.moe/
+PublisherSupportUrl: https://github.com/typstyle-rs/typstyle/issues
+Author: Wenzhuo Liu
+PackageName: typstyle
+PackageUrl: https://typstyle-rs.github.io/typstyle/
+License: Apache-2.0
+LicenseUrl: https://github.com/typstyle-rs/typstyle/blob/HEAD/LICENSE
+Copyright: Copyright © 2023 - 2025 Typstyle Contributors
+ShortDescription: Beautiful and reliable typst code formatter
+Tags:
+- typst
+ReleaseNotes: |-
+  We now employ prettyless as the layout engine. It provides more features to support us to adopt better layout logic.
+  - Feature: Long lines after the first line will no longer cause compact layout to fail to fit.
+    For example:
+    #figure(caption: [], {
+      "looooooooooooooooooooooooooong"
+    })
+    It now fits in the compact layout regardless of the length of any long line in the code block.
+  - Feature: We now respect the flavor of arguments in any case, except that the sole argument is a code block, which is always folded. This reverts the behavior of "force folding" when the sole argument is combinable, so that users can freely decide whether the argument should be compact. This change is expected not to affect your code if it is already compact.
+    For example:
+    #f(
+      (1, 2, 3)
+    )
+    was formatted to
+    #f((1, 2, 3))
+    Now it is kept unchanged given its multiline flavor.
+  - Bug fix: In code mode, std.table was not recognized as a table function, preventing proper table formatting.
+  - Bug fix: Fixed incorrect formatting of table functions with empty content blocks.
+    When table.header or table.footer had no parentheses (()), the formatter would incorrectly add parentheses before empty content blocks. When parenthesized args are empty, the formatter would insert a line break with short line length.
+    For example:
+    #table(
+      columns: 2,
+      table.header[],
+      table.footer(),
+    )
+    was formatted to:
+    #table(
+      columns: 2,
+      table.header()[],
+      table.footer(),
+    )
+    or with short line length:
+    #table(
+      columns: 2,
+      table.header(
+
+      )[],
+      table.footer(
+
+      ),
+    )
+  - Bug fix: Fixed incorrect handling of trailing content blocks in set rules.
+    Previously, when there were no parentheses, a following content block would be wrapped by (); when parentheses were already present, any trailing content block was dropped.
+    For example:
+    #set circle[1]
+    #set circle()[1]
+    #set circle(stroke: blue)[1]
+    was previously formatted to:
+    #set circle([1])
+    #set circle()
+    #set circle(stroke: blue)
+ReleaseNotesUrl: https://github.com/typstyle-rs/typstyle/releases/tag/v0.13.14
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

@@ -1,0 +1,43 @@
+id: labelAdded.validationHttpError
+name: GitOps.PullRequestIssueManagement
+description: Handlers when "Validation-HTTP-Error" label is added
+owner:
+resource: repository
+disabled: false
+where:
+configuration:
+  resourceManagementConfiguration:
+    eventResponderTasks:
+      - description: >-
+          When the label "Validation-HTTP-Error" is added to a pull request
+          * Add a reply notifying the issue author
+          * Assign to the author
+          * Label with Needs-Author-Feedback
+          * Remove Azure-Pipeline-Passed label
+          * Remove Needs-Attention label
+        if:
+          - payloadType: Pull_Request
+          - labelAdded:
+              label: Validation-HTTP-Error
+        then:
+          - addReply:
+              reply: >-
+                Hello ${issueAuthor},
+
+
+                The validation code has detected one of the URLs in the manifest is not using the HTTPS protocol. Please update all URLs in the manifest to use HTTPS instead.
+
+
+                Template: msftbot/validationError/urls/https
+          - assignTo:
+              author: True
+          - addLabel:
+              label: Needs-Author-Feedback
+          - removeLabel:
+              label: Azure-Pipeline-Passed
+          - removeLabel:
+              label: Needs-Attention
+        # The policy service should trigger even when the label was added by the policy service
+        triggerOnOwnActions: true
+onFailure:
+onSuccess:
