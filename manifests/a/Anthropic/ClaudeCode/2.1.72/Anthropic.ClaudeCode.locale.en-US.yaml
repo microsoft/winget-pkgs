@@ -1,0 +1,90 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Anthropic.ClaudeCode
+PackageVersion: 2.1.72
+PackageLocale: en-US
+Publisher: Anthropic PBC
+Author: Anthropic PBC
+PackageName: Claude Code
+License: Proprietary
+Copyright: © 2026 Anthropic PBC
+ShortDescription: Unleash Claude’s raw power directly in your terminal. Search million-line codebases instantly. Turn hours-long workflows into a single command. Your tools. Your workflow. Your codebase, evolving at thought speed.
+Description: |-
+  Claude Code is Anthropic’s agentic coding tool that lives in your terminal and helps you turn ideas into code faster than ever before.
+  What Claude Code does for you
+  - Build features from descriptions: Tell Claude what you want to build in plain English. It will make a plan, write the code, and ensure it works.
+  - Debug and fix issues: Describe a bug or paste an error message. Claude Code will analyze your codebase, identify the problem, and implement a fix.
+  - Navigate any codebase: Ask anything about your team’s codebase, and get a thoughtful answer back. Claude Code maintains awareness of your entire project structure, can find up-to-date information from the web, and with MCP can pull from external datasources like Google Drive, Figma, and Slack.
+  - Automate tedious tasks: Fix fiddly lint issues, resolve merge conflicts, and write release notes. Do all this in a single command from your developer machines, or automatically in CI.
+  Why developers love Claude Code
+  - Works in your terminal: Not another chat window. Not another IDE. Claude Code meets you where you already work, with the tools you already love.
+  - Takes action: Claude Code can directly edit files, run commands, and create commits. Need more? MCP lets Claude read your design docs in Google Drive, update your tickets in Jira, or use your custom developer tooling.
+  - Unix philosophy: Claude Code is composable and scriptable. tail -f app.log | claude -p "Slack me if you see any anomalies appear in this log stream" works. Your CI can run claude -p "If there are new text strings, translate them into French and raise a PR for @lang-fr-team to review".
+  - Enterprise-ready: Use Anthropic’s API, or host on AWS or GCP. Enterprise-grade security, privacy, and compliance is built-in.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- claude
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  - Fixed tool search to activate even with ANTHROPIC_BASE_URL as long as ENABLE_TOOL_SEARCH is set.
+  - Added w key in /copy to write the focused selection directly to a file, bypassing the clipboard (useful over SSH)
+  - Added optional description argument to /plan (e.g., /plan fix the auth bug) that enters plan mode and immediately starts
+  - Added ExitWorktree tool to leave an EnterWorktree session
+  - Added CLAUDE_CODE_DISABLE_CRON environment variable to immediately stop scheduled cron jobs mid-session
+  - Added lsof, pgrep, tput, ss, fd, and fdfind to the bash auto-approval allowlist, reducing permission prompts for common read-only operations
+  - Restored the model parameter on the Agent tool for per-invocation model overrides
+  - Simplified effort levels to low/medium/high (removed max) with new symbols (○ ◐ ●) and a brief notification instead of a persistent icon. Use /effort auto to reset to default
+  - Improved /config — Escape now cancels changes, Enter saves and closes, Space toggles settings
+  - Improved up-arrow history to show current session's messages first when running multiple concurrent sessions
+  - Improved voice input transcription accuracy for repo names and common dev terms (regex, OAuth, JSON)
+  - Improved bash command parsing by switching to a native module — faster initialization and no memory leak
+  - Reduced bundle size by ~510 KB
+  - Changed CLAUDE.md HTML comments (<!-- ... -->) to be hidden from Claude when auto-injected. Comments remain visible when read with the Read tool
+  - Fixed slow exits when background tasks or hooks were slow to respond
+  - Fixed agent task progress stuck on "Initializing…"
+  - Fixed skill hooks firing twice per event when a hooks-enabled skill is invoked by the model
+  - Fixed several voice mode issues: occasional input lag, false "No speech detected" errors after releasing push-to-talk, and stale transcripts re-filling the prompt after submission
+  - Fixed --continue not resuming from the most recent point after --compact
+  - Fixed bash security parsing edge cases
+  - Added support for marketplace git URLs without .git suffix (Azure DevOps, AWS CodeCommit)
+  - Improved marketplace clone failure messages to show diagnostic info even when git produces no stderr
+  - Fixed several plugin issues: installation failing on Windows with EEXIST error in OneDrive folders, marketplace blocking user-scope installs when a project-scope install exists, CLAUDE_CODE_PLUGIN_CACHE_DIR creating literal ~ directories, and plugin.json with marketplace-only fields failing to load
+  - Fixed feedback survey appearing too frequently in long sessions
+  - Fixed --effort CLI flag being reset by unrelated settings writes on startup
+  - Fixed backgrounded Ctrl+B queries losing their transcript or corrupting the new conversation after /clear
+  - Fixed /clear killing background agent/bash tasks — only foreground tasks are now cleared
+  - Fixed worktree isolation issues: Task tool resume not restoring cwd, and background task notifications missing worktreePath and worktreeBranch
+  - Fixed /model not displaying results when run while Claude is working
+  - Fixed digit keys selecting menu options instead of typing in plan mode permission prompt's text input
+  - Fixed sandbox permission issues: certain file write operations incorrectly allowed without prompting, and output redirections to allowlisted directories (like /tmp/claude/) prompting unnecessarily
+  - Improved CPU utilization in long sessions
+  - Fixed prompt cache invalidation in SDK query() calls, reducing input token costs up to 12x
+  - Fixed Escape key becoming unresponsive after cancelling a query
+  - Fixed double Ctrl+C not exiting when background agents or tasks are running
+  - Fixed team agents to inherit the leader's model
+  - Fixed "Always Allow" saving permission rules that never match again
+  - Fixed several hooks issues: transcript_path pointing to the wrong directory for resumed/forked sessions, agent prompt being silently deleted from settings.json on every settings write, PostToolUse block reason displaying twice, async hooks not receiving stdin with bash read -r, and validation error message showing an example that fails validation
+  - Fixed session crashes in Desktop/SDK when Read returned files containing U+2028/U+2029 characters
+  - Fixed terminal title being cleared on exit even when CLAUDE_CODE_DISABLE_TERMINAL_TITLE was set
+  - Fixed several permission rule matching issues: wildcard rules not matching commands with heredocs, embedded newlines, or no arguments; sandbox.excludedCommands failing with env var prefixes; "always allow" suggesting overly broad prefixes for nested CLI tools; and deny rules not applying to all command forms
+  - Fixed oversized and truncated images from Bash data-URL output
+  - Fixed a crash when resuming sessions that contained Bedrock API errors
+  - Fixed intermittent "expected boolean, received string" validation errors on Edit, Bash, and Grep tool inputs
+  - Fixed multi-line session titles when forking from a conversation whose first message contained newlines
+  - Fixed queued messages not showing attached images, and images being lost when pressing ↑ to edit a queued message
+  - Fixed parallel tool calls where a failed Read/WebFetch/Glob would cancel its siblings — only Bash errors now cascade
+  - VSCode: Fixed scroll speed in integrated terminals not matching native terminals
+  - VSCode: Fixed Shift+Enter submitting input instead of inserting a newline for users with older keybindings
+  - VSCode: Added effort level indicator on the input border
+  - VSCode: Added vscode://anthropic.claude-code/open URI handler to open a new Claude Code tab programmatically, with optional prompt and session query parameters
+ReleaseNotesUrl: https://github.com/anthropics/claude-code/blob/HEAD/CHANGELOG.md#2172
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
