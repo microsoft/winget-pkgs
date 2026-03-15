@@ -759,7 +759,7 @@ try {
   } catch {
     throw "Microsoft.Winget.Client was not installed successfully"
   } finally {
-    # Check to be sure it acutally installed
+    # Check to be sure it actually installed
     if (-not(Get-Module -ListAvailable -Name Microsoft.Winget.Client)) {
       throw "Microsoft.Winget.Client was not found. Check that the Windows Package Manager PowerShell module was installed correctly."
     }
