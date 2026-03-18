@@ -1,0 +1,133 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: NearAI.IronClaw
+PackageVersion: 0.17.0
+PackageLocale: en-US
+Publisher: NEAR AI
+PublisherUrl: https://near.ai/
+PublisherSupportUrl: https://github.com/nearai/ironclaw/issues
+PrivacyUrl: https://near.ai/privacy-policy
+Author: Jasnah Inc.
+PackageName: ironclaw
+PackageUrl: https://www.ironclaw.com/
+License: Apache-2.0 or MIT
+LicenseUrl: https://github.com/nearai/ironclaw#license
+Copyright: Copyright (c) 2026 NEAR AI
+ShortDescription: Unleash Your AI Agent, With Peace of Mind
+Description: |-
+  IronClaw is the secure, open-source alternative to OpenClaw that runs in encrypted enclaves on NEAR AI Cloud. AI agents that actually do things, but your secrets never touch the LLM.
+
+  Philosophy
+  IronClaw is built on a simple principle: your AI assistant should work for you, not against you.
+  In a world where AI systems are increasingly opaque about data handling and aligned with corporate interests, IronClaw takes a different approach:
+  - Your data stays yours - All information is stored locally, encrypted, and never leaves your control
+  - Transparency by design - Open source, auditable, no hidden telemetry or data harvesting
+  - Self-expanding capabilities - Build new tools on the fly without waiting for vendor updates
+  - Defense in depth - Multiple security layers protect against prompt injection and data exfiltration
+  IronClaw is the AI assistant you can actually trust with your personal and professional life.
+
+  Features
+  Security First
+  - WASM Sandbox - Untrusted tools run in isolated WebAssembly containers with capability-based permissions
+  - Credential Protection - Secrets are never exposed to tools; injected at the host boundary with leak detection
+  - Prompt Injection Defense - Pattern detection, content sanitization, and policy enforcement
+  - Endpoint Allowlisting - HTTP requests only to explicitly approved hosts and paths
+  Always Available
+  - Multi-channel - REPL, HTTP webhooks, WASM channels (Telegram, Slack), and web gateway
+  - Docker Sandbox - Isolated container execution with per-job tokens and orchestrator/worker pattern
+  - Web Gateway - Browser UI with real-time SSE/WebSocket streaming
+  - Routines - Cron schedules, event triggers, webhook handlers for background automation
+  - Heartbeat System - Proactive background execution for monitoring and maintenance tasks
+  - Parallel Jobs - Handle multiple requests concurrently with isolated contexts
+  - Self-repair - Automatic detection and recovery of stuck operations
+  Self-Expanding
+  - Dynamic Tool Building - Describe what you need, and IronClaw builds it as a WASM tool
+  - MCP Protocol - Connect to Model Context Protocol servers for additional capabilities
+  - Plugin Architecture - Drop in new WASM tools and channels without restarting
+  Persistent Memory
+  - Hybrid Search - Full-text + vector search using Reciprocal Rank Fusion
+  - Workspace Filesystem - Flexible path-based storage for notes, logs, and context
+  - Identity Files - Maintain consistent personality and preferences across sessions
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- claw
+- large-language-model
+- llm
+ReleaseNotes: |-
+  Release Notes
+  Added
+  - (llm) per-provider unsupported parameter filtering (#749, #728) (#809)
+  - persist user_id in save_job and expose job_id on routine runs (#709)
+  - (ci) chained promotion PRs with multi-agent Claude review (#776)
+  - add background sandbox reaper for orphaned Docker containers (#634)
+  - (wasm) lazy schema injection on WASM tool errors (#638)
+  - add AWS Bedrock LLM provider via native Converse API (#713)
+  - full image support across all channels (#725)
+  - (skills) exclude_keywords veto in skill activation scoring (#688)
+  - (mcp) transport abstraction, stdio/UDS transports, and OAuth fixes (#721)
+  - add PID-based gateway lock to prevent multiple instances (#717)
+  - configurable LLM request timeout via LLM_REQUEST_TIMEOUT_SECS (#615) (#630)
+  - (timezone) add timezone-aware session context (#671)
+  - (setup) Anthropic OAuth onboarding with setup-token support (#384)
+  - (llm) add Google Gemini, AWS Bedrock, io.net, Mistral, Yandex, and Cloudflare WS AI providers (#676)
+  - unified thread model for web gateway (#607)
+  - WASM channel attachments with LLM pipeline integration (#596)
+  - enable Anthropic prompt caching via automatic cache_control injection (#660)
+  - (routines) approval context for autonomous job execution (#577)
+  - (llm) declarative provider registry (#618)
+  - (gateway) show IronClaw version in status popover [skip-regression-check] (#636)
+  - Wire memory hygiene retention policy into heartbeat loop (#629)
+  Fixed
+  - (ci) run fmt + clippy on staging PRs, skip Windows clippy [skip-regression-check] (#802)
+  - (ci) clean up staging pipeline — remove hacks, skip redundant checks [skip-regression-check] (#794)
+  - (ci) secrets can't be used in step if conditions [skip-regression-check] (#787)
+  - prevent irreversible context loss when compaction archive write fails (#754)
+  - button styles (#637)
+  - (mcp) JSON-RPC spec compliance — flexible id, correct notification format (#685)
+  - preserve tool-call history across thread hydration (#568) (#670)
+  - CLI commands ignore runtime DATABASE_BACKEND when both features compiled (#740)
+  - (web) prevent fetch error when hostname is an IP address in TEE check (#672)
+  - add timezone conversion support to time tool (#687)
+  - standardize libSQL timestamps as RFC 3339 UTC (#683)
+  - (docker) bind postgres to localhost only (#686)
+  - (repl) skip /quit on EOF when stdin is not a TTY (#724)
+  - (web) prevent Enter key from sending message during IME composition (#715)
+  - (config) init_secrets no longer overwrites entire config (#726)
+  - (cli) status command ignores config.toml and settings.json (#354) (#734)
+  - (setup) preserve model name when re-running onboarding with same provider (#600) (#694)
+  - (setup) initialize secrets crypto for env-var security option (#666) (#706)
+  - persist /model selection across restarts (#707)
+  - (routines) resolve message tool channel/target from per-job metadata (#708)
+  - sanitize HTML error bodies from MCP servers to prevent web UI white screen (#263) (#656)
+  - prevent Instant duration overflow on Windows (#657) (#664)
+  - enable libsql remote + tls features for Turso cloud sync (#587)
+  - (tests) replace hardcoded /tmp paths with tempdir + add 300 unit tests (#659)
+  - (llm) nudge LLM when it expresses tool intent without calling tools (#653)
+  - (llm) report zero cost for OpenRouter free-tier models (#463) (#613)
+  - reliable network tests and improved tool error messages (#626)
+  - (wasm) use per-engine cache dirs on Windows to avoid file lock error (#624)
+  - (libsql) support flexible embedding dimensions (#534)
+  Other
+  - Restructure CLAUDE.md into modular rules + add pr-shepherd command (#750)
+  - make src/llm/ self-contained for crate extraction (#767)
+  - add simplified Chinese (zh-CN) README translation (#488)
+  - (job) cover job tool validation and state transitions (#681)
+  - (agent) wire TestRig job tools through the scheduler (#716)
+  - Fix single-message mode to exit after one turn when background channels are enabled (#719)
+  - remove dead code (#648) (#703)
+  - add reviewer-feedback guardrails (CLAUDE.md, pre-commit hook, skill) (#665)
+  - update WASM artifact SHA256 checksums [skip ci] (#631)
+  - add explanatory comments to coverage workflow (#610)
+  - build system prompt once per turn, skip tools on force-text (#583)
+  - add comprehensive subdirectory CLAUDE.md files and update root (#589)
+  - Improve test infrastructure: StubChannel, gateway helpers, security tests, search edge cases (#623)
+  - (workspace) regression test for document_path in search results (#509)
+  Added
+  - AWS Bedrock LLM provider via native Converse API with IAM and SSO auth support (feature-gated: --features bedrock)
+ReleaseNotesUrl: https://github.com/nearai/ironclaw/releases/tag/v0.17.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
