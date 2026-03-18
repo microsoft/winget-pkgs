@@ -34,7 +34,7 @@ Location of Auth.csv - defaults to current path location. This might become a bu
 Location of logging file - defaults to "Log.txt" in current path location.
 
 ## -Chromatic
-Color schemes, for accessability and variety:
+Color schemes, for accessibility and variety:
 
 Color    | Warning | Caution | OK
 Default | Red   | Yellow | Green
