@@ -1,0 +1,57 @@
+# Created with WinGet Releaser using komac v2.15.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: axpnet.AeroFTP
+PackageVersion: 3.0.2
+PackageLocale: en-US
+Publisher: axpnet
+PublisherUrl: https://github.com/axpnet
+PublisherSupportUrl: https://github.com/axpnet/aeroftp/issues
+Author: axpnet
+PackageName: AeroFTP
+PackageUrl: https://github.com/axpnet/aeroftp
+License: GPL-3.0
+LicenseUrl: https://github.com/axpnet/aeroftp/blob/HEAD/LICENSE
+ShortDescription: A modern, multi-protocol file manager and FTP client with integrated AI, cloud sync, and military-grade encryption.
+Description: |-
+  AeroFTP is an open-source, multi-protocol file manager built with Tauri 2 (Rust + React 18 + TypeScript).
+  It supports 16 protocols (FTP, FTPS, SFTP, WebDAV, S3, Google Drive, Dropbox, OneDrive, MEGA, Box, pCloud, Azure Blob, 4shared, Filen, Zoho WorkDrive, and Cryptomator vaults),
+  features an AI assistant with 45 tools and 15 LLM providers, military-grade encrypted vaults (AES-256-GCM-SIV + Argon2id),
+  bidirectional real-time sync, a built-in code editor, SSH terminal, and media player with visualizers.
+  Available in 47 languages with 4 themes.
+Moniker: aeroftp
+Tags:
+- cloud-storage
+- encryption
+- file-manager
+- file-transfer
+- ftp
+- ftp-client
+- multi-protocol
+- rust
+- s3
+- sftp
+- sync
+- tauri
+- webdav
+ReleaseNotes: |-
+  [3.0.2] - 2026-03-18
+  Transfer & Settings Hotfix
+  Critical fixes for folder upload navigation, settings propagation, and session tab safety during transfers.
+  Fixed
+  - Folder upload remote panel navigation (critical): Uploading a folder with subfolders while using smart comparison modes (overwrite-if-newer, overwrite-if-different, skip-if-identical) caused the remote panel to navigate into the last subdirectory after upload completed. Root cause: FTP change_dir() during metadata collection phase was not restored to original directory
+  - Settings not applied on first transfer: Changing file handling settings (e.g. from "Ask" to "Overwrite if newer") required two transfer attempts before taking effect. Root cause: checkFolderOverwrite useCallback had stale closure — missing fileExistsAction in dependency array
+  - Settings save lag and double-click: Save Changes button had no visual feedback during async vault write, causing users to click multiple times. Now shows spinner while saving, checkmark on success, and auto-closes after brief confirmation
+  - Settings sync delay: Settings changes dispatched via custom event required async vault re-read before propagating to App.tsx. Now passes settings inline in CustomEvent detail for immediate synchronous application
+  Changed
+  - Session tabs locked during transfers: Non-active server tabs are visually dimmed (opacity 40%) and completely non-interactive during active file transfers — prevents accidental session switching that would queue a reconnection and confuse users during long batch transfers
+  - Settings panel header: Removed gradient badge icon, replaced with plain icon to match other modal dialogs
+  - Windows NSIS installer: Auto-downloads and installs VC++ Redistributable 2015-2022 if vcruntime140.dll is missing — fixes STATUS_DLL_NOT_FOUND crash on clean Windows installs. Uses NSISdl (same built-in plugin as Tauri's WebView2 bootstrapper)
+  - README: Added website and documentation links (aeroftp.app, docs.aeroftp.app)
+  Downloads:
+  - Windows: .msi installer or .exe
+  - macOS: .dmg disk image
+  - Linux: .deb, .rpm, .snap, or .AppImage
+ReleaseNotesUrl: https://github.com/axpnet/aeroftp/releases/tag/v3.0.2
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
