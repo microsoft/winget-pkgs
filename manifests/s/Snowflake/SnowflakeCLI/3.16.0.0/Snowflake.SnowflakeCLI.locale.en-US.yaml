@@ -23,6 +23,21 @@ Tags:
 - database
 - snowflake
 - sql
+ReleaseNotes: |-
+  New features and updates
+  - Added support for DCM commands in preview.
+  - Added the --in-account option to list commands (for example, snow object list, snow stage list). This option lists all objects of a given type in the account. Cannot be used together with the --in option.
+  - Added the experimental command snow spcs service build-image to build container images using an SPCS service. The command uploads the local build context to a stage, executes a build job, and streams logs in real time until completion. This command is experimental and subject to change.
+  - Added the --async option to the snow spcs service execute-job command to execute job services asynchronously without waiting for completion.
+  - Added the --replicas option to the snow spcs service execute-job command to specify the number of job replicas to run.
+  - Added the --dbt-version option to the snow dbt deploy and snow dbt execute commands. This option sets the dbt Core version on a dbt project object (snow dbt deploy command) or executes a dbt command on a specific dbt Core version without altering the dbt object (snow dbt execute commands).
+  - All authenticators (including snowflake-jwt, username_password_mfa, and workload_identity) are now case-insensitive.
+  - Changed how the fully qualified names for temporary stages are established for snow dbt deploy. The database and schema from the dbt project object’s fully qualified name now take precedence over those from the session.
+  Bug fixes
+  - Fixed snow stage copy --recursive dropping database and schema qualifiers from fully qualified stage names, which caused the command to resolve stages against the connection’s default database instead of the one specified in the FQN.
+  - Fixed snow streamlit deploy --prune failing with an incorrect stage path format for Streamlit entities using versioned deployment. The snow:// prefix is now correctly preserved through all stage path operations.
+  - Fixed a bug with snow dbt deploy where the dbt project uploaded files first and updated project properties afterward. This could cause deploys to fail if, for example, the project lacked external access integrations and dependencies were specified.
+  - Fixed the snow stage copy and snow stage put commands failing when a local directory path contains glob special characters (such as, square brackets in [id] or [slug]). The path is now escaped before glob expansion, so literal directory names are matched correctly.
 ReleaseNotesUrl: https://docs.snowflake.com/en/release-notes/clients-drivers/snowflake-cli-2026
 ManifestType: defaultLocale
 ManifestVersion: 1.12.0
