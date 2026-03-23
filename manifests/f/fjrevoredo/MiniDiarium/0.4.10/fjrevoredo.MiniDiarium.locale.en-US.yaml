@@ -1,0 +1,114 @@
+# Created using wingetcreate 1.12.8.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: fjrevoredo.MiniDiarium
+PackageVersion: 0.4.10
+PackageLocale: en-US
+Publisher: fjrevoredo
+PublisherUrl: https://mini-diarium.com/
+PublisherSupportUrl: https://github.com/fjrevoredo/mini-diarium/issues
+PrivacyUrl: https://github.com/fjrevoredo/mini-diarium/blob/master/docs/PRIVACY.md
+Author: Francisco J. Revoredo
+PackageName: Mini Diarium
+PackageUrl: https://github.com/fjrevoredo/mini-diarium
+License: MIT
+LicenseUrl: https://github.com/fjrevoredo/mini-diarium/blob/master/LICENSE
+Copyright: Copyright (c) 2026 Francisco J. Revoredo
+ShortDescription: Encrypted, local-first journaling app
+Description: A local-first journal with serious encryption. Free, open source, and never touches the internet.
+Moniker: mini-diarium
+Tags:
+- privacy
+- journaling
+- journal
+- diary
+- foss
+- open-source
+- rust
+ReleaseNotes: |-
+  What's Changed
+
+  Fixed
+
+  - Text alignment lost after calendar navigation (issue #63): alignment (justify, center, right)
+    applied to an entry was permanently overwritten after navigating away and returning. Root cause:
+    TipTap v3 changed setContent's emitUpdate default from false (v2) to true, causing the
+    programmatic content load in DiaryEditor's createEffect to fire onUpdate, which queued a debounced
+    save with un-aligned HTML from the production bundle's intermediate getHTML() state. Fixed by
+    passing { emitUpdate: false } to suppress onUpdate for programmatic loads; a new onSetContent
+    callback from DiaryEditor to EditorPanel (1) updates the editorIsEmpty reactive signal so the "add
+    entry" button state stays correct, and (2) re-triggers debouncedSave for blank entries (preserving
+    the auto-deletion-on-navigation behaviour that previously ran through the now-suppressed onUpdate
+    path). Signal reads in the callback use untrack() to avoid adding spurious reactive dependencies
+    to DiaryEditor's effect.
+  - E2E layout white gap above auth screens: three-part fix. (1) In E2E mode the Tauri window now sets
+    its size to 800×660 before win.show() (in lib.rs setup) — previously the window opened at the
+    production default (800×780). (2) All screen-filling containers (JournalPicker, PasswordCreation,
+    PasswordPrompt, App loading state, MainLayout) now use h-full (height: 100% via the html → body →
+    #root chain) instead of h-screen/min-h-screen (100vh), which may include the native app menu bar
+    height in WebView2 on Windows. (3) Removed browser.setWindowSize(800, 660) from the wdio.conf.ts
+    before hook — WebDriver setWindowRect is a post-render resize that uses a different window-size
+    measurement than Tauri's LogicalSize, causing a second resize after CSS 100vh/height:100% were
+    already computed and re-introducing the layout mismatch.
+  - "+" button stuck disabled after multi-entry navigation (two variants): fixed two related bugs
+    where the "Add entry for this day" button became permanently disabled on a day with real content.
+  - Variant 1 (navigation arrow): clicking "+", getting a blank second entry, then navigating back via
+  "←" left the "+" permanently disabled. Root cause: SolidJS re-evaluated addDisabled when
+  setPendingEntryId() changed, but TipTap had not yet processed the loaded entry's content, so
+  editor.isEmpty was stale. Fixed by adding an editorIsEmpty reactive signal updated in
+  handleContentUpdate (called by TipTap's onUpdate), forcing re-evaluation after TipTap reflects the
+  correct state.
+  - Variant 2 (day switch): same setup, but switching to a different day instead of using the arrow,
+  then switching back, also blocked the "+". Root cause: the blank entry's debounced auto-delete (500
+  ms) called setPendingEntryId(null) and left the editor showing stale blank content even though the
+  original real entry still existed. Fixed by having saveCurrentById auto-navigate to the nearest
+  remaining entry after deleting a blank entry, so pendingEntryId is never left as null while real
+  entries still exist on the day.
+
+  Added
+
+  - Multi-entry E2E tests: new e2e/specs/multi-entry.spec.ts covering (A) multi-entry persistence
+    after lock/unlock, (B) "+" recovery after backward navigation (v0.4.9 Variant 1 regression), and
+    (C) "+" recovery after day switch with blank entry (v0.4.9 Variant 2 regression). data-testid
+    attributes added to EntryNavBar (entry-nav-bar, entry-prev-button, entry-counter,
+    entry-next-button, entry-delete-button, entry-add-button) to support reliable E2E selectors.
+  - Backend assessment follow-up (Task 71): addressed all actionable findings from the March 2026
+    assessment. Two code quality fixes: deleteentry unlock guard now uses the consistent "Journal must
+    be unlocked to …" error message (A1); #[allow(deadcode)] suppressions in jrnl.rs now carry "why"
+    comments on the attribute line per project convention (A2). Ten new backend tests added:
+    deleteentry command logic (A3), navigatetotoday valid-date assertion (A4), updateslotlastused
+    NULL→non-null column check (A5), import/export plugin "not found" error message format (A6),
+    MAXIMPORTFILESIZE boundary (A7), and isolated v3→v4 and v4→v5 migration tests (A8). Comments added
+    to migratev3tov4 and migratev4to_v5 explaining why no pre-migration backup is taken (A9). Backend
+    test count: 239 → 249.
+  - Backend architectural assessment ( temporarely stored at docs/BACKENDASSESSMENT2026-03.md): full
+    health-check of all 42 Rust source files covering architecture alignment, code quality, security
+    posture, and test coverage.
+  - Known issues document (docs/KNOWN_ISSUES.md): comprehensive reference for all known limitations,
+    deliberate tradeoffs, and technical debt — organized for both users (KI-1 to KI-9) and developers
+    (AT-1 to AT-12, TD-1 to TD-5). Replaces the single-bullet entry in README.md.
+  - Journal name on unlock screen: the unlock screen now shows the name of the selected journal
+    ("Unlock My Journal") instead of the generic "Unlock your journal" subtitle. Falls back to the
+    generic text when no journal name is available.
+  - Accessibility improvements: comprehensive ARIA audit and fixes across the app. Editor toolbar now
+    has role="toolbar" and aria-pressed on all toggle buttons (bold, italic, lists, alignment, etc.).
+    Error and success message regions across all overlays and auth screens now carry role="alert" /
+    role="status" for automatic screen-reader announcement. Loading spinners use aria-busy and
+    aria-hidden. Calendar grid now exposes full WCAG role="grid" / role="row" / role="gridcell" /
+    role="columnheader" semantics with aria-selected, aria-current="date", and descriptive aria-label
+    on each day button; arrow-key navigation (←→ day, ↑↓ week, Home/End month, PageUp/PageDown month)
+    added so the calendar is fully keyboard-operable. Preferences dialog tabs now implement the ARIA
+    tab pattern (role="tablist", role="tab", role="tabpanel", aria-selected, aria-controls,
+    aria-labelledby) with Left/Right arrow key switching. Hamburger button gains aria-expanded and
+    aria-controls. Mobile sidebar overlay gains focus trapping and focus restoration. Journal picker
+    list uses <ul>/<li> semantics. Password strength indicator announces changes via
+    aria-live="polite".
+
+  ![Download Mini-Diarium
+  (https://a.fsdn.com/con/app/sf-download-button)](https://sourceforge.net/projects/mini-diarium/files/v0.4.10/)
+ReleaseNotesUrl: https://github.com/fjrevoredo/mini-diarium/releases/tag/v0.4.10
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/fjrevoredo/mini-diarium/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
