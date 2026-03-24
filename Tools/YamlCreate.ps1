@@ -135,12 +135,12 @@ if (Get-Command 'git' -ErrorAction SilentlyContinue) {
           try {
             winget upgrade --id Git.Git --exact
           } catch {
-            throw [UnmetDependencyException]::new('Git could not be upgraded sucessfully', $_)
+            throw [UnmetDependencyException]::new('Git could not be upgraded successfully', $_)
           } finally {
             $gitVersionString = ((git version) | Select-String '([0-9]{1,}\.?){3,}').Matches.Value.Trim(' ', '.')
             $gitVersion = [System.Version]::Parse($gitVersionString)
             if ($gitVersion -lt $GitMinimumVersion) {
-              throw [UnmetDependencyException]::new('Git could not be upgraded sucessfully')
+              throw [UnmetDependencyException]::new('Git could not be upgraded successfully')
             }
           }
         }
@@ -1346,7 +1346,7 @@ Function Read-InstallerEntry {
   $_Installer = Restore-YamlKeyOrder $_Installer $InstallerEntryProperties -NoComments
   $script:Installers += $_Installer
 
-  # Prompt the user for additional intaller entries
+  # Prompt the user for additional installer entries
   $_menu = @{
     entries       = @(
       '[Y] Yes'
@@ -2441,7 +2441,7 @@ Function Write-LocaleManifest {
 
   $LocaleManifest = Restore-YamlKeyOrder $LocaleManifest $LocaleProperties
 
-  # Set the appropriate langage server depending on if it is a default locale file or generic locale file
+  # Set the appropriate language server depending on if it is a default locale file or generic locale file
   if ($LocaleManifest.ManifestType -eq 'defaultLocale') { $yamlServer = $SchemaUrls.defaultLocale } else { $yamlServer = $SchemaUrls.locale }
 
   # Create the folder for the file if it doesn't exist

@@ -1,0 +1,164 @@
+# Created with komac v2.15.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: DDEVFoundation.DDEV
+PackageVersion: 1.25.0
+PackageLocale: en-US
+Publisher: DDEV Foundation
+PublisherUrl: https://github.com/ddev
+PublisherSupportUrl: https://github.com/ddev/ddev/issues
+PackageName: DDEV
+PackageUrl: https://github.com/ddev/ddev
+License: Apache-2.0
+LicenseUrl: https://github.com/ddev/ddev/blob/HEAD/LICENSE
+ShortDescription: Docker-based local PHP+Node.js web development environments
+Tags:
+- backdrop
+- craftcms
+- ddev
+- development
+- docker
+- drupal
+- laravel
+- linux
+- local-development
+- macos
+- magento
+- magento2
+- mariadb
+- moodle
+- nodejs
+- php
+ReleaseNotes: |-
+  Installation
+  See the installation instructions for details, but it's easy:
+  - macOS: brew install ddev/ddev/ddev or just brew upgrade ddev.
+  - Linux: Use sudo apt-get update && sudo apt-get install ddev, see apt/yum installation
+  - Windows and WSL2: Download the Windows Installer; you can run it for install or upgrade. winget install --interactive ddev works too.
+    ⚠️ Traditional Windows users (not WSL2): If needed, the installer will prompt you to uninstall the previous system-wide installation to avoid conflicts with the new per-user installation.
+  - Consider ddev delete images or ddev delete images --all after upgrading to free up disk space used by previous Docker image versions. This does no harm.
+  - Consider ddev config --auto to update your projects to current configuration.
+  Highlights
+  New defaults
+  - Debian Trixie is now the base image for ddev-webserver and ddev-ssh-agent (replacing Debian Bookworm). See Issues to be aware of for Trixie.
+    (Some projects with complex Dockerfiles or obsolete webimage_extra_packages may need to be updated.)
+  - XHGui is now the default profiler (prepend mode remains available via ddev config global --xhprof-mode=prepend).
+  - Node.js v24 is default in new projects (replacing Node.js v22)
+  - PHP 8.4 is default in new projects (replacing PHP 8.3)
+  - MariaDB 11.8 is default in new projects (replacing MariaDB 10.11)
+  Additional highlights
+  - Completely revised Windows installer now uses per-user installation for WSL2 or traditional Windows (no admin account required)
+  - Reworked configurable ddev share command with a new cloudflared share provider, see (draft) New ddev share Provider System Brings Free Sharing Options
+  - Add ddev utility xdebug-diagnose command, see (draft) Xdebug in DDEV: Understanding, Debugging, and Troubleshooting Step Debugging
+  - Add ddev utility mutagen-diagnose command, see (draft) Mutagen in DDEV: Functionality, Issues, and Debugging
+  - ddev pantheon pull got new DDEV_PANTHEON_SITE, DDEV_PANTHEON_ENVIRONMENT, DDEV_USE_PANTHEON_BACKUP variables, see updated Pantheon Integration
+  - ddev snapshot now uses zstd instead of gzip for significantly faster exports and restores, thanks to @deviantintegral
+  - Add CodeIgniter project type, thanks to @Franky5831
+  - Experimental support for Podman and Docker Rootless, see Podman and Docker Rootless in DDEV
+  - ddev-frankenphp is an official add-on with many improvements, see updated (draft) Using FrankenPHP with DDEV
+  Features
+  - New Wagtail (Python, Generic) quickstart
+  - Added Drupal 12 project type (development branch). Drupal 12 has not yet been released, but it's showing up in developer builds already.
+  - New --no-cache flag for ddev start and ddev restart (as an alternative to ddev utility rebuild)
+  - Improved support for non-Codespaces devcontainers
+  - Refactored ddev add-on subcommands with a fallback mechanism to avoid GitHub API rate limits
+  - Much faster ddev add-on list and ddev add-on search
+  - Shell autocompletion for ddev add-on get <TAB>
+  - SELinux enviroment detection (auto SELinux label for bind mounts)
+  - Support for additional SSH config files (*.conf) in .ddev/homeadditions/.ssh/config.d (global or project-level), see SSH confugation, thanks to @codebymikey
+  - More portable database collations. Databases imported and exported from newer MySQL and MariaDB are less likely to have problems with proprietary collations like utf8mb4_0900_ai_ci and utf8mb4_uca1400_ai_ci as they use more traditional collations in DDEV.
+  - DBeaver support for traditional Windows, thanks to @ddubau
+  Traefik Router Features, Fixes, and Breaking Changes
+  - Project Traefik configuration is now standardized to a single file: .ddev/traefik/config/<projectname>.yaml (all other files are ignored). See issue #8047.
+  - Add any global Traefik configuration inside the $HOME/.ddev/traefik/custom-global-config/ directory
+  - Removed defaultRuleSyntax: v2 and ruleSyntax: v3 from Traefik configs. Traefik v3 syntax is now used by default.
+  - Traefik configuration errors now show warnings instead of failing hard
+  - Improved Traefik health checks for more reliable router verification
+  - Prevent unnecessary router recreation when bound ports are unchanged
+  - ddev-router is no longer stopped automatically when the last project is stopped, use ddev poweroff to fully stop the router
+  - Traefik monitoring port is now bound to localhost only, thanks to @JUVOJustin
+  - Paused or stopped projects are excluded from Traefik configuration
+  - Bypass router port checks when all ports appear busy (for example, when endpoint security software intercepts localhost traffic)
+  Breaking Changes / Removals
+  - Default xhprof_mode changed from "prepend" to "xhgui" but you can easily change it back
+  - Removed ddev utility capabilities, use ddev_version_constraint instead in add-ons.
+  - Removed NFS support, use Mutagen
+  - Removed ddev service, custom services can be installed/uninstalled via ddev add-on
+  - Removed ddev nvm, install the ddev-nvm add-on if needed
+  - Removed obsolete or non-functional commands and command aliases:
+    - ddev restore-snapshot
+    - ddev auth pantheon
+    - ddev config pantheon
+  - Removed obsolete ddev config flags:
+    - --mutagen-enabled (use --performance-mode=mutagen)
+    - --upload-dir (use --upload-dirs)
+    - --db-image, --db-image-default (never documented or used)
+  - Removed deprecated ddev config flag aliases:
+    - --http-port → --router-http-port
+    - --https-port → --router-https-port
+    - --mailhog-port → --mailpit-http-port
+    - --mailhog-https-port → --mailpit-https-port
+    - --projectname → --project-name
+    - --projecttype, --apptype → --project-type
+    - --sitename → --project-name
+    - --image-defaults → --web-image-default
+  - Removed nginx.org repository from ddev-webserver, now using nginx from the Debian Trixie repository
+  - Migrated all APT repositories in ddev-webserver from legacy *.list files to *.sources (deb822) format
+  Bug Fixes
+  - Fixed ddev heidisql support for multiple databases
+  - Fixed PostgreSQL builds when overriding the database username
+  - Fixed Windows installer behavior on non-English Windows locales
+  - Improved Bash detection for non-admin Windows installations
+  - Fixed host.docker.internal IP detection for WSL2 mirrored mode with virtual adapters present
+  - Fixed conflicts between HostWorkingDir and WebWorkingDir affecting ddev npm, thanks to @crowjake
+  - Fixed support for PKCS#8 keys in ddev auth ssh
+  - Fixed ddev snapshot command for postgres:9
+  - Create Docker volumes only for the configured database type
+  - Fixed ddev xdebug, ddev xhprof, and ddev blackfire handlers for the ddev-frankenphp add-on
+  - Fixed ddev snapshot failure when run immediately after ddev snapshot restore
+  - Always show the correct project name in ddev mutagen st, thanks to @agviu
+  - Warn about non-persistent changes when using ddev composer self-update and ddev composer global
+  - Added support for COMPOSER_NO_SECURITY_BLOCKING=1 in ddev composer
+  - Run post-create-project-cmd for plugin events in ddev composer create-project
+  - Improved log-stderr.sh reporting during ddev start
+  - Skip poweroff prompts when containers are already stopped during version upgrades
+  - Fixed database port type in TYPO3 settings, thanks to @BreathCodeFlow
+  - Detect and warn about multiple global config directories during ddev start
+  Minor Updates
+  - PHP 8.3.30, 8.4.17, and 8.5.2
+  - Docker Compose v5.0.2
+  - Updated Generic webserver quickstart
+  - Add APP_FULL_BASE_URL for CakePHP, thanks to @ajibarra
+  - Updated Lagoon provider instructions with sync configuration, thanks to @froboy
+  - Added Cloudflare WARP networking instructions, thanks to @lguigo22
+  - Updated Ibexa DXP installation steps, thanks to @adriendupuis
+  - Added troubleshooting guidance for endpoint security interfering with Xdebug, thanks to @joelpittet
+  - Replaced github.com/docker/docker with github.com/moby/moby/client and github.com/moby/moby/api
+  What's Changed
+  - test: Allow overriding ignore expiring keys [skip buildkite] by @rfay in #7803
+  - test: Improve TestHasConfigNameOverride so it doesn't leave projects after completion, fixes #7797 by @rfay in #7798
+  - test: don't check for expiring keys in forks, for #7803 by @stasadev in #7831
+  - build(deps): bump golangci/golangci-lint-action from 8 to 9 by @dependabot[bot] in #7832
+  - fix(heidisql): use --databases flag only when needed, fixes #7829 by @stasadev in #7830
+  - docs: add missing dot in .ddev/.env.* by @yanniboi in #7828
+  - fix(postgres): use placeholder for username, fixes #7820 by @stasadev in #7827
+  - docs: remove community examples link in documentation by @weitzman in #7834
+  - refactor: improve ddev auth ssh readability and reuse cmd in tests by @stasadev in #7816
+  - test(quickstart): check for new FrankenPHP headers by @stasadev in #7836
+  - docs: Update Docker connection failure explanations with more on docker context ls by @rfay in #7833
+  - chore(images): Remove image build for ddev-nginx-proxy-router by @rfay in #7818
+  - chore: Remove ddev utility capabilities command completely, fixes #7174 by @Copilot in #7814
+  - build: fix getopt detection on macOS by @deviantintegral in #7846
+  - docs: Add Claude Code for Web environment configuration guide [skip ci] by @rfay in #7838
+  - chore(traefik): Remove redundant Traefik rule syntax configuration, fixes #7822 by @rfay in #7823
+  - chore: Remove NFS support for v1.25.0, remove unused CircleCI config, fixes #7810 by @Copilot in #7811
+  - build: use debian:trixie as base for ddev-webserver by @rfay in #7649
+  - fix(heidisql): add default --databases=db to postgres, for #7830 by @raphaelportmann in #7847
+  - test(timezone): Windows may show 'Universal' instead of UTC by @rfay in #7848
+  - build(deps): bump docker to v29 by @stasadev in #7835
+  - test(share): Fix TestShareCmd to handle non-string types in JSON logs by @Copilot in #7851
+  - fix: remove trailing comma from schema.json by @stasadev in #7850
+  - fix: Disable 64-bit file system redirection in Windows installer Section to access wsl.exe by @rfay in #7839
+ReleaseNotesUrl: https://github.com/ddev/ddev/releases/tag/v1.25.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
