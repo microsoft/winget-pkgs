@@ -1,0 +1,94 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: PBH-BTN.PeerBanHelper
+PackageVersion: 9.1.0
+PackageLocale: zh-CN
+Publisher: PBH-BTN Community
+PublisherUrl: https://github.com/PBH-BTN
+PublisherSupportUrl: https://github.com/PBH-BTN/PeerBanHelper/issues
+PackageName: PeerBanHelper
+PackageUrl: https://github.com/PBH-BTN/PeerBanHelper
+License: GPL-3.0
+LicenseUrl: https://github.com/PBH-BTN/PeerBanHelper/blob/HEAD/LICENSE
+ShortDescription: 自动封禁不受欢迎、吸血和异常的 BT 客户端，并支持自定义规则。
+Tags:
+- bt
+- 种子
+ReleaseNotes: |-
+  [!NOTE]
+  请做好数据备份，一旦升级到此版本，将无法降级到先前版本。如需降级则必须从备份中还原所有文件。
+  [!NOTE]
+  自此版本开始，PeerBanHelper 将使用 Java 25 版本。如果您在使用自己安装的 Java 运行时，请注意运行时版本。
+  下载器兼容性更新
+  以下下载器的兼容性支持有所变化，请您仔细阅读，并根据需要采取行动。
+  - BitComet 现在需要最低 2.18 正式版版本 @Ghost-chu
+  - BitComet 2.18 和更高版本现已支持流量统计功能 @Ghost-chu
+  - BiglyBT 的测试版本由于内部破坏性更改导致无法支持，在 BiglyBT 重构结束发布正式版本后，我们将更新支持插件。由于内部变更，新版本支持插件将不兼容旧版本 BiglyBT @Ghost-chu
+  - 预载适配 Transmission 未发布的 RPC API 更改，支持读取 peer_id, bytes_to_client 和 bytes_to_peer 字段，提供 Transmission 上的完整反吸血能力。请注意当前 Transmission 尚未发布带有此更新的测试版本，因此该功能尚未进行测试 @cdowen @Ghost-chu
+  新功能
+  仪表盘统计数据
+  @Ghost-chu
+  新增 “近 7 天会话唯一 IP 数量” 参考值，以便用户对比不同时间段 Peer 活动会话概览。
+  数据统计基于会话跟踪服务，实际值可能与参考值有所出入，数据仅供参考。
+  IP 统计
+  @Gaojianli @Ghost-chu
+  图表新增 IP 统计功能，基于会话跟踪服务统计数据，生成统计时段内的 Peer 连接情况概览。以便直观计算和统计和对比不同时段内的 Peer 活动情况。该视图可能不可见，您可以从右上角的 “视图选项” 中启用。
+  数据统计基于会话跟踪服务，实际值可能与参考值有所出入，数据仅供参考。
+  字段排序支持
+  @Gaojianli @Ghost-chu
+  封禁日志、访问记录、封禁记录等表格全面支持字段排序。现在你可以通过表格上的排序指示器进行多条件组合升序、降序排序。以便更加直观、直接、快速的整理数据。
+  数据统计基于 Peer 跟踪记录服务，可查询范围视设置的数据保留时长决定
+  封禁列表重映射
+  @KagurazakaNyaa @Ghost-chu
+  新的 “封禁列表重映射” 选项允许在向下载器更新 IP 封禁列表时，将单个 IP 地址映射到更广泛的范围，并生成 CIDR 表达式传入。该选项默认对 IPv6 地址开启，以改善随机 IPv6 地址的封禁效能。由于限制，目前暂时不支持 qBittorrent https://github.com/qbittorrent/qBittorrent/pull/23157 。
+  任务反吸血
+  @Ghost-chu
+  任务反吸血模块替代了原有的迅雷相关封禁的 PeerID/客户端名称 规则，现在 PeerBanHelper 将根据预设逻辑对已知默认设置存在不良行为的客户端进行管控。具体如下：
+  1. 如果是非 0019 版本的其他版本迅雷，则直接进行封禁。
+  2. 如果是 0019 版本的迅雷，由于迅雷官方添加了下载过程中向其它用户提供上传的功能，但由于仍然不会做种，因此 PBH 将仅拒绝其连接到做种任务
+  在未来我们计划添加对 BT 播放器等类似的管控规则。
+  其它新功能
+  1.【实验性】新增演示模式 （Demo Mode），以演示模式启动时，接口将积极拒绝所有写入和修改请求，并从响应中排除、替换敏感数据字段。@Ghost-chu
+  功能改进
+  进度反作弊
+  1. 现在支持来自同一 IP 地址不同端口的多重连接，现在能够正确单个连接计算传输量而不是按照回退进行叠加计算，避免出现错误的累积，改善了检测误封禁率 @Ghost-chu
+  2. 现在分离存储网段和单个 IP 的流量跟踪数据，pcb 数据表现已废弃，并可能在未来删除以回收存储空间 @Ghost-chu
+  3. 改善了进度反作弊的响应时间，现在在特定情况下能够更快的做出反应 @Ghost-chu
+  错误修复
+  1. 修复进度反作弊器针对解封事件的监听器未被正确注册以重置相关跟踪项数据的问题 @Ghost-chu
+  2. 修复 WebUI 部分页面当重新进行查询时，没有正确跳回第一页结果的问题 @Gaojianli
+  3. 修复特殊情况下表创建和表升级可能出现 SQLException 的问题 @Ghost-chu
+  4. 修复传递 orderBy 参数时，默认排序优先级比用户传递排序参数优先级更高的问题 @Ghost-chu
+  5. 修复 Java 运行时升级后，Docker 用户需要删除 JAVA_OPTS 和 JAVA_HOME 环境变量才能启动容器的问题 @Ghost-chu
+  6. 修复当下载器在任务上没有拥有任何完整 piece 时，PeerBanHelper 总是会额外请求一次 Properties API 的问题，这可能略微增加下载器的负载 @Ghost-chu
+  7. 修复当 Peer 被解除封禁时，其 ProgressCheatBlocker 数据没有被正确重置并可能导致被立刻再次封禁的问题 @Ghost-chu
+  8. 修复 “流量统计” 图表数据不准确、计算错误、数值溢出为负数、出现 NaN undefined 的问题 @Ghost-chu
+  删除的功能
+  1. PTRBlacklist （DNS 反向解析封禁）模块已在此版本中完全删除，因为其性能非常糟糕，且完全没有任何实质性作用 @Ghost-chu @Gaojianli
+  2. 实验室功能 “封禁列表批量写入” 已被删除，因为未能通过实验室稳定性测试 @Ghost-chu
+  其他更改
+  1. 改进了 Win32 平台工作集裁剪条件，并改善了 GC 后一段时间内的进程计算性能 @Ghost-chu
+  2. 调整汇总设置首选项有关 Peers 跟踪的选项到统一的模块下 @Ghost-chu
+  3. 允许使用 ExternalSwitch 关闭自动修改 qBittorrent 设置的逻辑 @Ghost-chu
+  4. Github API 检查更新时的 429 错误现在打印到控制台 @Ghost-chu
+  5. 改进了部分 WebAPI 的性能 @Ghost-chu
+  6. 项目从 Maven 迁移到 Gradle 以便改善构建灵活性和构建性能 @Gaojianli
+  7. Github 工作流和 Docker 构建改进 @Gaojianli
+  8. 预载 Client Analyse 统计服务、图表接口 @Ghost-chu
+  9. 调整部分数据表的索引 @Ghost-chu
+  10. 重构 Active Monitoring Module，拆分统计功能到单独模块，以更好的解耦合并降低维护难度 @Ghost-chu
+  11. 优化了 SQLite 数据库的性能表现 @Ghost-chu
+  12. 固定 Java 版本基准为 Java 25，调整更新 Docker 容器、install4j、软件包、Portable 包的启动命令 @Ghost-chu
+  Docker
+  DockerHub: ghostchu/peerbanhelper:v9.1.0
+  阿里云国内镜像加速：registry.cn-hangzhou.aliyuncs.com/ghostchu/peerbanhelper:v9.1.0
+  如在升级到 v9.1.0 后，Docker 容器出现无法启动的问题，请尝试从容器的环境变量中删除 JAVA_HOME 和 JAVA_OPTS 参数。
+
+  部署教程 | 常见问题 | 如何设置下载器
+ReleaseNotesUrl: https://github.com/PBH-BTN/PeerBanHelper/releases/tag/v9.1.0
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/PBH-BTN/PeerBanHelper/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

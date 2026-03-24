@@ -1,0 +1,54 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: arndawg.tmux-windows
+PackageVersion: 3.6a-win32.4
+PackageLocale: en-US
+Publisher: arndawg
+PublisherUrl: https://github.com/arndawg
+PublisherSupportUrl: https://github.com/arndawg/tmux-windows/issues
+Author: arndawg
+PackageName: tmux-windows
+PackageUrl: https://github.com/arndawg/tmux-windows
+License: ISC
+LicenseUrl: https://github.com/arndawg/tmux-windows/blob/master/COPYING
+ShortDescription: Terminal multiplexer for Windows, ported from tmux using ConPTY
+Description: |-
+  A native Windows port of tmux, the terminal multiplexer. Split your terminal
+  into multiple panes, create persistent sessions that survive disconnects, and
+  detach/reattach workflows — all natively on Windows 10+.
+
+  Built with ConPTY for full pseudo-terminal support and Windows Named Pipes for
+  secure, kernel-enforced IPC. Works in Windows Terminal, VS Code terminal, and
+  any VT-capable console host. Builds with MSVC, no Cygwin or WSL required.
+ReleaseNotes: |-
+  TTY Race Condition Fix & Security Hardening
+
+  Fixes the startup reliability issue where tmux new would intermittently fail
+  with "open terminal failed: not a terminal" or display a blank screen. Also
+  hardens the named pipe IPC against command injection and enables truecolor
+  by default.
+
+  Startup Race Condition Fix:
+  - Client: move TTY channel connection before identify messages, giving the
+    server maximum time to accept it
+  - Server: defer command processing with a blocking cmdq callback when the
+    TTY channel has not arrived yet; 2-second safety timeout
+  - Late init: preserve terminal dimensions across tty_init() memset, then
+    force recalculate_sizes() and full redraw
+
+  Security Hardening:
+  - Sanitize IPC label names to prevent arbitrary named pipe paths via
+    crafted -L arguments
+  - Cap pending TTY connection queue at 16 entries with 30-second expiry
+
+  Truecolor Support:
+  - 24-bit color now enabled by default on Windows
+Tags:
+- cli
+- terminal
+- multiplexer
+- tmux
+- conpty
+ReleaseNotesUrl: https://github.com/arndawg/tmux-windows/releases/tag/v3.6a-win32.4
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

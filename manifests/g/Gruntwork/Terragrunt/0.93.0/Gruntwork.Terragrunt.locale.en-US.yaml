@@ -1,0 +1,70 @@
+# Created with komac v2.13.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: Gruntwork.Terragrunt
+PackageVersion: 0.93.0
+PackageLocale: en-US
+Publisher: Gruntwork
+PublisherUrl: https://terragrunt.gruntwork.io/
+PublisherSupportUrl: https://terragrunt.gruntwork.io/docs/community/support
+PrivacyUrl: https://gruntwork.io/legal/privacy-policy
+PackageName: Terragrunt
+PackageUrl: https://github.com/gruntwork-io/terragrunt/releases/tag/v0.68.9
+License: MIT
+LicenseUrl: https://github.com/gruntwork-io/terragrunt/blob/HEAD/LICENSE.txt
+Copyright: © 2024 Gruntwork, Inc. All rights reserved.
+ShortDescription: Terragrunt is a thin wrapper for Terraform that provides extra tools for keeping your Terraform configurations DRY, working with multiple Terraform modules, and managing remote state.
+Description: Terragrunt is a thin wrapper for Terraform that provides extra tools for keeping your Terraform configurations DRY, working with multiple Terraform modules, and managing remote state.
+Tags:
+- IaC
+- Infrastructure as Code
+- Terraform
+- Terraform Wrapper
+- terragrunt
+ReleaseNotes: |-
+  🛠️ Breaking Changes
+  Removal of deprecated HCL attributes
+  The skip, retryable_errors, retry_max_attempts and retry_sleep_interval_sec have all been removed from Terragrunt.
+  This is the final planned breaking change on the road to Terragrunt 1.0 related to removal of deprecated functionality. Breaking changes will be minimized before Terragrunt 1.0, but may still occur based on user feedback, or based on the need to stabilize parts of Terragrunt before 1.0.
+  If you are currently using the skip attribute, you'll want to adjust your usage to leverage the exclude block instead:
+  Before:
+  # terragrunt.hcl
+  skip = true
+  After:
+  # terragrunt.hcl
+  exclude {
+    if      = true
+    actions = ["all"]
+  }
+  If you are currently using the retryable_errors attribute, you'll want to adjust your usage to leverage the errors block instead:
+  Before:
+  # terragrunt.hcl
+  retryable_errors = [
+    ".*Error: transient network issue.*",
+    ".*Error: timeout.*"
+  ]
+  retry_max_attempts     = 3
+  retry_sleep_interval_sec = 5
+  After:
+  # terragrunt.hcl
+  errors {
+    retry "transient_errors" {
+      retryable_errors = [
+        ".*Error: transient network issue.*",
+        ".*Error: timeout.*"
+      ]
+      max_attempts = 3
+      sleep_interval_sec = 5
+    }
+  }
+  Read the detailed migration guide for more information.
+  What's Changed
+  - chore: removal of deprecated hcl attributes skip, retryable_errors by @denis256 in #5033
+  - bug: empty paths handling in dependencies by @denis256 in #5016
+  Full Changelog: v0.92.1...v0.93.0
+ReleaseNotesUrl: https://github.com/gruntwork-io/terragrunt/releases/tag/v0.93.0
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/gruntwork-io/terragrunt/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

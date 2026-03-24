@@ -1,0 +1,49 @@
+# Created with komac v2.13.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: Gruntwork.Terragrunt
+PackageVersion: 0.93.5
+PackageLocale: en-US
+Publisher: Gruntwork
+PublisherUrl: https://terragrunt.gruntwork.io/
+PublisherSupportUrl: https://terragrunt.gruntwork.io/docs/community/support
+PrivacyUrl: https://gruntwork.io/legal/privacy-policy
+PackageName: Terragrunt
+PackageUrl: https://github.com/gruntwork-io/terragrunt/releases/tag/v0.68.9
+License: MIT
+LicenseUrl: https://github.com/gruntwork-io/terragrunt/blob/HEAD/LICENSE.txt
+Copyright: © 2024 Gruntwork, Inc. All rights reserved.
+ShortDescription: Terragrunt is a thin wrapper for Terraform that provides extra tools for keeping your Terraform configurations DRY, working with multiple Terraform modules, and managing remote state.
+Description: Terragrunt is a thin wrapper for Terraform that provides extra tools for keeping your Terraform configurations DRY, working with multiple Terraform modules, and managing remote state.
+Tags:
+- IaC
+- Infrastructure as Code
+- Terraform
+- Terraform Wrapper
+- terragrunt
+ReleaseNotes: |-
+  🧪 Experiments Updated
+  The filter-flag experiment now supports --filter in stack generate
+  The --filter flag can now be used in the stack generate command, and any command that performs stack generation, e.g. run --all (remember that you must use the filter-flag experiment to try this).
+  The --filter flag works in a slightly unique way when used to control stack generation in that it needs to be explicitly restricted to stacks for it to impact stack generation using the type=stack attribute filter.
+  e.g.
+  # Supported: Only generate the stacks that match the filter, as we are explicitly indicating that we are targeting stacks.
+  terragrunt stack generate --filter 'name=prod | type=stack'
+  # Not supported: This filter will be ignored, as we are not explicitly indicating that we are targeting stacks.
+  terragrunt stack generate --filter 'name=prod'  # This will not work
+  The reason for this is that stack generation can also be done automatically as part of other commands, like run, and thus we need to make it clear that we’re trying to control stack generation rather than run behavior.
+  # This will run any unit named 'vpc'
+  terragrunt run --all --filter 'vpc' -- plan
+  # This will run any unit named 'vpc', and prevent stack generation in any stack not named 'dev' (including any stacks named 'vpc')
+  terragrunt stack run --filter 'vpc' --filter 'name=dev | type=stack' -- apply
+  For more information, see the filter feature documentation
+  What's Changed
+  - feat: Adding support for -filter in stack generate by @yhakbar in #5073
+  - docs: Documenting -filter for stack generate by @yhakbar in #5084
+  Full Changelog: v0.93.4...v0.93.5
+ReleaseNotesUrl: https://github.com/gruntwork-io/terragrunt/releases/tag/v0.93.5
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/gruntwork-io/terragrunt/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

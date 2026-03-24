@@ -1,0 +1,130 @@
+# Created with komac v2.15.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: jtroo.kanata_gui
+PackageVersion: 1.11.0
+PackageLocale: en-US
+Publisher: jtroo
+PublisherUrl: https://github.com/jtroo
+PublisherSupportUrl: https://github.com/jtroo/kanata/issues
+Author: jtroo
+PackageName: Kanata GUI
+PackageUrl: https://github.com/jtroo/kanata
+License: LGPL-3.0
+LicenseUrl: https://github.com/jtroo/kanata/blob/HEAD/LICENSE
+ShortDescription: Improve keyboard comfort and usability with advanced customization
+Tags:
+- cross-platform
+- interception-driver
+- keyboard
+- keyboard-layout
+- linux
+- macos
+- mouse
+- mouse-emulation
+- rust
+- windows
+ReleaseNotes: |-
+  Configuration guide
+  Link to the appropriate configuration guide version: guide link.
+  Changelog (since v1.10.1)
+  Change log
+  - fix: reorder input events to prioritize modifiers (#1931)
+  - fix: deduplicate historical keys in chordsv1 (#1933)
+  - fix(chordsv2): process releases even while inactive (#1929)
+  - feat: add defoverridesv2 (#1928)
+  - feat: add RequestFakeKeyNames call to tcp-protocol, returns defined virtual keys (#1923)
+  - feat(windows,jis): add mapping for ro (#1908)
+  - feat: allow custom exit code for forceful exit (#1904)
+  - fix(linux): remove cfg for ro name (#1907)
+  - fix: delayed timedout tap-hold cannot hold (#1899)
+  - feat(tcp): add hello, status, reload wait+timeout (#1882)
+  - fix: add IntlRo/ro back to wasm build (#1895)
+  Sample configuration file
+  The attached kanata.kbd file is tested to work with the current version. The one in the main branch of the repository may have extra features that are not supported in this release.
+  Windows
+  Instructions
+  Download the appropriate kanata-windows-variant.zip file for your machine CPU. Extract and move the desired binary variant to its intended location. Optionally, download kanata.kbd. With the two files in the same directory, you can double-click the extracted .exe file to start kanata. Kanata does not start a background process, so the window needs to stay open after startup. See this discussion for tips to run kanata in the background.
+  You need to run via cmd or powershell to use a different configuration file:
+  kanata_windows_binaryvariant.exe --cfg <cfg_file>
+  Binary variants
+  Explanation of items in the binary variant:
+  - x64 vs. arm64:
+    - Select x64 if your machine's CPU is Intel or AMD. If ARM, use arm64.
+  - tty vs gui:
+    - tty runs in a terminal, gui runs as a system tray application
+  - cmd_allowed vs. not
+    - cmd_allowed allows the cmd actions; otherwise, they are compiled out of the application
+  - winIOv2 vs. wintercept
+    - winIOv2 uses the LLHOOK and SendInput Windows mechanisms to intercept and send events.
+    - wintercept uses the Interception driver. Beware of its known issue that disables keyboards and mice until system reboot: Link to issue.
+      - you will need to install the driver using the release or from the copy in this repo.
+      - the benefit of using this driver is that it is a lower-level mechanism than Windows hooks, and kanata will work in more applications.
+  wintercept installation
+  Steps to install the driver
+  - extract the .zip
+  - run a shell with administrator privilege
+  - run the script "command line installer/install-interception.exe"
+  - reboot
+  Additional installation steps
+  The above steps are those recommended by the interception driver author. However, I have found that those steps work inconsistently and sometimes the dll stops being able to be loaded. I suspect it has something to do with being installed in the privileged location of system32\drivers.
+  To help with the dll issue, you can copy the following file in the zip archive to the directory that kanata starts from: Interception\library\x64\interception.dll.
+  E.g. if you start kanata from your Documents folder, put the file there:
+  Example:
+  C:\Users\my_user\Documents\
+      kanata_windows_wintercept_x64.exe
+      kanata.kbd
+      interception.dll
+  kanata_passthru_x64.dll
+  The Windows kanata_passthru_x64.dll file allows using Kanata as a library within AutoHotkey to avoid conflicts between keyboard hooks installed by both. You can channel keyboard input events received by AutoHotkey into Kanata's keyboard engine and get the transformed keyboard output events (per your Kanata config) that AutoHotkey can then send to the OS.
+  To make use of this, take kanata_passthru_x64.dll, then the simulated_passthru_ahk folder with a brief example, place the dll there, open kanata_passthru.ahk to read what the example does and then double-click to launch it.
+  Linux
+  Instructions
+  Download the kanata-linux-x64.zip file.
+  Extract and move the desired binary variant to its intended location. Run the binary in a terminal and point it to a valid configuration file. Kanata does not start a background process, so the window needs to stay open after startup. See this discussion for how to set up kanata with systemd.
+  Example:
+  chmod +x kanata   # may be downloaded without executable permissions
+  sudo ./kanata_linux_x64 --cfg <cfg_file>`
+  To avoid requiring sudo, follow the instructions here.
+  Binary variants
+  Explanation of items in the binary variant:
+  - cmd_allowed vs. not
+    - cmd_allowed allows the cmd actions; otherwise, they are compiled out of the application
+  macOS
+  Instructions
+  The supported Karabiner driver version in this release is v6.2.0.
+  WARNING: macOS does not support mouse as input. The mbck and mfwd mouse button actions are also not operational.
+  Binary variants
+  Explanation of items in the binary variant:
+  - x64 vs. arm64:
+    - Select x64 if your machine's CPU is Intel. If ARM, use arm64.
+  - cmd_allowed vs. not
+    - cmd_allowed allows the cmd actions; otherwise, they are compiled out of the application
+  Instructions for macOS 11 and newer
+  You must use the Karabiner driver version v6.2.0.
+  Please read through this issue comment:
+  #1264 (comment)
+  Also have a read through this discussion:
+  #1537
+  At some point it may be beneficial to provide concise and accurate instructions within this documentation. The maintainer (jtroo) does not own macOS devices to validate; please contribute the instructions to the file docs/release-template.md if you are able.
+  Install Karabiner driver for macOS 10 and older:
+  - Install the Karabiner kernel extension.
+  After installing the appropriate driver for your OS (both macOS <=10 and >=11)
+  Download the appropriate kanata-macos-variant.zip for your machine CPU.
+  Extract and move the desired binary variant to its intended location. Run the binary in a terminal and point it to a valid configuration file. Kanata does not start a background process, so the window needs to stay open after startup.
+  Example:
+  chmod +x kanata_macos_arm64   # may be downloaded without executable permissions
+  sudo ./kanata_macos_arm64 --cfg <cfg_file>`
+  Add permissions
+  If Kanata is not behaving correctly, you may need to add permissions. Please see this issue: link to macOS permissions issue.
+  sha256 checksums
+  Sums
+  122eb1e7c92c42235e8c5942cb2ec27241bfbf93fde287121291211f407e9bb2  kanata.kbd
+  d9f634afb4c7f078cc2aacf3998fd65b432d4d83296cc48a89f941525459b4e2  linux-binaries-x64.zip
+  5256db787c0864098de9d58c59887cfeb67157753640ba47797d9b41d4fca78c  macos-binaries-arm64.zip
+  a51720ea96b2829f01c5c2640fbd62daa735600d5deb32dea5766dc9a478470f  macos-binaries-x64.zip
+  cbc52b520f62a68cc032df1cfbb93d5793b02612449b9bab573ecd781b253e1f  windows-binaries-arm64.zip
+  db43d06e7f8d0578bc77585bc24bb385cc99862e942e5554dbf3dec02bf081e9  windows-binaries-x64.zip
+ReleaseNotesUrl: https://github.com/jtroo/kanata/releases/tag/v1.11.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

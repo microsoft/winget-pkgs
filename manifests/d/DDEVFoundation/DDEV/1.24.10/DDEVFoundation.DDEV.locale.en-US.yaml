@@ -1,0 +1,103 @@
+# Created with komac v2.13.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: DDEVFoundation.DDEV
+PackageVersion: 1.24.10
+PackageLocale: en-US
+Publisher: DDEV Foundation
+PublisherUrl: https://github.com/ddev
+PublisherSupportUrl: https://github.com/ddev/ddev/issues
+PackageName: DDEV
+PackageUrl: https://github.com/ddev/ddev
+License: Apache-2.0
+LicenseUrl: https://github.com/ddev/ddev/blob/HEAD/LICENSE
+ShortDescription: Docker-based local PHP+Node.js web development environments
+Tags:
+- backdrop
+- craftcms
+- ddev
+- development
+- docker
+- drupal
+- laravel
+- linux
+- local-development
+- macos
+- magento
+- magento2
+- mariadb
+- moodle
+- nodejs
+- php
+ReleaseNotes: |-
+  Installation
+  See the installation instructions for details, but it's easy:
+  - macOS: brew install ddev/ddev/ddev or just brew upgrade ddev.
+  - Linux: Use sudo apt-get update && sudo apt-get install ddev, see apt/yum installation
+  - Windows and WSL2: Download the ddev_windows_amd64_installer.v1.24.10.exe; you can run it for install or upgrade.
+  - Consider ddev delete images or ddev delete images --all after upgrading to free up disk space used by previous Docker image versions. This does no harm.
+  - Consider ddev config --auto to update your projects to current configuration.
+  Note
+  This is a bugfix release. A regression in v1.24.9 prevented DDEV from updating the /etc/hosts file in CI environments (e.g., GitHub Actions) when using custom project TLDs:
+  - v1.24.10 reverts the change "Non-interactive mode now forced in non-tty environments"
+  Highlights
+  - Support for PHP 8.5.0 RC 3 (note: some extensions are not yet available: apcu, imagick, memcached, redis, uploadprogress, xdebug, xhprof, xmlrpc, yaml)
+  - Support for PostgreSQL 18
+  - Automatic HTTP/S communication between DDEV projects - no need to manually configure external_links
+  - Option to omit project names in .ddev/config.yaml by default with ddev config global --omit-project-name-by-default=true - useful when working with multiple Git worktrees
+  - Auto-discovery of PLATFORM_PROJECT and PLATFORM_ENVIRONMENT from existing config for Upsun Flex and Upsun Fixed (Platform.sh) provider integrations
+  Features
+  - New ddev utility diagnose command for quick diagnostics on your DDEV installation and current project
+  - New ddev add-on search command, thanks to @AkibaAT
+  - New ddev xdebug info command to display xdebug_info() output
+  - Customize ddev describe output using the x-ddev.describe-* extensions - useful for add-ons
+  - Change ddev ssh shell using the x-ddev.ssh-shell extension - useful for add-ons
+  - New --user/-u flag for ddev exec and ddev ssh
+  - exec hooks now support the user field
+  - New pre-share and post-share hooks. This can help change the required URL for ddev share in CMSs like WordPress and Magento2.
+  - PostgreSQL connection support in ddev heidisql, thanks to @raphaelportmann
+  - Show failed container logs on project start by running DDEV_DEBUG=true ddev start
+  - Enhanced composer_root support for app type detection in CakePHP, Craft CMS, Laravel, Magento 2, Shopware 6, and Symfony, thanks to @vanWittlaer for initial PR for Shopware 6
+  - Silence warnings about custom configuration files in the .ddev directory by adding #ddev-silent-no-warn to the file. Documentation
+  Bug Fixes
+  - PostgreSQL now runs as container user (mirrored from host user) instead of postgres:postgres
+  - ddev describe now works with stopped or broken containers
+  - Improved support for DDEV_* environment variables in PHP-based add-ons
+  - APP_DEFAULT_LOCALE is no longer overridden in CakePHP, thanks to @tyler36
+  - Removed hardcoded --server-id=0 parameter from MySQL/MariaDB startup, thanks to @cyppe
+  - Fixed docker-compose warnings on ddev start when project root .env file contains dollar signs
+  - ddev add-on get now retries without authentication on invalid GitHub token
+  - Debug and verbose output now suppressed when using --json-output/-j flag
+  - Improved container username sanitization with better fallback handling
+  - Fixed blackfire-php installation for older PHP versions
+  - Fixed bug with broken label in Mutagen volume when path to Docker socket is too long
+  - Fixed intermittent hang in ddev auth ssh when SSH key is password-protected
+  - Fixed hang in ddev start on macOS when temp directory permissions are broken after macOS upgrade (fixed in docker-compose)
+  Internal Improvements
+  - PHP 8.1 no longer preinstalled in ddev/ddev-webserver to reduce image size
+  - Native ARM builder now used for building DDEV Docker images, thanks to @AkibaAT
+  - ddev utility is now the primary command (ddev debug moved to alias)
+  - Healthcheck added to ddev/ddev-xhgui image
+  - Linux tests now run separately instead of in matrix, allowing single test restarts on failure
+  - Improved support for CI=true in GitHub Actions
+  - Vite setup documentation migrated into DDEV docs, thanks to @mandrasch for continuous support on the blog article
+  - Improved quickstarts code block formatting to resolve copy/paste issues in some terminals
+  - Added docker-buildx dependency for AUR installation
+  - Internet detection now uses one.one.one.one instead of test.ddev.site
+  - Replaced GITHUB_OWNER with DDEV_GITHUB_OWNER in https://ddev.com/install.sh
+  - Switched to lightweight debian-12 image for GitHub Codespaces
+  - Removed Gitpod configuration (service is no longer available)
+  Minor Updates
+  - PHP 8.3.27, 8.4.14, and 8.5.0 RC 3
+  - Docker Compose v2.40.3
+  - Updated quickstart for Moodle 5.1
+  What's Changed
+  - fix: make install_ddev_head.sh install all binaries [skip ci] by @stasadev in #7794
+  - fix: write download result to stderr for docker-compose and mutagen [skip ci] by @stasadev in #7792
+  - fix: don't assume non-interactive mode for CI=true or non-tty, fixes #7790 by @stasadev in #7791
+  - build(docker): bump images to v1.24.10 for release by @stasadev in #7793
+  - build: add mkcert to artifacts, for #7794 by @stasadev in #7796
+  Full Changelog: v1.24.9...v1.24.10
+ReleaseNotesUrl: https://github.com/ddev/ddev/releases/tag/v1.24.10
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0
