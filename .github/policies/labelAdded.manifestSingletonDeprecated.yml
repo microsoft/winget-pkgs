@@ -1,0 +1,40 @@
+id: labelAdded.manifestSingletonDeprecated
+name: GitOps.PullRequestIssueManagement
+description: Handlers when "Manifest-Singleton-Deprecated" label is added
+owner:
+resource: repository
+disabled: false
+where:
+configuration:
+  resourceManagementConfiguration:
+    eventResponderTasks:
+      - description: >-
+          When the label "Manifest-Singleton-Deprecated" is added to a pull request
+          * Add the PR specific reply notifying the issue author
+          * Assign to the Author
+          * Label with Needs-Author-Feedback
+          * Remove the Needs-Attention Label
+        if:
+          - payloadType: Pull_Request
+          - labelAdded:
+              label: Manifest-Singleton-Deprecated
+        then:
+          - addReply:
+              reply: >-
+                Hello ${issueAuthor},
+
+
+                The package manager bot determined that your submission uses a `Singleton` Manifest, which been deprecated in this repository. Please update your submission to use the newer multi-manifest format. If you built your manifest by hand, a tool like [WingetCreate](https://github.com/microsoft/winget-create) or [YamlCreate](https://github.com/microsoft/winget-pkgs/blob/master/doc/tools/YamlCreate.md) can help you build the multi-manifest.
+
+
+                Template: msftbot/validationError/manifest/singleton/deprecated
+          - assignTo:
+              author: True
+          - addLabel:
+              label: Needs-Author-Feedback
+          - removeLabel:
+              label: Needs-Attention
+        # The policy service should trigger even when the label was added by the policy service
+        triggerOnOwnActions: true
+onFailure:
+onSuccess:

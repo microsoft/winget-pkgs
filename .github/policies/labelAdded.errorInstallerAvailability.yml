@@ -1,0 +1,46 @@
+id: labelAdded.errorInstallerAvailability
+name: GitOps.PullRequestIssueManagement
+description: Handlers when "Error-Installer-Availability" label is added
+owner:
+resource: repository
+disabled: false
+where:
+configuration:
+  resourceManagementConfiguration:
+    eventResponderTasks:
+      - description: >-
+          When the label "Error-Installer-Availability" is added to a pull request
+          * Add a reply notifying the issue author
+          * Assign to the author
+          * Label with Needs-Author-Feedback
+          * Remove Azure-Pipeline-Passed label
+          * Remove Needs-Attention label
+        if:
+          - payloadType: Pull_Request
+          - labelAdded:
+              label: Error-Installer-Availability
+        then:
+          - addReply:
+              reply: >-
+                Hello ${issueAuthor},
+
+
+                When processing this package, the URL to the installer returned a 404 error or was determined to be invalid.
+
+
+                Please update the URL and hash at your convenience and resubmit your PR.
+
+
+                Template: msftbot/validationError/urls/404
+          - removeLabel:
+              label: Azure-Pipeline-Passed
+          - assignTo:
+              author: True
+          - removeLabel:
+              label: Needs-Attention
+          - addLabel:
+              label: Needs-Author-Feedback
+        # The policy service should trigger even when the label was added by the policy service
+        triggerOnOwnActions: true
+onFailure:
+onSuccess:

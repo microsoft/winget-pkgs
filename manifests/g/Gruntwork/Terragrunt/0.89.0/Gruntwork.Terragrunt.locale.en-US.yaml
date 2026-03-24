@@ -1,0 +1,105 @@
+# Created with komac v2.13.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: Gruntwork.Terragrunt
+PackageVersion: 0.89.0
+PackageLocale: en-US
+Publisher: Gruntwork
+PublisherUrl: https://terragrunt.gruntwork.io/
+PublisherSupportUrl: https://terragrunt.gruntwork.io/docs/community/support
+PrivacyUrl: https://gruntwork.io/legal/privacy-policy
+PackageName: Terragrunt
+PackageUrl: https://github.com/gruntwork-io/terragrunt/releases/tag/v0.68.9
+License: MIT
+LicenseUrl: https://github.com/gruntwork-io/terragrunt/blob/HEAD/LICENSE.txt
+Copyright: © 2024 Gruntwork, Inc. All rights reserved.
+ShortDescription: Terragrunt is a thin wrapper for Terraform that provides extra tools for keeping your Terraform configurations DRY, working with multiple Terraform modules, and managing remote state.
+Description: Terragrunt is a thin wrapper for Terraform that provides extra tools for keeping your Terraform configurations DRY, working with multiple Terraform modules, and managing remote state.
+Tags:
+- IaC
+- Infrastructure as Code
+- Terraform
+- Terraform Wrapper
+- terragrunt
+ReleaseNotes: |-
+  Several experimental features have been made generally available.
+  🛠️ Breaking Changes
+  Runner-pool
+  Terragrunt now supports the Runner Pool concurrency model, replacing the traditional group-based concurrency model with a dynamic scheduler by default.
+  Instead of waiting for groups of units that block downstream units to complete their runs, the Runner Pool executes each unit as soon as its dependencies (or dependents for destroys) are resolved. This improves efficiency, reduces bottlenecks, and limits the impact of individual failures on the run of the entire queue.
+  ✨New Features
+  - Dynamically schedules Units as soon as dependencies (or dependents) are satisfied
+  - Improves throughput for large stacks
+  - Provides better fault-isolation for failed units
+  image
+  Report
+  The experimental Report feature is now stable and enabled by default.
+  Every Terragrunt run will now emit a short summary at the end of the run that looks like the following by default:
+  $ terragrunt run --all plan
+  # Omitted for brevity...
+  ❯❯ Run Summary  3 units  62ms
+     ────────────────────────────
+     Succeeded    3
+  This summary will give a high-level overview of the run results for units in a given Terragrunt run.
+  You can optionally request a CSV or JSON report of runs as well, giving you detailed insights as to the performance of each run using the --report flag:
+  terragrunt run --all plan --report-schema-file report.schema.csv
+  Name,Started,Ended,Result,Reason,Cause
+  first-exclude,2025-06-05T16:28:41-04:00,2025-06-05T16:28:41-04:00,excluded,exclude block,
+  second-exclude,2025-06-05T16:28:41-04:00,2025-06-05T16:28:41-04:00,excluded,exclude block,
+  first-failure,2025-06-05T16:28:41-04:00,2025-06-05T16:28:42-04:00,failed,run error,
+  first-success,2025-06-05T16:28:41-04:00,2025-06-05T16:28:41-04:00,succeeded,,
+  second-failure,2025-06-05T16:28:41-04:00,2025-06-05T16:28:42-04:00,failed,run error,
+  second-success,2025-06-05T16:28:41-04:00,2025-06-05T16:28:41-04:00,succeeded,,
+  second-early-exit,2025-06-05T16:28:42-04:00,2025-06-05T16:28:42-04:00,early exit,run error,
+  first-early-exit,2025-06-05T16:28:42-04:00,2025-06-05T16:28:42-04:00,early exit,run error,
+  terragrunt run --all plan --report-schema-file report.schema.json
+  [
+    {
+      "Name": "first-exclude",
+      "Started": "2025-06-05T16:28:41-04:00",
+      "Ended": "2025-06-05T16:28:41-04:00",
+      "Result": "excluded",
+      "Reason": "exclude block"
+    },
+    {
+      "Name": "first-success",
+      "Started": "2025-06-05T16:28:41-04:00",
+      "Ended": "2025-06-05T16:28:41-04:00",
+      "Result": "succeeded"
+    }
+  ]
+  ✨New Features
+  - Generates detailed run reports (CSV and JSON formats supported)
+  - Displays run summaries directly in the CLI output
+  - Allows disabling summaries if desired
+  To learn more about the Run Report feature, read the dedicated guide on Run Reports here.
+  🔧 Migration Guide
+  No action is required
+  To disable summary output explicitly, use --disable-report-summary:
+  terragrunt run --all plan --disable-report-summary
+  Auto OpenTofu Provider Cache Directory
+  Terragrunt now automatically configures OpenTofu’s native provider caching mechanism by default when running with OpenTofu > = 1.10.
+  Note that if you are using Terraform, you will not be able to take advantage of this new feature.
+  This feature is only possible in OpenTofu due to the hard work and coordination with the OpenTofu team to ensure that concurrent access to the provider cache directory is safe for all OpenTofu users, regardless of whether they use Terragrunt.
+  Screenshot 2025-06-25 at 12 38 05 PM
+  ✨New Features
+  - Automatically sets the TF_PLUGIN_CACHE_DIR environment variable
+  - Uses OpenTofu’s native provider cache instead of Terragrunt’s internal cache server
+  - Provides improved concurrency safety in multi-runner and CI environments
+  🔧 Migration Guide
+  No action is required if you’re running OpenTofu > = 1.10 — provider caching will be configured automatically.
+  To disable this behavior, use the --no-auto-provider-cache-dir flag:
+  terragrunt run --all apply --no-auto-provider-cache-dir
+  What's Changed
+  - chore: Marked as completed runner-pool, reports and provider cache by @denis256 in #4900
+  - fix: Properly sets discovery context so that plan -destroy and apply -destroy work right by @yhakbar in #4887
+  - docs: Implement view plans button by @karlcarstensen in #4890
+  - docs: Visual updates to form by @karlcarstensen in #4902
+  - docs: Fix docs flag name by @rubensf in #4908
+  Full Changelog: v0.88.1...v0.89.0
+ReleaseNotesUrl: https://github.com/gruntwork-io/terragrunt/releases/tag/v0.89.0
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/gruntwork-io/terragrunt/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

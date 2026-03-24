@@ -1,0 +1,110 @@
+id: wingetbotTriggers
+name: GitOps.PullRequestIssueManagement
+description: Handlers that are specific to actions taken by wingetbot
+owner:
+resource: repository
+disabled: false
+where:
+configuration:
+  resourceManagementConfiguration:
+    eventResponderTasks:
+      - description: Add "Publish-Pipeline-Succeeded" when wingetbot indicates the pipeline has succeeded
+        if:
+          - payloadType: Issue_Comment
+          - commentContains:
+              pattern: Publish\s+pipeline\s+succeeded
+              isRegex: True
+          - isActivitySender:
+              user: wingetbot
+              issueAuthor: False
+        then:
+          - addLabel:
+              label: Publish-Pipeline-Succeeded
+      - description: Approve PRs to DevOpsPipelineDefinitions/* when opened by wingetbot
+        if:
+          - payloadType: Pull_Request
+          - isActivitySender:
+              user: wingetbot
+              issueAuthor: False
+          - filesMatchPattern:
+              pattern: DevOpsPipelineDefinitions/*
+          - not: # This checks to ensure the PR is not empty. If it is empty, it would be treated as a match for the above condition
+              filesMatchPattern:
+                pattern: ^$
+          - isOpen
+        then:
+          - approvePullRequest:
+              comment: ""
+      - description: Approve PRs for Validation Waivers when labeled "Validation-Metadata" by wingetbot
+        if:
+          - payloadType: Pull_Request
+          - labelAdded:
+              label: Validation-Metadata
+          - activitySenderHasPermission:
+              permission: Admin
+        then:
+          - approvePullRequest:
+              comment: ""
+          - addLabel:
+              label: Validation-Completed
+      - description: >-
+          Merge Validation Waivers when
+          * PR is Opened
+          * Created by wingetbot
+          * Files modified only contains .validation file
+        if:
+          - payloadType: Pull_Request
+          - isAction:
+              action: Opened
+          - isActivitySender:
+              user: wingetbot
+          - filesMatchPattern:
+                pattern: ^.*\.validation
+          - not:
+              filesMatchPattern:
+                pattern: ^.*\.yaml
+        then:
+          - addLabel:
+              label: Validation-Metadata
+          - addLabel:
+              label: Validation-Completed
+          - approvePullRequest:
+              comment: "This looks like an automatic waiver. You should be all set!"
+      - description: Close automatic waiver PRs when "Validation-Merge-Conflict" label is added
+        if:
+          - payloadType: Pull_Request
+          - isActivitySender:
+              user: wingetbot
+          - isOpen
+          - labelAdded:
+              label: Validation-Merge-Conflict
+          - filesMatchPattern:
+                pattern: ^.*\.validation
+          - not:
+              filesMatchPattern:
+                pattern: ^.*\.yaml
+        then:
+          - closeIssue
+      - description: >-
+          If a pull request is assigned to wingetbot
+          * Assign the ICM users
+        if:
+          - isPullRequest
+          - isOpen
+          - isAssignedToUser:
+              user: wingetbot
+          - not: # If it already has been labeled needing attention, don't re-trigger
+              hasLabel:
+                label: Needs-Attention
+          - not: # If a moderator reset the feedback, don't re-trigger
+              hasLabel:
+                label: Azure-Pipeline-Passed
+        then:
+          - addLabel:
+              label: Needs-Attention # This will automatically assign the ICM Users
+          - removeLabel:
+              label: Needs-Author-Feedback
+        # The policy service should trigger even when the assignment was made by the policy service
+        triggerOnOwnActions: true
+onFailure:
+onSuccess:

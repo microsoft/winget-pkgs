@@ -1,0 +1,72 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
+
+PackageIdentifier: Bitvise.SSH.Server
+PackageVersion: "9.43"
+PackageLocale: en-US
+Publisher: Bitvise Limited
+PublisherUrl: https://bitvise.com/
+PublisherSupportUrl: https://bitvise.com/contact
+PrivacyUrl: https://bitvise.com/privacy-policy
+Author: Bitvise Limited
+PackageName: Bitvise SSH Server
+PackageUrl: https://bitvise.com/ssh-server
+License: Proprietary
+LicenseUrl: https://bitvise.com/ssh-server-license
+Copyright: Copyright (C) 2000-2024 by Bitvise Limited.
+CopyrightUrl: https://bitvise.com/terms-of-use
+ShortDescription: Secure file transfer and terminal shell access for Windows
+Description: |-
+  Our SSH server supports all desktop and server versions of Windows, 32-bit and 64-bit, from Windows XP SP3 and Windows Server 2003, up to the most recent – Windows 11 and Windows Server 2025.
+  Bitvise SSH Server includes the following:
+  - SFTP server: Secure file transfer using SFTP - compatible with a wide variety of clients
+  - SCP server: Secure file transfer using SCP - compatible with command line and graphical clients
+  - FTPS server: Secure file transfer using FTP over TLS/SSL - compatible with secure FTPS clients
+  - SSH server: Secure remote access via console - vt100, xterm and bvterm are supported
+  - Secure remote access via GUI - Remote Desktop or WinVNC required
+  - Secure, effortless Git integration
+  - Secure TCP/IP connection tunneling (port forwarding)
+Moniker: bitvisesshserver
+Tags:
+- sftp
+- ssh
+- sshd
+Agreements:
+- AgreementLabel: End User License Agreement (EULA)
+  AgreementUrl: https://bitvise.com/ssh-server-license
+ReleaseNotes: |-
+  - Control Panel and Settings:
+    - Manage certificates interface: Improved error messages and handling of TLS certificate import. Improved display of certificates and private keys not supported by current cryptography settings.
+    - The SSH Server implements an installation path hijack check. This displays a warning if the filesystem permissions or ownership of parent directories could allow a path hijack by a less privileged user.
+      This is not a complete check. Permissions on the installation directory itself are not validated, and remain the responsibility of the administrator. The SSH Server checks for path hijack conditions, which can be subtle.
+      The BssCfg command-line configuration utility now supports the following commands:
+      BssCfg instDirCheck <run|status|enable|disable>
+      These can be used to run the installation path check for diagnostics; to see if it is enabled; or to disable it, if the administrator has confidence in the configured filesystem permissions.
+  - SSH cryptography:
+    - Starting with 9.43, the latest versions of Bitvise software no longer use OpenSSL:
+      - OpenSSL no longer supports versions 1.1.1. Our recent software versions used this to support a handful of algorithms not supported by Windows.
+      - There are new fixes only available in OpenSSL 3.x.
+      - OpenSSL 3.x promotes opaque interfaces and hides details. This is the opposite of our requirements.
+      - OpenSSL 3.x is even larger than 1.1.1, and dramatically increases linker bloat. Updating OpenSSL 1.1.1 to 3.4.1 increases the size of CiWinCng64.dll from 3.3 MB to 5.0 MB. Removing OpenSSL reduces the size to 1.4 MB. The difference, 3.6 MB, is a lot of complexity to support some marginal algorithms.
+      This change does not affect most algorithms. We support most algorithms using Windows cryptography. Only the following is affected:
+      - chacha20-poly1305: We now support this algorithm using public domain ChaCha20 implementations from Goll & Gueron (on most CPUs with AVX2), Daniel J. Bernstein (on CPUs without AVX2), and Poly1305 from Andrew Moon (poly1305-donna).
+        In new Bitvise software installations, chacha20-poly1305 is disabled by default, because it is the most susceptible to the Terrapin attack if the counterparty does not implement strict key exchange. This algorithm is secure if both parties support strict key exchange. In Bitvise software, strict key exchange is supported in versions 9.32 and newer.
+      - ECDSA and ECDH over the curve secp256k1: On Windows 10 and newer, and Windows Server 2016 and newer, we continue to support this curve using Windows cryptography. On these Windows versions, there is no change.
+        On Windows Vista to 8.1, and Windows Server 2008 to 2012 R2, secp256k1 is now supported using Crypto++ 5.6. This implementation is not constant-time, so in this case, we enable signature timing mitigations. The timing mitigations favor security over performance: a signature is delayed to take e.g. 50 ms instead of 1 ms.
+        In SSH, this prime field curve is rarely used. We support it for compatibility with previous versions. We originally added this curve because it is used in Bitcoin, so it is subject to intense scrutiny. However, users who want elliptic curve cryptography, but doubt the widely used NIST curves, have usually chosen Curve25519 and Ed25519.
+      If FIPS 140-2 cryptography is enabled in Windows, there is no change. If FIPS mode is enabled, Bitvise software already restricts itself only to algorithms supported by Windows. In this case, chacha20-poly1305 is not available, and secp256k1 is available only on Windows versions 10 and newer, which support it.
+    - Bitvise software versions 9.xx remain compatible with Windows XP and Windows Server 2003. To support SSH cryptography on these platforms, our installers include DLL files CiCpFips32/64.dll and CryptoPP530Fips32/64.dll. These DLLs are not used on Windows Vista and newer, but were previously installed on all Windows versions. They are now no longer installed on Windows versions where they are not used.
+  - SMTP email sending:
+    - In previous versions, when the SSH Server initialized Schannel to negotiate TLS for outgoing SMTP connections, it would specify acceptable key exchange algorithms as RSA, DHE, and ECDHE. If the administrator has used a utility such as IISCrypto to disable Diffie-Hellman key exchange using the Windows registry, this would cause the Windows function AcquireCredentialsHandle to fail with error code 0x80090331 (SEC_E_ALGORITHM_MISMATCH). This would abort the SMTP connection and prevent email sending.
+      The SSH Server now avoids this by not expressing a preference with regard to TLS algorithms. This leaves the choice of TLS cipher suites to the Windows administrator.
+ReleaseNotesUrl: https://www.bitvise.com/ssh-server-version-history-9#943
+PurchaseUrl: https://bitvise.com/ssh-server-pricing
+Documentations:
+- DocumentLabel: Printable Documentation
+  DocumentUrl: https://bitvise.com/printable-docs/ssh-server-doc-printable
+- DocumentLabel: Users' Guide
+  DocumentUrl: https://bitvise.com/ssh-server-users-guide
+- DocumentLabel: FAQ
+  DocumentUrl: https://bitvise.com/ssh-server-usage-faq
+ManifestType: defaultLocale
+ManifestVersion: 1.9.0

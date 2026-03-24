@@ -1,0 +1,125 @@
+# Created with komac v2.12.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: jj-vcs.jj
+PackageVersion: 0.32.0
+PackageLocale: en-US
+Publisher: jj-vcs
+PublisherUrl: https://github.com/jj-vcs
+PublisherSupportUrl: https://github.com/jj-vcs/jj/issues
+PackageName: jj
+PackageUrl: https://github.com/jj-vcs/jj
+License: Apache-2.0
+LicenseUrl: https://github.com/jj-vcs/jj/blob/HEAD/LICENSE
+ShortDescription: A Git-compatible VCS that is both simple and powerful
+Description: A Git-compatible VCS that is both simple and powerful
+Moniker: Jujutsu
+Tags:
+- cli
+- git
+- mercurial
+- vcs
+ReleaseNotes: |-
+  About
+  jj is a Git-compatible version control system that is both simple and powerful. See
+  the installation instructions to get started.
+  Breaking changes
+  - In revsets, symbol expressions (such as change ID prefix) no longer resolve to
+    multiple revisions, and error out if resolved to more than one revisions. Use
+    change_id(prefix) or bookmarks(exact:name) to query divergent changes or
+    conflicted bookmarks. Commands like jj rebase no longer require all: to
+    specify multiple destination revisions.
+  - jj op abandon now discards previous versions of a change (or predecessors)
+    if they become unreachable from the operation history. The evolution history
+    is truncated accordingly.
+    Once jj op abandon and jj util gc are run in a repository, old versions of
+    jj might get "commit not found" error on jj evolog.
+  - commit.working_copies() template method now returns List<WorkspaceRef>
+  - The previously predefined amend alias has been removed. You can restore it
+    by setting the config aliases.amend = ["squash"].
+  Deprecations
+  - The all: revset modifier and ui.always-allow-large-revsets setting is
+    planned to be removed in a future release.
+    #6016
+  - Rename the core.fsmonitor and core.watchman settings to
+    fsmonitor.backend, and fsmonitor.watchman respectively.
+  New features
+  - jj workspace list now accepts -T/--template option to customize its
+    output via templates.
+  - Added templates.workspace_list template to customize the output of
+    jj workspace list.
+  - jj fix now buffers the standard error stream from subprocesses and emits
+    the output from each all at once. The file name is printed before the output.
+  - jj status now collapses fully untracked directories into one line.
+    It still fully traverses them while snapshotting but they won't clutter up
+    the output with all of their contents.
+  - Add the working-copy.eol-conversion config which is similar to the git
+    core.autocrlf config. A heuristics is used to detect if a file is a binary
+    file to prevent the EOL conversion from changing binary files unexpectedly.
+  - Add a .parents() method to the
+    Operation type in the templating
+    language.
+  - Merge tools config can now explicitly forbid using them as diff editors or
+    diff formatters. Built-in tools that do not function well as diff editing
+    tools or as diff formatters will now report an error when used as such.
+  - jj diffedit now accepts filesets to edit only the specified paths.
+  - AnnotationLine objects in templates now have a original_line_number() -> Integer method.
+  - Commit templates now support .files() to list all existing files at that
+    revision.
+  - Glob patterns now support {foo,bar} syntax. There may be subtle behavior
+    changes as we use the globset library now.
+  - The new bisect(x) revset function can help bisect a range of commits to
+    find when a bug was introduced.
+  - New first_parent() and first_ancestors() revset functions which are
+    similar to parents() and ancestors(), but only traverse the first parent
+    of each commit (similar to Git's --first-parent option).
+  - New signing.backends.ssh.revocation-list config for specifying a list of revoked
+    public keys for commit signature verification.
+  - jj fix commands now replace $root with the workspace's root path. This is
+    useful for tools stored inside the workspace.
+  Fixed bugs
+  - Fixed an error in jj util gc caused by the empty blob being missing from
+    the Git store. #7062
+  - jj op diff -p and jj op log -p now show content diffs from the first
+    predecessor only. #7090
+  - jj git fetch no longer shows NaN% progress when connecting to slow remotes.
+    #7155
+  Contributors
+  Thanks to the people who made this release happen!
+  - adamnemecek (@adamnemecek)
+  - Alexander Kobjolke (@jakalx)
+  - Apromixately (@Apromixately)
+  - Austin Seipp (@thoughtpolice)
+  - Bryce Berger (@bryceberger)
+  - Daniel Danner (@dnnr)
+  - Daniel Luz (@mernen)
+  - Evan Martin (@evmar)
+  - George Christou (@gechr)
+  - George Elliott-Hunter (@george-palmsens)
+  - Hubert Głuchowski (@afishhh)
+  - Ilya Grigoriev (@ilyagr)
+  - Jade Lovelace (@lf-)
+  - Jake Martin (@jake-m-commits)
+  - Jan Klass (@Kissaki)
+  - Joaquín Triñanes (@JoaquinTrinanes)
+  - Josh Steadmon (@steadmon)
+  - Kaiyi Li (@06393993)
+  - Martin von Zweigbergk (@martinvonz)
+  - Nigthknight (@nigthknight)
+  - Ori Avtalion (@salty-horse)
+  - Pablo Brasero (@pablobm)
+  - Pavan Kumar Sunkara (@pksunkara)
+  - Philip Metzger (@PhilipMetzger)
+  - phoebe (@phoreverpheebs)
+  - Remo Senekowitsch (@senekor)
+  - Scott Taylor (@scott2000)
+  - Stephen Jennings (@jennings)
+  - Theo Buehler (@botovq)
+  - Tyarel8 (@Tyarel8)
+  - Yuya Nishihara (@yuja)
+ReleaseNotesUrl: https://github.com/jj-vcs/jj/releases/tag/v0.32.0
+Documentations:
+- DocumentLabel: Homepage
+  DocumentUrl: https://jj-vcs.github.io/jj/
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

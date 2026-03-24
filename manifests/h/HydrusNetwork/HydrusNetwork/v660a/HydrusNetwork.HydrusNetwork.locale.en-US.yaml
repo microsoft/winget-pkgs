@@ -1,0 +1,81 @@
+# Created with komac v2.15.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: HydrusNetwork.HydrusNetwork
+PackageVersion: v660a
+PackageLocale: en-US
+Publisher: Hydrus Network
+PublisherUrl: https://github.com/hydrusnetwork/hydrus
+PublisherSupportUrl: https://github.com/hydrusnetwork/hydrus/issues
+PrivacyUrl: https://hydrusnetwork.github.io/hydrus/privacy.html
+Author: Hydrus Network
+PackageName: Hydrus Network
+PackageUrl: https://github.com/hydrusnetwork/hydrus
+License: WTFPL
+LicenseUrl: https://github.com/hydrusnetwork/hydrus/blob/HEAD/license.txt
+Copyright: Copyright (C) 2011 Hydrus Developer
+CopyrightUrl: https://github.com/hydrusnetwork/hydrus/blob/master/license.txt
+ShortDescription: A personal booru-style media tagger that can import files and tags from your hard drive and popular websites. Content can be shared with other users via user-run servers.
+Description: |-
+  The hydrus network client is an application written for Anon and other internet-fluent media nerds who have large image/swf/webm collections.
+  It browses with tags instead of folders, a little like a booru on your desktop. Advanced users can share tags and files anonymously through custom servers that any user may run.
+  Everything is free and privacy is the first concern. Executable releases are available for Windows, Linux, and macOS.
+  The program is in python, so you can also run it straight from the source code.
+Moniker: hydrus-network
+Tags:
+- booru
+- cross-platform
+- image-database
+ReleaseNotes: |-
+  misc
+  - I cleaned up some internal layout logic in my new QtMediaPlayer. transitioning from certain landscape to portrait videos should no longer reposition the video to the right when you have 'use the same QtMediaPlayer' checkbox ticked. thank you for the reports. let's try one more time: if you are happy with this, I'll make it real
+  - the new 'help: random 403 errors' menu items on every retry button were driving me nuts, so I moved them to the 'retry ignored' button selection dialog
+  - fixed several issues when loading an Ugoira (or several other animation types) that has a faulty (0 or null) number of frames
+  - the 'check database integrity' job is completely removed. this thing is only useful for detecting SQLite-level corruption, which we often see as a 'malformed' error, and really should be run from the command line interface, on one file at a time, when working through the 'help my db is broke.txt' document. several users have wasted time with this thing over the years hoping it would fix other bugs--unfortunately, it does not
+  - added database->db maintenance->clear orphan URL mappings, a new job that helps resolve some 'system:num_urls' stuff if your client.master.db has been damaged
+  cleaner venv setup
+  - this only matters for users who run from source
+  - thanks to a user, the setup_venv scripts and general venv setup are simplified and improved. years of behind-the-scenes cruft is cleared
+  - for a while, I've maintained both a scatter of old requirement.txts to handle the different choices you make in setup_venv.blah and a more modern pyproject.toml file that bundles everything in a nicer way and can be used by tools like uv. the setup_venv script routine is now updated to talk to that pyproject.toml, so all the old .txts are gone. this cleans up how your venv is installed, making it one atomic call and allowing easier editing of package choices in future (also removes the duplicate maintenance situation)
+  - further, the three setup_venv scripts are converted into stubs that call one single multiplat setup_venv.py file. you can just run that setup_venv.py file on its own and it works, so that is now the recommendation for all platforms. this script now talks about how to launch the program after its 'Done!' message, too
+  - I've updated the 'running from source' help to talk about this. also, anyone who manually pip-installs their venv is using a different command to hit the single pyproject.toml rather than the requirements.txts, and I added some stuff about the venv activate script, and I talked a bit about python vs pythonw in Windows
+  - as I recently did with the setup_venv, I have decided to rename some of the groups in the pyproject.toml. the three groups mpv-new, opencv-new, and qt6-new are being renamed to xxxx-normal. I am achieving this today simply by duplicating the groups with new names, so using the old xxxx-new name will still work for now. I will be deleting the old group names in three months, v673, so if you have an automatic script that installs hydrus, please update it. since these are the default selections, I presume no one uses them and this doesn't really matter
+  - I will also delete the old setup_venv.bat/sh/command stubs and the basedir requirements.txt in three months, in v673, to be clean. if you use them in an automated script, please switch over to the .py
+  - I ran out of time, but I'll do the same for setup_help and git pull--it can all be multiplat .py soon
+  file storage granularity test
+  - for advanced users now, everyone else soon
+  - after much planning, I am rolling out a test for advanced users with fewer than 1 million files
+  - that improves latency on file access and other maintenance operations for clients with many files
+  - essentially, instead of storing files in just 256 "fxx" folders, the client can now use 4096 "fxx/x" folders. same for the "txx" thumbnails. this means 16x fewer files per subfolder, where big clients are pushing 10,000+, making for snappier folder scans and file access in the client and when you do something like 'open video externally' and the video player does a brief folder scan for subtitle files and such
+  - this is all accessed through database->move media files... in a new panel. your client now reports if it is currently granularity 2 or 3 and offers to migrate you to 3. this process involves moving all your files, so it can take a while. my tests suggest about 5,000 files/s on an NVME, so thumbs will zip by, but the actual files on HDD may be a good bit slower, especially on funky USB or NAS connections where there's odd buffering. it is cancellable if it is taking too long
+  - some first-draft help here too https://hydrusnetwork.github.io/hydrus/database_migration.html#granularity
+  - one additional issue is that this storage rejigger makes a backup look completely different! we don't want to do a 100% backup run just to mirror file moves, so this panel offers a similar migration for a backup. the text and dialogs guide you through it all
+  - if you are an advanced user with fewer than 1 million files and you definitely absolutely have a backup, I invite you to try this operation out. obviously let me know if there are any problems, but please also note the final dialog, which will say how long the migration took, and report to me something like, "500,000 files, thumbs on NVME, files on sata HDD, 21 minutes", which I hope to compile into nicer 'expect about x files/s on an HDD' estimates for the normal users
+  - if you have 8 million files and really want to do this, you can, but bear in mind it might be a three hour migration
+  boring file storage work
+  - the tables that track physical file storage have been updated to better handle 4096 rows rather than 256. all the tables now use a shared location_id table, with the same single read/write calls, ensuring all items here agree on portable vs absolute path storage and so on
+  - the database now stores how 'granular' its file storage is, with default being 2 (2 hex chars, or 256 subfolders). if the stored file locations do not match this, it raises a serious error
+  - the folder relocation code (when you do a 'move files now' run, and which will be replaced this year I hope by multi-location support and background migration) is more KISS and foolproof
+  - the folder repair code (when you boot with a missing location) is similarly more KISS and foolproof
+  - fixed a storage weight initialisation issue that could occur if the 'ideal thumbnail location' was specifically set and also in the media file storage locations list
+  - all prefix-generating methods now always take an explicit prefix length/granularity. there is no longer a nebulous default anywhere
+  - reworked my folder granularisation to be safer, to work both up and down, and added status reporting for an UI panel
+  - wrote a routine that looks at an existing base storage location and guesses its current granularisation for job pre-checks
+  - wrote a database granularisation routine and added 'aieeeee, it broke half way through, try and undo' code
+  - the client files manager now only performs rigorous checks of all existing subfolder locations on startup. any migration or other re-init reason now just repopulates the subfolder store
+  - when file subdirs of granularity 3 or more are migrated, if the intervening parent directory, for instance f83 in a f83/d prefix, is empty afterwards, it is now deleted
+  - the percentage usages in 'move media files' are now 2 sig figs since we are distributing 4096 things now and you'd get 0.0% sometimes
+  - the mysterious 'empty_client_files' archive is updated regarding all this
+  - wrote a 'help my db is the wrong granularity.txt' help document in the db dir for help recovering from big problems here
+  - wrote unit tests for 2to3 and 3to2 granularisation and cancel tech
+  - wrote unit tests for estimate folder granularity tech
+  boring cleanup
+  - I deleted a bunch of very old 'running from source' help from the pre-everything-is-a-wheel days that is no longer pertinent
+  - deleted some ancient unused client service UI code
+ReleaseNotesUrl: https://github.com/hydrusnetwork/hydrus/releases/tag/v660a
+PurchaseUrl: https://hydrusnetwork.github.io/hydrus/support.html
+Documentations:
+- DocumentLabel: FAQ
+  DocumentUrl: https://hydrusnetwork.github.io/hydrus/faq.html
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

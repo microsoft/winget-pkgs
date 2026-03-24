@@ -1,0 +1,92 @@
+# Created with komac v2.13.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: Gruntwork.Terragrunt
+PackageVersion: 0.91.3
+PackageLocale: en-US
+Publisher: Gruntwork
+PublisherUrl: https://terragrunt.gruntwork.io/
+PublisherSupportUrl: https://terragrunt.gruntwork.io/docs/community/support
+PrivacyUrl: https://gruntwork.io/legal/privacy-policy
+PackageName: Terragrunt
+PackageUrl: https://github.com/gruntwork-io/terragrunt/releases/tag/v0.68.9
+License: MIT
+LicenseUrl: https://github.com/gruntwork-io/terragrunt/blob/HEAD/LICENSE.txt
+Copyright: © 2024 Gruntwork, Inc. All rights reserved.
+ShortDescription: Terragrunt is a thin wrapper for Terraform that provides extra tools for keeping your Terraform configurations DRY, working with multiple Terraform modules, and managing remote state.
+Description: Terragrunt is a thin wrapper for Terraform that provides extra tools for keeping your Terraform configurations DRY, working with multiple Terraform modules, and managing remote state.
+Tags:
+- IaC
+- Infrastructure as Code
+- Terraform
+- Terraform Wrapper
+- terragrunt
+ReleaseNotes: |-
+  ✨ New Features
+  --reading flag added to the find command
+  The find command now supports the --reading flag, which allows you to discover the shared configurations read by units and stacks when using the --json format.
+  $ terragrunt find --reading --json
+  [
+    {
+      "type": "unit",
+      "path": "aws-account-1",
+      "reading": [
+        "aws-data.yml"
+      ]
+    },
+    {
+      "type": "unit",
+      "path": "aws-account-2",
+      "reading": [
+        "aws-data.yml"
+      ]
+    },
+    {
+      "type": "unit",
+      "path": "gcp-project-1",
+      "reading": [
+        "gcp-data.hcl"
+      ]
+    }
+  ]
+  You can use this information to drive custom logic in your workflows based on the changes related to particular files.
+  e.g.
+  $ terragrunt find --reading --json | jq '[.[] | select(.reading[]? | contains("aws-data.yml"))| .path]'
+  [
+    "aws-account-1",
+    "aws-account-2"
+  ]
+  $ terragrunt find --reading --json | jq '[.[] | select(.reading[]? | contains("gcp-data.hcl"))| .path]'
+  [
+    "gcp-project-1"
+  ]
+  You can learn more about the --reading flag in the find documentation.
+  🐛 Bug Fixes
+  Empty stacks no longer throw errors
+  Previously, a bug in the logic used for making sure that users didn’t accidentally run on empty stacks resulted in users getting a non-zero exit code when all units in a stack were excluded (e.g. via the exclude block).
+  That bug has been fixed.
+  Dependency outputs can now be used in generate blocks
+  Previously, a bug in the way HCL parsing was done during discovery resulted in errors being thrown for users when dependency outputs were used in generate blocks. That error has since been resolved.
+  That bug has been fixed.
+  What's Changed
+  - feat: Adding reading support in find by @yhakbar in #5002
+  - fix: Removing filter enabled check on empty stacks by @yhakbar in #4992
+  - fix: reference of dependency outputs in generate by @denis256 in #4994
+  - docs: Documenting new -reading flag for find by @yhakbar in #5003
+  - docs: Fixing --source-map explanation by @atheiman in #4997
+  - docs: Fixing Filters docs by @yhakbar in #4996
+  - chore: Tracking DAG nodes in components by @yhakbar in #4998
+  - chore: Tracking reads in components by @yhakbar in #5000
+  - chore: Updating language in discovery commands by @yhakbar in #5001
+  - chore: Using a standard shell string parsing library instead of handling it ourselves by @yhakbar in #4991
+  - build(deps): bump the js-dependencies group across 1 directory with 5 updates by @dependabot[bot] in #4993
+  - build(deps): bump vite from 6.3.6 to 6.4.1 in /docs-starlight by @dependabot[bot] in #4999
+  New Contributors
+  - @atheiman made their first contribution in #4997
+  Full Changelog: v0.91.2...v0.91.3
+ReleaseNotesUrl: https://github.com/gruntwork-io/terragrunt/releases/tag/v0.91.3
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/gruntwork-io/terragrunt/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

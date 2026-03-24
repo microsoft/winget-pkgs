@@ -1,0 +1,174 @@
+# Created with komac v2.14.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: BiomeJS.Biome
+PackageVersion: 2.3.9
+PackageLocale: en-US
+Publisher: BiomeJS
+PublisherUrl: https://biomejs.dev/
+PublisherSupportUrl: https://github.com/biomejs/biome/issues
+Author: Biome Developers and Contributors
+PackageName: Biome
+PackageUrl: https://biomejs.dev/
+License: Apache-2.0
+Copyright: Copyright (c) 2023-present Biome Developers and Contributors
+ShortDescription: Biome is a toolchain for web projects, aimed at providing functionalities to maintain them. It offers a formatter and linter, usable via CLI and LSP.
+Moniker: biome
+Tags:
+- css
+- formatter
+- javascript
+- json
+- jsx
+- linter
+- static-code-analysis
+- typescript
+- web
+ReleaseNotes: |-
+  2.3.9
+  Patch Changes
+  - #8232 84c9e08 Thanks @ruidosujeira! - Added the nursery rule noScriptUrl.
+    This rule disallows the use of javascript: URLs, which are considered a form of eval and can pose security risks such as XSS vulnerabilities.
+    <a href="javascript:alert('XSS')">Click me</a>
+  - #8341 343dc4d Thanks @arendjr! - Added the nursery rule useAwaitThenable, which enforces that await is only used on Promise values.
+    Invalid
+    await "value";
+    const createValue = () => "value";
+    await createValue();
+    Caution
+    This is a first iteration of the rule, and does not yet detect generic "thenable" values.
+  - #8034 e7e0f6c Thanks @Netail! - Added the nursery rule useRegexpExec. Enforce RegExp#exec over String#match if no global flag is provided.
+  - #8137 d407efb Thanks @denbezrukov! - Reduced the internal memory used by the Biome formatter.
+  - #8281 30b046f Thanks @tylersayshi! - Added the rule useRequiredScripts, which enforces presence of configurable entries in the scripts section of package.json files.
+  - #8290 d74c8bd Thanks @dyc3! - The HTML formatter has been updated to match Prettier 3.7's behavior for handling <iframe>'s allow attribute.
+    - <iframe allow="layout-animations 'none'; unoptimized-images 'none'; oversized-images 'none'; sync-script 'none'; sync-xhr 'none'; unsized-media 'none';"></iframe>
+    + <iframe
+    +       allow="
+    +               layout-animations 'none';
+    +               unoptimized-images 'none';
+    +               oversized-images 'none';
+    +               sync-script 'none';
+    +               sync-xhr 'none';
+    +               unsized-media 'none';
+    +       "
+    + ></iframe>
+  - #8302 d1d5014 Thanks @mlafeldt! - Fixed #8109: return statements in Astro frontmatter no longer trigger "Illegal return statement" errors when using experimentalFullSupportEnabled.
+  - #8346 f3aee1a Thanks @arendjr! - Fixed #8292: Implement tracking
+    of types of TypeScript constructor parameter properties.
+    This resolves certain false negatives in noFloatingPromises and other typed
+    rules.
+    Example
+    class AsyncClass {
+      async returnsPromise() {
+        return "value";
+      }
+    }
+    class ShouldBeReported {
+      constructor(public field: AsyncClass) {}
+      //          ^^^^^^^^^^^^----------------- Parameter property declaration
+      async shouldBeReported() {
+        // `noFloatingPromises` will now report the following usage:
+        this.field.returnsPromise();
+      }
+    }
+  - #8326 153e3c6 Thanks @ematipico! - Improved the rule noBiomeFirstException. The rule can now inspect if extended configurations already contain the catch-all ** inside files.includes and, if so, the rule suggests removing ** from the user configuration.
+  - #8433 397547a Thanks @dyc3! - Fixed #7920: The CSS parser, with Tailwind directives enabled, will no longer error when you use things like prefix(tw) in @import at rules.
+  - #8378 cc2a62e Thanks @Bertie690! - Clarify diagnostic message for lint/style/useUnifiedTypeSignatures
+    The rule's diagnostic message now clearly states that multiple similar overload signatures are hard to read & maintain, as opposed to overload signatures in general.
+  - #8296 9d3ef10 Thanks @dyc3! - biome rage now shows if you have experimental HTML full support enabled.
+  - #8414 09acf2a Thanks @Bertie690! - Updated the documentation & diagnostic message for lint/nursery/noProto, mentioning the reasons for its longstanding deprecation and why more modern alternatives are preferred.
+    Notably, the rule clearly states that using __proto__ inside object literal definitions is still allowed, being a standard way to set the prototype of a newly created object.
+  - #8445 c3df0e0 Thanks @tt-a1i! - Fix --changed and --staged flags throwing "No such file or directory" error when a file has been deleted or renamed in the working directory. The CLI now filters out files that no longer exist before processing.
+  - #8459 b17d12b Thanks @ruidosujeira! - Fix #8435: resolved false positive in noUnusedVariables for generic type parameters in construct signature type members (new <T>(): T).
+  - #8439 a78774b Thanks @tt-a1i! - Fixed #8011: useConsistentCurlyBraces no longer suggests removing curly braces from JSX expression children containing characters that would cause parsing issues or semantic changes when converted to plain JSX text ({, }, <, >, &).
+  - #8436 a392c06 Thanks @ruidosujeira! - Fixed #8429. Formatter, linter, and assist settings now correctly inherit from global configuration when not explicitly specified in overrides.
+    Before this fix, when an override specified only one feature (e.g., only linter), other features would be incorrectly disabled instead of inheriting from global settings.
+    Example configuration that now works correctly:
+    {
+      "formatter": { "enabled": true },
+      "overrides": [
+        {
+          "includes": ["*.vue"],
+          "linter": { "enabled": false }
+        }
+      ]
+    }
+    After this fix, .vue files will have the linter disabled (as specified in the override) but the formatter enabled (inherited from global settings).
+  - #8411 9f1b3b0 Thanks @rriski! - Properly handle name, type_arguments, and attributes slots for JsxOpeningElement and JsxSelfClosingElement GritQL patterns.
+    The following biome search commands no longer throw errors:
+    biome search 'JsxOpeningElement(name = $elem_name) where { $elem_name <: "div" }'
+    biome search 'JsxSelfClosingElement(name = $elem_name) where { $elem_name <: "div" }'
+  - #8441 cf37d0d Thanks @tt-a1i! - Fixed #6577: noUselessUndefined no longer reports () => undefined in arrow function expression bodies. Previously, the rule would flag this pattern and suggest replacing it with () => {}, which conflicts with the noEmptyBlockStatements rule.
+  - #8444 8caa7a0 Thanks @tt-a1i! - Fix noUnknownMediaFeatureName false positive for prefers-reduced-transparency media feature. The feature name was misspelled as prefers-reduded-transparency in the keywords list.
+  - #8443 c3fa5a1 Thanks @tt-a1i! - Fix useGenericFontNames false positive when a CSS variable is used as the last value in font-family or font. The rule now correctly ignores cases like font-family: "Noto Serif", var(--serif) and font: 1em Arial, var(--fallback).
+  - #8281 30b046f Thanks @tylersayshi! - Fixed noDuplicateDependencies incorrectly triggering on files like _package.json.
+  - #8315 c7915c4 Thanks @hirokiokada77! - Fixed #5213: The noDoneCallback rule no longer flags false positives when a method is called on a regular variable bound to identifiers such as before, after, beforeEach, and afterEach.
+  - #8398 204844f Thanks @Bertie690! - The default value of the ignoreRestSiblings option for noUnusedVariables'
+    has been reverted to its prior value of true after an internal refactor accidentally changed it.
+    The diagnostic message has also been tweaked for readability.
+  - #8242 9694e37 Thanks @dyc3! - Fixed bugs in the HTML parser so that it will flag invalid shorthand syntaxes instead of silently accepting them. For example, <Foo : foo="5" /> is now invalid because there is a space after the :.
+  - #8297 efa694c Thanks @Yonom! - Added support for negative value utilities in useSortedClasses. Negative value utilities such as -ml-2 or -top-4 are now recognized and sorted correctly alongside their positive counterparts.
+    // Now detected as unsorted:
+    <div class="-ml-2 p-4 -mt-1" />
+    // Suggested fix:
+    <div class="-mt-1 -ml-2 p-4" />
+  - #8335 3710702 Thanks @dibashthapa! - Added the new nursery rule useDestructuring. This rule helps to encourage destructuring from arrays and objects.
+    For example, the following code triggers because the variable name x matches the property foo.x, making it ideal for object destructuring syntax.
+    var x = foo.x;
+  - #8383 59b2f9a Thanks @ematipico! - Fixed #7927: noExtraNonNullAssertion incorrectly flagged separate non-null assertions on both sides of an assignment.
+    The rule now correctly distinguishes between nested non-null assertions (still flagged) and separate non-null assertions on different sides of an assignment (allowed).
+    Examples
+    Valid (now allowed)
+    arr[0]! ^= arr[1]!;
+    Invalid (still flagged)
+    arr[0]!! ^= arr[1];
+    arr[0] ^= arr[1]!!;
+  - #8401 382786b Thanks @Bertie690! - useExhaustiveDependencies now correctly validates custom hooks whose dependency arrays come before their callbacks.
+    Previously, a logical error caused the rule to be unable to detect dependency arrays placed before hook callbacks, producing spurious errors and blocking further diagnostics.
+    {
+      "linter": {
+        "rules": {
+          "correctness": {
+            "useExhaustiveDependencies": {
+              "level": "error",
+              "options": {
+                "hooks": [
+                  {
+                    "name": "doSomething",
+                    "closureIndex": 2,
+                    "dependenciesIndex": 0
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+    function component() {
+      let thing = 5;
+      // The rule will now correctly recognize `thing` as being specified
+      // instead of erroring due to "missing" dependency arrays
+      doSomething([thing], "blah", () => {
+        console.log(thing);
+      });
+    }
+    The rule documentation & diagnostic messages have also been reworked for improved clarity.
+  - #8365 8f36051 Thanks @JacquesLeupin! - Fixed #8360: GritQL plugins defined in child configurations with extends: "//" now work correctly.
+  - #8306 8de2774 Thanks @dibashthapa! - Fixed #8288: Fixed the issue with false positive errors
+    This new change will ignore attribute and only show diagnostics for JSX Expressions
+    For example
+    Valid:
+    <Something checked={isOpen && items.length} />
+    Invalid:
+    const Component = () => {
+      return isOpen && items.length;
+    };
+  - #8356 f9673fc Thanks @ematipico! - Fixed #7917, where Biome removed the styles contained in a <style lang="scss">, when experimentalFullSupportEnabled is enabled.
+  - #8371 d71924e Thanks @ematipico! - Fixed #7343, where Biome failed to resolve extended configurations from parent directories using relative paths.
+ReleaseNotesUrl: https://github.com/biomejs/biome/releases/tag/@biomejs/biome@2.3.9
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://biomejs.dev/guides/getting-started/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,57 @@
+# Created with komac v2.14.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: Gruntwork.Terragrunt
+PackageVersion: 0.97.2
+PackageLocale: en-US
+Publisher: Gruntwork
+PublisherUrl: https://terragrunt.gruntwork.io/
+PublisherSupportUrl: https://terragrunt.gruntwork.io/docs/community/support
+PrivacyUrl: https://gruntwork.io/legal/privacy-policy
+PackageName: Terragrunt
+PackageUrl: https://github.com/gruntwork-io/terragrunt/releases/tag/v0.68.9
+License: MIT
+LicenseUrl: https://github.com/gruntwork-io/terragrunt/blob/HEAD/LICENSE.txt
+Copyright: © 2024 Gruntwork, Inc. All rights reserved.
+ShortDescription: Terragrunt is a thin wrapper for Terraform that provides extra tools for keeping your Terraform configurations DRY, working with multiple Terraform modules, and managing remote state.
+Description: Terragrunt is a thin wrapper for Terraform that provides extra tools for keeping your Terraform configurations DRY, working with multiple Terraform modules, and managing remote state.
+Tags:
+- IaC
+- Infrastructure as Code
+- Terraform
+- Terraform Wrapper
+- terragrunt
+ReleaseNotes: |-
+  🏎️ Performance Improvements
+  Partial parse used for get_working_dir()
+  To assess where Terragrunt is going to run OpenTofu, it needs partially parsed information from the relevant terragrunt.hcl file of the unit running the HCL get_working_dir() function. The function was performing a full parse of the terragrunt.hcl file, which can be slow for users with large HCL configurations.
+  Given that the parse only requires access to the value of source in the terraform block, a partial parse is now performed by the function, only looking at the contents of the terraform block, improving performance significantly.
+  🐛 Bug Fixes
+  False positive parsing errors suppressed
+  When parsing an include that defined dependencies, the HCL parser used by Terragrunt would emit spurious errors that are internally ignored. Those messages are now suppressed.
+  Signal propagation for interrupts fixed
+  A bug in how Terragrunt forwarded signals to processes it spawned (like running tofu) resulted in underlying processes receiving SIGKILL signals rather than the original signal (e.g. SIGINT) sent to the Terragrunt process. That has been fixed.
+  🧹 Chores
+  Avoiding contextcheck suppression
+  While not changing much functionally in Terragrunt, this release did involve quite a lot of changes to Terragrunt internals. The majority of these changes related to better propagation of the Golang [context](https://pkg.go.dev/context) object to better obey Golang best practices. These issues were reported by the contextcheck linter in the codebase, but the findings were suppressed due to the scope of work required to address them.
+  These changes should make it so that context is propagated correctly more reliably in the codebase, increasing the usefulness of things like OpenTelemetry tracing and reduced resource usage.
+  Note that some public function signatures have changed in the Terragrunt codebase, which may be a breaking change to users consuming Terragrunt as a library. Given that we do not offer any stability guarantees for usage of Terragrunt as a library, these changes are still to be included in a patch release.
+  What's Changed
+  - perf: Using a partial parse for get_working_dir() by @yhakbar in #5318
+  - fix: false positive parsing errors by @denis256 in #5258
+  - fix: Fixing signal propagation issues by @yhakbar in #5326
+  - fix: Locking during run ensure calls by @yhakbar in #5312
+  - chore: Avoiding contextcheck suppression by @yhakbar in #5320
+  - chore: Fixing flaky tests by @yhakbar in #5316
+  - chore: Adding flake utility by @yhakbar in #5311
+  - chore: Cleaning up HCL fn spans by @yhakbar in #5315
+  - build(deps): bump github.com/cloudflare/circl from 1.3.3 to 1.6.1 in /test/flake by @dependabot[bot] in #5324
+  - build(deps): bump golang.org/x/oauth2 from 0.25.0 to 0.27.0 in /test/flake by @dependabot[bot] in #5323
+  - build(deps): bump golang.org/x/crypto from 0.7.0 to 0.45.0 in /test/flake by @dependabot[bot] in #5322
+  Full Changelog: v0.97.1...v0.97.2
+ReleaseNotesUrl: https://github.com/gruntwork-io/terragrunt/releases/tag/v0.97.2
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/gruntwork-io/terragrunt/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

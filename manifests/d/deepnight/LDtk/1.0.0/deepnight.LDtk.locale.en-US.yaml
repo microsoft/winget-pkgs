@@ -1,0 +1,151 @@
+# Created with YamlCreate.ps1 v2.1.2 $debug=QUSU.7-2-2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.1.0.schema.json
+
+PackageIdentifier: deepnight.LDtk
+PackageVersion: 1.0.0
+PackageLocale: en-US
+Publisher: Sebastien Benard
+PublisherUrl: https://ldtk.io
+PublisherSupportUrl: https://ldtk.io/go/discord
+# PrivacyUrl: 
+Author: IrishBruse
+PackageName: LDtk
+PackageUrl: https://ldtk.io/
+License: MIT
+LicenseUrl: https://raw.githubusercontent.com/deepnight/ldtk/master/LICENSE
+Copyright: Copyright (c) 2020, Sébastien Benard - Deepnight Games
+CopyrightUrl: https://raw.githubusercontent.com/deepnight/ldtk/master/LICENSE
+ShortDescription: 2D level editor
+Description: Level Designer Toolkit (LDtk) is a modern, efficient and open-source 2D level editor with a strong focus on user-friendliness.
+Moniker: ldtk
+Tags:
+- 2d
+- agnostic
+- electron
+- game-development
+- haxe
+- json
+- level-editor
+# Agreements: 
+ReleaseNotes: |-
+  Other major changes
+  • IntGrid values sorting: that's right, you can now sort your IntGrid values. Please note that re-organizing values will not remap them: so moving value "1" down, for example, will not modify it ("1" value stays "1"), only values order changes.
+  • Image reloading bug fixes:
+  •   • Reloading of images (tilesets, backgrounds etc.) will no longer occur if the app is not focused. As soon as LDtk is focused, images are updated.
+  •   • Fixed a critical crash when reloading an image which has a different width/height.
+  •   • You are no longer limited to deleting the last IntGrid value.
+  • Project colors: when you pick a color, a list of all colors used in this project will be displayed, to make consistent color usage easier.
+  • "Identifier" format policy: you can now pick your prefered "Identifier case policy" (default is "1st letter uppercased").
+
+  File format changes
+  Worlds
+  • Added worlds array and World JSON structure to the docs. This was added as a preview for the upcoming new feature "Multiple Worlds in a single project". Learn more about that here: #231
+
+  JSON changes
+  • All new projects will now discard by default the deprecated data of IntGrid layers (ie. the pre-"CSV format" data). More informations here: #358
+  • IntGridValues array index should no longer be used to guess IntGrid values, since the array can be manually sorted by users. See #553
+  • To avoid unnecessary file changes and renamings (bad for versioning systems), the following changes have been made:
+    • Irrelevant worldX/worldY values are now "-1" for all levels if the world layout is Horizontal or Vertical
+    • Irrelevant __neighbours array is now empty for all levels if the world layout is Horizontal or Vertical
+  • tileId in Entity Definitions has been replaced by tileRect to support multiple tiles instead of just single ones. The tileId will still be exported for now, but will be removed completely soon.
+  • levelUid in Neighbours arrays has been replaced by levelIid (new string based IID). The levelUid will still be exported for now, but will be removed completely soon.
+  • Merged the autoTilesetDefUid into tilesetDefUid for all Layer Definitions. This should have no impact if you properly used the __tilesetDefUid found in Layer Instances, as recommended in the docs. The autoTilesetDefUid will be dropped completely in a later update.
+  • Added __smartColor to Entity instance JSON.
+  • Fixed format of value "type" in JSON (now, it's always a String)
+  • Fixed unexpected intGridValues in JSON for non-IntGrid layers
+  • Fixed nullable Floats fields to now be really null in JSON.
+
+  Multi-worlds experimental preview
+  You can try multi-worlds using debug menu. Please note that this feature is highly experimental and will probably evolve a lot in upcoming updates. Don't use for production.
+  • Open an existing project,
+  • Open debug menu (CTRL+SHIFT+D),
+  • Create a new world,
+  • Navigate through worlds using the context menu in empty spaces between levels.
+  • Right click on an existing level in World view to move it between worlds.
+
+  Other changes
+  • External level files will no longer be prefixed with their index in array to avoid unnecessary renamings when inserting new levels. This can be re-enabled in Project panel, using an Advanced Option at the bottom.
+  • Fixed enumTags and customTileData typing in QuickTypes files.
+  • LDtk logs are now stored in a more legitimate location, depending on your OS. To locate your log file, just open settings (F12 key) and look for the Log File line.
+
+  UI
+  • Entities can now use rectangle of tiles for their representation instead of just single tiles.
+  • Added support for 9-slice scaling mode for Entity tiles (how it works: https://en.wikipedia.org/wiki/9-slice_scaling).
+  • New dialog to configure auto-layer Rules modulo, with support for X/Y offsets.
+  • You can now use up/down arrow keys to quickly increment/decrement an input value
+  • You can now freely adjust fill/outline/tile opacities of Entities.
+  • Current Level properties can now be edited directly from world view.
+  • Entity and Level custom fields that are not using default value are now much more visible in forms.
+  • Added a new optional "guide" grid per layer. This customizable grid is not used for snapping, and only serves as a visual guide.
+  • Better display of entities that have error(s) in their field values.
+  • Grid lines in levels are now truly 1 screen pixel thick.
+  • Added a new option (CTRL-H) to hide everything except Tiles in layers (entities, labels, intGrids etc.)
+  • Added an "App Settings" button to the main panel in editor
+  • Added a "*" near level names if they were modified but not saved.
+  • Added an error message when exporting to Tiled while having unsupported Aseprite images.
+  • Added PAGEUP/PAGEDOWN keyboard shortcuts to zoom in/out
+  • Added a unit selector (pixels/cells) near coordinates/size fields of entity instances
+  • Tiles that overflow outisde of a level are now properly visually cropped.
+  • Hold SPACE + Right mouse click to zoom in/out
+  • Better support of trackpad pinch gestures to zoom in/out
+  • Added a "Rename project" button in Project panel
+  • Added Youtube video tutorials to the Help panel
+  • Added "Release notes" button in Help panel
+  • Added a "click trap" to prevent miss-clicks while the app is not focused. Previously, if you clicked on the LDtk window to re-focus it, you would edit some layer or click a UI element accidentally.
+  • Changed T shortcut to SHIFT-T for "Tile stacking"
+  • Changed E shortcut to SHIFT-E for "Select empty spaces"
+  • Reworked the Enum panel and fixed many UX issues
+  • Removed the "CPU throttling" option from the app settings. The CPU throttling has been reworked and should not longer be noticeable at all. Therefore, it is now always enabled to reduce battery usage on laptops and energy consumption in general.
+  • Removed the "Tile Flickering Fix" option from the app settings: it was costly and inefficient.
+  • Replaced the dashed lines used to connect points by a smoother zig-zag line
+  • Entity fields and related visuals will now be faded away when not working in their layer.
+  • Entity fields width will now be limited by their entity width (this greatly reduces screen clutter when having many fields displayed)
+  • Custom fields of type Integer or Float can now have an optional text prefix/suffix to display in editor. Useful to display a unit near a value, like "0.5sec" or "$17".
+  • Added more values for App UI scaling setting.
+  • Added a Layer option to fade it away when it's not currently selected
+  • Added a Layer option to hide it from the layers list
+  • Moving mouse over UI components no longer interrupt view panning (Middle mouse click or Space+click)
+  • The "collapsed/expanded" status of a group of auto-layer rules is no longer saved in the project file: all rule groups will now be collapsed by default when loading a project.
+  • You can now manually reload any image asset (tileset, background etc.) using their "↻" button.
+  • Tool tips are now larger and easier to read.
+  • Mouse-overing entire rule blocks in the panel will no longer preview affected cells in the level. Now, to preview affected cells, you have to move your mouse over either the group name, or the "pattern" block.
+  • You can now manually edit X,Y coords and width,height values of an existing Entity.
+  • If you open a Backup copy of a project, all panels will be locked, preventing any edit. You may only Restore the backup.
+  • Level identifiers are now displayed in the top-left corner of levels in World view
+  • Better Level identifiers rendering in World view (they should now be easier to read in general)
+  • Clicking on the "New Tileset" button immediately invokes the "Pick image file" dialog.
+  • Creating a new Rule group will now immediately offer to rename it.
+  • Changed the "Help" button color in the main editor bar.
+  • Changed the aspect of various help-related elements.
+  • Zooming out a lot now has a subtle dimming effect.
+  • Added scrollbars to dialogs that are larger than app window (this could happen for example when using excessively big App UI scaling settings)
+  • Reorganized the debug menu (CTRL-SHIFT-D)
+
+  Bug fixes & misc
+  • Fixed a crash that could happen during reloading of an image, if it was being used by another app.
+  • Fixed "Locate file" buttons opening Windows explorer in the background
+  • Fixed tile picker centering animation when picking a tile from a level (using ALT-click)
+  • Fixed unnecessary re-rendering of all project layers when enabling/disabling optional group of layers
+  • Fixed "Smart CPU throttling" slowing down long operations (eg. saving a large project, or updating many auto-layer rules) while the app isn't focused.
+  • Fixed "hollow" entity selection which was kind of... erratic.
+  • Fixed entity "resizing handles" not updating properly when duplicating/moving an Entity
+  • Fixed the progress bar when saving large projects
+  • Fixed TAB key behavior when an Entity instance panel is open
+  • Fixed weird behaviors when clicking on overlapped levels.
+  • Fixed a crash when clicking on a partial tile in the Tilesets panel
+  • Fixed a crash when deleting the last level
+  • Fixed a crash when moving an Entity with a null "point" field value
+  • Fixed a rare crash when loading Aseprite files
+  • Fixed a crash related to Regular Expressions in String fields (thanks to Clement Duranti)
+  • Fixed a bug when reloading a tileset while its width changed.
+  • Fixed layers list not being properly updated when leaving world mode.
+  • Fixed a crash when using a field containing an array of null enums.
+  • Fixed various Quicktype generation issues.
+  • Fixed opacity of layers when exporting PNGs
+  • Added "Type" value for entities in Tiled exported files
+  • Updated sample maps
+  • Fixed project assets path resolution when starting LDtk from command line and providing just the project file name as an argument (eg. /path/to/app/LDtk myProject.ldtk)
+  • Many minor bug fixes.
+ReleaseNotesUrl: https://github.com/deepnight/ldtk/releases/tag/v1.0.0
+ManifestType: defaultLocale
+ManifestVersion: 1.1.0

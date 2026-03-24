@@ -1,0 +1,133 @@
+# Created with YamlCreate.ps1 v2.2.8 $debug=QUSU.CRLF.7-3-4.Win32NT
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.4.0.schema.json
+
+PackageIdentifier: Hugo.Hugo.Extended
+PackageVersion: 0.114.0
+PackageLocale: en-US
+Publisher: The Hugo Authors
+PublisherUrl: https://gohugo.io/
+PublisherSupportUrl: https://discourse.gohugo.io/
+# PrivacyUrl:
+Author: The Hugo Authors
+PackageName: Hugo (Extended)
+PackageUrl: https://gohugo.io/
+License: Apache-2.0
+LicenseUrl: https://gohugo.io/about/license/
+Copyright: Copyright 2023 The Hugo Authors.
+# CopyrightUrl:
+ShortDescription: The world’s fastest framework for building websites (with WebP encoding and Sass transpiling support)
+Description: |-
+  Hugo is one of the most popular open-source static site generators. With its amazing speed and flexibility, Hugo makes building websites fun again.
+  Hugo is available in two flavors: standard and extended. With the extended flavor you can:
+  - Encode WebP images (decoding is also available in the standard build)
+  - Transpile Sass to CSS using the embedded LibSass transpiler
+# Moniker:
+Tags:
+- blog
+- blog-engine
+- cms
+- content-management-system
+- documentation
+- documentation-tool
+- static-site
+- static-site-generator
+ReleaseNotes: |-
+  The main new thing in this release is that we now support both major versions of the Dart Sass Embedded protocol, which means that you now can use the regular Dart Sass binary. We measured the new protocol to be faster with high concurrency:
+
+  name                             old time/op    new time/op    delta
+  Transpiler/SCSS-10                  114µs ± 0%     145µs ± 1%  +26.40%  (p=0.029 n=4+4)
+  Transpiler/Start_and_Execute-10    25.6ms ± 2%    26.0ms ± 3%     ~     (p=0.486 n=4+4)
+  Transpiler/SCSS_Parallel-10        89.0µs ± 2%    44.4µs ± 3%  -50.12%  (p=0.029 n=4+4)
+
+  name                             old alloc/op   new alloc/op   delta
+  Transpiler/SCSS-10                 1.33kB ± 1%    1.33kB ± 0%     ~     (p=1.000 n=4+4)
+  Transpiler/Start_and_Execute-10    22.4kB ± 1%    22.4kB ± 1%     ~     (p=0.886 n=4+4)
+  Transpiler/SCSS_Parallel-10        1.34kB ± 3%    1.33kB ± 1%     ~     (p=1.000 n=4+4)
+
+  name                             old allocs/op  new allocs/op  delta
+  Transpiler/SCSS-10                   18.0 ± 0%      18.0 ± 0%     ~     (all equal)
+  Transpiler/Start_and_Execute-10       144 ± 1%       150 ± 0%   +4.16%  (p=0.029 n=4+4)
+  Transpiler/SCSS_Parallel-10          18.0 ± 0%      18.0 ± 0%     ~     (all equal)
+
+  We have also moved to a new log library and added some new math functions and also revised the existing set to work better with a mix of scalars and slices.
+
+  Notes
+  - We have removed the flags --log, --verboseLog, added the new flag --logLevel and deprecated --verbose and ----debug` See #11088
+  - This release contains a security fix in the upstream Go HTML template library disallowing JavaScript inside backticks by default. See golang/go#59234 If you really need this and are sure this isn't a security risk in your case, you can revert to the old behaviour:
+
+  [security]
+  [security.gotemplates]
+  allowActionJSTmpl = true
+
+  Bug fixes
+  - common/loggers: Drop the bold INFO etc. prefixes 6dfbd24 @bep
+  - all: Fix some typos 68d9d3e @deining
+  - all: Fix typos in function names and comments 9009c8c @alexandear
+  - deploy: Fix deploy defaults for non-zero flag values (e.g. maxDeletes, invalidateCDN) 12dc9a6 @bep #11127
+  - Fix upstream Go templates bug with reversed key/value assignment ee359df @bep #11112
+  - tpl/collections: Fix append when appending a slice to a slice of slices d178fe9 @bep #11093
+  - Fix .Width and .Height for animated gifs 21d1756 @bep #11079
+  - Fix config merge regression with root slices (e.g. disableKinds) 60a2cdf @bep #11089
+  - Fix handling of aliases (e.g. hugo serve) 0541a1b @bep #11090
+  - commands,config: Fix typo in log and error messages b8526f3 @alexandear
+  - Fix indented SASS imports for Dart Sass c782ebd @bep #11074
+
+  Improvements
+  - Add empty Environ when loading test config 3ab8465 @bep
+  - loggers: Avoid using Logf for the LevelLoggerToWriter f59c3c0 @bep
+  - tocss/dartsas: Avoid using Logf for the internal Dart Sass logging 3ca29b1 @bep
+  - helpers: Remove superflous formatting flag in deprecation warnings fdb0b7f @bep
+  - common/loggers: Re-add trailing newline in logger.Printf 1b85303 @bep #11130
+  - Replace the old log setup, with structured logging etc. 7c9fada @bep #11124
+  - common/collections: Always make a copy of the input slice in Append f73c567 @bep #10458
+  - Re-add site.RSSLink (and deprecate it) 90b2674 @bep #11110
+  - tpl/math: Allow variadic math functions to take slice args, add math.Product, math.Sum 2ba2271 @bep #11030
+  - commands: Remove flags log, verboseLog, add flag logLevel, deprecate flags verbose and debug ef147f4 @bep #9648 #11071
+  - cache: Set default cache path based on $USER 258884f @Sircular #7391
+  - resources: Remove failing and superflous test assertion 69f0e88 @bep
+  - helpers: Avoid url.Parse in RelURL and AbsURL if we can ed7e250 @bep
+  - Adjust benchmarks 6a09e7f @bep
+  - Adjust benchmark 29e5cbb @bep
+  - Add BenchmarkAbsURL ded6866 @bep
+  - helpers: Improve schema detection when creating relative URLs e1d4302 @jmooring #11080
+  - helpers: Add a basic benchmark for RelURL 5db215d @bep
+  - config: Remove unexpected _merge keys introduced in author and social maps b7dc93c @bep #11083
+  - Upgrade to v2 of the Dart Sass Embedded Protocol f210188 @bep #11059
+
+  Dependency Updates
+  - Revert "build(deps): bump gocloud.dev from 0.24.0 to 0.29.0" 59300fa @bep
+  - Revert "deps: Update github.com/tdewolff/minify/v2 v2.12.5 => v2.12.6" 49dd53a @bep #11132
+  - build(deps): bump github.com/evanw/esbuild from 0.18.3 to 0.18.4 8a04d47 @dependabot[bot]
+  - build(deps): bump github.com/evanw/esbuild from 0.18.2 to 0.18.3 aaf2e96 @dependabot[bot]
+  - build(deps): bump golang.org/x/sync from 0.2.0 to 0.3.0 0f989d5 @dependabot[bot]
+  - build(deps): bump google.golang.org/api from 0.123.0 to 0.127.0 732dcb8 @dependabot[bot]
+  - build(deps): bump golang.org/x/tools from 0.9.1 to 0.9.3 944859f @dependabot[bot]
+  - build(deps): bump github.com/kyokomi/emoji/v2 from 2.2.11 to 2.2.12 bb9377b @dependabot[bot]
+  - build(deps): bump github.com/getkin/kin-openapi from 0.117.0 to 0.118.0 e88f1b8 @dependabot[bot]
+  - build(deps): bump golang.org/x/net from 0.10.0 to 0.11.0 516f0cb @dependabot[bot]
+  - build(deps): bump gocloud.dev from 0.24.0 to 0.29.0 7bed16c @dependabot[bot]
+  - build(deps): bump golang.org/x/image from 0.7.0 to 0.8.0 e08cfc8 @dependabot[bot]
+  - build(deps): bump github.com/magefile/mage from 1.14.0 to 1.15.0 4895195 @dependabot[bot]
+  - build(deps): bump github.com/pelletier/go-toml/v2 from 2.0.6 to 2.0.8 91c0b0f @dependabot[bot]
+  - build(deps): bump github.com/evanw/esbuild from 0.17.19 to 0.18.2 baef235 @dependabot[bot]
+  - build(deps): bump go.uber.org/atomic from 1.10.0 to 1.11.0 254c2b3 @dependabot[bot]
+  - build(deps): bump github.com/hairyhenderson/go-codeowners 84f71ba @dependabot[bot]
+  - build(deps): bump github.com/frankban/quicktest from 1.14.4 to 1.14.5 82adc97 @dependabot[bot]
+  - build(deps): bump github.com/mattn/go-isatty from 0.0.17 to 0.0.19 60533fd @dependabot[bot]
+  - build(deps): bump github.com/spf13/afero from 1.9.3 to 1.9.5 261143b @dependabot[bot]
+
+  Documentation
+  - docs: Regen docshelper 9f98b3e @bep
+  - docs: Regen CLI docs 7241b5f @bep
+
+  Build Setup
+  - Revert "snap: Transition base snap from core20 to core22 (#11101)" (#11125) 0e79446 @jmooring #11116
+  - snap: Transition base snap from core20 to core22 (#11101) 35e9b3e @jmooring
+ReleaseNotesUrl: https://github.com/gohugoio/hugo/releases/tag/v0.114.0
+# PurchaseUrl:
+# InstallationNotes:
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://gohugo.io/documentation/
+ManifestType: defaultLocale
+ManifestVersion: 1.4.0
