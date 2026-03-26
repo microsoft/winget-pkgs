@@ -27,6 +27,13 @@ BeforeAll {
     }
 }
 
+AfterAll {
+    # Clean up stub functions created in BeforeAll to prevent them from persisting in the session
+    Remove-Item Function:\Get-MSITable -ErrorAction SilentlyContinue
+    Remove-Item Function:\Get-MSIProperty -ErrorAction SilentlyContinue
+    Remove-Item Function:\Get-Win32ModuleResource -ErrorAction SilentlyContinue
+}
+
 Describe 'YamlCreate.InstallerDetection Module' {
     Context 'Module Import' {
         It 'Should import the module successfully' {
