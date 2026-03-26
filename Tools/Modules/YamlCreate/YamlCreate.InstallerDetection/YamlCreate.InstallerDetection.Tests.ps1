@@ -5,33 +5,39 @@ BeforeAll {
 
     # Create stub functions for external dependencies that may not be available
     # These are typically provided by external modules like MSI or Windows SDK tools
+    $Script:AddedGetMSITable = $false
     if (-not (Get-Command Get-MSITable -ErrorAction SilentlyContinue)) {
         function Global:Get-MSITable {
             param([string]$Path)
             return $null
         }
+        $Script:AddedGetMSITable = $true
     }
 
+    $Script:AddedGetMSIProperty = $false
     if (-not (Get-Command Get-MSIProperty -ErrorAction SilentlyContinue)) {
         function Global:Get-MSIProperty {
             param([string]$Path, [string]$Property)
             return $null
         }
+        $Script:AddedGetMSIProperty = $true
     }
 
+    $Script:AddedGetWin32ModuleResource = $false
     if (-not (Get-Command Get-Win32ModuleResource -ErrorAction SilentlyContinue)) {
         function Global:Get-Win32ModuleResource {
             param([string]$Path, [switch]$DontLoadResource)
             return @()
         }
+        $Script:AddedGetWin32ModuleResource = $true
     }
 }
 
 AfterAll {
-    # Clean up stub functions created in BeforeAll to prevent them from persisting in the session
-    Remove-Item Function:\Get-MSITable -ErrorAction SilentlyContinue
-    Remove-Item Function:\Get-MSIProperty -ErrorAction SilentlyContinue
-    Remove-Item Function:\Get-Win32ModuleResource -ErrorAction SilentlyContinue
+    # Clean up stub functions that were created in BeforeAll to prevent them from persisting in the session
+    if ($Script:AddedGetMSITable) { Remove-Item Function:\Get-MSITable -ErrorAction SilentlyContinue }
+    if ($Script:AddedGetMSIProperty) { Remove-Item Function:\Get-MSIProperty -ErrorAction SilentlyContinue }
+    if ($Script:AddedGetWin32ModuleResource) { Remove-Item Function:\Get-Win32ModuleResource -ErrorAction SilentlyContinue }
 }
 
 Describe 'YamlCreate.InstallerDetection Module' {
