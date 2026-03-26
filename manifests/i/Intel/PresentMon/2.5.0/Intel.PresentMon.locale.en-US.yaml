@@ -1,0 +1,96 @@
+# Created by Anthelion using komac v2.15.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Intel.PresentMon
+PackageVersion: 2.5.0
+PackageLocale: en-US
+Publisher: Intel(R) Corporation
+PublisherUrl: https://www.intel.com/
+PublisherSupportUrl: https://github.com/GameTechDev/PresentMon/issues
+PrivacyUrl: https://www.intel.com/content/www/us/en/privacy/intel-privacy-notice.html
+Author: Intel Corporation
+PackageName: Intel(R) PresentMon
+PackageUrl: https://game.intel.com/intel-presentmon/
+License: MIT
+LicenseUrl: https://github.com/GameTechDev/PresentMon/blob/HEAD/LICENSE.txt
+Copyright: Copyright (C) 2017-2026 Intel Corporation
+CopyrightUrl: https://github.com/GameTechDev/PresentMon/blob/v2.4.1/LICENSE.txt
+ShortDescription: A gaming performance overlay and telemetry application to monitor and measure your gaming experience.
+Description: |-
+  PresentMon is a set of tools to capture and analyze the high-level performance characteristics of graphics applications on Windows.
+  PresentMon traces key performance metrics such as the CPU, GPU, and Display frame durations and latencies; and works across different graphics API such as DirectX, OpenGL, and Vulkan, different hardware configurations, and for both desktop and UWP applications.
+Moniker: presentmon
+Tags:
+- analysis
+- capture
+- event-tracing
+- gaming
+- graphics
+- intel
+- overlay
+- performance
+- telemetry
+ReleaseNotes: |-
+  Release Notes
+
+  🚀 Major Features
+
+  Middleware and IPC Rewrite
+  - Unified Metrics Calculator: Consolidated frame metric calculation system so that dynamic queries, frame queries, and the stand-alone console application all share the same single point of implementation for calculation logic
+  - New Query Framework: Complete rewrite of Middleware query registration and polling
+    - Query registration is now strictly validating queries and outputting detailed info to the diagnostic layer
+    - Dynamic query stats calculations reimplemented, solving several calculation bugs
+    - Service now has visibility on the metrics consumed by each client and enables telemetry accordingly
+  - New IPC: Complete rewrite of IPC that decouples telemetry from frame data and improves transport consistency
+  - Multi-Device Support: Support for querying metrics across multiple GPU devices and system components
+  - Independent Telemetry: It is now possible to gather telemetry data without targeting a presenter, and telemetry data rate is no longer tied to frame rate
+
+  Enhanced Metrics
+  - Improved Animation Error Tracking: Better source tracking and error handling for animation-related metrics
+
+  ETW Session Management
+  - Provider Lifecycle Improvements: Better tracking and management of ETW provider enable/disable operations with proper data quiescing
+  - Session Coordination: Separated ETW session startup from provider enabling for more reliable operation and reduced race conditions
+  - Anticheat Mitigation: Above changes enable PresentMon to gather data from certain titles that otherwise block ETW trace gathering
+
+  🔧 Performance & Reliability Improvements
+
+  Performance
+  - Service now only polls telemetry for a device only when a client is actively consuming metrics for that device
+
+  Logging & Diagnostics
+  - Enhanced Logging System: Significant performance improvements with async logging, throttling, and diagnostic options
+  - Verbose Module Support: Better CLI helpers and diagnostic capabilities for troubleshooting
+  - Crash Recovery: Added log flush on crash and improved error reporting
+  - ETW and Frame Latency: Added detailed debug logging to track ETW event delivery latency and service frame processing latency
+
+  🛠️ API & Integration Updates
+
+  New API Features
+  - Metrics can be tracked for multiple adapters within the same query
+  - Dynamic queries can be polled without a target process (set PID to 0)
+    - Only queries that contain no frame metrics can be used this way
+
+  API Behavior Changes
+  - Query registration validation is much more strict than previously
+  - Most API errors now have detailed diagnostics output to the diagnostics channel (see PresentMonDiagnostics.h)
+  - Metrics related to the CPU (frequency, utilization, name) now are associated with a new System device (ID=65536) instead of the Universal device (ID=0)
+
+  🐛 Bug Fixes
+  - Fixed shader path resolution issues
+  - Resolved race conditions in service backpressure handling
+  - Corrected frame metric calculations for CPU busy/wait times
+  - Fixed frame metric calculation bug when combining percentile and raw stats for the same metric
+  - Fixed percentile calculation algorithm (e.g. 99% was effectively reporting MAX instead)
+  - Fixed Intel adapter LUID detection and memory reporting
+  - Improved ETW session management and provider lifecycle
+
+  📦 Dependencies & Infrastructure
+  - Scriban: Updated to v6.6
+  - CSVHelper: Updated to latest version
+  - IGCL: Updated Intel Graphics Control Library
+  - Installation: Enhanced cleanup of AppData folders during install/uninstall
+  This release represents a significant architectural improvement with the introduction of the middleware and IPC layers while maintaining backward compatibility and improving overall system reliability.
+ReleaseNotesUrl: https://github.com/GameTechDev/PresentMon/releases/tag/v2.5.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
