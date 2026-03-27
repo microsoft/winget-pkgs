@@ -80,4 +80,4 @@ The WinGet community repository has a set of policies restricting the use of cer
 
 If your PR has been assigned to you, a timer will be triggered. You will have 7 days to resolve the issue, or the BOT will automatically close the PR.
 
-Submissions to the repository are reviewed by Windows Package Manager administrators and/or community moderators. To help identify these individuals, we have provided a  [Public Service Announcement](https://github.com/microsoft/winget-pkgs/issues/15674).
+Submissions to the repository are reviewed by Windows Package Manager administrators and/or community moderators. These individuals are identified in [Moderation](Moderation.md#moderators).

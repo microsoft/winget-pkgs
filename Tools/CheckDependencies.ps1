@@ -12,7 +12,7 @@
     Show this script's help
 .EXAMPLE
     PS C:\Projects\winget-pkgs> .\Tools\CheckDependencies.ps1
-    Run the script to output non-existant dependencies
+    Run the script to output non-existent dependencies
 .NOTES
     Please file an issue if you run into errors with this script:
     https://github.com/microsoft/winget-pkgs/issues

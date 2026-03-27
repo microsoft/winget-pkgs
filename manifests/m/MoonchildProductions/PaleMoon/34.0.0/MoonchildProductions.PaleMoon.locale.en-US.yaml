@@ -1,0 +1,71 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: MoonchildProductions.PaleMoon
+PackageVersion: 34.0.0
+PackageLocale: en-US
+Publisher: Moonchild Productions
+PublisherUrl: https://www.palemoon.org/
+PublisherSupportUrl: https://www.palemoon.org/contact/
+PrivacyUrl: https://www.palemoon.org/policies/privacy.shtml
+Author: Moonchild Productions
+PackageName: Pale Moon
+PackageUrl: https://www.palemoon.org/download.shtml
+License: MPL-2.0
+LicenseUrl: https://www.mozilla.org/MPL/2.0
+Copyright: Copyright © 2009-2026 Moonchild Productions - All rights reserved
+CopyrightUrl: https://www.palemoon.org/policies/usercontent.shtml
+ShortDescription: The best browser with fast site rendering, advanced privacy, a sleek design and innovative features.
+Description: |-
+  Pale Moon is an Open Source, Goanna-based web browser available for Microsoft Windows and Linux (with other operating systems in development), focusing on efficiency and ease of use.
+  Pale Moon offers you a browsing experience in a browser completely built from its own, independently developed source that has been forked off from Firefox/Mozilla code a number of years ago, with carefully selected features and optimizations to improve the browser's stability and user experience, while offering full customization and a growing collection of extensions and themes to make the browser truly your own.
+Moniker: palemoon
+Tags:
+- browser
+- gecko
+- internet
+- web
+- web-browser
+- webpage
+ReleaseNotes: |-
+  This is a new milestone release! There are many changes in this milestone; the most important ones are highlighted here.
+
+  New features:
+  - Our default theme on Windows received a refresh and update. It should integrate better with Windows 11 now, and be more responsive to dark accent colors, among other things.
+  - Implemented WeakRef. See implementation notes.
+  - Implemented URL.canParse().
+  - Implemented the inset-block and inset-inline CSS shorthands.
+  - Added a preference (privacy.forgetaboutsite.clearPasswords) to control clearing of passwords when using "forget about this site" in the permissions manager, and disabled clearing of passwords by default, since it was considered unexpected behavior by the community.
+  - Changed our JavaScript PRNG to Xoroshiro128++ to make it more robust while keeping high performance.
+  Important updates and fixes:
+  - Re-landed CSS Cascade Layers support after the previous back-out.
+  - Re-landed CSS color-mix support after the previous back-out. RGB and HSL color spaces only, like previous.
+  - Implemented viewport overflow propagation logic. See implementation notes.
+  - Unprefixed CSS -moz-appearance; Pale Moon now accepts the unprefixed CSS appearance keyword. For compatibility, -moz-appearance and -webkit-appearance (if enabled) have been retained, although the long-term plan is to eventually remove the -moz prefixed one, so if you are an extension or theme developer, please consider switching your CSS to use appearance without a prefix.
+  - Fixed an intermittent but fairly prominent crash-to-desktop due to JavaScript garbage collection on certain modern sites.
+  - Fixed a crash on sites with certain types of CSP handling.
+  - Fixed a crash in WASM.
+  - Updated NSS to 3.90.9 (custom) to pick up several security and stability fixes.
+  - Updated ICU to v78.1. This is a major uplift for our internationalization subsystem, allowing further future developments for the Internationalization API.
+  - Updated Emoji support to Unicode 17.
+  - Updated our expat parser code to a more recent version (2.7.3), fixing various issues.
+  - Improved handling and rendering of emoji clusters.
+  Other changes:
+  - Added support for building on Sparc64 hardware.
+  - Added support for building for NetBSD on Alpha.
+  - Added basic support for building on Mac PowerPC (still a work in progress).
+  - Added basic support for building on LoongArch64 hardware (龍芯 CPUs).
+  - Added support for running on FreeBSD 15.
+  - Removed automatic coloring of auto-filled login fields as it would interfere with various browser and system color schemes.
+    If preferred, this can be reinstated by users with a userContent.css document or e.g. the Stylem extension by leveraging the :autofill CSS pseudo-class.
+  - Restored support for in-process NPAPI plugins, allowing plugin use on systems where out-of-process is undesirable.
+  - Improved JavaScript IonMonkey stability on ARM and Mac SoC hardware.
+  - Linux GTK builds now always build with gio, and gconf support has been removed.
+  - Security issues addressed: CVE-2025-13015, CVE-2026-0879 (DiD), CVE-2026-0880 (DiD), CVE-2026-0889 (DiD), CVE-2026-0883, CVE-2026-0886 (DiD), and several others without a CVE designation.
+  Implementation notes:
+  - This milestone implements WeakRef in the platform in 2 modes, controlled by a new preference javascript.options.weakrefs. In the default mode (false), WeakRef does not allow page content to reach into the JavaScript engine to coerce garbage collection, while still offering the front-end API to web content (effectively creating a stub). The other mode (true) allows this coersion and gives potentially malicious web scripting some* control over the JavaScript garbage collector. It is not recommended to set this to true for general use. Only enable this if your situation is running trusted code and explicitly requires nudging the JavaScript engine to dereference objects. We resisted having this strongly discouraged and potentially dangerous API at all, but some sites started to use WeakRef unconditionally and breaking without the API front-end, so this compromise was implemented, leaving control in the hands of the user.
+    * The spec only allows for code to hint/coerce and does not guarantee if or when dereferencing happens.
+  - A number of sites (including some top Internet sites) have started using overflow-x: clip without overflow-y on full-document elements (document root/<html> or <body>). While doing this makes little to no logical sense, our strict implementation of clip (since 33.9.0, also see the implementation notes there) would, as a result, create unscrollable pages.There is some special logic for this (viewport overflow propagation) described in the relevant drafts which we have now implemented, updating our overflow: clip implementation to avoid the previously problematic strict behaviour in these particular cases.
+ReleaseNotesUrl: https://www.palemoon.org/releasenotes.shtml
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
