@@ -1,0 +1,40 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: libjpeg-turbo.libjpeg-turbo.VC
+PackageVersion: 3.1.4.1
+PackageLocale: en-US
+Publisher: libjpeg-turbo
+PublisherUrl: https://libjpeg-turbo.org/
+PublisherSupportUrl: https://github.com/libjpeg-turbo/libjpeg-turbo/issues
+Author: Darrell Commander
+PackageName: libjpeg-turbo SDK for Visual C++
+PackageUrl: https://libjpeg-turbo.org/
+License: IJG license, Modified (3-clause) BSD License and zlib License
+LicenseUrl: https://github.com/libjpeg-turbo/libjpeg-turbo/blob/main/LICENSE.md
+Copyright: Copyright (C)2009-2026 D. R. Commander. All Rights Reserved.
+ShortDescription: SIMD-accelerated libjpeg-compatible JPEG codec library
+Description: libjpeg-turbo is a JPEG image codec that uses SIMD instructions (MMX, SSE2, NEON, AltiVec) to accelerate baseline JPEG compression and decompression on x86, x86-64, ARM, and PowerPC systems. On such systems, libjpeg-turbo is generally 2-6x as fast as libjpeg, all else being equal. On other types of systems, libjpeg-turbo can still outperform libjpeg by a significant amount, by virtue of its highly-optimized Huffman coding routines. In many cases, the performance of libjpeg-turbo rivals that of proprietary high-speed JPEG codecs.
+Tags:
+- jpeg
+- libjpeg
+ReleaseNotes: |-
+  Significant changes relative to 3.1.4:
+  1. Fixed multiple issues, some long-standing and some that were regressions introduced in 3.1.4, that made the CMake package config files non-relocatable and broke the --prefix option to cmake --install.
+  Significant changes relative to 3.1.3:
+  1. Fixed an issue in the TurboJPEG 2.x compatibility wrapper whereby, if a calling program attempted to decompress a lossless JPEG image using tjDecompress2() with decompression scaling, the decompressed image was unexpectedly unscaled. This could have led to a buffer overrun if the caller allocated the packed-pixel destination buffer based on the assumption that the decompressed image would be scaled down.
+  2. The SIMD dispatchers now use getauxval() or elf_aux_info(), if available, to detect support for Neon and AltiVec instructions on AArch32 and PowerPC Linux, Android, and *BSD systems.
+  3. Hardened the libjpeg API against hypothetical applications that may erroneously set one of the exposed quantization table values to 0 just before calling jpeg_start_compress(). (This would never happen in a correctly-written program, because jpeg_add_quant_table() clamps all values less than 1.)
+  4. Fixed a division-by-zero error that occurred when attempting to use the jpegtran -drop option with a specially-crafted malformed drop image (specifically an image in which one or more of the quantization table values was 0.)
+  5. Fixed an issue in the TurboJPEG API library's data destination manager that manifested as:
+     - a memory leak that occurred if a pre-allocated JPEG destination buffer was passed to tj3Compress*() or tj3Transform(), TJPARAM_NOREALLOC was unset, and it was necessary for the library to re-allocate the buffer to accommodate the destination image, and
+     - a potential caller double free that occurred if pre-allocated JPEG destination buffers were passed to tj3Transform(), multiple lossless transform operations were performed, and it was necessary for the library to re-allocate the second buffer to accommodate the second destination image.
+  6. Fixed an issue in tj3Transform() whereby, if TJPARAM_SAVEMARKERS was set to 2 or 4, TJXOPT_COPYNONE was not specified, an ICC profile was extracted from the source image, and another ICC profile was associated with the TurboJPEG instance using tj3SetICCProfile(), both profiles were embedded in the destination image. The documented API behavior is for TJXOPT_COPYNONE to take precedence over TJPARAM_SAVEMARKERS and for TJPARAM_SAVEMARKERS to take precedence over the associated ICC profile. Thus, tj3Transform() now ignores the associated ICC profile unless TJXOPT_COPYNONE is specified or TJPARAM_SAVEMARKERS is set to something other than 2 or 4.
+  7. Fixed an oversight in the libjpeg API whereby, if a calling application manually set cinfo.Ss (the predictor selection value) to a value less than 1 or greater than 7 after calling jpeg_enable_lossless() and prior to calling jpeg_start_compress(), an incorrect (all white) lossless JPEG image was silently generated.
+  8. Further hardened the TurboJPEG Java API against hypothetical applications that may erroneously pass huge values to one of the compression, YUV encoding, decompression, YUV decoding, or packed-pixel image I/O methods, leading to signed integer overflow in the JNI wrapper's buffer size checks that rendered those checks ineffective.
+ReleaseNotesUrl: https://github.com/libjpeg-turbo/libjpeg-turbo/releases/tag/3.1.4.1
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://libjpeg-turbo.org/Documentation/Documentation
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

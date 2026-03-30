@@ -1,0 +1,66 @@
+# Created with komac v2.15.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: eitsupi.arf
+PackageVersion: 0.2.6
+PackageLocale: en-US
+Publisher: eitsupi
+PublisherUrl: https://github.com/eitsupi
+PublisherSupportUrl: https://github.com/eitsupi/arf/issues
+Author: arf authors
+PackageName: arf console
+PackageUrl: https://github.com/eitsupi/arf
+License: MIT
+LicenseUrl: https://github.com/eitsupi/arf/blob/HEAD/LICENSE.md
+Copyright: Copyright (c) 2026 arf authors
+CopyrightUrl: https://github.com/eitsupi/arf/blob/HEAD/LICENSE.md
+ShortDescription: Alternative R Frontend — a modern R console written in Rust
+Description: arf is a modern, cross-platform R console written in Rust. It provides a rich interactive experience with fuzzy help search, intelligent history navigation, and syntax highlighting—all with fast startup times.
+Moniker: arf
+Tags:
+- console
+- r
+- rust
+- terminal
+ReleaseNotes: |-
+  Release Notes
+  Added
+  - Experimental: Headless mode (arf headless) for running R without the interactive REPL, controlled entirely via JSON-RPC IPC. Designed for AI agents and CI environments where a terminal is not available (#119, #122, #123, #124, #125, #126)
+    - --bind, --pid-file, --quiet, --log-file options and graceful shutdown on SIGTERM/SIGHUP
+    - --json flag to output session info as JSON on startup, enabling programmatic discovery of socket path and session details (#130)
+    - Persists evaluated commands to history database with session-scoped isolation via unique session IDs (#133, #134)
+  - Experimental: IPC history method and arf ipc history CLI subcommand for querying R command history from external tools (#136)
+  - Experimental: IPC session info (arf ipc session, arf ipc list) and session file now include log_file field, exposing the headless mode log file path for debugging and monitoring
+  Changed
+  - Experimental/Breaking: All arf ipc subcommands now output JSON to stdout (pretty-printed on terminal, compact when piped) (#137)
+    - Commands that previously used plain text (list, eval, send, shutdown) now return structured JSON
+    - Errors are written to stderr as JSON objects of the form {"error": {"code": "...", "message": "...", "hint": ..., "data": ...}} with all fields always present (null when not applicable) for a fixed schema
+    - Exit codes now indicate error category: 2 (transport), 3 (session), 4 (protocol)
+  - Experimental/Breaking: arf ipc eval no longer exits with code 1 for R evaluation errors. R errors are returned as part of the JSON response (exit 0) to distinguish from IPC failures. The value and error fields are always present (null when not applicable)
+  Removed
+  - Experimental/Breaking: Remove the arf ipc status subcommand, which is superseded by arf ipc session (returns a superset of the same information via IPC)
+  - Experimental: Remove send as a JSON-RPC method alias for user_input. The CLI subcommand arf ipc send is unchanged
+  Install arf-console 0.2.6
+  Install prebuilt binaries via shell script
+  curl --proto '=https' --tlsv1.2 -LsSf https://github.com/eitsupi/arf/releases/download/v0.2.6/arf-console-installer.sh | sh
+  Install prebuilt binaries via powershell script
+  powershell -ExecutionPolicy Bypass -c "irm https://github.com/eitsupi/arf/releases/download/v0.2.6/arf-console-installer.ps1 | iex"
+  Download arf-console 0.2.6
+  ─────────────────────────────────────────────────┬───────────────────┬─────────────
+  File                                             │Platform           │Checksum
+  ─────────────────────────────────────────────────┼───────────────────┼─────────────
+  arf-console-aarch64-apple-darwin.tar.xz          │Apple Silicon macOS│checksum
+  ─────────────────────────────────────────────────┼───────────────────┼─────────────
+  arf-console-x86_64-apple-darwin.tar.xz           │Intel macOS        │checksum
+  ─────────────────────────────────────────────────┼───────────────────┼─────────────
+  arf-console-aarch64-pc-windows-msvc.zip          │ARM64 Windows      │checksum
+  ─────────────────────────────────────────────────┼───────────────────┼─────────────
+  arf-console-x86_64-pc-windows-msvc.zip           │x64 Windows        │checksum
+  ─────────────────────────────────────────────────┼───────────────────┼─────────────
+  arf-console-aarch64-unknown-linux-gnu.tar.xz     │ARM64 Linux        │checksum
+  ─────────────────────────────────────────────────┼───────────────────┼─────────────
+  arf-console-x86_64-unknown-linux-gnu.tar.xz      │x64 Linux          │checksum
+  ─────────────────────────────────────────────────┴───────────────────┴─────────────
+ReleaseNotesUrl: https://github.com/eitsupi/arf/releases/tag/v0.2.6
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
