@@ -39,18 +39,34 @@ Tags:
 - streaming
 - webrtc
 ReleaseNotes: |-
-  New major features
-  TODO
-
   Fixes and improvements
-  TODO
+  General
+  - prevent directory traversal attacks (#5602) Path names are used as part of paths in several components: in the recorder, in the playback server and in every HTTP-based component (WebRTC, HLS, API). Special characters that allow to escape from the intended directory are now forbidden in order to prevent directory traversal attacks.
 
-  Security
-  Binaries are compiled from source code by the Release workflow, which is a fully-visible process that prevents any change or external interference in produced artifacts.
-  Checksums of binaries are also published in a public blockchain by using GitHub Attestations, and they can be verified by running:
-  ls mediamtx_* | xargs -L1 gh attestation verify --repo bluenviron/mediamtx
-  You can verify checksums of binaries by downloading checksums.sha256 and running:
-  cat checksums.sha256 | grep "$(ls mediamtx_*)" | sha256sum --check
+  RTSP
+  - client: fill server name indication (SNI) of TLS connections (bluenviron/gortsplib#1038)
+
+  RTMP
+  - implement AbortMessage (#4673) (bluenviron/gortmplib#59)
+  - client: fill server name indication (SNI) of TLS connections (bluenviron/gortmplib#63)
+
+  WebRTC
+  - fix random absolute timestamps with Opus, G711 and LPCM (#5597) When rewriting audio RTP timestamps in WebRTC egress, NTP was derived using regenerated packet timestamps minus the incoming RTP base timestamp. That mixed timestamp domains and could shift absolute time by an arbitrary offset while still exposing mapping as available. Fix by using a consistent outgoing RTP domain in rewritten audio paths
+  - strip TWCC extension of incoming RTP packets (#5146) (#5605) The TWCC extension is used as part of the WebRTC congestion control algorithm placed between the publisher and the server. If this extension is routed untouched from the server to readers, it messes with the congestion control algorithm present between the server and each reader. Remove it.
+  
+  RPI Camera
+  - restore Docker compatibility with armv6 devices (#5590) (#5595)
+  - restore compatibility with armv6 devices (#5590) (bluenviron/mediamtx-rpicamera#95)
+
+  Dependencies
+  - github.com/bluenviron/gortmplib updated from v0.3.0 to v0.3.1
+  - github.com/bluenviron/gortsplib/v5 updated from v5.5.0 to v5.5.1
+  - github.com/gin-contrib/pprof updated from v1.5.3 to v1.5.4
+  - github.com/go-git/go-git/v5 updated from v5.17.0 to v5.17.2
+  - github.com/pion/ice/v4 updated from v4.2.1 to v4.2.2
+  - github.com/pion/webrtc/v4 updated from v4.2.9 to v4.2.11
+  - github.com/pion/sctp updated from v1.9.2 to v1.9.4
+  - github.com/bluenviron/mediamtx-rpicamera updated from v2.5.4 to v2.5.5
 ReleaseNotesUrl: https://github.com/bluenviron/mediamtx/releases/tag/v1.17.1
 ManifestType: defaultLocale
 ManifestVersion: 1.12.0
