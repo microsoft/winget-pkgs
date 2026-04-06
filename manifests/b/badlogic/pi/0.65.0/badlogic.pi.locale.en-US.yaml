@@ -1,0 +1,101 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: badlogic.pi
+PackageVersion: 0.65.0
+PackageLocale: en-US
+Publisher: Mario Zechner
+PublisherUrl: https://github.com/badlogic
+PublisherSupportUrl: https://github.com/badlogic/pi-mono/issues
+Author: Mario Zechner
+PackageName: pi
+PackageUrl: https://github.com/badlogic/pi-mono
+License: MIT
+LicenseUrl: https://github.com/badlogic/pi-mono/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Mario Zechner
+ShortDescription: AI coding assistant with read, bash, edit, write tools
+Description: |-
+  Pi is a minimal terminal coding harness. Adapt pi to your workflows, not the other way around, without having to fork and modify pi internals. Extend it with TypeScript Extensions, Skills, Prompt Templates, and Themes. Put your extensions, skills, prompt templates, and themes in Pi Packages and share them with others via npm or git.
+  Pi ships with powerful defaults but skips features like sub agents and plan mode. Instead, you can ask pi to build what you want or install a third party pi package that matches your workflow.
+  Pi runs in four modes: interactive, print or JSON, RPC for process integration, and an SDK for embedding in your own apps. See openclaw/openclaw for a real-world SDK integration.
+Moniker: pi
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  New Features
+  - Session runtime API: createAgentSessionRuntime() and AgentSessionRuntime provide a closure-based runtime that recreates cwd-bound services and session config on every session switch. Startup, /new, /resume, /fork, and import all use the same creation path. See docs/sdk.md and examples/sdk/13-session-runtime.ts.
+  - Label timestamps in /tree: Toggle timestamps on tree entries with Shift+T, with smart date formatting and timestamp preservation through branching (#2691 by @w-winter)
+  - defineTool() helper: Create standalone custom tool definitions with full TypeScript parameter type inference, no manual casts needed (#2746). See docs/extensions.md.
+  - Unified diagnostics: Arg parsing, service creation, session option resolution, and resource loading all return structured diagnostics (info/warning/error) instead of logging or exiting. The app layer decides presentation and exit behavior.
+  Breaking Changes
+  - Removed extension post-transition events session_switch and session_fork. Use session_start with event.reason ("startup" | "reload" | "new" | "resume" | "fork"). For "new", "resume", and "fork", session_start includes previousSessionFile.
+  - Removed session-replacement methods from AgentSession. Use AgentSessionRuntime for newSession(), switchSession(), fork(), and importFromJsonl(). Cross-cwd session replacement rebuilds all cwd-bound runtime state and replaces the live AgentSession instance.
+  - Removed session_directory from extension and settings APIs.
+  - Unknown single-dash CLI flags (e.g. -s) now produce an error instead of being silently ignored.
+  Migration: Extensions
+  Before:
+  pi.on("session_switch", async (event, ctx) => { ... });
+  pi.on("session_fork", async (_event, ctx) => { ... });
+  After:
+  pi.on("session_start", async (event, ctx) => {
+    // event.reason: "startup" | "reload" | "new" | "resume" | "fork"
+    // event.previousSessionFile: set for "new", "resume", "fork"
+  });
+  Migration: SDK session replacement
+  Before:
+  await session.newSession();
+  await session.switchSession("/path/to/session.jsonl");
+  After:
+  import {
+    type CreateAgentSessionRuntimeFactory,
+    createAgentSessionFromServices,
+    createAgentSessionRuntime,
+    createAgentSessionServices,
+    getAgentDir,
+    SessionManager,
+  } from "@mariozechner/pi-coding-agent";
+
+  const createRuntime: CreateAgentSessionRuntimeFactory = async ({ cwd, sessionManager, sessionStartEvent }) => {
+    const services = await createAgentSessionServices({ cwd });
+    return {
+      ...(await createAgentSessionFromServices({ services, sessionManager, sessionStartEvent })),
+      services,
+      diagnostics: services.diagnostics,
+    };
+  };
+
+  const runtime = await createAgentSessionRuntime(createRuntime, {
+    cwd: process.cwd(),
+    agentDir: getAgentDir(),
+    sessionManager: SessionManager.create(process.cwd()),
+  });
+
+  await runtime.newSession();
+  await runtime.switchSession("/path/to/session.jsonl");
+  await runtime.fork("entry-id");
+
+  // After replacement, runtime.session is the new live session.
+  // Rebind any session-local subscriptions or extension bindings.
+  Added
+  - Added createAgentSessionRuntime() and AgentSessionRuntime for runtime-backed session replacement. The runtime takes a CreateAgentSessionRuntimeFactory closure that closes over process-global fixed inputs and recreates cwd-bound services and session config for each effective cwd. Startup and later /new, /resume, /fork, import all use the same factory.
+  - Added unified diagnostics model (info/warning/error) for arg parsing, service creation, session option resolution, and resource loading. Creation logic no longer logs or exits. The app layer decides presentation and exit behavior.
+  - Added error diagnostics for missing explicit CLI resource paths (-e, --skill, --prompt-template, --theme)
+  - Added defineTool() so standalone and array-based custom tool definitions keep inferred parameter types without manual casts (#2746)
+  - Added label timestamps to the session tree with a Shift+T toggle in /tree, smart date formatting, and timestamp preservation through branching (#2691 by @w-winter)
+  Fixed
+  - Fixed startup resource loading to reuse the initial ResourceLoader for the first runtime, so extensions are not loaded twice before session startup and session_start handlers still fire for singleton-style extensions (#2766)
+  - Fixed retry settlement so retried agent runs wait for the full retry cycle to complete before declaring idle, preventing stale state after transient errors
+  - Fixed theme export colors to resolve theme variables the same way as colors, so /export HTML backgrounds now honor entries like pageBg: "base" instead of requiring inline hex values (#2707)
+  - Fixed Bedrock throttling errors being misidentified as context overflow, causing unnecessary compaction instead of retry (#2699 by @xu0o0)
+  - Added tool streaming support for newer Z.ai models (#2732 by @kaofelix)
+ReleaseNotesUrl: https://github.com/badlogic/pi-mono/releases/tag/v0.65.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
