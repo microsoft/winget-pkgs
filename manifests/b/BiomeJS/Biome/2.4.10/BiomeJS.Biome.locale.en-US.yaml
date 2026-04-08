@@ -1,0 +1,95 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: BiomeJS.Biome
+PackageVersion: 2.4.10
+PackageLocale: en-US
+Publisher: BiomeJS
+PublisherUrl: https://biomejs.dev/
+PublisherSupportUrl: https://github.com/biomejs/biome/issues
+Author: Biome Developers and Contributors
+PackageName: Biome
+PackageUrl: https://biomejs.dev/
+License: Apache-2.0
+Copyright: Copyright (c) 2023-present Biome Developers and Contributors
+ShortDescription: Biome is a toolchain for web projects, aimed at providing functionalities to maintain them. It offers a formatter and linter, usable via CLI and LSP.
+Moniker: biome
+Tags:
+- css
+- formatter
+- javascript
+- json
+- jsx
+- linter
+- static-code-analysis
+- typescript
+- web
+ReleaseNotes: |-
+  2.4.10
+
+  Patch Changes
+  - #8838 f3a6a6b Thanks @baeseokjae! - Added new lint nursery rule noImpliedEval.
+    The rule detects implied eval() usage through functions like setTimeout, setInterval, and setImmediate when called with string arguments.
+    // Invalid
+    setTimeout("alert('Hello');", 100);
+    // Valid
+    setTimeout(() => alert("Hello"), 100);
+  - #9320 93c3b6c Thanks @taberoajorge! - Fixed #7664: noUnusedVariables no longer reports false positives for TypeScript namespace declarations that participate in declaration merging with an exported or used value declaration (const, function, or class) of the same name. The reverse direction is also handled: a value declaration merged with an exported namespace is no longer flagged.
+  - #9630 1dd4a56 Thanks @raashish1601! - Fixed #9629: noNegationElse now keeps ternary branch comments attached to the correct branch when applying its fixer.
+  - #9216 04243b0 Thanks @FrederickStempfle! - Fixed #9061: noProcessEnv now also detects process.env when process is imported from the "process" or "node:process" modules.
+    Previously, only the global process object was flagged:
+    import process from "node:process";
+    // This was not flagged, but now it is:
+    console.log(process.env.NODE_ENV);
+  - #9692 61b7ec5 Thanks @mkosei! - Fixed Svelte #each destructuring parsing and formatting for nested patterns such as [key, { a, b }].
+  - #9627 06a0f35 Thanks @ematipico! - Fixed #191: Improved the performance of how the Biome Language Server pulls code actions and diagnostics.
+    Before, code actions were pulled and computed all at once in one request. This approach couldn't work in big files, and caused Biome to stale and have CPU usage spikes up to 100%.
+    Now, code actions are pulled and computed lazily, and Biome won't choke anymore in big files.
+  - #9643 5bfee36 Thanks @dyc3! - Fixed #9347: useVueValidVBind no longer reports valid object bindings like v-bind="props".
+  - #9627 06a0f35 Thanks @ematipico! - Fixed assist diagnostics being invisible when using --diagnostic-level=error. Enforced assist violations (e.g. useSortedKeys) were filtered out before being promoted to errors, causing biome check to incorrectly return success.
+  - #9695 9856a87 Thanks @dyc3! - Added the new nursery rule noUnsafePlusOperands, which reports + and += operations that use object-like, symbol, unknown, or never operands, or that mix number with bigint.
+  - #9627 06a0f35 Thanks @ematipico! - Fixed duplicate parse errors in check and ci output. When a file had syntax errors, the same parse error was printed twice and the error count was inflated.
+  - #9627 06a0f35 Thanks @ematipico! - Improved the performance of the commands lint and check when they are called with --write.
+  - #9627 06a0f35 Thanks @ematipico! - Fixed --diagnostic-level not fully filtering diagnostics. Setting --diagnostic-level=error now correctly excludes warnings and infos from both the output and the summary counts.
+  - #9623 13b3261 Thanks @ematipico! - Fixed #9258: --skip no longer causes suppressions/unused warnings for suppression comments targeting skipped rules or domains.
+  - #9631 599dd04 Thanks @raashish1601! - Fixed #9625: experimentalEmbeddedSnippetsEnabled no longer crashes when a file mixes formatable CSS-in-JS templates with tagged templates that the embedded formatter can't currently delegate, such as a styled-components interpolation returning `css```.
+
+  What's Changed
+  - feat(linter): add noImpliedEval rule by @baeseokjae in #8838
+  - fix(linter): detect process.env when process is imported from module by @FrederickStempfle in #9216
+  - fix(cli): skip with domains should not report by @ematipico in #9623
+  - fix: avoid unresolved embedded CSS tag ranges by @raashish1601 in #9631
+  - chore(deps): update dependency happy-dom to v20.8.8 [security] by @renovate[bot] in #9628
+  - fix(cli): improve code actions filtering by @ematipico in #9627
+  - fix(lint): preserve ternary branch comments in noNegationElse by @raashish1601 in #9630
+  - fix(markdown-parser): incorrect inline link R_PAREN token range by @jfmcdowell in #9642
+  - fix(useVueValidVBind): don't flag missing arguments by @dyc3 in #9643
+  - chore(deps): update rust crate terminal_size to 0.4.4 by @raashish1601 in #9646
+  - test(markdown-parser): add criterion benchmarks and CI workflow by @jfmcdowell in #9657
+  - chore(deps): update dependency happy-dom to v20.8.9 [security] by @renovate[bot] in #9694
+  - chore(Cargo.toml): clean up, compile insta in opt-level=3 by @Conaclos in #9698
+  - fix(lint): handle namespace declaration merging in noUnusedVariables by @taberoajorge in #9320
+  - feat(md/fmt): links, codeblocks by @ematipico in #9699
+  - fix(html): support nested svelte each destructuring by @mkosei in #9692
+  - feat(lint/js): add noUnsafePlusOperands by @dyc3 in #9695
+  - chore(deps): update rust crate papaya to 0.2.4 by @renovate[bot] in #9707
+  - chore(deps): update rust crate rustc-hash to 2.1.2 by @renovate[bot] in #9710
+  - chore(deps): update rust crate boa_engine to 0.21.1 by @renovate[bot] in #9706
+  - chore(deps): update dependency tombi to v0.9.8 by @renovate[bot] in #9705
+  - chore(deps): update dependency rust to v1.94.1 by @renovate[bot] in #9704
+  - chore(deps): update dependency dprint to v0.53.1 by @renovate[bot] in #9703
+  - chore(deps): update rust crate quickcheck_macros to 1.2.0 by @renovate[bot] in #9601
+  - chore: update sponsors by @ematipico in #9714
+  - ci: release by @github-actions[bot] in #9622
+
+  New Contributors
+  - @raashish1601 made their first contribution in #9631
+  - @taberoajorge made their first contribution in #9320
+  - @mkosei made their first contribution in #9692
+  Full Changelog: https://github.com/biomejs/biome/compare/@biomejs/biome@2.4.9...@biomejs/biome@2.4.10
+ReleaseNotesUrl: https://github.com/biomejs/biome/releases/tag/@biomejs/biome@2.4.10
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://biomejs.dev/guides/getting-started/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

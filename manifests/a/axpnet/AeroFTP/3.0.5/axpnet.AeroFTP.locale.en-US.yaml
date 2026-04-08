@@ -1,0 +1,72 @@
+# Created with WinGet Releaser using komac v2.15.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: axpnet.AeroFTP
+PackageVersion: 3.0.5
+PackageLocale: en-US
+Publisher: axpnet
+PublisherUrl: https://github.com/axpnet
+PublisherSupportUrl: https://github.com/axpnet/aeroftp/issues
+Author: axpnet
+PackageName: AeroFTP
+PackageUrl: https://github.com/axpnet/aeroftp
+License: GPL-3.0
+LicenseUrl: https://github.com/axpnet/aeroftp/blob/HEAD/LICENSE
+ShortDescription: A modern, multi-protocol file manager and FTP client with integrated AI, cloud sync, and military-grade encryption.
+Description: |-
+  AeroFTP is an open-source, multi-protocol file manager built with Tauri 2 (Rust + React 18 + TypeScript).
+  It supports 16 protocols (FTP, FTPS, SFTP, WebDAV, S3, Google Drive, Dropbox, OneDrive, MEGA, Box, pCloud, Azure Blob, 4shared, Filen, Zoho WorkDrive, and Cryptomator vaults),
+  features an AI assistant with 45 tools and 15 LLM providers, military-grade encrypted vaults (AES-256-GCM-SIV + Argon2id),
+  bidirectional real-time sync, a built-in code editor, SSH terminal, and media player with visualizers.
+  Available in 47 languages with 4 themes.
+Moniker: aeroftp
+Tags:
+- cloud-storage
+- encryption
+- file-manager
+- file-transfer
+- ftp
+- ftp-client
+- multi-protocol
+- rust
+- s3
+- sftp
+- sync
+- tauri
+- webdav
+ReleaseNotes: |-
+  [3.0.5] - 2026-03-20
+  SFTP Upload Fix, GitHub Integration Pro & Download Safety
+  Critical fix for SFTP file uploads, complete GitHub integration with multi-repo, co-authoring, Pages monitoring, and atomic download writes across all 22 providers.
+  > First release tagged and published entirely from AeroFTP with aeroftp[bot].
+  Fixed
+  - SFTP upload 0-byte bug (critical): File uploads via russh/russh-sftp produced 0-byte files on the server due to a write buffering race condition in russh 0.57.x. The SFTP upload backend was replaced with ssh2/libssh2 SCP, which reliably delivers file content. Downloads, listing, and navigation remain on russh. Identified by the development team through systematic root cause analysis and 10 fix attempts against a live NAS target
+  - Atomic download writes: All 22 providers now write downloads to a .aerotmp temporary file and atomically rename on completion. If a download fails mid-stream, the original file is untouched and no 0-byte file is left behind
+  Added
+  - GitHub PEM vault storage: GitHub App .pem private keys are now encrypted (AES-256-GCM) and stored in the vault on first import. Reconnection uses the vault copy — the original .pem file can be safely deleted
+  - GitHub token expiry badges: Dynamic status indicators show token state (valid, expiring soon, expired) with auto-refresh messaging
+  - GitHub PEM error messages: Specific, actionable error messages for missing, empty, or invalid PEM files instead of generic "InvalidKeyFormat"
+  - ssh2 dependency: Added ssh2 0.9.5 with vendored OpenSSL for reliable SFTP uploads via SCP protocol
+  - GitHub App co-authoring: Commits via App (.pem) mode now show both the repository owner (author) and aeroftp[bot] (committer) with dual avatars on GitHub
+  - GitHub auth mode badge: Colored badge (APP/PAT/OAuth) on saved GitHub servers for instant identification
+  - GitHub token countdown: Live remaining time in saved server subtitle (green >15min, amber <15min, red expired) with auto-refresh messaging
+  - 0 B file alert badge: Warning triangle on files with 0 bytes in list and grid views (local + remote panels)
+  - GitHub Pages browser: Site info, deployment history, build status, custom domain, and "Open Site" button for repos with GitHub Pages enabled (auto-detected via API)
+  - GitHub PAT vault storage: Personal Access Tokens encrypted in vault on first use; pre-populated for new connections to different repos
+  - GitHub OAuth vault storage: Device Flow tokens stored in vault; "Already authorized" badge for instant multi-repo setup
+  - GitHub multi-repo: Connect to multiple GitHub repositories simultaneously with separate tabs (APP, PAT, OAuth modes coexist)
+  - GitHub context menu icons: "Commit" with GitHub icon replaces "Upload" on local panel; "Delete" and "Rename" show GitHub icon on remote panel
+  - Release CHANGELOG import: "Import from CHANGELOG" button reads CHANGELOG.md from repo and auto-populates release body matching the tag version
+  - Release form improvements: Wider dialog (max-w-2xl), markdown preview toggle, smart tag suggestion (next patch version), resizable textarea
+  - github_read_file command: Generic Tauri command to read any text file from the connected GitHub repository
+  - 12 new i18n keys: GitHub Pages, PEM vault, token status, 0B warning, context menu, auth status in 47 languages
+  Changed
+  - SFTP upload architecture: Hybrid model — russh for SSH connection lifecycle, listing, downloads; ssh2/SCP for uploads with post-upload size verification
+  - README: AeroCloud documentation link updated to docs.aeroftp.app
+  Downloads:
+  - Windows: .msi installer or .exe
+  - macOS: .dmg disk image
+  - Linux: .deb, .rpm, .snap, or .AppImage
+ReleaseNotesUrl: https://github.com/axpnet/aeroftp/releases/tag/v3.0.5
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

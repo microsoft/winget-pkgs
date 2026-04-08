@@ -1,0 +1,72 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: astral-sh.uv
+PackageVersion: 0.11.0
+PackageLocale: en-US
+Publisher: Astral Software Inc.
+PublisherUrl: https://astral.sh/
+PublisherSupportUrl: https://github.com/astral-sh/uv/issues
+Author: Astral Software Inc.
+PackageName: uv
+PackageUrl: https://github.com/astral-sh/uv
+License: Apache-2.0 or MIT
+LicenseUrl: https://github.com/astral-sh/uv/blob/HEAD/README.md#license
+Copyright: Copyright (c) 2026 Astral Software Inc.
+ShortDescription: An extremely fast Python package and project manager, written in Rust.
+Description: An extremely fast Python package and project manager, written in Rust. Designed as a single tool to replace pip, pip-tools, pipx, poetry, pyenv, twine, virtualenv workflows, and more.
+Moniker: uv
+Tags:
+- python
+ReleaseNotes: |-
+  Released on 2026-03-23.
+  Breaking changes
+  This release includes changes to the networking stack used by uv. While we think that breakage will be rare, it is possible that these changes will result in the rejection of certificates previously trusted by uv so we have marked the change as breaking out of an abundance of caution.
+  The changes are largely driven by the upgrade of reqwest, which powers uv's HTTP clients, to v0.13 which included some breaking changes to TLS certificate verification.
+  The following changes are included:
+  - rustls-platform-verifier is used instead of rustls-native-certs and webpki for certificate verification
+    This change should have no effect unless you are using the native-tls option to enable reading system certificates.
+    rustls-platform-verifier delegates to the system for certificate validation (e.g., Security.framework on macOS) instead of eagerly loading certificates from the system and verifying them via webpki. The effects of this change will vary based on the operating system. In general, uv's certificate validation should now be more consistent with browsers and other native applications. However, this is the most likely cause of breaking changes in this release. Some previously failing certificate chains may succeed, and some previously accepted certificate chains may fail. In either case, we expect the validation to be more correct and welcome reports of regressions.
+    In particular, because more responsibility for validating the certificate is transferred to your system's security library, some features like CA constraints or revocation of certificates via OCSP and CRLs may now be used.
+    This change should improve performance when using system certificate on macOS, as uv no longer needs to load all certificates from the keychain at startup.
+  - aws-lc is used instead of ring for a cryptography backend
+    There should not be breaking changes from this change. We expect this to expand support for certificate signature algorithms.
+  -  --native-tls is deprecated in favor of a new --system-certs flag
+    The --native-tls flag is still usable and has identical behavior to --system-certs.
+    This change was made to reduce confusion about the TLS implementation uv uses. uv always uses rustls not native-tls.
+  - Building uv on x86-64 and i686 Windows requires NASM
+    NASM is required by aws-lc. If not found on the system, a prebuilt blob provided by aws-lc-sys will be used.
+    If you are not building uv from source, this change has no effect.
+    See the CONTRIBUTING guide for details.
+  - Empty SSL_CERT_FILE values are ignored (for consistency with SSL_CERT_DIR)
+  See #18550 for details.
+  Python
+  - Enable frame pointers for improved profiling on Linux x86-64 and aarch64
+  See the python-build-standalone release notes for details.
+  Enhancements
+  - Treat 'Dynamic' values as case-insensitive (#18669)
+  - Use a dedicated error for invalid cache control headers (#18657)
+  - Enable checksum verification in the generated installer script (#18625)
+  Preview features
+  - Add --service-format and --service-url to uv audit (#18571)
+  Performance
+  - Avoid holding flat index lock across indexes (#18659)
+  Bug fixes
+  - Find the dynamic linker on the file system when sniffing binaries fails (#18457)
+  - Fix export of conflicting workspace members with dependencies (#18666)
+  - Respect installed settings in uv tool list --outdated (#18586)
+  - Treat paths originating as PEP 508 URLs which contain expanded variables as relative (#18680)
+  - Fix uv export for workspace member packages with conflicts (#18635)
+  - Continue to alternative authentication providers when the pyx store has no token (#18425)
+  - Use redacted URLs for log messages in cached client (#18599)
+  Documentation
+  - Add details on Linux versions to the platform policy (#18574)
+  - Clarify FLASH_ATTENTION_SKIP_CUDA_BUILD guidance for flash-attn installs (#18473)
+  - Split the dependency bots page into two separate pages (#18597)
+  - Split the alternative indexes page into separate pages (#18607)
+ReleaseNotesUrl: https://github.com/astral-sh/uv/releases/tag/0.11.0
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://docs.astral.sh/uv/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
