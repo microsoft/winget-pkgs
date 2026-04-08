@@ -1,0 +1,67 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: RightNow-AI.OpenFang
+PackageVersion: 0.5.7
+PackageLocale: en-US
+Publisher: RightNow AI, Inc.
+PublisherUrl: https://www.rightnowai.co/
+PublisherSupportUrl: https://github.com/RightNow-AI/openfang/issues
+PrivacyUrl: https://www.rightnowai.co/privacy-policy
+Author: RightNow AI, Inc.
+PackageName: OpenFang
+PackageUrl: https://www.openfang.sh/
+License: MIT
+LicenseUrl: https://github.com/RightNow-AI/openfang/blob/HEAD/LICENSE-MIT
+Copyright: Copyright (c) 2026 OpenFang Contributors
+ShortDescription: Open-source Agent Operating System
+Description: |-
+  OpenFang is an open-source Agent Operating System — not a chatbot framework, not a Python wrapper around an LLM, not a "multi-agent orchestrator." It is a full operating system for autonomous agents, built from scratch in Rust.
+  Traditional agent frameworks wait for you to type something. OpenFang runs autonomous agents that work for you — on schedules, 24/7, building knowledge graphs, monitoring targets, generating leads, managing your social media, and reporting results to your dashboard.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- claw
+- large-language-model
+- llm
+ReleaseNotes: |-
+  Headline: Multi-Instance Hands
+  Customer ask (thank you to the Discord community + issue #878): you can now run multiple instances of the same hand type. Just pass an optional instance_name when activating.
+  Web UI: new "Instance name (optional)" field in the Setup wizard.
+  CLI: openfang hand activate clip --name clip-youtube
+  API: POST /api/hands/clip/activate with {"instance_name": "clip-youtube", "config": {}}
+  Each named instance gets a unique stable agent id derived from hand_instance_{instance_id}. Activating the same (hand_id, instance_name) pair twice is rejected. Unnamed activations keep the legacy one-per-hand behavior.
+  openfang hand activate clip --name clip-youtube
+  openfang hand activate clip --name clip-tiktok
+  # Both running in parallel, each with its own agent
+  Critical bug fixes
+  - #919 [SECURITY] rm bypass in Allowlist mode closed. The process_start tool previously skipped validate_command_allowlist, letting LLMs delete files even when rm wasn't in allowed_commands. Both command and args are now validated for metacharacters and allowlist membership. 5 regression tests added.
+  - #1013 Moonshot session repair. session_repair::validate_and_repair now runs deduplicate_tool_results BEFORE insert_synthetic_results. Fixes Moonshot's non-unique function_name:index tool_call_id format — orphaned ToolUse blocks get synthetic results after dedup.
+  - #1003 Global [[fallback_providers]] actually used at runtime. resolve_driver now wraps the primary in a FallbackDriver with the full fallback chain at driver-creation time. Network errors (connection refused, timeout) escalate to fallback instead of looping on the dead primary. Two new regression tests.
+  - #937 Discord gateway heartbeat. Discord adapter now spawns a heartbeat task after HELLO, tracks the sequence number, handles HEARTBEAT_ACK (op 11), detects zombie connections via an ACK gate, and force-closes the socket to reconnect when the server stops ACKing. Credits @hello-world-bfree for PR #938 that flagged the root cause.
+  - #935 System prompt no longer leaks in Web UI. GET /api/agents/:id/session now filters Role::System messages by default (opt-in debug via ?include_system=true). Defense-in-depth client-side filter in chat.js too. Integration test asserts the system prompt literal does not appear in the default JSON body.
+  - #984 Custom hands persist across daemon restart. openfang hand install ./path now copies the hand to ~/.openfang/hands/<hand_id>/, and the kernel scans that directory on startup to reload custom hands. New load_workspace_hands method mirrors the load_workspace_skills pattern.
+  - #884 Version stamp fixed. Workspace version bumped to 0.5.7. CLI openfang --version and API /api/health both correctly report 0.5.7. Previous releases were stamped with the pre-bump 0.5.5.
+  Cleanup
+  - rmcp 1.3 builder API adopted for StreamableHttpClientTransportConfig. Cleaner than field-assignment-after-default. Credits @jefflower (PR #986) and @varpress (PR #927).
+  - Task tracking and live daemon verification integrated into the fix workflow — every fix verified with real HTTP + Groq calls before ship.
+  Verified end-to-end
+  Before shipping, each fix was verified against a real daemon running with Groq:
+  - openfang --version → openfang 0.5.7 ✅
+  - /api/health → {"status":"ok","version":"0.5.7"} ✅
+  - Two clip instances (clip-youtube + clip-tiktok) active simultaneously with different agent_ids ✅
+  - Third activation of clip-tiktok correctly rejected with "Hand already active" ✅
+  - Groq round-trip say PONG → PONG ✅
+  Stats
+  - 22 files changed, 1315 insertions, 154 deletions
+  - Full workspace test suite (1800+ tests) green
+  - Five reviewer agents audited all overlapping community PRs before merge
+  Full Changelog: https://github.com/RightNow-AI/openfang/compare/v0.5.6...v0.5.7
+ReleaseNotesUrl: https://github.com/RightNow-AI/openfang/releases/tag/v0.5.7
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://www.openfang.sh/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
