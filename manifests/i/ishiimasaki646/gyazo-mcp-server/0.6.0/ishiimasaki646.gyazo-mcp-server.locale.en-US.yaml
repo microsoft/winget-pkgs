@@ -1,0 +1,42 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: ishiimasaki646.gyazo-mcp-server
+PackageVersion: 0.6.0
+PackageLocale: en-US
+Publisher: ishii-masaki-646
+PublisherUrl: https://github.com/ishii-masaki-646
+PublisherSupportUrl: https://github.com/ishii-masaki-646/gyazo-mcp-server/issues
+PackageName: Gyazo MCP Server
+PackageUrl: https://github.com/ishii-masaki-646/gyazo-mcp-server
+License: Apache-2.0
+LicenseUrl: https://github.com/ishii-masaki-646/gyazo-mcp-server/blob/master/LICENSE-MIT
+ShortDescription: Local MCP server for Gyazo with HTTP and stdio transport support
+Description: A local MCP (Model Context Protocol) server for Gyazo. Provides image listing, searching, uploading, deleting, and oEmbed metadata retrieval. Supports both streamable HTTP and stdio transports with MCP standard OAuth authentication.
+Tags:
+- ai
+- developer-tools
+- gyazo
+- image
+- mcp
+- screenshot
+ReleaseNotes: |-
+  - service サブコマンドに start / stop / restart を追加しました。Linux は systemctl --user start/stop/restart、macOS は launchctl load/unload を経由してサービスを操作します。Windows は schtasks /Run で起動し、停止は Get-NetTCPConnection -LocalPort <tcp_port> -State Listen から OwningProcess の PID を取得し、その PID が gyazo-mcp-server であることを確認したうえで Stop-Process -Id で停止します。タスクスケジューラから Start-Process で本体を切り離して起動しているため schtasks /End ではラッパー PowerShell しか止められず、また Get-Process -Name ではサービス対象でない stdio モード等まで巻き込むため、tcp_port を listen しているプロセスを起点に厳密に特定する方式にしています。
+  - Windows の service install / service uninstall / service status で日本語等の非 ASCII 出力が文字化けする不具合を修正しました。生成する .ps1 の先頭で [Console]::OutputEncoding と $OutputEncoding を UTF-8 に固定し、service status の schtasks.exe 呼び出しも PowerShell 経由で UTF-8 化してから受け取るようにしました。Windows PowerShell 5.x の標準出力が既定で OEM コードページ (日本語環境では CP932) になるため、Rust 側で UTF-8 として読むと文字化けしていました。
+  - Windows の service uninstall で、タスク登録を解除したあとに実行中の gyazo-mcp-server.exe (HTTP transport) を検出して警告を表示するようにしました。タスクスケジューラから Start-Process で本体を切り離して起動しているため、Unregister-ScheduledTask だけでは本体プロセスが停止せず、サービス登録を解除しても動き続ける問題に気付けるようにすることが目的です。検出は Get-NetTCPConnection -State Listen から OwningProcess を辿り、ProcessName が gyazo-mcp-server のものに限定するため、stdio モードで動いているインスタンスは巻き込みません。本体プロセスを自動で停止することはしません (別ポートで手動起動した HTTP インスタンス等、サービス管理対象でないプロセスを巻き込まないため)。検出されたプロセスの停止は Stop-Process -Id <PID> -Force を手動で実行してください。詳細は README の Windows uninstall 注意事項を参照してください。
+  - Windows / macOS で cargo build / cargo install 時に constant SERVICE_NAME is never used の dead_code 警告が出ていた問題を修正しました。SERVICE_NAME 定数は Linux の systemd unit 名 / systemctl 引数でしか使っていないため、#[cfg(target_os = "linux")] でガードして他 OS では存在しないようにしました。
+  - CI の clippy ジョブを ubuntu-latest / macos-latest / windows-latest の matrix 構成に変更しました。これまで clippy ジョブが ubuntu-latest 限定だったため、Windows / macOS でだけ発生する dead_code 警告が CI で検出できず手元検証まで気付けない問題がありました (上記 SERVICE_NAME の警告がまさに該当)。再発防止として OS matrix 化します。あわせて CI のトリガーに test/* ブランチへの push を追加しました。リリース前に他 OS の CI 結果を実機なしで確認するためのリハーサル用ブランチとして使えます。
+  - Windows ビルドで service::tests::uninstall_ps1_warns_about_running_listener_processes_without_stopping_them テストが失敗していた問題を修正しました。生成 ps1 内のヒント表示用 Write-Host '停止例: Stop-Process -Id <PID> -Force' 文字列リテラルにテスト assertion !ps1.contains("Stop-Process") が誤マッチしていたため、Stop-Process を含む行は Write-Host (= ヒント表示) で始まることだけを確認する形に厳密化しました。あわせて main.rs の test mod で import していた service_runtime_port_hint が Windows ビルドで unused 警告になっていた問題も修正しました (Windows では参照する回帰テストが #[cfg(not(target_os = "windows"))] で除外されるため、import 自体も同じ cfg ガードで条件付きにしました)。
+  - CI / リリースワークフローで使っている GitHub Actions の major バージョンを最新に更新しました: actions/checkout v5 → v6、actions/upload-artifact v6 → v7、actions/download-artifact v6 → v8、docker/setup-qemu-action v3 → v4、docker/setup-buildx-action v3 → v4、docker/login-action v3 → v4、docker/build-push-action v6 → v7。各 release notes を確認し、本リポジトリの呼び出しに影響する破壊的変更が含まれていないこと (廃止された input/env を未使用、Node.js 24 ランタイム要件は GitHub-hosted runner で自動充足される等) を確認したうえで一括更新しました。
+  - service install / service uninstall を冪等にしました。service install は既に登録されている場合に登録処理をスキップして案内メッセージのみ表示し、service uninstall は登録されていない場合に解除処理をスキップして案内メッセージのみ表示します。これまでは状態を確認せずに OS のインストール / アンインストール処理を実行していたため、二重登録や存在しないタスクの解除エラーが起きる場合がありました。
+  - service start / service stop / service restart を冪等にしました。is_running() を OS 別に追加し、start は既に起動中の場合に起動処理をスキップして案内メッセージのみ表示し、stop は既に停止中の場合に停止処理をスキップして案内メッセージのみ表示し、restart は停止中の場合に「起動のみ実行します」と表示してから起動します。検出は Linux で systemctl --user is-active --quiet の終了コード、macOS で launchctl list の PID 列、Windows で設定 TCP ポートを listen している gyazo-mcp-server プロセスの有無で行います。判定不能 (Unknown) の場合は OS 別ロジックへ流して本来のエラーを返します。これにより、schtasks /Run の二重発火による多重起動や、launchctl unload の「未ロード状態でのエラー」、stop の「未起動エラー」が起きなくなります。
+  - README に独立した Uninstall 節を追加しました。これまで Install 節と Service 節に分散していたアンインストール関連の記述を 1 か所に集約し、(1) 事前クリーニング (OS 別: Linux / macOS / Windows / Docker) と (2) パッケージのアンインストール (エコシステム別: Homebrew / winget / cargo / Docker) の 2 段階構成で案内するようにしました。設定ファイル (config.toml / .env / token.toml / mcp_sessions.toml) の保存先一覧と任意削除手順、Windows で access denied が出たときのリカバリ手順も同節に含めています。サービス登録を残したままバイナリを削除すると再ログイン時にタスクスケジューラ等が存在しないバイナリを起動しようとすること、Windows では実行中バイナリを削除できないためプロセスが残っているとアンインストール自体が失敗することも理由として明示しました。
+  - gyazo_get_image / gyazo_list_images / gyazo_get_latest_image / gyazo_search の戻り JSON に resource_uri フィールドを追加しました。値は MCP resource として登録済みの gyazo-mcp:///{image_id} 形式で、MCP read_resource に渡すと画像本体のバイナリを取得できます。
+  - 上記 4 ツールの tool/list description を、戻り値の resource_uri を MCP read_resource に渡すと画像本体のバイナリを取得できることが分かるよう拡張しました。エージェントが説明文だけから resource_uri の使い方に気付けるようにすることが目的です。
+  - gyazo_get_oembed_metadata の戻り JSON に oembed_discovery_link フィールドを追加しました。oEmbed spec 第 4 章で定義された discovery 用の <link rel="alternate" type="application/json+oembed" href="https://api.gyazo.com/api/oembed?url=..." title="Image shared with Gyazo" /> 形式の HTML タグで、HTML ページの <head> に埋め込むと oEmbed 対応クライアント (クローラ等) が画像の埋め込み情報を発見できます。href の URL クエリ値は RFC 3986 unreserved 文字以外を percent encode するため、HTML 属性内に直接埋め込んでも安全です。
+  - 同ツールの戻り JSON に img_tag_html フィールドを追加しました。これは oEmbed spec の構造ではなく便利機能で、url / width / height と alt から組み立て済みの <img src="..." width="..." height="..." alt="..." /> を返します。markdown / HTML にそのまま貼り付けて画像埋め込みに使えます。oEmbed spec の予約フィールド名 html との混同を避けるため img_tag_html という名前にしています。
+  - 同ツールに引数 alt を追加しました。img_tag_html の alt 属性に使われ、省略時は "Gyazo image" です。alt と src は HTML 属性向けに & / < / > / " を最小限エスケープします。
+  - 同ツールの description を更新し、oembed_discovery_link が oEmbed spec 準拠の discovery タグであることと、img_tag_html が spec 外の便利機能であること、title 等のリッチメタデータが必要な場合は gyazo_get_image を併用すべきことを明示しました。
+ReleaseNotesUrl: https://github.com/ishii-masaki-646/gyazo-mcp-server/releases/tag/v0.6.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
