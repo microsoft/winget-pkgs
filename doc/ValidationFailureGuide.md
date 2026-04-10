@@ -2,7 +2,8 @@
 
 When you submit a pull request to [microsoft/winget-pkgs](https://github.com/microsoft/winget-pkgs), automated validation pipelines run a series of checks on your manifest and installers. If something fails, labels are applied to your PR to indicate what went wrong. This document explains each label, what causes it, and how to resolve it.
 
-> **Tip:** Many issues can be caught before submitting by running:
+> [!TIP]
+> Many issues can be caught before submitting by running:
 > ```powershell
 > winget validate <path-to-manifest>
 > winget install --manifest <path-to-manifest>
