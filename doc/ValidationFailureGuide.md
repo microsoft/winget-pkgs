@@ -387,9 +387,7 @@ These labels are applied by [moderators](https://github.com/microsoft/winget-pkg
 | **Manifest-Singleton-Deprecated** | Singleton manifests are no longer accepted — convert to multi-file format. |
 | **Version-Parameter-Mismatch** | The version in the manifest doesn't match what the installer writes to the registry. |
 | **Portable-Archive** | The installer is a portable archive that may need special handling. This is a **blocking issue**. |
-| **Zip-Binary** | The installer is a zip containing a binary. This is a **blocking issue**. |
 | **Scripted-Application** | The package uses scripts (`.bat`, `.ps1`) as installers, which are **not allowed**. |
-| **Windows-Features** | The installer depends on optional Windows features. This is a **blocking issue**. |
 | **Hardware** | The package requires specific hardware. This is a **blocking issue**. |
 
 ---
