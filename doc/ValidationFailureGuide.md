@@ -237,6 +237,7 @@ Update the `InstallerSha256` value in your manifest and resubmit.
 - Missing or incorrect silent install switches (`/S`, `/silent`, `/quiet`, etc.)
 - The installer displays a dialog that blocks progress (license agreement, options screen)
 - A dependency is missing on the test machine
+- The `exe` installer type was specified instead of `portable` for an application that runs without an installer
 
 **How to fix:**
 1. Verify your `InstallerSwitches` include the correct `Silent` and `SilentWithProgress` values.
