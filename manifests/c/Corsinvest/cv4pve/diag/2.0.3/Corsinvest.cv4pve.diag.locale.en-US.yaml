@@ -1,0 +1,69 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Corsinvest.cv4pve.diag
+PackageVersion: 2.0.3
+PackageLocale: en-US
+Publisher: Corsinvest Srl
+PublisherUrl: https://www.corsinvest.it/
+PublisherSupportUrl: https://www.corsinvest.it/cv4pve
+PrivacyUrl: https://www.corsinvest.it/privacy
+Author: Corsinvest Srl
+PackageName: cv4pve-diag
+PackageUrl: https://github.com/Corsinvest/cv4pve-diag
+License: GPL-3.0
+LicenseUrl: https://github.com/Corsinvest/cv4pve-diag/blob/HEAD/LICENSE.md
+Copyright: Copyright (c) 2019-2025 Corsinvest Srl
+CopyrightUrl: https://github.com/Corsinvest/cv4pve-diag/blob/master/LICENSE.md
+ShortDescription: Diagnostic Tool for Proxmox VE
+Description: |-
+  cv4pve-diag is a comprehensive diagnostic tool for Proxmox VE that performs health checks
+  and system analysis on your virtualization infrastructure.
+
+  Features:
+  - Node health and status monitoring
+  - VM/Container diagnostics and configuration validation
+  - Storage capacity and performance checks
+  - Replication and backup status verification
+  - Snapshot age monitoring
+  - Multiple output formats (Text, HTML, JSON, Markdown)
+  - Customizable severity thresholds
+  - Support for ignore patterns
+Moniker: cv4pve-diag
+Tags:
+- corsinvest
+- diagnostic
+- health-check
+- monitoring
+- proxmox
+- proxmoxve
+- virtualization
+- vm
+ReleaseNotes: |-
+  License change
+  - License changed from MIT to GPL-3.0-only.
+  New checks
+  VM (QEMU):
+  - CPU type 'host' with HA enabled (CQ0004) — critical when a VM uses CPU type host and is managed by HA. HA requires live migration, which is impossible with host CPU type.
+  - Disk on local storage with HA enabled (CQ0005) — critical when a VM disk is on non-shared storage but the VM is managed by HA. Live migration will fail.
+  - vCPU overcommit (WQ0036) — warns when the total vCPU count on a node exceeds the configured ratio vs physical CPUs (default 4.0x, configurable via Node.MaxVCpuRatio).
+  - Machine type not set (IQ0012) — info when a VM has no machine type configured. QEMU will use the default, which may change across PVE upgrades and cause unexpected guest behavior.
+  - No network interface (WQ0034) — warns when a VM has no network interface configured (completely isolated from the network).
+  - Duplicate MAC address (WQ0033) — warns when two or more VMs share the same MAC address, which causes network conflicts.
+  - Snapshot with RAM state (WQ0035) — warns when a snapshot includes the full guest RAM state, wasting disk space and blocking storage migration.
+  LXC:
+  - No memory limit (WL0022) — warns when a container has Memory=0 (unbounded), which allows it to consume all host RAM and starve other guests.
+  Storage:
+  - No backup storage configured (WS0006) — warns when no storage in the cluster has the backup content type, meaning vzdump has nowhere to save backups.
+  - Backup storage unreachable from node (WS0007) — warns when a backup job targets a storage that is not available on a node where VMs reside. Those VMs will not be backed up.
+  Improvements
+  - Excel export (--output=Excel) — new output format that generates an .xlsx report with a summary header (generated date, duration, nodes, version) and a filtered table with all diagnostic results. File name defaults to cv4pve-diagnostic-<timestamp>.xlsx if --output-file is not specified.
+  - --output-file — new option to save any output format to a file instead of stdout.
+  - Node.MaxVCpuRatio — new configurable setting (default 4.0) for the vCPU overcommit check.
+  - SettingsPressure — PSI pressure thresholds extracted into a dedicated class (Pressure.Cpu, Pressure.IoFull, Pressure.MemoryFull) for cleaner settings structure.
+  What's Changed
+  - feat: v2.0.3 — new checks, Excel export, GPL-3.0, SettingsPressure refactor by @franklupo in #25
+  Full Changelog: v2.0.2...v2.0.3
+ReleaseNotesUrl: https://github.com/Corsinvest/cv4pve-diag/releases/tag/v2.0.3
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
