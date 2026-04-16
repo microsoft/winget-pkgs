@@ -1,0 +1,116 @@
+# Created with komac v2.15.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: AzaharEmu.Azahar
+PackageVersion: '2125.0'
+PackageLocale: en-US
+Publisher: Azahar
+PublisherUrl: https://github.com/azahar-emu/
+PublisherSupportUrl: https://github.com/azahar-emu/azahar/issues
+Author: OpenSauce04 & PabloMK7
+PackageName: Azahar
+PackageUrl: https://github.com/azahar-emu/azahar
+License: GPL-2.0
+LicenseUrl: https://github.com/azahar-emu/azahar/blob/HEAD/license.txt
+ShortDescription: Azahar is an open-source 3DS emulator project based on Citra.
+Moniker: AzaharEmu.Azahar
+Tags:
+- 3ds
+- emu
+- emulator
+- games
+ReleaseNotes: |-
+  Note
+  Currently, the MSYS2 binary for Azahar 2125.0 is not available. This is due to a compiler issue which was discovered last-minute before release, and the issue greatly affects emulator stability.
+  For now, users are advised to use the MSVC build. An MSYS2 build will be retroactively added to this release page when the issue has been resolved.
+  Note
+  Pre-existing users of the Android vanilla variant should uninstall their current Azahar app before installing this new version, as the application ID has changed. No user data will not be lost, and the same user directory just needs to be selected during setup.
+  The new application ID for vanilla is org.azahar_emu.azahar. Third-party emulator launchers may need to account for this change. The application ID for the Google Play Store variant remains unchanged.
+  This is to differentiate the Vanilla build from the Google Play version, preventing the Google Play Store from attempting to update it.
+  Azahar 2125.0 Changelog
+  libretro
+  - Azahar is now available as libretro/RetroArch cores for various OS platforms. | @warmenhoven #1215 + other PRs
+    - Below is a list of platforms with available cores in this initial release:
+      - Linux (x86_64)
+      - Windows (x86_64)
+      - macOS (arm64)
+      - macOS (x86_64)
+      - Android (arm64)
+      - iOS
+      - tvOS
+    - Other platforms and architectures may be added in subsequent releases.
+    - It's important to note that, due to restrictions around the use of JIT compilation on the App Store, the iOS and tvOS have JIT forcefully disabled by default* on those platforms. Disabling JIT has a big impact on performance, so emulation speed may be below 100% on devices other than those which have been released relatively recently.
+      - * For more information, read here: https://docs.libretro.com/guides/install-ios/#jit
+  All
+  - Implemented a disk shader cache for the Vulkan renderer in the form of .vkch files. | @PabloMK7 #1725 #1748
+    - These files keep track of compiled shaders so that there is no need to recompile them on subsequent application launches, which removes all stutter caused by shader compilation after the first playthrough of the application.
+    - Cache files can also be copied between your own devices to benefit from the reduced stutter.
+  - Implemented NWM_SOC::GetMACAddress, allowing applications which utilize it to function on Azahar. | @PabloMK7 #1840
+  - Greatly reduced CPU usage of Azahar while using Artic Base. | @keynote #1789
+  - Shader and pipeline compilation tasks are now handled by separate workers, improving parallelism and slightly reducing shader compilation stutter. | @PabloMK7 #1802
+  - Re-added texture filtering functionality while using the Vulkan renderer. | @jbm11208 #1675
+    - This feature was previously added in version 2124, but was subsequently removed in 2124.2 due to stability issues.
+    - This iteration should address the issues present in the previous implementation.
+  - Fixed an issue where, if a game with no cheats had its cheat list viewed or the game was launched, the cheats list for the previously loaded game would be erroneously used. | @Fs00 #1640
+  - Minor fixes to local play for Luigi's Mansion 1 and Download Play applications. | @lannoene #1690
+  - Minor optimization applied to the Vulkan renderer which slightly reduces its memory usage. | @PabloMK7 #1710
+  - Very minor optimization for log message filtering, effective when a large number of LOG_DEBUG messages are produced in a short time-frame. | @PabloMK7 #1773
+  - Implemented new "Integer Scaling" option. @DavidRGriswold #1400
+  - Added a new "Layouts to Cycle" setting, which allows users to select which layouts are cycled by the Cycle Layout/Toggle Layout hotkey. | @DavidRGriswold #1430
+  - Apply the selected texture filter to color surfaces, not just texture surfaces. | @PabloMK7 #1784
+  - Major refactor of configuration backend for all platforms, improving maintainability | @OpenSauce04 #1762
+    - This change is primarily a developer-facing one, but does somewhat affect end-users on Android by having the default config.ini file be dynamically generated and validated, meaning that keys which were missing in the default config file are now present. | @OpenSauce04 #1762
+  - CECD LLE module is now enabled by the "Enable required LLE modules for online features" setting. | @PabloMK7 #1842
+  - Download Play sessions can now be both connected to hosted without the DLP LLE module, meaning that Download Play is now fully operational with HLE only. | @lannoene #1741 #1828
+  - Fix an issue where certain applications, such as Nintendo Video, would incorrectly think they were receiving SpotPass data. | @lannoene #1828
+  - Fixed an issue which could prevent .zcci and .zcxi ROMs from being recognized correctly if the 3DS system files hadn't been set up. | @PabloMK7 #1930
+  - Added a debug option which allows toggling the console type specified in the console unique data between the Old and New 3DS types. | @PabloMK7 #1826
+  - Addressed validation issues Vulkan renderer which could potentially have resulted in undefined behavior. | @PabloMK7 #1818
+  - Fixed Nintendo Badge Arcade incorrectly displaying an "update data has been applied" message. | @PabloMK7 #1845
+  - Version numbers have been moved to the end of the release files' filenames for easier readability. | @OpenSauce04 #1815
+  - Implemented NAND RW, NAND RO, and NAND RO W archives, allowing the use of applications which utilize these archives. | @PabloMK7 #1861
+  Android
+  - Fixed a crash when attempting to use still-image camera emulation. | @PabloMK7 #1892
+  - Fixed an issue where the emulator could erroneously pause after selecting a file for camera emulation. | @OpenSauce04 #1894
+  - Added a new "Hotkey Enable" button bind. This button can be used in button combinations to activate hotkeys. | #1464
+    - See the linked PR for a more detailed explanation.
+  - Added new "Auto-Map Controller" button which functions similarly to its desktop equivalent. | @RJNY #1769
+  - Fixed a crash under certain circumstances when a secondary screen is disconnected. | @PabloMK7 #1903
+  - Fixed an issue where secondary screens could sometimes use the wrong aspect ratio. | @DavidRGriswold #1907
+  - Fixed multiple issues in the setup screen which could cause the setup process to crash or get stuck in a loop on certain Android distributions. | @PabloMK7 @OpenSauce04 #1902
+  - If the Applications button is double-clicked while already selected, it will now display the current Azahar version in a toast notification. | @OpenSauce04 #1891
+  - The drawer menu now always uses the layout appropriate for the current device orientation. | @DavidRGriswold #1473
+  - Fixed an instance of the word "cartridges" being misspelled as "cartidges". | @sks316 #1879
+  - Fixed an issue where applications would not display properly in the application list if its update title failed to load. | @PabloMK7 #1930
+  Android (Vanilla)
+  - Move to a new package ID, org.azahar_emu.azahar. | @OpenSauce04 #1874
+    - The Google Play variant still uses the old package ID, meaning that these two variants now how separate package IDs.
+  - Migrated to a more consistently effective method of determining removable storage paths. | @PabloMK7 #1863
+  - Transition to using fully native file I/O for the Vanilla (non-GooglePlay) build variant. | @PabloMK7 @OpenSauce04 #1795
+    - This results in extreme reductions of loading time compared to previous builds or the current Google Play build.
+      - As an example, booting the HOME menu has been observed to drop from taking 30-45 seconds to now taking under 5 seconds.
+    - As explained in previous patch notes, these improvements don't apply to the Google Play build due to restrictions put in place by Google via their Play Store app policies.
+  Desktop
+  - Implemented a setting which allows a controller touchpad to be used to control the emulated 3DS touchscreen. | @DavidRGriswold #777
+  - Fixed a rare issue where the emulator could attempt to pre-load custom textures even when they were disabled, resulting in a crash. | @coolguy1842 #1629
+  - Fixed an issue where a small subset of setting tooltips wouldn't have any automatic line breaks as intended. | @OpenSauce04 #1718
+  - Added new "Enable display refresh rate detection" debug setting. | @OpenSauce04 #1726
+    - This setting is enabled by default, and disabling it prevents Azahar from attempting to detect the display's refresh rate when choosing its preferred Vulkan presentation mode. Disabling this setting can result in emulation slowdowns with certain displays, so it's recommended to leave it enabled unless you know what you're doing.
+  - Fixed an issue which could cause Azahar to crash when resetting all settings to their default value. | @ChaseParate #1751
+  - Removed all code relating to the old SDL2 frontend. | @OpenSauce04 #1756
+    - This is not to be confused with the SDL2 functionality present in the Qt frontend.
+      This exclusively refers to the SDL2 emulation frontend, which has been disabled at build time by default for ages.
+  - Improved update checker logic to prevent potential downgrades caused by hypothetical future release patterns. | @RedBlackAka #1749
+  Windows
+  - Fixed camera emulation with a real camera not working as intended in the MSYS2 build. | @jbm11208 #1812
+  - Fixed filesystem issues with some games due to minor file I/O emulation inaccuracies. | @PabloMK7 #1841
+  - Fixed an issue where certain characters in an application name could become corrupted when creating a desktop shortcut. | @RedBlackAka
+  - Explicitly tell AMD drivers to use the dedicated GPU by default if an integrated GPU is available. | @RedBlackAka #1783
+  macOS
+  - Added a warning message when launching Azahar directly rather than from the .app bundle informing users of the proper way of launching the app. | @OpenSauce04 #1873
+  - Fixed a possible UI freeze during game list population. | @TeamPuzel #1785
+  Technical
+  - If certain features are disabled at compile-time in the desktop build, code related to those features is now more aggressively excluded. | @RedBlackAka #1630
+ReleaseNotesUrl: https://github.com/azahar-emu/azahar/releases/tag/2125.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
