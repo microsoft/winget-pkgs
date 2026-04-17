@@ -1,0 +1,117 @@
+# Created using wingetcreate 1.12.8.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: fjrevoredo.MiniDiarium
+PackageVersion: 0.4.14
+PackageLocale: en-US
+Publisher: fjrevoredo
+PublisherUrl: https://mini-diarium.com/
+PublisherSupportUrl: https://github.com/fjrevoredo/mini-diarium/issues
+PrivacyUrl: https://github.com/fjrevoredo/mini-diarium/blob/master/docs/PRIVACY.md
+Author: Francisco J. Revoredo
+PackageName: Mini Diarium
+PackageUrl: https://github.com/fjrevoredo/mini-diarium
+License: MIT
+LicenseUrl: https://github.com/fjrevoredo/mini-diarium/blob/master/LICENSE
+Copyright: Copyright (c) 2026 Francisco J. Revoredo
+ShortDescription: Encrypted, local-first journaling app
+Description: A local-first journal with serious encryption. Free, open source, and never touches the internet.
+Moniker: mini-diarium
+Tags:
+- privacy
+- journaling
+- journal
+- diary
+- foss
+- open-source
+- rust
+ReleaseNotes: |-
+  What's Changed
+
+  v0.4.14 delivers full internationalisation (i18n) with Spanish translation and live native-menu
+  locale switching, Markdown file import into the active entry, a benchmarking infrastructure for Rust
+  and frontend, and Flatpak/Flathub distribution. Three editor correctness fixes address word-count
+  HTML-awareness, an entry-not-saved race on fresh dates, and an auto-delete race on newly created
+  entries.
+
+  Added
+
+  - Benchmarking infrastructure: Rust criterion benchmarks for AES-256-GCM cipher operations,
+    encrypted SQLite queries, and word-count; frontend Vitest bench for Markdown parsing; CI benchmark
+    workflow tracks trends on each merge to master; benchmarks/CLAUDE.md domain guide.
+  - Markdown file import into current entry: A new "Import Markdown file" button in the advanced
+    formatting toolbar (next to Insert Image) allows importing a .md file from disk into the active
+    editor. When the current entry is empty the imported content replaces it; when the entry already
+    has content the Markdown is appended after a horizontal-rule separator. marked (GFM mode) handles
+    Markdown-to-HTML conversion on the frontend; DOMPurify sanitizes the output via the postprocess
+    hook before it reaches TipTap. File size is capped at 1 MB; import errors surface as a dismissible
+    banner in the editor footer.
+  - i18n / Translation support: All ~220 hardcoded English UI strings are extracted into a typed
+    locale file (src/i18n/locales/en.ts) using @solid-primitives/i18n. The system is designed for
+    community-contributed translations — add a JSON file to src/i18n/locales/ and run bun run
+    validate:locales to check completeness. See docs/TRANSLATIONS.md for the full translator guide
+    covering interpolation syntax, plural key pairs, and PR instructions.
+  - Language selector in Preferences: A Language dropdown is now available in Preferences → General.
+  The locale is stored in user preferences and applied reactively at runtime (no restart needed).
+  - Spanish (Español) translation: full translation of all UI strings into Spanish
+  (src/i18n/locales/es.json). Select "Español" in Preferences → General → Language.
+  - Native OS menu i18n: The native app menu (Navigation, Diary, and all items within) now updates to
+  the selected language in real time without an app restart. A new updatemenulocale Tauri command
+  stores all translatable MenuItem and Submenu handles in a TranslatableMenuItems managed-state struct
+  and calls set_text() on each. Adding a new community locale requires adding its ~15 menu strings to
+  the match block in src-tauri/src/commands/menu.rs alongside the JSON locale file.
+  - Flatpak / Flathub distribution: The release process is extended to automatically publish Mini
+    Diarium to Flathub on each release. A new flathub-publish.yml workflow generates offline-vendored
+    Cargo and Node source lists, patches the Flatpak manifest with the release tag and commit SHA, and
+    opens a PR against the Flathub repository. The Flatpak manifest (flatpak/com.minidiarium.yml)
+    builds via npm ci --offline → npm run build → cargo build --release, bypassing the Tauri CLI so
+    Bun is not required in the sandbox. Desktop entry, AppStream metainfo, and icon installs are all
+    included. One-time manual setup (screenshots, local manifest test, initial Flathub submission PR)
+    is documented in docs/RELEASING.md.
+
+  Changed
+
+  - Benchmarks revised to cover actual hot paths: added dbupdateentry (the real auto-save path
+    replacing dbinsertentry as primary write bench), dbgetallentrydates at 100 and 500 entries,
+    authargon2 group for Argon2id wrap/unwrap (the unlock path, samplesize(10)); scaled dbgetall
+    corpus to 500 entries alongside 100; replaced synthetic word-count input with realistic TipTap
+    HTML; added context comments to cipher_bench.
+
+  Fixed
+
+  - Word count live updates and HTML-awareness: two bugs corrected. (1) The word counter now updates
+    on every keystroke — handleContentUpdate calls setWordCount(countWordsFromText(editor.getText()))
+    on each TipTap transaction so the counter reflects the current document without requiring a save.
+    (2) Load-time word count calculations previously split raw HTML with a whitespace regex, inflating
+    the count to thousands of "words" for entries containing embedded base64 images. All four
+    calculation sites in EditorPanel.tsx now use a new countWordsInHtml helper (src/lib/wordcount.ts)
+    that strips all HTML tags (including <img src="data:…"> in full) before splitting — consistent
+    with the backend countwords / striphtml_tags implementation. editor.getText() (TipTap's own
+    plain-text extractor) is used for the live path; countWordsInHtml is used as a fallback and for
+    all load-time sites.
+  - Entry-not-saved race on fresh date: typing on a date with no prior entries and locking the journal
+    before the createEntry IPC call returned would leave the entry blank after unlock. Two windows
+    existed: (1) pendingEntryId was still null when the cleanup callback fired so the normal save path
+    was skipped entirely; (2) createEntry returned and setPendingEntryId was set but the 500 ms
+    debounce hadn't fired before debouncedSave.cancel() was called. Fixed by extracting a shared
+    startEntryCreation helper that stores the in-flight Promise in a pendingCreationPromise ref, and
+    updating the registerCleanupCallback to await that Promise and call saveEntry directly — with the
+    DB still open — before returning. Ghost entries created during the race with no real content are
+    cleaned up via deleteEntryIfEmpty.
+  - Auto-delete race on newly created blank entry: clicking "+" and typing within 500 ms could delete
+    the just-created entry before the first keystroke was saved. The race: addEntry() cancels the old
+    debounce synchronously, but DiaryEditor's createEffect (which calls onSetContent(isEmpty=true))
+    runs as a SolidJS microtask at the following await getAllEntryDates() — after cancel() has already
+    returned. onSetContent then re-queued a fresh 500 ms debounce that was never cancelled, racing
+    against the user's first input. Fixed with a justCreatedEntryId mutable ref set in addEntry()
+    after the new entry's ID is known; the onSetContent callback skips queuing the auto-delete
+    debounce when the active entry ID matches. The ref is cleared on first real user input
+    (handleContentUpdate or handleTitleInput). Blank entries loaded from the DB (e.g. on navigation or
+    date switch-back) are unaffected — justCreatedEntryId is null for those paths and the auto-delete
+    debounce fires normally.
+ReleaseNotesUrl: https://github.com/fjrevoredo/mini-diarium/releases/tag/v0.4.14
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/fjrevoredo/mini-diarium/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
