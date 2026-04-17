@@ -1,0 +1,56 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: badlogic.pi
+PackageVersion: 0.67.67
+PackageLocale: en-US
+Publisher: Mario Zechner
+PublisherUrl: https://github.com/badlogic
+PublisherSupportUrl: https://github.com/badlogic/pi-mono/issues
+Author: Mario Zechner
+PackageName: pi
+PackageUrl: https://github.com/badlogic/pi-mono
+License: MIT
+LicenseUrl: https://github.com/badlogic/pi-mono/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Mario Zechner
+ShortDescription: AI coding assistant with read, bash, edit, write tools
+Description: |-
+  Pi is a minimal terminal coding harness. Adapt pi to your workflows, not the other way around, without having to fork and modify pi internals. Extend it with TypeScript Extensions, Skills, Prompt Templates, and Themes. Put your extensions, skills, prompt templates, and themes in Pi Packages and share them with others via npm or git.
+  Pi ships with powerful defaults but skips features like sub agents and plan mode. Instead, you can ask pi to build what you want or install a third party pi package that matches your workflow.
+  Pi runs in four modes: interactive, print or JSON, RPC for process integration, and an SDK for embedding in your own apps. See openclaw/openclaw for a real-world SDK integration.
+Moniker: pi
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  New Features
+  - Bedrock sessions can now authenticate with AWS_BEARER_TOKEN_BEDROCK, enabling Converse API access without local SigV4 credentials. See docs/providers.md#amazon-bedrock.
+  Added
+  - Added Bedrock bearer-token authentication support via AWS_BEARER_TOKEN_BEDROCK, enabling coding-agent sessions to use Bedrock Converse without local SigV4 credentials (#3125 by @wirjo)
+  Fixed
+  - Fixed /scoped-models Alt+Up/Down to stay a no-op in the implicit all enabled state instead of materializing a full explicit enabled-model list and marking the selector dirty (#3331)
+  - Fixed Mistral Small 4 default thinking requests to use the model's supported reasoning control, avoiding 400 errors when starting sessions on mistral-small-2603 and mistral-small-latest (#3338)
+  - Fixed Qwen chat-template thinking replay to preserve prior thinking across turns, so affected OpenAI-compatible models keep multi-turn tool-call arguments instead of degrading to empty {} payloads (#3325)
+  - Fixed exported HTML transcripts so text selection no longer triggers click-based expand/collapse toggles (#3332 by @xu0o0)
+  - Fixed flaky git package update notifications by waiting for captured git command stdio to fully drain before comparing local and remote commit SHAs (#3027)
+  - Fixed system prompt dates to use a stable YYYY-MM-DD format instead of locale-dependent output, keeping prompts deterministic across runtimes and locales (#2814)
+  - Fixed auto-retry transient error detection to treat Network connection lost. as retryable, so dropped provider connections retry instead of terminating the agent (#3317)
+  - Fixed compact interactive extension startup summaries to disambiguate package extensions and repeated local index.ts entries by using package-aware labels and the minimal parent path needed to make local entries unique (#3308)
+  - Fixed git package dependency installation to use production installs (npm install --omit=dev) during both install and update flows, so extension runtime dependencies must come from dependencies and not devDependencies (#3009)
+  - Fixed tool_result / afterToolCall extension handling for error results by forwarding details and isError overrides through AgentSession instead of dropping them when isError was already true (#3051)
+  - Fixed missing root exports for RpcClient and RPC protocol types from @mariozechner/pi-coding-agent, so ESM consumers can import them from the main package entrypoint (#3275)
+  - Fixed OpenAI Codex service-tier cost accounting to trust the explicitly requested tier when the API echoes the default tier in responses, keeping session cost displays aligned with the selected tier (#3307 by @markusylisiurunen)
+  - Fixed parallel tool-call finalization to convert afterToolCall hook throws into error tool results instead of aborting the remaining tool batch (#3084)
+  - Fixed Bun binary asset path resolution to honor PI_PACKAGE_DIR for built-in themes, HTML export templates, and interactive bundled assets (#3074)
+  - Fixed user-message turn spacing in interactive mode by restoring an inter-message spacer before user turns (except the first user message), preventing assistant and user blocks from rendering flush together.
+  - Fixed interactive /import handling to support quoted JSONL paths with spaces, route missing JSONL files through the non-fatal SessionImportFileNotFoundError path, and document the importFromJsonl() exceptions (SessionImportFileNotFoundError, MissingSessionCwdError).
+ReleaseNotesUrl: https://github.com/badlogic/pi-mono/releases/tag/v0.67.67
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
