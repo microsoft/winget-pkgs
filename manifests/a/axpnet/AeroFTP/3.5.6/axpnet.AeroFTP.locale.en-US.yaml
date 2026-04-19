@@ -1,0 +1,85 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: axpnet.AeroFTP
+PackageVersion: 3.5.6
+PackageLocale: en-US
+Publisher: axpnet
+PublisherUrl: https://github.com/axpnet
+PublisherSupportUrl: https://github.com/axpnet/aeroftp/issues
+Author: axpnet
+PackageName: AeroFTP
+PackageUrl: https://github.com/axpnet/aeroftp
+License: GPL-3.0
+LicenseUrl: https://github.com/axpdev-lab/aeroftp/blob/HEAD/LICENSE
+ShortDescription: A modern, multi-protocol file manager and FTP client with integrated AI, cloud sync, and military-grade encryption.
+Description: |-
+  AeroFTP is an open-source, multi-protocol file manager built with Tauri 2 (Rust + React 18 + TypeScript).
+  It supports 16 protocols (FTP, FTPS, SFTP, WebDAV, S3, Google Drive, Dropbox, OneDrive, MEGA, Box, pCloud, Azure Blob, 4shared, Filen, Zoho WorkDrive, and Cryptomator vaults),
+  features an AI assistant with 45 tools and 15 LLM providers, military-grade encrypted vaults (AES-256-GCM-SIV + Argon2id),
+  bidirectional real-time sync, a built-in code editor, SSH terminal, and media player with visualizers.
+  Available in 47 languages with 4 themes.
+Moniker: aeroftp
+Tags:
+- cloud-storage
+- encryption
+- file-manager
+- file-transfer
+- ftp
+- ftp-client
+- multi-protocol
+- rust
+- s3
+- sftp
+- sync
+- tauri
+- webdav
+ReleaseNotes: |-
+  [3.5.6] - 2026-04-19
+  Resource-Lifecycle Hardening
+  60+ findings from a 5-auditor external and internal review (4x Claude Opus 4.7 + GPT-5.3 Codex) closed across four phases. The sprint delivered a platform, not a patch set — five reusable primitives now absorb the four "leak shapes" the audit surfaced (orphan listeners, spawn-without-handle, MutexGuard across I/O, timer leaks after debounce). Audit grade C to A- across all tracks.
+  Added
+  - useTauriListener hook + createTauriListener + guardedUnlisten (src/hooks/useTauriListener.ts): structural answer to the "orphan listener" class. The previous useEffect → await listen() → return .then(fn => fn()) pattern leaked registrations whenever the component unmounted before listen resolved. The new hook latches a cancel flag before the await and owns the disposer synchronously.
+  - usePointerDrag hook (src/hooks/usePointerDrag.ts): replaces 6 sites that attached document-level mousemove/mouseup globals from inside onMouseDown and never cleaned them up on unmount mid-drag.
+  - util::AbortOnDrop<T> (src-tauri/src/util/abort_on_drop.rs): wraps a JoinHandle, aborts on drop, exposes .wait() for tokio::select! composition. Replaces every let _ = tokio::spawn(...) outside explicit daemon sites.
+  - util::ProviderGuard (src-tauri/src/util/provider_guard.rs): RAII guard that disconnects the wrapped Box<dyn StorageProvider> on drop, regardless of which ?-style error skipped the manual cleanup.
+  - util::shutdown_signal (src-tauri/src/util/shutdown.rs): cross-platform first-signal future (SIGINT / SIGTERM / Ctrl+Break). Replaces tokio::signal::ctrl_c() which silently ignored SIGTERM — the normal systemd / Docker stop signal.
+  - New ai_cancel_chat Tauri command: plumbs CancellationToken through non-streaming AI requests so "Cancel" actually cancels.
+  Fixed
+  - Orphan Tauri listeners (11 sites): App.tsx × 6, CustomTitlebar, CloudPanel × 3, useVaultState × 2, useCloudSync × 3, useTransferEvents × 2, useTraySync × 2, useProviderHealth, PlacesSidebar, SyncScheduler, WatcherStatus, ToolProgressIndicator, SSHTerminal, AIChat, AISettingsPanel, SettingsPanel, SyncPanel. All migrated to useTauriListener / createTauriListener / guardedUnlisten.
+  - provider_connect overwrite (R2 Critical): the previous provider was abandoned without disconnect() — a dead TCP session leaked until GC. The new implementation awaits the disconnect before the swap.
+  - OAuth callback TCP listener (R2 Critical): the callback task and its listener were leaked on timeout, port open failure, or early error. Now wrapped in AbortOnDrop + tokio::select! so every exit path releases the port.
+  - MCP progress emitter (R3 Critical): replaced a tokio::spawn-per-progress-sample leak (measured at 262k spawned tasks under high-volume MCP workloads) with a bounded mpsc::channel(32) + single consumer.
+  - S3 multipart abort on failure (R2 High): one failed part left siblings running and never issued AbortMultipartUpload, leaving dangling multipart uploads in the bucket. Now uses JoinSet, aborts siblings on first failure, drains, and calls AbortMultipartUpload.
+  - FTP session pool lease (R2 High): Drop without release() left the next lease with dirty session state; now spawns async reset/disconnect if not released.
+  - MCP pool eviction (R3 High): last_used_ms is now AtomicU64 read outside the lock; disconnect is deferred outside the lock; eviction is refcount-gated so in-use connections survive.
+  - MCP per-profile serialization (R3 High): HashMap<String, Arc<Mutex<()>>> leaked one lock per unique profile name — now Weak<Mutex<()>> with prune-on-access.
+  - Retry sleeps honour cancellation (R2 Critical, 5 sites): provider_commands, provider_transfer_executor, ftp_transfer_executor, lib::background_sync_worker, cross_profile_commands. Previously the user's Cancel meant "finish after the next poll"; now every retry sleep is a tokio::select! race against the cancel token.
+  - CLI server shutdown surfaces (R4 Critical × 2, High × 3): serve http, serve webdav, serve ftp, serve sftp, daemon, mount (Linux FUSE + Windows map-as-drive). All observe SIGINT and SIGTERM; serve sftp drains per-connection tasks with a 5s grace window; FUSE uses fuser::spawn_mount2 and drops the BackgroundSession on signal (was blocking mount2 with no cancel surface).
+  - Plugin hook kill_on_drop(true) (GPT Critical): plugin children used to outlive panics / timeouts.
+  - AI tools blocking the reactor (R3 High): local_disk_usage, local_find_duplicates, local_grep now run inside tokio::task::spawn_blocking.
+  - Monaco / Web Audio / WebGL lifecycle (R1 Medium): Monaco disposables retained and disposed on unmount; Web Audio nodes disconnected and AudioContext.close() called; AudioPlayer WeakMap entry cleared on unmount.
+  - CancellationToken retry in cross-profile transfers (R2 High): ProviderGuard on every provider; retry sleeps wake on cancel.
+  - Cross-profile plan TTL sweeper (R2 Medium): approved_plans was only pruned opportunistically on store_plan / take_plan; a periodic 60s sweeper now prunes expired plans after the 15-minute TTL.
+  - TRANSFER_IN_PROGRESS RAII guard (R2 Medium): a panic in the folder-transfer pipeline left the flag true forever, suppressing the filesystem watcher until app restart. A drop-guard restores the flag on every exit path including unwind.
+  - Watcher drop policy (R2 Medium): try_send drops are now throttled to one log line per 100 drops via an AtomicU64 counter (previously spammed every drop).
+  - MCP per-tool-call timeout (R3 Medium): defense-in-depth wall-clock cap (600 s default, override via AEROFTP_MCP_TOOL_TIMEOUT_SECS) on the dispatch future, so a wedged provider cannot pin a pool slot indefinitely.
+  - CLI memory DB memoization (R3 Medium): init_cli_db used to open a fresh SQLite Connection on every CLI invocation of agent_memory_* commands, paying WAL + schema-init on each call. Now memoized via OnceLock<Mutex<Connection>>.
+  - DebugPanel console capture is now reversible (R1 F14 Low): activateGlobalCapture + activateNetworkCapture are ref-counted; when the last DebugPanel unmounts and debugMode is off, the original console.* and __TAURI_INTERNALS__.invoke bindings are restored.
+  - Auto-lock interval stability (P4.1.2): the 30s auto-lock poller used to reset on every isAppLocked toggle (React re-schedules on dependency change). Now only masterPasswordSet triggers start/stop; isAppLocked is read through a ref.
+  - MyServersPanel scroll timeout cleanup (P4.1.1): scrollTimeout was not cleared on unmount; the 600 ms timeout fired on a detached DOM node.
+  - AudioPlayer retry timeout + AudioVisualizer RAF self-spin + TransferProgressBar / ContextMenu RAF cancel (P4.1.3/4/5): four timer/RAF sites where the handle was not stored in a ref or not cancelled on unmount.
+  Changed
+  - Grade deltas (external + internal audit, before → after): Frontend C+ → A-; Backend transfer C+ → A-; AI / MCP / plugins C+ → A; Media / Monaco / CLI C+ → A-; overall C → A-.
+  - ProviderGuard renamed as_mut / as_ref to provider_mut / provider_ref to avoid clippy should_implement_trait.
+  Audit artefacts
+  - docs/dev/audit/2026-04-19-resource-lifecycle/APPENDIX-RETROSPECTIVE.md — primitives, fix index, regression greps, lessons learned.
+  - docs/dev/audit/2026-04-19-resource-lifecycle/AUDIT-POST-FIX.md — post-fix review, 6 dimensions, grade A-.
+  Downloads:
+  - Windows: .msi installer, .exe, or .zip portable (no installation required)
+  - macOS: .dmg disk image
+  - Linux: .deb, .rpm, .snap, or .AppImage
+  Download AeroFTP
+ReleaseNotesUrl: https://github.com/axpdev-lab/aeroftp/releases/tag/v3.5.6
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
