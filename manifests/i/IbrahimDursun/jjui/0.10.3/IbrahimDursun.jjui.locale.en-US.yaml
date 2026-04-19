@@ -1,0 +1,76 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: IbrahimDursun.jjui
+PackageVersion: 0.10.3
+PackageLocale: en-US
+Publisher: Ibrahim Dursun
+PublisherUrl: https://idursun.com/
+PublisherSupportUrl: https://github.com/idursun/jjui/issues
+Author: Ibrahim Dursun
+PackageName: Jujutsu UI
+PackageUrl: https://github.com/idursun/jjui
+License: MIT
+LicenseUrl: https://github.com/idursun/jjui/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 ibrahim dursun
+ShortDescription: Jujutsu UI (jjui) is a Text User Interface (TUI) designed for interacting with the Jujutsu version control system.
+Moniker: jjui
+Tags:
+- jj
+ReleaseNotes: |-
+  This release includes new Lua customisation support, repo-local configuration, preview sizing improvements, and a set of UI fixes. There were also some internal changes around action routing and rendering, so if something feels broken or behaves differently, please let me know.
+  Features
+  Repository-local configuration
+  Repository-local configuration is now supported. You can add .jjui/config.toml or .jjui/config.lua to a repository to customise jjui for that repo while still inheriting global configuration. This is useful for repo-specific revsets, limits, bindings, and Lua configuration. JJUI_CONFIG_DIR remains a hard override when set. #609
+  Lua editor metadata
+  Lua scripting now has installable editor metadata. Run jjui --install-lua-types to write generated types.lua metadata to your jjui config directory and create .luarc.json for LuaLS when one does not already exist. This gives Lua users autocomplete and basic type information for config.lua, plugins, and embedded Lua scripts. #617
+  Preview pane sizing
+  Preview commands now receive the preview pane size through COLUMNS and LINES. Width-sensitive tools such as difft, and configured delta setups, can now wrap output to the jjui preview pane instead of the outer terminal width. #608
+  Layered revision operations
+  Revision operations can now be layered more naturally, with active operation scopes reflected in key handling and help/status display. Active key bindings are grouped by their current scope, and overridden bindings are shown with strikethrough, making it easier to understand which shortcuts are available in nested operations. #625
+  Improvements
+  Inline describe customisation
+  Inline describe is now easier to customise from bindings and Lua. You can bind revisions.inline_describe.new_line separately from revisions.inline_describe.accept, and accept can take force = true for workflows that intentionally update immutable revisions. #260
+  [[bindings]]
+  action = "revisions.inline_describe.accept"
+  key = "enter"
+  scope = "revisions.inline_describe"
+
+  [[bindings]]
+  action = "revisions.inline_describe.new_line"
+  key = "shift+enter"
+  scope = "revisions.inline_describe"
+  - jjui now refreshes only once on startup instead of doing duplicate initial refresh work.
+  - Git operation screens now close when the underlying command starts executing, making the transition from choosing an action to running it clearer.
+  - Debug logging now uses JJUI_DEBUG instead of the generic DEBUG environment variable, reducing the chance that unrelated shell configuration accidentally enables jjui debug behaviour.
+  Fixes
+  - Fixed paste handling in Bubble Tea v2 text-input flows, including pasting into the bookmark filter input. #601, #597
+  - Fixed rebase source plus insert-between so jjui generates the correct jj rebase -s <source> --insert-before <rev> --insert-after <rev> command. #598
+  - Fixed diff rendering for tab-indented lines. The diff view now preserves indentation and handles wrapping and horizontal scrolling correctly for tab-expanded content. #606, #604
+  - Fixed command history rendering so long histories are not clipped at the top border, including exact-fit cases. Flash and command-history overlays also layer more cleanly above the status area. #626, #622
+  - Fixed fuzzy file overlay ordering so the fuzzy file UI appears in the correct layer.
+  - Fixed clipped rendering for partially visible list items and fallback messages while horizontally scrolled.
+  - Fixed revset alias parameter metadata preservation.
+  What's Changed
+  - Handle Bubble Tea paste messages in text-input flows by @shardulbee in https://github.com/idursun/jjui/pull/601
+  - Set preview subprocess size via env by @OliverJAsh in https://github.com/idursun/jjui/pull/608
+  - add repo config file which overrides global config.toml by @nickchomey in https://github.com/idursun/jjui/pull/609
+  - fix(diff): preserve tab indentation in diff view by @baggiiiie in https://github.com/idursun/jjui/pull/606
+  - Update installation instruction for archlinux by @TeddyHuang-00 in https://github.com/idursun/jjui/pull/613
+  - refactor: replace owner-based dispatch with scope-layer routing by @idursun in https://github.com/idursun/jjui/pull/625
+  - fix: command history clipping by @idursun in https://github.com/idursun/jjui/pull/626
+  - fix(set_parents): leak set_parents operation key scope by @baggiiiie in https://github.com/idursun/jjui/pull/628
+  - fix(details): sync details selection for routed intents by @baggiiiie in https://github.com/idursun/jjui/pull/627
+  - fix: add back esc to clear selected revisions by @baggiiiie in https://github.com/idursun/jjui/pull/629
+  - fix(revisions): avoid toggle-select panic on empty revisions by @baggiiiie in https://github.com/idursun/jjui/pull/636
+  - feat(lua): install Lua meta types by @idursun in https://github.com/idursun/jjui/pull/617
+  New Contributors
+  - @shardulbee made their first contribution in https://github.com/idursun/jjui/pull/601
+  - @OliverJAsh made their first contribution in https://github.com/idursun/jjui/pull/608
+  Full Changelog: https://github.com/idursun/jjui/compare/v0.10.2...v0.10.3
+ReleaseNotesUrl: https://github.com/idursun/jjui/releases/tag/v0.10.3
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/idursun/jjui/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
