@@ -1,0 +1,211 @@
+# Created by Anthelion using komac v2.15.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: BiomeJS.Biome
+PackageVersion: 2.4.0
+PackageLocale: en-US
+Publisher: BiomeJS
+PublisherUrl: https://biomejs.dev/
+PublisherSupportUrl: https://github.com/biomejs/biome/issues
+Author: Biome Developers and Contributors
+PackageName: Biome
+PackageUrl: https://biomejs.dev/
+License: Apache-2.0
+Copyright: Copyright (c) 2023-present Biome Developers and Contributors
+ShortDescription: Biome is a toolchain for web projects, aimed at providing functionalities to maintain them. It offers a formatter and linter, usable via CLI and LSP.
+Moniker: biome
+Tags:
+- css
+- formatter
+- javascript
+- json
+- jsx
+- linter
+- static-code-analysis
+- typescript
+- web
+ReleaseNotes: |-
+  2.4.0
+  Minor Changes
+  - #8964 0353fa0 Thanks @dyc3! - Added ignore option to the useHookAtTopLevel rule.
+    You can now specify function names that should not be treated as hooks, even if they follow the use* naming convention.
+    Example configuration:
+    {
+      "linter": {
+        "rules": {
+          "correctness": {
+            "useHookAtTopLevel": {
+              "options": {
+                "ignore": ["useDebounce", "useCustomUtility"]
+              }
+            }
+          }
+        }
+      }
+    }
+  - #8769 d0358b0 Thanks @rahuld109! - Added the rule useAnchorContent for HTML to enforce that anchor elements have accessible content for screen readers. The rule flags empty anchors, anchors with only whitespace, and anchors where all content is hidden with aria-hidden. Anchors with aria-label or title attributes providing a non-empty accessible name are considered valid.
+  - #8742 6340ce6 Thanks @rahuld109! - Added the rule useMediaCaption to the HTML language. Enforces that audio and video elements have a track element with kind="captions" for accessibility. Muted videos are allowed without captions.
+  - #8621 d11130b Thanks @Netail! - Added support for multiple reporters, and the ability to save reporters on arbitrary files.
+    Combine two reporters in CI
+    If you run Biome on GitHub, take advantage of the reporter and still see the errors in console, you can now use both reporters:
+    biome ci --reporter=default --reporter=github
+    Save reporter output to a file
+    With the new --reporter-file CLI option, it's now possible to save the output of all reporters to a file. The file is a path,
+    so you can pass a relative or an absolute path:
+    biome ci --reporter=rdjson --reporter-file=/etc/tmp/report.json
+    biome ci --reporter=summary --reporter-file=./reports/file.txt
+    You can combine these two features. For example, have the default reporter written on terminal, and the rdjson reporter written on file:
+    biome ci --reporter=default --reporter=rdjson --reporter-file=/etc/tmp/report.json
+    The --reporter and --reporter-file flags must appear next to each other, otherwise an error is thrown.
+  - #8399 ab88099 Thanks @ematipico! - The Biome CSS parser is now able to parse Vue SFC syntax such as :slotted and :deep. These pseudo functions are only correctly parsed when the CSS is defined inside .vue components. Otherwise, Biome will a emit a parse error.
+    This capability is only available when experimentalFullHtmlSupportedEnabled is set to true.
+  - #8663 3dfea16 Thanks @ematipico! - Added support for Cursor files. When Biome sees a Cursor JSON file, it will parse it with comments enabled and trailing commas enabled:
+    - $PROJECT/.cursor/
+    - %APPDATA%\Cursor\User\ on Windows
+    - ~/Library/Application Support/Cursor/User/ on macOS
+    - ~/.config/Cursor/User/ on Linux
+  - #8723 fe2c642 Thanks @cbstns! - Added JSON as a target language for GritQL pattern matching. You can now write Grit plugins for JSON files.
+    This enables users to write GritQL patterns that match against JSON files, useful for:
+    - Searching and transforming JSON configuration files
+    - Enforcing patterns in package.json and other JSON configs
+    - Writing custom lint rules for JSON using GritQL
+    Example patterns:
+    Match all key-value pairs:
+    language json
+    pair(key = $k, value = $v)
+    Match objects with specific structure:
+    language json
+    JsonObjectValue()
+    Supports both native Biome AST names (JsonMember, JsonObjectValue) and TreeSitter-compatible names (pair, object, array) for compatibility with existing Grit patterns.
+    For more details, see the GritQL documentation.
+  - #8814 4d9c676 Thanks @Netail! - Added ignore option to noUnknownProperty. If an unknown property name matches any of the items provided in ignore, a diagnostic won't be emitted.
+  - #8631 4d8f19d Thanks @Netail! - Add a new reporter --reporter=sarif, that emits diagnostics using the SARIF format.
+  - #8270 4f7909d Thanks @lucasweng! - Added the useIframeTitle lint rule for HTML. The rule enforces the usage of the title attribute for the iframe element.
+    Invalid:
+    <iframe></iframe> <iframe title=""></iframe>
+    Valid:
+    <iframe title="title"></iframe>
+  - #8164 1d25856 Thanks @ematipico! - Added a new assist action useSortedInterfaceMembers that sorts TypeScript interface members, for readability.
+    It includes an autofix.
+    Invalid example.
+    interface MixedMembers {
+      z: string;
+      a: number;
+      (): void;
+      y: boolean;
+    }
+    Valid example (after using the assist).
+    interface MixedMembers {
+      a: number;
+      y: boolean;
+      z: string;
+      (): void;
+    }
+  - #8647 4c7c06f Thanks @siketyan! - It's now possible to provide the stacktrace for a fatal error. The stacktrace is only available when the environment variable RUST_BACKTRACE=1 is set, either via the CLI or exported $PATH. This is useful when providing detailed information for debugging purposes:
+    RUST_BACKTRACE=1 biome lint
+  - #7961 a04c8df Thanks @siketyan! - The Biome Language Server now reports progress while scanning files and dependencies in the project.
+  - #8289 a9025d4 Thanks @theshadow27! - Fixed #8024. The rule useIterableCallbackReturn now supports a checkForEach option. When set to false, the rule will skip checking for forEach() callbacks for returning values.
+  - #8690 e06e5d1 Thanks @ematipico! - Added the rule useValidLang to the HTML language.
+  - #7847 e90b14f Thanks @Jagget! - Added support for jsxFactory and jsxFragmentFactory.Biome now respects jsxFactory and jsxFragmentFactory settings from tsconfig.json when using the classic JSX runtime, preventing false positive noUnusedImports errors for custom JSX libraries like Preact.
+    // tsconfig.json
+    {
+      compilerOptions: {
+        jsx: "react",
+        jsxFactory: "h",
+        jsxFragmentFactory: "Fragment",
+      },
+    }
+    // Component.jsx
+    import { h, Fragment } from "preact";
+    function App() {
+      return <div>Hello</div>;
+    }
+  - #8071 7f5bcf4 Thanks @ematipico! - Added new CLI options to the commands lsp-proxy and start that allow to control the Biome file watcher.
+    --watcher-kind
+    Controls how the Biome file watcher should behave. By default, Biome chooses the best watcher strategy for the
+    current OS, however sometimes this could result in some issues, such as folders locked.
+    The option accepts the current values:
+    - recommended: the default option, which chooses the best watcher for the current platform.
+    - polling: uses the polling strategy.
+    - none: it doesn't enable the watcher. When the watcher is disabled, changes to files aren't recorded anymore by Biome. This might have
+      repercussions on some lint rules that might rely on updated types or updated paths.
+    The environment variable BIOME_WATCHER_KIND can be used as alias.
+    --watcher-polling-interval
+    The polling interval in milliseconds. This is only applicable when using the polling watcher. It defaults to 2000 milliseconds.
+    The environment variable BIOME_WATCHER_POLLING_INTERVAL can be used as alias.
+  - #8262 4186b83 Thanks @lucasweng! - Added the useHtmlLang lint rule for HTML. The rule enforces that the html element has a lang attribute.
+    Invalid:
+    <html></html>
+    <html lang></html>
+    <html lang=""></html>
+    Valid:
+    <html lang="en"></html>
+  - #8376 1a9334c Thanks @siketyan! - Added support for formatting and linting embedded GraphQL snippets in JavaScript.
+    For example, the following snippets are now formatted:
+    import gql from "graphql-tag";
+    const PeopleCountQuery = gql`
+      query PeopleCount {
+        allPeople {
+          totalCount
+        }
+      }
+    `;
+    import { graphql } from "./graphql";
+    const PeopleCountQuery = graphql(`
+      query PeopleCount {
+        allPeople {
+          totalCount
+        }
+      }
+    `);
+    This feature is experimental and must be enabled explicitly in the configuration:
+    {
+      "javascript": {
+        "experimentalEmbeddedSnippetsEnabled": true
+      }
+    }
+  - #7799 54682aa Thanks @PaulRBerg! - Added groupByNesting option to the useSortedKeys assist. When enabled, object keys are grouped by their value's nesting depth before sorting alphabetically.
+    Simple values (primitives, single-line arrays, and single-line objects) are sorted first, followed by nested values (multi-line arrays and multi-line objects).
+    Example
+    To enable this option, configure it in your biome.json:
+    {
+      "linter": {
+        "rules": {
+          "source": {
+            "useSortedKeys": {
+              "options": {
+                "groupByNesting": true
+              }
+            }
+          }
+        }
+      }
+    }
+    With this option, the following unsorted object:
+    const object = {
+      name: "Sample",
+      details: {
+        description: "nested",
+      },
+      id: 123,
+    };
+    Will be sorted as:
+    const object = {
+      id: 123,
+      name: "Sample",
+      details: {
+        description: "nested",
+      },
+    };
+  - #8641 1dc8dc2 Thanks @tt-a1i! - Added the noAutofocus lint rule for HTML. This rule enforces that the autofocus attribute is not used on elements, as it can cause usability issues for sighted and non-sighted users. The rule allows autofocus inside dialog elements or elements with the popover attribute, as these are modal contexts where autofocus is expected.
+  - #8501 8eb3f19 Thanks @tt-a1i! - Added noPositiveTabindex to HTML. This rule prevents the usage of positive integers on the tabindex attribute, which can disrupt natural keyboard navigation order.
+  - #8661 b36ff03 Thanks @tt-a1i! - Added the useAltText lint rule for HTML. This rule enforces that elements requiring alternative text (<img>, <area>, <input type="image">, <object>) provide meaningful information for screen reader users via alt, title (for objects), aria-label, or aria-labelledby attributes. Elements with aria-hidden="true" are exempt.
+  - #7749 1c59333 Thanks @andogq! - Implements #1984. Updated useHookAtTopLevel to better catch invalid hook usage.
+    This rule is now capable of finding invalid hook usage in more locations. A diagnostic will now be generated if:
+    - A hook is used at the module level (top of the file, outside any function).
+ReleaseNotesUrl: https://github.com/biomejs/biome/releases/tag/@biomejs/biome@2.4.0
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://biomejs.dev/guides/getting-started/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

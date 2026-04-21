@@ -1,0 +1,121 @@
+# Created with komac v2.15.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: ossia.score
+PackageVersion: 3.8.1
+PackageLocale: en-US
+Publisher: ossia
+PublisherUrl: https://ossia.io/
+PublisherSupportUrl: https://github.com/ossia/score/issues
+PackageName: score
+PackageUrl: https://ossia.io/
+License: GPLv3
+LicenseUrl: https://github.com/ossia/score/blob/HEAD/LICENSE.txt
+ShortDescription: ossia score, an interactive sequencer for the intermedia arts.
+Tags:
+- art
+- creative-coding
+- digital-art
+- hacktoberfest
+- interactive
+- intermedia
+- media-art
+- midi
+- open-sound-control
+- open-source
+- osc
+- osc-messages
+- qt
+- sequencer
+ReleaseNotes: |-
+  Discord Open Collective backers and sponsors GitHub Sponsors
+  ossia score is a sequencer for audio-visual artists, designed to create interactive shows.
+  Sequence OSC, MIDI, DMX, sound, video and more, between multiple software and hardware. Create interactive and intermedia scores, script and live-code with JavaScript, ISF Shaders, Faust, PureData or C++. Leverage IoT protocols such as CoAP or MQTT, interact with joysticks, Wiimotes, Leapmotions, Web APIs and BLE sensors and integrate programs from a wealth of creative programming languages such as Structure Synth, Context-Free Art and Bytebeat. Load any kind of audio or video format and process visuals through Spout, Syphon, NDI, Shmdata or Sh4lt ; sonify large datasets with CSV and HDF5 support.
+  ossia score 3.8.1 brings major video improvements, video mapping features, HDR support, full backwards playback, and many bug fixes.
+  Full Changelog: v3.8.0...v3.8.1
+  New features
+  - video: massive hardware decoding rework with D3D12 and Vulkan Video backends, thanks to FFMPEG. True zero-copy for Vulkan Video -> Vulkan render pipeline and VideoToolbox -> Metal ; 1 GPU copy otherwise.
+  - video: finish the implementation for GPU-accelerated rendering of pretty much every useful YUV format in existence: UYVY422, VUYA, XV30, Y210, YUV420, YUV420P10, YUV420P12, YUV422, YUV422P10, YUV422P12, YUV440, YUV444, YUV444P10, YUV444P12, YUVA420, YUVA444, YUVA444P10, YUVA444P12, YUYV422, ...
+  - time ruler: implement scrubbing by double-clicking and dragging.
+  prores
+  - video: added automatic mode to pick the best hardware decoder for a given task.
+  - video: HDR support for Window output (tested on macOS and Windows).
+  - video: HDR shaders added to user library: tonemapping, exposure, OETF, etc.
+  - video: rework of color processing, proper support for full range MPEG, fix Cineform support
+  - video: hardware-decoded DXV
+  - video: add a direct synchronous playback option for formats that support it (HAP, DXV and other all-I formats)
+  - video: add .ts as acceptable extension
+  - video: add a multi-window output mode to handle multi-projector mapping, with soft-edge blending and warping.
+  multi-window-1
+  - scenario: allow backwards playback
+  - process: add a VU meter object for audio visualization
+  vumeter
+  - process: add a video mapper (rect-mapper) object in the user library for mapping multiple textures in one viewport.
+  rect-mapper-1
+  - process: add an advanced-text object in the user library for fancy text rendering.
+  advanced-text
+  - process: add a presentation object in the user library because what use is a graphics software which isn't even able to render slides.
+  presentation
+  - isf: initial infrastructure for cubemap textures
+  - network: add a debug log panel to HTTP, WebSocket, etc.
+  o
+  - js: add Util.environmentVariable(), Util.timestamp(), file info utility functions
+  - js: add API functions for working with TimeVal
+  - js: add a positionChanged signal for UIs ; implement Score.scrub(milliseconds)
+  - js: store a path to allow processes that have local file dependencies to retrieve them ; enables creating advanced QML objects with multiple files.
+  - js: give access to Util in JSProcessModel
+  - mapper: add support for adding framing (SLIP, etc.) to stream-based protocols such as TCP
+  - cli: js: allow to run a script on startup with --script
+  - gfx: add infrastructure to allow objects to fetch a texture from a previous node instead of being rendered into
+  - ui: allow to disable the UI updates during execution for low power systems
+  - core: add SCORE_PRETTIFY_JSON=1 environment variable to save JSON indented
+  - tools: add a git update tool
+  Improvements
+  - ui: improve styling for Qt Quick objects
+  - ui: make it easier to start a drag from a port which already has a cable
+  - ui: make port labels clickable
+  - video: improve thumbnail computations and seeking logic
+  - video: better heuristics for direct video playback
+  - video: use software decoding as far as possible for thumbnails
+  - js: use Basic style for QML UIs to match score style
+  - js: force update of items on each tick to ensure View3D updates correctly
+  - create-app: include assets from score file directory in create-app scripts for all platforms. Thanks @ogauthiersat!
+  - 3rdparty: broad library update
+  - ci: update to SDK 36 (FFmpeg 8.1)
+  - msvc: update to VS2026
+  Bugfixes
+  - ui: fix that library download check had been moved to opening the settings UI
+  - ui: fix wrong condition to check whether value input is some binary string
+  - ui: fix scroll in timeline view scrolling the interior of nodal views
+  - metal/d3d: fix background texture inverted. Fixes #1968
+  - exec: fix looping when playing backwards
+  - scenario: drop on cable: fix crash when a node would be changed in a separate slot upon drag and drop
+  - video: fix IgnoreTempo property read missing regression. Thanks @ogauthiersat!
+  - video decoder: add a missing flush
+  - lfo: fix phase in quantified mode
+  - lfo: fix phase missing a multiplication by pi
+  - js: fix state not restoring on graph change
+  - js: fix using background textures from QML in hidden views
+  - js: fix a QtQuick3D deletion order issue
+  - js: fix passing paths that have LIBRARY: or PROJECT: prefixes
+  - js: GPU node fixes for state handling
+  - qml: put the ASIO state in a separate thread-safe object to prevent concurrency issues in mapper device
+  - qml: set simpler environment for Python support
+  - coremidi: fix observer not being initialized
+  - core: fix settings crash on close
+  - core: make the settings children of qApp so that JS engine does not appropriate them
+  - ports: fix changing between ControlInlet and ValueInlet at runtime for e.g. JS script
+  - avnd: variable ports: fix missing resize of intermediary buffers
+  - avnd: increase resiliency against 0 I/O channels ; fix order of calls for channel allocation
+  - avnd: fix that buffers were only up to 31 bit size, instead of 32. 4GB buffers are now possible if the GPU handles it.
+  - gfx: prevent a node that has been just removed to be added again as a preview node
+  - gfx: null check fix in buffer release
+  - preview: fix gamma blending
+  - model display: fix that preview had broken
+  - fft: kfr: fix an issue with deallocation
+  - linux: fix missing avahi-daemon program warning on some distros. Thanks @ogauthiersat!
+  - tools: fix missing line feed in mac custom app launcher environment. Thanks @ogauthiersat!
+  - core: prevent dummy warning with Clang 22 on each COUNTER
+ReleaseNotesUrl: https://github.com/ossia/score/releases/tag/v3.8.1
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,80 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: badlogic.pi
+PackageVersion: 0.68.0
+PackageLocale: en-US
+Publisher: Mario Zechner
+PublisherUrl: https://github.com/badlogic
+PublisherSupportUrl: https://github.com/badlogic/pi-mono/issues
+Author: Mario Zechner
+PackageName: pi
+PackageUrl: https://github.com/badlogic/pi-mono
+License: MIT
+LicenseUrl: https://github.com/badlogic/pi-mono/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Mario Zechner
+ShortDescription: AI coding assistant with read, bash, edit, write tools
+Description: |-
+  Pi is a minimal terminal coding harness. Adapt pi to your workflows, not the other way around, without having to fork and modify pi internals. Extend it with TypeScript Extensions, Skills, Prompt Templates, and Themes. Put your extensions, skills, prompt templates, and themes in Pi Packages and share them with others via npm or git.
+  Pi ships with powerful defaults but skips features like sub agents and plan mode. Instead, you can ask pi to build what you want or install a third party pi package that matches your workflow.
+  Pi runs in four modes: interactive, print or JSON, RPC for process integration, and an SDK for embedding in your own apps. See openclaw/openclaw for a real-world SDK integration.
+Moniker: pi
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  New Features
+  - Configurable streaming working indicator for extensions via ctx.ui.setWorkingIndicator(), including animated, static, and hidden indicators. See docs/tui.md#working-indicator, docs/extensions.md, and examples/extensions/working-indicator.ts.
+  - before_agent_start now exposes systemPromptOptions (BuildSystemPromptOptions) so extensions can inspect the structured system-prompt inputs without re-discovering resources. See docs/extensions.md#before_agent_start and examples/extensions/prompt-customizer.ts.
+  - Configurable keybindings for scoped model selector actions and session-tree filter actions. See docs/keybindings.md.
+  - /clone duplicates the current active branch into a new session, while extensions can choose whether to fork before or at an entry via ctx.fork(..., { position }). See README.md, docs/extensions.md, and docs/session.md.
+  Breaking Changes
+  - Changed SDK and CLI tool selection from cwd-bound built-in tool instances to tool-name allowlists. createAgentSession({ tools }) now expects string[] names such as "read" and "bash" instead of Tool[], --tools now allowlists built-in, extension, and custom tools by name, and --no-tools now disables all tools by default rather than only built-ins. Migrate SDK code from tools: [readTool, bashTool] to tools: ["read", "bash"] (#2835, #3452)
+  - Removed prebuilt cwd-bound tool and tool-definition exports from @mariozechner/pi-coding-agent, including readTool, bashTool, editTool, writeTool, grepTool, findTool, lsTool, readOnlyTools, codingTools, and the corresponding *ToolDefinition values. Use the explicit factory exports instead, for example createReadTool(cwd), createBashTool(cwd), createCodingTools(cwd), and createReadToolDefinition(cwd) (#3452)
+  - Removed ambient process.cwd() / default agent-dir fallback behavior from public resource helpers. DefaultResourceLoader, loadProjectContextFiles(), and loadSkills() now require explicit cwd/agent-dir style inputs, and exported system-prompt option types now require an explicit cwd. Pass the session or project cwd explicitly instead of relying on process-global defaults (#3452)
+  Added
+  - Added extension support for customizing the interactive streaming working indicator via ctx.ui.setWorkingIndicator(), including custom animated frames, static indicators, hidden indicators, a new working-indicator.ts example extension, and updated extension/TUI/RPC docs (#3413)
+  - Added systemPromptOptions (BuildSystemPromptOptions) to before_agent_start extension events, so extensions can inspect the structured inputs used to build the current system prompt (#3473 by @dljsjr)
+  - Added /clone to duplicate the current active branch into a new session, while keeping /fork focused on forking from a previous user message (#2962)
+  - Added ctx.fork() support for position: "before" | "at" so extensions and integrations can branch before a user message or duplicate the current point in the conversation; the interactive clone/fork UX builds on that runtime support (#3431 by @mitsuhiko)
+  - Added configurable keybinding ids for scoped model selector actions and tree filter actions, so those interactive shortcuts can be remapped in keybindings.json (#3343 by @mpazik)
+  - Added PI_OAUTH_CALLBACK_HOST support for built-in OAuth login flows, allowing local callback servers used by pi auth to bind to a custom interface instead of hardcoded 127.0.0.1 (#3409 by @Michaelliv)
+  - Added reason and targetSessionFile metadata to session_shutdown extension events, so extensions can distinguish quit, reload, new-session, resume, and fork teardown paths (#2863)
+  Changed
+  - Changed pi update to batch npm package updates per scope and run git package updates with bounded parallelism, reducing multi-package update time while preserving skip behavior for pinned and already-current packages (#2980)
+  - Changed Bedrock session requests to omit maxTokens when model token limits are unknown and to omit temperature when unset, letting Bedrock use provider defaults and avoid unnecessary TPM quota reservation (#3400 by @wirjo)
+  Fixed
+  - Fixed AgentSession system-prompt option initialization to avoid constructing an invalid empty BuildSystemPromptOptions, so npm run check passes after cwd became mandatory.
+  - Fixed shell-path resolution to stop consulting ambient process.cwd() state during bash execution, so session/project-specific shellPath settings now follow the active coding-agent session cwd instead of the launcher cwd (#3452)
+  - Fixed ctx.ui.setWorkingIndicator() custom frames to render verbatim instead of forcing the theme accent color, so extensions now own working-indicator coloring when they customize it (#3467)
+  - Fixed pi update reinstalling npm packages that are already at the latest published version by checking the installed package version before running npm install <pkg>@latest (#3000)
+  - Fixed @ autocomplete plain queries to stop matching against the full cwd/base path, so path fragments in worktree names no longer crowd out intended results such as @plan (#2778)
+  - Fixed built-in tool wrapping to use the same extension-runner context path as extension tools, so built-in tools receive execution context and read can warn when the current model does not support images (#3429)
+  - Fixed openai-completions assistant replay to preserve compat.requiresThinkingAsText text-part serialization, avoiding same-model follow-up crashes when previous assistant messages mix thinking and text (#3387)
+  - Fixed direct OpenAI Chat Completions sessions to map sessionId and cacheRetention to prompt caching fields, sending prompt_cache_key when caching is enabled and prompt_cache_retention: "24h" for direct api.openai.com requests with long retention (#3426)
+  - Fixed OpenAI-compatible Chat Completions sessions to optionally send aligned session_id, x-client-request-id, and x-session-affinity headers from sessionId via compat.sendSessionAffinityHeaders, improving cache-affinity routing for backends such as Fireworks (#3430)
+  - Fixed threaded /resume session relationships and current-session detection to canonicalize symlinked session paths during selector comparisons, so shared session directories no longer break parent-child matching or active-session delete protection (#3364)
+  - Fixed /session, Sessions docs, and CLI help to consistently document that session reuse supports both file paths and session IDs, and that /session shows the current session ID (#3390)
+  - Fixed Windows pnpm global install detection to recognize \\.pnpm\\ store paths, so update notices now suggest pnpm install -g @mariozechner/pi-coding-agent instead of falling back to npm (#3378)
+  - Fixed missing @sinclair/typebox runtime dependency in @mariozechner/pi-coding-agent, so strict pnpm installs no longer fail with ERR_MODULE_NOT_FOUND when starting pi (#3434)
+  - Fixed xterm uppercase typing in the interactive editor by decoding printable modifyOtherKeys input and normalizing shifted letter matching, so Shift+letter no longer disappears in pi (#3436)
+  - Fixed /compact to reuse the session thinking level for compaction summaries instead of forcing high, avoiding invalid reasoning-effort errors on github-copilot/claude-opus-4.7 sessions configured for medium thinking (#3438)
+  - Fixed shared/exported plain-text tool output to preserve indentation instead of collapsing leading whitespace in the web share page (#3440)
+  - Fixed exported share pages to use browser-safe T and O shortcuts with clickable header toggles for thinking and tool visibility instead of browser-reserved Ctrl+T / Ctrl+O bindings (#3374 by @vekexasia)
+  - Fixed skill resolution to dedupe symlinked aliases by canonical path, so pi config no longer shows duplicate skill entries when ~/.pi/agent/skills points to ~/.agents/skills (#3417 by @rwachtler)
+  - Fixed OpenRouter request attribution to include Pi app headers (HTTP-Referer: https://pi.dev, X-OpenRouter-Title: pi, X-OpenRouter-Categories: cli-agent) when sessions are created through the coding-agent SDK and install telemetry is enabled (#3414)
+  - Fixed custom-model compat schema/docs to support cacheControlFormat: "anthropic" for OpenAI-compatible providers that expose Anthropic-style prompt caching via cache_control markers (#3392)
+  - Fixed Cloud Code Assist tool schemas to strip JSON Schema meta-declaration keys before provider translation, avoiding validation failures for tool-enabled sessions that use $schema, $defs, and related metadata (#3412 by @vladlearns)
+  - Fixed direct Bedrock sessions to honor model.baseUrl as the runtime client endpoint, restoring support for custom Bedrock VPC or proxy routes (#3402 by @wirjo)
+  - Fixed the edit tool to coerce stringified edits JSON before validation, so models that send the array payload as a JSON string no longer fall back to ad-hoc shell edits (#3370 by @dannote)
+  - Fixed package manifest positive glob entries to expand before loading packaged resources, restoring manifest patterns such as skills/**/*.md (#3350 by @neonspectra)
+ReleaseNotesUrl: https://github.com/badlogic/pi-mono/releases/tag/v0.68.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
