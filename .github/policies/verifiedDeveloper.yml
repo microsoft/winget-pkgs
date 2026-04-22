@@ -1,0 +1,74 @@
+id: verifiedDeveloper
+name: GitOps.PullRequestIssueManagement
+description: Handles auto-approval for verified developer submissions
+owner:
+resource: repository
+disabled: false
+where:
+configuration:
+  resourceManagementConfiguration:
+    eventResponderTasks:
+      - description: >-
+          Approve and comment when a verified developer's PR completes validation.
+          Triggers when Validation-Completed is added and Publisher-Verified is present.
+        if:
+          - payloadType: Pull_Request
+          - labelAdded:
+              label: Validation-Completed
+          - hasLabel:
+              label: Publisher-Verified
+          - isOpen
+        then:
+          - approvePullRequest:
+              comment: ""
+          - addReply:
+              reply: >-
+                This pull request was submitted by a **verified developer** and all validation checks have passed.
+
+
+                The author is a trusted publisher registered with the Windows Package Manager service. No additional moderator review is required — this PR will be merged automatically.
+
+
+                Template: msftbot/verifiedDeveloper/approved
+        triggerOnOwnActions: true
+      - description: >-
+          Handle case where Publisher-Verified is added after Validation-Completed.
+        if:
+          - payloadType: Pull_Request
+          - labelAdded:
+              label: Publisher-Verified
+          - hasLabel:
+              label: Validation-Completed
+          - isOpen
+        then:
+          - approvePullRequest:
+              comment: ""
+          - addReply:
+              reply: >-
+                This pull request was submitted by a **verified developer** and all validation checks have passed.
+
+
+                The author is a trusted publisher registered with the Windows Package Manager service. No additional moderator review is required — this PR will be merged automatically.
+
+
+                Template: msftbot/verifiedDeveloper/approved
+        triggerOnOwnActions: true
+      - description: >-
+          Fallback: When Publisher-Verified is set by wingetbot but
+          Validation-Completed is missing, add it to trigger the merge chain.
+        if:
+          - payloadType: Pull_Request
+          - labelAdded:
+              label: Publisher-Verified
+          - isActivitySender:
+              user: wingetbot
+          - not:
+              hasLabel:
+                label: Validation-Completed
+          - isOpen
+        then:
+          - addLabel:
+              label: Validation-Completed
+        triggerOnOwnActions: true
+onFailure:
+onSuccess:

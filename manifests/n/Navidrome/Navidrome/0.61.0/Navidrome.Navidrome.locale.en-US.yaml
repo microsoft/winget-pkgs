@@ -1,0 +1,132 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Navidrome.Navidrome
+PackageVersion: 0.61.0
+PackageLocale: en-US
+Publisher: Navidrome
+PublisherUrl: https://github.com/navidrome
+PublisherSupportUrl: https://github.com/navidrome/navidrome/issues
+PackageName: Navidrome
+PackageUrl: https://github.com/navidrome/navidrome
+License: GPL-3.0
+LicenseUrl: https://github.com/navidrome/navidrome/blob/HEAD/LICENSE
+ShortDescription: Modern Music Server and Streamer compatible with Subsonic/Airsonic
+Tags:
+- airsonic
+- madsonic
+- media-server
+- music
+- music-server
+- navidrome
+- opensubsonic
+- raspberry-pi
+- self-hosted
+- streamer
+- streaming-api
+- streaming-audio
+- subsonic
+- subsonic-server
+ReleaseNotes: |-
+  This version brings a comprehensive Artwork overhaul, with per-disc cover art, artist image uploads, animated image preservation, and a faster image pipeline powered by WebP encoding. You can now upload custom artwork for playlists, artists, and internet radios directly from the UI, and multi-disc albums will automatically pick up disc-specific cover images.
+  Search has been completely rebuilt on top of SQLite FTS5 with two-phase BM25 ranking, delivering faster and more accurate results across your entire library.
+  Transcoding is now fully server-managed: Navidrome detects client codecs, applies format-aware bitrate defaults, and implements the OpenSubsonic Transcoding extension, so clients no longer need to guess what format to request.
+  The Plugin System continues to mature with new host services for HTTP requests, persistent task queues, lyrics providers, and key-value storage with TTL support, giving plugin developers more tools to build powerful integrations.
+  Security
+  - Bump golang.org/x/image to v0.38.0 to address CVE-2026-33809. (#5268)
+  - Add ownership checks to share Delete and Update operations, preventing unauthorized access to other users' shares. (#5189 by @deluan)
+  - Clear server-managed fields in savePlaylist to prevent field injection via REST API. (f102036dc by @deluan)
+
+  ⚠️ Breaking Changes
+  - Remove built-in Spotify integration. The Spotify.ID and Spotify.Secret configuration options are no longer supported. Use the Last.fm or Deezer agents, or a plugin for similar functionality, like the new Apple Music Plugin. (#5197 by @deluan)
+
+  Configuration Changes
+  ───────┬─────────────────────────────────┬────────────────────────────────────────────────────────────────────────────────────────────┬──────────────────────────────────────────────────────────────────
+  Status │Option                           │Description                                                                                 │Default
+  ───────┼─────────────────────────────────┼────────────────────────────────────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────────────
+  New    │EnableArtworkUpload              │Enable uploading custom artwork for playlists and artists. (#5110, #5198)                   │true
+  ───────┼─────────────────────────────────┼────────────────────────────────────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────────────
+  New    │EnableM3UExternalAlbumArt        │Enable fetching album art URLs from #EXTALBUMARTURL directives in M3U playlists. (#5131)    │false
+  ───────┼─────────────────────────────────┼────────────────────────────────────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────────────
+  New    │DiscArtPriority                  │Priority list for disc-level cover art sources. (#5182)                                     │disc*.*, cd*.*, cover.*, folder.*, front.*, discsubtitle, embedded
+  ───────┼─────────────────────────────────┼────────────────────────────────────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────────────
+  New    │ArtistImageFolder                │Folder name to search for artist images within the library. (#5198)                         │—
+  ───────┼─────────────────────────────────┼────────────────────────────────────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────────────
+  New    │Search.Backend                   │Search backend to use (fts for FTS5 full-text search). (#5079)                              │fts
+  ───────┼─────────────────────────────────┼────────────────────────────────────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────────────
+  New    │ExtAuth.LogoutURL                │URL to redirect to when logging out with external authentication. (#5074)                   │""
+  ───────┼─────────────────────────────────┼────────────────────────────────────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────────────
+  New    │Subsonic.AppendAlbumVersion      │Append album version/edition to album names in Subsonic API responses. (#5111)              │true
+  ───────┼─────────────────────────────────┼────────────────────────────────────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────────────
+  New    │UISearchDebounceMs               │Debounce delay for the UI search field. (#5079)                                             │—
+  ───────┼─────────────────────────────────┼────────────────────────────────────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────────────
+  Changed│CoverJpegQuality →               │Renamed for clarity. Old name still works. (#5181)                                          │75
+         │CoverArtQuality                  │                                                                                            │
+  ───────┼─────────────────────────────────┼────────────────────────────────────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────────────
+  CHanged│SearchFullString                 │Use Search.FullString instead. (#5079)                                                      │—
+  ───────┼─────────────────────────────────┼────────────────────────────────────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────────────
+  Removed│Spotify.ID, Spotify.Secret       │Spotify integration has been removed. (#5197)                                               │—
+  ───────┴─────────────────────────────────┴────────────────────────────────────────────────────────────────────────────────────────────┴──────────────────────────────────────────────────────────────────
+  For a complete list of all configuration options, see the Configuration Options documentation.
+
+  Artwork
+  - Add per-disc cover art support, with configurable DiscArtPriority. (#5182 by @deluan)
+  - Add artist image uploads and image-folder artwork source. (#5198 by @deluan)
+  - Preserve animated image artwork (GIF, APNG, animated WebP) during resize. (#5184 by @deluan)
+  - Improve image serving performance with WebP encoding and optimized pipeline. (#5181 by @deluan)
+  - Increase cover art size to 600px and use CatmullRom scaling for sharper images. (cb396f3db by @deluan)
+  - Fallback mediafile cover art to disc artwork before album. (#5216 by @deluan)
+  - Refresh stale artist image URLs on expiry. (#5267 by @deluan)
+  - Validate ffmpeg pipe before returning in cover art fallback. (420d2c8e5 by @deluan)
+  - Search parent folders for album cover art in multi-disc layouts. (#5157 by @deluan)
+
+  UI
+  - Add custom playlist cover art upload. (#5110 by @adrbn)
+  - Add cover art support for internet radio stations. (#5229 by @deluan)
+  - Add Dracula theme. (#5023 by @Saulimedes)
+  - Add Nutball theme. (#4544 by @cafecitopuro)
+  - Add tooltips for long playlist and album names. (#5070 by @sfredo)
+  - Add download link for config TOML and disable clipboard copy when unavailable. (#5035 by @kgarner7)
+  - Add path field as optional column in library list for desktop view. (4e34d3ac1 by @deluan)
+  - Integrate server-managed transcoding decisions into web player. (#5155 by @deluan)
+  - Improve browser codec detection. (#5171 by @deluan)
+  - Allow DefaultTheme="Auto" from config. (#5190 by @trek-e)
+  - Fix search focus after clearing search field. (#4932 by @borisrorsvort)
+  - Fix "Play Next" from restarting playback at top of queue. (#5049 by @alannnna)
+  - Fix toggle switches not visible in Gruvbox Dark theme. (#5064 by @deluan)
+  - Fix delete button contrast in AMusic theme. (51c48bcac by @deluan)
+  - Cancel in-flight image requests on pagination, cache across remounts. (#5249 by @deluan)
+  - Prevent mobile touch events from triggering playback after lightbox close. (197d357f0 by @deluan)
+  - Prevent duplicate getCoverArt requests on artist page. (549b81263 by @deluan)
+
+  Search
+  - Implement FTS5-based full-text search for faster and more accurate results. (#5079 by @deluan)
+  - Improve FTS queries with two-phase BM25 ranking for Subsonic's search3 endpoint. (#5086 by @deluan)
+
+  Transcoding
+  - Implement server-managed transcoding. (#4990 by @deluan)
+  - Add player MaxBitRate cap, format-aware defaults, and browser profile filtering. (#5165 by @deluan)
+  - Improve transcoding failure diagnostics and error responses. (#5227 by @deluan)
+  - Use ADTS for AAC transcoding. (#5167 by @deluan)
+  - Implement fallback to DefaultDownsamplingFormat for unknown formats. (5ecbe31a0 by @deluan)
+  - Prevent raw file being returned when explicit transcode format is requested. (053a0fd6c by @deluan)
+
+  Subsonic API
+  - Implement OpenSubsonic transcoding extension. (#4990 by @deluan)
+  - Append album version to names in Subsonic API responses. (#5111 by @deluan)
+  - Add coverArt to internetRadioStation response. (03608d3ee by @deluan)
+  - Add per-disc cover art support. (#5182 by @deluan)
+  - Never omit duration for AlbumID3. (#5217 by @kgarner7)
+  - Always return required playqueue fields. (#5172 by @kgarner7)
+  - Always include mandatory title field in Child responses. (a887521d7 by @deluan)
+  - Restore public attribute for playlists in XML responses. (0c3cc8653 by @deluan)
+
+  Scanner
+  - Add MKA/Matroska audio file support via TagLib 2.2. (#5071 by @deluan)
+  - Exclude Vorbis VERSION from albumversion tag mapping. (#5194 by @trek-e)
+  - Widen WASM panic recovery to cover tag/property reading. (#5223 by @deluan)
+  - Prevent duplicate tracks when multiple missing files match same target. (#5183 by @deluan)
+  - Prevent ScanOnStartup when scanner is disabled. (1cf3fd916 by @deluan)
+ReleaseNotesUrl: https://github.com/navidrome/navidrome/releases/tag/v0.61.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
