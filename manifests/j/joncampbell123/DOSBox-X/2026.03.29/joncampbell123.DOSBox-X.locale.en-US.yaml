@@ -1,0 +1,192 @@
+# Created with Devicie using komac v2.15.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: joncampbell123.DOSBox-X
+PackageVersion: 2026.03.29
+PackageLocale: en-US
+Publisher: joncampbell123 [DOSBox-X Team]
+PublisherUrl: https://dosbox-x.com/
+PublisherSupportUrl: https://github.com/joncampbell123/dosbox-x/issues
+Author: John Campbell
+PackageName: DOSBox-X
+PackageUrl: https://github.com/joncampbell123/dosbox-x
+License: GPL-2.0
+LicenseUrl: https://raw.githubusercontent.com/joncampbell123/dosbox-x/master/COPYING
+Copyright: Copyright 2011-2025 The DOSBox-X Team
+CopyrightUrl: https://raw.githubusercontent.com/joncampbell123/dosbox-x/master/COPYING
+ShortDescription: DOSBox-X is an open-source DOS emulator for running DOS games and applications.
+Description: |-
+  DOSBox-X emulates a PC necessary for running many DOS games and applications that simply cannot be run on modern PCs and operating systems, similar to DOSBox.
+  However, while the main focus of DOSBox is for running DOS games, DOSBox-X goes much further than this.
+  Started as a fork of the DOSBox project, it retains compatibility with the wide base of DOS games and DOS gaming DOSBox was designed for.
+  But it is also a platform for running DOS applications, including emulating the environments to run Windows 3.x, 9x and ME and software written for those versions of Windows.
+  By adding official support for Windows 95, 98, ME emulation and acceleration, we hope that those old Windows games and applications could be enjoyed or used once more.
+  Moreover, DOSBox-X adds support for DOS/V and NEC PC-98 emulations so that you can play DOS/V and PC-98 games with it.
+Moniker: dosbox-x
+Tags:
+- dos
+- dosbox
+- dosv
+- emulator
+- ibmdos
+- ms-dos
+- msdos
+- necpc-98
+- pc-dos
+- pc98
+- pcdos
+- windows3.0
+- windows3.1
+- windows95
+- windows98
+- windowsme
+ReleaseNotes: |-
+  2026.03.29
+  - Add dosbox.conf option to control the duration of the beep when
+    DOS CON and INT 10h are given the BEL character. (joncampbell123).
+  - DOS CON device BEL (beep) handling: For IBM PC modes, call on
+    INT 10h to make the beep, rather than duplicate code. Fix the
+    DOS CON device so that it can also properly beep in PC-98 mode.
+    (joncampbell123).
+  - Fix bug where the "zero memory on DOS allocation" option was
+    stuck on. Some games, like "Bad Cat" rely on memory contents
+    peristing across DOS EXEC and memory allocation. (joncampbell123).
+  - Fix Hercules palette selection related to herc blend. (joncampbell123).
+  - DOS kernel: When executing an EXE file, the loader can now detect
+    EXE files that were compressed using EXEPACK. Based on the new
+    exepack dosbox.conf setting, it can decompress the EXE by itself,
+    switch off the A20 gate, or do nothing. The purpose of this
+    setting is to avoid EXEPACK "Packed File is Corrupt" errors that
+    happen if the A20 gate is enabled and the EXE was loaded too low
+    in memory. (joncampbell123).
+  - Linux SDL1: Use XDG_SESSION_TYPE environment variable to detect
+    whether or not the user is running DOSBox-X under X11 or Wayland,
+    and if so, prevent the fbcon and svga drivers from initializing.
+    There seems to be a problem where, if run under Wayland and the
+    XWayland compatibility layer if not present, SDL1 uses the fbcon
+    driver to take over the screen using vtcon switching and the classic
+    fbdev driver interface. Don't do that! (joncampbell123).
+  - INT 21h AH=4Ah resize memory: If memory resize fails because there
+    is not enough room for the requested amount of memory, do not
+    set ownership of the block to the program. This fixes memory
+    allocation error in California Games II. The game at one point
+    seems to miscalculate and ask for an excessively large amount
+    of memory on resize, and then fail, which doesn't seem to affect
+    the game. HOWEVER, prior to the bugfix, the memory block that
+    was available was assigned ownership to the game anyway. Later
+    on after helicopter takeoff, the game would attempt to allocate
+    more memory, which would fail because of the erroneous assignment
+    of ownership to free memory. (joncampbell123).
+  - Add debug logging to not only indicate DOS kernel memory alloc,
+    free, and resize, but also log when the memory operation fails.
+    Perhaps someday I'll figure out what the memory management in
+    California Games II is doing wrong that makes the helicopter part
+    fail in DOSBox-X. (joncampbell123).
+  - Code development now occurs across two primary branches: master
+    for fully functional emulation, and main-osfree for versions of
+    DOSBox-X where built-in MS-DOS OS emulation is disabled. The osfree
+    branch can only boot a guest OS. main-osfree is for use in jurisdictions
+    that enforce or wish to enforce OS level age verification, and
+    therefore, may consider the MS-DOS emulation an OS that is subject
+    to those laws. (joncampbell123).
+  - El Torito CD-ROM floppy disk boot emulation is no longer as slow
+    as an actual floppy drive. Your bootable CDs will boot much faster
+    now. (joncampbell123).
+  - DOSBox-X shell: If a DOS error happened while trying to execute a
+    DOS program, read the error code and print an appropriate message
+    on the console. So far only "Access Denied" has any specific error
+    message there. (joncampbell123).
+  - Skip all keyboard code page and layout loading if running in PC-98
+    mode. PC-98 systems store the entire font in ROM with only very
+    limited room for custom fonts, therefore, it makes no sense to load
+    code pages in PC-98 mode. (joncampbell123).
+  - Keyboard code page layout: Fix bug where an out of range start_pos
+    can cause DOSBox-X to segfault. Range check and print an error
+    message instead. (joncampbell123).
+  - Keyboard code page layout: The UPX unpacker checks the stack pointer
+    (like a COM program would) to determine if there is enough memory
+    to decompress. If there is not, it executes INT 20h to exit to DOS.
+    Problem is, the code page execution never makes a proper PSP segment
+    for that to work, so, during execution, intercept INT 20h and safely
+    redirect execution to exit properly when called. Set an error flag
+    so the code can know if that happened and say so. (joncampbell123).
+  - Keyboard code page layout: If executing the CPI/CPX file because UPX
+    decompression is detected, allocate memory based on the size of the
+    file plus reasonable stack space rather than assume about 128KB of
+    RAM following a DOS allocation of less, which for lower memsizes,
+    only causes a crash on startup. (joncampbell123).
+  - Debug print to log what code page file is being loaded at startup (joncampbell123).
+  - CPU Idle callback is now strictly limited to processing IRQs and one
+    CPU instruction, instead of however many CPU instructions can run
+    until the next scheduled emulator event. This fixes a bug where
+    system calls that use the Idle callback (INT 21h, etc) can sometimes
+    vary their delay time by emulator events, and if "scanline render on
+    demand is enabled", can cause the Idle call to take a full 1ms interval
+    of time. This fixes an issue where "scanline render on demand" caused
+    some DOS games like Xargon to take 5 to 10 times longer to transition
+    between title, main menu, gameplay, etc. (joncampbell123).
+  - Debugger LOGL command now includes the PIC_FullIndex() emulator time
+    in millseconds so that it can be used to determine time as well as
+    CPU state for debugging (joncampbell123).
+  - Add dosbox.conf option to control whether VBE emulation provides the
+    protected mode interface or not (joncampbell123).
+  - Add dosbox.conf option vbememsize and vbememsizekb to control how much
+    video memory is reported through the VESA BIOS, which can be less than
+    actual video memory (but must be at least 256KB). This option can help
+    with some DOS programs that have problems with "too much" video memory
+    in the system (joncampbell123).
+  - Add INT 10h mode flag _REQUIRE_LFB. When set, INT 10h calls to set
+    VESA BIOS modes will fail unless requesting to set the linear framebuffer
+    version of the mode (joncampbell123).
+  - S3 emulation will mark any more large enough to exceed bank switching
+    limits in S3 hardware as _REQUIRE_LFB (joncampbell123).
+  - I'm not sure why Adlib emulation defaults to 48KHz in most versions of
+    DOSBox, but the hardware rate is 49716 and that should be the default
+    (joncampbell123).
+  - Fixed crash on starting debugger on MinGW builds (maron2000)
+  - Adjusted the ChinaSea/Big5-2003 extended code point ranges for CP951 to
+    0x9140–0xA3FE and 0xC6A1–0xFEFE (1abcd)
+  - Replaced deprecated symbols to enable launching on old macOSs (maron2000)
+  - Converted all bash-dependent shell files to POSIX-shell compliant
+    (pandasoli)
+  - Removed 7 duplicate Chinese character mappings from CP951 (Big5-UAO) (1abcd)
+  - Added SoundBlaster microphone input support (Windows WASAPI)
+    (meldro364-glitch)
+  - Fixed segfault on launch of macOS builds (maron2000)
+  - Added OS/2 support for tinyfiledialogs, browser and external programs and
+    some more fixes. (josch1710)
+  - Fixed savestate load "Memory size mismatch" error on MSVC build (rebb)
+  - Fixed savestate loading crash related to dynamically allocated TempLine in
+    VGA system (rebb)
+  - Added Direct3D11 and Metal support (Experimental, SDL2 only) (maron2000)
+  - When leaving fullscreen, only force rebuilding the window for OpenGL mode.
+    (rebb)
+  - Clear modifier keys before savestate gets saved. (rebb)
+  - Re-enabled WinMM joystick support (Windows SDL1) (maron2000)
+  - Fixed colors option fails at launch on TTF mode (maron2000)
+  - Optional switch to disable post exit delay in DX-CAPTURE (villesundell)
+  - Fixed Emscripten builds for Dosbox x v2026.01.02 (grootpot)
+  - Fixed long freeze during startup on linux (SmileTheory)
+  - Fixed windowposition option at launch (maron2000)
+  - Fixed detection of EXEPACK failures (maron2000)
+  - Added OS/2 dimension handling to UpdateWindowDimensions (josch1710)
+  - Fixed handling of volume label searches (Allofich)
+  - Microphone input: Make Hands-Free profile (HFP) optional (maron2000)
+  - macOS: Fixed build script typo that made loading freetype library fail
+    (maron2000)
+  - Fixed FPU FILD emulation (asemarafa)
+  - Removed range check in INT10_GetCursorPos causing text glitches (maron2000)
+  - Added experimental VS2026 CI builds. Can be downloaded as 64-bit Visual
+    Studio nightly builds. (maron2000)
+  - macOS: Fixed garbled message when opening image file(s) from dropdown menu.
+    (maron2000)
+  - Fixed XCOPY argument parsing to correctly handle switches appended directly
+    to file paths without whitespace. (maron2000)
+  - Fixed some Yes/No character was remained hardcoded as Y/N for some languages
+    specifiying other characters (e.g. German). (maron2000)
+ReleaseNotesUrl: https://github.com/joncampbell123/dosbox-x/releases/tag/dosbox-x-v2026.03.29
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/joncampbell123/dosbox-x/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
