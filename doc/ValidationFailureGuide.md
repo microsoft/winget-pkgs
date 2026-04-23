@@ -8,7 +8,7 @@ When you submit a pull request to [microsoft/winget-pkgs](https://github.com/mic
 > winget validate <path-to-manifest>
 > winget install --manifest <path-to-manifest>
 > ```
-> For isolated testing, use the [SandboxTest.ps1](https://github.com/microsoft/winget-pkgs/blob/master/doc/tools/SandboxTest.md) script in Windows Sandbox.
+> For isolated testing, use the [SandboxTest.ps1](https://github.com/microsoft/winget-pkgs/blob/master/doc/tools/SandboxTest.md) script or Windows Sandbox.
 
 ---
 
