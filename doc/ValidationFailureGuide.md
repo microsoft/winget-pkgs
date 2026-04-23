@@ -61,7 +61,7 @@ These labels track the progress of your PR through the validation pipeline.
 ```powershell
 winget validate <path-to-manifest>
 ```
-Address all errors reported by the validator and resubmit.
+Address all reported errors and resubmit.
 
 ---
 
