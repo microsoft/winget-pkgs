@@ -1,0 +1,181 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: TareqImbasher.NetPad.vNext
+PackageVersion: 0.12.0
+PackageLocale: en-US
+Publisher: Tareq Imbasher
+PublisherUrl: https://github.com/tareqimbasher
+PublisherSupportUrl: https://github.com/tareqimbasher/NetPad/issues
+Author: Tareq Imbasher
+PackageName: NetPad vNext
+PackageUrl: https://github.com/tareqimbasher/NetPad
+License: MIT
+LicenseUrl: https://github.com/tareqimbasher/NetPad/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Tareq Imbasher
+ShortDescription: A cross-platform C# editor and playground.
+Description: |-
+  NetPad is a C# playground that lets you run C# code instantly, without the hassle of creating and managing projects. Open NetPad, start coding, hit Run, and see your output immediately. It's that simple.
+  - Prototyping and Testing: Quickly prototype and test code snippets before incorporating them into your projects.
+  - Data Visualization: Visualize data interactively for better insights and analysis.
+  - Database Queries: Query databases using LINQ or SQL effortlessly.
+  - Learn and Experiment: Experiment with new C# features or start learning C# in an intuitive and accessible environment.
+  - Utility Scripts: Create and save your own utility or administration scripts for repeated use.
+Tags:
+- .net
+- c#
+- code
+- coding
+- csharp
+- develop
+- development
+- dotnet
+- editor
+- playground
+- programming
+ReleaseNotes: |-
+  If you like NetPad, please star the repo ⭐ and consider sponsoring FOSS!
+  This release brings performance improvements, a major CLI update, new features for managing data
+  connections, and a large number of bug fixes and stability improvements.
+  🎯 A special thanks to @antonkesy and @wuuer for their contributions in this release.
+  What's New 🚀
+  Database Server Connections
+  You can now add a database server to the connections list and select one or more databases from that
+  server. All databases under a server share the same connection and scaffolding options, so you only
+  configure things once. Server connections are supported for SQL Server, PostgreSQL, MySQL, and
+  MariaDB.
+  Script Performance Improvements
+  Script startup and re-run speed was improved:
+  - Compilation results are cached so unchanged re-runs skip compilation entirely.
+  - Nuget dependency graphs and script dependencies are cached so resolution only occurs when needed.
+  - Framework assembly dependency cache is pre-warmed on a background thread at startup.
+  - Other similar optimizations for quicker re-runs.
+  .NET SDK Detection Improvements
+  NetPad now discovers all valid .NET installations on your system (user settings, environment
+  variables, user-level, system-level, PATH) and aggregates SDKs and runtimes from each. Previously,
+  only the first valid installation was used. When running a script, the correct dotnet executable
+  is resolved based on which installation contains the target framework's SDK.
+  User Interface
+  - Statusbar background color now changes to indicate script status (running, error, etc.), with
+    unified status colors throughout the app.
+  - A context menu was added to the scripts explorer sidebar.
+  - Added separators between editor tabs and added tree nesting indicators in the explorer pane for
+    better visual hierarchy.
+  - When text is selected in the editor, the statusbar now shows the number of selected chars (or
+    lines).
+  - Style run/stop buttons with colored tints and flatten save/properties to icon buttons.
+  - Change open folder icons in scripts explorer to blue to indicate expanded state.
+  - Increase global border-radius for a softer look across all components.
+  - Better background colors for input controls.
+  - Add toolbar dividers to group action icons where needed.
+  - Reduced prominence of toolbar labels (SDK, Kind, etc.) for a cleaner look.
+  - Add more contrast to pane toolbar background.
+  - Switch package reference buttons to outline style for less visual noise.
+  - Window size and position are now remembered across Tauri app restarts (#370).
+  [!NOTE]
+  The Styling page of the wiki is updated with the latest styles if you want to override anything.
+  OmniSharp / IntelliSense
+  OmniSharp stability was improved:
+  - Requests to OmniSharp are queued and wait for OmniSharp to finish its internal initialization to
+    prevent broken language server features when typing in scripts before OmniSharp is finished
+    loading.
+  - OmniSharp now detects process crashes and auto-restarts.
+  NetPad CLI (npad) v0.2.0
+  The CLI tool received a major update with many new commands and usability improvements. See
+  the CLI wiki for more info and usage details.
+  New commands:
+  - new: Create .netpad scripts or plain .cs files with options for kind, SDK, connection,
+    and more
+  - show: Inspect a script's metadata and source code (renamed from cat, BREAKING CHANGE)
+  - logs show/tail/rm/clear: View, follow, and manage log files
+  - settings show/edit: View settings as a table or JSON, or open in default editor
+  New features:
+  - run is now the default command: npad myscript works without typing run
+  - Stdin piping: echo 'Console.WriteLine("hi")' | npad
+  -  --eval (renamed from --code): Run inline C# from the command line, BREAKING CHANGE
+  -  --format json: NDJSON output for piping to jq and other tools
+  -  --kind option on run: Override a script's kind at runtime
+  - Interactive script picker: Prompts for selection when multiple scripts match
+  - Script exit codes: Propagates meaningful exit codes (0=success, 1=runtime failure,
+    2=compilation failure, 130=cancelled)
+  - Short aliases: -e, -s, -c, -O, -b, -f, -m, -v, -k and command aliases (
+    ls, log)
+  - Various TUI improvements and fixes
+  Install or update via:
+  dotnet tool install -g netpad.cli
+  dotnet tool update -g netpad.cli
+  Coming Soon: NetPad MCP Server
+  A Model Context Protocol (MCP) server for NetPad is in the works and nearly complete. It will let AI
+  assistants (like Claude Code) and other MCP clients to create, run, and manage scripts directly
+  through NetPad. Stay tuned!
+  Build & Release
+  - Added Linux ARM64 and Windows ARM64 builds for both Electron and Tauri.
+  - Support for alpha/beta pre-release version names in app update checks.
+  - Unified release workflow: a single release.yml replaces the old pack-electron.yml and
+    pack-tauri.yml with support for alpha/beta pre-releases.
+  Fixes 🐛
+  - Fix The filename, directory name, or volume label syntax is incorrect error (#390). Thanks to
+    @wuuer.
+  - Fix NuGet dependency resolution issues including native library resolution (#350).
+  - Fix script counts in the explorer sidebar.
+  - Fix using scale for precision in database structure column details.
+  - Fix OmniSharp bugs related to changing a script's SDK and finding installed SDK locations.
+  - Fix script-host not loading the correct SDK in release builds.
+  - Fix multiple NetPad instances sharing temp directories causing IOExceptions: temp directories are
+    now scoped per process.
+  - Fix .NET backend not stopping gracefully on Windows when using the Tauri app.
+  - Fix memory leaks and race conditions in several areas.
+  - Fix duplicate script save overwriting existing scripts in web shell.
+  - Fix unrelated script runs to serialize against each other.
+  Support ❤️
+  If you find NetPad useful, please consider sponsoring the project to help keep it free and
+  open-source! And if you haven't already, a ⭐ on the repo is always appreciated, thank you!
+  A special thanks to all my sponsors. Your support is greatly appreciated and helps keep this
+  project growing!
+  New Contributors
+  - @antonkesy made their first contribution in https://github.com/tareqimbasher/NetPad/pull/414
+  - @wuuer made their first contribution in https://github.com/tareqimbasher/NetPad/pull/390
+  Full Changelog: https://github.com/tareqimbasher/NetPad/compare/v0.11.0...v0.12.0
+  Downloads
+  NetPad comes in 2 variants:
+  - Electron: The current stable package. Installers start with netpad
+  - Native (vNext): Uses a native desktop shell instead of Electron, resulting in a lighter package that uses fewer system resources. Installers start with netpad_vnext
+  Both variants have the same features and are equally maintained. See wiki for more info.
+  Windows
+  File Variant Arch
+  netpad-0.12.0-win-x64.exe Electron x64
+  netpad-0.12.0-win-x64.zip Electron x64
+  netpad-0.12.0-win-arm64.exe Electron ARM64
+  netpad-0.12.0-win-arm64.zip Electron ARM64
+  netpad_vnext-0.12.0-win-x64.exe Native (vNext) x64
+  netpad_vnext-0.12.0-win-x64.msi Native (vNext) x64
+  netpad_vnext-0.12.0-win-arm64.exe Native (vNext) ARM64
+  netpad_vnext-0.12.0-win-arm64.msi Native (vNext) ARM64
+  macOS
+  File Variant Arch
+  netpad-0.12.0-mac-x64.zip Electron x64
+  netpad-0.12.0-mac-arm64.zip Electron ARM64
+  netpad_vnext-0.12.0-mac-x64.app.tar.gz Native (vNext) x64
+  netpad_vnext-0.12.0-mac-x64.dmg Native (vNext) x64
+  netpad_vnext-0.12.0-mac-aarch64.app.tar.gz Native (vNext) ARM64
+  netpad_vnext-0.12.0-mac-aarch64.dmg Native (vNext) ARM64
+  Linux
+  File Variant Arch
+  netpad-0.12.0-linux-amd64.deb Electron x64
+  netpad-0.12.0-linux-amd64.snap Electron x64
+  netpad-0.12.0-linux-x64.pacman Electron x64
+  netpad-0.12.0-linux-x64.zip Electron x64
+  netpad-0.12.0-linux-x86_64.AppImage Electron x64
+  netpad-0.12.0-linux-x86_64.rpm Electron x64
+  netpad-0.12.0-linux-arm64.AppImage Electron ARM64
+  netpad-0.12.0-linux-arm64.zip Electron ARM64
+  netpad_vnext-0.12.0-1-linux-x86_64.rpm Native (vNext) x64
+  netpad_vnext-0.12.0-linux-amd64.deb Native (vNext) x64
+  netpad_vnext-0.12.0-1-linux-aarch64.rpm Native (vNext) ARM64
+  netpad_vnext-0.12.0-linux-arm64.deb Native (vNext) ARM64
+ReleaseNotesUrl: https://github.com/tareqimbasher/NetPad/releases/tag/v0.12.0
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/tareqimbasher/NetPad/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
