@@ -221,7 +221,7 @@ Update the `InstallerSha256` value in your manifest and resubmit.
 
 #### `Validation-Indirect-URL`
 
-**What it means:** The installer URL uses a redirector rather than pointing directly to the publisher's server.
+**What it means:** The installer URL uses a redirect rather than pointing directly to the publisher's server.
 
 **How to fix:** Replace the redirected URL with the direct/final URL from the publisher's server.
 
