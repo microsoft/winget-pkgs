@@ -167,7 +167,6 @@ Moderators are often the first to see and triage new issues, and so they have th
 * `Issue-Feature`
 * `Last-Version-Removal`
 * `License-Blocks-Install`
-* `Manifest-Content-Incomplete`
 * `Manifest-Singleton-Deprecated`
 * `Moderator-Approved`
 * `Needs-Attention`
