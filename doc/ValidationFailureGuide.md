@@ -65,6 +65,14 @@ Address all reported errors and resubmit.
 
 ---
 
+#### `Manifest-Version-Deprecated`
+
+**What it means:** Your manifest uses a schema version that is no longer accepted by the repository.
+
+**How to fix:** Update your manifest to use a supported schema version. The recommended schema version is **1.12.0** (1.10.0 is also accepted). Update the `ManifestVersion` field in all manifest files and ensure the `# yaml-language-server: $schema=...` comment references the correct version.
+
+---
+
 #### `Manifest-Path-Error`
 
 **What it means:** Your manifest files are not in the correct directory structure.
@@ -106,6 +114,7 @@ manifests/<first-letter>/<Publisher>/<PackageName>/<PackageVersion>/
 **Common causes:**
 - `InstallerType` mismatch between what is declared and what is detected
 - Missing or incorrect `PackageFamilyName` for MSIX packages
+- Incorrect `MinimumOSVersion` for MSIX packages
 - Inconsistencies in `AppsAndFeaturesEntries`
 
 **How to fix:** Verify that installer metadata matches the actual installer. For MSIX, ensure `PackageFamilyName` and `SignatureSha256` are correct.
@@ -209,6 +218,9 @@ Update the `InstallerSha256` value in your manifest and resubmit.
 
 **How to fix:** Use the official download URL from the publisher's website. If the URL is legitimate, add a comment to your PR for investigation.
 
+> [!TIP]
+> Including `PackageUrl` in your manifest and ensuring the `InstallerUrl` can be found by navigating the publisher's website from that URL helps speed up moderator reviews.
+
 ---
 
 #### `Validation-Unapproved-URL`
@@ -225,6 +237,42 @@ Update the `InstallerSha256` value in your manifest and resubmit.
 
 **How to fix:** Replace the redirected URL with the direct/final URL from the publisher's server.
 
+<details><summary>PowerShell: Find the final URL after redirects</summary>
+
+```powershell
+Function Get-UrlResponse {
+    Param
+    (
+        [Parameter(Mandatory = $true, Position = 0)]
+        [string] $URL
+    )
+    try {
+        $HTTP_Request = [System.Net.WebRequest]::Create($URL)
+        $HTTP_Request.UserAgent = 'Microsoft-Delivery-Optimization/10.1'
+        $HTTP_Response = $HTTP_Request.GetResponse()
+        $ResponseUri = $HTTP_Response.ResponseUri
+        $AbsoluteUrl = $HTTP_Response.ResponseUri.AbsoluteUri
+        $HTTP_Status = [int]$HTTP_Response.StatusCode
+        $ResponseLength = $HTTP_Response.ContentLength
+        $Headers = @{}; $HTTP_Response.Headers.ForEach({ $Headers[$_] = $Http_Response.Headers[$_] })
+    } catch {
+        $HTTP_Status = 404
+    }
+    If ($null -eq $HTTP_Response) { $HTTP_Status = 404 }
+    Else { $HTTP_Response.Close() }
+    return @{
+        Url           = $URL
+        ResponseUrl   = $AbsoluteUrl
+        ResponseCode  = $HTTP_Status
+        ContentLength = $ResponseLength
+        Headers       = $Headers
+        Response      = $ResponseUri
+    }
+}
+```
+
+</details>
+
 ---
 
 ### Installation Testing Errors
@@ -234,13 +282,15 @@ Update the `InstallerSha256` value in your manifest and resubmit.
 **What it means:** The installer did not complete silently — it either timed out or required user interaction.
 
 **Common causes:**
+- Incorrect installer type (e.g., `exe` specified for a `nullsoft`, `burn`, or `inno` installer, or `msi` for `wix`) — WinGet handles silent switches automatically for known types, so a wrong type means the wrong switches are used
 - Missing or incorrect silent install switches (`/S`, `/silent`, `/quiet`, etc.)
 - The installer displays a dialog that blocks progress (license agreement, options screen)
 - A dependency is missing on the test machine
 - The `exe` installer type was specified instead of `portable` for an application that runs without an installer
 
 **How to fix:**
-1. Verify your `InstallerSwitches` include the correct `Silent` and `SilentWithProgress` values.
+1. Check that your `InstallerType` is correct — use `nullsoft`, `inno`, `burn`, or `wix` instead of generic `exe` or `msi` when applicable.
+2. Verify your `InstallerSwitches` include the correct `Silent` and `SilentWithProgress` values.
 2. Test locally:
    ```powershell
    winget install --manifest <path-to-manifest>
@@ -397,6 +447,7 @@ These labels are applied by [moderators](https://github.com/microsoft/winget-pkg
 | Label | Category | Author Action Required? | Summary |
 |---|---|---|---|
 | `Manifest-Validation-Error` | Manifest | ✅ Yes | Fix YAML syntax / schema errors |
+| `Manifest-Version-Deprecated` | Manifest | ✅ Yes | Update to a supported schema version |
 | `Manifest-Path-Error` | Manifest | ✅ Yes | Fix directory structure / file naming |
 | `PullRequest-Error` | PR | ✅ Yes | One package, one version per PR |
 | `Manifest-Installer-Validation-Error` | Manifest | ✅ Yes | Fix installer metadata inconsistencies |
@@ -429,4 +480,4 @@ These labels are applied by [moderators](https://github.com/microsoft/winget-pkg
 
 ---
 
-*For more information, see the [official validation documentation](https://docs.microsoft.com/windows/package-manager/package/winget-validation) and the [Troubleshooting guide](https://github.com/microsoft/winget-pkgs/blob/master/doc/Troubleshoot.md).*
+*For more information, see the [official validation documentation](https://docs.microsoft.com/windows/package-manager/package/winget-validation).*
