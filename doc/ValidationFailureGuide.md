@@ -8,7 +8,7 @@ When you submit a pull request to [microsoft/winget-pkgs](https://github.com/mic
 > winget validate <path-to-manifest>
 > winget install --manifest <path-to-manifest>
 > ```
-> For isolated testing, use the [SandboxTest.ps1](https://github.com/microsoft/winget-pkgs/blob/master/doc/tools/SandboxTest.md) script in Windows Sandbox.
+> For isolated testing, use the [SandboxTest.ps1](https://github.com/microsoft/winget-pkgs/blob/master/doc/tools/SandboxTest.md) script or Windows Sandbox.
 
 ---
 
@@ -36,7 +36,7 @@ These labels track the progress of your PR through the validation pipeline.
 | Label | Meaning |
 |---|---|
 | **Azure-Pipeline-Passed** | Your manifest passed automated testing and is awaiting moderator approval. |
-| **Validation-Completed** | All checks passed. Your PR will be merged automatically. |
+| **Validation-Completed** | All checks passed. Your PR may be merged automatically after moderator review. |
 | **Needs-Author-Feedback** | Something needs your attention. If not addressed within 10 days, the PR will be auto-closed. |
 | **Needs-Attention** | The PR has been escalated to the WinGet engineering team for investigation. |
 | **Blocking-Issue** | The PR cannot be approved until the blocking issue (indicated by an accompanying error label) is resolved. |
@@ -61,7 +61,7 @@ These labels track the progress of your PR through the validation pipeline.
 ```powershell
 winget validate <path-to-manifest>
 ```
-Address all errors reported by the validator and resubmit.
+Address all reported errors and resubmit.
 
 ---
 
@@ -221,7 +221,7 @@ Update the `InstallerSha256` value in your manifest and resubmit.
 
 #### `Validation-Indirect-URL`
 
-**What it means:** The installer URL uses a redirector rather than pointing directly to the publisher's server.
+**What it means:** The installer URL uses a redirect rather than pointing directly to the publisher's server.
 
 **How to fix:** Replace the redirected URL with the direct/final URL from the publisher's server.
 
