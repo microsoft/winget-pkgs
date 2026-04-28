@@ -35,7 +35,7 @@ These labels track the progress of your PR through the validation pipeline.
 
 | Label | Meaning |
 |---|---|
-| **Azure-Pipeline-Passed** | Your manifest passed automated testing and is awaiting moderator approval. |
+| **Azure-Pipeline-Passed** | Your manifest passed automated testing. There may be additional manual verification required. |
 | **Validation-Completed** | All checks passed. Your PR may be merged automatically after moderator review. |
 | **Needs-Author-Feedback** | Something needs your attention. If not addressed within 10 days, the PR will be auto-closed. |
 | **Needs-Attention** | The PR has been escalated to the WinGet engineering team for investigation. |
