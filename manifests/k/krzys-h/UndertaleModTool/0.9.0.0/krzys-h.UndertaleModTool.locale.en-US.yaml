@@ -1,0 +1,102 @@
+# Created with WinGet Updater using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: krzys-h.UndertaleModTool
+PackageVersion: 0.9.0.0
+PackageLocale: en-US
+Publisher: krzys-h
+PublisherUrl: https://github.com/UnderminersTeam
+PublisherSupportUrl: https://github.com/krzys-h/UndertaleModTool/issues
+Author: krzys-h
+PackageName: UndertaleModTool
+PackageUrl: https://github.com/UnderminersTeam/UndertaleModTool
+License: GPL-3.0
+LicenseUrl: https://github.com/UnderminersTeam/UndertaleModTool/blob/HEAD/LICENSE.txt
+ShortDescription: 'The most complete tool for modding, decompiling and unpacking Undertale (and other Game Maker: Studio games!)'
+Description: |-
+  The most complete tool for modding, decompiling and unpacking Undertale (and other GameMaker games!)
+
+  Main Features:
+  - Can read every single byte from the data file for latest versions of Undertale, Deltarune, and most other GameMaker games, and then recreate a byte-for-byte exact copy from the decoded data.
+  - Properly handles all of the pointers in the file so that if you add/remove stuff, make things longer/shorter, move them around, etc., the file format won't break.
+  - An editor which lets you change (almost) every single value, including unknown ones.
+  - Includes a simple room/level editor.
+  - Allows for GML VM code editing. This means you can add any custom code to a game, either using the built-in GML compiler or GML assembly. (YYC is not supported for this.)
+  - High-level GML decompiler and compiler. Supports a large range of GameMaker versions, and most important GML features (still missing a few).
+  - Support for running scripts that automatically modify your data file (or perform other nefarious tasks). This can be used for mod distribution, aside from other methods such as file patches/project systems.
+  - All core functionality extracted into a library for use in external tools.
+  - Can generate a .yydebug file for the GM:S debugger so that you can edit variables live! (see here)
+  - Automatic file associations for all GameMaker related data files. This is opt-in at the first boot of the tool, and can also be disabled by having a dna.txt file next to the executable.
+Tags:
+- decompiler
+- deltarune
+- editor
+- game-maker
+- game-maker-studio
+- game-maker-studio-2
+- gamemaker
+- gml
+- undertale
+- unpacker
+ReleaseNotes: |-
+  This is the 0.9.0.0 UndertaleModTool release, for 64-bit Windows. Downloads can be found at the bottom of this release.
+  ("UTMT_CLI" is the command-line interface version with no GUI, supported for Windows, Ubuntu, and macOS.)
+  Changelog
+  Added
+  - Added an optional project system, designed to be a more resilient and collaborative method of creating mods.
+    - Has the ability to export and reimport assets of many types, in a manner that is friendly to source control such as Git. This both makes collaboration much easier and allows easy version history.
+    - Similar to the now-obsolete profile mode, GML edits are retained in plaintext, meaning that comments and formatting are preserved. External editors can also be used on all asset types, including code.
+    - Theoretically can be used as a mod installation process, with the ability to manage external data files, create backups when installing, apply file patches (using BPS), verify game versions, and execute scripts.
+    - In the GUI, asset changes are detected when you change them in their respective editors, which marks them to be exported when you later save the project. This works for the majority of supported assets, but some features are only supported via manual editing of JSON files, such as the main project file itself, and general info (such as changing the game window title).
+    - The system is not yet feature-complete, and has room to grow to reach its full potential - see #2350. Currently, it is only accessible from the GUI and from the library itself, although it should have no issue being extended to the CLI in the future.
+  - Added zoom functionality to the code editor by @Cheesecake2960 in #2141
+  - Added partial support for automatically resolving collision event names in CodeImportGroup, which affects ImportGML.csx and other scripts that import code.
+    - Specifically, an event name such as gml_Object_obj_example_a_Collision_obj_example_b, which appears in GameMaker Studio 2.3 and beyond, is supported. (As long as neither object name contains _Collision_/Collision_ within its name, which becomes ambiguous.)
+  - Added support for piped input in the CLI by @danielpancake in #2312
+  - Improved support for OGG/MP3 file types in the embedded audio editor by @HighFlyer-222 in #2084
+  - Added additional game-specific data for Deltarune by @ImDigas in #2353
+  - Added a message for when the Windows CLI is launched outside of the command line, to help new users.
+  Changed
+  - ExportAllSprites.csx has been refactored, improving memory usage by exporting sprites on the same texture together by @setupwitch in #2340
+  - README updates contributed by @YarTom in #2336
+  - Underanalyzer updated, including support for some recent GameMaker 2024.14.4 code generation, and some miscellaneous fixes.
+  - Following path refactors from the project system, many scripts will now enforce that their input/output is confined to folders selected by the user.
+  - Profile mode has been entirely removed from the tool and library, as it has been superseded by the project system. Old profiles can be manually migrated into a project by simply copying over the GML files.
+  Fixed
+  - Fixed a mathematical error during parsing of Spine texture entries by @Aipako in #2344
+  - Fixed newly-added rooms being corrupted in GameMaker 2024.13+ games.
+  - Fixed tile rendering errors not showing properly.
+  - Fixed concurrency issues in ReduceEmbeddedTexturePages.csx.
+  - Fixed a mistake in the GameMaker 2024.14.1 version check (thanks @luizzeroxis for pointing out the problem!).
+  - Fixed Underanalyzer.pdb getting unnecessarily included in builds.
+  - Fixed some issues with launching processes, e.g. when using Temp Run or when opening an audio group. Loading games from a Temp Run should now be faster due to debug logs being disabled.
+  - Fixed thread safety issues in some scripts, where race conditions could rarely occur (more on that in the technical changes section...).
+  Other Technical Changes
+  - With the integration of the project system, multiple utilities have been added to UndertaleModLib:
+    - BPS: Support for applying BPS patch files, with a native C# implementation.
+    - Paths: Support for joining paths and verifying that they reside within expected directories.
+    - ScriptingUtil: Some helpers that are used for scripting, including the builder for the options that UndertaleModTool/CLI use for scripts.
+    - TextureGroupPacker: Support for rectangle-packing textures that are part of a single texture group, onto potentially multiple textures.
+  - Various dependencies have been updated. Particularly, the Magick.NET (ImageMagick) library has undergone version upgrades with breaking changes.
+  - Switched to using Extent() instead of Composite() for padding images in TextureWorker, which is faster by @setupwitch in #2335
+  - In order to have proper thread safety, SyncBinding() and DisableAllSyncBindings() have been removed from the scripting API.
+    - These methods essentially covered up the root problem, rather than fix it. Now, scripts should use MainThreadAction, a new addition to the scripting API, in order to make changes to game data from an asynchronous context.
+  - Cleanup of some enums, variables, and documentation by @setupwitch in #2322
+  - Small code cleanup, improved FancyRoomSelect.csx by @BioTomateHP in #2236
+  - Improved formatting and removed redundancy in BuiltinList.cs by @BioTomateDE in #2321
+  New Contributors
+  - @Cheesecake2960 made their first contribution in #2141
+  - @HighFlyer-222 made their first contribution in #2084
+  - @Aipako made their first contribution in #2344
+  - @YarTom made their first contribution in #2336
+  - @ImDigas made their first contribution in #2353
+  - @danielpancake made their first contribution in #2312
+  Full Changelog: 0.8.4.1...0.9.0.0
+ReleaseNotesUrl: https://github.com/UnderminersTeam/UndertaleModTool/releases/tag/0.9.0.0
+Documentations:
+- DocumentLabel: Scripts Info
+  DocumentUrl: https://github.com/UnderminersTeam/UndertaleModTool/blob/master/SCRIPTS.md
+- DocumentLabel: UndertaleModTool Wiki
+  DocumentUrl: https://github.com/UnderminersTeam/UndertaleModTool/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
