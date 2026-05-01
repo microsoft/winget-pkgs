@@ -1,0 +1,57 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Aixbox.DesktopGo
+PackageVersion: 1.0.4
+PackageLocale: zh-CN
+Publisher: Aixbox
+PublisherUrl: https://github.com/Aixbox
+PublisherSupportUrl: https://github.com/Aixbox/DesktopGo/issues
+PackageName: DesktopGo
+PackageUrl: https://github.com/Aixbox/DesktopGo
+License: MIT
+LicenseUrl: https://github.com/Aixbox/DesktopGo/blob/HEAD/LICENSE.txt
+Copyright: Copyright (c) Aixbox
+ShortDescription: 一个面向 Windows 的桌面启动台，把应用唤起、图标整理和 Everything 文件搜索收进同一个入口。
+Description: |-
+  DesktopGo 是一个使用 Tauri 2 + React 19 + Rust 构建的 Windows 桌面启动台。它参考 macOS Launchpad 的交互方式，但能力设计围绕 Windows 桌面场景展开，重点解决三个问题：
+  - 用全局快捷键快速呼出统一入口
+  - 把桌面图标和自定义应用入口整理成可拖拽、可分页的布局
+  - 基于 Everything 提供快速文件搜索、预览和打开能力
+Tags:
+- 搜索
+- 文件
+- 文件夹
+- 查找
+- 目录
+ReleaseNotes: |-
+  DesktopGo v1.0.4 ✨
+  v1.0.4 聚焦启动台交互体验、拖拽放置算法与窗口材质稳定性，同时重构了图标重命名与导入流程。
+  新功能 🚀
+  - 拖放直接导入：移除原"导入模式"开关，任何时候把应用、文件夹、文件或快捷方式拖进窗口即可导入。拖拽期间窗口顶部显示浮动提示胶囊，鼠标旁跟随一个带真实 Shell 图标的缩略卡片，多文件时显示 +N 角标。
+  - 图标 Inline 重命名：在启动台右键图标点击系统菜单中的"重命名"，应用会拦截 rename verb，在图标标题位置直接切换为输入框，Enter 保存 / Esc 取消 / 失焦提交。重命名只影响启动台内显示名，不改动真实文件或快捷方式；独立持久化到 customNames.json，下次启动自动恢复。
+  - 多选拖框选择：多选模式下在空白区域按住左键拖动，画出矩形选区实时选中范围内的图标；按住 Ctrl / Shift 进入加选模式在原有已选基础上追加，松开鼠标固定选中，体验对齐 Windows 桌面。
+  - 窗口常驻材质升级：常驻模式下的背景改走 Windows 11 DWM 新 API (DWMWA_SYSTEMBACKDROP_TYPE) 托管 Mica 效果，主窗口失焦时不再褪色消失；旧系统自动回落到 window-vibrancy 旧 API 保持可用。
+  修复与优化 🛠️
+  - 拖拽放置算法全面统一：拖拽预览、drop 提交、folder resize、拖放导入、页几何变化等所有"溢出"场景现在遵循同一规则——
+    - 当前页按行优先填空位
+    - 当前页满则挤出尾部图标（最后一行最右边起逆序）
+    - 被挤出的图标按 row-major 行优先到下一页空位
+    - 不移动下一页原有图标；下一页空位不够就在当前页之后插入一个新页
+  - 修复 dock 拖拽吞图标的严重 bug：从启动台拖一个图标到 dock 后，原来会把整个外层页所有图标都误吞进 dock、外层被清空。根因是 useDragDropCommit 在 dock 上下文传错了 sourceSlots。
+  - 修复拖到满页时下一页图标被错误后移：applyForwardSpillEvasion 重写，shift 链只在当前页内，挤出的单个图标独立寻找下一页空位 / 新页。
+  - 修复 folder 改 size 后挤出图标散布各处：改用 row-major-forward 紧凑放置策略，挤出图标紧挨新页第一格起排布，不再按曼哈顿距离散落。
+  - 启动时改为坐标驱动恢复图标网格：resizeSlotPages 优先使用持久化的 (page, row, col) 坐标精确复位每个图标；几何变化（切 icon size、窗口尺寸、dock 开关）也按坐标重排，极端场景下才回落到 slots normalize 兜底。
+  - 修复多选模式无法点击空白退出：marquee 拖框守卫误拦了单纯点击，现在只在指针实际移动 > 2px 时才判定为拖框结束并拦截后续 click，纯点击可正常退出多选。
+  - 主题与材质同步：深 / 浅色切换、窗口风格切换不再需要重新聚焦窗口就能完整刷新；设置页改动实时同步到 Launchpad 主窗口。
+  - 异常分页修复：优化布局重置和修复逻辑，降低异常分页、单格页布局残留的概率。
+  - 拖入提示文案调整：浮动胶囊从"拖到这里即可导入"改为"松开即可导入"，避免用户误以为要拖胶囊本身。
+  移除 🧹
+  - 去掉"导入模式"开关及其相关 UI、快捷退出逻辑、Rust 端命令（get_import_mode_enabled / set_import_mode_enabled）和状态字段，导入流程不再需要先进入一个特殊模式。
+  工程与发布 📦
+  - 开发版与安装版现在使用独立的数据 profile，设置、布局数据库、图标快照、搜索日志和 Everything SDK 缓存完全隔离，避免开发调试污染正式安装数据。
+  - 新增 Rust 命令 get_drag_preview_icon，异步（spawn_blocking）抽取任意路径的 Shell 图标，用于拖放期间的浮动缩略卡。
+  - 本次发布已同步更新应用版本号、官网版本信息和发布说明文件，满足现有 GitHub Actions 发布流程要求。
+ReleaseNotesUrl: https://github.com/Aixbox/DesktopGo/releases/tag/v1.0.4
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,241 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: tstack.lnav
+PackageVersion: 0.14.0
+PackageLocale: en-US
+Publisher: Timothy Stack
+PublisherUrl: https://lnav.org/
+PublisherSupportUrl: https://lnav.org/
+Author: Timothy Stack
+PackageName: lnav
+PackageUrl: https://lnav.org/
+License: BSD-2-Clause
+LicenseUrl: https://github.com/tstack/lnav/blob/HEAD/LICENSE
+Copyright: Copyright (c) Timothy Stack
+ShortDescription: The Logfile Navigator is a log file viewer for the terminal
+Moniker: lnav
+Tags:
+- command-line-tool
+- less
+- log-analysis
+- log-monitor
+- log-viewer
+- log-visualization
+- logging
+- more
+- pager
+- tail
+- terminal
+- terminal-pager
+- tui
+ReleaseNotes: |-
+  lnav v0.14.0
+  Features:
+  - The Filter configuration panel in the TUI now supports
+    editing the minimum log level and minimum/maximum
+    times for the current view. Previously, only the
+    :set-min-log-level, :hide-lines-before, and
+    :hide-lines-after commands could be used to set the
+    values. Pressing l will create/set the log level.
+    Pressing m will create/set the minimum
+    time and pressing Shift + M will create/set the
+    maximum time. Live preview has also been added to
+    show which lines will be filtered out when the min/max
+    is applied.
+  - The -S/--since and -U/--until flags have been
+    added to limit how much of a log file is indexed.
+    Supported values are relative (e.g. "yesterday",
+    "30 min ago") or absolute local times ("2020-01-01").
+    The values on the main command-line set the defaults
+    for all values that are opened. The :open command
+    supports the same options to change the values from
+    the default for a particular file. Files with
+    content that lie completely outside of the cutoff
+    will be closed to reduce resource usage.
+  - Broadened support for viewing files on remote hosts.
+    The "tailer" program that is transferred to the
+    remote host to monitor files and perform other tasks
+    has been translated to Python3. If the remote host
+    does not have Python, lnav will fall back to the APE
+    binary.
+  - Highlights can now be applied to a particular field
+    instead of the whole line. For log formats, a
+    value entry can now have a highlights object
+    that contains definitions for the pattern to match
+    and the style to apply. For interactive use, the
+    :highlight-field command was added.
+  - The "Files" panel now shows a progress bar for each
+    file as it is being indexed and finishes with a
+    check-mark if indexing was successful, a warning
+    sign if the file has some notes, or an error mark
+    if something else happened.
+  - The :write-jsonlines-to command now supports the LOG
+    view. When lines are marked in the LOG view, the command
+    will write each marked log message as a JSON object with
+    the standard log fields (log_path, log_time,
+    log_level, log_opid, log_line_link) along with any
+    format-specific parsed values, comments, and tags.
+    The --all flag can be used to write all visible log
+    lines instead of only marked lines.
+  - Added a log format for MongoDB's structured JSON log
+    format (4.4+).
+  - Added a log format for the Robot Framework's debug
+    log file format.
+  - Added "timestamp" as a value kind for log format
+    definitions. Fields with this kind will be parsed
+    and displayed in the local timezone, and SQL
+    queries will return them in a normalized format.
+  - Added the :toggle-sticky-header command to pin a
+    line to the top of the view as a sticky header.
+    Sticky headers remain visible as you scroll past
+    them, making it easy to keep context lines in view.
+    The :clear-all-sticky-headers command removes all
+    sticky headers in the current view. A hidden
+    log_sticky_mark column is available in log tables
+    to get/set the sticky state via SQL. Sticky headers
+    and user bookmarks are saved and restored across
+    sessions for both log and text views. The command
+    is bound to CTRL+S by default.
+  - In pager mode (activated by the -q flag), the input
+    will always be written to the terminal if it is
+    smaller than the height. Previously, if the input
+    took awhile to generate, nothing would be written.
+    Also, when the input is larger than the terminal
+    height, any marked lines will be written to the
+    terminal.
+  - Introducing "Log-Oriented Debugging", a collection of
+    features to streamline mapping log messages back to
+    the source code that generated them. For example,
+    given the log message "Hello, Steve!" and the source
+    directory containing the log statement. lnav can
+    find the line of code that generated the message,
+    such as logging.info("Hello, %s!", name), and
+    determine the value of the substituted variables
+    (name => Steve). This functionality is
+    implemented using the
+    log2src project.
+    The following features have been added in support of
+    this functionality:
+    - The :add-source-path command was added to specify
+      the source directories to be scanned for log
+      statements.
+    - Log formats can now specify source file/line and
+      thread ID with the src-file-field, src-line-field,
+      src-location-field, and thread-id-field properties.
+      These fields can then be accessed in the SQL vtables
+      as log_src_file, log_src_line, and log_thread_id.
+    - The :breakpoint, :toggle-breakpoint, and
+      :clear-breakpoints commands have been added to
+      support setting/clearing breakpoints for log messages.
+      The CTRL-B shortcut toggles a breakpoint on the
+      focused line in the LOG view. Once breakpoints have
+      been added, you can press F7/F8 to move to the
+      previous/next log message that matches a breakpoint.
+    - The :disable-breakpoint and :enable-breakpoint
+      commands have been added to allow disabling a
+      breakpoint without deleting it.
+    - If the log format specifies source file/line fields
+      and a breakpoint is set, a red bullet point will be
+      inserted to signify the presence of a breakpoint.
+      Left-clicking on the bullet will toggle enabling/
+      disabling the breakpoint. A right-click will
+      delete the breakpoint.
+      In addition, if the :add-source-path command has
+      been used, the first character of the source file
+      will be underlined and can be left-clicked to open
+      the source file at the given log message. A
+      right-click will set a breakpoint.
+  - The all_opids and all_thread_ids virtual tables
+    have been added to make it simple to discover all of
+    the operations and threads across all log files. The
+    all_opids table also supports setting a description
+    for an operation using through an UPDATE.
+  - The :xopen command will now open text files in an
+    external editor. To open the file at a particular
+    line/column, add a URL fragment of the form
+    L<line>C<column>.
+  - When opening the contents of the prompt in an external
+    editor (CTRL+O), the cursor position will be preserved,
+    if possible.
+  - The external-editor configuration has been expanded
+    with extra properties to help lnav choose the right one
+    to use:
+    - The config-dir property specifies the name of the
+      directory that stores the editor's configuration in a
+      source tree. If the directory is found in an ancestor
+      of the path to be opened, and it has the most recent
+      modified time, the associated editor will be used.
+    - The prefers property is a regular expression that
+      will be tested against the full path to be opened.
+      If matched, that editor will be chosen.
+  - The :external-access command has been added to open a
+    localhost HTTP port that can be used to remotely control
+    lnav. Requests can be sent to execute commands and poll
+    for changes in the view state. When the external port
+    is open, a globe icon (🌐) is displayed in the top-right
+    corner. Clicking that icon will open a URL in a browser
+    and log you into the server. The :external-access-login
+    command can also be used to login.
+  - Custom "Apps" can be added to the "external access"
+    server to provide custom browser-based user interfaces
+    to lnav. See the "External Access" documentation online
+    for more details.
+  - The ;.save SQL command has been added that can save
+    tables you have created to a SQLite database file. The
+    tables that lnav creates have been moved to a separate
+    in-memory DB, so the main DB should only contain your
+    own tables/views/etc...
+  - The json_object_count_of() SQL aggregate function has
+    been added to make it easy to create a JSON object
+    where the values are the number of times a value has
+    been seen.
+  - The :write-json-cols-to command has been added to
+    write JSON output in a column-oriented fashion.
+  - The encode() and decode() SQL functions now accept
+    html as an algorithm.
+  - The opid-field can now be set to a JSON array/object
+    for JSON-lines logs. For example, the spans array in
+    a Rust tracing log message. The OPID for the message
+    will be computed by hashing the contents of the array
+    or object and the description will be the container
+    itself.
+  - An OPID can now be constructed from multiple fields by
+    leaving the opid-field blank and creating a single
+    opid/description definition with a format. The
+    content of the format fields will then be hashed to
+    create the OPID. The builtin log formats have been
+    updated to use this when appropriate. For example,
+    access_log now uses c_ip and cs_user_agent as the
+    OPID.
+    > [!NOTE]
+    > If you want a description, but don't want it used as
+    > the OPID. You can set the opid/source field to
+    > "from-whole-msg" and the OPID will be computed from
+    > the contents of the log message.
+  - The duration-field log format property has been added
+    to specify the field that contains a duration in the
+    log message. If a duration is available, it will be
+    used to calculate time spans in the TIMELINE view.
+    If the value of field is a number that is not in
+    seconds, the duration-divisor property can be used
+    to convert it. For example, if the duration field is
+    in milliseconds, the divisor should be 1000. The
+    duration can be accessed in the SQL vtables through
+    the log_duration column. For JSON-lines logs, the
+    special __duration__ field name can be used in the
+    line-format to add a humanized version of the
+    duration to the pretty-printed message.
+  - Added the start-timestamp-field log format property.
+    When set, the duration of an operation is computed as the
+    difference between the timestamp-field (treated as the
+    end time) and the start-timestamp-field. This is an
+    alternative to duration-field for logs that record
+    separate start and end timestamps. The Cloudflare log
+    format has been updated to use this feature with
+    EdgeEndTimestamp and EdgeStartTimestamp.
+  - The TIMELINE view now shows rows for user-defined tags
+    and partitions. Each tagged log line appears as a
+ReleaseNotesUrl: https://github.com/tstack/lnav/releases/tag/v0.14.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

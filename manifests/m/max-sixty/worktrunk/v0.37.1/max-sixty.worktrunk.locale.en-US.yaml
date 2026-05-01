@@ -1,0 +1,72 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: max-sixty.worktrunk
+PackageVersion: v0.37.1
+PackageLocale: en-US
+Publisher: max-sixty
+PublisherUrl: https://github.com/max-sixty
+PublisherSupportUrl: https://github.com/max-sixty/worktrunk/issues
+PackageName: worktrunk
+PackageUrl: https://github.com/max-sixty/worktrunk
+License: MIT OR Apache-2.0
+LicenseUrl: https://github.com/max-sixty/worktrunk/blob/HEAD/LICENSE
+ShortDescription: A Git worktree manager for trunk-based development
+Description: |-
+  worktrunk (wt) is a Git worktree manager designed for trunk-based development workflows.
+  It simplifies creating, switching between, and managing Git worktrees, making it easy to
+  work on multiple features or branches simultaneously without the overhead of stashing
+  or switching branches in a single working directory.
+Tags:
+- cli
+- git
+- git-worktree
+- rust
+- terminal
+- worktree
+ReleaseNotes: |-
+  Release Notes
+  Improved
+  - Progressive rendering in wt switch picker: The picker now mirrors wt list's skeleton-first model — branch and path render immediately, while status, diff stats, counts, and summaries fill in in place as they resolve. Replaces the previous ~500ms blocking freeze before first render. (#2231)
+  - Clean rows no longer flash the timeout glyph in the picker: The LLM semaphore is now acquired only around the actual LLM call, so the no-changes and cache-hit fast paths return immediately instead of sitting behind up to 8 concurrent LLM calls. A clean main row in the picker now renders blank rather than the · "timed out" placeholder. (#2222)
+  Fixed
+  - Picker preview styling bleed: color_print's </> emits SGR 22 to reset <bold>/<dim>, which skim 0.20's ANSI parser silently drops. Preview spans now emit an explicit full reset (\x1b[0m), so dim and bold no longer bleed across the rest of the preview pane. (#2232)
+  - Picker alt-screen enter/exit asymmetry: In partial-height mode (height=90%), skim-tuikit skipped smcup on startup but still emitted rmcup on exit, corrupting the outer terminal's scrollback. The vendored tuikit now pairs enter/exit symmetrically. (#2230)
+  - Partial first render under tmux: Under tmux PTY pressure, rows past the first ~1024 bytes would silently vanish because Output::flush used write instead of write_all. Vendored skim-tuikit fixes the short-write bug. (#2226)
+  Library
+  - Expose worktree removal API from the worktrunk library: remove_worktree_with_cleanup, RemoveOptions, and BranchDeletionMode are now public, letting external tools reuse the canonical removal flow (fsmonitor cleanup, trash-path staging) instead of reimplementing it with raw git commands. Motivated by worktrunk-sync. (#2227, thanks @pablospe for the request in #2053)
+  Documentation
+  - Document worktrunk-sync: Linked from the Extending page and the FAQ as a community-maintained companion tool for rebasing stacked worktree branches. (#2225)
+  - Catalog vendored skim patches: vendor/skim-tuikit/PATCHES.md now records both landed and candidate patches against skim-tuikit, and a Cargo.toml comment records why skim is pinned to 0.20.x. (#2228, #2229)
+  Internal
+  - Drop unreachable rayon::spawn fallback in the picker orchestrator. (#2216)
+  Install worktrunk 0.37.1
+  Install prebuilt binaries via shell script
+  curl --proto '=https' --tlsv1.2 -LsSf https://github.com/max-sixty/worktrunk/releases/download/v0.37.1/worktrunk-installer.sh | sh && wt config shell install
+  Install prebuilt binaries via powershell script
+  powershell -ExecutionPolicy Bypass -c "irm https://github.com/max-sixty/worktrunk/releases/download/v0.37.1/worktrunk-installer.ps1 | iex"; git-wt config shell install
+  Install prebuilt binaries via Homebrew
+  brew install worktrunk && wt config shell install
+  Download worktrunk 0.37.1
+  ────────────────────────────────────────────────┬───────────────────┬─────────────
+  File                                            │Platform           │Checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-aarch64-apple-darwin.tar.xz           │Apple Silicon macOS│checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-x86_64-apple-darwin.tar.xz            │Intel macOS        │checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-x86_64-pc-windows-msvc.zip            │x64 Windows        │checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-aarch64-unknown-linux-musl.tar.xz     │ARM64 MUSL Linux   │checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-x86_64-unknown-linux-musl.tar.xz      │x64 MUSL Linux     │checksum
+  ────────────────────────────────────────────────┴───────────────────┴─────────────
+  Install via Cargo
+  cargo install worktrunk && wt config shell install
+  Install via Winget (Windows)
+  winget install max-sixty.worktrunk && git-wt config shell install
+  Install via AUR (Arch Linux)
+  paru worktrunk-bin && wt config shell install
+ReleaseNotesUrl: https://github.com/max-sixty/worktrunk/releases/tag/v0.37.1
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
