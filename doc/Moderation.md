@@ -124,7 +124,7 @@ Sometimes a label is misapplied or needs to be removed to keep things clean. Thi
 
 In order to help keep the issues queues clean, moderators are able to close/re-open pull requests and issues. It is important to exercise discretion when closing/re-opening, ensuring that it is done with good reason.
 > [!IMPORTANT]
-> The ending semicolon is required. Using a URL in the reason is not supported
+> The ending semicolon is required.
 
 ### Marking Issues as Duplicate
 
