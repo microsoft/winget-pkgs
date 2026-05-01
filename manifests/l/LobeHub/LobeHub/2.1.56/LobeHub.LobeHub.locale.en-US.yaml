@@ -1,0 +1,71 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: LobeHub.LobeHub
+PackageVersion: 2.1.56
+PackageLocale: en-US
+Publisher: LobeHub
+PublisherUrl: https://lobehub.com/
+PublisherSupportUrl: https://github.com/lobehub/lobe-chat/issues
+PrivacyUrl: https://lobehub.com/privacy
+Author: LobeHub LLC
+PackageName: LobeHub-Beta
+PackageUrl: https://github.com/lobehub/lobe-chat
+License: Apache-2.0
+LicenseUrl: https://github.com/lobehub/lobe-chat/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026/06/17 - current LobeHub LLC. All rights reserved.
+CopyrightUrl: https://lobehub.com/terms
+ShortDescription: An open-source, modern-design AI chat framework. Supports Multi AI Providers (OpenAI / Claude 4 / Gemini / Ollama / DeepSeek / Qwen), Knowledge Base (file upload / knowledge management / RAG), Multi-Modals (Plugins/Artifacts) and Thinking.
+Tags:
+- ai
+- chatbot
+- chatgpt
+- claude
+- deepseek
+- doubao
+- gemini
+- kimi
+- large-language-model
+- llama
+- llm
+- mistral
+- ollama
+- qwen
+- rag
+ReleaseNotes: |-
+  This release was automatically published from PR #14354.
+  Changes
+  See PR description: https://github.com/lobehub/lobehub/pull/14354
+  Commit Message
+  🚀 LobeHub v2.1.56 (20260501)
+  Release Date: May 1, 2026
+  Migration Scope: briefs table — 2 new columns (trigger, metadata), 1 new index (briefs_trigger_idx)
+  🗄️ Migration Overview
+  File: packages/database/migrations/0100_add_metadata_and_trigger_to_briefs.sql
+  Added columns on briefs:
+  - trigger varchar(255) — module that triggered the brief (e.g. task, agent, signal)
+  - metadata jsonb — freeform business state attached by the producer
+  Added index:
+  - briefs_trigger_idx on briefs(trigger)
+  The migration uses ADD COLUMN IF NOT EXISTS and CREATE INDEX IF NOT EXISTS, so re-running it is safe.
+
+  ⚙️ Operator Notes
+  - Migration runs automatically on application startup.
+  - Both new columns are nullable — existing rows are unaffected and no backfill is required.
+  - The migration is additive only; no existing column or index is modified or dropped.
+  - Recommended: take a routine snapshot before deployment, as with any schema change.
+
+  🔒 Reliability & Risk
+  - Backwards-compatible: Older application code that does not read or write trigger / metadata continues to work, since both columns are nullable.
+  - Index cost: briefs_trigger_idx is built with IF NOT EXISTS and is small (single varchar(255) column); build time on existing data is expected to be negligible.
+  - Rollback: If a rollback is required, drop briefs_trigger_idx and the two new columns; no data migration is involved.
+
+  👥 Owner
+  Migration owner: @nekomeowww
+  The migration owner is responsible for rollout follow-up and incident handling for this schema change.
+ReleaseNotesUrl: https://github.com/lobehub/lobehub/releases/tag/v2.1.56
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://lobehub.com/docs/usage/start
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
