@@ -1,0 +1,83 @@
+# Created with Devicie using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: AnInsomniacy.MotrixNext
+PackageVersion: 3.8.6
+PackageLocale: en-US
+Publisher: motrix
+PublisherUrl: https://github.com/AnInsomniacy
+PublisherSupportUrl: https://github.com/AnInsomniacy/motrix-next/issues
+PackageName: MotrixNext
+PackageUrl: https://github.com/AnInsomniacy/motrix-next
+License: MIT
+LicenseUrl: https://github.com/AnInsomniacy/motrix-next/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2025-present AnInsomniacy
+ShortDescription: A full-featured download manager — rebuilt from the ground up
+Description: |-
+  Motrix by agalwood was one of the best open-source download managers available — clean UI, aria2-powered, cross-platform. It inspired thousands of users and developers alike.
+  However, the original project has been largely inactive since 2023. The Electron + Vue 2 + Vuex + Element UI stack accumulated technical debt, making it increasingly difficult to maintain, extend, or package for modern platforms.
+
+  What we kept
+  We owe a great deal to the original Motrix and its community. The following were gratefully adopted and continue to serve as the foundation for parts of Motrix Next:
+  - Aria2 error code system and RPC client — the error handling conventions and JSON-RPC communication layer for the aria2 engine
+  - Internationalization — 25+ community-contributed locale files covering Chinese, Japanese, Korean, Arabic, French, German, and many more
+  - Download utilities — tracker list management, cURL command parsing, and other protocol-level helpers
+
+  What we rebuilt
+  Motrix Next is not a fork — it is a complete rewrite. Every other layer of the application has been redesigned and reimplemented from scratch:
+  | Layer        | Motrix (Legacy)         | Motrix Next                     |
+  | ------------ | ----------------------- | ------------------------------- |
+  | Runtime      | Electron                | Tauri 2 (Rust)                  |
+  | Frontend     | Vue 2 + Vuex            | Vue 3 Composition API + Pinia   |
+  | UI Framework | Element UI              | Naive UI                        |
+  | Language     | JavaScript              | TypeScript + Rust               |
+  | Styling      | SCSS + Element theme    | Vanilla CSS + custom properties |
+  | Engine Mgmt  | Node.js `child_process` | Tauri sidecar                   |
+  | Build System | electron-builder        | Vite + Cargo                    |
+  | Bundle Size  | ~80 MB                  | ~20 MB                          |
+  | Auto-Update  | electron-updater        | Tauri updater plugin            |
+
+  Design & Motion
+  The overall UI layout stays true to Motrix's original design — the sidebar navigation, task list, and preference panels all follow the familiar structure that made Motrix intuitive from day one.
+  What changed is everything underneath. Every transition and micro-interaction has been carefully tuned to follow Material Design 3 motion guidelines:
+  - Asymmetric timing — enter animations are slightly longer than exits, giving new content time to land while dismissed content leaves quickly
+  - Emphasized easing curves — decelerate on enter (cubic-bezier(0.2, 0, 0, 1)), accelerate on exit (cubic-bezier(0.3, 0, 0.8, 0.15)), replacing generic ease curves throughout the codebase
+  - Spring-based modals — dialogs use physically-modeled spring animations for a natural, responsive feel
+  - Consistent motion tokens — all durations and curves are defined as CSS custom properties, ensuring a unified rhythm across 12+ components
+Tags:
+- download
+- downloader
+ReleaseNotes: |-
+  What's Changed
+  Motrix Next 3.8.6 is a reliability-focused release for browser integration, deep links, filename handling, and download safety. It improves how downloads are received from extensions and external protocols, resolves more real-world server filename formats, and hardens the path from user input to aria2.
+  ✨ New Features
+  - Deep link service — Added a native deep-link service for safer startup handling, queued external inputs, and browser-extension handoff.
+  - Improved filename resolution — Added support for referer/cookie-aware filename probing, RFC 2047 encoded filenames, non-UTF-8 Content-Disposition headers, and extensionless media URLs.
+  - Filesystem-safe aria2 output names — Added sanitization for aria2 out filenames to reduce invalid filename and path-safety issues.
+  🛠 Improvements
+  - Adopted mature parsing utilities for filename and torrent metadata handling.
+  - Enhanced filename fallback logic for extensionless URLs with trustworthy basenames.
+  - Added validation for weak or unsafe URL basenames before using them as filenames.
+  - Sanitized HTTP headers before passing them to aria2.
+  - Updated RPC and extension API security handling.
+  - Corrected TypeScript path mappings for more reliable module resolution.
+  🐛 Bug Fixes
+  - Fixed Cyrillic and other encoded filenames resolving to question marks, unreadable text, or generic placeholders.
+  - Fixed downloads whose filename is only exposed on the actual GET request instead of HEAD.
+  - Fixed extensionless image URLs resolving to unresolved-filename.jpg when a usable URL basename is available.
+  - Fixed unsafe or malformed out values reaching aria2.
+  - Removed redundant debug logging from the HTTP API ping endpoint.
+  📦 Downloads
+  ────────┬─────────────────────┬─────────────
+  Platform│Architecture         │File
+  ────────┼─────────────────────┼─────────────
+  macOS   │Apple Silicon · Intel│.dmg
+  ────────┼─────────────────────┼─────────────
+  Windows │x64 · ARM64          │-setup.exe
+  ────────┼─────────────────────┼─────────────
+  Linux   │x64 · ARM64          │.AppImage
+          │                     │.deb
+  ────────┴─────────────────────┴─────────────
+ReleaseNotesUrl: https://github.com/AnInsomniacy/motrix-next/releases/tag/v3.8.6
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
