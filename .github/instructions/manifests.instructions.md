@@ -147,6 +147,8 @@ This section defines what the review agent should and should not flag. The goal 
 
 5. **Field order within the YAML** — YAML field order within a manifest file does not need to match a specific sequence.
 
+6. **Fields not nested under `Installers`** — Many installer manifest fields (e.g., `InstallerType`, `Scope`, `InstallerSwitches`, `UpgradeBehavior`, `Commands`, `FileExtensions`, `Protocols`, `InstallModes`, `ElevationRequirement`, `PackageFamilyName`, `ProductCode`, `AppsAndFeaturesEntries`, etc.) are valid at **both** the root level of the installer manifest (as defaults that apply to all entries) and within individual installer entries under `Installers`. A field placed at the root is not a mistake — it is a supported and common pattern. Before flagging any field placement as incorrect, consult the schema. If you are less than 90% certain the placement is invalid, **do not flag it** — legitimate schema violations are caught by the automated validation pipeline.
+
 ---
 
 ## Field Semantics Reference
