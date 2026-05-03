@@ -125,15 +125,25 @@ This section defines what the review agent should and should not flag. The goal 
    - `PackageIdentifier` not matching the folder path (case-sensitive)
    - `PackageVersion` not matching the version folder name
 
-3. **Singleton manifest type** — Singleton manifests (`ManifestType: singleton`) are prohibited in the community repository. Only multi-file manifests are accepted.
+3. **Missing or incorrect schema header** — Every manifest file must begin with a `# yaml-language-server` comment declaring its schema URL. The URL must match both the `ManifestType` and `ManifestVersion` declared in that same file. There may be other comment lines before the schema declaration. The URL format is:
+   ```
+   # yaml-language-server: $schema=https://aka.ms/winget-manifest.<type>.<version>.schema.json
+   ```
+   Where `<type>` corresponds to the file's `ManifestType` and `<version>` matches the file's `ManifestVersion`. Examples for `ManifestVersion: 1.12.0`:
+   - Version file (`ManifestType: version`): `https://aka.ms/winget-manifest.version.1.12.0.schema.json`
+   - Installer file (`ManifestType: installer`): `https://aka.ms/winget-manifest.installer.1.12.0.schema.json`
+   - Default locale file (`ManifestType: defaultLocale`): `https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json`
+   - Additional locale file (`ManifestType: locale`): `https://aka.ms/winget-manifest.locale.1.12.0.schema.json`
 
-4. **Scripts as installers** — `.bat`, `.cmd`, `.ps1`, `.vbs`, and other script files are expressly disallowed as installer types.
+4. **Singleton manifest type** — Singleton manifests (`ManifestType: singleton`) are prohibited in the community repository. Only multi-file manifests are accepted.
 
-5. **Agreements with body text from non-verified developer** — The `Agreement` field (agreement body text) is only allowed for verified developers. Community PRs must not include `Agreement` text; only `AgreementLabel` and `AgreementUrl` are permitted.
+5. **Scripts as installers** — `.bat`, `.cmd`, `.ps1`, `.vbs`, and other script files are expressly disallowed as installer types.
 
-6. **Installer URLs from unofficial sources** — Installer URLs should be discoverable on the publisher's official website or CDN. URLs pointing to unofficial mirrors or unrelated third-party hosts are a concern.
+6. **Agreements with body text from non-verified developer** — The `Agreement` field (agreement body text) is only allowed for verified developers. Community PRs must not include `Agreement` text; only `AgreementLabel` and `AgreementUrl` are permitted.
 
-7. **Architecture mismatch** — The `Architecture` field should reflect the installed binaries, not the installer itself. An x86 installer that installs x64 binaries should declare `x64`.
+7. **Installer URLs from unofficial sources** — Installer URLs should be discoverable on the publisher's official website or CDN. URLs pointing to unofficial mirrors or unrelated third-party hosts are a concern.
+
+8. **Architecture mismatch** — The `Architecture` field should reflect the installed binaries, not the installer itself. An x86 installer that installs x64 binaries should declare `x64`.
 
 ### ❌ Do NOT Flag These (Not Actionable Issues)
 
