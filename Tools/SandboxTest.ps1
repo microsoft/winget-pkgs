@@ -872,6 +872,9 @@ Write-Verbose 'Creating WSB file for launching the sandbox'
   <LogonCommand>
   <Command>PowerShell Start-Process PowerShell -WindowStyle Maximized -WorkingDirectory '$($script:SandboxWorkingDirectory)' -ArgumentList '-ExecutionPolicy Bypass -NoExit -NoLogo -File $($script:SandboxBootstrapFile)'</Command>
   </LogonCommand>
+  <AudioInput>Disable</AudioInput>
+  <VideoInput>Disable</VideoInput>
+  <PrinterRedirection>Disable</PrinterRedirection>
 </Configuration>
 "@ | Out-File -FilePath $script:ConfigurationFile
 
