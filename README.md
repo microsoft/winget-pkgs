@@ -1,31 +1,36 @@
-# 🪟 AgentTeamLand fork of `microsoft/winget-pkgs`
+# Windows Package Manager Community Repository
 
-> Fork of the official Windows Package Manager community repository. Used by AgentTeamLand to host new `atl` manifests on a feature branch before opening upstream PRs to [`microsoft/winget-pkgs`](https://github.com/microsoft/winget-pkgs).
+[![Gitter](https://img.shields.io/gitter/room/Microsoft/winget-pkgs)](https://gitter.im/Microsoft/winget-pkgs)
+[![Validation Pipeline Badge](https://img.shields.io/endpoint?url=https://winget-validation-pme-f8gqfjhzacawbecy.z01.azurefd.net/api/GetServiceComponentStatusBadge?component=ValidationPipeline "Validation Pipeline Badge")](https://dev.azure.com/shine-oss/winget-pkgs/_build?definitionId=14)
+[![Publish Pipeline Badge](https://img.shields.io/endpoint?url=https://winget-validation-pme-f8gqfjhzacawbecy.z01.azurefd.net/api/GetServiceComponentStatusBadge?component=PublishPipeline "Publish Pipeline Badge")](https://dev.azure.com/shine-oss/winget-pkgs/_build?definitionId=12)
+[![GitHub Status](https://img.shields.io/endpoint?url=https://api.bittu.eu.org/github-status-badge-endpoint)](https://www.githubstatus.com)
+[![Azure Pipelines Status](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fstatus.dev.azure.com%2F_apis%2Fstatus%2Fhealth%3Fservices%3DPipelines%26geographies%3DUS&query=%24.services%5B0%5D.geographies%5B0%5D.health&label=Azure%20Pipelines%20Status
+)](https://status.dev.azure.com/)
 
-This is **not** the upstream Microsoft repo. If you came here looking to submit a manifest for your own application, you want [`microsoft/winget-pkgs`](https://github.com/microsoft/winget-pkgs) — its README + `doc/` directory carry the upstream contribution guide.
+This repository contains the manifest files for the **Windows Package Manager** default source. You are highly encouraged to submit manifests for your favorite application.
 
-## Why this fork exists
+> [!IMPORTANT]
+> At this time installers must be MSIX, MSI, APPX, MSIXBundle, APPXBundle, or .exe application installers. Font files (.ttf, .ttc, .otf, .otc, and .fnt) are also supported. Script-based installers are not currently supported.
 
-winget unlike Homebrew or Scoop does NOT pull from arbitrary repos — packages must be in Microsoft's official catalog. The flow for getting a new `atl` version into the catalog:
+The **Windows Package Manager** is an [open source client](https://github.com/microsoft/winget-cli) designed for command-line usage. If you are interested in exploring private repositories offering private WinGet package hosting, see [private repositories](doc/private/README.md).
 
-1. Goreleaser auto-pushes new manifests to this fork's `master` branch (under `manifests/a/AgentTeamLand/atl/<version>/`)
-2. We open an upstream PR from this fork to `microsoft/winget-pkgs:master`
-3. Microsoft's validation pipeline runs + a Microsoft reviewer merges
-4. `winget install AgentTeamLand.atl` works for end users
+# Documentation
 
-The fork is the publishing target in step 1 + the PR source in step 2. Steps 3-4 happen on Microsoft's side.
+Please check the [overview](doc/README.md) for detailed topics. Common topics for the WinGet Community repository are available below:
+* [Authoring a manifest](doc/README.md#authoring-a-manifest)
+* [Testing a manifest](doc/README.md#testing-a-manifest)
+* [Submitting a manifest](doc/README.md#submitting-a-manifest)
+* [Requesting a new package](doc/Issues.md#Request-a-New-Package)
+* [Requesting a new package version](doc/Issues.md#Request-a-New-Package-Version)
 
-## 📚 Documentation
+# Contributing
 
-Full docs live at **[agentteamland.github.io/docs](https://agentteamland.github.io/docs/)**.
+This project welcomes contributions and suggestions. Most contributions require you to agree to a Contributor License Agreement (CLA) declaring that you have the right to, and do, grant us the rights to use your contribution. For details, visit https://cla.opensource.microsoft.com.
 
-Most relevant sections:
+When you submit a pull request, a CLA bot will automatically determine whether you need to provide a CLA and decorate the PR appropriately (e.g., status check, comment). Follow the instructions provided by the bot. You will only need to do this once across all Microsoft repositories using our CLA.
 
-- [winget upstream-PR process](https://agentteamland.github.io/docs/contributing/winget-process) — the manual-PR step we run from this fork (the only release step that's not auto)
-- [Release pipeline](https://agentteamland.github.io/docs/contributing/release-pipeline) — full goreleaser flow including how this fork fits in
-- [Install `atl` (winget section)](https://agentteamland.github.io/docs/guide/install#windows-winget) — the user-facing install command
-- [`microsoft/winget-pkgs`](https://github.com/microsoft/winget-pkgs) — the upstream repo (their README + `doc/` is the canonical contribution guide for non-AgentTeamLand manifests)
+This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/).
+See the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or
+contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments. More information is available in our [Contributing document](CONTRIBUTING.md).
 
-## License
-
-This fork inherits the upstream MIT license. Our own contributions (commits + branches under `agentteamland/winget-pkgs`) are also MIT.
+To avoid doubt, you may not make any Submissions linking to third-party materials if such Submission is prohibited by the applicable third party and/or otherwise violates such third party's rights.
