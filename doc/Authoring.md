@@ -33,7 +33,7 @@ The directory structure for a manifest is determined by the "PackageIdentifier" 
 
 ## First steps
 
-If this is your first contribution to the community repository, review the [first-time contributor checklist](FirstContribution.md) before you start authoring.
+If this is your first contribution to the community repository, use the [first-time contributor checklist](FirstContribution.md) alongside this guide as you work through the authoring steps.
 
 Before creating and submitting a manifest, check if the package already exists:
 1. Run `winget search <package>` in your terminal.

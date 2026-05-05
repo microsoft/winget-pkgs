@@ -44,23 +44,21 @@ If you discover a documentation, spelling, or tooling fix while preparing a mani
 
 ```mermaid
 flowchart TD
-    A[Start a new contribution] --> B{Is this PR for a routine manifest submission?}
-    B -- No --> C[Open or link an issue first, then follow the repo workflow for code, tooling, or docs changes]
-    B -- Yes --> D{Does an open PR already exist for this package version?}
-    D -- Yes --> E[Do not open another PR for the same package version]
-    D -- No --> F{Does the PR contain exactly one package version<br/>as one multi-file manifest set?}
-    F -- No --> G[Split the work into separate PRs until each PR has one package version]
-    F -- Yes --> H{Does the PR also change README, doc, spelling files,<br/>tooling, or other non-manifest files?}
-    H -- Yes --> I[Move the non-manifest changes into a separate PR]
-    H -- No --> J{Is the installer URL stable, version-specific,<br/>and reachable from validation infrastructure?}
-    J -- No --> K[Pick a stable official release URL before submitting]
-    J -- Yes --> L{Can the installer run unattended with the correct type,<br/>switches, and dependencies?}
-    L -- No --> M[Fix the installer metadata or use a package that supports unattended install]
-    L -- Yes --> N[Run winget validate --manifest <path>]
-    N --> O{Validation succeeded?}
-    O -- No --> P[Fix the reported manifest issues and validate again]
-    O -- Yes --> Q[Run winget install --manifest <path><br/>and optionally Tools\\SandboxTest.ps1]
-    Q --> R{Install test succeeded?}
-    R -- No --> S[Fix the installer behavior, URL, or metadata and test again]
-    R -- Yes --> T[Submit the PR and monitor labels/comments]
+    A[Start a manifest contribution] --> B{Existing PR for this package version?}
+    B -- Yes --> C[Do not open another PR]
+    B -- No --> D{Exactly one package version in this PR?}
+    D -- No --> E[Split the work into separate PRs]
+    D -- Yes --> F{Any non-manifest files in this PR?}
+    F -- Yes --> G[Move non-manifest changes to a separate PR]
+    F -- No --> H{Stable and version-specific installer URL?}
+    H -- No --> I[Use a stable official release URL]
+    H -- Yes --> J{Installer can run unattended?}
+    J -- No --> K[Fix installer type, switches, or dependencies]
+    J -- Yes --> L[Run winget validate --manifest <path>]
+    L --> M{Validation succeeded?}
+    M -- No --> N[Fix manifest issues and validate again]
+    M -- Yes --> O[Run winget install --manifest <path>]
+    O --> P{Install test succeeded?}
+    P -- No --> Q[Fix installer behavior, URL, or metadata]
+    P -- Yes --> R[Submit the PR and monitor labels]
 ```
