@@ -10,7 +10,7 @@ Use this checklist before you open your first manifest PR to `microsoft/winget-p
 4. Use a [supported installer type](Policies.md#installer-types) and make sure the installer can run unattended.
 5. Use a multi-file manifest set. Singleton manifests are not allowed in the community repository.
 6. Add schema headers to every manifest file, including the `# yaml-language-server: $schema=...` comment at the top of each file.
-7. Use the latest manifest version supported by the repository. See [doc\manifest\schema\README.md](manifest/schema/README.md) for the current schema versions.
+7. Use the latest manifest version supported by the repository. See [doc\manifest\README.md](manifest/README.md) for the current schema versions.
 8. Use a stable, version-specific installer URL from an official source whenever possible.
 9. Validate the manifest locally:
 
