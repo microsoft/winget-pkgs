@@ -28,12 +28,22 @@ Tags:
 - 文件
 - 服务器
 ReleaseNotes: |-
-  1. 新增支持添加 SFTP/FTP(FTPS)/SMB 三种网络文件系统，支持自动发现 SMB 服务器、自动发现 SMB 共享目录
-  2. 添加备份时可选不立即执行全量扫描，默认值为添加备份后立即执行全量扫描
-  3. 修复 1.0.5 在某些系统下运行过程中有可能挂起的问题
-  4. 在文件浏览器根目录中移除云存储可选择是否永久移除，如不永久删除，该云存储只在当前运行中被移除，重启后还会恢复
-  5. 其它性能优化和 bug 修复
-ReleaseNotesUrl: https://github.com/cloud-fs/cloud-fs.github.io/releases/tag/v1.0.6
+  ⚠️ 重要安全提示（Windows 用户必读）
+  本版本将 WinFSP 升级至 2026 beta1，以修复旧版本 WinFSP 中发现的安全漏洞 CVE-2026-3006。https://github.com/winfsp/winfsp/releases/tag/v2.2B1
+  - 请务必下载完整安装包重新运行安装程序，并按安装向导提示重启系统。
+  - 请勿使用应用内 OTA 升级：OTA 仅替换 CloudDrive2 程序文件，不会重新安装 WinFSP 驱动，将无法获得本次安全修复。
+  1.  115 网盘配置界面最大下载线程数限制为 2，设置的值不能超过 2
+  2.  115 网盘配置界面增加每秒最大请求数限制，最大不能超过 5.0
+  3. SMB/SFTP/FTP 新增支持获取磁盘空间大小（仅部分 FTP 服务端支持，目前已知 Pure-FTPd 与启用 mod_facts 的 ProFTPD 可正确返回，其它服务端将回退为占位值。受协议限制，AVBL 只返回可用字节数，因此 总容量 与 可用 相同、已用 显示为 0）
+  4. 改进 smb 服务器和共享发现算法，适应更多场景
+  5. 文件重命名冲突处理方式改进：
+  - 核心层(webdav/http/clouddrive 共享等)的重命名冲突从原来的直接覆盖旧文件（遵循 POSIX 重命名行为）改为返回重命名失败
+  - Linux 和 macOS 保持原来的遵循 Unix 重命名覆盖语义-先删除旧文件再重命名，若旧文件为非空目录则返回错误 ENOTEMPTY，符合 POSIX rename(2)行为
+  - Windows 由原来的遵循 POSIX 行为改为循序 Win32 MoveFile 默认行为，即重命名冲突时返回 ERROR_ALREAD_EXISTS 错误，资源管理器会弹出"目标已存在"提示
+  6. 通过迅雷直接登录的帐号和通过合作伙伴设备直接登录的帐号，在个人资料页屏蔽修改密码选项，只保留修改邮箱和密码选项
+  7. 修复 web 界面复制到剪贴板按钮在非安全上下文(访问 cd2 的 url 为 http://且非 localhost)下工作不正常的问题
+  8. 其它性能改进和 bug 修复
+ReleaseNotesUrl: https://github.com/cloud-fs/cloud-fs.github.io/releases/tag/v1.0.7
 PurchaseUrl: https://www.clouddrive2.com/pricing.html
 ManifestType: locale
 ManifestVersion: 1.12.0

@@ -767,25 +767,55 @@ New-Item -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Policies\Associa
 New-ItemProperty -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Policies\Associations' -Name 'ModRiskFileTypes' -Type 'String' -Value '.bat;.exe;.reg;.vbs;.chm;.msi;.js;.cmd' | Out-Null
 
 Write-Host @'
-Tip: you can type 'Update-EnvironmentVariables' to update your environment variables, such as after installing a new software.
-'@
-
-Write-Host @'
-
 --> Fixing slow MSI package installers
 '@
 
-reg add "HKLM\SYSTEM\CurrentControlSet\Control\CI\Policy" /v "VerifiedAndReputablePolicyState" /t REG_DWORD /d 0 /f # See: https://github.com/microsoft/Windows-Sandbox/issues/68#issuecomment-2754867968
+reg add "HKLM\SYSTEM\CurrentControlSet\Control\CI\Policy" /v "VerifiedAndReputablePolicyState" /t REG_DWORD /d 0 /f | Out-Null # See: https://github.com/microsoft/Windows-Sandbox/issues/68#issuecomment-2754867968
 CiTool.exe --refresh --json | Out-Null # Refreshes policy. Use json output param or else it will prompt for confirmation, even with Out-Null
 
 Write-Host @'
+--> Disabling background services
+'@
 
+# Disable Search Indexing to prevent performance issues during installation of packages with many files
+Stop-Service WSearch
+Set-Service WSearch -StartupType Disabled
+
+# Disable Superfetch since we don't need to optimize disk access patterns in a disposable environment
+Stop-Service SysMain
+Set-Service SysMain -StartupType Disabled
+
+# Disable Windows Update since it can't be used in the sandbox
+Stop-Service wuauserv
+Set-Service wuauserv -StartupType Disabled
+
+# Disable Scheduled Tasks
+schtasks /Change /TN "\Microsoft\Windows\DiskCleanup\SilentCleanup" /Disable | Out-Null
+schtasks /Change /TN "\Microsoft\Windows\Defrag\ScheduledDefrag" /Disable | Out-Null
+
+# Disable Telemetry since it isn't needed in a disposable environment
+Stop-Service DiagTrack
+Set-Service DiagTrack -StartupType Disabled
+
+# Disable the Print Spooler
+Stop-Service Spooler
+Set-Service Spooler -StartupType Disabled
+
+# Disable Edge Background Processes
+reg add "HKLM\Software\Policies\Microsoft\Edge" /v BackgroundModeEnabled /t REG_DWORD /d 0 /f | Out-Null
+
+Write-Host @'
 --> Configuring Winget
 '@
 winget settings --Enable LocalManifestFiles
 winget settings --Enable LocalArchiveMalwareScanOverride
 Get-ChildItem -Filter 'settings.json' | Copy-Item -Destination C:\Users\WDAGUtilityAccount\AppData\Local\Packages\Microsoft.DesktopAppInstaller_8wekyb3d8bbwe\LocalState\settings.json
 Set-WinHomeLocation -GeoID $($script:HostGeoID)
+
+Write-Host @'
+
+Tip: you can type 'Update-EnvironmentVariables' to update your environment variables, such as after installing a new software.
+'@
 
 `$manifestFolder = (Get-ChildItem `$pwd -Directory).Where({Get-ChildItem `$_ -Filter '*.yaml'}).FullName | Select-Object -First 1
 if (`$manifestFolder) {
@@ -842,6 +872,9 @@ Write-Verbose 'Creating WSB file for launching the sandbox'
   <LogonCommand>
   <Command>PowerShell Start-Process PowerShell -WindowStyle Maximized -WorkingDirectory '$($script:SandboxWorkingDirectory)' -ArgumentList '-ExecutionPolicy Bypass -NoExit -NoLogo -File $($script:SandboxBootstrapFile)'</Command>
   </LogonCommand>
+  <AudioInput>Disable</AudioInput>
+  <VideoInput>Disable</VideoInput>
+  <PrinterRedirection>Disable</PrinterRedirection>
 </Configuration>
 "@ | Out-File -FilePath $script:ConfigurationFile
 
