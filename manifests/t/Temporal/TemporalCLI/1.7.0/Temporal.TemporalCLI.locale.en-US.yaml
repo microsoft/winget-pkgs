@@ -1,0 +1,106 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Temporal.TemporalCLI
+PackageVersion: 1.7.0
+PackageLocale: en-US
+Publisher: Temporal Technologies Inc.
+PublisherUrl: https://temporal.io/
+PublisherSupportUrl: https://github.com/temporalio/cli/issues
+PrivacyUrl: https://temporal.io/global-privacy-policy
+Author: Temporal Technologies Inc.
+PackageName: Temporal CLI
+PackageUrl: https://github.com/temporalio/cli
+License: MIT
+LicenseUrl: https://github.com/temporalio/cli/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Temporal Technologies Inc. All rights reserved.
+CopyrightUrl: https://temporal.io/terms-of-service
+ShortDescription: Command-line interface for running Temporal Server and interacting with Workflows, Activities, Namespaces, and other parts of Temporal
+Tags:
+- temporal
+ReleaseNotes: |-
+  Breaking Changes
+  Structured logging removed from CLI commands
+  The CLI itself no longer uses structured logging. Warnings and errors are printed as plain text to stderr. The --log-level flag now only controls logging for the SDK client and server start-dev. Its default has changed from info to never for most commands (warn for server start-dev).
+  If you rely on structured log output, pass --log-level info explicitly to restore the previous SDK logging behavior.
+  Activity command flag changes
+  Removed flags: The --activity-type and --match-all flags have been removed from temporal activity pause, temporal activity unpause, temporal activity reset, and temporal activity update-options. These were experimental and allowed targeting all activities of a given type within a single workflow. They have been removed in favor of upcoming server-side batch operations that will be more intuitive. Use --activity-id with --workflow-id, or --query for batch targeting.
+  Changed flag semantics: --workflow-id is no longer always required for temporal activity complete and temporal activity fail. It is required for workflow-attached activities but must be omitted for Standalone Activities. When --workflow-id is absent, --run-id refers to the Activity Run ID rather than the Workflow Run ID. Existing scripts that always pass --workflow-id are unaffected.
+  New Features
+  Standalone Activity Support (Experimental)
+  New subcommands under temporal activity for managing Standalone Activities:
+  - temporal activity start -- Start a new Standalone Activity
+  - temporal activity execute -- Start a Standalone Activity and wait for its result
+  - temporal activity result -- Wait for and output the result of a Standalone Activity
+  - temporal activity describe -- Show detailed info for a Standalone Activity
+  - temporal activity list -- List Standalone Activities matching a query
+  - temporal activity count -- Count Standalone Activities matching a query
+  - temporal activity cancel -- Request cancellation of a Standalone Activity
+  - temporal activity terminate -- Forcefully end a Standalone Activity
+  The dev server (temporal server start-dev) automatically enables the required dynamic config flags (EnableChasm and activity.Enabled). For self-hosted server deployments, these must be enabled manually. They will be on by default starting in server v1.32.
+  Worker Deployment Commands
+  Added temporal worker deployment create and temporal worker deployment create-version commands for managing Worker Deployments via direct gRPC API calls, including AWS Lambda compute configuration.
+  Task Queue Fairness Weight Overrides
+  Added CLI support for setting fairness key weight overrides via UpdateTaskQueueConfig. This allows configuring per-key weights on task queues directly from the CLI.
+  Nexus Caller Timeouts
+  Pending Nexus operations now display ScheduleToStart and StartToClose timeouts in workflow output.
+  Reverse workflow history
+  List workflow history events in reverse (newest event first) using the new --reverse flag on temporal workflow show. Helpful for debugging workflows where you only care about the most recent events.
+  Improvements
+  - Experimental warning on activity batch operations -- Activity batch operations now display an experimental warning.
+  Bug Fixes
+  -  --tls=false now correctly disables TLS when used with --api-key -- Previously, passing --api-key X --tls=false would still dial with TLS enabled because the SDK auto-enables TLS when credentials are present. The envconfig v1.0.0 upgrade fixes ToClientOptions to respect the explicit --tls=false flag. (sdk-go#2205)
+  - Task queue warnings go to stderr -- Warnings in task queue commands (e.g. the stop-all-queues confirmation) were incorrectly sent to stdout, breaking structured output. They now go to stderr. (#1000)
+  -  --build-id and --unversioned mutual exclusivity enforced -- temporal worker deployment set-current-version now returns an error if both flags are provided. Previously the conflict was silently ignored. (#991)
+  - Activity command flag fixes (#974):
+    - activity pause silently ignored the --identity flag, always sending the global client identity
+    - activity pause was missing the --reason flag despite the server accepting one
+    - --activity-type displayed activity-id as its value placeholder in help output for pause, unpause, and reset
+    - --reset-heartbeats on unpause and reset incorrectly claimed it only works with --reset-attempts
+    - activity complete and activity fail lacked the a shorthand for --activity-id that other activity subcommands had
+  - temporal env deprecation warning now visible at all log levels -- The warning about deprecated positional arguments was routed through the logger, so it was invisible at the new default --log-level never. It now prints directly to stderr.
+  Dependency Upgrades
+  - Temporal Server: upgraded to v1.31.x
+  - Temporal SDK: upgraded to v1.41.1
+  - envconfig: upgraded to v1.0.0
+  - Go: upgraded to v1.26.2
+  - gRPC: upgraded to v1.79.3
+  - UI Server: upgraded to v2.49.1
+  - Removed Nexus UseSystemCallbackURL config (no longer needed server-side)
+  What's Changed
+  - Nexus caller timeouts by @bergundy in https://github.com/temporalio/cli/pull/904
+  - bump server version to 151.6 by @chaptersix in https://github.com/temporalio/cli/pull/961
+  - Do not use logging by @dandavison in https://github.com/temporalio/cli/pull/956
+  - chore: update CODEOWNERS to @temporalio/act by @chaptersix in https://github.com/temporalio/cli/pull/968
+  - Add experimental warning around activity batch operations by @spkane31 in https://github.com/temporalio/cli/pull/966
+  - chore: bump cloud server to 1.31.0-152.2 and go to 1.26.1 by @chaptersix in https://github.com/temporalio/cli/pull/970
+  - Remove experimental labels from config-related global flags by @tlalfano in https://github.com/temporalio/cli/pull/972
+  - Fix activity command flag bugs and help text inconsistencies by @spkane31 in https://github.com/temporalio/cli/pull/974
+  - chore: upgrade temporal SDK to v1.41.0 and envconfig to v1.0.0 by @chaptersix in https://github.com/temporalio/cli/pull/975
+  - remove activity-type targeting from activity pause/unpause/reset/update by @spkane31 in https://github.com/temporalio/cli/pull/978
+  - chore: bump server to 1.31.0-154.0 and remove nexus UseSystemCallbackURL config by @chaptersix in https://github.com/temporalio/cli/pull/982
+  - Bump google.golang.org/grpc from 1.67.1 to 1.79.3 in /cliext by @dependabot in https://github.com/temporalio/cli/pull/964
+  - uplift ui-server to v2.48.4 by @jaypipes in https://github.com/temporalio/cli/pull/994
+  - error if both --build-id and --unversioned used by @jaypipes in https://github.com/temporalio/cli/pull/991
+  - temporal worker deployment create|create-version by @jaypipes in https://github.com/temporalio/cli/pull/990
+  - fix: update regional endpoint for API key CI tests by @chaptersix in https://github.com/temporalio/cli/pull/995
+  - Standalone Activity client and UI by @dandavison in https://github.com/temporalio/cli/pull/986
+  - Test workflow and activity helper docstrings by @dandavison in https://github.com/temporalio/cli/pull/989
+  - CLI Support for UpdateTaskQueueConfig's fairness weight overrides by @majiru in https://github.com/temporalio/cli/pull/987
+  - bump ui-server and Go patch version by @chaptersix in https://github.com/temporalio/cli/pull/996
+  - make sure warnings go to stderr instead of stdout in taskqueue commands by @majiru in https://github.com/temporalio/cli/pull/1000
+  - SEC-1654: remediate missing-govulncheck-workflow by @picatz in https://github.com/temporalio/cli/pull/999
+  - Fix username in default reason string by @dandavison in https://github.com/temporalio/cli/pull/1002
+  - feat: add --reverse flag to temporal workflow show by @veeral-patel in https://github.com/temporalio/cli/pull/988
+  - chore: update go dependencies by @chaptersix in https://github.com/temporalio/cli/pull/1014
+  New Contributors
+  - @tlalfano made their first contribution in https://github.com/temporalio/cli/pull/972
+  - @majiru made their first contribution in https://github.com/temporalio/cli/pull/987
+  - @veeral-patel made their first contribution in https://github.com/temporalio/cli/pull/988
+  Full Changelog: https://github.com/temporalio/cli/compare/v1.6.2...v1.7.0
+ReleaseNotesUrl: https://github.com/temporalio/cli/releases/tag/v1.7.0
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://docs.temporal.io/cli
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

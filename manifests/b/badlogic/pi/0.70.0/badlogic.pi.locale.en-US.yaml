@@ -1,0 +1,78 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: badlogic.pi
+PackageVersion: 0.70.0
+PackageLocale: en-US
+Publisher: Mario Zechner
+PublisherUrl: https://github.com/badlogic
+PublisherSupportUrl: https://github.com/badlogic/pi-mono/issues
+Author: Mario Zechner
+PackageName: pi
+PackageUrl: https://github.com/badlogic/pi-mono
+License: MIT
+LicenseUrl: https://github.com/badlogic/pi-mono/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Mario Zechner
+ShortDescription: AI coding assistant with read, bash, edit, write tools
+Description: |-
+  Pi is a minimal terminal coding harness. Adapt pi to your workflows, not the other way around, without having to fork and modify pi internals. Extend it with TypeScript Extensions, Skills, Prompt Templates, and Themes. Put your extensions, skills, prompt templates, and themes in Pi Packages and share them with others via npm or git.
+  Pi ships with powerful defaults but skips features like sub agents and plan mode. Instead, you can ask pi to build what you want or install a third party pi package that matches your workflow.
+  Pi runs in four modes: interactive, print or JSON, RPC for process integration, and an SDK for embedding in your own apps. See openclaw/openclaw for a real-world SDK integration.
+Moniker: pi
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  New Features
+  - Searchable auth provider login flow: the /login provider selector now supports fuzzy search/filtering, making it faster to find providers when many are configured. See docs/providers.md. (#3572 by @mitsuhiko)
+  - GPT-5.5 Codex support: openai-codex/gpt-5.5 is available as a model option, including xhigh reasoning support and corrected priority-tier pricing.
+  - Terminal progress indicators are now opt-in: OSC 9;4 progress reporting during streaming/compaction is off by default and can be toggled via terminal.showTerminalProgress in /settings (#3588)
+  -  --no-builtin-tools / createAgentSession({ noTools: "builtin" }) now correctly disables only built-in tools while keeping extension tools active. See docs/extensions.md and README.md (#3592)
+  Breaking Changes
+  - Disabled OSC 9;4 terminal progress indicators by default. Set terminal.showTerminalProgress to true in /settings to re-enable (#3588)
+  Added
+  - Added searchable auth provider login flow with fuzzy filtering in the provider selector (#3572 by @mitsuhiko)
+  - Added GPT-5.5 Codex model
+  - Added auth source labels in /login so provider entries can show when auth comes from --api-key, an environment variable, or custom provider fallback without exposing secrets.
+  Changed
+  - Updated default model selection across providers to current recommended models.
+  - Improved stale extension context errors after session replacement or reload to tell extension authors to avoid captured pi/command ctx and use withSession for post-replacement work.
+  Fixed
+  - Fixed /model selector cancellation to request render instead of incorrectly triggering login selector.
+  - Changed login, OAuth, and extension selectors for more consistent styling.
+  - Added Amazon Bedrock setup guidance to /login and updated /model copy to refer to configured providers instead of only API keys.
+  - Improved no-model and missing-auth warnings to point users to /login for OAuth or API key setup.
+  - Fixed /quit shutdown ordering to stop the TUI before extension UI teardown can repaint, preserving the final rendered frame while still emitting session_shutdown before process exit.
+  - Fixed SettingsManager.inMemory() initial settings being lost after reloads triggered by SDK resource loading (#3616)
+  - Fixed models.json provider compatibility to accept compat.supportsLongCacheRetention, allowing proxies to opt out of long-retention cache fields when needed while long retention is enabled by default when requested (#3543)
+  - Fixed --thinking xhigh for openai-codex gpt-5.5 so it is no longer downgraded to high.
+  - Fixed git package installs with custom npmCommand values such as pnpm by avoiding npm-specific production flags in that compatibility path (#3604)
+  - Fixed first user messages rendering without spacing after existing notices such as compaction summaries or status messages (#3613)
+  - Fixed the handoff extension example to use the replacement-session context after creating a new session, avoiding stale ctx errors when it installs the generated prompt (#3606)
+  - Fixed session replacement and /quit teardown ordering to run host-owned extension UI cleanup synchronously after session_shutdown handlers complete but before invalidating the old extension context, preventing stale extension UI from rendering against a disposed session (#3597 by @vegarsti)
+  - Fixed crash on /quit when an extension registers a custom footer whose render() accesses ctx, by tearing down extension-provided UI before invalidating the extension runner during shutdown (#3595)
+  - Fixed auto-retry to treat Bedrock/Smithy HTTP/2 transport failures like http2 request did not get a response as transient errors, so the agent retries automatically instead of waiting for a manual nudge (#3594)
+  - Fixed the CLI/SDK tool-selection split so --no-builtin-tools and createAgentSession({ noTools: "builtin" }) disable only built-in default tools while keeping extension/custom tools enabled, instead of falling through to the same "disable everything" path as --no-tools (#3592)
+  - Fixed remaining hardcoded pi / .pi branding to route through APP_NAME and CONFIG_DIR_NAME extension points, so SDK rebrands get consistent naming in /quit description, process.title, and the project-local extensions directory (#3583 by @jlaneve)
+  - Fixed pi-coding-agent shipping uuid@11, which triggered npm audit moderate vulnerability reports for downstream installs; the package now depends on uuid@14 (#3577)
+  - Fixed openai-completions streamed tool-call assembly to coalesce deltas by stable tool index when OpenAI-compatible gateways mutate tool call IDs mid-stream, preventing malformed Kimi K2.6/OpenCode tool streams from splitting one call into multiple bogus tool calls (#3576)
+  - Fixed ctx.ui.setWorkingMessage() to persist across loader recreation, matching the behavior of ctx.ui.setWorkingIndicator() (#3566)
+  - Fixed coding-agent fs.watch error handling for theme and git-footer watchers to retry after transient watcher failures such as EMFILE, avoiding startup crashes in large repos (#3564)
+  - Fixed built-in kimi-coding model generation to attach the expected User-Agent header so direct Kimi Coding requests use the provider's expected client identity (#3586)
+  - Fixed extension shortcut conflict diagnostics to display at startup instead of only on reload, so extension authors discover reserved keybinding conflicts immediately rather than discovering them later through user feedback (#3617)
+  - Fixed models.json Anthropic-compatible provider configuration to accept compat.supportsEagerToolInputStreaming, allowing proxies that reject per-tool eager_input_streaming to use the legacy fine-grained tool streaming beta header instead (#3575)
+  - Fixed startup banner extension labels to strip trailing index.js/index.ts suffixes (#3596 by @aliou)
+  - Fixed OSC 9;4 terminal progress updates to stay alive in terminals such as Ghostty during long-running agent work (#3610)
+  - Fixed OpenAI-compatible completion usage parsing to avoid double-counting reasoning tokens already included in completion_tokens (#3581)
+  - Fixed openai-responses compatibility for strict OpenAI-compatible proxies by allowing models.json to disable the underscore-containing session_id header with compat.sendSessionIdHeader: false (#3579)
+  - Fixed GPT-5.5 Codex capability handling to clamp unsupported minimal reasoning to low and apply the model's 2.5x priority service-tier pricing multiplier (#3618 by @markusylisiurunen)
+ReleaseNotesUrl: https://github.com/badlogic/pi-mono/releases/tag/v0.70.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
