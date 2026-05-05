@@ -2,14 +2,14 @@
 
 ## Authoring a Manifest
 
-If this is your first manifest submission, start with the [first-time contributor checklist](FirstContribution.md).
-
 A few different tools are available to help you author a manifest.
 
 - [Windows Package Manager Manifest Creator](https://github.com/microsoft/winget-create)
 - [YamlCreate.ps1](tools/YamlCreate.md)
 - Other WinGet Manifest Creators developed by the community:
   - [Komac - Community Manifest Creator](https://github.com/russellbanks/Komac) (maintained by [**@russellbanks**](https://github.com/russellbanks))
+
+If this is your first manifest submission, start with the [first-time contributor checklist](FirstContribution.md).
 
 > [!Note]
 > Only one package version (one multi-file manifest set) may be submitted per PR.
@@ -53,10 +53,10 @@ Just provide the path to manifest as parameter:
 
 To submit a package to this repository, you should follow these steps:
 
-1. Review the [first-time contributor checklist](FirstContribution.md).
-2. Follow the [Contributing](../CONTRIBUTING.md) guidelines.
-3. [Author](Authoring.md) a Manifest.
-4. [Test](#testing-a-manifest) your manifest.
+1. Follow the [Contributing](../CONTRIBUTING.md) guidelines.
+2. [Author](Authoring.md) a Manifest.
+3. [Test](#testing-a-manifest) your manifest.
+4. If this is your first time submitting a manifest, review the [first-time contributor checklist](FirstContribution.md).
 5. [Submit](#submit-your-pr) your pull request (PR).
 6. Respond to any feedback in your PR.
 
