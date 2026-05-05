@@ -44,21 +44,21 @@ If you discover a documentation, spelling, or tooling fix while preparing a mani
 
 ```mermaid
 flowchart TD
-    A[Start a manifest contribution] --> B{Existing PR for this package version?}
-    B -- Yes --> C[Do not open another PR]
-    B -- No --> D{Exactly one package version in this PR?}
-    D -- No --> E[Split the work into separate PRs]
-    D -- Yes --> F{Any non-manifest files in this PR?}
-    F -- Yes --> G[Move non-manifest changes to a separate PR]
-    F -- No --> H{Stable and version-specific installer URL?}
-    H -- No --> I[Use a stable official release URL]
-    H -- Yes --> J{Installer can run unattended?}
-    J -- No --> K[Fix installer type, switches, or dependencies]
-    J -- Yes --> L[Run winget validate --manifest <path>]
-    L --> M{Validation succeeded?}
-    M -- No --> N[Fix manifest issues and validate again]
-    M -- Yes --> O[Run winget install --manifest <path>]
-    O --> P{Install test succeeded?}
-    P -- No --> Q[Fix installer behavior, URL, or metadata]
-    P -- Yes --> R[Submit the PR and monitor labels]
+    A[Start a manifest<br/>contribution] --> B{Existing PR for this<br/>package version?}
+    B -- Yes --> C[Do not open<br/>another PR]
+    B -- No --> D{Exactly one package<br/>version in this PR?}
+    D -- No --> E[Split the work into<br/>separate PRs]
+    D -- Yes --> F{Any non-manifest files<br/>in this PR?}
+    F -- Yes --> G[Move non-manifest changes<br/>to a separate PR]
+    F -- No --> H{Stable and version-specific<br/>installer URL?}
+    H -- No --> I[Use a stable official<br/>release URL]
+    H -- Yes --> J{Installer can run<br/>unattended?}
+    J -- No --> K[Fix installer type,<br/>switches, or dependencies]
+    J -- Yes --> L[Run winget validate<br/>--manifest <path>]
+    L --> M{Validation<br/>succeeded?}
+    M -- No --> N[Fix manifest issues<br/>and validate again]
+    M -- Yes --> O[Run winget install<br/>--manifest <path>]
+    O --> P{Install test<br/>succeeded?}
+    P -- No --> Q[Fix installer behavior,<br/>URL, or metadata]
+    P -- Yes --> R[Submit the PR and<br/>monitor labels]
 ```
