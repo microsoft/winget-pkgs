@@ -33,6 +33,8 @@ The directory structure for a manifest is determined by the "PackageIdentifier" 
 
 ## First steps
 
+If this is your first contribution to the community repository, use the [first-time contributor checklist](FirstContribution.md) alongside this guide as you work through the authoring steps.
+
 Before creating and submitting a manifest, check if the package already exists:
 1. Run `winget search <package>` in your terminal.
 2. Search for the package in this repository using GitHub's search box.
@@ -46,6 +48,8 @@ Manifests submitted to this repository should be multi-file manifests. The minim
 - A [version][versionSchema] file
 - A [defaultLocale][defaultLocaleSchema] file
 - An [installer][installerSchema] file
+
+When you are ready to submit your work, keep the PR limited to one package version (one multi-file manifest set). If you also need to update `README.md`, `doc/`, spelling files, or other non-manifest content, submit those changes in a separate PR.
 
 ## Creating your first manifest
 
@@ -87,6 +91,7 @@ winget validate --manifest <Path to manifest>
 
 Test your manifest before submission to ensure it meets quality standards:
 - Verify the application installs unattended.
+- Verify the installer URL is stable, version-specific, and points to the intended release asset.
 - Ensure the application version matches the "PackageVersion" or includes `AppsAndFeaturesEntries` if necessary.
 - Confirm the application publisher matches the defaultLocale "Publisher" or includes `AppsAndFeaturesEntries` if necessary.
 - Check that the application name matches the defaultLocale "PackageName" or includes `AppsAndFeaturesEntries` if necessary.

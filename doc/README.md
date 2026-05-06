@@ -9,8 +9,11 @@ A few different tools are available to help you author a manifest.
 - Other WinGet Manifest Creators developed by the community:
   - [Komac - Community Manifest Creator](https://github.com/russellbanks/Komac) (maintained by [**@russellbanks**](https://github.com/russellbanks))
 
+If this is your first manifest submission, start with the [first-time contributor checklist](FirstContribution.md).
+
 > [!Note]
-> Only one manifest may be submitted per PR.
+> Only one package version (one multi-file manifest set) may be submitted per PR.
+> Non-manifest changes such as `README.md`, `doc/`, spelling updates, and tooling updates must be submitted in a separate PR.
 
 ## Testing a Manifest
 
@@ -53,8 +56,9 @@ To submit a package to this repository, you should follow these steps:
 1. Follow the [Contributing](../CONTRIBUTING.md) guidelines.
 2. [Author](Authoring.md) a Manifest.
 3. [Test](#testing-a-manifest) your manifest.
-4. [Submit](#submit-your-pr) your pull request (PR).
-5. Respond to any feedback in your PR.
+4. If this is your first time submitting a manifest, review the [first-time contributor checklist](FirstContribution.md).
+5. [Submit](#submit-your-pr) your pull request (PR).
+6. Respond to any feedback in your PR.
 
 > [!Note]
 > Please check the package's manifest you intend to submit does not already exist in the repository, and there are no open PRs for it in order to avoid duplicates.
@@ -66,6 +70,9 @@ Once you have verified your manifest, it's time to submit a PR. Place your manif
 ```
 manifests\<first lower case letter of publisher>\<publisher>\<package>\<version>\
 ```
+
+Your PR must be limited to a single package version. If you also need to update documentation, spelling files, repository tooling, or other non-manifest content, open a separate PR for those changes.
+
 ### Validation Process
 
 Your PR will go through a validation process. The core team or the Microsoft bot (BOT) will use  [labels](https://docs.microsoft.com/windows/package-manager/package/winget-validation#pull-request-labels)  to assist during the process. In case of a failure, the BOT will suggest the problem with the submission and assign the PR back to you.
