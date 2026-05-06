@@ -1,0 +1,93 @@
+# Created using wingetcreate 1.12.8.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: fjrevoredo.MiniDiarium
+PackageVersion: 0.4.20
+PackageLocale: en-US
+Publisher: fjrevoredo
+PublisherUrl: https://mini-diarium.com/
+PublisherSupportUrl: https://github.com/fjrevoredo/mini-diarium/issues
+PrivacyUrl: https://github.com/fjrevoredo/mini-diarium/blob/master/docs/PRIVACY.md
+Author: Francisco J. Revoredo
+PackageName: Mini Diarium
+PackageUrl: https://github.com/fjrevoredo/mini-diarium
+License: MIT
+LicenseUrl: https://github.com/fjrevoredo/mini-diarium/blob/master/LICENSE
+Copyright: Copyright (c) 2026 Francisco J. Revoredo
+ShortDescription: Encrypted, local-first journaling app
+Description: A local-first journal with serious encryption. Free, open source, and never touches the internet.
+Moniker: mini-diarium
+Tags:
+- privacy
+- journaling
+- journal
+- diary
+- foss
+- open-source
+- rust
+ReleaseNotes: |-
+  What's Changed
+
+  v0.4.20 delivers RTL/bidirectional text editing with toolbar toggle, a multi-entry number navigation
+  bar, editor font selection, and timestamp insertion — plus critical security hardening that moves
+  the multi-auth requirement into the encrypted database with MAC integrity protection.
+
+  Added
+  - RTL/LTR toggle button in the editor toolbar: a new paragraph-direction toggle button (pilcrow icon
+    with directional arrow) is now available in the advanced formatting toolbar, placed before the
+    alignment controls. The icon dynamically shows PilcrowRight when the current block is LTR (click
+    to switch to RTL) and PilcrowLeft when RTL (click to switch to LTR), matching the convention used
+    by Google Docs and LibreOffice. The button reuses the same setTextDirection command as the
+    existing Ctrl+Shift+D / Cmd+Shift+D keyboard shortcut. New textDirection / textDirectionTitle i18n
+    keys are added to all four locales.
+  - Multi-entry number navigation bar: the entry counter (1 / 3) has been replaced with clickable
+    number buttons (← 1 2 3 →) that jump directly to the chosen entry. The current entry is
+    highlighted in bold with an aria-current="true" attribute for screen readers. The prev/next arrows
+    retain their existing step-by-step behaviour. A goToEntry aria-label key is added to all four
+    locales.
+  - Insert timestamp in the editor: a new clock button in the advanced formatting toolbar opens a
+    popup that lets you choose between 12-hour and 24-hour format, pick hours:minutes or
+    hours:minutes:seconds precision, and insert the current time at the cursor position. Both
+    selections are remembered across sessions.
+  - Editor font selection: a new "Editor font" dropdown in Preferences → Writing lets you choose from
+    five bundled open-source font families (Noto Sans, Source Sans 3, Noto Serif, JetBrains Mono, Fira
+    Mono). Fonts are loaded on-demand as base64 data URLs and applied to the TipTap editor only. The
+    selection is persisted as the editorFontFamily preference and works fully offline — no network
+    requests, no OS-level font enumeration.
+
+  Fixed
+  - unicode-bidi: plaintext CSS overrides dir attribute on paragraphs and headings: the plaintext
+    value in the editor CSS forced the browser to always auto-detect text direction from content,
+    silently overriding any explicit dir attribute set by the RTL toggle button or Ctrl+Shift+D
+    shortcut. The unicode-bidi override has been removed from both paragraph and heading rules,
+    allowing the dir HTML attribute to control direction natively while the existing BidiExtension
+    auto-detection plugin still sets dir on new blocks.
+  - bump-version scripts now inject metainfo.xml release entry: bump-version.sh and bump-version.ps1
+    both prepend a <release version="X.Y.Z"> element to the AppStream metainfo file during version
+    bumps. The .sh script was also made portable to BSD/macOS sed. The pre-release checklist now
+    validates the metainfo version as a fifth consistency check.
+
+  Security
+  - Multi-auth requirement can no longer be bypassed by re-adding a journal: the "Require All
+    Authentication Methods" setting was previously stored in config.json. Removing a journal from the
+    list and re-adding the same database file produced a fresh config entry with the flag absent,
+    allowing a single-credential unlock even when multi-auth was required. The flag is now stored
+    inside diary.db itself (new db_settings table, schema v6), so it stays with the database file
+    regardless of what happens to the config. Existing journals are migrated automatically on the
+    first unlock after updating.
+  - Multi-auth requirement MAC integrity: the requireallauth flag stored in dbsettings inside diary.db
+    was vulnerable to plaintext SQLite tampering — deleting or modifying the row would bypass the
+    guard and allow single-credential unlock. The flag is now bound to the master key via HKDF-SHA256
+    MAC (computed as HKDF-SHA256(IKM=masterkey, salt=None, info="mini-diarium:requireallauth:v1") and
+    stored as a 64-char hex string under the requireallauth_mac key). A fail-safe ensures any
+    tampering (absent, malformed, or mismatched MAC) enforces the guard. Existing journals are
+    self-healed on the first successful all-methods unlock — no user action required. No schema
+    migration; no new dependencies.
+
+  [](https://sourceforge.net/projects/mini-diarium/files/v0.4.20/)
+ReleaseNotesUrl: https://github.com/fjrevoredo/mini-diarium/releases/tag/v0.4.20
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/fjrevoredo/mini-diarium/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
