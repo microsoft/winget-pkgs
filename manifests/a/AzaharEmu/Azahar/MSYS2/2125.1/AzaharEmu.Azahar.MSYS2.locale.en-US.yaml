@@ -1,0 +1,79 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: AzaharEmu.Azahar.MSYS2
+PackageVersion: '2125.1'
+PackageLocale: en-US
+Publisher: Azahar Emulator Developers
+PublisherUrl: https://azahar-emu.org/
+PublisherSupportUrl: https://github.com/azahar-emu/azahar/issues
+Author: OpenSauce04 & PabloMK7
+PackageName: Azahar
+PackageUrl: https://azahar-emu.org/
+License: GPL-2.0
+LicenseUrl: https://github.com/azahar-emu/azahar/blob/HEAD/license.txt
+ShortDescription: An open-source 3DS emulator project based on Citra.
+Description: |-
+  Azahar is an open-source 3DS emulator project based on Citra.
+  
+  It was created from the merging of PabloMK7's Citra fork and the Lime3DS project, both of which emerged shortly after Citra was taken down.
+  
+  The goal of this project is to be the de-facto platform for future development.
+Moniker: azahar-msys2
+Tags:
+- 2ds
+- 3ds
+- citra
+- emulator
+- lime3ds
+- nintendo
+ReleaseNotes: |-
+  This is a minor release for the 2125 series which introduces bug fixes and some low-risk improvements + new features.
+  Azahar 2125.1 Changelog
+  
+  All
+  - Added emulation of the 3DS's notification LED. | @PabloMK7 #2019
+    - Only the desktop frontend exposes this functionality as of now (see "Desktop" section).
+  - Fixed color blend modes behaving incorrectly on the OpenGL graphics backend. | @PabloMK7 #2038
+    - This notably fixes an issue where a black square could appear in the bottom-right corner of the screen in some games (e.g. Shin Megami Tensei IV)
+  - Implemented syscore CPU time limiting to match real hardware behaviour. | @PabloMK7 #1934
+    - Makes emulated applications properly use the syscore without starving LLE system applets, which fixes several subtle timing issues.
+    - Most notably, fixes stability issues caused by having the BOSS LLE module enabled.
+  - The BOSS LLE module is now enabled by the "Enable required LLE modules for online features" setting. | @PabloMK7 #1952
+  - Fixed emulated applications receiving incorrect error values from getaddrinfo/getnameinfo functions. | @GasInfinity #1956
+  - Optimize GeometryEmitter SETEMIT state, providing a minor performance improvement for games which use geometry shaders. | @Wunkolo #1996
+  
+  Desktop
+  - Added a new UI element which displays the emulated 3DS's notification LED. | @PabloMK7 #2019
+  - Fixed Discord rich presence often not being set correctly due to a race condition. | @PabloMK7 #2035
+  - Removed Vulkan warnings which could appear at application launch on setups with missing Vulkan features. | @RedBlackAka #1938
+  - Removed Mesa OpenGL version override due to improved upstream support. | @RedBlackAka #1938
+  
+  Android
+  - All builds of Azahar on Android, including the libretro core, now use the Vulkan renderer by default. | @OpenSauce04 #2003
+    - Note: On builds of Azahar other than the libretro core, this change doesn't apply retroactively to existing user configurations.
+  - Added a button to the about game dialog which allows deletion of disk shader cache on a per-game basis. | @PabloMK7 #2032
+  - Addressed an issue where orientation changes while a 3DS application is booting could cause the emulator to crash. | @PabloMK7 #2030
+  - Fixed an issue where hidden 3DS system titles could appear in the application list erroneously. | @PabloMK7 #1935
+  - Fixed an issue where, if a game was launched via an intent while another game was already open, the new game would be stuck infinitely loading. | @inssekt #2000
+  - Fixed an issue where resetting the values of the background color setting to the default would cause the app to crash. | @ptyfyre #1959
+  - Fixed application exits (e.g. with homebrew apps that close themselves) resulting in an "Invalid ROM Format" error dialog. | @SiniKraft #1991
+  
+  libretro
+  - Fixed an issue where the libretro core could crash under certain circumstances when using the Vulkan renderer. | @warmenhoven #2004
+  
+  Technical
+  - Added new ENABLE_BUILTIN_KEYBLOB CMake option, enabled by default. | @PabloMK7 #2024
+    - This is enabled by default for all of our builds, mimicking prior behaviour.
+    - Disabling it omits the built-in keys usually distributed with Azahar, which disables certain functionality.
+  - Added new USE_SYSTEM_OAKNUT CMake option. | @marcin-serwin #1947
+  - Improved logging for SVC failures. | @PabloMK7 #1948
+  - Our x86_64/Intel macOS binaries are now cross-compiled from an ARM64 macOS runner. | @OpenSauce04 #1953
+  - Fixed an issue where attempting to build Azahar's test suite alongside our libretro core while using GCC would result in a linker error. | @warmenhoven #2012
+  - Fixed several issues related to building and using Azahar on NetBSD. | @OpenSauce04 #1998
+  - Unit tests are now able to be discovered by IDEs via catch_discover_tests. | @Wunkolo #1997
+  - Correct the response of SendToOther in soc:U. | @GasInfinity #1929
+    - This is a correctness fix, and has no effect on the end-user.
+ReleaseNotesUrl: https://github.com/azahar-emu/azahar/releases/tag/2125.1
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

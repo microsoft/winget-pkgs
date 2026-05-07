@@ -22,6 +22,16 @@ Packages submitted to the community repository must install without requiring us
 - Installers may display a UI.
 - Users must not need to interact with the UI for a successful installation.
 
+## Security Scans and Potentially Unwanted Applications (PUA)
+
+All packages submitted to the community repository are subject to multiple security scans as part of the validation pipeline. For more details on these checks, see [How do I know the packages in the Community Repository are safe?](FAQ.md#how-do-i-know-the-packages-in-the-community-repository-are-safe) in the FAQ.
+
+Because of the security position this repository is placed in, there is a strict policy against Potentially Unwanted Applications (PUA) and potentially malicious software. If a package is flagged by any of the security scans in the validation pipeline, it cannot be accepted into the repository, regardless of the application's legitimacy or intent. This policy exists to protect users and maintain the integrity of the repository.
+
+Policy updates related to PUA handling are being tracked in:
+- [microsoft/winget-cli#6107](https://github.com/microsoft/winget-cli/issues/6107)
+- [microsoft/winget-cli#6189](https://github.com/microsoft/winget-cli/issues/6189)
+
 ## Manifest Agreements
 WinGet manifests support adding agreements to manifests. These agreements are between the publisher and the user (or organization) installing the software. These applications are licensed to you by their owner. Microsoft is not responsible for, nor does it grant any licenses to, third-party packages.
 
