@@ -1,0 +1,188 @@
+# Created with WinGet Updater using komac v2.15.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Sidero.omnictl
+PackageVersion: 1.6.0
+PackageLocale: en-US
+Publisher: Sidero Labs
+PublisherUrl: https://github.com/siderolabs/omni
+PublisherSupportUrl: https://github.com/siderolabs/omni/issues
+PrivacyUrl: https://www.siderolabs.com/privacy-policy/
+Author: Sidero Labs
+PackageName: omnictl
+PackageUrl: https://github.com/siderolabs/omni
+License: Mozilla Public License Version 2.0
+LicenseUrl: https://github.com/siderolabs/omni/blob/HEAD/LICENSE
+ShortDescription: A command line tool for communicating with Omni
+Moniker: omnictl
+Tags:
+- k8s
+- kubernetes
+- omni
+- talos
+ReleaseNotes: |-
+  Omni 1.6.0 (2026-03-16)
+  Welcome to the v1.6.0 release of Omni!
+  Please try out the release binaries and report any issues at
+  https://github.com/siderolabs/omni/issues.
+  Urgent Upgrade Notes (No, really, you MUST read this before you upgrade)
+  The deprecated flags and config fields that were kept for the SQLite migration period (introduced in v1.4.0) have been removed.
+  If you still have any of the following flags or config keys set, you must remove them before upgrading, as they will cause startup errors:
+  - --audit-log-dir (.logs.audit.path)
+  - --secondary-storage-path (.storage.secondary.path)
+  - --machine-log-storage-path (.logs.machine.storage.path)
+  - --machine-log-storage-enabled (.logs.machine.storage.enabled)
+  - --log-storage-path (.logs.machine.storage.path)
+  - --embedded-discovery-service-snapshot-path (.services.embeddedDiscoveryService.snapshotsPath)
+  - --machine-log-buffer-capacity (.logs.machine.bufferInitialCapacity)
+  - --machine-log-buffer-max-capacity (.logs.machine.bufferMaxCapacity)
+  - --machine-log-buffer-safe-gap (.logs.machine.bufferSafetyGap)
+  - --machine-log-num-compressed-chunks (.logs.machine.storage.numCompressedChunks)
+  The automatic migration code for BoltDB secondary storage, file-based audit logs, file-based discovery service snapshots, and circular buffer machine logs has also been removed. If you are upgrading from a version older than v1.4.0, you must first upgrade to v1.4.x to complete the migrations, then upgrade to this version.
+  Talos and Kubernetes CA Rotation
+  Omni now supports rotating the Talos and Kubernetes Certificate Authorities for managed clusters.
+  Talos and Kubernetes Versions in ClusterStatus
+  The ClusterStatus resource now includes talos_version and kubernetes_version fields, making cluster version information available programmatically. They are now also shown in the cluster list in the UI.
+  Pending and Historical Config Diffs in UI
+  The UI now shows pending and historical configuration diffs, making it easy to review what changed and when.
+  diffs
+  Force Machine Destroy
+  A --force flag has been added to the machine destroy command (and a corresponding UI option) to forcibly remove machines that are stuck or unresponsive.
+  Helm Chart v2
+  A new Helm chart v2 has been implemented with improved structure and more configurable options.
+  More configuration values are now exposed in the Helm chart, giving operators greater flexibility when deploying Omni.
+  Installation Media Wizard
+  The installation media flow now uses a wizard-based UI by default, replacing the previous modal dialog. Presets may now also be saved, allowing for future reuse.
+  wizard
+  Machine Log Storage Cleanup
+  Global size-based cleanup has been added for machine log storage, preventing unbounded disk usage.
+  Configurable options for audit log cleanup have also been added.
+  Minimum Talos Version Bump
+  The minimum supported Talos version for new clusters has been bumped to 1.8.
+  Minor UI Improvements
+  Other minor UI improvements part of this release:
+  - Talos and Kubernetes versions are now shown in the cluster list.
+  - Node name and UUID are shown in the support bundle modal.
+  - Machine set pools now have a collapse/expand toggle.
+  - Cluster scaling has been moved to a modal dialog.
+  - Getting started guidance and empty-state pages have been added for clusters, machines, and machine classes.
+  - Instructions for adding machines and exporting cluster templates are now shown in the UI.
+  - Clarification text has been added to backup settings.
+  - YouTube video embedding is now supported in documentation/onboarding flows.
+  - The frontend authentication flow no longer requires an explicit login click.
+  - Resource labels use new colors for improved visual clarity.
+  Detailed Node Disk Information
+  The node details page now shows detailed disk information, including disk model, size, and type.
+  disks
+  PCI Devices on Node Details
+  The node details page now includes a dedicated section listing all PCI devices present on the node.
+  devices
+  Reset Node Unique Tokens
+  It is now possible to reset the unique token for a node, which can be useful for re-enrolling machines.
+  OIDC Token Cache Isolation for Kubeconfigs
+  Generated kubeconfigs now use isolated OIDC token caches, preventing token collisions between different kubeconfig users.
+  Pending Machines
+  Machines that were previously rejected can now be unrejected from the UI, allowing them to be accepted into Omni.
+  Rejected machines can also now be deleted directly from the UI.
+  SAML Logout Flow
+  Omni now implements the SAML logout flow, properly terminating sessions with the SAML identity provider on sign-out.
+  SQLite Metrics and Cleanup Counters
+  Metrics for the SQLite state backend have been exposed, along with cleanup counters for better observability.
+  Upgrade Parallelism
+  The upgrade parallelism for machine sets can now be configured via cluster templates and the UI, allowing operators to control how many machines are upgraded concurrently.
+  User and Service Account Activity Tracking
+  Omni now tracks the last activity time for users and service accounts, providing better visibility into account usage.
+  User Management gRPC Endpoints
+  New ManagementService gRPC endpoints have been added for user operations, enabling programmatic user management.
+  Configurable User and Service Account Limits
+  Operators can now enforce configurable limits on the number of users and service accounts that can be created in Omni.
+  Custom Vault Kubernetes Auth Mount Path
+  The Vault Kubernetes authentication mount path is now configurable, supporting non-default Vault configurations.
+  Contributors
+  - Edward Sammut Alessi
+  - Andrey Smirnov
+  - Utku Ozdemir
+  - Oguz Kilcan
+  - Artem Chernyshev
+  - Kevin Tijssen
+  - Noel Georgi
+  - Orzelius
+  - Mateusz Urbanek
+  - Pranav Patil
+  - Tim Jones
+  - Daddie0
+  - Daniil Kivenko
+  - Dmitrii Sharshakov
+  - Justin Garrison
+  - Steve Francis
+  - greenpsi
+  Changes
+  160 commits
+  - 69873dc8 release(v1.6.0): prepare release
+  - cf7d7524 feat: enforce configurable machine registration limit
+  - 711782b0 feat: warn about non-factory machines on extensions and kernel args
+  - dcf25297 docs: fix cluster create command in development docs
+  - be6862ac fix(frontend): cater for cmd/ctrl click on cluster/machine links
+  - 7d902897 fix: properly update infra provider connection status
+  - cf7be162 release(v1.6.0-beta.3): prepare release
+  - 6d52a697 feat: add hsts header for omni frontend
+  - 385c512d test: fix ConfigPatching test
+  - 72cb85a4 feat: add configurable bandwidth rate limiting for SideroLink tunnel
+  - 49795f0c feat(frontend): display appropriate message for talos apis when booting
+  - 3a19194f fix: add missing timeout to the backup download calls in secrets ctrl
+  - 017b0398 fix(frontend): fix cluster details layout for ultrawide and mobile
+  - febba94d test: fix flaky link cleanup test
+  - 118a2c7c chore(frontend): expose error codes on watches
+  - 28e85107 fix: calculate diff history and machine config out of applied config
+  - 7a153579 chore: remove go-jsonschema fork, use upstream v0.22.0
+  - 1e9b733c chore: bump deps, rekres
+  - 31e13e9e fix: do not release lock on apply config fails
+  - 91ec5eed fix(frontend): prevent -1 stats on home page
+  - cf8f58e6 fix(frontend): correct config patch routing for cluster machines
+  - cec99c31 feat(frontend): replace mount status data with volume status data
+  - 433fe435 chore: bump default talos version
+  - 23951c5c fix(frontend): reset support bundle state on close
+  - 7ed46ba9 feat(frontend): reintroduce apexcharts tree-shaking
+  - a566261b feat(frontend): allow specifying date range for audit logs
+  - 75b77f7f fix: skip schematic comparison for invalid schematic machines
+  - d4ae1460 release(v1.6.0-beta.2): prepare release
+  - 0b01dfdd fix: use localhost for internal kubeconfig server address
+  - 8ebaa095 fix(frontend): revert apexcharts tree-shaking
+  - a168a96e feat: add info for audit-log filter args
+  - afe41b09 release(v1.6.0-beta.1): prepare release
+  - e2adcb0b fix: close ssa manager after use
+  - 543cf70b chore: force SSA manifests sync mode for Talos >= 1.13
+  - 6a0da38f chore(frontend): bump dependencies
+  - ef3946cf fix: use uncached read for MachineExtensions in SchematicConfiguration
+  - 1e6be81f refactor: introduce uncached reader/writer package, fix flaky tests
+  - beb7dba8 release(v1.6.0-beta.0): prepare release
+  - a7b8b145 feat(frontend): update selected state of machineset labels
+  - 943a9ad4 fix(frontend): reset pagination when selectors change
+  - 05738937 feat: support setting upgrade parallelism in templates and UI
+  - a9f2937c feat: add OIDC token cache isolation for generated kubeconfigs
+  - 8a814d17 feat(frontend): use new resource label colors
+  - 0cb34323 refactor(frontend): use tailwind classes instead of color variables
+  - 8a72a8ae refactor(frontend): don't interpolate resource label classes
+  - f8a42eeb chore: move graceful upgrades to the lowest level
+  - 6f0ca32f fix(frontend): truncate machine classes in cluster list
+  - 5bb4ad9d fix(frontend): fix pending manifests warning sidebar color
+  - 6d03fc7c feat: track user and service account last activity
+  - a6811877 refactor(frontend): create pagecontainer component to manage padding
+  - e7f7a8ee fix(frontend): re-add padding in cluster scoped for error case
+  - ed1ebe35 fix: enhance SAML handler startup error
+  - a907c311 fix: properly select extensions when they're defined for cluster/ms lvl
+  - 66dbbdc6 feat(frontend): add instructions for adding machines
+  - 51747657 chore: update LICENSE
+  - 2372684a feat(frontend): show pci devices on node details
+  - 823af623 fix(frontend): fix unintented icon button size overrides
+  - b5076c19 feat: implement saml logout flow
+  - e57b7f5b chore(frontend): bump storybook dependencies
+  - 5d13f4ba chore(frontend): add uncategorised vue lint rules
+  - 415111c7 chore(frontend): update eslint related dependencies
+  - 05957580 chore(frontend): add lint rule for scoped styles
+  - f361fa73 chore: bump deps
+  - ba578e60 feat(frontend): move cluster scale pencil edit to a modal
+  - 7b1de4f0 feat(frontend): show talos and k8s versions in the cluster list
+ReleaseNotesUrl: https://github.com/siderolabs/omni/releases/tag/v1.6.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
