@@ -1,0 +1,78 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: max-sixty.worktrunk
+PackageVersion: v0.48.0
+PackageLocale: en-US
+Publisher: max-sixty
+PublisherUrl: https://github.com/max-sixty
+PublisherSupportUrl: https://github.com/max-sixty/worktrunk/issues
+PackageName: worktrunk
+PackageUrl: https://github.com/max-sixty/worktrunk
+License: MIT OR Apache-2.0
+LicenseUrl: https://github.com/max-sixty/worktrunk/blob/HEAD/LICENSE
+ShortDescription: A Git worktree manager for trunk-based development
+Description: |-
+  worktrunk (wt) is a Git worktree manager designed for trunk-based development workflows.
+  It simplifies creating, switching between, and managing Git worktrees, making it easy to
+  work on multiple features or branches simultaneously without the overhead of stashing
+  or switching branches in a single working directory.
+Tags:
+- cli
+- git
+- git-worktree
+- rust
+- terminal
+- worktree
+ReleaseNotes: |-
+  Release Notes
+  Improved
+  - --format=json extends to seven more commands: wt step rebase, wt step push, wt step commit, wt step squash, wt step relocate, wt step copy-ignored, and wt hook show now accept --format=json. Shapes follow the existing pattern (additive on stdout; human prose stays on stderr) and use stable snake_case outcome discriminators where the result has multiple variants. (#2560)
+  - wt step commit and wt step squash gain --dry-run: Renders the prompt, prints the shell invocation that would call the LLM, calls the LLM and prints the generated message in three labeled sections (PROMPT, COMMAND, MESSAGE), then exits without staging, running hooks, or committing. For commit, --stage is honored against a temporary index — the previewed prompt matches what a real run would send the LLM, but the user's real index is never touched. --show-prompt is now hidden from --help but kept working for piping the rendered prompt to another LLM. (#2557)
+  - New dirname and basename template filters: Two new filters expose Path::parent and Path::file_name, enabling path traversal that previous filters couldn't express. They unblock the bare-repo-in-hidden-directory layout (myproject/.git), where {{ repo }} resolves to .git: users can write {{ repo_path | dirname | basename }} to recover myproject. (#2592, #2605, thanks @seakayone for reporting #1279 and @Xilis for raising the parent_dir question)
+  - New [remove] delete-branch config option: Setting delete-branch = false defaults wt remove to keeping branches, equivalent to passing --no-delete-branch every time. CLI flags still override the config either direction. (#2589, thanks @jameslairdsmith for #2587)
+  - wt-perf timeline subcommand for trace capture: One command runs wt, captures stderr, parses [wt-trace] records, and prints a column-aligned text timeline (sorted by start time, with subprocess totals and externally-measured wall) or emits Chrome Trace Format JSON for Perfetto. Replaces the previous RUST_LOG=debug wt … 2>&1 | wt-perf trace > trace.json dance. (#2558)
+  - wt list skips redundant merge-tree probes on dirty worktrees: For dirty worktrees with no unmerged entries, the dirty-tree probe is authoritative and the HEAD-only probe is skipped — one merge-tree subprocess per dirty row instead of two. The dirty probe also reflects the current working state, so when uncommitted changes resolve a HEAD conflict, wt list no longer reports it as conflicting. (#2602)
+  - Faster alias dispatch: Two changes compound to cut warm alias-dispatch latency by ~25 ms — Repository::prewarm overlaps the three independent pre-dispatch reads (rev-parse, git config, user-config TOML) on scoped threads instead of running them in series, and build_hook_context only executes the four shell-out blocks (default_branch, primary_worktree, commit/short_commit, remote/remote_url/upstream) when the alias body actually references those template variables. (#2556, #2573)
+  - Short-SHA display honors core.abbrev: Sites that abbreviated a commit SHA previously sliced &sha[..7] or ran ad-hoc git rev-parse --short calls — 7-char prefixes regularly collide in larger repos and none of the slicing sites respected core.abbrev. The step commit / step squash success lines, the step push --no-ff "Merged to" line, the {{ short_commit }} template variable, post-remove hook context, the safety-backup ref display, the orphan-check (detached <sha>) label, and wt list row display all route through one canonical helper now. (#2576, #2577, #2584)
+  - Shell-integration hint escalates after repeat showings: worktrunk.hints.<name> migrates from "true" to an integer counter so the system tracks how many times a hint has been displayed. After 5+ displays of the shell-integration install hint, it appends a wt config show pointer so users who keep seeing it can investigate why their wrapper isn't intercepting. Legacy "true" values parse as 0, so the next display normalises to 1; first-time-skip behaviour is unchanged. (#2603)
+  - Cleaner wt config show shell-integration section for new users: Several follow-ups smooth the section's first impression. "Not configured" rows render as peer status lines (○) with bold shell name, matching Already configured and Skipped, instead of looking like a sub-bullet. The type wt verification hint only fires under the user's actual shell, not under every configured shell. On a stock zsh-only macOS, bash / fish / nu no longer render four Skipped; ~/.foorc not found rows — a new Shell::is_installed() PATH lookup filters them unless the binary is present. The status text now distinguishes "not configured" (no working integration anywhere) from "not active" (installed but not loaded in this session), with the install hint moved directly under the warning, and the Skipped row's shell name renders bold to match other status rows. (#2562, #2572, #2574, #2579)
+  Fixed
+  - wt step prune no longer trips a debug_assert on multi-line git errors: When git config failed mid-prune, the multi-line stderr propagated as a top-level anyhow message with an empty chain — exactly the case print_command_error's debug_assert!(false, "Multiline error without context") is designed to nag on. Debug builds (including cargo test) exited 101 instead of rendering the error. Targeted .context(...) wrappers on the prune call sites route prune errors through the structured rendering path. (#2567)
+  - wt config update no longer prints a redundant wt config update self-suggestion: Every wt invocation against a deprecated config emitted a deprecation warning followed by a to apply updates, run wt config update hint — silly when the user was already running wt config update. The update command latches warning suppression before Repository::prewarm, then renders per-pattern warnings inline alongside its diff. --print is also fully silent on stderr now, matching its pipe-friendly intent. (#2590)
+  - wt config show iterates PowerShell uniformly with other shells: PowerShell's status row went through a separate code path, producing a slightly different layout on Windows than on Unix. The shell loop now iterates the full set uniformly, so PowerShell renders the same way as bash / zsh / fish / nu. (#2581)
+  Internal
+  - Library API rework (Breaking library API): cargo-semver-checks reports several breaking changes — removed public exports (worktrunk::git::interrupt_exit_code / worktrunk::git::exit_code in #2611, worktrunk::shell_exec::trace_instant in #2554, struct worktrunk::config::LoadedConfigs in #2573); changed parameter count (worktrunk::config::format_alias_variables now takes 2 parameters instead of 1, in #2556); new remove field on ResolvedConfig, UserConfig, and UserProjectOverrides (#2589).
+  - Typed error variants gain a Diagnostic trait: Display is now a single-line label suitable for embedding in format! strings, JSON output, or log files; Diagnostic::render produces the styled multi-line block (emoji, color, gutter, follow-up hints). Implemented for GitError, WorktrunkError, HookErrorWithHint, TemplateExpandError, and CommandError. The renderer in format_command_error walks the anyhow chain via try_render_diagnostic once instead of per-type downcast branches. (#2580, #2611)
+  - Trace spans carry dynamic context: Alias execution spans carry the alias name (try_alias:deploy, run_alias:deploy); template_render carries the command label; the concurrent-group span moved inside the per-command map so each render emits its own record. Cmd::run / Cmd::pipe_into trace emission consolidated behind WtTraceLog::record_result. (#2554, #2555, #2613)
+  - HookLog::Shared for branch-agnostic logs: The trash sweep at sweep_stale_trash is repo-wide, but HookLog::path() always prefixed a branch segment, so the call site worked around this by passing a fake "wt" branch. The new Shared(InternalOp) variant resolves to {log_dir}/internal/{op}.log directly, alongside the other top-level shared logs. (#2595)
+  Install worktrunk 0.48.0
+  Install prebuilt binaries via shell script
+  curl --proto '=https' --tlsv1.2 -LsSf https://github.com/max-sixty/worktrunk/releases/download/v0.48.0/worktrunk-installer.sh | sh && wt config shell install
+  Install prebuilt binaries via powershell script
+  powershell -ExecutionPolicy Bypass -c "irm https://github.com/max-sixty/worktrunk/releases/download/v0.48.0/worktrunk-installer.ps1 | iex"; git-wt config shell install
+  Install prebuilt binaries via Homebrew
+  brew install worktrunk && wt config shell install
+  Download worktrunk 0.48.0
+  ────────────────────────────────────────────────┬───────────────────┬─────────────
+  File                                            │Platform           │Checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-aarch64-apple-darwin.tar.xz           │Apple Silicon macOS│checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-x86_64-apple-darwin.tar.xz            │Intel macOS        │checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-x86_64-pc-windows-msvc.zip            │x64 Windows        │checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-aarch64-unknown-linux-musl.tar.xz     │ARM64 MUSL Linux   │checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-x86_64-unknown-linux-musl.tar.xz      │x64 MUSL Linux     │checksum
+  ────────────────────────────────────────────────┴───────────────────┴─────────────
+  Install via Cargo
+  cargo install worktrunk && wt config shell install
+  Install via Winget (Windows)
+  winget install max-sixty.worktrunk && git-wt config shell install
+  Install via AUR (Arch Linux)
+  paru worktrunk-bin && wt config shell install
+ReleaseNotesUrl: https://github.com/max-sixty/worktrunk/releases/tag/v0.48.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
