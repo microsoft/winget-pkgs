@@ -25,7 +25,8 @@ Use this checklist before you open your first manifest PR to `microsoft/winget-p
    winget install --manifest <path-to-manifest>
    ```
 
-   > **Note:** `winget settings --enable LocalManifestFiles` requires elevation (run as administrator). On enterprise-managed devices, Group Policy may also block this setting. If you cannot enable local manifests, use Windows Sandbox with `Tools\SandboxTest.ps1` instead (step 11).
+   > [!NOTE]
+   > `winget settings --enable LocalManifestFiles` requires elevation (run as administrator). On enterprise-managed devices, Group Policy may also block this setting. If you cannot enable local manifests, use Windows Sandbox with `Tools\SandboxTest.ps1` instead (step 11).
 
 11. If possible, test in Windows Sandbox with [`Tools\SandboxTest.ps1`](tools/SandboxTest.md).
 12. If your PR is a routine manifest submission, you do **not** need a separate issue first. Open an issue when you are proposing a repo change, discussing a policy/spec question, or reporting a broader problem.
