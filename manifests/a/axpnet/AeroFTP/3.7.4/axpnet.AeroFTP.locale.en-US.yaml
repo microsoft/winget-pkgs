@@ -1,0 +1,80 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: axpnet.AeroFTP
+PackageVersion: 3.7.4
+PackageLocale: en-US
+Publisher: axpnet
+PublisherUrl: https://github.com/axpnet
+PublisherSupportUrl: https://github.com/axpnet/aeroftp/issues
+Author: axpnet
+PackageName: AeroFTP
+PackageUrl: https://github.com/axpnet/aeroftp
+License: GPL-3.0
+LicenseUrl: https://github.com/axpdev-lab/aeroftp/blob/HEAD/LICENSE
+ShortDescription: A modern, multi-protocol file manager and FTP client with integrated AI, cloud sync, and military-grade encryption.
+Description: |-
+  AeroFTP is an open-source, multi-protocol file manager built with Tauri 2 (Rust + React 18 + TypeScript).
+  It supports 16 protocols (FTP, FTPS, SFTP, WebDAV, S3, Google Drive, Dropbox, OneDrive, MEGA, Box, pCloud, Azure Blob, 4shared, Filen, Zoho WorkDrive, and Cryptomator vaults),
+  features an AI assistant with 45 tools and 15 LLM providers, military-grade encrypted vaults (AES-256-GCM-SIV + Argon2id),
+  bidirectional real-time sync, a built-in code editor, SSH terminal, and media player with visualizers.
+  Available in 47 languages with 4 themes.
+Moniker: aeroftp
+Tags:
+- cloud-storage
+- encryption
+- file-manager
+- file-transfer
+- ftp
+- ftp-client
+- multi-protocol
+- rust
+- s3
+- sftp
+- sync
+- tauri
+- webdav
+ReleaseNotes: |-
+  [3.7.4] - 2026-05-07
+  Filen reliability, provider polish and Windows Auto-Update parity
+  Added
+  - Activity Log is reachable from the View menu: the Activity Log panel is now exposed through the desktop menu, making authentication, transfer and provider diagnostics easier to inspect without hunting through secondary surfaces.
+  - Media providers are first-class in the UI: media-oriented services added across the recent provider wave are surfaced consistently in provider discovery and navigation so ImageKit, Uploadcare, Cloudinary and related integrations are no longer hidden behind generic cloud categories.
+  - Cloudinary provider integration: Cloudinary joins the media-provider set alongside ImageKit and Uploadcare, keeping the Home / Add Service flow consistent for image-CDN and media-storage backends.
+  - Tab.digital provider preset: Tab.digital is available as a Nextcloud-as-a-service preset with EU / GDPR positioning, first-run health metadata and provider-card polish.
+  - Backblaze B2 usability upgrades: bucket-level quota, share-link UI and a clearer hide-vs-permanent-delete model are exposed so users can recover soft-deleted files instead of treating every delete as final.
+  - AeroFTP file icons and associations: .aeroftp and .aeroftp-keystore receive dedicated mimetype icons and bundle wiring, matching the existing AeroVault document treatment.
+  Changed
+  - Filen Desktop local bridges are first-class: local WebDAV and S3 bridge profiles are treated as intended local integrations instead of fragile custom endpoints.
+  - Provider HTTP transfers share a 30 minute read timeout: long-running cloud reads now use a unified timeout policy, reducing false failures on large downloads and slow links.
+  - OneDrive nested mkdir and Drime listing behavior are more predictable: nested folder creation and listing code paths now avoid provider-specific side effects that could surprise users during sync or browse operations.
+  Fixed
+  - Filen v3 upload reliability: uploads now use the required 1 MiB AES-GCM chunking model, retry individual chunks when response-body decoding flakes, and open the dedicated 2FA prompt on Filen TOTP challenges.
+  - CLI / MCP WebDAV profile mapping: saved webdavScheme values now map to tls_mode, so CLI and MCP connections honor the same HTTP/HTTPS behavior as the GUI.
+  - Nextcloud / ownCloud WebDAV navigation: drill-down and URL-bar population are fixed for WebDAV providers that expose Nextcloud / ownCloud style paths.
+  - Benchmark privacy and shell behavior: aeroftp-cli benchmark sanitizes PII before assertions and ignores SIGPIPE during sweeps, preventing noisy failures when output is piped.
+  - Provider preset polish: Tab.digital no longer carries stale basePath / contactVerified defaults, the IntroHub card detects its WebDAV variant correctly, and related OCS badge colors are aligned.
+  Windows Auto-Update parity (MSI silent, NSIS silent, Portable in-place)
+  Added
+  - Portable Windows ZIP becomes a complete portable build (#176): the AeroFTP-X.Y.Z-portable-windows-x64.zip artifact previously contained only AeroFTP.exe. It now ships with portable.marker, README.txt, and LICENSE.txt alongside the executable. The marker file is the canonical detection signal for portable mode and survives any folder the user picks (USB drive, network share, custom path).
+  - Portable data directory honesty: when portable.marker is present next to AeroFTP.exe, all per-app data (config, cache, AeroAgent SQLite databases, file tags, vault credentials, plugins, speech models, agent memory, chat history) is written to <exe-dir>\data\ instead of %APPDATA%. Copy the portable folder to another machine and your saved servers, AeroVault, and AeroAgent state come with it. Standard MSI / NSIS installs continue to use %APPDATA% exactly as before, no migration, no behaviour change for existing users.
+  Changed
+  - Windows auto-updater installs silently and restarts automatically across all three formats: previously, even when an update was downloaded and Sigstore-verified, the user had to click "Open file manager" and run the installer manually. Now the updater dispatches through a transient .cmd helper in %TEMP% spawned with CREATE_NO_WINDOW | DETACHED_PROCESS that:
+    - MSI: runs msiexec /i ... /qb /norestart REBOOT=ReallySuppress (basic UI with progress dialog, no prompts), then relaunches AeroFTP.
+    - NSIS (*-setup.exe): runs setup.exe /S (silent install: Tauri's NSIS template + the existing installer/hooks.nsh already handle silent mode for PATH registration, .aerovault association, VC++ runtime check), then relaunches.
+    - Portable: extracts the new ZIP into %TEMP%, renames the running AeroFTP.exe to *.old (Windows allows rename of a running exe but not delete), moves the new exe into place, copies the new portable.marker / README.txt / LICENSE.txt over the old ones, relaunches with --post-update-cleanup <old-exe-path>. The new process retries delete-with-backoff for up to 30 s and falls back to MoveFileEx(MOVEFILE_DELAY_UNTIL_REBOOT) as a last resort.
+    All three paths run with a 2 s parent-exit grace and 5-attempt move retry to survive transient locks from antivirus scanners.
+  - Windows install-format detection is now deterministic: detect_install_format() for Windows replaces the old "in Program Files implies MSI, otherwise EXE" path heuristic with a three-stage cascade: marker file, registry scan of HKLM / HKCU\Software\Microsoft\Windows\CurrentVersion\Uninstall\* for an AeroFTP DisplayName whose InstallLocation matches the running exe (with WindowsInstaller=1 distinguishing MSI from NSIS), path heuristic (logged as warning). MSI users no longer get accidentally classified as NSIS when they install to a non-default folder.
+  Fixed
+  - Portable users were being pointed at the NSIS installer (#176): the asset matcher returned the *-setup.exe artifact for any non-Program-Files install. A user running the portable build who clicked "Update" got the NSIS wizard and ended up with two parallel copies of AeroFTP on disk. The matcher now anchors on -setup.exe for the NSIS format and on portable*.zip for the portable format, with no ambiguity.
+  Security
+  - portable.marker cannot be forged into a privilege gain: the marker only changes where data is written and which artifact is downloaded. It does not unlock any privileged operation, bypass any sandbox, or alter the Sigstore verification step (which still re-verifies the bundle before invoking the helper). The portable.zip Sigstore bundle (AeroFTP-X.Y.Z-portable-windows-x64.zip.sigstore.json) has been published since v3.6.x and the updater consumes it on the same code path as MSI/NSIS bundles.
+  - The .cmd helper is staged in per-user %TEMP% and rejects ZIP path-traversal: extraction validates entry names against .., absolute paths, and drive prefixes before writing anywhere on disk.
+  Downloads:
+  - Windows: .msi installer, .exe, or .zip portable (no installation required)
+  - macOS: .dmg disk image
+  - Linux: .deb, .rpm, .snap, or .AppImage
+  Download AeroFTP
+ReleaseNotesUrl: https://github.com/axpdev-lab/aeroftp/releases/tag/v3.7.4
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

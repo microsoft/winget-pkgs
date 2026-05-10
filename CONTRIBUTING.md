@@ -75,6 +75,8 @@ If you don't have any additional info/context to add but would like to indicate 
 
 Authoring a manifest is not intended to be a painful experience. We have been working to make it easier. Sometimes this is to our own detriment. Please take the time to read our guidance on [authoring manifests](/doc/Authoring.md). This will save everyone time, and it will reduce the frustration of other Windows users who are just trying to get their job done, or have some fun.
 
+If this is your first manifest submission, review the [first-time contributor checklist](/doc/FirstContribution.md) before opening a PR. Routine manifest submissions do not require a separate issue first, but they must stay limited to one package version per PR and should not include non-manifest file changes.
+
 ## Contributing fixes / features
 
 For those able & willing to help fix issues and/or implement features ...

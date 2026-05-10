@@ -1,0 +1,126 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: KeeperSecurity.Commander
+PackageVersion: 18.0.0
+PackageLocale: en-US
+Publisher: Keeper Security, Inc.
+PublisherUrl: https://www.keepersecurity.com/
+PublisherSupportUrl: https://github.com/Keeper-Security/Commander/issues
+PackageName: Keeper Commander
+PackageUrl: https://github.com/Keeper-Security/Commander
+License: MIT
+LicenseUrl: https://github.com/Keeper-Security/Commander/blob/HEAD/LICENSE
+Copyright: Copyright (c) Keeper Security, Inc.
+CopyrightUrl: https://github.com/Keeper-Security/Commander/blob/master/LICENSE
+ShortDescription: Keeper Commander is a python-based CLI and SDK interface to the Keeper Security platform. Provides administrative controls, reporting, import/export and vault management.
+Description: Keeper Commander is a command-line and SDK interface to Keeper® Password Manager. Commander can be used to access and control your Keeper vault, perform administrative functions (such as end-user onboarding and data import/export), launch remote sessions, rotate passwords, eliminate hardcoded passwords and more. Keeper Commander is an open source project with contributions from Keeper's engineering team and partners.
+Moniker: keeper
+Tags:
+- cli
+- password
+- password-manager
+- secrets
+- security-tools
+ReleaseNotes: |-
+  Keeper Commander 18.0.0 — Release Notes
+  This is a major release headlined by KeeperDrive — a brand-new command suite for managing folders, records, sharing, and permissions through the Keeper API. It also adds KCM/Guacamole import for PAM, JSON output for rotation status, automation modes for tunnels, and a new way to add KSM tokens to existing applications.
+  KeeperDrive
+  A new kd-* command family for working with KeeperDrive folders, records, sharing, and permissions. All commands require authentication and a synced vault. Visibility is gated behind a feature flag so the commands appear only for permitted users.
+  The full reference is in KEEPER_DRIVE_COMMANDS.md.
+  Permission roles
+  The five sharing roles supported across folder and record commands:
+  ─────────────────────┬─────────────────────────────────────────────────
+  Role                 │Description
+  ─────────────────────┼─────────────────────────────────────────────────
+  viewer               │Read-only access
+  ─────────────────────┼─────────────────────────────────────────────────
+  shared-manager       │Can manage access grants
+  ─────────────────────┼─────────────────────────────────────────────────
+  content-manager      │Can add / edit records
+  ─────────────────────┼─────────────────────────────────────────────────
+  content-share-manager│Can add / remove / edit records and manage access
+  ─────────────────────┼─────────────────────────────────────────────────
+  full-manager         │Full control
+  ─────────────────────┴─────────────────────────────────────────────────
+  Folder commands
+  - kd-mkdir — create a folder. Supports --color {none,red,orange,yellow,green,blue,gray} and --no-inherit for permission inheritance. // escapes a literal / inside a folder name.
+  - kd-rndir — rename a folder, change its color, or toggle permission inheritance (--inherit / --no-inherit). -q suppresses the confirmation message.
+  - kd-list — list KeeperDrive folders and records from the local cache. --folders / --records filters, --format {table,csv,json} and --output FILE for export. Each row reports share status and accessor count.
+  - kd-rmdir — remove folders. Always shows an impact preview before prompting. Modes: folder-trash (default, recoverable) or delete-permanent (irreversible). Supports --force, --dry-run, --quiet, max 100 folders per invocation.
+  - kd-share-folder — grant or remove access (-a {grant,remove}) to one or more folders for one or more recipients (-e is repeatable). @existing / @current targets all current users in the folder. Time-limited shares via --expire-at <ISO> or --expire-in <30d|6mo|1y|24h|30mi|never>.
+  Record commands
+  - kd-record-add — create a record. Required: -t TITLE, -rt TYPE. Optional: -n NOTES, --folder. Fields use type=value or type.label=value notation; run with --syntax-help for the full grammar.
+  - kd-record-update — update title, type, notes, or field values for one or more records (-r is repeatable).
+  - kd-rm — remove records with an impact preview. Operations:
+    - owner-trash (default) — move to owner's trash, recoverable.
+    - folder-trash — remove from a folder and trash.
+    - unlink — remove from a specific folder only (requires --folder).
+      Supports --force, --dry-run, max 500 records per invocation.
+  - kd-ln — link a record into a folder (kd-ln <record> <folder>) without removing it from its current location.
+  - kd-shortcut list / kd-shortcut keep — manage records that appear in more than one folder. list shows multi-folder records with --format {table,csv,json} and --output; keep retains a record in one folder and unlinks it from all others, with -f to skip the confirmation prompt.
+  Sharing commands
+  - kd-share-record — single command for grant / revoke / transfer-ownership via -a {grant,revoke,owner}. Required: -e EMAIL (repeatable), -r ROLE for grant. Supports -R/--recursive for bulk sharing across a folder tree, --contacts-only, --force, --dry-run, and --expire-at / --expire-in. -a grant on an already-shared record updates the existing role.
+  - kd-record-permission — bulk update sharing across all records in a folder (and optionally sub-folders with -R). Required: -a {grant,revoke}, -r ROLE for grant. Always shows a change plan before executing. Supports --force and --dry-run.
+  - kd-transfer-record — transfer ownership of one or more records to another user. Irreversible — you lose access after the transfer.
+  Inspection commands
+  - kd-record-details — batch metadata (title, type, version, revision) for one or more records. --format {table,json}.
+  - kd-get — full details for a record or folder (fields, notes, access list). --format {detail,json}, -v/--verbose for a per-permission flag breakdown per accessor, --unmask to reveal masked values like passwords.
+  Cross-type validation (#2008)
+  Commands now validate that the target's type matches the operation (e.g. record-only commands reject folder UIDs, and vice versa) so a mistyped UID gets a clear error instead of a silent no-op.
+  PAM
+  pam project export (new)
+  Walks the vault graph for a given PAM project configuration UID and emits a JSON document directly re-importable by pam project import.
+  - Output schema matches PROJECT_IMPORT_JSON_TEMPLATE exactly (project, shared_folder_users, shared_folder_resources, pam_configuration, pam_data.{resources,users}).
+  - Resource UIDs derive deterministically from Keeper record UIDs, so re-imports across tenants are idempotent.
+  - sort_keys=True produces deterministic JSON suitable for git diffs.
+  - --output FILE writes to disk; omitting prints to stdout.
+  - tool_version: "commander-export-1.0" is emitted to enable generator-aware behavior on the import side.
+  - Registered as the shortcut x under pam project.
+  pam project kcm-import / pam project kcm-cleanup (new)
+  Import connections directly from a KCM / Guacamole database into Keeper PAM.
+  - Docker auto-detect.
+  - Group filtering.
+  - Adaptive throttling.
+  - 150+ parameter mappings across SSH, RDP, VNC, Telnet, HTTP, MySQL, PostgreSQL, Oracle, SQL Server, LDAP, and Kubernetes protocols.
+  - Round-trip support: KCM-imported records reference users by title in pam_settings.connection.launch_credentials / administrative_credentials. pam project export now resolves title-shaped values against a per-export title-to-UID index built once from record_cache, so exporting and re-importing a KCM project preserves the user list. 22-character UID-shaped values are still accepted as direct UIDs for back-compat with hand-edited records.
+  pam tunnel automation modes (#1993)
+  Non-interactive tunnel modes for CI/CD, systemd, and scripts, plus a cross-process session registry so pam tunnel list / pam tunnel stop work across Commander processes.
+  PAMTunnelStartCommand:
+  - --foreground — run in the current process; exit on Ctrl-C or --timeout.
+  - --background — spawn a detached child; the parent returns immediately.
+  - --run "<cmd>" — start the tunnel, run the command, tear the tunnel down on exit.
+  - --timeout / --pid-file for lifecycle control.
+  - Mutual-exclusivity checks; safe defaults when no TTY (batch mode).
+  PAMTunnelListCommand / PAMTunnelStopCommand:
+  - Surface tunnels owned by other processes via the file registry.
+  - stop sends SIGTERM (Unix) / TerminateProcess (Windows) and cleans the registry row.
+  New keepercommander/commands/tunnel_registry.py:
+  - Atomic JSON writes at <tmp>/keeper-tunnel-sessions/<pid>.json.
+  - Stale-entry cleanup, duplicate-bind detection (host/port aware).
+  - 0o700 directory permissions on POSIX.
+  pam launch improvements (#2009)
+  - Surfaces involuntary terminations to the user. KeeperAI close prints a red Session terminated by KeeperAI.; admin close prints a yellow Session terminated by administrator.; other involuntary reasons print a single Session ended (<reason>). info line; normal/client-initiated closes remain silent.
+  - Distinct exit codes in batch mode. keeper pam launch UID raises SystemExit(40) for KeeperAI termination and SystemExit(41) for admin termination so callers can branch. In the interactive shell, the prompt is restored without tearing the shell down.
+  - Fixed close-reason name table in python_handler — previously only mapped codes 0-6 (with the wrong name for code 0) and missed every reason added since, including the two we now act on.
+  - Fuzzy record resolution. Falls back to a case-insensitive substring match on PAM record titles and any host / pamHostname field when UID / path / exact-title yield nothing. Multiple matches show a numbered picker (or list-and-exit on non-TTY).
+  pam rotation info --format=json (KC-1230)
+  Adds JSON output to PAMRouterGetRotationInfo via the shared json_output_parser (--format {table,json}, --output FILE).
+  JSON fields when online:
+  status, ready_to_rotate, pam_config_uid, node_id, gateway_name,
+  gateway_uid, admin_resource_uid, password_complexity,
+  password_complexity_detail, schedule_type, schedule_data,
+  disabled, script_name
+  Non-online: status, ready_to_rotate=false. Same pattern applied to discoveryrotation_v1.py for parity.
+  Secrets Manager
+  secrets-manager token add <APP_UID_OR_NAME> (new)
+  A thin wrapper around the existing client add flow so operators and automation scripts can add one-time access tokens to an existing KSM application without recreating it. Closes the gap where the only token-generation path was app creation.
+  Supported flags (same as client add):
+  --count, --unlock-ip, --first-access-expires-in-min,
+  --access-expire-in-min, --name, --config-init, --return-tokens
+  Implementation delegates entirely to KSMCommand.add_client() — no new API surface.
+  Fixes
+  - pam project import rejects duplicate UIDs. process_data now collects all UID values assigned to resources and nested users after the UID-normalization loop and aborts with a clear error if any UID appears more than once. Duplicate UIDs produced an ambiguous dependency graph and led to silent link errors during record creation. Externally supplied valid UIDs that are unique continue to work unchanged.
+ReleaseNotesUrl: https://github.com/Keeper-Security/Commander/releases/tag/v18.0.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

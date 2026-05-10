@@ -1,0 +1,48 @@
+# Created with YamlCreate.ps1 v2.7.1 $debug=NVS1.CRLF.7-6-1.Win32NT
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: appergb.OpenLess
+PackageVersion: 1.2.11
+PackageLocale: zh-CN
+Publisher: openless
+PublisherUrl: https://github.com/appergb
+PublisherSupportUrl: https://github.com/appergb/openless/issues
+# PrivacyUrl:
+# Author:
+PackageName: OpenLess
+PackageUrl: https://github.com/appergb/openless
+License: MIT
+LicenseUrl: https://github.com/appergb/openless/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 OpenLess contributors
+# CopyrightUrl:
+ShortDescription: 按住快捷键说话，松开即得润色后的文字
+Description: |-
+  OpenLess 是一个跨平台（macOS & Windows）语音输入应用，对标 Typeless、Wispr Flow、Lazy、Superwhisper 等商业语音输入工具的 完全开源 替代品。
+  把光标放在 ChatGPT、Claude、Cursor、Notion、邮件、聊天框任意输入框里，按一次全局快捷键说话——OpenLess 会录音、转写、按你选的模式润色，把结果直接插入光标位置。插入失败时会自动复制到剪贴板，尽量保证「你说过的话不丢」。
+  不像那些只把语音转成「逐字稿」的输入法，OpenLess 的核心模式是 AI prompt 模式：你只管乱讲，它自动补上结构、列出约束、整理出有上下文的 prompt，复制粘贴就能直接喂给 ChatGPT / Claude / Cursor。
+# Moniker:
+Tags:
+- 听写
+- 语音识别
+- 语音转文字
+- 转写
+- 转录
+ReleaseNotes: |-
+  🛠 修复
+  - Windows 划词追问 preset 用 Ctrl+Shift+ 替代 Cmd+Shift+（#119 follow-up）：之前 SelectionAsk 设置页 dropdown 全是 Cmd+Shift+;/// ...（macOS 命名），Windows 用户选了之后后端把 cmd 翻译成 Win 键 → Win+Shift+; 大概率被 OS 占用 / 注册失败 → 浮窗永远不弹。现在按 detectOS() 平台分流：
+    - macOS：Cmd+Shift+; / Cmd+Shift+/ / Cmd+Shift+, / Cmd+Shift+.（不变）
+    - Windows：Ctrl+Shift+; / Ctrl+Shift+/ / Ctrl+Shift+, / Ctrl+Shift+.
+  为什么不用 Fn+Shift+/ (评估过)
+  Windows 的 Win32 全局热键 API（RegisterHotKey 和 WH_KEYBOARD_LL）收不到 Fn 的虚拟键码——Fn 是硬件级 modifier，在 OS 内核 / 键盘驱动之下被吃掉。Linux 同理。写进 preset 用户也注册不上。Cmd 在 Windows 上的对等键就是 Ctrl（参见 macOS 的 Cmd+C ↔ Windows 的 Ctrl+C）。
+  备注
+  - 对 macOS 用户：本版本无功能变化，跟 v1.2.10 行为一致；Sparkle 自动更新跳过即可。
+  - 对 Windows 用户：升级后第一次打开划词追问设置页会看到全新的 Ctrl+Shift+ preset 列表；旧 prefs 里如有不兼容的 cmd+shift+ 绑定会自动落回 list 第一项。
+  - 后端 types.rs::QaHotkeyBinding::default() 早就按平台返回正确默认（Windows=ctrl+shift+;），本次只补前端 dropdown 的平台分流。
+
+  Full Changelog: https://github.com/appergb/openless/compare/v1.2.10-tauri...v1.2.11-tauri
+ReleaseNotesUrl: https://github.com/appergb/openless/releases/tag/v1.2.11-tauri
+# PurchaseUrl:
+# InstallationNotes:
+# Documentations:
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

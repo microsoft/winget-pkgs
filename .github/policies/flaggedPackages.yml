@@ -13,21 +13,21 @@ configuration:
           - isAction:
               action: Opened
           - or:
-              # Filezilla Client/Server
+              # Filezilla Client/Server (Filezilla.*)
               - titleContains:
                   pattern: Filezilla
                   isRegex: False
               - bodyContains:
                   pattern: Filezilla
                   isRegex: False
-              # CheatEngine
+              # *.CheatEngine
               - titleContains:
                   pattern: CheatEngine
                   isRegex: False
               - bodyContains:
                   pattern: CheatEngine
                   isRegex: False
-              # GitCredentialManager
+              # *.GitCredentialManager
               - titleContains:
                   pattern: GitCredentialManager
                   isRegex: False
@@ -35,19 +35,21 @@ configuration:
                   pattern: GitCredentialManager
                   isRegex: False
               # ranpha.LavFiltersMegamix
-              - titleContains:
-                  pattern: ranhpa
-                  isRegex: False
-              - bodyContains:
-                  pattern: ranhpa
-                  isRegex: False
-              - titleContains:
-                  pattern: LavFiltersMegamix
-                  isRegex: False
-              - bodyContains:
-                  pattern: LavFiltersMegamix
-                  isRegex: False
-              # Mariocube
+              - and:
+                - titleContains:
+                    pattern: ranhpa
+                    isRegex: False
+                - titleContains:
+                    pattern: LavFiltersMegamix
+                    isRegex: False
+              - and:
+                - bodyContains:
+                    pattern: ranhpa
+                    isRegex: False
+                - bodyContains:
+                    pattern: LavFiltersMegamix
+                    isRegex: False
+              # Mariocube.*
               - titleContains:
                   pattern: Mariocube
                   isRegex: False
@@ -98,6 +100,12 @@ configuration:
                     isRegex: False
                 - titleContains:
                     pattern: GhostScript
+              - and:
+                - bodyContains:
+                    pattern: ArtifexSoftware
+                    isRegex: False
+                - bodyContains:
+                    pattern: GhostScript
               # PuloversMacroCreator
               - titleContains:
                   pattern: PuloversMacroCreator
@@ -119,11 +127,11 @@ configuration:
               - bodyContains:
                   pattern: 3Kontakt
                   isRegex: False
-              # Black Desert
+              # *.BlackDesert
               - bodyContains:
                   pattern: .BlackDesert
                   isRegex: False
-              # Mozilla Maintenance Service
+              # Mozilla Maintenance Service (Mozilla.MaintenanceService)
               - and:
                 - titleContains:
                     pattern: Mozilla
@@ -144,6 +152,20 @@ configuration:
                 - titleContains:
                     pattern: CoolSoft
                     isRegex: False
+              # *.Zapret
+              - titleContains:
+                  pattern: Zapret
+                  isRegex: False
+              - bodyContains:
+                  pattern: Zapret
+                  isRegex: False
+              # uTorrent
+              - titleContains:
+                  pattern: "(?in)[Uμ]torrent"
+                  isRegex: true
+              - bodyContains:
+                  pattern: "(?in)[Uμ]torrent"
+                  isRegex: true
         then:
           - addLabel:
               label: Package-Flagged
@@ -154,39 +176,43 @@ configuration:
 
                 The package in your PR appears to be flagged. See the table below for more information. If it is not clear why you are seeing this message, please open a [new issue](https://github.com/microsoft/winget-pkgs/issues/new) inquiring about the status of the package.
 
-                | Package Name                     | Block Reason                                                                                                                                                                             | Reference                   |
+                | Package Name                     | Block Reason                                                                                                                                                                           | Reference                   |
 
-                | -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------- |
+                | -------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------- |
 
-                | Filezilla Client                 | Redistribution not allowed by license                                                                                                                                                    | #78578                      |
+                | Filezilla Client                 | Redistribution not allowed by license                                                                                                                                                  | #78578                      |
 
-                | Filezilla Server                 | Redistribution not allowed by license                                                                                                                                                    | #78578                      |
+                | Filezilla Server                 | Redistribution not allowed by license                                                                                                                                                  | #78578                      |
 
-                | CheatEngine                      | Installs PUA                                                                                                                                                                             | #61767                      |
+                | CheatEngine                      | Installs PUA                                                                                                                                                                           | #61767                      |
 
-                | Git GitCredentialManager         | Publisher has requested removal                                                                                                                                                          | #100542                     |
+                | Git GitCredentialManager         | Publisher has requested removal                                                                                                                                                        | #100542                     |
 
-                | Ranpha LavFiltersMegamix         | Package is known to be an unofficial redistribution which hijacks the official package                                                                                                   | #95155                      |
+                | Ranpha LavFiltersMegamix         | Package is known to be an unofficial redistribution which hijacks the official package                                                                                                 | #95155                      |
 
-                | Mariocube - Any                  | Publisher is known to distribute packages unofficially with misrepresentation of origin                                                                                                  | #109796 / #103191 (comment) |
+                | Mariocube - Any                  | Publisher is known to distribute packages unofficially with misrepresentation of origin                                                                                                | #109796 / #103191 (comment) |
 
-                | aloneguid (Ivan G) Browser Tamer | Publisher has requested removal                                                                                                                                                          | #115266 (comment)           |
+                | aloneguid (Ivan G) Browser Tamer | Publisher has requested removal                                                                                                                                                        | #115266 (comment)           |
 
-                | FFXIV Teamcraft                  | Publisher has requested removal                                                                                                                                                          | #115369                     |
+                | FFXIV Teamcraft                  | Publisher has requested removal                                                                                                                                                        | #115369                     |
 
-                | ArtifexSoftware GhostScript      | Several versions of this package (<= 10.01.2) are affected by a critical security vulnerability. New PRs require attention to ensure that those versions are not added back to the repo. | #122294                     |
+                | ArtifexSoftware GhostScript      | Several versions of this package (≤10.01.2) are affected by a critical security vulnerability. New PRs require attention to ensure that those versions are not added back to the repo. | #122294                     |
 
-                | Pulovers Macro Creator           | Installs PUA                                                                                                                                                                             | #123889                     |
+                | Pulovers Macro Creator           | Installs PUA                                                                                                                                                                           | #123889                     |
 
-                | ALVR                             | Publisher has requested removal                                                                                                                                                          | #125124                     |
+                | ALVR                             | Publisher has requested removal                                                                                                                                                        | #125124                     |
 
-                | 3Kontakt                         | Publisher has requested removal (Multiple brands by multiple vendors, may cause conflicts)                                                                                               | #269259                     |
+                | 3Kontakt                         | Publisher has requested removal (Multiple brands by multiple vendors, may cause conflicts)                                                                                             | #269259                     |
 
-                | Black Desert                     | Publisher has requested removal                                                                                                                                                          | #343444                     |
+                | Black Desert                     | Publisher has requested removal                                                                                                                                                        | #343444                     |
 
-                | Mozilla Maintenance Service      | Publisher has requested removal                                                                                                                                                          | #361213                     |
+                | Mozilla Maintenance Service      | Publisher has requested removal                                                                                                                                                        | #361213                     |
 
-                | CoolSoft - Any                   | Publisher has requested to not redistribute their software                                                                                                                               | https://github.com/microsoft/winget-pkgs/issues/358413#issuecomment-4242137019 |
+                | CoolSoft - Any                   | Publisher has requested to not redistribute their software                                                                                                                             | #358413 (comment)           |
+
+                | Zapret - Any                     | Package is known to be malicious                                                                                                                                                       | #366274                     |
+
+                | uTorrent Web                     | Package is known to include PUA, as well as sponsored links to Elsagate                                                                                                                | #368872                     |
 
                 Template: msftbot/validationError/packageFlagged
 onFailure:

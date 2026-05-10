@@ -1,0 +1,32 @@
+# Created using wingetcreate 1.12.8.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: kts982.WinTUI
+PackageVersion: 2.7.2
+PackageLocale: en-US
+Publisher: kts982
+PublisherUrl: https://github.com/kts982
+PublisherSupportUrl: https://github.com/kts982/wintui/issues
+Author: Kostas T.
+PackageName: WinTUI
+PackageUrl: https://github.com/kts982/wintui
+License: MIT
+LicenseUrl: https://github.com/kts982/wintui/blob/main/LICENSE
+ShortDescription: Terminal UI for winget on Windows.
+Description: WinTUI is a terminal user interface for Windows Package Manager featuring a split-panel workspace for browsing, searching, installing, upgrading, and managing packages. Includes disk-persistent cache for instant startup, background refresh, integrated search with install queue, batch operations with a single UAC prompt, per-package rules and ignore filters, live command preview, system health checks, registry-driven cleanup tab with per-target sizing and elevated-helper integration, package list export and import for moving installs across machines, and a headless CLI mode for scripting.
+Moniker: wintui
+Tags:
+- winget
+- windows
+- tui
+- terminal
+- package-manager
+- cli
+ReleaseNotes: |-
+  - Bug fix: on systems with one or two pending upgrades whose package data is short, winget pads Version/Available/Source with single spaces instead of the usual ≥2-space gaps. The v2.7.1 column-aware parser folded those three headers into one cell ("Version Available Source"), reported "3-column upgrade table is not a known shape", and refused to populate the disk cache. The Health tab then showed "no cached scan yet" even right after a successful workspace scan, and cache.json was never written.
+  - The header parser now subdivides any cell whose whitespace-separated tokens all resolve through the locale dictionary, so tightly-packed English upgrade tables parse correctly. Korean "장치 ID" and other localized headers with intentional internal spaces are unaffected because their tokens don't individually resolve.
+  - Reliability: winget list and winget upgrade no longer run in parallel on cold start. Concurrent invocations race on a winget-internal lock and one returns 0x8a150001 with empty output ~50% of the time, which masked real upgrade results. Sequential is ~1s slower on first scan and reliable; the disk cache covers restart latency afterwards.
+  - No setting changes, no breaking changes, no new Win32 surface.
+ReleaseNotesUrl: https://github.com/kts982/wintui/releases/tag/v2.7.2
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
