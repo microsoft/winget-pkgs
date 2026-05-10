@@ -1,0 +1,77 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: axpnet.AeroFTP
+PackageVersion: 3.7.7
+PackageLocale: en-US
+Publisher: axpnet
+PublisherUrl: https://github.com/axpnet
+PublisherSupportUrl: https://github.com/axpnet/aeroftp/issues
+Author: axpnet
+PackageName: AeroFTP
+PackageUrl: https://github.com/axpnet/aeroftp
+License: GPL-3.0
+LicenseUrl: https://github.com/axpdev-lab/aeroftp/blob/HEAD/LICENSE
+ShortDescription: A modern, multi-protocol file manager and FTP client with integrated AI, cloud sync, and military-grade encryption.
+Description: |-
+  AeroFTP is an open-source, multi-protocol file manager built with Tauri 2 (Rust + React 18 + TypeScript).
+  It supports 16 protocols (FTP, FTPS, SFTP, WebDAV, S3, Google Drive, Dropbox, OneDrive, MEGA, Box, pCloud, Azure Blob, 4shared, Filen, Zoho WorkDrive, and Cryptomator vaults),
+  features an AI assistant with 45 tools and 15 LLM providers, military-grade encrypted vaults (AES-256-GCM-SIV + Argon2id),
+  bidirectional real-time sync, a built-in code editor, SSH terminal, and media player with visualizers.
+  Available in 47 languages with 4 themes.
+Moniker: aeroftp
+Tags:
+- cloud-storage
+- encryption
+- file-manager
+- file-transfer
+- ftp
+- ftp-client
+- multi-protocol
+- rust
+- s3
+- sftp
+- sync
+- tauri
+- webdav
+ReleaseNotes: |-
+  [3.7.7] - 2026-05-10
+  Benchmark Trash Purge, AeroFile UX Polish, and Windows Update No-Trace
+  A consolidation release. The original benchmark trash-purge work (still detailed below) ships alongside a sweep of file-browser UX papercuts surfaced in #178, the no-trace portable update and per-user file associations on Windows (#176), and a handful of provider polish items.
+  Added
+  - Dedicated MIME-style icons for AeroFTP file types so .aerovault, .aeroftp and .aeroftp-keystore render with their own document icons in the file list and in the host file manager.
+  - App version in the window title and Help menu, so users can see at a glance which build they are running.
+  - Folder drill-in spinner (#178 #2): both Remote and Local panels now show a soft overlay spinner while a directory listing is in flight. Debounced via a fadeInDelayed keyframe (opacity 0 for the first ~250 ms of a 450 ms animation) so fast listings never reveal the spinner. Honours prefers-reduced-motion.
+  - Per-panel Up button (#178 #3): Up has moved from the global toolbar into each panel's path bar (next to the existing refresh icon) so the affordance is unambiguously bound to the panel it operates on. Works in both AeroFile mode and dual-pane.
+  Changed
+  - Parent folder row navigates on single click (#178 bonus): the legacy .. row required a double-click, inheriting the FileZilla / WinSCP convention. Selecting a Parent row was always a no-op (you cannot download, delete or rename a parent entry) so single-click is strictly better.
+  - Self-extracting auto-update artifacts stage outside ~/Downloads/ (#176): portable .zip and .AppImage now stage into a private cache directory ($XDG_CACHE_HOME/aeroftp/updates/ on Linux, ~/Library/Caches/aeroftp/updates/ on macOS, %LOCALAPPDATA%\aeroftp\updates\ on Windows). Installer formats (msi/exe/deb/rpm/dmg) keep ~/Downloads/ because they ARE the artifact, useful to re-run, copy to USB, hand to a colleague. The Windows portable cmd helper also wipes the staged ZIP, the sigstore sidecar and the temp extraction dir after the swap so the "portable" no-trace contract is honoured. The Linux AppImage install drops the staged source archive after copying it into the running install location.
+  - WebDAV setup example shows the full URL with https:// scheme (#175 follow-up): the previous example "Example: cloud.example.com/remote.php/dav/files/user/" omitted the scheme the server field actually requires, so users would copy-paste a URL the backend then rejected. The placeholder is now hardcoded as a technical example; only the surrounding "Example:" label stays translated.
+  Fixed
+  - WebDAV reads tolerate a missing TLS close_notify after the full body has been received: some WebDAV servers do not send close_notify after the last byte and the previous behaviour aborted the read mid-stream once Content-Length had been satisfied.
+  - Trash purge fixes for MEGA, Internxt and pCloud after live tests: final live-test corrections on top of the benchmark trash-purge work below.
+  - Filen S3 and WebDAV wrapper triage: connections through Filen's S3 and WebDAV bridges work again after a wrapper-layer regression.
+  - Filen email placeholder key + Tab.digital tabdigital.cloud shard recognition: the email field now displays the correct hint, and the Tab.digital connection screen recognises tabdigital.cloud as a Tab.digital shard for proper routing.
+  - 2FA detection ordered before the failure log on the saved-server connect path (#128 follow-up): the saved-server flow logged Connection to <server> failed. Check credentials. before checking for the TOTP challenge, so the activity log misled users into thinking the password was wrong when the server was just asking for a 2FA code. The order now mirrors the QuickConnect path: 2FA detection first, log entry becomes auth.enter2FAHint instead of Check credentials.
+  - Portable AeroFTP no longer overwrites the installed app's vault keyring entry: portable builds now use a separate vault-passphrase-portable slot under the same KEYRING_SERVICE, so a portable instance launched alongside an installed AeroFTP cannot lock the installed vault on first init.
+  - Windows file associations register under HKCU for per-user installs: the previous HKLM writes were being silently dropped by Windows registry virtualisation on non-elevated Tauri NSIS installs, which is why the doc-style MIME icons were never honoured. Explorer's icon cache is also flushed post-install so the icons appear immediately rather than after a logout.
+  - Windows auto-update no longer flashes a cmd.exe console window: dropping DETACHED_PROCESS while keeping CREATE_NO_WINDOW and pinning the child stdio to null eliminates the console-allocation race that briefly drew the window before destroying it.
+  - Stale protocol.tabdigital* and webdavLocalScheme* translation keys: 5 keys had been carrying [NEEDS TRANSLATION] placeholders in 45 locales since their introduction. npm run i18n:validate is now warning-free.
+  Benchmark Cleanup: Trash Purge for Consumer Cloud Providers
+  A targeted cleanup release that stops the CLI benchmark from silently filling up provider trash bins. Reported by a user after a v3.7.5 community benchmark sweep left ~1 GB of test artefacts in Google Drive's trash, with similar leaks expected on Dropbox, OneDrive, Box, MEGA, FileLu, Internxt, kDrive, Zoho WorkDrive, pCloud, OpenDrive and Backblaze B2 over long runs.
+  Added
+  - StorageProvider::delete_permanent trait method: a hard-delete path that bypasses the recycle bin. The default returns Ok(false) (no-op), which is correct for protocols without a trash concept (FTP, FTPS, SFTP, plain S3, plain WebDAV) and for any unmigrated provider. Trash-aware providers override it to perform the actual purge.
+  - CLI benchmark trash purge: aeroftp-cli speed and aeroftp-cli benchmark now call delete_permanent after the standard cleanup. The speed JSON / CSV / Markdown reports gain a trash_purged column and a trash_purge_error field. The benchmark command logs the purge of the test root and surfaces any failure in the run errors.
+  Fixed
+  - Google Drive trash leak: benchmark and speed cleanup now resolves the just-trashed file by basename via name='X' and trashed=true and calls the existing inherent permanent_delete(file_id), leaving the trash empty after the run.
+  - Dropbox trash leak: delete_permanent wraps the inherent permanent_delete(path). The OAuth scope set was bumped to include files.permanent_delete so newly issued tokens can perform the call. Existing tokens issued before this release will need a one-time disconnect and reconnect to refresh permissions: a clear hint is now surfaced when the API returns the missing-scope error.
+  - MEGA cmd trash leak: delete_permanent reconstructs the rubbish path as //bin/<full-relative-path> and invokes mega-rm -r -f. The original inherent helper assumed the trash item was at top level (basename only), which is correct for items the user trashed via the GUI but wrong for items just moved by our delete() because mega-mv ... //bin/ preserves the original folder hierarchy under //bin/. NotFound is now treated as Ok(false) so concurrent purges do not propagate as errors.
+  - MEGA native trash leak: delete_permanent strips the input to basename before calling the inherent permanent_delete_from_trash(name). The native SDK's delete() moves only the file node (not its parents) to the trash root, so the trashed item is keyed by basename. Passing the original full path was the bug behind the previous "X not found in trash" failures. NotFound is treated as Ok(false).
+  - Box, OpenDrive, kDrive, Zoho WorkDrive trash leak: each provider's delete_permanent resolves the basename in its trash listing, recovers the item id (and item type / dir flag where required) from the listing metadata, then dispatches to the existing inherent permanent_delete* helper.
+  - pCloud trash leak (folder case): delete_permanent resolves the basename in the trash listing and dispatches to trash_clear?folderid=X, which is documented and works. The single-file path (trash_clear?fileid=X) falls back to Ok(false) because the pCloud API silently ignores the unknown fileid query parameter on trash_clear and returns a generic "Log in required" error: there is no documented single-file purge endpoint, so trashed plain files rely on pCloud's 30-day retention to reclaim space. Benchmark cleanup is unaffected because the test root is a folder.
+  - FileLu trash leak (single-file case): matches the basename in files/deleted and calls permanent_delete_file(file_code). Folder-level paths fall back to the no-op default because the FileLu API has no folder permanent-delete endpoint and trashed files do not carry parent-folder identifiers.
+  - Internxt trash leak: matches the basename in the trash listing, extracts the item UUID and type, then issues DELETE /storage/trash with { items: [{ uuid, type }] }. The existing list_trash was also fixed: it had been issuing /storage/trash/paginated?offset=X&limit=Y without the required type and root query parameters and the gateway rejected the call with 400 Bad Request: it now pages through type=folders and type=files separately and tolerates both the new { "result": [] } and legacy { "files": [], "folders": [] } response shapes. On the gateway tested (gateway.internxt.com, 2026-05-09) DELETE /drive/files/{uuid} already removes the file hard so this override mostly returns Ok(false), but it remains wired for deployments and workspace plans that route through a recoverable trash.
+  - Backblaze B2 version leak: delete_permanent calls the inherent permanent_delete_path(path) which walks every version (including hide markers) so soft-deleted files no longer accumulate when versioning is on.
+ReleaseNotesUrl: https://github.com/axpdev-lab/aeroftp/releases/tag/v3.7.7
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
