@@ -1,0 +1,120 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: argoproj.argocd
+PackageVersion: 3.4.1
+PackageLocale: en-US
+Publisher: Argo Project
+PublisherUrl: https://argoproj.github.io/
+PublisherSupportUrl: https://github.com/argoproj/argo-cd/issues
+Author: Argo Project
+PackageName: ArgoCD
+PackageUrl: https://github.com/argoproj/argo-cd
+License: Apache-2.0
+LicenseUrl: https://github.com/argoproj/argo-cd/blob/HEAD/LICENSE
+ShortDescription: A command line tool for communicating with ArgoCD
+Moniker: argocd
+Tags:
+- argocd
+- k8s
+- kubernetes
+ReleaseNotes: |-
+  Important
+  Following Helm 3.19.0 change in how Helm interprets K8s cluster version, this Argo CD release contains a change that aligns how Argo CD interprets K8s cluster version with Helm behavior.
+  Impact: Application Sets with Cluster Generators, that fetch clusters based on their Kubernetes version and use argocd.argoproj.io/auto-label-cluster-info on the cluster secret, need to be updated to use argocd.argoproj.io/kubernetes-version with the vMajor.Minor.Patch format instead of the previous Major.Minor format.
+  More details here: https://argo-cd.readthedocs.io/en/stable/operator-manual/upgrading/3.3-3.4/#cluster-version-format-change
+  Quick Start
+  Non-HA:
+  kubectl create namespace argocd
+  kubectl apply -n argocd --server-side --force-conflicts -f https://raw.githubusercontent.com/argoproj/argo-cd/v3.4.1/manifests/install.yaml
+  HA:
+  kubectl create namespace argocd
+  kubectl apply -n argocd --server-side --force-conflicts -f https://raw.githubusercontent.com/argoproj/argo-cd/v3.4.1/manifests/ha/install.yaml
+  Release Signatures and Provenance
+  All Argo CD container images are signed by cosign. A Provenance is generated for container images and CLI binaries which meet the SLSA Level 3 specifications. See the documentation on how to verify.
+  Release Notes Blog Post
+  For a detailed breakdown of the key changes and improvements in this release, check out the official blog post
+  Upgrading
+  If upgrading from a different minor version, be sure to read the upgrading documentation.
+  Changelog
+  Features
+  - 05504d6 feat(appset): add Health field to ApplicationSet status (#25753) (Peter Jiang)
+  - f83906d feat(appset): optimize appset controller performance when grabbing cluster secrets (#25624) (#25577) (rumstead)
+  - ed6d2c5 feat(controller): Annotation to pause reconciliation for a specific cluster (#26442) (Drew Bailey, Drew Bailey)
+  - 3157fb1 feat(helm): support wildcard glob patterns for valueFiles (cherry-pick #26768 for 3.4) (#26919) (argo-cd-cherry-pick-bot[bot], Nitish Kumar)
+  - 5072899 feat(hydrator): making configurable authorName/Email used for hydration commit (#22847) (#25746) (Aditya Raj)
+  - 8ed52b2 feat(notification): add appProject access to notification templates (#26437) (#26470) (Aditya Raj)
+  - e1aeb79 feat(ui): AppSet Slide Out Summary (#26490) (Peter Jiang, reggie-k)
+  - 5ab598e feat(ui): add annotation filtering support to applications list (#25590) (Ji Kwan)
+  - 1391e2f feat(ui): add appset tree-view details page (#26262) (Peter Jiang, reggie-k, Keith Chong)
+  - 7208578 feat(ui): appset list page and filters (#25837) (Peter Jiang)
+  - ff45972 feat(ui): enable hydrator support in app create panel (#26485) (jwinters01, Alexandre Gaudreault)
+  - 1214946 feat(ui): support hydrator properties in summary tab (#26152) (jwinters01, Michael Crenshaw)
+  - b414432 feat: Add application filter for operation status to UI (#25636) (Dylan Schlager)
+  - 408e99e feat: Allow custom User-Agent headers for Helm repository requests (#25473) (Yugan)
+  - 19b41b9 feat: ApplicationSet watch API (#26409) (Peter Jiang, nitishfy)
+  - b442167 feat: Document and expose K8S API client environment variables(#8527) (#25145) (gami, Alexandre Gaudreault)
+  - 7a3d6f1 feat: Implement nmstate health checks (#26506) (#26507) (Sander Tervoert)
+  - 5859065 feat: add ApplicationSet listResourceEvents API (#25537) (Peter Jiang, Alexy Mantha)
+  - 2793097 feat: add OTEL instrumentation for authentication and handlers (#25296) (Mike Cutsail, Alexandre Gaudreault)
+  - b7e2027 feat: add Prune and Delete as application level sync option (#23370) (Arthur Outhenin-Chalandre)
+  - 73b4d98 feat: add --no-install-recommends in argocd-base #25841 (#25852) (Jakub Rudnik, Nitish Kumar)
+  - 13bc5ae feat: add argocd account session-token command (#15277) (#24638) (Alex Eftimie, Alexandre Gaudreault, Peter Jiang)
+  - d8635ca feat: add clear-all button to applications list filters (#26007) (Jaewoo Choi)
+  - c2e594c feat: disable gRPC service config DNS TXT lookups by default (#26077) (Valentin Stoican, Valentin Stoican)
+  - 3cb4955 feat: expose notifications controller processors count via cmd params (#26798) (Kirill Bilchenko)
+  - c0a2a57 feat: implement application cache synchronization in appset controller (#26578) (Alexander Matyushentsev)
+  - ef75a2e feat: limit max certificates and known hosts in stream parsing (#25777) (Ankit Pramanik)
+  - f85ad11 feat: remove unused reposFilter from Applications list (#24667) (Jaewoo Choi)
+  - 6f0de8b feat: update health checks for Numaflow resources (#25698) (Dillen Padhiar)
+  Bug fixes
+  - 9fd02aa Revert "fix: prevent automatic refreshes from informer resync and status updates (cherry-pick #25290 for 3.4)" (#27402) (Michael Crenshaw)
+  - f4e7a6e [release-3.4] fix: improve perf: switch parentUIDToChildren to map of sets, remove cache rebuild (#26863) (#27110) (Jonathan Ogilvie)
+  - 21e13a6 fix(UI): show RollingSync step clearly when labels match no step (cherry-pick #26877 for 3.4) (#26882) (argo-cd-cherry-pick-bot[bot], Atif Ali)
+  - ede9229 fix(actions): Use correct annotation for CNPG suspend/resume (#26711) (Rouke Broersma)
+  - 6665f94 fix(appcontroller): application controller in core mode fails to sync when server.secretkey is missing (#26793) (#27476) (Anand Francis Joseph)
+  - f45ee22 fix(appset): change appset resource status count to 5000 by default (#26249) (Peter Jiang)
+  - bb894e8 fix(appset): do not trigger reconciliation on appsets not part of allowed namespaces when updating a cluster secret (#25622) (OpenGuidou)
+  - 330077c fix(appset): fix post-generator selector ignoring labels in GoTemplate mode (#26717) (Josef Kolář)
+  - bdc3447 fix(appset): update appset resources after creation (#26511) (Peter Jiang)
+  - 59f229b fix(ci): Add missing git-lfs installer checksum for ppc64le (#26835) (Oliver Gondža)
+  - cbc7ecd fix(ci): Inconsistent use of IMAGE_REGISTRY and IMAGE_NAMESPACE Makefile variables (#25846) (#25860) (dudinea)
+  - 2253481 fix(ci): Remove stale label when Issue/PR is updated (#26452) (S Kevin Joe Harris)
+  - e70034a fix(ci): add .gitkeep to images dir (cherry-pick #26892 for 3.4) (#26912) (argo-cd-cherry-pick-bot[bot], Blake Pettersson)
+  - 4a5d3a7 fix(ci): add gitops-engine unit tests to CI (#25863) (Peter Jiang)
+  - 92c5389 fix(ci): ensure cherry-pick commits include DCO sign-off (#26124) (Anagha S Devan)
+  - aadf2af fix(ci): fix deleting files on linux in make build-ui (#26134) (#26135) (dudinea)
+  - 946a3ab fix(ci): fix make image DEV_IMAGE=true on non-amd64 architecture (#25897) (#25898) (dudinea, Nitish Kumar)
+  - b7f9f6d fix(ci): run yarn install with --frozen-lockfile (cherry-pick #27099 for 3.4) (#27350) (dudinea)
+  - a19a83a fix(cli): uses DrySource revision for app diff/manifests with sourceHydrator (#23817) (cherry-pick #24670 for 3.4) (#27483) (argo-cd-cherry-pick-bot[bot], Aditya Raj)
+  - 956a6a1 fix(controller): handle comma-separated hook annotations for PreDelete/PostDelete hooks (#26420) (Linghao Su)
+  - f50abb6 fix(controller): reduce secret deepcopies and deserialization (#27049) (cherry-pick release-3.4) (#27132) (rumstead)
+  - af05c56 fix(dashboards): Correct job label for the Controller Telemetry Panel (#26548) (Daniel Barnes)
+  - 986cdf0 fix(dev): skip Tilt rebuild on test file changes (#26624) (Nitish Kumar)
+  - 63698bd fix(dex): run as user 1001 (#26726) (#26757) (Michael Crenshaw)
+  - 8a507b7 fix(dex): run as user 1001 (#26726) (#26775) (Michael Crenshaw)
+  - 99e29c7 fix(docs): Fix manifest path in Source Hydrator docs (cherry-pick #27123 for 3.4) (#27166) (argo-cd-cherry-pick-bot[bot], Oliver Gondža)
+  - 3eeebd8 fix(docs): PR title guide from refactor to chore and reformat json (#26450) (Jaewoo Choi)
+  - d66ad45 fix(docs): update other sections of feature maturity to match feature status in overview (#26411) (Kanika Rana)
+  - 1dc85e5 fix(engine): always preserve sync status for hooks (#25692) (Alexandre Gaudreault, Regina Voloshin, github-actions[bot], reggie-k, dependabot[bot], renovate[bot], Afzal Ansari, Blake Pettersson, Julie Vogelman, Michael Crenshaw)
+  - a1d68ca fix(engine): correctly set prune confirmation message in setRunningPhase (#25915) (Arthur Outhenin-Chalandre)
+  - 95d19f2 fix(engine): improve operation phase messages (#25668) (Alexandre Gaudreault)
+  - 8259711 fix(health): app missing health only when all resources are missing (#23995) (#25962) (Alexandre Gaudreault, Peter Jiang)
+  - a22f33d fix(health): configconnectorcontext and configconnector (#26308) (#26309) (Niclas Mietz)
+  - 6eea558 fix(health): use note.drySha when available (#26698) (Michael Crenshaw)
+  - afdf99f fix(helm): Improve error message when helm cmd fails (#26159) (Oliver Gondža)
+  - 67d12eb fix(hook): Fixed hook code issues that caused stuck applications on "Deleting" state (Issues #18355 and #17191) (cherry-pick #26724 for 3.4) (#27257) (argo-cd-cherry-pick-bot[bot], Nikolaos Astyrakakis)
+  - 2283784 fix(hooks): always remove finalizers (#23226) (#25916) (Alexandre Gaudreault, Leonardo Luz Almeida)
+  - 67712c1 fix(hydrator): .gitattributes include deeply nested files (#25870) (#26011) (Michael Crenshaw)
+  - 3453367 fix(hydrator): Fix compilation error (#26024) (Oliver Gondža)
+  - ef40ba8 fix(hydrator): empty links for failed operation (#25025) (#26014) (Michael Crenshaw)
+  - 6f21978 fix(hydrator): git fetch needs creds (#25727) (#25738) (Michael Crenshaw)
+  - a439c6c fix(hydrator): hydrated sha missing on no-ops (#25694) (#25695) (Michael Crenshaw)
+  - 6994a42 fix(hydrator): pass destination.namespace to manifest rendering (#25478) (#25699) (Sean Liao)
+  - 33247b9 fix(hydrator): preserve all source type fields in GetDrySource() (cherry-pick #27189 for 3.4) (#27196) (argo-cd-cherry-pick-bot[bot], Alexandre Gaudreault)
+  - 0a2ae95 fix(hydrator): race when pushing notes (#25700) (Michael Crenshaw)
+  - e5e00d3 fix(hydrator): use refresh paths from drySource when source hydration is enabled (#25516) (Codey Jenkins, pbhatnagar-oss, Alexandre Gaudreault)
+  - fee6962 fix(makefile): Improve performance of make lint-local and dependent goals (#26025) (Oliver Gondža)
+ReleaseNotesUrl: https://github.com/argoproj/argo-cd/releases/tag/v3.4.1
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
