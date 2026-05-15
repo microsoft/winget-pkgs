@@ -528,7 +528,11 @@ if (!$SkipManifestValidation -and ![String]::IsNullOrWhiteSpace($Manifest)) {
             Start-Sleep -Seconds 5 # Allow the user 5 seconds to read the warnings before moving on
         }
         default {
-            Write-Information $validateCommandOutput.Trim() # On the success, print an empty line after the command output
+            # Avoid writing a raw object array when `winget validate` returns multiple lines
+            $validateSuccessOutput = @($validateCommandOutput).ForEach({ $_.ToString().Trim() }).Where({ -not [String]::IsNullOrWhiteSpace($_) })
+            if ($validateSuccessOutput) {
+                Write-Information ($validateSuccessOutput -join [Environment]::NewLine)
+            }
         }
     }
 }

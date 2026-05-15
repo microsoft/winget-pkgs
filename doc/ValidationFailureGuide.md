@@ -103,7 +103,7 @@ manifests/<first-letter>/<Publisher>/<PackageName>/<PackageVersion>/
 - PR contains manifests for **more than one package** or **more than one version**
 - Modified files that are not part of the manifest submission
 
-**How to fix:** Each PR must contain exactly one package version. Split your submission into separate PRs if needed.
+**How to fix:** Each PR must contain exactly one package version (one multi-file manifest set). If you need to update non-manifest files such as `README.md`, files under `doc/`, spelling files, or tooling, submit those changes in a separate PR. See the [first-time contributor checklist](FirstContribution.md) before resubmitting.
 
 ---
 
