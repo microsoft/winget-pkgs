@@ -1,0 +1,66 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: axpnet.AeroFTP
+PackageVersion: 3.7.1
+PackageLocale: en-US
+Publisher: axpnet
+PublisherUrl: https://github.com/axpnet
+PublisherSupportUrl: https://github.com/axpnet/aeroftp/issues
+Author: axpnet
+PackageName: AeroFTP
+PackageUrl: https://github.com/axpnet/aeroftp
+License: GPL-3.0
+LicenseUrl: https://github.com/axpdev-lab/aeroftp/blob/HEAD/LICENSE
+ShortDescription: A modern, multi-protocol file manager and FTP client with integrated AI, cloud sync, and military-grade encryption.
+Description: |-
+  AeroFTP is an open-source, multi-protocol file manager built with Tauri 2 (Rust + React 18 + TypeScript).
+  It supports 16 protocols (FTP, FTPS, SFTP, WebDAV, S3, Google Drive, Dropbox, OneDrive, MEGA, Box, pCloud, Azure Blob, 4shared, Filen, Zoho WorkDrive, and Cryptomator vaults),
+  features an AI assistant with 45 tools and 15 LLM providers, military-grade encrypted vaults (AES-256-GCM-SIV + Argon2id),
+  bidirectional real-time sync, a built-in code editor, SSH terminal, and media player with visualizers.
+  Available in 47 languages with 4 themes.
+Moniker: aeroftp
+Tags:
+- cloud-storage
+- encryption
+- file-manager
+- file-transfer
+- ftp
+- ftp-client
+- multi-protocol
+- rust
+- s3
+- sftp
+- sync
+- tauri
+- webdav
+ReleaseNotes: |-
+  [3.7.1] - 2026-05-04
+  Mount Manager + community wishlist push (issue #147)
+  A community-driven release closing the v3.7.x medium-effort cluster from issue #147 and shipping the first big-feature ask from the same thread, the persistent Mount Manager. Filen Desktop's local WebDAV and S3 bridges now connect on the first try, AeroFile gains an aggregate multi-file Properties view and a recursive * flatten search, AeroSync wrapper scripts round-trip as .sh / .ps1, and a long list of polish items lands in one batch (PathBar empty-area edit, Settings keyboard model, smart Open with default app, configurable provider icon size, drag-reorder custom icons, dedup-aware Server Health dots on Discover, S3Drive icon + setup banner). My Servers gains a unified table layout with drag-to-reorder columns and a per-protocol dedup footer.
+  Added
+  - Mount Manager: new persistent mount registry reachable from File > Mount Manager, the My Servers toolbar, and the connected remote address bar. Saves multiple mount configs (profile, remote path, mountpoint, read-only, cache TTL, allow-other, auto-start) in either a plaintext sidecar JSON (default, daemon-friendly) or in the encrypted vault, toggleable from the dialog header. Per-row Mount / Unmount / Open in file manager / Edit / Delete actions, with a "Pick free drive letter" helper on Windows. Phase B autostart installs systemd-user units on Linux and Task Scheduler ONLOGON entries on Windows. Phase C "Open mount in file manager" auto-creates a default mount for the connected profile when none exists, waits 800ms for FUSE / WebDAV to settle, then opens the OS file manager. Tracked mounts inherit the GUI's vault credentials through aeroftp-cli --profile; mount configs themselves never carry secrets.
+  - Filen Desktop local presets: two new Discover entries connect AeroFTP to a logged-in Filen Desktop instance over the local Network Drive bridges. Filen Desktop (local WebDAV) runs at local.webdav.filen.io:1900 over HTTP with basic auth (username and password set in Filen Desktop > Network Drive > WebDAV, separate from the Filen account). Filen Desktop (local S3) runs at local.s3.filen.io:1700 with literal filen region and bucket and path-style addressing. Both presets ship inline setup steps that surface the Filen Desktop configuration path the user has to walk before the bridge accepts connections.
+  - Multi-file Properties: right-clicking on two or more files in AeroFile (local panel and any of the 22 remote providers) now opens a dedicated aggregate Properties dialog, mirroring the Windows multi-select view. Reports total file count and folder count, summed bytes with formatted units, common parent path, modified-date range (single Modified row when all entries share the same mtime, otherwise Oldest / Newest pair), and a "Mixed" indicator on the permissions row when entries do not agree. Tri-state Read-only and Hidden rows surface from a parallel get_file_properties lazy load. A scrollable list of selected entries with kind icon, name, and per-item size sits at the bottom.
+  - Recursive search in AeroFile: typing * or ** in the local search box now flattens the subtree under the current directory, every descendant file and folder is listed with its relative path, BFS-bounded at 32 levels and 5,000 entries (clamped to 20,000). Optional residual filter after the marker (* foo, ** foo) narrows the result by substring on the relative path. Search bar flips purple while flatten mode is active and warns when the entry cap is reached.
+  - Custom Icons Manager: Settings > Appearance > Icons hosts a standalone gallery for the global custom-icon library, with upload of SVG / PNG / JPG / WEBP / ICO, sort by recent or A-Z, drag-reorder (in recent mode), inline rename via double-click, and delete with confirmation. Shares storage with the per-profile Choose Icon dialog so changes round-trip both ways through a aeroftp-custom-icons-changed window event.
+  - AeroSync wrapper script export: the AeroSync Templates dialog now exports the active sync configuration as a POSIX .sh or PowerShell .ps1 script, defaulting to bash on Linux / macOS and pwsh on Windows. Generated scripts wrap aeroftp-cli sync with the right flags and embed an # AEROFTP-META JSON line so importing a .sh or .ps1 reconstructs the AeroSync settings without parsing the rest of the script. Round-trip is supported, hand-edited scripts are explicitly out of scope.
+  - PathBar polish: clicking the empty area to the right of the last segment now drops straight into edit mode (Enter commits, Escape / blur cancels), and a trailing > chevron after the current segment opens a dropdown listing the first-generation subdirectories so users can dive deeper without leaving the keyboard.
+  - Settings keyboard navigation: Settings now behaves like a proper modal. Escape closes, Tab and Shift+Tab stay inside the dialog, the forward Tab cycle wraps from footer back to first focusable. The sidebar is a vertical tablist with Arrow Up/Down/Left/Right + Home/End. Settings > Appearance subtabs (Theme / Icons / Interface / Backgrounds) mirror the same model with a horizontal tablist.
+  - Open with default app: AeroFile right-click adds a smart routing entry. .aerovault / .aeroftp / .aeroftp-keystore open inside AeroFTP, scripts (.ps1 / .sh) drop into AeroTools Terminal with the right shell prefix and POSIX-quoted path, every other extension goes through the OS default via tauri-plugin-opener.
+  - Configurable provider icon size: Settings > Appearance > Interface exposes a Provider icon size slider (18-32 px, default 24). Both ServerCard (My Servers compact + detailed) and DiscoverPanel cards size from the shared preference, including custom uploaded icons and favicons.
+  - Custom icon drag-reorder + sort toggle: each tile in the IconPickerDialog Custom tab is now draggable, drop on another tile splices the array and persists the new order. Shipped tab gets a "Sort: Popular first / A-Z" chip pair below the search input, persisted in localStorage['aeroftp-icon-picker-sort'].
+  - Server Health dot on Discover cards: each ServiceCard in the Discover panel now renders the same overlay-dot pattern as ServerCard, gated on healthStatus !== 'unknown' so services without a healthCheckUrl stay clean.
+  - CLI aeroftp-cli profiles -i: interactive prompt loop after the table renders, with compact 1l / 2t / 3d / q tokens (number-then-letter and letter-then-number both accepted) for list / tree / delete a numbered profile. Delete is gated by name-typed confirmation, the loop reuses the running binary via current_exe() so output stays bit-for-bit identical to the standalone subcommand.
+  - F2 keyboard shortcut hint: ContextMenuItem gains an optional shortcut prop rendered right-aligned in monospace. Local + remote AeroFile rename entries advertise F2 so the keyboard shortcut is discoverable from the menu.
+  - Provider setup steps banner: connection forms with setupInstructions (S3Drive, Filen Desktop S3, Filen Desktop WebDAV, MEGAcmd) now render a numbered checklist above their credential fields with a link to the upstream documentation.
+  - My Servers unified table: five-phase rework brings storage Used / Total / % columns with configurable warning thresholds, a real semantic <table> with sticky <thead> / <tfoot> and click-to-sort on every column, dedup-aware footer and a per-protocol "Storage by protocol" expandable panel, CLI aeroftp-cli profiles parity with the GUI columns and JSON / CSV output, and column drag-to-reorder + resize (also applied to AeroFile remote and local panels through a shared useTableColumns<T> hook). Storage column visibility persists in vault keys (my_servers_table, aero_file_remote_table, aero_file_local_table).
+  Fixed
+  - WebDAV scheme detection rewrite (root cause for the Filen Desktop local-WebDAV failure reported on #128): WebDavConfig::from_provider_config was falling back to "port == 80, http, otherwise https", so HTTPS handshakes hit Filen Desktop's HTTP listener on port 1900 and failed before any auth or path negotiation. Detection is now layered: explicit scheme on the host string wins, then the new tls_mode extra field ("http" / "https" / "auto"), then "auto" maps localhost / 127.0.0.1 / RFC 1918 / *.local / *.localhost / Filen Desktop hostnames to HTTP on any port. The ProviderConnectionParams path now forwards tls_mode and verify_cert into the WebDAV extra map, ConnectionScreen propagates options.webdavScheme from a provider preset into the connection params. 7 unit tests in webdav_config_tests cover the new precedence rules.
+  - Filen v3 Argon2id authentication: new Filen accounts using authVersion >= 3 can now log in. AeroFTP derives credentials with the same Argon2id parameters used by the official Filen SDK (t=3, m=65536, p=4, v=0x13, dkLen=64) and decodes auth/info salt as hex bytes for v3. v1 (SHA-512) and v2 (PBKDF2-SHA512) accounts continue to work unchanged. New "Auth version" badge v1 / v2 / v3 on saved cards, surfaced after first successful connect.
+  - Storage quota persistence on OAuth providers: Dropbox, Google Drive, and pCloud showed quota in the bottom status bar but not on the saved server card. The OAuth call paths now pass effectiveParams / normalizedParams so savedServerId flows through persistQuotaToProfile, a localStorage mirror plus serversRefreshKey bump re-renders My Servers without a full reopen.
+  - Koofr WebDAV quota: Koofr does not implement RFC 4331 quota properties, so PROPFIND returned empty values. The WebDAV provider now detects app.koofr.net and falls back to the native Koofr REST API (/api/v2/mounts) using the same basic-auth credentials.
+  - Terminal goes black on tab switch: replaced the single shared DOM container + xterm.open() reattach pattern with one persistent DOM container per tab, hidden via CSS when inactive. xterm.open() is now called exactly once per xterm instance. Verified end-to-end on Linux (WebKitGTK) and Windows 11 (WebView2).
+ReleaseNotesUrl: https://github.com/axpdev-lab/aeroftp/releases/tag/v3.7.1
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
