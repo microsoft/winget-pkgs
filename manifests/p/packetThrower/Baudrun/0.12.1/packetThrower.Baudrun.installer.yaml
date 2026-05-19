@@ -1,0 +1,55 @@
+# yaml-language-server: =https://aka.ms/winget-manifest.installer.1.12.0.schema.json
+#
+# Installer manifest template. Fill in:
+#
+#   0.12.1              SemVer, no leading `v` (e.g. `0.12.0`)
+#   2026-05-19         ISO date the GitHub Release was cut
+#   5A8E7C3D1A3CC61C41F1F3A61757B33A64D2FD8776F00EB3508058B5696DB81F     `Get-FileHash -Algorithm SHA256` of the amd64 .msi
+#   466B8D5DE3034A061EBA91A1E7C4D8FC4932B84370BBB740F3C75DC737E3A13F     same for the arm64 .msi
+#   {6DA249C7-57F7-49DE-AB7D-9DB7297A68C3}   '{GUID}' from the amd64 .msi (wingetcreate auto-detects)
+#   {F66EBAF5-BE4F-4EA0-A2C3-B319ABE19CD0}   '{GUID}' from the arm64 .msi (wingetcreate auto-detects)
+#
+# Both architectures ship .msi installers (cargo-wix + system WiX
+# 3.14, see release.yml). MSI is preferred for winget because:
+#   * `ProductCode` lets winget reliably locate the install after
+#     it's applied — the `Validation-Executable-Error` we hit on
+#     v0.12.0's first submission traced back to cargo-packager's
+#     NSIS installer writing the uninstall key under HKCU instead
+#     of HKLM, which the validator's HKLM-scoped scan missed.
+#   * Apps & Features integration is automatic — Windows Installer
+#     writes `DisplayName`, `Publisher`, `DisplayVersion`,
+#     `InstallLocation`, etc. from the MSI's tables.
+#   * `Scope: machine` is honored by MSI tooling without per-tool
+#     configuration the way NSIS needs.
+# The portable NSIS .exe is still published as a Releases-page
+# artifact for users who'd rather skip an installer, but it's not
+# referenced from this manifest.
+
+PackageIdentifier: packetThrower.Baudrun
+PackageVersion: 0.12.1
+ReleaseDate: 2026-05-19
+InstallModes:
+  - interactive
+  - silent
+  - silentWithProgress
+Installers:
+  - Architecture: x64
+    InstallerType: wix
+    InstallerUrl: https://github.com/packetThrower/Baudrun/releases/download/v0.12.1/Baudrun_0.12.1_amd64_en-US.msi
+    InstallerSha256: 5A8E7C3D1A3CC61C41F1F3A61757B33A64D2FD8776F00EB3508058B5696DB81F
+    ProductCode: '{6DA249C7-57F7-49DE-AB7D-9DB7297A68C3}'
+    Scope: machine
+    InstallerSwitches:
+      Silent: /quiet /norestart
+      SilentWithProgress: /passive /norestart
+  - Architecture: arm64
+    InstallerType: wix
+    InstallerUrl: https://github.com/packetThrower/Baudrun/releases/download/v0.12.1/Baudrun_0.12.1_arm64_en-US.msi
+    InstallerSha256: 466B8D5DE3034A061EBA91A1E7C4D8FC4932B84370BBB740F3C75DC737E3A13F
+    ProductCode: '{F66EBAF5-BE4F-4EA0-A2C3-B319ABE19CD0}'
+    Scope: machine
+    InstallerSwitches:
+      Silent: /quiet /norestart
+      SilentWithProgress: /passive /norestart
+ManifestType: installer
+ManifestVersion: 1.12.0
