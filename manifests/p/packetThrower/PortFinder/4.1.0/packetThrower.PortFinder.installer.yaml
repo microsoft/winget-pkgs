@@ -1,27 +1,48 @@
-# Created using wingetcreate 1.12.8.0
-# yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.6.0.schema.json
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.12.0.schema.json
+#
+# Installer manifest template. Fill in:
+#
+#   4.1.0              SemVer, no leading `v` (e.g. `4.1.0`)
+#   2026-05-19         ISO date the GitHub Release was cut
+#   163F4350780E12CD1B32A349C12C906117E97F7BFCEC40F2A048819E310F1DD3     `Get-FileHash -Algorithm SHA256` of the .msi
+#   7DB2D08EDDB4322C2373C6AF609DC314D63A0C9AEBF60F5B70E2A3C0B08B1166    same for the ARM64 -setup.exe
+#   {BB261BDC-771D-464B-A80D-264AADCC7860}   '{GUID}' extracted from the .msi (wingetcreate auto-detects)
+#
+# AMD64 ships both NSIS and WiX MSI on stable releases (per
+# .github/workflows/release.yml's "Build .exe (NSIS) + .msi
+# (stable amd64 only)" step); we prefer the .msi for winget
+# because it has a ProductCode + clean Add/Remove Programs
+# integration. ARM64 ships NSIS only (no WiX on ARM64 builds),
+# so the arm64 entry uses `nullsoft` with explicit silent-mode
+# switches.
+#
+# Pre-releases (`-beta`, `-alpha`) DON'T produce a .msi (only
+# stable amd64 does), so this template is only viable for
+# stable tags. Beta artifacts can still be installed via
+# `winget install --manifest <path>` against a hand-edited
+# manifest, but the upstream submission has to wait for stable.
 
 PackageIdentifier: packetThrower.PortFinder
 PackageVersion: 4.1.0
-InstallModes:
-- interactive
-- silent
-- silentWithProgress
-Installers:
-- Architecture: x64
-  InstallerType: wix
-  Scope: machine
-  InstallerUrl: https://github.com/packetThrower/PortFinder/releases/download/v4.1.0/PortFinder_4.1.0_x64_en-US.msi
-  InstallerSha256: 163F4350780E12CD1B32A349C12C906117E97F7BFCEC40F2A048819E310F1DD3
-  ProductCode: '{BB261BDC-771D-464B-A80D-264AADCC7860}'
-- Architecture: arm64
-  InstallerType: nullsoft
-  Scope: machine
-  InstallerUrl: https://github.com/packetThrower/PortFinder/releases/download/v4.1.0/PortFinder_4.1.0_arm64-setup.exe
-  InstallerSha256: 7DB2D08EDDB4322C2373C6AF609DC314D63A0C9AEBF60F5B70E2A3C0B08B1166
-  InstallerSwitches:
-    Silent: /S
-    SilentWithProgress: /S
-ManifestType: installer
-ManifestVersion: 1.6.0
 ReleaseDate: 2026-05-19
+InstallModes:
+  - interactive
+  - silent
+  - silentWithProgress
+Installers:
+  - Architecture: x64
+    InstallerType: wix
+    InstallerUrl: https://github.com/packetThrower/PortFinder/releases/download/v4.1.0/PortFinder_4.1.0_x64_en-US.msi
+    InstallerSha256: 163F4350780E12CD1B32A349C12C906117E97F7BFCEC40F2A048819E310F1DD3
+    ProductCode: '{BB261BDC-771D-464B-A80D-264AADCC7860}'
+    Scope: machine
+  - Architecture: arm64
+    InstallerType: nullsoft
+    InstallerUrl: https://github.com/packetThrower/PortFinder/releases/download/v4.1.0/PortFinder_4.1.0_arm64-setup.exe
+    InstallerSha256: 7DB2D08EDDB4322C2373C6AF609DC314D63A0C9AEBF60F5B70E2A3C0B08B1166
+    Scope: machine
+    InstallerSwitches:
+      Silent: /S
+      SilentWithProgress: /S
+ManifestType: installer
+ManifestVersion: 1.12.0
