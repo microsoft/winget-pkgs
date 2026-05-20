@@ -1,0 +1,112 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: zed.rainxch.githubstore
+PackageVersion: 1.8.3
+PackageLocale: en-US
+Publisher: rainxchzed
+PublisherUrl: https://github.com/OpenHub-Store
+PublisherSupportUrl: https://github.com/OpenHub-Store/GitHub-Store/issues
+PackageName: GitHub Store
+PackageUrl: https://github.com/OpenHub-Store/GitHub-Store
+License: Apache-2.0
+LicenseUrl: https://github.com/OpenHub-Store/GitHub-Store/blob/HEAD/LICENSE
+Copyright: Copyright (C) 2026
+ShortDescription: GitHub Store - app store for GitHub releases - installer.
+Tags:
+- android
+- desktop
+- github-app
+- github-store
+- kotlin
+- kotlin-android
+- kotlin-desktop
+- kotlin-multiplatform
+- linux
+- macos
+- macos-app
+- online-store
+- open-source
+- open-source-project
+- windows
+ReleaseNotes: |-
+  🚀 GitHub Store 1.8.3 — Forges, Privacy Translators & Power-User Polish
+  Codeberg + Forgejo land. Self-hosted Git forges become first-class citizens. Three new privacy-respecting translation engines join Google + Youdao. KSafe encrypts every persisted credential. Web-OAuth sign-in. Plus a wave of perf, layout, and edge-case fixes.
+  ✨ New Features
+  🌲 Codeberg + Forgejo + Gitea Support
+  - Paste any Codeberg.org, Forgejo, or Gitea repository URL in the manual-link sheet — GHS picks an asset, downloads, installs, and polls for updates exactly like a GitHub repo
+  - Details screen fully wired for foreign forges — readme, releases, stats, and downloads all load from the forge directly (no GitHub fallback for non-GitHub repos)
+  - License sniffing for forge repos (regex SPDX detection from /contents/LICENSE since Forgejo has no /license endpoint)
+  - Source chip on every row tells you where the app came from
+  - Self-hosted? Tweaks → Network → Custom forges accepts any hostname
+  - Search now has a GitHub / Codeberg / custom-forge source toggle — plus a chip per custom forge you've added
+  - Smart auto-match sweeps GitHub + Codeberg + custom forges in parallel (bounded fanout, per-call timeout, candidate budget)
+  🔐 Privacy-Respecting Translation Engines (#644)
+  - LibreTranslate — works out of the box via the bundled public Disroot mirror, or paste your own self-hosted URL for max privacy. Optional API key
+  - DeepL — auth key auto-routes Free (:fx suffix) vs Pro endpoints. Pro tier keeps text private; Free tier disclosed in-app
+  - Microsoft Azure Translator — No-Trace by default (text never stored, never used for training, GDPR/HIPAA compliant). 2M chars/month free
+  - "Get a free key →" deep links straight to signup pages
+  🔑 Per-Host Access Tokens
+  - Tweaks → Access Tokens accepts PATs for GitHub, Codeberg, and any custom forge
+  - AES-256-GCM encrypted via KSafe (hardware-backed Keystore on Android)
+  - OAuth signed-in users see the GitHub preset hidden — no confusion
+  - Higher rate limits + private repo access when authenticated per host
+  🌐 Web-OAuth Sign-In
+  - Sign in with GitHub now uses the standard web flow — tap, authorize in browser, done
+  - No more 8-digit device code dance
+  🛡️ KSafe Everywhere
+  - All persisted preferences and credentials AES-256-GCM encrypted via KSafe — GitHub auth tokens, proxy credentials, app settings, device ID, mirror choice, coachmarks, announcements cache, plus the new per-host PATs and translation provider keys
+  - Hardware-backed Keystore on Android
+  - Existing data migrates seamlessly on first launch
+  - Safe-wrappers around every KSafe call — crash-proof for 1.8.2 → 1.8.3 upgrades
+  📐 Content Width Preference (Desktop)
+  - New Tweaks → Appearance → Content width: Compact (680dp, default), Wide (960dp), Extra wide (full window)
+  - Mouse wheel in empty side gutters scrolls the content column (gesture-aware, doesn't fight LazyColumn touch on Android)
+  🍎 macOS via Homebrew
+  - brew install --cask github-store from the new tap
+  🇸🇰 Keep Android Open Coalition
+  - Joined the coalition — in-app banner on Apps explains why
+  🐛 Bug Fixes
+  - Multi-flavor apps (e.g. OSS-DocumentScanner ships generic + Play APKs) — Details no longer shows a false "Update" CTA when one variant is current
+  - Platform chips on Details now open Search filtered by that platform (was a no-op)
+  - Android 12 keyboard search button triggers search across Chinese IMEs
+  - Externally-linked repo banner on Details with one-tap unlink
+  - Sign-in opens device-code URL prefilled + copies a paste-friendly code
+  - Android 16 / custom-ROM crash on Settings + download failure — falls back to internal storage when external is blocked
+  - Magisk / KernelSU / APatch detection on Android 13+ — previous probe was masked by SELinux
+  - Pinned-variant label refreshes across releases — stale beta/rc qualifiers gone
+  - README and release-notes keep scroll position when you scroll past and return
+  - macOS Compose a11y NPE guarded on both AWT event-queue path and coroutine-failure path
+  - DB downgrade survival — switching back to an older build no longer crashes ("migration from 18 to 17" hardening)
+  - Forgejo release bodies normalize CRLF so GFM tables render correctly
+  - Forgejo release assets without content_type now decode (was silently dropping the whole releases list)
+  - URL paste in the auto-link sheet verifies the repo actually exists before showing a 100% match
+  - Empty-state gutters on Desktop no longer eat scroll input or invert wheel direction
+  - Smart-match scan respects a 5-second skip button if it's taking too long
+  - Import scan caps Forgejo fanout to 12 unmatched candidates (24 if user added custom forges) — done in seconds instead of minutes
+  ⚡ Performance
+  - README + release-notes markdown re-render no longer triggered ~10×/sec by download progress updates
+  - Chunked progressive markdown with off-main pre-processing — large READMEs (Gadgetbridge, Kubernetes) no longer freeze the UI
+  - Image painters memoized — no more reload flicker on recomposition
+  - Parallel Forgejo fanout with bounded Semaphore(8) concurrency + per-call withTimeoutOrNull(4s) cap
+  - Forgejo HTTP client registry honors proxy changes + closes cached clients on shutdown
+  🎨 UX Polish
+  - Manual link sheet sorts by installer source (F-Droid / Obtainium first, system updates last) with source chip per app
+  - Smart match suggests ranked repos from GitHub + Codeberg + your custom forges
+  - GFM alert callouts (Note / Tip / Important / Warning / Caution) render as tinted cards
+  - Emoji shortcodes — :rocket: → 🚀 (~250 covered)
+  - SVG images render natively; theme-aware images respect light/dark; browser-like UA unblocks CDN-hotlinked badges
+  - Code blocks syntax-highlighted (Kotlin / Java / Python / JS/TS / Rust / Swift / C# / Ruby / Shell, theme-aware)
+  - Markdown polish — HTML blockquotes + <pre><code> render, sub/superscript → unicode, HTML entities decoded
+  - Collapsible <details> render as tap-to-expand cards; badge/button image rows flow inline
+  - Manual matching trusts your version — no re-download to verify
+  - Section-aware sort across library — Installed, Starred, Favourites each remember their own choice
+  - Custom forges dialog explains that Codeberg / gitea.com / git.disroot.org are built-in
+  - Suggestion rows show source-host chip (GitHub / Codeberg / custom) so you know where matches come from
+  - Translation auto-target picker exposes all 33 supported languages (was capped to 13 app-UI locales)
+  - Translation protects code fences, HTML tags, markdown link URLs, bare URLs, and GFM alert markers from translation
+  Full Changelog: 1.8.2...1.8.3
+  🌐 Website | 💬 Discord
+ReleaseNotesUrl: https://github.com/OpenHub-Store/GitHub-Store/releases/tag/v1.8.3
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
