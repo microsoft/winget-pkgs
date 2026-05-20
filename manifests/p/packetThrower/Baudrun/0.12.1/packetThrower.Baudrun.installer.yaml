@@ -12,11 +12,11 @@
 # Both architectures ship .msi installers (cargo-wix + system WiX
 # 3.14, see release.yml). MSI is preferred for winget because:
 #   * `ProductCode` lets winget reliably locate the install after
-#     it's applied — the `Validation-Executable-Error` we hit on
+#     it's applied â€” the `Validation-Executable-Error` we hit on
 #     v0.12.0's first submission traced back to cargo-packager's
 #     NSIS installer writing the uninstall key under HKCU instead
 #     of HKLM, which the validator's HKLM-scoped scan missed.
-#   * Apps & Features integration is automatic — Windows Installer
+#   * Apps & Features integration is automatic â€” Windows Installer
 #     writes `DisplayName`, `Publisher`, `DisplayVersion`,
 #     `InstallLocation`, etc. from the MSI's tables.
 #   * `Scope: machine` is honored by MSI tooling without per-tool
@@ -42,6 +42,9 @@ Installers:
     InstallerSwitches:
       Silent: /quiet /norestart
       SilentWithProgress: /passive /norestart
+    Dependencies:
+      PackageDependencies:
+        - PackageIdentifier: Microsoft.VCRedist.2015+.x64
   - Architecture: arm64
     InstallerType: wix
     InstallerUrl: https://github.com/packetThrower/Baudrun/releases/download/v0.12.1/Baudrun_0.12.1_arm64_en-US.msi
@@ -51,5 +54,8 @@ Installers:
     InstallerSwitches:
       Silent: /quiet /norestart
       SilentWithProgress: /passive /norestart
+    Dependencies:
+      PackageDependencies:
+        - PackageIdentifier: Microsoft.VCRedist.2015+.arm64
 ManifestType: installer
 ManifestVersion: 1.12.0
