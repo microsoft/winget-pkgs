@@ -1,0 +1,102 @@
+# Created with Devicie using komac v2.15.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: CyberTimon.RapidRAW
+PackageVersion: 1.5.2
+PackageLocale: en-US
+Publisher: Timon Käch
+PublisherUrl: https://github.com/CyberTimon
+PublisherSupportUrl: https://github.com/CyberTimon/RapidRAW/issues
+Author: Timon Käch
+PackageName: RapidRAW
+PackageUrl: https://github.com/CyberTimon/RapidRAW
+License: AGPL-3.0
+LicenseUrl: https://github.com/CyberTimon/RapidRAW/blob/HEAD/LICENSE
+ShortDescription: A beautiful, non-destructive, and GPU-accelerated RAW image editor built with performance in mind.
+Description: |-
+  RapidRAW is a modern, high-performance alternative to Adobe Lightroom®. It delivers a simple, beautiful editing experience in a lightweight package (under 20MB) for Windows, macOS, and Linux.
+
+  RapidRAW is for photographers who love to edit their photos in a clean, fast, and simple workflow. It prioritizes speed, a beautiful user interface, and powerful tools that let you achieve your creative color vision quickly.
+
+  It is not for users who seek absolute, perfect color accuracy. While the results are great for most purposes, the focus is on a fluid, creative process rather than perfect color precision.
+
+  RapidRAW is still in active development and isn't yet as polished as mature tools like Darktable, RawTherapee, or Adobe Lightroom®. Right now, the focus is on building a fast, enjoyable core editing experience. You may encounter bugs - if you do, please report them so I can fix them :) Your feedback really helps!
+Moniker: rapidraw
+Tags:
+- color-grading
+- editing
+- image-processing
+- masks
+- raw
+- react
+- rust
+- tauri
+ReleaseNotes: |-
+  This update is packed with new editing tools and smarter processing. I've added AI-powered denoising based on nind-denoise, a full image analytics panel with waveforms and scopes, and new parametric masking options for targeting specific colors or luminance zones. Subject masking has also been upgraded with SAM-2 models and single-click selection. On the export side, there's now support for JPEG XL, WebP, and CUBE LUTs - the last one being great if you want to bring color grades from RapidRAW into a video editor. Under the hood, I've added an LRU cache for instant image switching and region-of-interest rendering, which makes editing while zoomed in significantly faster.
+  New Features
+  NIND Denoising
+  Previously, RapidRAW only had a traditional BM3D denoiser. It produced decent results, but it was never really competitive with the newer AI-based denoising methods found in other software.
+  So I'm excited to introduce a new denoising method based on nind-denoise. It can be applied directly to RAW images to naturally remove noise while preserving detail.
+  The results speak for themselves:
+  ───────────────┬───────────┬───────────
+  Original       │BM3D       │NIND
+  ───────────────┼───────────┼───────────
+  Original       │BM3D       │NIND
+  ───────────────┴───────────┴───────────
+  Due to dependency limitations, NIND denoise is not yet GPU accelerated, so it will take some time to process each image. In future versions, once things have matured, I plan to support batch denoising and move the processing over to the RapidRAW AI Connector, which supports GPU acceleration.
+  Credits for this denoising method go to @trougnouf's nind-denoise.
+  Image Analytics Panel
+  RapidRAW now features a switchable image analytics panel, giving you multiple ways to exactly visualize what's going on with your edit in real time.
+  Supported modes:
+  - Luma Waveform
+  - RGB Waveform
+  - RGB Parade
+  - Vectorscope
+  - RGB Histogram
+  Parametric Color & Luminance Masks
+  I've added two new mask types that let you quickly target specific color ranges or luminance zones in your image.
+  Parametric Masks
+  Single Point Subject Masks
+  This release ships with updated, more accurate, and higher resolution AI subject detection models based on SAM-2. On top of that, I've implemented single point masking - just click on your subject and it gets selected. No need to draw a bounding box around it first.
+  Single Point Subject Mask
+  JPEG XL, WebP, and Additional Format Support
+  This update adds support for a bunch of new export formats, including JPEG XL, WebP, and CUBE LUTs. The LUT export is something I'm particularly happy about: You can screenshot a frame from your video editor, color grade it in RapidRAW, export the result as a LUT, and then apply that same color grade back in the video editor at full quality.
+  Export formats
+  LRU Cache
+  RapidRAW now keeps recently viewed images in a cache, so switching between them is instant and seamless. This is especially useful when you're culling and need to quickly flip back and forth to check focus.
+  ROI Rendering
+  Previously, dragging sliders while zoomed in would lag and stutter because the entire image was being reprocessed on every change. Now RapidRAW only processes the region that's actually visible in the viewport, which gives a huge speedup when editing zoomed in.
+  Core Improvements
+  - Improved tonemapper & shader, particularly how it behaves within masked regions
+  - Refined keybinds across the app for a smoother editing workflow
+  - Various UI polish and visual tweaks
+  - A ton of bug fixes under the hood - too many to list individually ;)
+  What to Download
+  ─────────────────────┬────────────┬──────┬──────────────────────────────
+  OS                   │Architecture│Format│Download Link
+  ─────────────────────┼────────────┼──────┼──────────────────────────────
+  Windows              │x64         │.exe  │RapidRAW for Windows
+  ─────────────────────┼────────────┼──────┼──────────────────────────────
+  macOS (Apple Silicon)│ARM64       │.dmg  │RapidRAW for macOS ARM
+  ─────────────────────┼────────────┼──────┼──────────────────────────────
+  macOS (Intel)        │x64         │.dmg  │RapidRAW for macOS x64
+  ─────────────────────┼────────────┼──────┼──────────────────────────────
+  Ubuntu 22.04         │x86_64      │.deb  │RapidRAW for Ubuntu 22.04
+  ─────────────────────┼────────────┼──────┼──────────────────────────────
+  Ubuntu 24.04         │x86_64      │.deb  │RapidRAW for Ubuntu 24.04
+  ─────────────────────┴────────────┴──────┴──────────────────────────────
+  For other platforms and formats (ARM builds, RPM, AppImage, etc.), check the full asset list below.
+  Running on Windows, macOS and Linux
+  RapidRAW is not yet code-signed, so Windows and macOS may show warnings when launching the app. On Linux, GPU driver differences require a default compatibility mode.
+  - Windows: When launching the app, you may see a Windows Defender SmartScreen warning.
+    - Click "More info" → "Run anyway" to proceed.
+  - macOS: You'll need to remove the quarantine flag after installation, otherwise macOS may report the app as corrupted:
+  xattr -dr com.apple.quarantine /Applications/RapidRAW.app
+  - Linux: The app starts in compatibility mode by default to ensure stability across different GPU drivers and distributions.
+    - Disable compatibility mode in Settings to enable full GPU acceleration.
+ReleaseNotesUrl: https://github.com/CyberTimon/RapidRAW/releases/tag/v1.5.2
+Documentations:
+- DocumentLabel: Documentation & Tutorials
+  DocumentUrl: https://github.com/CyberTimon/RapidRAW-Docs
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,79 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Anthropic.ClaudeCode
+PackageVersion: 2.1.84
+PackageLocale: en-US
+Publisher: Anthropic PBC
+Author: Anthropic PBC
+PackageName: Claude Code
+License: Proprietary
+Copyright: © 2026 Anthropic PBC
+ShortDescription: Unleash Claude’s raw power directly in your terminal. Search million-line codebases instantly. Turn hours-long workflows into a single command. Your tools. Your workflow. Your codebase, evolving at thought speed.
+Description: |-
+  Claude Code is Anthropic’s agentic coding tool that lives in your terminal and helps you turn ideas into code faster than ever before.
+  What Claude Code does for you
+  - Build features from descriptions: Tell Claude what you want to build in plain English. It will make a plan, write the code, and ensure it works.
+  - Debug and fix issues: Describe a bug or paste an error message. Claude Code will analyze your codebase, identify the problem, and implement a fix.
+  - Navigate any codebase: Ask anything about your team’s codebase, and get a thoughtful answer back. Claude Code maintains awareness of your entire project structure, can find up-to-date information from the web, and with MCP can pull from external datasources like Google Drive, Figma, and Slack.
+  - Automate tedious tasks: Fix fiddly lint issues, resolve merge conflicts, and write release notes. Do all this in a single command from your developer machines, or automatically in CI.
+  Why developers love Claude Code
+  - Works in your terminal: Not another chat window. Not another IDE. Claude Code meets you where you already work, with the tools you already love.
+  - Takes action: Claude Code can directly edit files, run commands, and create commits. Need more? MCP lets Claude read your design docs in Google Drive, update your tickets in Jira, or use your custom developer tooling.
+  - Unix philosophy: Claude Code is composable and scriptable. tail -f app.log | claude -p "Slack me if you see any anomalies appear in this log stream" works. Your CI can run claude -p "If there are new text strings, translate them into French and raise a PR for @lang-fr-team to review".
+  - Enterprise-ready: Use Anthropic’s API, or host on AWS or GCP. Enterprise-grade security, privacy, and compliance is built-in.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- claude
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  - Added PowerShell tool for Windows as an opt-in preview. Learn more at https://code.claude.com/docs/en/tools-reference#powershell-tool
+  - Added ANTHROPIC_DEFAULT_{OPUS,SONNET,HAIKU}_MODEL_SUPPORTS env vars to override effort/thinking capability detection for pinned default models for 3p (Bedrock, Vertex, Foundry), and _MODEL_NAME/_DESCRIPTION to customize the /model picker label
+  - Added CLAUDE_STREAM_IDLE_TIMEOUT_MS env var to configure the streaming idle watchdog threshold (default 90s)
+  - Added TaskCreated hook that fires when a task is created via TaskCreate
+  - Added WorktreeCreate hook support for type: "http" — return the created worktree path via hookSpecificOutput.worktreePath in the response JSON
+  - Added allowedChannelPlugins managed setting for team/enterprise admins to define a channel plugin allowlist
+  - Added x-client-request-id header to API requests for debugging timeouts
+  - Added idle-return prompt that nudges users returning after 75+ minutes to /clear, reducing unnecessary token re-caching on stale sessions
+  - Deep links (claude-cli://) now open in your preferred terminal instead of whichever terminal happens to be first in the detection list
+  - Rules and skills paths: frontmatter now accepts a YAML list of globs
+  - MCP tool descriptions and server instructions are now capped at 2KB to prevent OpenAPI-generated servers from bloating context
+  - MCP servers configured both locally and via claude.ai connectors are now deduplicated — the local config wins
+  - Background bash tasks that appear stuck on an interactive prompt now surface a notification after ~45 seconds
+  - Token counts ≥1M now display as "1.5m" instead of "1512.6k"
+  - Global system-prompt caching now works when ToolSearch is enabled, including for users with MCP tools configured
+  - Fixed voice push-to-talk: holding the voice key no longer leaks characters into the text input, and transcripts now insert at the correct position
+  - Fixed up/down arrow keys being unresponsive when a footer item is focused
+  - Fixed Ctrl+U (kill-to-line-start) being a no-op at line boundaries in multiline input, so repeated Ctrl+U now clears across lines
+  - Fixed null-unbinding a default chord binding (e.g. "ctrl+x ctrl+k": null) still entering chord-wait mode instead of freeing the prefix key
+  - Fixed mouse events inserting literal "mouse" text into transcript search input
+  - Fixed workflow subagents failing with API 400 when the outer session uses --json-schema and the subagent also specifies a schema
+  - Fixed missing background color behind certain emoji in user message bubbles on some terminals
+  - Fixed the "allow Claude to edit its own settings for this session" permission option not sticking for users with Edit(.claude) allow rules
+  - Fixed a hang when generating attachment snippets for large edited files
+  - Fixed MCP tool/resource cache leak on server reconnect
+  - Fixed a startup performance issue where partial clone repositories (Scalar/GVFS) triggered mass blob downloads
+  - Fixed native terminal cursor not tracking the text input caret, so IME composition (CJK input) now renders inline and screen readers can follow the input position
+  - Fixed spurious "Not logged in" errors on macOS caused by transient keychain read failures
+  - Fixed cold-start race where core tools could be deferred without their bypass active, causing Edit/Write to fail with InputValidationError on typed parameters
+  - Improved detection for dangerous removals of Windows drive roots (C:\, C:\Windows, etc.)
+  - Improved interactive startup by ~30ms by running setup() in parallel with slash command and agent loading
+  - Improved startup for claude "prompt" with MCP servers — the REPL now renders immediately instead of blocking until all servers connect
+  - Improved Remote Control to show a specific reason when blocked instead of a generic "not yet enabled" message
+  - Improved p90 prompt cache rate
+  - Reduced scroll-to-top resets in long sessions by making the message window immune to compaction and grouping changes
+  - Reduced terminal flickering when animated tool progress scrolls above the viewport
+  - Changed issue/PR references to only become clickable links when written as owner/repo#123 — bare #123 is no longer auto-linked
+  - Slash commands unavailable for the current auth setup (/voice, /mobile, /chrome, /upgrade, etc.) are now hidden instead of shown
+  - [VSCode] Added rate limit warning banner with usage percentage and reset time
+  - Stats screenshot (Ctrl+S in /stats) now works in all builds and is 16× faster
+ReleaseNotesUrl: https://github.com/anthropics/claude-code/blob/HEAD/CHANGELOG.md#2184
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
