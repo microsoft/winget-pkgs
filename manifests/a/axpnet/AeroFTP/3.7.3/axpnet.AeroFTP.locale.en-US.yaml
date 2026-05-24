@@ -1,0 +1,61 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: axpnet.AeroFTP
+PackageVersion: 3.7.3
+PackageLocale: en-US
+Publisher: axpnet
+PublisherUrl: https://github.com/axpnet
+PublisherSupportUrl: https://github.com/axpnet/aeroftp/issues
+Author: axpnet
+PackageName: AeroFTP
+PackageUrl: https://github.com/axpnet/aeroftp
+License: GPL-3.0
+LicenseUrl: https://github.com/axpdev-lab/aeroftp/blob/HEAD/LICENSE
+ShortDescription: A modern, multi-protocol file manager and FTP client with integrated AI, cloud sync, and military-grade encryption.
+Description: |-
+  AeroFTP is an open-source, multi-protocol file manager built with Tauri 2 (Rust + React 18 + TypeScript).
+  It supports 16 protocols (FTP, FTPS, SFTP, WebDAV, S3, Google Drive, Dropbox, OneDrive, MEGA, Box, pCloud, Azure Blob, 4shared, Filen, Zoho WorkDrive, and Cryptomator vaults),
+  features an AI assistant with 45 tools and 15 LLM providers, military-grade encrypted vaults (AES-256-GCM-SIV + Argon2id),
+  bidirectional real-time sync, a built-in code editor, SSH terminal, and media player with visualizers.
+  Available in 47 languages with 4 themes.
+Moniker: aeroftp
+Tags:
+- cloud-storage
+- encryption
+- file-manager
+- file-transfer
+- ftp
+- ftp-client
+- multi-protocol
+- rust
+- s3
+- sftp
+- sync
+- tauri
+- webdav
+ReleaseNotes: |-
+  [3.7.3] - 2026-05-06
+  Community Benchmark (Phase 1) + CI / UX fixes
+  Added
+  - aeroftp-cli benchmark CLI command: schema-v1 conforming, sanitization-enforced community benchmark across upload, download, list, stat, and delete operations. Four levels are available (quick, standard, deep, custom). Output is anonymized: no hostnames, paths, credentials, usernames, or bucket names are written to the report. See docs/COMMUNITY-BENCHMARK.md and the new Community Benchmark Report Issue template to participate.
+  - Community Benchmark public guide: docs/COMMUNITY-BENCHMARK.md explains why the dataset exists, how to run each benchmark level, what the JSON report contains, what is never collected, how to submit a report manually, and how the 2-month Phase 2 decision gate works.
+  - Benchmark report Issue template: .github/ISSUE_TEMPLATE/benchmark-report.yml accepts sanitized JSON reports with coarse region and connection-type metadata, keeping Phase 1 human-reviewed and consent-based.
+  Fixed
+  - Windows titlebar: modal close buttons (X) within the upper 36 px were blocked by an overly wide drag region. Drag is preserved by the two explicit child elements (logo + spacer), while interactive controls can receive their first click.
+  - ImageKit listing rejected by API: the provider was sending type=file-and-folder to ImageKit's /files endpoint, which is not in the API's accepted set (file | file-version | folder | all). Every list call after a successful authentication failed with Invalid configuration: Your request contains invalid value for type parameter. Switched to type=all, which returns the folder + file mix the rest of the provider already consumes.
+  - ImageKit listing decode error on folder rows: with type=all, ImageKit emits an explicit JSON null for fields that only make sense on file entries (size, tags, mime, fileType, dimensions). #[serde(default)] only fires on missing keys and tripped on null, so the response refused to deserialize against Vec<IkFile> and the connection failed with Parse error: error decoding response body. Added a null_to_default deserializer helper applied to every non-Option field that the API can return as null for folder rows.
+  - Activity log "Authenticated as htt*"**: maskCredential() was masking provider account identifiers that happen to be public URLs (ImageKit's URL Endpoint ID, Uploadcare's, self-hosted WebDAV / Immich) as the unhelpful three-char prefix. The endpoint URL is not secret. The helper now detects https://... and returns host + pathname unmasked, so the log reads Authenticated as ik.imagekit.io/aeroftp instead. AKIA / email / generic-username masking unchanged.
+  - benchmark CLI ignored profile initial path: the working directory was anchored at the remote root (/.aeroftp-bench/...) regardless of the profile's initialPath. On read-only roots the benchmark failed before any measurement. Now anchored under the resolved profile base, so cleanup, leak grep and report paths share a single, profile-respecting prefix. Warm-up upload errors are also fatal now, instead of being swallowed into a summary.errors=[] "0 runs" report.
+  - IntroHub redundant + New button merged into Discover tab (#171): the standalone "+ New" button next to the tab strip and the "Discover Services" tab opened the exact same destination. Reported by @legion1978: two side-by-side controls for one action confused the onboarding instead of clarifying it. The "+ New" button has been removed; the Discover tab is now labeled Add Service (translated in 47 languages) and uses a circled-plus icon to keep the affordance explicit. The Ctrl+N shortcut and the empty-state quick-connect still route to the same tab.
+  CI
+  - Snap build: Tauri release binary is now built inside the build-snap job before snapcore/action-build. The job pulls libnghttp2-14 patched against USN-8233-1 from the Ubuntu archive at build time.
+  - build-snap no longer silently green: dropped continue-on-error from the actual build step and switched the post-build confirm step to fail-loud (exit 1 on missing or sub-10 MB output). The v3.7.2 deploy of the dedicated job ran with continue-on-error: true masking a real failure as success and skipping the downstream sigstore / GitHub Release / Snap Store steps. With this change a snap regression now blocks the release like deb / rpm / AppImage do.
+  Downloads:
+  - Windows: .msi installer, .exe, or .zip portable (no installation required)
+  - macOS: .dmg disk image
+  - Linux: .deb, .rpm, .snap, or .AppImage
+  Download AeroFTP
+ReleaseNotesUrl: https://github.com/axpdev-lab/aeroftp/releases/tag/v3.7.3
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

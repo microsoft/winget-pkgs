@@ -1,0 +1,74 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: zizmor.zizmor
+PackageVersion: 1.25.0
+PackageLocale: en-US
+Publisher: William Woodruff
+PublisherUrl: https://zizmor.sh/
+PublisherSupportUrl: https://github.com/zizmorcore/zizmor/issues
+Author: William Woodruff
+PackageName: zizmor
+PackageUrl: https://zizmor.sh/
+License: MIT
+LicenseUrl: https://github.com/zizmorcore/zizmor/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2024 William Woodruff <william @ yossarian.net>
+CopyrightUrl: https://github.com/zizmorcore/zizmor/blob/HEAD/LICENSE
+ShortDescription: Static analysis for GitHub Actions.
+Description: |-
+  zizmor is a static analysis tool for GitHub Actions.
+
+  It can find many common security issues in typical GitHub Actions CI/CD setups, including:
+  - Template injection vulnerabilities, leading to attacker-controlled code execution
+  - Accidental credential persistence and leakage
+  - Excessive permission scopes and credential grants to runners
+  - Impostor commits and confusable git references
+  - ...and much more!
+Tags:
+- github-actions
+- security
+- security-tools
+- static-analysis
+ReleaseNotes: |-
+  New Features 🌈🔗
+  - zizmor's finding severities can now be remapped on a per-audit basis. See the configuration for details (#1913)
+    Many thanks to @Proximyst for proposing and implementing this improvement!
+  - New audit: github-app detects dangerous usages of GitHub App installation tokens (#1926)
+  - New audit: [unpinned-tools] detects actions that install tools without pinning to a specific version (#1820)
+  - zizmor now accepts the --no-ignores flag to disable all ignore comments and configurations when reporting findings (#1935)
+  - zizmor's LSP now honors the --persona flag on the CLI (#1943)
+  - zizmor is now aware of Docker-based action definitions, in addition to the pre-existing support for "composite" actions (#1965)
+
+  Enhancements🔗
+  - Recommend gh issue edit --add-label / gh pr edit --add-label as a replacement for actions-ecosystem/action-add-labels in superfluous-actions
+  - Recommend gh issue edit --remove-label / gh pr edit --remove-label as a replacement for actions-ecosystem/action-remove-labels in superfluous-actions
+  - Recommend jq as a replacement for sergeysova/jq-action in superfluous-actions
+  - Recommend git add, git commit, and git push as a replacement for stefanzweifel/git-auto-commit-action in superfluous-actions
+  - Recommend git add, git commit, and git push as a replacement for EndBug/add-and-commit in superfluous-actions
+  - tibdex/github-app-token is now recognized as an archived action by archived-uses (#1910)
+  - The [dangerous-triggers] audit now explicitly exempts workflows that only invoke actions/labeler (#1956)
+  - The unpinned-images audit now detects unpinned image references in Docker-based action definitions (#1965)
+  - zizmor's SARIF output now provides slightly more detailed finding messages (#1972)
+  - The archived-uses audit now detects more archived actions (#1978)
+  - deno is now recognized as a package-ecosystem in dependabot.yml (#1991)
+
+  Performance Improvements 🚄🔗
+  - The impostor-commit audit is now significantly faster (in addition to being more correct) when the user has pinned their action to a tag SHA instead of a commit SHA (#1998)
+    Bug Fixes 🐛🔗
+  - Fixed a crash in the template-injection audit when a workflow uses a parenthesized compound expression in context position (#1904)
+  - Fixed a bug where local directory input collection could miss workflows for relative-path invocations from within .github subdirectories (#1909)
+  - Fixed a bug where the unpinned-images audit would miss images defined in container: clauses (#1944)
+  - Fixed a bug where inline ignore comments could not be easily applied to superfluous-actions findings (#1945)
+  - Fixed a bug where the cache-poisoning audit would fail to detect some release trigger patterns (#1946)
+  - Fixed a bug where inline ignore comments could not be easily applied to cache-poisoning findings (#1962)
+  - Fixed a class of imprecisions where the cache-poisoning audit would incorrectly flag cache usage that doesn't actually occur on release events (#1940)
+    Many thanks to @reubenwong97 for implementing this fix!
+  - Fixed a bug where dependabot.yml files containing a private cargo repository couldn't be parsed (#1976)
+  - Fixed a bug where zizmor's input validation warnings lacked a mention of which files failed to validate (#1980)
+  - Fixed a bug where the impostor-commit audit would falsely indicate impostor commits if an action was pinned to a tag SHA instead of a commit SHA (#1998)
+ReleaseNotesUrl: https://github.com/zizmorcore/zizmor/releases/tag/v1.25.0
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://docs.zizmor.sh/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
