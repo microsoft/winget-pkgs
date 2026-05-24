@@ -236,7 +236,7 @@ if ($Settings) {
   exit
 }
 
-$ScriptHeader = '# Created with YamlCreate.ps1 v2.7.1'
+$ScriptHeader = '# Created with YamlCreate.ps1 v2.7.2'
 $ManifestVersion = '1.12.0'
 $PSDefaultParameterValues = @{ '*:Encoding' = 'UTF8' }
 $Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
@@ -1981,8 +1981,8 @@ Function Read-PRBody {
     # | Where-Object { $_ -like '-*[ ]*' }))
     if ($_line -like '-*[ ]*' ) {
       $_showMenu = $true
-      switch -Wildcard ( $_line ) {
-        '*CLA*' {
+      switch -Regex ( $_line ) {
+        '(?i)CLA' {
           if ($ScriptSettings.SignedCLA -eq 'true') {
             $PrBodyContent = $PrBodyContent.Replace($_line, $_line.Replace('[ ]', '[x]'))
             $_showMenu = $false
@@ -1997,7 +1997,7 @@ Function Read-PRBody {
           }
         }
 
-        '*open `[pull requests`]*' {
+        '(?i)open \[pull requests\]' {
           $_menu = @{
             Prompt        = "Have you checked that there aren't other open pull requests for the same manifest update/change?"
             Entries       = @('[Y] Yes'; '*[N] No')
@@ -2007,7 +2007,7 @@ Function Read-PRBody {
           }
         }
 
-        '*winget validate*' {
+        '(?i)winget validate' {
           if ($? -and $(Get-Command 'winget' -ErrorAction SilentlyContinue)) {
             $PrBodyContent = $PrBodyContent.Replace($_line, $_line.Replace('[ ]', '[x]'))
             $_showMenu = $false
@@ -2024,7 +2024,7 @@ Function Read-PRBody {
           }
         }
 
-        '*tested your manifest*' {
+        '(?i)tested .* ?manifest' {
           if ($script:SandboxTest -eq '0') {
             $PrBodyContent = $PrBodyContent.Replace($_line, $_line.Replace('[ ]', '[x]'))
             $_showMenu = $false
@@ -2041,7 +2041,7 @@ Function Read-PRBody {
           }
         }
 
-        '*schema*' {
+        '(?i)schema' {
           if ($script:Option -ne 'RemoveManifest') {
             $_Match = ($_line | Select-String -Pattern 'https://+.+(?=\))').Matches.Value
             $_menu = @{
@@ -2056,12 +2056,12 @@ Function Read-PRBody {
           }
         }
 
-        '*only modifies one*' {
+        '(?i)(only)? modifies one' {
           $PrBodyContent = $PrBodyContent.Replace($_line, $_line.Replace('[ ]', '[x]'))
           $_showMenu = $false
         }
 
-        '*linked issue*' {
+        '(?i)linked .* ?issue' {
           # Linked issues is handled as a separate prompt below so that the issue numbers can be gathered
           $_showMenu = $false
         }

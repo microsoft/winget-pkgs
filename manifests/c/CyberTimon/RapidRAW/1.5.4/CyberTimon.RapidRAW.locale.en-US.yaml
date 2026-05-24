@@ -1,0 +1,102 @@
+# Created with Devicie using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: CyberTimon.RapidRAW
+PackageVersion: 1.5.4
+PackageLocale: en-US
+Publisher: Timon Käch
+PublisherUrl: https://github.com/CyberTimon
+PublisherSupportUrl: https://github.com/CyberTimon/RapidRAW/issues
+Author: Timon Käch
+PackageName: RapidRAW
+PackageUrl: https://github.com/CyberTimon/RapidRAW
+License: AGPL-3.0
+LicenseUrl: https://github.com/CyberTimon/RapidRAW/blob/HEAD/LICENSE
+ShortDescription: A beautiful, non-destructive, and GPU-accelerated RAW image editor built with performance in mind.
+Description: |-
+  RapidRAW is a modern, high-performance alternative to Adobe Lightroom®. It delivers a simple, beautiful editing experience in a lightweight package (under 20MB) for Windows, macOS, and Linux.
+
+  RapidRAW is for photographers who love to edit their photos in a clean, fast, and simple workflow. It prioritizes speed, a beautiful user interface, and powerful tools that let you achieve your creative color vision quickly.
+
+  It is not for users who seek absolute, perfect color accuracy. While the results are great for most purposes, the focus is on a fluid, creative process rather than perfect color precision.
+
+  RapidRAW is still in active development and isn't yet as polished as mature tools like Darktable, RawTherapee, or Adobe Lightroom®. Right now, the focus is on building a fast, enjoyable core editing experience. You may encounter bugs - if you do, please report them so I can fix them :) Your feedback really helps!
+Moniker: rapidraw
+Tags:
+- color-grading
+- editing
+- image-processing
+- masks
+- raw
+- react
+- rust
+- tauri
+ReleaseNotes: |-
+  This update brings a boost in rendering speed, a reworked preset system, and the first steps onto Android. I've built a direct WGPU renderer that skips the usual webview overhead, making the app feel incredibly fast. I've also rewritten the presets system so you can now create "Tool" presets that stack on top of your edits, and you can finally save masks and crops into them. On top of that, there's a new mask intersect mode alongside new flow masks, and several highly requested workflow improvements like batch denoising or keeping EXIF data for stitched and denoised files.
+  New Features
+  Direct WGPU Renderer
+  I've implemented a direct WGPU renderer that bypasses Tauri's standard communication and browser decoding. It essentially draws a native window behind the webview, making the editing experience noticeably smoother.
+  Note for especially Linux users: This new renderer is currently experimental and not available on Linux. Tauri uses GTK for webviews on Linux, which conflicts with WGPU on the same screen surface and causes flickering. To keep things stable, Linux versions will safely default to the standard webview renderer for now. For more informations, check this issue: tauri-apps/tauri#9220.
+  Reworked Presets System
+  The presets system has been completely rebuilt to give you more flexibility in your workflow.
+  - Style vs. Tool Presets: You can now set a preset to be a "Style" (which overwrites the entire image's settings) or a "Tool" (which acts additively, blending new changes on top of your current edit).
+  - Mask & Crop Support: You can now save your masks and crops directly into your presets.
+  image
+  Experimental Android Support
+  I'm excited to officially bring RapidRAW to Android! This is an early, experimental build, so you might run into a few bugs. Currently, the UI is specifically optimized for tablets (it will not display properly on phones yet). General editing and masking are working nicely.
+  The AI tools require a lot of memory, so I highly recommend testing this on an Android device with at least 8 GB of RAM.
+  Many thanks to @Duecki1 for the support in releasing RapidRAW for Android.
+  Intersecting Masks
+  You can now easily intersect masks, making complex masking workflows simpler and more precise.
+  image
+  Flow Masks
+  The new Flow Mask type works like an additive brush. It builds up strength when you paint over the same area multiple times, which is perfect for dodge and burn adjustments.
+  image
+  Copy/Paste Upgrades
+  You can now copy and paste masks and crops between images! This is turned off by default to prevent accidental overwrites, but you can easily enable it in the copy/paste settings.
+  image
+  Fluid Canvas Navigation
+  I've completely rewritten the engine for zooming, panning, and pinching on the canvas. Trackpad users on macOS will notice it finally feels completely native and smooth.
+  Windows users: There is currently a minor gesture quirk on Windows, so you will need to hold down CTRL while using a two-finger scroll to zoom. A more seamless fix is planned for a future update!
+  Retaining EXIF Data
+  Denoised and stitched images now keep their original EXIF data (saved using the new .rrexif format). This means you will no longer lose your lens correction profiles, capture dates, or export data when running these intensive processes.
+  Core Improvements
+  - Better Auto-Adjust: The auto-adjustment algorithm has been greatly improved to deliver faster, more accurate results.
+  - Redesigned Color Wheels: The color grading wheels have been redesigned for a clean, consistent look and now feature dynamic sliders.
+  - Batch Processing Upgrades: I've added batch denoising and a new option to preserve your exact folder structure when exporting in batches.
+  - AVIF Export: Added support for AVIF export.
+  - Removed mask limits.
+  - Improved the downscaling algorithm so you feel less of a difference when dragging sliders.
+  - Fixed bugs that occurred when rapidly switching between images.
+  - General UI polish, bug fixes & usability improvements.
+  What to Download
+  ────────────────────────┬────────────┬──────┬───────────────────────────────────────
+  OS                      │Architecture│Format│Download Link
+  ────────────────────────┼────────────┼──────┼───────────────────────────────────────
+  Windows                 │x64         │.exe  │RapidRAW for Windows
+  ────────────────────────┼────────────┼──────┼───────────────────────────────────────
+  macOS (Apple Silicon)   │ARM64       │.dmg  │RapidRAW for macOS ARM
+  ────────────────────────┼────────────┼──────┼───────────────────────────────────────
+  macOS (Intel)           │x64         │.dmg  │RapidRAW for macOS x64
+  ────────────────────────┼────────────┼──────┼───────────────────────────────────────
+  Ubuntu 22.04            │x86_64      │.deb  │RapidRAW for Ubuntu 22.04
+  ────────────────────────┼────────────┼──────┼───────────────────────────────────────
+  Ubuntu 24.04            │x86_64      │.deb  │RapidRAW for Ubuntu 24.04
+  ────────────────────────┼────────────┼──────┼───────────────────────────────────────
+  Android (Tablet UI only)│ARM64       │.apk  │RapidRAW for Android ^{(Experimental)}
+  ────────────────────────┴────────────┴──────┴───────────────────────────────────────
+  For other platforms and formats (ARM builds, RPM, AppImage, etc.), check the full asset list below.
+  Running on Windows, macOS and Linux
+  RapidRAW is not yet code-signed, so Windows and macOS may show warnings when launching the app. On Linux, GPU driver differences require a default compatibility mode.
+  - Windows: When launching the app, you may see a Windows Defender SmartScreen warning.
+    - Click "More info" → "Run anyway" to proceed.
+  - macOS: You'll need to remove the quarantine flag after installation, otherwise macOS may report the app as corrupted:
+  xattr -dr com.apple.quarantine /Applications/RapidRAW.app
+  - Linux: The app starts in compatibility mode by default to ensure stability across different GPU drivers and distributions.
+    - Disable compatibility mode in Settings to enable GPU acceleration.
+ReleaseNotesUrl: https://github.com/CyberTimon/RapidRAW/releases/tag/v1.5.4
+Documentations:
+- DocumentLabel: Documentation & Tutorials
+  DocumentUrl: https://github.com/CyberTimon/RapidRAW-Docs
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

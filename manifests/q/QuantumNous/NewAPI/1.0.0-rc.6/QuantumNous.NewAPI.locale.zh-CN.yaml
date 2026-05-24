@@ -1,0 +1,68 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: QuantumNous.NewAPI
+PackageVersion: 1.0.0-rc.6
+PackageLocale: zh-CN
+Publisher: Quantum Nous
+PublisherUrl: https://www.newapi.ai/
+PublisherSupportUrl: https://www.newapi.ai/support/
+Author: 锟腾科技（杭州）有限公司
+PackageName: New API
+PackageUrl: https://www.newapi.ai/
+License: AGPL-3.0
+LicenseUrl: https://github.com/QuantumNous/new-api/blob/HEAD/LICENSE
+Copyright: Copyright © 2026 Quantum Nous. All Rights Reserved.
+ShortDescription: 新一代大模型网关与 AI 资产管理系统
+Description: New API 是一个新一代大模型网关与 AI 资产管理系统，基于 One API 进行二次开发。该项目旨在提供一个统一的接口来管理和使用各种 AI 模型服务，包括但不限于 OpenAI、Anthropic、Gemini和 Midjourney 等。
+Tags:
+- anthropic-api
+- openai-api
+- openai-response
+- 人工智能
+- 大语言模型
+- 聊天机器人
+ReleaseNotes: |-
+  Highlights
+  This release improves observability by recording upstream request IDs in logs and adds a compliance confirmation step for paid features. If your logs table is large, pre-apply the upstream_request_id column and index with online DDL before upgrading to avoid a potentially long migration.
+  New Features
+  - Added upstream request ID tracking in request logs for easier upstream call tracing, while avoiding unintended response header overrides.
+  - Added a compliance confirmation step before paid features can be used.
+  Bug Fixes
+  - Fixed the channel combobox so focusing it no longer hides valid channel options (#4829).
+  Other
+  - Upgrade notice: the logs table now includes a new upstream_request_id column and index; on large installations, run the appropriate online DDL below before upgrading to avoid a long or blocking automatic migration.
+  MySQL / InnoDB:
+  -- 1. Add the column using online DDL.
+  ALTER TABLE logs
+    ADD COLUMN upstream_request_id VARCHAR(128) NOT NULL DEFAULT '',
+    ALGORITHM=INPLACE, LOCK=NONE;
+
+  -- 2. Add the index using online DDL.
+  ALTER TABLE logs
+    ADD INDEX idx_logs_upstream_request_id (upstream_request_id),
+    ALGORITHM=INPLACE, LOCK=NONE;
+  PostgreSQL 11+:
+  -- 1. Add the column without rewriting the table on PG 11+.
+  ALTER TABLE logs
+    ADD COLUMN IF NOT EXISTS upstream_request_id VARCHAR(128) NOT NULL DEFAULT '';
+
+  -- 2. Add the index concurrently to avoid blocking reads and writes.
+  CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_logs_upstream_request_id
+    ON logs (upstream_request_id);
+
+  What's Changed
+  - chore(deps): bump axios from 1.15.0 to 1.15.2 in /web/classic by @dependabot[bot] in https://github.com/QuantumNous/new-api/pull/4634
+  - chore(deps-dev): bump ip-address from 10.1.0 to 10.2.0 in /electron by @dependabot[bot] in https://github.com/QuantumNous/new-api/pull/4811
+  - 修复渠道列表显示不全问题 by @feitianbubu in https://github.com/QuantumNous/new-api/pull/4829
+  Full Changelog: https://github.com/QuantumNous/new-api/compare/v1.0.0-rc.5...v1.0.0-rc.6
+ReleaseNotesUrl: https://github.com/QuantumNous/new-api/releases/tag/v1.0.0-rc.6
+Documentations:
+- DocumentLabel: 使用指南
+  DocumentUrl: https://www.newapi.ai/guide/
+- DocumentLabel: 维基百科
+  DocumentUrl: https://www.newapi.ai/wiki/
+- DocumentLabel: 接口文档
+  DocumentUrl: https://www.newapi.ai/api/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
