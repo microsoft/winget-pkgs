@@ -1,0 +1,153 @@
+# Created using wingetcreate 1.12.8.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: fjrevoredo.MiniDiarium
+PackageVersion: 0.5.0
+PackageLocale: en-US
+Publisher: fjrevoredo
+PublisherUrl: https://mini-diarium.com/
+PublisherSupportUrl: https://github.com/fjrevoredo/mini-diarium/issues
+PrivacyUrl: https://github.com/fjrevoredo/mini-diarium/blob/master/docs/PRIVACY.md
+Author: Francisco J. Revoredo
+PackageName: Mini Diarium
+PackageUrl: https://github.com/fjrevoredo/mini-diarium
+License: MIT
+LicenseUrl: https://github.com/fjrevoredo/mini-diarium/blob/master/LICENSE
+Copyright: Copyright (c) 2026 Francisco J. Revoredo
+ShortDescription: Encrypted, local-first journaling app
+Description: A local-first journal with serious encryption. Free, open source, and never touches the internet.
+Moniker: mini-diarium
+Tags:
+- privacy
+- journaling
+- journal
+- diary
+- foss
+- open-source
+- rust
+ReleaseNotes: |-
+  What's Changed
+
+  v0.5.0 is the biggest Mini Diarium release to date, delivering substantial improvements on every
+  front. User-facing highlights include entry tags with calendar filtering, a first-run welcome tour,
+  expanded cross-app image drag-and-drop, a fully configurable editor toolbar with 17 individually
+  toggleable controls (including optional font family and size pickers), and smooth blur animations on
+  lock and unlock. On the internal side, the Rust backend and SolidJS frontend were each refactored
+  into focused, independently testable modules, test coverage was substantially expanded across both
+  layers, a multi-auth duplicate-credential vulnerability was fixed, network isolation was hardened
+  with additional defense-in-depth layers, and all user-facing documentation was brought fully up to
+  date.
+
+  Added
+
+  - IndexNow integration for the marketing website: all public URLs are now automatically submitted to
+    Bing, Yandex, Seznam, and other participating search engines via the IndexNow protocol. A new
+    scripts/submit-indexnow.mjs script reads the sitemap and submits URLs in bulk. A GitHub Actions
+    workflow (.github/workflows/indexnow.yml) enables manual submission after deployment, with an
+    automatic push trigger ready to be enabled once Coolify auto-deployment is configured. Run bun run
+    website:submit-indexnow to submit, or bun run website:submit-indexnow:dry-run to preview the
+    payload.
+  - Multi-auth duplicate-credential fix: unlockdiaryall_methods previously accepted the same
+    credential twice, allowing a single factor to satisfy both slots in a require-all-auth setup. The
+    backend now rejects duplicate slot IDs so each registered factor must be provided independently.
+  - Error message sanitization: several dialogs (import, statistics, journal picker, security
+    preferences, password creation) were displaying raw internal error strings that could leak
+    filesystem paths or library internals. All user-facing error messages are now sanitized before
+    display.
+  - Network isolation hardening: added defense-in-depth layers to prevent outbound network use from
+    within the WebView. Layers added: explicit connect-src 'self' ipc: http://ipc.localhost CSP
+    directive; worker-src 'none', child-src 'none', frame-src 'none', object-src 'none', form-action
+    'none', manifest-src 'none' CSP directives; document-start init script nulling RTCPeerConnection,
+    WebTransport, Worker, SharedWorker, navigator.serviceWorker, navigator.sendBeacon,
+    navigator.connection, and window.open in all frames; onnewwindow(Deny) handler blocking popup
+    creation on all platforms; Windows WebView2 WebResourceRequested COM handler; macOS
+    WKContentRuleList content-blocking rule; Windows installer outbound firewall rule (NSIS,
+    perMachine); removed devtools Cargo feature from release builds; added CI static check for
+    network-capable crates and APIs. (fetch/XMLHttpRequest/WebSocket/EventSource remain available for
+    IPC/local runtime communication and are constrained by CSP + platform handlers.)
+  - Tags for diary entries: entries can now be tagged with user-defined labels. A row of tag chips
+    appears below the title in the editor. Click + Add tag to type a new tag or pick an existing one
+    from the dropdown; click × on a chip to remove it. Tags are managed globally via Manage tags →
+    rename or delete any tag across all entries. Tag names are encrypted with AES-256-GCM (the same
+    key as entry content) so they are never stored as readable text in the database. A keyed
+    HKDF-SHA256 fingerprint enforces deduplication at the database level. Existing journals are
+    automatically migrated to schema v7 on next unlock.
+  - Tag filter: click a tag chip's name to activate a tag filter — the calendar in the sidebar narrows
+  its dot indicators to only show dates that have entries with that tag. A banner above the calendar
+  names the active filter and provides a × to clear it. Clicking the same chip again also clears it.
+  The filter persists across month navigation and is automatically cleared on journal lock or when the
+  filtered tag is deleted.
+  - First-run onboarding tour: creating a new journal now triggers a 3-step transparent overlay tour
+    that highlights key features — enabling the advanced toolbar (Preferences → Writing), importing
+    entries from other apps, and finding the online documentation. The tour can be minimized to a
+    floating help icon (?) in the bottom-right corner; clicking the icon shows a popover with Resume
+    Tour and Dismiss options. Pressing Escape while the tour is active minimizes it instead of
+    quitting the app. The tour fires only once per app profile and is permanently dismissed via the
+    popover or by completing all three steps; subsequent launches render nothing.
+  - Spotlight anchoring: each tour step now highlights its real target element — the editor toolbar
+  strip and the About button in the header are spotlit via a box-shadow cutout with the card
+  dynamically positioned adjacent and an arrow pointing at the target; for native OS elements outside
+  the webview (such as Import in the menu bar) a soft pulsing glow appears at the webview edge nearest
+  the item.
+  - Cross-application image drag-and-drop: dragging images from desktop apps that embed them as HTML
+    payloads now works, extending the existing file-manager and clipboard-paste paths. Two payload
+    types are handled: apps that inline images as data:image/... base64 sources (some Electron apps),
+    and apps that reference images as local file:// paths (e.g. Typora with file-linked images). All
+    dropped images pass through the same canvas resize pipeline (max 1200 px, re-encoded as JPEG or
+    PNG). The editor container shows a blue border highlight when a file-manager drag hovers over it.
+    When an image is dragged from a web browser or web app (where the drag payload only contains an
+    HTTPS URL), a dismissible banner explains that embedding is not possible because it would require
+    a network request — which the app never makes — and directs the user to use right-click → Copy
+    Image and paste instead.
+
+  Changed
+
+  - Unlock/lock transition animations: unlocking the journal now reveals the main view through a
+    blur-dissolve effect (encrypted fog lifting over ~1.4 s); locking plays the reverse — a blur fades
+    in over the content for ~700 ms while the backend closes the database, then the lock screen
+    appears. Both animations respect prefers-reduced-motion. The lock animation blocks pointer
+    interaction during the transition; all security operations (save flush, database close) run on the
+    same schedule as before — the timing change is cosmetic only.
+  - Internal refactoring: a large structured pass across the Rust backend and SolidJS frontend. No
+    user-facing behavior changes; all encryption and auth guarantees are preserved.
+  - Backend: the database query, schema/migration, and auth-command layers were each split into
+  focused modules. Encrypted row decoding and the locked-state guard are now centralized, so failures
+  surface as errors instead of being silently swallowed. The password, key-file, and multi-auth unlock
+  paths share a single auditable implementation; the local-only auto-unlock path remains intentionally
+  separate.
+  - Frontend: the security preferences panel and the rich-text editor were each broken into smaller,
+  independently testable components.
+  - Test coverage: command-level, security-preference, and editor-integration tests were added across
+  both layers; a CI check now enforces the error-sanitization rule going forward.
+  - Sticky editor toolbar: the formatting toolbar now stays pinned at the top of the scroll area while
+    scrolling through a long entry, so formatting controls remain accessible at all times without
+    scrolling back to the top. When multiple entries are stacked (multiple entries per day), each
+    toolbar independently sticks as its entry scrolls through the viewport.
+  - Central plugins directory: user .rhai plugins now live in {appdatadir}/plugins/ (e.g.
+    %APPDATA%\com.minidiarium\plugins\ on Windows) instead of the per-journal {journal_path}/plugins/
+    folder. Plugins are shared across all journals and loaded once at startup. On first launch after
+    upgrading, any .rhai scripts found in the old per-journal locations are automatically copied to
+    the new central directory (originals are left in place).
+  - Font family and font size in editor toolbar: the editor font family and font size can now be
+    changed directly from the editor toolbar without opening Preferences. Both controls appear as
+    compact dropdown selectors and are opt-in — enable them in Preferences → Writing → Toolbar items
+    (Font family and Font size are added at the bottom of every user's item list, disabled by
+    default). Existing users with a saved toolbar configuration automatically get the new items
+    appended. The dropdowns write directly to the saved preference, so the value is always in sync
+    with the Preferences → Writing sliders and selects.
+  - Per-item toolbar configuration: the all-or-nothing Show advanced formatting toolbar toggle in
+    Preferences → Writing has been replaced with a fully configurable Toolbar items list. Each of the
+    15 formatting controls (Headings, Underline, Strikethrough, Text color, Highlight color,
+    Blockquote, Inline code, Bullet list, Numbered list, Horizontal rule, Insert image, Import
+    Markdown, Insert timestamp, Text direction, Alignment controls) can be individually enabled or
+    disabled, and reordered with ↑/↓ arrows. Select all and Select none buttons enable quick bulk
+    actions. Bold and Italic remain fixed at the start of the toolbar and are not configurable.
+    Existing users are migrated automatically: advancedToolbar: false keeps Underline, Bullet list,
+    and Numbered list enabled (matching the previous basic toolbar); advancedToolbar: true enables all
+    15 items.
+ReleaseNotesUrl: https://github.com/fjrevoredo/mini-diarium/releases/tag/v0.5.0
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/fjrevoredo/mini-diarium/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
