@@ -1,0 +1,65 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Corsinvest.cv4pve.report
+PackageVersion: 2.4.0
+PackageLocale: en-US
+Publisher: Corsinvest Srl
+PublisherUrl: https://www.corsinvest.it/
+PublisherSupportUrl: https://www.corsinvest.it/cv4pve
+PrivacyUrl: https://www.corsinvest.it/privacy
+Author: Corsinvest Srl
+PackageName: cv4pve-report
+PackageUrl: https://github.com/Corsinvest/cv4pve-report
+License: GPL-3.0
+LicenseUrl: https://github.com/Corsinvest/cv4pve-report/blob/HEAD/LICENSE.md
+Copyright: Copyright (c) 2026 Corsinvest Srl
+CopyrightUrl: https://github.com/Corsinvest/cv4pve-report/blob/master/LICENSE.md
+ShortDescription: Report Tool for Proxmox VE
+Description: |-
+  cv4pve-report exports your entire Proxmox VE infrastructure to a single
+  navigable Excel file — nodes, VMs, containers, storages, users, firewall
+  rules, backup jobs, resource pools and more. Every row is a hyperlink to
+  its detail sheet.
+
+  Features:
+  - Single .xlsx file with one sheet per node, VM and storage
+  - Fully navigable — summary rows link to detail sheets
+  - Cluster: users, API tokens, TFA, groups, roles, ACL, firewall, backup jobs, replication, SDN, pools
+  - Nodes: services, network, disks, SMART, RRD metrics, APT updates, SSL certificates, tasks
+  - VMs/CTs: config, network, disks, RRD metrics, backups, snapshots, firewall, QEMU agent info
+  - Storages: content inventory, RRD metrics
+  - Three profiles: Fast, Standard, Full
+  - Works with a read-only API token, no root access required
+Moniker: cv4pve-report
+Tags:
+- corsinvest
+- excel
+- infrastructure
+- inventory
+- proxmox
+- proxmoxve
+- report
+- xlsx
+ReleaseNotes: |-
+  What's new
+  - Cluster split into five sheets / pages / files. On large clusters the single "Cluster" tab had grown past 4500 mixed-schema rows (status, users, ACL, HA, SDN, pools, mappings — all together). It is now broken into a main Cluster (status, options, firewall options, backup jobs, replication, storages, metric servers, mappings) plus four sibling deep-dives: Cluster Access, Cluster SDN, Cluster HA, Cluster Pools. JSON gets matching cluster-access.json / cluster-sdn.json / cluster-ha.json / cluster-pools.json; HTML lists them as children under the expandable Cluster entry in the sidebar alongside the existing Cluster Log and Cluster Tasks. Thanks @shaundeeb for the request (#42).
+  - Section order reworked. Reading order is now: at-a-glance Cluster first, then day-to-day inventory (Storages, Nodes, VMs, Containers, Network, …), then time-series (RRD, Syslog), and finally the Cluster deep-dives (Access, SDN, HA, Pools, Log, Tasks). Applies to Excel sheets, HTML sidebar, JSON file ordering, and the Summary contents table.
+  - HTML cover renamed Home → Summary so it matches the Excel Summary sheet. The file is still index.html, no bookmark breaks.
+  Breaking changes (JSON only)
+  - JSON values are now raw — bytes for sizes / IO, fractions 0–1 for percentages — and keys lose the unit suffix. Excel and HTML output is unchanged (still 16.50 GB, 0.02 MB, 45.00 %). Only JSON consumers see new keys/values: "memorySize": 17179869184 instead of "memorySizeGB": 16.5, "cpuUsage": 0.45 instead of "cpuUsagePct": 0.45. The change makes snapshot diffs lossless (a few-MB drift used to round to the same 16.5 GB; now the byte count tells you the truth) and keeps the JSON keys free of formatting hints. Applies to every table and to the info block of detail files. metadata.json now reports "schemaVersion": 2. Closes #45.
+  Fixes
+  - RRD Nodes: "Io Wait" column is no longer always 0. The value coming from Proxmox is a fraction 0–1 (typically tiny — 0.0002 = 0.02%), and the column wasn't being treated as a percentage, so the formatter rounded it to zero on every row. It now displays the real percentage. Thanks for the report (#43).
+  - HTML format guide listed rrd-storages.html (plural) — the file is and always was rrd-storage.html.
+  - HTML cover page: the export button is now aligned with the title divider line.
+  What's Changed
+  - fix(rrd-nodes): treat IoWait as percentage by @franklupo in #44
+  - feat(json): expose raw values in table rows (schema v2) by @franklupo in #47
+  - chore: drop unused engine helpers, unify on LinkKey by @franklupo in #48
+  - feat: split Cluster into 5 sections + section order rework by @franklupo in #49
+  - chore: tighten comments + align docs with current behaviour by @franklupo in #50
+  - chore: bump version to 2.4.0 by @franklupo in #51
+  Full Changelog: v2.3.0...v2.4.0
+ReleaseNotesUrl: https://github.com/Corsinvest/cv4pve-report/releases/tag/v2.4.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
