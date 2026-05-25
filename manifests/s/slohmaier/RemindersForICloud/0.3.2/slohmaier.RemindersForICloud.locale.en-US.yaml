@@ -2,7 +2,7 @@
 # Created for: https://github.com/slohmaier/reminders-for-icloud
 
 PackageIdentifier: slohmaier.RemindersForICloud
-PackageVersion: 0.3.1
+PackageVersion: 0.3.2
 PackageLocale: en-US
 Publisher: Stefan Lohmaier
 PublisherUrl: https://github.com/slohmaier
@@ -36,10 +36,21 @@ Tags:
   - reminders
   - todo
 ReleaseNotes: |-
-  - Edge is now launched with --disable-extensions in the dedicated
-    app-mode profile, so Edge's bundled extras (Read Aloud, Coupons,
-    Cashback, etc.) and any user-installed extensions don't run against
-    iCloud Reminders. Component extensions (PDF viewer etc.) are unaffected.
+  - The dedicated app-mode Edge profile now starts free of any
+    user-installed or Edge-bundled extras (Read Aloud, Coupons, Cashback,
+    etc.). Implemented by scrubbing the profile's Extensions directory
+    before launch rather than passing --disable-extensions, which in
+    --app mode would also disable the bookmark-app shell and leave the
+    window black. Component extensions (PDF viewer etc.) are unaffected.
+  - Forces light theme via CDP so the window is readable for sighted
+    users and screen-share/screenshot scenarios even on systems with
+    Windows dark theme. iCloud Reminders' dark-mode CSS is incomplete
+    and renders black-on-black under Windows' system dark theme; the
+    launcher pins prefers-color-scheme: light browser-wide and also
+    injects a matchMedia shim before any iCloud script runs (Reminders
+    reads the preference in JS at boot and ignored the CSS-level
+    override). Apple's app now takes the light-theme code path from
+    the first frame. NVDA workflow is unaffected.
   - (0.3.0) Inno Setup installer with proper Start Menu integration and a
     Start Menu shortcut whose System.AppUserModel.ID matches what the
     launcher sets at runtime, so the Start Menu, taskbar pin, and the
@@ -47,6 +58,6 @@ ReleaseNotes: |-
   - (0.3.0) Out-of-app links (anything not on *.icloud.com / *.apple.com)
     are now routed to the system default browser via Chrome DevTools
     Protocol; the in-app popup is closed before it paints.
-ReleaseNotesUrl: https://github.com/slohmaier/reminders-for-icloud/releases/tag/v0.3.1
+ReleaseNotesUrl: https://github.com/slohmaier/reminders-for-icloud/releases/tag/v0.3.2
 ManifestType: defaultLocale
 ManifestVersion: 1.6.0
