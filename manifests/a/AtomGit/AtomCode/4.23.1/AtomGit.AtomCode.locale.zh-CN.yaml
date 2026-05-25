@@ -1,0 +1,113 @@
+# Created with YamlCreate.ps1 v2.7.2 $debug=NVS1.CRLF.7-6-2.Win32NT
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: AtomGit.AtomCode
+PackageVersion: 4.23.1
+PackageLocale: zh-CN
+Publisher: asdf
+PublisherUrl: https://atomgit.com/
+PublisherSupportUrl: https://atomgit.com/atomgit_atomcode/atomcode/issues
+PrivacyUrl: https://docs.gitcode.com/docs/help/home/protocol/privacy-policy
+Author: 重庆开源共创科技有限公司
+PackageName: 专有软件
+PackageUrl: https://atomcode.atomgit.com/
+License: MIT
+LicenseUrl: https://atomgit.com/atomgit_atomcode/atomcode/blob/main/LICENSE
+Copyright: Copyright (c) 2026 Yubang Xu
+CopyrightUrl: https://docs.gitcode.com/docs/help/home/protocol/ai-privacy-policy
+ShortDescription: AI 编程助手 在你的终端中运行
+Description: Claude Code / Cursor Agent 的开源平替，住在你的终端里。连接任意 OpenAI 兼容大模型，自主读文件、改代码、跑测试、自我验证 —— 用 Rust 构建。
+# Moniker:
+Tags:
+- 人工智能
+- 代码
+- 大语言模型
+- 智能体
+- 编程
+- 聊天机器人
+- 自主智能
+ReleaseNotes: |-
+  AtomCode v4.23.1
+  发布日期：2026-05-24
+
+  ✨ 重点亮点
+  - 🔒 权限模型安全收敛：RequireApprovalAlways 不再被 session grant 绕过，工作区外 grep/list_symbols/diagnostics 现在需要读取审批，与已有安全模型对齐。
+  - 🏠 ATOMCODE_HOME 语义统一：此前 plugin/skill/setup 模块把 ATOMCODE_HOME 当作 $HOME 替身（再追加 .atomcode/），而 config/memory 直接把它当根目录，导致自定义路径用户数据目录被劈成两半。本次统一为后者。同时废弃 ATOMCODE_HOME_OVERRIDE，uninstall 统一读 ATOMCODE_HOME。
+  - 💾 Telemetry 配置持久化：atomcode telemetry disable 写入的 [telemetry] enabled = false 此前会被后续任何保存操作（如 /login、/provider）静默重置；现在配置往返保真。
+  - 🛠 工具链修复：search_replace 支持路径 glob、edit_file 写入符号链接真实路径、find_references 按 JSON 解析 rg 输出、list_directory 拒绝文件路径入参。
+  - 📦 发布基础设施补齐：新增 Linux ARM64 自更新目标、HarmonyOS PC 资产纳入 release manifest、修正 CI 资产命名约定。
+  - 🧹 审批系统体验大修：修复审批后输入框消失、Bash 与 result 行间空行、多行 spinner 残留、审批提示自动换行等系列 TUI 问题。
+  - 401 自动刷新 token：检测到 atomgit-gateway 401 时自动刷新并重试一次，失败后显示友好登录提示。
+
+  ⚠️ Behavior Changes（注意行为变化）
+  - RequireApprovalAlways 工具不再被 session grant 跳过。即使用户对某个敏感工具按过 [A]（始终允许），下次再触发标记为"始终要求确认"的操作（如工作区外写入、敏感路径访问等）仍会重新提示。
+  - ATOMCODE_HOME 语义统一。此前 plugin/skill/setup 模块把 ATOMCODE_HOME 当作 $HOME 替身（再追加 .atomcode/），而 config/memory/MCP/sessions 直接把它当 config 根。本次全部统一为后者：ATOMCODE_HOME=/X 等价于 ~/.atomcode/。
+    - 受影响范围：仅显式设置过 ATOMCODE_HOME 的用户。
+    - 影响：plugins/skills 状态目录由 $ATOMCODE_HOME/.atomcode/plugins 改为 $ATOMCODE_HOME/plugins，与其他状态一致。
+    - 同时废弃了独立的 ATOMCODE_HOME_OVERRIDE 变量，uninstall 现在统一读 ATOMCODE_HOME。
+  - Telemetry 配置不再被 Config::save 抹掉。atomcode telemetry disable 写入的 [telemetry] enabled = false 此前会被后续任何保存配置的操作（如 /login、/provider、codingplan 保存）静默重置回默认；现在配置往返保真。
+
+  🎯 新功能
+  TUI / 输入
+  - Tab 键切换模式放宽条件 (8569bfb3)：输入框有内容但无补全菜单时，Tab 也可切换 Plan/Build 模式。此前仅在输入框为空时生效。
+  - Up/Down 光标导航增强 (e573058b)：在多行 buffer 中 ↑/↓ 先 snap 到行首/行尾，再交给历史记录，避免误吞多行草稿。
+  - 二维码登录按 Enter 打开 URL (80e6cdae)：二维码登录步骤按 Enter 直接用默认浏览器打开授权页，桌面用户一键到达，手机用户继续扫码。
+  Provider / 网络
+  - 401 主动刷新 token (3b93dab3)：检测到 atomgit-gateway 401 时先用 refresh_access_token 刷新一次，成功后用新 token 重发原请求。刷新失败或重试仍 401 时显示 i18n 友好提示"认证已过期，请执行 /login 重新登录"。非 atomgit gateway 的 401 仍保持原始错误信息。
+  Daemon
+  - 注册 TodoTool (ff054e10)：daemon 工具注册表中新增 TodoTool，补齐功能。
+  Release / 构建
+  - 新增 Linux ARM64 自更新目标 (6b6cc92b)：detect_target() 现在识别 linux/aarch64 → linux-arm64，与 latest.json、release.sh、install.sh 已发布的命名对齐。
+  - HarmonyOS PC 资产纳入 release 流程 (e06e48bd)：ohos-arm64 资产正式纳入 release.sh 的 manifest 枚举列表，避免重跑脚本时从 latest.json 漏掉该条目。
+  - GitCode Issue URL 支持 (ee799b47)：IssueRef::parse 同时接受 gitcode.com 的 issue URL，并支持带 host 端口的 URL（如 :443）。/fixissue 等流程从 GitCode 复制 issue 链接不再被拒。
+
+  🛠 工具修复
+  - edit_file 写入符号链接真实路径 (3bcc35fb)：解析后的真实路径写入，修复符号链接场景下的写入位置错误。
+  - search_replace 支持路径 glob (7325f95a)：pattern 中支持路径 glob 表达式（如 src/**/*.ts）。
+  - list_directory 拒绝文件路径入参 (b9e7a282)：当传入文件路径时返回错误，避免误用。
+  - find_references 按 JSON 解析 rg 输出 (4461ad3f)：行号/列号解析更可靠。
+  - skill 解析 frontmatter 到 EOF (e49060af)：frontmatter 缺尾 --- 但到文件末尾的情况现在正常解析。
+  - cd / bash 保留 ~ 前缀路径 (73f19220, 3bbdd852)：保留以 ~ 开头的路径不做提前展开，避免环境/字符串拼接错位。
+  - hooks 跳过未知 event 名称 (2ed8771f)：legacy hooks.json 中未知或拼错的 event 名称不再静默回退为 pre_tool_use，直接跳过该 hook。
+  - SearchReplace 审批显示替换详情 (1dfbe909)：审批提示中显示 search → replace 格式及文件 glob/path 信息，让用户知道具体要替换什么。
+
+  🔒 权限 & 安全
+  - RequireApprovalAlways 不被 session_grant 绕过 (edbcb57b)：InteractivePermissionDecider::decide 在调用 PermissionStore::check 前不再把 RequireApprovalAlways 改写为 RequireApproval，确保敏感操作即使曾被 [A] 放行也会重新提示。
+  - 工作区外 grep 需要读取审批 (1420ba30)：ExternalPathAction::Enumerate 改为 Read，非敏感外部路径搜索也会触发审批。
+  - 工作区外 list_symbols 需要读取审批 (56b23b80)：与 grep 行为对齐。
+  - 工作区外 diagnostics 需要读取审批 (dfec3e74)：与 grep 行为对齐。
+  - 插件 git URL 校验收紧 (1fba229c)：使用 url::Url 解析 + SSH shorthand 单独处理 host/path 完整性，结构不合法的输入（git@、https://x.com、file:/// 等）在 git clone 之前就被拒绝。
+
+  🐛 Bug 修复
+  TUI / 渲染
+  - Bash 长命令卡死 (66c1f147)：snapshot_workspace_changes 中 git status --porcelain -uall 无超时，遇到 .git/index.lock 残留等情况会拖垮整个 bash。现强制 2s 超时，纯只读命令跳过快照。
+  - 审批阶段 spinner 文案误导 (66c1f147)：审批阶段 spinner 不再显示 "Running Bash… · 273s"，改为 "Waiting approval"。
+  - 审批后 Bash 与 result 行间空行 (224d5f99)：skip_body_scroll_count: u16 确保结果行直接覆盖审批提示行。
+  - 多行 spinner 提交后残留 (b2b09312)：擦除所有 inflight_tool_rows 行而非仅底部一行。
+  - 审批完成后输入框消失 (bb1780b2)：\x1b[J 向下擦除改为逐行 \x1b[K，只擦审批块不碰底部。
+  - 待审批输入后输入框消失 (d3a2e14c)：清除审批行后 screen.invalidate() 强制全量重绘。
+  - 审批提示自动换行 (828784d0)：长命令时拆分标签行和操作按钮行，确保 Y/A/N 按钮始终可见。
+  - 审批提示合并为一行 (e1c28706)：空间足够时合并为一行显示。
+  - OSC 11 响应残留输入框 (422bed2d)：排空启动时迟到的 OSC 11 背景色查询响应，避免回填到输入框。
+  - 启动时 scrollback 残留 (7f399e8d)：初始化时发送 \x1b[3J 清除 scrollback 缓冲区。
+  CLI / 网络
+  - 静默刷新污染输入框 (d626cc53)：save_auth() 末尾的 println! 在静默刷新路径下残留到输入框，已移除。
+  - Headless thinking 换行 (c7d51910)：修复 headless 模式下 thinking 流式输出每个 token 换行的问题，改为单行 [thinking] ... 格式。
+  - Bash 2>&1 重定向路径保留 (73f19220)：修复 ~ 路径在 2>&1 等场景下的展开问题。
+  测试
+  - setup_cli 测试 locale 兼容 (9a8d256d)：接受中/英文两种 setup 成功标记，避免英文环境误报失败。
+  - test-all 警告统计修正 (fad75dd7)：同时匹配 warning: 与 warning[lint]: 两种 rustc 输出形态，此前长期漏报为 0。
+  - turn test 工具注册警告 (cc4a00b4)：修正多处不必要的 mut 绑定与 .await 遗漏。
+
+  🧹 工程 / 构建
+  - CI 资产命名约定统一 (fd370bca)：tag trigger atomcode-v* → v*；macOS 资产统一前缀 atomcode-；x86_64 → x64。
+  - Linux ARM64 cc 环境变量修正 (0308c645)：连字符改为下划线，避免在含 C-FFI 依赖（ring、zstd-sys 等）时静默回退到宿主 toolchain。
+  - plugin 测试迁移 TempDir::keep (1c8863c8)：从弃用的 TempDir::into_path() 迁移。
+ReleaseNotesUrl: https://atomgit.com/atomgit_atomcode/atomcode/releases/v4.23.1
+# PurchaseUrl:
+# InstallationNotes:
+Documentations:
+- DocumentLabel: 文档
+  DocumentUrl: https://atomcode.atomgit.com/docs/zh/index.html
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
