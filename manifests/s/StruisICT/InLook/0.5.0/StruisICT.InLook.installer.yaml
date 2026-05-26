@@ -12,6 +12,16 @@ InstallModes:
   - silentWithProgress
 UpgradeBehavior: install
 ReleaseDate: 2026-05-25
+Dependencies:
+  PackageDependencies:
+    # WebView2 Runtime — ships preinstalled on Windows 11 and 10 22H2+, but
+    # winget's clean-room validator (and older Windows) needs it for wry to
+    # load WebView2Loader.dll. Without this, inlook.exe exits with
+    # STATUS_DLL_NOT_FOUND (0xC0000135) on first launch.
+    - PackageIdentifier: Microsoft.EdgeWebView2Runtime
+    # Microsoft Visual C++ 2015-2022 redistributable — same reason; rustc
+    # links dynamically against vcruntime140.dll / msvcp140.dll.
+    - PackageIdentifier: Microsoft.VCRedist.2015+.x64
 Installers:
   - Architecture: x64
     InstallerUrl: https://github.com/StruisICT/InLook/releases/download/v0.5.0/inlook-0.5.0-x86_64.msi
