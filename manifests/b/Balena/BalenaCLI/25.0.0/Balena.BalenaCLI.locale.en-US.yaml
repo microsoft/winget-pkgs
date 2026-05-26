@@ -1,0 +1,133 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Balena.BalenaCLI
+PackageVersion: 25.0.0
+PackageLocale: en-US
+Publisher: Balena Inc. (https://balena.io/)
+PublisherUrl: https://github.com/balena-io/balena-cli
+PublisherSupportUrl: https://github.com/balena-io/balena-cli/issues
+PrivacyUrl: https://www.balena.io/privacy-policy
+Author: Juan Cruz Viotti
+PackageName: balena-cli
+PackageUrl: https://www.balena.io/docs/reference/balena-cli
+License: Apache-2.0
+LicenseUrl: https://github.com/balena-io/balena-cli/blob/HEAD/LICENSE
+Copyright: Copyright 2023 Balena
+ShortDescription: The balena CLI is a Command Line Interface for balenaCloud or openBalena.
+Description: |-
+  The balena CLI is a Command Line Interface for balenaCloud or openBalena.
+  It is a software tool available for Windows, macOS and Linux, used through a command prompt / terminal window.
+  It can be used interactively or invoked in scripts.
+  The balena CLI builds on the balena API and the balena SDK, and can also be directly imported in Node.js applications.
+  The balena CLI is an open-source project on GitHub, and your contribution is also welcome!
+Tags:
+- balena-io
+- cli
+- command-line-interface
+- iot
+ReleaseNotes: |-
+  Update @balena/compose to v8
+  This release adds CLI support for a number of compose fields in the latest docker compose spec. The fields are listed below, however note that balena Supervisor support needs to be added for the fields to be fully supported by balena. These fields will be rejected by the Supervisor via the container contract mechanism until Supervisor support is implemented. See balena-io-modules/balena-compose-parser#19 where the compose container contract is injected if new fields are detected.
+  Dev overlay file merging
+  While in local mode, all top-level fields in docker-compose.dev.yml are merged into the main compose file. Before, only top-level service fields were merged. A bare Dockerfile with no docker-compose.yml will no longer apply docker-compose.dev.yml as an overlay, so make sure to create a docker-compose file if you wish for dev overlays to be applied.
+  Add support for compose fields:
+  Compose features:
+  - Fragments, extensions (pre-v8 balena-compose already supported this, but using a custom implementation. balena-compose v8 moves to the official implementation used by docker compose (compose-go)
+  - include directive
+  services.${serviceName}:
+  NOTE: "logged / not logged" refers to Supervisor logging Ignoring unsupported or unknown compose fields
+  ───────────────────────────────────┬─────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  field                              │SV behavior
+  ───────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  annotations                        │ignored, logged
+  ───────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  attach                             │ignored, logged
+  ───────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  cgroup                             │ignored, logged
+  ───────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  cpu_rt_runtime                     │ignored, logged
+  ───────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  cpu_rt_period                      │ignored, logged
+  ───────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  cpus                               │ignored, not logged
+  ───────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  device_cgroup_rules                │ignored, logged
+  ───────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  env_file                           │N/A - compose-go folds this into environment during parsing
+  ───────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  extends                            │N/A - compose-go folds this into the composition during parsing
+  ───────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  healthcheck.start_interval         │ignored, not logged
+  ───────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  healthcheck.start_period           │supported
+  ───────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  ipc                                │conditional error loop if ipc: service:${serviceName}, supports ipc: shareable
+  ───────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  label_file                         │N/A - compose-go folds this into labels during parsing
+  ───────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  network_mode=service:${serviceName}│supported (this was supported before but compose-go adds a depends_on dependency which wasn't present before)
+  ───────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  networks.aliases                   │supported
+  ───────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  networks.ipv4_address              │supported
+  ───────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  networks.ipv6_address              │ignored, not logged
+  ───────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  networks.link_local_ips            │error loop
+  ───────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  networks.mac_address               │ignored; Supervisor configures it in the wrong place, Config.MacAddress, instead of
+                                     │NetworkSettings.MacAddress
+  ───────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  networks.driver_opts               │ignored, not logged
+  ───────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  networks.gw_priority               │ignored, not logged
+  ───────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  networks.priority                  │ignored, not logged
+  ───────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  pid=service:${serviceName}         │ignored, not logged
+  ───────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  pids_limit                         │conditional error loop if negative pids_limit
+  ───────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  post_start                         │ignored, logged
+  ───────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  pre_stop                           │ignored, logged
+  ───────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  read_only                          │supported
+  ───────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  uts                                │ignored, logged
+  ───────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  volumes_from                       │ignored, logged
+  ───────────────────────────────────┴─────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  Reject unsupported fields with clear messages:
+  - Top-level secrets & configs
+  - Service fields defined in SERVICE_CONFIG_DENY_LIST
+  - Service.build fields defined in BUILD_CONFIG_DENY_LIST
+  - container:${containerId} for service.network_mode
+  - container:${containerId} for service.pid
+  - container:${containerId} for service.volumes_from
+  - All service.security_opt as unsupported except no-new-privileges
+  - Network subfields attachable, external, name, driver that's not bridge or default, enable_ipv4, enable_ipv6, ipam.config.aux_addresses
+  - Volume subfields external, name, driver that's not local or default
+  - Long syntax volumes of type bind, npipe, cluster, image, unless specified bind mount is in allowedBindMounts (corresponding to balena's supported labels)
+  - Labels using balena namespace io.balena.private
+  Ignore fields that are required in balena-compose:
+  - Top-level version is now optional and won't throw an error if not present and equal to one of
+    2.0, 2.1, 2.2, 2.3, or 2.4
+  Normalize fields parsed by compose-go to be more compatible with balena or in line with current balena-compose behavior:
+  - Remove null entrypoint, which in Docker means that the default entrypoint from the image is used,
+    but in balena, overrides any ENTRYPOINT directive in the Dockerfile.
+  - Convert long syntax ports to short syntax, as all port definitions are converted to long syntax by compose-go,
+    but aren't supported by the Supervisor. For similar reasons, also convert long syntax depends_on, devices, and volumes.
+  - Compose converts relative context paths to absolute paths, convert back to relative paths to be compatible with our build system.
+  - For any allowed bind mount specified in service.volumes, remove them from volumes and add to feature labels.
+  - Add image as build tag if image & build both present. However, uncertain if this behavior is necessary.
+  - Move service.volumes of type tmpfs to service.tmpfs
+  - Reject service.volume where:
+    * source or target are not defined
+    * volume is not defined in top-level volumes
+    * it specifies volume options (long syntax only)
+  - Reject service.tmpfs if it defines tmpfs options (long syntax only)
+ReleaseNotesUrl: https://github.com/balena-io/balena-cli/releases/tag/v25.0.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

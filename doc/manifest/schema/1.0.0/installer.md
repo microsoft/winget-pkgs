@@ -1,5 +1,5 @@
 [JSON Schema]:                              https://github.com/microsoft/winget-cli/blob/master/schemas/JSON/manifests/v1.0.0/manifest.installer.1.0.0.json
-[Manifest Specification]:                   https://github.com/microsoft/winget-cli/blob/master/doc/ManifestSpecv1.0.md
+[Manifest Specification]:                   https://github.com/microsoft/winget-pkgs/blob/master/doc/manifest/README.md
 [Windows Package Manager Manifest Creator]: https://github.com/microsoft/winget-create
 [YAML]:                                     https://yaml.org/spec
 [semantic version]:                         https://semver.org
@@ -10,7 +10,7 @@
 [Inno]:                                     https://jrsoftware.org/isinfo.php
 [Nullsoft]:                                 https://sourceforge.net/projects/nsis
 [WiX]:                                      https://wixtoolset.org
-[Burn]:                                     https://wixtoolset.org/documentation/manual/v3/bundle
+[Burn]:                                     https://wixtoolset.org/docs/v3/bundle/
 
 # Windows Package Manager
 ## Manifest Schema v1.0.0 Installer File

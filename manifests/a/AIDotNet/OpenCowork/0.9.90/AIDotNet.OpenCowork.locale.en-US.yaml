@@ -1,0 +1,53 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: AIDotNet.OpenCowork
+PackageVersion: 0.9.90
+PackageLocale: en-US
+Publisher: example.com
+PublisherUrl: https://github.com/AIDotNet
+PublisherSupportUrl: https://github.com/AIDotNet/OpenCowork/issues
+PackageName: OpenCoWork
+PackageUrl: https://github.com/AIDotNet/OpenCowork
+License: Apache-2.0
+LicenseUrl: https://github.com/AIDotNet/OpenCowork/blob/HEAD/LICENSE
+Copyright: Copyright 2026 AIDotNet
+ShortDescription: Open-source desktop platform for multi-agent collaboration. Empowering AI agents with local tools, parallel teamwork, and seamless workplace integration.
+Description: |-
+  Traditional LLM interfaces are often "environment-isolated islands." Developers spend 50% of their time copy-pasting code, terminal logs, and file contents between the chat and their IDE.
+  OpenCowork solves this by providing:
+  - Local Agency: Agents can directly read/write files and execute shell commands with your permission.
+  - Context Awareness: No more manual context feeding. Agents explore your codebase and logs autonomously.
+  - Task Orchestration: Complex tasks (like "Refactor this module and update tests") are broken down and handled by specialized sub-agents.
+  - Human-in-the-loop: You stay in control with a transparent tool-call approval system.
+Tags:
+- agent
+- agentic
+- ai
+- large-language-model
+- llm
+ReleaseNotes: |-
+  Added
+  - Added reasoning mode support for Anthropic/OpenAI with thinking/reasoning parameter passthrough, cache control, and prompt caching markers.
+  - Added browser plugin capability with IPC for cookie cleanup and tool re-registration on project switch.
+  - Added new DAO interfaces for querying user messages only and for reverse-lookup run changes by sessionId and toolUseIds.
+  - Added reasoning effort mapping directly supporting xhigh without client-side normalization.
+  Changed
+  - Refactored streaming chat and tool chain to be runtime-state-driven: removed legacy long_running_mode field, now driven by current runtime state and configuration.
+  - Narrowed theme presets to the default only; removed global theme panel, SSH terminal theme panel, and redundant session title display. Settings migration falls back to default theme on old versions.
+  - Simplified message list to always load all session messages at once; removed "load earlier messages" button, auto-fill, and scroll anchor recovery. Added session-level deduplication to prevent duplicate tail tool restores.
+  - Completed Anthropic SSE/usage handling: unified message_start/message_delta/message_stop and data.type, aggregated input/output/cache read/cache creation/reasoning token stats, with cache writes billed per 5m/1h buckets. Tool call end events flush at stream end; message_end acts as fallback.
+  - Rewrote Clarify mode prompt as a strict "clarify first, then plan" flow with enforced AskUserQuestion/EnterPlanMode/ExitPlanMode closure.
+  - Enhanced file edit tool to preserve original line-ending style (CRLF/LF), avoiding mixed line endings.
+  - Tool output with structured errors is now recognized as failure instead of success.
+  - Run change queries expanded from exact runId match to also support sessionId and toolUseIds reverse-lookup.
+  - Improved stream rendering with new typing render pool, finer-grained animation classes, and progressive Markdown/table/component reveal.
+  - AssistantMessage now binds run changes precisely via tool_use ids, filtering out failed file tool results.
+  - Cron recovery marks still-running background runs as aborted on app restart to prevent hanging states.
+  - Enhanced request header forwarding security to avoid duplicating body-managed headers.
+  Fixed
+  - Fixed multi-line code block and local path recognition in Markdown rendering.
+  - Stopped duplicate tail tool restoration when resuming sessions.
+ReleaseNotesUrl: https://github.com/AIDotNet/OpenCowork/releases/tag/0.9.90
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

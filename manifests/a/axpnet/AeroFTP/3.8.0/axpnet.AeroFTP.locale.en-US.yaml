@@ -1,0 +1,63 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: axpnet.AeroFTP
+PackageVersion: 3.8.0
+PackageLocale: en-US
+Publisher: axpnet
+PublisherUrl: https://github.com/axpnet
+PublisherSupportUrl: https://github.com/axpnet/aeroftp/issues
+Author: axpnet
+PackageName: AeroFTP
+PackageUrl: https://github.com/axpnet/aeroftp
+License: GPL-3.0
+LicenseUrl: https://github.com/axpdev-lab/aeroftp/blob/HEAD/LICENSE
+ShortDescription: A modern, multi-protocol file manager and FTP client with integrated AI, cloud sync, and military-grade encryption.
+Description: |-
+  AeroFTP is an open-source, multi-protocol file manager built with Tauri 2 (Rust + React 18 + TypeScript).
+  It supports 16 protocols (FTP, FTPS, SFTP, WebDAV, S3, Google Drive, Dropbox, OneDrive, MEGA, Box, pCloud, Azure Blob, 4shared, Filen, Zoho WorkDrive, and Cryptomator vaults),
+  features an AI assistant with 45 tools and 15 LLM providers, military-grade encrypted vaults (AES-256-GCM-SIV + Argon2id),
+  bidirectional real-time sync, a built-in code editor, SSH terminal, and media player with visualizers.
+  Available in 47 languages with 4 themes.
+Moniker: aeroftp
+Tags:
+- cloud-storage
+- encryption
+- file-manager
+- file-transfer
+- ftp
+- ftp-client
+- multi-protocol
+- rust
+- s3
+- sftp
+- sync
+- tauri
+- webdav
+ReleaseNotes: |-
+  [3.8.0] - 2026-05-15
+  AeroVault Wrapper-Stack, Behind-the-Scenes Telemetry, AeroRsync Streaming and Dual-Panel Unification
+  A large release across three fronts: the AeroVault v3 wrapper stack gets real small-file packing and a behind-the-scenes technical receipt, the native AeroRsync engine ships streaming and enabled by default, and the AeroFile dual panel grows endpoint-aware unification. It also lands the v3.8.0 wishlist batch and the CLI profile-management fixes from issues #194, #195, #196 and #180.
+  The AeroVault wrapper-stack design (the compression -> chunking -> crypt -> error-correction pipeline, the wrapper-vs-step taxonomy, the corrected AES-256-GCM-SIV avalanche framing, algorithm versioning as a forward-compat clause, and the small-file-packing model) is a sustained community design contribution by Ehud Kirsh in the COMMUNITY ROADMAP thread (#162). The wrapper-stack hardening and telemetry land in commits 406e273c (engine), abad0cba (receipt UI plus 47-language i18n) and ed01fbe3 (CLI vault subcommand documentation). Credit is inline in every receipt and in the architecture primer.
+  AeroRsync Native Streaming, Session Reuse, Default ON, and Local-to-Local Sync
+  This release closes the P3-T01 cap and the Track Z.1 + Z.2 AeroRsync/AeroFile convergence work (internal roadmap APPENDIX-Z). It is the first release where the native rsync delta-sync engine ships enabled by default on fresh installs and no longer caps file size at 256 MiB.
+  Streaming end-to-end. The upload and download paths now stream delta plans through iterator-style state machines (send_delta_phase_streaming on the upload side, apply_delta_streaming + StreamingAtomicWriter on the download side). The 256 MiB in-memory cap that previously gated multi-gigabyte files is gone. A 4 GB cold upload and a 4 GB file re-synced after a 5% mutation both completed end-to-end against a real WD My Cloud NAS over residential SSH (862s / 846s wall clock respectively), confirming feature parity with the wire protocol and headroom for arbitrary file sizes. The writer ensures kill-9 safety by writing to a .aerotmp temp file and renaming atomically on completion.
+  Batch session reuse. Multi-file batches now share a single SSH session via AerorsyncBatch. A 100-file batch (1.1 MiB each) against the Docker fixture archives delta_session_count = Some(1) and a 99.45% savings on the second pass. The session-pool spec keeps short-lived sessions to side-step long-running NAS embedded-SSH lock-ups, and the new delta_session_count / delta_bytes_on_wire fields are surfaced in SyncReport, plumbed into the AeroSync UI as syncPanel.deltaBatchSummary and syncPanel.deltaBytesOnWire, and translated across all 47 locales.
+  Host-key pinning symmetric across transports. Classic SFTP (libssh2) and native probe (russh 0.57) now use the same AERORSYNC_HOST_KEY_ALGS ordering (Ed25519 → ECDSA → RSA SHA-2). Previously the two transports could land on different host keys when a server exposed multiple, which produced a fingerprint mismatch during pin verification. Both transports now publish identical preferences via session.method_pref (libssh2) and russh::Preferred.key (russh).
+  Default ON. load_native_rsync_enabled() now returns true when no config file exists. Existing installs with a TOML config keep their stored choice (no breaking change). Users on a fresh boot get the native delta engine automatically; the legacy classic SFTP path remains opt-in via Settings > Sync > Use native rsync = off or by editing the config.
+  Wire preamble robustness. A 2 to 3% hard-rejection rate on high-cardinality batches (≥ 50 files over a single SSH session) was traced to read_u8_len_prefixed_ascii returning InvalidAlgoListLen (terminal) when the SSH read chunk happened to end exactly on a length byte of the algo list. The parser now returns TruncatedBuffer { needed, available } (recoverable), letting the preamble exchange loop continue reading. Two regression unit tests pin the behaviour, and the Z.1.1 KPI batch test now asserts errors = 0 (pre-fix: 2/100).
+  Local-to-local AeroSync (Z.2 track). A new LocalDeltaTransport implements the same DeltaTransport trait against pure local paths, bypassing SSH entirely. Files at or above 1 MiB go through the in-process delta engine; smaller files fall back to plain copy. Exposed two ways: the CLI auto-detects aeroftp sync <SRC> <DST> when both arguments are local paths (smoke: 99.91% savings on a 1-byte mutation of a 2 MiB file), and a dedicated AeroSync panel reachable from View → Local Sync... and from the command palette. The panel offers source and destination pickers, exclude patterns, a delta-transport toggle, dry-run preview, live progress events (local-sync-progress), and a final report with byte-savings percentage.
+  AeroVault v3 Wrapper-Stack Hardening and Behind-the-Scenes Telemetry
+  Real small-file packing. The packing: small-file-batching wrapper declared in the v3 manifest is now actually exercised by the write path. Previously the manifest advertised the wrapper but the writer processed one file at a time, so a tree of small files was never packed and the CDC chunker saw one tiny entry per file. The packing stage now concatenates sub-threshold files (engine-derived 256 KiB boundary) into a pure-concatenation pack with the manifest as the index (offset plus length per file, no in-pack frame headers, the "tar-ish framing without metadata bloat" agreed in #162). The CDC chunker runs over the pack, so chunks stay multi-MiB and dedup stays chunk-aligned regardless of how small the inputs are. The change is additive and serde-compatible (pack_offset: Option<u64> with #[serde(default)]): existing v3 vaults open and extract byte-identically with no format bump, the format stays v3 Beta. Verified end-to-end through the new CLI vault subcommand: a 254-file round trip (250 small, 2 duplicates, 2 large above threshold) collapsed to 4 physical chunks with 251 dedup hits and byte-identical extraction 254/254.
+  Behind-the-scenes technical receipt. A shared vault_telemetry module records the per-operation wrapper trail (packing, chunking, chunk-id, compression, crypt, cipher hash), plaintext vs compressed bytes, compression ratio, dedup count, chunk count and timing, and surfaces it as a VaultReport. A new in-modal receipt panel shows the wrapper stack and the numbers after a vault create/add, exportable as text, and an Activity Log entry records each vault operation with the same redaction pipeline as the rest of the Debug Panel buffer. The receipt carries an inline academic attribution to Ehud Kirsh for the wrapper-stack design. The module is wired across v1, v2 and v3 so the receipt is consistent regardless of vault tier.
+  CLI vault subcommand (v1, v2, v3). aeroftp-cli vault exposes the create/add/info/extract lifecycle for every AeroVault format. The on-disk version is auto-detected from the file header for info/add/extract (v3 magic, v2 self-describing, else the legacy v1 WinZip-AES container); --vault-version selects it explicitly and create defaults to v3 (--cascade enables the v2 paranoid mode). add --receipt prints the technical receipt. The library crate gained the necessary pub surface for the binary to call each engine directly. Round-trip verified byte-identical on v1, v2 and v3 with wrong-password rejection.
+  AeroFile Dual-Panel Unification (issue #162 Slice B + Slice C bridge)
+  The dual-panel surface from T-DUAL-PANEL-UNIFICATION advances past Slice A: a unified panel controller with an endpoint selector and a transfer planner that routes local/local, local/remote and remote/local through the right engine, plus a FreeFileSync-style compare panel (6-bucket classifier), sync presets, conflict policy with versioned backup, inline cross-profile transfer from the planner, and the terminal cwd following the focused panel. The local-to-local Copy/Move chips are exposed for setup-only selectors and translated across all 47 locales.
+  Provider Modes and AeroCrypt
+  OpenDrive gains a Native API plus WebDAV mode group, the generalized ProviderModeTabs (lifted from FileLuSubTabs) adds a Filen group and fixes legacy-profile edit and connect, and the FileLu Rsync R2 dedicated provider lands behind the engine-awareness and classic-availability gate. AeroCrypt gains path-overlay decode plus mkdir and rename with encrypted names (#179).
+  v3.8.0 Wishlist and CLI Profile Management (issues #180, #194, #195, #196)
+  The CLI profile-management batch from the wishlist and the three profile bug reports lands here. aeroftp-cli profiles -i gets a substantial interactive-shell refactor (multi-target selectors, 0/-1/q quit, tombstone reprint, f/r/c/e actions with colour cues), a scriptable profile-add / profile-duplicate, vault-first profile reconcile so CLI deletes propagate to the GUI, favourites moved into the vault (config_favorite_servers) so the Fav column renders, the Type column renamed to Badges to match the GUI, the real OAuth error surfaced before browser re-auth, the Activity Log Errors filter including status=error rows, and a quick-win polish pass (eye-icon hit area, search-by-badges). This release also closes the four open items from the post-09:36 wishlist replies: an exclusive --show allowlist with */all wildcard, the font-size popup at the min/max bound, the server Duplicate action renamed to Copy, and the docs.aeroftp.app PWA meta deprecation.
+  Storage Quota, Vault CLI Parity and Compression Telemetry (Ehud batch 2)
+ReleaseNotesUrl: https://github.com/axpdev-lab/aeroftp/releases/tag/v3.8.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

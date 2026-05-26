@@ -1,0 +1,45 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: CraftDocs.CraftAgents
+PackageVersion: 0.9.4
+PackageLocale: en-US
+Publisher: Craft Docs Ltd.
+PublisherUrl: https://www.craft.do/
+PublisherSupportUrl: https://github.com/craft-ai-agents/craft-agents-oss/issues
+PrivacyUrl: https://www.craft.do/privacy
+Author: Craft Docs Ltd.
+PackageName: Craft Agents
+PackageUrl: https://agents.craft.do/
+License: Apache-2.0
+LicenseUrl: https://github.com/craft-ai-agents/craft-agents-oss/blob/HEAD/LICENSE
+Copyright: Copyright 2026 Craft Docs Ltd.
+CopyrightUrl: https://www.craft.do/terms
+ShortDescription: Work with most powerful agents in the world, with the UX they deserve
+Description: 'Craft Agents brings Claude’s coding capabilities to your entire digital workflow. It massively improves both coding and non-coding workflows via enhanced UI, review, and auto execution. Built on the same foundation as Claude Code (the Claude Agent SDK), it extends the model’s reasoning power to work across all your tools: GitHub, Linear, Slack, Craft documents, local files, and any API you can connect.'
+Tags:
+- agent
+- agentic
+- ai
+- large-language-model
+- llm
+ReleaseNotes: |-
+  v0.9.4 — RTK token optimization, compact-session fixes, Codex transport stability
+  Features
+  - Optional RTK Bash token compression — Adds opt-in support for RTK in Settings → AI → Performance. Craft Agent still shows and permission-checks the original Bash command, but when RTK is installed (>=0.23.0) and enabled, the execution path is rewritten through rtk so common development-command output is compressed before it reaches the model. The settings UI now detects missing/outdated installs, offers Get RTK + Re-check actions, and shows saved-token / efficiency stats once RTK has processed commands. (754d254c, a96b8706, 57452664)
+  Improvements
+  - Backend packaging cleanup after Pi consolidation — Removes stale Copilot/Codex binary packaging entries, import guards, runtime fields, and docblocks that survived the move to the actual two-backend architecture (ClaudeAgent + PiAgent). This trims dead build metadata and makes the codebase less misleading for future backend work. (a96b8706)
+  - OSS README metadata refresh — Adds the Trendshift badge to the OSS README so repository discovery metadata stays current. (7feae925)
+  Bug Fixes
+  - OpenAI/Codex long-running session instability — Upgrades the Pi SDK stack to 0.73.1, picking up the upstream Codex transport fixes: WebSocket setup can fall back to SSE before streaming starts, and cached WebSocket sessions are closed properly during session shutdown. This targets the 1011 keepalive timeout, 1006 disconnect, and certificate-verification failures reported for long-running ChatGPT Plus / Codex OAuth sessions. Fixes #747. (e30762b6)
+  - Compact session menu no longer clips nested actions — On narrow/compact layouts, the chat title menu now uses a vaul drawer with iOS-style drill-in panes for Status, Labels, Share, and Messaging instead of Radix nested dropdowns anchored inside the container-query panel. This keeps status and label actions reachable on small widths while leaving the desktop dropdown unchanged. The follow-up review fixes close leaked desktop dropdown state when switching layouts and prevent drawer actions from retargeting if navigation changes the active session while the drawer is open. (db9f506f, 084547e8)
+  - Rapid session-label toggles are race-safe — Extracts shared session-menu behavior into useSessionMenuActions and moves label toggling to optimistic state that compounds rapid taps, avoids Strict Mode double side effects, and resets correctly when switching sessions. This fixes compact drawer multi-label editing and removes behavior drift between desktop and compact session menus. (f0c12ed1, 88f8d733)
+  - Skills “Show in Finder” opens the real skill folder — Skills list, skill detail, and skill menu actions now reveal the authoritative skill.path directory instead of constructing a synthetic SKILL.md path, and failures surface via a platform-aware Finder/Explorer toast instead of silently no-oping. Fixes #756. (d44e5691)
+  Breaking Changes
+  - None. All changes are backward-compatible.
+ReleaseNotesUrl: https://github.com/craft-ai-agents/craft-agents-oss/releases/tag/v0.9.4
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://agents.craft.do/docs/getting-started/introduction
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,103 @@
+# Created with komac v2.11.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
+
+PackageIdentifier: Rizin.Rizin
+PackageVersion: 0.8.0
+PackageLocale: en-US
+Publisher: RizinOrg
+PublisherUrl: https://github.com/rizinorg
+PublisherSupportUrl: https://github.com/rizinorg/rizin/issues
+Author: RizinOrg
+PackageName: Rizin
+PackageUrl: https://github.com/rizinorg/rizin
+License: LGPL-3.0
+LicenseUrl: https://github.com/rizinorg/rizin/blob/v0.6.2/COPYING
+Copyright: (c) 2024 Rizin
+ShortDescription: UNIX-like reverse engineering framework and command-line toolset.
+Description: |
+  Rizin is a fork of the radare2 reverse engineering framework with a focus on usability,
+  working features and code cleanliness.
+
+  Rizin is portable and it can be used to analyze binaries, disassemble code, debug programs,
+  as a forensics tool, as a scriptable command-line hexadecimal editor able to open disk files,
+  and much more!
+Tags:
+- debugging
+- exploitation
+- program-analysis
+- reverse-engineering
+- security
+ReleaseNotes: |-
+  In this release we completed migration of the code to the rzshell - YAML-based commands description language and corresponding APIs.
+  Another notable refactoring change - a beginning of merging RzAsm and RzAnalysis plugins into RzArch ones, currently incomplete and with compatibility layer. Move RzParse plugins into the RzArch as well. Huge refactoring happened in search commands, to better handle Unicode and regular expressions.
+  On the RzIL front, new architectures now support uplifting:
+  - MIPS
+  - PIC
+  - MSP430
+  - Xtensa
+  - Hexagon
+  - Tricore uplifting was improved to include all missing floating point instructions.
+  New architectures were added:
+  - DEC Alpha
+  - nanoMIPS (a part of MIPS ISA family)
+  - LoongArch.
+  As usual, these architectures were added into the Capstone as well.
+  ESIL is marked as deprecated and will be removed in the next release.
+  Analysis behavior slightly changed - now Rizin checks for jumps to function preludes by default.
+  Added support for parsing PE relocations. Added support for Python 3.11-3.13 bytecode versions.
+  New and refactored search commands (strings, bytes, cryptographic material) dispatch their work now into threads. Making them faster on large files. This drops support for search modifiers /f, /b etc.
+  And, as usual, droves of various fixes across the framework.
+  Show scrolling progress in percent in various interfaces, e.g. in Vv (lower right corner):
+  Screenshot 2025-04-22 at 8 51 07 PM
+  New command line options
+  - rz-find -E to execute a command on every match
+  - rz-ax - add MS-DOS and Win32 timestamp conversion
+  - Add linker version to rz-bin -I output
+  New commands
+  - dcco - continue until call
+  - aezsue - step until PC equals given address and output RzIL VM changes
+  - fdt command to print more information about the flag
+  - dbtt to print in a table mode
+  - aLc command to list features and CPUs of an RzArch plugin (and rz-asm -m to do the same)
+  - /cm to search for cryptographic materials
+  - /ce and /cef commands for entropy search
+  - /z command for searching strings (supports now Unicode 16, regex, and many encodings).
+  - izx data to list strings that are referenced from somewhere else
+  Removals
+  - Deprecated APIs
+  - RAP protocol
+  - NIOS-II architecture support
+  - fb command
+  - dta command
+  - /w - now handled by /z
+  - /!
+  - /b
+  - /f
+  - /+
+  - /cd
+  - /ca
+  - /cr
+  - obr
+  - rizin -Q flag
+  Renames:
+  - avg renamed into avgl, added table mode
+  - / command became /z
+  - /e command became either /z or /xr
+  Configuration variables changes
+  Removed options
+  - str.search.max_uni_blocks
+  Renamed options
+  - str.search.encoding -> str.encoding - Valid for all string interpretations.
+  - str.search.max_threads -> search.max_threads - This is a general setting for the search now.
+  - str.search.raw_alignment -> search.str.raw_alignment
+  - str.search.min_length -> search.str.min_length
+  - str.search.buffer_size -> search.str.max_length
+  - str.search.max_region_size -> search.str.max_region_size
+  - str.search.check_ascii_freq -> search.str.check_ascii_freq
+  Dependency
+  This release adds a dependency on SoftFloat3 library for RzFloat and RzIL floating point operations.
+  Sponsors
+  @stephen-fox
+ReleaseNotesUrl: https://github.com/rizinorg/rizin/releases/tag/v0.8.0
+ManifestType: defaultLocale
+ManifestVersion: 1.9.0

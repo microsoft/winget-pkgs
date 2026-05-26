@@ -1,0 +1,64 @@
+# Created with WinGet Updater using komac v2.11.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
+
+PackageIdentifier: DoltHub.Dolt
+PackageVersion: 1.51.4
+PackageLocale: en-US
+Publisher: DoltHub
+PublisherUrl: https://github.com/dolthub/dolt
+PublisherSupportUrl: https://github.com/dolthub/dolt/issues
+Author: DoltHub
+PackageName: Dolt
+PackageUrl: https://www.dolthub.com/
+License: Apache-2.0
+LicenseUrl: https://github.com/dolthub/dolt/blob/HEAD/LICENSE
+CopyrightUrl: https://raw.githubusercontent.com/dolthub/dolt/master/LICENSE
+ShortDescription: Dolt is a SQL database that you can fork, clone, branch, merge, push and pull just like a git repository.
+Description: |-
+  Dolt is a SQL database that you can fork, clone, branch, merge, push and pull just like a git repository.
+  Connect to Dolt just like any MySQL database to run queries or update the data using SQL commands.
+  Use the command line interface to import CSV files, commit your changes, push them to a remote, or merge your teammate's changes.
+Moniker: dolt
+Tags:
+- cli
+- data
+- git-for-data
+- versioning
+ReleaseNotes: |-
+  Merged PRs
+  dolt
+  go-mysql-server
+  - 2940: Bug fix: ensure DropCheck.IfExists gets copied over to new instances
+    This change doesn't affect Dolt, but is needed by Doltgres to make sure IF EXISTS logic for dropping a constraint is correctly executed.
+  - 2937: Fixed problems with StrExpr
+    Schema() was being called during Doltgres's Prepare implementation, and there's no reason it can't be.
+  - 2936: Add support for ALTER TABLE ... DROP CONSTRAINT IF EXISTS
+    Depends on: dolthub/vitess#411
+  - 2935: implement ntile
+    This PR implements the NTILE() SQL function, which groups rows into evenly sized buckets.
+    mysql docs: https://dev.mysql.com/doc/refman/8.4/en/window-function-descriptions.html#function_ntile
+    fixes: #9087
+  - 2934: Unwrap inputs to find_in_set function.
+    This was missed in the initial wrapped values PR because we only had tests for find_in_set where the inputs came from VARCHAR columns. This adds a test for inputs from TEXT columns.
+    Fixes #9101
+  - 2932: Optimize ConvertToBytes by avoiding unnecessary string <-> bytes conversions and copies.
+    ConvertToBytes is a commonly called function to get the string representation of a value. However, it has some unnecessary allocations where a child function allocates a byte buffer, only for the result to be copied into the buffer provided by the parent function. In other places we needlessly round-trip between string and []byte.
+    This PR improves performance by removing some of these unneeded copies. In places where ConvertToBytes calls a function that allocates a buffer (instead of using the buffer that ConvertToBytes can provide), we can optimize by using the returned value without copying it again.
+    Dolt shows a 7% improvement in the types_table_scan benchmark.
+    We can potentially do even better by allowing these child functions to take a buffer, removing the need for an extra allocation.
+  - 2931: Corrected return type for RegexpLike
+    Required for proper type conversion in doltgres
+  vitess
+  - 411: Add AST support for DROP CONSTRAINT IF EXISTS
+  - 410: fix ntile syntax
+    This PR implements the correct syntax for NTILE()
+    mysql docs: https://dev.mysql.com/doc/refman/8.4/en/window-function-descriptions.html#function_ntile
+    syntax for: #9087
+  - 409: add var_samp to keywords
+  Closed Issues
+  - 9101: Handler caught panic: interface conversion: interface {} is *val.TextStorage, not string
+  - 9099: Exceptionally long table names when adding unnamed constraints results in a Django error
+  - 9087: Request for NTILE function
+ReleaseNotesUrl: https://github.com/dolthub/dolt/releases/tag/v1.51.4
+ManifestType: defaultLocale
+ManifestVersion: 1.9.0

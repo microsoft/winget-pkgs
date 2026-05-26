@@ -1,0 +1,75 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
+
+PackageIdentifier: Drrakendu78.UniCreate
+PackageVersion: 1.0.9
+PackageLocale: en-US
+Publisher: Drrakendu78
+PublisherUrl: https://github.com/drrakendu78
+PrivacyUrl: https://github.com/drrakendu78/UniCreate/blob/master/PRIVACY.md
+Author: Drrakendu78
+PackageName: UniCreate
+ReleaseDate: 2026-05-13
+PackageUrl: https://github.com/drrakendu78/UniCreate
+License: MIT
+LicenseUrl: https://github.com/drrakendu78/UniCreate/blob/master/LICENSE
+ShortDescription: The modern WinGet manifest creator — Create and submit packages to winget-pkgs with a beautiful GUI
+Description: The modern WinGet manifest creator — Create and submit packages to winget-pkgs with a beautiful GUI
+Tags:
+- desktop-app
+- gui
+- manifest
+- open-source
+- package-manager
+- react
+- rust
+- tauri
+- typescript
+- windows
+- winget
+- winget-pkgs
+ReleaseNotes: |-
+  # UniCreate - Patch Notes v1.0.9
+  
+  Date: 2026-05-13
+  Release tag: `v1.0.9`
+  Repository: `drrakendu78/UniCreate`
+  
+  ## Highlights
+  
+  - **Auto-update no longer fails with `os error 740`** on non-admin sessions: UniCreate now restarts itself as administrator automatically before launching the updater. One-click update again works end to end.
+  - **All updater error messages translated to English** (previously some surfaced the localized Windows error text, e.g. "L'opération demandée nécessite une élévation").
+  
+  ## Changes
+  
+  ### 1) Fix — `ERROR_ELEVATION_REQUIRED` (740) on auto-update
+  
+  - Windows installer-detection heuristic forces UAC elevation for any `.exe` whose name contains `updater` / `setup` / `install`. Launching `UniCreate-Updater.exe` from a non-admin process therefore fails with OS error 740, which the previous build surfaced as a cryptic toast.
+  - UniCreate now checks `is_running_as_admin` before triggering the updater. When the app is not elevated, it persists the pending download URL + filename in `localStorage` (`unicreate-pending-update`), calls a new `restart_as_admin` Tauri command, and resumes the install automatically once the app reboots with elevated privileges. A single UAC prompt now suffices — no need to manually relaunch the app as admin.
+  
+  Impacted files:
+  - `src-tauri/Cargo.toml` (added `is_elevated` dependency on Windows)
+  - `src-tauri/src/lib.rs` (new `is_running_as_admin` and `restart_as_admin` Tauri commands)
+  - `src-tauri/src/github.rs` (`start_silent_update` now translates `raw_os_error() == 740` into a clear English message)
+  - `src/App.tsx` (`openUpdateAction` checks admin first + resumes pending update on next boot)
+  
+  ### 2) Updater error messages are now consistently in English
+  
+  - The pre-existing English strings stay unchanged.
+  - The 740 case used to fall through to `std::io::Error::Display`, which Windows localizes (French users saw "L'opération demandée nécessite une élévation"). It now returns: *"Update requires administrator privileges. Please restart UniCreate as administrator and try again."*
+  
+  Impacted files:
+  - `src-tauri/src/github.rs`
+  
+  ### 3) Version bump
+  
+  - App version updated to `1.0.9`.
+  
+  ## Checksums (SHA-256)
+  
+  | File | SHA-256 |
+  |------|---------|
+  | `UniCreate_1.0.9_x64-setup.exe` | `a56a1fb2a1b498e92da853f8f380bc357ed0ead56760e40c80f5af64760464fd` |
+  | `UniCreate_1.0.9_x64_en-US.msi` | `4f59bd03348e5024090aec16f564341f6163f5c6fa1398645d10604dbf55c3e4` |
+ReleaseNotesUrl: https://github.com/drrakendu78/UniCreate/releases/tag/v1.0.9
+ManifestType: defaultLocale
+ManifestVersion: 1.9.0

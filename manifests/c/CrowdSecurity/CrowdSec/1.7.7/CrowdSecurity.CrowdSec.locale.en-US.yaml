@@ -1,0 +1,159 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: CrowdSecurity.CrowdSec
+PackageVersion: 1.7.7
+PackageLocale: en-US
+Publisher: CrowdSecurity
+PublisherUrl: https://github.com/crowdsecurity
+PublisherSupportUrl: https://github.com/crowdsecurity/crowdsec/issues
+PackageName: CrowdSec
+PackageUrl: https://github.com/crowdsecurity/crowdsec
+License: MIT
+LicenseUrl: https://github.com/crowdsecurity/crowdsec/blob/HEAD/LICENSE
+ShortDescription: CrowdSec Agent for Windows
+Tags:
+- attacks-prevention
+- detection
+- linux
+- protection
+- security
+ReleaseNotes: |-
+  CrowdSec 1.7.7 brings 2 major changes:
+  - On linux, RE2 is now used by default for evaluating regexp in parsers
+  - WAF rules can now contain a mix of AND/OR conditions without any limits, giving much greater flexibility when writing new rules
+  RE2 by default on linux
+  CrowdsSec has supported for a long time using RE2 as the regexp engine, and with this release we make it the default.
+  CrowdSec has always used the builtin Go regexp package, which is a Go reimplementation of the RE2 library, but with known performance limitations.
+  The switch to RE2 will bring significantly increased regexp performance (one of the most critical part of CrowdSec) at the cost of slightly longer regexp compilation and higher baseline memory usage.
+  Important
+  If you encounter any issues with the new regexp engine, you can fallback to the previous Go implementation by setting the feature flag re2_disable_grok_support (see the documentation).
+  Other changes
+  Other notable changes include:
+  - a new kind attribute for alerts used to identify its source (a scenario, a WAF rule, a manual decision creation, ...)
+  - a new cscli allowlist import command
+  - support for the HTTP_PROXY environment variable in the notification-http plugin
+  - A resource leak under high load was fixed
+  Full changelog
+  New Features
+  - add LookupFile and FileMap expr helpers (#4372) @buixor
+  - waf rules: allow arbitrary mix of AND and OR conditions (#4358) @blotus
+  Improvements
+  - enable RE2 support by default on linux (#4386) @blotus
+  - cscli allowlists: add import command (#4378) @blotus
+  - WAF: expose more transformations from coraza (#4140) @blotus
+  - Add new kind alert attribute (#4351) @blotus
+  - Use environment proxy settings for notification-http (#4364) @op3
+  Bug Fixes
+  - allowlists: apply items to existing decisions in batch (#4095) @blotus
+  - waf: fix tests for modsec rules generation (#4385) @blotus
+  - windows: add file notification plugin in MSI package (#4367) @blotus
+  - leakroutine: call cancel after leakroutine returns (#4369) @blotus
+  - notification-sentinel: lower-case x-ms-date header for correct HMAC (#4288) @ebirn
+  - tests: remove temporary sqlite/plugin files from /tmp/ (#4332) @mmetc
+  - pkg/apiserver: fix scenario count in debug log (#4333) @mmetc
+  - pkg/csplugin: prevent race condition, deadlock (#4294) @mmetc
+  - pkg/acquisitioncontext: minimal fix for data race in tests (#4327) @mmetc
+  - acquisition/file: minimal fix for data race in tests (#4326) @mmetc
+  - fix lint fsutil/freebsd: unnecessary conversion (#4324) @mmetc
+  - cscli: consistent status and usage message for unknown subcommands (#4320) @mmetc
+  - cscli detect: set log type for caddy unit to "syslog" (#4321) @mmetc
+  - CI: add published_at to version.crowdsec.net/latest (#4291) @blotus
+  - cmd/crowdsec: assign overflow after parsing (#4226) @mmetc
+  - waf: format as CRS match only if anomaly score is not 0 (#4230) @blotus
+  Changes
+  - build(deps): bump cryptography from 46.0.3 to 46.0.5 in /build/docker/test (#4298) @dependabot[bot]
+  - support for waf- alias in cscli (#4347) @buixor
+  - refact pkg/dumps: reduce complexity (#4209) @mmetc
+  - lint: refact pkg/dumps for nilaway (#4208) @mmetc
+  - refact pkg/parser: redundant indirection (#4344) @mmetc
+  - refact pkg/parser: extract+embed NodeConfig in Node struct (#4343) @mmetc
+  - move calls to trace.ReportPanic() on top of goroutines (#4338) @mmetc
+  - pkg/csplugin: simplify notification loop; noop with empty queue (#4328) @mmetc
+  - pkg/parsers: light refact, remove redundant code (#4213) @mmetc
+  - refact cmd/crowdsec: encapsulate cache into alertBuffer (#4300) @mmetc
+  - cmd/notification-*: don't provide the same context twice for request (#4316) @mmetc
+  - don't flush 127.0.0.1 (#4315) @sabban
+  - clipapi: replace tomb with errgroup (#4207) @mmetc
+  - refact cmd/crowdsec: remove redundant global variable (#4299) @mmetc
+  - refact: remove unused code in crowdsec-cli, apiserver, acquisition, database (#4304) @mmetc
+  - refact pkg/leakybucket: trim down redundant Leaky struct fields (#4290) @mmetc
+  - pkg/leakybucket: remove global bucketStore, unused parameters + tags (#4286) @mmetc
+  - pkg/leakybucket: remove Simulated field from Leaky, keep it in config (#4285) @mmetc
+  - pkg/leakybucket: extract BucketSpec from BucketFactory (#4284) @mmetc
+  - refact pkg/leakybucket: extract methods from LoadBucket() part 2 (#4282) @mmetc
+  - pkg/leakybucket: refact test loop, more explicit failures in testFile() (#4281) @mmetc
+  - refact pkg/leakybucket: extract methods from LoadBucket() (#4279) @mmetc
+  - pkg/leakybucket: replace Signal chan with explicit read/done chans (#4277) @mmetc
+  - pkg/leakybucket: replace waitgroups with single rwlock (#4276) @mmetc
+  - pkg/leakybucket: garbage collect: compare float with epsilon (#4275) @mmetc
+  - pkg/leakybucket: refactor tests (#4272) @mmetc
+  - pkg/leakybucket: replace sycn.Map with map + mutex (#4271) @mmetc
+  - pkg/leakybucket: replace global counter with call to bucket store (#4273) @mmetc
+  - pkg/leakybucket: review README.md (#4274) @mmetc
+  - pkg/leakybucket: encapsulate store map + add methods (#4253) @mmetc
+  - pkg/leakybucket: remove redundant bool var (#4252) @mmetc
+  - fix hub console side (#4266) @sabban
+  - version workflow fix (#4262) @sabban
+  - rename the prod branch to main (#4261) @sabban
+  - add version workflow (#4210) @sabban
+  - pkg/leakybucket: remove unused global (#4251) @mmetc
+  - pkg/leakybucket: pass bucket factories by pointer (#4250) @mmetc
+  - pkt/leakybucket: compileScopeFilter() -> ScopeType.CompileFilter() (#4247) @mmetc
+  - pkg/leakybucket: rename OverflowFilter -> OverflowProcessor (#4248) @mmetc
+  - pkg/leakybucket: rename Buckets -> BucketStore (#4246) @mmetc
+  - refact leaky bayesian: method to function, unlock w/defer (#4242) @mmetc
+  - pkg/leakybucket: early return (#4244) @mmetc
+  - pkg/leakybucket: variable shorthand (#4245) @mmetc
+  - pkg/leakybucket: move LeakRoutine to method, rename parameters (#4243) @mmetc
+  - pkg/leakybucket: review bucket validation and tests (#4241) @mmetc
+  - refact: remove unnecessary pointers to map, string, mutex (#4212) @mmetc
+  - pkg/leakybucket: function to method BucketFactory.LoadBucket() (#4229) @mmetc
+  - pkg/leakybucket: BucketType interface, method BucketFactory.Validate() (#4228) @mmetc
+  Chore / Deps
+  - build(deps): bump github.com/buger/jsonparser from 1.1.1 to 1.1.2 (#4382) @dependabot[bot]
+  - CI: use windows-2025 image (#4379) @blotus
+  - build(deps): bump github/codeql-action from 4.32.6 to 4.33.0 (#4371) @dependabot[bot]
+  - build(deps): bump astral-sh/setup-uv from 7.5.0 to 7.6.0 (#4373) @dependabot[bot]
+  - build(deps): bump google.golang.org/grpc from 1.74.2 to 1.79.3 (#4376) @dependabot[bot]
+  - build(deps): bump astral-sh/setup-uv from 7.3.1 to 7.5.0 (#4366) @dependabot[bot]
+  - build(deps): bump filippo.io/edwards25519 from 1.1.0 to 1.1.1 (#4319) @dependabot[bot]
+  - build(deps): bump github/codeql-action from 4.32.5 to 4.32.6 (#4360) @dependabot[bot]
+  - build(deps): bump docker/build-push-action from 6.19.2 to 7.0.0 (#4361) @dependabot[bot]
+  - build(deps): bump release-drafter/release-drafter from 6.2.0 to 6.4.0 (#4362) @dependabot[bot]
+  - build(deps): bump docker/setup-buildx-action from 3.12.0 to 4.0.0 (#4356) @dependabot[bot]
+  - build(deps): bump docker/setup-qemu-action from 3.7.0 to 4.0.0 (#4353) @dependabot[bot]
+  - build(deps): bump actions/setup-node from 6.2.0 to 6.3.0 (#4352) @dependabot[bot]
+  - build(deps): bump docker/login-action from 3.7.0 to 4.0.0 (#4354) @dependabot[bot]
+  - deps: update actions and golangci-lint (#4348) @mmetc
+  - build(deps): bump github/codeql-action from 4.32.4 to 4.32.5 (#4345) @dependabot[bot]
+  - build(deps): bump astral-sh/setup-uv from 7.3.0 to 7.3.1 (#4346) @dependabot[bot]
+  - build(deps): bump actions/setup-go from 6.2.0 to 6.3.0 (#4339) @dependabot[bot]
+  - build(deps): bump actions/upload-artifact from 6.0.0 to 7.0.0 (#4342) @dependabot[bot]
+  - replace trace.CatchPanic(...) with trace.ReportPanic() (#4336) @mmetc
+  - build(deps): bump github/codeql-action from 4.32.3 to 4.32.4 (#4322) @dependabot[bot]
+  - deps: update gocron v1 -> v2 (#4317) @mmetc
+  - build(deps): bump docker/build-push-action from 6.19.0 to 6.19.2 (#4306) @dependabot[bot]
+  - build(deps): bump github/codeql-action from 4.32.2 to 4.32.3 (#4312) @dependabot[bot]
+  - build(deps): bump github/codeql-action from 4.32.1 to 4.32.2 (#4292) @dependabot[bot]
+  - update golangci-lint 2.9 (#4302) @mmetc
+  - build(deps): bump astral-sh/setup-uv from 7.2.1 to 7.3.0 (#4296) @dependabot[bot]
+  - build(deps): bump docker/build-push-action from 6.18.0 to 6.19.0 (#4303) @dependabot[bot]
+  - build(deps): bump github/codeql-action from 4.32.0 to 4.32.1 (#4278) @dependabot[bot]
+  - build(deps): bump actions/setup-node from 4.4.0 to 6.2.0 (#4264) @dependabot[bot]
+  - CI: update python and dependencies (#4249) @mmetc
+  - build(deps): bump actions/checkout from 6.0.1 to 6.0.2 (#4263) @dependabot[bot]
+  - build(deps): bump astral-sh/setup-uv from 7.2.0 to 7.2.1 (#4265) @dependabot[bot]
+  - build(deps): bump docker/login-action from 3.6.0 to 3.7.0 (#4257) @dependabot[bot]
+  - build(deps): bump github/codeql-action from 4.31.11 to 4.32.0 (#4254) @dependabot[bot]
+  - build(deps): bump github/codeql-action from 4.31.10 to 4.31.11 (#4233) @dependabot[bot]
+  - build(deps): bump actions/checkout from 6.0.1 to 6.0.2 (#4234) @dependabot[bot]
+  - build(deps): bump release-drafter/release-drafter from 6.1.0 to 6.2.0 (#4222) @dependabot[bot]
+  - build(deps): bump actions/setup-python from 6.1.0 to 6.2.0 (#4223) @dependabot[bot]
+  Geolite2 notice
+  This product includes GeoLite2 data created by MaxMind, available from https://www.maxmind.com.
+  Installation
+  Take a look at the installation instructions.
+ReleaseNotesUrl: https://github.com/crowdsecurity/crowdsec/releases/tag/v1.7.7
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

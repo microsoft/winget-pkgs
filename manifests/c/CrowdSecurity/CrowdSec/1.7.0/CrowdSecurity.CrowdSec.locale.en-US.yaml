@@ -1,0 +1,110 @@
+# Created with komac v2.12.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: CrowdSecurity.CrowdSec
+PackageVersion: 1.7.0
+PackageLocale: en-US
+Publisher: CrowdSecurity
+PublisherUrl: https://github.com/crowdsecurity
+PublisherSupportUrl: https://github.com/crowdsecurity/crowdsec/issues
+PackageName: CrowdSec
+PackageUrl: https://github.com/crowdsecurity/crowdsec
+License: MIT
+LicenseUrl: https://github.com/crowdsecurity/crowdsec/blob/HEAD/LICENSE
+ShortDescription: CrowdSec Agent for Windows
+Tags:
+- attacks-prevention
+- detection
+- linux
+- protection
+- security
+ReleaseNotes: |-
+  The 1.7.0 release of crowdsec brings some major changes to how services are auto-detected during installation, and to the metrics shared by the log processors to LAPI.
+  The new detection system, cscli setup, is much more flexible and powerful:
+  - Supports Linux, BSD and Windows (at the time, auto-detection is only performed at install time for deb and RPM packages)
+  - More services are detected out of the box
+  - A custom detection configuration can be provided during installation to detect custom services and generate custom acquisition configs (eg, when not using default log paths)
+  - The auto-detection can be skipped if the configuration is managed with tools like Ansible
+  Learn more about it in our documentation.
+  The Log Processors now send metrics about the acquisition (number of lines read and parsed per datasource) and the parsers (number of events parsed, unparsed, or whitelisted) to LAPI.
+  Those metrics are shown when running cscli machines inspect XXX.
+  In the future, they will also be displayed in the console and used to detect potentially misconfigured or misbehaving installations.
+  Other notable changes include:
+  - Support for swarm in the docker datasource
+  - Better CRS integration in the WAF (this will continue to be improved over time)
+  - New expr helpers to compute the average and median time between events
+  Warning
+  Starting with this release, when crowdsec is run in a docker (or podman) container, a volume must be provided /var/lib/crowdsec/data/, otherwise the container will refuse to start.
+  This requirement does not apply to Kubernetes.
+  Note
+  As previously documented here, the cscli dashboard command has been removed.
+  If you are still using the metabase dashboard, we recommend you migrate to https://app.crowdsec.net
+  Changes
+  - use go 1.24.6 (#3835) @mmetc
+  - CI: update actions; drop version comments (#3823) @mmetc
+  - install scripts: echo -e -> echo (we're not requiring bash anymore) (#3799) @mmetc
+  - move detect.yaml to /var/lib/crowdsec/data (#3797) @mmetc
+  - restore wizard.sh --unattended (#3790) @mmetc
+  - cleanup wizard.sh (#3786) @mmetc
+  - remove the cscli_setup feature flag (#3784) @mmetc
+  - add detect.yaml in rpm files section (#3773) @sabban
+  - refact whitelist/allowlist: net.IP to net/netip (#3683) @mmetc
+  - refact: pkg/database decisions filter, queries (#3635) @mmetc
+  New Features
+  - cscli: remove "dashboard" command (#3004) @mmetc
+  - clean up buckets serialization code (#3777) @sabban
+  - cscli setup: new service detection and configuration (#3730) @mmetc
+  - feat: add swarm support to docker acquistion (#3744) @LaurenceJJones
+  Improvements
+  - WAF: Improve user-experience with CRS and modsecurity rules (#3827) @blotus
+  - cscli setup: allow skipping service detection with $CROWDSEC_SETUP_UN… (#3822) @mmetc
+  - cscli setup: improve service detection and datasource validation (#3812) @mmetc
+  - cscli setup: skip missing items, fix collection name (#3794) @mmetc
+  - Improve the output of appsec cscli hubtest (#3791) @buixor
+  - cscli setup improvements (#3789) @mmetc
+  - cscli: print command name along with errors (#3768) @mmetc
+  - enhance: Add 2 time helpers for average and median (#3748) @LaurenceJJones
+  - usage metrics: report acquisition + parsers metrics to LAPI (#3709) @blotus
+  - improve datasource validation (goccy/go-yaml) (#3646) @mmetc
+  Bug Fixes
+  - fix "cscli alerts list -s " for alerts with no decisions (#3830) @mmetc
+  - unify the output format of start_at and stop_at (#3819) @buixor
+  - pkg/cwhub: fix relative symlink resolution (#3824) @mmetc
+  - fix: Postint check also if api.server.enable is false (#3802) @LaurenceJJones
+  - detect.yaml: always acquire ssh logs from file if present (#3825) @mmetc
+  - detect.yaml: avoid double acquisition on deb (#3821) @mmetc
+  - review config/detect.yaml (#3820) @mmetc
+  - fix rpm detect.yaml (#3814) @sabban
+  - CI: remove config/detect.yaml reference from rpm (#3813) @mmetc
+  - fix rpm dovecot detection (#3796) @sabban
+  - Increase hub download timeout to 10 minutes (#3785) @mmetc
+  - docker: enforce volume use for /var/lib/crowdsec/data/ (#3757) @blotus
+  - setup: add detect.yaml to windows install (#3775) @blotus
+  - fix timemachine lock (#3767) @sabban
+  - appsec: properly set URI in the original request object for use in hooks (#3755) @blotus
+  Chore / Deps
+  - build(deps): bump codecov/codecov-action from 5.4.3 to 5.5.0 (#3816) @dependabot[bot]
+  - build(deps): bump github/codeql-action from 3.29.7 to 3.29.11 (#3818) @dependabot[bot]
+  - build(deps): bump github.com/crowdsecurity/machineid from 1.0.2 to 1.0.3 (#3769) @dependabot[bot]
+  - build(deps): bump docker/login-action from 3.4.0 to 3.5.0 (#3783) @dependabot[bot]
+  - update dependencies, use go 1.24.5 (#3774) @mmetc
+  - build(deps): bump github.com/go-sql-driver/mysql from 1.6.0 to 1.9.3 (#3761) @dependabot[bot]
+  - build(deps): bump github.com/go-openapi/swag from 0.23.0 to 0.23.1 (#3763) @dependabot[bot]
+  - build(deps): bump github.com/hashicorp/go-version from 1.2.1 to 1.7.0 (#3764) @dependabot[bot]
+  - build(deps): bump github/codeql-action from 3.29.4 to 3.29.5 (#3765) @dependabot[bot]
+  - build(deps): bump github.com/alexliesenfeld/health from 0.8.0 to 0.8.1 (#3760) @dependabot[bot]
+  - build(deps): bump github.com/r3labs/diff/v2 from 2.14.1 to 2.15.1 (#3721) @dependabot[bot]
+  - build(deps): bump google.golang.org/grpc from 1.67.1 to 1.74.2 (#3750) @dependabot[bot]
+  - build(deps): bump github.com/go-openapi/validate from 0.20.0 to 0.24.0 (#3719) @dependabot[bot]
+  - build(deps): bump github.com/sanity-io/litter from 1.5.5 to 1.5.8 (#3720) @dependabot[bot]
+  - build(deps): bump golang.org/x/net from 0.41.0 to 0.42.0 (#3749) @dependabot[bot]
+  - build(deps): bump astral-sh/setup-uv from 6.4.1 to 6.4.3 (#3753) @dependabot[bot]
+  - build(deps): bump github/codeql-action from 3.29.2 to 3.29.4 (#3751) @dependabot[bot]
+  - build(deps): bump golang.org/x/mod from 0.25.0 to 0.26.0 (#3746) @dependabot[bot]
+  Geolite2 notice
+  This product includes GeoLite2 data created by MaxMind, available from https://www.maxmind.com.
+  Installation
+  Take a look at the installation instructions.
+ReleaseNotesUrl: https://github.com/crowdsecurity/crowdsec/releases/tag/v1.7.0
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

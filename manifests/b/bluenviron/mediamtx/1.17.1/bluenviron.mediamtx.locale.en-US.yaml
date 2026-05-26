@@ -1,0 +1,72 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: bluenviron.mediamtx
+PackageVersion: 1.17.1
+PackageLocale: en-US
+Publisher: bluenviron
+PublisherUrl: https://github.com/bluenviron
+PublisherSupportUrl: https://github.com/bluenviron/mediamtx/issues
+Author: aler9
+PackageName: mediamtx
+PackageUrl: https://github.com/bluenviron/mediamtx
+License: MIT
+LicenseUrl: https://github.com/bluenviron/mediamtx/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2019 aler9
+CopyrightUrl: https://github.com/bluenviron/mediamtx/blob/main/LICENSE
+ShortDescription: |-
+  Ready-to-use SRT / WebRTC / RTSP / RTMP / LL-HLS media server and media proxy that allows to read,
+  publish, proxy, record and playback video and audio streams.
+Description: |-
+  MediaMTX is a ready-to-use and zero-dependency real-time media server and media proxy that allows
+  to publish, read, proxy, record and playback video and audio streams. It has been conceived as a
+  "media router" that routes media streams from one end to the other.
+Tags:
+- go
+- golang
+- hls
+- media-server
+- obs-studio
+- rtcp
+- rtmp
+- rtmp-proxy
+- rtmp-server
+- rtp
+- rtsp
+- rtsp-proxy
+- rtsp-relay
+- rtsp-server
+- streaming
+- webrtc
+ReleaseNotes: |-
+  Fixes and improvements
+  General
+  - prevent directory traversal attacks (#5602) Path names are used as part of paths in several components: in the recorder, in the playback server and in every HTTP-based component (WebRTC, HLS, API). Special characters that allow to escape from the intended directory are now forbidden in order to prevent directory traversal attacks.
+
+  RTSP
+  - client: fill server name indication (SNI) of TLS connections (bluenviron/gortsplib#1038)
+
+  RTMP
+  - implement AbortMessage (#4673) (bluenviron/gortmplib#59)
+  - client: fill server name indication (SNI) of TLS connections (bluenviron/gortmplib#63)
+
+  WebRTC
+  - fix random absolute timestamps with Opus, G711 and LPCM (#5597) When rewriting audio RTP timestamps in WebRTC egress, NTP was derived using regenerated packet timestamps minus the incoming RTP base timestamp. That mixed timestamp domains and could shift absolute time by an arbitrary offset while still exposing mapping as available. Fix by using a consistent outgoing RTP domain in rewritten audio paths
+  - strip TWCC extension of incoming RTP packets (#5146) (#5605) The TWCC extension is used as part of the WebRTC congestion control algorithm placed between the publisher and the server. If this extension is routed untouched from the server to readers, it messes with the congestion control algorithm present between the server and each reader. Remove it.
+  
+  RPI Camera
+  - restore Docker compatibility with armv6 devices (#5590) (#5595)
+  - restore compatibility with armv6 devices (#5590) (bluenviron/mediamtx-rpicamera#95)
+
+  Dependencies
+  - github.com/bluenviron/gortmplib updated from v0.3.0 to v0.3.1
+  - github.com/bluenviron/gortsplib/v5 updated from v5.5.0 to v5.5.1
+  - github.com/gin-contrib/pprof updated from v1.5.3 to v1.5.4
+  - github.com/go-git/go-git/v5 updated from v5.17.0 to v5.17.2
+  - github.com/pion/ice/v4 updated from v4.2.1 to v4.2.2
+  - github.com/pion/webrtc/v4 updated from v4.2.9 to v4.2.11
+  - github.com/pion/sctp updated from v1.9.2 to v1.9.4
+  - github.com/bluenviron/mediamtx-rpicamera updated from v2.5.4 to v2.5.5
+ReleaseNotesUrl: https://github.com/bluenviron/mediamtx/releases/tag/v1.17.1
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
