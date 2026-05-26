@@ -14,11 +14,19 @@ InstallModes:
   - silent
   - silentWithProgress
 InstallerSwitches:
-  # WinGet's default for InstallerType: inno is already
-  # `/VERYSILENT /SUPPRESSMSGBOXES /NORESTART /SP-`; we set them
-  # explicitly so a future schema default change can't surprise us.
-  # /SP- skips the "This will install..." pre-install dialog.
-  Silent: /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /SP-
+  # `/SILENT` (not /VERYSILENT) is deliberate. Inno Setup 6.7's
+  # RedirectionGuard handoff (level 2 SL5 → level 3 protected Setup)
+  # fails silently with /VERYSILENT in sandboxed contexts — the
+  # protected temp dir gets created with only `_setup64.tmp` + an
+  # empty `_isetup\` and the install never proceeds, leaving the
+  # install dir half-populated. Same root cause as the failure mode
+  # we hit during the launcher's in-app self-update. /SILENT keeps
+  # the small progress dialog visible, which is what RG's protected
+  # handoff needs to complete; the dialog is dismissed automatically
+  # at the end so the WinGet sandbox sees a clean exit.
+  # /SP- skips the "This will install..." pre-install dialog so the
+  # install still runs without any user clicks.
+  Silent: /SILENT /SUPPRESSMSGBOXES /NORESTART /SP-
   SilentWithProgress: /SILENT /SUPPRESSMSGBOXES /NORESTART /SP-
   Custom: ""
 UpgradeBehavior: install
