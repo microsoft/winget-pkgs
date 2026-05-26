@@ -30,12 +30,26 @@ InstallerSwitches:
   SilentWithProgress: /SILENT /SUPPRESSMSGBOXES /NORESTART /SP-
   Custom: ""
 UpgradeBehavior: install
-# The "_is1" suffix is what Inno Setup appends to the AppId GUID when
-# it writes its Uninstall registry key under
-# HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall. WinGet uses
-# this for upgrade detection and uninstall.
+# 0 is implicit; 3010 (success-needs-restart) and 1641 (restart-initiated)
+# are Inno Setup's only documented non-zero success codes. /NORESTART
+# converts 3010→0 in practice but we list them defensively.
+InstallerSuccessCodes:
+  - 1641
+  - 3010
+# Explicit ARP (Apps and Features) entry so WinGet's post-install
+# verification knows exactly which Uninstall registry subkey to look
+# for. Inno writes `<AppId>_is1` under
+# HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall\ — the
+# top-level `ProductCode` field is also kept for tooling that reads
+# the older shape.
+AppsAndFeaturesEntries:
+  - DisplayName: Translation Manager
+    DisplayVersion: 1.1.0
+    Publisher: Nehoray
+    ProductCode: '{B0D4F2A7-3CCE-4A1A-9C44-7E1A1B6F0001}_is1'
+    InstallerType: inno
 ProductCode: '{B0D4F2A7-3CCE-4A1A-9C44-7E1A1B6F0001}_is1'
-ReleaseDate: 2026-05-25
+ReleaseDate: 2026-05-26
 Installers:
   - Architecture: x64
     InstallerUrl: https://github.com/nehorayc04/translation-launcher/releases/download/v1.1.0/TranslationManager-Setup-1.1.0.exe
