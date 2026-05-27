@@ -10,6 +10,12 @@ Describe 'YamlCreate.GitHub Module' {
             Get-Module 'YamlCreate.GitHub' | Should Not BeNullOrEmpty
         }
 
+        It 'Should declare FileOperations as a required module dependency' {
+            $ModulePath = Split-Path -Parent $PSCommandPath
+            $manifest = Import-PowerShellDataFile -Path (Join-Path $ModulePath 'YamlCreate.GitHub.psd1')
+            (@($manifest.RequiredModules) -contains 'FileOperations') | Should Be $true
+        }
+
         It 'Should export all expected functions' {
             $ExportedFunctions = (Get-Module 'YamlCreate.GitHub').ExportedFunctions.Keys
             'Get-Remote' -in $ExportedFunctions | Should Be $true

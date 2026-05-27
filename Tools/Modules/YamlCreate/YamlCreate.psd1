@@ -53,6 +53,7 @@
     # Modules that must be imported into the global environment prior to importing this module
     RequiredModules = @(
         'VirtualTerminal' # Required for virtual terminal support
+        'FileOperations'
     )
 
     # Assemblies that must be loaded prior to importing this module
@@ -91,6 +92,7 @@
 
     # List of all modules packaged with this module
     ModuleList = @(
+        'FileOperations'
         'YamlCreate.InstallerDetection'
         'YamlCreate.Menuing'
         'YamlCreate.GitHub'
@@ -139,4 +141,3 @@
     # DefaultCommandPrefix = ''
 
 }
-

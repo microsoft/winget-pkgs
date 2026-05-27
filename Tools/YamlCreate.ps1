@@ -405,26 +405,6 @@ if ($remoteUpstreamUrl -and $remoteUpstreamUrl -ne $wingetUpstream) {
   }
 }
 
-####
-# Description: Removes files and folders from the file system
-# Inputs: List of paths to remove
-# Outputs: None
-####
-function Invoke-FileCleanup {
-  param (
-    [Parameter(Mandatory = $true)]
-    [AllowEmptyString()]
-    [AllowEmptyCollection()]
-    [String[]] $FilePaths
-  )
-  if (!$FilePaths) { return }
-  foreach ($path in $FilePaths) {
-    Write-Debug "Removing $path"
-    if (Test-Path $path) { Remove-Item -Path $path -Recurse }
-    else { Write-Warning "Could not remove $path as it does not exist" }
-  }
-}
-
 # Since this script changes the UI Calling Culture, a clean exit should set it back to the user preference
 # If the remote upstream was changed, that should also be set back
 Function Invoke-CleanExit {
@@ -635,41 +615,6 @@ Function Get-InstallerFile {
   }
 
   return $_OutFile
-}
-
-Function SafeRemovePath {
-  Param(
-    [Parameter(Mandatory=$true, Position=0)]
-    [string] $Path,
-    [int] $Retries = 6,
-    [int] $DelayMs = 250
-  )
-
-  # Check if path exists using .NET
-  $fileInfo = [System.IO.FileInfo]$Path
-  $dirInfo = [System.IO.DirectoryInfo]$Path
-
-  if (-not ($fileInfo.Exists -or $dirInfo.Exists)) { return }
-
-  for ($i = 0; $i -lt $Retries; $i++) {
-    try {
-      if ($dirInfo.Exists) {
-        $dirInfo.Delete($true)
-      } elseif ($fileInfo.Exists) {
-        $fileInfo.Delete()
-      }
-      return
-    } catch [System.IO.IOException] {
-      [GC]::Collect()
-      [GC]::WaitForPendingFinalizers()
-      Start-Sleep -Milliseconds $DelayMs
-      $DelayMs = [Math]::Min(5000, $DelayMs * 2)
-    } catch {
-      throw
-    }
-  }
-
-  Write-Warning "Could not remove file '$Path' after $Retries attempts; it may be in use by another process."
 }
 
 Function Get-UserSavePreference {
@@ -1477,7 +1422,7 @@ Function Read-QuickInstallerEntry {
         }
       }
       # Remove the downloaded files
-      SafeRemovePath -Path $script:dest
+      Request-RemoveItem -Path $script:dest
       Write-Host -ForegroundColor 'Green' "Installer updated!`n"
     }
 
@@ -3125,7 +3070,7 @@ Switch ($script:Option) {
         }
       }
       # Remove the downloaded files
-      SafeRemovePath -Path $script:dest
+      Request-RemoveItem -Path $script:dest
       $_NewInstallers += Restore-YamlKeyOrder $_Installer $InstallerEntryProperties -NoComments
     }
     # Write the new manifests

@@ -7,40 +7,6 @@ $script:CachedTokenExpiration = 30 # Days
 $script:GitHubToken = $env:WINGET_PKGS_GITHUB_TOKEN
 $script:GitHubApiBaseUri = 'https://api.github.com'
 
-function Initialize-Folder {
-    param (
-        [Parameter(Mandatory = $true)]
-        [String] $FolderPath
-    )
-
-    $FolderPath = [System.Io.Path]::GetFullPath($FolderPath)
-    if (Test-Path -Path $FolderPath -PathType Container) { return $true }
-    if (Test-Path -Path $FolderPath) { return $false }
-
-    try {
-        New-Item -Path $FolderPath -ItemType Directory -Force -ErrorAction Stop | Out-Null
-        return $true
-    } catch {
-        return $false
-    }
-}
-
-function Invoke-FileCleanup {
-    param (
-        [Parameter(Mandatory = $true)]
-        [AllowEmptyString()]
-        [AllowEmptyCollection()]
-        [String[]] $FilePaths
-    )
-
-    if (!$FilePaths) { return }
-    foreach ($path in $FilePaths) {
-        if (Test-Path $path) {
-            Remove-Item -Path $path -Recurse -Force -ErrorAction SilentlyContinue
-        }
-    }
-}
-
 function Test-GithubToken {
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingConvertToSecureStringWithPlainText', '',
         Justification = 'The standard workflow that users use with other applications requires the use of plaintext GitHub Access Tokens')]
