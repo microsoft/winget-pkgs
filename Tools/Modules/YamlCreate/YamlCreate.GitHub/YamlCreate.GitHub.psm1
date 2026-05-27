@@ -141,23 +141,6 @@ function Invoke-GitHubRequest {
     }
 }
 
-<#
-.SYNOPSIS
-    Gets the URL of a git remote.
-
-.DESCRIPTION
-    Gets the URL for a specified git remote by name.
-
-.PARAMETER RemoteName
-    The name of the git remote (e.g., 'origin', 'upstream').
-
-.OUTPUTS
-    System.String - The URL of the remote, or $null if the remote does not exist.
-
-.EXAMPLE
-    PS> Get-Remote -RemoteName upstream
-    https://github.com/microsoft/winget-pkgs.git
-#>
 function Get-Remote {
     param(
         [Parameter(Mandatory = $true)]
@@ -175,26 +158,6 @@ function Get-Remote {
     }
 }
 
-<#
-.SYNOPSIS
-    Sets or adds a git remote.
-
-.DESCRIPTION
-    Sets the URL for an existing git remote, or adds a new remote if it doesn't exist.
-
-.PARAMETER RemoteName
-    The name of the git remote (e.g., 'origin', 'upstream').
-
-.PARAMETER Url
-    The URL to set for the remote.
-
-.OUTPUTS
-    System.Boolean - $true if successful, $false otherwise.
-
-.EXAMPLE
-    PS> Set-Remote -RemoteName upstream -Url 'https://github.com/microsoft/winget-pkgs.git'
-    True
-#>
 function Set-Remote {
     param(
         [Parameter(Mandatory = $true)]
@@ -217,25 +180,6 @@ function Set-Remote {
     }
 }
 
-<#
-.SYNOPSIS
-    Finds open pull requests for a package version.
-
-.DESCRIPTION
-    Queries the GitHub API for open pull requests matching the specified package identifier and version.
-
-.PARAMETER PackageIdentifier
-    The package identifier (e.g., 'Microsoft.WindowsTerminal').
-
-.PARAMETER PackageVersion
-    The version of the package (e.g., '1.18.0').
-
-.OUTPUTS
-    System.Object - The PR API response object if found, or $null if none found.
-
-.EXAMPLE
-    PS> Find-PullRequest -PackageIdentifier 'Microsoft.WindowsTerminal' -PackageVersion '1.18.0'
-#>
 function Find-PullRequest {
     param(
         [Parameter(Mandatory = $true)]
@@ -264,21 +208,6 @@ function Find-PullRequest {
     }
 }
 
-<#
-.SYNOPSIS
-    Gets the PR template content from the upstream remote.
-
-.DESCRIPTION
-    Fetches the PULL_REQUEST_TEMPLATE.md content from the upstream remote repository.
-    If the template cannot be fetched, a warning is issued but the function continues.
-
-.OUTPUTS
-    System.String - The template content if available, or $null if unavailable.
-
-.EXAMPLE
-    PS> Get-PrTemplate
-    # PR Template Content...
-#>
 function Get-PrTemplate {
     try {
         $contentsApiUrl = '/repos/microsoft/winget-pkgs/contents/.github/PULL_REQUEST_TEMPLATE.md?ref=master'
