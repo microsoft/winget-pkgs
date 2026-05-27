@@ -246,7 +246,6 @@ $callingCulture = [Threading.Thread]::CurrentThread.CurrentCulture
 [Threading.Thread]::CurrentThread.CurrentUICulture = 'en-US'
 [Threading.Thread]::CurrentThread.CurrentCulture = 'en-US'
 if (-not ([System.Environment]::OSVersion.Platform -match 'Win')) { $env:TEMP = '/tmp/' }
-$wingetUpstream = 'https://github.com/microsoft/winget-pkgs.git'
 $RunHash = $(Get-FileHash -InputStream $([IO.MemoryStream]::new([byte[]][char[]]$(Get-Date).Ticks.ToString()))).Hash.Substring(0, 8)
 $script:UserAgent = 'Microsoft-Delivery-Optimization/10.1'
 $script:CleanupPaths = @()
@@ -394,12 +393,16 @@ $Patterns = @{
 }
 
 # check if upstream exists
-($remoteUpstreamUrl = $(git remote get-url upstream)) *> $null
+$remoteUpstreamUrl = Get-Remote -RemoteName upstream
 if ($remoteUpstreamUrl -and $remoteUpstreamUrl -ne $wingetUpstream) {
-  git remote set-url upstream $wingetUpstream
+  if (-not (Set-Remote -RemoteName upstream -Url $wingetUpstream)) {
+    Write-Warning "Failed to update upstream remote URL. You may need to manually run: git remote set-url upstream $wingetUpstream"
+  }
 } elseif (!$remoteUpstreamUrl) {
   Write-Host -ForegroundColor 'Yellow' 'Upstream does not exist. Permanently adding https://github.com/microsoft/winget-pkgs as remote upstream'
-  git remote add upstream $wingetUpstream
+  if (-not (Set-Remote -RemoteName upstream -Url $wingetUpstream)) {
+    Write-Warning "Failed to add upstream remote. You may need to manually run: git remote add upstream $wingetUpstream"
+  }
 }
 
 ####
@@ -1984,7 +1987,10 @@ Function Read-LocaleMetadata {
 # Requests the user to answer the prompts found in the winget-pkgs pull request template
 # Uses this template and responses to create a PR
 Function Read-PRBody {
-  $PrBodyContent = Get-Content $args[0]
+  $PrBodyContent = Get-PrTemplate
+  if (-not $PrBodyContent) {
+    Write-Warning "The Pull Request Template Contained No Content!"
+  }
   ForEach ($_line in $PrBodyContent) {
     # | Where-Object { $_ -like '-*[ ]*' }))
     if ($_line -like '-*[ ]*' ) {
@@ -2746,7 +2752,7 @@ do {
 # Check the api for open PR's
 # This is unauthenticated because the call-rate per minute is assumed to be low
 if ($ScriptSettings.ContinueWithExistingPRs -ne 'always' -and $script:Option -ne 'RemoveManifest' -and !$SkipPRCheck) {
-  $PRApiResponse = @(Invoke-WebRequest "https://api.github.com/search/issues?q=repo%3Amicrosoft%2Fwinget-pkgs%20is%3Apr%20$($PackageIdentifier -replace '\.', '%2F'))%2F$PackageVersion%20in%3Apath&per_page=1" -UseBasicParsing -ErrorAction SilentlyContinue | ConvertFrom-Json)[0]
+  $PRApiResponse = Find-PullRequest -PackageIdentifier $PackageIdentifier -PackageVersion $PackageVersion
   # If there was a PR found, get the URL and title
   if ($PRApiResponse.total_count -gt 0) {
     $_PRUrl = $PRApiResponse.items.html_url
@@ -3234,16 +3240,7 @@ if ($PromptSubmit -eq '0') {
     # If the user has the cli too
     if (Get-Command 'gh' -ErrorAction SilentlyContinue) {
       # Request the user to fill out the PR template
-      if (Test-Path -Path "$gitTopLevel\.github\PULL_REQUEST_TEMPLATE.md") {
-        Read-PRBody (Resolve-Path "$gitTopLevel\.github\PULL_REQUEST_TEMPLATE.md").Path
-      } else {
-        while ([string]::IsNullOrWhiteSpace($PRTemplate)) {
-          Write-Host
-          Write-Host -ForegroundColor 'Green' -Object 'PULL_REQUEST_TEMPLATE.md not found, input path'
-          $PRTemplate = Read-Host -Prompt 'PR Template' | TrimString
-        }
-        Read-PRBody "$PRTemplate"
-      }
+      Read-PRBody
     }
   }
 
