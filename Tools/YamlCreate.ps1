@@ -642,11 +642,19 @@ Function SafeRemovePath {
     [int] $DelayMs = 250
   )
 
-  if (-not (Test-Path -LiteralPath $Path)) { return }
+  # Check if path exists using .NET
+  $fileInfo = [System.IO.FileInfo]$Path
+  $dirInfo = [System.IO.DirectoryInfo]$Path
+
+  if (-not ($fileInfo.Exists -or $dirInfo.Exists)) { return }
 
   for ($i = 0; $i -lt $Retries; $i++) {
     try {
-      Remove-Item -LiteralPath $Path -Force -ErrorAction Stop
+      if ($dirInfo.Exists) {
+        $dirInfo.Delete($true)
+      } elseif ($fileInfo.Exists) {
+        $fileInfo.Delete()
+      }
       return
     } catch [System.IO.IOException] {
       [GC]::Collect()
