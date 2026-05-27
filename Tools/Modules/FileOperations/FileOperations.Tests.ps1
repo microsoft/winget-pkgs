@@ -6,14 +6,14 @@ Describe 'FileOperations Module' {
 
     Context 'Module Import' {
         It 'Should import the module successfully' {
-            Get-Module 'FileOperations' | Should Not BeNullOrEmpty
+            Get-Module 'FileOperations' | Should -Not -BeNullOrEmpty
         }
 
         It 'Should export all expected functions' {
             $ExportedFunctions = (Get-Module 'FileOperations').ExportedFunctions.Keys
-            'Initialize-Folder' -in $ExportedFunctions | Should Be $true
-            'Invoke-FileCleanup' -in $ExportedFunctions | Should Be $true
-            'Request-RemoveItem' -in $ExportedFunctions | Should Be $true
+            'Initialize-Folder' -in $ExportedFunctions | Should -Be $true
+            'Invoke-FileCleanup' -in $ExportedFunctions | Should -Be $true
+            'Request-RemoveItem' -in $ExportedFunctions | Should -Be $true
         }
     }
 }
@@ -25,8 +25,8 @@ Describe 'Initialize-Folder' {
 
         try {
             $result = Initialize-Folder -FolderPath $targetFolder
-            $result | Should Be $true
-            (Test-Path -Path $targetFolder -PathType Container) | Should Be $true
+            $result | Should -Be $true
+            (Test-Path -Path $targetFolder -PathType Container) | Should -Be $true
         } finally {
             if (Test-Path -Path $tempRoot) { Remove-Item -Path $tempRoot -Recurse -Force -ErrorAction SilentlyContinue }
         }
@@ -38,7 +38,7 @@ Describe 'Initialize-Folder' {
 
         try {
             $result = Initialize-Folder -FolderPath $tempRoot
-            $result | Should Be $true
+            $result | Should -Be $true
         } finally {
             if (Test-Path -Path $tempRoot) { Remove-Item -Path $tempRoot -Recurse -Force -ErrorAction SilentlyContinue }
         }
@@ -49,7 +49,7 @@ Describe 'Initialize-Folder' {
 
         try {
             $result = Initialize-Folder -FolderPath $tempFile.FullName
-            $result | Should Be $false
+            $result | Should -Be $false
         } finally {
             if (Test-Path -Path $tempFile.FullName) { Remove-Item -Path $tempFile.FullName -Force -ErrorAction SilentlyContinue }
         }
@@ -60,7 +60,7 @@ Describe 'Request-RemoveItem' {
     It 'Should remove a file path' {
         $tempFile = New-TemporaryFile
         Request-RemoveItem -Path $tempFile.FullName
-        (Test-Path -Path $tempFile.FullName) | Should Be $false
+        (Test-Path -Path $tempFile.FullName) | Should -Be $false
     }
 
     It 'Should remove a directory path recursively' {
@@ -71,12 +71,12 @@ Describe 'Request-RemoveItem' {
         Set-Content -Path $nestedFile -Value 'payload'
 
         Request-RemoveItem -Path $tempRoot
-        (Test-Path -Path $tempRoot) | Should Be $false
+        (Test-Path -Path $tempRoot) | Should -Be $false
     }
 
     It 'Should be a no-op when path does not exist' {
         $missingPath = Join-Path -Path ([System.IO.Path]::GetTempPath()) -ChildPath ([System.Guid]::NewGuid().ToString())
-        { Request-RemoveItem -Path $missingPath } | Should Not Throw
+        { Request-RemoveItem -Path $missingPath } | Should -Not -Throw
     }
 }
 
@@ -90,18 +90,18 @@ Describe 'Invoke-FileCleanup' {
 
         Invoke-FileCleanup -FilePaths @($tempFolder, $tempFile)
 
-        (Test-Path -Path $tempFolder) | Should Be $false
-        (Test-Path -Path $tempFile) | Should Be $false
+        (Test-Path -Path $tempFolder) | Should -Be $false
+        (Test-Path -Path $tempFile) | Should -Be $false
 
         if (Test-Path -Path $tempRoot) { Remove-Item -Path $tempRoot -Recurse -Force -ErrorAction SilentlyContinue }
     }
 
     It 'Should not throw when file list is empty' {
-        { Invoke-FileCleanup -FilePaths @() } | Should Not Throw
+        { Invoke-FileCleanup -FilePaths @() } | Should -Not -Throw
     }
 
     It 'Should not throw when file list contains missing paths' {
         $missingPath = Join-Path -Path ([System.IO.Path]::GetTempPath()) -ChildPath ([System.Guid]::NewGuid().ToString())
-        { Invoke-FileCleanup -FilePaths @($missingPath) } | Should Not Throw
+        { Invoke-FileCleanup -FilePaths @($missingPath) } | Should -Not -Throw
     }
 }
