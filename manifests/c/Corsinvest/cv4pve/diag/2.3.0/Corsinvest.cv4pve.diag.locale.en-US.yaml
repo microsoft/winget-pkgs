@@ -1,0 +1,70 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Corsinvest.cv4pve.diag
+PackageVersion: 2.3.0
+PackageLocale: en-US
+Publisher: Corsinvest Srl
+PublisherUrl: https://www.corsinvest.it/
+PublisherSupportUrl: https://www.corsinvest.it/cv4pve
+PrivacyUrl: https://www.corsinvest.it/privacy
+Author: Corsinvest Srl
+PackageName: cv4pve-diag
+PackageUrl: https://github.com/Corsinvest/cv4pve-diag
+License: GPL-3.0
+LicenseUrl: https://github.com/Corsinvest/cv4pve-diag/blob/HEAD/LICENSE.md
+Copyright: Copyright (c) 2019-2025 Corsinvest Srl
+CopyrightUrl: https://github.com/Corsinvest/cv4pve-diag/blob/master/LICENSE.md
+ShortDescription: Diagnostic Tool for Proxmox VE
+Description: |-
+  cv4pve-diag is a comprehensive diagnostic tool for Proxmox VE that performs health checks
+  and system analysis on your virtualization infrastructure.
+
+  Features:
+  - Node health and status monitoring
+  - VM/Container diagnostics and configuration validation
+  - Storage capacity and performance checks
+  - Replication and backup status verification
+  - Snapshot age monitoring
+  - Multiple output formats (Text, HTML, JSON, Markdown)
+  - Customizable severity thresholds
+  - Support for ignore patterns
+Moniker: cv4pve-diag
+Tags:
+- corsinvest
+- diagnostic
+- health-check
+- monitoring
+- proxmox
+- proxmoxve
+- virtualization
+- vm
+ReleaseNotes: |-
+  Resilience
+  - A failing PVE API call no longer aborts the whole analysis. Each call now degrades gracefully: the affected check is skipped and a Warning (WG0042, sub-context ApiError) is reported so it is clear the picture is incomplete. Endpoints not implemented on the running PVE version (HTTP 501) are skipped silently.
+  New checks
+  Cluster:
+  - CC0005 — HA resource in error state (manual recovery required).
+  - WC0009 — replication job disabled (guest data no longer replicated).
+  - WC0010 — enabled replication job without a schedule (it will never run).
+  - WC0011 — nodes run different Proxmox VE versions.
+  - WC0012 — nodes run different kernel versions.
+  - IC0007 — user without an email (will not receive notifications).
+  - IC0008 — empty group.
+  - IC0009 — unused custom role (not assigned in any ACL).
+  Node:
+  - WN0023 — certificate expiring within 30 days.
+  - WN0034 — bond with fewer than two slaves (no link redundancy).
+  - IN0004 — self-signed certificate.
+  Storage:
+  - WS0008 — storage disabled.
+  Fixes
+  - CS0001 (Storage unavailable) no longer fires for storages disabled on purpose — those are reported as WS0008 (Warning) instead of a false Critical.
+  What's Changed
+  - feat: add cluster/node/storage diagnostic checks by @franklupo in #43
+  - feat: resilient API calls — a failing fetch no longer aborts the analysis by @franklupo in #44
+  - chore: release 2.3.0 by @franklupo in #45
+  Full Changelog: v2.2.4...v2.3.0
+ReleaseNotesUrl: https://github.com/Corsinvest/cv4pve-diag/releases/tag/v2.3.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
