@@ -17,6 +17,7 @@ The **Windows Package Manager** is an [open source client](https://github.com/mi
 # Documentation
 
 Please check the [overview](doc/README.md) for detailed topics. Common topics for the WinGet Community repository are available below:
+
 * [Authoring a manifest](doc/README.md#authoring-a-manifest)
 * [Testing a manifest](doc/README.md#testing-a-manifest)
 * [First-time contributor checklist](doc/FirstContribution.md)
@@ -26,7 +27,7 @@ Please check the [overview](doc/README.md) for detailed topics. Common topics fo
 
 # Contributing
 
-This project welcomes contributions and suggestions. Most contributions require you to agree to a Contributor License Agreement (CLA) declaring that you have the right to, and do, grant us the rights to use your contribution. For details, visit https://cla.opensource.microsoft.com.
+This project welcomes contributions and suggestions. Most contributions require you to agree to a Contributor License Agreement (CLA) declaring that you have the right to, and do, grant us the rights to use your contribution. For details, visit <https://cla.opensource.microsoft.com>.
 
 When you submit a pull request, a CLA bot will automatically determine whether you need to provide a CLA and decorate the PR appropriately (e.g., status check, comment). Follow the instructions provided by the bot. You will only need to do this once across all Microsoft repositories using our CLA.
 
