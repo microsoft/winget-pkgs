@@ -1,0 +1,78 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: max-sixty.worktrunk
+PackageVersion: v0.47.0
+PackageLocale: en-US
+Publisher: max-sixty
+PublisherUrl: https://github.com/max-sixty
+PublisherSupportUrl: https://github.com/max-sixty/worktrunk/issues
+PackageName: worktrunk
+PackageUrl: https://github.com/max-sixty/worktrunk
+License: MIT OR Apache-2.0
+LicenseUrl: https://github.com/max-sixty/worktrunk/blob/HEAD/LICENSE
+ShortDescription: A Git worktree manager for trunk-based development
+Description: |-
+  worktrunk (wt) is a Git worktree manager designed for trunk-based development workflows.
+  It simplifies creating, switching between, and managing Git worktrees, making it easy to
+  work on multiple features or branches simultaneously without the overhead of stashing
+  or switching branches in a single working directory.
+Tags:
+- cli
+- git
+- git-worktree
+- rust
+- terminal
+- worktree
+ReleaseNotes: |-
+  Release Notes
+  Improved
+  - wt switch <number> suggests pr:N / mr:N first: When wt switch 2474 fails because no branch by that name exists, the hint now leads with how to switch to the matching PR/MR before mentioning --create. Platform is detected by hostname-matching the primary remote's effective URL (so url.insteadOf rewrites are respected): GitHub → wt switch pr:N, GitLab → wt switch mr:N, unknown host → both. Non-numeric branch names keep the original hint unchanged. (#2516)
+  - Faster alias and hook dispatch: Trivial-alias wall time drops 30.4ms → 20.4ms (1.49× via hyperfine) from three changes — replacing the 10ms try_wait+sleep poll in Cmd::stream with an event-driven Signals::forever() listener (and the matching 25ms poll in spawn_signal_forwarder), merging the two cold-path git rev-parse forks (--git-common-dir and the prewarm_info batch) into one, and loading user and project config on scoped threads instead of sequentially. Ctrl-C latency on concurrent steps drops from "up to 25 ms" to "as soon as signal-hook delivers". (#2537, #2538, #2541, #2543)
+  - Running … hook announce uses one canonical grammar: Replaces the overloaded Running <hook>: ... punctuation with a layered grammar where each separator carries one meaning — & joins concurrent commands within a step, , joins serial steps within a pipeline, ; joins source pipelines and hook-type clauses. Source label moves to a per-pipeline suffix annotation (sync, push (user)), so multi-source events no longer double-colon, and multi-hook-type events bundle onto a single line: Running post-commit: mark (user); post-remove: cleanup (user); post-switch: notify (user); post-merge: sync (user) @ ~/repo. (#2504)
+  - (user) / (project) source labels no longer rendered bold: The Running … background-hook announce wrapped each pipeline's source label in <bold>, producing visually noisy bold inner text against parens that weren't bold. Source labels render as plain inner text now; named command names (sync, push, …) stay bold as before. (#2514)
+  Fixed
+  - Integration detection now ORs local + upstream: wt list, wt remove, wt merge, and wt step prune previously checked a single integration target picked by effective_integration_target, so a branch merged into local main while origin/main had unique commits (or vice versa) was misreported as unintegrated and skipped. integration_reason now considers both — integrated if either matches. (#2507, #2513, #2515)
+  - wt step copy-ignored no longer writes outside the destination through symlinked directories: A symlinked destination directory (e.g. target -> /tmp/outside) let copy-ignored create files outside the worktree; --force made it riskier still by overwriting outside files. New guarded entry points reject paths whose resolved parent chain escapes the destination root. Leaf-symlink behavior is unchanged. (#2501, thanks @douglas)
+  - wt step copy-ignored no longer hardcodes .pi/ in built-in excludes: Removed from the default excludes list; users who need it can add it via the [step.copy-ignored] config. (#2527, thanks @indigoviolet for reporting #2526)
+  - wt step for-each -- <argv> preserves quoting and argument boundaries: The post--- argv was rebuilt with args.join(" ") and passed through sh -c, breaking anything with spaces, ;, or shell metacharacters inside an argv element. It's now exec'd directly with no implicit shell. Users wanting shell features (pipes, redirects, $VAR, globs) write sh -c '<snippet>' explicitly — same pattern as xargs, find -exec. (Breaking: previously wt step for-each -- <snippet> accepted shell snippets without sh -c; for-each is [experimental].) (#2465)
+  Documentation
+  - extending.md hooks-vs-aliases comparison gains a stdin row: The comparison table covered invocation, positional handling, approval flags, source filters, and template-context extras, but never said anything about stdin. Hooks have always received the template context as JSON on stdin; aliases inherit the parent's stdin so pipes pass through and interactive TUIs (wt switch) keep the tty. (#2529)
+  - bench command help cites the positional FILTER instead of --skip: Criterion's CLI takes filter as a positional argument; --skip exists but the documented form was misleading. (#2547)
+  - CLAUDE.md codifies the local-first network access policy: Adds a Network Access subsection under Command Execution Principles. Worktrunk is local-first; the only fall-through-to-the-wire helper is the first Repository::default_branch() call per repo. A TTL cache does not authorize background polling. (#2536)
+  Internal
+  - RefSnapshot replaces ambient ref-keyed caches: Callers now capture a point-in-time RefSnapshot and thread it through read paths instead of reading through cached commit_shas/integration_reasons/etc., which could go stale when wt itself moved a ref (e.g. wt merge advancing the local target). The head_shas per-worktree cache is also dropped so {{ commit }} reflects post-rebase HEAD movement. (Breaking library API: Repository::ahead_behind, batch_ahead_behind, effective_integration_target, integration_target removed; Repository::integration_reason, worktrunk::copy::copy_dir_recursive, copy_leaf, worktrunk::git::compute_integration_lazy, remove_worktree_with_cleanup, and delete_branch_if_safe each gained a parameter.) (#2528, #2530)
+  - Aliases keyed by (name, source) and EXEC decided per step: Same-name user+project alias collisions used to scrub EXEC for the whole merged pipeline; per-step decisions now keep the EXEC relaxation on user steps and scrub only project steps. Strictly more permissive than before. (#2474, #2521)
+  - Span RAII guard for in-process [wt-trace] attribution: Records [wt-trace] span="name" dur_us=… on drop, parsed by the existing chrome-trace renderer. Wired through alias dispatch, config load, build_hook_context, template_render, and execute_shell_command, so cold-cache attribution down to ~µs lands in trace.json for https://ui.perfetto.dev. (#2539)
+  - Codecov uploads enabled on fork PRs: Drops the github.repository_owner == 'max-sixty' guards on both Codecov upload steps; the action falls back to tokenless when CODECOV_TOKEN is empty. (#2535)
+  - Nightly benchmark results append to a public gist as JSONL (timestamp, commit SHA, mean_ns, stddev_ns) so results are queryable across runs. (#2531, #2532)
+  Install worktrunk 0.47.0
+  Install prebuilt binaries via shell script
+  curl --proto '=https' --tlsv1.2 -LsSf https://github.com/max-sixty/worktrunk/releases/download/v0.47.0/worktrunk-installer.sh | sh && wt config shell install
+  Install prebuilt binaries via powershell script
+  powershell -ExecutionPolicy Bypass -c "irm https://github.com/max-sixty/worktrunk/releases/download/v0.47.0/worktrunk-installer.ps1 | iex"; git-wt config shell install
+  Install prebuilt binaries via Homebrew
+  brew install worktrunk && wt config shell install
+  Download worktrunk 0.47.0
+  ────────────────────────────────────────────────┬───────────────────┬─────────────
+  File                                            │Platform           │Checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-aarch64-apple-darwin.tar.xz           │Apple Silicon macOS│checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-x86_64-apple-darwin.tar.xz            │Intel macOS        │checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-x86_64-pc-windows-msvc.zip            │x64 Windows        │checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-aarch64-unknown-linux-musl.tar.xz     │ARM64 MUSL Linux   │checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-x86_64-unknown-linux-musl.tar.xz      │x64 MUSL Linux     │checksum
+  ────────────────────────────────────────────────┴───────────────────┴─────────────
+  Install via Cargo
+  cargo install worktrunk && wt config shell install
+  Install via Winget (Windows)
+  winget install max-sixty.worktrunk && git-wt config shell install
+  Install via AUR (Arch Linux)
+  paru worktrunk-bin && wt config shell install
+ReleaseNotesUrl: https://github.com/max-sixty/worktrunk/releases/tag/v0.47.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

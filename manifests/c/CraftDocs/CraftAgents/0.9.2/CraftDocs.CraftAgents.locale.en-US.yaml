@@ -1,0 +1,50 @@
+# Created with YamlCreate.ps1 v2.7.2 $debug=NVS1.CRLF.7-6-1.Win32NT
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: CraftDocs.CraftAgents
+PackageVersion: 0.9.2
+PackageLocale: en-US
+Publisher: Craft Docs Ltd.
+PublisherUrl: https://www.craft.do/
+PublisherSupportUrl: https://github.com/craft-ai-agents/craft-agents-oss/issues
+PrivacyUrl: https://www.craft.do/privacy
+Author: Craft Docs Ltd.
+PackageName: Craft Agents
+PackageUrl: https://agents.craft.do/
+License: Apache-2.0
+LicenseUrl: https://github.com/craft-ai-agents/craft-agents-oss/blob/HEAD/LICENSE
+Copyright: Copyright 2026 Craft Docs Ltd.
+CopyrightUrl: https://www.craft.do/terms
+ShortDescription: Work with most powerful agents in the world, with the UX they deserve
+Description: 'Craft Agents brings Claude’s coding capabilities to your entire digital workflow. It massively improves both coding and non-coding workflows via enhanced UI, review, and auto execution. Built on the same foundation as Claude Code (the Claude Agent SDK), it extends the model’s reasoning power to work across all your tools: GitHub, Linear, Slack, Craft documents, local files, and any API you can connect.'
+# Moniker:
+Tags:
+- agent
+- agentic
+- ai
+- large-language-model
+- llm
+ReleaseNotes: |-
+  v0.9.2 — OAuth refresh ordering, Pi system prompt persistence, cross-machine spawn guard, i18n key restore, source_test/streaming/browser hotfixes
+  Bug Fixes
+  - OAuth tokens silently refresh before agent build — On cold sessions, SessionManager.sendMessage ran getOrCreateAgent → buildServersFromSources → refreshOAuthTokensIfNeeded in that order. The first build saw stale tokens, emitted AUTH_REQUIRED, and the wrapper called markSourceNeedsReauth — flipping isAuthenticated=false on disk. The user saw a brief "needs auth" UI flicker before the late refresh restored state. Three coordinated changes: (1) refresh now runs before getOrCreateAgent so its internal cold-session build sees fresh tokens, the old refreshOAuthTokensIfNeeded (refresh + conditional rebuild) is gone, and a single post-refresh build is the only build per send; (2) buildServersFromSources reclassifies AUTH_REQUIRED → TOKEN_EXPIRED when the credential is merely expired-but-refreshable and skips markSourceNeedsReauth in that case (prevents flicker if refresh is skipped, e.g. during cooldown); (3) TokenRefreshManager.ensureFreshToken failure branches now mirror markSourceNeedsReauth's disk write to source.config in memory, so isSourceUsable() returns false and the failed source is excluded from intendedSlugs by the post-refresh build. Closes #710. (347820ab)
+  - Pi backend silently dropped the Craft system prompt — Pi SDK 0.72.1's session.prompt() wipes agent.state.systemPrompt back to _baseSystemPrompt on every turn (agent-session.js ~L796), so pi-agent-server's direct assignment was silently dropped — taking preferences/notes, <session_state>, <sources>, working directory, and all other Craft-built system-prompt content with it. The Anthropic backend was unaffected because it uses the SDK's append: option, which the Claude SDK appends verbatim. New applySystemPromptOverride() helper stamps all three SDK private fields (state.systemPrompt, _baseSystemPrompt, _rebuildSystemPrompt) so the prompt survives both per-turn resets and tool-change rebuilds. Pattern matches OpenClaw's applySystemPromptOverrideToSession — same SDK, same constraint, validated workaround until upstream exposes a public API. Wired into both call sites that previously did state.systemPrompt = …: the per-turn prompt handler and the ephemeral queryLlm session. Regression test asserts all three fields are stamped (catches the original single-field regression and any future drop of one of the writes). Closes #648. (13f6e63e)
+  - SDK spawn guard against stale branch cwd from cross-machine imports — The SDK's Claude Code native binary not found at … error is a misleading wrapper around spawn ENOENT, which fires whenever the subprocess cwd is also missing — not just when the binary is missing. Cross-machine session imports preserve branchInfo.sdkCwd from the source machine, so a Send to Workspace recipient hits this error on first chat even though the bundle is fine. A pre-spawn guard now catches stale branchFromSdkCwd in chatImpl() and routes through the same branch-fallback recovery the post-failure path already uses (parent summary injection preserved). A new onBranchForkInvalidated callback persists all four fork fields atomically — fixing a pre-existing bug where onSdkSessionIdCleared only persisted sdkSessionId, leaving stale branch fields on disk to reload on next launch. ENOENT classification was lifted out of the if (isProcessError) gate (it never fired for the SDK wrapper, which is a ReferenceError, not a process-exit error); now it disambiguates binary vs cwd vs unknown causes, surfaces typed sdk_binary_missing / sdk_cwd_missing errors after retry exhaustion, and keeps the 2-second auto-retry for the auto-update bundle-swap window. Helpers extracted to agent/spawn-helpers.ts for unit testing (34 new tests; existing branching suite extended with v2 callback coverage). (12166f4a, e40a3801)
+  - source_test lastTestedAt now persists — UI no longer always shows "Never" — The source_test handler wrote an ISO string (new Date().toISOString()); the Zod validator in validators.ts enforces z.number().int().min(0), so the string was silently stripped before persist. A second hidden mismatch compounded it: session-tools-core/src/types.ts declared lastTestedAt?: string while the canonical shared type already used number. Fixed by switching the handler to Date.now() and aligning the local type to number. Storage, validator, and UI (formatRelativeTime) already expected a millisecond timestamp — no other files needed changing. Closes #708. (d4427cac)
+  - Assistant response content no longer disappears after completion — handleTextComplete unconditionally overwrote the streaming-accumulated message content with event.text from the SDK completion event. If event.text arrived empty (SDK race condition or intermediate event without text), the message bubble went blank. Now destructures streaming from state and applies a fallback chain in both the update-existing and create-new message paths: event.text || streaming?.content || existingMsg?.content || ''. Closes #709. (d4427cac)
+  - Browser toggle now fully disables system prompt section and prerequisite rule — Three independent sub-problems gated by the same getBrowserToolEnabled() toggle that was already wired to session-scoped-tools.ts but nowhere else. (a) System prompt: system.ts unconditionally injected the ## Browser Tools section and its "calls are blocked until you read browser-tools.md" warning regardless of the setting — now gated. (b) Prerequisite matcher too broad: prerequisite-manager.ts used isBrowserToolNameOrAlias() which matched any tool named browser_tool, including external MCP tools like mcp__playwright__browser_tool — narrowed to session-scoped canonical names only ('browser_tool' and 'mcp__session__browser_tool'). (c) Rule always registered: the prerequisite rule was registered even when the feature was disabled, causing external browser tools to be incorrectly blocked — getBrowserToolEnabled() check now makes the rule a no-op when the toggle is off. Closes #711. (d4427cac)
+  Improvements
+  - Spawn-guard defensive cleanup simplified per SOLID/KISS review — Rolled back over-engineering identified after the spawn-ENOENT fix while preserving the load-bearing bits (pre-spawn guard, atomic onBranchForkInvalidated, working ENOENT classification, .app-bundle-aware regex). Inlined pickFirstExistingDirectory and probeEnoentPaths; deleted classifyEnoentCause — the 4-line directory loop and 2-line probe didn't earn their abstraction at single call sites. Collapsed the binary|cwd|unknown trichotomy in the catch block to three plain steps: stale-cwd-with-branch → recovery, first attempt → 2 s retry, retry exhausted → typed error pointed at the more likely cause (removes 5 separate enoentCause branches). Dropped the 5-value reason union on recoverFromStaleBranchFork to a single isPreSpawn boolean — status text was the only differentiator. Promoted lastResolvedCwd / lastResolvedBinaryPath from instance fields to chatImpl-scoped locals (visible to the inner catch via closure) — avoids stale-state risk across chat() invocations. ErrorCode centralized in @craft-agent/core/types via re-export from errors.ts. Net −206 lines, no behavior change; 608 agent tests + 102 server-core tests pass. (e40a3801)
+  Breaking Changes
+  - None. All fixes are backward-compatible.
+  Notes
+  - The OAuth refresh fix changes the order of operations on every send-message — refresh now runs once before any server build instead of after a stale build. If you operate API/MCP sources with custom OAuth flows, the visible behavior change is fewer disk writes per refresh cycle and no transient needs_auth flicker on cold sessions. No config or migration is required.
+  - Cross-machine "Send to Workspace" recipients who previously hit Claude Code native binary not found at … on first chat in an imported session will now succeed silently — the guard reroutes through the existing branch-fallback recovery and persists clean fork metadata for the next launch.
+ReleaseNotesUrl: https://github.com/craft-ai-agents/craft-agents-oss/releases/tag/v0.9.2
+# PurchaseUrl:
+# InstallationNotes:
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://agents.craft.do/docs/getting-started/introduction
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

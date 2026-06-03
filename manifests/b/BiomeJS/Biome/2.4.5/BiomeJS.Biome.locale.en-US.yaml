@@ -1,0 +1,170 @@
+# Created by Anthelion using komac v2.15.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: BiomeJS.Biome
+PackageVersion: 2.4.5
+PackageLocale: en-US
+Publisher: BiomeJS
+PublisherUrl: https://biomejs.dev/
+PublisherSupportUrl: https://github.com/biomejs/biome/issues
+Author: Biome Developers and Contributors
+PackageName: Biome
+PackageUrl: https://biomejs.dev/
+License: Apache-2.0
+Copyright: Copyright (c) 2023-present Biome Developers and Contributors
+ShortDescription: Biome is a toolchain for web projects, aimed at providing functionalities to maintain them. It offers a formatter and linter, usable via CLI and LSP.
+Moniker: biome
+Tags:
+- css
+- formatter
+- javascript
+- json
+- jsx
+- linter
+- static-code-analysis
+- typescript
+- web
+ReleaseNotes: |-
+  2.4.5
+  Patch Changes
+  - #9185 e43e730 Thanks @dyc3! - Added the nursery rule useVueScopedStyles for Vue SFCs. This rule enforces that <style> blocks have the scoped attribute (or module for CSS Modules), preventing style leakage and conflicts between components.
+  - #9184 49c8fde Thanks @chocky335! - Improved plugin performance by batching all plugins into a single syntax visitor with a kind-to-plugin lookup map, reducing per-node dispatch overhead from O(N) to O(1) where N is the number of plugins.
+  - #9283 071c700 Thanks @dyc3! - Fixed noUndeclaredVariables erroneously flagging functions and variables defined in the <script setup> section of Vue SFCs.
+  - #9221 4612133 Thanks @ematipico! - Fixed an issue where the JSON reporter didn't contain the duration of the command.
+  - #9294 1805c8f Thanks @Netail! - Extra rule source reference. biome migrate eslint should do a bit better detecting rules in your eslint configurations.
+  - #9178 101b3bb Thanks @Bertie690! - Fixed #9172 and #9168:
+    Biome now considers more constructs as valid test assertions.
+    Previously, assert, expectTypeOf and assertType
+    were not recognized as valid assertions by Biome's linting rules, producing false positives in lint/nursery/useExpect and other similar rules.
+    Now, these rules will no longer produce errors in test cases that used these constructs instead of expect:
+    import { expectTypeOf, assert, assertType } from "vitest";
+    const myStr = "Hello from vitest!";
+    it("should be a string", () => {
+      expectTypeOf(myStr).toBeString();
+    });
+    test("should still be a string", () => {
+      assertType<string>(myStr);
+    });
+    it.todo("should still still be a string", () => {
+      assert(typeof myStr === "string");
+    });
+  - #9173 32dad2d Thanks @dyc3! - Added parsing support for Svelte's new comments-in-tags feature.
+    The HTML parser will now accept JS style comments in tags in Svelte files.
+    <button
+      // single-line comment
+      onclick={doTheThing}
+    >click me</button>
+    <div
+      /* block comment */
+      class="foo"
+    >text</div>
+  - #8952 1d2ca15 Thanks @pkallos! - Added the nursery rule useNullishCoalescing. This rule suggests using the nullish coalescing operator (??) instead of logical OR (||) when the left operand may be nullish. This prevents bugs where falsy values like 0, '', or false are incorrectly treated as missing. Addresses #8043
+    // Invalid
+    declare const x: string | null;
+    const value = x || "default";
+    // Valid
+    const value = x ?? "default";
+  - #9243 1992a85 Thanks @Netail! - Fixed #7813: improved the diagnostic of the rule useExhaustiveDependencies. The diagnostic now shows the name of the variable to add to the dependency array.
+  - #9063 3d0648f Thanks @taga3s! - Added the nursery rule noVueRefAsOperand. This rule disallows cases where a ref is used as an operand.
+    The following code is now flagged:
+    import { ref } from "vue";
+    const count = ref(0);
+    count++; // Should be: count.value++
+    import { ref } from "vue";
+    const ok = ref(false);
+    if (ok) {
+      // Should be: if (ok.value)
+      //
+    }
+  - #9273 f239e20 Thanks @denbezrukov! - Fixed #9253: parsing of @container scroll-state(...) queries.
+    @container scroll-state(scrolled: bottom) {
+    }
+    @container scroll-state(stuck) {
+    }
+    @container scroll-state(not (stuck)) {
+    }
+    @container scroll-state((stuck) and (scrolled: bottom)) {
+    }
+    @container scroll-state((stuck) or (snapped: x)) {
+    }
+    @container main-layout scroll-state(not ((stuck) and (scrolled: bottom))) {
+    }
+  - #9259 96939c0 Thanks @ematipico! - Fixed CSS formatter incorrectly collapsing selectors when a BOM (Byte Order Mark) character is present at the start of the file. The formatter now correctly preserves line breaks between comments and selectors in BOM-prefixed CSS files, matching Prettier's behavior.
+  - #9251 59e33fb Thanks @ematipico! - Fixed #9249: The CSS formatter no longer incorrectly breaks ratio values (like 1 / -1) across lines when followed by comments.
+  - #9284 ec3a17f Thanks @denbezrukov! - Fixed #9253: removed false-positive diagnostics for valid @container/@supports general-enclosed queries.
+    @container scroll-state(scrolled: bottom) {
+    }
+    @supports foo(bar: baz) {
+    }
+  - #9215 b2619a1 Thanks @FrederickStempfle! - Fixed #9189: biome ci in GitHub Actions now correctly disables colors so that ::error/::warning workflow commands are not wrapped in ANSI escape codes.
+  - #9256 65ae4c1 Thanks @ematipico! - Fixed JSON reporter escaping of special characters in diagnostic messages. The JSON reporter now properly escapes double quotes, backslashes, and control characters in error messages and advice text, preventing invalid JSON output when diagnostics contain these characters.
+  - #9223 5b9da81 Thanks @ematipico! - Fixed an issue where the JSON reporter didn't write output to a file when --reporter-file was specified. The output is now correctly written to the specified file instead of always going to stdout.
+  - #9154 c487e54 Thanks @abossenbroek! - Fixed #9115: The noPlaywrightMissingAwait rule no longer produces false positives on jest-dom matchers like toBeVisible, toBeChecked, toHaveAttribute, etc. For matchers shared between Playwright and jest-dom, the rule now checks whether expect()'s argument is a Playwright locator or page object before flagging. Added semantic variable resolution so that extracted Playwright locators (e.g. const loc = page.locator('.item'); expect(loc).toBeVisible()) are still correctly flagged.
+  - #9269 33e5cdf Thanks @dyc3! - Fixed a false positive where noUndeclaredVariables reported bindings from Vue <script setup> as undeclared when used in <template>.
+    This change ensures embedded bindings collected from script snippets (like imports and defineModel results) are respected by the rule.
+  - #9267 2c2e060 Thanks @ematipico! - Fixed #9143 and #8849: The noUnresolvedImports rule no longer reports false positives for several common patterns:
+    - node:fs, node:path, node:url, and other Node.js built-in modules with the node: prefix are now accepted.
+    - Packages that declare their TypeScript entry point via "typings" (instead of "types") in package.json now resolve correctly.
+    - Named imports from aliased re-export chains (e.g. export { x as y } from "...") are now resolved correctly through the alias.
+    - Namespace re-exports (e.g. export * as Ns from "...") are now recognized as own exports of the barrel module.
+  - #9254 f7bf12b Thanks @ematipico! - Fixed #8842: The CSS formatter now correctly formats @container scroll-state() without adding an unwanted space between the function name and opening parenthesis.
+  - #9211 2d0b8e6 Thanks @ematipico! - Fixed #7905. Improved the accuracy of type-aware lint rules when analyzing re-exported functions and values.
+    Previously, when a binding was imported from another module, its type was not correctly inferred during the type analysis phase. This caused type-aware lint rules to fail to detect issues when working with re-exported imports.
+    The following rules now correctly handle re-exported imports:
+    - useAwaitThenable
+    - noFloatingPromises
+    - noMisusedPromises
+    - useArraySortCompare
+    Example of now-working detection:
+    // getValue.ts
+    export async function getValue(): Promise<number> {
+      return 42;
+    }
+    // reexport.ts
+    export { getValue } from "./getValue";
+    // index.ts
+    import { getValue } from "./reexport";
+    // Previously: no diagnostic (type was unknown)
+    // Now: correctly detects that getValue() returns a Promise
+    await getValue(); // Valid - properly awaited
+    getValue(); // Diagnostic - floating promise
+  - #8934 b49707c Thanks @tim-we! - Fixed #8265: Biome now correctly detects test framework calls that use three arguments (label, options, callback) (e.g., describe("foo", { retry: 2 }, () => {})). This fixes both formatting and the noDuplicateTestHooks lint rule for test frameworks like Vitest.
+  - #9191 688fd34 Thanks @dyc3! - Fixed #9180: fixed a panic caused by an interaction between noRedundantUseStrict and the formatter
+  - #9048 9bbdf4d Thanks @ff1451! - Added the nursery rule useNamedCaptureGroup.
+    The rule enforces using named capture groups in regular expressions instead of numbered ones. It supports both regex literals and RegExp constructor calls.
+    // Invalid: unnamed capture group
+    /(foo)/;
+    new RegExp("(foo)");
+    // Valid: named capture group
+    /(?<id>foo)/;
+    new RegExp("(?<id>foo)");
+  - #9255 9b6685b Thanks @ematipico! - Fixed #9234, where some nursery rules panicked when they were configured with the option level without the corresponding options.
+  - #8968 a2b4494 Thanks @LouisLau-art! - Fixed #8812: lint/suspicious/noArrayIndexKey will now report index usage anywhere in JSX key template or binary expressions, not only in the last visited identifier.
+  - #9266 84935a4 Thanks @dyc3! - Fixed #9250: noVueDuplicateKeys will no longer flag keys under watch, preventing false positives.
+  - #9056 1f2fe2e Thanks @ruidosujeira! - Added the nursery rule useArraySome to prefer .some() over verbose existence checks like filter(...).length > 0 and findIndex(...) !== -1, with suggestions for find/findLast existence checks. This also applies to ES2025 iterator helpers such as Iterator.prototype.find.
+  - #9163 f87acf6 Thanks @JUSTIVE! - Added graphql to valid embedded graphql template tags inside JavaScript files, when the feature javascript.experimentalEmbeddedSnippetsEnabled is enabled. This allows proper support for graphql tags used in RelayJS.
+    Now, code snippets like the following are correctly formatted and limited:
+    import { graphql } from "react-relay";
+    const query = graphql`
+      query {
+        user(id: 1) {
+          id
+          name
+        }
+      }
+    `;
+  - #8773 6b01778 Thanks @xcb3d! - Added the new nursery rule useUnicodeRegex.
+    The rule enforces the use of the u or v flag for regular expressions. This ensures proper handling of Unicode characters like emoji.
+    // Invalid
+    /foo/;
+    new RegExp("foo", "gi");
+    // Valid
+    /foo/u;
+    new RegExp("foo", "giu");
+  What's Changed
+ReleaseNotesUrl: https://github.com/biomejs/biome/releases/tag/@biomejs/biome@2.4.5
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://biomejs.dev/guides/getting-started/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

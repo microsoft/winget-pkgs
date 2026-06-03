@@ -331,7 +331,7 @@ Function Get-PRWatch {
 				$cautionColor = "yellow"
 
 				Switch ($Chromatic) {
-					#Color schemes, to accomodate needs and also add variety.
+					#Color schemes, to accommodate needs and also add variety.
 						"Default" {
 							$validColor = "Green"
 							$invalidColor = "Red"
