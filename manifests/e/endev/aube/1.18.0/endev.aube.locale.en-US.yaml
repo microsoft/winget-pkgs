@@ -1,0 +1,47 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: endev.aube
+PackageVersion: 1.18.0
+PackageLocale: en-US
+Publisher: en.dev
+PublisherUrl: https://en.dev/
+PublisherSupportUrl: https://github.com/endevco/aube/discussions/categories/troubleshooting-and-bugs
+Author: en.dev
+PackageName: aube
+PackageUrl: https://aube.en.dev/
+License: MIT
+LicenseUrl: https://github.com/endevco/aube/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 en.dev inc
+CopyrightUrl: https://github.com/endevco/aube/blob/HEAD/LICENSE
+ShortDescription: A fast Node.js package manager
+Description: |-
+  aube is a package manager for Node.js projects. It uses pnpm-style isolated node_modules for fast, disk-efficient installs.
+
+  Existing projects keep their lockfile format. aube reads and writes pnpm-lock.yaml, package-lock.json, npm-shrinkwrap.json, yarn.lock, and bun.lock in place. New projects without a supported lockfile get aube-lock.yaml.
+
+  Why Try It
+  - Fast installs. Warm installs are about 8x faster than pnpm and about 5x faster than Bun in the current benchmarks. Repeat test commands run up to 35x faster than pnpm and up to 5x faster than Bun.
+  - Existing lockfiles. Reads and writes pnpm-lock.yaml, package-lock.json, npm-shrinkwrap.json, yarn.lock, and bun.lock in place.
+  - Cheap repeat commands. aubr test, aube test, and aube exec vitest auto-install when dependencies are stale, then skip that work when nothing changed. aubx uses a local binary when one is installed, or a throwaway environment for one-off tools.
+  - Less disk use. A global content-addressable store lets projects share package files instead of keeping a full copy of the same dependencies in every checkout.
+  - Secure defaults. Out of the box, exotic transitive deps are blocked, lifecycle scripts wait for approval, trust downgrades fail at resolve, and brand-new releases sit in a 24h cooling window. One paranoid: true line adds the build jail and turns the soft gates into hard fails.
+Moniker: aube
+ReleaseNotes: |-
+  A small feature + fix release: a new aube sponsors command and a publish-time fix that normalizes the repository manifest field for stricter registries.
+  Added
+  - aube sponsors command (#824 by @jdx) — A new top-level subcommand that acknowledges 37signals and links to the canonical en.dev sponsor pages. The root README also gains a "Sponsored by 37signals" line.
+    aube sponsors
+
+  Fixed
+  - (publish) Normalize string repository fields in the publish manifest (#826 by @jdx) — When package.json contains a string repository value, the PUT body now rewrites it to { "type": "git", "url": "<normalized>" }, matching npm/pnpm 11.5.1 behavior. Shorthand forms (owner/repo, github:…, gitlab:…, bitbucket:…) expand to full git-suffixed HTTPS URLs; explicit https, git@, and URL fragments are preserved, and existing object-shaped repository values are left untouched. This unblocks publishing to registries that reject bare-string repository fields.
+
+  Changed
+  - Refresh benchmarks for v1.17.1 (#820 by @mise-en-dev) — Warm-install ratios vs. Bun improved from 3× to 5×, and vs. pnpm from 5× to 9×.
+
+  💚 Sponsor aube
+  aube is part of en.dev — an independent developer-tooling studio run by @jdx, also behind mise. Work on aube is funded entirely by sponsors.
+  If aube is saving your team install time or CI minutes, please consider sponsoring at en.dev. Individual and company sponsorships are what keep the project fast, free, and independent.
+ReleaseNotesUrl: https://github.com/endevco/aube/releases/tag/v1.18.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
