@@ -1,0 +1,68 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: can1357.oh-my-pi
+PackageVersion: 15.7.6
+PackageLocale: en-US
+Publisher: Can Bölük
+PublisherUrl: https://can.ac/
+PublisherSupportUrl: https://github.com/can1357/oh-my-pi/issues
+Author: Can Bölük
+PackageName: oh-my-pi
+PackageUrl: https://omp.sh/
+License: MIT
+LicenseUrl: https://github.com/can1357/oh-my-pi/blob/HEAD/LICENSE
+Copyright: |-
+  Copyright (c) 2025 Mario Zechner
+  Copyright (c) 2025-2026 Can Bölük
+ShortDescription: ⌥ AI Coding agent for the terminal — hash-anchored edits, optimized tool harness, LSP, Python, browser, subagents, and more
+Description: |-
+  omp is a terminal-first coding agent that runs on your machine, talks to any provider, and treats sessions like git branches.
+  omp (pronounced “oh-em-pi”, binary omp) is a fork of Mario Zechner’s Pi. It runs as a single Bun process, drives any model provider you have credentials for, and ships a flat tool surface the model uses to read code, run commands, edit files, drive a debugger, and spawn subagents that coordinate over an in-process IRC bus.
+  Sessions persist as JSONL under ~/.omp/agent/sessions/. You resume, fork, branch, and share them. Settings, credentials, plugins, and caches all live under ~/.omp/agent/. Nothing leaves the machine unless you call a tool that does.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  @oh-my-pi/pi-coding-agent
+  Added
+  - Added ask option descriptions so agents can keep short labels and render explanatory text as separate muted rows in the selector.
+  - Added an extension API for rendering supplemental UI below visible assistant thinking blocks.
+  - Added default-on lsp.diagnosticsDeduplicate support so post-edit LSP diagnostics already shown for a file are suppressed within the session and only new or changed diagnostics are surfaced.
+  Fixed
+  - Fixed a single ESC press both dismissing the @/slash autocomplete popup and aborting the running agent operation. ESC now drains the popup first; only when no popup is visible does it route to the global interrupt handler (matching the standard TUI/IDE pattern). The shouldBypassAutocompleteOnEscape editor hook is removed — it had become the trigger for this bug (#1655).
+  - Fixed Claude Code slash command discovery to load subdirectory commands recursively while preserving basename commands (e.g. /apply) and adding namespace aliases (e.g. /opsx:apply) for tools that install colon-namespaced workflows (#1523).
+  - Fixed the eval tool's per-cell timeout killing cells that were not stalled. The timeout is now a plain wall-clock budget on the cell's own work that is paused only while a host-side agent()/parallel()/llm() bridge call is in flight — those calls pump a heartbeat that re-arms the watchdog, so a long fanout or a slow (e.g. reasoning-tier) completion runs to completion instead of being aborted mid-flight (a subagent's time-to-first-token, a long quiet nested tool, or an entire oneshot llm() request no longer trip it). Nothing else re-arms the budget: ordinary compute, print/stdout, log()/phase(), and non-agent tool calls all count against it, so a cell that is not delegating to an agent/llm is bounded by the regular wall-clock timeout (and the timeout message no longer says "of inactivity"). The heartbeat is a pure keepalive — never persisted or rendered.
+  @oh-my-pi/pi-tui
+  Fixed
+  - Fixed native Windows + Windows Terminal freezing the editor on the wrap keystroke, on /plan//resume/model-switch/status-line toggles, and on any other offscreen structural mutation until the next prompt submit. The 15.7.5 #1635 fix routed every viewport-saturating pure-append and structural mutation through deferredMutation (a literal no-op) whenever isNativeViewportAtBottom() returned undefined — which it always does under WT_SESSION because the kernel32 probe can't see WT host scrollback. The deferral was only ever meant for the confirmed-scrolled case; an unknown viewport now falls back to a non-destructive viewportRepaint instead, so the live UI keeps updating without emitting \x1b[3J and without yanking a possibly-scrolled reader. Confirmed-scrolled frames (probe returns false) still defer.
+  Fixed
+  - Removed the hard-coded 20-result cap on @-prefixed fuzzy file completion in CombinedAutocompleteProvider.#getFuzzyFileSuggestions. The dropdown now honors the existing maxResults: 100 ceiling already configured for fuzzyFind, so projects with many files sharing a common stem (e.g. @controller, @test) surface all relevant matches instead of being silently truncated. (#1652)
+  What's Changed
+  - fix(ai/anthropic): request current Claude Code OAuth scopes by @ephraimduncan in https://github.com/can1357/oh-my-pi/pull/1631
+  - Improve ask option rendering by @rimless-casualty in https://github.com/can1357/oh-my-pi/pull/1629
+  - feat(coding-agent): add assistant thinking renderers by @shoucandanghehe in https://github.com/can1357/oh-my-pi/pull/1577
+  - fix(agent): compact before oversized prompts by @roboomp in https://github.com/can1357/oh-my-pi/pull/1619
+  - feat(theme): make spinner frames overridable per custom theme by @roboomp in https://github.com/can1357/oh-my-pi/pull/1555
+  - fix(coding-agent): raised auto-discovered model maxTokens cap to 32K by @roboomp in https://github.com/can1357/oh-my-pi/pull/1529
+  - fix(coding-agent): resolve Claude subdirectory slash commands by @roboomp in https://github.com/can1357/oh-my-pi/pull/1524
+  - fix(coding-agent/acp): MCP tools registered but never activated for ACP sessions by @ForeverYoungPp in https://github.com/can1357/oh-my-pi/pull/1598
+  - fix(tui): repaint visible window when native viewport probe is unknown by @daaximus in https://github.com/can1357/oh-my-pi/pull/1656
+  - fix(tui): removed 20-result hard cap on @-file fuzzy completion by @roboomp in https://github.com/can1357/oh-my-pi/pull/1653
+  - fix(coding-agent): stop ESC from aborting agent run while @ autocomplete is open by @roboomp in https://github.com/can1357/oh-my-pi/pull/1657
+  New Contributors
+  - @rimless-casualty made their first contribution in https://github.com/can1357/oh-my-pi/pull/1629
+  Full Changelog: https://github.com/can1357/oh-my-pi/compare/v15.7.5...v15.7.6
+ReleaseNotesUrl: https://github.com/can1357/oh-my-pi/releases/tag/v15.7.6
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://omp.sh/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
