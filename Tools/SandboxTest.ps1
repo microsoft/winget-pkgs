@@ -681,8 +681,18 @@ foreach ($dependency in $script:AppInstallerDependencies) {
 }
 
 # Kill the active running sandbox, if it exists, otherwise the test data folder can't be removed
-Stop-NamedProcess -ProcessName 'WindowsSandboxClient'
-Stop-NamedProcess -ProcessName 'WindowsSandboxRemoteSession'
+if (Get-Command wsb -ErrorAction SilentlyContinue) {
+    $sandboxInstance = @(wsb list) | Select-Object -First 1
+    if ($sandboxInstance) {
+        wsb stop --id $sandboxInstance
+    } else {
+        Write-Verbose 'No running instance of Sandbox'
+    }
+} else {
+    Write-Debug 'wsb command was not found - terminaing any sessions by process name'
+    Stop-NamedProcess -ProcessName 'WindowsSandboxClient'
+    Stop-NamedProcess -ProcessName 'WindowsSandboxRemoteSession'
+}
 Start-Sleep -Milliseconds 5000 # Wait for the lock on the file to be released
 
 # Remove the test data folder if it exists. We will rebuild it with new test data
