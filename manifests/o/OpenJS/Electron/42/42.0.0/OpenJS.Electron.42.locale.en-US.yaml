@@ -24,6 +24,96 @@ Tags:
 - nodejs
 - v8
 - works-with-codespaces
+ReleaseNotes: |-
+  Release Notes for v42.0.0
+  Stack Upgrades
+  - Chromium 148.0.7778.96
+    - New in 148
+    - New in 147
+  - Node v24.15.0
+    - Node 24.15.0 blog post
+  - V8 14.8
+  Breaking Changes
+  Behavior Changed: macOS notifications now use UNNotification API
+  Electron has migrated from the deprecated NSUserNotification API to the UNNotification API on macOS. The new API requires that an application be code-signed in order for notifications to be displayed. If an application is not code-signed, notifications will emit a failed event on the Notification object. #47817
+  Behavior Changed: electron no longer downloads itself via postinstall script
+  Previously, the electron npm package would download the Electron binary from the repository's GitHub Releases in the package's postinstall script. With recent supply chain security attacks against the npm ecosystem with postinstall scripts as a common attack vector, Electron will now download itself dynamically the first time that its main bin script is run (e.g. via npx electron). See RFC #22 for more context. #49328
+  Behavior Changed: Offscreen rendering default device scale factor
+  Previously, OSR used the primary display's device scale factor for rendering. Starting from Electron 42, the default changes to a constant value of 1.0 for more consistent output sizes. Use webPreferences.offscreen.deviceScaleFactor to specify a custom value. #49683
+  Removed: quotas object from Session.clearStorageData(options)
+  When calling Session.clearStorageData(options), the options.quotas object is no longer supported because it has been removed from upstream Chromium.
+  Removed: ELECTRON_SKIP_BINARY_DOWNLOAD environment variable
+  This environment variable is no longer supported due to the new lazy download behavior. #50459
+  Features
+  Additions
+  - Added app.configureWebAuthn({ touchID: { keychainAccessGroup } }) to enable the WebAuthn Touch ID platform authenticator on macOS. Also introduces a select-webauthn-account session event for discoverable-credential selection. #51411 (Also in 41)
+  - Added Notification.getHistory() for macOS. #51123
+  - Added Notification.handleActivation(callback) API on Windows to handle notification clicks, replies, and action buttons - including when the app is launched from a notification (cold start). #49919
+  - Added ELECTRON_INSTALL_PLATFORM and ELECTRON_INSTALL_ARCH variables to install binaries from other platforms and architectures. #49981
+  - Added allowExtensions privilege to protocol.registerSchemesAsPrivileged() to enable Chrome extensions on custom protocols. #50530 ^{(Also in 40, 41)}
+  - Added app.isActive() to check if the app is the active/foreground application (macOS only). #49622
+  - Added globalShortcut.setSuspended() and globalShortcut.isSuspended() methods to temporarily suspend and resume global shortcut handling. #50777
+  - Added id and groupId options to the Notification constructor on macOS. id allows custom identifiers for notifications, and groupId visually groups notifications together in Notification Center. #50304
+  - Added webContents.getOrCreateDevToolsTargetId(). #49733 ^{(Also in 41)}
+  - Added a disclaim option to the UtilityProcess API to allow for TCC disclaiming on macOS. #49128 ^{(Also in 39, 40, 41)}
+  - Added a reason property to the Notification 'closed' event on Windows to allow developers to know the reason the Notification was dismissed. #49913 ^{(Also in 40, 41)}
+  - Added an usePrinterDefaultPageSize option to webContents.print() to allow using the printer's default page size. #49523 ^{(Also in 41)}
+  - Added animation functionality to view.setBounds and added view.setBackgroundBlur. #48812
+  - Added id, groupId, and groupTitle support for Windows notifications. #50895
+  - Added nativeTheme.shouldDifferentiateWithoutColor on macOS. #50409 ^{(Also in 41)}
+  - Added support for MSIX auto-updating. #49230 ^{(Also in 39, 40, 41)}
+  - Added support for --experimental-transform-types. #49711 ^{(Also in 39, 40, 41)}
+  - Added support for long-animation-frame script attribution (via --enable-features=AlwaysLogLOAFURL). #49706 ^{(Also in 39, 40, 41)}
+  - Added support for heap profiling in contentTracing. #51162 (Also in 41)
+  - Added support for importing shared textures using the nv16 pixel format. #51187
+  - Added support for importing shared textures using the p010le 10-bit YUV pixel format. #49272
+  - Added support for several more safeStorage backends via new asynchronous functionality in safeStorage. #49054
+  - Added support for the urgency option in Notifications on Windows. #50383 ^{(Also in 41)}
+  - Added the ability to capture JS stack trace on renderer OOM. #50911
+  - Added the ability to disable auto-focusing of WebContents on navigation using webPreferences.focusOnNavigation. #49425 ^{(Also in 40, 41)}
+  - Electron now downloads its binary into node_modules dynamically on first launch instead of running a postinstall script. Added the install-electron script to manually trigger the download as well. #49328
+  - Enabled wasm trap handlers behind WasmTrapHandlers fuse. #48983 ^{(Also in 41)}
+  - Extended actions support for Windows notifications to include buttons, select dropdowns, and replies. #48132 ^{(Also in 40, 41)}
+  - On Wayland (Linux), frameless windows now have GTK drop shadows and extended resize boundaries. To create fully frameless windows with no decorations, set hasShadow: false in the window constructor. #49295 ^{(Also in 41)}
+  - Replaced deprecated NSUserNotification with User Notifications. #47817
+  Fixes
+  - Added additional ASAR support to additional fs copy methods. #50285 ^{(Also in 39, 40, 41)}
+  - Added crash keys to diagnose power monitor shutdown crash on arm64 windows. #51205
+  - Added missing metadata fields to contentTracing traces. #51007 ^{(Also in 41)}
+  - Added validation to protocol client methods to reject protocol names that do not conform to the RFC 3986 URI scheme grammar. #50141 ^{(Also in 38, 39, 40, 41)}
+  - Addressed upstream Chromium shift to enable CoreAudio Tap API for audio capture used in electron's desktopCapturer (macOS). #49717 ^{(Also in 39, 40, 41)}
+  - Allow dynamically updating menu item labels, sublabels, and icons. #49678 ^{(Also in 40, 41)}
+  - BrowserWindow now enforces min/max size constraints on window creation, even if they conflict with the requested width and height. #50754 ^{(Also in 41)}
+  - Changed the kResizeThreshold to trigger the resize on corners. #51001 ^{(Also in 41)}
+  - Fixed AllowUniversalAccessFromFileURLs not being properly constrained to file: origins in agent cluster key assignment. #51404
+  - Fixed corsEnabled: false protocol handlers incorrectly working across protocols. #51269 (Also in 39, 40, 41)
+  - Fixed printToPDF queue not resetting after a rejection. #51222 (Also in 40, 41)
+  - Fixed webContents.print() not honoring dpi horizontal/vertical options. #51354 (Also in 41)
+  - Fixed Electron child process titles on Linux so they show their types (render, gpu, etc.) and complete command-line arguments and flags in ps aux. #50533
+  - Fixed Fetch-intercepted requests using incorrect header client, which could cause request failures. #51372 (Also in 41)
+  - Fixed fs.stat on files inside asar archives returning undefined for blksize and blocks instead of numeric values. #50877 ^{(Also in 40, 41)}
+  - Fixed globalShortcut not working on Wayland with GlobalShortcutsPortal feature enabled. #49842 ^{(Also in 40, 41)}
+  - Fixed a bug that cause offscreen rendering doesn't have valid screen info and unable to get valid result of related media queries. Added webPreference.offscreen.deviceScaleFactor to allow user specify a value. #48730 ^{(Also in 40, 41)}
+  - Fixed a bug where Windows notification icons could fail to save because their temporary filenames contained invalid characters. #50482 ^{(Also in 40, 41)}
+  - Fixed a crash in AutofillPopup teardown. #51317 (Also in 40, 41)
+  - Fixed a crash in clipboard.readImage() when the clipboard contains malformed image data. #50494 ^{(Also in 39, 40, 41)}
+  - Fixed a crash that could occur when using the File System Access API. #49578 ^{(Also in 39, 40, 41)}
+  - Fixed a crash when calling contentTracing APIs before app is ready. #51353 (Also in 41)
+  - Fixed a crash when calling contentTracing.getTraceBufferUsage() while a trace session is active. #50592 ^{(Also in 39, 40, 41)}
+  - Fixed a crash when calling webRequest.onBeforeSendHeaders with invalid header names or values. #51366 (Also in 40, 41)
+  - Fixed a crash when calling an offscreen shared texture's release() after the texture object was garbage collected. #50502 ^{(Also in 39, 40, 41)}
+  - Fixed a crash when rendering PDFs when Site Isolation is disabled. #50846 ^{(Also in 41)}
+  - Fixed a crash caused by missing MicrotasksScope for worker exit emit in ContextWillDestroy. #51350 (Also in 40, 41)
+  - Fixed a crash when the <permission> element was used, by including permission element string resources in locale paks. #51374 (Also in 41)
+  - Fixed a macOS crash when creating a new tab from the tab overview. #49917 ^{(Also in 40, 41)}
+  - Fixed a memory leak where Menu items were not cleaned up after Menu.setApplicationMenu was called repeatedly. #50832 ^{(Also in 40, 41)}
+  - Fixed a potential crash when using webContents.print(). #50853
+  - Fixed absent 'Electron Isolated Context' in the execution context dropdown in Dev Tools. #51079 ^{(Also in 41)}
+  - Fixed an accessibility issue where the AXMenuOpened event was not fired on menu creation. #50504 ^{(Also in 40, 41)}
+  - Fixed an application crash on MacOS where the menu observer was not being properly removed before garbage collection. #49648 ^{(Also in 40, 41)}
+  - Fixed an error with Windows release builds after MSIX merger. #49613
+  - Fixed an intermittent Invoke in DisallowJavascriptExecutionScope crash on application quit when a WebContents (or other JS-emitting native object) is garbage-collected during shutdown. #50695 ^{(Also in 40, 41)}
+  - Fixed an issue in chrome://accessibility. #49547 ^{(Also in 39, 40, 41)}
 ReleaseNotesUrl: https://github.com/electron/electron/releases/tag/v42.0.0
 ManifestType: defaultLocale
 ManifestVersion: 1.12.0

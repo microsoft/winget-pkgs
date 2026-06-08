@@ -1,0 +1,60 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Corsinvest.cv4pve.report
+PackageVersion: 2.0.0
+PackageLocale: en-US
+Publisher: Corsinvest Srl
+PublisherUrl: https://www.corsinvest.it/
+PublisherSupportUrl: https://www.corsinvest.it/cv4pve
+PrivacyUrl: https://www.corsinvest.it/privacy
+Author: Corsinvest Srl
+PackageName: cv4pve-report
+PackageUrl: https://github.com/Corsinvest/cv4pve-report
+License: GPL-3.0
+LicenseUrl: https://github.com/Corsinvest/cv4pve-report/blob/HEAD/LICENSE.md
+Copyright: Copyright (c) 2026 Corsinvest Srl
+CopyrightUrl: https://github.com/Corsinvest/cv4pve-report/blob/master/LICENSE.md
+ShortDescription: Report Tool for Proxmox VE
+Description: |-
+  cv4pve-report exports your entire Proxmox VE infrastructure to a single
+  navigable Excel file — nodes, VMs, containers, storages, users, firewall
+  rules, backup jobs, resource pools and more. Every row is a hyperlink to
+  its detail sheet.
+
+  Features:
+  - Single .xlsx file with one sheet per node, VM and storage
+  - Fully navigable — summary rows link to detail sheets
+  - Cluster: users, API tokens, TFA, groups, roles, ACL, firewall, backup jobs, replication, SDN, pools
+  - Nodes: services, network, disks, SMART, RRD metrics, APT updates, SSL certificates, tasks
+  - VMs/CTs: config, network, disks, RRD metrics, backups, snapshots, firewall, QEMU agent info
+  - Storages: content inventory, RRD metrics
+  - Three profiles: Fast, Standard, Full
+  - Works with a read-only API token, no root access required
+Moniker: cv4pve-report
+Tags:
+- corsinvest
+- excel
+- infrastructure
+- inventory
+- proxmox
+- proxmoxve
+- report
+- xlsx
+ReleaseNotes: |-
+  What's new
+  - HTML output — pick --format Html at the command line to get the report as a self-contained zipped website. Extract the zip and open index.html in any browser — works fully offline, no server needed. Built for large clusters (tested with 2700+ VMs), with a sidebar to navigate every node/VM/container, click-to-sort and per-table search, light/dark theme, and an Export button on every detail page that lets you share a single page as a stand-alone file (ready to email, paste into a ticket or drop on a wiki). The Excel output (--format Xlsx, the default) is unchanged.
+  Fixes
+  - Reports no longer crash on VMs with empty cloud-init values — a VM whose config has an empty cicustom: field used to abort the whole report. The failing VM is now skipped cleanly. Thanks @janrenard for the report (#24).
+  - Reports no longer crash on user accounts with very long expiration dates — accounts set to expire after the year 2038 caused the report to fail. All time-based fields (account expiry, scheduled next run, replication times, RRD timestamps, cluster log time…) now handle dates well into the future. Thanks @LordXearo for the report (#25).
+  - Reports no longer crash when the firewall log is empty — an empty firewall log used to abort the report. Empty logs (firewall, system journal, task log, replication log) now produce an empty section instead. Thanks @LordXearo for the report (#26).
+  - Clearer error messages — when a VM or container config fails to load, the error now identifies the offending guest (id, node and name) instead of a bare crash.
+  Documentation
+  - README reorganised with a dedicated Output Formats section: Excel and HTML side-by-side, so you can pick the one that fits your workflow at a glance.
+  What's Changed
+  - feat: writers abstraction + HTML report format by @franklupo in #27
+  - release: 2.0.0 — HTML output, large-cluster support and fixes by @franklupo in #29
+  Full Changelog: v1.8.1...v2.0.0
+ReleaseNotesUrl: https://github.com/Corsinvest/cv4pve-report/releases/tag/v2.0.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
