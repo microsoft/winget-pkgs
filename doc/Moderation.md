@@ -168,6 +168,7 @@ Moderators are often the first to see and triage new issues, and so they have th
 * `Last-Version-Removal`
 * `License-Blocks-Install`
 * `Manifest-Singleton-Deprecated`
+* `Manifest-Validation-Error`
 * `Moderator-Approved`
 * `Needs-Attention`
 * `Needs-Author-Feedback`
