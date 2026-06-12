@@ -140,13 +140,13 @@ using System.Web.Script.Serialization;
 namespace WinGetApprovalNamespace {
     public class WinGetApprovalPipeline : Form {
 		//vars
-        public int build = 931;//Get-RebuildPipeApp
+        public int build = 934;//Get-RebuildPipeApp
 		public string appName = "WinGetApprovalPipeline";
 		public string appTitle = "WinGet Approval Pipeline - Build ";
 		public static string owner = "microsoft";
 		public static string repo = "winget-pkgs";
 
-		public static string remoteIP = Dns.GetHostEntry(Dns.GetHostName()).AddressList.Where(n => n.ToString().Contains("172.")).FirstOrDefault().ToString();
+		public static string remoteIP = Dns.GetHostEntry(Dns.GetHostName()).AddressList.Where(n => n.ToString().Contains("192.")).FirstOrDefault().ToString();
 		//PowerShell: $remoteIP = ([ipaddress](($ipconfig[($ipconfig | Select-String "vEthernet").LineNumber..$ipconfig.Length] | Select-String "IPv4 Address") -split ": ")[1]).IPAddressToString
 		
 		//From VM perspective - for validation script builder.
@@ -173,7 +173,7 @@ namespace WinGetApprovalNamespace {
 		public string DataFileName = ReposFolder+"\\Tools\\ManualValidationPipeline.csv";
 
 		public static string imagesFolder = MainFolder+"\\Images"; //VM Images folder;
-		public string Win10Folder = imagesFolder+"\\Win10-Created053025-Original";
+		// public string Win10Folder = imagesFolder+"\\Win10-Created053025-Original";
 		public string Win11Folder = imagesFolder+"\\Win11-Created010424-Original";
 
 		public static string GitHubBaseUrl = "https://github.com/"+owner+"/"+repo;
@@ -575,6 +575,7 @@ namespace WinGetApprovalNamespace {
 			submenu = new MenuItem("Regular Close");
 				item.MenuItems.Add(submenu);
 					submenu.MenuItems.Add("Close: (User Input);", new EventHandler(Closed_Action));
+					submenu.MenuItems.Add("Close: Stale;", new EventHandler(Stale_Action));
 					submenu.MenuItems.Add("Close: Package still available;", new EventHandler(Package_Available_Action));
 					submenu.MenuItems.Add("Close: Duplicate of (User Input);", new EventHandler(Duplicate_Action));
 				// item.MenuItems.Add("Add Waiver", new EventHandler(Add_Waiver_Action));
@@ -706,8 +707,10 @@ namespace WinGetApprovalNamespace {
 			drawToolTip(ref toolTip3, ref btn11, "Automatically start manifest for random IEDS in VM.");
 			drawButton(ref btn19, col7, row4, gridItemWidth, gridItemHeight, "Idle Mode", Idle_Action);
 			drawToolTip(ref toolTip4, ref btn19, "It does nothing.");
-			drawButton(ref btn20, col8, row3, gridItemWidth, gridItemHeight, "Testing button", Testing_Action);
-			drawButton(ref btn21, col8, row4, gridItemWidth, gridItemHeight, "Testing button 2", Testing2_Action);
+			drawButton(ref btn20, col8, row3, gridItemWidth, gridItemHeight, "NoNew", NoNew_Action);
+			drawToolTip(ref toolTip4, ref btn20, "Only validates pre-existing packages.");
+			drawButton(ref btn21, col8, row4, gridItemWidth, gridItemHeight, "OnlyNew", OnlyNew_Action);
+			drawToolTip(ref toolTip4, ref btn21, "Only validates new packages.");
 			
  	 }// end drawGoButton
 
@@ -827,32 +830,56 @@ namespace WinGetApprovalNamespace {
 				btn18.BackColor = color_DefaultBack;//Individual Validations
 				btn11.BackColor = color_DefaultBack;//IEDS
 				btn19.BackColor = color_DefaultBack;//Idle
+				btn20.BackColor = color_DefaultBack;//Idle
+				btn21.BackColor = color_DefaultBack;//Idle
 			} else if (Mode == "Validating") {
 				btn10.BackColor = color_DefaultBack;//Bulk Approving
 				btn18.BackColor = color_ActiveBack;//Individual Validations
 				btn11.BackColor = color_DefaultBack;//IEDS
 				btn19.BackColor = color_DefaultBack;//Idle
+				btn20.BackColor = color_DefaultBack;//Idle
+				btn21.BackColor = color_DefaultBack;//Idle
 			} else if (Mode == "IEDS") {
 				btn10.BackColor = color_DefaultBack;//Bulk Approving
 				btn18.BackColor = color_DefaultBack;//Individual Validations
 				btn11.BackColor = color_ActiveBack;//IEDS
 				btn19.BackColor = color_DefaultBack;//Idle
+				btn20.BackColor = color_DefaultBack;//Idle
+				btn21.BackColor = color_DefaultBack;//Idle
 			} else if (Mode == "Idle") {
 				btn10.BackColor = color_DefaultBack;//Bulk Approving
 				btn18.BackColor = color_DefaultBack;//Individual Validations
 				btn11.BackColor = color_DefaultBack;//IEDS
 				btn19.BackColor = color_ActiveBack;//Idle
+				btn20.BackColor = color_DefaultBack;//Idle
+				btn21.BackColor = color_DefaultBack;//Idle
 			} else if (Mode == "Config") {
 				btn10.BackColor = color_DefaultBack;//Bulk Approving
 				btn18.BackColor = color_DefaultBack;//Individual Validations
 				btn11.BackColor = color_DefaultBack;//IEDS
 				btn19.BackColor = color_DefaultBack;//Idle
+				btn20.BackColor = color_DefaultBack;//Idle
+				btn21.BackColor = color_DefaultBack;//Idle
+			} else if (Mode == "NoNew") {
+				btn10.BackColor = color_DefaultBack;//Bulk Approving
+				btn18.BackColor = color_DefaultBack;//Individual Validations
+				btn11.BackColor = color_DefaultBack;//IEDS
+				btn19.BackColor = color_DefaultBack;//Idle
+				btn20.BackColor = color_ActiveBack;//Idle
+				btn21.BackColor = color_DefaultBack;//Idle
+			} else if (Mode == "OnlyNew") {
+				btn10.BackColor = color_DefaultBack;//Bulk Approving
+				btn18.BackColor = color_DefaultBack;//Individual Validations
+				btn11.BackColor = color_DefaultBack;//IEDS
+				btn19.BackColor = color_DefaultBack;//Idle
+				btn20.BackColor = color_DefaultBack;//Idle
+				btn21.BackColor = color_ActiveBack;//Idle
 			} 
 			
 			if (TestPath(StatusFile) == "File") {
 				double VMRAM = 0;
 					try {
-				Dictionary<string,object>[] GetStatus = FromCsv(GetContent(StatusFile));
+				Dictionary<string,object>[] GetStatus = FromCsv(GetContent(StatusFile, false));
 				//Update RAM column and write
 				for (int VM = 0; VM < GetStatus.Length -1; VM++) {
 					//$_.RAM = Math.Round((Get-VM -Name ("vm"+$_.vm)).MemoryAssigned/1024/1024/1024,2)}
@@ -893,8 +920,8 @@ namespace WinGetApprovalNamespace {
 					dataGridView_vm.Columns[4].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;//Package
 					dataGridView_vm.Columns[5].AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells;//PR
 					dataGridView_vm.Columns[6].AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells;//RAM
-
-										dataGridView_val.DataSource=table_val;
+					
+					dataGridView_val.DataSource=table_val;
 					dataGridView_val.Columns[0].AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCellsExceptHeader;//Timestamp
 					dataGridView_val.Columns[1].AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells;//PR
 					dataGridView_val.Columns[2].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;//PackageIdentifier
@@ -2478,17 +2505,25 @@ bool ConnectionStatus = vm.Scope.IsConnected;
 
 		public string FindWinGetVersion(string PackageIdentifier) {
 			string string_out = "";	
-			string command = "winget search " + PackageIdentifier + " --exact --disable-interactivity";
+			// string command = "winget search " + PackageIdentifier + " --exact --disable-interactivity";
+			string commandSpace  = " ";
+			string commandSearch  = "search";
+			string commandPackageIdentifier  = PackageIdentifier;
+			string commandFlags  = "--exact --disable-interactivity";
+			string Arguments = commandSpace + commandSearch + commandSpace + PackageIdentifier + commandSpace + commandFlags;
+			// string command = "winget" + Arguments;
 
 			Process process = new Process();
 			StreamWriter StandardInput;
 			StreamReader StandardOut;
-			ProcessStartInfo processStartInfo = new ProcessStartInfo("PowerShell.exe");
+			// ProcessStartInfo processStartInfo = new ProcessStartInfo("PowerShell.exe");
+			ProcessStartInfo processStartInfo = new ProcessStartInfo("winget.exe");
 			processStartInfo.UseShellExecute = false;
 			processStartInfo.RedirectStandardInput = true;
 			processStartInfo.RedirectStandardOutput = true;
 			processStartInfo.RedirectStandardError = true;
 			processStartInfo.CreateNoWindow = true;
+			processStartInfo.Arguments = Arguments;
 			process.StartInfo = processStartInfo;
 			process.Start();
 
@@ -3093,7 +3128,7 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 			}
 		}
 
-		public int ManifestFile(int PR = 0, string Arch = "", string OS = "", string Scope = "", int VM = 0, string clip = ""){//Gets next VM, pulls a file from the clipboard and puts into the VM's manifest folder, then if it's the Version (.yaml) file, start the VM for validation.  
+		public int ManifestFile(int PR = 0, string Arch = "", string OS = "", string Scope = "", int VM = 0, string clip = ""){//Gets next VM, pulls a flie from the clipboard and puts into the VM's manifest folder, then if it's the Version (.yaml) file, start the VM for validation.  
 			if (VM == 0){
 				VM = NextFreeVM();//.Replace("vm","");
 			}
@@ -3227,11 +3262,11 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 			//[ValidateSet("Win10","Win11")]
 			int VM = 0;
 			string OriginalLoc = "";
-			if (OS == "Win10") {
-				OriginalLoc = Win10Folder;
-			} else if (OS == "Win11") {
+			// if (OS == "Win10") {
+				// OriginalLoc = Win10Folder;
+			// } else if (OS == "Win11") {
 				OriginalLoc = Win11Folder;
-			}
+			// }
 			//string ImageLoc = "imagesFolder\\OS-image\\";
 			int version = GetVMVersion(OS) + 1;
 			//Write-Host "Writing OS version version"
@@ -3321,7 +3356,7 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 				}
 			}
 			StopVM(vm);
-			RemoveVM(VMName);
+			// RemoveVM(VMName);
 
 			// string_out = GetStatus();
 			// string_out = string_out .Where(n => !n.vm.Contains(VM));
@@ -3383,11 +3418,11 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 
 		public void StopVM(int vm,string VMName = ""){
 			if (VMName == "") {
-				VMName = "vm"+vm;
+				VMName = "vm"+vm.ToString();
 			} else {
-				VMName = vm;
+				VMName = vm.ToString();
 			}
-			F(VMName, 3);
+			SetVMState(VMName, 3);
 		}
 
 
@@ -4769,6 +4804,12 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 			dynamic response_out = FromJson(InvokeGitHubPRRequest(PR,WebRequestMethods.Http.Post,"comments","Close with reason: Version already exists;"));
         }// end Version_Already_Exiss_Action
 		
+        public void Stale_Action(object sender, EventArgs e) {
+			int PR = GetCurrentPR();
+			AddPRToRecord(PR,"Closed");
+			dynamic response_out = FromJson(InvokeGitHubPRRequest(PR,WebRequestMethods.Http.Post,"comments","Close with reason: Stale;"));
+        }// end Stale_Action
+		
         public void Package_Available_Action(object sender, EventArgs e) {
 			int PR = GetCurrentPR();
 			AddPRToRecord(PR,"Closed");
@@ -4779,7 +4820,7 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 			int PR = GetCurrentPR();
 			AddPRToRecord(PR,"Closed");
 			dynamic response_out = FromJson(InvokeGitHubPRRequest(PR,WebRequestMethods.Http.Post,"comments","Close with reason: Regenerate with new hash, and the newest version number.;"));
-        }// end Package_Available_Action
+        }// end Regen_Hash_Action
 		
         public void Duplicate_Action(object sender, EventArgs e) {
 			int PR = GetCurrentPR();
@@ -4946,21 +4987,17 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 
 
 
-        public void Testing_Action(object sender, EventArgs e) {
+
+			// string UserInput = inputBox_User.Text;
+			// List<string> versions = ManifestListing(UserInput);
+			// outBox_msg.AppendText(Environment.NewLine + "Testing2: " + ToJson(versions));
+			// dynamic line = FromCsv(GetContent(DataFileName)).Where(n => (string)n["PackageIdentifier"] == (UserInput));
 			// string string_out = (PRStateFromComments(PR).ToString());
  			// dynamic string_out = GetFileData(DataFileName,"PackageIdentifier", UserInput);
 			// dynamic string_out = FromCsv(GetContent(DataFileName)).Where(n => n[Property] != null).Where(n => (string)n[Property].Contains(Match);
-			string UserInput = inputBox_User.Text;
-			dynamic line = FromCsv(GetContent(DataFileName)).Where(n => (string)n["PackageIdentifier"] == (UserInput));
-			outBox_msg.AppendText(Environment.NewLine + "Testing: " + ToJson(line));
-		}// end Testing_Action
-
-        public void Testing2_Action(object sender, EventArgs e) {
-			string UserInput = inputBox_User.Text;
-			List<string> versions = ManifestListing(UserInput);
+			// string UserInput = inputBox_User.Text;
 			// dynamic line = FromCsv(GetContent(DataFileName)).Where(n => (string)n["PackageIdentifier"] == (UserInput));
-			outBox_msg.AppendText(Environment.NewLine + "Testing2: " + ToJson(versions));
-		}// end Testing_Action
+			// outBox_msg.AppendText(Environment.NewLine + "Testing: " + ToJson(line));
 
 
 
@@ -5065,8 +5102,13 @@ public string UpdateArchInPR(int PR, string SearchTerm = "  Architecture: x86", 
 			SetMode("Idle");
         }// end Idle_Action
 
+        public void NoNew_Action(object sender, EventArgs e) {
+			SetMode("NoNew");
+		}// end NoNew_Action
 
-
+        public void OnlyNew_Action(object sender, EventArgs e) {
+			SetMode("OnlyNew");
+		}// end OnlyNew_Action
 
 
 
