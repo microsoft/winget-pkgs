@@ -73,31 +73,32 @@ Tags:
 - llm
 - programming
 ReleaseNotes: |-
-  这个版本把 FylloCode 推进为更可追溯的项目治理。新的 Overview 页面成为项目默认入口，集中展示项目治理、进行中变更、近期讨论和基于 lineage 的指标。Chat、Task 与 Proposal 现在通过持久化 lineage 模型串联；Chat 也可以渲染并持久化由 Agent 输出、经用户确认后执行的 Fyllo action。同时，本版本补齐了公开文档站，恢复了多会话并行流式输出，并提升了不同 ACP Agent 的工具调用展示兼容性。
-  新增
-  - 新增接入真实主进程数据的项目 Overview 页面，将 OpenSpec 数量、guideline 活动、git 趋势、进行中变更、近期 lineage 线索和治理指标聚合到项目默认视图
-  - 新增项目 lineage 模型与持久化能力，用于追踪一条需求线索在任务、聊天会话和 proposal 之间的流转，并包含 lineage IPC、任务来源会话关联、来自 fyllo-specs create-proposal 的 proposal 关联，以及 Overview 所需的近期线索投影
-  - 从任务发起的 Chat 会话新增来源任务横幅，重新进入对话后仍可看到该会话对应的任务来源
-  - Chat 新增 <fyllo-action> 渲染与状态持久化，首个支持的 task.create action 可让 Agent 以结构化输出提议创建本地任务，同时由 FylloCode 控制校验、确认和最终执行
-  - 直接在 Chat 中讨论并创建 proposal 的开放会话，现在可通过本地任务创建流程补齐来源任务，并把任务绑定回同一个 lineage subject
-  - 新增 VitePress 文档站，包含产品指南、功能参考、截图、ACP Agent 文档、fyllo-specs 与 fyllo-skills 参考资料，以及文档构建/预览脚本
-  调整
-  - 项目入口现在默认打开 Overview，让项目治理状态和当前工作进展成为进入项目后的第一屏
-  - Chat 中过长的用户文本消息现在默认折叠，并提供展开/收起控制，减少粘贴日志、规格和长 prompt 时对对话可扫描性的影响
-  - 统一主进程、preload 与渲染层之间的 ACP 流式事件契约，减少重复映射，并更稳定地保留工具调用中的 input、content、diff、locations 与 terminal 等字段
-  - Chat system reminder 现在会注入 Fyllo action 契约和 lineage 上下文；对于绑定任务的会话，会注入任务标题，但仍避免注入完整任务描述
-  - 仓库源码目录迁移到 src/，测试迁移到顶层 test/ 镜像结构，并同步刷新项目 guideline、README 与贡献文档
-  - 新增 commit message hook 校验，并扩展 lint-staged 对 ESM/CJS/TS/Vue 文件的覆盖
-  - 刷新运行时和开发依赖，包括 ACP SDK、AI SDK、Nuxt UI、Vue 工具链、VitePress 及相关 lockfile 更新
-  修复
-  - 恢复 Chat 多会话并行流式输出，切换会话不再丢失其他运行中会话的 chunk、状态、标题或 usage 更新
-  - 修复并发流式输出时 Chat MessagePort 交接可能错绑的问题，现在每条 stream 都通过独立 streamId 关联
-  - 修复 ACP Agent 运行时启动逻辑，npx、uvx 和 binary 分发现在会正确读取 registry 中声明的启动 args 与 env
-  - 修复消息渲染中使用 content-visibility 导致的 Chat 滚动偏移问题
-  - 改进工具调用卡片对不同 Agent 的兼容性，覆盖先收到 update、不同阶段携带 input/diff、以及 completed 状态附带错误输出等情况
-  - 修复源码目录迁移后 fyllo-specs 共享类型依赖解析问题，使 bundled server 能重新纳入 lint 和 type-aware 检查
-  备注
-  - 本地 task 与 session metadata 新增 lineage 和 action-state 相关字段。既有数据仍可读取，不需要手动迁移。
-ReleaseNotesUrl: https://github.com/Fioooooooo/FylloCode/blob/HEAD/CHANGELOG.md#0130---2026-06-12
+  This release turns FylloCode into a more traceable project workspace. The new Overview page surfaces project governance, active changes, recent threads, and lineage-backed metrics as the default project entry. Chat, Task, and Proposal are now connected through a persisted lineage model, while Chat can render confirmed Fyllo actions from agent output. The release also adds the public documentation site, restores parallel chat streaming, and improves ACP tool-call compatibility across agents.
+  Added
+  - Project Overview page backed by real main-process data, combining OpenSpec counts, guideline activity, git trends, active changes, recent lineage subjects, and governance metrics in one project landing view
+  - Project lineage model and storage for tracing a requirement subject across tasks, chat sessions, and proposals, including lineage IPC, task-origin session links, proposal links from fyllo-specs create-proposal, and recent-thread projection for Overview
+  - Origin task banner in Chat sessions started from a task, so users can see the task source even after returning to the conversation later
+  - Chat <fyllo-action> rendering and persistence, starting with a confirmed task.create action that lets agents propose a local task from structured assistant output while FylloCode keeps validation and execution under user control
+  - Open-discussion task creation flow for direct Chat sessions that produce proposals, allowing unbound conversations to create and bind a local task into the same lineage subject
+  - VitePress documentation site with product guides, feature references, screenshots, ACP agent docs, fyllo-specs and fyllo-skills references, and docs build/preview scripts
+  - Codex session repair skill for recovering Codex CLI session JSONL files affected by encrypted-content parse failures
+  Changed
+  - Project entry now opens Overview first, making project governance and current work state the initial workspace surface
+  - Long user text messages in Chat now collapse by default with expand/collapse controls, improving scanability for pasted logs, specs, and long prompts
+  - ACP stream event contracts were unified across main, preload, and renderer layers, reducing duplicated mapping and preserving tool-call fields such as input, content, diff, locations, and terminal metadata more consistently
+  - Chat system reminders now include Fyllo action contracts and lineage context, including task titles for task-bound sessions while still avoiding full task-description injection
+  - Repository source layout moved under src/, tests moved into the top-level test/ mirror, and project guidelines, README, and contribution docs were refreshed for the new layout
+  - Contributor workflow now validates commit messages through the hook pipeline and broadens lint-staged coverage for ESM/CJS/TS/Vue files
+  - Runtime and development dependencies were refreshed, including ACP SDK, AI SDK, Nuxt UI, Vue tooling, VitePress, and related lockfile updates
+  Fixed
+  - Restored parallel Chat session streaming so switching sessions no longer drops chunks, status, title updates, or usage updates from other running sessions
+  - Fixed Chat MessagePort handoff for concurrent streams by correlating each stream with its own streamId
+  - Fixed ACP agent runtime spawning so npx, uvx, and binary distributions now honor registry-provided startup args and env
+  - Fixed Chat scroll offset issues caused by content-visibility on message rendering
+  - Improved tool-call card compatibility for agents that send updates before start events, include input or diff content at different phases, or report completed calls with error output
+  - Fixed fyllo-specs shared-type dependency resolution after the source-layout migration so lint and type-aware checks can cover the bundled server correctly
+  Notes
+  - Local task and session metadata now carries additional lineage and action-state fields. Existing data remains readable; no manual migration is required.
+ReleaseNotesUrl: https://github.com/Fioooooooo/FylloCode/blob/HEAD/CHANGELOG.en.md#0130---2026-06-12
 ManifestType: defaultLocale
 ManifestVersion: 1.12.0
