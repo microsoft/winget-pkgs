@@ -1,0 +1,161 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: BiomeJS.Biome
+PackageVersion: 2.4.16
+PackageLocale: en-US
+Publisher: BiomeJS
+PublisherUrl: https://biomejs.dev/
+PublisherSupportUrl: https://github.com/biomejs/biome/issues
+Author: Biome Developers and Contributors
+PackageName: Biome
+PackageUrl: https://biomejs.dev/
+License: Apache-2.0
+Copyright: Copyright (c) 2023-present Biome Developers and Contributors
+ShortDescription: Biome is a toolchain for web projects, aimed at providing functionalities to maintain them. It offers a formatter and linter, usable via CLI and LSP.
+Moniker: biome
+Tags:
+- css
+- formatter
+- javascript
+- json
+- jsx
+- linter
+- static-code-analysis
+- typescript
+- web
+ReleaseNotes: |-
+  2.4.16
+
+  Patch Changes
+  - #10329 ef764d5 Thanks @Conaclos! - Fixed an issue where diagnostics showed an incorrect location in Astro files.
+  - #10363 50aa415 Thanks @dyc3! - Fixed HTML formatting for a case where comments could cause the formatter to split up a closing tag, which would cause the resulting HTML to be syntactically invalid.
+    Input:
+    <span
+      ><!-- 1
+    --><span>a</span
+      ><!-- 2
+    --><span>b</span
+      ><!-- 3
+    --></span>
+    Output:
+      <span
+              ><!-- 1
+    - --> <span>a</span<!-- 2
+    - --> ><span>b</span><!-- 3
+    + --><span>a</span><!-- 2
+    + --><span>b</span><!-- 3
+      --></span
+      >
+  - #10465 0c718da Thanks @dfedoryshchev! - Fixed diagnostics emitted by the noUntrustedLicenses rule.
+  - #10358 05c2617 Thanks @dyc3! - Fixed #10356: biome rage --linter now displays rules enabled through linter domains in the enabled rules list.
+  - #10300 950247c Thanks @dyc3! - Fixed #10265: Svelte function bindings such as bind:value={get, set} are now parsed more precisely, so noCommaOperator won't emit false positives for that syntax anymore.
+  - #9786 e71f584 Thanks @MeGaNeKoS! - Fixed #8480: useDestructuring now provides variableDeclarator and assignmentExpression options to control which contexts enforce destructuring, matching ESLint's prefer-destructuring configuration. Both default to {array: true, object: true}. The diagnostic for object destructuring in assignment expressions now instructs users to wrap the assignment in parentheses.
+  - #10425 1948b72 Thanks @sjh9714! - Fixed #10244: The useOptionalChain rule now detects negated guard inequality chains like !foo || foo.bar !== "x".
+  - #10442 001f94f Thanks @ematipico! - Fixed #10411: noMisusedPromises no longer causes a stack overflow when a nested function returns an object with shorthand properties that shadow destructured variables from an outer scope.
+  - #10318 9b1577f Thanks @dyc3! - Added support for formatter.trailingCommas in overrides. This option was previously available in the top-level formatter configuration but missing from formatter overrides.
+  - #10319 2e37709 Thanks @dyc3! - Fixed Vue and Svelte formatting for standalone interpolations in inline elements. Biome now preserves existing newlines in cases like:
+    - <span> {{ value }} </span>
+    + <span>
+    +   {{ value }}
+    + </span>
+  - #10365 0a58eb0 Thanks @Netail! - Fixed #10361: noUnusedFunctionParameters now mentions the parameter name in the diagnostic.
+  - #10439 df6b867 Thanks @denbezrukov! - Fixed CSS and SCSS formatting for comments around declaration colons so comments between property names, colons, and values stay at the same boundary as Prettier.
+     .selector {
+    -  color: /* red, */
+    -    blue;
+    +  color: /* red, */ blue;
+     }
+  - #10344 b30208c Thanks @siketyan! - Fixed #10123: Corrected the noReactNativeDeepImports source rule to point to the proper upstream rule, so users can migrate from the original rule correctly.
+  - #10328 b59133f Thanks @dyc3! - Fixed #10309: Biome no longer adds newlines to Astro frontmatter when linter or assist --write mode is enabled.
+
+  What's Changed
+  - fix(format/html/vue): preserve newlines around standalone interpolations by @dyc3 in #10319
+  - refactor(css_parser): remove allow_css_ratio from SCSS expression parsing functions by @denbezrukov in #10325
+  - fix(astro): display diagnostic advices with the correct location by @Conaclos in #10329
+  - fix: trim astro frontmatter content before processing it by @dyc3 in #10328
+  - fix(config): support trailingCommas in overrides by @dyc3 in #10318
+  - chore(deps): update rust:1.95.0-bullseye docker digest to b26cecc by @renovate[bot] in #10334
+  - chore(deps): update rust:1.95.0-trixie docker digest to 5b1e348 by @renovate[bot] in #10335
+  - chore(deps): update dependency @types/node to v24.12.3 by @renovate[bot] in #10336
+  - chore(deps): update dependency tombi to v0.10.6 by @renovate[bot] in #10337
+  - feat(css_parser): support for SCSS @include ... using clauses by @denbezrukov in #10327
+  - chore(deps): update github-actions by @renovate[bot] in #10338
+  - chore(deps): update pnpm to v10.33.4 by @renovate[bot] in #10339
+  - chore(deps): update rust crate filetime to 0.2.28 by @renovate[bot] in #10340
+  - chore(deps): update dependency @changesets/changelog-github to v0.7.0 by @renovate[bot] in #10342
+  - feat(parse/tailwind): differentiate between number and non-number values by @dyc3 in #10332
+  - chore(deps): update rust crate rayon to 1.12.0 by @renovate[bot] in #10343
+  - fix(markdown_parser): parse tab-indented siblings by @jfmcdowell in #10333
+  - fix(lint/js): correct the rule source of noReactNativeDeepImports by @siketyan in #10344
+  - fix(markdown_parser): column-aware tab handling around block containers by @jfmcdowell in #10345
+  - chore: update pnpm to the lateset by @ematipico in #10348
+  - chore: fix renovate config by @dyc3 in #10352
+  - feat(css_parser): support SCSS interpolated selector by @denbezrukov in #10351
+  - feat(useDestructuring): add options for assignment/declaration and improve diagnostic for bare object assignments by @MeGaNeKoS in #9786
+  - chore: remove benchmark from repository by @ematipico in #10355
+  - fix(rage): print rules enabled by domains by @dyc3 in #10358
+  - feat(css): support SCSS interpolation in attribute selectors by @denbezrukov in #10357
+  - fix(js_analyze): noUnusedFunctionParameters mention parameter name by @Netail in #10365
+  - feat(parse/html): parse svelte function bindings more precisely by @dyc3 in #10300
+  - feat(css_formatter): add support for formatting SCSS keyframes selectors by @denbezrukov in #10362
+  - fix: yaml linting panic fixes by @jjroush in #10287
+  - feat(css_parser): add support for SCSS interpolated dashed identifiers and properties by @denbezrukov in #10367
+  - fix(markdown_parser): handle ordered sublist continuation by @jfmcdowell in #10349
+  - docs: fix duplicate-word typos in code comments by @dfedoryshchev in #10371
+  - test(markdown_parser): add CST list invariants by @jfmcdowell in #10369
+  - chore: yaml formatting infra by @ematipico in #10366
+  - chore(goverance): cover expenses for representing Biome at a conference by @Conaclos in #10246
+  - docs: clarify vcs.root description by @Dotify71 in #10379
+  - Revert "docs: clarify vcs.root description" by @ematipico in #10381
+  - feat(css_parser): add support for SCSS parent selectors by @denbezrukov in #10370
+  - fix(css_parser): parse CSS custom functions in SCSS by @denbezrukov in #10387
+  - feat(useSortedClasses): scaffold v4 parser-based sort module by @jiwon79 in #10291
+  - fix(css_parser): support semicolonless SCSS statement at-rules by @denbezrukov in #10389
+  - fix(format/html): fix case where comments cause invalid html by @dyc3 in #10363
+  - fix(markdown_parser): break paragraph at sibling list marker without tab by @jfmcdowell in #10376
+  - feat(css_formatter): preserve raw scss string interpolation by @denbezrukov in #10388
+  - fix(service): correct FileExistsParams typo by @yanthomasdev in #10399
+  - chore(deps): update rust crate bpaf to 0.9.26 by @renovate[bot] in #10403
+  - chore(deps): update rust crate filetime to 0.2.29 by @renovate[bot] in #10404
+  - chore(deps): update dependency tombi to v0.11.4 by @renovate[bot] in #10405
+  - chore(deps): update rust crate dashmap to 6.2.1 by @renovate[bot] in #10406
+  - chore: remove dashmap from project by @ematipico in #10407
+  - chore(deps): update dependency @types/node to v24.12.4 by @renovate[bot] in #10400
+  - chore(deps): update pnpm to v11.1.2 by @renovate[bot] in #10401
+  - fix(css_formatter): preserve scss identifier interpolation spacing by @denbezrukov in #10398
+  - chore(format/html): fix unused code warnings in release builds by @dyc3 in #10412
+  - chore(service): make grit opt-in by @ematipico in #10410
+  - feat(css_formatter): preserve source-tight scss binary edges by @denbezrukov in #10413
+  - refactor: make yaml, md and graphql gated via rust features by @ematipico in #10416
+  - feat(css_parser): add support for parsing and formatting unknown SCSS/CSS at-rules by @denbezrukov in #10397
+  - refactor: make plugins opt-in via feature gate by @ematipico in #10418
+  - feat(css_formatter): align SCSS map pair value layout by @denbezrukov in #10417
+  - fix: incorrect build when using build or test by @ematipico in #10426
+  - ci: agent scan, zizmor and reduce permissions by @ematipico in #10428
+  - ci: remove checkout step from agentscan workflow by @MatteoGabriele in #10429
+  - fix(css_parser): classify interpolated query feature ranges correctly by @denbezrukov in #10421
+  - docs: remove outdated Caveats section in useImportExtensions by @Dotify71 in #10431
+  - docs: remove redundant default phrase in useConsistentObjectDefinitions rule by @Dotify71 in #10430
+  - fix(css_formatter): preserve blank lines between SCSS map pairs by @denbezrukov in #10427
+  - ci: fix preview releases by @dyc3 in #10436
+  - fix(useSortedClasses): sort Tailwind v4 arbitrary values by @jiwon79 in #10414
+  - fix(css_parser): improve diagnostics for missing attribute names and empty selectors in SCSS by @denbezrukov in #10437
+  - ci: remove corepack by @ematipico in #10440
+  - fix(css_formatter): improve comment handling in generic CSS properties by @denbezrukov in #10439
+  - fix(css_formatter): align commented SCSS map value layout by @denbezrukov in #10445
+  - fix(css_formatter): handle control variable maps in SCSS map expressions by @denbezrukov in #10446
+  - fix(inference): pass correct scope on return statements by @ematipico in #10442
+  - feat(css_parser): parse interpolated scss nested properties by @denbezrukov in #10455
+  - chore(deps): update rust:1.95.0-bullseye docker digest to 28afaeb by @renovate[bot] in #10457
+  - fix(test): leaky CLI tests by @ematipico in #10463
+  - fix(css_formatter): align SCSS map comment trailing commas by @denbezrukov in #10449
+  - fix(markdown_parser): keep list blank-line separators inside the preceding item by @jfmcdowell in #10466
+  - chore(deps): update rust crate jiff to 0.2.27 by @renovate[bot] in #10459
+  - docs: fix duplicate "from" in noUntrustedLicenses diagnostic by @dfedoryshchev in #10465
+ReleaseNotesUrl: https://github.com/biomejs/biome/releases/tag/@biomejs/biome@2.4.16
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://biomejs.dev/guides/getting-started/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
