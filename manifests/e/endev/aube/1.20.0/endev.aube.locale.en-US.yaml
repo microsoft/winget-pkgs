@@ -1,0 +1,52 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: endev.aube
+PackageVersion: 1.20.0
+PackageLocale: en-US
+Publisher: en.dev
+PublisherUrl: https://en.dev/
+PublisherSupportUrl: https://github.com/endevco/aube/discussions/categories/troubleshooting-and-bugs
+Author: en.dev
+PackageName: aube
+PackageUrl: https://aube.en.dev/
+License: MIT
+LicenseUrl: https://github.com/endevco/aube/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 en.dev inc
+CopyrightUrl: https://github.com/endevco/aube/blob/HEAD/LICENSE
+ShortDescription: A fast Node.js package manager
+Description: |-
+  aube is a package manager for Node.js projects. It uses pnpm-style isolated node_modules for fast, disk-efficient installs.
+
+  Existing projects keep their lockfile format. aube reads and writes pnpm-lock.yaml, package-lock.json, npm-shrinkwrap.json, yarn.lock, and bun.lock in place. New projects without a supported lockfile get aube-lock.yaml.
+
+  Why Try It
+  - Fast installs. Warm installs are about 8x faster than pnpm and about 5x faster than Bun in the current benchmarks. Repeat test commands run up to 35x faster than pnpm and up to 5x faster than Bun.
+  - Existing lockfiles. Reads and writes pnpm-lock.yaml, package-lock.json, npm-shrinkwrap.json, yarn.lock, and bun.lock in place.
+  - Cheap repeat commands. aubr test, aube test, and aube exec vitest auto-install when dependencies are stale, then skip that work when nothing changed. aubx uses a local binary when one is installed, or a throwaway environment for one-off tools.
+  - Less disk use. A global content-addressable store lets projects share package files instead of keeping a full copy of the same dependencies in every checkout.
+  - Secure defaults. Out of the box, exotic transitive deps are blocked, lifecycle scripts wait for approval, trust downgrades fail at resolve, and brand-new releases sit in a 24h cooling window. One paranoid: true line adds the build jail and turns the soft gates into hard fails.
+Moniker: aube
+ReleaseNotes: |-
+  A tighter pnpm-parity release: scripts now see the full npm_* environment pnpm exports, git/tarball deps materialize correctly under the global virtual store, and per-project lockfiles in workspaces keep their original format. Plus a new Embedder profile that lets downstream tools drive aube's command layer as their own package-manager engine.
+  Added
+  - Full pnpm npm_* env parity for lifecycle & aube run scripts (#879 by @rubnogueira) — Scripts now receive npm_execpath, npm_node_execpath, npm_package_json, npm_command, npm_config_node_gyp, npm_lifecycle_script, and the full deep-flattened npm_package_* set (including engines, config, and bin), envified with pnpm's exact allowlist and casing. PM-detection bridges and build tooling that branch on these vars now behave identically under aube.
+    - npm_command is stamped per command family (run-script, install, rebuild, pack) and re-asserted at the spawn site so a preceding auto-install can't clobber it.
+    - npm_config_node_gyp points at a lazy, dependency-free node-gyp stand-in in aube's cache that bootstraps the real node-gyp only when a tool actually invokes it.
+    - npm_node_execpath/NODE fall back to the ambient node on PATH when no runtime switch is active, so they're always populated.
+    - Manifest-derived vars are applied after the build jail's env_clear, so jailed dependency builds see them too. Diffed byte-for-byte against pnpm 11.5.
+  - Embeddable Embedder profile (#862 by @colinhacks) — A compile-time pluggability foundation that exposes aube's command layer as a library and lets downstream tools register a &'static Embedder profile controlling aube's name, version, lockfile filename, cache/data namespaces, env-var prefix, user-agent, and workspace-yaml name — plus host-owned behavior toggles and embedder-supplied setting defaults. Standalone aube is unchanged: the default const AUBE profile reproduces every prior constant verbatim. Direct-command embedders call set_embedder once at startup; cli_main handles registration automatically.
+
+  Fixed
+  - Preserve per-member lockfile format under sharedWorkspaceLockfile: false (#880 by @rubnogueira) — aube install previously wrote a redundant aube-lock.yaml next to a member's existing pnpm-lock.yaml because the per-project writer applied a single format detected at the workspace root to every member. Each member's existing lockfile format is now detected individually; only members with no lockfile fall back to the workspace default. This brings the per-project path in line with add/remove/update and with pnpm's shared-workspace-lockfile=false behavior.
+  - Resolve git & remote-tarball deps in the global virtual store (#857 by @rubnogueira) — With enableGlobalVirtualStore: true, a registry package depending on a git or remote-tarball dependency previously got a dangling sibling symlink, surfacing as runtime errors like TypeError: Cannot read properties of undefined (reading 'prototype') for the canonical request-promise → request-promise-core chain. Two defects were fixed:
+    - Shareable local sources (git, remote tarball) are now materialized into the shared store like registry packages, not just into the per-project .aube/.
+    - Sibling lookups now canonicalize git/tarball specs to the same dep_path the package itself is keyed under (promoting #committish → resolved, stripping pnpm's (peer@ver) suffix), so the symlink resolves.
+    Self-healing: the install clears stale per-project entries left by older aube versions. Non-GVS installs are unaffected.
+
+  💚 Sponsor aube
+  aube is part of jdx.dev — an independent developer-tooling studio run by @jdx, also behind mise. Work on aube is funded entirely by sponsors.
+  If aube is saving your team install time or CI minutes, please consider sponsoring at jdx.dev. Individual and company sponsorships are what keep the project fast, free, and independent.
+ReleaseNotesUrl: https://github.com/jdx/aube/releases/tag/v1.20.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
