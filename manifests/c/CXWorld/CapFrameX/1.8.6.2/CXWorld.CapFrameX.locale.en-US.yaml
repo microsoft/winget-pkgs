@@ -1,0 +1,101 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: CXWorld.CapFrameX
+PackageVersion: 1.8.6.2
+PackageLocale: en-US
+Publisher: CXWorld
+PublisherUrl: https://www.capframex.com/
+PublisherSupportUrl: https://www.capframex.com/support
+PrivacyUrl: https://www.capframex.com/privacy
+Author: CapFrameX Team
+PackageName: CapFrameX
+PackageUrl: https://github.com/CXWorld/CapFrameX
+License: MIT
+LicenseUrl: https://github.com/CXWorld/CapFrameX/blob/HEAD/LICENSE
+ShortDescription: Frametime capture and analysis tool
+Description: Frametimes capture and analysis tool based on Intel's PresentMon. Overlay provided by Rivatuner Statistics Server.
+Moniker: capframex
+Tags:
+- analysis-tool
+- benchmark
+- benchmarking
+- fps
+- frametime
+- rivatuner
+ReleaseNotes: |-
+  Release Notes
+  Enhancements & New Features
+  - New Animation Error metrics (Average, P99) in Analysis and Report views, including a new animation error chart. The PresentMon parameters --track_frame_type and --track_app_timing are used to improve the accuracy of the Animation Error.
+  - New frametime percentile parameters (P1/P5 frametime quantiles)
+  - Intel fabric clock sensors (e.g. NGU/D2D clocks on Arrow Lake) based on a new IntelOOBMSM PawnIO module
+  - New Intel PawnIO wrapper (MSR, OC mailbox) with updated Intel MSR IDs
+  - Zen 6 standard path support, experimental Ryzen SMU support
+  - Prefer total/board power sensors over Intel's core-only "GPU TDP"
+  - Expanded MCP server tool set:
+    - Capture lifecycle tools: list capture-eligible processes, start/stop captures, wait for capture completion
+    - Configuration tools: read/write AppSettings, read/write overlay slot configurations, toggle single overlay entries, select logged sensors, edit record comments
+    - Frametime tools: frametime time series with downsampling, stutter/spike detection
+    - PMD tools: per-channel power summaries and time series (GPU/CPU/system power)
+    - Sensor analysis and cross-record analysis tools
+    - ETW buffer health status tool
+    - Frame generation awareness in metrics and comparison tools
+  Bugfixes
+  - Fixed animation error chart rendering
+  - App start freeze handling (ETW service health check, PawnIO initialization)
+  - Zen 6 core clock handling
+  - More robust handling of invalid PresentMon output lines
+  - Comparison tab variances chart corner radius
+  Platform & Infrastructure
+  - PawnIO module updates (IntelMSR, RyzenSMU, LpcIO, SMBus modules), added new IntelOOBMSM module
+  Runtime Requirements
+  - .NET 9 is now required for full feature support and optimal stability. Download here.
+  MCP Server: Setting up Claude Code communication
+  CapFrameX ships an in-process Model Context Protocol server hosted by CapFrameX.exe. Once registered with Claude Code, the assistant can read captures, compute statistics, query the live system, and diagnose capture issues. Starting with v1.8.6, the assistant can also control captures (start/stop) and modify the configuration (AppSettings, overlay entries, logged sensors) via dedicated tools. The endpoint exists only while CapFrameX is running.
+  Setup
+  1. Find the port. Open %appdata%/CapFrameX/Configuration/AppSettings.json and read WebservicePort (default 1337; CapFrameX falls back to a free port if it's taken).
+  2. Register with Claude Code (one-time, user-scoped):
+     claude mcp add -s user capframex --transport http http://localhost:<port>/mcp
+  3. Verify:
+     claude mcp list
+     Expected: capframex: http://localhost:<port>/mcp (HTTP) - ✓ Connected
+  In an active session, /mcp shows live status and the CapFrameX tools become available to the model.
+  Troubleshooting
+  - Disconnected / connect failure — CapFrameX isn't running, or the port changed since you registered. Re-check WebservicePort, then:
+    claude mcp remove capframex
+    claude mcp add -s user capframex --transport http http://localhost:<new-port>/mcp
+  - Tools missing in the model — start a new Claude Code session; existing sessions don't pick up newly added servers.
+  - Disable entirely — set McpEnabled to false in AppSettings.json and restart CapFrameX.
+  Note: unlike v1.8.5, the v1.8.6 tool set is no longer read-only — it includes capture control and configuration write tools. The endpoint binds to localhost without auth.
+  CapFrameX Portable Mode
+  CapFrameX supports a portable mode that allows the application to run entirely from a single folder without writing to system directories. This is useful for running from USB drives, network shares, or keeping multiple isolated installations.
+  Portable mode is activated by placing a portable.json file in the same directory as the CapFrameX executable. See the v1.8.5 release notes for the full configuration reference, requirements, and behavior differences.
+  Troubleshooting & Known Issues
+  The following tips address the most common issues reported by users and can help resolve stability, overlay, and capture-related problems efficiently. We recommend working through them in order if you encounter unexpected behavior.
+  1. Ensure you are running the latest version
+     If you experience application crashes or unstable behavior, verify that you have installed CapFrameX v1.8.6 or newer. Many known issues have been resolved in this patch. If you were previously using version 1.7.7, we recommend uninstalling CapFrameX before installing the new version.
+  2. Reset application settings
+     In some cases, corrupted or outdated configuration files may cause problems. Deleting
+     %appdata%/CapFrameX/Configuration/AppSettings.json
+     will reset CapFrameX to its default settings and often resolves startup or UI-related issues.
+  3. Reset overlay configuration files
+     If overlay-related problems persist, try deleting the overlay configuration files located at
+     %appdata%/CapFrameX/Configuration/OverlayEntryConfiguration_(0/1/2).json.
+     These files will be recreated automatically on the next application start.
+  4. Restore missing or zero-value overlay entries
+     When overlay entries are missing or display constant zero values, open the Overlay tab and use the Reset button to restore all overlay entries to a valid default state.
+  5. Fix incorrect overlay entry order
+     If the order of overlay entries appears inconsistent or unintentionally rearranged, use the Sort button in the Overlay tab to restore a clean and logical ordering.
+  6. Resolve frametime anomalies after updates
+     In rare cases, existing background capture processes can interfere with CapFrameX after an update. If you encounter frametime issues, close all running PresentMon processes before installing or launching CapFrameX v1.8.6 release.
+  7. Avoid conflicts with other monitoring tools
+     Applications such as HWiNFO or AIDA64 that implement their own FPS or frametime metrics may conflict with CapFrameX's capture service, as they also rely on PresentMon-based mechanisms. Disabling overlapping FPS or frametime monitoring features in those tools is strongly recommended when using CapFrameX.
+  Known Limitations
+  - PC latency metric may return invalid values (NaN) under specific conditions.
+ReleaseNotesUrl: https://github.com/CXWorld/CapFrameX/releases/tag/v1.8.6
+InstallationNotes: If you are using a network drive as your capture directory and having problems connecting to it on autostart, you might want to download this additional zip file (https://cxblobs.blob.core.windows.net/releases/Autostart%20using%20network%20drives.zip) too and read the info inside it.
+Documentations:
+- DocumentLabel: README for CapFrameX
+  DocumentUrl: https://github.com/CXWorld/CapFrameX/blob/master/README.md
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,22 +1,20 @@
 # Created with komac v2.16.0
 # yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
 
+
 PackageIdentifier: NexusMods.Vortex
 PackageVersion: 2.0.2
 PackageLocale: en-US
 Publisher: Black Tree Gaming Ltd.
-PublisherUrl: https://github.com/Nexus-Mods/Vortex
+PublisherUrl: https://github.com/Nexus-Mods
 PublisherSupportUrl: https://github.com/Nexus-Mods/Vortex/issues
 PrivacyUrl: https://help.nexusmods.com/article/20-privacy-policy
 Author: Nexus Mods
 PackageName: Vortex
-PackageUrl: https://github.com/Nexus-Mods/Vortex/wiki
+PackageUrl: https://github.com/Nexus-Mods/Vortex
 License: GPL-3.0
 LicenseUrl: https://github.com/Nexus-Mods/Vortex/blob/HEAD/LICENSE.md
-ReleaseNotesUrl: https://github.com/Nexus-Mods/Vortex/releases/latest
-ReleaseNotes: https://github.com/Nexus-Mods/Vortex/releases/latest
-Copyright: Copyright (C) 2007 Free Software Foundation, Inc.
-CopyrightUrl: https://raw.githubusercontent.com/Nexus-Mods/Vortex/master/LICENSE.md
+Copyright: Copyright © 2026 Black Tree Gaming Ltd.
 ShortDescription: Vortex is the new, modern mod manager from Nexus Mods.
 Description: |-
   Vortex is the new, modern mod manager from Nexus Mods.
@@ -24,13 +22,35 @@ Description: |-
   Led by Tannin, the creator of Mod Organizer, Vortex takes the lessons learnt during the development of MO and Nexus Mod Manager to provide the most powerful and intuitive modding experience available.
 Moniker: vortex
 Tags:
-- launcher
-- mod-launcher
-- mods
-- nexus
-- nexus-mods
+  - launcher
+  - mod-launcher
+  - mods
+  - nexus
+  - nexus-mods
+ReleaseNotes: |-
+  Changed
+  - nexus-api now refreshes the OAuth access token proactively when within 30s of expiry; concurrent refreshes coalesce into a single /oauth/token call, with the 401-driven fallback retained for clock skew and server-side revocation (23178)
+  - Notifications with actions now persist until the user acts on or dismisses them, matching the documented INotification contract (both classic and modern UI) (23226)
+  - Modern UI notification popover now auto-opens for notifications dispatched during startup (23226)
+  - Extension install failures now surface the underlying 7z error text instead of the generic "needs to include index.js and info.json on top-level" message (23209)
+  - Added diagnostic logging in the External Changes path to help triage spurious ECD reports (23208)
+  - Removed last traces of electron/remote from bundled plugins (23131)
+  Fixed
+  - Missing or failed-to-load extension dependencies left games un-manageable; the install, profile-management, notifications, and modtype-enb paths were all hardened against this state (23226)
+  - "Game not discovered" dialog incorrectly shown on --game restart/relaunch while async discovery was still in flight (23210)
+  - Tracked-mods fetch crashing when the Nexus client lacked OAuth configuration (23173)
+  - Main-process access violation when destroying a BrowserWindow with the mouse over it; added synchronous renderer diagnostics that survive teardown crashes (23179)
+  - Old "Tools" dashlet appeared in the modern UI and was missing from the classic UI (23166)
+  - Notification "suppress" action icon was a cog/gear, which read as "settings" rather than "suppress" (23152)
+  - profile-did-change crash when the active game's discovery folder had just been cleared by the startup discovery pass (23144)
+  - Auto-updater spuriously logging downloadUpdate errors on every launch when already on the latest version (23132)
+  - Conflict Editor "Before All" / "After All" silently doing nothing when a filter was applied to the source mod name (23136)
+  - "Not yet initialized" log line caused by startup.json being read before ApplicationData.init() resolved (23130)
+  - Improved scrollbar visibility for the table component (23125)
+ReleaseNotesUrl: https://github.com/Nexus-Mods/Vortex/releases/tag/v2.0.2
 Documentations:
-- DocumentLabel: Wiki
-  DocumentUrl: https://github.com/Nexus-Mods/Vortex/wiki
+  - DocumentLabel: Wiki
+    DocumentUrl: https://github.com/Nexus-Mods/Vortex/wiki
 ManifestType: defaultLocale
 ManifestVersion: 1.12.0
+
