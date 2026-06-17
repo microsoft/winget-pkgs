@@ -1,0 +1,45 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Jellyfin2Samsung.Jellyfin2Samsung
+PackageVersion: 2.3.1.1
+PackageLocale: en-US
+Publisher: Jellyfin2Samsung
+PublisherUrl: https://github.com/Jellyfin2Samsung
+PublisherSupportUrl: https://github.com/Jellyfin2Samsung/Samsung-Jellyfin-Installer/issues
+PackageName: Jellyfin2Samsung
+PackageUrl: https://github.com/Jellyfin2Samsung/Samsung-Jellyfin-Installer
+License: MIT
+LicenseUrl: https://github.com/Jellyfin2Samsung/Samsung-Jellyfin-Installer/blob/HEAD/LICENSE
+ShortDescription: Bridge tool to install Jellyfin on all Samsung Tizen Devices
+Tags:
+- jellyfin
+- jellyfin-tizen
+- sdb
+- tizen
+- tizen-studio
+- tizen-tv
+ReleaseNotes: |-
+  📦 [v2.3.1.1] – 2026-06-04
+  ✅ What's New & Improved
+  #355 - Slow Jellyfin boot (40-60s) after auto-login injection (JellyfinIndex.cs)
+  - InjectAutoLoginAsync() - stopped injecting the server's self-reported LocalAddress blindly; it's now probed for reachability first and falls back to the verified server URL. Added LastConnectionMode: 2 (Manual) so the web client connects to the known-good address immediately instead of probing connection modes
+  - UpdateServerAddressAsync() - the config.json LocalAddress fallback is now gated on the same reachability check, so a dead .local/IP entry can't stall the server-select path either
+  - Root cause: Jellyfin's web client pings every stored address on startup with a 20s timeout (fetchWithTimeout) before falling back, so each unreachable address added ~20s to cold boot (40s = two dead addresses, 60s = three). A plain credential-less install was fast because there was no saved server to reconnect to
+  - IsAddressReachableAsync() added to JellyfinApiClient.cs - bounded GET on /System/Info/Public (3s budget); only addresses that respond at install time get baked into credentials or config.json
+  ─────────────────────┬─────────┬───────────────────────────
+  Platform             │Status   │Notes
+  ─────────────────────┼─────────┼───────────────────────────
+  🍎 macOS (.app + dmg)│✅ Stable│ARM64 + Intel
+  ─────────────────────┼─────────┼───────────────────────────
+  🍎 macOS (CLI)       │✅ Stable│Per-arch tar.gz
+  ─────────────────────┼─────────┼───────────────────────────
+  🐧 Linux             │✅ Stable│x64 + ARM64 (tar.gz / .deb)
+  ─────────────────────┼─────────┼───────────────────────────
+  🪟 Windows           │✅ Stable│CI-built
+  ─────────────────────┴─────────┴───────────────────────────
+  🛡️ Security Notice
+  Antivirus warnings may occur and are likely false positives.
+ReleaseNotesUrl: https://github.com/Jellyfin2Samsung/Samsung-Jellyfin-Installer/releases/tag/v2.3.1.1
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

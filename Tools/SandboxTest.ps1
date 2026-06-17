@@ -23,6 +23,7 @@ param(
     [Parameter(HelpMessage = 'The folder to map in the Sandbox.')]
     [ValidateScript({
             if (-not (Test-Path -Path $_ -PathType Container)) { throw "$_ is not a folder." }
+            if ($_ -match '[''"<>&]') { throw "MapFolder path contains forbidden characters (' `" < > &): $_" }
             return $true
         })]
     [String] $MapFolder = $pwd,
@@ -31,6 +32,41 @@ param(
     [string] $WinGetVersion,
     # WinGetOptions
     [Parameter(HelpMessage = 'Additional options for WinGet')]
+    [ValidateScript({
+            # Parse allowed flags only from flag definition lines in winget install --help
+            # These lines start with whitespace followed by a dash (e.g., "  -h,--silent  ...")
+            if (-not (Get-Command 'winget.exe' -ErrorAction SilentlyContinue)) {
+                Write-Warning 'WinGet is not installed on the host. Skipping WinGetOptions validation.'
+                return $true
+            }
+            $helpLines = winget install --help 2>&1 | Where-Object { $_ -match '^\s+-' }
+            $allowedFlags = @()
+            foreach ($line in $helpLines) {
+                # Extract the flag portion before the description (everything up to two consecutive spaces)
+                $flagPart = ($line.Trim() -split '\s{2,}')[0]
+                $parsedTokens = $flagPart -split ',' | ForEach-Object { $_.Trim() }
+                Write-Debug "WinGetOptions: Parsed line '$($line.Trim())' -> flags: $($parsedTokens -join ', ')"
+                $allowedFlags += $parsedTokens
+            }
+            $allowedFlags = $allowedFlags | Where-Object { $_ } | Select-Object -Unique
+            if (-not $allowedFlags) {
+                throw 'Could not parse winget install flags from --help output. Ensure winget is installed.'
+            }
+            Write-Debug "WinGetOptions: Allow-list ($($allowedFlags.Count) flags): $($allowedFlags -join ', ')"
+            $tokens = $_ -split '\s+'
+            foreach ($token in $tokens) {
+                if ($token.StartsWith('-')) {
+                    $isAllowed = $token -in $allowedFlags
+                    Write-Debug "WinGetOptions: Checking token '$token' -> $(if ($isAllowed) { 'ALLOWED' } else { 'BLOCKED' })"
+                    if (-not $isAllowed) {
+                        throw "WinGetOptions contains disallowed flag: $token. Allowed flags: $($allowedFlags -join ', ')"
+                    }
+                } else {
+                    Write-Debug "WinGetOptions: Skipping value token '$token'"
+                }
+            }
+            return $true
+        })]
     [string] $WinGetOptions,
     # Switches
     [switch] $SkipManifestValidation,
@@ -681,8 +717,18 @@ foreach ($dependency in $script:AppInstallerDependencies) {
 }
 
 # Kill the active running sandbox, if it exists, otherwise the test data folder can't be removed
-Stop-NamedProcess -ProcessName 'WindowsSandboxClient'
-Stop-NamedProcess -ProcessName 'WindowsSandboxRemoteSession'
+if (Get-Command wsb -ErrorAction SilentlyContinue) {
+    $sandboxInstance = @(wsb list) | Select-Object -First 1
+    if ($sandboxInstance) {
+        wsb stop --id $sandboxInstance
+    } else {
+        Write-Verbose 'No running instance of Sandbox'
+    }
+} else {
+    Write-Debug 'wsb command was not found - terminaing any sessions by process name'
+    Stop-NamedProcess -ProcessName 'WindowsSandboxClient'
+    Stop-NamedProcess -ProcessName 'WindowsSandboxRemoteSession'
+}
 Start-Sleep -Milliseconds 5000 # Wait for the lock on the file to be released
 
 # Remove the test data folder if it exists. We will rebuild it with new test data
@@ -862,19 +908,23 @@ Pop-Location
 # Create the WSB file
 # Although this could be done using the native XML processor, it's easier to just write the content directly as a string
 Write-Verbose 'Creating WSB file for launching the sandbox'
+$escapedTestDataFolder = [System.Security.SecurityElement]::Escape($script:TestDataFolder)
+$escapedPrimaryMappedFolder = [System.Security.SecurityElement]::Escape($script:PrimaryMappedFolder)
+$escapedSandboxWorkingDirectory = [System.Security.SecurityElement]::Escape($script:SandboxWorkingDirectory)
+$escapedSandboxBootstrapFile = [System.Security.SecurityElement]::Escape($script:SandboxBootstrapFile)
 @"
 <Configuration>
   <Networking>Enable</Networking>
   <MappedFolders>
     <MappedFolder>
-      <HostFolder>$($script:TestDataFolder)</HostFolder>
+      <HostFolder>$($escapedTestDataFolder)</HostFolder>
     </MappedFolder>
     <MappedFolder>
-      <HostFolder>$($script:PrimaryMappedFolder)</HostFolder>
+      <HostFolder>$($escapedPrimaryMappedFolder)</HostFolder>
     </MappedFolder>
   </MappedFolders>
   <LogonCommand>
-  <Command>PowerShell Start-Process PowerShell -WindowStyle Maximized -WorkingDirectory '$($script:SandboxWorkingDirectory)' -ArgumentList '-ExecutionPolicy Bypass -NoExit -NoLogo -File $($script:SandboxBootstrapFile)'</Command>
+  <Command>PowerShell Start-Process PowerShell -WindowStyle Maximized -WorkingDirectory '$($escapedSandboxWorkingDirectory)' -ArgumentList '-ExecutionPolicy Bypass -NoExit -NoLogo -File $($escapedSandboxBootstrapFile)'</Command>
   </LogonCommand>
   <AudioInput>Disable</AudioInput>
   <VideoInput>Disable</VideoInput>
