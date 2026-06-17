@@ -1,0 +1,121 @@
+# Created with WinGet Updater using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: DoltHub.Dolt
+PackageVersion: 2.1.8
+PackageLocale: en-US
+Publisher: DoltHub
+PublisherUrl: https://github.com/dolthub/dolt
+PublisherSupportUrl: https://github.com/dolthub/dolt/issues
+Author: DoltHub
+PackageName: Dolt
+PackageUrl: https://www.dolthub.com/
+License: Apache-2.0
+LicenseUrl: https://github.com/dolthub/dolt/blob/HEAD/LICENSE
+CopyrightUrl: https://raw.githubusercontent.com/dolthub/dolt/master/LICENSE
+ShortDescription: Dolt is a SQL database that you can fork, clone, branch, merge, push and pull just like a git repository.
+Description: |-
+  Dolt is a SQL database that you can fork, clone, branch, merge, push and pull just like a git repository.
+  Connect to Dolt just like any MySQL database to run queries or update the data using SQL commands.
+  Use the command line interface to import CSV files, commit your changes, push them to a remote, or merge your teammate's changes.
+Moniker: dolt
+Tags:
+- cli
+- data
+- git-for-data
+- versioning
+ReleaseNotes: |-
+  Merged PRs
+  dolt
+  - 11217: remove the dolt archive command
+    The dolt archive command was a precursor to GC support using archives. It offered the ability to test and roll back is problems arose. Now that archives are the default and have been for awhile, this command seems unnecessary.
+  - 11215: fix silent data loss for large JSON values with control characters
+    Large JSON values containing control characters were silently dropped on read. The stored text was re-parsed strictly, and an over-eager unescape step corrupted any non-HTML \uXXXX escape.
+    - preserve non-HTML unicode escapes in unescapeHTMLCodepoints
+    - guard against truncated escapes
+      Fix #11210
+      Depends on dolthub/go-mysql-server#3589
+      Close #11218
+  - 11214: go,integration-tests: Enable session aware safepoint controller by default.
+    Fixes a regression in the session-aware controller where fast-complete no-op GC was not working as intended.
+  - 11192: reject column reference args in dolt_diff with a clear error
+    DOLT_DIFF requires literal commit and table arguments, but an argument referencing a column (e.g. branch.name from a correlated subquery) panics at evaluation with an unknown field index.
+    Refs #11187
+  go-mysql-server
+  - 3595: Rollback event-driven stale-client detection.
+  - 3593: server/handler.go: Use event-driven notification to quickly cancel a running query after a client-disconnect, instead of polling socket state in a platform-dependent way.
+  - 3590: server: Use pollForClosedConnection on all query paths, including DML, DDL, OkResults, empty result schemas, etc.
+  - 3589: fix JSON control-character escaping and out-of-band text reads
+    Escape every control character in JSON output and unwrap lazily loaded text so JSON functions read it correctly.
+    - escape U+0000 to U+001F as \uXXXX, keeping the short forms for backspace, tab, newline, form feed, and carriage return.
+    - unwrap StringWrapper before evaluating JSON functions, fixing JSON_VALID and friends on large keyless TEXT
+    - add serializer, JSON_QUOTE, and function tests
+      Block #11215
+  - 3587: go.mod: Bump github.com/lestrrat-go/strftime to v1.2.0. Fixes a lock leak which can deadlock queries in Dolt.
+  - 3585: Add right side lookup overhead for LookupJoins
+    LookupJoins were getting costed lower than they should be, resulting in bad join strategies in some cases.
+    This PR adjusts the coster and includes an overhead for the right side of a lookup join.
+    An example of the bad join is:
+    explain SELECT SUM(CASE WHEN s_quantity = 0 THEN 1 ELSE 0 END) AS stockouts, SUM(ol.ol_amount) AS total_cost FROM stock s JOIN order_line ol ON s.s_i_id = ol.ol_i_id WHERE  s.s_i_id <= 7500;
+    plan
+    ---------------------------------------------------------------------------------------------------------------------------------------------------------------
+    Project
+    ├─ columns: [sum(case  when s.s_quantity = 0 then 1 else 0 end as case when s_quantity = 0 then 1 else 0 end) as stockouts, sum(ol.ol_amount) as total_cost]
+    └─ GroupBy
+    ├─ select: SUM(CASE  WHEN s.s_quantity = 0 THEN 1 ELSE 0 END as CASE WHEN s_quantity = 0 THEN 1 ELSE 0 END), SUM(ol.ol_amount)
+    ├─ group:
+    └─ LookupJoin
+    ├─ TableAlias(ol)
+    │   └─ Table
+    │       ├─ name: order_line
+    │       └─ columns: [ol_i_id ol_amount]
+    └─ Filter
+    ├─ s.s_i_id <= 7500
+    └─ TableAlias(s)
+    └─ IndexedTableAccess(stock)
+    ├─ index: [stock.s_i_id]
+    ├─ columns: [s_i_id s_quantity]
+    └─ keys: ol.ol_i_id
+    (17 rows)
+    The more optimal plan uses a HashJoin
+    explain SELECT /*+ HASH_JOIN(ol, s) */ HINT SUM(CASE WHEN s_quantity = 0 THEN 1 ELSE 0 END) AS stockouts,
+    SUM(ol.ol_amount) AS total_cost
+    FROM stock s
+    JOIN order_line ol ON s.s_i_id = ol.ol_i_id
+    WHERE s.s_i_id <= 7500;
+    plan
+    ---------------------------------------------------------------------------------------------------------------------------------------------------------------
+    Project
+    ├─ columns: [sum(case  when s.s_quantity = 0 then 1 else 0 end as case when s_quantity = 0 then 1 else 0 end) as stockouts, sum(ol.ol_amount) as total_cost]
+    └─ GroupBy
+    ├─ select: SUM(CASE  WHEN s.s_quantity = 0 THEN 1 ELSE 0 END as CASE WHEN s_quantity = 0 THEN 1 ELSE 0 END), SUM(ol.ol_amount)
+    ├─ group:
+    └─ HashJoin
+    ├─ s.s_i_id = ol.ol_i_id
+    ├─ TableAlias(ol)
+    │   └─ Table
+    │       ├─ name: order_line
+    │       └─ columns: [ol_i_id ol_amount]
+    └─ HashLookup
+    ├─ left-key: (ol.ol_i_id)
+    ├─ right-key: (s.s_i_id)
+    └─ Filter
+    ├─ s.s_i_id <= 7500
+    └─ TableAlias(s)
+    └─ Table
+    ├─ name: stock
+    └─ columns: [s_i_id s_quantity]
+    Source: I made it up.
+  vitess
+  - 473: Revert "Merge pull request #472 from dolthub/aaron/vitess-async-read-eof"
+    This reverts commit 02705d5447c2e7062c3ae31f6909d4e5e1c97812, reversing changes made to 0893abc805429d8a31ea9fa395ff118fa95474da.
+  - 472: go/mysql: Conn: Add WaitForClientActivity, which has semantics that allow a server to quickly cancel inflight work if a client goes away.
+  - 471: add not valid on fkey and check constraints
+  Closed Issues
+  - 11210: 3 Dolt JSON Bugs for large JSON payloads / parallel execution of JSON payloads.
+  - 10854: Feature Request: git-backed dolt support for "gcrypt::" transport protocol
+  - 11205: Pre-2.1 ALTERed TEXT columns: mixed-row 'invalid hash length: 19' panics on 2.1.4; schema-encoding-drift check reports clean; rows not repairable via SQL
+  - 11209: sql-server: DOLT_CLONE from a file:// remote fails "manifest referenced table file for which there is no chunkSource" after the remote is rewritten in the same server process
+ReleaseNotesUrl: https://github.com/dolthub/dolt/releases/tag/v2.1.8
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
