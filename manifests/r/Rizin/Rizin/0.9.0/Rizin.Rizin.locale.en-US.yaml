@@ -1,0 +1,132 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Rizin.Rizin
+PackageVersion: 0.9.0
+PackageLocale: en-US
+Publisher: RizinOrg
+PublisherUrl: https://github.com/rizinorg
+PublisherSupportUrl: https://github.com/rizinorg/rizin/issues
+Author: RizinOrg
+PackageName: Rizin
+PackageUrl: https://github.com/rizinorg/rizin
+License: LGPL-3.0
+LicenseUrl: https://github.com/rizinorg/rizin/blob/v0.6.2/COPYING
+Copyright: (c) 2024 Rizin
+ShortDescription: UNIX-like reverse engineering framework and command-line toolset.
+Description: |
+  Rizin is a fork of the radare2 reverse engineering framework with a focus on usability,
+  working features and code cleanliness.
+
+  Rizin is portable and it can be used to analyze binaries, disassemble code, debug programs,
+  as a forensics tool, as a scriptable command-line hexadecimal editor able to open disk files,
+  and much more!
+Tags:
+- debugging
+- exploitation
+- program-analysis
+- reverse-engineering
+- security
+ReleaseNotes: |-
+  In this release we continued the long-running migration toward the unified RzArch plugin model: the legacy RzAsm struct was dropped from the public API (a compatibility layer remains for the in-progress parts), and ESIL was moved into its own isolated namespace. ESIL remains deprecated and is scheduled for removal, while RzIL continues to grow as its replacement. Sadly, in this release we weren't able to finish the ESIL->RzIL migration yet, but we made a substantial progress in this regard and have working prototype.
+  On the architecture front several new disassemblers and analysis plugins were added. TMS320C54x joins the TMS320 family (whose C55x/C55x+ RzIL coverage was also greatly extended), classic BPF (cBPF) disassembly was added, SuperH-3 (SH-3) is now selectable via asm.cpu, and new M680X CPU types (RS08, HCS12X) and MCS96 ISA variants (8096/80C196/80C296) are supported. MCS96 got the analysis support. We also moved more plugins onto Capstone v6 (now 6.0.0-alpha9): RISC-V was rewritten on top of Capstone, HPPA (PA-RISC) switched to the Capstone disassembler (dropping its GNU plugin), and M68k ColdFire support was added. Infineon C166 and MIL-STD-1750 support was added as well. DEC VAX was rewritten from scratch and analysis was implemented.
+  On the RzIL front, uplifting was expanded with scalar x86 SSE/SSE2 floating-point instructions and a full SPARC lifter, and the RzIL VM can now halt on exceptions. Also, the uplifting was implemented for the whole TMS320C5x series. RzIL output is now first-class in the UI: a new pl/plF print path, colorized RzIL in ao, and colors, Unicode and RzIL in the visual bit editor.
+  The pf format was completely reworked and syntax has changed to support more features and be more consistent. Consult with the doc/pf.md and pf? output for more details.
+  A major new visualization arrived: statistical/entropy histograms. Rizin can now render per-block χ², index of coincidence, min-entropy and serial-correlation graphs (essential indicators that allow to scrutinize data when simple entropy is uniform), both as vertical (p=) and horizontal (p==) histograms, several with an interactive minimap mode. A new Marks subsystem (the m command family) lets you place, color, comment, name and navigate named locations in the file.
+  rizin-visual-histogram-min-entropy
+  Visual bit editor mode was improved:
+  rizin-visual-bit-editor
+  A new color theme "underwater" was added:
+  rizin-new-undewater-color-theme
+  Binary-format support saw a lot of activity. New loaders/parsers were added for STABS debug info, Lua bytecode (Luac 5.0–5.5) and LuaJIT 2.1, the CaRT container, Amiga hunk, MDT (Qualcomm peripheral images), and PEF (Preferred Executable Format); the NE parser was rewritten and bootimg now understands v1–v4 images. The iH header-structure command was extended to a long list of formats (WASM, DEX, AVR, PYC, bFLT, CGC, Menuet, …), and ELF coredump parsing was added for LoongArch, s390x, RISC-V, PPC64, HP PA-RISC and DEC Alpha. Python 3.14 bytecode is now supported.
+  The debugger's heap inspection was reorganized into per-allocator namespaces under dmh: dmhg for glibc (renamed from dmh), dmhw for Windows heaps (renamed from dmw), and dmhj for jemalloc (renamed from dmx, with new jemalloc 5.3.0 support). On the analysis side we added value constraints for variables and globals, C++ devirtualization of virtual calls, and a typeclass system for types.
+  As part of an ongoing licensing cleanup, several GPL/GNU-derived plugins (VAX, SPARC, HPPA) were removed in favor of LGPL or Capstone-based implementations. The unmaintained brainfuck, rzweb and rzpipe RzIO backends (and the brainfuck RzDebug plugin) were removed, along with the old pg "print gadgets"/visual-ROP feature and ESIL-based search. As usual, this cycle also brought broad performance work (a hashtable-based RzGraph, faster RzVector/RzBitVector/RzList primitives, a ROP/JOP/COP gadget cache) and continued the battle against global state for thread-safety, plus a large number of fixes across the framework.
+  > Note: the on-disk project format version was bumped from 19 to 25 during this cycle. Projects saved with older versions will be migrated/loaded through the compatibility path.
+  New command line options
+  - rz-find -R <cmd> to execute a Rizin command for each search hit (complements -E, which runs a shell command per file)
+  - rz-find -V for verbose output (print each file scanned)
+  - rz-diff -K <theme> to set a color theme (same themes as the eco command)
+  - rz-ar became a working archive (.a) extraction tool: rz-ar [-hlqv] [-o outdir] archive [member ...] — -l list members, -o output directory, -q quiet, -v version
+  New commands
+  Marks (named locations) — new m family:
+  - m / m+ — add a mark, m- / m-* — remove one or all marks
+  - ml / ml. — list all marks / those covering the current offset
+  - mi — show marks in the current block, md — describe marks at the offset, mf — distance to a mark
+  - mc — set/show a mark color, mC — set/show a mark comment, mN — set/show a mark realname
+  - mm — move a mark, mr — rename a mark
+  Statistical & entropy histograms:
+  - p=C / p=I / p=M / p=S — vertical histograms of χ², index of coincidence, min-entropy and serial correlation per block
+  - p==C / p==I / p==M / p==S — the same as horizontal histograms, with interactive …v variants (p==Cv, p==Iv, p==Mv, p==Sv)
+  Gadget search (ROP/JOP/COP):
+  - /J, /J/, /Jl, /Js, /Jg, /Jk, /J- — list/search JOP (Jump-Oriented Programming) gadgets
+  - /C, /C/, /Cl, /Cs, /Cg, /Ck, /C- — list/search COP (Call-Oriented Programming) gadgets
+  - /Rl, /Rs, /R- — search ROP gadgets by size / by stack delta, and clear the gadget cache
+  Debugger heap (reorganized, see Renames below for the moved commands):
+  - glibc dmhg*, Windows dmhw*, and jemalloc dmhj* families, including new jemalloc 5.3.0 commands dmhje / dmhjei (extent inspection)
+  Analysis:
+  - afvc / afvcs / afvc- — list/set/remove value constraints of local variables (e.g. afvcs var0 ">0,<=9")
+  - avgc / avgcs / avgc- — list/set/remove value constraints of global variables
+  - avD — devirtualize calls to virtual functions for the current function; avx — show addresses of calls to a virtual function
+  - ahie / ahie- — set/delete an enum type hint for an operand
+  Types & classes:
+  - tk / tkl / tks — show / list / set the typeclass of a type
+  - tr — rename a type and update every type and function type that references it
+  - tdf — define a type from a pf format string (or a saved pf.<name>)
+  - ica — apply class flags at a given address; ics — generate type definitions from classes
+  Print / structured data:
+  - plf / plF — print RzIL / print Unicode RzIL of the function at the current seek
+  - pFas — deserialize an ASN.1 DER structure from the current block; pF8 — deserialize PKCS#8 private keys
+  - pfa — apply a format string at a given address and define flags for each field
+  - ppd/ — return the offset where a value appears in the default De Bruijn pattern
+  Misc:
+  - obs — select the binary version for a given architecture from a fat binary
+  - ecl — list colors with their descriptions
+  - ?**, ?***, ?**e — interactively search command summaries, their extended help, and settings (aliases for ?*~…, deep help search, and el~…)
+  A new Unicode-enabled plF RzIL output:
+  rizin-plF-Unicode-RzIL-output
+  Renames
+  - Heap commands were namespaced per allocator:
+    - glibc: dmh* → dmhg* (e.g. dmha→dmhga, dmhc→dmhgc, dmht→dmhgt, …)
+    - Windows: dmw* → dmhw* (dmw→dmhw, dmwb→dmhwb, dmwbf→dmhwbf)
+    - jemalloc: dmx* → dmhj* (dmxa→dmhja, dmxb→dmhjb, dmxc→dmhjc, …)
+  - The ROP rop.* configuration variables were renamed to gadget.* (see Configuration variables changes), reflecting that gadget handling now covers ROP, JOP and COP.
+  Removals
+  - ESIL-based search /E (offset matching an ESIL expression)
+  - /cc — checksum-collision brute-force search
+  - pg, pg*, pg-*, pgm — the old "print gadgets" / visual-ROP feature
+  - ik* — "show all binary header information" (superseded by the now widely-supported iH)
+  - dbh- — remove breakpoint plugin handler
+  - rz-asm -r (output in Rizin commands)
+  - rz-bin -X [fmt] [f] .. (package the given files/bins into a fat or zip archive)
+  - RzIO backends brainfuck, rzweb and rzpipe, plus the brainfuck RzDebug plugin
+  - GPL/GNU-derived VAX, SPARC and HPPA plugins (replaced by LGPL or Capstone-based ones)
+  - Deprecated/internal APIs: RzAsm from the public headers, rz_range, addrbytes from RzIO, several rz_list_iter_* helpers, and assorted ESIL remnants
+  Configuration variables changes
+  New options
+  - analysis.fcn_max_size — maximum function size (default 256K)
+  - bin.show.blocks — append block-type information to strings (default true)
+  - hex.nodot — hide the dot before printable characters in HexII mode (pxi)
+  - scr.pf.short — render pf offsets as +<delta> from the format base instead of absolute addresses
+  - scr.hist.ruler — show the histogram ruler
+  - scr.hist.minimap — show the top minimap on the visual histogram (p==v); auto-hides when data fits the screen
+  - scr.hist.width / scr.hist.height — default size of the horizontal histogram (0 = auto-clamp to the terminal)
+  - str.unprintable — comma-separated hex code points to treat as non-printable
+  Renamed options
+  - rop.cache → gadget.cache
+  - rop.comments → gadget.comments
+  - rop.conditional → gadget.conditional
+  - rop.len → gadget.len
+  - rop.subchains → gadget.subchains
+  - graph.offset was merged into asm.offset
+  Removed options
+  - asm.demangle (demangling is now controlled elsewhere; this drove the project-format bump)
+  - bin.debase64
+  Dependencies
+  - Capstone is now at 6.0.0-alpha9.
+  - Swift demangling moved to the external rz-libswift dependency (the bundled use_swift_demangler path is disabled globally); rz-libdemangle was updated several times, including a CVE fix.
+  Notes for packagers / API users
+  - The minimum on-disk project version is now 25 (was 19).
+  - RzAsm & RzAnalysis are no longer part of the public API surface; consumers should migrate to call appropriate functions & when available the new RzArch APIs. A compatibility layer remains for parts of the migration.
+ReleaseNotesUrl: https://github.com/rizinorg/rizin/releases/tag/v0.9.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
