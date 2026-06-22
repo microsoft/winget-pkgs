@@ -1,0 +1,77 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: can1357.oh-my-pi
+PackageVersion: 16.1.15
+PackageLocale: en-US
+Publisher: Can Bölük
+PublisherUrl: https://can.ac/
+PublisherSupportUrl: https://github.com/can1357/oh-my-pi/issues
+Author: Can Bölük
+PackageName: oh-my-pi
+PackageUrl: https://omp.sh/
+License: MIT
+LicenseUrl: https://github.com/can1357/oh-my-pi/blob/HEAD/LICENSE
+Copyright: |-
+  Copyright (c) 2025 Mario Zechner
+  Copyright (c) 2025-2026 Can Bölük
+ShortDescription: ⌥ AI Coding agent for the terminal — hash-anchored edits, optimized tool harness, LSP, Python, browser, subagents, and more
+Description: |-
+  omp is a terminal-first coding agent that runs on your machine, talks to any provider, and treats sessions like git branches.
+  omp (pronounced “oh-em-pi”, binary omp) is a fork of Mario Zechner’s Pi. It runs as a single Bun process, drives any model provider you have credentials for, and ships a flat tool surface the model uses to read code, run commands, edit files, drive a debugger, and spawn subagents that coordinate over an in-process IRC bus.
+  Sessions persist as JSONL under ~/.omp/agent/sessions/. You resume, fork, branch, and share them. Settings, credentials, plugins, and caches all live under ~/.omp/agent/. Nothing leaves the machine unless you call a tool that does.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  @oh-my-pi/pi-ai
+  Fixed
+  - Fixed API-key /login providers replacing sibling credentials instead of appending new keys for the same provider. (#3265)
+  - Fixed OpenAI Codex OAuth account rotation for quota failures that surface as bare HTTP 429 or insufficient_quota, so pre-content failures temporarily block only the exhausted credential and retry a healthy sibling. The 429 status-only fallback applies only to absent/opaque bodies; informative transient bodies (Too many requests, Service overloaded 529, Please retry in 5s, …) defer to parseRateLimitReason and stay in the provider's own backoff layer instead of burning sibling credentials. (#3231)
+  @oh-my-pi/pi-coding-agent
+  Added
+  - Added a share.store setting (blob "Encrypted Blob" | gist "GitHub Gist", default blob) controlling where /share uploads the encrypted session blob — the share server (blob) or a secret GitHub gist with share-server fallback (gist).
+  Changed
+  - Changed /share to upload the encrypted session blob to the share server by default instead of a secret GitHub gist. Gist-hosted shares are fetched through the unauthenticated GitHub gist API from the viewer's browser, which GitHub rate-limits to 60 requests/hour per IP, so shared NATs and repeated reloads surfaced Failed to load session: Gist fetch failed: HTTP 403 in the viewer. Opt back into gist hosting with share.store: "gist".
+  Fixed
+  - Fixed nohup/& background processes started inside an auto-backgrounded (:async:) bash turn being killed when that turn's shell was torn down. The per-job shell is now retained while a background process is still running (and reaped once it exits), so backgrounded commands survive across turns while still dying with the harness process.
+  - Fixed openai-completions provider session state surviving /model switches across different providers or base URLs. AgentSession.#closeProviderSessionsForModelSwitch only evicted openai-codex-responses and openai-responses:<provider> keys; entries keyed openai-completions:<provider>:<resolvedBaseUrl>:<modelId> (cached strict-tools disable scopes and reasoning-effort fallbacks for the old transport) lingered indefinitely. Moving away from an openai-completions backend now evicts every cached entry for the previous provider, including entries whose base URL was resolved at request time rather than read from the catalog, while same-backend model toggles keep their cached state (#3260)
+  - Fixed MCP stdio servers failing on Windows when the launcher's PATH walk can't pin down a bare npx/yarn/pnpm-style shim (empty Bun.env.PATH under a restricted parent process, UNC mounts that reject fs.access, locked-down shells). resolveStdioSpawnCommand used to fall back to the bare command name, which Bun.spawn → CreateProcess can only resolve as <name>.exe — never .cmd/.bat — so npx -y … died ~140ms after spawn with ENOENT/EINVAL. The Windows resolver now routes any unresolvable bare command through cmd.exe /d /s /c so Windows's own PATHEXT search picks up the shim. The reporter's diagnosis ("process.env not merged") was incorrect — the merge happens at transports/stdio.ts:316-319 — but the symptom they hit is real (#3250).
+  - Fixed bracketed paste treating a bare .png filename as an image attachment path instead of normal prompt text. (#3253)
+  - Fixed Perplexity web-search provider hijacking the auto fallback chain when only OpenRouter auth was configured. PerplexityProvider.isAvailable() accepted hasAuth("openrouter") as a credential, so any user with an OpenRouter key (for LLM access) had every webSearch: auto request silently routed through OpenRouter's perplexity/sonar-pro — bypassing downstream providers like Gemini and producing unexpected OpenRouter billing. Auto-chain admission now requires a direct Perplexity credential (PERPLEXITY_COOKIES, OAuth, or PERPLEXITY_API_KEY); users who want the OpenRouter-backed Perplexity path can still opt in explicitly with webSearch: perplexity (#3251)
+  - Fixed configured model discovery caches to refresh when models.yml/models.json is newer than the cached row, so updated local model metadata is not shadowed by fresh models.db entries. (#3242)
+  - Fixed hide-secrets handling so advisor session updates are redacted before the advisor model sees them and opaque assistant thinking blocks are no longer deobfuscated.
+  - Filtered alias definitions brush's whitespace-only expander cannot execute ((, ), |, &, ;, <, >, `) from the bash-tool shell snapshot, so user rc-files containing compound aliases like Fedora's default which='(alias; declare -f) | /usr/bin/which …' no longer poison the brush session with error: command not found: (alias; (#3234).
+  @oh-my-pi/pi-natives
+  Added
+  - Added Shell.liveBackgroundJobCount() reporting the number of live external background jobs (&/nohup children) on a persistent session, reaping completed jobs first via a silent poll(). Lets the host retain a shell whose background process is still running instead of dropping it (which would SIGKILL the child via kill-on-drop).
+  Fixed
+  - Fixed pi_natives failing to load in Bun worker threads on macOS x64 when the host built only the modern (AVX2) variant. The runtime detector's child_process.spawnSync("sysctl", …) returned null from the worker even though the build-time detector succeeded in the parent, so loadNative() resolved variant=baseline and searched a file list that excluded the on-disk pi_natives.darwin-x64-modern.node. Resolution now prefers Bun.spawnSync, tries /usr/sbin/sysctl before bare sysctl, and caches the first context's verdict via a private env key so child workers and subprocesses inherit it instead of re-detecting (#3238).
+  @oh-my-pi/omp-stats
+  Added
+  - Added token usage breakdown by agent type (Main, Subagents, Advisor) to the overview dashboard
+  What's Changed
+  - fix(tui): preserve bare png filename pastes by @roboomp in https://github.com/can1357/oh-my-pi/pull/3255
+  - fix(coding-agent): evict openai-completions provider session state on backend switch by @roboomp in https://github.com/can1357/oh-my-pi/pull/3261
+  - fix(ai): append api key logins by @roboomp in https://github.com/can1357/oh-my-pi/pull/3266
+  - fix(ai): rotate Codex OAuth credentials on quota 429 by @roboomp in https://github.com/can1357/oh-my-pi/pull/3233
+  - fix(coding-agent): filtered brush-incompatible aliases from shell snapshot by @roboomp in https://github.com/can1357/oh-my-pi/pull/3235
+  - fix(coding-agent): hide secrets in advisor prompts by @roboomp in https://github.com/can1357/oh-my-pi/pull/3239
+  - fix(natives): make worker-context variant detection robust on darwin x64 by @roboomp in https://github.com/can1357/oh-my-pi/pull/3240
+  - fix(providers): refresh discovery cache after model config edits by @roboomp in https://github.com/can1357/oh-my-pi/pull/3243
+  - fix(coding-agent): stop Perplexity auto-chain from hijacking OpenRouter auth by @roboomp in https://github.com/can1357/oh-my-pi/pull/3254
+  - fix(mcp): wrap unresolvable Windows commands in cmd.exe for PATHEXT lookup by @roboomp in https://github.com/can1357/oh-my-pi/pull/3256
+  Full Changelog: https://github.com/can1357/oh-my-pi/compare/v16.1.14...v16.1.15
+ReleaseNotesUrl: https://github.com/can1357/oh-my-pi/releases/tag/v16.1.15
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://omp.sh/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
