@@ -1,5 +1,5 @@
 $VM = 0
-$build = 146
+$build = 148
 $ipconfig = (ipconfig)
 $remoteIP = ([ipaddress](($ipconfig | select-string "Default Gateway") -split ": ")[1]).IPAddressToString
 #$remoteIP = ([ipaddress](($ipconfig[($ipconfig | select-string "vEthernet").LineNumber..$ipconfig.length] | select-string "IPv4 Address") -split ": ")[1]).IPAddressToString
@@ -18,8 +18,11 @@ $SharedFolder = $writeFolder
 if ($VM -eq 0) {
 	$VM = (gc "$MainFolder\vmcounter.txt")-1
 }
-"`$VM = $VM" | Out-File $profile
-(Get-Content "\\$remoteIP\ManVal\vm\0\profile.ps1")[1..999] | Out-File $profile -append
+$NewProfile = (Get-Content "\\$remoteIP\ManVal\vm\0\profile.ps1") -split "`n"
+if ($NewProfile) {
+	"`$VM = $VM" | Out-File $profile
+	($NewProfile[1..999]) -join "`n" | Out-File $profile -append
+}
 
 Function Send-SharedError {
 	param(
