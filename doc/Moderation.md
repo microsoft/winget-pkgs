@@ -29,12 +29,19 @@ Our intent was not to introduce a numbers game for others to achieve and automat
 | **[@ImJoakim](https://github.com/ImJoakim)** |
 | **[@ItzLevvie](https://github.com/ItzLevvie)** |
 | **[@jedieaston](https://github.com/jedieaston)** |
-| **[@KaranKad](https://github.com/KaranKad)** |
 | **[@mdanish-kh](https://github.com/mdanish-kh)** |
-| **[@OfficialEsco](https://github.com/OfficialEsco)** |
-| **[@quhxl](https://github.com/quhxl)** |
 | **[@russellbanks](https://github.com/russellbanks)** |
 | **[@Trenly](https://github.com/Trenly)** |
+
+## Emeritus Moderators
+
+We are grateful to the following community members for their service as moderators. Their contributions helped shape the Windows Package Manager community repository, and we thank them for their dedication and the time they gave to support contributors. Emeritus moderators are always welcome to return as active moderators on request.
+
+| Emeritus Moderators |
+| ------------------- |
+| **[@KaranKad](https://github.com/KaranKad)** |
+| **[@OfficialEsco](https://github.com/OfficialEsco)** |
+| **[@quhxl](https://github.com/quhxl)** |
 
 # Information for Contributors
 
