@@ -15,7 +15,6 @@ Our intent was not to introduce a numbers game for others to achieve and automat
 | **[@AmelBawa-msft](https://github.com/AmelBawa-msft)** |
 | **[@denelon](https://github.com/denelon)** |
 | **[@dkbennett](https://github.com/dkbennett)** |
-| **[@erinpwoo](https://github.com/erinpwoo)** |
 | **[@florelis](https://github.com/florelis)** |
 | **[@hackean-msft](https://github.com/hackean-msft)** |
 | **[@JohnMcPMS](https://github.com/JohnMcPMS)** |
