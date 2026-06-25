@@ -80,6 +80,14 @@ Matrix Room Alias (for all other homeservers): `#Microsoft_winget-pkgs:gitter.im
 
 Moderators are expected to continue behaving in a manner consistent with what led to their nomination. In addition, they are given the ability to approve PRs for manifests. This should not be seen as the goal, however. The goal is to help ensure high-quality manifests and to help the community with package submission. They may request to discontinue this responsibility at any time and for any reason, and it will be honored.
 
+### Maintaining Moderator Status
+
+Moderator status reflects ongoing, active participation in the project. A moderator is considered active if they have approved at least one pull request within the trailing twelve (12) months.
+
+The core team periodically reviews moderators who fall below this activity bar. Removal is not automatic; each case is considered individually so that context — such as a temporary break or contributions in other areas of the project — can be taken into account. When a moderator is removed for inactivity, it is not a reflection on the quality of their past contributions, which remain appreciated.
+
+A moderator who has been removed for inactivity and later wishes to resume may be reinstated on request, at the discretion of the core team, without going through the nomination process again.
+
 ### Reviewing Pull Requests
 
 Moderators should review PRs to ensure the metadata is accurate and that the Windows Package Manager will behave predictably with the given manifest. This includes checking the metadata and testing the installation of packages. Ideally, common issues will be documented and referred to for the sake of consistency. This might also include tips and tooling to help with the process. Some users are new to GitHub and may need a bit more support. We've all been new to Git at one point.
