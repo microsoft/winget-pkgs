@@ -82,9 +82,9 @@ Moderators are expected to continue behaving in a manner consistent with what le
 
 ### Maintaining Moderator Status
 
-Moderator status reflects ongoing, active participation in the project. A moderator is considered active if they have approved at least one pull request within the trailing twelve (12) months.
+Moderator status reflects ongoing, active participation in the project. A moderator is considered active if they have reviewed at least ten (10) pull requests covering at least ten (10) different packages within the trailing twelve (12) months.
 
-The core team periodically reviews moderators who fall below this activity bar. Removal is not automatic; each case is considered individually so that context — such as a temporary break or contributions in other areas of the project — can be taken into account. When a moderator is removed for inactivity, it is not a reflection on the quality of their past contributions, which remain appreciated.
+The core team periodically reviews moderators who fall below this activity bar. Removal is not automatic; each case is considered individually so that context — such as a temporary break or contributions in other areas of the project — can be taken into account. Activity in other Windows Package Manager repositories (for example, [winget-cli](https://github.com/microsoft/winget-cli), [winget-cli-restsource](https://github.com/microsoft/winget-cli-restsource), and [winget-dsc](https://github.com/microsoft/winget-dsc)) may also be taken into consideration during this review. When a moderator is removed for inactivity, it is not a reflection on the quality of their past contributions, which remain appreciated.
 
 A moderator who has been removed for inactivity and later wishes to resume may be reinstated on request, at the discretion of the core team, without going through the nomination process again.
 
