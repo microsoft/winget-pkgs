@@ -19,11 +19,9 @@ Our intent was not to introduce a numbers game for others to achieve and automat
 | **[@florelis](https://github.com/florelis)** |
 | **[@hackean-msft](https://github.com/hackean-msft)** |
 | **[@JohnMcPMS](https://github.com/JohnMcPMS)** |
-| **[@KevinLaMS](https://github.com/KevinLaMS)** |
 | **[@Madhusudhan-MSFT](https://github.com/Madhusudhan-MSFT)** |
 | **[@msftrubengu](https://github.com/msftrubengu)** |
 | **[@ranm-msft](https://github.com/ranm-msft)** |
-| **[@RDMacLachlan](https://github.com/RDMacLachlan)** |
 | **[@stephengillie](https://github.com/stephengillie)** |
 | **[@yao-msft](https://github.com/yao-msft)** |
 
