@@ -1,0 +1,70 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: max-sixty.worktrunk
+PackageVersion: v0.59.0
+PackageLocale: en-US
+Publisher: max-sixty
+PublisherUrl: https://github.com/max-sixty
+PublisherSupportUrl: https://github.com/max-sixty/worktrunk/issues
+PackageName: worktrunk
+PackageUrl: https://github.com/max-sixty/worktrunk
+License: MIT OR Apache-2.0
+LicenseUrl: https://github.com/max-sixty/worktrunk/blob/HEAD/LICENSE
+ShortDescription: A Git worktree manager for trunk-based development
+Description: |-
+  worktrunk (wt) is a Git worktree manager designed for trunk-based development workflows.
+  It simplifies creating, switching between, and managing Git worktrees, making it easy to
+  work on multiple features or branches simultaneously without the overhead of stashing
+  or switching branches in a single working directory.
+Tags:
+- cli
+- git
+- git-worktree
+- rust
+- terminal
+- worktree
+ReleaseNotes: |-
+  Release Notes
+  Improved
+  - Picker frees digit keys for filtering; preview tabs move to Alt: In the wt switch picker, plain digits now go to the filter, so a branch name with a number in it can be typed directly. Preview tabs jump with Alt-1–Alt-5 or cycle with Tab/Shift-Tab. (Breaking: 1–5 no longer switch preview tabs) (#3079)
+  - Squash templates use commit_details instead of commits: The squash commit-message template's {{ commits }} variable (commit subjects) is deprecated in favor of {{ commit_details }}, which renders as the bare subject when printed directly and also exposes .subject and .body. wt config update migrates commits to commit_details as a plain rename. (#2985)
+  - wt step eval -v lists template variables: wt step eval -v now prints the available template variables on stderr in the gutter style, above the {{ template }} → result expansion it already showed. The result still goes to stdout, so $(wt step eval …) is unchanged. Since eval mutates nothing and is experimental, its --dry-run flag (which dumped the raw variable context) is removed rather than deprecated. (#3078)
+  Fixed
+  - Picker no longer freezes on the first keystroke: With many worktrees, typing the first character in the wt switch picker locked the UI for several seconds. The fuzzy matcher shares rayon's global thread pool with worktrunk's git collection, which floods it with blocking subprocess calls, so the matcher queued behind them. Collection and preview work now run on a dedicated pool, keeping the matcher responsive. (#3087, thanks @bendrucker; fixes #2926, thanks @mahume for reporting)
+  - Tab-completion covers all hook types: wt hook <type> <Tab> completed configured command names for only seven of the ten hook types; pre-switch, post-switch, and post-remove returned nothing. Completion now derives the type from the canonical hook list, so every type completes its command names. (#3070)
+  - Ctrl-C on a concurrent alias reports the right exit code: Interrupting wt step <concurrent-alias> could report exit 143 (SIGTERM) instead of 130 (SIGINT), because a per-child SIGINT → SIGTERM → SIGKILL escalation could land a SIGTERM on a child during the grace window; the escalation also serialized across process groups, so repeated Ctrl-C could wait. wt now forwards the user's signal once per process group, so a cooperative child dies from the signal actually sent (130 on Ctrl-C); a second signal kills any survivor immediately. (#3075)
+  Documentation
+  - Per-worktree env vars: A Tips & Patterns section shows how to give each worktree its own environment variables with direnv or mise. (#3074)
+  Internal
+  - The commit-generation command is not rewritten to disk when its value is unchanged. (#3084)
+  Install worktrunk 0.59.0
+  Install prebuilt binaries via shell script
+  curl --proto '=https' --tlsv1.2 -LsSf https://github.com/max-sixty/worktrunk/releases/download/v0.59.0/worktrunk-installer.sh | sh && wt config shell install
+  Install prebuilt binaries via powershell script
+  powershell -ExecutionPolicy Bypass -c "irm https://github.com/max-sixty/worktrunk/releases/download/v0.59.0/worktrunk-installer.ps1 | iex"; git-wt config shell install
+  Install prebuilt binaries via Homebrew
+  brew install worktrunk && wt config shell install
+  Download worktrunk 0.59.0
+  ────────────────────────────────────────────────┬───────────────────┬─────────────
+  File                                            │Platform           │Checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-aarch64-apple-darwin.tar.xz           │Apple Silicon macOS│checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-x86_64-apple-darwin.tar.xz            │Intel macOS        │checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-x86_64-pc-windows-msvc.zip            │x64 Windows        │checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-aarch64-unknown-linux-musl.tar.xz     │ARM64 MUSL Linux   │checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-x86_64-unknown-linux-musl.tar.xz      │x64 MUSL Linux     │checksum
+  ────────────────────────────────────────────────┴───────────────────┴─────────────
+  Install via Cargo
+  cargo install worktrunk && wt config shell install
+  Install via Winget (Windows)
+  winget install max-sixty.worktrunk && git-wt config shell install
+  Install via AUR (Arch Linux)
+  paru worktrunk-bin && wt config shell install
+ReleaseNotesUrl: https://github.com/max-sixty/worktrunk/releases/tag/v0.59.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
