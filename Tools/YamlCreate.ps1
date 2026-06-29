@@ -2106,8 +2106,8 @@ Function Read-PRBody {
 
   # Write the PR using a temporary file
   Set-Content -Path PrBodyFile -Value $PrBodyContent | Out-Null
-  # gh pr create --body-file PrBodyFile -f
-  # Remove-Item PrBodyFile
+  gh pr create --body-file PrBodyFile -f
+  Remove-Item PrBodyFile
 }
 
 # Takes a comma separated list of values, converts it to an array object, and adds the result to a specified object-key
