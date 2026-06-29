@@ -1932,7 +1932,7 @@ Function Read-LocaleMetadata {
 # Requests the user to answer the prompts found in the winget-pkgs pull request template
 # Uses this template and responses to create a PR
 Function Read-PRBody {
-  $PrBodyContent = Get-PrTemplate
+  $PrBodyContent = (Get-PrTemplate) -split '\n'
   if (-not $PrBodyContent) {
     Write-Warning "The Pull Request Template Contained No Content!"
   }
@@ -2106,8 +2106,8 @@ Function Read-PRBody {
 
   # Write the PR using a temporary file
   Set-Content -Path PrBodyFile -Value $PrBodyContent | Out-Null
-  gh pr create --body-file PrBodyFile -f
-  Remove-Item PrBodyFile
+  # gh pr create --body-file PrBodyFile -f
+  # Remove-Item PrBodyFile
 }
 
 # Takes a comma separated list of values, converts it to an array object, and adds the result to a specified object-key
