@@ -1,0 +1,84 @@
+# Created with komac v2.14.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: bluenviron.mediamtx
+PackageVersion: 1.15.5
+PackageLocale: en-US
+Publisher: bluenviron
+PublisherUrl: https://github.com/bluenviron
+PublisherSupportUrl: https://github.com/bluenviron/mediamtx/issues
+Author: aler9
+PackageName: mediamtx
+PackageUrl: https://github.com/bluenviron/mediamtx
+License: MIT
+LicenseUrl: https://github.com/bluenviron/mediamtx/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2019 aler9
+CopyrightUrl: https://github.com/bluenviron/mediamtx/blob/main/LICENSE
+ShortDescription: |-
+  Ready-to-use SRT / WebRTC / RTSP / RTMP / LL-HLS media server and media proxy that allows to read,
+  publish, proxy, record and playback video and audio streams.
+Description: |-
+  MediaMTX is a ready-to-use and zero-dependency real-time media server and media proxy that allows
+  to publish, read, proxy, record and playback video and audio streams. It has been conceived as a
+  "media router" that routes media streams from one end to the other.
+Tags:
+- go
+- golang
+- hls
+- media-server
+- obs-studio
+- rtcp
+- rtmp
+- rtmp-proxy
+- rtmp-server
+- rtp
+- rtsp
+- rtsp-proxy
+- rtsp-relay
+- rtsp-server
+- streaming
+- webrtc
+ReleaseNotes: |-
+  Fixes and improvements
+  General
+  - apidocs: fix compatibility with OpenAPI 3.0 (#5210) double-precision numbers are now represented as double.
+  - playback: support concatenating segments with long gaps (#5172) Thanks to the new mtxi MP4 box, it's possible to check whether two segments are consecutive without involving dates or timestamps. When the new mtxi box is present in both segments, do not check if the end of the first segment corresponds to the start of the second segment.
+  - recorder: reset when absolute time drifts from stream time (#4778) (#5239) the server now detects when system time changes too much and restarts recordings when that happens.
+  - playback: fix crash (#5240) (#5250) when requesting a recording with the mp4 format, if there are two tracks and the second track has no samples, the server crashed. This fixes the issue.
+  - fix panic when changing log file to a nonexisting directory (#5132) (#5249)
+  - h264: fix regression in DTS extractor (#5207) (bluenviron/mediacommon#263)
+  - h264: increase MaxNALUsPerAccessUnit (bluenviron/mediacommon#262) Some parrot drones use slice-encoding with 45 independent slices, resulting in frames consisting of 48 NALUs.
+  - pmp4: fix crash when unmarshaling and there are no samples (#5240) (bluenviron/mediacommon#267)
+  - fmp4: Correctly parse trun v0 sample composition time offset (bluenviron/mediacommon#268)
+  - h265: fix DTS extraction with multiple slices (#5071) (bluenviron/mediacommon#269)
+  API
+  - always reply with JSON in case of success or failure (#5252) Reply with "status": "ok" in case of success, and with "status": "error" in case of error. This makes the API more accessible and user friendly.
+  RTSP
+  - fix crash when setupping tracks between stream changes (#5253) (#5257)
+  - Allow 1 byte of extra padding at mikey message (bluenviron/gortsplib#953)
+  RTMP
+  - prevent dropping initial video and audio frames (bluenviron/gortmplib#26)
+  Dependencies
+  - github.com/bluenviron/gortmplib updated from v0.1.1 to v0.1.2
+  - github.com/bluenviron/gortsplib/v5 updated from v5.2.0 to v5.2.1
+  - github.com/bluenviron/mediacommon/v2 updated from v2.5.1 to v2.5.3
+  - github.com/go-git/go-billy/v5 updated from v5.6.2 to v5.7.0
+  - github.com/go-git/go-git/v5 updated from v5.16.3 to v5.16.4
+  - github.com/pion/ice/v4 updated from v4.0.10 to v4.0.13
+  - github.com/pion/rtp updated from v1.8.25 to v1.8.26
+  - github.com/pion/webrtc/v4 updated from v4.1.6 to v4.1.7
+  - github.com/pion/dtls/v3 updated from v3.0.7 to v3.0.8
+  - github.com/pion/mdns/v2 updated from v2.0.7 to v2.1.0
+  - github.com/pion/sctp updated from v1.8.40 to v1.8.41
+  - github.com/pion/srtp/v3 updated from v3.0.8 to v3.0.9
+  - github.com/pion/stun/v3 updated from v3.0.0 to v3.0.1
+  - github.com/pion/turn/v4 updated from v4.1.1 to v4.1.3
+  Security
+  Binaries are compiled from source through the Release workflow without human intervention, preventing any external interference.
+  You can verify that binaries have been produced by the workflow by using GitHub Attestations:
+  ls mediamtx_* | xargs -L1 gh attestation verify --repo bluenviron/mediamtx
+  You can verify checksums of binaries by downloading checksums.sha256 and running:
+  cat checksums.sha256 | grep "$(ls mediamtx_*)" | sha256sum --check
+ReleaseNotesUrl: https://github.com/bluenviron/mediamtx/releases/tag/v1.15.5
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

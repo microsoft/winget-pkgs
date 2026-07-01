@@ -212,7 +212,7 @@ ManifestVersion: 1.10.0        # The manifest syntax version
  </details>
 
  <details>
-   <summary><b>Agreements/b> - List of package agreements</summary>
+   <summary><b>Agreements</b> - List of package agreements</summary>
 
    **Optional Field**
 

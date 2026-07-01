@@ -1,7 +1,7 @@
-[Manifest Specification]:   manifest/schema/1.10.0
-[versionSchema]:            manifest/schema/1.10.0/version.md
-[defaultLocaleSchema]:      manifest/schema/1.10.0/defaultLocale.md
-[installerSchema]:          manifest/schema/1.10.0/installer.md
+[Manifest Specification]:   manifest/schema/1.12.0
+[versionSchema]:            manifest/schema/1.12.0/version.md
+[defaultLocaleSchema]:      manifest/schema/1.12.0/defaultLocale.md
+[installerSchema]:          manifest/schema/1.12.0/installer.md
 
 # Authoring Manifests
 
@@ -33,6 +33,8 @@ The directory structure for a manifest is determined by the "PackageIdentifier" 
 
 ## First steps
 
+If this is your first contribution to the community repository, use the [first-time contributor checklist](FirstContribution.md) alongside this guide as you work through the authoring steps.
+
 Before creating and submitting a manifest, check if the package already exists:
 1. Run `winget search <package>` in your terminal.
 2. Search for the package in this repository using GitHub's search box.
@@ -46,6 +48,8 @@ Manifests submitted to this repository should be multi-file manifests. The minim
 - A [version][versionSchema] file
 - A [defaultLocale][defaultLocaleSchema] file
 - An [installer][installerSchema] file
+
+When you are ready to submit your work, keep the PR limited to one package version (one multi-file manifest set). If you also need to update `README.md`, `doc/`, spelling files, or other non-manifest content, submit those changes in a separate PR.
 
 ## Creating your first manifest
 
@@ -87,6 +91,7 @@ winget validate --manifest <Path to manifest>
 
 Test your manifest before submission to ensure it meets quality standards:
 - Verify the application installs unattended.
+- Verify the installer URL is stable, version-specific, and points to the intended release asset.
 - Ensure the application version matches the "PackageVersion" or includes `AppsAndFeaturesEntries` if necessary.
 - Confirm the application publisher matches the defaultLocale "Publisher" or includes `AppsAndFeaturesEntries` if necessary.
 - Check that the application name matches the defaultLocale "PackageName" or includes `AppsAndFeaturesEntries` if necessary.
@@ -104,7 +109,7 @@ For a more isolated test, use the [SandboxTest.ps1 Script](https://github.com/mi
 
 ### AppsAndFeaturesEntries
 
-Most installers write accurate version data to the Windows Registry, but not all. To help with version matching and correllation between the installed application and the manifest in repo, additional `AppsAndFeaturesEntries` metadata can be used. These include the `PackageFamilyName`, `ProductCode`, `UpgradeCode`, and `InstallerType`. Additional information on how `AppsAndFeaturesEntries` affect version matching, package correllation, and sort order can be found below.
+Most installers write accurate version data to the Windows Registry, but not all. To help with version matching and correlation between the installed application and the manifest in repo, additional `AppsAndFeaturesEntries` metadata can be used. These include the `PackageFamilyName`, `ProductCode`, `UpgradeCode`, and `InstallerType`. Additional information on how `AppsAndFeaturesEntries` affect version matching, package correlation, and sort order can be found below.
 
 #### What is Version Matching & Package Correllation?
 
@@ -138,7 +143,7 @@ For more information on how to specify `AppsAndFeaturesEntries` and what the ava
 
 ## Version Sorting in WinGet
 
-Inherently, all versions are strings. Whether a publisher uses a date code, a commit hash, or some other crazy format they are all saved as string values in the Windows Registry. In fact, a sematic version is just a string with a certain format. To convert these strings into versions and sort them, WinGet goes through the following process.
+Inherently, all versions are strings. Whether a publisher uses a date code, a commit hash, or some other crazy format they are all saved as string values in the Windows Registry. In fact, a semantic version is just a string with a certain format. To convert these strings into versions and sort them, WinGet goes through the following process.
 
 > [!IMPORTANT]
 > Step 1 of the below process only occurs in WinGet version 1.9.1763-preview or newer

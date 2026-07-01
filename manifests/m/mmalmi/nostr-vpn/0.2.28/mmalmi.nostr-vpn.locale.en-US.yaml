@@ -1,0 +1,63 @@
+# Created with WinGet Updater using komac v2.15.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: mmalmi.nostr-vpn
+PackageVersion: 0.2.28
+PackageLocale: en-US
+Publisher: mmalmi
+PublisherUrl: https://github.com/mmalmi
+PublisherSupportUrl: https://github.com/mmalmi/nostr-vpn/issues
+Author: Martti Malmi
+PackageName: Nostr VPN
+PackageUrl: https://github.com/mmalmi/nostr-vpn
+License: unknown
+LicenseUrl: https://github.com/mmalmi/nostr-vpn
+ShortDescription: nostr-vpn is a Rust workspace for a Tailscale-style mesh VPN control plane built on Nostr signaling and userspace WireGuard.
+Description: nostr-vpn is a Rust workspace for a Tailscale-style mesh VPN control plane built on Nostr signaling and userspace WireGuard. It includes the nvpn CLI plus a Tauri/Svelte app codebase that targets desktop and mobile platforms.
+Moniker: nostr-vpn
+ReleaseNotes: |-
+  Downloads
+  Most people
+  - Nostr VPN for macOS (Apple Silicon)
+  - Nostr VPN for Linux (AppImage)
+  - Nostr VPN for Debian/Ubuntu (.deb)
+  - Nostr VPN for Windows
+  - Nostr VPN for Android
+  Prebuilt Intel macOS release artifacts have been sunset. Intel Mac users should build from source or use an older release.
+  Headless CLI downloads
+  - macOS Apple Silicon CLI
+  - Windows x86_64 CLI
+  - Linux x86_64 CLI
+  - Linux ARM64 CLI
+  Quick CLI install (Apple Silicon macOS/Linux)
+  case "$(uname -s)/$(uname -m)" in
+    Darwin/arm64) ASSET=nvpn-aarch64-apple-darwin.tar.gz ;;
+    Linux/x86_64) ASSET=nvpn-x86_64-unknown-linux-musl.tar.gz ;;
+    Linux/aarch64|Linux/arm64) ASSET=nvpn-aarch64-unknown-linux-musl.tar.gz ;;
+    Darwin/x86_64)
+      echo "Prebuilt Intel macOS releases have been sunset. Build from source or use an older release." >&2
+      exit 1
+      ;;
+    *)
+      echo "Unsupported platform: $(uname -s)/$(uname -m)" >&2
+      exit 1
+      ;;
+  esac
+  curl -fsSL "https://github.com/mmalmi/nostr-vpn/releases/download/v0.2.28/${ASSET}" | tar -xz && cd nvpn && ./install.sh
+  That command auto-detects the matching Apple Silicon macOS/Linux CLI tarball, extracts nvpn, and runs the bundled installer.
+  Manual CLI install
+  # macOS Apple Silicon
+  curl -LO https://github.com/mmalmi/nostr-vpn/releases/download/v0.2.28/nvpn-aarch64-apple-darwin.tar.gz
+  # Linux x86_64
+  curl -LO https://github.com/mmalmi/nostr-vpn/releases/download/v0.2.28/nvpn-x86_64-unknown-linux-musl.tar.gz
+  # Linux ARM64
+  curl -LO https://github.com/mmalmi/nostr-vpn/releases/download/v0.2.28/nvpn-aarch64-unknown-linux-musl.tar.gz
+  tar -xzf nvpn-*.tar.gz && cd nvpn && ./install.sh
+  On Intel macOS, install from source instead:
+  cargo install --git https://github.com/mmalmi/nostr-vpn --locked --bin nvpn nostr-vpn-cli
+  Verify
+  nvpn --help
+  nvpn init --participant npub1...alice --participant npub1...bob
+ReleaseNotesUrl: https://github.com/mmalmi/nostr-vpn/releases/tag/v0.2.28
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

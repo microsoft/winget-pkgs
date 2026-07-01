@@ -1,0 +1,85 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: MySolutionsNORDIC.NSClient++
+PackageVersion: 0.10.7.0
+PackageLocale: en-US
+Publisher: MySolutions NORDIC
+PublisherUrl: https://medin.name/
+PublisherSupportUrl: https://github.com/mickem/nscp/issues
+Author: My Computer Solutions NORDIC KB
+PackageName: NSClient++
+PackageUrl: https://nsclient.org/
+License: GPL-2.0
+LicenseUrl: https://github.com/mickem/nscp/blob/HEAD/COPYING
+Copyright: Copyright (C) 2025 - Michael Medin
+ShortDescription: A fully fledged monitoring agent which can be used with many monitoring tools.
+Description: |-
+  NSClient++ (nscp) aims to be a simple yet powerful and secure monitoring daemon. It was built for Nagios/Icinga, but nothing in the daemon is Nagios/Icinga specific and it can be used in many other scenarios where you want to receive/distribute check metrics.
+  The daemon has 3 main functions:
+  - Allow a remote machine (monitoring server) to request commands to be run on this machine (the monitored machine) which return the status of the machine.
+  - Submit the same results to a remote (monitoring server).
+  - Take action and perform tasks.
+Moniker: nscp
+Tags:
+- icinga
+- naemon
+- nagios
+ReleaseNotes: |-
+  PLEASE NOTE That there is a new legacy-xp binary which can be used on older version of windows..
+  NRPE updates
+  - NRPE setup now supports 2-way tls
+  - Also fixed many issues with the cli to make ti tork more reliable.
+  Command to set up 1-way TLS NRPE server
+  nscp nrpe install --allowed-hosts 127.0.0.1 --insecure=false ^
+  	--verify=none --certificate nsclient.pem --certificate-key nsclient.key
+  nscp nrpe install --allowed-hosts 127.0.0.1 --insecure=false ^
+  	--verify=peer-cert --certificate nsclient.pem --certificate-key nsclient.key --ca ca.pem
+  Installer:
+  Added installer option IMPORT_CONFIG to allow copying a configuration during installation.
+  This is a great way to simplify configuration distribution during installation if you do not have better tools in place.
+  To import the configuration from a http server you can do:
+  $ msiexec /i NSClient++.msi IMPORT_CONFIG=http://myserver.com/nsclient.ini
+  This release also fixes import of http configuration so you can do:
+  $ nscp settings --migrate-from https://raw.githubusercontent.com/mickem/nscp/refs/heads/main/tests/rest/nsclient.ini
+  Improved how debug in queries work
+  Using the debug option with queries is now much simpler.
+  First it will return the debug data instead of adding it to the log making it possible to use this remote (please note that many protocols have payload limits).
+  The output is now simplified as it includes useful details about the object as well as a standardized list:
+  ignored  c:\src\nscp\build\docker\debian-9\Dockerfile
+  match    c:\src\nscp\build\docker\files\plugin_pb2.py
+  ignored  c:\src\nscp\build\perl\echo_date.pl
+  match    c:\src\nscp\build\python\config.py
+  warning  c:\src\nscp\build\python\create_plugin_module.py
+  match    c:\src\nscp\build\python\create_zip_module.py
+  match    c:\src\nscp\build\python\mk_pyzip.py
+  Where:
+  ignored means the item did not match the filter
+  match means the item matched the filter and was not critical nor warning.
+  warning and critical means the item is a warning or a critical.
+  Windows XP support: is back
+  This version brings back experimental Windows XP support.
+  As I am unable to get a Windows XP machine up and running I cannot verify it but it runs on Windows 2008 (which is the oldest test machine I have) and in theory it should run on Windows XP with a lot of service packs.
+  If you have access to old machines, please do give it a spin and let me know how it goes.
+  To install NSClient++ on Windows XP use the Win32-legacy-xp packages below.
+  Please note: MSI files might not work (as it requires newer MSI version) but you should be able to use the zip in those cases.
+  Documentation
+  - Updated links and fixed various markdown issues making the documentation easier to read.
+  - A new guide explaining how to configure NRPE with and without certificate authentication making on boarding NRPE much much easier.
+  - Many other changes and fixes in the documentation
+  Updated to OpenSSL 3.5.x:
+  This is actually huge as OpenSSL which I updated to a year or so ago when I started to updated dependencies was the last 1.1.1 version.
+  There are numerous changes is 3.5.4 which we will eventually start to benefit from but for now the only benefit is that the certificate generation is a bit improved.
+  Various minor improvements:
+  - Fixed some configuration keys which where missing the comment describing what they are in the config file.
+  - Added option debug verify to show why certificate validation fails, this option will likely be removed and replaced by default handling in the future.
+  - check_memory Change text syntax of check_memory from only show used to show "type: used/total"
+  - CheckExternalScripts Added new option under [/settings/external scripts] called kill tree=true to kill process tree when exiting process.
+  - Fix for update not working on Windows 2025
+  - Updated the mongoose web server to latest version (and dependency)
+ReleaseNotesUrl: https://github.com/mickem/nscp/releases/tag/0.10.7
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://nsclient.org/docs/
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

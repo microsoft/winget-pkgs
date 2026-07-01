@@ -1,0 +1,53 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: paopaoandlingyia.PrismCat
+PackageVersion: 1.9.0
+PackageLocale: en-US
+Publisher: Etgpao
+PublisherUrl: https://github.com/paopaoandlingyia
+PublisherSupportUrl: https://github.com/paopaoandlingyia/PrismCat/issues
+PackageName: PrismCat
+PackageUrl: https://github.com/paopaoandlingyia/PrismCat
+License: MIT
+LicenseUrl: https://github.com/paopaoandlingyia/PrismCat/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 paopaoandlingyia
+ShortDescription: A self-hosted, transparent proxy and debugging console for LLM APIs.
+Description: PrismCat is a self-hosted, transparent proxy and debugging console for LLM APIs. Change one line — your base_url — and instantly see every request and response between your app and OpenAI / Claude / Gemini / Ollama / any LLM API, including streaming (SSE).
+Tags:
+- ai
+- chatbot
+- large-language-model
+- llm
+- proxy
+ReleaseNotes: |-
+  中文
+  v1.9.0 引入了基于存储空间上限的自动清理机制、日志快捷导航，以及 Web 界面 JSON 浏览器的多项显示和渲染优化。
+  - 新增日志存储空间上限限制：支持通过 max_storage_bytes 配置或环境变量 PRISMCAT_MAX_STORAGE_BYTES 限制最大存储。超出时将按时间限制顺序删除未保存的历史日志，并自动触发 WAL checkpoint 和 VACUUM 整理数据库物理空间。可在设置页面直观配置。
+  - 新增日志快捷导航：在日志详情视图（Dashboard 和 Trace 详情）中增加“上一条 / 下一条”切换按钮，方便了连续排查日志的操作。
+  - 优化 JSON 浏览器显示与渲染：
+    - 将 JSON 视图字体大小调整为 13px，修复 Windows ClearType 下 11px 中文字体模糊的视觉问题。
+    - 去除强行指定的 -webkit-font-smoothing，使 Windows 系统能够保留边缘清晰的 ClearType 渲染。
+    - 在字体栈中显式增加了 PingFang SC 和 Microsoft YaHei 中文字体。
+    - 本地化托管 Inter 和 Fira Code 字体，摆脱 Google CDN 字体加载依赖。
+    - 为 JSON 缩进层级添加垂直辅助线，提升复杂结构下的可读性。
+  - 修复 SQLite 日志清理锁表问题：日志保留期（Retention）清理逻辑调整为每批次限制删除 2000 条，并在清理后自动进行 WAL checkpoint，避免单次删除海量日志导致 SQLite 长时间锁表。
+  - 修复流式日志 (SSE) 的 Token 提取解析：处理流式事件时，Token 提取器由原先的“仅保留最后一次匹配”改为“增量合并”方式，避免旧事件的数据被完全覆盖。
+  - 修复默认超时初始化：统一规范在配置及 UI 修改中的 Upstream 缺省超时时间为 120 秒。
+  English
+  v1.9.0 introduces size-based log storage limit cleanup, quick log navigation, and multiple display and font rendering enhancements to the JSON viewer in the Web UI.
+  - Added log storage size limit: Allows setting a storage limit via max_storage_bytes config or PRISMCAT_MAX_STORAGE_BYTES env var. When exceeded, oldest unsaved logs are deleted, followed by WAL checkpoint and database VACUUM to reclaim physical disk space. Can be easily configured on the settings page.
+  - Added log navigation: Prev/Next buttons added in log details panel on both Dashboard and Trace Detail pages for seamless traversal of consecutive log records.
+  - Improved JSON viewer display & rendering:
+    - Bumped JSON viewer font size to 13px to fix blurry CJK text rendering at 11px under Windows.
+    - Dropped forced -webkit-font-smoothing so Windows keeps crisp ClearType rendering.
+    - Added explicit CJK fonts (PingFang SC / Microsoft YaHei) to font stacks.
+    - Self-hosted Inter & Fira Code fonts via @fontsource, removing Google CDN dependency.
+    - Added bordered vertical lines for JSON indentation guidelines to enhance readability.
+  - Fixed SQLite retention cleanup locking: The log retention background worker now deletes logs in batches of 2000 and triggers WAL checkpoint, preventing long-running write transactions from locking the database.
+  - Fixed SSE token usage parsing: SSE parser now correctly merges input/output token counts from sequential events rather than overwriting them.
+  - Standardized default upstream timeout: Unified upstream proxy default timeout to 120s across config loader and UI creation.
+  Full Changelog: https://github.com/paopaoandlingyia/PrismCat/compare/v1.8.0...v1.9.0
+ReleaseNotesUrl: https://github.com/paopaoandlingyia/PrismCat/releases/tag/v1.2.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,75 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Anthropic.ClaudeCode
+PackageVersion: 2.1.143
+PackageLocale: en-US
+Publisher: Anthropic PBC
+Author: Anthropic PBC
+PackageName: Claude Code
+License: Proprietary
+Copyright: © 2026 Anthropic PBC
+ShortDescription: Unleash Claude’s raw power directly in your terminal. Search million-line codebases instantly. Turn hours-long workflows into a single command. Your tools. Your workflow. Your codebase, evolving at thought speed.
+Description: |-
+  Claude Code is Anthropic’s agentic coding tool that lives in your terminal and helps you turn ideas into code faster than ever before.
+  What Claude Code does for you
+  - Build features from descriptions: Tell Claude what you want to build in plain English. It will make a plan, write the code, and ensure it works.
+  - Debug and fix issues: Describe a bug or paste an error message. Claude Code will analyze your codebase, identify the problem, and implement a fix.
+  - Navigate any codebase: Ask anything about your team’s codebase, and get a thoughtful answer back. Claude Code maintains awareness of your entire project structure, can find up-to-date information from the web, and with MCP can pull from external datasources like Google Drive, Figma, and Slack.
+  - Automate tedious tasks: Fix fiddly lint issues, resolve merge conflicts, and write release notes. Do all this in a single command from your developer machines, or automatically in CI.
+  Why developers love Claude Code
+  - Works in your terminal: Not another chat window. Not another IDE. Claude Code meets you where you already work, with the tools you already love.
+  - Takes action: Claude Code can directly edit files, run commands, and create commits. Need more? MCP lets Claude read your design docs in Google Drive, update your tickets in Jira, or use your custom developer tooling.
+  - Unix philosophy: Claude Code is composable and scriptable. tail -f app.log | claude -p "Slack me if you see any anomalies appear in this log stream" works. Your CI can run claude -p "If there are new text strings, translate them into French and raise a PR for @lang-fr-team to review".
+  - Enterprise-ready: Use Anthropic’s API, or host on AWS or GCP. Enterprise-grade security, privacy, and compliance is built-in.
+Moniker: claudecode
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- claude
+- claude-code
+- claudecode
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  - Added plugin dependency enforcement: claude plugin disable now refuses when another enabled plugin depends on the target (with a copy-pasteable disable-chain hint), and claude plugin enable force-enables transitive dependencies
+  - Added projected context cost (per-turn and per-invocation token estimates) to the /plugin marketplace browse pane
+  - Added worktree.bgIsolation: "none" setting to let background sessions edit the working copy directly without EnterWorktree, for repos where worktrees are impractical
+  - PowerShell tool now passes -ExecutionPolicy Bypass. Opt out with CLAUDE_CODE_POWERSHELL_RESPECT_EXECUTION_POLICY=1
+  - Background sessions now preserve the model and effort level you set after waking from idle
+  - Shift+Tab in attached agent sessions now includes auto mode in the cycle
+  - Fixed a corrupt .credentials.json with a non-array scopes value hanging the CLI on startup or silently aborting OAuth token refresh
+  - Fixed right-click paste in claude agents on Windows Terminal and WSL
+  - Fixed stop hooks that block repeatedly looping forever — the turn now ends with a warning after 8 consecutive blocks (override via CLAUDE_CODE_STOP_HOOK_BLOCK_CAP)
+  - Fixed Esc/Ctrl+C not cancelling a pending /loop wakeup while Claude is idle between iterations
+  - Fixed /goal evaluator firing while background shells or delegated subagents are still running
+  - Fixed NO_COLOR/FORCE_COLOR in settings.json env stripping Claude Code's own UI colors — they now apply to subprocesses only
+  - Fixed agent view spawning repeated PowerShell processes on Windows when listing sessions
+  - Fixed /bg without a prompt sending "continue" to the forked session — the fork now waits for input
+  - Fixed --agent <name> not finding plugin-contributed agents without the plugin: prefix
+  - Fixed deleting a session from agent view not removing its transcript file
+  - Fixed stale-fragment rendering when scrolling in attached background sessions on Windows Terminal
+  - Fixed background agents false-positive worker-stall detection storm after host sleep or macOS App Nap
+  - Fixed 5xx error messages pointing at status.claude.com instead of naming the configured gateway or cloud provider
+  - The PowerShell tool is now enabled by default on Windows for Bedrock, Vertex, and Foundry users. Opt out with CLAUDE_CODE_USE_POWERSHELL_TOOL=0.
+  - claude agents now accepts --add-dir, --settings, --mcp-config, and --plugin-dir and applies them to the dashboard and to background sessions dispatched from it
+  - claude agents accepts --permission-mode, --model, --effort, and --dangerously-skip-permissions to set defaults for sessions dispatched from the view
+  - claude --bg --dangerously-skip-permissions now persists across retire→wake
+  - Fixed background sessions silently capturing IDE file references into the warm spare's input, which caused the reference to be prepended to the next prompt dispatched from claude agents
+  - Worktree cleanup no longer falls back to rm -rf when git worktree remove fails, preventing loss of gitignored or in-progress files
+  - Fixed background-job sessions on macOS getting "Operation not permitted" errors when reading files under ~/Documents, ~/Desktop, or ~/Downloads, even with Full Disk Access granted.
+  - /bg now preserves --mcp-config, --settings, --add-dir, --plugin-dir, and --strict-mcp-config, so backgrounded sessions keep their MCP servers and settings across respawn.
+  - Background sessions launched from claude agents now honor permissions.defaultMode from settings.json (was previously overridden to auto mode)
+  - Fixed: on Windows, pressing ← in claude agents while a response was streaming could leave the agents list unresponsive to all input
+  - /bg and ←-detach now preserve --fallback-model, so backgrounded workers degrade to the fallback model on overload instead of hard-failing.
+  - /bg and ←-detach now preserve --allow-dangerously-skip-permissions, so the forked worker keeps bypass-permissions available in its Shift+Tab cycle.
+  - Fixed: background daemon spawn now falls back to the running binary when the ~/.local/bin/claude launcher is missing or non-executable
+  - Fixed claude agents --allow-dangerously-skip-permissions defaulting dispatched sessions to bypass mode instead of making it available in the permission cycle
+ReleaseNotesUrl: https://github.com/anthropics/claude-code/blob/HEAD/CHANGELOG.md#21143
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
