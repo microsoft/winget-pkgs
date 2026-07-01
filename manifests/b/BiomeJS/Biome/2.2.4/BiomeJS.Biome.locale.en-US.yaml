@@ -1,0 +1,210 @@
+# Created with komac v2.13.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: BiomeJS.Biome
+PackageVersion: 2.2.4
+PackageLocale: en-US
+Publisher: BiomeJS
+PublisherUrl: https://biomejs.dev/
+PublisherSupportUrl: https://github.com/biomejs/biome/issues
+Author: Biome Developers and Contributors
+PackageName: Biome
+PackageUrl: https://biomejs.dev/
+License: Apache-2.0
+Copyright: Copyright (c) 2023-present Biome Developers and Contributors
+ShortDescription: Biome is a toolchain for web projects, aimed at providing functionalities to maintain them. It offers a formatter and linter, usable via CLI and LSP.
+Moniker: biome
+Tags:
+- css
+- formatter
+- javascript
+- json
+- jsx
+- linter
+- static-code-analysis
+- typescript
+- web
+ReleaseNotes: |-
+  2.2.4
+  Patch Changes
+  - #7453 aa8cea3 Thanks @arendjr! - Fixed #7242: Aliases specified in package.json's imports section now support having multiple targets as part of an array.
+  - #7454 ac17183 Thanks @arendjr! - Greatly improved performance of noImportCycles by eliminating allocations.
+    In one repository, the total runtime of Biome with only noImportCycles enabled went from ~23s down to ~4s.
+  - #7447 7139aad Thanks @rriski! - Fixes #7446. The GritQL $... spread metavariable now correctly matches members in object literals, aligning its behavior with arrays and function calls.
+  - #6710 98cf9af Thanks @arendjr! - Fixed #4723: Type inference now recognises index signatures and their accesses when they are being indexed as a string.
+    Example
+    type BagOfPromises = {
+      // This is an index signature definition. It declares that instances of type
+      // `BagOfPromises` can be indexed using arbitrary strings.
+      [property: string]: Promise<void>;
+    };
+    let bag: BagOfPromises = {};
+    // Because `bag.iAmAPromise` is equivalent to `bag["iAmAPromise"]`, this is
+    // considered an access to the string index, and a Promise is expected.
+    bag.iAmAPromise;
+  - 351bccd Thanks @ematipico! - Fixed #7212, now the useOptionalChain rule recognizes optional chaining using typeof (e.g., typeof foo !== 'undefined' && foo.bar).
+  - 351bccd Thanks @ematipico! - Fixed #7323. noUnusedPrivateClassMembers no longer reports as unused TypeScript private members if the rule encounters a computed access on this.
+    In the following example, member as previously reported as unused.
+    It is no longer reported.
+    class TsBioo {
+      private member: number;
+      set_with_name(name: string, value: number) {
+        this[name] = value;
+      }
+    }
+  - 351bccd Thanks @ematipico! - Added the new nursery lint rule noJsxLiterals, which disallows the use of string literals inside JSX.
+    The rule catches these cases:
+    <>
+      <div>test</div> {/* test is invalid */}
+      <>test</>
+      <div>
+        {/* this string is invalid */}
+        asdjfl test foo
+      </div>
+    </>
+  - 351bccd Thanks @ematipico! - Fixed an issue (#6393) where the useHookAtTopLevel rule reported excessive diagnostics for nested hook calls.
+    The rule now reports only the offending top-level call site, not sub-hooks of composite hooks.
+    // Before: reported twice (useFoo and useBar).
+    function useFoo() {
+      return useBar();
+    }
+    function Component() {
+      if (cond) useFoo();
+    }
+    // After: reported once at the call to useFoo().
+  - #7461 ea585a9 Thanks @arendjr! - Improved performance of noPrivateImports by eliminating allocations.
+    In one repository, the total runtime of Biome with only noPrivateImports enabled went from ~3.2s down to ~1.4s.
+  - 351bccd Thanks @ematipico! - Fixed #7411. The Biome Language Server had a regression where opening an editor with a file already open wouldn't load the project settings correctly.
+  - 351bccd Thanks @ematipico! - Added the new nursery rule noDuplicateDependencies, which verifies that no dependencies are duplicated between the bundledDependencies, bundleDependencies, dependencies, devDependencies, overrides, optionalDependencies, and peerDependencies sections.
+    For example, the following snippets will trigger the rule:
+    {
+      "dependencies": {
+        "foo": ""
+      },
+      "devDependencies": {
+        "foo": ""
+      }
+    }
+    {
+      "dependencies": {
+        "foo": ""
+      },
+      "optionalDependencies": {
+        "foo": ""
+      }
+    }
+    {
+      "dependencies": {
+        "foo": ""
+      },
+      "peerDependencies": {
+        "foo": ""
+      }
+    }
+  - 351bccd Thanks @ematipico! - Fixed #3824. Now the option CLI --color is correctly applied to logging too.
+  2.2.4
+  Patch Changes
+  - #7415 d042f18 Thanks @qraqras! - Fixed #7212, now the useOptionalChain rule recognizes optional chaining using typeof (e.g., typeof foo !== 'undefined' && foo.bar).
+  - #7419 576baf4 Thanks @Conaclos! - Fixed #7323. noUnusedPrivateClassMembers no longer reports as unused TypeScript private members if the rule encounters a computed access on this.
+    In the following example, member as previously reported as unused.
+    It is no longer reported.
+    class TsBioo {
+      private member: number;
+      set_with_name(name: string, value: number) {
+        this[name] = value;
+      }
+    }
+  - #7248 75b6a0d Thanks @ematipico! - Added the new nursery lint rule noJsxLiterals, which disallows the use of string literals inside JSX.
+    The rule catches these cases:
+    <>
+      <div>test</div> {/* test is invalid */}
+      <>test</>
+      <div>
+        {/* this string is invalid */}
+        asdjfl test foo
+      </div>
+    </>
+  - #7406 b906112 Thanks @mdevils! - Fixed an issue (#6393) where the useHookAtTopLevel rule reported excessive diagnostics for nested hook calls.
+    The rule now reports only the offending top-level call site, not sub-hooks of composite hooks.
+    // Before: reported twice (useFoo and useBar).
+    function useFoo() {
+      return useBar();
+    }
+    function Component() {
+      if (cond) useFoo();
+    }
+    // After: reported once at the call to useFoo().
+  - #7418 00e1a6b Thanks @ematipico! - Fixed #7411. The Biome Language Server had a regression where opening an editor with a file already open wouldn't load the project settings correctly.
+  - #7142 53ff5ae Thanks @Netail! - Added the new nursery rule noDuplicateDependencies, which verifies that no dependencies are duplicated between the bundledDependencies, bundleDependencies, dependencies, devDependencies, overrides, optionalDependencies, and peerDependencies sections.
+    For example, the following snippets will trigger the rule:
+    {
+      "dependencies": {
+        "foo": ""
+      },
+      "devDependencies": {
+        "foo": ""
+      }
+    }
+    {
+      "dependencies": {
+        "foo": ""
+      },
+      "optionalDependencies": {
+        "foo": ""
+      }
+    }
+    {
+      "dependencies": {
+        "foo": ""
+      },
+      "peerDependencies": {
+        "foo": ""
+      }
+    }
+  - #7441 733828c Thanks @ematipico! - Fixed #3824. Now the option CLI --color is correctly applied to logging too.
+  What's Changed
+  - chore: initialise project layout in test examples by @arendjr in #7401
+  - chore: validate diagnostics in examples of Promise-related rules by @arendjr in #7403
+  - ci: ignore @biomejs/plugin-api on publish by @siketyan in #7405
+  - feat(analyse/json): add noDuplicateDependencies rule by @Netail in #7142
+  - fix(noUnusedPrivateClassMembers): ignore all TS private members if a this[computed] is found by @Conaclos in #7419
+  - fix(lsp): project loading by @ematipico in #7418
+  - fix(lint): useHookAtTopLevel should not report issues unrelated to the nested hook call by @mdevils in #7406
+  - fix(useOptionalChain): support optional chaining using typeof by @qraqras in #7415
+  - chore: fix rule version metadata, add script to automate it by @dyc3 in #7412
+  - refactor(noUnusedPrivateClassMembers): avoid some allocations by @Conaclos in #7424
+  - ci: improve rule version metadata automation by @dyc3 in #7429
+  - chore(deps): update github-actions by @renovate[bot] in #7431
+  - chore(deps): update rust crate camino to 1.1.12 by @renovate[bot] in #7432
+  - chore(deps): update rust crate insta to 1.43.2 by @renovate[bot] in #7433
+  - chore(deps): update rust crate mimalloc to 0.1.48 by @renovate[bot] in #7434
+  - chore(deps): update rust crate proc-macro2 to 1.0.101 by @renovate[bot] in #7436
+  - chore(deps): update rust crate regex to 1.11.2 by @renovate[bot] in #7437
+  - chore(deps): update rust crate serde_json to 1.0.143 by @renovate[bot] in #7439
+  - chore(deps): update rust crate terminal_size to 0.4.3 by @renovate[bot] in #7440
+  - fix(cli): logging color by @ematipico in #7441
+  - feat(linter): add rule noJsxLiterals by @ematipico in #7248
+  - chore: move get_test_services function to biome_test_utils crate by @ryan-m-walker in #7438
+  - chore: prepare rules for release by @ematipico in #7449
+  - ci: release by @github-actions[bot] in #7413
+  - feat(grit): match JS object members using spread metavariable $... by @rriski in #7447
+  - ci: actually automate updating rule version metadata, for real this time by @dyc3 in #7430
+  - chore: fix typo in formatter bug type issue template by @woohm402 in #7452
+  - fix(core): support arrays as alias targets by @arendjr in #7453
+  - perf(linter): improve noImportCycles performance by @arendjr in #7454
+  - feat(core): implement support for index signatures by @arendjr in #6710
+  - chore(deps): update dependency vite to v7.1.5 [security] by @renovate[bot] in #7458
+  - chore(rules_check): remove file name titles from noImportCycles lint … by @ryan-m-walker in #7459
+  - chore: cleanup file annotations by @arendjr in #7462
+  - chore: disable CodeRabbit review status by @arendjr in #7463
+  - perf(linter): speed up noPrivateImports by @arendjr in #7461
+  - ci: release by @github-actions[bot] in #7450
+  New Contributors
+  - @woohm402 made their first contribution in #7452
+  Full Changelog: https://github.com/biomejs/biome/compare/@biomejs/biome@2.2.3...@biomejs/biome@2.2.4
+ReleaseNotesUrl: https://github.com/biomejs/biome/releases/tag/@biomejs/biome@2.2.4
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://biomejs.dev/guides/getting-started/
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

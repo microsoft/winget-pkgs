@@ -1,0 +1,213 @@
+# Created with komac v2.13.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: BiomeJS.Biome
+PackageVersion: 2.3.0
+PackageLocale: en-US
+Publisher: BiomeJS
+PublisherUrl: https://biomejs.dev/
+PublisherSupportUrl: https://github.com/biomejs/biome/issues
+Author: Biome Developers and Contributors
+PackageName: Biome
+PackageUrl: https://biomejs.dev/
+License: Apache-2.0
+Copyright: Copyright (c) 2023-present Biome Developers and Contributors
+ShortDescription: Biome is a toolchain for web projects, aimed at providing functionalities to maintain them. It offers a formatter and linter, usable via CLI and LSP.
+Moniker: biome
+Tags:
+- css
+- formatter
+- javascript
+- json
+- jsx
+- linter
+- static-code-analysis
+- typescript
+- web
+ReleaseNotes: |-
+  2.3.0
+  Minor Changes
+  - #7263 a3e3369 Thanks @arendjr! - Biome's resolver now supports baseUrl if specified in tsconfig.json.
+    Example
+    Given the following file structure:
+    tsconfig.json
+    {
+      "compilerOptions": {
+        "baseUrl": "./src"
+      }
+    }
+    src/foo.ts
+    export function foo() {}
+    In this scenario, import { foo } from "foo"; should work regardless of the
+    location of the file containing the import statement.
+    Fixes #6432.
+  - #7745 6fcbc07 Thanks @dyc3! - Added ignore option to noUnknownAtRules. If an unknown at-rule matches any of the items provided in ignore, a diagnostic won't be emitted.
+  - #7753 63cb7ff Thanks @ematipico! - Enhanced the init command. The init command now checks if the existing project contains known ignore files and known generated folders.
+    If Biome finds .gitignore or .ignore files, it will add the following configuration to biome.json:
+    {
+    +  "vcs": {
+    +    "enabled": true,
+    +    "clientKind": "git",
+    +    "useIgnoreFile": true
+    +  }
+    }
+    If Biome finds a dist/ folder, it will exclude it automatically using the double-exclude syntax:
+    {
+    +  "files": {
+    +    "includes": ["**", "!!**/dist"]
+    +  }
+    }
+  - #7548 85d3a3a Thanks @siketyan! - The rules in a domain are no longer enabled automatically by the installed dependencies unless the rule is recommended.
+  - #7723 d3aac63 Thanks @ematipico! - Added --css-parse-css-modules CLI flag to control whether CSS Modules syntax is enabled.
+    You can now enable or disable CSS Modules parsing directly from the command line:
+    biome check --css-parse-css-modules=true file.module.css
+    biome format --css-parse-css-modules=true file.module.css
+    biome lint --css-parse-css-modules=true file.module.css
+    biome ci --css-parse-css-modules=true file.module.css
+  - #7723 d3aac63 Thanks @ematipico! - Added --css-parse-tailwind-directives CLI flag to control whether Tailwind CSS 4.0 directives and functions are enabled.
+    You can now enable or disable Tailwind CSS 4.0 directive parsing directly from the command line:
+    biome check --css-parse-tailwind-directives=true file.css
+    biome format --css-parse-tailwind-directives=true file.css
+    biome lint --css-parse-tailwind-directives=true file.css
+    biome ci --css-parse-tailwind-directives=true file.css
+  - #7330 272632f Thanks @ematipico! - Updated the formatting of .svelte and .vue files. Now the indentation of the JavaScript blocks matches Prettier's:
+    <script>
+    - import Component from "./Component"
+    +   import Component from "./Component"
+    </script>
+  - #7333 de0d2d6 Thanks @dyc3! - Implemented the indentScriptAndStyle option for vue and svelte files, with the default set to false to match Prettier's vueIndentScriptAndStyle option. When enabled, this option indents the content within <script> and <style> tags to align with the surrounding HTML structure.
+    It can be enabled with this configuration:
+    {
+      "html": {
+        "formatter": {
+          "indentScriptAndStyle": true
+        }
+      }
+    }
+    Which will format this code to:
+    <script>
+    import Component from "./Component.vue";
+    </script>
+  - #7359 ebbddc4 Thanks @arendjr! - Deprecated the option files.experimentalScannerIgnores in favour of force-ignore syntax in files.includes.
+    files.includes supports ignoring files by prefixing globs with an exclamation mark (!). With this change, it also supports force-ignoring globs by prefixing them with a double exclamation mark (!!).
+    The effect of force-ignoring is that the scanner will not index files matching the glob, even in project mode, even if those files are imported by other files, and even if they are files that receive special treatment by Biome, such as nested biome.json files.
+    Example
+    Let's take the following configuration:
+    {
+      "files": {
+        "includes": [
+          "**",
+          "!**/generated",
+          "!!**/dist",
+          "fixtures/example/dist/*.js"
+        ]
+      },
+      "linter": {
+        "domains": {
+          "project": "all"
+        }
+      }
+    }
+    This configuration achieves the following:
+    - Because the project domain is enabled, all supported files in the project are indexed and processed by the linter, except:
+    - Files inside a generated folder are not processed by the linter, but they will get indexed if a file outside a generated folder imports them.
+    - Files inside a dist folder are never indexed nor processed, not even if they are imported for any purpose, except:
+    - When the dist folder is inside fixtures/example/, its .js files do get both indexed and processed.
+    In general, we now recommend using the force-ignore syntax for any folders that contain output files, such as build/ and dist/. For such folders, it is highly unlikely that indexing has any useful benefits. For folders containing generated files, you may wish to use the regular ignore syntax so that type information can still be extracted from the files.
+    experimentalScannerIgnores will continue to work for now, but you'll see a deprecation warning if you still use it.
+    Run the biome migrate --write command to automatically update the configuration file.
+  - #7698 3b6f5e3 Thanks @ematipico! - Added a new reporter named rdjson. This reporter prints diagnostics following the RDJSON format:
+    The following command:
+    biome check --reporter=rdjson
+    Will emit diagnostics in the following format:
+    {
+      "source": {
+        "name": "Biome",
+        "url": "https://biomejs.dev"
+      },
+      "diagnostics": [
+        {
+          "code": {
+            "url": "https://biomejs.dev/linter/rules/no-unused-imports",
+            "value": "lint/correctness/noUnusedImports"
+          },
+          "location": {
+            "path": "index.ts",
+            "range": {
+              "end": {
+                "column": 11,
+                "line": 0
+              },
+              "start": {
+                "column": 7,
+                "line": 0
+              }
+            }
+          },
+          "message": "This import is unused."
+        },
+        {
+          "code": {
+            "url": "https://biomejs.dev/linter/rules/no-unused-imports",
+            "value": "lint/correctness/noUnusedImports"
+          },
+          "location": {
+            "path": "index.ts",
+            "range": {
+              "end": {
+                "column": 10,
+                "line": 1
+              },
+              "start": {
+                "column": 9,
+                "line": 1
+              }
+            }
+          },
+          "message": "Several of these imports are unused."
+        }
+      ]
+    }
+  - #7719 188a767 Thanks @cadunass! - The formatWithErrors option can now be set via CLI using the --format-with-errors flag.
+    This flag was previously only available in the configuration file. It allows formatting to proceed on files with syntax errors, which is useful during development when you want to auto-format code while fixing syntax issues.
+    Example
+    biome format --format-with-errors=true --write file.js
+  - #7723 d3aac63 Thanks @ematipico! - Added --json-parse-allow-comments CLI flag to control whether comments are allowed in JSON files.
+    You can now enable or disable comment parsing in JSON files directly from the command line:
+    biome check --json-parse-allow-comments=true file.json
+    biome format --json-parse-allow-comments=true file.json
+    biome lint --json-parse-allow-comments=true file.json
+    biome ci --json-parse-allow-comments=true file.json
+  - #7723 d3aac63 Thanks @ematipico! - Added --json-parse-allow-trailing-commas CLI flag to control whether trailing commas are allowed in JSON files.
+    You can now enable or disable trailing comma parsing in JSON files directly from the command line:
+    biome check --json-parse-allow-trailing-commas=true file.json
+    biome format --json-parse-allow-trailing-commas=true file.json
+    biome lint --json-parse-allow-trailing-commas=true file.json
+    biome ci --json-parse-allow-trailing-commas=true file.json
+  - #7758 cea002f Thanks @ematipico! - Promoted new lint rules:
+    - Promoted noNonNullAssertedOptionalChain to the suspicious group
+    - Promoted useReactFunctionComponents to the style group
+    - Promoted useImageSize to the correctness group
+    - Promoted useConsistentTypeDefinitions to the style group
+    - Promoted useQwikClasslist to the correctness group
+    - Promoted noSecrets to the security group
+    Removed the lint rule useAnchorHref, because its use case is covered by useValidAnchor.
+  - #6356 296627d Thanks @wrick17! - Added the new checkstyle reporter. When --reporter=checkstyle is passed to the CLI, Biome will emit diagnostics for Checkstyle format:
+    <?xml version="1.0" encoding="utf-8"?>
+    <checkstyle version="4.3">
+      <file name="index.ts">
+        <error line="1" column="8" severity="warning" message="This import is unused." source="lint/correctness/noUnusedImports" />
+        <error line="2" column="10" severity="warning" message="Several of these imports are unused." source="lint/correctness/noUnusedImports" />
+        <error line="8" column="5" severity="warning" message="This variable f is unused." source="lint/correctness/noUnusedVariables" />
+        <error line="9" column="7" severity="warning" message="This variable f is unused." source="lint/correctness/noUnusedVariables" />
+        <error line="1" column="1" severity="error" message="The imports and exports are not sorted." source="assist/source/organizeImports" />
+        <error line="4" column="3" severity="error" message="Using == may be unsafe if you are relying on type coercion." source="lint/suspicious/noDoubleEquals" />
+        <error line="6" column="1" severity="error" message="This is an unexpected use of the debugger statement." source="lint/suspicious/noDebugger" />
+        <error line="8" column="5" severity="error" message="This variable implicitly has the any type." source="lint/suspicious/noImplicitAnyLet" />
+        <error line="9" column="7" severity="error" message="This variable implicitly has the any type." source="lint/suspicious/noImplicitAnyLet" />
+ReleaseNotesUrl: https://github.com/biomejs/biome/releases/tag/@biomejs/biome@2.3.0
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://biomejs.dev/guides/getting-started/
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

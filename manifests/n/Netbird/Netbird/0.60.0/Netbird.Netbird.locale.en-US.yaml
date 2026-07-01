@@ -1,0 +1,91 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: Netbird.Netbird
+PackageVersion: 0.60.0
+PackageLocale: en-US
+Publisher: NetBird GmbH
+PublisherUrl: https://netbird.io/
+PublisherSupportUrl: https://github.com/netbirdio/netbird/issues
+PrivacyUrl: https://netbird.io/privacy
+Author: Wiretrustee UG (haftungsbeschreankt)
+PackageName: Netbird
+PackageUrl: https://netbird.io/
+License: BSD-3-Clause
+LicenseUrl: https://github.com/netbirdio/netbird/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2025 Wiretrustee UG (haftungsbeschränkt) & AUTHORS
+CopyrightUrl: https://netbird.io/terms
+ShortDescription: Connect your devices into a secure WireGuard®-based overlay network with SSO, MFA and granular access controls.
+Description: |-
+  NetBird combines a configuration-free peer-to-peer private network and a centralized access control system in a single platform, making it easy to create secure private networks for your organization or home.
+  Connect. NetBird creates a WireGuard-based overlay network that automatically connects your machines over an encrypted tunnel, leaving behind the hassle of opening ports, complex firewall rules, VPN gateways, and so forth.
+  Secure. NetBird enables secure remote access by applying granular access policies while allowing you to manage them intuitively from a single place. Works universally on any infrastructure.
+Moniker: netbird
+Tags:
+- network
+- security
+- vpn
+- wireguard
+ReleaseNotes: |-
+  What's New
+  Native SSH Access & OpenSSH Integration
+  NetBird v0.60.0 ships a complete rewrite of SSH access. Every peer can now run a built-in SSH server, giving you identity-aware, private SSH access over your NetBird network — using either the netbird ssh command or your existing OpenSSH clients.
+  Highlights
+  - Built-in SSH server on every peer - Enable with netbird up --allow-server-ssh and get a native SSH endpoint without exposing port 22 to the internet.
+  - Identity-aware access with JWT - SSH sessions are authenticated via your IdP (OIDC/JWT) by default, so you know which user accessed which machine.
+  - Works with netbird ssh and OpenSSH - Use netbird ssh user@<peer-ip> or standard ssh, sftp, and scp commands; NetBird configures OpenSSH automatically via a drop-in 99-netbird.conf.
+  - Port 22, transparently secured - NetBird listens on TCP 22022 and redirects NetBird-network port 22 traffic to it, so existing SSH workflows keep working without changing ports.
+  - Advanced features when you need them - Optional SFTP, local and remote port forwarding, root login, and JWT token caching (--ssh-jwt-cache-ttl) for fewer auth prompts.
+  - Machine identity mode (legacy behavior) - Prefer host-based trust? Disable JWT auth with --disable-ssh-auth and rely purely on network-level ACLs.
+  How it works
+  1. Enable the SSH server on the target peer
+  netbird down  # if already running
+  netbird up --allow-server-ssh
+  Add optional flags for SFTP, port forwarding, or root login as needed:
+  netbird up --allow-server-ssh \
+    --enable-ssh-local-port-forwarding \
+    --enable-ssh-remote-port-forwarding \
+    --enable-ssh-sftp \
+    --enable-ssh-root
+  2. Create an ACL policy for SSH
+     Allow TCP port 22022 from your SSH client peers/groups to your SSH server peers/groups in Access Control.
+  3. Enable SSH in the Dashboard
+     Open the target peer → enable SSH Access.
+  4. Connect via CLI or OpenSSH
+  - NetBird CLI:
+  netbird ssh user@100.119.230.104
+  - OpenSSH:
+  ssh user@100.119.230.104
+  sftp user@100.119.230.104
+  scp file.txt user@100.119.230.104:/path
+  📖 Read more in the SSH documentation: https://docs.netbird.io/how-to/ssh
+
+  Client Improvements
+  - Updated the client login success page with an improved user experience.
+    #4797
+  - Reverted deprecated gRPC client code migration to restore expected behavior.
+    #4805
+
+  Management Improvements
+  - Fixed handling of port ranges in route firewall rules to ensure accurate rule application.
+    #4801
+
+  Upgrade & Compatibility Notes
+  - ⚠️ NetBird SSH in v0.60.0 is a breaking change:
+    - Server port changed from 44338 → 22022
+    - Authentication moved from machine public keys to JWT-based user identity
+    - Implicit firewall rules were removed - you now need an explicit ACL for port 22022
+  - ⚠️ Version compatibility: v0.60.0+ SSH is not backward compatible with older peers.
+    For self-hosted environments, we recommend updating in this order:
+    1. Management server
+    2. Dashboard (for browser SSH, if used)
+    3. SSH servers first (peers with --allow-server-ssh)
+    4. SSH clients last (netbird ssh users)
+  Full Changelog: v0.59.13...v0.60.0
+ReleaseNotesUrl: https://github.com/netbirdio/netbird/releases/tag/v0.60.0
+PurchaseUrl: https://netbird.io/pricing
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://docs.netbird.io/
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

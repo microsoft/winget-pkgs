@@ -1,0 +1,271 @@
+# Created with komac v2.13.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: BiomeJS.Biome
+PackageVersion: 2.2.5
+PackageLocale: en-US
+Publisher: BiomeJS
+PublisherUrl: https://biomejs.dev/
+PublisherSupportUrl: https://github.com/biomejs/biome/issues
+Author: Biome Developers and Contributors
+PackageName: Biome
+PackageUrl: https://biomejs.dev/
+License: Apache-2.0
+Copyright: Copyright (c) 2023-present Biome Developers and Contributors
+ShortDescription: Biome is a toolchain for web projects, aimed at providing functionalities to maintain them. It offers a formatter and linter, usable via CLI and LSP.
+Moniker: biome
+Tags:
+- css
+- formatter
+- javascript
+- json
+- jsx
+- linter
+- static-code-analysis
+- typescript
+- web
+ReleaseNotes: |-
+  2.2.5
+  Patch Changes
+  - #7597 5c3d542 Thanks @arendjr! - Fixed #6432: useImportExtensions now works correctly with aliased paths.
+  - #7269 f18dac1 Thanks @CDGardner! - Fixed #6648, where Biome's noUselessFragments contained inconsistencies with ESLint for fragments only containing text.
+    Previously, Biome would report that fragments with only text were unnecessary under the noUselessFragments rule. Further analysis of ESLint's behavior towards these cases revealed that text-only fragments (<>A</a>, <React.Fragment>B</React.Fragment>, <RenamedFragment>B</RenamedFragment>) would not have noUselessFragments emitted for them.
+    On the Biome side, instances such as these would emit noUselessFragments, and applying the suggested fix would turn the text content into a proper JS string.
+    // Ended up as: - const t = "Text"
+    const t = <>Text</>
+    // Ended up as: - const e = t ? "Option A" : "Option B"
+    const e = t ? <>Option A</> : <>Option B</>
+    /* Ended up as:
+      function someFunc() {
+        return "Content desired to be a multi-line block of text."
+      }
+    */
+    function someFunc() {
+      return <>
+        Content desired to be a multi-line
+        block of text.
+      <>
+    }
+    The proposed update was to align Biome's reaction to this rule with ESLint's; the aforementioned examples will now be supported from Biome's perspective, thus valid use of fragments.
+    // These instances are now valid and won't be called out by noUselessFragments.
+    const t = <>Text</>
+    const e = t ? <>Option A</> : <>Option B</>
+    function someFunc() {
+      return <>
+        Content desired to be a multi-line
+        block of text.
+      <>
+    }
+  - #7498 002cded Thanks @siketyan! - Fixed #6893: The useExhaustiveDependencies rule now correctly adds a dependency that is captured in a shorthand object member. For example:
+    useEffect(() => {
+      console.log({ firstId, secondId });
+    }, []);
+    is now correctly fixed to:
+    useEffect(() => {
+      console.log({ firstId, secondId });
+    }, [firstId, secondId]);
+  - #7509 1b61631 Thanks @siketyan! - Added a new lint rule noReactForwardRef, which detects usages of forwardRef that is no longer needed and deprecated in React 19.
+    For example:
+    export const Component = forwardRef(function Component(props, ref) {
+      return <div ref={ref} />;
+    });
+    will be fixed to:
+    export const Component = function Component({ ref, ...props }) {
+      return <div ref={ref} />;
+    };
+    Note that the rule provides an unsafe fix, which may break the code. Don't forget to review the code after applying the fix.
+  - #7520 3f06e19 Thanks @arendjr! - Added new nursery rule noDeprecatedImports to flag imports of deprecated symbols.
+    Invalid example
+    // foo.js
+    import { oldUtility } from "./utils.js";
+    // utils.js
+    /**
+     * @deprecated
+     */
+    export function oldUtility() {}
+    Valid examples
+    // foo.js
+    import { newUtility, oldUtility } from "./utils.js";
+    // utils.js
+    export function newUtility() {}
+    // @deprecated (this is not a JSDoc comment)
+    export function oldUtility() {}
+  - #7457 9637f93 Thanks @kedevked! - Added style and requireForObjectLiteral options to the lint rule useConsistentArrowReturn.
+    This rule enforces a consistent return style for arrow functions. It can be configured with the following options:
+    - style: (default: asNeeded)
+      - always: enforces that arrow functions always have a block body.
+      - never: enforces that arrow functions never have a block body, when possible.
+      - asNeeded: enforces that arrow functions have a block body only when necessary (e.g. for object literals).
+    style: "always"
+    Invalid:
+    const f = () => 1;
+    Valid:
+    const f = () => {
+      return 1;
+    };
+    style: "never"
+    Invalid:
+    const f = () => {
+      return 1;
+    };
+    Valid:
+    const f = () => 1;
+    style: "asNeeded"
+    Invalid:
+    const f = () => {
+      return 1;
+    };
+    Valid:
+    const f = () => 1;
+    style: "asNeeded" and requireForObjectLiteral: true
+    Valid:
+    const f = () => {
+      return { a: 1 };
+    };
+  - #7510 527cec2 Thanks @rriski! - Implements #7339. GritQL patterns can now use native Biome AST nodes using their PascalCase names, in addition to the existing TreeSitter-compatible snake_case names.
+    engine biome(1.0)
+    language js(typescript,jsx)
+    or {
+      // TreeSitter-compatible pattern
+      if_statement(),
+      // Native Biome AST node pattern
+      JsIfStatement()
+    } as $stmt where {
+      register_diagnostic(
+        span=$stmt,
+        message="Found an if statement"
+      )
+    }
+  - #7574 47907e7 Thanks @kedevked! - Fixed 7574. The diagnostic message for the rule useSolidForComponent now correctly emphasizes <For /> and provides a working hyperlink to the Solid documentation.
+  - #7497 bd70f40 Thanks @siketyan! - Fixed #7320: The useConsistentCurlyBraces rule now correctly detects a string literal including " inside a JSX attribute value.
+  - #7522 1af9931 Thanks @Netail! - Added extra references to external rules to improve migration for the following rules: noUselessFragments & noNestedComponentDefinitions
+  - #7597 5c3d542 Thanks @arendjr! - Fixed an issue where package.json manifests would not be correctly discovered
+    when evaluating files in the same directory.
+  - #7565 38d2098 Thanks @siketyan! - The resolver can now correctly resolve .ts, .tsx, .d.ts, .js files by .js extension if exists, based on the file extension substitution in TypeScript.
+    For example, the linter can now detect the floating promise in the following situation, if you have enabled the noFloatingPromises rule.
+    foo.ts
+    export async function doSomething(): Promise<void> {}
+    bar.ts
+    import { doSomething } from "./foo.js"; // doesn't exist actually, but it is resolved to `foo.ts`
+    doSomething(); // floating promise!
+  - #7542 cadad2c Thanks @mdevils! - Added the rule noVueDuplicateKeys, which prevents duplicate keys in Vue component definitions.
+    This rule prevents the use of duplicate keys across different Vue component options such as props, data, computed, methods, and setup. Even if keys don't conflict in the script tag, they may cause issues in the template since Vue allows direct access to these keys.
+    Invalid examples
+    <script>
+    export default {
+      props: ["foo"],
+      data() {
+        return {
+          foo: "bar",
+        };
+      },
+    };
+    </script>
+    <script>
+    export default {
+      data() {
+        return {
+          message: "hello",
+        };
+      },
+      methods: {
+        message() {
+          console.log("duplicate key");
+        },
+      },
+    };
+    </script>
+    <script>
+    export default {
+      computed: {
+        count() {
+          return this.value * 2;
+        },
+      },
+      methods: {
+        count() {
+          this.value++;
+        },
+      },
+    };
+    </script>
+    Valid examples
+    <script>
+    export default {
+      props: ["foo"],
+      data() {
+        return {
+          bar: "baz",
+        };
+      },
+      methods: {
+        handleClick() {
+          console.log("unique key");
+        },
+      },
+    };
+    </script>
+    <script>
+    export default {
+      computed: {
+        displayMessage() {
+          return this.message.toUpperCase();
+        },
+      },
+      methods: {
+        clearMessage() {
+          this.message = "";
+        },
+      },
+    };
+    </script>
+  - #7546 a683acc Thanks @siketyan! - Internal data for Unicode strings have been updated to Unicode 17.0.
+  - #7497 bd70f40 Thanks @siketyan! - Fixed #7256: The useConsistentCurlyBraces rule now correctly ignores a string literal with braces that contains only whitespaces. Previously, literals that contains single whitespace were only allowed.
+  - #7565 38d2098 Thanks @siketyan! - The useImportExtensions rule now correctly detects imports with an invalid extension. For example, importing .ts file with .js extension is flagged by default. If you are using TypeScript with neither the allowImportingTsExtensions option nor the rewriteRelativeImportExtensions option, it's recommended to turn on the forceJsExtensions option of the rule.
+  - #7581 8653921 Thanks @lucasweng! - Fixed #7470: solved a false positive for noDuplicateProperties. Previously, declarations in @container and @starting-style at-rules were incorrectly flagged as duplicates of identical declarations at the root selector.
+    For example, the linter no longer flags the display declaration in @container or the opacity declaration in @starting-style.
+    a {
+      display: block;
+      @container (min-width: 600px) {
+        display: none;
+      }
+    }
+    [popover]:popover-open {
+      opacity: 1;
+      @starting-style {
+        opacity: 0;
+      }
+    }
+  - #7529 fea905f Thanks @qraqras! - Fixed #7517: the useOptionalChain rule no longer suggests changes for typeof checks on global objects.
+    // ok
+    typeof window !== "undefined" && window.location;
+  - #7476 c015765 Thanks @ematipico! - Fixed a bug where the suppression action for noPositiveTabindex didn't place the suppression comment in the correct position.
+  - #7511 a0039fd Thanks @arendjr! - Added nursery rule noUnusedExpressions to flag expressions used as a statement that is neither an assignment nor a function call.
+    Invalid examples
+    f; // intended to call `f()` instead
+    function foo() {
+      0; // intended to `return 0` instead
+    }
+    Valid examples
+    f();
+    function foo() {
+      return 0;
+    }
+  - #7564 40e515f Thanks @turbocrime! - Fixed #6617: improved useIterableCallbackReturn to correctly handle arrow functions with a single-expression void body.
+    Now the following code doesn't trigger the rule anymore:
+    [].forEach(() => void null);
+  What's Changed
+  - chore: add spanish readme translation by @Terraciano in #7465
+  - feat(yaml_parser): parse block scalars by @l0ngvh in #7417
+  - docs: improve noDuplicateDependencies by @Netail in #7471
+  - chore: repair changelog by @ematipico in #7477
+  - fix(noPositiveTabindex): suppression action by @ematipico in #7476
+  - fix(lint/useConsistentCurlyBraces): adjust condition to allow removing the braces by @siketyan in #7497
+  - fix(lint/useExhaustiveDependencies): correctly fix the dependency list from a shorthand object member by @siketyan in #7498
+  - chore(deps): update rust:1.89.0-bullseye docker digest to 8f72d97 by @renovate[bot] in #7506
+ReleaseNotesUrl: https://github.com/biomejs/biome/releases/tag/@biomejs/biome@2.2.5
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://biomejs.dev/guides/getting-started/
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

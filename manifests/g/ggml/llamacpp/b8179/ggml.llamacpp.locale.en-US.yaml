@@ -1,0 +1,73 @@
+# Created with komac v2.15.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: ggml.llamacpp
+PackageVersion: b8179
+PackageLocale: en-US
+Publisher: ggml
+PublisherUrl: https://github.com/ggml-org
+PublisherSupportUrl: https://github.com/ggml-org/llama.cpp/issues
+PackageName: llama.cpp
+PackageUrl: https://github.com/ggml-org/llama.cpp
+License: MIT
+LicenseUrl: https://github.com/ggml-org/llama.cpp/blob/HEAD/LICENSE
+ShortDescription: LLM inference in C/C++
+Tags:
+- ggml
+- llama
+ReleaseNotes: |-
+  CUDA: add CDNA3 MFMA support for flash attention MMA kernel (#19806)
+  - CUDA: add CDNA3 MFMA support for flash attention MMA kernel
+  Add MI300X (gfx942) MFMA tensor core flash attention using
+  v_mfma_f32_16x16x16_f16 (FP16 in, FP32 accumulate).
+  - Add FATTN_WARP_SIZE=64 for CDNA wavefront64
+  - Add CDNA config for head sizes 64, 80, 96, 112, 128
+  - Add FP16 MFMA intrinsic path in mma.cuh
+  - Add manual V transpose load for MFMA register layout
+  - Route CDNA to MMA for prompt processing, VEC for token generation
+  - Fix Q loading and combine stride granularity for non-power-of-2 heads
+  Benchmarks (Qwen2.5-1.5B Q4_K_M, MI300X):
+  pp512 +7%, pp1024 +13%, pp2048 +23%, pp4096 +39%
+  tg128 -10% (FA overhead, VEC used for both)
+  All 2480 flash attention tests pass.
+  Ref: #17917
+  - address review: replace FATTN_WARP_SIZE with constexpr, improve dispatch
+  - Replace #define FATTN_WARP_SIZE with constexpr int warp_size =
+    ggml_cuda_get_physical_warp_size() in each device function
+  - Use ne[1]*gqa_ratio threshold for MMA vs tile dispatch. Benchmarked
+    crossover on MI300X @ d32768 with power-of-2 GQA models:
+    hsk=64 (Llama 1B, gqa=4): MMA wins at eff >= 128 (+11%)
+    hsk=128 (Llama 3B, gqa=4): MMA wins at eff >= 128 (+4%)
+    Unified threshold: eff_nq >= 128 for all head sizes.
+  - Remove VEC fallback; small batches fall through to tile kernel
+  - Update ggml/src/ggml-cuda/fattn.cu
+  - use ggml_cuda_info().devices warp_size instead of hardcoded check
+  Co-authored-by: Johannes Gäßler johannesg@5d6.de
+  macOS/iOS:
+  - macOS Apple Silicon (arm64)
+  - macOS Intel (x64)
+  - iOS XCFramework
+  Linux:
+  - Ubuntu x64 (CPU)
+  - Ubuntu x64 (Vulkan)
+  - Ubuntu x64 (ROCm 7.2)
+  - Ubuntu s390x (CPU)
+  Windows:
+  - Windows x64 (CPU)
+  - Windows arm64 (CPU)
+  - Windows x64 (CUDA 12) - CUDA 12.4 DLLs
+  - Windows x64 (CUDA 13) - CUDA 13.1 DLLs
+  - Windows x64 (Vulkan)
+  - Windows x64 (SYCL)
+  - Windows x64 (HIP)
+  openEuler:
+  - openEuler x86 (310p)
+  - openEuler x86 (910b, ACL Graph)
+  - openEuler aarch64 (310p)
+  - openEuler aarch64 (910b, ACL Graph)
+ReleaseNotesUrl: https://github.com/ggml-org/llama.cpp/releases/tag/b8179
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/ggml-org/llama.cpp/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

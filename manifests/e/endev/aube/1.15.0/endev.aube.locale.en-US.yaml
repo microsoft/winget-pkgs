@@ -1,0 +1,48 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: endev.aube
+PackageVersion: 1.15.0
+PackageLocale: en-US
+Publisher: en.dev
+PublisherUrl: https://en.dev/
+PublisherSupportUrl: https://github.com/endevco/aube/discussions/categories/troubleshooting-and-bugs
+Author: en.dev
+PackageName: aube
+PackageUrl: https://aube.en.dev/
+License: MIT
+LicenseUrl: https://github.com/endevco/aube/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 en.dev inc
+CopyrightUrl: https://github.com/endevco/aube/blob/HEAD/LICENSE
+ShortDescription: A fast Node.js package manager
+Description: |-
+  aube is a package manager for Node.js projects. It uses pnpm-style isolated node_modules for fast, disk-efficient installs.
+
+  Existing projects keep their lockfile format. aube reads and writes pnpm-lock.yaml, package-lock.json, npm-shrinkwrap.json, yarn.lock, and bun.lock in place. New projects without a supported lockfile get aube-lock.yaml.
+
+  Why Try It
+  - Fast installs. Warm installs are about 8x faster than pnpm and about 5x faster than Bun in the current benchmarks. Repeat test commands run up to 35x faster than pnpm and up to 5x faster than Bun.
+  - Existing lockfiles. Reads and writes pnpm-lock.yaml, package-lock.json, npm-shrinkwrap.json, yarn.lock, and bun.lock in place.
+  - Cheap repeat commands. aubr test, aube test, and aube exec vitest auto-install when dependencies are stale, then skip that work when nothing changed. aubx uses a local binary when one is installed, or a throwaway environment for one-off tools.
+  - Less disk use. A global content-addressable store lets projects share package files instead of keeping a full copy of the same dependencies in every checkout.
+  - Secure defaults. Out of the box, exotic transitive deps are blocked, lifecycle scripts wait for approval, trust downgrades fail at resolve, and brand-new releases sit in a 24h cooling window. One paranoid: true line adds the build jail and turns the soft gates into hard fails.
+Moniker: aube
+ReleaseNotes: |-
+  This release closes three Yarn Berry compatibility gaps (portal:, exec:, and patch: protocols), adds an aube add --deny-build flag for strictDepBuilds=true workflows, and fixes two install-correctness bugs around workspace updates and Bun patched dependencies.
+  Added
+  - (yarn) Berry portal: and exec: protocols (#729 by @jdx) — Yarn Berry lockfile entries using portal: and exec: are now parsed instead of skipped, and round-trip cleanly when aube writes the lockfile back (portal: as linkType: soft, exec: as a generated hard-link package). portal: targets materialize as local packages whose dependencies are followed (matching Yarn's documented difference from link:); exec: generator scripts run into a temp build directory and the generated package is imported, with versions and dependencies locked at resolve time. exec: generators require Node.js on PATH, are blocked under --ignore-scripts, and are rejected if the generator path resolves outside the project root.
+  - (yarn) Berry patch: protocol (#728 by @jdx) — Berry patch: resolutions are now parsed into aube's patched-dependency map (builtin patches are skipped), preserved on lockfile write, and threaded through install/link so the referenced Yarn patch files are actually applied during materialization. Previously these entries were silently dropped, so Berry projects relying on patch: could install with unpatched package contents.
+  - (add) aube add --deny-build=<pkg> (#730, closes #726, by @jdx) — Repeatable flag that records a dependency's lifecycle scripts as reviewed-and-denied by writing allowBuilds.<pkg>=false before install. This lets strictDepBuilds=true workflows explicitly skip selected package builds without failing the install, and is forwarded through global installs (aube add -g --deny-build=<pkg>). Specifying the same package in both --allow-build and --deny-build is rejected with the new ERR_AUBE_CONFLICTING_BUILD_FLAGS.
+    # Mark esbuild's postinstall as reviewed-and-denied, then install
+    aube add --deny-build=esbuild esbuild
+
+  Fixed
+  - (update) Workspace-member aube update writes to the root lockfile (#732 by @jdx) — aube update run inside a workspace member previously started from the nearest project root and produced sub/aube-lock.yaml, disagreeing with aube install (which already targets the workspace root). Plain member updates now merge into the shared workspace-root aube-lock.yaml via the same helper used by filtered/recursive updates, carrying per-importer workspace_extra_fields alongside dependency and skipped-optional metadata.
+  - (bun) Bun top-level patchedDependencies are applied at install (#724 by @jdx) — aube preserved Bun's package.json#patchedDependencies in bun.lock, but install-time patch loading only read pnpm.patchedDependencies, aube.patchedDependencies, and workspace YAML entries — so Bun-only projects could install successfully while materializing unpatched package contents. Bun's top-level field is now merged into the patch sources used by install (including for BOM-prefixed package.json), and is correctly removed when the map becomes empty.
+
+  💚 Sponsor aube
+  aube is part of en.dev — an independent developer-tooling studio run by @jdx, also behind mise. Work on aube is funded entirely by sponsors.
+  If aube is saving your team install time or CI minutes, please consider sponsoring at en.dev. Individual and company sponsorships are what keep the project fast, free, and independent.
+ReleaseNotesUrl: https://github.com/endevco/aube/releases/tag/v1.15.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
