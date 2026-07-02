@@ -6,7 +6,7 @@
 #Notes: Utilities to streamline evaluating 3rd party PRs.
 #Secure/Stable/Scalable is the new Works/Fast/Pretty
 
-$build = 1765
+$build = 1770
 $appName = "ManualValidationPipeline"
 Write-Host "$appName build: $build"
 $Owner = "microsoft"
@@ -5989,6 +5989,24 @@ Function Get-SchemaCheck {
 				}# end if Optional
 			}# end if DataStrand
 		}#end if SchemaInfo
+		$Item = $Enum.SchemaKeysEtc.title
+		if ($SchemaInfo.($Item)) {
+			if ($Display) {Write-Host "Get-SchemaCheck Schema $Item Start $DataToVerify"};
+			$SchemaKeys.Remove($item)
+			$DataStrand = $DataToVerify
+			$SchemaStrand = $SchemaInfo.($Item)
+			# if ($DataStrand -match $SchemaStrand) {
+				if ($Display) {Write-Host "Get-SchemaCheck Schema $Item Pass"};
+			# } else {
+				# if ($Optional) {
+					# if ($Display) {Write-Host "Get-SchemaCheck Schema $Item optional"};
+					# Return $Null
+				# } else {
+					# if ($Display) {Write-Host "Get-SchemaCheck Schema $Item FastFail mandatory but not matching!!!"};
+					# Return $Tombstone
+				# }# end if Optional
+			# }# end if DataStrand
+		}#end if SchemaInfo
 		$Item = $Enum.SchemaKeysEtc.Default
 		if ($SchemaInfo.($Item)) {
 			if ($Display) {Write-Host "Get-SchemaCheck Schema $Item Start $DataToVerify"};
@@ -6119,19 +6137,15 @@ Function Get-SchemaFinder {
 				}
 				$enum.ManifestinstallerProperties.WindowsFeatures {
 					$schemaData.($File).definitions.Dependencies.Properties.($Property)
-# Items - Means it follows the 3rd path.
 				}
 				$enum.ManifestinstallerProperties.WindowsLibraries {
 					$schemaData.($File).definitions.Dependencies.Properties.($Property)
-# Items
 				}
 				$enum.ManifestinstallerProperties.PackageDependencies {
 					$schemaData.($File).definitions.Dependencies.Properties.($Property)
-# Items
 				}
 				$enum.ManifestinstallerProperties.ExternalDependencies {
 					$schemaData.($File).definitions.Dependencies.Properties.($Property)
-# Items
 				}
 				$enum.ManifestinstallerProperties.ExpectedReturnCodes {
 					$schemaData.($File).definitions.($Property)
@@ -6181,6 +6195,57 @@ Function Get-SchemaFinder {
 				$enum.ManifestinstallerProperties.Repair {
 					$schemaData.($File).definitions.InstallerSwitches.Properties.($Property)
 				}
+				$enum.ManifestinstallerProperties.Platform_Items {
+					$schemaData.($File).definitions.Platform.items
+				}
+				$enum.ManifestinstallerProperties.NestedInstallerFiles_Items {
+					$schemaData.($File).definitions.NestedInstallerFiles.items
+				}
+				$enum.ManifestinstallerProperties.InstallModes_Items {
+					$schemaData.($File).definitions.InstallModes.items
+				}
+				$enum.ManifestinstallerProperties.InstallerSuccessCodes_Items {
+					$schemaData.($File).definitions.InstallerReturnCodes
+				}
+				$enum.ManifestinstallerProperties.ExpectedReturnCodes_Items {
+					$schemaData.($File).definitions.ExpectedReturnCodes.items
+				}
+				$enum.ManifestinstallerProperties.Commands_Items {
+					$schemaData.($File).definitions.Commands.items
+				}
+				$enum.ManifestinstallerProperties.Protocols_Items {
+					$schemaData.($File).definitions.Protocols.items
+				}
+				$enum.ManifestinstallerProperties.FileExtensions_Items {
+					$schemaData.($File).definitions.FileExtensions.items
+				}
+				$enum.ManifestinstallerProperties.WindowsFeatures_Items {
+					$schemaData.($File).definitions.Dependencies.properties.WindowsFeatures.items
+				}
+				$enum.ManifestinstallerProperties.WindowsLibraries_Items {
+					$schemaData.($File).definitions.Dependencies.properties.WindowsLibraries.items
+				}
+				$enum.ManifestinstallerProperties.ExternalDependencies_Items {
+					$schemaData.($File).definitions.Dependencies.properties.ExternalDependencies.items
+				}
+				$enum.ManifestinstallerProperties.Capabilities_Items {
+					$schemaData.($File).definitions.Capabilities.items
+				}
+				$enum.ManifestinstallerProperties.RestrictedCapabilities_Items {
+					$schemaData.($File).definitions.RestrictedCapabilities.items
+				}
+				$enum.ManifestinstallerProperties.MarketArray_Items {
+					$schemaData.($File).definitions.Market
+				}
+				$enum.ManifestinstallerProperties.UnsupportedOSArchitectures_Items {
+					$schemaData.($File).definitions.UnsupportedOSArchitectures.items
+				}
+				$enum.ManifestinstallerProperties.UnsupportedArguments_Items {
+					$schemaData.($File).definitions.UnsupportedArguments.items
+				}
+				$enum.ManifestinstallerProperties.AppsAndFeaturesEntries_Items {
+					$schemaData.($File).definitions.Commands.items
+				}
 				$enum.ManifestinstallerProperties.ManifestType {
 					$schemaData.($File).Properties.($Property)
 				}
@@ -6189,23 +6254,18 @@ Function Get-SchemaFinder {
 				}
 				$enum.ManifestinstallerProperties.Platform {
 					$schemaData.($File).definitions.($Property)
-# Items
 				}
 				$enum.ManifestinstallerProperties.Protocols {
 					$schemaData.($File).definitions.($Property)
-# Items
 				}
 				$enum.ManifestinstallerProperties.RestrictedCapabilities {
 					$schemaData.($File).definitions.($Property)
-# Items
 				}
 				$enum.ManifestinstallerProperties.UnsupportedArguments {
 					$schemaData.($File).definitions.($Property)
-# Items
 				}
 				$enum.ManifestinstallerProperties.UnsupportedOSArchitectures {
 					$schemaData.($File).definitions.($Property)
-# Items - Means it follows the 3rd path.
 				}
 				$enum.ManifestinstallerProperties.UpgradeBehavior {
 					$schemaData.($File).definitions.($Property)
@@ -6253,6 +6313,9 @@ Function Get-SchemaFinder {
 				$enum.ManifestDefaultLocaleProperties.AgreementUrl {
 					$schemaData.($File).definitions.Url
 				}
+				$enum.ManifestDefaultLocaleProperties.Description_Items {
+					$schemaData.($File).properties.Description
+				}
 				$enum.ManifestDefaultLocaleProperties.Documentations {
 					$schemaData.($File).definitions.Documentation
 				}
@@ -6289,7 +6352,7 @@ Function Get-SchemaFinder {
 				$enum.ManifestDefaultLocaleProperties.Icons {
 					$schemaData.($File).Properties.($Property)
 				}
-				$enum.ManifestLocaleProperties.Icons_Items {
+				$enum.ManifestDefaultLocaleProperties.Icons_Items {
 					$schemaData.($File).definitions.Icon
 				}
 				$enum.ManifestDefaultLocaleProperties.Icon {
@@ -6496,13 +6559,17 @@ Function Get-ManifestValidation {
 			if ($Display2) {Write-Host "S: $s - Filename: $Filename - String $String"}
 	#First, match against enum'd string indentation, and put that in a var
 			foreach ($Indentation in (Get-Keys $enum.IndentationStylesReverse)) {
-				if ($String -match ("^"+$Indentation)) {
+				if ($Display) {Write-Host "Indentation $($enum.IndentationStylesReverse.($Indentation))"}
+				if ($String -match ("^"+$Indentation+"[a-zA-Z]")) {
 					if ($Display) {Write-Host "Found Indentation $($enum.IndentationStylesReverse.($Indentation))"}
 					$out += $Indentation
 					$String = $String -replace $Indentation,""
 				}; #end if String
 			}; #end foreach Indentation
 	#Then, use the matched key type to build the key part. Then match against that key part, and also store that in a var.
+			if ($String -match "[:] |-") {
+				$String = $string -replace "[:] [|][-]",":-" #Need to hide the space between the colon and the pipe, so it skips the first option below but hits the second.
+			}
 			if ($String -match "[:] ") {
 				if ($Display) {Write-Host "Yaml detected"}
 				foreach ($Property in (Get-Values $PropertiesToUse)) {
@@ -6531,15 +6598,19 @@ Function Get-ManifestValidation {
 					if ($SplitString[0] -eq $Property) {
 						$ListKey = $Property
 						if ($Display) {Write-Host "Found ListKey $Property"}
+						if ($SplitString[1] -match "-") {
+							$PropertyColon = $PropertyColon + " |-"
+						} 
 						$out += $PropertyColon
 					}; #end if String
 				}; #end foreach Property
 			} elseif ($String -ne "") {
 	#If you are here, then you're a list item. 
 				if ($ListKey -ne "") {
-					$ListKey = $ListKey -replace "s$",""  -replace "ie$","y" 
-					if ($Display) {Write-Host "Yaml List Item $ListKey detected"}
-					$SchemaToUse = Get-SchemaFinder -File $FileType -Property "$ListKey-item"
+					# $ListKey = $ListKey -replace "s$",""  -replace "ie$","y" 
+					$ItemKey = $ListKey  + "_items"
+					if ($Display) {Write-Host "Yaml List Item $ItemKey detected"}
+					$SchemaToUse = Get-SchemaFinder -File $FileType -Property $ItemKey
 					if ($Display) {Write-Host "SchemaToUse $($SchemaToUse.description)"}
 					$SchemaCheck = Get-SchemaCheck -InputData $String -SchemaInfo $SchemaToUse
 					if ($Display) {Write-Host "Found Data $SchemaCheck"}
