@@ -1,0 +1,68 @@
+# Created with WinGet Tracker using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: t8y2.DBX
+PackageVersion: 0.5.42
+PackageLocale: en-US
+Publisher: t8y2
+PublisherUrl: https://github.com/t8y2
+PublisherSupportUrl: https://github.com/t8y2/dbx/issues
+Author: t8y2
+PackageName: DBX
+PackageUrl: https://github.com/t8y2/dbx
+License: Apache-2.0
+LicenseUrl: https://github.com/t8y2/dbx/blob/HEAD/LICENSE
+ShortDescription: 15MB，lightweight, cross-platform database client. Supports MySQL, PostgreSQL, SQLite, Redis, MongoDB, DuckDB, ClickHouse, SQL Server and more.
+Tags:
+- clickhouse
+- database
+- database-client
+- database-management
+- duckdb
+- gui
+- mongodb
+- mysql
+- postgresql
+- redis
+- rust
+- sql-server
+- sqlite
+- tauri
+- vue
+ReleaseNotes: |-
+  新功能
+  - OSCAR 数据库 — 新增 OSCAR 数据库支持，补齐连接、查询和基础元数据浏览能力。
+  - MongoDB Shell — 支持 db.collection.createIndex(keys, options)，可直接在 shell 风格命令里创建索引并返回索引名 (contributed by @onenewcode, closes #2187)
+  - SQL Server 兼容模式 — 高级设置新增旧版兼容模式，可在 TLS 握手失败或旧版本服务端环境中使用非加密连接。
+  - SQL 补全 — SELECT 列表支持按表名/别名展开全部字段，并优化 FROM、LIMIT、AND/OR 等上下文关键字排序 (contributed by @zipg)
+  - 数据网格 — 新增表格字号调节，查询结果和表数据的 Canvas、DOM、转置视图与编辑状态统一生效 (contributed by @zipg)
+  - 标签页 — 支持标签页切换快捷键，固定标签页会单独显示为一行，便于区分长期保留的工作区。
+  - Kafka — 新增 Kafka MQ Admin Client 支持，便于管理和浏览 Kafka 资源。 (contributed by @onceMisery )
+  - 打包安装 — 新增 Windows WebView2 离线安装包，并支持 NixOS 打包。
+  改进
+  - 表结构编辑 — 字段拖拽排序改为 pointer 跟踪，发布版中拖拽按钮可正常排序，并显示插入位置提示；SQL Server 新增字段支持设置 IDENTITY 自增 (contributed by @zipg, closes #2119, closes #2254)
+  - SQL 执行入口 — 左侧 gutter 运行按钮复用统一执行目标解析，避免多条 SQL 只执行第一条；大 SQL 滚动时缓存可执行范围，减少编辑器卡顿 (contributed by @zipg, closes #2256)
+  - 单元格详情 — 记住 JSON 格式化开关，侧边栏和弹窗保持一致；格式化编辑提示限制次数，减少重复打扰 (contributed by @zipg, closes #2252)
+  - 连接与驱动 — 连接失败时提示可更新的内置驱动；隐藏不适用的 native agent JRE 标记；Agent/JRE 下载流程更健壮 (contributed by @zipg)
+  - Web 部署 — 图标资源遵守 DBX_PUBLIC_BASE_PATH，Agent 驱动默认持久化到 DBX_DATA_DIR/agents，便于 Docker/Web 部署 (contributed by @CN-Scars)
+  - AI — 查询超时错误页可跳转到超时设置；OpenAI-compatible Provider 的工具调用流式解析更稳定，保留工具名和 UTF-8 内容 (contributed by @lc6464, @jischeng)
+  - 界面交互 — SQL 库根层文件点击后高亮正确，数据库打开状态可在连接树展示，更多高风险操作收纳到子菜单 (contributed by @eryajf, closes #2250, closes #2251)
+  - 国际化 — 补齐意大利语缺失文案 (contributed by @fraluc06)
+  修复
+  - 数据网格复制 — 修复编辑行后复制 INSERT/UPDATE 仍使用旧值的问题，复制 SQL 会随当前单元格值重新生成 (closes #2204)
+  - SQL Server — 修复 BIT/nullable BIT 编辑生成 TRUE/FALSE、默认值修改 SQL 报错、列注释显示、rowversion 迁移写入失败、IDENTITY_INSERT 补全缺失等问题 (contributed by @zipg, closes #2208, closes #2190, closes #2146, closes #2093)
+  - MongoDB — 修复旧版 MongoDB legacy agent 不支持 updateOne/updateMany 的问题；复制 JSON/INSERT、createIndex 和 shell 执行路径也做了兼容补齐 (closes #2207)
+  - Elasticsearch — 更新和删除带 _routing 的文档时会保留并传递 routing，避免路由索引写入失败 (closes #2217)
+  - Oracle — 修复 XMLTYPE 查询可能返回 NULL 或 TTC 错误的问题；恢复对象浏览元数据；修复注释开头查询不返回结果表 (closes #2259)
+  - MySQL / MariaDB — 修复 enum 类型带字符集/排序规则后编辑识别错误、DESC UPDATE 行内执行按钮重复、存储过程 SELECT 结果不显示、无选中数据库时创建数据库失败等问题 (closes #2247, closes #2245)
+  - PostgreSQL / GaussDB — 修复联合外键 DDL 导出被拆分、GaussDB 浏览对象报错、owned sequence 迁移丢失、重载过程重复显示等问题 (contributed by @zipg, @weihanhan, closes #2091, closes #2186)
+  - ClickHouse / Lake 表 — 修复带顶层 SETTINGS 的分页 SQL 位置错误；无快照 Lake/外部表打开时降级为 LIMIT 0 预览结构 (contributed by @CN-Scars, @jischeng, closes #2206, closes #2197)
+  - OceanBase / Kingbase / Milvus — 同步 OceanBase 查询超时到服务端会话；修复 Kingbase 新增字段 SQL 语法；Milvus 集合列表使用用户指定数据库 (contributed by @zipg, @lexmin0412, closes #2156, closes #2180, closes #2087)
+  - 对象浏览与侧边栏 — 修复对象浏览器标签页切回后布局异常、简单视图侧边栏分页超量、连接树偶发只剩用户与权限等问题 (contributed by @zipg, closes #2223, closes #2092)
+  - 导出与传输 — 导出 DDL 自动追加分号；SQL Server rowversion 迁移时跳过自动生成列；DuckDB 空占位数据库文件处理更稳。
+  - Web / 驱动安装 — 修复 Web 版 agent driver 持久化、离线驱动下载说明、fallback agent batch 错误处理等问题 (contributed by @CN-Scars)
+  - 稳定性 — 修复 SQL 子查询语义诊断误报，并将自动诊断默认关闭以降低大 SQL 性能影响；SQL 预览高亮失败会回退纯文本避免白屏。
+  > 国内下载：如果 GitHub 下载较慢，可从 CNB 镜像 下载桌面端安装包，Docker 镜像从 docker.cnb.cool/dbxio.com/dbx:0.5.42 拉取。
+ReleaseNotesUrl: https://github.com/t8y2/dbx/releases/tag/v0.5.42
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
