@@ -111,6 +111,8 @@ Need work:
 
 
 
+
+
 //////////////////////////////////////////====================////////////////////////////////////////
 //////////////////////====================--------------------====================////////////////////
 //====================--------------------      Init vars     --------------------====================
@@ -140,7 +142,7 @@ using System.Web.Script.Serialization;
 namespace WinGetApprovalNamespace {
     public class WinGetApprovalPipeline : Form {
 		//vars
-        public int build = 934;//Get-RebuildPipeApp
+        public int build = 935;//Get-RebuildPipeApp
 		public string appName = "WinGetApprovalPipeline";
 		public string appTitle = "WinGet Approval Pipeline - Build ";
 		public static string owner = "microsoft";
@@ -203,8 +205,7 @@ namespace WinGetApprovalNamespace {
         public Regex regex_hashPRRegexEnd = new Regex(@string_hashPRRegexEnd);
         public Regex regex_colonPRRegex = new Regex(@string_colonPRRegex);
 		
-		public string file_GitHubToken = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + "\\Documents\\PowerShell\\ght.txt";
-		//public string file_GitHubToken = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + "\\Documents\\PowerShell\\ght.txt";
+		// public string file_GitHubToken = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + "\\Documents\\PowerShell\\ght.txt";
 		public string GitHubToken;
 		public bool TokenLoaded = false;
 		public int GitHubRateLimitDelay = 333; // ms
@@ -265,8 +266,8 @@ namespace WinGetApprovalNamespace {
 		int table_vm_Row_Index = 0;
 		
 		//PRWatch
-		public string oldclip = "";
-		public string PRTitle = "";
+		public string oldclip;
+		public string PRTitle;
 
 		//Grid
 		public static int gridItemWidth = 70;
@@ -301,7 +302,12 @@ namespace WinGetApprovalNamespace {
 		
         public WinGetApprovalPipeline() {
 			if (TokenLoaded == false) {
-				GitHubToken = GetContent(file_GitHubToken);
+			try {
+				GitHubToken = GetUserCredential("GitHubToken").password;
+			} catch (Exception e) {
+				MessageBox.Show("GitHubToken GetUserCredential error: " + e.Message, "Error");
+			}//end try
+
 				if (GitHubToken.Length > 0) {
 					TokenLoaded = true;
 				}
@@ -335,7 +341,9 @@ namespace WinGetApprovalNamespace {
 			drawMenuBar();
 			drawUrlBoxAndGoButton();
 			RefreshStatus();
-			
+
+		
+		
         } // end WinGetApprovalPipeline		
 
 
@@ -2530,7 +2538,7 @@ bool ConnectionStatus = vm.Scope.IsConnected;
 			StandardInput = process.StandardInput;
 			StandardOut = process.StandardOutput;
 			StandardInput.AutoFlush = true;
-			StandardInput.WriteLine(command);
+			// StandardInput.WriteLine(command);
 			StandardInput.Close();
 			
 			string_out = StandardOut.ReadToEnd();
@@ -2551,27 +2559,49 @@ bool ConnectionStatus = vm.Scope.IsConnected;
 		
 		public int FindWinGetTotalVersions(string PackageIdentifier) {
 			string string_out = "";	
-			string command = "(((winget search " + PackageIdentifier + " --exact --disable-interactivity --versions --disable-interactivity) -join ',' -replace '-+,','' -split 'Version,')[1] -split ',').count";
-
+			// string command = "winget search " + PackageIdentifier + " --exact --disable-interactivity";
+			string commandSpace  = " ";
+			string commandSearch  = "search";
+			string commandPackageIdentifier  = PackageIdentifier;
+			string commandFlags  = "--exact --disable-interactivity";
+			string Arguments = commandSpace + commandSearch + commandSpace + PackageIdentifier + commandSpace + commandFlags;
+			// string command = "winget" + Arguments;
+			
 			Process process = new Process();
 			StreamWriter StandardInput;
 			StreamReader StandardOut;
-			ProcessStartInfo processStartInfo = new ProcessStartInfo("PowerShell.exe");
+			// ProcessStartInfo processStartInfo = new ProcessStartInfo("PowerShell.exe");
+			ProcessStartInfo processStartInfo = new ProcessStartInfo("winget.exe");
 			processStartInfo.UseShellExecute = false;
 			processStartInfo.RedirectStandardInput = true;
 			processStartInfo.RedirectStandardOutput = true;
 			processStartInfo.RedirectStandardError = true;
 			processStartInfo.CreateNoWindow = true;
+			processStartInfo.Arguments = Arguments;
 			process.StartInfo = processStartInfo;
 			process.Start();
 
 			StandardInput = process.StandardInput;
 			StandardOut = process.StandardOutput;
 			StandardInput.AutoFlush = true;
-			StandardInput.WriteLine(command);
+			// StandardInput.WriteLine(command);
 			StandardInput.Close();
 			
 			string_out = StandardOut.ReadToEnd();
+			// try {
+				// string_out = string_out
+				// .Split('\n')
+				// .Where(n => !n.Contains("disable-interactivity"))
+				// .Where(n => n.ToLower().Contains(PackageIdentifier.ToLower())).FirstOrDefault();
+				
+				// int stringStart = string_out.IndexOf(PackageIdentifier);
+				// string_out = string_out.Substring(stringStart);
+				// string_out = string_out.Split(' ')[1];
+			// } catch {
+				// string_out = "";
+			// }
+			// return string_out;
+						
 			// outBox_msg.AppendText(Environment.NewLine + "Testing2: " + string_out); 
 			foreach (string string_in in string_out.Split('\n')) {
 				if (string_in.Length > 1 && string_in.Length < 5) {
@@ -2591,7 +2621,7 @@ bool ConnectionStatus = vm.Scope.IsConnected;
 //////////////////////====================--------------------====================////////////////////
 //////////////////////////////////////////====================////////////////////////////////////////
 
-public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string PackageVersion = "", int PR = 0, string Arch = "",string Scope = "", string InstallerType = "",string OS = "",string Locale = "",bool InspectNew = false,bool notElevated = false,string MinimumOSVersion = "", string ManualDependency = "", bool NoFiles = false, string installerLine = "", string Operation = "Scan"){
+		public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string PackageVersion = "", int PR = 0, string Arch = "",string Scope = "", string InstallerType = "",string OS = "",string Locale = "",bool InspectNew = false,bool notElevated = false,string MinimumOSVersion = "", string ManualDependency = "", bool NoFiles = false, string installerLine = "", string Operation = "Scan"){
 	/* Vaidation orchestration
 	Construct WinGet args string and populate script variables.
 	- if Configure - skip all of this and just add the Configure file as the WinGet arg.
@@ -3948,6 +3978,88 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 
 
 
+//////////////////////////////////////////====================////////////////////////////////////////
+//////////////////////====================--------------------====================////////////////////
+//===================-------------------   Credential Manager  -------------------====================
+//////////////////////====================--------------------====================////////////////////
+//////////////////////////////////////////====================////////////////////////////////////////
+
+		[DllImport("advapi32.dll", EntryPoint = "CredReadW", CharSet = CharSet.Unicode, SetLastError = true)]
+		private static extern bool CredRead(string target, int type, int reservedFlag, out IntPtr credentialPtr);
+		//Extend/reference CredReadW as CredRead.
+
+		public static Credential GetUserCredential(string target) {
+			CredentialMem credMem;
+			IntPtr credPtr;
+			if (CredRead(target, 1, 0, out credPtr)) { //If found, returns true and adds to credPtr, else false and error. 
+				credMem = Marshal.PtrToStructure<CredentialMem>(credPtr); 
+				//"Marshals data from an unmanaged block of memory to a newly allocated managed object of the type specified by a generic type parameter."
+				byte[] passwordBytes = new byte[credMem.credentialBlobSize]; //Make a new byte array passwordBytes of size credentialBlobSize.
+				Marshal.Copy(credMem.credentialBlob, passwordBytes, 0, credMem.credentialBlobSize); 
+				//Copies data from an unmanaged memory pointer to a managed 8-bit unsigned integer array.
+				//
+				Credential cred = new Credential(credMem.targetName, credMem.userName, Encoding.Unicode.GetString(passwordBytes)); //Make a new Credential object cred.
+				//Original example doesn't include these:
+				Marshal.FreeHGlobal(credPtr);
+				// Marshal.FreeHGlobal(credMem.credentialBlob);
+				return cred;
+			} else {
+				throw new Exception("Failed to retrieve credentials");
+			}
+		}
+
+		[DllImport("Advapi32.dll", SetLastError = true, EntryPoint = "CredWriteW", CharSet = CharSet.Unicode)]
+		private static extern bool CredWrite([In] ref CredentialMem userCredential, [In] int flags);
+		//Extend/reference CredWriteW as CredWrite.
+
+		public static void SetUserCredential(string target, string userName, string password) {
+			//New CredentialMem object userCredential
+			CredentialMem userCredential = new CredentialMem();
+			userCredential.targetName = target;
+			userCredential.type = 1;
+			userCredential.userName = userName;
+			userCredential.attributeCount = 0;
+			userCredential.persist = 3;
+			byte[] bpassword = Encoding.Unicode.GetBytes(password);
+			userCredential.credentialBlobSize = (int)bpassword.Length;
+			userCredential.credentialBlob = Marshal.StringToCoTaskMemUni(password);
+			//If write fails, emit last error. 
+			if (!CredWrite(ref userCredential, 0)) {
+				throw new System.ComponentModel.Win32Exception(Marshal.GetLastWin32Error());
+			}
+			//Original example doesn't include this. Was going to use FreeCoTaskMem as recommended, but this gave an error. 
+			Marshal.FreeHGlobal(userCredential.credentialBlob);
+		}
+
+		[StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+		public struct CredentialMem {
+			public int flags;
+			public int type;
+			public string targetName;
+			public string comment;
+			public System.Runtime.InteropServices.ComTypes.FILETIME lastWritten;
+			public int credentialBlobSize;
+			public IntPtr credentialBlob;
+			public int persist;
+			public int attributeCount;
+			public IntPtr credAttribute;
+			public string targetAlias;
+			public string userName;
+		}
+
+		public class Credential {
+			public string target;
+			public string username;
+			public string password;
+			public Credential(string target, string username, string password) {
+				this.target = target;
+				this.username = username;
+				this.password = password;
+			}
+		}
+
+
+
 
 //////////////////////////////////////////====================////////////////////////////////////////
 //////////////////////====================--------------------====================////////////////////
@@ -3978,7 +4090,6 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 			}
 			return string_out;
 		}
-
 
 
 

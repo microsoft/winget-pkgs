@@ -1,5 +1,5 @@
 $VM = 0
-$build = 148
+$build = 149
 $ipconfig = (ipconfig)
 $remoteIP = ([ipaddress](($ipconfig | select-string "Default Gateway") -split ": ")[1]).IPAddressToString
 #$remoteIP = ([ipaddress](($ipconfig[($ipconfig | select-string "vEthernet").LineNumber..$ipconfig.length] | select-string "IPv4 Address") -split ": ")[1]).IPAddressToString
@@ -27,16 +27,21 @@ if ($NewProfile) {
 Function Send-SharedError {
 	param(
 		[switch]$Approved,
+		[switch]$Feedback,
 		$Clip = (Get-Clipboard)
 	)
 	if ($Clip.length -gt 0) {
 		Write-Host "Writing $($Clip.length) lines."
 		$Clip -join "`n" | Out-File "$writeFolder\err.txt"
-		if ($Approved) {
-			Get-TrackerVMSetStatus "SendStatus-Approved"
+		if ($Feedback) {
+			Get-TrackerVMSetStatus "SendStatus-Feedback"
 		}  else {
-			Get-TrackerVMSetStatus "SendStatus-Complete"
-		} #end if Approved
+			if ($Approved) {
+				Get-TrackerVMSetStatus "SendStatus-Approved"
+			}  else {
+				Get-TrackerVMSetStatus "SendStatus-Complete"
+			} #end if Approved
+		} #end if Feedback
 	}
 }
 
