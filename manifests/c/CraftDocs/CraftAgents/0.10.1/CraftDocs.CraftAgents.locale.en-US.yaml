@@ -1,0 +1,43 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: CraftDocs.CraftAgents
+PackageVersion: 0.10.1
+PackageLocale: en-US
+Publisher: Craft Docs Ltd.
+PublisherUrl: https://www.craft.do/
+PublisherSupportUrl: https://github.com/craft-ai-agents/craft-agents-oss/issues
+PrivacyUrl: https://www.craft.do/privacy
+Author: Craft Docs Ltd.
+PackageName: Craft Agents
+PackageUrl: https://agents.craft.do/
+License: Apache-2.0
+LicenseUrl: https://github.com/craft-ai-agents/craft-agents-oss/blob/HEAD/LICENSE
+Copyright: Copyright 2026 Craft Docs Ltd.
+CopyrightUrl: https://www.craft.do/terms
+ShortDescription: Work with most powerful agents in the world, with the UX they deserve
+Description: 'Craft Agents brings Claude’s coding capabilities to your entire digital workflow. It massively improves both coding and non-coding workflows via enhanced UI, review, and auto execution. Built on the same foundation as Claude Code (the Claude Agent SDK), it extends the model’s reasoning power to work across all your tools: GitHub, Linear, Slack, Craft documents, local files, and any API you can connect.'
+Tags:
+- agent
+- agentic
+- ai
+- large-language-model
+- llm
+ReleaseNotes: |-
+  v0.10.1 — Claude Opus 4.8 default, localized session titles, and Apple Silicon–only macOS builds
+  Features
+  - None.
+  Improvements
+  - Claude Opus 4.8 is now the default Opus model — Upgraded the Claude Agent SDK to 0.3.154 and set Claude Opus 4.8 as the default Anthropic Opus model, while keeping Opus 4.7 selectable. The deprecated Opus 4.6 is removed from the model pickers. Existing direct-Anthropic Opus 4.7 defaults move to Opus 4.8, and Opus 4.5/4.6 selections migrate to the best available current Opus model. Bedrock mappings, Pi fallback handling, model-migration tests, docs, and UI examples were updated to match. (0a1357b2)
+  Bug Fixes
+  - Session titles honour the Settings → Appearance language — The main-process i18n instance has no language-detection plugin (there is no localStorage in Node) and was never re-hydrated from disk, so it always sat at the en fallback after restart. Title generation (generateTitle / refreshTitle) and the system prompt's "Preferred language" line read that main-process language, so they came back in English even when Appearance was set to another language. The chosen UI language is now persisted to an internal, validated uiLanguage field and the main-process i18n is hydrated from it on startup; the renderer also pushes its resolved language to main once on upgrade so the value is learned without re-picking. Partially addresses #815 and #738. (4a743ef2)
+  - Text-selection highlight stays aligned when scrolling a preview — Selecting text inside a scrollable markdown-preview block (the max-h-[400px] overflow-auto wrapper) and adding a follow-up left the yellow range highlight and its numbered chip anchored to the original coordinates, so they drifted away from the text as the block scrolled. A capture-phase scroll listener now recomputes the overlay geometry on any nested scroll — a coords-only fast path coalesced with requestAnimationFrame, with a no-op short-circuit when there are no annotations — keeping the highlight pinned to its text. The same fix is mirrored in the viewer's annotation path. (14bba50c)
+  Breaking Changes
+  - macOS Intel (x64) builds discontinued — Apple Silicon only — Craft Agents for macOS now ships an Apple Silicon (arm64) build only; Intel-based Macs are no longer supported. The x64 .dmg is no longer produced (v0.10.0 was the last release with an Intel build). Apple Silicon (M-series) Macs, Windows, and Linux are unaffected.
+  - Legacy language preference field removed — The free-text, user-editable language field in preferences.json is replaced by an internal, validated uiLanguage field driven by Settings → Appearance. Existing config files are tolerated (the schema is passthrough) and the stale language key is scrubbed on read, so no user action is required. The update_user_preferences tool no longer accepts a language argument.
+ReleaseNotesUrl: https://github.com/craft-ai-agents/craft-agents-oss/releases/tag/v0.10.1
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://agents.craft.do/docs/getting-started/introduction
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

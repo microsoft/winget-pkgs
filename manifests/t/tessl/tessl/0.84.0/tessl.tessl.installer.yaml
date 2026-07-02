@@ -1,0 +1,29 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.9.0.schema.json
+PackageIdentifier: tessl.tessl
+PackageVersion: 0.84.0
+InstallerType: inno
+Scope: user
+UpgradeBehavior: install
+Commands:
+  - tessl
+# Inno's standard silent flags. /SUPPRESSMSGBOXES suppresses any prompt the
+# script might raise, /NORESTART prevents automatic post-install reboots.
+InstallerSwitches:
+  Silent: /VERYSILENT /NORESTART /SUPPRESSMSGBOXES
+  SilentWithProgress: /SILENT /NORESTART /SUPPRESSMSGBOXES
+# Inno Setup ARP key is "{AppId}_is1" — ProductCode must match the AppId GUID in
+# installer/windows/tessl.iss. Do not change without changing both.
+ProductCode: '{B8E7F4D2-9A1C-4E5B-8F3D-2C6A9E4B7F1D}_is1'
+Installers:
+  # Canonical Tessl-hosted release assets. The pipeline uploads to these exact
+  # paths in cli-create-release.yml ("Upload Windows installer to S3"). Both arches are
+  # built by the installer-windows matrix; future submit-winget invocations pass
+  # both URLs to `wingetcreate update --urls`.
+  - Architecture: x64
+    InstallerUrl: https://install.tessl.io/installers-windows/0.84.0/TesslSetup-0.84.0-x64.exe
+    InstallerSha256: 4DCB1347CA875411FA4BBD2CB7AAC3413F7012CD4DCDF9E7A6D3E800FE2AD4ED
+  - Architecture: arm64
+    InstallerUrl: https://install.tessl.io/installers-windows/0.84.0/TesslSetup-0.84.0-arm64.exe
+    InstallerSha256: 85F10A943E401F4BFD489EC22F9507DA46708E95A93AC691C495B2F4C2BD94BB
+ManifestType: installer
+ManifestVersion: 1.9.0
