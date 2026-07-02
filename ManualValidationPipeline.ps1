@@ -6,11 +6,11 @@
 #Notes: Utilities to streamline evaluating 3rd party PRs.
 #Secure/Stable/Scalable is the new Works/Fast/Pretty
 
-$build = 1665
+$build = 1765
 $appName = "ManualValidationPipeline"
 Write-Host "$appName build: $build"
 $Owner = "microsoft"
-if ($preprod) {
+if ($PReprod) {
 	$Repo = "winget-pkgs-preprod"	
 	$Host.UI.RawUI.WindowTitle = "PREPROD"
 } else {
@@ -30,13 +30,13 @@ $imagesFolder = "$MainFolder\Images" #VM Images folder
 $logsFolder = "$MainFolder\logs" #VM Logs folder
 $MiscFolder = "$MainFolder\misc"
 $writeFolder = "$MainFolder\write" #Folder with write permissions
-$vmCounter = "$MainFolder\vmcounter.txt"
+$VMCounter = "$MainFolder\vmcounter.txt"
 $VMversion = "$MainFolder\VMversion.txt"
 
 #Files
 $TrackerModeFile = "$logsFolder\trackermode.txt"
 $RemoteTrackerModeFile = "$RemoteMainFolder\ManVal\logs\trackermode.txt" #TrackerModeFile from the VM's perspective.
-$FunctionTraceFile = "$logsFolder\FunctionTrace.txt"
+$FunctionTraceFileName = "$logsFolder\FunctionTrace.txt"
 $LogFile = "$MiscFolder\ApprovedPRs.txt"
 $PRQueueFile = "$MiscFolder\PRQueue.txt"
 $PRExcludeFile = "$MiscFolder\PRExclude.txt"
@@ -75,7 +75,7 @@ $NextStaleCheck = (Get-Date)
 $CheckpointName = "Validation"
 $VMUserName = "user" #Set to the internal username you're using in your VMs.
 $SystemRAM = (Get-CimInstance Win32_PhysicalMemory | Measure-Object -Property capacity -Sum).sum /1gb
-if ($preprod) {
+if ($PReprod) {
 	$Host.UI.RawUI.WindowTitle = "PREPROD-Utility"
 } else {
 	$Host.UI.RawUI.WindowTitle = "Utility"
@@ -96,8 +96,9 @@ $MVschemaData = gc $SchemaFileName | convertfrom-json
 
 #First tab
 Function Get-TrackerVMRunTracker {
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-TrackerVMRunTracker Start"};
 	while ($True) {
-		if ($preprod) {
+		if ($PReprod) {
 			$Host.UI.RawUI.WindowTitle = "PREPROD-Orchestration"
 		} else {
 			$Host.UI.RawUI.WindowTitle = "Orchestration"
@@ -146,7 +147,7 @@ Function Get-TrackerVMRunTracker {
 		# $GhRlRemain = ((Get-GitHubRateLimit) | where {$_.source -match $Enum.GitHubRateLimit.Unlogged}).remaining
 		Write-Host -nonewline "Build: $build - Mode $valMode - $GhRlRemain GH calls remain. Hours worked: "
 		Write-Host -nonewline -f $timeClockColor (Get-HoursWorkedToday)
-		Get-UpdateSource
+		# Get-UpdateSource
 		Write-Host " - PRs in queue: $PRQueueCount"
 		Write-Host -nonewline "VMs are taking $VMRate minutes each, for about $PRsPerHour per hour. "
 		(Get-VM) | ForEach-Object {
@@ -210,6 +211,7 @@ Function Get-TrackerVMRunTracker {
 
 #Second tab
 Function Get-TrackerVMScheduler {
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-TrackerVMScheduler Start"};
 	$Now = get-date
 	while ($true) {
 		$Timestamp = (get-date -f s) -replace $Enum.Char.T,$Enum.Char.Space
@@ -253,7 +255,7 @@ Function Get-TrackerVMScheduler {
 		} #Twice an hour at 20 and 50 after.
 		cls
 		Write-Host "$Timestamp - Waiting"
-		if ($preprod) {
+		if ($PReprod) {
 			$Host.UI.RawUI.WindowTitle = "PREPROD-Waiting"
 		} else {
 			$Host.UI.RawUI.WindowTitle = "Waiting"
@@ -291,7 +293,7 @@ Function Get-PRWatch {
 		[string]$LogFile = ".\PR.txt",
 		$oldclip = $Enum.Char.Blank,
 		[ValidateScript( { $_ -in (Get-Keys $Enum.SearchPresets)})][string]$SearchPreset = $Enum.SearchPresets.Approval2,
-		$PrePipeline = $false,
+		$PRePipeline = $false,
 		[switch]$DirectMode,
 		[switch]$Continuous,
 		$AuthList = (Get-ValidationData -Property authStrictness),
@@ -303,7 +305,7 @@ Function Get-PRWatch {
 		[switch]$WhatIf,
 		[switch]$Display
 	)
-	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace -OutFile $FunctionTraceFile -out "Get-PRWatch Start"};
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-PRWatch Start"};
 	[string]$PRtitle = ""
 	$ManifestReview = $True
 	$ResultsCount = 0
@@ -313,13 +315,13 @@ Function Get-PRWatch {
 	$Run = $True
 	while($Run -eq $True){
 		if ($WhatIf) {
-			if ($preprod) {
+			if ($PReprod) {
 				$Host.UI.RawUI.WindowTitle = "PREPROD-(WhatIf) Watcher"
 			} else {
 				$Host.UI.RawUI.WindowTitle = "(WhatIf) Watcher"#I'm the Fisher King, and "What if I watched PRs go by" is my question. 
 			}
 		} else {
-			if ($preprod) {
+			if ($PReprod) {
 				$Host.UI.RawUI.WindowTitle = "PREPROD-PR Watcher"
 			} else {
 				$Host.UI.RawUI.WindowTitle = "PR Watcher"#I'm a PR Watcher, watchin PRs go by. 
@@ -372,7 +374,7 @@ Function Get-PRWatch {
 						}
 						[string]$Submitter = $PRData.user.login
 						[string]$InstallerType = $QueryClipboard.InstallerType
-						[string]$prVersion = $QueryClipboard.PackageVersion
+						[string]$PRVersion = $QueryClipboard.PackageVersion
 						[string]$PackageIdentifier = $QueryClipboard.PackageIdentifier
 						$matchColor = $validColor
 						if ($Display) {Write-Host "PackageIdentifier $PackageIdentifier"}
@@ -385,7 +387,7 @@ Function Get-PRWatch {
 						
 
 						#Variable effervescence
-						$prAuth = $Enum.Char.Plus
+						$PRAuth = $Enum.Char.Plus
 						$Auth = "A"
 						$Review = "R"
 						$WordFilter = "W"
@@ -404,7 +406,7 @@ Function Get-PRWatch {
 						# $fullPR.labels.name -match $Enum.PRLabels.NP
 							$ManifestVersion = Get-ManifestVersion -PackageIdentifier $PackageIdentifier
 							$ManifestVersionParams = ($ManifestVersion -split "[.]").Count
-							$prVersionParams = ($prVersion -split "[.]").Count
+							$PRVersionParams = ($PRVersion -split "[.]").Count
 							
 							
 							#/////////////////////////\\\\\\\\\\\\\\\\\\\\\\\\\
@@ -589,7 +591,7 @@ Function Get-PRWatch {
 									$InstallerMatch = ($InstallerUrl -split $Enum.Char.Slash) -match $Submitter
 
 									if ($DisplayVersion) {
-										if ($DisplayVersion -eq $prVersion) {
+										if ($DisplayVersion -eq $PRVersion) {
 											$matchColor = $invalidColor
 											$AnF = $Enum.Char.Dash
 											if (!$WhatIf) {
@@ -667,7 +669,7 @@ Function Get-PRWatch {
 								} else {
 									$NumVersions = $ListVersions.Count
 								}
-								if (($prVersion -eq $ManifestVersion) -OR ($NumVersions -eq 1)) {
+								if (($PRVersion -eq $ManifestVersion) -OR ($NumVersions -eq 1)) {
 									$matchColor = $invalidColor
 									if ($WhatIf) {
 										"Reply-ToPR -PR $PR -CannedMessage VersionCount -UserInput $Submitter -Silent -Policy '[Policy] $($Enum.PRLabels.NAF)`n[Policy] $($Enum.PRLabels.HVL)'"
@@ -709,12 +711,12 @@ Function Get-PRWatch {
 										$PRvMan = $ManifestVersion
 									}
 									$matchColor = $invalidColor
-								} elseif ($prVersion -gt $ManifestVersion) {
+								} elseif ($PRVersion -gt $ManifestVersion) {
 									$PRvMan = $ManifestVersion.toString()
-								} elseif ($prVersion -lt $ManifestVersion) {
+								} elseif ($PRVersion -lt $ManifestVersion) {
 									$PRvMan = $ManifestVersion.toString()
 									$matchColor = $cautionColor
-								} elseif ($prVersion -eq $ManifestVersion) {
+								} elseif ($PRVersion -eq $ManifestVersion) {
 									$PRvMan = " = "
 								} else {
 									$noRecord = $True
@@ -730,14 +732,14 @@ Function Get-PRWatch {
 							$Auth = $Enum.Char.NotExclamation
 							$AnF = "F"
 							$InstVer = "I"
-							$prAuth = $Enum.Char.NotExclamation
+							$PRAuth = $Enum.Char.NotExclamation
 							$Review = "R"
 							$ListingDiff = "D"
 							$NumVersions = 99
 							$WordFilter = "W"
 							$AgreementAccept = "G"
 							$PRvMan = "P"
-							Open-PRInBrowser -PR $pr
+							Open-PRInBrowser -PR $PR
 						}
 
 
@@ -745,7 +747,7 @@ Function Get-PRWatch {
 						($Auth -eq $Enum.Char.NotExclamation) -or 
 						($AnF -eq $Enum.Char.Dash) -or 
 						($InstVer -eq $Enum.Char.NotExclamation) -or 
-						($prAuth -eq $Enum.Char.NotExclamation) -or 
+						($PRAuth -eq $Enum.Char.NotExclamation) -or 
 						($Review -ne "R") -or 
 						($ListingDiff -eq $Enum.Char.NotExclamation) -or 
 						($NumVersions -eq 1) -or 
@@ -770,7 +772,7 @@ Function Get-PRWatch {
 
 
 
-						if ($PrePipeline -eq $false) {
+						if ($PRePipeline -eq $false) {
 							if ($WhatIf) {
 								Write-Host "Approve-PR -PR $PR"
 								Write-Host "Add-PRToRecord -PR $PR -Action $($Enum.PRActions.Approved) -Title $PRtitle"
@@ -807,13 +809,13 @@ Function Get-PRWatch {
 				$RunAvgSecPerItem = $RunSeconds/$ResultsCount
 				Write-Log "Last run approved $ResultsCount PRs in $RunMinutes minutes ($RunSeconds seconds), for an average of $RunAvgSecPerItem seconds per PR - sleeping until $WakeTime"
 				if ($WhatIf) {
-					if ($preprod) {
+					if ($PReprod) {
 						$Host.UI.RawUI.WindowTitle = "PREPROD-(WhatIf) until $WakeTime"
 					} else {
 						$Host.UI.RawUI.WindowTitle = "(WhatIf) until $WakeTime"
 					}
 				} else {
-					if ($preprod) {
+					if ($PReprod) {
 						$Host.UI.RawUI.WindowTitle = "PREPROD-sleeping until $WakeTime"
 					} else {
 						$Host.UI.RawUI.WindowTitle = "sleeping until $WakeTime"
@@ -836,10 +838,11 @@ Function Get-PRWatch {
 
 Function Get-WorkSearch {
 	Param(
-		$PresetList = @($Enum.SearchPresets.ToWork),#Approval","
+		[string[]]$PresetList = @($Enum.SearchPresets.ToWork),#Approval","
 		[int]$Page = $Enum.Num.One,
 		[switch]$OpenInBrowser
 	)
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-WorkSearch $PresetList"};
 	Foreach ($Preset in $PresetList) {
 		Write-Host "Preset $Preset"
 		$PRs = (Get-SearchGitHub -Preset $Preset -Page $Page -NoLabels -nBMM) 
@@ -903,7 +906,7 @@ Function Get-WorkSearch {
 
 Function Get-GitHubPreset {
 	Param(
- [ValidateScript( { $_ -in (Get-Keys $Enum.GitHubPresets)} )][string]$Preset,
+		[ValidateScript( { $_ -in (Get-Keys $Enum.GitHubPresets)} )][string]$Preset,
 		[int]$PR,
 		$CannedMessage = $Preset,
 		$UserInput,
@@ -911,6 +914,7 @@ Function Get-GitHubPreset {
 		$out = $Enum.Char.Blank
 	)
 	$PR = Get-SchemaCheck -SchemaInfo $MVschemaData.PR.Number -InputData $PR
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-GitHubPreset $Preset"};
 	if (($Preset -eq $Enum.GitHubPresets.GitHubStatus) -OR
 		($Preset -eq $Enum.GitHubPresets.IdleMode) -OR
 		($Preset -eq $Enum.GitHubPresets.IEDSMode) -OR
@@ -961,7 +965,7 @@ Function Get-GitHubPreset {
 					Add-PRToRecord -PR $PR -Action $Preset
 					$out += Invoke-GitHubPRRequest -PR $PR -Type $Enum.PRRequestTypes.Comments -Output $Enum.PRRequestOutput.StatusDescription -Method $Enum.PRRequestMethods.Post -Data "Close with reason: $UserInput;"
 				} else {
-					Write-Output "-UserInput needed to use preset $preset"
+					Write-Output "-UserInput needed to use Preset $Preset"
 				}
 			}
 			$Enum.GitHubPresets.DefenderFail {
@@ -985,7 +989,7 @@ Function Get-GitHubPreset {
 				if ($UserInput) {
 					$out += Reply-ToPR -PR $PR -Body $UserInput -Policy $Enum.PRLabels.NAF
 				} else {
-					Write-Output "-UserInput needed to use preset $preset"
+					Write-Output "-UserInput needed to use Preset $Preset"
 				}
 			}
 			$Enum.GitHubPresets.GitHubStatus {
@@ -1096,6 +1100,7 @@ Function Get-PRLabelAction { #Soothing label action.
 		# [switch]$Debug
 	)
 	$PR = $PR2
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-GitHubPreset $PR2"};
 	Write-Output "PR $PR has labels $PRLabels"
 	if ($PRLabels -contains $Enum.PRLabels.VDE) {
 		if ($Debug) {Write-Host ($PRLabels -join $Enum.Char.Space)}
@@ -1378,8 +1383,9 @@ Function Get-PRLabelAction { #Soothing label action.
 }
 
 Function Get-ScheduledRun {
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-ScheduledRun Start"};
 		# [console]::beep(500,250);[console]::beep(500,250);[console]::beep(500,250) #Beep 3x to alert the PC user.
-		if ($preprod) {
+		if ($PReprod) {
 			$Host.UI.RawUI.WindowTitle = "PREPROD-Periodic Run"
 		} else {
 			$Host.UI.RawUI.WindowTitle = "Periodic Run"
@@ -1423,7 +1429,7 @@ Function Get-ScheduledRun {
 				}
 			}#end if Results12
 			Write-Output "$(Get-Date -Format $($Enum.Char.T)) Completing $Preset with $($Results.Length) Results"
-		}#End for preset
+		}#End for Preset
 
 		$PresetList = ($Enum.SearchPresets.Defender,$Enum.SearchPresets.Duplicate,$Enum.SearchPresets.HVR,$Enum.SearchPresets.IEDS,$Enum.SearchPresets.LVR,$Enum.SearchPresets.MMC,$Enum.SearchPresets.NMM,$Enum.SearchPresets.ToWork3,$Enum.SearchPresets.Approval,$Enum.SearchPresets.VCMA)
 		foreach ($Preset in $PresetList) {
@@ -1459,7 +1465,7 @@ Function Get-ScheduledRun {
 				}#end switch Preset
 			}#end if Results12
 			Write-Output "$(Get-Date -Format $($Enum.Char.T)) Completing $Preset with $($Results.Length) Results"
-		}#End for preset
+		}#End for Preset
 		
 			Write-Output "$(Get-Date -Format $($Enum.Char.T)) Starting $Preset with $($Results.Length) Results"
 
@@ -1474,11 +1480,12 @@ Function Get-ScheduledRun {
 
 Function Get-CannedMessage {
 	Param(
- [ValidateScript( { $_ -in (Get-Keys $Enum.CannedMessages)} )][string[]]$Response,
+		[ValidateScript( { $_ -in (Get-Keys $Enum.CannedMessages)} )][string[]]$Response,
 		$UserInput,
 		[switch]$NoClip,
 		[switch]$NotAutomated
 	)
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-CannedMessage $Response"};
 	[string]$Username = $Enum.Char.Ampersand + $UserInput.replace($Enum.Char.Space,$Enum.Char.Blank) + $Enum.Char.Comma
 	switch ($Response) {
 		$Enum.CannedMessages.AgreementMismatch {
@@ -1600,6 +1607,7 @@ Function Get-AutomatedErrorAnalysis {
 		$UserInput,
 		$Spacer = " | "
 	)
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-AutomatedErrorAnalysis $($UserInput.length)"};
 
 	#$UserSplit = $UserInput -replace "0x",$Enum.Char.Blank -replace "[^\w]",$Enum.Char.Space -split $Enum.Char.Space
 	$UserInput = ($UserInput -split $Enum.Char.LineBreak) | where {$_ -notmatch 'Winget errors'}
@@ -1636,6 +1644,7 @@ Function Get-ValidationResult {
 	Param(
 		[Parameter(ValueFromPipeline)][int]$PR
 	)
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-ValidationResult $PR"};
 	Write-Host "Get-ValidationResult PR $PR"
 	$BuildNumber = Get-BuildFromPR -PR $PR 
 	
@@ -1688,6 +1697,7 @@ Function Get-AutoValLog {
 		$notes = $Enum.Char.Blank
 	)
 	$PR = $PR2
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-AutoValLog $PR2"};
 	Write-Host "Gathering data for PR $PR"
 	$PRState = Get-PRStateFromComments $PR
 	$FileList = $null
@@ -1701,7 +1711,7 @@ Function Get-AutoValLog {
 	$LowerOps = $true;
 	$WaiverList = Get-ValidationData -Property AutoWaiverLabel
 	#Get-Process *photosapp* | Stop-Process
-	if ($Preprod) {
+	if ($PReprod) {
 		$BuildNumber = 1
 	} else {
 		
@@ -1711,7 +1721,7 @@ Function Get-AutoValLog {
 		while ($null -eq $FileList) {
 			try {
 				#This downloads to Windows default location, which has already been set to $DestinationPath
-				if ($Preprod) {
+				if ($PReprod) {
 					$ZipPath = "$DestinationPath\WinGetSvc-Validation-Ppe-$PR-3-artifacts.zip"
 					
 					$CheckData = Get-CheckData -PR $PR | where {$_.name -match "Validation Completed"}
@@ -1967,7 +1977,8 @@ Function Invoke-Commits {
 		[string]$Type = "commits"
 	)
 	Process {
-		$Commits = Invoke-GitHubRequest "$GitHubApiBaseUrl/pulls/$pr/$Type" -JSON
+		if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Invoke-Commits $PR"};
+		$Commits = Invoke-GitHubRequest "$GitHubApiBaseUrl/pulls/$PR/$Type" -JSON
 		$Commits
 	}
 }
@@ -1988,13 +1999,14 @@ Function Invoke-GitHubPRRequest {
 		$commit = (($PRCommits.commit.url -split $Enum.Char.Slash)[$Enum.Index.Last])
 	)
 	$PR = $PR2
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Invoke-GitHubPRRequest $PR2"};
 	$Response = @{}
 	$ResponseType = $Type
-	$uri = "$GitHubApiBaseUrl/$Path/$pr/$Type"
+	$uri = "$GitHubApiBaseUrl/$Path/$PR/$Type"
 
 	if (($Type -eq $Enum.PRRequestTypes.Blank) -OR ($Type -eq $Enum.PRRequestTypes.Files) -OR ($Type -eq $Enum.PRRequestTypes.Reviews)){
 		$Path = $Enum.PRRequestPaths.Pulls
-		$uri = "$GitHubApiBaseUrl/$Path/$pr/$Type"
+		$uri = "$GitHubApiBaseUrl/$Path/$PR/$Type"
 	} elseif ($Type -eq $Enum.PRRequestTypes.Comments) {
 		$Response.body += $Data
 	} elseif ($Type -eq $Enum.PRRequestTypes.Commits) {
@@ -2026,7 +2038,7 @@ Function Invoke-GitHubPRRequest {
 			"Invoke-GitHubRequest -Method $Method -Uri $uri"
 		} else {
 			$out = Invoke-GitHubRequest -Method $Method -Uri $uri
-#$uri = "$GitHubApiBaseUrl/$Path/$pr/$Type"
+#$uri = "$GitHubApiBaseUrl/$Path/$PR/$Type"
 #$uri = "$GitHubApiBaseUrl/commits/$headSha/check-runs?per_page=100&filter=latest"
 
 		}
@@ -2053,7 +2065,8 @@ Function Invoke-GitHubPRRequest {
 }
 
 Function Get-UpdateSource {
-	$GhRlRemain = ((Get-GitHubRateLimit) | where {$_.source -match $Enum.GitHubRateLimit.Unlogged}).remaining
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-UpdateSource Start"};
+	# $GhRlRemain = ((Get-GitHubRateLimit) | where {$_.source -match $Enum.GitHubRateLimit.Unlogged}).remaining
 	# Param(
 	# )
 	# if ($GhRlRemain -gt 0) {
@@ -2065,21 +2078,23 @@ Function Get-UpdateSource {
 
 Function Get-SyncFork {
 	Param(
-		$SyncUserName = $Enum.GitHubUserNames.GitHubUserName,
-		$SyncRepo = $repo,
-		$SyncFork = $Enum.Strings.PrimaryFork,
-		$Uri = "https://api.github.com/repos/$SyncUserName/$SyncRepo/merge-upstream",
-		$Body = "{`"branch`":`"$SyncFork`"}"
+		[string]$SyncUserName = $Enum.GitHubUserNames.GitHubUserName,
+		[string]$SyncRepo = $repo,
+		[string]$SyncFork = $Enum.Strings.PrimaryFork,
+		[string]$Uri = "https://api.github.com/repos/$SyncUserName/$SyncRepo/merge-upstream",
+		[string]$Body = "{`"branch`":`"$SyncFork`"}"
 	)
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-SyncFork Start"};
 	$out = (Invoke-GitHubRequest -Uri $Uri -Body $Body -Method $Enum.PRRequestMethods.Post).content | ConvertFrom-Json
 	return $out
 }
 
 Function Get-GitHubRateLimit {
 	Param(
-		$Url = "https://api.github.com/rate_limit"
+		[string]$Url = "https://api.github.com/rate_limit"
 	)
-	(Get-Date)#Time, as a number, constantly increases. 
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-GitHubRateLimit $Url"};
+	(Get-Date)#Time, as a number, constantly increases. So the future is always greater than the present, which is always greater than the past. 
 	$Response = Invoke-WebRequest -Uri $Url -ProgressAction SilentlyContinue
 	$Content = $Response.content | ConvertFrom-Json;
 	$Content.rate | Select-Object @{n = $Enum.GitHubRateLimit.Source; e = {$Enum.GitHubRateLimit.Unlogged}}, limit, used, remaining, @{n = $Enum.GitHubRateLimit.Reset; e = {([System.DateTimeOffset]::FromUnixTimeSeconds($_.reset)).DateTime.AddHours(-8)}}
@@ -2088,6 +2103,7 @@ Function Get-GitHubRateLimit {
 }
 
 Function Get-GitHubTimeout {
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-GitHubTimeout Start"};
 	$GitHubRateLimit = Get-GitHubRateLimit
 	$starttime = get-date $GitHubRateLimit[$Enum.Index.First]
 	$UsedCalls = ($GitHubRateLimit)[$Enum.Num.Two].used
@@ -2114,6 +2130,7 @@ Function Get-FileFromGitHub {
 		[string]$FirstLetter = ($PI[$Enum.Index.First].tostring().tolower())
 	)
 	$PackageIdentifier = $PI
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-FileFromGitHub $PackageIdentifier"};
 	Write-Host "$($MyInvocation.MyCommand.name) $PR"
 	try{
 		$content = (Invoke-GitHubRequest -Uri "$GitHubContentBaseUrl/master/manifests/$FirstLetter/$Path/$Version/$PackageIdentifier.$Suffix").content
@@ -2125,17 +2142,17 @@ Function Get-FileFromGitHub {
 
 Function Get-SearchGitHub {
 	Param(
- [ValidateScript( { $_ -in (Get-Keys $Enum.SearchPresets)} )][string[]]$Preset = $Enum.SearchPresets.Approval,
-		[Switch]$Browser,
-		$Url = "https://api.github.com/search/issues?page=$Page&q=",
-		$SearchString,
-		$Author, #wingetbot
-		$Commenter, #wingetbot
-		$Title,
-		$ExcludeTitle,
+		[ValidateScript( { $_ -in (Get-Keys $Enum.SearchPresets)} )][string[]]$Preset = $Enum.SearchPresets.Approval,
+		[string]$Url = "https://api.github.com/search/issues?page=$Page&q=",
+		[string]$SearchString,
+		[string]$Author, #wingetbot
+		[string]$Commenter, #wingetbot
+		[string]$Title,
+		[string]$ExcludeTitle,
 		[string]$Label, 
 		[int]$Page = $Enum.Num.One,
 		[int]$DaysAgo,
+		[Switch]$Browser,
 		[Switch]$BMM,
 		[Switch]$NewPackages,
 		[Switch]$nBMM,
@@ -2144,6 +2161,7 @@ Function Get-SearchGitHub {
 		[Switch]$NoLabels,
 		[Switch]$AllowClosedPRs
 	)
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-SearchGitHub $Url"};
 	if ($Browser) {
 		$Url = "$GitHubBaseUrl/pulls?page=$Page&q="
 	}
@@ -2425,19 +2443,20 @@ Function Get-ClaCheck {
 		[switch]$WhatIf
 	)
 	$PR = (Get-SchemaCheck -SchemaInfo $MVschemaData.PR.Number -InputData $PR)
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-ClaCheck $PR"};
 	$Status = (Get-CheckData -PR $PR | where {$_.name -match $LabelName}).status
-	If ($WhatIf) {Write-Host "$($MyInvocation.MyCommand.name): $Status"} 
+	If ($WhatIf) {Write-Host "Status: $Status"} 
 	switch ($Status) {
 		$Enum.PRCheckLabels.Queued {
 			If ($WhatIf) {
-				Write-Host "Get-AddPRLabel -PR $PR -Label $($Enum.PRLabels.CLA)"
+				Write-Host "Add PRLabel -PR $PR -Label $($Enum.PRLabels.CLA)"
 			} else {
 				Get-AddPRLabel -PR $PR -Label $Enum.PRLabels.CLA
 			}			
 		}
 		$Enum.PRCheckLabels.Completed {
 			If ($WhatIf) {
-				Write-Host "Get-RemovePRLabel -PR $PR -Label $($Enum.PRLabels.CLA)"
+				Write-Host "Remove PRLabel -PR $PR -Label $($Enum.PRLabels.CLA)"
 			} else {
 				Get-RemovePRLabel -PR $PR -Label $Enum.PRLabels.CLA
 			}			
@@ -2460,7 +2479,7 @@ Function Get-CheckIfPackageIsNew {
 	)
 	Process {
 		$PR = $PR2
-		if ($FunctionTrace) {Write-FunctionTrace -OutFile $FunctionTraceFile -out "Get-CheckIfPackageIsNew $PR2"};
+		if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-CheckIfPackageIsNew $PR2"};
 		Write-Host "$($MyInvocation.MyCommand.name): PR $PR - PackageIdentifier: $PackageIdentifier - ManifestVersion $ManifestVersion"
 		if ($ManifestVersion) {#If any version data exists, then it's a New-Manifest.
 			Get-AddPRLabel -PR $PR -LabelName $Enum.PRLabels.NM
@@ -2490,6 +2509,7 @@ Function Get-CommitFile {
 	)
 	$PR = $PR2
 	$PackageIdentifier = $PI
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-CheckIfPackageIsNew $PR2"};
 	if ($VM) {
 		Write-Host "Starting PR $PR on VM $VM for CommitFile"
 	}
@@ -2514,7 +2534,7 @@ Function Get-CommitFile {
 			$Mode = $Enum.CommitFileModes.Parent
 		}
 	}	
-	$manifestFolder = "$MainFolder\vm\$vm\manifest"
+	$manifestFolder = "$MainFolder\vm\$VM\manifest"
 	if ($VM -gt $Enum.Num.Zero) {
 		if (!($Silent)) {Write-Host $Enum.Strings.RemovingPreviousManifestAndAddingCurrent}
 		Get-RemoveFileIfExist "$manifestFolder" -remake -Silent
@@ -2592,8 +2612,9 @@ Function Get-DecodeGitHubFile {
 	Param(
 		[string]$Base64String,
 		$Bits = ([Convert]::FromBase64String($Base64String)),
-		$String = ([System.Text.Encoding]::UTF8.GetString($Bits))
+		[string]$String = ([System.Text.Encoding]::UTF8.GetString($Bits))
 	)
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-DecodeGitHubFile $String"};
 	return $String -split $Enum.Char.LineBreak
 }
 
@@ -2606,6 +2627,7 @@ Function Get-PatchedValidation {
 	)
 	$VM = (Get-SchemaCheck -SchemaInfo $MVschemaData.VM.Number -InputData (Get-NextFreeVM))
 	$PR = $PR2
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-PatchedValidation $PR"};
 	while ($commit.files.Length -eq $Enum.Num.Zero) {
 		if ($PatchedValidationIteration -gt 3) {
 			Write-Host "Infinte Loop Detected after $PatchedValidationIteration iterations."
@@ -2630,27 +2652,26 @@ Function Get-PatchedFile {
 	Param(
 		[Parameter(ValueFromPipeline)][int]$PR,
 		[int]$PR2 = (Get-SchemaCheck -SchemaInfo $MVschemaData.PR.Number -InputData $PR),
-		[int]$vm = (Get-NextFreeVM),
+		[int]$VM = (Get-NextFreeVM),
 		$Suffix = $Enum.ManifestFileTypes.installeryaml,
 		$commit = (Invoke-GitHubPRRequest -PR $PR2 -Type commits -Output $Enum.PRRequestOutput.Content -JSON),
 		[Switch]$WhatIf,
 		[Switch]$InnerWhatIf
 	)
 	$PR = $PR2
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-PatchedFile $PR"};
 	$n = $Enum.Num.Zero
 	while ($commit.files.Length -eq $Enum.Num.Zero) {
 		$commit = (Invoke-GitHubRequest -Uri $commit.parents.url -JSON)
 		if ($WhatIf) {
-			Write-Host "Get-PatchedFile commit parents Iteration $n"
+			Write-Host "PatchedFile commit parents Iteration $n"
 			$n++
 		}
 	}
 	$patch = ($commit.files | where {$_.filename -match $Suffix}).patch -join $Enum.Char.Blank -split $Enum.Char.LineBreak
 	$PackageIdentifier = ($commit.files[$Enum.Index.First].filename -split $Enum.Char.Slash)[$Enum.Index.Last] -replace $Enum.ManifestFileExtension.Installer,$Enum.Char.Blank -replace $Enum.ManifestFileExtension.LocaleEnUS,$Enum.Char.Blank -replace $Enum.ManifestFileExtension.Root,$Enum.Char.Blank
 	$PackageIdentifier = (Get-SchemaCheck -InputData $PackageIdentifier -SchemaInfo $schemaData.installer.definitions.PackageIdentifier)
-	if ($WhatIf) {
-		Write-Host "PackageIdentifier: $PackageIdentifier"
-	}
+	if ($WhatIf) {Write-Host "PackageIdentifier: $PackageIdentifier"}
 	$PackageVersion = (Get-ManifestListing $PackageIdentifier -ListVersions)[$Enum.Index.Last] 
 	$file = Get-FileFromGitHub -PackageIdentifier $PackageIdentifier -Version $PackageVersion -Suffix $Suffix 
 	if ($InnerWhatIf) {
@@ -2667,6 +2688,7 @@ Function Get-InnerPatchedFile {
 		$Patch,
 		[switch]$WhatIf
 	);
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-InnerPatchedFile $PR"};
 	$Loop = 1
 	$AddedLines = $Enum.Num.Zero
 	$HunkData = $Patch -join "%%" -split $Enum.Char.DoubleAmpersand
@@ -2752,6 +2774,7 @@ Function Get-LogFromCommitFile {
 		[switch]$WhatIf
 	)
 	$PR = (Get-SchemaCheck -SchemaInfo $MVschemaData.PR.Number -InputData $PR)
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-LogFromCommitFile $PR"};
 	Foreach ($Log in $LogNumbers) {
 		$n = 0;
 		if ($WhatIf) {Write-Host "Log: $log"}
@@ -2790,12 +2813,12 @@ Function Get-PRManifest {#Regenerates just enough of the Files Changed tab page,
 		[switch]$Patch
 	)
 	$PR = (Get-SchemaCheck -SchemaInfo $MVschemaData.PR.Number -InputData $PR)
-	if ($FunctionTrace) {Write-FunctionTrace -OutFile $FunctionTraceFile -out "Get-PRManifest $PR"};
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-PRManifest $PR"};
 	$CommitFile = (Get-CommitFile -PR $PR -Deparent);
 	$PackageIdentifier = (Get-SchemaCheck -YamlValue $Enum.ManifestKeys.PackageIdentifier -SchemaInfo $schemaData.installer.definitions.PackageIdentifier -InputData ($CommitFile -split "`n" | Where {$_ -match $Enum.ManifestKeys.PackageIdentifier})[0])
 	# $PackageIdentifier = Get-SchemaCheck -YamlValue $Enum.ManifestKeys.PackageIdentifier -SchemaInfo $schemaData.installer.definitions.PackageIdentifier -InputData $CommitFile | Get-RemoveQuotes
 	$PackageVersion = Get-YamlValue -Key $Enum.ManifestKeys.PackageVersion -InputArray $CommitFile | Get-RemoveQuotes
-	$Submitter = ((Invoke-GitHubRequest "$GitHubApiBaseUrl/pulls/$pr" -JSON).user.login);
+	$Submitter = ((Invoke-GitHubRequest "$GitHubApiBaseUrl/pulls/$PR" -JSON).user.login);
 	
 	if ($Patch) {
 		$CommitFile = (Get-CommitFile -PR $PR -Mode Patch)
@@ -2816,10 +2839,11 @@ Function Approve-PR {
 		[string]$Body = $Enum.Char.Blank,
 		$PRCommits = (Invoke-Commits -PR $PR2),
 		$commit = (($PRCommits.commit.url -split $Enum.Char.Slash)[$Enum.Index.Last]),
-		$uri = "$GitHubApiBaseUrl/pulls/$pr/reviews"
+		$uri = "$GitHubApiBaseUrl/pulls/$PR/reviews"
 	)
 	Process {
 		$PR = $PR2
+		if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Approve-PR $PR"};
 		if (!(Get-PRApprovalCheck -PR $PR)) {
 			try {
 				[array]$AuthorList = $PRCommits.commit.author.name# -join $Enum.Char.Space
@@ -2849,6 +2873,7 @@ Function Get-PRApprovalCheck {
 	)
 	Process {
 		$PR = (Get-SchemaCheck -SchemaInfo $MVschemaData.PR.Number -InputData $PR)
+		if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-PRApprovalCheck $PR"};
 		[array]$StateData = ($PRCommits | Where {$_.user.login -match $Enum.GitHubUserNames.GitHubUserName}).state
 		$State = $StateData -join $Enum.Char.Blank
 		[bool]$out = $State -match "APPROVED"
@@ -2863,6 +2888,7 @@ Function Get-PRRange {
 		[string]$Body,
 		[string]$Preset
 	) 
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-PRRange $firstPR $lastPR"};
 	$line = 0; 
 	$firstPR..$lastPR | %{
 		if ($Preset -eq $Enum.PRStates.Closed) {
@@ -2882,6 +2908,7 @@ function Get-PushMePRYou {
 		$MatchString = $Enum.Strings.StandardizeFormatting,
 		[int]$Page = $Enum.Num.One
 	)
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-PRRange $Author $MatchString"};
 	foreach ($Preset in ($Enum.SearchPresets.Approval,$Enum.SearchPresets.ToWork)) {
 		Write-Host "$(Get-Date -Format T) $($MyInvocation.MyCommand.name): $PR - $($Preset)";
 		$PRsForAuthor = @();
@@ -2906,7 +2933,7 @@ Function Get-PRData {
 	)
 	Process {
 		$PR2 = Get-SchemaCheck -SchemaInfo $MVschemaData.PR.Number -InputData $PR
-		if ($FunctionTrace) {Write-FunctionTrace -OutFile $FunctionTraceFile -out "Get-PRData $PR2"};
+		if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-PRData $PR2"};
 		Invoke-GitHubRequest "$GitHubApiBaseUrl/pulls/$PR2" -JSON
 	}
 }
@@ -2923,6 +2950,7 @@ Function Get-RerunCheck {
 	)
 	Process {
 		$PR = $PR2
+		if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-RerunCheck $PR2"};
 		$LastAutomationComment = $Enum.Char.Blank
 		$ValPipeRunCount = 0
 		try {
@@ -2937,9 +2965,9 @@ Function Get-RerunCheck {
 		($ValPipeRunCount -lt $RetryCount)) {
 			Write-Host "Checking PR $PR"
 			if ($WhatIf) {
-				Write-Host "Reply-ToPR -PR $pr -body '$($Enum.Strings.WingetbotRun)'"
+				Write-Host "Reply-ToPR -PR $PR -body '$($Enum.Strings.WingetbotRun)'"
 			} else {
-				Reply-ToPR -PR $pr -body $Enum.Strings.WingetbotRun
+				Reply-ToPR -PR $PR -body $Enum.Strings.WingetbotRun
 			}
 		} else {
 			Write-Host "PR $PR is workable, adding to queue."
@@ -2957,6 +2985,7 @@ Function Get-AddPRLabel {
 	)
 	Process {
 		$PR = (Get-SchemaCheck -SchemaInfo $MVschemaData.PR.Number -InputData $PR)
+		if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-AddPRLabel $PR"};
 		$Response = Invoke-GitHubPRRequest -PR $PR -Method $Enum.PRRequestMethods.Post -Type labels -Data $LabelName -Output Content
 		Write-Host $Response.name
 	}
@@ -2969,6 +2998,7 @@ Function Get-RemovePRLabel {
 	)
 	Process {
 		$PR = (Get-SchemaCheck -SchemaInfo $MVschemaData.PR.Number -InputData $PR)
+		if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-RemovePRLabel $PR"};
 		$Uri = "$GitHubApiBaseUrl/issues/$PR/labels/$LabelName"
 		$Response = Invoke-GitHubRequest -Uri $Uri -Method $Enum.PRRequestMethods.Delete
 		Write-Host $Response.StatusDescription
@@ -2979,7 +3009,8 @@ function Get-CompletePR {
 	Param(
 		[Parameter(ValueFromPipeline)][int]$PR
 	)
-		$PR = (Get-SchemaCheck -SchemaInfo $MVschemaData.PR.Number -InputData $PR)
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-CompletePR $PR"};
+	$PR = (Get-SchemaCheck -SchemaInfo $MVschemaData.PR.Number -InputData $PR)
 	$PRLabels = (invoke-GitHubPRRequest -PR $PR -Type labels -Method $Enum.PRRequestMethods.Get -Output Content).name | 
 	where {$_ -notmatch $Enum.PRLabels.APP} |
 	where {$_ -notmatch $Enum.PRLabels.MMC} |
@@ -3006,11 +3037,12 @@ Function Get-MergePR {
 	)
 	Process {
 		$PR = (Get-SchemaCheck -SchemaInfo $MVschemaData.PR.Number -InputData $PR)
+		if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-MergePR $PR"};
 		$sha = (Invoke-Commits -PR $PR).sha
 		$sha = Get-StringOrArrayLast -StringOrArray $Sha -ArrayIndex $ShaNumber
 		
 		$out = $Enum.Char.Blank
-		$Data = Invoke-GitHubrequest -Uri "https://api.github.com/repos/microsoft/winget-pkgs/pulls/$pr/merge" -Method $Enum.PRRequestMethods.Put -Body "{`"merge_method`":`"squash`",`"sha`":`"$sha`"}"
+		$Data = Invoke-GitHubrequest -Uri "https://api.github.com/repos/microsoft/winget-pkgs/pulls/$PR/merge" -Method $Enum.PRRequestMethods.Put -Body "{`"merge_method`":`"squash`",`"sha`":`"$sha`"}"
 		if ($Data.Content) {
 			$out = $Data.Content
 		} else {
@@ -3046,6 +3078,7 @@ Function Get-RetryPR {
 	)
 	Process {
 		$PR = (Get-SchemaCheck -SchemaInfo $MVschemaData.PR.Number -InputData $PR)
+		if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-RetryPR $PR"};
 		$Response = Invoke-GitHubPRRequest -PR $PR -Type $Enum.PRRequestTypes.Comments -Output $Enum.PRRequestOutput.StatusDescription -Method $Enum.PRRequestMethods.Post -Data $Command
 		Write-Host $Response
 	}
@@ -3056,6 +3089,7 @@ Function Get-VerifyMMC {
 		[Parameter(ValueFromPipeline)][int]$PR
 	)
 	$PR = (Get-SchemaCheck -SchemaInfo $MVschemaData.PR.Number -InputData $PR)
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-VerifyMMC $PR"};
 	$Comments = (Get-PRComments -PR $PR | Select-Object $Enum.Strings.CreatedAt,@{n = $Enum.Strings.UserName; e = {$_.user.login -replace $Enum.Strings.BotPrefix}},body)
 	
 	[array]$MissingProperties = ($Comments.body | Where-Object {$_ -match $Enum.MMC.ManifestsHeader}) -split $Enum.Char.LineBreak | Where-Object { $_ -notmatch $Enum.MMC.ManifestsHeader -AND
@@ -3081,6 +3115,7 @@ Function Get-DuplicateCheck {
 		[Parameter(ValueFromPipeline)][int]$PR 
 	)
 	$PR = (Get-SchemaCheck -SchemaInfo $MVschemaData.PR.Number -InputData $PR)
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-DuplicateCheck $PR"};
 	$mainPRLabels = ((Invoke-GitHubPRRequest -PR $PR -Type $Enum.prRequestTypes.Labels -Output $Enum.PRRequestOutput.Content -JSON).name)
 	[int]$mainPR = 0
 	[int]$closePR = 0
@@ -3139,6 +3174,7 @@ Function Add-Waiver {
 		$LabelNames = ((Invoke-GitHubPRRequest -PR $PR -Type $Enum.prRequestTypes.Labels -Output $Enum.PRRequestOutput.Content -JSON).name)
 	)
 	$PR = (Get-SchemaCheck -SchemaInfo $MVschemaData.PR.Number -InputData $PR)
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-Waiver $PR"};
 	Foreach ($Label in $LabelNames) {
 		$Waiver = $Enum.Char.Blank
 		Switch ($Label) {
@@ -3225,6 +3261,7 @@ Function Add-GitHubReviewComment {
 		$Line
 	)
 	$PR = $PR2
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-GitHubReviewComment $PR"};
 	$Filename = Get-StringOrArrayLast $Filename
 
 	$Response = @{}
@@ -3239,7 +3276,7 @@ Function Add-GitHubReviewComment {
 	$Response.side = $Side
 	[string]$Body = $Response | ConvertTo-Json
 
-	$uri = "$GitHubApiBaseUrl/pulls/$pr/comments"
+	$uri = "$GitHubApiBaseUrl/pulls/$PR/comments"
 
 	$out = Invoke-GitHubRequest -Method $Enum.PRRequestMethods.Post -Uri $uri -Body $Body 
 	$out.$Enum.PRRequestOutput.StatusDescription
@@ -3255,6 +3292,7 @@ Function Get-PRApproval {
 		[switch]$DemoMode
 	)
 	$PR = (Get-SchemaCheck -SchemaInfo $MVschemaData.PR.Number -InputData $PR)
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-PRApproval $PR"};
 	Reply-ToPR -PR $PR -UserInput $Approver -CannedMessage Approve -Policy $Enum.PRLabels.NR
 }
 
@@ -3272,6 +3310,7 @@ Function Reply-ToPR {
 	)
 	process {
 		$PR = $PR2
+		if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Reply-ToPR $PR"};
 		if ($PR -eq 1) {
 			Write-Host "Invalid PR number, quitting to squelch output: $Body"
 		} else {
@@ -3318,6 +3357,7 @@ Function Get-PRComments {
 		[Parameter(ValueFromPipeline)][int]$PR
 	)
 	$PR = (Get-SchemaCheck -SchemaInfo $MVschemaData.PR.Number -InputData $PR)
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-PRComments $PR"};
 	$Comments = (Invoke-GitHubPRRequest -PR $PR -Type $Enum.PRRequestTypes.Comments -Output $Enum.PRRequestOutput.Content -LastPage)
 	foreach ($Comment in $Comments) {
 		$Comment.($Enum.Strings.CreatedAt) = [TimeZoneInfo]::ConvertTimeBySystemTimeZoneId($Comment.($Enum.Strings.CreatedAt), $Enum.Strings.Pst)
@@ -3333,6 +3373,7 @@ Function Get-NonStdPRComments {
 		$Comments = (Get-PRComments -PR $PR2).body
 	)
 	process {
+		if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-NonStdPRComments $PR2"};
 		foreach ($StdComment in (Get-Values $Enum.StandardPRComments)) {
 			$Comments = $Comments | Where-Object {$_ -notmatch $StdComment}
 		}
@@ -3349,6 +3390,7 @@ Function Get-PRStateFromComments {
 		[switch]$WhatIf
 	)
 	$PR = $PR2
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-PRStateFromComments $PR2"};
 	if ($WhatIf) {Write-Host "$($MyInvocation.MyCommand.name): $PR - Comments $($Comments.Count)"}
 	$out = @()
 	foreach ($Comment in $Comments) {
@@ -3404,55 +3446,47 @@ Function Get-RevertCompletePR {
 	Param(
 		[int]$PR
 	)
-	$VRlabels = Get-ValidationResult $pr
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-PRStateFromComments $PR2"};
+	$VRlabels = Get-ValidationResult $PR
 	$VRlabels = $VRlabels | where {$_ -notmatch $Enum.PRLabels.vc}
 	if ($VRlabels) {
-		Get-RemovePRLabel -PR $pr -LabelName $Enum.PRLabels.vc
-		$VRlabels | %{Get-AddPRLabel -PR $pr -LabelName $_}
+		Get-RemovePRLabel -PR $PR -LabelName $Enum.PRLabels.vc
+		$VRlabels | %{Get-AddPRLabel -PR $PR -LabelName $_}
 	}
 }
 
-Function Get-ApproveBySearch {
-	Param(
-		[Parameter(mandatory = $True)][string]$Author,
-		$Preset = $Enum.SearchPresets.ToWork,
-		$MatchText = $Enum.Strings.StandardizeFormatting,
-		$Results = (Get-SearchGitHub -Author $Author -Preset $Preset -NoLabels)
-	)
-	$Results = $Results | Where-Object {$_.user.login -eq $Author -and $_.title -match $MatchText -and $_.labels.name -notcontains $Enum.PRLabels.MA -and $_.labels.name -notcontains $Enum.PRLabels.CR};
-	$Results.number | % { Write-Host "$_ - " -nonewline;Approve-PR $_ };
-}
-
 #Inject dependencies
-Function Add-ToValidationFile {
+Function Add-ToValidationFile {#AddVCRedist
 	Param(
-		[Parameter(mandatory = $True)][int]$vm,
- [ValidateScript( { $_ -in (Get-Keys $Enum.Dependencies) } )][string]$Common = $Enum.Dependencies.VCRedist,
-		$Dependency = $Common,
-		$VMFolder = "$MainFolder\vm\$vm",
-		$manifestFolder = "$VMFolder\manifest",
-		$FilePath = "$manifestFolder\Package.installer.yaml",
+		[Parameter(mandatory = $True)][int]$VM,
+		[ValidateScript( { $_ -in (Get-Keys $Enum.Dependencies) } )][string]$Common = $Enum.Dependencies.VCRedist,
+		[string]$Dependency = $Common,
+		[string]$VMFolder = "$MainFolder\vm\$VM",
+		[string]$manifestFolder = "$VMFolder\manifest",
+		[string]$FilePath = "$manifestFolder\Package.installer.yaml",
 		$fileContents = (Get-Content $FilePath),
-		$Selector = "Installers:",
-		$offset = 1,
-		$lineNo = (($fileContents | Select-String $Selector -List).LineNumber -$offset),
-		$fileInsert = "Dependencies:`n PackageDependencies:`n - PackageIdentifier: $Dependency",
+		[string]$Selector = "Installers:",
+		[int]$offset = 1,
+		[int]$lineNo = (($fileContents | Select-String $Selector -List).LineNumber -$offset),
+		[string]$fileInsert = "Dependencies:`n PackageDependencies:`n - PackageIdentifier: $Dependency",
 		$fileOutput = ($fileContents[$Enum.Index.First..($lineNo -1)] + $fileInsert + $fileContents[$lineNo..($fileContents.Length)])
 	)
-		Write-Host "Writing $($fileContents.Length) lines to $FilePath"
-		Out-File -FilePath $FilePath -InputObject $fileOutput
-		Get-TrackerVMSetStatus $Enum.VMStatus.Revert $VM;
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Add-ToValidationFile $VM"};
+	Write-Host "Writing $($fileContents.Length) lines to $FilePath"
+	Out-File -FilePath $FilePath -InputObject $fileOutput
+	Get-TrackerVMSetStatus $Enum.VMStatus.Revert $VM;
 }
 
 Function Add-InstallerSwitch {
 	Param(
-		[Parameter(mandatory = $True)][int]$vm,
+		[Parameter(mandatory = $True)][int]$VM,
 		$Data = '/qn',
 		$Selector = "ManifestType:",
 		[ValidateSet("EXE","MSI","MSIX","Inno","Nullsoft","InstallShield")]
 		[string]$InstallerType
 
 	)
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Add-InstallerSwitch $VM"};
 	switch ($InstallerType) {
 		"MSIX"{
 		$Data = '/quiet'
@@ -3482,6 +3516,7 @@ Function Get-UpdateHashInPR {
 		[string]$comment = "``````suggestion`n$ReplaceString`n```````n`n(Deterministic automation - build $build.)"
 	)
 	$PR = $PR2
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-UpdateHashInPR $PR"};
 	foreach ($Line in $LineNumbers) {
 		Add-GitHubReviewComment -PR $PR -Comment $comment -Line $Line -Action $Enum.PRLabels.NAF
 	}
@@ -3500,6 +3535,7 @@ Function Get-UpdateArchInPR {
 		[string]$comment = "``````suggestion`n$ReplaceString`n```````n`n(Deterministic automation - build $build.)"
 	)
 	$PR = $PR2
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-UpdateArchInPR $PR"};
 	foreach ($Line in $LineNumbers) {
 		Add-GitHubReviewComment -PR $PR -Comment $comment -Line $Line -Action $Enum.PRLabels.NAF
 	}
@@ -3516,7 +3552,7 @@ Function Add-DependencyToPR {
 		$comment = "``````suggestion`n$ReplaceString`n```````n`n(Deterministic automation - build $build.)"
 	)
 	$PR = $PR2
-	if (($FunctionTrace) -OR ($Debug)) {Write-FunctionTrace -OutFile $FunctionTraceFile -out "Add-DependencyToPR $PR2"};
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Add-DependencyToPR $PR2"};
 	$out = $Enum.Char.Blank
 	foreach ($Line in $LineNumbers) {
 		$out += Add-GitHubReviewComment -PR $PR -Comment $comment -Line $Line -Action $Enum.PRLabels.NAF
@@ -3536,7 +3572,7 @@ Function Get-AddToAutowaiver {
 		[switch]$AlsoRunAutowaiver
 	)
 	Process {
-		if (($FunctionTrace) -OR ($WhatIf)) {Write-FunctionTrace -OutFile $FunctionTraceFile -out "Get-AddToAutowaiver $PR2"};
+		if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-AddToAutowaiver $PR2"};
 		if ($PackageIdentifier.Length -gt 1) {
 			$NewLine = $Enum.Char.Blank | Select-Object $Enum.AutowaiverColumns.PackageIdentifier,$Enum.AutowaiverColumns.ManifestValue,$Enum.AutowaiverColumns.ManifestKey,$Enum.AutowaiverColumns.RemoveLabel
 			$NewLine.PackageIdentifier = $PackageIdentifier
@@ -3574,7 +3610,7 @@ Function Get-Autowaiver {
 	)
 	Process {
 		$PR = $PR2
-		if (($FunctionTrace) -OR ($WhatIf)) {Write-FunctionTrace -OutFile $FunctionTraceFile -out "Get-Autowaiver $PR2"};
+		if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-Autowaiver $PR2"};
 		$PRLabels = $PRLabels | where {$_ -notmatch "Waived"}
 		$JoinLabels = ($PRLabels -join $Enum.Char.Space)
 
@@ -3594,8 +3630,8 @@ Function Get-Autowaiver {
 						"Get-AddPRLabel -PR $PR -LabelName $($Enum.PRLabels.VC)"
 					} else {
 						Get-RemovePRLabel -PR $PR -LabelName $Waiver.RemoveLabel
-						Get-RemovePRLabel -PR $pr -LabelName $Enum.PRLabels.NAF
-						Get-RemovePRLabel -PR $pr -LabelName $Enum.PRLabels.NA
+						Get-RemovePRLabel -PR $PR -LabelName $Enum.PRLabels.NAF
+						Get-RemovePRLabel -PR $PR -LabelName $Enum.PRLabels.NA
 						Get-AddPRLabel -PR $PR -LabelName $Enum.PRLabels.VC
 					}
 				} else {
@@ -3642,6 +3678,7 @@ Function Get-CheckData {
 		$CheckData = (Invoke-GitHubRequest "$GitHubApiBaseUrl/commits/$headSha/check-runs?per_page=100&filter=latest" -JSON)
 	)
 	process {
+		if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-CheckData $PR2"};
 		Return $CheckData.check_runs #| Select-Object id, name, status, conclusion, started_at, completed_at | ft
 	}
 }
@@ -3653,6 +3690,7 @@ Function Get-ADOValidationStatus {
 		[switch]$WhatIf
 	)
 	$PR = (Get-SchemaCheck -SchemaInfo $MVschemaData.PR.Number -InputData $PR)
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-ADOValidationStatus $PR"};
 	$PRbuild = (Get-BuildFromPR -PR $PR)
 	$LogNumber = (55)
 	$URL = "$ADOMSBaseUrl/$ADOMSGUID/_apis/build/builds/$PRbuild/logs/$LogNumber"
@@ -3699,6 +3737,7 @@ Function Get-ADOLastStatus {
 	)
 	Process {
 		$PR = (Get-SchemaCheck -SchemaInfo $MVschemaData.PR.Number -InputData $PR)
+		if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-ADOLastStatus $PR"};
 		$Statii = Get-ADOValidationStatus -PR $PR
 		$Last = $Statii[$Enum.Index.Last]
 		if ($Last.Statii -match $Enum.ADOValidationStatus.InProgress) {
@@ -3728,6 +3767,7 @@ Function Get-PRStateFromAPI {
 		[int]$PR2 = (Get-SchemaCheck -SchemaInfo $MVschemaData.PR.Number -InputData $PR),
 		$Data = (Get-CheckData -PR $PR2)
 	)
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-PRStateFromAPI $PR2"};
 	$in = (($Data | where {$_.name -match "Installation Validation"}).output.text -split $Enum.Char.LineBreak)
 	$out = @()
 	$in[$Enum.Num.Two..($in.Count -$Enum.Num.Two)] -replace "Status: " | %{
@@ -3746,6 +3786,7 @@ Function Get-PRFailData {
 		$Data = (Get-CheckData -PR $PR2)
 	)
 	process {
+		if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-PRFailData $PR2"};
 		$in = ($Data | where {$_.name -match "`\. "} | where {$_.conclusion -match $Enum.PRCheckStates.Failure})
 		$out = $in.output.text -split $Enum.Char.LineBreak
 		return $out
@@ -3759,6 +3800,7 @@ Function Get-ParseGHAppData {
 		$Data = (Get-PRFailData -PR $PR2)
 	)
 	Process {
+		if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-ParseGHAppData $PR2"};
 		$out = $Enum.Char.Blank
 		[array]$h3 = ($Data | Select-string '###').LineNumber
 		
@@ -3783,6 +3825,7 @@ Function Get-PRStateFromBoth {
 		$PRStateFromAPI = (Get-PRStateFromAPI -PR $PR2),
 		$PRStateFromComments = (Get-PRStateFromComments -PR $PR2)
 	)
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-PRStateFromBoth $PR2"};
 	$out = $PRStateFromAPI + $PRStateFromComments | sort $Enum.Strings.CreatedAt
 	Return $out
 }
@@ -3801,13 +3844,14 @@ Function Get-DownloadADOFile {
 		$notes = $Enum.Char.Blank
 	)
 	$PR = (Get-SchemaCheck -SchemaInfo $MVschemaData.PR.Number -InputData $PR)
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-DownloadADOFile $PR2"};
 	$PRState = Get-PRStateFromComments $PR
 	$FileList = $null
 	[int]$BackoffSeconds = 0
 	[int]$Retries = 0
 	$ArtfiactUrl = $Enum.Char.Blank
 	$DownloadSeconds = 8;
-	if ($Preprod) {
+	if ($PReprod) {
 		$BuildNumber = 1
 	} else {
 		$BuildNumber = Get-BuildFromPR -PR $PR 
@@ -3816,7 +3860,7 @@ Function Get-DownloadADOFile {
 		while ($FileList -eq $null) {
 			try {
 				#This downloads to Windows default location, which has already been set to $DestinationPath
-					if ($Preprod) {
+					if ($PReprod) {
 						$CheckData = Get-CheckData -PR $PR | where {$_.name -match "Validation Completed"}
 						$ArtfiactUrl = (($CheckData.output.text -split $Enum.Char.LineBreak | select-string "zip")[$Enum.Index.Last] -split $Enum.Char.DoubleQuote)[3]
 					} else {
@@ -3878,6 +3922,7 @@ Function Get-BuildFromPR {
 		[array]$href = ($content.body | where {$_ -match $Enum.Strings.BuildLinkComment})
 	)
 	process {
+		if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-BuildFromPR $PR2"};
 		$href = ($href -split $Enum.Char.LineBreak)[$Enum.Index.Last]
 		# [int]$LineNo = ($content.body | Select-String $Enum.Strings.BuildLinkComment).LineNumber[$Enum.Index.Last]
 		# $href = ($href -split $Enum.Char.LineBreak)[$LineNo - 1]
@@ -3902,6 +3947,7 @@ Function Get-LineFromBuildResult {
 	)
 	process {
 		$PR = $PR2
+		if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-LineFromBuildResult $PR2"};
 		foreach ($Match in $MatchLine) {
 			$output += ($Log[($Match + $MatchOffset)..($Match + $Length + $MatchOffset)])
 		}
@@ -3928,6 +3974,7 @@ Function Invoke-GitHubRequest {
 		[switch]$JSON,
 		$out = $Enum.Char.Blank
 	)
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Invoke-GitHubRequest $Uri"};
 	if ($Body) {
 		try {
 			$out = (Invoke-WebRequest -Method $Method -Uri $Uri -Headers $Headers -Body $Body -ContentType application/json -ProgressAction SilentlyContinue)
@@ -3953,7 +4000,7 @@ Function Invoke-GitHubRequest {
 	if ($out -match $Enum.Strings.ApiRateLimitExceeded) {
 		Get-GitHubTimeout
 	}
-	#GitHub requires the value be the .body property of the variable. This makes more sense with Curl, where this is the -data parameter. However with Invoke-WebRequest it's the -Body parameter, so we end up with the awkward situation of having a Body parameter that needs to be prepended with a body property.
+	#GitHub requires the value be the .body Property of the variable. This makes more sense with Curl, where this is the -data parameter. However with Invoke-WebRequest it's the -Body parameter, so we end up with the awkward situation of having a Body parameter that needs to be prepended with a body Property.
 	#if (!($Silent)) {
 		if (($JSON)){# -OR ($Output -eq $Enum.PRRequestOutput.Content)) {
 			try {$out | ConvertFrom-Json} catch {$out}
@@ -3969,6 +4016,7 @@ Function Check-PRInstallerStatusInnerWrapper {
 		$Url,
 		$Out = $Enum.Char.Blank
 	)
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Check-PRInstallerStatusInnerWrapper $Uri"};
 	try {
 		$Out = (Invoke-GitHubRequest $Url -Method $Enum.PRRequestMethods.Head -ErrorAction SilentlyContinue -ProgressAction SilentlyContinue).StatusCode
 	} catch {}
@@ -3977,6 +4025,8 @@ Function Check-PRInstallerStatusInnerWrapper {
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+######################### - Validation Starts Here  - #########################
+######################### - Validation Starts Here  - #########################
 ######################### - Validation Starts Here  - #########################
 #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -3991,7 +4041,7 @@ Function Get-TrackerVMValidate {
 		[string]$ManualDependency,
 		[string]$PackageIdentifier = ($QueryClipboard.PackageIdentifier),
 		[string]$PackageVersion = ($QueryClipboard.PackageVersion),
-		[string]$RemoteFolder = "//$remoteIP/ManVal/vm/$vm",
+		[string]$RemoteFolder = "//$remoteIP/ManVal/vm/$VM",
 		[string]$installerLine = "--manifest $RemoteFolder/manifest",
 		[string]$InstallerType,
 		[string]$Locale,
@@ -4006,6 +4056,7 @@ Function Get-TrackerVMValidate {
 		[switch]$NoStaleCheck,
 		[string]$optionsLine = $Enum.Char.Blank
 	)
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-TrackerVMValidate $VM"};
 	Write-Host "Starting Manual Validation build $build on vm$VM for package $PackageIdentifier version $PackageVersion in PR $PR"
 	# Get-TrackerVMSetStatus $Enum.VMStatus.Prevalidation $VM -PackageIdentifier $PackageIdentifier -PR $PR -Silent
 	<#Sections:
@@ -4034,7 +4085,7 @@ Function Get-TrackerVMValidate {
 			($JoinLabels -match $Enum.PRLabels.NP)) -OR 
 		($PRState.merged -ne $False) -OR 
 		($PRState.state -ne $Enum.PRStates.Open)) {
-			if ($vm -eq 0){
+			if ($VM -eq 0){
 				Write-Host "No available $OS VMs";
 				Get-PipelineVmGenerate -OS $OS;
 				#Break;
@@ -4078,7 +4129,7 @@ Function Get-TrackerVMValidate {
 				$logLine = "$OS "
 				$nonElevatedShell = $Enum.Char.Blank
 				$logExt = "log"
-				$VMFolder = "$MainFolder\vm\$vm"
+				$VMFolder = "$MainFolder\vm\$VM"
 				$manifestFolder = "$VMFolder\manifest"
 				$CmdsFileName = "$VMFolder\cmds.ps1"
 
@@ -4270,9 +4321,9 @@ Function Get-TrackerVMValidate {
 
 		`$InstallStart = Get-Date;
 		Out-Log 'Starting preinstall filescan.'
-		`$PreinstallFilesystem = &cmd /c 'dir C:\ /b /s'
-		`$PreinstallFileCount = `$PreinstallFilesystem.Count
-		Out-Log `"Completing preinstall filescan. Read `$PreinstallFileCount files.`"
+		`$PReinstallFilesystem = &cmd /c 'dir C:\ /b /s'
+		`$PReinstallFileCount = `$PReinstallFilesystem.Count
+		Out-Log `"Completing preinstall filescan. Read `$PReinstallFileCount files.`"
 		$ManualDependency
 		Out-Log `"Main Package Install with args: $wingetArgs`"
 		`$mainpackage = (Start-Process 'winget' '$wingetArgs' -wait -PassThru);
@@ -4347,8 +4398,8 @@ Function Get-TrackerVMValidate {
 			} else {
 				`$PostinstallFilesystem = &cmd /c 'dir C:\ /b /s'
 				`$PostinstallFileCount = `$PostinstallFilesystem.Count
-				Out-Log `"Completing postinstall filescan. Read `$PostinstallFileCount files, a difference of `$(`$PostinstallFileCount - `$PreinstallFileCount) files.`"
-				`$files = (Compare-Object `$PreinstallFilesystem `$PostinstallFilesystem | where {`$_.SideIndicator -eq '=>'}).inputobject
+				Out-Log `"Completing postinstall filescan. Read `$PostinstallFileCount files, a difference of `$(`$PostinstallFileCount - `$PReinstallFileCount) files.`"
+				`$files = (Compare-Object `$PReinstallFilesystem `$PostinstallFilesystem | where {`$_.SideIndicator -eq '=>'}).inputobject
 				
 				`$list = 'AppRepository','assembly', 'CbsTemp', 'CryptnetUrlCache', 'CacheStorage', 'Cache_Data', 'Code Cache', 'DesktopAppInstaller', 'dump64a', 'EdgeCore', 'EdgeUpdate', 'EdgeWebView', 'ErrorDlg', 'ErrorDialog', 'Microsoft\\Edge\\Application', 'Microsoft\\Copilot', 'Microsoft.Copilot', 'Microsoft\\Defender', 'Microsoft\\Diagnosis', 'Microsoft\\Edge\\Temp', 'msedge', 'NativeImages', 'Prefetch', 'Provisioning', 'redis', 'servicing', 'ServiceProfiles', 'Start Menu', 'System32', 'SystemTemp', 'SysWOW64', 'unins', 'waasmedic', 'C:\\Windows', 'Windows\\Explorer', 'WinSxS'
 				
@@ -4411,10 +4462,10 @@ Function Get-TrackerVMValidate {
 			} elseif ((Get-Content $RemoteTrackerModeFile) -eq 'IEDS') {
 				Out-Log `" = = = = Auto-Completing Manual Validation pipeline build $build on VM $VM for $PackageIdentifier $logLine in `$(((Get-Date) -`$TimeStart).TotalSeconds) seconds. = = = = `"
 				Get-TrackerVMSetStatus 'Approved' -Package $PackageIdentifier -PR $PR
-			} elseif ((Get-TrackerVMStatus | where {`$_.vm -match `$vm}).Mode -eq 'Existing') {
+			} elseif ((Get-TrackerVMStatus | where {`$_.vm -match `$VM}).Mode -eq 'Existing') {
 				Out-Log `" = = = = Auto-Completing Manual Validation pipeline build $build on VM $VM for $PackageIdentifier $logLine in `$(((Get-Date) -`$TimeStart).TotalSeconds) seconds. = = = = `"
 				Get-TrackerVMSetStatus 'Approved' -Package $PackageIdentifier -PR $PR
-			} elseif ((Get-TrackerVMStatus | where {`$_.vm -match `$vm}).Mode -eq 'New') {
+			} elseif ((Get-TrackerVMStatus | where {`$_.vm -match `$VM}).Mode -eq 'New') {
 				Out-Log `" = = = = Attempting Auto-Completion of Manual Validation pipeline build $build on VM $VM for $PackageIdentifier $logLine in `$(((Get-Date) -`$TimeStart).TotalSeconds) seconds. = = = = `"
 				Get-TrackerVMSetStatus 'ValidationCompleted' -Package $PackageIdentifier -PR $PR
 				Get-installedVersions
@@ -4438,15 +4489,24 @@ Function Get-TrackerVMValidate {
 
 			if ($NoFiles -eq $False) {
 				if ($VM) {
-					# Get-ManifestSplitter -PackageIdentifier $PackageIdentifier -PackageVersion $PackageVersion
 					$SplitManifest = Get-ManifestSplitter -PackageIdentifier $PackageIdentifier -PackageVersion $PackageVersion -OutputToVariable
+					
+					$InstallerFile  = Get-ManifestValidation -StrArray $SplitManifest.installer -NoRun
+					Write-Host "InstallerFile $InstallerFile"
+					Get-ManifestFile -InstallerFile $InstallerFile -VM $VM
+				
+					$SplitManifest.remove("installer")
+					$root = $SplitManifest.Root
+					$SplitManifest.remove("root")
 					[string[]]$SplitManifestValues = $SplitManifest.values
-					[string[]]$SplitManifestKeys = $SplitManifest.keys
 					$SplitManifestValues | %{
 						$InstallerFile = Get-ManifestValidation -StrArray $_ -NoRun
-						# Write-Host "InstallerFile $InstallerFile"
+						Write-Host "InstallerFile $InstallerFile"
 						Get-ManifestFile -InstallerFile $InstallerFile -VM $VM
 					}
+					$InstallerFile = Get-ManifestValidation -StrArray $root -NoRun
+					Write-Host "InstallerFile $InstallerFile"
+					Get-ManifestFile -InstallerFile $InstallerFile -VM $VM
 				}#end if VM
 			}#end if NoFiles
 			if (!($Silent)) {Write-Host "File operations complete, starting VM operations."}
@@ -4460,6 +4520,7 @@ Function Get-TrackerVMValidateByID {
 	Param(
 		[string]$PackageIdentifier
 	)
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-TrackerVMValidateByID $PackageIdentifier"};
 	$PackageIdentifier = Get-SchemaCheck -InputData $PackageIdentifier -SchemaInfo $schemaData.installer.definitions.PackageIdentifier 
 	Get-TrackerVMValidate -installerLine "--id $PackageIdentifier" -PackageIdentifier $PackageIdentifier -NoFiles #-notElevated
 }
@@ -4469,6 +4530,7 @@ Function Get-TrackerVMValidateByConfig {
 	$PackageIdentifier = "Microsoft.Devhome",
 	$ManualDependency = "Git.Git"
 	)
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-TrackerVMValidateByConfig $PackageIdentifier"};
 	$PackageIdentifier = Get-SchemaCheck -InputData $PackageIdentifier -SchemaInfo $schemaData.installer.definitions.PackageIdentifier 
 	Get-TrackerVMValidate -installerLine "--id $PackageIdentifier" -PackageIdentifier $PackageIdentifier -NoFiles -ManualDependency $ManualDependency -Operation "DevHomeConfig"
 	Start-Sleep $Enum.Num.Two
@@ -4476,18 +4538,21 @@ Function Get-TrackerVMValidateByConfig {
 }
 
 Function Get-TrackerVMValidateByArch {
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-TrackerVMValidateByArch Start"};
 	Get-TrackerVMValidate -Arch $Enum.Arch.64;
 	Start-Sleep $Enum.Num.Two;
 	Get-TrackerVMValidate -Arch $Enum.Arch.86;
 }
 
 Function Get-TrackerVMValidateByScope {
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-TrackerVMValidateByScope Start"};
 	Get-TrackerVMValidate -Scope Machine;
 	Start-Sleep $Enum.Num.Two;
 	Get-TrackerVMValidate -Scope User;
 }
 
 Function Get-TrackerVMValidateBothArchAndScope {
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-TrackerVMValidateBothArchAndScope Start"};
 	Get-TrackerVMValidate -Arch $Enum.Arch.64 -Scope Machine;
 	Start-Sleep $Enum.Num.Two;
 	Get-TrackerVMValidate -Arch $Enum.Arch.86 -Scope Machine;
@@ -4502,8 +4567,8 @@ Function Get-InstallerFileAutomation {
 	Param(
 		[int]$PR
 	)
-	if ($FunctionTrace) {Write-FunctionTrace -OutFile $FunctionTraceFile -out "Get-InstallerFileAutomation $PR2"};
 	[int]$PR2 = (Get-SchemaCheck -SchemaInfo $MVschemaData.PR.Number -InputData $PR)
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-InstallerFileAutomation $PR2"};
 	[string[]]$InstallerFile = (Get-CommitFile -PR $PR2)
 	# $PR2
 	# Write-Host "Get-InstallerFileAutomation $PR2"
@@ -4521,7 +4586,7 @@ Function Get-SingleFileAutomation {
 		[int]$VM = (Get-SchemaCheck -SchemaInfo $MVschemaData.VM.Number -InputData (Get-NextFreeVM))
 	)
 	$PR2 = (Get-SchemaCheck -SchemaInfo $MVschemaData.PR.Number -InputData $PR)
-	if ($FunctionTrace) {Write-FunctionTrace -OutFile $FunctionTraceFile -out "Get-SingleFileAutomation $PR2"};
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-SingleFileAutomation $PR2"};
 	for ($File = 0; $File -lt $listing.Length; $File++) {
 		Write-Host "SingleFileAutomation $PR2 - $File for VM $VM"
 		$InstallerFile = (Get-FileFromGitHub -PackageIdentifier $PackageIdentifier -Version $version -Suffix $listing[$File])
@@ -4535,30 +4600,31 @@ Function Get-ManifestFile {
 		[string[]]$InstallerFile,
 		[string]$FileName = "Package",
 		# [string]$PackageIdentifier = (Get-SchemaCheck -InputData $InstallerFile -YamlValue $Enum.ManifestKeys.PackageIdentifier -SchemaInfo $schemaData.installer.definitions.PackageIdentifier),
-		[string]$PackageIdentifier = (Get-YamlValue -Key $Enum.ManifestKeys.PackageIdentifier -InputArray $InstallerFile),
+		[string]$PackageIdentifier = (Get-YamlValue -Key $Enum.ManifestKeys.PackageIdentifier -InputArray ($InstallerFile -split "`n")),
 		[int]$PR,
 		[string]$Arch,
 		[string]$OS,
 		[string]$Scope,
 		[switch]$Display
 	);
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-ManifestFile $VM"};
 	if ($VM) {
 		if ($Display) {Write-Output "InstallerFile: $InstallerFile"}
 		$VM = (Get-SchemaCheck -SchemaInfo $MVschemaData.VM.Number -InputData $VM)
 		$PR = (Get-SchemaCheck -SchemaInfo $MVschemaData.PR.Number -InputData $PR)
 		#Write-Output "PackageIdentifier: $PackageIdentifier"
-		$manifestFolder = "$MainFolder\vm\$vm\manifest"
+		$manifestFolder = "$MainFolder\vm\$VM\manifest"
 		$InstallerFile = $InstallerFile | Where-Object {$_ -notmatch $Enum.Strings.MarkedThisConversationAsResolved}
 
 		$YamlValue = (Get-YamlValue $Enum.ManifestVersionProperties.ManifestType -InputArray ($InstallerFile -split "`n"))
 		if ($Display) {Write-Output "YamlValue: $YamlValue"}
 		switch ($YamlValue) {
 			$Enum.ManifestFileTypes.defaultLocale {
-				$Locale = (Get-YamlValue PackageLocale -InputArray $InstallerFile)
+				$Locale = (Get-YamlValue PackageLocale -InputArray ($InstallerFile -split "`n"))
 				$FileName = "$FileName.locale.$Locale"
 			}
 			$Enum.ManifestFileTypes.Locale {
-				$Locale = (Get-YamlValue PackageLocale -InputArray $InstallerFile)
+				$Locale = (Get-YamlValue PackageLocale -InputArray ($InstallerFile -split "`n"))
 				$FileName = "$FileName.locale.$Locale"
 			}
 			$Enum.ManifestFileTypes.installer {
@@ -4583,7 +4649,8 @@ Function Get-ManifestFile {
 		}
 		$FilePath = "$manifestFolder\$FileName.yaml"
 		Write-Output "Writing $($InstallerFile.Length) lines to $FilePath"
-		$InstallerFile -replace "0New version: ","0" -replace "0Add version: ","0" -replace "0Add ","0" -replace "0New ","0" | Out-File $FilePath -Encoding unicode
+		# $InstallerFile -replace "0New version: ","0" -replace "0Add version: ","0" -replace "0Add ","0" -replace "0New ","0" | Out-File $FilePath -Encoding unicode
+		$InstallerFile | Out-File $FilePath -Encoding unicode
 		return $VM
 	}
 }
@@ -4599,7 +4666,7 @@ Function Get-ManifestListing {#Uses an unauthenticatable endpoint, so consumes u
 		[Switch]$ListVersions
 	)
 	$PackageIdentifier = $PI
-	if (($FunctionTrace) -OR ($Debug)) {Write-FunctionTrace -OutFile $FunctionTraceFile -out "Get-ManifestListing $PackageIdentifier"};
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-ManifestListing $PackageIdentifier"};
 	If ($ListVersions) {
 		$Uri = "$GitHubApiBaseUrl/contents/manifests/$FirstLetter/$Path/"
 	} else {
@@ -4625,7 +4692,7 @@ Function Get-ManifestVersion {
 		$VersionNumber, 
 		[switch]$Display
 	)
-	if (($FunctionTrace) -OR ($Display)) {Write-FunctionTrace -OutFile $FunctionTraceFile -out "Get-ManifestVersion $PackageIdentifier"};
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-ManifestVersion $PackageIdentifier"};
 	$PackageIdentifier = (Get-SchemaCheck -InputData $PackageIdentifier -SchemaInfo $schemaData.installer.definitions.PackageIdentifier)
 	$Invo = $($MyInvocation.MyCommand.name)
 	if ($Display) {Write-Host "$Invo"}
@@ -4650,6 +4717,7 @@ Function Get-ManifestVersion {
 }
 
 Function Get-OSFromVersion {
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-OSFromVersion Start"};
 	$Enum.VMOS.Win11
 }
 
@@ -4681,25 +4749,26 @@ Process:
 
 Function Get-PipelineVmGenerate {
 	Param(
-		[int]$vm = (Get-Content $vmCounter),
+		[int]$VM = (Get-Content $VMCounter),
  [ValidateScript( { $_ -in $Enum.VMOS.Win11 } )][string]$OS = $Enum.VMOS.Win11,
 		[int]$version = (Get-TrackerVMVersion -OS $OS),
-		$destinationPath = "$imagesFolder\$vm\",
-		$VMFolder = "$MainFolder\vm\$vm",
+		$destinationPath = "$imagesFolder\$VM\",
+		$VMFolder = "$MainFolder\vm\$VM",
 		$newVmName = ("vm$VM"),
 		$startTime = (Get-Date)
 	)
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-PipelineVmGenerate $VM"};
 	Test-Admin
 	Write-Host "Creating VM $newVmName version $version OS $OS"
-	[int]$vm + 1|Out-File $vmCounter
-	"`"$vm`",`"Generating`",`"$version`",`"$OS`",`"`",`"1`",`"Creation`",`"0`""|Out-File $StatusFile -Append -Encoding unicode
+	[int]$VM + 1|Out-File $VMCounter
+	"`"$VM`",`"Generating`",`"$version`",`"$OS`",`"`",`"1`",`"Creation`",`"0`""|Out-File $StatusFile -Append -Encoding unicode
 	Get-RemoveFileIfExist $destinationPath -remake
 	Get-RemoveFileIfExist $VMFolder -remake
-	$vmImageFolder = (ls "$imagesFolder\$OS-image\Virtual Machines\" *.vmcx).fullname
+	$VMImageFolder = (ls "$imagesFolder\$OS-image\Virtual Machines\" *.vmcx).fullname
 	
 	$ImportEst = (get-date).AddSeconds(400).ToString($Enum.Char.T)
 	Write-Host "Takes about 400 seconds. (Until $($ImportEst).) Beginning import..."
-	Import-VM -Path $vmImageFolder -Copy -GenerateNewId -VhdDestinationPath $destinationPath -VirtualMachinePath $destinationPath;
+	Import-VM -Path $VMImageFolder -Copy -GenerateNewId -VhdDestinationPath $destinationPath -VirtualMachinePath $destinationPath;
 	$ImportSeconds = ((Get-Date)-$startTime).TotalSeconds
 	if ($ImportSeconds -gt 30) { 
 		Write-Host "Import complete, taking $ImportSeconds seconds. Renaming..."
@@ -4721,18 +4790,18 @@ Function Get-PipelineVmGenerate {
 
 Function Get-PipelineVmDisgenerate {
 	Param(
-		[Parameter(mandatory = $True)][int]$vm,
-		$destinationPath = "$imagesFolder\$vm\",
-		$VMFolder = "$MainFolder\vm\$vm",
-		$vmName = ("vm$VM")
+		[Parameter(mandatory = $True)][int]$VM,
+		$destinationPath = "$imagesFolder\$VM\",
+		$VMFolder = "$MainFolder\vm\$VM",
+		$VMName = ("vm$VM")
 	)
-		
-	if ($vm -gt 0) {
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-PipelineVmDisgenerate $VM"};
+	if ($VM -gt 0) {
 	Test-Admin
 	Get-TrackerVMSetStatus $Enum.VMStatus.Disgenerate $VM
 	Get-ConnectedVM | Where-Object {$_.vm -match $VMName} | ForEach-Object {Stop-Process -id $_.id}
 	Stop-TrackerVM $VM
-	Remove-VM -Name $vmName -Force
+	Remove-VM -Name $VMName -Force
 
 	$out = Get-Status
 	$out = $out | Where-Object {$_.vm -notmatch $VM}
@@ -4752,8 +4821,9 @@ Function Get-PipelineVmDisgenerate {
 
 Function Get-ImageVMStart {
 	Param(
- [ValidateScript( { $_ -in $Enum.VMOS.Win11 } )][string]$OS = $Enum.VMOS.Win11
+		[ValidateScript( { $_ -in $Enum.VMOS.Win11 } )][string]$OS = $Enum.VMOS.Win11
 	)
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-ImageVMStart $OS"};
 	Test-Admin
 	$VM = 0
 	Start-VM $OS;
@@ -4763,8 +4833,9 @@ Function Get-ImageVMStart {
 
 Function Get-ImageVMStop {
 	Param(
- [ValidateScript( { $_ -in $Enum.VMOS.Win11 } )][string]$OS = $Enum.VMOS.Win11
+		[ValidateScript( { $_ -in $Enum.VMOS.Win11 } )][string]$OS = $Enum.VMOS.Win11
 	)
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-ImageVMStop $OS"};
 	Test-Admin
 	$VM = 0
 	$OriginalLoc = $Enum.Char.Blank
@@ -4794,6 +4865,7 @@ Function Get-ImageVMMove {
 		$CurrentVMName = $Enum.Char.Blank,
 		$newLoc = "$imagesFolder\$OS-Created$(get-date -f MMddyy)-Original"
 	)
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-ImageVMMove $OS"};
 	Test-Admin
 	# switch ($OS) {
 		# $Enum.VMOS.Win10 {
@@ -4811,9 +4883,10 @@ Function Get-ImageVMMove {
 #VM Pipeline Management
 Function Get-TrackerVMLaunchWindow {
 	Param(
-		[Parameter(mandatory = $True)][int]$vm,
+		[Parameter(mandatory = $True)][int]$VM,
 		$VMName = ("vm$VM")
 	)
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-TrackerVMLaunchWindow $VM"};
 	Test-Admin
 	Get-ConnectedVM | Where-Object {$_.vm -match $VMName} | ForEach-Object {Stop-Process -id $_.id}
 	C:\Windows\System32\vmconnect.exe localhost $VMName
@@ -4821,10 +4894,11 @@ Function Get-TrackerVMLaunchWindow {
 
 Function Get-TrackerVMRevert {
 	Param(
-		[Parameter(mandatory = $True)][int]$vm,
+		[Parameter(mandatory = $True)][int]$VM,
 		$VMName = ("vm$VM"),
 		[Switch]$Silent
 	)
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-TrackerVMRevert $VM"};
 	Test-Admin
 	if ($Silent) {
 		Get-TrackerVMSetStatus $Enum.VMStatus.Restoring $VM -Silent
@@ -4841,10 +4915,11 @@ Function Get-TrackerVMRevert {
 
 Function Complete-TrackerVM {
 	Param(
-		[Parameter(mandatory = $True)][int]$vm,
-		$VMFolder = "$MainFolder\vm\$vm",
+		[Parameter(mandatory = $True)][int]$VM,
+		$VMFolder = "$MainFolder\vm\$VM",
 		$filesFileName = "$VMFolder\files.txt"
 	)
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Complete-TrackerVM $VM"};
 	Test-Admin
 	Get-TrackerVMSetStatus $Enum.VMStatus.Completing $VM
 	Stop-Process -id ((Get-ConnectedVM)|Where-Object {$_.VM -match ("vm$VM")}).id -ErrorAction Ignore
@@ -4859,6 +4934,7 @@ Function Stop-TrackerVM {
 		[Parameter(mandatory = $True)][int]$VM,
 		$VMName = ("vm$VM")
 	)
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Stop-TrackerVM $VM"};
 	Test-Admin
 	Stop-VM $VMName -TurnOff
 }
@@ -4903,15 +4979,15 @@ Function Get-TrackerVMSetStatus {
 Function Get-Status {
 	Param(
 		[int]$VM,
- [ValidateScript( { $_ -in (Get-Keys $Enum.VMStatus) } )][string]$Status,
- [ValidateScript( { $_ -in $Enum.VMOS.Win11 } )][string]$OS,
+		 [ValidateScript( { $_ -in (Get-Keys $Enum.VMStatus) } )][string]$Status,
+		 [ValidateScript( { $_ -in $Enum.VMOS.Win11 } )][string]$OS,
 		[string]$PackageIdentifier,
 		[Parameter(ValueFromPipeline)][int]$PR,
- [ValidateScript( { $_ -in (Get-Keys $Enum.VmModes)} )][string]$Mode,
+		[ValidateScript( { $_ -in (Get-Keys $Enum.VmModes)} )][string]$Mode,
 		$RAM,
 		$out = (Get-Content $StatusFile | ConvertFrom-Csv)
 	)
-
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-TrackerVMSetStatus $VM"};
 	if ($VM) {$out = ($out | Where-Object {$_.vm -eq $VM})}
 	if ($Status) {$out = ($out | Where-Object {$_.Status -eq $Status})}
 	if ($OS) {$out = ($out | Where-Object {$_.OS -eq $OS})}
@@ -4929,6 +5005,7 @@ Function Get-Status {
 }
 
 Function Get-TrackerVMResetStatus {
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-TrackerVMResetStatus Start"};
 	$VMs = (Get-Status -Status Ready -RAM 0).VM
 	$VMs += (Get-Status -Status Ready -PackageIdentifier $Enum.Char.Blank).VM
 	Foreach ($VM in $VMs) {
@@ -4940,6 +5017,7 @@ Function Get-TrackerVMResetStatus {
 }
 
 Function Get-TrackerVMRebuildStatus {
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-TrackerVMRebuildStatus Start"};
 	$Status = Get-VM | 
 	Where-Object {$_.name -notmatch "vm0"} |
 	Where-Object {$_.name -notmatch $Enum.VMOS.Win10} |
@@ -4957,26 +5035,29 @@ Function Get-TrackerVMRebuildStatus {
 
 Function Get-TrackerVMProcess {
 	Param(
-		[int]$vm
+		[int]$VM
 	)
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-TrackerVMRebuildStatus $VM"};
 	return (Get-process *vmwp* -IncludeUserName) | where {($_.username -replace "NT VIRTUAL MACHINE\\",$Enum.Char.Blank) -match (Get-VM ("vm$VM")).vmid}
 }
 
 #VM Versioning
 Function Get-TrackerVMVersion {
 	Param(
- [ValidateScript( { $_ -in $Enum.VMOS.Win11 } )][string]$OS = $Enum.VMOS.Win11,
+		[ValidateScript( { $_ -in $Enum.VMOS.Win11 } )][string]$OS = $Enum.VMOS.Win11,
 		[int]$VM = ((Get-Content $VMversion | ConvertFrom-Csv | Where-Object {$_.OS -eq $OS}).version)
 	)
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-TrackerVMVersion $OS"};
 	Return $VM
 }
 
 Function Get-TrackerVMSetVersion {
 	Param(
 		[int]$Version,
- [ValidateScript( { $_ -in $Enum.VMOS.Win11 } )][string]$OS = $Enum.VMOS.Win11,
+		[ValidateScript( { $_ -in $Enum.VMOS.Win11 } )][string]$OS = $Enum.VMOS.Win11,
 		$Versions = (Get-Content $VMversion | ConvertFrom-Csv)
 	)
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-TrackerVMVersion $Version"};
 	($Versions | Where-Object {$_.OS -eq $OS}).Version = $Version
 	$Versions | ConvertTo-Csv|Out-File $VMversion
 }
@@ -4987,6 +5068,7 @@ Function Get-TrackerVMRotate {
 		$OS = $Enum.VMOS.Win11,
 		$VMs = ($status | Where-Object {$_.version -lt (Get-TrackerVMVersion -OS $OS)} | Where-Object {$_.OS -eq $OS})
 	)
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-TrackerVMVersion $OS"};
 	if ($VMs){
 		if (!(($status | Where-Object {$_.status -ne $Enum.VMStatus.Ready}).Count)) {
 			Get-TrackerVMSetStatus Regenerate ($VMs.VM | Get-Random)
@@ -4999,15 +5081,16 @@ Function Get-TrackerVMCycle {
 	Param(
 		$VMs = (Get-Status)
 	)
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-TrackerVMCycle $VMs"};
 	Foreach ($VM in $VMs) {
-		$vmNum = $Enum.Strings.Vm + $vm.vm
+		$VMNum = $Enum.Strings.Vm + $VM.vm
 		Switch ($VM.status) {
 			$Enum.VMStatus.AddVCRedist {
 				Add-ToValidationFile $VM.vm
-				Suspend-VM -Name $vmNum
+				Suspend-VM -Name $VMNum
 			}
 			$Enum.VMStatus.Approved {
-				Suspend-VM -Name $vmNum
+				Suspend-VM -Name $VMNum
 				$PRLabels = ((Invoke-GitHubPRRequest -PR $VM.PR -Type $Enum.prRequestTypes.Labels -Output $Enum.PRRequestOutput.Content -JSON).name) -join $Enum.Char.Space
 				if ($PRLabels -match $Enum.PRLabels.VC) {
 					Approve-PR -PR $VM.PR
@@ -5020,7 +5103,7 @@ Function Get-TrackerVMCycle {
 				Redo-Checkpoint $VM.vm
 			}
 			$Enum.VMStatus.Complete {
-				Suspend-VM -Name $vmNum -ErrorAction SilentlyContinue
+				Suspend-VM -Name $VMNum -ErrorAction SilentlyContinue
 				if (($VMs | Where-Object {$_.vm -eq $VM.vm} ).version -lt (Get-TrackerVMVersion -OS $VM.os)) {
 					Get-TrackerVMSetStatus $Enum.VMStatus.Regenerate $VM.vm
 				} else {
@@ -5028,41 +5111,41 @@ Function Get-TrackerVMCycle {
 				}
 			}
 			$Enum.VMStatus.Disgenerate {
-				Suspend-VM -Name $vmNum
+				Suspend-VM -Name $VMNum
 				Get-PipelineVmDisgenerate $VM.vm
 			}
 			$Enum.VMStatus.DoesntRun {
-				Suspend-VM -Name $vmNum
+				Suspend-VM -Name $VMNum
 				Get-SendStatus -Status $Enum.VMStatus.Complete
 			}
 			$Enum.VMStatus.Feedback {
-				Suspend-VM -Name $vmNum
+				Suspend-VM -Name $VMNum
 				Get-AddPRLabel -PR $VM.PR -LabelName $Enum.PRLabels.NAF
 				Get-TrackerVMSetStatus $Enum.VMStatus.Complete $VM.vm
 			}
 			$Enum.VMStatus.Revert {
-				Suspend-VM -Name $vmNum
+				Suspend-VM -Name $VMNum
 				Get-TrackerVMRevert $VM.vm
 			}
 			$Enum.VMStatus.Regenerate {
-				Suspend-VM -Name $vmNum
+				Suspend-VM -Name $VMNum
 				Get-PipelineVmDisgenerate $VM.vm
 				Get-PipelineVmGenerate -OS $VM.os
 			}
 			$Enum.VMStatus.SendStatusApproved {
-				Suspend-VM -Name $vmNum
+				Suspend-VM -Name $VMNum
 				Get-SendStatus -Status $Enum.VMStatus.Approved
 			}
 			$Enum.VMStatus.SendStatusComplete {
-				Suspend-VM -Name $vmNum
+				Suspend-VM -Name $VMNum
 				Get-SendStatus -Status $Enum.VMStatus.Complete
 			}
 			$Enum.VMStatus.SendStatusFeedback {
-				Suspend-VM -Name $vmNum
+				Suspend-VM -Name $VMNum
 				Get-SendStatus -Status $Enum.VMStatus.Feedback
 			}
 			$Enum.VMStatus.SendStatus {
-				Suspend-VM -Name $vmNum
+				Suspend-VM -Name $VMNum
 				Get-SendStatus -Status $Enum.VMStatus.Complete
 			}
 			default {
@@ -5073,28 +5156,32 @@ Function Get-TrackerVMCycle {
 
 Function Get-TrackerVMMode {
 	Param(
-		$mode = (Get-Content $TrackerModeFile)
+		$Mode = (Get-Content $TrackerModeFile)
 	)
-	$mode
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-TrackerVMMode $Mode"};
+	Return $Mode
 }
 
 Function Get-TrackerVMSetMode {
 	Param(
- [ValidateScript( { $_ -in (Get-Keys $Enum.TrackerModes) } )][string]$Mode = $Enum.TrackerModes.Validating
+		[ValidateScript( { $_ -in (Get-Keys $Enum.TrackerModes) } )][string]$Mode = $Enum.TrackerModes.Validating
 	)
-	$Mode | Out-File $TrackerModeFile -NoNewLine
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-TrackerVMSetMode $Mode"};
+	Return $Mode | Out-File $TrackerModeFile -NoNewLine
 }
 
 Function Get-ConnectedVM {
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-ConnectedVM Start"};
 	Test-Admin
 	(Get-Process *vmconnect*) | Select-Object id, @{n = $Enum.Strings.Vm; e = {ForEach-Object{$_.mainwindowtitle[$Enum.Index.First..5] -join $Enum.Char.Blank}}}
 }
 
 Function Get-NextFreeVM {
 	Param(
- [ValidateScript( { $_ -in $Enum.VMOS.Win11 } )][string]$OS = $Enum.VMOS.Win11,
+		[ValidateScript( { $_ -in $Enum.VMOS.Win11 } )][string]$OS = $Enum.VMOS.Win11,
 		$Status = $Enum.VMStatus.Ready
 	)
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-NextFreeVM $OS"};
 	Test-Admin
 	try {
 		$out_status = Get-Status 
@@ -5113,6 +5200,7 @@ Function Redo-Checkpoint {
 		[Parameter(mandatory = $True)][int]$VM,
 		$VMName = ("vm$VM")
 	)
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Redo-Checkpoint $VM"};
 	Test-Admin
 	Get-TrackerVMSetStatus $Enum.VMStatus.Checkpointing $VM
 	Remove-VMCheckpoint -Name $CheckpointName -VMName $VMName
@@ -5124,6 +5212,7 @@ Function Get-StopStuckVMs {
 	Param(
 		$VMsToStop = (Get-Status -Status Completing).VM
 	)
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-StopStuckVMs $VMsToStop"};
 	if ($VMsToStop) {
 		$VMsToStop | %{Get-TrackerVMProcess $_ | Stop-Process -Force}
 	}
@@ -5136,7 +5225,7 @@ Function Get-RandomIEDS {#Only used by IEDS mode.
 		[ValidateScript( { $_ -in $Enum.VMOS.Win11 } )][string]$OS = $Enum.VMOS.Win11,
 		[int]$PR = (Get-SchemaCheck -SchemaInfo $MVschemaData.PR.Number -InputData ($IEDSPRs.number | where {$_ -notin (Get-Status).pr} | Get-Random))#,
 	)
-	
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-RandomIEDS $VM"};	
 	if ($VM -eq 0){
 		Write-Host "No available $OS VMs";
 		Get-PipelineVmGenerate -OS $OS;
@@ -5148,20 +5237,21 @@ Function Get-RandomIEDS {#Only used by IEDS mode.
 
 #VM Misc
 Function Get-StaleVMCheck {
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-StaleVMCheck Start"};
 	if ((get-date) -gt $NextStaleCheck) {
 		$VMStatus = Get-Content $statusFile | convertfrom-csv
 		$CheckVMStatus = ($VMStatus | where {$_.status -ne $Enum.VMStatus.Ready} | where {$_.status -ne $Enum.VMStatus.LongRunning})
 		Write-Output "$(Get-Date -Format $($Enum.Char.T)) Starting stale VM check with $($CheckVMStatus.Count) Results"
-		foreach ($vm in $CheckVMStatus) {
+		foreach ($VM in $CheckVMStatus) {
 			if ($VM.pr -ne 1) {
-				$vmNum = $vm.vm
+				$VMNum = $VM.vm
 				$PRState = (Invoke-GitHubPRRequest -PR $VM.pr -Type $Enum.PRRequestTypes.Blank -Output Content).state;
 				$PRLabels = ((Invoke-GitHubPRRequest -PR $VM.pr -Type $Enum.PRRequestTypes.Labels -Output $Enum.PRRequestOutput.Content -JSON).name)
 				if ($null -ne $PRState) {
 					if (($PRState -ne $Enum.PRStates.Open) -OR
 						(($PRLabels -join $Enum.Char.Space) -match $Enum.PRLabels.CR)){
-						Get-TrackerVMSetStatus -Status $Enum.VMStatus.Complete -VM $vmNum
-						Suspend-VM -Name "vm$vmNum"
+						Get-TrackerVMSetStatus -Status $Enum.VMStatus.Complete -VM $VMNum
+						Suspend-VM -Name "vm$VMNum"
 					} #end if PRState.state
 				} #end if null
 			} #end VM.pr
@@ -5179,7 +5269,7 @@ Function Get-TrackerVMWindowLoc {
 		$VMProcesses = (Get-Process vmconnect),
 		$MWHandle = ($VMProcesses | where {$_.MainWindowTitle -match ("vm$VM")}).MainWindowHandle
 	)
-	if ($FunctionTrace) {Write-FunctionTrace -OutFile $FunctionTraceFile -out "Get-TrackerVMWindowLoc $VM"};
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-TrackerVMWindowLoc $VM"};
 	[window]::GetWindowRect($MWHandle,[ref]$Rectangle)
 	Return $Rectangle
 }
@@ -5194,7 +5284,7 @@ Function Get-TrackerVMWindowSet {
 		$VMProcesses = (Get-Process vmconnect),
 		$MWHandle = ($VMProcesses | where {$_.MainWindowTitle -match ("vm$VM")}).MainWindowHandle
 	)
-	if ($FunctionTrace) {Write-FunctionTrace -OutFile $FunctionTraceFile -out "Get-TrackerVMWindowSet $VM"};
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-TrackerVMWindowSet $VM"};
 	$null = [window]::MoveWindow($MWHandle,$Left,$Top,$Right,$Bottom,$True)
 }
 
@@ -5202,7 +5292,7 @@ Function Get-TrackerVMWindowArrange {
 	Param(
 		$VMs = (Get-Status |where {$_.status -ne $Enum.VMStatus.Ready}|where {$_.status -ne $Enum.VMStatus.Unhealthy}).vm 
 	)
-	if ($FunctionTrace) {Write-FunctionTrace -OutFile $FunctionTraceFile -out "Get-TrackerVMWindowArrange $VMs"};
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-TrackerVMWindowArrange $VMs"};
 	If ($VMs) {
 		Get-TrackerVMWindowSet $VMs[$Enum.Index.First] $Enum.VMWinLoc.Left $Enum.VMWinLoc.Top $Enum.VMWinLoc.Bottom $Enum.VMWinLoc.Right
 		$Base = Get-TrackerVMWindowLoc $VMs[$Enum.Index.First]
@@ -5227,10 +5317,11 @@ Function Get-TrackerVMWindowArrange {
 Function Get-SendStatus {
 	Param(
 		[int]$PR,
- [ValidateScript( { $_ -in (Get-Keys $Enum.VMStatus)} )][string]$Status = $Enum.VMStatus.Complete,
+		[ValidateScript( { $_ -in (Get-Keys $Enum.VMStatus)} )][string]$Status = $Enum.VMStatus.Complete,
 		$SharedError = ((Get-Content $SharedErrorFile) -split $Enum.Char.LineBreak)
 	)
 	$PR = (Get-SchemaCheck -SchemaInfo $MVschemaData.PR.Number -InputData $PR)
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-SendStatus $PR"};	
 
 	$SharedError = $SharedError -replace $Enum.Char.CarriageReturn,$Enum.Char.Blank 
 	$SharedError = $SharedError -replace $Enum.SendStatusReplace.Caller1,$Enum.Char.Blank
@@ -5250,6 +5341,7 @@ Function Get-SendStatus {
 }
 
 Function Get-TrackerVMRotateLog {
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-TrackerVMRotateLog Start"};	
 	$logYesterDate = (Get-Date -f dd) - 1
 	Move-Item "$writeFolder\logs\$logYesterDate" "$logsFolder\$logYesterDate"
 }
@@ -5260,6 +5352,7 @@ Function Get-RemoveFileIfExist {
 		[switch]$remake,
 		[switch]$Silent
 	)
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-RemoveFileIfExist $FilePath"};	
 	if (Test-Path $FilePath) {Remove-Item $FilePath -Recurse}
 	if ($Silent) {
 		if ($remake) {$null = New-Item -ItemType Directory -Path $FilePath}
@@ -5275,6 +5368,7 @@ Function Get-LoadFileIfExists {
 		$FileContents,
 		[Switch]$Silent
 	)
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-LoadFileIfExists $FileName"};	
 	if (Test-Path $FileName) {
 		$FileContents = Get-Content $FileName | ConvertFrom-Csv
 		if (!($Silent)) {
@@ -5295,6 +5389,7 @@ Function Get-ManifestEntryCheck {
 		$Entry = $Enum.ManifestKeys.DisplayVersion
 	)
 	$PackageIdentifier = (Get-SchemaCheck -InputData $PackageIdentifier -SchemaInfo $schemaData.installer.definitions.PackageIdentifier)
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-ManifestEntryCheck $PackageIdentifier"};	
 	$content = Get-FileFromGitHub $PackageIdentifier $Version
 	$out = ($content | Where-Object {$_ -match $Entry})
 	if ($out) {$True} else {$False}
@@ -5308,7 +5403,7 @@ Function Add-PRToQueue {
 	)
 	process {
 		$PR = (Get-SchemaCheck -SchemaInfo $MVschemaData.PR.Number -InputData $PR)	
-		if (($FunctionTrace) -OR ($Debug)) {Write-FunctionTrace -OutFile $FunctionTraceFile -out "Add-PRToQueue $PR"};
+		if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Add-PRToQueue $PR"};
 		if ($PRExclude -notcontains $PR) {
 			$PR | Out-File $PRQueueFile -Append
 		}
@@ -5316,7 +5411,7 @@ Function Add-PRToQueue {
 }
 
 Function Get-PopPRQueue {
-	if (($FunctionTrace) -OR ($Debug)) {Write-FunctionTrace -OutFile $FunctionTraceFile -out "Get-PopPRQueue"};
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-PopPRQueue"};
 	[array]$PRQueue = Get-Content $PRQueueFile
 	$PRQueue = $PRQueue -split $Enum.Char.LineBreak
 	$PRQueue = Get-Diff $PRQueue (Get-Status).PR 
@@ -5327,13 +5422,13 @@ Function Get-PopPRQueue {
 }
 
 Function Get-PRQueueCount {
-	if (($FunctionTrace) -OR ($Debug)) {Write-FunctionTrace -OutFile $FunctionTraceFile -out "Get-PRQueueCount"};
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-PRQueueCount"};
 	$count = ((Get-Content $PRQueueFile) -split $Enum.Char.LineBreak).Count
 	return $count
 }
 
 Function Get-CleanPRExcludeFile {
-	if (($FunctionTrace) -OR ($Debug)) {Write-FunctionTrace -OutFile $FunctionTraceFile -out "Get-CleanPRExcludeFile"};
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-CleanPRExcludeFile"};
 	[int[]]$out = $null
 	Get-Content $PRExcludeFile | %{
 			[int]$PR = (Get-SchemaCheck -SchemaInfo $MVschemaData.PR.Number -InputData $_)
@@ -5346,7 +5441,7 @@ Function Get-CleanPRExcludeFile {
 }
 
 Function Get-CleanPRFolder {
-	if (($FunctionTrace) -OR ($Debug)) {Write-FunctionTrace -OutFile $FunctionTraceFile -out "Get-CleanPRFolder"};
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-CleanPRFolder"};
 	[array]$Images = ((Get-ChildItem $imagesFolder -Directory).name | where {$_ -notmatch $Enum.Strings.Win})
 	$VMs = (Get-Status).vm
 	$VMs += 0
@@ -5361,7 +5456,7 @@ Function Add-PRToRecord {
 		[ValidateScript( { $_ -in (Get-Keys $Enum.PRActions)} )][string[]]$Action,
 		$Title
 	)
-	if (($FunctionTrace) -OR ($Debug)) {Write-FunctionTrace -OutFile $FunctionTraceFile -out "Add-PRToRecord $Action"};
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Add-PRToRecord $Action"};
 	$PR = (Get-SchemaCheck -SchemaInfo $MVschemaData.PR.Number -InputData $PR)
 	$Title = ($Title -split $Enum.Char.Hash)[$Enum.Index.First]
 	"$PR,$Action,$Title" | Out-File $LogFile -Append 
@@ -5371,7 +5466,7 @@ Function Get-PRPopulateRecord {
 	Param(
 		$Logs = (Get-Content $LogFile | ConvertFrom-Csv -Header ($Enum.PRRecordHeaders.PR,$Enum.PRRecordHeaders.Action,$Enum.PRRecordHeaders.Title))
 	)
-	if (($FunctionTrace) -OR ($Debug)) {Write-FunctionTrace -OutFile $FunctionTraceFile -out "Get-PRPopulateRecord $($Logs.count)"};
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-PRPopulateRecord $($Logs.count)"};
 	Foreach ($Log in $Logs) {
 		#Populate the Title column where blank, so all lines with the same PR number also have the same title, preventing the API calls for the lookup.
 		$ThisPR = (Get-SchemaCheck -SchemaInfo $MVschemaData.PR.Number -InputData $_.PR)
@@ -5385,7 +5480,7 @@ Function Get-PRFromRecord {
 	Param( 
 	[ValidateScript( { $_ -in (Get-Keys $Enum.PRActions)} )][string]$Action
 	)
-	if (($FunctionTrace) -OR ($Debug)) {Write-FunctionTrace -OutFile $FunctionTraceFile -out "Get-PRFromRecord $Action"};
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-PRFromRecord $Action"};
 	Get-PRPopulateRecord
 	(Get-Content $LogFile) | ConvertFrom-Csv -Header ($Enum.PRRecordHeaders.PR,$Enum.PRRecordHeaders.Action,$Enum.PRRecordHeaders.Title) | Where-Object {$_.Action -match $Action}
 }
@@ -5398,7 +5493,7 @@ Function Get-PRReportFromRecord {
 		$Record = ((Get-PRFromRecord $Action) | Sort-Object PR -Unique),
 		[switch]$NoClip
 	)
-	if (($FunctionTrace) -OR ($Debug)) {Write-FunctionTrace -OutFile $FunctionTraceFile -out "Get-PRReportFromRecord $Action"};
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-PRReportFromRecord $Action"};
 	
 	$LogContents = (Get-Content $LogFile | ConvertFrom-Csv | Where-Object {$_.Action -notmatch $Action} | ConvertTo-Csv)
 	Out-File -FilePath $LogFile -InputObject $LogContents
@@ -5429,7 +5524,7 @@ Function Get-PRFullReport {
 		$HeaderList = ($Enum.PRActions.Feedback,$Enum.PRActions.Blocking,$Enum.PRActions.Waiver,$Enum.PRActions.Retry,$Enum.PRActions.Manual,$Enum.PRActions.Closed,$Enum.PRActions.Project,$Enum.PRActions.Squash,$Enum.PRActions.Approved)
 		# $HeaderList = (Get-Keys $Enum.PRActions)
 	)
-	if (($FunctionTrace) -OR ($Debug)) {Write-FunctionTrace -OutFile $FunctionTraceFile -out "Get-PRFullReport $Today"};
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-PRFullReport $Today"};
 	Write-Host "Generating report for $Today"
 	md "$logsFolder\$Month\Stats\" -ErrorAction SilentlyContinue
 	Copy-Item -Path $LogFile -Destination "$logsFolder\$Month\Stats\$Today-Report.csv"
@@ -5446,13 +5541,13 @@ Function Get-RepoCountReport {
 		$Date = (Get-Date -Format "s"),
 		$Count = (((Find-WinGetPackage $Enum.Char.Blank) | Measure-Object).Count)
 	)
-	if (($FunctionTrace) -OR ($Debug)) {Write-FunctionTrace -OutFile $FunctionTraceFile -out "Get-RepoCountReport $Date"};
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-RepoCountReport $Date"};
 	$out = "`"$Date`", `"$Count`""
 	Out-file -InputObject $out -FilePath $RepoCountFile -Append
 }
 
 Function Get-RepoState {
-		if (($FunctionTrace) -OR ($Debug)) {Write-FunctionTrace -OutFile $FunctionTraceFile -out "Get-RepoState $Date"};
+		if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-RepoState $Date"};
 "https://github.com/microsoft/winget-pkgs/pulls?page=1&q = repo%3Amicrosoft%2Fwinget-pkgs + is%3Apr + is%3Aopen + draft%3Afalse + sort%3Aupdated-asc + label%3ANew-Package" # NewPackages
 "https://github.com/microsoft/winget-pkgs/issues?q = state%3Aopen%20label%3AInternal-Error-Dynamic-Scan%20sort%3Aupdated-asc&page=1" #IEDS
 "https://github.com/microsoft/winget-pkgs/pulls?q = repo%3Amicrosoft%2Fwinget-pkgs + is%3Apr + is%3Aopen + draft%3Afalse + -label%3AProject-File + -label%3Ablocked-installertype + -label%3AAzure-Pipeline-Passed + -label%3AValidation-Completed + -label%3AModerator-Approved + -label%3ABlocking-Issue + -label%3AInternal-Error-Manifest + -label%3AValidation-Defender-Error + -label%3AChanges-Requested + -label%3ANeeds-CLA + -label%3ANo-Recent-Activity + -label%3ANeeds-Attention + -label%3ANeeds-Author-Feedback + -label%3ANeeds-Review + -label%3AValidation-Merge-Conflict + -label%3AUnexpected-File + -label%3ALast-Version-Remaining + sort%3Aupdated-asc+" #NoLabels
@@ -5481,7 +5576,7 @@ Function Get-ApprovalStats {
 		# [Switch]$Debug
 	)
 	Process {
-		if (($FunctionTrace) -OR ($Debug)) {Write-FunctionTrace -OutFile $FunctionTraceFile -out "Get-ApprovalStats $Date"};
+		if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-ApprovalStats $Date"};
 		# $ApprovalStats = Get-Content $ApprovalStatsFile | ConvertFrom-Csv
 		$ApprovalStats = Get-Content $ApprovalStatsFile | ConvertFrom-Csv | where {(get-date $_.DateTime).day -match $date}
 		$AverageArray = @()
@@ -5522,7 +5617,7 @@ Function Get-RunDurationStats {
 		[switch]$Debug
 	)
 	$Return = @()
-	if (($FunctionTrace) -OR ($Debug)) {Write-FunctionTrace -OutFile $FunctionTraceFile -out "Get-RunDurationStats Crunching $($Files.Count) log files..."};
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-RunDurationStats Crunching $($Files.Count) log files..."};
 	$ItemNumber = 0
 	Foreach ($File in $Files) {
 		$out = $Enum.Char.Blank | Select-Object @{n = "DateTime"; e = {$SplitLog = ($File.FullName -split "\\"); 
@@ -5544,7 +5639,7 @@ Function Get-SuccessRates {
 	Param(
 		$LastMonth = (Get-Date (Get-Date).AddMonths(-1) -Format "MMMM")
 	)
-	if ($FunctionTrace) {Write-FunctionTrace -OutFile $FunctionTraceFile -out "Get-SuccessRates $LastMonth"};
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-SuccessRates $LastMonth"};
 	$out = @()
 	$MonthList = (Get-ChildItem "$logsFolder\$LastMonth\" -Directory).fullname
 	Foreach ($DayList in $MonthList) {
@@ -5584,7 +5679,7 @@ Function Get-VMMinutesPerPackage {
 		[string]$Day = (Get-Date -Format "dd"),
 		[string]$Month = (Get-Date -Format "MMMM")
 	)
-	if ($FunctionTrace) {Write-FunctionTrace -OutFile $FunctionTraceFile -out "Get-VMMinutesPerPackage $Day"};
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-VMMinutesPerPackage $Day"};
 	$Path = "C:\ManVal\write\logs\$Month\$Day"
 	if (test-path $Path) {
 		$ChildItem = Get-ChildItem $Path
@@ -5611,7 +5706,7 @@ Function Write-ApprovalStats {
 		[Switch]$Silent,
 		[Switch]$WhatIf
 	)
-	if (($FunctionTrace) -OR !($Silent)) {Write-FunctionTrace -OutFile $FunctionTraceFile -out "Write-ApprovalStats $DateTime"};
+	if (($FunctionTrace) -OR !($Silent)) {Write-FunctionTrace "Write-ApprovalStats $DateTime"};
 	# $out = "$DateTime,$PR, $Switch, $LineNos, $Trigger" | ConvertTo-Csv -NoHeader
 	
 	$out = $Enum.Char.Blank | Select-Object DateTime,PRsApprovedDuringLastRun,LastRunTookSeconds,AvgSecPerPR,SleepUntil
@@ -5644,7 +5739,7 @@ Function Write-Status {
 		[Switch]$NoClobber,
 		$OutFile = $StatusFile
 	)
-	if (($FunctionTrace) -OR !($Silent)) {Write-FunctionTrace -OutFile $FunctionTraceFile -out "Write-Status Writing $($out.Length) lines to $OutFile."};
+	if (($FunctionTrace) -OR !($Silent)) {Write-FunctionTrace "Write-Status Writing $($out.Length) lines to $OutFile."};
 	if ($out.Length -gt $Enum.Num.Zero) {
 		$out | ConvertTo-Csv | Out-File $OutFile -Encoding unicode
 	}
@@ -5653,7 +5748,7 @@ Function Write-Status {
 Function Write-FunctionTrace {
 	Param(
 		$out,
-		$OutFile = $FunctionTraceFile
+		[string]$OutFile = $FunctionTraceFileName
 	)
 	# if (($FunctionTrace) -OR !($Silent)) {"Write-FunctionTrace Writing $($out.Length) lines to $OutFile." | Out-File $OutFile -Encoding unicode  -Append};
 	if ($out.Length -gt $Enum.Num.Zero) {
@@ -5672,7 +5767,7 @@ Function Write-CovertReviewFile {
 		[Switch]$Silent
 	)
 	$PR = (Get-SchemaCheck -SchemaInfo $MVschemaData.PR.Number -InputData $PR)
-	if ($FunctionTrace) {Write-FunctionTrace -OutFile $FunctionTraceFile -out "Write-CovertReviewFile $PR"};
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Write-CovertReviewFile $PR"};
 
 	# $out = "$DateTime,$PR, $Switch, $LineNos, $Trigger" | ConvertTo-Csv -NoHeader
 	$out = $Enum.Char.Blank | Select-Object DateTime,PR,Switch,LineNos,Trigger 
@@ -5699,7 +5794,7 @@ Function Write-Log {
 		[string]$FileName = "$logsFolder\$Month\$Today-Approval.log",
 		[switch]$NoNewLine
 	)
-	if ($FunctionTrace) {Write-FunctionTrace -OutFile $FunctionTraceFile -out "Write-Log $Today"};
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Write-Log $Today"};
 	md "$logsFolder\$Month\" -ErrorAction SilentlyContinue
 	if ($NoNewLine) {
 		Write-Host $logData -ForegroundColor $ForegroundColor -NoNewLine
@@ -5716,7 +5811,7 @@ Function Get-BackupDataFIles {
 	Param (
 		$path = "$RepoFolder\Backups\$date.zip"
 	)
-	if ($FunctionTrace) {Write-FunctionTrace -OutFile $FunctionTraceFile -out "Get-BackupDataFIles $path"};
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-BackupDataFIles $path"};
 	$date = (get-Date -f s) -replace("\:","_")
 	# $path = "$RepoFolder\Backups\$date\"
 	# md $path
@@ -5730,7 +5825,7 @@ Function Get-UpdateExitCodeFile {
 		$FileName = $ExitCodeFile,
 		$ExitCodes = (Get-Content $FileName | ConvertFrom-Csv)
 	)
-	if ($FunctionTrace) {Write-FunctionTrace -OutFile $FunctionTraceFile -out "Get-UpdateExitCodeFile $FileName"};
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-UpdateExitCodeFile $FileName"};
 	try {
 		$ExitCodes | %{$_.dec = [System.Convert]::ToInt32($_.Hex,16)}
 	} catch {}
@@ -5745,7 +5840,7 @@ Function Get-UpdateExitCodeFile2 {
 		$FileName = $ExitCodeFile,
 		$ExitCodes = (Get-Content $FileName | ConvertFrom-Csv)
 	)
-	if ($FunctionTrace) {Write-FunctionTrace -OutFile $FunctionTraceFile -out "Get-UpdateExitCodeFile2 $FileName"};
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-UpdateExitCodeFile2 $FileName"};
 	for ($i = 0; $i -lt $ExitCodes.count; $i++){
 		if ($ExitCodes[$i].hex -match $ExitCodes[$i+1].hex){
 			if ($ExitCodes[$i].Symbol -eq "") {
@@ -5776,7 +5871,7 @@ Function Get-ManifestCovertReview {
 		[string]$StringToReview,
 		[switch]$WhatIf
 	)
-	if (($FunctionTrace) -OR ($WhatIf)) {Write-FunctionTrace -OutFile $FunctionTraceFile -out "Get-ManifestCovertReview"}; #end if display
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-ManifestCovertReview"}; #end if display
 	[bool]$ReturnValue = $True
 	foreach ($Switch in (Get-Keys $Enum.CovertReviewtSwitches)) {
 		foreach ($Key in (Get-Keys $Enum.CovertReviewKeys)) {
@@ -5803,7 +5898,7 @@ Function Get-SchemaCheck {
 		$SchemaInfo,
 		[switch]$Display #Only use debug for troubleshooting with verified internally-generated data, never with untested external data. 
 	)
-	if (($FunctionTrace) -OR ($Display)) {Write-FunctionTrace -OutFile $FunctionTraceFile -out "Get-SchemaCheck File: $($SchemaInfo.description)"}; #end if display
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-SchemaCheck File: $($SchemaInfo.description)"}; #end if display
 	#Diagnostic check, to see how many checks are being run. If it starts to slow down or get laggy. 
 	# [int]$num = ([int](gc $SchemaCheckFile) +1);Out-File -FilePath $SchemaCheckFile -InputObject $num
 	$Tombstone = $Enum.Strings.FastFailTombstone
@@ -6014,7 +6109,7 @@ Function Get-SchemaFinder {
 		[ValidateScript( { $_ -in ((Get-Keys $Enum.ManifestDefaultLocaleProperties) -OR (Get-Keys $Enum.ManifestInstallerProperties)-OR (Get-Keys $Enum.ManifestLocaleProperties)-OR (Get-Keys $Enum.ManifestVersionProperties)) } )][string]$Property,
 		[switch]$Display
 	)
-	if (($FunctionTrace) -OR ($Display)) {Write-FunctionTrace -OutFile $FunctionTraceFile -out "Get-SchemaFinder File: $File - $Property"}; #end if display
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-SchemaFinder File: $File - $Property"}; #end if display
 
 	Switch ($File) {
 		$Enum.ManifestFileTypeNames.Installer {
@@ -6023,19 +6118,19 @@ Function Get-SchemaFinder {
 					$schemaData.($File).definitions.($Property)
 				}
 				$enum.ManifestinstallerProperties.WindowsFeatures {
-					$schemaData.($File).definitions.Dependencies.properties.($Property)
+					$schemaData.($File).definitions.Dependencies.Properties.($Property)
 # Items - Means it follows the 3rd path.
 				}
 				$enum.ManifestinstallerProperties.WindowsLibraries {
-					$schemaData.($File).definitions.Dependencies.properties.($Property)
+					$schemaData.($File).definitions.Dependencies.Properties.($Property)
 # Items
 				}
 				$enum.ManifestinstallerProperties.PackageDependencies {
-					$schemaData.($File).definitions.Dependencies.properties.($Property)
+					$schemaData.($File).definitions.Dependencies.Properties.($Property)
 # Items
 				}
 				$enum.ManifestinstallerProperties.ExternalDependencies {
-					$schemaData.($File).definitions.Dependencies.properties.($Property)
+					$schemaData.($File).definitions.Dependencies.Properties.($Property)
 # Items
 				}
 				$enum.ManifestinstallerProperties.ExpectedReturnCodes {
@@ -6048,46 +6143,49 @@ Function Get-SchemaFinder {
 					$schemaData.($File).definitions.($Property)
 				}
 				$enum.ManifestinstallerProperties.ReturnResponse {
-					$schemaData.($File).definitions.ExpectedReturnCodes.items.properties.($Property)
+					$schemaData.($File).definitions.ExpectedReturnCodes.items.Properties.($Property)
 				}
 				$enum.ManifestinstallerProperties.ReturnResponseUrl {
-					$schemaData.($File).definitions.ExpectedReturnCodes.items.properties.($Property)
+					$schemaData.($File).definitions.ExpectedReturnCodes.items.Properties.($Property)
 				}
 				$enum.ManifestinstallerProperties.Installers {
-					$schemaData.($File).properties.($Property)
+					$schemaData.($File).Properties.($Property)
 				}
 				$enum.ManifestinstallerProperties.InstallerSwitches {
 					$schemaData.($File).definitions.($Property)
 				}
 				$enum.ManifestinstallerProperties.Silent {
-					$schemaData.($File).definitions.InstallerSwitches.properties.($Property)
+					$schemaData.($File).definitions.InstallerSwitches.Properties.($Property)
 				}
 				$enum.ManifestinstallerProperties.SilentWithProgress {
-					$schemaData.($File).definitions.InstallerSwitches.properties.($Property)
+					$schemaData.($File).definitions.InstallerSwitches.Properties.($Property)
 				}
 				$enum.ManifestinstallerProperties.Interactive {
-					$schemaData.($File).definitions.InstallerSwitches.properties.($Property)
+					$schemaData.($File).definitions.InstallerSwitches.Properties.($Property)
 				}
 				$enum.ManifestinstallerProperties.InstallLocation {
-					$schemaData.($File).definitions.InstallerSwitches.properties.($Property)
+					$schemaData.($File).definitions.InstallerSwitches.Properties.($Property)
+				}
+				$enum.ManifestinstallerProperties.InstallMode {
+					$schemaData.($File).definitions.InstallModes.items
 				}
 				$enum.ManifestinstallerProperties.Log {
-					$schemaData.($File).definitions.InstallerSwitches.properties.($Property)
+					$schemaData.($File).definitions.InstallerSwitches.Properties.($Property)
 				}
 				$enum.ManifestinstallerProperties.Upgrade {
-					$schemaData.($File).definitions.InstallerSwitches.properties.($Property)
+					$schemaData.($File).definitions.InstallerSwitches.Properties.($Property)
 				}
 				$enum.ManifestinstallerProperties.Custom {
-					$schemaData.($File).definitions.InstallerSwitches.properties.($Property)
+					$schemaData.($File).definitions.InstallerSwitches.Properties.($Property)
 				}
 				$enum.ManifestinstallerProperties.Repair {
-					$schemaData.($File).definitions.InstallerSwitches.properties.($Property)
+					$schemaData.($File).definitions.InstallerSwitches.Properties.($Property)
 				}
 				$enum.ManifestinstallerProperties.ManifestType {
-					$schemaData.($File).properties.($Property)
+					$schemaData.($File).Properties.($Property)
 				}
 				$enum.ManifestinstallerProperties.ManifestVersion {
-					$schemaData.($File).properties.($Property)
+					$schemaData.($File).Properties.($Property)
 				}
 				$enum.ManifestinstallerProperties.Platform {
 					$schemaData.($File).definitions.($Property)
@@ -6116,25 +6214,25 @@ Function Get-SchemaFinder {
 					$schemaData.($File).definitions.($Property)
 				}
 				$enum.ManifestinstallerProperties.DisplayName {
-					$schemaData.($File).definitions.AppsAndFeaturesEntry.properties.($Property)
+					$schemaData.($File).definitions.AppsAndFeaturesEntry.Properties.($Property)
 				}
 				$enum.ManifestinstallerProperties.Publisher {
-					$schemaData.($File).definitions.AppsAndFeaturesEntry.properties.($Property)
+					$schemaData.($File).definitions.AppsAndFeaturesEntry.Properties.($Property)
 				}
 				$enum.ManifestinstallerProperties.DisplayVersion {
-					$schemaData.($File).definitions.AppsAndFeaturesEntry.properties.($Property)
+					$schemaData.($File).definitions.AppsAndFeaturesEntry.Properties.($Property)
 				}
 				$enum.ManifestinstallerProperties.InstallerLocale {
 					$schemaData.($File).definitions.Locale
 				}
 				$enum.ManifestinstallerProperties.InstallerSha256 {
-					$schemaData.($File).definitions.installer.properties.($Property)
+					$schemaData.($File).definitions.installer.Properties.($Property)
 				}
 				$enum.ManifestinstallerProperties.InstallerUrl {
 					$schemaData.($File).definitions.Url
 				}
 				$enum.ManifestinstallerProperties.SignatureSha256 {
-					$schemaData.($File).definitions.installer.properties.($Property)
+					$schemaData.($File).definitions.installer.Properties.($Property)
 				}
 				Default {
 					$schemaData.($File).definitions.($Property)
@@ -6147,10 +6245,10 @@ Function Get-SchemaFinder {
 					$schemaData.($File).definitions.Agreement
 				}
 				$enum.ManifestDefaultLocaleProperties.Agreement {
-					$schemaData.($File).definitions.Agreement.properties.($Property)
+					$schemaData.($File).definitions.Agreement.Properties.($Property)
 				}
 				$enum.ManifestDefaultLocaleProperties.AgreementLabel {
-					$schemaData.($File).definitions.Agreement.properties.($Property)
+					$schemaData.($File).definitions.Agreement.Properties.($Property)
 				}
 				$enum.ManifestDefaultLocaleProperties.AgreementUrl {
 					$schemaData.($File).definitions.Url
@@ -6162,67 +6260,67 @@ Function Get-SchemaFinder {
 					$schemaData.($File).definitions.($Property)
 				}
 				$enum.ManifestDefaultLocaleProperties.DocumentLabel {
-					$schemaData.($File).definitions.Documentation.properties.($Property)
+					$schemaData.($File).definitions.Documentation.Properties.($Property)
 				}
 				$enum.ManifestDefaultLocaleProperties.DocumentUrl {
 					$schemaData.($File).definitions.Url
 				}
-<#
-Error: Unverified schema keys FastFail mandatory but missing: default
-get-schemaFinder -File DefaultLocale -Property PackageLocale
-get-schemaFinder -File DefaultLocale -Property ManifestType
-get-schemaFinder -File DefaultLocale -Property ManifestVersion
-#>
-				$enum.ManifestLocaleProperties.Moniker {
+				$enum.ManifestDefaultLocaleProperties.Moniker {
 					$schemaData.($File).definitions.Tag
 				}
-				$enum.ManifestLocaleProperties.CopyrightUrl {
+				$enum.ManifestDefaultLocaleProperties.CopyrightUrl {
 					$schemaData.($File).definitions.Url
 				}
-				$enum.ManifestLocaleProperties.PublisherUrl {
+				$enum.ManifestDefaultLocaleProperties.PublisherUrl {
 					$schemaData.($File).definitions.Url
 				}
-				$enum.ManifestLocaleProperties.PublisherSupportUrl {
+				$enum.ManifestDefaultLocaleProperties.PublisherSupportUrl {
 					$schemaData.($File).definitions.Url
 				}
-				$enum.ManifestLocaleProperties.PackageUrl {
+				$enum.ManifestDefaultLocaleProperties.PackageUrl {
 					$schemaData.($File).definitions.Url
 				}
-				$enum.ManifestLocaleProperties.LicenseUrl {
+				$enum.ManifestDefaultLocaleProperties.LicenseUrl {
 					$schemaData.($File).definitions.Url
 				}
-				$enum.ManifestLocaleProperties.ReleaseNotesUrl {
+				$enum.ManifestDefaultLocaleProperties.ReleaseNotesUrl {
 					$schemaData.($File).definitions.Url
 				}
 				$enum.ManifestDefaultLocaleProperties.Icons {
-					$schemaData.($File).properties.($Property)
+					$schemaData.($File).Properties.($Property)
+				}
+				$enum.ManifestLocaleProperties.Icons_Items {
+					$schemaData.($File).definitions.Icon
 				}
 				$enum.ManifestDefaultLocaleProperties.Icon {
-					$schemaData.($File).properties.Icons.items
-				}
-				$enum.ManifestDefaultLocaleProperties.IconUrl {
-					$schemaData.($File).definitions.Icon.properties.($Property)
-				}
-				$enum.ManifestDefaultLocaleProperties.IconFileType {
-					$schemaData.($File).definitions.Icon.properties.($Property)
-				}
-				$enum.ManifestDefaultLocaleProperties.IconResolution {
-					$schemaData.($File).definitions.Icon.properties.($Property)
-				}
-				$enum.ManifestDefaultLocaleProperties.IconTheme {
-					$schemaData.($File).definitions.Icon.properties.($Property)
-				}
-				$enum.ManifestDefaultLocaleProperties.IconSha256 {
-					$schemaData.($File).definitions.Icon.properties.($Property)
-				}
-				$enum.ManifestLocaleProperties.Tag {
 					$schemaData.($File).definitions.($Property)
 				}
-				$enum.ManifestLocaleProperties.Url {
+				$enum.ManifestDefaultLocaleProperties.IconUrl {
+					$schemaData.($File).definitions.Icon.Properties.($Property)
+				}
+				$enum.ManifestDefaultLocaleProperties.IconFileType {
+					$schemaData.($File).definitions.Icon.Properties.($Property)
+				}
+				$enum.ManifestDefaultLocaleProperties.IconResolution {
+					$schemaData.($File).definitions.Icon.Properties.($Property)
+				}
+				$enum.ManifestDefaultLocaleProperties.IconTheme {
+					$schemaData.($File).definitions.Icon.Properties.($Property)
+				}
+				$enum.ManifestDefaultLocaleProperties.IconSha256 {
+					$schemaData.($File).definitions.Icon.Properties.($Property)
+				}
+				$enum.ManifestDefaultLocaleProperties.Tag {
+					$schemaData.($File).definitions.($Property)
+				}
+				$enum.ManifestLocaleProperties.Tags_Items {
+					$schemaData.($File).definitions.Tag
+				}
+				$enum.ManifestDefaultLocaleProperties.Url {
 					$schemaData.($File).definitions.($Property)
 				}
 				Default {
-					$schemaData.($File).properties.($Property)
+					$schemaData.($File).Properties.($Property)
 				}
 			}# end switch
 		}# END DefaultLocale
@@ -6232,10 +6330,10 @@ get-schemaFinder -File DefaultLocale -Property ManifestVersion
 					$schemaData.($File).definitions.Agreement
 				}
 				$enum.ManifestLocaleProperties.Agreement {
-					$schemaData.($File).definitions.Agreement.properties.($Property)
+					$schemaData.($File).definitions.Agreement.Properties.($Property)
 				}
 				$enum.ManifestLocaleProperties.AgreementLabel {
-					$schemaData.($File).definitions.Agreement.properties.($Property)
+					$schemaData.($File).definitions.Agreement.Properties.($Property)
 				}
 				$enum.ManifestLocaleProperties.AgreementUrl {
 					$schemaData.($File).definitions.Url
@@ -6262,7 +6360,7 @@ get-schemaFinder -File DefaultLocale -Property ManifestVersion
 					$schemaData.($File).definitions.($Property)
 				}
 				$enum.ManifestLocaleProperties.DocumentLabel {
-					$schemaData.($File).definitions.Documentation.properties.($Property)
+					$schemaData.($File).definitions.Documentation.Properties.($Property)
 				}
 				$enum.ManifestLocaleProperties.DocumentUrl {
 					$schemaData.($File).definitions.Url
@@ -6270,35 +6368,41 @@ get-schemaFinder -File DefaultLocale -Property ManifestVersion
 				$enum.ManifestLocaleProperties.Icon {
 					$schemaData.($File).definitions.($Property)
 				}
+				$enum.ManifestLocaleProperties.Icons_Items {
+					$schemaData.($File).definitions.Icon
+				}
 				$enum.ManifestLocaleProperties.IconUrl {
-					$schemaData.($File).definitions.Icon.properties.($Property)
+					$schemaData.($File).definitions.Icon.Properties.($Property)
 				}
 				$enum.ManifestLocaleProperties.IconFileType {
-					$schemaData.($File).definitions.Icon.properties.($Property)
+					$schemaData.($File).definitions.Icon.Properties.($Property)
 				}
 				$enum.ManifestLocaleProperties.IconResolution {
-					$schemaData.($File).definitions.Icon.properties.($Property)
+					$schemaData.($File).definitions.Icon.Properties.($Property)
 				}
 				$enum.ManifestLocaleProperties.IconTheme {
-					$schemaData.($File).definitions.Icon.properties.($Property)
+					$schemaData.($File).definitions.Icon.Properties.($Property)
 				}
 				$enum.ManifestLocaleProperties.IconSha256 {
-					$schemaData.($File).definitions.Icon.properties.($Property)
+					$schemaData.($File).definitions.Icon.Properties.($Property)
 				}
 				$enum.ManifestLocaleProperties.Tag {
 					$schemaData.($File).definitions.($Property)
+				}
+				$enum.ManifestLocaleProperties.Tags_Items {
+					$schemaData.($File).definitions.Tag
 				}
 				$enum.ManifestLocaleProperties.Url {
 					$schemaData.($File).definitions.($Property)
 				}
 				Default {
-					$schemaData.($File).properties.($Property)
+					$schemaData.($File).Properties.($Property)
 				}
 			}# end switch
 		}# END Locale
 		#$Enum.ManifestFileTypeNames.Version uses the default for everything.
 		Default {
-			$schemaData.($File).properties.($Property)
+			$schemaData.($File).Properties.($Property)
 		}
 	}# end switch
 }
@@ -6310,7 +6414,7 @@ Function Get-QueryCheck {
 		$Schema = $MVschemaData.General.($Item),
 		[ValidateSet("string","bool")][string]$ReturnType
 	)
-	if ($FunctionTrace) {Write-FunctionTrace -OutFile $FunctionTraceFile -out "Get-QueryCheck $($Schema.description)"};
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-QueryCheck $($Schema.description)"};
 	if ($Item) {
 		if ($String -match $Item) {
 			if ($debug) {Write-Host "$Section $Item Schema Begin - $($Schema.description)"}
@@ -6333,12 +6437,14 @@ Function Get-ManifestValidation {
 	Param(
 		[string[]]$StrArray,
 		[switch]$NoRun,
-		[switch]$Display
+		[switch]$Display,
+		[switch]$Display2
 	); #end Param
-	if (($FunctionTrace) -OR ($Display)) {Write-FunctionTrace -OutFile $FunctionTraceFile -out "Get-ManifestValidation $($StrArray.length)"};
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-ManifestValidation $($StrArray.length)"};
 	[string]$out = ""
 	[string]$Filename = ""
 	[string]$FileType = ""
+	[string]$ListKey = ""
 	[string[]]$Extensions = $Enum.ManifestFileExtension.Locale , $Enum.ManifestFileExtension.Installer , $Enum.ManifestFileExtension.Root
 	if ($StrArray.Length -eq 1) {
 		#In case the array got stuffed into the first slot instead of being split linewise. 
@@ -6347,7 +6453,7 @@ Function Get-ManifestValidation {
 	}
 
 	Foreach ($String in $StrArray) {
-		if ($Display) {Write-Host "String: $String"}
+	if ($Display2) {Write-Host "String: $String"}
 	# While  ($FileType -eq "") {
 		if ($String -match "ManifestType") {
 			foreach ($ManifestFileType in (get-keys $Enum.ManifestFileTypes)) {
@@ -6382,66 +6488,74 @@ Function Get-ManifestValidation {
 			#This is hacky but I'm too tired to make it not hacky. 
 		}
 	}
-	# if ($Display) {Write-Host "PropertiesToUse: $PropertiesToUse"}
-	Foreach ($String in $StrArray) {
-		if ($Display) {Write-Host "String: $String"}
-		# if ($Display) {Write-Host "S: $s - Filename: $Filename - String $String"}
-		#Foreach string, if it matches the built string, then the schema validation for that section starts. Every subsequent string gets tried agasint that file type's schema. 
-
-#First, match against enum'd string indentation, and put that in a var
-		foreach ($Indentation in (Get-Keys $enum.IndentationStylesReverse)) {
-			if ($String -match ("^"+$Indentation)) {
-				if ($Display) {Write-Host "Found Indentation $($enum.IndentationStylesReverse.($Indentation))"}
-				$out += $Indentation
-				$String = $String -replace $Indentation,""
-			}; #end if String
-		}; #end foreach Indentation
-		
-#Then, use the matched key type to build the key part. Then match against that key part, and also store that in a var.
-		if ($String -match "[:] ") {
-			if ($Display) {Write-Host "Yaml detected"}
-			foreach ($Property in (Get-Values $PropertiesToUse)) {
-			# if ($Display) {Write-Host -nonewline "Property $Property - "}
-			# foreach ($Property in ((Get-Values $Enum.ManifestInstallerProperties) + (Get-Values $Enum.ManifestDefaultLocaleProperties) + (Get-Values $Enum.ManifestLocaleProperties) + (Get-Values $Enum.ManifestVersionProperties))) {
-				$PropertyColon = $Property + ": "
-				if ($String -match $PropertyColon) {
-					if ($Display) {Write-Host "Found Property $Property"}
-					$out += $PropertyColon
-					$String = $String -replace $PropertyColon,""
-					$SchemaToUse = Get-SchemaFinder -File $FileType -Property $Property #-Display
-					if ($Display) {Write-Host "SchemaToUse $($SchemaToUse.description)"}
-					$SchemaCheck = Get-SchemaCheck -InputData $String -SchemaInfo $SchemaToUse #-Display
-					if ($Display) {Write-Host "Found String $String"}
-					$String = $String -replace $String,""
-					#Need to validate this
-					#Need to validate this
-					$out += $SchemaCheck + "`n"
+	if ($Display2) {Write-Host "PropertiesToUse: $PropertiesToUse"}
+#Foreach string, if it matches the built string, then the schema validation for that section starts. Every subsequent string gets tried agasint that file type's schema. 
+	if ($FileType) {
+		Foreach ($String in $StrArray) {
+			if ($Display) {Write-Host "String: $String"}
+			if ($Display2) {Write-Host "S: $s - Filename: $Filename - String $String"}
+	#First, match against enum'd string indentation, and put that in a var
+			foreach ($Indentation in (Get-Keys $enum.IndentationStylesReverse)) {
+				if ($String -match ("^"+$Indentation)) {
+					if ($Display) {Write-Host "Found Indentation $($enum.IndentationStylesReverse.($Indentation))"}
+					$out += $Indentation
+					$String = $String -replace $Indentation,""
 				}; #end if String
-			}; #end foreach Property
-		} elseif ($String -ne "") {
-#If you are here, then you're a list header or item. 
-			#Need to validate this
-			#Need to validate this
-			#Need to validate this
-			$SchemaCheck = $String
-			# $SchemaCheck = Get-SchemaCheck -InputData $String -SchemaInfo (Get-SchemaFinder -File $FileType -Property $Property)
-			if ($Display) {Write-Host "Found Data $String"}
-			$String = $String -replace $String,""
-			#Need to validate this
-			#Need to validate this
-			#Need to validate this - if you're reading this, then I haven't validated it. Please stop me and tell me. 
-			$out += $SchemaCheck = "`n"
-		}; #end if String
-			if ($Display) {Write-Host " S: $s - Filename: $Filename - FileType $FileType - String $String"}
-	}; #end for StrArray
-	$out = "# Deterministic Automation build $build - auto-regenerated $FileType header.`n" + $out
-	if ($NoRun) {
-		Return $out
-	} else {
-		Get-ManifestFile -InstallerFile ($out -split "`n")
+			}; #end foreach Indentation
+	#Then, use the matched key type to build the key part. Then match against that key part, and also store that in a var.
+			if ($String -match "[:] ") {
+				if ($Display) {Write-Host "Yaml detected"}
+				foreach ($Property in (Get-Values $PropertiesToUse)) {
+				if ($Display2) {Write-Host -nonewline "Property $Property - "}
+					$PropertyColon = $Property + ": "
+					$SplitString = $String -split ": "
+					if ($SplitString[0] -eq $Property) {
+						if ($Display) {Write-Host "Found Property $Property"}
+						$ListKey = ""
+						$out += $PropertyColon
+						$String = $SplitString[1]# -replace $PropertyColon,""
+						$SchemaToUse = Get-SchemaFinder -File $FileType -Property $Property
+						if ($Display) {Write-Host "SchemaToUse $($SchemaToUse.description)"}
+						$SchemaCheck = Get-SchemaCheck -InputData $String -SchemaInfo $SchemaToUse
+						if ($Display) {Write-Host "Found String $String"}
+						$out += $SchemaCheck
+					}; #end if String
+				}; #end foreach Property
+			} elseif ($String -match "[:]") {
+	#If you are here, then you're a list header. 
+				if ($Display) {Write-Host "Yaml List detected"}
+				foreach ($Property in (Get-Values $PropertiesToUse)) {
+				if ($Display2) {Write-Host -nonewline "Property $Property - "}
+					$PropertyColon = $Property + ":"
+					$SplitString = $String -split ":"
+					if ($SplitString[0] -eq $Property) {
+						$ListKey = $Property
+						if ($Display) {Write-Host "Found ListKey $Property"}
+						$out += $PropertyColon
+					}; #end if String
+				}; #end foreach Property
+			} elseif ($String -ne "") {
+	#If you are here, then you're a list item. 
+				if ($ListKey -ne "") {
+					$ListKey = $ListKey -replace "s$",""  -replace "ie$","y" 
+					if ($Display) {Write-Host "Yaml List Item $ListKey detected"}
+					$SchemaToUse = Get-SchemaFinder -File $FileType -Property "$ListKey-item"
+					if ($Display) {Write-Host "SchemaToUse $($SchemaToUse.description)"}
+					$SchemaCheck = Get-SchemaCheck -InputData $String -SchemaInfo $SchemaToUse
+					if ($Display) {Write-Host "Found Data $SchemaCheck"}
+					$out += $SchemaCheck
+				}; #end if String
+			}; #end if String
+			if ($Display2) {Write-Host " S: $s - Filename: $Filename - FileType $FileType - String $String"}
+			$out = ($out + "`n") -replace "`n`n","`n"
+		}; #end for StrArray
+		$out = "# Deterministic Automation build $build - auto-regenerated $FileType header.`n`n" + $out
+		if ($NoRun) {
+			Return $out
+		} else {
+			Get-ManifestFile -InstallerFile ($out -split "`n")
+		}
 	}
-}
-
 <# iterations
 1. Remove hidden characters
 2. Above plus schema validation.
@@ -6456,9 +6570,9 @@ Function Get-ManifestValidation {
 11. Single run through manifest
 12. Slicee up manifest then run through, then ManifestFile
 #>
+}
 
 #Needs
-#Validate other 2 paths
 #Readd try/catch fastfail lines
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -6472,7 +6586,7 @@ Function Get-CleanClipboard {
 		[String[]]$StrArray = $null,
 		[switch]$Debug
 	); #end Param
-	if (($FunctionTrace) -OR ($Debug)) {Write-FunctionTrace -OutFile $FunctionTraceFile -out "Get-CleanClipboard $($StrArray.length)"};
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-CleanClipboard $($StrArray.length)"};
 	$StrArrayMaxLength = 2048
 	
 	if ($null -ne $StrArray) {
@@ -6499,7 +6613,7 @@ Function Get-QueryClipboard {
 		[String[]]$StrArray = $null,
 		[switch]$Debug
 	)
-	if (($FunctionTrace) -OR ($Debug)) {Write-FunctionTrace -OutFile $FunctionTraceFile -out "Get-QueryClipboard $Query"};
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-QueryClipboard $Query"};
 	
 #Get-QueryClipboard -Query $Enum.ClipboardQueries.PRWatch -StrArray ((Get-PRManifest -pr $PR) -split "`n") -Debug
 
@@ -6551,7 +6665,7 @@ Function Get-QueryClipboard {
 				
 
 				$Item = $Enum.ManifestKeys.DisplayVersion
-				$ThisItemschemaData = $schemaData.installer.definitions.AppsAndFeaturesEntry.properties.($Item)
+				$ThisItemschemaData = $schemaData.installer.definitions.AppsAndFeaturesEntry.Properties.($Item)
 				[bool]$Mandatory.($Item) = $True
 				if ($ThisItemschemaData.type -contains $Enum.SchemaKeysEtc.Null) {$Mandatory.($Item) = $False}
 				if ($String -match ($Item + ":")) {
@@ -6616,7 +6730,7 @@ Function Get-QueryClipboard {
 				
 				#Optional for my system, mandatory for overall system.
 				$Item = $Enum.ManifestKeys.InstallerUrl
-				$ThisItemschemaData = $schemaData.installer.definitions.Installer.properties.($Item)
+				$ThisItemschemaData = $schemaData.installer.definitions.Installer.Properties.($Item)
 				[bool]$Mandatory.($Item) = $False
 				# if ($ThisItemschemaData.type -contains $Enum.SchemaKeysEtc.Null) {$Mandatory.($Item) = $False}
 				if ($String -match ($Item + ":")) {
@@ -6657,7 +6771,7 @@ Function Get-QueryClipboard {
 		}
 		$Enum.ClipboardQueries.TrackerVMValidate {
 			$null = (Get-ManifestCovertReview $StrArray)
-			$out = "" | Select-Object $Enum.SchemaKeysEtc.PRNumber, $Enum.ManifestKeys.PackageIdentifier, $Enum.ManifestKeys.PackageVersion, $Enum.ManifestKeys.Architecture, $Enum.ManifestKeys.ElevationRequirement
+			$out = "" | Select-Object $Enum.SchemaKeysEtc.PRNumber, $Enum.ManifestKeys.PackageIdentifier, $Enum.ManifestKeys.PackageVersion, $Enum.ManifestInstallerProperties.Architecture, $Enum.ManifestKeys.ElevationRequirement
 			$keys = Get-Keys $out
 
 			$Item = $Enum.SchemaKeysEtc.PRNumber
@@ -6700,7 +6814,7 @@ Function Get-QueryClipboard {
 					[string]$out.($Item) = $SchemaCheck
 				}# end if String
 				
-				$Item = $Enum.ManifestKeys.Architecture
+				$Item = $Enum.ManifestInstallerProperties.Architecture
 				$ThisItemschemaData = $schemaData.installer.definitions.($Item)
 				[bool]$Mandatory.($Item) = $True
 				if ($ThisItemschemaData.type -contains $Enum.SchemaKeysEtc.Null) {$Mandatory.($Item) = $False}
@@ -6756,8 +6870,9 @@ Function Get-ManifestSplitter {#The ol' manifest splitter
 		[switch]$NoRun,
 		[switch]$Display
 	); #end Param
-	if (($FunctionTrace) -OR ($Display)) {Write-FunctionTrace -OutFile $FunctionTraceFile -out "Get-ManifestSplitter $PackageIdentifier"};
-	$StrArray = Get-CleanClipboard $StrArray
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-ManifestSplitter $PackageIdentifier"};
+	# $StrArray = Get-CleanClipboard $StrArray
+	$StrArray = (Get-CleanClipboard $StrArray) -split "`n"
 	$out = @{}
 	[string]$Filename = ""
 	[string]$FileType = ""
@@ -6801,13 +6916,13 @@ Function Get-ManifestSplitter {#The ol' manifest splitter
 			}; #end foreach Extension
 		}; #end if String
 		$SchemaCheck = $String
-		$out.($Filename) += $SchemaCheck + "`n"
+		$out.($FileType) += $SchemaCheck + "`n"
 	}; #end for StrArray
 	$out.remove("");
 	if ($OutputToVariable) {
 		Return $out
 	} else {
-		[string[]]$vals = $out.values
+		# [string[]]$vals = $out.values
 		if ($NoRun) {
 			$vals | %{Get-ManifestValidation $_ -NoRun}
 		} else {
@@ -6824,7 +6939,7 @@ Function Get-YamlValue {
 		[switch]$Display
 	)
 	Process {
-		if (($FunctionTrace) -OR ($Display)) {Write-FunctionTrace -OutFile $FunctionTraceFile -out "Get-YamlValue $Key"};
+		if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-YamlValue $Key"};
 		if ($JSON) {
 			$Key = "`"$($Key)`": "
 		} else {
@@ -6851,7 +6966,7 @@ Function Get-YamlValue {
 }
 
 Function Get-AllPRsOnClipboard {
-	if ($FunctionTrace) {Write-FunctionTrace -OutFile $FunctionTraceFile -out "Get-AllPRsOnClipboard $PR"};
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-AllPRsOnClipboard $PR"};
 	return Get-QueryClipboard -Query $Enum.ClipboardQueries.AllPRsOnClipboard
 }
 
@@ -6866,7 +6981,7 @@ Function Open-PRInBrowser {
 		[int]$PR,
 		[Switch]$Files
 	)
-	if ($FunctionTrace) {Write-FunctionTrace -OutFile $FunctionTraceFile -out "Get-PRInBrowser $PR"};
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-PRInBrowser $PR"};
 	$PR = (Get-SchemaCheck -SchemaInfo $MVschemaData.PR.Number -InputData $PR)
 	$URL = "$GitHubBaseUrl/pull/$PR#issue-comment-box"
 	if ($Files) {
@@ -6877,7 +6992,7 @@ Function Open-PRInBrowser {
 }#end Function
 
 Function Test-Admin {
-	if ($FunctionTrace) {Write-FunctionTrace -OutFile $FunctionTraceFile -out "Test-Admin"};
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Test-Admin"};
 	$UserGroups = ([System.Security.Principal.WindowsIdentity]::GetCurrent()).groups
 	if (![bool]($UserGroups -match $Enum.TestAdmin.AdminString)){
 		Write-Host $Enum.TestAdmin.TryElevatingYourSession;
@@ -6893,7 +7008,7 @@ Function Get-TrackerProgress {
 		[int]$TotalItems,
 		$Percent = [math]::round($ItemNumber / $TotalItems*100,$Enum.Num.Two)
 	)
-	if ($FunctionTrace) {Write-FunctionTrace -OutFile $FunctionTraceFile -out "Get-TrackerProgress $Activity"};
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-TrackerProgress $Activity"};
 	Write-Progress -Activity $Activity -Status "$ItemNumber / $TotalItems = $Percent % - $ItemName" -PercentComplete $Percent
 }
 
@@ -6902,7 +7017,7 @@ Function Get-ArraySum {
 		$in = $Enum.Num.Zero,
 		$out = $Enum.Num.Zero
 	)
-	if ($FunctionTrace) {Write-FunctionTrace -OutFile $FunctionTraceFile -out "Get-ArraySum $in $out"};
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-ArraySum $in $out"};
 	$in |ForEach-Object{$out += $_* $Enum.Num.One}
 	[math]::Round($out,$Enum.Num.Two)
 }
@@ -6929,7 +7044,7 @@ Function Get-Diff {
 		$Right, 
 		[ValidateScript( { $_ -in (Get-Keys $Enum.DiffData)} )][string]$Side = $Enum.DiffData.Left
 	)
-	if ($FunctionTrace) {Write-FunctionTrace -OutFile $FunctionTraceFile -out "Get-Diff $($Left.count) $($Right.count)"};
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-Diff $($Left.count) $($Right.count)"};
 	$matchSide = $Enum.Char.Blank
 	switch ($Side) {
 		$Enum.DiffData.Left {
@@ -6953,7 +7068,7 @@ Function Get-RemoveQuotes {
 		[Parameter(ValueFromPipeline)][string]$String
 	)
 	Process {
-		if ($FunctionTrace) {Write-FunctionTrace -OutFile $FunctionTraceFile -out "Get-RemoveQuotes $String"};
+		if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-RemoveQuotes $String"};
 		$String -replace $Enum.Char.DoubleQuote,$Enum.Char.Blank-replace $Enum.Char.SingleQuote,$Enum.Char.Blank
 	}
 }
@@ -6962,7 +7077,7 @@ Function Get-Keys {
 	Param(
 		$Data
 	)
-	if ($FunctionTrace) {Write-FunctionTrace -OutFile $FunctionTraceFile -out "Get-Keys"};
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-Keys"};
 	if ($Data) {
 		[string[]]$Names = ($Data | Get-Member | Where-Object {$_.membertype -eq $Enum.Words.NoteProperty}).name
 		Return $Names
@@ -6973,15 +7088,31 @@ Function Get-Values {
 	Param(
 		$Data
 	)
-	if ($FunctionTrace) {Write-FunctionTrace -OutFile $FunctionTraceFile -out "Get-Values"};
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-Values"};
 	$Names = Get-Keys $Data
 	$Values = $Names | %{$Data.($_)}
 	Return $Values
 }
 
+Function Get-PadRight {
+	Param(
+		[string]$InputString,
+		[int]$PadChars = 45
+	)
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-PadRight $PadChars"};
+	$out = $InputString
+	if ($InputString.Length -lt $PadChars) {
+		$out = $InputString + ($Enum.Char.Space*($PadChars - $InputString.Length -1))
+	} elseif ($InputString.Length -lt $PadChars) {
+		$out = $InputString[$Enum.Index.First..($PadChars -1)]
+	}
+	$out = $out -join $Enum.Char.Blank
+	$out
+}
+
 #Self-Testing
 Function Get-StartupTest {
-	if ($FunctionTrace) {Write-FunctionTrace -OutFile $FunctionTraceFile -out "Get-StartupTest"};
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-StartupTest"};
 Write-Host -nonewline "Loading Startup path tests - "
 $StartupTestPaths = "Path,Name
 $DataFileName,DataFileName
@@ -7000,7 +7131,7 @@ $imagesFolder,imagesFolder
 $logsFolder,logsFolder
 $MiscFolder,MiscFolder
 $writeFolder,writeFolder
-$vmCounter,vmCounter
+$VMCounter,vmCounter
 $VMversion,VMversion
 $RemoteTrackerModeFile,RemoteTrackerModeFile
 $TrackerModeFile,TrackerModeFile
@@ -7039,11 +7170,11 @@ Write-Host -nonewline "Loading Schema tests - "
 
 #SchemaFinder
 $SchemaFinderKeys += (get-keys $schemaData.installer.definitions) | %{$a = Get-SchemaFinder -File Installer -Property $_;if (!$a){$_}}
-$SchemaFinderKeys += (get-keys $schemaData.installer.properties) | %{$a = Get-SchemaFinder -File Installer -Property $_;if (!$a){$_}}
-$SchemaFinderKeys += (get-keys $schemaData.version.properties) | %{$a = Get-SchemaFinder -File Version -Property $_;if (!$a){$_}}
-$SchemaFinderKeys += (get-keys $schemaData.defaultLocale.properties) | %{$a = Get-SchemaFinder -File defaultlocale -Property $_;if (!$a){$_}}
+$SchemaFinderKeys += (get-keys $schemaData.installer.Properties) | %{$a = Get-SchemaFinder -File Installer -Property $_;if (!$a){$_}}
+$SchemaFinderKeys += (get-keys $schemaData.version.Properties) | %{$a = Get-SchemaFinder -File Version -Property $_;if (!$a){$_}}
+$SchemaFinderKeys += (get-keys $schemaData.defaultLocale.Properties) | %{$a = Get-SchemaFinder -File defaultlocale -Property $_;if (!$a){$_}}
 $SchemaFinderKeys += (get-keys $schemaData.defaultLocale.definitions) | %{$a = Get-SchemaFinder -File defaultlocale -Property $_;if (!$a){$_}}
-$SchemaFinderKeys += (get-keys $schemaData.locale.properties) | %{$a = Get-SchemaFinder -File locale -Property $_;if (!$a){$_}}
+$SchemaFinderKeys += (get-keys $schemaData.locale.Properties) | %{$a = Get-SchemaFinder -File locale -Property $_;if (!$a){$_}}
 $SchemaFinderKeys += (get-keys $schemaData.locale.definitions) | %{$a = Get-SchemaFinder -File locale -Property $_;if (!$a){$_}}
 # $SchemaFinderKeys = $SchemaFinderKeys | sort -unique
 
@@ -7109,22 +7240,6 @@ $($SchemaFinderKeys.count -eq 0),SchemaFinder
 		Write-Host -ForegroundColor $Enum.PSColors.Green "$Fail failed!" -NoNewline
 	}
 	Write-Host $Enum.Char.Blank #Write a blank string, to auto-add the console newline at the end of the tests.
-}
-
-Function Get-PadRight {
-	Param(
-		[string]$InputString,
-		[int]$PadChars = 45
-	)
-	if ($FunctionTrace) {Write-FunctionTrace -OutFile $FunctionTraceFile -out "Get-PadRight $PadChars"};
-	$out = $InputString
-	if ($InputString.Length -lt $PadChars) {
-		$out = $InputString + ($Enum.Char.Space*($PadChars - $InputString.Length -1))
-	} elseif ($InputString.Length -lt $PadChars) {
-		$out = $InputString[$Enum.Index.First..($PadChars -1)]
-	}
-	$out = $out -join $Enum.Char.Blank
-	$out
 }
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -7261,7 +7376,7 @@ Function Read-JsonData {
 		$FileName = $JsonFileName,
 		$InputData = (Get-Content $FileName | ConvertFrom-Json)
 	)
-	if ($FunctionTrace) {Write-FunctionTrace -OutFile $FunctionTraceFile -out "Read-JsonData"};
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Read-JsonData"};
 	$out = @{}
 	$Names = ($InputData | Get-Member | where {$_.MemberType -match $Enum.Words.NoteProperty}).name
 	foreach ($Name in $Names) {#Reserialize PSObject as hash table.
@@ -7274,7 +7389,7 @@ Function Write-JsonData {
 	Param(
 		$Data = $Enum
 	)
-	if ($FunctionTrace) {Write-FunctionTrace -OutFile $FunctionTraceFile -out "Write-JsonData"};
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Write-JsonData"};
 	[string]$Enum = $Data | ConvertTo-Json
 	if ($Enum) {
 		$Enum > $JsonFileName
@@ -7288,7 +7403,7 @@ Function Get-ValidationData {
 		$data = (Get-Content $DataFileName | ConvertFrom-Csv | Where-Object {$_.$Property} | Where-Object {$_.$Property -match $Match}),
 		[switch]$Exact
 	)
-	if ($FunctionTrace) {Write-FunctionTrace -OutFile $FunctionTraceFile -out "Get-ValidationData $Property"};
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Get-ValidationData $Property"};
 	if ($Exact -eq $True) {
 		$data = $data | Where-Object {$_.$Property -eq $Match}
 	}
@@ -7311,7 +7426,7 @@ Function Add-ValidationData {
 		[string]$reviewText,
 		$data = (Get-Content $DataFileName | ConvertFrom-Csv)
 	)
-	if ($FunctionTrace) {Write-FunctionTrace -OutFile $FunctionTraceFile -out "Add-ValidationData $PackageIdentifier"};
+	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Add-ValidationData $PackageIdentifier"};
 	$PackageIdentifier = Get-SchemaCheck -InputData $PackageIdentifier -SchemaInfo $schemaData.installer.definitions.PackageIdentifier 
 	$out = ($data | where {$_.PackageIdentifier -eq $PackageIdentifier} | Select-Object $Enum.manifestKeys.PackageIdentifier,"GitHubUserName","authStrictness","authUpdateType","AutoWaiverLabel","versionParamOverrideUserName","versionParamOverridePR","code200OverrideUserName","code200OverridePR","AgreementOverridePR","AgreementURL","reviewText")
 	if ($null -eq $out) {
