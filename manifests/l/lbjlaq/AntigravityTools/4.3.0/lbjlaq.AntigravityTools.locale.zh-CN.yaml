@@ -20,13 +20,13 @@ Tags:
 - antigravity
 ReleaseNotes: |-
   - [核心修复] 解决 Claude 请求映射到 Gemini 时混入 System 角色消息导致 400 错误的 Bug (Claude System Message Fix):
-    - System 消息提取与过滤: 在 Claude 转 Gemini 的协议映射中，提取并过滤掉 messages 列表中 role == "system" 的消息，防止其混入 contents 从而引起 Gemini API 返回 400 INVALID_ARGUMENT 报错。
+    - System 消息提取与过滤：在 Claude 转 Gemini 的协议映射中，提取并过滤掉 messages 列表中 role == "system" 的消息，防止其混入 contents 从而引起 Gemini API 返回 400 INVALID_ARGUMENT 报错。
     - 追加至 System Instruction: 过滤出的所有系统消息在 build_system_instruction 阶段会被作为文本块追加到 Gemini 的 system_instruction 中，保证系统提示词依然生效且符合 Gemini 的 API 格式要求。
     - 相关 PR: 详见 PR #3219
   - [核心修复/功能拓展] 引入 Apply Patch 预检系统与 WebSocket 代理支持 (Patch Pre-flight & WS Support):
-    - Pre-flight 自动修复: 在 patch 发送给 Codex 写入前，先读取本地目标文件进行预检，自动规整首尾空白、尾部空格等无害的格式偏差，极大降低了大模型因为少空格等瑕疵导致的 Failed to find expected lines 匹配失败。
-    - 多会话项目目录（CWD）智能对齐: 支持进程级缓存 12 个最近的项目 cwd 历史。多会话并发修改时，会自动分析打分并选用与 patch 锚点命中率最高的目标路径，解决工具循环调用时不带工作目录的定位问题。
-    - 新增 WebSocket 代理: 激活 Axum 的 WebSocket feature，引入 tokio-tungstenite 依赖，扩展了底层的实时流式代理与连接能力。
+    - Pre-flight 自动修复：在 patch 发送给 Codex 写入前，先读取本地目标文件进行预检，自动规整首尾空白、尾部空格等无害的格式偏差，极大降低了大模型因为少空格等瑕疵导致的 Failed to find expected lines 匹配失败。
+    - 多会话项目目录（CWD）智能对齐：支持进程级缓存 12 个最近的项目 cwd 历史。多会话并发修改时，会自动分析打分并选用与 patch 锚点命中率最高的目标路径，解决工具循环调用时不带工作目录的定位问题。
+    - 新增 WebSocket 代理：激活 Axum 的 WebSocket feature，引入 tokio-tungstenite 依赖，扩展了底层的实时流式代理与连接能力。
     - 相关 PR: 详见 PR #3214
 ReleaseNotesUrl: https://github.com/lbjlaq/Antigravity-Manager/releases/tag/v4.3.0
 ManifestType: defaultLocale
