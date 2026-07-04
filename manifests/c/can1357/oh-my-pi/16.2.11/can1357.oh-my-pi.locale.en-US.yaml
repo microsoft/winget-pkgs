@@ -1,0 +1,98 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: can1357.oh-my-pi
+PackageVersion: 16.2.11
+PackageLocale: en-US
+Publisher: Can Bölük
+PublisherUrl: https://can.ac/
+PublisherSupportUrl: https://github.com/can1357/oh-my-pi/issues
+Author: Can Bölük
+PackageName: oh-my-pi
+PackageUrl: https://omp.sh/
+License: MIT
+LicenseUrl: https://github.com/can1357/oh-my-pi/blob/HEAD/LICENSE
+Copyright: |-
+  Copyright (c) 2025 Mario Zechner
+  Copyright (c) 2025-2026 Can Bölük
+ShortDescription: ⌥ AI Coding agent for the terminal — hash-anchored edits, optimized tool harness, LSP, Python, browser, subagents, and more
+Description: |-
+  omp is a terminal-first coding agent that runs on your machine, talks to any provider, and treats sessions like git branches.
+  omp (pronounced “oh-em-pi”, binary omp) is a fork of Mario Zechner’s Pi. It runs as a single Bun process, drives any model provider you have credentials for, and ships a flat tool surface the model uses to read code, run commands, edit files, drive a debugger, and spawn subagents that coordinate over an in-process IRC bus.
+  Sessions persist as JSONL under ~/.omp/agent/sessions/. You resume, fork, branch, and share them. Settings, credentials, plugins, and caches all live under ~/.omp/agent/. Nothing leaves the machine unless you call a tool that does.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  @oh-my-pi/pi-ai
+  Added
+  - Added streaming support for keyed parameter argument deltas in XML-family in-band tool call scanners (Anthropic, DeepSeek, XML, Minimax)
+  Changed
+  - Improved native tool-call passthrough in wrapInbandToolStream to accurately mirror live streaming IDs, arguments, and partial JSON states from the underlying provider
+  Fixed
+  - Fixed streaming UI glitches and resolved an issue where invalid empty tool call IDs were persisted in the chat history.
+  - Fixed a bug where tool calls with empty or missing IDs were not detected as malformed, causing API validation failures (e.g., 400 errors with Anthropic) on subsequent requests
+  - Raised Gemini header runaway threshold to prevent premature interruption of complex reasoning loops
+  - Fixed leaked ```thinking fences with nested language-tagged Markdown code blocks so inner fences remain inside structured thinking instead of leaking as visible reply text.
+  @oh-my-pi/pi-catalog
+  Added
+  - Added Claude Sonnet 3.7, Claude Opus 3, and Claude Sonnet 3 model entries to the Anthropic catalog
+  - Added Anthropic Claude Sonnet 5 model entry to the Kilo provider catalog
+  - Added first-party catalog discovery support for the Anthropic provider
+  - Added Gemini 3.1 Flash Lite Image model entry to the Kilo provider catalog
+  - Added Anthropic Claude Sonnet 5 model variants with low, medium, high, xhigh, and max thinking efforts to the Devin provider catalog
+  - Added Claude Sonnet 5 model entry to the Anthropic curated catalog.
+  Changed
+  - Updated the base API URL for the Claude Sonnet 5 model in the Anthropic catalog
+  - Updated pricing metrics for DeepSeek R1 and DeepSeek V3 model entries to reflect new rates
+  Fixed
+  - Fixed a potential memory leak caused by dangling timeout timers during model discovery in OpenAI-compatible, vLLM, LiteLLM, and LM Studio catalogs.
+  - Widened stream watchdogs for local OpenAI-compatible backends (including llama.cpp, LM Studio, vLLM, and Ollama) to prevent premature timeouts during cold model loads.
+  @oh-my-pi/pi-coding-agent
+  Changed
+  - Updated grep warnings to clarify that large files are partially searched rather than entirely skipped
+  - Renamed the filesystem walker worker count environment variable from PI_GREP_WORKERS to PI_WALK_WORKERS
+  - Centralized filesystem traversal policy in pi-walker.
+  - Changed the in-session /resume session picker to open as a fullscreen window on the terminal's alternate screen, matching the startup --resume picker and /settings. It borrows the alt buffer for its lifetime (the transcript is untouched underneath) and enables mouse tracking — the wheel scrolls the list and a left click resumes the row under the pointer — with the keybinding hint and bottom border pinned to the screen bottom. Previously it mounted inline in the editor slot and rendered compactly without mouse support.
+  Fixed
+  - Fixed model-discovery requests (Ollama, Llama.cpp, LM Studio, OpenAI, LiteLLM, vLLM) failing to clear timeouts after completion, preventing potential memory and timer leaks.
+  - Fixed grep and ripgrep built-in tools ignoring shell abort and timeout signals during recursive directory walks, allowing them to be interrupted immediately.
+  - Fixed omp setup speech returning prematurely before Whisper STT downloads complete, and improved error reporting for worker download failures.
+  - Fixed high memory usage in multi-target ast_grep searches by only retaining the final page window while preserving exact match and file counts.
+  - Fixed async job manager disposal and task cancellation handling to properly release session semaphores when aborted.
+  - Updated and expanded omp:// documentation coverage for managed memory, skill tools, image/speech generation, and package CLIs.
+  - Fixed Git subcommands ignoring repository paths by stripping ambient Git environment variables
+  - Fixed concurrent bash commands cross-killing each other on cancel/timeout. Cancellation cleanup previously walked the whole host process tree and signalled every descendant spawned since a per-run baseline, so cancelling or timing out one command could SIGTERM an unrelated command's child still running in parallel (it looked "new" relative to the canceller's baseline). Each run now tracks only the processes it actually spawned (via a brush-core spawn-observer hook) and scopes its TERM/KILL waves to that set, leaving concurrent runs untouched.
+  - Fixed /skill:<name> invocation losing the user's prompt context when the slash token was reached mid-prompt via the autocomplete. The slash-command parser now recognizes a /skill:<name> token surrounded by whitespace in non-slash, non-local-execution drafts (in addition to the leading form) and threads the surrounding prose through to the skill as args, so the typed prompt survives both in the editor (see the TUI changelog) and in the dispatched skill message. Drafts that already begin with another slash command (/compact /skill:foo), a bash sigil (!echo /skill:foo, !!echo /skill:foo), or a python sigil ($ run.py /skill:foo, $$ run.py /skill:foo) keep their existing dispatcher precedence and are not hijacked by the mid-prompt skill parser. Applies to the interactive TUI, ACP, and RPC dispatch paths via the shared parseSkillInvocation helper in extensibility/skills (#3913).
+  - Fixed the incomplete-todo reminder drifting to the bottom of the screen and piling up as dozens of duplicate copies in native scrollback. The reminder rendered in a dedicated anchored live-region container (todoReminderContainer) pinned above the editor, so it re-rendered in place every frame and — being taller than the viewport on short terminals while the subagent/job HUD churned below it — had its top rows committed to scrollback again on each reflow. It is now committed once into the transcript as a regular block (the same path TTSR notifications use), so it stays anchored in history where it fired.
+  - Fixed subagent frontmatter thinkingLevel being overridden by modelRoles.task model suffixes. (#3915)
+  - Fixed Ruff LSP auto-detection for Windows Python virtualenvs by checking .venv/Scripts, venv/Scripts, and .env/Scripts before falling back to PATH. (#3916)
+  @oh-my-pi/pi-natives
+  Added
+  - Added a platform-native no-ignore filesystem traversal path for glob/grep scans, using getattrlistbulk on macOS, getdents64/statx on Linux, and NtQueryDirectoryFile with FileIdFullDirectoryInformation on Windows while preserving the existing WalkBuilder path for gitignore-aware scans.
+  Fixed
+  - Fixed high memory usage in native astGrep and astMatch by retaining only the requested page window of match payloads during broad searches while preserving exact totals.
+  @oh-my-pi/pi-tui
+  Fixed
+  - Fixed mid-prompt /skill:<name> autocomplete acceptance wiping the user's draft. The autocomplete now inserts the /skill:<name> token at the cursor (replacing only the partial /sk slash token) and preserves prose typed before and after it, so a user can compose a prompt and reach for a skill without losing their train of thought (#3913).
+  What's Changed
+  - fix(stt): keep Whisper setup downloads alive by @roboomp in https://github.com/can1357/oh-my-pi/pull/3944
+  - fix(agent): bound async job disposal timeout by @roboomp in https://github.com/can1357/oh-my-pi/pull/3936
+  - fix(uutils): grep/rg directory walks now observe scope cancellation by @roboomp in https://github.com/can1357/oh-my-pi/pull/3937
+  - docs(coding-agent): sync omp docs coverage by @roboomp in https://github.com/can1357/oh-my-pi/pull/3941
+  - fix(ast): bound AST search pagination payloads by @roboomp in https://github.com/can1357/oh-my-pi/pull/3942
+  - fix(catalog): widen local OpenAI stream watchdogs by @roboomp in https://github.com/can1357/oh-my-pi/pull/3943
+  Full Changelog: https://github.com/can1357/oh-my-pi/compare/v16.2.10...v16.2.11
+ReleaseNotesUrl: https://github.com/can1357/oh-my-pi/releases/tag/v16.2.11
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://omp.sh/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

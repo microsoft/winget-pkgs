@@ -1,0 +1,28 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: sonicboom15.daimon
+PackageVersion: 0.3.1
+PackageLocale: en-US
+Publisher: sonicboom15
+PublisherUrl: https://github.com/sonicboom15
+PublisherSupportUrl: https://github.com/sonicboom15/daimon/issues
+PackageName: daimon
+PackageUrl: https://github.com/sonicboom15/daimon
+License: Apache-2.0
+LicenseUrl: https://github.com/sonicboom15/daimon/blob/HEAD/LICENSE
+ShortDescription: The spirit that runs alongside your AI app. A pluggable sidecar runtime for LLMs, memory, and tools.
+ReleaseNotes: |-
+  Bug Fixes
+  Qdrant: fix "unknown component type" on startup with existing collection
+  daimon serve was reporting unknown component type "qdrant" even when the Qdrant server was running and the collection was fully populated.
+  Root cause: ensureCollection always issued a PUT /collections/{name} request. Qdrant returns 400 when the collection already exists, which caused New() to return an error. sidecar.go silently discarded the error and fell through to the LLM registry, which produced the misleading "unknown type" message.
+  Fix: ensureCollection now GETs the collection first. If it exists (200), it returns immediately. If it doesn't exist (404), it creates it with PUT. Any other status is a real error.
+  Improved error reporting in sidecar wiring
+  Added HasVectorStore and HasGraphStore to the memory registry. sidecar.go now distinguishes between "type not registered" (try the next registry) and "type registered but factory failed" (fatal error with a clear message). Previously, a factory error from a known component type would silently fall through and produce a confusing "unknown type" error at the LLM registry.
+ReleaseNotesUrl: https://github.com/sonicboom15/daimon/releases/tag/v0.3.1
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/sonicboom15/daimon/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

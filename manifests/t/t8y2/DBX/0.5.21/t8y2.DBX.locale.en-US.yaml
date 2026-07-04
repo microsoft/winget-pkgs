@@ -1,0 +1,108 @@
+# Created with WinGet Tracker using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: t8y2.DBX
+PackageVersion: 0.5.21
+PackageLocale: en-US
+Publisher: t8y2
+PublisherUrl: https://github.com/t8y2
+PublisherSupportUrl: https://github.com/t8y2/dbx/issues
+Author: t8y2
+PackageName: DBX
+PackageUrl: https://github.com/t8y2/dbx
+License: AGPL-3.0
+LicenseUrl: https://github.com/t8y2/dbx/blob/HEAD/LICENSE
+ShortDescription: 15MB，lightweight, cross-platform database client. Supports MySQL, PostgreSQL, SQLite, Redis, MongoDB, DuckDB, ClickHouse, SQL Server and more.
+Tags:
+- clickhouse
+- database
+- database-client
+- database-management
+- duckdb
+- gui
+- mongodb
+- mysql
+- postgresql
+- redis
+- rust
+- sql-server
+- sqlite
+- tauri
+- vue
+ReleaseNotes: |-
+  新功能
+  - Web 版驱动管理 — Web 运行模式支持驱动管理能力，部署到浏览器环境时也能更完整地管理数据库驱动
+  - ClickHouse TLS 连接 — ClickHouse 连接新增 TLS 支持，适配需要加密连接的生产环境
+  - 查询超时设置 — 全局设置中新增查询超时配置，默认 30 秒，长查询和弱网络场景更可控
+  改进
+  - 系统库显示开关 — 数据库可见性选择器新增「显示系统库」选项，可按需显示 MySQL、PostgreSQL、ClickHouse、SQL Server、MongoDB、Oracle 等系统数据库
+  - PostgreSQL 模板库可见性 — PostgreSQL 数据库选择器支持显示可连接的模板库，例如 template1
+  - 侧边栏搜索匹配 — 统一侧边栏搜索过滤规则，保留合理的子序列模糊匹配，同时避免跨单词误匹配导致结果不准
+  - 数据表头部操作 — 数据网格头部控件更紧凑，筛选、排序和工具入口在有限空间内更好用
+  - GaussDB 连接路径 — GaussDB / openGauss 改进为更合适的 PostgreSQL 兼容查询路径，诊断和元数据行为更稳定
+  - 前端质量检查 — 清理前端 lint warning，让 CI 输出更干净
+  修复
+  - Agent 元数据隔离 — Agent 类型数据库按 database 维度隔离元数据连接池，避免多数据库展开时串库或取错元数据 (closes #446)
+  - MySQL 中文乱码 — MySQL 连接默认执行 SET NAMES utf8mb4，并支持安全读取 URL 中的 charset 参数，修复中文内容显示异常 (closes #450)
+  - PostgreSQL 时区参数 — 连接参数中直接填写 timezone=Asia/Shanghai 或 TimeZone=UTC 时会自动转换为驱动支持的启动参数，不再连接失败
+  - MySQL BIT(1) 显示 — BIT(1) 字段按数字字符串显示，避免被误解码成乱码
+  - PostgreSQL 系统 Catalog — 修复 PostgreSQL 系统 catalog 查询结果处理，展开系统对象更稳定
+  - PostgreSQL SSL CA — sslmode=require 搭配自定义 CA 时可正常连接
+  - SQL Server TOP 保留 — 已有 TOP 子句不再被错误改写
+  - Doris / StarRocks 会话连接 — 避免在缺少 database 上下文时创建 session pool，减少连接错位
+  - 数据传输元数据 — 表创建过程中保留传输元数据，跨库传输更可靠
+  - 表结构编辑器滚动 — 修复字段较多时表结构编辑器无法向下滚动的问题
+  - 新增字段聚焦 — 点击「新增字段」后自动滚到新行并聚焦字段名输入框，避免输入命中区域偏移
+  - 浏览器快捷键 — 桌面端阻止浏览器刷新快捷键误触，避免工作区被意外刷新
+  - Windows 升级保留数据 — Windows 安装升级时保留已有数据
+  - StarRocks 连接 — 禁用 mysql_async 的 socket 偏好，修复升级后 StarRocks 连接失败
+  - 清空表 SQL — 修复部分方言下清空表 SQL 生成不正确的问题
+  下载安装
+  系统要求
+  ────────┬──────────────────────────────┬───────────────────────────────────
+  操作系统│最低版本                      │架构
+  ────────┼──────────────────────────────┼───────────────────────────────────
+  Windows │Windows 10 或更高版本         │x64
+  ────────┼──────────────────────────────┼───────────────────────────────────
+  macOS   │macOS 12 (Monterey) 或更高版本│Intel (x64) / Apple Silicon (arm64)
+  ────────┼──────────────────────────────┼───────────────────────────────────
+  Linux   │见下表                        │x64
+  ────────┴──────────────────────────────┴───────────────────────────────────
+  Windows
+  ────────────────────────┬────────────────────────────────
+  文件                    │说明
+  ────────────────────────┼────────────────────────────────
+  DBX_0.5.21_x64-setup.exe│推荐 — NSIS 安装包，支持自动更新
+  ────────────────────────┼────────────────────────────────
+  DBX_0.5.21_x64_en-US.msi│MSI 安装包，适用于企业部署
+  ────────────────────────┴────────────────────────────────
+  Scoop:
+  scoop bucket add dbx https://github.com/t8y2/scoop-bucket
+  scoop install dbx
+  更新：
+  scoop update dbx
+  macOS
+  ──────────────────────┬─────────────────────────────────────────
+  文件                  │说明
+  ──────────────────────┼─────────────────────────────────────────
+  DBX_0.5.21_aarch64.dmg│推荐 — 适用于 Apple Silicon (M1/M2/M3/M4)
+  ──────────────────────┼─────────────────────────────────────────
+  DBX_0.5.21_x64.dmg    │适用于 Intel Mac
+  ──────────────────────┴─────────────────────────────────────────
+  Homebrew:
+  brew install --cask t8y2/tap/dbx
+  更新：
+  brew upgrade --cask t8y2/tap/dbx
+  Linux
+  ──────────────────────────────────────┬─────────┬───────────────────────────────────────────
+  发行版                                │推荐格式 │安装方式
+  ──────────────────────────────────────┼─────────┼───────────────────────────────────────────
+  Ubuntu / Debian / Linux Mint / Pop!_OS│.deb     │sudo apt install ./DBX_*.deb
+  ──────────────────────────────────────┼─────────┼───────────────────────────────────────────
+  Fedora / RHEL / CentOS / Rocky Linux  │.rpm     │sudo dnf install ./DBX-*.rpm
+  ──────────────────────────────────────┼─────────┼───────────────────────────────────────────
+  其他发行版                            │.AppImage│chmod +x DBX_*.AppImage && ./DBX_*.AppImage
+  ──────────────────────────────────────┴─────────┴───────────────────────────────────────────
+ReleaseNotesUrl: https://github.com/t8y2/dbx/releases/tag/v0.5.21
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
