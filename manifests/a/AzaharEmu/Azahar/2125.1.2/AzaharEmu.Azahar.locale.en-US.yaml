@@ -1,0 +1,42 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: AzaharEmu.Azahar
+PackageVersion: 2125.1.2
+PackageLocale: en-US
+Publisher: Azahar
+PublisherUrl: https://github.com/azahar-emu/
+PublisherSupportUrl: https://github.com/azahar-emu/azahar/issues
+Author: OpenSauce04 & PabloMK7
+PackageName: Azahar
+PackageUrl: https://github.com/azahar-emu/azahar
+License: GPL-2.0
+LicenseUrl: https://github.com/azahar-emu/azahar/blob/HEAD/license.txt
+ShortDescription: Azahar is an open-source 3DS emulator project based on Citra.
+Moniker: AzaharEmu.Azahar
+Tags:
+- 3ds
+- emu
+- emulator
+- games
+ReleaseNotes: |-
+  This is an unscheduled release to put into action new security policies we have enabled for Azahar after the recent TeamPCP supply chain attacks, which affected big open source projects like CEMU Emulator.
+  This release contains no user-facing changes when compared with 2125.1.1 outside of the security policy changes. We decided to publish this release now so that the new policies are applied as soon as possible. Users may choose to skip this release if they wish.
+  Please keep in mind that Azahar was NOT compromised by the attacks and our users are safe. We are just being proactive and adding security measures to our release distribution process as a preventative measure.
+  Azahar 2125.1.2 Changelog
+  All
+  - Enabled Attestation and Software Bill Of Materials for release assets to increase release security. | @PabloMK7 #2117
+    - From now on, Azahar releases are immutable. This means that once we publish a release, the assets linked to it cannot be changed in any way. This prevents token stealers from modifying release assets after they are published. You are able to know if a release is immutable if it shows a padlock icon with the word Immutable at the top left of the page.
+    - Starting from this release, Azahar release binaries are attested. This means that all of the official Azahar assets have now signed claims that specify where they were produced (CI jobs), the exact commit and timestamp, and other metadata.
+      - Users should be able to verify the validity of azahar binaries using the GitHub Cli. For example: gh attestation verify --owner azahar-emu --predicate-type "https://spdx.dev/Document/v2.3" <file-path>. This command will only succeed if the file was not tampered with, which is useful when downloading assets from secondary sources, such as our Internet Archive page.
+      - While plain sha256 hashes serve to verify integrity, attestations also allow to include the aforementioned metadata.
+      - You can view the attestations for all of our binaries in the Attestations page.
+    - Also starting from this release, Azahar binaries have a Sofware Bill Of Materials, which consists in a JSON that (in theory) contains all dependencies Azahar relies upon, which should help tracking vulnerabilities. In practice, this technology is rather new, so not all dependencies are fully detected. You can read more about this in #2117.
+    - A verify-release bash script is now provided in our source code that helps verifying the validity of Azahar releases. This allows users to better audit our releases as well as easily obtain the software bill of materials. Example usage is as follows: ./tools/verify-release.sh azahar-emu/azahar 2125.1.2. You can learn more about this tool in #2117.
+  Technical
+  - Added EXCLUDE_FROM_ALL to CMake targets where applicable, speeding up build times for certain non-standard build configurations. | @OpenSauce04 #2088
+  - All libretro core binaries are now stripped, greatly reducing filesize (primarily for the Android core) without affecting functionality in any way. | @OpenSauce04 #2111
+    - This is only relevant for the core binaries distributed by us; The cores used by the RetroArch core downloader were already doing this.
+ReleaseNotesUrl: https://github.com/azahar-emu/azahar/releases/tag/2125.1.2
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,102 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: jcardama.LeopardWM
+PackageVersion: 0.2.4
+PackageLocale: en-US
+Publisher: jcardama
+PublisherUrl: https://github.com/jcardama
+PublisherSupportUrl: https://github.com/jcardama/LeopardWM/issues
+Author: jcardama
+PackageName: LeopardWM
+PackageUrl: https://github.com/jcardama/LeopardWM
+License: GPL-3.0
+LicenseUrl: https://github.com/jcardama/LeopardWM/blob/HEAD/LICENSE
+ShortDescription: Scroll-first tiling window manager for Windows 10 and 11.
+Description: LeopardWM is an open-source tiling window manager for Windows 10 and 11 that takes a scroll-first approach inspired by niri and PaperWM. Windows sit on a horizontal strip and the monitor acts as a viewport that scrolls over them, so navigation stays spatially consistent as windows are added — instead of constantly rebuilding split trees. Written in Rust on top of the Win32 API.
+Moniker: leopardwm
+Tags:
+- niri
+- paperwm
+- rust
+- scrollable
+- tiling
+- window-manager
+- windows
+- workspace
+ReleaseNotes: |-
+  Improvements
+  - F13–F24 can be used as hotkey modifiers. Hold one of these keys and press
+    another to form a combo (for example F13+H), the same way Ctrl or Alt work,
+    bindable in config and the Settings recorder. A key used this way is consumed
+    by LeopardWM and won't reach the focused app. F1–F12 remain keys only.
+  - Vertical monitor navigation for stacked displays. Focus or move the
+    focused window to the monitor above or below, picked by physical position.
+    New defaults: Ctrl+Alt+Win+Up/Down to focus, add Shift to move. Rebindable in
+    Settings.
+  - Fullscreen now follows focus. Changing focus while a window is fullscreen
+    keeps you in fullscreen and makes the newly focused window fullscreen, instead
+    of dropping back to the tiled layout. Structural commands (moving columns or
+    windows) still exit fullscreen.
+  Fixes
+  - Sticky tiled windows keep their width across workspace switches. A sticky
+    window in the tiled layout was re-added at the default width every time you
+    changed workspaces, shrinking it. It now carries its column width along.
+  - Windows that open maximized hold it better during a burst. An app opening
+    several windows or tabs at once could briefly report a restored size and get
+    tiled narrow. A just-opened maximized window now gets a short grace to
+    re-assert maximize before the layout snaps it back.
+  - Progress and notification dialogs no longer get tiled. A window with a
+    title bar but no minimize or maximize button (the typical dialog shape, like a
+    file-copy or progress popup) is now left floating where it opens instead of
+    taking a column, even when it is resizable. Add a window rule with the tile
+    action to override this for a specific app.
+  - Higher-privilege windows are left floating instead of getting an empty
+    column. When LeopardWM runs without administrator rights, Windows blocks it
+    from moving a window that runs at a higher privilege level (an elevated or
+    administrator window, or a protected process), so tiling one reserved a column
+    that stayed empty, including when a saved layout restored such a window after a
+    restart. These windows are now left floating, listed in lwm doctor, and
+    announced with a notification. Run LeopardWM as administrator to tile elevated
+    windows.
+  - A window no longer re-resizes itself every time you switch to a workspace.
+    When a workspace's column was saved narrower than a window's minimum width, the
+    window kept snapping back to its minimum on each switch to that workspace. The
+    layout now confirms the window's real minimum and widens the column to fit, so
+    it settles instead of fighting on every switch.
+  - A reopened app window no longer floats over the layout. A window the user
+    dismissed quickly and the app then reopened (for example Edge's download popup)
+    could be left floating on top of the tiled layout on every workspace. Only
+    genuinely frameless popups (notification toasts) are now treated as transient;
+    a real window is re-tiled normally.
+  - A new window no longer draws over a fullscreen window. While a window was
+    fullscreen, a newly opened window was placed behind it in the layout but still
+    rendered on top. The new window now stays behind, and the fullscreen window
+    keeps focus and stays on top until you leave fullscreen.
+  - Edit Config opens on the workspace you are on. A single-instance editor
+    (like VS Code) reuses an existing window, so clicking Edit Config could switch
+    you to whichever workspace that window was on. The config file is now pulled to
+    your current workspace instead.
+  - Windows keep their size and position when moved between workspaces. Moving
+    a resized window to another workspace re-tiled it at the default width, and
+    moving it back never restored where it had been. A moved window now keeps its
+    column width, and on return it lands back on its original column.
+  - The overview overlay stays put when an Alt-drag tool grabs it. A
+    third-party Alt-drag window mover (such as AltSnap) could drag the overview
+    overlay out of place while it was open. The overlay now holds its position for
+    as long as it is shown.
+  - The layout survives a monitor sleeping or being unplugged. When a screen
+    powered off long enough to drop from Windows, its windows were flattened onto
+    the primary monitor at default widths and never restored, so the layout looked
+    reset by morning. A disconnected monitor's layout is now saved and restored
+    when it returns, matched by a stable device name. Its windows stay usable on
+    the primary monitor while it is away and snap back on reconnect.
+  - Switching workspaces no longer leaves ghost windows on battery. On battery
+    or in Windows power saver, LeopardWM turns off animations, but the outgoing
+    workspace's windows were only hidden as part of that animation, so they stayed
+    on screen. They are now hidden immediately when animations are off. A new
+    reduce_motion_on_battery setting under [animation] (default true) keeps
+    animations off on battery to save power; set it false to keep them running.
+ReleaseNotesUrl: https://github.com/jcardama/LeopardWM/releases/tag/v0.2.4
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

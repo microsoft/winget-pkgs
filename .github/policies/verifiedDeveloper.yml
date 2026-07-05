@@ -53,5 +53,22 @@ configuration:
 
                 Template: msftbot/verifiedDeveloper/approved
         triggerOnOwnActions: true
+      - description: >-
+          Fallback: When Publisher-Verified is set by wingetbot but
+          Validation-Completed is missing, add it to trigger the merge chain.
+        if:
+          - payloadType: Pull_Request
+          - labelAdded:
+              label: Publisher-Verified
+          - isActivitySender:
+              user: wingetbot
+          - not:
+              hasLabel:
+                label: Validation-Completed
+          - isOpen
+        then:
+          - addLabel:
+              label: Validation-Completed
+        triggerOnOwnActions: true
 onFailure:
 onSuccess:
