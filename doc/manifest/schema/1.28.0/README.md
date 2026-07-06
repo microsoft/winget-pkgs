@@ -62,7 +62,9 @@ The length of strings in this specification should be limited to 100 characters 
 * No Changes
 ### [Default Locale](defaultLocale.md)
 * Added `Icons`
+  * NOTE: `Icons` is not an authorable field in the community repository. Icon metadata is populated by the validation pipelines during validation and cannot be added in pull requests.
 ### [Installer](installer.md)
 * Added `DesiredStateConfiguration`
 ### [Locale](locale.md)
 * Added `Icons`
+  * NOTE: `Icons` is not an authorable field in the community repository. Icon metadata is populated by the validation pipelines during validation and cannot be added in pull requests.
