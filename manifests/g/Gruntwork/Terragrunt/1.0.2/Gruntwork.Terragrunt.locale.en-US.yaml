@@ -1,0 +1,162 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Gruntwork.Terragrunt
+PackageVersion: 1.0.2
+PackageLocale: en-US
+Publisher: Gruntwork
+PublisherUrl: https://terragrunt.gruntwork.io/
+PublisherSupportUrl: https://terragrunt.gruntwork.io/docs/community/support
+PrivacyUrl: https://gruntwork.io/legal/privacy-policy
+PackageName: Terragrunt
+PackageUrl: https://github.com/gruntwork-io/terragrunt/releases/tag/v0.68.9
+License: MIT
+LicenseUrl: https://github.com/gruntwork-io/terragrunt/blob/HEAD/LICENSE.txt
+Copyright: © 2024 Gruntwork, Inc. All rights reserved.
+ShortDescription: Terragrunt is a thin wrapper for Terraform that provides extra tools for keeping your Terraform configurations DRY, working with multiple Terraform modules, and managing remote state.
+Description: Terragrunt is a thin wrapper for Terraform that provides extra tools for keeping your Terraform configurations DRY, working with multiple Terraform modules, and managing remote state.
+Tags:
+- IaC
+- Infrastructure as Code
+- Terraform
+- Terraform Wrapper
+- terragrunt
+ReleaseNotes: |-
+  🐛 Bug Fixes
+  shared_credentials_files and other list/map backend config values were serialized incorrectly
+  Setting shared_credentials_files (or any other list-valued key) in the remote_state.config block produced a broken -backend-config argument:
+  -backend-config=shared_credentials_files=[/a/creds /b/creds]
+  OpenTofu and Terraform both failed to parse this. The same problem affected map-valued keys. Lists and maps are now written as single-line HCL (["/a/creds","/b/creds"] and {key="value"}), and strings inside them are quoted so embedded quotes, newlines, and tabs survive the round trip.
+  Thanks to @Rahul-Kumar-prog for contributing this fix!
+  Panic in get_repo_root() when OpenTelemetry tracing is enabled with TRACEPARENT
+  Running terragrunt stack generate (or any command that invoked shell commands like git rev-parse) with OpenTelemetry trace exporting enabled (TG_TELEMETRY_TRACE_EXPORTER=http) caused a nil pointer panic:
+  Call to function "get_repo_root" failed: panic in function implementation:
+  runtime error: invalid memory address or nil pointer dereference
+  The root cause of the panic was fixed, and telemetry codepaths have been hardened against future panics.
+  stack output now respects the exclude block
+  terragrunt stack output previously ignored the exclude block on units, attempting to fetch outputs (including directly from S3 state when using --dependency-fetch-output-from-state) for units that should have been excluded.
+  The fix uses Terragrunt discovery to identify excluded units before reading outputs. Excluded units are now omitted from the stack output entirely, consistent with how they are handled during stack run.
+  To exclude a unit from stack output, add "output" to the actions list in the exclude block:
+  exclude {
+    if      = true
+    actions = ["plan", "apply", "destroy", "output"]
+  }
+  Special action values "all" and "all_except_output" are also supported.
+  🧪 Experiments Added
+  catalog-redesign — Reworked terragrunt catalog TUI
+  A new catalog-redesign experiment reworks the design of the terragrunt catalog TUI.
+  terragrunt catalog now launches the TUI right away and runs discovery in the background instead of waiting for discovery to complete before launching the TUI. As a consequence, terragrunt catalog users with large catalogs should see significant speed improvements as they launch the terragrunt catalog TUI.
+  Modules now stream into the list view of the catalog as they are discovered, so you'll be able to select and use a module even if your entire catalog hasn't been discovered yet.
+  If catalog.urls is not configured in root.hcl, terragrunt catalog no longer errors. A welcome screen explains how to populate the catalog and can open the catalog documentation on a keypress. In addition, terraform.source values from existing units are automatically included in the set of URLs used for discovery, so users with existing units get a populated catalog pointing to other modules that can be pulled from the same module source without any additional configuration.
+  This experiment is subject to change, and core elements of the design are being iterated on rapidly.
+  To try it out, run:
+  terragrunt catalog --experiment catalog-redesign
+  To learn more, see the experiment documentation.
+  🧪 Experiments Updated
+  stack-dependencies — Cross-stack dependency support and autoinclude improvements
+  The stack-dependencies experiment now supports cross-stack and nested-stack dependency patterns, expanding the autoinclude block capabilities in terragrunt.stack.hcl files.
+  New features:
+  - stack.<name>.path references for depending on an entire stack. The DAG expands the stack into its constituent units so that all units in the stack complete before the dependent unit runs
+  - stack.<name>.<unit_name>.path references for depending on a specific unit within a nested stack (fine-grained cross-stack dependencies)
+  - dependency blocks targeting stack directories — aggregated outputs from all units in the stack are accessible as dependency.stack_name.outputs.unit_name.output_key
+  - Partial evaluation of local.* in autoinclude — expressions mixing local.* and dependency.* are partially evaluated during stack generation: locals resolve to literals while dependency references are preserved for evaluation when the unit is applied
+  Dependency on an entire stack:
+  stack "infra" {
+    source = "../catalog/stacks/infra"
+    path   = "infra"
+  }
+  unit "app" {
+    source = "../catalog/units/app"
+    path   = "app"
+    autoinclude {
+      dependency "infra" {
+        config_path = stack.infra.path
+      }
+      inputs = {
+        vpc_id = dependency.infra.outputs.vpc.vpc_id
+      }
+    }
+  }
+  Dependency on a unit within a nested stack:
+  stack "networking" {
+    source = "../catalog/stacks/networking"
+    path   = "networking"
+  }
+  unit "app" {
+    source = "../catalog/units/app"
+    path   = "app"
+    autoinclude {
+      dependency "vpc" {
+        config_path = stack.networking.vpc.path
+      }
+      inputs = {
+        vpc_id = dependency.vpc.outputs.vpc_id
+      }
+    }
+  }
+  terragrunt run --all --experiment stack-dependencies -- plan
+  To learn more, see the experiment documentation.
+  ⚙️ Process Updates
+  Install script now supports tip and test builds
+  The install script can now install tip builds and on-demand test builds. Three new flags are available:
+  - --tip installs the latest tip build from main
+  - --test installs an on-demand test build
+  - --commit <sha> installs a build for a specific commit
+  Downloads are verified against GPG/Cosign signatures and SHA256 checksums before installation.
+  Tip build notifications on referenced issues
+  When a tip build is produced on main for a merged PR, Terragrunt now posts a comment on any issues that PR references, linking to the build and including instructions for installing and testing it.
+  What's Changed
+  - feat: add new hclparse package in internal by @denis256 in #5816
+  - feat: Adding catalog-redesign experiment by @yhakbar in #5894
+  - feat: Adding types, sources and versions to catalog by @yhakbar in #5922
+  - feat: handling of stacks dependencies in run queue / runner pool by @denis256 in #5909
+  - feat: Supporting catalog with no config by @yhakbar in #5902
+  - feat: Supporting streaming components to the catalog by @yhakbar in #5914
+  - fix: Addressing #5895 review comments by @yhakbar in #5897
+  - fix: correct cloud-nuke config YAML keys and bump to v0.49.0 by @james00012 in #5920
+  - fix: Fixing panic in telemetry by @yhakbar in #5915
+  - fix: handling of exclusions when reading outputs by @denis256 in #5900
+  - fix: Use httptest in ./internal/tf to avoid issues from integration in unit tests by @yhakbar in #5925
+  - fix(s3): fix shared_credentials_files HCL serialization for backend config by @Rahul-Kumar-prog in #5886
+  - docs: Avoid indexing changelog in search by @yhakbar in #5928
+  - docs: Fix bash commands in "Terralith to Terragrunt" guide by @chorrell in #5904
+  - docs: Fix missing newline in remote_state examples by @thoreinstein in #5921
+  - docs: Splitting up changelog by @yhakbar in #5930
+  - docs: updated stack-dependencies implementation roadmap by @denis256 in #5910
+  - docs: Updating v1.0.2 changelog entries by @yhakbar in #5927
+  - docs: Updating install docs by @yhakbar in #5923
+  - chore: add 7-day cooldown to dependabot updates by @diofeher in #5889
+  - chore: Adding vexec by @yhakbar in #5931
+  - chore: Adding catalog redesign fork by @yhakbar in #5896
+  - chore: Adding support for vfs in cas by @yhakbar in #5908
+  - chore: Adding tests and docs missing from #5886 by @yhakbar in #5926
+  - chore: Adding tip notification system by @yhakbar in #5895
+  - chore: bump cloud-nuke to v0.49.0 by @james00012 in #5893
+  - chore: coverage scripts collection simplifications by @denis256 in #5724
+  - chore: Dropping CAS test by @yhakbar in #5936
+  - chore: Expanding lll coverage to configbridge by @yhakbar in #5834
+  - chore: Expanding lll coverage to errors by @yhakbar in #5833
+  - chore: Expanding lll coverage to gcphelper by @yhakbar in #5832
+  - chore: Expanding lll coverage to generate by @yhakbar in #5840
+  - chore: Expanding lll coverage to help by @yhakbar in #5835
+  - chore: Expanding lll coverage to middleware by @yhakbar in #5839
+  - chore: Expanding lll coverage to tips by @yhakbar in #5837
+  - chore: Expanding lll coverage to tui by @yhakbar in #5836
+  - chore: Expanding lll coverage to writer by @yhakbar in #5838
+  - chore: Make workflow dispatch for signing useful by @yhakbar in #5929
+  - chore: otel dependencies update by @denis256 in #5878
+  - chore: simplified returned discovery errors by @denis256 in #5664
+  - chore: Updating install script to support tip builds by @yhakbar in #5892
+  - chore: Revert "chore: bump cloud-nuke to v0.49.0" by @yhakbar in #5919
+  New Contributors
+  - @diofeher made their first contribution in #5889
+  - @chorrell made their first contribution in #5904
+  - @thoreinstein made their first contribution in #5921
+  - @Rahul-Kumar-prog made their first contribution in #5886
+  Full Changelog: v1.0.1...v1.0.2
+ReleaseNotesUrl: https://github.com/gruntwork-io/terragrunt/releases/tag/v1.0.2
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/gruntwork-io/terragrunt/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

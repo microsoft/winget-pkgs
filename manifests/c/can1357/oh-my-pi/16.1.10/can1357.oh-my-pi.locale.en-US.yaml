@@ -1,0 +1,72 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: can1357.oh-my-pi
+PackageVersion: 16.1.10
+PackageLocale: en-US
+Publisher: Can Bölük
+PublisherUrl: https://can.ac/
+PublisherSupportUrl: https://github.com/can1357/oh-my-pi/issues
+Author: Can Bölük
+PackageName: oh-my-pi
+PackageUrl: https://omp.sh/
+License: MIT
+LicenseUrl: https://github.com/can1357/oh-my-pi/blob/HEAD/LICENSE
+Copyright: |-
+  Copyright (c) 2025 Mario Zechner
+  Copyright (c) 2025-2026 Can Bölük
+ShortDescription: ⌥ AI Coding agent for the terminal — hash-anchored edits, optimized tool harness, LSP, Python, browser, subagents, and more
+Description: |-
+  omp is a terminal-first coding agent that runs on your machine, talks to any provider, and treats sessions like git branches.
+  omp (pronounced “oh-em-pi”, binary omp) is a fork of Mario Zechner’s Pi. It runs as a single Bun process, drives any model provider you have credentials for, and ships a flat tool surface the model uses to read code, run commands, edit files, drive a debugger, and spawn subagents that coordinate over an in-process IRC bus.
+  Sessions persist as JSONL under ~/.omp/agent/sessions/. You resume, fork, branch, and share them. Settings, credentials, plugins, and caches all live under ~/.omp/agent/. Nothing leaves the machine unless you call a tool that does.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  @oh-my-pi/pi-agent-core
+  Fixed
+  - Fixed labeled user interrupts retaining incomplete streamed tool calls before toolcall_end, which could persist malformed tool-call IDs into replay.
+  @oh-my-pi/pi-ai
+  Changed
+  - Improved JSON robustness by replacing external dependency with a custom, high-performance parser
+  - Strengthened streaming JSON parsing to prevent non-finite numbers from surfacing as undefined/NaN
+  - Configured JSON parser to reject JS-specific NaN and Infinity values for tool arguments
+  - Replaced the JSON repair/parse helpers (parseJsonWithRepair, parseStreamingJson) with a single from-scratch tolerant parser (RelaxedJson) that accepts single-quoted strings, unquoted object keys, trailing/stray commas, // and /* */ comments, Python True/False/None, raw control characters, invalid escapes, and unescaped apostrophes ('it's'). Final parsing still throws on truncated/garbage input (so a malformed tool call is skipped rather than executed with half-formed args) and rejects JS-only NaN/Infinity; streaming parsing stays non-throwing and rolls back incomplete trailing tokens instead of surfacing undefined/NaN. The Cursor provider's ad-hoc regex + JSON5 tool-argument parser now routes through the shared parser.
+  Fixed
+  - Fixed tool call ID normalization for Anthropic-compatible models
+  - Fixed Anthropic Messages replay sanitizing malformed tool-call IDs, including aborted native tool calls with empty IDs, so retries no longer send invalid tool_use.id / tool_result.tool_use_id pairs.
+  - Fixed the Codex Responses WebSocket transport attributing a prior turn's output to the current one on a reused connection: a trailing/duplicate frame from a cleanly-completed previous response that slipped past the queue drain could be consumed as this request's terminal (ending the turn with empty output) or as a stale tool call. Frames are now keyed by response.id — a frame carrying the previous response's id is dropped, and one carrying a third id (or a regressed sequence_number) fails closed so the turn retries instead of mixing two responses' streams. Idless frames (deltas, the rate-limit/metadata preamble, response.created-less streams) still pass through, matching upstream codex-rs.
+  - Fixed transformMessages pulling an earlier, orphaned tool result onto a later tool call that reused the same id (left behind when compaction folded the originating tool_use into a summary). The pending-call flush now pairs each call with a result positioned after its assistant turn, so a reused id surfaces its own output rather than a prior turn's.
+  - Fixed DashScope 429 rate-limit messages that mention authorization being classified as credential failures, preventing valid API keys from being invalidated after throttling. (#3172)
+  - Fixed OpenCode Go 401 Insufficient balance quota errors being treated as unknown failures instead of usage-limit errors, restoring credential rotation and fallback chains. (#3169)
+  Removed
+  - Removed the partial-json dependency; streaming JSON parsing now uses the in-house RelaxedJson parser.
+  @oh-my-pi/pi-coding-agent
+  Added
+  - Added tab.ariaSnapshot(selector?) to the browser tool for Playwright-format ARIA-tree YAML
+  - Added tab.ref("e5") and support for aria-ref=e5 selectors in all tab action methods
+  Changed
+  - Made write and find tools essential so they are always available initially (surviving tools.discoveryMode === "all" hiding) to ensure instructions to write/find files are immediately executable (#3165)
+  Fixed
+  - Fixed streamed tool-call previews freezing on their placeholder body ($ …, Write: …, an empty args tree) even after the tool finished: the pending card was created while arguments streamed, but when the closing full-arguments message_update never arrived (smooth-streaming disabled leaving the throttled arguments stale, an owned-dialect projector, or a superseded/aborted turn that still ran the call) nothing re-applied the final args. tool_execution_start — the one event every execution path emits with validated full arguments right before the result — now reconciles them onto the existing pending card and cancels any in-flight reveal so a late tick can't re-truncate the body.
+  @oh-my-pi/pi-tui
+  Fixed
+  - Fixed streaming output being lost from native scrollback below a commit-unstable "barrier" block (a provisional/collapsed tool preview, a displaceable job poll, or a reflowing-markdown reply) once the content under it overflowed the viewport. The engine committed native scrollback only up to the barrier's seam, so rows that scrolled above the window under the barrier were committed nowhere and repainted nowhere — they vanished, and a later shift/finalize/removal of the barrier silently dropped the rows beneath it. The append-only commit floor is now windowTop in every non-frozen paint path (ordinary update, shrink re-slice, full paint), so whatever scrolls above the window always reaches history; the seam boundaries now only classify which committed rows stay byte-stable-audited vs. durable-exempt. The committed-prefix audit is range-aware: it audits the forced-overflow suffix in full (re-anchoring — duplication, never loss — when a barrier finalizes), exempts the durable middle (a streaming table re-aligning its columns) from re-anchor spray, and runs a full hard scan of rows a frame newly marks permanent so a single-row finalize edit far above the commit boundary still re-anchors instead of being dropped.
+  What's Changed
+  - fix(ai): handle OpenCode insufficient balance quota errors by @roboomp in https://github.com/can1357/oh-my-pi/pull/3170
+  - fix(ai): classify DashScope throttles as rate limits by @roboomp in https://github.com/can1357/oh-my-pi/pull/3173
+  Full Changelog: https://github.com/can1357/oh-my-pi/compare/v16.1.9...v16.1.10
+ReleaseNotesUrl: https://github.com/can1357/oh-my-pi/releases/tag/v16.1.10
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://omp.sh/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

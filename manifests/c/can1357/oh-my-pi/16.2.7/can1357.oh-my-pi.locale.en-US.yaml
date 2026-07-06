@@ -1,0 +1,108 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: can1357.oh-my-pi
+PackageVersion: 16.2.7
+PackageLocale: en-US
+Publisher: Can Bölük
+PublisherUrl: https://can.ac/
+PublisherSupportUrl: https://github.com/can1357/oh-my-pi/issues
+Author: Can Bölük
+PackageName: oh-my-pi
+PackageUrl: https://omp.sh/
+License: MIT
+LicenseUrl: https://github.com/can1357/oh-my-pi/blob/HEAD/LICENSE
+Copyright: |-
+  Copyright (c) 2025 Mario Zechner
+  Copyright (c) 2025-2026 Can Bölük
+ShortDescription: ⌥ AI Coding agent for the terminal — hash-anchored edits, optimized tool harness, LSP, Python, browser, subagents, and more
+Description: |-
+  omp is a terminal-first coding agent that runs on your machine, talks to any provider, and treats sessions like git branches.
+  omp (pronounced “oh-em-pi”, binary omp) is a fork of Mario Zechner’s Pi. It runs as a single Bun process, drives any model provider you have credentials for, and ships a flat tool surface the model uses to read code, run commands, edit files, drive a debugger, and spawn subagents that coordinate over an in-process IRC bus.
+  Sessions persist as JSONL under ~/.omp/agent/sessions/. You resume, fork, branch, and share them. Settings, credentials, plugins, and caches all live under ~/.omp/agent/. Nothing leaves the machine unless you call a tool that does.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  @oh-my-pi/pi-ai
+  Added
+  - Added service tier support for Google Gemini and Vertex AI, including model-specific service tier configurations via ServiceTierByFamily.
+  - Added Google Vertex AI Interactions API support for Gemini 3+ models by default, with automatic fallback to 😒treamGenerateContent and a useInteractionsApi: false option to force standard generation.
+  - Added support for explicit Vertex bearer access tokens via GOOGLE_CLOUD_ACCESS_TOKEN or CLOUDSDK_AUTH_ACCESS_TOKEN environment variables.
+  Changed
+  - Updated service tier logic to use per-provider configurations instead of global scopes.
+  - Refactored priority request billing and accounting to better align with specific provider capabilities.
+  - Updated API key resolution precedence so explicit environment variables (e.g., GEMINI_API_KEY) override stored or broker-migrated static API keys, while deliberate OAuth logins still take highest precedence.
+  Fixed
+  - Improved Vertex AI reliability by automatically falling back to global endpoints on 404 errors.
+  - Fixed safety setting application for Google Vertex AI models.
+  - Fixed Kimi Code's Anthropic-compatible request path to keep thinking enabled and downgrade forced tool choice for Kimi K2.7 Code title generation.
+  - Fixed leaked reasoning fences (such as ```thinking or ) across all providers by splitting them into structured thinking blocks during streaming.
+  - Fixed Codex requests failing with unsupported all_turns errors on older models (gpt-5.1 and gpt-5.3) by gating the reasoning.context: "all_turns" default to gpt-5.4+ models.
+  @oh-my-pi/pi-catalog
+  Fixed
+  - Fixed compatibility with Kimi K2.7 Code on native endpoints to ensure thinking mode is preserved and tool choice is not forced.
+  - Fixed Cerebras gemma-4-31b dynamic discovery to correctly identify the model as image-capable, enabling proper serialization of attached images.
+  @oh-my-pi/pi-coding-agent
+  Breaking Changes
+  - Replaced the global serviceTier and fastModeScope settings with granular, per-family settings (tier.openai, tier.anthropic, and tier.google) to control service tiers, subagents, advisors, and /fast mode targets.
+  Changed
+  - Improved binary file detection and terminal handling to prevent corruption from non-UTF-8 content, and updated file summaries to explicitly note skipped binary files.
+  - Enhanced context compaction (snapcompact) to resolve shapes contextually based on rendered text content.
+  Fixed
+  - Improved reliability of DuckDuckGo web searches by updating browser request headers and parameters
+  - Fixed an issue where CJK (Chinese, Japanese, Korean) history could become unrenderable during repeated context compactions.
+  - Fixed a memory exhaustion bug in the TUI when using /resume on large previous sessions.
+  - Fixed an issue where the irc inbox missed messages that arrived while the recipient agent was already running.
+  - Fixed a startup hang caused by system-prompt GPU detection blocking and repeatedly running failed probes.
+  - Improved error reporting for omp tiny-models download by displaying the actual worker-side download error.
+  - Resolved status inconsistencies between /extensions, /mcp list, and the dashboard, ensuring MCP server states, allowlists/denylists, and configuration files (like mcp.json) stay fully synchronized.
+  - Improved branch-mode task merges to preserve the agent's original commit history (messages and authors) and fixed a bug where merges were rejected due to unrelated dirty changes in the parent checkout.
+  - Fixed an issue where the Working... loader spinner would prematurely disappear or fail to re-arm after a subagent (task) tool completed or during transient overlays (such as auto-compaction or auto-retry).
+  @oh-my-pi/pi-natives
+  Added
+  - Added embedded Silver TrueType font rendering support to renderSnapcompactPng, featuring automatic per-glyph fallback for missing bitmap characters and anti-aliased scaling for East Asian wide code points.
+  - Added the snapcompactSupportedChars function to check font capability for specific characters.
+  @oh-my-pi/snapcompact
+  Added
+  - Added the silver16-bw shape backed by an embedded Silver TrueType font to support CJK and other non-Latin text.
+  - Added resolveShapeForText to support font-aware shape resolution.
+  Changed
+  - Improved non-ASCII text normalization by folding semantic emojis to ASCII labels (e.g., [OK], [WARN]), dropping decorative emojis, and folding box-drawing symbols to ASCII skeletons.
+  - Enhanced missing glyph rendering to use the embedded Silver TrueType fallback per-character, including support for East Asian wide characters across two grid cells.
+  - Updated text wrapping, pagination, and provider shape geometries to support wide character footprints and updated X.org 8x13 font metrics.
+  @oh-my-pi/omp-stats
+  Fixed
+  - Improved premium request calculation accuracy by correctly accounting for specific model families.
+  @oh-my-pi/pi-tui
+  Fixed
+  - Fixed an issue where a fast double-Escape keypress was swallowed and ignored, preventing double-escape gestures and subsequent Escape key handlers from firing.
+  @oh-my-pi/pi-utils
+  Added
+  - Added a utility to detect binary files based on content sniffing.
+  What's Changed
+  - fix(tui): aligned /extensions MCP status with /mcp list by @roboomp in https://github.com/can1357/oh-my-pi/pull/3829
+  - fix(irc): surface pending asides in inbox by @roboomp in https://github.com/can1357/oh-my-pi/pull/3836
+  - fix(prompting): bound GPU detection during prompt startup by @roboomp in https://github.com/can1357/oh-my-pi/pull/3838
+  - fix(cli): surface tiny-model download worker errors by @roboomp in https://github.com/can1357/oh-my-pi/pull/3840
+  - Fix dirty parent isolated branch merges by @roboomp in https://github.com/can1357/oh-my-pi/pull/3844
+  - fix(coding-agent): preserve agent commits across isolated branch merges by @roboomp in https://github.com/can1357/oh-my-pi/pull/3845
+  - fix(coding-agent): skip rebuilding previous session display context on different-session switch by @roboomp in https://github.com/can1357/oh-my-pi/pull/3847
+  - fix(catalog): omit disabled thinking for Kimi K2.7 Code by @roboomp in https://github.com/can1357/oh-my-pi/pull/3853
+  - fix(catalog): mark Cerebras Gemma 4 vision-capable by @roboomp in https://github.com/can1357/oh-my-pi/pull/3856
+  - fix(coding-agent): restore working loader after subagent ends inside overlay window by @roboomp in https://github.com/can1357/oh-my-pi/pull/3859
+  - fix(tui): deliver buffered double-Esc as two events and re-arm working loader after task completion by @roboomp in https://github.com/can1357/oh-my-pi/pull/3860
+  Full Changelog: https://github.com/can1357/oh-my-pi/compare/v16.2.6...v16.2.7
+ReleaseNotesUrl: https://github.com/can1357/oh-my-pi/releases/tag/v16.2.7
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://omp.sh/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

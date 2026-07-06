@@ -1,0 +1,66 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: can1357.oh-my-pi
+PackageVersion: 15.10.4
+PackageLocale: en-US
+Publisher: Can Bölük
+PublisherUrl: https://can.ac/
+PublisherSupportUrl: https://github.com/can1357/oh-my-pi/issues
+Author: Can Bölük
+PackageName: oh-my-pi
+PackageUrl: https://omp.sh/
+License: MIT
+LicenseUrl: https://github.com/can1357/oh-my-pi/blob/HEAD/LICENSE
+Copyright: |-
+  Copyright (c) 2025 Mario Zechner
+  Copyright (c) 2025-2026 Can Bölük
+ShortDescription: ⌥ AI Coding agent for the terminal — hash-anchored edits, optimized tool harness, LSP, Python, browser, subagents, and more
+Description: |-
+  omp is a terminal-first coding agent that runs on your machine, talks to any provider, and treats sessions like git branches.
+  omp (pronounced “oh-em-pi”, binary omp) is a fork of Mario Zechner’s Pi. It runs as a single Bun process, drives any model provider you have credentials for, and ships a flat tool surface the model uses to read code, run commands, edit files, drive a debugger, and spawn subagents that coordinate over an in-process IRC bus.
+  Sessions persist as JSONL under ~/.omp/agent/sessions/. You resume, fork, branch, and share them. Settings, credentials, plugins, and caches all live under ~/.omp/agent/. Nothing leaves the machine unless you call a tool that does.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  @oh-my-pi/pi-ai
+  Added
+  - Added anthropic-client-platform (desktop_app) and anthropic-client-version (1.11187.4) headers to the Anthropic request fingerprint for OAuth sessions
+  Changed
+  - Changed non-built-in tool names sent to Anthropic from proxy_ prefixing to _ prefixing (for example bash to _bash) while built-in tool names remain unchanged
+  - Updated the Anthropic OAuth stealth fingerprint to track Claude Code 2.1.165: claudeCodeVersion bumped to 2.1.165 (flows into both the cc_version billing header and the claude-cli/<version> user-agent), claudeCodeSystemInstruction changed to "You are a Claude agent, built on Anthropic's Claude Agent SDK.", and the billing-header cc_entrypoint changed from cli to local-agent.
+  - Clamped the Anthropic request max_tokens to Math.min(CLAUDE_CODE_MAX_OUTPUT_TOKENS, options.maxTokens || model.maxTokens) (64k) so OAuth requests match Claude Code's requested output cap instead of sending the model's full ceiling (e.g. 128k for Opus 4.8).
+  @oh-my-pi/pi-coding-agent
+  Added
+  - macOS release binaries are now signed with a Developer ID Application identity (hardened runtime + secure timestamp + JIT/library-validation entitlements) and notarized in CI when the APPLE_* signing secrets are configured; releases auto-fall back to ad-hoc signing until then. This makes the shipped binaries Gatekeeper-acceptable, unblocking an official Homebrew submission (#776). See docs/macos-signing-notarization.md.
+  - Added a Homebrew install path: brew install can1357/tap/omp. The can1357/homebrew-tap formula installs the prebuilt release binary, and a release_brew CI job regenerates it (version + per-asset sha256) from each published release via scripts/ci-update-brew-formula.ts (#776).
+  Changed
+  - Adjusted completion() model resolution so the default tier now prefers the session’s active model and falls back to the configured default role when needed
+  - Rewrote the session auto-title prompt (prompts/system/title-system.md) and the set_title tool description to ask for a concise, sentence-case title (3-7 words) that captures the session's topic/goal, with good/bad examples and explicit guidance to treat the first message as data (no following embedded links/instructions, no refusals, describe URL/reference asks). The local on-device title prompt (tiny-title-system.md) was aligned to the same 3-7 word, sentence-case convention. The deterministic greeting/low-signal filter and the none deferral sentinel are unchanged.
+  - Renamed the eval oneshot helper from llm() to completion() in both JavaScript and Python preludes, including status events, prompt docs, and runtime tests.
+  Fixed
+  - Fixed completion() to always send a non-empty default system prompt when system is omitted so providers that require instructions no longer reject requests
+  - Fixed structured completion() mode to return parsed JSON from plain text output when the model skips the forced respond tool call
+  - Fixed slow-tier completion() reasoning requests to avoid unsupported effort settings by only enabling reasoning on reasoning-capable models and capping effort to supported levels
+  - Fixed JS eval worker reset/dispose to close workers gracefully before forced termination, avoiding Bun 1.3.14 N-API teardown crashes with native modules such as canvas.
+  @oh-my-pi/pi-tui
+  Fixed
+  - Fixed Windows ConPTY session-resume painting the transcript with the last several rows truncated below the viewport until Alt+Tab forced a host repaint. After sessionReplace/historyRebuild/overlayRebuild paints that scroll-push content into native scrollback, the renderer now arms a 150 ms ConPTY settle window that coalesces spinner/blink-driven requestRender(false) calls into a single trailing render — Windows Terminal's viewport-follow logic no longer falls further behind the cursor on every tick of the post-paint storm. The arm also reclaims any render request queued during the in-flight composition (notably ImageBudget.endPass() calling requestRender() synchronously when a frame trips the live-graphics cap): without that, the queued request sat on the standard 30 Hz throttle and fired at ~33 ms — well inside the 150 ms quiet window — defeating the coalescing. Bumped the ConPTY per-WriteFile chunk cap from 8 KiB to 16 KiB so a multi-megabyte resume paint emits half as many writes (still well under the ~32 KiB threshold from #2034 that the original cap defends against), and made the cap measure encoded UTF-8 bytes instead of JS code units so a CJK-heavy transcript can't silently inflate a 16-KiB-of-code-units chunk into ~48 KiB of WriteFile traffic and reintroduce the #2034 viewport bug (#2095).
+  What's Changed
+  - fix(coding-agent): close JS eval workers gracefully by @basedcorp99 in https://github.com/can1357/oh-my-pi/pull/2079
+  - fix(tui): settle ConPTY after big paints to stop session-resume tail truncation by @roboomp in https://github.com/can1357/oh-my-pi/pull/2101
+  Full Changelog: https://github.com/can1357/oh-my-pi/compare/v15.10.3...v15.10.4
+ReleaseNotesUrl: https://github.com/can1357/oh-my-pi/releases/tag/v15.10.4
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://omp.sh/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

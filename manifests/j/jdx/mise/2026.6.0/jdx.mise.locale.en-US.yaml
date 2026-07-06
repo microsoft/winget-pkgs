@@ -1,0 +1,54 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: jdx.mise
+PackageVersion: 2026.6.0
+PackageLocale: en-US
+Publisher: jdx
+PublisherUrl: https://en.dev/
+PublisherSupportUrl: https://github.com/jdx/mise
+Author: jdx
+PackageName: mise-en-place
+PackageUrl: https://mise.en.dev/
+License: MIT
+LicenseUrl: https://github.com/jdx/mise/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Jeff Dickey
+CopyrightUrl: https://github.com/jdx/mise/blob/HEAD/LICENSE
+ShortDescription: Your dev env, already prepped.
+Description: Your dev env, already prepped. One tool to manage languages, env vars, and tasks per project, reproducibly.
+Moniker: mise
+Tags:
+- cli
+- dev-tool
+- env
+- environment
+- task
+ReleaseNotes: |-
+  A focused release that wires npm into Corepack when requested, brings aqua's Windows extension handling in line with upstream, and fixes task include ordering plus a Git Bash cygdrive regression.
+  Added
+  - (npm) Ensure npm itself is managed by Corepack when node.corepack=true and node.npm_shim=false, so the Corepack-managed npm shim is enabled alongside yarn/pnpm (#10196 by @roele).
+  - (cli) New mise sponsors subcommand and a sponsor block on the docs site that lists sponsors fetched from en.dev/sponsors.json (#10182 by @jdx).
+
+  Fixed
+  - (aqua) Mirror aqua's Windows extension semantics end-to-end (#10167 by @risu729):
+    - complete_windows_ext is now tri-state — explicit true completes Windows asset/URL/file source names, explicit false leaves them alone, and an omitted value completes by default except for github_content/github_archive packages.
+    - Registry windows_ext (default .exe, .sh for github_content/github_archive) and append_ext are honored when rendering assets, URLs, and Windows install links.
+    - .exe and .jar assets are treated as already complete, existing extensions like .ps1 are preserved when format is omitted, and version dots in names like tool.1.0.0 no longer suppress Windows completion. The registry compilation cache is bumped to version 2 and will be regenerated on next use.
+  - (spm) Include provider, api_url, artifactbundle, and artifactbundle_asset in SPM lock identity so toggling between source builds and artifact bundles no longer silently reuses a stale mise.lock entry. provider is canonicalized to lowercase (default github omitted), api_url has trailing slashes trimmed, and filter_bins stays out of lock identity since it only affects which built executables are exposed (#10160 by @risu729).
+  - (bun) Improve musl detection on Linux: when the system libc preference is unset, fall back to runtime detection and treat unknown results as non-musl, fixing glibc-system installs that were incorrectly resolving to bun's musl build (#10195 by @roele).
+  - (task) Honor task_config.includes order so a local task can override a same-named git:: include. Previously a regression in #9147 combined with non-git includes being loaded before all git:: includes meant a git:: include always clobbered a same-named local task regardless of position. Includes now load in their declared order with first-wins file-task dedup, so the earlier entry in the list takes precedence uniformly across directory, toml-file, and git:: includes (#10191 by @vmaleze).
+  - (task) Honor MISE_CYGDRIVE_PREFIX for Git Bash / MSYS2, not only Cygwin. Git Bash users with a custom /etc/fstab automount root can now set the prefix to fix the converted PATH; defaults are unchanged (/c/... for Git Bash, /cygdrive/c/... for Cygwin) (#10190 by @JamBalaya56562).
+  - (completion) Rely on usage 3.4.0's usage#649 for inherited global flags so -C/--cd, -j/--jobs, and -q/--quiet are recognized before a mounted task without the broad promotion workaround. The narrowed promotion now only covers orphan-short flags -r/-S (whose root globals are long-only), and min_usage_version is bumped to 3.4 so older usage CLIs warn to upgrade instead of silently regressing (#10176 by @JamBalaya56562).
+
+  Documentation
+  - Fix the choice template function example to use named-argument syntax (#10197 by @joekrill).
+
+  New Contributors
+  - @joekrill made their first contribution in #10197
+
+  💚 Sponsor mise
+  mise is built by @jdx under en.dev — an independent studio making developer tooling (mise, aube, and more). Development is funded by sponsors.
+  If mise saves you or your team time, please consider sponsoring at en.dev. Individual and company sponsorships keep mise fast, free, and independent.
+ReleaseNotesUrl: https://github.com/jdx/mise/releases/tag/v2026.6.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
