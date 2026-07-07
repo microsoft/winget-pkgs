@@ -1,0 +1,49 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: endev.aube
+PackageVersion: 1.18.1
+PackageLocale: en-US
+Publisher: en.dev
+PublisherUrl: https://en.dev/
+PublisherSupportUrl: https://github.com/endevco/aube/discussions/categories/troubleshooting-and-bugs
+Author: en.dev
+PackageName: aube
+PackageUrl: https://aube.en.dev/
+License: MIT
+LicenseUrl: https://github.com/endevco/aube/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 en.dev inc
+CopyrightUrl: https://github.com/endevco/aube/blob/HEAD/LICENSE
+ShortDescription: A fast Node.js package manager
+Description: |-
+  aube is a package manager for Node.js projects. It uses pnpm-style isolated node_modules for fast, disk-efficient installs.
+
+  Existing projects keep their lockfile format. aube reads and writes pnpm-lock.yaml, package-lock.json, npm-shrinkwrap.json, yarn.lock, and bun.lock in place. New projects without a supported lockfile get aube-lock.yaml.
+
+  Why Try It
+  - Fast installs. Warm installs are about 8x faster than pnpm and about 5x faster than Bun in the current benchmarks. Repeat test commands run up to 35x faster than pnpm and up to 5x faster than Bun.
+  - Existing lockfiles. Reads and writes pnpm-lock.yaml, package-lock.json, npm-shrinkwrap.json, yarn.lock, and bun.lock in place.
+  - Cheap repeat commands. aubr test, aube test, and aube exec vitest auto-install when dependencies are stale, then skip that work when nothing changed. aubx uses a local binary when one is installed, or a throwaway environment for one-off tools.
+  - Less disk use. A global content-addressable store lets projects share package files instead of keeping a full copy of the same dependencies in every checkout.
+  - Secure defaults. Out of the box, exotic transitive deps are blocked, lifecycle scripts wait for approval, trust downgrades fail at resolve, and brand-new releases sit in a 24h cooling window. One paranoid: true line adds the build jail and turns the soft gates into hard fails.
+Moniker: aube
+ReleaseNotes: |-
+  A small patch release focused on install robustness: lockfiles with Git merge conflict markers now recover gracefully, aube update --global works from anywhere, and lockfile tarball URLs are verified against the registry before download.
+  Fixed
+  - (install) Regenerate conflicted lockfiles (#843 by @jdx) — When aube-lock.yaml still contains Git conflict markers (<<<<<<<, =======, >>>>>>>), install now treats it as a recoverable prefer-frozen parse failure rather than aborting. It emits the new WARN_AUBE_LOCKFILE_CONFLICT_MARKERS warning and regenerates the lockfile from package.json, so a plain aube install after a messy merge just works.
+  - (update) Support global updates (#840 by @jdx) — aube update --global (and aube update -g <pkg>) now routes through the global install directory instead of requiring a project package.json, so it works from any directory — including outside a repo. Each global install runs the normal update pipeline with --latest and exact manifest pins, then bin shims are relinked and stale executables removed. Named packages resolve by alias; unknown names fail with not globally installed. When combined with a workspace --filter, --global takes precedence and leaves workspace manifests untouched. Fixes #839.
+    aube update -g           # update every globally installed tool
+    aube update -g prettier  # update a single global tool
+
+  Security
+  - (install) Verify lockfile tarball URLs (#842 by @jdx) — When the lockfile pins an explicit registry tarball URL (e.g. lockfile-include-tarball-url=true or npm-alias entries), install now fetches per-version registry metadata and compares dist.tarball to the lockfile URL before downloading. Mismatches abort with the new ERR_AUBE_TARBALL_URL_MISMATCH (exit 34). Exact matches pass, and lockfile URLs on registry.npmjs.org are still accepted on alternative hosts when the /-/…tgz path matches, so Verdaccio and other local mirrors continue to work — but tampered paths or arbitrary hosts impersonating npm are rejected.
+
+  Changed
+  - Refresh benchmarks for v1.18.0 (#841 by @mise-en-dev) — Warm-install ratios improved from 5× to 7× vs. Bun; vs. pnpm holds steady at 9×.
+
+  💚 Sponsor aube
+  aube is part of en.dev — an independent developer-tooling studio run by @jdx, also behind mise. Work on aube is funded entirely by sponsors.
+  If aube is saving your team install time or CI minutes, please consider sponsoring at en.dev. Individual and company sponsorships are what keep the project fast, free, and independent.
+ReleaseNotesUrl: https://github.com/endevco/aube/releases/tag/v1.18.1
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

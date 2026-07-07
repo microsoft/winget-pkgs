@@ -8,11 +8,11 @@
 ###
 
 [CmdletBinding()]
-Param(
+param(
     # Manifest
     [Parameter(Position = 0, HelpMessage = 'The Manifest to install in the Sandbox.')]
     [ValidateScript({
-            if (-Not (Test-Path -Path $_)) { throw "$_ does not exist" }
+            if (-not (Test-Path -Path $_)) { throw "$_ does not exist" }
             return $true
         })]
     [String] $Manifest,
@@ -22,7 +22,8 @@ Param(
     # MapFolder
     [Parameter(HelpMessage = 'The folder to map in the Sandbox.')]
     [ValidateScript({
-            if (-Not (Test-Path -Path $_ -PathType Container)) { throw "$_ is not a folder." }
+            if (-not (Test-Path -Path $_ -PathType Container)) { throw "$_ is not a folder." }
+            if ($_ -match '[''"<>&]') { throw "MapFolder path contains forbidden characters (' `" < > &): $_" }
             return $true
         })]
     [String] $MapFolder = $pwd,
@@ -31,6 +32,41 @@ Param(
     [string] $WinGetVersion,
     # WinGetOptions
     [Parameter(HelpMessage = 'Additional options for WinGet')]
+    [ValidateScript({
+            # Parse allowed flags only from flag definition lines in winget install --help
+            # These lines start with whitespace followed by a dash (e.g., "  -h,--silent  ...")
+            if (-not (Get-Command 'winget.exe' -ErrorAction SilentlyContinue)) {
+                Write-Warning 'WinGet is not installed on the host. Skipping WinGetOptions validation.'
+                return $true
+            }
+            $helpLines = winget install --help 2>&1 | Where-Object { $_ -match '^\s+-' }
+            $allowedFlags = @()
+            foreach ($line in $helpLines) {
+                # Extract the flag portion before the description (everything up to two consecutive spaces)
+                $flagPart = ($line.Trim() -split '\s{2,}')[0]
+                $parsedTokens = $flagPart -split ',' | ForEach-Object { $_.Trim() }
+                Write-Debug "WinGetOptions: Parsed line '$($line.Trim())' -> flags: $($parsedTokens -join ', ')"
+                $allowedFlags += $parsedTokens
+            }
+            $allowedFlags = $allowedFlags | Where-Object { $_ } | Select-Object -Unique
+            if (-not $allowedFlags) {
+                throw 'Could not parse winget install flags from --help output. Ensure winget is installed.'
+            }
+            Write-Debug "WinGetOptions: Allow-list ($($allowedFlags.Count) flags): $($allowedFlags -join ', ')"
+            $tokens = $_ -split '\s+'
+            foreach ($token in $tokens) {
+                if ($token.StartsWith('-')) {
+                    $isAllowed = $token -in $allowedFlags
+                    Write-Debug "WinGetOptions: Checking token '$token' -> $(if ($isAllowed) { 'ALLOWED' } else { 'BLOCKED' })"
+                    if (-not $isAllowed) {
+                        throw "WinGetOptions contains disallowed flag: $token. Allowed flags: $($allowedFlags -join ', ')"
+                    }
+                } else {
+                    Write-Debug "WinGetOptions: Skipping value token '$token'"
+                }
+            }
+            return $true
+        })]
     [string] $WinGetOptions,
     # Switches
     [switch] $SkipManifestValidation,
@@ -165,7 +201,7 @@ function Initialize-Folder {
 ####
 function Get-Release {
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingConvertToSecureStringWithPlainText', '',
-        Justification='The standard workflow that users use with other applications requires the use of plaintext GitHub Access Tokens')]
+        Justification = 'The standard workflow that users use with other applications requires the use of plaintext GitHub Access Tokens')]
 
     param (
         [Parameter()]
@@ -183,8 +219,7 @@ function Get-Release {
         Write-Verbose 'Adding Bearer Token Authentication to Releases API Request'
         $requestParameters.Add('Authentication', 'Bearer')
         $requestParameters.Add('Token', $(ConvertTo-SecureString $GitHubToken -AsPlainText))
-    }
-    else {
+    } else {
         # No token was provided or the token has expired
         # If an invalid token was provided, an exception will have been thrown before this code is reached
         Write-Warning @"
@@ -243,8 +278,7 @@ function Get-RemoteContent {
     try {
         $downloadTask = $script:HttpClient.GetByteArrayAsync($URL)
         [System.IO.File]::WriteAllBytes($localfile.FullName, $downloadTask.Result)
-    }
-    catch {
+    } catch {
         # If the download fails, write a zero-byte file anyways
         $null | Out-File $localFile.FullName
     }
@@ -347,7 +381,7 @@ function Test-FileChecksum {
 ####
 function Test-GithubToken {
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingConvertToSecureStringWithPlainText', '',
-        Justification='The standard workflow that users use with other applications requires the use of plaintext GitHub Access Tokens')]
+        Justification = 'The standard workflow that users use with other applications requires the use of plaintext GitHub Access Tokens')]
 
     param (
         [Parameter(Mandatory = $true)]
@@ -403,7 +437,7 @@ function Test-GithubToken {
             $tokenExpirationDays = [Math]::Round($tokenExpirationDays, 2) # We don't need all the precision the system provides
 
             if ($cachedExpirationForParsing -eq [System.DateTime]::MaxValue.ToLongDateString().Trim()) {
-                Write-Verbose "The cached token contained content. It is set to never expire"
+                Write-Verbose 'The cached token contained content. It is set to never expire'
                 return $true
             }
 
@@ -416,21 +450,18 @@ function Test-GithubToken {
                 Write-Verbose 'The cached token contained content, but it could not be parsed as a date. It will be re-validated'
                 Invoke-FileCleanup -FilePaths $cachedToken.FullName
                 # Do not return anything, since the token will need to be re-validated
-            }
-            else {
+            } else {
                 Write-Verbose "The cached token contained content, but the token expired $([Math]::Abs($tokenExpirationDays)) days ago"
                 # Leave the cached token so that it doesn't throw script exceptions in the future
                 # Invoke-FileCleanup -FilePaths $cachedToken.FullName
                 return $false
             }
-        }
-        else {
+        } else {
             # Either the token was empty, or the cached token is expired. Remove the cached token so that re-validation
             # of the token will update the date the token was cached if it is still valid
             Invoke-FileCleanup -FilePaths $cachedToken.FullName
         }
-    }
-    else {
+    } else {
         Write-Verbose 'Token was not found in the cache'
     }
 
@@ -458,18 +489,18 @@ function Test-GithubToken {
     Write-Verbose 'Token validated successfully. Adding to cache'
     # Trim off any non-digit characters from the end
     # Strip off the array wrapper since it is no longer needed
-    $tokenExpiration = $tokenExpiration[0] -replace '[^0-9]+$',''
+    $tokenExpiration = $tokenExpiration[0] -replace '[^0-9]+$', ''
     # If the token doesn't expire, write a special value to the file
     if (!$tokenExpiration -or [string]::IsNullOrWhiteSpace($tokenExpiration)) {
-        Write-Debug "Token expiration was empty, setting it to maximum"
+        Write-Debug 'Token expiration was empty, setting it to maximum'
         $tokenExpiration = [System.DateTime]::MaxValue
     }
     # Try parsing the value to a datetime before storing it
-    if ([DateTime]::TryParse($tokenExpiration,[ref]$tokenExpiration)) {
+    if ([DateTime]::TryParse($tokenExpiration, [ref]$tokenExpiration)) {
         Write-Debug "Token expiration successfully parsed as DateTime ($tokenExpiration)"
     } else {
         # TryParse Failed
-        Write-Warning "Could not parse expiration date as a DateTime object. It will be set to the minimum value"
+        Write-Warning 'Could not parse expiration date as a DateTime object. It will be set to the minimum value'
         $tokenExpiration = [System.DateTime]::MinValue
     }
     # Explicitly convert to a string here to avoid implicit casting
@@ -483,7 +514,7 @@ function Test-GithubToken {
 #### Start of main script ####
 
 # Check if Windows Sandbox is enabled
-if (-Not (Get-Command 'WindowsSandbox' -ErrorAction SilentlyContinue)) {
+if (-not (Get-Command 'WindowsSandbox' -ErrorAction SilentlyContinue)) {
     Write-Error -ErrorAction Continue -Category NotInstalled -Message @'
 Windows Sandbox does not seem to be available. Check the following URL for prerequisites and further details:
 https://docs.microsoft.com/windows/security/threat-protection/windows-sandbox/windows-sandbox-overview
@@ -501,20 +532,20 @@ if (!$SkipManifestValidation -and ![String]::IsNullOrWhiteSpace($Manifest)) {
         Write-Error -Category NotInstalled 'WinGet is not installed. Manifest cannot be validated' -ErrorAction Continue
         Invoke-CleanExit -ExitCode 3
     }
-    Write-Information "--> Validating Manifest"
+    Write-Information '--> Validating Manifest'
     $validateCommandOutput =
-        & {
-            # Store current output encoding setting
-            $prevOutEnc = [Console]::OutputEncoding
-            # Set [Console]::OutputEncoding to UTF-8 since winget uses UTF-8 for output
-            [Console]::OutputEncoding = $OutputEncoding = [System.Text.Utf8Encoding]::new()
+    & {
+        # Store current output encoding setting
+        $prevOutEnc = [Console]::OutputEncoding
+        # Set [Console]::OutputEncoding to UTF-8 since winget uses UTF-8 for output
+        [Console]::OutputEncoding = $OutputEncoding = [System.Text.Utf8Encoding]::new()
 
-            winget.exe validate $Manifest
+        winget.exe validate $Manifest
 
-            # Reset the encoding to the previous values
-            [Console]::OutputEncoding = $prevOutEnc
-        }
-        switch ($LASTEXITCODE) {
+        # Reset the encoding to the previous values
+        [Console]::OutputEncoding = $prevOutEnc
+    }
+    switch ($LASTEXITCODE) {
         '-1978335191' {
             # Skip the first line and the empty last line
             $validateCommandOutput | Select-Object -Skip 1 -SkipLast 1 | ForEach-Object {
@@ -532,8 +563,12 @@ if (!$SkipManifestValidation -and ![String]::IsNullOrWhiteSpace($Manifest)) {
             Write-Warning 'Manifest validation succeeded with warnings'
             Start-Sleep -Seconds 5 # Allow the user 5 seconds to read the warnings before moving on
         }
-        Default {
-            Write-Information $validateCommandOutput.Trim() # On the success, print an empty line after the command output
+        default {
+            # Avoid writing a raw object array when `winget validate` returns multiple lines
+            $validateSuccessOutput = @($validateCommandOutput).ForEach({ $_.ToString().Trim() }).Where({ -not [String]::IsNullOrWhiteSpace($_) })
+            if ($validateSuccessOutput) {
+                Write-Information ($validateSuccessOutput -join [Environment]::NewLine)
+            }
         }
     }
 }
@@ -595,8 +630,7 @@ if ($script:AppInstallerParsedVersion -ge [System.Version]'1.9.25180') {
         Algorithm   = 'SHA256'
         SaveTo      = (Join-Path -Path $script:AppInstallerReleaseAssetsFolder -ChildPath $script:DependenciesZipFileName)
     }
-}
-else {
+} else {
     $script:DependencySource = [DependencySources]::Legacy
     # Add the VCLibs to the dependencies
     Write-Debug 'Adding VCLibs UWP to dependency list'
@@ -626,8 +660,7 @@ else {
             Algorithm   = 'SHA256'
             SaveTo      = (Join-Path -Path $script:DependenciesCacheFolder -ChildPath 'Microsoft.UI.Xaml.2.7.x64.appx')
         }
-    }
-    else {
+    } else {
         # Add Xaml 2.8 to the dependencies
         Write-Debug 'Adding Microsoft.UI.Xaml (v2.8) to dependency list'
         $script:AppInstallerDependencies += @{
@@ -684,8 +717,18 @@ foreach ($dependency in $script:AppInstallerDependencies) {
 }
 
 # Kill the active running sandbox, if it exists, otherwise the test data folder can't be removed
-Stop-NamedProcess -ProcessName 'WindowsSandboxClient'
-Stop-NamedProcess -ProcessName 'WindowsSandboxRemoteSession'
+if (Get-Command wsb -ErrorAction SilentlyContinue) {
+    $sandboxInstance = @(wsb list) | Select-Object -First 1
+    if ($sandboxInstance) {
+        wsb stop --id $sandboxInstance
+    } else {
+        Write-Verbose 'No running instance of Sandbox'
+    }
+} else {
+    Write-Debug 'wsb command was not found - terminaing any sessions by process name'
+    Stop-NamedProcess -ProcessName 'WindowsSandboxClient'
+    Stop-NamedProcess -ProcessName 'WindowsSandboxRemoteSession'
+}
 Start-Sleep -Milliseconds 5000 # Wait for the lock on the file to be released
 
 # Remove the test data folder if it exists. We will rebuild it with new test data
@@ -712,7 +755,7 @@ $script:SandboxWinGetSettings | ConvertTo-Json | Out-File -FilePath (Join-Path -
 foreach ($dependency in $script:AppInstallerDependencies) { Copy-Item -Path $dependency.SaveTo -Destination $script:TestDataFolder -ErrorAction SilentlyContinue }
 
 # Create a script file from the script parameter
-if (-Not [String]::IsNullOrWhiteSpace($Script)) {
+if (-not [String]::IsNullOrWhiteSpace($Script)) {
     Write-Verbose "Creating script file from 'Script' argument"
     $Script | Out-File -Path (Join-Path $script:TestDataFolder -ChildPath 'BoundParameterScript.ps1')
 }
@@ -759,7 +802,7 @@ try {
   } catch {
     throw "Microsoft.Winget.Client was not installed successfully"
   } finally {
-    # Check to be sure it acutally installed
+    # Check to be sure it actually installed
     if (-not(Get-Module -ListAvailable -Name Microsoft.Winget.Client)) {
       throw "Microsoft.Winget.Client was not found. Check that the Windows Package Manager PowerShell module was installed correctly."
     }
@@ -774,17 +817,55 @@ New-Item -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Policies\Associa
 New-ItemProperty -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Policies\Associations' -Name 'ModRiskFileTypes' -Type 'String' -Value '.bat;.exe;.reg;.vbs;.chm;.msi;.js;.cmd' | Out-Null
 
 Write-Host @'
-Tip: you can type 'Update-EnvironmentVariables' to update your environment variables, such as after installing a new software.
+--> Fixing slow MSI package installers
 '@
 
-Write-Host @'
+reg add "HKLM\SYSTEM\CurrentControlSet\Control\CI\Policy" /v "VerifiedAndReputablePolicyState" /t REG_DWORD /d 0 /f | Out-Null # See: https://github.com/microsoft/Windows-Sandbox/issues/68#issuecomment-2754867968
+CiTool.exe --refresh --json | Out-Null # Refreshes policy. Use json output param or else it will prompt for confirmation, even with Out-Null
 
+Write-Host @'
+--> Disabling background services
+'@
+
+# Disable Search Indexing to prevent performance issues during installation of packages with many files
+Stop-Service WSearch
+Set-Service WSearch -StartupType Disabled
+
+# Disable Superfetch since we don't need to optimize disk access patterns in a disposable environment
+Stop-Service SysMain
+Set-Service SysMain -StartupType Disabled
+
+# Disable Windows Update since it can't be used in the sandbox
+Stop-Service wuauserv
+Set-Service wuauserv -StartupType Disabled
+
+# Disable Scheduled Tasks
+schtasks /Change /TN "\Microsoft\Windows\DiskCleanup\SilentCleanup" /Disable | Out-Null
+schtasks /Change /TN "\Microsoft\Windows\Defrag\ScheduledDefrag" /Disable | Out-Null
+
+# Disable Telemetry since it isn't needed in a disposable environment
+Stop-Service DiagTrack
+Set-Service DiagTrack -StartupType Disabled
+
+# Disable the Print Spooler
+Stop-Service Spooler
+Set-Service Spooler -StartupType Disabled
+
+# Disable Edge Background Processes
+reg add "HKLM\Software\Policies\Microsoft\Edge" /v BackgroundModeEnabled /t REG_DWORD /d 0 /f | Out-Null
+
+Write-Host @'
 --> Configuring Winget
 '@
 winget settings --Enable LocalManifestFiles
 winget settings --Enable LocalArchiveMalwareScanOverride
 Get-ChildItem -Filter 'settings.json' | Copy-Item -Destination C:\Users\WDAGUtilityAccount\AppData\Local\Packages\Microsoft.DesktopAppInstaller_8wekyb3d8bbwe\LocalState\settings.json
 Set-WinHomeLocation -GeoID $($script:HostGeoID)
+
+Write-Host @'
+
+Tip: you can type 'Update-EnvironmentVariables' to update your environment variables, such as after installing a new software.
+'@
 
 `$manifestFolder = (Get-ChildItem `$pwd -Directory).Where({Get-ChildItem `$_ -Filter '*.yaml'}).FullName | Select-Object -First 1
 if (`$manifestFolder) {
@@ -827,20 +908,27 @@ Pop-Location
 # Create the WSB file
 # Although this could be done using the native XML processor, it's easier to just write the content directly as a string
 Write-Verbose 'Creating WSB file for launching the sandbox'
+$escapedTestDataFolder = [System.Security.SecurityElement]::Escape($script:TestDataFolder)
+$escapedPrimaryMappedFolder = [System.Security.SecurityElement]::Escape($script:PrimaryMappedFolder)
+$escapedSandboxWorkingDirectory = [System.Security.SecurityElement]::Escape($script:SandboxWorkingDirectory)
+$escapedSandboxBootstrapFile = [System.Security.SecurityElement]::Escape($script:SandboxBootstrapFile)
 @"
 <Configuration>
   <Networking>Enable</Networking>
   <MappedFolders>
     <MappedFolder>
-      <HostFolder>$($script:TestDataFolder)</HostFolder>
+      <HostFolder>$($escapedTestDataFolder)</HostFolder>
     </MappedFolder>
     <MappedFolder>
-      <HostFolder>$($script:PrimaryMappedFolder)</HostFolder>
+      <HostFolder>$($escapedPrimaryMappedFolder)</HostFolder>
     </MappedFolder>
   </MappedFolders>
   <LogonCommand>
-  <Command>PowerShell Start-Process PowerShell -WindowStyle Maximized -WorkingDirectory '$($script:SandboxWorkingDirectory)' -ArgumentList '-ExecutionPolicy Bypass -NoExit -NoLogo -File $($script:SandboxBootstrapFile)'</Command>
+  <Command>PowerShell Start-Process PowerShell -WindowStyle Maximized -WorkingDirectory '$($escapedSandboxWorkingDirectory)' -ArgumentList '-ExecutionPolicy Bypass -NoExit -NoLogo -File $($escapedSandboxBootstrapFile)'</Command>
   </LogonCommand>
+  <AudioInput>Disable</AudioInput>
+  <VideoInput>Disable</VideoInput>
+  <PrinterRedirection>Disable</PrinterRedirection>
 </Configuration>
 "@ | Out-File -FilePath $script:ConfigurationFile
 
@@ -860,7 +948,7 @@ Write-Information @"
     - Configuring Winget
 "@
 
-if (-Not [String]::IsNullOrWhiteSpace($Manifest)) {
+if (-not [String]::IsNullOrWhiteSpace($Manifest)) {
     Write-Information @"
       - Installing the Manifest $(Split-Path $Manifest -Leaf)
       - Refreshing environment variables
@@ -868,7 +956,7 @@ if (-Not [String]::IsNullOrWhiteSpace($Manifest)) {
 "@
 }
 
-if (-Not [String]::IsNullOrWhiteSpace($Script)) {
+if (-not [String]::IsNullOrWhiteSpace($Script)) {
     Write-Information @"
       - Running the following script: {
 $Script

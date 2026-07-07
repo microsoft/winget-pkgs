@@ -3093,7 +3093,7 @@ public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string P
 			}
 		}
 
-		public int ManifestFile(int PR = 0, string Arch = "", string OS = "", string Scope = "", int VM = 0, string clip = ""){//Gets next VM, pulls a flie from the clipboard and puts into the VM's manifest folder, then if it's the Version (.yaml) file, start the VM for validation.  
+		public int ManifestFile(int PR = 0, string Arch = "", string OS = "", string Scope = "", int VM = 0, string clip = ""){//Gets next VM, pulls a file from the clipboard and puts into the VM's manifest folder, then if it's the Version (.yaml) file, start the VM for validation.  
 			if (VM == 0){
 				VM = NextFreeVM();//.Replace("vm","");
 			}

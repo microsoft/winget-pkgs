@@ -1,0 +1,155 @@
+# Created by Anthelion using komac v2.15.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: CaddyServer.Caddy
+PackageVersion: 2.11.1
+PackageLocale: en-US
+Publisher: Stack Holdings GmbH.
+PublisherUrl: https://github.com/caddyserver
+PublisherSupportUrl: https://github.com/caddyserver/caddy/issues
+PackageName: Caddy
+PackageUrl: https://github.com/caddyserver/caddy
+License: Apache-2.0
+LicenseUrl: https://github.com/caddyserver/caddy/blob/HEAD/LICENSE
+ShortDescription: HTTP/2 web server with automatic HTTPS
+Tags:
+- acme
+- automatic-https
+- caddy
+- caddyfile
+- go
+- golang
+- hacktoberfest
+- http
+- http-server
+- http3
+- https
+- privacy
+- reverse-proxy
+- security
+- tls
+- web-server
+ReleaseNotes: |-
+  Our community is pleased to announce Caddy 2.11! Of note are new features, numerous bug fixes including several security patches, and various QoL ("quality-of-life") enhancements.
+  There are no code changes from v2.11.0 other than to a CI job. Due to a recent external change that broke our release process, the first release of 2.11 is v2.11.1.
+  Special Sponsor Shoutout
+  Extra big thanks to our major sponsors:
+  - ZeroSSL
+  - Stripe
+  - Railway
+  They, along with dozens of smaller sponsors, make this project and new releases possible, together with our maintainer team. Thank you all!
+  Notable changes
+  - Encrypted ClientHello (ECH) keys are rotated automatically.
+  - Time-rolling options for logs.
+  - SIGUSR1 can now reload configuration if it was initially loaded from a file on the command line and did not get changed via the API.
+  - Reverse proxy now automatically rewrites the Host header to the address of the upstream when the upstream is HTTPS (#7454)
+  - log_append can now log request and response bodies, useful for debugging.
+  - Our project now implements and requires Assistance Disclosures (for AI/LLMs) on issues, PRs, comments, replies, reviews, etc.
+  - Many, many other minor improvements and bug fixes.
+  Thank you to everyone who was involved this release!
+  ⚠️ Security patches
+  - fastcgi: CVE-2026-27590 by @dunglas and @AbdrrahimDahmani - Unicode case-folding length expansion causes incorrect split_path index (SCRIPT_NAME/PATH_INFO confusion) in FastCGI transport.
+  - admin: CVE-2026-27589 by @1seal - Cross-origin requests attempted with no-cors mode could cause some API requests to succeed; such requests are now blocked. (In order for this to be practically exploitable, a web browser executing a malicious web page must be running locally to a production Caddy process.)
+  - caddyhttp: CVE-2026-27588 by Asim Viladi Oglu Manizada - The Host matcher becomes case-sensitive for large host lists (>100), enabling host-based route/auth bypass.
+  - caddyhttp: CVE-2026-27587 by Asim Viladi Oglu Manizada - The Path matcher skips case normalization for escape sequences, enabling path-based route/auth bypass.
+  - caddytls: CVE-2026-27586 by @moscowchill - TLS client authentication silently fails open when CA certificate file is missing or malformed.
+  - caddyhttp: CVE-2026-27585 by @parrot409 - Improper sanitization of glob characters in file matcher may lead to bypassing security protections.
+  What's Changed
+  - caddyhttp: add replacer placeholders for escaped values by @Qusic in #7181
+  - AI assistance disclosure by @mholt in #7212
+  - caddyfile: Prevent trailing space on line before env variable - Fixes #6881 by @arpansaha13 in #7215
+  - add: encode header Content-Type graphql-response by @aro-lew in #7214
+  - caddyhttp: Removing redundant middleware next copy by @maxcelant in #7217
+  - build(deps): bump the all-updates group with 17 updates by @dependabot[bot] in #7236
+  - build(deps): bump the actions-deps group with 5 updates by @dependabot[bot] in #7237
+  - encode: fix response corruption when handle_errors is used by @Siomachkin in #7235
+  - Fix PKI creation when auto_https is disabled (#7211) by @Siomachkin in #7238
+  - logging: Buffer the logs before config is loaded by @francislavoie in #7245
+  - fileserver: set Content-Length for precompressed files by @WeidiDeng in #7251
+  - refactor: use WaitGroup.Go to simplify code by @mickychang9 in #7253
+  - caddyfile: Allow block to do nothing if nothing passed to import by @BeeJay28 in #7206
+  - logging: Adjustments to BufferedLog to keep logs in the correct order by @francislavoie in #7257
+  - caddyhttp: Prevent commas in header values from being split in CLI commands by @gilbsgilbs in #7268
+  - update quic-go to v0.54.1 by @marten-seemann in #7273
+  - chore: ugh, lint fix... by @mohammed90 in #7275
+  - caddypki: check intermediate lifetime to actual root cert lifetime by @u5surf in #7272
+  - refactor: omit unnecessary reassignment by @asttool in #7276
+  - core: use reflect.TypeFor to check for encoding/json.RawMessage by @WeidiDeng in #7274
+  - core: Reloading with SIGUSR1 if config never changed via admin by @francislavoie in #7258
+  - build(deps): bump the actions-deps group with 8 updates by @dependabot[bot] in #7284
+  - httpcaddyfile: Add missing DNS challenge check for acme_dns by @rightaditya in #7270
+  - httpcaddyfile: Map default_bind to BindHost in globalACMEDefaults by @Monviech in #7278
+  - Argon2id Support for Basic Auth by @GreyXor in #7186
+  - update quic-go to v0.55.0 by @marten-seemann in #7288
+  - reverse_proxy: use http1 for outbound tls requests with placeholder t… by @WeidiDeng in #7296
+  - caddyhttp: Add server options keepalive_idle and keepalive_count by @joshuamcbeth in #7298
+  - chore: fix some comments by @wyrapeseed in #7303
+  - logging: Switch from lumberjack to timberjack, add time-rolling options by @aeris in #7244
+  - reverseproxy: Use http1.1 upgrade for websocket for extended connect of http2 and http3. by @tonyb486 in #7305
+  - caddyhttp: Add trusted_proxies_unix for trusting unix socket X-Forwarded-* headers by @cseufert in #7265
+  - caddyhttp: wrap accepted connection to suppress tls.ConnectionState by @WeidiDeng in #7247
+  - logging: fix multiple regexp filters on same field (fixes #7049) by @s2010 in #7061
+  - intercept: use already buffered response if possible when intercepting by @WeidiDeng in #7028
+  - listeners: Add support for named socket activation by @Siomachkin in #7243
+  - reverseproxy: do not disable keepalive if proxy protocol is used by @WeidiDeng in #7300
+  - metrics: resolve per-host inifinite cardinality by @mohammed90 in #7306
+  - reverseproxy: use http.Protocols to handle h2c requests by @WeidiDeng in #6990
+  - refactor: use reflect.TypeFor by @wyrapeseed in #7313
+  - build(deps): bump the all-updates group across 1 directory with 2 updates by @dependabot[bot] in #7307
+  - build(deps): bump github.com/slackhq/nebula from 1.9.5 to 1.9.7 by @dependabot[bot] in #7315
+  - feat: switch to autoexport for OpenTelemetry span exporter by @PKeidel in #7317
+  - reverse_proxy: set default values for keepalive if only some of them are set by @WeidiDeng in #7318
+  - fix quote within quotes formatted incorrectly by fmt by @keystroke3 in #7045
+  - caddytls: correct documentation of LeafFolderLoader by @mohammed90 in #7327
+  - fix golangci-lint error G602 in caddyhttp by @cdenicola in #7334
+  - feat: allow customizing the Server header by @dunglas in #7338
+  - update quic-go to v0.56.0, enable qlog for HTTP/3 by @marten-seemann in #7345
+  - build(deps): bump the all-updates group with 4 updates by @dependabot[bot] in #7333
+  - feat: custom slog handlers for modules (log contextual data) by @dunglas in #7346
+  - ci: implement new release flow by @mohammed90 in #7341
+  - reverse_proxy: use interfaces to modify the behaviors of the transports by @WeidiDeng in #7353
+  - build(deps): bump golang.org/x/crypto from 0.43.0 to 0.45.0 by @dependabot[bot] in #7355
+  - update quic-go to v0.57.0 by @marten-seemann in #7359
+  - refactor: replace HasSuffix+TrimSuffix with CutSuffix by @ledigang in #7357
+  - Fix retries for requests with bodies by @chebyrash in #7360
+  - build(deps): bump the all-updates group with 3 updates by @dependabot[bot] in #7376
+  - ci: escape backticks in changelogs embedded in JS by @mohammed90 in #7382
+  - build(deps): bump github.com/smallstep/certificates from 0.28.4 to 0.29.0 by @dependabot[bot] in #7381
+  - caddypki: Add support for multiple intermediates in signing chain by @hslatman in #7057
+  - caddyhttp: Fix logging on wildcard sites when SkipUnmappedHosts is true by @francislavoie in #7372
+  - multiplexing: Introduce packet conn wrappers by @vnxme in #7180
+  - docs: add maybe template function documentation by @steffenbusch in #7388
+  - caddyhttp: create a placeholder for and log ech status by @WeidiDeng in #7328
+  - caddytls: fix preferred chains options by appending values instead of replacing by @okrc in #7387
+  - feat: mark Assert* functions as test helpers by @dunglas in #7380
+  - caddytls: ECH key rotation by @mholt in #7356
+  - caddytls: panic when using tls.ca_pool.source.http -> tls.ca by @Zenexer in #7393
+  - notify: implement windows service status and error notifications by @FreyreCorona in #7389
+  - caddyhttp: {http.request.body_base64} placeholder by @francislavoie in #7367
+  - chore: update tscert package to latest (aea342f6) by @willnorris in #7397
+  - logging: log_append Early option, Supports {http.response.body} by @francislavoie in #7368
+  - update quic-go to v0.58.0 by @marten-seemann in #7404
+  - cmd: add --json flag to list-modules by @pauloappbr in #7409
+  - Add span attributes to tracing module by @felix-hilden in #7269
+  - readme: fix fence by @mohammed90 in #7416
+  - build(deps): bump the all-updates group across 1 directory with 12 updates by @dependabot[bot] in #7421
+  - reverseproxy: make error chan bigger when reverse proxying websocket by @WeidiDeng in #7419
+  - headers: Make ApplyTo nil-safe by @tpaulus in #7426
+  - chore: Dumb prealloc lint fix by @francislavoie in #7430
+  - update quic-go to v0.59.0 by @marten-seemann in #7431
+  - reverseproxy: Avoid returning error if remote address is not an IP by @pauloappbr in #7429
+  - caddyfile: Fix indentation of multiline strings in fmt (#7425) by @pauloappbr in #7433
+  - core: Embed time/tzdata by @francislavoie in #7432
+  - caddyfile: add observe_catchall_hosts option by @mohammed90 in #7434
+  - core: Show JSON error offsets where possible by @francislavoie in #7437
+  - autohttps: deterministic logic and strict bind checking on Linux by @pauloappbr in #7435
+  - reverseproxy: Set Host to {upstream_hostport} automatically if TLS by @francislavoie in #7454
+  - reverseproxy: fix X-Forwarded-* headers for Unix socket requests by @XYenon in #7463
+  - chore: use math/rand/v2 instead of math/rand by @WeidiDeng in #7413
+  - chore: bump Go to v1.26 by @francislavoie in #7466
+  - acmeserver: warn when policy rules unset by @1seal in #7469
+  - caddytls: Return errors instead of nil in client auth provisioning by @moscowchill in #7464
+  - fix(deps): update nebula v1.10.3 to resolve cve by @omercnet in #7471
+ReleaseNotesUrl: https://github.com/caddyserver/caddy/releases/tag/v2.11.1
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,46 @@
+# Created with komac v2.15.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: jdx.mise
+PackageVersion: 2026.2.10
+PackageLocale: en-US
+Publisher: jdx
+PublisherUrl: https://jdx.dev/
+PublisherSupportUrl: https://github.com/jdx/mise
+Author: jdx
+PackageName: mise-en-place
+PackageUrl: https://mise.jdx.dev/
+License: MIT
+LicenseUrl: https://github.com/jdx/mise/blob/HEAD/LICENSE
+ShortDescription: Dev tools, env vars, tasks
+Moniker: mise
+ReleaseNotes: |-
+  This release brings several quality-of-life features alongside a solid round of bug fixes.
+  Highlights
+  - Shims as PATH fallback during activation — When not_found_auto_install is enabled (the default), mise now adds the shims directory to your PATH as a fallback. This fixes a subtle issue where subshells or child processes could miss uninstalled tools or pick up the wrong system version instead of the mise-managed one. Thanks @ctaintor for this contribution! #8106
+  - tools variable in Tera templates — You can now reference {{ tools.node.version }} and {{ tools.node.path }} directly in env templates and task templates (with tools = true), eliminating the need for exec(command='node --version') workarounds. #8108 — Template docs
+  - mise set --stdin for multiline values — Need to set an SSH key, certificate, or other multiline value as an environment variable? mise set --stdin MY_KEY now reads from stdin until EOF. #8110
+  Bug Fixes
+  - MISE_OFFLINE now works correctly — Previously, offline mode could hang or error out instead of gracefully falling back to local data. This is now fixed, and offline/prefer_offline are proper settings configurable in mise.toml. #8109
+  - Upgrade symlink cleanup — Fixed an issue where mise upgrade could leave behind invalid symlinks when uninstalling old versions, thanks @roele. #8099 #8101
+  - Conda dependency resolution — Improved patchelf handling and dependency version pinning for complex conda packages on Linux. #8087
+  - SLSA provenance for Docker Buildx — Tools like github:docker/buildx that ship in-toto statements without sigstore signatures no longer fail verification, thanks @gerhard. #8094
+  - Vfox plugin auto-installation — Fixed a clean-setup failure where vfox-backed env modules would error with "Plugin directory not found" before the plugin was installed, thanks @pose. #8035
+  - GitHub latest version prefix — The v prefix is no longer incorrectly added when resolving "latest" for GitHub release backends. #8105
+  - GitLab tool options — Tool options from config are now correctly resolved for aliased GitLab tools. #8084
+  - Flutter version resolution — Fixed version resolution by using version_expr. #8081
+  - Tuist on Linux — Registry now includes Linux support for tuist, thanks @fortmarek. #8102
+  Registry
+  - Added conda backends for mysql, ffmpeg, ghc, vim, and several other previously asdf-only tools. #8080 #8083
+  - Added podman-tui, thanks @tony-sol. #8098
+  New Contributors
+  Welcome @ctaintor, @rileychh, @fortmarek, @pose, and @gerhard — thanks for your first contributions!
+  📦 Aqua Registry Updates
+  New Packages (2)
+  - entireio/cli
+  - rmitchellscott/reManager
+  Updated Packages (1)
+  - atuinsh/atuin
+ReleaseNotesUrl: https://github.com/jdx/mise/releases/tag/v2026.2.10
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

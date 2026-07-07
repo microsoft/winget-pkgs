@@ -1,0 +1,59 @@
+# Created with Devicie using komac v2.15.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: ArianesLine.Ariane
+PackageVersion: 26.2.0
+PackageLocale: en-US
+Publisher: Ariane's Line
+PublisherUrl: https://github.com/Ariane-s-Line
+PublisherSupportUrl: https://github.com/Ariane-s-Line/Ariane-Release/issues
+PackageName: Ariane
+PackageUrl: https://github.com/Ariane-s-Line/Ariane-Release
+License: Copyright (c) Sebastien Kister - Ariane's Line. All rights reserved.
+ShortDescription: Ariane cave survey software
+ReleaseNotes: |-
+  Release Notes - Ariane v26.2.0
+  This release introduces the Remote Threshold line drawing mode with start station selection, parallel line rendering for improved map performance, new Polar Least Squares loop closure implementations (both native Rust and CUDA-accelerated), and major enhancements to the 3D map rendering.
+  New Features
+  - Polar Least Squares Loop Closure:
+    - Implemented Polar Least Squares (PLS) loop closure in both a Rust-native path and a pure-Java fallback path.
+    - PLS adjusts edge azimuths and lengths directly (polar coordinates) rather than Cartesian vertex positions, producing minimum-norm corrections weighted by measurement variances.
+    - Z coordinates are preserved from pressure-sensor readings in both solver paths; the PLS correction is 2D horizontal only.
+    - Implemented a new CUDA-accelerated Polar Least Squares solver for blazing-fast loop closure on supported GPUs.
+    - Optimized the CUDA solver by restructuring the iterative calculations and caching trigonometric edge derivatives.
+    - see Ghilani, C.D. & Wolf, P.R. (2012). Adjustment Computations: Spatial Data Analysis (6th ed.). Wiley. Wiley Online Books — The canonical reference for the Conditional Adjustment (Method of Correlates), including the Lagrange multiplier formulation $S\lambda = w$, $v = W^{-1}A^T\lambda$
+  - Remote Threshold Line Drawing Mode:
+    - New map display mode that colors survey lines based on a remoteness distance threshold, distinguishing remote segments (red) from near-exit segments (blue).
+    - Added a start station selector allowing users to compute distance from a specific start station, or from all exits (default empty entry).
+    - Integrated threshold slider and text field for interactive adjustment of the remoteness cutoff value.
+  - Enhanced 3D Map Rendering:
+    - Significantly improved 3D drawing logic for smoother tab switching and added precise camera centering functionality.
+    - Increased shape divisions for all graphical elements to produce much higher quality 3D shape rendering.
+    - Unified shadow placement for stations, lines, and corridors.
+    - Added mouse event handling for interactive station selection in the 3D view.
+  - Parallel Line Rendering:
+    - Refactored line rendering to compute coordinates in parallel using Java streams, while keeping JavaFX node creation sequential for thread safety.
+    - Significant rendering speed improvement on multi-core systems for large cave datasets.
+  - Privacy & Data Policy:
+    - Included a comprehensive Privacy and Data Usage Policy.
+    - Added a directly accessible "Data Usage Policy" button in the About Box that displays the policy with nicely formatted HTML and markdown tables.
+  Improvements & Fixes
+  - Features & UI:
+    - Added color normalization and naming utilities to properly filter and display named colors in the Data Table.
+    - Simplified task execution calls in the DisplayToolController.
+  - Performance & Core:
+    - Added a new JFR (Java Flight Recorder) analysis tool along with automated integration tests for detailed application profiling.
+    - Fixed lock leaks in MapController coordinate computation and simplified stroke assignment logic.
+    - Added demo data support for big data mode testing.
+  - Polar Least Squares Refinements:
+    - Fixed handling of start stations in Polar LS reconstruction to prevent solver divergence.
+    - Preserved original Z position from pressure sensor in vertex updates.
+    - Extracted BFS spanning tree and cycle building logic into a separate method for improved readability.
+    - Fixed FFI native solver initialization, cycle data offset calculations, and improved boundary safety.
+  Documentation
+  - Added new cave data files for loop traversal and simple loop structure testing.
+  - Updated loop closure methods documentation.
+  - Added Polar Least Squares integration tests and visual comparison tests.
+ReleaseNotesUrl: https://github.com/Ariane-s-Line/Ariane-Release/releases/tag/26.2.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

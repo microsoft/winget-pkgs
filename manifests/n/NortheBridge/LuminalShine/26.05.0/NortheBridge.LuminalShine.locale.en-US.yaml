@@ -1,0 +1,61 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: NortheBridge.LuminalShine
+PackageVersion: 26.05.0
+PackageLocale: en-US
+Publisher: NortheBridge Foundation
+PublisherUrl: https://github.com/NortheBridge
+PublisherSupportUrl: https://gitdocs.northebridge.com/
+Author: NortheBridge Foundation
+PackageName: LuminalShine
+PackageUrl: https://github.com/NortheBridge/luminalshine
+License: GPL-3.0
+LicenseUrl: https://github.com/NortheBridge/luminalshine/blob/HEAD/LICENSE
+Copyright: Copyright (c) NortheBridge Foundation
+ShortDescription: A Modern Self-hosted High Performance Sunshine-compatible game stream host for Moonlight designed for Windows 11 and Windows 11 Insider Preview. Maintained by the NortheBridge Foundation.
+Description: Modern Self-Hosted High Performance Sunshine-compatible game streaming host for Moonlight clients designed for Windows 11 and Windows 11 Insider Preview.
+Moniker: luminalshine
+Tags:
+- amdgpu
+- blackwell-gpu
+- contributions-welcome
+- contributors-welcome
+- cpp
+- game-stream
+- game-streaming
+- game-streaming-server
+- geforce-experience
+- intelgpu
+- moonlight
+- nvidia-gpu
+- python
+- remote-desktop
+- windows-insiders
+- windows11
+ReleaseNotes: |-
+  LuminalShine 26.05.0 Update Beta 7
+  Tip
+  This is the final Beta version before we enter the Release Candidate Stage.
+  Important
+  Update to this version as soon as possible. It resolves a critical bug with pairings not being retained by LuminalShine.
+  General
+  - Pairings now persist through a corrupted state file. nvhttp::save_state previously short-circuited and returned the moment it couldn't parse the existing sunshine_state.json — which meant that on a broken install, every new pair was silently dropped before the atomic write and the rotating .bak had a chance to fire. The save path now flows through the same recovery-aware loader as the read path: if both the primary and .bak are unusable, an empty tree is used and the corrupt file is overwritten with valid new content. New pairings stick.
+  - Stacked brand-mark in the navigation header. The web UI's top-left identity block now stacks "LuminalShine" over "NortheBridge Foundation" in the gitdocs.northebridge.com type style, with the Sunshine logo on the left wearing a soft cyan halo. Product name leads; foundation attribution stays visible without dominating the nav.
+  - "Reset Stored Pairings" escape hatch in Troubleshooting. New POST /api/state/reset endpoint (auth-gated) and matching button in the Troubleshooting view. Archives the current sunshine_state.json, luminalshine_state.json, and their .bak siblings to .corrupt-<UTC-timestamp> (kept on disk for forensics), clears in-memory pairings, generates a new host UUID, and writes a fresh empty state. Admin credentials are NOT touched — login survives the reset. Use this when the auto-recovery paths can't resolve a corruption on their own.
+  Windows 11 General Availability
+  - Upgrades no longer race the running service. The installer now stops the LuminalShine service unconditionally on every upgrade and repair, not just on basic/silent (UILevel < 5) installs. The previous gating meant interactive upgrades had to rely on Windows Restart Manager to detect file-in-use, which is unreliable when Defender holds a scan handle on sunshine.exe. The result was sporadic "Access Denied" rollbacks of the whole MSI transaction, leaving LuminalShine in an unusable state.
+  - Service stop retries with backoff. The PowerShell stop block retries Stop-Service up to 5 times with 1-second backoff so transient Stopping states from SCM can't leak past file replacement. The companion process kill list now also includes sunshine_display_helper and display_helper, both of which were observed holding sunshine_*.dll open across upgrades.
+  - Migration failures can no longer roll back an install. RunInstallerMigrations is now flagged Return="ignore", so a best-effort config migration that hits a sharing violation or transient error never tears down the MSI transaction. The C++ runtime carries the same migration logic as a safety net on first launch.
+  - Runtime migration refuses to import corrupt JSON. platf::appdata() now validates each *.json file before copying it from the legacy <INSTALL_ROOT>\config\ directory into %ProgramData%\LuminalShine\config\. Zero-byte and unparseable files are skipped with a Warning: appdata: skipping unparseable JSON during migration: ... log line, so a corrupt state file from a previous broken install doesn't propagate into the new location.
+  - Self-heal for a stuck install. When sunshine_state.json exists at exactly zero bytes AND no .bak is present, LuminalShine now deletes the empty file on startup so the next save can write cleanly. Targets the exact stuck signature produced by the previous beta's silent-abort bug — no manual elevation or File Explorer surgery needed.
+  - Visible migration diagnostics. Every std::filesystem::copy failure (Access Denied, sharing violation, antivirus quarantine, disk full) is now logged through BOOST_LOG instead of being silently swallowed. The installer's PowerShell migration script also tees its full output to %TEMP%\luminalshine-installer-migration.log so the next install incident is diagnosable from a single file.
+  Windows 11 Insider Preview
+  - Interactive-UI upgrades on Insider Preview no longer hit "Access Denied" during the install routine. The combination of the unconditional service stop, the retry/backoff loop, the broadened process kill list, and the non-fatal migration flag closes the exact MSI rollback path that left LuminalShine in an unusable state on flight upgrades. The fix is concentrated at the points where Insider Preview servicing and Defender are most likely to be holding scan handles or staged-file replacements: just before InstallFiles, and around RunInstallerMigrations.
+  - Corrupt state files from a prior broken upgrade no longer follow you forward. Earlier flight cycles could leave a zero-byte sunshine_state.json in C:\Program Files\Sunshine\config\ that the installer would faithfully copy into the new %ProgramData%\LuminalShine\config\ location. The runtime migration now validates each JSON file before copying — and if a previous install already deposited an empty file at the new location, the self-heal on next launch removes it so the first new pair can write a clean state plus a fresh .bak.
+  - The previously-stuck installation self-recovers on first launch. No manual cleanup is required: the empty sunshine_state.json is removed, the next pair attempt writes valid state, the .bak chain finally bootstraps, and every subsequent boot is protected by the recovery loader. If anything else ever wedges it again, the new "Reset Stored Pairings" button in Troubleshooting is the manual lever.
+  Automated release for 26.05.0-beta.7.
+  Full Changelog: 26.05.0-beta.6...26.05.0-beta.7
+ReleaseNotesUrl: https://github.com/NortheBridge/luminalshine/releases/tag/26.05.0-beta.7
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
