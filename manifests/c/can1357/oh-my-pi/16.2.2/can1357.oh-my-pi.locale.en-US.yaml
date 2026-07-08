@@ -1,0 +1,86 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: can1357.oh-my-pi
+PackageVersion: 16.2.2
+PackageLocale: en-US
+Publisher: Can Bölük
+PublisherUrl: https://can.ac/
+PublisherSupportUrl: https://github.com/can1357/oh-my-pi/issues
+Author: Can Bölük
+PackageName: oh-my-pi
+PackageUrl: https://omp.sh/
+License: MIT
+LicenseUrl: https://github.com/can1357/oh-my-pi/blob/HEAD/LICENSE
+Copyright: |-
+  Copyright (c) 2025 Mario Zechner
+  Copyright (c) 2025-2026 Can Bölük
+ShortDescription: ⌥ AI Coding agent for the terminal — hash-anchored edits, optimized tool harness, LSP, Python, browser, subagents, and more
+Description: |-
+  omp is a terminal-first coding agent that runs on your machine, talks to any provider, and treats sessions like git branches.
+  omp (pronounced “oh-em-pi”, binary omp) is a fork of Mario Zechner’s Pi. It runs as a single Bun process, drives any model provider you have credentials for, and ships a flat tool surface the model uses to read code, run commands, edit files, drive a debugger, and spawn subagents that coordinate over an in-process IRC bus.
+  Sessions persist as JSONL under ~/.omp/agent/sessions/. You resume, fork, branch, and share them. Settings, credentials, plugins, and caches all live under ~/.omp/agent/. Nothing leaves the machine unless you call a tool that does.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  @oh-my-pi/pi-agent-core
+  Added
+  - Added optional AgentTool.matcherPaths(args) and AgentTool.matcherEntries(args) hooks to allow tools to surface target file paths and isolate file evaluations for path-scoped stream matchers (e.g., when handling multi-file payloads or embedded paths in streamed arguments).
+  Removed
+  - Removed support for Pi dialect integration.
+  @oh-my-pi/pi-ai
+  Added
+  - Added a comprehensive, public-facing error module exported via the "./error" path, featuring structured error classification, provider-specific HTTP error classes (e.g., Anthropic, OpenAI, Gemini), OAuth/Auth-specific errors, rate-limit utilities, and retryability predicates.
+  Changed
+  - Updated OpenAI Codex defaults to increase default text verbosity to medium, enable detailed reasoning summaries by default, and include all turns in the reasoning context by default.
+  - Updated the OpenAI Codex WebSocket transport to resolve its configuration (via PI_CODEX_WEBSOCKET_* environment variables) once at startup rather than re-parsing on every request.
+  - Enhanced cross-model reasoning recovery and preservation to render demoted reasoning in the target model's canonical inline thinking dialect (such as Gemini's thinking fence or standard think tags) to prevent leaking inert context or control tokens into history.
+  - Broadened the leaked-thinking stream healer to recover reasoning emitted in any dialect's canonical idiom (including Gemini, Gemma, Harmony, and scratchpads) and route them to thinking events instead of raw markup.
+  - Implemented automatic retry logic for detected thinking-loop stalls to improve response reliability.
+  - Hardened stateful delta chaining to ignore transient streaming bookkeeping symbols during structural equality checks, preventing unnecessary full-transcript replays.
+  Fixed
+  - Fixed preservation of OpenAI Responses assistant message phase values across auth-gateway parsing, streaming, and history replay, ensuring GPT-5.4/GPT-5.5 intermediate updates and final answers retain their original phase labels.
+  Removed
+  - Removed Pi dialect support and related serialization/parsing logic.
+  @oh-my-pi/pi-catalog
+  Removed
+  - Removed 'pi' from the list of supported dialects.
+  @oh-my-pi/pi-coding-agent
+  Added
+  - Added a new tiny model role for consolidated online task handling.
+  - Added a textVerbosity setting to control OpenAI and Codex response detail.
+  Changed
+  - Simplified the status line subagent display by removing running state and hub hint indicators.
+  - Updated online title, memory, and classification tasks to prioritize the new tiny model role.
+  Fixed
+  - Improved reliability of auto-retry logic for aborted requests by standardizing error classification across model adapters and ensuring stale session states are reset.
+  - Enhanced MCP authentication error detection, header-based server discovery, and 401/403 authorization failure detection during Smithery commands and HTTP RPCs.
+  - Fixed auto-generated session titles incorrectly preserving user all-caps text, ensuring proper sentence casing while still respecting intentional mixed-case identifiers.
+  - Fixed Tavily web search with recency filters to automatically retry without a time range if Tavily returns an empty HTTP 200 response.
+  - Fixed TUI thought stream stalling and ui.loop-blocked warnings during subagent-heavy runs by optimizing the mid-run compaction persistence check.
+  - Fixed marketplace-installed plugins incorrectly appearing in both the npm plugin list and the extension-package status provider.
+  - Fixed inconsistent OpenRouter prompt-cache hits on /advisor turns by ensuring advisor agents inherit the same provider-shaping options, hooks, and settings as the main agent.
+  - Fixed path-scoped TTSR (Targeted Tool Safety Rules) evaluation for hashline and apply_patch edit streams, ensuring rules are correctly applied to file paths parsed from section headers and envelope markers without leaking across file scopes.
+  @oh-my-pi/pi-mnemopi
+  Fixed
+  - Improved resilience during API extraction calls by enhancing the handling of rate limits and transient errors.
+  What's Changed
+  - fix(coding-agent): hide marketplace plugins from duplicate plugin lists by @roboomp in https://github.com/can1357/oh-my-pi/pull/3630
+  - fix(agent-session): cut mid-run persistence check from O(n²) to O(n) to unfreeze TUI thought stream by @roboomp in https://github.com/can1357/oh-my-pi/pull/3631
+  - fix(web-search): retry empty Tavily recency results by @roboomp in https://github.com/can1357/oh-my-pi/pull/3636
+  - fix(coding-agent): route hashline + apply_patch edit paths into TTSR by @roboomp in https://github.com/can1357/oh-my-pi/pull/3648
+  Full Changelog: https://github.com/can1357/oh-my-pi/compare/v16.2.1...v16.2.2
+ReleaseNotesUrl: https://github.com/can1357/oh-my-pi/releases/tag/v16.2.2
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://omp.sh/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
