@@ -691,11 +691,17 @@ ManifestVersion: 1.12.0
 </details>
 
 <details>
-  <summary><b>ElevationRequirement</b> - Indicator for elevation requirements when installing or upgrading packages.</summary>
+  <summary><b>ElevationRequirement</b> - Indicator for elevation behavior when installing or upgrading packages.</summary>
 
   **Optional Field**
 
-  This key represents which scope a package is required to be executed under. Some packages require user level execution while others require administrative level execution.
+  This key describes how the installer interacts with elevation (administrator privileges). It tells WinGet whether to request elevation on the user's behalf, whether the installer handles elevation itself, or whether elevation must be avoided entirely.
+
+  - **elevationRequired** — The installer always requires administrator privileges to complete (e.g., it writes to `Program Files`, modifies system registry keys, or installs a Windows service). If WinGet is running in a non-elevated context, it will launch the installer elevated via a UAC prompt.
+  - **elevatesSelf** — The installer contains its own logic to determine whether elevation is needed and will request it when necessary. For example, the installer may check whether the current user is a member of the local Administrators group and automatically switch between a per-user and machine-wide installation. WinGet will not elevate the installer itself but will warn the user that a UAC prompt may appear.
+  - **elevationProhibited** — The installer must not be run from an elevated (administrator) context. If WinGet is running elevated, the installation will be blocked.
+
+  > **Choosing between `elevationRequired` and `elevatesSelf`:** Use `elevationRequired` when the installer unconditionally needs administrator privileges due to what it installs (protected file locations, HKLM registry, system services). Use `elevatesSelf` when the installer has built-in logic that conditionally decides whether elevation is needed based on runtime checks.
 </details>
 
 <details>

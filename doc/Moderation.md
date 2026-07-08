@@ -15,15 +15,12 @@ Our intent was not to introduce a numbers game for others to achieve and automat
 | **[@AmelBawa-msft](https://github.com/AmelBawa-msft)** |
 | **[@denelon](https://github.com/denelon)** |
 | **[@dkbennett](https://github.com/dkbennett)** |
-| **[@erinpwoo](https://github.com/erinpwoo)** |
 | **[@florelis](https://github.com/florelis)** |
 | **[@hackean-msft](https://github.com/hackean-msft)** |
 | **[@JohnMcPMS](https://github.com/JohnMcPMS)** |
-| **[@KevinLaMS](https://github.com/KevinLaMS)** |
 | **[@Madhusudhan-MSFT](https://github.com/Madhusudhan-MSFT)** |
 | **[@msftrubengu](https://github.com/msftrubengu)** |
 | **[@ranm-msft](https://github.com/ranm-msft)** |
-| **[@RDMacLachlan](https://github.com/RDMacLachlan)** |
 | **[@stephengillie](https://github.com/stephengillie)** |
 | **[@yao-msft](https://github.com/yao-msft)** |
 
@@ -32,12 +29,19 @@ Our intent was not to introduce a numbers game for others to achieve and automat
 | **[@ImJoakim](https://github.com/ImJoakim)** |
 | **[@ItzLevvie](https://github.com/ItzLevvie)** |
 | **[@jedieaston](https://github.com/jedieaston)** |
-| **[@KaranKad](https://github.com/KaranKad)** |
 | **[@mdanish-kh](https://github.com/mdanish-kh)** |
-| **[@OfficialEsco](https://github.com/OfficialEsco)** |
-| **[@quhxl](https://github.com/quhxl)** |
 | **[@russellbanks](https://github.com/russellbanks)** |
 | **[@Trenly](https://github.com/Trenly)** |
+
+## Emeritus Moderators
+
+We are grateful to the following community members for their service as moderators. Their contributions helped shape the Windows Package Manager community repository, and we thank them for their dedication and the time they gave to support contributors. Emeritus moderators are always welcome to return as active moderators on request.
+
+| Emeritus Moderators |
+| ------------------- |
+| **[@KaranKad](https://github.com/KaranKad)** |
+| **[@OfficialEsco](https://github.com/OfficialEsco)** |
+| **[@quhxl](https://github.com/quhxl)** |
 
 # Information for Contributors
 
@@ -79,6 +83,23 @@ Matrix Room Alias (for all other homeservers): `#Microsoft_winget-pkgs:gitter.im
 ## Expectations
 
 Moderators are expected to continue behaving in a manner consistent with what led to their nomination. In addition, they are given the ability to approve PRs for manifests. This should not be seen as the goal, however. The goal is to help ensure high-quality manifests and to help the community with package submission. They may request to discontinue this responsibility at any time and for any reason, and it will be honored.
+
+### Maintaining Moderator Status
+
+Moderator status reflects ongoing, active participation in the project. A moderator is considered active if they have reviewed at least ten (10) pull requests covering at least ten (10) different packages within the trailing twelve (12) months.
+
+The core team periodically reviews moderators who fall below this activity bar. Removal is not automatic; each case is considered individually so that context — such as a temporary break or contributions in other areas of the project — can be taken into account. When a moderator is removed for inactivity, it is not a reflection on the quality of their past contributions, which remain appreciated.
+
+Activity in other Windows Package Manager repositories may also be taken into consideration during this review, including:
+
+* [winget-cli](https://github.com/microsoft/winget-cli) — the WinGet client (CLI, PowerShell modules, and COM API)
+* [winget-cli-restsource](https://github.com/microsoft/winget-cli-restsource) — reference implementation for a REST-based winget package source
+* [winget-command-not-found](https://github.com/microsoft/winget-command-not-found) — PowerShell 7 module that recommends packages for unrecognized commands
+* [winget-create](https://github.com/microsoft/winget-create) — the Windows Package Manager Manifest Creator (`wingetcreate`)
+* [winget-dsc](https://github.com/microsoft/winget-dsc) — WinGet DSC resources and sample configurations
+* [winget-studio](https://github.com/microsoft/winget-studio) — WinGet Studio
+
+A moderator who has been removed for inactivity and later wishes to resume may be reinstated on request, at the discretion of the core team, without going through the nomination process again.
 
 ### Reviewing Pull Requests
 

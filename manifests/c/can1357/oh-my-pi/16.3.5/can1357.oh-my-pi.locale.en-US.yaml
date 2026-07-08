@@ -1,0 +1,79 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: can1357.oh-my-pi
+PackageVersion: 16.3.5
+PackageLocale: en-US
+Publisher: Can Bölük
+PublisherUrl: https://can.ac/
+PublisherSupportUrl: https://github.com/can1357/oh-my-pi/issues
+Author: Can Bölük
+PackageName: oh-my-pi
+PackageUrl: https://omp.sh/
+License: MIT
+LicenseUrl: https://github.com/can1357/oh-my-pi/blob/HEAD/LICENSE
+Copyright: |-
+  Copyright (c) 2025 Mario Zechner
+  Copyright (c) 2025-2026 Can Bölük
+ShortDescription: ⌥ AI Coding agent for the terminal — hash-anchored edits, optimized tool harness, LSP, Python, browser, subagents, and more
+Description: |-
+  omp is a terminal-first coding agent that runs on your machine, talks to any provider, and treats sessions like git branches.
+  omp (pronounced “oh-em-pi”, binary omp) is a fork of Mario Zechner’s Pi. It runs as a single Bun process, drives any model provider you have credentials for, and ships a flat tool surface the model uses to read code, run commands, edit files, drive a debugger, and spawn subagents that coordinate over an in-process IRC bus.
+  Sessions persist as JSONL under ~/.omp/agent/sessions/. You resume, fork, branch, and share them. Settings, credentials, plugins, and caches all live under ~/.omp/agent/. Nothing leaves the machine unless you call a tool that does.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  @oh-my-pi/pi-ai
+  Added
+  - OAuthCallbackFlow now serves a GET /launch route on its loopback callback server that 302-redirects to the pending authorization URL, and exposes that short URL as OAuthAuthInfo.launchUrl. UIs can advertise it as a truncation-safe copy target (~30 chars) instead of the full authorize URL, so terminals narrower than the composed row cannot silently drop OAuth query parameters like code_challenge_method=S256 (#4418).
+  - Preserved explicit tool.strict === false on OpenAI-family function tool payloads (openai-responses, openai-codex-responses, openai-completions) so backends that distinguish strict: false from an omitted flag stop over-filling optional arguments (#4336).
+  Fixed
+  - Fixed tool-call validation to strip stray trailing line terminators on schema-matching enum values and on well-known identifier fields (path, paths, file, file_path, url, uri, title, label) before dispatch, keeping ordinary trailing spaces and content-carrying fields (content, input, code, command, etc.) intact (#4461).
+  @oh-my-pi/pi-coding-agent
+  Fixed
+  - Fixed Mnemopi auto-retention so protocol markers are stripped from embedding and FTS projections while stored transcripts remain readable. (#4395)
+  - Fixed mnemopi auto-retain storing cumulative full-session transcripts on every retention interval; subsequent retains now store only newly completed user-turn suffixes. (#4396)
+  - Fixed large artifact:// reads materializing entire MCP/tool artifacts before selector paging, preventing OOM crashes on unbounded raw reads and surfacing bounded read/search/copy guidance (#4482).
+  - Fixed /mcp reauth and /mcp add dropping OAuth scopes advertised via WWW-Authenticate: Bearer scope="..." challenges and via protected-resource metadata (scopes_supported / scopes / scope), which caused tokens to be issued without the required scopes and reconnects to fail with insufficient_scope (#4467)
+  - Fixed task-branch merges aborting the whole cherry-pick range when a single commit was empty against HEAD (redundant with an already-applied change, or 3-way merged to HEAD); the sequencer now --skips the empty commit and continues so later non-overlapping work still lands (#4438).
+  - Fixed write/edit LSP diagnostics for TypeScript files outside any project root by suppressing project-resolution noise while preserving real syntax errors (#4401).
+  - Fixed /mcp reauth against S256-only OAuth providers (Linear, and OAuth 2.1 flows generally) failing on Windows and other environments where the browser cannot auto-open. Two independent defects converged on Linear's The plain PKCE method is not allowed. Use S256 instead. error page: openPath invoked bare rundll32 and silently swallowed the resulting Executable not found in $PATH when the Windows machine PATH no longer referenced System32, and MCPAuthorizationLinkPrompt composed a Copy URL: line wider than the viewport that TUI#prepareLine then silently truncated — trimming the trailing code_challenge_method=S256 (RFC 7636 §4.3 treats a request with code_challenge and no method as plain). The MCP OAuth fallback, /login, setup wizard, auth-broker CLI, and login-dialog now advertise the short OAuthAuthInfo.launchUrl (loopback /launch route hosted by OAuthCallbackFlow) as the copy target; the OSC 8 hyperlink still carries the full URL for click-through; the MCP flow additionally stages the copy target on the clipboard via OSC 52; and the Windows opener now resolves rundll32.exe through %SystemRoot%\System32\, logging spawn failures and non-zero exits instead of dropping them (#4418).
+  - Fixed lsp rename_file aborting when an LSP server returns duplicate byte-identical non-empty text edits for the same range, such as tsserver willRenameFiles edits through barrel re-exports (#4458).
+  - Fixed Linux x64 PI_TINY_DEVICE=cuda tiny-model side runtimes missing ONNX Runtime CUDA provider binaries by repairing the onnxruntime-node CUDA sidecar install and preserving actionable CUDA diagnostics in omp tiny-models download output (#4475).
+  - Improved reliability of edits when file snapshots share identical 16-bit hash tags
+  - Fixed ACP terminal/create sending the bash tool's full shell line in command with no args, which broke spec-conformant clients that spawn command+args directly (no implicit shell) — any command containing a space, pipe, &&, redirect, or $(...) failed with ENOENT and the agent silently degraded to read-only tools. The bash tool now wraps the shell line before calling clientBridge.createTerminal, reusing the same shell binary + args the local bash-executor resolves via settings.getShellConfig() (Git Bash / bash.exe on Windows, $SHELL with sh fallback on POSIX) so bash semantics — $VAR, $(...), source, POSIX quoting, -l — are preserved on both platforms. (#4333)
+  - Fixed inference worker subprocesses (TTS, STT, tiny-model, mnemopi embeddings) discarding stderr, which left every unexpected exit — most visibly the local Kokoro TTS worker's recurring exit code 7 crash loop — undiagnosable from the parent's logs. createWorkerSubprocess now pipes stderr without starting a live read while the worker is idle, then drains the stream after onExit, emits captured lines to logger.debug under an <exitLabel> stderr message, and keeps the last 16 KiB in a bounded ring that gets appended to the Error surfaced through onError. The exit surface is synchronized with the post-exit drain via SpawnedSubprocess.stderrDrained, so the full native trace shows up on the tts: worker error line without reintroducing event-loop liveness from unref'd workers. (#4324)
+  - Fixed Windows session tail loss after atomic compaction rewrites by fencing append writers during full-file replacement and gating the atomic publish on a commitGuard that the storage backend checks synchronously before rename, so a concurrent flushSync (Ctrl+C / session-exit) is not overwritten by the stale body serialized before it ran. Covers post-compaction prompts, tool results, title changes, and exit diagnostics on the current JSONL path (#4338).
+  @oh-my-pi/pi-mnemopi
+  Fixed
+  - Fixed remember(..., { embedText }) so hosts can store full transcripts while embedding, FTS-indexing, and rebuild-reembedding a marker-free projection. (#4395)
+  @oh-my-pi/pi-tui
+  Fixed
+  - Fixed the modifyOtherKeys keyboard fallback enabling on unknown SSH terminals, avoiding broken Shift input in iOS SSH clients such as Redock (#4325).
+  What's Changed
+  - fix(mnemopi): retain only new auto-retain turns by @roboomp in https://github.com/can1357/oh-my-pi/pull/4397
+  - fix(mnemopi): strip retention markers from embedding projections by @roboomp in https://github.com/can1357/oh-my-pi/pull/4398
+  - fix(lsp): suppress orphan TypeScript project diagnostics by @roboomp in https://github.com/can1357/oh-my-pi/pull/4404
+  - fix(mcp): surface a short launch URL and log Windows opener failures for OAuth by @roboomp in https://github.com/can1357/oh-my-pi/pull/4420
+  - fix(task): auto-skip empty cherry-picks during task-branch merges (#4438) by @roboomp in https://github.com/can1357/oh-my-pi/pull/4440
+  - fix(lsp): dedupe identical replacement edits by @roboomp in https://github.com/can1357/oh-my-pi/pull/4460
+  - fix(ai): trim whitespace around enum tool args by @roboomp in https://github.com/can1357/oh-my-pi/pull/4465
+  - fix(mcp): carry OAuth scopes from challenge and resource metadata by @roboomp in https://github.com/can1357/oh-my-pi/pull/4468
+  - fix(read): guard large artifact raw reads by @roboomp in https://github.com/can1357/oh-my-pi/pull/4483
+  - fix(ai): preserve explicit tool.strict:false on OpenAI-family payloads by @roboomp in https://github.com/can1357/oh-my-pi/pull/4340
+  - fix(tiny): repair Linux CUDA side-runtime install by @roboomp in https://github.com/can1357/oh-my-pi/pull/4476
+  Full Changelog: https://github.com/can1357/oh-my-pi/compare/v16.3.4...v16.3.5
+ReleaseNotesUrl: https://github.com/can1357/oh-my-pi/releases/tag/v16.3.5
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://omp.sh/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
