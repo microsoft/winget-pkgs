@@ -142,7 +142,7 @@ using System.Web.Script.Serialization;
 namespace WinGetApprovalNamespace {
     public class WinGetApprovalPipeline : Form {
 		//vars
-        public int build = 935;//Get-RebuildPipeApp
+        public int build = 936;//Get-RebuildPipeApp
 		public string appName = "WinGetApprovalPipeline";
 		public string appTitle = "WinGet Approval Pipeline - Build ";
 		public static string owner = "microsoft";
@@ -205,8 +205,6 @@ namespace WinGetApprovalNamespace {
         public Regex regex_hashPRRegexEnd = new Regex(@string_hashPRRegexEnd);
         public Regex regex_colonPRRegex = new Regex(@string_colonPRRegex);
 		
-		// public string file_GitHubToken = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + "\\Documents\\PowerShell\\ght.txt";
-		public string GitHubToken;
 		public bool TokenLoaded = false;
 		public int GitHubRateLimitDelay = 333; // ms
 		public int HyperVRateLimitDelay = 3; // seconds
@@ -301,18 +299,6 @@ namespace WinGetApprovalNamespace {
         }// end Main
 		
         public WinGetApprovalPipeline() {
-			if (TokenLoaded == false) {
-			try {
-				GitHubToken = GetUserCredential("GitHubToken").password;
-			} catch (Exception e) {
-				MessageBox.Show("GitHubToken GetUserCredential error: " + e.Message, "Error");
-			}//end try
-
-				if (GitHubToken.Length > 0) {
-					TokenLoaded = true;
-				}
-			}
-
 			System.Windows.Forms.Timer timer = new System.Windows.Forms.Timer();
 			timer.Interval = (1 * 1000); // 10 secs
 			timer.Tick += new EventHandler(timer_everysecond);
@@ -4258,7 +4244,7 @@ bool ConnectionStatus = vm.Scope.IsConnected;
 				HttpWebRequest request = (HttpWebRequest)WebRequest.Create(Url);
 				
 				if (Authorization == true) {
-					request.Headers.Add("Authorization", "Bearer "+GitHubToken);
+					request.Headers.Add("Authorization", "Bearer "+GetUserCredential("GitHubToken").password);
 					request.Headers.Add("X-GitHub-Api-build", "2022-11-28");
 					request.PreAuthenticate = true;
 				}
