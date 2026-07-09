@@ -1,0 +1,108 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Fioooooooo.FylloCode
+PackageVersion: 0.14.0
+PackageLocale: en-US
+Publisher: Fio
+PublisherUrl: https://github.com/Fioooooooo
+PublisherSupportUrl: https://github.com/Fioooooooo/FylloCode/issues
+PackageName: FylloCode
+PackageUrl: https://github.com/Fioooooooo/FylloCode
+License: AGPL-3.0
+LicenseUrl: https://github.com/Fioooooooo/FylloCode/blob/HEAD/LICENSE
+ShortDescription: A desktop app that turns Coding Agents into reliable teammates — by splitting every change into Task → Proposal → Apply → Archive, with you reviewing the plan before any code is written.
+Description: |-
+  In this new era, the work that really needs our attention is no longer repetitive coding, but higher-level business understanding and architecture design. The future workflow I have in mind is: understand the business → think through the architecture → write a Proposal → review the Proposal → let the Agent implement it automatically, then move on to the next Proposal.
+  That thinking led me to build FylloCode — a step from Vibe Coding toward Agentic Coding.
+
+  How FylloCode Solves It
+  FylloCode enforces a structured workflow that separates thinking from doing:
+  ┌──────────┐     ┌────────────────┐     ┌───────────┐     ┌───────────┐
+  │   Task   │ ──→ │ Chat/Proposal  │ ──→ │   Apply   │ ──→ │  Archive  │
+  │          │     │                │     │           │     │           │
+  │ What to  │     │ Agent explores │     │ Agent     │     │ Specs     │
+  │ work on  │     │ codebase and   │     │ implements│     │ updated,  │
+  │          │     │ writes a plan  │     │ the plan  │     │ change    │
+  │          │     │                │     │           │     │ recorded  │
+  │          │     │  ➜ YOU REVIEW  │     │           │     │           │
+  └──────────┘     └────────────────┘     └───────────┘     └───────────┘
+  Task — Pick a task from your local list or synced from platforms like Yunxiao. One click sends it to Chat.
+  Chat / Proposal — The Agent explores your codebase, asks clarifying questions, and produces a structured proposal (what to change, which files, acceptance criteria). The Agent is prohibited from writing code in this stage. You review, edit, and approve the proposal before anything else happens.
+  Apply — A fresh Agent session implements the approved proposal task-by-task. It reads only the proposal artifacts — not the Chat history — so every decision must be captured in writing, not left in context-window memory.
+  Archive — Specs are updated, the change is recorded with full traceability. Your project's knowledge base grows with every shipped change.
+  Why Separating Thinking from Execution Matters
+  Most Coding Agents understand a task and write code in the same session. Any misunderstanding becomes code directly, and code is expensive to review. FylloCode physically separates understanding from execution. Misunderstandings can only become proposal text — and text is cheap to review. A 2-minute proposal review catches problems that would take 20 minutes to find in a diff.
+
+  Features
+
+  Agent Protocol (ACP)
+  FylloCode connects to any Coding Agent through ACP (Agent Client Protocol). Claude Code, Codex, or any ACP-compatible agent — one protocol, one interface, without juggling a pile of terminal windows.
+  There are currently 35 agents available in the ACP Registry, with support for parallel chats and parallel Proposal Apply runs.
+
+  System Reminders
+  Each workflow stage injects a system reminder that constrains what the Agent can and cannot do. In Chat, the Agent is instructed to explore and propose, not code. In Apply, it follows the approved task list. This isn't a suggestion — it's a hard boundary enforced at session start.
+
+  Task Panel
+  View and manage tasks from your local list or synced from external platforms. Tasks serve as the entry point to the entire workflow — select a task, start a Chat, and the Agent begins with full context.
+
+  Integration with Development Platforms
+  Connect to platforms like Yunxiao (Alibaba Cloud DevOps) at the provider level — one authentication, multiple tools across task management, source code, and CI/CD. More platform integrations (GitHub, TAPD, Jira, etc.) are planned.
+  Task integrations use APIs instead of Agent Skills by design. API calls are fast and do not spend tokens, so tokens stay focused on the work that actually needs reasoning.
+
+  Workflow Editor
+  Define and customize multi-stage workflows. Built-in templates get you started; edit the YAML to fit your team's process.
+
+  OpenSpec-Driven Proposals
+  Proposals are structured artifacts — not chat messages. Each proposal contains a design document, spec changes, and a concrete task list with file paths and acceptance criteria. The built-in fyllo-specs MCP server manages the full lifecycle: explore → create-proposal → apply-change → archive-change.
+
+  Streaming Rendering Engine
+  FylloCode uses markstream-vue as its streaming rendering engine. It is fast and smooth, with built-in integration for Monaco Editor, KaTeX, and Mermaid. While working on Proposals, it can render flowcharts and formatted specs in real time, making architecture flows and business logic easier to inspect.
+  Engineering Guardrails
+  FylloCode provides two layers of engineering guardrails:
+  - Soft constraints — Capture engineering conventions as Guidelines and continuously maintain them through the built-in fyllo-skills MCP server, without manual upkeep.
+  - Hard constraints — Agents may not always follow Guidelines perfectly, so FylloCode's health checks establish engineering-level enforcement through lint, test runners, git hooks, and CI.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  This stable release consolidates the 0.14 beta cycle around session-scoped planning, project guideline governance, and clearer project governance views. Chat now has a more explicit split between direct implementation, Plan, and Proposal flows, while Overview, Proposal, Task, and the new Guidelines browser form a fuller operating surface for project governance. The bundled MCP servers are updated as well: fyllo-specs now handles linked-worktree exploration and archive guidance more accurately, and fyllo-cortex focuses its guidelines tool on maintenance workflows.
+  Added
+  - Session-scoped Plan workflow: agents can create lightweight plans, users can review, edit, save, and approve them in-app, approvals are recorded in lineage, and plan.create Fyllo actions connect them back to the current Chat session
+  - Read-only /guidelines project guidelines browser, reachable from the Overview Guidelines stat card, showing recursive guidelines/**/*.md entries, frontmatter metadata, document bodies, empty states, and error states
+  - Chat user prompt timeline, message copy actions, sent-time display, and collapsible session sidebar for more stable navigation and reading in long conversations
+  - Task board entries for linked Chat sessions, allowing users to inspect and reopen conversations related to a task; local tasks also gain a clearer close-task card action
+  - Unified linked-worktree indicators across Proposal, Overview, and Chat EventRail, with the related worktree path shown on hover or focus
+  - New OpenSpec capabilities for project-health, guidelines-browser, local-task-actions, task-linked-conversations, proposal-browser, fyllo-specs-explore, and related governance/workflow contracts introduced during the release
+  Changed
+  - Chat system reminders now use a three-lane decision model: direct implementation, Plan, and Proposal. Chat and Apply stages also inject a project guidelines/**/*.md index so agents spend less effort rediscovering repository conventions before making changes
+  - Overview now uses a clearer dynamic/static two-area structure, making active proposals, recent lineage, governance health, spec growth, and guideline evolution easier to scan
+  - /proposal is simplified into a complete proposal-list entry point, removing duplicate stats, status tabs, and local filtering while keeping the detail Slideover
+  - Local task actions now distinguish routine closing from permanent deletion: task cards close open tasks, and deletion lives inside the task detail edit dialog
+  - fyllo-specs instructions for create-plan, create-proposal, apply-change, and archive-change were tightened to report progress in the user's language, reread approved plans, and write concrete guideline-maintenance tasks
+  - fyllo-specs explore now discovers active changes in both the main workspace and registered linked worktrees, returning workspace metadata and non-fatal warnings in state
+  - fyllo-specs create-proposal now writes an accurate ISO created timestamp for new OpenSpec changes; archive-change guidance now emphasizes the proposal's delivered work instead of archive mechanics in commit subjects
+  - fyllo-cortex guidelines tool changed from read/write to three maintenance modes: init, create, and update, returning scenario-specific <tool_instruction> content and current <state>
+  - FylloCode's own guidelines, OpenSpec baseline, README, and documentation site were refreshed for Overview, Plan/SDD workflows, Loop Engineering, and MCP server references
+  Fixed
+  - Fixed Chat EventRail proposal state not always refreshing after Proposal details close
+  - Fixed Proposal detail headers failing to distinguish ready-to-archive, archiving, and base states, and fixed stale task counts, statuses, or dates after reopening details
+  - Fixed Proposal workflow menus escaping the Slideover and Proposal overlays stacking below the task origin banner
+  - Fixed Proposal archive actions appearing available when run metadata belongs to another proposal or an archive operation is already in progress
+  - Fixed fyllo-cortex guideline scanning fallback behavior for unreadable files, UTF-8 BOM frontmatter, and missing FYLLO_PROJECT_PATH
+  - Fixed shell tooltip hover options applying too broadly, plus several Chat layout, global overlay, prompt timeline, and archive-status display details
+  Notes
+  - The application version is now 0.14.0.
+  - fyllo-specs MCP server is now 0.8.0, covering the Plan tool, worktree-aware explore, accurate change creation timestamps, create-proposal guideline task rules, and archive commit guidance.
+  - fyllo-cortex MCP server is now 0.4.0. This is a breaking change: guidelines read/write modes were removed; callers must use init, create, or update.
+  - Local lineage session links now include a plans field. Existing data is read as an empty plans array and does not require manual migration.
+ReleaseNotesUrl: https://github.com/Fioooooooo/FylloCode/blob/HEAD/CHANGELOG.en.md#0140---2026-07-07
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
