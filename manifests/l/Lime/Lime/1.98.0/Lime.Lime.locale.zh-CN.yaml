@@ -1,0 +1,64 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Lime.Lime
+PackageVersion: 1.98.0
+PackageLocale: zh-CN
+Publisher: Lime
+PublisherUrl: https://limeai.run/
+PublisherSupportUrl: https://github.com/limecloud/lime/issues
+PrivacyUrl: https://limeai.run/privacy/
+PackageName: Lime
+PackageUrl: https://limeai.run/
+License: 专有软件
+LicenseUrl: https://limeai.run/terms/
+Copyright: © 2026 Lime
+ShortDescription: 给中文创作者用的开源 AI 内容工作台
+Description: |-
+  Lime 是一个开源的 Electron 桌面端 AI 内容工作台，面向中文创作者、品牌运营、研究型写作者和小团队，覆盖 AI 写作、选题研究、素材管理、提示词沉淀、知识库和多模型创作流程。
+
+  你可以把它理解成一个更适合长期创作的 AI 工作台：
+  - 不是只问一句、答一句，而是围绕一个项目持续推进
+  - 不是每次都重新找资料、重新写提示词，而是把参考、风格和做法沉淀下来
+  - 不是生成完就散落在聊天记录里，而是把结果保存起来，下一次还能继续用
+  - 不是绑定某一家 AI 服务，而是让你使用自己已经配置好的模型能力
+  如果你经常在收藏夹、文档、聊天工具、图片工具和模型后台之间来回切换，Lime 想帮你把这些动作收回到同一个创作空间里。
+
+  你可以用 Lime 做什么
+  - AI 写作与内容创作：写公众号文章、小红书笔记、视频脚本、播客提纲和直播话术
+  - 资料研究与知识整理：整理网页、笔记、截图、访谈和历史材料，生成报告或简报
+  - 选题分析与内容复盘：拆解爆款案例、竞品内容、发布节奏和表达风格
+  - 提示词管理与风格复用：保存常用写法、品牌语气、选题方法和团队模板
+  - 多模态创作准备：生成图片提示词、封面方向、演示稿结构或网页草稿
+  - 多模型工作流：使用自己配置的 AI 服务商和模型，在同一个任务里持续修改、扩写、压缩或换平台发布
+ReleaseNotes: |-
+  Lime v1.98.0
+  新功能
+  - Tool Runtime 接入 current 工具执行面，新增协作 Agent、文件读取 / 搜索、Shell、原生 dispatch、用户输入请求、工具调用 surface 和结果投影模块，为 Codex-first Thread / Turn / Item 执行链提供统一 owner。
+  - Agent Runtime 复用 tool-runtime 的 request user input 协议和 model-provider 的 response event 类型，减少 runtime / provider / tool 三侧重复定义。
+  - Benchmark release gate 新增 current-chain evidence builder、P0 coding workflow、release audit report、baseline descriptor 和 true-run evidence 透传能力，要求外部 benchmark 证明 agentSession/turn/start 与 evidence/export 主链。
+  - App Server coding evidence summary 增加 tool call 数量、完成 / 失败统计、tool name 和 tool call id 汇总，便于 release / replay 审计。
+  修复
+  - 修复 App Server tool lifecycle 投影中 runtime tool_input_delta 缺少 tool.started 的情况，并避免 synthetic start 后重复记录 runtime start。
+  - 修复停止 / 中断 Agent 流后 assistant 消息、thread item、文本 overlay、queued turn 恢复和后续继续发送之间的状态不一致。
+  - 修复历史 hydrate / local merge 对 interrupted turn 的识别和保留，避免恢复会话时把已中止输出重新显示为仍在运行。
+  - 修复 benchmark true-run summary 对 current-chain、external verifier、Evidence Pack 和 task set 的放行条件校验，避免首题或伪 evidence 误判为整套 ready。
+  优化与重构
+  - 大幅收缩 agent-compat 旧 Aster-shaped 实现，删除旧 context、permission policy、parallel、resume、recipe、provider、prompt、scheduler 和部分 legacy tool 文件，保留必要 compat owner。
+  - 将 App Server read model 拆分为 model routing、queued turns、runtime items、session metadata 和测试子模块，降低中心文件复杂度。
+  - 拆分 Claw / AgentChatWorkspace 右侧 surface、文章编辑器、工作区文件管理、技能目录、任务中心发送、scene app execution 和 home recovery runtime，减少巨型组件直接持有业务状态。
+  - 将 model-provider 的 provider stream 事件拆分到 failure、image input、model change、notification、plaintext tool use、poll、progress、response content / context / event、sampling、source execution、text delta 和 tool input delta 等子模块。
+  测试与质量
+  - 新增和更新 tool runtime execution、request user input、collab agent、provider stream、App Server read model、tool lifecycle、coding evidence、Agent stream flow control 和 session state 回归。
+  - 扩展 benchmark release run / summary / render / audit report / current-chain evidence 测试，确保 strict gate、P0 blocker、true-run blocker 和 evidence blocker fail closed。
+  - 更新 App Server protocol schema、manifest、generated TypeScript types、current boundary guard、Aster migration boundary 和 i18n unused key 检查。
+  - 当前外部 benchmark release gate 仍要求真实 current-chain evidence，不会因为 dry-run / preflight / 本地缺证据而误放行。
+  文档
+  - 更新 Aster migration Phase 6、dead code deletion、provider reply backend、refactor v1 impact audit、benchmark release、version test plan 和执行计划索引。
+  - 补充 benchmark P0 coding 门禁、current-chain evidence、release audit report 和 strict gate baseline 的治理说明。
+  其他
+  - 版本事实源更新到 1.98.0：根应用、CLI npm package、Rust workspace、lime-rs/Cargo.lock 和 release notes。
+  完整变更：v1.97.0 → v1.98.0
+ReleaseNotesUrl: https://github.com/limecloud/lime/releases/tag/v1.98.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
