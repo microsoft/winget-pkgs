@@ -1,0 +1,173 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: AtomGit.AtomCode
+PackageVersion: 4.24.1
+PackageLocale: zh-CN
+Publisher: 重庆开源共创科技有限公司
+PublisherUrl: https://atomgit.com/
+PublisherSupportUrl: https://atomgit.com/atomgit_atomcode/atomcode/issues
+PrivacyUrl: https://docs.gitcode.com/docs/help/home/protocol/privacy-policy
+Author: 重庆开源共创科技有限公司
+PackageName: AtomCode
+PackageUrl: https://atomcode.atomgit.com/
+License: MIT
+LicenseUrl: https://atomgit.com/atomgit_atomcode/atomcode/blob/main/LICENSE
+Copyright: Copyright (c) 2026 Yubang Xu
+CopyrightUrl: https://docs.gitcode.com/docs/help/home/protocol/ai-privacy-policy
+ShortDescription: AI 编程助手 在你的终端中运行
+Description: Claude Code / Cursor Agent 的开源平替，住在你的终端里。连接任意 OpenAI 兼容大模型，自主读文件、改代码、跑测试、自我验证 —— 用 Rust 构建。
+Tags:
+- 人工智能
+- 代码
+- 大语言模型
+- 智能体
+- 编程
+- 聊天机器人
+- 自主智能
+ReleaseNotes: |-
+  AtomCode v4.24.1 Release Notes
+  发布日期：2026-06-03
+  🎉 新里程碑：WebUI 正式发布
+  v4.24.1 是一次重大版本更新，带来了完整的 Web 图形界面、TUI ↔ WebUI 实时同步、技能快捷菜单、推荐邀请系统、Plugin 多市场与自动安装、Provider 管理重构等核心能力。同时修复了大量终端渲染稳定性和兼容性问题。
+
+  ✨ 新增功能（Features）
+  WebUI 图形界面（里程碑新功能）
+  - 完整 Web 应用：基于 Preact + Vite + Tailwind 构建的两栏布局聊天界面，支持流式渲染、工具执行展示、Markdown 渲染（含表格/代码块/列表）
+  - 侧栏系统：通栏侧栏，支持收起/展开、会话历史列表（显示时间）、搜索、CC 风格新建、头像显示、会话重命名/删除
+  - 远程访问：进程内 atomcode webui 子命令 + TUI /webui 命令启动 Web 服务端，集成蒲公英(Oray PGY)远程访问替代 Tailscale
+  - 设置面板：深浅主题切换、中英语言切换、模型配置（增删改）、Provider 排序/编辑、工作目录切换器
+  - 鉴权安全：敏感路由 Token 鉴权，仅页面+资源+health 端点公开
+  - 图片支持：聊天支持上传/粘贴图片（Vision + VL 兜底）、2MB 大小限制、历史缩略图展示
+  - 文件管理：@ 文件选择器（附件菜单 + 目录树，支持进入子目录/返回上级/新建文件夹）、目录选择器
+  - 落地页：空会话居中落地页、项目建议、刷新恢复防闪屏（restoring 态）
+  - 模型管理：独立弹窗添加/编辑模型、同名模型附加 Provider 消歧、上下文窗口选择（AtomGit 锁定）、名称唯一性校验
+  - 执行中排队：运行时可继续输入并排队消息
+  - 引导提示：无技能时提示如何添加
+  TUI ↔ WebUI 实时同步（LiveSession）
+  - LiveSession 总线：协调器骨架（单写者 turn、广播扇出、晚加入快照）+ 阶段性实现三个阶段
+  - 阶段①：公共类型与总线骨架
+  - 阶段②：Daemon 端 AppState 持有 LiveSession、SSE 快照+广播、消息投递、TUI /sync 附着
+  - 阶段③：交互式审批（/live 推 permission_request + POST /live/permission）、AgentEvent 映射转发、全局当前 LiveSession
+  - /webui 自动开启同步：TUI 自动附着 + 浏览器 sync=1 默认开
+  - 同步会话持久化：独立 Session（每轮落盘、稳定 id、/live 暴露 session_id）
+  $ 技能菜单（指令补全）
+  - 在输入框中输入 $ 触发技能列表菜单（MenuKind::Skill）
+  - Tab 补全技能名，Enter 直接调用
+  - 提交后分发为 skill invocation
+  - 菜单渲染仅显示 bare name
+  推荐邀请系统（Referral）
+  - 完整的邀请追踪系统（referral tracking）
+  - 落地页从安装命令改为邀请链接
+  - 结算方式切换为现金提现 + 反作弊规则
+  - 安装脚本验证邀请码格式
+  - 主题切换、中英文切换、动效与移动端导航适配
+  - 安装命令 UI 重新设计 + 浅色主题
+  Provider 管理重构
+  - /provider add 合并模板导入，自动识别 curl/JSON/TOML 格式
+  - 手动填写改为 Base URL 优先，类型自动预填
+  - 模板步仅接收模板，Base URL 归入手动填写
+  - 名字优先取主域名而非子域
+  - $VAR / 环境变量名形式的 API key 视为占位符
+  Plugin 生态增强
+  - 多市场引导启动（multi-marketplace bootstrap），支持 Git 子目录源
+  - 启动时自动同步官方市场（marketplace），检查 git 可用性并给出友好提示
+  - 插件缺失目录时自动重新 clone，而非报错失败
+  - 完整的 git 错误链展示，支持按插件名安装/卸载
+  - Claude Code 桥接集成：加载 Claude Code 已安装插件，避免重复安装
+  包管理器分发（distro-pm）
+  - 新增 distro-pm feature 和 is_package_managed 辅助判断
+  - HarmonyBrew 包管理器场景下短路自更新（self-update），跳过分发升级 spawn
+  - 升级/启动提示适配 HarmonyBrew 文案（中英文 i18n）
+  缓存与遥测
+  - 所有请求携带 x-atomcode-session-id 用于网关亲和性
+  - Session ID 统一：agent 驱动、datalog 记录、持久化绑定
+  - 会话重置时重新生成 session id，SetMessages 不重置
+  - 缩放 microcompact 阈值随窗口动态调整
+  破坏性命令防护
+  - Bash 工具拦截 ORM 迁移 schema 重置类破坏性命令，防止误操作
+  崩溃日志
+  - Panic 时同步落盘崩溃日志到 ~/.atomcode/logs/panic.log，便于问题定位
+  安装脚本
+  - 安装脚本（install.sh / install.ps1）自动获取最新版本号，改用免版本号 raw 地址
+  Daemon 层
+  - 抽 run_server 为库函数，二进制变薄壳
+  - 嵌入式 webui 静态资源（rust-embed）+ SPA fallback
+  - GET /skills 端点列 user-invocable 技能（token 保护）
+  - GET /fs/list 目录列举端点
+  - /chat 改用交互式权限 + SSE 转发 permission_request
+  - 权限桥接通道 PermissionResponders
+  其他
+  -  -y / --dangerously-skip-permissions 短选项支持（BYPASS 徽标从黄改红）
+  - Hook 系统：Webhook + 异步批量支持（社区贡献）
+  - SubAgent 框架：AgentTool（invoke_subagent）、SubAgentRunner（取消/早退/截断）、工具沙箱
+
+  🛠 修复（Fixes）
+  终端渲染 / Windows 兼容
+  - 经典 conhost resize 闪退修复——改用 ED2 清屏替代 ED3 避开崩溃；on_resize 增加 RSZ 阶段诊断日志定位
+  - 仅在 CodingPlan provider 激活时显示漂移警告
+  - AltScreenRenderer 缺 pop_approval_prompt 修复 Windows "Waiting for approval" 残留
+  - dark-theme 下工具调用 header/result 行的色彩层次恢复
+  - 并行工具组子行在深色主题下变暗的问题
+  WebUI
+  - 会话菜单在底部时向上展开，避免被视口裁切
+  - 连续审批时第二个审批卡片不弹出导致任务卡死
+  - 同步评审修正：卸载中止 live 流、发送同步置 busy、按钮状态文案
+  - 刷新恢复会话时抑制新建落地页消除闪屏
+  - 移动端设置菜单被抽屉裁剪
+  - 编辑模型时支持修改名称
+  - 输入法组字回车误触发全量修复
+  - 代码块 Copy 按钮定位到右上角
+  - 工具完成状态统一显示「完成」，不再显示耗时
+  - Markdown 表格/列表/段落样式补全
+  - 模型下拉只保留 model 名（provider 移到 hover）
+  - favicon 改为本地内置，脱离外网 CDN 依赖
+  - 历史会话显示时剥离 daemon 注入的 VL 标注块
+  Sync / Live
+  - 重复附着 LiveSession 导致 TUI 同步内容双重渲染
+  - VL 预处理移到 coordinator 共享层，修复 TUI 也丢图
+  - daemon live/sync 路径补回 VL 预处理
+  - 先回显用户消息再做 VL 预处理，带图发送不再卡顿
+  - live/sync 发送消息带上选中 provider
+  Plugin
+  - 状态文件缺失/手动删除已安装插件目录的稳健恢复
+  - 处理 installed_plugins.json 中陈旧的条目
+  - 使用 load_skills_dir pub(crate) 使插件加载器测试可编译
+  - Claude Code 桥接：作用域优先级、相对路径、可测试性
+  Coding Plan
+  - 月度额度耗尽时按 quota_exhausted 判定，抑制 0% 滚动窗口误导
+  缓存
+  - 会话 id 在 conversation reset 时重新生成，SetMessages 不重置
+  - Prompt prefix 稳定性优化，缓存命中率 ~79% → ~96%
+  Provider
+  - OAuth access_token 回退场景下的防泄露守卫
+  - /provider 编辑/新建模型支持选择上下文窗口（AtomGit 锁定）
+  其他
+  - Ctrl+C 现在可以在输入非空时取消 guide subagent
+  - UserPromptSubmit hook 失败不再阻塞会话
+  - 无 setsid 二进制环境的后台模式修复
+  - 斜杠命令执行后回填输入框，且不弹出命令列表
+  - handle_plugin_job_event 调用点 state 可变性不匹配导致编译失败
+  - 含 Tab 缩进的粘贴文本输入光标错位
+  - 出错的轮次显示「✗ 已中断」而非「✓ Nailed it」成功横幅
+  - 流式/工具执行时输入框不再闪动（改用逐行 EL 取代整屏 ED 0）
+  - 编译告警清理（hook/agent 模块的未用导入与死字段）
+
+  🔧 重构（Refactoring）
+  - Guide subagent 系统整体移除及相关代码清理
+  - 所有 session-id 绑定统一路由至 bind_telemetry_to_session
+  - 当前 LiveSession 迁为进程内全局 + current_live_session()
+  - /provider 流程简化：模板步只收模板，Base URL 归入手动填写
+  - Daemon run_server 抽为库函数
+
+  📚 文档（Docs）
+  - 补全 v4.24.1 新功能文档（WebUI/同步/$ 菜单/后台与破坏性命令）
+  - 新增 webui 远程访问使用引导，官网加入口
+  - 更新安装方式说明，新增 npm / Homebrew
+  - 完善 /plugin 官方文档，新增命令速查表和交互式管理器说明
+ReleaseNotesUrl: https://atomgit.com/atomgit_atomcode/atomcode/releases/v4.24.1
+Documentations:
+- DocumentLabel: 文档
+  DocumentUrl: https://atomcode.atomgit.com/docs/zh/index.html
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

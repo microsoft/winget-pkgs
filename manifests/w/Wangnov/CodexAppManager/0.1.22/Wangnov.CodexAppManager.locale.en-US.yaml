@@ -1,0 +1,60 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Wangnov.CodexAppManager
+PackageVersion: 0.1.22
+PackageLocale: en-US
+Publisher: Wangnov
+PublisherUrl: https://github.com/Wangnov
+PublisherSupportUrl: https://github.com/Wangnov/Codex-App-Manager/issues
+PackageName: Codex App Manager
+PackageUrl: https://github.com/Wangnov/Codex-App-Manager
+License: MIT
+LicenseUrl: https://github.com/Wangnov/Codex-App-Manager/blob/HEAD/LICENSE
+ShortDescription: Installer, updater, and uninstaller for the official Codex desktop app.
+Description: A cross-platform desktop client to install, incrementally update, and cleanly uninstall the official Codex desktop app, with built-in self-update.
+Moniker: codex-app-manager
+Tags:
+- codex
+- installer
+- openai
+- tauri
+- updater
+ReleaseNotes: |-
+  Codex App Manager
+  > 这一版修复了应用内更新在老版 Windows curl 和 macOS Gatekeeper 文件句柄耗尽时的失败提示与兼容性。
+  > This release fixes in-app update compatibility and messaging when older Windows curl builds or macOS Gatekeeper file limits get in the way.
+  🐛 修复 · Fixes
+  - Windows 下载兼容性:更新器仍优先使用现代 --no-progress-meter,但当系统里的老版 curl 明确不支持这个参数时,会自动用兼容参数重试,避免安装/更新在真正联网前就中断。
+    Windows download compatibility: the updater still prefers modern --no-progress-meter, but if an older system curl rejects that flag it retries with a compatible silent mode instead of stopping before the download really starts.
+  - macOS 安全校验更稳:Gatekeeper 校验前会尝试提高当前进程的文件句柄软限制,减少大型 .app 校验时遇到 Too many open files 的概率。
+    macOS security checks are more resilient: before running Gatekeeper assessment, the app now tries to raise its process file-descriptor soft limit, reducing Too many open files failures for larger .app bundles.
+  - macOS 失败提示更准确:如果 Gatekeeper 仍然报文件句柄耗尽,提示会说明是系统校验资源不足且不会替换文件,不再误写成 bundle 本身被拒绝。
+    macOS failure messaging is clearer: if Gatekeeper still reports file-descriptor exhaustion, the error now says the assessment could not complete and no files were replaced, instead of incorrectly saying the bundle was rejected.
+  📦 安装与升级 · Install & Upgrade
+  已经安装? 打开应用即可收到本次更新——macOS 只下载版本间的增量,校验失败自动回滚。
+  Already installed? The app offers this update in-app — macOS pulls only the delta, with automatic rollback.
+  ─────────────────────┬───────────────────────────────────────────
+  平台 · Platform      │下载 · Download(国内直连 · China-reachable)
+  ─────────────────────┼───────────────────────────────────────────
+  macOS · Apple Silicon│CodexAppManager_aarch64.dmg
+  ─────────────────────┼───────────────────────────────────────────
+  macOS · Intel        │CodexAppManager_x86_64.dmg
+  ─────────────────────┼───────────────────────────────────────────
+  Windows · x64        │CodexAppManager_x64-setup.exe
+  ─────────────────────┴───────────────────────────────────────────
+  Windows 签名状态: CodexAppManager_x64-setup.exe 当前没有 Authenticode 代码签名,首次运行可能出现 SmartScreen 提示;.sig / latest.json 里的 Tauri updater 签名只用于应用内自更新的字节校验,不代表 Windows 发行者信任。详情见 Windows signing and verification。
+  Windows signing status: CodexAppManager_x64-setup.exe is not Authenticode-signed yet, so SmartScreen may warn on first run; the Tauri updater signature in .sig / latest.json verifies in-app update bytes only and is not Windows publisher trust. See Windows signing and verification.
+  核验下载: 本页 Assets 带有 SHA256SUMS;Windows 用 Get-FileHash .\CodexAppManager_x64-setup.exe -Algorithm SHA256,macOS 用 shasum -a 256 CodexAppManager_aarch64.dmg,再与 SHA256SUMS 比对。
+  Verify downloads: This release includes SHA256SUMS in Assets; on Windows run Get-FileHash .\CodexAppManager_x64-setup.exe -Algorithm SHA256, and on macOS run shasum -a 256 CodexAppManager_aarch64.dmg, then compare with SHA256SUMS.
+  # macOS · Homebrew
+  brew install --cask wangnov/tap/codex-app-manager
+  > 镜像直链恒指向最新版本;如需本页对应的历史版本,请使用下方 Assets。.app.tar.gz / .sig / latest.json 是自动更新器的工件,手动安装请选 .dmg / .exe。
+  > Mirror permalinks always resolve to the latest release — for this exact version use the assets below. .app.tar.gz / .sig / latest.json belong to the auto-updater; pick the .dmg / .exe for manual installs.
+  What's Changed
+  - fix: harden update compatibility gates by @Wangnov in #93
+  - chore(release): bump version to 0.1.22 by @Wangnov in #94
+  Full Changelog: v0.1.21...v0.1.22
+ReleaseNotesUrl: https://github.com/Wangnov/Codex-App-Manager/releases/tag/v0.1.22
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

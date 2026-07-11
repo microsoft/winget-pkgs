@@ -1,0 +1,38 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: bodaay.hfdownloader
+PackageVersion: 3.2.0
+PackageLocale: en-US
+Publisher: bodaay
+PublisherUrl: https://github.com/bodaay
+PublisherSupportUrl: https://github.com/bodaay/HuggingFaceModelDownloader/issues
+PackageName: HuggingFace Model Downloader
+PackageUrl: https://github.com/bodaay/HuggingFaceModelDownloader
+License: Apache-2.0
+LicenseUrl: https://github.com/bodaay/HuggingFaceModelDownloader/blob/HEAD/LICENSE
+ShortDescription: Simple go utility to download HuggingFace Models and Datasets
+Description: The HuggingFace Model Downloader is a utility tool for downloading models and datasets from the HuggingFace website. It offers multithreaded downloading for LFS files and ensures the integrity of downloaded models with SHA256 checksum verification.
+Moniker: hfdownloader
+Tags:
+- huggingface
+ReleaseNotes: |-
+  Security, Reliability & Web-UI Hardening
+  Security & Concurrency
+  - WebSocket hub races fixed — slow-client eviction now runs under the write lock (was a concurrent map write under a read lock that could panic the hub); the send channel is closed exactly once.
+  - WebSocket origin checks — CheckOrigin validates Origin against the allow-list (same-origin allowed, cross-origin denied by default), preventing cross-site WebSocket hijacking.
+  - Race-free settings updates — POST /api/settings locks and publishes the proxy config copy-on-write, so it no longer races in-flight downloads.
+  - Constant-time basic-auth comparison; checked crypto/rand; coalescer stopped on shutdown.
+  Reliability
+  - Stronger verification — files are SHA256-verified whenever a content hash is known (covers multipart); --verify etag now actually verifies instead of doing nothing.
+  - Path-traversal guard on entries from the (operator-configurable) repo tree before any write.
+  - Mirror push/pull streams blobs with io.Copy (no whole-file-into-RAM) and --verify does a real SHA256 check.
+  - Typed errors (*APIError/*DownloadError/*VerificationError) so errors.Is/As works.
+  Web UI
+  - One model at a time (#85) — adding several models via Analyze used to start them all at once. Downloads now run serially (like the CLI); extra models stay queued. The setting "Concurrent downloads" is relabeled "Parallel files per model".
+  Internal / Docs
+  - Version sourced from the build (health, WebSocket, UI footer); removed dead blob-coordination code; documented dismiss/mirror/cache endpoints and analyze -i / download --exact.
+  Full Changelog: https://github.com/bodaay/HuggingFaceModelDownloader/compare/v3.1.1...v3.2.0
+ReleaseNotesUrl: https://github.com/bodaay/HuggingFaceModelDownloader/releases/tag/v3.2.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
