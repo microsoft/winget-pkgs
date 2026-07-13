@@ -3974,6 +3974,14 @@ bool ConnectionStatus = vm.Scope.IsConnected;
 		private static extern bool CredRead(string target, int type, int reservedFlag, out IntPtr credentialPtr);
 		//Extend/reference CredReadW as CredRead.
 
+		[DllImport("Advapi32.dll", SetLastError = true, EntryPoint = "CredWriteW", CharSet = CharSet.Unicode)]
+		private static extern bool CredWrite([In] ref CredentialMem userCredential, [In] int flags);
+		//Extend/reference CredWriteW as CredWrite.
+
+		[DllImport("Advapi32.dll", SetLastError = true, EntryPoint = "CredFree", CharSet = CharSet.Unicode)]
+		private static extern bool CredRelease([In] IntPtr credentialPtr);
+		//Extend/reference CredFree as CredWrite.
+
 		public static Credential GetUserCredential(string target) {
 			CredentialMem credMem;
 			IntPtr credPtr;
@@ -3986,17 +3994,13 @@ bool ConnectionStatus = vm.Scope.IsConnected;
 				//
 				Credential cred = new Credential(credMem.targetName, credMem.userName, Encoding.Unicode.GetString(passwordBytes)); //Make a new Credential object cred.
 				//Original example doesn't include these:
-				Marshal.FreeHGlobal(credPtr);
-				// Marshal.FreeHGlobal(credMem.credentialBlob);
+				CredRelease(credPtr);
+				CredRelease(credMem.credentialBlob);
 				return cred;
 			} else {
 				throw new Exception("Failed to retrieve credentials");
 			}
 		}
-
-		[DllImport("Advapi32.dll", SetLastError = true, EntryPoint = "CredWriteW", CharSet = CharSet.Unicode)]
-		private static extern bool CredWrite([In] ref CredentialMem userCredential, [In] int flags);
-		//Extend/reference CredWriteW as CredWrite.
 
 		public static void SetUserCredential(string target, string userName, string password) {
 			//New CredentialMem object userCredential
@@ -4014,7 +4018,7 @@ bool ConnectionStatus = vm.Scope.IsConnected;
 				throw new System.ComponentModel.Win32Exception(Marshal.GetLastWin32Error());
 			}
 			//Original example doesn't include this. Was going to use FreeCoTaskMem as recommended, but this gave an error. 
-			Marshal.FreeHGlobal(userCredential.credentialBlob);
+			Marshal.FreeCoTaskMem(userCredential.credentialBlob);
 		}
 
 		[StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
