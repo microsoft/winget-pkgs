@@ -3986,16 +3986,17 @@ bool ConnectionStatus = vm.Scope.IsConnected;
 			CredentialMem credMem;
 			IntPtr credPtr;
 			if (CredRead(target, 1, 0, out credPtr)) { //If found, returns true and adds to credPtr, else false and error. 
-				credMem = Marshal.PtrToStructure<CredentialMem>(credPtr); 
-				//"Marshals data from an unmanaged block of memory to a newly allocated managed object of the type specified by a generic type parameter."
-				byte[] passwordBytes = new byte[credMem.credentialBlobSize]; //Make a new byte array passwordBytes of size credentialBlobSize.
-				Marshal.Copy(credMem.credentialBlob, passwordBytes, 0, credMem.credentialBlobSize); 
-				//Copies data from an unmanaged memory pointer to a managed 8-bit unsigned integer array.
-				//
-				Credential cred = new Credential(credMem.targetName, credMem.userName, Encoding.Unicode.GetString(passwordBytes)); //Make a new Credential object cred.
-				//credentialBlob is an interior pointer into credPtr; the release above already frees it.
-				CredRelease(credPtr);
-				return cred;
+				try {
+					credMem = Marshal.PtrToStructure<CredentialMem>(credPtr);
+					//"Marshals data from an unmanaged block of memory to a newly allocated managed object of the type specified by a generic type parameter."
+					byte[] passwordBytes = new byte[credMem.credentialBlobSize]; //Make a new byte array passwordBytes of size credentialBlobSize.
+					Marshal.Copy(credMem.credentialBlob, passwordBytes, 0, credMem.credentialBlobSize);
+					//Copies data from an unmanaged memory pointer to a managed 8-bit unsigned integer array.
+					return new Credential(credMem.targetName, credMem.userName, Encoding.Unicode.GetString(passwordBytes)); //Make a new Credential object cred.
+				} finally {
+					//credentialBlob is an interior pointer into credPtr; free the buffer once via CredFree.
+					if (credPtr != IntPtr.Zero) { CredRelease(credPtr); }
+				}
 			} else {
 				throw new Exception("Failed to retrieve credentials");
 			}
@@ -4013,11 +4014,14 @@ bool ConnectionStatus = vm.Scope.IsConnected;
 			userCredential.credentialBlobSize = (int)bpassword.Length;
 			userCredential.credentialBlob = Marshal.StringToCoTaskMemUni(password);
 			//If write fails, emit last error. 
-			if (!CredWrite(ref userCredential, 0)) {
-				throw new System.ComponentModel.Win32Exception(Marshal.GetLastWin32Error());
+			try {
+				if (!CredWrite(ref userCredential, 0)) {
+					throw new System.ComponentModel.Win32Exception(Marshal.GetLastWin32Error());
+				}
+			} finally {
+				//Match StringToCoTaskMemUni allocation with FreeCoTaskMem.
+				Marshal.FreeCoTaskMem(userCredential.credentialBlob);
 			}
-			//Original example doesn't include this. Was going to use FreeCoTaskMem as recommended, but this gave an error. 
-			Marshal.FreeCoTaskMem(userCredential.credentialBlob);
 		}
 
 		[StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
