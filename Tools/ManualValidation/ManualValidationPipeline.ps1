@@ -7431,6 +7431,10 @@ namespace CredManager {
 		private static extern bool CredRead(string target, int type, int reservedFlag, out IntPtr credentialPtr);
 		//Extend/reference CredReadW as CredRead.
 
+		[DllImport("Advapi32.dll", SetLastError = true, EntryPoint = "CredFree", CharSet = CharSet.Unicode)]
+		private static extern void CredRelease([In] IntPtr credentialPtr);
+		//Extend/reference CredFree as CredRelease.
+
 		public static Credential GetUserCredential(string target) {
 			CredentialMem credMem;
 			IntPtr credPtr;
@@ -7442,9 +7446,8 @@ namespace CredManager {
 				//Copies data from an unmanaged memory pointer to a managed 8-bit unsigned integer array.
 				//
 				Credential cred = new Credential(credMem.targetName, credMem.userName, Encoding.Unicode.GetString(passwordBytes)); //Make a new Credential object cred.
-				//Original example doesn't include these:
-				Marshal.FreeHGlobal(credPtr);
-				Marshal.FreeHGlobal(credMem.credentialBlob);
+				//credentialBlob is an interior pointer into credPtr; free the buffer once via CredFree.
+				CredRelease(credPtr);
 				return cred;
 			} else {
 				throw new Exception("Failed to retrieve credentials");
@@ -7470,8 +7473,8 @@ namespace CredManager {
 			if (!CredWrite(ref userCredential, 0)) {
 				throw new System.ComponentModel.Win32Exception(Marshal.GetLastWin32Error());
 			}
-			//Original example doesn't include this. Was going to use FreeCoTaskMem as recommended, but this gave an error. 
-			Marshal.FreeHGlobal(userCredential.credentialBlob);
+			//Match StringToCoTaskMemUni allocation with FreeCoTaskMem.
+			Marshal.FreeCoTaskMem(userCredential.credentialBlob);
 		}
 	}
 }

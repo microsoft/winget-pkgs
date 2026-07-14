@@ -3979,8 +3979,8 @@ bool ConnectionStatus = vm.Scope.IsConnected;
 		//Extend/reference CredWriteW as CredWrite.
 
 		[DllImport("Advapi32.dll", SetLastError = true, EntryPoint = "CredFree", CharSet = CharSet.Unicode)]
-		private static extern bool CredRelease([In] IntPtr credentialPtr);
-		//Extend/reference CredFree as CredWrite.
+		private static extern void CredRelease([In] IntPtr credentialPtr);
+		//Extend/reference CredFree as CredRelease.
 
 		public static Credential GetUserCredential(string target) {
 			CredentialMem credMem;
@@ -3993,9 +3993,8 @@ bool ConnectionStatus = vm.Scope.IsConnected;
 				//Copies data from an unmanaged memory pointer to a managed 8-bit unsigned integer array.
 				//
 				Credential cred = new Credential(credMem.targetName, credMem.userName, Encoding.Unicode.GetString(passwordBytes)); //Make a new Credential object cred.
-				//Original example doesn't include these:
+				//credentialBlob is an interior pointer into credPtr; the release above already frees it.
 				CredRelease(credPtr);
-				CredRelease(credMem.credentialBlob);
 				return cred;
 			} else {
 				throw new Exception("Failed to retrieve credentials");
