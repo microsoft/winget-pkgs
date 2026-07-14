@@ -1,0 +1,96 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: astral-sh.ty
+PackageVersion: 0.0.33
+PackageLocale: en-US
+Publisher: Astral Software Inc.
+PublisherUrl: https://astral.sh/
+PublisherSupportUrl: https://github.com/astral-sh/ty/issues
+Author: Astral Software Inc.
+PackageName: ty
+PackageUrl: https://github.com/astral-sh/ty
+License: MIT
+LicenseUrl: https://github.com/astral-sh/ty/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2025 Astral Software Inc.
+CopyrightUrl: https://github.com/astral-sh/ty/blob/HEAD/LICENSE
+ShortDescription: An extremely fast Python type checker and language server, written in Rust.
+Moniker: ty
+Tags:
+- python
+ReleaseNotes: |-
+  Breaking changes
+  - ty now prefers the declared type of an annotated assignment in more situations (#24802).
+    Consider this example:
+    from some_library import untyped_function
+    threshold: int | None = 0
+    result: str = untyped_function()
+    ty previously favored the inferred type of the right hand side expression when threshold and result were used. This is useful for threshold, as it allows something like threshold += 1 to work without an error: we know that threshold could later become None, but right now, we see that it is an int. However, for result, the inferred type is Unknown. This is not a useful type and it can lead to false negatives. Starting with this release, ty will therefore prefer
+    the declared type if the inferred and declared types are mutually assignable. In the above example, threshold will still be inferred as int (or rather Literal[1]), but result will now be inferred as str. If you previously added casts to work around this behavior, you should be able to remove them after upgrading.
+
+  Bug fixes
+  - Fix reporting of annotation-only locals as unused (#24811)
+  - Fix project and workspace selection (#24824)
+  - Fix go-to definition for generic classes (#24714)
+  - Fix receiver coloring for aliased decorators (#24884)
+
+  LSP server
+  - Add support for go-to definition in literal enum member inlay hints (#24792)
+  - Add support for "baking" keyword argument inlay hints into the source code (#24667)
+  - Don't allow inlay hint edits when introducing a non global scope symbol (#24797)
+  - Omit semantic highlighting for unresolved symbols (#24718)
+
+  Core type checking
+  - Support narrowing with aliased conditional expressions (#24302)
+  - Model short-circuiting control flow in Boolean expressions (#24458)
+  - Handle finally blocks where all try/except blocks are terminal (#24882)
+  - Detect invalid ClassVar vs instance-attribute overrides (#24767)
+  - Emit diagnostic for invalid uses of Unpack[...] (#24868)
+  - Infer lambda parameter types with Callable type context (#24317)
+  - Support ** unpacking of TypedDict in dict-literal assignments (#24703)
+  - Support Unpack[TypedDict] in **kwargs signatures (#24653)
+  - Treat [*xs] as an irrefutable pattern when matching on Sequence (#24787)
+  - Improve generics solving for unions in invariant positions (#24698)
+  - Improve generics solving for unions when matching against protocols (#24837)
+
+  Diagnostics
+  - Add error context to invalid-return-type diagnostics, invalid-yield diagnostics, attribute assignment diagnostics (#24770, #24771)
+  - Add error context for invalid TypedDict assignments (#24790)
+  - Add error context for invalid intersection type assignments (#24772)
+  - Improve TypedDict to dict assignment error diagnostics (#24768)
+  - Add contextual secondary annotations in more places (#24696)
+  - Include full type in invalid-key diagnostics for unions of TypedDicts (#24693)
+  - Emit more specific diagnostics for "possibly unbound" errors from context manager dunder methods invoked on a union. (#24662)
+  - Remove duplicate invalid-type-form diagnostics for PEP-613 type alias values (#24760)
+  - Improve diagnostics for implicit calls to a possibly unbound unary operator (#24816)
+  - Improve diagnostics for possibly-unbound errors from implicit dunder calls on unions (#24676)
+
+  Performance
+  - Optimize signature checking based on number of arguments (#24674)
+  - Defer union of parameter types (#24756)
+  - Skip checks for gradual vararg calls (#24748)
+
+  Other changes
+  - Fix notifications about watched changes for entities outside any workspace (#24775)
+
+  Contributors
+  - @MatthewMckee4
+  - @lerebear
+  - @tonyxwz
+  - @sharkdp
+  - @felixscherz
+  - @MichaReiser
+  - @tamird
+  - @ibraheemdev
+  - @AlexWaygood
+  - @denyszhak
+  - @charliermarsh
+  - @mtshiba
+  - @EliteTK
+  - @carljm
+ReleaseNotesUrl: https://github.com/astral-sh/ty/releases/tag/0.0.33
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://docs.astral.sh/ty/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

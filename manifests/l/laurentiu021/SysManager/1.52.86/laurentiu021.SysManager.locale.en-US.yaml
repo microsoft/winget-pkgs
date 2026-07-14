@@ -1,0 +1,44 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: laurentiu021.SysManager
+PackageVersion: 1.52.86
+PackageLocale: en-US
+Publisher: laurentiu021
+PublisherUrl: https://github.com/laurentiu021
+PublisherSupportUrl: https://github.com/laurentiu021/SystemManager/issues
+PackageName: SysManager
+PackageUrl: https://github.com/laurentiu021/SystemManager
+License: MIT
+LicenseUrl: https://github.com/laurentiu021/SystemManager/blob/HEAD/LICENSE
+ShortDescription: Modern Windows system toolkit — network monitor, performance tuning, cleanup, battery health, process manager, and more.
+Description: |-
+  SysManager is a modern Windows system toolkit built with WPF and .NET 10.
+  It provides a comprehensive set of tools in a single application including
+  live network monitoring, ping and traceroute, speed tests, performance tuning
+  with power plan management, deep disk cleanup, duplicate file finder, disk
+  analyzer, battery health monitoring, process manager, app uninstaller,
+  startup control, Windows services manager, Windows features manager, driver
+  information, and system health overview.
+Tags:
+- battery
+- cleanup
+- dotnet
+- network-monitor
+- open-source
+- performance
+- process-manager
+- system-utility
+- uninstaller
+- windows
+- wpf
+ReleaseNotes: |-
+  [1.52.86] - 2026-07-10
+  Fixed
+  - On a PC without winget (App Installer), the App Updates and Uninstaller tabs popped a raw OS-error dialog on their first action instead of a friendly message. All winget calls launch winget.exe via Process.Start; when App Installer isn't present or its execution alias is off (common on older/LTSC/Server machines), that throws Win32Exception ("The system cannot find the file specified"). AppUpdatesViewModel.ScanAsync, AppUpdatesViewModel.UpgradeSelectedAsync, and UninstallerViewModel.ScanAsync caught only OperationCanceledException/InvalidOperationException, so the Win32Exception escaped the generated AsyncRelayCommand to the global dispatcher handler and surfaced as a bare OS-error dialog on the tab's very first action. (The sibling UninstallerViewModel.UninstallSelectedAsync already handled this — a missed migration of that fix.) All three now catch Win32Exception and show a shared plain-language message ("winget (App Installer) isn't available on this PC — install "App Installer" from the Microsoft Store to use this tab."). The upgrade batch stops on the first Win32Exception (winget won't reappear mid-run) and keeps the friendly message instead of a misleading "Updated 0 of N" summary.
+  Verify the download
+  Get-FileHash .\SysManager-v1.52.86.exe -Algorithm SHA256
+  Expected SHA256: 7191E5552CE9C10F04B3E2458814BF0A19A618CE676581BCEE020280080F7D69
+ReleaseNotesUrl: https://github.com/laurentiu021/SystemManager/releases/tag/v1.52.86
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
