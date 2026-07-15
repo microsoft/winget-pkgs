@@ -1,0 +1,66 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: axpnet.AeroFTP
+PackageVersion: 4.1.5
+PackageLocale: en-US
+Publisher: axpnet
+PublisherUrl: https://github.com/axpnet
+PublisherSupportUrl: https://github.com/axpnet/aeroftp/issues
+Author: axpnet
+PackageName: AeroFTP
+PackageUrl: https://github.com/axpnet/aeroftp
+License: GPL-3.0
+LicenseUrl: https://github.com/axpdev-lab/aeroftp/blob/HEAD/LICENSE
+ShortDescription: A modern, multi-protocol file manager and FTP client with integrated AI, cloud sync, and military-grade encryption.
+Description: |-
+  AeroFTP is an open-source, multi-protocol file manager built with Tauri 2 (Rust + React 18 + TypeScript).
+  It supports 16 protocols (FTP, FTPS, SFTP, WebDAV, S3, Google Drive, Dropbox, OneDrive, MEGA, Box, pCloud, Azure Blob, 4shared, Filen, Zoho WorkDrive, and Cryptomator vaults),
+  features an AI assistant with 45 tools and 15 LLM providers, military-grade encrypted vaults (AES-256-GCM-SIV + Argon2id),
+  bidirectional real-time sync, a built-in code editor, SSH terminal, and media player with visualizers.
+  Available in 47 languages with 4 themes.
+Moniker: aeroftp
+Tags:
+- cloud-storage
+- encryption
+- file-manager
+- file-transfer
+- ftp
+- ftp-client
+- multi-protocol
+- rust
+- s3
+- sftp
+- sync
+- tauri
+- webdav
+ReleaseNotes: |-
+  [4.1.5] - 2026-07-15
+  Non-Identical Duplicate Detection, Restartable Transfers and AeroCrypt Portability
+  Find Duplicates gains near-duplicate detection across images, text and arbitrary payloads, exposed in the GUI, CLI and agent tools and always opt-in. The transfer queue now survives an app restart, bringing interrupted transfers back as re-queueable Restored items. AeroCrypt gains portability and safety work: an advanced default-salt mode, a shared .aerocrypt.tsv marker with verified migration, an offline Emergency Kit validity check, and a missing headed marker rebuilt from the local keystore. Password Forge becomes always-discoverable with reusable presets and honest 2FA-secret handling, classic rsync animates a live progress bar, and the CLI honours machine-mode and banner environment variables consistently. 47 languages translated.
+  Added
+  - Non-identical duplicate detection across the engine, GUI, CLI and agent tools: a shared engine routes raster images through pHash, text including SVG through SimHash with a MinHash cross-check, and any other payload through pure-Rust TLSH; the GUI and CLI expose Exact and Non-identical modes, local_find_duplicates delegates to the shared engine with similarity metadata, and aeroftp_dedupe / remote_dedupe support non-identical staging with similarity and distance while preserving the remote exact SHA-256 fast path. Non-identical mode is opt-in and never auto-selects files for deletion (@EhudKirsh, #383).
+  - The transfer queue survives an app restart: interrupted queue items are journaled atomically to aeroftp_data_root/transfer-queue/queue.json as re-executable descriptors, and on the next launch any transfer that was still pending or in flight comes back as a re-queueable "Restored" item with a Retry action. Restored items do not auto-start or auto-reconnect: after you reconnect to the same server, Retry re-runs them through the normal transfer path. Verified live end to end (persist, restart, restore, real re-upload of a 100 MB file). Per-provider byte-range resume stays deferred.
+  - AeroCrypt default-salt portability and TSV marker migration: default-salt mode is an advanced opt-in with a password-strength gate, explicit attestation and salt-mode MAC binding, and the recovery kit gains QR export controls; new headed markers write .aerocrypt.tsv while the legacy .aeroftp-crypt.json stays readable, and CLI and GUI migration verifies the new marker before deleting the old one (@EhudKirsh, #276).
+  - Emergency Kit validity check (crypt kit-verify and GUI Verify): a saved kit text, QR dump, .aerocrypt.tsv or legacy .aeroftp-crypt.json can be re-parsed offline and checked against the active profile keystore (vault id, salt, version, KDF) without a recovery drill or password, from the CLI crypt kit-verify, the Tauri aerocrypt_verify_recovery_kit command and the Recovery Kit modal Verify action with native Save and Print (@EhudKirsh, #276).
+  - Password Forge and encrypted-provider credential hardening: Security Tools is always discoverable, the generator supports reusable presets including Compatible 32, granular and custom character sets, exclusions, guaranteed selected groups, batch generation and live entropy, and inline generation covers AeroVault, encrypted overlays and protected archives. Saved Filen and MEGA 2FA secrets are demoted behind a collapsed advanced disclosure with an honest warning, Filen bridge credentials enforce the documented 32-character restrictions, and MD5/SHA-1 are marked legacy (@EhudKirsh, #266, #369).
+  - CLI machine mode via AEROFTP_MACHINE: a truthy AEROFTP_MACHINE enables machine and agent output mode as an equivalent to --machine, resolved right after argument parsing so agents and CI no longer repeat the flag on every call.
+  Changed
+  - AEROFTP_NO_BANNER realigned to the strict_env_truthy convention: it now matches AEROFTP_STRICT and AEROFTP_MACHINE, so only 1, true, yes or on suppress the banner, and =0 or =false no longer do.
+  - The Linux release workflow retries transient Tauri AppImage helper downloads: the bundling step retries the helper fetch that occasionally fails mid-build, reducing spurious red Build runs.
+  Fixed
+  - Emergency Kit recovery wording no longer contradicts itself: the printed kit and the recovery-kit panel told the user both to save the kit "together with your password" and to "NEVER store the password alongside this kit". The copy now separates the functional requirement (the kit and the password are both needed to recover a vault, neither one alone can open it) from the security rule (keep them in separate places), retranslated across all 46 non-EN locales (@EhudKirsh, #276).
+  - A missing headed marker is rebuilt from the local keystore with a one-shot lockout warning: when a headed vault's remote marker is gone, unlock no longer silently degrades to headerless; the marker is restored from the keystore and the user is told not to delete it again. Profile withHeader is plumbed end to end, and legacy JSON to TSV conversion is opt-in from the AEROCRYPT badge menu when the JSON is still present (@EhudKirsh, #276).
+  - Classic rsync transfers animate a live progress bar instead of jumping at the end: the classic rsync path (system rsync with --info=progress2) parsed live progress lines but dropped them, so a delta transfer over that path showed no movement until the final summary; the existing progress sink is now threaded through RsyncBinaryTransport into run_rsync and called on each parsed line, matching the native delta path.
+  - A drive attached while AeroFTP is in the background now appears in the PLACES sidebar on window focus: on Windows and macOS the volume watcher falls back to a 30s poll (real-time inotify is Linux-only), so a freshly attached drive could take up to 30s to show; AeroFile now refetches mounted volumes and unmounted partitions on window focus. Linux is unaffected (@EhudKirsh, #351).
+  Security
+  - Credential and marker hardening. Default-salt mode binds the salt mode into the MAC so a silent downgrade is detected, the missing-marker rebuild is fail-closed (it restores from the local keystore rather than silently opening headerless), and saved 2FA secrets are demoted behind an honest advanced disclosure. The dependency review was clean: cargo audit reported no advisories over 1206 crate dependencies and npm audit reported no production vulnerabilities.
+  Contributors
+  @EhudKirsh
+  Downloads:
+  - Windows: .msi installer, .exe, or .zip portable (no installation required)
+  - macOS: .dmg disk image
+  - Linux: .deb, .rpm, .snap, or .AppImage
+ReleaseNotesUrl: https://github.com/axpdev-lab/aeroftp/releases/tag/v4.1.5
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
