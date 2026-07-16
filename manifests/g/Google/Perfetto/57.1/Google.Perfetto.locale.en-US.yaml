@@ -1,0 +1,93 @@
+# Created with WinGet Updater using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Google.Perfetto
+PackageVersion: '57.1'
+PackageLocale: en-US
+Publisher: Google
+PublisherUrl: https://github.com/google
+PublisherSupportUrl: https://github.com/google/perfetto/issues
+PackageName: Perfetto
+PackageUrl: https://github.com/google/perfetto
+License: Apache-2.0
+LicenseUrl: https://github.com/google/perfetto/blob/HEAD/LICENSE
+ShortDescription: Performance instrumentation and tracing for Android, Linux and Chrome.
+ReleaseNotes: |-
+  We're excited to share Perfetto v57.1! This release introduces an installable AI skill that teaches coding agents how to use Perfetto, a long-awaited fix for overlapping events in JSON traces (PyTorch profiler, vLLM, and friends), state tracks, a brand-new track type alongside slices and counters, end-to-end support for systemd journald logs, a rework of the query results grid, and new SDK capabilities like nested tracks and correlation ids.
+  > Note: v57.0 was never released due to an issue with the install of the newly introduced AI skill. v57.1 includes a fix for this issue.
+  🤖 An AI skill for Perfetto
+  Perfetto now ships an AI skill that teaches coding agents how to record, query, and analyze traces, including guided workflows for common investigations. It works with any Agent Skills-compatible agent (Claude Code, OpenAI Codex, Gemini CLI, OpenCode, and others) and bundles a working trace_processor for the agent to use:
+  # Claude Code
+  /plugin marketplace add google/perfetto@ai-agents
+  # Codex
+  codex plugin marketplace add google/perfetto --ref ai-agents
+  # Other agents
+  curl -fsSL https://get.perfetto.dev/agents-install | python3 - --agent <opencode|antigravity|pi>
+  See the Using AI with Perfetto docs for agent-specific install paths and what the skill can do.
+  🧩 Overlapping events in JSON traces now work
+  Perfetto now imports overlapping "ph": "X" (complete) events in JSON (Chrome Trace Event Format) traces instead of silently dropping them. This was a long-standing pain point (#4280) for tools which emit overlapping synchronous events, notably traces from the PyTorch profiler and vLLM: the affected slices vanished from both the timeline and SQL, and some users were resorting to self-hosting old versions of the UI. Overlapping events are now ingested onto overflow tracks which the UI merges back into a single thread track, so everything is visible in the timeline and queryable in SQL.
+  overlapping JSON events rendering in the timeline
+  Note that overlapping "X" events remain outside the Trace Event Format spec: the importer records stats naming the offending events (surfaced in the UI's import warnings) so you can flag them to your tracing tool's maintainers. If you maintain such a tool, prefer async ("b"/"e") events, which is how the format natively represents genuinely overlapping intervals.
+  🚦 State tracks
+  Slices and counters have a new sibling: state tracks, a first-class way to record the state of a system or subsystem over time (e.g. "Buffering", "Playing", "Paused"). A state track always has exactly one current value; each event simply transitions it to a new state, and clearing it marks the track as idle.
+  state_tracks
+  You can emit states from all the SDKs:
+  // C++ SDK
+  perfetto::StateTrack track("Player state");
+  TRACE_STATE("player", "Buffering", track);
+  // C SDK (high-level API)
+  PERFETTO_TE(player, PERFETTO_TE_STATE("Buffering"),
+              PERFETTO_TE_REGISTERED_TRACK(&player_state_track));
+  The Android Java SDK gets the same capability. Trace Processor ingests state events into a new state SQL table, and the UI renders state tracks natively with a dedicated details panel.
+  📜 systemd journald logs
+  Linux system logs can now be captured as part of a trace, end to end:
+  - A new linux.systemd_journald data source records journald entries while tracing, with filters for minimum syslog priority, SYSLOG_IDENTIFIERs, and systemd unit names.
+  - Trace Processor stores them alongside Android logcat entries in a unified log table, distinguished by a new log_source column (plus a linux_systemd_journald_logs view in the standard library).
+  - The UI gained a JournaldLog plugin: a logs track on the timeline plus a filterable logs tab (priority, tags, free text).
+  journald
+  🖥️ UI
+  The query results grid got a big upgrade: columns can be sorted, reordered, and hidden, the sidebar is collapsible, and SQL errors are now surfaced properly in the grid.
+  query_grid
+  - Shift + mouse-wheel scrolls the timeline horizontally.
+  - The Heap Dump Explorer now opens by default on more traces, keeps its state in shared permalinks, and shows oom_score_adj in the overview.
+  - Saved custom textproto record configs can be re-opened and edited.
+  - Adjacent slices that share a boundary timestamp now render with a 1px gap, so back-to-back instances of the same slice are visually distinguishable.
+  - A new smaps plugin shows an instants track with a datagrid details panel for traces containing /proc/<pid>/smaps data.
+  - A new opt-in Arm Telemetry Solution plugin adds an Arm CPU page (under Support) for loading Arm CPU telemetry specs, which turn raw PMU counters into derived per-CPU metrics (e.g. IPC, cache misses) shown as tracks.
+  🧰 SDK
+  - Nested tracks with sibling ordering and merging in the C SDK high-level ABI and the Android Java SDK (PerfettoTrack): build multi-level track hierarchies and control how sibling tracks are sorted and merged in the UI.
+  - Correlation ids: tag events that belong to the same logical operation without implying a causal link (use flows for those), via PERFETTO_TE_CORRELATION_ID() / PERFETTO_TE_CORRELATION_ID_STR() in the C SDK and PerfettoTrackEventBuilder.setCorrelationId() in the Java SDK.
+  - The TRACE_STATE / PERFETTO_TE_STATE() APIs for state tracks described above.
+  🔬 Profiling
+  heapprofd's process_cmdline now supports partial wildcard matching (e.g. system_* or /system/bin/*), with the same semantics as the perf profiling and Java heap dump data sources. Wildcards only match already-running processes, so configs using them must set no_startup = true.
+  🧠 Trace Processor
+  - trace_processor can now load traces directly from URLs and ui.perfetto.dev permalinks:
+  trace_processor query "https://ui.perfetto.dev/#!/?s=<hash>" "select count(*) from slice"
+  - Track descriptors support explicit thread and process ordering, so producers can control how their processes and threads are sorted in the UI.
+  - The Adreno GPU adreno_cmdbatch_retired and adreno_cmdbatch_sync ftrace events are now parsed into GPU timeline slices.
+  - The perfetto Python package now defaults to a trace_processor binary pinned to the package version instead of downloading the latest build at runtime, making analysis scripts reproducible. Opt back into the old behavior with TraceProcessorConfig.fetch_latest_trace_processor.
+  ⚙️ Tracing service & probes
+  - The RelayPort IPC service (multi-machine tracing) is now only exposed on producer sockets that explicitly opt in; the new --enable-relay-endpoint-on=<sock> flag enables it per-socket, while --enable-relay-endpoint keeps its existing semantics.
+  - New ftrace events: psci_domain_idle_enter / psci_domain_idle_exit for finer-grained CPU power-state insight than cpu_idle alone, plus disp_dpu_line_underrun and panel settings events.
+  - The Windows ETW data source now supports system_io_provider_events.
+  🛠️ v57.1 patch fixes
+  - AI: Fixed the AI skill missing its bundled trace_processor wrapper. The wrapper now ships inside the skill directory itself, for every install method and agent.
+  Happy Tracing!
+  A huge thanks to everyone, both inside and outside of Google, who contributed to making Perfetto v57 a success. ♥️
+  New Contributors
+  - @chrislu0129 made their first contribution in #6012
+  - @harshitrawatjgd made their first contribution in #5983
+  - @zzl360 made their first contribution in #6048
+  - @Piotrek605 made their first contribution in #6089
+  - @yuzhy8701 made their first contribution in #6161
+  - @BogdanLionte made their first contribution in #6175
+  - @abhmen01 made their first contribution in #5284
+  - @fmeawad made their first contribution in #6279
+  - @noamraph made their first contribution in #6264
+  - @shaybarak made their first contribution in #6278
+  For complete details, see the changelog or view all changes on GitHub.
+  Download Perfetto v57.1 from our releases page, get started at docs.perfetto.dev, or try the UI directly at ui.perfetto.dev.
+  Full Changelog: v56.1...v57.1
+ReleaseNotesUrl: https://github.com/google/perfetto/releases/tag/v57.1
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

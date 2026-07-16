@@ -53,6 +53,7 @@
     # Modules that must be imported into the global environment prior to importing this module
     RequiredModules = @(
         'VirtualTerminal' # Required for virtual terminal support
+        'FileOperations'
     )
 
     # Assemblies that must be loaded prior to importing this module
@@ -71,6 +72,7 @@
     NestedModules = @(
         'YamlCreate.InstallerDetection'
         'YamlCreate.Menuing'
+        'YamlCreate.GitHub'
     )
 
     # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
@@ -90,8 +92,10 @@
 
     # List of all modules packaged with this module
     ModuleList = @(
+        'FileOperations'
         'YamlCreate.InstallerDetection'
         'YamlCreate.Menuing'
+        'YamlCreate.GitHub'
     )
 
     # List of all files packaged with this module
@@ -137,4 +141,3 @@
     # DefaultCommandPrefix = ''
 
 }
-

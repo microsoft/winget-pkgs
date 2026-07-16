@@ -1,0 +1,51 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: rizukirr.apic-gui
+PackageVersion: 0.4.0
+PackageLocale: en-US
+Publisher: Rizki Rakasiwi
+PublisherUrl: https://github.com/rizukirr
+PublisherSupportUrl: https://github.com/rizukirr/apic/issues
+Author: Rizki Rakasiwi
+PackageName: apic-gui
+PackageUrl: https://github.com/rizukirr/apic
+License: MIT
+LicenseUrl: https://github.com/rizukirr/apic/blob/main/LICENSE
+Copyright: Copyright (c) Rizki Rakasiwi
+ShortDescription: Desktop GUI for apic — design and collaborate on Git-friendly API contracts.
+Description: apic-gui is the desktop front-end for apic, built on the shared apic-core, for designing, validating, and collaborating on API contracts with a graphical interface.
+Moniker: apic-gui
+Tags:
+- api
+- contract
+- gui
+- json
+- rest
+ReleaseNotes: |-
+  A large release: a simplified, breaking contract format plus full redesigns of both the TUI and the desktop GUI editors around it.
+  Changed
+  - Contract format (breaking). The request URL is now a single free-form string ("url": "https://api.example.com/v1/users/{id}") with inline {name} path tokens, replacing the old structured URL object. Query parameters are { name, value, description, required }, both query parameters and headers gain a required flag, and each response can carry its own headers. A request body is the raw JSON payload written directly under request, and a response body is written under the response's schema key. The old type/schema field-level model and the { "example": ... } body wrapper are gone.
+  - User-facing messages use commas instead of semicolons and em-dashes.
+  - TUI editing, redesigned. The endpoint header is one inline-editable METHOD url line; the method is chosen from a picker popup instead of cycling. QUERY and HEADERS are NAME/VALUE(/DESCRIPTION) tables. RESPONSE is a code - title tab strip: a opens a Status / Short Description form and then the JSON editor, e edits a tab's status/title (or opens the editor on its body), and d removes a response. The JSON editor saves with Ctrl-S, cancels with Esc, and pretty-prints with Ctrl-P; saving an empty body removes its response.
+  - Desktop GUI, redesigned. A single tabbed editor (Overview, Headers, Query, Request, Response) with a line-numbered JSON editor, metadata tables carrying a Required/Optional chip, editable response-code tabs, frameless inline inputs, and a calmer green theme.
+
+  Added
+  - The HTTP method is selected from a dropdown in the GUI (and a picker popup in the TUI) listing all methods, rather than cycling one click at a time.
+  - A required flag on request headers and query parameters, surfaced across the CLI/TUI/GUI, the Postman converter, and the project template.
+  - Response-level headers, editable in both the TUI and the GUI.
+  - apic convert --postman gains a --force flag to overwrite contracts thatalready exist. The default still refuses (erroring on an existing file), and the error now points to --force.
+  - Refreshed bundled example/ project (authentication/ and profile/ sets).
+
+  Removed
+  - The structured body schema, type, field schema, typed fields, properties, file/accept parts, and object[] array bodies, along with the structured URL object. Request and response bodies are now raw JSON payloads (the request written directly under request, a response under schema).
+  - apic read --example (bodies are already example-only) and the TUI schema generate/infer keys, which no longer have a schema to operate on.
+
+  Fixed
+  - GUI: the sidebar method badge now refreshes when a contract is saved.
+  - GUI: warn when installing a per-user launcher entry would duplicate an existing system-wide apic entry.
+  - TUI: numerous editing-correctness fixes (method focus on the url line, modal key handling after close, selected response-tab text color, empty-row cleanup).
+  - Windows: statically link the MSVC CRT so binaries run without VCRedist, and install apic-gui.exe at the MSI root so winget resolves the executable.
+ReleaseNotesUrl: https://github.com/rizukirr/apic/releases/tag/v0.4.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
