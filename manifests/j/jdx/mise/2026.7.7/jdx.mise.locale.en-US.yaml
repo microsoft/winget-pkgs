@@ -1,0 +1,61 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: jdx.mise
+PackageVersion: 2026.7.7
+PackageLocale: en-US
+Publisher: jdx
+PublisherUrl: https://en.dev/
+PublisherSupportUrl: https://github.com/jdx/mise
+Author: jdx
+PackageName: mise-en-place
+PackageUrl: https://mise.en.dev/
+License: MIT
+LicenseUrl: https://github.com/jdx/mise/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Jeff Dickey
+CopyrightUrl: https://github.com/jdx/mise/blob/HEAD/LICENSE
+ShortDescription: Your dev env, already prepped.
+Description: Your dev env, already prepped. One tool to manage languages, env vars, and tasks per project, reproducibly.
+Moniker: mise
+Tags:
+- cli
+- dev-tool
+- env
+- environment
+- task
+ReleaseNotes: |-
+  This release extends dependency providers and systemd bootstrap to monorepo and timer-based workflows, and hardens GitHub OAuth token refreshes and cache clearing against concurrent mise processes.
+  Added
+  - deps: experimental mise deps --monorepo runs dependency providers across every explicitly configured [monorepo].config_roots entry, aligned with mise install --monorepo. Provider IDs are qualified by config root (e.g. //apps/api:uv) so repeated provider names across subprojects no longer collide, and mise installs the union of tools declared across participating roots before running providers. Plain mise deps remains scoped to the current config root. (#10975 by @jdx)
+    monorepo_root = true
+    [monorepo]
+    config_roots = ["apps/*", "packages/*"]
+    mise deps --monorepo
+    mise deps --monorepo --only //apps/api:uv
+  - bootstrap: manage systemd user timers alongside services via [bootstrap.linux.systemd.units]. Timer entries render to .timer units with scheduling (on_boot_sec, on_unit_active_sec, on_unit_inactive_sec, on_calendar), persistence, and timers.target linkage. Services gain optional directives including type, remain_after_exit, exec_stop, start/stop timeouts, no_new_privileges, and private_tmp. When a unit name switches between service and timer, the stale sibling unit is stopped, disabled, and removed on apply. (#10984 by @jdx)
+
+  Fixed
+  - github: serialize OAuth token refreshes across mise processes. Single-use refresh tokens were only guarded by an in-process mutex, so parallel mise runs could burn the same token or overwrite the cache with stale data. The full read-refresh-write cycle now holds a filesystem lock, re-reads the cache after acquiring it, and writes atomically. Rejected refreshes now surface a sanitized error with reauthorization guidance instead of falling back silently to anonymous requests. (#10995 by @jdx)
+  - cache: mise cache clear no longer fails with DirectoryNotEmpty when another mise process (e.g. hook-env) recreates cache files mid-removal. Removal now retries with bounded backoff and tolerates concurrently recreated entries, while permission and other errors still propagate. (#10993 by @jdx)
+  - github: skip OS package and installer assets (.apk, .deb, .rpm, DMG/PKG, MSI/MSIX/AppX and sidecars) during automatic asset selection for the github:, gitlab:, and forgejo: backends, so releases containing only unsupported packages now report that no platform asset matches instead of installing an unusable file. Explicit asset_pattern and URL selection are unchanged. (#11001 by @risu729)
+  - aqua: honor explicit false overrides for rosetta2, windows_arm_emulation, and no_asset, so a version or platform override can disable inherited emulation or asset flags instead of being treated as omitted. (#11002 by @risu729)
+  - vfox: support short annotated-tag refs in plugin source URLs (e.g. a .git URL followed by #v1.0.0), resolving explicit refs against exact remote branch and tag namespaces so annotated tags no longer fail to check out. (#10998 by @junior-ricon)
+  - task: render Tera templates in nested task-level tool option arrays and tables, and preserve their structure through resolution instead of dropping structured values. (#10960 by @risu729)
+  - bootstrap: add Homebrew-compatible Array#second, #third, #fourth, and #fifth helpers to the cask shim, fixing casks (such as OrbStack) that reference version.csv.second. (#10992 by @casparbreloh)
+  - status: status.show_env output now respects the status.truncate setting instead of always truncating. (#10983 by @ytjmt)
+  - schema: add bootstrap.macos.launchd.agents.<name>.start_calendar_interval to the published schema (single schedule or array), so strict TOML validators and editors accept valid launchd calendar configurations. (#11008 by @risu729)
+
+  Registry
+  - Add microsandbox (aqua:superradcompany/microsandbox) (#10985 by @joealden).
+
+  New Contributors
+  - @junior-ricon made their first contribution in #10998
+  - @ytjmt made their first contribution in #10983
+  - @casparbreloh made their first contribution in #10992
+
+  💚 Sponsor mise
+  mise is maintained by @jdx, an open source developer for entire.io, the title sponsor of the jdx.dev open source tools. Development is funded by sponsors.
+  If mise saves you or your team time, please consider sponsoring at jdx.dev. Individual and company sponsorships keep mise fast, free, and independent.
+ReleaseNotesUrl: https://github.com/jdx/mise/releases/tag/v2026.7.7
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

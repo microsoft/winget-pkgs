@@ -1,0 +1,92 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: can1357.oh-my-pi
+PackageVersion: 16.0.11
+PackageLocale: en-US
+Publisher: Can Bölük
+PublisherUrl: https://can.ac/
+PublisherSupportUrl: https://github.com/can1357/oh-my-pi/issues
+Author: Can Bölük
+PackageName: oh-my-pi
+PackageUrl: https://omp.sh/
+License: MIT
+LicenseUrl: https://github.com/can1357/oh-my-pi/blob/HEAD/LICENSE
+Copyright: |-
+  Copyright (c) 2025 Mario Zechner
+  Copyright (c) 2025-2026 Can Bölük
+ShortDescription: ⌥ AI Coding agent for the terminal — hash-anchored edits, optimized tool harness, LSP, Python, browser, subagents, and more
+Description: |-
+  omp is a terminal-first coding agent that runs on your machine, talks to any provider, and treats sessions like git branches.
+  omp (pronounced “oh-em-pi”, binary omp) is a fork of Mario Zechner’s Pi. It runs as a single Bun process, drives any model provider you have credentials for, and ships a flat tool surface the model uses to read code, run commands, edit files, drive a debugger, and spawn subagents that coordinate over an in-process IRC bus.
+  Sessions persist as JSONL under ~/.omp/agent/sessions/. You resume, fork, branch, and share them. Settings, credentials, plugins, and caches all live under ~/.omp/agent/. Nothing leaves the machine unless you call a tool that does.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  @oh-my-pi/pi-agent-core
+  Changed
+  - Updated the display format for truncated file operation summaries
+  @oh-my-pi/pi-coding-agent
+  Added
+  - Added __advisor.jsonl transcript persistence for advisor model usage attribution and visibility in the Agent Hub
+  - Added defensive reservation against naming a task __advisor to prevent filesystem collisions with internal transcripts
+  - Added mode property to the CompactOptions interface for extension-based compaction control
+  - Updated /compact slash command to support soft, remote, and snapcompact subcommands for per-run strategy overrides
+  - Added /compact mode subcommands so a manual compaction can override the configured compaction.strategy/remoteEnabled for that one run: /compact soft (summarize locally, skip remote endpoints), /compact remote (summarize via the remote endpoint / provider-native compaction; warns and falls back to a local summary when no remote path is available), and /compact snapcompact (archive history onto dense bitmap images, no LLM call). Bare /compact and /compact <focus text> keep their existing behavior; soft/remote still accept trailing focus instructions, snapcompact rejects them. The subcommands are advertised to ACP clients and surface in TUI autocomplete. Extensions can pass the same selection via compact(instructions, { mode }).
+  - The advisor now persists its own turns to a subagent-style transcript (<session>/__advisor.jsonl) so the advisor model's usage is attributed in omp stats and its transcript is observable in the Agent Hub (read-only). The transcript follows session switches (/new, resume, branch) and is drained/released before a /drop deletes the old artifacts dir. The advisor remains a non-peer: it is hidden from agent-facing rosters (irc list, history://, subagent peer prompt, broadcast targets), is not messageable (irc send / collab chat), and is not revivable/killable from the Hub or collab.
+  Changed
+  - Standardized file elision markers to a compact […Nln elided…] format
+  - Updated transcript viewer to clear cached content if the session file is deleted while opened
+  - Refactored agent hub to use a fullscreen overlay for agent transcripts instead of inline chat
+  - Improved transcript rendering stability by using a non-incremental builder for viewer replays
+  - Advisor transcripts are now excluded from agent-facing surfaces like irc, history://, and peer rosters
+  - Advisor transcripts are read-only and cannot be messaged, revived, or killed via the Agent Hub or IRC
+  - Refined /compact argument parsing to reject focus instructions for modes that do not support them (e.g., snapcompact)
+  - Protocol hosts (RPC/rpc-ui/ACP) now host-default the full advisor settings group — advisor.syncBacklog and advisor.immuneTurns in addition to advisor.enabled/advisor.subagents — so a host that opts the advisor in gets the default tuning instead of inheriting the user's local advisor preferences.
+  Fixed
+  - Fixed memory-leaking stale transcripts in the agent viewer when underlying files are deleted
+  - Fixed the Agent Hub transcript viewer rendering the transcript body one column right of the "Agent Hub" title (and the title appearing to shift when scrolled to the top): the fullscreen viewer added its own outer gutter on top of the transcript rows, which already carry a 1-column left pad, so the header and body no longer shared a gutter. The viewer now renders the scroll body at full width without the extra gutter, and the file-mention row carries the same 1-column pad as every other row.
+  - Fixed the bash tool failing with pi-natives:command: syntax error at end of input on a valid &&/; chain whose later pipeline stage is a compound command, e.g. echo x && git log | while read h; do …; done | head. The minimizer's segmented-chain runner rebuilds each chain segment from the brush AST via pipeline.to_string() and re-executes that string, but simple_segment only validated the first pipeline stage — so a compound later stage (while/for/if/subshell) was re-serialized without its terminator and re-run as broken shell. Every stage is now required to be a Display-safe simple command, and — as a general guard against the recurring class of brush Display round-trip divergences (previously: quoted here-doc close tags, multi-byte char/byte offsets) — each reconstructed segment is now re-parsed and must match the original pipeline shape before the chain runner executes it; any divergence runs the command whole, unsegmented, instead of corrupting it.
+  - Fixed Ctrl+T (toggle thinking blocks) and the /settings "Hide Thinking Blocks" toggle only collapsing/expanding thinking in the live region: blocks that had scrolled into committed native scrollback on ED3-risk terminals kept their pre-toggle snapshot, so scrolling up showed the old thinking state. Both paths now resetDisplay() after flipping each block's flag, forcing a full clear + replay of the whole transcript (matching the tool-output expansion toggle) so every block above the fold re-renders at its new height.
+  - Fixed ACP mobile voice settings being unable to call speech.models.list by exposing the local STT/TTS model and voice catalog without triggering setup or downloads (#3011).
+  - Fixed the collapsed inline arg preview used by tools without a custom renderer (e.g. advise, MCP tools) truncating every value at a fixed 24 columns, so a long note was cut to note="Your “stric…" even on a wide card with empty space to spare. Each value now grows into the width the card actually has, reserving only a small slice for the keys that still follow so a long leading value can't hide them.
+  Removed
+  - Removed display.tabWidth setting and configurable tab width support
+  @oh-my-pi/pi-natives
+  Fixed
+  - Fixed native shell execution reporting pi-natives:command: syntax error at end of input for a valid &&/; chain whose later pipeline stage is a compound command, e.g. echo x && git log | while read h; do …; done | head. The output minimizer's segmented-chain runner rebuilds each chain segment from the brush-parser AST via pipeline.to_string() and re-executes that string, but simple_segment only validated the first pipeline stage — so a compound later stage (while/for/if/subshell) was re-serialized without its terminator (Display drops it) and re-run as broken shell. simple_segment now requires every stage to be a Display-safe simple command, and — closing the recurring class of brush Display round-trip divergences (here-doc close-tag quoting, multi-byte char/byte offsets) at its root — each reconstructed segment is re-parsed and must match the original pipeline shape before the chain runner executes it; any divergence runs the command whole via the unsegmented path instead of corrupting it.
+  @oh-my-pi/snapcompact
+  Changed
+  - Refined elision markers for file operations and truncated text for better display consistency
+  - Updated summary text for consistent descriptions of archived tool output
+  - Folded a much wider range of Unicode to ASCII in normalize() before native rendering: added a per-character Unicode NFKD decomposition fallback (fullwidth forms, super/subscripts, ligatures, circled and math-styled alphanumerics, Roman numerals, vulgar fractions) and expanded the CHAR_FOLD punctuation table (more quotes/primes, hyphens, the fraction slash, dot leaders, bullets, and arrows) so undrawable glyphs land on close ASCII equivalents instead of ?
+  @oh-my-pi/pi-tui
+  Breaking Changes
+  - Removed getIndentation and getIndentationNoescape exported utilities
+  - Tab-related operations no longer respect per-file or globally configured indentation settings
+  Changed
+  - Standardized tab expansion to use a fixed display width instead of configurable settings
+  - Removed support for custom tab width configuration in text rendering and input handling
+  Fixed
+  - Corrected logic in string truncation to prevent improper truncation of short strings
+  - Fixed a one-frame transcript flash during a non-multiplexer resize drag: while the drag borrowed the alternate screen and painted only the viewport, any ordinary (non-forced) render from a still-animating block — a tool spinner tick, a streamed token, a cursor blink — fell through to the deferred geometry-rebuild full paint, which left the alternate screen to repaint the whole transcript on the normal screen for a single frame before the next SIGWINCH re-entered the viewport fast path, so a live tool block flashed in and vanished. Ordinary renders mid-drag now stay on the viewport fast path; only forced renders (tool finalization, reset, image reconciliation) still preempt it.
+  @oh-my-pi/pi-utils
+  Removed
+  - Removed getIndentation, setDefaultTabWidth, and getDefaultTabWidth helpers
+  What's Changed
+  - fix(acp): list local speech models for mobile by @roboomp in https://github.com/can1357/oh-my-pi/pull/3013
+  Full Changelog: https://github.com/can1357/oh-my-pi/compare/v16.0.10...v16.0.11
+ReleaseNotesUrl: https://github.com/can1357/oh-my-pi/releases/tag/v16.0.11
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://omp.sh/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

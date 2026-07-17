@@ -1,0 +1,59 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: endev.aube
+PackageVersion: 1.19.0
+PackageLocale: en-US
+Publisher: en.dev
+PublisherUrl: https://en.dev/
+PublisherSupportUrl: https://github.com/endevco/aube/discussions/categories/troubleshooting-and-bugs
+Author: en.dev
+PackageName: aube
+PackageUrl: https://aube.en.dev/
+License: MIT
+LicenseUrl: https://github.com/endevco/aube/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 en.dev inc
+CopyrightUrl: https://github.com/endevco/aube/blob/HEAD/LICENSE
+ShortDescription: A fast Node.js package manager
+Description: |-
+  aube is a package manager for Node.js projects. It uses pnpm-style isolated node_modules for fast, disk-efficient installs.
+
+  Existing projects keep their lockfile format. aube reads and writes pnpm-lock.yaml, package-lock.json, npm-shrinkwrap.json, yarn.lock, and bun.lock in place. New projects without a supported lockfile get aube-lock.yaml.
+
+  Why Try It
+  - Fast installs. Warm installs are about 8x faster than pnpm and about 5x faster than Bun in the current benchmarks. Repeat test commands run up to 35x faster than pnpm and up to 5x faster than Bun.
+  - Existing lockfiles. Reads and writes pnpm-lock.yaml, package-lock.json, npm-shrinkwrap.json, yarn.lock, and bun.lock in place.
+  - Cheap repeat commands. aubr test, aube test, and aube exec vitest auto-install when dependencies are stale, then skip that work when nothing changed. aubx uses a local binary when one is installed, or a throwaway environment for one-off tools.
+  - Less disk use. A global content-addressable store lets projects share package files instead of keeping a full copy of the same dependencies in every checkout.
+  - Secure defaults. Out of the box, exotic transitive deps are blocked, lifecycle scripts wait for approval, trust downgrades fail at resolve, and brand-new releases sit in a 24h cooling window. One paranoid: true line adds the build jail and turns the soft gates into hard fails.
+Moniker: aube
+ReleaseNotes: |-
+  The headline feature: aube now manages your project's Node.js version and aube's own version directly — no shims, no shell activation, no corepack dance. Pin Node via devEngines.runtime, .node-version, or .nvmrc and aube injects the right binary at every script and binary spawn. Pin aube via packageManager and aube re-execs itself under the requested version. Plus three install/scripts fixes around build approvals and override warnings.
+  Added
+  - Node runtime switching (#861 by @jdx) — Projects can pin Node through devEngines.runtime (pnpm 10.14+/11 compatible OpenJS spec), .node-version, or .nvmrc (searched upward, stopping at $HOME). Exact versions, ranges, lts, latest, and codenames like lts/jod all resolve. Resolution is zero-network on the hot path: PATH node → installed versions (mise installs at ~/.local/share/mise/installs/ reused read-only, plus aube's own ~/.local/share/aube/nodejs/) → download per the new runtimeInstaller setting (auto|mise|aube; auto delegates to mise install node@<exact> when mise is on PATH, falling back to a SHASUMS256-verified nodejs.org download honoring nodeDownloadMirrors.release). The switched Node is injected into aube run/aubr, aube exec (including node env shebangs), aubx/dlx (resolved from the original cwd), root + dep lifecycle scripts, and the build jail — and exported as npm_node_execpath/NODE. Projects with no pin behave exactly as before, with no node --version probe.
+    // package.json
+    {
+      "devEngines": {
+        "runtime": { "name": "node", "version": "22.11.0", "onFail": "error" }
+      }
+    }
+    Engines interplay: engines.node/engineStrict now validate against the switched node. The new runtimeOnFail setting (download|error|warn|ignore) is the air-gapped-CI override; version files default to download, bare devEngines to the spec's error. Lockfile pins use pnpm 10.14+'s exact node@runtime: shape with per-platform URLs and sha256- integrity — and parsing them doubles as a compat fix for pnpm-11 lockfiles aube previously misread as registry deps.
+  - aube runtime CLI (#861 by @jdx) — aube runtime set node <version> (pnpm 11 parity — writes devEngines, installs, records the pin; -g delegates to mise use -g) and aube runtime list. aube doctor gains node-source, node-requested, node-provenance, and node-bin rows.
+    aube runtime set node 22.11.0
+    aube runtime list
+  - aube self-version switching (#861 by @jdx) — managePackageManagerVersions (previously a documented no-op, default on, pnpm 10 parity) now re-execs aube under the version requested by devEngines.packageManager (ranges) or packageManager: "aube@<exact>". The switch happens before dispatch — so aube install and any chained auto-installs run under the pinned binary — and preserves the aube/aubr/aubx multicall name. A guard env degrades a broken install to a warning rather than an exec loop. Self-downloads are verified against GitHub's server-computed release asset digests (assets[].digest, tamper-evident under immutable releases), with release metadata served from mise-versions.jdx.dev (CDN-cached, no rate limits) and falling back to the GitHub API (honoring GITHUB_TOKEN/GH_TOKEN, scoped to api.github.com), .sha256 siblings for custom mirrors, then TLS-only. Setting managePackageManagerVersions=false restores the previous strict-validation behavior. Intel macOS has no published asset and errors with a pointer to mise.
+
+  Fixed
+  - (scripts) Require exact source keys for non-registry build approvals (#858 by @jdx) — Source-backed dependencies (file:, git:, raw tarballs) no longer inherit lifecycle build approval from bare package names or name@semver pins. They must be allowed via an exact source key — e.g. esbuild@file+abc123 — with separate allowed_sources/denied_sources sets in BuildPolicy. Workspace onlyBuiltDependencies by name now correctly skips file: postinstalls until the source key is approved. Graph hashing also folds local source specifiers into the package id, so different file/git bytes at the same manifest version get distinct virtual-store hashes (with cascade to parents).
+  - (scripts) Match pnpm-style URL source keys for build approvals (#860 by @jdx) — Follow-up to #858: non-registry approval keys now use the pnpm-authored shapes (e.g. dep@file:vendor/dep or dep@<tarball-url>) instead of lockfile dep_path bases. allowBuilds keys that mix semver and URL/source specs in a || union are rejected (both orderings) with a clear error. Lifecycle-script docs and the generated allowBuilds settings reference now spell out the exact source-key shapes.
+  - (install) Warn on deprecated $ override refs (#859 by @jdx) — Merged overrides whose values start with pnpm's deprecated $ reference syntax now log WARN_AUBE_OVERRIDE_DOLLAR_REF_DEPRECATED, pointing users toward catalog entries. Resolution and drop behavior are unchanged; the existing WARN_AUBE_OVERRIDE_MISSING_DEP path still runs for unresolved $ refs.
+
+  Changed
+  - Refresh benchmarks for v1.18.2 (#851 by @mise-en-dev) — Public warm-install ratios: vs Bun 7× (unchanged), vs pnpm 9× → 6×. Repeat-test: vs Bun 5× (unchanged), vs pnpm 37× → 29×. Absolute aube warm-install times moved from 272ms → 383ms on the refreshed run.
+
+  💚 Sponsor aube
+  aube is part of jdx.dev — an independent developer-tooling studio run by @jdx, also behind mise. Work on aube is funded entirely by sponsors.
+  If aube is saving your team install time or CI minutes, please consider sponsoring at jdx.dev. Individual and company sponsorships are what keep the project fast, free, and independent.
+ReleaseNotesUrl: https://github.com/jdx/aube/releases/tag/v1.19.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

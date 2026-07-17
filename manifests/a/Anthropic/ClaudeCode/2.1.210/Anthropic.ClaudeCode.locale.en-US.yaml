@@ -1,0 +1,75 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Anthropic.ClaudeCode
+PackageVersion: 2.1.210
+PackageLocale: en-US
+Publisher: Anthropic PBC
+Author: Anthropic PBC
+PackageName: Claude Code
+License: Proprietary
+Copyright: © 2026 Anthropic PBC
+ShortDescription: Unleash Claude’s raw power directly in your terminal. Search million-line codebases instantly. Turn hours-long workflows into a single command. Your tools. Your workflow. Your codebase, evolving at thought speed.
+Description: |-
+  Claude Code is Anthropic’s agentic coding tool that lives in your terminal and helps you turn ideas into code faster than ever before.
+  What Claude Code does for you
+  - Build features from descriptions: Tell Claude what you want to build in plain English. It will make a plan, write the code, and ensure it works.
+  - Debug and fix issues: Describe a bug or paste an error message. Claude Code will analyze your codebase, identify the problem, and implement a fix.
+  - Navigate any codebase: Ask anything about your team’s codebase, and get a thoughtful answer back. Claude Code maintains awareness of your entire project structure, can find up-to-date information from the web, and with MCP can pull from external datasources like Google Drive, Figma, and Slack.
+  - Automate tedious tasks: Fix fiddly lint issues, resolve merge conflicts, and write release notes. Do all this in a single command from your developer machines, or automatically in CI.
+  Why developers love Claude Code
+  - Works in your terminal: Not another chat window. Not another IDE. Claude Code meets you where you already work, with the tools you already love.
+  - Takes action: Claude Code can directly edit files, run commands, and create commits. Need more? MCP lets Claude read your design docs in Google Drive, update your tickets in Jira, or use your custom developer tooling.
+  - Unix philosophy: Claude Code is composable and scriptable. tail -f app.log | claude -p "Slack me if you see any anomalies appear in this log stream" works. Your CI can run claude -p "If there are new text strings, translate them into French and raise a PR for @lang-fr-team to review".
+  - Enterprise-ready: Use Anthropic’s API, or host on AWS or GCP. Enterprise-grade security, privacy, and compliance is built-in.
+Moniker: claudecode
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- claude
+- claude-code
+- claudecode
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  - Added a live elapsed-time counter to the collapsed tool summary line so long-running tool calls visibly tick instead of looking stuck
+  - Added a startup warning for Write(path), NotebookEdit(path), and Glob(path) permission rules — use Edit(path) or Read(path) instead
+  - Fixed isolation: 'worktree' subagents being able to run git-mutating commands against the main repo checkout instead of their own isolated worktree
+  - Fixed the ultracode keyword opt-in firing on non-human-originated input such as webhook payloads and relayed PR comments
+  - Fixed a rendered text fragment leaking into crash telemetry when a UI component returned content outside a styled text element
+  - Fixed paste markers leaking into external editors opened from Claude Code, which could appear as stray È/É characters around pasted text
+  - Fixed claude attach sometimes failing with "job not found" or "agent is still starting" errors during session transitions — attach now waits for the daemon to settle, and terminal resizes during a slow attach are applied once it completes
+  - Fixed a session crash when a tool's result renderer returned a numeric bigint value or plain text instead of a UI element
+  - Fixed a hook callback timeout being misreported to the model as a user rejection, which made unattended sessions stop and wait
+  - Fixed Claude assuming a cd took effect after its command was moved to the background; the tool result now states the working directory is unchanged
+  - Fixed plugin-provided MCP servers being torn down when MCP servers are re-synced mid-session
+  - Fixed plan approvals without edits being labeled "(edited by user)" and overwriting the plan file with a stale snapshot
+  - Fixed /doctor skipping its auto-mode-default proposal on Bedrock, Vertex, and Foundry, where auto mode no longer needs an opt-in
+  - Fixed Grep content mode claiming "No matches found" when paginating past the end of results
+  - Fixed unmatched $1/$2 positional placeholders in skills and commands being silently stripped; they are now preserved verbatim
+  - Fixed plugin cache writes leaving temp files behind on failure and failing on locked-file renames on Windows and network filesystems
+  - Fixed background workers crash-looping when a client resets its connection to the background service
+  - Fixed claude agents --effort ultracode not reaching dispatched sessions; the value was silently dropped
+  - Fixed pressing ← to open the agents view dropping the task tracker when returning to the session
+  - Fixed the agents dashboard retaining pasted images from abandoned reply drafts after their session was deleted
+  - Fixed killed background sessions leaving a permanent git worktree lock behind; the periodic sweep now releases locks whose owning process is gone
+  - Fixed SDK MCP servers registered via an initialize control request waiting until the next turn to start connecting
+  - Fixed returning to the agents view from a session leaving overlapping ghost frames with CLAUDE_CODE_DISABLE_ALTERNATE_SCREEN=1
+  - Fixed late-appearing .claude/* symlinks not being reconciled into the sandbox deny-write list
+  - Hardened the Agent tool against indirect prompt injection via content a subagent read
+  - Improved the Bash/PowerShell tool message when a command hits its timeout and is auto-backgrounded, so the model can distinguish a hang from an explicit background request
+  - Improved auto mode: the permission classifier now defaults to Sonnet 5 for external sessions, validated on the session's first request and pinned for the session
+  - Improved the bundled dataviz skill's chart color validation with perceptual OKLab color difference and recalibrated color-blindness thresholds
+  - Memory writes that leave a MEMORY.md index over its read limit now produce an explicit error instead of silent truncation
+  - Screen reader mode now announces permission mode changes aloud when cycling modes with Shift+Tab
+  - The agents footer hint now shows how many background agents are waiting on your input, with a brief color emphasis when the count changes
+  - Agent view: the session you pressed ← from stays visibly marked even after mouse hover or arrow keys move the selection
+  - Fable temporarily shows as unavailable in the advisor picker while a server-side issue causing Fable advisor failures is fixed
+ReleaseNotesUrl: https://github.com/anthropics/claude-code/blob/HEAD/CHANGELOG.md#21210
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,104 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Liquibase.Liquibase
+PackageVersion: 5.0.3
+PackageLocale: en-US
+Publisher: Liquibase
+PublisherUrl: https://www.liquibase.com/
+PublisherSupportUrl: https://github.com/liquibase/liquibase/issues
+PrivacyUrl: https://www.liquibase.com/privacy-policy
+Author: Liquibase Inc.
+PackageName: Liquibase
+PackageUrl: https://www.liquibase.com/community
+License: Apache-2.0
+LicenseUrl: https://github.com/liquibase/liquibase/blob/HEAD/LICENSE.txt
+Copyright: Copyright 2026 Liquibase Inc.
+CopyrightUrl: https://www.liquibase.com/terms-of-use
+ShortDescription: Easiest, safest, and most powerful community-led database change management solution.
+Description: |-
+  Liquibase helps millions of developers track, version, and deploy database schema changes. It will help you to:
+  - Control database schema changes for specific versions
+  - Eliminate errors and delays when releasing databases
+  - Automatically order scripts for deployment
+  - Easily rollback changes
+  - Collaborate with tools you already use
+Tags:
+- database
+- db
+ReleaseNotes: |-
+  Liquibase Community 5.0.3 Release Notes
+  Liquibase Community v5.0.3 is a focused release: two security fixes, a handful of database-specific bug fixes across Oracle, PostgreSQL, and MSSQL, and a thread safety improvement for teams running Liquibase in multitenant environments. Thanks to the ten community contributors who made it happen!
+  Latest release: v5.0.3, May 15, 2026: https://www.liquibase.com/download-community
+  Nightly builds: Updated automatically after each successful test run on main: https://github.com/liquibase/liquibase/releases/tag/nightly
+  Next planned release: August 20, 2026
+  Roadmap: https://github.com/orgs/liquibase/projects/3/views/9?layout=board
+  Thank you to every contributor who filed an issue, reviewed code, or submitted a fix. Your work makes each Liquibase Community release stronger than the last.
+
+  What's in this release
+  Security
+  (#7689) by @abrackxInput sanitization for generate-changelog: Closes two reported vulnerabilities.
+  Thanks to @FORIMOC, @Yuremin, and @invoke1442 for the reports.
+  Notable improvements
+  (#7647) by @harsh-kaushal PostgreSQL: Sequence discovery is more accurate: The sequence metadata query now uses a LEFT JOIN instead of NOT IN, improving handling of SERIAL and IDENTITY columns in complex ownership scenarios. Note: columns decoupled from their sequence after creation may still appear as autoIncrement="true" in generated changelogs. A follow-up fix is tracked separately.
+  (#1944) by @MatrixDai MSSQL: systranschemas excluded from diff output: This system view was being flagged as a missing or unexpected table during diff. It's now correctly treated as a system object and filtered out.
+  (#7674) by @andrewcedgar perf: cache ranChangeSets lookup in SqlChangeLogParser.generateId: Performance improvements in SqlChangeLogParser by building the lookup once per Database as a Map<changeLog, interimId> and reuse it for every subsequent file. Total work becomes O(M+N) and the per-file cost returns to ~O(1).
+  (#7674) by @andrewcedgar Fixed a performance regression that caused SQL changelog parsing to slow significantly on large projects
+  SQL changelog parsing became significantly slower starting in 4.32.0. On projects with thousands of SQL changelog files and a large DATABASECHANGELOG history, parse time could increase from roughly 3 minutes to over 15 minutes compared to 4.31.1. This is a performance-only fix, your changelogs will parse and execute exactly as before, just faster.
+  Users with large SQL changelog sets should see parse times return to pre-4.32.0 levels after upgrading.
+  New parameter: --diff-column-default-value-constraint-name: Set to false to ignore auto-generated constraint names on column defaults during diff. Prevents false diffs in SQL Server environments where default value constraints are named differently across databases. Default: true.
+  Fixes
+  (#7660) by @sayaliM0412 Default branch is now main: Development snapshots are now published as main-SNAPSHOT; contributors should target main for new pull requests.
+  (#1964, #7680) by @MatrixDai and @wwillard7800 Improved handling of MSSQL view definitions across two fixes: false positive diffs from inconsistent SQL Server version formatting are resolved, and schema qualifiers are now correctly preserved in generated changelogs.
+  - (#1964) In Microsoft SQL Server, Liquibase incorrectly reported views as changed when comparing two databases, even when the view definitions were identical. This occurred because different SQL Server versions format view definitions differently (with or without schema prefixes and brackets). Liquibase now normalizes view definitions before comparing them, eliminating false positives in diff output.
+  - (#7680) Continued improvement from the initial #1964: generate-changelog now correctly preserves schema qualifiers in MSSQL view definitions. View definitions are now normalized only during comparison, so diffs remain accurate and generated changelogs retain the original [schema].[view] qualifier.
+  (#7603) by @filipelautert DATABASECHANGELOGLOCK hanging on multithreaded services: A failed cleanup left recycled threads in pooled environments in an incorrect locked state, causing unexpected errors during subsequent operations. Liquibase now correctly cleans up lock state after a command finishes, even if an error occurs during cleanup. This prevents unexpected lock errors on subsequent operations in environments that reuse threads, such as connection pools.
+  (#7488) by @MalloD12 PostgreSQL with PgBouncer: fixed leaks in transaction pooling mode:
+  When using Liquibase with PostgreSQL behind PgBouncer in transaction pooling mode, database schema settings applied by Liquibase could leak into other applications sharing the same connection pool, causing unexpected behavior. Liquibase now properly scopes these settings to individual transactions, preventing any interference with other services.
+  (#7659) by @filipelautert Oracle: Columns that begin with “int” caused errors in diff-changelog commands: Columns with names that start with “int”, like internalPhoneNumber and integration_type, were causing diff-changelog to report inaccurately. Fixed with exact matching on int and integer only.
+  (#7542) by @marchof Oracle: FLOAT column precision is back in snapshots: For Oracle databases, float column precision was incorrectly ignored during diff operations due to a regression introduced in a previous release. This could result in inaccurate diff output or generated changelogs missing float precision changes.
+  (#7646) by @filipelautert Improved logging support: When using Liquibase as an embedded library (such as in a Spring Boot application), some log messages generated during startup bypassed your application's configured logging framework and were handled by Java's built-in logging instead. This could result in missing log output or unexpected warnings, particularly for users on Log4j 2.25+. All Liquibase log output now routes through your configured logging framework from the start.
+  (#7500) by @MalloD12 diff-changelog uses the right constraint name in DROP statements: When databases have differently named constraints, generated DROP statements now use the target database's name rather than the reference database's, so changelogs actually apply cleanly. Covers foreign keys, indexes, primary keys, and unique constraints.
+  Security, driver and other updates
+  PR Description
+  #7699 chore(deps-dev): Bump net.snowflake:snowflake-jdbc from 4.1.0 to 4.2.0
+  #7695 chore(deps): Bump test-deps group with 2 updates
+  #7691 chore(deps-dev): Bump org.xerial:sqlite-jdbc from 3.53.0.0 to 3.53.1.0
+  #7692 fix(TECHOPS-365): Pin Docker base image to temurin:21-jre-noble
+  #7688 chore(deps-dev): Bump production-deps group with 2 updates
+  #7677 chore(deps): Bump eclipse-temurin from 21-jre-noble to 25-jre-noble in /docker
+  #7664 chore(deps): Bump production-deps group with 6 updates
+  #7658 chore(deps): Bump production-deps group with 8 updates
+  #7681 chore(deps-dev): Bump build-tools group with 3 updates
+  #7635 chore(deps-dev): Bump build-tools group with 4 updates
+  #7678 chore(deps): Bump github-actions group with 5 updates
+  #7657 chore(deps): Bump github-actions group with 10 updates
+  #7579 chore(deps): Bump github-actions group with 3 updates
+  #7670 chore(deps): Bump org.testcontainers:testcontainers-bom from 2.0.4 to 2.0.5
+  #7621 chore(deps): Bump org.testcontainers:testcontainers-bom from 2.0.3 to 2.0.4
+  #7671 chore(deps): Bump org.projectlombok:lombok from 1.18.44 to 1.18.46
+  #7606 chore(deps): Bump org.projectlombok:lombok from 1.18.42 to 1.18.44
+  #7672 chore(deps): Bump commons-io:commons-io from 2.21.0 to 2.22.0
+  #7662 chore(deps): Bump targetMavenVersion from 3.9.14 to 3.9.15
+  #7613 chore(deps): Bump targetMavenVersion from 3.9.13 to 3.9.14
+  #7601 chore(deps): Bump targetMavenVersion from 3.9.12 to 3.9.13
+  #7656 chore(deps): Bump ant.version from 1.10.15 to 1.10.17
+  #7652 chore(deps): Bump jakarta.servlet:jakarta.servlet-api from 5.0.0 to 6.0.0
+  #7636 chore(deps): Bump javax.servlet:javax.servlet-api from 3.1.0 to 4.0.1
+  #7614 chore(deps): Bump spring.version from 7.0.5 to 7.0.6
+  #7626 chore(deps-dev): Bump test-deps group with 2 updates
+  #7608 chore(deps-dev): Bump org.mockito:mockito-core from 5.22.0 to 5.23.0
+  #7576 chore(deps-dev): Bump org.mockito:mockito-core from 5.21.0 to 5.22.0
+  #7578 chore(deps): Bump org.yaml:snakeyaml from 2.5 to 2.6
+  #7577 chore(deps-dev): Bump org.apache.felix:maven-bundle-plugin from 5.1.9 to 6.0.2
+  #7586 chore(deps): Bump build-tools group with 2 updates
+  #7628 DAT-22652: Pin GitHub Actions to commit SHAs for supply chain security
+  #7610 chore(deps): Upgrade testcontainers to 2.0.3
+ReleaseNotesUrl: https://github.com/liquibase/liquibase/releases/tag/v5.0.3
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://docs.liquibase.com/
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/liquibase/liquibase/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

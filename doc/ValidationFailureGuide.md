@@ -8,7 +8,7 @@ When you submit a pull request to [microsoft/winget-pkgs](https://github.com/mic
 > winget validate <path-to-manifest>
 > winget install --manifest <path-to-manifest>
 > ```
-> For isolated testing, use the [SandboxTest.ps1](https://github.com/microsoft/winget-pkgs/blob/master/doc/tools/SandboxTest.md) script in Windows Sandbox.
+> For isolated testing, use the [SandboxTest.ps1](https://github.com/microsoft/winget-pkgs/blob/master/doc/tools/SandboxTest.md) script or Windows Sandbox.
 
 ---
 
@@ -35,8 +35,8 @@ These labels track the progress of your PR through the validation pipeline.
 
 | Label | Meaning |
 |---|---|
-| **Azure-Pipeline-Passed** | Your manifest passed automated testing and is awaiting moderator approval. |
-| **Validation-Completed** | All checks passed. Your PR will be merged automatically. |
+| **Azure-Pipeline-Passed** | Your manifest passed automated testing. There may be additional manual verification required. |
+| **Validation-Completed** | All checks passed. Your PR may be merged automatically after moderator review. |
 | **Needs-Author-Feedback** | Something needs your attention. If not addressed within 10 days, the PR will be auto-closed. |
 | **Needs-Attention** | The PR has been escalated to the WinGet engineering team for investigation. |
 | **Blocking-Issue** | The PR cannot be approved until the blocking issue (indicated by an accompanying error label) is resolved. |
@@ -61,7 +61,15 @@ These labels track the progress of your PR through the validation pipeline.
 ```powershell
 winget validate <path-to-manifest>
 ```
-Address all errors reported by the validator and resubmit.
+Address all reported errors and resubmit.
+
+---
+
+#### `Manifest-Version-Deprecated`
+
+**What it means:** Your manifest uses a schema version that is no longer accepted by the repository.
+
+**How to fix:** Update your manifest to use a supported schema version. The recommended schema version is **1.12.0** (1.10.0 is also accepted). Update the `ManifestVersion` field in all manifest files and ensure the `# yaml-language-server: $schema=...` comment references the correct version.
 
 ---
 
@@ -95,7 +103,7 @@ manifests/<first-letter>/<Publisher>/<PackageName>/<PackageVersion>/
 - PR contains manifests for **more than one package** or **more than one version**
 - Modified files that are not part of the manifest submission
 
-**How to fix:** Each PR must contain exactly one package version. Split your submission into separate PRs if needed.
+**How to fix:** Each PR must contain exactly one package version (one multi-file manifest set). If you need to update non-manifest files such as `README.md`, files under `doc/`, spelling files, or tooling, submit those changes in a separate PR. See the [first-time contributor checklist](FirstContribution.md) before resubmitting.
 
 ---
 
@@ -106,6 +114,7 @@ manifests/<first-letter>/<Publisher>/<PackageName>/<PackageVersion>/
 **Common causes:**
 - `InstallerType` mismatch between what is declared and what is detected
 - Missing or incorrect `PackageFamilyName` for MSIX packages
+- Incorrect `MinimumOSVersion` for MSIX packages
 - Inconsistencies in `AppsAndFeaturesEntries`
 
 **How to fix:** Verify that installer metadata matches the actual installer. For MSIX, ensure `PackageFamilyName` and `SignatureSha256` are correct.
@@ -209,6 +218,9 @@ Update the `InstallerSha256` value in your manifest and resubmit.
 
 **How to fix:** Use the official download URL from the publisher's website. If the URL is legitimate, add a comment to your PR for investigation.
 
+> [!TIP]
+> Including `PackageUrl` in your manifest and ensuring the `InstallerUrl` can be found by navigating the publisher's website from that URL helps speed up moderator reviews.
+
 ---
 
 #### `Validation-Unapproved-URL`
@@ -221,9 +233,45 @@ Update the `InstallerSha256` value in your manifest and resubmit.
 
 #### `Validation-Indirect-URL`
 
-**What it means:** The installer URL uses a redirector rather than pointing directly to the publisher's server.
+**What it means:** The installer URL uses a redirect rather than pointing directly to the publisher's server.
 
 **How to fix:** Replace the redirected URL with the direct/final URL from the publisher's server.
+
+<details><summary>PowerShell: Find the final URL after redirects</summary>
+
+```powershell
+Function Get-UrlResponse {
+    Param
+    (
+        [Parameter(Mandatory = $true, Position = 0)]
+        [string] $URL
+    )
+    try {
+        $HTTP_Request = [System.Net.WebRequest]::Create($URL)
+        $HTTP_Request.UserAgent = 'Microsoft-Delivery-Optimization/10.1'
+        $HTTP_Response = $HTTP_Request.GetResponse()
+        $ResponseUri = $HTTP_Response.ResponseUri
+        $AbsoluteUrl = $HTTP_Response.ResponseUri.AbsoluteUri
+        $HTTP_Status = [int]$HTTP_Response.StatusCode
+        $ResponseLength = $HTTP_Response.ContentLength
+        $Headers = @{}; $HTTP_Response.Headers.ForEach({ $Headers[$_] = $Http_Response.Headers[$_] })
+    } catch {
+        $HTTP_Status = 404
+    }
+    If ($null -eq $HTTP_Response) { $HTTP_Status = 404 }
+    Else { $HTTP_Response.Close() }
+    return @{
+        Url           = $URL
+        ResponseUrl   = $AbsoluteUrl
+        ResponseCode  = $HTTP_Status
+        ContentLength = $ResponseLength
+        Headers       = $Headers
+        Response      = $ResponseUri
+    }
+}
+```
+
+</details>
 
 ---
 
@@ -234,13 +282,16 @@ Update the `InstallerSha256` value in your manifest and resubmit.
 **What it means:** The installer did not complete silently — it either timed out or required user interaction.
 
 **Common causes:**
+- Incorrect installer type (e.g., `exe` specified for a `nullsoft`, `burn`, or `inno` installer, or `msi` for `wix`) — WinGet handles silent switches automatically for known types, so a wrong type means the wrong switches are used
 - Missing or incorrect silent install switches (`/S`, `/silent`, `/quiet`, etc.)
 - The installer displays a dialog that blocks progress (license agreement, options screen)
+- The installer triggers a UAC prompt that cannot be accepted in the automated test environment — if the installer needs elevation, add `ElevationRequirement: elevationRequired` to the manifest so WinGet handles it
 - A dependency is missing on the test machine
 - The `exe` installer type was specified instead of `portable` for an application that runs without an installer
 
 **How to fix:**
-1. Verify your `InstallerSwitches` include the correct `Silent` and `SilentWithProgress` values.
+1. Check that your `InstallerType` is correct — use `nullsoft`, `inno`, `burn`, or `wix` instead of generic `exe` or `msi` when applicable.
+2. Verify your `InstallerSwitches` include the correct `Silent` and `SilentWithProgress` values.
 2. Test locally:
    ```powershell
    winget install --manifest <path-to-manifest>
@@ -274,7 +325,30 @@ Update the `InstallerSha256` value in your manifest and resubmit.
 
 **What it means:** A general error occurred during manual validation of the package.
 
-**How to fix:** Check the accompanying PR comment for specific next steps.
+**Common causes:**
+- The installer requires administrator privileges but the manifest does not specify `ElevationRequirement: elevationRequired`. The validation infrastructure runs installers as a standard (non-elevated) user by default. If the installer needs to write to protected locations (e.g., `Program Files`), modify system registry keys (HKLM), or install a Windows service, it will fail without the correct elevation requirement.
+- A dependency is missing on the test machine.
+- The installer encountered an unexpected error during setup.
+
+**How to fix:**
+1. If the validation logs indicate an access-denied or permissions error, add `ElevationRequirement: elevationRequired` to your installer manifest. See the [ElevationRequirement documentation](https://github.com/microsoft/winget-pkgs/blob/master/doc/manifest/schema/1.12.0/installer.md) for guidance on choosing the correct value.
+2. Check the accompanying PR comment for specific next steps.
+
+---
+
+#### `Validation-Shell-Execute`
+
+**What it means:** The installer failed to launch or did not complete during dynamic validation. WinGet was unable to execute the installer successfully via `ShellExecute`.
+
+**Common causes:**
+- The installer requires administrator privileges but the manifest does not specify `ElevationRequirement: elevationRequired`. The validation environment runs as a standard user — if the installer unconditionally needs elevation (e.g., it writes to `Program Files`, modifies HKLM registry keys, or installs a system service), it will fail without this field.
+- The installer binary is corrupted or not a valid executable.
+- The installer depends on a runtime or framework that is not present on the test machine.
+
+**How to fix:**
+1. If the installer needs elevation to complete, add `ElevationRequirement: elevationRequired` to your manifest. Do **not** use `elevatesSelf` unless the installer has its own built-in logic to conditionally request elevation. See the [ElevationRequirement documentation](https://github.com/microsoft/winget-pkgs/blob/master/doc/manifest/schema/1.12.0/installer.md) for details.
+2. Test locally with `winget install --manifest <path>` from a non-elevated terminal to reproduce the issue.
+3. Verify the installer binary is valid and not corrupted.
 
 ---
 
@@ -397,6 +471,7 @@ These labels are applied by [moderators](https://github.com/microsoft/winget-pkg
 | Label | Category | Author Action Required? | Summary |
 |---|---|---|---|
 | `Manifest-Validation-Error` | Manifest | ✅ Yes | Fix YAML syntax / schema errors |
+| `Manifest-Version-Deprecated` | Manifest | ✅ Yes | Update to a supported schema version |
 | `Manifest-Path-Error` | Manifest | ✅ Yes | Fix directory structure / file naming |
 | `PullRequest-Error` | PR | ✅ Yes | One package, one version per PR |
 | `Manifest-Installer-Validation-Error` | Manifest | ✅ Yes | Fix installer metadata inconsistencies |
@@ -410,6 +485,8 @@ These labels are applied by [moderators](https://github.com/microsoft/winget-pkg
 | `Validation-Indirect-URL` | URL | ✅ Yes | Remove URL redirection |
 | `Validation-Unattended-Failed` | Install | ✅ Yes | Fix silent install switches |
 | `Validation-Executable-Error` | Install | ⚠️ Maybe | Verify executable is discoverable |
+| `Validation-Installation-Error` | Install | ✅ Yes | Fix installation failure (check elevation) |
+| `Validation-Shell-Execute` | Install | ✅ Yes | Fix installer launch failure (check elevation) |
 | `Validation-Defender-Error` | Install | ⚠️ Maybe | Fix or submit for false positive review |
 | `Validation-Merge-Conflict` | PR | ✅ Yes | Resolve merge conflict |
 | `Validation-MSIX-Dependency` | Dependency | ✅ Yes | Add missing framework dependency |
@@ -429,4 +506,4 @@ These labels are applied by [moderators](https://github.com/microsoft/winget-pkg
 
 ---
 
-*For more information, see the [official validation documentation](https://docs.microsoft.com/windows/package-manager/package/winget-validation) and the [Troubleshooting guide](https://github.com/microsoft/winget-pkgs/blob/master/doc/Troubleshoot.md).*
+*For more information, see the [official validation documentation](https://docs.microsoft.com/windows/package-manager/package/winget-validation).*

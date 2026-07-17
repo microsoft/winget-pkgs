@@ -1,0 +1,68 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Lime.Lime
+PackageVersion: 1.102.0
+PackageLocale: zh-CN
+Publisher: Lime
+PublisherUrl: https://limeai.run/
+PublisherSupportUrl: https://github.com/limecloud/lime/issues
+PrivacyUrl: https://limeai.run/privacy/
+PackageName: Lime
+PackageUrl: https://limeai.run/
+License: 专有软件
+LicenseUrl: https://limeai.run/terms/
+Copyright: © 2026 Lime
+ShortDescription: 给中文创作者用的开源 AI 内容工作台
+Description: |-
+  Lime 是一个开源的 Electron 桌面端 AI 内容工作台，面向中文创作者、品牌运营、研究型写作者和小团队，覆盖 AI 写作、选题研究、素材管理、提示词沉淀、知识库和多模型创作流程。
+
+  你可以把它理解成一个更适合长期创作的 AI 工作台：
+  - 不是只问一句、答一句，而是围绕一个项目持续推进
+  - 不是每次都重新找资料、重新写提示词，而是把参考、风格和做法沉淀下来
+  - 不是生成完就散落在聊天记录里，而是把结果保存起来，下一次还能继续用
+  - 不是绑定某一家 AI 服务，而是让你使用自己已经配置好的模型能力
+  如果你经常在收藏夹、文档、聊天工具、图片工具和模型后台之间来回切换，Lime 想帮你把这些动作收回到同一个创作空间里。
+
+  你可以用 Lime 做什么
+  - AI 写作与内容创作：写公众号文章、小红书笔记、视频脚本、播客提纲和直播话术
+  - 资料研究与知识整理：整理网页、笔记、截图、访谈和历史材料，生成报告或简报
+  - 选题分析与内容复盘：拆解爆款案例、竞品内容、发布节奏和表达风格
+  - 提示词管理与风格复用：保存常用写法、品牌语气、选题方法和团队模板
+  - 多模态创作准备：生成图片提示词、封面方向、演示稿结构或网页草稿
+  - 多模型工作流：使用自己配置的 AI 服务商和模型，在同一个任务里持续修改、扩写、压缩或换平台发布
+ReleaseNotes: |-
+  Lime v1.102.0
+  新功能
+  - 打通 MCP server elicitation 的真实产品链：thread-scoped runtime 通过 App Server reverse JSON-RPC 发起表单请求，Electron 原样转发，Renderer 提供五语言交互，并支持 response、远端 resolved 与取消收口。
+  - 建立 durable Agent graph、identity 与 mailbox，并通过 per-turn gateway 向 current provider 提供 spawn_agent、list_agents、send_message、followup_task、interrupt_agent、wait_agent 六个控制工具；QueueOnly / TriggerTurn、canonical Item 和 delivered audit 共享同一持久化事实源。
+  - 补齐 Multi-Agent 按需恢复与终态通知：restart 后只 hydrate exact target，child 完成或失败通过 durable assistant Item / mailbox 通知 parent，wait_agent 以 steer-first 语义返回结构化 activity，并投影 canonical Collab / SubAgent Item。
+  - MCP Tool surface 改为 sampling-step snapshot，冻结 definition、allowlist、route、connection 与 timeout；资源和提示词读写使用精确 (server, uri/name) identity，避免跨连接误命中。
+  - 为 runtime MCP server 增加并发启动与故障隔离：optional server 失败不影响健康连接，required server 失败保持旧 generation 并拒绝不完整 replacement。
+  修复
+  - 修复 reverse JSON-RPC 的连接归属、boot-scoped request ID、abort cleanup、at-most-once response 与 resolved tombstone，重复、迟到、断连或未知响应继续 fail closed。
+  - 修复 MCP elicitation 的 active-time timeout、响应 _meta、表单 schema/number/enum 语义与取消竞态，用户等待时间不再计入服务端执行超时。
+  - 修复 Claw 首字与长工具循环稳定性：首轮响应策略统一归 App Server，移除 Renderer 快速路由双轨，并在已有联网证据后进入真实模型总结阶段。
+  - 修复 Claw 中断会话从“新建任务”首页重新进入同一会话时的导航去重，显式用户意图现在可以恢复 current read model、输入框与后续发送，不再被 stale draft pause 拦截。
+  - 修复媒体 provider/model 选择的原子持久化，以及侧边栏、归档会话、Automation、Skills 和 Plugin history 对旧 Agent runtime barrel 的依赖。
+  - 修复 approval session-cache、canonical Thread identity、active/queued Turn、终态历史与输入恢复之间的投影偏差，避免生成重复 pending 项或回退旧 read model。
+  优化与重构
+  - MCP management control plane 与 provider tool bridge 分离；canonical Tool Item 成为 history、compaction、coding、Skills、MCP、browser 与 artifact evidence 的唯一消费合同。
+  - 删除旧 Agent session store、subagent sidecar、aggregate runtime、session query、execution strategy compat、backend event stream 和默认 Playwright MCP seed，并补回流守卫。
+  - Agent Chat、Automation、Skills、归档会话、Sidebar 与 Plugin history 迁到各自 current owner，继续收缩旧兼容 barrel、快速响应 helper 和 pending shell 双轨。
+  - Multi-Agent canonical activity 收敛为 Started / Interacted / Interrupted 三类；list_agents 保持普通 Tool，旧 V1 resume / close 与历史 activity taxonomy 不再进入 current producer。
+  - 拆分 App Server event store、projection materializer、Agent runtime 与 GUI 大文件，保持领域 owner 和单一事实源边界。
+  测试与质量
+  - 扩展 App Server protocol/schema、Rust/TypeScript client、Electron host 与 Renderer contract，覆盖 server-originated request、resolved notification、MCP target identity 和 elicitation form。
+  - 新增 Agent graph/mailbox/control、restart-on-demand、terminal Result、concurrent wait、MCP router/timeout/fault isolation、canonical projection、first-token flow control 与 atomic media preference 的定向回归。
+  - 补充真实 Electron Gate B、Claw 中断后重入与继续会话、current fixture、协议守卫和 S1-S6 删除证据，验证生产 bridge 不回退 mock。
+  - 用户可见的 MCP elicitation 文案与 GUI 回归覆盖 zh-CN、zh-TW、en-US、ja-JP、ko-KR。
+  文档
+  - 更新架构、命令与 MCP 文档，明确 reverse JSON-RPC、MCP runtime/control-plane owner、Agent graph/mailbox、首轮响应策略和 canonical projection 边界。
+  - 更新 refactor v2 执行计划与逐切片 evidence，记录 current / compat / deprecated / dead 分类、验证结果和删除退出条件。
+  其他
+  - 版本事实源更新到 1.102.0：根应用、CLI npm package、Rust workspace、lime-rs/Cargo.lock 和 release notes。
+  完整变更：v1.101.0 → v1.102.0
+ReleaseNotesUrl: https://github.com/limecloud/lime/releases/tag/v1.102.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,98 @@
+# Created with WinGet Tracker using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: t8y2.DBX
+PackageVersion: 0.5.35
+PackageLocale: en-US
+Publisher: t8y2
+PublisherUrl: https://github.com/t8y2
+PublisherSupportUrl: https://github.com/t8y2/dbx/issues
+Author: t8y2
+PackageName: DBX
+PackageUrl: https://github.com/t8y2/dbx
+License: Apache-2.0
+LicenseUrl: https://github.com/t8y2/dbx/blob/HEAD/LICENSE
+ShortDescription: 15MB，lightweight, cross-platform database client. Supports MySQL, PostgreSQL, SQLite, Redis, MongoDB, DuckDB, ClickHouse, SQL Server and more.
+Tags:
+- clickhouse
+- database
+- database-client
+- database-management
+- duckdb
+- gui
+- mongodb
+- mysql
+- postgresql
+- redis
+- rust
+- sql-server
+- sqlite
+- tauri
+- vue
+ReleaseNotes: |-
+  新功能
+  - AI 助手 — 聊天工具栏新增模型下拉选择，可在对话中快速切换模型，无需进入设置页 (contributed by @Abeautifulsnow)
+  - 侧边栏搜索 — 鼠标位于连接侧边栏时可直接输入开始过滤，并支持 Backspace / Escape 快速调整搜索 (contributed by @SpencerZhang)
+  - SQL Server — 支持浏览 Linked Server，并补齐驱动 panic 后连接池重建，提升 SQL Server 场景稳定性
+  - 表结构编辑 — 新增默认值快捷选择，并支持 PostgreSQL-like 数据库（含瀚高 HighGo）编辑外键
+  - 数据网格 — 新增查询结果历史固定入口，单行多列结果可自动转置，列注释默认展示更清晰
+  - SSH / 连接 — 支持自定义 SSH Agent Socket 路径，方便复用本机密钥代理
+  改进
+  - 大数据导出 — XLSX 导出改为流式写入并减少内存分配，大表导出不再一次性堆积所有行，显著降低卡顿和 OOM 风险 (contributed by @onceMisery, @bigliangzao)
+  - MongoDB — 大集合无筛选浏览时使用估算计数，加快 collection 加载速度 (contributed by @linjianlin)
+  - 传输 / 导出 — 同类型数据库传输优先复用源库原始表 DDL，并继续按外键依赖排序，减少结构差异和导入失败 (contributed by @ptma)
+  - 界面体验 — 统一稠密菜单样式，优化侧边栏连接详情 tooltip、工具栏溢出、折叠图标、行号颜色和选中单元格边框
+  - 设置页 — 系统字体列表改为打开字体下拉时懒加载，减少设置页首次渲染卡顿 (contributed by @linjianlin)
+  - 文档预览 — JSON 文档预览/编辑区域会跟随编辑器字体设置 (contributed by @linjianlin)
+  - 安装文档 — README 增加 WinGet 安装说明 (contributed by @leic4u)
+  修复
+  - 侧边栏 — 修复 PostgreSQL 多级分区表分页加载后子分区漂在顶层的问题；修复 tooltip 在右键菜单或鼠标移出后残留的问题；修改可见数据库后已展开连接会自动刷新 (contributed by @lexmin0412, closes #1441)
+  - Redis — 修复 JSON 树视图中超大整数精度丢失，并补齐 Redis Cluster 经 SSH/proxy transport layer 的路由 (contributed by @dal1wg, @CN-Scars, closes #1184)
+  - MySQL / Goldendb / GBase — 修复中文 WHERE 条件导致 panic、侧边栏表注释中文乱码、直连 IP 多余 TCP 探测、列重排重复 SQL、Goldendb 元数据兼容和旧 GBase driver_profile 兼容 (contributed by @bigliangzao, @IT-SDJ)
+  - Oracle PL/SQL — 更准确识别 CREATE FUNCTION/PROCEDURE/TRIGGER/PACKAGE 代码块，避免语句切分错误
+  - JDBC / 分页 — 保留查询分页 cursor session，避免默认最大行数重写影响分页结果
+  - QuestDB / IRIS / Dameng / OceanBase — 修复 QuestDB 物化视图识别、IRIS 删除索引语法、Dameng 视图 DDL 类型、OceanBase JDBC 兼容参数
+  - MCP — SSH transport layer 会通过桌面桥接路径执行查询、表列表和表描述，避免 Node 直连绕过 SSH 隧道 (contributed by @xcstatus, closes #1329)
+  - AI / 编辑器 — 修复 Kimi K2.5+ 参数发送、Ollama reasoning 流解析、AI streaming markdown 解析崩溃，以及对象源码标签保存关闭问题
+  - 表结构默认值 — 字符串类型默认值会正确加引号，减少生成 DDL 后执行失败
+  - ClickHouse / 导出 — ClickHouse ORDER BY 覆盖 PRIMARY KEY 列，提升导出/建表兼容性
+  - 工具链 — 更新 GitHub Action runtime，并优化镜像同步工作流
+  下载安装
+  Windows
+  ───────────────────────────┬────────────────────────────────
+  文件                       │说明
+  ───────────────────────────┼────────────────────────────────
+  DBX_0.5.35_x64-setup.exe   │推荐 — NSIS 安装包，支持自动更新
+  ───────────────────────────┼────────────────────────────────
+  DBX_0.5.35_x64_en-US.msi   │MSI 安装包，适用于企业部署
+  ───────────────────────────┼────────────────────────────────
+  DBX_0.5.35_x64-portable.zip│便携版 ZIP，适合免安装和离线拷贝
+  ───────────────────────────┴────────────────────────────────
+  Scoop:
+  scoop bucket add dbx https://github.com/t8y2/scoop-bucket
+  scoop install dbx
+  WinGet:
+  winget install t8y2.DBX
+  macOS
+  ──────────────────────┬───────────────────────────
+  文件                  │说明
+  ──────────────────────┼───────────────────────────
+  DBX_0.5.35_aarch64.dmg│推荐 — 适用于 Apple Silicon
+  ──────────────────────┼───────────────────────────
+  DBX_0.5.35_x64.dmg    │适用于 Intel Mac
+  ──────────────────────┴───────────────────────────
+  Homebrew:
+  brew install --cask dbx
+  Linux
+  ──────────────────────────────────────┬─────────┬─────────────────────────────────────────
+  发行版                                │推荐格式 │安装方式
+  ──────────────────────────────────────┼─────────┼─────────────────────────────────────────
+  Ubuntu / Debian / Linux Mint / Pop!_OS│.deb     │sudo apt install ./DBX_*.deb
+  ──────────────────────────────────────┼─────────┼─────────────────────────────────────────
+  Fedora / RHEL / CentOS / Rocky Linux  │.rpm     │sudo dnf install ./DBX-*.rpm
+  ──────────────────────────────────────┼─────────┼─────────────────────────────────────────
+  其他发行版                            │.AppImage│chmod +x DBX_.AppImage && ./DBX_.AppImage
+  ──────────────────────────────────────┴─────────┴─────────────────────────────────────────
+ReleaseNotesUrl: https://github.com/t8y2/dbx/releases/tag/v0.5.35
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

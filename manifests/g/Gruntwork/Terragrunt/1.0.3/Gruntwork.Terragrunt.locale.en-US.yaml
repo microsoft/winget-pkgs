@@ -1,0 +1,129 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Gruntwork.Terragrunt
+PackageVersion: 1.0.3
+PackageLocale: en-US
+Publisher: Gruntwork
+PublisherUrl: https://terragrunt.gruntwork.io/
+PublisherSupportUrl: https://terragrunt.gruntwork.io/docs/community/support
+PrivacyUrl: https://gruntwork.io/legal/privacy-policy
+PackageName: Terragrunt
+PackageUrl: https://github.com/gruntwork-io/terragrunt/releases/tag/v0.68.9
+License: MIT
+LicenseUrl: https://github.com/gruntwork-io/terragrunt/blob/HEAD/LICENSE.txt
+Copyright: © 2024 Gruntwork, Inc. All rights reserved.
+ShortDescription: Terragrunt is a thin wrapper for Terraform that provides extra tools for keeping your Terraform configurations DRY, working with multiple Terraform modules, and managing remote state.
+Description: Terragrunt is a thin wrapper for Terraform that provides extra tools for keeping your Terraform configurations DRY, working with multiple Terraform modules, and managing remote state.
+Tags:
+- IaC
+- Infrastructure as Code
+- Terraform
+- Terraform Wrapper
+- terragrunt
+ReleaseNotes: |-
+  ✨ New Features
+  --no-cas flag for disabling CAS per command
+  The new --no-cas flag disables the CAS for a single invocation, even when the cas experiment is enabled. It is available on run, stack generate, and stack run.
+  terragrunt stack generate --experiment cas --no-cas
+  This is useful when you want to fall back to the standard getter path without unwinding experiment configuration.
+  Generation and runs error when --no-cas is combined with update_source_with_cas = true on any reachable unit, stack, or terraform block, since relative sources in catalog repositories cannot be resolved without the CAS.
+  🐛 Bug Fixes
+  hcl fmt --diff no longer requires the diff binary
+  Previously, terragrunt hcl fmt --diff spawned a diff process discovered in $PATH to render its output. This made it incompatible with minimal container images and Windows installations where that binary was unavailable.
+  The flag now produces unified diff output without depending on any external binary.
+  Note that the output is not byte-identical to GNU diff -u. Each file diff is now preceded by a diff old/<path> new/<path> header line, and the ---/+++ lines no longer include a trailing timestamp. Scripts that parsed the previous output may need small adjustments.
+  Fixed crash when include and locals with read_terragrunt_config coexist
+  A unit that combined an include block with a locals block calling read_terragrunt_config(...) could crash during discovery, surfacing as a misleading Call to function "read_terragrunt_config" failed error pointed at the locals expression.
+  Discovery now reports the underlying error instead of crashing.
+  Reported in #5949.
+  Fixed crash when a root.hcl declares no remote_state block
+  A root.hcl that only declared locals (or otherwise omitted a remote_state block) could trigger a nil pointer dereference inside Terragrunt's remote-state initialization. Downstream tools that embed the Terragrunt config parser, such as terragrunt-ls, crashed on every such file.
+  A missing remote_state block now initializes an empty remote-state value instead of panicking, so parsing proceeds normally when no backend is configured.
+  Reported in terragrunt-ls#134.
+  Thanks to @SAY-5 for contributing this fix!
+  Fixed a race condition in terragrunt stack generate
+  Fixed a race condition in terragrunt stack generate that could produce non-deterministic file errors on nested stack hierarchies. The same stack file could reach the worker pool twice through different path forms and cause the duplicate writes to conflict with each other. Paths are now normalized before dispatch so each stack file is generated exactly once per invocation.
+  When a stack file is legitimately claimed by more than one parent during generation, Terragrunt now logs a warning that names the contending parents and records the latest claimant, so the configuration can be corrected before it causes silent overwrites.
+  Fixed data race in --version flag parsing under concurrent CLI invocations
+  When multiple Terragrunt CLI invocations ran concurrently in the same process, urfave/cli/v2's package-level VersionFlag singleton was mutated concurrently by each invocation's flag-parsing path, producing a WARNING: DATA RACE on shared flag state.
+  Terragrunt now sets cli.App.HideVersion = true at construction, which prevents urfave from auto-appending its shared VersionFlag into each App's flag set. The --version / -v flag is unchanged from the user's perspective — it is handled by Terragrunt's own flag registered in internal/cli/flags/global.NewHelpVersionFlags.
+  🧪 Experiments Added
+  mark-many-as-read — Mark many files as read in one step
+  Enable the new mark-many-as-read experiment to turn on two behaviors that each mark many files as read in a single call: automatic marking of files inside a local terraform { source = "..." } block, and the new mark_glob_as_read HCL function.
+  With the experiment on, a unit like this:
+  # live/unit/terragrunt.hcl
+  terraform {
+    source = "../../modules/service"
+  }
+  records every *.tf, *.tf.json, *.hcl, *.tofu, and *.tofu.json file found under ../../modules/service (recursively) as read for the unit. Non-source files such as README.md are skipped. A reading-based filter expression such as --filter 'reading=../../modules/service/**' then matches every unit that points at the module, so a change to any file in the module cascades to its consumers.
+  The same experiment also enables a new HCL function, mark_glob_as_read(pattern), which expands a glob using the same gobwas/glob syntax as filter expressions and marks every matching file as read. It returns the list of absolute paths that matched, so it composes with other expressions:
+  locals {
+    configs = mark_glob_as_read("${get_terragrunt_dir()}/config/{*.yaml,**/*.yaml}")
+  }
+  ** only collapses the surrounding separators when the adjacent segments are literals, so match-at-any-depth with a wildcard trailing segment is written as {*.yaml,**/*.yaml}. See the HCL reference for full pattern syntax.
+  This is useful when a unit reads a collection of files indirectly (for example, via run_cmd or templatefile) and you want changes to any of them to trigger the unit through reading-based filters. Calling mark_glob_as_read without the experiment enabled returns an error.
+  🧪 Experiments Updated
+  cas — Stack integration via update_source_with_cas
+  The cas experiment now integrates with stacks. Units and terraform blocks can set update_source_with_cas = true to use relative source paths in catalog repositories, removing the need to plumb remote Git URLs through values expressions.
+  # stacks/my-stack/terragrunt.stack.hcl (in your catalog repository)
+  unit "service" {
+    source = "../..//units/my-service"
+    update_source_with_cas = true
+    path = "service"
+  }
+  During stack generation, Terragrunt rewrites these relative sources to cas:: references that resolve against content stored in the CAS. The repository is cloned once, and subsequent stack generations resolve content from the local store without network access. Generated .terragrunt-stack files contain deterministic CAS references, so regeneration does not produce spurious diffs.
+  CAS also supports SHA-256 repositories now, detected automatically via git rev-parse --show-object-format. The on-disk store layout was reorganized into blobs/ and trees/ namespaces under ~/.cache/terragrunt/cas/store/.
+  To learn more, see the CAS documentation and Explicit Stacks: CAS Integration.
+  catalog-redesign — Templates and .terragrunt-catalog-ignore
+  The catalog-redesign experiment picked up user-visible improvements to discovery and filtering.
+  Discovery walks the entire repository instead of only a modules/ directory, so modules and templates can live anywhere in the tree. Boilerplate templates (directories containing a .boilerplate/ subdirectory or a top-level boilerplate.yml) are discovered as a distinct component kind alongside OpenTofu/Terraform modules and labeled as templates in the UI. When a directory qualifies as both, it is classified as a template.
+  Catalog authors can commit a .terragrunt-catalog-ignore file at the repo root to keep directories such as examples/ or test/ out of discovery. The file uses .gitignore-style semantics: one pattern per line, # for comments, ! for negation, and last match wins. Matching is anchored at the repo root; a lone * does not cross /, and ** does.
+  # .terragrunt-catalog-ignore
+  examples
+  examples/**
+  test/**
+  !test/keep
+  An --ignore-file flag (also available via TG_IGNORE_FILE) points at an additional ignore file that is layered on top of the repo's .terragrunt-catalog-ignore. The extra rules are appended under last-match-wins semantics, so the flag can either add new exclusions or re-include paths that the repo file excluded.
+  To learn more, see Excluding paths from discovery.
+  The list view is split into All, Modules, and Templates tabs, with All selected on launch so every discovered component is visible without switching views. Press tab and shift+tab to cycle between them; each tab keeps its own cursor and search filter.
+  stack-dependencies — Multi-level nested stack.<name>.<nested_stack>.path references
+  The stack-dependencies experiment already supported stack.<name>.path (a whole stack) and stack.<name>.<unit_name>.path (a unit inside a stack). It now also resolves references where the second segment is itself a nested stack, so an autoinclude block in a parent stack can target a stack that lives inside another stack:
+  # live/terragrunt.stack.hcl
+  stack "infra" {
+    source = "../catalog/stacks/infra"
+    path   = "infra"
+  }
+  unit "app" {
+    source = "../catalog/units/app"
+    path   = "app"
+    autoinclude {
+      dependency "deep" {
+        config_path = stack.infra.deep.path
+      }
+    }
+  }
+  Here stack.infra.deep.path resolves to the generated directory of a stack "deep" block declared inside catalog/stacks/infra/terragrunt.stack.hcl. This makes deeper stack hierarchies addressable from a single dependency expression without flattening the layout.
+  What's Changed
+  - feat: Mark module sources as read by @yhakbar in #5963
+  - feat: Adding support for CAS in stacks by @yhakbar in #5911
+  - feat: Splitting modules from templates by @yhakbar in #5932
+  - feat: allow units to depend on stacks by @denis256 in #5924
+  - fix: Addressing panic in read_terragrunt_config() by @yhakbar in #5953
+  - fix: version flag race condition fix by @denis256 in #5961
+  - fix: fixing concurrent-write race in stack generate by @denis256 in #5962
+  - fix(remotestate): survive nil Config passed to New by @SAY-5 in #5965
+  - docs: Cleaning up changelog for v1.0.3 by @yhakbar in #5977
+  - docs: Touching up docs for catalog-redesign by @yhakbar in #5940
+  - docs: Adding Terragrunt Scale callout in README.md by @yhakbar in #5946
+  - docs: Fixing Kapa integration by @yhakbar in #5942
+  - chore: Integrating vexec into NewGitRunner by @yhakbar in #5934
+  - chore: Offboarding Travis by @yhakbar in #5944
+  - chore: Expanding lll coverage to amazonsts by @yhakbar in #5852
+  - chore: Expanding lll coverage to runner-common by @yhakbar in #5853
+ReleaseNotesUrl: https://github.com/gruntwork-io/terragrunt/releases/tag/v1.0.3
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/gruntwork-io/terragrunt/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

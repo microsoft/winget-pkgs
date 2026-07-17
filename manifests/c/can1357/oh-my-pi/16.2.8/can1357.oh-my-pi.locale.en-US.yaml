@@ -1,0 +1,69 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: can1357.oh-my-pi
+PackageVersion: 16.2.8
+PackageLocale: en-US
+Publisher: Can Bölük
+PublisherUrl: https://can.ac/
+PublisherSupportUrl: https://github.com/can1357/oh-my-pi/issues
+Author: Can Bölük
+PackageName: oh-my-pi
+PackageUrl: https://omp.sh/
+License: MIT
+LicenseUrl: https://github.com/can1357/oh-my-pi/blob/HEAD/LICENSE
+Copyright: |-
+  Copyright (c) 2025 Mario Zechner
+  Copyright (c) 2025-2026 Can Bölük
+ShortDescription: ⌥ AI Coding agent for the terminal — hash-anchored edits, optimized tool harness, LSP, Python, browser, subagents, and more
+Description: |-
+  omp is a terminal-first coding agent that runs on your machine, talks to any provider, and treats sessions like git branches.
+  omp (pronounced “oh-em-pi”, binary omp) is a fork of Mario Zechner’s Pi. It runs as a single Bun process, drives any model provider you have credentials for, and ships a flat tool surface the model uses to read code, run commands, edit files, drive a debugger, and spawn subagents that coordinate over an in-process IRC bus.
+  Sessions persist as JSONL under ~/.omp/agent/sessions/. You resume, fork, branch, and share them. Settings, credentials, plugins, and caches all live under ~/.omp/agent/. Nothing leaves the machine unless you call a tool that does.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  @oh-my-pi/pi-coding-agent
+  Added
+  - Added built-in Go coding rules including go-add-cleanup, go-bench-loop, go-exp-promoted, go-ioutil, go-join-hostport, go-new-expr, go-rand-v2, and go-range-int
+  Changed
+  - Relaxed strict bash tool constraints regarding the use of search, grep, ls, and find commands
+  Fixed
+  - Fixed auto-compaction dead-ends by automatically triggering a shake rescue to elide oversized tails
+  - Improved compaction warning message to suggest running /shake images for irreducible image tails
+  - Fixed grep/search direct execution to accept JSON-array string paths for string-or-array inputs. (#3873)
+  - Fixed auto-compaction dead-ending with "Compaction freed too little context to make progress" when a single recent turn (large tool output, heavy fenced/XML block) is itself bigger than the recovery band — findCutPoint can't cut inside one message, so the summarizer had no lever left. The guard now runs an artifact-backed shake elide pass over the oversized tail and re-tests headroom before pausing, and the remaining warning points at /shake images for image-only tails it can't elide. (#3786)
+  - Fixed reviewer/task subagents whose incremental yield (type: ["overall_correctness"], type: ["findings"], …) carried a value that mismatched the matching property's sub-schema being silently accepted and then post-mortem rejected with schema_violation — opaquely swapping the agent's accepted output for an error blob. The yield tool now validates each incremental section's data against its top-level property's sub-schema (items schema for array-typed labels) and surfaces the same retry feedback as terminal yields, so models like deepseek-v4-pro that emit "Correct"/"correct."/"approved" for an enum field get up to three corrective retries; the existing MAX_SCHEMA_RETRIES override then accepts the value with SUBAGENT_WARNING_SCHEMA_OVERRIDDEN instead of losing the entire result. Unknown labels stay unconstrained (#3870).
+  - Fixed streaming tool-call previews (notably write) showing an empty body for the entire streaming phase by surfacing the partial JSON already in hand on the first reveal, then pacing only subsequent growth (#3881).
+  - Fixed hashline edit mode preserving UTF-8 BOM bytes on edited files. (#3867)
+  - Fixed slow local LLM streams by forwarding persisted stream timeout settings (providers.streamFirstEventTimeoutSeconds, providers.streamIdleTimeoutSeconds) into model requests, so users can widen or disable watchdogs without environment variables. (#3878)
+  - Fixed the bash interceptor blocking echo / printf redirects to /dev/null, /dev/tty, /dev/stdout, and /dev/stderr device sinks while still directing real file writes to the write tool. (#3763)
+  - Fixed long snapcompact sessions re-sending multi-megabyte standing image archives on every provider request by enforcing a per-request frame byte budget, letting auto-compaction fall back to context-full summaries when snapcompact output is too large, and omitting legacy over-budget frames from rebuilt LLM contexts. (#3792)
+  @oh-my-pi/hashline
+  Fixed
+  - Fixed hashline writes preserving UTF-8 BOM bytes when the host text decoder hides the leading U+FEFF. (#3867)
+  @oh-my-pi/snapcompact
+  Fixed
+  - Fixed large snapcompact archives being reconstructed into unbounded per-request image payloads by adding a frame base64 byte budget and omitting over-budget archive frames from prompt blocks. (#3792)
+  What's Changed
+  - fix(compaction): cap snapcompact frame payloads by @roboomp in https://github.com/can1357/oh-my-pi/pull/3866
+  - fix(yield): validate incremental sections per-label to prevent fatal schema_violation by @roboomp in https://github.com/can1357/oh-my-pi/pull/3872
+  - fix(tools): accept json-array grep paths by @roboomp in https://github.com/can1357/oh-my-pi/pull/3874
+  - fix(coding-agent): forward stream timeout settings by @roboomp in https://github.com/can1357/oh-my-pi/pull/3879
+  - fix(coding-agent): seed tool-args reveal with the partial JSON already in hand by @roboomp in https://github.com/can1357/oh-my-pi/pull/3883
+  - fix(edit): preserve hashline UTF-8 BOM by @roboomp in https://github.com/can1357/oh-my-pi/pull/3868
+  Full Changelog: https://github.com/can1357/oh-my-pi/compare/v16.2.7...v16.2.8
+ReleaseNotesUrl: https://github.com/can1357/oh-my-pi/releases/tag/v16.2.8
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://omp.sh/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

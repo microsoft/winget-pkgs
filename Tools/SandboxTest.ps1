@@ -23,6 +23,7 @@ param(
     [Parameter(HelpMessage = 'The folder to map in the Sandbox.')]
     [ValidateScript({
             if (-not (Test-Path -Path $_ -PathType Container)) { throw "$_ is not a folder." }
+            if ($_ -match '[''"<>&]') { throw "MapFolder path contains forbidden characters (' `" < > &): $_" }
             return $true
         })]
     [String] $MapFolder = $pwd,
@@ -31,6 +32,41 @@ param(
     [string] $WinGetVersion,
     # WinGetOptions
     [Parameter(HelpMessage = 'Additional options for WinGet')]
+    [ValidateScript({
+            # Parse allowed flags only from flag definition lines in winget install --help
+            # These lines start with whitespace followed by a dash (e.g., "  -h,--silent  ...")
+            if (-not (Get-Command 'winget.exe' -ErrorAction SilentlyContinue)) {
+                Write-Warning 'WinGet is not installed on the host. Skipping WinGetOptions validation.'
+                return $true
+            }
+            $helpLines = winget install --help 2>&1 | Where-Object { $_ -match '^\s+-' }
+            $allowedFlags = @()
+            foreach ($line in $helpLines) {
+                # Extract the flag portion before the description (everything up to two consecutive spaces)
+                $flagPart = ($line.Trim() -split '\s{2,}')[0]
+                $parsedTokens = $flagPart -split ',' | ForEach-Object { $_.Trim() }
+                Write-Debug "WinGetOptions: Parsed line '$($line.Trim())' -> flags: $($parsedTokens -join ', ')"
+                $allowedFlags += $parsedTokens
+            }
+            $allowedFlags = $allowedFlags | Where-Object { $_ } | Select-Object -Unique
+            if (-not $allowedFlags) {
+                throw 'Could not parse winget install flags from --help output. Ensure winget is installed.'
+            }
+            Write-Debug "WinGetOptions: Allow-list ($($allowedFlags.Count) flags): $($allowedFlags -join ', ')"
+            $tokens = $_ -split '\s+'
+            foreach ($token in $tokens) {
+                if ($token.StartsWith('-')) {
+                    $isAllowed = $token -in $allowedFlags
+                    Write-Debug "WinGetOptions: Checking token '$token' -> $(if ($isAllowed) { 'ALLOWED' } else { 'BLOCKED' })"
+                    if (-not $isAllowed) {
+                        throw "WinGetOptions contains disallowed flag: $token. Allowed flags: $($allowedFlags -join ', ')"
+                    }
+                } else {
+                    Write-Debug "WinGetOptions: Skipping value token '$token'"
+                }
+            }
+            return $true
+        })]
     [string] $WinGetOptions,
     # Switches
     [switch] $SkipManifestValidation,
@@ -528,7 +564,11 @@ if (!$SkipManifestValidation -and ![String]::IsNullOrWhiteSpace($Manifest)) {
             Start-Sleep -Seconds 5 # Allow the user 5 seconds to read the warnings before moving on
         }
         default {
-            Write-Information $validateCommandOutput.Trim() # On the success, print an empty line after the command output
+            # Avoid writing a raw object array when `winget validate` returns multiple lines
+            $validateSuccessOutput = @($validateCommandOutput).ForEach({ $_.ToString().Trim() }).Where({ -not [String]::IsNullOrWhiteSpace($_) })
+            if ($validateSuccessOutput) {
+                Write-Information ($validateSuccessOutput -join [Environment]::NewLine)
+            }
         }
     }
 }
@@ -677,8 +717,18 @@ foreach ($dependency in $script:AppInstallerDependencies) {
 }
 
 # Kill the active running sandbox, if it exists, otherwise the test data folder can't be removed
-Stop-NamedProcess -ProcessName 'WindowsSandboxClient'
-Stop-NamedProcess -ProcessName 'WindowsSandboxRemoteSession'
+if (Get-Command wsb -ErrorAction SilentlyContinue) {
+    $sandboxInstance = @(wsb list) | Select-Object -First 1
+    if ($sandboxInstance) {
+        wsb stop --id $sandboxInstance
+    } else {
+        Write-Verbose 'No running instance of Sandbox'
+    }
+} else {
+    Write-Debug 'wsb command was not found - terminaing any sessions by process name'
+    Stop-NamedProcess -ProcessName 'WindowsSandboxClient'
+    Stop-NamedProcess -ProcessName 'WindowsSandboxRemoteSession'
+}
 Start-Sleep -Milliseconds 5000 # Wait for the lock on the file to be released
 
 # Remove the test data folder if it exists. We will rebuild it with new test data
@@ -767,25 +817,55 @@ New-Item -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Policies\Associa
 New-ItemProperty -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Policies\Associations' -Name 'ModRiskFileTypes' -Type 'String' -Value '.bat;.exe;.reg;.vbs;.chm;.msi;.js;.cmd' | Out-Null
 
 Write-Host @'
-Tip: you can type 'Update-EnvironmentVariables' to update your environment variables, such as after installing a new software.
-'@
-
-Write-Host @'
-
 --> Fixing slow MSI package installers
 '@
 
-reg add "HKLM\SYSTEM\CurrentControlSet\Control\CI\Policy" /v "VerifiedAndReputablePolicyState" /t REG_DWORD /d 0 /f # See: https://github.com/microsoft/Windows-Sandbox/issues/68#issuecomment-2754867968
+reg add "HKLM\SYSTEM\CurrentControlSet\Control\CI\Policy" /v "VerifiedAndReputablePolicyState" /t REG_DWORD /d 0 /f | Out-Null # See: https://github.com/microsoft/Windows-Sandbox/issues/68#issuecomment-2754867968
 CiTool.exe --refresh --json | Out-Null # Refreshes policy. Use json output param or else it will prompt for confirmation, even with Out-Null
 
 Write-Host @'
+--> Disabling background services
+'@
 
+# Disable Search Indexing to prevent performance issues during installation of packages with many files
+Stop-Service WSearch
+Set-Service WSearch -StartupType Disabled
+
+# Disable Superfetch since we don't need to optimize disk access patterns in a disposable environment
+Stop-Service SysMain
+Set-Service SysMain -StartupType Disabled
+
+# Disable Windows Update since it can't be used in the sandbox
+Stop-Service wuauserv
+Set-Service wuauserv -StartupType Disabled
+
+# Disable Scheduled Tasks
+schtasks /Change /TN "\Microsoft\Windows\DiskCleanup\SilentCleanup" /Disable | Out-Null
+schtasks /Change /TN "\Microsoft\Windows\Defrag\ScheduledDefrag" /Disable | Out-Null
+
+# Disable Telemetry since it isn't needed in a disposable environment
+Stop-Service DiagTrack
+Set-Service DiagTrack -StartupType Disabled
+
+# Disable the Print Spooler
+Stop-Service Spooler
+Set-Service Spooler -StartupType Disabled
+
+# Disable Edge Background Processes
+reg add "HKLM\Software\Policies\Microsoft\Edge" /v BackgroundModeEnabled /t REG_DWORD /d 0 /f | Out-Null
+
+Write-Host @'
 --> Configuring Winget
 '@
 winget settings --Enable LocalManifestFiles
 winget settings --Enable LocalArchiveMalwareScanOverride
 Get-ChildItem -Filter 'settings.json' | Copy-Item -Destination C:\Users\WDAGUtilityAccount\AppData\Local\Packages\Microsoft.DesktopAppInstaller_8wekyb3d8bbwe\LocalState\settings.json
 Set-WinHomeLocation -GeoID $($script:HostGeoID)
+
+Write-Host @'
+
+Tip: you can type 'Update-EnvironmentVariables' to update your environment variables, such as after installing a new software.
+'@
 
 `$manifestFolder = (Get-ChildItem `$pwd -Directory).Where({Get-ChildItem `$_ -Filter '*.yaml'}).FullName | Select-Object -First 1
 if (`$manifestFolder) {
@@ -828,20 +908,27 @@ Pop-Location
 # Create the WSB file
 # Although this could be done using the native XML processor, it's easier to just write the content directly as a string
 Write-Verbose 'Creating WSB file for launching the sandbox'
+$escapedTestDataFolder = [System.Security.SecurityElement]::Escape($script:TestDataFolder)
+$escapedPrimaryMappedFolder = [System.Security.SecurityElement]::Escape($script:PrimaryMappedFolder)
+$escapedSandboxWorkingDirectory = [System.Security.SecurityElement]::Escape($script:SandboxWorkingDirectory)
+$escapedSandboxBootstrapFile = [System.Security.SecurityElement]::Escape($script:SandboxBootstrapFile)
 @"
 <Configuration>
   <Networking>Enable</Networking>
   <MappedFolders>
     <MappedFolder>
-      <HostFolder>$($script:TestDataFolder)</HostFolder>
+      <HostFolder>$($escapedTestDataFolder)</HostFolder>
     </MappedFolder>
     <MappedFolder>
-      <HostFolder>$($script:PrimaryMappedFolder)</HostFolder>
+      <HostFolder>$($escapedPrimaryMappedFolder)</HostFolder>
     </MappedFolder>
   </MappedFolders>
   <LogonCommand>
-  <Command>PowerShell Start-Process PowerShell -WindowStyle Maximized -WorkingDirectory '$($script:SandboxWorkingDirectory)' -ArgumentList '-ExecutionPolicy Bypass -NoExit -NoLogo -File $($script:SandboxBootstrapFile)'</Command>
+  <Command>PowerShell Start-Process PowerShell -WindowStyle Maximized -WorkingDirectory '$($escapedSandboxWorkingDirectory)' -ArgumentList '-ExecutionPolicy Bypass -NoExit -NoLogo -File $($escapedSandboxBootstrapFile)'</Command>
   </LogonCommand>
+  <AudioInput>Disable</AudioInput>
+  <VideoInput>Disable</VideoInput>
+  <PrinterRedirection>Disable</PrinterRedirection>
 </Configuration>
 "@ | Out-File -FilePath $script:ConfigurationFile
 

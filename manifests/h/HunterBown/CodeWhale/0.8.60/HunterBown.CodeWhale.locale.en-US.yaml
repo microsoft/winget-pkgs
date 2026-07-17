@@ -1,0 +1,45 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: HunterBown.CodeWhale
+PackageVersion: 0.8.60
+PackageLocale: en-US
+Publisher: Hunter Bown
+PublisherUrl: https://github.com/Hmbown
+PublisherSupportUrl: https://github.com/Hmbown/CodeWhale/issues
+Author: Hunter Bown
+PackageName: CodeWhale
+PackageUrl: https://github.com/Hmbown/CodeWhale
+License: MIT
+LicenseUrl: https://github.com/Hmbown/CodeWhale/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2024-2026 DeepSeek CLI Contributors
+ShortDescription: Coding agent for DeepSeek models that runs in your terminal
+Description: Terminal coding agent for DeepSeek V4. It runs from the deepseek command, streams reasoning blocks, edits local workspaces with approval gates, and includes an auto mode that chooses both model and thinking level per turn.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- deepseek
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  Added
+  - Agent Fleet real-run cutover (#3154/#3096). codewhale fleet run now launches durable workers through the headless codewhale exec --output-format stream-json path instead of the local simulation interpreter, with terminal worker events freeing leases so queued fleet tasks continue running.
+  - Read-only shell parallelism (#2983). The engine can now run conservative read-only shell calls in parallel, including strict bash/sh/zsh -c wrappers for whitelisted commands, while writes, stdin, background TTY work, redirects, pipes, command substitution, and follow-mode tails stay serial.
+  - Declarative JS/TS WhaleFlow authoring (#3097). WhaleFlow now accepts a compile-only workflow({...}) JavaScript/TypeScript authoring form that lowers into the existing WorkflowSpec validator without executing user JavaScript.
+  - Slash-menu Ctrl+P/Ctrl+N navigation (#3196). The slash command menu now supports Ctrl+P/Ctrl+N movement without letting the global file picker steal focus while the menu is open. Thanks @1Git2Clone for the PR.
+  - New models and first-party provider routes. This release adds GLM-5.2 (selectable on the Z.ai Coding Plan and over OpenRouter as z-ai/glm-5.2, alongside the existing GLM-5.1 default), a first-party Z.ai provider route, a first-party StepFun / StepFlash route (step-3.7-flash), and a first-party MiniMax route defaulting to MiniMax-M3 with the M2.7/M2.5/M2.1 family selectable (#3187/#3191).
+  Changed
+  - README and contributor credits. The README now has a shorter public overview and moves the full contributor ledger to docs/CONTRIBUTORS.md, preserving public thanks for DeepSeek, DataWhale, OpenWarp, and Open Design.
+  - Fleet-backed sub-agent direction. Runtime docs now state the intended cutover clearly: "sub-agent" is role/UX vocabulary, while durable detached work should converge on the fleet-backed worker lifecycle with retries, receipts, and ledgered inspection.
+  Fixed
+  - Sub-agent eval no longer blocks by default. agent_eval now returns the current projection immediately and delivers follow-up input without waiting for a running child to finish its provider call. Pass block:true for an intentional terminal wait.
+  - Z.ai GLM thinking traces. Direct Z.ai requests now use the documented thinking shape, preserve and replay reasoning_content, classify GLM reasoning streams as thinking output, and accept ultracode as a max-effort alias.
+  - Claude skill archive compatibility (#2743). /skill install keeps portable Claude-style skill folders supported while rejecting multi-skill Claude plugin archives clearly instead of silently installing only one skill and dropping plugin semantics. Thanks @AiurArtanis for the ecosystem request.
+ReleaseNotesUrl: https://github.com/Hmbown/CodeWhale/blob/HEAD/CHANGELOG.md#0860---2026-06-13
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

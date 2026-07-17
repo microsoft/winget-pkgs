@@ -1,0 +1,70 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: PBH-BTN.PeerBanHelper
+PackageVersion: 9.4.0
+PackageLocale: zh-CN
+Publisher: PBH-BTN Community
+PublisherUrl: https://github.com/PBH-BTN
+PublisherSupportUrl: https://github.com/PBH-BTN/PeerBanHelper/issues
+PackageName: PeerBanHelper
+PackageUrl: https://github.com/PBH-BTN/PeerBanHelper
+License: GPL-3.0
+LicenseUrl: https://github.com/PBH-BTN/PeerBanHelper/blob/HEAD/LICENSE
+ShortDescription: 自动封禁不受欢迎、吸血和异常的 BT 客户端，并支持自定义规则。
+Tags:
+- bt
+- 种子
+ReleaseNotes: |-
+  新功能
+  - 通知推送渠道支持 Ntfy @gongfuture
+  - 对 Android 操作系统 Termux 运行环境的基础适配 @Ghost-chu
+  - 添加 FreeBSD 15.1 程序包打包 @Ghost-chu @paulzzh @copilot
+  重构
+  - 重构 BanWave 核心底层代码，缓解之前版本中下载器请求卡住后所有逻辑都会阻塞的问题 @Ghost-chu
+    - 现在当封禁线程阻塞时，能够详细跟踪导致线程卡住的任务，并显示各模块和任务的状态
+    - 现在采用流水线替代分批处理，大幅提高处理性能
+    - BanWave 流水线现在充分利用平台线程池和虚拟线程处理任务
+    - 现在能够在封禁波次间复用线程池，避免线程池的反复创建
+  - 重构各封禁模块处理项传递逻辑和注册逻辑，允许封禁模块以最适合的最高效率的方式处理 @Ghost-chu
+  - 重构 PBH AutoStun UPnP 核心代码，减少依赖项并改善兼容性 @paulzzh
+  - [WebUI] 当功能模块未启用时，前端禁用对应选单 @Gaojianli
+  - 重构 JNI 相关代码，迁移到更安全更现代的 FFM 实现 @Ghost-chu @paulzzh
+  - 重构路由注册逻辑，仅在模块启用时注册路由，以缩减潜在攻击面 @Ghost-chu @paulzzh
+  - 重复规则的注释现在支持合并 @Ghost-chu
+  - PCBAddressEntity, PCBRangeEntity, TrackedSwarmEntity 现在支持按需写入，以缓解磁盘 IO 压力，减少写入量 @Ghost-chu
+  - 重构 PBH 内存缓存系统，现在支持延迟回写和合批回写，PeerConnectionMetricsTrackService, TrackedSwarmService, PeerRecordingService 和 ProgressCheatBlocker 现已支持新的内存缓存系统，以缓解磁盘 IO 压力，减少写入量 @Ghost-chu
+  - 重构缓存系统，统一缓存处理工具 @Ghost-chu
+  - 所有调度器转为虚拟线程专用调度器以减少平台线程数量 @Ghost-chu
+  - [Security] 对于未授权登录的请求，现在不再显示已激活的封禁模块，以改善安全性 @Ghost-chu
+  - 重构系统颜色检测器，现在能够检测主流 OS 和 DE 的系统颜色，并减少对 native 层的依赖 @Ghost-chu
+  - 重构封禁统计信息内存计数器，减轻 CPU 压力 @Ghost-chu
+  - 重构 WatchDog 机制，减少看门狗运行时的 CPU 使用 @Ghost-chu
+  - 桌面安装器 UI 换新 @Ghost-chu
+  - 开发人员与社区贡献者关于页面视觉换新 @Ghost-chu
+  移除
+  - 移除了一些未使用的依赖项以缩减程序体积 @Ghost-chu
+  错误修复
+  - 修复订阅规则提示 @paulzzh
+  - 修复多个与 PostgreSQL 有关的错误 @Ghost-chu
+  - 修复 BTN 模块状态显示与实际模块状态显示不一致的问题 @Ghost-chu
+  - [WebUI] 修复 PBH 运行于 macOS 26 上时，运行状态页面可能崩溃的问题 @Gaojianli
+  默认值更改
+  - 由于目前中国大陆主流 ISP 的 QOS 策略导致大量连接出现与拒绝服务攻击保护类似的行为，此版本开始拒绝服务攻击保护模块默认处于禁用状态。 @Ghost-chu
+  依赖项
+  - 以下各项依赖项已更新到发布时的最新稳定版本，已解决现有问题或改善安全性：
+    - beecp, oshi-core, javalin, ntfy, xz, vue, sentry, intl-durationformat, lombok, spring-context, sqlite-jdbc, flatlaf-extras, ipaddress, kotlin, swt-win32.x86_64, copy-to-clipboard, uuid, postgresql, gson, mysql-connector-j, formatjs, oshi-core-ffm, geoip2, fastcsv, markdown-it, okhttp, install4j-runtime, commonmark, jackson, install4j, echarts
+  - 捆绑 JRE 版本已升级
+  本地化
+  - 修正 zh_tw 语言代码的文本 @david082321
+  Docker
+  DockerHub: ghostchu/peerbanhelper:v9.4.0
+  阿里云国内镜像加速：registry.cn-hangzhou.aliyuncs.com/ghostchu/peerbanhelper:v9.4.0
+
+  部署教程 | 常见问题 | 如何设置下载器 | PBH-BTN BBS
+ReleaseNotesUrl: https://github.com/PBH-BTN/PeerBanHelper/releases/tag/v9.4.0
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/PBH-BTN/PeerBanHelper/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

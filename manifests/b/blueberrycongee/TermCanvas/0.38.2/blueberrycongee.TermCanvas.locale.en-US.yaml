@@ -1,0 +1,51 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: blueberrycongee.TermCanvas
+PackageVersion: 0.38.2
+PackageLocale: en-US
+Publisher: blueberrycongee
+PublisherUrl: https://github.com/blueberrycongee
+PublisherSupportUrl: https://github.com/blueberrycongee/termcanvas/issues
+PackageName: TermCanvas
+PackageUrl: https://github.com/blueberrycongee/termcanvas
+License: MIT
+LicenseUrl: https://github.com/blueberrycongee/termcanvas/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 TermCanvas Contributors
+ShortDescription: An infinite canvas desktop app for visually managing terminals
+Description: |-
+  TermCanvas spreads all your terminals across an infinite spatial canvas — no more tabs, no more split panes. Drag them around, zoom in to focus, zoom out to see the big picture.
+  It organizes everything in a Project → Worktree → Terminal hierarchy that mirrors how you actually use git. Add a project, and TermCanvas auto-detects its worktrees. Create a new worktree from the terminal, and it appears on the canvas instantly.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- claude-code
+- code
+- codex
+- coding
+- gemini-cli
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  Added
+  - Markdown sanitization: rendered markdown (session replay, agent bubbles, etc.) now passes through DOMPurify before insertion via dangerouslySetInnerHTML. Defense-in-depth against any future provider that ships HTML in message text.
+  - Copy buttons in session replay: every user prompt and assistant text row gets a muted copy icon at the bottom-right (brightens on hover, swaps to ✓ for 1.2s on success). Source is TimelineEvent.textPreview, capped at 16 KB by the scanner — covers the 95th-percentile message.
+  - Zustand setState-loop debug middleware (wrapSetState): traces high-frequency setState calls during dev so future "max update depth" regressions surface as a counter instead of a crash.
+  Changed
+  - Session replay footer: removed the progress bar. The highlighted-row indicator already shows position, and the bar crowded the footer. Play/pause/seek controls stay for keyboard stepping.
+  Fixed
+  - Title input dragged the whole tile: clicking-and-dragging inside the custom-title input was moving the node instead of selecting text — onMouseDown stopPropagation doesn't help because React Flow detects drag from pointerdown. The title container now carries the nodrag opt-out; rest of the header stays draggable.
+  - Pin drawer never reopened after a transient list failure: pinStore.openDrawer cached an empty array on rejection, short-circuiting every subsequent open for that project. The cache key now stays unset on failure so the next open retries.
+  - One corrupt pin file aborted the whole list: PinStore.list() threw on the first malformed .md, hiding every other pin in the repo. Per-file errors are now caught, logged, and skipped. readFile also validates required string fields and ID_REGEX before constructing a Pin.
+  - Invalid pin status silently accepted on create: PinStore.create skipped the status validation that update already had, so a CLI-created pin with a bad status would write to disk and then vanish from list/get. create now throws PinStoreError 400, matching update's contract.
+  - Pin dispatch errors said "Task": legacy "Task not found" copy and [Task] log prefixes leaked through pin.dispatch.failed toasts after the rename. Renamed to "Pin" everywhere; stale TERMCANVAS_DIR/tasks/ comments updated to pins/.
+  - pnpm test skipped the entire Pin feature: the script still listed deleted task-*.test.ts files instead of the renamed pin-* equivalents. Replaced.
+  - wrapSetState broke the release-build typecheck: the wrapper's forwarded (partial, replace) didn't match either zustand setState overload. Single function-cast at the forwarded call; runtime semantics preserved.
+  Docs
+  - CLAUDE.md: documented the TermCanvas Pin system — when to record a pin, the termcanvas pin CLI surface, and conventions for capturing user-deferred work.
+ReleaseNotesUrl: https://github.com/blueberrycongee/termcanvas/releases/tag/v0.38.2
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
