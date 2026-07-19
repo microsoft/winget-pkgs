@@ -1,0 +1,80 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: max-sixty.worktrunk
+PackageVersion: v0.49.0
+PackageLocale: en-US
+Publisher: max-sixty
+PublisherUrl: https://github.com/max-sixty
+PublisherSupportUrl: https://github.com/max-sixty/worktrunk/issues
+PackageName: worktrunk
+PackageUrl: https://github.com/max-sixty/worktrunk
+License: MIT OR Apache-2.0
+LicenseUrl: https://github.com/max-sixty/worktrunk/blob/HEAD/LICENSE
+ShortDescription: A Git worktree manager for trunk-based development
+Description: |-
+  worktrunk (wt) is a Git worktree manager designed for trunk-based development workflows.
+  It simplifies creating, switching between, and managing Git worktrees, making it easy to
+  work on multiple features or branches simultaneously without the overhead of stashing
+  or switching branches in a single working directory.
+Tags:
+- cli
+- git
+- git-worktree
+- rust
+- terminal
+- worktree
+ReleaseNotes: |-
+  Release Notes
+  Improved
+  - New codename(n) template filter: Produces deterministic friendly names from any input string — codename(1) returns a noun, codename(2) returns adjective-noun, higher counts add more adjectives. The pool is large enough (~1.26M combinations for codename(2)) that the result usually stands alone as a worktree leaf, e.g. worktree-path = "{{ repo_path }}/../{{ repo }}.{{ branch | codename(2) }}". (#2641, thanks @endigma)
+  - Picker preview disk cache: The wt switch picker now caches Log, BranchDiff, and UpstreamDiff previews to disk under .git/wt/cache/picker-preview/, keyed by SHA + width, so repeat invocations skip the git log / git diff subprocesses they already paid for. The Log cache splits SHA-deterministic raw output from the dim/bright styling that depends on main's position, and a background refresh worker rewrites stale entries after every disk hit so the next visit sees up-to-date ref decorations. State integration bundles the new cache with the existing git-commands cache for wt config state get / state clear --all. (#2628, #2646)
+  - Picker fans out fewer git rev-parse calls: compute_branch_diff_preview previously forked git rev-parse <default_branch> once per item to key its disk cache. A new Repository::default_branch_sha() reads the SHA from the already-cached branch inventory, collapsing N redundant subprocesses down to one. (#2658)
+  - "X has uncommitted changes" errors now list the dirty files: GitError::UncommittedChanges carries the porcelain lines from git status and the renderer prints them between the title and hint, so users hitting the error on wt remove, wt merge cleanup, wt step promote, or wt merge --no-commit see exactly what's blocking without re-running git status. No new git subprocesses — is_dirty() was already running git status --porcelain and discarding the output. (Breaking: GitError::UncommittedChanges gained a dirty_files: Vec<String> field.) (#2653)
+  Fixed
+  - wt switch integrates with cd aliases like zoxide: Previously the shell wrapper invoked the cd shell function directly, so users with cd aliased to __zoxide_z or similar saw zoxide: no match found when switching to a fresh worktree. The bash and zsh wrappers now use builtin cd to bypass the alias. Fixes #2643. (#2644, thanks @xkumiyu for reporting)
+  - Empty hook tables no longer panic during wt switch --create: A config like [post-start] with no entries below it would crash the background HookAnnouncer path. The config layer now treats an empty hook table as zero steps. Fixes #2634. (#2635, thanks @topit for reporting)
+  - Repository accessors no longer leak the process CWD: Repository::current_worktree() resolved against the global CWD instead of the Repository's own discovery path, so callers using Repository::at(p) (output handlers, picker, recovery, tests) silently got a WorkingTree at the process CWD rather than at p. Five sibling sites had the same bug — project_config_path, project_config, require_current_branch, resolve_worktree_name("@"), resolve_worktree("@"). Fixed at the helper itself, replacing PR #2625's per-site workaround. (#2652)
+  - WorkingTree::is_linked tolerates non-git CWDs: When wt's process CWD was outside any git repo (e.g. the Nix build sandbox), infer_default_branch_locally would error out trying to call is_linked on a non-git path. The check now returns false instead. Fixes #2624. (#2625, thanks @DArtagan for reporting)
+  - Picker no longer overlays warnings on the active TUI: Warnings emitted by collect::collect (stale default branch, batch-fetch failure, drain timeout) used to print to stderr from a background thread while skim's TUI owned the terminal, corrupting the rendered frame and leaving fragments visible after the user picked. Warnings now stash through the picker and drain to stderr after skim releases the terminal. The drain-timeout warning is also subcommand-agnostic instead of hardcoding wt list. (#2627)
+  - Picker clears its frame on exit in inline mode: On some Linux terminals the picker's rows remained visible after pressing Enter because skim emitted an unmatched rmcup (alternate-screen toggle) instead of an explicit erase. Setting skim's no_clear_start option forces the explicit erase path. (#2626)
+  - Failed git log no longer poisons the picker's preview disk cache: When the underlying git log subprocess errored, the picker still wrote the error string into the preview cache, so the next read served the stale failure instead of retrying. The write is now skipped on failure. (#2651)
+  - wt step prune says "removing branch" for branch-only candidates: The error context wrapping every try_remove call was hardcoded to "removing worktree for X", which misled users when prune was actually removing an orphan branch with no worktree attached. (#2619)
+  - Claude Code Windows integration uses a cross-platform wrapper: The plugin's wt invocation collided with Windows Terminal's built-in wt.exe alias, opening Windows Terminal windows instead of running the wt CLI. A new wt.sh wrapper script tries the standard Worktrunk binary names (wt, git-wt) and dispatches to the right one across pwsh, Git Bash, and WSL. (#1754, thanks @lucaspimentel)
+  - wt config plugins opencode install writes to ~/.config/opencode/ on macOS: The install path fell through to dirs::config_dir(), which resolves to ~/Library/Application Support/opencode/ on macOS — but that's OpenCode's managed settings directory; user plugins belong under ~/.config/opencode/. The path now follows OpenCode's documented precedence: $OPENCODE_CONFIG_DIR > $XDG_CONFIG_HOME/opencode > ~/.config/opencode. Linux behavior is unchanged. Fixes #2654. (#2655, thanks @gwenwindflower for reporting)
+  Documentation
+  - cmux workspace integration recipe: Adds cmux to the Agent handoffs section and documents a per-worktree workspace recipe with create/select/close lifecycle hooks. Includes the key gotcha — cmux's socket restricts access to processes with cmux terminal ancestry, so pre-* hooks must be used instead of post-*. (#1907, thanks @alvistar)
+  Internal
+  - Consolidated slow CI checks (Nix flake build, Windows long-tail) onto a nightly workflow triggered by a nightly PR label, keeping the PR-blocking suite faster. (#2630, #2636, #2645, #2647, #2648)
+  - cargo-affected now uploads its report.json as a build artifact for downstream tooling. (#2621)
+  - Test isolation hardening: wt_command() defaults to an isolated tempdir so tests no longer inherit the process CWD, and the current_or_recover test was decoupled from the inherited CWD. (#2642, #2649)
+  Install worktrunk 0.49.0
+  Install prebuilt binaries via shell script
+  curl --proto '=https' --tlsv1.2 -LsSf https://github.com/max-sixty/worktrunk/releases/download/v0.49.0/worktrunk-installer.sh | sh && wt config shell install
+  Install prebuilt binaries via powershell script
+  powershell -ExecutionPolicy Bypass -c "irm https://github.com/max-sixty/worktrunk/releases/download/v0.49.0/worktrunk-installer.ps1 | iex"; git-wt config shell install
+  Install prebuilt binaries via Homebrew
+  brew install worktrunk && wt config shell install
+  Download worktrunk 0.49.0
+  ────────────────────────────────────────────────┬───────────────────┬─────────────
+  File                                            │Platform           │Checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-aarch64-apple-darwin.tar.xz           │Apple Silicon macOS│checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-x86_64-apple-darwin.tar.xz            │Intel macOS        │checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-x86_64-pc-windows-msvc.zip            │x64 Windows        │checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-aarch64-unknown-linux-musl.tar.xz     │ARM64 MUSL Linux   │checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-x86_64-unknown-linux-musl.tar.xz      │x64 MUSL Linux     │checksum
+  ────────────────────────────────────────────────┴───────────────────┴─────────────
+  Install via Cargo
+  cargo install worktrunk && wt config shell install
+  Install via Winget (Windows)
+  winget install max-sixty.worktrunk && git-wt config shell install
+  Install via AUR (Arch Linux)
+  paru worktrunk-bin && wt config shell install
+ReleaseNotesUrl: https://github.com/max-sixty/worktrunk/releases/tag/v0.49.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

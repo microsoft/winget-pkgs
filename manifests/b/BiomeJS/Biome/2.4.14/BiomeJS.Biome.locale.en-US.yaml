@@ -1,0 +1,156 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: BiomeJS.Biome
+PackageVersion: 2.4.14
+PackageLocale: en-US
+Publisher: BiomeJS
+PublisherUrl: https://biomejs.dev/
+PublisherSupportUrl: https://github.com/biomejs/biome/issues
+Author: Biome Developers and Contributors
+PackageName: Biome
+PackageUrl: https://biomejs.dev/
+License: Apache-2.0
+Copyright: Copyright (c) 2023-present Biome Developers and Contributors
+ShortDescription: Biome is a toolchain for web projects, aimed at providing functionalities to maintain them. It offers a formatter and linter, usable via CLI and LSP.
+Moniker: biome
+Tags:
+- css
+- formatter
+- javascript
+- json
+- jsx
+- linter
+- static-code-analysis
+- typescript
+- web
+ReleaseNotes: |-
+  2.4.14
+
+  Patch Changes
+  - #9393 491b171 Thanks @dyc3! - Added the nursery rule useTestHooksOnTop in the test domain. The rule flags lifecycle hooks (beforeEach, beforeAll, afterEach, afterAll) that appear after test cases in the same block, enforcing that hooks are defined before any test case.
+  - #10157 eefc5ab Thanks @dyc3! - Fixed #7882: The HTML parser will now emit better diagnostics when it encounters a void element with a closing tag, such as <br></br>. Previously, the parser would emit multiple diagnostics with conflicting advice. Now it emits a single diagnostic that clearly states that void elements should not have closing tags.
+  - #10054 0e9f569 Thanks @minseong0324! - noMisleadingReturnType no longer misses widening from concrete object types, class instances, object literals, tuples, functions, and regular expressions to : object.
+    A function annotated : object returning an object literal:
+    function f(): object {
+      return { retry: true };
+    }
+  - #10116 53269eb Thanks @jiwon79! - Fixed #6201: noUselessEscapeInRegex no longer flags an escaped backslash followed by - as a useless escape. Patterns like /[\\-]/ are now considered valid because the second \ is the escaped backslash, not an unnecessary escape of the trailing dash.
+  - #10092 33d8543 Thanks @Conaclos! - Fixed #9097: organizeImports no longer adds a blank line between a never-matched group and a matched group.
+    Given the following organizeImports options:
+    {
+      "groups": [":NODE:", ":BLANK_LINE:", ":PACKAGE:", ":BLANK_LINE:", ":PATH:"]
+    }
+    The following code...
+    // Comment
+    import "package";
+    import "./file.js";
+    ...was organized as:
+    +
+      // Comment
+      import "package";
+    +
+      import "./file.js";
+    A blank line was added even though the group ':NODE:' doesn't match any imports here.
+    :BLANK_LINE: between never-matched groups and matched groups are now ignored.
+    The code is now organized as:
+      // Comment
+      import "package";
+    +
+      import "./file.js";
+  - #10138 a10b6c1 Thanks @dyc3! - Fixed Vue v-for handling for noUndeclaredVariables and noUnusedVariables. Biome now recognizes variables declared by v-for directives and references to iterated values in Vue templates.
+  - #10115 d428d76 Thanks @minseong0324! - noMisleadingReturnType no longer reports false positives when a union return type's boolean variant is covered by both true and false returns.
+  - #9922 7acf1e0 Thanks @dyc3! - Added the new nursery rule noReactStringRefs, which disallows legacy React string refs such as ref="hello" and this.refs.hello.
+    Biome also reports template-literal refs such as ref={`hello`}, so React code can consistently migrate to callback refs, createRef(), or useRef().
+  - #10010 f3e76ab Thanks @dyc3! - Fixed a bug in the LSP file watcher registration so Biome now watches .biome.json and .biome.jsonc configuration files and reloads workspace settings when they change.
+  - #10176 8a40ef8 Thanks @dyc3! - Fixed #10011: The noThisInStatic rule no longer reports this when it is used as the constructor target in new this(...), which is required for inherited static factory methods.
+  - #10163 6867e96 Thanks @jiwon79! - Fixed #9884: The useSortedAttributes auto-fix no longer corrupts source code when both an outer JSX element and a nested JSX-valued attribute have unsorted attributes in the same pass. Multiple unsorted groups separated by spread or shorthand attributes within the same JSX element are now reported as a single diagnostic.
+  - #10079 d29dd19 Thanks @Damix48! - Fixed false positive in noAssignInExpressions for Svelte {@const} blocks. Assignments in {@const name = value} are now correctly recognized as declarations rather than accidental assignments in expressions.
+  - #10080 5d8fdac Thanks @Damix48! - Fixed parsing of closing parentheses in Svelte {#each} block key expressions. Biome now correctly parses method calls and other parenthesised expressions used as keys.
+    For example, the following snippets are now parsed correctly:
+    {#each numbers as number, index (number.toString())}
+      <p>{number}</p>
+    {/each}
+    {#each numbers as number (key(number))}
+      <p>{number}</p>
+    {/each}
+  - #10140 e7024b9 Thanks @solithcy! - Fixed #10135: Biome no longer crashes on missing Svelte template expressions.
+    The following code snippet longer panics:
+    {#if }
+     <p>^ this would previously crash</p>
+    {/if}
+    {@const }
+    <p>    ^ this would also crash</p>
+  - #10111 7818009 Thanks @jiwon79! - Fixed #9997: noDuplicateSelectors no longer reports false positives for selectors inside @scope queries. Biome now treats @scope as a separate at-rule context, like @media, @supports, @container, and @starting-style.
+    The following snippet is no longer flagged as a duplicate:
+    .Example {
+      padding: 0;
+    }
+    @scope (.theme-dark) {
+      .Example {
+        color: white;
+      }
+    }
+  - #9926 d62b331 Thanks @dyc3! - Added the nursery lint rule useMathMinMax, which prefers Math.min() and Math.max() over equivalent ternary comparisons.
+    For example, this code:
+    const min = a < b ? a : b;
+    is much more readable when rewritten as:
+    const min = Math.min(a, b);
+  - #10115 d428d76 Thanks @minseong0324! - useExhaustiveSwitchCases now flags missing true/false cases for boolean discriminants, including when boolean is a union variant.
+  - #10125 a55a0b6 Thanks @bmish! - Fixed a resolver bug where packages that define a typed entry point through package.json's main field but omit types were ignored during type-aware resolution. Type-aware rules such as noFloatingPromises can now inspect imports from those packages.
+  - #10117 895e809 Thanks @denizdogan! - Added support for the corner-shape family of CSS properties and the superellipse()/squircle() value functions, so noUnknownProperty and noUnknownFunction no longer flag them as unknown.
+    New known properties: corner-shape, corner-block-end-shape, corner-block-start-shape, corner-bottom-left-shape, corner-bottom-right-shape, corner-bottom-shape, corner-end-end-shape, corner-end-start-shape, corner-inline-end-shape, corner-inline-start-shape, corner-left-shape, corner-right-shape, corner-start-end-shape, corner-start-start-shape, corner-top-left-shape, corner-top-right-shape, corner-top-shape.
+    New known value functions: superellipse(), squircle().
+  - #8620 8df8f73 Thanks @dyc3! - Fixed #8062: Added support for parsing Vue v-for directives more accurately.
+  - #10191 aa055cd Thanks @guney! - Now the rule noStaticElementInteractions doesn't trigger custom elements.
+  - #9757 2c62594 Thanks @dyc3! - Fixed #9099: the HTML formatter collapsing non-text children (inline elements, Svelte expressions, comments) onto a single line when the source had them on separate lines. Biome now preserves the user's intended line breaks for exclusively non-text children.
+    For example, the following Svelte snippet is now preserved instead of being collapsed to <div>{name}<!-- comment --></div>:
+    <div>
+      {name}<!-- comment -->
+    </div>
+    Similarly, HTML elements like <span> inside a <div> are now preserved when written on their own line:
+    <div>
+      <span>text</span>
+    </div>
+  - #10105 e7c1a6d Thanks @jiwon79! - Fixed #10039: useReadonlyClassProperties now detects unreassigned private members in class expressions and export default classes, not only in class declarations.
+    The following patterns are now correctly flagged:
+    const AnonClass = class {
+      #prop = 123;
+      constructor() {
+        console.log(this.#prop);
+      }
+    };
+    export default class {
+      #prop = 123;
+      constructor() {
+        console.log(this.#prop);
+      }
+    }
+  - #10141 46a77d0 Thanks @minseong0324! - Improved noUnnecessaryConditions to detect conditions that are always truthy because they check built-in global class instances such as Date, Map, Set, WeakMap, and Error.
+  - #10178 7b05a89 Thanks @dyc3! - Fixed #10177: The HTML parser no longer reports lowercase html or doctype text as invalid after void elements such as <br>.
+  - #10155 0d4595d Thanks @jiwon79! - Fixed #10045: the CSS formatter no longer compounds indentation inside nested functional pseudo-classes such as :not(:where(...)), :is(:where(...)), and similar combinations. The same fix also removes one level of unnecessary indentation that was added inside any pseudo-class function whose argument list wrapped onto multiple lines, including :nth-child(... of ...), ::part(...), and :active-view-transition-type(...).
+    The following snippet is now correctly formatted, matching Prettier.
+    input:not(
+      :where(
+        [type="submit"],
+        [type="checkbox"],
+        [type="radio"],
+        [type="button"],
+        [type="reset"]
+      )
+    ) {
+      inline-size: 100%;
+    }
+  - #10112 6f0251e Thanks @dyc3! - Fixed #10110: Biome's parser now accepts surrogate code points in JavaScript string \u{...} escapes.
+  - #10141 46a77d0 Thanks @minseong0324! - Improved noMisleadingReturnType to detect object return annotations that hide built-in global class instances such as Date, Map, Set, WeakMap, and Error.
+  - #10083 4a664c1 Thanks @ematipico! - Added two new options to noShadow, both defaulting to true to match typescript-eslint's behavior.
+    Fixed #9482: Added ignoreFunctionTypeParameterNameValueShadow option. When enabled, parameter names inside function type annotations (e.g. (options: unknown) => void) are not flagged as shadowing outer variables.
+    Fixed #7812: Added ignoreTypeValueShadow option. When enabled, a value binding that shares its name with a type-only declaration (type alias or interface) is not flagged, since types and values occupy separate namespaces in TypeScript.
+  - #9286 52695cf Thanks @Hugo-Polloli! - Fixed #6316: Biome now resolves Svelte $store references to the underlying store binding in semantic analysis, preventing false noUndeclaredVariables diagnostics when the store is declared.
+  - #10188 ae659dd Thanks @dyc3! - Added a new nursery rule noExcessiveNestedCallbacks, which disallows callbacks nested deeper than the configured maximum.
+ReleaseNotesUrl: https://github.com/biomejs/biome/releases/tag/@biomejs/biome@2.4.14
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://biomejs.dev/guides/getting-started/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

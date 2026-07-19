@@ -1,0 +1,76 @@
+# Created using wingetcreate 1.9.2.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
+
+PackageIdentifier: mtkennerly.ludusavi
+PackageVersion: 0.28.0
+PackageLocale: en-US
+Publisher: mtkennerly
+PublisherUrl: https://github.com/mtkennerly
+PublisherSupportUrl: https://github.com/mtkennerly/ludusavi/issues
+Author: Matthew T. Kennerly
+PackageName: ludusavi
+PackageUrl: https://github.com/mtkennerly/ludusavi
+License: MIT
+LicenseUrl: https://github.com/mtkennerly/ludusavi/blob/master/LICENSE
+Copyright: Copyright (c) 2020 Matthew T. Kennerly (mtkennerly)
+CopyrightUrl: https://github.com/mtkennerly/ludusavi/blob/master/LICENSE
+ShortDescription: Backup tool for PC game saves
+Moniker: ludusavi
+ReleaseNotes: |-
+  * Added:
+    * On Linux, for Lutris roots that point to a Flatpak installation,
+      Ludusavi now checks `$XDG_DATA_HOME` and `$XDG_CONFIG_HOME`
+      inside of the Flatpak installation of Lutris.
+    * Custom games now let you specify installed folder names.
+      This can be used to satisfy the `<base>` and `<game>` path placeholders
+      in cases where Ludusavi can't automatically detect the right folder.
+    * On the "other" screen,
+      there is a new option to skip backups when saves are only removed but not added/updated.
+      This can be useful because uninstalling a game may cause some of its data (but not all) to be removed,
+      but you may not want to exclude that data from your backups yet.
+    * CLI: `config show` command.
+    * CLI: The `backup`, `restore`, `cloud upload`, and `cloud download` commands
+      now support a `--gui` option for graphical dialog prompts.
+    * CLI: The `backup` and `restore` commands now support a `--dump-registry` option,
+      which includes the serialized registry content in the output.
+      This may be useful if you're consuming the `--api` output to back up with another tool,
+      but don't have a good way to check the registry keys directly.
+    * CLI: The `find` command now supports `--fuzzy` and `--multiple` options.
+      This is also available for the `api` command's `findTitle` request.
+    * CLI: The `wrap` command now supports several options from the `backup` command:
+      `--path`,
+      `--format`,
+      `--compression`,
+      `--compression-level`,
+      `--full-limit`,
+      `--differential-limit`,
+      `--cloud-sync`,
+      `--no-cloud-sync`.
+  * Changed:
+    * When the game list is filtered,
+      the summary line (e.g., "1 of 10 games") now reflects the filtered totals.
+    * The `enable/disable all` buttons are now constrained by the active filter.
+    * GUI: Changed some icons to a softer version.
+    * CLI: When using the `--gui` option of any command that supports it,
+      errors at the end of the process will also be reported via dialogs.
+      This does not apply to CLI parse errors.
+    * Application crash and CLI parse errors are now logged.
+    * Updated translations, including partial support for Vietnamese and Swedish.
+      (Thanks to contributors on the [Crowdin project](https://crowdin.com/project/ludusavi))
+  * Fixed:
+    * If a custom game's title begins or ends with a space,
+      that custom game will now be ignored.
+      Previously, Ludusavi would make a backup folder for the game including the space,
+      but the OS (namely Windows) would remove the space from the folder title,
+      causing unpredictable behavior when Ludusavi couldn't find the expected folder name.
+    * GUI: In backup mode, if Ludusavi failed to prepare the backup target folder,
+      it would get stuck where you couldn't cancel/restart the operation.
+    * CLI: `find --normalized` now better prioritizes the closest match
+      when multiple manifest entries have the same normalized title.
+    * Some default paths are now formatted more consistently.
+    * GUI: There was an error when the backup/restore paths were relative to the working directory.
+    * When backing up a read-only file using the simple format,
+      Ludusavi would fail to set the backed up file's modified time.
+ReleaseNotesUrl: https://github.com/mtkennerly/ludusavi/releases/tag/v0.28.0
+ManifestType: defaultLocale
+ManifestVersion: 1.9.0

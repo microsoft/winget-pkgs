@@ -1,0 +1,78 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: jcardama.LeopardWM
+PackageVersion: 0.2.5
+PackageLocale: en-US
+Publisher: jcardama
+PublisherUrl: https://github.com/jcardama
+PublisherSupportUrl: https://github.com/jcardama/LeopardWM/issues
+Author: jcardama
+PackageName: LeopardWM
+PackageUrl: https://github.com/jcardama/LeopardWM
+License: GPL-3.0
+LicenseUrl: https://github.com/jcardama/LeopardWM/blob/HEAD/LICENSE
+ShortDescription: Scroll-first tiling window manager for Windows 10 and 11.
+Description: LeopardWM is an open-source tiling window manager for Windows 10 and 11 that takes a scroll-first approach inspired by niri and PaperWM. Windows sit on a horizontal strip and the monitor acts as a viewport that scrolls over them, so navigation stays spatially consistent as windows are added — instead of constantly rebuilding split trees. Written in Rust on top of the Win32 API.
+Moniker: leopardwm
+Tags:
+- niri
+- paperwm
+- rust
+- scrollable
+- tiling
+- window-manager
+- windows
+- workspace
+ReleaseNotes: |-
+  Improvements
+  - Optional fullscreen-follows-focus (monocle). By default, changing focus
+    while a window is fullscreen carries fullscreen to the newly focused window.
+    With fullscreen_follows_focus = false under [behavior], a focus command
+    instead drops back to the tiled layout, so fullscreen only ever affects the
+    one window it was toggled on.
+  - More keys can be bound to hotkeys. PageUp, PageDown, and the numpad keys
+    (Numpad0-Numpad9, plus +, -, *, /, and decimal) are now accepted in hotkey
+    bindings, in config and the Settings recorder. Numpad keys fire with NumLock
+    on.
+  - The default width for new windows is configurable. A new
+    default_width_preset setting under [layout] picks which width preset new
+    windows open at (1-based index into width_presets, default 1). Previously
+    new windows always opened at the first preset.
+  - Move the focused window to the next or previous workspace. New
+    move_to_workspace_next / move_to_workspace_prev commands (bound to
+    Ctrl+Alt+Shift+PageDown / PageUp by default) shift the focused window one
+    workspace over, wrapping 1 to 9. Previously only the numbered
+    move-to-workspace shortcuts existed.
+  - Optional workspace edge-wrap for vertical navigation. With
+    workspace_edge_wrap = true under [behavior] (off by default), focus_up /
+    focus_down at a column's top / bottom edge switch to the previous / next
+    workspace, and move_window_up / move_window_down at the edge move the focused
+    window there. Applies in the tiled layout, not while a window is fullscreen.
+  - Optional mouse-follows-focus. With mouse_follows_focus = true under
+    [behavior] (off by default), the cursor warps onto the focused window after
+    a focus-navigation command, including the monitor focus/move commands. This
+    is the inverse of focus_follows_mouse and completes the vertical-monitor
+    navigation request. Applies in the tiled layout, not while a window is
+    fullscreen.
+  - Smarter off-screen parking on multi-monitor setups. A window scrolled off
+    one monitor's edge is parked just off the nearest edge that has no adjacent
+    monitor (below/above for side-by-side monitors, to the sides for stacked ones)
+    so it can't render on a neighboring monitor, adapting to the monitor
+    arrangement instead of using a fixed far-off-screen point.
+  Fixes
+  - .NET Framework windows animate smoothly instead of stuttering. WinForms
+    and WPF windows (Visual Studio, many .NET tools) were left out of the DWM
+    thumbnail animation path, so they moved via per-frame repaints during layout
+    changes, which made switching to them laggy and could leave them visually
+    corrupted. They now use the same ghost-animation path as Chromium and Firefox.
+  - Windows retile correctly after a monitor wakes from sleep. A screen
+    powered off long enough to drop from Windows would come back with some of its
+    windows left untiled and gaps in the layout: the windows Windows un-minimized
+    on wake were still flagged minimized internally, so they were skipped by the
+    tiler. Window minimized state is now re-synced against the OS after a display
+    change and on startup (the stale flags could persist in saved layout state
+    across a restart), so the layout tiles what is actually on screen.
+ReleaseNotesUrl: https://github.com/jcardama/LeopardWM/releases/tag/v0.2.5
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

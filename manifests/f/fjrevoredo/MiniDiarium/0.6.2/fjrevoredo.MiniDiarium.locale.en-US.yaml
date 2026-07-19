@@ -1,0 +1,68 @@
+# Created using wingetcreate 1.12.8.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: fjrevoredo.MiniDiarium
+PackageVersion: 0.6.2
+PackageLocale: en-US
+Publisher: fjrevoredo
+PublisherUrl: https://mini-diarium.com/
+PublisherSupportUrl: https://github.com/fjrevoredo/mini-diarium/issues
+PrivacyUrl: https://github.com/fjrevoredo/mini-diarium/blob/master/docs/PRIVACY.md
+Author: Francisco J. Revoredo
+PackageName: Mini Diarium
+PackageUrl: https://github.com/fjrevoredo/mini-diarium
+License: MIT
+LicenseUrl: https://github.com/fjrevoredo/mini-diarium/blob/master/LICENSE
+Copyright: Copyright (c) 2026 Francisco J. Revoredo
+ShortDescription: Encrypted, local-first journaling app
+Description: A local-first journal with serious encryption. Free, open source, and never touches the internet.
+Moniker: mini-diarium
+Tags:
+- privacy
+- journaling
+- journal
+- diary
+- foss
+- open-source
+- rust
+ReleaseNotes: |-
+  What's Changed
+
+  Mini Diarium 0.6.2 brings two new locking controls: auto-lock when the window loses focus so you can
+  minimize or switch away without leaving your journal open, and a per-entry lock that makes
+  individual entries read-only so you can browse without worrying about accidental edits. The
+  auto-lock timeout now enforces a 5-second minimum to keep the app usable.
+
+  Added
+  - Lock journal when the window loses focus (TODO-0068, addressing #194
+    (https://github.com/fjrevoredo/mini-diarium/issues/194)): a new "Lock when the window loses focus"
+    toggle in Preferences → Security (off by default, independent of the existing idle-timer
+    auto-lock) locks the journal a few seconds after the app window loses OS-level focus — minimizing,
+    Alt+Tab/Cmd+Tab away, clicking another window, or Cmd+H on macOS. A short debounce means a quick
+    misclick outside the window doesn't lock the journal if focus returns in time, and opening one of
+    the app's own native dialogs (export, import, key-file save) never triggers it. Detection lives in
+    Rust (WindowEvent::Focused) rather than the DOM visibilitychange API, which does not reliably fire
+    on window minimize in the bundled WebView2. Verified end-to-end on Windows; macOS/Linux rely on
+    the same cross-platform windowing API and have not been separately live-tested.
+  - Per-entry lock against accidental edits (TODO-0071, addressing #205
+    (https://github.com/fjrevoredo/mini-diarium/issues/205)): a lock/unlock button in the editor's
+    entry nav bar makes an entry read-only so you can reread older days from the calendar or timeline
+    without risking a stray edit. A locked entry cannot be edited, deleted, or re-tagged — the editor,
+    title field, formatting toolbar, delete button, and the add/remove-tag controls all disable, and
+    the backend rejects saveentry, deleteentry, addtagtoentry, and removetagfromentry for a locked
+    entry as a safety net. Locked days show a small passive lock indicator on their calendar cell and
+    timeline row (the toggle itself lives only in the editor). This is a convenience affordance, not a
+    security feature: the lock state is stored as a plaintext column and is independent of the
+    journal's auth-lock. Requires a database migration (schema v12 → v13) that runs automatically on
+    first unlock.
+
+  Fixed
+  - Auto-lock timeout floor (TODO-0069): the auto-lock timeout preference can no longer be set below 5
+    seconds. Any pre-existing stored value outside the 5–999 range is corrected automatically on next
+    load. Addresses #194 (https://github.com/fjrevoredo/mini-diarium/issues/194).
+ReleaseNotesUrl: https://github.com/fjrevoredo/mini-diarium/releases/tag/v0.6.2
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/fjrevoredo/mini-diarium/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

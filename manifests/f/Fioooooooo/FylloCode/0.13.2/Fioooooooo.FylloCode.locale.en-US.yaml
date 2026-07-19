@@ -1,0 +1,100 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Fioooooooo.FylloCode
+PackageVersion: 0.13.2
+PackageLocale: en-US
+Publisher: Fio
+PublisherUrl: https://github.com/Fioooooooo
+PublisherSupportUrl: https://github.com/Fioooooooo/FylloCode/issues
+PackageName: FylloCode
+PackageUrl: https://github.com/Fioooooooo/FylloCode
+License: AGPL-3.0
+LicenseUrl: https://github.com/Fioooooooo/FylloCode/blob/HEAD/LICENSE
+ShortDescription: A desktop app that turns Coding Agents into reliable teammates — by splitting every change into Task → Proposal → Apply → Archive, with you reviewing the plan before any code is written.
+Description: |-
+  In this new era, the work that really needs our attention is no longer repetitive coding, but higher-level business understanding and architecture design. The future workflow I have in mind is: understand the business → think through the architecture → write a Proposal → review the Proposal → let the Agent implement it automatically, then move on to the next Proposal.
+  That thinking led me to build FylloCode — a step from Vibe Coding toward Agentic Coding.
+
+  How FylloCode Solves It
+  FylloCode enforces a structured workflow that separates thinking from doing:
+  ┌──────────┐     ┌────────────────┐     ┌───────────┐     ┌───────────┐
+  │   Task   │ ──→ │ Chat/Proposal  │ ──→ │   Apply   │ ──→ │  Archive  │
+  │          │     │                │     │           │     │           │
+  │ What to  │     │ Agent explores │     │ Agent     │     │ Specs     │
+  │ work on  │     │ codebase and   │     │ implements│     │ updated,  │
+  │          │     │ writes a plan  │     │ the plan  │     │ change    │
+  │          │     │                │     │           │     │ recorded  │
+  │          │     │  ➜ YOU REVIEW  │     │           │     │           │
+  └──────────┘     └────────────────┘     └───────────┘     └───────────┘
+  Task — Pick a task from your local list or synced from platforms like Yunxiao. One click sends it to Chat.
+  Chat / Proposal — The Agent explores your codebase, asks clarifying questions, and produces a structured proposal (what to change, which files, acceptance criteria). The Agent is prohibited from writing code in this stage. You review, edit, and approve the proposal before anything else happens.
+  Apply — A fresh Agent session implements the approved proposal task-by-task. It reads only the proposal artifacts — not the Chat history — so every decision must be captured in writing, not left in context-window memory.
+  Archive — Specs are updated, the change is recorded with full traceability. Your project's knowledge base grows with every shipped change.
+  Why Separating Thinking from Execution Matters
+  Most Coding Agents understand a task and write code in the same session. Any misunderstanding becomes code directly, and code is expensive to review. FylloCode physically separates understanding from execution. Misunderstandings can only become proposal text — and text is cheap to review. A 2-minute proposal review catches problems that would take 20 minutes to find in a diff.
+
+  Features
+
+  Agent Protocol (ACP)
+  FylloCode connects to any Coding Agent through ACP (Agent Client Protocol). Claude Code, Codex, or any ACP-compatible agent — one protocol, one interface, without juggling a pile of terminal windows.
+  There are currently 35 agents available in the ACP Registry, with support for parallel chats and parallel Proposal Apply runs.
+
+  System Reminders
+  Each workflow stage injects a system reminder that constrains what the Agent can and cannot do. In Chat, the Agent is instructed to explore and propose, not code. In Apply, it follows the approved task list. This isn't a suggestion — it's a hard boundary enforced at session start.
+
+  Task Panel
+  View and manage tasks from your local list or synced from external platforms. Tasks serve as the entry point to the entire workflow — select a task, start a Chat, and the Agent begins with full context.
+
+  Integration with Development Platforms
+  Connect to platforms like Yunxiao (Alibaba Cloud DevOps) at the provider level — one authentication, multiple tools across task management, source code, and CI/CD. More platform integrations (GitHub, TAPD, Jira, etc.) are planned.
+  Task integrations use APIs instead of Agent Skills by design. API calls are fast and do not spend tokens, so tokens stay focused on the work that actually needs reasoning.
+
+  Workflow Editor
+  Define and customize multi-stage workflows. Built-in templates get you started; edit the YAML to fit your team's process.
+
+  OpenSpec-Driven Proposals
+  Proposals are structured artifacts — not chat messages. Each proposal contains a design document, spec changes, and a concrete task list with file paths and acceptance criteria. The built-in fyllo-specs MCP server manages the full lifecycle: explore → create-proposal → apply-change → archive-change.
+
+  Streaming Rendering Engine
+  FylloCode uses markstream-vue as its streaming rendering engine. It is fast and smooth, with built-in integration for Monaco Editor, KaTeX, and Mermaid. While working on Proposals, it can render flowcharts and formatted specs in real time, making architecture flows and business logic easier to inspect.
+  Engineering Guardrails
+  FylloCode provides two layers of engineering guardrails:
+  - Soft constraints — Capture engineering conventions as Guidelines and continuously maintain them through the built-in fyllo-skills MCP server, without manual upkeep.
+  - Hard constraints — Agents may not always follow Guidelines perfectly, so FylloCode's health checks establish engineering-level enforcement through lint, test runners, git hooks, and CI.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  This patch release continues turning Chat into the operating surface for project governance. The session event rail can now show proposals linked to the current session and update as OpenSpec status changes are detected. Users can also start implementation, open details, or archive completed proposals from Chat. The documentation site now has a bilingual structure, blog entry points, and sitemap support, and the project license has moved to MIT to lower the barrier for external use and contributions.
+  Added
+  - Chat session event rail now includes a Session Proposals panel with linked proposals, status badges, and detail entry points for the current session
+  - Users can start draft proposal implementation from the Chat event rail by choosing a workflow, then archive the proposal once the apply run is complete
+  - Main process proposal status watching and proposal:statusChanged broadcasts, covering active and archive directory changes in the main worktree and .worktrees/*
+  - Pending Fyllo actions now appear in the Chat event rail, with event items that locate the original action card
+  - Chat session list now shows a linked-task indicator and hover popover with the task source and lineage snapshot title
+  - Documentation site now has an English locale, blog index pages, ACP agent layer and lineage design posts, and sitemap configuration
+  - Shared UiSurface component and renderer UI design guidelines for consistent cards, page hierarchy, color usage, and copywriting
+  Changed
+  - Unified the Chat plan panel and session proposal panel headers, collapse behavior, spacing, and Chinese titles
+  - Improved Chat main-area resizing when the event rail is visible so the message column, error block, and prompt stay aligned
+  - Activity Bar now uses an icon-first compact navigation with tooltips and consistent active and hover states
+  - App Header now uses a lighter window-frame style, with a pill-shaped project switcher aligned with macOS title-bar constraints
+  - Global tooltip behavior is configured through UApp, standardizing hover delay and keyboard focus behavior
+  - Project license changed from AGPL-3.0 to MIT, with matching updates in package.json, README, and contribution docs
+  - Upgraded @nuxt/ui to 4.9.0 and configured the Nuxt UI root for the updated .nuxt-ui override directory location
+  Fixed
+  - Fixed cases where a new proposal status push arrived before the proposal store was loaded and the Chat event rail could show only the raw change id
+  - Fixed layout issues where long change ids in Chat proposal cards could squeeze the status badge
+  - Fixed creating-state proposals showing unavailable action entry points
+  - Fixed newly task-bound sessions requiring a session-list reload before origin task information appeared
+ReleaseNotesUrl: https://github.com/Fioooooooo/FylloCode/blob/HEAD/CHANGELOG.en.md#0132---2026-06-24
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

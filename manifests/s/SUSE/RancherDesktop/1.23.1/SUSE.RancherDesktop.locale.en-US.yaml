@@ -1,0 +1,114 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: SUSE.RancherDesktop
+PackageVersion: 1.23.1
+PackageLocale: en-US
+Publisher: SUSE
+PublisherUrl: https://github.com/rancher-sandbox/rancher-desktop
+PublisherSupportUrl: https://github.com/rancher-sandbox/rancher-desktop/issues
+Author: rancher-sandbox
+PackageName: Rancher Desktop
+PackageUrl: https://rancherdesktop.io/
+License: Apache-2.0
+LicenseUrl: https://github.com/rancher-sandbox/rancher-desktop/blob/HEAD/LICENSE
+CopyrightUrl: https://github.com/rancher-sandbox/rancher-desktop/blob/main/LICENSE
+ShortDescription: Kubernetes and container management to the desktop.
+Description: |-
+  Rancher Desktop is an open-source project to bring Kubernetes and container management to the desktop.
+  Windows, macOS and Linux versions of Rancher Desktop are available for download, though do note that the Linux version is considered a tech preview.
+Moniker: rancher-desktop
+Tags:
+- k3s
+- nerdctl
+- rancher
+ReleaseNotes: |-
+  This is the 1.23.1 release of Rancher Desktop, an open source desktop application to bring Kubernetes and container management to macOS, Windows, and Linux.
+  Installers
+  - Windows
+  - macOS x86_64
+  - macOS aarch64
+  - Linux install notes
+  Rancher Desktop 2.0 Alpha 1 is available
+  The first alpha of Rancher Desktop 2.0 is out: a ground-up rewrite that runs with or without the GUI and installs alongside Rancher Desktop without touching it. It is an early tech preview, not for production. For what it is and how to try it, see Welcome to Rancher Desktop 2.0 on our blog.
+  New Contributors
+  Thank you to our new contributors: @linghengqian, @endemics, @cm-iwata, @maximumschmidt, @immanuwell, @officialasishkumar, and @edwinbalani!
+  Release Notes for 1.23.1
+  Kubernetes portforwarding on macOS and Linux has been fixed
+  In the 1.23.0 release Kubernetes port were not being forwarded to the host. This has been fixed.
+  Release Notes for 1.23.0
+  What's New
+  Dark mode preference
+  Rancher Desktop now lets you choose between dark, light, and system themes under Preferences > Behavior. Previous versions always followed the OS theme. (#5905)
+  Container dashboard improvements
+  Thanks to @endemics, the container detail page now includes a Shell tab that opens an interactive terminal session inside a running container. The session persists across tab switches, so you can check logs and return to your shell without losing context. (#9925)
+  @endemics also added an Inspect tab that displays key container metadata pulled from docker inspect: name, image, IP address, creation date, and collapsible sections for mounts, environment variables, commands and arguments, capabilities, ports, and labels. (#9986)
+  A Stats tab, also from @endemics, shows live CPU, memory, network, and disk I/O charts for a running container, plus a table of its processes. The refresh interval defaults to one second, with 5-second, 20-second, 30-second, and 1-minute options; collection stops when you leave the tab. (#9987)
+  Separately, @officialasishkumar added a Restart action to the Containers list for running containers, available for single containers or bulk selections. The table refreshes once the restart completes. (#10224)
+  Dynamic ports for the Cluster Dashboard
+  The Cluster Dashboard's API server used to bind to a fixed port (9443) and failed to start when another program already used it. It now picks an available port automatically at startup. (#1890)
+  Windows: proxy bypass for domains and wildcards
+  The no-proxy list now supports domain names and wildcard patterns (e.g. *.example.com) in addition to IP addresses and CIDR subnets. (#9803)
+  AI Workbench extension
+  The bundled Open WebUI extension has been renamed to AI Workbench and updated to version 0.2.0. AI Workbench provides a local web interface for interacting with large language models running in containers, letting you experiment with AI workloads directly from Rancher Desktop.
+  Installed extension details
+  Thanks to @officialasishkumar, the Installed extensions table now shows each extension's vendor, description, and a More information link, drawn from the metadata the extension already publishes. (#8698)
+  Improved macOS disk image installer
+  Thanks to @maximumschmidt, the macOS disk image now guides installation: a lasso wraps the Rancher Desktop icon and points it toward the Applications folder, under a "Drag to Applications to install" instruction. The Finder volume title reads "Install Rancher Desktop …" so it names the action rather than the product. (#10194)
+  Bug Fixes
+  macOS and Linux: could fail to start after an unclean shutdown
+  After an unclean shutdown, such as a host crash or force-quit, Rancher Desktop could refuse to start because a leftover virtual-machine process confused its startup checks. Rancher Desktop now clears the leftover process and starts normally. (#7760)
+  Windows: startup could fail after many launches
+  After Rancher Desktop had been started many times, it could stop starting altogether: each launch added a certificate to the VM's trust store — once that store filled past a fixed limit, certificate setup failed and blocked startup. Rancher Desktop now removes stale certificates before adding new ones. Thanks to @cm-iwata! (#9929)
+  Windows: running other-architecture binaries could stop working
+  Starting Rancher Desktop could disable support for running binaries built for other architectures (WSLInterop) — not only inside Rancher Desktop, but in your other WSL distributions too. Rancher Desktop now leaves those registrations alone. (#10049)
+  Windows: host-network containers could shadow published ports
+  A container run with --network=host and listening on 127.0.0.1 could hijack a port that another container had published with -p, or that a Kubernetes hostPort used — leaving the published port unreachable from Windows, or sending its traffic to the wrong container. Published ports and host-network ports no longer collide. (#10357)
+  Windows: slow clients could get corrupted Docker API responses
+  A program reading from the Docker API slowly could receive a corrupted response, because the proxy sometimes inserted stray bytes into the stream. The proxy no longer corrupts responses. Thanks to @linghengqian! (#9499)
+  Windows: docker compose down --volumes ignored
+  docker compose down --volumes (and its -v shorthand) did not remove the named volumes. Both flags now work as expected. Thanks to @officialasishkumar! (#10096)
+  docker cp failed on a created-but-not-started container
+  docker cp failed when copying files to or from a container that had been created but not yet started. Copying now works for created containers as well. Thanks to @edwinbalani! (#1544, #9787)
+  Windows: no-proxy list could not be edited
+  The no-proxy list could not be edited: adding an entry failed with an error and corrupted the saved setting. It now works correctly. (#9803)
+  Linux: rdctl used the wrong configuration in the AppImage
+  On native Linux, the AppImage mistook itself for a WSL environment, so rdctl looked for its configuration in the wrong place and could not reach Rancher Desktop. rdctl now reads the correct configuration on Linux. Thanks to @linghengqian! (#9789)
+  Container logs showed errors with the dockerd engine
+  With the dockerd (moby) engine, the container log view showed spurious error messages mixed in with the logs. The logs now display cleanly. Thanks to @endemics! (#9934)
+  Ctrl+C didn't copy container logs
+  In the read-only container log view, Ctrl+C was intercepted as an interrupt instead of copying text. Ctrl+C now copies the selected text to the clipboard. (#9788)
+  Auto-update could silently stop working
+  Two problems could leave Rancher Desktop quietly unable to find new versions: a single failed check disabled all later checks until the next restart, and a bad response from the update server was cached for about a day, so every check kept failing. Update checks now recover from both on their own. (#10019, #10359)
+  Security
+  Updated containerd from 2.2.0 to 2.2.5, fixing five security advisories in its CRI plugin:
+  - CVE-2026-50195 (critical): a CRI checkpoint import could poison a node's local image cache under an attacker-chosen tag.
+  - CVE-2026-53488 (critical): a label in a pulled image could trigger command execution on the host.
+  - CVE-2026-53492 (critical): a CRI checkpoint restore could inject arbitrary CDI configuration into the restored container.
+  - CVE-2026-53489 (high): a symlink in a checkpoint image could expose arbitrary host files through kubectl logs.
+  - CVE-2026-47262 (moderate): a crafted image could exhaust memory and crash containerd.
+  Updates to Bundled Utilities (from Rancher Desktop 1.22.0)
+  - docker 29.1.4 → 29.5.3
+  - docker-compose 5.0.1 → 5.1.4
+  - docker-buildx 0.30.1 → 0.34.1
+  - docker-credential-helpers 0.9.5 → 0.9.8
+  - helm 4.0.5 → 4.2.0
+  - kuberlr 0.6.1 → 0.7.0
+  - nerdctl 2.2.1 → 2.2.2
+  - trivy 0.68.2 → 0.71.0
+  - amazon-ecr-credential-helper 0.11.0 → 0.12.0
+  - spin 3.5.1 → 4.0.0
+  - spin-shim 0.22.0 → 0.24.0
+  Unchanged:
+  - spin-operator 0.6.1
+  Connect with the developers
+  - The issue queue
+  - Rancher Users Slack in the #rancher-desktop channel
+  Changelog
+  The full version changelog, from v1.22.0, can be found using GitHub compare and the details of the release can be found in the v1.23.0 milestone.
+ReleaseNotesUrl: https://github.com/rancher-sandbox/rancher-desktop/releases/tag/v1.23.1
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/rancher-sandbox/rancher-desktop/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

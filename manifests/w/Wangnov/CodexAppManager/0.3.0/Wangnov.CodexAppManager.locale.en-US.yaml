@@ -1,0 +1,94 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Wangnov.CodexAppManager
+PackageVersion: 0.3.0
+PackageLocale: en-US
+Publisher: Wangnov
+PublisherUrl: https://github.com/Wangnov
+PublisherSupportUrl: https://github.com/Wangnov/Codex-App-Manager/issues
+PackageName: Codex App Manager
+PackageUrl: https://github.com/Wangnov/Codex-App-Manager
+License: MIT
+LicenseUrl: https://github.com/Wangnov/Codex-App-Manager/blob/HEAD/LICENSE
+ShortDescription: Installer, updater, and uninstaller for the official Codex desktop app.
+Description: A cross-platform desktop client to install, incrementally update, and cleanly uninstall the official Codex desktop app, with built-in self-update.
+Moniker: codex-app-manager
+Tags:
+- codex
+- installer
+- openai
+- tauri
+- updater
+ReleaseNotes: |-
+  Codex App Manager
+  > 跟上上游 Codex 并入 ChatGPT 品牌后的身份变化——按产品身份识别、安装与启动,不再依赖文件名。
+  > Follow Codex through the ChatGPT rebrand: detect, install, and launch by product identity, not by filename.
+  ✨ 亮点 · Highlights
+  - 兼容 ChatGPT 品牌合并后的 Codex:上游把桌面 Codex 并入 ChatGPT 品牌(macOS 可能是 ChatGPT.app,Windows 入口可能是 ChatGPT.exe),产品身份仍是 com.openai.codex / OpenAI.Codex。Manager 现在按身份识别,不会把 ChatGPT Classic 当成 Codex,也不会漏掉改名后的新版。
+    ChatGPT-rebranded Codex support: upstream merged desktop Codex into the ChatGPT brand (ChatGPT.app / ChatGPT.exe are possible on disk, identity remains com.openai.codex / OpenAI.Codex). Manager now keys off identity so Classic is never mistaken for Codex, and renamed installs still work.
+  - 安装与启动走真实入口:Windows portable/MSIX 从清单解析入口可执行文件,旧布局(Codex.exe)与新布局(ChatGPT.exe)都能检测、启动和健康检查;macOS 安装后仍规范到本地 Codex.app 目录名。
+    Real entry resolution: Windows portable/MSIX paths read the manifest entry exe so both legacy (Codex.exe) and rebranded (ChatGPT.exe) layouts detect, launch, and health-check correctly; macOS still normalizes installs to a local Codex.app directory name.
+  - 歧义安装更安全:多个血统安装并存时会上报歧义并引导明确选择,破坏性操作前重新校验路径、版本与身份;macOS 对仍处于 App Translocation 的实例 fail-closed。
+    Safer ambiguous installs: coexisting lineage installs report ambiguity and ask for an explicit pick; destructive steps re-verify path, build, and identity; macOS fails closed on live App Translocation.
+  - 自研图标与交互动效:界面图标改为自研描边图标,并补上轻量 hover 微动画,视觉更统一。
+    In-house icons and micro-motion: UI icons move to a custom stroke set with light hover animations for a more consistent look.
+  🐛 修复 · Fixes
+  - Windows 更新服务器连不上(证书吊销离线):当 Schannel 报 CRYPT_E_REVOCATION_OFFLINE 时自动用 --ssl-no-revoke 重试,不再误报“无法连接更新服务器”。
+    Windows update fetch when certificate revocation is offline: on Schannel CRYPT_E_REVOCATION_OFFLINE, Manager retries with --ssl-no-revoke instead of a false “cannot reach update server” failure.
+  - 主题与系统外观:减少启动时主题闪烁,系统浅/深色切换时跨页平滑过渡。
+    Theme and system appearance: less FOUC on launch, and smoother cross-page transitions when the OS light/dark theme changes.
+  - 无障碍:开关与单选组补齐可访问名称与语义,读屏更准确。
+    Accessibility: switches and radio groups get proper accessible names and semantics for screen readers.
+  - Windows 焦点重检:切回 Manager 窗口时会重新核对安装状态,避免界面停留在过时结论。
+    Windows focus re-check: returning focus to Manager revalidates install status so the UI does not stick on a stale conclusion.
+  - 文案与动效细节:标题行间距在动画后恢复正确;退出确认 sheet 的滑出动画锚点更稳;全局错误提示更克制、少误导。
+    Copy and motion polish: headline spacing stays correct after animation; quit-confirm sheet slide is better anchored; global error surfaces are calmer and less misleading.
+  📦 安装与升级 · Install & Upgrade
+  已经安装? 打开应用即可收到本次更新——macOS 只下载版本间的增量,校验失败自动回滚。
+  Already installed? The app offers this update in-app — macOS pulls only the delta, with automatic rollback.
+  ─────────────────────┬───────────────────────────────────────────
+  平台 · Platform      │下载 · Download(国内直连 · China-reachable)
+  ─────────────────────┼───────────────────────────────────────────
+  macOS · Apple Silicon│CodexAppManager_aarch64.dmg
+  ─────────────────────┼───────────────────────────────────────────
+  macOS · Intel        │CodexAppManager_x86_64.dmg
+  ─────────────────────┼───────────────────────────────────────────
+  Windows · x64        │CodexAppManager_x64-setup.exe
+  ─────────────────────┼───────────────────────────────────────────
+  Windows · ARM64      │CodexAppManager_arm64-setup.exe
+  ─────────────────────┴───────────────────────────────────────────
+  Windows 签名状态: CodexAppManager_x64-setup.exe / CodexAppManager_arm64-setup.exe 当前没有 Authenticode 代码签名,首次运行可能出现 SmartScreen 提示;.sig / latest.json 里的 Tauri updater 签名只用于应用内自更新的字节校验,不代表 Windows 发行者信任。详情见 Windows signing and verification。
+  Windows signing status: CodexAppManager_x64-setup.exe / CodexAppManager_arm64-setup.exe are not Authenticode-signed yet, so SmartScreen may warn on first run; the Tauri updater signature in .sig / latest.json verifies in-app update bytes only and is not Windows publisher trust. See Windows signing and verification.
+  核验下载: 本页 Assets 带有 SHA256SUMS;Windows 用 Get-FileHash .\CodexAppManager_x64-setup.exe -Algorithm SHA256 或替换为 ARM64 文件名,macOS 用 shasum -a 256 CodexAppManager_aarch64.dmg,再与 SHA256SUMS 比对。
+  Verify downloads: This release includes SHA256SUMS in Assets; on Windows run Get-FileHash .\CodexAppManager_x64-setup.exe -Algorithm SHA256 or swap in the ARM64 filename, and on macOS run shasum -a 256 CodexAppManager_aarch64.dmg, then compare with SHA256SUMS.
+  # macOS · Homebrew
+  brew install --cask wangnov/tap/codex-app-manager
+  > 镜像直链恒指向最新版本;如需本页对应的历史版本,请使用下方 Assets。.app.tar.gz / .sig / latest.json 是自动更新器的工件,手动安装请选 .dmg / .exe。
+  > Mirror permalinks always resolve to the latest release — for this exact version use the assets below. .app.tar.gz / .sig / latest.json belong to the auto-updater; pick the .dmg / .exe for manual installs.
+  What's Changed
+  - fix: anchor quit sheet slide animation by @Wangnov in #120
+  - chore(deps): bump actions/attest-build-provenance from 4.1.0 to 4.1.1 by @dependabot[bot] in #121
+  - chore(deps): bump tauri from 2.11.3 to 2.11.4 in /src-tauri by @dependabot[bot] in #122
+  - chore(deps-dev): bump @tauri-apps/cli from 2.11.3 to 2.11.4 by @dependabot[bot] in #123
+  - chore(deps): bump lucide-react from 1.21.0 to 1.22.0 by @dependabot[bot] in #124
+  - chore(deps): bump uuid from 1.23.3 to 1.23.4 in /src-tauri by @dependabot[bot] in #125
+  - chore(deps-dev): bump vite from 8.1.0 to 8.1.1 by @dependabot[bot] in #126
+  - feat(ui): in-house stroke icons with hover micro-animations by @Wangnov in #132
+  - fix(a11y): switch names, real radio semantics, keyboard nav by @Wangnov in #133
+  - test(home): lock down the Mac/Win home state machines by @Wangnov in #134
+  - fix(robustness): calmer global errors, contract guards, safer interpolation, event-driven sheet exit by @Wangnov in #135
+  - chore(ux): fix theme FOUC, live system-theme cross-fade, cleanup by @Wangnov in #136
+  - refactor(home): extract shared progress/download/focus pieces + Windows focus re-check by @Wangnov in #137
+  - chore(ci): add ESLint (react-hooks + jsx-a11y) as a blocking frontend gate by @Wangnov in #138
+  - chore(deps): bump tauri from 2.11.4 to 2.11.5 in /src-tauri by @dependabot[bot] in #128
+  - chore(deps-dev): bump vitest from 4.1.9 to 4.1.10 by @dependabot[bot] in #129
+  - chore(deps-dev): bump vite from 8.1.1 to 8.1.3 by @dependabot[bot] in #130
+  - fix(ui): restore headline spacing after animation by @Wangnov in #141
+  - fix(win): retry Schannel revocation-offline update fetches by @Wangnov in #143
+  - fix: follow Codex lineage through the ChatGPT rebrand by bundle/package identity by @Wangnov in #142
+  - chore(release): bump version to 0.3.0 by @Wangnov in #163
+  Full Changelog: v0.2.4...v0.3.0
+ReleaseNotesUrl: https://github.com/Wangnov/Codex-App-Manager/releases/tag/v0.3.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

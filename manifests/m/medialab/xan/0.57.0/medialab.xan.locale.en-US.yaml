@@ -1,0 +1,89 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: medialab.xan
+PackageVersion: 0.57.0
+PackageLocale: en-US
+Publisher: médialab Sciences Po
+PublisherUrl: https://medialab.sciencespo.fr/
+PublisherSupportUrl: https://github.com/medialab/xan/issues
+Author: médialab Sciences Po
+PackageName: xan
+PackageUrl: https://github.com/medialab/xan
+License: Unlicense, MIT
+LicenseUrl: https://github.com/medialab/xan/blob/HEAD/COPYING
+Copyright: Copyright (c) 2015-2026 Andrew Gallant, Guillaume Plique
+ShortDescription: The CSV magician
+Description: |-
+  xan is a command line tool that can be used to process CSV files directly from the shell.
+  It has been written in Rust to be as fast as possible, use as little memory as possible, and can very easily handle large CSV files (Gigabytes). It leverages a novel SIMD CSV parser and is also able to parallelize some computations (through multithreading) to make some tasks complete as fast as your computer can allow.
+  It can easily preview, filter, slice, aggregate, sort, join CSV files, and exposes a large collection of composable commands that can be chained together to perform a wide variety of typical tasks.
+  xan also offers its own expression language so you can perform complex tasks that cannot be done by relying on the simplest commands. This minimalistic language has been tailored for CSV data and is way faster than evaluating typical dynamically-typed languages such as Python, Lua, JavaScript etc.
+  Note that this tool is originally a fork of BurntSushi's xsv, but has been nearly entirely rewritten at that point, to fit SciencesPo's médialab use-cases, rooted in web data collection and analysis geared towards social sciences (you might think CSV is outdated by now, but read our love letter to the format before judging too quickly).
+  xan therefore goes beyond typical data manipulation and expose utilities related to lexicometry, graph theory and even scraping.
+  Beyond CSV data, xan is able to process a large variety of CSV-adjacent data formats from many different disciplines such as web archival (.cdx) or bioinformatics (.vcf, .gtf, .sam, .bed etc.). xan is also able to convert to & from many data formats such as json, excel files, numpy arrays etc. using xan to and xan from. See this section for more detail.
+  Finally, xan can be used to display CSV files in the terminal, for easy exploration, and can even be used to draw basic data visualisations.
+Tags:
+- csv
+- data
+- datascience
+- diagram
+- graph
+- graphics
+- plot
+- statistics
+- stats
+ReleaseNotes: |-
+  The temporal update.
+  Breaking
+  - xan select -n will not error anymore on empty inputs and, generally, empty files should not trigger selection errors when using commands with -n/--no-headers.
+  - xan heatmap -C/--cram becomes a flag accepting either auto, always or never.
+  - Dropping -C short flag for xan sort --cells (it could be confused with --columns or --check).
+  - Completely overhauled how datetimes work in moonblade.
+  - xan separate will not trim splitted values with some modes by default anymore.
+  - Dropping xan network --stats in favor of -f stats.
+  -  -D becomes short flag for xan network --degrees instead of --disjoint-keys.
+  - xan separate --capture-groups is dropped in favor of -c/--captures & -C/--all-captures.
+  - Renaming xan search --breakdown shortflag to -b to allow for future -B/--before-context.
+  Features
+  - Adding xan matrix count & xan matrix adj.
+  - Adding front_coding window function.
+  - Timestamp support with xan plot -LT.
+  - Adding xan rename -n/--no-headers support for -p/--prefix & -x/--suffix.
+  - Adding xan from -f parquet (requires the parquet feature).
+  - Adding xan to latex.
+  - Adding xan top -L/--lexicographic.
+  - Adding xan heatmap flags: -w/--width, -F/--fill, -a/--align, -U/--unit, -Z/--show-normalized, -A/--ascii, -l/--label & -v/--values.
+  - Adding new gradients to xan heatmap.
+  - Adding range & repeat moonblade functions.
+  - Adding xan sort --columns.
+  - Adding xan view -T/--tee.
+  - Adding now, fractional_days, to_timezone, to_local_timezone, with_timezone, with_local_timezone, without_timezone, to_timestamp, to_timestamp_ms, from_timestamp, from_timestamp_ms, span, date & time moonblade functions.
+  - Better type inference with xan stats, and the type & types aggregation functions, now including more types for temporal values (zoned_datetime, datetime, date & time).
+  - Adding xan input -T/--tolerant.
+  - Adding xan separate --trim.
+  - Adding xan grep -B/--before-context & -A/--after-context.
+  - Adding xan network -f=components, -S/--simple, --union-find, --minify & --sample-size <n>.
+  - Adding xan plot --timezone.
+  - Adding xan hist --log shorthand flag for --scale=log.
+  - Adding log_dist sparkline column to xan stats -q output.
+  - Adding dist & log_dist aggregation functions.
+  - Adding xan search -L/--levenshtein <k> & -D/--damerau-levenshtein <k>.
+  Fixes
+  - Fixing xan separate automatic column prefix extraction.
+  - Fixing xan heatmap -n.
+  - Fixing xan heatmap --repeat-headers --cram always not repeating x-axis legend.
+  - Fixing correctness of xan plot -T and increase resolution to microseconds.
+  - Fixing moonblade column-related functions returning incorrect results wrt -n/--no-headers.
+  - xan search should now properly error when handling invalid utf-8 in relevant modes.
+  - Fixing xan search -iR & xan search -i --replacement-column.
+  Performance
+  - Improving performance of xan complete, xan top, xan plot -T & xan hist.
+  - Improving overall performance of xan network.
+  - Slightly optimizing xan vocab by allowing needless heap allocation & indirection.
+  - Improving performance and memory usage of xan separate.
+  Quality of Life
+  - Adding proper help to xan heatmap.
+ReleaseNotesUrl: https://github.com/medialab/xan/releases/tag/0.57.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
