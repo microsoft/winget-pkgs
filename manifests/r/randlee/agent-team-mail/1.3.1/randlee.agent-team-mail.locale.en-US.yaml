@@ -1,0 +1,120 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: randlee.agent-team-mail
+PackageVersion: 1.3.1
+PackageLocale: en-US
+Publisher: Randy Lee
+PublisherUrl: https://github.com/randlee
+PublisherSupportUrl: https://github.com/randlee/atm-core/issues
+Author: Randy Lee
+PackageName: agent-team-mail
+PackageUrl: https://github.com/randlee/atm-core
+License: MIT OR Apache-2.0
+LicenseUrl: https://github.com/randlee/atm-core/blob/main/LICENSE
+ShortDescription: Daemon-free CLI for local agent team mail workflows
+Description: |-
+  agent-team-mail (atm) is a daemon-free CLI for mail-like messaging with
+  Claude agent teams. It provides send, read, ack, clear, doctor, log, teams,
+  and members workflows over a file-based API with atomic I/O and conflict
+  detection.
+Moniker: atm
+Tags:
+- agent
+- cli
+- developer-tools
+- mail
+- rust
+- teams
+ReleaseNotes: |-
+  Release Notes
+
+  Summary
+  - version: 1.3.1
+  - release date: 2026-07-15
+  - release owner: publisher (ATM release execution)
+  This release lands Phase AE (installed-copy packaging, docs/help surfacing,
+  publisher freshness gate) and Phase AF (host-wide singleton closure,
+  observability/release gates, native send input-integrity hardening), plus a
+  1.3.1 cross-host smoke-test validation sprint and a Homebrew tap
+  platform-asset mapping fix.
+
+  Included Changes
+
+  Phase AF — reliability hardening (PR #539 integrate/phase-AF → develop)
+  - Close the host-wide singleton bypass that blocked the 1.3.0 release
+    (Sprint AF.1).
+  - Add observability and release-gate hardening: structured tracing fields,
+    request-ID sentinel-collision fix, release-preflight freshness checks
+    (Sprint AF.2).
+  - Harden native atm send input-integrity handling (Sprint AF.3).
+  - Remove the workflow-sidecar (superseded by daemon-native dispatch,
+    reclassified from Sprint AF.4 to Sprint AD.36).
+
+  Phase AE — installed-copy packaging & docs (PR #530 integrate/phase-AE → develop)
+  - Ship an installed-copy packaging path and publisher freshness gate
+    (Sprints AE.1, AE.8).
+  - Land hooks/nudge template corpus and mailbox/diagnostics corpus expansion
+    (Sprints AE.3, AE.4).
+  - Surface CLI help content and verify the installed user-doc graph
+    end-to-end (Sprints AE.6, AE.7, AE.9).
+
+  1.3.1 cross-host smoke-test validation (PR #540)
+  - Independently re-run and verify the full macOS and Windows smoke suites
+    against the 1.3.1 candidate (fast/normal/thorough/shared-host/graft-
+    same-host lanes) with evidence SHAs verified as real ancestors of the
+    reviewed commit.
+  - Formally document the true cross-host (Windows↔macOS simultaneous)
+    coverage gap as deferred (AB-SMOKE-001–010, still pending) rather than
+    silently glossing over it.
+
+  Homebrew formula fix (PR #529, issue #522)
+  - Fix the update-homebrew formula generator's platform-asset mapping bug
+    that caused all three platform url/sha256 blocks to point at the same
+    aarch64-apple-darwin asset.
+  - Backfill the 1.3.0 and 1.2.3 tap formulas with corrected per-platform
+    assets using the fixed generator.
+
+  Other fixes carried into this release
+  - winget token wiring fix (PR #532).
+  - Preflight documentation pass (PR #531).
+  - atm send/SendMessage-to-atm-send audit and correction (PR #534).
+
+  Operator / User Impact
+  - No breaking CLI changes. atm continues to operate as documented in 1.3.0.
+  - Installations using the daemon/plugin host benefit from the host-wide
+    singleton fix (prevents duplicate daemon instances race-starting on a
+    single host) and observability improvements.
+  - Homebrew tap users on 1.3.0/1.2.3 who hit a platform-asset mismatch
+    (wrong sha256/url for non-macOS-arm64 platforms) get corrected formulas
+    as part of this release's tap backfill.
+  - True cross-host (Windows↔macOS simultaneous) messaging remains
+    same-host-validated only; the cross-host matrix is tracked as pending,
+    not yet executed.
+
+  Packaging / Distribution Notes
+  - crates.io: publish in dependency order per the release manifest (9
+    publishable crates): atm-storage → agent-team-mail-core →
+    atm-storage-rusqlite → atm-daemon-client → atm-runtime →
+    atm-daemon-bootstrap → atm-daemon → atm-graft → agent-team-mail.
+  - GitHub Releases: tag v1.3.1 cut from main via the Release workflow.
+  - Homebrew: regenerate agent-team-mail.rb and atm.rb at 1.3.1 with the
+    fixed generator; backfill 1.3.0 and 1.2.3 formulas with corrected
+    per-platform url/sha256.
+  - winget: token wiring fix included (PR #532); manifest publish follows
+    standard release workflow.
+
+  Known Issues / Waivers
+  - True cross-host (Windows↔macOS simultaneous) smoke coverage
+    (AB-SMOKE-001–010) remains PENDING; only same-host validation was run
+    for this release.
+
+  Follow-Up
+  - Execute the frozen cross-host smoke matrix
+    (docs/plans/phase-AB/cross-host-smoke-checklist.md) in a future
+    release window.
+  - File the non-blocking flaky-test hardening follow-up for
+    mailbox_locking.rs:606-621 (tracked, not yet filed as of this release).
+ReleaseNotesUrl: https://github.com/randlee/atm-core/releases/tag/v1.3.1
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
