@@ -1,0 +1,47 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: endev.aube
+PackageVersion: 1.30.0
+PackageLocale: en-US
+Publisher: en.dev
+PublisherUrl: https://en.dev/
+PublisherSupportUrl: https://github.com/endevco/aube/discussions/categories/troubleshooting-and-bugs
+Author: en.dev
+PackageName: aube
+PackageUrl: https://aube.en.dev/
+License: MIT
+LicenseUrl: https://github.com/endevco/aube/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 en.dev inc
+CopyrightUrl: https://github.com/endevco/aube/blob/HEAD/LICENSE
+ShortDescription: A fast Node.js package manager
+Description: |-
+  aube is a package manager for Node.js projects. It uses pnpm-style isolated node_modules for fast, disk-efficient installs.
+
+  Existing projects keep their lockfile format. aube reads and writes pnpm-lock.yaml, package-lock.json, npm-shrinkwrap.json, yarn.lock, and bun.lock in place. New projects without a supported lockfile get aube-lock.yaml.
+
+  Why Try It
+  - Fast installs. Warm installs are about 8x faster than pnpm and about 5x faster than Bun in the current benchmarks. Repeat test commands run up to 35x faster than pnpm and up to 5x faster than Bun.
+  - Existing lockfiles. Reads and writes pnpm-lock.yaml, package-lock.json, npm-shrinkwrap.json, yarn.lock, and bun.lock in place.
+  - Cheap repeat commands. aubr test, aube test, and aube exec vitest auto-install when dependencies are stale, then skip that work when nothing changed. aubx uses a local binary when one is installed, or a throwaway environment for one-off tools.
+  - Less disk use. A global content-addressable store lets projects share package files instead of keeping a full copy of the same dependencies in every checkout.
+  - Secure defaults. Out of the box, exotic transitive deps are blocked, lifecycle scripts wait for approval, trust downgrades fail at resolve, and brand-new releases sit in a 24h cooling window. One paranoid: true line adds the build jail and turns the soft gates into hard fails.
+Moniker: aube
+ReleaseNotes: |-
+  This release fixes a long-standing issue where aube dlx and aube exec could leave the tool they launched running after aube itself was terminated, and lays the groundwork for embedding aube's library crates in other tools like mise.
+  Fixed
+  - aube dlx no longer orphans the tool it launches (#1065 by @jdx) — Previously, terminating aube left the spawned tool running, reparented to init (ppid=1), surviving even a catchable SIGTERM — leaking long-running stdio servers and memory on every host teardown (discussion #1059). dlx and exec spawns now route through a process guard that ties the child's lifetime to aube: on any Unix, catchable signals (SIGTERM/SIGINT/SIGHUP/SIGQUIT) are forwarded to the child (so pkill -x aube stops the tool), and on Linux PR_SET_PDEATHSIG additionally reaps the child even on an uncatchable SIGKILL. This matches the teardown behavior of npx, pnpm dlx, and bunx. (macOS SIGKILL-of-aube remains a documented gap.)
+
+  Changed
+  - Standalone aube exec <bin> and aube dlx <local-bin> now replace aube's process image (#1067 by @jdx) — On the standalone Unix binary, these single-tool paths now execvp into the tool instead of spawning it as a supervised child. The tool inherits aube's pid, so any signal — including an uncatchable SIGKILL — reaches it directly with no supervisor process to outlive, closing the macOS SIGKILL gap for these paths. This matches how aube node and mise x already behave. Embedded hosts (aube-ffi/aube-node), Windows, the dlx install path, and recursive aube exec -r continue to use the supervised spawn.
+    Worth noting: on the standalone binary, aube exec <bin> / aube dlx <local-bin> no longer appears as a parent process — the tool takes over aube's pid.
+
+  Added
+  - Library crates are now embeddable at MSRV 1.91 with backend-agnostic features (#1068 by @jdx) — Groundwork for embedding aube's library crates (starting with aube-registry) into other tools like mise. The workspace MSRV is lowered from 1.93 to 1.91, and TLS/DNS/zlib backend selection (rustls, hickory-dns, zlib-ng) moves from the workspace to leaf crates so embedders no longer inherit those global build side effects. Standalone aube behavior is unchanged via defaults; embedders opt in with default-features = false, features = ["rustls"].
+
+  💚 Sponsor aube
+  aube is maintained by @jdx, an open source developer for entire.io, the title sponsor of the jdx.dev open source tools including mise. Work on aube is funded by sponsors.
+  If aube is saving your team install time or CI minutes, please consider sponsoring at jdx.dev. Individual and company sponsorships are what keep the project fast, free, and independent.
+ReleaseNotesUrl: https://github.com/jdx/aube/releases/tag/v1.30.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
