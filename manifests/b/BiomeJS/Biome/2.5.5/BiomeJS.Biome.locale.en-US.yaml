@@ -1,0 +1,147 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: BiomeJS.Biome
+PackageVersion: 2.5.5
+PackageLocale: en-US
+Publisher: BiomeJS
+PublisherUrl: https://biomejs.dev/
+PublisherSupportUrl: https://github.com/biomejs/biome/issues
+Author: Biome Developers and Contributors
+PackageName: Biome
+PackageUrl: https://biomejs.dev/
+License: Apache-2.0
+Copyright: Copyright (c) 2023-present Biome Developers and Contributors
+ShortDescription: Biome is a toolchain for web projects, aimed at providing functionalities to maintain them. It offers a formatter and linter, usable via CLI and LSP.
+Moniker: biome
+Tags:
+- css
+- formatter
+- javascript
+- json
+- jsx
+- linter
+- static-code-analysis
+- typescript
+- web
+ReleaseNotes: |-
+  2.5.5
+
+  Patch Changes
+  - #10972 ab8c21b Thanks @ematipico! - Fixed useExhaustiveSwitchCases for unions of bigint literals. The rule now reports missing bigint cases and compares bigint literals by value, including binary, octal, hexadecimal, and separator-containing spellings. For example, this switch now reports the missing 2n case:
+    declare const value: 1n | 2n;
+    switch (value) {
+      case 1n:
+        break;
+    }
+  - #10972 ab8c21b Thanks @ematipico! - Fixed false positives in noBaseToString and useNullishCoalescing when member, stringification, or nullish inference cannot complete. These rules now suppress diagnostics instead of reporting from partial type information. For example, neither expression is reported when a recursive type cannot be fully resolved:
+    type Recursive = Recursive;
+    declare const value: Recursive;
+    String(value);
+    value || "fallback";
+  - #10977 0bf7486 Thanks @ematipico! - Fixed #10922: the action useSortedAttributes no longer triggers for HTML instructions.
+  - #10957 cf263c4 Thanks @dyc3! - Fixed noThenProperty failing to detect Object.fromEntries, Object.defineProperty, and Reflect.defineProperty calls with comments between their tokens.
+  - #10983 edc0ed7 Thanks @ayaangazali! - Fixed #10980: useAriaPropsSupportedByRole no longer reports false positives when the attribute that determines an element's implicit ARIA role is written as a shorthand attribute, such as <a {href} aria-label="..."> in Astro and Svelte files.
+    Shorthand attributes are now taken into account when computing the implicit role, so the anchor above correctly resolves to the link role instead of generic.
+  - #10889 89526e3 Thanks @denbezrukov! - Fixed CSS formatter casing for syntax-owned names while preserving author-defined names, including scoped keyframes and container scroll-state queries.
+    - A:HOVER { COLOR: INITIAL; }
+    + A:hover { color: initial; }
+    - @KEYFRAMES :GLOBAL KeepFrames { FROM { COLOR: RED; } }
+    + @keyframes :GLOBAL KeepFrames { from { color: RED; } }
+    - @CONTAINER scroll-state((SCROLLED: TOP) AND (STUCK)) { A:HOVER { COLOR: RED; } }
+    + @container scroll-state((SCROLLED: TOP) AND (STUCK)) { A:hover { color: RED; } }
+  - #10964 794ccd0 Thanks @denbezrukov! - Fixed CSS formatting for comments between declaration values and !important.
+    -a { color: /* before */ /* after */ red !important; }
+    +a { color: /* before */ red /* after */ !important; }
+  - #10993 b7a9694 Thanks @denbezrukov! - Fixed the CSS formatter to preserve comments on the correct side of selector combinators and before declaration blocks.
+    -.before > /* comment */ .after {}
+    +.before /* comment */ > .after {}
+    It now also keeps selectors with escaped newlines in attribute values inline when they fit.
+    -div
+    -  span[foo="bar\
+    +div span[foo="bar\
+     value"] {}
+  - #10978 8ebafe1 Thanks @ematipico! - Fixed #10870: noUnresolvedImports no longer reports false positives such as import type { NextRequest } from "next/server".
+  - #10901 68c10e6 Thanks @Socialpranker! - Fixed #10622: the HTML/Vue parser no longer panics on the argument-less v-bind shorthand (:="props").
+    This syntax is valid Vue and equivalent to v-bind="props", so the parser now accepts it (along with the longhand v-bind:="props") instead of crashing while building a diagnostic for a missing argument.
+  - #10936 7df46f5 Thanks @ematipico! - Improved generic tuple inference for useIncludes. The rule now recognizes specialised tuple element types returned through generic aliases.
+  - #10941 f787725 Thanks @siketyan! - Fixed #10855: Biome now supports parsing and formatting CSS custom media queries declared with @custom-media.
+  - #10969 72d309b Thanks @ematipico! - Fixed an issue where Biome logs became too verbose, dumping information not relevant to user's operations.
+  - e62f6b6 Thanks @ematipico! - Fixed #10963: Biome no longer panics when a type-aware rule such as noFloatingPromises checks a call to a function with multiple call signatures imported from another module.
+  - #10931 899c60d Thanks @ematipico! - Fixed check --write command. Now the command reports code frame of the formatted code, if the formatter is enabled.
+  - #10904 ceee4f4 Thanks @qzwxsaedc! - Fixed #10892: noUnnecessaryConditions no longer reports a false positive when checking a member of a discriminated union that is accessed through a default type-only namespace import. The following code is no longer flagged:
+    import type Types from "./types";
+    declare function parse(): Types.Result<string>;
+    const result = parse();
+    if (!result.success) {
+    }
+  - #10962 f0a67f2 Thanks @ematipico! - Biome no longer removes embedded styles and scripts in HTML files.
+  - #11000 5039a1e Thanks @ematipico! - Fixed a bug where closing one editor stopped a shared Biome daemon used by other editors. LSP proxy processes now exit when either the editor or daemon disconnects.
+  - #10957 cf263c4 Thanks @dyc3! - Improved the performance of the noThenProperty lint rule by about 50%.
+  - #10992 4bf9b21 Thanks @ematipico! - Fixed noMisusedPromises: The rule now reports Promise-returning callbacks where a synchronous callback is expected when calls use tuple spreads or tuple rest parameters, including generic and deeply nested tuples, and when constructor signatures come from interface or object types. Recursive or excessively nested tuple spreads use a conservative fallback so analysis terminates.
+    For example, the following callback is now reported.
+    declare function consume(...args: [number, () => void]): void;
+    const prefix: [number] = [1];
+    consume(...prefix, async () => {});
+  - #10915 b3b12b3 Thanks @Functionhx! - Added the rule noNegationInEqualityCheck. The rule flags negated expressions on the left side of strict equality checks like !foo === bar — due to operator precedence this evaluates as (!foo) === bar which is almost always a mistake for foo !== bar.
+    The rule provides an unsafe fix that flips the operator.
+    // Invalid
+    !foo === bar;
+    !foo !== bar;
+    // Valid
+    foo !== bar;
+    foo === bar;
+  - #10970 bd1038b Thanks @ematipico! - Improved overload selection for noMisusedPromises. Biome now handles overloaded calls, overloaded constructors, rest parameters, union arguments, and generic constraints without selecting an incompatible signature. For example, noMisusedPromises now reports the async callback passed to the synchronous overload:
+    declare function consume(kind: "async", callback: () => Promise<void>): void;
+    declare function consume(kind: "sync", callback: () => void): void;
+    consume("sync", async () => {});
+  - #10933 48a4abb Thanks @ematipico! - Fixed useArrayFind to recognize bigint zero indexes.
+  - #10931 899c60d Thanks @ematipico! - Fixed an orchestration issue that could lead to deadlocks when type-aware rules are enabled.
+  - #10969 72d309b Thanks @ematipico! - Hardened the Biome Language Server by improving its synchronisation logic.
+  - #10972 ab8c21b Thanks @ematipico! - Fixed false positives in noMisusedPromises and useAwaitThenable when Promise or thenable inference cannot complete. These rules now suppress diagnostics instead of treating incomplete type information as a definite result. For example, useAwaitThenable no longer reports await value when the value's thenability is unknown:
+    declare const value: unknown;
+    async function consume() {
+      await value;
+    }
+
+  What's Changed
+  - chore: add latitude to sponsors by @ematipico in #10947
+  - fix(workspace): make process_file call stateless by @ematipico in #10931
+  - feat(css): support custom media queries by @siketyan in #10941
+  - fix(inference): harden Salsa type inference by @ematipico in #10932
+  - feat(css_formatter): align syntax-owned casing policy by @denbezrukov in #10889
+  - fix(markdown): let space-indented bullets interrupt paragraphs in block quotes by @jfmcdowell in #10914
+  - feat(lint): add noNegationInEqualityCheck rule by @Functionhx in #10915
+  - docs(useIterableCallbackReturn): fix list bullet for the from method by @dfedoryshchev in #10956
+  - refactor(lint): port direct type-aware rules by @ematipico in #10933
+  - chore: changeset and skip check deps by @ematipico in #10962
+  - feat: parse angular attributes by @Netail in #9242
+  - fix(css_formatter): format comments before !important by @denbezrukov in #10964
+  - fix(parser): accept argument-less v-bind shorthand :="props" in HTML/Vue by @Socialpranker in #10901
+  - refactor(lint): port behavior-sensitive type rules by @ematipico in #10934
+  - perf(noThenProperty): use typed syntax tree traversal and TokenText by @dyc3 in #10957
+  - fix(workspace): synchronisation and logging by @ematipico in #10969
+  - fix(inference): resolve members of default namespace imports by @qzwxsaedc in #10904
+  - refactor: discourage usages of Text, prefer TokenText by @dyc3 in #10967
+  - fix(analyzer): handle HTML processing instructions by @ematipico in #10977
+  - fix(inference): improve imported and aliased types by @ematipico in #10936
+  - fix(resolver): fallback to disk loading if exports is missing by @ematipico in #10978
+  - fix(inference): improve overload selection by @ematipico in #10970
+  - chore(deps): update rust crate quote to 1.0.47 by @renovate[bot] in #10726
+  - chore(deps): update rust crate rustc-hash to 2.1.3 by @renovate[bot] in #10857
+  - fix(inference): argument and type parameters inference by @ematipico in #10992
+  - fix(inference): improve member and Promise inference by @ematipico in #10971
+  - fix(css_formatter): preserve selector boundary comments by @denbezrukov in #10993
+  - fix: preview ci by @Netail in #11001
+  - fix(daemon): avoid disconnection from clients by @ematipico in #11000
+  - chore(deps): update rust crate globset to 0.4.19 by @renovate[bot] in #10999
+  - feat(fmt/yaml): format document markers, directives, and multi-doc streams by @dyc3 in #10989
+  - fix(html_analyze): account for shorthand attributes when computing implicit ARIA roles by @ayaangazali in #10983
+  - fix(inference): suppress incomplete type results by @ematipico in #10972
+  - chore(deps): update dependency @changesets/cli to v2.31.1 by @renovate[bot] in #10997
+ReleaseNotesUrl: https://github.com/biomejs/biome/releases/tag/@biomejs/biome@2.5.5
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://biomejs.dev/guides/getting-started/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
