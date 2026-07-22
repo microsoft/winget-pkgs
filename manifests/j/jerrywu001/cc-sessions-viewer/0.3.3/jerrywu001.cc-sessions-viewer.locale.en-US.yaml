@@ -1,0 +1,58 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: jerrywu001.cc-sessions-viewer
+PackageVersion: 0.3.3
+PackageLocale: en-US
+Publisher: wuchao
+PublisherUrl: https://github.com/jerrywu001
+PublisherSupportUrl: https://github.com/jerrywu001/cc-sessions-viewer/issues
+PackageName: cc-sessions-viewer
+PackageUrl: https://github.com/jerrywu001/cc-sessions-viewer
+License: Freeware
+ShortDescription: Support cc/codex/gemini sessions viewer, token usage statistics, global search, resume, and export to html
+Description: |-
+  A native desktop browser for Claude Code, Codex, and Gemini CLI — read, search, and manage local session transcripts from all three in one place.
+  Faithful replay — thinking chains, tool-call pairings, structured diffs, inline screenshots.
+  Fast search — cross-project global hit (⌘⇧F) jumps to the exact message; one-click resume in Terminal.
+  Deep stats — aggregate token spend and cost; slice by project, model, or tool.
+  Read-only safety — original JSONL is never touched; delete is a move to shared trash, never rm.
+  Flexible export — single session or batches to offline-readable Markdown or HTML.
+
+  Features
+  - 🗂 Unified project view — group sessions by working directory across both CLIs
+  - 💬 Faithful chat replay — text, thinking blocks, tool calls, structured diffs, inline images
+  - 🔎 In-session search with scope — search across the whole conversation or scope to user messages, agent replies (incl. edits), or tool noise; prev / next jump + match counter
+  - 🌐 Global search (⌘⇧F / Ctrl+Shift+F) — Algolia-style overlay over the current agent, scoped to session titles and your own messages; click a hit to jump straight to that message with a flash highlight; recent queries with single-item removal
+  - 🔃 Session list search & sort — keyword search runs on the Rust side, matching session titles and your message text (cancellable mid-typing); sort by recency / size / message count, or show only ones with an ID
+  - 🪗 Collapse / expand all tool calls — one click to hide tool-call clutter and focus on the conversation
+  - 📤 Export session — save a single session to Markdown or HTML (native Save-As, offline-renderable HTML with inlined avatars / styles)
+  - 🧰 Multi-select & batch ops — pick sessions in bulk to move them to the trash or export them into a single export-YYYYMMDD-HHMMSS-{md,html}/ folder
+  - 🔄 Resume or start fresh — open Terminal in a project to resume an existing session (claude --resume <id> / codex resume <id>) or start a brand-new one
+  - 📡 Live tail — opened session auto-refreshes as the CLI appends new messages; an "● Live" indicator shows the watcher is active, and a "N new ↓" pill surfaces additions when you've scrolled up
+  - 🗑 Shared trash — soft-delete, preview a deleted session's transcript, restore one or many (multi-select); survives across both agents
+  - 🏠 Welcome screen — recently opened projects per agent with one-click reopen + per-entry removal
+  - 📌 Pin / sink projects — color-coded pins on the sidebar; sunk projects go to the bottom
+  - ✏️ Rename sessions — your new title syncs back to the CLI, so claude / codex resume pickers show it too
+  - 🌗 Light / dark / system theme — Codex-inspired neutral palette with brand-color accents
+  - 🌐 i18n with auto-detect — English / 简体中文 / 繁體中文 / 日本語；first launch matches the OS language, falls back to English
+  - ⚡️ Custom tooltip & agent brand icons — no out-of-place native chrome
+  - 🖼 Image lightbox for screenshots embedded in transcripts
+Tags:
+- antigravity-cli
+- claude-code
+- codex
+- gemini-cli
+ReleaseNotes: |-
+  Features
+  - Codex /side side chat — Codex GUI chat gains a floating side panel (mirroring Claude's /btw), accessible via Ctrl+J, the /side slash command, or the side-panel button. Forks the current Codex thread via the app-server so the side chat inherits context without polluting the main conversation. Session files are purged on close to keep the session list clean.
+  - Slash command one-press delete — pressing Backspace when the cursor is within a recognized slash command token (the blue-highlighted /git-push, /side, etc.) deletes the entire token in one keystroke instead of character-by-character.
+  - Slash command hover tooltip — hovering over a recognized slash command in the composer now shows a tooltip with the command name and description, using the app's custom tooltip system rather than native browser tooltips.
+  - Tab strip auto-scroll — opening a new session, chat, or TUI tab now automatically scrolls the tab strip to reveal the newly activated tab, so it's always visible even when many tabs are open.
+  Bug Fixes
+  - Topbar search bar not restoring after tab switch — switching from a TUI or session tab to a chat GUI or git diff tab and then back left the global topbar empty (no "Search terminal" / "Search sessions" bar). The topbar condition now checks whether a TUI tab is active before checking for chat/git view tabs, so the correct topbar always renders when switching back.
+  - Git diff tab showing "Search sessions" — the git diff view tab fell through to the SessionsTopbar condition, showing an irrelevant search bar. Git tabs now render an empty topbar since GitChangesView has its own built-in toolbar.
+  - Washed-out Codex TUI colors on Windows — Codex neither queries the terminal background (no OSC 11) nor reads COLORFGBG on Windows, so it always paints with its dark-theme palette and every foreground comes out pale under the light theme. Rather than discarding those colors (which flattened hints, paths, and syntax highlighting to black), the SGR normalizer now converts Codex's dark palette into its light twin: it mirrors each color's lightness in HSL and keeps hue and saturation. The full brightness ladder survives the flip — body text becomes the darkest, faint separators become the lightest — and accents keep their color instead of turning to mud. The foreground mirror is Windows-only, since that's where Codex is confirmed to mis-detect the background; other platforms and the dark theme are untouched. Also fixes extended-color parameters (38;2;40;…) being mis-read as standalone SGR codes and silently corrupting the color.
+ReleaseNotesUrl: https://github.com/jerrywu001/cc-sessions-viewer/blob/HEAD/CHANGELOG.md#v033
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

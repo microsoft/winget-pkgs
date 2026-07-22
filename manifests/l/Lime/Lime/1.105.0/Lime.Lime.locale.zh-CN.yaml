@@ -1,0 +1,60 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Lime.Lime
+PackageVersion: 1.105.0
+PackageLocale: zh-CN
+Publisher: Lime
+PublisherUrl: https://limeai.run/
+PublisherSupportUrl: https://github.com/limecloud/lime/issues
+PrivacyUrl: https://limeai.run/privacy/
+PackageName: Lime
+PackageUrl: https://limeai.run/
+License: 专有软件
+LicenseUrl: https://limeai.run/terms/
+Copyright: © 2026 Lime
+ShortDescription: 给中文创作者用的开源 AI 内容工作台
+Description: |-
+  Lime 是一个开源的 Electron 桌面端 AI 内容工作台，面向中文创作者、品牌运营、研究型写作者和小团队，覆盖 AI 写作、选题研究、素材管理、提示词沉淀、知识库和多模型创作流程。
+
+  你可以把它理解成一个更适合长期创作的 AI 工作台：
+  - 不是只问一句、答一句，而是围绕一个项目持续推进
+  - 不是每次都重新找资料、重新写提示词，而是把参考、风格和做法沉淀下来
+  - 不是生成完就散落在聊天记录里，而是把结果保存起来，下一次还能继续用
+  - 不是绑定某一家 AI 服务，而是让你使用自己已经配置好的模型能力
+  如果你经常在收藏夹、文档、聊天工具、图片工具和模型后台之间来回切换，Lime 想帮你把这些动作收回到同一个创作空间里。
+
+  你可以用 Lime 做什么
+  - AI 写作与内容创作：写公众号文章、小红书笔记、视频脚本、播客提纲和直播话术
+  - 资料研究与知识整理：整理网页、笔记、截图、访谈和历史材料，生成报告或简报
+  - 选题分析与内容复盘：拆解爆款案例、竞品内容、发布节奏和表达风格
+  - 提示词管理与风格复用：保存常用写法、品牌语气、选题方法和团队模板
+  - 多模态创作准备：生成图片提示词、封面方向、演示稿结构或网页草稿
+  - 多模型工作流：使用自己配置的 AI 服务商和模型，在同一个任务里持续修改、扩写、压缩或换平台发布
+ReleaseNotes: |-
+  Lime v1.105.0
+  新功能
+  - 新增 Codex 对齐的 exec_command / write_stdin current 工具面，支持 PTY、持续会话、增量输出、超时 yield、输出预算、stdin 写入和终态回收；命令执行统一进入 App Server execution process、审批、sandbox 与 canonical Tool/Command lifecycle。
+  - spawn_agent.fork_turns 支持 all、none 与最近 N 个 canonical Turn，child 使用独立稳定 identity 重建可选历史和 provider transcript；Pending → Open crash commit 在 child 完整持久化后才发布可见状态。
+  - 新增 DeepSWE adapter、项目级 Gate candidate/coverage 入口和 Electron smoke evidence owner，为后续完整 Gate A/B 候选冻结提供可审计的 snapshot、surface contract 与证据分级。
+  修复
+  - Provider SSE 改为 300 秒空闲超时而非请求总时长上限，保留底层 transport error chain；OpenAI chat 流会忽略全空 tool-call placeholder，并对携带参数但缺少工具名的调用 fail closed。
+  - 修复 Agent final answer/commentary phase 在 TextEnd 映射时丢失、失败命令错误投影为 generic Tool，以及 streaming Turn DOM 缺少稳定终态的问题。
+  - 修复 AgentControl spawn 在 history、lineage、graph、identity 或 mailbox 写入失败后残留半成品 child 的问题；启动恢复只暴露已完成 crash commit 的 Open child。
+  优化与重构
+  - Codex 本地历史导入开始直接重建 canonical Thread/Turn/Item，移除 imported runtime event sidecar、conversationImport/thread/runtimeEvents/read、专用详情面板和 imported-only 工具投影，导入记录不再形成第二套完整历史事实源。
+  - 删除旧 Bash/PowerShell/shell alias 与独立 shell_execution owner，将 live process、PTY、输出 drain、interrupt/terminate 和 sandbox command preparation 收敛到 tool-runtime 与 App Server current owner。
+  - 删除 Renderer synthetic Team projection、Team Memory shadow、selected-team/session metadata、Workspace Agent Team settings 和旧 SubAgent 工具 whitelist；GUI、read model 与 runtime 继续只消费 canonical child Thread/graph facts。
+  - 拆分 Task Center draft-send dispatch、conversation import history builder、execution process、sandbox command 与 Electron smoke evidence 等高复杂度 owner，减少热文件体量和跨层隐式接线。
+  测试与质量
+  - 扩展 unified exec/PTY、execution process JSON-RPC、sandbox/policy、AgentControl fork/crash recovery、provider SSE、conversation import canonical mapping 与 GUI projection 的 Rust/TypeScript 回归。
+  - 新增 DeepSWE coding slice、项目 Gate candidate digest、34-surface coverage contract、Gate B execution evidence 和 App Server stdio transport fixture；旧 benchmark release 双轨脚本及其过期 manifest 已删除。
+  - 同步 App Server protocol schema、generated TypeScript client、command catalog、runtime fixture、Electron smoke 和 current docs guard。
+  文档
+  - 更新全局架构、Refactor V2 中央计划、Codex 导入路线图、Multi-Agent/Agent UI、测试策略和项目 Gate A/B 计划，记录 current owner、删除分类、候选冻结与后续验收条件。
+  其他
+  - 版本事实源更新到 1.105.0：根应用、CLI npm package、Rust workspace、lime-rs/Cargo.lock 和 release notes。
+  完整变更：v1.104.0 → v1.105.0
+ReleaseNotesUrl: https://github.com/limecloud/lime/releases/tag/v1.105.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
