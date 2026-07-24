@@ -1,0 +1,79 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: TinyHumansAI.OpenHuman
+PackageVersion: 0.63.0
+PackageLocale: en-US
+Publisher: openhuman
+PublisherUrl: https://tinyhumans.ai/
+PublisherSupportUrl: https://github.com/tinyhumansai/openhuman/issues
+PackageName: OpenHuman
+PackageUrl: https://tinyhumans.ai/openhuman
+License: GPL-3.0
+LicenseUrl: https://github.com/tinyhumansai/openhuman/blob/HEAD/LICENSE
+ShortDescription: Your Personal AI super intelligence. Private, Simple and extremely powerful.
+Description: |-
+  OpenHuman is an open-source AI assistant designed to be the memory and doer for everything you do across your tools. Built on Rust + Tauri and licensed under GNU GPL3, it closes the gap between what AI models can do and what they actually know about you.
+  Every model in the world, all 200+ of them, shares the same fundamental limitation: they are stateless. You type a prompt, get a response, and the context evaporates. Even the ones with "memory" store a few bullet points. A few bullet points is a sticky note, not intelligence.
+  OpenHuman solves this with a stack that's calmly, deliberately different:
+  - A local-first Memory Tree. Every source you connect. Gmail, Slack, GitHub, Notion, your own notes, flows through a deterministic pipeline: canonical Markdown, ≤3k-token chunks, scored, folded into per-source / per-topic / per-day summary trees. Stored in SQLite on your machine. No vector-soup black box.
+  - An Obsidian-style wiki on top of it. The same chunks the agent reasons over land as .md files in a vault you can open in Obsidian, browse, edit, and link by hand. Inspired by Karpathy's obsidian-wiki workflow. You can't trust a memory you can't read.
+  - 118+ third-party integrations. One-click OAuth into Gmail, GitHub, Slack, Notion, Stripe, Calendar, Drive, Linear, Jira and more - no API keys to wire by hand, no plugin marketplace to navigate.
+  - Auto-fetch. Every twenty minutes, OpenHuman pulls fresh data from every active connection and folds it into the Memory Tree without you asking, so the agent already has tomorrow's context this morning.
+  - An agent built for big data. Smart token compression (TokenJuice) compacts verbose tool output before it ever enters the model's context, so sweeping through your last six months of email costs single-digit dollars. Automatic model routing sends each task to the right model - hint:reasoning to a frontier model, hint:fast to a cheap one, vision to vision - all under one subscription. Optional local AI via Ollama keeps embeddings and summarization on-device.
+  - Batteries included. A complete agent toolbelt is wired in by default: web search, a web-fetch scraper, a full coder toolset (filesystem, git, lint, test, grep), browser & computer control, cron & scheduling, memory tools, agent coordination for spawning sub-agents, and native voice - STT in, TTS out, mascot lip-sync, and a live Google Meet agent that joins meetings, transcribes them into your Memory Tree, and can speak back into the call. No "install a plugin to read files" friction.
+  - Simple, UI-first. A clean desktop experience and short onboarding paths take you from install to a working agent in a few clicks - no config-first setup, no terminal required. The agent has a face: a desktop mascot that speaks, reacts to its surroundings, joins your Google Meets as a real participant, remembers you across weeks, and keeps thinking in the background even when you've stopped typing.
+  Together, these turn OpenHuman into something fundamentally different from a chatbot. It is an AI agent that consumes large amounts of personal data at low cost, maintains a persistent and evolving understanding of your world, and takes proactive actions on your behalf.
+Tags:
+- ai
+- knowledge-base
+- large-language-model
+- llm
+- llm-wiki
+- wiki
+ReleaseNotes: |-
+  The Reliability & Control Upgrade
+  This release is packed with sturdier workflows, smoother chat and Agent World experiences, and a ton of under-the-hood hardening to keep everything fast and dependable. 🎉
+  Highlights
+  Workflows you can trust 🧩
+  The Workflows copilot and canvas got a major reliability pass: proposals consistently render (even for larger graphs), every copilot turn now ends in a real terminal outcome (no more silent trail‑offs), Accept now saves automatically, and the runs UI stays accurate and live-updating. Safety and correctness also improved with fixes for live-arming on updates, better circuit-breaking, approval-state visibility, and stronger tier/approval enforcement for Composio tool calls.
+  (#4881, #4886, #4887, #4888, #4889, #4890, #4891, #4893, #4904, #4911, #4932, #4933, #4941, #4942, #4943, #4945, #4955, #4956, #4999, #5000, #5007, #5011, #5012, #5013) — Thank you @graycyrus and @senamakel!
+  Chat that feels snappier & more controllable 💬
+  Chat got a big UX win with a Stop button plus ESC-to-interrupt and re-edit, and stronger protection against “hydrate” snapshots wiping fresh streaming or tool timelines. Orchestration also became more transparent: async sub-agent failures and “awaiting user” outcomes now surface correctly in chat, and delegations are now async-by-default with durable, resumable sessions and persistent workflow proposals.
+  (#4898, #4903, #4908, #5074) — Thank you @M3gA-Mind, @graycyrus, and @senamakel!
+  Memory & transcript upgrades 🧠
+  Memory ingestion and recall got sharper and safer: OpenHuman can ingest Codex and Claude coding sessions, Composio sync no longer keys upserts off secret-like titles, and recall avoids pulling same-session “echo” documents that drown out real facts. On top of that, transcripts are now much more robust: cold-boot resumes restore full-fidelity context and thinking, and the transcript system is moving to an append-only, derived view with raw session logs as the source of truth.
+  (#4863, #4953, #4991, #5077, #5086) — Thank you @senamakel, @M3gA-Mind, and @graycyrus!
+  Agent World (Tiny Place) feels alive 🌍
+  Tiny Place is now more interactive and complete: DMs and feeds update in real time, ledgers and feeds paginate beyond the first 50 items, and directory entries finally open a rich profile view. Profiles also leveled up with editing for your own profile (name/bio/avatar) and a public viewer route for arbitrary handles.
+  (#4951, #4952, #4988, #4989, #4990, #4994, #4996, #4997) — Thank you @M3gA-Mind!
+  Performance, polish, and “it just works” fixes ⚡
+  From accessibility and UI polish to startup and runtime performance, this release reduces friction across the app: improved dark theme contrast, paused mesh-gradient rendering when the app isn’t visible, and boot polling is consolidated and quieter. First-run setup overlays now appear only when actually provisioning, channel setup guidance is corrected in-app, pricing/checkout redirects behave properly, and the settings “Clear App Data” reset now correctly targets the signed-in user.
+  (#4897, #4902, #4905, #4910, #4939, #4954, #5035, #5036, #5066, #5075, #5085) — Thank you @M3gA-Mind, @YellowSnnowmann, and @senamakel!
+  Build flexibility, CI hardening, and new surfaces 🛠️
+  The core is now far more modular and easier to ship in slim builds via compile-time feature gates (media, web3, flows, skills, MCP, meet) and a new feature-gated terminal chat UI (openhuman tui). Desktop shipping and CI also got stricter and safer: voice and tokenjuice-treesitter are correctly forwarded into the desktop build, CI now gates feature-forwarding drift, macOS clippy blockers are resolved, the “gates-off” smoke lane is repaired and runs tests, and learning startup subscribers are decoupled from channels and covered with more stable tests. There’s also a core refactor moving the web chat conduit out of channels/.
+  (#4840, #4855, #4912, #4913, #4914, #4915, #4916, #4917, #4934, #5004, #5020, #5023, #5025, #5070, #5082, #5084) — Thank you @oxoxDev, @CodeGhost21, @senamakel, and @M3gA-Mind!
+  Integrations, inference, and tooling improvements 🔌
+  Integrations and local AI got more reliable: OpenAI-compatible local runtimes now probe /v1/models correctly, custom embedding endpoint verification errors are clearer and actionable, and streaming retries now honor Retry-After. Composio tool execution is smarter and safer with per-action tools gated on their full contracts (reducing argument guessing), and unsyncable toolkits no longer auto-register as memory sources. There’s also a new generate_document tool that emits real .docx, plus a public accessor for last-turn usage totals for downstream hosting/billing.
+  (#4899, #4909, #4940, #4993, #4995, #5064, #5067) — Thank you @M3gA-Mind and @senamakel!
+  Account, sharing, and navigation delights 🔗
+  You can now generate one-tap “look what my agent did” share cards for X and LinkedIn, the X/Twitter “Continue with Google” popup stays in-app, Rewards is finally discoverable via a cloud-gated sidebar entry, and the Codex auth button is properly localized. Plus: proactive “Agentic task insights” fixtures and lifecycle resets were tightened to keep the UI consistent.
+  (#4892, #4944, #4949, #4992, #5010, #5015, #5065) — Thank you @YellowSnnowmann, @graycyrus, and @M3gA-Mind!
+  Safety & prompt discipline changes 🧯
+  Desktop automation safety controls saw churn: an Emergency Stop was introduced and later fully removed based on product direction. Meanwhile, agent behavior improved for local LLM providers with provider-aware context/delegation guardrails, stronger structured-output enforcement, more resilient tool-call parsing for small models, and AGENTS.md instructions are now loaded into the system prompt—with follow-up security hardening to prevent symlink/path escape and to redact debug logs when AGENTS.md is present.
+  (#4600, #4900, #4935, #4938, #5073, #5087, #5096) — Thank you @CodeGhost21, @M3gA-Mind, @sanil-23, @yh928, and @senamakel!
+  Additional highlights 🔗
+  A few more focused contributions round out this release with targeted fixes and improvements that are worth calling out. (#4872, #4877, #4906, #5008) — Thank you @senamakel, @graycyrus, and @M3gA-Mind!
+  New Contributors
+  - Thank you @yh928 for improving tool-call robustness by recovering pipe-garbled <tool_call> tags from small models. (#4938)
+  Hope you’ll join us on Discord—there are exclusive roles and contributor rewards waiting.
+  Contributor Credits
+  Thank you @CodeGhost21, @Cyrus Gray, @Mega Mind, @oxoxDev, @sanil-23, @Steven Enamakel, @YellowSnnowmann, and @yh928!
+  Full Compare
+  https://github.com/tinyhumansai/openhuman/compare/v0.61.8...v0.63.0
+ReleaseNotesUrl: https://github.com/tinyhumansai/openhuman/releases/tag/v0.63.0
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://tinyhumans.gitbook.io/openhuman
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
