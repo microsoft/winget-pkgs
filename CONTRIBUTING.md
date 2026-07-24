@@ -146,8 +146,8 @@ cd winget-pkgs
 ```
 Create a new branch for your feature or bug fix:
 ```
- git checkout -b feature-branch
- ```
+git checkout -b feature-branch
+```
 
 Make your changes and commit them:
 ```
