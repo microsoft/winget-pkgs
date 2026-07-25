@@ -1,0 +1,184 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: ractive.hyalo
+PackageVersion: 0.18.0
+PackageLocale: en-US
+Publisher: '@ractive'
+PublisherUrl: https://github.com/ractive
+PublisherSupportUrl: https://github.com/ractive/hyalo/issues
+Author: Jean-Pierre Bergamin
+PackageName: hyalo
+PackageUrl: https://github.com/ractive/hyalo
+License: MIT
+LicenseUrl: https://github.com/ractive/hyalo/blob/HEAD/LICENSE
+ShortDescription: CLI for exploring and managing Markdown knowledge bases with YAML frontmatter
+Description: Hyalo is a fast command-line tool for searching, filtering, and mutating collections of Markdown files with YAML frontmatter. It supports property queries, tag filtering, regex search, wikilink tracking, and bulk metadata updates. Compatible with Obsidian vaults, Zettelkasten systems, and any structured Markdown documentation.
+Moniker: hyalo
+Tags:
+- agent-skill
+- agentic-workflows
+- cli
+- knowledge-base
+- knowledge-management
+- markdown
+- obsidian
+- rust
+- zettelkasten
+ReleaseNotes: |-
+  [0.18.0] - 2026-07-18
+  Added
+  - OKF (Open Knowledge Format) support (iters 163–166): datetime-tz
+    property type (timezone-aware timestamps, disjoint from naive datetime);
+    [schema] exempt glob list binding reserved files (index.md, log.md) to
+    no schema, honored by lint and validate-on-write; hyalo init --profile okf
+    writes an OKF-ready .hyalo.toml and installs a bundled okf skill with
+    --claude; hyalo okf index / hyalo okf log reserved-file generators
+    (deterministic, managed-region-aware, dry-run by default with a non-zero
+    exit on drift); hyalo lint --profile okf applies the same profile fragment
+    as an ephemeral overlay and adds six warn-level OKF conformance rules
+    (reserved-file structure, citations, augmentation guards). Bundle-root
+    absolute links are supported via site_prefix = "".
+  - Composable profiles: profiles are declarative TOML fragments deep-merged
+    (upserted) into .hyalo.toml — multiple init --profile <p> runs coexist
+    in one vault, re-running a profile is idempotent, and user-authored keys the
+    profile doesn't own are never touched (iter-164).
+  - madr profile (iter-167): adr schema type (status lifecycle,
+    supersede pattern, MADR 3.x deciders alias, required
+    Context/Options/Decision sections) bound to docs/decisions/** via the new
+    generic [[schema.bind]] path-bound schemas (ordered, first-match-wins
+    globs, wired into lint, validate-on-write, and fix); {n:04} zero-padded
+    filename-template tokens; MADR-SUPERSEDE-RESOLVE and
+    MADR-DUPLICATE-NUMBER advisory lints; hyalo madr toc dashboard
+    generator.
+  - skills profile (iter-168): validates Agent Skills <name>/SKILL.md
+    files (path-bound skill schema, name↔dirname coupling, reserved names,
+    description and body-length budgets) with three advisory rules; generic
+    string min_length/max_length schema constraints.
+  - changelog profile (iter-169): validates CHANGELOG.md against the
+    Keep a Changelog 1.1.0 grammar (heading sequence, semver-descending
+    versions, category subsections, footer link references) through a new
+    reusable declarative heading-grammar engine, with eight CHANGELOG-* lint
+    rules; hyalo changelog release <X.Y.Z> rotates [Unreleased] into a dated
+    version section and hyalo changelog add appends categorized entries —
+    both dry-run by default. This file is maintained with them.
+  - hyalo lint --format github (iter-170): emits one GitHub Actions
+    workflow command per violation (::error / ::warning with repo-root
+    relative paths and spec-compliant escaping) so findings render as inline PR
+    annotations; lint-only; output caps are lifted so no annotation is silently
+    dropped.
+  - Companion GitHub Action
+    ractive/setup-hyalo (iter-171):
+    installs the prebuilt hyalo binary on any runner (checksum-verified against
+    the release SHA256SUMS, tool-cached); the README documents the two-step
+    PR-check recipe and the claude-code-action agent recipe.
+  - [scan] include config (iter-175): glob allow-list re-admitting
+    specific hidden subtrees (e.g. .claude/skills/**) to the vault walker for
+    every command (.git stays hard-excluded). The skills profile ships
+    include = [".claude/skills/**"] so **/SKILL.md bindings reach the
+    canonical Claude Code skill location.
+  - [changelog] path config (iter-175): point the changelog commands at
+    a file outside the vault — e.g. the repo-root CHANGELOG.md when dir is
+    a docs subdirectory — with a path-escape guard.
+  - xtask check-bundled-skills CI gate (iter-175): every bundled skill
+    template is linted as installed under the skills profile, so a bundled
+    skill can never ship violating its own schema again.
+  - okf index / madr toc non-destructive adopt (iter-173): a marker-less
+    index.md/README.md is now adopted — its entire hand-written body is
+    preserved and the managed region is appended after it (dry-run reports
+    adopt (preserving N existing lines)). The old overwrite behavior is opt-in
+    via a new --replace flag. On case-insensitive filesystems an existing
+    INDEX.md is recognized as the reserved file and adopted by its on-disk
+    casing.
+  - [okf] ignore config: vault-relative globs (_template/**,
+    test/fixture-vault/**) the OKF generators skip, independent of
+    [lint] ignore.
+  - HYALO005 / frontmatter-parse-error lint rule (iter-174): a file whose
+    frontmatter cannot be parsed (invalid YAML, duplicate keys, oversized scalar)
+    is now reported as an error-severity lint violation under a stable rule id and
+    still counts toward files_checked, so it appears in text/json/github output
+    and fails CI. Listed in hyalo lint-rules list; severity configurable via
+    [lint.rules.HYALO005] but never silently downgraded by a profile.
+  - Skip-summary in text & github (iter-174): when --files-from drops input
+    paths, --format text prints a note: N input paths missing, M non-markdown skipped line (stderr) and --format github emits the same as a ::notice::,
+    matching the counters JSON already exposes. An explicitly named --file
+    excluded by [lint] ignore prints a notice instead of a silent 0 files checked.
+  - Distinguishable --fix --dry-run --format github (iter-174):
+    would-be-fixed violations render as ::notice with a [fixable] title prefix
+    and the summary becomes N fixable, M remaining, so a dry-run preview is no
+    longer byte-identical to a plain lint run.
+  Changed
+  - BREAKING (CI): unparseable frontmatter now fails lint (iter-174). Files
+    that previously vanished silently from the scan (leaving a green
+    0 files checked, no issues) now surface as HYALO005 errors and exit 1.
+    Vaults that unknowingly contained corrupt files will start failing CI — this
+    is intentional: a green lint must mean the vault is genuinely clean.
+  - Profile composition now truly composes (iter-172): merging a profile
+    into .hyalo.toml unions array keys ([schema] exempt, [lint] ignore,
+    [schema.default] required) and dedups [[schema.bind]] entries by
+    (glob, type) instead of clobbering the previous profile's values; the
+    merge is comment- and order-preserving (toml_edit) and reports
+    conflict: lines when a scalar would be overwritten. [lint] profile
+    (single scalar) is deprecated in favor of the profiles list so every
+    activated profile's rules fire together; the --profile CLI overlay
+    composes with file config instead of resetting user additions.
+  - Path-bound files satisfy the required-type check (iter-172): a file
+    typed via [[schema.bind]] (e.g. a frontmatter-less SKILL.md or ADR) no
+    longer needs an explicit type: key to pass required = ["type"],
+    including under --strict.
+  - The OKF profile is vendor-neutral (iter-175): the BigQuery example types
+    are no longer injected into every vault.
+  - hyalo new --type <t> honors [schema.types.<t>.defaults] (e.g.
+    status, date = "$today") and omits the type: key when the target
+    path is covered by a [[schema.bind]] binding (iter-175).
+  - madr toc excludes files whose explicit type: is not adr from the
+    dashboard instead of listing every .md in the directory (iter-175).
+  - Generated index.md/log.md/README.md managed regions now emit a blank
+    line after the begin marker and before the end marker, so a freshly
+    generated file passes MD022 — ending the lint --fix ↔ okf index revert
+    ping-pong.
+  - okf index / okf log / madr toc --format text output now renders
+    readable per-file lines instead of a mis-nested files: action: create key
+    dump.
+  - This repository's own knowledgebase is linted in CI on every PR
+    (lint-kb job, hyalo lint --strict --format github) (iter-170).
+  Fixed
+  - OKF generator hardening (iter-176): closes the data-safety and
+    output-correctness edges the final pre-release dogfood found in okf index/
+    okf log.
+    - Marker-edge data loss: an index.md with a dangling / reversed /
+      duplicate okf:index managed-region marker is now left byte-identical and
+      reported as skip (with a stderr warning), never rewritten — the
+      generator no longer splices across a broken marker and deletes the hand
+      prose after it on a second --apply. A new advisory OKF-INDEX-MARKERS
+      lint rule flags the same condition in CI, and malformed-marker files count
+      as drift in --dry-run.
+    - CommonMark-valid links: generated bullets are always valid Markdown link
+      items — destinations with spaces are angle-bracket wrapped
+      (](<blocks table.md>)), [/] in titles are backslash-escaped, and
+      multi-line description / titles are collapsed to one line.
+    - Robust apply: an impossible or unwritable target (e.g. a directory named
+      index.md) is warned-and-skipped and the run continues writing the other
+      files instead of aborting mid-run; --dry-run reports skip for such
+      targets instead of claiming create. okf log rejects a non-file target
+      the same way.
+    - Scope & message polish: a nonexistent okf index <dir> scope is rejected
+      (exit 1) instead of vacuously passing; -q/--quiet now suppresses the
+      skip warnings; okf log indents multi-line --message continuation lines
+      so an embedded ## heading can't corrupt the log; okf log --action ""
+      errors like --message ""; a nonexistent okf log <dir> target is
+      rejected consistently in dry-run and apply. Grammar: N file written and
+      preserving 1 existing line. Re-running init --profile <p> on an
+      already-merged config now reports unchanged instead of updated.
+  - Malformed-file policy (iter-173): okf index now skips a concept with
+    unparseable frontmatter with a per-file stderr warning and continues, instead
+    of aborting the whole run on the first bad file (exit code 2 is reserved for
+    real I/O/config errors; drift stays exit 1). A scoped run (okf index <subtree>) no longer dies on a malformed file elsewhere in the vault.
+  - SCHEMA "missing required property" violations now report
+    autofixable: false when no schema default exists for the property (so
+    --fix cannot synthesize a value), instead of a misleading true.
+  - lint --limit 0 now means unlimited (iter-174): it previously emptied the
+    files[] list and zeroed the errors counter, so hyalo lint --limit 0 on
+ReleaseNotesUrl: https://github.com/ractive/hyalo/releases/tag/v0.18.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

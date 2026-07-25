@@ -1,5 +1,5 @@
 $VM = 0
-$build = 137
+$build = 149
 $ipconfig = (ipconfig)
 $remoteIP = ([ipaddress](($ipconfig | select-string "Default Gateway") -split ": ")[1]).IPAddressToString
 #$remoteIP = ([ipaddress](($ipconfig[($ipconfig | select-string "vEthernet").LineNumber..$ipconfig.length] | select-string "IPv4 Address") -split ": ")[1]).IPAddressToString
@@ -12,25 +12,37 @@ Set-Location $homePath
 $runPath = "$MainFolder\vm\$VM"
 $writeFolder = "\\$remoteIP\write"
 $statusFile = "$writeFolder\status.csv"
+# $statusFile = "$writeFolder\status\$VM.csv"
 $SharedFolder = $writeFolder
 
 if ($VM -eq 0) {
 	$VM = (gc "$MainFolder\vmcounter.txt")-1
 }
-"`$VM = $VM" | Out-File $profile
-(Get-Content "\\$remoteIP\ManVal\vm\0\profile.ps1")[1..999] | Out-File $profile -append
+$NewProfile = (Get-Content "\\$remoteIP\ManVal\vm\0\profile.ps1") -split "`n"
+if ($NewProfile) {
+	"`$VM = $VM" | Out-File $profile
+	($NewProfile[1..999]) -join "`n" | Out-File $profile -append
+}
 
 Function Send-SharedError {
 	param(
 		[switch]$Approved,
+		[switch]$Feedback,
 		$Clip = (Get-Clipboard)
 	)
-	Write-Host "Writing $($Clip.length) lines."
-	$Clip -join "`n" | Out-File "$writeFolder\err.txt"
-	if ($Approved) {
-		Get-TrackerVMSetStatus "SendStatus-Approved"
+	if ($Clip.length -gt 0) {
+		Write-Host "Writing $($Clip.length) lines."
+		$Clip -join "`n" | Out-File "$writeFolder\err.txt"
+		if ($Feedback) {
+			Get-TrackerVMSetStatus "SendStatus-Feedback"
+		}  else {
+			if ($Approved) {
+				Get-TrackerVMSetStatus "SendStatus-Approved"
+			}  else {
+				Get-TrackerVMSetStatus "SendStatus-Complete"
+			} #end if Approved
+		} #end if Feedback
 	}
-	Get-TrackerVMSetStatus "SendStatus-Complete"
 }
 
 function Get-ARPTable {
@@ -50,7 +62,7 @@ function Get-ARPTable {
 
 Function Get-TrackerVMSetStatus {
 	param(
-		[ValidateSet("AddVCRedist","Approved","CheckpointComplete","Checkpointing","CheckpointReady","Completing","Complete","Disgenerate","Generating","Installing","Prescan","Prevalidation","Ready","Rebooting","Regenerate","Restoring","Revert","Scanning","SendStatus","SendStatus-Approved","SendStatus-Complete","Setup","SetupComplete","Starting","Updating","ValidationCompleted")]
+		[ValidateSet("AddVCRedist","Approved","CheckpointComplete","Checkpointing","CheckpointReady","Completing","Complete","Disgenerate","DoesntRun","Feedback","LongRunning","FileScan1","FileScan2","FileScan1Pause","FileScan2Pause","Generating","Installing","Prescan","Prevalidation","Ready","Rebooting","Regenerate","Restoring","Revert","Scanning","SendStatus","SendStatus-Approved","SendStatus-Complete","SendStatus-Feedback","Setup","SetupComplete","Starting","Unhealthy","Updating","ValidationCompleted")]
 		$Status = "Complete",
 		[string]$Package,
 		[int]$PR
@@ -73,6 +85,7 @@ Function Get-TrackerVMRunValidation {
 	param(
 		$fileName = "cmds.ps1"
 	)
+	Get-EventLog -LogName * | ForEach { Clear-EventLog $_.Log } 
 	Copy-Item $runPath\$fileName  $homePath\$fileName 
 	& $homePath\$fileName 
 }
@@ -80,7 +93,7 @@ Function Get-TrackerVMRunValidation {
 Function Get-TrackerVMStatus{
 	param(
 		[int]$vmNum,
-		[ValidateSet("AddVCRedist","Approved","CheckpointComplete","Checkpointing","CheckpointReady","Completing","Complete","Disgenerate","Generating","Installing","Prescan","Prevalidation","Ready","Rebooting","Regenerate","Restoring","Revert","Scanning","SendStatus","Setup","SetupComplete","Starting","Updating","ValidationCompleted")]
+		[ValidateSet("AddVCRedist","Approved","CheckpointComplete","Checkpointing","CheckpointReady","Completing","Complete","Disgenerate","DoesntRun","Feedback","LongRunning","FileScan1","FileScan2","FileScan1Pause","FileScan2Pause","Generating","Installing","Prescan","Prevalidation","Ready","Rebooting","Regenerate","Restoring","Revert","Scanning","SendStatus","SendStatus-Approved","SendStatus-Complete","SendStatus-Feedback","Setup","SetupComplete","Starting","Unhealthy","Updating","ValidationCompleted")]
 		$Status,
 		$Option = "status",
 		$out = (Get-Content $StatusFile | ConvertFrom-Csv | where {$_.status -notmatch "ImagePark"})
@@ -94,6 +107,27 @@ Function Get-TrackerVMStatus{
 	$out
 }
 
+Function Get-InstalledVersions {
+	Param(
+		$file = (gc C:\Users\User\Desktop\ChangedFiles.txt | where {$_ -match "Links"} | where {$_ -match "exe"}),
+		$cmdstring = "version",
+		$ArpName = (($file -split "\\")[-1] -split "\.")[0]
+	)
+	if ($file) {
+		Write-Host "Reading $ArpName"
+		$ArpData = Get-ARPTable $ArpName
+		$FileData = &"$file" "--$cmdstring"
+		if ($null -eq $FileData){
+			$FileData = &"$file" "$cmdstring"
+		}
+		$shouldsend = $false
+		($FileData -replace ":"," " -replace "v","" -split " ") |%{if ($ArpData.DisplayVersion -match $_ ) {$shouldsend = $true}}
+		if ($shouldsend){
+			Send-SharedError -Status Approved -Clip $FileData
+		}
+	}
+}
+
 <#
 Registry:
 $a = gci HKLM:SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall | Get-ItemProperty | select DisplayName,DisplayVersion
@@ -103,12 +137,7 @@ $a | where {$_.displayname} | sort displayname -Unique
 #Clear event logs.
 
 # Commands
-$n = 15;$t = $n;while ($n -gt 0) {$n--;$r = $t - $n;Write-Progress -Activity "Build latch" -Status "Seconds remaining: $r/$t" -PercentComplete ((1-$n/$t)*100);sleep 1};
-Get-NetAdapter|Disable-NetAdapter;Get-NetAdapter|Enable-NetAdapter;sleep 30;Import-Module $Profile -Force;Import-Module $Profile -Force;cls;Write-Host "VM$VM with remoteIP $remoteIP version $build";
-Get-TrackerVMSetStatus CheckpointReady;
-$n = 15;$t = $n;while ($n -gt 0) {$n--;$r = $t - $n;Write-Progress -Activity "Run latch" -Status "Seconds remaining: $r/$t" -PercentComplete ((1-$n/$t)*100);sleep 1};
-Get-TrackerVMRunValidation
-#Get-NetAdapter|Disable-NetAdapter;Get-NetAdapter|Enable-NetAdapter;sleep 30;Import-Module $Profile -Force;Import-Module $Profile -Force;cls;Write-Host "VM$VM with remoteIP $remoteIP version $build";Get-TrackerVMSetStatus CheckpointReady;$n = 15;$t = $n;while ($n -gt 0) {$n--;$r = $t - $n;Write-Progress -Activity "Process latch" -Status "Seconds remaining: $r/$t" -PercentComplete ((1-$n/$t)*100);sleep 1};Write-Host "Waiting for Network...";Get-TrackerVMRunValidation
+$n = 15;$t = $n;while ($n -gt 0) {$n--;$r = $t - $n;Write-Progress -Activity "Build latch" -Status "Seconds remaining: $r/$t" -PercentComplete ((1-$n/$t)*100);sleep 1}; Get-NetAdapter|Disable-NetAdapter -confirm:$false;Get-NetAdapter|Enable-NetAdapter;sleep 30;Import-Module $Profile -Force;Import-Module $Profile -Force;cls;Write-Host "VM$VM with remoteIP $remoteIP version $build"; Get-TrackerVMSetStatus CheckpointReady; $n = 15;$t = $n;while ($n -gt 0) {$n--;$r = $t - $n; Write-Progress -Activity "Run latch" -Status "Seconds remaining: $r/$t" -PercentComplete ((1-$n/$t)*100);sleep 1};Write-Host "Waiting for Network...";Get-TrackerVMRunValidation
 
 
 # Reset display window
@@ -123,6 +152,7 @@ shutdown -r -t 05
 # Setup: ExecutionPolicy, Uninstall, Enable WinGet settings.
 Set-ExecutionPolicy Unrestricted
 winget uninstall Microsoft.Teams
+winget uninstall Microsoft.Teams.Free
 winget uninstall Microsoft.OneDrive
 winget uninstall Microsoft.MSIXPackagingTool_8wekyb3d8bbwe
 winget settings --enable LocalManifestFiles;winget settings --enable LocalArchiveMalwareScanOverride;
