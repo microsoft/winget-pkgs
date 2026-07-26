@@ -1,0 +1,73 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: WilsonGlasser.Oryxis
+PackageVersion: 0.11.0
+PackageLocale: en-US
+Publisher: Wilson Glasser
+PublisherUrl: https://github.com/wilsonglasser
+PublisherSupportUrl: https://github.com/wilsonglasser/oryxis/issues
+Author: Wilson Glasser
+PackageName: Oryxis
+PackageUrl: https://github.com/wilsonglasser/oryxis
+License: AGPL-3.0
+LicenseUrl: https://github.com/wilsonglasser/oryxis/blob/HEAD/LICENSE
+Copyright: AGPL-3.0-or-later
+ShortDescription: Modern SSH client built in Rust — terminal, SFTP, and host management.
+Description: Modern SSH client built in Rust — terminal, SFTP, and host management.
+Moniker: oryxis
+Tags:
+- rust
+- sftp
+- ssh
+- terminal
+ReleaseNotes: |-
+  Oryxis 0.11.0: remote apps on your screen, live vitals in the sidebar, and a window you can rearrange
+  Disclosure: this release note was drafted with assistance from LLM and edited by Wilson Glasser, the project author. The engineering decisions are mine; the LLM helped with the code and turn the changelog into prose.
+  Oryxis is a Rust-native SSH client built on iced with a russh engine. Where 0.10.0 went down into the trust layer (an ssh-agent for the whole system, certificates, security keys), 0.11.0 goes outward into what a session can show you. Remote GUI applications now draw on your local display. Every SSH tab can report the host's CPU, memory, disk and network without installing anything on the server. Host folders nest. And the window itself became rearrangeable: the tab strip docks to any edge, the sidebar to either side.
+  Remote applications on your local display
+  X11 forwarding is in, as a per-host toggle that also imports from ForwardX11 in your ~/.ssh/config. Run xclock, a Java installer or a vendor's GUI admin tool on a server and it draws on your screen.
+  The part worth explaining is the cookie handling, because getting it wrong is how X11 forwarding leaks a desktop. Oryxis never hands the remote host the real cookie of your local display: on a multi-user server, anyone able to read a forwarded .Xauthority would gain full access to your session, keystrokes and screen included. Instead a fake MIT-MAGIC-COOKIE-1 is minted per session and announced to the server. Every X11 channel the server opens back must present that fake cookie, which is verified in constant time and swapped for the real one before a single byte reaches your X server. A mismatch closes the channel. That is exactly what OpenSSH does, down to the timing-safe compare.
+  Getting $DISPLAY right across three platforms took more care than the protocol did. Linux and BSD get the unix socket; macOS gets the XQuartz launchd path, whose socket file name literally ends in :0 and which a naive parser silently breaks; Windows has no native X server, so an unset DISPLAY falls back to the TCP endpoint VcXsrv, Xming and MobaXterm serve. Bracketed and bare IPv6 literals, the legacy hostname/unix:N transport form, and displays running with access control off (WSLg, VcXsrv -ac, where the auth is stripped on the way in rather than substituted) all work.
+  This is trusted forwarding, OpenSSH's -Y. Untrusted mode (-X) relies on the X SECURITY extension, which denies the pointer and keyboard grabs Java and Swing toolkits need, so the enterprise GUIs people actually forward would fail to start under it.
+  Live host vitals, without installing anything (#83)
+  A new Monitor tab in the terminal sidebar shows CPU, memory, swap, disk and network for the host you are connected to. It reads them off the SSH connection you already have, on an exec channel multiplexed onto the live session, so there is no agent to install and nothing to keep updated on the server. Linux /proc is the primary source, with BSD and macOS probe fallbacks.
+  It is opt-in twice: the whole feature hides behind a Features & Plugins toggle, and then per host, so no connection starts probing behind your back. An "Enable for all hosts" switch and a configurable interval are there when you want it everywhere. The panel also lists what the host is listening on and turns any row into a local port forward in one click, honoring the listener's own bind address. Thresholds raise alerts, a long mount list collapses, and an optional status-bar segment keeps the headline numbers visible with the panel closed.
+  One design note: every number in that panel comes from a machine you may not control. All the probe arithmetic saturates rather than wrapping, and a truncated or forged payload degrades to "unknown" instead of rendering nonsense.
+  Folders that nest (discussion #67)
+  Host groups now hold groups, to any depth. If your fleet is prod / eu-west / db rather than a flat list, it finally maps.
+  The details are where this kind of feature usually breaks, so: pickers render the full breadcrumb path, so two folders named prod under different parents stay distinguishable; typing a path creates the whole chain at once; deleting a folder promotes its children to the grandparent instead of orphaning them; and a cycle guard keeps a re-parent from swallowing its own subtree. If two devices create a cycle by editing concurrently, sync degrades it to root so the folders stay visible and editable rather than vanishing. A dedicated "New group" button creates top-level folders from the dropdown and the empty state, and a compact header with a back arrow replaces the breadcrumb inside a folder.
+  A window you can rearrange (#85, #87)
+  The tab strip docks to any edge: top, bottom, left or right. The side docks turn the strip vertical, can absorb the window chrome (burger, Home, window buttons) to reclaim the top bar entirely, and can run full height. Inactive tabs take a separation style of your choice: none, border or underline.
+  The terminal sidebar docks left as well as right, remembers which tab you want it to open on, and can open itself on connect, globally or overridden per host. The status bar became fully configurable, every segment toggles individually, and latency, transfer size and the shell's working directory join the existing ones.
+  Shortcuts that stop stealing from your shell (#99, #100)
+  Several actions sat on bare chords a terminal application could legitimately want. They moved onto Ctrl+Shift:
+  ──────────────┬──────┬────────────
+  Action        │Was   │Now
+  ──────────────┼──────┼────────────
+  New-tab picker│Ctrl+K│Ctrl+Shift+T
+  ──────────────┼──────┼────────────
+  Quick connect │Ctrl+K│Ctrl+Shift+G
+  ──────────────┼──────┼────────────
+  Jump to tab   │Ctrl+J│Ctrl+Shift+J
+  ──────────────┼──────┼────────────
+  Local shell   │Ctrl+L│Ctrl+Shift+L
+  ──────────────┴──────┴────────────
+  A bare Ctrl+K, Ctrl+L or Ctrl+J reaches the shell again. Custom bindings you set yourself are untouched. New alongside them: Ctrl+Shift+R reconnects the active tab, and the terminal context menu gains a Close pane entry on split tabs.
+  Settings you can search
+  Type in the Settings sidebar and matching rows highlight in place, with a hit-count badge per section, while the section tree stays put and non-matching sections dim. Enter and Shift+Enter step through matches with a position counter. Matching runs against the English labels as well as the active language, so an English term works no matter what language the UI is in.
+  Also in the box
+  - Search inside session recordings (discussion #67): the History screen searches the recorded content itself, not just titles, decrypting on demand under a bounded scan, and can filter to the hosts a given command ever ran on.
+  - Theme portability (#82): terminal and UI themes export to a file, import from one, and clone a built-in as a starting point. Two new built-in palettes, One Dark and Gruvbox Dark, bring the count to 15.
+  - SFTP Open with (#84): hand a remote file to a specific local application, with a MobaXterm-style confirmation before the edited copy goes back up, plus a path-history dropdown.
+  - Self-healing port forwards: an auto-start forward that fails to bind retries with capped backoff (15 / 30 / 60 / 120 s) behind a "Retrying" chip, instead of silently staying down.
+  - SGR 58 underline color: underlines paint in the color the escape sequence asks for, live and in exported transcripts.
+  - The TOTP secret sits behind a "Use TOTP" disclosure toggle, keeping the host editor short for the hosts that do not use it.
+  Fixes worth calling out
+  SSH agent discovery got a real overhaul (#98). Oryxis now tries every agent it finds instead of stopping at the first pipe, sweeps all Pageant-style named pipes, dedupes offers across agents so a shared key is not presented twice, tries a host's pinned key first across every agent before the full sweep, and bounds each candidate dial so a wedged agent cannot stall the connect. A server that hangs up mid-sweep is reported as "too many authentication attempts" rather than a generic failure. Separately, Oryxis no longer dials its own ssh-agent while connecting, which could pop a confirmation prompt for its own outgoing session.
+  The auth timeout moved to 120 s, matching sshd's default LoginGraceTime. The server, not the client, sets the real ceiling on how long authentication may take, so a shorter client budget was cutting off confirm-gated agents, hardware-key touches and 2FA prompts before the server ever would. The 15 s connect timeout is unchanged, so an unreachable host still fails fast.
+  A host with no terminfo entry for your terminal type is now probed before the PTY request and falls back, with a toast explaining the substitution, instead of leaving you with a broken display (#88). Session transcripts render through the real terminal widget, scroll with sub-cell pixel wheels, and stay scrollable when the recording ends inside a full-screen application (#90, #91). The player fits the recording's font to the stage instead of letting a wide recording scroll (#89). Privacy Mode merges overlapping mask spans into a single bar instead of drawing two eye-slashes. And tab lifecycle was unified: reconnect and close share one teardown path, Close pane targets the pane you clicked, and a tab closed mid-dial no longer leaves an orphan connection running.
+  Full details in the CHANGELOG.
+ReleaseNotesUrl: https://github.com/wilsonglasser/oryxis/releases/tag/v0.11.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
