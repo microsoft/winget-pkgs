@@ -1,0 +1,46 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.12.0.schema.json
+#
+# Installer manifest template. Fill in:
+#
+#   0.12.4              SemVer, no leading `v` (e.g. `0.12.0`)
+#   2026-05-21         ISO date the GitHub Release was cut
+#   5DABC4C48EB0579C839C12BB5513D0D17E6BCDC4562258AC99E68EB1C1382CF5     `Get-FileHash -Algorithm SHA256` of the amd64 .msi
+#   D0829465AD00CC53524BC5EA918B9691DE4C8D355BFD7D60705490A575E47AB7     same for the arm64 .msi
+#   {AB861629-8AF6-493F-B76A-778F6BBC0ED1}   '{GUID}' from the amd64 .msi (wingetcreate auto-detects)
+#   {9D96937E-829E-4EE7-96C3-FE4AEACD6547}   '{GUID}' from the arm64 .msi (wingetcreate auto-detects)
+#
+# Both architectures ship .msi installers (cargo-wix + system WiX
+# 3.14, see release.yml). MSI is preferred for winget because:
+#   * `ProductCode` lets winget reliably locate the install after
+#     it's applied — the `Validation-Executable-Error` we hit on
+#     v0.12.0's first submission traced back to cargo-packager's
+#     NSIS installer writing the uninstall key under HKCU instead
+#     of HKLM, which the validator's HKLM-scoped scan missed.
+#   * Apps & Features integration is automatic — Windows Installer
+#     writes `DisplayName`, `Publisher`, `DisplayVersion`,
+#     `InstallLocation`, etc. from the MSI's tables.
+#   * `Scope: machine` is honored by MSI tooling without per-tool
+#     configuration the way NSIS needs.
+# The portable NSIS .exe is still published as a Releases-page
+# artifact for users who'd rather skip an installer, but it's not
+# referenced from this manifest.
+
+PackageIdentifier: packetThrower.Baudrun
+PackageVersion: 0.12.4
+ReleaseDate: 2026-05-21
+InstallModes:
+  - interactive
+  - silent
+  - silentWithProgress
+Installers:
+  - Architecture: x64
+    InstallerType: wix
+    InstallerUrl: https://github.com/packetThrower/Baudrun/releases/download/v0.12.4/Baudrun_0.12.4_amd64_en-US.msi
+    InstallerSha256: 5DABC4C48EB0579C839C12BB5513D0D17E6BCDC4562258AC99E68EB1C1382CF5
+    ProductCode: '{AB861629-8AF6-493F-B76A-778F6BBC0ED1}'
+    Scope: machine
+    InstallerSwitches:
+      Silent: /quiet /norestart
+      SilentWithProgress: /passive /norestart
+ManifestType: installer
+ManifestVersion: 1.12.0

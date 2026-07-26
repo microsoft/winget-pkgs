@@ -1,0 +1,45 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: SteveTheKiller.KillerPDF
+PackageVersion: 1.6.6
+PackageLocale: en-US
+Publisher: Steve the Killer
+PublisherUrl: https://github.com/SteveTheKiller
+PublisherSupportUrl: https://github.com/SteveTheKiller/KillerPDF/issues
+Author: Steve the Killer
+PackageName: KillerPDF
+PackageUrl: https://github.com/SteveTheKiller/KillerPDF
+License: GPL-3.0
+LicenseUrl: https://github.com/SteveTheKiller/KillerPDF/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Steve the Killer
+ShortDescription: PDF editor for Windows. Install or run portable. GPLv3. No account, no subscription, no telemetry.
+Description: KillerPDF is a lightweight PDF viewer and toolkit for Windows. View, merge, split, and manage PDF files. Runs portable or installs to your user profile - no admin rights required. No account, no subscription, no telemetry. Open source under GPLv3.
+Moniker: killerpdf
+Tags:
+- dotnet
+- gplv3
+- opensource
+- pdf
+- pdf-editor
+- portable
+- windows
+- wpf
+ReleaseNotes: |-
+  1.6.6 is primarily a bug fix release - the big one being form fields sitting in the wrong place on non-A4 documents - plus a tool-hotkey remap, a new Remove Password command, more menu polish, and other small keyboard and UI improvements.
+  Added
+  - Remove Password in the Save dropdown (#149, thanks dmantisk): saves the open document back over the original with its password protection dropped - available whenever the file needed a password (or carried owner restrictions) to open. KillerPDF already strips encryption at open time because the editing pipeline cannot modify encrypted files in place, so every save has always written an unprotected PDF; this makes that behavior a visible, deliberate action, and regular saves of a previously protected file now say so in the status bar instead of dropping the password silently. In all ten languages.
+  Changed
+  - Tool hotkey remap - the digits again mirror the toolbar left to right, with Shapes slotted in (breaks some muscle memory; the letter keys are unchanged): V = Select (the Photoshop / Illustrator / Figma convention; its old digit went to Text), 1 = Text, 2 = Highlight, 3 = Line, 4 = Shapes, 5 = Draw, 6 = Image, 7 = Signature, 8 = Crop, 9 = Transform, 0 = Stamp. The toolbar buttons reorder to match (Highlight now before Line, Shapes between Line and Draw), and the Shapes tool has a keyboard shortcut for the first time. The shortcuts overlay (both views), tooltips, and the help page follow.
+  - Invert document colors moved from Ctrl+I to the bare N key (night mode), freeing the conventional italic chord: Ctrl+B / Ctrl+I / Ctrl+U now toggle Bold / Italic / Underline while typing in a text box, matching the text bar's B/I/U buttons. Listed in the shortcuts overlay in all ten languages.
+  - Esc now steps down instead of straight out: with nothing left to cancel it first returns to the Select tool, Acrobat-style, and only a second Esc exits the app as before. And the Highlight tools' hint on a page with no text layer now points at the deliberate rectangle path - "No text here - Shapes is on 4" - in all ten languages.
+  - The right-click menus caught up with 1.6.5's menu polish: every item in the page, annotation, sidebar-thumbnail, and background context menus now carries its icon in the left gutter, matching the toolbar's glyph for the same action - and page rotation gets a proper mirrored CW / CCW pair.
+  - The page sidebar now starts collapsed when no PDF is open and opens itself when one is - an empty workspace has no thumbnails to show - and re-collapses when the last document closes. The empty page-number box and "/ –" that used to sit in the sidebar header on an empty workspace are hidden until a document is open.
+  Fixed
+  - Interactive form-field overlays sat in the wrong place on any document that is not A4-sized - shifted down and slightly wide, worst near the top of the page, while the page itself (and every other viewer) drew the fields correctly. PdfSharpCore's page.Width getter, which the link layer touches on every render, silently converts the parsed /MediaBox array into its internal rectangle type; the field parser's array read then came up empty and fell back to a hardcoded A4 page size, so only A4 documents lined up. The field parser now reads both representations and walks the page-tree inheritance chain for /MediaBox and /CropBox. Found through the brochure: the shipped copy is A4, so the bug was invisible until a US Letter rebuild put every field about 40 points adrift.
+  - The Document Info shortcut label showed mojibake in Spanish, Bengali, and both Chinese interfaces - the same double-encoding repaired for Japanese in 1.6.5 (#136). All four now render their real text.
+  - Exported JPEGs no longer come out as black pages, and exported PNGs no longer carry a transparent background (#148, thanks Ryokoxx). PDFium leaves unpainted background pixels fully transparent; the JPEG encoder dropped that alpha channel and kept the zeroed color underneath, so any page without an explicit background - most PDFs - rendered solid black through --to-image --format jpg and the new Export pages as images dialog. Exports now composite over white by default, which also keeps the needless full-page alpha channel out of flattened PDFs (--flatten and Save Flattened). A new --transparent flag on --to-image keeps the raw alpha for PNG output when transparency is actually wanted.
+  - The Password Required prompt for opening a protected PDF is now a themed dialog like the rest of the app - wordmark title bar, dark card with film grain, a themed password field, and Open / Cancel buttons - instead of the stock white Windows dialog with native chrome it used to be.
+ReleaseNotesUrl: https://github.com/SteveTheKiller/KillerPDF/releases/tag/v1.6.6
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

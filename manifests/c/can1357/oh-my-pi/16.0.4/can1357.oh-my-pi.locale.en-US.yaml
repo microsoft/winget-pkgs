@@ -1,0 +1,65 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: can1357.oh-my-pi
+PackageVersion: 16.0.4
+PackageLocale: en-US
+Publisher: Can Bölük
+PublisherUrl: https://can.ac/
+PublisherSupportUrl: https://github.com/can1357/oh-my-pi/issues
+Author: Can Bölük
+PackageName: oh-my-pi
+PackageUrl: https://omp.sh/
+License: MIT
+LicenseUrl: https://github.com/can1357/oh-my-pi/blob/HEAD/LICENSE
+Copyright: |-
+  Copyright (c) 2025 Mario Zechner
+  Copyright (c) 2025-2026 Can Bölük
+ShortDescription: ⌥ AI Coding agent for the terminal — hash-anchored edits, optimized tool harness, LSP, Python, browser, subagents, and more
+Description: |-
+  omp is a terminal-first coding agent that runs on your machine, talks to any provider, and treats sessions like git branches.
+  omp (pronounced “oh-em-pi”, binary omp) is a fork of Mario Zechner’s Pi. It runs as a single Bun process, drives any model provider you have credentials for, and ships a flat tool surface the model uses to read code, run commands, edit files, drive a debugger, and spawn subagents that coordinate over an in-process IRC bus.
+  Sessions persist as JSONL under ~/.omp/agent/sessions/. You resume, fork, branch, and share them. Settings, credentials, plugins, and caches all live under ~/.omp/agent/. Nothing leaves the machine unless you call a tool that does.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  @oh-my-pi/pi-ai
+  Fixed
+  - Fixed tool argument coercion to parse double-encoded JSON strings, including quoted values like "300", when schema expects a number
+  - Fixed object-array coercion to parse JSON object and array strings into proper array arguments instead of wrapping raw strings
+  - Fixed handling of malformed JSON container strings for array schema fields so validation now surfaces a top-level expected array, received string error rather than nested element errors
+  - Fixed ChatGPT/Codex browser login missing connector OAuth scopes and rendering object-shaped token endpoint errors as [object Object]. (#2825)
+  - Fixed Zhipu/BigModel GLM-5.2 chat-completions requests so internal xhigh effort serializes as provider-native reasoning_effort: "max" and tool calls opt into tool_stream. (#2833)
+  - Fixed Google Gemini CLI and Antigravity tool calls with toolChoice: "auto" serializing an explicit toolConfig AUTO mode, which can cause Gemini-3 models to leak raw planning JSON instead of executing tools. (#2830)
+  @oh-my-pi/pi-catalog
+  Fixed
+  - Fixed GLM-5.2 catalog thinking metadata for Zhipu/BigModel so the top effort is exposed as xhigh and maps to provider-native max. (#2833)
+  @oh-my-pi/pi-coding-agent
+  Fixed
+  - Fixed RPC/ACP startup forcing todo settings back to host defaults, so project-level todo.enabled, todo.reminders, and todo.eager opt-outs now suppress protocol-mode todo prompt injection; enabled todo reminders are now persisted to the JSONL transcript so the log matches the model-visible context (#2824).
+  - Fixed default prompts to instruct the agent to read applicable skill://<name> content before starting work, so discovered skills influence broad task requests like frontend generation (#2829).
+  - Fixed hashline visible-line validation for ACP editor reads so INS.POST anchors displayed by bridge-backed range and multi-range read output are merged into the session snapshot before edit validates them (#2773).
+  @oh-my-pi/pi-natives
+  Fixed
+  - Fixed summarizeCode BFS unfold aborting the entire pass when it hit an oversized, un-unfoldable leaf span (e.g. an HTML <style> raw-text block, an embedded blob, or a minified line) whose only unfold candidate is its whole body. The overflow check used to break the breadth-first loop, so any large leaf encountered before its siblings starved the rest of the tree — an HTML page summarized to <style> ... </style> plus <div class="page"> ... </div>, collapsing the document body into one dead .... An overflowing span is now skipped (left folded, its subtree unexplored) and the BFS keeps unfolding the remaining queued siblings, so structured siblings like the <body> DOM are revealed up to unfoldLimit while the oversized leaf stays folded.
+  What's Changed
+  - fix(hashline): record ACP read lines for edit provenance by @roboomp in https://github.com/can1357/oh-my-pi/pull/2823
+  - fix(rpc): honor todo setting opt-outs by @roboomp in https://github.com/can1357/oh-my-pi/pull/2828
+  - fix(ai): repair ChatGPT Codex token exchange by @roboomp in https://github.com/can1357/oh-my-pi/pull/2832
+  - fix(providers): omit google cli auto tool config by @roboomp in https://github.com/can1357/oh-my-pi/pull/2835
+  - fix(prompting): load applicable skills before work by @roboomp in https://github.com/can1357/oh-my-pi/pull/2837
+  Full Changelog: https://github.com/can1357/oh-my-pi/compare/v16.0.3...v16.0.4
+ReleaseNotesUrl: https://github.com/can1357/oh-my-pi/releases/tag/v16.0.4
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://omp.sh/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

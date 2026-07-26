@@ -1,0 +1,103 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Fioooooooo.FylloCode
+PackageVersion: 0.14.1
+PackageLocale: en-US
+Publisher: Fio
+PublisherUrl: https://github.com/Fioooooooo
+PublisherSupportUrl: https://github.com/Fioooooooo/FylloCode/issues
+PackageName: FylloCode
+PackageUrl: https://github.com/Fioooooooo/FylloCode
+License: AGPL-3.0
+LicenseUrl: https://github.com/Fioooooooo/FylloCode/blob/HEAD/LICENSE
+ShortDescription: A desktop app that turns Coding Agents into reliable teammates — by splitting every change into Task → Proposal → Apply → Archive, with you reviewing the plan before any code is written.
+Description: |-
+  In this new era, the work that really needs our attention is no longer repetitive coding, but higher-level business understanding and architecture design. The future workflow I have in mind is: understand the business → think through the architecture → write a Proposal → review the Proposal → let the Agent implement it automatically, then move on to the next Proposal.
+  That thinking led me to build FylloCode — a step from Vibe Coding toward Agentic Coding.
+
+  How FylloCode Solves It
+  FylloCode enforces a structured workflow that separates thinking from doing:
+  ┌──────────┐     ┌────────────────┐     ┌───────────┐     ┌───────────┐
+  │   Task   │ ──→ │ Chat/Proposal  │ ──→ │   Apply   │ ──→ │  Archive  │
+  │          │     │                │     │           │     │           │
+  │ What to  │     │ Agent explores │     │ Agent     │     │ Specs     │
+  │ work on  │     │ codebase and   │     │ implements│     │ updated,  │
+  │          │     │ writes a plan  │     │ the plan  │     │ change    │
+  │          │     │                │     │           │     │ recorded  │
+  │          │     │  ➜ YOU REVIEW  │     │           │     │           │
+  └──────────┘     └────────────────┘     └───────────┘     └───────────┘
+  Task — Pick a task from your local list or synced from platforms like Yunxiao. One click sends it to Chat.
+  Chat / Proposal — The Agent explores your codebase, asks clarifying questions, and produces a structured proposal (what to change, which files, acceptance criteria). The Agent is prohibited from writing code in this stage. You review, edit, and approve the proposal before anything else happens.
+  Apply — A fresh Agent session implements the approved proposal task-by-task. It reads only the proposal artifacts — not the Chat history — so every decision must be captured in writing, not left in context-window memory.
+  Archive — Specs are updated, the change is recorded with full traceability. Your project's knowledge base grows with every shipped change.
+  Why Separating Thinking from Execution Matters
+  Most Coding Agents understand a task and write code in the same session. Any misunderstanding becomes code directly, and code is expensive to review. FylloCode physically separates understanding from execution. Misunderstandings can only become proposal text — and text is cheap to review. A 2-minute proposal review catches problems that would take 20 minutes to find in a diff.
+
+  Features
+
+  Agent Protocol (ACP)
+  FylloCode connects to any Coding Agent through ACP (Agent Client Protocol). Claude Code, Codex, or any ACP-compatible agent — one protocol, one interface, without juggling a pile of terminal windows.
+  There are currently 35 agents available in the ACP Registry, with support for parallel chats and parallel Proposal Apply runs.
+
+  System Reminders
+  Each workflow stage injects a system reminder that constrains what the Agent can and cannot do. In Chat, the Agent is instructed to explore and propose, not code. In Apply, it follows the approved task list. This isn't a suggestion — it's a hard boundary enforced at session start.
+
+  Task Panel
+  View and manage tasks from your local list or synced from external platforms. Tasks serve as the entry point to the entire workflow — select a task, start a Chat, and the Agent begins with full context.
+
+  Integration with Development Platforms
+  Connect to platforms like Yunxiao (Alibaba Cloud DevOps) at the provider level — one authentication, multiple tools across task management, source code, and CI/CD. More platform integrations (GitHub, TAPD, Jira, etc.) are planned.
+  Task integrations use APIs instead of Agent Skills by design. API calls are fast and do not spend tokens, so tokens stay focused on the work that actually needs reasoning.
+
+  Workflow Editor
+  Define and customize multi-stage workflows. Built-in templates get you started; edit the YAML to fit your team's process.
+
+  OpenSpec-Driven Proposals
+  Proposals are structured artifacts — not chat messages. Each proposal contains a design document, spec changes, and a concrete task list with file paths and acceptance criteria. The built-in fyllo-specs MCP server manages the full lifecycle: explore → create-proposal → apply-change → archive-change.
+
+  Streaming Rendering Engine
+  FylloCode uses markstream-vue as its streaming rendering engine. It is fast and smooth, with built-in integration for Monaco Editor, KaTeX, and Mermaid. While working on Proposals, it can render flowcharts and formatted specs in real time, making architecture flows and business logic easier to inspect.
+  Engineering Guardrails
+  FylloCode provides two layers of engineering guardrails:
+  - Soft constraints — Capture engineering conventions as Guidelines and continuously maintain them through the built-in fyllo-skills MCP server, without manual upkeep.
+  - Hard constraints — Agents may not always follow Guidelines perfectly, so FylloCode's health checks establish engineering-level enforcement through lint, test runners, git hooks, and CI.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  This release lets FylloCode keep multiple projects open in independent windows and completes the project-level durable knowledge path from discovery and capture through review, browsing, and cleanup. Fyllo Action persistence, execution idempotency, and Markdown recognition are hardened throughout, while the underlying cross-process structure moves to a domain-first architecture with clearer ownership boundaries for future capabilities.
+  Added
+  - One-project-per-window behavior and a project-free launcher: reopening a project focuses its existing window, opening another project does not replace the current project context, and launcher/project window bounds and maximized state are persisted independently
+  - Project-level durable knowledge workflow: agents can mark valuable findings with knowledge.flag, users can trigger batched capture, and knowledge.review opens the app-data knowledge document for review and editing
+  - New fyllo-cortex knowledge tool with capture, update, retire, and audit modes, plus file, package, and URL anchor checks that classify entries as active, suspect, or unknown
+  - Overview Knowledge summary and a dedicated /knowledge browser for grouped project, reference, and feedback entries, full Markdown reading, status and scan-error visibility, and confirmation-protected single-entry deletion
+  - Persisted Fyllo Action ready state, authoritative registration and command-based transitions, plus per-session attention badges so unresolved Actions remain visible after an app restart
+  - .nvmrc and a worktree environment preparation script that align the Node version and validate or install dependencies from the lockfile
+  Changed
+  - Cross-process and module structure now follows six domains—platform, workspace, session, proposal, insight, and automation: preload APIs use window.api.<domain>.<area>, IPC channels use <domain>:<area>:<action>, and lint rules enforce main-service, renderer-store, and feature dependency direction
+  - Fyllo Action shared contracts, main services, and renderer code are split into explicit layers; the main process now validates registration, transitions, and side-effect idempotency so task creation and batched knowledge-flag handling do not repeat business effects during state-sync retries
+  - Inline Fyllo Action rendering, EventRail projection, and action identity now share one source analyzer; only complete tags in standalone top-level Markdown blocks are executable, while inline code, fenced code, lists, blockquotes, and explanatory examples stay literal Markdown
+  - Multi-window runtimes isolate Chat probes, Proposal status watchers, and stream cancellation by project, while app-level ACP agent events fan out to every active window
+  - Renderer feature boundaries are enforced by generic ESLint rules, with expanded project guidance for architecture, comments, testing, and worktree environment setup
+  - fyllo-specs archive-change now requires generated capability specs to receive a substantive ## Purpose before an archive can be reported as complete
+  Fixed
+  - Fixed unresolved Fyllo Actions disappearing after restart, invalid transitions overwriting authoritative state, and retries potentially creating durable business objects more than once
+  - Fixed Action tags in inline code, code examples, lists, blockquotes, normal prose, or incomplete streaming fragments being misrecognized and causing swallowed text, incorrect registration, or disagreement between Inline and EventRail state
+  - Fixed matching sessionId, changeId, runId, or agent keys in concurrent projects potentially overwriting runtime state, leaking events, or cancelling work in another project
+  - Fixed knowledge review edits potentially being lost after autosave rejection or component unmount, and malformed knowledge files being hidden instead of surfaced explicitly
+  Notes
+  - The application version is now 0.14.1.
+  - fyllo-cortex MCP server is now 0.5.0, adding the durable knowledge tool and status-audit workflow.
+  - fyllo-specs MCP server is now 0.8.1, adding the post-archive capability Purpose placeholder check.
+  - Compatibility note: preload API roots and IPC channels have moved to the domain-first shape. Custom integrations using legacy window.api.<area> APIs or channel names must migrate to window.api.<domain>.<area> and <domain>:<area>:<action>; local storage paths and data formats remain compatible.
+ReleaseNotesUrl: https://github.com/Fioooooooo/FylloCode/blob/HEAD/CHANGELOG.en.md#0141---2026-07-15
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

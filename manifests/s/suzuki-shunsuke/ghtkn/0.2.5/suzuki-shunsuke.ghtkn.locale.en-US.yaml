@@ -1,0 +1,228 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: suzuki-shunsuke.ghtkn
+PackageVersion: 0.2.5
+PackageLocale: en-US
+Publisher: Shunsuke Suzuki
+PublisherUrl: https://suzuki-shunsuke.github.io/profile/
+PublisherSupportUrl: https://github.com/suzuki-shunsuke/ghtkn/issues
+Author: Shunsuke Suzuki
+PackageName: ghtkn
+PackageUrl: https://github.com/suzuki-shunsuke/ghtkn
+License: MIT
+LicenseUrl: https://github.com/suzuki-shunsuke/ghtkn/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Shunsuke Suzuki
+CopyrightUrl: https://github.com/suzuki-shunsuke/ghtkn/blob/HEAD/LICENSE
+ShortDescription: A CLI to create short-lived (8 hours) GitHub App User Access Token for secure local development
+Moniker: ghtkn
+Tags:
+- cli
+- github
+- github-app-token
+- github-token
+- security
+ReleaseNotes: |-
+  Support the environment variable GHTKN_GITHUB_TOKEN
+  If the GHTKN_GITHUB_TOKEN environment variable is set, ghtkn will use it as the GitHub token.
+  This is useful when a personal access token is required due to the limitations of user access tokens.
+
+  Authenticate without outputting an access token
+  Add the ghtkn auth command, which authenticates to GitHub and caches an access token without printing it to stdout.
+  ghtkn auth
+  ghtkn auth is for authentication rather than retrieving a token to use, so it doesn't output the token.
+  It always runs the device flow to regenerate the token, regardless of any cached token.
+  This lets you run it periodically (before the 8-hour validity period elapses) to proactively refresh the cached token and prevent it from expiring.
+  Unlike ghtkn get, the device flow is always allowed even when GHTKN_ENABLE_DEVICE_FLOW=false, because authentication is inherently interactive.
+  Also unlike ghtkn get, it does not accept -min-expiration (-m) nor read GHTKN_MIN_EXPIRATION; those knobs are reserved for ghtkn get.
+
+  Disable Device Flow
+  ghtkn obtains a GitHub App User access token via the OAuth Device Flow, which is interactive: it prints a one-time (user) code and waits for the user.
+  A coding agent (or any background / non-interactive process) cannot complete this, so it would block until a device code expires.
+  The device flow is enabled by default. By setting GHTKN_ENABLE_DEVICE_FLOW to false, ghtkn will fail fast with an actionable error instead of blocking.
+  e.g.
+  ~/.claude/settings.json:
+  {
+    "env": {
+      "GHTKN_ENABLE_DEVICE_FLOW": "false"
+    }
+  }
+  $ claude
+    Claude Code v2.1.158
+    Opus 4.8 (1M context) with high effort - Claude Max
+    ~/repos/src/github.com/csm-actions/securefix-action
+  $ gh repo view
+  > Bash(gh repo view)
+    | Error: Exit code 1
+      May 31 14:27:42.175 ERR ghtkn failed program=ghtkn version=v3.0.0-local error="get or create access token: get or create token: create a
+      GitHub App User Access Token: a GitHub App User access token can't be created via Device Flow because it's disabled by
+      GHTKN_ENABLE_DEVICE_FLOW=false. The Device Flow is interactive and can't be completed by a background or non-interactive process. If you are a
+      coding agent, do NOT run `ghtkn get` yourself because it would fail the same way; instead, ask the user to run `ghtkn auth` in their own
+      interactive terminal to authenticate"
+  > gh repo view failed - it couldn't authenticate. The gh CLI here goes through ghtkn, which needs an interactive GitHub App user access token
+    (Device Flow is disabled for non-interactive processes).
+    Could you authenticate in your own terminal by typing:
+    ! ghtkn auth
+    Once that succeeds, I'll re-run gh repo view.
+  ghtkn get's --device-flow (-d) flag overrides the GHTKN_ENABLE_DEVICE_FLOW environment variable.
+  ghtkn get -d
+  ghtkn auth also re-authenticates.
+
+  ghtkn info command for troubleshooting
+  ghtkn info is useful for troubleshooting.
+  It outputs information about OS, architecture, version, environment variables, backend, app name, config file path, and so on.
+  $ ghtkn info
+  {
+    "os": "darwin",
+    "arch": "arm64",
+    "version": "v3.0.0-local",
+    "envs": {
+      "GHTKN_APP": "suzuki-shunsuke/write",
+      "GHTKN_BACKEND": "agent",
+      "GHTKN_ENABLE_DEVICE_FLOW": "false",
+      "XDG_CONFIG_HOME": "/Users/shunsukesuzuki/.config"
+    },
+    "backend": "agent",
+    "app": "suzuki-shunsuke/write",
+    "config_path": "/Users/shunsukesuzuki/.config/ghtkn/ghtkn.yaml"
+  }
+
+  Backend
+  By default ghtkn stores access tokens in the OS keyring.
+  You can change where they are stored with the GHTKN_BACKEND environment variable.
+  This is useful in environments where the OS keyring is hard to use, such as containers and microVMs.
+  GHTKN_BACKEND supports the following values:
+  - keyring: OS keyring (default)
+  - text: Store tokens as plaintext files
+  - agent: Store tokens encrypted via the ghtkn agent
+
+  Which backend should you use?
+  On desktop environments where the OS keyring is available, using the default OS keyring is the most secure and recommended option, so you usually don't need to worry about backends.
+  In environments where the OS keyring is unavailable and you want to prioritize security, the agent backend, which encrypts access tokens with AES-256-GCM, is a good choice.
+  However, the agent backend takes some effort: you need to start the agent and manage a passphrase.
+  If you prefer simplicity, the text backend, which avoids that effort, is a good choice.
+
+  text Backend
+  export GHTKN_BACKEND=text
+  The text backend stores access tokens as plaintext files.
+  The files are created with permission 0600, so other users can't read them, but to prevent leaks the following measures are recommended:
+  - Don't manage the storage directory with git
+  - Exclude it from cloud storage such as Dropbox
+  - Enable OS-level disk encryption
+  The access token storage location is resolved in the following order of precedence:
+  1. $GHTKN_TEXT_BACKEND_DIR
+  2. $XDG_CACHE_HOME/ghtkn/tokens
+  3. $HOME/.cache/ghtkn/tokens
+  On Windows:
+  1. $GHTKN_TEXT_BACKEND_DIR
+  2. $LocalAppData\cache\ghtkn\tokens
+
+  agent Backend
+  The agent backend stores access tokens encrypted without depending on the OS keyring.
+  The encryption works as follows:
+  - Access tokens are encrypted with AES-256-GCM.
+  - The 32-byte data key used for encryption is generated randomly when the agent first starts.
+  - The data key is encrypted (wrapped) with a key (KEK) derived from the passphrase via Argon2id and saved to a key file. The passphrase itself and the KEK are not saved to disk; they are kept only in the agent's memory after unlocking.
+  Start the agent with the ghtkn agent start command.
+  : Start the agent in the background
+  ghtkn agent start &
+  Even after the agent starts, you can't get access tokens until you enter the passphrase with the ghtkn agent unlock command.
+  : Enter the passphrase
+  ghtkn agent unlock
+  There are also status and stop commands.
+  : Check the agent status
+  ghtkn agent status
+  : Stop the agent
+  ghtkn agent stop
+  To get access tokens, set GHTKN_BACKEND to agent and run ghtkn get or the ghtkn Go SDK.
+  export GHTKN_BACKEND=agent
+  ghtkn get
+  ghtkn get and the ghtkn Go SDK communicate with the agent over a socket to get access tokens.
+  If you forget the passphrase, the only option is to reset it with ghtkn agent reset.
+  Note that resetting deletes the existing key and access tokens.
+  : Stop the agent, delete the saved access tokens and key, and create a new key
+  ghtkn agent reset
+  The socket, the encryption key, and the encrypted access tokens are created with permission 0600, so other users can't read them or connect to the socket.
+
+  Running the agent as a service
+  ghtkn agent start & runs the agent for the current shell session.
+  Whether it keeps running after you close the terminal depends on your shell, so for a long-lived agent run it under a service manager (or detach it explicitly with nohup / disown).
+  In every case the agent starts locked, so after it (re)starts you need to run ghtkn agent unlock once.
+
+  Linux (systemd user service)
+  On a VM, a microVM, or a minimal Linux box without a keyring, run the agent as a systemd user service.
+  Create ~/.config/systemd/user/ghtkn-agent.service:
+  [Unit]
+  Description=ghtkn agent
+  [Service]
+  ExecStart=/path/to/ghtkn agent start
+  Restart=on-failure
+  [Install]
+  WantedBy=default.target
+  : Enable and start the service
+  systemctl --user enable --now ghtkn-agent
+  : Unlock it once after it starts
+  ghtkn agent unlock
+  Notes:
+  - Use the absolute path to ghtkn in ExecStart; the systemd user environment has a minimal PATH.
+  - Use Restart=on-failure, not Restart=always. ghtkn agent stop exits successfully, so Restart=always would immediately start the agent again.
+  - To keep the agent running even when you are not logged in, enable lingering with loginctl enable-linger "$USER".
+
+  Containers (Docker / devcontainer)
+  Containers usually have no init system, so start the agent from the container's entrypoint.
+  Use a wrapper that starts the agent in the background and then runs the container's main process:
+  #!/usr/bin/env bash
+  # entrypoint.sh
+  set -eu
+  ghtkn agent start &
+  exec "$@"
+  ENV GHTKN_BACKEND=agent
+  ENTRYPOINT ["entrypoint.sh"]
+  Setting GHTKN_BACKEND=agent with ENV in the Dockerfile selects the backend for every process in the container, so you don't have to export it in each shell.
+  After attaching to the container (for example docker exec -it <container> bash), unlock the agent once:
+  ghtkn agent unlock
+  ghtkn get
+  The encryption key and the encrypted access tokens live on the container's filesystem, so they are lost when the container is removed (the tokens are reminted on the next ghtkn get).
+  To persist them, mount a volume for $XDG_DATA_HOME (the key) and $XDG_CACHE_HOME (the tokens).
+  A microVM (Firecracker, Cloud Hypervisor, Kata Containers, Lima, etc.) fits one of the two patterns above: use the systemd service if it boots a minimal Linux with systemd, or the entrypoint approach if it runs a single application like a container.
+
+  Socket path
+  The socket path is resolved in the following order of precedence:
+  1. $GHTKN_AGENT_SOCKET
+  2. $XDG_RUNTIME_DIR/ghtkn/agent.sock
+  3. $XDG_CACHE_HOME/ghtkn/agent.sock
+  4. $HOME/.cache/ghtkn/agent.sock
+  On Windows:
+  1. $GHTKN_AGENT_SOCKET
+  2. $XDG_RUNTIME_DIR\ghtkn\agent.sock
+  3. $XDG_CACHE_HOME\ghtkn\agent.sock
+  4. $LocalAppData\cache\ghtkn\agent.sock
+
+  Access token storage location
+  The access token storage location is resolved in the following order of precedence:
+  1. $GHTKN_AGENT_TOKEN_DIR/<client-id>
+  2. $XDG_CACHE_HOME/ghtkn/agent/<client-id>
+  3. $HOME/.cache/ghtkn/agent/<client-id>
+  On Windows:
+  1. $GHTKN_AGENT_TOKEN_DIR\<client-id>
+  2. $LocalAppData\cache\ghtkn\agent\<client-id>
+
+  Encryption key storage location
+  The encryption key storage location is resolved in the following order of precedence:
+  1. $GHTKN_AGENT_KEY
+  2. $XDG_DATA_HOME/ghtkn/key
+  3. $HOME/.local/share/ghtkn/key
+  On Windows:
+  1. $GHTKN_AGENT_KEY
+  2. $LocalAppData\ghtkn\key
+
+  Example
+  In this example, we use ghtkn in a Docker container.
+  First, build a Docker image and run it.
+  Dockerfile:
+ReleaseNotesUrl: https://github.com/suzuki-shunsuke/ghtkn/releases/tag/v0.2.5
+Documentations:
+- DocumentLabel: Usage
+  DocumentUrl: https://github.com/suzuki-shunsuke/ghtkn/blob/HEAD/USAGE.md
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,117 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: medialab.xan
+PackageVersion: 0.58.0
+PackageLocale: en-US
+Publisher: médialab Sciences Po
+PublisherUrl: https://medialab.sciencespo.fr/
+PublisherSupportUrl: https://github.com/medialab/xan/issues
+Author: médialab Sciences Po
+PackageName: xan
+PackageUrl: https://github.com/medialab/xan
+License: Unlicense, MIT
+LicenseUrl: https://github.com/medialab/xan/blob/HEAD/COPYING
+Copyright: Copyright (c) 2015-2026 Andrew Gallant, Guillaume Plique
+ShortDescription: The CSV magician
+Description: |-
+  xan is a command line tool that can be used to process CSV files directly from the shell.
+  It has been written in Rust to be as fast as possible, use as little memory as possible, and can very easily handle large CSV files (Gigabytes). It leverages a novel SIMD CSV parser and is also able to parallelize some computations (through multithreading) to make some tasks complete as fast as your computer can allow.
+  It can easily preview, filter, slice, aggregate, sort, join CSV files, and exposes a large collection of composable commands that can be chained together to perform a wide variety of typical tasks.
+  xan also offers its own expression language so you can perform complex tasks that cannot be done by relying on the simplest commands. This minimalistic language has been tailored for CSV data and is way faster than evaluating typical dynamically-typed languages such as Python, Lua, JavaScript etc.
+  Note that this tool is originally a fork of BurntSushi's xsv, but has been nearly entirely rewritten at that point, to fit SciencesPo's médialab use-cases, rooted in web data collection and analysis geared towards social sciences (you might think CSV is outdated by now, but read our love letter to the format before judging too quickly).
+  xan therefore goes beyond typical data manipulation and expose utilities related to lexicometry, graph theory and even scraping.
+  Beyond CSV data, xan is able to process a large variety of CSV-adjacent data formats from many different disciplines such as web archival (.cdx) or bioinformatics (.vcf, .gtf, .sam, .bed etc.). xan is also able to convert to & from many data formats such as json, excel files, numpy arrays etc. using xan to and xan from. See this section for more detail.
+  Finally, xan can be used to display CSV files in the terminal, for easy exploration, and can even be used to draw basic data visualisations.
+Tags:
+- csv
+- data
+- datascience
+- diagram
+- graph
+- graphics
+- plot
+- statistics
+- stats
+ReleaseNotes: |-
+  Breaking
+  - Stopping to serialize moonblade lists either as joined by some separator or JSON. This was awkard, error-prone & potentially lossy. Use the join function manually to format output when required.
+  - As per previous point, dropping xan scrape --sep.
+  - Dropping implicit unary function calls in moonblade pipelines. This feature was not well-known, confusing (an indentifier, could be understood as a call in a pipeline, only if not in first position...), and mostly useless now that moonblade has had a proper dot operator.
+  - xan plot -A/--aggregate does not take an expression anymore but has an automatic selection of two modes: sum and mean. It should also be faster.
+  - Renaming the index function as row_index for clarity.
+  - xan agg -C/--along-columns & -M/--along-matrix & xan groupby -C/--along-columns & -M/--along-matrix will not map current column index to the result of the index() function. The col_index() can be now used instead for this very purpose.
+  - xan window -g/--groupby does not require the file to be sorted anymore. This means using -g/--groupby will now require the whole file to be buffered into memory by the command. The old behavior can still be used through the -S/--sorted flag, thus aligning the xan window command with the rest of the tool.
+  - row_index will now error if the expression has no concept of row index, instead of returning nothing.
+  - xan parallel -z/--compress now take the desired compression (either gzip or zstd).
+  - Retiring the xan grep command in favor of xan search -Z/--fast-parser.
+  - xan tokenize --keep short flag becomes -k instead of -K to harmonize with other commands.
+  - Retiring the xan flatmap command in favor of xan explode -e.
+  - Retiring the xan fuzzy-join command in favor of a consolidated xan join command.
+  - Changing xan from -f txt -c <name> default to line instead of value.
+  - Renaming xan join -L/--prefix-left & -R/--prefix-right short flags to -l & -r respectively to avoid colliding with the added -R/--reverse flag that can be used for merge joins.
+  - Dropping xan plot -B/--bars. It never worked very well and its use-case will be redirected to xan spark.
+  - Changing xan heatmap --width short flag from -w to -W so that adding a -H/--height flag remain consistent and avoids clashing with -h/--help.
+  - Dropping xan heatmap --show-gradients in favor of xan help gradients.
+  - Renaming xan search -A/--all flag to --every-column for clarity and avoid clash with -A/--after-context.
+  - Dropping xan sort -U/--unstable. It was never used and the performance boost it supposedly provides cannot be observed.
+  Features
+  - Adding xan parallel --dont-chunk.
+  - Adding nullary col, col_index & header variants, to work with expression applied in series to multiple columns at once.
+  - Adding prev_col & next_col functions.
+  - Adding xan (search|filter) -B/--before-context & -A/--after-context.
+  - Adding xan window -O/--overwrite.
+  - Adding xan map -C/--along-columns.
+  - Adding xan window -C/--along-columns.
+  - Adding xan cat rows --raw, -P/--preprocess & -H/--shell-preprocess.
+  - Improving xan select DSL star selectors. You can now do stuff like vec_*_count, *[1], vec_*[1] etc.
+  - xan p -H/--shell-preprocess now works on Windows.
+  - Adding native zsh completions (@apcamargo).
+  - Adding xan dedup --u32.
+  - Adding xan explode -e/--evaluate, -f/--evaluate-file, --pad & -k/--keep.
+  - xan to npy is now able to stream.
+  - Adding xan parallel top & xan top -p/--parallel, -t/--threads.
+  - Adding xan network edgelist --range.
+  - Adding xan network nodelist.
+  - Adding the xan run command.
+  - Adding xan view --name.
+  - Adding xan join -S/--sorted, -R/--reverse & -N/--numeric.
+  - Adding xan parallel --run & xan cat rows --run.
+  - Adding xan to md -l/--limit.
+  - Adding the xan spark command.
+  - Adding xan stats -R/--report, --color, --cols, --sep.
+  - Adding xan (freq|p freq) -X/--approx-algo.
+  - Adding xan plot -D/--density-gradient, --density-scale, --hide-legend, --hide-x-axis, --hide-y-axis, --hide-all & -Q/--square.
+  - xan separate will now avoid emitting columns with an empty name given to --into.
+  - Adding xan separate --txt & --F/--filter.
+  - Adding pow & sqrt scales.
+  Fixes
+  - Fixing issues related to nested lambdas in expressions.
+  - Fixing xan rename consistency regarding CRLF newlines and first row normalization when using -n/--no-headers.
+  - Fixing xan map --overwrite --filter.
+  - Fixing lead window function when there is not enough rows ahead.
+  - Fixing xan network --format not being validated early enough.
+  - Fixing xan explode -D/--drop-empty when selecting multiple columns.
+  - Fixing xan merge -u row precedence.
+  - Fixing xan join -D/--drop-key automatic selection when using --full.
+  - Fixing granularity inference of xan plot -T.
+  - Fixing xan from -f (json|ndjson) to emit empty outputs from empty inputs.
+  - Fixing xan headers layout when input files have a very large number of columns (>= 1000).
+  - Fixing arity validation of top, argtop, most_common & most_common_counts aggregation functions.
+  Performance
+  - moonblade expressions are now faster overall and allocate more cautiously, thus saving memory.
+  - Improving performance of xan transform, xan flatmap, xan agg & xan groupby.
+  - Improving performance of xan rename.
+  - Faster xan range.
+  - Faster xan parallel -H/--shell-preprocess.
+  - Faster xan tokenize words.
+  - Adding fast path for xan explode when only a single column is selected.
+  - Faster xan sort -e.
+  Quality of Life
+  - xan plot will now display <empty> label in legends.
+  - xan cat rows will now error when input have inconsistent columns.
+  - Automatic column alignement with xan to md.
+  - xan from now consider .log files as text lines.
+ReleaseNotesUrl: https://github.com/medialab/xan/releases/tag/0.58.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
