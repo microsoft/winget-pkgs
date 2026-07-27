@@ -1,5 +1,5 @@
 # Using YamlCreate.ps1
-Using the YamlCreate script is easy. First, [create a fork](https://docs.github.com/get-started/quickstart/fork-a-repo) of this repository and then [clone it](https://docs.github.com/repositories/creating-and-managing-repositories/cloning-a-repository) to your computer. Once the repository has finished cloning, open file explorer and navigate to the folder that the repository was cloned into. Inside this folder, you should be able to navigate to the `Tools` folder, which contains the script. Right click on "YamlCreate" and select "Run with PowerShell". If it is your first time running the script, you may see a message that it is installing some additional packages - [NuGet](https://docs.microsoft.com/nuget/), and [powershell-yaml](https://www.powershellgallery.com/packages/powershell-yaml/0.4.2) ([See it on GitHub](https://github.com/cloudbase/powershell-yaml)). These are required for the script to run.
+Using the YamlCreate script is easy. First, [create a fork](https://docs.github.com/get-started/quickstart/fork-a-repo) of this repository and then [clone it](https://docs.github.com/repositories/creating-and-managing-repositories/cloning-a-repository) to your computer. Once the repository has finished cloning, open file explorer and navigate to the folder that the repository was cloned into. Inside this folder, you should be able to navigate to the `Tools` folder, which contains the script. Right click on "YamlCreate" and select "Run with PowerShell". If it is your first time running the script, you may see a message that it is installing some additional packages - [NuGet](https://docs.microsoft.com/nuget/), and [powershell-yaml](https://www.powershellgallery.com/packages/powershell-yaml) ([See it on GitHub](https://github.com/cloudbase/powershell-yaml)). These are required for the script to run.
 
 Once the script begins, it will walk you through a series of prompts to create manifests. Enter the requested information for each of the prompts and once all the prompts are completed, the manifest will be generated! If you have Windows Sandbox enabled and the GitHub CLI installed, you can even automatically test and submit your manifest instead of having to do it manually.
 
@@ -83,5 +83,5 @@ EnableDeveloperOptions: false
 
 # This setting allows for the selection of which manifest version is used
 # The script is not tested with all manifest versions, and stability is not guaranteed. Use with caution
-OverrideManifestVersion: 1.4.0
+OverrideManifestVersion: 1.28.0
 ```

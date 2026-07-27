@@ -103,7 +103,7 @@ winget settings --enable LocalManifestFiles
 winget install --manifest <path>
 ```
 
-For a more isolated test, use the [SandboxTest.ps1 Script](https://github.com/microsoft/winget-pkgs/blob/master/doc/tools/SandboxTest.md) to test in Windows Sandbox.
+For a more isolated test, use the [SandboxTest.ps1 Script](tools/SandboxTest.md) to test in Windows Sandbox.
 
 ## Advanced Authoring
 
@@ -175,7 +175,7 @@ When comparing one `Part` to another, WinGet goes through the following process.
 	* If both values of `string` are empty, the parts are equal
 	* If one `Part` has a value in `string` and the other does not, the `Part` which ***does not*** have a value in `string` is considered to be greater
 	* Example: When comparing `34` and `34-beta`, the `integer` is equal for both (`34`). However, the `string` for the former is empty and the `string` for the latter is `-beta`, so `34` is the larger `Part`. This leads to `1.2.34` being considered a higher `Version` than `1.2.34-beta`
-4. If both parts have a value in `string`, perform a case-insensitive comparison of the two
+3. If both parts have a value in `string`, perform a case-insensitive comparison of the two
 	* If the values of `string` are not equal, the lexicographic comparison determines which `Part` is larger
 
 #### Examples of Version Comparisons
