@@ -1,0 +1,133 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: SkyLLC.UFFS
+PackageVersion: 0.6.24
+PackageLocale: en-US
+Publisher: Sky, LLC
+PublisherUrl: https://github.com/skyllc-ai
+PublisherSupportUrl: https://github.com/skyllc-ai/UltraFastFileSearch/issues
+PackageName: UFFS - Ultra Fast File Search
+PackageUrl: https://github.com/skyllc-ai/UltraFastFileSearch
+License: MPL-2.0
+LicenseUrl: https://github.com/skyllc-ai/UltraFastFileSearch/blob/HEAD/LICENSE
+ShortDescription: Benchmark-driven NTFS search engine for Windows
+Description: |-
+  UFFS reads the NTFS Master File Table directly, builds a compact persisted index,
+  and serves targeted queries in 0-3 ms daemon-side. One Rust engine for CLI, daemon,
+  TUI, and MCP agent workflows. Proven on 100M-record scale.
+Tags:
+- cli
+- file-search
+- mft
+- ntfs
+- rust
+- search
+- windows
+ReleaseNotes: |-
+  UFFS v0.6.24
+  🚀 What's New
+  See the full changelog
+  and CHANGELOG.md in the repository for details.
+  📦 Downloads
+  UFFS is a Windows-native NTFS search engine — live indexing of
+  the Master File Table requires Windows. The engine core is
+  cross-platform, so macOS and Linux builds are shipped for
+  offline MFT analysis from captured .mft / .bin snapshots.
+  Each platform ships as a one-download ZIP bundle in three
+  tiers — pick the one that matches how much you need:
+  ──────┬───────────┬─────────────────────────────────────────────────────────────────────
+  Tier  │Zip suffix │Contents
+  ──────┼───────────┼─────────────────────────────────────────────────────────────────────
+  min   │-min.zip   │uffs + uffsd + uffs-tui demo. Lean engine for CI/scripting.
+  ──────┼───────────┼─────────────────────────────────────────────────────────────────────
+  normal│(no suffix)│min + uffsmcp + uffs-mft + docs + brand + packaging helper.
+        │           │Recommended.
+  ──────┼───────────┼─────────────────────────────────────────────────────────────────────
+  full  │-full.zip  │normal + the uffs-diag diagnostic tools.
+  ──────┴───────────┴─────────────────────────────────────────────────────────────────────
+  > 🖥️ Every tier bundles the free uffs-tui demo — the
+  > zero-setup front door. After unzipping, just run uffs-tui
+  > to browse your own drives in a UI (the daemon auto-starts).
+  > The demo has capped result counts and disabled exports; see
+  > DEMO-LICENSE.txt in the zip. Full TUI/GUI are commercial.
+  Individual binaries are also attached for automation that
+  wgets a single file.
+  🟦 Windows x86_64 — primary live-indexing target
+  - uffs-windows-x64.zip — recommended (normal tier): CLI +
+    daemon + MCP + MFT tooling + uffs-tui demo + icon + docs.
+    The .exes ship with the UFFS icon and asInvoker manifest
+    embedded. Also: uffs-windows-x64-min.zip,
+    uffs-windows-x64-full.zip.
+  - Raw binaries: uffs-windows-x64.exe, uffsd-windows-x64.exe,
+    uffsmcp-windows-x64.exe, uffs-mft-windows-x64.exe,
+    uffs-broker-windows-x64.exe, uffs-update-windows-x64.exe.
+  🍏 macOS Apple Silicon — offline MFT analysis
+  - uffs-macos-arm64.zip — recommended (normal tier): raw
+    binaries + uffs-tui demo + a ready-to-run UFFS.app bundle
+    - icns + docs + packaging/macos/bundle.sh for rebuilding.
+      Also: uffs-macos-arm64-min.zip, uffs-macos-arm64-full.zip.
+  - Raw binaries: uffs-macos-arm64, uffsd-macos-arm64,
+    uffsmcp-macos-arm64, uffs-mft-macos-arm64, uffs-update-macos-arm64.
+  - Intel Macs: run the arm64 build under Rosetta 2.
+  🐧 Linux x86_64 — offline MFT analysis
+  - uffs-linux-x64.zip — recommended (normal tier): binaries
+    - uffs-tui demo + full hicolor icon tree +
+      packaging/linux/install.sh (drops the .desktop entry and
+      icons under /usr/local with one sudo invocation) + docs.
+      Also: uffs-linux-x64-min.zip, uffs-linux-x64-full.zip.
+  - Raw binaries: uffs-linux-x64, uffsd-linux-x64,
+    uffsmcp-linux-x64, uffs-mft-linux-x64, uffs-update-linux-x64.
+  - Use with --mft-file to analyse captured MFT snapshots on servers, forensics VMs, or in Docker.
+  🔐 Verification
+  All binaries are accompanied by SHA256 checksums in CHECKSUMS.txt
+  (and SHA256SUMS, the conventionally-named copy the in-app
+  self-update helper fetches). Verify with:
+  sha256sum -c CHECKSUMS.txt
+  Additionally, every release asset carries a SLSA build-
+  provenance attestation signed with the workflow's Sigstore
+  OIDC identity. Verify with GitHub CLI:
+  gh attestation verify <file> --owner skyllc-ai
+  A successful verification proves the bytes were produced by
+  this exact workflow run on this exact commit.
+  📋 SBOM (Software Bill of Materials)
+  Each workspace crate ships a CycloneDX 1.5 SBOM alongside the
+  binaries: sbom-<crate>.cdx.json. The SBOMs are covered by
+  the same SLSA attestation as the binaries, so you can verify
+  the inventory with the same command above. Inspect with any
+  CycloneDX-aware tool, e.g.:
+  jq '.components[] | {name, version, purl}' sbom-uffs-cli.cdx.json
+  📋 Installation
+  Recommended: ZIP bundle
+  1. Download uffs-<platform>.zip for your platform.
+  2. Unzip anywhere.
+  3. Windows: the .exes are ready to run; place them on PATH. Icon + asInvoker manifest are already baked into the PE.
+  4. macOS: double-click UFFS.app, or move the raw uffs binary into /usr/local/bin/. First launch: Gatekeeper warns because the bundle is unsigned — right-click → Open to confirm, or run xattr -dr com.apple.quarantine UFFS.app.
+  5. Linux: run sudo packaging/linux/install.sh from the unzipped directory — installs the binary, the .desktop entry, and the full hicolor icon set. Override prefix with sudo PREFIX=/opt/uffs packaging/linux/install.sh.
+  Raw-binary path (automation)
+  - Download the individual binary, e.g. uffs-linux-x64.
+  - macOS / Linux: chmod +x uffs-* then optionally mv uffs-* /usr/local/bin/uffs.
+  - Windows: the .exe is ready to run; place it on PATH.
+  🛠️ Build Information
+  - Triggered by: release-pr-merge-#538
+  - Commit: 4afebf9
+  - Toolchain: pinned nightly from rust-toolchain.toml
+  - Profile: [profile.release] — LTO=fat, codegen-units=1, strip=symbols
+  - CPU baselines: x86_64 = x86-64-v3 (Haswell+/Zen+); macOS ARM64 = apple-m1 (M1+)
+  Full Changelog: https://github.com/skyllc-ai/UltraFastFileSearch/commits/v0.6.24
+  What's Changed
+  - feat(version): consistent --version across every UFFS binary by @githubrobbi in #526
+  - feat(status): protocol + styling foundation for a unified --status by @githubrobbi in #527
+  - feat(status): unify --daemon status (short/-v/--json), fold in stats by @githubrobbi in #528
+  - feat(status): rewrite combined uffs --status on uffs-statusfmt (+ -v / --json) by @githubrobbi in #529
+  - docs(crates): "Part of UFFS" callout on uffs-text / uffs-time READMEs by @githubrobbi in #530
+  - docs(manual): refresh daemon/status pages for the unified --daemon status by @githubrobbi in #531
+  - test(harness): make daemon-status validators JSON-aware by @githubrobbi in #532
+  - feat: NTFS full-volume capture, offline parity validation, and tooling by @githubrobbi in #535
+  - ci(deps): bump codeql-action to 4.36.3 and group action bumps by @githubrobbi in #536
+  - build: bump nightly to 2026-07-06 and migrate chunks_exact to as_chunks by @githubrobbi in #537
+  - chore: release v0.6.24 — ship pipeline auto-commit by @githubrobbi in #538
+  Full Changelog: v0.6.23...v0.6.24
+ReleaseNotesUrl: https://github.com/skyllc-ai/UltraFastFileSearch/releases/tag/v0.6.24
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,74 @@
+# Created with WinGet Tracker using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: t8y2.DBX
+PackageVersion: 0.5.63
+PackageLocale: en-US
+Publisher: t8y2
+PublisherUrl: https://github.com/t8y2
+PublisherSupportUrl: https://github.com/t8y2/dbx/issues
+Author: t8y2
+PackageName: DBX
+PackageUrl: https://github.com/t8y2/dbx
+License: Apache-2.0
+LicenseUrl: https://github.com/t8y2/dbx/blob/HEAD/LICENSE
+ShortDescription: 15MB，lightweight, cross-platform database client. Supports MySQL, PostgreSQL, SQLite, Redis, MongoDB, DuckDB, ClickHouse, SQL Server and more.
+Tags:
+- clickhouse
+- database
+- database-client
+- database-management
+- duckdb
+- gui
+- mongodb
+- mysql
+- postgresql
+- redis
+- rust
+- sql-server
+- sqlite
+- tauri
+- vue
+ReleaseNotes: |-
+  新功能
+  - 版本化离线驱动包 — Agent 发布产物现在包含明确的驱动版本，并为每种驱动提供可独立导入的 ZIP 包；驱动商店和离线导入会识别版本化文件名，方便只下载、更新或分发需要的数据库驱动。
+  - 代理隧道端点测试 — 在隧道配置中可直接测试 HTTP CONNECT 和 SOCKS5 代理的可达性、认证及可选目标转发能力，支持 IPv4、IPv6 和域名目标。(contributed by @azens)
+  - MongoDB 集合重命名 — 可从侧边栏右键菜单或按 F2 重命名 MongoDB 集合；目标名称已存在时会明确报错，并保持 legacy MongoDB 连接原有行为。(contributed by @onenewcode) (closes #905)
+  - 连接列表排序 — 连接侧边栏新增手动排序、名称 A–Z 和名称 Z–A 三种模式；选择会持久化，并分别对根连接和分组内连接排序。(contributed by @DASungta)
+  - MySQL 导出选项 — MySQL 系数据库导出 DDL 时可选择移除表级 AUTO_INCREMENT=N，便于在新环境中从初始序列创建数据库；该选项默认关闭，不影响其他数据库。(contributed by @soddygo)
+  - 数据查看工具 — 只读单元格支持双击打开完整内容，查询结果搜索新增上一个和下一个匹配项导航。(contributed by @eryajf) (closes #3981)
+  - 右侧面板模式 — 编辑器设置新增右侧面板互斥选项，可在打开一个右侧工具面板时自动关闭其他面板。
+  - 任务耗时显示 — 导入、导出和数据传输任务的进度日志现在会持续显示已用时间。
+  改进
+  - Redis Cluster 扫描性能 — 批量扫描 Key 时复用主节点拓扑和节点连接，并避免在游标续查时重复统计 DBSIZE，显著降低稀疏匹配查询的网络开销。(contributed by @CN-Scars)
+  - 大结果集导出稳定性 — MySQL、PostgreSQL、SQL Server 和 ClickHouse 的流式导出将查询超时解释为连续无数据进展的超时，不再因健康导出的总耗时超过配置值而中断；真正停滞、取消和禁用超时的行为保持不变。(contributed by @zipg)
+  - 表数据筛选交互 — 扩大筛选条件编辑区域，改善长字段名展示，并支持字段搜索自动聚焦、键盘选择、选择字段后定位值输入框及 Shift+Enter 连续添加条件。(contributed by @zipg) (closes #4006, #4007)
+  - 数据网格交互 — 重新执行 SQL 时会清除旧排序状态；排序菜单和已排序列提示更清晰，列搜索支持匹配字段注释，对象浏览器也会突出显示当前正在查看的对象。(contributed by @zipg, @gggaiitx)
+  - 侧边栏搜索 — 数据库对象的类型筛选会真正限制搜索结果，不再仅改变筛选控件状态。
+  - SQL 智能补全 — 多段表名可使用全部分段首字母生成别名；输入 or、on、exec 等内容时，不会因短关键字提前匹配而遗漏 ORDER BY、ON CONFLICT、EXECUTE IMMEDIATE 等较长候选。(contributed by @zipg)
+  - 启动主题体验 — 应用会在前端启动前应用已保存的主题，减少深色主题用户启动时短暂出现浅色界面的情况。
+  - SQL 文件执行性能 — 高频进度事件改为节流发送，减少执行大型 SQL 文件时的前后端通信和界面刷新开销。
+  - MySQL 权限提示 — 创建数据库因权限不足失败时提供更准确的说明和所需授权提示。(contributed by @zipg)
+  - Nix 安装支持 — 更新 Nix 构建依赖和固定哈希，恢复当前依赖版本下的 Nix 软件包构建。(contributed by @juvevood)
+  修复
+  - MySQL 数据编辑与结构管理 — 修复无主键表编辑 JSON 字段时更新不到行或内容丢失、表结构编辑丢失空字符串默认值，以及用户授权信息未同步到权限编辑器的问题。(contributed by @zipg) (closes #3968)
+  - MySQL 导出与重新导入 — 表 DDL 不再产生重复分号，SQL 文件解析会按连续反斜杠数量判断引号是否转义，避免多个建表语句被错误合并。(contributed by @zipg)
+  - 数据网格与查询结果 — DBX 内部复制数据库 NULL 后可恢复为真正的空值；无限滚动会正确追加后续结果段，查询结果元数据会使用实际执行数据库，重新打开侧边栏对象也不会覆盖已有数据标签页。(contributed by @zipg)
+  - 临时查询结果导出 — 已完整加载到内存的结果可直接导出，不再重新执行依赖临时表、已删除对象或其他一次性上下文的原 SQL；尚未完整加载的结果继续使用流式全量导出。(contributed by @zipg) (closes #3970, #4077)
+  - MongoDB 数据类型 — 编辑形似日期的字符串时不再自动转换成 BSON Date；真实日期仍可通过 ISODate(...)、new Date(...) 或 Extended JSON 写入。查询结果复制语句也改为按需生成，减少不必要的处理。(contributed by @xddcode) (closes #4030)
+  - Oracle 与 OceanBase Oracle — Oracle 未限定 schema 的字段补全会复用当前 SQL 标签页会话，并在 CURRENT_SCHEMA 改变后刷新缓存；恢复别名字段补全和实际 DIP 用户显示。OceanBase Oracle 模式也会根据当前会话解析正确 schema。(contributed by @zipg)
+  - PostgreSQL 与 Kingbase — PostgreSQL 可正确区分和读取重载函数源码，数据网格条件补全会正确引用大小写敏感字段；Kingbase 原生驱动会遵循连接的 database_mode。(contributed by @amwps290)
+  - GaussDB 与达梦 — 修复 GaussDB 函数、存储过程源码显示；达梦支持读取触发器源码，SQL 文件执行目标可选择 schema，导出字符串中的 NUL 字符会以可还原的 CHR(0) 表达式保存。(contributed by @zipg)
+  - SQL Server 兼容性 — 正确识别 DATEPART 等函数参数，解析默认元数据 schema，并兼容旧版服务器返回的 sql_variant 元数据。
+  - 数据库兼容性 — 恢复 Doris 用户权限管理；StarRocks 物化视图不再被当作普通视图；TDengine REST 连接切换数据库时不再执行不支持的 USE；ClickHouse mutation SQL 不再被错误拆分；GoldenDB 主键匹配兼容大小写差异。
+  - 数据对比同步 — 生成同步 SQL 时跳过计算列、identity 等数据库生成列，避免写入不可更新字段。
+  - Excel 与 DBeaver 导入 — Excel 导入执行阶段会保持用户选中的工作表；导入 DBeaver 连接时恢复原有连接文件夹层级。
+  - SQL 编辑器快捷键 — 执行快捷键继续遵循当前语句或全部语句设置，但不再错误弹出执行目标选择器；按钮和右键入口仍可使用目标选择器。(contributed by @TongEc) (closes #4043)
+  - 界面与退出行为 — 未保存内容对话框会限制在可视区域内；即使前端尚未完成初始化，系统原生退出操作也可以正常关闭应用。
+  - MCP 权限设置 — 修复 Windows 等环境下 MCP 权限选项造成的布局错位，并统一选择卡片交互样式。(contributed by @ptma) (closes #4001)
+  - 云同步 AI 配置 — 从旧格式云同步快照恢复时，会用快照配置替换现有 AI 配置，避免旧配置残留或重复。
+  安装
+  > 国内下载：如果 GitHub 下载较慢，可从 CNB 镜像 下载桌面端安装包，Docker 镜像从 docker.cnb.cool/dbxio.com/dbx:0.5.63 拉取。
+ReleaseNotesUrl: https://github.com/t8y2/dbx/releases/tag/v0.5.63
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
