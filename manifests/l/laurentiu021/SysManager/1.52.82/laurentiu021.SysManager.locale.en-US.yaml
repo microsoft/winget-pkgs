@@ -1,0 +1,44 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: laurentiu021.SysManager
+PackageVersion: 1.52.82
+PackageLocale: en-US
+Publisher: laurentiu021
+PublisherUrl: https://github.com/laurentiu021
+PublisherSupportUrl: https://github.com/laurentiu021/SystemManager/issues
+PackageName: SysManager
+PackageUrl: https://github.com/laurentiu021/SystemManager
+License: MIT
+LicenseUrl: https://github.com/laurentiu021/SystemManager/blob/HEAD/LICENSE
+ShortDescription: Modern Windows system toolkit — network monitor, performance tuning, cleanup, battery health, process manager, and more.
+Description: |-
+  SysManager is a modern Windows system toolkit built with WPF and .NET 10.
+  It provides a comprehensive set of tools in a single application including
+  live network monitoring, ping and traceroute, speed tests, performance tuning
+  with power plan management, deep disk cleanup, duplicate file finder, disk
+  analyzer, battery health monitoring, process manager, app uninstaller,
+  startup control, Windows services manager, Windows features manager, driver
+  information, and system health overview.
+Tags:
+- battery
+- cleanup
+- dotnet
+- network-monitor
+- open-source
+- performance
+- process-manager
+- system-utility
+- uninstaller
+- windows
+- wpf
+ReleaseNotes: |-
+  [1.52.82] - 2026-07-10
+  Fixed
+  - Drive enumeration aborted entirely when a single volume's DriveFormat property threw (e.g. BitLocker-locked or transiently busy). FixedDriveService.Enumerate() used a LINQ .Where(di => ... di.DriveFormat ...) predicate to filter drives to NTFS/ReFS. Because LINQ predicates evaluate lazily during MoveNext(), the DriveFormat property access ran OUTSIDE the per-drive try/catch block (which only covered the loop body). An IOException from one BitLocker-locked or transiently-busy volume caused the IEnumerator.MoveNext() call to throw, aborting enumeration of ALL remaining drives — even healthy ones. Callers (Deep Cleanup, System Health) saw zero drives instead of all-minus-one. Moved the DriveFormat filter inside the per-drive try block so one flaky volume is skipped (logged at Debug) while all remaining drives enumerate normally. The DriveType and IsReady checks remain in the predicate — those are backed by cached kernel data and do not hit the volume handle.
+  Verify the download
+  Get-FileHash .\SysManager-v1.52.82.exe -Algorithm SHA256
+  Expected SHA256: FF091AB1D0015598838818074FCBFD2CD4B1CC283787F6F2A769FA11F0DACE59
+ReleaseNotesUrl: https://github.com/laurentiu021/SystemManager/releases/tag/v1.52.82
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

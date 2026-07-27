@@ -1,0 +1,38 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: RaijuMounun.intqual
+PackageVersion: 1.3.0
+PackageLocale: en-US
+Publisher: Eren Keskinoğlu
+PublisherUrl: https://github.com/RaijuMounun
+PublisherSupportUrl: https://github.com/RaijuMounun/intqual/issues
+PackageName: Intqual
+PackageUrl: https://github.com/RaijuMounun/intqual
+License: MIT
+LicenseUrl: https://github.com/RaijuMounun/intqual/blob/HEAD/LICENSE
+ShortDescription: A dual-layer asynchronous network latency analyzer and observability tool.
+Tags:
+- network
+- ping
+- tui
+ReleaseNotes: |-
+  Release Notes: v1.3.0
+  Features & Architectural Improvements
+  - Privileged Worker Process Architecture for Traceroute:
+    The Traceroute functionality has been fundamentally redesigned to adhere to the Principle of Least Privilege. Raw socket network operations that require root access have been isolated into a dedicated, short-lived worker process. You no longer need to run the entire intqual application as root to perform accurate traceroutes.
+  - Event-Driven JSONL IPC Streaming:
+    The communication bridge between the parent TUI and the worker process is now fully asynchronous. The worker streams telemetry data continuously using JSON Lines (JSONL), drastically reducing latency and providing real-time, incremental rendering on the UI without blocking the main event loop.
+  - Asynchronous DNS Resolution:
+    DNS lookups have been explicitly decoupled from the privileged network layer. The worker process now only yields raw IP data, while the parent process offloads DNS resolution to concurrent Tokio background tasks.
+  Bug Fixes & Stability
+  - TUI Artifact Prevention on Sudo Prompts:
+    Resolved an issue where invoking sudo during raw TUI mode would permanently corrupt terminal layouts. The application now gracefully detaches the alternate screen, issues a synchronous sudo -v challenge to securely prompt for credentials (if necessary), and flawlessly resumes the UI state.
+  - Enhanced IPC Error Handling:
+    Introduced the IpcError variant to strictly trap and escalate communication breakdowns. Silent failures in inter-process data exchange are eliminated; tokio::process spawn failures, serde_json parse errors, and non-zero OS exit codes are now proactively caught and rendered onto the UI dashboard.
+  - General Code Health:
+    Resolved static analysis warnings across the intqual-core and CLI crates, collapsing redundant conditionals for a cleaner abstract syntax tree.
+  Full Changelog: v1.2.0...v1.3.0
+ReleaseNotesUrl: https://github.com/RaijuMounun/intqual/releases/tag/v1.3.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
