@@ -8,6 +8,7 @@ Manifests submitted to the community repository are subject to [moderation](Mode
 ## Installer Types
 WinGet supports the following installer types:
 - **MSIX**
+- **APPX**
 - **MSI**
 - **Exe-based installers**
 - **Font files**
