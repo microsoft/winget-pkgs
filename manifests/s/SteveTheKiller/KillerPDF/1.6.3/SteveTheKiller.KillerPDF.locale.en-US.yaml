@@ -1,0 +1,49 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: SteveTheKiller.KillerPDF
+PackageVersion: 1.6.3
+PackageLocale: en-US
+Publisher: Steve the Killer
+PublisherUrl: https://github.com/SteveTheKiller
+PublisherSupportUrl: https://github.com/SteveTheKiller/KillerPDF/issues
+Author: Steve the Killer
+PackageName: KillerPDF
+PackageUrl: https://github.com/SteveTheKiller/KillerPDF
+License: GPL-3.0
+LicenseUrl: https://github.com/SteveTheKiller/KillerPDF/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Steve the Killer
+ShortDescription: PDF editor for Windows. Install or run portable. GPLv3. No account, no subscription, no telemetry.
+Description: KillerPDF is a lightweight PDF viewer and toolkit for Windows. View, merge, split, and manage PDF files. Runs portable or installs to your user profile - no admin rights required. No account, no subscription, no telemetry. Open source under GPLv3.
+Moniker: killerpdf
+Tags:
+- dotnet
+- gplv3
+- opensource
+- pdf
+- pdf-editor
+- portable
+- windows
+- wpf
+ReleaseNotes: |-
+  A bugfix release for the 1.6 line. Highlights: memory use on large documents is dramatically lower, and two save corruption bugs (crop boxes and bookmarks) are fixed for good, including healing files damaged by earlier 1.6.x builds.
+  Changed
+  - Links open directly again: the confirm-before-opening prompt and its Settings row are off for now.
+  - When both document scrollbars are visible, the vertical bar now runs the full pane height and owns the corner.
+  - Grid view packs pages edge to edge with a hairline separator, so more of the window shows actual pages.
+  - Two-Page mode: Fit Page now leaves even margins above and below the spread.
+  Fixed
+  - Saving any PDF whose pages had no crop box silently planted a zero-size /CropBox on every page, which Adobe rejects with a "page dimensions out-of-range" error - the real reason merged Google Docs exports failed in Acrobat but opened in Chrome. Every save now strips degenerate crop boxes, so re-saving a file damaged by 1.6.x heals it (thanks Richard Lam).
+  - Saving any PDF that has no bookmarks silently corrupted the file's structure (a dangling /Outlines reference). Strict viewers refused the file with a repair prompt, and the repair stripped fillable forms. Saves are now clean, and the repair path first tries a lossless PDFium re-save that preserves forms and bookmarks, so files damaged by older builds recover intact (#103, thanks Peter5164).
+  - High memory use on large documents (#122, thanks RoyYang567): the page-bitmap cache is capped to a window around the viewport, closing a tab returns memory to the OS, and Continuous view only holds bitmaps for pages near the viewport - a 243-page image-heavy PDF now costs a few hundred MB instead of climbing past 7 GB.
+  - Switching from Grid to Continuous view kept the grid's scrollbar overrides, clipping zoomed pages with no horizontal scrollbar.
+  - Closing with unsaved changes stacked two prompts; confirming "close without saving" now counts as the quit confirmation, and it defaults to No so a stray Enter can't discard work.
+  - The quit prompt no longer appears when no documents are open.
+  - Two-Page mode: arrow keys, PgUp/PgDn, and the wheel's edge page-flip now move one spread at a time (#120, thanks eddardburger).
+  - Selection boxes could get stranded on screen until restart; they are now removed properly and swept on file close (#121, thanks TaBnLd).
+  Checksums
+  KillerPDF.exe SHA256: 5165E4D5F7002B29791A7F392C191936ABE2DB4C02F21F8037DBE35BF187D2FE
+  Full changelog: CHANGELOG.md
+ReleaseNotesUrl: https://github.com/SteveTheKiller/KillerPDF/releases/tag/v1.6.3
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

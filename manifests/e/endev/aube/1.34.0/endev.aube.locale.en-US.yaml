@@ -1,0 +1,51 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: endev.aube
+PackageVersion: 1.34.0
+PackageLocale: en-US
+Publisher: en.dev
+PublisherUrl: https://en.dev/
+PublisherSupportUrl: https://github.com/endevco/aube/discussions/categories/troubleshooting-and-bugs
+Author: en.dev
+PackageName: aube
+PackageUrl: https://aube.en.dev/
+License: MIT
+LicenseUrl: https://github.com/endevco/aube/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 en.dev inc
+CopyrightUrl: https://github.com/endevco/aube/blob/HEAD/LICENSE
+ShortDescription: A fast Node.js package manager
+Description: |-
+  aube is a package manager for Node.js projects. It uses pnpm-style isolated node_modules for fast, disk-efficient installs.
+
+  Existing projects keep their lockfile format. aube reads and writes pnpm-lock.yaml, package-lock.json, npm-shrinkwrap.json, yarn.lock, and bun.lock in place. New projects without a supported lockfile get aube-lock.yaml.
+
+  Why Try It
+  - Fast installs. Warm installs are about 8x faster than pnpm and about 5x faster than Bun in the current benchmarks. Repeat test commands run up to 35x faster than pnpm and up to 5x faster than Bun.
+  - Existing lockfiles. Reads and writes pnpm-lock.yaml, package-lock.json, npm-shrinkwrap.json, yarn.lock, and bun.lock in place.
+  - Cheap repeat commands. aubr test, aube test, and aube exec vitest auto-install when dependencies are stale, then skip that work when nothing changed. aubx uses a local binary when one is installed, or a throwaway environment for one-off tools.
+  - Less disk use. A global content-addressable store lets projects share package files instead of keeping a full copy of the same dependencies in every checkout.
+  - Secure defaults. Out of the box, exotic transitive deps are blocked, lifecycle scripts wait for approval, trust downgrades fail at resolve, and brand-new releases sit in a 24h cooling window. One paranoid: true line adds the build jail and turns the soft gates into hard fails.
+Moniker: aube
+ReleaseNotes: |-
+  This release rounds out shell completion — aubx now completes, and TAB now offers registry packages, project bins, workspace packages, settings, and more — teaches the resolver to never mistake a deprecated republish for an upgrade, and makes activated shims survive aube upgrades.
+  Added
+  - Rich, mise-style completions plus aubx support (#1130 by @jdx) — Completions are now generated for the aubx multicall surface alongside aube and aubr, and a set of dynamic completers fills in real values as you type: registry packages (queried against your configured npm registry with scoped-registry auth, a ~1.2s timeout, and a 2 MiB response cap), local dependencies, workspace packages, project bins from node_modules/.bin, settings/aliases, patch keys, and filesystem paths. Typed text is safely quoted before evaluation, and the aubx spec stops at the fetched command so downstream arguments aren't parsed as aube flags.
+  - effect= metadata for every command (#1122 by @jdx) — All 114 aube commands now declare whether they only inspect state (read), change it (write), or destroy something (destructive), via usage 4's effect=. Registry commands like publish, deprecate, dist-tag, and access are never read and carry blast-radius comments (they affect every consumer of a package), while code-running commands (run, exec, dlx, node, create, …) are deliberately left unclassified since their effect is whatever the executed code does. This lets tooling reason about what a command will do before running it. Requires a usage CLI of 4.0 or newer to consume the generated spec.
+
+  Fixed
+  - Never prefer a deprecated version inside a range (#1136 by @jdx) — A deprecated, mis-tagged republish that sorts above genuine releases (e.g. codemirror@6.65.7, an accidental republish of 5.65.7) could make aube outdated offer a downgrade-in-disguise as an upgrade and cause installs to land on the withdrawn version. Version selection now mirrors pnpm: dist-tags.latest wins when it's in range, otherwise the highest satisfying non-deprecated version, otherwise (as a tiebreak, not a filter) the highest satisfying version so ranges that only reach deprecated versions still resolve. The rule is shared across install/add/update, the vulnerable-version re-pick, and the Wanted column of outdated/update, keeping them in agreement.
+  - Keep activated shims stable across upgrades (#1129 by @jdx) — On Unix, aube activate previously symlinked each tool shim to the exact executable that created it, so removing a version-managed aube left every activated shim dangling. Activation now writes small dispatcher scripts that resolve the current aube from PATH and route through an internal marker, matching mise's stable-indirection model. Windows behavior is unchanged.
+  - Replace activated shims atomically (#1131 by @jdx) — Follow-up to #1129: shim updates on Unix now build the replacement in a sibling temp file, apply 0755, and rename it over the live path, closing the window where a concurrent command could see a missing or half-written shim.
+  - Clear the progress row for no-op installs (#1132 by @jdx) — On a no-op install, the transient TTY progress bar left a durable row alongside Already up to date, producing two completion lines for one result. The progress row is now cleared for no-op installs, while real installs and --lockfile-only runs still keep the finished bar (or CI summary) visible.
+  - Complete package scripts through aubr (#1128 by @jdx) — aube completion now registers a dedicated aubr surface, so both aube run <TAB> and aubr <TAB> complete the scripts declared in the nearest package.json (with their commands as descriptions). Previously aubr <TAB> was treated as an unknown top-level invocation and offered nothing.
+
+  Changed
+  - Prioritize opencode-ai in the native-build critical path (#1127 by @jdx) — opencode-ai is added to the curated build-heavy allowlist so its tarball is fetched earlier and its build step can overlap with remaining package downloads.
+
+  💚 Sponsor aube
+  aube is maintained by @jdx, an open source developer for entire.io, the title sponsor of the jdx.dev open source tools including mise. Work on aube is funded by sponsors.
+  If aube is saving your team install time or CI minutes, please consider sponsoring at jdx.dev. Individual and company sponsorships are what keep the project fast, free, and independent.
+ReleaseNotesUrl: https://github.com/jdx/aube/releases/tag/v1.34.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

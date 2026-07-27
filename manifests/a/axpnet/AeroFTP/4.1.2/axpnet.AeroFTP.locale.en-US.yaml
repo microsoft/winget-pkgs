@@ -1,0 +1,77 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: axpnet.AeroFTP
+PackageVersion: 4.1.2
+PackageLocale: en-US
+Publisher: axpnet
+PublisherUrl: https://github.com/axpnet
+PublisherSupportUrl: https://github.com/axpnet/aeroftp/issues
+Author: axpnet
+PackageName: AeroFTP
+PackageUrl: https://github.com/axpnet/aeroftp
+License: GPL-3.0
+LicenseUrl: https://github.com/axpdev-lab/aeroftp/blob/HEAD/LICENSE
+ShortDescription: A modern, multi-protocol file manager and FTP client with integrated AI, cloud sync, and military-grade encryption.
+Description: |-
+  AeroFTP is an open-source, multi-protocol file manager built with Tauri 2 (Rust + React 18 + TypeScript).
+  It supports 16 protocols (FTP, FTPS, SFTP, WebDAV, S3, Google Drive, Dropbox, OneDrive, MEGA, Box, pCloud, Azure Blob, 4shared, Filen, Zoho WorkDrive, and Cryptomator vaults),
+  features an AI assistant with 45 tools and 15 LLM providers, military-grade encrypted vaults (AES-256-GCM-SIV + Argon2id),
+  bidirectional real-time sync, a built-in code editor, SSH terminal, and media player with visualizers.
+  Available in 47 languages with 4 themes.
+Moniker: aeroftp
+Tags:
+- cloud-storage
+- encryption
+- file-manager
+- file-transfer
+- ftp
+- ftp-client
+- multi-protocol
+- rust
+- s3
+- sftp
+- sync
+- tauri
+- webdav
+ReleaseNotes: |-
+  [4.1.2] - 2026-07-05
+  Complete Archive Format Coverage, Quick Connect Consistency and a Full-Surface Security Audit
+  An archive-focused release: a format-coverage audit closed every gap it found, so what AeroFTP creates it can always reopen, and archives from native tools (7-Zip, gzip, WinRAR) open reliably. A single file now compresses to and extracts from a plain .gz, .xz or .bz2, the Compress dialog gains a 7z Advanced section, ZIP archives using non-Deflate methods now open, tar symlinks extract safely, and the compression presets align with the 7-Zip canonical levels. Alongside archives: a full-surface security audit fixed 16 findings, AeroShare gains offline LAN (mDNS) discovery, and a broad Quick Connect consistency pass lands with the crypt-overlay fixes reported against v4.1.1. 47 languages translated.
+  Added
+  - Standalone gzip / xz / bzip2, full round-trip: a lone file compresses to a plain .gz, .xz or .bz2 with no tar wrapper, and extracts back through the real extract path (member name = archive name minus the codec extension). The Compress dialog adds GZ/XZ/BZ2 cards enabled only for a single non-folder selection; the CLI infers the format from the extension (longest match keeps foo.tar.gz a tarball) and the CLI, GUI and AI extract verbs all reach the standalone lane, including a .gz produced by system gzip. (#365)
+  - 7z Advanced options: content method, dictionary size, solid block, threads: a collapsed Advanced section in the Compress dialog, with matching aeroftp compress flags, exposes the 7z content method (LZMA2 default, plus LZMA, PPMd, BZip2), an LZMA2 dictionary size and thread count, and a solid-block option (one pack for every file: better ratio on many small files, off by default). Every method is decodable by the extractor, so an unreadable archive is never created. (#365)
+  - ZIP archives with non-Deflate methods now open (BZip2, LZMA, Deflate64, Zstd, XZ): these previously failed with "unsupported compression". The read codecs are now enabled and such archives extract byte-exact; the write path is unchanged (AeroFTP still emits Store/Deflate + AES, which every native archiver opens). Full bidirectional interop with 7-Zip verified.
+  - AeroShare LAN (mDNS) discovery: a new lan discovery mode resolves peers over local mDNS only, publishing nothing to n0 or the public DHT, so two devices on the same subnet find each other fully offline (no internet, no relay). mDNS is also folded into the default both mode, so LAN peers resolve instantly there too. (@EhudKirsh, #284)
+  - aero benchmark --all-protocols alias for the existing --all flag (benchmarks every saved profile), so the intent reads clearly. (@EhudKirsh, #277)
+  Changed
+  - Compression level presets aligned with the 7-Zip canonical levels: the Compress dialog now offers six presets (Store=0, Fastest=1, Fast=3, Normal=5, Maximum=7, Ultra=9) shared across all compressible formats; 7z and the tar.gz/tar.xz/tar.bz2 family drop Store since their codecs have no real store mode. The default level moves from 6 to 5 (7-Zip "Normal") in the dialog, in every backend fallback and in the CLI --level help. (#365)
+  - 2FA Quick Connect polish (Filen, MEGA, Internxt): the six-digit Two-Factor Code field is compact (six digits, centered, 000000 placeholder) and digit-only, the code auto-submits the moment the sixth digit lands, and on Filen and MEGA the live TOTP preview (key, code, copy, timer) sits on the 2FA Secret label row. (@EhudKirsh, #369)
+  - Interactive -i sections split clear from cls / .: in profiles -i, groups -i and users -i, clear now does a plain screen wipe with no reprint (the universal terminal behaviour), while cls, the single-key . and refresh keep the clear-and-reprint refresh. (@EhudKirsh, #266)
+  - Add Service catalog refinements: a single Grid/Table "switch to" toggle (mirroring My Servers), the generic-servers strip filtered to the active tab, Microsoft-prefixed OneDrive and Azure Blob so the two sort together, consistent S3 / WebDAV / API badge order, and corrected free tiers (DriveHQ 5 GB, Uploadcare 1 GB). (@EhudKirsh, #274)
+  Fixed
+  - Crypt overlay stuck decrypting forever after a reconnect (kDrive and other OAuth backends): the red Disconnect never tore down the transparent crypt overlay, so a stale vault id survived and the next connect short-circuited the auto-unlock. Disconnect now locks the backend keys, unwraps the provider and resets the overlay state so a reconnect starts clean. (@EhudKirsh, #386)
+  - Crypt upload "Path not found" on strict WebDAV (Koofr, OpenDrive): a PUT failed when the encrypted parent collection did not exist. The overlay now creates the encrypted parent chain and retries once on a path-missing error, gated so an auth or quota failure leaves no stray encrypted directories. (@EhudKirsh, #385)
+  - Koofr WebDAV endpoint dropped on an in-edit mode switch (404): the per-mode credential stash keyed on providerId || protocol, which collides for Koofr, so switching Native API to/from WebDAV leaked the bare API host over the WebDAV preset endpoint. Now keyed collision-free; for a crypt profile this also restores the transparent overlay, which had vanished only because the connection never came up. (@EhudKirsh, #385)
+  - Crypt overlay secrets carried over on Convert / Save-as-new: converting a crypt profile to another mode (or saving it as new) minted a new profile id but left the overlay password and salt under the old id, so the new profile never auto-unlocked. The secrets are now copied to the new id. (@EhudKirsh, #385)
+  - MEGA API/CMD Quick Connect adopts the two-column layout: the narrow legacy card squeezed the MEGA MODES tab bar and never exposed the transparent Crypt overlay or the Remember-credentials toggle; API/CMD now use the shared grid, verified live on real MEGA with both overlay kinds. (@EhudKirsh, #369)
+  - Quick Connect edit-mode consistency: a preset endpoint stays hidden from the main form in edit mode too (collapsed and unlock-gated in Advanced), a provider's WebDAV mode reads the preset's own field labels instead of generic Username/Password, kDrive's Drive ID sits above the API Token as a numeric-only field with direct find-your-id and create-a-token links, and single-preset provider names keep their brand casing. (@EhudKirsh, #369)
+  - A delta transport drop no longer fails the transfer outright: when the native delta lane dies on a wire-level drop (for example a fragile NAS closing the SSH exec channel mid file list, observed live on a WD MyCloud), the single-file transfer now falls back to the classic SFTP path instead of surfacing "delta hard rejection". The destination is never torn (every write goes through a temp file plus atomic rename), and security refusals (host-key mismatch) still never fall back.
+  - Text preview copy and gutter drag-selection: Ctrl+C now copies the active text selection (the global file-manager shortcut used to swallow it), and the line-number gutter drag-selection tracks both ways from a window mousemove. (@EhudKirsh, #347)
+  - Split / multi-volume archive parts report a clear message: a .7z.001, .zip.001, .z01 or .r00 part gets a specific "rejoin the volumes" message instead of the generic "Unsupported archive type"; real multi-part RAR (.partN.rar) stays on the normal .rar lane so it keeps working.
+  - i18n: provider.modes.lockedInEdit translated in all 47 locales: the mode-tabs hint referenced a key that existed in no locale, flooding the console with missing-translation warnings.
+  Security
+  - Full-surface security and hardening audit: 16 findings fixed (3 high, 7 medium, 6 low). High: remote-controlled path traversal in the sync_tree download engine, unbounded eager allocation from a server-declared native-rsync block count, FileLu API key leaking into surfaced errors. Medium: privileged auto-update installs fail closed on a backend-authoritative registry of signature-verified artifacts, Azure Service SAS rebuilt to the correct field layout, MEGA and OpenDrive session ids redacted from errors, native-rsync symlink varint panic guarded, shell_execute meta-character filter closed for redirection and glob, DebugPanel redaction extended to serialized secret fields. Low: vault mountpoint collision hash, component-aware update-path boundary, MCP deny-list parity, bounded peer inbound-rate map, CLI edit temp 0o600 with no-follow, constant-time SFTP serve auth.
+  - Tar symlink and hardlink entries extract safely: a link target is validated with the same in-root check as file paths, an in-root symlink is recreated (unix), and a malicious link pointing outside the destination is never materialised and is surfaced in the report instead of being silently dropped.
+  - quick-xml bumped to 0.41 for RUSTSEC-2026-0194 and RUSTSEC-2026-0195.
+  - Pre-tag commit audit: PASS. A punctual multi-reviewer audit of every commit in this cycle (archive, connection and share/CLI/catalog lanes) confirmed the security posture: no path traversal in the new extract lanes (symlink chains, hardlinks and TOCTOU covered), no secret ever logged or misdirected by the credential migrations, dependencies clean. The six minor findings it surfaced are all fixed in this release: the LAN discovery mode now disables relays entirely (true offline, no WAN service contacted), the default discovery description honestly discloses the local mDNS announce in all 47 languages, tar re-extraction overwrites existing links instead of failing, the CLI tar extract report stays a clean path, per-mode credential snapshots saved by earlier versions migrate to the new collision-free keys, and pasting a 2FA code with separators keeps all six digits.
+  Contributors
+  @EhudKirsh
+  Downloads:
+  - Windows: .msi installer, .exe, or .zip portable (no installation required)
+  - macOS: .dmg disk image
+  - Linux: .deb, .rpm, .snap, or .AppImage
+  Download AeroFTP
+ReleaseNotesUrl: https://github.com/axpdev-lab/aeroftp/releases/tag/v4.1.2
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

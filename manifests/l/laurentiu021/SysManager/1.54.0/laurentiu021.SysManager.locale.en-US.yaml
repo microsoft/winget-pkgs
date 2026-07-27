@@ -1,0 +1,50 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: laurentiu021.SysManager
+PackageVersion: 1.54.0
+PackageLocale: en-US
+Publisher: laurentiu021
+PublisherUrl: https://github.com/laurentiu021
+PublisherSupportUrl: https://github.com/laurentiu021/SystemManager/issues
+PackageName: SysManager
+PackageUrl: https://github.com/laurentiu021/SystemManager
+License: MIT
+LicenseUrl: https://github.com/laurentiu021/SystemManager/blob/HEAD/LICENSE
+ShortDescription: Modern Windows system toolkit — network monitor, performance tuning, cleanup, battery health, process manager, and more.
+Description: |-
+  SysManager is a modern Windows system toolkit built with WPF and .NET 10.
+  It provides a comprehensive set of tools in a single application including
+  live network monitoring, ping and traceroute, speed tests, performance tuning
+  with power plan management, deep disk cleanup, duplicate file finder, disk
+  analyzer, battery health monitoring, process manager, app uninstaller,
+  startup control, Windows services manager, Windows features manager, driver
+  information, and system health overview.
+Tags:
+- battery
+- cleanup
+- dotnet
+- network-monitor
+- open-source
+- performance
+- process-manager
+- system-utility
+- uninstaller
+- windows
+- wpf
+ReleaseNotes: |-
+  [1.54.0] - 2026-07-22
+  Added
+  - Bandwidth Monitor — a new Monitor tab that shows how much data is moving through your network and which apps are using it (replaces the previous work-in-progress placeholder). It has two measurement modes so it's useful to everyone without forcing elevation:
+    - Default (no administrator): accurate machine-wide download/upload speed with a live rolling throughput chart (the last ~2 minutes), plus a per-app list attributed by active TCP/UDP connections — which programs are talking, how many connections each holds, and the remote ports involved. This reads the same connection tables Windows exposes to any user (GetExtendedTcpTable/GetExtendedUdpTable), so it needs no elevation and no setup.
+    - Precise per-app rates (optional, administrator): exact per-process upload/download speeds and per-session data totals (like Task Manager's Network column), captured from a Windows kernel ETW session. It's offered only when the app is already running as administrator, and if the kernel session can't start (privilege, a locked-down host, a blocked native helper) the tab logs it and falls back to the no-admin view — it never crashes because precise mode was unavailable.
+    - Threshold alert: set a Mbps limit and the tab warns when total download or upload exceeds it (useful for catching a runaway background upload); 0 turns the alert off.
+    - Strictly local and read-only — SysManager only observes network activity, never throttles or blocks it, and nothing about your traffic leaves the machine. Total-throughput history is stored as NDJSON under %LocalAppData%\SysManager. Closes #337.
+  Changed
+  - Added the Microsoft.Diagnostics.Tracing.TraceEvent dependency (used only by the Bandwidth Monitor's optional precise mode). Its native helpers embed into the single-file build, so the shipped SysManager-vX.Y.Z.exe remains one self-contained file.
+  Verify the download
+  Get-FileHash .\SysManager-v1.54.0.exe -Algorithm SHA256
+  Expected SHA256: D143D5E13A28D75AB0073D0A5B7001F7996DDF6902B0D95967332679F0B24713
+ReleaseNotesUrl: https://github.com/laurentiu021/SystemManager/releases/tag/v1.54.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
