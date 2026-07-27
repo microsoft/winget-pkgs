@@ -1,4 +1,4 @@
-[JSON Schema]: https://github.com/microsoft/winget-cli/blob/master/schemas/JSON/manifests/latest/manifest.installer.latest.json
+[JSON Schema]: https://github.com/microsoft/winget-cli/blob/master/schemas/JSON/manifests/v1.28.0/manifest.installer.1.28.0.json
 [Windows Package Manager Manifest Creator]: https://github.com/microsoft/winget-create
 [YAML]: https://yaml.org/spec
 [semantic version]: https://semver.org

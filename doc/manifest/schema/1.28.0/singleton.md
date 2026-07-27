@@ -1,4 +1,4 @@
-[JSON schema]:                              https://github.com/microsoft/winget-cli/blob/master/schemas/JSON/manifests/latest/manifest.singleton.latest.json
+[JSON schema]:                              https://github.com/microsoft/winget-cli/blob/master/schemas/JSON/manifests/v1.28.0/manifest.singleton.1.28.0.json
 [semantic version]:                         https://semver.org
 [install]:                                  https://docs.microsoft.com/windows/package-manager/winget/install
 [list]:                                     https://docs.microsoft.com/windows/package-manager/winget/list

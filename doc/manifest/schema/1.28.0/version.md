@@ -1,4 +1,4 @@
-[JSON schema]:      https://github.com/microsoft/winget-cli/blob/master/schemas/JSON/manifests/latest/manifest.version.latest.json
+[JSON schema]:      https://github.com/microsoft/winget-cli/blob/master/schemas/JSON/manifests/v1.28.0/manifest.version.1.28.0.json
 [YAML]:             https://yaml.org/spec
 [semantic version]: https://semver.org
 
