@@ -1,0 +1,136 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Patchloom.Patchloom
+PackageVersion: 0.24.0
+PackageLocale: en-US
+Publisher: Patchloom
+PublisherUrl: https://github.com/patchloom
+PublisherSupportUrl: https://github.com/patchloom/patchloom/issues
+Author: Patchloom
+PackageName: Patchloom
+PackageUrl: https://github.com/patchloom/patchloom
+License: MIT
+LicenseUrl: https://github.com/patchloom/patchloom/blob/HEAD/LICENSE
+Copyright: Copyright (c) Patchloom contributors
+ShortDescription: Structured file editing CLI for AI agents
+Description: |-
+  Patchloom is a single-binary CLI that gives AI coding agents safe, structured
+  file editing: search and replace, unified diffs, parser-backed JSON/YAML/TOML
+  document ops, markdown section editing, AST-aware renames, multi-file
+  transactions, undo, and an MCP server for tool calls.
+Moniker: patchloom
+Tags:
+- ai
+- cli
+- developer-tools
+- mcp
+- rust
+ReleaseNotes: |-
+  Patchloom 0.24.0
+  MCP coding agents get directory inventory without a second filesystem server,
+  a tighter core tool pack, and clearer path rules. Library hosts get public
+  batch fuzzy refuse, safer multi-file apply, and more reliable path peels.
+  Fourteen commits since 0.23.0.
+  Highlights
+  list_files is part of the core MCP pack (11 tools) so agents can inventory a
+  workspace with the same ignore and glob rules as search. Walks honor
+  max_depth at walk time. Embedders that apply multi-op buffer edits can call
+  refuse_batch_if_suspicious_fuzzy instead of reimplementing over-wide span
+  policy. Host and agent JSON paths report more accurate peels for missing
+  paths, binary loads, multi-file fuzzy refuse, and apply failures with undo.
+  New features
+  - MCP list_files (full and core pack).
+    Bounded directory inventory with ignore / exclude / glob rules, optional
+    multi-root paths, max_results (default 500) with truncated and
+    total_matched, and optional max_depth relative to each walk root.
+    Missing roots hard-fail; ../ escapes are rejected. Prefer this over a
+    second filesystem MCP for list + search + edit. (#2077, #2079, #2080, #2081)
+    Set PATCHLOOM_MCP_SURFACE=core for the 11-tool pack:
+    read_file, search_files, list_files, replace_text, batch_replace,
+    doc_get, doc_set, doc_query, md_replace_section, execute_plan,
+    server_info.
+  - Walk-time max_depth prune.
+    Deep trees stop descending past max_depth instead of filtering only after
+    a full walk. Search and other unlimited walks are unchanged. (#2080, #2078)
+  - api::refuse_batch_if_suspicious_fuzzy.
+    Public helper for hosts that run buffer multi-op then write themselves.
+    Same over-wide fuzzy refuse policy and EditErrorKind::FuzzySpanSuspicious
+    shape as the disk path and for_agent. (#2065, #2067)
+  - Agent packaging for dual-host MCP.
+    Canonical CLI / plan / MCP name map in handshake and agent-rules,
+    explore guidance that prefers MCP tools over shell file walks for edits,
+    and YAML style_changed when block-sequence indent or presentation shifts
+    on write (values stay correct). Core tool names share one source of truth
+    with agent-rules --surface core. (#2073, #2074)
+  Bug fixes
+  - Library relative multi-component paths.
+    Relative paths such as src/lib.rs no longer double-join under the project
+    root (src/src/lib.rs). Absolute path handling for doc, md, tidy, patch,
+    and AST write siblings matches. (#2068, #2069)
+  - Finalize before write and atomic multi-file apply.
+    Library write_if_apply / apply_mutation create the backup session before
+    mutating so a failed write can restore. Multi-file patch apply preflights
+    then commits one session (no half-applied trees). Cross-file markdown move
+    follows the same atomic path. (#2071)
+  - Host and agent peels.
+    AST rename/replace missing path peels as not-found; batch AST remapper keeps
+    binary and invalid-encoding kinds; multi-file fuzzy total miss lands in
+    refused[]; MCP ast_rename miss is isError + no_matches; doc keys/len
+    multi-doc edges no longer soft-miss incorrectly. (#2068, #2069)
+  - Search same-line match order.
+    Matches on one line sort by column so agents can map index to
+    replace --nth. (#2069)
+  - Plan for_each nested has_symbol.
+    Nested methods match correctly under symbol checks. (#2069)
+  - Exclude globs vs explicit file args.
+    .patchloom.toml exclude still filters walks, but an explicit file path
+    on the command line is not dropped as no_matches. (#2072)
+  - Case-insensitive whole-line insert.
+    replace -i with insert-after on a whole-line case fold no longer glues
+    the replacement to the anchor (Debug + insert no longer yields
+    Debugnote). (#2072)
+  - MCP absolute paths under the workspace.
+    Docs and agent packaging match runtime: absolute paths that resolve inside
+    the MCP root are allowed (AllowIfContained); outside and ../ still
+    reject. Agents can join server_info.cwd with a relative path. (#2075)
+  Numbers
+  ──────────────────────────────┬──────┬───────────────
+  Metric                        │0.23.0│0.24.0
+  ──────────────────────────────┼──────┼───────────────
+  Test attributes (src/ +       │4,069 │4,129
+  tests/)                       │      │
+  ──────────────────────────────┼──────┼───────────────
+  Unit-ish (src/)               │2,739 │2,783
+  ──────────────────────────────┼──────┼───────────────
+  Commands                      │24    │24
+  ──────────────────────────────┼──────┼───────────────
+  MCP core pack tools           │10    │11 (list_files)
+  ──────────────────────────────┴──────┴───────────────
+  Upgrading
+  - From crates: patchloom = "0.24"
+  - From npm: npx patchloom@0.24 or pin patchloom@0.24.0
+  - CLI binary: GitHub Release installers, Homebrew tap, Scoop, Chocolatey,
+    or (when the community PR is approved) winget install Patchloom.Patchloom
+  - MCP hosts / agents: add list_files to inventories; prefer
+    PATCHLOOM_MCP_SURFACE=core for coding agents unless you need AST tools.
+    Absolute paths under the server root are valid; do not reject them solely
+    for looking absolute.
+  - Library hosts: call refuse_batch_if_suspicious_fuzzy on buffer multi-op
+    before write if you previously inlined the span check. Keep a wildcard
+    match arm on EditErrorKind and related #[non_exhaustive] types.
+    Relative multi-component paths and multi-file apply/session behavior
+    match CLI/tx more closely; re-test host glue that assumed old join or
+    half-apply edge cases.
+  - YAML writers: watch style_changed when block-sequence presentation
+    shifts; content values remain correct.
+  Full changelog
+  patchloom-v0.23.0...patchloom-v0.24.0
+ReleaseNotesUrl: https://github.com/patchloom/patchloom/releases/tag/patchloom-v0.24.0
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://patchloom.github.io/patchloom/
+- DocumentLabel: Installation
+  DocumentUrl: https://github.com/patchloom/patchloom/blob/main/docs/getting-started/installation.md
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
