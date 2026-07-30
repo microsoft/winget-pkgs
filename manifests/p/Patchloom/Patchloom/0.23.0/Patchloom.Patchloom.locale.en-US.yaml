@@ -1,0 +1,135 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Patchloom.Patchloom
+PackageVersion: 0.23.0
+PackageLocale: en-US
+Publisher: Patchloom
+PublisherUrl: https://github.com/patchloom
+PublisherSupportUrl: https://github.com/patchloom/patchloom/issues
+Author: Patchloom
+PackageName: Patchloom
+PackageUrl: https://github.com/patchloom/patchloom
+License: MIT
+LicenseUrl: https://github.com/patchloom/patchloom/blob/HEAD/LICENSE
+Copyright: Copyright (c) Patchloom contributors
+ShortDescription: Structured file editing CLI for AI agents
+Description: |-
+  Patchloom is a single-binary CLI that gives AI coding agents safe, structured
+  file editing: search and replace, unified diffs, parser-backed JSON/YAML/TOML
+  document ops, markdown section editing, AST-aware renames, multi-file
+  transactions, undo, and an MCP server for tool calls.
+Moniker: patchloom
+Tags:
+- ai
+- cli
+- developer-tools
+- mcp
+- rust
+ReleaseNotes: |-
+  Patchloom 0.23.0
+  Library hosts can rename and delete non-text files without loading them as
+  UTF-8, call Morph-class fragment apply from the Rust API, and read package
+  version plus MCP protocol from server_info. Agent JSON paths got a large
+  correctness pass across CLI, plan/tx, and MCP. Twenty-seven commits since
+  0.22.0.
+  Highlights
+  Embedders that handle binaries and invalid UTF-8 can use path-only
+  file_rename / file_delete and the new apply_fragment_to_file helper
+  without inventing OS fallbacks. server_info now returns the crate
+  version and the active MCP protocol version next to cwd, surface, and
+  tool_count. Callers that parse --json / MCP tool results get more
+  reliable error_kind, applied, jsonl trailers, and binary peels so
+  scripts and agents do not treat previews or refusals as successful writes.
+  New features
+  - Path-only non-text rename and delete (library API).
+    When the source is binary or invalid UTF-8, rename and delete operate
+    on the path without requiring a text load. Force rename over an
+    existing binary destination is covered. Prefer this over host-side OS
+    fallbacks after a soft load fails. (#2031, #2035, #2037, #2038)
+  - api::apply_fragment_to_file.
+    Same Morph-class constrained fragment apply as CLI / plan / MCP
+    (after / before / replace-old anchors, marker strip, unique
+    match by default), as a one-shot file API for embedders. (#2032, #2035)
+    use patchloom::api::{apply_fragment_to_file, ApplyMode, FragmentPlacement};
+    use std::path::Path;
+    apply_fragment_to_file(
+        Path::new("src/lib.rs"),
+        fragment,
+        FragmentPlacement::After("fn foo() {".into()),
+        /* unique */ true,
+        ApplyMode::Apply,
+        None,
+    )?;
+  - Public ContentEditHonesty test constructors.
+    Hosts and tests can build honesty records without private fields.
+    (#2033, #2035)
+  - server_info version fields.
+    The MCP tool returns package version and MCP protocol_version
+    (aligned with the initialize handshake), plus cwd, surface, and
+    tool_count. (#2060, #2061)
+  - WinGet release automation.
+    Release workflow can open microsoft/winget-pkgs version PRs when
+    WINGET_TOKEN is set; install docs document
+    winget install Patchloom.Patchloom. (#2058)
+  Bug fixes
+  - Cross-device (EXDEV) rename and force-dest rollback.
+    Rename across filesystems and force overwrite on EXDEV no longer leave
+    a half-applied destination or skip safe rollback. (#2047, #2048)
+  - Agent JSON and exit peels (CLI / plan / MCP).
+    Preview vs apply, applied, format_failed (with backup session when
+    files were written), binary and invalid-encoding peels, NotFound,
+    multi-doc delete, patch EOF newlines, stale delete patches, force
+    rename backup, files-from (including stdin), case-only rename, YAML
+    CRLF, MCP apply_fragment, and related surfaces now report consistent
+    error_kind and exit codes instead of looking like a clean write.
+    (#2040–#2051, #2055)
+  - jsonl trailers and summary honesty.
+    read, schema, tidy, lint, and search jsonl streams include the summary
+    trailers agents need; AST empty-scan and impact paths refuse empty or
+    invalid targets clearly. (#2049, #2050)
+  - Fail-closed plan edges.
+    Empty for_each, bad insert positions, patch merge exits, undo/status
+    that hide backups, batch force, and MCP search containment follow the
+    same refuse-or-error rules as single-file commands. (#2046, #2047)
+  - Strict binary rollback and fuzzy match_count.
+    Binary failure during multi-op apply rolls back correctly; fuzzy
+    results report match counts hosts can trust. (#2041)
+  - MCP stack on rmcp 3.
+    Server depends on rmcp 3.0.1 (MCP protocol 2026-07-28). Re-check any
+    host that pinned rmcp 2.x APIs against the server. (#2059)
+  Numbers
+  ──────────────────────────────┬──────┬──────
+  Metric                        │0.22.0│0.23.0
+  ──────────────────────────────┼──────┼──────
+  Test attributes (src/ +       │3,998 │4,069
+  tests/)                       │      │
+  ──────────────────────────────┼──────┼──────
+  Unit-ish (src/)               │2,706 │2,739
+  ──────────────────────────────┼──────┼──────
+  Commands                      │24    │24
+  ──────────────────────────────┴──────┴──────
+  Upgrading
+  - From crates: patchloom = "0.23"
+  - From npm: npx patchloom@0.23 or pin patchloom@0.23.0
+  - CLI binary: GitHub Release installers, Homebrew tap, Scoop, Chocolatey,
+    or (when the community PR is approved) winget install Patchloom.Patchloom
+  - Library hosts: path-only non-text rename/delete and
+    apply_fragment_to_file land in this crate version; drop OS fallbacks
+    that were temporary on 0.22.0. Keep a wildcard match arm on
+    EditErrorKind and related #[non_exhaustive] types.
+  - MCP hosts: server_info JSON gains version and protocol_version.
+    Server is built against rmcp 3; confirm client protocol compatibility.
+  - Agents / scripts: prefer error_kind and applied over exit code
+    or ok alone. Preview mode still uses exit 2 when changes would be
+    written; sole binary paths peel binary / invalid_encoding.
+  Full changelog
+  patchloom-v0.22.0...patchloom-v0.23.0
+ReleaseNotesUrl: https://github.com/patchloom/patchloom/releases/tag/patchloom-v0.23.0
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://patchloom.github.io/patchloom/
+- DocumentLabel: Installation
+  DocumentUrl: https://github.com/patchloom/patchloom/blob/main/docs/getting-started/installation.md
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
