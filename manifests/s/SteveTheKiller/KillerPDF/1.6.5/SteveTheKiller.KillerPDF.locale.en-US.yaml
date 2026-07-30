@@ -1,0 +1,57 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: SteveTheKiller.KillerPDF
+PackageVersion: 1.6.5
+PackageLocale: en-US
+Publisher: Steve the Killer
+PublisherUrl: https://github.com/SteveTheKiller
+PublisherSupportUrl: https://github.com/SteveTheKiller/KillerPDF/issues
+Author: Steve the Killer
+PackageName: KillerPDF
+PackageUrl: https://github.com/SteveTheKiller/KillerPDF
+License: GPL-3.0
+LicenseUrl: https://github.com/SteveTheKiller/KillerPDF/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Steve the Killer
+ShortDescription: PDF editor for Windows. Install or run portable. GPLv3. No account, no subscription, no telemetry.
+Description: KillerPDF is a lightweight PDF viewer and toolkit for Windows. View, merge, split, and manage PDF files. Runs portable or installs to your user profile - no admin rights required. No account, no subscription, no telemetry. Open source under GPLv3.
+Moniker: killerpdf
+Tags:
+- dotnet
+- gplv3
+- opensource
+- pdf
+- pdf-editor
+- portable
+- windows
+- wpf
+ReleaseNotes: |-
+  Added
+  - Shapes tool: rectangle, ellipse, and free-form polygon markers, each with an optional fill. Box keeps the classic drag-a-filled-rectangle gesture the highlighter used to have; ellipse and polygon are closed outlines that move, resize, flatten, and print like any other drawing. Freeform places points click by click - click the first point (its target lights up when you are close) or double-click to close, Esc cancels, Backspace removes the last point. The tool shares the draw bar's color, size, and opacity, with a mini-shape sub-mode picker and a Fill toggle.
+  - Export pages as images (#132, thanks KaneLeung): a new entry in the Save dropdown renders pages to PNG or JPEG files at a chosen DPI (24-1200, default 150) with an optional page range, through the same pipeline as the CLI's --to-image. Pending annotations and stamps are burned in, in-app rotations are honored, and files land as <name>-page-001.png next to the base name you pick.
+  - Odd/even page printing (#134, thanks superaustingao): a new selector in the print dialog under Pages - All pages, Odd pages only, Even pages only - applied on top of the page range, with the preview following along. Print the odds, flip the stack, print the evens: manual duplex for printers without a duplexer, the Word way.
+  - Invert document colors (#135, thanks dmantisk): a moon toggle at the bottom of the sidebar rail (or Ctrl+I) renders the document with inverted colors for dark-mode reading - the icon lights in the accent while active, and the choice is remembered across launches. Display only: saving, printing, exporting, OCR, and the sidebar thumbnails all keep the document's true colors.
+  - App-wide size control for accessibility, the KillerNotes way: the title bar now shows the app icon next to the wordmark, and scrolling the mouse wheel over that logo scales the app chrome - toolbar, sidebar, and tab strip - in fine steps from 70% to 250% (or Ctrl+Shift and the +/- keys, Ctrl+Shift+0 to reset), remembered across launches. The document pane is deliberately untouched: app size and page zoom stay separate controls, so scaling the chrome never changes what the page looks like. It uses a layout scale so UI text stays sharp, and the title bar and footer stay fixed so the logo never moves out from under the cursor.
+  - Recent-files privacy controls (#146, thanks Bolle1987): a Clear list link on the start screen's Recent panel (matching the one already in the Open dropdown), and a "Don't remember recently opened files" toggle in the About window next to Clear all Data, where the data-hygiene controls live - turning it on also empties the existing list, so nothing about your documents persists on a shared machine. Translated into all ten languages.
+  - Czech (cs-CZ) localization (#138, thanks jiri-ops): the tenth interface language, a full translation following Czech Windows/Adobe conventions, in the language picker as "Čeština" - with Czech ("ces") joining the OCR language catalog, downloadable on demand like the rest.
+  Fixed
+  - Page numbers and watermarks are now actually written into the saved PDF when they are the document's only markup (#147, thanks Mr-Update). Every save path only burned the stamp layer when the document also carried at least one annotation, so stamping a clean document - the whole point of the tool on a fresh file - produced a PDF with nothing on it.
+  - Stamps can be removed again (#145, thanks Mr-Update). Unchecking both Page Numbers and Watermark disabled the Apply button, so once a document had stamps there was no way to turn them off - applying with both sections off is exactly how they are cleared, and is now allowed whenever the document already has stamps.
+  - Crash opening the Stamp or Transform tool (and on save) on a page with a multi-line text annotation (#142, thanks TrNguyen20; root cause and fix from Ryokoxx in #144). The burn silently used justified alignment, whose draw path dereferenced the empty line-break blocks a newline produces - any font, any machine. Burned text is now explicitly left-aligned, finally matching the editor once a line wraps, and the vendored formatter skips line-break blocks (and no longer flings blocks off the page on single-word justified lines). As a separate net for genuine font failures - the typeface behind a text box resolves lazily, so a font that constructed fine can still fail at first draw on machines missing that face - the draw falls back to the stock font, then skips just that annotation, and a failed preview burn renders the page without its annotation layer instead of taking the app down.
+  - The pre-save signature scrub tripped a NullReferenceException on every save of a document with no form fields (a fresh blank document, most PDFs without forms) - swallowed silently in release builds, but it aborted the scrub early and broke into any attached debugger. Absent dictionary entries like a missing /AcroForm are now treated as "not there" instead of dereferenced.
+  - Bookmarks that point at named destinations now resolve (#143, thanks Ryokoxx). PDFs from HTML-to-PDF generators (wkhtmltopdf underneath most invoice and statement tools) write outline destinations as names looked up through the catalog, which the outline loader did not handle - Debug builds popped an assertion dialog and Release builds left the bookmark silently dead. Resolution now falls back to the same name-tree walker the link layer already uses.
+  - The sidebar page thumbnails, outline tooltips, and grid-view tooltips always said English "Page N" regardless of the interface language (#137, thanks jiri-ops) - the labels are now real localized strings in every language, and they update immediately on a language switch.
+  - Japanese: repaired a garbled Document Info shortcut label (mojibake) and tightened the About wording (#136, thanks coolvitto).
+  - Fresh clones build again without manual repair: an explicit .gitattributes rule keeps EOL normalization away from the vendored third_party sources (#140, thanks Ryokoxx), belt and braces on top of the earlier re-encode.
+  - The Shapes tool strings and the outline's "(untitled)" placeholder existed only in English and Czech - the other eight languages showed blank tooltips and labels there. All ten languages now carry the full string set, verified key-for-key against English.
+  Changed
+  - Text selection now flows with the text (#127, thanks Ryokoxx): dragging with the Select tool tracks the actual run of characters in reading order, browser-style - across lines, paragraphs, and (in continuous view) across pages. A plain click still selects annotations, and drags that start on empty page keep the classic box select, so scans and annotation multi-select behave as before. Ctrl+A now shows real per-line selection on the page.
+  - Highlight, Strikethrough, and Underline follow the text the same way: drag over words and the markup hugs each line instead of laying down one rectangle. One gesture produces one grouped annotation per page - it selects, moves, deletes, and undoes as a single unit. On pages with no text layer the tools show a status hint instead of silently drawing a box; the highlight eraser keeps its rectangle.
+  - Black theme: the on-page selection color was a stray royal blue; it is now a readable dark green matching the theme.
+  - The form-field font-size stepper is now an "inline flyout" - a new style for controls that float on the document itself: a translucent rounded pill that drips down from the field being typed in, follows it through scrolling and zoom, flips above it at the bottom of the pane, and solidifies on hover. Subtle enough to sit on a legal document without being in the way, and it can no longer collide with the draw/text bars or the toolbar.
+  - Menu polish: dropdown items can carry icons in the gutter the check column always reserved (Save, Open, and OCR menus got them), and the OCR "Use High Quality Models" toggle now keeps the menu open, refreshing its checkmark and the per-language "(download)" labels in place.
+  - Tooltips now show their keyboard shortcut everywhere one exists, in all ten languages: the whole tool palette carries its single-key hint (V select, T text, H highlight, D draw, L line, I image, G signature, C crop, R transform, S stamp), and the invert and app-size controls show Ctrl+I and Ctrl+Shift+=/-/0. The shortcuts overlay's list view also caught up with the keyboard view: Ctrl+Shift+Z (redo), Ctrl+Shift+Tab (previous tab), and F2 (rename bookmark) are listed now.
+  - Collapsing and expanding the sidebar is now a smooth slide instead of a snap: the panel glides shut over a quarter second with the thumbnails holding their size (clipped, not squished), and the document settles in a single crisp pass afterwards - the same pipeline a splitter drag uses.
+ReleaseNotesUrl: https://github.com/SteveTheKiller/KillerPDF/releases/tag/v1.6.5
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

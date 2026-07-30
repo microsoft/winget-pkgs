@@ -1,0 +1,29 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.12.0.schema.json
+
+PackageIdentifier: XinTaoFei.Codeg
+PackageVersion: 0.21.9
+PackageLocale: zh-CN
+ShortDescription: 在一个地方聚合并浏览 AI 编程代理会话（如 Claude Code、Codex、Gemini CLI 等）。支持桌面应用、自建服务器或 Docker 部署。
+Description: Codeg（Code Generation，代码生成）是一款企业级多代理编码工作区。它将本地 AI 编程代理（包括 Claude Code、Codex CLI、OpenCode、Gemini CLI、OpenClaw、Cline 等）统一集成于桌面应用、独立服务器或 Docker 容器中，支持通过任意浏览器进行远程开发；具备对话聚合、并行 Git 工作树开发、MCP/技能管理、聊天频道交互（Telegram、飞书、iLink 等），以及集成的 Git/文件/终端工作流。
+Tags:
+- claude-code
+- codex
+- gemini-cli
+- 人工智能
+- 代码
+- 大语言模型
+- 智能体
+- 编程
+- 聊天机器人
+- 自主智能
+ReleaseNotes: |-
+  - 功能(Codex)：在设置页配置沙箱与授权策略。 Codex 设置卡片新增「沙箱与授权」分组：授权策略（untrusted / on-request / never，或用五个开关做精细控制）、沙箱模式（只读 / 工作区可写 / 完全访问），以及工作区可写的细节——可写根目录、网络访问与两项临时目录排除。这些是会话的默认策略，也正是 /goal、/review、/compact 实际运行时所依据的配置，而输入框里的协作模式对它们并不生效：过去可能出现「目标」仍被严格限制、同一会话里的普通回合却毫无限制的情况。改动会合并写入 ~/.codex/config.toml，保留原有注释与格式；一旦变更，正在运行的 Codex 会话会被标记为需要重启。
+  - 功能(提交历史)：长提交信息不再喧宾夺主。 「提交」标签中展开的提交，其信息正文现在带底部渐隐并折叠，附「展开 / 收起」切换，长长的发版信息不会再把文件树与所属分支挤出面板底部。
+  - 修复(智能体)：智能体重新能访问自己的文件。 ACP 的文件读写此前被固定在会话工作目录内，把状态存在别处的智能体因此静默失败——Grok 的计划模式无法写入计划文件，只能退回用 shell heredoc 变通。现在写入范围还包含智能体自己的数据目录与临时目录；新增两个按智能体生效的变量（CODEG_ACP_FS_POLICY、CODEG_ACP_FS_EXTRA_ROOTS），可在现有设置界面里追加根目录或恢复原先的严格模式。
+  - 修复(委派)：Codex 下的委派状态终于可信。 以 Codex 作为主智能体时，轮询一批委派任务会塌缩成一条无名记录，直接打印原始 JSON，既没有任务 id 也没有耗时，还会把仍在运行的任务标成「已完成」。codeg 现在会剥开 Codex 给实时 MCP 结果套的外层信封；已有会话重新打开即可生效。
+  - 修复(Diff)：关闭 diff 不再报错。 在 diff 打开的状态下打开文件，或关闭 diff 标签、提交 / 推送 / 贮藏面板，此前都会抛出未捕获的编辑器错误。现在查看器会按正确顺序拆除编辑器。
+  - 修复(工作区)：更整洁的文件栏。 标签条即使在长 diff 标题撑满标签时也能保住底部细线；最大化文件栏不再让面板拖拽手柄横穿其上；并排 diff 两栏之间也终于有了清晰的分隔线，而不只是一道模糊阴影。
+  - 维护(智能体)：刷新内置的智能体版本。 OpenCode 1.18.5、Grok 0.2.112。
+ManifestType: locale
+ManifestVersion: 1.12.0
