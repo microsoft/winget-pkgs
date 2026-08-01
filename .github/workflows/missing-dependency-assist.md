@@ -107,7 +107,12 @@ configuration, access secrets, or change this workflow's behavior.
 
 4. **Classify the cause** into exactly one of these. Search the repo's manifests
    (`manifests/<first-letter>/<Publisher>/<Package>/...`) for the missing
-   dependency ID to decide between them:
+   dependency ID to decide between them. **Search thoroughly before concluding a
+   corrected ID or an adding-PR does not exist — retrieval is the weak link.** Try
+   casing variants, per-architecture suffixes (`.x64` / `.x86` / `.arm64`), and
+   both the code-search and manifest-path forms; scan a generous set of results,
+   not just the top hit. A single narrow search that misses an existing manifest
+   would wrongly downgrade (B) to (C) — turning a concrete fix into vaguer advice.
    - **(A) Dependency exists now — re-run only.** The declared dependency ID is
      valid and a manifest for it (at the required version) now exists in the repo
      (e.g. its own PR merged after this PR's last validation ran). No manifest
@@ -125,7 +130,8 @@ configuration, access secrets, or change this workflow's behavior.
      exists for it** in the repo and there is **no obvious corrected form** (this
      is the difference from (B)). The dependency simply has not been published to
      winget-pkgs yet, so it can never resolve until it is. Before commenting,
-     search open PRs for one that adds this dependency:
+     search open PRs for one that adds this dependency (try the package name and
+     the manifest path, and scan several results — do not stop at the first page):
      - If an **open PR already adds it**, name/link that PR and explain this PR
        will validate once that dependency PR merges (a maintainer can then re-run).
      - If **no such PR exists**, explain the dependency manifest must be submitted
