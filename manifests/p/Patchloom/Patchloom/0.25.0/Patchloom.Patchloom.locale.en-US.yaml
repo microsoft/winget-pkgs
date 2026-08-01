@@ -1,0 +1,165 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Patchloom.Patchloom
+PackageVersion: 0.25.0
+PackageLocale: en-US
+Publisher: Patchloom
+PublisherUrl: https://github.com/patchloom
+PublisherSupportUrl: https://github.com/patchloom/patchloom/issues
+Author: Patchloom
+PackageName: Patchloom
+PackageUrl: https://github.com/patchloom/patchloom
+License: MIT
+LicenseUrl: https://github.com/patchloom/patchloom/blob/HEAD/LICENSE
+Copyright: Copyright (c) Patchloom contributors
+ShortDescription: Structured file editing CLI for AI agents
+Description: |-
+  Patchloom is a single-binary CLI that gives AI coding agents safe, structured
+  file editing: search and replace, unified diffs, parser-backed JSON/YAML/TOML
+  document ops, markdown section editing, AST-aware renames, multi-file
+  transactions, undo, and an MCP server for tool calls.
+Moniker: patchloom
+Tags:
+- ai
+- cli
+- developer-tools
+- mcp
+- rust
+ReleaseNotes: |-
+  Patchloom 0.25.0
+  Library hosts (including coding agents that embed the crate) can delete
+  special path nodes through the same guarded API as regular files, and can
+  read YAML presentation drift on doc writes via EditResult.style_changed.
+  Agents and CLI users get safer pure git renames, clearer create and path
+  errors, and more reliable restore after failed applies. Twenty commits
+  since 0.24.0.
+  Highlights
+  file_delete unlinks regular files, symlinks (including dangling), and
+  FIFO, socket, and device nodes under PathGuard. Hosts no longer need a
+  separate OS unlink branch for special nodes. Doc writers set
+  style_changed (and api::is_style_changed) when YAML block-sequence
+  indent or similar presentation shifts while values stay correct. Path
+  renames from git patches refuse to overwrite an existing destination,
+  report one rename row in JSON, and keep path-only semantics for symlink
+  and special sources.
+  New features
+  - EditResult.style_changed for library doc writes.
+    Doc API results include a style_changed field when presentation
+    drifts (for example YAML block-sequence indent collapse). Use
+    api::is_style_changed without re-running presentation helpers.
+    Non-doc ops leave the field false. Not a failure: content values
+    remain correct. (#2090)
+  - Special-node file_delete.
+    Library, CLI, and tx delete unlink FIFO, socket, character/block
+    device, and symlink paths (including dangling). Real directories are
+    still refused. Non-regular deletes use an empty backup marker so
+    restore does not block on FIFO copy. (#2090)
+  - Path-only rename for symlinks and special nodes.
+    Rename no longer soft-loads symlink targets as text (which could
+    rewrite the target under write policy). Dangling links and
+    symlink-to-dir rename as paths; FIFO is not opened for a binary
+    probe. (#2092)
+  Bug fixes
+  - Mutation failure after backup was hard to recover from.
+    When a write failed after the backup session was created, restore
+    outcome was dropped. Hosts now get a restored session id, or a clear
+    restore-also-failed message with the session id. Hardlink write
+    recovery is more reliable. (#2089)
+  - Empty-file delete restore under strict validate.
+    Plans that delete an empty file then fail a later strict check
+    restore that path correctly (empty deletes were missing from the
+    change set used for rollback). (#2084)
+  - plan.cwd with for_each double-prefixed paths.
+    Combining a re-rooted plan cwd with for_each globs is refused (same
+    on CLI, library, and MCP) instead of producing not_found under a
+    double path. Multi-match for_each guards are clearer. (#2086)
+  - Append/prepend CRLF separators.
+    Append and prepend pick separators that match the file's line endings
+    more consistently on Windows-style files. (#2086)
+  - Create already exists in all write modes.
+    Without --force / force, create refuses an existing path in
+    Preview, Check, and Apply (not only soft-success in Preview). Library
+    and engine modes match CLI already_exists. (#2098)
+  - Create over dangling symlink.
+    A broken symlink is treated as an existing path entry. Preview and
+    apply agree; force replaces the dangling link with a regular file.
+    (#2099)
+  - Library fuzzy no-op on Apply.
+    Fuzzy or context replaces that leave content unchanged no longer
+    report a misleading success shape on Apply. (#2099)
+  - Ambiguous markdown headings fail closed.
+    Section ops that match the same heading more than once return
+    error_kind: ambiguous (exit 5). Level-qualified queries (for
+    example ## Rules) still disambiguate. (#2103)
+  - Git rename patches load and apply the old path.
+    Rename-style unified diffs parse rename metadata, load content from
+    the old path, and apply correctly. Pure renames without hunks are
+    supported when rename meta is present (copy is never treated as
+    rename). (#2103, #2104)
+  - Pure rename destination overwrite refused.
+    Patch apply of a pure or git path rename fails with
+    error_kind: already_exists if the destination exists (same rule as
+    rename without --force). Case-only renames remain allowed.
+    (#2107)
+  - Patch JSON one row per pure rename.
+    CLI patch JSON/JSONL emits a single files[] row with from,
+    to, and action: "renamed" instead of two independent rows.
+    (#2108)
+  - C-quoted and octal rename paths.
+    Git C-quoted paths with spaces and octal UTF-8 sequences (for
+    example caf\303\251.rs) unquote correctly on pure renames.
+    Preview sets changed for path-only renames. (#2105, #2110)
+  - Rename then create or delete in one plan.
+    Transaction rename bookkeeping keeps create-after-rename and
+    rename-then-delete outcomes correct. Pure rename PathGuard checks
+    both source and destination (including outside-workspace sources).
+    (#2109)
+  - Append/prepend on dangling or special nodes.
+    Dangling symlinks and special directory entries peel as structured
+    invalid input instead of hanging or misclassifying the path.
+    (#2110)
+  - AST directory walk skips .git.
+    Project AST walks do not descend into .git trees. (#2103, #2104)
+  - move_section destination error messages.
+    Source vs destination failures are easier to tell apart in agent
+    and CLI output. (#2104)
+  Numbers
+  ──────────────────────────────┬──────┬──────
+  Metric                        │0.24.0│0.25.0
+  ──────────────────────────────┼──────┼──────
+  Test attributes (src/ +       │4,129 │4,190
+  tests/)                       │      │
+  ──────────────────────────────┼──────┼──────
+  Unit-ish (src/)               │2,783 │2,840
+  ──────────────────────────────┼──────┼──────
+  Commands                      │24    │24
+  ──────────────────────────────┴──────┴──────
+  Upgrading
+  - From crates: patchloom = "0.25"
+  - From npm: npx patchloom@0.25 or pin patchloom@0.25.0
+  - CLI binary: GitHub Release installers, Homebrew tap, Scoop, Chocolatey,
+    or (when the community PR is approved) winget install Patchloom.Patchloom
+  - Library hosts: match on new EditResult.style_changed for doc
+    writes if you warn on presentation drift. Prefer
+    api::file_delete for special nodes and drop host-only OS unlink
+    branches that existed for 0.24 regular-file-only delete. Keep a
+    wildcard arm on EditErrorKind and other #[non_exhaustive] types.
+  - Rename / delete hosts: re-test symlink and special-node paths;
+    path-only rename and delete should cover cases that previously needed
+    custom handling.
+  - Patch and tx users: pure git renames refuse dest overwrite; JSON
+    rename shape uses one row with from/to/action. Do not combine
+    plan.cwd re-root with for_each globs.
+  - Markdown section edits: multi-match headings fail with
+    ambiguous; qualify by level when needed.
+  Full changelog
+  patchloom-v0.24.0...patchloom-v0.25.0
+ReleaseNotesUrl: https://github.com/patchloom/patchloom/releases/tag/patchloom-v0.25.0
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://patchloom.github.io/patchloom/
+- DocumentLabel: Installation
+  DocumentUrl: https://github.com/patchloom/patchloom/blob/main/docs/getting-started/installation.md
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
