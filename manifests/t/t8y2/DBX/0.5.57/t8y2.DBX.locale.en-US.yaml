@@ -1,0 +1,68 @@
+# Created with WinGet Tracker using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: t8y2.DBX
+PackageVersion: 0.5.57
+PackageLocale: en-US
+Publisher: t8y2
+PublisherUrl: https://github.com/t8y2
+PublisherSupportUrl: https://github.com/t8y2/dbx/issues
+Author: t8y2
+PackageName: DBX
+PackageUrl: https://github.com/t8y2/dbx
+License: Apache-2.0
+LicenseUrl: https://github.com/t8y2/dbx/blob/HEAD/LICENSE
+ShortDescription: 15MB，lightweight, cross-platform database client. Supports MySQL, PostgreSQL, SQLite, Redis, MongoDB, DuckDB, ClickHouse, SQL Server and more.
+Tags:
+- clickhouse
+- database
+- database-client
+- database-management
+- duckdb
+- gui
+- mongodb
+- mysql
+- postgresql
+- redis
+- rust
+- sql-server
+- sqlite
+- tauri
+- vue
+ReleaseNotes: |-
+  新功能
+  - PostgreSQL 进程列表 — 新增 PostgreSQL 会话与活动查询查看器，可检查连接状态、运行 SQL 和事务信息。(contributed by @antwa)
+  - XLSX 附带查询 SQL — 查询结果导出新增“XLSX（含 SQL）”，在独立 Sheet 中记录实际生成结果的 SQL，支持多结果集、流式导出和超长 SQL 分段。(contributed by @zipg) (closes #2386)
+  - 批量执行遇错继续 — 查询设置新增遇到语句错误后继续执行后续 SQL 的选项，便于运行包含多个独立步骤的脚本。(contributed by @gggaiitx)
+  - Oracle 多 Schema 补全 — 增强跨用户对象、包、函数和存储过程的 SQL 自动补全。(contributed by @zipg)
+  - 独立 JDBC 连接入口 — 新建连接新增专用 JDBC 入口；缺少 Agent/JDBC 驱动时可直接定位到对应的驱动安装页面。(contributed by @zipg, @onceMisery)
+  - 连接分组路径 — 侧边栏支持显示连接所属分组路径，便于在大量分组和连接中快速识别位置。(contributed by @eryajf) (closes #3381)
+  - 版本更新日志 — 关于页面内置当前版本的更新日志，用户可以直接查看主要新增能力和修复内容。(contributed by @xddcode) (closes #3377)
+  改进
+  - ZooKeeper 连接速度 — 连接前并行探测节点并缩短不可达场景的等待时间，同时保留完整 ensemble 以支持节点恢复和故障切换。(contributed by @onceMisery)
+  - Redis TTL 保留 — 编辑已有 String 值且未指定新 TTL 时使用 KEEPTTL；旧版 Redis 自动回退到兼容方案，避免更新值时意外清除过期时间。(contributed by @eryajf) (closes #3366)
+  - 数据网格筛选 — 重复数据库值筛选改用结构化列表处理，减少重复选项并改善筛选交互和大数据量表现。
+  - 侧边栏交互 — 统一树节点操作、异步弹窗和数据页签打开流程；取消固定节点后恢复正确顺序，并提升大型连接树的稳定性。
+  - 对象浏览布局 — 网格模式下的对象卡片保持等高，改善名称、类型和操作区域的视觉对齐。(contributed by @xddcode) (closes #3414)
+  - 对象导航 — 从网格、编辑器和 SQL 导航打开视图时保留原始对象类型，避免普通视图与物化视图混淆。
+  - 达梦显示名称 — 连接列表、导入和新建连接中的数据库名称统一为“达梦 Dameng”。(contributed by @zipg)
+  - Linux 安装文档 — 新增 RPM 安装包说明，并补充贡献者本地构建教程和缺失的文档侧边栏图标。(contributed by @BabyLy233)
+  修复
+  - Linux Nouveau 黑屏 — 针对 Nouveau 驱动下 WebKitGTK DMABUF 渲染导致的黑屏增加兼容处理，并避免仅因模块加载就影响其他显卡。(contributed by @zipg) (closes #3406)
+  - MongoDB 长整型 — NumberLong 筛选、Extended JSON 和超出 JavaScript 安全整数范围的 _id 更新保持 BSON Int64 精度，不再匹配失败或误改字符串 ID。(contributed by @zipg) (refs #2527)
+  - Oracle 数据插入 — 生成兼容 Oracle 的 INSERT 语句，修复日期、二进制及特殊数据类型导致的插入失败。(contributed by @zipg) (closes #3385)
+  - Oracle 无主键查询 — 为通配符查询追加 ROWID 前正确限定表别名，避免多表或带别名 SQL 产生语法错误。(contributed by @zipg)
+  - SQL Server 事务 — 保留显式事务批次的执行边界，并避免过期的连接测试结果覆盖当前连接状态。
+  - SQL Server 旧版兼容 — 改进旧版 SQL Server 的兼容模式检测和提示，减少错误诊断。(contributed by @zipg)
+  - Kingbase 连接与触发器 — 支持 Kingbase8 JDBC URL，并正确解析系统目录模式下的触发时机标志。(contributed by @zipg, @HandSonic)
+  - GBase 8a 离线驱动 — 离线环境下正确识别已安装的 GBase 8a 驱动，不再反复提示缺少驱动。(contributed by @zipg)
+  - MySQL 元数据 — 代理或兼容数据库拒绝设置 group_concat_max_len 时自动使用兼容路径，避免连接及元数据加载失败。(contributed by @xddcode) (closes #3407)
+  - Doris 复杂类型 — 保留 STRUCT 等复杂类型字段之间的分隔符，避免 SQL 解析或格式化后类型定义损坏。(contributed by @onenewcode) (closes #3349)
+  - OpenAI 请求兼容 — 不再向不接受额外 body 的 OpenAI 兼容接口发送空扩展字段，减少请求校验失败。
+  - 隧道配置同步 — 从同步数据恢复连接配置后立即刷新 SSH 隧道配置列表，无需重启或重新打开设置。
+  - 侧边栏顺序 — 取消固定连接、数据库或对象后恢复其在原始树结构中的正确位置。
+  - 文档导航 — 补齐文档侧边栏图标，修复部分页面导航标识缺失。
+  > 国内下载：如果 GitHub 下载较慢，可从 CNB 镜像 下载桌面端安装包，Docker 镜像从 docker.cnb.cool/dbxio.com/dbx:0.5.57 拉取。
+ReleaseNotesUrl: https://github.com/t8y2/dbx/releases/tag/v0.5.57
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

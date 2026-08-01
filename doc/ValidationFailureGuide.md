@@ -5,7 +5,7 @@ When you submit a pull request to [microsoft/winget-pkgs](https://github.com/mic
 > [!TIP]
 > Many issues can be caught before submitting by running:
 > ```powershell
-> winget validate <path-to-manifest>
+> winget validate --manifest <path-to-manifest>
 > winget install --manifest <path-to-manifest>
 > ```
 > For isolated testing, use the [SandboxTest.ps1](https://github.com/microsoft/winget-pkgs/blob/master/doc/tools/SandboxTest.md) script or Windows Sandbox.
@@ -37,7 +37,7 @@ These labels track the progress of your PR through the validation pipeline.
 |---|---|
 | **Azure-Pipeline-Passed** | Your manifest passed automated testing. There may be additional manual verification required. |
 | **Validation-Completed** | All checks passed. Your PR may be merged automatically after moderator review. |
-| **Needs-Author-Feedback** | Something needs your attention. If not addressed within 10 days, the PR will be auto-closed. |
+| **Needs-Author-Feedback** | Something needs your attention. If not addressed within 5 days, `No-Recent-Activity` will be added. If there is still no activity after a further 3 days, the PR will be automatically closed. |
 | **Needs-Attention** | The PR has been escalated to the WinGet engineering team for investigation. |
 | **Blocking-Issue** | The PR cannot be approved until the blocking issue (indicated by an accompanying error label) is resolved. |
 | **Needs-CLA** | You have not signed the [Contributor License Agreement](https://cla.opensource.microsoft.com/microsoft/winget-pkgs). The PR cannot be merged until the CLA is signed. |
