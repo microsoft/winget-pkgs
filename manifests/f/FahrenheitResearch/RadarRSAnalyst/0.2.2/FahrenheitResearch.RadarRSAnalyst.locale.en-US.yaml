@@ -1,0 +1,47 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: FahrenheitResearch.RadarRSAnalyst
+PackageVersion: 0.2.2
+PackageLocale: en-US
+Publisher: Fahrenheit Research
+PublisherUrl: https://github.com/FahrenheitResearch
+PublisherSupportUrl: https://github.com/FahrenheitResearch/radar-rs-analyst/issues
+Author: Fahrenheit Research
+PackageName: Radar RS Analyst
+PackageUrl: https://github.com/FahrenheitResearch/radar-rs-analyst
+License: MIT OR Apache-2.0
+LicenseUrl: https://github.com/FahrenheitResearch/radar-rs-analyst/blob/main/LICENSE-APACHE
+Copyright: Copyright © Fahrenheit Research. MIT OR Apache-2.0.
+CopyrightUrl: https://github.com/FahrenheitResearch/radar-rs-analyst/blob/main/LICENSE-MIT
+ShortDescription: Fast native Rust Level II radar viewer
+Description: Radar RS Analyst is a native Rust Level II radar viewer focused on fast, high-fidelity CPU rendering. It loads public NEXRAD Level II data, shows a lightweight map-style radar canvas, overlays live NWS/SPC hazards, and keeps the native super-resolution pixel pattern visible for analyst workflows. This is early analyst software. The priority is a small, fast desktop app that preserves radar detail and keeps interaction fluid while the feature surface grows.
+Moniker: radar-rs-analyst
+ReleaseNotes: |-
+  Radar RS Analyst v0.2.2
+  Supersedes v0.2.1 with the accepted history/live/portability/velocity work plus the extra velocity-dealias spoke guardrails from review.
+  Highlights:
+  - Frame history with selectable 3/5/7/10/15/20/25/30 frame limits.
+  - Timeline scrubber, previous/next controls, and play/pause looping.
+  - Explicit Load Loop history backfill so normal live loading stays focused on current data.
+  - Level II live backfill and live partial handling with stale/partial/complete labels.
+  - Low-level live chunk display is gated by the Chunks option; default waits for a complete low-level tilt.
+  - Same-site live refresh preserves map view and product selection, including velocity.
+  - Multi-radar overlays remain available while the primary radar keeps priority.
+  - RadarScope/analyst-style stepped palette parsing and additional REF/VEL color presets.
+  - Plain VEL can use the dealiased continuity grid by default via Unfold VEL.
+  - Velocity dealias spoke guardrails: radial unfold cap reduced, stale slope propagation after gaps blocked, and isolated spoke cleanup retained.
+  - Portable cache/config paths; no Drew/source-tree runtime path dependency found in source or release EXE audit.
+  - Profiling examples for single and multi-radar decode/render/memory checks.
+  Verification:
+  - cargo test -p render2d velocity_dealias -- --nocapture
+  - cargo clippy --all-targets --all-features -- -D warnings
+  - cargo test -p render2d -p app_ui -p color_tables -p data_source
+  - cargo build --release -p app_ui with path remapping
+  - Source hardcoded-path audit passed.
+  - Release EXE binary string audit passed for Drew/Codex/Downloads/source-tree paths.
+  Known caveat:
+  The velocity dealiaser is still a lightweight local implementation, not a full GR2A/RadarScope-grade dealiaser. It now has additional radial-spoke guardrails, but complex velocity regions can still differ from commercial tools.
+ReleaseNotesUrl: https://github.com/FahrenheitResearch/radar-rs-analyst/releases/tag/v0.2.2
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

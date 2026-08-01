@@ -5,7 +5,7 @@ When you submit a pull request to [microsoft/winget-pkgs](https://github.com/mic
 > [!TIP]
 > Many issues can be caught before submitting by running:
 > ```powershell
-> winget validate <path-to-manifest>
+> winget validate --manifest <path-to-manifest>
 > winget install --manifest <path-to-manifest>
 > ```
 > For isolated testing, use the [SandboxTest.ps1](https://github.com/microsoft/winget-pkgs/blob/master/doc/tools/SandboxTest.md) script or Windows Sandbox.
@@ -37,7 +37,7 @@ These labels track the progress of your PR through the validation pipeline.
 |---|---|
 | **Azure-Pipeline-Passed** | Your manifest passed automated testing. There may be additional manual verification required. |
 | **Validation-Completed** | All checks passed. Your PR may be merged automatically after moderator review. |
-| **Needs-Author-Feedback** | Something needs your attention. If not addressed within 10 days, the PR will be auto-closed. |
+| **Needs-Author-Feedback** | Something needs your attention. If not addressed within 5 days, `No-Recent-Activity` will be added. If there is still no activity after a further 3 days, the PR will be automatically closed. |
 | **Needs-Attention** | The PR has been escalated to the WinGet engineering team for investigation. |
 | **Blocking-Issue** | The PR cannot be approved until the blocking issue (indicated by an accompanying error label) is resolved. |
 | **Needs-CLA** | You have not signed the [Contributor License Agreement](https://cla.opensource.microsoft.com/microsoft/winget-pkgs). The PR cannot be merged until the CLA is signed. |
@@ -285,6 +285,7 @@ Function Get-UrlResponse {
 - Incorrect installer type (e.g., `exe` specified for a `nullsoft`, `burn`, or `inno` installer, or `msi` for `wix`) — WinGet handles silent switches automatically for known types, so a wrong type means the wrong switches are used
 - Missing or incorrect silent install switches (`/S`, `/silent`, `/quiet`, etc.)
 - The installer displays a dialog that blocks progress (license agreement, options screen)
+- The installer triggers a UAC prompt that cannot be accepted in the automated test environment — if the installer needs elevation, add `ElevationRequirement: elevationRequired` to the manifest so WinGet handles it
 - A dependency is missing on the test machine
 - The `exe` installer type was specified instead of `portable` for an application that runs without an installer
 
@@ -324,7 +325,30 @@ Function Get-UrlResponse {
 
 **What it means:** A general error occurred during manual validation of the package.
 
-**How to fix:** Check the accompanying PR comment for specific next steps.
+**Common causes:**
+- The installer requires administrator privileges but the manifest does not specify `ElevationRequirement: elevationRequired`. The validation infrastructure runs installers as a standard (non-elevated) user by default. If the installer needs to write to protected locations (e.g., `Program Files`), modify system registry keys (HKLM), or install a Windows service, it will fail without the correct elevation requirement.
+- A dependency is missing on the test machine.
+- The installer encountered an unexpected error during setup.
+
+**How to fix:**
+1. If the validation logs indicate an access-denied or permissions error, add `ElevationRequirement: elevationRequired` to your installer manifest. See the [ElevationRequirement documentation](https://github.com/microsoft/winget-pkgs/blob/master/doc/manifest/schema/1.12.0/installer.md) for guidance on choosing the correct value.
+2. Check the accompanying PR comment for specific next steps.
+
+---
+
+#### `Validation-Shell-Execute`
+
+**What it means:** The installer failed to launch or did not complete during dynamic validation. WinGet was unable to execute the installer successfully via `ShellExecute`.
+
+**Common causes:**
+- The installer requires administrator privileges but the manifest does not specify `ElevationRequirement: elevationRequired`. The validation environment runs as a standard user — if the installer unconditionally needs elevation (e.g., it writes to `Program Files`, modifies HKLM registry keys, or installs a system service), it will fail without this field.
+- The installer binary is corrupted or not a valid executable.
+- The installer depends on a runtime or framework that is not present on the test machine.
+
+**How to fix:**
+1. If the installer needs elevation to complete, add `ElevationRequirement: elevationRequired` to your manifest. Do **not** use `elevatesSelf` unless the installer has its own built-in logic to conditionally request elevation. See the [ElevationRequirement documentation](https://github.com/microsoft/winget-pkgs/blob/master/doc/manifest/schema/1.12.0/installer.md) for details.
+2. Test locally with `winget install --manifest <path>` from a non-elevated terminal to reproduce the issue.
+3. Verify the installer binary is valid and not corrupted.
 
 ---
 
@@ -461,6 +485,8 @@ These labels are applied by [moderators](https://github.com/microsoft/winget-pkg
 | `Validation-Indirect-URL` | URL | ✅ Yes | Remove URL redirection |
 | `Validation-Unattended-Failed` | Install | ✅ Yes | Fix silent install switches |
 | `Validation-Executable-Error` | Install | ⚠️ Maybe | Verify executable is discoverable |
+| `Validation-Installation-Error` | Install | ✅ Yes | Fix installation failure (check elevation) |
+| `Validation-Shell-Execute` | Install | ✅ Yes | Fix installer launch failure (check elevation) |
 | `Validation-Defender-Error` | Install | ⚠️ Maybe | Fix or submit for false positive review |
 | `Validation-Merge-Conflict` | PR | ✅ Yes | Resolve merge conflict |
 | `Validation-MSIX-Dependency` | Dependency | ✅ Yes | Add missing framework dependency |

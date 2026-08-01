@@ -1,0 +1,60 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: CraftDocs.CraftAgents
+PackageVersion: 0.11.0
+PackageLocale: en-US
+Publisher: Craft Docs Ltd.
+PublisherUrl: https://www.craft.do/
+PublisherSupportUrl: https://github.com/craft-ai-agents/craft-agents-oss/issues
+PrivacyUrl: https://www.craft.do/privacy
+Author: Craft Docs Ltd.
+PackageName: Craft Agents
+PackageUrl: https://agents.craft.do/
+License: Apache-2.0
+LicenseUrl: https://github.com/craft-ai-agents/craft-agents-oss/blob/HEAD/LICENSE
+Copyright: Copyright 2026 Craft Docs Ltd.
+CopyrightUrl: https://www.craft.do/terms
+ShortDescription: Work with most powerful agents in the world, with the UX they deserve
+Description: 'Craft Agents brings Claude’s coding capabilities to your entire digital workflow. It massively improves both coding and non-coding workflows via enhanced UI, review, and auto execution. Built on the same foundation as Claude Code (the Claude Agent SDK), it extends the model’s reasoning power to work across all your tools: GitHub, Linear, Slack, Craft documents, local files, and any API you can connect.'
+Tags:
+- agent
+- agentic
+- ai
+- large-language-model
+- llm
+ReleaseNotes: |-
+  v0.11.0 — Projects & Kanban Task Board (Beta)
+  The biggest release in a while: workspaces gain Projects, and work gets a visual home on a Kanban task board backed by durable Tasks that can fan out into orchestrated multi-session runs.
+  ⭐ Projects
+  Workspaces now have first-class Projects: named collections of sessions, assets, and context stored at {workspaceRootPath}/projects/{slug}/. Bind a session to a project and it inherits the project's working directory and gets a <project_context> block injected into its system prompt — including the project's asset manifest and a size-capped MEMORY.md — so the agent starts every conversation already knowing what the project is about.
+  - Projects panel & info page — a ProjectsListPanel in the navigator and a ProjectInfoPage with Sessions / Assets / Settings tabs; assign sessions from the session menu. (f2eb9542, 95bc761e, 423ff362)
+  - Project-aware session list — group and filter your sessions by project. (0ad7189e)
+  - Per-project accent color — with an appearance-treatment toggle; workspaces got avatars and a rebuilt color picker along the way. (2b2d64bd, 481851f8)
+  - Live binding + context injection — binding events update the UI live; asset manifest and project memory flow into every bound session. (7d540944, 742a2761)
+  - Fully localized in all 7 languages. (ada9ded1)
+  ⭐ Kanban Task Board — Beta
+  A new board view turns a workspace's sessions and tasks into draggable cards over per-project, fully editable columns. Under it sits a durable Tasks system: tasks live independently of chat, can be edited, re-run, and — for bigger jobs — decomposed into dependency DAGs that a Conductor orchestrator executes over real child sessions.
+  - The board — add, rename, recolor, and reorder columns per project; columns carry an optional drop status (settable from the board header), so moving a card can transition the underlying session's status. Cards keep stable ordering, auto-move columns as states change, and never auto-close — closing a card stays your decision. (e6f5ea5b, 5ae740b7, 82a661f4, fd9c0f04, 854a9860, aa9d581e)
+  - Tasks — a dedicated task editor with create/edit modes, a results tab, and live session binding; per-task labels; acceptance criteria; create-only vs. create-then-run flows; filter-aware "New Task"; run-from-tile; inherited project working directories. (9a608cc3, 7c7eb49c, 476a0c21, 36b978f0)
+  - Subtasks & DAGs (Conductor) — decompose a task into a task.yaml DAG; the Conductor spawns and supervises a child session per node with dependency-ordered execution, durable resume after interruption, and union subtask progress on the tile. Subtask nodes render colored, localized state pills. (ea814eba, 5702ea6b, 36b978f0, b03a9357, 937f0ff3)
+  - Repair loop — when a task's output doesn't meet its acceptance criteria, a repair pass re-checks and dispatches fixes. (36b978f0)
+  Beta notice: the Kanban board and Tasks (including Conductor DAG runs) ship as beta. Expect rough edges — board behaviors and the task spec format may still change between releases. Please report issues and ideas on GitHub.
+  Features
+  - Background agents stay alive across turns — background subagents are no longer killed when the turn that spawned them ends (previously surfacing as "stopped by user"). A persistent query keeps the session alive; when an agent finishes while the session is idle, the session wakes itself and presents the result. On by default — set CRAFT_KEEP_BG_AGENTS_ALIVE=0 to opt out. Running work shows as chips above the input (including live Workflow fan-out counts) with a floating completion chip when results land. Fixes #953. (32072bca, c0a726a6, c4201dd0, 5e7490ae)
+  Improvements
+  - Pi SDK 0.80.3 — removes a hardcoded 20s SSE timeout that cut off long Codex responses on OpenAI-protocol connections. (c9e456bd)
+  - UI fully localized — every hardcoded English string flagged by the i18n lint is gone (aria-labels, drawer titles, menus, crash screen, code-block chrome); the permission-mode selector and the standalone browser-toolbar window (which previously rendered raw translation keys) are properly localized across all 7 languages. (5fcdda43, 94f531f1)
+  - Docs — Claude Sonnet 5 documented on the LLM connections page. (a350766f)
+  Bug Fixes
+  - macOS Local Network access — the missing NSLocalNetworkUsageDescription is now embedded, so macOS shows Craft Agents under Privacy & Security → Local Network and LAN addresses (local Ollama, LAN MCP servers) work once granted. Fixes #938. (ed1e37aa)
+  - Automation "Test" timeout — automations:test no longer blocks on full turn completion, so prompt automations don't falsely report "Request timeout (30000ms)". Fixes #943. (c48cc012)
+  - Sidebar label overflow — very long session-label names now truncate instead of blowing out the session list. (98d29930)
+  Breaking Changes
+  - None. Background-agent keep-alive changes default behavior (subagents outlive the turn that spawned them) but is fully opt-out via CRAFT_KEEP_BG_AGENTS_ALIVE=0.
+ReleaseNotesUrl: https://github.com/craft-ai-agents/craft-agents-oss/releases/tag/v0.11.0
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://agents.craft.do/docs/getting-started/introduction
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

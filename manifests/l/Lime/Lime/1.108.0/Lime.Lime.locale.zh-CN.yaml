@@ -1,0 +1,65 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Lime.Lime
+PackageVersion: 1.108.0
+PackageLocale: zh-CN
+Publisher: Lime
+PublisherUrl: https://limeai.run/
+PublisherSupportUrl: https://github.com/limecloud/lime/issues
+PrivacyUrl: https://limeai.run/privacy/
+PackageName: Lime
+PackageUrl: https://limeai.run/
+License: 专有软件
+LicenseUrl: https://limeai.run/terms/
+Copyright: © 2026 Lime
+ShortDescription: 给中文创作者用的开源 AI 内容工作台
+Description: |-
+  Lime 是一个开源的 Electron 桌面端 AI 内容工作台，面向中文创作者、品牌运营、研究型写作者和小团队，覆盖 AI 写作、选题研究、素材管理、提示词沉淀、知识库和多模型创作流程。
+
+  你可以把它理解成一个更适合长期创作的 AI 工作台：
+  - 不是只问一句、答一句，而是围绕一个项目持续推进
+  - 不是每次都重新找资料、重新写提示词，而是把参考、风格和做法沉淀下来
+  - 不是生成完就散落在聊天记录里，而是把结果保存起来，下一次还能继续用
+  - 不是绑定某一家 AI 服务，而是让你使用自己已经配置好的模型能力
+  如果你经常在收藏夹、文档、聊天工具、图片工具和模型后台之间来回切换，Lime 想帮你把这些动作收回到同一个创作空间里。
+
+  你可以用 Lime 做什么
+  - AI 写作与内容创作：写公众号文章、小红书笔记、视频脚本、播客提纲和直播话术
+  - 资料研究与知识整理：整理网页、笔记、截图、访谈和历史材料，生成报告或简报
+  - 选题分析与内容复盘：拆解爆款案例、竞品内容、发布节奏和表达风格
+  - 提示词管理与风格复用：保存常用写法、品牌语气、选题方法和团队模板
+  - 多模态创作准备：生成图片提示词、封面方向、演示稿结构或网页草稿
+  - 多模型工作流：使用自己配置的 AI 服务商和模型，在同一个任务里持续修改、扩写、压缩或换平台发布
+ReleaseNotes: |-
+  Lime v1.108.0
+  新功能
+  - Agent 主链升级为 App Server v2 Thread / Turn / Item 协议，统一线程创建、恢复、归档、回合启动/中断/引导、Item 生命周期和 token usage 通知。
+  - 新增线程目标、记忆模式、线程设置、Shell 命令、分页 history/read model 与 durable notification 能力，GUI 可直接恢复同一 canonical identity。
+  - Agent session loop 支持 queued input、steer、interrupt、审批回填、上下文压缩、子代理 mailbox 和跨回合继续执行，并将状态持久化到 current owner。
+  修复
+  - 修复会话切换、历史 hydrate、归档/反归档、running turn 重开和长线程分页时的消息重复、终态丢失、identity 漂移与错误恢复问题。
+  - 修复 queued/steer/interrupt 在 Electron IPC、App Server notification 和 GUI 输入框之间的时序，停止或失败后可恢复输入并继续同一线程。
+  - 修复 provider 路由 readiness、credential lookup、pending generation、stream terminal 和模型错误展示，未知能力继续 fail closed。
+  - 修复 Settings 中归档会话、Provider 连接错误、语音模型与系统能力调用的 current bridge 接线，移除已退役快捷键设置面和生产 mock fallback。
+  - 修复插件 worker、自动化、MCP elicitation、Browser Session 与系统工具在重启、取消和权限失败下的状态回收。
+  - 修复内容工厂首次打开、编辑草稿、reload 恢复和 workflow 操作中的静态 session identity；Article Editor、artifact 与右侧工作区统一消费服务端 canonical Thread/Turn identity 和 durable v2 read model。
+  优化与重构
+  - App Server protocol、transport、processor、RuntimeCore、ThreadStore 和 Renderer typed gateway 收口到 v2 current 单轨；已退役 agentSession 会话方法和 schema 被删除。
+  - Agent runtime 拆分 session loop、turn start、thread state/listener、goal/usage、history merge、route selection 与 provider request owner，降低跨层耦合。
+  - Electron Desktop Host 收窄为 App Server 转发和系统宿主能力，Plugin、Voice、System Utility 与 preload/IPC allowlist 同步更新。
+  - Renderer 的 canonical projection、event stream、workspace runtime、消息列表、任务轨和右侧工作台按单一 Thread/Turn/Item read model 重组。
+  - 统一用户数据、缓存、凭证和数据库根路径迁移，删除 runtime queue、imported session sidecar、重复 repository 和旧兼容入口。
+  测试与质量
+  - 扩展 App Server v2 JSON-RPC、session loop、ThreadStore history、provider route、MCP、Multi-Agent、Plugin worker 与 Electron host 的单元/集成回归。
+  - 新增 Gate A browser projection 与 Gate B Electron/current fixture 证据入口，断言真实 preload/IPC、app_server_handle_json_lines、read model、GUI 终态和零生产 mock。
+  - 内容工厂 Gate B 覆盖 Article Editor 打开、编辑、reload 恢复、artifact/read model 与 workflow 控制，70/70 断言通过且 console/page error 为 0。
+  - 更新 protocol type generation、command/catalog、storage root、legacy surface 和脚本 owner 守卫，防止 v0/compat 路径回流。
+  文档
+  - 更新全局架构、数据库/持久化、Provider、治理、Codex/OpenCode 对齐、Writing v2、Agent Workbench 与项目 Gate A/B 事实源。
+  其他
+  - 版本事实源更新到 1.108.0：根应用、CLI npm package、Rust workspace、lime-rs/Cargo.lock 和 release notes。
+  完整变更：v1.107.0 → v1.108.0
+ReleaseNotesUrl: https://github.com/limecloud/lime/releases/tag/v1.108.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

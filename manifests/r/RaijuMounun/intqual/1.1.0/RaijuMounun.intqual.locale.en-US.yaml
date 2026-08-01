@@ -1,0 +1,41 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: RaijuMounun.intqual
+PackageVersion: 1.1.0
+PackageLocale: en-US
+Publisher: Eren Keskinoğlu
+PublisherUrl: https://github.com/RaijuMounun
+PublisherSupportUrl: https://github.com/RaijuMounun/intqual/issues
+PackageName: Intqual
+PackageUrl: https://github.com/RaijuMounun/intqual
+License: MIT
+LicenseUrl: https://github.com/RaijuMounun/intqual/blob/HEAD/LICENSE
+ShortDescription: A dual-layer asynchronous network latency analyzer and observability tool.
+Tags:
+- network
+- ping
+- tui
+ReleaseNotes: |-
+  Release v1.1.0: The Great Decoupling
+  This release introduces a major architectural milestone for the project. The internal architecture has been entirely rewritten to separate the monolithic structure into a fully decoupled workspace.
+  This release sets the foundation for future extensibility and provides significantly richer telemetry data for network diagnostics.
+  Major Architectural Changes (The Great Decoupling)
+  - Introduction of intqual-core: The monolithic application has been split into a Cargo Workspace. The core network intelligence engine, diagnostic probes, and business logic are now completely isolated in the intqual-core library.
+  - Standalone Engine Usage: Developers can now import intqual-core into their own Rust applications to leverage highly concurrent ICMP, TCP, and Traceroute engines without bringing in any CLI/UI overhead.
+  - Strict Encapsulation: The CLI is now a "Thin Client" that interacts with the engine purely through TelemetryEvent data contracts, enforcing strict thread-safety and robust data flow.
+  Enhanced Diagnostic Precision
+  - ICMP Error Telemetry: Previously, detailed ICMP error fields were intercepted but swallowed by the engine. Now, raw ICMP type and code variables from TimeExceeded and DestinationUnreachable packets are extracted and surfaced directly to the UI.
+  - Richer Traceroute Hops: Traceroute hops now include a dedicated icmp_error field. When a route fails or drops packets, precise, low-level OS/Network error codes are provided instead of silent timeouts, enabling much faster root-cause analysis.
+  Performance & Quality Improvements
+  - Memory Optimization: Eliminated redundant heap allocations (Arc<String>) inside the high-frequency probe loops (e.g., TracerouteProbe), reducing reference-counting overhead and improving CPU cache locality.
+  - Zero Technical Debt: Conducted a thorough codebase audit, resolving all hidden dead_code warnings and YAGNI violations. The engine now compiles with strict zero-warnings policies (-D warnings).
+  - CI/CD Upgrades: Release pipelines have been updated to seamlessly handle multi-crate publishing (intqual-core followed by intqual).
+  For Developers
+  To use the new core engine in your own Rust project:
+  [dependencies]
+  intqual-core = "1.1.0"
+  Full Changelog: v1.0.9...v1.1.0
+ReleaseNotesUrl: https://github.com/RaijuMounun/intqual/releases/tag/v1.1.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

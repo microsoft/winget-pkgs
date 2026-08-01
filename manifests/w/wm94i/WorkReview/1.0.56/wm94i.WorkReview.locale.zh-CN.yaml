@@ -1,0 +1,77 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: wm94i.WorkReview
+PackageVersion: 1.0.56
+PackageLocale: zh-CN
+Publisher: workreview
+PublisherUrl: https://github.com/wm94i
+PublisherSupportUrl: https://github.com/wm94i/Work-Review/issues
+PackageName: Work Review
+PackageUrl: https://github.com/wm94i/Work-Review
+License: 免费软件
+Copyright: © 2026 WorkReview
+ShortDescription: 帮你自动记录一天中使用了哪些应用、浏览了哪些网页、在每个应用上花了多少时间
+Description: |-
+  Work Review 会在后台持续记录你当天使用过的应用、访问过的网站、关键窗口和屏幕内容，再把这些离散片段整理成一条可回看、可追问、可复盘的工作轨迹。
+  - 不需要手动打卡，也不用事后回忆今天干了什么
+  - 概览、时间线、日报、工作助手共用同一份底层记录
+  - 既能看统计，也能直接追到具体页面、窗口标题和上下文截图
+  - 支持简体中文 / English / 繁體中文三种界面语言，日报会按当前语言分别生成与切换
+  - 支持轻量模式、按小时活跃度视图、日报 Markdown 导出和多屏截图策略切换
+  - 现在还提供 桌面化身 Beta，用更轻量的桌宠状态反馈陪你工作
+  全部数据本地存储，不上传任何服务器。AI 功能可选，关掉也完全可用。
+Tags:
+- 时间
+- 计时器
+- 跟踪器
+ReleaseNotes: |-
+  新增
+  - 阿拉伯语支持（RTL）（#128）：新增阿拉伯语界面翻译 + RTL 布局适配（CSS 逻辑属性替换硬编码方向），后端日报/分类名/活动时间线同步支持阿拉伯语输出。社区贡献 by algethamy。
+  - MCP Server 功能增强：
+    - get_current_context 通过 localhost API 获取真实前台窗口（主应用运行时），不再仅返回数据库历史记录；回退时标注 "source": "history"。
+    - generate_report 在 AI 增强模式下委托主应用生成 AI 日报，尊重用户的模型配置、工作时段、自定义 prompt 和隐私过滤。
+    - 隐私过滤对齐主应用：MCP 查询结果现支持 Anonymized 级别脱敏，与主应用的 PrivacyFilter 行为一致。
+  - 接入管理页面重构：将 997 行单文件拆分为容器 + 7 个子面板（nodeGateway/），分 3 组折叠（AI 工具接入 / 消息通知 / 高级）。飞书/钉钉/企业微信统一为泛型 BotCredentialsPanel 组件。
+  - 设计 Token 体系：建立 --radius-sm/md/lg（8/12/20px）+ --shadow-sm/md/lg + --space-section/block 统一基准，app.css 中 35 处硬编码值迁移到 token 变量。
+  - localhost API /v1/context 端点：返回当前前台窗口 + 最近应用列表，供 MCP Server 委托调用。
+  - 工作助手 Token 流式输出（阶段 2）：Agent 回答现按 token 逐字流式推送到前端（StreamEvent::Token，后端 64 字节/100ms 批量合并降低 IPC 频率），长回答不再"憋到最后一次性蹦出"。四类 provider（OpenAI 兼容/Ollama/Claude/Gemini）各自实现 SSE/NDJSON 增量解析 + 工具调用分片拼装，流式失败自动回退非流式；请求格式转换抽取为流式/非流式共享函数，超时改为逐块空闲 30s + 总时长 120s 双护栏。新增 10 个装配器/批量器单测。
+  - 工作助手联网工具（阶段 1）：工具系统从"仅同步本地工具"扩展为支持异步工具（ToolExecutor::Sync/Async 双通道，5 个本地工具零改动），新增三个联网工具——fetch_url（读网页正文，零依赖）、web_search（支持 Tavily / 博查需配 Key，以及 DuckDuckGo / Bing 免费搜索无需 Key）、query_activities（按日期查询活动记录，专为"今天做了什么"类问题设计，替代无法匹配相对时间的 FTS 搜索）。移除了 get_weather（open-meteo 超时频繁，天气改走 web_search）。默认全关，需在「设置 → AI 模型 → 助手联网能力」显式开启（守住隐私默认关立场）；开启后才把联网配置传入 Agent，问题才会发给搜索服务商/目标网站。含 SSRF 护栏（拦本机/内网/链路本地地址，防模型被诱导抓取本机 localhost API），联网提示注入帮助小模型正确选工具。四语言 i18n + 单测覆盖工具门控、SSRF、HTML 提取、搜索格式化、异步统一入口。
+  修复
+  - 创意类应用活动时长漏记：PS/C4D 等创意软件操作时画面几乎不变，但旧逻辑把"键鼠超时 + 画面静止"判定为空闲导致丢时长。反转哈希判定语义：画面静止不再判空闲，仅键鼠 10 分钟硬超时兜底。
+  - 助手页表格右侧大空白（#124 回归）：.assistant-markdown table 仍为 display:block，窄内容表格右侧留白。统一为 display:table; width:100%。
+  - 紧凑数据风格深色模式白边（#129）：ui-style-c 外框浅色 border + 半透明白底在深色模式下显示为白边。补齐 dark 覆盖（border-color + box-shadow + background）。
+  - 深色模式白色高光线（#129）：9 个元素（settings-tab-rail、ask-welcome-panel、overview-panel::before 等）的 inset 0 1px 0 rgba(255,255,255,X) 在深色下未被覆盖。统一补齐 box-shadow: none 或 display:none。
+  - 深色模式原生控件浅色：新增 color-scheme: light/dark，原生 <select>/<option> 下拉列表在深色模式下正确渲染。
+  - Windows 任务栏不显示应用名（#129）：窗口标题为空字符串导致任务栏/任务视图无名称。设为 "Work Review"。
+  - 时间线节点未对齐时间轴（#129）：轴线（absolute + calc）和节点（flex margin:auto）两套独立定位算法差约 14px。统一为共享水平基准。
+  - 日报活动时间线表格斑马纹误伤：details 内表格被全局 zebra striping + 表头灰底覆盖。补豁免规则。
+  - 亮色模式视觉不一致：StatsCard 文字灰度统一为 slate-500；主卡片圆角极端值收敛（32px→28px）；卡片边框统一为 border-slate-200/80。
+  - 设置页 memoryHint 文案过时：移除洞察卡片后文案仍提及"自动生成洞察"，改为描述 memory 实际功能。
+  - 助手流式事件从未到达前端的两处线格式错误：StreamEvent::Error(String) 为内部标签 + newtype 组合，serde 序列化直接失败且被静默吞掉，前端从未收到错误事件（改 struct 变体 { error }）；Done 事件的 tool_labels 字段以蛇形上线而前端读 event.toolLabels（枚举顶层 rename_all 不作用于字段），一直靠命令返回值双通道掩盖（补字段级 camelCase）。新增线格式契约测试锁定。
+  - 停止记录后两处指示器仍显示绿色脉冲（#131）：概览右上角"实时"圆点只判断是否"今天"模式，时间轴"活动记录"圆点更是硬编码绿色脉冲——两处都没响应录制状态。新增 recordingStore（参照 assistantStore 模式），App.svelte 在 get_recording_state 初始化和 recording-state-changed 事件中写入 store，概览/时间轴读取 store 判断圆点颜色：录制中（绿+脉冲）/ 已停止（灰）。新增 7 个单测。
+  - 火山引擎（豆包）连接测试 URL 拼接错误：连接测试的 /v1 回退逻辑假设所有 OpenAI 兼容 API 的端点都以 /v1 结尾，但火山引擎用 /api/v3、智谱用 /api/paas/v4——这些已含版本段，不应再追加 /v1（会拼出 /api/v3/v1/chat/completions 这种不存在的端点，用户报错 os error 10061 根因）。修复 openai_compatible_chat_completion_urls 和 fetch_openai_compatible_models：识别任何版本号段（/v1～/v9）后不再回退。新增 3 个测试覆盖火山引擎 v3 / 智谱 v4 / DeepSeek 无版本号三种场景。
+  - 助手页配了模型却默认用基础模板（#133）：用户在设置页配置好 AI 模型并测试通过后，助手页的模型选择器仍默认停在"基础模板"而非已配置的模型——用户不知道要手动切换下拉框，导致 AI 回答"我目前无法使用 AI 模型进行分析"。新增 hasUserSelectedModel 标志：首次打开助手页且用户从未手动操作过模型选择器时，如果存在已配置的模型档案，自动选中第一个；一旦用户手动切换（含切回基础模板），就尊重用户选择不再覆盖。新增 3 个单测。
+  - 基础模板模式下身份/能力类问答答非所问："你是谁"被路由到 FallbackPath，机械回答"我目前无法使用 AI 模型进行分析"。根因是 route_query 的闲聊触发词列表太窄（只有"你好/hello/帮助"），身份类问题（"你是谁/你是什么/who are you"）和能力类问题（"你能干什么/介绍下自己"）全部漏网。统一修复：扩展 DirectPath 触发词覆盖身份/能力问答；direct_answer 新增身份模板（介绍工作助手身份 + 提示当前模式）和能力模板；fallback_answer 文案改为引导性而非机械报错（"这个问题我需要 AI 模型才能回答好"）。新增 5 个测试。
+  - 基础模板模式大幅扩展工作查询关键词覆盖：之前 work_signals 列表只收了某个说法的单一表达（如"做了什么"但不收"干了什么"，"应用"但不收"软件"），导致大量常见工作查询问法（"忙不忙""摸鱼了吗""数据怎么样""开会开了多久""在干嘛"等 15+ 种）落到 FallbackPath 给引导文案。按同义词家族扩展：做/干/搞、忙、数据/情况/概览、专注/产出/摸鱼/下班、app/软件/程序、多久/小时、开会/会议、小结/汇总、干嘛/干什么。同时 fast_answer 在无时间词时默认查"今天"（而非全量 10000 条），让"小结""数据如何"等无时间词查询更聚焦。新增 1 个测试覆盖 15 种扩展问法。
+  - 日报提示词预设编辑（#130）：日报页面的提示词预设下拉菜单新增编辑按钮（铅笔图标），用户可以直接修改已有预设的名称和内容，而不必删除后重建。编辑保存逻辑区分"新建"与"更新"两种场景。
+  - 配置文件原子写入与故障安全启动：配置加载/保存改为原子操作（临时文件 + rename + fsync），写入前自动备份上一版本（.bak），临时文件通过 RAII 在所有路径（含错误/panic）自动清理。启动时若主配置损坏，从备份恢复或以故障安全默认值（关闭所有采集/权限/远端）启动，保留损坏现场供排查。支持 4 种状态（Loaded / Missing / RecoveredFromBackup / Corrupted），故障状态下跳过权限初始化和自动写回。Unix 临时文件权限 0600 防符号链接劫持。新增覆盖四态组合、原子覆盖写、备份生成、父目录 sync 失败等场景的测试。
+  - MCP Server localhost 请求认证：MCP Server 对 localhost API 的所有请求现在携带 Bearer token 认证（从 localhost_api_token.txt 读取）。fail-closed 设计——token 缺失或格式非法时不发请求，降级到本地模板/历史数据。每次请求重读 token 文件，支持主应用轮换后即时生效，无需重启 MCP。2 秒超时，请求失败不阻塞 MCP 主流程。
+  - Bot 日报生成 API 对齐：IM Bot（Telegram/飞书/企业微信/钉钉）触发的日报生成改为走标准 localhost API（POST /v1/reports/generate，JSON body），替代旧的查询字符串拼接。鉴权从 URL token 升级为 Bearer header（token 不再暴露在 URL/访问日志里）。服务端同时保留 GET（query）和 POST（JSON body）两条路径，旧版 bot 仍可兼容。
+  优化
+  - 日报页面视觉重设计：去玻璃拟态 + 斜纹纹理，改极简现代风（统一 token、轻阴影、大留白、统计卡重做、表格去重阴影 + zebra、活动时间线折叠样式现代化）。
+  - 助手多轮对话携带工具历史轨迹：历史 payload 此前只发 {role, content}，丢掉了工具步骤信息，导致下一轮模型重走上一轮失败的工具（例如上轮 search_memory 0 条后下轮又先调 search_memory）。现在 assistant 消息若含已完成工具步骤，会以紧凑内联摘要追加到 content 尾部再发后端。摘要按工具类型区分，避免数字误导：
+    - 失败工具：web_search↯（最强"别再试"信号）
+    - search_memory：search_memory→0 条（references 仅它贡献，hits 有真实语义）
+    - 其他成功工具：query_activities✓ / fetch_url✓（不写数字，因为它们的 hits 恒为 0——collect_references 全项目仅 search_memory 调用一次）
+    - 示例：[工具：search_memory→0 条 | query_activities✓ | web_search↯]
+    - system prompt 增加声明，告知模型这种方括号片段是机器摘要、不要复述给用户（4 个 locale 各自翻译，加在 ask.rs 的 build_assistant_system_prompt 末尾——该函数是生产路径 chat_work_assistant 唯一调用的 prompt 源；之前曾误加在 executor.rs 的 DEFAULT_SYSTEM_PROMPT，但生产路径 unwrap_or 永远走不到，是死代码，已修正）。
+    - 同时：后端 StepResult 事件增加 ok: bool 字段区分真正失败 vs 成功但 0 引用；前端跳过 streaming 或失败的半截轮次；补齐端到端“防重走失败路径”、旧事件三态兼容和各 locale system prompt 契约测试。
+  - 助手流式请求隔离与可靠投递：每次回答按 assistant 消息 ID 定点更新，并以 sendingRequestId 绑定发送占用；页面卸载后可立即开始新请求，旧请求的迟到事件和 finally 不会污染或释放新请求。Token 增量仍允许在背压时丢帧，StepStart、StepResult、Done 则通过内部 ACK 等待 Tauri Channel 实际发送成功；桥接失败会向 Agent 传播并取消已在途的模型/工具 Future，且不会误走 FastPath。
+  - 工具计数测试断言修复：移除 get_weather 后基础工具数从 5 变 6，但 test_openai_tools_format_is_valid 的断言未同步更新，已修正。
+  macOS 安装说明
+  首次打开可能提示「已损坏，无法打开」，请执行：
+  sudo xattr -rd com.apple.quarantine '/Applications/Work Review.app'
+ReleaseNotesUrl: https://github.com/wm94i/Work-Review/releases/tag/v1.0.56
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

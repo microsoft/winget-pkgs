@@ -1,0 +1,54 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: DavidEngelhart.Termpolis
+PackageVersion: 1.16.7
+PackageLocale: en-US
+Publisher: Termpolis
+PublisherUrl: https://github.com/codedev-david
+PublisherSupportUrl: https://github.com/codedev-david/termpolis/issues
+PrivacyUrl: https://github.com/codedev-david/termpolis/blob/HEAD/PRIVACY.md
+Author: David Engelhart
+PackageName: Termpolis
+PackageUrl: https://termpolis.com/
+License: Apache-2.0
+LicenseUrl: https://github.com/codedev-david/termpolis/blob/HEAD/LICENSE
+Copyright: Copyright 2026 David Engelhart
+ShortDescription: The open-source multi-agent terminal where Claude, Codex, Gemini, and Qwen work together as a team — without your source code leaving the machine.
+Description: |-
+  Termpolis is a cross-platform desktop terminal manager (Windows, macOS, Linux) built on Electron + React + TypeScript with node-pty powering the underlying shells. It ships as a native app, code signed on Windows, notarized on macOS.
+  What makes it different:
+  - Secure AI-assisted development. Built-in AI Security Center auto-scans every AI prompt against 70+ secret patterns, enforces Gemini paid-tier mode, and keeps an auditable JSONL log of every AI-agent terminal launch — every check runs locally.
+  - Multi-agent swarm. Claude Code, Codex, Gemini CLI, and Qwen Code work together on a task. A dedicated Claude Code instance acts as the conductor.
+  - MCP server baked in. AI agents control Termpolis via Model Context Protocol, open terminals, run commands, send messages.
+  - Transparent routing. Every subtask shows which agent got it, why, and what it cost.
+  - Activity observability. Every token, every tool call, every message from every agent is visible in real time.
+  - Intervention controls. Pause, cancel, or steer any agent mid-task without leaving the feed.
+  - Shared memory. A RAG-backed memory store that any agent can read and write via MCP.
+  - MCP-native end to end. All four agents speak MCP — no terminal-output parsers, no glue scripts, no bridge code paths.
+  - Share-ready output. One shortcut from terminal to Slack, Teams, or a PR — see Copy for Slack / Teams / PRs.
+Tags:
+- ai
+- command-line
+- console
+- terminal
+ReleaseNotes: |-
+  🧠 Memory hardening — context you can see, trust, and keep
+  v1.16.7 is a reliability release for Termpolis's persistent shared memory. Five fixes so the brain stops losing context and stops surfacing stale or low-relevance hits — the difference between "memory that mostly works" and "memory you can rely on every session."
+  What's fixed
+  - Observable recall. Claude's memory priming is invisible by design (a system-prompt file + a SessionStart hook), so a working recall used to look identical to no recall at all. Now every primed launch shows a banner — 🧠 Loaded N memories for "<project>" on success, or a clear ⚠️ Memory recall unavailable if the brain couldn't be reached. You always know whether context loaded.
+  - No more live-session lag. A new fast indexer tier runs on a ~90-second cadence and ingests only the active session's freshest turns (freshness-filtered, capped), so your current conversation is searchable within seconds instead of waiting for the next 30-minute full pass.
+  - Staleness guard. Code-anchored memories (path:line) whose file no longer exists are now flagged ⚠ STALE — file removed, verify before use in the recall digest, instead of being handed back to the agent as fact.
+  - PATH-proof memory hook. The SessionStart hook now resolves an absolute Node path (scanning PATH plus standard install locations), so memory still loads under thin-PATH login shells — NVM setups, restricted shells, and similar — where a bare node wouldn't resolve.
+  - Adaptive relevance floor. The recall floor can no longer resurrect below-threshold noise: it only fills up to the number of hits that actually clear the relevance bar. Weak, off-topic results stay out of the digest entirely — the agent gets the relevant slice, never padding.
+  Quality
+  All five fixes ship with full test coverage — 4,201 tests passing, coverage gate green (lines 94% / branches 85.7% / functions 91% / statements 92%), lint + build + typecheck clean. Tests and Release CI both green across Windows, macOS, and Linux.
+  Install / update
+  Existing installs auto-update. Or grab the latest build for your platform from the assets below — Windows (signed .exe), macOS (signed + notarized .dmg/.zip, Apple Silicon & Intel), Linux (.AppImage / .deb).
+  Full Changelog: https://github.com/codedev-david/termpolis/compare/v1.16.6...v1.16.7
+ReleaseNotesUrl: https://github.com/codedev-david/termpolis/releases/tag/v1.16.7
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://termpolis.com/docs.html
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
