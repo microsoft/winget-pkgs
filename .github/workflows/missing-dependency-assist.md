@@ -105,27 +105,41 @@ configuration, access secrets, or change this workflow's behavior.
    Messages: [ ... Dependency not found: [PackageIdentifier] Value: <ID> ... ]`.
    Extract the exact missing dependency **ID** (and version, if given).
 
-4. **Classify the cause** into exactly one of these:
+4. **Classify the cause** into exactly one of these. Search the repo's manifests
+   (`manifests/<first-letter>/<Publisher>/<Package>/...`) for the missing
+   dependency ID to decide between them:
    - **(A) Dependency exists now — re-run only.** The declared dependency ID is
-     valid and a manifest for it now exists in the repo (e.g. its own PR merged
-     after this PR's last validation ran). No manifest change is needed; the PR
-     just needs validation to run again. Do **not** tell the author to fix the
-     manifest, and do **not** post the re-run command yourself — say a
-     maintainer can re-run validation.
+     valid and a manifest for it (at the required version) now exists in the repo
+     (e.g. its own PR merged after this PR's last validation ran). No manifest
+     change is needed; the PR just needs validation to run again. Do **not** tell
+     the author to fix the manifest, and do **not** post the re-run command
+     yourself — say a maintainer can re-run validation.
    - **(B) Invalid or malformed dependency ID — author fix.** The declared ID is
-     not a real package identifier in the repo (wrong casing, a non-existent ID,
-     or a family alias like `Microsoft.VCRedist.2015+` instead of a real
-     per-architecture ID such as `Microsoft.VCRedist.2015+.x64`). Identify the
-     correct ID(s) by searching the repo's manifests, and recommend the precise
+     wrong but a **corrected form exists in the repo**: wrong casing, a typo, or a
+     family alias like `Microsoft.VCRedist.2015+` used instead of the real
+     per-architecture ID `Microsoft.VCRedist.2015+.x64` / `.x86`. Identify the
+     correct ID(s) by searching the repo's manifests and recommend the precise
      correction.
-   - **(C) Cannot determine confidently.** If the log is unavailable or the
-     cause is ambiguous, emit `noop` — do not guess.
+   - **(C) Valid ID, not published in winget-pkgs yet — submit the dependency
+     first.** The declared ID is well-formed and plausibly real, but **no manifest
+     exists for it** in the repo and there is **no obvious corrected form** (this
+     is the difference from (B)). The dependency simply has not been published to
+     winget-pkgs yet, so it can never resolve until it is. Before commenting,
+     search open PRs for one that adds this dependency:
+     - If an **open PR already adds it**, name/link that PR and explain this PR
+       will validate once that dependency PR merges (a maintainer can then re-run).
+     - If **no such PR exists**, explain the dependency manifest must be submitted
+       to winget-pkgs first (by the author or someone else) before this PR can pass.
+     This is **not** a manifest-ID fix and **not** a re-run — do not tell the
+     author their ID is wrong.
+   - **(D) Cannot determine confidently.** If the log is unavailable or the cause
+     is ambiguous, emit `noop` — do not guess.
 
 ## What to output
 
-If and only if you have a confident classification of **(A)** or **(B)**, post
-**exactly one** comment with `add_comment`, in this exact shape (fill the
-bracketed parts; keep the warning banner and the collapsed details):
+If and only if you have a confident classification of **(A)**, **(B)**, or
+**(C)**, post **exactly one** comment with `add_comment`, in this exact shape
+(fill the bracketed parts; keep the warning banner and the collapsed details):
 
 > [!WARNING]
 > **Experimental automated suggestion — please verify before acting.** This
@@ -138,14 +152,17 @@ bracketed parts; keep the warning banner and the collapsed details):
 > **Suggested next step:** [one sentence — for (A): the dependency now exists,
 > so validation can be re-run by a maintainer, no manifest change needed. For
 > (B): the concrete manifest correction, e.g. replace `<bad ID>` with
-> `<correct ID>`].
+> `<correct ID>`. For (C): the dependency must be published to winget-pkgs first
+> — link the open PR that adds it if one exists, otherwise note it must be
+> submitted before this PR can validate].
 >
 > <details><summary>Details</summary>
 >
 > - **Missing dependency:** `[ID]`[` version [X]` if applicable]
 > - **Declared in:** `[manifest path]`
 > - **Validation result:** `DependenciesNotFound`
-> - [for (B) only] **Why it failed:** [short explanation]
+> - [for (B)/(C) only] **Why it failed:** [short explanation — (B): the correct
+>   ID to use; (C): dependency not yet published, plus the adding PR link if any]
 > </details>
 
 ## Hard rules
