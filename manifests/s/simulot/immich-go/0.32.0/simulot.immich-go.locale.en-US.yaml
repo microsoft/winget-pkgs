@@ -1,0 +1,78 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: simulot.immich-go
+PackageVersion: 0.32.0
+PackageLocale: en-US
+Publisher: simulot
+PublisherUrl: https://github.com/simulot
+PublisherSupportUrl: https://github.com/simulot/immich-go/issues
+PackageName: immich-go
+PackageUrl: https://github.com/simulot/immich-go
+License: AGPL-3.0
+LicenseUrl: https://github.com/simulot/immich-go/blob/HEAD/LICENSE
+ShortDescription: An alternative to the immich-CLI command that doesn't depend on nodejs installation.
+Description: Immich-Go is an open-source tool designed to streamline uploading large photo collections to your self-hosted Immich server. It doesn't require NodeJS or Docker for installation. This makes it easy to get started, even for those less familiar with technical environments.
+Tags:
+- golang
+- google
+- immich
+- immich-cli
+- photos
+- takeout
+ReleaseNotes: |-
+  Release Notes - v0.32.0
+  This release brings full compatibility with Immich V3.0.0. All upload, album, and server
+  communication paths have been updated to work with the new API while maintaining backward
+  compatibility with Immich V2.
+  A big thank you to bwees who has done the very neat work for addressing changes:
+  ✨ New Features
+  - Immich V3 support – Full compatibility with Immich V3.0.0. The tool now detects the
+    server version and adapts its behavior accordingly, ensuring smooth operation regardless
+    of which version you're running.
+  - Server version detection – immich-go now reads and exposes the server version at
+    startup, enabling version-aware API calls.
+  🚀 Improvements
+  - Album contents via search – Album asset retrieval now uses the paginated
+    POST /api/search/metadata endpoint instead of relying on GET /api/albums/{id} to
+    return assets. This works with both Immich V2 and V3 and is more reliable for large
+    albums.
+  - Error handling overhaul – Server error messages are now parsed according to the
+    server version (Zod-based errors for V3, legacy format for V2), providing clearer and
+    more actionable error output.
+  🔧 Internal Changes
+  - Asset upload field changes – Removed deviceId and deviceAssetId from the upload
+    payload (dropped in Immich V3's AssetMediaCreateDto). These fields are silently
+    ignored by V2, so this change is safe across versions.
+  - Duration field handling – The duration field has been updated to use "0" as a
+    plain string value, which is accepted by both Immich V2 and V3.
+  - Removed deprecated replaceAsset – The ReplaceAsset method and its associated
+    asset.replace permission have been removed entirely. Use CopyAsset instead.
+  - Error processing moved to immich/error.go – All server error parsing logic is now
+    centralized with a serverError interface and separate serverErrorV2/serverErrorV3
+    implementations.
+  - Album contents E2E test – Added Test_GetImmichAlbums to verify that album uploads
+    and duplicate detection work correctly with the new search-based album retrieval.
+  Changelog
+  - 6bbcad6 Merge pull request #1227 from simulot/dependabot/github_actions/actions/setup-go-6
+  - eaf6d44 Merge pull request #1228 from simulot/dependabot/github_actions/actions/upload-artifact-5
+  - 3fe9218 Merge pull request #1229 from simulot/dependabot/github_actions/actions/checkout-6
+  - 720fd5a Merge pull request #1230 from simulot/dependabot/github_actions/actions/setup-node-6
+  - 2e5607a Merge pull request #1231 from simulot/dependabot/github_actions/actions/github-script-8
+  - d274f81 Merge pull request #1260 from rob518183:patch-1
+  - cc928ed Merge pull request #1300 from marianwolf/main
+  - e6b8933 Merge pull request #1377 from bwees:fix/v3
+  - 3e5ee70 Update archive.md
+  - 6cfb85f chore(deps): bump actions/checkout from 4 to 6
+  - d43f6d1 chore(deps): bump actions/github-script from 7 to 8
+  - dd52877 chore(deps): bump actions/setup-go from 5 to 6
+  - 2cdd446 chore(deps): bump actions/setup-node from 4 to 6
+  - 59e781e chore(deps): bump actions/upload-artifact from 4 to 5
+  - f7d19fc doc: update readme for v0.32.0 with Immich V3 support
+  - 51e2032 feat: add release notes for v0.32.0 with Immich V3 compatibility and improvements
+  - 5ca6b5a fix: album upload
+  - 18196f9 fix: immich v3 support
+  - d717789 update archive bash command in readme
+ReleaseNotesUrl: https://github.com/simulot/immich-go/releases/tag/v0.32.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

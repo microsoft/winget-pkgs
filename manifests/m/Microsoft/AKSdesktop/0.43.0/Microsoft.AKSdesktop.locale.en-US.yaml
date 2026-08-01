@@ -1,0 +1,104 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Microsoft.AKSdesktop
+PackageVersion: 0.43.0
+PackageLocale: en-US
+Publisher: Microsoft
+PublisherUrl: https://www.microsoft.com/
+PublisherSupportUrl: https://github.com/Azure/aks-desktop/issues
+PrivacyUrl: https://privacy.microsoft.com/privacystatement
+Author: Microsoft Corporation
+PackageName: AKS desktop
+PackageUrl: https://github.com/Azure/aks-desktop
+License: Apache-2.0
+LicenseUrl: https://github.com/Azure/aks-desktop/blob/HEAD/LICENSE.txt
+Copyright: Copyright (c) Microsoft Corporation.
+ShortDescription: Azure Kubernetes Service (AKS) desktop application.
+Description: |-
+  Kubernetes workflows often require writing and maintaining YAML, switching between tools (kubectl, dashboards, monitoring), and an understanding of low-level infrastructure concepts.
+  AKS desktop simplifies this process using Projects, which group everything your application needs into a single, manageable unit, and provides guided workflows for deploying, monitoring, scaling, and troubleshooting applications.
+  AKS desktop works within your existing environment and tools, including Visual Studio Code, GitHub, and CI/CD pipelines. It connects to your existing AKS clusters and supports multi-environment scenarios across dev, test, staging, and production, including Azure hybrid and edge deployments.
+Tags:
+- aks
+- azure
+- azure-kubernetes-service
+- cluster
+- cluster-management
+- dashboard
+- k8s
+- kubernetes
+ReleaseNotes: |-
+  AKS Desktop v0.9.0 improves multi-tenant Azure support, upgrades the AI Assistant preview, introduces privacy-conscious usage telemetry controls, and moves the underlying Headlamp experience to version 0.43.
+  ✨ Highlights
+  Multi-tenant AKS cluster registration
+  AKS Desktop now supports selecting an Azure tenant before selecting a subscription when registering an AKS cluster.
+  - Subscriptions are filtered to the selected tenant, making it easier to find clusters across multi-tenant Azure environments.
+  - When all available subscriptions belong to one tenant, that tenant is selected automatically.
+  - Changing the tenant resets the subscription and cluster selections to prevent mismatched registrations.
+  - Tenant information is obtained from the existing subscription lookup, so this does not add another Azure CLI request.
+  Added in #733.
+  AI Assistant 0.3.0-alpha (Preview)
+  The AI Assistant preview has been upgraded to the shared Headlamp AI Assistant 0.3.0-alpha implementation, bringing a more extensible foundation for Kubernetes troubleshooting and natural-language cluster management.
+  - Adds Holmes Agent mode, allowing AKS Desktop to connect to a HolmesGPT agent running in a cluster for enhanced Kubernetes diagnostics.
+  - Adds desktop support for Model Context Protocol (MCP) servers, including configuration through a form or JSON editor, automatic tool discovery, per-tool enablement, input schema visibility, usage statistics, and bulk enable or disable actions.
+  - Expands model provider support with DeepSeek and OpenAI-compatible endpoints, alongside OpenAI, Azure OpenAI, Anthropic, Mistral, Gemini, and local models through Ollama.
+  - Retains context-aware cluster questions, Kubernetes resource generation, log interpretation, and configuration analysis through the updated shared AI UI and runtime.
+  - Restores localized AI Assistant catalogs for supported languages.
+  - Hardens secret redaction, HTML and URL handling, untrusted input parsing, filenames, endpoint normalization, and MCP state handling.
+  - Uses the canonical @headlamp-k8s/ai-assistant package identity so Electron command permissions are granted only to the expected plugin package.
+  The AI Assistant remains an alpha preview. Using external model providers may require API credentials and may incur provider charges.
+  Implemented in #770, with the supporting Headlamp package identity and permission changes in #768.
+  Anonymous usage telemetry and controls
+  Anonymous product usage telemetry has been restored with additional privacy safeguards.
+  - Telemetry uses a fixed set of typed, sanitized events for application usage, enabled plugins, feature usage, errors, and general cluster characteristics.
+  - Automatic request, cookie, route, and browser exception collection is disabled.
+  - Cluster information is limited to generalized values such as Kubernetes version, Azure region, service tier, and bucketed node or namespace counts.
+  - A pseudonymous installation identifier is used to distinguish installations without collecting user identity.
+  - A final privacy scrubber removes unsafe filesystem paths, URLs, identifiers, route values, IP or geolocation fields, and exception data before telemetry is sent.
+  - Initial lifecycle telemetry is limited to AKS project creation or import and application deployment workflows.
+  - Telemetry is enabled by default and can be disabled under Settings → Plugins → AKS Desktop → Send anonymous usage data.
+  - Changes to the telemetry setting take effect after restarting AKS Desktop.
+  Implemented in #718, with follow-up fixes in #745 and additional privacy hardening in #773.
+  Headlamp 0.43 foundation
+  AKS Desktop now incorporates the Headlamp 0.43 codebase, bringing a large set of Kubernetes UI, accessibility, and reliability improvements.
+  Notable additions include:
+  - Node upgrade visualization showing progress through cordon, drain, delete, reimage, and completion stages.
+  - Workload diagnostics on Pod and workload detail pages, providing troubleshooting hints based on status, events, and container information.
+  - Dry-run support for validating YAML changes and previewing workload rollbacks before applying them.
+  - Batch scaling for multiple Deployments, StatefulSets, or ReplicaSets.
+  - Saved Advanced Search queries, including support for restoring, renaming, and deleting saved searches.
+  - A dedicated Job details view with status information and direct access to related Pod logs.
+  - A new form for creating Deployments directly from the UI.
+  - Node pool information in Node list and detail views.
+  - Node information in the cluster overview Events table.
+  - Additional resource details matching information commonly shown by kubectl describe.
+  See the Headlamp 0.43 release notes for the complete upstream list.
+  🐞 Fixes and reliability improvements
+  The Headlamp update also includes numerous fixes that improve everyday cluster management:
+  - Resource updates now use JSON Patch, reducing 409 Conflict errors when editing frequently changing resources such as HPAs.
+  - Fixed crashes when entering incomplete YAML in the resource creation dialog.
+  - Fixed stale Pod status indicators after readiness checks complete.
+  - Fixed resource-map loading and rendering issues, including missing relationships and unsupported Gateway API filters.
+  - Improved Job and DaemonSet log access.
+  - Fixed memory and subscription leaks in log viewing, WebSocket handling, OAuth, node draining, and port forwarding.
+  - Improved OIDC compatibility, including authentication with public providers such as Microsoft Entra ID when no custom CA is configured.
+  - Improved cluster chooser search and keyboard navigation.
+  - Table pagination preferences and Pod log formatting preferences now persist between sessions.
+  - Improved screen-reader announcements for empty tables and several other keyboard and high-zoom accessibility scenarios.
+  - Fixed error and warning icons in Project resource views.
+  - Fixed startup failures caused by malformed settings stored in local storage.
+  - Improved Windows path handling and application shutdown behavior on Windows and Linux.
+  The Headlamp fork was rebased onto version 0.43 in #741, with downstream compatibility and build fixes in #756.
+  🔧 Build and dependency updates
+  - Updated the backend build to Go 1.26 to match the upgraded Headlamp backend requirements in #762.
+  - Updated actions/checkout from 6.0.3 to 7.0.0 in #738.
+  - Updated actions/setup-go from 6.4.0 to 6.5.0 in #742.
+  - Updated step-security/harden-runner from 2.19.4 to 2.20.0 in #758.
+  - Updated @types/node from 25.8.0 to 26.0.0 in #739.
+  - Updated lint-staged from 17.0.7 to 17.0.8 in #743.
+  - Updated tsx from 4.22.3 to 4.22.4 in #708.
+  Full Changelog: https://github.com/Azure/aks-desktop/compare/v0.8.0...v0.9.0
+ReleaseNotesUrl: https://github.com/Azure/aks-desktop/releases/tag/v0.9.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

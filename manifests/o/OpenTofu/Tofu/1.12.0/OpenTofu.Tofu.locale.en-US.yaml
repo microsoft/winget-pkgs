@@ -1,0 +1,71 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: OpenTofu.Tofu
+PackageVersion: 1.12.0
+PackageLocale: en-US
+Publisher: The Linux Foundation
+PublisherUrl: https://opentofu.org/
+PublisherSupportUrl: https://github.com/opentofu/opentofu/issues
+PackageName: OpenTofu
+PackageUrl: https://github.com/opentofu/opentofu
+License: MPL-2.0
+LicenseUrl: https://github.com/opentofu/opentofu/blob/HEAD/LICENSE
+Copyright: Copyright (c) The Linux Foundation
+CopyrightUrl: https://github.com/opentofu/opentofu/blob/main/LICENSE
+ShortDescription: OpenTofu lets you declaratively manage your cloud infrastructure.
+Moniker: tofu
+ReleaseNotes: |-
+  OpenTofu 1.12.0
+  We're proud to announce that OpenTofu 1.12.0 is now officially available! 🎉
+
+  Highlights
+  This release cycle introduces major new capabilities and integrations:
+
+  Dynamic prevent_destroy
+  OpenTofu v1.12.0 now allows prevent_destroy to be defined dynamically in terms of other values available elsewhere in the same module. For example:
+  variable "prevent_destroy_database" {
+    type    = bool
+    default = true
+  }
+  resource "example_database" "example" {
+    # ...
+    lifecycle {
+      prevent_destroy = var.prevent_destroy_database
+    }
+  }
+
+  Provider Checksum Improvements
+  The default provider installation behavior in OpenTofu is designed to mostly "just work" by getting the needed providers installed and making the necessary changes to the dependency lock file, but in previous versions friction appeared for any teams using many of the non-default installation settings such as the shared provider plugin cache, or local mirrors of upstream providers.
+  For OpenTofu v1.12, OpenTofu Registry now provides a full set of official checksums in all of the checksum formats needed by other installation methods. This means that after running tofu init the dependency lock file will immediately have all of the information required to successfully use a global plugin cache directory and to verify matching packages served from a local mirror, without needing to run tofu providers lock separately.
+
+  Simultaneous Human-readable and Machine-readable Output
+  Many OpenTofu commands support both human-oriented UI output and machine-readable JSON output, but previously those commands could be run with only one or the other. This was bothersome for those implementing alternative UIs in terms of the machine-readable output because it meant they would need to implement all possible features of the UI before their tool could actually be used.
+  OpenTofu v1.12.0 introduces a new option -json-into=FILENAME, which produces the same output format that -json would have produced but sends that output to the given filename instead of to the standard output stream. The OpenTofu UI output then appears on the standard output stream as normal, so that software interpreting the JSON output can behave as just a supplement to the normal UI rather than a complete replacement.
+
+  New destroy lifecycle meta-argument
+  The new destroy = false lifecycle option for managed resources allows removing an object from the state without first destroying the remote object.
+
+  Deprecation Notices
+
+  WinRM for Provisioners is Now Deprecated
+  Some of the Go libraries that OpenTofu uses for WinRM connection support in provisioners have become unmaintained over time, and so unfortunately we are phasing out support for WinRM in OpenTofu starting with deprecation warnings in this release.
+  If your configuration includes a connection block with type = "winrm" then OpenTofu v1.12 will warn that this connection type is deprecated, but provisioning should otherwise still work as it did before.
+  We intend to remove WinRM support completely in the forthcoming OpenTofu v1.13 series, and so if you are currently relying on WinRM support we recommend that you begin planning to migrate to using OpenSSH for Windows instead.
+
+  Phasing Out Support for 32-bit CPU Architectures
+  We are also planning to stop producing official releases for 32-bit CPU architectures (386 and arm) in a future version of OpenTofu. Support for 64-bit architectures (amd64 and arm64) is unaffected.
+  OpenTofu v1.12 does not include any changes to CPU support yet, but we expect that the official builds in the forthcoming v1.13 series will begin producing warnings when running on 32-bit CPU architectures, before we stop producing those packages altogether in a future release series.
+
+  Compatibility Notes
+  - macOS: Requires macOS 12 Monterey or later
+  - The OPENTOFU_USER_AGENT environment variable, which allowed fully overriding the default User-Agent header on all HTTP requests, has been removed.
+  - On Unix systems OpenTofu now considers the BROWSER environment variable as a possible override for the default behavior for launching a web browser. If you run OpenTofu in a context where an environment variable of that name is already set, it may cause OpenTofu to now open a web browser in a different way than previous versions would have. Unsetting that environment variable will restore the previous platform-specific behavior.
+
+  Reference
+  - Full Changelog
+  - Blog Post
+  Thank you for your continued support and testing of the OpenTofu project!
+ReleaseNotesUrl: https://github.com/opentofu/opentofu/releases/tag/v1.12.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

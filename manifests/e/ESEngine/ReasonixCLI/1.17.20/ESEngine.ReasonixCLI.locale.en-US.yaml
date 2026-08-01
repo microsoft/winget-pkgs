@@ -1,0 +1,73 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: ESEngine.ReasonixCLI
+PackageVersion: 1.17.20
+PackageLocale: en-US
+Publisher: reasonix
+PublisherUrl: https://esengine.cn/
+PublisherSupportUrl: https://github.com/esengine/DeepSeek-Reasonix/issues
+PackageName: Reasonix CLI
+PackageUrl: https://esengine.github.io/DeepSeek-Reasonix/
+License: MIT
+LicenseUrl: https://github.com/esengine/DeepSeek-Reasonix/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Reasonix Contributors
+ShortDescription: A DeepSeek-native coding agent, for your terminal.
+Description: Reasonix talks straight to api.deepseek.com. The loop is append-only, engineered around DeepSeek's byte-stable prefix cache — long sessions hold 90%+ cache hit and input-token cost collapses to ~1/5. Terminal-first, leave it running.
+Moniker: reasonix
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- deepseek
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  此版本为 CLI 自动化新增保护隐私的机器接口，让 Planner 与子 Agent 通过稳定且缓存友好的代理使用已授权 MCP 能力，为 Debian 安装包带来经过验证的应用内更新，并提升桌面端模型切换、富文本编辑、Plan 恢复和代码预览的可靠性。
+  English → · 网页版完整更新日志 →
+  使用攻略
+  - CLI 自动化接口 — 使用文档化的会话、任务、Hook 和事件流契约集成 Reasonix，无需解析终端展示文本。
+  概览
+  Reasonix v1.17.20 — 机器友好 CLI、可信 MCP 协作与更安全的桌面更新
+  此版本为 CLI 自动化新增保护隐私的机器接口，让 Planner 与子 Agent 通过稳定且缓存友好的代理使用已授权 MCP 能力，为 Debian 安装包带来经过验证的应用内更新，并提升桌面端模型切换、富文本编辑、Plan 恢复和代码预览的可靠性。
+  发布日期：2026-07-24
+  重点内容
+  - 保护隐私的机器接口 — CLI 自动化现在可通过结构化契约检查会话、任务、Hook 和生命周期事件，并使用不透明机器身份、经过验证的制品状态和安全失败的运行时所有权边界。 (#6859)
+  - Planner 与子 Agent 可使用可信 MCP — 已安装并授权的 MCP 能力现在通过稳定的 use_capability schema 提供，在保持 Provider 前缀缓存稳定的同时，执行实时授权、精确运行时身份、撤销和破坏性效果边界。 (#6865)
+  - 经过验证的 Debian 安装包更新 — Debian 与 Ubuntu 桌面安装现在可通过随包提供的 Polkit helper 授权升级；在 apt 安装更新前，会重新检查所有权、签名、包身份、架构和版本。 (#6866)
+  - 桌面编辑与 Provider 状态更加稳定 — 富文本输入框在调用标签附近编辑时不再跳到末尾，Plan 修订刷新不会清除历史文本选择，快速模型切换也不会恢复过期余额或混淆会话模型与全局默认值。 (#6872, #6466, #6881)
+  新功能
+  - 结构化会话、任务、Hook 与事件输出 — 新的 CLI 机器投影可提供持久生命周期状态，同时避免泄露 Provider 控制的工具名称或可猜测的历史记录身份；现有 json 与 stream-json 会话标识保持兼容。 (#6859)
+  - 委派任务的稳定 MCP 能力路由 — Planner、Review、Task、Fleet 和双模型 Executor 现在共享已授权 MCP 运行时状态，同时保持每个 Agent 的独立记录、精确白名单、写操作串行化、结构化图片结果和稳定的 Provider 可见 schema。 (#6865)
+  改进
+  - 按 Episode 限制 Auto 恢复并支持明确退出 Plan — 恢复上限现在只作用于当前执行 Episode，并会在真正的新工作开始时重置；桌面端和 CLI 也可退出 Plan 而不执行计划或丢失当前 Goal。 (#6871)
+  - 更准确的完成证据 — complete_step 现在只接受位于最新变更之后并覆盖其结果的新鲜结构化 Review 回执，同时拒绝过期 Review 和仅启动的后台任务。 (#6762)
+  - 覆盖更广且有安全上限的语法高亮 — 桌面预览现在支持 52 种语言，并在聊天、Diff 和文件视图中共用路径感知的解析器；超大代码块会安全回退为转义纯文本，避免高亮负载过大。 (#6861)
+  - 可按通道恢复的稳定版发布 — 稳定版恢复现在会携带受保护控制面验证过的审核版说明，并可只重试失败通道，同时仍校验全部公开制品。 (#6843)
+  - 减少仅用于发版的 Pull Request — 发布说明现在可直接生成到同仓库已有的发版边界 Pull Request 中，专用发布说明 PR 仅作为兜底，同时继续保留受保护 main-v2 审核和全部发布门禁。 (#6893)
+  修复
+  - 富文本输入框光标与输入法稳定性 — 选择映射现在能正确处理调用标签、NBSP 锚点、范围选择、重复文本、临时选择丢失和 WebView2 输入法事件顺序，不再把中间编辑移到末尾。 (#6872)
+  - 最后点击生效的模型切换 — 每个标签页的模型切换现在会串行执行，过期余额和模型目录响应会被丢弃，失败切换会恢复安全状态，会话内选择也不会改写新会话使用的全局默认值。 (#6881)
+  - Plan 修订保留历史文本选择 — 周期性父级刷新不再重新聚焦修订编辑器，也不会清除用户为复制而选中的历史文本。 (#6466)
+  - 文档侧边栏正确跟随当前章节 — 文档站现在会高亮实际可见的章节，不再让过期的侧边栏项目保持激活。 (#6222)
+  升级提醒
+  - 现有 Debian 安装需要一次性 bootstrap — 旧版 .deb 尚未包含新的 Polkit helper。请先执行一次 sudo apt install ./Reasonix-linux-amd64.deb 安装 1.17.20；之后即可使用应用内授权更新，无需先卸载。 (#6866)
+  - Desktop 与 Remote Host 请保持同版本 — 远程协议新增可选的已解析能力元数据。旧数据仍可读取，但 Desktop 与 Remote Host 应继续遵循同版本构建的升级约定。 (#6865)
+  - 无需手动迁移数据 — 现有 Provider、会话、项目、Goal、后台任务和 MCP 定义会继续加载。events-jsonl 机器接口首次使用时会创建每次安装私有的身份密钥；旧有 json 与 stream-json 恢复标识保持不变。 (#6859)
+  风险提示
+  - 已安装 MCP 的授权状态是信任边界 — Planner 与普通子 Agent 可在不重复弹出启动确认的情况下调用已安装且授权的 MCP 能力。显式 deny、实时撤销、破坏性检查、精确运行时身份和写操作串行化仍然生效。 (#6865)
+  致谢
+  感谢本版本的贡献者：@SivanCola、@mchenziyi、@JesonChou、@SauronSkywalker、@9710willy、@par73e
+  下载与安装
+  - 官网按平台下载
+  - 查看完整差异
+ReleaseNotesUrl: https://github.com/esengine/DeepSeek-Reasonix/releases/tag/v1.17.20
+Documentations:
+- DocumentLabel: FAQ
+  DocumentUrl: https://esengine.github.io/DeepSeek-Reasonix/index.html#faq
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
