@@ -348,7 +348,7 @@ Post exactly one comment only for a confident supported classification:
 > [!WARNING]
 > **Experimental moderator-assist diagnosis - verify before acting.** This
 > workflow is advisory and does not modify or approve the pull request.
-> Feedback: [share it in this discussion](https://github.com/microsoft/winget-pkgs/discussions/410702).
+> Feedback: [share it in this discussion](https://github.com/microsoft/winget-pkgs/discussions/411303).
 >
 > **Finding:** [one concise sentence naming the class and specific evidence].
 >
