@@ -1,0 +1,51 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: jdx.mise
+PackageVersion: 2026.6.13
+PackageLocale: en-US
+Publisher: jdx
+PublisherUrl: https://en.dev/
+PublisherSupportUrl: https://github.com/jdx/mise
+Author: jdx
+PackageName: mise-en-place
+PackageUrl: https://mise.en.dev/
+License: MIT
+LicenseUrl: https://github.com/jdx/mise/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Jeff Dickey
+CopyrightUrl: https://github.com/jdx/mise/blob/HEAD/LICENSE
+ShortDescription: Your dev env, already prepped.
+Description: Your dev env, already prepped. One tool to manage languages, env vars, and tasks per project, reproducibly.
+Moniker: mise
+Tags:
+- cli
+- dev-tool
+- env
+- environment
+- task
+ReleaseNotes: |-
+  Added
+  - bootstrap: Support brew cask pkg artifacts, installing via sudo installer and tracking pkgutil receipt IDs for status checks (#10587 by @jdx).
+  - registry: Added lore (#10558 by @ggoggam) and published-checksum resolution for dart, neo4j, nomad-pack, sentinel, tfc-agent, oc, openshift-install, claude, flutter, and julia (#10552 by @itochan).
+
+  Fixed
+  - lock: mise lock now errors out when an active tool request cannot be resolved instead of silently skipping it and updating the lockfile (#10586 by @jdx).
+  - aqua: Verified checksum files can now upgrade an existing recorded checksum when the algorithm differs (e.g. GitHub release metadata records sha256 but SHA512SUMS provides sha512); same-algorithm mismatches still fail hard (#10569 by @jdx).
+  - aqua: GitHub Artifact Attestations badge is no longer inferred from .sigstore release asset names; it is shown only when the aqua registry config actually enables attestation verification (#10588 by @jdx).
+  - aqua: list_bin_paths no longer caches transient filesystem existence, fixing missing uv/uvx shims after concurrent mise upgrade runs that an extra mise reshim could not repair (#10559 by @devnulled, fixes #6468).
+  - task: mise run and mise hook-env now build their initial toolset with offline resolution, so task startup no longer triggers remote GitHub lookups (or github.credential_command) for latest/rolling/semver-range tools (#10571 by @jdx).
+  - sigstore: Retry transient GitHub attestation API failures (5xx, 429, timeouts) with exponential backoff and Retry-After support, instead of failing the install on a single 504 (#10482 by @afreyermuth98).
+  - swift: Opt core:swift out of the --locked URL requirement, since the download URL depends on the local distro and cannot be locked cross-platform (#10575 by @AllDmeat).
+  - gem: Opt gem: backend out of the --locked URL requirement so mise install --locked no longer fails on gem: tools in CI (#10578 by @itochan).
+  - node: Suppress duplicate npm update notices during core Node installs (#10557 by @risu729).
+  - node: Record per-platform install outcomes in the lockfile, including install = "source" and the source tarball URL/checksum for platforms without precompiled binaries, instead of writing bogus platform binary URLs (#10547 by @risu729).
+  - file (Windows): Use directory symlinks instead of junctions for UNC plugin targets (e.g. \\wsl.localhost\...), so linked plugins show up in mise plugins ls and can be removed (#10566 by @rozsazoltan).
+  - oci: Write symlinks with targets longer than tar's 100-byte linkname field via the GNU @LongLink extension, fixing mise oci build for deep npm/aube install trees (#10519 by @JamBalaya56562).
+  - deps (Dart): Look for package_config.json at the pub workspace root, using .dart_tool/pub/workspace_ref.json, so Dart monorepos resolve dependencies correctly (#10521 by @tjarvstrand).
+
+  💚 Sponsor mise
+  mise is built by @jdx under en.dev — an independent studio making developer tooling (mise, aube, and more). Development is funded by sponsors.
+  If mise saves you or your team time, please consider sponsoring at en.dev. Individual and company sponsorships keep mise fast, free, and independent.
+ReleaseNotesUrl: https://github.com/jdx/mise/releases/tag/v2026.6.13
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

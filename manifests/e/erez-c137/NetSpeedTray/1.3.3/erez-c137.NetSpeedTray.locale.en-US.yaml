@@ -1,0 +1,64 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: erez-c137.NetSpeedTray
+PackageVersion: 1.3.3
+PackageLocale: en-US
+Publisher: Erez C137
+PublisherUrl: https://github.com/erez-c137
+PublisherSupportUrl: https://github.com/erez-c137/NetSpeedTray/issues
+PrivacyUrl: https://github.com/erez-c137/NetSpeedTray/blob/main/privacy.md
+Author: Erez C137
+PackageName: NetSpeedTray
+PackageUrl: https://github.com/erez-c137/NetSpeedTray
+License: GPL-3.0
+LicenseUrl: https://github.com/erez-c137/NetSpeedTray/blob/HEAD/LICENSE
+Copyright: Copyright (c) Erez C137. All rights reserved.
+ShortDescription: lightweight, open-source network monitor for Windows that displays live upload/download speeds directly on the Taskbar with a native look and feel.
+Description: A lightweight, open-source network monitor for Windows that displays live upload/download speeds directly on the Taskbar with a native look and feel.
+Moniker: netspeedtray
+Tags:
+- bandwidth-monitor
+- data-usage
+- freeware
+- internet-speed
+- netspeedmon
+- network-monitor
+- network-speed
+- network-traffic
+- speed-monitor
+- system-tray
+- taskbar
+- utility
+- widget
+- windows
+ReleaseNotes: |-
+  Release v1.3.3 - June 25, 2026
+  🔧 NetSpeedTray v1.3.3: The Updater Fix
+  A stabilization release that repairs a critical regression in v1.3.2: the app shipped without OpenSSL, which silently broke every HTTPS request — including the built-in update checker (the "Could not check for updates" error many of you hit). This release restores it, hardens the build so it can't happen again, and fixes a startup crash plus four other reported bugs.
+  > ⚠️ If you're on v1.3.2, the in-app updater can't reach GitHub — so it won't notify you about this release. Please update manually from this page, or run winget upgrade erez-c137.NetSpeedTray. Once you're on v1.3.3, automatic update checks work again.
+  🐛 Bug Fixes
+  Update Checker Broken — "Could not check for updates" (critical): v1.3.2's slimmed-down build accidentally stripped Python's OpenSSL libraries (libcrypto-3.dll / libssl-3.dll) from the bundle on the false assumption that Windows uses SChannel — but Python's ssl is backed by OpenSSL, so _ssl could no longer load and all HTTPS failed. Restored OpenSSL, shielded it (plus _ssl/_hashlib) from UPX compression, and added a build-time guard that fails the build if these libraries ever go missing again.
+  Crash After Enabling Auto-Cycling (#131): A one-character typo (constants.renderer.renderer.…) crashed the app on every launch once "cycle" display mode had been saved. Fixed.
+  No Speed Shown Above ~5 Gbit/s on 10GbE NICs (#154): The widget capped speeds at the link rate Windows reports via psutil, which is unreliable for multi-gigabit adapters — anything above the (often wrong or half) value was silently dropped, leaving a constant 0. Removed the per-NIC cap; a 100 Gbps absolute ceiling plus the rolling-average spike filter still guard against counter glitches.
+  Color Coding at Idle + Live Apply (#153): Color coding now shows the Default Color at rest — the bands are ascending (below Low → Default, Low–High → Low Color, above High → High Color) — and color/threshold changes now apply instantly instead of only after a restart.
+  Widget Hid Over Fullscreen Despite "Keep Visible" (#107): The fullscreen emergency-hide path ignored the "keep visible over fullscreen" setting that the normal visibility logic already respected. It now honors it.
+  AMD Ryzen CPU Temperature (#148): Ryzen exposes its CPU temperature as Core (Tctl/Tdie) rather than CPU Package. Detection now also matches on the LibreHardwareMonitor identifier (/amdcpu/, /intelcpu/) and the Tctl / Tdie / Tccd labels.
+  Settings Window Scrollbars: The Settings window now auto-sizes to its content (using the real on-screen fonts) and is a touch taller, so the General page no longer shows a stray horizontal or vertical scrollbar, and dropdowns no longer stretch to the width of their longest item.
+  📦 Packaging & Installer
+  Clean Upgrades: The installer now clears the previous app payload before copying the new build, so upgrades no longer leave behind stale, mismatched DLLs from older versions — the leftover-file problem that turned the OpenSSL bug into a confusing version mismatch on upgrade. Your settings and history in %APPDATA% are never touched.
+  numpy Hardening (#136): numpy's compiled core (_multiarray_umath) and its bundled OpenBLAS are no longer UPX-compressed — a known cause of "DLL load failed while importing _multiarray_umath."
+  🌍 Localization
+  Updated the High/Low Speed threshold tooltips to describe the new ascending-band color behavior across all 9 supported languages (English, German, Spanish, French, Korean, Dutch, Polish, Russian, Slovenian). 100% locale key parity preserved.
+  Also filled in the UI strings that were still showing in English for German, Spanish, French, Dutch, Polish, Russian, and Slovenian — mainly the App Activity window, the Support Bundle export, and the Preferred Monitor setting. These are AI-assisted translations pending native-speaker review (noted as such in TRANSLATORS.md, and not attributed to the human translators) — one-line correction PRs are very welcome and will be credited.
+  🧪 Quality Assurance
+  Added a regression suite (test_v1_3_3_regressions.py) pinning the auto-cycle startup crash, the 10GbE speed-drop bug, and the color-coding live-apply fix. Unit suite now at 196 passing tests.
+  Full Changelog
+ReleaseNotesUrl: https://github.com/erez-c137/NetSpeedTray/releases/tag/v1.3.3
+Documentations:
+- DocumentLabel: Changelog
+  DocumentUrl: https://github.com/erez-c137/NetSpeedTray/blob/main/changelog.md
+- DocumentLabel: README
+  DocumentUrl: https://github.com/erez-c137/NetSpeedTray/blob/main/README.md
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
