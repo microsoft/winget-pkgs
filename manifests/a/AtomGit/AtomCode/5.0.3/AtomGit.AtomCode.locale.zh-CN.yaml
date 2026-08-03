@@ -1,0 +1,169 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: AtomGit.AtomCode
+PackageVersion: 5.0.3
+PackageLocale: zh-CN
+Publisher: 重庆开源共创科技有限公司
+PublisherUrl: https://atomgit.com/
+PublisherSupportUrl: https://atomgit.com/atomgit_atomcode/atomcode/issues
+PrivacyUrl: https://docs.gitcode.com/docs/help/home/protocol/privacy-policy
+Author: 重庆开源共创科技有限公司
+PackageName: AtomCode
+PackageUrl: https://atomcode.atomgit.com/
+License: MIT
+LicenseUrl: https://atomgit.com/atomgit_atomcode/atomcode/blob/main/LICENSE
+Copyright: Copyright (c) 2026 Yubang Xu
+CopyrightUrl: https://docs.gitcode.com/docs/help/home/protocol/ai-privacy-policy
+ShortDescription: AI 编程助手 在你的终端中运行
+Description: Claude Code / Cursor Agent 的开源平替，住在你的终端里。连接任意 OpenAI 兼容大模型，自主读文件、改代码、跑测试、自我验证 —— 用 Rust 构建。
+Tags:
+- 人工智能
+- 代码
+- 大语言模型
+- 智能体
+- 编程
+- 聊天机器人
+- 自主智能
+ReleaseNotes: |-
+  AtomCode v5.0.3 Release Notes
+  发布日期：2026-07-30
+  v5.0.3 是 AtomCode 架构升级里程碑版本，正式退役 atomcode-core crate（~72k 行代码迁移至 capabilities/kernel/daemon），新增 Provider 账号与模型配置体系、Tool 产出物系统（Artifact）、安全回滚（Rewind）、回合上限检查点等重大功能，并修复了大量 Provider 网络、TUI 渲染、WebUI 同步路径和跨平台兼容性问题。
+
+  ✨ 新增功能（Features）
+  Provider 账号与模型配置体系
+  - Provider 预设注册表：内置预设厂商列表，支持一键添加常见 Provider（DeepSeek、Ollama、OpenAI Compatible 等），含预设 base_url 和认证方式
+  - Provider 账号与模型配置：新增 [provider_account] / [model_profile] 配置模型，支持多账号管理和按模型选择器切换
+  - CodingPlan schema 适配：CodingPlan 账号按「账号 + 模型」分组展示，消费者通过 resolve_model 获取活动模型
+  - TUI /provider 面板全面重设计：全新的面板式管理界面，含「账号」和「模型」两个 tab，支持添加/编辑 Provider 账号、配置模型、自定义名称和协议切换
+  - 厂商预设快速添加：在「账号」tab 列表展示未配置的预设厂商，点击即可快速添加
+  - API Key 收集：添加模型时自动提示输入对应 API Key
+  - 新增 TaoToken 厂商预设：支持通过 TaoToken 服务接入
+  模型定价与成本归因
+  - Models.dev 定价解析：从 models.dev 获取并解析模型定价信息，/cost 命令按 Provider 和模型准确归属用量与费用
+  Tool 产出物系统（Artifact）
+  - ArtifactStore：内容寻址的 tool 输出存储，确保每次输出的唯一性和可溯源性
+  - ArtifactMiddleware：通过 ToolMiddleware::after 钩子实现确定性预览和产物收集
+  - fetch_output 工具：支持分页检索已归档的 tool 产出物
+  - 会话集成：ArtifactMiddleware + fetch_output 在有活动 session 时自动挂载
+  Safe Rewind 回滚
+  - 安全回滚工作流：支持用户安全地回滚到历史状态，保留上下文完整性
+  - Workspace checkpoint 基础：为回滚提供工作区检查点支持
+  回合上限检查点
+  - 检查点问询：回合上限从硬错误改为交互式检查点，用户可选择继续或停止
+  - [coding] max_rounds 配置项：TOML 配置支持设置最大轮次上限
+  Agent / Persona 增强
+  - WORKFLOW 意图对齐：新增 UNDERSTAND 步骤，在正式开始工作前确认对任务的理解，减少误解和返工
+  - 进度提示（Signpost）：在工具调用批次前输出进度提示，提升用户对 Agent 正在做什么的感知
+  - Subtask 进展透明：实时展示子任务进度，footer 固定显示当前进度状态
+  内容安全边界
+  - 内容安全过滤：Coding 系统提示中加入安全边界（涉政/涉黄/涉暴），始终生效，确保输出合规
+  TUI
+  - 用户输入背景块：用户输入区域增加背景色块，视觉上更清晰区分输入与输出区域
+  - 模型切换快捷键：支持通过快捷键快速在模型间循环切换
+  - Session 删除自动清理：删除会话时自动清理对应的 artifacts 目录
+  WebUI
+  - Sync 模式 /compact：新增 /live/compact 端点，WebUI 同步模式下可直接发起手动压缩操作
+  - VL 图片持久化：VL 预处理图片以 display-only sidecar 方式持久化，刷新后仍可见，且零上下文开销
+  Headless CLI
+  - Shell 自动补全：新增 shell completions，支持 bash/zsh/fish/powershell 等主流 shell
+  /skills
+  - 贪婪多技能匹配：/skills 命令支持贪婪匹配多个 skill 名称片段，一次性加载多个匹配的技能
+  - 已加载回显：加载后回显已启用的 skill 名称列表
+  平台兼容性
+  - Bash askpass 支持：ssh/sudo 等交互式密码命令可正常使用，不再因非交互等待超时而放弃
+  - Windows SChannel 默认后端：Windows 平台默认使用 native-tls（SChannel）作为 TLS 后端，绕过 rustls 指纹拦截导致的连接失败
+  - HarmonyOS bash 回退：HarmonyOS 系统上 bash 不可用时自动回退到 sh
+  🛠 修复（Fixes）
+  Provider / 网络
+  - TLS BadRecordMac 恢复：修复 OPEN 路径上 TLS BadRecordMac 错误导致的连接中断
+  - Provider 切换同步守卫：轮次运行中拒绝 Provider 切换，修复跨窗口模型选择不一致
+  - MCP stdio 服务恢复：stdio 模式下的 MCP 服务器进程退出后自动恢复
+  - Rate limit 重试合并：统一 Provider 限流重试逻辑，减少误报
+  - 不支持的 Gateway Provider 启动恢复：启动时正确处理不支持的 gateway provider，不再崩溃
+  - Provider schema 迁移间隙闭合：完成 schema 感知迁移中的配置读取间隙修复
+  - 配置边界补齐：所有 config.providers 读取统一经过 schema 感知边界
+  - Provider 状态修复：TUI 正确区分 Provider 可用性状态，避免误报「未配置」
+  - 厂商预设 Quick-add 过滤：排除含 gateway 且无端点的预设，仅展示可直接添加的厂商
+  TUI
+  - CJK 图表对齐：修复中文/日文等宽字符在表格/图表中对齐偏移问题
+  - 插件含 CJK 描述中止修复：插件描述包含 CJK 字符时不再导致中止
+  - 原生 Provider 恢复与列表：重启后正确恢复原生 Provider 并列入模型选择器
+  - 会话保持在对应模型：已打开的会话在模型变更后仍保持原有模型
+  - 背景通知延迟：背景通知延迟到轮次结束后展示，避免干扰当前操作
+  - Rewind 界面修复：Rewind 加载状态不进入滚动记录，弹窗间距优化
+  - 粘贴支持：Provider 表单和 request_user_input 面板中支持粘贴
+  - /resume 并行 tool 分组恢复：/resume 后并行工具批次正确分组展示
+  - 附件延续缩进填充：附件延续行以面板背景色填充缩进，视觉更整洁
+  - 面板颜色匹配：/resume 选择色在插件/Provider 面板中保持一致
+  - Split_skill_names 花括号修复：修复坏合并丢失的闭合花括号
+  - Provider 添加后保持面板打开：添加 Provider 账号后不自动关闭面板
+  TUIX
+  - 摘要重复错误修复：中断 summary 不再重复显示已在上方显示的错误原因
+  - 终端滚动稳定：修复多次滚动回退累积导致的空屏和滚动位置不正确
+  - Footer 上下文用量刷新：/login 采纳活动 Provider 新配置后 footer 正确刷新
+  - 初始上下文窗口显示：首次展示时正确显示上下文窗口大小
+  - Tab 切换不提交运行中工具：Tab 切换 mode 时不会错误提交正在运行的工具
+  - Streaming 用户输入保持：工具运行且流式生成时，用户编辑的输入内容保持可见
+  - 自动 Tool folding 保持静默：自动折叠的工具保持静默展示，不影响界面
+  - Subagent 活动高亮：子代理活动在界面中正确高亮区分
+  - Clipboard 图片提示短暂：剪贴板图片提示只在初次粘贴时短暂显示
+  - 滚动条跨 live spinner 保持：live spinner 刷新前后滚动位置不变
+  - 自动模式下显示用户输入提示：auto 模式下正确展示用户输入提示
+  - Provider 新建配置后 login 采纳：/login 正确使用活动 Provider 新配置（含 context_window）
+  WebUI
+  - VL 图片 sidecar 修复：/chat 路径上正确持久化 VL 处理后的图片，WebUI 贴图在同步 TUI 显示空框的问题已修复
+  - 移动端 composer 控件重叠：移动端下 composer 控件不再重叠
+  - 同步路径消息发送优化：同步模式下 optimistically 展示已发送消息，无需等待确认
+  - 同步路径图片上传：同步路径上传图片时展示原始消息+图片而非 VL caption
+  - /models 统一目录：CodingPlan 新 schema 模型不再从选择器消失
+  - SSE 广播模型保持：多窗口 SSE 广播时正确保持用户选择的模型
+  - MCP readiness 等待：headless runtime 首次轮次前等待 MCP readiness
+  - 响应式加宽与暗色边框：内容列响应式加宽，暗色模式表格边框对比度提升
+  - 创建 sessions dir 前置：stash display-image sidecar 前先创建 sessions 目录
+  Session
+  - Git snapshot freeze on resume：恢复时冻结 git 快照以保持前缀缓存温度
+  - 中断轮次安全恢复：中断的轮次可安全恢复，不丢失上下文
+  - Legacy turn counts 容错：容错处理缺失的 legacy turn 计数
+  - Legacy 对话恢复：从空 native stub 正确恢复旧版会话
+  - Busy continue forks 限界：限制繁忙 continue 的分支数量，避免无限增长
+  Skills
+  - 多片段模糊过滤：/skills 菜单支持多片段模糊匹配（如 atom smoke 匹配 atomcode-smoke-test）
+  - 防止幻觉 skill 名：过滤不存在或幻觉生成的 skill 名称
+  - 命名空间技能裸名解析：命名空间文件技能可通过裸名直接解析
+  - 按规范身份去重：避免同一 skill 因别名或路径差异被双注入
+  权限 & 安全
+  - AtomGit 会话恢复：401 后自动恢复 AtomGit 会话
+  - 并发 token 恢复加固：修复并发场景下的 token 恢复竞态条件
+  - Secrets 和 sessions 权限限制：加固持久化的 secrets 和 sessions 文件权限
+  - AtomGit 安全收紧：收紧 AtomGit 安全与会话删除语义
+  - /status 文件路径展示：明确展示指令与记忆文件路径
+  Vision
+  - VL Provider name 传递：正确传递 Provider 名称到 tier 配置
+  - VL Provider 缺失折叠：配置的 VL Provider 缺失时折叠「图片识别失败」提示，防止图片误传给纯文本模型
+  其他
+  - Windows SChannel 默认后端：修复部分网络环境下 rustls TLS 指纹被 RST 导致连接失败的问题
+  - VSCode 文件协议链接跳转：VSCode 扩展支持文件协议链接（file://）跳转
+  - Markdown 重复标题去重：弱模型连续重复的 section 标题自动去重
+  - 目标评估器加固：harden evaluator 完成处理逻辑
+  - Panic 监督：完善运行时 panic 终态监督，防止 held-turn 泄漏
+  - Legacy 页面编码解码：修复旧版页面编码解码
+  - Hook code-review 问题修复：修复孤儿测试导致 core 测试目标编译失败
+  🔧 重构（Refactoring）
+  - 正式退役 atomcode-core crate：历经 5 个子项目（A–E），将 core 所有功能完整迁移至 capabilities、kernel、daemon 等 crate，物理删除 ~72k 行旧代码。构建更快、二进制更小、架构更清晰
+  📚 文档（Docs）
+  - 站点文档全面更新至 v5.0.3：含配置指南、WebUI 说明、会话管理、工具参考、FAQ 等中英文页面同步刷新
+  - v5.0.3 版本特性文档化
+  - TLS 设计文档更新版本引用
+  - Referral 推荐页面替换为活动结束公告
+  - Release/v5.0.3 整体测试清单和 core 退役验收文档
+  🧹 工程 / 构建
+  - 安装脚本同步更新至 v5.0.3
+  - Dockerfile 文档更新
+  - MCP test server 新增用于集成测试
+ReleaseNotesUrl: https://atomgit.com/atomgit_atomcode/atomcode/releases/v5.0.3
+Documentations:
+- DocumentLabel: 文档
+  DocumentUrl: https://atomcode.atomgit.com/docs/zh/index.html
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
