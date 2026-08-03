@@ -1,0 +1,106 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Patchloom.Patchloom
+PackageVersion: 0.26.0
+PackageLocale: en-US
+Publisher: Patchloom
+PublisherUrl: https://github.com/patchloom
+PublisherSupportUrl: https://github.com/patchloom/patchloom/issues
+Author: Patchloom
+PackageName: Patchloom
+PackageUrl: https://github.com/patchloom/patchloom
+License: MIT
+LicenseUrl: https://github.com/patchloom/patchloom/blob/HEAD/LICENSE
+Copyright: Copyright (c) Patchloom contributors
+ShortDescription: Structured file editing CLI for AI agents
+Description: |-
+  Patchloom is a single-binary CLI that gives AI coding agents safe, structured
+  file editing: search and replace, unified diffs, parser-backed JSON/YAML/TOML
+  document ops, markdown section editing, AST-aware renames, multi-file
+  transactions, undo, and an MCP server for tool calls.
+Moniker: patchloom
+Tags:
+- ai
+- cli
+- developer-tools
+- mcp
+- rust
+ReleaseNotes: |-
+  Patchloom 0.26.0
+  Safer path containment, FIFO handling, and multi-file soft skips for agents
+  and library hosts. Pure renames and deletes guard the path you named, not only
+  the symlink target. Special files (FIFOs and similar) no longer hang text probes
+  or get mislabeled as unreadable. Public soft-skip reporting gains
+  not_regular_file. Minor release for a public SoftTextSkip break under 0.x
+  (bump-minor-pre-major).
+  Highlights
+  PathGuard can check the entry (the path you pass) for delete and path-only
+  rename, including pure git rename patches under --contain. Soft text and
+  binary probes refuse non-regular files before open, so FIFOs do not block the
+  CLI. Multi-path replace, search, and tidy put special co-paths in refused[]
+  with reason: not_regular_file so agents do not retry chmod. Multi-file patch
+  apply always backs up creates and rename destinations so a mid-batch failure
+  can restore. Windows install docs prefer Scoop and GitHub assets over winget
+  and Chocolatey while those channels catch up.
+  Breaking changes
+  - SoftTextSkip is #[non_exhaustive] and gains NotRegularFile.
+    Hosts that match on SoftTextSkip exhaustively must add a _ arm.
+    Existing specials (FIFO, socket, device, and other non-regular entries)
+    use NotRegularFile (as_reason → not_regular_file) instead of
+    Unreadable. Missing paths stay Unreadable. (#2122)
+  Bug fixes
+  - FIFOs hung rename, backup, and binary probes.
+    Rename, backup, and related paths no longer open special nodes for
+    content probes. Path-only rename of a FIFO still works when the product
+    allows it; text ops refuse FIFO with a clear error. (#2113)
+  - is_binary_file and soft text read still opened specials.
+    Public probes refuse non-regular paths from metadata before open (same
+    hang class as rename). (#2118)
+  - PathGuard followed symlink targets for delete and path-only rename.
+    Entry mode checks the path you named so a workspace symlink to an
+    outside target is not treated as an allowed outside path. CLI, MCP, and
+    library delete/rename dual paths share the policy. Pure patch renames
+    use entry guard at execute; content hunks still follow. (#2116, #2117, #2121)
+  - Multi-file patch apply could leave orphan creates after a mid-batch failure.
+    Creates and rename destinations always get a backup marker so restore can
+    undo a partial apply. Soft-read diagnostics no longer re-open a FIFO on
+    error. (#2120)
+  - Multi-path FIFO soft skip said unreadable while stderr said not a regular file.
+    Soft skip reason is not_regular_file. Search and tidy multi-path lists
+    now refuse the same specials as replace (not silent skip of non-is_file
+    entries). (#2122, #2123)
+  - Git octal C-quotes, dangling paths, and sole special peels.
+    Pure renames decode git octal escapes; dangling append/prepend/create
+    peels are consistent; sole-path text ops still follow real symlink
+    targets. (#2110)
+  Docs
+  - Install docs prefer Scoop and GitHub portable assets over winget and
+    Chocolatey while community packages lag. (#2119)
+  Numbers
+  ───────┬────────────────────────────────────────────────────────────
+  Metric │Notes
+  ───────┼────────────────────────────────────────────────────────────
+  Version│0.25.0 → 0.26.0 (0.x minor for public SoftTextSkip change)
+  ───────┼────────────────────────────────────────────────────────────
+  Focus  │PathGuard entry, FIFO safety, multi-path soft refuse honesty
+  ───────┴────────────────────────────────────────────────────────────
+  Upgrading
+  - Library hosts matching SoftTextSkip: handle NotRegularFile or use
+    a wildcard arm (#[non_exhaustive]).
+  - Agents: multi-path specials report refused[].reason: not_regular_file.
+    Do not treat that as a permission problem.
+  - Containment: delete and path-only rename (including pure patch renames)
+    use entry PathGuard when that mode is enabled.
+  - Install from crates.io, npm, Homebrew, or Scoop after the tag ships. Winget
+    and Chocolatey may lag.
+  Full changelog
+  patchloom-v0.25.0...patchloom-v0.26.0
+ReleaseNotesUrl: https://github.com/patchloom/patchloom/releases/tag/patchloom-v0.26.0
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://patchloom.github.io/patchloom/
+- DocumentLabel: Installation
+  DocumentUrl: https://github.com/patchloom/patchloom/blob/main/docs/getting-started/installation.md
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
