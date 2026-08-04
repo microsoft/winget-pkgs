@@ -1,0 +1,49 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: WebCodr.jwtd
+PackageVersion: 5.3.0
+PackageLocale: en-US
+Publisher: webcodr
+PublisherUrl: https://github.com/webcodr
+PublisherSupportUrl: https://github.com/webcodr/jwtd/issues
+Author: David Henning
+PackageName: jwtd
+PackageUrl: https://github.com/webcodr/jwtd
+License: MIT
+LicenseUrl: https://github.com/webcodr/jwtd/blob/HEAD/LICENSE
+Copyright: Copyright (c) David Henning
+ShortDescription: Decode and pretty-print JSON Web Tokens with syntax highlighting
+Description: jwtd is a command-line tool that decodes and pretty-prints JSON Web Tokens (JWT) and JSON Web Encryption (JWE) tokens with syntax-highlighted JSON output. It can verify JWS signatures and decrypt JWEs when given a key via the --key flag or the JWTD_KEY environment variable.
+Moniker: jwtd
+Tags:
+- cli
+- command-line
+- command-line-tool
+- jwe
+- jwt
+- jwt-decode
+- jwt-decoder
+- jwt-token
+ReleaseNotes: |-
+  Highlights
+  Validate claims (opt-in)
+  jwtd can now enforce claim validity, not just display it. Pass --verify-claims to check the temporal claims and exit nonzero when a token is expired or not yet valid:
+  jwtd --verify-claims <token>
+  Add --aud and/or --iss to additionally require a specific audience or issuer (either flag implies validation):
+  jwtd --aud my-api --iss https://issuer.example <token>
+  The verdict prints as a Claims: VALID / Claims: INVALID section and is reported as claimsValid under --json. Claim validation is independent of signature verification: it runs with or without --key, and when both are used the command exits nonzero if either check fails. A token with no exp is not treated as expired, and the default behavior is unchanged — a bare decode still never fails on expiry.
+  Relative timestamps
+  Decoded exp, nbf, and iat claims now show how long until — or since — they matter: expires in 14m, expired 2h ago, not yet valid, in 5m. This is display-only and never affects verification or the exit code, and the --json output keeps the raw numeric claim values.
+  Fixes
+  - Reading a token from a closed or detached stdin no longer panics; jwtd falls back to the interactive prompt.
+  What's Changed
+  - feat: relative-time timestamp annotations + nil stdin-stat guard by @bsg62 in #20
+  - feat: opt-in claim validation (--verify-claims, --aud, --iss) by @bsg62 in #21
+  - docs(site): add claim validation to the capabilities list by @bsg62 in #22
+  - ci: skip winget update during the first-submission window by @bsg62 in #23
+  - docs: set release notes for 5.3.0 by @bsg62 in #24
+  Full Changelog: v5.2.0...v5.3.0
+ReleaseNotesUrl: https://github.com/webcodr/jwtd/releases/tag/v5.3.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
