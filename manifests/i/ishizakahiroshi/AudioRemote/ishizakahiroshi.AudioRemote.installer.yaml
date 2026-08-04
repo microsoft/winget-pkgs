@@ -1,0 +1,31 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.6.0.schema.json
+
+PackageIdentifier: ishizakahiroshi.AudioRemote
+PackageVersion: 0.1.0
+
+# 22000 is the first Windows 11 build. The server talks to Core Audio through
+# an interface that exists on Windows 10 too, but nothing about this app is
+# tested there and the README says Windows 11 only — so the floor is stated
+# here rather than left for a user to discover.
+MinimumOSVersion: 10.0.22000.0
+
+# The release ships a zip holding one exe, which is what `portable` inside `zip`
+# is for: winget unpacks it into its own package store and puts an `audioremote`
+# alias on PATH. No installer, nothing in Program Files, nothing to uninstall by
+# hand.
+InstallerType: zip
+NestedInstallerType: portable
+NestedInstallerFiles:
+  - RelativeFilePath: audioremote.exe
+    PortableCommandAlias: audioremote
+
+Installers:
+  - Architecture: x64
+    InstallerUrl: https://github.com/ishizakahiroshi/audioremote/releases/download/v0.1.0/audioremote-win32-x64.zip
+    # Copied from the release's own SHA256SUMS.txt, never recomputed here. Two
+    # places claiming to know the hash is two places that can disagree.
+    InstallerSha256: 45BC534702ECF220ADFEE9BA6818C09AC44F947545276D1B253A2A4B3E2176BD
+
+ReleaseDate: 2026-07-31
+ManifestType: installer
+ManifestVersion: 1.6.0
