@@ -1,0 +1,79 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: StablyAI.Orca
+PackageVersion: 1.4.173
+PackageLocale: en-US
+Publisher: stablyai
+PublisherUrl: https://www.stably.ai/
+PublisherSupportUrl: https://github.com/stablyai/orca/issues
+PrivacyUrl: https://www.onorca.dev/privacy
+Author: Lovecast Inc.
+PackageName: Orca
+PackageUrl: https://www.onorca.dev/
+License: MIT
+LicenseUrl: https://github.com/stablyai/orca/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Lovecast Inc.
+CopyrightUrl: https://www.onorca.dev/terms
+ShortDescription: Ship 100x With The Agent IDE
+Description: |-
+  Orca is a desktop IDE for running multiple AI coding agents side by side. Every task gets its own git worktree, its own agent terminal, and its own browser tab — so you can fan out work across Claude Code, Codex, Cursor CLI, and friends without stashing, branch-juggling, or losing flow.
+
+  When to use Orca
+  - You want three agents trying the same bug in parallel and to pick the winner.
+  - You want to review AI-generated diffs seriously before you ship them.
+  - You already pay for Claude Code, Codex, or Cursor CLI and want one place to orchestrate them.
+  - You want agents to run remotely over SSH without giving up your IDE.
+
+  Who it's for
+  Orca is designed for people who already write code for a living and want to use AI as leverage — not as a replacement. It assumes you read diffs, care about commits, and keep a worktree tidy. If you're looking for a no-code tool, Orca is not that.
+
+  What Orca is not
+  - Not a model. Orca runs agents you already use — bring your own Claude, Codex, or OpenCode subscription.
+  - Not a git replacement. Every worktree is a real git worktree. You can cd in and use plain git whenever you want.
+  - Not cloud-only. Orca runs locally. Remote agents happen through SSH to machines you own.
+Tags:
+- agent
+- agent-team
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- multi-agent
+- programming
+ReleaseNotes: |-
+  Summary
+  SSH / remote-server reliability series since 1.4.169. If you skipped 1.4.170–1.4.172, this build includes the whole stack.
+  What broke / what we fixed (by theme):
+  - Remote terminals that would not reattach or stay live — truthful handle liveness, seed titles/previews from restore, attach never-activated daemon sessions, materialize the host surface on reconnect.
+  - Outages and flaky reconnect UX — stop error-toast floods and stuck panes after reconnect; stop remote tab titles / agent status flapping.
+  - Wedged SSH sessions — recover instead of staying “connected” on a dead multiplexer (“Multiplexer disposed”); preserve agent generation timeouts; let terminate reach abandoned remote PTYs.
+  - Rejected PTY frames killing the whole relay — explicit non-destructive owner admission, then targeted recovery for rejected deliveries instead of tearing down the channel (new in this line vs 1.4.171).
+  - 1.4.172 attempted the rejected-delivery fix but failed the release build; 1.4.173 adds the watcher isolation-gate fix so packaging can complete.
+  New in 1.4.173 (vs 1.4.171)
+  - fix(ssh): make PTY owner admission explicit and non-destructive by @Jinwoo-H in https://github.com/stablyai/orca/pull/12673
+  - fix(ssh): recover rejected PTY deliveries without killing the relay channel by @AmethystLiang in https://github.com/stablyai/orca/pull/12746
+  - fix(release): admit PTY consumer in SSH watcher isolation gate by @AmethystLiang in https://github.com/stablyai/orca/pull/12754
+  Note: 1.4.172 was cut with #12673 + #12746 but never published (build failed on the relay watcher harness). Prefer 1.4.173.
+  Also included from 1.4.171
+  - fix(remote-runtime): keep a remote outage from flooding the error surface and dead-ending the pane by @Jinwoo-H in https://github.com/stablyai/orca/pull/12650
+  - fix(remote-runtime): stop the host tab mirror from fighting renderer-owned agent status by @Jinwoo-H in https://github.com/stablyai/orca/pull/12641
+  - Recover automatically instead of getting stuck on "Multiplexer disposed" when an SSH relay drops by @nwparker in https://github.com/stablyai/orca/pull/12216
+  Also included from 1.4.170
+  - fix(terminal): truthful handle liveness + no forked resume tabs for hidden restorable panes by @Jinwoo-H in https://github.com/stablyai/orca/pull/12574
+  - fix(runtime): reject leaf terminal sends only on controller-proven PTY absence by @Jinwoo-H in https://github.com/stablyai/orca/pull/12578
+  - fix(runtime): seed terminal previews and titles from restore payloads by @Jinwoo-H in https://github.com/stablyai/orca/pull/12579
+  - fix(terminal): attach never-activated daemon sessions on remote subscribe and provider-read fallback by @Jinwoo-H in https://github.com/stablyai/orca/pull/12589
+  - fix(remote-runtime): materialize the host surface when reconnecting a terminal pane by @planderdev in https://github.com/stablyai/orca/pull/11542
+  - fix(ssh): preserve agent generation timeout budget by @Jinwoo-H in https://github.com/stablyai/orca/pull/12644
+  - fix(ssh): let terminate reach remote PTYs the app gave up reattaching (STA-3376) by @Jinwoo-H in https://github.com/stablyai/orca/pull/12642
+  Full Changelog: https://github.com/stablyai/orca/compare/v1.4.169...v1.4.173
+ReleaseNotesUrl: https://github.com/stablyai/orca/releases/tag/v1.4.173
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://www.onorca.dev/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
