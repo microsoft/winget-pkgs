@@ -21,6 +21,10 @@ if: >-
     github.event.label.name == 'Manifest-Singleton-Deprecated'
   )
 checkout: false
+concurrency:
+  group: "gh-aw-${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}"
+  cancel-in-progress: false
+  queue: max
 engine: copilot
 permissions:
   contents: read
