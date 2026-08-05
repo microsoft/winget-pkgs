@@ -9,20 +9,16 @@ description: >-
 on:
   pull_request_target:
     types: [labeled]
-  workflow_dispatch:
   roles: [admin, maintainer, write]
 if: >-
-  (github.event_name == 'workflow_dispatch' && github.repository == 'denelon/gh-aw-trial') ||
+  github.event_name == 'pull_request_target' &&
+  github.event.action == 'labeled' &&
+  github.event.pull_request.user.login != 'wingetbot' &&
   (
-    github.event_name == 'pull_request_target' &&
-    github.event.action == 'labeled' &&
-    github.event.pull_request.user.login != 'wingetbot' &&
-    (
-      github.event.label.name == 'Manifest-Validation-Error' ||
-      github.event.label.name == 'Manifest-Installer-Validation-Error' ||
-      github.event.label.name == 'Manifest-AppsAndFeaturesVersion-Error' ||
-      github.event.label.name == 'Manifest-Singleton-Deprecated'
-    )
+    github.event.label.name == 'Manifest-Validation-Error' ||
+    github.event.label.name == 'Manifest-Installer-Validation-Error' ||
+    github.event.label.name == 'Manifest-AppsAndFeaturesVersion-Error' ||
+    github.event.label.name == 'Manifest-Singleton-Deprecated'
   )
 checkout: false
 engine: copilot
@@ -70,21 +66,15 @@ Otherwise emit `noop`.
 This workflow is recommend-only. Never edit the pull request, approve, merge, close, label, waive,
 remove a label, or invoke wingetbot.
 
-For `workflow_dispatch`, inspect only the pull request identified by the built-in `aw_context`
-pull-request context.
-
 ## Trusted trigger context
 
 - Event: `${{ github.event_name }}`
-- Workflow repository: `${{ github.repository }}`
 - Pull-request head SHA at the label event: `${{ github.event.pull_request.head.sha || '' }}`
 
 ## Gate - emit `noop` immediately if any condition applies
 
 - For `pull_request_target`, the trusted label-event head SHA is missing or does not exactly match
   the pull request's current full head SHA.
-- For `workflow_dispatch`, the workflow repository is not `denelon/gh-aw-trial`. Production manual
-  dispatches must not post comments.
 - The pull request is authored by `wingetbot`.
 - None of these labels is currently present:
   `Manifest-Validation-Error`, `Manifest-Installer-Validation-Error`,
