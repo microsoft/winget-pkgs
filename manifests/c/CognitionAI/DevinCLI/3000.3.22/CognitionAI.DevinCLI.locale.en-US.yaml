@@ -1,0 +1,79 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: CognitionAI.DevinCLI
+PackageVersion: 3000.3.22
+PackageLocale: en-US
+Publisher: Cognition AI, Inc.
+PublisherUrl: https://devin.ai/
+PrivacyUrl: https://cognition.ai/privacy-policy
+Author: Cognition AI, Inc.
+PackageName: Devin CLI
+PackageUrl: https://cli.devin.ai/docs
+License: Proprietary
+LicenseUrl: https://cognition.ai/terms-of-service
+ShortDescription: A fast and minimal agent that lives both in your terminal and in the cloud.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+ReleaseNotes: |-
+  Added
+  - New smart permission mode: workspace edits auto-approve like Accept Edits, and a fast model decides whether other actions (shell commands, fetches, out-of-workspace writes) are safe to auto-run, falling back to the normal prompt otherwise. Auto-approval is limited to routine development work (building, testing, linting) — package installs, downloads that execute code, mutating git, rm, sudo, kubectl delete, cloud CLIs, and anything destructive always prompt, as do sensitive paths (dotenv, key material, Git config, agent configuration). Switch with /smart, /mode smart, Shift+Tab, or --permission-mode smart. Available in all builds, off unless the server-side rollout flag is enabled for your client.
+  - Plugins can now contribute rules, hooks, MCP servers, and custom subagents, not just skills. Plugin AGENTS.md/AGENT.md/.windsurfrules load as always-on rules, hooks.json loads alongside project hooks, MCP servers declared via a root .mcp.json or an inline manifest mcpServers map run for the session, and agents/<name>/AGENT.md files surface as <plugin>:<agent> subagent profiles. devin plugins info and the install trust prompt list all of them before you confirm, and devin rules list / devin mcp list include them.
+  - New plugin sources and manifest options: the git-subdir source kind installs a plugin living in a subdirectory of a shared repo (devin plugins install acme/vendor-plugins#plugins/stripe), a skills manifest field controls where skills load from (or disables them with []), and a Claude-compatible .claude-plugin/plugin.json manifest is used when no .devin-plugin/plugin.json is present.
+  - MCP prompts support: prompts offered by connected MCP servers are available as /mcp__<server>__<prompt> slash commands, with arguments mapped positionally onto the prompt’s declared arguments.
+  - Editable command approvals: the shell-command permission prompt now offers “Edit command” to tweak the proposed command inline before approving, and “Describe change to command” to have a fast model rewrite it in plain language (out-of-band — nothing enters the conversation) for review. ACP clients get the same affordances.
+  - Command permission prompts now offer a global “Yes, always allow <cmd> commands in all projects” option saved to the user-level config.json, alongside the existing per-project option. Web-fetch prompts gained an equivalent “always allow all web fetches” option.
+  - Configurable keybindings via a keymap section in config.json, keyed by context then action (e.g. { "keymap": { "global": { "clear_screen": "ctrl-shift-k" } } }). /shortcuts now lists every binding across all contexts, shows each action’s context.action identifier, and lets you rebind interactively. Ctrl+C cannot be unbound.
+  - Copilot agent skills are discovered automatically from .github/skills/ and ~/.copilot/skills/, toggled with the copilot key under read_config_from.
+  - New subagents_enabled setting in config.json (on by default) turns the run_subagent / read_subagent tools off; changes apply live to the running session.
+  - In plan mode, a megaplan keyword (megaplan, ultraplan, masterplan) triggers extra planning guidance: the agent plans more extensively and always asks at least one clarifying question before writing the plan.
+  - Old log files are gzip-compressed on startup — logs from finished processes untouched for 48 hours become .log.gz (still searchable with zgrep/rg -z).
+  - Administrators can configure the CLI’s outbound HTTP proxy through the MDM-distributed enterprise policy file (system.json); it takes precedence over the user config, and the updater honors it too.
+  - devin acp --model <name> (or DEVIN_MODEL) sets the default model for every session the ACP server creates, matched the same way /model matches it. devin acp --cloud (insiders) relays the ACP connection to Devin cloud instead of running the local agent.
+  - /btw, /loop, /mcp, /context, /add-dir, /undo-add-dir, and /workspace are now advertised as agent-side ACP slash commands, so any ACP client (Devin Desktop, JetBrains, or Zed) can invoke them and their progress streams back as session updates. /remove-dir and /workspaces were added as second names for /undo-add-dir and /workspace.
+
+  Changed
+  - MCP servers now live in dedicated config files — ~/.config/devin/mcp_config.json (%APPDATA%\devin\mcp_config.json on Windows), .devin/mcp_config.json, and .devin/mcp_config.local.json — instead of the mcpServers key of config.json. Existing mcpServers entries in config.json are migrated automatically on startup. See MCP Configuration.
+  - Shell commands run by the agent now inherit your login shell’s environment (.bashrc/.zshrc/.zprofile/fish config), so nvm, pyenv, rbenv, direnv, and custom PATH entries just work. Snapshotted once per session; macOS/Linux only.
+  - Plan mode now allows read-only MCP tools (those annotated readOnlyHint: true) plus listing MCP servers, tools, and resources, so the agent can gather context while planning.
+  - Relative plugin references (./path) in manifests and repo plugin configs now resolve against the entity that declares them rather than the process working directory — including forbiddenPlugins deny entries, which previously matched nothing. Manifests with unresolvable relative references now fail to parse instead of carrying a silently dead entry.
+  - Organization sandbox enforcement now applies to running sessions: team settings are refreshed at each prompt, and turning on required sandboxing mid-session refuses further prompts with a message asking you to restart.
+  - /session-stats renders every usage dimension the server reports — credits, ACUs, agent messages, turn continuations, token usage — using the server’s own labels and grouping, the Model row names the model that actually served the billed turns, and totals persist across resume.
+  - Automatic context compaction is no longer surfaced in the scrollback or the ACP conversation view; an explicit /compact still confirms in the transcript.
+
+  Fixed
+  - Interrupting the agent now pauses running subagents instead of leaving them working in the background: they park with their state intact and resume on your next message. Subagent activity also survives a session reload, and a subagent’s approval prompt now shows the command and names the requesting subagent.
+  - Sending a queued message immediately (Enter on an empty input while Devin is working) actually interrupts the current turn instead of leaving the message queued until the turn finished.
+  - Exiting plan mode now injects an explicit mode-change announcement, so the agent reliably starts acting in the new mode instead of continuing to follow plan-mode restrictions from earlier in the conversation.
+  - Permission rules with recursive globs (e.g. deny: ["Read(/etc/**)"]) now also cover the base directory itself.
+  - On Windows, Deny rules now block a forbidden command hidden behind a safe leading command in a &&, ||, or & chain (e.g. Get-ChildItem && git push); the PowerShell parser previously collapsed these into a single scope.
+  - When running sandboxed through an ACP client, commands reaching a network host outside the sandbox allow list now surface a permission prompt instead of being silently blocked.
+  - apply_patch no longer rewrites a whole Windows (CRLF) file’s line endings to LF, so a one-line edit no longer produces a whole-file diff.
+  - @ file mentions pick up files created, moved, or deleted while the CLI is running instead of showing a stale snapshot from startup.
+  - Attached images tell the model where the file lives on disk.
+  - Reverting removes the empty directories Devin created to hold a new file (only ones it created, and only while empty), and /revert no longer ends the session with an “already open in another process” lock error.
+  - The context window usage indicator appears immediately after resuming an old session, and revert steps are available as soon as a session is reopened.
+  - The ACP server stays responsive while opening, listing, saving, or updating sessions — persistence runs on a dedicated database thread with a reused connection instead of blocking the async runtime.
+  - ACP resource links and inline <ref_file> links show the file’s basename on Windows and build well-formed, percent-encoded file:// URIs (file:///C:/Users/you/file.txt) instead of malformed backslash paths.
+  - Skipping some questions in an ask_user_question will no longer block progress.
+  - Claude-format hooks that block by exiting with code 2 now take their block reason from stderr, matching Claude Code’s convention.
+  - The exec tool rejects empty commands with an error instead of silently reporting success, preventing repeated empty-command loops.
+  - The “Update vX available!” banner will never advertise a version older than the one you’re running.
+
+  Outposts
+  - devin worker start no longer requires a pre-provisioned outposts token: with no --token / DEVIN_OUTPOSTS_TOKEN it creates an outpost with your CLI login and reuses the saved worker token on later runs.
+  - devin worker start downloads the correct devin-remote binary on Windows x64 and passes the Windows system environment through, fixing the immediate os error 10106 crash on every Windows outpost session. It also accepts an outpost name as well as an id, and fails fast on an OS mismatch instead of repeatedly claiming and releasing queued sessions.
+ReleaseNotesUrl: https://cli.devin.ai/docs/changelog/stable
+PurchaseUrl: https://devin.ai/pricing
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://cli.devin.ai/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

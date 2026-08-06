@@ -1,0 +1,63 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Lime.Lime
+PackageVersion: 1.117.0
+PackageLocale: zh-CN
+Publisher: Lime
+PublisherUrl: https://limeai.run/
+PublisherSupportUrl: https://github.com/limecloud/lime/issues
+PrivacyUrl: https://limeai.run/privacy/
+PackageName: Lime
+PackageUrl: https://limeai.run/
+License: 专有软件
+LicenseUrl: https://limeai.run/terms/
+Copyright: © 2026 Lime
+ShortDescription: 给中文创作者用的开源 AI 内容工作台
+Description: |-
+  Lime 是一个开源的 Electron 桌面端 AI 内容工作台，面向中文创作者、品牌运营、研究型写作者和小团队，覆盖 AI 写作、选题研究、素材管理、提示词沉淀、知识库和多模型创作流程。
+
+  你可以把它理解成一个更适合长期创作的 AI 工作台：
+  - 不是只问一句、答一句，而是围绕一个项目持续推进
+  - 不是每次都重新找资料、重新写提示词，而是把参考、风格和做法沉淀下来
+  - 不是生成完就散落在聊天记录里，而是把结果保存起来，下一次还能继续用
+  - 不是绑定某一家 AI 服务，而是让你使用自己已经配置好的模型能力
+  如果你经常在收藏夹、文档、聊天工具、图片工具和模型后台之间来回切换，Lime 想帮你把这些动作收回到同一个创作空间里。
+
+  你可以用 Lime 做什么
+  - AI 写作与内容创作：写公众号文章、小红书笔记、视频脚本、播客提纲和直播话术
+  - 资料研究与知识整理：整理网页、笔记、截图、访谈和历史材料，生成报告或简报
+  - 选题分析与内容复盘：拆解爆款案例、竞品内容、发布节奏和表达风格
+  - 提示词管理与风格复用：保存常用写法、品牌语气、选题方法和团队模板
+  - 多模态创作准备：生成图片提示词、封面方向、演示稿结构或网页草稿
+  - 多模型工作流：使用自己配置的 AI 服务商和模型，在同一个任务里持续修改、扩写、压缩或换平台发布
+ReleaseNotes: |-
+  Lime v1.117.0
+  新功能
+  - 完成 currentTime/read、item/permissions/requestApproval 与 item/tool/call 三项 Host capability：系统时间读取、权限提升和桌面动态工具调用都经 Electron Host、App Server JSON-RPC 与 RuntimeCore 的同一条产品链闭环。
+  - 动态工具调用升级为 canonical Thread Item，完整保留 namespace、tool、原始参数、有序文本/图片/音频输出、状态和耗时；恢复会话后仍能可靠呈现工具生命周期。
+  - Multi-Agent 对话补齐六项 AgentControl 工具、typed wait state、子 Agent 活动投影和冷重启恢复；parent-owned 子线程现在明确禁止直接输入。
+  - Lime Hub 可通过 bundled canonical registry 恢复已知模型的执行能力，并新增 Agnes 2.5 Flash/Pro canonical catalog；未知模型仍保持 fail-closed。
+  修复
+  - 修复干净环境无法解析 @limecloud/app-server-client/browser、图片任务 fixture 使用错误 Chat 模型、模型列表 generation 基线漂移，以及非法模型参数返回错误 JSON-RPC code 的问题。
+  - 修复模型选择器展示 RuntimeCore 无法执行的 inferred-only 模型、live provider metadata 被本地 hint 覆盖，以及 Windows Lime Hub 已保存模型无法进入首回合的问题。
+  - 修复媒体预览依赖 transient chunk/completed 通知和 Renderer live-drain helper 的双轨行为；所有分段读取现在先校验 offset、length、digest 与大小再更新进度。
+  - 修复初始会话和子 Agent 导航、canonical Item 读取、事件序列门控与待处理交互恢复中的边界问题。
+  优化与重构
+  - 将 configWarning 从 v0 DTO/schema 迁移到唯一的 typed v2 owner，Renderer 只投影解码后的全局告警，并提供五语言去重提示。
+  - 删除 v0 配置告警、TextPosition/TextRange schema、媒体 transient notification 消费者、旧协议 facade 与重复预览同步模块，不保留生产兼容包装。
+  - 收紧请求权限 profile、沙箱命令、动态工具路由、provider history 与 read model 的类型边界；保留名、schema 冲突、身份错配、重复或迟到响应全部 fail-closed。
+  - Skill 安装目录改用后端权威 localDirectoryPath，Electron 对目录使用 openPath、对文件使用 showItemInFolder。
+  测试与质量
+  - 新增 Host capability、动态工具、权限 profile、current time、AgentControl、parent-owned thread、配置告警 v2 与模型路由的 Rust、Electron、协议和 Renderer 回归。
+  - 补充真实 Electron Gate B 证据，覆盖 preload/IPC、app_server_handle_json_lines、App Server、RuntimeCore、canonical read model、GUI 可见状态和冷重启 identity。
+  - 加强 app-server-client browser 子路径、协议生成物、五语言资源、legacy surface 和 current bridge 的守卫。
+  文档
+  - 更新 Host capability、DynamicTool canonical payload、配置告警 v2、媒体 transient retirement 与 Lime Hub capability provenance 的架构事实源。
+  - 更新 Refactor v2 V2-04/V2-05 进度、Gate B evidence、Windows runtime 模型路由计划和 Soul 输出面路线图。
+  其他
+  - 将根应用、CLI npm 包、Rust workspace 与锁文件版本统一提升到 1.117.0。
+  完整变更：v1.116.0 → v1.117.0
+ReleaseNotesUrl: https://github.com/limecloud/lime/releases/tag/v1.117.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

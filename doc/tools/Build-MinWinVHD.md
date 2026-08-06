@@ -1,6 +1,6 @@
-# Using Build-MinWin11.ps1
+# Using Build-MinWinVHD.ps1
 
-The [Build-MinWinVHD.ps1](Tools/Build-MinWinVHD.ps1) script creates a new `V`irtual `H`ard `D`isk (VHD) using a mounted Windows ISO for use with a virtual machine. This image will have as few dependencies and apps enabled as possible, to provide the best approximation of the images uses by the validation pipelines. Although this is not the same image, it should be close enough to use for testing manifests for those who are unable to use Windows Sandbox and [SandboxTest.ps1](doc/tools/SandboxTest.ps1).
+The [Build-MinWinVHD.ps1](Build-MinWinVHD.ps1) script creates a new `V`irtual `H`ard `D`isk (VHD) using a mounted Windows ISO for use with a virtual machine. This image will have as few dependencies and apps enabled as possible, to provide the best approximation of the images uses by the validation pipelines. Although this is not the same image, it should be close enough to use for testing manifests for those who are unable to use Windows Sandbox and [SandboxTest.ps1](SandboxTest.md).
 
 ## Summary
 
