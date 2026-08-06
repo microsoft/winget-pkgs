@@ -1,0 +1,39 @@
+# Created with komac v2.9.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
+
+PackageIdentifier: Databricks.DatabricksCLI
+PackageVersion: 1.11.0
+PackageLocale: en-US
+Publisher: Databricks
+PublisherUrl: https://databricks.com/
+PublisherSupportUrl: https://github.com/databricks/cli/issues
+PackageName: DatabricksCLI
+PackageUrl: https://github.com/databricks/cli
+License: DB license
+LicenseUrl: https://github.com/databricks/cli/blob/HEAD/LICENSE
+ShortDescription: Databricks Command Line Interface
+Tags:
+- command-line-interface
+- databricks
+ReleaseNotes: |-
+  CLI
+  - Fixed databricks repos get/update/delete failing with object at path "..." is not a repo for Git-CLI-enabled folders (currently in preview), which the workspace API reports as directories rather than repos (#6181).
+  - Support dbfs:/Skills/... paths in databricks fs commands, routed to the Files API. (#6147)
+  Bundles
+  - For jobs where ai_runtime_task.code_source_path is a relative path to a local directory, the directory is now packaged into a tarball (honoring .gitignore and sync.include/sync.exclude), uploaded during deployment, and code_source_path is rewritten to the uploaded workspace path. (#6110)
+  - Added JSON output to bundle init. Running databricks bundle init <template> -o json now reports the files the template wrote, relative to the output directory. This lets callers that pass --output-dir learn where the template materialized instead of assuming the output is a single directory named after the project. The default text output is unchanged. (#6161)
+  - The terraform deployment engine is deprecated and will stop working in a future version of the CLI. Setting bundle.engine: terraform now emits a deprecation warning. See https://docs.databricks.com/aws/en/dev-tools/bundles/direct for how to migrate to the direct deployment engine. (#6099)
+  - Fixed the direct deployment engine planning a spurious create for an empty grants: [] list. Terraform records no grants resource for such a list, so bundle plan after bundle deployment migrate no longer reports an action for it. Emptying a previously deployed list still revokes the grants, after which the node is dropped from the deployment state instead of being reported as unchanged forever. (#6039)
+  - Fixed bundle generate downloading notebooks found inside a folder without their file extension. They are now exported like top-level notebooks, so a Python notebook lands as notebook.py instead of an extensionless file (#6144).
+  - direct: webhook_notifications.on_* destinations on jobs, tasks, and for_each_task are now compared as unordered sets. Previously the Jobs API returning these lists in a different order than submitted produced a phantom diff that bundle plan and bundle deploy could never converge past, reporting 1 to change on every run (#6060).
+  - Fixed a pipeline with allow_duplicate_names: true never converging on the direct engine: the field is only accepted on create/update and is never returned by the pipelines GET API, so every subsequent bundle plan reported the pipeline as a perpetual update. (#6076)
+  - direct: A local change to an input-only field (one the API accepts on write but never returns on read, e.g. pipelines' run_as or external locations' skip_validation) is no longer silently skipped when the new value coincidentally matches the field's fabricated remote value. Previously such a change could hit the remote_already_set shortcut and be dropped from the plan. (#6112)
+  - Revert usage of RedactiveSenstiveFields (added in #5896, released in 1.10.0) which lead to incorrect behaviour (permanent drift) for duration field in Postgres resources (#6179).
+  - Document postgres resource fields in the json schema (#6164, #6163).
+  - direct: Recreating a vector_search_indexes resource no longer fails with "Index ... is currently pending deletion" when the backend has not yet released the index name. The create is now retried until the name becomes available. (#6143)
+  Dependency Updates
+  - Bump github.com/databricks/databricks-sdk-go from v0.165.0 to v0.166.0. (#6175)
+  - Upgrade Terraform provider to 1.124.0. (#6174)
+ReleaseNotesUrl: https://github.com/databricks/cli/releases/tag/v1.11.0
+ManifestType: defaultLocale
+ManifestVersion: 1.9.0
