@@ -1,0 +1,100 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Odamex.Odamex
+PackageVersion: 12.3.0
+PackageLocale: en-US
+Publisher: Odamex
+PublisherUrl: https://odamex.net/
+PublisherSupportUrl: https://github.com/odamex/odamex/issues
+PrivacyUrl: https://odamex.net/privacy
+PackageName: Odamex
+PackageUrl: https://odamex.net/
+License: GPL-2.0
+LicenseUrl: https://github.com/odamex/odamex/blob/HEAD/LICENSE
+ShortDescription: Multiplayer-oriented source port for Doom
+Tags:
+- doom
+- game
+- multiplayer
+ReleaseNotes: |-
+  Odamex 12.3.0 is out now!
+  This is a minor version release with many bug fixes, feature additions, and performance improvements.
+  Added
+  - Created a cvardocjson console command to dump cvar information in both the client and server.
+    - External programs can import this to have information about Odamex's cvars.
+    - Odalaunch now uses these exports as a source-of-truth for cvar information.
+    - This can also be run from the command line as --cvardocjson to dump this information without requiring a WAD or other subsystems to be loaded.
+  - Created --cvardoc and --cvardocjson command line flags to dump the cvardoc file, in HTML or JSON format, from the command line.
+    - The client's --cvardocjson will print to a file on Windows platforms, and dump the file to stdout otherwise.
+  - Added a 90fps option to the Framerate selector in Video Options.
+  - Added a "Server Details" window to Odalaunch.
+    - To activate it, right click a server and select "View Server Details..." or middle-click a server in the server list.
+  - Implemented MBF's changes to player movement and spawning code, which should help cases where players may get stuck in walls.
+  - Added a new cvar g_horde_cooldown that puts recently played waves in a cooldown queue to avoid playing the same wave twice in a short interval.
+  - Added a clientside freecam for net demos and survival game modes that can be accessed when a player is out of lives.
+  - Added the cvar ui_mouse to navigate Odamex menus using the mouse, defaulting to on.
+    - Left click toggles selections, drags sliders, and drives down into menus.
+    - Right click emulates the Esc key and goes back 1 menu level.
+    - Scroll wheel scrolls menus as you'd expect.
+  - Added an implementation of ZDoom's stacked portal things.
+    - Things added to support these:
+      - Thing 9077 - Upper Sector Portal
+      - Thing 9078 - Lower Sector Portal
+    - Also uses the cvar r_portalrecursions to limit the amount of recursions when rendering portals.
+  - ACS additions:
+    - Added the ability to run client-side scripts.
+    - Add support for SpawnProjectile, SpawnSpotFacing, Thing_Projectile2, SpawnForced, SpawnSpotForced, SpawnSpotFacingForced, StrCmp, StrICmp, Sqrt, FixedSqrt, VectorLength, SetSectorDamage, SetSkyScrollSpeed, Floor, Round, Ceil, SetActivator, SetActivatorToTarget, and SetActorAngle.
+    - Spawn specials/functions taking a spawn number can now spawn health bonuses, mancubus fireballs, and baron projectiles (spawn numbers 152, 153, and 154)
+    - Print now supports x, b, n:PRINTNAME_LEVELNAME, n:PRINTNAME_LEVEL, n:PRINTNAME_NEXTLEVEL, n:PRINTNAME_NEXTSECRET, and n:PRINTNAME_SKILL.
+    - Spawn and SpawnSpot now return the number of things spawned
+  - WIP PowerShell tab completions for Odamex and Odasrv are now available.
+    - These are not yet included in the releases.
+    - See the completion/ folder for more information.
+  - Added support for UZDoom's Tag property in DeHackEd for setting thing display names.
+  Changed
+  - Removed the vid_pillarbox cvar as it was not operational.
+  - Pasting into the client console when running under X11 or Wayland now allows pasting from both the clipboard and the primary selection:
+    - Middle-click and ALT+V paste from the primary selection.
+    - Right-click and CTRL+V paste from the clipboard.
+  - Skyboxes now recursively stack together.
+    - Skyboxes will render recursively up to a level defined by the new cvar r_portalrecursions which defaults to 16.
+  - Missing patches are now treated as non-fatal.
+  - The tntem command can now be run by the server itself.
+  - Teammates no longer hit each other with BFG tracers when sv_unblockplayers is 1 and sv_friendlyfire is 0.
+  - Bossactions now use a copy of line 0, keeping up with UMAPINFO spec.
+  - Odalaunch changes
+    - Server browser now sorts servers that return << NO RESPONSE >> to the bottom of the server list.
+    - Instead of permanent tables that show players and server configuration, we show "popovers" when you mouse over a server's player list or server name.
+    - "Copy server address" copies to the clipboard instead of the primary selection when running under X11/Wayland
+  Fixed
+  - Fixed X11 WM_CLASS/Wayland app_id not being set on the BSD family of platforms.
+  - A_WeaponBulletAttack no longer handles refire (matches MBF21 behavior).
+  - Fixed exec and -config not searching relative paths.
+  - Many stability fixes and crash remedies.
+  - Fixed some cases of weapons not changing as you'd expect when grabbing a weapon while lowering your current weapon.
+  - Fixed many instances of HOM with high FOV, or maps with massive open areas causing the renderer functions to overflow.
+  - Fixed instances of deep water rendering where it should not.
+    - Also fixed instances where deep water should render but it does not.
+  - Fixed clearing additional flags when activating a dormant monster.
+  - Fixed players losing their color when fast forwarding or rewinding a demo.
+  - Fixed the VC++ runtime not installing when installing via installer.
+  - Fixed a bug in Odalaunch when multiple client instances launched at the same time are closed.
+  - Fixed MBF21 death exits not killing everyone.
+  - Fixed incorrect red screen when spectating a new player.
+  - Fixed bumping gamma not affecting colored sectors.
+  - Fixed HOM in status bar when starting a new game after viewing a netdemo.
+  - Fixed jitter when netdemo is paused.
+  - Fixed crash when wads had textures between TX_ markers.
+  - Fixed pixel gap when drawing 2 sided midtextures.
+  - Fixed some DeHackEd things being spawned as player starts.
+  - Fixed players sometimes spawning at the wrong start in coop on Hexen format maps.
+  - Fixed some locked doors displaying as the wrong color on the automap.
+  - ACS fixes:
+    - Spawn, CheckInventory, GiveInventory, and TakeInventory are now fully case insensitive
+    - SpawnSpot no longer uses the tid argument as the value for the spottid argument
+    - Fixed an off by one error when printing player names with Print
+    - Fixed out of bounds array accesses in GiveInventory, CheckInventory, and TakeInventory
+ReleaseNotesUrl: https://github.com/odamex/odamex/releases/tag/12.3.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
