@@ -1,0 +1,56 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: athrvk.Vayu
+PackageVersion: 0.14.0
+PackageLocale: en-US
+Publisher: Atharva Kusumbia
+PublisherUrl: https://github.com/athrvk
+PublisherSupportUrl: https://github.com/athrvk/vayu/issues
+Author: Atharva Kusumbia
+PackageName: Vayu
+PackageUrl: https://github.com/athrvk/vayu
+License: AGPL-3.0
+LicenseUrl: https://github.com/athrvk/vayu/blob/HEAD/LICENSE
+Copyright: Copyright © 2026 Atharva Kusumbia
+ShortDescription: Open-source API client with a native C++ load-testing engine - Postman-style requests and k6-level load tests in one local app.
+Description: Vayu is a free, open-source desktop app for Windows, macOS, and Linux that combines a full REST and GraphQL request builder - with collections, environments, and scripting - and a high-throughput load tester powered by a C++20 engine, with all data staying on your machine.
+Moniker: vayu
+Tags:
+- api
+- api-client
+- api-testing
+- benchmark
+- developer-tools
+- graphql
+- http
+- insomnia
+- load-testing
+- performance
+- postman
+- rest
+ReleaseNotes: |-
+  0.14.0 - 2026-08-01
+  The script editor and state-correctness release. The engine now serves its pm.* surface as TypeScript declarations as well as completions, which turns Monaco's language service on in the script editors - hover documentation, signature help, typo diagnostics with quick fixes, and rename/find-references inside a script. The declarations are generated from the completion table the engine already owns, so the app never carries a second copy to drift from it. Around that, the active environment became real engine state instead of a per-machine localStorage value, and a sustained sweep closed a long tail of renderer bugs that lost edits, served deleted rows from cache, or wrote state nothing ever read.
+  Added
+  - A language service in the script editors. A new GET /scripting/types returns the pm.* surface as a .d.ts, generated from the same table that backs GET /scripting/completions - a function's detail is already its signature, so the types are derived rather than hand-maintained. Feeding it to Monaco's TypeScript worker gives hover documentation over an existing call, signature help while typing arguments, red squiggles under pm.response.staus with a "Did you mean 'status'?" quick fix, and rename/find-references/go-to-definition within a script. The worker is configured to match the sandbox rather than a browser - lib: ["es2022"] with no DOM, target: ESNext - so it cannot offer fetch or setTimeout, which do not exist at runtime. The globals the sandbox lacks are declared explicitly with the reason as hover text, and that list is held to the runtime by a test that probes each name in the real script engine.
+  - Variable names complete inside pm.* accessors. The names were visible in the panel above the editor and had to be retyped by hand into pm.environment.get("..."), where a misremembered one is silent - the accessor just returns undefined. They are now offered in the string argument of every accessor, scoped to what the call can really read: pm.environment.get lists environment variables only, and generators like {{$guid}} appear for pm.variables.replaceIn alone, since that is the only one that interpolates. Both the {{name}} and script lists now also see the active collection's own variables, which previously reached neither editor.
+  - console levels reach the Console tab. console.log, .info, .warn and .error were indistinguishable in the response pane, because all four were bound to one function that pushed a bare string - the level was destroyed at the QuickJS binding and no styling could have recovered it. Warnings and errors now carry their own colour plus a gutter label, so the distinction is not colour-only.
+  - One active environment, stored by the engine and restored on launch. environments.is_active was a column nothing enforced, while the choice that actually drove variable resolution lived in localStorage - per-machine, and invisible to the engine storing a column for it. Activating an environment is now a single write (isActive: true), with the previous one deactivated atomically in the same transaction, so no reader ever observes two actives or none. The selection survives a restart and is shared by every client on the same database.
+  Changed
+  - Accepting a completion no longer duplicates an existing call. At pm.variables.rep|("$guid"), accepting replaceIn used to leave pm.variables.replaceIn("template")("$guid") - the snippet's own parentheses landing beside arguments the user had already written. When the text after the cursor already opens a call, only the callee is inserted, matching VS Code's completeFunctionCalls behaviour.
+  - GraphQL schema introspection uses the request's auth. It previously sent header rows and nothing else, so any endpoint whose credentials live in the Auth panel answered 401 and the schema never loaded. Introspection now composes engine-side first, so variables, inherit walked through the collection chain, and OAuth 2.0 all work. The schema cache keys on the whole target rather than the URL alone - two environments pointing one URL at different tokens no longer share the first one's schema.
+  - docs/engine/scripting.md no longer claims modern syntax is unavailable. Optional chaining and nullish coalescing were listed as unsupported "ES2021+" features; both are ES2020 and both work, as do Array.prototype.at, Object.hasOwn and String.prototype.replaceAll. What a script lacks is host globals, not syntax - and the editor now enforces exactly that distinction.
+  Fixed
+  - Editing surfaces that lost or hid edits. Four editors dropped data at their edges - most sharply the variable table, where a save snapshotted its rows at the start and then rebuilt every row from the cache it had just written, reverting anything typed while the save was in flight and clearing the dirty flag, so the newer edit would never be written at all.
+  - Deleted things stopped lingering. Deleting a run threw inside the delete mutation's own cache patch whenever a request tab was open, so the engine deleted the run while the row stayed on screen behind a "Couldn't delete run" toast. Run tabs are now closed when their run goes (they are persisted, so one left open rehydrated into a permanently failing pane on every restart), deleting a collection invalidates its requests, and the response map gained eviction it never had.
+  - Zombie ids and stale reads. A deleted environment's id kept riding on every composed payload; a collection scope nothing ever wrote kept scoping variable previews. A finished load test could flip a newly started run to "completed" with the previous run's percentiles. Polling the runs list re-fetched every loaded page, so a user ten pages deep drove roughly ten engine requests per tick. A 404 no longer fires three identical retries, and the request pane tells a genuine 404 apart from an unreachable engine instead of reporting a deleted request whenever the daemon is down.
+  - engineError was written on every failed health poll and read nowhere, so "Disconnected" said the same thing for a refused connection, a timeout and a TLS failure. The reason now reaches the Dock's indicator.
+  - Design runs stored an indeterminate end_time. The insert stamped start_time and nothing else while Run::end_time had no default, so the row reached SQLite with whatever was on the stack. Normal completion hid it, but a run orphaned by a daemon crash is marked failed with end_time as recorded - so the garbage reached the report, where a duration could span the entire downtime.
+  - Tab panels stacked and the focus ring was clipped. Radix's forceMount means "always present", not "present but hidden", so Collection Detail's four draft-holding panels painted on top of whichever tab was selected. The ring was clipped to two vertical strokes on every scrolling tab strip in the app. Both fixed in the primitive.
+  - The installer silently discarded flags. bash -c "$(curl …)" --force hands the flag to bash's -c as its name argument, so $# was 0 and --force vanished - the run reported "already installed - nothing to do" while ignoring exactly what it had been asked. --purge without --uninstall is now a usage error rather than accepted and ignored, and the hint printed after an uninstall names a command that actually runs.
+  Internal
+  The type declarations are guarded against silent degradation: tests assert every listed member reaches the output, that the assertion-chain vocabulary is still in the table (a getter that continues a chain and one that performs an assertion are indistinguishable as completion entries), and that parameter lists TypeScript cannot parse fall back rather than emitting a file that will not compile. Store persistence gained versioning and per-object default completion, so the next key added to a nested settings object cannot arrive undefined, and nine store actions and hooks with no callers were deleted.
+ReleaseNotesUrl: https://github.com/athrvk/vayu/releases/tag/v0.14.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

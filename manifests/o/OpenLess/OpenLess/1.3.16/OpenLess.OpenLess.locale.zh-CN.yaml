@@ -1,0 +1,97 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: OpenLess.OpenLess
+PackageVersion: 1.3.16
+PackageLocale: zh-CN
+Publisher: openless
+PublisherUrl: https://github.com/Open-Less
+PublisherSupportUrl: https://github.com/Open-Less/openless/issues
+PackageName: OpenLess
+PackageUrl: https://github.com/Open-Less/openless
+License: MIT
+LicenseUrl: https://github.com/Open-Less/openless/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 OpenLess contributors
+ShortDescription: 按住快捷键说话，松开即得润色后的文字
+Description: |-
+  OpenLess 是一个跨平台（macOS & Windows）语音输入应用，对标 Typeless、Wispr Flow、Lazy、Superwhisper 等商业语音输入工具的 完全开源 替代品。
+  把光标放在 ChatGPT、Claude、Cursor、Notion、邮件、聊天框任意输入框里，按一次全局快捷键说话——OpenLess 会录音、转写、按你选的模式润色，把结果直接插入光标位置。插入失败时会自动复制到剪贴板，尽量保证「你说过的话不丢」。
+  不像那些只把语音转成「逐字稿」的输入法，OpenLess 的核心模式是 AI prompt 模式：你只管乱讲，它自动补上结构、列出约束、整理出有上下文的 prompt，复制粘贴就能直接喂给 ChatGPT / Claude / Cursor。
+Tags:
+- 听写
+- 语音识别
+- 语音转文字
+- 转写
+- 转录
+ReleaseNotes: |-
+  macOS 用户首次安装提示
+  下载 DMG 拖入 /Applications 后，必须在终端运行：
+  xattr -cr /Applications/OpenLess.app
+  否则 Gatekeeper 会提示「OpenLess 已损坏」——这是因为当前 build 用 ad-hoc 签名、没做 Apple 公证。
+  渠道说明
+  - 以 -tauri 结尾的 tag 是正式版（自动推送给所有 in-app 检查更新的用户）。
+  - 以 -beta-tauri 结尾或包含 -Beta.N-tauri 的 tag 是 Beta 版（GitHub 标 pre-release，不通过 in-app updater 推送给正式版用户；只对在「设置 → 关于 → 加入 Beta 渠道」开关切到 Beta 的用户可见，且需要手动从此页面下载安装）。
+  行为变更提示
+  - 流式输入默认开启；不兼容场景会自动回落到一次性插入。可在「设置 → 高级」关闭。
+  - 流式输入成功后默认把最终文本同步到剪贴板，方便再次粘贴；可在「设置 → 高级」关闭。
+  v1.3.16 更新内容
+  这是 1.3.15 之后的正式版，包含多个新功能与修复（含 1.3.16-Beta.1 已验证的全部改动）：
+  ✨ 新功能
+  - 静音后自动停止（切换式录音模式专属，开关默认关闭）：检测到语音后，连续静音达到所选时长（1/1.5/2/3/4/5 秒）即自动结束并提交；一直没说话则 10 秒后自动取消。可在「设置 → 录音与输入 → 静音后自动停止」开启并选择静音时长（#860）。
+  - ZenMux 语音转写：新增 ZenMux（JSON + base64）作为可选云端 ASR 提供商（#837）。
+  - 自定义 OpenAI 兼容 ASR 预设：可在 ASR 提供商中选择「自定义 OpenAI 兼容」并配置高级参数（#854）。
+  - 手动开关系统代理：网络设置中可手动启用/禁用系统代理（#869）。
+  🛠 修复
+  - 胶囊样式切换立即生效（Windows/Linux 修复）：此前在 Windows/Linux 上把胶囊样式切换为「Openless 默认风格」后仍显示流光 Siri 风格——样式原子只在录音 30Hz 帧循环里同步，Windows 主线程拥塞时整场录音都下发旧样式。现在设置保存即同步、prefs:changed 广播即时下发，切换后立即生效，录音中切换也当帧换肤；重启后样式保留（#912）。
+  - GLM-ASR 纯井号占位过滤：GLM-ASR 在静音/弱音片段偶发返回仅含 # 的占位文本，现已归一化为空转写，不再把占位符当有效内容插入（#787 / #916）。
+  - 热键冲突不再拒绝保存：升级时自动迁移停用冲突的默认键，保存时自动化解冲突，不再弹「冲突无法保存」（#904）。
+  - 无麦克风提示：未检测到麦克风时明确提示，不再误报权限未授权（#779）。
+  🎨 设置页动画与视觉统一
+  - 录音方式分段选框（切换式 / 按住说话 / 自动）新增滑动指示动画，首次进入设置即正确高亮当前选项。
+  - 静音后自动停止整组随录音方式切换从下方平滑拉出/收回；静音时长行随开关展开/收起，开关行不再因内联下拉而抽搐。
+  - 静音时长下拉与麦克风下拉视觉统一（同底色、同宽度、右边缘对齐）；所有下拉框切换选项时新增值切换动画。
+  - 检查更新弹窗的全屏遮罩大幅减淡：不再把设置页白色选项行盖成灰色。
+  - 无障碍：折叠状态下的控件移出键盘焦点与读屏树（inert）。
+  下载与安装
+  按你的平台选择对应安装包：
+
+  | 平台          | 架构                 | 安装包                                                                                       |
+  | ------------- | -------------------- | -------------------------------------------------------------------------------------------- |
+  | macOS         | Apple 芯片（M 系列） | OpenLess_1.3.16_aarch64.dmg                                                                  |
+  | macOS         | Intel                | OpenLess_1.3.16_x64.dmg                                                                      |
+  | macOS（任意） | -                    | OpenLess_aarch64.app.tar.gz / OpenLess_x86_64.app.tar.gz（免安装解压版）                     |
+  | Windows       | x64                  | OpenLess_1.3.16_x64-setup.exe（NSIS 安装器）或 OpenLess_1.3.16_x64_en-US.msi                 |
+  | Linux         | x64                  | OpenLess_1.3.16_amd64.deb / .rpm / .AppImage，fcitx5 用户另装 libopenless.so + openless.conf |
+  | Android       | -                    | OpenLess_1.3.16_arm64-v8a.apk（另有 armeabi-v7a / x86_64 / x86）                             |
+
+  正式版会通过 in-app 更新推送给所有用户（设置 → 关于 → 检查更新）。
+  测试重点
+  1. 设置 → 录音与输入：胶囊样式切换后立即生效；重启应用样式保留。
+  2. 录音方式在「按住说话 ↔ 切换式」之间切换：静音后自动停止整组平滑拉出/收回。
+  3. 切换式模式下开启「静音后自动停止」：静音时长行展开动画，选 3 秒后说话→停顿→自动提交。
+  What's Changed
+  - fix(mic): 无麦克风时明确提示“未检测到麦克风”，不再误报权限未授权（#779） by @H-Chris233 in https://github.com/Open-Less/openless/pull/896
+  - [cask] openless 1.3.15 (auto from release) by @appergb in https://github.com/Open-Less/openless/pull/899
+  - feat(net): 支持手动开关系统代理（#869） by @H-Chris233 in https://github.com/Open-Less/openless/pull/897
+  - feat(asr): 新增「自定义 OpenAI 兼容」ASR 预设与高级参数（#854） by @H-Chris233 in https://github.com/Open-Less/openless/pull/898
+  - feat(dictation): optional silence auto-stop for Toggle mode (#860) by @H-Chris233 in https://github.com/Open-Less/openless/pull/903
+  - docs(readme): remove jiangmuran and Cooper, sync latest stable data by @appergb in https://github.com/Open-Less/openless/pull/911
+  - fix(settings): 热键冲突不再拒绝保存——升级迁移停用冲突默认键 + 保存自动化解（#904） by @H-Chris233 in https://github.com/Open-Less/openless/pull/907
+  - fix(capsule): 切换样式立即生效 + 设置动画/视觉统一（Windows 样式切换修复） by @appergb in https://github.com/Open-Less/openless/pull/912
+  - chore(release): prepare 1.3.16-Beta.1 by @appergb in https://github.com/Open-Less/openless/pull/913
+  - fix(asr): 过滤 GLM-ASR 偶发的纯井号占位转写（#787） by @H-Chris233 in https://github.com/Open-Less/openless/pull/916
+  - feat(asr): 接入 ZenMux 语音转写（JSON + base64）作为可选云端 ASR（#837） by @H-Chris233 in https://github.com/Open-Less/openless/pull/915
+  - chore(release): prepare 1.3.16（正式版版本号） by @appergb in https://github.com/Open-Less/openless/pull/919
+  - fix(asr): 过滤 GLM-ASR 偶发的纯井号占位转写（#787）（同步 #916 到 beta） by @appergb in https://github.com/Open-Less/openless/pull/920
+  Full Changelog: https://github.com/Open-Less/openless/compare/v1.3.15-tauri...v1.3.16-tauri
+  Android 安装说明
+  - 推荐：真机下载 OpenLess_<version>_arm64-v8a.apk（arm64 设备）。
+  - 模拟器：x86_64 模拟器用 OpenLess_<version>_x86_64.apk。
+  - 首次安装需在系统设置中允许「安装未知应用」；应用内更新会拉起系统安装器。
+  - adb 调试：adb install -r OpenLess_<version>_arm64-v8a.apk
+  Android 应用内更新
+  - Stable 用户检查 latest-android-aarch64.json（及 mirror 变体）。
+  - Beta 用户（设置 → 高级 → 加入 Beta）检查带 -beta 后缀的 manifest。
+ReleaseNotesUrl: https://github.com/Open-Less/openless/releases/tag/v1.3.16-tauri
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
