@@ -1,0 +1,49 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: PureDevSoftware.FramePro
+PackageVersion: 1.11.0.0
+PackageLocale: en-US
+Publisher: PureDev Software
+PublisherUrl: https://www.puredevsoftware.com/
+PublisherSupportUrl: https://www.puredevsoftware.com/contact.php
+Author: PureDev Software Limited
+PackageName: FramePro
+PackageUrl: https://www.puredevsoftware.com/framepro/
+License: Proprietary
+LicenseUrl: https://www.puredevsoftware.com/terms.htm
+Copyright: Copyright 2025 PureDev Software
+CopyrightUrl: https://www.puredevsoftware.com/terms.htm
+ShortDescription: C++ Frame Profiler
+Description: |-
+  Getting Started
+  Integrate FramePro into your codebase in minutes - simply add FramePro.cpp/h into your code and start adding scopes. Add timing scopes using the supplied macros to any function or block of code. FramePro will then track the time, thread and core of each scope. This scope information will be sent to the FramePro application, where thread and core utilization can be viewed for each frame.
+
+  Why FramePro?
+  FramePro has minimal overhead. When profiling, the first rule is to not change the behavior of what is being profiled. FramePro allows you to add thousands of timing scopes per frame with no noticeable impact on frame rate.
+  Profile in real-time. In interactive mode you can see the data as it is being recorded, easily spot a frame rate spike, and immediately zoom in to that frame to find the cause.
+  No limit to the length of a capture. Unlike many profilers which can only capture a few seconds worth of data, FramePro can capture long play sessions.
+  Framepro uses the highest resolution timer available on your system. It is configured for many platforms and easily configurable.
+  FramePro is easy and intuitive to use. Everyone who sees FramePro in action immediately 'gets it'. FramePro can be used by programmers and non-programmers alike.
+
+  How it works
+  Call the FRAMEPRO_FRAME_START() macro at the start of your frame. This tells FramePro when the frame starts and ends and this will be marked on the timeline in both the thread and code view. This simple feature is one which many profilers lack.
+  Use the FRAMEPRO_SCOPE() macro to time a function call. This creates an object on the stack that records information. In its constructor it records the start time using the high resolution system timer. In its destructor it records the end time, the current thread id, the current CPU core, and the current function name. This information is then copied onto a thread local storage (TLS) buffer. These TLS buffers are sent once a frame on a separate thread.
+  The scope recording code is minimal and consists of only a few instructions. The thread local storage means that there is no locking or contention with other threads. The function name string is a string literal, and the only value that is sent to FramePro is the pointer. The actual string value is resolved later. All this means that there are only a few instruction per scope, and only a few bytes of data is copied to the send buffer. this allows you to add thousands of scopes per frame without affecting frame rate.
+  There are a number of different scope macros. If you want to name a scope use FRAMEPRO_NAMED_SCOPE("MyScope"). You can also send dynamic (non-literal) strings using FRAMEPRO_DYNAMIC_SCOPE(). to scope idle processor time, such as in an event wait, use FRAMEPRO_IDLE_SCOPE(). This will show up in a different colour in FramePro. Use the conditional scopes to only show the scope if it is longer than a specified time. This time can be dynamically changed in FramePro while recording. The scope macros are fully documented in FramePro.h.
+  FramePro can run in connected or offline mode. When running in connected mode your application will send data using sockets every frame. FramePro will then display the data as it is received. You can pause the data and inspect frames at any time while recording. If you don't want the overhead of FramePro on your system you can run in non-interactive mode and it will take up almost no CPU. This is useful when profiling on the same PC as you are running the application. For best results, it is recommended that you run your application/game on a different PC or Console and then connect in interactive mode.
+  If your codebase doesn't support sockets or you can't connect for some other reason you can run FramePro in offline mode and all network data will be written to a .framepro_dump file. This file can then be loaded into framepro.
+Tags:
+- c++
+- cpp
+- profiler
+ReleaseNotes: '- Fixed context switch recording (broken by Windows 11 24H2 update)'
+ReleaseNotesUrl: https://www.puredevsoftware.com/framepro/Download.htm
+PurchaseUrl: https://www.puredevsoftware.com/framepro/Purchase_paddle.htm
+Documentations:
+- DocumentLabel: User Guide
+  DocumentUrl: https://www.puredevsoftware.com/framepro/FrameProUserGuide/Introduction.htm
+- DocumentLabel: FAQ
+  DocumentUrl: https://www.puredevsoftware.com/framepro/FAQ.htm
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

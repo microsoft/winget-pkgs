@@ -236,7 +236,7 @@ if ($Settings) {
   exit
 }
 
-$ScriptHeader = '# Created with YamlCreate.ps1 v2.8.0'
+$ScriptHeader = '# Created with YamlCreate.ps1 v2.7.1'
 $ManifestVersion = '1.12.0'
 $PSDefaultParameterValues = @{ '*:Encoding' = 'UTF8' }
 $Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
@@ -246,6 +246,7 @@ $callingCulture = [Threading.Thread]::CurrentThread.CurrentCulture
 [Threading.Thread]::CurrentThread.CurrentUICulture = 'en-US'
 [Threading.Thread]::CurrentThread.CurrentCulture = 'en-US'
 if (-not ([System.Environment]::OSVersion.Platform -match 'Win')) { $env:TEMP = '/tmp/' }
+$wingetUpstream = 'https://github.com/microsoft/winget-pkgs.git'
 $RunHash = $(Get-FileHash -InputStream $([IO.MemoryStream]::new([byte[]][char[]]$(Get-Date).Ticks.ToString()))).Hash.Substring(0, 8)
 $script:UserAgent = 'Microsoft-Delivery-Optimization/10.1'
 $script:CleanupPaths = @()
@@ -393,15 +394,31 @@ $Patterns = @{
 }
 
 # check if upstream exists
-$remoteUpstreamUrl = Get-Remote -RemoteName upstream
+($remoteUpstreamUrl = $(git remote get-url upstream)) *> $null
 if ($remoteUpstreamUrl -and $remoteUpstreamUrl -ne $wingetUpstream) {
-  if (-not (Set-Remote -RemoteName upstream -Url $wingetUpstream)) {
-    Write-Warning "Failed to update upstream remote URL. You may need to manually run: git remote set-url upstream $wingetUpstream"
-  }
+  git remote set-url upstream $wingetUpstream
 } elseif (!$remoteUpstreamUrl) {
   Write-Host -ForegroundColor 'Yellow' 'Upstream does not exist. Permanently adding https://github.com/microsoft/winget-pkgs as remote upstream'
-  if (-not (Set-Remote -RemoteName upstream -Url $wingetUpstream)) {
-    Write-Warning "Failed to add upstream remote. You may need to manually run: git remote add upstream $wingetUpstream"
+  git remote add upstream $wingetUpstream
+}
+
+####
+# Description: Removes files and folders from the file system
+# Inputs: List of paths to remove
+# Outputs: None
+####
+function Invoke-FileCleanup {
+  param (
+    [Parameter(Mandatory = $true)]
+    [AllowEmptyString()]
+    [AllowEmptyCollection()]
+    [String[]] $FilePaths
+  )
+  if (!$FilePaths) { return }
+  foreach ($path in $FilePaths) {
+    Write-Debug "Removing $path"
+    if (Test-Path $path) { Remove-Item -Path $path -Recurse }
+    else { Write-Warning "Could not remove $path as it does not exist" }
   }
 }
 
@@ -615,6 +632,33 @@ Function Get-InstallerFile {
   }
 
   return $_OutFile
+}
+
+Function SafeRemovePath {
+  Param(
+    [Parameter(Mandatory=$true, Position=0)]
+    [string] $Path,
+    [int] $Retries = 6,
+    [int] $DelayMs = 250
+  )
+
+  if (-not (Test-Path -LiteralPath $Path)) { return }
+
+  for ($i = 0; $i -lt $Retries; $i++) {
+    try {
+      Remove-Item -LiteralPath $Path -Force -ErrorAction Stop
+      return
+    } catch [System.IO.IOException] {
+      [GC]::Collect()
+      [GC]::WaitForPendingFinalizers()
+      Start-Sleep -Milliseconds $DelayMs
+      $DelayMs = [Math]::Min(5000, $DelayMs * 2)
+    } catch {
+      throw
+    }
+  }
+
+  Write-Warning "Could not remove file '$Path' after $Retries attempts; it may be in use by another process."
 }
 
 Function Get-UserSavePreference {
@@ -1422,7 +1466,7 @@ Function Read-QuickInstallerEntry {
         }
       }
       # Remove the downloaded files
-      Request-RemoveItem -Path $script:dest
+      SafeRemovePath -Path $script:dest
       Write-Host -ForegroundColor 'Green' "Installer updated!`n"
     }
 
@@ -1932,16 +1976,13 @@ Function Read-LocaleMetadata {
 # Requests the user to answer the prompts found in the winget-pkgs pull request template
 # Uses this template and responses to create a PR
 Function Read-PRBody {
-  $PrBodyContent = (Get-PrTemplate) -split '\n'
-  if (-not $PrBodyContent) {
-    Write-Warning "The Pull Request Template Contained No Content!"
-  }
+  $PrBodyContent = Get-Content $args[0]
   ForEach ($_line in $PrBodyContent) {
     # | Where-Object { $_ -like '-*[ ]*' }))
     if ($_line -like '-*[ ]*' ) {
       $_showMenu = $true
-      switch -Regex ( $_line ) {
-        '(?i)CLA' {
+      switch -Wildcard ( $_line ) {
+        '*CLA*' {
           if ($ScriptSettings.SignedCLA -eq 'true') {
             $PrBodyContent = $PrBodyContent.Replace($_line, $_line.Replace('[ ]', '[x]'))
             $_showMenu = $false
@@ -1956,7 +1997,7 @@ Function Read-PRBody {
           }
         }
 
-        '(?i)open \[pull requests\]' {
+        '*open `[pull requests`]*' {
           $_menu = @{
             Prompt        = "Have you checked that there aren't other open pull requests for the same manifest update/change?"
             Entries       = @('[Y] Yes'; '*[N] No')
@@ -1966,7 +2007,7 @@ Function Read-PRBody {
           }
         }
 
-        '(?i)winget validate' {
+        '*winget validate*' {
           if ($? -and $(Get-Command 'winget' -ErrorAction SilentlyContinue)) {
             $PrBodyContent = $PrBodyContent.Replace($_line, $_line.Replace('[ ]', '[x]'))
             $_showMenu = $false
@@ -1983,7 +2024,7 @@ Function Read-PRBody {
           }
         }
 
-        '(?i)tested .* ?manifest' {
+        '*tested your manifest*' {
           if ($script:SandboxTest -eq '0') {
             $PrBodyContent = $PrBodyContent.Replace($_line, $_line.Replace('[ ]', '[x]'))
             $_showMenu = $false
@@ -2000,7 +2041,7 @@ Function Read-PRBody {
           }
         }
 
-        '(?i)schema' {
+        '*schema*' {
           if ($script:Option -ne 'RemoveManifest') {
             $_Match = ($_line | Select-String -Pattern 'https://+.+(?=\))').Matches.Value
             $_menu = @{
@@ -2015,12 +2056,12 @@ Function Read-PRBody {
           }
         }
 
-        '(?i)(only)? modifies one' {
+        '*only modifies one*' {
           $PrBodyContent = $PrBodyContent.Replace($_line, $_line.Replace('[ ]', '[x]'))
           $_showMenu = $false
         }
 
-        '(?i)linked .* ?issue' {
+        '*linked issue*' {
           # Linked issues is handled as a separate prompt below so that the issue numbers can be gathered
           $_showMenu = $false
         }
@@ -2697,7 +2738,7 @@ do {
 # Check the api for open PR's
 # This is unauthenticated because the call-rate per minute is assumed to be low
 if ($ScriptSettings.ContinueWithExistingPRs -ne 'always' -and $script:Option -ne 'RemoveManifest' -and !$SkipPRCheck) {
-  $PRApiResponse = Find-PullRequest -PackageIdentifier $PackageIdentifier -PackageVersion $PackageVersion
+  $PRApiResponse = @(Invoke-WebRequest "https://api.github.com/search/issues?q=repo%3Amicrosoft%2Fwinget-pkgs%20is%3Apr%20$($PackageIdentifier -replace '\.', '%2F'))%2F$PackageVersion%20in%3Apath&per_page=1" -UseBasicParsing -ErrorAction SilentlyContinue | ConvertFrom-Json)[0]
   # If there was a PR found, get the URL and title
   if ($PRApiResponse.total_count -gt 0) {
     $_PRUrl = $PRApiResponse.items.html_url
@@ -3070,7 +3111,7 @@ Switch ($script:Option) {
         }
       }
       # Remove the downloaded files
-      Request-RemoveItem -Path $script:dest
+      SafeRemovePath -Path $script:dest
       $_NewInstallers += Restore-YamlKeyOrder $_Installer $InstallerEntryProperties -NoComments
     }
     # Write the new manifests
@@ -3185,7 +3226,16 @@ if ($PromptSubmit -eq '0') {
     # If the user has the cli too
     if (Get-Command 'gh' -ErrorAction SilentlyContinue) {
       # Request the user to fill out the PR template
-      Read-PRBody
+      if (Test-Path -Path "$gitTopLevel\.github\PULL_REQUEST_TEMPLATE.md") {
+        Read-PRBody (Resolve-Path "$gitTopLevel\.github\PULL_REQUEST_TEMPLATE.md").Path
+      } else {
+        while ([string]::IsNullOrWhiteSpace($PRTemplate)) {
+          Write-Host
+          Write-Host -ForegroundColor 'Green' -Object 'PULL_REQUEST_TEMPLATE.md not found, input path'
+          $PRTemplate = Read-Host -Prompt 'PR Template' | TrimString
+        }
+        Read-PRBody "$PRTemplate"
+      }
     }
   }
 

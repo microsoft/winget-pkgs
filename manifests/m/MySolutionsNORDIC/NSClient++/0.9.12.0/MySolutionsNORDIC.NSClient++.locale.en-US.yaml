@@ -1,0 +1,78 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: MySolutionsNORDIC.NSClient++
+PackageVersion: 0.9.12.0
+PackageLocale: en-US
+Publisher: MySolutions NORDIC
+PublisherUrl: https://medin.name/
+PublisherSupportUrl: https://github.com/mickem/nscp/issues
+Author: My Computer Solutions NORDIC KB
+PackageName: NSClient++
+PackageUrl: https://nsclient.org/
+License: GPL-2.0
+LicenseUrl: https://github.com/mickem/nscp/blob/HEAD/COPYING
+Copyright: Copyright (C) 2025 - Michael Medin
+ShortDescription: A fully fledged monitoring agent which can be used with many monitoring tools.
+Description: |-
+  NSClient++ (nscp) aims to be a simple yet powerful and secure monitoring daemon. It was built for Nagios/Icinga, but nothing in the daemon is Nagios/Icinga specific and it can be used in many other scenarios where you want to receive/distribute check metrics.
+  The daemon has 3 main functions:
+  - Allow a remote machine (monitoring server) to request commands to be run on this machine (the monitored machine) which return the status of the machine.
+  - Submit the same results to a remote (monitoring server).
+  - Take action and perform tasks.
+Moniker: nscp
+Tags:
+- icinga
+- naemon
+- nagios
+ReleaseNotes: |-
+  A summary of all changes since 0.8.0 which was the previous released version, if you have been using pre-releases then there are no changes.
+  REST API updates
+  Removed some old (deprecated) rest API endpoints.
+  The oldest REST apis (endpoints starting without /api) were not stable as they exposed an JSON representation of the internal NSClient++ messages.
+  To mitigate this the newer endpoints (which is found in the documentation) starting with /api/v1 or /api/v2 were added several years ago.
+  Many of these old endpoints have now been removed which allowed us to migrate from the outdated JSON library to a more modern one.
+  Note: The old check endpoints have NOT been removed to retain compatibility with Icinga and similar tools.
+  In addition to this I have also added numerous integration test to help to keep the APIs stable.
+  Installer improvments
+  The installer has been updated a lot to behave more predictably and in general work better.
+  I have also added numerous tests to the installer to ensure less accidental breaking changes in the future.
+  Should not impact anything but instead of a dedicated Json library we now use boost to reduce number of dependencies.
+  Removed sample config from installer (as you can easily generate the config i removed it from the installer).
+  Documentation for installer config options have also been updated.
+  One of the biggest changes now is that how keys are overridden behave more predictably:
+  1. The tool (generic or op5) set the value
+  2. Any existing configuration file will override the value set by the tool
+  3. Any property (command-line or UI change) will override the value set previously
+  4. Any value which is not same as config or default will be written during install.
+  It will also handle rest settings and boot.ini properties correctly.
+  Web UI improvements
+  The web interface has gotten a medium overhaul improving settings and queries.
+  You can now change setting under modules.
+  Settings now have widgets for boolean settings
+  Settings view now show all settings not just changed ones.
+  You can now use " in queries when executing from the Web UI so "filter=1 > 2" is now possible,
+  Improved settings and log widgets
+  Updated installer (fixed overriding keys from command line)
+  Added test cases for installer
+  Restored Linux builds
+  This is still a work in progress but for now you can build and run NSClient++ on Linux (there are pipelines as well for this).
+  "Soon(TM)" I will add some packages and config files and such to make it more usable.
+  Various other bugfixes:
+  - Fixed https settings caching when using http(s) settings.
+  - Fixed lots of compiler warnings and linting
+  - Fixed indexing in arrays in lua
+  - Fixed help screen typo by @vanitysys28 in #965
+  - Installed should not place op5.ini config in subfolder (like since 0.6.x)
+  - Settings now have a type (string, int, bool, etc)
+  - Fixed: Hostname should not be lowercased
+  - Change log level for connection closed when reading request to debug
+  - Added signatures to exe files by @mickem in #981
+    In this release nscp.exe and check_xxx.exe are digitally signed making using them hopefully a bit simpler on secured machines.
+  Full Changelog: https://github.com/mickem/nscp/compare/0.9.10...0.8.0
+ReleaseNotesUrl: https://github.com/mickem/nscp/releases/tag/0.9.12
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://nsclient.org/docs/
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0
