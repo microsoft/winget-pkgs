@@ -1,0 +1,90 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: jcardama.LeopardWM
+PackageVersion: 0.2.6
+PackageLocale: en-US
+Publisher: jcardama
+PublisherUrl: https://github.com/jcardama
+PublisherSupportUrl: https://github.com/jcardama/LeopardWM/issues
+Author: jcardama
+PackageName: LeopardWM
+PackageUrl: https://github.com/jcardama/LeopardWM
+License: GPL-3.0
+LicenseUrl: https://github.com/jcardama/LeopardWM/blob/HEAD/LICENSE
+ShortDescription: Scroll-first tiling window manager for Windows 10 and 11.
+Description: LeopardWM is an open-source tiling window manager for Windows 10 and 11 that takes a scroll-first approach inspired by niri and PaperWM. Windows sit on a horizontal strip and the monitor acts as a viewport that scrolls over them, so navigation stays spatially consistent as windows are added — instead of constantly rebuilding split trees. Written in Rust on top of the Win32 API.
+Moniker: leopardwm
+Tags:
+- niri
+- paperwm
+- rust
+- scrollable
+- tiling
+- window-manager
+- windows
+- workspace
+ReleaseNotes: |-
+  Fixes
+  - Direct watchdog launches no longer open a console window. Release builds
+    now run as a Windows GUI-subsystem process, so launching the watchdog
+    directly (for example from a user-configured scheduled task) cannot expose a
+    watchdog terminal for LeopardWM to tile or users to close.
+    Crash supervision and Job Object daemon-lifetime coupling are unchanged.
+  - Windows input-method helpers no longer leave blank columns after sign-in.
+    The IME and MSCTFIME UI helper classes are rejected during live and
+    startup admission instead of remaining managed after becoming invisible.
+  - Windows session end no longer strands scrolled-away windows off-screen.
+    Committed sign-out, restart, and shutdown now restore snap styles and visible
+    window positions before the interactive session ends, preventing off-screen
+    sentinel geometry from carrying into the next sign-in. Graceful daemon
+    shutdown remains best effort after visibility recovery.
+  - Closing the console no longer strands scrolled-away windows off-screen.
+    Console close and Ctrl+C / Ctrl+Break now restore windows parked at the
+    off-screen sentinel before graceful shutdown, and the watchdog stays alive
+    long enough for the daemon to finish that cleanup instead of killing it via
+    the Job Object first.
+  - Trackpad modifier-scroll navigation no longer races through focus. Rapid
+    wheel-message bursts are normalized and rate-limited while separated mouse
+    wheel notches remain responsive.
+  - Battery animation preference is available and preserved in Settings. The
+    option now controls battery and Windows power saver motion reduction without
+    being reset by unrelated saves; disabling it takes effect at startup, while
+    Windows Accessibility animation settings still override it.
+  - Layout Settings no longer overflows horizontally. The default width for
+    new windows is now selected from a compact dropdown of configured width
+    presets instead of an unbounded numeric index. Options show their percentage,
+    and the selection stays valid as presets are edited or removed.
+  - Shell copy/move/delete progress dialogs are no longer tiled. Windows'
+    file-operation progress window keeps a minimize button, so the style-based
+    dialog check did not recognize it and reserved a column for it. It is now
+    skipped by class and stays at its natural size.
+  - Automatic placement timeouts now show the correct paused state. When a
+    five-second Win32 placement batch auto-pauses tiling, the tray immediately
+    changes to Resume Tiling, its tooltip reports Paused, and a notification
+    explains what happened. Logs now include every candidate window from the
+    timed-out batch with best-effort class, title, and executable details, without
+    claiming one was the blocker.
+  - Shell-open actions no longer invoke cmd.exe or block the daemon. Opening
+    the config file, log folder, releases page, or settings links now uses
+    ShellExecuteW on a dedicated COM-initialized worker, so shell association
+    resolution cannot stall the event loop and characters like & or % are not
+    reinterpreted as shell syntax or environment variables.
+  Improvements
+  - Read-only window admission diagnostic for bug reports. lwm doctor windows
+    (and leopardwm-cli doctor windows) inspects live top-level windows and reports
+    identity plus tile/skip verdicts for both the live-create and startup/refresh
+    admission paths, without changing tiling behaviour. By default only windows that
+    ADMIT on at least one path are printed (pass --all for every window). Optional
+    --watch, --delay, and --include-titles help catch transient popups safely
+    for public issue pastes. Live-create verdicts include the create/show WinEvent
+    pre-gate so minimized and non-WS_VISIBLE windows report SKIP rather than a false
+    ADMIT.
+  - Security policy accurately documents network and auto-start behavior.
+    SECURITY.md now describes the optional GitHub update check (endpoint,
+    frequency, what is and is not sent, and how to disable it) and the per-user
+    auto-start registry key. Documentation-accuracy correction only; no behavior
+    change.
+ReleaseNotesUrl: https://github.com/jcardama/LeopardWM/releases/tag/v0.2.6
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
