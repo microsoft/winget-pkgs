@@ -1,0 +1,171 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: uutils.coreutils
+PackageVersion: 0.10.0
+PackageLocale: en-US
+Publisher: uutils
+PublisherUrl: https://github.com/uutils
+PublisherSupportUrl: https://github.com/uutils/coreutils/issues
+Author: uutils
+PackageName: coreutils
+PackageUrl: https://github.com/uutils/coreutils
+License: MIT
+LicenseUrl: https://github.com/uutils/coreutils/blob/HEAD/LICENSE
+Copyright: Copyright (c) uutils developers
+CopyrightUrl: https://github.com/uutils/coreutils/blob/main/LICENSE
+ShortDescription: Cross-platform Rust rewrite of the GNU coreutils
+Tags:
+- busybox
+- command-line-tool
+- coreutils
+- cross-platform
+- gnu-coreutils
+- rust
+ReleaseNotes: |-
+  Rust Coreutils 0.10.0 Release:
+  We are happy to announce the release of Rust Coreutils 0.10.0 - a release focused on GNU compatibility and robustness. The GNU test suite results improved sharply this cycle (645 passing, 29 failing, down from 56), we landed a second wave of security hardening (TOCTOU races, safe recursive descent, SELinux labeling at creation, backup guards), and we ran a broad anti-panic campaign across the utilities. On top of that: new features (mv --exchange, install --reflink, an OpenSSL backend for the checksum utilities), more zero-copy/read-ahead performance work, and wasm32-wasip2 support.
+
+  GNU Test Suite Compatibility:
+  ──────┬─────┬──────┬──────────────────────┬─────────────┬──────────────┬────────────────────────
+  Result│0.9.0│0.10.0│Change 0.9.0 to 0.10.0│% Total 0.9.0│% Total 0.10.0│% Change 0.9.0 to 0.10.0
+  ──────┼─────┼──────┼──────────────────────┼─────────────┼──────────────┼────────────────────────
+  Pass  │625  │645   │+20                   │90.58%       │93.48%        │+2.90%
+  ──────┼─────┼──────┼──────────────────────┼─────────────┼──────────────┼────────────────────────
+  Skip  │8    │15    │+7                    │1.16%        │2.17%         │+1.01%
+  ──────┼─────┼──────┼──────────────────────┼─────────────┼──────────────┼────────────────────────
+  Fail  │56   │29    │-27                   │8.12%        │4.20%         │-3.92%
+  ──────┼─────┼──────┼──────────────────────┼─────────────┼──────────────┼────────────────────────
+  Error │1    │1     │0                     │0.14%        │0.14%         │0%
+  ──────┼─────┼──────┼──────────────────────┼─────────────┼──────────────┼────────────────────────
+  Total │690  │690   │0                     │             │              │
+  ──────┴─────┴──────┴──────────────────────┴─────────────┴──────────────┴────────────────────────
+  > Note: 0.9.0 bumped the GNU reference to 9.11, which added 25 new tests and temporarily pushed the failure count up. This cycle absorbed most of that debt: failures dropped from 56 to 29 and passes reached an all-time high of 645.
+  > As we contributed many tests to the GNU implementation, we are also the source of some of these regressions!
+
+  Highlights:
+  - GNU Compatibility
+    - 645 passing GNU tests (+20) and 27 fewer failures, the largest single-cycle drop we have had
+    - Dozens of behavior alignments: pr (-w/-W/-l/-e/-o, merge mode, page ranges), nproc (cgroups v2 quota, affinity mask, offline cores, OMP_* handling), date (out-of-range years, -d -, O modifier, timezone strings), numfmt, ls, du, install, od, truncate, fold, head/tail, sum, stat
+    - Many error messages now carry the file name and the real OS error instead of a vague or stripped message
+  - Security Hardening
+    - Continued the TOCTOU work started in 0.9.0: touch no longer uses O_TRUNC on create, mkfifo drops the path-based chmod, head checks the open fd instead of the path, split hardens the output-open path, chcon anchors recursive relabeling to the traversal dirfd
+    - Safe recursive descent fixes for chmod/chown (symlink cycles, --preserve-root re-checked during the descent), and cp no longer descends into a destination subdirectory that is a symlink
+    - SELinux labels are now applied at creation in mkdir, mkfifo and mknod instead of being applied afterwards
+    - mv fails closed when recreating a cross-device directory destination, compares file identity in the --backup=simple guard, and strips setuid/setgid when a cross-device copy cannot preserve ownership
+    - chroot chroots exactly the path --skip-chdir validated; stdbuf refuses a libstdbuf path that cannot be represented in LD_PRELOAD; install finalizes ownership before mode
+    - Added SECURITY.md documenting our threat model, scope and reporting process
+  - Robustness: Anti-Panic Campaign
+    - Removed panics and aborts across a long list of utilities: shuf, printf, numfmt, fmt, pr, chroot, dircolors, install, ln, touch, stat, split, expand, more, kill, cp, du, rm, runcon, sort, chown/chgrp, dirname, expr, cksum, dd, truncate, hashsum
+    - Recurring classes fixed: write failures on /dev/full, char-boundary panics on multibyte input, integer overflow on extreme widths/precisions/sizes, and unbounded allocations for huge arguments
+    - expr now uses an iterative parser, so deeply nested expressions no longer overflow the stack
+  - New Features
+    - mv --exchange to atomically swap two paths
+    - install --reflink support, and install -C now works with --preserve-timestamps
+    - OpenSSL backend for the faster checksum utilities
+    - cut -O as a short option for --output-delimiter
+    - rm --one-file-system
+    - timeout now works on Windows, and tail -f/-F finally follows files on Windows
+  - Performance
+    - Read-ahead hints across the cksum family, sum, split, expand/unexpand and the base* utilities
+    - tee zero-copy fast path; cat throughput improvements; faster non-reflink cp; cross-device mv via the fast copy path
+    - expr: index went from O(N*M) to O(N+M); uniq and du improvements; tsort now buffers its output
+    - New benchmarks for expr, tr, cut, uniq and locale-aware sort merges
+  - Internationalization
+    - cut supports multibyte characters in non-UTF-8 locales
+    - ls uses Unicode quotes for the locale/clocale styles in UTF-8 locales and escapes non-ASCII control characters
+    - Fixed C.UTF-8 being detected as ASCII, and incomplete Fluent fallback bundles
+    - cksum quotes file names in a locale-aware way
+  - Cross-platform Reach
+    - New wasm32-wasip2 target support
+    - Windows: timeout implementation, sparse copy support in cp, tail -f, cksum CRLF fix
+    - ls --numeric-uid-gid on non-unix platforms, uptime uses CLOCK_BOOTTIME on more platforms
+  - Code Quality
+    - clippy::collapsible_if and clippy::match_same_arms are now clean and enabled workspace-wide
+    - Continued nix → rustix migration (dd, kill, sync, uptime) and further removal of unsafe and to_string_lossy
+  - Contributions: This release was made possible by 50 new contributors joining our community
+
+  Call to Action:
+  Try it in your browser - Online Playground powered by WebAssembly
+  Help us translate - Contribute to Rust Coreutils on Weblate
+  Sponsor us on GitHub to accelerate development: github.com/sponsors/uutils
+
+  What's Changed
+
+  arch
+  - arch: remove .to_string_lossy() by @oech3 in #13355
+
+  base32, base64, basenc
+  - baseNM: read ahead by @oech3 in #12570
+  - Fix base32/base64 error for file paths ending in slash by @TheAdamWarlock in #12726
+
+  cat
+  - cat: drop fuse workaround by @oech3 in #12821
+  - cat: improve throughput & simplify (split PR) by @oech3 in #12850
+  - cat: don't call io::stdin() twice by @oech3 in #13043
+  - cat: change is_unsafe_override to is_safe_override by @oech3 in #13133
+
+  chgrp
+  - chgrp: unstripped error on operation not permitted error by @Devel08 in #13361
+  - chgrp: fix error message for --from nonexisting_group GROUP by @cakebaker in #13490
+  - chgrp: make test_reference less strict on Linux by @cakebaker in #13650
+
+  chmod
+  - chmod: always call chmod(2) even when mode bits are unchanged by @sylvestre in #13213
+  - test_chmod.rs: remove an ignored test covered by check-safe-traversal.sh by @oech3 in #13298
+  - chmod: fix 2 clippy::collapsible_if by @oech3 in #13509
+  - chmod: report the real error when a target's metadata is inaccessible by @0xfandom in #13637
+
+  chown
+  - chown: -h on symlink to directory operates on link, not target by @rossilor95 in #12522
+  - chown: restrict no-dereference symlink ctime test to Linux by @rossilor95 in #12556
+  - chown, chgrp: report a verbose stdout write error instead of panicking by @leeewee in #13381
+  - fix(chown,chgrp): print --verbose success lines to stdout by @l46983284-cpu in #13419
+
+  chroot
+  - chroot: don't panic on --skip-chdir with a non-resolving NEWROOT by @leeewee in #12732
+  - chroot: avoid unwrap-like operation by @oech3 in #13306
+
+  cksum
+  - cksum family: read ahead file by @oech3 in #12549
+  - cksum: fix collapsible_if by @oech3 in #12942
+  - feat: add OpenSSL backend for checksum utilities by @sylvestre in #12412
+  - checksum: handle stdin before directory checks by @wtcpython in #13394
+  - fix(cksum): reject absurdly large SHAKE --length instead of aborting by @koopatroopa787 in #13083
+  - cksum: fix checksum giving false fails on windows due to crlf -> lf conversion by @nikolalukovic in #13431
+  - cksum: Locale aware filename quoting in not-found messages by @RenjiSann in #13733
+
+  comm
+  - comm: remove overhead by .is_dir() by @oech3 in #13371
+
+  cp
+  - cp: replace match by is_ok_and by @oech3 in #12688
+  - cp: simplify bool by @oech3 in #12689
+  - cp: remove unuseful .map(|_|()) by @oech3 in #12700
+  - cp: remove unnecessary cfgs in Linux module by @cakebaker in #12692
+  - cp: Added error handling for printing debug message by @max-amb in #12710
+  - cp: simplify return type of backup_dest() by @cakebaker in #12719
+  - cp: handle --parents source ending in parent dir by @nkgotcode in #12639
+  - cp: propagate the --attributes-only destination open error by @leeewee in #12625
+  - cp: improve perf for non-reflink copy by @oech3 in #13057
+  - minorbug(cp): io error messages vague when using -g by @Devel08 in #13110
+  - cp: fix --remove-destination deleting source when dest is the same file under a different path by @LoukasPap in #13135
+  - cp: implement sparse copy support for windows by @nikolalukovic in #12686
+  - fix(cp): remove overrides_with_all from flag group by @BAMF0 in #13258
+  - cp: don't panic on write error when printing --verbose output by @Chaganti-Reddy in #13310
+  - cp: fix --reflink=never by @oech3 in #13065
+  - fix(cp): change error to align with GNU by @BAMF0 in #13382
+  - cp: dedup match & remove GNU version from comment by @oech3 in #13556
+  - cp: don't hang forever when the backup destination is a fifo by @Chaganti-Reddy in #13344
+  - cp: fix 2 clippy expections by @oech3 in #13537
+  - cp: remove feat_acl & exacl by @oech3 in #13626
+  - cp: simplify loop by while let by @oech3 in #13741
+
+  csplit
+  - csplit: include the file name in output-file errors by @eyupcanakman in #13138
+  - csplit: fix clippy::collapsible_if by @oech3 in #13512
+
+  cut
+ReleaseNotesUrl: https://github.com/uutils/coreutils/releases/tag/0.10.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
