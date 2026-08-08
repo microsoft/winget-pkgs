@@ -1,0 +1,135 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: NortheBridge.LuminalShine
+PackageVersion: 26.08.1
+PackageLocale: en-US
+Publisher: NortheBridge Foundation
+PublisherUrl: https://github.com/NortheBridge
+PublisherSupportUrl: https://apps.northebridge.com/en/luminalshine
+Author: NortheBridge Foundation
+PackageName: LuminalShine
+PackageUrl: https://github.com/NortheBridge/luminalshine
+License: GPL-3.0
+LicenseUrl: https://github.com/NortheBridge/luminalshine/blob/HEAD/LICENSE
+Copyright: Copyright (c) NortheBridge Foundation
+ShortDescription: A Modern Self-hosted High Performance Sunshine-compatible game stream host for Moonlight designed for Windows 11 and Windows 11 Insider Preview. Maintained by the NortheBridge Foundation.
+Description: Modern Self-Hosted High Performance Sunshine-compatible game streaming host for Moonlight clients designed for Windows 11 and Windows 11 Insider Preview.
+Moniker: luminalshine
+Tags:
+- amdgpu
+- blackwell-gpu
+- contributions-welcome
+- contributors-welcome
+- cpp
+- game-stream
+- game-streaming
+- game-streaming-server
+- geforce-experience
+- intelgpu
+- moonlight
+- nvidia-gpu
+- python
+- remote-desktop
+- windows-insiders
+- windows11
+ReleaseNotes: |-
+  LuminalShine 26.08.1
+  LuminalShine 26.08.1 is a stability-focused release for the LuminalVGD direct-to-encoder path introduced in 26.08.0. It addresses the shared GPU-resource lifetime and recovery failures that could produce a frozen picture, brief continued audio, and eventually an unreachable host. It also corrects worker startup, requested display-mode handling, topology cleanup, and interrupted state-file writes.
+  This release continues to bundle the signed LuminalVGD v0.1.0-alpha.7 / Build 23 package used by 26.08.0:
+  - Driver version: 0.1.0.23
+  - Driver build: 23
+  - Protocol: 0.9
+  - Package SHA-256: afe890d0b0b94232b20eb0b6e3aac738e2f1ea73c66572541b9bb1b2e97d5afe
+  The release build downloads the signed driver archive from the LuminalVGD GitHub release and verifies it against the pinned SHA-256 digest. Signed driver binaries and catalogs are not stored in the LuminalShine source repository.
+  > Recommended update: Hosts running 26.08.0 should upgrade to 26.08.1, especially systems using LuminalVGD direct capture, HDR, high refresh rates, HEVC 4:4:4, or long-running sessions.
+  Highlights
+  Direct capture is decoupled from encoder lifetime
+  LuminalVGD ring textures are no longer kept in an encoder-owned lifetime while NVENC or another encoder is consuming a frame.
+  - Claimed LuminalVGD frames are copied into LuminalShine-owned mailbox textures.
+  - The driver ring slot is released after the bounded copy instead of remaining coupled to encoder progress.
+  - A stalled or rebuilding encoder cannot indefinitely stop the driver producer from recycling its ring surfaces.
+  - Ring ownership, generation, transport, and slot validation remain enforced before a frame is accepted.
+  - Direct capture retains the negotiated resolution, refresh rate, HDR state, and chroma behavior.
+  This changes the failure boundary: encoder latency or teardown can no longer hold LuminalVGD's IddCx-facing surfaces hostage and turn a local encode problem into a display-wide resource deadlock.
+  Capture and encoding worker isolation
+  The latency-sensitive capture and encode pipeline now runs in a bounded worker process for supported streaming sessions.
+  - The main LuminalShine service supervises the worker with startup, readiness, liveness, and shutdown deadlines.
+  - A capture or encoder failure is contained to the worker instead of permanently wedging the host control plane.
+  - Worker readiness requires a real first encoded packet, not merely successful process creation.
+  - The worker receives the encoder capabilities already validated by the parent, avoiding a second full encoder probe during client connection.
+  - Startup errors and first-frame failures are returned explicitly to the parent for deterministic cleanup.
+  Exact LuminalVGD session handoff
+  Process isolation initially exposed a process-local state problem: a child process could not infer the parent's active virtual-display session and could fall back to desktop capture. The handoff is now explicit and fail-closed.
+  - The parent transfers the exact active LuminalVGD session and display identity.
+  - Ring generation, slot count, selected transport, dimensions, format, and active state are validated in the worker.
+  - Stale or mismatched ring identities are rejected.
+  - A direct LuminalVGD worker cannot silently substitute Windows Graphics Capture or Desktop Duplication.
+  - Authentication and process identity checks protect the local worker-control channel.
+  Requested client display modes are authoritative
+  Direct LuminalVGD sessions now preserve the client-requested mode throughout display preparation and worker startup.
+  - Client resolution and refresh-rate requests are enforced for direct capture.
+  - Capture readiness is tied to the requested virtual display rather than whichever physical display Windows currently exposes as primary.
+  - Active-ring identity and dimensions must agree with the prepared display mode.
+  - Startup failures clean up the staged virtual-display session instead of leaving a partial topology behind.
+  This is particularly important for 4K120, HDR, and high-refresh clients whose requested mode differs from the local physical monitor.
+  Recovery and shutdown improvements
+  - Display-helper teardown uses phase-specific deadlines so a slow recovery step is not mistaken for a fatal global hang.
+  - Worker failure is isolated from the RTSP control plane, allowing the host to remain reachable for cleanup and subsequent connections.
+  - Direct capture fails closed when its LuminalVGD target is stale instead of entering an unintended WGC path.
+  - Virtual-display staging and cleanup retain enough identity information to remove the correct session after partial startup.
+  - GPU and ring recovery diagnostics now distinguish worker startup, first-frame, liveness, transport, and display-preparation failures.
+  - Physical-display topology restoration is separated from encoder shutdown, reducing cross-component teardown races.
+  State-file reliability
+  Atomic state persistence and recovery have been hardened for interrupted and concurrent writes.
+  - Unique temporary files are used instead of relying on a single shared .tmp pathname.
+  - Legacy temporary files and backups remain recoverable.
+  - A valid temporary or backup record can restore state after an interrupted replacement.
+  - Failed replacements retain recoverable data instead of silently discarding the last usable state.
+  - Cleanup recognizes the state files LuminalShine creates when running from the installed service context.
+  These changes cover display restoration and other persistent state used during launch, shutdown, and recovery.
+  Security and correctness
+  - Worker IPC uses constrained local access and verifies the expected peer process.
+  - Message sizes and transferred ring metadata are validated before use.
+  - The worker binds to the parent's exact LuminalVGD target and rejects stale generations or incompatible transport state.
+  - Encoder capability transfer is bounded and validated rather than reconstructed from untrusted or incomplete child state.
+  - Failure paths prefer an explicit connection error and cleanup over silently capturing the wrong display.
+  Upgrade notes
+  1. Download and run LuminalShine_x64-installer.exe from this release.
+  2. Existing paired clients and ordinary LuminalShine configuration are retained.
+  3. The bundled LuminalVGD driver remains Build 23 / protocol 0.9; a driver re-sign or driver-version change is not required for this host update.
+  4. Reboot only if Windows or the installer reports that an in-use component could not be replaced.
+  5. After installation, verify LuminalShine 26.08.1 on the About page.
+  Portable-package users should stop all LuminalShine processes before replacing files. Driver installation and updates remain privileged system operations and are best handled by the installer.
+  Validation
+  - Windows UCRT production build completed for luminalshine.exe.
+  - The C++ test binary built successfully.
+  - 67 focused tests covering LuminalVGD ring liveness, worker targeting, display-helper behavior, requested modes, state storage, and session identity passed locally.
+  - GitHub Windows AMD64 build and coverage completed successfully.
+  - CodeQL analysis passed for C/C++, Actions, C#, JavaScript/TypeScript, Python, and Ruby.
+  - Vitest coverage, Codecov patch analysis, and bundle-size analysis passed.
+  - The release source contains no signed driver packages, certificates, logs, ETLs, or locally generated binaries.
+  Known limitations
+  - A genuine GPU device removal, reset, or hang still destroys the active graphics-device generation. LuminalShine can contain the worker failure and preserve service reachability, but Windows and the GPU driver must successfully recreate the graphics device before streaming can resume.
+  - A machine-wide display-stack failure where Windows permanently rejects display-configuration queries can still require a reboot.
+  - Clients may need to reconnect after a sufficiently long GPU outage even when LuminalShine remains reachable.
+  - LuminalVGD direct capture deliberately fails closed if the worker cannot prove that it opened the exact prepared ring. It will not silently reduce fidelity or capture a physical display in place of the requested virtual display.
+  Downloads
+  - LuminalShine_x64-installer.exe — recommended installer, application update, and LuminalVGD deployment path
+  - LuminalShine_x64-portable.zip — portable application package
+  - LuminalShine_x64-debuginfo.7z — symbols for crash dumps and field diagnostics
+  The raw MSI remains available inside the GitHub Actions build artifact for internal diagnosis but is intentionally not attached to the public release.
+  Reporting problems
+  For frozen video, missing first video, incorrect virtual-display modes, or recovery failures, include:
+  - the complete LuminalShine runtime log, including worker-process output
+  - LuminalVGD, IddCx, and DDisplay ETLs covering the failure when available
+  - the client resolution, refresh rate, codec, chroma mode, and HDR state
+  - the selected virtual-display mode and layout
+  - relevant Windows events from Display, DxgKrnl, the GPU vendor driver, and WHEA
+  These details distinguish an encoder stall, worker startup failure, stale ring handoff, driver transport failure, client disconnect, GPU device removal, and machine-wide Windows display-stack failure.
+  Changes since 26.08.0
+  - Stabilize LuminalVGD direct capture and recovery
+  - Full source comparison
+ReleaseNotesUrl: https://github.com/NortheBridge/luminalshine/releases/tag/26.08.1
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
