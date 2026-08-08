@@ -1,0 +1,48 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: SteveTheKiller.KillerShell
+PackageVersion: 1.0.1
+PackageLocale: en-US
+Publisher: Steve the Killer
+PublisherUrl: https://github.com/SteveTheKiller
+PublisherSupportUrl: https://github.com/SteveTheKiller/KillerShell/issues
+Author: Steve the Killer
+PackageName: KillerShell
+PackageUrl: https://killershell.net/
+License: GPL-3.0
+LicenseUrl: https://github.com/SteveTheKiller/KillerShell/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Steve the Killer
+ShortDescription: Free shell for power users. A file browser, a terminal and a text editor share one window, one tab strip and one set of keys, in a single portable Windows exe.
+Description: KillerShell is a file browser, a terminal and a text editor sharing one window, one tab strip and one set of keys. Search by filename wildcard or by file content across any directory, with results streaming in as they are found and no indexing service running in the background. Open PowerShell or cmd in a tab that starts in the folder you were just looking at, and edit ps1, reg, ini, log, JSON, XML, YAML and CSV files with syntax highlighting without leaving the window. Ships as a single portable Windows executable with no installer, no runtime to chase, no account and no telemetry. Free and open source under GPLv3.
+Moniker: KillerShell
+Tags:
+- csharp
+- dotnet
+- dual-pane
+- explorer-replacement
+- file-explorer
+- file-manager
+- file-search
+- gplv3
+- grep
+- msp
+- portable
+- powershell
+- sysadmin
+- tabs
+- terminal
+- text-editor
+ReleaseNotes: |-
+  1.0.1 is a bug fix release - a delete no longer walks the pane up a folder, a restored tab comes back as the folder it was instead of an empty search form, a refused delete asks in KillerShell's own dialog rather than Windows', a file operation stops throwing the listing back to the top of the folder, and the toolbar stops hiding a lone button behind an overflow chevron. The selected file's full path also lands in the footer, where a trimmed name cannot hide it.
+  Added
+  - The selected file's full path shows in the footer. Every view has to trim a name that will not fit - the icon grid worst of all, where a tile is as wide as the icon - and the part it trims is the tail, which is the part that tells two files apart. Selecting a row or a tile now puts its full path on the footer status line, which is the one place in the window sized for an unbounded string and which already elides from the front, so a narrow window costs you the drive letter rather than the file name. More than one selected shows a count instead. Clearing a selection leaves the line alone rather than wiping whatever a file operation just reported.
+  Fixed
+  - Deleting a file no longer moves you up a folder. Deleting something in Documents left you sitting in your home folder. Refreshing the folder tree after any file operation rebuilt each node's children by clearing the collection and refilling it, which threw away the container holding the tree's selection - and WPF answers a lost selection by selecting the PARENT node, which the tree then followed by navigating there. The refresh now reconciles in place, removing only entries that actually left the disk and inserting only new ones, so the selected folder and its container survive and nothing re-selects behind you. It affected every file operation that refreshes the tree, not just delete: a rename, a paste or a new folder could move you the same way.
+  - A restored tab comes back as the folder it was, not an empty search form. The session format was still KillerFind's and had no field for browse state, so every folder tab was written out as a search scoped at that folder and restored as one: the location box showed the path, the listing was empty, and the first-run Home navigation was skipped because it only ran for a tab with no search root. The saved line now carries the current folder and a browsing flag, appended after the original nine fields so a session written by an older build still loads, and a restored folder tab is re-listed on startup. A session saved before those fields existed has no folder to resume, so the test is now whether the tab has a pattern to run at all: one with nothing to search browses its scope instead of showing an empty pane, and a scope that has since been deleted or unmounted falls back to Home. A real search tab with terms in it still comes back as a search form, untouched.
+  - A refused delete asks in KillerShell's own dialog instead of Windows'. When the shell would not recycle a file on permissions - Controlled Folder Access, a locked-down ACL, a file owned by another account - it drew its own "You'll need to provide administrator permission" box, the one piece of UI in the app that was never ours. FOF_NOERRORUI suppresses it, the refusal comes back as a return code, and the answer is a themed prompt offering the one thing that can still do it: an elevated retry, which starts a second instance with --recycle, does the delete and exits without a window. Declining leaves everything where it was. The shell's progress dialog is untouched in the interactive path, since a long recycle still needs to show something, but the headless helper suppresses it as well - it has no message pump to draw one with. The dialog also says out loud that elevation will not defeat Controlled Folder Access, which blocks by binary rather than by token, and that the fix there is adding KillerShell to the allowed apps list in Windows Security. The helper's exit code is now checked, so an elevated retry that gets refused says so in the status bar instead of looking exactly like one that worked: a UAC prompt, then nothing, and the file still sitting there.
+  - The toolbar no longer hides a single button behind the overflow chevron. In a pane narrow enough to shed exactly one button - which in practice meant Export, first in the shed order - you got a chevron that opened onto one icon. The chevron is about as wide as the narrowest button it can hide, so the trade bought no room and cost a click. Overflow now appears only when two or more buttons have been shed; below that the button stays on the strip where you can reach it.
+  - A file operation no longer throws the listing back to the top of the folder. Deleting one file out of a long folder scrolled you to the top and left you hunting for your place. The refresh after a file operation was re-listing the whole folder, clearing and refilling the collection, which resets the scroll position by definition - while the folder watcher was sitting right there patching the same listing entry by entry, which is what it exists for. The re-list now runs only where there is no watcher to do the job: This PC, demo mode, and a share that refused a watch. Everywhere else the row disappears where it stands and nothing else moves.
+ReleaseNotesUrl: https://github.com/SteveTheKiller/KillerShell/releases/tag/v1.0.1
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
