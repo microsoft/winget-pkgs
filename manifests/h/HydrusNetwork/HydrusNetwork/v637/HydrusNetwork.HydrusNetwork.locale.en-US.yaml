@@ -1,0 +1,83 @@
+# Created with komac v2.12.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: HydrusNetwork.HydrusNetwork
+PackageVersion: v637
+PackageLocale: en-US
+Publisher: Hydrus Network
+PublisherUrl: https://github.com/hydrusnetwork/hydrus
+PublisherSupportUrl: https://github.com/hydrusnetwork/hydrus/issues
+PrivacyUrl: https://hydrusnetwork.github.io/hydrus/privacy.html
+Author: Hydrus Network
+PackageName: Hydrus Network
+PackageUrl: https://github.com/hydrusnetwork/hydrus
+License: WTFPL
+LicenseUrl: https://github.com/hydrusnetwork/hydrus/blob/HEAD/license.txt
+Copyright: Copyright (C) 2011 Hydrus Developer
+CopyrightUrl: https://github.com/hydrusnetwork/hydrus/blob/master/license.txt
+ShortDescription: A personal booru-style media tagger that can import files and tags from your hard drive and popular websites. Content can be shared with other users via user-run servers.
+Description: |-
+  The hydrus network client is an application written for Anon and other internet-fluent media nerds who have large image/swf/webm collections.
+  It browses with tags instead of folders, a little like a booru on your desktop. Advanced users can share tags and files anonymously through custom servers that any user may run.
+  Everything is free and privacy is the first concern. Executable releases are available for Windows, Linux, and macOS.
+  The program is in python, so you can also run it straight from the source code.
+Moniker: hydrus-network
+Tags:
+- booru
+- cross-platform
+- image-database
+ReleaseNotes: |-
+  Important
+  v636 was the last release with a macOS App. Please check that release for information on how to convert a macOS App install to a source install!
+  duplicates auto-resolution
+  - 'test A or B' comparators now support 'system:time', for the four main time system predicates (import time, modified time, last viewed time, archived time)
+  - 'test A against B using file info' comparators now support the same 'system:time' stuff, so you can now mandate, say, that "A has system:import time earlier than B". I also wangled a time delta in there, so you can say 'A was imported more than three months earlier than B' if you like
+  - I brushed up the comparator UI for time; instead of < and =, you'll see a vertical stack of 'earlier than', 'roughly the same time as' and so on. also, the deltas for +/- and the B delta are full time widgets, so you set the time you mean and don't have to care about converting to milliseconds. this all percolates to the comparator summary string too.
+  - same deal for system:duration in that panel--it now has a time delta for the absolute +/- test and the B delta, and has a time-aware summary string
+  - I added 'only earlier imports' variants for the 'visually similar pairs' suggested duplicates auto-resolution rules. I am sure there are many edge cases, but I feel that these are pretty good 'near-zero false positive' rules to try out
+  - the 'edit duplicate auto-resolution rules' panel now has export/import/duplicate buttons
+  - the 'comparison' tab of 'edit duplicate auto-resolution rule', where you edit comparators, now has export/import/duplicate buttons
+  duplicates
+  - in the duplicate filter, jpeg subsampling and quality info is cached in a nicer, more thread-safe way. certain laggy calculation situations should be more stable. I am not sure if this was the source of the crashes some people have had, so if you still get them, please let me know
+  misc
+  - for the new /db/static overwrite tech, a .png icon in the db dir now overrides an .svg in the install dir. if you chose to add it, I'll prefer it
+  - the star.png used for favourites buttons is now an svg
+  - the fullscreen_switch.png used in the media viewer is now an svg, and more like the typical icon for this
+  - I forgot to do some metadata regen on epubs last week, so any existing epubs probably got stretched thumbnails. soon after v637 boots, your epubs should double-check their resolution ratios and regen any busted thumbs (issue #1788)
+  - I overhauled one of the ways that threads can give Qt work to do, making it more Qt safe. there were about 80 calls that used this system, mostly stuff like initialising a label or focusing a button in the event loop immediately after a panel appears. fingers crossed, these will be much more stable in edge cases when, say, a dialog insta-closes before an initialising job can fire
+  big brain subscription logic improvement
+  - when subscription queries compact themselves down to the (typically 250) newest URLs, they now recognise that child URLs ("Found 2 new URLs in 2 sub-posts.") should not be counted. in sites where the gallery pages have potentially high count and each gallery-parsed post URL can also each produce many files (e.g. Pixiv manga), 250 file import objects could only be, say, 21 top-level Post URLs, significantly less than the gallery page provides, and the safety checks here, which are tuned to recognise 100 contiguous Post URLs 'already in cache', were overflowing every n checks and causing some post re-downloads. hydrus should be better about recognising this situation
+  - the compaction routine does this by grouping file import objects into parents, including nesting parents, and only culling on the top level. when things are confusing, it tries to fail safely in complicated situations, on the side of reducing compaction aggressision
+  - if you have manga subs, they may well grow to be like 4,000 files. let me know how it all goes
+  - a similar bit of logic that tests the number of items found versus the pre-gallery-sync size of the file log now uses this tech to estimate that size (previously it did some hacky referral url checking stuff)
+  - thanks to the user who worked with me to figure this one out
+  - this is more evidence that I should write a layer on the database level URL storage for 'subscription x saw this URL', and then we wouldn't have such a problem
+  base64URL
+  - String Converters can now encode/decode with Base64URL, which is a variant of Base64 that uses -_ instead of +/ and where '=' padding is encoder-optional (and not added here) to make inclusion in an URL parameter simpler
+  - when I decode (convert from base64 to normal text) by base64 of either sort now, I add any extra = padding that is needed, no worries
+  - String Matches can now have a 'character set' of Base64URL (^[a-zA-Z\d\-_]+={0,2}$) or 'Base64 (url encoded)'' (^([a-zA-Z\d]|%2B|%2F)+(%3D){0,2}$)
+  boring stuff
+  - removed the macOS build script and such. I left the macOS build files in place and copied my various .yml workflow scripts to static/build_files/macos
+  - fixed up some bad layout flags in the duplicates auto-resolution comparator edit panels
+  - swapped the trash and retry buttons in the gallery downloader page sidebar
+  - similarly moved the trash button to the end in the watcher downloader page sidebar
+  - wrote unit tests for predicate value testing (i.e. for Metadata Conditionals) for import time, modified time, last viewed time, archived time
+  - wrote unit tests for predicate value extracting (i.e. for relative file info comparators) for import time, modified time, last viewed time, archived time
+  - wrote unit tests for the new Base64URL encode/decode and added some clever stuff to check for the +/-_ stuff
+  - wrote unit tests for the new Base64 character set filters
+  - fleshed out some of my Base64 unit tests to catch a couple extra situations
+  - wrote unit tests for my new query compaction parent-grouping tech and 'master url' counting routine
+  - moved the 'CallAfter' thread-to-qt calling system to a new file ClientGUICallAfter.py, and made it safer
+  - moved an overhead-heavy alternate Qt-safe CallAfter to this leaner pipeline
+  - renamed PREDICATE_TYPE_SYSTEM_AGE to PREDICATE_TYPE_SYSTEM_IMPORT_TIME
+  - the NumberTest init no longer flips from +/-% to = if the inherent 'value' is 0--this was not helping in duplicates auto-resolution, where the value is not used and in some cases initialises to 0
+  - updated the predicate object so null/stub preds (which until comparators generally only appeared in memory as autocomplete dropdown system preds) can always serialise
+  - if a menu item label is longer than 128 characters and thus...elides, the tooltip will no longer have doubled ampersands (generally affects urls in menus)
+  - added a catch to the help->about error reporting; if you have "sio_flush" in an mpv import error, I now say to try running from source
+ReleaseNotesUrl: https://github.com/hydrusnetwork/hydrus/releases/tag/v637
+PurchaseUrl: https://hydrusnetwork.github.io/hydrus/support.html
+Documentations:
+- DocumentLabel: FAQ
+  DocumentUrl: https://hydrusnetwork.github.io/hydrus/faq.html
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

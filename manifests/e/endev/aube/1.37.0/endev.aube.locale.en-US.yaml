@@ -1,0 +1,49 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: endev.aube
+PackageVersion: 1.37.0
+PackageLocale: en-US
+Publisher: en.dev
+PublisherUrl: https://en.dev/
+PublisherSupportUrl: https://github.com/endevco/aube/discussions/categories/troubleshooting-and-bugs
+Author: en.dev
+PackageName: aube
+PackageUrl: https://aube.en.dev/
+License: MIT
+LicenseUrl: https://github.com/endevco/aube/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 en.dev inc
+CopyrightUrl: https://github.com/endevco/aube/blob/HEAD/LICENSE
+ShortDescription: A fast Node.js package manager
+Description: |-
+  aube is a package manager for Node.js projects. It uses pnpm-style isolated node_modules for fast, disk-efficient installs.
+
+  Existing projects keep their lockfile format. aube reads and writes pnpm-lock.yaml, package-lock.json, npm-shrinkwrap.json, yarn.lock, and bun.lock in place. New projects without a supported lockfile get aube-lock.yaml.
+
+  Why Try It
+  - Fast installs. Warm installs are about 8x faster than pnpm and about 5x faster than Bun in the current benchmarks. Repeat test commands run up to 35x faster than pnpm and up to 5x faster than Bun.
+  - Existing lockfiles. Reads and writes pnpm-lock.yaml, package-lock.json, npm-shrinkwrap.json, yarn.lock, and bun.lock in place.
+  - Cheap repeat commands. aubr test, aube test, and aube exec vitest auto-install when dependencies are stale, then skip that work when nothing changed. aubx uses a local binary when one is installed, or a throwaway environment for one-off tools.
+  - Less disk use. A global content-addressable store lets projects share package files instead of keeping a full copy of the same dependencies in every checkout.
+  - Secure defaults. Out of the box, exotic transitive deps are blocked, lifecycle scripts wait for approval, trust downgrades fail at resolve, and brand-new releases sit in a 24h cooling window. One paranoid: true line adds the build jail and turns the soft gates into hard fails.
+Moniker: aube
+ReleaseNotes: |-
+  This release makes minimumReleaseAge visible in outdated/update reports instead of silently hiding upgrades, gives embedding hosts precise control over how runtime binaries sit on PATH, and fixes several rough edges in add, patch, licenses, and shim resolution.
+  Added
+  - Built-in pnpm trusted-dependency list for lifecycle scripts (#1199 by @jdx) — Built-in lifecycle-script approvals now come from a pinned, validated snapshot of pnpm's maintained trusted-dependencies list (e.g. esbuild, sharp), embedded at build time so installs stay offline and reproducible. Project and workspace allowBuilds settings are merged, and explicit denials always win over built-in or configured approvals.
+  - Leave PATH unchanged for embedder runtimes (#1189 by @jdx) — A new EmbedderRuntime::without_path() builder lets embedding hosts supply the Node program and npm exec path (NODE, npm_node_execpath) without deriving or prepending a PATH entry, so bare node commands resolve as inherited. path_dir(...) and without_path() follow last-call-wins builder semantics.
+
+  Fixed
+  - Surface upgrades hidden by minimumReleaseAge (#1193, #1192 by @jdx) — aube outdated, aube update, and the interactive picker now apply the same release-age policy as install resolution, so they no longer offer versions that selecting wouldn't install. When newer releases are still quarantined, a single aggregated WARN_AUBE_MINIMUM_RELEASE_AGE_BLOCKED_UPDATE explains what's hidden and why (e.g. updates hidden by minimumReleaseAge: is-odd@3.0.1). aube up --latest now selects the newest mature version instead of admitting a quarantined dist-tag, aliased dependencies are handled correctly, and full timestamped packuments are fetched when abbreviated metadata lacks publish times. Fixes the behavior reported in #1191.
+  - Trust exact popular package names in aube add (#1198 by @jdx) — The similar-name supply-chain gate now stops once a requested name exactly matches the top-100k popularity corpus, so aube add esbuild and aube add @types/node no longer require --allow-low-downloads just because lower-ranked lookalikes (msbuild, @types/code) exist. Typo detection for names not in the corpus is unchanged.
+  - Preserve existing patches and refresh their hashes (#1196 by @jdx) — patch-commit now reuses a dependency's existing patchedDependencies path and appends new hunks so the result still applies to pristine package contents, instead of orphaning the original patch behind a freshly generated file. Lockfile freshness checks now SHA-256 declared patch files against the hashes recorded in pnpm-lock.yaml, re-resolving on normal installs and failing frozen installs with ERR_AUBE_LOCKFILE_CONFIG_MISMATCH. Addresses discussions #1195 and #1197.
+  - Resolve licenses from hoisted installs (#1183 by @jdx) — aube licenses no longer assumes an isolated virtual store. It now prefers the recorded install layout, reconstructs hoisted placements from the lockfile graph, and reads each package.json from its on-disk hoisted path, fixing hoisted installs (including --node-linker=hoisted) where every dependency reported UNKNOWN. Fixes #1182.
+  - Keep wrapper node first on PATH (#1188 by @jdx) — Wrapper embedder runtimes were being silently bypassed when a dependency or project exposed a node_modules/.bin/node, defeating host-supplied instrumentation, transpilation, or sandboxing. Wrapper shims are now prepended ahead of project-local bins, while selector runtimes keep the existing .bin-first precedence, with the same ordering applied across lifecycle scripts, run, and shell-mode exec/dlx. Addresses Discussion #1083.
+  - Keep activated shims available in scripts (#1187 by @jdx) — After aube activate, package scripts run via aube run can again resolve pnpm, npm, and yarn through the activated shim directory, which was previously stripped by aube's own startup PATH sanitization. aube's process PATH stays sanitized so internal runtime probes don't recurse through shims. Fixes discussion #1186.
+
+  💚 Sponsor aube
+  aube is maintained by @jdx, an open source developer for entire.io, the title sponsor of the jdx.dev open source tools including mise. Work on aube is funded by sponsors.
+  If aube is saving your team install time or CI minutes, please consider sponsoring at jdx.dev. Individual and company sponsorships are what keep the project fast, free, and independent.
+ReleaseNotesUrl: https://github.com/jdx/aube/releases/tag/v1.37.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

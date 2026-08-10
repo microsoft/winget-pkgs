@@ -1,0 +1,65 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: can1357.oh-my-pi
+PackageVersion: 16.2.5
+PackageLocale: en-US
+Publisher: Can Bölük
+PublisherUrl: https://can.ac/
+PublisherSupportUrl: https://github.com/can1357/oh-my-pi/issues
+Author: Can Bölük
+PackageName: oh-my-pi
+PackageUrl: https://omp.sh/
+License: MIT
+LicenseUrl: https://github.com/can1357/oh-my-pi/blob/HEAD/LICENSE
+Copyright: |-
+  Copyright (c) 2025 Mario Zechner
+  Copyright (c) 2025-2026 Can Bölük
+ShortDescription: ⌥ AI Coding agent for the terminal — hash-anchored edits, optimized tool harness, LSP, Python, browser, subagents, and more
+Description: |-
+  omp is a terminal-first coding agent that runs on your machine, talks to any provider, and treats sessions like git branches.
+  omp (pronounced “oh-em-pi”, binary omp) is a fork of Mario Zechner’s Pi. It runs as a single Bun process, drives any model provider you have credentials for, and ships a flat tool surface the model uses to read code, run commands, edit files, drive a debugger, and spawn subagents that coordinate over an in-process IRC bus.
+  Sessions persist as JSONL under ~/.omp/agent/sessions/. You resume, fork, branch, and share them. Settings, credentials, plugins, and caches all live under ~/.omp/agent/. Nothing leaves the machine unless you call a tool that does.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  @oh-my-pi/pi-ai
+  Fixed
+  - Fixed Google and Cloud Code Assist streams that end without a finish reason (dropped connections or truncated responses) being treated as fatal; they are now classified as transient so the coding agent automatically retries.
+  @oh-my-pi/pi-coding-agent
+  Changed
+  - Status line now collapses a linked git worktree path to the project name with a worktree icon, leaving the git segment to show the branch once instead of repeating it in the path.
+  Fixed
+  - Fixed Ollama and llama.cpp discovery overestimating local context windows by using model training metadata instead of the runtime num_ctx / n_ctx, which could let compaction retry prompts that llama.cpp rejects as over context. (#3752)
+  - Fixed isolated subagent worktrees embedding long task ids and merged in the working path; isolation now uses compact hashed segments with an m mount dir. (#3756)
+  - Fixed recoverable context-overflow compaction keeping the failed assistant error turn in visible session history after scheduling the retry. (#3747)
+  - Fixed editing a file read from outside the workspace (e.g. ~/.claude/settings.json) failing with "File not found": the read snapshot header now carries the full out-of-workspace path so the edit resolves it directly instead of against the working directory.
+  - Fixed subagents spawned with an output schema (agent(..., schema=...), task with structured output) failing with schema_violation: missing required fields since the typed-yield rework: a type: "result" finalize carrying the full object was assembled as a section named result, nesting the payload one level deep. String-typed yields are now treated as terminal finalizers (their data is the complete result), only array-typed yields form accumulating sections, and a data-less finalize keeps accumulated sections instead of collapsing to the last assistant turn.
+  - Fixed the per-provider concurrency cap (e.g. providers.ollama-cloud.maxConcurrency) bracketing the whole subagent lifecycle, which deadlocked any spawn tree wider than the cap because parents held every slot while waiting for children queued on the same cap. The semaphore now wraps each provider HTTP request, so a parent's slot frees between turns and child subagents can acquire while their parent's tool calls are running. (#3749)
+  - Fixed Ctrl+Q / Ctrl+Enter follow-up submissions sending the literal [Paste #N] marker instead of the expanded paste body (#3737).
+  @oh-my-pi/pi-natives
+  Fixed
+  - Fixed the in-process grep builtin rejecting GNU-grep's --color/--colour (with or without =WHEN) and --version flags. The shadowing rejection broke bash's near-universal alias grep='grep --color=auto', causing bare grep in any pipeline to fail with exit 2. The builtin now accepts and ignores --color[=WHEN] (its output goes through in-process file descriptors, never a TTY, so ANSI injection would corrupt downstream consumers) and reports its version through the context streams (#3755).
+  What's Changed
+  - fix(coding-agent): expand paste markers in Ctrl+Q follow-ups by @roboomp in https://github.com/can1357/oh-my-pi/pull/3738
+  - fix(session): drop recovered overflow error turns by @roboomp in https://github.com/can1357/oh-my-pi/pull/3748
+  - fix(task): scoped provider concurrency cap to each LLM turn by @roboomp in https://github.com/can1357/oh-my-pi/pull/3751
+  - fix(providers): honor local runtime context limits by @roboomp in https://github.com/can1357/oh-my-pi/pull/3754
+  - fix(grep-builtin): accept --color/--colour/--version by @roboomp in https://github.com/can1357/oh-my-pi/pull/3757
+  - fix(agent): shorten isolated task worktree paths by @roboomp in https://github.com/can1357/oh-my-pi/pull/3758
+  - fix(tool): allow bash redirects to dev sinks by @roboomp in https://github.com/can1357/oh-my-pi/pull/3764
+  Full Changelog: https://github.com/can1357/oh-my-pi/compare/v16.2.4...v16.2.5
+ReleaseNotesUrl: https://github.com/can1357/oh-my-pi/releases/tag/v16.2.5
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://omp.sh/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

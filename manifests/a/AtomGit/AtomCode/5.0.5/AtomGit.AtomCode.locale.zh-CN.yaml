@@ -1,0 +1,102 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: AtomGit.AtomCode
+PackageVersion: 5.0.5
+PackageLocale: zh-CN
+Publisher: 重庆开源共创科技有限公司
+PublisherUrl: https://atomgit.com/
+PublisherSupportUrl: https://atomgit.com/atomgit_atomcode/atomcode/issues
+PrivacyUrl: https://docs.gitcode.com/docs/help/home/protocol/privacy-policy
+Author: 重庆开源共创科技有限公司
+PackageName: AtomCode
+PackageUrl: https://atomcode.atomgit.com/
+License: MIT
+LicenseUrl: https://atomgit.com/atomgit_atomcode/atomcode/blob/main/LICENSE
+Copyright: Copyright (c) 2026 Yubang Xu
+CopyrightUrl: https://docs.gitcode.com/docs/help/home/protocol/ai-privacy-policy
+ShortDescription: AI 编程助手 在你的终端中运行
+Description: Claude Code / Cursor Agent 的开源平替，住在你的终端里。连接任意 OpenAI 兼容大模型，自主读文件、改代码、跑测试、自我验证 —— 用 Rust 构建。
+Tags:
+- 人工智能
+- 代码
+- 大语言模型
+- 智能体
+- 编程
+- 聊天机器人
+- 自主智能
+ReleaseNotes: |-
+  AtomCode v5.0.5 Release Notes
+  发布日期：2026-08-07
+  v5.0.5 聚焦于持久化目标（Goal）生命周期、实时转向与下一轮提示建议、MCP 与文件工具增强、TUI 交互打磨（目录选择器、快捷键体系），以及多项跨平台（Windows）兼容性与稳定性修复。
+
+  ✨ 新增功能（Features）
+  Goal 持久化目标
+  - 阶段感知的持久目标：目标从启动到结束经历明确阶段（进行中 / 已暂停 / 达上限暂停 / 已达成 / 已结束），达成后仍保持注册，TUI 持续显示目标徽章
+  - Esc 暂停目标：Esc 暂停进行中的目标，下一条用户消息自动恢复，无需重新输入目标条件
+  - 达成后继续对话：目标达成后在下一条用户消息时自动重新参与，由模型判定是继续 / 新任务 / 闲聊
+  - 轮数预算替代时间上限：目标轮数预算取自计划配额，预算用尽时提示「继续对话即推进」，不再硬性卡时间上限
+  Live Steering 实时转向与提示建议
+  - 回合中实时转向：agent 执行期间继续输入即可作为实时转向并入当前回合，TUI 与 WebUI 同步生效
+  - 下一轮提示建议：回合自然结束后采样「用户最可能输入的下一条消息」，TUI 空输入框一键接受
+  - WebUI 草稿恢复：未确认的实时转向在回合取消 / 会话切换时自动恢复为可编辑草稿，不丢失输入
+  MCP
+  - JSONC 注释支持：.mcp.json 配置允许 // 与 /* … */ 注释，编辑器中粘贴的带注释配置可直接生效
+  - 工具名规范化：MCP 服务器 / 工具名含空格、冒号或中文时自动规范化为合法的 OpenAI 函数名，不再导致整请求 400（超长名附稳定哈希后缀保持唯一）
+  - 协议协商与请求标注：MCP 协议版本协商改进，HTTP 传输请求正确标注
+  文件工具
+  - GBK/GB18030 原位编辑：edit_file 支持直接编辑 GBK/GB18030 编码文件并按原编码写回，中文 Windows 场景不再被转成 UTF-8
+  - 路径不存在提示：read_file / glob 等工具在路径不存在时给出最近存在的祖先目录及条目，便于模型自行恢复
+  配置
+  - 服务端地址可配置：平台、CodingPlan API、更新清单、下载源、relay、插件市场等所有服务端地址均支持环境变量覆盖，自托管部署无需改源码
+  - CodingPlan 前缀可配置：provider 前缀可通过 ATOMCODE_CODINGPLAN_PROVIDER_PREFIX 调整，并兼容识别历史 AtomGit-* 配置键
+  - 按模型 api_key：CodingPlan models-v2 数据支持按模型下发独立 api_key
+  - Todo 急切规划策略：新增 [tools.todo] eager 配置（auto / preferred / always），可让新任务强制或优先使用 todowrite 建立任务清单
+  TUI
+  - 目录选择器重构：/cd 目录选择器支持搜索、Tab 补全，并聚合会话目录与最近目录
+  - 快捷键体系增强：Tab / Shift+Tab 切换执行模式、F2 / Shift+F2 切换模型、Ctrl+R 反向搜索输入历史、Ctrl+T 切换 reasoning_effort、Ctrl+J 换行、Ctrl+V / Ctrl+Alt+V 粘贴文本或图片
+  review 子命令
+  -  --no-coverage 支持：atomcodex review 新增 --no-coverage 跳过覆盖率复检，并优化复检范围（上限 8 个文件、按信号优先级排序）
+  🛠 修复（Fixes）
+  Goal
+  - 暂停 / 恢复生命周期正确保持：暂停不丢目标，恢复时重置无进展计数与截止时间
+  - 目标结束后正确恢复回合统计分隔线，避免残留状态串扰后续轮次
+  - 修复目标徽章时钟重置时机、轮数预算饱和计算等问题
+  终端渲染 / TUI
+  - 修复暗色面板文本对比度与浅色终端下输入提示可读性
+  - 快捷键帮助文案与实际快捷键对齐
+  - 目录选择器当前目录标记去重、输入期间保持最新输出可见
+  - 修复旧版 conhost 窗口尺寸变化时的重排问题
+  Provider / 网络
+  - 首个瞬态 429 静默重试，避免重复横幅刷屏
+  - 网关首字节（TTFB）超时保护，网关接受连接但无响应时不再无限挂起
+  - hyper IncompleteMessage 纳入可重试分类
+  - Anthropic 强制工具调用时抑制不兼容的 thinking 模式，兼容扩展 / 自适应思考
+  会话 / 持久化
+  - 修复 Windows 上会话 transcript 追加因 LockFileEx 权限不足失败（os error 5）
+  - 安全软件短暂占用文件时自动重试打开 / 加锁
+  - Rewind 账本升级至 v2（工作区树可选），旧账本仍可正常读取
+  Agent / 工具
+  - 符号工具不再把「类型不支持」记成调用失败；缺失文件对不支持类型仍保持错误
+  - 宽松整数参数校验：拒绝分数、无穷与超出精确范围的浮点
+  - request_user_input 多选勾选项与自定义输入合并保留，不再丢弃已勾选项
+  权限 & 安全
+  - 阻止通过 bash 工具提取凭据（含凭据重试循环），要求改用凭据感知工具或用户手动完成认证步骤
+  - 调度任务 id 校验，阻止路径逃逸读写 schedules 目录之外的文件
+  WebUI
+  - 结构化输入弹窗点击背景不再意外关闭，daemon 接受响应后才关闭
+  - 首次登录时正确解析 provider
+  VSCode 扩展
+  - 修复窗口重开后请求排队失效：窗口重开后旧回合仍在 daemon 运行时的消息正确入队，旧回合结束后自动重放队列
+  Skills
+  - 设置 ATOMCODE_HOME 后，用户级 .atomcode 下的 skills / commands 目录正确重定向到新配置根目录
+  📚 文档（Docs）
+  - 重写 docs/mcp.md：按当前代码更新 MCP 配置、传输与工具说明
+  - README 更新快捷键说明与目录选择器行为描述
+  - docs/config.example.toml 新增 [tools.todo] 配置示例
+ReleaseNotesUrl: https://atomgit.com/atomgit_atomcode/atomcode/releases/v5.0.5
+Documentations:
+- DocumentLabel: 文档
+  DocumentUrl: https://atomcode.atomgit.com/docs/zh/index.html
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

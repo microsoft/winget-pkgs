@@ -1,0 +1,75 @@
+# Created with WinGet Releaser using komac v2.15.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: max-sixty.worktrunk
+PackageVersion: v0.32.0
+PackageLocale: en-US
+Publisher: max-sixty
+PublisherUrl: https://github.com/max-sixty
+PublisherSupportUrl: https://github.com/max-sixty/worktrunk/issues
+PackageName: worktrunk
+PackageUrl: https://github.com/max-sixty/worktrunk
+License: MIT OR Apache-2.0
+LicenseUrl: https://github.com/max-sixty/worktrunk/blob/HEAD/LICENSE
+ShortDescription: A Git worktree manager for trunk-based development
+Description: |-
+  worktrunk (wt) is a Git worktree manager designed for trunk-based development workflows.
+  It simplifies creating, switching between, and managing Git worktrees, making it easy to
+  work on multiple features or branches simultaneously without the overhead of stashing
+  or switching branches in a single working directory.
+Tags:
+- cli
+- git
+- git-worktree
+- rust
+- terminal
+- worktree
+ReleaseNotes: |-
+  Release Notes
+  Improved
+  - Hooks rationalized: Every lifecycle event now has a symmetric pre- (blocking) / post- (background) pair. This required one rename: post-create → pre-start, reflecting that it runs before post-start as a blocking dependency step. A new post-commit hook fires in the background after commits (including squash commits during merge). post-merge is now background instead of blocking, consistent with all other post-* hooks. Configs using post-create get a deprecation warning on any wt command; run wt config update to rename automatically. The old name continues to work during the deprecation period. Docs (#1679, closes #1670, thanks @ortonomy for reporting #1571)
+  - Hook template variables consolidated: Bare variables (branch, worktree_path, commit) now consistently point to the Active worktree — the destination for switch/create, the source for merge/remove. New directional variables ({{ base }}, {{ base_worktree_path }}, {{ target_worktree_path }}, {{ cwd }}) give hooks explicit access to both sides of two-worktree operations. (Breaking: {{ worktree_path }} changed in pre-switch for existing worktrees and in post-merge — use {{ cwd }} or {{ base_worktree_path }} for the previous behavior.) Docs (#1655, #1660, #1663, thanks @sysradium for reporting #1543)
+  - Detached worktree support: Detached HEAD worktrees can now be removed via wt remove /path/to/worktree and switched to via wt switch /path/to/worktree. The interactive picker also handles detached worktrees for both operations. (#1665, #1680, thanks @mjakl for reporting #1661)
+  - In-place worktree removal in picker: Press alt-r in the wt switch picker to remove the selected worktree without leaving the picker. Currently hidden from picker legend and help text pending a cursor-reset issue (#1695). (#1677, #1696)
+  - Smarter column dropping in wt list: Low-priority columns (Message, Time, Commit) are now dropped when Summary needs more space, using graduated thresholds based on priority distance. Extends the no-data column dropping from v0.31.0. (#1678)
+  Fixed
+  - Bare repo project config ignored: .config/wt.toml placed in the primary worktree of a bare repository was not found when running commands from the bare repo root directory. Config is now loaded from the primary worktree as fallback, and accidental config in the bare repo root itself is skipped. Fixes #1691. (#1692, #1697, thanks @seakayone)
+  - pre-start hook failure was non-blocking: pre-start was the only pre-* hook that warned on failure instead of aborting. All pre-* hooks now consistently use FailFast. (Breaking: pre-start hook failures that previously only warned now abort the operation.) (#1708)
+  - Spurious mismatch warning for detached worktree switches: Switching to a detached worktree by path produced a "Branch-worktree mismatch" warning because the directory name was treated as a branch name. (#1686)
+  - Detached worktree switch output showed redundant path: Output now shows "detached worktree" instead of repeating the directory name (which duplicated the path after @). (#1685)
+  - Picker alt-r removal fixes: Picker removals now validate the worktree synchronously before removing it from the list, perform the actual git removal on a background thread to prevent UI freezing, and correctly handle detached worktrees. (#1699, #1702, #1717)
+  Documentation
+  - Migration guide for hook rationalization and template variable changes. (#1666, #1693)
+  Internal
+  - All test git commands now go through Cmd for consistent debug logging and timing traces. (#1714, #1716, #1718)
+  - Worktree removal logic extracted into shared helpers. (#1683, #1700, #1701)
+  Install worktrunk 0.32.0
+  Install prebuilt binaries via shell script
+  curl --proto '=https' --tlsv1.2 -LsSf https://github.com/max-sixty/worktrunk/releases/download/v0.32.0/worktrunk-installer.sh | sh && wt config shell install
+  Install prebuilt binaries via powershell script
+  powershell -ExecutionPolicy Bypass -c "irm https://github.com/max-sixty/worktrunk/releases/download/v0.32.0/worktrunk-installer.ps1 | iex"; git-wt config shell install
+  Install prebuilt binaries via Homebrew
+  brew install worktrunk && wt config shell install
+  Download worktrunk 0.32.0
+  ────────────────────────────────────────────────┬───────────────────┬─────────────
+  File                                            │Platform           │Checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-aarch64-apple-darwin.tar.xz           │Apple Silicon macOS│checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-x86_64-apple-darwin.tar.xz            │Intel macOS        │checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-x86_64-pc-windows-msvc.zip            │x64 Windows        │checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-aarch64-unknown-linux-musl.tar.xz     │ARM64 MUSL Linux   │checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-x86_64-unknown-linux-musl.tar.xz      │x64 MUSL Linux     │checksum
+  ────────────────────────────────────────────────┴───────────────────┴─────────────
+  Install via Cargo
+  cargo install worktrunk && wt config shell install
+  Install via Winget (Windows)
+  winget install max-sixty.worktrunk && git-wt config shell install
+  Install via AUR (Arch Linux)
+  paru worktrunk-bin && wt config shell install
+ReleaseNotesUrl: https://github.com/max-sixty/worktrunk/releases/tag/v0.32.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,37 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Game1024.OpenSpeedy
+PackageVersion: 3.3.5
+PackageLocale: en-US
+Publisher: Game1024
+PublisherUrl: https://github.com/game1024
+PublisherSupportUrl: https://github.com/game1024/OpenSpeedy/issues
+PackageName: OpenSpeedy
+PackageUrl: https://github.com/game1024/OpenSpeedy
+License: GPL-3.0
+LicenseUrl: https://github.com/game1024/Speedy/blob/HEAD/LICENSE
+ShortDescription: 🎮 An open-source game speed modifier.[一款开源的游戏变速器]
+Tags:
+- cplusplus
+- gamedev
+- gamemod
+- pc
+- qt
+- speed-engine
+- toolkit
+- windows
+ReleaseNotes: |-
+  🐛修复
+  - 恢复原速时小概率卡死：修复 speedpatch 中 5 个时间 detour 函数 (DetourTimeGetTime / DetourGetMessageTime / DetourGetTickCount / DetourGetTickCount64 / DetourQueryPerformanceCounter) 的 baseline/prevcall 数据竞争。速度倍率改变时 baseline 重校准写入与其他线程并发读取之间无 happens-before 保证，32 位进程可能读到 8 字节撕裂值导致时间倒退死等。全部改为 std::atomic
+  - 命名管道持久连接复用：Bridge 客户端改为单例持久管道连接，缓存的 HANDLE 跨命令复用，断开自动重连。解决之前每次命令执行后管道释放导致重新加速有概率不生效的问题
+  - 编译器警告修复：消除 unused_must_use 和 unused_import 警告
+  ✨新增
+  - 快捷键注册状态显示：设置界面中快捷键注册失败时以红色冲突样式提示（shortcutStatus），利用 useSyncExternalStore 细粒度订阅，仅在对应快捷键状态变化时触发重渲染
+  - React 状态管理升级：useShortcut / useSettings 从模块级事件总线改为 useSyncExternalStore，获得 React 19 并发模式撕裂防护；useSettingsValue 从回调式 API 改为声明式返回值
+ReleaseNotesUrl: https://github.com/game1024/OpenSpeedy/releases/tag/3.3.5
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/game1024/OpenSpeedy/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

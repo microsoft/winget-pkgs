@@ -1,0 +1,128 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Matteo842.SaveState
+PackageVersion: '3.0'
+PackageLocale: en-US
+Publisher: Matteo842
+PublisherUrl: https://github.com/Matteo842
+PublisherSupportUrl: https://github.com/Matteo842/SaveState/issues
+Author: Matteo Cioffi
+PackageName: SaveState
+PackageUrl: https://github.com/Matteo842/SaveState
+License: GPL-3.0
+LicenseUrl: https://github.com/Matteo842/SaveState/blob/HEAD/LICENSE
+ShortDescription: |
+  A versatile game save backup manager, featuring Steam detection, Minecraft support, drag & drop, desktop shortcuts and emulator compatible.
+Description: |
+  A user-friendly GUI application for Windows and Linux to easily back up and restore video game save files. Perfect for games without cloud saves, managing multiple save locations, or syncing your progress across devices.
+Tags:
+- automation
+- backup
+- desktop-app
+- game
+- games
+- gui
+- minecraft
+- open-source
+- pyside6
+- python
+- save
+- save-manager
+- savegame
+- steam
+- video-game
+- windows
+ReleaseNotes: |-
+  SaveState v3.0 — The Original Xbox Update
+  SaveState 3.0 is the largest and most ambitious release in the project's history.
+  After more than a year of research and development, SaveState can now back up and restore individual game saves directly from the virtual Xbox HDD used by xemu.
+  This release also introduces a complete rewrite of Linux save-path discovery, a redesigned multi-profile workflow, instant keyboard search, modern notifications, and major improvements to icon extraction.
+  What's New
+  Native xemu and Original Xbox Support
+  SaveState now officially supports xemu, the original Xbox emulator.
+  Unlike traditional backup methods that copy the entire virtual HDD, SaveState can locate, extract, and restore the data belonging to an individual Xbox title while leaving every other game on the HDD untouched.
+  - Direct FATX Access: SaveState can read and modify the FATX filesystem used by the original Xbox directly inside xemu's virtual HDD.
+  - Pure Python Implementation: The FATX and QCOW2 handling engine was built specifically for SaveState in pure Python, without external FATX libraries and without requiring or launching QEMU.
+  - Per-Game Backups: Only the selected game's save data is extracted instead of copying the complete Xbox HDD image.
+  - Surgical Restore: Backups can be written directly into the live xemu HDD without replacing or modifying unrelated titles.
+  - Guest-Aware Restoration: SaveState can restore data both to its original FATX layout and through safe cluster remapping when the destination HDD uses a different internal allocation.
+  - Preflight Validation: The HDD and backup archive are checked before any write operation begins.
+  - Restore Protection: Additional validation and undo safeguards reduce the risk of damaging the live Xbox HDD image.
+  - Dedicated Xemu Restore Interface: A new restore dialog displays the detected Xbox titles, available backups, destination HDD information, restore status, and external ZIP import options.
+  - Background Operations: Extraction and restoration run through dedicated workers so the interface remains responsive during large operations.
+  Despite the complexity of the new storage engine, the user workflow remains unchanged: simply drag and drop a xemu shortcut into SaveState. The Xbox HDD is detected automatically and the game-selection dialog opens immediately, allowing one or more profiles to be created.
+  immagine
+  Linux Save Discovery Engine Rewritten
+  Linux support had fallen behind the Windows version, so the heuristic save-path discovery engine has been almost completely rewritten.
+  The new engine provides significantly better detection across native Linux games, compatibility layers, alternative package formats, and non-standard installations.
+  - Improved Name Matching: New normalization, tokenization, abbreviation, fuzzy matching, and Roman/Arabic numeral handling improve detection for complex game titles.
+  - Proton Prefix Discovery: SaveState can locate and inspect Proton compatibility prefixes, including prefixes belonging to non-Steam games without a known Steam AppID.
+  - Expanded Steam Detection: Additional Steam layouts are now recognized, including Flatpak and Snap installations.
+  - Better Compatibility-Layer Support: Improved scanning for Proton, Wine, Heroic Games Launcher, Steam userdata, Flatpak, and Snap environments.
+  - Linux Desktop Shortcut Support: Dragging a .desktop file now allows SaveState to correctly read its executable, working directory, and display name.
+  - XDG Directory Support: Save discovery and displayed paths now respect XDG_DATA_HOME and XDG_CONFIG_HOME.
+  - Engine-Specific Detection: Expanded recognition of save structures used by engines and frameworks such as Ren'Py and Godot.
+  - Safer Directory Scanning: System folders, launcher roots, and unsafe installation directories are rejected before deep scanning begins.
+  - Reduced False Positives: Publisher matching, folder ranking, save-file evidence, traversal limits, and result scoring have all been refined.
+  - Improved Performance: Per-directory traversal limits, cancellation checks, deduplication, and result caps prevent excessively large searches.
+  - Linux Path Shortcuts: Common Linux save locations are shown through shorter and more readable aliases in the profile interface.
+  - Regression Testing: Dedicated Linux save-discovery tests are now executed as part of continuous integration.
+  Multi-Profile Dialog Redesign
+  The multi-profile dialog has received a complete visual overhaul to match the interface introduced with SaveState 2.0 and 2.1.
+  - Modern Theme-Aware Interface: Lists, profile cards, buttons, headers, and progress states now use the shared SaveState theme system.
+  - Dark and Light Theme Support: The redesigned interface adapts consistently to both application themes.
+  - Cleaner Profile Cards: Improved spacing, labels, delete controls, save paths, and selection feedback make large imports easier to review.
+  - Simplified Primary Action: Scanning, progress, and profile creation now share a single state-aware primary button.
+  - Readable Save Paths: Long paths can now be shortened relative to known game directories and common platform locations.
+  - Reduced Layout Movement: Button dimensions and state labels remain stable while scans are running.
+  Instant Keyboard Search
+  The profile search bar has finally been fixed.
+  Since the earliest versions of SaveState, users had to manually focus the search field before typing. In SaveState 3.0, keyboard input is routed directly to profile search as soon as the main window opens.
+  - Start typing immediately to search through profiles.
+  - No click or manual focus is required.
+  - Press Escape to instantly clear the current search.
+  - Keyboard shortcuts and editable text fields continue to work normally.
+  Redesigned Backup Notifications
+  Notifications shown by silent backups, profile shortcuts, and background operations have been completely redesigned.
+  - Profile Icons: Notifications can now display the icon belonging to the selected game or emulator profile.
+  - Modern Card Layout: New spacing, accent indicators, shadows, typography, and theme-aware styling provide a cleaner appearance.
+  - Stacked Notifications: Multiple notifications can remain visible simultaneously without overlapping.
+  - Cross-Process Coordination: Notifications launched by separate SaveState processes share screen positions and queue correctly.
+  - Improved Lifecycle Handling: Popups remain visible for their intended duration and release their resources correctly when closed.
+  - HiDPI Support: Notification icons are scaled using the active display's device-pixel ratio for sharper rendering.
+  - Better Screen Positioning: Popup placement and margins have been corrected across different display configurations.
+  notify ---
+  Improved Profile Icon Extraction
+  Automatic icon extraction has been made more reliable, particularly on 64-bit Windows systems.
+  - Higher-Resolution Icon Cache: Automatically extracted icons are now stored at a minimum usable resolution.
+  - Automatic Cache Repair: Invalid, corrupted, or undersized cached icons are detected and regenerated.
+  - Safer Windows API Handling: Native icon extraction now uses correctly typed 64-bit Win32 handles, preventing truncation and extraction failures.
+  - Consistent Icon Resolution: Profile lists, notifications, and other interface elements now request icons using a shared resolution policy.
+  Documentation Overhaul
+  The project documentation has been reorganized and expanded.
+  New dedicated documentation now covers:
+  - General usage and first-time setup
+  - Cloud Sync
+  - Building SaveState from source
+  - How heuristic save-path discovery works
+  - Project contribution guidelines
+  The main README has also been simplified to provide a clearer overview, faster installation instructions, and direct access to the complete documentation.
+  SaveState 3.0 at a Glance
+  - Native per-game backup and restore support for xemu
+  - Direct FATX and QCOW2 access implemented in pure Python
+  - No QEMU installation or external FATX tools required
+  - Dedicated and safety-focused xemu restore workflow
+  - Completely rewritten Linux save discovery
+  - Improved Proton, Wine, Steam, Flatpak, Snap, and Heroic support
+  - Linux .desktop drag-and-drop support
+  - Redesigned multi-profile interface
+  - Immediate keyboard profile search
+  - Modern profile-aware notifications
+  - Cross-process notification stacking
+  - Sharper and more reliable profile icon extraction
+  - Expanded project documentation
+  SaveState 3.0 represents a major step forward for the project: a backup manager capable of handling modern PC games, native Linux installations, compatibility layers, traditional emulators, and now even the internal filesystem of the original Xbox.
+ReleaseNotesUrl: https://github.com/Matteo842/SaveState/releases/tag/v3.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

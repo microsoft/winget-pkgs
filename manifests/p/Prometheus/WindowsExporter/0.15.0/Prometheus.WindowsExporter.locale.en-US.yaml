@@ -1,0 +1,46 @@
+# Created with komac v2.12.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: Prometheus.WindowsExporter
+PackageVersion: 0.15.0
+PackageLocale: en-US
+Publisher: Prometheus Community
+PublisherUrl: https://github.com/prometheus-community
+PublisherSupportUrl: https://github.com/prometheus-community/windows_exporter/issues
+PackageName: windows_exporter
+PackageUrl: https://github.com/prometheus-community/windows_exporter
+License: MIT
+LicenseUrl: https://github.com/prometheus-community/windows_exporter/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2021 The Prometheus Authors
+CopyrightUrl: https://github.com/prometheus-community/windows_exporter/blob/master/LICENSE
+ShortDescription: Prometheus exporter for Windows machines
+Description: A Prometheus exporter for Windows machines.
+Moniker: windows_exporter
+Tags:
+- prometheus
+- prometheus-exporter
+- windows
+- wmi
+ReleaseNotes: |-
+  ⚠️ Breaking changes
+  windows_mssql_transactions_active_total has been removed, and is replaced by windows_mssql_transactions_active (see below)
+  Enhancements
+  - Specific allowed remote IPs can now be set on the firewall rule created by the installed. The default is still to allow any machine access. (#608, thanks @siku4!)
+  - TCP collector now uses perflib instead of WMI, which will lead to faster collection times (#615, thanks @mallenLF!)
+  - TCP collector now exposed both IPv6 statistics in addition to the IPv4 statistics previously exposed. There is a new label af (address family) which lets you separate the two (#615, thanks @mallenLF!)
+  - The windows_exporter.exe file now has version information set (#563)
+  - Add a time collector with metrics about the Windows Time Service (#639)
+  - Add a collect[] url parameter if you need to customize what collectors to use per-scrape (#640, thanks @fischerman!)
+  - Add a --collectors.exchange.enabled flag to restrict which subcollectors are enabled on the exchange collector (#642, thanks @fischerman!)
+  - Add support for configuration files as a complement to command line flags (#638)
+  Bug fixes
+  - Fix a panic in the hyperv collector when WMI data is in the wrong format (#632)
+  - windows_mssql_transactions_active_total was erronously a counter, and has been replaced by a gauge windows_mssql_transactions_active (#636)
+  Changes
+  - The WMI library has been upgraded, which will hopefully fix rare memory leaks on some systems (#631, thanks @dcrn)
+  - Build exporter with Go 1.15 (#630, thanks @snoyberg!)
+  - Change the ordering of operations during upgrades, so that the old version is shut down before installing the new one (#597)
+  - Add a dependency on the WMI Performance Adapter for service start. This attempts to fix the exporter not starting at boot for some systems, please let us know if you still see the exporter failing to start (#645)
+ReleaseNotesUrl: https://github.com/prometheus-community/windows_exporter/releases/tag/v0.15.0
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

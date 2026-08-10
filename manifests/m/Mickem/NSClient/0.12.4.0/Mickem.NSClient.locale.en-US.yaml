@@ -1,0 +1,101 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Mickem.NSClient
+PackageVersion: 0.12.4.0
+PackageLocale: en-US
+Publisher: MySolutions NORDIC
+PublisherUrl: https://medin.name/
+PublisherSupportUrl: https://github.com/mickem/nscp/issues
+Author: My Computer Solutions NORDIC KB
+PackageName: NSClient++
+PackageUrl: https://nsclient.org/
+License: GPL-2.0
+LicenseUrl: https://github.com/mickem/nscp/blob/HEAD/COPYING
+Copyright: Copyright (C) 2026 - Michael Medin
+ShortDescription: A fully fledged monitoring agent which can be used with many monitoring tools.
+Description: |-
+  NSClient++ (nscp) aims to be a simple yet powerful and secure monitoring daemon. It was built for Nagios/Icinga, but nothing in the daemon is Nagios/Icinga specific and it can be used in many other scenarios where you want to receive/distribute check metrics.
+  The daemon has 3 main functions:
+  - Allow a remote machine (monitoring server) to request commands to be run on this machine (the monitored machine) which return the status of the machine.
+  - Submit the same results to a remote (monitoring server).
+  - Take action and perform tasks.
+Moniker: nscp
+Tags:
+- icinga
+- naemon
+- nagios
+ReleaseNotes: |-
+  0.12.4 — Regression fixes for Icinga and CheckSystem
+  This is a maintenance release focused on regressions introduced since 0.12.3.
+  No new features; no breaking changes for configurations that don't hit the items below.
+  Highlights
+  - Icinga check_nscp_api works again. The query-string credential path was removed in 0.12.3 for security (commit
+    340b8db1). That hardening broke Icinga's bundled check_nscp_api plugin, which still passes the password as
+    ?password=.... This release reinstates the legacy path behind a User-Agent allowlist (default: clients whose
+    User-Agent matches Icinga/check_nscp_api) — every other client keeps the strict post-340b8db1 rejection.
+  - Better "module not found" messages on Windows. When a configured module fails to load, the error now points at the
+    WiX installer feature that ships the module (e.g. NRPEServer → "NRPE Support"), so operators
+    can fix the cause (re-run the installer and tick that feature) without reading source.
+  - IcingaClient.dll is now in the installer. The DLL was being built but not packaged, so the corresponding
+    Op5/Icinga client features were unusable on stock Windows installs.
+  - os_updates.status keyword renamed to update_status. The previous name clashed with the built-in status
+    keyword every check exposes, which made filter / detail-syntax expressions ambiguous on check_os_updates. Any custom
+    config that referenced os_updates.status must be updated — see Behaviour change below.
+  - check_wmi no longer crashes on warn/crit filters. A use-after-mutation in the WMI row iterator caused an access
+    violation whenever a warn= or crit= filter touched a column value (e.g.
+    check_wmi "query=Select Version from win32_OperatingSystem" "warn=Version not like '6.3'"). Affected every
+    filter that exercised the post-iteration deferred-evaluation path.
+  Detailed changes
+  WebServer — legacy query-string authentication restored for specific clients (94b2057d)
+  The 0.12.3 hardening removed three paths because URL-borne credentials and tokens leak into browser history, proxy logs,
+  and Referer headers:
+  - GET/POST /auth/token?password=...
+  - GET/POST /auth/logout?token=...
+  - ?TOKEN=... / ?__TOKEN=... as a session-token fallback on any endpoint
+  Removing them broke Icinga's bundled check_nscp_api plugin, which still ships with the query-string mechanism. To
+  unblock that integration without re-opening the vector to browsers and arbitrary scrapers, this release gates the legacy
+  paths on a User-Agent allowlist:
+  - New setting [/settings/WEB/server] legacy query auth user agents. Comma-separated list of User-Agent substrings (
+    case-insensitive). A request whose User-Agent contains any pattern is allowed to use the legacy query-string
+    mechanism; everything else still gets the 0.12.3 rejection (410 Gone on /auth/*, 403 on ?TOKEN=).
+  - Default: Icinga/check_nscp_api — anchors on the specific plugin name, so unrelated tooling that merely mentions "
+    Icinga" in its User-Agent doesn't slip through.
+  - Set to an empty string to disable the fallback entirely (matches the strict 0.12.3 behaviour).
+  - The 410 / 403 rejection log lines now mention this setting as the escape hatch so operators don't have to dig through
+    source to find it.
+  Security posture, in short: this is not a defence against malicious clients — an attacker can spoof the User-Agent — but
+  it keeps the legacy vector off the default surface for browsers, scrapers, and anything else that isn't
+  check_nscp_api.
+  Service — installer-feature hints in module-load errors (793c3ee1)
+  When a referenced module's DLL isn't on disk (typically because the operator didn't tick the relevant feature in the
+  Windows installer), the error now ends with a hint:
+  Failed to load NRPEServer: <reason> (module 'NRPEServer' is part of the 'NRPE Support' installer feature; re-run the
+  NSClient++ installer and enable that feature, or see installers/installer-NSCP/Product.wxs for the full feature map)
+  Covers every module shipped by the MSI: CheckPlugins (the bulk of check_* modules), NRPE Support, Check MK Support,
+  NSCA / NSCA-NG, WEB Server, Lua / Python scripting, OP5 / Elastic / Icinga client, etc.
+  Hint is Windows-only — on Linux the package manager handles module installation and the hint would be misleading.
+  Installer — IcingaClient.dll added (3a9af3cf)
+  IcingaClient.dll is built by the CheckSystem solution but was missing from Product.wxs, so it was never shipped. The
+  Op5 → Icinga integration path was effectively broken on stock Windows installs. The DLL is now in the "Various client
+  plugins" feature alongside GraphiteClient, SMTPClient, SyslogClient, etc.
+  CheckSystem — check_os_updates keyword rename (cf3613e2)
+  The check_os_updates filter previously exposed a per-item field called status (overall update status: up_to_date /
+  pending / error).
+  Every check also exposes a built-in top-level status (OK / WARNING / CRITICAL / UNKNOWN), so filter and detail-syntax
+  expressions like status = 'pending' were ambiguous — a regression caught by users upgrading from 0.11.x. The per-item
+  field has been renamed to update_status.
+  The built-in status keyword (OK/WARNING/CRITICAL) is unaffected.
+  Upgrade notes
+  - Icinga users: check_nscp_api should start working again after the upgrade with no config changes. If you have a
+    non-stock Icinga probe that uses a different binary name, set [/settings/WEB/server] legacy query auth user agents
+    to a substring matching its User-Agent (or to plain Icinga to broaden the match beyond the default).
+  - Strict-deployment operators: if you want the strict 0.12.3 behaviour (no query-string credentials, no exceptions),
+    set [/settings/WEB/server] legacy query auth user agents = (empty).
+  Full Changelog: https://github.com/mickem/nscp/compare/0.12.3...0.12.4
+ReleaseNotesUrl: https://github.com/mickem/nscp/releases/tag/0.12.4
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://nsclient.org/docs/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

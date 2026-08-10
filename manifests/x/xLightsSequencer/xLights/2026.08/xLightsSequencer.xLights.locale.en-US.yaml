@@ -1,0 +1,52 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: xLightsSequencer.xLights
+PackageVersion: '2026.08'
+PackageLocale: en-US
+Publisher: xLightsSequencer
+PublisherUrl: https://github.com/xLightsSequencer/
+PublisherSupportUrl: https://github.com/xLightsSequencer/xLights/issues
+PackageName: xLights
+PackageUrl: https://github.com/xLightsSequencer/xLights
+License: GPL-3.0
+LicenseUrl: https://github.com/xLightsSequencer/xLights/blob/HEAD/License.txt
+ShortDescription: xLights is a free and open source program that enables you to design, create and play amazing lighting displays through the use of DMX controllers, E1.31 Ethernet controllers and more.
+ReleaseNotes: |-
+  2026.08 — May 7, 2026
+  Enhancements
+  - dkulp — When a JobPool worker thread dies from an unhandled C++ exception, the log now records the exception type, what() message, and the in-flight job name instead of just "unknown exception". Helps diagnose render-thread crashes.
+  - agfazio — Add "Also add alias to model" checkbox to the Select Model dialog shown when renaming a missing submodel during sequence load.
+  - charlie — Right-click a timing track → "Search for Lyrics Online..." searches LRCLIB by song title/artist (auto-filled from sequence header) and imports the chosen result's synced .lrc lyrics as a phrase-per-line timing track.
+  - dkulp — macoS: Hook up Apple "Speech Recognizer" to Apple Intelligence to create timing tracks. Really only usable for very clean voice tracks and "Announcement" kind of things.
+  - dkulp — Liquid effect: velocity slider rescaled to allow full use of range instead of just values between 0 and 6 providing visual changes
+  - dkulp — Liquid effect: now frame-rate independent. Sequences imported between different frame rates render visually the same instead of emitting more particles per second at higher frame rates. Flow is now particles-per-second; Warm Up Frames renamed to Warm Up Time (hundredths of a second). Particle solver sub-stepping adapts to the frame rate. Existing sequences migrate automatically using each sequence's stored frame interval.
+  - dkulp — Liquid effect: Flow slider is now non-linear (linear 0-500 to 2000 particles/sec, exponential 500-1000 to 20000 particles/sec) with a sub-frame accumulator so low slider values emit occasionally instead of jumping straight from 0 to a constant stream.
+  - derwin12 — Add duration to lrclib lyric results
+  - derwin12 — Add option to add alias when opening a sequence and missing models were found
+  - derwin12 — Provide option to select which groups to import to when importing from layout
+  - dkulp — Liquid effect: added an Enabled checkbox for particle source 1 (defaults to on)
+  - dkulp — Linux: text rendering switched from wxGraphicsContext (Cairo+Pango) to a portable FreeType+HarfBuzz+Fontconfig backend in src-core/. Text and Shape effects can now render on background threads on Linux (previously forced to the main thread because the wx/Pango stack isn't off-thread safe), parallelizing rendering of sequences with heavy text/emoji content.
+  Bug Fixes
+  - dkulp — Fix House Preview / Model Preview floating panes coming up gray after a perspective load (would only render once manually docked and re-floated). The fix runs the same dock+refloat cycle automatically right after perspective load, preserving the saved float position.
+  - dkulp — Fix status bar stuck showing "Batch Rendering ... ## sequences left to render" after cancelling a batch render or batch check-sequence with Escape.
+  - MrPierreB — Fix house-preview video export producing dark/washed-out colors on Windows and when uploaded to YouTube. Also fixes Windows GPU encoder selection to prefer the correct hardware encoder (NVIDIA, AMD, or Intel) for faster exports.
+  - agfazio — Fix channel numbers not recalculating after deleting a model from the layout.
+  - dkulp — macOS: fix Metal compute-render buffer leak. MetalComputeUtilities was double-retaining MTLBuffer/MTLTexture objects allocated via newBufferWith*/newTextureWithDescriptor: but releasing only once, leaking a reference per render-buffer resize.
+  - dkulp — Fix scrambled rendering of interlaced animated GIFs (Pictures effect, etc.).
+  - dkulp — macOS: process the unselect-effect / choicebook-page-change events synchronously before starting an effect-button drag, instead of posting them async. Posted events were firing inside DoDragDrop's nested event loop, racing with AppKit's NSCoreDragManager and producing a null deref inside NSCoreDragProcessSourceDrag. Suspected cause of the AppKit drag crash.
+  - dkulp — Fix EXC_BAD_ACCESS in MetalRenderBufferComputeData::bufferResized when a model has nodes with zero coordinates. Empty-coord nodes now use the same -1 sentinel as out-of-bounds single-coord nodes instead of dereferencing past end of vector.
+  - derwin12 — Validate values for fadein/fadeout and add check for bad values in Check Sequence (#6297)
+  - derwin12 — Fix Dimensions showing incorrectly in 2D vs 3D (#6294)
+  - derwin12 — Some WMA music files were hard crashing. (#6306)
+  - derwin12 — Restored the missing assets alert (#6276)
+  - derwin12 — Fix in the lua script for batch rendering
+  - derwin12 — Imported sequences placed media in inocrrect folder if sequence was not previously saved
+  - derwin12 — Fix download model search (#6252)
+  - dkulp — Circles effect: GPU (Metal) path was clearing non-circle pixels to (0,0,0,0), wiping the buffer's pre-existing contents. Now leaves background pixels untouched, matching the CPU and ISPC paths.
+  Changes
+  - dkulp — Windows shader effect: GL work now runs on a dedicated worker thread inside GLContextManager instead of being dispatched to the wx UI thread.
+  - dkulp — Render engine cleanup: removed the main-thread effect render queue and all the wx CallAfter / drain plumbing that supported it. No effect now needs main-thread dispatch.
+ReleaseNotesUrl: https://github.com/xLightsSequencer/xLights/releases/tag/2026.08
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

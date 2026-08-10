@@ -1,0 +1,107 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Psychotoxical.Psysonic
+PackageVersion: 1.50.0
+PackageLocale: en-US
+Publisher: Psysonic
+PublisherUrl: https://github.com/Psychotoxical
+PublisherSupportUrl: https://github.com/Psychotoxical/psysonic/issues
+PackageName: Psysonic
+PackageUrl: https://www.psysonic.de/
+License: GPL-3.0
+LicenseUrl: https://github.com/Psychotoxical/psysonic/blob/HEAD/LICENSE
+ShortDescription: Gorgeous, modern desktop client for Navidrome and Subsonic music servers
+Description: A beautiful desktop music player built for Subsonic API compatible servers (Navidrome, Gonic, etc.). Built with Tauri v2 and React, featuring a native Rust/rodio audio engine, community theme store, Last.fm integration, synchronized lyrics, EQ, crossfade, gapless playback, and more.
+Tags:
+- audio
+- music
+- navidrome
+- player
+- subsonic
+ReleaseNotes: |-
+  Added
+  Square corners — sharp-edged cards and covers
+  By @Psychotoxical, PR #1215
+  - New Square Corners toggle under Settings → Appearance → Visual Options → Display overrides the active theme to render cards and cover art with square, non-rounded corners. Covers album, playlist, artist and song cards, detail-page cover art, the Now Playing / Radio and fullscreen views, the cover lightbox, the queue cover, and the mini player. Off by default; buttons, inputs and dialogs keep the theme's corners.
+  Discord community banner
+  By @ImAsra, PR #1222
+  - A dismissible banner inviting you to join the Psysonic community on Discord appears after 20 hours of accumulated app use. Join opens the invite; dismiss it for the session, or choose Never show again to hide it permanently. The icon renders at a consistent size on every platform, including Windows.
+  Bulgarian translation
+  By @akirichev, PR #1228
+  - Full Bulgarian (Български) UI translation — selectable from the language picker on the Settings and Login screens.
+  Artists browse — album vs track credit mode
+  By @cucadmuh, PR #1232
+  - Toggle Album artists vs Track artists on the Artists page — album mode lists indexed album artists; track mode includes performers from the local artist index (featured/guest credits). Star filter works in both modes; the choice persists across app restarts like Show artist images.
+  - Letter bucket filter (A–Z, #, OTHER) runs in local SQL instead of scanning catalog chunks client-side, so late-alphabet picks load promptly on large libraries.
+  - Artist name search no longer depends on query letter case for Cyrillic (and other non-ASCII) names when the local library index is enabled.
+  CLI — relative volume and quieter scripting output
+  By @cucadmuh, PR #1238
+  - psysonic --player volume +5 / volume -10 adjust the current level by that many percent; volume 80 still sets an absolute level (use -q before --player when the delta is negative so it is not parsed as a flag).
+  - CLI invocations no longer print WebKit/NVIDIA workaround notes on stderr; on Linux, remote --player forwarding runs before WebKit startup so helper processes exit with less noise.
+  Theme Store — per-theme changelogs and pinned updates
+  By @Psychotoxical, PR #1240
+  - Each theme card now has an expandable What's new with per-version release notes, so you can see what a theme update changed — including non-visual fixes. Provided by theme authors; themes without notes just don't show the section.
+  - Installed themes with an available update now appear at the top of the store list instead of wherever the sort placed them, so you don't have to hunt for them.
+  Multi-library filter — browse and search across selected libraries
+  By @cucadmuh, PR #1241
+  - The sidebar library picker now supports multi-select with priority ordering: browse, search, genre and album/artist detail views aggregate across the chosen libraries and de-duplicate shared items by priority. Built for large libraries — scoped SQL uses the hot library_id column with covering indexes and FTS-first matching.
+  - Identity matching that powers cross-library de-duplication now normalises names per shipped locale (folds German ß, Norwegian æ, French œ, Romanian ș/ț, and Cyrillic ё/й); CJK titles are matched as-is.
+  - The Genres page and album browse genre filter list the full catalog on large libraries when All libraries is selected.
+  Theme contributors credited in Settings
+  By @Psychotoxical, PR #1248
+  - Settings → System → Contributors now lists community theme authors in a Themes sub-section alongside the App contributors, pulled from the theme store so it stays current as new themes are published.
+  - The theme card What's new now shows just the latest version's notes instead of the full version history.
+  - Theme author names refresh quietly from the store in the background instead of staying stale for up to 12 hours.
+  Fullscreen player — Minimal and Immersive styles
+  By @Psychotoxical, PR #1249
+  - Settings → Appearance → Fullscreen player style lets you choose Minimal (the current view) or Immersive — the earlier fullscreen player, with the artist photo/backdrop, a cover-derived accent colour, and rail or Apple-style scrolling lyrics.
+  - In Immersive, Show artist photo and Photo dimming are configurable; Apple-style lyrics show the artist image as a dimmed full-screen backdrop.
+  Italian translation
+  By @daquino94, PR #1250
+  - Full Italian (Italiano) UI translation — selectable from the language picker on the Settings and Login screens.
+  Fullscreen player — Prism style
+  By @Psychotoxical, PR #1251
+  - A third Fullscreen player style, Prism — a full-bleed artist backdrop with a floating glass lyrics panel on the right and a single glass control bar at the bottom (transport, a centred now-playing pill with an integrated progress line, and utilities). The cover-derived accent colour drives the progress fill and the active lyric line, and upcoming lyric lines fade out with a progressive blur.
+  Lyrics — word-by-word highlighting straight from your server
+  By @Psychotoxical, PR #1265
+  - The Server lyrics source now highlights lyrics word by word, so karaoke sync no longer depends on the third-party YouLyPlus backend. Requires Navidrome 0.63 or newer and lyrics that carry word timing (TTML or Enhanced LRC); anything else keeps highlighting line by line.
+  - Settings → Lyrics → Lyrics Sources spells out those requirements, and the block now follows the standard settings sub-card layout.
+  - Embedded Enhanced LRC no longer prints raw word timing codes (<00:12.34>) in the lyric text — those codes drive word-by-word highlighting instead.
+  - FLAC, Ogg Vorbis, Opus and Speex files that store synced lyrics in the SYNCEDLYRICS tag show embedded lyrics again, with that tag taking priority over the plain LYRICS tag.
+  Start minimized to tray
+  By @cucadmuh, PR #1271
+  - New Start Minimized to Tray toggle under Settings → System → Behavior. When enabled, the next cold start keeps the main window hidden and Psysonic runs from the system tray until you show it from the tray icon.
+  - Requires Show Tray Icon (turning this on enables the tray automatically; hiding the tray clears the setting). The choice applies on the next launch only — toggling it in Settings does not hide the window immediately.
+  - Opening the main window from the tray after a cold start renders the sidebar and main content immediately — including on Linux tiling WMs such as Hyprland — instead of leaving the sidebar or Mainstage invisible or blank until a restart.
+  Navidrome public share links — open and play without logging in
+  By @cucadmuh, PR #1275
+  - Paste or search a Navidrome public share URL (/share/{id}) to preview the shared track list in a modal, then play the full queue with no server account — direct stream and cover URLs are resolved anonymously from the share page.
+  - Share playback uses a dedicated scope so an idle server play-queue pull cannot replace the share queue while you are also logged into Navidrome. Share sessions are not restored after an app restart — the server play queue applies as usual.
+  - While a share queue is active, Save Playlist is hidden in the queue toolbar (share tracks cannot be saved to the server); Load Playlist stays available. The queue Share button copies the original Navidrome /share/{id} page URL.
+  Track lists — optional album cover thumbnails
+  By @cucadmuh, PR #1280
+  - Browse and queue track rows can show the track's album cover (per-disc art when the album has distinct disc covers). Covers load through the standard cover cache pipeline — library resolve, viewport ensure, Rust resize to disk tiers — not a separate warm path.
+  - Settings → Appearance adds separate toggles for queue vs browse tracklists. Favorites, playlist, and album-detail track grids gain a flex-resize handle on the title column when covers are shown.
+  - Album detail pages skip per-row cover thumbs when the album art is already shown above the list — no duplicate image on every line.
+  Discord — server cover art source, without the credential leak
+  By @Psychotoxical, PR #1299
+  - Settings → Integrations → Discord → Cover art source gets a Server option, alongside None and Apple Music. It resolves artwork through the standard Subsonic getAlbumInfo2 endpoint's public image link — never an authenticated cover URL that could expose your login credentials (reported by lavioso on Discord). Needs a publicly reachable server; anyone viewing your Discord profile can see that server's public address, but nothing else.
+  Playlist cards — play and queue from the right-click menu
+  By @Psychotoxical, PR #1307
+  - Right-clicking a playlist card now offers Play next and Add to queue alongside Play now, matching the album card. All three honour offline mode and the active multi-library filter.
+  Playlists browse — scoped header search
+  By @cucadmuh, PR #1308
+  - The header search field on the Playlists page now filters the list by playlist name (same scoped badge pattern as Artists / Albums), including in folder view.
+  Artist page — add the whole discography to the queue
+  By @Psychotoxical, PR #1321
+  - A new queue button on the artist page appends the artist's entire discography to the current queue in one click, next to Play all and Shuffle — matching what album pages already offer.
+  Changed
+  Frontend restructure — feature-folder architecture and hardening
+  By @Psychotoxical, with additional architecture by @cucadmuh, PR #1225
+  - Reorganised the frontend into a feature-folder architecture with a CI-enforced layering guard, added unit + behavior-scenario + boot-smoke test coverage, and introduced a compile-time frontend/backend IPC contract via tauri-specta. Internal only — no change to how the app looks or behaves.
+  Typed-IPC contract — completed the tauri-specta cutover
+  By @Psychotoxical, with additional architecture by @cucadmuh, PR #1230
+ReleaseNotesUrl: https://github.com/Psychotoxical/psysonic/releases/tag/app-v1.50.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

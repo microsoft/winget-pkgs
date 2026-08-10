@@ -1,0 +1,70 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: PostgreSQL.pgAdmin
+PackageVersion: "9.17"
+PackageLocale: en-US
+Publisher: The pgAdmin Development Team
+PublisherUrl: https://www.pgadmin.org/
+PublisherSupportUrl: https://www.pgadmin.org/support/
+PrivacyUrl: https://www.pgadmin.org/privacy_policy/
+Author: The pgAdmin Development Team
+PackageName: pgAdmin 4
+PackageUrl: https://www.pgadmin.org/download/pgadmin-4-windows/
+License: PostgreSQL
+LicenseUrl: https://www.pgadmin.org/licence/
+Copyright: Copyright © 1996-2026 The PostgreSQL Global Development Group
+CopyrightUrl: https://www.postgresql.org/about/policies/trademarks/
+ShortDescription: Open Source administration and development platform for PostgreSQL
+Description: |-
+  pgAdmin is designed to answer the needs of all users, from writing simple SQL queries to developing complex databases.
+  The graphical interface supports all PostgreSQL features and makes administration easy.
+  The application also includes a syntax highlighting SQL editor, a server-side code editor, an SQL/batch/shell job scheduling agent, support for the Slony-I replication engine and much more.
+  Server connection may be made using TCP/IP or Unix Domain Sockets (on *nix platforms), and may be SSL encrypted for security.
+  No additional drivers are required to communicate with the database server.
+Moniker: pgadmin
+Tags:
+- pgsql
+- postgres
+- postgresql
+- sql
+ReleaseNotes: |-
+  The pgAdmin Development Team is pleased to announce the release of pgAdmin 4 version 9.17. This release of pgAdmin 4 includes 28 bug fixes and new features, including fixes for seven security vulnerabilities (CVE-2026-17346 through CVE-2026-17351, and CVE-2026-17566). For more details, please see the release notes.
+  pgAdmin is the leading open-source graphical management tool for PostgreSQL. For more information, please see the website.
+  Notable changes in this release include:
+  Features:
+  - Include the authenticated user's identity in the HTTP access log.
+  - Add an opt-in Gateway API HTTPRoute template to the Helm chart as an alternative to the existing Ingress.
+  - Add a preference to cap the row count fetched by the plain "View Data" action, so it is usable on large tables without always doing a full SELECT *.
+  - Add support for a custom XYZ tile provider (URL, name, CRS, attribution, max zoom) in the Geometry Viewer, alongside the existing built-in base layers.
+  Security Fixes:
+  - Fix a tool-permission bypass where a user denied the Query Tool, Grant Wizard, or Schema Diff permission could still drive that tool's backend routes and Socket.IO handlers directly, since the permission check was applied only to a single "front door" route per tool. Also fixes a non-owner triggering an adhoc connection against another user's shared server persisting a new server record still owned by that other user (CVE-2026-17350).
+  - Fix OS command injection in the MASTER_PASSWORD_HOOK feature, where an externally-sourced username (e.g. via OAuth2/OIDC, Kerberos, or webserver authentication) containing shell metacharacters could execute arbitrary commands as the pgAdmin service account when the configured hook string uses %u (CVE-2026-17347).
+  - Fix a lexer-differential bypass of the AI Assistant's read-only transaction guard, where sqlparse's string-literal lexing disagreed with PostgreSQL's own parser under standard_conforming_strings = on, letting a crafted multi-statement payload smuggle a COMMIT past the intended read-only wrapper; an incomplete fix for CVE-2026-12045 (CVE-2026-17351).
+  - Fix SQL injection in the Index Statistics all-indexes listing and the Publications/Subscriptions Dependencies views, where an apostrophe in a table, index, publication, or subscription name broke out of an unescaped template interpolation; an incomplete fix for CVE-2026-12044 (CVE-2026-17346).
+  - Fix several Constraints, Preferences, Debugger, and Schema Diff routes missing the @pga_login_required decorator, making them reachable without authentication in server mode; an incomplete fix for CVE-2026-12046 (CVE-2026-17348).
+  - Fix an adhoc server connection cloning another user's stored database credentials (password, save password flag, tunnel password) alongside ownership, letting a non-owner who cloned another user's shared server connect using that user's saved database password (CVE-2026-17349).
+  - Fix OS command injection in the Import/Export Data tool, where a query-based export could pass a crafted query string past the \copy (...) parenthesis-balance guard by exploiting a backslash-escape mismatch with psql's default standard_conforming_strings = on behaviour, exposing a live TO PROGRAM clause for arbitrary command execution (CVE-2026-17566).
+  Bugs/Housekeeping:
+  - Fix Schema Diff's "Generate Script" and the browser tree's CREATE Script view emitting wrong SQL for SERIAL/identity columns, by detecting column-owned sequences via pg_depend instead of guessing the sequence name.
+  - Fix ALT+F5 ("Execute query at cursor") doing nothing when the cursor is on or near a statement that is not highlighted, in a Query Tool tab with multiple statements separated by blank lines.
+  - Fix the object browser's extension UI breaking under PostgreSQL 19's extension catalog changes.
+  - Detect a selected-but-unusable OS keyring and fall back gracefully instead of failing.
+  - Warn when OAuth2 provider settings are misplaced at the top level of the config instead of under OAUTH2_CONFIG.
+  - Honor the selected EOL sequence when copying query text to the clipboard.
+  - Fix a Schema Diff result-status filter chip showing "No difference found" after being toggled off and back on, even when real differences exist.
+  - Fix the Object Explorer briefly showing literal HTML markup instead of a greyed-out "[Disconnecting...]" label when disconnecting a server or database.
+  - Centralize shared-server-group visibility and access-control logic, and adjust the ServerGroup-to-Server/SharedServer model relationships.
+  - Fail the macOS appbundle build if any bundled library links outside the bundle, and scan all Mach-O binaries for bundle linkage.
+  - Pin the sonarqube-scan-action GitHub workflow to a full commit SHA, and pin the Yarn version used by the build scripts to the packageManager field.
+  - Bump JavaScript and Python third-party dependencies, including axios, webpack, react, electron, and certifi.
+  - Update the Simplified Chinese (zh_Hans_CN) translation.
+  Builds for Windows and macOS are available now, along with a Python Wheel, Docker Container, RPM, DEB Package, and source code tarball from the download area.
+ReleaseNotesUrl: https://www.pgadmin.org/docs/pgadmin4/9.17/release_notes_9_17.html
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://www.pgadmin.org/docs/
+- DocumentLabel: FAQ
+  DocumentUrl: https://www.pgadmin.org/faq/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
