@@ -176,7 +176,7 @@ This step checks for:
 - Declaring a dependency on a package or version that does not exist in the catalog.
 - Removing a package that is listed as a dependency by one or more other packages.
 
-**How to fix:** If the failure is a `DisplayVersion` overlap, review the [AppsAndFeaturesEntries guidance](Authoring.md#appsandfeaturesentrieswhen-is-appsandfeaturesentries-needed) and ensure `DisplayVersion` accurately reflects what the installer writes to the registry.
+**How to fix:** If the failure is a `DisplayVersion` overlap, review the AppsAndFeaturesEntries guidance in [Authoring.md](Authoring.md) and ensure `DisplayVersion` accurately reflects what the installer writes to the registry.
 
 **Labels applied on review:** `Manifest-AppsAndFeaturesVersion-Error`
 
@@ -240,7 +240,7 @@ This step downloads the installer and runs it in an isolated environment as a **
 - Wrong `InstallerType` — use `nullsoft`, `inno`, `burn`, or `wix` instead of generic `exe` when applicable, so WinGet can pass the correct silent switches.
 - Missing or incorrect `InstallerSwitches` for `Silent` or `SilentWithProgress`.
 - Installer requires elevation but `ElevationRequirement` is not set.
-- A required dependency (runtime, framework, VC++ redistributable) is not present in the test environment.
+- A required dependency (runtime, framework, VC++ runtime package) is not present in the test environment.
 - The installer is a portable executable that should use `InstallerType: portable` instead of `exe`.
 - The installer triggers a UAC prompt that cannot be accepted in the automated environment.
 
