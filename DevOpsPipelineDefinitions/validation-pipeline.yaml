@@ -54,50 +54,10 @@ extends:
           fetchDepth: 0
           fetchTags: false
 
-        # Roll back agent to 2.76, see issue https://github.com/Azure/azure-cli/issues/32088#issuecomment-3283886207
-        # NOTE: Remove the next 3 steps once issue is fixed.
-        - powershell: |
-            Start-Process msiexec -ArgumentList ' /x {37CCEB8D-306A-4DB4-B25B-7608A093D184} /qn' -NoNewWindow -Wait
-          displayName: "Uninstall Azure CLI"
-
-        - powershell: |
-            Invoke-WebRequest -Uri "https://azurecliprod.blob.core.windows.net/msi/azure-cli-2.76.0-x64.msi" -OutFile "azure-cli-2.76.0.msi"
-            Start-Process msiexec -ArgumentList '/i "azure-cli-2.76.0.msi" /quiet /norestart' -NoNewWindow -Wait
-          displayName: "Install Azure CLI 2.76.0"
-          workingDirectory: $(Agent.TempDirectory)
-
-        - script: |
-            az version
-          displayName: "Check Azure CLI version"
-
-        # Downloads all the setup files and its dependencies.
-        - task: AzureCLI@2
-          displayName: 'Azure Setup'
-          inputs:
-            azureSubscription: '$(WinGetSvc.DataAccess)'
-            scriptType: batch
-            scriptLocation: inlineScript
-            inlineScript: |
-              az storage blob download-batch --auth-mode login -d . --pattern * -s servicewrapper --output none --account-name $(ValidationStorageAccountName)
-            addSpnToEnvironment: true
-
-        - task: CmdLine@2
-          name: 'wingetsetup'
-          displayName: 'WinGet Setup'
-          env:
-            HOST_KEY: $(AzureFunctionHostKey)
-            SMART_SCREEN_ENDPOINT: $(AzFuncSmartScreenEndpoint)
-            DOMAIN_URLS_VALIDATION_ENDPOINT: $(AzFuncDomainUrlValEndpoint)
-            MANIFEST_POLICY_ENDPOINT: $(AzFuncManifestPolicyEndpoint)
-            SCAN_ENDPOINT: $(AzFuncScanEndpoint)
-            INSTALLATION_ENDPOINT: $(AzFuncInstallationVerificationEndpoint)
-            LABEL_ENDPOINT: $(AzFuncSetLabelOnPullRequestEndpoint)
-            LABEL_KEY: $(AzureFunctionLabelKey)
-            CATALOG_CONTENT_VERIFICATION_ENDPOINT: $(AzFuncCatalogContentVerificationEndpoint)
-            INSTALLER_METADATA_VALIDATION_ENDPOINT: $(AzFuncInstallerMetadataValidationEndpoint)
-          inputs:
-            script: 'winget_validation_setup.cmd'
-            workingDirectory: scripts
+        # Downloads dependencies and publishes the pipeline secrets.
+        - template: /DevOpsPipelineDefinitions/templates/winget-setup.yaml@self
+          parameters:
+            type: Validation
 
         # Validates integrity of pull request.
         - task: AzureCLI@2
@@ -113,7 +73,6 @@ extends:
           env:
             ValidationStorageAccountName: $(ValidationStorageAccountName)
             CacheStorageAccountName: $(CacheStorageAccountName)
-            StorageManagedIdentityClientId: $(StorageManagedIdentityClientId)
             WinGet:AppConfig:PrimaryEndpoint: $(AppConfigPrimaryEndpoint)
             WinGet:AppConfig:SecondaryEndpoint: $(AppConfigSecondaryEndpoint)
             DIApplicationInsightKey: $(DIApplicationInsightKey)
@@ -133,7 +92,6 @@ extends:
           env:
             ValidationStorageAccountName: $(ValidationStorageAccountName)
             CacheStorageAccountName: $(CacheStorageAccountName)
-            StorageManagedIdentityClientId: $(StorageManagedIdentityClientId)
             WinGet:AppConfig:PrimaryEndpoint: $(AppConfigPrimaryEndpoint)
             WinGet:AppConfig:SecondaryEndpoint: $(AppConfigSecondaryEndpoint)
             DIApplicationInsightKey: $(DIApplicationInsightKey)
