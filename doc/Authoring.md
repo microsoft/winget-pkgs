@@ -44,7 +44,7 @@ Before creating and submitting a manifest, check if the package already exists:
 
 Review the [Manifest Specification]. If the process seems complex, you can create a new issue and select [Package Request/Submission 👀](https://github.com/microsoft/winget-pkgs/issues/new/choose).
 
-Manifests submitted to this repository should be multi-file manifests. The minimum required files are:
+Manifests submitted to this repository must be multi-file manifests. The minimum required files are:
 - A [version][versionSchema] file
 - A [defaultLocale][defaultLocaleSchema] file
 - An [installer][installerSchema] file
@@ -86,6 +86,8 @@ If you manually edit the YAML, validate your manifest using the following comman
 ```powershell
 winget validate --manifest <Path to manifest>
 ```
+
+When you submit a PR, a **GitHub App** automatically runs the [Validation Pipeline](Validation.md) on your manifest and installers, reporting results directly on the PR. For a detailed description of each step and how to resolve failures, see the [Validation](Validation.md) and [Validation Failure Guide](ValidationFailureGuide.md) documents.
 
 ## Testing
 
