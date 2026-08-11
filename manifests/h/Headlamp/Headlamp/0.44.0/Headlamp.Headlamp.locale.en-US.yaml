@@ -1,0 +1,76 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Headlamp.Headlamp
+PackageVersion: 0.44.0
+PackageLocale: en-US
+Publisher: Headlamp
+PublisherUrl: https://headlamp.dev/
+PublisherSupportUrl: https://github.com/kubernetes-sigs/headlamp/issues
+PackageName: Headlamp
+PackageUrl: https://github.com/kubernetes-sigs/headlamp
+License: Apache-2.0
+LicenseUrl: https://github.com/kubernetes-sigs/headlamp/blob/HEAD/LICENSE
+ShortDescription: Kubernetes web UI.
+Description: A Kubernetes web UI that is fully-featured, user-friendly and extensible.
+Tags:
+- cncf
+- dashboard
+- headlamp
+- kinvolk
+- kubernetes
+- logging
+- monitoring
+- plugins
+- ui
+- web
+ReleaseNotes: |-
+  Need for speed! 🏎️ 💨  Headlamp 0.44.0 extends practical cluster support beyond 30,000 pods. Resource Map remains usable at this scale, Pod lists fetch 1,000 items at a time, Cluster Overview avoids unbounded watch traffic, and Brotli pre-compression reduces typical JavaScript and CSS transfers by 75-80% and server load for compression to 0%. Got dozens of clusters? Headlamp doesn't try to connect to all of them at startup anymore (potentially opening several browser login windows). Four new structured forms cover DaemonSets, CronJobs, Jobs, and ReplicaSets, while ConfigMap binaryData, ServiceAccount permission visibility, Gateway API v1.5.1, and new plugin controls expand day-to-day capabilities. The release includes 99+ bug fixes, including protections against white-screen startup failures when developing Headlamp on Windows, more accurate workload health reporting, stable large-manifest editing on large busy clusters, and actionable cluster connection errors. Accessibility work restores macOS zoom, improves WCAG AA contrast in a few spots, and broadens automated a11y checks. Security and documentation updates add github cosign of release checksums, safer redirects, tested in-cluster kubeconfig examples, and ready-to-use MCP configurations.
+  These changes were contributed by over 100+ people. Thanks! 🎉
+  ⚡ Performance
+  ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┬─────────────────────────────────────────────────────────────────────────────────────────────
+  ResourceMap performance improved with iterative BFS, graph simplification, and incremental WebSocket updates — 59% faster initial load and 86% faster updates at 2,000 pods, and clusters with 20,000+ pods are now usable where they previously crashed the browser.│Thanks to @illume. Also thanks to @itpick for reporting the issue. #4991
+  ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────────
+  Cluster overview now polls pod, node, and event data every minute instead of using persistent watch streams, preventing browser OOMs on large clusters.                                                                                                              │Thanks to @Aamod007. Also thanks to @lucas-jackson for reporting the issue. #6021
+  ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────────
+  Optimized sidebar rendering to eliminate UI lag and main thread blocking caused by unnecessary DOM nodes and layout thrashing during CSS transitions.                                                                                                                │Thanks to @Psykii22. #6233
+  ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────────
+  Frontend and plugin static assets are now precompressed with Brotli and served as .br sidecars — JS/CSS bundles are 75–80% smaller over the wire, WASM assets ~60% smaller, and runtime CPU compression overhead drops to zero.                                      │Thanks to @illume. #6004
+  ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────────
+  Fixed a memory leak where Backstage receiver event listeners accumulated on each remount of the Home component, improving stability during navigation.                                                                                                               │Thanks to @Rohith-Saran. #5775
+  ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────────
+  Fixed unbounded memory growth in OIDC login by evicting abandoned state tokens that were never cleaned up when users left the login flow.                                                                                                                            │Thanks to @ayushmaan-16. #5866
+  ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────────
+  Reduced per-message memory allocations in the WebSocket multiplexer hot path by replacing reflection-based decoding and fmt.Sprintf with typed structs and string concatenation.                                                                                     │Thanks to @Slambot01. #6294
+  ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────────
+  Reduced memory allocations in the k8cache hot path by checking error status before marshalling and replacing fmt.Sprintf with string concatenation, improving cache performance.                                                                                     │Thanks to @Slambot01. #6420
+  ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────────
+  Replaced repeated linear metrics searches with a memoized namespace/name-keyed Map in the Pod List, reducing CPU overhead during metric lookups.                                                                                                                     │Thanks to @skools-here. #6011
+  ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────────
+  Added pagination to the Pods list with a 1000-item budget and a load-more button, preventing out-of-memory crashes on clusters with tens of thousands of pods.                                                                                                       │Thanks to @drewbailey. #5660
+  ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┴─────────────────────────────────────────────────────────────────────────────────────────────
+
+  ResourceMap performance improved with iterative BFS, graph simplification, and incremental WebSocket updates.
+  20,000+ pods — all operations under 37ms, where previously the browser would crash:
+
+  Added pagination to the Pods list with a 1,000-item budget and a load-more button, preventing out-of-memory crashes on clusters with tens of thousands of pods.
+
+  📱 Mobile
+  A mobile audit was done, and a number of improvements were made.
+  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┬────────────────────────────────
+  Tables now hide least-important columns first on narrow viewports instead of squashing them, keeping visible data readable at high zoom levels.                        │Thanks to @skoeva. #6468
+  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼────────────────────────────────
+  Fixed several mobile UI issues including overflow-menu, dialog, terminal, editor, and temporary-sidebar behaviour, making the interface more reliable on small screens.│Thanks to @illume. #5739
+  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┴────────────────────────────────
+
+  Tables now hide least-important columns first on narrow viewports instead of squashing them.
+
+  Mobile overflow menus and terminal dialogs now use the available screen space more effectively.
+
+  ✨ Enhancements (part 1 of 2)
+ReleaseNotesUrl: https://github.com/kubernetes-sigs/headlamp/releases/tag/v0.44.0
+Documentations:
+- DocumentLabel: Headlamp Documentation
+  DocumentUrl: https://headlamp.dev/docs/latest
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

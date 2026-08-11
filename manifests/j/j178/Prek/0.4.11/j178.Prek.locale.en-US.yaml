@@ -1,0 +1,115 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: j178.Prek
+PackageVersion: 0.4.11
+PackageLocale: en-US
+Publisher: j178
+PublisherUrl: https://github.com/j178
+PublisherSupportUrl: https://github.com/j178/prek/issues
+Author: j178
+PackageName: Prek
+PackageUrl: https://github.com/j178/prek
+License: MIT
+LicenseUrl: https://github.com/j178/prek/blob/HEAD/LICENSE
+ShortDescription: ⚡ Better `pre-commit`, re-engineered in Rust
+Moniker: prek
+Tags:
+- git
+- git-hooks
+- pre-commit
+- prek
+ReleaseNotes: |-
+  Release Notes
+  Released on 2026-07-25.
+  Highlights
+  - This release adds two new builtin hooks, deny-pattern and require-pattern,
+    as native alternatives for pygrep use cases. deny-pattern fails when a
+    configured pattern is found, while require-pattern ensures every selected
+    file contains a match. By matching natively without spawning a Python
+    subprocess, they run over 4x faster than pygrep in benchmarks. Note that
+    they use
+    Rust regex syntax, which does
+    not support look-around features such as negative lookbehind.
+  - prek run now supports --glob <PATTERN> to run hooks on tracked files
+    matching a glob. It can be repeated or combined with --files and
+    --directory.
+  - Hook priorities now support reusable aliases:
+    [priorities]
+    checks = 10
+    [[repos]]
+    repo = "builtin"
+    hooks = [
+      { id = "check-json", priority = "checks" },
+      { id = "check-yaml", priority = "checks" },
+    ]
+    This makes parallel scheduling easier to read and maintain.
+  Enhancements
+  - Add deny-pattern and require-pattern builtin hooks (#2359)
+  - Support --glob patterns in prek run (#2381)
+  - Support reusable aliases for hook priorities (#2331)
+  - Implement requirements-txt-fixer as a builtin hook (#2390)
+  - Improve user-facing warnings and errors (#2380)
+  - Install Node hooks through git url (#2394)
+  Performance
+  - Reduce blocking-pool overhead in file hooks (#2384)
+  - Speed up mixed-line-ending scans with memchr2 (#2391)
+  Bug fixes
+  - Honor filenames in builtin hook entry and args (#2389)
+  - Match identify tags across filename parts (#2399)
+  - Preserve hook output order with a shared pipe (#2385)
+  - Preserve system download policy when applying metadata (#2395)
+  Contributors
+  - @j178
+  - @chrisoro
+  Install prek 0.4.11
+  Install prebuilt binaries via shell script
+  curl --proto '=https' --tlsv1.2 -LsSf https://github.com/j178/prek/releases/download/v0.4.11/prek-installer.sh | sh
+  Install prebuilt binaries via powershell script
+  powershell -ExecutionPolicy Bypass -c "irm https://github.com/j178/prek/releases/download/v0.4.11/prek-installer.ps1 | iex"
+  Install prebuilt binaries via Homebrew
+  brew install prek
+  Download prek 0.4.11
+  ───────────────────────────────────────────────┬────────────────────────────┬─────────────
+  File                                           │Platform                    │Checksum
+  ───────────────────────────────────────────────┼────────────────────────────┼─────────────
+  prek-aarch64-apple-darwin.tar.gz               │Apple Silicon macOS         │checksum
+  ───────────────────────────────────────────────┼────────────────────────────┼─────────────
+  prek-x86_64-apple-darwin.tar.gz                │Intel macOS                 │checksum
+  ───────────────────────────────────────────────┼────────────────────────────┼─────────────
+  prek-aarch64-pc-windows-msvc.zip               │ARM64 Windows               │checksum
+  ───────────────────────────────────────────────┼────────────────────────────┼─────────────
+  prek-i686-pc-windows-msvc.zip                  │x86 Windows                 │checksum
+  ───────────────────────────────────────────────┼────────────────────────────┼─────────────
+  prek-x86_64-pc-windows-msvc.zip                │x64 Windows                 │checksum
+  ───────────────────────────────────────────────┼────────────────────────────┼─────────────
+  prek-aarch64-unknown-linux-gnu.tar.gz          │ARM64 Linux                 │checksum
+  ───────────────────────────────────────────────┼────────────────────────────┼─────────────
+  prek-i686-unknown-linux-gnu.tar.gz             │x86 Linux                   │checksum
+  ───────────────────────────────────────────────┼────────────────────────────┼─────────────
+  prek-riscv64gc-unknown-linux-gnu.tar.gz        │RISCV Linux                 │checksum
+  ───────────────────────────────────────────────┼────────────────────────────┼─────────────
+  prek-s390x-unknown-linux-gnu.tar.gz            │S390x Linux                 │checksum
+  ───────────────────────────────────────────────┼────────────────────────────┼─────────────
+  prek-x86_64-unknown-linux-gnu.tar.gz           │x64 Linux                   │checksum
+  ───────────────────────────────────────────────┼────────────────────────────┼─────────────
+  prek-armv7-unknown-linux-gnueabihf.tar.gz      │ARMv7 Linux                 │checksum
+  ───────────────────────────────────────────────┼────────────────────────────┼─────────────
+  prek-aarch64-unknown-linux-musl.tar.gz         │ARM64 MUSL Linux            │checksum
+  ───────────────────────────────────────────────┼────────────────────────────┼─────────────
+  prek-i686-unknown-linux-musl.tar.gz            │x86 MUSL Linux              │checksum
+  ───────────────────────────────────────────────┼────────────────────────────┼─────────────
+  prek-x86_64-unknown-linux-musl.tar.gz          │x64 MUSL Linux              │checksum
+  ───────────────────────────────────────────────┼────────────────────────────┼─────────────
+  prek-arm-unknown-linux-musleabihf.tar.gz       │ARMv6 MUSL Linux (Hardfloat)│checksum
+  ───────────────────────────────────────────────┼────────────────────────────┼─────────────
+  prek-armv7-unknown-linux-musleabihf.tar.gz     │ARMv7 MUSL Linux            │checksum
+  ───────────────────────────────────────────────┴────────────────────────────┴─────────────
+  Verifying GitHub Artifact Attestations
+  The artifacts in this release have attestations generated with GitHub Artifact Attestations. These can be verified by using the GitHub CLI:
+  gh attestation verify <file-path of downloaded artifact> --repo j178/prek
+  You can also download the attestation from GitHub and verify against that directly:
+  gh attestation verify <file-path of downloaded artifact> --bundle <file-path of downloaded attestation>
+ReleaseNotesUrl: https://github.com/j178/prek/releases/tag/v0.4.11
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

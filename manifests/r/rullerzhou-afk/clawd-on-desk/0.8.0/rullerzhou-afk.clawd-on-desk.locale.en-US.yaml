@@ -1,0 +1,116 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: rullerzhou-afk.clawd-on-desk
+PackageVersion: 0.8.0
+PackageLocale: en-US
+Publisher: rullerzhou-afk
+PublisherUrl: https://github.com/rullerzhou-afk
+PublisherSupportUrl: https://github.com/rullerzhou-afk/clawd-on-desk/issues
+PackageName: Clawd on Desk
+PackageUrl: https://github.com/rullerzhou-afk/clawd-on-desk
+License: MIT
+LicenseUrl: https://github.com/rullerzhou-afk/clawd-on-desk/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 rullerzhou-afk
+ShortDescription: A pixel desktop pet that watches Claude Code, Codex, Cursor & other AI coding agents — so you don't have to.
+Description: |-
+  Clawd lives on your desktop and reacts to what your AI coding agent is doing — in real time. Start a long task, walk away, come back when the crab tells you it's done.
+  Thinking when you prompt, typing when tools run, juggling subagents, reviewing permissions, celebrating when tasks complete, sleeping when you step away. Ships with two built-in themes: Clawd (pixel crab) and Calico (三花猫), with full support for custom themes.
+  Supports Windows 11, macOS, and Ubuntu/Linux. Requires Node.js. Works with Claude Code, Codex CLI, Copilot CLI, Gemini CLI, Cursor Agent, CodeBuddy, Kiro CLI, and opencode.
+  Features
+  Multi-Agent Support
+  - Claude Code — full integration via command hooks + HTTP permission hooks
+  - Codex CLI — automatic JSONL log polling (~/.codex/sessions/), no configuration needed
+  - Copilot CLI — command hooks via ~/.copilot/hooks/hooks.json
+  - Gemini CLI — command hooks via ~/.gemini/settings.json (registered automatically when Clawd starts, or run npm run install:gemini-hooks)
+  - Cursor Agent — Cursor IDE hooks in ~/.cursor/hooks.json (registered automatically when Clawd starts, or run npm run install:cursor-hooks)
+  - CodeBuddy — Claude Code-compatible command hooks + HTTP permission hooks via ~/.codebuddy/settings.json (registered automatically when Clawd starts, or run node hooks/codebuddy-install.js)
+  - Kiro CLI — command hooks injected into custom agent configs under ~/.kiro/agents/, plus an auto-created clawd agent that is re-synced from Kiro's built-in kiro_default whenever Clawd starts, so you can opt into hooks with minimal behavior drift via kiro-cli --agent clawd or /agent swap clawd (registered automatically when Clawd starts, or run npm run install:kiro-hooks). State hooks have been verified on macOS.
+  - opencode — plugin integration via ~/.config/opencode/opencode.json (registered automatically when Clawd starts); zero-latency event streaming, permission bubbles with Allow/Always/Deny, and building animations when parallel subagents are spawned via the task tool
+  - Multi-agent coexistence — run all agents simultaneously; Clawd tracks each session independently
+  Animations & Interaction
+  - Real-time state awareness — agent hooks and log polling drive Clawd's animations automatically
+  - 12 animated states — idle, thinking, typing, building, juggling, conducting, error, happy, notification, sweeping, carrying, sleeping
+  - Eye tracking — Clawd follows your cursor in idle state, with body lean and shadow stretch
+  - Sleep sequence — yawning, dozing, collapsing, sleeping after 60s idle; mouse movement triggers a startled wake-up animation
+  - Click reactions — double-click for a poke, 4 clicks for a flail
+  - Drag from any state — grab Clawd anytime (Pointer Capture prevents fast-flick drops), release to resume
+  - Mini mode — drag to right edge or right-click "Mini Mode"; Clawd hides at screen edge with peek-on-hover, mini alerts/celebrations, and parabolic jump transitions
+  Permission Bubble
+  - In-app permission review — when Claude Code, CodeBuddy, or opencode request tool permissions, Clawd pops a floating bubble card instead of waiting in the terminal
+  - Allow / deny / agent-native extras — one-click approve or reject, plus permission rules / Always actions when the source agent supports them
+  - Global hotkeys — Ctrl+Shift+Y to Allow, Ctrl+Shift+N to Deny the latest permission bubble (only registered while bubbles are visible)
+  - Stacking layout — multiple permission requests stack upward from the bottom-right corner
+  - Auto-dismiss — if you answer in the terminal first, the bubble disappears automatically
+  - Per-agent toggle — open Settings… → Agents, pick an agent, and turn off Show pop-up bubbles to keep prompts in that agent's own terminal/TUI
+  Session Intelligence
+  - Multi-session tracking — sessions across all agents resolve to the highest-priority state
+  - Subagent awareness — juggling for 1 subagent, conducting for 2+
+  - Terminal focus — right-click Clawd → Sessions menu to jump to a specific session's terminal window; notification/attention states auto-focus the relevant terminal
+  - Process liveness detection — detects crashed/exited supported agent processes and cleans up orphan sessions
+  - Startup recovery — if Clawd restarts while any supported agent is still running, it stays awake instead of falling asleep
+  System
+  - Click-through — transparent areas pass clicks to windows below; only Clawd's body is interactive
+  - Position memory — Clawd remembers where you left it across restarts (including mini mode)
+  - Single instance lock — prevents duplicate Clawd windows
+  - Auto-start — Claude Code's SessionStart hook can launch Clawd automatically if it's not running
+  - Do Not Disturb — right-click or tray menu to enter sleep mode; all hook events are silenced until you wake Clawd. Permission bubbles are suppressed during DND — opencode falls back to its built-in TUI prompt, while Claude Code and CodeBuddy fall back to their built-in permission flow
+  - Sound effects — short audio cues on task completion and permission requests (toggle via right-click menu; 10s cooldown, auto-muted during DND)
+  - System tray — resize (S/M/L), DND mode, language switch, auto-start, check for updates
+  - i18n — English, Chinese, and Korean UI; switch via right-click menu or tray
+  - Auto-update — checks GitHub releases; Windows installs NSIS updates on quit, macOS/Linux git pull + restart when running from a cloned repo
+Tags:
+- claude-code
+- codebuddy
+- codex
+- copilot-cli
+- cursor
+- desktop-pet
+- gemini-cli
+- kiro
+- opencode
+ReleaseNotes: |-
+  v0.8.0
+  New Features
+  - Telegram remote approval - Approve Claude Code / CodeBuddy / Codex / Pi permission requests from your phone via a Telegram bot. New Settings → Remote Approval tab covers bot token entry, recipient pairing, sidecar status, and a manual test send. Local approval bubbles remain the primary surface; Telegram is an opt-in remote channel that falls back gracefully when offline, disabled, or under Do Not Disturb. Full guide at docs/guides/telegram-approval.md.
+  - Pinned sidecar binary distribution - The Telegram approval sidecar (cc-connect-clawd) is now fetched from a pinned GitHub release tag with sha256 checksum verification. Both source launches (npm start) and packaged builds use the same pinned per-platform binaries. Windows x64, Windows arm64, macOS x64, macOS arm64, and Linux x64 are covered.
+  - Refreshed Clawd thinking animation - New thinking bubble (v25) with softer edge-flow pixels and a regenerated GIF preview.
+  - Normalized agent icons - All twelve agent icons (claude-code, codex, copilot-cli, cursor-agent, gemini-cli, hermes, kimi-cli, codebuddy, opencode, openclaw, pi, kiro-cli) are now exported at a consistent 64×64 PNG runtime spec with sources tracked under assets/source/agent-icons/ and a stable manifest hash.
+  Bug Fixes
+  - Remote SSH Windows node resolution (#293) - Fixed node binary detection and SSH probe / hook timeouts when deploying from a Windows host. Added a dedicated remote-ssh-node module and tightened hook resolution edge cases.
+  - Windows Terminal focus startup race - Settings window no longer steals the foreground Windows Terminal HWND during the startup window; focus reports are now gated by hook event whitelist.
+  - Mini-mode multi-monitor seam clipping (#294, by @Rladmsrl) - Pet no longer bleeds across display seams during entry, reload, or hover hit-window. Subsequent follow-ups hardened the clip for startup and reload phases and aligned mini seam hover after clipping.
+  - Settings dashboard positioning (#287, by @YOIMIYA66) - Dashboard now anchors correctly within Settings bounds (top edge, bottom edge, parent offset, floating bounds, source forwarding all re-aligned).
+  - Agent icon source hash stability (#285, by @YOIMIYA66) - Icon exporter now writes the manifest atomically and uses stable source hashes so subsequent exports don't drift.
+  - Claude hook lifecycle hardening - Tightened managed Claude hook marker matching, avoided blocking on clawd-only hook repair, and preserved third-party hooks when settings.json suddenly shrinks (#286, by @taehwanis).
+  - Cold-start Claude watcher seeding (#286, by @taehwanis) - Addressed review feedback for snapshot seeding so the suspicious-shrink heuristic doesn't false-positive on a fresh boot.
+  - Windows uninstall Claude hook cleanup - NSIS uninstaller now runs a PowerShell script that removes managed Claude hook entries from ~/.claude/settings.json, with a write-once backup.
+  - Telegram approval Settings repaint race - Fixed status badge flicker on the Telegram tab; tokenInfo and status refreshes are now sequence-guarded.
+  - Non-focusable HUD sessions - HUD sessions that should never receive terminal focus are now tagged so focus heuristics skip them.
+  Release & Packaging
+  - Pinned sidecar fetch workflow - New npm run fetch:sidecars and npm run verify:sidecars flows; prebuild* scripts now run the verifier before every electron-builder invocation.
+  - Tag-gated draft releases - GitHub Actions release workflow only fires on v* tags, creates GitHub releases as drafts, and marks hyphenated tags (e.g. v0.8.0-rc1) as prereleases. Release notes are pulled from docs/releases/release-<tag>.md.
+  - Per-platform packaging resources - package.json extraResources ships the full bin/cc-connect-clawd/ tree into the app bundle; Windows NSIS x64/arm64 artifacts remain architecture-specific.
+  - Sidecar upstream update policy - New docs/project/release-process.md documents how to bump the pinned sidecar release tag and refresh checksums.
+  Docs & Contributors
+  - Telegram approval guide - End-to-end setup walkthrough at docs/guides/telegram-approval.md (bot token, recipient pairing, sidecar status, test send, troubleshooting).
+  - Release process doc - New docs/project/release-process.md covers tag → draft release → upload artifact flow and sidecar upstream pin maintenance.
+  - State mapping & theme-state UI - Minor copy refresh in docs/guides/state-mapping*.md and docs/project/theme-state-ui.md.
+  - 5 contributors shipped code, docs, or release polish in this release (66 commits).
+  Contributors
+  Huge thanks to everyone who shipped code, tests, docs, or release polish for v0.8.0:
+  - @rullerzhou-afk - Telegram approval end-to-end (sidecar manager, hook wiring, settings, hardening rounds), pinned sidecar fetch/verify pipeline, release workflow gating, Windows Terminal focus + Remote SSH Windows fixes, Claude hook marker tightening, thinking bubble refresh, and Windows uninstall hook cleanup (38 commits)
+  - @YOIMIYA66 - Settings dashboard positioning end-to-end (#287), normalized agent icon exporter with stable source hashes and atomic manifest writes (#285)
+  - @Ruller_Lulu - PR merge support via the GitHub web UI (10 merge commits)
+  - @Rladmsrl - Mini-mode multi-monitor seam clipping (#294)
+  - @taehwanis - Preserve third-party hooks on suspicious settings.json shrink and cold-start seeding hardening (#286)
+  Known Limitations
+  - Telegram approval surface is opt-in and limited - Skipped for unsafe / no-summary requests, elicitation prompts, opencode (already fire-and-forget), and Do Not Disturb. Requires bot token, recipient setup, sidecar availability, and network access.
+  - Disable doesn't cancel in-flight Telegram approvals - Toggling Telegram approval off while a card is already live in the chat does not abort the in-flight request; the card can still resolve a local bubble within its 60-second TTL. Planned for v0.8.1.
+  - No UI toast on Telegram timeout - Approval cards expire silently in Telegram after 60s; the local bubble stays pending. Planned for v0.8.1.
+  - Windows arm64 is cross-compiled, not validated on hardware - CI builds the arm64 NSIS via cross-compilation; no real-arm64-hardware regression run has happened yet.
+  - macOS / Linux real-machine QA pending - electron-builder produces dmg/AppImage/deb artifacts, but the maintainer does not have a Mac and Linux QA is best-effort. Real terminal focus and Telegram approval should be manually verified by macOS/Linux users before relying on them.
+  - CI runs npm test on Windows only - macOS and Linux jobs fetch sidecars and build but do not run the test suite. Cross-platform regressions surface only at runtime until a dedicated test job is added.
+ReleaseNotesUrl: https://github.com/rullerzhou-afk/clawd-on-desk/releases/tag/v0.8.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

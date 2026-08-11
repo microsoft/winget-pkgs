@@ -1,0 +1,26 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: ishiimasaki646.gyazo-mcp-server
+PackageVersion: 0.6.3
+PackageLocale: en-US
+Publisher: ishii-masaki-646
+PublisherUrl: https://github.com/ishii-masaki-646
+PublisherSupportUrl: https://github.com/ishii-masaki-646/gyazo-mcp-server/issues
+PackageName: Gyazo MCP Server
+PackageUrl: https://github.com/ishii-masaki-646/gyazo-mcp-server
+License: Apache-2.0
+LicenseUrl: https://github.com/ishii-masaki-646/gyazo-mcp-server/blob/master/LICENSE-MIT
+ShortDescription: Local MCP server for Gyazo with HTTP and stdio transport support
+Description: A local MCP (Model Context Protocol) server for Gyazo. Provides image listing, searching, uploading, deleting, and oEmbed metadata retrieval. Supports both streamable HTTP and stdio transports with MCP standard OAuth authentication.
+Tags:
+- ai
+- developer-tools
+- gyazo
+- image
+- mcp
+- screenshot
+ReleaseNotes: '- 0.6.2 で導入した Claude Code 向けワークアラウンド (anthropics/claude-code#46879) が tool 呼び出し時に MCP error -32602: request context に authorized session が含まれていません エラーで失敗する不具合を修正しました。ワークアラウンド用の require_mcp_bearer_token ミドルウェアは検証済みの AuthorizedSession を request.extensions_mut() に挿入していましたが、rmcp の StreamableHttpService は HTTP リクエストの Parts のみを tool handler の RequestContext::extensions に転送し、任意の拡張は転送しません。そのため Authorization ヘッダ無しで届いた呼び出しでは tool handler 側でセッションを取り戻せずエラーになっていました。authorized_session_from_context を async 化し、Parts 経由でも取れず fallback session も無い場合に get_verified_session を最終フォールバックとして呼ぶように変更しました。キャッシュにヒットする限り Gyazo API への追加問い合わせは発生しません。'
+ReleaseNotesUrl: https://github.com/ishii-masaki-646/gyazo-mcp-server/releases/tag/v0.6.3
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

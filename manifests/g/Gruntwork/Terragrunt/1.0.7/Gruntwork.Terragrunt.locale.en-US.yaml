@@ -1,0 +1,118 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Gruntwork.Terragrunt
+PackageVersion: 1.0.7
+PackageLocale: en-US
+Publisher: Gruntwork
+PublisherUrl: https://terragrunt.gruntwork.io/
+PublisherSupportUrl: https://terragrunt.gruntwork.io/docs/community/support
+PrivacyUrl: https://gruntwork.io/legal/privacy-policy
+PackageName: Terragrunt
+PackageUrl: https://github.com/gruntwork-io/terragrunt/releases/tag/v0.68.9
+License: MIT
+LicenseUrl: https://github.com/gruntwork-io/terragrunt/blob/HEAD/LICENSE.txt
+Copyright: © 2024 Gruntwork, Inc. All rights reserved.
+ShortDescription: Terragrunt is a thin wrapper for Terraform that provides extra tools for keeping your Terraform configurations DRY, working with multiple Terraform modules, and managing remote state.
+Description: Terragrunt is a thin wrapper for Terraform that provides extra tools for keeping your Terraform configurations DRY, working with multiple Terraform modules, and managing remote state.
+Tags:
+- IaC
+- Infrastructure as Code
+- Terraform
+- Terraform Wrapper
+- terragrunt
+ReleaseNotes: |-
+  ✨ New Features
+  tfr:// source URLs accept an optional version
+  The version query parameter on tfr:// source URLs is now optional. When omitted, Terragrunt queries the registry's list-versions endpoint and downloads the latest stable version, matching how OpenTofu and Terraform resolve a module reference that has no version constraint.
+  terraform {
+    source = "tfr:///terraform-aws-modules/vpc/aws"
+  }
+  Prereleases are excluded from resolution, so a registry that only publishes 4.0.0-rc1 alongside 3.3.0 will pin to 3.3.0. Pin a version explicitly with ?version= when you need reproducible builds or want to opt into a prerelease.
+  Thanks to @raman1236 for contributing this feature!
+  🐛 Bug Fixes
+  update_source_with_cas: preserve //subdir on a unit's terraform.source
+  When a unit's terraform.source used the // subdir convention (for example, source = "../..//modules/foo") and opted into update_source_with_cas, the rewritten source dropped the //subdir tail and the synthetic tree contained only the leaf module's files. A module that referenced a sibling via a relative path (source = "../bar") could not resolve that reference after materialization.
+  Rewrites now preserve the original //subdir (for example, cas::sha1:<hash>//modules/foo), and the synthetic tree is rooted at the path before //, so sibling files reachable via relative paths land in the materialized working directory.
+  Sources without // are unchanged: the tree stays scoped to the leaf module, and the rewritten reference has no //subdir tail.
+  --filter now detects affected units on Windows
+  On Windows, terragrunt find --filter '[origin/main...HEAD]' (and its variants) returned no affected units even when git diff reported changed files. The source= and reading= filters were affected by the same problem.
+  Filter glob patterns are always written with forward slashes, but the affected-unit comparison was being made with Windows backslash separators, so nothing matched. Terragrunt now compares paths consistently with forward slashes on every platform, and the filter detects changed units on Windows as it already did on Linux and macOS.
+  Reported in #6214.
+  startswith, endswith, strcontains, and run_cmd no longer panic on malformed calls
+  Calling startswith, endswith, or strcontains with the wrong number of arguments (for example a single argument instead of two) crashed Terragrunt instead of reporting a configuration error. Calling run_cmd with only option flags and no command (for example run_cmd("--terragrunt-quiet")) crashed the same way.
+  These calls now return a clear error: a wrong-number-of-parameters error for the string functions, and an empty-command error for run_cmd.
+  The --parallelism flag no longer accepts non-positive numbers
+  Previously, terragrunt commands that accept the --parallelism flag (or equivalently the $TG_PARALLELISM environment variable) used to hang indefinitely when invoked with --parallelism=0.
+  Terragrunt now validates that the value is positive and exits with an error otherwise.
+  Reported in #6211
+  🧪 Experiments Updated
+  cas — content-addressing for non-git sources
+  CAS now covers module sources beyond git: http(s), Amazon S3, Google Cloud Storage, and Mercurial. Repeat runs against an unchanged remote reuse the cached tree instead of downloading the bytes again.
+  Before fetching, CAS issues a cheap remote probe (an HTTP HEAD, an S3 object-attributes lookup, a GCS metadata read, or hg identify) to derive a cache key without pulling the source. On a hit, the cached tree is linked directly; on a miss, or when the remote exposes no usable signal, CAS downloads the source, ingests it, and keys the resulting tree by its content hash. A remote that publishes a new version under the same address pins to a new entry, so a stale cache cannot serve outdated bytes.
+  cas — OpenTofu/Terraform registry sources
+  Module sources of the form tfr://... are now content-addressed in CAS. Repeat runs against the same pinned registry version reuse the cached module instead of re-downloading the archive from the registry.
+  CAS resolves a tfr:// source by asking the registry where the underlying archive lives and uses that resolved URL as the cache key. Two runs that pin the same version share one entry; a republish under the same version pins to a new entry, so a stale cache cannot serve outdated bytes.
+  stack-dependencies: unit.<name>.path and stack.<name>.path resolve in values
+  The stack-dependencies experiment now exposes unit.<name>.path and stack.<name>.path when evaluating the values attribute of a unit or stack block, not only inside autoinclude blocks. A parent stack can pass the generated path of a sibling component down into a child stack, so a unit nested in that child stack can depend on a unit that lives at a different level of the hierarchy.
+  unit "vpc" {
+    source = "../catalog/units/vpc"
+    path   = "vpc"
+  }
+  stack "app" {
+    source = "../catalog/stacks/app"
+    path   = "app"
+    values = {
+      vpc_path = unit.vpc.path
+    }
+  }
+  A unit inside the app stack reads values.vpc_path and uses it as the config_path of an autoinclude dependency, wiring the cross-level relationship at generation time. Paths follow the same layout the generator produces, including no_dot_terragrunt_stack on the referenced block.
+  stack-dependencies: simplified unit.* / stack.* ref shape
+  The stack-dependencies experiment no longer resolves stack.<name>.<unit_name>.path or stack.<name>.<nested_stack>.path. Only the top-level stack.<name>.path and unit.<name>.path forms remain. stack.<name>.name and unit.<name>.name are gone too; both only ever echoed the label that the reference already had to spell out.
+  Nested references required parsing every nested catalog up front and conflicted with the reserved name and path attributes on each ref: a nested unit named name or path could not be addressed.
+  To depend on a generated unit inside a stack, compute the path as ${stack.<name>.path}/<unit-relative-path> directly. The layout under a stack's generated directory follows no_dot_terragrunt_stack on the parent stack and on each unit, so hand-computed paths must mirror that resolution.
+  stack-dependencies: .terragrunt-stack-origin no longer written
+  Terragrunt no longer writes the .terragrunt-stack-origin file when generating nested stacks. Set update_source_with_cas = true on your unit and stack blocks if you would like relative paths in your catalog to resolve correctly instead.
+  Pull Requests
+  ✨ Features
+  - feat: Make version optional in tfr:// module registry URLs by @yhakbar in #6112
+  - feat: Supporting all getters in CAS by @yhakbar in #6076
+  🐛 Bug Fixes
+  - fix: Removing use of cas.WithFS by @yhakbar in #6195
+  - fix: panics in startswith / endswith / strcontains / run_cmd by @denis256 in #5984
+  - fix: Allowing all TG HCL fns in terragrunt.stack.hcl, including autoinclude by @yhakbar in #6166
+  - fix: Fixing synthetic trees for terraform.source URLs with // by @yhakbar in #6218
+  - fix: Fixing nested generation for paths with // by @yhakbar in #6234
+  - fix: Fixing stack path variables in values by @yhakbar in #6235
+  - fix: Fixing stack autoinclude by @yhakbar in #6236
+  - fix: Fixing git filters on Windows by @yhakbar in #6242
+  - fix: validate that --parallelism value is positive by @ccmtaylor in #6212
+  📖 Documentation
+  - docs: Cleaning up experiment docs by @yhakbar in #6228
+  - docs: Fixing unreleased changelog page by @yhakbar in #6237
+  - docs: Cleaning up changelogs for v1.0.7 by @yhakbar in #6246
+  🧹 Chores
+  - chore: Getting rid of fatih/structs dependency by @yhakbar in #6186
+  - chore: Getting rid of go-homedir direct dependency by @yhakbar in #6184
+  - chore: improved coderabbit rules by @denis256 in #6193
+  - chore: Consolidating on lipgloss for color by @yhakbar in #6188
+  - chore: Removing go-errors as a dependency by @yhakbar in #6182
+  - chore: tests simplification by @denis256 in #6208
+  - chore: Adding separate archive field by @yhakbar in #6196
+  - chore: Addressing UI/UX feedback for interactive scaffold in catalog by @yhakbar in #6175
+  - chore: added unknown-unknowns heuristics for coderabbit by @denis256 in #6220
+  - chore: Make clone tests a bit faster by @yhakbar in #6081
+  - chore: stacks dependencies simplificaitons by @denis256 in #6171
+  - chore(deps): bump actions/stale from 10.2.0 to 10.3.0 by @dependabot[bot] in #6201
+  - chore: Fixing gopls workflow by @yhakbar in #6229
+  - chore: Increasing test coverage for stack dependencies by @yhakbar in #6231
+  - chore: Go and GHA dependencies by @denis256 in #6240
+  - chore: Ensuring full support for tfr in CAS by @yhakbar in #6123
+  - chore: Adding no // path test for source with CAS by @yhakbar in #6239
+  - chore: Modernizing using gopls by @yhakbar in #6232
+ReleaseNotesUrl: https://github.com/gruntwork-io/terragrunt/releases/tag/v1.0.7
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/gruntwork-io/terragrunt/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

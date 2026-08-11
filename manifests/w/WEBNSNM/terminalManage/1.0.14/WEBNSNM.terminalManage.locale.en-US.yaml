@@ -1,0 +1,60 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.12.0.schema.json
+
+PackageIdentifier: WEBNSNM.terminalManage
+PackageVersion: 1.0.14
+PackageLocale: en-US
+License: Freeware
+ShortDescription: Local Development Manager
+Description: |-
+  terminalManage is a desktop project manager designed for frontend developers. When you are maintaining a dozen or even dozens of local projects at the same time, terminalManage frees you from the pain of repeatedly jumping between folders and terminals -- you can uniformly manage the startup, monitoring, log viewing, Git commit and Node version switching of all projects on one interface.
+
+  Core Features
+
+  🔍 Smart Project Scan
+  After selecting a working directory, terminalManage automatically and recursively scans all projects containing `package.json` (up to 4 levels deep), and identifies the package manager (npm / pnpm / yarn) used by each project. The scan results are displayed in a card grid layout, supporting hiding projects you do not need to follow.
+
+  ▶️ One-Click Script Execution
+  It automatically reads the `scripts` field in each project's `package.json` and displays them as buttons. Click to start the script, running scripts are marked with green highlight, and one-click KILL is supported to forcibly terminate the process (including the child process tree).
+
+  📊 Real-Time Process Monitoring
+  After the script is started, terminalManage collects process resource data every 2 seconds, aggregates the CPU and memory usage of parent and child processes (such as npm → node → vite), and displays them in real time on the project card with visual progress bars.
+
+  📟 Embedded Terminal Log
+  The terminal view based on xterm.js displays script output in real time, supporting:
+  - ANSI color rendering to restore the real terminal effect
+  - Log copying and one-click clearing
+  - Clickable file paths to open the corresponding file directly in VS Code
+
+  🤖 AI Intelligent Assistance
+  Integrated multi-model AI capabilities, providing two core scenarios:
+  - AI Git Commit: Click the Git button on the project card, the tool automatically obtains `git diff`, generates a Chinese Commit Message that conforms to the Angular specification via AI, and supports one-click commit after confirmation.
+  - Intelligent Log Diagnosis: When an error occurs in the terminal, send the log context to AI for analysis with one click, and get the error cause and repair suggestions (displayed in Markdown rendering).
+  It supports three API protocols: OpenAI compatible protocol (GPT / DeepSeek / Codex, etc.), Anthropic (Claude), and Google Gemini. Multiple models can be configured and switched at any time. The API Key is only stored in the local configuration file, and requests are forwarded through the backend proxy.
+
+  🔄 Automatic Node Version Switching
+  Solves the pain point that multiple projects require different Node versions. No need to run `nvm use` manually, terminalManage automatically uses the Node version required by the project when starting the script.
+  Working principle:
+  1. Automatic detection: Read `.nvmrc` → `.node-version` → `package.json engines.node` during project scanning, and match the best installed version using semver
+  2. Manual override: Each project card has a version selection drop-down box, you can manually specify the version, and the override configuration is stored persistently
+  3. Process-level isolation: By modifying the PATH of the child process environment variable, the target version of node + corresponding `cli.js` is called directly, without affecting the global version of the system
+  It supports two nvm implementations: nvm-windows (Windows) and nvm (macOS/Linux).
+  Meaning of version label colors:
+  - 🟢 Green -- Automatically detected and matched
+  - 🟣 Purple -- Manually specified version
+  - ⚪ Gray -- Using system default
+
+  🌐 Public Network Access via Cloudflare Tunnel
+  Built-in Tunnel gateway, which supports exposing currently running local projects to the public network through Cloudflare Tunnel, which is convenient for joint debugging, demonstration and real device debugging.
+  - Built-in local gateway: 127.0.0.1:26324
+  - Supports configuring cloudflared Token and public domain name
+  - Supports one-click switching of intranet penetration target service "Automatically switch tunnel target project when running script"
+  - The Tunnel URL can be directly displayed and clicked in the project card (only displayed when cloudflared is running)
+Tags:
+- console
+- develop
+- development
+- shell
+- terminal
+ManifestType: locale
+ManifestVersion: 1.12.0

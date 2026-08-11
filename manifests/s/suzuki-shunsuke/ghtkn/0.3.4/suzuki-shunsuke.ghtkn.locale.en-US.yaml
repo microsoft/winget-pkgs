@@ -1,0 +1,55 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: suzuki-shunsuke.ghtkn
+PackageVersion: 0.3.4
+PackageLocale: en-US
+Publisher: Shunsuke Suzuki
+PublisherUrl: https://suzuki-shunsuke.github.io/profile/
+PublisherSupportUrl: https://github.com/suzuki-shunsuke/ghtkn/issues
+Author: Shunsuke Suzuki
+PackageName: ghtkn
+PackageUrl: https://github.com/suzuki-shunsuke/ghtkn
+License: MIT
+LicenseUrl: https://github.com/suzuki-shunsuke/ghtkn/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Shunsuke Suzuki
+CopyrightUrl: https://github.com/suzuki-shunsuke/ghtkn/blob/HEAD/LICENSE
+ShortDescription: A CLI to create short-lived (8 hours) GitHub App User Access Token for secure local development
+Moniker: ghtkn
+Tags:
+- cli
+- github
+- github-app-token
+- github-token
+- security
+ReleaseNotes: |-
+  This is arguably the most innovative release so far.
+  Here are the highlights picked from the many updates.
+  Please refer to the documentation for details.
+  1. #508 Support automatic access token renewal with refresh tokens.
+  2. #508 The agent's architecture was revisited, and the device flow now runs on the agent side instead of the client. This makes it possible to confine refresh tokens to the agent, and it also shrinks the client's responsibilities, making it easier to run in a sandboxed environment.
+     1. A protocol version between the agent and the client was defined as well
+  3. The information the ghtkn info command outputs was expanded, making it more useful for troubleshooting. As described below, this also helps coding agents solve problems autonomously
+  4. ghtkn became more AI friendly. We aim for a state where coding agents can understand ghtkn autonomously, troubleshoot it, and answer users' questions
+  5. #526 Fixed a bug where the git-credential command failed on the store and erase actions
+  Refreshing access tokens
+  Authenticating every 8 hours is no longer necessary.
+  This feature is designed with great care for security, and to keep it secure it comes with certain restrictions, such as being supported only on the agent backend on Linux and macOS.
+  The agent backend was originally intended for environments where the keyring backend does not work, but on Linux and macOS the agent backend may become the mainstream choice going forward.
+  If a similar tool supports the same kind of automatic renewal without restrictions like ghtkn's, chances are ghtkn is the one paying more attention to security.
+
+  AI Native
+  ghtkn became more AI friendly.
+  We aim for a state where coding agents can understand ghtkn autonomously, troubleshoot it, and answer users' questions.
+  1. #493 Added the ghtkn docs list and ghtkn docs show commands, which output the list and the contents of the documentation for coding agents.
+     1. The content is the same as the Agent SKILL, but unlike a skill, an agent can read it as long as ghtkn is installed, without the user installing the skill.
+     2. Because the human-facing documentation and the skill are unified and embedded at build time, the two never drift apart
+  2. Adding the ghtkn docs command is meaningless if agents never notice the command exists. Added pointers to the ghtkn docs command in README.md, ghtkn -v, the help and info commands, and error messages, so that coding agents notice the ghtkn docs command and use it autonomously
+  3. #539 Added a warning to the documentation to prevent incidents where a coding agent mistakenly prints an access token and leaks it. Agents read this warning through the docs command, which contributes to actually preventing accidental leaks
+  4. Created guides for running ghtkn inside the Claude Code and Codex sandboxes (claude, codex)
+ReleaseNotesUrl: https://github.com/suzuki-shunsuke/ghtkn/releases/tag/v0.3.4
+Documentations:
+- DocumentLabel: Usage
+  DocumentUrl: https://github.com/suzuki-shunsuke/ghtkn/blob/HEAD/USAGE.md
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

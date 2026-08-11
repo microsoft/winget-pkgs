@@ -1,0 +1,60 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: endev.aube
+PackageVersion: 1.28.0
+PackageLocale: en-US
+Publisher: en.dev
+PublisherUrl: https://en.dev/
+PublisherSupportUrl: https://github.com/endevco/aube/discussions/categories/troubleshooting-and-bugs
+Author: en.dev
+PackageName: aube
+PackageUrl: https://aube.en.dev/
+License: MIT
+LicenseUrl: https://github.com/endevco/aube/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 en.dev inc
+CopyrightUrl: https://github.com/endevco/aube/blob/HEAD/LICENSE
+ShortDescription: A fast Node.js package manager
+Description: |-
+  aube is a package manager for Node.js projects. It uses pnpm-style isolated node_modules for fast, disk-efficient installs.
+
+  Existing projects keep their lockfile format. aube reads and writes pnpm-lock.yaml, package-lock.json, npm-shrinkwrap.json, yarn.lock, and bun.lock in place. New projects without a supported lockfile get aube-lock.yaml.
+
+  Why Try It
+  - Fast installs. Warm installs are about 8x faster than pnpm and about 5x faster than Bun in the current benchmarks. Repeat test commands run up to 35x faster than pnpm and up to 5x faster than Bun.
+  - Existing lockfiles. Reads and writes pnpm-lock.yaml, package-lock.json, npm-shrinkwrap.json, yarn.lock, and bun.lock in place.
+  - Cheap repeat commands. aubr test, aube test, and aube exec vitest auto-install when dependencies are stale, then skip that work when nothing changed. aubx uses a local binary when one is installed, or a throwaway environment for one-off tools.
+  - Less disk use. A global content-addressable store lets projects share package files instead of keeping a full copy of the same dependencies in every checkout.
+  - Secure defaults. Out of the box, exotic transitive deps are blocked, lifecycle scripts wait for approval, trust downgrades fail at resolve, and brand-new releases sit in a 24h cooling window. One paranoid: true line adds the build jail and turns the soft gates into hard fails.
+Moniker: aube
+ReleaseNotes: |-
+  This release makes aube embeddable in other applications, landing a stable in-process embedding API for both Rust and Node.js/Bun/Electron hosts, and fixes a warm-path bug where changed local file:/portal: directory dependencies weren't reinstalled.
+  Highlights
+  - Embed aube in your own apps — Three stacked pieces come together to let you drive installs programmatically: invocation-scoped install controls with structured events and cancellation (#1036), a stable aube::embed Rust facade (#1042), and a production @jdxcode/aube-node Node-API addon (#1025) — all by @jdx.
+
+  Added
+  - @jdxcode/aube-node Node-API addon (#1025 by @jdx) — Run aube installs in-process from Node.js, Bun, Electron, and compiled Bun executables. The addon exposes install/add, dev-dependency saves, structured progress/output events, cooperative cancellation via AbortSignal, offline mode, structured errors (AubeError with stable code and diagnostic), and result statistics. It creates package.json when absent, saves requested versions exactly, honors supported lockfile formats and project registry/auth config, skips lifecycle scripts, and uses aube's install-state fast path. Independent projects install concurrently; operations on the same workspace serialize through its project lock, and cancellation during add restores manifest and lockfile snapshots. Ships the root package plus eight optional platform packages (macOS, Windows, glibc and musl Linux), with signed macOS addons, attested tarballs, and npm trusted publishing.
+    import { install } from "@jdxcode/aube-node"
+    const result = await install(projectDirectory, {
+      add: [
+        { name: "react", version: "19.1.0" },
+        { name: "typescript", version: "5.9.3", dev: true },
+      ],
+      offline: false,
+      signal,
+      onEvent(event) {
+        // event.kind: "phase" | "progress" | "output"
+      },
+    })
+  - Stable aube::embed Rust API (#1042 by @jdx) — Native Rust hosts get a supported public contract (initialize, install, add, error_code) without depending on internal aube-util, aube-settings, or CLI command structs. add_to_project holds the workspace project lock across manifest mutation and install, supports offline/network modes, and rolls back package.json and the lockfile on cancellation. Includes docs covering embedding, concurrency, lifecycle policy, and errors.
+  - Install control hooks (#1036 by @jdx) — New invocation-scoped InstallControl with human (CLI default), structured-event, and silent output modes. A non-blocking InstallReporter delivers phase, progress, and output events, and cooperative cancellation returns the stable ERR_AUBE_INSTALL_CANCELLED diagnostic at safe install boundaries. Concurrent installs stay isolated via Tokio task-local state; standalone aube install behavior is unchanged.
+
+  Fixed
+  - Refresh changed local directory dependencies (#1034 by @jdx) — Editing the contents of a file: directory or portal: dependency could previously hit the Already up to date fast path and leave stale installed output, even when the file size was unchanged. Install freshness now records per-source content and metadata fingerprints (BLAKE3), and the linker re-materializes mutable local entries during the ensuing full install.
+
+  💚 Sponsor aube
+  aube is maintained by @jdx, an open source developer for entire.io, the title sponsor of the jdx.dev open source tools including mise. Work on aube is funded by sponsors.
+  If aube is saving your team install time or CI minutes, please consider sponsoring at jdx.dev. Individual and company sponsorships are what keep the project fast, free, and independent.
+ReleaseNotesUrl: https://github.com/jdx/aube/releases/tag/v1.28.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

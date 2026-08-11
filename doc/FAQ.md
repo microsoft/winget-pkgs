@@ -12,7 +12,7 @@
   10. [**How can I use PowerShell to parse the output from winget?**](#how-can-i-use-powershell-to-parse-the-output-from-winget)
   11. [**Why do WinGet and AppInstaller have different versions?**](#why-do-winget-and-appinstaller-have-different-versions)
   12. [**How do I know the packages in the Community Repository are safe?**](#how-do-i-know-the-packages-in-the-community-repository-are-safe)
-  13. [**How do portable applications get “Installed”?**](#how-do-portable-applications-get-installed)
+  13. [**How do portable applications get "Installed"?**](#how-do-portable-applications-get-installed)
 -----
 ## **What is an ARP Entry?**
 ARP stands for `A`dd and `R`emove `P`rograms. In Windows, installer files put information about the package they have installed into the Windows Registry. This information is used to tell Windows exactly what a program is and how to uninstall or modify it. Users can view these entries through the Add and Remove Programs option in Control Panel, or by running `appwiz.cpl`. Alternatively, the `Apps & features` menu in Windows Settings can be used to view the entries. Each entry in the table is an ARP Entry, and the Windows Package Manager uses these entries to help determine which applications are currently installed on your system.
@@ -68,13 +68,17 @@ Applications may continually upgrade due to the following reasons:
 ### Future Work:
 Efforts to resolve these issues are being tracked in:
 - [microsoft/winget-cli#2345](https://github.com/microsoft/winget-cli/issues/2345)
-- [microsoft/winget-cli#1413](https://github.com/microsoft/winget-cli/issues/1413)
-## **How can I use PowerShell to parse the output from winget?**
-The Windows Package Manager is still in development and does not yet support emitting rich data objects as output. There are a few issues tracking this feature request. Please add your thumbs up to these issues as the reactions are used to help prioritize which features are implemented next.
-* [Add Native PowerShell Support - microsoft/winget-cli#221](https://github.com/microsoft/winget-cli/issues/221)
-* [Add list option to format output as JSON - microsoft/winget-cli#2032](https://github.com/microsoft/winget-cli/issues/2032)
 
-Also, take a look at the [discussions](https://github.com/microsoft/winget-cli/discussions/categories/powershell) based around PowerShell support!
+## **How can I use PowerShell to parse the output from winget?**
+Native PowerShell support is now available through the `Microsoft.WinGet.Client` module on the [PowerShell Gallery](https://www.powershellgallery.com/packages/Microsoft.WinGet.Client). It provides PowerShell cmdlets that return structured objects, making it straightforward to use WinGet in scripts and automation without parsing text output.
+
+Install the module with:
+
+```powershell
+Install-Module -Name Microsoft.WinGet.Client
+```
+
+Take a look at the [discussions](https://github.com/microsoft/winget-cli/discussions/categories/powershell) for community examples and Q&A around PowerShell support.
 ## Why do WinGet and AppInstaller have different versions?
 
 WinGet and AppInstaller are two distinct pieces of software, even though WinGet is included as part of the AppInstaller package. Their versioning differs because:

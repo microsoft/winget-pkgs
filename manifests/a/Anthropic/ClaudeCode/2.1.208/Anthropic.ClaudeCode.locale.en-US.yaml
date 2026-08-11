@@ -1,0 +1,87 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Anthropic.ClaudeCode
+PackageVersion: 2.1.208
+PackageLocale: en-US
+Publisher: Anthropic PBC
+Author: Anthropic PBC
+PackageName: Claude Code
+License: Proprietary
+Copyright: © 2026 Anthropic PBC
+ShortDescription: Unleash Claude’s raw power directly in your terminal. Search million-line codebases instantly. Turn hours-long workflows into a single command. Your tools. Your workflow. Your codebase, evolving at thought speed.
+Description: |-
+  Claude Code is Anthropic’s agentic coding tool that lives in your terminal and helps you turn ideas into code faster than ever before.
+  What Claude Code does for you
+  - Build features from descriptions: Tell Claude what you want to build in plain English. It will make a plan, write the code, and ensure it works.
+  - Debug and fix issues: Describe a bug or paste an error message. Claude Code will analyze your codebase, identify the problem, and implement a fix.
+  - Navigate any codebase: Ask anything about your team’s codebase, and get a thoughtful answer back. Claude Code maintains awareness of your entire project structure, can find up-to-date information from the web, and with MCP can pull from external datasources like Google Drive, Figma, and Slack.
+  - Automate tedious tasks: Fix fiddly lint issues, resolve merge conflicts, and write release notes. Do all this in a single command from your developer machines, or automatically in CI.
+  Why developers love Claude Code
+  - Works in your terminal: Not another chat window. Not another IDE. Claude Code meets you where you already work, with the tools you already love.
+  - Takes action: Claude Code can directly edit files, run commands, and create commits. Need more? MCP lets Claude read your design docs in Google Drive, update your tickets in Jira, or use your custom developer tooling.
+  - Unix philosophy: Claude Code is composable and scriptable. tail -f app.log | claude -p "Slack me if you see any anomalies appear in this log stream" works. Your CI can run claude -p "If there are new text strings, translate them into French and raise a PR for @lang-fr-team to review".
+  - Enterprise-ready: Use Anthropic’s API, or host on AWS or GCP. Enterprise-grade security, privacy, and compliance is built-in.
+Moniker: claudecode
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- claude
+- claude-code
+- claudecode
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  - Added screen reader mode: opt-in plain-text rendering for screen reader users. Run claude --ax-screen-reader, set CLAUDE_AX_SCREEN_READER=1, or add "axScreenReader": true to settings.
+  - Added vimInsertModeRemaps setting: map two-key insert-mode sequences like jj to Escape in vim mode
+  - Added CLAUDE_CODE_PROCESS_WRAPPER: agent view and the background service now honor a corporate launcher by running every Claude Code self-spawn through a required wrapper executable
+  - Added mouse-click support for multi-select menus and "Other" input rows in fullscreen mode
+  - Fixed fast mode staying off after switching back to a model that supports it — it now restores automatically when enabled in settings
+  - Fixed replies typed to a background agent being lost when delivery fails — the text is now saved and delivered when the session restarts
+  - Fixed background-session attach failing permanently ("Couldn't start the background daemon") after an update replaced the binary a running claude agents process was launched from
+  - Fixed the context window (and auto-compact indicator) briefly resetting to 200k after the CLI auto-updates, causing a false "100% context used" when resuming long-context sessions
+  - Fixed supervised and background sessions crashing when a server closed an HTTP/2 connection with a GOAWAY while requests were in flight
+  - Fixed truncated stream-json/JSON output and missing result message when piping large responses from claude -p
+  - Fixed CLAUDE_CODE_MAX_OUTPUT_TOKENS and similar env vars silently using the mantissa of scientific-notation values (1e6 became 1)
+  - Fixed very large markdown tables stalling rendering or using excessive memory; tables over 200 rows show the first 200 with a "… N more rows" notice
+  - Fixed the Edit tool failing on files modified after reading when the target text still matches uniquely
+  - Fixed Read reporting empty files as "shorter than offset", Grep silently returning "No files found" for invalid regex patterns, Grep count mode under-reporting totals when paginated, and Glob crashing with an unclear error when the pattern, path, or working directory contained a null byte
+  - Fixed apiKeyHelper script failures being hidden behind a generic 401 after ~10 silent retries; the script's own error is now shown within 3 attempts
+  - Fixed Bedrock streaming requests failing with a misleading "Truncated event message received" when a gateway transforms the response — the error now names the content-type and points at the proxy
+  - Fixed /upgrade showing a login flow instead of the upgrade URL when the browser fails to open
+  - Fixed stream-json input killing the session on blank CRLF or whitespace-only lines from Windows-style SDK hosts
+  - Fixed headless stream-json sessions hanging permanently when a control_request carried a non-string set_model payload; the CLI now answers with an error response
+  - Fixed repeated "No completion record was found" notices on session resume — orphaned background tasks now collapse into a single summary
+  - Fixed Remote Control clients attaching to a terminal-hosted session not seeing background agents and workflow progress until a task started or stopped
+  - Fixed the Agent tool launching with no tools when a subagent's tools list resolves to nothing — it now returns a clear error naming the unrecognized entries
+  - Fixed /usage showing stale cached bars over fresher data, and /mcp not reclassifying placeholder servers after config edits
+  - Fixed "Change directory" in SDK hosts (e.g. Claude Desktop) failing with "A turn is in progress" on idle sessions that have a running background task
+  - Fixed the workflow save dialog showing ~/.claude/workflows/ instead of the CLAUDE_CONFIG_DIR location for user-scope saves
+  - Fixed /release-notes adding the viewed notes to the model's context — "Show all" previously injected the entire changelog into every subsequent request
+  - Fixed a memory leak in the agent view where pasted images were retained for the screen's lifetime after sending peek replies
+  - Fixed SDK sessions losing agents defined via the initialize request when a plugin refresh ran before the client attached
+  - Fixed several memory leaks in long sessions: MCP stdio server stderr accumulating up to 64 MB per server, LSP documents staying open indefinitely (now LRU with 50-doc cap), async hook output retained after backgrounding, and unbounded growth in headless/SDK sessions from large tool-result payloads
+  - Fixed a memory blowup when reading files with extremely long single lines using offset/limit — the read now returns a clean error instead of loading the whole line
+  - Fixed multi-second per-turn slowdowns in sessions with many permission deny/ask rules — rule matchers are now compiled once and cached
+  - Improved input responsiveness while agent task lists update — task updates no longer re-render the entire UI
+  - Reduced per-tool-call CPU overhead in print/SDK sessions with many MCP tools by caching tool-pool assembly (up to 7x faster tool rounds at high tool counts)
+  - Reduced memory usage by bounding the file edit read cache to 16 MB instead of pinning up to 1,000 full files
+  - Reduced session transcript size (up to 79x in edit-heavy sessions) and bounded checkpoint disk usage by pruning superseded file-history backups
+  - Reduced memory usage when resuming sessions with background agents or forks spawned from large conversations
+  - Completed background agents now stay listed in /tasks until cleanup instead of vanishing the moment they finish
+  - Attaching to a stopped background agent now shows its transcript immediately while the session warms up, instead of a blank "Session is starting" screen
+  - Background sessions: an older daemon no longer silently restarts workers spawned by a newer version onto the older binary
+  - Agent view: Ctrl+X now deletes renamed-branch worktrees, never destroys unpushed commits, keeps the session row when a worktree is kept, and reused worktree names reset to the current base
+  - Catastrophic removals (e.g. rm -rf ~) in commands containing $(…)/backticks/<(…) now prompt in --dangerously-skip-permissions and auto mode, matching the plain form
+  - /install-github-app and the /mcp settings menu no longer open in background sessions
+  - MCP servers configured with an empty URL now show as "not configured" in /mcp instead of a config error
+  - /usage now shows your last-known usage bars with an "as of" note when the usage endpoint is rate-limited, instead of an error screen
+  - Fixed Bedrock auth failing with "Session token not found or invalid" for AWS SSO profiles whose sso_region differs from the Bedrock region (2.1.207 regression)
+ReleaseNotesUrl: https://github.com/anthropics/claude-code/blob/HEAD/CHANGELOG.md#21208
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

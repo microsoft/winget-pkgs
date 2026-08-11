@@ -1,0 +1,42 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: endev.aube
+PackageVersion: 1.38.1
+PackageLocale: en-US
+Publisher: en.dev
+PublisherUrl: https://en.dev/
+PublisherSupportUrl: https://github.com/endevco/aube/discussions/categories/troubleshooting-and-bugs
+Author: en.dev
+PackageName: aube
+PackageUrl: https://aube.en.dev/
+License: MIT
+LicenseUrl: https://github.com/endevco/aube/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 en.dev inc
+CopyrightUrl: https://github.com/endevco/aube/blob/HEAD/LICENSE
+ShortDescription: A fast Node.js package manager
+Description: |-
+  aube is a package manager for Node.js projects. It uses pnpm-style isolated node_modules for fast, disk-efficient installs.
+
+  Existing projects keep their lockfile format. aube reads and writes pnpm-lock.yaml, package-lock.json, npm-shrinkwrap.json, yarn.lock, and bun.lock in place. New projects without a supported lockfile get aube-lock.yaml.
+
+  Why Try It
+  - Fast installs. Warm installs are about 8x faster than pnpm and about 5x faster than Bun in the current benchmarks. Repeat test commands run up to 35x faster than pnpm and up to 5x faster than Bun.
+  - Existing lockfiles. Reads and writes pnpm-lock.yaml, package-lock.json, npm-shrinkwrap.json, yarn.lock, and bun.lock in place.
+  - Cheap repeat commands. aubr test, aube test, and aube exec vitest auto-install when dependencies are stale, then skip that work when nothing changed. aubx uses a local binary when one is installed, or a throwaway environment for one-off tools.
+  - Less disk use. A global content-addressable store lets projects share package files instead of keeping a full copy of the same dependencies in every checkout.
+  - Secure defaults. Out of the box, exotic transitive deps are blocked, lifecycle scripts wait for approval, trust downgrades fail at resolve, and brand-new releases sit in a 24h cooling window. One paranoid: true line adds the build jail and turns the soft gates into hard fails.
+Moniker: aube
+ReleaseNotes: |-
+  A small patch release with three targeted fixes to aube update --no-save, POSIX shim resolution, and cold-store filtered installs.
+  Fixed
+  - Keep --no-save resolutions inside the existing range (#1247 by @jdx) — aube update --latest --no-save no longer treats --latest as permission to bump the manifest or catalog specifier. It now refreshes the lockfile to the newest version allowed by the retained range (for both direct and shared catalog entries) instead of recording a latest that the specifier itself excludes — which could otherwise make a subsequent frozen install reject the lockfile.
+  - Resolve symlinks in POSIX shims (#1249 by @jdx) — Generated POSIX .bin shims now follow their invocation path through absolute and relative symlink chains (up to 40 hops, guarding against cycles) before computing basedir. Launching a tool via a symlink on PATH previously pointed basedir at the external symlink directory rather than the real node_modules/.bin, breaking the shim's relative target. The shim marker is bumped to aube-bin-shim v2 so older shims are still parsed correctly on uninstall.
+  - Filter cold per-project materialization (#1253 by @jdx) — Filtered installs (--production, --filter, workspace scoping) now apply dependency-section and workspace selection before pipelined materialization. Previously a cold store streamed the full lockfile graph into node_modules/.aube, leaving unrelated package cells on disk even though the importer symlinks were correct (warm installs looked fine because cached packages aren't re-streamed). The on-disk lockfile and full-graph validation still use the unfiltered graph. Fixes #1250.
+
+  💚 Sponsor aube
+  aube is maintained by @jdx, an open source developer for entire.io, the title sponsor of the jdx.dev open source tools including mise. Work on aube is funded by sponsors.
+  If aube is saving your team install time or CI minutes, please consider sponsoring at jdx.dev. Individual and company sponsorships are what keep the project fast, free, and independent.
+ReleaseNotesUrl: https://github.com/jdx/aube/releases/tag/v1.38.1
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

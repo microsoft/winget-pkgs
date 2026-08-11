@@ -1,0 +1,92 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: TenacityTeam.Tenacity
+PackageVersion: 1.3.5
+PackageLocale: en-US
+Publisher: Tenacity Team
+PublisherUrl: https://tenacityaudio.org/
+PublisherSupportUrl: https://tenacityaudio.org/#community-buttons
+PackageName: Tenacity
+PackageUrl: https://codeberg.org/tenacityteam/tenacity
+License: GPL-2.0
+LicenseUrl: https://codeberg.org/tenacityteam/tenacity/src/branch/HEAD/LICENSE.txt
+Copyright: Copyright © 2021-2026 Tenacity Team.
+ShortDescription: An easy-to-use, cross-platform multi-track audio editor/recorder.
+Description: |-
+  Tenacity is a free and open source audio editor forked from the popular audio editor Audacity. Tenacity is licensed under the GNU General Public License version 2 or later. It contains the following features:
+  - Recording from audio devices, real or virtual.
+  - Support for importing from and exporting to a wide range of audio formats, extensible with FFmpeg.
+  - High quality audio processing, including up to 32-bit float audio support.
+  - Extensibility with support for plug-ins, providing support for VST 2, LADSPA/LV2, and AU plugins.
+  - Support for scripting in the built-in scripting language Nyquist, or in Python, Perl, and other languages with named pipes.
+  - Editing arbitrary sampling and multi-track timeline.
+  - Accessibility including editing via keyboard, screen reader support and narration support.
+  - Tools useful in the analysis of signals, including audio.
+  Tenacity does not have a single application when it comes to audio processing. Musicians recording real instruments can make a song in Tenacity, podcasters can edit their episodes in Tenacity, and even academic researchers can analyze signals using Tenacity. We don’t intend to focus Tenacity on a single area of audio processing, but rather, we intend to focus Tenacity over audio processing in general, including the aforementioned applications.
+Moniker: tenacity
+Tags:
+- audio
+- editor
+ReleaseNotes: |-
+  This release was originally unplanned, but after learning about several vulnerabilities being discovered in libexpat, one of Tenacity's core dependencies, we decided to make a new release. However, as time progressed, several other issues came up that needed addressing. This took longer than expected, primarily due to busy schedules and personal issues, but despite that, we present to you a new release bringing fixes to several long-standing issues.
+  This release is also the first release with an original maintainer. Due to the project's early history, they had to step away for a long while, but since they are doing better, they chose to come back. We'd like to welcome them in coming back and we're both excited to see where Tenacity goes!
+  New
+  - ASIO is now natively supported in Tenacity.
+  - Windows on ARM is now supported. We expect minimal issues, if any, on Windows on ARM, with an exception due to a lack of plugin support (we expect only native ARM plugins to work, but we have not tested this aspect yet).
+    - Windows 11 or later is required for the Windows on ARM installer. The other installers continue to require Windows 7 (SP1) or later.
+  - macOS builds have returned.
+    - Tenacity supports macOS 10.15 or later, both on Intel and Apple Silicon.
+    - Note that these builds are unsigned and thus require extra steps to get working. Open a Terminal window and run xattr -d com.apple.quarantine /path/to/Tenacity.app
+  Changes
+  - For packagers: wxWidgets 3.3 and later is now supported.
+  - On Windows, some parts of the UI now better adapt to dark mode if enabled. (However, Tenacity's theme will not automatically adapt to dark mode; you need to wait for 1.4 for that).
+  - Update about dialog:
+    - Remove build date. It wasn't necessarily accurate on Linux depending on who packaged Tenacity (e.g., through our official Flatpak).
+    - Move an original maintainer from emeritus to active.
+  - Miscellaneous: CPack is now used for building packages across all platforms, including Inno Setup installers.
+  Fixes
+  - Fixed several build issues.
+  - Fixed a spectrogram crash (backported from 1.4 alpha 1).
+  FFmpeg
+  Instead of the previous FFmpeg 6.1.2, we now have FFmpeg 7.1.5. Support for FFmpeg 7 was backported in some previous release accidentally, but you can use it to your benefit :)
+  Unfortunately, we do not provide FFmpeg libraries for Windows on ARM. However, you can download FFmpeg 7.1.5 for Windows on ARM here. Configuration is the same as if you were on x86(_64). Keep in mind that we have not tested these binaries, so if any issue comes up, please create a new issue for it and we'll try to resolve it. We will continue to provide our own builds for 64-bit and, for now, 32-bit Windows.
+  Under normal circumstances, the 1.3.x series would be locked to only FFmpeg 6.x. Because it's been a while since the last stable release (over a year and a half), and 1.3.x supports up to FFmpeg 7.x, we will provide FFmpeg 7.x libraries. These libraries have been compiled manually under Windows using MSVC and MSYS2 tools.
+  Hashes and Verification
+  There are two ways to verify your downloads: via PGP signatures or SHA256 hashes.
+  PGP Signatures
+  IMPORTANT: we made yet another signing key, this time containing both active maintainers. The new key's fingerprint is 29FE9795E57619BC854CF9A730EFEEFA63DF61BA.
+  If you are using gpg, you can import it like so:
+  $ gpg --keyserver pgp.mit.edu --recv-keys 29FE9795E57619BC854CF9A730EFEEFA63DF61BA
+  Then you can verify your download like so:
+  $ gpg --verify /path/to/download-signature.asc /path/to/download
+  For example, to verify the AppImage using gpg:
+  # Receive the key first if you haven't done so
+  $ gpg --keyserver pgp.mit.edu --recv-keys 29FE9795E57619BC854CF9A730EFEEFA63DF61BA
+
+  # Then verify the release like so
+  $ gpg --verify tenacity-linux-1.3.5-x86_64.AppImage.asc tenacity-linux-1.3.5-x86_64.AppImage
+  gpg: Signature made Sun 05 Jul 2026 03:29:52 PM PDT
+  gpg:                using EDDSA key 9F7144C4FEC3D116E8569F728F5DF0C25B19955F
+  gpg: Good signature from "Avery King (Tenacity) <gperson@disroot.org>" [full]
+  gpg:                 aka "Emily Mabrey (Tenacity) <emilymabrey93@gmail.com>" [full]
+  If it says there's a bad signature, your download may have been tampered with. Try checking against the SHA256 hash (down below) for additional verification. If the hash doesn't match, try redownloading the file. If it does match, please open an issue so we can correct the signature.
+  Windows
+  Windows 64-bit installer: e8c5d9090ca2ffb64789e3df9991cf7e05989c63482d811b9b7d8e1277643c5d Windows 32-bit installer: 2ea931cff38c23630144610746c1b4f9ff7b2311712ba2fa42af434926c2fa29 Windows on ARM installer: a6895f71ea0606d2794e98ca8500156b53947ee0dc4bcf8ffa0a888847afe649
+  FFmpeg Downloads
+  32-bit FFmpeg libraries: 367ccc8321c99806b826d664f85382d9a0dafc6327bc9b166f2691856aecdea0 64-bit FFmpeg libraries: 9551d79195bb37bd48178e760c7d099acd3d323e14d0ff849e3dbd45bf820819
+  macOS
+  macOS Apple Silicon DMG: dca2c606b8ab2146c4aebc98a27d5791c587f677f6fbccd846515a694bde49a1 macOS Intel DMG: 51825677212b8864c163a0011c5cc4d1f5010cca3c459ec8c9a4e7754f14b6cc
+  Linux
+  Tenacity AppImage: 53202c1f3f12ea3c264221a31c88890463533d8debd1677f96f904273db7844f
+  Source Tarball
+  Source tarball: 0446e14e09046a0c72d0fdfbbf3823a2ba3451204de7b93f715cc4fe2333e781
+  Other Notes
+  Other updates, such as through your distribution's repos or our official Flatpak, will occur shortly, but will proably span over the next few days as we all perform testing. Our official Flatpak will also be updated to use the latest runtime and dependencies.
+  There should be one last 1.3.x release if one comes, that being version 1.3.6. This will contain minimal but otherwise more important updates. After that release, we plan to no longer make releases for 1.3.x unless deemed necessary (e.g., because of a security vulnerability).
+ReleaseNotesUrl: https://codeberg.org/tenacityteam/tenacity/releases/tag/v1.3.4
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://tenacityaudio.org/docs/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

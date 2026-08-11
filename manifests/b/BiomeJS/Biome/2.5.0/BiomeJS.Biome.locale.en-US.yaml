@@ -1,0 +1,176 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: BiomeJS.Biome
+PackageVersion: 2.5.0
+PackageLocale: en-US
+Publisher: BiomeJS
+PublisherUrl: https://biomejs.dev/
+PublisherSupportUrl: https://github.com/biomejs/biome/issues
+Author: Biome Developers and Contributors
+PackageName: Biome
+PackageUrl: https://biomejs.dev/
+License: Apache-2.0
+Copyright: Copyright (c) 2023-present Biome Developers and Contributors
+ShortDescription: Biome is a toolchain for web projects, aimed at providing functionalities to maintain them. It offers a formatter and linter, usable via CLI and LSP.
+Moniker: biome
+Tags:
+- css
+- formatter
+- javascript
+- json
+- jsx
+- linter
+- static-code-analysis
+- typescript
+- web
+ReleaseNotes: |-
+  2.5.0
+
+  Minor Changes
+  - #9539 f0615fd Thanks @ematipico! - Added a new reporter called concise. When --reporter=concise is passed the commands format, lint, check and ci, the diagnostics are printed in a compact manner:
+    ! index.ts:2:10: lint/correctness/noUnusedImports: Several of these imports are unused.
+    ! main.ts:9:7: lint/correctness/noUnusedVariables: This variable f is unused.
+    × index.ts:8:5: lint/suspicious/noImplicitAnyLet: This variable implicitly has the any type.
+    × main.ts:2:10: lint/suspicious/noRedeclare: Shouldn't redeclare 'z'. Consider to delete it or rename it.
+  - #9495 2056b23 Thanks @aviraldua93! - Added the useKeyWithClickEvents a11y lint rule for HTML files (.html, .vue, .svelte, .astro). This is a port of the existing JSX rule. The rule enforces that elements with an onclick handler also have at least one keyboard event handler (onkeydown, onkeyup, or onkeypress) to ensure keyboard accessibility.
+    Inherently keyboard-accessible elements (<a>, <button>, <input>, <select>, <textarea>, <option>) are excluded, as are elements hidden from assistive technologies (aria-hidden) or with role="presentation" / role="none".
+    <!-- Invalid: no keyboard handler -->
+    <div onclick="handleClick()">Click me</div>
+    <!-- Valid: has keyboard handler -->
+    <div onclick="handleClick()" onkeydown="handleKeyDown()">Click me</div>
+    <!-- Valid: inherently keyboard-accessible -->
+    <button onclick="handleClick()">Submit</button>
+  - #9152 9ec8500 Thanks @ematipico! - Added new nursery lint rule noUndeclaredClasses for HTML, JSX, and SFC files (Vue, Astro, Svelte). The rule detects CSS class names used in class="..." (or className) attributes that are not defined in any <style> block or linked stylesheet reachable from the file.
+    <!-- .typo is used but never defined -->
+    <html>
+      <head>
+        <style>
+          .button {
+            color: blue;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="button typo"></div>
+      </body>
+    </html>
+  - #9152 9ec8500 Thanks @ematipico! - Added new nursery lint rule noUnusedClasses for CSS. The rule detects CSS class selectors that are never referenced in any HTML or JSX file that imports the stylesheet. This is a project-domain rule that requires the module graph.
+    /* styles.css — .ghost is never used in any importing file */
+    .button {
+      color: blue;
+    }
+    .ghost {
+      color: red;
+    }
+    /* App.jsx */
+    import "./styles.css";
+    export default () => <div className="button" />;
+  - #9546 6567efa Thanks @nhedger! - Added a biome upgrade command for standalone installations. It upgrades Homebrew installs with brew upgrade biome, updates manually installed binaries from the latest GitHub release, and tells npm users to upgrade with their package manager instead.
+  - #9716 701767a Thanks @faizkhairi! - Added the HTML version of the useHeadingContent rule. The rule now enforces that heading elements (h1-h6) have content accessible to screen readers in HTML, Vue, Svelte, and Astro files.
+    <!-- Invalid: empty heading -->
+    <h1></h1>
+    <!-- Invalid: heading hidden from screen readers -->
+    <h1 aria-hidden="true">invisible content</h1>
+    <!-- Valid: heading with text content -->
+    <h1>heading</h1>
+    <!-- Valid: heading with accessible name -->
+    <h1 aria-label="Screen reader content"></h1>
+  - #9582 f437ef8 Thanks @rahuld109! - Added the HTML version of the useKeyWithMouseEvents rule. The rule now enforces that onmouseover is accompanied by onfocus and onmouseout is accompanied by onblur in HTML, Vue, Svelte, and Astro files.
+    <!-- Invalid: onmouseover without onfocus -->
+    <div onmouseover="handleMouseOver()"></div>
+    <!-- Valid: onmouseover paired with onfocus -->
+    <div onmouseover="handleMouseOver()" onfocus="handleFocus()"></div>
+  - #9275 1fdbcee Thanks @ff1451! - Added the new assist action useSortedTypeFields, which sorts the fields of GraphQL object types, interface types and input object types alphabetically, e.g. name, age, id becomes age, id, name.
+  - #10561 78075b7 Thanks @Conaclos! - Added a new style option to useExportType,
+    which enforces a style for exporting types.
+    This is the same option as the one provided by useImportType.
+  - #8987 d16e32b Thanks @DerTimonius! - Ported the useValidAnchor rule to HTML. This rule enforces that all anchors are valid and that they are navigable elements.
+  - #9533 4d251d4 Thanks @ematipico! - The init command now prints the Biome logo.
+  - #10069 0eb9310 Thanks @Netail! - Added the HTML lint rule noStaticElementInteractions, which enforces that static, visible elements (such as <div>) that have click handlers use the valid role attribute.
+    Invalid:
+    <div onclick="myFunction()"></div>
+  - #9134 2a43488 Thanks @ematipico! - Added the assist action useSortedPackageJson.
+    This action organizes package.json fields according to the same conventions as the popular sort-package-json tool.
+  - #9309 7daa18b Thanks @Bertie690! - The allowDoubleNegation option has been added to noImplicitCoercions to allow ignoring double negations inside code.
+    With the option enabled, the following example is considered valid and is ignored by the rule:
+    const truthy = !!value;
+  - #9700 894f3fb Thanks @ematipico! - The Biome Language server now supports the "go-to definition" feature.
+    When the cursor of the mouse is hovering an entity (variable, CSS class, type, etc.), and the command CTRL + click is triggered, the editor jumps to where this entity is defined, if the language server can find it.
+    Here's what Biome is able to resolve:
+    - Variables and types used in JavaScript modules, defined in the same file or imported from another module.
+    - JSX Components used in JavaScript modules, defined in the same file or imported from another module.
+    - CSS classes used in JSX and HTML-ish files (Vue, Svelte and Astro), and defined in CSS files.
+    - Components used in HTML-ish files and defined in other HTML-ish.
+    - Variables used in HTML-ish files and defined in the same file or imported from another module (JavaScript or HTML-ish).
+  - #10070 bae0710 Thanks @Conaclos! - Added the :STYLE: group matcher for organizeImports that matches style imports.
+    For example, the following configuration...
+    {
+      "assist": {
+        "actions": {
+          "source": {
+            "organizeImports": {
+              "level": "on",
+              "options": {
+                "groups": ["**", "!:STYLE:"],
+                "sortBareImports": true
+              }
+            }
+          }
+        }
+      }
+    }
+    ...places style imports last:
+    - import "./style.css"
+      import A from "./a.js"
+    + import "./style.css"
+  - #9170 e3107de Thanks @mdrobny! - Added bundleDependencies option to NoUndeclaredDependencies rule.
+    This rule now supports imports of packages that are defined only in bundleDependencies and bundledDependencies arrays.
+  - #9547 01f8473 Thanks @mujpao! - Added new assist rule useSortedAttributes for HTML, porting the existing JSX rule. This rule enforces sorted HTML attributes.
+    Invalid
+    <input type="text" id="name" name="name" />
+  - #9366 2ca1117 Thanks @dyc3! - Added the html.parser.vue configuration option. When enabled, it adds support for the parsing of Vue in .html files. Most Vue users don't need to enable this option since Vue files typically use the .vue extension, but it can be useful for projects that embed Vue syntax in regular HTML files.
+  - #9073 74b20ee Thanks @chocky335! - Added support for applying GritQL plugin rewrites as code actions. GritQL plugins that use the rewrite operator (=>) now produce fixable diagnostics for JavaScript, CSS, and JSON files. By default, plugin rewrites are treated as unsafe fixes and require --write --unsafe to apply. Plugin authors can pass fix_kind = "safe" to register_diagnostic() to mark a fix as safe, allowing it to be applied with just --write.
+    Example plugin (useConsoleInfo.grit):
+    language js
+    `console.log($msg)` as $call where {
+        register_diagnostic(span = $call, message = "Use console.info instead of console.log.", severity = "warn", fix_kind = "safe"),
+        $call => `console.info($msg)`
+    }
+    Running biome check --write applies safe rewrites. Unsafe rewrites (the default, or fix_kind = "unsafe") still require --write --unsafe.
+  - #9384 f4c9edc Thanks @Conaclos! - Added the sortBareImports option to organizeImports,
+    which allows bare imports to be sorted within other imports when set to false.
+    {
+      "assist": {
+        "actions": {
+          "source": {
+            "organizeImports": {
+              "level": "on",
+              "options": { "sortBareImports": true }
+            }
+          }
+        }
+      }
+    }
+    - import "b";
+      import "a";
+    + import "b";
+      import { A } from "a";
+    + import "./file";
+      import { Local } from "./file";
+    - import "./file";
+  - #8731 e7872bf Thanks @siketyan! - Added the watch mode (--watch) to the CLI for check/format/lint commands. By enabling this option, Biome will re-run the check automatically when any file in the workspace has changed after the first run.
+  - #10106 9b35f78 Thanks @ematipico! - Biome can now format and lint .svg files.
+  - #9967 e9b6c17 Thanks @dyc3! - Added HTML support for noExcessiveLinesPerFile. Biome now reports HTML files that exceed the configured line limit, including when skipBlankLines is enabled.
+  - #9491 b3eb63c Thanks @IxxyDev! - Added the HTML lint rule noAriaUnsupportedElements. This rule enforces that elements that do not support ARIA roles, states, and properties (meta, html, script, style) do not have role or aria-* attributes.
+    <!-- Invalid: meta does not support aria attributes -->
+    <meta charset="UTF-8" role="meta" />
+  - #9306 afd57a6 Thanks @viraxslot! - Added the noNoninteractiveTabindex lint rule for HTML. This rule enforces that tabindex is not used on non-interactive elements, as it can cause usability issues for keyboard users.
+    <div tabindex="0">Invalid: non-interactive element</div>
+    `
+ReleaseNotesUrl: https://github.com/biomejs/biome/releases/tag/@biomejs/biome@2.5.0
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://biomejs.dev/guides/getting-started/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

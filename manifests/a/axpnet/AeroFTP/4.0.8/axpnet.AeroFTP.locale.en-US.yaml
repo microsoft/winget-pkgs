@@ -1,0 +1,73 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: axpnet.AeroFTP
+PackageVersion: 4.0.8
+PackageLocale: en-US
+Publisher: axpnet
+PublisherUrl: https://github.com/axpnet
+PublisherSupportUrl: https://github.com/axpnet/aeroftp/issues
+Author: axpnet
+PackageName: AeroFTP
+PackageUrl: https://github.com/axpnet/aeroftp
+License: GPL-3.0
+LicenseUrl: https://github.com/axpdev-lab/aeroftp/blob/HEAD/LICENSE
+ShortDescription: A modern, multi-protocol file manager and FTP client with integrated AI, cloud sync, and military-grade encryption.
+Description: |-
+  AeroFTP is an open-source, multi-protocol file manager built with Tauri 2 (Rust + React 18 + TypeScript).
+  It supports 16 protocols (FTP, FTPS, SFTP, WebDAV, S3, Google Drive, Dropbox, OneDrive, MEGA, Box, pCloud, Azure Blob, 4shared, Filen, Zoho WorkDrive, and Cryptomator vaults),
+  features an AI assistant with 45 tools and 15 LLM providers, military-grade encrypted vaults (AES-256-GCM-SIV + Argon2id),
+  bidirectional real-time sync, a built-in code editor, SSH terminal, and media player with visualizers.
+  Available in 47 languages with 4 themes.
+Moniker: aeroftp
+Tags:
+- cloud-storage
+- encryption
+- file-manager
+- file-transfer
+- ftp
+- ftp-client
+- multi-protocol
+- rust
+- s3
+- sftp
+- sync
+- tauri
+- webdav
+ReleaseNotes: |-
+  [4.0.8] - 2026-06-22
+  AeroProgress, Quick Connect Polish and AeroCrypt as a First-Class Profile
+  A flagship pass on the transfer and encryption progress experience (AeroProgress): the floating transfer card is back with a lane per file, live speed, ETA and bytes, a collapsible speed graph and per-theme styling, and the Transfer Queue, vault creation and cross-profile transfers all report real progress instead of a bare spinner or a frozen "Streaming" state. Around it, Quick Connect gets the polish from Ehud Kirsh's v4.0.6 connection review (#215), including a per-mode credential isolation fix and an app-aware local-bridge detector, and AeroCrypt is promoted from the roadmap to a first-class Crypt profile type with a navigate-out encrypted scope (#272). The Windows portable build and the contributor setup docs round out the release.
+  Added
+  - AeroCrypt is a first-class Crypt profile type: the native AeroCrypt overlay and the rclone-crypt interop overlay (equal grade) now show as a single Crypt class in My Servers and in aeroftp-cli profiles, with an Encrypted marker on the card, instead of living only in CLI commands and .sh / .ps1 automation. Public share links and server-side checksums are disabled while inside the encrypted area, since they would act on ciphertext, not your file. (@EhudKirsh, #272)
+  - Navigate-out encrypted scope: one connection can bind the overlay to a subfolder, show its contents decrypted, and step above it to see the rest of the server in clear (the path-bar badge switches to an "outside" state), then step back in to transparent decryption. A single fail-closed rule drives the badge, the transfer routing and the action gating, so the badge can never disagree with what an operation actually does. (@EhudKirsh, #272)
+  - Live progress bar for AeroVault create and add: creating a vault or adding files now shows a live progress bar for the compression and encryption stage with real bytes, instead of a bare spinner, which is most useful on a large vault that takes a few seconds.
+  - App-aware local-bridge detector: the Filen Desktop / MEGAcmd "Local WebDAV / Local S3" modes show a live 🔴/🟠/🟢 status dot and an app-aware message (not installed / installed but not running / active) in place of the static "Requires …" warning, and Save is disabled only when the helper app is confidently not installed. (@EhudKirsh, #215)
+  - CLI aeroftp profiles --health: an opt-in flag that probes the local-bridge helper apps for every bridge profile and prints a 🔴/🟠/🟢 status line after the table, mirroring the GUI detector (off by default so the plain listing stays instant). (@EhudKirsh, #215)
+  - Per-theme progress styling: the progress card, the shared progress bar and the speed graph have a dedicated look for every one of the 8 app themes (light, dark, true dark, tokyo, cyber, green, ice, redhorse), instead of the extra themes falling back to the dark gradient.
+  - Settings opt-out for the transfer progress card: shown by default, under Settings then General, for users who prefer not to see it.
+  - Export a technical report from an open vault and OS drag-and-drop with mixed file/folder staging for AeroVault.
+  - Change Mode for an open vault: re-pack a vault under a new security level (Standard / Advanced / Paranoid / Archive), compression profile and Error Correction, keeping the same password. It moves a vault between the v2 and v3 formats and toggles the AES + ChaCha20 cascade by re-encrypting every file in place, available next to Change Password in the GUI and as aeroftp vault change-mode in the CLI. (@EhudKirsh)
+  - Full AeroVault command parity in the CLI, so every file-management operation in the GUI is now scriptable for automation and agents: add --to-dir, add-dir (recursive folder add), extract-all (whole-vault, tree-preserving), mkdir, rm, mv, cp, change-password, compact, scan-dir, sync-compare / sync-apply and recovery-status, each auto-detecting the v2 / v3 format from the file.
+  Changed
+  - Archive vault preset lowered to zstd -15: a better ratio-to-speed balance for the Archive compression preset.
+  - Bundled aerovault crate updated to 0.6.3: the shared AEROVAULT3 core gains streaming seal and extract (constant-memory on large vaults), progress callbacks behind the new live vault progress bar, and per-shard error-correction health, all from a single audited implementation published on crates.io and pinned byte-for-byte with the app via the cross-implementation golden.
+  - Dependencies panel now covers every direct crate: the in-app Help then Dependencies check expanded from 49 to 115 monitored crates (all direct dependencies of the desktop app and CLI), grouped into Core, Protocols, Security, Archives, CLI & Tools, System and Plugins, each resolved from Cargo.lock and checked live against crates.io so an available update or a major bump is visible at a glance. log was advanced to 0.4.33 (a safe patch); tauri, suppaftp and aes-kw are deliberately held at their pinned versions for compatibility.
+  Fixed
+  - AeroProgress: the rich transfer card is back: the floating card was demoted to a bare percentage pill by an earlier Transfer Queue refactor. It now shows a lane per file (parallel uploads and downloads at once), live speed, ETA and bytes, a collapsible speed graph and a minimize-to-chip control, all from the real data the backend already reported.
+  - Transfer Queue real progress: a bar per active file plus an aggregate footer with the X of Y file counter, replacing the previous one-pixel strip and plain percentage.
+  - Real transfer progress over SFTP and cloud: transfers show the real filling bar with live speed and ETA instead of a frozen "Streaming" state, and large file uploads complete reliably. The floating card stays locked while a transfer runs (minimize only, no dismiss until 100 percent), the queue bar reflects only the current transfer, and every percentage is rounded.
+  - Real aggregate ETA for folder and multi-file transfers: a byte-based aggregate ETA computed from the actual remaining bytes over the live combined speed, instead of a blank zero, with each queued file showing its own live speed.
+  - Cross-profile transfer ETA and shared AeroSync bar: server-to-server transfers show a real ETA, and AeroSync uses the same shared progress bar as the rest of the app instead of its own inline strip.
+  - AeroProgress hardening after an independent correctness, security and performance review: the aggregate snapshot is matched to its own transfer so concurrent folder transfers cannot skew each other's ETA, the displayed percentage is clamped, malformed sizes can no longer render as NaN, and Transfer Queue rows are memoized so a long queue stays smooth.
+  - Native delta sync re-enabled over SFTP: byte-level differential transfer fills the card with live wire-byte progress. It had been routed through the classic streaming path because it showed no progress and a brand-new upload whose compressed delta exceeded the protocol frame limit failed outright; the delta payload is now split into protocol-safe frames, so those large uploads complete.
+  - Windows portable ZIP ships the CLI: the portable .zip bundled only AeroFTP.exe, so the headless aeroftp-cli (and Mount a folder, which calls it) was unavailable in portable mode while the .msi / .exe installers already included it. The portable ZIP now ships aeroftp-cli.exe and aeroftp-dispatch.exe next to AeroFTP.exe, with a hard-fail packaging guard so a future build cannot silently drop them. (@Trihedraf, #342)
+  - Quick Connect feedback from the v4.0.6 connection review: the Filen local-bridge admin default now shows as the username/password placeholder instead of being masked by the generic WebDAV default; the Filen CLI API key is documented like the 2FA secret (stored encrypted, reused on reconnect, with an edit-time "already saved" indicator); the MEGAcmd "Fetch URL" hint is corrected and the native ↔ MEGAcmd toggle is unlocked while editing; Koofr and OpenDrive drop the per-protocol "remember credentials" opt-in (one credential set), while Convert and Save-as-new carry that opt-in onto the new profile; the ⭐ favourite and server-group membership survive a protocol switch; and the InfiniCloud and GitHub auth-method toggles are switchable while editing. (@EhudKirsh, #215)
+  - Collapsible bridge setup box: the tall "Setup … first" instruction box on the bridge modes auto-collapses once the bridge is active and expands while it is not. (@EhudKirsh, #215)
+  - CLI interactive profiles refresh is consistent across terminals: the . refresh now clears the scrollback too (ESC[3J), so Alacritty / pwsh / Windows Terminal no longer keep old tables stacked while WezTerm wiped them. (#341)
+  - Crypt overlay survives export/import: exporting a profile that carries an encrypted overlay and re-importing it now round-trips the binding for both overlay kinds (it previously dropped on import and came back as plaintext), and the stored-credential indicators reflect exactly what was restored. (@EhudKirsh, #272)
+  - Visual consistency: the floating transfer card and several dialogs (host key, permissions, insecure-certificate warning, keystore import result) share the same corner radius as the Transfer Queue panel and the other app dialogs.
+  - Cryptomator vaults are interoperable with the real Cryptomator: "Create Cryptomator Vault..." from a selection now encrypts the selected files and folders into the vault instead of leaving it empty, and AeroFTP vaults round-trip byte-for-byte with the official Cryptomator in both directions. Two format defects were fixed alongside the empty-vault one: directory-ID hashing (AES-SIV with zero associated-data components per RFC 5297, not one empty component) and encrypted-filename encoding (padded base64url, not unpadded), both of which a real Cryptomator requires. Proven bidirectionally against cryptomator-cli 0.6.2 (cryptofs 2.8.0) with sha256 byte-identity, and covered by new round-trip, edge-case and reverse-read tests. (@EhudKirsh, #322)
+ReleaseNotesUrl: https://github.com/axpdev-lab/aeroftp/releases/tag/v4.0.8
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
