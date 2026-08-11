@@ -3,15 +3,24 @@ PackageVersion: 6.0.1
 InstallerType: zip
 NestedInstallerType: portable
 Installers:
-  - Architecture: neutral
+  - Architecture: x64
     NestedInstallerFiles:
       - RelativeFilePath: gru953-studio.cmd
         PortableCommandAlias: gru953-studio
     # The launcher loads the CLI from src/ beside itself via %~dp0, so it only works
-    # from the folder it was extracted into. With the default, a .cmd invoked through
+    # from the folder it was extracted into. Without this, a .cmd invoked through
     # winget's alias resolves %~dp0 to the alias's directory, where src/ does not
-    # exist — it would install cleanly and then fail to run. Adding the install
-    # location to PATH instead is correct for a script with sibling files.
+    # exist — it would install cleanly and then fail to run.
+    ArchiveBinariesDependOnPath: true
+    InstallerUrl: https://github.com/GRU-953/GRU953-Studio/releases/download/v6.0.1/gru953-studio-windows-portable-6.0.1.zip
+    InstallerSha256: 5E9EA972E08EB7F831CE6DE6F7FAA34F58178BAE8A17363B873CDAF14BFDFDA7
+    Dependencies:
+      PackageDependencies:
+        - PackageIdentifier: OpenJS.NodeJS
+  - Architecture: arm64
+    NestedInstallerFiles:
+      - RelativeFilePath: gru953-studio.cmd
+        PortableCommandAlias: gru953-studio
     ArchiveBinariesDependOnPath: true
     InstallerUrl: https://github.com/GRU-953/GRU953-Studio/releases/download/v6.0.1/gru953-studio-windows-portable-6.0.1.zip
     InstallerSha256: 5E9EA972E08EB7F831CE6DE6F7FAA34F58178BAE8A17363B873CDAF14BFDFDA7
