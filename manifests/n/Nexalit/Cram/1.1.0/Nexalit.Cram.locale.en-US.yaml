@@ -1,7 +1,7 @@
 # yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
 
 PackageIdentifier: Nexalit.Cram
-PackageVersion: 1.0.2
+PackageVersion: 1.1.0
 PackageLocale: en-US
 Publisher: Nexal IT
 PublisherUrl: https://nexalit.fr
@@ -42,15 +42,19 @@ Tags:
 - tar
 - zip
 ReleaseNotes: |-
-  Fixed: a directory tree more than about 640 levels deep killed the process. Both tree walks
-  recursed, so a scan or a create running on such a tree exhausted its stack and the process
-  disappeared without an error, a diagnostic or an exit code that said anything useful. Both walks
-  now carry their own stack, so depth is bounded by memory.
+  Added: a duplicate scan now reports what it has found while it is still running, instead of saying
+  nothing for the minutes it takes to walk a drive.
 
-  Added: a checkpoint file that outlives a run which dies without unwinding. A running operation
-  records its phase, item count and current depth once a second and deletes the file when it
-  finishes, so a file left behind is itself evidence the run did not, and says where it stopped.
-ReleaseNotesUrl: https://github.com/lukr54/cram/releases/tag/v1.0.2
+  Fixed: a look-alike group could swallow hundreds of unrelated images. Grouping was by perceptual
+  hash alone, unioned, which is single-linkage clustering, so one bridging pair merged two sets that
+  resembled each other not at all. A candidate pair is now verified against the pixels.
+
+  Fixed: a cancelled extraction removed more than it wrote. It now takes back only files and
+  directories that did not exist when it created them.
+
+  Fixed: a directory cycle walked forever. Past 1,000 levels the walk checks file identity and stops
+  when it reaches somewhere it has already been.
+ReleaseNotesUrl: https://github.com/lukr54/cram/releases/tag/v1.1.0
 Documentations:
 - DocumentLabel: README
   DocumentUrl: https://github.com/lukr54/cram/blob/main/README.md
