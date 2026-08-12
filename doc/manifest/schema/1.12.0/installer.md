@@ -987,6 +987,17 @@ This field controls the scope which will be used when using Entra Id for downloa
 
 </details>
 
+</details>
+
+<details>
+ <summary><b>MSStoreProductIdentifier</b> - The Microsoft Store app ID</summary>
+
+**Optional Field**
+
+This field lists the Microsoft Store app ID of the app's corresponding Microsoft Store listing (if any).
+
+</details>
+
 <details>
  <summary><b>ManifestType</b> - The manifest type</summary>
 
