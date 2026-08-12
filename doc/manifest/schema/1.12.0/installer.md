@@ -106,6 +106,7 @@ Installers:                                # The list of package installers
       MicrosoftEntraIdAuthenticationInfo:  # Information required for Entra Id authentication in private sources
         Resource:                          # The resource to use for Microsoft Entra Id authentication
         Scope:                             # The scope of Microsoft Entra Id authentication for the resource
+    MSStoreProductIdentifier:              # Optional Microsoft Store app ID of the app's Microsoft Store listing
 ManifestType: installer                    # The manifest type
 ManifestVersion: 1.12.0                    # The manifest syntax version
 ```
