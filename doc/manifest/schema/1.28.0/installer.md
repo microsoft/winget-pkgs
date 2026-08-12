@@ -1085,6 +1085,15 @@ This field controls the fully qualified type name of the DSC v3 resource. The ty
 </details>
 
 <details>
+ <summary><b>MSStoreProductIdentifier</b> - The Microsoft Store app ID</summary>
+
+**Optional Field**
+
+This field lists the Microsoft Store app ID of the app's corresponding Microsoft Store listing (if any).
+
+</details>
+
+<details>
  <summary><b>ManifestType</b> - The manifest type</summary>
 
 **Required Field**
