@@ -115,6 +115,7 @@ Installers:                                # The list of package installers
       DSCv3:                               # *Not implemented* DSC resources contained in the package using the DSC v3 specification
         Resources:                         # *Not implemented* The DSC v3 resources contained in the package
           - Type:                          # *Not implemented* The fully qualified type name of the DSC v3 resource
+    MSStoreProductIdentifier:              # Optional Microsoft Store app ID of the app's Microsoft Store listing
 ManifestType: installer                    # The manifest type
 ManifestVersion: 1.28.0                    # The manifest syntax version
 ```
