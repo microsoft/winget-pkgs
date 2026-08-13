@@ -1,0 +1,64 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Lime.Lime
+PackageVersion: 1.109.0
+PackageLocale: zh-CN
+Publisher: Lime
+PublisherUrl: https://limeai.run/
+PublisherSupportUrl: https://github.com/limecloud/lime/issues
+PrivacyUrl: https://limeai.run/privacy/
+PackageName: Lime
+PackageUrl: https://limeai.run/
+License: 专有软件
+LicenseUrl: https://limeai.run/terms/
+Copyright: © 2026 Lime
+ShortDescription: 给中文创作者用的开源 AI 内容工作台
+Description: |-
+  Lime 是一个开源的 Electron 桌面端 AI 内容工作台，面向中文创作者、品牌运营、研究型写作者和小团队，覆盖 AI 写作、选题研究、素材管理、提示词沉淀、知识库和多模型创作流程。
+
+  你可以把它理解成一个更适合长期创作的 AI 工作台：
+  - 不是只问一句、答一句，而是围绕一个项目持续推进
+  - 不是每次都重新找资料、重新写提示词，而是把参考、风格和做法沉淀下来
+  - 不是生成完就散落在聊天记录里，而是把结果保存起来，下一次还能继续用
+  - 不是绑定某一家 AI 服务，而是让你使用自己已经配置好的模型能力
+  如果你经常在收藏夹、文档、聊天工具、图片工具和模型后台之间来回切换，Lime 想帮你把这些动作收回到同一个创作空间里。
+
+  你可以用 Lime 做什么
+  - AI 写作与内容创作：写公众号文章、小红书笔记、视频脚本、播客提纲和直播话术
+  - 资料研究与知识整理：整理网页、笔记、截图、访谈和历史材料，生成报告或简报
+  - 选题分析与内容复盘：拆解爆款案例、竞品内容、发布节奏和表达风格
+  - 提示词管理与风格复用：保存常用写法、品牌语气、选题方法和团队模板
+  - 多模态创作准备：生成图片提示词、封面方向、演示稿结构或网页草稿
+  - 多模型工作流：使用自己配置的 AI 服务商和模型，在同一个任务里持续修改、扩写、压缩或换平台发布
+ReleaseNotes: |-
+  Lime v1.109.0
+  新功能
+  - 新增 App Server v2 thread/fork，支持按完整历史、指定 Turn 或边界复制 canonical Thread/Turn/Item 前缀，并在重启后从 canonical history 恢复 provider 上下文。
+  - 新增 v2 thread/delete，以原子子树快照清理持久化与 pending-only 子线程、运行态、Goal、mailbox、trace、telemetry 和投影，并广播 thread/deleted。
+  - Thread Goal 支持 terminal 后自动续跑、idle wall-time 计量、恢复 admission 与 fork 延迟继承，统一由 canonical goal store 和 continuation owner 管理。
+  - App Server client 与 Agent runtime client 新增 typed reverse server-request 回包能力，仅使用 JSON-RPC outer id 完成响应或拒绝。
+  修复
+  - 修复 fork history 在工具调用、MCP、Reasoning、Context Compaction 与冷启动恢复时的重复、缺失和 lineage 断裂；无法无损表达的历史继续 fail closed。
+  - 修复 Provider 模型缓存跨凭证串用，以及 host-managed、图片和 Plugin worker 路径丢失已解析 credential identity 后重新选路的问题。
+  - 修复 Provider protocol 依赖名称猜测的问题；current client 现在要求 route 显式给出协议，缺失时返回不可重试的配置错误。
+  - 修复 MCP stdio 启动继承宿主敏感环境、启动超时被隐式放大和停止时遗留子进程树的问题，并兼顾 macOS 与 Windows 进程清理。
+  - 移除 Claw 空白布局判定中的临时调试日志，避免正常空态产生生产 console 噪音。
+  优化与重构
+  - 删除生产 agentSession/delete 协议、schema、dispatch 与客户端入口，线程删除唯一收口到 v2 thread/delete。
+  - Plugin runtime 的 approval、AskUser 与 MCP elicitation 回包迁移到 typed reverse request responder，不再通过 action metadata 猜测 waiter。
+  - MCP runtime 增加显式 environment identity、auth scopes、step snapshot generation 与 elicitation provenance；本地 stdio 启动收口到单一 launcher/process owner。
+  - Provider history、Goal continuation、fork seed、projection repair 和 compaction prompt boundary 收口到 canonical Thread/Turn/Item 事实源，不复制 raw EventLog 作为第二套历史。
+  - Plugin worker turn 复用 credential-scoped model metadata cache，并通过 application additional context 传递业务 metadata。
+  测试与质量
+  - 扩展 ThreadGoal、public fork/delete、AgentControl fork、compaction lineage、provider cache/route、typed reverse request 与 MCP lifecycle/provenance 的单元、集成和公共 JSON-RPC 回归。
+  - 更新 v2 schema、生成类型、package client、Renderer gateway 与 contract/legacy guard，防止旧 session delete 和 metadata-routed action response 回流。
+  - 内容工厂 Plugin worker scoped model cache Gate B 通过真实 Electron、App Server current JSON-RPC、RuntimeCore、Provider metadata 与 Article Editor 投影链路。
+  文档
+  - 更新全局架构、Codex 对齐协调计划、Writing v2 验证记录与本次发布执行计划。
+  其他
+  - 版本事实源更新到 1.109.0：根应用、CLI npm package、Rust workspace、lime-rs/Cargo.lock 和 release notes。
+  完整变更：v1.108.0 → v1.109.0
+ReleaseNotesUrl: https://github.com/limecloud/lime/releases/tag/v1.109.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

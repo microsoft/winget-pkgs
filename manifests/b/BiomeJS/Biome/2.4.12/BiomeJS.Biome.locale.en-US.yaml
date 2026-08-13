@@ -1,0 +1,145 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: BiomeJS.Biome
+PackageVersion: 2.4.12
+PackageLocale: en-US
+Publisher: BiomeJS
+PublisherUrl: https://biomejs.dev/
+PublisherSupportUrl: https://github.com/biomejs/biome/issues
+Author: Biome Developers and Contributors
+PackageName: Biome
+PackageUrl: https://biomejs.dev/
+License: Apache-2.0
+Copyright: Copyright (c) 2023-present Biome Developers and Contributors
+ShortDescription: Biome is a toolchain for web projects, aimed at providing functionalities to maintain them. It offers a formatter and linter, usable via CLI and LSP.
+Moniker: biome
+Tags:
+- css
+- formatter
+- javascript
+- json
+- jsx
+- linter
+- static-code-analysis
+- typescript
+- web
+ReleaseNotes: |-
+  2.4.12
+  
+  Patch Changes
+  - #9376 9701a33 Thanks @dyc3! - Added the nursery/noIdenticalTestTitle lint rule. This rule disallows using the same title for two describe blocks or two test cases at the same nesting level.
+    describe("foo", () => {});
+    describe("foo", () => {
+      // invalid: same title as previous describe block
+      test("baz", () => {});
+      test("baz", () => {}); // invalid: same title as previous test case
+    });
+  - #9889 7ae83f2 Thanks @dyc3! - Improved the diagnostics for useForOf to better explain the problem, why it matters, and how to fix it.
+  - #9916 27dd7b1 Thanks @Jayllyz! - Added a new nursery rule noComponentHookFactories, that disallows defining React components or custom hooks inside other functions.
+    For example, the following snippets trigger the rule:
+    function createComponent(label) {
+      function MyComponent() {
+        return <div>{label}</div>;
+      }
+      return MyComponent;
+    }
+    function Parent() {
+      function Child() {
+        return <div />;
+      }
+      return <Child />;
+    }
+  - #9980 098f1ff Thanks @ematipico! - Fixed #9941: Biome now emits a warning diagnostic when a file exceed the files.maxSize limit.
+  - #9942 9956f1d Thanks @dyc3! - Fixed #9918: useConsistentTestIt no longer panics when applying fixes to chained calls such as test.for([])("x", () => {});.
+  - #9891 4d9ac51 Thanks @dyc3! - Improved the noGlobalObjectCalls diagnostic to better explain why calling global objects like Math or JSON is invalid and how to fix it.
+  - #9902 3f4d103 Thanks @ematipico! - Fixed #9901: the command lint --write is now idempotent when it's run against HTML-ish files that contains scripts and styles.
+  - #9891 4d9ac51 Thanks @dyc3! - Improved the noMultiStr diagnostic to explain why escaped multiline strings are discouraged and what to use instead.
+  - #9966 322675e Thanks @siketyan! - Fixed #9113: Biome now parses and formats @media and other conditional blocks correctly inside embedded CSS snippets.
+  - #9835 f8d49d9 Thanks @bmish! - The noFloatingPromises rule now detects floating promises through cross-module generic wrapper functions. Previously, patterns like export const fn = trace(asyncFn) — where trace preserves the function signature via a generic <F>(fn: F): F — were invisible to the rule when the wrapper was defined in a different file.
+  - #9981 02bd8dd Thanks @siketyan! - Fixed #9975: Biome now parses nested CSS selectors correctly inside embedded snippets without requiring an explicit &.
+  - #9949 e0ba71d Thanks @Netail! - Added the nursery rule useIframeSandbox, which enforces the sandbox attribute for iframe tags.
+    Invalid:
+    <iframe></iframe>
+  - #9913 d417803 Thanks @Netail! - Added the nursery rule noJsxNamespace, which disallows JSX namespace syntax.
+    Invalid:
+    <ns:testcomponent />
+  - #9892 e75d70e Thanks @dyc3! - Improved the noSelfCompare diagnostic to better explain why comparing a value to itself is suspicious and what to use for NaN checks.
+  - #9861 2cff700 Thanks @dyc3! - Added the new nursery rule useVarsOnTop, which requires var declarations to appear at the top of their containing scope.
+    For example, the following code now triggers the rule:
+    function f() {
+      doSomething();
+      var value = 1;
+    }
+  - #9892 e75d70e Thanks @dyc3! - Improved the noThenProperty diagnostic to better explain why exposing then can create thenable behavior and how to avoid it.
+  - #9892 e75d70e Thanks @dyc3! - Improved the noShorthandPropertyOverrides diagnostic to explain why later shorthand declarations can unintentionally overwrite earlier longhand properties.
+  - #9978 4847715 Thanks @mdevils! - Fixed #9744: useExhaustiveDependencies no longer reports false positives for variables obtained via object destructuring with computed keys, e.g. const { [KEY]: key1 } = props.
+  - #9892 e75d70e Thanks @dyc3! - Improved the noRootType diagnostic to better explain that the reported root type is disallowed by project configuration and how to proceed.
+  - #9927 7974ab7 Thanks @dyc3! - Added eslint-plugin-unicorn's no-nested-ternary as a rule source for noNestedTernary
+  - #9873 19ff706 Thanks @minseong0324! - noMisleadingReturnType now checks class methods, object methods, and getters in addition to functions.
+  - #9888 362b638 Thanks @dyc3! - Updated metadata for biome migrate eslint to better reflect which ESLint rules are redundant versus unsupported versus unimplemented.
+  - #9892 e75d70e Thanks @dyc3! - Improved the noAutofocus diagnostic to better explain why autofocus harms accessibility outside allowed modal contexts.
+  - #9982 d6bdf4a Thanks @dyc3! - Improved performance of noMagicNumbers.
+    Biome now maps ESLint no-magic-numbers sources more accurately during biome migrate eslint.
+  - #9889 7ae83f2 Thanks @dyc3! - Improved the diagnostics for noConstantCondition to better explain the problem, why it matters, and how to fix it.
+  - #9866 40bd180 Thanks @dyc3! - Added a new nursery rule noExcessiveSelectorClasses, which limits how many class selectors can appear in a single CSS selector.
+  - #9796 f1c1363 Thanks @dyc3! - Added a new nursery rule useStringStartsEndsWith, which prefers startsWith() and endsWith() over verbose string prefix and suffix checks.
+    The rule uses type information, so it only reports on strings and skips array lookups such as items[0] === "a".
+  - #9942 9956f1d Thanks @dyc3! - Fixed the safe fix for noSkippedTests so it no longer panics when rewriting skipped test function names such as xit(), xtest(), and xdescribe().
+  - #9874 9e570d1 Thanks @minseong0324! - Type-aware lint rules now resolve members through Pick<T, K> and Omit<T, K> utility types.
+  - #9909 0d0e611 Thanks @Netail! - Added the nursery rule useReactAsyncServerFunction, which requires React server actions to be async.
+    Invalid:
+    function serverFunction() {
+      "use server";
+      // ...
+    }
+  - #9925 29accb3 Thanks @ematipico! - Fixed #9910: added support for parsing member expressions in Svelte directive properties. Biome now correctly parses directives like in:renderer.in|global, use:obj.action, and deeply nested forms like in:a.b.c|global.
+  - #9904 e7775a5 Thanks @ematipico! - Fixed #9626: noUnresolvedImports no longer reports false positives for named imports from packages that have a corresponding @types/* package installed. For example, import { useState } from "react" with @types/react installed is now correctly recognised.
+  - #9942 9956f1d Thanks @dyc3! - Fixed the safe fix for noFocusedTests so it no longer panics when rewriting focused test function names such as fit() and fdescribe().
+  - #9577 c499f46 Thanks @tt-a1i! - Added the nursery rule useReduceTypeParameter. It flags type assertions on the initial value passed to Array#reduce and Array#reduceRight and recommends using a type parameter instead.
+    // before: type assertion on initial value
+    arr.reduce((sum, num) => sum + num, [] as number[]);
+    // after: type parameter on the call
+    arr.reduce<number[]>((sum, num) => sum + num, []);
+  - #9895 1c8e1ef Thanks @Netail! - Added extra rule sources from react-xyz. biome migrate eslint should do a bit better detecting rules in your eslint configurations.
+  - #9891 4d9ac51 Thanks @dyc3! - Improved the noInvalidUseBeforeDeclaration diagnostic to better explain why using a declaration too early is problematic and how to fix it.
+  - #9889 7ae83f2 Thanks @dyc3! - Improved the diagnostics for noRedeclare to better explain the problem, why it matters, and how to fix it.
+  - #9875 a951586 Thanks @minseong0324! - Type-aware lint rules now resolve members through Partial<T>, Required<T>, and Readonly<T> utility types, preserving optional, readonly, and nullable member flags.
+  
+  What's Changed
+  - fix(migrate): update some more rule metadata by @dyc3 in #9888
+  - chore: extra rule sources by @Netail in #9895
+  - fix(core): idempotent lint write by @ematipico in #9902
+  - chore: just a small harness to prevent markdown leaking by @ematipico in #9906
+  - fix(lint/js): improve diagnostics for noConstantCondition, useForOf, noRedeclare by @dyc3 in #9889
+  - fix(resolver): resolution of namespace members by @ematipico in #9904
+  - feat(lint/js): add noExcessiveSelectorClasses by @dyc3 in #9866
+  - fix(lint/js): improve diagnostics for noSelfCompare, noThenProperty, noShorthandPropertyOverrides, noRootType, noAutofocus by @dyc3 in #9892
+  - fix(lint/js): improve diagnostics for noGlobalObjectCalls, noMultiStr, noInvalidUseBeforeDeclaration by @dyc3 in #9891
+  - feat(lint): implement useReduceTypeParameter nursery rule by @tt-a1i in #9577
+  - feat(css): extend SCSS parsing with function names, interpolated values by @denbezrukov in #9837
+  - chore: ignore rand unsoundness advisory by @dyc3 in #9923
+  - feat(lint/js): add noIdenticalTestTitle by @dyc3 in #9376
+  - feat(js_analyze): implement noJsxNamespace by @Netail in #9913
+  - fix: main release by @Netail in #9924
+  - feat(lint/js): add useStringStartsEndsWith by @dyc3 in #9796
+  - feat(md/fmt): better formatting for some cases by @ematipico in #9917
+  - fix(parse/html): svelte directive member expression by @ematipico in #9925
+  - feat(js_analyze): implement useReactAsyncServerFunction by @Netail in #9909
+  - feat(react/js): add noComponentHookFactories by @Jayllyz in #9916
+  - chore: add rule source for noNestedTernary by @dyc3 in #9927
+  - refactor(conf): opt-in bpaf by @ematipico in #9920
+  - feat(lint): support class methods, object methods, and getters in noMisleadingReturnType by @minseong0324 in #9873
+  - fix(markdown_parser): paragraph with trailing hard break absorbs following blank line by @jfmcdowell in #9931
+  - fix(markdown_parser): mixed bullet markers and lazy continuation in lists by @jfmcdowell in #9933
+  - fix(useConsistentTestIt): fix panic when applying code fix by @dyc3 in #9942
+  - fix(markdown_parser): restore leading-space stripping after hard line breaks by @jfmcdowell in #9934
+  - chore(deps): update dependency @types/node to v24.12.2 by @renovate[bot] in #9954
+  - chore(deps): update dependency tombi to v0.9.16 by @renovate[bot] in #9955
+  - feat(type-info): add Partial, Required, and Readonly type synthesis by @minseong0324 in #9875
+ReleaseNotesUrl: https://github.com/biomejs/biome/releases/tag/@biomejs/biome@2.4.12
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://biomejs.dev/guides/getting-started/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

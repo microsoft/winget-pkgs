@@ -1,0 +1,54 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: endev.aube
+PackageVersion: 1.27.0
+PackageLocale: en-US
+Publisher: en.dev
+PublisherUrl: https://en.dev/
+PublisherSupportUrl: https://github.com/endevco/aube/discussions/categories/troubleshooting-and-bugs
+Author: en.dev
+PackageName: aube
+PackageUrl: https://aube.en.dev/
+License: MIT
+LicenseUrl: https://github.com/endevco/aube/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 en.dev inc
+CopyrightUrl: https://github.com/endevco/aube/blob/HEAD/LICENSE
+ShortDescription: A fast Node.js package manager
+Description: |-
+  aube is a package manager for Node.js projects. It uses pnpm-style isolated node_modules for fast, disk-efficient installs.
+
+  Existing projects keep their lockfile format. aube reads and writes pnpm-lock.yaml, package-lock.json, npm-shrinkwrap.json, yarn.lock, and bun.lock in place. New projects without a supported lockfile get aube-lock.yaml.
+
+  Why Try It
+  - Fast installs. Warm installs are about 8x faster than pnpm and about 5x faster than Bun in the current benchmarks. Repeat test commands run up to 35x faster than pnpm and up to 5x faster than Bun.
+  - Existing lockfiles. Reads and writes pnpm-lock.yaml, package-lock.json, npm-shrinkwrap.json, yarn.lock, and bun.lock in place.
+  - Cheap repeat commands. aubr test, aube test, and aube exec vitest auto-install when dependencies are stale, then skip that work when nothing changed. aubx uses a local binary when one is installed, or a throwaway environment for one-off tools.
+  - Less disk use. A global content-addressable store lets projects share package files instead of keeping a full copy of the same dependencies in every checkout.
+  - Secure defaults. Out of the box, exotic transitive deps are blocked, lifecycle scripts wait for approval, trust downgrades fail at resolve, and brand-new releases sit in a 24h cooling window. One paranoid: true line adds the build jail and turns the soft gates into hard fails.
+Moniker: aube
+ReleaseNotes: |-
+  A feature release that adds an npm-style aube access command and Git-repository-scoped allowBuilds keys, tightens credential redaction on publish, fixes stale pnpm patch handling after re-resolve, and lays the groundwork for parallel embedded installs by making the explicit-install path fully reentrant.
+  Added
+  - aube access (#1012 by @jdx) — Manage registry package permissions from the CLI, modeled on npm and compatible with pnpm's forms. Subcommands cover get status, list packages / list collaborators, ls packages [entity] (pnpm-compatible), set status=public|private, set mfa=none|publish|automation, grant <permission> <team> <package>, and revoke <team> <package>. Requests use scoped-registry auth, honor --otp for MFA-protected mutations, cap response bodies, and produce distinct errors (ERR_AUBE_ACCESS_ENTITY_NOT_FOUND vs. plain 404). Supports --json for scripting alongside the human-readable default.
+  - Git-repository build approvals (#1010 by @jdx) — allowBuilds rules can now be keyed by a package plus a normalized Git repository URL (for example, native-addon@git+<https repo url>). The commit is intentionally omitted from the key so audited repositories can advance to new SHAs without re-approving each one. Exact per-source approvals and name-only registry approvals still work as before, and deny rules continue to win over allows. Repository rules are applied consistently across lifecycle execution, script jailing, ignored-build reporting, and install graph hashes.
+  - aube add --dangerously-allow-all-builds (#1016 by @risu729) — The broad build-approval flag was previously only accepted on install, so aube add --global <pkg> --dangerously-allow-all-builds (as used by mise) was rejected at parse time. The flag now works on add, is forwarded through local, filtered, and global add paths into the shared install pipeline, and conflicts explicitly with --deny-build=<pkg>. The override is invocation-scoped — it does not persist dangerouslyAllowAllBuilds=true to project config.
+
+  Fixed
+  - Redact inline registry credentials in publish output (#1009 by @jdx) — When a registry URL embeds credentials in the user:secret@host form, publish no longer echoes them raw. The "already published" error, the OIDC token-exchange failure wrapper, and the --dry-run "would PUT to …" line now pass URLs through aube_util::url::redact_url. Dry-run output is centralized in dry_run_outcome_line, with test coverage confirming scoped package targets redact inline auth while preserving the encoded path.
+  - Ignore stale pnpm patch entries after re-resolve (#1022 by @jdx, fixes #1019) — On a non-frozen install that had to re-resolve, overlay_metadata_from was copying patchedDependencies from the previous pnpm-lock.yaml, so removed or wrong-version patches were still being applied and written back. Fresh-resolve now replaces graph.patched_dependencies with the workspace's current read_patched_dependencies, and the pnpm 11 hash-only scalar form is no longer misread as a file path. Bats coverage was added for both the pnpm 10 object form and the pnpm 11 hash-only form.
+
+  Changed
+  - Reentrant explicit-directory installs (#1026 by @jdx) — Removes the process-wide project-lock reentrancy flag that could let an install for project B skip its filesystem lock just because project A was already installing in the same process. Commands that chain into install (add, remove, update, filtered add, ci, dedupe) now hold an explicit ProjectLock guard and call install::run_with_project_lock. Dependency-chain diagnostics move from a global mutex to Tokio task-local state and propagate into spawned fetch and lifecycle tasks, so parallel installs no longer clobber each other's transitive error chains. configure_script_settings also only mutates global script config when scripts aren't disabled.
+  - Per-install runtime and script-settings isolation (#1027 by @jdx) — Building on #1026, Node runtime selection and lifecycle-script settings are now scoped to each explicit install via nested task-local scopes (runtime, aube_scripts) instead of process-wide snapshots. Spawned fetch and dependency-lifecycle tasks inherit the owning install's context via scope_current. The install entry uses run_scoped and Box::pins run_inner to avoid Tokio worker stack overflow when scopes stack, and aube runtime set now re-reads package.json and the lockfile-pinned runtime for its status line rather than trusting a possibly stale process cache. Non-install CLI commands continue to use the process-wide fallbacks. Together with #1026, this is prerequisite groundwork for concurrent embedded installs to drop their addon-wide serialization mutex.
+  - Refreshed benchmarks for v1.26.0 (#1002 by @jdx) — benchmarks/results.json and the README BENCH_RATIOS block regenerated on the hermetic Verdaccio registry against aube 1.26.0 and pnpm 11.10.0. Public ratios shift to ~3× Bun / ~6× pnpm on warm installs and ~3× Bun / ~28× pnpm on the repeat install && test case.
+
+  New Contributors
+  - @risu729 made their first contribution in #1016
+
+  💚 Sponsor aube
+  aube is maintained by @jdx, an open source developer for entire.io, the title sponsor of the jdx.dev open source tools including mise. Work on aube is funded by sponsors.
+  If aube is saving your team install time or CI minutes, please consider sponsoring at jdx.dev. Individual and company sponsorships are what keep the project fast, free, and independent.
+ReleaseNotesUrl: https://github.com/jdx/aube/releases/tag/v1.27.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

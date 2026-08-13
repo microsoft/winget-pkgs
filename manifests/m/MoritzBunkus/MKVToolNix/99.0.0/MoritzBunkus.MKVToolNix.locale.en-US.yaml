@@ -1,0 +1,56 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: MoritzBunkus.MKVToolNix
+PackageVersion: 99.0.0
+PackageLocale: en-US
+Publisher: Moritz Bunkus
+PublisherUrl: https://www.bunkus.org/
+PublisherSupportUrl: https://mkvtoolnix.download/community.html
+PrivacyUrl: https://mkvtoolnix.download/privacy-policy.html
+Author: Moritz Bunkus
+PackageName: MKVToolNix
+PackageUrl: https://mkvtoolnix.download/
+License: GPL-2.0
+LicenseUrl: https://gitlab.com/mbunkus/mkvtoolnix/-/blob/main/COPYING
+Copyright: © 2002 – 2026 Moritz Bunkus
+ShortDescription: MKVToolNix is a set of tools to create, alter and inspect Matroska files under Linux, other Unices and Windows.
+Tags:
+- mkv
+- mkvextract
+- mkvinfo
+- mkvmerge
+- mkvpropedit
+ReleaseNotes: |-
+  New features and enhancements
+  - MKVToolNix GUI: the GUI will now remember the last used directory for selecting audio files for playback in "play audio file" program runners separately from any other "open file"-type situations. This directory will also default to /System/Library/Sounds on macOS now. Implemented by #6213.
+  - MKVToolNix GUI: executing actions → running programs: added new variables: MTX_DESTINATION_FILE_BASE_NAME (the name without the drive letter, path or the suffix; e.b. /movies/A.new.hope.mkv → A.new.hope) and MTX_DESTINATION_FILE_SUFFIX (only the letters after the last ., e.g. /movies/A.new.hope.mkv → mkv). Added examples to all the destination file variables in the popup menu when adding variables in the preferences. Implements parts of #6220.
+  - MKVToolNix GUI: executing actions → running programs: the command-line input widget will now receive focus again after using the popup menu for adding a variable. Implements parts of #6220.
+  - MKVToolNix GUI: executing actions → running programs: the variables will now also be set as environment variables when running a program after a job completes.
+  - MKVToolNix GUI: executing actions → running programs: when using the "Execute now" button for testing the MTX_… variables will be set to the current multiplexer tab's values for easier testing. Implements parts of #6220.
+
+  Bug fixes
+  - mkvmerge: if using legacy font MIME types is off mkvmerge will now remap legacy font MIME types present in source files into the current ones. Patch by corticalcode via #6249.
+  - mkvmerge, mkvpropedit, MKVToolNix GUI's multiplexer & header editor: on Windows & macOS the MIME type detection will now use the FreeDesktop.org MIME database instead of falling back to file extension-based guesses. This matches how it works on other operating systems. This fixes e.g. OpenType fonts being detected as the legacy type application/vnd.ms-opentype instead of the current IETF RFC, font/otf, no matter what the "use legacy font MIME types" settings in the preferences was set to. Fixes #6240 for Windows; fixes #6248 for macOS. Implemented by corticalcode for macOS in #6250.
+  - MKVToolNix GUI: update checker: fixed a potential attempt to read from an invalid memory address if an error occurred when parsing the XML file retrieved from the official MKVToolNix server.
+  - macOS: GUI: the default audio file for program runners of type "play audio file" has been changed to an AIFF file as Qt's Multimedia backend routes through Core Audio which doesn't support WebM/VP8/Vorbis/Opus. Existing configurations will be updated if they point to the prior default WebM audio file. Fixes #6209.
+
+  Build system changes
+  - macOS: build.sh: the Qt installation is now done via cmake --install instead of using classic make as the classic Makefiles produced by Qt's build system are incomplete. Patch by corticalcode. Fixes #6205.
+  - macOS: build.sh: the binaries in the DMG are now stripped of debug symbols. Patch by corticalcode. Fixes #6206.
+  - macOS: build.sh: enabled release build optimizations for dependencies. Patch by corticalcode. Fixes #6207.
+  - macOS: build.sh: disabled use of pkg-config for Qt to prevent linking against installed non-OS libraries such as from Homebrew. Patch by corticalcode. Fixes #6208.
+  - macOS: added support for notarization of a macOS disk image by an Apple developer account. Implementation of #6212 by Touchstone64.
+  - macOS: patch added to make building Qt 6.11 from source possible on macOS 26.4. Patch by Touchstone64.
+  - macOS: additions to DMG package naming including the machine type it targets (arm64 or x86_64) and a revision number (to support re-packaging of an existing MKVToolnix release). For example, MKVToolNix-98.0-1-arm64.dmg would represent the first revision of a DMG package for an Apple Silicon Mac, containing MKVToolNix release 98.0. Implementation by Touchstone64.
+  - macOS: the packaging process now verifies the MKVToolNix source release using the author's GPG key before packaging. Implementation by Touchstone64.
+  - macOS: the app bundle name has been standardised by removing the version number, so DMG packages will contain 'MKVToolNix.app'. Implementation by Touchstone64.
+  - macOS: Qt is now built without printing support, reducing the size of the resulting DMG slightly. Implementation by Corticalcode. Implements #6230.
+ReleaseNotesUrl: https://mkvtoolnix.download/doc/NEWS.md
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://mkvtoolnix.download/docs.html
+- DocumentLabel: FAQ
+  DocumentUrl: https://gitlab.com/mbunkus/mkvtoolnix/-/wikis/FAQ
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

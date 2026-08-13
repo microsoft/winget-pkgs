@@ -1,0 +1,107 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: Fleet.fleetctl
+PackageVersion: 4.71.0
+PackageLocale: en-US
+Publisher: Fleet Device Management Inc.
+PublisherUrl: https://fleetdm.com/
+PublisherSupportUrl: https://github.com/fleetdm/fleet/issues
+PrivacyUrl: https://fleetdm.com/legal/privacy
+Author: Fleet Device Management Inc.
+PackageName: fleetctl
+PackageUrl: https://github.com/fleetdm/fleet
+License: MIT
+LicenseUrl: https://github.com/fleetdm/fleet/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2020-present Fleet Device Management Inc
+ShortDescription: A command line interface (CLI) tool for managing Fleet from the command line.
+Description: |-
+  fleetctl (pronounced "Fleet control") is a command line interface (CLI) tool for managing Fleet from the command line. fleetctl enables a GitOps workflow with Fleet.
+  fleetctl also provides a quick way to work with all the data exposed by Fleet without having to use the Fleet UI or work directly with the Fleet API.
+Tags:
+- fleet
+ReleaseNotes: |-
+  Security Engineers
+  - Updated CIS benchmarks for Windows 10 to version 3.
+  - Added support for IdP-based labels.
+  - Added last opened time for Windows applications.
+  - Updated GET /hosts/:id/encryption_key to return most recently archived encryption key if current key is not available.
+  - Added support for ingesting user's "Department" via SCIM and added support to set the FLEET_VAR_HOST_END_USER_IDP_DEPARTMENT variable on configuration profiles.
+  - Cleaned up false-positive vulnerabilities on Amazon Linux 2 hosts reported in Fleet ⇐ 4.55.
+  IT Admins
+  - Added the verification of user-scoped profiles on macOS.
+  - Added last opened time for Windows applications.
+  - Updated Windows Custom OS Settings including Win32/Desktop Bridge ADMX policies to now be marked verified after the host has acknowledged the MDM install command.
+  - Added support for "Host Vitals" label, starting with IdP-based labels which update automatically including after software installs.
+  - Displayed VPP apps installed on a host in the UI after command is acknowledged.
+  - Updated GET /hosts/:id/encryption_key to return most recently archived encryption key if current key is not available.
+  - Increased how often Fleet checks for new Fleet-maintained apps, from once per day to once per hour.
+  - Improved GitOps speed when managing software with hashes on a large number of teams.
+  - Separated host details software list into two separate sections: Inventory (software installed on a host) and Library (software available for installation on a host).
+  - Updated Apple profile verification code to disallow uploading profiles with the same identifier but differing PayloadScopes.
+  - Recorded installer URL when a Fleet-maintained app is added via the web UI or REST API.
+  - Added support for ingesting user's "Department" via SCIM and added support to set the FLEET_VAR_HOST_END_USER_IDP_DEPARTMENT variable on configuration profiles.
+  - Added support for the Apple MDM user channel. When a mobileconfig with a payloadscope of User is targeted for a host with a user channel connection, it will now be sent to the user channel.
+  - Added ability to add EULA end user sees during setup experience via gitops.
+  Other improvements and bug fixes
+  - Added user property api_only to backend activity details.
+  - Replaced email with user full name for login activity.
+  - Added a new avatar for API-only users in the activity feed.
+  - Updated side navigation styles across the app.
+  - Added premium tier messaging to the certificates section on the integrations page.
+  - Removed ability to upload a EULA in the UI if gitops is enabled.
+  - Migrated from aws-sdk-go v1 to aws-sdk-go-v2.
+  - Optimized database queries for MDM enrollment checks when one host is being checked at a time.
+  - Replaced own SAML implementation with https://github.com/crewjam/saml.
+  - Increased page size for software versions shown on the software view page from 5 to 10.
+  - Added retries in PATCH policies API requests to fix deadlock errors in "Manage automations" page.
+  - Added missing team_name property on /api/v1/fleet/hosts/identifier/:id endpoint.
+  - Added missing "url" parameter when exporting YAML on software packages that have a URL specified (thanks @drvcodenta!)
+  - Improved performance when pulling team settings on osquery config and distributed read endpoints.
+  - Allowed team selection and name updates when saving a copy of an existing query as a new query.
+  - Updated Fleet maintained apps uninstall script to use pkgutil to remove applications files.
+  - Added functionality for verifying installation of VPP apps.
+  - Moved the SSO and Host status webhook settings from Settings > Organization to Settings > Integrations.
+  - Updated software installed activities created during setup experience correctly categorized as from automation.
+  - Fixed cases where valid operating system vulnerabilities would be periodically incorrectly purged.
+  - Fixed details not showing when the device page URL was edited.
+  - Fixed an issue where the fleetctl codesignature requirements couldn't be used to verify the codesignature of fleetctl.
+  - Fixed issue where IdP integration page did not show the premium feature message.
+  - Fixed bug present on gitops cmd when importing no-team.yml with scripts without default.yml.
+  - Fixed a bug where Fleet-maintained app updates via GitOps wouldn't pull the latest version of Google Chrome on each run, and would display an invalid SHA256 hash in the UI and API.
+  - Fixed host API to returns empty array (instead of 404) if software title or version is not found on hosts on that team consistent with other host filters.
+  - Fixed bug with the run script modal on the Hosts page when running under FreeTier due to invalid teamId filter.
+  - Fixed a case where host software counts wouldn't be updated if the host_software database table included one or more rows with a zero software_id.
+  - Fixed issue where attempting to lock an MDM-unenrolled macOS host was not returning the expected error.
+  - Fixed error when deleting a calendar event for a Google Workspace user that no longer exists.
+  - Fixed fleetctl panic caused by missing SSO settings during gitops generate.
+  - Fixed software title ID + installer status filters to return an empty array with 0 count instead of 404 when an installer is not present on a team.
+  - Fixed issue where iOS devices were not refetching at the expected cadence when re-enrolled without first deleting the host.
+  - Fixed cases where valid operating system vulnerabilities would be periodically incorrectly purged.
+  - Fixed issue with PATCH /fleet/scim/Groups/<group name> endpoint handling duplicate entries.
+  - Fixed bug with calendar/webhook endpoint that caused an error if the calendar event relates to a deleted host.
+  - Fixed host details > MDM OS settings tooltips from flashing during a host refetch.
+  - Fixed an issue where macos_setup would not always be exported by fleetctl generate-gitops when it should have been.
+  - Fixed host certificate source recording (including associated performance/database load issues) when multiple hosts share the same certificate on user keychains with differing usernames.
+  - Fixed software package version output in generated GitOps YAML.
+  - Fixed truncation of the MDM server url value on the about card on host details page.
+  - Fixed a bug that prevented users from adding VPP apps to macOS setup experience if the iOS version of the app was also added to their team software library.
+  - Fixed cases where installed-then-uninstalled software would show up in software inventory.
+  - Fixed automation tooltip not showing the correct filesystem log destination.
+  - Fixed SSO settings page returning 500 when SSO settings are undefined.
+  - Fixed the linux uninstall script.
+  - Fixed broken macOS users causing errors during query ingestion.
+  Fleet-maintained app updates and vulnerability fixes are applied, whether or not you upgrade.
+  Fleet's agent
+  The following version of Fleet's agent (fleetd) support the latest changes to Fleet:
+  1. orbit-v1.45.1
+  2. fleet-desktop-v1.45.1 (included with Orbit)
+  3. fleetd-chrome-v1.3.2
+  While newer versions of fleetd still function with older versions of the Fleet server (and vice versa), Fleet does not actively test these scenarios and some newer features won't be available.
+ReleaseNotesUrl: https://github.com/fleetdm/fleet/releases/tag/fleet-v4.71.0
+PurchaseUrl: https://fleetdm.com/pricing
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://fleetdm.com/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

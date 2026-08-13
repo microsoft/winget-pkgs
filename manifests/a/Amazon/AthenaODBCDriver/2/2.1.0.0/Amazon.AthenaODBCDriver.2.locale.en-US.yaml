@@ -1,0 +1,51 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Amazon.AthenaODBCDriver.2
+PackageVersion: 2.1.0.0
+PackageLocale: en-US
+Publisher: Amazon.com Services LLC
+PublisherUrl: https://aws.amazon.com/
+PublisherSupportUrl: https://console.aws.amazon.com/support/home/
+PrivacyUrl: https://aws.amazon.com/privacy/
+Author: Amazon Web Services, Inc
+PackageName: Amazon Athena ODBC Driver
+PackageUrl: https://docs.aws.amazon.com/athena/latest/ug/odbc-v2-driver.html
+License: Proprietary
+LicenseUrl: https://aws.amazon.com/agreement/
+Copyright: © 2026, Amazon Web Services, Inc. or its affiliates. All rights reserved.
+CopyrightUrl: https://aws.amazon.com/agreement/
+ShortDescription: Athena ODBC 2.x driver
+Description: Use an ODBC connection to connect to Athena from third-party SQL client tools and applications.
+Tags:
+- athena
+- aws
+- odbc
+ReleaseNotes: |-
+  The Amazon Athena The Amazon Athena ODBC v2.1.0.0 driver includes security improvements. This release enhances authentication flows, query processing, and transport security. We recommend upgrading to this version as soon as possible.
+  Breaking changes
+  - SSL certificate validation enabled by default – The driver now enforces SSL certificate verification when connecting to identity providers. If you use a local identity provider without a valid SSL certificate, you must explicitly set SSL_Insecure=1 in your connection string. For more information, see SSL insecure (IdP).
+  - TLS 1.2 minimum enforced – The driver no longer accepts TLS 1.0 or TLS 1.1 connections to identity providers. All IdP connections now require TLS 1.2 or later.
+  - BrowserSSOOIDC authentication flow updated – The BrowserSSOOIDC plugin now uses Authorization Code with PKCE instead of Device Code Authorization. A new optional parameter listen_port (default 7890) is available for the OAuth 2.0 callback server. You may need to allowlist this port on your network. The default scope has changed to sso:account:access. For more information, see Browser SSO OIDC.
+  Improvements
+  - BrowserSSOOIDC – Migrated from Device Code flow to Authorization Code with PKCE for improved security.
+  - BrowserAzureAD – Added PKCE (Proof Key for Code Exchange) to the OAuth 2.0 authorization flow to prevent authorization code interception attacks.
+  - BrowserSAML – Added RelayState CSRF protection to prevent SAML token injection attacks.
+  - Credentials cache – Starting in v2.1.0.0, cached credentials are stored as plaintext JSON in the user-profile/.athena-odbc/ directory with file permissions restricted to the owning user, consistent with how the AWS CLI protects locally stored credentials.
+  - IAM Profile – Added support for EcsContainer and Environment credential sources in addition to the existing Ec2InstanceMetadata.
+  - Connection string parser – Implemented proper ODBC }} escape handling.
+  - Catalog queries – Added SQL identifier escaping for schema names and table patterns.
+  - ODBC pattern matching – Replaced regex-based matching with direct ODBC LIKE wildcard matcher.
+  - XML parsing – Added recursion depth limit (100 levels) and size limit (1MB) for SAML tokens.
+  - ADFS authentication – Added response size limit (200KB) for ADFS server responses.
+  Fixes
+  - Fixed improper neutralization of special elements in authentication components that could allow code execution or authentication flow redirection via crafted connection parameters. Affects BrowserSSOOIDC, BrowserAzureAD, and BrowserSAML plugins.
+  - Fixed improper neutralization of special elements in query processing components that could allow denial of service or SQL injection via crafted table metadata.
+  - Fixed improper certificate validation when connecting to identity providers.
+  - Fixed missing authentication security controls in browser-based authentication flows, including PKCE for OAuth, CSRF protection for SAML, secure credential caching, and exclusive callback port binding.
+  - Fixed uncontrolled resource consumption in parsing components that could allow denial of service via crafted input patterns, unbounded server responses, or deeply nested XML payloads.
+  - Fixed an issue where SQLColumns and SQLTables returned no results when using UseSingleCatalogAndSchema=1 with cross-account federated catalogs in Power BI Import mode.
+  To download the new ODBC v2 driver, see ODBC 2.x driver download. For connection information, see Amazon Athena ODBC 2.x.
+ReleaseNotesUrl: https://docs.aws.amazon.com/athena/latest/ug/odbc-v2-driver-release-notes.html
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

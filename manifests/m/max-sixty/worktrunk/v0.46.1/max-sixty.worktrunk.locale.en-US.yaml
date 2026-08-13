@@ -1,0 +1,64 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: max-sixty.worktrunk
+PackageVersion: v0.46.1
+PackageLocale: en-US
+Publisher: max-sixty
+PublisherUrl: https://github.com/max-sixty
+PublisherSupportUrl: https://github.com/max-sixty/worktrunk/issues
+PackageName: worktrunk
+PackageUrl: https://github.com/max-sixty/worktrunk
+License: MIT OR Apache-2.0
+LicenseUrl: https://github.com/max-sixty/worktrunk/blob/HEAD/LICENSE
+ShortDescription: A Git worktree manager for trunk-based development
+Description: |-
+  worktrunk (wt) is a Git worktree manager designed for trunk-based development workflows.
+  It simplifies creating, switching between, and managing Git worktrees, making it easy to
+  work on multiple features or branches simultaneously without the overhead of stashing
+  or switching branches in a single working directory.
+Tags:
+- cli
+- git
+- git-worktree
+- rust
+- terminal
+- worktree
+ReleaseNotes: |-
+  Release Notes
+  Fixed
+  - No spurious Skipping pre-commit hooks (--no-hooks) line after declined approval: wt step commit, wt step squash, and wt merge collapsed two distinct hook-skip reasons — the user passing --no-hooks and the user declining an interactive approval prompt — into a single verify: bool. With hooks configured, declining produced both ○ Commands declined, committing without hooks and ○ Skipping pre-commit hooks (--no-hooks) back-to-back; the second line was wrong because the user never passed --no-hooks. The call chain now carries a HookGate (Run / NoHooksFlag / Silent), so declined-approval paths skip hooks silently while the explicit --no-hooks flag still prints its message exactly once. (#2485)
+  Internal
+  - HookAnnouncer is the single entry point for hook dispatch: post-commit and post-switch now route through the same announcer used by other phases, and remaining call sites adopt TemplateVars for variable assembly. (#2481, #2482, #2484)
+  - Merge cleanup extracted: The post-merge finish sequence moves into worktree::finish_after_merge, and wt list threads the placeholder explicitly instead of reaching through Cell. (#2491, #2492)
+  - CI consolidated onto a shared composite action: New advisory cargo-affected jobs land, and the test matrix and affected-jobs setup now share one composite action. (#2475, #2483, #2486)
+  Install worktrunk 0.46.1
+  Install prebuilt binaries via shell script
+  curl --proto '=https' --tlsv1.2 -LsSf https://github.com/max-sixty/worktrunk/releases/download/v0.46.1/worktrunk-installer.sh | sh && wt config shell install
+  Install prebuilt binaries via powershell script
+  powershell -ExecutionPolicy Bypass -c "irm https://github.com/max-sixty/worktrunk/releases/download/v0.46.1/worktrunk-installer.ps1 | iex"; git-wt config shell install
+  Install prebuilt binaries via Homebrew
+  brew install worktrunk && wt config shell install
+  Download worktrunk 0.46.1
+  ────────────────────────────────────────────────┬───────────────────┬─────────────
+  File                                            │Platform           │Checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-aarch64-apple-darwin.tar.xz           │Apple Silicon macOS│checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-x86_64-apple-darwin.tar.xz            │Intel macOS        │checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-x86_64-pc-windows-msvc.zip            │x64 Windows        │checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-aarch64-unknown-linux-musl.tar.xz     │ARM64 MUSL Linux   │checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-x86_64-unknown-linux-musl.tar.xz      │x64 MUSL Linux     │checksum
+  ────────────────────────────────────────────────┴───────────────────┴─────────────
+  Install via Cargo
+  cargo install worktrunk && wt config shell install
+  Install via Winget (Windows)
+  winget install max-sixty.worktrunk && git-wt config shell install
+  Install via AUR (Arch Linux)
+  paru worktrunk-bin && wt config shell install
+ReleaseNotesUrl: https://github.com/max-sixty/worktrunk/releases/tag/v0.46.1
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

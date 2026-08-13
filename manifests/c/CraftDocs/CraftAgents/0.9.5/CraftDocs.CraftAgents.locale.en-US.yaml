@@ -1,0 +1,52 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: CraftDocs.CraftAgents
+PackageVersion: 0.9.5
+PackageLocale: en-US
+Publisher: Craft Docs Ltd.
+PublisherUrl: https://www.craft.do/
+PublisherSupportUrl: https://github.com/craft-ai-agents/craft-agents-oss/issues
+PrivacyUrl: https://www.craft.do/privacy
+Author: Craft Docs Ltd.
+PackageName: Craft Agents
+PackageUrl: https://agents.craft.do/
+License: Apache-2.0
+LicenseUrl: https://github.com/craft-ai-agents/craft-agents-oss/blob/HEAD/LICENSE
+Copyright: Copyright 2026 Craft Docs Ltd.
+CopyrightUrl: https://www.craft.do/terms
+ShortDescription: Work with most powerful agents in the world, with the UX they deserve
+Description: 'Craft Agents brings Claude’s coding capabilities to your entire digital workflow. It massively improves both coding and non-coding workflows via enhanced UI, review, and auto execution. Built on the same foundation as Claude Code (the Claude Agent SDK), it extends the model’s reasoning power to work across all your tools: GitHub, Linear, Slack, Craft documents, local files, and any API you can connect.'
+Tags:
+- agent
+- agentic
+- ai
+- large-language-model
+- llm
+ReleaseNotes: |-
+  v0.9.5 — Compact-mode UX polish and MCP / branching stability
+  Features
+  - Compact-mode drawer for the session row menu — Session row context menus on compact / mobile layouts now open as a vaul drawer instead of a clipped Radix popover, matching the drawer pattern already used for status, labels, share, and messaging actions. (a0468049)
+  - Drawer-based working-directory selector in compact mode — The working-directory picker switches to a drawer on narrow widths so the path list, recent dirs, and "Choose folder…" action remain reachable without horizontal scroll. The desktop dropdown is unchanged. (6e147c03)
+  - Expandable chat input on compact layouts — Users can now tap to expand a collapsed chat input on compact / mobile views so longer prompts are easier to compose without leaving the active session. (15fe589b)
+  - Drawer-based AcceptPlan picker in compact mode — The plan-acceptance UI uses a drawer in compact / mobile layouts so action rows aren't pushed off-screen on narrow widths. (f8e92a11)
+  - Compact model selector in the web UI's mobile / auto-compact view — The web UI's model picker collapses into a compact selector when the shell width crosses the mobile breakpoint, matching the Electron app's container-query behavior. (75c7825d)
+  Improvements
+  - Shared useWorkingDirectoryState hook — Path resolution, recent dirs, and folder-picker handling are extracted into a single hook so the desktop dropdown and compact drawer can't drift in behavior. (aa01895d)
+  - Windows RTK install docs — Clarifies the Windows install path in the RTK setup docs so the "RTK not found" detection in Settings → AI → Performance matches what users see on Windows. (129c28ff)
+  Bug Fixes
+  - Branching on the latest turn no longer drops the last assistant message — The Pi-backed branching path now captures the conversation anchor after the SDK appends the new entry, so branching off the most recent turn no longer truncates the message that triggered the branch. Fixes #782. (0988d0d6)
+  - Stdio MCP source_test gives real diagnostics instead of a fake timeout — source_test for stdio MCP servers now runs a single process with a proper stderr-activity watchdog and surfaces actual startup output, replacing the false "Server startup timeout" that fired for any slow-but-healthy server. Fixes #787. (a7fa0a3a, 69d74167)
+  - Parallel source_test calls no longer wedge a session — When a source-activation abort interrupts a turn, sibling tool_result blocks are now drained before the abort propagates so the SDK doesn't end up with orphaned tool_use IDs that permanently jam the next turn. Fixes #790. (58087fbf)
+  - AcceptPlan dropdown positioning and compact visibility — The desktop AcceptPlan dropdown is now built on Radix DropdownMenu, fixing anchor drift and viewport clipping that could push actions off-screen. The web UI also now actually renders the dropdown in compact / mobile views — previously hidden behind a wider-only branch. (01d062e3, d32f390d)
+  - Chat view no longer stuck on "Thinking…" when a turn ends on a tool call — Mirrors the messaging-gateway fix on the Electron main UI side. When the Pi agent emits intermediate text plus a tool call and then completes without a non-intermediate text_complete, groupMessagesByTurn now uses the session's isProcessing=false signal to mark the open turn complete and promote the intermediate text as the response. Pre-fix the chat sat on "Thinking…" forever and the user had to send a follow-up message to unstick it.
+  - Messaging gateway delivers the final assistant message in progress / final_only modes — Automations whose last action is a tool call (e.g. the agent uses a tool to send the Telegram message and never emits a clean non-intermediate text_complete) used to leave progress frozen on 💭 thinking… and final_only silent. The renderer now tracks the most recent assistant text regardless of isIntermediate and falls back to it on complete when no clean final arrived; genuinely empty runs still leave the status label in place. Thanks to @nheagy for the original PR (#779). (13187c2c)
+  - SDK Agent subagent activity groups are collapsible again — The activity grouping for SDK Agent subagent runs no longer renders flat; the collapse toggle behavior is restored. (774e7ecb)
+  Breaking Changes
+  - None. All changes are backward-compatible.
+ReleaseNotesUrl: https://github.com/craft-ai-agents/craft-agents-oss/releases/tag/v0.9.5
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://agents.craft.do/docs/getting-started/introduction
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

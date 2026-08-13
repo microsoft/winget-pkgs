@@ -28,17 +28,23 @@ configuration:
               issueAuthor: False
           - filesMatchPattern:
               pattern: DevOpsPipelineDefinitions/*
+          - not: # This checks to ensure the PR is not empty. If it is empty, it would be treated as a match for the above condition
+              filesMatchPattern:
+                pattern: ^$
           - isOpen
         then:
           - approvePullRequest:
               comment: ""
-      - description: Approve PRs for Validation Waivers when labeled "Validation-Metadata" by wingetbot
+      - description: Approve PRs for Validation Waivers when labeled "Validation-Metadata" by an admin or the validation GitHub App
         if:
           - payloadType: Pull_Request
           - labelAdded:
               label: Validation-Metadata
-          - activitySenderHasPermission:
-              permission: Admin
+          - or:
+            - activitySenderHasPermission:
+                permission: Admin
+            - isActivitySender:
+                user: wingetvalidator-prod[bot]
         then:
           - approvePullRequest:
               comment: ""
@@ -47,14 +53,17 @@ configuration:
       - description: >-
           Merge Validation Waivers when
           * PR is Opened
-          * Created by wingetbot
+          * Created by wingetbot or the validation GitHub App
           * Files modified only contains .validation file
         if:
           - payloadType: Pull_Request
           - isAction:
               action: Opened
-          - isActivitySender:
-              user: wingetbot
+          - or:
+            - isActivitySender:
+                user: wingetbot
+            - isActivitySender:
+                user: wingetvalidator-prod[bot]
           - filesMatchPattern:
                 pattern: ^.*\.validation
           - not:
@@ -70,8 +79,11 @@ configuration:
       - description: Close automatic waiver PRs when "Validation-Merge-Conflict" label is added
         if:
           - payloadType: Pull_Request
-          - isActivitySender:
-              user: wingetbot
+          - or:
+            - isActivitySender:
+                user: wingetbot
+            - isActivitySender:
+                user: wingetvalidator-prod[bot]
           - isOpen
           - labelAdded:
               label: Validation-Merge-Conflict
@@ -96,6 +108,9 @@ configuration:
           - not: # If a moderator reset the feedback, don't re-trigger
               hasLabel:
                 label: Azure-Pipeline-Passed
+          - not: # If manually validated, don't re-trigger
+              hasLabel:
+                label: Validation-Completed
         then:
           - addLabel:
               label: Needs-Attention # This will automatically assign the ICM Users

@@ -1,0 +1,166 @@
+# Created with komac v2.14.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: jj-vcs.jj
+PackageVersion: 0.36.0
+PackageLocale: en-US
+Publisher: jj-vcs
+PublisherUrl: https://github.com/jj-vcs
+PublisherSupportUrl: https://github.com/jj-vcs/jj/issues
+PackageName: jj
+PackageUrl: https://github.com/jj-vcs/jj
+License: Apache-2.0
+LicenseUrl: https://github.com/jj-vcs/jj/blob/HEAD/LICENSE
+ShortDescription: A Git-compatible VCS that is both simple and powerful
+Description: A Git-compatible VCS that is both simple and powerful
+Moniker: Jujutsu
+Tags:
+- cli
+- git
+- mercurial
+- vcs
+ReleaseNotes: |-
+  About
+  jj is a Git-compatible version control system that is both simple and powerful. See
+  the installation instructions to get started.
+  Release highlights
+  - The documentation has moved from https://jj-vcs.github.io/jj/ to
+    https://docs.jj-vcs.dev/.
+    301 redirects are being issued towards the new domain, so any existing links
+    should not be broken.
+  - Fixed race condition that could cause divergent operations when running
+    concurrent jj commands in colocated repositories. It is now safe to
+    continuously run e.g. jj log without --ignore-working-copy in one
+    terminal while you're running other commands in another terminal.
+    #6830
+  - jj now ignores $PAGER set in the environment and uses less -FRX on most
+    platforms (:builtin on Windows). See the docs for
+    more information, and #3502 for
+    motivation.
+  Breaking changes
+  - In filesets or path patterns, glob matching
+    is enabled by default. You can use cwd:"path" to match literal paths.
+  - In the following commands, string pattern
+    arguments are now parsed the same way they
+    are in revsets and can be combined with logical operators: jj bookmark delete/forget/list/move, jj tag delete/list, jj git clone/fetch/push
+  - In the following commands, unmatched bookmark/tag names is no longer an
+    error. A warning will be printed instead: jj bookmark delete/forget/move/track/untrack, jj tag delete, jj git clone/push
+  - The default string pattern syntax in revsets will be changed to glob: in a
+    future release. You can opt in to the new default by setting
+    ui.revsets-use-glob-by-default=true.
+  - Upgraded scm-record from v0.8.0 to v0.9.0. See release notes at
+    https://github.com/arxanas/scm-record/releases/tag/v0.9.0.
+  - The minimum supported Rust version (MSRV) is now 1.89.
+  - On macOS, the deprecated config directory ~/Library/Application Support/jj
+    is not read anymore. Use $XDG_CONFIG_HOME/jj instead (defaults to
+    ~/.config/jj).
+  - Sub-repos are no longer tracked. Any directory containing .jj or .git
+    is ignored. Note that Git submodules are unaffected by this.
+  Deprecations
+  - The --destination/-d arguments for jj rebase, jj split, jj revert,
+    etc. were renamed to --onto/-o. The reasoning is that --onto,
+    --insert-before, and --insert-after are all destination arguments, so
+    calling one of them --destination was confusing and unclear. The old names
+    will be removed at some point in the future, but we realize that they are
+    deep in muscle memory, so you can expect an unusually long deprecation period.
+  - jj describe --edit is deprecated in favor of --editor.
+  - The config options git.auto-local-bookmark and git.push-new-bookmarks are
+    deprecated in favor of remotes.<name>.auto-track-bookmarks. For example:
+    [remotes.origin]
+    auto-track-bookmarks = "glob:*"
+    For more details, refer to
+    the docs.
+  - The flag --allow-new on jj git push is deprecated. In order to push new
+    bookmarks, please track them with jj bookmark track. Alternatively, consider
+    setting up an auto-tracking configuration to avoid the chore of tracking
+    bookmarks manually. For example:
+    [remotes.origin]
+    auto-track-bookmarks = "glob:*"
+    For more details, refer to
+    the docs.
+  New features
+  - jj commit, jj describe, jj squash, and jj split now accept
+    --editor, which ensures an editor will be opened with the commit
+    description even if one was provided via --message/-m.
+  - All jj commands show a warning when the provided fileset expression
+    doesn't match any files.
+  - Added files() template function to DiffStats. This supports per-file stats
+    like lines_added() and lines_removed()
+  - Added join() template function. This is different from separate() in that
+    it adds a separator between all arguments, even if empty.
+  - RepoPath template type now has a absolute() -> String method that returns
+    the absolute path as a string.
+  - Added format_path(path) template that controls how file paths are printed
+    with jj file list.
+  - New built-in revset aliases visible() and hidden().
+  - Unquoted * is now allowed in revsets. bookmarks(glob:foo*) no longer
+    needs quoting.
+  - jj prev/next --no-edit now generates an error if the working-copy has some
+    children.
+  - A new config option remotes.<name>.auto-track-bookmarks can be set to a
+    string pattern. New bookmarks matching it will be automatically tracked for
+    the specified remote. See
+    the docs.
+  - jj log now supports a --count flag to print the number of commits instead
+    of displaying them.
+  Fixed bugs
+  - jj fix now prints a warning if a tool failed to run on a file.
+    #7971
+  - Shell completion now works with non‑normalized paths, fixing the previous
+    panic and allowing prefixes containing . or .. to be completed correctly.
+    #6861
+  - Shell completion now always uses forward slashes to complete paths, even on
+    Windows. This renders completion results viable when using jj in Git Bash.
+    #7024
+  - Unexpected keyword arguments now return a parse failure for the coalesce()
+    and concat() templating functions.
+  - Nushell completion script documentation add -f option, to keep it up to
+    date.
+    #8007
+  - Ensured that with Git submodules, remnants of your submodules do not show up
+    in the working copy after running jj new.
+    #4349
+  Contributors
+  Thanks to the people who made this release happen!
+  - abgox (@abgox)
+  - ase (@adamse)
+  - Björn Kautler (@Vampire)
+  - Bryce Berger (@bryceberger)
+  - Chase Naples (@cnaples79)
+  - David Higgs (@higgsd)
+  - edef (@edef1c)
+  - Evan Mesterhazy (@emesterhazy)
+  - Fedor (@sheremetyev)
+  - Gaëtan Lehmann (@glehmann)
+  - George Christou (@gechr)
+  - Hubert Lefevre (@Paluche)
+  - Ilya Grigoriev (@ilyagr)
+  - Jonas Greitemann (@jgreitemann)
+  - Joseph Lou (@josephlou5)
+  - Julia DeMille (@judemille)
+  - Kaiyi Li (@06393993)
+  - Kyle Lippincott (@spectral54)
+  - Lander Brandt (@landaire)
+  - Lucio Franco (@LucioFranco)
+  - Luke Randall (@lukerandall)
+  - Martin von Zweigbergk (@martinvonz)
+  - Matt Stark (@matts1)
+  - Mitchell Skaggs (@magneticflux-)
+  - Peter Schilling (@schpet)
+  - Philip Metzger (@PhilipMetzger)
+  - QingyaoLin (@QingyaoLin)
+  - Remo Senekowitsch (@senekor)
+  - Scott Taylor (@scott2000)
+  - Stephen Jennings (@jennings)
+  - Steve Klabnik (@steveklabnik)
+  - Tejas Sanap (@whereistejas)
+  - Tommi Virtanen (@tv42)
+  - Velociraptor115 (@Velociraptor115)
+  - Vincent Ging Ho Yim (@cenviity)
+  - Yuya Nishihara (@yuja)
+ReleaseNotesUrl: https://github.com/jj-vcs/jj/releases/tag/v0.36.0
+Documentations:
+- DocumentLabel: Homepage
+  DocumentUrl: https://jj-vcs.github.io/jj/
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

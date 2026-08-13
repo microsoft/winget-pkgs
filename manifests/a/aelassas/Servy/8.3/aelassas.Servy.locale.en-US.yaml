@@ -1,0 +1,155 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: aelassas.Servy
+PackageVersion: '8.3'
+PackageLocale: en-US
+Publisher: Akram El Assas
+PublisherUrl: https://github.com/aelassas
+PublisherSupportUrl: https://github.com/aelassas/servy/issues
+Author: Akram El Assas
+PackageName: Servy
+PackageUrl: https://servy-win.github.io/
+License: MIT
+LicenseUrl: https://github.com/aelassas/servy/blob/HEAD/LICENSE.txt
+Copyright: Copyright (c) 2025 Akram El Assas
+ShortDescription: Servy lets you run any app as a native Windows service with full control over working directory, startup type, process priority, logging, health checks, pre-launch scripts and parameters.
+Description: |-
+  Servy lets you run any app as a native Windows service with full control over the working directory, startup type, process priority, logging, health checks, environment variables, dependencies, pre-launch and post-launch hooks, pre-stop and post-stop hooks, and parameters. It's designed to be a full-featured alternative to NSSM, WinSW, and FireDaemon Pro.
+
+  Servy is digitally signed using a trusted code-signing certificate provided by the SignPath Foundation. This ensures that all Servy executables and installers are verified and secure, giving you peace of mind when using the tool.
+
+  Servy offers a desktop app, a CLI, and a PowerShell module that let you create, configure, and manage Windows services interactively or through scripts and CI/CD pipelines. It also includes a Manager app for easily monitoring and managing all installed services in real time.
+
+  Features:
+  - Clean, simple UI
+  - Monitor and manage all installed services with Servy Manager
+  - Real-time CPU and RAM monitoring with live performance graphs for installed services
+  - Real-time service stdout and stderr output preview in Servy Console
+  - Service dependency tree visualization with status indicators
+  - CLI and PowerShell module for full scripting and automated deployments
+  - Run any executable as a Windows service
+  - Set service name, description, startup type, priority, working directory, environment variables, and dependencies
+  - Environment variable expansion supported in parameters, process paths and startup directories
+  - Run services as Local System, local or domain accounts, Active Directory accounts, or gMSAs
+  - Redirect stdout/stderr to log files with automatic size-based and date-based rotations
+  - Run pre-launch hook before starting the service, with retries, timeout, logging and failure handling
+  - Run post-launch hook after the application starts successfully
+  - Run pre-stop and post-stop hooks before the application stops and after the application stops
+  - Supports Ctrl+C for command-line apps, close-window for GUI apps, and force kill if unresponsive
+  - Prevent orphaned/zombie processes with improved lifecycle management and ensuring resource cleanup
+  - Health checks and automatic service recovery
+  - Browse and search logs by level, date, and keyword for faster troubleshooting from Servy Manager
+  - Export/Import service configurations for easy backups and automation
+  - Service Event Notification alerts on service failures via Windows notifications and email
+  - Compatible with Windows 7-11 x64 and Windows Server editions
+
+  Who is it for?
+  - Developers: Run development servers, scripts, or custom tools as services without extra setup.
+  - Sysadmins & IT professionals: Ensure critical background processes stay alive, monitored, and properly logged.
+  - Teams or organizations: Automate background services reliably across multiple machines.
+Moniker: servy
+Tags:
+- admin
+- automation
+- background-service
+- cli
+- devops
+- dotnet
+- nssm
+- powershell
+- scm
+- service-manager
+- service-supervisor
+- service-wrapper
+- watchdog
+- windows-service
+- windows-tools
+- winsw
+ReleaseNotes: |-
+  Servy 8.3 improves the UI experience and includes many fixes. The full changelog is available below.
+  Full Changelog
+  Click to expand release notes!
+  - fix(service): Console.CursorVisible causes service crash when running console app as Windows service (#814)
+  - fix(core): ImportServiceCommandTests - MockXmlValidator/MockJsonValidator ignore isValid parameter (#738)
+  - fix(core): implement fine-grained per-PID locking and atomic cache pruning in ProcessHelper (#796)
+  - fix(core): ServiceManager.UninstallServiceAsync - stop-wait loop ignores cancellation, blocks up to ServiceStopTimeoutSeconds (#798)
+  - fix(core): HandleHelper.cs - regex timeout hardcoded to 1s, bypasses AppConfig.InputRegexTimeout convention (#801)
+  - fix(core): ServiceValidationRules.cs - Service name not validated against SCM-forbidden characters (, /) (#806)
+  - fix(core): ServiceManager.cs - ServiceStopTimeoutSeconds hardcoded as a local const, should live in AppConfig (#809)
+  - fix(core): ServiceDto.cs - ShouldSerializEnableSizeRotation typo (missing 'e') breaks conditional serialization of EnableSizeRotation (#810)
+  - fix(core): ServiceManager.GetAllServices - Parallel.ForEach has no per-service timeout, single hung SCM RPC blocks a worker (#819)
+  - fix(core): ProcessKiller.CriticalSystemProcesses - incomplete safelist; killing dwm/MsMpEng/audiodg/fontdrvhost can destabilize the host (#825)
+  - fix(core): ProcessHelper.GetProcessTreeMetrics - caps summed CPU at 100%, hides multi-core saturation (#829)
+  - fix(core): ProcessHelper.EscapeArgument - fails to double backslashes that precede an internal quote (Win32 CommandLineToArgvW corruption) (#827)
+  - fix(core): Logger.cs - MaxBackupFiles is hardcoded to 0 (unlimited), no admin override path (#838)
+  - fix(core): SecureData.Decrypt - on crypto failure of marked payload, returns the post-marker payload (not the documented 'original cipherText') (#848)
+  - fix(core): ProtectedKeyProvider.GetOrGenerate - comment claims 'exponential backoff' but Thread.Sleep math is linear (#852)
+  - fix(core): ProcessHelper.cs - EscapeProcessArgument is dead code; only the broken EscapeArgument is called (#857)
+  - fix(core): ProtectedKeyProvider.SaveProtected - WindowsIdentity from GetCurrent() is never disposed (handle leak per save) (#861)
+  - fix(core): SecurityHelper.CreateSecureDirectory - WindowsIdentity from GetCurrent() never disposed (handle leak per call) (#868)
+  - fix(core): LogonAsServiceGrant.Ensure - InvalidOperationException loses the underlying SID-resolution failure cause (#874)
+  - fix(core): ResourceHelper + ServiceExporter - non-atomic file writes can leave truncated/partial files on crash, mid-copy interruption, or disk full (#875)
+  - fix(core): SecurityHelper.ApplySecurityRules — comparing the current user's SID to BuiltinAdministrators/LocalSystem GROUP SIDs is meaningless (#933)
+  - fix(core): ProcessKiller.KillProcessTreeAndParents(string) - silent catch-all swallows ALL errors with no logging (#935)
+  - fix(core): ProcessKiller.KillProcessTree - uses stale 'allProcesses' snapshot during recursion; processes spawned mid-walk survive (#936)
+  - fix(core): ResourceHelper.TerminateBlockingProcesses - for .exe resources, kills ALL processes matching the filename, including unrelated instances belonging to other services (#938)
+  - fix(core): Logger.Log - bare 'catch { /* Fail-silent */ }' on the write path swallows every I/O exception with no fallback channel (#940)
+  - fix(core): ServiceManager.GetAllServices - orphaned PopulateNativeDetails task races with results consumer and uses scmHandle after dispose (#965)
+  - fix(core): EventLogReader.ReadEvents - materializes the entire result set in memory before MaxResults limit can apply (#970)
+  - fix(core): EventLogLogger.Info/Warn/Error - EventLog.WriteEntry calls have no try/catch and no length truncation (32766-char limit) (#971)
+  - fix(core): ServiceControllerWrapper.BuildDependencyTree - bare catch swallows every error with no logging, leaving '(Unavailable)' nodes indistinguishable (#972)
+  - fix(infra): ServiceRepository.cs - XmlSerializer instantiated per export, leaks dynamic assemblies (#816)
+  - fix(infra): ServiceRepository.UpsertBatchAsync - IN clause uses default BINARY collation while upsert key is LOWER(Name); ID sync misses case-mismatched rows (#820)
+  - fix(infra): ServiceRepository.SearchAsync - Name LIKE @pattern is case-sensitive for non-ASCII characters; rest of the repo uses LOWER(...) = LOWER(...) (#881)
+  - fix(service): ProcessWrapper.cs - CancelOutputRead/CancelErrorRead missing ThrowIfDisposed check (#800)
+  - fix(service): ServiceHelper.cs - duplicate using Servy.Core.Config directive (#802)
+  - fix(service): CheckHealth handler never -= from _healthCheckTimer before Dispose, delegate leak on each restart cycle (#803)
+  - fix(service): fileSemaphore and _healthCheckSemaphore never disposed, kernel handle leak on teardown (#807)
+  - fix(service): ProcessLauncher.ApplyLanguageFixes - substring match on 'python'/'java' in FileName produces false positives (#834)
+  - fix(service): ProcessWrapper.WaitUntilRunningAsync - always waits the full timeout, never returns 'running' early (#858)
+  - fix(service): ProcessLauncher.Start - TimeoutMs silently ignored when OnScmHeartbeat is null (#860)
+  - fix(service): truncated XML doc tag '/// <pa' on the unit-test constructor (#889)
+  - fix(service): ServiceHelper - SensitiveKeyWords list and MaskingRegex pattern are out of sync (CREDENTIAL / CONNECTIONSTRING / CERTIFICATE missing from regex) (#896)
+  - fix(service): ServiceHelper.MaskSensitiveValue - substring-based keyword match flags non-secret env-var names (e.g. MONKEY, APIPATH, PRIVATELY) (#929)
+  - fix(service): ProcessLauncher.Start - synchronous launch with TimeoutMs == 0 falls into unbounded WaitForExit() and can hang the service (#952)
+  - fix(service): ProcessExtensions.GetChildren / GetAllDescendants - bare catch swallows ALL errors with no logging (parallel to #935) (#975)
+  - fix(service): ProcessLaunchOptions.TimeoutMs - XML doc says 0 = infinite wait but ProcessLauncher.Start throws ArgumentException when TimeoutMs <= 0 (#976)
+  - fix(desktop): add None date rotation type (#812)
+  - fix(desktop,manager): all ViewModels coupled to Application.Current - cannot instantiate in tests (#429)
+  - fix(desktop,manager): ViewModels directly use Mouse.OverrideCursor - fails without WPF context (#431)
+  - fix(desktop,manager): FileSystemWatcher event handlers never unsubscribed before Dispose (#804)
+  - fix(desktop,manager): AsyncCommand.Execute - async void with no try/catch propagates exceptions to the WPF dispatcher and can crash the UI (#866)
+  - fix(desktop,manager): MainWindow.OnClosed (Servy + Manager) - Process.GetCurrentProcess() handle never disposed (#873)
+  - fix(manager): ServiceCommands.cs - SearchServicesAsync does not filter nulls returned by ToModelAsync (#797)
+  - fix(manager): ProcessHelper calls made without _metricsLock held, inconsistent with MainViewModel (#799)
+  - fix(manager): ConsoleViewModel / PerformanceViewModel - StopMonitoring hides base virtual method instead of overriding it (#808)
+  - fix(manager): MonitoringViewModelBase.OnTick - async void handler does not wrap OnTickAsync in try/catch; an unhandled exception will crash the WPF dispatcher (#982)
+  - fix(cli): ExportServiceCommand.cs - new Uri(fullPath) throws UriFormatException on legitimate paths (#815)
+  - fix(cli,psm1): DateRotationType.None missing from documented enum values (#812)
+  - fix(cli): ExportServiceCommand - ReservedPortRegex misses COM0/LPT0 (and Unicode-superscript COM¹/LPT¹/etc.) per current Microsoft naming docs (#900)
+  - fix(psm1): Servy.psd1 - AliasesToExport declared twice; line 85 empty array overwrites line 76 entries (#811)
+  - fix(psm1): Assert-Administrator - WindowsIdentity from GetCurrent() never disposed (handle leak per call) (#864)
+  - fix(psm1): Invoke-ServyCli - finally block calls process.WaitForExit() with no timeout; if Kill() failed, PowerShell hangs forever (#879)
+  - fix(psm1): Install-ServyService - dead 'if ($paramName -eq "Password") { continue }' guard (no '--password' entry exists in $paramMapping) (#891)
+  - fix(tests): ProcessHelper and ProcessKiller are static - cannot be mocked (#430)
+  - fix(tests): multiple test files - Mock-only tests verify Moq dispatch, not production code (#552)
+  - fix(tests): TestableService - 16 reflection hops into Service private members with silent null-forgiving (#742)
+  - fix(tests): test fixtures - 13 occurrences of maintainer-specific Python path (C:\Users\aelassas...) (#753)
+  - fix(iss): NumericVersion drops patch component, mis-classifies upgrade vs reinstall (#817)
+  - fix(publish): 8 publish-res scripts are structurally identical (~800 lines) (#406)
+  - fix(publish): signpath.ps1 - API token stored in plaintext file with no ACL guidance (#583)
+  - fix(notifications): Get-ServyLastErrors.ps1 - Get-WinEvent -FilterHashtable requires PS 3.0+, contradicts script's "PowerShell 2.0 or later" header (#805)
+  - fix(notifications): ServyFailureEmail.ps1 --claims PowerShell 2.0 compatibility but dot-sources a script that #Requires -Version 3.0 (#836)
+  - fix(notifications): ServyFailureEmail.ps1 / ServyFailureNotification.ps1 - masking regex lacks word boundaries, can mangle non-secret content (#837)
+  - fix(notifications): ServyFailureEmail.ps1 / Get-ServyLastErrors.ps1 - DateTime.Parse on watermark/parameters is culture-sensitive while the file is written invariant ISO 8601 (#863)
+  - fix(notifications): ServyFailureEmail.ps1 - SmtpClient is never disposed; comment about 'PS 2.0 / .NET 3.5' is incorrect (#884)
+  - fix(notifications): Get-ServyLastErrors.ps1 - fallback log file is named 'ServyFailureEmail.log' (copy-paste from sibling script) (#926)
+  - fix(notifications): ServyFailureEmail.ps1 and ServyFailureNotification.ps1 - concurrent watermark re-read uses bare [DateTime]::Parse instead of ParseExact, can silently misinterpret Kind under non-en-US culture (#945)
+  - fix(bump-runtime): TFM regex 'net\d+.\d+' lacks word boundary, can match inside larger tokens (#844)
+ReleaseNotesUrl: https://github.com/aelassas/servy/releases/tag/v8.3
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/aelassas/servy/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,4 +1,4 @@
-id: labelAdded.validationHttpError
+id: labelAdded.validationCompleted
 name: GitOps.PullRequestIssueManagement
 description: Handlers when "Validation-Completed" label is added
 owner:
@@ -11,6 +11,7 @@ configuration:
       - description: >-
           When the label "Validation-Completed" is added to a pull request and the "Moderator-Approved" label is not present
           * Add a reply notifying the issue author
+          * Remove the Validation-Guide label
         if:
           - payloadType: Pull_Request
           - labelAdded:
@@ -21,17 +22,19 @@ configuration:
           - not:
               hasLabel:
                 label: Validation-Metadata
+          - not:
+              hasLabel:
+                label: Publisher-Verified
           - isOpen
         then:
+          - removeLabel:
+              label: Validation-Guide
           - addReply:
               reply: >-
-                ${issueAuthor},
-
-
                 The check-in policies require a moderator to approve PRs from the community.
 
 
-                Our [moderators](https://github.com/microsoft/winget-pkgs/issues/15674#issue-908889039) are community volunteers, please be patient and allow them sufficient time to review your submission.
+                Our [moderators](https://github.com/microsoft/winget-pkgs/blob/master/doc/Moderation.md#moderators) are community volunteers, please be patient and allow them sufficient time to review your submission.
 
 
                 Template: msftbot/requiresApproval/moderator

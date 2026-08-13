@@ -1,0 +1,126 @@
+# Created by Anthelion using komac v2.15.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: SST.OpenCodeDesktop
+PackageVersion: 1.3.0
+PackageLocale: en-US
+Publisher: opencode
+PublisherUrl: https://anoma.ly/
+PublisherSupportUrl: https://github.com/anomalyco/opencode/issues
+PackageName: OpenCode
+PackageUrl: https://opencode.ai/
+License: MIT
+LicenseUrl: https://github.com/anomalyco/opencode/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 opencode
+ShortDescription: OpenCode is an open source agent that helps you write and run code with any AI model. It''s available as a terminal-based interface, desktop app, or IDE extension.
+Description: |-
+  opencode is an AI coding agent. It features:
+  - A responsive, native, themeable terminal UI and desktop app.
+  - Automatically loads the right LSPs, so the LLMs make fewer mistakes.
+  - Have multiple agents working in parallel on the same project.
+  - Create shareable links to any session for reference or to debug.
+  - Log in with Anthropic to use your Claude Pro or Claude Max account.
+  - Supports 75+ LLM providers through Models.dev, including local models.
+Tags:
+- ai
+- code
+- coding
+- develop
+- development
+- programming
+ReleaseNotes: |-
+  New Features
+  - GitLab Agent Platform (#18014): GitLab Agent Platform is now fully supported with automatic discovery of workflow models from your GitLab instance. Workflow models can use opencode's local tools (file read/write, shell, etc.) over WebSocket.
+  - Git-backed Session Review (#17961): Added git-backed session review modes, enabling users to review uncommitted changes and branch diffs directly within opencode. Git changes are now the default review source with the desktop review tree staying synchronized with your selected source.
+  - Multistep Authentication (#18103, #18035): Desktop app now supports multistep authentication flows, enabling login with OAuth providers, SAML, and other complex auth methods directly in the app. Providers that require additional questions during authentication are now fully supported.
+  - Interactive Update Flow (#18662): Major and minor updates now show a confirmation dialog before upgrading, allowing you to review changes before updating. You can also skip specific versions if you prefer to stay on your current release.
+  - Node.js Support (#18324): opencode can now run on Node.js in addition to Bun, with a dedicated Node.js entry point and build script that bundles the server with database migrations.
+
+  Desktop App Improvements
+  - Project Navigation (#18502): Navigate between projects faster using keyboard shortcuts (cmd+option+arrow keys).
+  - File Uploads (#18403): Desktop app now supports file type filters and multiple file selection when uploading files.
+  - Review Panel Access (#18251): Users can now access the review panel before starting a session, with proper empty states shown when no changes exist yet.
+  - Workspace Switching (#18207): Fixed visual flickering when switching between workspaces or projects - the interface now transitions smoothly without showing loading spinners during navigation.
+  - Sidebar Resize (#18647): Fixed issue where sidebar would automatically close when being resized to minimum width. The sidebar now clamps at minimum width instead of closing.
+  - Loading States (#18501): Improved loading state management across the app for smoother, more consistent feedback during async operations.
+  - Console Login (#18281): Fixed console device login to properly handle pending authorization states, ensuring the login process continues polling instead of failing while waiting for approval.
+
+  Terminal & Editor
+  - Terminal Rename (#18263): Fixed terminal renaming from the context menu, which previously failed due to dropdown focus conflicts.
+  - Terminal Error Recovery (#17591): Fixed an issue where terminals would become unresponsive when the server returned a "not found" error for terminal sessions. Terminals now properly reinitialize and remain interactive.
+  - Paste Operations (#18079): Paste operations now preserve raw byte data, enabling proper handling of binary content and special characters when pasting into the terminal.
+  - Prevent Duplicate Submits (#18148): Fixed issue where rapidly pressing Enter could submit prompts multiple times. Now ignores repeated Enter submits.
+
+  Providers & Models
+  - xAI Responses API (#18175): Improved xAI reasoning models performance in long multi-turn conversations by switching to the responses API with encrypted content support.
+  - GPT Model List (#18101): Updated the GPT subscription model list with the latest available models.
+  - Vertex AI Fix (#18283): Fixed Vertex AI errors with non-thinking models (like gemini-2.0-flash) by only applying thinking configuration to models that support reasoning capabilities.
+  - vLLM Context Overflow (#17763): Improved error detection for vLLM context overflow errors, providing clearer feedback when context limits are exceeded during inference.
+  - Cost Chunk Format (#16817): Fixed streaming error where cost data was sent in upstream provider format instead of client-requested format, preventing validation errors when mixing provider formats.
+
+  Review & Collaboration
+  - Review Comments (#18406): Review file comments now submit when clicked and display without horizontal overflow, matching the behavior of diff review comments.
+  - File Attachments (#17815): Fixed file and image attachments being silently lost when reusing or forking a previous prompt with attachments.
+  - Snapshot Revert (#18093): Fixed snapshot revert issues where overlapping file changes could apply the wrong patch hash, and resolved a sorting bug in hidden file ordering.
+
+  Authentication & Account
+  - Stale Credentials (#18426): Fixed stale server URL and email on re-login. Previously, logging into a different server could fail due to cached credentials from a previous environment.
+  - Codex Access (#18337): OAuth plan users can now access codex instructions freely without the previous whitelisting restrictions.
+
+  UI/UX Improvements
+  - Theme Improvements (#17958): Improved UI contrast and reduced brightness of hover/active elements for better readability and reduced eye strain.
+  - System Prompt (#18140): Cleaner AI responses with a streamlined fallback system prompt that removes unnecessary boilerplate text.
+  - Agent & Skill Ordering (#18261): More consistent AI responses with improved prompt caching by stabilizing the order of agents and skills in system prompts.
+
+  Bug Fixes
+  - Remote Server Switching (#17214): Fixed issues when switching between remote servers that caused stale project data, broken terminal spawning, and sidebar showing incorrect projects.
+  - Windows Commands (#18010): Fixed Windows command execution for shims (.cmd/.bat files) to resolve failures during upgrades, uninstalls, IDE installs, and LSP launches.
+  - Tool Discovery (#18320): Fixed tool discovery for npm-installed packages by including the cache bin directory in PATH lookups, ensuring locally installed tools are properly found.
+  - Error Messages (#18165): Tool and session error messages now display in clean, human-readable format instead of showing confusing technical error strings.
+  - Chunk Timeout (#18264): Disabled chunk timeout by default to prevent issues across various use cases; users can still enable it in their configuration if needed.
+  - Event Ordering (#18259): Events in real-time streams now process sequentially in order, ensuring consistent and predictable event display instead of potentially out-of-order delivery.
+  - Desktop Stability (#18300): Improved desktop stability with more reliable workspace and session routing, fixing sidebar selection mismatches and race conditions when switching projects.
+  Thank you to 16 community contributors:
+  - @jquense:
+    - fix(opencode): preserve prompt tool enables with empty agent permissions (#17064)
+  - @bugulo:
+    - fix(app): agent switch should not reset thinking level (#17470)
+  - @ghost91-:
+    - fix(core): consider code: context_length_exceeded as context overflow in API call errors (#17748)
+    - fix(core): detect vLLM context overflow errors (#17763)
+  - @Tarquinen:
+    - fix(opencode): apply message transforms during compaction (#17823)
+  - @AbigailJixiangyuyu:
+    - fix(windows): restore /editor support on Windows (#17146)
+  - @altendky:
+    - fix(tui): check for selected text instead of any selection in dialog escape handler (#16779)
+    - docs: add describe annotation to snapshot config field (#17861)
+  - @OpeOginni:
+    - docs: mark tools config as deprecated (#17951)
+    - docs(cli): update experimental TY LSP flag description for clarity across multiple languages (#14770)
+    - fix(desktop): fix error handling by adding errorName function to identify NotFoundError rather than statusCode (#17591)
+    - fix(desktop): remote server switching (#17214)
+  - @ariane-emory:
+    - fix: Add apply_patch to EDIT_TOOLS filter (#18009)
+  - @anduimagui:
+    - fix(app): ignore repeated Enter submits in prompt input (#18148)
+  - @jorgitin02:
+    - fix: stabilize agent and skill ordering in prompt descriptions (#18261)
+  - @Jaaneek:
+    - feat: switch xai provider to responses API (#18175)
+  - @mchenco:
+    - docs: add Cloudflare Workers AI provider (#18322)
+  - @vglafirov:
+    - feat: enable GitLab Agent Platform with workflow model discovery (#18014)
+  - @github-actions[bot]:
+    - Update VOUCHED list
+  - @Protocol-zero-0:
+    - fix(provider): only set thinkingConfig for models with reasoning capability (#18283)
+  - @neriousy:
+    - fix(app): terminal rename from context menu (#18263)
+ReleaseNotesUrl: https://github.com/anomalyco/opencode/releases/tag/v1.3.0
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://opencode.ai/docs/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

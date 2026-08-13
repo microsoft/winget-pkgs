@@ -1,0 +1,128 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: A2-Ai.rv
+PackageVersion: 0.9.0
+PackageLocale: en-US
+Publisher: A2-Ai
+PublisherUrl: https://a2-ai.com/
+PublisherSupportUrl: https://github.com/A2-ai/rv/issues
+Author: A2-Ai LLC
+PackageName: rv
+PackageUrl: https://github.com/A2-ai/rv
+License: MIT
+LicenseUrl: https://github.com/A2-ai/rv/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2025 A2-Ai
+ShortDescription: A new way to manage and install your R packages in a reproducible, fast, and declarative way.
+Tags:
+- r
+ReleaseNotes: |-
+  Welcome to this new release of rv v0.9.0!
+  rv v0.9.0 Release Notes
+  (testing AI generation based on feeding it diffs and otherwise, generally reviewed for output)
+  Released: June 22, 2025
+  We're excited to announce rv v0.9.0, a major release that brings significant performance improvements, enhanced R-Universe support, better build logging, and more robust dependency resolution. This release focuses on making rv faster, more reliable, and easier to use in production environments.
+  🚀 Major Features
+  Incremental Library Builds
+  - Revolutionary Performance: Implemented incremental library builds that dramatically reduce sync times by only installing changed packages
+  - Smart Staging: New staging directory approach prevents unnecessary copying and linking
+  - Process Safety: Added sophisticated process detection to prevent removal of packages currently in use by R sessions
+  - Multi-library Support: Enhanced R CMD INSTALL to support multiple library paths for better dependency resolution
+  Enhanced R-Universe Integration
+  - Native API Support: Complete rewrite of R-Universe integration using their native API instead of PACKAGES files
+  - Improved Git Tracking: Better handling of R-Universe packages with proper git SHA tracking and subdirectory support
+  - Single Query Efficiency: Optimized to use single API calls instead of multiple queries per package
+  Build Logging and Debugging
+  - Comprehensive Build Logs: All package builds now generate detailed logs with stdout/stderr output
+  - Log Extraction: New --save-install-logs-in flag for rv sync to save build logs to a specified directory
+  - Better Error Diagnosis: Build failures now provide more actionable error information
+  🔧 Core Improvements
+  Dependency Resolution Enhancements
+  - Cyclic Dependency Handling: Completely resolved infinite loops when resolving cyclic dependencies
+  - Version Requirement Tracking: Fixed issues where version requirements weren't properly loaded from lockfiles
+  - Smarter Conflict Resolution: Improved SAT solver performance with better variable handling
+  System Dependencies
+  - Enhanced System Requirement Parsing: Better handling of system dependencies without packages
+  - Improved Status Reporting: More informative system dependency status in project summaries
+  - Better Ubuntu 20.04 Support: Fixed parsing issues with system requirements JSON
+  Command Line Interface
+  - Flexible R Version Handling: New RCommandLookup system allows soft R version requirements for planning commands
+  - Tree Command Improvements: Added --r-version flag to rv tree command for better flexibility
+  - Dependencies-Only Support: Better handling of dependencies_only packages in tree output
+  🛠️ Technical Improvements
+  Build System
+  - Parallel Installation: Enhanced worker threading with better debugging information
+  - Transactional Safety: Improved error handling to prevent corrupted library states
+  - Force Source Support: New example projects demonstrating force_source functionality
+  Cache Management
+  - Log Path Management: New cache methods for managing build log storage
+  - Better Path Resolution: Improved cache path resolution for different package sources
+  - Enhanced Metadata: Better tracking of package metadata and installation status
+  Configuration
+  - Extended Skip List: Added local-deps-depends-only to integration test skip list
+  - Environment Variable Support: New RV_NO_CHECK_OPEN_FILE environment variable for controlling file checks
+  - Timeout Adjustments: Increased CI timeout from 30 to 60 minutes for better reliability
+  🐛 Bug Fixes
+  - Fixed Activate/Deactivate: Commands now correctly use project directory instead of current directory
+  - Resolved Tree Filtering: Fixed handling of ignored dependencies in dependency trees
+  - SAT Solver Performance: Significant performance improvements in dependency conflict resolution
+  - Repository Parsing: Better error handling for malformed repository responses
+  - Process Detection: Improved detection of packages in use on Unix systems
+  📁 Project Structure Changes
+  - New Example Projects: Added force-src and local-deps-depends-only example configurations
+  - Improved Gitignore: Added logs/ directory to gitignore
+  - Enhanced Documentation: Better inline documentation and code comments
+  ⚡ Performance Improvements
+  - Faster Sync Operations: Incremental builds reduce sync time by up to 80% for unchanged packages
+  - Optimized R-Universe Queries: Single API calls instead of multiple per-package queries
+  - Better SAT Solving: Enhanced dependency resolution performance with timing information
+  - Reduced Network Calls: Smarter caching and fewer redundant operations
+  🔄 Potentially Breaking Changes
+  - R-Universe Handling: Changed from PACKAGES file parsing to native API - automatic migration
+  - Library Staging: New staging approach may require clearing existing staging directories
+  - Log Storage: Build logs now stored in new cache locations
+  🧪 Developer Experience
+  - Better Error Messages: More informative error messages with actionable suggestions
+  - Enhanced Debugging: Better debugging output with worker thread identification
+  - Improved Testing: New integration tests for complex dependency scenarios
+  - Documentation Updates: Better code documentation and inline comments
+  📋 Dependencies and Compatibility
+  - Rust Compatibility: Continues to require Rust 1.78.0 or later
+  - R Version Support: Enhanced support for R with better version detection on mac with rig installs
+  - Platform Support: Improved Windows, macOS, and Linux compatibility
+  - System Requirements: Better detection and handling of system-level dependencies
+  🎯 Migration Guide
+  From v0.8.0 to v0.9.0
+  1. No Breaking Config Changes: Your existing rproject.toml files will continue to work
+  2. R-Universe: R-Universe packages will automatically use the new API - no changes needed
+  3. Build Logs: Build logs are now automatically saved - use --save-install-logs-in to save to a particular directory during installation
+  New Configuration Options
+  [project]
+  repositories = [
+      {alias = "posit", url = "https://packagemanager.posit.co/cran/2024-12-16/", force_source = true}
+  ]
+  dependencies = [
+      { name = "dplyr", dependencies_only = true, install_suggestions = true }
+  ]
+  🤝 Contributors
+  This release includes contributions from:
+  - Vincent Prouillet - Incremental builds, dependency resolution improvements
+  - Wes Cummings - R-Universe integration, system requirements
+  - Devin Pastoor - Architecture improvements, project coordination
+  🔗 Additional Resources
+  - GitHub Repository: https://github.com/A2-ai/rv
+  - Installation Guide: See the repository's installation documentation
+  - Usage Documentation: Check out the usage guide for rproject.toml configuration
+  - Example Projects: Explore the example_projects/ directory for configuration examples
+  🐛 Known Issues
+  - Large parallel builds may occasionally encounter resource contention
+  - Some edge cases in complex dependency trees may require manual intervention
+  - Windows path handling in some scenarios may need additional testing
+
+  For detailed technical changes, see the full commit history on GitHub. For issues or feature requests, please create an issue in the GitHub repository.
+  All artifacts are signed with this repos identity using Sigstore.
+  You can verify the signatures using the GitHub CLI.
+  gh attestation verify --owner A2-ai <my-artifact>
+ReleaseNotesUrl: https://github.com/A2-ai/rv/releases/tag/v0.9.0
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

@@ -1,0 +1,49 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: qingchencloud.ClawPanel
+PackageVersion: 0.18.1
+PackageLocale: zh-CN
+Publisher: openclaw
+PublisherUrl: https://qingchencloud.com/
+PublisherSupportUrl: https://github.com/qingchencloud/clawpanel/issues
+PrivacyUrl: https://qingchencloud.com/privacy.html
+Author: 武汉晴辰天下网络科技有限公司
+PackageName: ClawPanel
+PackageUrl: https://github.com/qingchencloud/clawpanel
+License: AGPL-3.0
+LicenseUrl: https://github.com/qingchencloud/clawpanel/blob/HEAD/LICENSE
+Copyright: © 2026 武汉晴辰天下网络科技有限公司
+ShortDescription: "\U0001F99E OpenClaw 可视化管理面板 — 内置 AI 助手（工具调用 + 图片识别 + 多模态），一键安装"
+Tags:
+- openclaw
+- 人工智能
+- 大语言模型
+- 智能体
+- 聊天机器人
+- 自主智能
+- 龙虾
+ReleaseNotes: |-
+  修复 (Fixes)
+  - Windows OpenClaw 切换/升级后版本丢失 — 修复 npm 源切换时新旧包共用 openclaw.cmd，旧包卸载把新 CLI shim 一并删除的问题；安装成功后会重新确认 npm CLI 入口、读取版本并写入 ClawPanel 绑定
+  - standalone 升级后仍使用旧 CLI — standalone 安装完成后先校验目标 CLI 版本，再自动切换当前绑定路径，避免升级成功但面板仍指向旧 npm 全局目录
+  - 多安装路径提示误导 — 安装管理与仪表盘会区分“当前绑定安装”和 PATH 残留；已绑定新版时，旧 npm 路径只提示为 PATH 残留，不再误导用户再次绑定旧版
+  - Gateway 配对失败 / role-upgrade 循环 — 自动配对会补齐已有设备记录中的 operator role、scopes、approvedScopes 和 operator token，避免控制台反复提示 pairing required: device is asking for a higher role
+  - 配对修复误杀手动 Gateway — 设备配对和聊天页自动配对不再主动 reload/restart Gateway，避免 Windows 上手动启动的 Gateway 被面板重启打断
+  - Codex 导入缺少 API Key 后 OpenClaw 无法启动 — 导入 Codex/OpenAI 客户端配置时，如果引用的环境变量缺失，会阻止导入并提示补齐；保存 OpenClaw 配置时也会校验模型服务商的环境变量引用
+  - 仪表盘升级后仍显示旧版本/未知来源 — 升级或卸载完成后自动清理仪表盘版本缓存并刷新；自定义 npm prefix（如 D:\...\npm-global\openclaw.cmd）会读取 shim 内容识别为官方版或汉化版
+  - 升级弹窗关闭无效 — 修复升级完成后关闭按钮可能被页面刷新打断的问题
+  改进 (Improvements)
+  - 安装校验更严格 — npm 与 standalone 安装完成后都会校验目标版本，校验失败会保留旧绑定并给出明确错误
+  - Gateway 重装提示更清晰 — 切换 OpenClaw 源后会先修复并绑定当前 CLI，再重装 Gateway 服务，失败时保留更明确的手动处理提示
+  - Web/dev 后端行为对齐 — scripts/dev-api.js 同步桌面端的配对规范化、模型环境变量校验、安装绑定和 PATH 残留处理逻辑
+  测试与验证 (Testing)
+  - 已通过 npm run build
+  - 已通过 node --check scripts\dev-api.js
+  - 已通过 cd src-tauri && cargo fmt --check
+  - 已通过 cd src-tauri && cargo check
+  - 已通过 cd src-tauri && cargo test commands::pairing::tests
+  - 已通过 npm run tauri build（Windows NSIS / MSI 本地打包）
+ReleaseNotesUrl: https://github.com/qingchencloud/clawpanel/releases/tag/v0.18.1
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

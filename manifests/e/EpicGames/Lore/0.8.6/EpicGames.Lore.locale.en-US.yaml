@@ -1,0 +1,56 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: EpicGames.Lore
+PackageVersion: 0.8.6
+PackageLocale: en-US
+Publisher: Epic Games
+PublisherUrl: https://lore.org/
+PublisherSupportUrl: https://github.com/EpicGames/lore/issues
+PrivacyUrl: https://legal.epicgames.com/epicgames/privacy-policy
+Author: Epic Games, Inc.
+PackageName: Lore
+PackageUrl: https://lore.org/
+License: MIT
+LicenseUrl: https://github.com/EpicGames/lore/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Epic Games, Inc.
+CopyrightUrl: https://legal.epicgames.com/epicgames/tos
+ShortDescription: Next-Generation Open Source Version Control
+Description: Lore is an open source version control system designed for unprecedented scalability of both data and teams. It is optimized for projects that combine code with large binary assets, including games and entertainment, and caters for the needs of developers and artists alike.
+Tags:
+- vcs
+ReleaseNotes: |-
+  Changes since v0.8.5.
+  Breaking changes
+  - lore-client: logging CLI arguments are now strictly mutually exclusive; a command line passing conflicting logging flags is rejected instead of silently accepted
+  - Auth login/info now return NotSupported (code 18) when the server has no auth endpoint configured, and surface NotAuthenticated / Disconnected instead of a generic internal error (code -1); scripts branching on these exit/FFI codes must be updated
+  - Presigned URL vending (POST /v1/repository/{id}/content/{address}/presign) is now restricted to service accounts; normal user tokens can no longer mint presigned URLs
+  Features
+  - lore-server: forward BranchList and RepositoryCreate to a remote Lore server when configured (extending the existing BranchCreate/BranchDelete/BranchGet forwarding)
+  - lore: add a batch node-add verb (lore_revision_tree_add) to the low-level revision API, landing a whole subtree atomically
+  - lore: run the service process (lore service run) on Linux and macOS, not just Windows
+  - lore: validate that all strings passed to the C API are valid UTF-8, rejecting invalid input up front with a named field
+  - lore-server: support file:// JWKS endpoints in the JWK service
+  - lore-revision: optional durable_delay on the composite store so read replicas can answer before the durable tier is queried
+  - lore-storage: self-heal corrupt (torn-write / zero-filled) mutable store buckets instead of failing to open the store
+  - lore-server: add Cache-Control headers to the presigned-URL redeem endpoint for immutable content
+  - Add a self-contained Terraform example for an AWS primary + edge deployment under contrib/aws/
+  Fixes & Improvements
+  - lore-storage: read_into now respects the requested byte range for single-fragment reads (partial reads of files ≤ 256 KiB no longer fail)
+  - lore-server: fix JWK refresh cache check so a missing/rotated key triggers a fetch, allowing key rotation without a restart
+  - lore-credential: require a DNS label boundary when matching a dotless JWT aud, and allow exact apex-domain matches, closing an audience-suffix leak
+  - lore-revision: preserve dirty move status through status --scan instead of degrading it to delete + add
+  - lore-revision: bound commit read memory with a travelling fragment permit, and cap directory recursion fan-out during commit
+  - lore-revision: drain staging tasks on all error paths so failures propagate cleanly
+  - lore-storage: batch FastCDC chunking to cut per-chunk overhead on medium/large writes
+  - Add transport connect timeouts so local reads no longer stall on an unreachable remote
+  - lore: use the calling process's working directory for absolute-path resolution in the service process
+  - Fix lore_branch_switch and lore_branch_reset to restore the branch name→id mapping (so the branch appears in the local list), with a --force override
+  - lore-revision: fix restore failing with Dirty node remain after nodes were committed
+  - lore-base: update vendored rpmalloc to 2.0.1
+ReleaseNotesUrl: https://github.com/EpicGames/lore/releases/tag/v0.8.6
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://epicgames.github.io/lore/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,121 @@
+# Created with WinGet Updater using komac v2.15.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: DoltHub.Dolt
+PackageVersion: 1.81.3
+PackageLocale: en-US
+Publisher: DoltHub
+PublisherUrl: https://github.com/dolthub/dolt
+PublisherSupportUrl: https://github.com/dolthub/dolt/issues
+Author: DoltHub
+PackageName: Dolt
+PackageUrl: https://www.dolthub.com/
+License: Apache-2.0
+LicenseUrl: https://github.com/dolthub/dolt/blob/HEAD/LICENSE
+CopyrightUrl: https://raw.githubusercontent.com/dolthub/dolt/master/LICENSE
+ShortDescription: Dolt is a SQL database that you can fork, clone, branch, merge, push and pull just like a git repository.
+Description: |-
+  Dolt is a SQL database that you can fork, clone, branch, merge, push and pull just like a git repository.
+  Connect to Dolt just like any MySQL database to run queries or update the data using SQL commands.
+  Use the command line interface to import CSV files, commit your changes, push them to a remote, or merge your teammate's changes.
+Moniker: dolt
+Tags:
+- cli
+- data
+- git-for-data
+- versioning
+ReleaseNotes: |-
+  Merged PRs
+  dolt
+  - 10383: Fix SQL engine panic when database is locked
+    • Prevent NewSqlEngine from panicking when a repo fails to open due to lock contention.
+    • Load-check the underlying DoltDB in engine DB collection and return the recorded load error (e.g.
+    nbs.ErrDatabaseLocked) instead of nil-dereferencing.
+    • Enables embedded/driver callers to detect “database locked” and safely retry engine initialization.
+  - 10376: /go/libraries/doltcore/sqle/dsess/autoincrement_tracker.go: remove print statement
+  - 10375: Fix embedded DB lock contention by closing nocache DoltDBs and plumbing DBLoadParams through CREATE DATABASE / clone / stats
+    Summary
+    This change fixes an embedded / driver reopen failure where a two-phase flow (CREATE DATABASE then later Ping) could still
+    hit the database is locked by another dolt process even with disable_singleton_cache + fail-fast lock behavior enabled.
+    Key updates:
+    • Close underlying DoltDBs in nocache mode: sqle.DoltDatabaseProvider.Close() now closes all underlying *doltdb.DoltDB
+    instances when DisableSingletonCacheParam is in effect, ensuring .dolt/noms/LOCK is released on engine shutdown.
+    • Plumb DBLoadParams into provider-managed DB creation paths:
+    • CREATE DATABASE / UNDROP DATABASE now use env.LoadWithoutDB so DBLoadParams can be applied before any DB is opened.
+    • dolt_clone applies provider DBLoadParams to the clone env before registration.
+    • registerNewDatabase defensively applies provider DBLoadParams to the env.
+    • Propagate DBLoadParams into stats backing store: statspro now uses LoadWithoutDB for new stats storage and copies
+    DBLoadParams from the host env so embedded-mode settings apply consistently.
+    • Regression coverage: adds a test that creates a DB via the SQL engine, closes the engine, and asserts the LOCK is
+    released.
+    Why
+    Embedded callers rely on deterministic reopen semantics under contention. Previously, the SQL provider close path didn’t
+    close the underlying *doltdb.DoltDB for newly created DBs in nocache mode, leaving the journal manifest LOCK held and
+    causing retries / reopens to fail.
+  - 10374: cache strictLookupIter
+  - 10371: go.mod,.github: Bump Go version to 1.25.6.
+    Fixes potential impact in some configurations from CVE-2025-61729.
+  - 10366: Bug fix: don't set branch control admin privs when rebasing
+    Fixes #10352
+  - 10363: Add embedded-mode options to bypass DB cache and fail fast on journal lock contention
+    This PR adds opt-in controls for embedded/driver use-cases that need deterministic reopen semantics under contention:
+    • Disable local singleton DB caching for file-backed databases via a new dbfactory param, so each open constructs a fresh store.
+    • Fail fast on journal manifest lock timeout via a new dbfactory param, returning a sentinel error instead of falling back to read-only.
+    • Plumb DB load parameters through the SQL engine / env so an embedded driver can thread these options into Dolt database creation.
+    Key changes
+    • dbfactory:
+    • Adds DisableSingletonCacheParam (disable_singleton_cache)
+    • Adds FailOnJournalLockTimeoutParam (fail_on_journal_lock_timeout)
+    • Bypasses the singleton cache in FileFactory.CreateDB when disable_singleton_cache is set.
+    • nbs:
+    • Adds ErrDatabaseLocked
+    • Adds JournalingStoreOptions + NewLocalJournalingStoreWithOptions
+    • Updates newJournalManifest(..., failOnTimeout) to return ErrDatabaseLocked on lock timeout when enabled.
+    • SQL engine / env plumbing:
+    • Adds DBLoadParams to engine.SqlEngineConfig and threads them into env.DoltEnv prior to DB loading.
+    • Adds DBLoadParams to env.DoltEnv and merges them into both DB load paths (LoadDoltDB and LoadDoltDBWithParams).
+    • Updates env.MultiEnvForDirectory to respect a caller-provided *DoltEnv to avoid preloading before params are set.
+  - 10314: Minimize binlog deletions in branch control
+    I didn't find a way to trigger multiple deletions through SQL on non-existent rows, but just in case we're somehow able to get to that point through some other bug, we put it in the binlog everytime. This way, we only add to the binlog if we actually had something to delete.
+  - 9748: Bump gopkg.in/yaml.v3 from 3.0.0 to 3.0.1 in /integration-tests/transactions
+    Bumps gopkg.in/yaml.v3 from 3.0.0 to 3.0.1.
+    Dependabot compatibility score
+    You can trigger a rebase of this PR by commenting @dependabot rebase.
+    [//]: # (dependabot-automerge-start)
+    [//]: # (dependabot-automerge-end)
+    Dependabot commands and options
+    You can trigger Dependabot actions by commenting on this PR: - `@dependabot rebase` will rebase this PR - `@dependabot recreate` will recreate this PR, overwriting any edits that have been made to it - `@dependabot merge` will merge this PR after your CI passes on it - `@dependabot squash and merge` will squash and merge this PR after your CI passes on it - `@dependabot cancel merge` will cancel a previously requested merge and block automerging - `@dependabot reopen` will reopen this PR if it is closed - `@dependabot close` will close this PR and stop Dependabot recreating it. You can achieve the same result by closing it manually - `@dependabot show ignore conditions` will show all of the ignore conditions of the specified dependency - `@dependabot ignore this major version` will close this PR and stop Dependabot creating any more for this major version (unless you reopen the PR or upgrade to it yourself) - `@dependabot ignore this minor version` will close this PR and stop Dependabot creating any more for this minor version (unless you reopen the PR or upgrade to it yourself) - `@dependabot ignore this dependency` will close this PR and stop Dependabot creating any more for this dependency (unless you reopen the PR or upgrade to it yourself) You can disable automated security fix PRs for this repo from the [Security Alerts page](https://github.com/dolthub/dolt/network/alerts). > **Note** > Automatic rebases have been disabled on this pull request as it has been open for over 30 days.
+  go-mysql-server
+  - 3406: Set table names to lower when creating table map
+    fixes #10385
+  - 3404: Bump google.golang.org/protobuf from 1.28.1 to 1.33.0
+    Bumps google.golang.org/protobuf from 1.28.1 to 1.33.0.
+    Dependabot compatibility score
+    Dependabot will resolve any conflicts with this PR as long as you don't alter it yourself. You can also trigger a rebase manually by commenting @dependabot rebase.
+    [//]: # (dependabot-automerge-start)
+    [//]: # (dependabot-automerge-end)
+    Dependabot commands and options
+    You can trigger Dependabot actions by commenting on this PR: - `@dependabot rebase` will rebase this PR - `@dependabot recreate` will recreate this PR, overwriting any edits that have been made to it - `@dependabot merge` will merge this PR after your CI passes on it - `@dependabot squash and merge` will squash and merge this PR after your CI passes on it - `@dependabot cancel merge` will cancel a previously requested merge and block automerging - `@dependabot reopen` will reopen this PR if it is closed - `@dependabot close` will close this PR and stop Dependabot recreating it. You can achieve the same result by closing it manually - `@dependabot show ignore conditions` will show all of the ignore conditions of the specified dependency - `@dependabot ignore this major version` will close this PR and stop Dependabot creating any more for this major version (unless you reopen the PR or upgrade to it yourself) - `@dependabot ignore this minor version` will close this PR and stop Dependabot creating any more for this minor version (unless you reopen the PR or upgrade to it yourself) - `@dependabot ignore this dependency` will close this PR and stop Dependabot creating any more for this dependency (unless you reopen the PR or upgrade to it yourself) You can disable automated security fix PRs for this repo from the [Security Alerts page](https://github.com/dolthub/go-mysql-server/network/alerts).
+  - 3403: /go.{mod,sum}: bump go version
+  - 3399: GMS warning on functional indices
+    Makes it so create index queries with expression argument will produce a warning instead of an error.
+  - 3396: avoid converting float64 to float64
+    We save on conversion costs by avoiding a call to convert float64 to float64.
+    Unfortunately this has little to no impact on any of our benchmarks because groupbyIter uses concurrency.
+    benchmarks: #10359 (comment)
+  - 3395: fewer strings.ToLower calls in gatherTableAlias
+    benchmarks: #10355 (comment)
+  - 3388: Apply filter simplifications to Join condition
+    part of #10284
+    part of #10335
+  - 3387: Simplify Between expression to Equals if lower and upper bounds refer to the same field
+  - 3386: Push filters that contain references to outer/lateral scopes.
+    We attempt to push filter expressions deeper into the tree so that they can reduce the size of intermediate iterators. Ideally, we want to push filters to directly above the data source that they reference.
+    Previously, we only pushed filters if they only referenced a single table, since pushing a filter that referenced multiple tables could potentially move the filter to a location where one of the referenced tables is no longer in scope. However, if the extra table references refer to a table in an outer scope or lateral scope, pushing the filter is completely safe. GetFields that reference an outer or lateral scope can be effectively treated as literals for the purpose of this optimization.
+    This PR changes getFiltersByTable, a function that maps tables onto the filters that reference those tables. Previously it would ignore filters that reference multiple tables. Now, it allows those filters provided that the extra references are to outer/lateral scopes.
+    This improves many of the plan tests:
+    - The changed test in tpch_plans.go pushes a filter into the leftmost table lookup
+    - The second changed test in query_plans.go replaces a naive InnerJoin with a CrossHashjoin
+ReleaseNotesUrl: https://github.com/dolthub/dolt/releases/tag/v1.81.3
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

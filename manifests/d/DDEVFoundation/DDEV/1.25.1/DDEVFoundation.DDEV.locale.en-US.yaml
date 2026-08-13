@@ -1,0 +1,123 @@
+# Created with komac v2.15.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: DDEVFoundation.DDEV
+PackageVersion: 1.25.1
+PackageLocale: en-US
+Publisher: DDEV Foundation
+PublisherUrl: https://github.com/ddev
+PublisherSupportUrl: https://github.com/ddev/ddev/issues
+PackageName: DDEV
+PackageUrl: https://github.com/ddev/ddev
+License: Apache-2.0
+LicenseUrl: https://github.com/ddev/ddev/blob/HEAD/LICENSE
+ShortDescription: Docker-based local PHP+Node.js web development environments
+Tags:
+- backdrop
+- craftcms
+- ddev
+- development
+- docker
+- drupal
+- laravel
+- linux
+- local-development
+- macos
+- magento
+- magento2
+- mariadb
+- moodle
+- nodejs
+- php
+ReleaseNotes: |-
+  Installation
+  See the installation instructions for details, but it's easy:
+  - macOS: brew install ddev/ddev/ddev or just brew upgrade ddev.
+  - Linux: Use sudo apt-get update && sudo apt-get install ddev, see apt/yum installation
+  - Windows and WSL2: Download the Windows Installer; you can run it for install or upgrade.
+    ⚠️ Traditional Windows users (not WSL2): If needed, the installer will prompt you to uninstall the previous system-wide installation to avoid conflicts with the new per-user installation.
+  - Consider ddev delete images or ddev delete images --all after upgrading to free up disk space used by previous Docker image versions. This does no harm.
+  - Consider ddev config --auto to update your projects to current configuration.
+  Highlights
+  - New interactive DDEV TUI (terminal user interface). Try it out! Just type ddev.
+    See the Interactive Dashboard and Terminal Compatibility documentation.
+  - Users of v1.25.0 are encouraged to upgrade due to multiple fixes and stability improvements.
+  Bug Fixes
+  MariaDB / Database
+  - Use MariaDB 10.11 client for older MariaDB servers, fixing the v1.25.0 error: "TLS/SSL error: SSL is required, but the server does not support it".
+  - Automatically add --skip-ssl-verify-server-cert for MariaDB 11.x clients.
+  - Fixed mixed collation errors after ddev import-db for utf8mb4_uca1400_ai_ci (MariaDB) and utf8mb4_0900_ai_ci (MySQL) introduced in v1.25.0.
+  Traefik / Router
+  - Fixed Traefik router healthcheck warnings for stopped projects.
+  - Copy all certificates from .ddev/traefik/certs to ddev-router, not only auto-generated ones.
+  - Copy Traefik-related files directly to ddev-router without intermediate containers to avoid healthcheck issues.
+  - Restored support for custom Traefik project configurations removed in v1.25.0.
+  - Fixed Traefik router communication between containers/projects that was partially broken in v1.25.0.
+  - Clean up Traefik staging directories on poweroff to prevent downgrade issues (notably with v1.24.10).
+  - Do not report Traefik warnings in ddev-router healthchecks, thanks to @jonesrussell.
+  Remote Docker
+  - Skip port checks for remote Docker hosts, thanks to @svicervlad.
+  - Automatically bind all interfaces for remote Docker hosts.
+  - Fixed broken TLS connection to remote Docker hosts introduced in v1.24.8.
+  Other Fixes
+  - Fixed AVIF and HEIC write support in ImageMagick 7.
+  - Remove unnecessary warnings for files during ddev pull, thanks to @jonesrussell.
+  - Use Composer 2.2 LTS automatically when Composer 1 (deprecated and non-working) is requested, thanks to @jonesrussell.
+  - Skip port checks for remote Docker hosts, thanks to @svicervlad.
+  - Automatically bind all interfaces for remote Docker hosts.
+  - Show warnings/errors in ddev share that could previously be hidden.
+  - Fixed non-working ddev share on traditional Windows (regression from v1.25.0).
+  Internal Improvements
+  - Check for Docker Buildx plugin (required by Docker Compose).
+  - Added retry logic for docker-compose build, see #8136.
+  - Added WSL2 testing in GitHub Actions.
+  Minor Updates
+  - PHP 8.4.18 and 8.5.3.
+  What's Changed
+  - chore(schema): Minor updates to schema.json [skip ci] by @rfay in #8097
+  - fix: router healthcheck incorrectly warns when all projects stopped, fixes #8081 by @Copilot in #8082
+  - docs: note that "pull acquia" uses latest available backup by @damienmckenna in #8107
+  - docs: Do not include version with create-project when using Drupal official release by @gitressa in #8068
+  - fix(webserver): add AVIF and HEIC write support for ImageMagick by @stasadev in #8104
+  - docs(claude): Minor casual edits to CLAUDE.md [skip ci] by @rfay in #8112
+  - test(traefik): add TestCustomProjectConfig for custom project-level Traefik configuration by @rfay in #8114
+  - fix(traefik): copy all traefik certs from project to router, fixes #8100, replaces #8108 by @rfay in #8113
+  - fix(traefik): Attempt to fix possible fsnotify problems with traefik and config by @rfay in #8116
+  - fix(docker): handle TLS, improve ddev utility dockercheck, fixes #8111 by @stasadev in #8115
+  - chore: fix webimage_extra_packages example in config.yaml by @joelpittet in #8122
+  - fix: suppress files_pull warning when provider has files_import_command, fixes #8103 by @jonesrussell in #8123
+  - fix(ddev-router): only show Traefik ERR (not WRN) as config problems, fixes #8102 by @jonesrussell in #8125
+  - test(quickstart): use flexible regex for WordPress REST API link header [skip buildkite] by @rfay in #8133
+  - chore(vscode): Minor launch.json fiddles [skip ci] by @rfay in #8134
+  - docs: update ddev.readthedocs.io URLs to docs.ddev.com [skip ci] by @rfay in #8137
+  - fix(config): replace composer_version 1 option with 2.2 (LTS), fixes #8084 by @jonesrussell in #8126
+  - docs: add PR creation guidance for gh pr create/edit [skip ci] by @rfay in #8140
+  - fix: skip port check for remote Docker hosts by @svicervlad in #8128
+  - docs: Add "tested on" badge to README by @tyler36 in #8118
+  - fix: add timeout to IsPortActive to prevent macOS hangs by @rfay in #8147
+  - fix(compose): add retry logic for docker-compose build BuildKit snapshot race condition, for #8136 by @Copilot in #8142
+  - ci: add WSL2 GitHub Actions testing workflow, for #6444 by @rfay in #8151
+  - fix(ci): fetch upstream tags in WSL2 workflow for correct version detection, for #8151 by @rfay in #8153
+  - feat: merge multiple traefik config files per project, fixes #8047 by @Copilot in #8109
+  - fix: use valid bind addresses for remote Docker hosts by @rfay in #8139
+  - fix(router): recreate router when network aliases change, fixes #8110 by @rfay in #8132
+  - chore(traefik): Clean up traefik staging directories on poweroff to prevent downgrade issues, fixes #8120 by @Copilot in #8135
+  - feat: add Docker buildx plugin as hard requirement, fixes #8117 by @rfay in #8149
+  - fix: remove check for no-bind-mounts in remote Docker, for #8139 by @stasadev in #8158
+  - fix: run share provider scripts via bash, fixes Windows ddev share by @rfay in #8157
+  - feat(mariadb): use 10.11 client for <11.x servers, add --skip-ssl-verify-server-cert wrappers for 11.x, fixes #8119 by @stasadev in #8141
+  - docs: Remove architecture specification for Homebrew installation by @rfay in #8160
+  - feat(tui): add Bubble Tea TUI dashboard with detail view, logs, and project management, fixes #5762 by @rfay in #8144
+  - fix(share): simplify ddev share provider scripts and show output in real-time by @stasadev in #8156
+  - test(quickstart): fix wagtail hang, reduce job timeout to 60m by @rfay in #8164
+  - test: fix intermittent and cleanup issues in TestCmdAddonPHP by @rfay in #8161
+  - test(wsl): increase time limit for test [skip ci] by @rfay in #8166
+  - build(docker): bump images to v1.25.1 for release, fixes #8162 by @stasadev in #8163
+  - fix(import-db): replace modern collations with server default, fixes #8129, fixes #8130 by @stasadev in #8138
+  - feat(tui): add viewport scrolling for dashboard and detail views by @stasadev in #8169
+  New Contributors
+  - @svicervlad made their first contribution in #8128
+  Full Changelog: v1.25.0...v1.25.1
+ReleaseNotesUrl: https://github.com/ddev/ddev/releases/tag/v1.25.1
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

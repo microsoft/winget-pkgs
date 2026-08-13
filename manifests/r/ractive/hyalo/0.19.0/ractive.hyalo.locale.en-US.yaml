@@ -1,0 +1,169 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: ractive.hyalo
+PackageVersion: 0.19.0
+PackageLocale: en-US
+Publisher: '@ractive'
+PublisherUrl: https://github.com/ractive
+PublisherSupportUrl: https://github.com/ractive/hyalo/issues
+Author: Jean-Pierre Bergamin
+PackageName: hyalo
+PackageUrl: https://github.com/ractive/hyalo
+License: MIT
+LicenseUrl: https://github.com/ractive/hyalo/blob/HEAD/LICENSE
+ShortDescription: CLI for exploring and managing Markdown knowledge bases with YAML frontmatter
+Description: Hyalo is a fast command-line tool for searching, filtering, and mutating collections of Markdown files with YAML frontmatter. It supports property queries, tag filtering, regex search, wikilink tracking, and bulk metadata updates. Compatible with Obsidian vaults, Zettelkasten systems, and any structured Markdown documentation.
+Moniker: hyalo
+Tags:
+- agent-skill
+- agentic-workflows
+- cli
+- knowledge-base
+- knowledge-management
+- markdown
+- obsidian
+- rust
+- zettelkasten
+ReleaseNotes: |-
+  [0.19.0] - 2026-07-19
+  Added
+  - hyalo lint accepts multiple positional files (iter-179): hyalo lint a.md b.md lints every listed file, matching --files-from semantics; the
+    positional FILE argument is now repeatable.
+  - hyalo mv accepts a positional destination (iter-181): hyalo mv old.md new.md is now an alias for hyalo mv old.md --to new.md, matching the
+    positional-file ergonomics of the other mutation commands. The positional
+    DEST requires the positional source and is mutually exclusive with --to.
+  - hyalo changelog add --wrap <cols> (iter-181): word-wrap a long entry
+    message on word boundaries into a hanging-indented bullet (2-space
+    continuation indent), for 80-column changelogs.
+  - hyalo set emits an advisory note for enum/pattern violations (iter-181):
+    setting a value the type's schema would reject (an out-of-enum value or one
+    failing a pattern) now surfaces the same kind of non-blocking note: that
+    date violations already get. The write still proceeds — hyalo lint (or
+    set --validate) remains the enforcement gate.
+  Changed
+  - --format github is deterministic and truncation-honest (iter-186):
+    annotations are now emitted sorted by (path, line, rule), so which findings
+    GitHub keeps under its per-step annotation cap is stable across runs. hyalo
+    still emits every workflow command, but GitHub registers at most 10 error +
+    10 warning annotations per step — when a run exceeds either cap hyalo now
+    appends a ::notice:: stating the true totals so the truncation is visible
+    (quiet when both are under the cap). The exit-code contract is unchanged.
+    The project's own CI (.github/workflows/ci.yml) is split accordingly: a
+    diff-aware lint-kb job lints only a PR's changed files
+    (git diff origin/$BASE...HEAD | hyalo lint --files-from -) so the annotation
+    budget is spent on the PR's own findings, plus a full-vault lint-kb-full job
+    on push to main to catch cross-file regressions the diff-aware check can't
+    see.
+  - Exit-code contract: flag-conflict user errors exit 1, not 2 (iter-181):
+    combining --jq with --format text, --count with --jq, --count on a
+    non-list command, and --format github on a non-lint command now exit 1
+    (user error) instead of 2 (which the help reserves for internal errors).
+  - hyalo set JSON response echoes the coerced value (iter-181): the
+    value field now reflects the parsed YAML value written to frontmatter (e.g.
+    a list for --property 'x=[a, b]', a number for x=3) rather than the raw
+    input string.
+  - hyalo new omits schema-violating placeholders (iter-181): when a
+    required pattern/length-constrained string has no valid default, the scaffold
+    no longer emits an invalid TBD value (e.g. branch: TBD against
+    ^iter-\d+[a-z]*/); the key is omitted for the user to fill, and a later
+    hyalo lint flags it as missing-required.
+  Fixed
+  - Angle-bracket link destinations are parsed correctly (L-A1): a
+    CommonMark-valid markdown link destination like [text](<my dest.md>) —
+    which hyalo's own generator has emitted since iter-176 — is no longer
+    stored with literal <> characters. find --broken-links no longer
+    false-positives on these links, and backlinks now resolves them.
+  - Escaped brackets in link text no longer drop the link (L-A2): a label
+    containing an escaped bracket, e.g. [Contains \[test\] brackets](dest.md),
+    no longer terminates the label scan early and silently discards the whole
+    link from --fields links and backlinks output.
+  - Property-regex parse errors surface the engine detail (iter-181): an
+    invalid --property 'title~=(' filter now reports the regex engine's own
+    message (with caret/position) as the error cause, the way find -e does,
+    instead of dropping it.
+  - Hints preserve the vault context and active filters (iter-180,
+    BUG-7/BUG-8): the create-index hint after a slow or large-vault command now
+    carries the explicit --dir (running it verbatim indexes the right vault, not
+    the default one) and drops the dangling …queries: colon. Derived find
+    hints now compose with the active graph/title filters — a "Show all N" or
+    "Narrow by tag" hint on a --orphan / --broken-links / --dead-end query
+    keeps that filter (and any --index-file), so the suggested command
+    reproduces the same scoped set instead of widening to the whole vault. When
+    the shown results were a truncated page, the misleading per-tag/per-status
+    count is dropped rather than presenting a page-local number the command would
+    not return.
+  - summary schema counter is honest (iter-180, BUG-9): the schema
+    error/warning tally now applies [lint] ignore globs and the hint is
+    relabelled Schema: N errors, M warnings pointing at hyalo lint --rule SCHEMA — the exact command that reproduces those counts (plain hyalo lint
+    also runs MD body rules, so its totals never matched the schema-only counter).
+    The stale "Show all N files with issues" hint is suppressed after a lint --fix apply, where the pre-fix count no longer holds.
+  - Fewer false-positive did-you-mean suggestions (iter-180): summary no
+    longer flags enumerated numeric-suffix values (hero-6 vs hero-4, v2 vs
+    v3) as possible typos of one another.
+  - Site-URL diagnostic for absolute-link vaults (iter-180): when nearly every
+    link in a link-heavy vault is unresolvable (e.g. an MDN-style copy where
+    49,933/49,935 links are absolute site URLs), summary now suggests setting
+    --site-prefix instead of offering links fix on tens of thousands of
+    unfixable links.
+  - Lint respects fenced code and inline code spans (iter-179, BUG-5):
+    HYALO001 (bare-checkbox) and HYALO002 (completed-tasks) no longer fire on a
+    [] or literal - [ ] that appears inside a ``` / ~~~ fenced code block or a
+    `…` inline code span — documenting checkbox/array syntax in prose is no
+    longer flagged. This removed the entire HYALO001 false-positive class on real
+    MDN prose.
+  - Body lint reports file-absolute line numbers (iter-179, BUG-6): a body
+    rule's line N now counts from the top of the file (offset past frontmatter),
+    matching the raw file; the HYALO001 message no longer embeds a redundant,
+    body-relative line number that disagreed with it.
+  - Per-violation severity matches the counts (iter-179, BUG-17): each lint
+    line is labelled with its own error/warn severity, so a folded SCHEMA
+    group that mixes the two no longer renders error lines that the summary
+    tallies as warnings.
+  - Lint message polish (iter-179): summary and hint counts pluralize
+    correctly (1 error, 0 warnings); the --files-from missing/outside-vault
+    hints use singular/plural grammar; the HYALO005 frontmatter-parse message no
+    longer double-prefixes (could not parse frontmatter: failed to parse YAML frontmatter: … → single prefix); MD034's autolink fix no longer swallows a
+    trailing Liquid tag ({% … %} / {{ … }}) into <…>; and changelog add
+    into an existing empty ### Category keeps a blank line after the heading.
+  - Frontmatter wikilink anchors survive mv and links fix (iter-178,
+    L-2/L-7): an anchored frontmatter link such as related: - "[[decision-log#DEC-041]]"
+    is now rewritten with its #anchor preserved when the target moves, and
+    links fix repairs keep the anchor instead of dropping it. Both paths route
+    through a single shared rewrite_frontmatter_wikilink_text helper so they
+    stay symmetric.
+  - Self-referencing frontmatter links survive a rename (iter-178, L-1): the
+    moved file's own frontmatter self-links (e.g. related: - "[[a]]" when moving
+    a.md) are now rewritten to the new path in both single-file and batch mv,
+    instead of being left as a dangling reference.
+  - mv --index refreshes the source link graph (iter-178, L-5): after a
+    move with --index, a subsequent backlinks --index query reflects the
+    rewritten source outbound links (the index now refreshes both the entry and
+    its graph edges, matching the live scan).
+  - links fix no longer desyncs on a %% inside a code fence (iter-178,
+    L-8): a literal %% line inside a fenced code block is treated as code, not
+    an Obsidian comment delimiter, so links after the block are still repaired.
+  - Fuzzy link matcher accepts a lone valid candidate (iter-178, L-9): a
+    single fuzzy candidate scoring just above the threshold is no longer wrongly
+    rejected as an ambiguous "tie" against the threshold value itself.
+  - Case-only rename works on case-insensitive filesystems (iter-178, L-14):
+    hyalo mv a.md --to A.md on macOS/Windows no longer fails with "target file
+    already exists" when the source and destination resolve to the same inode.
+  What's Changed
+  Other Changes
+  - ci(lint-kb): use ractive/setup-hyalo@v1 for the KB lint job (iter-171) by @ractive in #209
+  - iter-178: link surgical fixes (Phase A — anchors, self-links, stale graph) by @ractive in #210
+  - iter-179: lint precision — code fences, absolute line numbers, message polish by @ractive in #211
+  - iter-180: hint trust — filter preservation, --dir, honest counters by @ractive in #212
+  - iter-181: write-path polish — set advisories, exit codes, scaffolds by @ractive in #214
+  - docs(kb): iter-182 knowledgebase hygiene — links, duplicates, statuses by @ractive in #215
+  - chore(skills): /release — target/release/hyalo everywhere; explicit publish-crates dispatch by @ractive in #213
+  - iter-183: unify six body-scan loops onto one stateful lexer by @ractive in #216
+  - iter-184: case-insensitive link resolver map, fuzzy tiers, Unicode boundaries by @ractive in #217
+  - feat(links): backslash-escape suppression (L-16) + case-insensitive --file resolution by @ractive in #218
+  - iter-186: diff-aware KB lint in CI + --format github truncation honesty by @ractive in #219
+  - fix(links): angle-bracket destinations (L-A1) and escaped link-text brackets (L-A2) by @ractive in #220
+  Full Changelog: v0.18.0...v0.19.0
+ReleaseNotesUrl: https://github.com/ractive/hyalo/releases/tag/v0.19.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

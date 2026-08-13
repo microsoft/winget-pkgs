@@ -1,0 +1,109 @@
+# Created by Anthelion using komac v2.15.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: bluenviron.mediamtx
+PackageVersion: 1.16.2
+PackageLocale: en-US
+Publisher: bluenviron
+PublisherUrl: https://github.com/bluenviron
+PublisherSupportUrl: https://github.com/bluenviron/mediamtx/issues
+Author: aler9
+PackageName: mediamtx
+PackageUrl: https://github.com/bluenviron/mediamtx
+License: MIT
+LicenseUrl: https://github.com/bluenviron/mediamtx/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2019 aler9
+CopyrightUrl: https://github.com/bluenviron/mediamtx/blob/main/LICENSE
+ShortDescription: |-
+  Ready-to-use SRT / WebRTC / RTSP / RTMP / LL-HLS media server and media proxy that allows to read,
+  publish, proxy, record and playback video and audio streams.
+Description: |-
+  MediaMTX is a ready-to-use and zero-dependency real-time media server and media proxy that allows
+  to publish, read, proxy, record and playback video and audio streams. It has been conceived as a
+  "media router" that routes media streams from one end to the other.
+Tags:
+- go
+- golang
+- hls
+- media-server
+- obs-studio
+- rtcp
+- rtmp
+- rtmp-proxy
+- rtmp-server
+- rtp
+- rtsp
+- rtsp-proxy
+- rtsp-relay
+- rtsp-server
+- streaming
+- webrtc
+ReleaseNotes: |-
+  Fixes and improvements
+  General
+  - support X-Forwarded-Proto in playback server (#4970) (#5445) allow reverse proxies to change the schema of URLs returned by the server through the X-Forwarded-Proto header.
+  - make config file YAML 1.2 compliant (#5345) (#5456)
+  - replace YAML parser (#5461) switch from the unmaintained gopkg.in/yaml to goccy/go-yaml
+  - deprecate unix+rtp (#5318) (#4999) (#5351) (#5470) Unix socket are stream-based connections, while RTP requires packet-based connections. While packet-based Unix sockets exist (unixgram), no client supports them. Consequently we are forced to deprecate unix+rtp.
+  - fix codec parameters not being loaded from alwaysAvailableFile (#5484)
+  - warn when alwaysAvailableFile is not MP4 (#5483)
+  - suggest using JWTs in query parameters for RTSP and RTMP (#5267) (#5493) In case of RTSP and RTMP, JWTs cannot be used as passwords since there's a size limit. Therefore, documentation is updated to suggest passing JWT through query parameters, and authJWTInHTTPQuery is updated to act on HTTP requests only.
+  - fix error 400 with parallel describe and publish requests (#5095) (#5502) When a path is dynamic, and the path receives multiple describe and publish requests in parallel, describe requests might cause the path to be deleted, and this might cause pending publish requests to fail, since the path has been deleted. This patch improves the situation by checking for pending requests before deleting a path.
+  - add integrated packet dumper (#5488) this allows to dump any incoming and outgoing packet, to disk, in pcapng format.
+  - log packet sizes if UDPMaxPayloadSize is exceeded (#4668)
+  - improve video/audio sync of alwaysAvailable (#5443) (#5508) store elapsed time once for the entire stream and start PTS of sub streams from there.
+  - improve pmp4 and fmp4 parser robustness (bluenviron/mediacommon#299)
+  - mp4: fix H265 + iOS compatibility (bluenviron/mediacommon#290) On iOS, H265 requires the hvc1 box instead of the hev1 box.
+  - h264: prevent Annex-B from decoding more NALUs than MaxNALUsPerAccessUnit (bluenviron/mediacommon#303)
+  - improve H264 and MPEG-4 video performance (#4971) (bluenviron/mediacommon#304)
+  - mp4: fill reserved fields properly (bluenviron/mediacommon#307)
+  - mpegts: parse Opus channel configuration (#5002) (bluenviron/mediacommon#309)
+  API
+  - add conns to RTSP Sessions (#5454) this allows to find connections associated with a RTSP session.
+  RTMP
+  - prevent legacy clients from reading multiple video/audio tracks (#5478)
+  - fix marshaling H264 VideoExCodedFrames (#4996) (bluenviron/gortmplib#46) These messages were marshaled wrongly, causing errors when trying to read H264 tracks with an ID >= 1.
+  - support reading H265 with video codec id 12 (#5105) (bluenviron/gortmplib#48)
+  HLS
+  - client: support storing and sending cookies (#5444)
+  WebRTC
+  - allow tuning WHEP timeouts (#5027) (#5479) add whepHandshakeTimeout, whepTrackGatherTimeout, whepSTUNGatherTimeout
+  - add whepBearerTokenParameter (#3796) (#5486) this allows to pass Authorization: Bearer to servers that require it.
+  SRT
+  - set timeout of idle peers to readTimeout (#5489)
+  RPI Camera
+  - fix cross-compilation (bluenviron/mediamtx-rpicamera#89)
+  - fix kernel warning when closing camera (#4988) (bluenviron/mediamtx-rpicamera#88) close camera and encoder handlers properly.
+  Dependencies
+  - Go updated from 1.25 to 1.26
+  - code.cloudfoundry.org/bytefmt updated from v0.63.0 to v0.64.0
+  - github.com/MicahParks/keyfunc/v3 updated from v3.7.0 to v3.8.0
+  - github.com/bluenviron/gohlslib/v2 updated from v2.2.5 to v2.2.6
+  - github.com/bluenviron/gortmplib updated from v0.2.1 to v0.3.0
+  - github.com/bluenviron/gortsplib/v5 updated from v5.3.1 to v5.3.2
+  - github.com/bluenviron/mediacommon/v2 updated from v2.7.1 to v2.8.0
+  - github.com/datarhei/gosrt updated from v0.9.0 to v0.10.0
+  - github.com/go-git/go-git/v5 updated from v5.16.4 to v5.16.5
+  - github.com/matthewhartstonge/argon2 updated from v1.4.5 to v1.4.6
+  - github.com/pion/ice/v4 updated from v4.2.0 to v4.2.1
+  - github.com/pion/sdp/v3 updated from v3.0.17 to v3.0.18
+  - github.com/pion/webrtc/v4 updated from v4.2.3 to v4.2.9
+  - golang.org/x/crypto updated from v0.47.0 to v0.48.0
+  - golang.org/x/sys updated from v0.40.0 to v0.41.0
+  - golang.org/x/term updated from v0.39.0 to v0.40.0
+  - gopkg.in/yaml.v2 removed
+  - github.com/goccy/go-yaml updated from v1.18.0 to v1.19.2
+  - github.com/pion/dtls/v3 updated from v3.0.10 to v3.1.2
+  - golang.org/x/net updated from v0.49.0 to v0.50.0
+  - golang.org/x/text updated from v0.33.0 to v0.34.0
+  - github.com/google/gopacket v1.1.19 added
+  - github.com/bluenviron/mediamtx-rpicamera updated from v2.5.3 to v2.5.4
+  Security
+  Binaries are compiled from source code by the Release workflow without human intervention.
+  You can verify that binaries have been produced by the workflow by using GitHub Attestations:
+  ls mediamtx_* | xargs -L1 gh attestation verify --repo bluenviron/mediamtx
+  You can verify checksums of binaries by downloading checksums.sha256 and running:
+  cat checksums.sha256 | grep "$(ls mediamtx_*)" | sha256sum --check
+ReleaseNotesUrl: https://github.com/bluenviron/mediamtx/releases/tag/v1.16.2
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

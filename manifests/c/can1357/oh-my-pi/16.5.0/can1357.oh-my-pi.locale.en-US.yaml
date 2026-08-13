@@ -1,0 +1,98 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: can1357.oh-my-pi
+PackageVersion: 16.5.0
+PackageLocale: en-US
+Publisher: Can Bölük
+PublisherUrl: https://can.ac/
+PublisherSupportUrl: https://github.com/can1357/oh-my-pi/issues
+Author: Can Bölük
+PackageName: oh-my-pi
+PackageUrl: https://omp.sh/
+License: MIT
+LicenseUrl: https://github.com/can1357/oh-my-pi/blob/HEAD/LICENSE
+Copyright: |-
+  Copyright (c) 2025 Mario Zechner
+  Copyright (c) 2025-2026 Can Bölük
+ShortDescription: ⌥ AI Coding agent for the terminal — hash-anchored edits, optimized tool harness, LSP, Python, browser, subagents, and more
+Description: |-
+  omp is a terminal-first coding agent that runs on your machine, talks to any provider, and treats sessions like git branches.
+  omp (pronounced “oh-em-pi”, binary omp) is a fork of Mario Zechner’s Pi. It runs as a single Bun process, drives any model provider you have credentials for, and ships a flat tool surface the model uses to read code, run commands, edit files, drive a debugger, and spawn subagents that coordinate over an in-process IRC bus.
+  Sessions persist as JSONL under ~/.omp/agent/sessions/. You resume, fork, branch, and share them. Settings, credentials, plugins, and caches all live under ~/.omp/agent/. Nothing leaves the machine unless you call a tool that does.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  @oh-my-pi/pi-agent-core
+  Added
+  - Added an automated image-dropping rescue tier to compaction dead-end recovery.
+  - Added visual warnings and detailed recovery instructions to the session timeline when compaction fails to free sufficient space.
+  @oh-my-pi/pi-ai
+  Added
+  - Added diagnostic response headers to auth-gateway inference endpoints, including request IDs (x-request-id/request-id), LiteLLM model metadata (x-litellm-model-id/x-litellm-model-api-base), and performance/cost metrics (x-litellm-response-cost, x-litellm-response-duration-ms, openai-processing-ms) on non-streaming responses.
+  Changed
+  - Updated Google and Google Vertex providers to always use streamGenerateContent requests.
+  Fixed
+  - Fixed empty provider responses (such as from Cloud Code Assist API) being classified as non-retryable, allowing session retries and model-fallback chains to engage instead of failing the turn.
+  Removed
+  - Removed automatic /interactions chaining for follow-up turns in Google provider calls, along with the useInteractionsApi, storeInteraction, and previousInteractionId stream options.
+  @oh-my-pi/pi-coding-agent
+  Breaking Changes
+  - Replaced the --reasoning-slide-* flag family with a unified --prewalk mechanism (--prewalk, --prewalk-into <model>, and --no-prewalk) to manage model handoffs during execution.
+  Added
+  - Added a new --prewalk execution flow (with --prewalk-into <model> and --no-prewalk overrides) that starts tasks on a strong model for planning and todo initialization before handing off to a faster, cheaper model for implementation.
+  - Added a status line annotation for the active prewalk phase (armed or active).
+  - Added the tui.scrollbackRebuild setting to gate the erase-and-replay native scrollback rebuild mechanism (defaults to off).
+  - Added a display setting to toggle between collapsing or keeping compacted history inline in live session displays.
+  - Added a compact session-only model picker (Alt+P) for quick model switching, featuring @ search to quickly list and apply configured quick roles.
+  - Redesigned Agent Hub entries into a cleaner two-line card layout showing identity, active model, reasoning level, age, and task description.
+  - Added a project-scoped launch tool (gated by launch.enabled) for managing shared long-running services and debuggers, featuring readiness probes, bounded logs, PTY input, restart policies, and automatic teardown.
+  - Added support for detached launches, allowing standalone services to survive broker shutdowns and reconnect to subsequent sessions.
+  Changed
+  - Updated JSON logs (--mode json) to include provider payloads in auto-compaction events.
+  - Updated tangential agent forks (/tan) to ignore parent session history and focus exclusively on the new request, hardening isolation with cleared todo lists and concurrent editing warnings.
+  - Added visual markers in the transcript for elided tool calls that have no corresponding result.
+  - Updated the status event log to prioritize the most recent entries in the display window.
+  - Upgraded @agentclientprotocol/sdk to version 1.2.1.
+  Fixed
+  - Fixed terminal scrollback duplication issues with expanded streaming edit previews (Ctrl+O) by using a viewport-sized tail window.
+  - Fixed custom model role resolution and alias parsing, ensuring canonical role selectors (@role) and thinking suffixes resolve correctly across all configuration surfaces.
+  - Fixed quadratic growth in JSON logs by eliding redundant message snapshots and payloads.
+  - Fixed prompt cache misses and incorrect cache key pinning for /tan and /fork clones.
+  - Fixed inconsistent history rendering and scrollback repainting when toggling the display setting for compacted items.
+  - Fixed retry.fallbackChains failing to engage on non-retryable provider errors, ensuring the agent correctly falls back to the next candidate model.
+  - Improved auto-compaction to automatically drop images and elide content when context is tight, and added persistent warning badges when manual intervention is required.
+  - Fixed backgrounded Bash blocks continuing to repaint with live output; they now freeze with a compact job notice while completion is delivered separately.
+  - Fixed rendering, status display, and PTY control sequence formatting issues in the launch tool.
+  - Fixed in-process shell builtins (including stat, date, sed, mktemp, tail, find, base64, and ln) to correctly detect and translate macOS/BSD-style arguments and flags, preventing failures caused by GNU-only assumptions.
+  Removed
+  - Removed the --prewalk-boomerang feature and its associated configuration setting.
+  - Removed the unreliable Bing and Yahoo HTML-scraping web search providers.
+  @oh-my-pi/hashline
+  Fixed
+  - Fixed a critical issue where ambiguous swaps could silently delete range boundaries.
+  - Prevented incorrect auto-repairing of structural closing lines when payload placement is ambiguous.
+  - Fixed a bug in stale-hash recovery that could incorrectly relocate edits onto duplicated context after the original target changed.
+  @oh-my-pi/snapcompact
+  Changed
+  - Updated archived transcript rendering to use a more compact format with ¶user:, ¶think:, ¶ai:, and ¶call: scopes, omitting repeated adjacent scope headers and appending tool-call intents as comments.
+  @oh-my-pi/pi-tui
+  Changed
+  - Improved native scrollback history management by introducing an optional erase-and-replay mechanism to rebuild scrollback when mutated rows (such as finalized tool blocks or collapsed transcripts) diverge. This is now gated behind the tui.scrollbackRebuild setting and defaults to off.
+  Fixed
+  - Fixed a rendering issue where resizing the terminal during forced renders (such as tool finalization or image reconciliation) caused the entire transcript to visibly replay and flicker. Forced renders are now consolidated into a single paint once the resize settles.
+  Full Changelog: https://github.com/can1357/oh-my-pi/compare/v16.4.8...v16.5.0
+ReleaseNotesUrl: https://github.com/can1357/oh-my-pi/releases/tag/v16.5.0
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://omp.sh/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,154 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: restic.restic
+PackageVersion: 0.19.0
+PackageLocale: en-US
+Publisher: restic
+PublisherUrl: https://github.com/restic
+PublisherSupportUrl: https://github.com/restic/restic/issues
+Author: Alexander Neumann
+PackageName: restic
+PackageUrl: https://github.com/restic/restic
+License: BSD-2-Clause
+LicenseUrl: https://github.com/restic/restic/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2014, Alexander Neumann <alexander@bumpern.de>
+CopyrightUrl: https://github.com/restic/restic/raw/master/LICENSE
+ShortDescription: Fast, secure, efficient backup program
+Description: |-
+  restic is a backup program that is fast, efficient and secure. It supports the three major operating
+  systems (Linux, macOS, Windows) and a few smaller ones (FreeBSD, OpenBSD).
+Moniker: restic
+Tags:
+- backup
+- dedupe
+- deduplication
+- go
+- restic
+- secure-by-default
+ReleaseNotes: |-
+  Changelog for restic 0.19.0 (2026-06-09)
+  The following sections list the changes in restic 0.19.0 relevant to restic users. The changes are ordered by importance.
+  Summary
+  - Fix #2034: Support serving a restic mount of a Windows system via Samba
+  - Fix #4447: Use mode 0700 for repository directories created over SFTP
+  - Fix #4467: Exit with code 3 when some backup source paths do not exist
+  - Fix #4759: Error out when environment variables hold invalid values
+  - Fix #5233: Return exit code 3 when failing to remove snapshots
+  - Fix #5258: Exit with code 130 on SIGINT
+  - Fix #5280: Reject impossible find time bounds immediately
+  - Fix #5280: Make find --pack list blobs for tree packs
+  - Fix #5354: Allow rclone and sftp backends when running in background
+  - Fix #5427: Correctly restore ACL inheritance state on Windows
+  - Fix #5477: Password prompt was sometimes not shown for backup -v
+  - Fix #5487: Mark repository files read-only when using the SFTP backend
+  - Fix #5586: Correctly handle snapshots --group-by with --latest
+  - Fix #5595: Avoid spurious chmod errors on certain file backends
+  - Fix #5683: Prevent backup --stdin-from-command from hanging
+  - Fix #5757: Respect --user and --host in key passwd
+  - Fix #21820: Correct handling of duplicate index entries
+  - Fix #21820: Correctly handle pack files missing from the index
+  - Chg #5293: Prune small packfiles more aggressively
+  - Chg #5767: Prevent excluding paths explicitly passed to backup
+  - Chg #21791: Update dependencies and require Go 1.25 or newer
+  - Enh #3326: Limit check to snapshots selected by filters
+  - Enh #3572: Support restoring ownership by name on UNIX systems
+  - Enh #3738: Optional GitHub token for self-update API requests
+  - Enh #4278: Support include filters in the rewrite command
+  - Enh #4728: Support zstd compression levels fastest and better
+  - Enh #4868: Include repository ID in the filesystem name used by mount
+  - Enh #5175: Add status counters to copy in verbose text output
+  - Enh #5352: Support excluding cloud-backed files on macOS
+  - Enh #5383: Reduce progress bar refresh rates to decrease energy usage
+  - Enh #5424: Enable Windows filesystem privileges before file access
+  - Enh #5440: Make --host override environment variable RESTIC_HOST
+  - Enh #5448: Support configuring nice and ionice in the Docker image
+  - Enh #5453: Copy multiple snapshots in batches
+  - Enh #5523: Add Open Container Initiative labels to release Docker image
+  - Enh #5531: Reduce Azure storage costs by optimizing uploads
+  - Enh #5562: Rewrite only changed status lines each frame
+  - Enh #5588: Show timezone context in snapshots output
+  - Enh #5610: Reduce check, copy, diff and stats memory usage
+  - Enh #5689: Show more detailed progress for stats
+  - Enh #5713: Significantly speed up index loading
+  - Enh #5718: Stricter and earlier validation of the mount point
+  Details
+  - Bugfix #2034: Support serving a restic mount of a Windows system via Samba
+    A repository mounted using restic mount on a POSIX system could not use Samba to serve files from backups of Windows systems, while backups of non-Windows systems could be served successfully. This has now been fixed.
+    #2034 #4382 #21784
+  - Bugfix #4447: Use mode 0700 for repository directories created over SFTP
+    When creating a repository over SFTP, restic created the repository directories with the SFTP server's default permissions, often 0755, rather than the 0700 permissions it uses for local repositories.
+    Restic now creates these directories with 0700 permissions.
+    #4447 #21817
+  - Bugfix #4467: Exit with code 3 when some backup source paths do not exist
+    Restic used to exit with code 0 when a top-level backup source path was missing, and exited with code 3 only when a child path under an existing source did not exist. Scripts that relied on the exit code could therefore treat an incomplete backup as success.
+    Restic now exits with code 3 when any backup source path does not exist.
+    #4467 #5347
+  - Bugfix #4759: Error out when environment variables hold invalid values
+    If the environment variables RESTIC_COMPRESSION, RESTIC_PACK_SIZE, or RESTIC_READ_CONCURRENCY could not be parsed, restic used to ignore them. Restic now fails with an error unless the same setting is overridden on the command line.
+    #4759 #5592 #5700
+  - Bugfix #5233: Return exit code 3 when failing to remove snapshots
+    Previously, the forget command returned exit code 0 when it failed to remove one or more snapshots. This was misleading to scripts.
+    The forget command now instead returns exit code 3 when failing to remove one or more snapshots.
+    #5233 #5322
+  - Bugfix #5258: Exit with code 130 on SIGINT
+    Restic used to return exit code 1 on SIGINT. It now returns 130, the usual convention for a process stopped by Ctrl-C.
+    #5258 #5363
+  - Bugfix #5280: Reject impossible find time bounds immediately
+    The find command now fails with an error when both --oldest and --newest are set and --oldest is later than --newest.
+    #5280 #5310
+  - Bugfix #5280: Make find --pack list blobs for tree packs
+    The find --pack <tree-pack> command now also reports blobs for packs that only contain tree blobs.
+    #5280 #5664
+  - Bugfix #5354: Allow rclone and sftp backends when running in background
+    Previously, starting restic in the background could result in unexpected behavior when using the rclone or sftp backends. For example, restic -r rclone:./example --insecure-no-password init & could cause the calling bash shell to exit unexpectedly.
+    This has now been fixed.
+    #5354 #5358 #5493 #5494
+  - Bugfix #5427: Correctly restore ACL inheritance state on Windows
+    Since security descriptor backups were added in restic 0.17.0, Access Control Entry inheritance was not restored correctly on Windows; restored permissions were always marked as explicit (not inherited) even when they were inherited from a parent folder.
+    The inheritance flags are now correctly applied when restoring the security descriptor, preserving the original permission structure.
+    #5427 #5465
+  - Bugfix #5477: Password prompt was sometimes not shown for backup -v
+    The repository password prompt could be hidden when running the backup -v command. This has now been fixed.
+    #5477 #5554
+  - Bugfix #5487: Mark repository files read-only when using the SFTP backend
+    Files created through the SFTP backend previously stayed writable. New files now get read-only permissions where the server supports chmod.
+    #5487 #5497
+  - Bugfix #5586: Correctly handle snapshots --group-by with --latest
+    For the snapshots command, --latest did not interact correctly with a non-default --group-by value. This combination now behaves as intended.
+    #5586 #5601
+  - Bugfix #5595: Avoid spurious chmod errors on certain file backends
+    On filesystems that do not support chmod (for example CIFS or FUSE-mounted WebDAV), restic since version 0.18.0 failed to remove stale locks, throwing the error chmod ...: operation not supported. This has now been fixed.
+    #5595 #5596
+  - Bugfix #5683: Prevent backup --stdin-from-command from hanging
+    When using --stdin-from-command, the backup command could hang until manually cancelled if the backup stopped before all subprocess output was consumed, for example after a failed upload to the repository. This has now been fixed.
+    #5683 #21829
+  - Bugfix #5757: Respect --user and --host in key passwd
+    The key passwd command previously ignored the --user and --host options and always stored the new key with the current user and host name. These options are now honored.
+    #5757 #21781
+  - Bugfix #21820: Correct handling of duplicate index entries
+    Before restic 0.10.0, a bug could, in very rare cases, split information about a pack file across multiple index files.
+    Since restic 0.17.0, any operation that rewrites the index (like prune or repair packs) could lose part of that information, resulting in errors in later check or prune runs. This can be fixed by running repair packs, and only repositories using repository format version 1 might be affected.
+    Split pack index entries are no longer lost during index rewrites. The check command now reports these cases as errors that can be fixed using the repair packs command. On older restic versions, running repair index twice also fixes the problem.
+    #21820 #21828
+  - Bugfix #21820: Correctly handle pack files missing from the index
+    The repair packs command was unable to salvage blobs from a pack file if the pack file was not contained in the index or the index entry was incomplete.
+    The command now uses information from both the index and the pack file header.
+    #21820 #21827
+  - Change #5293: Prune small packfiles more aggressively
+    The prune command now repacks more small packfiles by default. The option --repack-small is no longer needed and has been marked as deprecated. The --repack-smaller-than option can still be used to further control repacking of small pack files.
+    #5293 #21803
+  - Change #5767: Prevent excluding paths explicitly passed to backup
+    When e.g. restic backup --exclude-if-present .git /home/user/data was run and /home/user/.git existed, restic excluded the data directory from the snapshot. The same applied to --exclude-caches or --one-file-system.
+    Similarly, restic backup --exclude-larger-than 1M large-file.bin produced an empty snapshot when the file was larger than one megabyte.
+    The backup command now tracks which files and directories were specified on the command line and does not apply excludes to those paths. Content inside a backed-up directory is still filtered by excludes as before.
+    #5767 #21797
+  - Change #21791: Update dependencies and require Go 1.25 or newer
+    Dependencies have been updated. Building restic now requires Go 1.25 or newer. The Windows build with Go 1.26 was also fixed.
+    #21791 #5619 #21796
+  - Enhancement #3326: Limit check to snapshots selected by filters
+    The check command can now restrict pack verification to snapshots chosen with the usual snapshot filters (--tag, --host, --path, or explicit snapshot IDs on the command line).
+    #3326 #5469 #5644
+ReleaseNotesUrl: https://github.com/restic/restic/releases/tag/v0.19.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,73 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: dreamlonglll.Mini-Term
+PackageVersion: 0.4.13
+PackageLocale: zh-CN
+Publisher: tauri-app
+PublisherUrl: https://github.com/dreamlonglll
+PublisherSupportUrl: https://github.com/dreamlonglll/mini-term/issues
+PackageName: Mini-Term
+PackageUrl: https://github.com/dreamlonglll/mini-term
+License: 免费软件
+ShortDescription: 为 AI 时代打造的桌面终端管理器
+Description: |-
+  一个 AI 终端管理工具，支持多项目、多终端布局管理
+
+  功能特性
+  终端核心
+  - 多标签管理 — 每个项目独立标签页，拖拽排序，状态图标一目了然
+  - 递归分屏 — 横向 / 纵向任意嵌套分屏，Allotment 拖拽调整比例
+  - 高性能渲染 — xterm.js v6 + WebGL 加速，自动降级为 Canvas
+  - 10 万行滚动缓冲 — 拦截 CSI 3J（ED3）指令，Claude / Codex 等 TUI 清屏时保留上滚历史
+  - 终端缓存 — 切换标签 / 分屏不重建 xterm 实例，已有内容不丢失
+  - 复制粘贴 — Ctrl+Shift+C / Ctrl+Shift+V 快捷键 + 右键菜单，未选中时"复制"自动置灰；Windows 大段多行粘贴自动分块写入，防止 ConPTY 丢行
+  - 长文本粘贴 — 剪贴板文本 ≥10 行或 ≥2000 字符时自动转存为临时 .txt 并粘贴带引号的文件路径，避免 AI 工具直接处理超长内容引发性能与 paste bracket 问题
+  - 图片粘贴 — 剪贴板含截图时自动检测，通过 Win32 API 保存为临时 PNG 并粘贴带引号的路径，兼容 PinPix 等非标准格式
+  - 文件拖拽 — 文件拖到终端自动插入带引号的绝对路径，兼容含空格的路径
+  - 多 Shell 配置 — Windows（cmd / powershell / pwsh）、macOS（zsh / bash）、Linux（bash / sh）等，可自由增删
+  AI 进程感知
+  - 实时状态检测 — 500ms 轮询子进程名，自动识别 Claude / Codex，显示 idle / working / error 状态
+  - 状态聚合 — 面板 → 标签页 → 项目逐层聚合，优先级 error > ai-working > ai-idle > idle
+  - 完成提醒三件套 — AI 任务从 working → idle 时立刻触发：
+    - 右下角 Toast 桌面通知（仅非活跃项目弹出，同项目去重）
+    - 项目列表 DONE 徽章，点击清除
+    - 任务栏闪烁（Windows）/ Dock 跳动（macOS），窗口失焦时才触发
+    - 三个开关独立可配
+  - 会话进出检测 — 命令 echo 识别进入 AI；双击 Ctrl+C / Ctrl+D 或 exit / quit / :quit / /logout 识别退出
+  - 会话历史 — 读取本地 Claude / Codex 历史会话记录，右键复制恢复命令快速续接
+  - AI 任务标记 — AI 会话内每次用户按 Enter 自动在 xterm 打点，标签右上角 ⚑ 按钮下拉展示历史提交列表，点击或 Ctrl+Shift+↑/↓ 在标记间跳转，目标行短暂高亮提示
+  项目管理
+  - 项目列表 — 左侧边栏管理多个项目目录，一键切换工作区，重启自动恢复上次激活项目
+  - 拖拽添加项目 — 从资源管理器拖拽文件夹到项目列表即可快速添加，自动识别文件 / 文件夹 / 重复项目并给出视觉反馈
+  - 嵌套分组 — 最多 3 级项目分组，拖拽排序，折叠 / 展开
+  - 文件树 — 集成目录浏览器，嵌套 .gitignore 置灰（每层子目录的忽略规则与 !pattern 白名单都会生效，与 git 行为一致），notify 文件监听实时刷新
+  - 文件操作 — 文件树内新建文件 / 文件夹、重命名、查看内容（二进制与超大文件友好提示）
+  - VS Code 快捷打开 — 文件树右上角按钮一键用配置的 VS Code 可执行文件打开当前项目，路径可在「设置 → 系统设置 → 外部编辑器」自定义
+  Git 集成
+  - 文件状态 — 文件树显示 Git 状态颜色（修改 / 新增 / 删除 / 冲突）
+  - 变更 Diff — 工作区文件变更的详细 Diff，Hunk 行级解析，并排 / 内联双视图
+  - 提交历史 — 浏览仓库提交记录，游标分页加载（默认 30 条）
+  - 提交 Diff — 查看任意提交的文件变更，逐文件切换
+  - 分支信息 — 本地 / 远程分支列表
+  - 源码控制面板 — VS Code 风格 Changes 面板，Staged / Changes / Untracked 分组展示，支持单文件和全量 stage / unstage / discard，Ctrl+Enter 快速提交，列表与树形视图切换
+  - Pull / Push — 仓库行内按钮一键同步远端，支持刷新按钮重新加载提交记录与分支信息
+  - 多仓库发现 — 自动扫描项目目录下所有 Git 仓库（递归 5 层，跳过 node_modules 等）
+  外观与配置
+  - Activity Bar 侧边栏 — 最左侧常驻 40px 图标栏，含 Projects / Sessions / Files / Git 四个面板开关，独立控制显隐，激活态蓝色竖条指示，状态持久化
+  - 三种主题模式 — Auto（跟随系统）/ Light / Dark，深色基于 Warm Carbon 暖炭色调，自定义 CSS 变量体系
+  - 字体独立调节 — UI 与终端字号分别可调（10-20px），终端可选是否跟随 UI 主题
+  - 布局持久化 — 分屏比例、标签页、窗口大小 / 位置自动保存，重启恢复（tauri-plugin-window-state）
+  - 关闭确认 — 关闭窗口前二次确认，并 flush 所有项目布局，避免误操作
+  - 版本检查 — 启动时拉取 GitHub Release，标题栏显示新版本提示
+  - 设置中心 — 统一的 SettingsModal 管理主题、字体、Shell、AI 通知等所有开关
+ReleaseNotes: |-
+  更新内容
+  - release: 升级版本号至 v0.4.13 - 主要变更：「字体」设置从「系统设置」中独立成单独菜单，承载界面/终端字体大小与 font-family 共 4 项配置；修复输入框输入大写 F 被 F1-F12 拦截逻辑误吞的隐藏 bug（任何文本输入框都受影响，不止字体输入框） - 字体菜单：在「系统设置」与「AI 完成通知」之间插入，系统设置迁出后聚焦于主题/皮肤/外部编辑器 - F 键 bug 修复：main.tsx 中 F1-F12 拦截原写法 e.key.startsWith('F') && !isNaN(Number(e.key.slice(1)))，单独 'F' 时 slice(1) 为空串、Number('') 为 0 不是 NaN 命中拦截；改为正则 /^F([1-9]|1[0-2])$/ 精确匹配 - package.json、Cargo.toml、tauri.conf.json 与 Cargo.lock 版本号同步升级至 0.4.13，README 版本徽章同步
+  - fix: 修复输入框无法输入大写 F 的问题 - main.tsx 中 F1-F12 功能键拦截逻辑漏判：e.key === 'F' 时 'F'.slice(1) === ''，Number('') 为 0 不是 NaN，单独的大写 F 被误判为功能键 preventDefault - 改为正则 /^F([1-9]|1[0-2])$/ 精确匹配 F1-F12，单独的 'F' 不再被拦截 - 影响范围不止字体输入框，任何文本输入框输入大写 F 都被吞掉
+  - refactor: 字体设置从系统设置中独立成单独菜单 - SettingsPage 类型新增 'font'，菜单项在「系统设置」与「AI 完成通知」之间插入「字体」 - 新增 FontSettings 组件，承载字体大小（界面/终端）与字体 family（界面/终端）四项配置 - SystemSettings 中字体大小滑块、字体 family 输入框及对应 4 个 handler 整块迁出，迁出后系统设置只保留主题/皮肤/终端跟随主题/外部编辑器
+  - feat: 新增界面与终端字体自定义能力 - AppConfig 增加 ui_font_family / terminal_font_family 两个可选字段，配套 2 条 serde 往返单测覆盖老配置缺省与新字段读写 - styles.css 把硬编码 font-family 抽成 --app-font-family / --app-font-mono CSS 变量，新增 .font-mono 重定向覆盖 Tailwind v4 默认值 - 新增 utils/fontManager.ts，单字段同时写入两个变量实现「一项覆盖整个 UI」；空值移除 inline style 回退默认 - SettingsModal 设置面板增加「字体」分组与 FontFamilyInput 子组件，onBlur/Enter 提交避免每键写盘 - TerminalInstance 监听 terminalFontFamily 变化实时刷新 xterm.options.fontFamily 并 refit，无需重开终端 - terminalCache 抽出 DEFAULT_TERMINAL_FONT_FAMILY 常量与 resolveTerminalFontFamily 工具，新建终端时直接用配置值
+  - chore(task): archive 05-25-support-wsl-project-root
+ReleaseNotesUrl: https://github.com/dreamlonglll/mini-term/releases/tag/v0.4.13
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

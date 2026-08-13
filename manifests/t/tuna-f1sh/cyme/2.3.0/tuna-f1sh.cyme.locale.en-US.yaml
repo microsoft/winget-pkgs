@@ -1,0 +1,48 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: tuna-f1sh.cyme
+PackageVersion: 2.3.0
+PackageLocale: en-US
+Publisher: tuna-f1sh
+PublisherUrl: https://github.com/tuna-f1sh
+PublisherSupportUrl: https://github.com/tuna-f1sh/cyme/issues
+PackageName: Cyme
+PackageUrl: https://github.com/tuna-f1sh/cyme
+License: GPL-3.0
+LicenseUrl: https://github.com/tuna-f1sh/cyme/blob/HEAD/LICENSE
+Copyright: 2024, John Whittington <john@jbrengineering.co.uk>
+CopyrightUrl: https://github.com/tuna-f1sh/cyme/blob/v2.1.1/Cargo.toml?plain=1#L96
+ShortDescription: List system USB buses and devices
+Description: A modern cross-platform lsusb that attempts to maintain compatibility with, but also add new features. Profiles system USB buses and the devices on those buses, including full device descriptors.
+Moniker: cyme
+Tags:
+- cli
+- libusb
+- lsusb
+- macos
+- rust
+- tool
+- usb
+ReleaseNotes: |-
+  Big reduction of profiling time^ when filtering by passing options with filter to profiler. Previously, filtering was done post profiling of all devices - even those that would be filtered out. This included opening descriptors and reading data for redundant devices.
+  Also wrote some more tests to diff actual output of lsusb against cyme --lsusb - found some discrepancies in the tree and tree verbose output which have been fixed.
+  ^ ~O(n) where n is devices on host - ~ because depends on descriptors and number of filter matches. See #104 for more details.
+  Changed
+  - tree: default to branch sort to match lsusb and expected.
+  - main: default --block-operation is add not new (replace) (#106).
+  Added
+  - profiler: reduce profiling time when filtering by passing options with filter to profiler (#104).
+  - profiler: gets active config and alt setting for interfaces.
+  - profiler: (Linux) sysfs fallback for hub ports, active config and alt setting.
+  - watch: if not started with --verbose then could not cycle verbose mode with 'v' key.
+  - arg: hidden --filter-post for filtering post profiling in case fallback to previous behaviour is required.
+  - icons: defaults include CANnectivity gs_usb devices.
+  - icons: defaults update Arduino and add Qualcomm EDL.
+  Fixed
+  - lsusb: fix --tree --verbose using PCI IDs not root hub USB IDs.
+  - lsusb: fix --tree -v showing all config and alt interfaces, not just active like lsusb --tree -v.
+  - main: --device -D not working without --lsusb flag.
+ReleaseNotesUrl: https://github.com/tuna-f1sh/cyme/releases/tag/v2.3.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,111 @@
+# Created with komac v2.6.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.6.0.schema.json
+
+PackageIdentifier: astral-sh.uv
+PackageVersion: 0.5.3
+PackageLocale: en-US
+Publisher: Astral
+PublisherUrl: https://github.com/astral-sh/uv
+PublisherSupportUrl: https://github.com/astral-sh/uv/issues
+Author: uv contributors
+PackageName: uv
+PackageUrl: https://github.com/astral-sh/uv
+License: Either the Apache-2.0 License, or the MIT License
+LicenseUrl: https://github.com/astral-sh/uv/blob/0.5.3/README.md#license
+Copyright: Copyright (c) 2024 Astral Software Inc.
+CopyrightUrl: https://github.com/astral-sh/uv/blob/0.5.3/README.md#license
+ShortDescription: An extremely fast Python package and project manager, written in Rust.
+Description: An extremely fast Python package and project manager, written in Rust. Designed as a single tool to replace pip, pip-tools, pipx, poetry, pyenv, twine, virtualenv workflows, and more.
+Moniker: uv
+Tags:
+- python
+- uv
+ReleaseNotes: |-
+  Release Notes
+  This release includes support for conflicting optional dependencies and dependency groups in the uv resolver, including the ability to specify dependency sources (like index assignment) on a per-extra or per-group basis.For example, you can now select CPU-only vs. GPU-enabled PyTorch builds at runtime by defining conflicting extras in a pyproject.toml, and assigning different extras to different PyTorch indexes:
+  [project]
+  name = "project"
+  version = "0.1.0"
+  requires-python = ">=3.12.0"
+
+  [project.optional-dependencies]
+  # Include `torch` whenever `--extra cpu` or `--extra gpu` is provided.
+  cpu = ["torch>=2.5.1"]
+  gpu = ["torch>=2.5.1"]
+
+  [tool.uv]
+  # But allow `cpu` and `gpu` to choose conflicting versions of `torch`.
+  conflicts = [[{ extra = "cpu" }, { extra = "gpu" }]]
+
+  [tool.uv.sources]
+  torch = [
+    # With `--extra cpu`, pull PyTorch from the CPU-only index.
+    { index = "pytorch-cpu", extra = "cpu", marker = "platform_system != 'Darwin'" },
+    # With `--extra gpu`, pull PyTorch from the GPU-enabled index.
+    { index = "pytorch-gpu", extra = "gpu" },
+  ]
+
+  [[tool.uv.index]]
+  name = "pytorch-cpu"
+  url = "https://download.pytorch.org/whl/cpu"
+  explicit = true
+
+  [[tool.uv.index]]
+  name = "pytorch-gpu"
+  url = "https://download.pytorch.org/whl/cu124"
+  explicit = true
+
+  See the PyTorch documentation for more.Enhancements
+  - Allow conflicting extras in explicit index assignments (#9160)
+  - Support overrides and constraints in PEP 723 scripts (#9162)
+  - Update uv tool install --force to imply --reinstall-package <name> (#9074)
+  - Turn --verify-hashes on by default (#9170)
+  Performance
+  - Enable zlib-rs on all platforms (#9202)
+  Bug fixes
+  - Allow apostrophe in virtual environment name (#8984)
+  - Automatically retry body errors when processing response (#9213)
+  - Detect nested workspace inside the current workspace and members with identical names (#9094)
+  - Only install the specified project with --frozen --package in legacy non-[project] workspaces (#9215)
+  - Respect [[tool.uv.index]] in PEP 723 scripts (#9208)
+  - Show derivation markers for resolutions with project name (#9136)
+  - Sort distributions when computing hash (#9185)
+  - Include trampolines in source distributions on Windows (#9172)
+  Documentation
+  - Add --index <name>=<url> syntax to index documentation (#9139)
+  - Add documentation for using uv with PyTorch (#9210)
+  Error messages
+  - Add a dedicated error for include = "dev" with tool.uv.dev-dependencies (#9173)
+  - Avoid showing disjoint marker error with true (#9169)
+  - Improve error message when git is not found (#9206)
+  - Include extras and dependency groups in derivation chains (#9113)
+  - Include version constraints in derivation chains (#9112)
+  Install uv 0.5.3
+  Install prebuilt binaries via shell script
+  curl --proto '=https' --tlsv1.2 -LsSf https://github.com/astral-sh/uv/releases/download/0.5.3/uv-installer.sh | sh
+
+  Install prebuilt binaries via powershell script
+  powershell -ExecutionPolicy ByPass -c "irm https://github.com/astral-sh/uv/releases/download/0.5.3/uv-installer.ps1 | iex"
+
+  Download uv 0.5.3
+  |  File  | Platform | Checksum |
+  |--------|----------|----------|
+  | uv-aarch64-apple-darwin.tar.gz | Apple Silicon macOS | checksum |
+  | uv-x86_64-apple-darwin.tar.gz | Intel macOS | checksum |
+  | uv-i686-pc-windows-msvc.zip | x86 Windows | checksum |
+  | uv-x86_64-pc-windows-msvc.zip | x64 Windows | checksum |
+  | uv-aarch64-unknown-linux-gnu.tar.gz | ARM64 Linux | checksum |
+  | uv-i686-unknown-linux-gnu.tar.gz | x86 Linux | checksum |
+  | uv-powerpc64-unknown-linux-gnu.tar.gz | PPC64 Linux | checksum |
+  | uv-powerpc64le-unknown-linux-gnu.tar.gz | PPC64LE Linux | checksum |
+  | uv-s390x-unknown-linux-gnu.tar.gz | S390x Linux | checksum |
+  | uv-x86_64-unknown-linux-gnu.tar.gz | x64 Linux | checksum |
+  | uv-armv7-unknown-linux-gnueabihf.tar.gz | ARMv7 Linux | checksum |
+  | uv-aarch64-unknown-linux-musl.tar.gz | ARM64 MUSL Linux | checksum |
+  | uv-i686-unknown-linux-musl.tar.gz | x86 MUSL Linux | checksum |
+  | uv-x86_64-unknown-linux-musl.tar.gz | x64 MUSL Linux | checksum |
+  | uv-arm-unknown-linux-musleabihf.tar.gz | ARMv6 MUSL Linux (Hardfloat) | checksum |
+  | uv-armv7-unknown-linux-musleabihf.tar.gz | ARMv7 MUSL Linux | checksum |
+ReleaseNotesUrl: https://github.com/astral-sh/uv/releases/tag/0.5.3
+ManifestType: defaultLocale
+ManifestVersion: 1.6.0

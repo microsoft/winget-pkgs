@@ -1,0 +1,129 @@
+# Created by Anthelion using komac v2.15.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: FluxCD.Flux
+PackageVersion: 2.8.0
+PackageLocale: en-US
+Publisher: FluxCD
+PublisherUrl: https://fluxcd.io/
+PublisherSupportUrl: https://github.com/fluxcd/flux2/issues
+PackageName: Flux
+PackageUrl: https://github.com/fluxcd/flux2
+License: Apache-2.0
+LicenseUrl: https://github.com/fluxcd/flux2/blob/HEAD/LICENSE
+ShortDescription: A command line tool for communicating with FluxCD
+Tags:
+- continuous-delivery
+- gitops
+- gitops-toolkit
+- helm
+- kubernetes
+- kustomize
+ReleaseNotes: |-
+  Highlights
+  Flux v2.8.0 is a feature release. Users are encouraged to upgrade for the best experience.
+  For a compressive overview of new features and API changes included in this release, please refer to the Announcing Flux 2.8 GA blog post.
+  Overview of the new features:
+  - Helm v4 support, including server-side apply and kstatus-based health checking (HelmRelease)
+  - Readiness evaluation of Helm-managed objects with CEL expressions (HelmRelease)
+  - Improved observability of Helm releases with inventory tracking in .status.inventory (HelmRelease)
+  - Reduced the mean time to recovery of Flux-managed applications via CancelHealthCheckOnNewRevision feature gate (Kustomization, HelmRelease)
+  - Support for commenting on Pull Requests directly from Flux notifications (Provider)
+  - Custom SSA apply stages for ordering resource application in kustomize-controller (Kustomization)
+  - Automatic GitHub App installation ID lookup from the repository owner (GitRepository, ImageUpdateAutomation, Provider)
+  - Support for Cosign v3 for verifying OCI artifacts and container images (OCIRepository)
+  - ArtifactGenerator support for extracting and modifying Helm charts (ArtifactGenerator)
+  - Bypass cache when fetching source objects via DirectSourceFetch feature gate (Kustomization, HelmRelease, ArtifactGenerator)
+  ❤️ Big thanks to all the Flux contributors that helped us with this release!
+  Kubernetes compatibility
+  This release is compatible with the following Kubernetes versions:
+  ──────────────────┬────────────────
+  Kubernetes version│Minimum required
+  ──────────────────┼────────────────
+  v1.33             │>= 1.32.0
+  ──────────────────┼────────────────
+  v1.34             │>= 1.34.1
+  ──────────────────┼────────────────
+  v1.35             │>= 1.35.0
+  ──────────────────┴────────────────
+  Note
+  Note that the Flux project offers support only for the latest three minor versions of Kubernetes.
+  Backwards compatibility with older versions of Kubernetes and OpenShift is offered by vendors such as
+  ControlPlane that provide enterprise support for Flux.
+  OpenShift compatibility
+  Flux can be installed on Red Hat OpenShift cluster directly from OperatorHub using Flux Operator. The operator allows the configuration of Flux multi-tenancy lockdown, network policies, persistent storage, sharding, vertical scaling and the synchronization of the cluster state from Git repositories, OCI artifacts, and S3-compatible storage.
+  Upgrade procedure
+  ⚠️ The Flux APIs v1beta2 and v2beta2 (deprecated in 2024) have reached end-of-life and have been removed from the CRDs.
+  Please follow the Upgrade Procedure for Flux v2.7+ for a smooth upgrade from older versions of Flux to v2.8.
+  Components changelog
+  - source-controller v1.8.0
+  - kustomize-controller v1.8.0
+  - notification-controller v1.8.0
+  - helm-controller v1.5.0
+  - image-reflector-controller v1.1.0
+  - image-automation-controller v1.1.0
+  - source-watcher v2.1.0
+  CLI changelog
+  - ci: Set GITHUB_TOKEN in the release-flux-manifests workflow by @stefanprodan in #5547
+  - Add backport label for Flux 2.7 by @matheuscscp in #5550
+  - build(deps): bump the ci group across 1 directory with 3 updates by @dependabot[bot] in #5548
+  - Fix flux push artifact not working with --provider by @matheuscscp in #5551
+  - Extend flux migrate to work with local files by @matheuscscp in #5554
+  - Improve flux migrate for live cluster migrations by @stefanprodan in #5558
+  - Fix flux migrate -f command to work with comments by @matheuscscp in #5560
+  - Add source-watcher to docs by @stefanprodan in #5562
+  - Fix flux migrate -f not considering kind comments by @matheuscscp in #5563
+  - refactor: convert Kustomization resource into unstructured map only once during variable substitution by @ramasai1 in #5566
+  - Update toolkit components by @fluxcdbot in #5568
+  - Disable AUR publishing by @stefanprodan in #5570
+  - Fix manifest generation for --storage-adv-addr and --events-addr flags by @stefanprodan in #5574
+  - Update dependencies to Kubernetes v1.34.1 and Go 1.25.2 by @stefanprodan in #5576
+  - Update toolkit components by @fluxcdbot in #5578
+  - Restore GitHub PAT for backports by @matheuscscp in #5581
+  - [RFC-0012] Add command flux get source external by @dgunzy in #5555
+  - fix: handle error when writing password prompt to stdout by @akshatsinha0 in #5589
+  - Pin cosign to v2.6.1 by @matheuscscp in #5594
+  - [RFC-0012] Add command flux export source external by @dgunzy in #5583
+  - Fix bootstrap e2e test for image policy by @matheuscscp in #5604
+  - Update toolkit components by @fluxcdbot in #5603
+  - fix: return accepted values for flags when calling Values.Type() by @jaxels10 in #5602
+  - ci: Include source-watcher in the e2e test suite by @stefanprodan in #5614
+  - Add source.extensions.fluxcd.io group to aggregated RBAC roles by @matheuscscp in #5627
+  - Fix panic on reconcile with source of ExternalArtifact kind by @matheuscscp in #5630
+  - Upgrade k8s to 1.34.2, c-r to 0.22.4 and helm to 3.19.2 by @matheuscscp in #5633
+  - diff: report if object is skipped by @hown3d in #5625
+  - Update toolkit components by @fluxcdbot in #5639
+  - Allow option to skip tenant namespace creation by @anshuishere in #5597
+  - Update toolkit components by @fluxcdbot in #5648
+  - fix: #5654 by checking if both --chart and --chart-ref are set by @jaxels10 in #5656
+  - Added retry logic with delays to the Flux CLI download by @ivan-munteanu in #5659
+  - Run conformance tests for Kubernetes 1.35.0 by @stefanprodan in #5663
+  - fix: normalize path for Windows compatibility by @sibasispadhi in #5674
+  - Introduce support for looking up GH app installation ID by @matheuscscp in #5682
+  - Update dependencies to Kubernetes v1.35.0 by @stefanprodan in #5688
+  - Fix resume command logging success after reconciliation failure by @Aman-Cool in #5690
+  - Add 2.8 to supported versions for flux migrate -f by @matheuscscp in #5713
+  - Introduce workflow for bumping fluxcd/pkg deps by @matheuscscp in #5717
+  - Update fluxcd/pkg dependencies by @fluxcdbot in #5719
+  - Fix event listing ignoring pagination token by @matheuscscp in #5721
+  - Build with Go 1.26 by @stefanprodan in #5723
+  - Update toolkit components by @fluxcdbot in #5722
+  - Update helm-controller to v1.5.0 by @fluxcdbot in #5725
+  - build(deps): bump the ci group across 1 directory with 12 updates by @dependabot[bot] in #5720
+  - Fix bootstrap failure on Windows cross-drive paths by @veeceey in #5726
+  - Dump debug info on e2e tests by @matheuscscp in #5729
+  - Set Kubernetes 1.33 as min supported version by @matheuscscp in #5730
+  - Update conformance tests to min Kubernetes 1.33 by @stefanprodan in #5731
+  New Contributors
+  - @ramasai1 made their first contribution in #5566
+  - @akshatsinha0 made their first contribution in #5589
+  - @jaxels10 made their first contribution in #5602
+  - @hown3d made their first contribution in #5625
+  - @anshuishere made their first contribution in #5597
+  - @ivan-munteanu made their first contribution in #5659
+  - @sibasispadhi made their first contribution in #5674
+  - @Aman-Cool made their first contribution in #5690
+  - @veeceey made their first contribution in #5726
+ReleaseNotesUrl: https://github.com/fluxcd/flux2/releases/tag/v2.8.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,49 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: PlanetLinux98.GUARD
+PackageVersion: 0.5.3
+PackageLocale: en-US
+Publisher: PlanetLinux98
+PublisherUrl: https://github.com/PlanetLinux98
+PublisherSupportUrl: https://github.com/PlanetLinux98/guard/issues
+Author: PlanetLinux98
+PackageName: GUARD
+PackageUrl: https://github.com/PlanetLinux98/guard
+License: MIT
+LicenseUrl: https://github.com/PlanetLinux98/guard/blob/HEAD/LICENSE
+ShortDescription: A portable, screen-reader-first backup, system-imaging and app-inventory utility for Windows that requires no installation.
+Description: |-
+  GUARD is a portable, fully accessible backup and data-protection utility for Windows. It backs up your chosen folders to any destination (a local drive, an external disk, or a network share), creates full bare-metal system images with Windows' built-in wbadmin, and keeps an inventory of your installed apps so they are easy to reinstall after a clean OS install - optionally with their settings.
+
+  The release ships as a self-contained portable folder with the .NET 10 runtime and Windows App SDK bundled in, so there is nothing to install. GUARD is built screen-reader-first, with native dark-mode theming, and keeps itself current with a built-in checksum-verified updater.
+
+  Features include additive and mirror copy modes (built on Robocopy), one-tick and custom exclusions, dated backup versions with pruning, a dry-run preview, scheduled and run-on-connect backups, scheduled or on-demand system images with a recovery-media wizard, and app-list export/reinstall through winget.
+Moniker: guard
+Tags:
+- accessibility
+- backup
+- data-protection
+- portable
+- restore
+- robocopy
+- winui
+ReleaseNotes: |-
+  GUARD v0.5.3 fixes various bugs to ensure GUARD keeps protecting the things you ask it to, and adds a way to clean up its data on-demand.
+  Added
+  - Settings gains Remove GUARD's Scheduled Tasks, which unregisters GUARD's schedules from Windows. Run it before deleting or uninstalling GUARD, so that tasks don't get left behind and keep firing at an app that's been removed.
+  - GUARD now warns when a folder has nothing left to back up while your backup still holds files from it, and when the backup destination is empty but records show a backup has run (deleted backup or reformatted drive).
+  Changed
+  - Installed with winget, GUARD now keeps its settings, scripts and logs in %LOCALAPPDATA%\GUARD and updates through winget upgrade rather than updating itself: winget deletes its whole install folder on upgrade and uninstall, which would destroy anything kept there. Set your settings up once more after this update; they'll survive from now on. A folder you extracted yourself stays fully portable.
+  Fixed
+  - GUARD installed via winget install would previously not launch, and a scheduled backup task saved under that install would silently never run, because winget's portable packages launch through a symlink Windows reports as the app's real location.
+  - The default backup folders (Documents, Desktop, etc.) were fixed paths, so if Windows moved one - OneDrive's "Back up your folders", or a folder's Location tab - GUARD backed up the empty folder left behind and still reported success. GUARD now tracks each default row and offers to follow a move.
+  - Every date GUARD showed or wrote followed the system locale's calendar, so on a Thai or Arabic Windows the versioned backup folder names carried Buddhist or Hijri dates. That's the dangerous one: pruning deletes the oldest by name, so a later locale change could make it delete the newest backups first. If you're on such a Windows with existing versioned backups, delete the old wrongly-named folders once.
+  - Online-only OneDrive files could be left out of backups, size estimates included.
+  - Folder paths in warnings and confirmation dialogs were shown unexpanded, the literal %USERPROFILE%\Documents text was visible on screen, and a screen reader read it out as "percent USERPROFILE percent backslash." They now show, and announce, the real path names as they're actually written.
+  - Two portable copies of GUARD installing winget at once could wipe each other's half-finished download.
+  - Building recovery media, and "View Existing Images", failed with nothing to show on a copy where no backup had run yet.
+  Full changelog: https://github.com/PlanetLinux98/guard/blob/main/CHANGELOG.md#053---2026-08-01
+ReleaseNotesUrl: https://github.com/PlanetLinux98/guard/releases/tag/v0.5.3
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

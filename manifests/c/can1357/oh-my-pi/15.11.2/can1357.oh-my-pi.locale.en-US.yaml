@@ -1,0 +1,82 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: can1357.oh-my-pi
+PackageVersion: 15.11.2
+PackageLocale: en-US
+Publisher: Can Bölük
+PublisherUrl: https://can.ac/
+PublisherSupportUrl: https://github.com/can1357/oh-my-pi/issues
+Author: Can Bölük
+PackageName: oh-my-pi
+PackageUrl: https://omp.sh/
+License: MIT
+LicenseUrl: https://github.com/can1357/oh-my-pi/blob/HEAD/LICENSE
+Copyright: |-
+  Copyright (c) 2025 Mario Zechner
+  Copyright (c) 2025-2026 Can Bölük
+ShortDescription: ⌥ AI Coding agent for the terminal — hash-anchored edits, optimized tool harness, LSP, Python, browser, subagents, and more
+Description: |-
+  omp is a terminal-first coding agent that runs on your machine, talks to any provider, and treats sessions like git branches.
+  omp (pronounced “oh-em-pi”, binary omp) is a fork of Mario Zechner’s Pi. It runs as a single Bun process, drives any model provider you have credentials for, and ships a flat tool surface the model uses to read code, run commands, edit files, drive a debugger, and spawn subagents that coordinate over an in-process IRC bus.
+  Sessions persist as JSONL under ~/.omp/agent/sessions/. You resume, fork, branch, and share them. Settings, credentials, plugins, and caches all live under ~/.omp/agent/. Nothing leaves the machine unless you call a tool that does.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  @oh-my-pi/pi-agent-core
+  Added
+  - AgentTool.concurrency now also accepts a per-call resolver function (args) => "shared" | "exclusive", letting tools pick the scheduling mode from the call's arguments (a throwing resolver falls back to "exclusive")
+  Fixed
+  - Fixed whitespace-only error tool results so Anthropic requests no longer 400 with tool_result: content cannot be empty if is_error is true and wedge the session on every subsequent turn
+  @oh-my-pi/pi-ai
+  Fixed
+  - Fixed Anthropic encoding of error tool results with whitespace-only content so requests no longer 400 with tool_result: content cannot be empty if is_error is true
+  @oh-my-pi/pi-coding-agent
+  Added
+  - Added the Expert Elixir language server (expert, invoked as expert --stdio) to the built-in LSP server list, auto-detected for Mix projects (mix.exs/mix.lock). When both are installed, elixir-ls remains the primary navigation server (Expert is ordered after it).
+  - Added magicKeywords.enabled and per-keyword magicKeywords.ultrathink, magicKeywords.orchestrate, and magicKeywords.workflow settings to disable hidden magic-keyword notices and ultrathink auto-thinking escalation (#1796).
+  - Added external-editor support for Plan Review section annotations, preserving multiline feedback for Refine plan (#2305).
+  - Added plain-RPC slash command discovery with command source metadata and startup/update notifications (#2261).
+  Changed
+  - Bash tool calls in one assistant message now run in parallel instead of serializing the batch: non-pty bash is scheduled as a shared tool (pty: true stays exclusive), and overlapping calls on the same shell session key degrade to isolated one-shot shells so they cannot queue behind or abort each other
+  Fixed
+  - Fixed CDP attach target selection for Chromium/Edge endpoints that expose page targets through discovery before browser.pages() is populated, and improved ws:// app.cdp_url diagnostics (#2246).
+  - Fixed local memory consolidation on Responses-style models that reject user-only requests by sending a dedicated stage-two system prompt.
+  - Fixed extension, custom-tool, custom-command, and hook loaders injecting pi through bare @oh-my-pi/pi-coding-agent self-imports, which could pull a different cached package version into global installs during plugin load and trigger mixed-runtime stack overflows.
+  - Marked unsmoothed assistant streaming renders as transient so streamed code blocks can avoid synchronous syntax highlighting until the message finalizes.
+  - Routed LSP hover code rendering through the shared cached highlighter instead of calling the native highlighter directly on each render.
+  - Kept smooth assistant streaming renders transient until message_end so catch-up frames do not synchronously re-highlight still-growing code blocks.
+  - Fixed the job tool's poll header repeating the running count ("waiting on 19 of 19 19 running"): the title now reads "waiting on N jobs" (or "waiting on N of M jobs" when some settled) and the dim meta lists only settled categories (done/failed/cancelled)
+  - Fixed irc send await:true to a busy peer stranding the sender until timeout when async execution is disabled: the recipient (e.g. Main blocked in a synchronous task spawn awaiting the sender's own batch) can never reach a step boundary to reply, so it now generates an ephemeral side-channel auto-reply from its context (the pre-mailbox respondAsBackground behavior), records it as an irc:autoreply aside in its own history, and delivers it back over the bus with replyTo threading
+  - Fixed Windows-style backslash paths and globs being parsed as literal POSIX path segments by search/find tools (#2245).
+  @oh-my-pi/pi-tui
+  Fixed
+  - Fixed Ctrl+C/exit corrupting the parent shell on Windows: emergencyTerminalRestore() wrote \x1b[?1049l (leave alternate screen) unconditionally on every exit path, and conhost/Windows Terminal execute an unconditional cursor restore for it even when the alt buffer was never entered — with no prior save the cursor jumped to the viewport home, so the shell prompt landed on top of the dead frame. The leave sequence is now gated on tracked alt-screen state (set/cleared by the TUI's fullscreen-overlay enter/leave and stop paths).
+  - Skipped native syntax highlighting for transient markdown streaming renders, including nested list code blocks, leaving code blocks plain until their content stabilizes to avoid main-thread highlighter spikes.
+  What's Changed
+  - fix: prevent Anthropic 400 on empty error tool results by @Mokto in https://github.com/can1357/oh-my-pi/pull/2250
+  - feat(coding-agent): add Expert Elixir language server to built-in LSP defaults by @tlarevo in https://github.com/can1357/oh-my-pi/pull/2282
+  - fix(browser): attach to discovered CDP pages by @danzaio in https://github.com/can1357/oh-my-pi/pull/2264
+  - fix(coding-agent): avoid mixed-runtime self imports in loaders by @jiwangyihao in https://github.com/can1357/oh-my-pi/pull/2297
+  - fix(tools): normalize Windows search paths by @danzaio in https://github.com/can1357/oh-my-pi/pull/2263
+  - Avoid transient syntax highlight work by @cexll in https://github.com/can1357/oh-my-pi/pull/2310
+  - feat(rpc): expose slash command metadata by @danzaio in https://github.com/can1357/oh-my-pi/pull/2262
+  - feat(prompting): add magic keyword toggles by @danzaio in https://github.com/can1357/oh-my-pi/pull/2283
+  - Add external editor for Plan Review annotations by @daandden in https://github.com/can1357/oh-my-pi/pull/2308
+  New Contributors
+  - @tlarevo made their first contribution in https://github.com/can1357/oh-my-pi/pull/2282
+  Full Changelog: https://github.com/can1357/oh-my-pi/compare/v15.11.1...v15.11.2
+ReleaseNotesUrl: https://github.com/can1357/oh-my-pi/releases/tag/v15.11.2
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://omp.sh/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

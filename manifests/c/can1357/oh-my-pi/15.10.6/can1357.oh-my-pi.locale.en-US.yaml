@@ -1,0 +1,73 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: can1357.oh-my-pi
+PackageVersion: 15.10.6
+PackageLocale: en-US
+Publisher: Can Bölük
+PublisherUrl: https://can.ac/
+PublisherSupportUrl: https://github.com/can1357/oh-my-pi/issues
+Author: Can Bölük
+PackageName: oh-my-pi
+PackageUrl: https://omp.sh/
+License: MIT
+LicenseUrl: https://github.com/can1357/oh-my-pi/blob/HEAD/LICENSE
+Copyright: |-
+  Copyright (c) 2025 Mario Zechner
+  Copyright (c) 2025-2026 Can Bölük
+ShortDescription: ⌥ AI Coding agent for the terminal — hash-anchored edits, optimized tool harness, LSP, Python, browser, subagents, and more
+Description: |-
+  omp is a terminal-first coding agent that runs on your machine, talks to any provider, and treats sessions like git branches.
+  omp (pronounced “oh-em-pi”, binary omp) is a fork of Mario Zechner’s Pi. It runs as a single Bun process, drives any model provider you have credentials for, and ships a flat tool surface the model uses to read code, run commands, edit files, drive a debugger, and spawn subagents that coordinate over an in-process IRC bus.
+  Sessions persist as JSONL under ~/.omp/agent/sessions/. You resume, fork, branch, and share them. Settings, credentials, plugins, and caches all live under ~/.omp/agent/. Nothing leaves the machine unless you call a tool that does.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  @oh-my-pi/pi-ai
+  Added
+  - Added AIML API as an OpenAI-compatible provider preset with AIMLAPI_API_KEY discovery (#2105).
+  @oh-my-pi/pi-coding-agent
+  Added
+  - Added a /plan-review command that manually (re-)opens the plan-review overlay while plan mode is active. Since there is no fixed plan filename, it reviews the newest local://<slug>-plan.md the agent wrote — useful for pulling the review back up after dismissing it, or reviewing a plan the agent wrote without calling resolve.
+  Changed
+  - Reverted the task tool's result-header glyph from the ⇶ signature icon back to the quiet status.done bullet (•): white while a subagent is running, accent once it finishes. The reviewer verdict line and per-agent result lines use the same bullet.
+  Fixed
+  - Fixed /login API-key prompts (OpenCode Zen, Perplexity OTP, GitHub Enterprise URL, manual OAuth redirect URL, …) silently dropping pasted content on kitty/Linux/Wayland — and any other terminal supporting OSC 5522 enhanced paste. InputController enables kitty's enhanced clipboard protocol on TUI start and consumes the resulting OSC 5522 packets in an addInputListener that runs before focus dispatch, so the paste never reached the modal Input's bracketed-paste handler; the routing then stuffed the text into the main CustomEditor unconditionally, even when selector-controller had detached the editor and focused a temporary OAuth input. The pasted API key accumulated in the hidden editor and only resurfaced in the main prompt when the user dismissed the modal with Enter or Esc. The enhanced-paste callback now consults ui.getFocused() and routes the text to the focused component when it exposes a pasteText hook, falling back to the editor only when no modal target is in focus; image pastes refuse with a status message instead of stuffing a binary blob into the hidden editor. (#2127)
+  - Fixed an auto-compaction dead loop when compaction.strategy was shake and the configured threshold was low enough that a single shake pass could not bring the context below it (e.g. a 50K-token threshold on a session well above it). Each pass auto-continued, the next agent turn re-triggered the threshold check, and the second shake had nothing new to drop, so the session spun forever. The shake recovery path now estimates post-shake context and, when it is still above the threshold (or shake reclaimed nothing on overflow recovery), surfaces a one-shot warning and falls back to the summarization-driven context-full compaction so progress actually resumes (#2119).
+  - Fixed /skill: prompts so magic keywords and turn-budget directives in skill args inject the same hidden notices as normal user prompts, matching the editor highlight behavior (#2128).
+  - Fixed MCP OAuth fallback rendering to show a short terminal hyperlink and keep the raw authorization URL on one unwrapped copy line (#2121).
+  - Fixed the task tool rendering a success bullet and a success frame state for detail-less error results (e.g. an argument-validation failure that never executes): the header now shows the error glyph with an error border and error state, and surfaces the dispatched agent name.
+  - Fixed Agent Control Center new-agent creation so Windows Ctrl+Enter sequences submitted as a single LF generate the agent instead of inserting a newline (#2118).
+  - Fixed plan-mode subagents preserving read-only specialty tools such as report_finding while still stripping mutating tools (#1998).
+  - Removed unreachable standalone Exa tool-suite exports and stale tool-count barrel exposure while keeping the live Exa web_search provider helpers (#2093).
+  - Fixed omp commit split plans accepting hunk selectors that resolve to no parsed hunks, which crashed the apply step after the index reset and left the working tree fully unstaged (#2098).
+  @oh-my-pi/pi-tui
+  Added
+  - Added TUI.getFocused() accessor and Input.pasteText(text) method so callers consuming non-bracketed paste transports (e.g. kitty's OSC 5522 enhanced clipboard) can route a paste payload to the currently focused modal Input rather than always to the primary editor. Mirrors the existing Editor.pasteText semantics: newlines stripped, tabs normalized, NFC normalization applied. (#2127)
+  Fixed
+  - Fixed tmux/screen/zellij rewind/branch (requestRender(true, { clearScrollback: true })) permanently anchoring the input box to the pane top and overlaying scrollback after a streamed reply had grown past the viewport. #emitFullPaint only reset #scrollbackHighWater inside the clearScrollback branch and otherwise raised it monotonically, so inside multiplexers (where \x1b[3J is a no-op and clearScrollback is forced off) the streaming peak survived the rewind; on the next frame #planLiveRegionPinnedRender saw the stale high-water and anchored renderViewportTop past the actual content, repainting every visible row blank and parking the cursor at screen row 0 for the rest of the session. A full repaint with clearViewport: true re-emits the entire transcript from row 0, so #scrollbackHighWater is now assigned (not max-clamped) to the natural push count regardless of whether ED 3 was issued (#2130).
+  What's Changed
+  - fix(commit): reject empty split hunk selectors by @danzaio in https://github.com/can1357/oh-my-pi/pull/2116
+  - fix: close several issues by @danzaio in https://github.com/can1357/oh-my-pi/pull/2120
+  - fix(cli): keep MCP auth URLs clickable by @roboomp in https://github.com/can1357/oh-my-pi/pull/2133
+  - fix(coding-agent): honor magic keywords in skill args by @roboomp in https://github.com/can1357/oh-my-pi/pull/2132
+  - fix(coding-agent): fall back to context-full when shake cannot drop below the threshold by @roboomp in https://github.com/can1357/oh-my-pi/pull/2135
+  - fix(tui): reset scrollbackHighWater on full repaint inside multiplexers by @roboomp in https://github.com/can1357/oh-my-pi/pull/2137
+  - fix(tui): route enhanced-paste text to the focused Input prompt by @roboomp in https://github.com/can1357/oh-my-pi/pull/2138
+  New Contributors
+  - @danzaio made their first contribution in https://github.com/can1357/oh-my-pi/pull/2116
+  Full Changelog: https://github.com/can1357/oh-my-pi/compare/v15.10.5...v15.10.6
+ReleaseNotesUrl: https://github.com/can1357/oh-my-pi/releases/tag/v15.10.6
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://omp.sh/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

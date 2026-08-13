@@ -1,0 +1,64 @@
+# Created with WinGet Releaser using komac v2.14.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: max-sixty.worktrunk
+PackageVersion: v0.18.0
+PackageLocale: en-US
+Publisher: max-sixty
+PublisherUrl: https://github.com/max-sixty
+PublisherSupportUrl: https://github.com/max-sixty/worktrunk/issues
+PackageName: worktrunk
+PackageUrl: https://github.com/max-sixty/worktrunk
+License: MIT OR Apache-2.0
+LicenseUrl: https://github.com/max-sixty/worktrunk/blob/HEAD/LICENSE
+ShortDescription: A Git worktree manager for trunk-based development
+Description: |-
+  worktrunk (wt) is a Git worktree manager designed for trunk-based development workflows.
+  It simplifies creating, switching between, and managing Git worktrees, making it easy to
+  work on multiple features or branches simultaneously without the overhead of stashing
+  or switching branches in a single working directory.
+Tags:
+- cli
+- git
+- git-worktree
+- rust
+- terminal
+- worktree
+ReleaseNotes: |-
+  Release Notes
+  Improved
+  - Post-remove hook: New hook type runs after worktree removal. Template variables ({{ branch }}, {{ worktree_path }}, {{ commit }}) reference the removed worktree, enabling cleanup scripts for containers, servers, or other resources. (#757)
+  - Graceful handling of missing worktree directories: wt remove now prunes stale git metadata when the worktree directory was deleted externally (e.g., rm -rf), making the command more idempotent. Fixes #724. (thanks @strangemonad for reporting)
+  - Config validation warnings at load time: Unknown fields in config files (typos like [commit-gen] instead of [commit-generation]) now show warnings immediately instead of only in wt config show. (#758)
+  Fixed
+  - Age column shows "future" on NixOS/direnv: wt list no longer uses SOURCE_DATE_EPOCH for time calculations, which NixOS and direnv commonly set to past timestamps for reproducible builds. Fixes #763. (thanks @ngotchac for reporting)
+  - CI status with URL-based pushremote: CI detection now works when branch.<name>.pushremote is set to a URL directly (as gh pr checkout does) instead of a remote name. (#769)
+  - GitLab nested groups in URL parsing: URLs like gitlab.com/group/subgroup/repo now correctly identify repo as the repository name instead of subgroup. This was a security fix — previously, approval bypass was possible across sibling repos in the same parent group. (#768)
+  - GitLab CI status detection: Fixed multiple issues with glab CLI compatibility — MR lookup now uses two-step resolution, "manual" pipelines show as running instead of failed, and rate limit errors are handled properly. Fixes #764. (thanks @ngotchac for reporting)
+  Internal
+  - Refactored accessor functions to use bare nouns per Rust convention. (#765)
+  - Clarified target/integration naming across codebase. (#755)
+  Install worktrunk 0.18.0
+  Install prebuilt binaries via shell script
+  curl --proto '=https' --tlsv1.2 -LsSf https://github.com/max-sixty/worktrunk/releases/download/v0.18.0/worktrunk-installer.sh | sh
+  Install prebuilt binaries via powershell script
+  powershell -ExecutionPolicy Bypass -c "irm https://github.com/max-sixty/worktrunk/releases/download/v0.18.0/worktrunk-installer.ps1 | iex"
+  Install prebuilt binaries via Homebrew
+  brew install max-sixty/worktrunk/wt
+  Download worktrunk 0.18.0
+  ────────────────────────────────────────────────┬───────────────────┬─────────────
+  File                                            │Platform           │Checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-aarch64-apple-darwin.tar.xz           │Apple Silicon macOS│checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-x86_64-apple-darwin.tar.xz            │Intel macOS        │checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-x86_64-pc-windows-msvc.zip            │x64 Windows        │checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-aarch64-unknown-linux-musl.tar.xz     │ARM64 MUSL Linux   │checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-x86_64-unknown-linux-musl.tar.xz      │x64 MUSL Linux     │checksum
+  ────────────────────────────────────────────────┴───────────────────┴─────────────
+ReleaseNotesUrl: https://github.com/max-sixty/worktrunk/releases/tag/v0.18.0
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

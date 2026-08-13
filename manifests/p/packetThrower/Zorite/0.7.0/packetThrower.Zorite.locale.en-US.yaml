@@ -1,0 +1,172 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: packetThrower.Zorite
+PackageVersion: 0.7.0
+PackageLocale: en-US
+Publisher: packetThrower
+PublisherUrl: https://github.com/packetThrower
+PublisherSupportUrl: https://github.com/packetThrower/zorite/issues
+Author: packetThrower
+PackageName: Zorite
+PackageUrl: https://github.com/packetThrower/zorite
+License: GPL-3.0
+LicenseUrl: https://github.com/packetThrower/zorite/blob/HEAD/LICENSE
+Copyright: © 2026 packetThrower / Zorite contributors
+CopyrightUrl: https://github.com/packetThrower/zorite/blob/main/LICENSE
+ShortDescription: A local-first outliner and daily-journal note app (Logseq-style).
+Description: |-
+  Zorite is a cross-platform (macOS + Windows + Linux) local-first
+  daily-journal and outliner note app. Logseq-style: an infinite-scroll
+  journal of daily pages plus linked [[wiki-link]] pages, written in
+  Markdown and stored in a local SQLite database.
+
+  Embed and annotate PDFs, drop in images, and search across
+  everything — no cloud, no account; your notes stay on your machine.
+Moniker: zorite
+Tags:
+- journal
+- knowledge-base
+- local-first
+- logseq
+- markdown
+- note-taking
+- notes
+- outliner
+- pdf
+ReleaseNotes: |-
+  Highlights
+  The everything release: multiple notebooks, PDF form filling, a portable
+  Markdown + canvas exporter, a Nix flake — and a deep pass over the editor's
+  papercuts, so the everyday interactions stop showing their markdown seams.
+  Added
+  - Right-click, everywhere — one page menu on every surface a page shows
+    up: sidebar rows, the All Pages browser, search results, linked references,
+    and page tabs all offer open-in-new-tab/window, favorites, rename, delete,
+    export — plus Copy link ([[Title]]) and Copy contents. Selected
+    text gets a Cut/Copy/Paste menu (spelling suggestions stack on top on a
+    flagged word), and a property panel row offers Edit / Delete property.
+  - Notebooks — keep more than one set of notes, each a self-contained
+    folder (database, images, PDFs, themes), and switch between them from a
+    chip at the bottom of the sidebar. Add a notebook by picking a folder — an
+    empty one starts fresh, one holding a Zorite database opens as-is (a folder
+    in Dropbox works) — then confirm and Zorite relaunches into it. Rename
+    (the name travels with the folder), reveal, or remove a notebook from the
+    list without touching its files; the window title shows which notebook
+    you're in once there's more than one. Settings gained a Notebooks tab
+    with the same management (plus the per-notebook data-location move, which
+    used to live under General). An encrypted notebook lands on its unlock
+    screen, exactly like a normal launch.
+  - Nix flake — nix run github:packetThrower/zorite builds and launches
+    Zorite from source on NixOS and other Linux systems with Nix, desktop entry
+    and icon included; nix develop gives a ready dev shell. A CI job keeps the
+    flake building.
+  - Export Notebook as Markdown — File → Export Notebook as Markdown… lays
+    your whole notebook out as a folder of plain, portable markdown + assets for
+    any other app (not just Obsidian): Foo::Bar namespaces become folders with
+    every [[link]] and ![[embed]] rewritten to match (anchors and |alias
+    labels preserved, code fences untouched), journal days become
+    journals/YYYY-MM-DD.md, aliases become YAML frontmatter, and referenced
+    images/PDFs copy alongside. Tags, properties, callouts, block ids, and math
+    pass through as-is. Whiteboards export too — each becomes a JSON Canvas
+    .canvas file (the format Obsidian Canvas reads): shapes flatten to text
+    cards, page cards point at the exported note, images come along, and
+    arrows/lines between cards become edges (freehand strokes have no canvas
+    equivalent and are counted in the summary). The export only ever writes into
+    an empty folder, and a summary reports counts plus anything skipped.
+  - Fill PDF forms in the viewer — AcroForm PDFs are now fillable: click a
+    checkbox or radio to toggle it, click a text field for an in-place input
+    seated under the field (Enter or click away saves, Esc cancels, Tab /
+    Shift-Tab hops field to field, scrolling each into view). Edits write back
+    to the stored PDF with regenerated appearances, so the filled file renders
+    correctly in every other viewer too. Display also got honest: filled values
+    render even when the file left drawing to the viewer (the NeedAppearances
+    case), and checkboxes/radios show their checked state (their
+    state-dictionary appearances previously didn't draw at all). Signature and
+    read-only fields stay inert; choice fields edit as free text for now.
+  Fixed
+  - Editing papercuts — a sweep from a UX audit: Home on a list/task/quote
+    line lands on the text (a second press reaches the true start) instead of
+    revealing the hidden marker; Enter, Backspace, and Delete around a property
+    panel open its editor instead of splicing raw key:: value source;
+    finishing a property or formula at the very end of a note drops the caret
+    on a fresh line below; double- and triple-clicking a formula no longer
+    selects its hidden source; deleting a formula removes it whole, like an
+    image (its alignment marker too); ⌥-arrow word jumps treat formulas and
+    panels as objects; and selecting across a rendered block (math, diagram,
+    properties, code) reveals its source so what you see highlighted is exactly
+    what copies.
+  - Failures speak up — renaming a page to a name that's taken now says so
+    (right in the rename dialog, which stays open), and errors from deleting
+    pages, exporting formulas, filling PDF form fields, and adding images to a
+    whiteboard all show a dialog instead of failing silently. A PDF that can't
+    be opened shows why instead of loading forever, and a page deleted in one
+    window closes its tabs in every window.
+  - Windows spell-check follows your system language (it was fixed to
+    English), and the math editor renders sharp on non-Retina displays.
+  What's Changed
+  - docs(changelog): the 0.7.0 section (73dec2b)
+  - docs(todo+changelog): the papercuts batch is done (1a4c8dd)
+  - fix(math): rasterize the structural editor at the window's real DPR (855c9e2)
+  - fix(spellcheck): Windows follows the system UI language (e47929e)
+  - fix(pdf): terminal load errors show; is_pdf sees through URL queries (fbfe375)
+  - fix(app): a page deleted in another window closes its tabs everywhere (12c07ac)
+  - fix(editor): word-jumps respect constructs; selections reveal swept blocks (2a6dd1f)
+  - feat(ui): unified right-click — one page menu everywhere, text menu, compact (ca4a09c)
+  - fix(app): error-dialog sweep — silent failures now speak (b34a08a)
+  - fix(editor): interaction papercuts — Home, Enter/joins on panels, atomic math (9cf010c)
+  - docs(todo): the v0.6.2 UX-papercuts section from the four-way audit (9be9750)
+  - docs(todo): small components done (9052d09)
+  - style(ui): small chrome controls everywhere (Baudrun-style) (115e826)
+  - docs(todo+changelog): notebooks Phase 1 complete (be26031)
+  - feat(notebooks): window-title label, Settings Notebooks tab, cached registry (c344190)
+  - docs(todo+changelog): notebooks Phase 1 built (88c078c)
+  - feat(notebooks): multiple data folders with a sidebar switcher (Phase 1) (a89b488)
+  - docs(readme): plain language pass (57e5ea8)
+  - chore(nix): flake + staged nixpkgs package to 0.6.1 (dabc8d4)
+  - ci(nix): silence the SC2016 false positive actionlint flags (5f33072)
+  - docs(changelog): the 0.6.1 section (68eeb3d)
+  - fix(editor): caret matches the text height, not the grown row (40bfbad)
+  - docs(changelog): properties fixes + the /property command (1011172)
+  - feat(properties): /property inserts a row and opens the form (6c7945e)
+  - fix(properties): clicks land where clicked; empty fields editable; keys can name pages (7c659ba)
+  - fix(nix): staging — __structuredAttrs = true (nixpkgs-vet NPV-166) (587f7be)
+  - ci(nix): staging evals like nixpkgs CI — live master, aliases off (750e14b)
+  - fix(nix): staging — xcbutil is an alias; the real attr is libxcb-util (edd4f85)
+  - fix(nix): staging uses master's lowercase X lib attrs (58890ed)
+  - fix(nix): nixpkgs staging — xorg.* args + nixfmt (036d80f)
+  - docs(todo): nixpkgs submission opened (NixOS/nixpkgs#539400) (41ad6d9)
+  - fix(ci): staging job builds for the runner's own system (3f0665b)
+  - ci(nix): build the staged nixpkgs derivation on arm too (5d2cea2)
+  - ci(nix): stage the nixpkgs derivation for the upstream submission (7f605e0)
+  - ci(nix): build the flake on arm too (2889315)
+  - docs: Nix install line, changelog entry, nixpkgs-upstreaming Maybe item (fa0707f)
+  - fix(nix): perl for the vendored-OpenSSL build (3d9cd10)
+  - fix(nix): builtin fetchGit instead of per-source outputHashes (3aeea85)
+  - feat(nix): flake packaging Zorite for NixOS/Linux (40046bc)
+  - chore(deps): oxidize-pdf 3.1, embed-resource 3.0.11, heic_decoder 019b2fd (4c66e3a)
+  - docs(site): Google Search Console verification file (0c2ce10)
+  - fix(export): normalize the one test path collection the last fix missed (4f1f7fe)
+  - fix(export): OS-independent path assertions in the exporter tests (88ae4db)
+  - feat(export): whiteboards export as JSON Canvas (ec24113)
+  - feat(export): Export Notebook as Markdown (d05973f)
+  - docs(todo): Maybe section — MCP server, with the corrected prompt (1e8001a)
+  - docs(readme): restructure Highlights — grouped, skimmable, docs-linked (3450c45)
+  - feat(pdf): fill forms in the viewer (M3) (11a0ea4)
+  - feat(pdf): form-field enumeration + value write-back (M2) (51f33c3)
+  - feat(pdf): AcroForm display correctness — the forms feature (M1) (dd6e4e2)
+  - docs(todo): file the API-audit findings + noted follow-ups (ad3983c)
+  - docs(gpui-whiteboard): complete API reference in API.md (343ec55)
+  - docs(gpui-markdown): complete API reference in API.md (b6dbb45)
+  - docs(gpui-editor): complete API reference in API.md (ab3653f)
+  - docs(ratex-gpui): complete API reference in API.md (811f6c4)
+  - docs(gpui-pdf): complete API reference in API.md (4bd16d7)
+  - docs(os-spellcheck): split a complete API reference into API.md (0f56b4b)
+  - chore(deps): Bump taiki-e/install-action in the actions-all group (971fa6e)
+  Full Changelog: v0.6.0...v0.7.0
+ReleaseNotesUrl: https://github.com/packetThrower/zorite/releases/tag/v0.7.0
+Documentations:
+- DocumentLabel: Project page
+  DocumentUrl: https://github.com/packetThrower/zorite
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

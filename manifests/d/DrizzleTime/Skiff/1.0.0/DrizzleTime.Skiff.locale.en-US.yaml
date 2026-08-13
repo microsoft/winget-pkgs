@@ -1,0 +1,49 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.12.0.schema.json
+
+PackageIdentifier: DrizzleTime.Skiff
+PackageVersion: 1.0.0
+PackageLocale: en-US
+License: Freeware
+ShortDescription: Skiff is a local cross-platform disk cleanup tool for inspecting caches, applications, duplicate files, and large files before removal.
+Description: |-
+  Skiff is a local cross-platform disk cleanup tool for inspecting caches, applications, duplicate files, and large files before removal.
+  Features
+  - Disk overview: reads total, used, available space, usage ratio, and disk location for the current user's home directory.
+  - Junk cleanup: scans and cleans platform-specific cache locations, including system caches, browser caches, developer tool caches, Flatpak and Arch package caches on Linux, and Homebrew cache on macOS.
+  - Large file scan: scans common user directories for large files and deletes selected files after confirmation.
+  - Duplicate file scan: finds duplicate files by size and content hash, keeping the first file in each group selected as the default survivor.
+  - Application cleanup: reads Linux packages, macOS applications and Homebrew packages, or Windows uninstall registry entries, with filtering, search, selection, and confirmed uninstall.
+  - Cleanup history: shows the latest cleanup or deletion result.
+  - Settings: adjusts large-file and duplicate-file scan thresholds.
+  - Tray behavior: closing the main window hides it to the system tray instead of exiting the app.
+  Safety Boundaries
+  Skiff performs real file deletion and package uninstall operations. The current implementation has these boundaries:
+  - Linux, macOS, and Windows are supported by the local app and CLI. Each platform has its own cleanup target list.
+  - Junk cleanup removes contents from predefined cache directories. Some package-manager cleanup targets call system commands.
+  - Large-file and duplicate-file deletion only allows regular files inside the current user's HOME directory.
+  - Application uninstall uses the platform's registered uninstall mechanism:
+    - APT: apt-get remove -y
+    - RPM: prefers dnf remove -y, then yum remove -y, zypper --non-interactive remove, and finally rpm -e
+    - Pacman: pacman -R --noconfirm -- <package>
+    - Flatpak: flatpak uninstall -y --app
+    - macOS .app: moves the app bundle to Trash
+    - Homebrew: brew uninstall --formula or brew uninstall --cask
+    - Windows: reads UninstallString / QuietUninstallString from the registry and runs that command
+  - Linux commands that require administrator privileges use pkexec when available. macOS and Windows may show their native authorization prompts.
+  - Flatpak application data cleanup is high risk because it removes app configuration, login state, local databases, and other local app data.
+  - CLI deletion, cleanup, and uninstall commands require an explicit --yes.
+  - The macOS and Windows local builds in this repository are not configured for code signing, Apple notarization, or Windows signing.
+Tags:
+- accelerate
+- application
+- apps
+- clean
+- cleaner
+- cleanup
+- optimize
+- program
+- software
+- uninstall
+ManifestType: locale
+ManifestVersion: 1.12.0

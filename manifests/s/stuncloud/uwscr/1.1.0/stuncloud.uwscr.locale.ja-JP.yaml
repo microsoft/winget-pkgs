@@ -1,0 +1,123 @@
+# Created with komac v2.11.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
+
+PackageIdentifier: stuncloud.uwscr
+PackageVersion: 1.1.0
+PackageLocale: ja-JP
+Publisher: stuncloud
+PublisherUrl: https://github.com/stuncloud/
+PublisherSupportUrl: https://github.com/stuncloud/UWSCR/issues
+Author: stuncloud
+PackageName: UWSCR
+PackageUrl: https://github.com/stuncloud/UWSCR/
+License: MIT
+LicenseUrl: https://github.com/stuncloud/UWSCR/blob/HEAD/LICENSE
+ShortDescription: UWSC互換スクリプト実行ツール
+Moniker: uwsc
+ReleaseNotes: |-
+  Important
+  設定ファイルを更新してください
+  設定ファイルの仕様が変更されたため更新が必要となります
+  以下のコマンドのいずれかを行い設定ファイルを更新してください
+  # 以前の設定を残す場合
+  uwscr --settings merge
+  # デフォルト設定にする場合
+  uwscr --settings init
+  Warning
+  破壊的変更があります
+  以下の機能については以前のバージョンと互換性がなく、スクリプトの修正が必要になる場合があります
+  HtmlNode
+  詳しくは下記変更欄を参照ください
+  chkimg
+  chkimg関数がUWSC準拠になりました (動作および引数がUWSCと同等になります)
+  いままでchkimgであったものはsearchimageに名前が変更されました
+  それに伴い同関数で利用していた定数名が以下に変更されました
+  ───────────────────────────┬───────────────────────────
+  変更前                     │変更後
+  ───────────────────────────┼───────────────────────────
+  CHKIMG_NO_GRAY             │SCHIMG_NO_GRAY
+  ───────────────────────────┼───────────────────────────
+  CHKIMG_USE_WGCAPI          │SCHIMG_USE_WGCAPI
+  ───────────────────────────┼───────────────────────────
+  CHKIMG_METHOD_SQDIFF       │SCHIMG_METHOD_SQDIFF
+  ───────────────────────────┼───────────────────────────
+  CHKIMG_METHOD_SQDIFF_NORMED│SCHIMG_METHOD_SQDIFF_NORMED
+  ───────────────────────────┼───────────────────────────
+  CHKIMG_METHOD_CCORR        │SCHIMG_METHOD_CCORR
+  ───────────────────────────┼───────────────────────────
+  CHKIMG_METHOD_CCORR_NORMED │SCHIMG_METHOD_CCORR_NORMED
+  ───────────────────────────┼───────────────────────────
+  CHKIMG_METHOD_CCOEFF       │SCHIMG_METHOD_CCOEFF
+  ───────────────────────────┼───────────────────────────
+  CHKIMG_METHOD_CCOEFF_NORMED│SCHIMG_METHOD_CCOEFF_NORMED
+  ───────────────────────────┴───────────────────────────
+  新規
+  - #242 yaml互換UObject
+    - FromYaml: yaml文字列をUObjectにする
+    - ToYaml: UObjectをyaml文字列にする
+  - UWSC互換のchkimgを実装
+    - 戻り値は従来と同じく座標を示す配列の配列
+      - G_IMG_X, G_IMG_Y, ALL_IMG_X, ALL_IMG_Yはありません
+  変更
+  - 設定ファイル用のjson schemaファイルを設定ファイルと同じフォルダに出力するようにした
+  - 設定ファイルがローカルのjson schemaを参照するようにした
+  - setsliderの第四引数の初期値を FALSE にした
+  - MORG_DIRECT時のbtn, kbdに #240 の調査結果を反映
+  - HtmlNodeオブジェクトに以下の変更を加えた
+    - 文字列に変換した場合の表記を変更した
+    - 内部的に以下の状態を持つようになった
+      - ルートエレメント (ParseHTMLで返した直後)
+      - コレクション (findメソッド)
+      - エレメント (firstメソッド, コレクションへのインデックスアクセス)
+      - isEmptyプロパティの廃止
+      - isRoot, isElement, isCollection プロパティの追加
+      - outerhtml, innerhtml, textプロパティの出力の変更
+  - 従来のchkimgの名称をsearchimageに変更した
+  - #232 chkclrの画面キャプチャ方法にGDI方式を追加
+    - デフォルトでGDI方式を利用するように変更
+  - getitemにITM_ACC_TREEを追加
+    - 対象ウィンドウのACCツリー構造をUObjectで得る
+  バグ修正
+  - #156 ACC探索関数の修正に伴い改善
+  - #153 座標のオブジェクトがROLE_SYSTEM_STATICTEXTの場合は親を返すようにした
+  - #152 #153の修正により一部改善、ビジー状態については保留
+  - #238 lexerの括弧ペア探索の不備を修正
+  - #239 getslider/setsliderでスクロールバーの情報が取得できていなかった問題を修正
+  - btn関数にてWHEEL または WHEEL2 での座標処理に誤りがあった
+    - MORG_DIRECT時: 必要のない座標補正関数を呼んでいた
+    - MORG_DIRECT以外
+      - 座標補正関数を呼んでいなかった
+      - 指定座標ではなく (0, 0) に対して送信していた
+  - kbd関数の第一引数が文字コードを受けられなかった
+  - #243 withの一時変数を消す処理で名前の比較処理に誤りがあり一時変数以外すべてを消していた
+  - #244 エレメントを示すHtmlNodeオブジェクトからfind()やfirst()といったメソッドが利用できなかった
+  - #250 座標位置の子ウィンドウに対してメッセージを送信する (暫定対策)
+  リファクタリング
+  - Rust Edition 2024への変更に伴う警告への対応
+    - 主にunsafe関連
+  - clippyの警告への対応
+  ビルド環境
+  ──────────────────────────────┬─────────────────────────────
+  ツール                        │バージョン
+  ──────────────────────────────┼─────────────────────────────
+  OS                            │Windows 10 22H2
+  ──────────────────────────────┼─────────────────────────────
+  Visual Studio Build Tools 2019│16.11.15
+  ──────────────────────────────┼─────────────────────────────
+  Rust Edition                  │2024
+  ──────────────────────────────┼─────────────────────────────
+  cargo                         │1.86.0 (adf9b6ad1 2025-02-28)
+  ──────────────────────────────┼─────────────────────────────
+  rustc                         │1.86.0 (05f9846f8 2025-03-31)
+  ──────────────────────────────┼─────────────────────────────
+  opencv                        │4.6.0
+  ──────────────────────────────┼─────────────────────────────
+  cmake                         │3.25.1
+  ──────────────────────────────┼─────────────────────────────
+  llvm                          │15.0.6
+  ──────────────────────────────┼─────────────────────────────
+  Sphinx                        │5.2.3
+  ──────────────────────────────┴─────────────────────────────
+ReleaseNotesUrl: https://github.com/stuncloud/UWSCR/releases/tag/1.1.0
+ManifestType: defaultLocale
+ManifestVersion: 1.9.0

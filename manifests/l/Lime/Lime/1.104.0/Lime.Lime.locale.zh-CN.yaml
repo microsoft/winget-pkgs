@@ -1,0 +1,68 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Lime.Lime
+PackageVersion: 1.104.0
+PackageLocale: zh-CN
+Publisher: Lime
+PublisherUrl: https://limeai.run/
+PublisherSupportUrl: https://github.com/limecloud/lime/issues
+PrivacyUrl: https://limeai.run/privacy/
+PackageName: Lime
+PackageUrl: https://limeai.run/
+License: 专有软件
+LicenseUrl: https://limeai.run/terms/
+Copyright: © 2026 Lime
+ShortDescription: 给中文创作者用的开源 AI 内容工作台
+Description: |-
+  Lime 是一个开源的 Electron 桌面端 AI 内容工作台，面向中文创作者、品牌运营、研究型写作者和小团队，覆盖 AI 写作、选题研究、素材管理、提示词沉淀、知识库和多模型创作流程。
+
+  你可以把它理解成一个更适合长期创作的 AI 工作台：
+  - 不是只问一句、答一句，而是围绕一个项目持续推进
+  - 不是每次都重新找资料、重新写提示词，而是把参考、风格和做法沉淀下来
+  - 不是生成完就散落在聊天记录里，而是把结果保存起来，下一次还能继续用
+  - 不是绑定某一家 AI 服务，而是让你使用自己已经配置好的模型能力
+  如果你经常在收藏夹、文档、聊天工具、图片工具和模型后台之间来回切换，Lime 想帮你把这些动作收回到同一个创作空间里。
+
+  你可以用 Lime 做什么
+  - AI 写作与内容创作：写公众号文章、小红书笔记、视频脚本、播客提纲和直播话术
+  - 资料研究与知识整理：整理网页、笔记、截图、访谈和历史材料，生成报告或简报
+  - 选题分析与内容复盘：拆解爆款案例、竞品内容、发布节奏和表达风格
+  - 提示词管理与风格复用：保存常用写法、品牌语气、选题方法和团队模板
+  - 多模态创作准备：生成图片提示词、封面方向、演示稿结构或网页草稿
+  - 多模型工作流：使用自己配置的 AI 服务商和模型，在同一个任务里持续修改、扩写、压缩或换平台发布
+ReleaseNotes: |-
+  Lime v1.104.0
+  新功能
+  - Message、Reasoning 与 Plan 全面进入 Codex 对齐的 canonical Item lifecycle：Start/Delta/End 共享稳定 identity，provider 输出按 canonical Turn 与 sampling attempt 隔离，Turn 终态不再旁路补造内容。
+  - canonical AgentMessage 新增 typed content_parts，Text 与 reference-only Media 从 ThreadStore、thread/read、agentSession/read 到 live GUI 保持同一顺序与引用，拒绝 inline data URI 和 provider raw payload。
+  - agentSession/read 明确为 ThreadStore-backed 的 current 产品展示端点；Approval cold/live read 统一输出 typed terminal response，GUI 决策别名只在 view-model 边界转换。
+  - AgentControl child 从 parent Turn 继承已解析的 provider、model、reasoning、workspace 与 search policy；warm followup_task 保持目标 child 的有效 route，cold target 才使用 caller snapshot。
+  - runtime-owned MCP client 使用 2025-06-18 并精确广告 form elicitation capability；没有可信 Thread owner 的 management connection 继续保持 capability absent。
+  - Agent Chat 的任务索引、审核决策、工具过程与媒体工作台补齐 current owner、稳定 DOM identity 和五语言用户界面，空时间线会主动恢复 canonical history。
+  修复
+  - 修复同一 provider raw ID 在后续 sampling attempt 或 Turn 被复用的问题；Reasoning、Message、Plan 与 Tool 只按首次 canonical outer sequence 排序，terminal Item 拒绝 late delta。
+  - 修复 producer ordinal 与 ThreadStore 唯一索引碰撞、imported Reasoning source ordinal 丢失，以及 canonical projection 失败仍继续通知 GUI/推进内存历史的问题。
+  - 修复已有 Turn 元数据但 Message/Item 尚未加载时，同 session 导航错误跳过 history hydrate 而显示空对话的问题；缺失 canonical detail 现在显式失败。
+  - 修复 Approval terminal wire 使用 GUI alias、Coding recovery 跨 Turn 复用执行 identity、Content Factory 合成 action/contract probe，以及 Project Shell 空白颜色环境变量不回落默认值的问题。
+  优化与重构
+  - 删除 app-data session fallback、681 行 session_hydration、旧 Team runtime governor/SubAgent tree、Renderer Agent Runtime root barrel 与 stale 类型聚合；RuntimeCore、EventLog、ProjectionStore/ThreadStore 成为唯一 session 事实源。
+  - 物理删除 RuntimeCore 第二套 provider-neutral request/event algebra 与 Model Provider generic chat/gemini/ollama lowering，共净删约 1,500 行；current 链只接受 canonical request/event 与 media body builder。
+  - 拆分 provider output lifecycle、conversation import Plan、canonical message lifecycle、Approval/read-model workflow 等 owner 模块，保持主文件低于既有体量门槛，不新增 facade 或兼容双轨。
+  - 媒体 DTO、Workspace request、Evidence/Inventory/Expert/Plugin 类型和 Agent client/session/thread 消费面迁到各自 current owner，并补 dead barrel 回流守卫。
+  测试与质量
+  - 扩展 Rust/TypeScript canonical lifecycle、typed media parts、Approval、session history、projection fail-closed、provider lowering 与 current owner 回归，并同步 App Server schema 和 generated client。
+  - 补齐六个 AgentControl 工具、Reasoning 可见顺序、图片 media reference、Content Factory、Coding recovery 和 history replay 的真实 Electron / Gate B 证据。
+  - AgentControl visible-DOM Gate B 验证六个 completed Tool row 与 Started/Interacted/Interrupted activity；MCP elicitation Gate B 同时验证 runtime capability 与 management absence。
+  - history replay oracle 只在 Reasoning summary、图片附件与 MCP tool row 完整可见后断言；工具行新增稳定 name/status DOM 属性，减少瞬态竞态与脆弱文本定位。
+  - 统一 Rust layer runner 在 macOS 测试进程中的最小栈默认值，同时保留显式调用者配置；smart frontend suite、changed Rust、legacy governance 与 GUI smoke 均有本轮候选证据。
+  - 任务索引与 Runtime Review Decision 文案覆盖 zh-CN、zh-TW、en-US、ja-JP、ko-KR，并补 locale 稳定回归。
+  文档
+  - 更新全局架构、Refactor V2 中央计划、Agent Workspace、Project Thread 与逐切片 evidence，明确 canonical lifecycle、ThreadStore ordinal/projection、AgentSession presentation 和 provider algebra 的唯一 owner。
+  - 记录 app-data fallback、旧 provider lowering、root barrel、Team/synthetic fixture 等 dead / deleted / forbidden-to-restore 分类及其验证、handoff 与退出条件。
+  其他
+  - 版本事实源更新到 1.104.0：根应用、CLI npm package、Rust workspace、lime-rs/Cargo.lock 和 release notes。
+  完整变更：v1.103.0 → v1.104.0
+ReleaseNotesUrl: https://github.com/limecloud/lime/releases/tag/v1.104.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

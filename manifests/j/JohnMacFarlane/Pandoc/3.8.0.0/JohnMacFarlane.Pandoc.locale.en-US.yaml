@@ -1,0 +1,137 @@
+# Created with komac v2.13.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: JohnMacFarlane.Pandoc
+PackageVersion: 3.8.0.0
+PackageLocale: en-US
+Publisher: John MacFarlane
+PublisherUrl: https://github.com/jgm/pandoc
+PublisherSupportUrl: https://github.com/jgm/pandoc/issues
+Author: John Mac Farlane
+PackageName: Pandoc
+PackageUrl: https://pandoc.org/
+License: GPL-2.0-or-later
+LicenseUrl: https://github.com/jgm/pandoc/blob/master/COPYRIGHT
+Copyright: Copyright (C) 2006-2023 John MacFarlane <jgm at berkeley dot edu>
+CopyrightUrl: https://github.com/jgm/pandoc/blob/master/COPYRIGHT
+ShortDescription: If you need to convert files from one markup format into another, pandoc is your swiss-army knife.
+Tags:
+- converter
+- doc
+- docs
+- markdown
+- pandoc
+ReleaseNotes: |-
+  I'm pleased to announce the release of pandoc 3.8,
+  available in the usual places:
+  Binary packages & changelog:
+  https://github.com/jgm/pandoc/releases/tag/3.8
+  Source & API documentation:
+  http://hackage.haskell.org/package/pandoc-3.8
+  This release comes with many small improvements and a few larger ones.
+  Among the more visible changes:
+  + A new input/output format xml, which exactly represents a pandoc
+    AST in a more easily human-readable form than JSON. The format is
+    documented in doc/xml.md, and schemas can be found in tools/pandoc-xml.*.
+  + A new command line option --syntax-highlighting, which takes the
+    values 'none', 'default', 'idiomatic', a style name, or a path to
+    a theme file.  --no-highlighting and --highlight-style are deprecated.
+  + New extensions smart_quotes and special_strings for org mode.
+    These allow pandoc's parsing to more closely reproduce Emacs org-mode's
+    behavior.
+  + The old compact_definition_lists extension has been removed.
+  API changes:
+  + New modules Text.Pandoc.Readers.XML (exporting readXML) and
+    Text.Pandoc.Writers.XML (exporting writeXML).
+  + Text.Pandoc.Extensions: added constructors Ext_smart_quotes,
+    Ext_special_strings; removed Ext_compact_definition_lists.
+  + Text.Pandoc.App now exports versionInfo, a function that takes
+    three parameters that can be filled in by pandoc-cli.
+  + Text.Pandoc.Parsing: tableWith and tableWith' now return
+    a list of lists of Blocks, allowing for multiple header rows.
+  + Text.Pandoc.ImageSize: Add Point and Pica as constructors of
+    ImageSize.  Add Avif constructor of ImageType.
+  + Text.Pandoc.Class: CommonState is now opaque and does not support
+    its fields.  To compensate for this, we now export several
+    new functions: getRequestHeaders, setRequestHeaders, getSourceURL,
+    getTrace.
+  Thanks to all who contributed, especially new contributors
+  Christopher Kenny, Erik Post, Repetitive, Reuben Thomas, Ryan Gibb,
+  Sean Soon, and massifrg.
+  Click to expand changelog
+  - Add a new input and output format xml, exactly representing a Pandoc AST and isomorphic to the existing native and json formats (massifrg). XML schemas for validation can be found in tools/pandoc-xml.*. The format is documented in doc/xml.md. Pandoc now defaults to this reader and writer when the .xml extension is used.
+    Two new exported modules are added [API change]: Text.Pandoc.Readers.XML, exporting readXML, and Text.Pandoc.Writers.XML, exporting writeXML. A new unexported module Text.Pandoc.XMLFormat is also added.
+  - Add a new command line option --syntax-highlighting; this takes the values none, default, idiomatic, a style name, or a path to a theme file. It replaces the --no-highlighting, --highlighting-style, and --listings options, which will still work but with a deprecation warning. (Albert Krewinkel)
+  - Create directory of output file if it doesn’t exist (#11040).
+  - Update --version copyright dates (#10961), and use a hardcoded string “pandoc” for the program name in --version, per GNU guidelines.
+  - Add smart_quotes and special_strings extensions (Albert Krewinkel). Currently these only affect org. Org mode makes a distinction between smart parsing of quotes, and smart parsing of special strings like .... The finer grained control over these features is necessary to truthfully reproduce Emacs Org mode behavior. Special strings are enabled by default, while smart quotes are disabled.
+  - Remove the old compact_definition_lists extension. This was neded to preserve backwards compatibility after pandoc 1.12 was released, but at this point we can get rid of it.
+  - Make -t chunkedhtml -o - output to stdout (as documented), rather than creating a directory called - (#11068).
+  - RST reader: Support multiple header rows (#10338, TuongNM).
+  - LaTeX reader:
+    - Support soft hyphens (Albert Krewinkel).
+    - Parse \minisec as unlisted level 6 headings (#10635, Albert Krewinkel).
+    - Support \ifmmode (#10915).
+    - Change handling of math environments (#9711, #9296). Certain environments in LaTeX will trigger math mode and can’t occur within math mode: e.g., align or equation. Previously we “downshifted” these, parsing an align environment as a Math element with aligned, and an equation environment as a regular display math element. With this shift, we put these in Math inlines but retain the original environments. texmath and MathJax both handle these environments well.
+  - Typst reader:
+    - Fix addition of image path prefix to use posix separator.
+    - Properly resolve image paths in included files (#11090).
+    - Handle inline-level show rules on block content (#11017). Typst allows things like smallcaps to be applied to block-level content like headings. This produces a type mismatch in pandoc, so before processing the output of typst-hs, we transform it, pulling the block-level elements outside of the inline-level elements.
+  - Org reader:
+    - Improve sub- and superscript parsing (Albert Krewinkel). Sub- and superscript must be preceded by a string in Org mode. Some text preceded by space or at the start of a paragraph was previously parsed incorrectly as sub- or superscript.
+    - Allow “greater block” names to contain any non-space char (#4287, Albert Krewinkel).
+    - Accept quoted values as argument values (#8869, Albert Krewinkel).
+    - Recognize “fast access” characters in TODO state definitions (#10990, Ryan Gibb).
+    - Improve org-cite parsing: Handle global prefix and suffix properly. Use all and only the styles mentioned in oc-basic.el. Allow space after ;.
+  - HTML reader:
+    - Don’t drop the initial newline in a pre element (#11064).
+  - DocBook reader:
+    - Add rowspan support (#10981, Sean Soon).
+    - Be sensitive to startingnumber attribute on ordered lists (#10912).
+  - POD reader:
+    - Fix named entity lookup (#11015, Evan Silberman).
+  - Man reader:
+    - Support header and footer reader (Sean Soon).
+  - Markdown reader:
+    - Don’t confuse a span after an author-in-text citation with a locator. E.g. @foo [test]{.bar}. See #9080 (comment).
+    - Make definition lists behave like other lists (#10889). If the four_space_rule extension is not enabled, figure out the indentation needed for child blocks dynamically, by looking at the first nonspace content after the : marker. Previously the four-space rule was always obeyed.
+    - Fix tight/loose detection for definition lists, to conform to the documentation.
+  - ODT reader:
+    - Support table-header-rows (Tuong Nguyen Manh).
+  - Docx reader:
+    - Don’t add highlighting if highlight color is “none” (#10900).
+    - Handle strict OpenXML as well as transitional (#7691).
+    - Fix stringToInteger (#9184). It previously converted things like 11ccc to an integer; now it requires that the whole string be parsable as an integer.
+    - Improve handling of AlternateContent. This fixes handling of one representation of emojis in Word (#11113).
+  - LaTeX writer:
+    - Control figure placement with attribute (#10369, Sean Soon). If a latex-placement attribute is present on a figure, it will be used as the optional positioning hint in LaTeX (e.g. ht). With implicit figures, latex-placement will be added to the figure (and removed from the image) if it is present on the image.
+    - Include cancel package only if there is math that contains \cancel, \bcancel, or \xcancel.
+    - Add braces around comments in title-meta (#10501). This is needed to prevent PDFs from interpreting this as a sequence of titles.
+    - Set pdf-trailer-id if SOURCE_DATE_EPOCH envvar is set (#6539, Albert Krewinkel). The SOURCE_DATE_EPOCH environment variable is used to trigger reproducible PDF compilation, i.e., PDFs that are identical down to the byte level for repeated runs.
+    - Be more conservative about using \url (#8802). We only use it when the URL is all ASCII, since the \url macro causes problems when used with some non-ASCII characters.
+    - Support soft hyphens (Albert Krewinkel).
+    - Change handling of math environments (#9711, #9296). When certain math environments (e.g. align) are found in Math elements, we emit them “raw” instead of putting them in $..$.
+  - Typst writer:
+    - Check XID_Continue in identifiers (Tuong Nguyen Manh).
+    - Add escapes to prevent inadvertent lists due to automatic wrapping (#10047). Also simplify existing code that was meant to do this.
+    - Add parentheses around typst-native year-only citations (#11044).
+    - Add native Typst support for nocite (#10680, Albert Krewinkel). The nocite metadata field can now be used to supply additional citations that don’t appear in the text, just as with citeproc and LaTeX’s bibtex and natbib.
+    - Set lang attribute in Divs (#10965).
+    - Rename numbering variable to section-numbering (Albert Krewinkel). This is the name expected by the default template.
+    - Add support for custom and/or translated “Abstract” titles (Albert Krewinkel, #9724).
+  - Org writer:
+    - Don’t wrap link descriptions (#9000). Org doesn’t reliable display these as links if they have hard breaks.
+    - Disable smart quotes by default (Albert Krewinkel).
+  - Markdown writer:
+    - Better handling of pandoc-generated code blocks (#10926). Omit the wrapper sourceCode divs added by pandoc around code blocks. More intelligently identify which class to use for the one class allowed in GFM code blocks. If there is a class of form language-X, use X; otherwise use the first class other than sourceCode.
+    - Use fenced divs even with empty attributes (#10955, Carlos Scheidegger). Previously fenced divs were not used in this case, causing the writer to fall back to raw HTML.
+    - Match indents in definition items (#10890, Albert Krewinkel). Previously, the first line of a definition details item always used a colon and three spaces instead of respecting the tab-stop setting, which could lead to round-tripping issues. Likewise, the indentation of continuation paragraphs in definition lists now matches the two-characters leader of the first line for Markua output.
+  - DocBook writer:
+    - Use startingnumber instead of override for start numbers on ordered lists (#10912).
+  - ANSI writer:
+ReleaseNotesUrl: https://github.com/jgm/pandoc/releases/tag/3.8
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/jgm/pandoc/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

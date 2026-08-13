@@ -1,0 +1,79 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: steipete.gogcli
+PackageVersion: 0.17.0
+PackageLocale: en-US
+Publisher: Peter Steinberger
+PublisherUrl: https://steipete.me/
+PublisherSupportUrl: https://github.com/steipete/gogcli/issues
+Author: Peter Steinberger
+PackageName: gogcli
+PackageUrl: https://gogcli.sh/
+License: MIT
+LicenseUrl: https://github.com/openclaw/gogcli/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Peter Steinberger
+CopyrightUrl: https://github.com/steipete/gogcli/blob/HEAD/LICENSE
+ShortDescription: gog unifies Gmail, Calendar, Drive, Contacts, Tasks, Sheets, Docs, Slides, and People under one CLI — with JSON output and sane defaults.
+Description: |-
+  gog unifies Gmail, Calendar, Drive, Contacts, Tasks, Sheets, Docs, Slides, and People under one CLI — with JSON output and sane defaults.
+
+  Features
+  - Gmail
+    - Search threads, send mail, manage labels, drafts, filters, settings, and watch (Pub/Sub push).
+  - Calendar
+    - List/create/update events, respond to invites, detect conflicts, and check free/busy.
+  - Drive
+    - List/search/upload/download, export Docs formats, permissions, folders, URLs.
+  - Sheets / Docs / Slides
+    - Read/write Sheets; export Docs/Slides/Sheets to PDF/DOCX/PPTX/XLSX/CSV via Drive.
+  - Contacts / People
+    - Personal contacts, “other contacts”, Workspace directory, and your profile.
+  - Tasks
+    - Tasklists + tasks: add/update/done/undo/delete/clear with paging and JSON output.
+Moniker: gogcli
+Tags:
+- gcal
+- gcontacts
+- gdrive
+- gmail
+- google
+ReleaseNotes: |-
+  0.17.0
+
+  Added
+  - slides create-from-markdown: import slidey-flavored decks with per-slide YAML frontmatter (layout:, content:), ## Notes speaker notes, Font Awesome icon shortcodes, mermaid diagrams, ::cols::/::col2::/::col3::/::right:: columns, and ::boxes::/::arrows:: icon-row blocks. New flags: --fa-style, --mmdc, --strict, --keep-temp-images, --no-notes — thanks @njreid.
+  - Calendar: add calendar events --sort=start|end|summary|calendar and --order=asc|desc so --all output can be returned chronologically across calendars instead of per-calendar API iteration order. Also documents now in the --from/--to help strings (already accepted by timeparse) — the relative form agents need when planning "from now on" — thanks @gado-ships-it.
+  - Calendar: add calendar events --location to include event locations in table output. Embedded newlines in the location string are collapsed so multi-line addresses still render on one row — thanks @gado-ships-it.
+  - Auth: add gog auth import --client --email with --refresh-token-stdin, --refresh-token-file, or --refresh-token-env for non-interactive token import without exposing secrets in argv — thanks @jcarnegie.
+  - Drive: add drive share --notify for invite targets that require a Drive notification email.
+  - Calendar: keep calendar appointments as an explicit diagnostic because the Calendar API still rejects eventTypes=appointmentSchedule. (#329)
+  - CLI: add nested docs tabs ... and forms questions ... aliases for consistent sub-item command patterns while preserving existing flat commands. (#433)
+  - Drive: add drive audit sharing|user plus guarded drive bulk remove-public|update-role permission operations with dry-run and confirmation support. (#336)
+  - Drive: add drive labels file list|apply|remove alongside Drive Labels API v2 discovery. (#339)
+  - Maps: add directions, distance matrix, geocode, and reverse-geocode commands alongside Places search/details. (#571)
+  - Photos: add read-only photos list|search|get|download for app-created Google Photos media. (#381)
+
+  Fixed
+  - CLI: make mutating dry-runs for contacts, Docs, Drive, Meet, and Slides stop before auth/API calls while still validating local inputs; harden live smoke tests for self-sharing, disabled Meet, Gmail filter labels, and forced batch deletes.
+  - CLI: make drive upload, drive bulk remove-public/update-role, calendar subscribe, docs clear, slides create-from-markdown, slides insert-text, slides replace-text, auth tokens import, and Gmail tracking key rotation dry-runs use the standard parseable dry-run envelope without auth/API access.
+  - CLI: keep additional Docs write/update/delete/format/find-replace, Drive mkdir/changes, Gmail label create/modify, and Slides add/delete/replace/update-notes dry-runs offline before auth/API calls.
+  - CLI: give destructive Classroom, Gmail, Keep, and Tasks dry-runs stable JSON operation names and structured request payloads instead of prose op values with null requests.
+  - CLI: keep Docs tab edits, Sheets tab deletes, Drive deletes, comment deletes, auth removals, Gmail delegate/watch removals, Classroom guardian deletes, and other-contact deletes dry-run parseable without auth/API access.
+  - CLI: make dry-runs for Gmail label edits, Sheets table deletes, Sheets banding/conditional clears, and Forms deletes stop before auth/API calls, and make Forms dry-runs validate choice, scale, quiz, and empty update inputs locally.
+  - CLI: make dry-runs for Calendar secondary calendars, Forms create/publish/watch/move, Gmail label delete, Sheets table append/clear, Sheets named-range edits, Apps Script create, and Slides template creation stay offline before auth/API calls.
+  - Calendar: keep calendar create/update --dry-run with --location-search or --place-id offline before Places API lookup while still validating the requested lookup.
+  - CLI: make dry-runs for Admin group/user/org-unit edits, Contacts delete, Docs tab export, Drive tab download/share/unshare, and Gmail watch renew stay offline before auth/API calls; redact Admin user create passwords in dry-run output.
+  - Auth: keep fresh OAuth saves working even when old file-keyring token entries are unreadable, and clarify that --services all means all user OAuth services while Workspace-only services use service accounts.
+  - Auth: include Chat reaction scopes in --services chat and keep the generated auth scope table freshness-tested.
+  - Auth: keep the accounts manager bound to loopback addresses, generate callback URLs from the actual listener host, and avoid deleting renamed-account tokens before replacements are stored.
+  - Gmail: reject off-palette gmail labels style colors locally instead of forwarding an opaque Gmail API error.
+  - Drive: make drive share --dry-run stop before permission creation for user and domain shares, including --notify.
+  - Forms: make forms create --description apply the description with a follow-up batch update, and preserve zero-valued indexes in forms move-question.
+  - Analytics: show Analytics Admin/Data API enablement hints instead of an Admin SDK hint for GA API-disabled errors.
+  - Docs: make docs find-replace --format markdown strip inline and block Markdown markers while preserving nested bold/italic/code/link formatting in the inserted Google Doc content. (#586) — thanks @sebsnyk.
+  - YouTube: preserve API-key authentication when wrapping requests with the retry transport, so public youtube/yt reads no longer fail as unregistered callers. (#578) — thanks @adityarya24.
+  - Docs: update OAuth success/accounts GitHub links to the openclaw/gogcli repository. (#561)
+ReleaseNotesUrl: https://github.com/openclaw/gogcli/releases/tag/v0.17.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

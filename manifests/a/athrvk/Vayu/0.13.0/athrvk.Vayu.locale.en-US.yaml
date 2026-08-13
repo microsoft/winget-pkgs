@@ -1,0 +1,54 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: athrvk.Vayu
+PackageVersion: 0.13.0
+PackageLocale: en-US
+Publisher: Atharva Kusumbia
+PublisherUrl: https://github.com/athrvk
+PublisherSupportUrl: https://github.com/athrvk/vayu/issues
+Author: Atharva Kusumbia
+PackageName: Vayu
+PackageUrl: https://github.com/athrvk/vayu
+License: AGPL-3.0
+LicenseUrl: https://github.com/athrvk/vayu/blob/HEAD/LICENSE
+Copyright: Copyright © 2026 Atharva Kusumbia
+ShortDescription: Open-source API client with a native C++ load-testing engine - Postman-style requests and k6-level load tests in one local app.
+Description: Vayu is a free, open-source desktop app for Windows, macOS, and Linux that combines a full REST and GraphQL request builder - with collections, environments, and scripting - and a high-throughput load tester powered by a C++20 engine, with all data staying on your machine.
+Moniker: vayu
+Tags:
+- api
+- api-client
+- api-testing
+- benchmark
+- developer-tools
+- graphql
+- http
+- insomnia
+- load-testing
+- performance
+- postman
+- rest
+ReleaseNotes: |-
+  0.13.0 - 2026-07-31
+  The scripting and composition release. Request preparation - {{variable}} interpolation and inherit-auth resolution - moved into the C++ engine behind a new POST /compose endpoint, ending the era of every client carrying its own copy of the rules, and the scripting sandbox grew the pieces users kept reaching for: dynamic variables, pm.variables.replaceIn, request signing with pm.crypto, and a substantially fuller pm.* surface. The engine also now runs one JavaScript interpreter on every platform - QuickJS-NG 0.16 - where Windows and Linux/macOS previously ran two different ones. The bulk of the change is new C++ in the engine and the deletion of duplicated resolution code in the app.
+  Added
+  - Dynamic variables. {{$guid}}, {{$randomUUID}}, {{$timestamp}}, {{$isoTimestamp}} and eleven {{$random*}} generators resolve anywhere {{name}} does - URL, headers, body, form fields - with a fresh value per occurrence, so two {{$guid}} in one body are two ids. The {{ autocomplete offers them under a Dynamic heading. A workspace variable literally named $guid keeps its own value, and an unknown {{$typo}} stays on the wire as written rather than silently emptying the field.
+  - {{templates}} inside scripts: pm.variables.replaceIn. The same resolver the request fields use, run at call time over a string the script passes in - const id = pm.variables.replaceIn("{{$guid}}"). Because it resolves at call time, a variable the script set a line earlier is visible to it, which {{}} in the URL (resolved before the script starts) can never be. Script source is deliberately never interpolated: a rewrite cannot tell code from a string literal, and splicing variable values into JavaScript would let a variable's value become code.
+  - Request signing from scripts: pm.crypto and base64 globals. pm.crypto.sha256(data, encoding?) and pm.crypto.hmacSha256(key, data, encoding?) - synchronous, since the sandbox has no event loop for a Promise to settle on - plus standard btoa/atob. Together with the writable pm.request, a pre-request script can now compute and attach an HMAC or webhook signature. Backed by the already-vendored picosha2; OpenSSL is still not linked.
+  - Engine-owned request composition: POST /compose. The engine resolves {{variables}} (environment > collection chain > globals, enabled only) and walks the collection ancestor chain for inherit auth, returning a fully-resolved payload that POST /execute / POST /runs send byte-for-byte. Composition is pure - nothing is sent, no run row is created - and the execution endpoints never interpolate, so a body that legitimately contains {{...}} survives exactly one resolution. The app's three send paths (Send, load test, History replay) and every MCP execute/load tool now compose through it; MCP checks its host allowlist against the resolved URL before any traffic flows. A shared conformance fixture keeps the app's preview (tab titles, unresolved-token painting) pinned to the engine's semantics, and OAuth 2.0 configs resolve their variables before the token cache key is derived, so two environments differing only through {{vars}} can never share a token.
+  - A fuller pm.* surface. Every variable scope gained has/unset/clear/toObject, plus the merged read-only pm.variables accessor that resolves across scopes in {{name}}'s own precedence order. Request headers gained get/has/add/upsert/remove (case-insensitive, as HTTP header names are), and responses gained reason() and size(). The script panels link the scripting guide directly.
+  - Linux installs and updates with the same one-liner as macOS. install.sh now handles Linux end to end - AppImage, desktop entry, icon, and a vayu command when ~/.local/bin is on PATH, all under ~/.local/share/vayu with no sudo - and safely updates an existing install on either platform. On macOS the app can quit itself for an update (the one quit path needing no Automation consent), and the sudo handling was restructured so privileged work is impossible before the password prompt has actually run.
+  Changed
+  - One JavaScript engine on every platform: QuickJS-NG 0.16.0. Linux and macOS previously ran Bellard's original QuickJS (pinned January 2024) while Windows ran the QuickJS-NG fork - two interpreters behind one pm.* surface, so an engine-level behaviour difference was a Windows-vs-Unix script divergence waiting to be found. All platforms now build the same vendored QuickJS-NG, upgraded to 0.16.0; the original copy and the API-difference shim are deleted.
+  - pm.expect(...).to.equal is now strict equality, .eql/.deep.equal is deep (behaviour change for scripts). The two were previously conflated, so two different objects with the same contents could pass .equal. Scripts comparing objects structurally should use .eql - which is what Postman's Chai does. The missing matchers around them were filled in at the same time.
+  - {{variable}} edge semantics are now one rule everywhere instead of two client copies that quietly disagreed: a variable definition whose enabled flag is absent counts as enabled (matching the importers), and a non-string stored value reads as the empty string. One malformed variable in a scope no longer silently discards the whole scope engine-side.
+  Fixed
+  - Validation error messages finally reach the user. The engine built specific messages for every rejected write - which field, why, what the valid values are - in a body shape the app's HTTP client discarded, so everything surfaced as a bare "HTTP 400: Bad Request". Every engine error now uses one nested shape the client reads, a failed bulk import names the item that broke, and the client still accepts the old shape so a newer app can read an older engine.
+  - The Insomnia importer dropped text bodies with a charset suffix, bearer prefixes, and folder-level scripts, among five smaller gaps; the OpenAPI importer now resolves $ref'd path items, imports form bodies, and honours consumes.
+  - The macOS update notification pointed at a stale installer URL, and a handful of installer edge cases (a hanging sudo keep-alive, a broken Linux path, shell patterns shellcheck rightly flags) were closed with a real end-to-end installer test suite covering both platforms' decisions and effects.
+  Internal
+  The pending-backlog item A1 (request composition consolidation) is closed by this release; the renderer's resolver is preview-only and MCP's composition copy is deleted outright, guarded by a cross-language conformance fixture both test suites drive. CI gained sccache on Windows, pinned shellcheck, and CodeQL/action bumps; the docs build covers requirements-docs.txt and the published site's analytics remain consent-gated and absent from forks and previews.
+ReleaseNotesUrl: https://github.com/athrvk/vayu/releases/tag/v0.13.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

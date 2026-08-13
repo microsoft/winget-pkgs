@@ -1,0 +1,47 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Snowflake.SnowflakeCLI
+PackageVersion: 3.17.0.0
+PackageLocale: en-US
+Publisher: Snowflake, Inc.
+PublisherUrl: https://www.snowflake.com/
+PublisherSupportUrl: https://www.snowflake.com/en/support/
+PrivacyUrl: https://www.snowflake.com/en/legal/privacy/privacy-policy/
+Author: Snowflake, Inc.
+PackageName: Snowflake CLI
+PackageUrl: https://docs.snowflake.com/en/developer-guide/snowflake-cli/index
+License: Proprietary
+LicenseUrl: https://www.snowflake.com/en/legal/terms-of-service/
+Copyright: © 2026 Snowflake Inc. All Rights Reserved
+CopyrightUrl: https://www.snowflake.com/en/legal/terms-of-service/
+ShortDescription: A command-line tool for Snowflake developers to create, manage, update, and view apps running on Snowflake across workloads such as Streamlit in Snowflake, the Snowflake Native App Framework, Snowpark Container Services, and Snowpark.
+Description: |-
+  Snowflake CLI is an open-source command-line tool explicitly designed for developer-centric workloads in addition to SQL operations. It is a flexible and extensible tool that can accommodate modern development practices and technologies.
+  With Snowflake CLI, developers can create, manage, update, and view apps running on Snowflake across workloads such as Streamlit in Snowflake, the Snowflake Native App Framework, Snowpark Container Services, and Snowpark. It supports a range of Snowflake features, including user-defined functions, stored procedures, Streamlit in Snowflake, and SQL execution.
+Tags:
+- database
+- snowflake
+- sql
+ReleaseNotes: |-
+  New features and updates
+  - The snow app command group now supports both Snowflake Native Apps (application and application package entities) and Snowflake Apps Deploy (snowflake-app entities). The entity type in snowflake.yml determines which flow is used, so shared subcommands such as bundle, deploy, validate, open, events, and teardown automatically select the correct behavior. The experimental hidden snow __app command group and the ENABLE_SNOWFLAKE_APPS feature flag have been removed.
+  - Added the snow app setup command for initializing a snowflake.yml file for a Snowflake Apps Deploy project.
+  - Added the snow connection generate-workload-identity-token command to generate a workload identity token for the current environment. Supports AWS, GCP, Azure, and OIDC providers via the --workload-identity-provider option or connection configuration.
+  - Added the snow custom-image validate command to validate custom Docker images against configured rules (entrypoint, environment variables, Python packages, and dependency health). Supports an optional --scan-vulnerabilities flag to run Grype vulnerability scanning.
+  - Added the snow dcm purge command to drop all the objects managed by the specified DCM Project. The project object itself is not dropped.
+  - DCM manifest targets now validate the account_identifier and project_owner fields. The CLI checks these against the current session and prints a warning on mismatch: account_identifier is checked for all manifest-based commands, and project_owner is checked for snow dcm create.
+  - Added the --secondary-roles option (and matching SNOWFLAKE_SECONDARY_ROLES environment variable and secondary_roles configuration key) to snow connection add and the global connection overrides. The value is forwarded to snowflake-connector-python and accepts ALL or NONE, so sessions can be pinned to the primary role without running USE SECONDARY ROLES.
+  - Added the --force option to snow spcs service drop to allow dropping services that contain block storage volumes.
+  - Significantly improved DCM file upload performance.
+  - Updated snowflake-connector-python to version 4.4.0. The 4.x series introduced stricter permission checks. In future versions of Snowflake CLI, strict configuration file permissions will become mandatory. To test whether your files have the correct permissions, set SNOWFLAKE_CLI_FEATURES_ENFORCE_STRICT_CONFIG_PERMISSIONS=1 before running CLI commands.
+  Bug fixes
+  - Fixed snow streamlit deploy failing with a collision error when a pages/*.py glob in additional_source_files overlaps with the automatically-included pages/ directory. Overlapping glob patterns are now deduplicated during v1-to-v2 definition conversion.
+  - Fixed the error message when the PRIVATE_KEY_PASSPHRASE environment variable is set to an empty string.
+  - Fixed SELECT * output being corrupted when joined tables share column names. Duplicate column names are now disambiguated by appending a numeric suffix (for example, NAME, NAME_2).
+  - Fixed snow connection generate-jwt and snow connection generate-workload-identity-token failing with Connection None is not configured when used with --temporary-connection.
+  - Fixed duplicate LOGIN_HISTORY events (and OVERFLOW_FAILURE_EVENTS_ELIDED entries) previously emitted when a snow invocation was rejected by an authentication policy. The internal connection cache now remembers failed connect attempts and re-raises the original exception on subsequent accesses within the same process, instead of re-dialing Snowflake every time a command accesses the shared connection.
+  - Fixed session/master token connections created from environment variables or named connection configuration not enabling token keep-alive settings. This could cause follow-up commands to fail with 251007: Session and master tokens invalid.
+ReleaseNotesUrl: https://docs.snowflake.com/en/release-notes/clients-drivers/snowflake-cli-2026
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

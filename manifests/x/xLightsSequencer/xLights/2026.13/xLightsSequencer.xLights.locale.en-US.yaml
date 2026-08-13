@@ -1,0 +1,66 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: xLightsSequencer.xLights
+PackageVersion: '2026.13'
+PackageLocale: en-US
+Publisher: xLightsSequencer
+PublisherUrl: https://github.com/xLightsSequencer/
+PublisherSupportUrl: https://github.com/xLightsSequencer/xLights/issues
+PackageName: xLights
+PackageUrl: https://github.com/xLightsSequencer/xLights
+License: GPL-3.0
+LicenseUrl: https://github.com/xLightsSequencer/xLights/blob/HEAD/License.txt
+ShortDescription: xLights is a free and open source program that enables you to design, create and play amazing lighting displays through the use of DMX controllers, E1.31 Ethernet controllers and more.
+ReleaseNotes: |-
+  2026.13 — July 14, 2026
+  Enhancements
+  - charlie — Effect Symbols: define a reusable effect once and link any number of effects to it; editing one propagates to all linked effects. Symbols round-trip through .xsq with a "Convert All Symbols to Effects" escape hatch for compatibility export (#2671)
+  - scott — Windows: experimental Vulkan preview rendering backend (model preview, sequencer grid, waveform, color canvases), switchable via Preferences > Other > "Preview graphics"; defaults to OpenGL with automatic fallback
+  - dan — Linux: Vulkan preview rendering backend with X11 and native Wayland surface support; new "Auto" default picks Vulkan only when OpenGL would fall back to software rendering (llvmpipe)
+  - dkulp — Linux/Windows: GPU-accelerated rendering (Vulkan) for blur, rotozoom, transitions, layer blending and most effects, mirroring the Metal backend on macOS; enable via Preferences > Other > GPU rendering
+  - dkulp — macOS/iPad: Shader effect now renders natively on Metal (GLSL translated to Metal via SPIR-V and cached); set XL_NO_NATIVE_SHADER=1 to force the OpenGL fallback
+  - dkulp/scott — Linux/Windows: Shader effect now renders natively on Vulkan (GLSL -> SPIR-V via glslang); falls back to OpenGL when Vulkan is unavailable
+  - dkulp — GPU/SIMD rendering for additional effects: Tree, Shimmer, Candle (per-node), Wave, Garlands, Fill, Life, Twinkle, and Meteors
+  - dkulp — Galaxy effect: faster per-pixel rendering method (ISPC/Metal/Vulkan)
+  - dkulp — Galaxy effect: blend passes now scan only the bounding box instead of the whole buffer, up to ~5x faster on large 2D models
+  - dkulp — Much faster saving of large .fseq files via multi-threaded zstd compression
+  - dkulp — Add headless render mode (--headless -s <seq.xsq>): renders sequences to .fseq with no window, then exits
+  - cybercop23 — Effect Presets track unsaved changes independently; preset-only edits no longer mark the RGB effects file dirty
+  - alex — Tools - Test: defer controller connection until a model/port is selected, eliminating startup delay; re-resolve hostnames on demand for controllers that were offline at startup
+  - daryl — Recall the last directory used in Open Sequence and Save Sequence As dialogs (#3107)
+  Bug Fixes
+  - daryl — Undo of a Model Set move now restores every member of the Set, not just the grabbed prop (#6681)
+  - daryl — Mark the layout as needing a save when aliases are added
+  - charlie — Fix app hang when changing a color to a gradient/color curve on an effect linked to an Effect Symbol (deadlock in symbol propagation)
+  - daryl — Fix Align To Closest Timing Mark doing nothing when both ends of an effect are closest to the same mark (#6659)
+  - daryl — Fix Align To Closest Timing Mark creating impossible effect overlaps (#6652)
+  - cybercop23 — Fix crash configuring a 3D Servo model when servo count is increased (#6663)
+  - cybercop23 — Fix "Copy Layers/SubModels to Models" for submodels with trailing empty layers (#6647)
+  - dkulp — Fix crash cancelling or failing a model download/import with a malformed .xmodel (double-free)
+  - dkulp — Fix crash in 3D layout preview after deleting a model (stale cached model list)
+  - dkulp — Fix crash closing the Key Bindings editor with an uncommitted property edit
+  - dkulp — Fix crash clicking "Render All" while a sequence is closing
+  - dkulp — macOS: fix crash after deleting a model while a property-grid combo popup is being torn down (wxWidgets fork fix)
+  - dkulp — Metal: fix crash when the GPU refuses a texture allocation (memory pressure or zero-sized image)
+  - dkulp — Windows: fix crash rendering Shader effects after a GPU device reset (WDDM TDR)
+  - dkulp — Linux: fix random startup crash from Moving Head panel adding its Color page to a notebook twice (use-after-free)
+  - dkulp — Fix non-deterministic Meteors effect rendering (threading race in overlapping trails)
+  - dkulp — macOS GPU: fix layer blending ignoring CPU-computed transition masks, causing wrong/non-deterministic transitions
+  - dkulp — Fix non-deterministic rendering with "Per Model" buffer style (race reading effect settings during parallel member renders)
+  - dkulp — Fix non-deterministic rendering of groups containing a nested group plus its own members (race on shared channels)
+  - dkulp — Fix "Random" value/color curves re-randomizing on every render instead of producing stable results
+  - dkulp — macOS GPU: fix non-deterministic Blur output (replaced MPS tent filter with deterministic compute kernel)
+  - dkulp — macOS GPU: fix RotoZoom X/Y rotate writing past buffer bounds into adjacent layers, causing run-to-run corruption
+  - dkulp — macOS: fix Video effect occasionally dropping frames or choosing different frames per render; playback is now frame-exact
+  - dkulp — macOS GPU: fix non-deterministic Canvas layer output when group nodes share a buffer pixel
+  - dkulp — macOS GPU: fix non-deterministic Rotate/Zoom output when multiple source pixels map to the same destination
+  - dkulp — Fix non-deterministic Twinkle effect when twinkling by node on groups with shared buffer pixels
+  - dkulp — Fix non-deterministic Kaleidoscope effect (Square/Triangle) rendering
+  - dkulp — Fix headless render not honoring the "Use GPU For Rendering" preference
+  - dkulp — Fix Galaxy effect rendering extremely slowly on very wide/short buffers (e.g. "Single Line" render style)
+  Changes
+  - dkulp — Render jobs now suspend and reschedule instead of blocking threads, reducing the thread pool to roughly CPU+GPU core count and lowering memory use on large sequences
+ReleaseNotesUrl: https://github.com/xLightsSequencer/xLights/releases/tag/2026.13
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
