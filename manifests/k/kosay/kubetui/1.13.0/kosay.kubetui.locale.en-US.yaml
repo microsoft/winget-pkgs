@@ -1,0 +1,69 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: kosay.kubetui
+PackageVersion: 1.13.0
+PackageLocale: en-US
+Publisher: kosay
+PublisherUrl: https://github.com/sarub0b0
+PublisherSupportUrl: https://github.com/sarub0b0/kubetui/issues
+Author: kosay
+PackageName: kubetui
+PackageUrl: https://github.com/sarub0b0/kubetui
+License: MIT
+LicenseUrl: https://github.com/sarub0b0/kubetui/blob/HEAD/LICENSE
+ShortDescription: A terminal UI for Kubernetes
+Description: |
+  Kubetui is a terminal user interface (TUI) tool designed for monitoring Kubernetes resources.
+  It provides an easy-to-use interface for developers and operators to access important information about their applications and infrastructure.
+Tags:
+- cli
+- kubernetes
+- monitor
+- rust
+- terminal
+- tui
+ReleaseNotes: |-
+  What's New
+  Features
+  Log Buffer Limit (#932)
+  Added a configurable upper bound on the number of lines retained in the log view buffer to prevent unbounded memory growth during long log sessions.
+  - Config: logging.max_lines in ~/.config/kubetui/config.yaml
+  - Per-query override: limit:<n> (alias lim) keyword in the log query
+  - When the buffer exceeds the limit, the oldest lines are dropped first
+  logging:
+    max_lines: 5000
+  pod:api log:error limit:1000
+  Namespace Fallback (#952)
+  Configurable list of namespaces to display when the Kubernetes API does not allow listing namespaces (e.g. RBAC restrictions). The namespace selector now falls back to the configured list with an indicator in the title.
+  fallback_namespaces:
+    - production
+    - staging
+    - dev
+  Per-widget Error Display (#953, #956)
+  Reworked the way data-fetch errors are displayed in widgets. Previously, errors were shoehorned into each widget's data type — Table widgets had their header replaced with ERROR, and Log/List widgets had ANSI-colored error lines mixed into their content. The Tab/Dialog layer now manages widget error state separately and renders the error in place while preserving the widget's title and border. The view automatically reverts to the normal display when fresh data arrives. The display style is themable via theme.component.error.
+  theme:
+    component:
+      error:
+        fg_color: red
+        modifier: bold
+  Bug Fixes
+  - Prevent API resources tab panic with non-zero priority columns (#958) - Fixed an index out-of-bounds panic when rendering tables that include priority columns.
+  Dependencies
+  - Update kube to v3.1.0 (#944) and k8s-openapi to v0.27.1 (#940)
+  - Update tokio to v1.50.0 (#938)
+  - Update clap to v4.6.1 (#928, #929, #942, #943, #960)
+  - Update jiff to v0.2.24 (#933, #937, #939, #961)
+  - Update unicode-segmentation to v1.13.2 (#945, #946, #947)
+  - Update rayon to v1.12.0 (#957)
+  - Update bitflags to v2.11.1 (#959)
+  - Update once_cell to v1.21.4 (#941)
+  - Update strum to 0.28.0 (#934)
+  - Update anyhow to v1.0.102 (#930)
+  - Update futures to v0.3.32 (#926)
+  - Update GitHub artifact actions (#936)
+  - Lock file maintenance (#925, #962)
+  Full Changelog: v1.12.1...v1.13.0
+ReleaseNotesUrl: https://github.com/sarub0b0/kubetui/releases/tag/v1.13.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

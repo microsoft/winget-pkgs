@@ -1,0 +1,44 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: laurentiu021.SysManager
+PackageVersion: 1.52.104
+PackageLocale: en-US
+Publisher: laurentiu021
+PublisherUrl: https://github.com/laurentiu021
+PublisherSupportUrl: https://github.com/laurentiu021/SystemManager/issues
+PackageName: SysManager
+PackageUrl: https://github.com/laurentiu021/SystemManager
+License: MIT
+LicenseUrl: https://github.com/laurentiu021/SystemManager/blob/HEAD/LICENSE
+ShortDescription: Modern Windows system toolkit — network monitor, performance tuning, cleanup, battery health, process manager, and more.
+Description: |-
+  SysManager is a modern Windows system toolkit built with WPF and .NET 10.
+  It provides a comprehensive set of tools in a single application including
+  live network monitoring, ping and traceroute, speed tests, performance tuning
+  with power plan management, deep disk cleanup, duplicate file finder, disk
+  analyzer, battery health monitoring, process manager, app uninstaller,
+  startup control, Windows services manager, Windows features manager, driver
+  information, and system health overview.
+Tags:
+- battery
+- cleanup
+- dotnet
+- network-monitor
+- open-source
+- performance
+- process-manager
+- system-utility
+- uninstaller
+- windows
+- wpf
+ReleaseNotes: |-
+  [1.52.104] - 2026-07-21
+  Fixed
+  - The app built every one of its ~55 tab view-models at startup, even the tabs you never open. MainWindowViewModel eagerly constructed all tab VMs up front, and most of them kick off real work in their constructor — a background scan, a poll timer, a WMI/registry query — so launching the app fired ~40 of those at once regardless of which tab you actually used (e.g. opening the app to the Dashboard still spun up Services, Drivers, Debloater, Bulk Installer and dozens more). Each tab's view-model is now built lazily, the first time its tab is opened (NavItem carries a ContentFactory that resolves the VM from DI on first access), so a fresh launch constructs only what the initial view needs. Startup tab-VM construction drops from ~55 to a handful. A deliberately small set stays eager because its constructor drives always-on, app-wide behavior that must run whether or not you open its tab: the Dashboard (the tab shown at launch), the Dark Mode scheduler (owns the theme-schedule poll), and About (its startup update-check feeds the title-bar version label and the "update available" banner). The four Network tabs also stay eager — they share a single network-state object and their constructors do no work. Behavior is otherwise identical; nothing is disabled, only deferred.
+  Verify the download
+  Get-FileHash .\SysManager-v1.52.104.exe -Algorithm SHA256
+  Expected SHA256: 23E14832C9A65CB7A4C7FB237040A0727CD23D2138A36DAAB877053B34C04DCD
+ReleaseNotesUrl: https://github.com/laurentiu021/SystemManager/releases/tag/v1.52.104
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

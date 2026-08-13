@@ -1,0 +1,103 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Fioooooooo.FylloCode
+PackageVersion: 0.14.3
+PackageLocale: en-US
+Publisher: Fio
+PublisherUrl: https://github.com/Fioooooooo
+PublisherSupportUrl: https://github.com/Fioooooooo/FylloCode/issues
+PackageName: FylloCode
+PackageUrl: https://github.com/Fioooooooo/FylloCode
+License: AGPL-3.0
+LicenseUrl: https://github.com/Fioooooooo/FylloCode/blob/HEAD/LICENSE
+ShortDescription: A desktop app that turns Coding Agents into reliable teammates — by splitting every change into Task → Proposal → Apply → Archive, with you reviewing the plan before any code is written.
+Description: |-
+  In this new era, the work that really needs our attention is no longer repetitive coding, but higher-level business understanding and architecture design. The future workflow I have in mind is: understand the business → think through the architecture → write a Proposal → review the Proposal → let the Agent implement it automatically, then move on to the next Proposal.
+  That thinking led me to build FylloCode — a step from Vibe Coding toward Agentic Coding.
+
+  How FylloCode Solves It
+  FylloCode enforces a structured workflow that separates thinking from doing:
+  ┌──────────┐     ┌────────────────┐     ┌───────────┐     ┌───────────┐
+  │   Task   │ ──→ │ Chat/Proposal  │ ──→ │   Apply   │ ──→ │  Archive  │
+  │          │     │                │     │           │     │           │
+  │ What to  │     │ Agent explores │     │ Agent     │     │ Specs     │
+  │ work on  │     │ codebase and   │     │ implements│     │ updated,  │
+  │          │     │ writes a plan  │     │ the plan  │     │ change    │
+  │          │     │                │     │           │     │ recorded  │
+  │          │     │  ➜ YOU REVIEW  │     │           │     │           │
+  └──────────┘     └────────────────┘     └───────────┘     └───────────┘
+  Task — Pick a task from your local list or synced from platforms like Yunxiao. One click sends it to Chat.
+  Chat / Proposal — The Agent explores your codebase, asks clarifying questions, and produces a structured proposal (what to change, which files, acceptance criteria). The Agent is prohibited from writing code in this stage. You review, edit, and approve the proposal before anything else happens.
+  Apply — A fresh Agent session implements the approved proposal task-by-task. It reads only the proposal artifacts — not the Chat history — so every decision must be captured in writing, not left in context-window memory.
+  Archive — Specs are updated, the change is recorded with full traceability. Your project's knowledge base grows with every shipped change.
+  Why Separating Thinking from Execution Matters
+  Most Coding Agents understand a task and write code in the same session. Any misunderstanding becomes code directly, and code is expensive to review. FylloCode physically separates understanding from execution. Misunderstandings can only become proposal text — and text is cheap to review. A 2-minute proposal review catches problems that would take 20 minutes to find in a diff.
+
+  Features
+
+  Agent Protocol (ACP)
+  FylloCode connects to any Coding Agent through ACP (Agent Client Protocol). Claude Code, Codex, or any ACP-compatible agent — one protocol, one interface, without juggling a pile of terminal windows.
+  There are currently 35 agents available in the ACP Registry, with support for parallel chats and parallel Proposal Apply runs.
+
+  System Reminders
+  Each workflow stage injects a system reminder that constrains what the Agent can and cannot do. In Chat, the Agent is instructed to explore and propose, not code. In Apply, it follows the approved task list. This isn't a suggestion — it's a hard boundary enforced at session start.
+
+  Task Panel
+  View and manage tasks from your local list or synced from external platforms. Tasks serve as the entry point to the entire workflow — select a task, start a Chat, and the Agent begins with full context.
+
+  Integration with Development Platforms
+  Connect to platforms like Yunxiao (Alibaba Cloud DevOps) at the provider level — one authentication, multiple tools across task management, source code, and CI/CD. More platform integrations (GitHub, TAPD, Jira, etc.) are planned.
+  Task integrations use APIs instead of Agent Skills by design. API calls are fast and do not spend tokens, so tokens stay focused on the work that actually needs reasoning.
+
+  Workflow Editor
+  Define and customize multi-stage workflows. Built-in templates get you started; edit the YAML to fit your team's process.
+
+  OpenSpec-Driven Proposals
+  Proposals are structured artifacts — not chat messages. Each proposal contains a design document, spec changes, and a concrete task list with file paths and acceptance criteria. The built-in fyllo-specs MCP server manages the full lifecycle: explore → create-proposal → apply-change → archive-change.
+
+  Streaming Rendering Engine
+  FylloCode uses markstream-vue as its streaming rendering engine. It is fast and smooth, with built-in integration for Monaco Editor, KaTeX, and Mermaid. While working on Proposals, it can render flowcharts and formatted specs in real time, making architecture flows and business logic easier to inspect.
+  Engineering Guardrails
+  FylloCode provides two layers of engineering guardrails:
+  - Soft constraints — Capture engineering conventions as Guidelines and continuously maintain them through the built-in fyllo-skills MCP server, without manual upkeep.
+  - Hard constraints — Agents may not always follow Guidelines perfectly, so FylloCode's health checks establish engineering-level enforcement through lint, test runners, git hooks, and CI.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  This release improves readability in long Chat sessions and while Agents are working. Chat can now pin important sessions, streaming assistant messages show a runtime indicator, and consecutive Thinking / Tool activity is grouped into expandable Activity groups. Claude Code subagent calls also get a dedicated inspector for parent-child tool relationships, runtime statistics, and final responses, while dependency pinning and release workflow guidance reduce upgrade and release risk.
+  Added
+  - Chat sessions can now be pinned and unpinned; the pinned state is persisted with project session metadata, the sidebar shows Pinned Sessions and Recent Sessions groups, and the pinned group is height-limited so recent sessions remain visible
+  - Streaming assistant messages now show a message-level runtime indicator with a 4×4 dot matrix animation, generic status text, and natural elapsed-time units; the state exists only in renderer runtime and is not stored in historical messages
+  - Added a Claude Code subagent call inspector: parent Agent tools render as standalone cards, and details show prompt, status, model, tokens, duration, tool statistics, child tool activity, and final response
+  - Added OpenSpec capabilities for assistant-stream-indicator, pinned-sessions, subagent-call-inspector, assistant-activity-display, and chat-prompt-timeline to capture this release's Chat observability and navigation contracts
+  Changed
+  - Chat prompt timeline now uses a compact line index with continuous nearest-prompt hit testing, drag-to-locate, one summary popover, keyboard navigation, and more stable reading-position synchronization
+  - Consecutive Thinking and normal tool calls in assistant messages are grouped into collapsible Activity groups; tool details use separate Input and Output sections and show the complete final output returned by Codex MCP calls
+  - The ACP event mapper is split into an Agent-neutral baseline, Claude / Codex adapters, a tool-call mapper, and update normalizers, preserving multi-Agent mapping boundaries while improving Claude Code and Codex session update compatibility
+  - The default Settings entry now opens /settings/preferences, and the Preferences and About pages are tightened around preference and release-update information
+  - Dependencies were updated to the current locked set, with markstream-vue 1.0.5 and stream-monaco 0.0.46 explicitly pinned together with compatibility notes for future upgrades
+  - references/ is reorganized into designs/ and third-party/, with added research and designs for ACP subagents, the Claude MCP initialization race, built-in MCP HTTP, and bundled MCP work
+  - The repository release skill now has tighter versioning, documentation-audit, release-note timing, and MCP server version decision rules
+  Fixed
+  - Fixed a Claude Code MCP initialization race by waiting for MCP startup before treating the session as ready, reducing early tool-unavailable failures
+  - Fixed Claude Code and Codex ACP session update mapping details so session titles, tool names, MCP call titles, and subagent output remain more stable while streaming
+  - Fixed prompt timeline summary popovers potentially stealing focus, reopening immediately, or shifting the summary window during hover, click, and focus transitions
+  - Fixed Chat session item width, config dropdown hover behavior, confirmation dialogs, and local layout/state details in lineage, task, and settings pages
+  - Removed redundant dynamic imports from the main process so runtime dependency paths stay direct
+  Notes
+  - The application version is now 0.14.3.
+  - fyllo-specs MCP server is now 0.8.2, containing only an internal archive outcome parsing type normalization with no changes to tool names, inputs, outputs, instructions, or archive behavior.
+  - fyllo-cortex MCP server remains at 0.5.0; that server did not change in this release range.
+  - Pinned sessions add an optional isPinned field to existing session metadata. Historical sessions without the field are read as unpinned and require no manual migration.
+ReleaseNotesUrl: https://github.com/Fioooooooo/FylloCode/blob/HEAD/CHANGELOG.en.md#0143---2026-07-22
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,100 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: TinyHumansAI.OpenHuman
+PackageVersion: 0.63.11
+PackageLocale: en-US
+Publisher: openhuman
+PublisherUrl: https://tinyhumans.ai/
+PublisherSupportUrl: https://github.com/tinyhumansai/openhuman/issues
+PackageName: OpenHuman
+PackageUrl: https://tinyhumans.ai/openhuman
+License: GPL-3.0
+LicenseUrl: https://github.com/tinyhumansai/openhuman/blob/HEAD/LICENSE
+ShortDescription: Your Personal AI super intelligence. Private, Simple and extremely powerful.
+Description: |-
+  OpenHuman is an open-source AI assistant designed to be the memory and doer for everything you do across your tools. Built on Rust + Tauri and licensed under GNU GPL3, it closes the gap between what AI models can do and what they actually know about you.
+  Every model in the world, all 200+ of them, shares the same fundamental limitation: they are stateless. You type a prompt, get a response, and the context evaporates. Even the ones with "memory" store a few bullet points. A few bullet points is a sticky note, not intelligence.
+  OpenHuman solves this with a stack that's calmly, deliberately different:
+  - A local-first Memory Tree. Every source you connect. Gmail, Slack, GitHub, Notion, your own notes, flows through a deterministic pipeline: canonical Markdown, ≤3k-token chunks, scored, folded into per-source / per-topic / per-day summary trees. Stored in SQLite on your machine. No vector-soup black box.
+  - An Obsidian-style wiki on top of it. The same chunks the agent reasons over land as .md files in a vault you can open in Obsidian, browse, edit, and link by hand. Inspired by Karpathy's obsidian-wiki workflow. You can't trust a memory you can't read.
+  - 118+ third-party integrations. One-click OAuth into Gmail, GitHub, Slack, Notion, Stripe, Calendar, Drive, Linear, Jira and more - no API keys to wire by hand, no plugin marketplace to navigate.
+  - Auto-fetch. Every twenty minutes, OpenHuman pulls fresh data from every active connection and folds it into the Memory Tree without you asking, so the agent already has tomorrow's context this morning.
+  - An agent built for big data. Smart token compression (TokenJuice) compacts verbose tool output before it ever enters the model's context, so sweeping through your last six months of email costs single-digit dollars. Automatic model routing sends each task to the right model - hint:reasoning to a frontier model, hint:fast to a cheap one, vision to vision - all under one subscription. Optional local AI via Ollama keeps embeddings and summarization on-device.
+  - Batteries included. A complete agent toolbelt is wired in by default: web search, a web-fetch scraper, a full coder toolset (filesystem, git, lint, test, grep), browser & computer control, cron & scheduling, memory tools, agent coordination for spawning sub-agents, and native voice - STT in, TTS out, mascot lip-sync, and a live Google Meet agent that joins meetings, transcribes them into your Memory Tree, and can speak back into the call. No "install a plugin to read files" friction.
+  - Simple, UI-first. A clean desktop experience and short onboarding paths take you from install to a working agent in a few clicks - no config-first setup, no terminal required. The agent has a face: a desktop mascot that speaks, reacts to its surroundings, joins your Google Meets as a real participant, remembers you across weeks, and keeps thinking in the background even when you've stopped typing.
+  Together, these turn OpenHuman into something fundamentally different from a chatbot. It is an AI agent that consumes large amounts of personal data at low cost, maintains a persistent and evolving understanding of your world, and takes proactive actions on your behalf.
+Tags:
+- ai
+- knowledge-base
+- large-language-model
+- llm
+- llm-wiki
+- wiki
+ReleaseNotes: |-
+  OpenHuman v0.63.11
+  187 commits — 52 features, 90 fixes, 45 refactors, docs and CI. This release carries everything merged to main since v0.63.9, including the kernel restructure, ElevenLabs Voice Agents, and a large reliability pass across memory, inference and voice.
+  Note on the previous notes: an earlier version of this page listed only the two release-promotion PRs. That was an artefact of how release is updated, not a description of the release. The full contents are below.
+  Highlights
+  Voice
+  - ElevenLabs Voice Agents — core RPC, realtime session, and local-agent relay handler (#5407)
+  - Send the relay identity token where the backend can read it (#5428)
+  - Stop the Piper voice id leaking into non-Piper TTS providers (#5367)
+  - Repair the execute bit on extracted Piper binaries (#5216), handle U16 sample format in the fallback capture path (#4537)
+  Memory & embeddings
+  - Warn before the embedding budget silently stops memory (#5402)
+  - Stop a signed-in user's embeddings failing, and unstick the parked queue (#5427)
+  - Classify Ollama-unavailable embed failures actionably (#5398)
+  - Drain the coding-session backlog across bounded passes (#5368)
+  - Canonicalize memory identifiers symmetrically (#5275); stop paging on caller ingest-payload schema errors (#5280)
+  Inference & model routing
+  - Route Codex OAuth chat to the subscription backend (#5371)
+  - Error on a misconfigured vision model instead of substituting (#5262); route vision at vision-capable models (#5253)
+  - Explain background-role provider fallback and verify BYOK keys (#5254)
+  - Route local AI through TinyAgents RPC (#5240); local model reliability — /api/tags fallback and real Ollama model ids (#5219)
+  Flows
+  - Surface bounded loops from the tinyflows engine (#5366)
+  - Accept declared workflow inputs on every run path (#5304)
+  - Per-item fan-out — run an array of flow work concurrently (#5302)
+  - Canvas visual refresh — kind tiles, elevation, step numbers (#5303)
+  Agent & chat
+  - Send user image attachments as image blocks, not text (#5370)
+  - Preserve chat context across a Quick/Reasoning switch (#5401)
+  - Name a thread in three words (#5412)
+  - Name the chat-template rejection instead of blaming model/temperature (#5309)
+  - Filesystem-offload convention for worker artifacts on long-horizon tasks (#5217)
+  Kernel restructure
+  - Collapse 124 flat domains into 31 gate-aligned families (#5328) — pure moves, byte-identical wire surface
+  - Kernelize openhuman: cut the workflow dependency floor 418 → 280 crates (#5314)
+  - Realign DomainGroup with the family directories (#5332) and guard three unenforced consumers (#5364)
+  - Gate the macOS Contacts cohort behind contacts (#5365); host capability adapters and config seam (#5396)
+  Media, mascot & config
+  - Error instead of false success on the generation poll timeout (#5411)
+  - Accept PNG/GIF/JPEG/WebP custom avatars with file upload (#5420)
+  - Surface a user notice when a corrupt config.toml is reset (#5340); stop transient active_user.toml read faults from resetting the profile (#5337)
+  Channels & sessions
+  - Stop a missing edit route from looking like a deleted message (#5283)
+  - Keep the /auth/me 401 classifiable as session expiry rather than a hard logout (#5311)
+  - Stop out-of-credits background scouts paging Sentry (#5310)
+  Contributors
+  Thank you to everyone who shipped this release:
+
+  | Contributor         | Commits |
+  | ------------------- | ------- |
+  | Steven Enamakel     | 50      |
+  | Cyrus Gray          | 45      |
+  | Mega Mind           | 31      |
+  | YellowSnnowmann     | 28      |
+  | mysma-9403          | 6       |
+  | CodeGhost21         | 6       |
+  | Sam                 | 3       |
+  | github-actions[bot] | 7       |
+
+  Full compare
+  https://github.com/tinyhumansai/openhuman/compare/v0.63.9...v0.63.11
+ReleaseNotesUrl: https://github.com/tinyhumansai/openhuman/releases/tag/v0.63.11
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://tinyhumans.gitbook.io/openhuman
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

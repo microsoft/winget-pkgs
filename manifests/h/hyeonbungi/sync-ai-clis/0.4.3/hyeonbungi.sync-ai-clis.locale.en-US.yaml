@@ -1,0 +1,43 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: hyeonbungi.sync-ai-clis
+PackageVersion: 0.4.3
+PackageLocale: en-US
+Publisher: hyeonbungi
+PublisherUrl: https://github.com/hyeonbungi
+PublisherSupportUrl: https://github.com/hyeonbungi/sync-ai-clis/issues
+PackageName: sync-ai-clis
+PackageUrl: https://github.com/hyeonbungi/sync-ai-clis
+License: MIT
+LicenseUrl: https://github.com/hyeonbungi/sync-ai-clis/blob/HEAD/LICENSE
+ShortDescription: Detect, install, and keep AI coding CLIs up to date with one command
+Description: A cross-platform CLI that reconciles your machine toward "every known AI coding CLI installed, working, and current" - installed tools get updated through the channel they were installed with, missing tools are installed after consent, and each tool is re-verified after the work.
+Moniker: sync-ai-clis
+Tags:
+- ai
+- claude
+- cli
+- codex
+- gemini
+- installer
+- updater
+ReleaseNotes: |-
+  sync-ai-clis 0.4.3
+  sync-ai-clis dry-run showing Windows native Codex update using the guarded official installer
+  This patch closes the remaining Windows Codex update path that could bypass the PowerShell compatibility wrapper added in 0.4.1 and completed in 0.4.2.
+  Fixed
+  - Windows native Codex updates now use the guarded official installer path. Previously, sync-ai-clis delegated native Codex updates to codex update. On Windows, that command can launch powershell -ExecutionPolicy Bypass -c "$env:CODEX_NON_INTERACTIVE=1; irm https://chatgpt.com/codex/install.ps1 | iex" internally, without -NoProfile or sync-ai-clis' local Get-FileHash fallback.
+  - The official Codex URL is still unchanged. sync-ai-clis now runs the same hardcoded https://chatgpt.com/codex/install.ps1 endpoint itself for Windows native updates, with CODEX_NON_INTERACTIVE=1, -NoProfile, and the SHA256 fallback that accepts both -Path and -LiteralPath.
+  - macOS, Linux, npm, and Homebrew Codex update paths are unchanged. Only the Windows native update branch moved away from delegating to codex update.
+  If Codex failed during a Windows sync after printing Updating Codex via powershell ... install.ps1, upgrade to sync-ai-clis 0.4.3 and rerun the same command.
+  sync-ai-clis 0.4.3 (한국어)
+  이번 패치는 0.4.1과 0.4.2에서 보강한 PowerShell 호환 래퍼가 닿지 못하던 Windows Codex 업데이트 경로를 마저 막습니다.
+  수정
+  - Windows native Codex 업데이트가 이제 보호된 공식 installer 경로를 사용합니다. 이전에는 sync-ai-clis가 native Codex 업데이트를 codex update에 맡겼습니다. 그런데 Windows에서 이 명령은 내부적으로 powershell -ExecutionPolicy Bypass -c "$env:CODEX_NON_INTERACTIVE=1; irm https://chatgpt.com/codex/install.ps1 | iex"를 실행할 수 있고, 이때 -NoProfile도, sync-ai-clis의 로컬 Get-FileHash fallback도 적용되지 않았습니다.
+  - 공식 Codex URL은 그대로입니다. Windows native 업데이트에서는 sync-ai-clis가 같은 하드코딩 공식 엔드포인트인 https://chatgpt.com/codex/install.ps1을 직접 실행합니다. 여기에 CODEX_NON_INTERACTIVE=1, -NoProfile, 그리고 -Path와 -LiteralPath를 모두 받는 SHA256 fallback을 붙였습니다.
+  - macOS, Linux, npm, Homebrew의 Codex 업데이트 경로는 바뀌지 않았습니다. codex update 위임을 피하는 건 Windows native 업데이트뿐입니다.
+  Windows sync 중 Updating Codex via powershell ... install.ps1 메시지 뒤에서 Codex가 실패했다면 sync-ai-clis 0.4.3으로 올린 다음 같은 명령을 다시 실행하면 됩니다.
+ReleaseNotesUrl: https://github.com/hyeonbungi/sync-ai-clis/releases/tag/v0.4.3
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
