@@ -1,0 +1,40 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: PyPA.Hatch
+PackageVersion: 1.18.0
+PackageLocale: en-US
+Publisher: Python Packaging Authority
+PublisherUrl: https://www.pypa.io/
+PublisherSupportUrl: https://github.com/pypa/hatch/issues
+PackageName: Hatch
+PackageUrl: https://hatch.pypa.io/
+License: MIT
+LicenseUrl: https://github.com/pypa/hatch/blob/HEAD/LICENSE.txt
+Copyright: Copyright (c) 2025-present Ofek Lev <oss@ofek.dev>
+ShortDescription: A modern, extensible Python project manager.
+Tags:
+- py
+- python
+ReleaseNotes: |-
+  Changed:
+  - Upgrade default CPython distributions to 20260807
+  Added:
+  - Add the sources environment option, which redirects dependencies to a local path, Git repository, URL, alternate index, or workspace member at install time without altering published metadata. The top-level [tool.hatch.sources] table is an alias for the default environment, environments inherit sources entry by entry, the HATCH_NO_SOURCES environment variable disables them, and hatch dep show sources reports what each source redirects
+  - Add the --all/-a flag to the build command to build the workspace root and every workspace member defined by the selected environment, consolidating artifacts in the workspace root's dist directory by default. A root that does not define a project table is skipped so that a top-level pyproject.toml may only contain workspace configuration
+  - Add the tool.hatch.requires-hatch field, a version specifier set that commands reading the project's metadata enforce against the running version of Hatch
+  - Add first-class support for free-threaded distribution names such as 3.13t and 3.14t to the python commands and environment python option, rather than requiring the HATCH_PYTHON_VARIANT_GIL environment variable
+  - The version command can now bump versions that are statically defined by the project.version field, updating pyproject.toml in place. Pass --force to allow an explicit downgrade
+  - Support managing Python 3.15 distributions, currently 3.15.0rc1
+  Fixed:
+  - Erase stale coverage data before running hatch test --cover.
+  - Fix environment creation crashing when a metadata hook exists that doesn’t happen to be installed in the hatch CLI’s environment.
+  - Fix commands run by hatch run no longer being interruptible with Ctrl-C, which happened because the ignored SIGINT of the parent process was inherited by the child process.
+  - Fix the generated Pyrefly config being invalid on Windows, since backslashes in the absolute paths were interpreted as TOML escape sequences.
+  - Fix the hardcoded reliance on pip when installing dependencies internally by using uv instead.
+  - Fix environment creation silently installing a GIL-enabled Python distribution when Hatch itself runs on a free-threaded build. The distribution matching the running interpreter, such as 3.14t, is now selected.
+  - Fix free-threaded selectors such as 3.14t being rejected by an environment's python option, even though hatch python install 3.14t already accepted them.
+  - Never automatically select a prerelease Python distribution, such as 3.15.0rc1, when falling back to the latest compatible version. A prerelease is still installed when requested explicitly.
+ReleaseNotesUrl: https://github.com/pypa/hatch/releases/tag/hatch-v1.18.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
