@@ -146,8 +146,8 @@ cd winget-pkgs
 ```
 Create a new branch for your feature or bug fix:
 ```
- git checkout -b feature-branch
- ```
+git checkout -b feature-branch
+```
 
 Make your changes and commit them:
 ```
@@ -178,6 +178,8 @@ When you'd like the team to take a look, (even if the work is not yet fully-comp
 
 > [!IMPORTANT]
 > Remember - **changes you make may affect both the Windows Package Manager and the schema support implemented in our validation pipelines!** Because of this, we will treat community PR's with the same level of scrutiny and rigor as commits submitted to the official Windows source by team members and partners.
+
+When you submit a manifest PR, a **GitHub App** automatically runs the [Validation Pipeline](/doc/Validation.md) on your manifest and installers, reporting results directly on the PR's Checks tab. For details on each step and how to resolve failures, see the [Validation documentation](/doc/Validation.md) and [Validation Failure Guide](/doc/ValidationFailureGuide.md).
 
 ### Merge
 

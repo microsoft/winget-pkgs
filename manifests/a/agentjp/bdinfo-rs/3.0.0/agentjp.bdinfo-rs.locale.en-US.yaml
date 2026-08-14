@@ -1,0 +1,121 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: agentjp.bdinfo-rs
+PackageVersion: 3.0.0
+PackageLocale: en-US
+Publisher: agentjp
+PublisherUrl: https://github.com/agentjp
+PublisherSupportUrl: https://github.com/agentjp/bdinfo-rs/issues
+Author: agentjp
+PackageName: bdinfo-rs
+PackageUrl: https://github.com/agentjp/bdinfo-rs
+License: LGPL-2.1
+LicenseUrl: https://github.com/agentjp/bdinfo-rs/blob/HEAD/LICENSE
+ShortDescription: Memory-safe, zero-C-dependency Rust Blu-ray disc analyzer — a drop-in BDInfo report tool for BDMV folders and .iso images.
+Description: 'bdinfo-rs is a memory-safe, statically-linked command-line Blu-ray disc analyzer and a drop-in replacement for the classic BDInfo tool. It scans BDMV folders and .iso images (playlists, clips, M2TS demux) and produces the classic human-readable disc report with per-stream video and audio specs: codecs, measured bitrates, resolution, HDR, Dolby Vision, and HDR10+. It ships as a single static binary with no runtime, no DLLs, and zero C dependencies.'
+Moniker: bdinfo-rs
+Tags:
+- bdinfo
+- bdmv
+- blu-ray
+- cli
+- dolby-vision
+- hdr
+- m2ts
+- memory-safety
+- no-unsafe
+- rust
+ReleaseNotes: |-
+  Release Notes
+  ⚠ BREAKING CHANGES
+  - wasm: the npm package's string-and-rows API is replaced by a structured disc model:
+    inspect and scan resolve to a Disc — a lossless, typed mirror of the analyzer's
+    output (disc metadata, playlists, streams, chapters, read errors) — and the new
+    renderReport re-renders the classic report from it on demand, byte-identical to the
+    CLI's. The report-string and row-tuple exports are gone. Only the npm surface breaks
+    here; the CLI and report contracts are untouched. (#215, #217)
+  - wasm: every entry point takes one ScanOptions object — inspect previously took
+    a bare positional threshold — and an out-of-domain shortPlaylistSeconds (negative,
+    non-finite, or above 86400) now rejects the call instead of silently scanning with the
+    20-second default. (#286)
+  - core: AACS-encrypted discs are detected up front, and the CLI refuses to scan them
+    with the new exit code 4; the library exposes the detection and leaves the decision to
+    the caller. (#246)
+  Added
+  - core: stream scans survive read errors: statistics accumulated before a failing
+    read are kept and reported, with the failure still listed in the WARNING block.
+    --drop-partial (CLI), the keep-partial-scans setting (GUI), and keepPartial (npm)
+    opt back into discarding. (#285)
+  - core: one short-playlist threshold contract on every surface: the valid domain is
+    0 to 86400 seconds, and 0 switches the short rule off. Programmatic surfaces (CLI,
+    npm) reject out-of-domain values; the GUI dialog clamps, and the demo page reverts to
+    its default. (#286)
+  - wasm: a codecs-depth inspect: codecs: true reads just each stream file's head,
+    so every stream carries its full codec description — profile, level, HDR metadata —
+    without the whole-file demux a measured scan costs. (#286)
+  - wasm: reportFileName exposes the sanitized BDINFO.<label>.txt filename the CLI
+    and GUI derive, so browser apps save reports under the identical name. (#286)
+  - wasm: scans list every playlist, each carrying hiddenBy classification metadata
+    instead of being withheld by a filter — filtering is the client's choice — and
+    selection measures an explicit playlist set unfiltered. (#214)
+  - wasm: the demo gains playlist-filter, report-section, and size-format settings.
+    (#214, #223)
+  - wasm: the structured model carries the encrypted-disc flag (isAacsEncrypted).
+    (#247)
+  - cli: playlist visibility switches — --show-short-playlists and
+    --show-looping-playlists with a hidden-playlist hint (#202) — plus
+    --short-playlist-seconds for the cutoff itself and the --no-stream-diagnostics /
+    --no-quick-summary report-section switches (#219), on a compacted single-screen
+    help card (#203).
+  - gui: encrypted discs are flagged and the scan disabled (#248); playlists hidden by
+    the filters can be shown with a transient toggle (#204).
+  - core: the playlist projection, classification, formatting, and selection layer is
+    part of the public library API, shared by all three front-ends. (#216, #261, #263)
+  - core: drive-root volume-label recovery moved into the vfs, covering every
+    front-end. (#262)
+  Fixes
+  - Hardening against hostile disc images from the continuous fuzz campaign: the backup
+    index is used when the primary is unparsable (#245), unknown PMT stream types are
+    skipped instead of aborting the section (#249), UDF CS0 dstring used lengths are
+    clamped (#250), chapter-mark timestamps are masked (#251), read_bits4 zero-fills its
+    past-window tail (#253), and a playlist summary's angle totals are bounded before
+    allocation (#244). Metadata reads are capped, cutting peak scan memory
+    (827918c).
+  - wasm: a shortPlaylistSeconds of zero disables the short-playlist filter instead
+    of reading as the 20-second default. (#252)
+  - packaging: the installer metadata names agentjp as the publisher. (#195)
+  - ci: the 2.0.0 release lanes are repaired — the gui-publish channel matrix, the AUR
+    and Homebrew checksum legs, gui crate packaging, the AUR deploy's source tree, and the
+    gui crate's post-release gaps. (#142, #143, #144, #145, #147, #148)
+  Install bdinfo-rs 3.0.0
+  Install prebuilt binaries via shell script
+  curl --proto '=https' --tlsv1.2 -LsSf https://github.com/agentjp/bdinfo-rs/releases/download/v3.0.0/bdinfo-rs-installer.sh | sh
+  Install prebuilt binaries via powershell script
+  powershell -ExecutionPolicy Bypass -c "irm https://github.com/agentjp/bdinfo-rs/releases/download/v3.0.0/bdinfo-rs-installer.ps1 | iex"
+  Install prebuilt binaries via Homebrew
+  brew install agentjp/tap/bdinfo-rs
+  Download bdinfo-rs 3.0.0
+  ────────────────────────────────────────────────┬───────────────────┬─────────────
+  File                                            │Platform           │Checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  bdinfo-rs-aarch64-apple-darwin.tar.gz           │Apple Silicon macOS│checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  bdinfo-rs-x86_64-apple-darwin.tar.gz            │Intel macOS        │checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  bdinfo-rs-aarch64-pc-windows-msvc.zip           │ARM64 Windows      │checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  bdinfo-rs-x86_64-pc-windows-msvc.zip            │x64 Windows        │checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  bdinfo-rs-aarch64-unknown-linux-musl.tar.gz     │ARM64 MUSL Linux   │checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  bdinfo-rs-x86_64-unknown-linux-musl.tar.gz      │x64 MUSL Linux     │checksum
+  ────────────────────────────────────────────────┴───────────────────┴─────────────
+  Verifying GitHub Artifact Attestations
+  The artifacts in this release have attestations generated with GitHub Artifact Attestations. These can be verified by using the GitHub CLI:
+  gh attestation verify <file-path of downloaded artifact> --repo agentjp/bdinfo-rs
+  You can also download the attestation from GitHub and verify against that directly:
+  gh attestation verify <file-path of downloaded artifact> --bundle <file-path of downloaded attestation>
+ReleaseNotesUrl: https://github.com/agentjp/bdinfo-rs/releases/tag/v3.0.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

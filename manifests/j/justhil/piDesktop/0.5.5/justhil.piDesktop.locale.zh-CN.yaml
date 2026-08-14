@@ -1,0 +1,58 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: justhil.piDesktop
+PackageVersion: 0.5.5
+PackageLocale: zh-CN
+Publisher: pi-desktop
+PublisherUrl: https://github.com/justhil
+PublisherSupportUrl: https://github.com/justhil/pi-app/issues
+PackageName: pi Desktop
+PackageUrl: https://github.com/justhil/pi-app
+License: 免费软件
+ShortDescription: 面向个人开发者的 pi 桌面 GUI
+Description: |-
+  面向个人开发者的 pi 桌面 GUI：在 Electron 里跑 pi SDK，复用 ~/.pi/agent 的认证、配置与会话 JSONL，用时间线、工具卡片、改动审查和扩展兼容层替代终端里那套 TUI 交互。
+
+  核心思想
+  1. 会话以 pi 为准
+  - 对话内容、工具调用记录、分支与压缩信息，都以 pi 写在 ~/.pi/agent/sessions/ 里的 JSONL 会话文件为准。
+  - 桌面端不另建一套「聊天记录数据库」来替代 pi；本地只存窗口布局、最近项目、扩展开关、适配器覆盖等应用偏好。
+  - 好处：终端 pi 与桌面 pi 可以接着同一条会话用；卸载桌面也不丢对话历史。
+  2. 配置与认证与终端共用
+  - 模型账号、settings.json、扩展包列表（packages）、项目下 .pi/ 资源，与你在终端用的 pi 同一套路径与规则。
+  - 桌面在 设置 → Pi 里改的项会写回全局 settings.json（与终端一致）；Skills 开关等也落在全局配置里，而不是只在桌面私有文件里「假启用」。
+  3. 扩展：兼容层 + 适配器，而不是改插件源码
+  - 扩展在终端里常用 TUI（选择、确认、问卷、工具结果卡片、/命令 进配置）。桌面没有终端画布。
+  - 兼容层：在应用内部统一接收扩展的 UI 请求，转成 Electron 对话框、时间线卡片、设置表单。
+  - 适配器：每个扩展一份「在桌面上怎么显示、怎么配、哪些命令特殊处理」的说明（内置在应用里，高级用户可用 JSON 覆盖）。
+  - 原则：不动扩展 npm 包、不 fork pi；差异写在适配器说明和文档里。
+  - 给 AI 写适配器：见仓库 doc/（adapter-authoring-guide.md 可整份发给模型定制 adapter.json）。
+Tags:
+- pi
+- pi-agent
+- 人工智能
+- 代码
+- 大语言模型
+- 智能体
+- 编程
+- 聊天机器人
+- 自主智能
+ReleaseNotes: |-
+  pi Desktop v0.5.5
+  修复
+  - #40 模型目录与 Pi CLI 不一致：设置页现在通过当前 Pi SDK 读取完整模型目录；即使 models.json 不存在、模型只保存在 models-store.json，或配置文件只有 overrides，供应商与模型仍会正常显示，无需复制或重命名文件
+  - 模型配置保存丢失高级字段：编辑基础字段后，不再删除 Pi 支持的 oauth、headers、compat、cost、modelOverrides，以及 thinkingLevelMap 中明确设置的 null；未来 SDK 新增且校验通过的字段也会原样保留
+  - 模型配置写入与重载诊断：损坏的原配置不会被草稿覆盖，非法配置不会落盘；写入成功但运行中的 Worker 重载失败时会单独报告，避免把部分成功误报为完整成功
+  优化
+  - Pi 0.83 运行时兼容：内置 @earendil-works/pi-coding-agent 升级至 0.83.0，模型切换、可用模型目录与配置重载统一使用 Pi 的 ModelRuntime，修复使用新版全局 / 用户 SDK 时的模型列表与刷新异常
+  - 模型目录与用户配置分离：设置页可浏览 SDK 完整目录，但只保存用户实际编辑的 models.json；缓存目录不会被反写进配置，重复模型也会自动去重
+  - 模型配置安全性：保存继续由 Main 进程负责 SDK 校验、同目录临时文件与原子替换；API key 不会出现在错误提示或测试快照中
+  注意
+  - 设置页中的 catalog-only 供应商和模型默认只读；需要自定义时请先添加供应商或把模型加入用户配置
+  - 模型管理页展示完整目录，Composer 仍只显示 Pi SDK 明确认定为可用的模型，两处列表用途不同
+
+  安装包见本页 Assets。更新说明以本正文为准（应用内「发现新版本」弹窗会展示）。
+ReleaseNotesUrl: https://github.com/justhil/pi-app/releases/tag/v0.5.5
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

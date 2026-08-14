@@ -1,0 +1,88 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: axpnet.AeroFTP
+PackageVersion: 4.1.7
+PackageLocale: en-US
+Publisher: axpnet
+PublisherUrl: https://github.com/axpnet
+PublisherSupportUrl: https://github.com/axpnet/aeroftp/issues
+Author: axpnet
+PackageName: AeroFTP
+PackageUrl: https://github.com/axpnet/aeroftp
+License: GPL-3.0
+LicenseUrl: https://github.com/axpdev-lab/aeroftp/blob/HEAD/LICENSE
+ShortDescription: A modern, multi-protocol file manager and FTP client with integrated AI, cloud sync, and military-grade encryption.
+Description: |-
+  AeroFTP is an open-source, multi-protocol file manager built with Tauri 2 (Rust + React 18 + TypeScript).
+  It supports 16 protocols (FTP, FTPS, SFTP, WebDAV, S3, Google Drive, Dropbox, OneDrive, MEGA, Box, pCloud, Azure Blob, 4shared, Filen, Zoho WorkDrive, and Cryptomator vaults),
+  features an AI assistant with 45 tools and 15 LLM providers, military-grade encrypted vaults (AES-256-GCM-SIV + Argon2id),
+  bidirectional real-time sync, a built-in code editor, SSH terminal, and media player with visualizers.
+  Available in 47 languages with 4 themes.
+Moniker: aeroftp
+Tags:
+- cloud-storage
+- encryption
+- file-manager
+- file-transfer
+- ftp
+- ftp-client
+- multi-protocol
+- rust
+- s3
+- sftp
+- sync
+- tauri
+- webdav
+ReleaseNotes: |-
+  [4.1.7] - 2026-08-08
+  Summer Release: AeroRsync Extended Attributes, a Rebuilt Duplicate Finder, and Two Independent Pre-Tag Audits
+  The release that goes looking for the bugs that do not announce themselves. AeroRsync gains extended attributes end to end against stock rsync, -X is on by default on Unix, and the file-list, out-of-band and oversized-datum paths that carry them are bounded against a hostile peer. The Find Duplicates dialog is rebuilt around the thing it was missing: the choice of which copy to keep, with real hashes, real distances (the fuzzy "distance" was a hash value, so any sort by similarity was meaningless), live scan progress, thumbnails and per-file sizes. Seventeen provider trash views become one sortable table. A hostile-name sweep across every writable provider profile found six defects, four of which could make sync --delete remove the user's own local files, and one XML entity bug that mangled any filename with & next to a space in every listing. On Linux, six destructive actions had been asking a confirmation nobody ever saw, because WebKitGTK does not implement window.confirm: on that platform an account could be deleted with no question asked. The Snap stopped shipping a payload its own base cannot load, a break that had gone out for roughly thirty releases, and the invariant is now proven before publishing rather than assumed. Two independent adversarial audits were run before this tag, the second reviewing all 333 code candidates since v4.1.6; both are recorded in the repository, findings and accepted debt included. 47 languages, with about 5,400 strings restored word by word after a mechanical pass had stripped their diacritics.
+  Added
+  - AeroRsync preserves user.* extended attributes end to end, verified against stock rsync 3.2.7, with -X enabled in production on Unix. The work landed in stages: the file-list extended-attribute block, the out-of-band path for attributes too large to fit in an entry, then reading and applying local user.* when a session opts in.
+  - Find Duplicates gives the choice of which copy to keep back to the user. Any copy can be ticked, and a selection that would leave a group with no copy is confirmed by name rather than blocked. With it: per-file byte sizes, spread sorting, a 128-bit hash readout, a thumbnail on every row, and the modal scrollbar that a WebKitGTK workaround had been suppressing.
+  - Find Duplicates shows the hashes, sorts by similarity and takes a cutoff. The Fuzzy cutoff had never reached the engine, so the per-type defaults were the only thing anyone could actually run.
+  - Copy and open buttons on every duplicate row. The Copy glyph in that dialog was decorative, so comparing two candidates meant reading the path off the screen.
+  - Compare and Find Duplicates report files, folders, bytes, depth and elapsed time while they scan. Compare needed no new backend: the events had been emitted since the recursive scan landed and nothing was listening.
+  - One sortable trash table for all seventeen providers, with a Type column, aligned name header, single-line timestamps, Shift ranges, Ctrl adding and a rubber band, in a shared component instead of seventeen copies with no sorting at all.
+  - Calculate Size, Find Duplicates and Disk Usage run on the directory you are in, from the empty space of the panel or from any breadcrumb segment including the collapsed ancestors, instead of only from a folder row one level up (@EhudKirsh, #347).
+  - My Servers says which providers encrypt on this device, reading the same list as the Add Service badge, with a test holding both surfaces to it. MEGA S4 stays unbadged on purpose: it is S3 and the server holds the keys.
+  - Image previews on the remote panel, plus a shared LRU thumbnail cache bounded in bytes and keyed by size and mtime, which changing directory no longer clears.
+  - The server-side trash is reachable from the CLI (@EhudKirsh, #397).
+  - The Checksum tab says what a backend can hash before you click, and hashing works inside the Overlays Path again (@EhudKirsh, #347).
+  - Blomp is a production provider (40 GB free, OpenStack Swift), after its API turned out to work: the 403 that had it parked is only on the account listing, which the client never needs.
+  - The status bar describes the page you are on, and 📜 Log joins ↑↓ Queue (@EhudKirsh, #347).
+  Changed
+  - The build toolchain moved to TypeScript 7. A release-note item rather than a lockfile detail, because tsc sits on the production build chain.
+  - The README provider logo grid is generated from the catalog, so it cannot drift from the other two public tables or list a company twice (@EhudKirsh, #347).
+  - The company is called Drime, not Drime Cloud, and the catalogue had it inverted as though the drive were a product under a parent. README, docs/PROVIDERS.md and cli_catalog.json are regenerated from the corrected entry (@EhudKirsh, #347).
+  - TAB.DIGITAL is capitalised on the documentation site too, and the suggested profile name is a brand name rather than an internal slug (@EhudKirsh, #347).
+  - Discover no longer promises a perpetual free tier on three providers that only offer a trial. AWS S3 and Azure Blob give 5 GB for 12 months, Alibaba OSS 1 to 3 months, and Blomp's free quota is corrected to 40 GB.
+  - One glyph and one order per connection method, shared by the My Servers table and Quick Connect: inside the table, API and S3 had been drawing the same glyph, separated only by a colour no legend explains (@EhudKirsh, #347).
+  - The pricing filter on Add Service is a preference again, not a per-visit choice (@EhudKirsh, #274).
+  Fixed
+  - A filename with & next to a space was mangled in every listing, so a GET of the displayed name returned 404 and sync --delete offered to delete the real local file. Seventeen XML readers now keep entity-adjacent fragments, re-proved live over MinIO and Nextcloud with zero delete_local.
+  - A hostile-name sweep across every writable provider profile found six defects, four of which could make sync --delete remove real local files: Azure listed nested folders as empty, every strict S3 endpoint (AWS, B2, R2, Alibaba, Storj, Tencent, Oracle, MEGA) could not create a folder at all, FileLu WebDAV files would not download, and FileLu S3 returned double-encoded names. 36 providers now pass end to end.
+  - Six destructive actions asked a confirmation the user never saw. WebKitGTK does not implement the script dialogs, so window.confirm returns without drawing and the caller proceeds as if the user had agreed: on Linux an account went with nothing asked. H18 of the v2.6.4 audit had regressed; it is a test now.
+  - The Find Duplicates delete confirmation could not be answered: the second asker sat at the same z-index as the finder, under its click-swallowing backdrop. The app-wide confirm now sits one explicit scale above every modal tier.
+  - The fuzzy duplicate distance was a hash value, not a distance, on the raster and text arms both, so a pair two bits apart could report billions.
+  - AeroSync stopped deleting the Plan and Sync settings on a tab switch. The tabs render conditionally, so leaving one unmounted it and React dropped all fourteen state values; they now live in a store owned by the dialog (@EhudKirsh, #347).
+  - AeroSync could not export a template in any of its four formats, and the titlebar would not drag from its right half (@EhudKirsh, #511, #514).
+  - aeroftp-cli find reported status: ok with zero matches on a directory full of files whenever --profile was used: with a profile the positionals shift left, so the pattern arrived in path and the search ran on path's own default. A silent wrong answer, not a visible failure.
+  - aeroftp-cli connect reported a plausible port and an empty username instead of the real ones, because it rebuilt them by parsing the human-readable server_info text.
+  - The Tauri commands that block stopped doing it on the window's thread. A synchronous #[tauri::command] runs on the GTK thread, so list_subdirectories walking a dead network mount froze the whole window; the scoping count was wrong too, 82 synchronous out of 853 rather than 38 (#517).
+  - Icons and Large Icons cropped every thumbnail to a square instead of showing the image, and Large Icons looked up remote paths on the local disk (@EhudKirsh, #347).
+  - Provider logos work as user avatars and are no longer cropped (@EhudKirsh, #550).
+  - A dropped profile lands on the blue line instead of one row past it, a stale text selection no longer locks a row in place, and a drag under a protocol chip reorders the visible list rather than the wrong vault slots (@EhudKirsh, #453).
+  - Zoho WorkDrive moves a file or folder across directories again (@EhudKirsh, #451).
+  - Jottacloud delete and Move to Trash work end to end, confirmed against a live account, and a folder deleted on MEGAcmd goes to the Rubbish Bin like a file does (@EhudKirsh, #397).
+  - Nextcloud features are detected by asking the server, not by how the profile URL was typed.
+  - An exported profile carries the OAuth app that refreshes its token and the region that picks its data centre; a 4shared profile carries its own token and its own app.
+  - AeroSync Compare stopped reporting "no differences" over a folder that has them, and Filen stopped dating every upload at the moment it was transferred (@EhudKirsh, #347).
+  - The file picker that did nothing now says why, in all 68 places (#510).
+  - Add Service keeps the search term, the pricing filter and every section when switching between grid and table.
+  - A NAS that is too old for zstd gets real delta sync again: one predicate was asking the wrong question. We were also advertising four compressors while driving two, and ranking one we cannot drive above one we can.
+  - The Snap stopped shipping a payload its own base cannot load (GLIBC_2.38 against a core22 base, out since v3.7.2), the Snap GUI paints again under strict confinement, and both invariants are now proven in CI, one by an ABI gate derived from the base snap itself and one by a captured frame (#460, #462).
+ReleaseNotesUrl: https://github.com/axpdev-lab/aeroftp/releases/tag/v4.1.7
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
