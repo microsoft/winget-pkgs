@@ -1,0 +1,109 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: RaspberryPiFoundation.RaspberryPiImager
+PackageVersion: 2.0.11
+PackageLocale: en-US
+Publisher: Raspberry Pi Ltd
+PublisherUrl: https://github.com/raspberrypi
+PublisherSupportUrl: https://github.com/raspberrypi/rpi-imager/issues
+Author: Raspberry Pi Ltd
+PackageName: Raspberry Pi Imager
+PackageUrl: https://github.com/raspberrypi/rpi-imager/
+License: Apache-2.0
+LicenseUrl: https://github.com/raspberrypi/rpi-imager/blob/HEAD/license.txt
+Copyright: Copyright (C) 2026 Raspberry Pi Ltd
+CopyrightUrl: https://github.com/raspberrypi/rpi-imager/blob/qml/license.txt
+ShortDescription: Raspberry Pi Imager is the quick and easy way to install Raspberry Pi OS and other operating systems to a microSD card, ready to use with your Raspberry Pi.
+Description: |-
+  Raspberry Pi Imager is the quick and easy way to install Raspberry Pi OS and other operating systems to a microSD card, ready to use with your Raspberry Pi.
+
+  Download and install Raspberry Pi Imager on a computer with an SD card reader. Insert the microSD card you’ll use with your Raspberry Pi into the reader and run Raspberry Pi Imager.
+Moniker: rpi-imager
+Tags:
+- flash
+- imager
+- raspberrypi
+- sd
+ReleaseNotes: |-
+  What's changed
+  - OS Customisation:
+    - Add the rpi-preseed first-boot customisation format, and list it as a
+      valid init_format in the schema notes.
+    - rpi-preseed: always add the account to the 'sudo' group.
+    - cloud-init: write sudo: null when the user declines passwordless sudo.
+      A singular user: block is merged over the distro default_user, which
+      raspberry-pi-os populates with passwordless sudo, so omitting the key
+      granted it regardless of the user's choice; null suppresses the rules
+      while keeping 'sudo' group membership, so the account is prompted for one.
+    - Centralise credential derivation in CustomisationGenerator and hash
+      credentials in C++ before persisting them.
+    - Verify the device kept the customisation files after writing.
+    - UI: keep customisation steps centre-middle; drop the unused ImageOptions
+      enum; bind SSH key row data; allow query parameters on custom manifest
+      URLs.
+  - Fastboot (Compute Module):
+    - Add an Erase command for 'Format'.
+    - Verify device identity before treating a target as a Pi.
+    - Align stage() tests and docs with the download verb.
+  - Write reliability:
+    - Support multi-frame .img.zst images (use ZSTD_findDecompressedSize).
+    - Linux/Windows: take an exclusive lock on drive open. On Windows, hold
+      volume locks rather than deleting drive letters, only remove removable
+      mountpoints, retry the exclusive open before falling back to shared, and
+      flush the filesystem to media before writing the partition table.
+    - macOS: run DiskArbitration on the main run loop with blocking calls, and
+      move the nested run loop onto worker threads.
+  - Embedded (Raspberry Pi network installer):
+    - Build a dedicated Qt configured -no-opengl -qpa linuxfb -no-dbus
+      -no-feature-icu. The pi-gen-micro netboot image carries no Mesa or X11
+      (far too large for a network-loaded image), no session bus, and none of
+      the languages that need ICU. The package had drifted onto the desktop Qt
+      and so linked libEGL/libGL/libX11 and libQt6DBus -- absent from the image
+      -- and could not load on the target.
+    - Build the application without QtDBus for embedded; its DBus users (portal
+      file dialog, NetworkManager WiFi backend, Pi Connect URI handler) are
+      unusable on a busless image and are compiled out via QT_DBUS_LIB guards.
+    - Assemble the .deb with debhelper so debian/control is the single source of
+      dependencies and metadata and md5sums are generated; trim Depends to the
+      minimal host-provided set (no libegl1/libgl1/libx11-6/libsystemd0, which
+      apt would otherwise pull -- Mesa and X11 included -- into the image).
+    - Bake an $ORIGIN-relative rpath at build time (was a leaked build-host
+      path), dereference the bundled fontconfig config, and drop the stale
+      vendored ICU handling.
+  - Build / packaging:
+    - Rootless multi-arch (amd64/arm64/armhf) release pipeline: every arch,
+      the host included, builds inside its bookworm mmdebstrap chroot; there is
+      no host-native build path (a package built against the host's libraries
+      is not the package it claims to be).
+    - Desktop and CLI AppImages are now self-contained: bundle the transitive
+      library closure of the staged AppDir (via readelf, so it also works for
+      foreign-architecture AppDirs), which was previously taken from the host
+      and left arm64/armhf incompletely bundled. Declare the genuinely
+      host-coupled libraries in debian/control.
+    - Build Qt with -no-feature-icu across desktop/CLI/embedded; drop the
+      JPEG 2000 image plugin; collect the source .buildinfo.
+    - liburing: probe for the 64-bit user_data API (added in 2.2) before
+      enabling io_uring, so an older build environment falls back to
+      synchronous writes instead of failing to link.
+    - Vendor curl/libarchive/libusb/nghttp2/xz as git submodules.
+    - Reproducibility and hygiene: normalise mtimes; generate version files in
+      an explicit build override; prune qmlls and performance profiles from the
+      packaged tree; stop deleting the screenshot; ship the fastboot udev rule
+      inside the .debs; assorted amd64/arm64 packaging fixes.
+  PRs
+  - Backport customization, font logging, and macOS DA fixes from dev/tdewey/2.1 by @tdewey-rpi in https://github.com/raspberrypi/rpi-imager/pull/1652
+  - Add rpi-preseed support by @tdewey-rpi in https://github.com/raspberrypi/rpi-imager/pull/1659
+  - Fix Windows device size truncation and backup boot sector mismatch by @elibosley in https://github.com/raspberrypi/rpi-imager/pull/1679
+  - fix(windows): classify UASP storage as USB by @elibosley in https://github.com/raspberrypi/rpi-imager/pull/1682
+  - perf(extract): coalesce archive blocks into large writes by @elibosley in https://github.com/raspberrypi/rpi-imager/pull/1681
+  - 2.0.11-rc2: Bugfixes by @tdewey-rpi in https://github.com/raspberrypi/rpi-imager/pull/1674
+  - 2.0.11-rc3 fixes by @tdewey-rpi in https://github.com/raspberrypi/rpi-imager/pull/1688
+  - Linux Build docs improvements by @tdewey-rpi in https://github.com/raspberrypi/rpi-imager/pull/1691
+  - Fixup Linux build on newer hosts by @tdewey-rpi in https://github.com/raspberrypi/rpi-imager/pull/1692
+  New Contributors
+  - @elibosley made their first contribution in https://github.com/raspberrypi/rpi-imager/pull/1679
+  Full Changelog: https://github.com/raspberrypi/rpi-imager/compare/v2.0.10...v2.0.11
+ReleaseNotesUrl: https://github.com/raspberrypi/rpi-imager/releases/tag/v2.0.11
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
