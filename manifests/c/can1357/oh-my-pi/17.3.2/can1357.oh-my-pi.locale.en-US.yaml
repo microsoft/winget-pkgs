@@ -1,0 +1,64 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: can1357.oh-my-pi
+PackageVersion: 17.3.2
+PackageLocale: en-US
+Publisher: Can Bölük
+PublisherUrl: https://can.ac/
+PublisherSupportUrl: https://github.com/can1357/oh-my-pi/issues
+Author: Can Bölük
+PackageName: oh-my-pi
+PackageUrl: https://omp.sh/
+License: MIT
+LicenseUrl: https://github.com/can1357/oh-my-pi/blob/HEAD/LICENSE
+Copyright: |-
+  Copyright (c) 2025 Mario Zechner
+  Copyright (c) 2025-2026 Can Bölük
+ShortDescription: ⌥ AI Coding agent for the terminal — hash-anchored edits, optimized tool harness, LSP, Python, browser, subagents, and more
+Description: |-
+  omp is a terminal-first coding agent that runs on your machine, talks to any provider, and treats sessions like git branches.
+  omp (pronounced “oh-em-pi”, binary omp) is a fork of Mario Zechner’s Pi. It runs as a single Bun process, drives any model provider you have credentials for, and ships a flat tool surface the model uses to read code, run commands, edit files, drive a debugger, and spawn subagents that coordinate over an in-process IRC bus.
+  Sessions persist as JSONL under ~/.omp/agent/sessions/. You resume, fork, branch, and share them. Settings, credentials, plugins, and caches all live under ~/.omp/agent/. Nothing leaves the machine unless you call a tool that does.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  @oh-my-pi/pi-ai
+  Fixed
+  - Dropped unsigned thinking blocks from Antigravity Claude requests instead of sending them without a signature, preventing HTTP 400 responses when resuming sessions or switching models.
+  - Classified Antigravity HTTP 429 responses from structured google.rpc.ErrorInfo reasons (QUOTA_EXHAUSTED, RATE_LIMIT_EXCEEDED, and INSUFFICIENT_G1_CREDITS_BALANCE), using retry delays of five minutes or longer to distinguish rotatable quota windows from transient throttling instead of relying only on message regexes.
+  Removed
+  - Removed the Antigravity identity-prompt injection (ANTIGRAVITY_SYSTEM_INSTRUCTION and shouldInjectAntigravitySystemInstruction): Cloud Code Assist accepts arbitrary system instructions on gemini-3.x and Claude routes (verified live), and the injected stub never matched the real client's system prompt anyway. User system prompts are now sent unmodified (still tagged role: "user").
+  - Fixed Antigravity auto mode not failing over to the sandbox endpoint when the daily endpoint returned a thinking-only STOP, which caused Advisor turns to be falsely recorded as empty-response failures (#8480).
+  @oh-my-pi/pi-catalog
+  Added
+  - Added support for the deepseek-v4-pro:preview model
+  - Added support for the gemini-3.7-flash model
+  - Added dynamic Antigravity client-version discovery from the official update manifest (darwin/arm64 channel), so version-gated models appear without a code change; PI_AI_ANTIGRAVITY_VERSION remains available as an override.
+  Fixed
+  - Fixed Antigravity discovery missing Gemini 3.7 Flash: Cloud Code Assist gates newer models on the client version in the User-Agent, and the pinned antigravity/hub/2.1.4 was too old. The user-agent now matches the captured 2.8.0 client format (antigravity/hub/2.8.0 (aidev_client; os_type=darwin; arch=arm64; cl=963137146)); os_type/arch stay pinned to the darwin/arm64 reference client. Overridable via PI_AI_ANTIGRAVITY_VERSION / PI_AI_ANTIGRAVITY_CL / PI_AI_ANTIGRAVITY_OS / PI_AI_ANTIGRAVITY_ARCH.
+  Removed
+  - Removed ANTIGRAVITY_SYSTEM_INSTRUCTION from wire/gemini-headers; the Antigravity transport and web search no longer inject a fake identity prompt.
+  @oh-my-pi/pi-coding-agent
+  Fixed
+  - Fixed the parent TUI stalling after a subagent submits its result until terminal focus or resize wakes the event loop (#8462).
+  - Fixed omp update misclassifying foreign npm/bun bin aliases while preserving package-manager ownership for globally linked checkouts (#8468).
+  - Fixed read hashline headers collapsing nested in-workspace paths to the bare basename, which let a same-basename file at the session cwd capture a verbatim follow-up edit and deterministically reject it with hash is not from this session. Headers now retain the workspace-relative path (e.g. [src/settings.json#0063]) (#8482).
+  @oh-my-pi/pi-utils
+  Fixed
+  - Fixed fetchWithRetry() aborts during retry backoff to preserve the documented "Request was aborted" error contract (#8450).
+  Full Changelog: https://github.com/can1357/oh-my-pi/compare/v17.3.1...v17.3.2
+ReleaseNotesUrl: https://github.com/can1357/oh-my-pi/releases/tag/v17.3.2
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://omp.sh/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
