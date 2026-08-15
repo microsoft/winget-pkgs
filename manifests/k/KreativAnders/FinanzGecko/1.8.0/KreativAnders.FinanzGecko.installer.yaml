@@ -1,0 +1,33 @@
+# Installer-Manifest (winget). Platzhalter werden von render.sh ersetzt.
+# Schema: https://aka.ms/winget-manifest.installer.1.6.0.schema.json
+PackageIdentifier: KreativAnders.FinanzGecko
+PackageVersion: 1.8.0
+
+# Inno Setup — siehe packaging/windows/finanzgecko.iss. NICHT auf "exe" ändern:
+# nur mit "inno" kennt winget die stillen Schalter (/VERYSILENT /NORESTART) und
+# kann sauber deinstallieren.
+InstallerType: inno
+
+# finanzgecko.iss setzt DefaultDirName={autopf} und verlangt damit Adminrechte.
+Scope: machine
+InstallModes:
+  - interactive
+  - silent
+  - silentWithProgress
+
+# Inno hängt an die AppId aus der .iss die Endung "_is1" an; das ist der
+# Uninstall-Registry-Key, über den winget die Installation wiederfindet.
+# Ändert sich AppId in finanzgecko.iss (dort ausdrücklich verboten), muss das
+# hier mitgezogen werden.
+ProductCode: '{7C1E9A42-3B6D-4F58-9E2A-8D5C41B0F7A3}_is1'
+UpgradeBehavior: install
+
+ReleaseDate: 2026-08-15
+
+Installers:
+  - Architecture: x64
+    InstallerUrl: https://github.com/kreativ-anders/finanzgecko/releases/download/v1.8.0/FinanzGecko-1.8.0-Setup.exe
+    InstallerSha256: 85B733C420163EA194A66C3EE5B882FA150D17BD8A394FA6E699C34C0650E38D
+
+ManifestType: installer
+ManifestVersion: 1.6.0
