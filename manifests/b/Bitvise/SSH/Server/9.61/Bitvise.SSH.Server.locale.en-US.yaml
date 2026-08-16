@@ -1,0 +1,80 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Bitvise.SSH.Server
+PackageVersion: "9.61"
+PackageLocale: en-US
+Publisher: Bitvise Limited
+PublisherUrl: https://bitvise.com/
+PublisherSupportUrl: https://bitvise.com/contact
+PrivacyUrl: https://bitvise.com/privacy-policy
+Author: Bitvise Limited
+PackageName: Bitvise SSH Server
+PackageUrl: https://bitvise.com/ssh-server
+License: Proprietary
+LicenseUrl: https://bitvise.com/ssh-server-license
+Copyright: Copyright (C) 2000-2026 by Bitvise Limited.
+CopyrightUrl: https://bitvise.com/terms-of-use
+ShortDescription: Secure file transfer and terminal shell access for Windows
+Description: |-
+  Our SSH server supports all desktop and server versions of Windows, 32-bit and 64-bit, from Windows XP SP3 and Windows Server 2003, up to the most recent – Windows 11 and Windows Server 2025.
+  Bitvise SSH Server includes the following:
+  - SFTP server: Secure file transfer using SFTP - compatible with a wide variety of clients
+  - SCP server: Secure file transfer using SCP - compatible with command line and graphical clients
+  - FTPS server: Secure file transfer using FTP over TLS/SSL - compatible with secure FTPS clients
+  - SSH server: Secure remote access via console - vt100, xterm and bvterm are supported
+  - Secure remote access via GUI - Remote Desktop or WinVNC required
+  - Secure, effortless Git integration
+  - Secure TCP/IP connection tunneling (port forwarding)
+Moniker: bitvisesshserver
+Tags:
+- sftp
+- ssh
+- sshd
+Agreements:
+- AgreementLabel: End User License Agreement (EULA)
+  AgreementUrl: https://bitvise.com/ssh-server-license
+ReleaseNotes: |-
+  - General:
+    - The SSH Server is now more defensive against processing patterns which could cause the SSH Server or its subsystems to allocate large amounts of memory.
+  - FTPS:
+    - Fixed issue which can allow hijack of FTPS data connections by an attacker on the network path. Users who enable FTPS should update.
+  - Authentication:
+    - If Windows stalls during Windows account lookup, this would previously stall all connections that require Windows account lookup. The SSH Server cannot fully mitigate blockage due to stalling Windows APIs, but the impact of a single stalled lookup is now less system-wide, and lookup for independent accounts can proceed concurrently.
+  - Auto-execute commands:
+    - Version 9.51 introduced configurable limits for concurrent execution of custom commands, including On-upload command, Connection on-logon command, On-disconnect command, Windows on-logon command, and Windows on-logoff command. In previous 9.5x versions, these limits were applied incorrectly to also count against commands not yet started, which were still in queue to execute. It was possible for the limits to be exceeded solely by the queued commands. This would cause execution of custom commands to completely stall. Connections that had already disconnected would remain stuck, waiting for command execution and cleanup.
+      Auto-execute command limits are configured in Advanced settings > Server > Auto-execute commands. Default limits could most readily cause deadlock on servers with a low amount of RAM. If you are using a 9.5x version with custom commands, we recommend updating, while keeping configured limits. If you continue to use a previous 9.5x version, maximally relax the limits under Auto-execute commands.
+    - Improvements to child process management and monitoring.
+  - Control Panel and Settings:
+    - When the SSH Server is stopped, the SSH Server Control Panel would previously immediately clear any displayed notifications about warnings and errors. Existing notifications of this type now continue to be displayed until the SSH Server is next started.
+    - Ctrl+Backspace is now more consistently supported across input elements.
+    - The Comment field for account settings entries is now also available in Easy settings.
+    - UI improvements, including for issues related to dark mode.
+    - Tightened information that is sent to delegated administrator clients without full administrative access.
+  - Scriptable settings:
+    - A new utility PowerShell script, PubKeyMaint.ps1, is available in the SSH Server installation directory. An administrator can run it, or configure it as a scheduled task, to scan the SSH Server's log files and remove client authentication public keys in SSH Server settings which have not been used for a specified number of days.
+  - Logging:
+    - The SSH Server now logs elapsed times for all SSH channels, including port forwarding channels.
+    - Filenames for archived log files now include a dash between the SSH Server instance name and timestamp, consistent with the same change for log files in 9.51.
+  - SSH:
+    - Cisco clients advertise support for the SSH protocol extension SSH_MSG_EXT_INFO, but incorrectly disconnect if extension information contains binary data. The delay-compression extension sent by the SSH Server contains binary data. The SSH Server will now avoid sending this extension for Cisco clients.
+    - Tightened environment variable handling for clients which are permitted to set environment variables for terminal shell and exec requests. Permission to set environment variables is disabled by default for virtual accounts, but enabled for Windows accounts.
+  - Port forwarding:
+    - When accepting port-forwarded connections using server-to-client port forwarding (reverse tunneling), the SSH Server would previously impose a fixed limit of 1 connection per listening socket per 200 ms. This would adversely affect normal use, but could still overburden the server if accept rules were taking a long time to process.
+      The SSH Server now imposes no accept delay under normal load, and implements throttling if verification for accepted connections is not keeping up with the number of connections that arrive.
+  - File transfer:
+    - When opening or creating a file on a mount point of type Another SFTP server, the SSH Server now strips access flags not supported by the other SFTP server. In previous versions, such access flags could cause file transfer actions to fail.
+    - The SSH Server would incorrectly manipulate an SFTP SACL if sent by client. This could cause an incorrect DACL or SACL being set. Fixed.
+    - The SSH Server could incorrectly continue an SCP transfer for some errors received from the SCP client. Fixed.
+    - The SSH Server did not correctly throttle some potentially expensive file transfer operations. Fixed.
+ReleaseNotesUrl: https://www.bitvise.com/ssh-server-version-history-9-5#961
+PurchaseUrl: https://bitvise.com/ssh-server-pricing
+Documentations:
+- DocumentLabel: Printable Documentation
+  DocumentUrl: https://bitvise.com/printable-docs/ssh-server-doc-printable
+- DocumentLabel: Users' Guide
+  DocumentUrl: https://bitvise.com/ssh-server-users-guide
+- DocumentLabel: FAQ
+  DocumentUrl: https://bitvise.com/ssh-server-usage-faq
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

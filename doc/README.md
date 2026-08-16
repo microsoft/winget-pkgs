@@ -9,14 +9,17 @@ A few different tools are available to help you author a manifest.
 - Other WinGet Manifest Creators developed by the community:
   - [Komac - Community Manifest Creator](https://github.com/russellbanks/Komac) (maintained by [**@russellbanks**](https://github.com/russellbanks))
 
-> [!Note]
-> Only one manifest may be submitted per PR.
+If this is your first manifest submission, start with the [first-time contributor checklist](FirstContribution.md).
+
+> [!NOTE]
+> Only one package version (one multi-file manifest set) may be submitted per PR.
+> Non-manifest changes such as `README.md`, `doc/`, spelling updates, and tooling updates must be submitted in a separate PR.
 
 ## Testing a Manifest
 
 Now that you have authored your manifest, you should make sure it works as expected.
 
-> [!Note]
+> [!NOTE]
 > You will need to run `winget settings --enable LocalManifestFiles` in an administrative shell before working with local manifests.
 
 ### Locally
@@ -53,10 +56,11 @@ To submit a package to this repository, you should follow these steps:
 1. Follow the [Contributing](../CONTRIBUTING.md) guidelines.
 2. [Author](Authoring.md) a Manifest.
 3. [Test](#testing-a-manifest) your manifest.
-4. [Submit](#submit-your-pr) your pull request (PR).
-5. Respond to any feedback in your PR.
+4. If this is your first time submitting a manifest, review the [first-time contributor checklist](FirstContribution.md).
+5. [Submit](#submit-your-pr) your pull request (PR).
+6. Respond to any feedback in your PR.
 
-> [!Note]
+> [!NOTE]
 > Please check the package's manifest you intend to submit does not already exist in the repository, and there are no open PRs for it in order to avoid duplicates.
 
 ## Submit your PR
@@ -66,18 +70,21 @@ Once you have verified your manifest, it's time to submit a PR. Place your manif
 ```
 manifests\<first lower case letter of publisher>\<publisher>\<package>\<version>\
 ```
+
+Your PR must be limited to a single package version. If you also need to update documentation, spelling files, repository tooling, or other non-manifest content, open a separate PR for those changes.
+
 ### Validation Process
 
-Your PR will go through a validation process. The core team or the Microsoft bot (BOT) will use  [labels](https://docs.microsoft.com/windows/package-manager/package/winget-validation#pull-request-labels)  to assist during the process. In case of a failure, the BOT will suggest the problem with the submission and assign the PR back to you.
+Your PR will go through a validation process. The core team or the Microsoft bot (BOT) will use [labels](https://docs.microsoft.com/windows/package-manager/package/winget-validation#pull-request-labels) to assist during the process. In case of a failure, the BOT will suggest the problem with the submission and assign the PR back to you.
 
 #### Community Repository Policies
 
 The WinGet community repository has a set of policies restricting the use of certain manifest fields in PRs. These policies primarily affect optional metadata fields restricted to verified developers. Some fields are automatically populated during our validation process like the fields for icons.
->[!Note]
->The verified developer workflow is still in progress.
+> [!NOTE]
+> The verified developer workflow is still in progress.
 
 ### Respond to PR feedback
 
-If your PR has been assigned to you, a timer will be triggered. You will have 7 days to resolve the issue, or the BOT will automatically close the PR.
+If your PR has been assigned to you, a timer will be triggered. If there is no activity for 5 days, a `No-Recent-Activity` label will be added. If there is still no activity after a further 3 days, the PR will be automatically closed.
 
-Submissions to the repository are reviewed by Windows Package Manager administrators and/or community moderators. To help identify these individuals, we have provided a  [Public Service Announcement](https://github.com/microsoft/winget-pkgs/issues/15674).
+Submissions to the repository are reviewed by Windows Package Manager administrators and/or community moderators. These individuals are identified in [Moderation](Moderation.md#moderators).

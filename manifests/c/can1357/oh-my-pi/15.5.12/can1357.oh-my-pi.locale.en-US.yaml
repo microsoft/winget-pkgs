@@ -1,0 +1,68 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: can1357.oh-my-pi
+PackageVersion: 15.5.12
+PackageLocale: en-US
+Publisher: Can Bölük
+PublisherUrl: https://can.ac/
+PublisherSupportUrl: https://github.com/can1357/oh-my-pi/issues
+Author: Can Bölük
+PackageName: oh-my-pi
+PackageUrl: https://omp.sh/
+License: MIT
+LicenseUrl: https://github.com/can1357/oh-my-pi/blob/HEAD/LICENSE
+Copyright: |-
+  Copyright (c) 2025 Mario Zechner
+  Copyright (c) 2025-2026 Can Bölük
+ShortDescription: ⌥ AI Coding agent for the terminal — hash-anchored edits, optimized tool harness, LSP, Python, browser, subagents, and more
+Description: |-
+  omp is a terminal-first coding agent that runs on your machine, talks to any provider, and treats sessions like git branches.
+  omp (pronounced “oh-em-pi”, binary omp) is a fork of Mario Zechner’s Pi. It runs as a single Bun process, drives any model provider you have credentials for, and ships a flat tool surface the model uses to read code, run commands, edit files, drive a debugger, and spawn subagents that coordinate over an in-process IRC bus.
+  Sessions persist as JSONL under ~/.omp/agent/sessions/. You resume, fork, branch, and share them. Settings, credentials, plugins, and caches all live under ~/.omp/agent/. Nothing leaves the machine unless you call a tool that does.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  @oh-my-pi/pi-ai
+  Removed
+  - Removed ANTML stream markup healing for antml:function_calls and antml:thinking envelopes, so Anthropic-compatible providers no longer parse those tags into toolCall/thinking events
+  Fixed
+  - Fixed GLM-5.x coding-plan OpenAI-compatible streams to use a longer default watchdog window, avoiding spurious OpenAI completions stream stalled while waiting for the next event errors during slow glm-5.1 thinking/output phases. (#1494)
+  - Fixed zhipu-coding-plan model discovery and credential validation to use the dedicated GLM Coding Plan endpoint (https://open.bigmodel.cn/api/coding/paas/v4) instead of the general BigModel endpoint, preventing requests from consuming ordinary account balance. (#1494)
+  - Fixed DeepSeek tool calls failing on NanoGPT (e.g. nanogpt/deepseek/deepseek-v4-pro with reasoning enabled) by routing tool-bearing DeepSeek requests through NanoGPT's :tools model route and adding nanogpt to the DSML leak allowlist so streamed <｜DSML｜tool_calls>...</｜DSML｜tool_calls> envelopes are healed into structured tool calls instead of being passed through as visible text. (#1488)
+  - Fixed DeepSeek tool calls failing on NanoGPT (e.g. nanogpt/deepseek/deepseek-v4-pro with reasoning enabled) by adding nanogpt to the DSML leak allowlist so streamed <｜DSML｜tool_calls>...</｜DSML｜tool_calls> envelopes are healed into structured tool calls instead of being passed through as visible text. The :tools model suffix is no longer appended on NanoGPT; that route triggered NanoGPT's server-side tool-call parser and 502'd with code: "malformed_tool_call" on complex tool schemas (todo_write) — the default route forwards delta.content (including DSML envelopes) which is healed client-side. (#1488)
+  - Fixed OpenAI-compatible streamed parallel tool calls losing indexed argument deltas by tracking active tool-call blocks by the provider's tool_calls[].index; this keeps parallel NanoGPT read calls from merging or dropping their path arguments. (#1488)
+  @oh-my-pi/pi-coding-agent
+  Added
+  - Added the omp-plugins discovery provider, which scans every extension package directory configured via extensions: (in ~/.omp/agent/settings.json or <cwd>/.omp/settings.json) or --extension/-e on the CLI for skills/, hooks/pre|post/, tools/, commands/, rules/, prompts/, and .mcp.json. Prior to this, only the extension's TypeScript factory module ran; every sibling capability the docs (https://omp.sh/docs/extension-authoring) advertised was silently ignored (#1496).
+  - Added the top-level omp install <target> subcommand documented at https://omp.sh/docs/extension-authoring. Local paths route to omp plugin link (so the directory is symlinked into the plugin set), and npm/marketplace specs route to omp plugin install. Before this, install was not a registered subcommand and the CLI runner silently forwarded install ./my-extension to launch as an initial LLM prompt (#1496).
+  Changed
+  - Changed the sticky Todos panel above the editor to advance as tasks close, instead of pinning to the first 5 tasks of the active phase. selectStickyTodoWindow now shows up to 5 open (pending / in_progress) tasks in original phase order and reports the count of remaining open tasks for the +N more hint, so every todo_write flip produces a visible row shift. Closed-phase tail falls back to the last 5 tasks (with the +N more line suppressed) until getActivePhase walks to the next phase.
+  - Linked the sticky Todos panel to the live SessionObserverRegistry so pending todos that have an in-flight subagent doing their work light up green with an animated spinner — the same theme.spinnerFrames ("status" preset) the task tool uses for its agent rows — instead of staying greyed out as if nothing is happening. A new exported todoMatchesAnyDescription(content, descriptions) does case- and whitespace-insensitive equality first with a 6-char minimum-overlap substring fallback in either direction, so "Sonnet #2: shallow bug scan" and a subagent description of "Sonnet #2" still link up. Completed todos now render with theme.status.success (✔ / \uf00c / [ok] per symbol preset, still wrapped in the success colour so themed palettes can keep their purple/green/whatever) and in_progress rows render with theme.status.running, matching the task tool's icon vocabulary. The spinner interval only ticks while at least one visible open todo has a matched active subagent, and self-stops once subagents finish, so plain in_progress todos do not animate forever in the absence of subagent activity.
+  - Extracted the top-level CLI command table from src/cli.ts into a side-effect-free src/cli-commands.ts so test code can introspect the registered subcommands without triggering the entrypoint's top-level await.
+  @oh-my-pi/hashline
+  Changed
+  - InMemorySnapshotStore now coalesces consecutive same-path reads into one tag whenever their views agree on every shared line. Overlapping or directly abutting range reads extend the existing snapshot's contiguous run in place; reads separated by a gap union into a SparseSnapshot spanning both ranges. A disagreeing shared line is treated as "the file changed on disk" and mints a fresh tag, preserving the prior superset-dedup behavior. This stops sequential range reads of an unchanged file (e.g. :50-100 then :100-200, or :1-100 then :150-200) from fragmenting into separate anchors.
+  @oh-my-pi/pi-tui
+  Fixed
+  - Fixed terminal resizes corrupting native scrollback with duplicated rows. The 15.4.0 change that defers a destructive scrollback clear+replay (so a user scrolled into history is not yanked while a streaming tail cell mutates) also caught genuine width/height resizes: a resize reflows the terminal's own committed scrollback at the new geometry, but repainting only the viewport left the stale old-size rows in history, so every overflowed row showed up twice (old-size wrap + new-size copy) when scrolling back, until the next prompt submit cleaned it up. #planRender now rebuilds history synchronously when the frame's geometry actually changed (widthChanged || heightChanged) via the restored historyRebuild intent, and defers the rebuild only for pure content mutations where the user may be reading scrollback mid-stream.
+  What's Changed
+  - fix(tui): deferred native scrollback rebuilds by @H4vC in https://github.com/can1357/oh-my-pi/pull/1478
+  - fix(discovery): wire extension package sub-dirs + add top-level install by @roboomp in https://github.com/can1357/oh-my-pi/pull/1498
+  - fix(ai): widen GLM coding-plan stream watchdog by @roboomp in https://github.com/can1357/oh-my-pi/pull/1495
+  - feat(coding-agent): advance the sticky todo panel as tasks close by @oldschoola in https://github.com/can1357/oh-my-pi/pull/1501
+  Full Changelog: https://github.com/can1357/oh-my-pi/compare/v15.5.11...v15.5.12
+ReleaseNotesUrl: https://github.com/can1357/oh-my-pi/releases/tag/v15.5.12
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://omp.sh/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

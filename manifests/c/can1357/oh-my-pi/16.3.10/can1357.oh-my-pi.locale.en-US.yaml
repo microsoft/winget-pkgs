@@ -1,0 +1,77 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: can1357.oh-my-pi
+PackageVersion: 16.3.10
+PackageLocale: en-US
+Publisher: Can Bölük
+PublisherUrl: https://can.ac/
+PublisherSupportUrl: https://github.com/can1357/oh-my-pi/issues
+Author: Can Bölük
+PackageName: oh-my-pi
+PackageUrl: https://omp.sh/
+License: MIT
+LicenseUrl: https://github.com/can1357/oh-my-pi/blob/HEAD/LICENSE
+Copyright: |-
+  Copyright (c) 2025 Mario Zechner
+  Copyright (c) 2025-2026 Can Bölük
+ShortDescription: ⌥ AI Coding agent for the terminal — hash-anchored edits, optimized tool harness, LSP, Python, browser, subagents, and more
+Description: |-
+  omp is a terminal-first coding agent that runs on your machine, talks to any provider, and treats sessions like git branches.
+  omp (pronounced “oh-em-pi”, binary omp) is a fork of Mario Zechner’s Pi. It runs as a single Bun process, drives any model provider you have credentials for, and ships a flat tool surface the model uses to read code, run commands, edit files, drive a debugger, and spawn subagents that coordinate over an in-process IRC bus.
+  Sessions persist as JSONL under ~/.omp/agent/sessions/. You resume, fork, branch, and share them. Settings, credentials, plugins, and caches all live under ~/.omp/agent/. Nothing leaves the machine unless you call a tool that does.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  @oh-my-pi/pi-ai
+  Fixed
+  - Fixed Ollama/Ollama Cloud EOS-only completions to retry empty stops with a single output token before the agent loop can halt silently. (#4659)
+  - Fixed Claude Sonnet 5 failing every request on feature-gated gateways (Azure Foundry, OpenAI-compatible relays) that reject strict tools with "structured_outputs not supported" — the rejection is now classified as a strict-tool rejection, so the request retries without strict tools and the session remembers the downgrade.
+  @oh-my-pi/pi-catalog
+  Fixed
+  - Fixed LiteLLM rich discovery to ignore unusable sentinel placeholders and continue to /v2/model/info for real models. (#4655)
+  @oh-my-pi/pi-coding-agent
+  Changed
+  - Limited subagent HUD display to 8 items with a summary for additional running subagents
+  - Improved TUI performance by coalescing agent registry and observer UI updates
+  Fixed
+  - Fixed high-subagent sessions overwhelming the TUI by bounding the running-subagent HUD and coalescing subagent progress repaint bursts.
+  - Fixed browser run cleanup crashing or wedging the whole omp session: run-end and tab-close aborts could reject fire-and-forget wait()/facade/tab promises with no consumer, and the global unhandled-rejection handler then exited the process, killing every subagent sharing it. Run-scoped promises are now observed at creation and routine browser teardown aborts are downgraded to log lines (#4499, #4672).
+  - Reduced CPU use while many task subagents stream progress by disabling the obsolete task partial-result spinner repaint loop (#4424).
+  - Capped collapsed nested subagent trees at the same per-level agent limit as top-level task rendering (failures prioritized, elided rows summarized), so deep many-subagent sessions no longer render unbounded progress trees on every repaint.
+  - Fixed skill card headers to render a single space between the skill tag and skill name (#4662).
+  - Fixed get_session_stats RPC responses to include context-window usage so RPC clients can render context meters.
+  - Fixed startup of cached llama.cpp vision models so the initial default/restored model refreshes /props metadata before the session exposes it as text-only.
+  - Fixed IRC-woken yielded subagents skipping empty-stop retry because stale yield-termination state carried into the wake turn (#4658).
+  - Fixed irc wait skipping replies that arrived between wait calls by draining pending IRC asides before honoring queued-interrupt aborts (#4657).
+  @oh-my-pi/pi-tui
+  Fixed
+  - Registered emergency terminal restore with the postmortem fatal path whenever a real terminal starts, so fatal exits restore raw mode/alternate screen on the normal CLI graph (previously the registration was a side effect of a barrel module the CLI never imported).
+  @oh-my-pi/pi-utils
+  Added
+  - Added postmortem.markExpectedCleanupError() / postmortem.isExpectedCleanupError() to tag errors thrown by routine resource teardown; the global uncaughtException/unhandledRejection handlers downgrade marked errors (walking the cause chain) to warnings instead of exiting the process.
+  Fixed
+  - Bounded postmortem cleanup with a 10s deadline so a hanging cleanup callback can no longer wedge the process indefinitely after a fatal error or signal; the process now always reaches process.exit.
+  What's Changed
+  - fix(catalog): ignore LiteLLM all-team-models placeholders by @roboomp in https://github.com/can1357/oh-my-pi/pull/4661
+  - fix(ai): retry empty Ollama completions by @roboomp in https://github.com/can1357/oh-my-pi/pull/4663
+  - fix(agent): reset IRC wake maintenance state by @roboomp in https://github.com/can1357/oh-my-pi/pull/4664
+  - fix(agent): surface pending irc replies to wait by @roboomp in https://github.com/can1357/oh-my-pi/pull/4665
+  - fix(tui): correct skill card header spacing by @roboomp in https://github.com/can1357/oh-my-pi/pull/4666
+  - fix(rpc): include context usage in session stats by @roboomp in https://github.com/can1357/oh-my-pi/pull/4671
+  - fix(agent): refresh startup llama.cpp vision metadata by @roboomp in https://github.com/can1357/oh-my-pi/pull/4675
+  Full Changelog: https://github.com/can1357/oh-my-pi/compare/v16.3.9...v16.3.10
+ReleaseNotesUrl: https://github.com/can1357/oh-my-pi/releases/tag/v16.3.10
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://omp.sh/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

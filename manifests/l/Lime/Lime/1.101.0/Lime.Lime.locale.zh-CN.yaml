@@ -1,0 +1,64 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Lime.Lime
+PackageVersion: 1.101.0
+PackageLocale: zh-CN
+Publisher: Lime
+PublisherUrl: https://limeai.run/
+PublisherSupportUrl: https://github.com/limecloud/lime/issues
+PrivacyUrl: https://limeai.run/privacy/
+PackageName: Lime
+PackageUrl: https://limeai.run/
+License: 专有软件
+LicenseUrl: https://limeai.run/terms/
+Copyright: © 2026 Lime
+ShortDescription: 给中文创作者用的开源 AI 内容工作台
+Description: |-
+  Lime 是一个开源的 Electron 桌面端 AI 内容工作台，面向中文创作者、品牌运营、研究型写作者和小团队，覆盖 AI 写作、选题研究、素材管理、提示词沉淀、知识库和多模型创作流程。
+
+  你可以把它理解成一个更适合长期创作的 AI 工作台：
+  - 不是只问一句、答一句，而是围绕一个项目持续推进
+  - 不是每次都重新找资料、重新写提示词，而是把参考、风格和做法沉淀下来
+  - 不是生成完就散落在聊天记录里，而是把结果保存起来，下一次还能继续用
+  - 不是绑定某一家 AI 服务，而是让你使用自己已经配置好的模型能力
+  如果你经常在收藏夹、文档、聊天工具、图片工具和模型后台之间来回切换，Lime 想帮你把这些动作收回到同一个创作空间里。
+
+  你可以用 Lime 做什么
+  - AI 写作与内容创作：写公众号文章、小红书笔记、视频脚本、播客提纲和直播话术
+  - 资料研究与知识整理：整理网页、笔记、截图、访谈和历史材料，生成报告或简报
+  - 选题分析与内容复盘：拆解爆款案例、竞品内容、发布节奏和表达风格
+  - 提示词管理与风格复用：保存常用写法、品牌语气、选题方法和团队模板
+  - 多模态创作准备：生成图片提示词、封面方向、演示稿结构或网页草稿
+  - 多模型工作流：使用自己配置的 AI 服务商和模型，在同一个任务里持续修改、扩写、压缩或换平台发布
+ReleaseNotes: |-
+  Lime v1.101.0
+  新功能
+  - 建立 canonical Thread / Turn / Item 的端到端产品链：App Server 提供 thread/read、列表与分页协议，ProjectionStore 直接持久化 typed changeset，并向 Renderer 投递完整 canonical entity。
+  - 新增 empty Thread 原子创建、active / queued Turn 读取与队列控制投影，使新会话、重启恢复、排队执行和终态读取共享同一事实源。
+  - 扩展 Skills 管理与读取协议，加入稳定 skill identity、authority、policy、dependency 和 workflow metadata，并接入 App Server、tool-runtime 与前端 typed client。
+  - 为 Tool、Approval、MCP 和协作 Agent 建立 typed display item 与 lifecycle contract，保留 arguments、structured output、duration、truncation、sidecar 和决策语义。
+  修复
+  - 修复 approval / request-user-input 在重启、恢复和取消路径中的 identity 与 continuation 校验，缺少可恢复 continuation 时返回结构化错误且不伪造 resolved 状态。
+  - 修复 canonical event sequence、重复 lifecycle、损坏 event-log 尾部、projection repair 和 conversation import 的一致性问题，非法 identity 或顺序继续 fail closed。
+  - 修复 GUI active Turn、queued Turn、terminal history、输入恢复和右侧工作台状态之间的投影偏差，避免 renderer cache 反向成为运行时真相。
+  - 修复 image command、media request、provider stream 和 imported Tool event 在 canonical lifecycle 中的参数、输出与终态保真。
+  优化与重构
+  - 将 provider wire lowering 从 runtime-core 迁到 model-provider，统一 OpenAI、Anthropic、Gemini、Ollama、Fal 与图像请求的 current owner。
+  - 将 current provider 工具执行切到 RuntimeTool / ToolCall / ToolLifecycleEmitter，由 host emitter 唯一产生 canonical item.started / item.completed。
+  - 前端 Agent Chat、Plugin runtime 与 app-server clients 改为消费 canonical Thread read 与 typed Item projection，收缩旧 agentSession/read presentation adapter 的职责。
+  - 删除旧 Agent tool orchestrator/lifecycle、runtime-core mapper、thread-store legacy store/transcript、raw tool batch，以及前端独立 media/subagent client 双轨实现。
+  测试与质量
+  - 扩展 App Server protocol/schema/client contract，覆盖 canonical Thread read、Skills、request access、通知序列与序列化边界。
+  - 新增 Rust 定向回归，覆盖 empty Thread、event-log repair、Tool/Approval lifecycle、conversation import、provider/media lowering、projection store 和 restart recovery。
+  - 新增 Agent Chat、Plugin runtime、queue control、canonical item reader、approval projection 与 workspace composition 的 TypeScript 回归。
+  - 补充 refactor v2 Gate A / Gate B、current fixture、协议守卫与逐切片 evidence，记录生产 consumer cutover 和 dead surface 删除证明。
+  文档
+  - 更新全局架构，明确 ProjectionStore、canonical read edge、Tool lifecycle、Approval 语义、provider lowering 和 Renderer 消费边界。
+  - 新增 refactor v2 多进程实施计划、v1 crosswalk 与 S1-S6 施工证据，统一 current / deprecated / dead 分类和后续退出条件。
+  其他
+  - 版本事实源更新到 1.101.0：根应用、CLI npm package、Rust workspace、lime-rs/Cargo.lock 和 release notes。
+  完整变更：v1.100.0 → v1.101.0
+ReleaseNotesUrl: https://github.com/limecloud/lime/releases/tag/v1.101.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,66 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: PlanetLinux98.GUARD
+PackageVersion: 0.5.2
+PackageLocale: en-US
+Publisher: PlanetLinux98
+PublisherUrl: https://github.com/PlanetLinux98
+PublisherSupportUrl: https://github.com/PlanetLinux98/guard/issues
+Author: PlanetLinux98
+PackageName: GUARD
+PackageUrl: https://github.com/PlanetLinux98/guard
+License: MIT
+LicenseUrl: https://github.com/PlanetLinux98/guard/blob/HEAD/LICENSE
+ShortDescription: A portable, screen-reader-first backup, system-imaging and app-inventory utility for Windows that requires no installation.
+Description: |-
+  GUARD is a portable, fully accessible backup and data-protection utility for Windows. It backs up your chosen folders to any destination (a local drive, an external disk, or a network share), creates full bare-metal system images with Windows' built-in wbadmin, and keeps an inventory of your installed apps so they are easy to reinstall after a clean OS install - optionally with their settings.
+
+  The release ships as a self-contained portable folder with the .NET 10 runtime and Windows App SDK bundled in, so there is nothing to install. GUARD is built screen-reader-first, with native dark-mode theming, and keeps itself current with a built-in checksum-verified updater.
+
+  Features include additive and mirror copy modes (built on Robocopy), one-tick and custom exclusions, dated backup versions with pruning, a dry-run preview, scheduled and run-on-connect backups, scheduled or on-demand system images with a recovery-media wizard, and app-list export/reinstall through winget.
+Moniker: guard
+Tags:
+- accessibility
+- backup
+- data-protection
+- portable
+- restore
+- robocopy
+- winui
+ReleaseNotes: |-
+  Largely a bug-fix release: a broad pass over the app closed up crashes, races, and a few data-safety gaps that had crept in.
+  Safer backups and app settings
+  - A drive that isn't your real backup destination can no longer be adopted silently: if the last-used drive letter now points at a different, reachable volume (for example, the real drive was unplugged and something else took its letter), Save now warns and needs a second Save to confirm, instead of risking that drive's files being deleted as "extras" in Mirror mode.
+  - Restoring app settings no longer risks losing the original folder: if putting the saved copy back failed right after the existing folder was renamed aside, GUARD now tries to move the original back first, and only reports it separately (with its location) if that also fails.
+  - A backup that robocopy couldn't fully reconcile (a "Mismatch", such as the destination having a file where the source now has a same-named folder) is now counted and called out in the run summary instead of being reported as a clean "Backup complete".
+  - Restoring app settings only accepts the three folder locations GUARD's own export writes (%APPDATA%, %LOCALAPPDATA%, %USERPROFILE%\.config), closing a gap where an imported manifest could target other folders for rename-aside-and-replace.
+  - App settings export and restore are more accurate: a symlinked or hard-linked file is now skipped like the folders around it (matching robocopy's own behaviour), and a subfolder that fails to enumerate is counted as an abandoned subtree rather than a single skipped file.
+  No more silent crashes
+  - A locked or momentarily unreadable settings file (an antivirus scan, the file open elsewhere, a laggy portable or network copy) no longer crashes GUARD on launch or the headless scheduled backup task; both fall back to defaults.
+  - Non-ASCII paths, drive names, and PowerShell error text are no longer mangled: GUARD's shell-based tooling now writes and reads UTF-8 throughout, fixing failed backups, skipped folders, broken self-update for non-ASCII usernames, and garbled captured errors.
+  - Self-update no longer fails when GUARD is installed at a drive's root (like the top of a USB stick) or under a path containing a literal %.
+  - An unusual GitHub release response with no assets at all no longer crashes the update download; it now falls through to the normal "no compatible download" message.
+  Recovery Media and System Image, hardened
+  - The recovery-media wizard is more robust against interruption: closing GUARD while it's writing a USB is now blocked, and a preparation error before the elevated step starts lands on the wizard's own "Could not finish" result instead of crashing GUARD.
+  - The USB list now warns before erasing a drive much larger than a typical recovery stick, so an external hard drive isn't mistaken for a blank flash stick.
+  - Opening System Image on a Windows edition without wbadmin (like Home) no longer invents an unsaved change when it automatically unticks a saved schedule.
+  - The System Image page's "Next run" time now loads when GUARD opens, not only after a save.
+  - A scheduled system image now registers correctly on non-Gregorian-calendar Windows locales (such as Thai or Umm al-Qura).
+  - Saving a system image now warns about a destination containing a stray %, matching the same protection File Backup already had.
+  More accurate status, fewer races
+  - Only one action runs at a time: backup, system image, winget reinstall/update, app-settings export, and app scan now check whether another is already running and name it, instead of racing each other with stacked elevation prompts.
+  - The installed-app scan no longer mistakes "winget doesn't know the version" for "already up to date" when a row has a blank installed version but a populated available-upgrade version.
+  - A fast double-click on Reinstall Selected or Update All Apps can no longer start two overlapping runs.
+  - Closing GUARD while "Update All Apps" is running with Administrator rights now actually shows the warning that was already written for this case.
+  - A large version-prune no longer gets misreported as "did not complete" in the backup log status check.
+  - A stuck scheduled or on-connect backup (like robocopy hanging on a flaky network share) is now killed and reported as a failed run after 12 hours, instead of silently blocking every later run.
+  - A scheduled-task registration error with a multi-line message now keeps every line instead of just the first.
+  - The status bar no longer loses a fresh status to a stale one that finishes checking late.
+  - A pinned Light or Dark theme now follows through to small follow-up dialogs (validation messages, file-picker and browser-launch errors), which previously always matched the OS theme.
+  - Backup run summaries now show sizes above 1 TB in TB instead of a very large number of GB.
+  These notes are the highlights; the complete list of changes is in the changelog.
+  Install: download GUARD.zip below, extract, and run GUARD.exe; or winget install PlanetLinux98.GUARD. Requires Windows 10 version 1809 or later. Existing installs can update from the in-app update notice.
+ReleaseNotesUrl: https://github.com/PlanetLinux98/guard/releases/tag/v0.5.2
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

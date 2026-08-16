@@ -1,0 +1,63 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Wangnov.CodexAppManager
+PackageVersion: 0.3.3
+PackageLocale: en-US
+Publisher: Wangnov
+PublisherUrl: https://github.com/Wangnov
+PublisherSupportUrl: https://github.com/Wangnov/Codex-App-Manager/issues
+PackageName: Codex App Manager
+PackageUrl: https://github.com/Wangnov/Codex-App-Manager
+License: MIT
+LicenseUrl: https://github.com/Wangnov/Codex-App-Manager/blob/HEAD/LICENSE
+ShortDescription: Installer, updater, and uninstaller for the official Codex desktop app.
+Description: A cross-platform desktop client to install, incrementally update, and cleanly uninstall the official Codex desktop app, with built-in self-update.
+Moniker: codex-app-manager
+Tags:
+- codex
+- installer
+- openai
+- tauri
+- updater
+ReleaseNotes: |-
+  Codex App Manager
+  > Windows 免安装版更新可靠性补丁：残留辅助进程或安全软件短暂占用文件时，目录替换会自动重试并保留精确诊断。
+  > A Windows portable-update reliability patch: directory replacement now retries transient locks from helper processes or security scanners and preserves precise diagnostics.
+  🐛 修复 · Fixes
+  - 短暂文件占用不再直接打断更新:Codex 退出或 Defender / EDR 扫描造成 Windows 错误 5、32、33 时，旧版本备份、新版本就位和回滚恢复会进行有界重试，而不是第一次重命名失败就终止。
+    Transient file contention no longer aborts an update immediately: when Codex shutdown or Defender / EDR scanning causes Windows errors 5, 32, or 33, backup, replacement, and rollback renames use bounded retries instead of failing on the first attempt.
+  - 残留辅助进程也会被正确关闭:更新前会识别当前安装目录内的所有可执行进程，不再只依赖 Codex.exe / ChatGPT.exe 文件名；匹配仍严格限定到托管安装根目录，不会影响其他位置的 ChatGPT。
+    Leftover helper processes are closed correctly: the updater now discovers every executable process under the managed install root instead of relying only on Codex.exe / ChatGPT.exe names, while the exact-root boundary keeps separate ChatGPT installs out of scope.
+  - 安装位置校验更贴近真实替换:选择路径时会在父目录执行非空目录重命名探测，并把可能的退避等待移出界面与异步运行线程；失败日志会记录具体操作边界、系统错误码和源/目标目录状态。
+    Install-location validation now mirrors the real swap: it probes a non-empty directory rename in the parent directory, keeps retry waits off UI and async runtime threads, and logs the exact operation boundary, OS error code, and source/destination state on failure.
+  📦 安装与升级 · Install & Upgrade
+  已经安装? 打开应用即可收到本次更新——macOS 只下载版本间的增量,校验失败自动回滚。
+  Already installed? The app offers this update in-app — macOS pulls only the delta, with automatic rollback.
+  ─────────────────────┬───────────────────────────────────────────
+  平台 · Platform      │下载 · Download(国内直连 · China-reachable)
+  ─────────────────────┼───────────────────────────────────────────
+  macOS · Apple Silicon│CodexAppManager_aarch64.dmg
+  ─────────────────────┼───────────────────────────────────────────
+  macOS · Intel        │CodexAppManager_x86_64.dmg
+  ─────────────────────┼───────────────────────────────────────────
+  Windows · x64        │CodexAppManager_x64-setup.exe
+  ─────────────────────┼───────────────────────────────────────────
+  Windows · ARM64      │CodexAppManager_arm64-setup.exe
+  ─────────────────────┴───────────────────────────────────────────
+  Windows 签名状态: 本版 CodexAppManager_x64-setup.exe / CodexAppManager_arm64-setup.exe 没有 Authenticode 代码签名,首次运行可能出现 SmartScreen 提示;.sig / latest.json 的 Tauri updater 签名只校验更新字节,不代表 Windows 发行者身份。SignPath Foundation 申请仍在审核。参见 代码签名政策与 Windows signing and verification。
+  Windows signing status: This release's CodexAppManager_x64-setup.exe / CodexAppManager_arm64-setup.exe are not Authenticode-signed, so SmartScreen may warn on first run. The Tauri updater signature in .sig / latest.json verifies update bytes only and is not Windows publisher identity. The SignPath Foundation application is pending. See the code signing policy and Windows signing and verification.
+  隐私 · Privacy: 隐私政策 · Privacy policy
+  核验下载: 本页 Assets 带有 SHA256SUMS;Windows 用 Get-FileHash .\CodexAppManager_x64-setup.exe -Algorithm SHA256 或替换为 ARM64 文件名,macOS 用 shasum -a 256 CodexAppManager_aarch64.dmg,再与 SHA256SUMS 比对。
+  Verify downloads: This release includes SHA256SUMS in Assets; on Windows run Get-FileHash .\CodexAppManager_x64-setup.exe -Algorithm SHA256 or swap in the ARM64 filename, and on macOS run shasum -a 256 CodexAppManager_aarch64.dmg, then compare with SHA256SUMS.
+  # macOS · Homebrew
+  brew install --cask wangnov/tap/codex-app-manager
+  > 镜像直链恒指向最新版本;如需本页对应的历史版本,请使用下方 Assets。.app.tar.gz / .sig / latest.json 是自动更新器的工件,手动安装请选 .dmg / .exe。
+  > Mirror permalinks always resolve to the latest release — for this exact version use the assets below. .app.tar.gz / .sig / latest.json belong to the auto-updater; pick the .dmg / .exe for manual installs.
+  What's Changed
+  - fix(windows): harden portable directory replacement by @Wangnov in #197
+  - chore(release): bump version to 0.3.3 by @Wangnov in #198
+  Full Changelog: v0.3.2...v0.3.3
+ReleaseNotesUrl: https://github.com/Wangnov/Codex-App-Manager/releases/tag/v0.3.3
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

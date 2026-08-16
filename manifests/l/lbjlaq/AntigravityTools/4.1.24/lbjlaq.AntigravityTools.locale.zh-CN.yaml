@@ -1,0 +1,36 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: lbjlaq.AntigravityTools
+PackageVersion: 4.1.24
+PackageLocale: zh-CN
+Publisher: lbjlaq
+PublisherUrl: https://github.com/lbjlaq
+PublisherSupportUrl: https://github.com/lbjlaq/Antigravity-Manager/issues
+PackageName: Antigravity Tools
+PackageUrl: https://github.com/lbjlaq/Antigravity-Manager
+License: CC-BY-NC-SA-4.0
+LicenseUrl: https://github.com/lbjlaq/Antigravity-Manager/blob/HEAD/LICENSE
+ShortDescription: 专业的 Antigravity 账号管理与切换工具。为 Antigravity 提供一键无缝账号切换功能。
+Description: |-
+  Antigravity Tools 是一个专为开发者和 AI 爱好者设计的全功能桌面应用。它将多账号管理、协议转换和智能请求调度完美结合，为您提供一个稳定、极速且成本低廉的 本地 AI 中转站。
+  通过本应用，您可以将常见的 Web 端 Session (Google/Anthropic) 转化为标准化的 API 接口，彻底消除不同厂商间的协议鸿沟。
+ReleaseNotes: |-
+  - [功能调整] 禁用自动预热调度程序，保留手动预热：
+    - 变更说明：为了减少不必要的后台资源占用，本版本已注释掉自动预热（Smart Warmup）的后台调度逻辑。
+    - 设置隐藏：设置页面中的“智能预热”配置项已隐藏。
+    - 手动保留：账号管理页面的手动预热功能保持不变，仍可正常使用。
+    - 恢复指引：如果您需要自动预热功能，可以自行拉取本项目源代码，在 src-tauri/src/lib.rs 中取消 start_scheduler 的注释并解除 Settings.tsx 中相关 UI 的注释后重新编译使用。
+  - [核心修复] 智能版本指纹选择与启动 Panic 修复 (Issue #2123):
+    - 问题根源：1) constants.rs 中的 KNOWN_STABLE_VERSION 硬编码了低版本号，当本地 IDE 检测失败时回退该版本作为请求头，导致 Google 拒绝 Gemini 3.1 Pro 模型。2) 新增的远端版本网络调用直接在 LazyLock 初始化（Tokio 异步上下文）中执行，导致 Cannot block the current thread 严重崩溃。
+    - 修复方案：1) 引入"智能最大版本"策略 max(本地版本，远端版本，4.1.24)，始终取最高值。2) 将网络探测逻辑移至独立 OS 线程并配合 mpsc 通道，安全避开异步运行时限制。保证无论本地版本新旧，指纹均不低于上游要求，且应用能稳定启动。
+  - [核心修复] 动态模型 maxOutputTokens 限额系统 (替代 PR #2119 硬编码方案):
+    - 问题根源：部分客户端发送的 maxOutputTokens 超过模型物理上限（如 Flash 限制 64k），导致上游返回 400 错误。
+    - 三层限额架构：
+      - 第一层（动态优先）: 实时读取账号 quota.models 数据。
+      - 第二层（静态默认表）: model_limits.rs 内置已知限额（如 Flash 65536）。
+      - 第三层（全局兜底）: 默认 131072。
+    - 实现细节：在 wrap_request() 中注入裁剪逻辑，确保请求参数合法。
+ReleaseNotesUrl: https://github.com/lbjlaq/Antigravity-Manager/releases/tag/v4.1.24
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,79 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Rustlang.Rust.GNU
+PackageVersion: 1.97.0
+PackageLocale: en-US
+Publisher: The Rust Project Developers
+PublisherUrl: https://github.com/rust-lang/rust
+PublisherSupportUrl: https://github.com/rust-lang/rust/issues
+Author: The Rust Project Developers
+PackageName: Rust (GNU)
+PackageUrl: https://www.rust-lang.org/
+License: Apache 2.0 and MIT
+LicenseUrl: https://raw.githubusercontent.com/rust-lang/rust/master/COPYRIGHT
+CopyrightUrl: https://raw.githubusercontent.com/rust-lang/rust/master/COPYRIGHT
+ShortDescription: this is the rust-lang built with gnu toolchain
+Moniker: rust-gnu
+Tags:
+- gnu
+- rust
+- windows
+ReleaseNotes: |-
+  Language
+  - Consider Result<T, Uninhabited> and ControlFlow<Uninhabited, T> to be equivalent to T for must use lint
+  - Add allow-by-default dead_code_pub_in_binary lint for unused pub items in binary crates
+  - Stabilize the div32, lam-bh, lamcas, ld-seq-sa and scq target features
+  - Stabilize cfg(target_has_atomic_primitive_alignment)
+  - Allow trailing self in imports in more cases
+
+  Platform Support
+  - nvptx64-nvidia-cuda: drop support for old architectures and old ISAs
+  Refer to Rust's platform support page for more information on Rust's tiered platform support.
+
+  Stabilized APIs
+  - Default for RepeatN
+  - Copy for ffi::FromBytesUntilNulError
+  - Send for std::fs::File on UEFI
+  - <{integer}>::isolate_highest_one
+  - <{integer}>::isolate_lowest_one
+  - <{integer}>::highest_one
+  - <{integer}>::lowest_one
+  - <{integer}>::bit_width
+  - NonZero<{integer}>::isolate_highest_one
+  - NonZero<{integer}>::isolate_lowest_one
+  - NonZero<{integer}>::highest_one
+  - NonZero<{integer}>::lowest_one
+  - NonZero<{integer}>::bit_width
+  These previously stable APIs are now stable in const contexts:
+  - char::is_control
+
+  Cargo
+  - Stabilize build.warnings config. This controls how lint warnings from local packages are treated. Useful for enforcing a warning-free build in CI, replacing -Dwarnings. docs
+  - Stabilize resolver.lockfile-path config. This allows specifying the path to the lockfile to use when resolving dependencies. Useful when working with read-only source directories. docs
+  - cargo-clean: Error when --target-dir doesn't look like a Cargo target directory. This prevents accidental deletion of non-target directories.
+  - Add -m shorthand for --manifest-path
+  - Remove curl dependency from crates-io crate
+
+  Rustdoc
+  - Stabilize --emit flag
+  - Stabilize --remap-path-prefix
+
+  Compatibility Notes
+  - Emit a future-compatibility warning when relying on f32: From<{float}> to constrain {float}
+  - Rust will use the v0 symbol mangling scheme by default. This may cause some tools (such as debuggers or profilers, especially with old versions) to fail to demangle symbols emitted by Rust. It may also cause the formatting of text in backtraces to change.
+  - Prevent deref coercions in pin!, in order to prevent unsoundness. The most likely case where this might impact users is: writing pin!(x) where x has type &mut T will now always correctly produce a value of type Pin<&mut &mut T>, instead of sometimes allowing a coercion that produces a value of type Pin<&mut T>. This coercion was previously incorrectly allowed since Rust 1.88.0.
+  - Deprecate std::char constants and functions
+  - Warn on linker output by default
+  - Remove hidden f64 methods which have been deprecated since 1.0
+  - report the varargs_without_pattern lint in deps
+  - Forbid passing generic arguments to module path segments even if the module reexports a generic enum variant
+  - Error on invalid macho link_section specifier
+  - The encoding of certain enums have changed. This is not a breaking change, as it only applies to enums without layout guarantees, but is noted here as we've seen people impacted from having made assumptions about the layout algorithm.
+  - Error on #[export_name = "..."] where the name is empty
+  - Syntactically reject tuple index shorthands in struct patterns
+  - validate #[link_name = "..."] & #[link(name = "...")] parameters
+  - On Windows, after calling shutdown on a socket to shut down the write side, attempting to write to the socket will now produce a BrokenPipe error rather than Other. Map WSAESHUTDOWN to io::ErrorKind::BrokenPipe
+ReleaseNotesUrl: https://github.com/rust-lang/rust/releases/tag/1.97.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

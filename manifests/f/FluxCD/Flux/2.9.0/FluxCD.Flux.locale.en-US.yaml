@@ -1,0 +1,154 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: FluxCD.Flux
+PackageVersion: 2.9.0
+PackageLocale: en-US
+Publisher: FluxCD
+PublisherUrl: https://fluxcd.io/
+PublisherSupportUrl: https://github.com/fluxcd/flux2/issues
+PackageName: Flux
+PackageUrl: https://github.com/fluxcd/flux2
+License: Apache-2.0
+LicenseUrl: https://github.com/fluxcd/flux2/blob/HEAD/LICENSE
+ShortDescription: A command line tool for communicating with FluxCD
+Tags:
+- continuous-delivery
+- gitops
+- gitops-toolkit
+- helm
+- kubernetes
+- kustomize
+ReleaseNotes: |-
+  Highlights
+  Flux v2.9.0 is a feature release. Users are encouraged to upgrade for the best experience.
+  For a compressive overview of new features and API changes included in this release, please refer to the Announcing Flux 2.9 GA blog post.
+  Overview of the new features:
+  - Flux CLI Plugin System with the Mirror and Schema plugins (flux plugin)
+  - Server-Side Apply field ignore rules for fine-grained drift control (Kustomization)
+  - SOPS decryption with the Age post-quantum cipher (Kustomization)
+  - Kubernetes Workload Identity authentication for OpenBao and Vault (Kustomization)
+  - Helm post-render strategies, including chart hooks support (HelmRelease)
+  - Literal mode for Helm values references mirroring helm --set-literal (HelmRelease)
+  - Allow empty kind in CEL health check expressions (Kustomization, HelmRelease)
+  - Git commit signing and verification with SSH keys (GitRepository, ImageUpdateAutomation)
+  - AWS CodeCommit authentication using Workload Identity (GitRepository)
+  - Custom Sigstore trusted root for keyless verification in air-gapped environments (OCIRepository)
+  - Path pattern directory discovery for monorepos (ArtifactGenerator)
+  - Secret-less, OIDC-secured webhook Receivers (Receiver)
+  ❤️ Big thanks to all the Flux contributors that helped us with this release!
+
+  Kubernetes compatibility
+  This release is compatible with the following Kubernetes versions:
+  ──────────────────┬────────────────
+  Kubernetes version│Minimum required
+  ──────────────────┼────────────────
+  v1.34             │>= 1.34.1
+  ──────────────────┼────────────────
+  v1.35             │>= 1.35.0
+  ──────────────────┼────────────────
+  v1.36             │>= 1.36.0
+  ──────────────────┴────────────────
+  Note
+  Note that the Flux project offers support only for the latest three minor versions of Kubernetes.
+  Backwards compatibility with older versions of Kubernetes and OpenShift is offered by vendors such as
+  ControlPlane that provide enterprise support for Flux.
+
+  OpenShift compatibility
+  Flux can be installed on Red Hat OpenShift cluster directly from OperatorHub using Flux Operator. The operator allows the configuration of Flux multi-tenancy lockdown, network policies, persistent storage, sharding, vertical scaling and the synchronization of the cluster state from Git repositories, OCI artifacts, and S3-compatible storage.
+
+  Upgrade procedure
+  ⚠️ The Flux APIs image.toolkit.fluxcd.io/v1beta2 and notification.toolkit.fluxcd.io/v1beta2
+  have reached end-of-life and have been removed from the CRDs.
+  Please follow the Upgrade Procedure for Flux v2.7+ for a smooth upgrade from older versions of Flux to v2.9.
+
+  Components changelog
+  - source-controller v1.9.1
+  - kustomize-controller v1.9.1
+  - notification-controller v1.9.1
+  - helm-controller v1.6.1
+  - image-reflector-controller v1.2.1
+  - image-automation-controller v1.2.1
+  - source-watcher v2.2.1
+
+  CLI changelog
+  - Add backport label for Flux 2.8 by @matheuscscp in #5732
+  - Remove no longer needed workaround for Flux 2.8 by @matheuscscp in #5733
+  - Update toolkit components by @fluxcdbot in #5740
+  - Add missing things to release notes template by @matheuscscp in #5743
+  - ci: add top-level permissions to upgrade-fluxcd-pkg workflow by @gaganhr94 in #5763
+  - build(deps): bump the ci group across 1 directory with 11 updates by @dependabot[bot] in #5764
+  - Update fluxcd/pkg dependencies by @fluxcdbot in #5766
+  - Update toolkit components by @fluxcdbot in #5769
+  - Add target branch name to update branch by @matheuscscp in #5773
+  - Fix/resume exit code by @Aman-Cool in #5701
+  - Mark RFC 0010, 0011 and 0012 as implemented by @stefanprodan in #5776
+  - Update toolkit components by @fluxcdbot in #5780
+  - Add --resolve-symlinks flag to build and push artifact commands by @rohansood10 in #5724
+  - fix: validate --source flag in create kustomization command by @gma1k in #5798
+  - Update toolkit components by @fluxcdbot in #5821
+  - Add --show-source to flux get ks and flux get hr by @rafaelperoco in #5828
+  - Add flux create secret receiver command by @stefanprodan in #5835
+  - fix: handle multiple symlinks to same target in build artifact by @Iam-Karan-Suresh in #5833
+  - Add --in-memory-build to flux build ks and flux diff ks by @rycli in #5794
+  - Migrate end-to-end test to latest cloud SDKs by @stefanprodan in #5840
+  - docs: Add AI Coding Assistants Guidance by @stefanprodan in #5841
+  - Add AI Agents guidance by @stefanprodan in #5847
+  - [RFC-0013] Flux CLI Plugin System by @stefanprodan in #5795
+  - Add --ignore-not-found to flux diff ks by @rycli in #5845
+  - [RFC-0013] Implement plugin system by @stefanprodan in #5849
+  - build(deps): bump github.com/go-git/go-git/v5 from 5.17.1 to 5.18.0 by @dependabot[bot] in #5853
+  - Update toolkit components by @fluxcdbot in #5856
+  - Add digest pinning support to flux plugin install by @Iam-Karan-Suresh in #5872
+  - Add --ns-follows-kube-context global flag for using the kubeconfig context namespace by @jtyr in #5831
+  - include source-watcher in install.yaml manifests by @tmmorin in #5881
+  - Update toolkit components by @fluxcdbot in #5890
+  - Update toolkit components by @fluxcdbot in #5903
+  - Update fluxcd/pkg dependencies by @fluxcdbot in #5907
+  - Validate Helm source URL schemes by @immanuwell in #5909
+  - Introduce flux trigger receiver by @matheuscscp in #5908
+  - refactor(api): migrate MakeDependsOn to shared apis/meta func by @vecil in #5912
+  - Update to Kubernetes 1.36 and Go 1.26 by @stefanprodan in #5924
+  - build(deps): bump the ci group across 1 directory with 19 updates by @dependabot[bot] in #5925
+  - Run conformance tests for Kubernetes 1.36 by @stefanprodan in #5926
+  - Add support for AWS CodeCommit to flux bootstrap git by @taraspos in #5868
+  - Validate plugin binary path by @stefanprodan in #5927
+  - Update fluxcd/pkg dependencies by @fluxcdbot in #5928
+  - fix: preserve invalid metadata.labels in flux build ks by @raffis in #5906
+  - build: target host arch for local builds/envtest by @stealthybox in #5932
+  - build(deps): bump the ci group with 6 updates by @dependabot[bot] in #5938
+  - Support specifing sparseCheckout in flux bootstrap by @piny940 in #5918
+  - Update toolkit components by @fluxcdbot in #5944
+  - Honor ks.spec.postBuild.substituteStrategy by @matheuscscp in #5945
+  - Add DriftIgnoreRules support to flux diff kustomization by @dipti-pai in #5923
+  - Allow signing commits using SSH key by @hiddeco in #5920
+  - Update toolkit components by @fluxcdbot in #5950
+  - Update fluxcd/pkg dependencies by @fluxcdbot in #5937
+  - cmd: support type!=status in get --status-selector by @3uzbcqje in #5952
+  - Fix flux get all --status-selector for empty results and notification resources by @matheuscscp in #5954
+  - Upgrade go-git-providers to v0.27.0 by @matheuscscp in #5956
+  - Fix using Receiver adapter for ArtifactGenerator by @matheuscscp in #5957
+  - feat: Install Plugins alongside Flux setup in gh actions by @gat786 in #5955
+  - Update fluxcd/pkg dependencies by @fluxcdbot in #5960
+  - Add CLI support for OCIRepository.spec.layerSelector in flux create source oci by @dme86 in #5892
+  - Update toolkit components by @fluxcdbot in #5963
+
+  New Contributors
+  - @gaganhr94 made their first contribution in #5763
+  - @rohansood10 made their first contribution in #5724
+  - @gma1k made their first contribution in #5798
+  - @rafaelperoco made their first contribution in #5828
+  - @Iam-Karan-Suresh made their first contribution in #5833
+  - @rycli made their first contribution in #5794
+  - @jtyr made their first contribution in #5831
+  - @tmmorin made their first contribution in #5881
+  - @immanuwell made their first contribution in #5909
+  - @vecil made their first contribution in #5912
+  - @taraspos made their first contribution in #5868
+  - @piny940 made their first contribution in #5918
+  - @3uzbcqje made their first contribution in #5952
+  - @gat786 made their first contribution in #5955
+  - @dme86 made their first contribution in #5892
+ReleaseNotesUrl: https://github.com/fluxcd/flux2/releases/tag/v2.9.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

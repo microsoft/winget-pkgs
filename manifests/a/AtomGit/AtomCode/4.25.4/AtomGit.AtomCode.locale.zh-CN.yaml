@@ -1,0 +1,95 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: AtomGit.AtomCode
+PackageVersion: 4.25.4
+PackageLocale: zh-CN
+Publisher: 重庆开源共创科技有限公司
+PublisherUrl: https://atomgit.com/
+PublisherSupportUrl: https://atomgit.com/atomgit_atomcode/atomcode/issues
+PrivacyUrl: https://docs.gitcode.com/docs/help/home/protocol/privacy-policy
+Author: 重庆开源共创科技有限公司
+PackageName: AtomCode
+PackageUrl: https://atomcode.atomgit.com/
+License: MIT
+LicenseUrl: https://atomgit.com/atomgit_atomcode/atomcode/blob/main/LICENSE
+Copyright: Copyright (c) 2026 Yubang Xu
+CopyrightUrl: https://docs.gitcode.com/docs/help/home/protocol/ai-privacy-policy
+ShortDescription: AI 编程助手 在你的终端中运行
+Description: Claude Code / Cursor Agent 的开源平替，住在你的终端里。连接任意 OpenAI 兼容大模型，自主读文件、改代码、跑测试、自我验证 —— 用 Rust 构建。
+Tags:
+- 人工智能
+- 代码
+- 大语言模型
+- 智能体
+- 编程
+- 聊天机器人
+- 自主智能
+ReleaseNotes: |-
+  AtomCode v4.25.4 Release Notes
+  发布日期：2026-06-23
+  v4.25.4 聚焦于 CC Hooks v2 引擎接入（里程碑新功能）、LiveSession Turn 取消、atomcodex 遥测上报、JetBrains 插件增强，以及大量终端渲染、Provider/网络、WebUI 和跨平台兼容性修复。
+
+  ✨ 新增功能（Features）
+  CC Hooks v2 引擎接入（里程碑新功能）
+  - 外部 hooks 完整移植：将 CC 外部 hook 引擎完整移植到 v2/kernel 架构，新增 CCExternalHooks 模块（约 1000 行），同时实现 LifecycleHooks（session_start / session_end / user_prompt_submit）和 ToolMiddleware（PreToolUse / PostToolUse）两套接口
+  - CC 合约兼容：支持 CC PascalCase 与原有 snake_case 两种事件名，仅有 exit 2 阻塞执行（exit 0/1 正常继续），超时/启动失败/异常输出静默跳过不阻塞 turn
+  - 插件内联 CC hooks（M2b）：插件可在 plugin.json 中声明内联 CC hooks，v2 引擎通过桥接层（bridge::gather_plugin_cc_hooks）自动加载并注册到 coding agent
+  - prepare_with_plugin_hooks：新增入口点，驱动层将插件 CC hooks 线程化传入，支持模型切换/reload 后存活
+  LiveSession 增强
+  - Turn 取消能力：LiveSession 新增 cancel_current_turn 方法，协调器在 turn 运行时注入 CancellationToken，TUI Ctrl+C / Esc 优先通过 LiveSession 取消同步 turn
+  - 退出保护：/quit /exit 在 streaming 状态下先取消 turn 再退出，避免强制关闭导致状态残留
+  - WebUI 停止按钮适配：根据同步模式自动调用 postLiveStop() 或 stopChat()
+  Telemetry / 遥测
+  - atomcodex 遥测上报：code 和 review 子命令新增 LLM 遥测数据上报，新增 tel.rs（约 200 行），遵循 4 级退出机制（DO_NOT_TRACK、环境变量、--no-telemetry、config 开关），退出时自动 flush 队列到磁盘
+  JetBrains 插件改进
+  - JBCefMessageView 重构：大幅重写 JetBrains 消息视图（增加约 360 行），改进 JS 交互与渲染性能
+  - StreamEventHandler：新增 SSE 流式事件处理器（约 170 行），提升响应性能
+  - CefLoadHandler：用 onLoadEnd 替代 Timer 轮询检测 JS 就绪状态，移除 forceReady 兜底机制，简化状态管理
+  - 单元测试：新增 ChatPanelHelpersTest（约 160 行）
+  TUI 交互增强
+  - /copy 命令：新增 /copy、/copy N、/copy all 命令，支持复制上一条回复中的代码块到剪贴板
+  - 多行用户消息视觉优化：连续多行输入以块形式展示，首行 ❯ 标记、续行 ▎ 彩色竖线（Windows/无 Unicode 字体回退 ASCII |）
+  - 代码块自动复制：代码块渲染完成后自动复制原始内容到剪贴板（可通过 ATOMCODE_AUTO_COPY=0 关闭）
+
+  🛠 修复（Fixes）
+  WebUI
+  - 警告作为一等事件：非致命警告（如 compaction advisory）不再硬塞为红色 [错误] 助理回复，改为独立 amber 色 notice 展示，新增中英文 i18n 文案（chat.warning）
+  - DEBUG eprintln 污染修复：移除 /webui live 路径（forwarder、coordinator、SessionSwitched、daemon live_api）遗留的 [DEBUG] eprintln 脚手架，全部改为文件级 trace 日志（tuix_trace! / ctrace!），修复终端被 DEC Special Graphics 莫吉巴淹没问题
+  - todo 工具展示优化：WebUI 中 todo add 显示任务描述，update 显示 #id → status，新增批次内序号前缀（#1, #2…）
+  终端渲染
+  - CJK/Emoji 表格边框对齐：修复 Markdown 表格中 CJK 字符和 Emoji 导致列边框错位的问题（#708），涉及 markdown.rs（约 150 行）和 width.rs（约 140 行）CJK 宽度计算优化
+  - Windows 粘贴合并：Windows Terminal / conhost 长文本分段粘贴（bracketed paste）合并为一个 [Pasted #N]，避免一次 Ctrl+V 出现数十个粘贴占位符（新增 coalesce_paste()，约 160 行单元测试覆盖）
+  - 斜杠命令参数粘贴展开：修复 /goal 等参数化斜杠命令中粘贴占位符未展开的问题——agent 不再收到字面 [Pasted #N] 字符串
+  - Kitty CSI-u 泄漏修复：移除 REPORT_EVENT_TYPES，防止 CSI-u 释放报告泄漏到输入框，干扰后续输入
+  - Kitty panic 键盘状态清理：panic hook 中清理 Kitty 键盘标志位，panic=abort 跳过 Drop 时确保终端状态一致；restore_terminal_if_tui() 增加全量 panic-safe 恢复序列
+  - 菜单切换 CJK 残影清除：菜单切换时强制清除 CJK 残影字符残留
+  - /skills 搜索改进：使用子串匹配（contains）替代前缀匹配（starts_with），搜索技能时能匹配名称中包含关键词的 skill（#686）
+  - 模型切换后状态栏刷新：切换模型后状态栏上下文窗口立刻跟随更新，无需等到下一轮对话（UiState::on_model_window_changed，覆盖 /model 选择器、磁盘配置重载、webui 镜像切换三种场景）
+  Provider / 网络
+  - v2 max_tokens 发送：修复 v2 引擎不发送 max_tokens 导致上游隐形 small-cap 截断长回复（finish_reason=length）的问题。BridgeConfig 新增 max_tokens 字段，三适配器（Anthropic/Ollama/OpenAI-compat）补齐与 v1 一致的 fallback 算法
+  - usage 缺失时上下文压力估算：部分网关不返回 usage.prompt 时，自动降级为基于请求字节量估算上下文利用率（Message::estimate_tokens()，~4 bytes/token，图片≈1600 tok），防止自动压缩永不触发导致上下文无界增长
+  - 401 认证友好提示：v2 引擎中 atomgit-gateway 401 错误不再裸抛上游原文，改为 i18n 友好提示「认证已过期，请执行 /login 重新登录」或「Authentication expired — please run /login to sign in again」
+  - bash 输出终端过滤：stdout/stderr 数据块增加 sanitize_terminal_output 过滤，防止终端转义序列泄漏
+  JSON 修复
+  - 控制字符转义：LLM 产出工具调用参数中的未转义字面控制字符（\n \r \t 等）转义为合法 JSON escape 序列（escape_unescaped_control_chars_in_strings），所有工具均受益。新增多个单元测试覆盖 repair_tool_args（#619）
+  - 修复工具详情文件名显示：修复 repair_tool_args 修复 JSON 后，format_tool_detail 中文件名等详情在 UI 中不显示的问题
+  Referral / 营销页面
+  - 手机号格式校验：支付弹窗新增手机号格式校验，支持大陆手机号或 +国家码 国际手机号
+  - SID 持久化降级：增加 localStorage 降级读取和认证失败 900ms 后重试一次，覆盖新 tab / 移动端恢复场景
+  - Toast 样式优化：支持 error 类型展示（红色边框），支持字段级和服务端错误分类展示（bad_request / auth / network / server / unknown），ARIA 可访问性改进（role="status" + aria-live="polite"）
+  - 预发布环境标识：header 新增橙色预发布标识
+  其他修复
+  - CLI 插件安装支持裸名称：atomcode plugin install <plugin> 支持不带 @marketplace 后缀的裸插件名，自动解析市场；多市场匹配时给出列表提示（行为与 TUI 的 /plugin install 一致）
+  - todo 工具返回值增强：add 返回完整任务列表，update 返回任务标题和列表（不再仅返回简短操作确认）
+  - config/mod.rs 测试格式化：测试代码格式化调整，无行为变化
+
+  🔧 重构（Refactoring）
+  - 重试抖动算法优化（共创大赛）：采用真实逐调用随机 jitter（wall-clock subsec-nanos），修复锁步重试（所有客户端同时退避）和文档 ±25% 但实现 ±12.5% 的问题，核心和能力层统一设计，新增纯度/单调性/亚 2ms 安全等测试
+  - JetBrains：CefLoadHandler 替代 Timer：JS 就绪检测从 Timer 轮询改为 onLoadEnd 回调，简化状态管理
+ReleaseNotesUrl: https://atomgit.com/atomgit_atomcode/atomcode/releases/v4.25.4
+Documentations:
+- DocumentLabel: 文档
+  DocumentUrl: https://atomcode.atomgit.com/docs/zh/index.html
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

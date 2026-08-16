@@ -1,0 +1,44 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: endev.aube
+PackageVersion: 1.25.0
+PackageLocale: en-US
+Publisher: en.dev
+PublisherUrl: https://en.dev/
+PublisherSupportUrl: https://github.com/endevco/aube/discussions/categories/troubleshooting-and-bugs
+Author: en.dev
+PackageName: aube
+PackageUrl: https://aube.en.dev/
+License: MIT
+LicenseUrl: https://github.com/endevco/aube/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 en.dev inc
+CopyrightUrl: https://github.com/endevco/aube/blob/HEAD/LICENSE
+ShortDescription: A fast Node.js package manager
+Description: |-
+  aube is a package manager for Node.js projects. It uses pnpm-style isolated node_modules for fast, disk-efficient installs.
+
+  Existing projects keep their lockfile format. aube reads and writes pnpm-lock.yaml, package-lock.json, npm-shrinkwrap.json, yarn.lock, and bun.lock in place. New projects without a supported lockfile get aube-lock.yaml.
+
+  Why Try It
+  - Fast installs. Warm installs are about 8x faster than pnpm and about 5x faster than Bun in the current benchmarks. Repeat test commands run up to 35x faster than pnpm and up to 5x faster than Bun.
+  - Existing lockfiles. Reads and writes pnpm-lock.yaml, package-lock.json, npm-shrinkwrap.json, yarn.lock, and bun.lock in place.
+  - Cheap repeat commands. aubr test, aube test, and aube exec vitest auto-install when dependencies are stale, then skip that work when nothing changed. aubx uses a local binary when one is installed, or a throwaway environment for one-off tools.
+  - Less disk use. A global content-addressable store lets projects share package files instead of keeping a full copy of the same dependencies in every checkout.
+  - Secure defaults. Out of the box, exotic transitive deps are blocked, lifecycle scripts wait for approval, trust downgrades fail at resolve, and brand-new releases sit in a 24h cooling window. One paranoid: true line adds the build jail and turns the soft gates into hard fails.
+Moniker: aube
+ReleaseNotes: |-
+  A new opt-in shell activation flow lets node, npm, pnpm, yarn, and friends route through aube without a prefix, plus resolver and npm-lockfile fixes for parity with pnpm.
+  Added
+  - Shell-activated tool shims (#945 by @jdx) — aube activate <bash|zsh|fish> creates (or refreshes) a per-user shim directory, sets AUBE_SHIM_DIR, and prints a shell snippet that prepends it to PATH. The shims dispatch via multicall argv[0] rewrites, mapping node, npm, npx, pnpm, pnpx, yarn, and yarnpkg onto their matching aube subcommands (including npm install → install vs add, bare yarn → install, and PM --version/--help handling). A new aube node [ARGS]… runs the project-resolved Node binary directly. On startup, sanitize_process_path strips the shim directory from PATH so runtime probes and child spawns don't recurse through the shims, and a new ERR_AUBE_SHIM_* family covers shim creation and exec failures. runtime set -g's messaging now points at activation instead of claiming there are no shims.
+  - Globs and version unions in minimumReleaseAgeExclude (#941 by @todd-elvers) — The setting previously matched package names exactly, so there was no way to exempt a whole scope or a specific version from the age gate. It's now backed by the same TrustExcludeRules engine pnpm uses, accepting bare names (react), * globs (@myorg/*), and exact-version unions (nx@21.6.5, webpack@4.47.0 || 5.102.1). Semver ranges like ^1.0.0 remain rejected, matching pnpm. The exemption is threaded per-candidate-version through pick_version and prefer_non_vulnerable_pick, so an exempt safe version can no longer be discarded in favor of a vulnerable one. Malformed entries now warn with WARN_AUBE_INVALID_MINIMUM_RELEASE_AGE_EXCLUDE and are dropped individually instead of silently invalidating the rest of the list.
+
+  Fixed
+  - Preserve npm optional natives across platforms (#942 by @jdx) — When no explicit supportedArchitectures is set, configure_resolver now widens architectures with accept_all: true for LockfileKind::Npm and NpmShrinkwrap, matching pnpm/aube/bun behavior. Regenerated package-lock.json / npm-shrinkwrap.json files keep foreign optional natives (e.g. win32-only optionals on Linux CI), while host-scoped filter_graph and fetch gating still keep mismatched optionals out of node_modules. Closes the regression reported in discussion #938.
+
+  💚 Sponsor aube
+  aube is part of jdx.dev — an independent developer-tooling studio run by @jdx, also behind mise. Work on aube is funded entirely by sponsors.
+  If aube is saving your team install time or CI minutes, please consider sponsoring at jdx.dev. Individual and company sponsorships are what keep the project fast, free, and independent.
+ReleaseNotesUrl: https://github.com/jdx/aube/releases/tag/v1.25.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

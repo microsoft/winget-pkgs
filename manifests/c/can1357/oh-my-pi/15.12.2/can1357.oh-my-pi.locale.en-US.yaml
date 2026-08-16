@@ -1,0 +1,49 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: can1357.oh-my-pi
+PackageVersion: 15.12.2
+PackageLocale: en-US
+Publisher: Can Bölük
+PublisherUrl: https://can.ac/
+PublisherSupportUrl: https://github.com/can1357/oh-my-pi/issues
+Author: Can Bölük
+PackageName: oh-my-pi
+PackageUrl: https://omp.sh/
+License: MIT
+LicenseUrl: https://github.com/can1357/oh-my-pi/blob/HEAD/LICENSE
+Copyright: |-
+  Copyright (c) 2025 Mario Zechner
+  Copyright (c) 2025-2026 Can Bölük
+ShortDescription: ⌥ AI Coding agent for the terminal — hash-anchored edits, optimized tool harness, LSP, Python, browser, subagents, and more
+Description: |-
+  omp is a terminal-first coding agent that runs on your machine, talks to any provider, and treats sessions like git branches.
+  omp (pronounced “oh-em-pi”, binary omp) is a fork of Mario Zechner’s Pi. It runs as a single Bun process, drives any model provider you have credentials for, and ships a flat tool surface the model uses to read code, run commands, edit files, drive a debugger, and spawn subagents that coordinate over an in-process IRC bus.
+  Sessions persist as JSONL under ~/.omp/agent/sessions/. You resume, fork, branch, and share them. Settings, credentials, plugins, and caches all live under ~/.omp/agent/. Nothing leaves the machine unless you call a tool that does.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  @oh-my-pi/pi-coding-agent
+  Fixed
+  - Collab links now dot-join the room secret (<roomId>.<key>, host/r/<roomId>.<key>) instead of using a second #: RFC 3986 forbids a raw # inside a URL fragment, so macOS Foundation (behind terminal click-to-open) percent-encoded the browser deep link's second # to %23 and the web client rejected the session. /join, omp join, and the web client still accept legacy #-joined links and leniently decode %23-mangled ones
+  - Fixed brew install can1357/tap/omp failing on macOS with sandbox-exec … exited with 1: the generated Formula/omp.rb (rendered by scripts/ci-update-brew-formula.ts) now stamps using: :nounzip on every per-platform url so Homebrew leaves the bare Mach-O/ELF asset in the staging CWD (the previous Dir["omp-*"].first returned nil because UnpackStrategy::Uncompressed#extract_nestedly nested the file outside it), and wraps generate_completions_from_executable in with_env(HOME: buildpath) so the popened binary's ~/.omp lookup goes to the writable staging dir instead of the sandbox-denied real home (#2398)
+  @oh-my-pi/collab-web
+  Fixed
+  - Link parsing accepts the new dot-joined room secret (<roomId>.<key>, /r/<roomId>.<key>) and leniently decodes %23-mangled legacy deep links (macOS Foundation percent-encodes a second # when terminals open clicked links), which previously failed to connect
+  What's Changed
+  - fix(brew): unbreak the generated homebrew formula install by @roboomp in https://github.com/can1357/oh-my-pi/pull/2399
+  Full Changelog: https://github.com/can1357/oh-my-pi/compare/v15.12.1...v15.12.2
+ReleaseNotesUrl: https://github.com/can1357/oh-my-pi/releases/tag/v15.12.2
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://omp.sh/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

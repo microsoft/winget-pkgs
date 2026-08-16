@@ -1,0 +1,164 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: BiomeJS.Biome
+PackageVersion: 2.5.7
+PackageLocale: en-US
+Publisher: BiomeJS
+PublisherUrl: https://biomejs.dev/
+PublisherSupportUrl: https://github.com/biomejs/biome/issues
+Author: Biome Developers and Contributors
+PackageName: Biome
+PackageUrl: https://biomejs.dev/
+License: Apache-2.0
+Copyright: Copyright (c) 2023-present Biome Developers and Contributors
+ShortDescription: Biome is a toolchain for web projects, aimed at providing functionalities to maintain them. It offers a formatter and linter, usable via CLI and LSP.
+Moniker: biome
+Tags:
+- css
+- formatter
+- javascript
+- json
+- jsx
+- linter
+- static-code-analysis
+- typescript
+- web
+ReleaseNotes: |-
+  2.5.7
+
+  Patch Changes
+  - #10822 c171b3b Thanks @pkallos! - Added the option ignoreIfStatements to useNullishCoalescing. Biome now flags if statements that only assign to a nullish variable (such as if (!a) { a = b }) and can rewrite them to ??=. When enabled, Biome ignores those if statements.
+  - #11136 e63354c Thanks @AkashNaickar! - Added a new nursery rule noExtendNative, which reports extending the prototype of a built-in object.
+  - #10094 e007143 Thanks @THEjacob1000! - Added the nursery rule noTailwindArbitraryValue. Biome now reports Tailwind CSS arbitrary values such as w-[400px], including in HTML/JSX class attributes, configured utility functions, and tagged templates.
+  - #11184 135f476 Thanks @subotac! - Fixed #11176: noUnknownPseudoClass now recognizes Vue's :deep() pseudo-class inside .vue style blocks.
+  - #8239 a519f9d Thanks @cormacrelf! - Fixed #8233, where Biome CLI in
+    stdin mode didn't work correctly when handling files in projects with nested
+    configurations. For example, with the following structure,
+    --stdin-file-path=subdirectory/... would not use the nested configuration in
+    subdirectory/biome.json:
+    ├── biome.json
+    └── subdirectory
+        ├── biome.json
+        └── lib.js
+    biome format --write --stdin-file-path=subdirectory/lib.js < subdirectory/lib.js
+    Now, the nested configuration is correctly picked up and applied.
+    In addition, Biome now shows a warning if --stdin-file-path is provided but
+    that path is ignored and therefore not formatted or fixed.
+  - #11138 8c2c6bd Thanks @ematipico! - Fixed noUnnecessaryConditions: Biome now chooses the same function overload as TypeScript when an argument is a callback, so conditions that were previously missed are reported.
+    The following code is now invalid, because a parameter typed () => void accepts an async callback and schedule therefore returns string:
+    declare function schedule(handler: () => void): string;
+    declare function schedule(handler: () => Promise<void>): string | undefined;
+    schedule(async () => {}) ?? "fallback";
+    The following code is also now invalid, because map(() => 42) returns 42:
+    type Mapper<T> = () => T;
+    declare function map<T>(mapper: Mapper<T>): T;
+    map(() => 42) || flag;
+  - #11138 8c2c6bd Thanks @ematipico! - Fixed #11087: noUnnecessaryConditions no longer reports optional chains and nullish coalescing whose receiver can be nullish.
+    For example, the optional chain and fallback in the following code are no longer reported:
+    declare const usage: { range: { startDate: string } } | null;
+    const startDate = usage?.range.startDate ?? "N/A";
+  - #11118 9c16840 Thanks @subotac! - Fixed #11098: The HTML formatter now preserves the configured trailing newline when a file ends with a comment.
+    -<!-- trailing comment -->
+    \ No newline at end of file
+    +<!-- trailing comment -->
+  - #11201 0e80610 Thanks @Bishwas-py! - Fixed #11182: suppression comments for noPositiveTabindex now suppress the rule in HTML files when the attributes of the element span multiple lines.
+  - #11079 607afd2 Thanks @dyc3! - The HTML formatter now lays out the srcset attribute of <img> and <source> as the list of candidates it is. Runs of whitespace between candidates collapse, and once the list no longer fits on one line each candidate goes on its own line with the descriptors aligned:
+    - <img srcset="/visual@0.5.png  400w, /visual.png 805w, /visual@2x.png 1610w, /visual@3x.png 2415w" />
+    + <img
+    +   srcset="
+    +     /visual@0.5.png  400w,
+    +     /visual.png      805w,
+    +     /visual@2x.png  1610w,
+    +     /visual@3x.png  2415w
+    +   "
+    + />
+  - #11156 fed72c7 Thanks @saberoueslati! - Fixed #11129: noUnusedVariables no longer reports Vue bindings as unused when they are assigned through automatically unwrapped template refs.
+  - #11124 d890b39 Thanks @denbezrukov! - Fixed CSS formatting of line comments between a declaration colon and value to preserve their source indentation.
+     .test {
+       background:
+    -  /////// foo
+    -  // bar
+    +        /////// foo
+    +        // bar
+         radial-gradient(circle, #000, transparent);
+     }
+  - #11113 3d8ab73 Thanks @denbezrukov! - Fixed CSS formatting of long block comments between comma-separated property values:
+     .foo {
+       box-shadow:
+    -    1000px /* long long long long long long long long long long long long comment */ 1000px /* long long long long long long long long long comment */ 2px color(srgb 0.555555555 0.555555555 0.555555555),
+    +    1000px
+    +      /* long long long long long long long long long long long long comment */
+    +      1000px /* long long long long long long long long long comment */ 2px
+    +      color(srgb 0.555555555 0.555555555 0.555555555),
+         1px 1px black;
+     }
+  - #11127 da5c1a5 Thanks @dyc3! - The HTML formatter now picks the quote character for an attribute by counting the quotes in the value rather than looking only for a double quote. &apos; and &quot; count as the characters they stand for, and only the character that ends up as the delimiter stays escaped:
+    - <div title='123 &apos;&quot; 456'></div>
+    + <div title="123 '&quot; 456"></div>
+    Entities that are not quotes, such as &amp; or &[#39](https://github.com/biomejs/biome/issues/39);, are left exactly as written.
+  - #11193 77035bb Thanks @dyc3! - Fixed the HTML formatter collapsing the blank line between an element and the text that follows it. A blank line before text is now kept, the way one before another element already was:
+      <div>foo</div>
+    -
+      text
+  - #11106 ad80f57 Thanks @dyc3! - The HTML formatter now writes the HTML5 doctype in lowercase, matching Prettier:
+    - <!DOCTYPE html>
+    + <!doctype html>
+    This only applies to a plain .html file whose doctype stands alone. A doctype that names a DTD keeps the case it was written with, since the rest of the declaration is not lowercased either:
+    <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+    A .vue, .svelte, or .astro file keeps whatever the author wrote.
+  - #11188 60679db Thanks @dyc3! - Fixed the HTML formatter printing a comment twice when it ended the line of the last element in a document:
+    - text<!-- a --><!-- a -->
+    + text<!-- a -->
+  - #11077 4dcd0d9 Thanks @dyc3! - Fixed a bug where the HTML formatter collapsed the whitespace inside <textarea>, <xmp> and <plaintext>, changing what the page renders.
+    - <textarea>
+    -  line one
+    - line two </textarea>
+    + <textarea>line one line two</textarea>
+    Biome now prints the content of these elements exactly as it appears in the source, matching the existing behavior for <pre>.
+  - #11194 abfbb11 Thanks @dyc3! - Fixed the HTML formatter refusing to format a Svelte file containing an array pattern that skips a position:
+    {#each animals as [, value]}
+            <p>{value}</p>
+    {/each}
+  - #10094 e007143 Thanks @THEjacob1000! - Fixed useSortedClasses to correctly detect unsorted classes in static member expression tagged templates (e.g. tw.div\...``). Previously, these were silently skipped due to surrounding whitespace trivia not being stripped from the tag name.
+  - #11078 10da30e Thanks @dyc3! - Fixed Vue single-file components failing to parse when they contain a custom block such as <i18n> or <docs>, or a <template> written in another language. Their content is no longer read as HTML, so a block may hold whatever its own tooling expects:
+    <docs>
+    This block is prose, and it may mention a `<my-component>` without closing it.
+    </docs>
+    <template lang="pug">
+      .test
+        #foo
+    </template>
+    Previously both blocks produced a parse error and the whole file was left unformatted. Biome now prints their content unchanged while still formatting the opening tag.
+  - #11231 4afd901 Thanks @ematipico! - Improved the performance of the following lint rules:
+    - noArguments.
+    - noGlobalAssign.
+    - noUndeclaredVariables.
+    - noRestrictedGlobals.
+    - noInvalidUseBeforeDeclaration.
+    - noShadow.
+    - noRedeclare.
+  - #11134 2fa0a62 Thanks @yanthomasdev! - Clarified the warning emitted when using the experimental json and json-pretty reporters.
+  - #11198 ed88b13 Thanks @saberoueslati! - Fixed #11171: variables referenced only inside a Svelte attachment ({@attach ...}) are no longer reported as unused by noUnusedVariables and noUnusedImports.
+  - #11155 6ee17ea Thanks @dyc3! - Improved performance when printing diagnostics to the console.
+  - #11160 217f8ad Thanks @dyc3! - Improved the performance of noFloatingPromises by skipping type inference for assignment statements, which are always considered handled.
+  - #11159 26c23d9 Thanks @saberoueslati! - Fixed #11144: noFloatingPromises no longer reports already-awaited optional Promise values.
+  - #11138 8c2c6bd Thanks @ematipico! - Fixed #11121: noUnnecessaryConditions no longer reports conditions based on an inapplicable function overload.
+    For example, the condition in the following code is no longer reported because query({}) selects the overload that returns boolean:
+    declare function query(options: { initial: string }): { isPending: false };
+    declare function query(options: { initial?: string }): { isPending: boolean };
+    const { isPending } = query({});
+    isPending || fallback;
+  - #11152 c4fc6a9 Thanks @dyc3! - Improved the performance of collecting rule timings with --profile-rules in heavily multithreaded environments.
+  - #11128 4d3ff76 Thanks @ematipico! - Fixed #7635: noDeprecatedImports now detects deprecated ambient declarations that are exported separately.
+  - #11117 01f7ef5 Thanks @subotac! - Fixed #11014: noDelete no longer reports process.env["FOO"] style property deletions.
+  - #11168 9847e68 Thanks @saberoueslati! - Added the nursery rule noNonScalableViewport, which reports viewport metadata that disables user scaling with user-scalable=no.
+    For example:
+    <meta name="viewport" content="width=device-width, user-scalable=no" />
+  - #11154 a1d6b1f Thanks @dyc3! - Improved the performance of noImportCycles by skipping graph traversals for imports that cannot be part of a cycle.
+ReleaseNotesUrl: https://github.com/biomejs/biome/releases/tag/@biomejs/biome@2.5.7
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://biomejs.dev/guides/getting-started/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

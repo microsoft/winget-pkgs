@@ -1,0 +1,56 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: rich-ayr.win11-toggle-rounded-corners
+PackageVersion: '1.3'
+PackageLocale: en-US
+Publisher: Rich Ayr
+PublisherUrl: https://github.com/rich-ayr
+PublisherSupportUrl: https://github.com/rich-ayr/win11-toggle-rounded-corners/issues
+Author: Rich Ayr
+PackageName: Win11 Toggle Rounded Corners
+PackageUrl: https://github.com/rich-ayr/win11-toggle-rounded-corners
+License: MIT
+LicenseUrl: https://github.com/rich-ayr/win11-toggle-rounded-corners/blob/master/LICENSE
+Copyright: Copyright (C) 2026 Rich Ayr, MIT License
+CopyrightUrl: https://github.com/rich-ayr/win11-toggle-rounded-corners/blob/master/LICENSE
+ShortDescription: A simple utility to disable rounded window corners on Windows 11
+Tags:
+- meson
+- tweaks
+- windows
+- windows-11
+- windows-tweaks
+ReleaseNotes: |-
+  Adds automatic elevation, a smaller-corners option, and a modernized codebase.
+  New
+  - The tool now requests administrator rights on launch, so starting it from Explorer, a
+    shortcut or the installer brings up the standard UAC prompt instead of failing with
+    "make sure you are running as admin". Note that every invocation now needs elevation,
+    including --help.
+  - --small option for a subtler alternative to fully square corners (thanks @amnweb!)
+  Changed
+  - Failures now say what actually went wrong. Where v1.2 printed status: 0x5, you now get
+    Access is denied. (0x5), with the Windows error text alongside the code.
+  - The installer now tells you when the "run automatically on logon" scheduled task could
+    not be created, instead of leaving it silently missing.
+  Removed
+  - The --no-patching fallback. It pulled in Zydis (a full x86 disassembler) just
+    for this one option, inflating the binary for a niche feature with worse visual
+    results than the primary .rdata patching method, which has been the default
+    all along and is now the only option. If you'd rather keep using it, v1.2 still
+    has it. Normal usage (--disable/--enable/--small) is unaffected.
+  Under the hood
+  - Modernized the codebase to C++23/26.
+  - Opens dwm.exe with just the memory read/write access the patch needs, rather than
+    requesting full access to the process.
+  - Every Win32 handle is now owned by an RAII guard instead of being closed by hand on each
+    exit path, so the process handle, snapshot, token and loaded module are all released even
+    when an error cuts the patch short.
+  - Builds are now reproducible and carry a signed build-provenance attestation via
+    GitHub Actions. Verify a download with:
+    gh attestation verify <file> -R rich-ayr/win11-toggle-rounded-corners
+  - Formatting is enforced in CI with clang-format.
+ReleaseNotesUrl: https://github.com/rich-ayr/win11-toggle-rounded-corners/releases/tag/v1.3
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

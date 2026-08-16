@@ -1,0 +1,115 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Watfaq.ClashRS
+PackageVersion: 0.10.8
+PackageLocale: en-US
+Publisher: Watfaq Technologies Pty Ltd
+PublisherUrl: https://github.com/Watfaq
+PublisherSupportUrl: https://github.com/Watfaq/clash-rs/issues
+Author: Watfaq Technologies Pty Ltd
+PackageName: ClashRS
+PackageUrl: https://github.com/Watfaq/clash-rs
+License: Apache-2.0
+LicenseUrl: https://github.com/Watfaq/clash-rs/blob/HEAD/LICENSE
+ShortDescription: A custom protocol, rule based network proxy software.
+Moniker: clash-rs
+Tags:
+- clash
+- network
+- proxy
+- vpn
+ReleaseNotes: |-
+  🚀 Features
+  - Auto-reload local file rule/proxy-providers on change (#1465) by @Copilot
+  - (tun) Add FreeBSD tun support via FIB multi-table routing (#1475) by @lakako
+  🐛 Bug Fixes
+  - (config) Ignore unknown fields for forward-compatible parsing (#1471) by @Copilot
+  - (hysteria2) Refresh the UDP poller after port hops (#1482) by @cedar-otter-47
+  - (ws) Percent-encode spaces in WebSocket paths (#1480) by @cedar-otter-47
+  - (urltest) Honor tolerance and skip unavailable proxies (#1481) by @cedar-otter-47
+  🚜 Refactor
+  - (dispatcher,transport) Dedup tracked streams + TransportLayer enum (#1477) by @ibigbug
+  🛠️ Builds
+  - (deps) Bump the npm-dependencies group in /clash-dashboard with 17 updates (#1462) by @dependabot[bot]
+  - (deps) Bump the actions-dependencies group with 6 updates (#1461) by @dependabot[bot]
+  - (deps) Bump the rust-dependencies group with 32 updates (#1463) by @dependabot[bot]
+  - (deps) Bump cmov from 0.5.3 to 0.5.4 (#1469) by @dependabot[bot]
+  - (deps) Bump body-parser from 2.2.2 to 2.3.0 in /clash-dashboard (#1479) by @dependabot[bot]
+  - (deps) Bump brace-expansion from 5.0.6 to 5.0.7 in /clash-dashboard (#1478) by @dependabot[bot]
+  - (deps) Bump serde_with from 3.20.0 to 3.21.0 (#1474) by @dependabot[bot]
+  ⚙️ Miscellaneous Tasks
+  - Bump shadowquic version (#1476) by @spongebob888
+  - Bump version to v0.10.8 by @github-actions[bot]
+  Other
+  - Add Hysteria2 inbound listener (#1466)
+  - Initial plan
+  - Add Hysteria2 inbound listener (issue #1460)
+  - Fix UdpPacket src_addr/inbound_user in Hysteria2InboundDatagram
+  - Refactor user watch-channel creation to use match with OR patterns
+  - fix(hysteria2 inbound): keep connection alive after auth; harden UDP/TCP paths
+  Address review findings on the Hysteria2 inbound listener.
+  - Keep the h3 server connection alive for the QUIC connection's lifetime.
+    authenticate() previously dropped it on return, and h3's Drop closes the
+    underlying QUIC connection — so every proxy stream/datagram failed
+    immediately after a successful auth, making the inbound non-functional.
+  - Bounds-check the UDP packet decoder before split_to(addr_len); a malformed
+    datagram with an oversized address length previously panicked the datagram
+    task (a remote DoS under panic = "abort").
+  - Send the correct address in UDP reply datagrams: use the upstream source
+    (src_addr), not the client's own address (dst_addr), so clients can
+    correlate replies (e.g. DNS-over-Hysteria2).
+  - Evict per-session Defraggers: move fragment state into the session map so
+    it is dropped when the session ends, instead of a separate map that grew
+    unbounded per distinct session id.
+  - Use try_send on the per-session datagram channel so one stalled UDP
+    destination cannot head-of-line-block every other session on the connection.
+  - Preserve payload bytes pipelined into the request frame via into_parts()
+    instead of discarding the read buffer with into_inner().
+  - Reject empty auth passwords so a blank password cannot become an open relay.
+  - Guard Fragments against underflow/divide-by-zero when the advertised max
+    datagram size is smaller than the frame header.
+  - Treat a request frame split across QUIC reads as "need more bytes" instead of
+    a fatal decode error.
+  - Canonicalize the client address before the allow_lan check (dual-stack
+    IPv4-mapped IPv6), matching the other inbounds.
+  - Remove a duplicate address parser; add regression tests for the UDP decode
+    bounds check and partial-frame handling.
+  - style: fix typos spellcheck (avoid 'mis' fragment in comment)
+  - refactor(hysteria2): split inbound/outbound and share stream/codec/TLS helpers
+  Reorganize the hysteria2 module to match the shadowsocks layout and remove
+  duplication between the client and server sides:
+  - Move the outbound client implementation from mod.rs into outbound/mod.rs;
+    mod.rs is now a thin module root that declares submodules and re-exports the
+    outbound surface (Handler, HystOption, Obfs, SalamanderObfs).
+  - Add a shared stream.rs unifying the outbound HystStream and inbound
+    HystServerStream into one HystStream (with an optional read prefix for the
+    server's pipelined-bytes case).
+  - Merge the duplicate Hy2TcpRespMsg into Hy2TcpResp (Hy2TcpResp::ok()).
+  - Extract resolve_server_cert_and_key into common/tls.rs and use it from
+    both the anytls and hysteria2 inbounds instead of copy-pasted load-or-generate
+    cert logic.
+  - fix(hysteria2): correct test_utils path after outbound module move
+  - fix(hysteria2 inbound): bound request lengths, validate auth request
+  Address review feedback:
+  - Cap the client-supplied address and padding lengths in Hy2TcpReqCodec
+    (MAX_ADDR_LEN / MAX_PADDING_LEN) so a bogus varint length can't force
+    unbounded buffering (memory DoS).
+  - Validate the auth handshake is POST /auth and 404 anything else, so an
+    unrelated first request isn't treated as authentication.
+  - Add codec unit tests: full-frame decode, oversized-length rejection, and
+    response encode/decode round-trip.
+  - style: nightly rustfmt for test imports
+
+  Co-authored-by: copilot-swe-agent[bot] 198982749+Copilot@users.noreply.github.com
+  Co-authored-by: Yuwei B contact@yba.dev by @Copilot
+  New Contributors ❤️
+  - @cedar-otter-47 made their first contribution in #1481
+  - @lakako made their first contribution in #1475
+  Full Changelog: https://github.com/Watfaq/clash-rs/compare/v0.10.7...v0.10.8
+ReleaseNotesUrl: https://github.com/Watfaq/clash-rs/releases/tag/v0.10.8
+Documentations:
+- DocumentLabel: User Manual
+  DocumentUrl: https://watfaq.gitbook.io/clashrs-user-manual
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

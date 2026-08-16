@@ -1,0 +1,35 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: cataggar.ghr
+PackageVersion: 0.3.0
+PackageLocale: en-US
+Publisher: cataggar
+PublisherUrl: https://github.com/cataggar
+PublisherSupportUrl: https://github.com/cataggar/ghr/issues
+PackageName: ghr
+PackageUrl: https://github.com/cataggar/ghr
+License: MIT
+LicenseUrl: https://github.com/cataggar/ghr/blob/HEAD/LICENSE
+ShortDescription: An installer for GitHub releases.
+Moniker: ghr
+Tags:
+- cli
+- github
+- installer
+ReleaseNotes: |-
+  A toolkit for GitHub releases.
+  Highlights since v0.2.1
+  - Sigstore + minisign + Authenticode verification. Every install/download checks any sigstore bundle, minisign sidecar, Authenticode signature, and SHA-256 sidecar published by the upstream release, fail-closed on mismatch. Pass a minisign key inline per-spec (ghr install owner/repo@tag <pubkey>) or via --minisign; narrow skip flags (--skip-sigstore, --skip-minisign, --skip-authenticode, --skip-checksum) cover the bypass cases. (#80, #81, #88)
+  - Multi-spec installs and downloads. ghr install A B C and ghr download A B C share a single HTTP client + auth context. New composite actions cataggar/ghr/actions/install@v1 and cataggar/ghr/actions/download@v1 cache the resulting binaries across CI runs. (#83)
+  - Signed, reproducible releases. Linux/macOS .tar.gz archives are byte-reproducible from the tagged commit, Windows .zip archives use deterministic forward-slash paths after an Authenticode-strip pass, and every archive ships *.sigstore.json and *.minisig sidecars signed by the release workflow. (#76, #82, #86, #89, #93)
+  - ghr list surfaces the minisign key it actually trusted at install time, so the entire line is directly pasteable as ghr install args on future upgrades. (#94)
+  - Bug fixes. Recover the executable bit on extracted .zip assets (#87); fix Windows-only CI smoke failures (#92).
+  Install:
+  pipx install ghr-bin==0.3.0
+  uv tool install ghr-bin==0.3.0
+  winget install ghr --version 0.3.0
+  ghr install cataggar/ghr@v0.3.0 RWSbsumpaHb+N3KCEt/EUXQ5y6Kkk8r/zCb5Z4jhEuEX8x2/U5wr5QC0
+ReleaseNotesUrl: https://github.com/cataggar/ghr/releases/tag/v0.3.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,83 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: qingchencloud.ClawPanel
+PackageVersion: 0.19.0
+PackageLocale: zh-CN
+Publisher: openclaw
+PublisherUrl: https://qingchencloud.com/
+PublisherSupportUrl: https://github.com/qingchencloud/clawpanel/issues
+PrivacyUrl: https://qingchencloud.com/privacy.html
+Author: 武汉晴辰天下网络科技有限公司
+PackageName: ClawPanel
+PackageUrl: https://github.com/qingchencloud/clawpanel
+License: AGPL-3.0
+LicenseUrl: https://github.com/qingchencloud/clawpanel/blob/HEAD/LICENSE
+Copyright: © 2026 武汉晴辰天下网络科技有限公司
+ShortDescription: "\U0001F99E OpenClaw 可视化管理面板 — 内置 AI 助手（工具调用 + 图片识别 + 多模态），一键安装"
+Tags:
+- openclaw
+- 人工智能
+- 大语言模型
+- 智能体
+- 聊天机器人
+- 自主智能
+- 龙虾
+ReleaseNotes: |-
+  新功能 (Features)
+  - 创作中心与后台生成队列 — 新增图片、视频生成和本地产物管理；提交后立即进入持久化后台队列，支持并发控制、队列状态、历史记录、重启恢复和批量连续提交
+  - 多服务商媒体生成 — 支持火山方舟、OpenAI / GPT 与 NewAPI / OpenAI 兼容网关，可分别配置 API Key、Base URL、图片模型、视频模型、超时和产出目录
+  - 统一模型渠道 — 新增统一渠道页，一处维护服务商、接口、密钥和模型列表，并显式同步到 OpenClaw、Hermes 与晴辰助手；支持从 OpenClaw 导入、在线拉取模型和未同步状态提示
+  - U 盘便携模式双向迁移 — 支持迁移到便携目录及从 U 盘迁回本机；配置、Agent、记忆、模型渠道和媒体数据一并迁移，目标已有数据会先备份再切换
+  兼容性 (Compatibility)
+  - OpenClaw 2026.7.1 稳定版适配 — 推荐稳定版切换到官方 2026.7.1 / 汉化修复版 2026.7.1-zh.2；桌面端、Web/headless、Linux 部署与 standalone 安装统一使用同一稳定基线
+  - OpenClaw 7.1 Node.js 门槛对齐 — 优先读取安装包 engines.node，缺少包元数据时按 >=22.22.3 <23 || >=24.15.0 <25 || >=25.9.0 兜底，避免误放行 Node.js 23 或过旧的 24.x
+  - OpenClaw 7.1 配置契约对齐 — 旧字符串模型自动迁移为含 id/name 的完整对象，旧 Codex Responses API 类型迁移到正式名称；未知 API 类型和模型能力元数据继续保留
+  - Hermes Agent 稳定版跟进 — 安装与升级固定到 Hermes Agent 0.18.2 / v2026.7.7.2，同步最新 Provider Registry，并补齐 Gateway 运行所需的 croniter、httpx、openai、aiohttp、websockets
+  - Hermes Dashboard 兼容 — 优先使用上游 dashboard_auth，并提供受管 Web dist 作为 token bootstrap 兜底，桌面与 Web/headless 启动行为一致
+  改进 (Improvements)
+  - 模型同步改为可验证事务 — OpenClaw 只提交目标 provider 的最小补丁并回读核对；Hermes 在备份、落盘和回读成功后才标记同步完成；助手同步同样执行本地回读确认
+  - 模型密钥与能力字段无损往返 — 结构化 SecretRef、环境变量引用、上下文长度、输入能力和未知字段不会在编辑、导入或同步时被字符串化或丢失
+  - OpenClaw 安装升级原子化 — npm 安装会先校验目标 Node.js 要求；standalone 归档通过 SHA-256、版本和运行依赖校验后再 staging/backup 切换，失败自动恢复旧安装
+  - OpenClaw standalone 双源容灾 — 固定版本从 GitHub 下载时不再依赖 CDN latest.json；便携模式优先使用 U 盘内置 Node.js 与 CLI，并避免污染宿主机 PATH
+  - Hermes 安装体验完善 — 安装与升级日志实时输出，支持 PyPI / Git 镜像、断点续行和可操作错误提示；环境异常时停留等待用户处理，不再自动跳页
+  - Hermes 安装运行时加固 — 桌面端受管 uv 更新到 0.11.28，拒绝早于 0.11.24 的缓存冲突版本；wheel 元数据或分发缓存异常时自动使用隔离缓存重试，Web/headless 同步采用相同恢复策略
+  - Web 自定义域名兼容 — 自动配对会把浏览器当前 Origin 增量写入 Gateway 白名单，支持 HTTPS 域名和自定义端口部署
+  - 初始设置页首屏提速 — 本地检测先渲染、网络版本信息异步补充，并复用启动缓存，避免 npm registry 查询阻塞首屏
+  - 发布流水线加固 — CI 在三平台运行锁定依赖的 Node / Rust 测试、格式、编译和 lint；tag 发布前校验版本、tag 与 HEAD 一致性，并在全平台产物成功后统一发布
+  安全 (Security)
+  - 桌面运行时安全升级 — Tauri 升级到 2.11.1，修复远程页面可能混淆 Origin 并调用本地 IPC 的问题；tar 升级到 0.4.46，修复 PAX header 解析不同步问题
+  - OpenClaw 配置安全写入 — 配置修改使用备份、同目录临时文件、fsync、原子替换和回读校验；失败保留最后有效备份，避免模型配置保存导致主配置损坏
+  - 外部密钥引用保护 — 未改动的环境变量和结构化 SecretRef 不再阻断无关保存，也不会被当作明文写回；file / exec 引用不会被模型测试误当 API Key
+  - 媒体 API Key 防泄漏 — 下载产物时仅向与服务商 Base URL 同源的地址携带 Authorization，跨源重定向自动剥离密钥，并限制响应体大小与读取超时
+  - 助手付费生成必须确认 — 媒体生成工具默认关闭且需显式启用；图片、视频等付费请求在任何助手模式下都必须二次确认
+  - 便携迁移路径保护 — 拒绝父目录穿越、源目标重叠和目录链接绕过，失败迁移不会留下半成品 manifest 或覆盖现有目标
+  修复 (Fixes)
+  - OpenClaw 7.1 初次安装缺少运行依赖 — standalone 激活前校验 CLI 及核心运行依赖，失败不会替换现有安装；npm 与 standalone 路径统一按目标版本检查环境
+  - OpenClaw 7.1 Gateway 重载不稳定 — 配置写入交给内核 watcher 热重载，不再探测不存在的面板端口；Windows 启动终端会等待受管 Gateway 进程退出，关闭窗口即可停止服务
+  - 实时聊天长时间卡住 — 等待首个响应期间也可中止本次运行，输入状态变化会重新同步发送按钮；连接恢复后不会继续保持错误的禁用状态
+  - 模型配置破坏未知字段 — 保存和删除 provider 改为最小补丁及显式墓碑，保留其它 provider、认证资料和上游新增字段；旧模型结构会在写入前安全迁移
+  - 模型渠道下拉显示 [object Object] — API 类型选项改为可读名称，未知类型在编辑时仍保留原值供用户确认
+  - Hermes 安装 wheel 元数据无效 — 修复旧 uv 缓存冲突导致 annotated-types 报 Metadata field Name not found；自动升级受管运行时并在缓存异常时透明重试
+  - Hermes 0.18.2 Windows 启动后端口未就绪 — 所有 Hermes 子进程显式继承 ClawPanel 管理的 HERMES_HOME，避免新版平台默认目录变化导致读取空配置；启动前自动补齐 API Server 开关和随机强密钥，并保留已有合格密钥与其它环境配置
+  - Hermes 0.18.2 自定义模型无回复 — 旧版裸 custom 配置自动迁移为新版命名 Provider，继续使用用户原有 Base URL 和密钥环境变量；迁移前备份 config.yaml，保留其它模型及高级配置，避免请求误回退到 OpenRouter 后返回 401
+  - Hermes 仪表盘误导性 9119 入口 — 隐藏默认不运行且当前安装包不提供完整页面的原生 Dashboard 外链；继续保留 ClawPanel 内置仪表盘、实时聊天及内部按需 Dashboard API 能力
+  - 创作中心提交后按钮一直禁用 — 后台刷新后重新定位当前表单按钮，生成完成或失败都会正确解锁；图片和视频提交不再阻塞页面等待云端任务结束
+  - 视频任务瞬时错误失联 — 429 / 5xx 时保留任务并继续轮询；已有服务商任务 ID 的失败任务可恢复，无法识别任务 ID 时也保留原始响应供排查
+  - 媒体历史膨胀与大文件卡顿 — 持久化前裁剪大体积原始响应，预览限制 64MB 并限制缓存数量；跨端视频状态解析保持一致
+  - 便携迁移数据和状态异常 — 媒体配置与历史跟随 OpenClaw 数据迁移，失败会显示原因并保持原目标可恢复；Web 多实例查询固定在本地执行
+  - 未安装时反复跳回检测页 — 安装失败不再强制重置向导；窗口聚焦只在后台更新检测结果，API Key / 配置错误改为页面内持续展示
+  - 默认密码无提示挡住登录 — 使用出厂密码 123456 时，桌面与 Web 锁定页均直接提示并预填，登录后引导立即修改
+  - 移动端语言菜单点穿 — 关闭状态不再拦截点击，切换语言后同步收起菜单和侧栏并更新 html lang
+  - 跨平台发布被 Tauri 版本校验拦截 — 前端 @tauri-apps/api 与 Rust Tauri 同步到 2.11 系列，并增加锁文件主次版本一致性回归测试
+  测试与验证 (Testing)
+  - Node.js 24.15.0 下 node --test tests/*.test.js：512 passed
+  - Node.js 24.15.0 下 npm run build：通过
+  - cargo fmt --all -- --check：通过
+  - cargo check --locked：通过
+  - cargo clippy --locked --all-targets -- -D warnings：通过
+  - cargo test --locked：351 passed
+  - Hermes Windows 隔离安装 smoke：使用 uv 0.11.14 --no-cache 完整安装 72 个依赖，hermes version 返回 v0.18.2 (2026.7.7.2)
+ReleaseNotesUrl: https://github.com/qingchencloud/clawpanel/releases/tag/v0.19.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

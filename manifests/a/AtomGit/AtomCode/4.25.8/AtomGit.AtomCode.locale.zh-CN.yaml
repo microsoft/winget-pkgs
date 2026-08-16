@@ -1,0 +1,119 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: AtomGit.AtomCode
+PackageVersion: 4.25.8
+PackageLocale: zh-CN
+Publisher: 重庆开源共创科技有限公司
+PublisherUrl: https://atomgit.com/
+PublisherSupportUrl: https://atomgit.com/atomgit_atomcode/atomcode/issues
+PrivacyUrl: https://docs.gitcode.com/docs/help/home/protocol/privacy-policy
+Author: 重庆开源共创科技有限公司
+PackageName: AtomCode
+PackageUrl: https://atomcode.atomgit.com/
+License: MIT
+LicenseUrl: https://atomgit.com/atomgit_atomcode/atomcode/blob/main/LICENSE
+Copyright: Copyright (c) 2026 Yubang Xu
+CopyrightUrl: https://docs.gitcode.com/docs/help/home/protocol/ai-privacy-policy
+ShortDescription: AI 编程助手 在你的终端中运行
+Description: Claude Code / Cursor Agent 的开源平替，住在你的终端里。连接任意 OpenAI 兼容大模型，自主读文件、改代码、跑测试、自我验证 —— 用 Rust 构建。
+Tags:
+- 人工智能
+- 代码
+- 大语言模型
+- 智能体
+- 编程
+- 聊天机器人
+- 自主智能
+ReleaseNotes: |-
+  AtomCode v4.25.8 Release Notes
+  发布日期：2026-06-30
+  本版本聚焦于移动端远程访问、代码审查质量提升、VS Code 扩展国际化、以及多项稳定性与用户体验改进。
+
+  ⚠️ Behavior Changes（注意行为变化）
+  - 代码块自动复制默认关闭：config.ui.auto_copy_code_blocks 默认值为 false，不再自动复制 AI 回复中的代码块到剪贴板。用户可通过 ATOMCODE_AUTO_COPY 环境变量或配置文件手动开启。显式 /copy 命令不受影响。
+  - /status 命令输出结构调整：登录状态行移至最前，Token 行移除（移至 /cost），CodingPlan 过期时显示清晰的重新登录提示。
+  - Windows Shell 描述修正：当 Git Bash 可用时，bash 工具描述和系统提示中的 Shell: 行现在如实报告为 bash，而非之前的 cmd.exe，避免模型使用错误的语法。
+  - /app 命令默认隐藏：/app 移动端远程访问命令默认不显示在命令菜单和补全中，需设置 ATOMCODE_ENABLE_APP=1 环境变量启用。
+  ✨ 新增功能（Features）
+  移动端远程访问
+  - /app 命令（隐藏）：新增 /app 命令，通过反向 WSS 隧道将当前 TUI 会话暴露给 GitCode 移动 App，支持任意网络下的双向实时同步、工具审批、远程命令执行和模型同步。/app stop 断开连接。
+  - 自动下载 relay-client：首次使用 /app 时，自动从 GitCode Release 下载并校验 atomcode-relay-client 二进制，支持 SHA256 校验和版本管理。
+  Agent / 工具
+  - Agent Client Protocol (ACP) 支持：新增 atomcode acp 子命令，使 AtomCode 可作为 ACP Agent 通过 stdio 被外部编辑器或编排器驱动。支持 initialize、session/new、session/prompt、session/cancel 及权限审批流程。
+  - 代码审查质量提升：
+    - 新增 --context-window 标志，允许为审查 Agent 设置自定义上下文窗口大小。
+    - 新增 --no-web 标志，禁用 web_search 工具，适用于无网络环境。
+    - 新增 --graph-max-files 标志，当仓库索引文件数超过阈值时自动降级，跳过代码图谱构建，避免大仓库超时。
+    - 新增影响面计划（Impact Plan），在审查任务中注入符号变更和生命周期契约检查，引导模型优先探索高风险区域。
+    - 新增轮次预算压力钩子（Round Budget Hook），在 --max-rounds 限制下，模型接近轮次上限时提示其优先提交已发现的发现。
+    - 新增覆盖率兜底机制：首次审查后，对零发现的变更文件进行二次聚焦审查，提升大 diff 的召回率。
+  - @-mention 目录下钻补全：在 TUI 和 WebUI 中输入 @ 后，选择目录可继续下钻浏览子目录和文件，提升文件引用效率。
+  - 输入历史导航：在 TUI 输入框中，光标位于行首时按 ↑/↓ 可浏览历史输入记录。
+  - /review 等命令国际化描述：为 /app、/sync、/review、/goal、/proxy 命令添加了中英文描述。
+  - Agent 提示优化：
+    - 为 GLM/DeepSeek 等弱指令遵循模型添加了强制的工具纪律块（TOOL DISCIPLINE），明确禁止用 shell 执行文件操作。
+    - 恢复 v2 端口丢失的三个行为护栏：反谄媚、禁止 bash 修改文件、坚持完成。
+    - 恢复注释密度规则，限制新注释数量，保留现有中文注释。
+    - 将“最小化工具调用”改为“最小化往返次数”，避免与并行工具调用建议矛盾。
+    - 将 REPRODUCE 步骤改为条件性执行，仅当存在可运行的复现命令时才执行。
+  WebUI
+  - 会话导出为 Markdown：在侧边栏和表头菜单中新增“导出 Markdown”按钮，可将完整会话（含用户消息、AI 回复、工具调用及结果）导出为 .md 文件。
+  - 复制按钮增强：助手消息新增复制按钮，可复制整轮对话内容（含工具调用）。用户消息也新增了复制按钮。
+  - @-mention 菜单滚动：@-mention 弹出菜单现在支持键盘导航时自动滚动到当前选中项。
+  - / 和 @ 命令菜单统一选择态颜色：统一了斜杠命令菜单和 @-mention 菜单的选中态背景色和强调色。
+  VS Code 扩展
+  - 国际化（i18n）支持：
+    - 扩展清单（package.json）使用 %key% 占位符，并提供了英文和简体中文的 package.nls.json 文件。
+    - 扩展运行时字符串使用 vscode.l10n.t 进行本地化。
+    - Webview UI 使用 TypeScript 目录和 I18nProvider，根据 VS Code 语言环境渲染中文或英文界面。
+    - 快速操作（Quick Actions）的提示文本根据语言环境切换。
+  - @-mention 文件引用：在 VS Code 扩展的 Webview 输入框中支持 @ 触发工作区文件搜索和补全，支持目录下钻。
+  - 输入历史导航：在 VS Code 扩展的 Webview 输入框中支持 ↑/↓ 浏览输入历史。
+  - Artifact 渲染：Webview 支持 Artifact 的块级渲染，包括代码、diff 和 Markdown 内容的独立展示。
+  - 流式 Markdown 修复：修复了流式输出时未闭合代码块的渲染问题，并保护内联代码中的 fence 标记不被错误解析。
+  Provider / 网络
+  - Provider 身份标识：所有 Provider 适配器（OpenAI、Anthropic、Ollama）现在发送产品级 User-Agent（atomcode/<version>）和 x-atomcode-session-id 头，便于网关进行流量归因和前缀缓存亲和性。
+  - skip_tls_verify 支持：Provider 配置新增 skip_tls_verify 字段，允许为自签名/内部网关禁用 TLS 证书验证。
+  - user_agent 配置项：Provider 配置新增 user_agent 字段，允许覆盖 HTTP 请求的 User-Agent。
+  - CodingPlan 请求重试：claim-v2、status-v2 等 CodingPlan API 调用在遇到瞬态传输错误时自动重试，提升稳定性。
+  终端渲染 / Windows 兼容
+  - Windows Git Bash 检测增强：改进了 Windows 下 Git Bash 的检测逻辑，支持从 git.exe 路径推导、注册表查询以及非 C: 盘安装的 Git。
+  - Windows WSL 别名排除：bash 工具检测时排除 WindowsApps 目录下的 WSL 执行别名，避免误用 WSL。
+  - Windows 浏览器打开修复：修复了 Windows 下通过 explorer.exe 打开含 & 符号的 URL 失败的问题。
+  - WebUI 图片历史展示修复：修复了 WebUI 中图片历史展示的问题，并恢复了 V2 Live 模式下的图片显示。
+  LiveSession 增强
+  - 断线恢复进行中回合：LiveSession 新增 join_with_replay 方法，晚加入的视图（如手机重连）可获取当前进行中回合的事件回放，避免丢失进度。
+  - 会话持久化增强：V2 Live 模式下，在回合开始、流式过程中和结束时均会持久化会话到磁盘，防止硬杀导致整轮会话丢失。
+  - 远程命令：手机 App 可通过 /live/command 请求桌面 TUI 执行只读信息类命令（/status、/cost、/whoami、/diff），输出通过 CommandOutput 事件广播。
+  - 取消运行中回合：新增 /live/cancel 端点，任一视图（手机/WebUI/TUI）均可取消正在运行的回合。
+  缓存稳定性
+  - 锚定压缩（Anchored Compaction）：压缩摘要现在以锚定标记（<!-- atomcode:anchor v1 -->）开头，后续压缩会更新而非重写该摘要，避免逐次退化。仅当有非锚定新内容时才触发压缩。
+  - 代码图性能优化：CodeGraph 新增 by_name 索引，将 find_by_name 从 O(nodes) 扫描优化为 O(candidates) 哈希查找。build_from_files 使用精确的 caller id 重建，修复了跨文件同名符号的调用者归属错误。
+  🛠 修复（Fixes）
+  Agent / 工具
+  - 修复重试退避不可取消：所有重试退避（空响应、限流、API 错误）现在均可被取消令牌中断，用户按 Esc/Ctrl+C 可立即停止等待。
+  - 修复死内核报告：当内核在 prompt 发送前已死亡时，ACP 和 V2 引擎正确报告错误，而非伪造 end_turn 成功。
+  - 修复 ~ 路径展开：read_file、glob、list_directory 等工具和代码图工具现在统一通过共享的 pathutil 展开 ~/ 路径，与 shell 行为一致。
+  - 修复 MCP 工具参数截断：MCP 工具参数详情显示上限从 200 字符提升至 450 字符。
+  - 修复 Web 抓取编码问题：web_fetch 现在根据 HTTP 头或 HTML <meta> 声明的字符集（如 GBK、Big5）解码响应，避免乱码。
+  - 修复 Web 抓取标签匹配 panic：remove_tag_content 和 replace_tag_with 使用 to_ascii_lowercase 替代 to_lowercase，避免因非 ASCII 字符长度变化导致“byte index out of bounds” panic。
+  - 修复推理填充物泄露：从 provider 推理流中剥离已知的填充物（如 (no reasoning detected)、</｜｜DSML｜｜parameter> 等），防止其被提升为可见文本或导致空响应重试。
+  - 修复 V2 引擎会话 ID 和 UA 丢失：V2 引擎的 Provider 适配器现在正确发送 x-atomcode-session-id 和 skip_tls 头。
+  - 修复 V2 引擎无效工具调用参数：在重发历史消息前，修复存储的无效 JSON 工具调用参数（如未转义的 Windows 路径），避免严格网关返回 400 错误。
+  - 修复 V2 引擎 TelemetryHook 模型归属：TelemetryHook 现在在 assemble 阶段构建，而非 prepare，确保 /login 或 /model 切换后，遥测数据正确归属到当前活跃模型。
+  - 修复 V2 引擎增量持久化：未完成的 turn 现在增量持久化到磁盘，硬杀 mid-turn 不再丢失整轮会话。
+  - 修复 V2 引擎图片恢复：V2 引擎在 turn 结束后，正确从 turn_base 恢复用户消息中的图片数据，避免 VL 预处理后的文本替换原始图片。
+  - 修复 V2 引擎 send_agent_command 错误处理：当 kernel 命令通道关闭时，正确返回错误事件而非静默失败。
+  - 修复 V2 引擎 ApprovalNeeded 事件处理：在 run_chat_turn_v2 中正确处理 ApprovalNeeded 事件。
+  - 修复 V2 引擎 TurnComplete 排干：ACP 和 V2 引擎在收到 Error 事件后，正确排干后续的 TurnComplete 事件，避免污染下一个 prompt。
+  - 修复 --dangerously-skip-permissions 在同步模式下的行为：在同步模式下，TUI 的 --dangerously-skip-permissions 标志现在能正确自动批准 daemon 发起的审批请求。
+  - 修复 /undo 后 V2 引擎图片丢失：/undo 后，V2 引擎正确恢复用户消息中的图片数据。
+  - 修复 V2 引擎 /cd 后会话管理器未更新：/cd 切换项目后，会话管理器现在重建到新项目的 hash 目录，避免新会话写入旧项目。
+  - 修复 V2 引擎 /cd 带 session_id 的会话切换：/cd 请求支持 session_id 参数，手机 App 点开历史对话时可同时切换目录和会话。
+ReleaseNotesUrl: https://atomgit.com/atomgit_atomcode/atomcode/releases/v4.25.8
+Documentations:
+- DocumentLabel: 文档
+  DocumentUrl: https://atomcode.atomgit.com/docs/zh/index.html
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

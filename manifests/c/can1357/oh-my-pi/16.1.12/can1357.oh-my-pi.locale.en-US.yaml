@@ -1,0 +1,54 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: can1357.oh-my-pi
+PackageVersion: 16.1.12
+PackageLocale: en-US
+Publisher: Can Bölük
+PublisherUrl: https://can.ac/
+PublisherSupportUrl: https://github.com/can1357/oh-my-pi/issues
+Author: Can Bölük
+PackageName: oh-my-pi
+PackageUrl: https://omp.sh/
+License: MIT
+LicenseUrl: https://github.com/can1357/oh-my-pi/blob/HEAD/LICENSE
+Copyright: |-
+  Copyright (c) 2025 Mario Zechner
+  Copyright (c) 2025-2026 Can Bölük
+ShortDescription: ⌥ AI Coding agent for the terminal — hash-anchored edits, optimized tool harness, LSP, Python, browser, subagents, and more
+Description: |-
+  omp is a terminal-first coding agent that runs on your machine, talks to any provider, and treats sessions like git branches.
+  omp (pronounced “oh-em-pi”, binary omp) is a fork of Mario Zechner’s Pi. It runs as a single Bun process, drives any model provider you have credentials for, and ships a flat tool surface the model uses to read code, run commands, edit files, drive a debugger, and spawn subagents that coordinate over an in-process IRC bus.
+  Sessions persist as JSONL under ~/.omp/agent/sessions/. You resume, fork, branch, and share them. Settings, credentials, plugins, and caches all live under ~/.omp/agent/. Nothing leaves the machine unless you call a tool that does.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  @oh-my-pi/pi-coding-agent
+  Changed
+  - Refined secret obfuscation to only target message roles and fields containing operator secrets
+  - Restricted obfuscator to ignore secrets and regex matches shorter than 8 characters
+  - Optimized obfuscation to skip static system prompts and tool schemas in provider contexts
+  - Ensured image data bytes are never modified to prevent corrupted data URL payloads
+  Fixed
+  - Fixed secret obfuscation corrupting Codex image reads (and other provider requests) with Invalid 'input[N].content[].image_url'. Expected a base64-encoded data URL ... but got an invalid base64-encoded value. The obfuscator deep-walked every string in the outbound request — including inline image base64 and opaque provider replay/signature fields — so a configured secret that happened to be a substring of the base64 (or of an ordinary word like response) injected #HASH# placeholders mid-payload. Obfuscation is now opt-in and fully typed: only user messages, tool-result messages, and user-attributed developer messages (@file mentions) are redacted; system prompts and tool schemas pass through untouched; image bytes and signature/encrypted-reasoning fields are never rewritten; and tool-call arguments are the only JSON walked. Configured plain secrets and regex matches shorter than 8 characters are now ignored to stop false matches on short words.
+  - Fixed RPC/ACP startup clobbering explicit caller/project/global configuration for task.isolation.{mode,merge,commits}, task.eager, task.batch, task.maxConcurrency, task.maxRecursionDepth, task.disabledAgents, task.agentModelOverrides, memory.backend, memories.enabled, advisor.{enabled,subagents,syncBacklog,immuneTurns}, plus the RPC-only async.{enabled,maxJobs} and bash.autoBackground.{enabled,thresholdMs}. applyDefaultSettingOverrides re-asserted the schema default as a runtime override after settings load, regressing the isConfigured() guard added for #2598 and ignoring every explicit value the embedder, project, --config overlay, or global config had set. The guard is restored, so the host default now only fills holes (#3207).
+  @oh-my-pi/pi-natives
+  Added
+  - Added Julia syntax highlighting to highlightCode/supportsLanguage via a vendored Julia.sublime-syntax folded into syntect's default set (jl/julia aliases); syntect ships no Julia grammar.
+  What's Changed
+  - fix(rpc): preserved explicit caller config across host-defaulted paths by @roboomp in https://github.com/can1357/oh-my-pi/pull/3209
+  Full Changelog: https://github.com/can1357/oh-my-pi/compare/v16.1.11...v16.1.12
+ReleaseNotesUrl: https://github.com/can1357/oh-my-pi/releases/tag/v16.1.12
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://omp.sh/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

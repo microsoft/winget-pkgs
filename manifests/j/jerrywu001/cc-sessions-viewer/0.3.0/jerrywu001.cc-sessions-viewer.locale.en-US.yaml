@@ -1,0 +1,66 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: jerrywu001.cc-sessions-viewer
+PackageVersion: 0.3.0
+PackageLocale: en-US
+Publisher: wuchao
+PublisherUrl: https://github.com/jerrywu001
+PublisherSupportUrl: https://github.com/jerrywu001/cc-sessions-viewer/issues
+PackageName: cc-sessions-viewer
+PackageUrl: https://github.com/jerrywu001/cc-sessions-viewer
+License: Freeware
+ShortDescription: Support cc/codex/gemini sessions viewer, token usage statistics, global search, resume, and export to html
+Description: |-
+  A native desktop browser for Claude Code, Codex, and Gemini CLI — read, search, and manage local session transcripts from all three in one place.
+  Faithful replay — thinking chains, tool-call pairings, structured diffs, inline screenshots.
+  Fast search — cross-project global hit (⌘⇧F) jumps to the exact message; one-click resume in Terminal.
+  Deep stats — aggregate token spend and cost; slice by project, model, or tool.
+  Read-only safety — original JSONL is never touched; delete is a move to shared trash, never rm.
+  Flexible export — single session or batches to offline-readable Markdown or HTML.
+
+  Features
+  - 🗂 Unified project view — group sessions by working directory across both CLIs
+  - 💬 Faithful chat replay — text, thinking blocks, tool calls, structured diffs, inline images
+  - 🔎 In-session search with scope — search across the whole conversation or scope to user messages, agent replies (incl. edits), or tool noise; prev / next jump + match counter
+  - 🌐 Global search (⌘⇧F / Ctrl+Shift+F) — Algolia-style overlay over the current agent, scoped to session titles and your own messages; click a hit to jump straight to that message with a flash highlight; recent queries with single-item removal
+  - 🔃 Session list search & sort — keyword search runs on the Rust side, matching session titles and your message text (cancellable mid-typing); sort by recency / size / message count, or show only ones with an ID
+  - 🪗 Collapse / expand all tool calls — one click to hide tool-call clutter and focus on the conversation
+  - 📤 Export session — save a single session to Markdown or HTML (native Save-As, offline-renderable HTML with inlined avatars / styles)
+  - 🧰 Multi-select & batch ops — pick sessions in bulk to move them to the trash or export them into a single export-YYYYMMDD-HHMMSS-{md,html}/ folder
+  - 🔄 Resume or start fresh — open Terminal in a project to resume an existing session (claude --resume <id> / codex resume <id>) or start a brand-new one
+  - 📡 Live tail — opened session auto-refreshes as the CLI appends new messages; an "● Live" indicator shows the watcher is active, and a "N new ↓" pill surfaces additions when you've scrolled up
+  - 🗑 Shared trash — soft-delete, preview a deleted session's transcript, restore one or many (multi-select); survives across both agents
+  - 🏠 Welcome screen — recently opened projects per agent with one-click reopen + per-entry removal
+  - 📌 Pin / sink projects — color-coded pins on the sidebar; sunk projects go to the bottom
+  - ✏️ Rename sessions — your new title syncs back to the CLI, so claude / codex resume pickers show it too
+  - 🌗 Light / dark / system theme — Codex-inspired neutral palette with brand-color accents
+  - 🌐 i18n with auto-detect — English / 简体中文 / 繁體中文 / 日本語；first launch matches the OS language, falls back to English
+  - ⚡️ Custom tooltip & agent brand icons — no out-of-place native chrome
+  - 🖼 Image lightbox for screenshots embedded in transcripts
+Tags:
+- antigravity-cli
+- claude-code
+- codex
+- gemini-cli
+ReleaseNotes: |-
+  Features
+  - Codex GPT-5.6 models — add GPT-5.6-Sol, GPT-5.6-Terra, and GPT-5.6-Luna to the Codex model menu. Default remains GPT-5.5; new models appear at the top of the list.
+  - Model-specific effort levels — Luna adds a max effort tier; Terra and Sol add max + ultra, matching the Codex CLI's per-model reasoning levels.
+  - Codex system commands — add /goal, /plan, /compact, /review, and /archive to the Codex chat slash menu. /goal, /plan, /compact are also available for Claude.
+  - /archive client action — typing /archive in Codex chat calls codex archive <id> to archive the session, closes the chat tab, and refreshes the session list.
+  - Archived session guard — clicking chat/resume on an archived Codex session shows a confirmation dialog with the codex unarchive <id> command, copies it to the clipboard, and opens a terminal tab for pasting.
+  - Font size slider — replace the 3-option segmented control (Small / Normal / Large) with a continuous 12–18 px slider and a live preview line. Zoom is deferred to settings modal close to prevent UI jitter during drag.
+  - Font family setting — new text input in Settings → General for customizing the app's CSS font-family. Includes a live preview line (same pattern as font size). Applied on settings modal close; persisted to localStorage. Empty value uses the default system font stack.
+  - Lazy terminal tab restore — terminal tabs are now lazily restored on startup, avoiding blocking the main thread when many saved tabs exist.
+  Bug Fixes
+  - Terminal theme switching — switching themes while a Codex embedded terminal was open left hardcoded inline background-color from the old theme on xterm DOM spans. Now the xterm-scrollable-element container background is updated manually, and a DOM walk strips inappropriate background/foreground colors based on luminance. New output from a light-started CLI in dark mode is normalized via normalizeDarkSgr (inverse of the existing light-mode ANSI normalizer).
+  - Tab restore race condition — the currentLayout deep watcher could fire persistViewTabs with an empty tab list before loadSavedViewTabs ran, overwriting saved tabs on reload. A _viewTabsRestoreComplete guard now blocks premature writes.
+  - Codex subtitle "---" — last_user_text was picking up <skill> / <context> / <environment_context> injection messages instead of the real user prompt, producing a --- subtitle from the YAML frontmatter. These injections are now skipped.
+  - More Models submenu clipping — the submenu could extend below the viewport when the trigger button was near the bottom of the screen. Added vertical flip detection (bottom: 0 when space is insufficient).
+  - Path detection false positives — parse_line_as_path treated any /-prefixed token (e.g. /fork, /model) as an absolute file path. Now requires a directory separator, file extension, or disk existence before promoting to a file block.
+  - Slash command prefix — Codex system commands (/model, /export, /rename, /clear) now always insert with / prefix; only skills use the $ prefix. Previously all items used $ for Codex.
+  - Slash command trailing text — /model, /export, /rename now intercept even when followed by trailing text, preventing accidental message sends.
+ReleaseNotesUrl: https://github.com/jerrywu001/cc-sessions-viewer/blob/HEAD/CHANGELOG.md#v030
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

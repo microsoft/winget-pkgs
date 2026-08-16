@@ -1,0 +1,140 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Oven-sh.Bun.BaselineProfile
+PackageVersion: 1.3.13
+PackageLocale: en-US
+Publisher: Oven-sh
+PublisherUrl: https://github.com/oven-sh
+PublisherSupportUrl: https://github.com/oven-sh/bun/issues
+PackageName: Bun Baseline Profile
+PackageUrl: https://bun.sh/
+License: MIT
+LicenseUrl: https://github.com/oven-sh/bun/blob/HEAD/LICENSE.md
+ShortDescription: Incredibly fast JavaScript runtime, bundler, test runner, and package manager – all in one
+Moniker: bun-baseline-profile
+Tags:
+- bun
+- bundler
+- javascript
+- javascriptcore
+- jsx
+- nodejs
+- npm
+- react
+- transpiler
+- typescript
+- zig
+- ziglang
+ReleaseNotes: |-
+  Fixes 82 issues (addressing 381 👍). bun test --parallel, --isolate, --shard, and --changed, bun install streams tarballs to disk using 17x less memory, source maps use 8x less memory, 5.5x faster gzip with zlib-ng, Range request support in Bun.serve(), SHA3 in node:crypto and WebCrypto, ws+unix:// WebSocket client, and many bugfixes and Node.js compatibility improvements
+
+  bun test --isolate and bun test --parallel
+  - --isolate runs each test file in a fresh global environment within the same process, draining microtasks, closing sockets, cancelling timers, killing subprocesses, and creating a clean global object. A VM‑level transpilation cache shares parsed dependencies across files.
+  - --parallel[=N] distributes test files across up to N worker processes (default CPU count). Workers steal work from the busiest queue and run with --isolate between files. Output is buffered and flushed atomically to avoid interleaving.
+  - Both flags work with existing options such as --bail, --randomize, --dots, JUnit reporting, LCOV coverage, snapshots, and all transpiler/resolver flags.
+
+  bun test --shard=M/N
+  - Splits test files across CI jobs using the syntax used by Jest, Vitest, and Playwright.
+  - Shard index is 1‑based; files are sorted by path and distributed round‑robin.
+  - Can be combined with --changed and --randomize.
+  - Gracefully exits with status 0 if a shard receives zero files; invalid inputs produce a clear error.
+
+  bun test --changed
+  - Runs only test files that transitively depend on git‑changed files.
+  - Supports uncommitted changes, changes since a specific commit/branch/tag, and can be combined with --watch for continuous re‑filtering.
+
+  bun install streams tarballs to disk
+  - Extracts package tarballs while downloading, using only in‑flight HTTP chunks plus fixed libarchive buffers.
+  - Integrity hashing runs incrementally; streaming extraction is enabled by default (can be disabled via BUN_FEATURE_FLAG_DISABLE_STREAMING_INSTALL=1).
+
+  Faster bun install with isolated linker
+  - In monorepos, `bun install --linker=isolated` reduces install time dramatically (e.g., from 20.5 s to 2.4 s).
+
+  Source maps use up to 8x less memory
+  - Re‑architected source‑map representation to a compact bit‑packed binary format (~2.4 B per mapping vs ~20 B).
+  - Reduces memory usage for large projects; lookup cost increases ~6 % while encoding is faster.
+
+  Bun’s runtime uses 5% less memory
+  - Upgraded mimalloc to v3 and added libpas scavenger support for Windows & Linux, reducing baseline memory and fixing long‑running hangs/crashes.
+
+  Upgraded JavaScriptCore engine
+  - Merged 1,316 upstream commits, bringing numerous performance improvements and bug fixes.
+
+  Performance improvements from upstream
+  - Inline cache for array.length assignment.
+  - Inline cache for primitive property keys.
+  - String length folding, toUpperCase intrinsic, fast path for String#indexOf, redundant mov removal, cached date formatters, wider bulk copy in GC‑safe memcpy/memmove, SIMD‑accelerated case‑insensitive comparisons, SIMD fast path for identifier parsing.
+
+  Faster addEventListener, dispatchEvent, and DOM events
+  - ~270 upstream WebKit commits improve event system and promise internals.
+
+  File streaming improvements in Bun.serve()
+  - Responses using `new Response(Bun.file(path))` now stream incrementally on SSL and Windows, reducing memory usage for large files.
+
+  Range request support in Bun.serve()
+  - Handles standard Range headers for file‑backed responses, returning 206 Partial Content or 416 as appropriate. Supports suffix, open‑ended, and multi‑range requests.
+
+  Up to 5.5x faster gzip compression with zlib‑ng
+  - Upgraded to zlib‑ng 2.3.3 with SIMD acceleration, yielding 1.86‑2.59× speedups for gzip and modest gains for gunzip.
+
+  Faster array iteration in Bun’s internals
+  - Direct butterfly memory reads make common array iteration up to 1.43× faster (e.g., expect(arr).toContain, new Blob([...])).
+
+  SHA3 support in WebCrypto and node:crypto
+  - Added SHA3‑224/256/384/512 to both APIs (crypto.createHash, crypto.subtle.digest, etc.).
+  - Updated BoringSSL with post‑quantum algorithm support.
+
+  X25519 deriveBits support in SubtleCrypto
+  - Full X25519 key agreement implementation, handling small‑order public keys per RFC 7748.
+
+  WebSocket client: support ws+unix:// and wss+unix://
+  - Allows connections over Unix domain sockets with optional request path and TLS.
+
+  Standalone HTML now inlines file‑loader assets imported from JS
+  - `bun build --compile --target browser` inlines assets imported via the file loader as data URIs, producing a fully self‑contained HTML file.
+
+  bunx claude alias
+  - `bunx claude` now works as a shorthand for `bunx @anthropic‑ai/claude‑code`.
+
+  Bugfixes
+
+  Node.js compatibility improvements
+  - Fixed worker lifecycle crashes, TLS hostname handling, process.ppid caching, --cpu-prof format, socket.setTimeout behavior, node:http2.createServer ENABLE_PUSH issue, StringDecoder crashes, native N‑API finalizer order, dgram source‑specific membership inversion, os.freemem on Linux, rare fs.watch deadlock, path.win32.resolve crash, fs.writeSync crash on Windows, root certificate race, macOS syscalls EINTR handling, export with string‑literal names, Error.captureStackTrace with non‑numeric stackTraceLimit, preventDefault on non‑passive listeners, WebIDL integer conversion rounding, BroadcastChannel data races.
+
+  Bun APIs
+  - Fixed Bun.inspect and console.log class name display, server.stop hanging, file descriptor leaks in static routes, error handler file‑backed Response drop, duplicate Content‑Length headers, MySQL adapter hanging on multi‑statement queries, Bun.YAML.parse crashes, sliced non‑regular file blob crashes, large file size fstat panic, Redis client crash on GC, Bun.pathToFileURL Windows crash, MKADDRESSBOOK method handling, AbortSignal leak in WebSocket upgrade, ~1 KB memory leak per hot reload, Glob.scan memory leak.
+
+  Web APIs
+  - Fixed controller.abort on queued fetch, AbortSignal.timeout leak, fetch hanging with tls.checkServerIdentity, fetch abort crash, HTTP_PROXY port injection bug, ws.close crash behind CONNECT proxy, WebSocket client send buffer leak, promise resolution crash, record key conversion crash, shared ArrayBuffer/TypedArray crashes.
+
+  bun install
+  - Fixed bunx @anthropic‑ai/claude‑code executable detection.
+
+  JavaScript bundler
+  - Fixed broken binaries on macOS ARM64 (v1.3.12), HTML import etag stale issue, NixOS/Guix executable path rewrite, resolver race crash, auto‑install invalid npm names crash.
+
+  CSS Parser
+  - Fixed stripping of top‑level @layer ordering declarations.
+
+  bun test
+  - Fixed toMatchSnapshot failing with --rerun-each, retry, or repeats.
+
+  Windows
+  - Fixed runtime transpiler race condition, timer degenerate delay crash, readFile >2 GB crash, fs.readdir malformed entry crash, libpas resource exhaustion, pthread_once issue, missing mprotect gate.
+
+  JavaScript engine
+  - Fixed RegExp exec/test cache issue, namespace import handling, TypedArray iterator with detached buffers, Date.toLocaleString crash in workers, YARR backtracking bugs, class field eval context propagation, DFG constant folding and BitAnd bugs.
+
+  Internal / Runtime
+  - Fixed debugger pause CPU pegging, macOS arm64 deadlock between allocator and thread pool, 8 libpas memory‑accounting bugs, various early‑exit state bugs (HTTP decompression, Request/Response handling, Bun.build plugin errors, Windows named pipe listeners), socket layer context pointer dereference crash, event loop timer sweep iterator crash, hardened HTTP chunked encoding parser.
+ReleaseNotesUrl: https://bun.com/blog/bun-v1.3.13
+Documentations:
+- DocumentLabel: API Reference
+  DocumentUrl: https://bun.com/reference
+- DocumentLabel: Docs
+  DocumentUrl: https://bun.sh/docs
+- DocumentLabel: Guides
+  DocumentUrl: https://bun.com/guides
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

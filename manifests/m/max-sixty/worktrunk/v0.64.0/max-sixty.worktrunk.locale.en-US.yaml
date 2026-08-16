@@ -1,0 +1,65 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: max-sixty.worktrunk
+PackageVersion: v0.64.0
+PackageLocale: en-US
+Publisher: max-sixty
+PublisherUrl: https://github.com/max-sixty
+PublisherSupportUrl: https://github.com/max-sixty/worktrunk/issues
+PackageName: worktrunk
+PackageUrl: https://github.com/max-sixty/worktrunk
+License: MIT OR Apache-2.0
+LicenseUrl: https://github.com/max-sixty/worktrunk/blob/HEAD/LICENSE
+ShortDescription: A Git worktree manager for trunk-based development
+Description: |-
+  worktrunk (wt) is a Git worktree manager designed for trunk-based development workflows.
+  It simplifies creating, switching between, and managing Git worktrees, making it easy to
+  work on multiple features or branches simultaneously without the overhead of stashing
+  or switching branches in a single working directory.
+Tags:
+- cli
+- git
+- git-worktree
+- rust
+- terminal
+- worktree
+ReleaseNotes: |-
+  Release Notes
+  Improved
+  - {{ git.branch.* }} template namespace for custom columns: wt list custom columns can now read a branch's own git config via {{ git.branch.<key> }} — both convention keys you set yourself (branch.<name>.jira) and the git-native branch.<name>.description — without re-storing the values through wt config state vars set. It complements {{ vars.* }}, which reads only worktrunk's own state namespace. (#3319, thanks @cazador481 for the request)
+  - Faster warm-cache wt list re-runs: A repeat wt list (with .git/wt/cache/ already populated) is ~36% faster, by removing redundant per-row git subprocesses — priming the commit→tree cache from the %ct batch already issued, persisting merge-base results to a content-addressed on-disk cache, and seeding worktree roots and git-dirs from the single git worktree list instead of re-forking git rev-parse per worktree. (#3334)
+  Fixed
+  - Refs that look like flags can't inject git options: wt's git diff previews and diffstats (picker diff previews, show_diffstat, push diffstat) now fence user-controlled refs behind --end-of-options, and branch removal (git branch -D) passes them after --, so a branch literally named like a flag (-x, --foo) reaches git as a positional ref instead of being misparsed as an option. (#3317)
+  - Statusline renders untruncated when COLUMNS=0: wt list statusline treated COLUMNS=0 as a zero-width budget and dropped every segment, rendering an empty line. A zero or unparsable COLUMNS is now treated as no detectable width, so the line renders everything untruncated — as the statusline sizing already documented for a missing width. (#3318)
+  - Watchdog "still waiting" line uses the hint symbol: The transient Waiting for the commit message (Ns) line shown during a slow wt step commit LLM call now uses the hint prefix (↳) instead of the info symbol (○), matching the convention for fully-dim status lines. (#3330)
+  Install worktrunk 0.64.0
+  Install prebuilt binaries via shell script
+  curl --proto '=https' --tlsv1.2 -LsSf https://github.com/max-sixty/worktrunk/releases/download/v0.64.0/worktrunk-installer.sh | sh && wt config shell install
+  Install prebuilt binaries via powershell script
+  powershell -ExecutionPolicy Bypass -c "irm https://github.com/max-sixty/worktrunk/releases/download/v0.64.0/worktrunk-installer.ps1 | iex"; git-wt config shell install
+  Install prebuilt binaries via Homebrew
+  brew install worktrunk && wt config shell install
+  Download worktrunk 0.64.0
+  ────────────────────────────────────────────────┬───────────────────┬─────────────
+  File                                            │Platform           │Checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-aarch64-apple-darwin.tar.xz           │Apple Silicon macOS│checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-x86_64-apple-darwin.tar.xz            │Intel macOS        │checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-x86_64-pc-windows-msvc.zip            │x64 Windows        │checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-aarch64-unknown-linux-musl.tar.xz     │ARM64 MUSL Linux   │checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-x86_64-unknown-linux-musl.tar.xz      │x64 MUSL Linux     │checksum
+  ────────────────────────────────────────────────┴───────────────────┴─────────────
+  Install via Cargo
+  cargo install worktrunk && wt config shell install
+  Install via Winget (Windows)
+  winget install max-sixty.worktrunk && git-wt config shell install
+  Install via AUR (Arch Linux)
+  paru worktrunk-bin && wt config shell install
+ReleaseNotesUrl: https://github.com/max-sixty/worktrunk/releases/tag/v0.64.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,262 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: sysmanage.sysmanage
+PackageVersion: 3.2.0.7
+PackageLocale: en-US
+Publisher: SysManage
+PublisherUrl: https://github.com/bceverly/sysmanage
+PublisherSupportUrl: https://github.com/bceverly/sysmanage/issues
+Author: Bryan Everly
+PackageName: SysManage Server
+PackageUrl: https://github.com/bceverly/sysmanage
+License: AGPL-3.0-or-later
+LicenseUrl: https://github.com/bceverly/sysmanage/blob/HEAD/LICENSE
+Copyright: Copyright (c) Bryan Everly
+ShortDescription: Open-source fleet management server for SysManage.
+Description: SysManage is the server-side component of an open-source fleet management platform. It accepts inventory from SysManage Agent hosts, dispatches declarative deployment plans (package install, firewall config, antivirus deployment, VM lifecycle), surfaces health and compliance dashboards, and exposes a REST + WebSocket API for orchestration.
+Moniker: sysmanage
+ReleaseNotes: |-
+  SysManage Server v3.2.0.7
+  Fixed test regression
+  Multi-platform system management and monitoring server with web-based interface.
+  Installation Instructions
+  Ubuntu/Debian
+  # Download and install
+  wget https://github.com/bceverly/sysmanage/releases/download/v3.2.0.7/sysmanage_3.2.0.7-1_all.deb
+  sudo apt install ./sysmanage_3.2.0.7-1_all.deb
+  # Install nginx if not already installed
+  sudo apt install nginx
+  # Configure the server
+  sudo nano /etc/sysmanage.yaml
+  # Run database migrations
+  cd /opt/sysmanage
+  sudo -u sysmanage .venv/bin/python -m alembic upgrade head
+  # Start the service
+  sudo systemctl enable --now sysmanage
+  OpenBSD
+  # Download the port tarball
+  wget https://github.com/bceverly/sysmanage/releases/download/v3.2.0.7/sysmanage-openbsd-port-3.2.0.7.tar.gz
+  # Extract to OpenBSD ports tree
+  cd /usr/ports/mystuff
+  mkdir -p www
+  tar xzf ~/sysmanage-openbsd-port-3.2.0.7.tar.gz -C www/
+  # Generate checksums
+  cd /usr/ports/mystuff/www/sysmanage
+  doas make makesum
+  # Build and install
+  doas make install
+  # Initialize PostgreSQL (if not already done)
+  doas su - _postgresql
+  initdb -D /var/postgresql/data -U postgres -A scram-sha-256 -E UTF8 -W
+  exit
+  doas rcctl enable postgresql
+  doas rcctl start postgresql
+  # Create database and user
+  doas su - _postgresql -c "createuser -P sysmanage"
+  doas su - _postgresql -c "createdb -O sysmanage sysmanage"
+  # Configure SysManage
+  doas vi /etc/sysmanage.yaml
+  # Update the database connection string
+  # Initialize database schema
+  cd /usr/local/libexec/sysmanage
+  doas python3 -m alembic upgrade head
+  # Enable and start the service
+  doas rcctl enable sysmanage
+  doas rcctl start sysmanage
+  FreeBSD
+  # Download and install
+  fetch https://github.com/bceverly/sysmanage/releases/download/v3.2.0.7/sysmanage-3.2.0.7.pkg
+  sudo pkg add ./sysmanage-3.2.0.7.pkg
+  # The package automatically installs nginx and PostgreSQL as dependencies
+  # Initialize PostgreSQL (if not already done)
+  sudo sysrc postgresql_enable=YES
+  sudo service postgresql initdb
+  sudo service postgresql start
+  # Create database and user
+  sudo su - postgres -c "createuser sysmanage"
+  sudo su - postgres -c "createdb sysmanage -O sysmanage"
+  sudo su - postgres -c "psql -c \"ALTER USER sysmanage WITH PASSWORD 'your-password';\""
+  # Configure SysManage
+  sudo vi /usr/local/etc/sysmanage/config.yaml
+  # Update the database connection string
+  # Run database migrations
+  cd /usr/local/lib/sysmanage
+  sudo -u sysmanage .venv/bin/python -m alembic upgrade head
+  # Enable and start the services
+  sudo sysrc sysmanage_enable=YES
+  sudo sysrc nginx_enable=YES
+  sudo service sysmanage start
+  sudo service nginx start
+  macOS
+  # Download and install
+  curl -L -O https://github.com/bceverly/sysmanage/releases/download/v3.2.0.7/sysmanage-3.2.0.7-macos.pkg
+  sudo installer -pkg sysmanage-3.2.0.7-macos.pkg -target /
+  # The installer automatically creates the virtual environment and copies files
+  # Install PostgreSQL (if not already installed)
+  brew install postgresql@16
+  brew services start postgresql@16
+  # Create database
+  createdb sysmanage
+  # Configure SysManage
+  sudo cp /etc/sysmanage.yaml.example /etc/sysmanage.yaml
+  sudo vi /etc/sysmanage.yaml
+  # Update the database connection string
+  # Run database migrations
+  cd /usr/local/lib/sysmanage
+  .venv/bin/python -m alembic upgrade head
+  # Install and configure nginx (if not already installed)
+  brew install nginx
+  cp /usr/local/etc/sysmanage/sysmanage-nginx.conf /usr/local/etc/nginx/servers/
+  brew services start nginx
+  # Load and start the service
+  sudo launchctl load /Library/LaunchDaemons/com.sysmanage.server.plist
+  NetBSD
+  # Download and verify
+  ftp https://github.com/bceverly/sysmanage/releases/download/v3.2.0.7/sysmanage-3.2.0.7-netbsd.tgz
+  ftp https://github.com/bceverly/sysmanage/releases/download/v3.2.0.7/sysmanage-3.2.0.7-netbsd.tgz.sha256
+  sha256 -c sysmanage-3.2.0.7-netbsd.tgz.sha256 sysmanage-3.2.0.7-netbsd.tgz
+  # Install package
+  su -
+  pkg_add sysmanage-3.2.0.7-netbsd.tgz
+  # The package automatically installs PostgreSQL 16 and nginx as dependencies
+  # Initialize PostgreSQL (if not already done)
+  /etc/rc.d/pgsql initdb
+  echo "pgsql=YES" >> /etc/rc.conf
+  /etc/rc.d/pgsql start
+  # Create database and user
+  su - pgsql -c "createuser -P sysmanage"
+  su - pgsql -c "createdb -O sysmanage sysmanage"
+  # Configure SysManage
+  cp /usr/pkg/etc/sysmanage/sysmanage.yaml.example /usr/pkg/etc/sysmanage.yaml
+  vi /usr/pkg/etc/sysmanage.yaml
+  # Update the database connection string
+  # Initialize database schema
+  cd /usr/pkg/lib/sysmanage
+  python3.12 -m venv .venv
+  .venv/bin/pip install -r requirements-prod.txt
+  .venv/bin/python -m alembic upgrade head
+  # Configure nginx (optional)
+  cp /usr/pkg/share/examples/sysmanage/sysmanage-nginx.conf /usr/pkg/etc/nginx/sites-enabled/
+  echo "nginx=YES" >> /etc/rc.conf
+  # Enable and start the services
+  cp /usr/pkg/share/examples/rc.d/sysmanage /etc/rc.d/
+  chmod +x /etc/rc.d/sysmanage
+  echo "sysmanage=YES" >> /etc/rc.conf
+  /etc/rc.d/sysmanage start
+  /etc/rc.d/nginx start
+  CentOS/RHEL/Fedora/Rocky Linux/AlmaLinux
+  # Download and install
+  wget https://github.com/bceverly/sysmanage/releases/download/v3.2.0.7/sysmanage-3.2.0.7-1.*.rpm
+  sudo dnf install ./sysmanage-3.2.0.7-1.*.rpm
+  # The package automatically installs nginx and PostgreSQL as dependencies
+  # Initialize PostgreSQL (if not already done)
+  sudo postgresql-setup --initdb
+  sudo systemctl enable --now postgresql
+  # Create database and user
+  sudo -u postgres createuser sysmanage
+  sudo -u postgres createdb sysmanage -O sysmanage
+  sudo -u postgres psql -c "ALTER USER sysmanage WITH PASSWORD 'your-password';"
+  # Configure SysManage
+  sudo vi /etc/sysmanage.yaml
+  # Update the database connection string
+  # Initialize database schema
+  cd /opt/sysmanage
+  sudo -u sysmanage .venv/bin/python -m alembic upgrade head
+  # Start the services
+  sudo systemctl enable --now sysmanage
+  sudo systemctl enable --now nginx
+  OpenSUSE/SLES
+  # Download and install
+  wget https://github.com/bceverly/sysmanage/releases/download/v3.2.0.7/sysmanage-3.2.0.7-1.noarch.rpm
+  sudo zypper install ./sysmanage-3.2.0.7-1.noarch.rpm
+  # The package automatically installs nginx and PostgreSQL as dependencies
+  # Initialize and start PostgreSQL (if not already done)
+  sudo systemctl enable --now postgresql
+  # Create database and user
+  sudo -u postgres createuser sysmanage
+  sudo -u postgres createdb sysmanage -O sysmanage
+  sudo -u postgres psql -c "ALTER USER sysmanage WITH PASSWORD 'your-password';"
+  # Configure SysManage
+  sudo vi /etc/sysmanage.yaml
+  # Update the database connection string
+  # Initialize database schema
+  cd /opt/sysmanage
+  sudo -u sysmanage .venv/bin/python -m alembic upgrade head
+  # Start the services
+  sudo systemctl enable --now sysmanage
+  sudo systemctl enable --now nginx
+  Alpine Linux (3.19, 3.20, 3.21)
+  # Download the APK package for your Alpine version (e.g., alpine319, alpine320, alpine321)
+  wget https://github.com/bceverly/sysmanage/releases/download/v3.2.0.7/sysmanage-3.2.0.7-alpine320.apk
+  # Allow installation of unsigned packages (required for GitHub releases)
+  apk add --allow-untrusted ./sysmanage-3.2.0.7-alpine320.apk
+  # The package installs to /usr/libexec/sysmanage with pip packages in a subdirectory
+  # Dependencies: python3, nginx, postgresql are automatically installed
+  # Initialize and start PostgreSQL
+  rc-update add postgresql default
+  rc-service postgresql start
+  # Create database and user
+  su - postgres -c "createuser -P sysmanage"
+  su - postgres -c "createdb -O sysmanage sysmanage"
+  # Configure SysManage
+  cp /etc/sysmanage/sysmanage.yaml.example /etc/sysmanage/sysmanage.yaml
+  vi /etc/sysmanage/sysmanage.yaml
+  # Update the database connection string
+  # Initialize database schema
+  cd /usr/libexec/sysmanage
+  PYTHONPATH=/usr/libexec/sysmanage/pip-packages python3 -m alembic upgrade head
+  # Enable and start the services
+  rc-update add sysmanage default
+  rc-update add nginx default
+  rc-service sysmanage start
+  rc-service nginx start
+  Windows (x64 and ARM64)
+  # Download the MSI installer (choose your architecture)
+  # For x64:
+  Invoke-WebRequest -Uri "https://github.com/bceverly/sysmanage/releases/download/v3.2.0.7/sysmanage-3.2.0.7-windows-x64.msi" -OutFile "sysmanage-3.2.0.7-windows-x64.msi"
+  # For ARM64:
+  Invoke-WebRequest -Uri "https://github.com/bceverly/sysmanage/releases/download/v3.2.0.7/sysmanage-3.2.0.7-windows-arm64.msi" -OutFile "sysmanage-3.2.0.7-windows-arm64.msi"
+  # Install the MSI package (run as Administrator)
+  # The installer will:
+  # - Check for and install Python 3.12 if needed
+  # - Install Visual C++ Redistributable if needed
+  # - Extract application files to C:\Program Files\SysManage Server
+  # - Create Python virtual environment and install dependencies
+  # - Create Windows Service "SysManageServer"
+  # - Start the service automatically
+  msiexec /i sysmanage-3.2.0.7-windows-x64.msi
+  # Configure SysManage (installer creates example config)
+  notepad "C:\ProgramData\SysManage\sysmanage.yaml"
+  # Update database connection string and other settings
+  # The service runs automatically. To manage it:
+  # Stop the service:
+  Stop-Service SysManageServer
+  # Start the service:
+  Start-Service SysManageServer
+  # Check service status:
+  Get-Service SysManageServer
+  # View service logs:
+  Get-Content "C:\ProgramData\SysManage\logs\sysmanage-service.log" -Tail 50
+  # To uninstall:
+  # Use "Add or Remove Programs" or run:
+  msiexec /x sysmanage-3.2.0.7-windows-x64.msi
+  Note for Windows: The installer requires administrator privileges. Python 3.12 and Visual C++ Redistributable will be automatically installed if not present. The service runs on port 8080 by default (configurable in sysmanage.yaml).
+  Access the Web Interface
+  After configuration and starting the service:
+  - Frontend: http://localhost:3000
+  - Backend API: http://localhost:8080
+  Checksum Verification
+  All packages include SHA256 checksums. Download both files and verify:
+  Linux (Ubuntu/Debian):
+  sha256sum -c sysmanage_3.2.0.7-1_all.deb.sha256
+  OpenBSD:
+  sha256 -C sysmanage-openbsd-port-3.2.0.7.tar.gz.sha256 sysmanage-openbsd-port-3.2.0.7.tar.gz
+  FreeBSD:
+  sha256 -c sysmanage-3.2.0.7.pkg.sha256 sysmanage-3.2.0.7.pkg
+  macOS:
+  shasum -a 256 -c sysmanage-3.2.0.7-macos.pkg.sha256
+  NetBSD:
+ReleaseNotesUrl: https://github.com/bceverly/sysmanage/releases/tag/v3.2.0.7
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

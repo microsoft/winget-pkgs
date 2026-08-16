@@ -88,7 +88,10 @@ configuration:
         triggerOnOwnActions: true
       - description: Clean email replies on every comment
         if:
-          - payloadType: Issue_Comment
+          - or:
+              - payloadType: Issue_Comment
+              - payloadType: Pull_Request_Review
+              - payloadType: Pull_Request_Review_Comment
         then:
           - cleanEmailReply
       - description: Approve pull requests that have completed validation and have been approved by a moderator
@@ -141,16 +144,6 @@ configuration:
         then:
           - labelSync:
               pattern: Blocking-Issue
-          - labelSync:
-              pattern: Hardware
-          - labelSync:
-              pattern: Area-External
-          - labelSync:
-              pattern: Installer-Issue
-          - labelSync:
-              pattern: Interactive-Only-Installer
-          - inPrLabel:
-              label: In-PR
       - description: Remove "Help-Wanted" and "Needs-Triage" labels when an issue goes into PR
         if:
           - payloadType: Issues
@@ -196,6 +189,24 @@ configuration:
               label: Needs-Author-Feedback
           - addLabel:
               label: Needs-Attention # This will automatically assign the ICM Users
+      - description: >-
+          If an author agrees to the CLA on a Pull Request
+          * Remove the Needs-CLA Label
+        if:
+          - or:
+              - payloadType: Pull_Request_Review
+              - payloadType: Pull_Request_Review_Comment
+              - payloadType: Issue_Comment
+          - isActivitySender:
+              issueAuthor: True
+          - hasLabel:
+              label: Needs-CLA
+          - commentContains:
+              pattern: '@microsoft-github-policy-service agree'
+              isRegex: False
+        then:
+          - removeLabel:
+              label: Needs-CLA
       - description: >-
           When changes are requested on a pull request
           * Disable automerge
@@ -346,6 +357,8 @@ configuration:
           - removeLabel:
               label: Unexpected-File
           - removeLabel:
+              label: Validate-Domain-Installer
+          - removeLabel:
               label: Validation-Completed
           - removeLabel:
               label: Validation-Defender-Error
@@ -388,7 +401,7 @@ configuration:
                   pattern: 'Validation Pipeline Run'
                   isRegex: false
               - commentContains:
-                  pattern: '@[Ww]ingetbot\s[Rr]un'
+                  pattern: '(?in)@wingetbot\srun'
                   isRegex: true
           - not:
               isActivitySender:
@@ -407,12 +420,6 @@ configuration:
                   user: ItzLevvie
               - isActivitySender:
                   user: jedieaston
-              - isActivitySender:
-                  user: KaranKad
-              - isActivitySender:
-                  user: OfficialEsco
-              - isActivitySender:
-                  user: quhxl
               - isActivitySender:
                   user: Trenly
               - isActivitySender:

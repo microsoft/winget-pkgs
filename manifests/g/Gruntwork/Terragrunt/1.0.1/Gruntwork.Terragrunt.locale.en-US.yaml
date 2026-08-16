@@ -1,0 +1,138 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Gruntwork.Terragrunt
+PackageVersion: 1.0.1
+PackageLocale: en-US
+Publisher: Gruntwork
+PublisherUrl: https://terragrunt.gruntwork.io/
+PublisherSupportUrl: https://terragrunt.gruntwork.io/docs/community/support
+PrivacyUrl: https://gruntwork.io/legal/privacy-policy
+PackageName: Terragrunt
+PackageUrl: https://github.com/gruntwork-io/terragrunt/releases/tag/v0.68.9
+License: MIT
+LicenseUrl: https://github.com/gruntwork-io/terragrunt/blob/HEAD/LICENSE.txt
+Copyright: © 2024 Gruntwork, Inc. All rights reserved.
+ShortDescription: Terragrunt is a thin wrapper for Terraform that provides extra tools for keeping your Terraform configurations DRY, working with multiple Terraform modules, and managing remote state.
+Description: Terragrunt is a thin wrapper for Terraform that provides extra tools for keeping your Terraform configurations DRY, working with multiple Terraform modules, and managing remote state.
+Tags:
+- IaC
+- Infrastructure as Code
+- Terraform
+- Terraform Wrapper
+- terragrunt
+ReleaseNotes: |-
+  🧪 Experiments Added
+  dag-queue-display — DAG tree visualization for the run queue
+  A new dag-queue-display experiment renders the run queue as a dependency tree instead of a flat list, making it easier to understand execution order and dependency relationships at a glance.
+  $ terragrunt run --all --experiment dag-queue-display -- plan
+  19:06:59.108 INFO   The following units will be run, starting with dependencies and then their dependents:
+  .
+  ├── monitoring
+  ╰── vpc
+      ╰── database
+          ╰── backend-app
+              ╰── frontend-app
+  To learn more, see the experiment documentation.
+  slow-task-reporting — Progress reporting for long-running operations
+  A new slow-task-reporting experiment displays animated progress spinners for operations that take longer than 1 second, such as source downloads, Git worktree creation, and catalog repository cloning. In non-interactive environments (CI/CD, piped output), spinners are replaced with periodic INFO log lines every 30 seconds to prevent CI systems from killing jobs due to output inactivity.
+  $ terragrunt run --all --experiment slow-task-reporting -- plan
+  INFO Downloading source from git::https://github.com/example/module.git...
+  INFO Downloaded source from git::https://github.com/example/module.git (3.2s)
+  To learn more, see the experiment documentation.
+  stack-dependencies — Dependency wiring between units in stacks
+  A new stack-dependencies experiment enables the autoinclude block in terragrunt.stack.hcl files, allowing units and stacks to define dependency relationships and arbitrary configuration overrides during stack generation. This implements RFC #5663.
+  unit "vpc" {
+    source = "../catalog/units/vpc"
+    path   = "vpc"
+  }
+  unit "app" {
+    source = "../catalog/units/app"
+    path   = "app"
+    autoinclude {
+      dependency "vpc" {
+        config_path = unit.vpc.path
+      }
+      inputs = {
+        vpc_id = dependency.vpc.outputs.vpc_id
+      }
+    }
+  }
+  terragrunt run --all --experiment stack-dependencies -- plan
+  To learn more, see the experiment documentation.
+  💡 Tip Added
+  Windows symlink warning for provider cache users
+  Terragrunt now warns Windows users when symlink creation fails and provider caching is enabled. OpenTofu and Terraform may silently fall back to copying provider plugins instead of symlinking, which can increase disk usage and slow down operations. For OpenTofu >= 1.12.0, the tip includes guidance on using TF_LOG=warn to detect the fallback.
+  Thank you to the OpenTofu team for introducing this warning to ensure that Windows users are aware of the fallback behavior.
+  🐛 Bug Fixes
+  hcl validate no longer fails on dependency.outputs references
+  terragrunt hcl validate previously failed with "Unsupported attribute" when a configuration referenced dependency.<name>.outputs.<key> without mock_outputs.
+  During validation, output resolution is skipped, but the outputs attribute was never added to the dependency evaluation context, causing any output reference to error. The fix provides a dynamic placeholder for dependency outputs (and inputs) during validation so that attribute access evaluates to unknown rather than failing. Additionally, the dependency resolution pipeline is now more resilient during validation. Dependencies with unresolvable config_path values or nonexistent targets no longer cause the entire dependency namespace to disappear from the evaluation context.
+  Destroy queue now displays units in correct order
+  Previously, the run queue display showed units in apply order even for destroy commands. The queue now correctly shows dependents before their dependencies when running destroy, matching the actual execution order.
+  Dependent discovery fixed in worktrees
+  Dependents are now correctly discovered when units are discovered in worktrees. Previously, dependent discovery could fail to find related units when operating within a git worktree.
+  Filter exclusions now respected in worktree sub-discoveries
+  Negated filters (e.g., !./catalog/** from .terragrunt-filters or --filter) are now propagated to worktree sub-discoveries used by git-based filtering (--filter-affected, --filter '[ref...ref]').
+  Previously, excluded source catalog units in worktrees were still discovered and parsed, causing errors when they referenced values.* or dependency.* variables without the stack generation context.
+  read_terragrunt_config() behavior in implicit stacks fixed
+  A regression introduced in v0.99.4 caused read_terragrunt_config() to fail to parse dependency blocks in external configurations during stack execution. This is fixed by resetting parsing context fields that prevented proper evaluation of dependencies in configurations read by read_terragrunt_config().
+  get_original_terragrunt_dir() now resolves correctly during dependency parsing
+  A regression introduced in v1.0.0-rc3 caused get_original_terragrunt_dir() to return the dependent directory instead of the dependency's directory when parsing dependency configurations from a unit.
+  This broke configurations where a dependency's read_terragrunt_config() chain relied on get_original_terragrunt_dir() to locate sibling files. The fix introduces a dedicated WithDependencyConfigPath method that correctly resets the original config path when parsing a dependency as an independent unit.
+  Chained dependency with exposed include conversion fixed
+  Chaining dependencies with exposed includes no longer produces a spurious "Could not convert include to the execution ctx to evaluate additional locals" error during partial parsing.
+  Provider cache fixed on Windows for remote URLs
+  The provider cache failed on Windows with CreateFile https://...: The filename, directory name, or volume label syntax is incorrect because remote download URLs were passed to os.Stat, and the colon in https: is invalid Windows path syntax. The fix skips the filesystem existence check when the download URL is a remote URL (://), going directly to the download path.
+  Additional transient network errors now retried automatically
+  Added retry patterns for provider resolution and registry connection failures commonly seen in CI environments, including TLS handshake timeouts, TCP connection resets, context deadline exceeded errors, and failed discovery document requests. These cover both Terraform and OpenTofu provider workflows.
+  File copy performance improved
+  Terragrunt now streams data from source files to target files more often by replacing some instances where files were read into memory in their entirety and written to a target file. This results in improved performance when copying files and reduced memory footprint.
+  ⚙️ Process Updates
+  Tip builds now available from main
+  Every successful CI run on the main branch now automatically produces tip build binaries with signed checksums for all supported platforms (Windows and macOS binaries are not codesigned in tip builds). These builds are accessible via the builds API at https://builds.terragrunt.com — see the releases process documentation for API endpoints and usage examples. Maintainers can also trigger on-demand test builds from any branch using the test-build.yml workflow.
+  Concurrency limits now respect GOMAXPROCS
+  All internal concurrency limits now use runtime.GOMAXPROCS(0) instead of runtime.NumCPU(). This means Terragrunt correctly honors the GOMAXPROCS environment variable and container CPU quotas (e.g., cgroups), resulting in better behavior in resource-constrained environments like Kubernetes pods and CI runners with CPU limits.
+  AWS SDK updated to v1.41.5
+  The aws-sdk-go-v2 dependency has been updated to v1.41.5.
+  Terragrunt Scale documentation added
+  A new Terragrunt Scale section has been added to the docs, covering Pipelines, Drift Detection, and Patcher with brief overviews and links to the full Gruntwork documentation.
+  What's Changed
+  - feat: experiment for reporting long running tasks by @denis256 in #5730
+  - feat: add stack dependencies experiment by @denis256 in #5809
+  - fix: Fixing #5624 by @yhakbar in #5766
+  - fix: Fixing #4153 by @yhakbar in #5746
+  - fix: Fixing macOS linting by @yhakbar in #5775
+  - fix: Refactoring unit display in runs for better communication by @yhakbar in #5752
+  - fix: Discover dependents in worktrees if units are discovered there by @yhakbar in #5763
+  - fix: provider cache path handling in Windows by @denis256 in #5788
+  - fix: Adding Windows symlink tip by @yhakbar in #5778
+  - fix: Addressing test flakes for TestReadTerragruntConfigDependencyInStack by @yhakbar in #5781
+  - fix: Fixing generation in stacks that read files by @yhakbar in #5790
+  - fix: use io.Copy instead of reading files into memory by @thisguycodes in #5608
+  - fix: Fix coverage compare regarding retries by @thisguycodes in #5793
+  - fix: add retry patterns for transient provider/registry network errors by @denis256 in #5779
+  - fix: Fixing get_original_terragrunt_dir() interaction with dependencies by @yhakbar in #5828
+  - fix: Using cty.DynamicVal to avoid 'Unsupported Attribute' errors by @yhakbar in #5827
+  - fix: Preventing parse errors in stack generation in worktrees by @yhakbar in #5826
+  - fix: Addressing #5828 feedback by @yhakbar in #5876
+  - fix: Fixing up lints by @yhakbar in #5887
+  - docs: Adding v1.0.0 callout by @yhakbar in #5768
+  - docs: Disable vercel skew protection by @karlcarstensen in #5789
+  - docs: Updating GTM tag by @yhakbar in #5769
+  - docs: Fixing search by @yhakbar in #5776
+  - docs: Fixing strict controls by @yhakbar in #5782
+  - docs: Fixing up changelog implementation by @yhakbar in #5784
+  - docs: Documenting tip/test build installation instructions by @yhakbar in #5829
+  - docs: Adding TGS docs by @yhakbar in #5831
+  - chore: disabled tmpfs usage in GHA by @denis256 in #5787
+  - chore: Adding tests to confirm #4395 is resolved by @yhakbar in #5761
+  - chore: updated aws-sdk-go-v2 to 1.41.5 by @denis256 in #5771
+  - chore(deps): bump the js-dependencies group across 1 directory with 5 updates by @dependabot[bot] in #5764
+  - chore(deps): bump peter-evans/create-pull-request from 7.0.8 to 8.1.0 by @dependabot[bot] in #5736
+ReleaseNotesUrl: https://github.com/gruntwork-io/terragrunt/releases/tag/v1.0.1
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/gruntwork-io/terragrunt/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
