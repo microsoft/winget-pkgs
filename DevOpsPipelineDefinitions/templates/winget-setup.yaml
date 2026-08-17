@@ -1,0 +1,36 @@
+# Common setup steps for the WinGet pipelines.
+
+parameters:
+- name: type
+  displayName: 'Pipeline type'
+  type: string
+  values:
+  - Publish
+  - Validation
+  - Rebuild
+
+steps:
+
+- task: AzureCLI@2
+  displayName: 'Azure Setup'
+  inputs:
+    azureSubscription: '$(WinGetSvc.DataAccess)'
+    scriptType: pscore
+    scriptLocation: inlineScript
+    inlineScript: |
+      $account = az keyvault secret show --vault-name $(KeyVaultName) --name ValidationStorageAccountName --query value --output tsv
+      az storage blob download-batch --auth-mode login -d . --pattern * -s servicewrapper --output none --account-name $account
+    addSpnToEnvironment: true
+
+# The 'wingetsetup' step name is significant: agentless jobs reads the
+# output through dependencies.<job>.outputs['wingetsetup.<name>'].
+- task: AzureCLI@2
+  name: 'wingetsetup'
+  displayName: 'WinGet Setup'
+  inputs:
+    azureSubscription: '$(WinGetSvc.DataAccess)'
+    scriptType: pscore
+    scriptLocation: scriptPath
+    scriptPath: 'scripts/winget_setup.ps1'
+    arguments: '-Type ${{ parameters.type }} -KeyVaultName $(KeyVaultName)'
+    addSpnToEnvironment: true

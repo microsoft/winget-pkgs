@@ -1,0 +1,75 @@
+# Created with WinGet Tracker using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: t8y2.DBX
+PackageVersion: 0.5.73
+PackageLocale: en-US
+Publisher: t8y2
+PublisherUrl: https://github.com/t8y2
+PublisherSupportUrl: https://github.com/t8y2/dbx/issues
+Author: t8y2
+PackageName: DBX
+PackageUrl: https://github.com/t8y2/dbx
+License: Apache-2.0
+LicenseUrl: https://github.com/t8y2/dbx/blob/HEAD/LICENSE
+ShortDescription: 15MB，lightweight, cross-platform database client. Supports MySQL, PostgreSQL, SQLite, Redis, MongoDB, DuckDB, ClickHouse, SQL Server and more.
+Tags:
+- clickhouse
+- database
+- database-client
+- database-management
+- duckdb
+- gui
+- mongodb
+- mysql
+- postgresql
+- redis
+- rust
+- sql-server
+- sqlite
+- tauri
+- vue
+ReleaseNotes: |-
+  新功能
+  - 查询编辑器格式化 — “格式化”可自动识别 JSON 与 XML，在保留大整数、重复键、转义、CDATA、DOCTYPE 等内容的同时完成结构化排版，并避免将 XML 误交给 SQL 格式化器。 (contributed by @Abeautifulsnow) (closes #4962)
+  - 代码片段同步加密 — GitHub Gist 与 Gitee 同步快照改为使用同步密码加密，并支持安全迁移历史明文快照与旧版片段 ID。 (contributed by @eryajf) (closes #5077)
+  改进
+  - 数据网格筛选 — 调整清除与新增条件操作，增加 Shift+Enter 提示，并仅在鼠标真实移动到候选项时更新悬停高亮。 (contributed by @zipg) (closes #5038, #5116)
+  - MongoDB 补全 — 修复集合名、字段、操作符与引号内补全中断或被过滤的问题，优化常用方法排序并显示当前命令范围。 (contributed by @zipg) (closes #5092)
+  - SQL 大小写设置 — 自动别名、布尔值、函数、窗口函数和粘贴生成的 IN 条件统一遵循关键字与函数名大小写设置，同时保留 ClickHouse 规范函数名。 (contributed by @eryajf, @zipg) (closes #777, #5009, #5046)
+  - Schema Diff — 同方言视图使用原始定义，并在依赖表之前创建序列，避免生成的迁移 SQL 顺序或语义错误。
+  - RocketMQ 消费组 — 为 Broker 查询设置并发与超时边界，避免单个慢节点拖长消费组列表加载时间。
+  - TDengine 表分页 — 获取表分页时避免扫描完整表集合，降低大规模实例的元数据加载开销。
+  修复
+  - Excel 导入 — 兼容旧格式工作簿的 Sheet 名称读取，并保留整数单元格，避免导入后出现 .0 或精度变化。
+  - Navicat 导入 — 在 HTTP 部署环境中也能正确解密 Navicat 导出的连接密码。
+  - SQL 文件库 — 导入目录时跳过无权限访问的文件夹，避免整个导入流程失败。
+  - 数据网格转置 — 键盘切换转置视图后恢复原滚动位置，不再将当前记录顶到视口顶部。 (contributed by @zipg) (closes #4562)
+  - SQL 编辑器多光标 — 在标识符上使用 Alt+Cmd/Ctrl 点击时保留多光标行为，同时保持普通 Cmd/Ctrl 点击的对象跳转。 (contributed by @zipg) (closes #4095)
+  - SQL 语句范围 — 保留尾部语句的 EOF 光标归属，并正确识别 SQL Server 临时表名中的 # 前缀。
+  - AI 默认模型 — 恢复 API 型 AI 提供商的默认模型输入与持久化，使不提供 /models 接口的兼容服务可正常测试和使用。 (contributed by @zipg) (closes #5140)
+  - 侧边栏加载更多 — 在双击打开模式下正确激活“加载更多”节点。
+  - MCP 启动 — 支持 pnpm 全局安装生成的运行时 shim，避免桌面端无法启动全局 MCP Server。
+  - Dameng 元数据 — 受限 Schema 下回退到可访问对象，并补齐序列与包对象展示。
+  - Dameng 复制表 — 规范化跨库复制的目标表名，避免生成错误的目标限定名。
+  - Dameng AI 上下文 — AI 助手按 Schema 加载可见命名空间，不再只显示单个数据库选项。 (contributed by @eryajf) (closes #5105)
+  - PostgreSQL 数据编辑 — 为无主键行的 JSON 条件生成正确类型转换，避免更新或删除谓词类型不匹配。
+  - PostgreSQL 查询 — 识别本地化的缓存计划失效错误并自动重试。
+  - PostgreSQL 分区 DDL — 保留子分区定义，避免读取或复制表结构时丢失分区关系。
+  - GaussDB — 正确解码例程源码记录，并在 M 模式连接树中展示 JDBC 连接地址。
+  - MySQL 元数据 — 刷新未限定表名时保留原数据库目标，并兼容返回非标准 Catalog 的列元数据。
+  - MySQL 查询与连接 — 保留存储过程结果集，并在无 TCP keepalive 的连接出现 EBADF 时执行安全重试。
+  - Oracle — 旧版服务器使用流式方式读取 LOB，并按连接隔离字符集转换器，避免并发连接相互污染。
+  - Informix — 按表 Owner 隔离 Schema 和对象元数据，修复部分表不可见及异步加载后节点状态异常。 (contributed by @chenhbb)
+  - Xugu — 普通用户缺少 SYSTEM 或 ALL_* 视图权限时回退到可访问元数据、字段发现和尽力生成的 DDL。 (contributed by @mapan0424)
+  - Neo4j / Memgraph — 无法使用 Catalog 发现数据库时回退到连接配置中的数据库名称。
+  - Elasticsearch — 删除旧版索引文档时保留类型信息，避免请求路由错误。
+  - Redshift — 表数据读取改用文本协议，避免二进制协议兼容问题。
+  - Kingbase 数据传输 — 元数据连接池可用于传输流程，避免目标结构读取失败。
+  - Nacos — 登录请求使用规范的 v2 端点，修复部分服务端无法认证的问题。
+  安装
+  - 驱动与 Agent 下载 — 支持从明确配置的 HTTP 地址安装驱动，并在 Agent 下载后校验文件摘要，避免损坏或不匹配的产物被加载。
+  > 国内下载：如果 GitHub 下载较慢，可从 CNB 镜像 下载桌面端安装包，Docker 镜像从 docker.cnb.cool/dbxio.com/dbx:v0.5.73 拉取。
+ReleaseNotesUrl: https://github.com/t8y2/dbx/releases/tag/v0.5.73
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

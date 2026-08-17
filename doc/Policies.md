@@ -8,6 +8,7 @@ Manifests submitted to the community repository are subject to [moderation](Mode
 ## Installer Types
 WinGet supports the following installer types:
 - **MSIX**
+- **APPX**
 - **MSI**
 - **Exe-based installers**
 - **Font files**
@@ -24,7 +25,7 @@ Packages submitted to the community repository must install without requiring us
 
 ## Security Scans and Potentially Unwanted Applications (PUA)
 
-All packages submitted to the community repository are subject to multiple security scans as part of the validation pipeline. For more details on these checks, see [How do I know the packages in the Community Repository are safe?](FAQ.md#how-do-i-know-the-packages-in-the-community-repository-are-safe) in the FAQ.
+All packages submitted to the community repository are subject to multiple security scans as part of the validation pipeline. For more details on these checks, see [How do I know the packages in the Community Repository are safe?](FAQ.md#how-do-i-know-the-packages-in-the-community-repository-are-safe) in the FAQ, and the [Validation documentation](Validation.md) for a full description of all 10 validation steps.
 
 Because of the security position this repository is placed in, there is a strict policy against Potentially Unwanted Applications (PUA) and potentially malicious software. If a package is flagged by any of the security scans in the validation pipeline, it cannot be accepted into the repository, regardless of the application's legitimacy or intent. This policy exists to protect users and maintain the integrity of the repository.
 
