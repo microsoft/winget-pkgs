@@ -1,0 +1,71 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: jens-duttke.usage-monitor-for-claude
+PackageVersion: 1.20.0
+PackageLocale: en-US
+Publisher: Jens Duttke
+PublisherUrl: https://github.com/jens-duttke
+PublisherSupportUrl: https://github.com/jens-duttke/usage-monitor-for-claude/issues
+Author: Jens Duttke
+PackageName: Usage-Monitor-for-Claude
+PackageUrl: https://github.com/jens-duttke/usage-monitor-for-claude
+License: MIT
+LicenseUrl: https://github.com/jens-duttke/usage-monitor-for-claude/blob/HEAD/LICENSE
+ShortDescription: Lightweight Windows tray app that monitors your Claude rate limits in real time - portable single EXE, zero configuration, fully auditable
+Description: Lightweight Windows tray app that monitors your Claude rate limits in real time - portable single EXE, zero configuration, fully auditable
+Tags:
+- anthropic
+- claude
+- claude-code
+- desktop-app
+- developer-tools
+- python
+- quota
+- rate-limit
+- system-tray
+- tray-icon
+- usage-monitor
+- windows
+ReleaseNotes: |-
+  Added
+  - Multi-account support - launch additional instances with --config-dir="<path>" to monitor a second Claude account side by side; each instance reads its own credentials and settings, gets its own tray tooltip prefix and autostart entry, and keeps its --config-dir across restarts (thanks to @hybrid2102 for the contribution)
+  - Custom CLI command - set cli_command (e.g. {"WSL": ["wsl", "/home/<user>/.local/bin/claude"]}) to list the Claude Code version of an install the app cannot detect on its own, such as one running inside WSL, alongside the native CLI and the IDE extensions
+  Changed
+  - When a custom config directory is in effect (--config-dir or CLAUDE_CONFIG_DIR), a usage-monitor-settings.json in that directory now takes priority over the one next to the EXE, so each instance can have its own settings
+  Fixed
+  - Closing a pinned popup no longer keeps its system-wide input hooks installed - previously every pin-and-close cycle left another set of hooks behind, gradually adding input lag machine-wide until the app was restarted
+  - The popup no longer stays invisible (and permanently refuses to open again until restart) when its rendered content happens to be exactly 400 pixels tall
+  - Starting the app while another instance runs with different rights (e.g. one of them "as administrator") now shows the usual "already running" dialog instead of silently starting a second instance with a second tray icon and doubled API polling
+  - Answering "Yes" in the "already running" dialog now verifies that the old instance is really gone before starting - if it could not be terminated (for example because it runs with administrator rights), an error message appears instead of both instances silently running side by side
+  - An account switch is no longer missed for the rest of the session when the profile request fails once around the switch - previously that also suppressed the "account switched" notification and could fire a false "quota reset" notification and reset command instead
+  - Opening the popup roughly 3 to 5 minutes before a quota reset no longer delays the reset-confirming poll - the tray and the "quota reset" notification/command now react a few seconds after the reset instead of up to two minutes late
+  - On Chinese, Hindi, and Indonesian Windows systems the app now starts in the system language instead of silently falling back to English (the shipped zh-CN, zh-TW, hi, and id translations were never picked up by the automatic language detection)
+  - A credentials file with an unexpected structure (e.g. claudeAiOauth left empty by a logout, or a file rewritten by another tool) no longer crashes the app and kills polling until restart - it is treated as "no token available right now"
+  - A profile response with an empty account or organization section no longer crashes the poll loop or the popup
+  - Configuring tooltip_fields or icon_fields with a response key that is not a quota field (e.g. limits) no longer freezes the tray on stale data - the entry is skipped in the tooltip and rendered as 0% in the icon
+  - An IDE extensions folder that exists but cannot be read (permission denied, broken junction) no longer breaks the popup or its live updates - the folder is skipped in the Claude Code version list
+  - Confirming the "already running" dialog after the old instance already exited on its own can no longer terminate an unrelated process that happened to receive the same process ID
+  - A settings file saved as UTF-8 with BOM (the default of older PowerShell and Notepad versions) is now accepted instead of being rejected with an "Invalid JSON" error that discarded all settings
+  - Notifications deferred while you were away can no longer stay stuck in the queue for hours (or get lost to a rare crash) when you return at just the wrong moment - they now appear promptly once you are back
+  - Setting an event command to an empty string ("on_double_click_command": "") now disables it like [] does - previously it still activated the double-click machinery, delaying every single click by the double-click interval and launching an empty shell on double-click
+  - Two quotas resetting at the same time (e.g. a weekly window together with its per-model limit) now produce a single "quota reset" notification instead of identical back-to-back toasts
+  - When the retry after an expired-token refresh is answered with a rate limit (HTTP 429), the app now honors the server's requested wait time and shows the rate-limit state instead of keeping the credentials-error icon and re-polling the already limited endpoint too early
+  - Setting the system clock backwards (manual correction, time sync, resuming a virtual machine snapshot) no longer freezes the tray on stale data for the duration of the jump - polling re-anchors to the new clock right away
+  - A pinned popup no longer stops receiving live updates after a single transient failure (it could previously show stale bars for days with only the clock still ticking) - a failed update is retried on the next tick
+  - The tray icon no longer permanently stops following light/dark theme switches after a single failed re-render (e.g. during an Explorer restart)
+  - Two content-height changes arriving in quick succession (e.g. toggling the compact view right as a data update lands) can no longer leave the popup clipped or oversized until the next content change
+  - When the set of quota bars changes while the popup is open but their number stays the same (e.g. an account switch between two plans), the bars now rebuild with the correct labels instead of showing the new values under the old quota names
+  - The tray icon shows "99" instead of a clipped, three-digit "100" while utilization is between 99.5% and 100% - "100" stays reserved for the actually-exhausted state
+  - A tray bar in overage mode no longer flips to a plain utilization fill in the short window between a quota reset and the confirming poll - it keeps its overage reading (empty while within budget)
+  - A currency_symbol override that happens to match the system's currency symbol now works - previously it was silently ignored and the billing currency reported by the API won; an empty override now consistently means "no symbol"
+  - On a weekly usage bar spanning a daylight-saving changeover, the day dividers after the changeover now stay on the actual local midnights instead of drifting by one hour
+  - The --verbose diagnostics now redact the Windows username from paths reliably - previously a differently-cased path (e.g. a lowercase CLAUDE_CONFIG_DIR) slipped through unredacted, and a neighboring user profile could be partially mangled
+  - On Windows 10 versions older than 1703 the app no longer dies at startup with an unhandled error dialog - it now starts with the legacy DPI behavior instead
+  - The popup's time marker and day dividers no longer shift by one pixel (with a visible slide animation on the marker) after the first live data update
+  - Notification icon - alerts and reset notifications now show the app logo instead of the current tray icon, so the icon no longer says "you have nothing left" when a limit was just reset or is only partway used
+  Full changelog
+  README for this version
+ReleaseNotesUrl: https://github.com/jens-duttke/usage-monitor-for-claude/releases/tag/v1.20.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
