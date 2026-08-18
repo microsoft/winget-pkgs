@@ -1,0 +1,60 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: PHPantom.LSP
+PackageVersion: 0.9.0
+PackageLocale: en-US
+Publisher: PHPantom-dev
+PublisherUrl: https://github.com/PHPantom-dev
+PublisherSupportUrl: https://github.com/PHPantom-dev/phpantom_lsp/issues
+Author: Anders Jenbo
+PackageName: PHPantom
+PackageUrl: https://github.com/PHPantom-dev/phpantom_lsp
+License: MIT
+LicenseUrl: https://github.com/PHPantom-dev/phpantom_lsp/blob/main/LICENSE
+Copyright: Copyright (c) 2026 PHPantom Contributors
+CopyrightUrl: https://github.com/PHPantom-dev/phpantom_lsp/blob/main/LICENSE
+ShortDescription: >
+  Fast PHP language server with deep type intelligence. Generics, Laravel, PHPStan annotations.
+  Ready in an instant.
+Description: >
+  A fast, lightweight PHP language server written in Rust. Ready in seconds, uses a fraction of the
+  RAM other language servers need, and stays responsive throughout. No indexing phase, no waiting.
+Tags:
+- drupal
+- laravel
+- lsp
+- lsp-server
+- neovim-plugin
+- php
+- phpstorm-plugin
+- vscode-extension
+ReleaseNotes: |-
+  Added
+  - Macro hover shows origin and inferred return types. Hovering on a macro method call now displays a "macro" indicator instead of the generic "virtual" label, distinguishing ::macro() registrations from @method/@mixin synthesized members. When the closure has no explicit return type hint, the return type is inferred from the closure body and shown with an "(inferred)" annotation. Bare $this / self / static returns preserve their keyword form, and method chains like $this->transform(...) use the last method's declared return type directly, preserving $this, static, and generic parameters that the general resolver would flatten to a bare class name. Regular (non-macro) methods with inferred return types also show the "(inferred)" annotation on hover. Contributed by @calebdw.
+  - Return type mismatch diagnostics (type_mismatch_return). Functions and methods with a declared return type are now checked against their return statements. Incompatible return values are flagged as errors. Void functions returning a value and bare return; in non-void functions are also flagged. Generators (functions using yield) are skipped. Uses the same conservative is_type_compatible policy as argument type checking to avoid false positives. Contributed by @calebdw.
+  - Property type assignment diagnostics (type_mismatch_property). Assignments to typed properties ($this->prop = expr and self::$prop = expr) are checked against the declared property type. Incompatible values are flagged as errors. Only plain = assignments are checked; compound operators (+=, .=, etc.) are skipped. Untyped and mixed properties are not flagged. Contributed by @calebdw.
+  - Conditional return types keep an intersection with the matched class. A @return ($x is class-string<T> ? T&SomeInterface : SomeInterface) annotation now resolves the matched branch to the concrete class intersected with the interface, instead of collapsing it to the bare class. Mock factories such as Mockery's mock(Foo::class) and Laravel's $this->mock(Foo::class) therefore resolve to Foo&MockInterface, so their members complete and assigning the result to a Foo-typed property or returning it from a Foo&MockInterface method no longer reports a spurious type mismatch.
+  - PSR-4 mismatch diagnostics and rename-based moves. Files now warn when the declared namespace or primary class name does not match the PSR-4 path or filename, with quick fixes to correct them. Renaming a class from its declaration now opens the full FQCN so you can move it between namespaces in one step, and renaming a namespace can rewrite multiple segments at once while moving PSR-4 directories and updating references across the project. Contributed by @calebdw.
+  - Case-sensitive autoloading diagnostic. A class reference whose casing differs from the class's actual declaration is now flagged, with a quick fix to correct it. This catches the bug where code loads on a case-insensitive filesystem (macOS, Windows) but fails with a class-not-found error on Linux, because PSR-4 maps the name to a file path and path lookups are case-sensitive there. It covers use imports and inline references to autoloaded classes; built-in classes and same-file references, which never reach the autoloader, are left alone.
+  - Completion candidates ranked by dependency provenance. Class, function, and constant completions are now sorted by origin tier: project code first, then core/stub symbols, then explicit Composer dependencies (require / require-dev), then transitive vendor dependencies last. The provenance is inferred from composer.json and installed.json during indexing. Contributed by @calebdw.
+  - analyze and fix work without composer.json. Both commands now treat a directory that has no composer.json (a WordPress site, a legacy codebase) as a plain PHP project: classes are indexed by scanning the tree and files are discovered by walking the root, so projects that never adopted Composer can be analysed directly. A note on stderr flags the fallback so a mistyped --project-root is not silently analysed as a bare tree.
+  - update command. A new phpantom_lsp update subcommand downloads the latest release from GitHub and replaces the current binary. Supports --check (dry run, exit code 1 if update available) and --no-confirm (for CI). Handles .tar.gz (Unix) and .zip (Windows) archives across all 6 supported platforms. Contributed by @calebdw in #194.
+  - array_map infers the output element type from its callback. The result of array_map now reflects what the callback actually returns instead of assuming the input element type is preserved. An explicit return type hint is honoured, including scalars like string or int, so array_map(fn(Item $item): string => $item->id, $items) produces list<string> rather than list<Item>. When the callback has no return type hint, the type is inferred from its body expression, so array_map(fn($item) => $item->id, $items) over a list<Item> also produces list<string>. Fixes #147. (contributed by @calebdw in #195)
+  - Static methods complete on instance access. Member completion after -> now offers a class's static methods alongside its instance methods, since PHP lets you call a static method through an instance ($obj->make()). Static properties remain excluded, as they are only reachable via ::. Contributed by @calebdw in #174.
+  - Array-callable navigation. Method-name strings in array callables ([Controller::class, 'method'] and [$object, 'method']) now resolve like a real member reference. This makes go-to-definition, find-references, and rename work on Laravel controller actions such as Route::get('/', [IndexPageController::class, 'indexPage']).
+  - Array-callable method completion. Typing inside the method-name string of an array callable ([Controller::class, '|']) now offers method name completions from the resolved class, including inherited and trait methods. Works with Class::class constants, $this, and typed variables. (thanks @calebdw)
+  - Convert arrow function to closure. A new refactor.rewrite code action converts arrow functions to anonymous closures (fn($x) => $x * 2 to function($x) { return $x * 2; }). Variables from the outer scope are automatically captured via a use() clause. Preserves static and return type hints. Contributed by @calebdw in #191.
+  - @phpstan-sealed tag support. The @phpstan-sealed FooClass|BarClass PHPDoc tag is now recognized. Class names in the tag are treated as type references, preventing false "unused import" diagnostics. Docblock completion also offers the tag. (contributed by @calebdw in #190)
+  - Magic methods complete when implemented. Magic methods declared on a class (__invoke, __toString, __call, and the rest) are now offered in member completion, so explicit calls like $x->__invoke() autocomplete and support go-to-definition. They are sorted below the regular methods so they never appear at the top of the list.
+  - Staleness detection and auto-refresh. The class index, function index, and constant index now stay fresh automatically. When PHP files are created or deleted outside the editor (e.g. git checkout, code generation), the indices update without a restart, and edits made outside the editor are reflected the next time the file is used. When composer.json or composer.lock changes (e.g. after composer install), vendor packages are rescanned automatically.
+  - #[ArrayShape] attribute support. Functions and methods annotated with #[ArrayShape(["key" => "type", ...])] (used by ~84 phpstorm-stubs entries) now produce array shape key completions, hover type info, and correct type resolution. Affects commonly used functions like parse_url, stat, pathinfo, gc_status, getimagesize, and session_get_cookie_params.
+  - Convert to arrow function. A new refactor.rewrite code action converts single-expression closures to arrow functions (function($x) { return $x * 2; } to fn($x) => $x * 2). The action is only offered when the conversion is safe: single return statement, no by-reference use captures, no void/never return type, and PHP >= 7.4.
+  - Convert switch to match. A new refactor.rewrite code action converts switch statements to match expressions when all arms are single-expression returns or assignments to the same variable. Handles fall-through cases (merged with commas), trailing break removal, and throw arms. Requires PHP >= 8.0.
+  - Extract interface. A new refactor.extract code action generates an interface from a concrete class. All public method signatures (excluding the constructor) are extracted into a new {ClassName}Interface.php file in the same directory, and the class is updated with implements {ClassName}Interface. Class-level and method-level @template tags are preserved when referenced by extracted methods.
+  - @template on @method tags. Virtual methods declared via @method PHPDoc tags can now define their own template parameters using the <T of Bound> syntax (e.g. @method TVal get<TVal of mixed>(TVal $default)). Template inference at call sites works the same as for real methods.
+  - Laravel custom Eloquent builder support. Models using the #[UseEloquentBuilder] attribute now have their custom builder's methods forwarded as static methods on the model. query(), newQuery(), and newModelQuery() return the custom builder type with correct generic model substitution. Contributed by @MingJen in #118.
+  - Eloquent relation and column string completion. Typing inside string arguments to with(), load(), whereHas(), and other Eloquent methods that accept relation names now offers relationship method names as completions, with dot-notation traversal for nested relations. Similarly, where(), orderBy(), select(), pluck(), and other column-accepting methods offer model column names (from $casts, $fillable, @property tags, timestamps, etc.).
+ReleaseNotesUrl: https://github.com/PHPantom-dev/phpantom_lsp/releases/tag/0.9.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

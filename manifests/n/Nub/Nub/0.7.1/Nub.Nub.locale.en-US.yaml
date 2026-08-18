@@ -1,0 +1,69 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Nub.Nub
+PackageVersion: 0.7.1
+PackageLocale: en-US
+Publisher: nub contributors
+PublisherUrl: https://nubjs.com/
+PublisherSupportUrl: https://github.com/nubjs/nub/issues
+Author: nub contributors
+PackageName: Nub
+PackageUrl: https://nubjs.com/
+License: MIT
+LicenseUrl: https://github.com/nubjs/nub/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 nub contributors
+CopyrightUrl: https://github.com/nubjs/nub/blob/HEAD/LICENSE
+ShortDescription: The all-in-one JavaScript toolkit that augments Node.js instead of trying to replace it.
+Description: "An all-in-one toolkit for Node.js. One Rust binary to run your files and scripts, install dependencies, and manage Node itself — a Bun-like modern DX on top of the node you already have. There's no new runtime to adopt and no lock-in: every augmentation rides on Node's own public extension surfaces."
+Moniker: nub
+Tags:
+- javascript-runtime
+- node-version-manager
+- nodejs
+- package-manager
+- script-runner
+ReleaseNotes: |-
+  Installation fixes: Homebrew works again, and reinstalling no longer leaves the package-manager shims on the previous binary.
+  Important
+  Homebrew could not install nub 0.7.0. Both brew install nubjs/tap/nub and brew upgrade failed with Errno::ENOENT: No such file or directory - bin/nubx, on macOS and Linux alike. Run brew update && brew upgrade nub to pick up the fix.
+  Installation
+  Release archives have shipped a single binary since 0.7.0, with the nub and nubx verbs selected from the argv[0] basename. Each installer creates the nubx alias itself — the Homebrew formula was the one that had not been updated to do so.
+  ───────────────────────┬─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┬─────────
+  Area                   │What changed                                                                                                                                                                                         │Ref
+  ───────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼─────────
+  Homebrew               │The formula installs bin/nub and creates nubx as a symlink beside it, and its test asserts that the alias dispatches rather than merely existing.                                                    │#676
+  ───────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼─────────
+  Curl and irm installers│Reinstalling now refreshes the ~/.nub/shims hardlinks. Those point at the nub binary, so replacing it left npm, npx, pnpm, pnpx, yarn and yarnpkg running the previous version with no error and no  │#678
+                         │warning.                                                                                                                                                                                             │
+  ───────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼─────────
+  Windows self-update    │The upgrade carries busybox.exe across. Upgrading from a release older than 0.6.0 left nub run unable to find nub's bundled shell, with no fallback.                                                 │#678
+  ───────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼─────────
+  Release pipeline       │The generated Homebrew formula is installed and tested on macOS before it is pushed to the tap, so a formula that cannot install no longer reaches users.                                            │#678
+  ───────────────────────┴─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┴─────────
+
+  Runtime
+  An inherited NODE_OPTIONS preload no longer displaces nub's own. A consumer that re-parses NODE_OPTIONS keeps one value per flag name, and nub appended the inherited value last — so the token dropped was nub's preload, and the augmentation layer went with it. That is the shape an APM injector uses, so an application running under an agent lost augmentation silently. Inherited --require and --import values are now folded into the same chainers as the configured ones. (#675)
+
+  Testing and internals
+  ────────────────────┬────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┬────────────
+  Area                │What changed                                                                                                                                    │Commit
+  ────────────────────┼────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼────────────
+  Installer harness   │Covers reinstalling over an existing install. Every case before it installed into an empty sandbox, which is why the shim staleness went unseen.│7ae0514
+  ────────────────────┼────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼────────────
+  Windows installer CI│Exercises the shim refresh, which a fresh install never reaches, against the checked-out script.                                                │7ae0514
+  ────────────────────┼────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼────────────
+  Matrix gates        │A leg cancelled by a superseding run is no longer counted as a failure.                                                                         │ceda397
+  ────────────────────┼────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼────────────
+  Action pins         │Took the dorny/paths-filter security backport and corrected the version comment.                                                                │12c784c
+  ────────────────────┴────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┴────────────
+
+  What's Changed
+  - fix(preload): fold inherited NODE_OPTIONS preloads into the chainer by @colinhacks in #675
+  - fix(homebrew): install bin/nub and create the nubx alias by @colinhacks in #678
+ReleaseNotesUrl: https://github.com/nubjs/nub/releases/tag/v0.7.1
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://nubjs.com/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,95 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: aelassas.Servy
+PackageVersion: '8.9'
+PackageLocale: en-US
+Publisher: Akram El Assas
+PublisherUrl: https://github.com/aelassas
+PublisherSupportUrl: https://github.com/aelassas/servy/issues
+Author: Akram El Assas
+PackageName: Servy
+PackageUrl: https://servy-win.github.io/
+License: MIT
+LicenseUrl: https://github.com/aelassas/servy/blob/HEAD/LICENSE.txt
+Copyright: Copyright (c) 2025 Akram El Assas
+ShortDescription: Servy lets you run any app as a native Windows service with full control over working directory, startup type, process priority, logging, health checks, pre-launch scripts and parameters.
+Description: |-
+  Servy lets you run any app as a native Windows service with full control over the working directory, startup type, process priority, logging, health checks, environment variables, dependencies, pre-launch and post-launch hooks, pre-stop and post-stop hooks, and parameters. It's designed to be a full-featured alternative to NSSM, WinSW, and FireDaemon Pro.
+
+  Servy is digitally signed using a trusted code-signing certificate provided by the SignPath Foundation. This ensures that all Servy executables and installers are verified and secure, giving you peace of mind when using the tool.
+
+  Servy offers a desktop app, a CLI, and a PowerShell module that let you create, configure, and manage Windows services interactively or through scripts and CI/CD pipelines. It also includes a Manager app for easily monitoring and managing all installed services in real time.
+
+  Features:
+  - Clean, simple UI
+  - Monitor and manage all installed services with Servy Manager
+  - Real-time CPU and RAM monitoring with live performance graphs for installed services
+  - Real-time service stdout and stderr output preview in Servy Console
+  - Service dependency tree visualization with status indicators
+  - CLI and PowerShell module for full scripting and automated deployments
+  - Run any executable as a Windows service
+  - Set service name, description, startup type, priority, working directory, environment variables, and dependencies
+  - Environment variable expansion supported in parameters, process paths and startup directories
+  - Run services as Local System, local or domain accounts, Active Directory accounts, or gMSAs
+  - Redirect stdout/stderr to log files with automatic size-based and date-based rotations
+  - Run pre-launch hook before starting the service, with retries, timeout, logging and failure handling
+  - Run post-launch hook after the application starts successfully
+  - Run pre-stop and post-stop hooks before the application stops and after the application stops
+  - Supports Ctrl+C for command-line apps, close-window for GUI apps, and force kill if unresponsive
+  - Prevent orphaned/zombie processes with improved lifecycle management and ensuring resource cleanup
+  - Health checks and automatic service recovery
+  - Browse and search logs by level, date, and keyword for faster troubleshooting from Servy Manager
+  - Export/Import service configurations for easy backups and automation
+  - Service Event Notification alerts on service failures via Windows notifications and email
+  - Compatible with Windows 7-11 x64 and Windows Server editions
+
+  Who is it for?
+  - Developers: Run development servers, scripts, or custom tools as services without extra setup.
+  - Sysadmins & IT professionals: Ensure critical background processes stay alive, monitored, and properly logged.
+  - Teams or organizations: Automate background services reliably across multiple machines.
+Moniker: servy
+Tags:
+- admin
+- automation
+- background-service
+- cli
+- devops
+- dotnet
+- nssm
+- powershell
+- scm
+- service-manager
+- service-supervisor
+- service-wrapper
+- watchdog
+- windows-service
+- windows-tools
+- winsw
+ReleaseNotes: |-
+  - fix(core): JsonServiceSerializer.cs - FormatLineInfo casts the exception to IJsonLineInfo, which no Newtonsoft exception implements, so JSON parse errors never report line/position (#4459)
+  - fix(core): ServiceControllerWrapper.cs - the 'if (deps != null)' guard in BuildDependencyTree's disposal finally is provably always true (#4460)
+  - fix(core): ServiceDtoImportValidator.cs - the manual CR/LF strip duplicates Logger's central SanitizeToSingleLine, and renders the same name differently from every other log line (#4463)
+  - fix(service): ProcessLauncher.cs - three provably-always-true path-emptiness terms at lines 205, 239 and 249, already folded into psi.RedirectStandardOutput/Error at 148-149 (#4404)
+  - fix(ui): AppBootstrapper.cs - critical-configuration failure tells operators to check an appsettings.json file that no app ships (#4437)
+  - fix(desktop): MainViewModel.cs (Servy) - three minor items: ManagerCommand is the only busy-block command without the !IsBusy guard, LoadServiceConfiguration missed the #3858 Async rename, trailing whitespace at 915 (#4447)
+  - fix(desktop,manager): DesignTimeAppConfig.cs / DesignTimeMocks.cs / DesignTimeServiceCommands.cs - the five design-time stand-ins follow four different implementation and documentation conventions (#4440)
+  - fix(manager): ConsoleViewModel.cs - t.IsFaulted is provably always true inside a TaskContinuationOptions.OnlyOnFaulted continuation (#4347)
+  - fix(manager): ConsoleViewModel.cs - ConsoleSearchText setter lacks the equality guard every sibling setter uses; a no-op write cancels the in-flight debounce and re-filters the whole buffer (#4349)
+  - fix(manager): Console/DependenciesViewModel.cs - SetPidText runs on every monitoring tick, defeating the change-detection branch immediately above it (#4353)
+  - fix(manager): MainViewModel.cs (Manager) - Select All raises HasSelectedServices once per row; the _isUpdatingSelectAll guard covers UpdateSelectAllState but not the notification (O(N²)) (#4367)
+  - fix(manager): PerformanceViewModel.cs - AddPoint's two 'valueHistory.Count > 0' guards (319, 361) are provably always true after the unconditional Enqueue at 311 (#4373)
+  - fix(cli): UninstallServiceCommand.cs - when the SCM service is already gone, the pipeline fails before onSuccess, so the repository row can never be cleaned from the CLI (#4235)
+  - fix(cli): Program.cs (Servy.CLI) - status/export still run the full runtime bootstrap (wrapper-exe extraction, event source, DB init); a corrupt servy.db breaks even 'status' (follow-up to #1760) (#4242)
+  - fix: linker.shared.xml - three trimmer roots preserve capabilities the trimmed projects do not have (Claims unused, FileSystemWatcher only in an untrimmed project, no STA code at all) (#4445)
+  - ci: resolve-version/action.yml - unused step 'id: resolve' left over from the removed outputs block (#2832) (#4172)
+  - ci: bump-version.yml - 'update-index --chmod=+x bump-version.ps1' is a no-op (mode already 100755, and Windows execution never needs it) (#4174)
+  - ci: loc.yml - badge deploy lacks force_orphan, so the loc branch accumulates one junk commit per push to main forever (#4177)
+  - ci: scoop.yml - step env re-maps HASH/VERSION to themselves; sibling Extras step proves the mapping is unnecessary (#4191)
+  - ci: bump-version.ps1 - no -DryRun preview mode, unlike sibling bump-runtime.ps1 (#4202)
+ReleaseNotesUrl: https://github.com/aelassas/servy/releases/tag/v8.9
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/aelassas/servy/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

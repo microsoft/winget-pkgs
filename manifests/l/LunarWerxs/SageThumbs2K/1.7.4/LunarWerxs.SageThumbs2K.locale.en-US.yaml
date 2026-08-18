@@ -1,0 +1,58 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: LunarWerxs.SageThumbs2K
+PackageVersion: 1.7.4
+PackageLocale: en-US
+Publisher: LunarWerx
+PublisherUrl: https://github.com/LunarWerxs
+PublisherSupportUrl: https://github.com/LunarWerxs/SageThumbs-2k/issues
+PackageName: SageThumbs 2K
+PackageUrl: https://github.com/LunarWerxs/SageThumbs-2k
+License: PolyForm Noncommercial License 1.0.0
+LicenseUrl: https://github.com/LunarWerxs/SageThumbs-2k/blob/HEAD/LICENSE.md
+Copyright: Copyright (c) 2026 LunarWerx
+ShortDescription: Explorer thumbnails for 326 file types Windows can't read, plus a right-click image toolkit.
+Description: SageThumbs 2K is a modern, crash-isolated Windows 11 shell extension written in Rust that rebuilds the classic SageThumbs. It gives File Explorer thumbnails for 326 file types Windows can't preview on its own — camera RAW, HEIC/AVIF, Photoshop, DjVu, ebooks and comics, video frames, 3D-print files and a long tail of obscure formats — plus a right-click image toolkit (convert, resize, rotate, OCR, color picker, metadata strip, combine-to-PDF/CBZ) and a console/AI CLI. Free for personal use.
+Moniker: sagethumbs2k
+Tags:
+- converter
+- explorer
+- heic
+- image
+- raw
+- shell-extension
+- thumbnails
+ReleaseNotes: |-
+  What's changed
+  Changed
+  - Game textures with mipmaps thumbnail about 17x faster. A .dds file usually already
+    contains the picture at every halved size down to 1 pixel, because that is what a game
+    engine displays at a distance. We were ignoring all of it and decompressing the full-size
+    image to build a small tile. An 8192 x 8192 texture went from 0.87 seconds to 0.05. The
+    tile now comes from the texture's own smaller copy, so it looks very slightly softer than
+    a full decode would, which is exactly what the game itself shows.
+  Fixed
+  - "Image info" reported the wrong size for large JPEG 2000 files. A 9958 x 7686 map scan
+    confidently described itself as 4096 x 3161. Nothing could read a .jp2 header directly, so
+    the size was taken from a full decode, and that decode is capped at 4096 pixels for safety.
+    The number you were shown was the cap, not the picture. It now reads the real dimensions
+    straight out of the file in about a third of a second, without decoding anything.
+  - Very large images thumbnailed about twice as fast, and huge scans stopped timing out.
+    A 76-megapixel JPEG 2000 map scan (only 11 MB on disk) took around 9 seconds and, on a busy
+    folder, missed the preview pane's time limit entirely, so the pane showed nothing for a file
+    that was perfectly readable. The problem was not the file's size: whatever you were going to
+    see it at, the decode always rendered a 4096-pixel version first and threw most of it away.
+    It now decodes straight to the size being displayed. That scan is about 4.4 seconds for an
+    Explorer thumbnail and 5 seconds in the preview pane, and detail is slightly better,
+    because the picture is no longer resized twice. Most of what remains is the JPEG 2000
+    decoder itself. (issue #11)
+  Verified installer
+  - File: SageThumbs2K-Setup-1.7.4.exe
+  - Size: 13408770 bytes
+  - SHA-256: 05a16462c44521ce1da82d6aa9dd0af9f8d8b09596d80576d25fb05af0e98590
+  - ARM64 installer: SageThumbs2K-Setup-1.7.4-arm64.exe
+  - ARM64 SHA-256: 0bc9cafc417930cd388493a769eb9e3d2b957150ae9dfdfbf6c81c5d0deab211
+ReleaseNotesUrl: https://github.com/LunarWerxs/SageThumbs-2k/releases/tag/v1.7.4
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

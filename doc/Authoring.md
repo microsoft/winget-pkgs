@@ -44,7 +44,7 @@ Before creating and submitting a manifest, check if the package already exists:
 
 Review the [Manifest Specification]. If the process seems complex, you can create a new issue and select [Package Request/Submission 👀](https://github.com/microsoft/winget-pkgs/issues/new/choose).
 
-Manifests submitted to this repository should be multi-file manifests. The minimum required files are:
+Manifests submitted to this repository must be multi-file manifests. The minimum required files are:
 - A [version][versionSchema] file
 - A [defaultLocale][defaultLocaleSchema] file
 - An [installer][installerSchema] file
@@ -87,6 +87,8 @@ If you manually edit the YAML, validate your manifest using the following comman
 winget validate --manifest <Path to manifest>
 ```
 
+When you submit a PR, a **GitHub App** automatically runs the [Validation Pipeline](Validation.md) on your manifest and installers, reporting results directly on the PR. For a detailed description of each step and how to resolve failures, see the [Validation](Validation.md) and [Validation Failure Guide](ValidationFailureGuide.md) documents.
+
 ## Testing
 
 Test your manifest before submission to ensure it meets quality standards:
@@ -103,7 +105,7 @@ winget settings --enable LocalManifestFiles
 winget install --manifest <path>
 ```
 
-For a more isolated test, use the [SandboxTest.ps1 Script](https://github.com/microsoft/winget-pkgs/blob/master/doc/tools/SandboxTest.md) to test in Windows Sandbox.
+For a more isolated test, use the [SandboxTest.ps1 Script](tools/SandboxTest.md) to test in Windows Sandbox.
 
 ## Advanced Authoring
 
@@ -175,7 +177,7 @@ When comparing one `Part` to another, WinGet goes through the following process.
 	* If both values of `string` are empty, the parts are equal
 	* If one `Part` has a value in `string` and the other does not, the `Part` which ***does not*** have a value in `string` is considered to be greater
 	* Example: When comparing `34` and `34-beta`, the `integer` is equal for both (`34`). However, the `string` for the former is empty and the `string` for the latter is `-beta`, so `34` is the larger `Part`. This leads to `1.2.34` being considered a higher `Version` than `1.2.34-beta`
-4. If both parts have a value in `string`, perform a case-insensitive comparison of the two
+3. If both parts have a value in `string`, perform a case-insensitive comparison of the two
 	* If the values of `string` are not equal, the lexicographic comparison determines which `Part` is larger
 
 #### Examples of Version Comparisons

@@ -1,0 +1,110 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: squidowl.halloy
+PackageVersion: 2026.8.0
+PackageLocale: en-US
+Publisher: Squidowl
+PublisherUrl: https://squidowl.org/
+PublisherSupportUrl: https://halloy.squidowl.org/
+PackageName: Halloy
+PackageUrl: https://github.com/squidowl/halloy/releases/tag/2026.8
+License: GPL-3.0-or-later
+LicenseUrl: https://github.com/squidowl/halloy/blob/2026.8/LICENSE
+Copyright: © 2022 - 2026 Casper Rogild Storm & Cory Forsstrom, Inc. All rights reserved.
+ShortDescription: Halloy is an open-source IRC client written in Rust, with the Iced GUI library. It aims to provide a simple and fast client for Mac, Windows, and Linux platforms.
+Description: Halloy is an open-source IRC client written in Rust, with the Iced GUI library. It aims to provide a simple and fast client for Mac, Windows, and Linux platforms.
+Tags:
+  - irc
+  - halloy
+ReleaseNotes: |-
+  Find full documentation at https://halloy.chat/
+
+  Added:
+    - Channel Monitor internal buffer for viewing messages from all joined channels
+    - Config editor internal buffer for editing the config file in-app
+    - Sidebar
+      - Collapse & expand servers in sidebar
+      - Internal buffers (logs, highlights, etc) can be added to sidebar
+      - Channel, query, and internal buffers can be muted (only shown if an unread/highlight indicator should be shown) via servers.<name>.channels, servers.<name>.queries, and sidebar.internal_buffers.mute
+      - sidebar.unread_indicator.exclude & sidebar.unread_indicator.include no longer controls highlight indicators
+      - New sidebar.highlight_indicator.title, sidebar.highlight_indicator.show_on_open_buffers, sidebar.highlight_indicator.exclude, and sidebar.highlight_indicator.include settings for independent highlight control
+    - Undo/redo in the message input and config editor (ctrl/cmd + z, ctrl/cmd + shift + z)
+    - Link interactions
+      - Context menu on channel links
+      - actions.buffer.click_nickname and actions.nicklist.click_nickname can be used to specify whether a nickname will: open query and how the query is opened, insert nickname in the input box, or no action ("no-action" or "noop"); takes over functionality from buffer.nickname.click and buffer.channel.nicklist.click and adds the ability to perform no action
+      - actions.buffer.click_channel_name and actions.buffer.click_highlight can be set to no action ("no-action" or "noop") to not open the channel when clicking on the channel name
+      - actions.buffer.click_channel_discovery to configure click behavior for channel names in the channel discovery pane (default: "new-pane")
+      - Allow image preview on URL click (actions.buffer.click_image_url)
+    - actions.buffer.notifications settings to control how interacting with notifications is handled
+    - Support displaying a larger version of the card images in-app
+    - pane.always_show_title_bar_buttons setting to prevent pane title bar buttons from being hidden when the pane is not hovered
+    - Shortcuts displayed in pane button tooltips (where available/configured)
+    - follow option for reroute rules (servers.<name>.reroute) to reroute messages to the focused buffer
+    - Add system keyring support for server, NickServ, channel, SASL, filehost credential, and proxy passwords
+    - IRCv3
+      - IRCv3 no-implicit-names support
+      - servers.<name>.do_not_request can be specified to prevent IRCv3 capability requests (e.g. servers.<name>.do_not_request = [ "labeled-response" ] will prevent labeled-response from being requested from the server)
+    - servers.<name>.max_connection_attempts setting to control the number of connection of attempts made before autoconnect is automatically disabled (defaults to 10)
+    - Improved legibility of the returned values of MONITOR list (/monitor L)
+    - Config option (preview.card.description_decode_html) to decode html strings in preview card descriptions
+    - runtime.metrics_hinting setting to control whether widgets are rendered using metrics hinting
+    - Keyboard shortcuts validation (e.g no duplicate key binds)
+    - servers.<name>.irc_protocol_log settings to enable logging of the IRC protocol messages sent-to / received-from the server
+    - logs.max_file_count setting to control the number of Halloy log files that are stored on disk
+    - logs.file_timestamp setting to control what timezone is used for timestamps in log files and log file names
+    - Explicit portable mode via HALLOY_PORTABLE_DIR environment variable
+    - Theme editor can be closed via Escape
+
+  Fixed:
+    - Nick highlight improvements
+      - Handle nick possessives <nick>'s (<nick> should be parsed)
+      - Skip parsing nicks inside abbreviations (e.g. shouldn't have highlights)
+    -Notifications no longer immediately dismissed in some Wayland DE(s)
+    - Sidebar
+      - Do not show unread/highlight indicators in sidebar for ignored messages
+      - Show unread indicators for panes hidden by maximize
+      - Queries specified in configuration correctly added to the sidebar
+    - Do not copy empty selections to the primary clipboard (i.e. do not clear the primary clipboard when a non-selection action is performed, such as moving the cursor or focusing the text input on some systems)
+    - Disabled menu entries now block clicks from passing through
+    - Only play one sound at a time (if two sounds would overlap, then the second sound is skipped)
+    - Allow sound files to be symbolic links
+    - When both card and image previews are excluded for a buffer, previews will not be pre-fetched for URLs in that buffer
+    - Suppress connection status messages while macOS is asleep
+    - Don't show a transient terminal window when running /exec on Windows
+    - Do not reconnect automatically when the server closes the connection in response to a requested quit
+    - Apply mode arguments to the correct targets when a MODE message mixes added and removed modes (e.g. -o+v foo bar de-ops foo and voices bar)
+    - Prevent anti-flood rate limiting from refilling the token bucket beyond its configured capacity
+    - Do not send duplicate JOIN message when using /join
+    - Do not send MARKREAD for non-PRIVMSG/NOTICE messages when the server does not support echoes
+    - Allow commands (e.g. /join) to be used in the input box of not-joined channels
+    - Preserve own away state when leaving and rejoining a channel
+    - Do not panic when previewing an SVG with a very large filter
+    - Reject overlong lines from the server connection instead of buffering them without bound
+    - Do not panic when a server-supplied METADATA retry-after value would overflow the retry timer
+    - Stop busy-looping on CPU when a DCC file-transfer peer closes its connection early
+
+  Changed:
+    - Clicking on a message expanded out of a condensed message will always contract it (configurable via actions.only_contract_expanded_message)
+    - Rerouted messages are marked with a icon next to the nickname
+    - When SASL authentication fails, after disconnecting from the server connection will be automatically re-tried if servers.<name>.autoconnect is enabled
+    - Renamed sidebar.server_icon → sidebar.primary_icon and sidebar.server_font_size → sidebar.primary_font_size since the settings now apply to both servers and internal buffers
+    - Renamed sidebar.unread_indicator.highlight_icon → sidebar.highlight_indicator.icon and sidebar.unread_indicator.highlight_icon_size → sidebar.highlight_indicator.icon_size
+    - Renamed sidebar.font_size → sidebar.secondary_font_size to reflect its relationship to sidebar.primary_font_size
+    - Renamed actions.buffer.local → actions.buffer.open_internal to match naming convention used elsewhere
+    - Renamed actions.buffer.click_username to actions.buffer.click_nickname for more consistent terminology
+    - Renamed servers.<name>.chathistory to servers.<name>.automated_chathistory, and it now controls whether chathistory requests are made automatically instead of controlling whether the chathistory capability is requested (see servers.<name>.do_not_request for controlling whether the capability is requested)
+    - Moved functionality from buffer.nickname.click → actions.buffer.click_nickname and buffer.channel.nicklist.click → actions.nicklist.click_nickname
+    - change_mode server messages are categorized as actions (i.e. actions_dimmed controls whether they are dimmed by default)
+    - keyboard.file_transfers shortcut is disabled when file_transfer.enabled = false
+    - More than one Halloy log file can be saved (configurable, defaults to 4); accordingly there is not a singular log file <data_dir>/halloy/halloy.log, instead log files are placed in <data_dir>/halloy/logs/
+    - Set window icon also on Linux for X11
+    - Windows release artifacts are signed using SignPath
+
+  Thanks:
+    - Contributions: @englut, @luca020400, @classabbyamp, @KaiKorla, @TheDcoder, @City-busz, @rtmongold, @Gelbpunkt, @zsigisti, quark
+    - Bug reports: @luca020400, agent314, @FlooferLand, @englut, @rexbinary, @belthesar, @deepspaceaxolotl, @neilzilla, @0ther0ne
+    - Feature requests: @FlooferLand, quark, @daniiooo, @deepspaceaxolotl, @4e554c4c, @RoboDanjal, @Vendicated, @raggi, @Avinash-Bhat
+
+ReleaseNotesUrl: https://github.com/squidowl/halloy/releases/tag/2026.8
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
