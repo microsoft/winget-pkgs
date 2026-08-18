@@ -1,0 +1,67 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: LunarWerxs.SageThumbs2K
+PackageVersion: 1.12.0
+PackageLocale: en-US
+Publisher: LunarWerx
+PublisherUrl: https://github.com/LunarWerxs
+PublisherSupportUrl: https://github.com/LunarWerxs/SageThumbs-2k/issues
+PackageName: SageThumbs 2K
+PackageUrl: https://github.com/LunarWerxs/SageThumbs-2k
+License: PolyForm Noncommercial License 1.0.0
+LicenseUrl: https://github.com/LunarWerxs/SageThumbs-2k/blob/HEAD/LICENSE.md
+Copyright: Copyright (c) 2026 LunarWerx
+ShortDescription: Explorer thumbnails for 327 file types Windows can't read, plus a right-click image toolkit.
+Description: SageThumbs 2K is a modern, crash-isolated Windows 11 shell extension written in Rust that rebuilds the classic SageThumbs. It gives File Explorer thumbnails for 327 file types Windows can't preview on its own — camera RAW, HEIC/AVIF, Photoshop, DjVu, ebooks and comics, video frames, 3D-print files and a long tail of obscure formats — plus a right-click image toolkit (convert, resize, rotate, OCR, color picker, metadata strip, combine-to-PDF/CBZ) and a console/AI CLI. Free for personal use.
+Moniker: sagethumbs2k
+Tags:
+- converter
+- explorer
+- heic
+- image
+- raw
+- shell-extension
+- thumbnails
+ReleaseNotes: |-
+  ## What's changed
+  
+  ### Added
+  
+  - **Build thumbnails for a whole folder up front, instead of waiting for Explorer to catch up.**
+    `st2k prebuild <folder> --recurse` walks a folder and asks Windows for every supported file's
+    thumbnail, so the pictures are already there the first time you open it. Useful after clearing
+    the thumbnail cache, or for a large library you have just copied in. By default it only builds
+    what is missing, so running it twice is cheap; `--rebuild-all` skips that check. It reports how
+    many were built, already present, and failed. Files that live in the cloud and have not been
+    downloaded yet are skipped, because building their thumbnails would pull them down.
+    Requested by @taylor-p-mason (#23).
+  
+    Windows stores thumbnails separately for each icon size, so building only one size would leave
+    you still watching tiles appear in every other Explorer view. It therefore builds the three
+    sizes Explorer's Medium, Large and Extra-large views actually read. `--size` takes a list if
+    you want to choose (for example `--size 256`), and sizes that land in the same internal bucket
+    are merged so nothing is built twice.
+  - **"Build thumbnails here" on the right-click menu for folders and drives.** The pre-build
+    feature above is now a menu entry rather than a command you have to type. Right-click a folder
+    (or the empty space inside one, or a drive) and it walks the whole tree with a progress window
+    you can cancel. It appears by default and can be turned off in Settings. It is a plain menu
+    entry rather than a shell add-in, so it loads no SageThumbs code into Explorer and cannot slow
+    down or crash your folder windows.
+  - **The welcome screen now offers the format badge.** The option that stamps a small label
+    (`PSD`, `SVG`, `AVIF`…) into the corner of a thumbnail already existed in Settings, but nothing
+    pointed at it, so people who wanted a way to tell similar-looking files apart never found it.
+    It is now one of the optional switches on the welcome screen's second page. Still off unless
+    you ask for it, because it changes the picture you asked to see. Raised by @knchmpgn (#22).
+  
+  ### Changed
+  
+  - **The toolbar icons now ship with SageThumbs instead of coming from Windows.** They used to be
+    drawn with whichever icon font the operating system happened to provide, which is why they
+    vanished entirely on Windows 10 (fixed in 1.11.1) and why they looked slightly different
+    between Windows versions. A small icon set is now built into the program itself, so every
+    machine shows the same buttons regardless of Windows version. It adds about 4 KB. The old
+    behaviour is kept as a fallback in case a machine refuses the built-in one.
+ReleaseNotesUrl: https://github.com/LunarWerxs/SageThumbs-2k/releases/tag/v1.12.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
