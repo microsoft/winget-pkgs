@@ -1,0 +1,165 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: BiomeJS.Biome
+PackageVersion: 2.5.9
+PackageLocale: en-US
+Publisher: BiomeJS
+PublisherUrl: https://biomejs.dev/
+PublisherSupportUrl: https://github.com/biomejs/biome/issues
+Author: Biome Developers and Contributors
+PackageName: Biome
+PackageUrl: https://biomejs.dev/
+License: Apache-2.0
+Copyright: Copyright (c) 2023-present Biome Developers and Contributors
+ShortDescription: Biome is a toolchain for web projects, aimed at providing functionalities to maintain them. It offers a formatter and linter, usable via CLI and LSP.
+Moniker: biome
+Tags:
+- css
+- formatter
+- javascript
+- json
+- jsx
+- linter
+- static-code-analysis
+- typescript
+- web
+ReleaseNotes: |-
+  2.5.9
+
+  Patch Changes
+  - #11321 41386f3 Thanks @dyc3! - Fixed #11315: The CSS parser now recovers at declaration boundaries after bogus declarations, allowing subsequent valid declarations to be parsed.
+  - #11248 57b197e Thanks @yanthomasdev! - Expanded the environment variable metadata used by biome rage to include BIOME_BINARY, BIOME_LOG_FILE, and RUST_BACKTRACE as well as reworded explanations for better readability.
+  - #11377 a8798ea Thanks @Netail! - Added a new nursery rule useNamedLayer which disallows anonymous cascade layers.
+    @layer {
+      a {
+        color: red;
+      }
+    }
+  - #11327 6771cf5 Thanks @dyc3! - The HTML formatter now preserves meaningful blank lines in HTML, including spacing after elements with trailing spaces and blank lines between comment groups.
+     <div>
+       <!-- first group -->
+    +
+       <!-- second group -->
+     </div>
+  - #10312 ba8aa18 Thanks @dyc3! - Added the nursery rule useTailwindShorthandClasses, which suggests shorter Tailwind utility classes. For example, the rule suggests replacing w-4 h-4 with size-4.
+  - #11333 715e0cd Thanks @kkkhs! - Fixed #11328: lint/nursery/useExpect now recognizes Vitest Browser Mode expect.element() calls as assertions.
+  - #11343 9b98211 Thanks @johncarmack1984! - Fixed #11311: the CSS parser now accepts Tailwind container-query variant names in @variant, such as @xl and @max-xl. These previously produced a parse error and a noUnknownAtRules diagnostic.
+    @variant @xl {
+      div {
+        background: red;
+      }
+    }
+  - #11220 3e8c488 Thanks @santichausis! - Fixed #9541: noUndeclaredVariables, noUnusedImports, and noUnusedVariables now correctly recognise exported variables and functions declared in one embedded <script> block as usable from a sibling <script> block, in Svelte's <script module>/<script> pair and Vue's non-setup <script> blocks.
+    For example, Biome no longer reports greet as undeclared in the following Svelte component:
+    <script module>
+      export function greet() {
+        console.log("Hello!");
+      }
+    </script>
+    <script>
+      greet();
+    </script>
+  - #11300 36430eb Thanks @dyc3! - Fixed the HTML formatter's whitespace handling for marquee, noscript, video, audio, and object elements.
+    - <marquee behavior="alternate"> This text will bounce </marquee>
+    + <marquee behavior="alternate">This text will bounce</marquee>
+  - #11299 6559e6c Thanks @jp-knj! - Added the nursery rule useAstroClientOnlyDirectiveValue, which reports Astro client:only directives without an initializer.
+    For example, <Component client:only /> triggers the rule.
+  - #11365 7529811 Thanks @MHJahanbakhsh! - Fixed #11229: The useGenericFontNames rule now treats math as a valid generic font family.
+  - #11346 674f5f4 Thanks @Jayllyz! - Fixed #11335: noComponentHookFactories now reports a use-prefixed variable only when a function is assigned to it directly.
+    function factory() {
+      const useColors = true; // no longer reported
+      const useStore = createStore({ count: 0 }); // no longer reported
+      const useData = () => useState(null); // still reported
+      return useColors;
+    }
+  - #11334 c87c46a Thanks @zkasuran! - Fixed #11317: noSvgWithoutTitle no longer reports an svg that uses the boolean shorthand aria-hidden (equivalent to aria-hidden={true} in React).
+  - #11364 13853b1 Thanks @ematipico! - Fixed a bug where useJsxKeyInIterable incorrectly flagged Astro files.
+  - #11321 41386f3 Thanks @dyc3! - Fixed #11315: Invalid CSS declarations in HTML style attributes now produce parser diagnostics instead of causing a panic.
+  - #11325 67c3bf0 Thanks @dyc3! - Fixed HTML text wrapping to account for the width of an adjacent closing tag, avoiding lines that exceed the configured width when the final word and tag must move together.
+     <a-long-long-long-element
+    -  >foo bar foo bar foo bar foo bar foo bar foo bar foo bar</a-long-long-long-element
+    +  >foo bar foo bar foo bar foo bar foo bar foo
+    +  bar</a-long-long-long-element
+     >
+  - #11367 fe5b5d4 Thanks @ematipico! - Fixed TypeScript compilerOptions.paths resolution when mapping targets omit ./. Biome now resolves these targets relative to their configured path base.
+  - #11316 17e48d6 Thanks @wanxiankai! - Fixed #11289: the safe fix for noExtraBooleanCast now preserves parentheses around nested conditional expressions.
+  - #11254 d25d113 Thanks @dyc3! - Fixed #11242: Biome no longer crashes with an access violation when analysing files on Windows ARM64.
+  - #11221 85aac73 Thanks @freeatnet! - Added the nursery rule noUnsafeTypeAssertion, which disallows TypeScript type assertions while allowing const assertions.
+    const value = input as SomeType;
+  - #11314 7ffb677 Thanks @ematipico! - Fixed #11310: Restored the performance of noMisusedPromises and noFloatingPromises when analyzed expressions share deep imported type paths.
+  - #11356 6cd3263 Thanks @johncarmack1984! - The Tailwind parser now understands modifiers on bare utilities (@container/sidebar, shadow/50).
+  - #11318 76059e9 Thanks @johncarmack1984! - The Tailwind parser now understands container-query variants (@sm:, @max-lg:, @min-[400px]:) and child and descendant variants (*:, **:).
+  - #11357 faa2074 Thanks @johncarmack1984! - The Tailwind parser now accepts the legacy leading ! important marker (!flex, hover:!p-4).
+  - #11344 f34e15c Thanks @johncarmack1984! - The Tailwind parser now understands combinator selectors in arbitrary variants (has-[>svg]:, has-[+p]:), modifiers on variants (group-hover/menu:, @sm/main:), and arbitrary container-query sizes (@[400px]:).
+  - #11324 2f5d452 Thanks @dyc3! - Fixed HTML formatting that inserted rendered whitespace between an element and touching text when the line wrapped.
+      <div>
+    -   before<meter value=".5"></meter>
+    -   after
+    +   before<meter value=".5"></meter
+    +   >after
+      </div>
+  - #11312 e65f07e Thanks @xosnos! - Added a new nursery rule useControlLabel for both HTML and JSX, which reports interactive control elements (button, menuitem) without an accessible label.
+    <button />
+  - #11364 13853b1 Thanks @ematipico! - Fixed SVG parsing for files with an XML declaration followed by a PUBLIC doctype, such as <?xml version="1.0"?><!DOCTYPE svg PUBLIC "a" "b">.
+  - #11301 610ee28 Thanks @dyc3! - Fixed parent tag wrapping when an HTML element starts or ends with a block-like or hidden child such as source, track, or param.
+    - <video src="brave.webm"><track kind="subtitles" src="brave.en.vtt"></video>
+    + <video src="brave.webm">
+    +   <track kind="subtitles" src="brave.en.vtt">
+    + </video>
+
+  What's Changed
+  - fix(deps): revert mimalloc to older version to mitigate access violation errors by @dyc3 in #11254
+  - chore(deps): update github-actions by @renovate[bot] in #11288
+  - feat(flags): add missing flags and reword metadata by @yanthomasdev in #11248
+  - feat(useSortedClasses): sort custom properties and reject invalid modifiers in sort_v4 by @johncarmack1984 in #11274
+  - fix(format/html): correct whitespace display classifications by @dyc3 in #11300
+  - fix(noExtraBooleanCast): preserve conditional parentheses by @wanxiankai in #11316
+  - fix(parse/css): handle bogus declarations slightly more gracefully by @dyc3 in #11321
+  - fix(format/html): keep block edge children structural by @dyc3 in #11301
+  - fix(format/html): preserve touching text adjacency by @dyc3 in #11324
+  - fix(format/html): include closing tags in fill width by @dyc3 in #11325
+  - fix(lint): recognize expect.element assertions by @kkkhs in #11333
+  - docs: address changes on CLI rework by @yanthomasdev in #11151
+  - fix(linter): noSvgWithoutTitle allows svg with shorthand aria-hidden by @zkasuran in #11334
+  - fix(md/parse): remove inline node from html comments by @ematipico in #11337
+  - refactor: store projects in salsa db by @ematipico in #11330
+  - fix(css/parser): allow Tailwind variant names to reference container-query variants by @johncarmack1984 in #11343
+  - fix(noMisusedPromises): perf regression by @ematipico in #11314
+  - feat(useSortedClasses): parse and sort container-query and child variants by @johncarmack1984 in #11318
+  - feat(useSortedClasses): parse combinator selectors and variant modifiers by @johncarmack1984 in #11344
+  - fix(js_analyze): recognize exported bindings across embedded script blocks by @santichausis in #11220
+  - fix(noComponentHookFactories): don't report non-function use* bindings by @Jayllyz in #11346
+  - fix(format/html): preserve meaningful blank lines by @dyc3 in #11327
+  - feat(lint): add useTailwindShorthandClasses by @dyc3 in #10312
+  - fix(inference): skip return arguments lookup by @ematipico in #11347
+  - test(noUnnecessaryConditions): add regression fixture for #10704 by @Jayllyz in #11350
+  - feat(useSortedClasses): sort @container and other bare utilities with modifiers by @johncarmack1984 in #11356
+  - feat(lint): nursery useControlLabel by @xosnos in #11312
+  - fix: html and svg bugs, plus false positive on lint rule by @ematipico in #11364
+  - fix(lint/css): treat math as a generic font family by @MHJahanbakhsh in #11365
+  - fix(resolver): relative paths without dot prefix by @ematipico in #11367
+  - chore(deps): update github-actions by @renovate[bot] in #11369
+  - chore(deps): update pnpm to v11.21.0 by @renovate[bot] in #11371
+  - fix(useSortedClasses): match Tailwind on ties, handle the legacy ! by @johncarmack1984 in #11357
+  - feat(lint): add noUnsafeTypeAssertion rule by @freeatnet in #11221
+  - feat: useNamedLayer by @Netail in #11377
+  - feat: adds the useAstroClientOnlyDirectiveValue rule for .astro files by @jp-knj in #11299
+  - refactor(lint): put impl Rule blocks first by @dyc3 in #11382
+  - ci: release by @github-actions[bot] in #11309
+
+  New Contributors
+  - @wanxiankai made their first contribution in #11316
+  - @kkkhs made their first contribution in #11333
+  - @zkasuran made their first contribution in #11334
+  - @santichausis made their first contribution in #11220
+  - @xosnos made their first contribution in #11312
+  - @MHJahanbakhsh made their first contribution in #11365
+  - @freeatnet made their first contribution in #11221
+  - @jp-knj made their first contribution in #11299
+ReleaseNotesUrl: https://github.com/biomejs/biome/releases/tag/@biomejs/biome@2.5.9
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://biomejs.dev/guides/getting-started/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
