@@ -1,0 +1,30 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: NoahSabaj.Mermaid
+PackageVersion: 0.25.0
+PackageLocale: en-US
+Publisher: Noah Sabaj
+PublisherUrl: https://github.com/noahsabaj
+PublisherSupportUrl: https://github.com/noahsabaj/mermaid-cli/issues
+PackageName: Mermaid
+PackageUrl: https://github.com/noahsabaj/mermaid-cli
+License: Apache-2.0
+LicenseUrl: https://github.com/noahsabaj/mermaid-cli/blob/main/LICENSE-MIT
+ShortDescription: Open-source, model-agnostic AI pair programmer for the terminal.
+Description: |-
+  Mermaid is an open-source, model-agnostic AI pair programmer for the terminal.
+  It works with Ollama (local), Anthropic, Gemini, OpenAI, Groq, OpenRouter, and
+  any OpenAI-compatible endpoint, with native tool calling, subagents,
+  computer-use tools, and a clean TUI.
+Tags:
+- ai
+- cli
+- developer-tools
+- llm
+- rust
+- terminal
+ReleaseNotes: "Mermaid 0.18.0\nChanged\n• BREAKING：Windows commands now run under PowerShell instead of cmd.\n  Foreground and background execute_command on Windows spawn PowerShell\n  (pwsh, falling back to Windows PowerShell 5.1) with -NoProfile -NonInteractive rather than cmd /C. Write commands in PowerShell syntax\n  ($env:VAR, Get-ChildItem, Select-String); cmd-only syntax\n  (%VAR%, if defined, & chaining) no longer works. Native exit codes\n  now propagate — a failing cargo build surfaces its real code instead of\n  collapsing to 0/1 — and background processes get a hidden console so they\n  survive detached. The read-only-command allowlist and the\n  destructive-command hard-deny both learned the PowerShell spellings\n  (read-only cmdlets like Get-Content/Test-Path, and blocked shapes like\n  Remove-Item -Recurse on dangerous roots).\n• BREAKING：write-capable MCP tools are vetted even in full_access. A\n  new [safety] external_writes floor (allow | auto | ask | deny,\n  default auto) means safety mode alone no longer authorizes an external\n  side effect：an MCP tool without a server-advertised readOnlyHint is\n  vetted against your request by the intent classifier — aligned calls run\n  silently, off-task calls escalate to approval — in every mode,\n  full_access included. Read-annotated tools are unaffected, and the hint\n  is treated as untrusted (it never grants more than the mode already\n  allows). Set external_writes = \"allow\" to restore the previous\n  unconditional behavior.\n• BREAKING：machine-scoped package installs are vetted even in\n  full_access. A new [safety] system_installs floor (same levels and\n  auto default) gates system-scoped package operations — npm -g, cargo install, pip install, pipx, gem install, go install, dotnet tool install, and brew/apt/dnf/pacman/winget/scoop/choco/…\n  installs — because they mutate the machine, not the project, and sit\n  outside checkpoint reach. Project-local installs (npm install, cargo add, yarn add) are untouched. Set system_installs = \"allow\" to restore\n  the previous behavior.\nAdded\n• blocked task-checklist status. A task stalled on an external\n  dependency can be marked blocked — rendered with its own glyph and\n  overflow-footer count — instead of masquerading as pending. Unblocking a\n  task preserves its original start time and token accounting. The blocker\n  workflow the agent follows：mark the stuck task blocked, add a task for the\n  blocker, and make that one in-progress.\nFixed\n• System prompt corrected against runtime behavior. The agent's system\n  prompt is now truthful about what the runtime actually does：the real\n  per-platform shells, the exact tool inventory (memory verbs,\n  ask_user_question, tool_search-deferred MCP tools), the read-only\n  mode's true allow/deny surface, scratchpad sweep timing, plan-mode gating,\n  and the reduced subagent toolset. Memory facts are now readable via\n  read_file in every scope, the write_file schema no longer points at a\n  removed tool, and the memory tool reports its search action. New\n  regression guards hold the prompt, the README's slash commands, and the\n  sample config to the runtime so they cannot silently drift again."
+ReleaseNotesUrl: https://github.com/noahsabaj/mermaid-cli/releases/tag/v0.18.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
