@@ -1,0 +1,75 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: FahrenheitResearch.BowEcho
+PackageVersion: 0.34.13
+PackageLocale: en-US
+Publisher: Fahrenheit Research
+PublisherUrl: https://github.com/FahrenheitResearch
+PublisherSupportUrl: https://github.com/FahrenheitResearch/bowecho/issues
+Author: Fahrenheit Research
+PackageName: BowEcho
+PackageUrl: https://github.com/FahrenheitResearch/bowecho
+License: MIT OR Apache-2.0
+LicenseUrl: https://github.com/FahrenheitResearch/bowecho/blob/main/LICENSE-APACHE
+Copyright: Copyright © Fahrenheit Research. MIT OR Apache-2.0.
+CopyrightUrl: https://github.com/FahrenheitResearch/bowecho/blob/main/LICENSE-MIT
+ShortDescription: Fast, free, native NEXRAD Level II radar viewer — live storm-scale radar in a single small download
+Description: 'BowEcho — A fast, free, native NEXRAD Level II radar viewer. Live super-resolution base data, dealiased velocity, dual-pol, derived severe-weather products, synced multi-pane, and vertical cross-sections — in a single small download. BowEcho decodes raw NEXRAD Level II data straight from the public AWS archive and live chunk feed (no account, no API key) and renders it with a fast CPU rasterizer that preserves the native super-resolution pixel pattern. It is built in Rust for speed: products switch instantly, panning stays fluid, and first pixels from a fresh volume arrive in well under a second on typical connections.'
+Moniker: bowecho
+ReleaseNotes: |-
+  BowEcho v0.34.13
+  This update restores the radar, archive, and model workflows reported during
+  RC testing while expanding BowEcho's normalized Rusty Weather model catalog.
+
+  Radar and archives
+  - Restores the always-visible radar frame scrubber with the selected frame,
+    timestamp, and status, while archive frames appear progressively as they
+    finish loading.
+  - Restores date-based SPC storm-report and tornado browsing, including a
+    clickable tornado list that can open the nearest-radar archive loop.
+  - Adds an always-visible model forecast-time scrubber that follows the actual
+    available-hour axis instead of assuming every forecast hour exists.
+
+  Model downloads and soundings
+  - Keeps Latest as an explicit user action: it no longer probes in the
+    background, is time-bounded, verifies the requested products and forecast
+    hours, and reports the provider it found.
+  - Newly written model hours now select and reveal the exact downloaded run,
+    rather than leaving the browser expanded on an older run.
+  - Fixes stalled-download state after a worker disconnect and improves the
+    visibility of acquisition work already in progress.
+  - Keeps the last complete sharppyrs sounding and toolbar mounted during fluid
+    Ctrl+Alt refreshes, eliminating the repeated panel collapse and jump, and
+    gives a newly docked Sounding the larger initial share.
+  - Corrects observation-analysis unit conversion and adds spatial buddy checks
+    so display-space Fahrenheit values and isolated bad reports cannot create
+    false cold pools.
+
+  Models
+  - Adds 12 normalized public-model lanes across ECCC, DWD, CMA, Roshydromet,
+    and CPTEC forecast products. Deterministic fields, provider-published ensemble
+    statistics, pressure levels, valid times, grid geometry, and provenance stay
+    explicitly typed rather than being inferred from filenames.
+  - The Models workspace can discover the expanded Rusty Weather catalog through
+    the existing remote-server workflow. Unsupported fields and incomplete
+    provider semantics remain unavailable instead of being guessed.
+  - ECCC rotated-grid winds are converted to earth-relative components with
+    fixture and live-provider checks. Published ensemble products remain
+    statistics-only and never imply access to raw members.
+
+  Data integrity
+  - Fixes bounded GRIB range reads and JPEG2000 cleanup for real operational
+    payloads.
+  - Fixes GRIB2 spatial-differencing missing-value decoding, preventing provider
+    missing codes from becoming enormous but plausible-looking weather values.
+  - Latest-run discovery now uses each model's first published lead, including
+    models whose cycles begin after forecast hour zero.
+  - Scheduler admission rejects partial substitutions for typed provider-
+    statistics profiles before any download or store mutation begins.
+  Every newly enabled lane is backed by a pinned official inventory and either a
+  fixture-level or live end-to-end RWS validation. Model availability still
+  depends on the configured Rusty Weather server and its published runs.
+ReleaseNotesUrl: https://github.com/FahrenheitResearch/bowecho/releases/tag/v0.34.13
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
