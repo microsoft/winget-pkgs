@@ -1,0 +1,37 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.12.0.schema.json
+
+PackageIdentifier: NextTrace.NextTrace.Tiny
+PackageVersion: 1.7.2
+PackageLocale: zh-CN
+ShortDescription: 一个使用 Golang 实现的开源轻量级可视化 traceroute 工具。
+Tags:
+- asn查询
+- as路径
+- geoip
+- geolocation
+- ip
+- ip查询
+- traceroute
+- 网络
+- 网络分析
+ReleaseNotes: |-
+  What's Changed
+  - 新增独立 DNS 客户端模式：完整版 nexttrace 支持 -l / --dns，通过 NextTrace adapter 复用 natesales/q v0.19.12 公共子包，提供 q-compatible DNS 查询体验
+  - DNS 模式支持 UDP/TCP、DoT、DoH、DoQ、ODoH、DNSCrypt，并支持 plain DNS、DoT、DoH、DNSCrypt 的 DNS Stamp server 形式
+  - DNS 模式支持 pretty、column、raw、json、yaml 输出，以及多 server、多 RR type、reverse lookup、DNSSEC/EDNS、NSID、A/AAAA 应答 PTR 补查与 recursive AXFR
+  - DNS 模式兼容 q 配置习惯：支持 ~/.qrc、Q_DEFAULT_SERVER、NO_COLOR、SSLKEYLOGFILE 等输入
+  - DNS 客户端仅包含在 full nexttrace；nexttrace-tiny / ntr 不注册该功能，传入 -l / --dns 会提示使用 full build
+  - 加固 DNS 客户端边界：修复 ECS、QUIC、敏感 HTTP header 日志、bootstrap resolver 递归、CHAOS marker、IPv6 zone、非正 timeout、AXFR 文件路径等边界问题
+  - 新增 DNS 客户端架构文档，记录 q adapter 边界、依赖体积、差分测试、已知语义差异和后续升级协议
+  - 修复 NextTrace API v4 GeoIP 输出中组织信息与 v3 输出不一致的问题，优先使用 domain 作为 owner，缺失时回退 owner
+  - 修复 MTR 探测结果 hop 切片分配上限，避免异常 hop 数导致过大分配
+  - 更新依赖：github.com/natesales/q 0.19.12、github.com/quic-go/quic-go 0.61.0、golang.org/x/net 0.57.0、github.com/mattn/go-runewidth 0.0.27、github.com/charmbracelet/log 1.0.0 等
+  额外的：
+  DNS 模式是独立 CLI 工作流，-l / --dns 必须作为第一个参数；它不会替换 traceroute、GeoIP/RDNS、WebUI、MCP 或其他服务路径使用的 resolver。
+  从源码构建现在要求 Go 1.26.5+；macOS 原生构建 TCP/UDP 抓包仍需要 Xcode Command Line Tools 与 cgo / libpcap。
+  tiny / ntr 仍保持轻量 flavor 边界，不包含 DNS 客户端依赖。
+  Full Changelog: https://github.com/nxtrace/NTrace-core/compare/v1.7.1...v1.7.2
+ReleaseNotesUrl: https://github.com/nxtrace/NTrace-core/releases/tag/v1.7.2
+ManifestType: locale
+ManifestVersion: 1.12.0

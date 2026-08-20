@@ -1,0 +1,108 @@
+# Created using wingetcreate 1.12.13.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Bennewitz.Ninja.ClaudeForge
+PackageVersion: 2026.3.810
+PackageLocale: en-US
+Publisher: Brian Bennewitz
+PublisherUrl: https://github.com/JanusMael
+PublisherSupportUrl: https://github.com/JanusMael/ClaudeForge/issues
+Author: Brian Bennewitz
+PackageName: ClaudeForge
+PackageUrl: https://github.com/JanusMael/ClaudeForge
+License: MIT
+LicenseUrl: https://github.com/JanusMael/ClaudeForge/blob/main/LICENSE
+Copyright: Copyright (c) 2024-2026 ClaudeForge Contributors
+CopyrightUrl: https://github.com/JanusMael/ClaudeForge/blob/main/LICENSE
+ShortDescription: A cross-platform desktop editor for Claude Code and Claude Desktop configuration files.
+Description: ClaudeForge is a cross-platform desktop editor for Claude Code and Claude Desktop configuration. It provides schema-validated, guided editors for settings.json, permission allow/deny/ask rules, hooks, MCP servers, environment variables, the model catalog, user-memory files, and agents/skills/slash-commands — plus backup and restore.
+Moniker: claudeforge
+Tags:
+- claude
+- claude-code
+- anthropic
+- ai
+- configuration
+- settings
+- editor
+- developer-tools
+- avalonia
+- dotnet
+ReleaseNotes: |-
+  ## Downloads
+
+  | Platform              | Architecture   | File                                                                       |
+  |-----------------------|----------------|----------------------------------------------------------------------------|
+  | Windows               | x64            | `ClaudeForge-win-x64.zip`                                       |
+  | Windows               | ARM64          | `ClaudeForge-win-arm64.zip`                                     |
+  | Linux                 | x64            | `ClaudeForge-linux-x64.tar.gz`                                  |
+  | Linux                 | ARM64          | `ClaudeForge-linux-arm64.tar.gz`                                |
+  | macOS (Intel)         | x64            | `ClaudeForge-osx-x64.tar.gz`                                    |
+  | macOS (Apple Silicon) | ARM64          | `ClaudeForge-osx-arm64.tar.gz`                                  |
+
+  The version (2026.3.810) is encoded in the release tag rather than in
+  the archive filenames — publish.ps1 produces unversioned artefact names
+  so local dev builds and CI builds share one filename pattern.
+
+  **Linux:** Extract, then run the bundled `linux-setup.sh` to install a per-user `.desktop` entry so Wayland compositors render the window icon correctly:
+  ```bash
+  tar -xzf ClaudeForge-linux-x64.tar.gz -C ~/ClaudeForge
+  cd ~/ClaudeForge
+  ./linux-setup.sh
+  ./ClaudeForge
+  ```
+
+  **macOS:** The binary is unsigned. Use the bundled `allow-app-to-run.sh` to strip the Gatekeeper quarantine xattr from every file in the extracted directory:
+  ```bash
+  tar -xzf ClaudeForge-osx-arm64.tar.gz -C ~/ClaudeForge
+  cd ~/ClaudeForge
+  ./allow-app-to-run.sh
+  ./ClaudeForge
+  ```
+
+  ---
+
+
+  <!-- Release notes generated using configuration in .github/release.yml at v2026.3.810 -->
+
+  ## What's Changed
+  - **Filter on the Agents & Skills page** — narrows all three segments
+    (Sub-agents / Skills / Slash Commands) by artifact name, description, or source,
+    with a match count and a clear button. Section headers drop out when their group
+    has no surviving row, so there are no orphan "Yours" / "Plugin" labels above
+    nothing. Long lists no longer have to be scrolled to find a known item.
+  - **Deep links (`--deep-link <path>`)** — launch straight into a page, tab, or
+    item: `--deep-link claude-code/permissions`,
+    `--deep-link agents-skills/skills/pdf`. The grammar is
+    `page[/tab][/item]` (or `product/page[/…]`), keyed on new stable
+    `NavigationNodeViewModel.NodeId` identifiers rather than display labels, so a
+    link keeps resolving in any language. A deep-linked item is revealed by
+    filtering the list to it, with the filter box outlined to show the narrowing
+    came from navigation. An unresolvable path is logged and ignored — it never
+    blocks launch. See the README "Deep links" section.
+  - **"Copy deep link"** on the Agents & Skills detail toolbar — puts a ready-to-use
+    `--deep-link` path for the open artifact on the clipboard, fully qualified as
+    `name@source`, so nobody has to derive an id by hand (and a path can be pasted into
+    a ticket or a runbook). A malformed `--deep-link` now reports itself on the terminal
+    with the valid pages listed instead of failing silently — the binary is a `WinExe`,
+    so it attaches to the parent console to do it — and a well-formed-but-unresolvable
+    path raises a status-bar warning. An unresolvable *persisted* path stays quiet,
+    since that is routine after deleting an artifact.
+  - **Your place is kept below the page level** — the active tab and open item are
+    persisted (`WindowState.lastDeepPath`) and restored on relaunch, instead of only
+    the page. **Reload Window** restores the full state, including an edit in
+    progress (see Fixed). Reusable via the new `IDeepNavigable` contract; the
+    Agents & Skills page is the first adopter.
+
+
+
+  ## New Contributors
+  * @JanusMael made their first contribution in https://github.com/JanusMael/ClaudeForge/pull/28
+
+  **Full Changelog**: https://github.com/JanusMael/ClaudeForge/compare/v2026.3.724...v2026.3.810
+ReleaseNotesUrl: https://github.com/JanusMael/ClaudeForge/releases/tag/v2026.3.810
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/JanusMael/ClaudeForge/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

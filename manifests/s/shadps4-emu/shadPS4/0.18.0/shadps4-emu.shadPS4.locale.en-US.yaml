@@ -1,0 +1,78 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: shadps4-emu.shadPS4
+PackageVersion: 0.18.0
+PackageLocale: en-US
+Publisher: shadps4-emu
+PublisherUrl: https://shadps4.net/
+PublisherSupportUrl: https://github.com/shadps4-emu/shadPS4/issues
+PrivacyUrl: https://shadps4.net/about/privacy-policy/
+PackageName: shadPS4
+PackageUrl: https://shadps4.net/downloads/
+License: GPL-2.0
+LicenseUrl: https://github.com/shadps4-emu/shadPS4/blob/HEAD/LICENSE
+Copyright: © 2026 shadPS4™. All Rights Reserved.
+ShortDescription: PlayStation 4 emulator for Windows, Linux and macOS written in C++
+Tags:
+- emulate
+- emulation
+- emulator
+- playstation4
+- ps4
+ReleaseNotes: |-
+  shadPS4 v0.18.0 "UltraPersona"
+  Hello there, it hasn't been a while, has it? While not much time has passed since our last stable release, we are here again with a brand new one. The main reason for this release is broken shadNet authorization in certain cases on the 0.17.0 release, but we have some more interesting new features as well.
+  Firstly, after some fixes, AvPlayer can now be loaded as LLE, meaning that you need the libSceAvPlayer.sprx (and libSceAvPlayerStreaming.sprx) module(s), which makes broken videos in a few games now work properly.
+  The above change was enabled by calling sceLibcInternalMemoryMutexEnable in LLE LibcInternal at boot, found by [@liuk7071](https://github.com/liuk7071), the developer of ChonkyStation4, another PS4 emulator.
+  A kernel event flag rewrite has also fixed Shadow of the Colossus often hanging on boot, and the game now consistently gets to menus.
+  Another big feature is the experimental [red zone](https://en.wikipedia.org/wiki/Red_zone_%28computing%29) protection, which fixes an issue specific to 12th generation and onwards Intel CPUs exclusively on Windows, that was causing crashes and other undefined behaviour in lots of games that were not expecting to have their stacks' red zone clobbered by Windows exception handling.
+  NpTus is also included in this new release, bringing more functionality to shadNet.
+  A few more fixes on GPU are included, such as fixing shadows in Persona games, or some effects in inFAMOUS and Gravity Rush 2. There's probably fixes in some other games too — that's your job to figure out.
+  Below you can find a full list of changes for 0.18.0. Happy testing 😃
+  Core
+  - Rewrote kernel event flags
+  - Added experimental workaround for Windows red-zone protection
+  - Fixed ordering of loading libs (libScePad before sceNpManager), fixed issues in shadNet authorization
+  - Added /dev/zero device
+  - Added some exports needed for VSH
+  - Call sceLibcInternalMemoryMutexEnable LLE on startup
+  - Added --mount flag, updated the no-flags popup text with Big Picture Mode info, and fixed a few edge cases with command line parsing
+  - Load guest modules below 4 GiB
+  Libraries
+  - Videodec: Flush codec buffers on packet EOF
+  - NpWebApi2: Fixed sceNpWebApi2GetHttpResponseHeader functions
+  - Libc_Internal: Added back HLE sceLibcHeapGetTraceInfo for when LLE libSceLibcInternal is not present
+  - Kernel: Implemented sceKernelIsDevkit and sceKernelIsCex
+  - Kernel: Do not double destroy threads when free threads exceeds MaxCachedThreads
+  - AvPlayer: You can now use LLE
+  - Sysmodule: Enabled some more safe library LLEs
+  - Kernel: Only clear oact if oact is provided
+  - NpTus: Added NpTus support
+  - AudioOut: Fixed deadlocks on stop
+  - NpTrophy: Fixed issues related to platinum trophies
+  Video Core
+  - Added more FMask formats
+  - Honor STENCILOPVAL for GCN ReplaceOp stencil writes
+  Shader Recompiler
+  - Fixed cubed array layer in FixCubeCoords
+  - Lower user clip planes to clip distances
+  - Use a*b+c instead of fma for v_mad* ops
+  Big Picture Mode
+  - Launch game in clean process
+  - Added zar support
+  - Fixed update checker crash with certain zar/folder combinations
+  Misc
+  - Fixed external FPS counters
+  - Added draw call and dispatch counts to frame info overlay
+  - Append last time played for each game in play_time.txt
+ReleaseNotesUrl: https://github.com/shadps4-emu/shadPS4/releases/tag/v.0.18.0
+Documentations:
+- DocumentLabel: Quickstart Guide
+  DocumentUrl: https://shadps4.net/quickstart/
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/shadps4-emu/shadPS4/wiki
+- DocumentLabel: FAQ
+  DocumentUrl: https://shadps4.net/about/faq
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

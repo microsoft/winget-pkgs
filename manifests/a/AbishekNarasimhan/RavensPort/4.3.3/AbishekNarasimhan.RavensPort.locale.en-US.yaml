@@ -1,0 +1,85 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: AbishekNarasimhan.RavensPort
+PackageVersion: 4.3.3
+PackageLocale: en-US
+Publisher: Abishek Narasimhan
+PublisherUrl: https://github.com/abishekvupputur
+PublisherSupportUrl: https://github.com/abishekvupputur/ravensPort/issues
+PrivacyUrl: https://github.com/abishekvupputur/ravensPort/blob/main/PRIVACY.md
+Author: Abishek Narasimhan
+PackageName: RavensPort
+PackageUrl: https://github.com/abishekvupputur/ravensPort
+License: MIT
+LicenseUrl: https://github.com/abishekvupputur/ravensPort/blob/main/LICENSE
+Copyright: Copyright (c) 2026 Abishek Narasimhan
+CopyrightUrl: https://github.com/abishekvupputur/ravensPort/blob/main/LICENSE
+ShortDescription: A tray-resident local proxy that owns the OAuth2 flow for the APIs and MCP servers you use, pools several servers behind one endpoint, and exposes only the tools each AI agent is allowed.
+Description: |-
+  MCP servers are increasingly locked behind OAuth2, but most MCP clients expect a bare HTTP
+  endpoint with no authentication story. And once an agent is connected to three servers, it sees
+  all of their tools with no way to say "this agent gets these six."
+
+  RavensPort solves both halves. It runs a local reverse proxy on 127.0.0.1, holds the OAuth2
+  grants and API keys for your upstreams, and lets you compose those upstreams into filtered,
+  per-agent MCP endpoints. Point an agent at http://127.0.0.1:5559/mcp/<name> and it sees exactly
+  the toolset you granted it, drawn from as many upstreams as you like, including ones it could
+  never reach on its own.
+
+  ROUTES
+  Attach a live OAuth2 token or a static API key to every request forwarded to an upstream. Your
+  client never handles authentication. Credentials can be placed anywhere the upstream expects
+  them: an Authorization header, any other header, a query parameter, or a request-body field,
+  with a custom value prefix. A route may attach none, one, or several credentials at once, and
+  the same credential may appear in more than one place. Tokens refresh automatically ten minutes
+  before they expire.
+
+  FUNNELS
+  Pool several MCP servers behind a single local endpoint and pick exactly which tools, resources,
+  and prompts it exposes. Each agent gets its own funnel, so tightening what one agent can reach
+  never touches another.
+
+  A KEY PER ENDPOINT
+  Every route and every funnel carries its own proxy key with its own expiry. Other processes on
+  your machine cannot spend your grants, and a key leaked from one client cannot reach the rest.
+
+  YOUR SECRETS STAY IN YOUR PASSWORD MANAGER
+  OAuth client secrets, access and refresh tokens, API keys, proxy keys, and the whole
+  configuration are stored in a vault in 1Password or Proton Pass, a vault you nominate and
+  control. There is no local cache and no fallback file. Nothing is written to the PC except
+  redacted activity logs. Because the configuration lives in the vault, one install supports as
+  many profiles as you have vaults.
+
+  While your password manager is locked, everything keeps working: edits, token refreshes, and key
+  rotation all proceed in memory and are written to the vault as soon as it is reachable again.
+
+  NO TELEMETRY
+  RavensPort contains no analytics, no crash reporting, and no update checks. It makes no network
+  connection you have not configured. The full source is public under the MIT License, and every
+  release is built by GitHub Actions with a build provenance attestation, so a download can be
+  verified against the workflow and commit that produced it.
+
+  BEFORE YOU INSTALL
+  RavensPort requires 1Password or Proton Pass, with the matching command-line tool installed and
+  signed in. It is where the configuration is kept, and the proxy does not start without it.
+  RavensPort does not install either one; setup inside the app checks what is present and walks
+  through connecting a vault. Windows 10 1809 or newer, 64-bit.
+Moniker: ravensport
+Tags:
+- 1password
+- ai
+- api-key
+- llm
+- mcp
+- oauth
+- oauth2
+- proton-pass
+- proxy
+- reverse-proxy
+- tray
+ReleaseNotesUrl: https://github.com/abishekvupputur/ravensPort/releases/tag/v4.3.3
+Documentations:
+- DocumentLabel: Readme
+  DocumentUrl: https://github.com/abishekvupputur/ravensPort#readme
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,84 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: can1357.oh-my-pi
+PackageVersion: 17.2.15
+PackageLocale: en-US
+Publisher: Can Bölük
+PublisherUrl: https://can.ac/
+PublisherSupportUrl: https://github.com/can1357/oh-my-pi/issues
+Author: Can Bölük
+PackageName: oh-my-pi
+PackageUrl: https://omp.sh/
+License: MIT
+LicenseUrl: https://github.com/can1357/oh-my-pi/blob/HEAD/LICENSE
+Copyright: |-
+  Copyright (c) 2025 Mario Zechner
+  Copyright (c) 2025-2026 Can Bölük
+ShortDescription: ⌥ AI Coding agent for the terminal — hash-anchored edits, optimized tool harness, LSP, Python, browser, subagents, and more
+Description: |-
+  omp is a terminal-first coding agent that runs on your machine, talks to any provider, and treats sessions like git branches.
+  omp (pronounced “oh-em-pi”, binary omp) is a fork of Mario Zechner’s Pi. It runs as a single Bun process, drives any model provider you have credentials for, and ships a flat tool surface the model uses to read code, run commands, edit files, drive a debugger, and spawn subagents that coordinate over an in-process IRC bus.
+  Sessions persist as JSONL under ~/.omp/agent/sessions/. You resume, fork, branch, and share them. Settings, credentials, plugins, and caches all live under ~/.omp/agent/. Nothing leaves the machine unless you call a tool that does.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  @oh-my-pi/pi-ai
+  Fixed
+  - Fixed an issue where AWS_BEDROCK_SKIP_AUTH failed to expose Amazon Bedrock models when AWS credential files were unavailable.
+  - Fixed an issue where forceReasoningOff was ignored by Anthropic and Google transports, which allowed native thinking alongside a caller-supplied external scratchpad.
+  @oh-my-pi/pi-catalog
+  Fixed
+  - Fixed classification of model IDs with large minor versions (e.g., claude-opus-5-11) or three-part versions, ensuring they no longer fall back to stale default configurations.
+  @oh-my-pi/pi-coding-agent
+  Added
+  - Added --external-thinking CLI flag to force external thinking tool activation.
+  - Added omp compress command, which uses an isolated, two-tool agent loop to rewrite single or multiple text files (supporting glob patterns and concurrent processing) into dense prompt registers.
+  - Expanded tool discovery in omp cleanse to support staticcheck and golangci-lint (Go); mypy, pylint, flake8, ty, and basedpyright (Python); oxlint, deno lint, stylelint, and vue-tsc (JS/TS); and actionlint (GitHub Workflows).
+  - Added support for natural language requests in omp cleanse "<request>", which launches a discovery subagent to automatically inspect the project, determine the correct commands, and map outputs.
+  - Added an interactive picker to omp cleanse when run without arguments on a TTY, allowing users to run all checkers, select a specific checker, or describe what to fix.
+  Changed
+  - Restricted the think tool to GPT, Claude, and Gemini transports that support native reasoning replacement.
+  - Increased the default subagent cap for omp cleanse from 8 to 32.
+  Fixed
+  - Fixed a hang in headless omp -p runs when plan.defaultOnStartup: true is enabled by disabling the startup default in print mode.
+  - Fixed display.hideToolActivity failing to hide certain activity blocks, such as reminders, diagnostics, and completions.
+  - Fixed several issues in the MCP Streamable HTTP transport, including updating the negotiated protocol version to 2025-11-25, resolving connection drops and SSE resumption gaps, and preventing double-execution of tools during auth refreshes.
+  - Fixed /handoff losing local artifacts (plans, scratch files, research notes) by copying them across the handoff session boundary.
+  - Replaced libarchive-based tar parsing with a hardened, in-process tar reader to prevent crashes and safely handle complex archive structures, symlinks, and sparse metadata.
+  - Fixed Ctrl+O tool-output expansion failing to reach launch-completion messages wrapped in the hidden tool activity container.
+  @oh-my-pi/hashline
+  Added
+  - Added a post-apply parse advisory warning that alerts users when an applied edit fails to parse (despite the pre-edit content parsing successfully), helping catch balance-neutral misplacements that previously failed silently.
+  Fixed
+  - Fixed a bug where Rust lifetimes (e.g., 'static) were incorrectly parsed as starting a string literal, which blinded the delimiter-balance scanner and could lead to silent signature deletions. Single-quote lexing on .rs files is now language-aware and correctly distinguishes lifetimes from character literals.
+  - Fixed an issue where terminal newlines in files were incorrectly exposed as editable blank rows.
+  @oh-my-pi/snapcompact
+  Fixed
+  - Fixed Anthropic model ID parsing to be case-insensitive and extended the high-resolution 1932px frame tier to Claude Opus 5 and later, preventing sessions from falling back to lower-resolution 1568px frames and preserving full history per compaction.
+  @oh-my-pi/pi-utils
+  Changed
+  - Extended parsed Server-Sent Events (SSE) to include optional id and retry fields, enabling reconnecting transports to retain stream cursors and respect server-requested retry intervals.
+  What's Changed
+  - fix(snapcompact): extend high-res frame tier to opus 5+ by @roboomp in https://github.com/can1357/oh-my-pi/pull/8257
+  - fix(coding-agent): copy local artifacts across handoff session boundary by @roboomp in https://github.com/can1357/oh-my-pi/pull/8262
+  - fix(mcp): send MCP-Protocol-Version header and negotiate 2025-11-25 by @roboomp in https://github.com/can1357/oh-my-pi/pull/8268
+  - fix(ai): honor Bedrock skip-auth during model discovery by @roboomp in https://github.com/can1357/oh-my-pi/pull/8269
+  - fix(tui): hide remaining activity in hidden-tool mode by @dannyboy-ai in https://github.com/can1357/oh-my-pi/pull/8273
+  - fix(coding-agent): stop print mode hanging on plan.defaultOnStartup by @roboomp in https://github.com/can1357/oh-my-pi/pull/8276
+  - fix(read): avoid libarchive for tar reads by @roboomp in https://github.com/can1357/oh-my-pi/pull/8260
+  Full Changelog: https://github.com/can1357/oh-my-pi/compare/v17.2.14...v17.2.15
+ReleaseNotesUrl: https://github.com/can1357/oh-my-pi/releases/tag/v17.2.15
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://omp.sh/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

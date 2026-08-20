@@ -1,0 +1,124 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: BiomeJS.Biome
+PackageVersion: 2.5.8
+PackageLocale: en-US
+Publisher: BiomeJS
+PublisherUrl: https://biomejs.dev/
+PublisherSupportUrl: https://github.com/biomejs/biome/issues
+Author: Biome Developers and Contributors
+PackageName: Biome
+PackageUrl: https://biomejs.dev/
+License: Apache-2.0
+Copyright: Copyright (c) 2023-present Biome Developers and Contributors
+ShortDescription: Biome is a toolchain for web projects, aimed at providing functionalities to maintain them. It offers a formatter and linter, usable via CLI and LSP.
+Moniker: biome
+Tags:
+- css
+- formatter
+- javascript
+- json
+- jsx
+- linter
+- static-code-analysis
+- typescript
+- web
+ReleaseNotes: |-
+  2.5.8
+
+  Patch Changes
+  - #10710 0a0fbc1 Thanks @dyc3! - Added a new nursery rule useReactCompiler, which reports diagnostics from React Compiler lint mode.
+  - #11251 ea9dd8a Thanks @dyc3! - Improved performance of noImportCycles.
+  - #11247 52b44d6 Thanks @dyc3! - Added the nursery rule noSvelteLegacyConst, which disallows legacy Svelte {@const} tags and recommends declaration tags with $derived().
+    Invalid:
+    {#each boxes as box}
+      {@const area = box.width * box.height}
+      <p>{area}</p>
+    {/each}
+    Valid:
+    {#each boxes as box}
+      {const area = $derived(box.width * box.height)}
+      <p>{area}</p>
+    {/each}
+  - #11252 d5f5704 Thanks @Turtle-Hwan! - Fixed #11250: useAwait no longer reports async functions that contain an await using declaration.
+  - #11143 6be7be1 Thanks @vznh! - Fixed #11017: noUselessUndefined no longer reports return undefined when the enclosing function has a return type annotation other than undefined or void.
+  - #11234 caefe39 Thanks @subotac! - Fixed #11228: CSS block comments between a declaration colon and value now preserve their source indentation.
+     :root {
+       --font-stack:
+    -/* comment */
+    +    /* comment */
+         system-ui;
+     }
+  - #11285 bca1f73 Thanks @denbezrukov! - Fixed #11280: CSS formatting keeps comments inside functional pseudo-classes and pseudo-elements instead of moving them before the function name.
+    -:/* comment */ where(div) {}
+    +:where(/* comment */ div) {}
+  - #11080 af16a0b Thanks @dyc3! - HTML style attribute values are now parsed as CSS. All Biome CSS lint rules are applied to the style attributes.
+  - #11195 6a85588 Thanks @dyc3! - Fixed Svelte files failing to parse when an expression begins with an object literal.
+    Now the following snippet is correctly parsed:
+    <p>{{ a: true }}</p>
+    <div class={{ active: isActive }}></div>
+  - #11173 481d008 Thanks @Austin1serb! - Fixed #10242: JavaScript GritQL patterns with multiple metavariables now match snippets consistently in WebAssembly.
+  - #11187 23c0369 Thanks @ematipico! - Added the nursery rule noInvalidPropertyInitValue, which reports an @property whose initial-value does not match its syntax descriptor. For example, the following declaration triggers the rule because red is not a <length>:
+    @property --size {
+      syntax: "<length>";
+      inherits: false;
+      initial-value: red;
+    }
+  - #11272 73896e6 Thanks @ematipico! - Improved the diagnostic emitted by noRootType.
+  - #11240 bd0b68d Thanks @ematipico! - Fixed #11223: Improved the
+    performance of noMisusedPromises
+    when analyzing async class methods that call other methods through this.
+  - #11172 4a0bc5c Thanks @saberoueslati! - Fixed #10806: noUselessFragments no longer causes Biome to panic when its unsafe fix removes a fragment used as a JSX attribute value.
+  - #11227 4d603b0 Thanks @saberoueslati! - Fixed #11178: noUndeclaredVariables no longer reports Vue's built-in instance properties, such as $slots and $attrs, in template expressions or $event in inline event-handler expressions. The instance properties are still reported inside <script setup>, where they are not defined.
+  - #11187 23c0369 Thanks @ematipico! - Fixed CSS parsing of registered custom properties: Biome now correctly validates the syntax descriptor of @property rules.
+
+  What's Changed
+  - feat(service): treat html style attributes as CSS by @dyc3 in #11080
+  - feat: code review skill by @ematipico in #11235
+  - refactor(inference): prepare legacy type removal by @ematipico in #11010
+  - fix(lint/noUselessFragments): panic when fixing a fragment used as a JSX attribute value by @saberoueslati in #11172
+  - ci: update codspeed crates by @ematipico in #11239
+  - feat(lint/js): add useReactCompiler by @dyc3 in #10710
+  - ci: fix windows builds by @dyc3 in #11245
+  - ci: enable longpaths in main.yml by @dyc3 in #11246
+  - fix(inference): query local types before global by @ematipico in #11240
+  - feat(lint/html): add noSvelteLegacyConst by @dyc3 in #11247
+  - fix(useAwait): treat await using as an async operation by @Turtle-Hwan in #11252
+  - feat(css): support SCSS nesting combinator by @denbezrukov in #11243
+  - feat: markdown linter by @ematipico in #11253
+  - fix(analyzer): scope Vue template globals correctly by @saberoueslati in #11227
+  - fix(grit): use byte offsets for WASM snippets by @Austin1serb in #11173
+  - fix(lint): preserve explicitly typed undefined returns by @vznh in #11143
+  - refactor(md/parse): two-phase parse by @ematipico in #11256
+  - perf(noImportCycles): exclude node_modules, add more tests by @dyc3 in #11251
+  - fix(css_formatter): preserve block comment indentation by @subotac in #11234
+  - chore: markdown rule generator by @Netail in #11261
+  - perf(md/parse): restore parser state via checkpoint by @ematipico in #11257
+  - chore: markdownlint rule source by @Netail in #11265
+  - fix(parse/html): stop reading {{ as an interpolation in Svelte by @dyc3 in #11195
+  - fix(yaml/parse): catch more errors by @ematipico in #11259
+  - fix(tools): rule gen and rename rule by @ematipico in #11269
+  - fix(tools): path normalisation by @ematipico in #11271
+  - test(format/html): format embedded content in the formatter tests by @dyc3 in #11209
+  - feat(useSortedClasses): order variants in sort_v4 by @johncarmack1984 in #11249
+  - fix(lint/graphql): text range by @ematipico in #11272
+  - test(format/html): indent script and style in the HTML Prettier samples by @dyc3 in #11210
+  - feat(lint): nursery noInvalidPropertyInitValue by @ematipico in #11187
+  - fix(css_formatter): preserve pseudo function comments by @denbezrukov in #11285
+  - chore(deps): update rust crate rust-lapper to 1.3.0 by @renovate[bot] in #11292
+  - chore(deps): update pnpm to v11.20.0 by @renovate[bot] in #11291
+  - feat: useTopLevelHeading by @Netail in #11286
+  - ci: release by @github-actions[bot] in #11236
+
+  New Contributors
+  - @Turtle-Hwan made their first contribution in #11252
+  - @Austin1serb made their first contribution in #11173
+  - @vznh made their first contribution in #11143
+  Full Changelog: https://github.com/biomejs/biome/compare/@biomejs/biome@2.5.7...@biomejs/biome@2.5.8
+ReleaseNotesUrl: https://github.com/biomejs/biome/releases/tag/@biomejs/biome@2.5.8
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://biomejs.dev/guides/getting-started/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

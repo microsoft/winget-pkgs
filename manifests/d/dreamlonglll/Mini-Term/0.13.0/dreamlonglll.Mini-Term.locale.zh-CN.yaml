@@ -1,0 +1,91 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: dreamlonglll.Mini-Term
+PackageVersion: 0.13.0
+PackageLocale: zh-CN
+Publisher: tauri-app
+PublisherUrl: https://github.com/dreamlonglll
+PublisherSupportUrl: https://github.com/dreamlonglll/mini-term/issues
+PackageName: Mini-Term
+PackageUrl: https://github.com/dreamlonglll/mini-term
+License: 免费软件
+ShortDescription: 为 AI 时代打造的桌面终端管理器
+Description: |-
+  一个 AI 终端管理工具，支持多项目、多终端布局管理
+
+  功能特性
+  终端核心
+  - 多标签管理 — 每个项目独立标签页，拖拽排序，状态图标一目了然
+  - 递归分屏 — 横向 / 纵向任意嵌套分屏，Allotment 拖拽调整比例
+  - 高性能渲染 — xterm.js v6 + WebGL 加速，自动降级为 Canvas
+  - 10 万行滚动缓冲 — 拦截 CSI 3J（ED3）指令，Claude / Codex 等 TUI 清屏时保留上滚历史
+  - 终端缓存 — 切换标签 / 分屏不重建 xterm 实例，已有内容不丢失
+  - 复制粘贴 — Ctrl+Shift+C / Ctrl+Shift+V 快捷键 + 右键菜单，未选中时"复制"自动置灰；Windows 大段多行粘贴自动分块写入，防止 ConPTY 丢行
+  - 长文本粘贴 — 剪贴板文本 ≥10 行或 ≥2000 字符时自动转存为临时 .txt 并粘贴带引号的文件路径，避免 AI 工具直接处理超长内容引发性能与 paste bracket 问题
+  - 图片粘贴 — 剪贴板含截图时自动检测，通过 Win32 API 保存为临时 PNG 并粘贴带引号的路径，兼容 PinPix 等非标准格式
+  - 文件拖拽 — 文件拖到终端自动插入带引号的绝对路径，兼容含空格的路径
+  - 多 Shell 配置 — Windows（cmd / powershell / pwsh）、macOS（zsh / bash）、Linux（bash / sh）等，可自由增删
+  AI 进程感知
+  - 实时状态检测 — 500ms 轮询子进程名，自动识别 Claude / Codex，显示 idle / working / error 状态
+  - 状态聚合 — 面板 → 标签页 → 项目逐层聚合，优先级 error > ai-working > ai-idle > idle
+  - 完成提醒三件套 — AI 任务从 working → idle 时立刻触发：
+    - 右下角 Toast 桌面通知（仅非活跃项目弹出，同项目去重）
+    - 项目列表 DONE 徽章，点击清除
+    - 任务栏闪烁（Windows）/ Dock 跳动（macOS），窗口失焦时才触发
+    - 三个开关独立可配
+  - 会话进出检测 — 命令 echo 识别进入 AI；双击 Ctrl+C / Ctrl+D 或 exit / quit / :quit / /logout 识别退出
+  - 会话历史 — 读取本地 Claude / Codex 历史会话记录，右键复制恢复命令快速续接
+  - AI 任务标记 — AI 会话内每次用户按 Enter 自动在 xterm 打点，标签右上角 ⚑ 按钮下拉展示历史提交列表，点击或 Ctrl+Shift+↑/↓ 在标记间跳转，目标行短暂高亮提示
+  项目管理
+  - 项目列表 — 左侧边栏管理多个项目目录，一键切换工作区，重启自动恢复上次激活项目
+  - 拖拽添加项目 — 从资源管理器拖拽文件夹到项目列表即可快速添加，自动识别文件 / 文件夹 / 重复项目并给出视觉反馈
+  - 嵌套分组 — 最多 3 级项目分组，拖拽排序，折叠 / 展开
+  - 文件树 — 集成目录浏览器，嵌套 .gitignore 置灰（每层子目录的忽略规则与 !pattern 白名单都会生效，与 git 行为一致），notify 文件监听实时刷新
+  - 文件操作 — 文件树内新建文件 / 文件夹、重命名、查看内容（二进制与超大文件友好提示）
+  - VS Code 快捷打开 — 文件树右上角按钮一键用配置的 VS Code 可执行文件打开当前项目，路径可在「设置 → 系统设置 → 外部编辑器」自定义
+  Git 集成
+  - 文件状态 — 文件树显示 Git 状态颜色（修改 / 新增 / 删除 / 冲突）
+  - 变更 Diff — 工作区文件变更的详细 Diff，Hunk 行级解析，并排 / 内联双视图
+  - 提交历史 — 浏览仓库提交记录，游标分页加载（默认 30 条）
+  - 提交 Diff — 查看任意提交的文件变更，逐文件切换
+  - 分支信息 — 本地 / 远程分支列表
+  - 源码控制面板 — VS Code 风格 Changes 面板，Staged / Changes / Untracked 分组展示，支持单文件和全量 stage / unstage / discard，Ctrl+Enter 快速提交，列表与树形视图切换
+  - Pull / Push — 仓库行内按钮一键同步远端，支持刷新按钮重新加载提交记录与分支信息
+  - 多仓库发现 — 自动扫描项目目录下所有 Git 仓库（递归 5 层，跳过 node_modules 等）
+  外观与配置
+  - Activity Bar 侧边栏 — 最左侧常驻 40px 图标栏，含 Projects / Sessions / Files / Git 四个面板开关，独立控制显隐，激活态蓝色竖条指示，状态持久化
+  - 三种主题模式 — Auto（跟随系统）/ Light / Dark，深色基于 Warm Carbon 暖炭色调，自定义 CSS 变量体系
+  - 字体独立调节 — UI 与终端字号分别可调（10-20px），终端可选是否跟随 UI 主题
+  - 布局持久化 — 分屏比例、标签页、窗口大小 / 位置自动保存，重启恢复（tauri-plugin-window-state）
+  - 关闭确认 — 关闭窗口前二次确认，并 flush 所有项目布局，避免误操作
+  - 版本检查 — 启动时拉取 GitHub Release，标题栏显示新版本提示
+  - 设置中心 — 统一的 SettingsModal 管理主题、字体、Shell、AI 通知等所有开关
+ReleaseNotes: |-
+  同一个任务，并排试两条思路 —— AI 会话分支树
+  本版合入社区贡献者 @hitechr 的功能批次（#47，31 个提交 / 37 个文件），review 反馈（两处必修 + 两处 minor）已由作者逐条落实。
+  ✨ 新功能
+  - 分支会话到新分屏 — pane / 终端右键「分支会话到新分屏」：原会话原地继续跑，旁边分出的新 pane 里是复制出来的分支（Claude 走 claude --resume <id> --fork-session，Codex 走 codex fork <id>）。命令全部经白名单模板产出，注入向量有测试覆盖
+  - 历史面板分支树视图 — 平铺｜树一键切换：fork 出的会话按缩进连线挂在父会话下，正在跑的节点带状态点；点任意节点——已开的切过去聚焦，没开的新终端自动恢复。分支节点显示「分叉后第一问」（父子会话用户消息前缀比对——Claude CLI fork 不写行级标记，标记不可依赖）
+  - 悬停家族面板 — 右键「查看会话分支」悬停即展开当前会话的家族全貌：家族树 + 当前位置标记 + 从任意节点再岔一条
+  - 厂商图标跟最新模型走 — 树与面板的厂商图标按会话最新使用的模型显示：claude CLI 挂 GLM / DeepSeek 中转时亮的是真实厂商的 icon（pane 标签上的 CLI 图标不变）
+  - grok 可从树 / 浮层恢复 — grok 补 resume 能力位，点击节点新终端 grok --resume；无 CLI 级 fork，分支入口不出现
+  - npm run package 一键出正式包 — 构建 + 产物收集一条命令走完
+  - 用量统计 KPI 行新增 Token 总数卡
+  🐛 修复
+  - 背景图皮肤下浮层看不清 — 抽屉与 Git 分支下拉补毛玻璃托底、右侧抽屉底色改不透明——盖在终端文字上的浮层按「浮层不透明」原则处理
+  - codex resume 后分支入口消失 — codex resume 不重新上报 SessionStart，恢复出的新 pane 现在当场写回会话身份，不再干等 hook
+  - hook 未注册时入口静默消失 — 输入检测认出 AI 在跑但拿不到会话身份时，菜单置灰并提示原因，不再让人以为功能坏了
+  🔒 安全
+  - session id 白名单统一 — 新增 session_id_path_safe：凡前端参数 / 持久化数据拼进会话文件路径的四处入口（本机 / WSL / SSH 远程）统一过 ^[A-Za-z0-9_-]+$ 白名单，附 ../ 等穿越向量测试
+  🔧 内部
+  - 新 command scan_session_lineage（70 → 71） — Claude forkedFrom + Codex forked_from_id 双源磁盘扫描分支边，与前端 fork 时的自记账边合并、磁盘优先——覆盖 Claude CLI fork 不落盘指针的缺口
+  - 能力位表 AgentBranchCaps 与树构建是纯逻辑，Node 测试直测；自记账边随 config 持久化（量级字节级，清理策略已留档）
+  ⚠️ 已知限制
+  - WSL / SSH 远程来源的会话记录在别的机器 / 发行版里，本地 resume 恢复不了，点击会提示
+  - grok 无 CLI 级 fork（--resume 是接管不是复制），只有恢复、没有分支
+
+  完整变更：https://github.com/dreamlonglll/mini-term/compare/v0.12.1...v0.13.0
+ReleaseNotesUrl: https://github.com/dreamlonglll/mini-term/releases/tag/v0.13.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

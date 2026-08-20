@@ -1,0 +1,51 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: IcyHotY2K.QuickImageViewer
+PackageVersion: 2.263.0.334
+PackageLocale: en-US
+Publisher: IcyHotY2K
+PublisherUrl: https://github.com/icyhoty2k
+PublisherSupportUrl: https://github.com/icyhoty2k/QuickImageViewer/issues
+PackageName: QuickImageViewer
+PackageUrl: https://github.com/icyhoty2k/QuickImageViewer
+License: AGPL-3.0
+LicenseUrl: https://github.com/icyhoty2k/QuickImageViewer/blob/HEAD/LICENSE
+Copyright: Copyright © 2026 All rights reserved, Ivan Hristov Yanev
+ShortDescription: Fast native Windows image viewer.
+Tags:
+- cpp
+- fast-image-viewer
+- image-viewer
+- lightweight-app
+- native-cpp
+- no-install
+- performance-optimized
+- portable-exe
+- webp
+- win32
+ReleaseNotes: |-
+  Orientation is now correct everywhere it is read, the remote folder list reflects the running session, and the current image can be handed to another program without going through Explorer first.
+  Image orientation
+  - EXIF orientation is baked into the decoded pixels instead of turning the viewport. The viewer used to rotate what was on the glass and leave the pixels alone, so fit-to-window, the pan limits, the pan direction and the zoom were all measuring the unrotated shape. Every one of those is fixed by decoding the picture the right way up in the first place, with no change to any of them. It shows up on HEIC above all, because virtually every photo straight off a phone carries the tag.
+  - A copied image is no longer turned differently from the one on screen. Orientation had two readings — one applied to the viewport, one not applied at all — and the clipboard took the second.
+  - A pushed preview arrives the right way up. The transfer path re-encodes pixels for another machine rather than drawing to the glass, so it never saw the viewport rotation and sent a sideways picture of an upright one. It went unnoticed on a normal library, where files that have lived on a PC are usually already rotated in their pixels; it was guaranteed to show on anything straight off a camera, which is exactly what the Stream feature pushes.
+  Remote
+  - The folder list a client sees is built from the live in-memory list, not the history file. That file is append-only, so it could not contain this session's changes — the phone's folder list and the History panel's disagreed until a restart.
+  Files and clipboard
+  - Ctrl+Shift+C — copy the current image's full path as text, for pasting into a terminal, a file dialog or a message. Ctrl+C still copies the picture itself.
+  - Ctrl+Shift+O — open the current image in another program through Windows' own chooser. The "always use this app" box is hidden deliberately: picking an editor for one look should not reassign the file type.
+  - Thumbnail right-click gains Copy Path, Open With and Show in Explorer. The main window could already reveal the current image with L, but there was no way to reveal a specific thumbnail.
+  - Both new commands, and all three menu entries, refuse an image that arrived over the network rather than guessing. A streamed picture lives in a temporary file that is deleted at the next change of image, so its path is worthless and opening it hands an editor a file that vanishes.
+  Fixes
+  - A file operation refused during a remote session now says why. The thumbnail strips asked the same rule as everything else and then discarded the reason it gave, so Ctrl+C, Ctrl+X, Ctrl+V and Delete in a strip were dead keys while a connection was live — the identical command from the main window had always explained itself.
+  - A failed clipboard open is reported. Copying the current image announced success and said nothing when the clipboard was held by another process, and copying files said nothing either way. A failed open leaves the previous contents in place, so the next paste quietly succeeded with the wrong data.
+  - Reveal-in-Explorer no longer opens the wrong folder. SHOpenFolderAndSelectItems does not fail on a missing file — it opens somewhere else — so deleting the picture on screen and pressing L sent you to the wrong place with no message. The check existed in one of the five copies of that call; all five now share it.
+  - The metadata panel's clipboard copy could publish an unwritten handle and leaked it on failure. Replaced with the shared implementation.
+  - Copy and Cut are refused on a streamed image in the cache strip. Cut marks the file for a move, so pasting it in Explorer would have moved a file the viewer then tries to delete.
+ReleaseNotesUrl: https://github.com/icyhoty2k/QuickImageViewer/releases/tag/v2.263.0.334
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/icyhoty2k/QuickImageViewer/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

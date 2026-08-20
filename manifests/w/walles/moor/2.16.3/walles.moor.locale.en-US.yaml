@@ -1,0 +1,53 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: walles.moor
+PackageVersion: 2.16.3
+PackageLocale: en-US
+Publisher: Johan Walles
+PublisherUrl: https://github.com/walles
+PublisherSupportUrl: https://github.com/walles/moor/issues
+Author: Johan Walles
+PackageName: Moor
+PackageUrl: https://github.com/walles/moor
+License: Proprietary
+LicenseUrl: https://github.com/walles/moor/blob/master/LICENSE
+Copyright: Copyright (c) 2013, johan.walles@gmail.com. All rights reserved.
+CopyrightUrl: https://github.com/walles/moor/blob/master/LICENSE
+ShortDescription: Moor is a pager. It's designed to just do the right thing without any configuration.
+Moniker: moor
+Tags:
+- console
+- console-application
+- moar
+- pager
+ReleaseNotes: |-
+  Before this release, --quit-if-one-screen made the terminal flash even
+  when the contents fit on one screen. Moor switched to the alternate
+  screen, painted a frame, and switched right back before printing the
+  contents where they belong.
+  With this release, when the contents fit on one screen moor prints them
+  without ever touching the alternate screen, so there is nothing to see
+  but the text.
+  Getting there also meant waiting for syntax highlighting before deciding
+  whether the contents fit: highlighting can turn one line of JSON into a
+  hundred, so source files and piped JSON used to flash where a .txt file
+  did not.
+  Also in this release:
+  - Moor now resets the terminal style before exiting, so a colored last
+    line no longer bleeds into your next shell prompt. This affected
+    --no-clear-on-exit and --quit-if-one-screen output as wide as the
+    screen
+  - With --no-clear-on-exit-margin 0, the last line of the contents is
+    no longer silently dropped on exit
+  - If the reader panics, moor now keeps going with whatever it read
+    instead of spinning its spinner forever
+  - pkg/moor: the terminal is restored even if paging panics, rather than
+    leaving the embedding process on the alternate screen in raw mode
+  - pkg/moor: embedders no longer lose the last line of short contents
+  Known limitation: input that is short but arrives slowly can still flash.
+  Fixing that requires waiting a fixed amount of time before showing
+  anything, and nobody has picked a number yet.
+ReleaseNotesUrl: https://github.com/walles/moor/releases/tag/v2.16.3
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

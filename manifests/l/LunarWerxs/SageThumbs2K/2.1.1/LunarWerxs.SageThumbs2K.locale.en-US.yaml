@@ -1,0 +1,60 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: LunarWerxs.SageThumbs2K
+PackageVersion: 2.1.1
+PackageLocale: en-US
+Publisher: LunarWerx
+PublisherUrl: https://github.com/LunarWerxs
+PublisherSupportUrl: https://github.com/LunarWerxs/SageThumbs-2k/issues
+PackageName: SageThumbs 2K
+PackageUrl: https://github.com/LunarWerxs/SageThumbs-2k
+License: PolyForm Noncommercial License 1.0.0
+LicenseUrl: https://github.com/LunarWerxs/SageThumbs-2k/blob/HEAD/LICENSE.md
+Copyright: Copyright (c) 2026 LunarWerx
+ShortDescription: Explorer thumbnails for 331 file types Windows can't read, plus a right-click image toolkit.
+Description: SageThumbs 2K is a modern, crash-isolated Windows 11 shell extension written in Rust that rebuilds the classic SageThumbs. It gives File Explorer thumbnails for 331 file types Windows can't preview on its own — camera RAW, HEIC/AVIF, Photoshop, DjVu, ebooks and comics, video frames, 3D-print files and a long tail of obscure formats — plus a right-click image toolkit (convert, resize, rotate, OCR, color picker, metadata strip, combine-to-PDF/CBZ) and a console/AI CLI. Free for personal use.
+Moniker: sagethumbs2k
+Tags:
+- converter
+- explorer
+- heic
+- image
+- raw
+- shell-extension
+- thumbnails
+ReleaseNotes: |-
+  ## What's changed
+  
+  ### Fixed
+  
+  - **Some AVI videos had a completely black thumbnail.** The affected files store empty filler
+    frames that carry no picture, and we were taking the first frame we could decode without ever
+    looking at it, so if one of those landed where the thumbnail is taken from, you got black,
+    even though your thumbnail-position setting was working perfectly. We now check whether a frame
+    actually has a picture in it and move on to the next one if it does not. A genuinely black
+    video still gets its black thumbnail, and dark scenes are unaffected: a frame only counts as
+    empty when EVERY pixel in it is black.
+  
+  - **"Build thumbnails here" could report 100% while some thumbnails were still missing.** A file
+    is built at several sizes, one per Explorer view, and the run marked a file done if ANY of them
+    worked. So a size that quietly failed left you with a finished-looking run and a folder that
+    still built its tiles on first open. PDFs showed this most, because each size re-renders the
+    page and several files render at once, so one could run out of time while the others succeeded.
+    A size that misses now gets one more attempt once the rest of that file is done, and anything
+    still missing is reported as **partly built** instead of counted as finished.
+  
+  - **Opening About started an update check even with automatic checking turned off.** The setting
+    correctly governed the check that happens when the app starts, but the About page ignored it
+    and checked every time it opened. It now respects the setting, and shows "Check for updates"
+    so you can still check whenever you want with one click. The button itself is unchanged: press
+    it and it checks, setting or no setting.
+  
+  - **Settings headings cut off the bottom of letters like "g".** The heading's height was a fixed
+    number rather than measured from the font, so it was always a few pixels short, and the taller
+    everything gets the more it takes off: at 300% display scaling it was losing around ten pixels.
+    It now measures the font. A heading too long for the space ends in an ellipsis rather than
+    running under the search box.
+ReleaseNotesUrl: https://github.com/LunarWerxs/SageThumbs-2k/releases/tag/v2.1.1
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
