@@ -25,10 +25,99 @@ Tags:
 - icinga
 - naemon
 - nagios
-ReleaseNotes: "Host security posture, JSON-aware HTTP checks, and a clearer licence\nThis release adds a brand-new CheckSecurity module for monitoring a host's\nsecurity posture — certificates, firewall, antivirus, BitLocker, Secure Boot,\nNLA and logged-on users — and teaches check_http to assert on values inside a\nJSON response body. It also fixes boolean check arguments over REST, tidies up\nprocess aggregation and module activation, relicenses the project under a clear\ndual licence, and reworks the documentation to handle Windows and Linux side by\nside.\nHighlights\n• New CheckSecurity module. Seven new checks for host security posture:\n  check_certificate, check_firewall, check_antivirus, check_bitlocker,\n  check_secureboot, check_nla and check_users. check_certificate and\n  check_users run everywhere; the rest are Windows-only. (#1339)\n• check_http can assert on JSON responses. New json-path=alias:path\n  options extract values from a JSON body into filter keywords you can threshold\n  on and emit as perfdata. (#1341)\n• CheckNet queries now emit performance data by default, so check_http,\n  check_tcp and friends graph out of the box without an explicit perf\n  syntax. (#1341)\n• Boolean check arguments accept values, not just flags.\n  check_ping host=www.google.com total=true now works alongside the bare-flag\n  form — the form REST already used. (#1338)\n• Activate several modules in one command:\n  nscp settings --active-module CheckSystem CheckNet. (#1329-follow-up)\n• Clear dual licence. NSClient++ is now Apache-2.0 OR GPL-2.0-only, with\n  machine-readable REUSE metadata and third-party notices. (#1343)\n• Reworked, multi-OS documentation that presents Windows and Linux options\n  and features together instead of assuming one platform. (#1342)\nDetailed changes\nCheckSecurity — new host security-posture module\nA new module, CheckSecurity (alias security), checks whether a host is in\nthe security state you expect. Each check is a normal modern_filter check, so\nyou can override the default warn/crit expressions, filter, and\ndetail-syntax/top-syntax as usual.\nCommand Platforms What it checks\ncheck_certificate All X.509 certificate expiry / validity / hygiene from files or the Windows store\ncheck_users Windows + Linux Count and detail of logged-on / RDP sessions\ncheck_firewall Windows only Firewall profile (Domain/Private/Public) enabled and active state\ncheck_antivirus Windows only Registered antivirus products' enabled / up-to-date state (Security Center)\ncheck_bitlocker Windows only BitLocker drive-encryption protection status per volume\ncheck_secureboot Windows only Whether UEFI Secure Boot is enabled (distinguishes \"disabled\" from \"legacy\")\ncheck_nla Windows only Network Location Awareness category (public/private/domain) per network\ncheck_certificate defaults to warning when a certificate expires within 30\ndays and critical within 10 (matching common practice), emits expires_in (whole\ndays until expiry) as perfdata, and can scan a whole directory:\ncheck_certificate file=/etc/ssl/certs/mysite.pem\ncheck_certificate file=/etc/ssl/certs recursive=true \"detail-syntax=${subject}：${expires_in}d\"\ncheck_certificate file=/etc/pki/tls/certs critical=expired=1\nThe Windows checks expose the raw state fields so you can tighten or relax the\ndefault posture. check_firewall adds an active flag (which profile is\ncurrently in effect) alongside enabled, so you can warn when a machine silently\nfalls back to the Public profile after a network change:\ncheck_firewall \"warn=active = 1 and profile = 'Public'\" \"detail-syntax=${profile} profile is active\"\ncheck_secureboot \"warn=supported = 0\" \"crit=supported = 1 and enabled = 0\"\ncheck_nla \"crit=connected = 1 and category != 'domain'\" \"detail-syntax=${network}=${category}\"\nOn a platform where a Windows-only check does not apply, the check returns\nUNKNOWN with a clear message rather than failing.\nCheckNet — check_http JSON path extraction\ncheck_http can now pull values out of a JSON response body and treat them as\nfilter keywords. Each json-path=alias:path option extracts the value at a\ndotted path (numeric segments index into arrays; single-quote a segment that\nitself contains a dot) and makes it available for warning=/critical=\nexpressions and perfdata:\ncheck_http url=https://api.example.com/health \"json-path=qlen:data.queue.length\" \"crit=qlen > 100\"\ncheck_http url=https://api.example.com/health \"json-path=st:status\" \"crit=st != 'ok'\"\ncheck_http url=https://api.example.com/health \"json-path=err:metrics.error_rate\" \"warn=err > 0.01\" \"crit=err > 0.05\"\ncheck_http url=https://api.example.com/health \"json-path=first:items.0.name\" \"json-path=cfg:'a.b'.c\"\nNumeric values keep full precision, strings compare and render as strings, and\nbooleans read as 1/0. A missing path — or a body that is not valid JSON —\nleaves the alias empty rather than failing the check, and multiple json-path\noptions can be combined freely.\nCheckNet — default performance data\nCheckNet queries now attach sensible performance data by default, so\ncheck_http, check_tcp and the other network checks produce graphable\nperfdata without a hand-written perf syntax. check_ntp_offset threshold\nhandling was also tidied up in the same change.\nCheck arguments — boolean options accept values\nBoolean check options now accept an explicit value in addition to the bare-flag\nform:\ncheck_ping host=www.google.com total=true\nPreviously the value form was rejected from the CLI even though REST always\npasses flags as key=true tokens, so a boolean option that worked over REST\ncould look broken from the command line. Both forms now behave identically.\nCheckSystem — process total aggregation\ncheck_process process-total aggregation now correctly reports the started\nand hung states (on both Windows and Linux), so totals of these statuses\nmatch what the per-process detail shows.\nSettings — activate multiple modules at once\nnscp settings --active-module now accepts several module names in one\ninvocation:\nnscp settings --active-module CheckSystem CheckNet\nLicensing — dual-licensed Apache-2.0 OR GPL-2.0-only\nNSClient++ is now explicitly dual-licensed under Apache-2.0 OR\nGPL-2.0-only. Source headers were updated to SPDX identifiers, the project\ncarries machine-readable REUSE metadata\n(REUSE.toml, LICENSES/), and a THIRD-PARTY-NOTICES.md / NOTICE collect\nthe third-party licences. The installer, packaging and docs licence text were\nupdated to match.\nBuild — Python library discovery\nCMake now derives the default Python library name instead of hardcoding a\nversion, and defaults it to the soname so the module loads without the Python\ndevelopment packages installed. This makes Linux builds far less sensitive to\nthe exact Python version on the build and target hosts. (#1334)\nDocumentation\n• Multi-OS reference docs. The reference documentation was reworked to\n  present Windows and Linux options and features together, handling checks whose\n  options diverge by platform instead of documenting a single OS. Windows docs\n  were regenerated. (#1342)\n• New docs/samples/ usage examples and descriptions for every new\n  CheckSecurity command and the check_http JSON feature.\n• check_process docs cross-reference filter_perf for top-N processes. (#1330)\n• README restructured and dead files removed. (#1340)\nQuality and CI\n• Spelling. A codespell GitHub workflow was added and spelling errors in\n  log messages and settings descriptions were fixed. (#1314, #1344)\n• Live integration tests. A new opt-in test suite runs checks against a real\n  VM in Azure, alongside the existing REST-driven integration tests. New\n  integration tests cover CheckSecurity, the check_http JSON feature, and\n  --active-module. (#1335)\n• Assorted build fixes for older Windows toolchains, Linux, and sanitizer runs.\nUpgrade notes\n• Licence change：NSClient++ is now distributed as Apache-2.0 OR\n  GPL-2.0-only. This is a clarification/relicensing — review it if your\n  organisation tracks the exact licence of bundled software. No code or runtime\n  behaviour changes as a result.\n• CheckNet perfdata is now on by default. Network checks emit performance\n  data without an explicit perf syntax. If you were adding perfdata manually,\n  double-check you are not now emitting it twice; graphs that previously showed\n  nothing will start populating.\n• Boolean check arguments：option=true / option=false now work from the\n  CLI as well as over REST. Existing bare-flag usage is unchanged.\n• CheckSecurity is not loaded by default. Enable it before using the new\n  checks, e.g. nscp settings --active-module CheckSecurity. Windows-only\n  checks return UNKNOWN on other platforms rather than erroring.\nFull Changelog：https://github.com/mickem/nscp/compare/0.14.0...0.14.1"
-ReleaseNotesUrl: https://github.com/mickem/nscp/releases/tag/0.14.1
-Documentations:
-- DocumentLabel: Documentation
-  DocumentUrl: https://nsclient.org/docs/
+ReleaseNotes: |-
+  # SQL Server monitoring, seventeen new checks and a stall-proof system collector
+
+  This release adds a new CheckMSSQL module for monitoring Microsoft SQL Server, a large batch of new Windows checks covering disks, security hygiene and patch state, richer keywords across many existing checks, and fixes a long-standing class of collector stalls caused by slow WMI providers.
+
+  ## ✨ Highlights
+
+  🗄️ **New CheckMSSQL module.** Five new commands monitor Microsoft SQL Server over ODBC: connectivity/health, arbitrary T-SQL queries, database state and log usage, backup age and SQL Agent jobs. Windows integrated authentication by default, with optional SQL authentication.
+  🆕 **Twelve more new check commands.** Disk writability (`check_disk_write`), UNC share free space (`check_uncpath`), Storage Spaces (`check_storagepool`), VSS snapshots (`check_shadowcopy`), SMB shares (`check_share`), Microsoft Defender (`check_defender`), local account hygiene (`check_local_accounts`), group membership drift (`check_group_members`), pending reboot (`check_pending_reboot`), hotfix age (`check_patch_age`), print queues (`check_printqueue`) and paging I/O (`check_swap_io`).
+  ⚙️ **The system collector no longer freezes on slow WMI providers.** Slow every-12-second collections (network, temperature, CPU frequency, battery, OS updates) now run on their own thread, so a blocking WMI query no longer stretches `check_cpu` time windows or drops samples (#1378).
+  📃 **Multi-line check output.** The new `list-separator` option on every filter-based check lets long results render one item per line, which Nagios-compatible frontends show as summary + long output (#1370).
+  🔥 **check_firewall now reports the effective, group-policy-aware state.** A firewall enabled or disabled through group policy previously reported its pre-policy local state (#1351).
+  ⏱️ **Per-disk I/O latency.** `check_disk_io` and `check_disk_health` gain `read_latency`, `write_latency` and `total_latency` keywords in milliseconds, on both Windows and Linux (#1369).
+  🐛 **Fixed `disable = cpu_frequency` silently stalling check_cpu.** Disabling CPU frequency collection also disabled CPU load sampling (#1368).
+  🐧 **Linux packages now ship executable scripts.** Bundled scripts lost their execute bit when installed by DEB/RPM packages. Thanks to Fabio Fantoni for this and for REUSE/SPDX compliance fixes.
+
+  ## 🔍 Detailed changes
+
+  ### 🗄️ CheckMSSQL — new module for monitoring Microsoft SQL Server
+
+  A new Windows module connecting over ODBC with Windows integrated authentication by default and optional SQL authentication (password stored as a masked settings key). The ODBC driver is auto-detected, preferring the newest "ODBC Driver NN for SQL Server" and falling back to the legacy "SQL Server" driver; on modern drivers `TrustServerCertificate=yes` is applied by default (overridable via `trust-cert`/`encrypt`). Login and query timeouts keep checks from ever hanging the agent, and unreachable servers report UNKNOWN with the full ODBC diagnostic chain.
+
+  | Command | Purpose |
+  | --- | --- |
+  | `check_mssql` | Connectivity and health: version, patch level, edition, uptime with time-unit thresholds |
+  | `check_mssql_query` | Arbitrary T-SQL with returned columns exposed as filter keywords and perfdata |
+  | `check_mssql_databases` | Database state, recovery model and sizes, plus log usage from `DBCC SQLPERF(LOGSPACE)` |
+  | `check_mssql_backup` | Age of last full/diff/log backup from msdb; never-backed-up reported as -1 and critical by default |
+  | `check_mssql_jobs` | SQL Agent job outcomes, duration and in-flight runs (`is_running`) |
+
+  `check_mssql_backup` excludes COPY_ONLY and snapshot backups by default so an ad-hoc dev backup or a VSS agent cannot mask a failing backup job (`include-copy-only` / `include-snapshot` opt back in). A new end-to-end scenario, *Monitoring a SQL Server host*, combines the module with service, disk, memory, PDH and event log checks and documents a low-privilege monitoring login.
+
+  ```
+  check_mssql_backup "critical=full_age > 26h or full_age = -1" "warn=log_age > 2h"
+  ```
+
+  ### 💾 CheckDisk — writability probes, UNC paths, Storage Spaces, VSS and SMB shares
+
+  | Command | Purpose |
+  | --- | --- |
+  | `check_disk_write` | Verify a disk is actually writable: exclusive-create a probe file, write, read back, delete. Never touches a file it did not create; probe size capped at 1M |
+  | `check_uncpath` | Free space on a UNC path (server share), with optional alternate credentials |
+  | `check_storagepool` | Storage Spaces pool health and capacity |
+  | `check_shadowcopy` | VSS snapshot recency, count and shadow-storage usage per volume |
+  | `check_share` | List SMB shares or verify that specific required shares exist |
+
+  Existing disk checks were extended as well:
+
+  `check_disk_io` and `check_disk_health` expose average per-I/O latency (`read_latency`, `write_latency`, `total_latency`, unit ms) with perfdata and metrics (#1369). On Windows the values are computed from raw `PERF_AVERAGE_TIMER` counters (the formatted WMI class truncates realistic latencies to 0); on Linux from `/proc/diskstats`. Thresholds like `"warn=total_latency > 20" "crit=total_latency > 50"` work regardless of workload shape.
+  `check_drivesize` gains `require` (alias `mandatory-drives`): the check goes CRITICAL if any listed drive is missing, even when scanning wildcards.
+  `check_drivesize` and `check_disk_health` can report physical-disk device state (health and operational status).
+  `check_files` gains aggregate file-size metrics and a folder count.
+
+  ### 🛡️ CheckSecurity — Defender, local accounts and group membership
+
+  | Command | Purpose |
+  | --- | --- |
+  | `check_defender` | Microsoft Defender status: signature/scan age, real-time and tamper protection, engine/signature versions |
+  | `check_local_accounts` | Local account hygiene: enabled/disabled, locked, password-required/expires, built-in admin/guest |
+  | `check_group_members` | Local group membership (default Administrators) with alerting on members not on an expected allow-list |
+
+  ### 🖥️ CheckSystem — patch state, reboot state, print queues and paging I/O
+
+  | Command | Purpose |
+  | --- | --- |
+  | `check_pending_reboot` | Whether the system is waiting for a reboot, aggregating servicing, Windows Update, file-rename, computer-rename and domain-join signals |
+  | `check_patch_age` | Installed-hotfix hygiene: time since the newest hotfix and presence of specific required hotfixes |
+  | `check_printqueue` | Print queues: queue depth, oldest-job age, offline and error states per printer |
+  | `check_swap_io` | System paging (swap) I/O rates: pages/bytes paged in and out per second |
+
+  ### 📈 check_process — background CPU sampling, owners and more memory keywords
+
+  `check_process delta=true` previously sampled inside the check, slept one second and sampled again — stalling every query by a second. CPU deltas are now published by an opt-in background collector (`process cpu` setting, mirroring `process history`) that diffs the process table once a second; the check overlays a rolling per-PID CPU% onto a normal no-sleep enumeration. With the collector off, `delta=true` fails fast with UNKNOWN naming the setting instead of reporting misleading values, and memory/handle fields now keep their real absolute values in delta mode.
+
+  Other process-check additions: process owner resolution (with user filtering), an `rss` alias for working set, thread count, working set and page file percentages, peak memory keywords and system-wide thread/memory totals. Also fixed: the `time` keyword always reported 0 unless delta sampling was on.
+
+  ### ➕ More keywords and options for existing checks
+
+  | Check | Addition |
+  | --- | --- |
+  | `check_network` | Per-interface packet rates, errors and discards (`packets_in`, `packets_out`, ...) with perfdata and metrics; NIC team membership (`team`, `team_status`) and WMI `source` keywords |
+  | `check_service` | `summary` option emitting aggregate state counts (`running_services`, `stopped_services`, `paused_services`, `pending_services`, `service_count`) for dashboard rollups |
+  | `check_os_version` | CPU architecture, Windows build revision and inventory-only BIOS fields (serial, version, manufacturer); fixed version detection for Windows 10/11 and Vista/Server 2008 |
+  | `check_os_updates` | Support for Defender definition updates and update rollups |
+  | `check_cpu_frequency` | Socket information and load percentage |
+  | `check_tasksched` | Next run time and missed-run tracking, task URI and hidden properties, default perfdata for task state and missed-run counters |
+  | `check_eventlog` | User SID retrieval and filtering; more efficient bookmark handling (plus a bookmark bug fix) |
+  | `check_pdh` | Built-in `memory_pages_sec` counter (`\Memory\Pages/sec`); more robust resolution of localized counter names |
+
+  ### ⚙️ CheckSystem collector — no more stalls from slow WMI providers (#1378)
+
+
+  _(release notes truncated to fit the 10000-character manifest limit -- see the full notes at the URL below)_
+ReleaseNotesUrl: https://github.com/mickem/nscp/releases/tag/0.15.0
 ManifestType: defaultLocale
 ManifestVersion: 1.12.0
