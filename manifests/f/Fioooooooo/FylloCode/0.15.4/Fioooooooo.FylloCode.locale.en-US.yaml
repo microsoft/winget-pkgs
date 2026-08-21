@@ -1,0 +1,94 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Fioooooooo.FylloCode
+PackageVersion: 0.15.4
+PackageLocale: en-US
+Publisher: Fio
+PublisherUrl: https://github.com/Fioooooooo
+PublisherSupportUrl: https://github.com/Fioooooooo/FylloCode/issues
+PackageName: FylloCode
+PackageUrl: https://github.com/Fioooooooo/FylloCode
+License: AGPL-3.0
+LicenseUrl: https://github.com/Fioooooooo/FylloCode/blob/HEAD/LICENSE
+ShortDescription: A desktop app that turns Coding Agents into reliable teammates — by splitting every change into Task → Proposal → Apply → Archive, with you reviewing the plan before any code is written.
+Description: |-
+  In this new era, the work that really needs our attention is no longer repetitive coding, but higher-level business understanding and architecture design. The future workflow I have in mind is: understand the business → think through the architecture → write a Proposal → review the Proposal → let the Agent implement it automatically, then move on to the next Proposal.
+  That thinking led me to build FylloCode — a step from Vibe Coding toward Agentic Coding.
+
+  How FylloCode Solves It
+  FylloCode enforces a structured workflow that separates thinking from doing:
+  ┌──────────┐     ┌────────────────┐     ┌───────────┐     ┌───────────┐
+  │   Task   │ ──→ │ Chat/Proposal  │ ──→ │   Apply   │ ──→ │  Archive  │
+  │          │     │                │     │           │     │           │
+  │ What to  │     │ Agent explores │     │ Agent     │     │ Specs     │
+  │ work on  │     │ codebase and   │     │ implements│     │ updated,  │
+  │          │     │ writes a plan  │     │ the plan  │     │ change    │
+  │          │     │                │     │           │     │ recorded  │
+  │          │     │  ➜ YOU REVIEW  │     │           │     │           │
+  └──────────┘     └────────────────┘     └───────────┘     └───────────┘
+  Task — Pick a task from your local list or synced from platforms like Yunxiao. One click sends it to Chat.
+  Chat / Proposal — The Agent explores your codebase, asks clarifying questions, and produces a structured proposal (what to change, which files, acceptance criteria). The Agent is prohibited from writing code in this stage. You review, edit, and approve the proposal before anything else happens.
+  Apply — A fresh Agent session implements the approved proposal task-by-task. It reads only the proposal artifacts — not the Chat history — so every decision must be captured in writing, not left in context-window memory.
+  Archive — Specs are updated, the change is recorded with full traceability. Your project's knowledge base grows with every shipped change.
+  Why Separating Thinking from Execution Matters
+  Most Coding Agents understand a task and write code in the same session. Any misunderstanding becomes code directly, and code is expensive to review. FylloCode physically separates understanding from execution. Misunderstandings can only become proposal text — and text is cheap to review. A 2-minute proposal review catches problems that would take 20 minutes to find in a diff.
+
+  Features
+
+  Agent Protocol (ACP)
+  FylloCode connects to any Coding Agent through ACP (Agent Client Protocol). Claude Code, Codex, or any ACP-compatible agent — one protocol, one interface, without juggling a pile of terminal windows.
+  There are currently 35 agents available in the ACP Registry, with support for parallel chats and parallel Proposal Apply runs.
+
+  System Reminders
+  Each workflow stage injects a system reminder that constrains what the Agent can and cannot do. In Chat, the Agent is instructed to explore and propose, not code. In Apply, it follows the approved task list. This isn't a suggestion — it's a hard boundary enforced at session start.
+
+  Task Panel
+  View and manage tasks from your local list or synced from external platforms. Tasks serve as the entry point to the entire workflow — select a task, start a Chat, and the Agent begins with full context.
+
+  Integration with Development Platforms
+  Connect to platforms like Yunxiao (Alibaba Cloud DevOps) at the provider level — one authentication, multiple tools across task management, source code, and CI/CD. More platform integrations (GitHub, TAPD, Jira, etc.) are planned.
+  Task integrations use APIs instead of Agent Skills by design. API calls are fast and do not spend tokens, so tokens stay focused on the work that actually needs reasoning.
+
+  Workflow Editor
+  Define and customize multi-stage workflows. Built-in templates get you started; edit the YAML to fit your team's process.
+
+  OpenSpec-Driven Proposals
+  Proposals are structured artifacts — not chat messages. Each proposal contains a design document, spec changes, and a concrete task list with file paths and acceptance criteria. The built-in fyllo-specs MCP server manages the full lifecycle: explore → create-proposal → apply-change → archive-change.
+
+  Streaming Rendering Engine
+  FylloCode uses markstream-vue as its streaming rendering engine. It is fast and smooth, with built-in integration for Monaco Editor, KaTeX, and Mermaid. While working on Proposals, it can render flowcharts and formatted specs in real time, making architecture flows and business logic easier to inspect.
+  Engineering Guardrails
+  FylloCode provides two layers of engineering guardrails:
+  - Soft constraints — Capture engineering conventions as Guidelines and continuously maintain them through the built-in fyllo-skills MCP server, without manual upkeep.
+  - Hard constraints — Agents may not always follow Guidelines perfectly, so FylloCode's health checks establish engineering-level enforcement through lint, test runners, git hooks, and CI.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  This release completes asynchronous control and observability for cross-Agent delegation: spawned Sessions now run in the background by default, can be cancelled on request, stream their completion notifications into the parent Session, and remain visible at any time through a persistent per-session activity bar. Every real session also gets its own URL for direct access, refresh recovery, and navigation from other pages.
+  Added
+  - Every real session now uses its own /chat/<session-id> subroute. Task pages, session search, and lineage open the session directly, and a refresh stays on the same session; /chat remains the draft entry before the first message, and an invalid or out-of-Workspace session route falls back to /chat with a notice
+  - Added a child-Agent activity bar at the bottom of the Chat conversation area. When the current session owns spawned Sessions, the bar shows the total as 子 Agent N plus the running count; its list orders Sessions by active first, then by most recent update, with each entry's Agent, synchronous or background mode, status, prompt preview, and update time. Opening a Session shows read-only details organized by Turn, with the latest Turn selected by default and earlier Turns available, each showing its original prompt, aggregated Activity, compacted Transcript, status, and response IDs
+  - Added the cancel_session tool to fyllo-spawn. The parent Agent can request cancellation of a running spawned Session it owns; { cancelled: true } only means the request was triggered, the turn settles as error with code TURN_CANCELLED_BY_PARENT, and the final state is confirmed through check_session_status
+  Changed
+  - fyllo-spawn's prompt_to_agent now runs in the background by default (background defaults to true): the call returns accepted once Main owns the turn, so the parent Agent can keep working and later collect the result through check_session_status and read_response. Callers that need synchronous blocking must pass background: false explicitly. This is an incompatible default change; older calls that omit the parameter behave differently
+  - When a background spawned turn completes, its completion notification now streams into the parent Session like a normal reply: the Session shows a running state and sending is temporarily disabled during the notification turn, and multiple pending notifications for the same parent are delivered one at a time in order. The notification turn lifecycle remains owned by Main; closing the window only interrupts the live projection and does not cancel or lose the reply
+  - The spawn.session Signal changed from a required discovery step to an optional contextual deep link. Main automatically exposes newly created and continued spawned Sessions through the parent Session's activity bar, so omitting the Signal does not affect visibility
+  Fixed
+  - Fixed the missing loading feedback and silently rejected sends in the parent Session while a spawn notification reply was running: once dispatch is accepted the Session enters submitted, and turns to streaming when the first content chunk arrives
+  Notes
+  - The application version is now 0.15.4.
+  - The fyllo-spawn MCP server is now 0.2.0. This version adds cancel_session and changes the background default to true; the latter is a breaking change, and callers that rely on synchronous blocking must pass background: false explicitly.
+  - The fyllo-cortex MCP server remains at 0.7.0, and the fyllo-specs MCP server remains at 0.11.1; neither server changed in this release range.
+  - The child-Agent activity bar and Turn details are read-only and read from Main's durable records and live state; no continue, cancel, or retry entry points were added to the UI, and completion-notification delivery semantics are unchanged.
+ReleaseNotesUrl: https://github.com/Fioooooooo/FylloCode/blob/HEAD/CHANGELOG.en.md#0154---2026-08-19
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
