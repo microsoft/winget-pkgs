@@ -1,0 +1,128 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Powerformer.OpenDesign
+PackageVersion: 0.20.2
+PackageLocale: en-US
+Publisher: Powerformer, Inc.
+PublisherUrl: https://nexu.io/
+PublisherSupportUrl: https://github.com/nexu-io/open-design/issues
+Author: Powerformer, Inc.
+PackageName: Open Design
+PackageUrl: https://open-design.ai/
+License: Apache-2.0
+LicenseUrl: https://github.com/nexu-io/open-design/blob/HEAD/LICENSE
+Copyright: Copyright 2026 Open Design contributors
+ShortDescription: The open-source alternative to Claude Design. Your existing coding agent — Claude · Codex · Cursor · Gemini · OpenCode · Qwen — becomes the design engine, driven by 31 composable skills and 72 brand-grade design systems.
+Description: |-
+  The open-source alternative to Claude Design. Local-first, web-deployable, BYOK at every layer — 16 coding-agent CLIs auto-detected on your PATH (Claude Code, Codex, Devin for Terminal, Cursor Agent, Gemini CLI, OpenCode, Qwen, Qoder CLI, GitHub Copilot CLI, Hermes, Kimi, Pi, Kiro, Kilo, Mistral Vibe, DeepSeek TUI) become the design engine, driven by 31 composable Skills and 72 brand-grade Design Systems. No CLI? An OpenAI-compatible BYOK proxy is the same loop minus the spawn.
+
+  Why this exists
+  Anthropic's Claude Design (released 2026-04-17, Opus 4.7) showed what happens when an LLM stops writing prose and starts shipping design artifacts. It went viral — and stayed closed-source, paid-only, cloud-only, locked to Anthropic's model and Anthropic's skills. There is no checkout, no self-host, no Vercel deploy, no swap-in-your-own-agent.
+  Open Design (OD) is the open-source alternative. Same loop, same artifact-first mental model, none of the lock-in. We don't ship an agent — the strongest coding agents already live on your laptop. We wire them into a skill-driven design workflow that runs locally with pnpm tools-dev, can deploy the web layer to Vercel, and stays BYOK at every layer.
+  Type make me a magazine-style pitch deck for our seed round. The interactive question form pops up before the model improvises a single pixel. The agent picks one of five curated visual directions. A live TodoWrite plan streams into the UI. The daemon builds a real on-disk project folder with a seed template, layout library, and self-check checklist. The agent reads them — pre-flight enforced — runs a five-dimensional critique against its own output, and emits a single <artifact> that renders in a sandboxed iframe seconds later.
+  That's not "AI tries to design something". That's an AI that has been trained, by the prompt stack, to behave like a senior designer with a working filesystem, a deterministic palette library, and a checklist culture — exactly the bar Claude Design set, but open and yours.
+  OD stands on four open-source shoulders:
+  - alchaincyf/huashu-design — the design-philosophy compass. Junior-Designer workflow, the 5-step brand-asset protocol, the anti-AI-slop checklist, the 5-dimensional self-critique, and the "5 schools × 20 design philosophies" idea behind our direction picker — all distilled into apps/daemon/src/prompts/discovery.ts.
+  - op7418/guizang-ppt-skill — the deck mode. Bundled verbatim under skills/guizang-ppt/ with original LICENSE preserved; magazine-style layouts, WebGL hero, P0/P1/P2 checklists.
+  - OpenCoworkAI/open-codesign — the UX north star and our closest peer. The first open-source Claude-Design alternative. We borrow its streaming-artifact loop, its sandboxed-iframe preview pattern (vendored React 18 + Babel), its live agent panel (todos + tool calls + interruptible generation), and its five-format export list (HTML / PDF / PPTX / ZIP / Markdown). We deliberately diverge on form factor — they are a desktop Electron app bundling pi-ai; we are a web app + local daemon that delegates to your existing CLI.
+  - multica-ai/multica — the daemon-and-runtime architecture. PATH-scan agent detection, the local daemon as the only privileged process, the agent-as-teammate worldview.
+Tags:
+- agent
+- agentic
+- ai
+- claude
+- design
+- large-language-model
+- llm
+ReleaseNotes: |-
+  ⚡ Production exports now finish in under a minute: when a font or an image in
+  your work never comes back, Open Design no longer holds the whole pipeline for
+  ten minutes — it stops waiting and delivers the image or PDF anyway. An HTML
+  preview you already opened keeps its state, and first-run setup only lets you
+  continue once it really connects. Alongside that, the pricing, entitlement
+  badges and upgrade paths that shipped with Go Plan got a careful calibration
+  pass, so what plan you're on, where you can go from it, and where a click will
+  take you all read honestly.
+  ⚡ Performance & reliability
+  - 📤 A stuck export now takes under a minute instead of ten. When a font or
+    an image in your work never loads, Open Design stops waiting on it and
+    finishes the image or PDF anyway. Work that loads normally still exports at
+    full quality, and a genuine failure now names its reason so you can act on it.
+    (#7182) Thanks @lefarcen.
+  - 🖥️ Come back to an open HTML preview and it's still where you left it.
+    Switching projects, switching file tabs and toggling Preview/Code no longer
+    trigger a blank flash or a full reload — scroll position, live documents and
+    your edits survive, and text changes show up the moment you save. (#7156)
+    Thanks @lefarcen.
+  - ✅ A run that produced files is no longer reported as producing nothing.
+    When the browser doesn't finish syncing files in time, Open Design trusts what
+    the daemon confirmed was delivered. Runs that genuinely produced nothing still
+    show the original error. (#5750) Thanks @ferrarifankid04.
+  - 🧩 Interactive scripts in a project preview survive URL rewriting. Inline
+    scripts are delivered untouched while CSS and other assets stay
+    workspace-scoped, so script-driven interactive previews actually run. (#6938)
+    Thanks @mturac.
+  🐛 Fixed
+  First-run setup
+  - 🚦 "Continue" now means you are actually ready to continue. Picking a local
+    CLI during first-run setup keeps the button inert until the CLI is detected.
+    With BYOK, filling in the key, base URL and model runs a real connection test
+    on click — a failure or a rate limit keeps you on the page with an actionable
+    error, and setup only completes once the test passes. (#7164)
+    Thanks @alchemistklk.
+  Pricing, plans & upgrades
+  - 🌐 The language you enter Pricing in is the language you stay in. The
+    locale the app hands over now applies before the page paints, instead of
+    flashing the wrong one first. Direct visits without an explicit locale still
+    follow your browser and saved preference. (#7197) Thanks @Siri-Ray.
+  - ↩️ Checkout returns you to the Cloud Console you came from. Pricing
+    handoffs from test, feature-validation and local environments come back to
+    their own entry point instead of landing in production. An invalid target
+    shows a localized error and disables checkout rather than silently falling
+    back. (#7219) Thanks @nettee.
+  - ⬆️ Your current plan, and where you can go from it, read at a glance. The
+    plan you're on is marked Current plan, anything below it is no longer
+    clickable, and higher tiers keep their upgrade entry. Savings amounts, model
+    order, the status column, the recommended accent and the monthly/annual toggle
+    all match the approved design. (#7191, #7222) Thanks @Siri-Ray.
+  - ♾️ "Unlimited" only appears on models your plan actually includes. Go,
+    Plus, Pro and Max badge according to their own entitlements; Team workspaces
+    no longer inherit a personal plan's badge, and BYOK no longer claims
+    platform-side unlimited use. A subscriber whose balance is exactly zero stops
+    seeing a balance chip they can't act on, while overdrafts, free plans and Team
+    still surface the balance that needs attention. (#7190, #7202, #7196)
+    Thanks @lefarcen, @Siri-Ray.
+  - The low-balance dialog's action buttons return to a consistent visual
+    hierarchy. (#7138)
+  Interface & navigation
+  - ⬇️ The update button stops crowding the account capsule. Once a new version
+    finishes downloading, the green update button appears as its own control to
+    the right of the avatar/balance capsule, so the account menu and the update
+    action stay in their own places. (#7237) Thanks @Siri-Ray.
+  - 🔔 The message center is a plain list again. Read and unread messages share
+    one view with no filter tabs; unread items carry a compact dot, and opening one
+    still marks just that message read. (#7231) Thanks @Siri-Ray.
+  - 🔗 Community links live at the bottom of the nav rail. Social links moved
+    out of the account menu into the footer of Home's navigation — the Chinese
+    interface shows the Feishu group, other languages show Discord, and X and email
+    stay the same. (#7232) Thanks @alchemistklk.
+  🌐 Website
+  - The homepage's first screen and capsule header got a round of tightening: a
+    clearer brand claim, lighter capability chips, more restrained CTAs, and a
+    video demo that loads on click. Visitors who already clicked download stop
+    being prompted again. (#7178, #7186) Thanks @joeylee12629-star.
+  - Chinese visitors get a Feishu community entry while other languages keep
+    Discord, and the event recap pages are localized. (#7120, #7119)
+  - The product menu now carries the Codex Plugin entry, and the DeepSeek Harness
+    guide switches to a per-platform one-line installer with a more direct
+    getting-started flow. (#7139) Thanks @joeylee12629-star.
+  🙏 Thanks to everyone who shipped 0.20.2
+  @alchemistklk · @ferrarifankid04 · @joeylee12629-star · @lefarcen · @mturac ·
+  @nettee · @PerishCode · @Siri-Ray
+ReleaseNotesUrl: https://github.com/nexu-io/open-design/releases/tag/open-design-v0.20.2
+Documentations:
+- DocumentLabel: Quick Start
+  DocumentUrl: https://github.com/nexu-io/open-design/blob/HEAD/QUICKSTART.md
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
