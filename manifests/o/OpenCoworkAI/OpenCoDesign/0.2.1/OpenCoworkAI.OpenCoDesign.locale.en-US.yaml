@@ -1,0 +1,198 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: OpenCoworkAI.OpenCoDesign
+PackageVersion: 0.2.1
+PackageLocale: en-US
+Publisher: OpenCoworkAI
+PublisherUrl: https://github.com/OpenCoworkAI
+PublisherSupportUrl: https://github.com/OpenCoworkAI/open-codesign/issues
+PackageName: Open CoDesign
+PackageUrl: https://opencoworkai.github.io/open-codesign/
+License: MIT
+LicenseUrl: https://github.com/OpenCoworkAI/open-codesign/blob/main/LICENSE
+ShortDescription: Open-source desktop AI design tool — prompt to prototype, BYOK, local-first.
+Description: |-
+  Open CoDesign turns natural-language prompts into HTML/JSX prototypes,
+  slide decks, and marketing assets. It runs entirely on your laptop with
+  whichever AI provider you already pay for (Anthropic, OpenAI, Gemini,
+  DeepSeek, or any OpenAI-compatible relay — including keyless
+  IP-allowlisted proxies).
+Moniker: open-codesign
+Tags:
+- ai
+- design
+- electron
+- open-source
+- prototyping
+ReleaseNotes: |-
+  > 🌐 **Languages:** English (below) · [简体中文](#中文版)
+
+  # v0.2.1 — Corporate networks, local workspace mode, and ChatGPT image generation
+
+  > Connect to internal LLM gateways behind a proxy or self-signed cert, design directly in a local folder, and use your ChatGPT subscription for image generation.
+
+  ## Highlights
+
+  • **🗂 Local workspace mode** — designs can be created directly against a local folder, with file browsing, project rebinding, and live local preview. by @mussonking (#334)
+  • **🌐 HTTP proxy support** — new field in Settings → Advanced. Applied to both Chromium and Node (uppercase + lowercase env vars), takes effect immediately, no restart needed. by @gandrenacci 🎉 (#350)
+  • **🔓 TLS verification toggle (per-provider)** — opt-in per custom/imported provider for connecting to corporate gateways with self-signed or private-CA certificates. Built-in providers (Anthropic, OpenAI, OpenRouter, Ollama) remain fully secured. (#355, addressing #229)
+  • **🎨 ChatGPT subscription for image generation** — `generate_image_asset` can now use your ChatGPT OAuth bearer instead of requiring a separate OpenAI API key. by @Sun-sunshine06 (#321)
+
+  ## What's fixed
+
+  Networks & gateways:
+
+  • HTTP proxy applied to both Chromium's network stack and Node's `HTTP(S)_PROXY` env vars, with lowercase mirrors for tools that only honor the lowercase spelling by @gandrenacci 🎉 (#350)
+  • TLS verification can now be disabled per non-built-in provider; covers connection-test, models discovery, generation, and the `codesign:apply-comment` IPC path (#355)
+
+  Desktop & runtime:
+
+  • `pnpm dev` and the preview-runtime Puppeteer spawn now pass `--no-sandbox` when launched as uid 0, unblocking containers, dev VMs, and CI runners by @tiegebentley 🎉 (#356)
+  • Workspace files watcher now falls back to polling for any filesystem watch error (previously only EPERM/EACCES/EISDIR), covering EINVAL / ENOSPC / ERR_FEATURE_UNAVAILABLE_ON_PLATFORM on Windows UNC paths, full disks, and Bun runtimes by @mussonking (#352)
+  • Workspace Markdown links can no longer replace the app window by @snowopsdev 🎉 (#340)
+  • Local workspace comments stabilized by @mussonking (#344)
+
+  Security:
+
+  • Agent-supplied SVG rendering hardened, encrypted secret-storage migration restored under Electron, private-network provider probes guarded by @snowopsdev 🎉 (#311)
+
+  Documentation:
+
+  • v0.2 ChatGPT subscription sign-in and provider support copy refreshed by @Sun-sunshine06 (#323)
+
+  ## Install
+
+  ```bash
+  # Windows
+  winget install OpenCoworkAI.OpenCoDesign
+
+  # macOS
+  brew install --cask opencoworkai/tap/open-codesign
+
+  # Or direct download
+  # https://github.com/OpenCoworkAI/open-codesign/releases/tag/v0.2.1
+  ```
+
+  ## First-time contributors 🎉
+
+  Welcome! These contributors land their work in v0.2.1:
+
+  • **@tiegebentley** (#356 — `--no-sandbox` when launched as uid 0)
+  • **@gandrenacci** (#350 — HTTP proxy setting; also filed the issue #349 that drove it)
+  • **@snowopsdev** (#311 — agent SVG / secret-storage / private-network hardening; #340 — desktop navigation boundary)
+
+  ## Special thanks
+
+  • **@kkksasasa** — for the issue #229 writeup that drove the TLS verification bypass design (full root-cause analysis and patch sketch — network constraints prevented them from submitting a PR, but the implementation in #355 directly follows their plan)
+  • **@gandrenacci** — for both filing the corporate proxy report (#349) and submitting the fix (#350)
+  • **@Sun-sunshine06** — continued provider/diagnostics polish across the v0.2 line
+  • **LINUX DO + WeChat community** — for the ongoing v0.2 feedback wave
+
+  ---
+
+  # 中文版
+
+  # v0.2.1 — 企业网络、本地工作区模式、ChatGPT 图像生成
+
+  > 现在能在企业代理或自签 CA 后面连接内部 LLM 网关、能直接在本地文件夹里做设计、能用 ChatGPT 订阅生成图像。
+
+  ## 本版亮点
+
+  • **🗂 本地工作区模式** — 设计可以直接绑定本地文件夹，支持文件浏览、项目重绑、本地实时预览 by @mussonking (#334)
+  • **🌐 HTTP 代理支持** — Settings → Advanced 新增字段。同时作用于 Chromium 和 Node（大小写 env vars 都写），保存即生效，无需重启 by @gandrenacci 🎉 (#350)
+  • **🔓 TLS 验证开关（按 provider）** — 自定义/导入的 provider 可单独关闭 TLS 证书校验，用于连接公司自签 CA 内部网关。内置 provider（Anthropic / OpenAI / OpenRouter / Ollama）保持严格校验 (#355，解 #229)
+  • **🎨 ChatGPT 订阅可用于图像生成** — `generate_image_asset` 现在可以走 ChatGPT OAuth bearer，不再强制单独配置 OpenAI API key by @Sun-sunshine06 (#321)
+
+  ## 修复
+
+  网络与网关：
+
+  • HTTP 代理同时作用于 Chromium 网络栈和 Node `HTTP(S)_PROXY` 环境变量，含小写镜像（部分工具只认小写） by @gandrenacci 🎉 (#350)
+  • TLS 校验可按非内置 provider 单独关闭；覆盖 connection-test、models discovery、生成、以及 `codesign:apply-comment` IPC 路径 (#355)
+
+  桌面端与运行时：
+
+  • `pnpm dev` 和 preview-runtime 的 Puppeteer 在 uid 0（root）下启动时自动加 `--no-sandbox`，解锁容器、dev VM、CI runner 环境 by @tiegebentley 🎉 (#356)
+  • workspace 文件 watcher 在任何 fs.watch 错误下都降级到 polling（之前仅 EPERM/EACCES/EISDIR），覆盖 Windows UNC 路径、磁盘满、Bun 运行时的 EINVAL/ENOSPC/ERR_FEATURE_UNAVAILABLE_ON_PLATFORM by @mussonking (#352)
+  • workspace Markdown 链接不再能替换 app 窗口 by @snowopsdev 🎉 (#340)
+  • 本地 workspace 评论稳定性修复 by @mussonking (#344)
+
+  安全：
+
+  • 加固 agent 提供的 SVG 渲染；恢复 Electron 下的加密 secret 存储迁移；私网 provider 探测加保护 by @snowopsdev 🎉 (#311)
+
+  文档：
+
+  • v0.2 ChatGPT 订阅登录和 provider 支持文案 refresh by @Sun-sunshine06 (#323)
+
+  ## 安装
+
+  ```bash
+  # Windows
+  winget install OpenCoworkAI.OpenCoDesign
+
+  # macOS
+  brew install --cask opencoworkai/tap/open-codesign
+
+  # 或直接下载
+  # https://github.com/OpenCoworkAI/open-codesign/releases/tag/v0.2.1
+  ```
+
+  ## 首次贡献者 🎉
+
+  欢迎！这些贡献者首次出现在 release 中：
+
+  • **@tiegebentley**（#356 — uid 0 下自动 `--no-sandbox`）
+  • **@gandrenacci**（#350 — HTTP 代理设置；同时报告 issue #349）
+  • **@snowopsdev**（#311 — agent SVG / secret 存储 / 私网加固；#340 — 桌面导航边界）
+
+  ## 特别感谢
+
+  • **@kkksasasa** — 提供 issue #229 的完整根因分析与方案草图（因网络限制无法直接提 PR，但 TLS bypass 实现 #355 沿用了他给的设计）
+  • **@gandrenacci** — 同时提交 issue #349 corp 代理报告并自己写出 #350 修复
+  • **@Sun-sunshine06** — 持续打磨 v0.2 这条线的 provider 与 diagnostics
+  • **LINUX DO 与微信群朋友们** — v0.2 持续反馈
+
+  ---
+
+  <details>
+  <summary>Full changelog / 完整变更</summary>
+
+  ### Features
+
+  • feat(desktop)：add HTTP proxy setting in advanced preferences (#350)
+  • feat(desktop)：add per-provider TLS verification bypass (#355)
+  • feat：add local workspace workflow (#334)
+
+  ### Bug Fixes
+
+  • fix(desktop)：harden workspace watcher fallback (#352)
+  • fix(desktop)：support --no-sandbox when launched as uid 0 (#356)
+  • fix desktop navigation boundary (#340)
+  • fix：allow ChatGPT OAuth for image generation (#321)
+  • [codex] Stabilize local workspace comments (#344)
+  • Harden agent SVG rendering, secret storage, and provider probes (#311)
+
+  ### Documentation
+
+  • docs：refresh v0.2 subscription copy (#323)
+
+  ### Dependencies
+
+  • bump the tailwind group across 1 directory with 3 updates (#331)
+  • bump the react group across 1 directory with 3 updates (#354)
+  • bump turbo from 2.9.9 to 2.9.14 (#353)
+  • bump electron from 39.8.9 to 39.8.10 (#329)
+  • bump @biomejs/biome from 2.4.14 to 2.4.15 (#328)
+  • bump @types/node from 22.19.17 to 22.19.19 (#327)
+  • bump pnpm/action-setup from 4.3.0 to 4.4.0 (#325)
+  • bump github/codeql-action from 3.35.4 to 3.35.5 (#346)
+  • bump github/codeql-action from 3.35.3 to 3.35.4 (#326)
+
+  **Full Changelog**：https://github.com/OpenCoworkAI/open-codesign/compare/v0.2.0...v0.2.1
+
+  </details>
+ReleaseNotesUrl: https://github.com/OpenCoworkAI/open-codesign/releases/tag/v0.2.1
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
