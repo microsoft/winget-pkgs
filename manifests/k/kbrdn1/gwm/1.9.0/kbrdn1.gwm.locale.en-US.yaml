@@ -1,0 +1,193 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: kbrdn1.gwm
+PackageVersion: 1.9.0
+PackageLocale: en-US
+Publisher: Kylian Bardini
+PublisherUrl: https://github.com/kbrdn1
+PublisherSupportUrl: https://github.com/kbrdn1/gwm-cli/issues
+Author: Kylian Bardini
+PackageName: gwm
+PackageUrl: https://github.com/kbrdn1/gwm-cli
+License: MIT
+LicenseUrl: https://github.com/kbrdn1/gwm-cli/blob/main/LICENSE-MIT
+Copyright: Copyright 2026 Kylian Bardini
+ShortDescription: git worktree manager - a TUI and CLI over git worktrees
+Description: gwm is a terminal UI and CLI over git worktrees, with native libgit2 and a per-repo .gwm.toml bootstrap (file copies, regex guards, lifecycle hooks). The installed command is gwm.
+Moniker: gwm
+Tags:
+- cli
+- git
+- git-worktree
+- libgit2
+- rust
+- terminal
+- tui
+- worktree
+ReleaseNotes: |-
+  # [1.9.0] - 2026-08-16
+
+  ### Added
+
+  **The libraries compiled into the binary ship their notices**
+    ([#577](https://github.com/kbrdn1/gwm-cli/issues/577)). `git2` builds with
+    `vendored-libgit2` and `libz-sys` with `static`, so every binary distributed
+    here statically contains libgit2 and zlib, and no package dependency carries
+    their terms. libgit2 is GPLv2 **with a linking exception**, and that
+    exception is what makes a permissively licensed binary possible at all: it
+    is conditional on the notice travelling with the distribution. zlib's terms
+    say its notice may not be removed. Neither was shipping, and neither had
+    anything to do with the project's own license, which is why this is separate
+    from #573 rather than part of it: both were unmet under MIT-only too.
+
+    Both notices now live under `third-party/` and reach the release archives,
+    the `.deb`, the `.rpm`, the AUR package and the published crate. They are
+    taken from the crate source cargo actually built, not from the libraries'
+    upstream repositories, because those diverge: `libgit2-sys` vendors a pinned
+    tree while libgit2 `main` moves.
+
+    `third-party/README.md` records which crate version each came from, and that
+    record is checked against `Cargo.lock`. A dependency bump moves the vendored
+    library without touching a file anyone reads, so without the check the notice
+    would quietly go on describing a version the binary no longer contains.
+
+  ### Changed
+
+  **The doc captures show what the binary actually prints**
+    ([#575](https://github.com/kbrdn1/gwm-cli/issues/575)). #567 rewrote 165
+    strings gwm prints and the captures predate it, so several showed text the
+    binary no longer says. They are images, so nothing in CI could notice. 21
+    moved, and they were behind on a second count the same regeneration fixes:
+    #568's tilde compression. `palette.png` shows it best. Its `PATH` column
+    read five near-identical `/Users/kbrdn1/gwm-demo/...` rows clipped mid-path,
+    and now starts at `~/gwm-demo/`, so what survives the clip is the part that
+    differs per row.
+
+    Five captures came back byte-identical, which is the correct answer rather
+    than a miss: `cli-list` and `cli-agents` are CLI output, where paths stay
+    absolute by design, and none of the five carries a rewritten string.
+
+    Two tapes `generate.sh` does not run are now named in the script and the
+    capture README, because neither absence was reported and a run therefore
+    ended with a tick over a set that still held them stale. `demo.tape` is the
+    documented one and was run separately here. `github-linking.tape` is the
+    other, and it is the one capture in the set that nobody but the maintainer
+    can reproduce: it needs a repo with an open PR, which the demo fixture has
+    not, so it points at a hardcoded checkout and photographs whatever it is
+    doing. Both were re-run by hand for this cut, `github-linking.png` from the
+    release branch itself, which is the only state in which that pane has
+    anything to show. Making it deterministic stays a design question rather
+    than a regeneration.
+
+    **The version chip is what set the order of this release.** It comes from
+    `CARGO_PKG_VERSION`, so all 24 TUI tapes bake the version into the image,
+    and a set regenerated before the bump would have advertised 1.8.0 for the
+    whole 1.9.0 line. The cut therefore bumps first and regenerates after, on
+    one branch, rather than following the usual order of merging the work and
+    adding a release commit on top. Every capture published here reads
+    `gwm 1.9.0`.
+
+  **gwm is now dual-licensed under MIT OR Apache-2.0**
+    ([#573](https://github.com/kbrdn1/gwm-cli/issues/573)). Nothing is taken
+    away: MIT stays, in full, under its own file. What is added is the option
+    of Apache-2.0, whose §3 is an express patent grant from every contributor.
+    MIT has no patent clause at all, and that gap is the one thing a corporate
+    legal review reliably stops on. It is also the ecosystem's default (rustc,
+    cargo, clap, serde, ratatui and git2 all ship this exact pair), so packagers
+    recognise the layout without asking.
+
+    `LICENSE.md` becomes `LICENSE-MIT`, copyright line untouched, and
+    `LICENSE-APACHE` joins it carrying the upstream Apache text verbatim,
+    appendix placeholders left unfilled. **Users pick either one, and never have
+    to say which.**
+
+    Both texts now travel in every artefact: the release tarballs and zips, the
+    `.deb` and `.rpm` payloads, the AUR package, and the published crate. The
+    declaration itself had to be written six times in six syntaxes, none of them
+    interchangeable: `MIT OR Apache-2.0` for crates.io and Arch, `any_of:` for
+    Homebrew, a `|` separator for Scoop, `[ licenses.asl20 licenses.mit ]` for
+    nixpkgs. A walk over `packaging/`, `Cargo.toml` and `flake.nix` now fails
+    the suite if any channel declares one half without the other, and a second
+    guard ties the files the release workflow stages into the tarball to the
+    files the AUR `PKGBUILD` installs back out of it.
+
+    The contribution terms are stated in
+    [`CONTRIBUTING.md`](CONTRIBUTING.md#license) and at the foot of the README:
+    a contribution is dual-licensed the same way unless its author says
+    otherwise. There is no CLA and nothing to sign.
+
+    A license change is worth seeing in the version, which is why this release
+    is a **minor** and not a patch.
+
+  **A message gwm prints reads without an em dash**
+    ([#567](https://github.com/kbrdn1/gwm-cli/issues/567)). The rule this
+    project writes under is that published prose does not use the em dash, and
+    the binary's own output is as published as the README. #516 swept `docs/`
+    and #543 finished the skills; neither reached `src/`, so a user hitting an
+    `exec` error read a dash the documentation for that same feature no longer
+    used. 165 of them across 161 string literals, in every error message, status
+    line and TUI hint the binary carries, and 49 more in `gwm --help`, which
+    `clap` builds out of the doc comments on the CLI types. The completion
+    scripts carried the same text and are fixed with it: `gwm completions zsh`
+    went from 23 to none.
+
+    The connector was chosen at each call site rather than substituted. A colon
+    where the dash introduced the remedy, a semicolon where the clause already
+    carried a colon, a full stop where a second colon would have made the
+    sentence unreadable. In the TUI the dash was often not punctuation at all
+    but a separator, and there is already one in use there, so `/ filter`, the
+    create form hints and the loader detail now read the way the segments beside
+    them already did.
+
+    Comments are untouched, roughly 1900 of them: a doc comment quoting a spec
+    or a command's real output has to stay verbatim, and it is read in the source
+    rather than printed. Two tests hold the rule from here on. One scans `src/`
+    with a Rust literal scanner rather than a grep, since telling a literal from
+    a doc comment is the whole difference between a guard that holds and one
+    nobody can keep green. The other walks `gwm --help` and every subcommand's,
+    because that is where a doc comment stops being a comment, and no scanner
+    can answer that question as reliably as reading what the binary prints.
+
+    Several doc captures showed the old wording and were tracked separately;
+    #575 regenerated them in this same cut, so the published site never serves
+    the two halves out of step.
+
+  **The one-line description reads without an em dash in every package
+    listing** ([#567](https://github.com/kbrdn1/gwm-cli/issues/567)). #567 swept
+    `src/`, and its guard is scoped there, so the same tagline kept its dash in
+    eight published fields no test could see: the crates.io description, the deb
+    `extended-description`, the rpm `summary`, both `flake.nix` descriptions, and
+    the Homebrew, Scoop and AUR blurbs. A ninth sat in the flake's `shellHook`,
+    printed to whoever runs `nix develop`. A package listing is read by a user,
+    which is the surface #567 is about. The connector is a colon: the dash was
+    introducing an expansion of the noun before it. Comments in those same files
+    keep theirs, which stays #567's to sweep.
+
+  **The Settings panel sizes to its active tab**
+    ([#569](https://github.com/kbrdn1/gwm-cli/issues/569)). #550 gave every
+    bounded overlay one width policy; height stayed a flat percentage of the
+    frame, so the panel took 60% of the terminal whether the tab under it had 3
+    rows or 173. On a 40-row terminal that is a 24-row box for the Worktree tab's
+    three fields, roughly six rows of it blank.
+
+    The box is now the header, the body, the footer hint, the border and the
+    padding, clamped between a floor of 11 rows (the shortest tab that carries a
+    real form) and a ceiling that leaves about 25 rows of body. It therefore
+    changes size as tabs are cycled, which is the deliberate trade: the tabs are
+    genuinely different lengths, and the alternative was blank rows on three tabs
+    out of five.
+
+    The `?` overlay and the command palette keep their percentage. Measured, they
+    carry about 220 rows and 52 commands, so sizing to content would resolve to
+    the ceiling in every ordinary state and only ever engage on a heavily
+    filtered palette, where it becomes a live resize while typing.
+
+    The exact-height modals (create, rename, both delete dialogues) keep sizing
+    the way they did, border flush with the frame and all. They have no scroll
+    path, so the policy's two rows of margin would not shrink those boxes, it
+
+  _(release notes truncated to fit the 10000-character manifest limit -- see the full notes at the URL below)_
+ReleaseNotesUrl: https://github.com/kbrdn1/gwm-cli/releases/tag/v1.9.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
