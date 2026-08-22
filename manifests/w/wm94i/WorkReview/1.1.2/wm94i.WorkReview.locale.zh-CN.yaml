@@ -1,0 +1,53 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: wm94i.WorkReview
+PackageVersion: 1.1.2
+PackageLocale: zh-CN
+Publisher: workreview
+PublisherUrl: https://github.com/wm94i
+PublisherSupportUrl: https://github.com/wm94i/Work-Review/issues
+PackageName: Work Review
+PackageUrl: https://github.com/wm94i/Work-Review
+License: 免费软件
+Copyright: © 2026 WorkReview
+ShortDescription: 帮你自动记录一天中使用了哪些应用、浏览了哪些网页、在每个应用上花了多少时间
+Description: |-
+  Work Review 会在后台持续记录你当天使用过的应用、访问过的网站、关键窗口和屏幕内容，再把这些离散片段整理成一条可回看、可追问、可复盘的工作轨迹。
+  - 不需要手动打卡，也不用事后回忆今天干了什么
+  - 概览、时间线、日报、工作助手共用同一份底层记录
+  - 既能看统计，也能直接追到具体页面、窗口标题和上下文截图
+  - 支持简体中文 / English / 繁體中文三种界面语言，日报会按当前语言分别生成与切换
+  - 支持轻量模式、按小时活跃度视图、日报 Markdown 导出和多屏截图策略切换
+  - 现在还提供 桌面化身 Beta，用更轻量的桌宠状态反馈陪你工作
+  全部数据本地存储，不上传任何服务器。AI 功能可选，关掉也完全可用。
+Tags:
+- 时间
+- 计时器
+- 跟踪器
+ReleaseNotes: |-
+  English → | 繁體中文 →
+
+  新增
+  - 企业微信智能机器人长连接（#147）：无公网地址时可用 Bot ID + Secret 主动连接 wss://openws.work.weixin.qq.com，心跳保活、断线重连、被踢后提示。命令处理仍复用 /devices /report /generate。原 Corp ID 回调模式保留为可选项。
+  - 助手/日报超时可配置：设置 → AI 模型可调助手绝对超时（默认 120s）与日报外层超时（默认 300s）。一次助手请求共用一份剩余预算（响应头、流式、回退、429 重试、工具确认、收束）；前端超时会发送取消。日报超时会 abort 后台任务。
+  - 思考模式与输出预算：按 Provider 能力映射思考开关 / thinking budget / max output tokens（Ollama think、Qwen 流式 enable_thinking、SiliconFlow chat_template_kwargs、Claude thinking、Gemini thinkingBudget）。不支持的提供商不发送扩展字段。Claude 在带工具时不开启 thinking，避免多轮签名块丢失。
+  - WebDAV 常用配置同步：远程存储为 WebDAV 时可把 AI、分类、外观等设置同步到网盘（最后保存获胜）。本机端口、窗口位置、开机自启、导出目录不覆盖。配置文件含密钥，仅建议同步到自己的网盘。
+  修复
+  - Windows/Linux 标题栏：默认紧凑风格顶距与自定义拖拽条对齐，避免顶部约 5px 被拖拽层盖住；最大化后按钮切换为还原图标。
+  - 思考型模型兼容（魔搭 DeepSeek-V4-Flash 等）：AI 助手流式/非流式解析支持 reasoning_content 思维链——思考帧实时输出、正文为空时兜底思维链，不再出现"连接测试成功但助手无回复"；max_tokens 1600 → 8192 给正文留足额度；连接测试改为校验模型实际返回非空内容（探测额度 16 → 256），消灭 HTTP 200 但无内容的假阳性。
+  - 模型 API Key 记忆：设置中切换 AI 服务商后，各家已填写的 API Key / 端点 / 模型名现按服务商持久化保存（新增 text_model_provider_cache 配置字段），切回原服务商或重启应用后自动恢复，不再丢失。
+  - 社区二维码格式：docs/group/wechat-group.png 实为 JPEG 误用 .png 扩展名导致测试失败，已转换为真 PNG。
+  变更
+  - 企微长连接：凭证未变且任务仍在跑时不再因保存配置而重连；命令处理移出 WebSocket 循环，避免生成日报时心跳中断。
+  - 助手超时收束：从总预算预留收束时间，超时后仍用已有工具结果再问一轮模型。
+  - Bot 生成日报超时：跟随设置里的日报超时，不再写死 120 秒。
+  - 死代码清理：移除生产路径不再使用的助手问题细分类、Ollama 旧列表解析、日报模式归一化 helper、本地分析器未接线的截图描述、小时摘要未使用的 AI prompt 构造，以及从未调用的多窗口采集预留函数；同步删除只覆盖上述死路径的测试。
+  - 安全审计触发调整：移除 Security Audit 工作流的每周定时扫描，保留锁文件变更触发与手动运行入口（Actions → Security Audit → Run workflow）。
+  - 安全审计降噪：Security Audit 工作流新增忽略 19 条 unmaintained 类 RustSec 公告（gtk-rs GTK3 全家桶、unic-*、paste、proc-macro-error、fxhash、rustls-pemfile——均为信息性"停止维护"提示，无安全漏洞且无 patched 版本），unsound / 漏洞类公告继续建 Issue 跟踪（保留 #167-#171）；同步关闭已生成的对应机器人 Issue #148-#166。
+  macOS 安装说明
+  首次打开可能提示「已损坏，无法打开」，请执行：
+  sudo xattr -rd com.apple.quarantine '/Applications/Work Review.app'
+ReleaseNotesUrl: https://github.com/wm94i/Work-Review/releases/tag/v1.1.2
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
