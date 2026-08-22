@@ -1,0 +1,59 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: sluicesync.sluice
+PackageVersion: 0.130.0
+PackageLocale: en-US
+Publisher: sluicesync
+PublisherUrl: https://sluicesync.com
+PackageName: sluice
+PackageUrl: https://sluicesync.com
+License: Apache-2.0
+LicenseUrl: https://github.com/sluicesync/sluice/blob/main/LICENSE
+Copyright: sluicesync
+ShortDescription: Open-source MySQL <-> Postgres database migration and continuous-sync (CDC) tool
+Description: sluice is an open-source database migration and continuous-sync (CDC) tool covering MySQL and Postgres in all four directions.
+Moniker: sluice
+Tags:
+- database
+- migration
+- cdc
+- mysql
+- postgres
+ReleaseNotes: |-
+  **A silent-data-loss fix a real user hit — and made cheap to catch up front.** A MySQL `TINYINT(1)` column used as a small integer (values `0–6`) migrated with every value silently rewritten to `1`. sluice now refuses loudly instead of collapsing, catches it *before* the copy starts, and does so without a full-table scan on the common case. **Drop-in from v0.129.0 — no schema, format, or flag change; one new refusal code, one behavior change (a warn becomes a refusal).**
+
+  ## Fixed
+
+  **A `TINYINT(1)` value outside `{0,1}` is now a loud refusal, not a silent collapse (`SLUICE-E-VALUE-TINYINT1-RANGE`).** MySQL aliases `BOOL`/`BOOLEAN` to `TINYINT(1)`, so sluice reads a `TINYINT(1)` column as a boolean — the right call for the overwhelmingly common case. But `(1)` is only a display width; the column physically stores the full signed 8-bit range, so a legacy column used as a small integer can hold values outside `{0,1}`, and the boolean decode collapses every non-zero value to `true`. sluice already *detected* this and warned — but it carried the collapsed value anyway, so a real user's migrate of two `TINYINT(1)` columns holding `0–6` exited 0 with every value rewritten to `1`, the warning lost in the output. That is silent data loss, the class this project ranks above everything. sluice now refuses at the first out-of-range value on every read path — the bulk-copy / snapshot reader, the binlog CDC reader, the VStream CDC + cold-start path, and the mydumper flat-file source — *before* the row is written, so no collapsed value ever reaches the target (the rows already copied held only genuine `0`/`1` and are correct). The remedy is named and always runnable: change the source column's type away from `TINYINT(1)` (e.g. `ALTER TABLE … MODIFY col SMALLINT`), which works on every source; for a bulk migrate from a non-Vitess MySQL source, `--type-override <col>=smallint` also preserves the integer without touching the source. A `TINYINT(1)` column that genuinely holds only `0` and `1` never triggers this.
+
+  **The MySQL plan report and query-timeout nudge now see a MySQL source (Bug 256).** v0.129.0's pre-copy plan/gotcha report and the query-timeout size gate both read the source's row estimate through an interface the MySQL reader did not implement — so for the exact case v0.129.0 targeted, a PlanetScale→PlanetScale region move (a MySQL source), the plan named no largest table and the PlanetScale nudge never fired. The MySQL reader now implements the surface (the estimate is the `information_schema` `TABLE_ROWS` count it already reads), so all three source engines feed the report. Advisory-only — the automatic per-index index split is gated separately and was unaffected — so no data was ever at risk; this just makes the guidance appear where it was meant to.
+
+  ## Added
+
+  **A fail-fast pre-copy check for the `TINYINT(1)` case, bounded so it never full-scans a clean table.** The refusal above is the correctness floor, but on a large multi-table copy it fires when the copy *reaches* the bad row — potentially hours in. sluice now also probes each in-scope `TINYINT(1)` column before any data moves, so the same refusal fires at planning time, before any target table is created, on both `migrate` and `sync` cold-start. The probe is a short-circuiting `… WHERE col NOT IN (0,1) LIMIT 1`: a column genuinely misused as a small integer has out-of-range values throughout and is caught in milliseconds, and a clean column uses an index if one exists (also instant). To keep the common case — a correct `0`/`1` column with no index on a huge table — from paying an unbounded full scan (measured ~1.6 s on a clean 10 M-row table, growing linearly with size), the probe is capped with a `MAX_EXECUTION_TIME` hint: it times out into a best-effort warning and proceeds under the decode-time floor rather than making the operator wait. A probe it cannot complete never blocks a legitimate migration — only a confirmed out-of-range value refuses.
+
+  ## Compatibility
+
+  Drop-in from v0.129.0 — no schema, format, or flag change; one new refusal code. A `migrate` or `sync` from a MySQL-family source whose `TINYINT(1)` column holds values outside `{0,1}` now refuses — loudly, coded, with a named remedy — where it previously exited 0 with those values collapsed to `true`. The refusal is the point: it converts a silent-loss case into an actionable one, and a column that only ever holds `0` and `1` is completely unaffected. The pre-copy check is bounded so it never adds an unbounded scan to a clean migration. Note that `--type-override` does not rescue this on a PlanetScale/Vitess (VStream) source — there the boolean decision comes from the replication wire's own column type, so change the source column's type instead (a follow-up to make the override apply on VStream is filed).
+
+  **Anyone migrating a MySQL-family source with a legacy `TINYINT(1)` column used as a small integer wants this release.** Everyone else: no action — a correct boolean column is byte-for-byte unchanged, and the new pre-copy check is bounded and best-effort.
+
+  ## Install
+
+  ```
+  # Homebrew
+  brew upgrade sluice
+
+  # Scoop (Windows)
+  scoop update sluice
+
+  # Go
+  go install sluicesync.dev/sluice/cmd/sluice@v0.130.0
+  ```
+
+  Container images: `ghcr.io/sluicesync/sluice:0.130.0` (multi-arch; the image tag carries no `v` prefix).
+
+ReleaseNotesUrl: https://github.com/sluicesync/sluice/releases/tag/v0.130.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
