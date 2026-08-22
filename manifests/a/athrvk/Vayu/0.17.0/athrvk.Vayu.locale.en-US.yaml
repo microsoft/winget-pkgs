@@ -1,0 +1,59 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: athrvk.Vayu
+PackageVersion: 0.17.0
+PackageLocale: en-US
+Publisher: Atharva Kusumbia
+PublisherUrl: https://github.com/athrvk
+PublisherSupportUrl: https://github.com/athrvk/vayu/issues
+Author: Atharva Kusumbia
+PackageName: Vayu
+PackageUrl: https://github.com/athrvk/vayu
+License: AGPL-3.0
+LicenseUrl: https://github.com/athrvk/vayu/blob/HEAD/LICENSE
+Copyright: Copyright © 2026 Atharva Kusumbia
+ShortDescription: Open-source API client with a native C++ load-testing engine - Postman-style requests and k6-level load tests in one local app.
+Description: Vayu is a free, open-source desktop app for Windows, macOS, and Linux that combines a full REST and GraphQL request builder - with collections, environments, and scripting - and a high-throughput load tester powered by a C++20 engine, with all data staying on your machine.
+Moniker: vayu
+Tags:
+- api
+- api-client
+- api-testing
+- benchmark
+- developer-tools
+- graphql
+- http
+- insomnia
+- load-testing
+- performance
+- postman
+- rest
+ReleaseNotes: |-
+  0.17.0 - 2026-08-15
+  The streaming and data-driven release. Two capabilities that Vayu could describe but not do: a text/event-stream endpoint was unusable - the design path buffered without a cap, blocked a pool thread and reported a status-0 timeout - and a data file was picked in the Run dialog, sent and forgotten, so at the moment someone wrote {{data.email}} nothing in the app knew that column existed. SSE is now a first-class request across all four legs (engine delivery, a live Events tab, scripts over a stream, MCP and codegen), and a collection declares its data contract in a Data tab that the token painter, the completions, the runner and the engine's refusals all read. Two new body modes land beside them - JSON-RPC 2.0 and XML, both enveloped or passed through at the engine chokepoint every client shares. The bulk of the change is new C++ in the engine and new React surface in the app, with the data binder's escaping and auth-ordering fixes concentrated engine-side.
+  Added
+  - SSE requests, end to end. POST /execute accepts "stream": true, creates the run row, hands the transfer to a managed consumer worker and answers 202 {runId, eventsUrl} at once. The worker parses frames into a bounded ring; GET /runs/:runId/events relays it with replay+tail, ?lastEventId= resume and the one-watcher claim; the completed trace carries a bounded events node so history restores the timeline. Every stream ends by a rule that names itself - server close, an explicit stop, maxStreamEvents, maxStreamDurationMs or the idle timeout - and nothing on the path is unbounded: the parser caps the frame, the ring caps what it retains, the trace caps what it stores with truthful totalEvents / eventsTruncated markers. The whole-transfer timeout is deliberately absent here, with CURLOPT_LOW_SPEED_LIMIT/_TIME bounding silence instead, so a healthy stream is never killed mid-flight.
+  - The Events experience. A per-request Event stream toggle (a setting, not a body mode - a stream is a GET as often as a POST, and what it changes is delivery), stored on the request so it survives a tab switch and rides a bulk import. Turning it on arms Accept: text/event-stream and turning it off takes the row back, through the same auto-header primitive the body mode's Content-Type uses. Sending branches to the streaming path, the URL bar's Send becomes Stop, the status band reads "Streaming - N events", and an eighth always-rendered Events tab shows live rows that are replaced by the stored trace when the stream ends - the record being the only copy carrying honest truncation markers.
+  - Scripts run on a streaming request. The pre-request script runs before the transfer starts, so its pm.request write-back reaches the wire; the post-request script runs once the stream has terminated and reads the bounded list as pm.response.events, with totalEvents and eventsTruncated beside it. Because the route answered 202 long before, script output is stored under the trace's scripts node and read back into the existing Tests and Console panes.
+  - MCP and codegen reach streams too. run_request takes stream: true, reads the relay under a stated budget and reports which bound stopped it - completed, capReached or budgetExhausted. curl emits -N, HTTPie --stream; fetch, python and powershell state that their stock idiom buffers rather than emitting a command that would hang.
+  - A collection's data contract, and a Data tab to declare it. collections.data_schema accepted through POST, PUT and /import/apply, validated (unique non-empty columns, capped at 1024 x 256 chars) - with its reader landing in the same change, so resolve_scenario cites the declared columns in the no-data refusal. The app gains the Data tab, a store holding each collection's file path (never its rows), a gated dataFile:read IPC, and a Run dialog that pre-fills from the declared file and diffs it against the schema.
+  - Schema-aware {{data.*}} at authoring time. The token paints in three states - declared (naming the declaring collection), undeclared-while-a-contract-exists (amber, listing what is declared) and no-contract (neutral) - never the destructive red, because an undeclared column still binds if the run's file carries it. Columns complete as {{data.<column>}} in request fields and body editors and as bare names inside pm.iterationData.get(" / .has(" in the script editors, and the Data tab audits the contract against every request it binds into referenced, referenced-but-undeclared and unreferenced. Which contract answers for a request is the variable chain read backwards: the nearest declared ancestor, leaf to root.
+  - A JSON-RPC 2.0 body mode, enveloped at the engine chokepoint every client shares. A frame that already declares a string jsonrpc member passes through byte for byte - your id, key order and extra members are yours, and an absent id is a notification rather than an oversight - while a bare call object is completed with "jsonrpc":"2.0" and "id":1. Batch arrays and unparseable text (an unresolved {{token}}) are left alone.
+  - An XML body mode and a response-side XML pretty-printer. XML was recognised and syntax-highlighted but never formatted, so Pretty and Raw were byte-identical for every XML response, and there was no XML request mode at all - which is most of the SOAP/legacy-enterprise ask with no WSDL machinery. The document reaches the wire byte for byte under a derived application/xml, a Content-Type you wrote still wins (a SOAP 1.2 endpoint keeps application/soap+xml), and Postman's xml raw language and Insomnia's application/xml / text/xml import as the mode. The printer is a pure-string tag-depth walk: malformed input and mixed content come back unchanged, so a body mid-edit renders as what you typed.
+  - Six sse* engine settings, seeded and read with the usual out-of-range fallback.
+  Changed
+  - Snippets carry the body mode's implied Content-Type. Codegen fell every content mode through as raw content with no header, so a copied curl of a GraphQL or JSON-RPC request went out under libcurl's x-www-form-urlencoded default - the snippet not doing what the app had just done. A declared header still wins, mirroring the engine's rule.
+  - The variables table's secret cell mounts the shared SecretInput. The reveal control was extracted from that very cell and then received fixes the leftover copy never got (the tabIndex={-1} removal that made a secret checkable from the keyboard, aria-pressed). The wider question - whether the table should mount the shared key/value editor - is settled as a permanent exclusion, with the parity both tables must hold now guarded rather than assumed.
+  - The inbox's live-claim slot is the shared primitive, not a second copy of the one-watcher rule; claim tokens are per-inbox, which is the invariant that was ever load-bearing.
+  - Release CI runs ctest the way PR CI does. The v0.16.0 release build failed where every PR build passed, because release.yml ran tests through a path whose child process gets an unwritten pipe as stdin. Both workflows now run ctest from a shell step with < /dev/null pinned as a stated contract.
+  - winget publishing syncs the fork before it publishes. Every credential-shaped failure - expired token, fine-grained token, missing, archived or merely stale fork - arrives as one opaque CreateRef permissions line, after komac has rendered all three manifests. v0.16.0 was spent minting tokens for what was a stale fork. A preflight action now checks the token, the fork and the real GraphQL mutation, and syncs the fork first, on both publishing paths.
+  Fixed
+  - A {{data.*}} value bound into a JSON string is escaped, and a null cell is refused. {"note":"{{data.note}}"} against a cell holding has,comma "quoted" put that text on the wire raw, so the body went out unparseable - silently, at the run's full rate - and a null cell rendered as {"n": }. A token now carries an encoding decided at plan resolution from the literals around it, and a null cell fails the bind naming the token and the row.
+  - {{data.*}} credentials are bound before auth encodes them. A credentials file behind basic auth sent base64("{{data.user}}:{{data.pass}}") - the literal token text - on every iteration, returning ordinary 401s the user would blame on the target. Auth is now applied per iteration after the row is bound; apikey-in-query works for the first time, and OAuth 2.0 is refused with a message naming the token rather than silently deferred.
+  - A header collision in the data binder is refused instead of silently dropping one side, and the "two virtual users never hold the same row" claim - true only until the cursor wraps - is corrected in all four places it was repeated, including the Run dialog text users read.
+  - Imported requests send their query string. Every parser splits the query away from the URL in its own way, but url is the wire truth and no engine path reads params[] - so an imported request sent its base URL with the query missing, by Send, scenario run and load run alike, until the user happened to edit the Params table once, which silently repaired it. The join now happens at parse time, one rule for every format.
+  - Data files are checked at pick time against the engine's own caps, read live so raising one engine-side is enough - a 5,000-row CSV previewed cleanly and died at Run with a 400, and a several-hundred-megabyte file was read wholesale into a renderer string first. Three silent-loss paths go with it: text ending inside a quoted value folded every remaining line into that cell, a Windows-1252 export arrived with replacement characters and parsed cleanly, and a file whose row 7 dropped a column previewed a full column and failed mid-run at iteration 7.
+ReleaseNotesUrl: https://github.com/athrvk/vayu/releases/tag/v0.17.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

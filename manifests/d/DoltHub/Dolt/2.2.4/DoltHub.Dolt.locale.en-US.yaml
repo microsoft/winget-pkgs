@@ -1,0 +1,128 @@
+# Created with WinGet Updater using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: DoltHub.Dolt
+PackageVersion: 2.2.4
+PackageLocale: en-US
+Publisher: DoltHub
+PublisherUrl: https://github.com/dolthub/dolt
+PublisherSupportUrl: https://github.com/dolthub/dolt/issues
+Author: DoltHub
+PackageName: Dolt
+PackageUrl: https://www.dolthub.com/
+License: Apache-2.0
+LicenseUrl: https://github.com/dolthub/dolt/blob/HEAD/LICENSE
+CopyrightUrl: https://raw.githubusercontent.com/dolthub/dolt/master/LICENSE
+ShortDescription: Dolt is a SQL database that you can fork, clone, branch, merge, push and pull just like a git repository.
+Description: |-
+  Dolt is a SQL database that you can fork, clone, branch, merge, push and pull just like a git repository.
+  Connect to Dolt just like any MySQL database to run queries or update the data using SQL commands.
+  Use the command line interface to import CSV files, commit your changes, push them to a remote, or merge your teammate's changes.
+Moniker: dolt
+Tags:
+- cli
+- data
+- git-for-data
+- versioning
+ReleaseNotes: |-
+  Merged PRs
+  dolt
+  - 11528: branch: fix -d when the upstream does not resolve
+    Deleting a branch with dolt branch -d could fail with branch not found when deleted from a remote. Dolt now compares against the local snapshot of the upstream, not the remote repository, and falls back to the current branch when its copy is gone.
+    - Add env.UpstreamRef to resolve a branch's upstream local ref from BranchConfig.
+    - Add upstreamOrHead to decide when to use the upstream branch or switch to current working branch.
+    - Upstream is searched by the configured merge ref in the BranchConfig to support different names.
+    - Merged predicate reads the remote-tracking ref instead of the live remote state.
+    - RemoteDbProvider parameter dropped because it goes unused.
+      Fix #11450
+  - 11520: Look up table names directly
+    Change table name lookups to try directly looking up the table name, instead of always iterating over all table names in the database.
+  - 11515: Use sql.ErrDuplicateCheckName
+    We should use the same error in GMS in Dolt.
+    Depends on: dolthub/go-mysql-server#3691
+  - 11486: Bug fixes for binlog replication with virtual columns
+    Adds support for correctly handling virtual columns and functional indexes in binlog replication, both when Dolt is acting as the replication primary and when Dolt is acting as a replica.
+    Fixes: #11475
+  - 11443: Fix dump of tables with a generated column
+    Fixes a panic in dolt dump on tables with a generated column which affected sql, csv, and parquet output. The generated INSERT statements also were updated to omit generated columns, addressing STORED generated columns non-restorable dumps.
+    - mvdata/engine_table_reader.go: NewSqlEngineReader took its rows from a SELECT statement but its schema from a separate SHOW CREATE TABLE plan that was built but never ran. When a table has a generated column, the planbuilder replaces it with plan.VirtualColumnTable that does not implement sql.PrimaryKeyTable, the interface that plan uses to fill its PrimaryKeySchema. The schema now comes from the same query as the rows to avoid a zero value.
+    - NewSqlEngineTableReaderWithEngine became same as the above and now delegates.
+    - sqlfmt/row_fmt.go: InsertStatementPrefix and SqlRowAsTupleString both skip generated columns, keeping the column list and the value tuple the same length.
+    - SqlRowAsTupleString returns an error on a row and schema width mismatch.
+      Fix #11439
+  - 11430: go: store/nbs: reject a file manifest update that references a missing table file
+    A bare local store takes no cross-process lock while a table file is landing, so between the moment a writer opens or renames a table file and the moment it commits a manifest naming it, another process can unlink it. The writer does not notice, since its own file descriptor keeps working, and it publishes a manifest that is broken for everyone else.
+    Add a sanity check where we Stat the newly added files under the manifest LOCK. This allows other Dolt processes which want to safely unlink unreferenced files from the directory to do so under the same LOCK. While a write may transiently fail if an about-to-be-referenced file is deleted out from under it, it won't cause database corruption by writing a manifest which references a non-existant table file.
+    This PR adds the add-files sanity check. It does not add the machinery to safely remove any files yet.
+    Journaled stores are unaffected: ChunkJournal goes through journalManifest, not fileManifest.
+  - 11406: bug fix for nonlocal tables to work in Doltgres
+  - 11400: go: remotesrv: Move away from deprecated http2/h2c package. Use SetUnencryptedHTTP2 instead.
+    Also adds "h2" as a supported ALPN next protocol to the remotesrv server listener when configuring with TLS.
+    Fixes #11386
+  - 11385: /go/store/{datas,nbs}: cleanup byte sink files on error
+    Currently there are some paths where temporary byte sink files may persist on disk despite an error. This PR aims to ensure these are always deleted in such cases.
+  - 11377: Enable signed.bats with isolated GNUPGHOME
+  - 11374: bug fixes for schema names in table statistics
+    This is necessary to get doltgres to use table statistics.
+    Also a bug fix for the declared column type of the dolt_statistics table, to match what GMS actually returns.
+  - 11368: Bug fix for lookup joins with extended types
+    Regression tests included in: dolthub/doltgresql#2988
+  - 11337: Refactor AutoIncrementTracker into generitc type with interfaces
+    The purpose of this PR is to enable Doltgres to create a global state for Sequences that behaves similarly to Dolt's global state for auto increment columns. In order to allow for code reuse, we have to do the following:
+    - Create a generic type containing the behavior common to both auto-increment and sequences.
+    - Create new interfaces that can be implemented to describe the behavior unique to each feature.
+      (Bikeshedding note: I use the term "Relation" to describe a top-level object in the database, and encompasses both tables and root objects. I'm open to alternative names.)
+      The new interfaces can be found in go/libraries/doltcore/sqle/globalstate/sequences/state.go
+    - SequenceState is an interface for a state machine that can be incremented. Each time it is incremented, it produces a new SQL value. SequenceStates can also be compared to each other to determine which one is "further along" and "merged" to create a single state that is further along in its sequence than any of the input states. The only implementation in Dolt is AutoIncrementState, which is just a uint64. Doltgres sequences will have a more complicated implementation, since they have more parameters that affect how the state is incremented.
+    - SequencedRelation is a relation that holds a SequenceState. The only implementation in Dolt is doltdb.Table, which can hold an auto-increment value. Doltgres Sequences will also implement this interface, and possibly Doltgres tables with a SERIAL column.
+      The common logic is in the SequenceTracker type, which has an interface in go/libraries/doltcore/sqle/globalstate/sequence_tracker.go and an implementation in go/libraries/doltcore/sqle/dsess/sequence_tracker.go
+      AutoIncrementTracker is now a type alias for a specialization of SequenceTracker.
+      Finally, while GlobalState previously only held an AutoIncrementTracker, it now contains a map from arbitrary keys to SequenceTrackers. This will allow Doltgres to add an additional SequenceTracker for global tracking of Doltgres sequences.
+      There are a couple places in this PR that are TODOs, because they are corner cases that aren't reachable for AutoIncrement but are reachable for Doltgres sequences. They mostly concern how to handle when branches contain incompatible Sequences. I haven't decided exactly how this should be handled, and this PR will not be merged until we know what to do in that case, but it shouldn't affect the review of the rest of the PR.
+  - 11329: Reject branch names that differ only by case
+    Branch names are matched case-insensitively causing branches that only differ by case to resolve to the same data (e.g., main and Main).
+    - Refuse to create branch whose names differs from existing one by case on checkout, branch, and other variants
+    dolt branch Main
+    dolt checkout -b Main
+    dolt branch -c main Main
+    dolt branch -f Main
+    - Allow case-only rename to remove ambiguity of conflicting branch names
+      Fix #11270
+  - 11279: Remove no-op AutoIncrement statement
+    A simple cleanup: this line always errors, but the error isn't being checked. It effectively does nothing and isn't needed because:
+    - the auto increment state is automatically updated by the AutoIncrement node in the plan tree
+      -as long as the auto_increment as long as w.aiSet is true, the correct auto_increment value will be read from the AutoIncrementTracker.
+  go-mysql-server
+  - 3693: fix panic for GeometryFromWKT and various GeoSpatial bugs
+    We added support for "pure empty geometry forms", which MySQL doesn't support, except for "GEOMETRYCOLLECTION EMPTY".
+    Changes:
+    - fix panics for pure empty geometry forms
+    - fix panics for invalid axis-order options
+    - fix ordering for axis-order options
+    - expose st_latitude function
+    - fix geospatial srid for st_x() and st_y() functions
+      Fixes: #11492
+  - 3691: block certain statements from PREPARE
+    This PR blocks CREATE EVENT and CREATE PROCEDURE from getting created.
+    Additionally, adds tests for a variety of DDL statements like DELETE, CREATE, and ALTER.
+    Fixes:
+    #11417
+    #11451
+  - 3690: Check for null before casting LAST_INSERT_ID input
+    fixes #11454
+  - 3689: Refactor window function tests into ScriptTests
+    Converts existing window function tests to use ScriptTest and moves those ScriptTests into a new window_function_queries.go file.
+  - 3687: SECURITY: Document security stance on panics generated by GMS.
+    Add some defensive recover() calls at places where GMS itself spawns goroutines.
+  - 3677: Bump jsonpath and add new test for parsing JSON null.
+    Fixes #11394
+    Our jsonpath dependency wasn't properly parsing paths when the input object was a JSON null value.
+  - 3676: Update various window aggregation functions to expect the correct number of children
+    Fixes #11428
+    Some window functions were expecting the wrong number of child expressions, thus incorrectly throwing an error. However, this error was getting swallowed and going unnoticed during fixExprToScope, which is intentional due to errors being falsely triggered for dual tables or subqueries but does lead to unintentional consequences. As a result, child expressions were not getting properly updated during fixExprToScope, leading to a panic.
+    This PR updates WithChildren for those window functions to expect the correct number of children.
+  - 3674: Error out for undefined window names
+    fixes #11426
+ReleaseNotesUrl: https://github.com/dolthub/dolt/releases/tag/v2.2.4
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

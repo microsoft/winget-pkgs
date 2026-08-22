@@ -1,0 +1,103 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Fioooooooo.FylloCode
+PackageVersion: 0.15.2
+PackageLocale: en-US
+Publisher: Fio
+PublisherUrl: https://github.com/Fioooooooo
+PublisherSupportUrl: https://github.com/Fioooooooo/FylloCode/issues
+PackageName: FylloCode
+PackageUrl: https://github.com/Fioooooooo/FylloCode
+License: AGPL-3.0
+LicenseUrl: https://github.com/Fioooooooo/FylloCode/blob/HEAD/LICENSE
+ShortDescription: A desktop app that turns Coding Agents into reliable teammates — by splitting every change into Task → Proposal → Apply → Archive, with you reviewing the plan before any code is written.
+Description: |-
+  In this new era, the work that really needs our attention is no longer repetitive coding, but higher-level business understanding and architecture design. The future workflow I have in mind is: understand the business → think through the architecture → write a Proposal → review the Proposal → let the Agent implement it automatically, then move on to the next Proposal.
+  That thinking led me to build FylloCode — a step from Vibe Coding toward Agentic Coding.
+
+  How FylloCode Solves It
+  FylloCode enforces a structured workflow that separates thinking from doing:
+  ┌──────────┐     ┌────────────────┐     ┌───────────┐     ┌───────────┐
+  │   Task   │ ──→ │ Chat/Proposal  │ ──→ │   Apply   │ ──→ │  Archive  │
+  │          │     │                │     │           │     │           │
+  │ What to  │     │ Agent explores │     │ Agent     │     │ Specs     │
+  │ work on  │     │ codebase and   │     │ implements│     │ updated,  │
+  │          │     │ writes a plan  │     │ the plan  │     │ change    │
+  │          │     │                │     │           │     │ recorded  │
+  │          │     │  ➜ YOU REVIEW  │     │           │     │           │
+  └──────────┘     └────────────────┘     └───────────┘     └───────────┘
+  Task — Pick a task from your local list or synced from platforms like Yunxiao. One click sends it to Chat.
+  Chat / Proposal — The Agent explores your codebase, asks clarifying questions, and produces a structured proposal (what to change, which files, acceptance criteria). The Agent is prohibited from writing code in this stage. You review, edit, and approve the proposal before anything else happens.
+  Apply — A fresh Agent session implements the approved proposal task-by-task. It reads only the proposal artifacts — not the Chat history — so every decision must be captured in writing, not left in context-window memory.
+  Archive — Specs are updated, the change is recorded with full traceability. Your project's knowledge base grows with every shipped change.
+  Why Separating Thinking from Execution Matters
+  Most Coding Agents understand a task and write code in the same session. Any misunderstanding becomes code directly, and code is expensive to review. FylloCode physically separates understanding from execution. Misunderstandings can only become proposal text — and text is cheap to review. A 2-minute proposal review catches problems that would take 20 minutes to find in a diff.
+
+  Features
+
+  Agent Protocol (ACP)
+  FylloCode connects to any Coding Agent through ACP (Agent Client Protocol). Claude Code, Codex, or any ACP-compatible agent — one protocol, one interface, without juggling a pile of terminal windows.
+  There are currently 35 agents available in the ACP Registry, with support for parallel chats and parallel Proposal Apply runs.
+
+  System Reminders
+  Each workflow stage injects a system reminder that constrains what the Agent can and cannot do. In Chat, the Agent is instructed to explore and propose, not code. In Apply, it follows the approved task list. This isn't a suggestion — it's a hard boundary enforced at session start.
+
+  Task Panel
+  View and manage tasks from your local list or synced from external platforms. Tasks serve as the entry point to the entire workflow — select a task, start a Chat, and the Agent begins with full context.
+
+  Integration with Development Platforms
+  Connect to platforms like Yunxiao (Alibaba Cloud DevOps) at the provider level — one authentication, multiple tools across task management, source code, and CI/CD. More platform integrations (GitHub, TAPD, Jira, etc.) are planned.
+  Task integrations use APIs instead of Agent Skills by design. API calls are fast and do not spend tokens, so tokens stay focused on the work that actually needs reasoning.
+
+  Workflow Editor
+  Define and customize multi-stage workflows. Built-in templates get you started; edit the YAML to fit your team's process.
+
+  OpenSpec-Driven Proposals
+  Proposals are structured artifacts — not chat messages. Each proposal contains a design document, spec changes, and a concrete task list with file paths and acceptance criteria. The built-in fyllo-specs MCP server manages the full lifecycle: explore → create-proposal → apply-change → archive-change.
+
+  Streaming Rendering Engine
+  FylloCode uses markstream-vue as its streaming rendering engine. It is fast and smooth, with built-in integration for Monaco Editor, KaTeX, and Mermaid. While working on Proposals, it can render flowcharts and formatted specs in real time, making architecture flows and business logic easier to inspect.
+  Engineering Guardrails
+  FylloCode provides two layers of engineering guardrails:
+  - Soft constraints — Capture engineering conventions as Guidelines and continuously maintain them through the built-in fyllo-skills MCP server, without manual upkeep.
+  - Hard constraints — Agents may not always follow Guidelines perfectly, so FylloCode's health checks establish engineering-level enforcement through lint, test runners, git hooks, and CI.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  This release lets each Chat session choose between FylloCode collaboration and the Agent's native behavior, and adds cross-Agent delegation with background execution and read-only inspection. Proposal Apply and Archive entry points now return to Chat: the user message expresses intent, while actual task and archive state drive the interface.
+  Added
+  - New Chat sessions can select FylloCode or Native before the first message. FylloCode mode continues to inject project specs, guidelines, knowledge, and built-in MCP servers; Native mode keeps the fixed Workspace scope and Agent Session configuration without FylloCode reminders or bundled MCP. Historical sessions default to FylloCode mode
+  - Added the fyllo-spawn MCP server. An Agent in FylloCode mode can delegate focused work synchronously or in the background to another installed ACP Agent, then query status, continue the owner-scoped Session, and read long responses in bounded chunks
+  - Chat can inspect spawned Sessions. A new delegation can render a clickable spawn.session Signal, and the detail Slideover shows trusted status, the original prompt, Activity, Transcript, and response IDs. The composer also summarizes background tasks running for the current parent Session
+  - Added a Session Actions menu to the Chat header for copying the current FylloCode Session ID, with success and failure feedback from the clipboard operation
+  Changed
+  - The Proposal detail Slideover is now for review and status inspection; it no longer starts Apply, Archive, or run history directly. Start Applying and Archive in the Chat Event Rail send owner-qualified user messages so the current Chat drives the next stage
+  - Proposal archive readiness now comes from the actual completion state in tasks.md. Main watches task and status changes and keeps tracking the same linked Proposal as it moves into archive, merges into the main worktree, and loses its linked worktree
+  - Draft attachments remain local previews until the first message is submitted instead of creating a Session early. First submission persists attachments and the message under one Session, and a failure removes the uncommitted Session while preserving the draft for retry
+  - Context usage now moves through yellow, orange, and red guidance at 75%, 90%, and 95%. The tooltip focuses on current Context use and recommends starting a new session or summarizing the conversation when risk increases
+  - The static startup page, the first renderer frame, and the Vue startup overlay now share the dot-matrix logo, wordmark, and startup status, reducing white flashes and visual jumps while preserving light, dark, and reduced-motion behavior
+  - Production dependency classification now avoids copying renderer-bundled libraries into app.asar/node_modules; the verified macOS arm64 package size dropped from 364 MiB to 284 MiB
+  Fixed
+  - Fixed draft attachment selection creating multiple empty Sessions, leaving a New Session title, and later causing cross-Session attachment rejection
+  - Fixed races that could access an already-destroyed Renderer or clean Chat probes twice during startup cleanup, Workspace cleanup, or shutdown
+  - Fixed internal FylloCode system reminders appearing as ordinary messages in Chat history
+  - Fixed completed Proposal tasks still displaying Applying, and linked Proposal archive relocation being misreported as removal after the worktree moved back to main
+  Notes
+  - The application version is now 0.15.2.
+  - The fyllo-spawn MCP server makes its first stable-app release at 0.1.1. It exposes four HTTP-only tools; Agents without HTTP MCP support and Native-mode Sessions do not receive this server.
+  - The fyllo-specs MCP server is now 0.11.0, adding archive-metadata persistence and a partial-success recovery state. Tool names and inputs remain compatible, while callers that inspect failed results must accept the new archive-metadata-update recovery kind.
+  - The fyllo-cortex MCP server remains at 0.7.0; that server did not change in this release range.
+  - Compatibility: Every Chat user message must now contain text that remains non-empty after trimming; attachments cannot be sent alone. Historical Session, message, and attachment formats require no migration.
+  - Background spawned turns do not continue across application processes. A normal exit records APP_SHUTDOWN, while leftover work after an unexpected restart records APP_RESTARTED. A long task with continuing ACP activity has no absolute time limit, but ten minutes without activity triggers cancellation.
+ReleaseNotesUrl: https://github.com/Fioooooooo/FylloCode/blob/HEAD/CHANGELOG.en.md#0152---2026-08-10
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

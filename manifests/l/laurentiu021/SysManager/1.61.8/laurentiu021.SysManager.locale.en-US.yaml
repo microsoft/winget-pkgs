@@ -1,0 +1,75 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: laurentiu021.SysManager
+PackageVersion: 1.61.8
+PackageLocale: en-US
+Publisher: laurentiu021
+PublisherUrl: https://github.com/laurentiu021
+PublisherSupportUrl: https://github.com/laurentiu021/SystemManager/issues
+PackageName: SysManager
+PackageUrl: https://github.com/laurentiu021/SystemManager
+License: MIT
+LicenseUrl: https://github.com/laurentiu021/SystemManager/blob/HEAD/LICENSE
+ShortDescription: Modern Windows system toolkit — network monitor, performance tuning, cleanup, battery health, process manager, and more.
+Description: |-
+  SysManager is a modern Windows system toolkit built with WPF and .NET 10.
+  It provides a comprehensive set of tools in a single application including
+  live network monitoring, ping and traceroute, speed tests, performance tuning
+  with power plan management, deep disk cleanup, duplicate file finder, disk
+  analyzer, battery health monitoring, process manager, app uninstaller,
+  startup control, Windows services manager, Windows features manager, driver
+  information, and system health overview.
+Tags:
+- battery
+- cleanup
+- dotnet
+- network-monitor
+- open-source
+- performance
+- process-manager
+- system-utility
+- uninstaller
+- windows
+- wpf
+ReleaseNotes: |-
+  [1.61.8] - 2026-08-11
+  Six places where SysManager either did not ask before doing something irreversible, or asked a
+  question it did not mean.
+  Fixed
+  - Deep Cleanup's confirmation said the Recycle Bin was not involved while it was about to empty it. The prompt ended with "These files are removed directly, not sent to the Recycle Bin." That was meant to say the deletion is permanent, but it reads as a promise that your Recycle Bin is left alone — and "Recycle Bin (all drives)" is one of the categories, ticked automatically whenever the bin has anything in it. So the single dialog standing between you and an emptied Recycle Bin implied the opposite of what the Clean button would do. It now says plainly that the Recycle Bin will be emptied when that category is selected, and keeps the "cannot be recovered" warning when it is not.
+  - "Upgrade selected" upgraded every ticked app without asking. The same action on the Dashboard has always asked first. Now both do, and the App Updates prompt names the apps when there are five or fewer, since "3 apps" tells you less than which three. One prompt covers the whole batch, not one per app.
+  - "Restore default" wiped your Windows Update settings without asking. Of the three buttons in the update-timing panel, the two that apply a setting both asked for confirmation; the one that discards everything you had configured did not. It now asks, and the prompt shows the current deferral or pause so you can see what you are giving up.
+  - "Create restore point" silently turned System Protection back on. Windows cannot create a restore point while System Protection is off for the Windows drive, so SysManager quietly switched it on first. That is the right thing to do — but it is a lasting change that starts reserving disk space, and it happened with no mention anywhere. Both places that create a restore point (Restore Points and Performance Mode) now say so before doing it.
+  - Saving a volume preset silently replaced an existing one. Deleting a preset asked for confirmation because the change is written to disk immediately with no undo; saving over one destroys exactly the same data and did not ask. Now it does — matching names case-insensitively, since "gaming" and "Gaming" are the same preset — while saving under a new name is never interrupted.
+  - A "cannot end this process" message was shown as a Yes/No question. Trying to end a critical system process from the File Lock Detector opened a dialog with two buttons that did the same thing, and the answer was thrown away. It is now a plain notice with a single button. Dialogs that ask nothing should not look like questions; that habit is what teaches people to dismiss the ones that matter.
+  Verify the download
+  Get-FileHash .\SysManager-v1.61.8.exe -Algorithm SHA256
+  Expected SHA256: 42B83E88874234759F73D9443E4C5C93943138929C9DD9B544D0F0AB90AA22E5
+  This build is not code-signed, so Windows will warn on first launch. That is
+  expected for a small independent app: see what the warning says and what to
+  click.
+  Code signing is planned through the SignPath Foundation,
+  which provides free certificates to open-source projects, with signing performed by
+  SignPath.io. Until then, the SHA256 above and the build
+  attestation below are what establish that a download is the genuine build.
+  Code signing policy
+  Free code signing provided by SignPath.io, certificate by
+  SignPath Foundation. Team roles, the release-approval process
+  and the privacy policy are documented under Code signing
+  policy.
+  This program will not transfer any information to other networked systems unless
+  specifically requested by the user or the person installing or operating it. Full
+  privacy policy.
+  Verify where this binary came from
+  This exe was built by GitHub Actions from this public source, and the build is
+  recorded in the Sigstore public transparency log. With the
+  GitHub CLI:
+  gh attestation verify .\SysManager-v1.61.8.exe --repo laurentiu021/SystemManager
+  That proves which commit and workflow produced this exact binary, something the
+  SHA256 file cannot show, since it is published alongside the exe it describes.
+  Each release also ships SysManager-v1.61.8.sbom.json, a CycloneDX inventory of
+  every dependency resolved for this build.
+ReleaseNotesUrl: https://github.com/laurentiu021/SystemManager/releases/tag/v1.61.8
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
