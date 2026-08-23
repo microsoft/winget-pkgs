@@ -1,0 +1,64 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: sluicesync.sluice
+PackageVersion: 0.131.3
+PackageLocale: en-US
+Publisher: sluicesync
+PublisherUrl: https://sluicesync.com
+PackageName: sluice
+PackageUrl: https://sluicesync.com
+License: Apache-2.0
+LicenseUrl: https://github.com/sluicesync/sluice/blob/main/LICENSE
+Copyright: sluicesync
+ShortDescription: Open-source MySQL <-> Postgres database migration and continuous-sync (CDC) tool
+Description: sluice is an open-source database migration and continuous-sync (CDC) tool covering MySQL and Postgres in all four directions.
+Moniker: sluice
+Tags:
+- database
+- migration
+- cdc
+- mysql
+- postgres
+ReleaseNotes: |-
+  **A correctness + reach patch** from an invariant-sweep and corpus-extension batch. Drop-in from v0.131.2 — no schema, format, or flag change. Two items are genuinely operator-facing：a broken backup-recovery path is now real, and large Postgres→PlanetScale migrations no longer wall on the index build.
+
+  ## Fixed
+
+  **`backup compact` / `backup prune` now heal a crash-stale chain signature on re-run — making the documented recovery actually work.** Both operations commit their catalog restructure *before* re-signing, so a crash between the two left a restructured chain under stale signatures. That state surfaces at `backup verify` as `SLUICE-E-BACKUP-SIGNATURE-INVALID` (whose message reads as tamper), while the missing-signature recovery hint — "re-run the maintenance step with the chain's key material" — was silently false for exactly this case：the re-run found nothing left to restructure and returned through a no-op door *before* it re-signed, leaving the stale signatures in place forever. The re-run now verifies the lineage signature against the current catalog at every no-op door and re-signs (loudly, with a WARN naming the failure and the signing-key id) only when it does not verify — so the published recovery is real. Verify-first: a healthy chain's no-op run writes zero new signature objects, and re-sign authority remains key possession exactly as on the restructure path (no new capability).
+
+  ## Changed
+
+  **Postgres source-size estimation for the ADR-0184 index-split — large Postgres→PlanetScale/Vitess migrations no longer wall on the combined index ALTER.** A Postgres→PlanetScale/Vitess migrate of a large table now sizes its per-index build split off the accurate source table size (`pg_table_size` — heap + TOAST) instead of a stale post-copy estimate. Previously the split was inert for every Postgres source：the byte-size estimator that drives it had only a MySQL implementor, so a >8 GiB Postgres table still hit the ~900 s combined-ALTER wall the split exists to avoid. The estimate is advisory (an unknown size falls back to the prior combined ALTER, so nothing regresses); SQLite/D1 sources keep the combined ALTER (no per-table size API).
+
+  **pgtrigger CDC now WARNs on a ceiling stall.** A long-open transaction anywhere on the source pins `xmin`, so the trigger-CDC poll sees zero new rows and logged healthy-idle while replication lag grew. That stall now produces a distinct WARN the hole-stall path could not surface.
+
+  **The v0.131.2 release notes' explanation of the SQLite float loss is corrected.** The mechanism is a 16-significant-digit cap in SQLite's `printf`/`format()` `%g` conversion (lifted to 26 by the `!` alternate-form flag), not a "SQLite 3.43 rewrite" — 16 digits don't round-trip every double, so `format('%.17g')` silently clamped to 16. The fix (`%!.20g`) and its gates are unchanged and correct; only the prose was wrong (it had been written from the C-`printf` analogy and never tested). Verified by direct experiment.
+
+  ## Added
+
+  Internal hardening (no user-facing effect)：the adversarial value-fidelity corpus now runs through the **mydumper flat-file** dump→restore path (real mydumper, both literal encodings, independent hand-written wants), and the **parquet / DuckDB** external gate's family × shape coverage gap was closed (it had claimed "every array element family" while missing five element families). The invariant-sweep claim that produced no fix — the sqlite/D1 gap-freedom sibling, already covered — is recorded with its verdict.
+
+  ## Compatibility
+
+  Drop-in from v0.131.2 — no schema, format, error-code, flag, or command change. The backup signature heal only re-signs a chain that fails verification and only when key material is supplied — and a keyless CLI run against a signed chain is refused earlier with `SLUICE-E-BACKUP-SIGNATURE-MISSING`, so it never silently leaves stale signatures (only an unsigned chain's keyless no-op simply exits 0). The Postgres estimator is advisory and falls back to the prior behaviour on an unknown size. The pgtrigger change adds a log line.
+
+  **Who needs this:** anyone running **large Postgres→PlanetScale/Vitess migrations** (the index-split now engages) or **signed encrypted backup chains through `compact`/`prune`** (a crash-stale signature now heals on re-run). Everyone else：no action.
+
+  ## Install
+
+  ```
+  # Homebrew
+  brew upgrade sluice
+
+  # Scoop (Windows)
+  scoop update sluice
+
+  # Go
+  go install sluicesync.dev/sluice/cmd/sluice@v0.131.3
+  ```
+
+  Container images：`ghcr.io/sluicesync/sluice:0.131.3` (multi-arch; the image tag carries no `v` prefix).
+ReleaseNotesUrl: https://github.com/sluicesync/sluice/releases/tag/v0.131.3
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
