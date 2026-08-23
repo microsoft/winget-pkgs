@@ -1,0 +1,65 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: endev.aube
+PackageVersion: 2.0.1
+PackageLocale: en-US
+Publisher: en.dev
+PublisherUrl: https://en.dev/
+PublisherSupportUrl: https://github.com/endevco/aube/discussions/categories/troubleshooting-and-bugs
+Author: en.dev
+PackageName: aube
+PackageUrl: https://aube.en.dev/
+License: MIT
+LicenseUrl: https://github.com/endevco/aube/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 en.dev inc
+CopyrightUrl: https://github.com/endevco/aube/blob/HEAD/LICENSE
+ShortDescription: A fast Node.js package manager
+Description: |-
+  aube is a package manager for Node.js projects. It uses pnpm-style isolated node_modules for fast, disk-efficient installs.
+
+  Existing projects keep their lockfile format. aube reads and writes pnpm-lock.yaml, package-lock.json, npm-shrinkwrap.json, yarn.lock, and bun.lock in place. New projects without a supported lockfile get aube-lock.yaml.
+
+  Why Try It
+  - Fast installs. Warm installs are about 8x faster than pnpm and about 5x faster than Bun in the current benchmarks. Repeat test commands run up to 35x faster than pnpm and up to 5x faster than Bun.
+  - Existing lockfiles. Reads and writes pnpm-lock.yaml, package-lock.json, npm-shrinkwrap.json, yarn.lock, and bun.lock in place.
+  - Cheap repeat commands. aubr test, aube test, and aube exec vitest auto-install when dependencies are stale, then skip that work when nothing changed. aubx uses a local binary when one is installed, or a throwaway environment for one-off tools.
+  - Less disk use. A global content-addressable store lets projects share package files instead of keeping a full copy of the same dependencies in every checkout.
+  - Secure defaults. Out of the box, exotic transitive deps are blocked, lifecycle scripts wait for approval, trust downgrades fail at resolve, and brand-new releases sit in a 24h cooling window. One paranoid: true line adds the build jail and turns the soft gates into hard fails.
+Moniker: aube
+ReleaseNotes: |-
+  This is the first release of the aube 2.x line. It moves global installs out of pnpm-owned directories and into aube's own data root, promotes lowest-direct to a first-class resolver mode, and slashes install-time memory usage for packages with large, multi-platform optional dependency graphs. Because of the global directory change, upgrading requires action for anyone who relies on aube add -g — see Breaking Changes.
+  Highlights
+  - Global installs now live under aube's own data root instead of pnpm's directories, with warnings to guide the one-time migration (#1231).
+  - Up to 77% less peak memory on installs with large optional platform graphs thanks to compact optional-package histories and streaming large tar entries into the store (#1315, #1318).
+  - lowest-direct becomes a first-class resolution mode on the public resolver API (#1345).
+
+  Added
+  - lowest-direct resolution mode (#1345 by @jdx) — pnpm's lowest-direct mode (resolve direct dependencies to the lowest compatible version) is now exposed directly through the public resolver API as ResolutionMode::LowestDirect, and CLI settings route through the enum. ResolutionMode is now #[non_exhaustive]. See Breaking Changes for the embedder-facing API change.
+  - Structured prune previews for aube store prune (#1321 by @jdx) — aube store prune --dry-run --json now emits a machine-readable schema-v1 plan: mutation roots, planned actions, per-subsystem (GVS/CAS) counts, reclaimable-byte upper bounds, and structured warnings. The same plan drives human previews, JSON previews, and real deletes, so what you preview is what gets pruned. Store writers are serialized against prune via a store-wide maintenance lock, and dry runs no longer migrate legacy indexes or initialize the project registry.
+    aube store prune --dry-run --json
+  - EngineContext runtime embedder seam (#1326 by @jdalton) — A process-global EngineContext complements the compile-time Embedder profile, letting embedders supply per-invocation runtime values. The first wired seam lets an embedder provide bundled ecosystem packageExtensions defaults, applied as the lowest-precedence layer at resolve time (user/project extensions always win). Bundled extensions are kept out of the packageExtensionsChecksum, so bumping the bundled list never drifts existing lockfiles or breaks --frozen-lockfile. Every field defaults to upstream-neutral behavior, so standalone aube is unaffected.
+
+  Fixed
+  - Compact exact optional package histories (#1315 by @jdx) — With time-aware resolution (minimumReleaseAge, trust no-downgrade), exact optional platform packages previously retained every historical version's full dependency and distribution metadata. Aube now decodes each exact optional dependency from a single packument response, keeping full metadata only for the selected version and just publish-time/trust evidence for the rest. Lockfile platform coverage and trust semantics are unchanged. For opencode-ai@1.18.18, retained platform version records dropped from 136,110 to 11,890, cutting median peak RSS by ~47% and wall time by ~20% versus the previous release. The bundled node-gyp toolchain is now also bootstrapped lazily (only when a lifecycle script actually invokes it) instead of before every approved lifecycle.
+  - Stream large tar entries into the store (#1318 by @jdx) — Large regular tar entries (≥8 MiB, when store compression is off) now stream into a content-addressed store tempfile while being hashed, then publish atomically, instead of being buffered fully into memory with read_to_end. Combined with the resolver change above, this brings the total peak-memory reduction on the opencode-ai benchmark to ~77% (and ~24% faster wall time) versus the previous release. store prune also cleans up orphaned streaming tempfiles left by crashes.
+  - Preserve applied builds after cache cleanup (#1339 by @jdx) — Clearing the reusable side-effects cache no longer forces dependency build scripts (e.g. native node-gyp rebuilds) to rerun for packages whose build output is already applied. Aube now treats a matching in-package side-effects marker as evidence the build is already in place, and only rebuilds when the generated output is actually missing or changed.
+  - Resolve catalog: dependencies when packing and publishing (#1334 by @jdx) — aube pack and directory-based aube publish now rewrite default and named catalog: specifiers to resolved semver ranges across dependencies, devDependencies, optionalDependencies, and peerDependencies before writing the archive, so consumers no longer receive unresolvable catalog: protocol specifiers. The on-disk package.json is left untouched (including its indentation and line endings), and published registry metadata matches the tarball. Fixes #1333.
+
+  Breaking Changes
+  - Global directories moved out of pnpm's layout (#1231 by @jdx) — aube add -g no longer installs into pnpm-owned locations (PNPM_HOME, $XDG_DATA_HOME/pnpm, ~/Library/pnpm, %LOCALAPPDATA%\pnpm). Globals now hang off aube's own data root, matching the store and runtimes:
+    <data_root>/bin           # globalBinDir — put this on PATH
+    <data_root>/global-aube   # physical installs
+    <data_root> resolves to $XDG_DATA_HOME/<namespace> (~/.local/share/<ns>, or %LOCALAPPDATA%\<ns> on Windows). PNPM_HOME is no longer read, and macOS now honors an explicit XDG_DATA_HOME instead of always using ~/Library/pnpm. AUBE_HOME keeps its existing meaning, so anyone who already set it sees no change.
+    Packages installed globally by aube 1.x are not migrated. Their bins keep working while the old directory is on PATH, but aube list -g / aube remove -g no longer see them. To recover, put the new bin dir on PATH and re-run aube add -g <pkg>, or set AUBE_HOME=<old dir> to pin the previous layout. Two new warnings flag the silent failure modes: WARN_AUBE_GLOBAL_DIR_LEGACY_LOCATION (globals found only in the old pnpm-named location; the old directory is only ever read, never modified) and WARN_AUBE_GLOBAL_BIN_DIR_NOT_ON_PATH (add -g linked a bin into a directory missing from $PATH). This release also fixes a related bug where remove -g left every global bin behind as a dangling symlink when the global virtual store was enabled.
+  - Resolver API: ResolutionMode change (#1345 by @jdx) — For embedders using the resolver crate directly: Resolver::with_lowest_direct is removed in favor of Resolver::with_resolution_mode(ResolutionMode::LowestDirect), and ResolutionMode is now #[non_exhaustive], so matches must include a wildcard arm. Resolution behavior is otherwise unchanged.
+
+  New Contributors
+  - @jdalton made their first contribution in #1326
+
+  💚 Sponsor aube
+  aube is maintained by @jdx, an open source developer for entire.io, the title sponsor of the jdx.dev open source tools including mise. Work on aube is funded by sponsors.
+  If aube is saving your team install time or CI minutes, please consider sponsoring at jdx.dev. Individual and company sponsorships are what keep the project fast, free, and independent.
+ReleaseNotesUrl: https://github.com/jdx/aube/releases/tag/v2.0.1
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
