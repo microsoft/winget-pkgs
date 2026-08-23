@@ -1,0 +1,113 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: jmrplens.gitlab-mcp-server
+PackageVersion: 2.6.6
+PackageLocale: en-US
+Publisher: José M. Requena Plens
+PublisherUrl: https://github.com/jmrplens
+PublisherSupportUrl: https://github.com/jmrplens/gitlab-mcp-server/issues
+PrivacyUrl: https://github.com/jmrplens/gitlab-mcp-server/blob/main/PRIVACY.md
+PackageName: GitLab MCP Server
+PackageUrl: https://github.com/jmrplens/gitlab-mcp-server
+License: MIT
+LicenseUrl: https://github.com/jmrplens/gitlab-mcp-server/blob/HEAD/LICENSE
+ShortDescription: GitLab MCP server exposing the REST v4 and GraphQL APIs as tools for AI assistants.
+Description: A Model Context Protocol (MCP) server that connects AI assistants (Claude, Cursor, VS Code + Copilot, and any MCP client) to GitLab.com or self-managed GitLab instances. Covers the full REST API v4 and GraphQL with automatic edition gating — roughly 850 to 1070 tools depending on the GitLab tier — plus 45 MCP resources, 37 prompts, argument completions, and progress notifications. Single static binary, stdio and HTTP transports, read-only and safe (mutation-preview) modes, and an interactive setup wizard (gitlab-mcp-server --setup) that auto-configures most MCP clients.
+Moniker: gitlab-mcp-server
+Tags:
+- ai
+- ci-cd
+- claude
+- devops
+- gitlab
+- graphql
+- llm
+- mcp
+- model-context-protocol
+- rest-api
+ReleaseNotes: |-
+  ## Highlights
+
+  ### 🚦 Every rejected request now says why — and `initialize` no longer looks like an outage
+
+  HTTP mode answered **every** unroutable request with `400 Bad Request` and the plain-text body `no server available`. That string is not ours：the MCP SDK emits it whenever the server-selection callback returns nil, which this server did for four unrelated reasons — a missing credential, an unparseable `GITLAB-URL` header, an exhausted authentication rate limiter, and an unreachable backend.
+
+  Two things were wrong with that beyond the lost detail.
+
+  **A missing credential is `401`.** The MCP authorization specification's own error table says `401 — Authorization required or token invalid` and reserves `400` for a *malformed authorization request*. Nothing in the specification exempts `initialize` from authentication — the transport says servers **SHOULD** implement authentication for all connections — and protocol `2026-07-28` removed the initialize handshake entirely, so there is no handshake to open up.
+
+  **And `400` now carries protocol meaning.** Revision `2026-07-28` tells a client that receives `400` with a body that is *not* a recognised JSON-RPC error to conclude the server is initialization-era and downgrade. A plain-text rejection therefore turned a missing header into a false protocol diagnosis — and the downgraded `initialize` answered `400` as well.
+
+  Each cause now carries its own status, headers, and machine-readable reason:
+
+  | Condition | Status | JSON-RPC code | Notable headers |
+  | --- | --- | --- | --- |
+  | No `PRIVATE-TOKEN` and no `Authorization：Bearer` | `401` | `-40100` | `WWW-Authenticate` |
+  | GitLab answered `401`/`403` to the credential | `401` | `-40100` | `WWW-Authenticate` |
+  | `GITLAB-URL` header is not a parseable URL | `400` | `-32600` | — |
+  | More than 10 auth failures from one IP in a minute | `429` | `-42900` | `Retry-After` |
+  | GitLab session could not be built for the token | `503` | `-50300` | — |
+
+  The legacy challenge is `Bearer realm="gitlab-mcp-server"` and deliberately omits `resource_metadata`：clients discover an OAuth authorization server through that parameter, and legacy mode has none, so advertising it would start a discovery flow that cannot complete. `Bearer` is still honest — the server accepts `Authorization: Bearer <pat>` alongside `PRIVATE-TOKEN` — and per RFC 6750 §3.1 a challenge for a request carrying no credential omits the error code, so the accepted headers are named in the JSON body instead. `GET` and `DELETE` keep their `405`, which is what `2026-07-28` prescribes.
+
+  Error codes are allocated **outside** the JSON-RPC reserved range, as the specification requires：`-32000`–`-32019` is legacy and `-32020`–`-32099` belongs to MCP. A test enforces the rule so a future code cannot squat there.
+
+  The cost of the old behaviour was measurable：the [does-it-install](https://github.com/chryaner/does-it-install) tracker recorded the hosted endpoint as `connect_failed` — *"endpoint unreachable"* — because its classifier maps `401`/`403` to *needs credentials* and every other status to *unreachable*. "No server available" reads as a dead service, not an absent header.
+
+  ### 🔐 A token GitLab refuses no longer gets a session
+
+  The server pool admitted an entry for any non-empty string, so `PRIVATE-TOKEN：x` completed a full MCP handshake — and a stream of distinct invented tokens churned the bounded LRU that real sessions live in.
+
+  Checking the token *format* would not fix it：GitLab lets self-managed administrators change the `glpat-` prefix, so a prefix rule would reject legitimate self-hosted tokens while still admitting any well-shaped fake. GitLab itself is the only deterministic, format-agnostic judge, so it is now asked — `GET /api/v4/user`, once per new pooled session and never per request.
+
+  Only an explicit `401`/`403` rejects. Every other outcome admits the session：failing closed whenever GitLab is unreachable would turn an instance outage into a total denial of service, which is worse than the churn being prevented.
+
+  A related correctness fix falls out of the same work. Scope detection already discarded its failure and returned `nil`, which `ScopeSatisfied` reads as *allow all* — so a refused token was being granted the unrestricted tool surface. And backend failures no longer consume authentication-rate-limit capacity：the credential was never judged in those cases, so counting them let a GitLab outage lock out clients holding valid tokens.
+
+  ### 🩺 `/health` reports how long the process has been up
+
+  ```json
+  {"status":"ok","version":"2.6.6","commit":"2adcccf8","started_at":"2026-08-22T21:34:12Z","uptime_seconds":1209600}
+  ```
+
+  Both fields, because they do different jobs. `started_at` is the stable fact — byte-identical across probes, so a monitor can cache it and detect a restart by noticing it moved, the same reason Prometheus exposes `process_start_time_seconds` rather than an uptime counter. `uptime_seconds` is the derived convenience value, in the unit the [IETF health-check draft](https://datatracker.ietf.org/doc/html/draft-inadarei-api-health-check-06) uses for it. Seconds are truncated, never rounded, so uptime can never exceed the gap since `started_at`.
+
+  `/health` still performs no GitLab round-trip; it reports that the process is serving, nothing more.
+
+  ## Also in this release
+
+  • **A latent flake in every `serveHTTP` test, fixed at the source.** They closed response bodies in a deferred call that ran *after* the server context was cancelled, so `Shutdown` raced a connection the test still held open. `http.Server.Shutdown` waits for connections to return to idle, and a connection whose response body the client has not consumed is not idle — measured against an unread body it takes exactly the full 5s budget and returns `context deadline exceeded`, which is precisely how this surfaced on a loaded CI runner. Bodies are now drained before cancellation rather than the timeout being widened.
+  • **The credential probe does not go through the SDK, on purpose.** client-go wraps requests in `retryablehttp` with `RetryMax 5`, which turns a refused connection into seconds of backoff; routed that way the probe would have added a 5s stall to every new session against a struggling instance (it took the `serverpool` package from 0.5s to 150s in testing). It uses the non-retrying health client and is bounded at 5 seconds.
+  • A hidden network dependency removed from the suite：one test asserted `200` while sending a fake token to the real gitlab.com, and only passed because the token was never validated.
+  • `docs/guides/http-server-mode.md` and the Starlight site (EN + ES) document the rejection statuses, the credential check, and the `/health` contract — including a note that a plain-text `400 no server available` from an older build comes from the SDK and is not a crash.
+
+  ## Upgrading
+
+  **Behaviour change worth checking:** HTTP status codes for failed requests are different. A client or monitor that treated `400` as *"the server needs a token"* must now handle `401`, and anything keying on the literal string `no server available` will no longer match. Successful requests are unaffected, and there are no API or configuration changes.
+
+  If you run the HTTP mode behind a reverse proxy, this is a good moment to confirm `--trusted-proxy-header` is set, so the new `429` counts real client IPs rather than the proxy's.
+
+  Self-update (`AUTO_UPDATE=true`, default), Homebrew (`brew upgrade gitlab-mcp-server`), winget, Docker, and the Claude Desktop `.mcpb` are all published for this tag.
+
+  **Full changelog**：[v2.6.5...v2.6.6](https://github.com/jmrplens/gitlab-mcp-server/compare/v2.6.5...v2.6.6)
+
+  <details>
+  <summary>Generated changelog</summary>
+
+
+  ### ✨ Features
+  • 318f49c1d19cfb431bb5fc975b88872595049cce：feat(dockerhub): own the Docker Hub descriptions from CI (#290) (@jmrplens)
+  ### 🐛 Bug Fixes
+  • 2adcccf86ab83834facd34b65b0bd338853879f3：fix(http): classify request rejections instead of a blanket 400 (#291) (@jmrplens)
+  ### 🚧 Maintenance
+  • 8ae014c84b9cc9ff0c9cc6cf454ea3bf0eadda18：chore: update manifests for v2.6.5 (@jmrplens)
+
+
+  </details>
+ReleaseNotesUrl: https://github.com/jmrplens/gitlab-mcp-server/releases/tag/v2.6.6
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://jmrplens.github.io/gitlab-mcp-server/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
