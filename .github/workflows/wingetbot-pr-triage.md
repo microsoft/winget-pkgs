@@ -86,17 +86,14 @@ pre-agent-steps:
           let checkRuns = [];
           let failedChecks = [];
           for (let attempt = 0; attempt < 2; attempt++) {
-            checkRuns = await github.paginate(
-              github.rest.checks.listForRef,
-              {
-                owner,
-                repo,
-                ref: headSha,
-                filter: "latest",
-                per_page: 100,
-              },
-              (response) => response.data.check_runs,
-            );
+            const response = await github.rest.checks.listForRef({
+              owner,
+              repo,
+              ref: headSha,
+              filter: "latest",
+              per_page: 100,
+            });
+            checkRuns = response.data.check_runs ?? [];
             failedChecks = checkRuns.filter((check) =>
               check?.app?.slug === "wingetvalidator-prod" &&
               check.head_sha === headSha &&
