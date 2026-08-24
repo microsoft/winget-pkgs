@@ -1,0 +1,37 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: lbjlaq.AntigravityTools
+PackageVersion: 4.6.0
+PackageLocale: zh-CN
+Publisher: lbjlaq
+PublisherUrl: https://github.com/lbjlaq
+PublisherSupportUrl: https://github.com/lbjlaq/Antigravity-Manager/issues
+PackageName: Antigravity Tools
+PackageUrl: https://github.com/lbjlaq/Antigravity-Manager
+License: CC-BY-NC-SA-4.0
+LicenseUrl: https://github.com/lbjlaq/Antigravity-Manager/blob/HEAD/LICENSE
+ShortDescription: 专业的 Antigravity 账号管理与切换工具。为 Antigravity 提供一键无缝账号切换功能。
+Description: |-
+  Antigravity Tools 是一个专为开发者和 AI 爱好者设计的全功能桌面应用。它将多账号管理、协议转换和智能请求调度完美结合，为您提供一个稳定、极速且成本低廉的 本地 AI 中转站。
+  通过本应用，您可以将常见的 Web 端 Session (Google/Anthropic) 转化为标准化的 API 接口，彻底消除不同厂商间的协议鸿沟。
+Tags:
+- account-manager
+- antigravity
+ReleaseNotes: |-
+  - [核心功能] OpenAI 兼容端点支持 response_format.json_schema 结构化输出 (Structured Outputs Support):
+    - 支持 JSON Schema 规范定义：完整支持 OpenAI 规范中的 response_format: { type: "json_schema", json_schema: { ... } } 格式定义。
+    - 深度清洗与 Schema 展开：自动提取并递归清洗 $ref/$defs 定义，转换 Schema 格式为 Gemini generationConfig.responseSchema 兼容标准，并设置 responseMimeType: "application/json"。
+    - 全框架兼容性提升：完美解决 LangChain、Zod、Instructor 等第三方客户端框架在开启 Structured Outputs 时因 Schema 丢失导致类型校验失败的问题。
+    - 相关 PR: 详见 PR #3324。
+  - [核心修复] 修复代理池健康检查报 407 认证失败及支持 URL 内嵌凭据解析 (Proxy Pool Health Check 407 & Auth Parsing Fix):
+    - 默认端点升级 HTTPS 204: 将默认健康检查端点由明文 http:// 升级为 https://cp.cloudflare.com/generate_204，强制走标准 HTTPS CONNECT 隧道建立鉴权管道，彻底解决 HTTP 代理下明文 Forwarding 报 407 Proxy Authentication Required 的误报问题。
+    - URL 内嵌凭据自动解析：在构建代理底层客户端时，自动从 http(s)://user:password@ip:port 格式的代理 URL 中安全提取 username 和 password 注入 Basic 认证，杜绝凭据漏传。
+    - 相关 Issue: 修复 #3323。
+  - [核心修复] 完整支持 Gemini 3.7 Flash / 3.6 Flash 阶梯别名与思考预算映射，修复 429 误判 (Gemini 3.7 Flash Variant Mapping & 429 Fix):
+    - 对齐官方 3.7 Flash 变体 Spec: 完整注册 gemini-3.7-flash 系列家族及 gemini-3.7-flash-low (1000 tokens)、gemini-3.7-flash-medium (4000 tokens)、gemini-3.7-flash-high (10000 tokens) 与 gemini-3.7-flash-tiered 等阶梯别名。
+    - 解决本地调度误判 429: 消除因未注册 3.7 族系变体而在账号配额检查与变体解析时触发“无可用账号 / All accounts limited”的 429 本地拦截问题。
+    - 相关 Issue: 修复 #3322。
+ReleaseNotesUrl: https://github.com/lbjlaq/Antigravity-Manager/releases/tag/v4.6.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
