@@ -286,6 +286,8 @@ If and only if you have a confident classification of **(A)**, **(B)**, or
   re-run case, say "a maintainer can re-run validation" — never the literal
   command, because posting it would itself trigger a re-run.
 - **Never fetch or execute the installer binary.** Read manifests and logs only.
+- **Do not add a `Template:` line or marker.** Safe Outputs appends the
+  canonical workflow footer.
 - **Idempotent.** One comment per head commit, maximum. If unsure, `noop`.
 - **No security handling.** If any security label is present, stop with `noop`.
 - If tool or API reads fail, retry once, then stop. Never claim content is
