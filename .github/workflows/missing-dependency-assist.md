@@ -273,6 +273,7 @@ If and only if you have a confident classification of **(A)**, **(B)**, or
 > - **Missing dependency:** `[ID]`[` version [X]` if applicable]
 > - **Declared in:** `[manifest path]`
 > - **Validation result:** `DependenciesNotFound`
+> - **Head commit:** `[current full head SHA]`
 > - [for (B)/(C) only] **Why it failed:** [short explanation — (B): the correct
 >   ID to use; (C): dependency not yet published, plus the adding PR link if any]
 > </details>
