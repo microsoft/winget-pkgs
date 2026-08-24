@@ -336,7 +336,8 @@ Post one concise comment:
 
 Include only concrete findings. Do not repeat the generic Validation Guide message. Do not mention
 model names, token usage, workflow internals, installer URLs, or hashes. Include the request to update
-the manifest and rerun validation only once. For a directly confirmed singleton manifest, omit the
+the manifest and rerun validation only once. Do not add a `Template:` line; Safe Outputs appends the
+canonical workflow footer automatically. For a directly confirmed singleton manifest, omit the
 validation-check line when no matching Check Run is available and use the authoring-documentation URL as
 the relevant reference.
 
