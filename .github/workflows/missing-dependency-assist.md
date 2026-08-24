@@ -96,7 +96,7 @@ pre-agent-steps:
             check.app?.slug === "wingetvalidator-prod" &&
             check.head_sha === headSha &&
             check.name === "10. Validation Completed"
-          ));
+          );
           const mapCheck = (check) => ({
             id: check.id,
             name: check.name,
