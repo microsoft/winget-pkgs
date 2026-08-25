@@ -33,6 +33,15 @@ if: >-
     )
   )
 checkout: false
+concurrency:
+  group: >-
+    gh-aw-${{ github.workflow }}-${{
+    github.event.pull_request.number ||
+    github.event.inputs.pull_request_number ||
+    fromJSON(github.event.inputs.aw_context || '{}').item_number ||
+    github.run_id }}
+  cancel-in-progress: false
+  queue: max
 pre-agent-steps:
   - name: Fetch trusted validation Check Runs
     uses: actions/github-script@v9
@@ -99,6 +108,7 @@ pre-agent-steps:
               owner,
               repo,
               ref: headSha,
+              app_id: 1451866,
               filter: "latest",
               per_page: 100,
             });
