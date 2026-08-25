@@ -1,0 +1,66 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: jdx.mise
+PackageVersion: 2026.8.5
+PackageLocale: en-US
+Publisher: jdx
+PublisherUrl: https://en.dev/
+PublisherSupportUrl: https://github.com/jdx/mise
+Author: jdx
+PackageName: mise-en-place
+PackageUrl: https://mise.en.dev/
+License: MIT
+LicenseUrl: https://github.com/jdx/mise/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Jeff Dickey
+CopyrightUrl: https://github.com/jdx/mise/blob/HEAD/LICENSE
+ShortDescription: Your dev env, already prepped.
+Description: Your dev env, already prepped. One tool to manage languages, env vars, and tasks per project, reproducibly.
+Moniker: mise
+Tags:
+- cli
+- dev-tool
+- env
+- environment
+- task
+ReleaseNotes: |-
+  This release lets mise install PyPy on the precompiled path (including on Windows), adds Node source-build patching, and lands a wide set of fixes across config precedence, install hooks, version pinning, and the Rust, conda, and vfox backends.
+  Added
+  - python: PyPy can now be installed on the precompiled path — when python.compile=false, and unconditionally on Windows, where PyPy versions previously never appeared in mise ls-remote python and could not be installed at all. mise reads the upstream downloads.python.org/pypy index, downloads and extracts the correct archive, runs ensurepip, and records a blake3 checksum in the lockfile on first install (PyPy publishes no machine-readable checksums). (#11846 by @JamBalaya56562)
+    mise install python@pypy3.10-7.3.17
+  - node: add node.apply_patches (MISE_NODE_APPLY_PATCHES) to apply local or remote patches to the Node source build before ./configure runs, mirroring ruby.apply_patches. It accepts a newline-separated list of patch files or URLs. Strip level is auto-detected from git- or diff-style markers, and patches are recorded in the lockfile since they change the built artifact. If patches are set but a precompiled Node was installed, mise now warns instead of silently dropping them. (#11850 by @JamBalaya56562)
+    [settings.node]
+    compile = true
+    apply_patches = "./patches/local.patch"
+
+  Fixed
+  - config: global config precedence inside ~/.config/mise now matches the documentation — config.local.toml overrides config.toml, which overrides conf.d/*.toml. Previously the order was reversed for [settings], [tools], and [env] when ~/.config/mise was outside the cwd walk. (#11906 by @halms)
+  - config: mise use now updates a single tool version in place within a standard [tools.<name>] table, preserving comments, key ordering, whitespace, and nested option tables instead of collapsing the table to inline form. (#11848 by @Marukome0743)
+  - install: inline preinstall and postinstall hooks now run from the owning project root, so relative paths resolve consistently even when mise install is started from a subdirectory. The invocation directory remains available through MISE_ORIGINAL_CWD. (#11857 by @jdx)
+  - use: mise use --pin now prefers an exact available release when pinning, instead of reusing a more-specific installed fuzzy match. For example mise use --pin erlang@27.3 will pin 27.3 if that exact release exists remotely, rather than depending on which versions happen to be installed. (#11838 by @Marukome0743)
+  - task: editing a root [task_templates.*] definition or a monorepo task default now correctly invalidates affected tasks, so stale outputs are no longer marked up to date after a template change. (#11858 by @jdx)
+  - rust: mise now reuses a complete external rustup installation (for example one installed by Homebrew) when the default Rust homes are not initialized, instead of downloading and initializing its own. Explicitly configured Cargo/Rustup homes continue using the mise-managed path. (#11840 by @Marukome0743)
+  - conda: conda package commands now run through prefix-aware launchers that activate each command's own conda prefix, fixing tools like jdtls that expand ${CONDA_PREFIX} and rely on activation scripts. Dependency executables stay isolated from the user's shell PATH. (#11855 by @Marukome0743)
+  - python: disable_tools = ["python"] (and allowlist forms like enable_tools = ["node"]) now also suppress the _.python.venv directive, so a disabled Python no longer leaves its virtualenv activated on PATH. (#11885 by @JamBalaya56562)
+  - vfox: configured vfox tool options are now exposed to plugin hooks through MISE_TOOL_OPTS__* (with legacy RTX_TOOL_OPTS__* aliases), so hooks reading os.getenv("MISE_TOOL_OPTS__...") see the resolved options during install, uninstall, exec-env, and lock paths. (#11884 by @Marukome0743)
+  - aqua: explicit github_release package-type overrides from version and platform overrides are now applied, fixing installs such as recent Claude Code releases that failed with "relative URL without a base". (#11901 by @Marukome0743)
+
+  Changed
+  - cache: remote build-cache prefetch now downloads output blobs concurrently (up to 48 in parallel) while reserving foreground slots for compiler lookups, dramatically speeding up large Rust cache restores that previously downloaded thousands of small artifacts serially. (#11905 by @jdx)
+
+  Documentation
+  - env: clarified _.source PATH handling. (#11889 by @jdx)
+  - task: fixed boolean flag usage examples. (#11887 by @Marukome0743)
+
+  Registry
+  - Use aqua for helmsman. (#11908 by @scop)
+
+  Breaking Changes
+  - If you relied on disable_tools = ["python"] while still keeping a _.python.venv activated, that virtualenv will no longer be activated. The existing venv remains on disk and is restored automatically when Python is re-enabled. (#11885)
+
+  💚 Sponsor mise
+  mise is maintained by @jdx, an open source developer for entire.io, the title sponsor of the jdx.dev open source tools. Development is funded by sponsors.
+  If mise saves you or your team time, please consider sponsoring at jdx.dev. Individual and company sponsorships keep mise fast, free, and independent.
+ReleaseNotesUrl: https://github.com/jdx/mise/releases/tag/v2026.8.5
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

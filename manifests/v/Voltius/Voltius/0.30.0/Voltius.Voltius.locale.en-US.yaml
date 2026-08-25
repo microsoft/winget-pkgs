@@ -1,0 +1,103 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Voltius.Voltius
+PackageVersion: 0.30.0
+PackageLocale: en-US
+Publisher: Voltius
+PublisherUrl: https://voltius.app/
+PublisherSupportUrl: https://github.com/VoltiusApp/voltius/issues
+PackageName: Voltius
+PackageUrl: https://voltius.app/
+License: AGPL-3.0
+LicenseUrl: https://github.com/VoltiusApp/voltius/blob/HEAD/LICENSE
+ShortDescription: Cross-platform SSH client and terminal
+Moniker: voltius
+Tags:
+- crdt
+- credential-manager
+- homelab
+- local-first
+- plugins
+- port-forwarding
+- rust
+- serial
+- sftp
+- ssh
+- ssh-client
+- sync
+- sysadmin
+- tauri
+- teams
+- terminal
+ReleaseNotes: |-
+  Added
+  - Your settings are now yours to sync group by group and setting by setting.
+    Settings → Sync gains a second block, "Settings", below the existing Sync
+    Preferences block that already governed hosts, identities, keys and the rest.
+    It carries one switch per group — Themes, Interface, Shortcuts, App settings,
+    Recent people — and each individual setting gains a cloud button in its own
+    row's hover controls, so a single value can stay on this device without
+    switching its whole group off. A held-back value never enters the uploaded
+    backup, and a copy already on the server is withdrawn when you switch the
+    setting off. Each group also lists what it is keeping local, which is the
+    only control for the handful of settings that have no row of their own.
+  - The default shell is no longer synced unless you ask for it. A shell path is
+    wrong on another machine by construction, so it is now device-scoped: it
+    stays out of the backup until you opt it in from the Sync panel.
+  - Your sunrise/sunset coordinates are no longer synced unless you ask for
+    them to be. Where you physically are is a property of the machine, not of
+    your account, so the theme location is now device-scoped: it stays out of
+    the uploaded backup — and out of any third-party sync destination, such as
+    the gist-sync plugin — until you opt it in from the cloud button beside the
+    latitude and longitude fields.
+  - Snippets now have their own cloud sync switch. The Sync Preferences block
+    gains a Snippets row alongside Hosts, Identities, SSH Keys, Folders and Port
+    Forwarding, so the whole collection can stay off the backup — individual
+    snippets could already be excluded one at a time from their card. Switching
+    Folders off now also stops snippet folders syncing, which is what their cards
+    already showed.
+  - Terminal font size is now a setting of its own in Appearance, overriding the
+    active theme, where before changing it meant cloning a theme or scaling the
+    whole UI. On mobile a two-finger pinch on the terminal drives the same value.
+    It stays on this device — a size that reads well on a phone does not read
+    well on a desktop — so it is never synced.
+  Changed
+  - Because the default shell now stays out of the uploaded backup, a device
+    still running 0.29.x will have its own default shell cleared back to the
+    system default. That older release reads an absent shell as "clear it", and
+    it happens again on every later settings change made on an updated device,
+    until the older device updates too. Devices on this release are unaffected,
+    and the setting itself is never lost — only the older device's copy is
+    reset to the default.
+  Fixed
+  - Three Russian strings read wrong. The Interface sync group described itself
+    with "раскладки", which reads first as keyboard layouts — an active
+    collision in a panel that also has a Shortcuts group — and the same word was
+    used for terminal panes; both now say what they mean. "Недавние люди" became
+    "Недавние контакты", which is what the counts beside it already said.
+  - Pasting went to the wrong terminal. With more than one terminal on screen,
+    the paste landed in whichever session the pane had opened last rather than
+    the one that received the keystroke.
+  - Your own tmux works inside a persistent session again. A persistent session
+    wraps the remote shell in Voltius's own tmux, and that wrapper leaked its
+    socket and its C-b prefix into the shell: tmux ls listed Voltius's
+    private sessions instead of yours, tmux attach refused to nest at all, and
+    a forced nest lost every prefix key. The wrapper now clears the multiplexer
+    environment and gives up its prefix. The fix reaches new sessions; a session
+    started before this release keeps the old wrapper until it is restarted.
+  - On a host that has screen but not tmux, the wrapper no longer swallows
+    C-a. A bare C-a d inside your own nested screen detached Voltius's
+    session instead, closing the connection and reconnecting underneath you.
+  - Duplicating a session no longer lands in your home directory when the
+    original's working directory has since been deleted. The directory probe
+    read the kernel's <path> (deleted) form verbatim, so the duplicate's cd
+    could never succeed; it now falls back to the nearest directory that still
+    exists. The same stale path also reached the stored working directory and
+    the file panel's follow-cwd.
+  - Exporting or deploying a key whose public half was never stored no longer
+    fails with "Public key not found". The public half is derived from the
+    private key instead.
+ReleaseNotesUrl: https://github.com/VoltiusApp/voltius/releases/tag/v0.30.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
