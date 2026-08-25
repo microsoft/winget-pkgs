@@ -1,0 +1,129 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: can1357.oh-my-pi
+PackageVersion: 18.0.4
+PackageLocale: en-US
+Publisher: Can Bölük
+PublisherUrl: https://can.ac/
+PublisherSupportUrl: https://github.com/can1357/oh-my-pi/issues
+Author: Can Bölük
+PackageName: oh-my-pi
+PackageUrl: https://omp.sh/
+License: MIT
+LicenseUrl: https://github.com/can1357/oh-my-pi/blob/HEAD/LICENSE
+Copyright: |-
+  Copyright (c) 2025 Mario Zechner
+  Copyright (c) 2025-2026 Can Bölük
+ShortDescription: ⌥ AI Coding agent for the terminal — hash-anchored edits, optimized tool harness, LSP, Python, browser, subagents, and more
+Description: |-
+  omp is a terminal-first coding agent that runs on your machine, talks to any provider, and treats sessions like git branches.
+  omp (pronounced “oh-em-pi”, binary omp) is a fork of Mario Zechner’s Pi. It runs as a single Bun process, drives any model provider you have credentials for, and ships a flat tool surface the model uses to read code, run commands, edit files, drive a debugger, and spawn subagents that coordinate over an in-process IRC bus.
+  Sessions persist as JSONL under ~/.omp/agent/sessions/. You resume, fork, branch, and share them. Settings, credentials, plugins, and caches all live under ~/.omp/agent/. Nothing leaves the machine unless you call a tool that does.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  @oh-my-pi/pi-agent-core
+  Changed
+  - Improved performance in append-only context mode by memoizing message serialization, keeping per-call sync overhead flat as conversations grow.
+  Fixed
+  - Fixed an issue where onTurnEnd was skipped for turns ended by a terminal tool result (such as a subagent's final yield).
+  @oh-my-pi/pi-ai
+  Fixed
+  - Fixed Cursor tool calls through OpenAI-compatible authentication gateways losing arguments when complete argument maps are sent without streaming deltas (#9479).
+  - Fixed Cursor plan entitlement refusals repeatedly selecting ineligible accounts by scoping credential blocks to the requested model during rotation (#9488).
+  - Improved HTTP 413 error classification to accurately distinguish between payload/media size limits and token context window overflows, preventing inappropriate token compaction attempts and routing to correct recovery/fallback strategies (#9235).
+  - Fixed Cursor conversation rotation after aborts or mid-turn restarts to properly replay the last user message on a fresh conversation.
+  @oh-my-pi/pi-catalog
+  Fixed
+  - Fixed default reasoning effort for cursor/cursor-grok-4.5 and cursor/cursor-grok-4.6 so requests without an explicit effort setting default to -medium instead of -low, preventing rate limit rejections on Cursor's Start plan (#9478).
+  - Fixed aliased OpenCode Zen Ox Alpha models exposing incorrect effort levels, ensuring the gateway's native low, high, and max tiers are correctly mapped and reachable (#9349).
+  - Fixed missing rate card tier for public xAI and SuperGrok models with prompt lengths exceeding 200K tokens (#9512).
+  @oh-my-pi/pi-coding-agent
+  Added
+  - Added the omp git command (and /git slash command): an interactive, fullscreen repository TUI featuring a split/inline/hunk diff viewer with minimap scrollbar, syntax highlighting, a staging sidebar with line-level staging, commit composer with amend support, and author avatars. Supports keyboard navigation, full mouse interaction, and pinning views to specific commits via omp git <revision>.
+  - Overhauled the /extensions Extension Control Center into a fullscreen alternate-screen dashboard with mouse support, tab navigation, unified inspector views across extension types, live MCP connection management, and expandable details (Ctrl+O).
+  - Added support for live syntax highlighting in streaming markdown code blocks.
+  - Added an immediately editable startup composer for interactive launches, preserving drafts typed while session initialization is in progress.
+  Changed
+  - Improved streaming markdown and thinking block rendering performance on long sessions by batching token updates and eliminating redundant re-processing.
+  - Optimized streaming edit verification and session restoration for large files and history-heavy sessions.
+  Fixed
+  - Fixed invalid streamed edit patches occasionally reaching the edit tool instead of being stopped early.
+  - Fixed ! shell commands on zsh/fish by running them inside a real PTY, resolving terminal option errors and preserving ANSI color formatting.
+  - Fixed transcript layout corruption and viewport compression caused by interrupted streams, empty blocks, or collapsed wrapped diff lines.
+  - Fixed transcript scrollback loss where output below sticky cards (such as hub-wait or todo) failed to commit to terminal history.
+  - Improved HTTP 413 error handling: accurately distinguish between true token-context overflows and provider byte/media budget limits, persist terminal errors across sessions, and enable proper fallback-chain model switching.
+  - Fixed discovery-backed session models failing to restore when resuming sessions with omp --resume or --continue.
+  - Fixed browser tool initial launch timeouts on slow or cold host environments.
+  - Fixed eval runtime probes hanging on Windows due to inherited stdin handles.
+  - Fixed Claude models replaying partial thinking blocks as conversation text when interrupted mid-turn.
+  - Fixed image request failures with Kimi Code and Moonshot models by ensuring inline base64 image delivery.
+  - Fixed SQLite WAL-mode databases without sidecars failing to open in the Read tool.
+  - Fixed pasted image thumbnail rendering in the composer attachment preview.
+  - Fixed Linux startup event loop delays caused by legacy extension cache fsync churn.
+  - Fixed subagent advisors abandoning reviews on the final yield turn during session teardown.
+  - Fixed /todo expand/collapse commands and corrected /shake thinking reporting.
+  @oh-my-pi/hashline
+  Changed
+  - Improved line-ending normalization performance by avoiding full scan-and-copy operations on files without carriage returns, eliminating stalls on large LF-only files.
+  @oh-my-pi/omp-stats
+  Fixed
+  - Fixed SuperGrok usage appearing as free by applying matching public xAI API pricing (including 200K-token rates), labeling costs as API-equivalent estimates, backfilling existing usage records, and displaying subscription-only models as N/A (#9512).
+  @oh-my-pi/pi-tui
+  Changed
+  - Significantly improved streaming Markdown rendering performance by caching unchanged rows, resuming boundary walks, and inspecting only text deltas for guard scans and OSC 8 normalization.
+  Fixed
+  - Fixed TUI aborting when syntax highlighting fails during Markdown rendering by falling back to unhighlighted text.
+  - Fixed Korean IME cursor drift in Orca by properly matching two-cell Hangul Compatibility Jamo rendering.
+  @oh-my-pi/pi-utils
+  Added
+  - Exported getAvatarCacheDir to resolve the avatar cache directory path.
+  What's Changed
+  - fix(eval): escalate unconfirmed kernel shutdown to a process-group kill by @Mustaqeem66 in https://github.com/can1357/oh-my-pi/pull/9222
+  - fix(prompts): scope the delete-safety rule so clean cutover is not self-contradictory by @Mustaqeem66 in https://github.com/can1357/oh-my-pi/pull/9241
+  - feat(coding-agent): overhaul the /extensions inspector by @atacolak in https://github.com/can1357/oh-my-pi/pull/9311
+  - fix(hindsight): preserve conversation timestamps by @atacolak in https://github.com/can1357/oh-my-pi/pull/9366
+  - perf(agent): memoize AppendOnlyContextManager message digests by object identity by @LukasParke in https://github.com/can1357/oh-my-pi/pull/9386
+  - fix(tui): recognize Orca's Hangul jamo width by @roboomp in https://github.com/can1357/oh-my-pi/pull/9398
+  - fix(tui): do not crash streaming fences when HighlightStream is missing by @dylanjkl in https://github.com/can1357/oh-my-pi/pull/9404
+  - fix(agent): route payload-size 413s away from token-context compaction by @ConfoundingVariables in https://github.com/can1357/oh-my-pi/pull/9406
+  - fix(cursor): make #8345 conversation rotation actually recover retry/resume turns by @dperhar in https://github.com/can1357/oh-my-pi/pull/9412
+  - fix(catalog): normalized aliased OpenCode Zen ox-alpha effort ladders by @coderredlab in https://github.com/can1357/oh-my-pi/pull/9435
+  - fix(eval): bound runtime availability probes with timeout and stdin ignore by @roboomp in https://github.com/can1357/oh-my-pi/pull/9467
+  - perf(coding-agent): coalesce caught-up streaming reveal renders to the reveal cadence by @szavadsky in https://github.com/can1357/oh-my-pi/pull/9476
+  - fix(ai): preserve Cursor gateway tool arguments by @roboomp in https://github.com/can1357/oh-my-pi/pull/9481
+  - fix(catalog): default effort-less cursor grok to the medium tier by @roboomp in https://github.com/can1357/oh-my-pi/pull/9484
+  - fix(tui): drop empty transcript blocks from viewport composition by @roboomp in https://github.com/can1357/oh-my-pi/pull/9485
+  - fix(ai): scope Cursor plan refusals by model by @roboomp in https://github.com/can1357/oh-my-pi/pull/9489
+  - fix(tui): wire todo HUD expansion commands by @roboomp in https://github.com/can1357/oh-my-pi/pull/9495
+  - fix(tui): preserve retired welcome rows across resize by @pedropaulovc in https://github.com/can1357/oh-my-pi/pull/9496
+  - test(coding-agent): isolate WSL host context discovery by @pedropaulovc in https://github.com/can1357/oh-my-pi/pull/9497
+  - test(tui): cover physical Option forward delete by @shawnkoh in https://github.com/can1357/oh-my-pi/pull/9501
+  - fix(coding-agent): restore discovery-backed models on session resume by @roboomp in https://github.com/can1357/oh-my-pi/pull/9504
+  - fix(agent): review subagent final yield in advisor by @roboomp in https://github.com/can1357/oh-my-pi/pull/9506
+  - fix(acp): stop dumping structured tool progress as JSON content by @roboomp in https://github.com/can1357/oh-my-pi/pull/9514
+  - fix(stats): estimate public xai oauth costs by @roboomp in https://github.com/can1357/oh-my-pi/pull/9515
+  - fix(coding-agent): preserve subagent output artifact on hub revival by @roboomp in https://github.com/can1357/oh-my-pi/pull/9519
+  - fix(tui): repaint plugins settings tab after async list mounts by @roboomp in https://github.com/can1357/oh-my-pi/pull/9528
+  - fix(extensions): use WAL for legacy pi parse cache by @roboomp in https://github.com/can1357/oh-my-pi/pull/9551
+  - docs: replaced unavailable README captures by @roboomp in https://github.com/can1357/oh-my-pi/pull/9472
+  New Contributors
+  - @LukasParke made their first contribution in https://github.com/can1357/oh-my-pi/pull/9386
+  - @dperhar made their first contribution in https://github.com/can1357/oh-my-pi/pull/9412
+  - @coderredlab made their first contribution in https://github.com/can1357/oh-my-pi/pull/9435
+  Full Changelog: https://github.com/can1357/oh-my-pi/compare/v18.0.3...v18.0.4
+ReleaseNotesUrl: https://github.com/can1357/oh-my-pi/releases/tag/v18.0.4
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://omp.sh/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,96 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: FahrenheitResearch.BowEcho
+PackageVersion: 0.34.11
+PackageLocale: en-US
+Publisher: Fahrenheit Research
+PublisherUrl: https://github.com/FahrenheitResearch
+PublisherSupportUrl: https://github.com/FahrenheitResearch/bowecho/issues
+Author: Fahrenheit Research
+PackageName: BowEcho
+PackageUrl: https://github.com/FahrenheitResearch/bowecho
+License: MIT OR Apache-2.0
+LicenseUrl: https://github.com/FahrenheitResearch/bowecho/blob/main/LICENSE-APACHE
+Copyright: Copyright © Fahrenheit Research. MIT OR Apache-2.0.
+CopyrightUrl: https://github.com/FahrenheitResearch/bowecho/blob/main/LICENSE-MIT
+ShortDescription: Fast, free, native NEXRAD Level II radar viewer — live storm-scale radar in a single small download
+Description: 'BowEcho — A fast, free, native NEXRAD Level II radar viewer. Live super-resolution base data, dealiased velocity, dual-pol, derived severe-weather products, synced multi-pane, and vertical cross-sections — in a single small download. BowEcho decodes raw NEXRAD Level II data straight from the public AWS archive and live chunk feed (no account, no API key) and renders it with a fast CPU rasterizer that preserves the native super-resolution pixel pattern. It is built in Rust for speed: products switch instantly, panning stays fluid, and first pixels from a fresh volume arrive in well under a second on typical connections.'
+Moniker: bowecho
+ReleaseNotes: |-
+  BowEcho v0.34.11
+  This release substantially expands native model analysis and export, improves
+  satellite loading and map behavior, and fixes several radar timeline and
+  inspection workflows.
+
+  Model and GRIB analysis
+  - Shift-clicking the map can now place a fixed model/GRIB probe. The inspector
+    reports the sampled value and units together with the run, lead, and
+    authoritative valid time, and the probe remains fixed while the view or
+    model timestep changes.
+  - Forecast graph plots the fixed point through locally stored forecast
+    times. The same graph can display the selected field's domain-wide minimum
+    or maximum, preserves missing-data gaps, and reads only the required grid
+    windows and cached field statistics.
+  - Model point sampling now uses the same bilinear curvilinear-grid sampling as
+    the displayed field, including a fallback to adjacent valid cells.
+  - The Models GIS controls now use packaged data in release builds. Native plots
+    include detailed worldwide country, state/province, coastline, and lake
+    context, with U.S. county boundaries available at county detail.
+  - The floating Native plot window now exposes durable map-detail, layer,
+    line-style, sampling, plot-style, output-scale, and saved-domain controls.
+    Rerender applies those choices immediately, and applied settings are
+    restored on the next launch.
+
+  WRF processing and export
+  - Quick import and full diagnostics publish each completed WRF timestep to the
+    Models library immediately after its atomic store commit. The optional
+    Follow completed timesteps while processing control advances the viewer
+    as new times finish; turning it off preserves the timestep being inspected.
+  - GIF loop and MP4 video actions in Field tools render the current field
+    across all completed timesteps using the native plot pipeline. GIF encoding
+    is built in; MP4 export uses ffmpeg when it is available on PATH.
+  - Animation export writes an ordered PNG sequence beside the final media file,
+    reports progress, uses bounded frame memory, and removes an unfinished output
+    when cancelled.
+
+  Satellite
+  - Tropical true-color requests now load the latest usable native frame instead
+    of starting a large multi-frame visible download. The visible action is
+    disabled on the storm's night side with IR remaining available.
+  - One-shot tropical and RGB loads now select their completed result atomically
+    even when its satellite, sector, resolution, or focused crop differs from the
+    live-follow panel. GOES RGB requests retain the selected detail settings.
+  - While the map is moving, an older satellite texture is reprojected across the
+    current map view instead of sliding as a single rectangle and snapping into
+    place after movement stops.
+  - SimSat results now have Save plot PNG, using the same georeferenced
+    1600x1200 export path as the satellite Native plot window.
+
+  Radar timeline and inspection
+  - Newly arriving low-level cuts no longer force the display through every new
+    sweep by default. Follow new low cuts is now an explicit persisted option
+    with a configurable minimum time gap, and it pauses during loop playback.
+  - Archive warning previews retain already visible, time-valid polygons until
+    the final warning sources arrive, preventing warning boxes from briefly
+    disappearing while stepping through the radar timeline.
+  - Storm-track analysis now warms complete frames from the loaded radar loop in
+    bounded background batches. The controls show analysis progress and make it
+    clearer that clicking a track exposes its motion and valid times.
+  - The weak-reflectivity gate filter now applies to reflectivity itself as well
+    as velocity and dual-pol decluttering, and its label and threshold describe
+    that behavior directly.
+  - Inspector-card visibility and each inspector field option now persist across
+    app restarts. Fixed probes also provide explicit forecast-graph and unpin
+    actions.
+  - The bottom status bar compacts background activity on narrower windows to
+    avoid overlapping status text, and the recent-radar-cache action is shown
+    only when it can target the selected U.S. radar unambiguously.
+
+  Operational notes
+  - Every official release asset is built from the v0.34.11 tag by GitHub
+    Actions. Matching .sha256 files are published beside the Windows, macOS,
+    and Linux downloads.
+ReleaseNotesUrl: https://github.com/FahrenheitResearch/bowecho/releases/tag/v0.34.11
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,70 @@
+# Created with WinGet Updater using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: CycloneDX.cdxgen
+PackageVersion: 13.0.0
+PackageLocale: en-US
+Publisher: OWASP Foundation
+PublisherUrl: https://owasp.org/
+PublisherSupportUrl: https://github.com/CycloneDX/cdxgen/issues
+Author: CycloneDX
+PackageName: CycloneDX Generator (cdxgen)
+PackageUrl: https://github.com/CycloneDX/cdxgen
+License: Apache-2.0
+LicenseUrl: https://github.com/CycloneDX/cdxgen/blob/HEAD/LICENSE
+ShortDescription: A polyglot tool and a library for generating various Bill of Materials in CycloneDX specification.
+Description: Generate Software Bill of Materials (SBOM) for most applications and container images with a single command. Generate Operations Bill of Materials (OBOM) for Linux and Windows hosts. Integrate with any CI/CD pipeline. Automatically submit the generated BOM to your dependency track server for analysis.
+Moniker: cdxgen
+Tags:
+- bom
+- cbom
+- containers
+- cyclonedx
+- docker
+- oci
+- owasp
+- package-url
+- purl
+- saasbom
+- sbom
+- sca
+- software-bill-of-materials
+- supply-chain
+ReleaseNotes: |-
+  cdxgen v13 - The cdx TEAn release
+  v13 is a major release. We ran multiple agentic loops powered by Claude Opus 5 and GLM-5.2 to refactor and rewrite cdxgen v12 for maximum performance, maintainability, and accuracy. Please refer to the migration document to plan your upgrade journey.
+  The npm package renamed from @cyclonedx/cdxgen to @cdxgen/cdxgen, the container images moved from ghcr.io/cyclonedx/* to ghcr.io/cdxgen/*, and the Node.js floor rose to 24. The CycloneDX generation floor is now 1.6, with 1.7 as the default and 2.0 accepted as a target. Generating 1.4 or 1.5 from the CLI is no longer supported, though downgrading an already-generated document with cdx-convert --to still works.
+  Performance
+  Startup and small-project scans are roughly 45 percent faster and peak memory is down. Large scans are significantly faster with the new Rust backend.
+  The JS and TypeScript AST walk now runs across worker threads, with file hashing done concurrently and an inline fallback when threads are unavailable. Registry metadata fetches for Maven, NuGet, RubyGems, PyPI, jsr, Swift, GitHub and pkg.go.dev are batched behind a prefetch seam with per-host rate limiting and in-flight deduplication, instead of one round trip per package. The CocoaPods podspec probe, the forge commit lookups and the predictive audit's repository resolution were all batched the same way.
+  Container and OS scans share a single directory walk across every ecosystem leg that enumerates an image rootfs, decide array uniqueness in linear time, and scan container paths concurrently. CMake resolution is skipped for container and OS scans where it cannot succeed.
+  atom was upgraded to 3.x. The bundled jars are replaced by native per-platform binaries on five targets (linux glibc amd64 and arm64, linux musl amd64, darwin arm64, windows amd64), so no JDK is needed there. The three jar-kind triples still need Java 23. atom 3 sizes its heap from the cgroup limit rather than host RAM, so it no longer OOMs in a memory-capped container. Reachables output is stricter: the new Flux data-flow engine drops sanitised and benign flows, so reachable counts fall and purl coverage rises. Re-baseline any assertions accordingly.
+  The cdxrs Rust binary backs cdxrs fetch, with the JavaScript paths retained as the primary implementation and the Rust paths as an optional optimisation. The fetch cache is bounded by an OS-appropriate root, a TTL sweep and an LRU byte ceiling, exposed through --no-cache, --cache-ttl and a cache subcommand.
+  New languages and ecosystems
+  Zig, Gleam and Mojo are first-class project types. Zig reads build.zig.zon and resolves the full transitive graph, emitting multihash 1220... digests as SHA-256 hashes. Gleam reads gleam.toml and manifest.toml and maps packages to pkg:hex. Mojo reads mojoproject.toml and separates Mojo-native packages from the conda and PyPI packages pulled in through pixi.lock.
+  Bazel projects using bzlmod are now parsed from MODULE.bazel and MODULE.bazel.lock. Resolved dependencies map to their real ecosystem purl (pkg:maven, pkg:npm, etc.) so advisories still match, and only Bazel Central Registry modules use the registered pkg:bazel type. Toolchain repositories are skipped and the bazel build runs only when dependency installation is permitted.
+  .NET Central Package Management (CPM) is supported, so Directory.Packages.props governed projects resolve correctly.
+  Nix flake inputs switched from an unrecognised pkg:nix type to pkg:generic with a vcs_url qualifier and a cdx:purl:proposedType=nix marker, which makes them visible to vulnerability databases for the first time.
+  CycloneDX 1.7
+  The 1.7 feature surface is covered: citations at the document root, Traffic Light Protocol classification under metadata.distributionConstraints.tlp (with value redaction for CLEAR, GREEN and AMBER), algorithmFamily and ellipticCurve on cryptographic assets, and TLP on distribution constraints. A weak TLP classification also redacts known sensitive property values. The protobuf export path passes 1.7 citations through via cdx-proto 2.1.
+  Python distributions that ship an embedded SBOM under .dist-info/sboms/ per PEP 770 are now expanded, so their declared components appear as dependencies of the distribution.
+  The Transparency Exchange API is supported in both directions: --tea-fetch retrieves and merges a supplier SBOM over the conformance endpoint, and --tea-publish publishes the generated BOM as a TEA Artifact (the publisher API is still a draft, so the flag is experimental and uses exit status 3 on publish failure so the locally written BOM is never lost).
+  Dependency Pruning
+  We rewrote and removed unwanted dependencies. The largest single contributor was removing cheerio, which had cost 71 ms of every invocation, 29 percent of module load, for two functions that only ran on Go projects. It took 22 transitive packages and a duplicate undici major with it. The Go licence and repository fields are now read with an in-house extractor. xml-js and sax were also dropped in favour of in-house parsers for pom, nuspec, csproj, VSIX and plist XML, and Babel was upgraded to 8.
+  npm dependency tree
+  The vendored arborist was upgraded to 10.0.2. packageExtensions in a project's package.json are now applied declaratively and disclosed on the BOM via cdx:npm:packageExtensionsHash and cdx:npm:packageExtensionsApplied, without executing project code. .npm-extension files are detected and hashed but never executed; repairs they made are taken from the lockfile instead. The last two arborist-only dependencies were dropped. pnpm path-style alias values are resolved instead of being built into purls, and sbt dependency tree refs were fixed.
+  Package URL canonicalization
+  packageurl-js was replaced with @cdxgen/cdx-purl, a strict implementation that enforces the purl-spec ABNF and per-type policies. PyPI names containing . or _ are normalised to - per PEP 503, changing both purl and bom-ref. Golang namespaces are lowercased. Components that cannot form a valid purl (Maven artifacts without a groupId, Swift local apps, vscode extensions without a publisher, single-segment Go modules) now get a name-based bom-ref and no purl field, instead of an invalid pkg:swift/swift-smoke@undefined. ASAR archive purls, ASP.NET route templates and the download_url qualifier on third-party SBOMs were all repaired. Downstream consumers that match on purl strings should normalise before lookup during the transition.
+  C and C++
+  C/C++ BOMs now resolve CMakeCache.txt and git submodules, attach cache versions to ZLIB-style packages, collapse repeated CMake requirements, and emit relative purl subpaths for absolute includes and versionless lockfile roots.
+  Container and OS
+  Container and OS scan BOMs are kept as CI artifacts even when a scan fails. Java archives whose Maven coordinates cannot be read are no longer dropped: they are emitted as file components with MD5, SHA-1 and SHA-256 hashes and a zero-confidence filename identity, the same treatment unpackaged executables and shared libraries already get. Directories that cannot be read are skipped while building the OS package path list instead of aborting the scan. Generic BSD license names no longer resolve to 0BSD.
+  CLI and output
+  stdout now carries only the payload; every diagnostic moved to stderr. -o - writes the BOM document to stdout, instead of silently creating a file named -. New flags cover quiet and countable verbose levels, --no-progress, --color, --log-format (with NDJSON on stderr), --tlp-classification, the TEA family, and --experimental-mcp-pinning. A CDXGEN_LOG_STREAM=stdout escape hatch restores the v12 stream layout during migration.
+  BOM unordered collections are sorted at finalization for deterministic output, and annotation timestamps are derived from the annotated document so repeated renders of one BOM agree.
+  Internal architecture
+  lib/cli/index.js was split into per-ecosystem modules over a shared assembly layer, and the monolithic lib/helpers/utils.js was decomposed into focused leaf modules under lib/core, lib/ecosystems and lib/inventory. A numbered layering scheme is enforced by contrib/check-boundaries.js. The old helpers/utils barrel is re-exported from ecosystems/utils for one major version, and legacy unnamespaced properties (SrcFile, ImportedModules, etc.) moved under an internal: prefix to mark them as implementation detail.
+  Full Changelog: v12.8.2...v13.0.0
+ReleaseNotesUrl: https://github.com/cdxgen/cdxgen/releases/tag/v13.0.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

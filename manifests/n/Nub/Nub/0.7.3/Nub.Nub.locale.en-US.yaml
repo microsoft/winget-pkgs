@@ -1,0 +1,72 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Nub.Nub
+PackageVersion: 0.7.3
+PackageLocale: en-US
+Publisher: nub contributors
+PublisherUrl: https://nubjs.com/
+PublisherSupportUrl: https://github.com/nubjs/nub/issues
+Author: nub contributors
+PackageName: Nub
+PackageUrl: https://nubjs.com/
+License: MIT
+LicenseUrl: https://github.com/nubjs/nub/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 nub contributors
+CopyrightUrl: https://github.com/nubjs/nub/blob/HEAD/LICENSE
+ShortDescription: The all-in-one JavaScript toolkit that augments Node.js instead of trying to replace it.
+Description: "An all-in-one toolkit for Node.js. One Rust binary to run your files and scripts, install dependencies, and manage Node itself — a Bun-like modern DX on top of the node you already have. There's no new runtime to adopt and no lock-in: every augmentation rides on Node's own public extension surfaces."
+Moniker: nub
+Tags:
+- javascript-runtime
+- node-version-manager
+- nodejs
+- package-manager
+- script-runner
+ReleaseNotes: |-
+  A Windows fix for nub run, native TypeScript transform configuration, and import-text on the Node 24 LTS backport.
+  Important
+  Windows npm installs could not run scripts. On 0.7.0–0.7.2, nub run failed on Windows with "bundled POSIX shell (busybox.exe) was not found" from the second invocation onward. Upgrading fixes it; there is nothing to clean up by hand.
+  Windows
+  nub run executes script bodies through a bundled busybox sh, which the binary resolves relative to itself. 0.7.0 began hardlinking nub.exe into npm's global bin directory for a faster dispatch path, which moved the binary away from that shell — so the first call after an install worked and every later one failed. The launcher now carries the shell into a nub-sh/ subdirectory beside the relocated binary, and the resolution accepts that layout. It goes in a subdirectory rather than beside the executable because that directory is on PATH, where a bare busybox.exe would shadow a busybox the user installed themselves. (#699, #687)
+
+  Configuration
+  Project nub.jsonc gains six native TypeScript transform fields — jsx, jsxFactory, jsxFragmentFactory, jsxImportSource, decorators, and emitDecoratorMetadata. (#697)
+
+  Runtime
+  ───────────┬──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┬────────────
+  Area       │What changed                                                                                                                                                                                                  │Commit
+  ───────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼────────────
+  import-text│--experimental-import-text is injected on the 24.19.0 LTS backport band as well as 26.5+, so a Node that knows the flag no longer falls through to the default loader and fails with                          │439853b
+             │ERR_UNKNOWN_FILE_EXTENSION                                                                                                                                                                                    │
+  ───────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼────────────
+  TypeScript │customConditions from tsconfig.json are applied as Node export conditions                                                                                                                                     │005e8e4
+  ───────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼────────────
+  Environment│An explicit env file is refused when Varlock owns the environment, rather than being silently layered                                                                                                         │dfe9b73
+  ───────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼────────────
+  Environment│.env.schema ownership is decided by loader resolution, and a missing schema is a refusal rather than a degrade                                                                                                │7dfeb95
+  ───────────┴──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┴────────────
+
+  Types
+  @nubjs/types splits its shared declarations into common.d.ts and routes pre-6.0 compilers through a dedicated entry, so proposal declarations coexist with the official ones as they land. The fixture matrix runs under TypeScript 5.9, 6.0 and 7.0. (e29dc5c)
+
+  Testing & internals
+  - The Windows busybox probe runs its whole case matrix against both shell layouts, plus a negative control that fails when no shell is present (#699).
+  - A stray root nub.jsonc setting nodeCompat: true was removed; it disabled augmentation for every in-tree test and took the whole test matrix red (#696, #695).
+  - The v0.7 config-schema snapshot was refreshed against latest.json after the transform fields landed, restoring the release verification gate (f58f09f).
+  - Documentation for the runtime API augmentations, Varlock, and the configuration reference (ddcf309, f1b2542, 1eb177c).
+
+  What's Changed
+  - node: inject --experimental-import-text on the 24.19.0 backport band by @pullfrog[bot] in #689
+  - runtime: refuse an explicit env file when Varlock owns the environment by @colinhacks in #690
+  - env: decide .env.schema ownership by loader resolution, and refuse when it is missing by @colinhacks in #691
+  - runtime: apply tsconfig customConditions as Node export conditions by @colinhacks in #692
+  - ci: remove the stray root nub.jsonc that disabled augmentation by @pullfrog[bot] in #696
+  - config: add native TypeScript transform fields by @colinhacks in #697
+  - run(windows): carry the bundled POSIX shell with the relocated nub.exe by @colinhacks in #699
+ReleaseNotesUrl: https://github.com/nubjs/nub/releases/tag/v0.7.3
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://nubjs.com/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,122 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: can1357.oh-my-pi
+PackageVersion: 17.4.0
+PackageLocale: en-US
+Publisher: Can Bölük
+PublisherUrl: https://can.ac/
+PublisherSupportUrl: https://github.com/can1357/oh-my-pi/issues
+Author: Can Bölük
+PackageName: oh-my-pi
+PackageUrl: https://omp.sh/
+License: MIT
+LicenseUrl: https://github.com/can1357/oh-my-pi/blob/HEAD/LICENSE
+Copyright: |-
+  Copyright (c) 2025 Mario Zechner
+  Copyright (c) 2025-2026 Can Bölük
+ShortDescription: ⌥ AI Coding agent for the terminal — hash-anchored edits, optimized tool harness, LSP, Python, browser, subagents, and more
+Description: |-
+  omp is a terminal-first coding agent that runs on your machine, talks to any provider, and treats sessions like git branches.
+  omp (pronounced “oh-em-pi”, binary omp) is a fork of Mario Zechner’s Pi. It runs as a single Bun process, drives any model provider you have credentials for, and ships a flat tool surface the model uses to read code, run commands, edit files, drive a debugger, and spawn subagents that coordinate over an in-process IRC bus.
+  Sessions persist as JSONL under ~/.omp/agent/sessions/. You resume, fork, branch, and share them. Settings, credentials, plugins, and caches all live under ~/.omp/agent/. Nothing leaves the machine unless you call a tool that does.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  @oh-my-pi/pi-agent-core
+  Breaking Changes
+  - Replaced global token counting functions (countTokens, countTokensConservatively, setTokenizerModel, and estimateTokens) with model-scoped, immutable Tokenizer instances (agent.tokenizer). Use tokenizer.countTokens(text, mode?), tokenizer.countMessage(message), or tokenizer.countMessages(messages).
+  - Updated context management functions (findCutPoint, prepareBranchEntries, collectShakeRegions, pruneToolOutputs, pruneSupersededToolResults, and trimRemoteCompactionInputToContextWindow) to require an explicit Tokenizer instance.
+  Added
+  - Added Tokenizer.checkTokenBudget(text, budget) to efficiently verify if text fits within a token limit using fast byte-bound checks before falling back to full tokenization.
+  - Added provider-anchored transcript token estimation (findTranscriptUsageAnchor, isTranscriptUsageAnchor, estimateTranscriptTokens) to calculate transcript token counts incrementally from the latest reported assistant turn usage.
+  - Added remotePreserveReusable() to check whether a previous remote compaction payload remains reusable with the active model.
+  Changed
+  - Expanded native tokenizer support across catalog models, adding exact embedded token counting for Claude, Qwen 3.5+, DeepSeek V3/V4/R1, Kimi K2/K3, and GLM-5+ models. Tokenizer now constructs from a resolved catalog Model.
+  - createCompactionSummaryMessage takes an options object after (summary, tokensBefore, timestamp); CompactionSummaryMessage gained optional method and tokensAfter display metadata.
+  @oh-my-pi/pi-ai
+  Added
+  - Added model metadata fields (context_length, max_output_tokens, input_modalities, etc.) to auth gateway model listing responses
+  Fixed
+  - Fixed tool-argument repair applying lossy transformations (such as stringifying objects or stripping unrecognized keys) when validating union schemas (anyOf/oneOf), preventing corrupted tool call and subagent payloads
+  - Fixed 400 errors when communicating with local OpenAI-compatible inference servers that reject chat_template_kwargs.reasoning_effort by improving reasoning effort parameter fallback and compatibility handling
+  - Fixed DeepSeek-family models on hosts like Fireworks losing reasoning whenever tools were offered: a redundant tool_choice: "auto" is now omitted so the provider keeps thinking enabled; forced and "none" selectors still take priority (#1207)
+  @oh-my-pi/pi-catalog
+  Added
+  - Models now include an optional tokenizer family field across bundled, discovered, and custom models (supporting Claude, Qwen, DeepSeek, Kimi, and GLM families), with support for explicit overrides in model configuration.
+  - Added long-context cost tiers (cost.longContext) to subscription Codex GPT-5.6 models (Sol, Terra, Luna) matching first-party API pricing above 272K input tokens.
+  Changed
+  - Bundled model metadata is prebuilt during generation, reducing catalog startup work.
+  Fixed
+  - Fixed tool-call turn failures for opencode-go/muse-spark-1.2 and related variants by ensuring API transport pins apply to live discovery and automatically inferring response routes for gateway-first OpenCode models (#8957).
+  @oh-my-pi/pi-coding-agent
+  Added
+  - /cleanse (and omp cleanse) — run the checker/repair loop in-session, with a live status board of running checkers, repair subagents, and token/cost totals.
+  - omp ps — interactive monitor for daemon-supervised background processes.
+  - Composer layouts — composer.shape picks the editor frame (rounded box, Claude Code rules, upstream-pi rules, borderless), with live previews in /settings and the setup wizard.
+  - Context line — statusLine.contextLine gauge (percentage, annotated, embedded) showing context usage and compaction boundaries.
+  - Backgroundable Python — eval cells can run async and auto-background like bash, with configurable thresholds.
+  - Local Claude token counting — Anthropic-family tokens now count via a native local tokenizer, and every counter (session maintenance, advisor, stats, context tools) uses the active model's own tokenizer.
+  - extendedContext setting — pick whether models with premium long-context pricing (272K/1M tiers on Codex-class models) use the extended window or compact early and stay on standard pricing.
+  - /extended-context — toggle premium long-context windows without leaving the session.
+  - Speculative compaction — with compaction.asyncEnabled, all compaction modes compact in parallel while the session continues, then splice the result in instantly.
+  - tokenizer property on custom models and modelOverrides to pin the tokenizer family for proxy models.
+  - qwenTemplateReasoningEffort in models.yml compat to disable the Qwen 3.8+ reasoning-effort template parameter for strict local servers.
+  - Click-to-toggle and drag-to-reorder for list-valued editors in /settings.
+  - icon.subscription and icon.advisor symbol-theme tokens (Nerd Font, Unicode, ASCII).
+  Changed
+  - Typing anywhere in the /models UI now immediately focuses the model list for instant search and arrow navigation.
+  - Revamped the todo HUD — overall progress renders along the tree-spine connector with smooth completion transitions.
+  - Compaction divider now names the maintenance method that fired (remote-compacted, soft-compacted, handed-off, snap-compacted) and shows the before → after context size (e.g. 256K→20K).
+  - /handoff (and automatic handoff compaction) now compacts in place, replacing the session context instead of forking a new session.
+  - Compaction method priorities — compaction.methodOrder takes an ordered preference list (e.g. [remote, snap] uses remote compaction where the provider supports it, such as OpenAI, and snap everywhere else), replacing compaction.strategy/compaction.remoteEnabled.
+  - Unified inline overlays and selectors (model picker, settings, /cleanse) into one titled rounded-box panel style.
+  - Risk badges and warnings on /settings rows, starting with External Thinking.
+  - Faster CLI Startup
+  Fixed
+  - /models keeps auto thinking on non-default roles such as task instead of changing the active model and displaying the role as max.
+  - Subagent yield structured results no longer get corrupted by lossy argument repairs; prompt guidance improved for weak callers.
+  - GitHub file_read returns proper image blocks and direct view URLs for image/binary files.
+  - Cancelled prompts during pre-stream turn setup restore the text and image attachments to the editor.
+  - top builtin accepts single-dash macOS flags such as -pid and -stats.
+  - GNU/BSD compat sweep across built-in shell utilities (timeout, diff, find, date, tail, head, rg, stat, truncate, cksum, sleep, which, nohup, kill).
+  @oh-my-pi/hashline
+  Added
+  - Added an opener-escape landing correction for insertions anchored on a construct's opening line to place shallower sibling constructs after the enclosing block rather than splitting the opener from its body.
+  Fixed
+  - Fixed an issue where single-line replacements echoing attributes or decorators (such as #[napi] or @Injectable()) could lead to silently duplicated annotations.
+  - Increased the default snapshot-store path capacity from 30 to 256 to prevent early tags in wide sessions from aging out and triggering misleading "hash is not from this session" errors.
+  @oh-my-pi/pi-natives
+  Added
+  - Added offline countTokens support for Anthropic Claude families (ClaudeV3, ClaudeV47, ClaudeV5) via a high-performance native port of ctok.
+  - Added exact offline token counting support for Qwen (3.5+, 3.6+, 3.8), DeepSeek (V3, V4, R1), Kimi (K2, K3), and GLM-5 models alongside rebuilt OpenAI encodings, with optimized zero-allocation string passing from JavaScript.
+  - Added nodeChainAt native API to retrieve innermost-first tree-sitter node chains with grammar kinds and line spans for structural syntax analysis.
+  Changed
+  - Improved shell builtins (grep, rg, sed, cat, head, tail, jq, ls, etc.) to stream output progressively with destination-aware line buffering for pipes, terminals, and live TUI output, while maintaining block buffering for file writes.
+  - Updated compound blocks ({ ...; }, (...)) and shell-function pipeline stages to run concurrently with other pipeline stages, preventing head-of-line blocking and pipe buffer deadlocks.
+  Fixed
+  - Fixed the shell output minimizer dropping failure details from non-TTY bun test runs: the (fail) line, code frame, error: assertion, and stack trace are now kept instead of collapsing a failing run to bare pass/fail counts; unrecognized failing test formats now fall back to head/tail instead of counts-only output.
+  @oh-my-pi/omp-stats
+  Changed
+  - Window token estimates now incorporate broker-reported fleet token burn when an auth broker is configured, accurately tracking fleet-wide usage instead of undercounting with local-only statistics.
+  Fixed
+  - Fixed an issue in subscription-window insights where distinct limits sharing a duration label (such as Anthropic overall vs. model-scoped 7-day windows) were incorrectly merged, which inflated window-equivalents and skewed tokens-per-window estimates. Windows are now grouped by provider limit ID.
+  @oh-my-pi/pi-tui
+  Added
+  - Added composer border styles (box, claude, pi, borderless) via ComposerStyle objects and getComposerStyle, unifying chrome geometry and rendering across the editor and previews.
+  - Added support for warning risk notes and row markers in settings lists.
+  Full Changelog: https://github.com/can1357/oh-my-pi/compare/v17.3.8...v17.4.0
+ReleaseNotesUrl: https://github.com/can1357/oh-my-pi/releases/tag/v17.4.0
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://omp.sh/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

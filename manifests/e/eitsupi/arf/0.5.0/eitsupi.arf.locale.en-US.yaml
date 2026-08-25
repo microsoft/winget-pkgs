@@ -1,0 +1,135 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: eitsupi.arf
+PackageVersion: 0.5.0
+PackageLocale: en-US
+Publisher: eitsupi
+PublisherUrl: https://github.com/eitsupi
+PublisherSupportUrl: https://github.com/eitsupi/arf/issues
+Author: arf authors
+PackageName: arf console
+PackageUrl: https://github.com/eitsupi/arf
+License: MIT
+LicenseUrl: https://github.com/eitsupi/arf/blob/HEAD/LICENSE.md
+Copyright: Copyright (c) 2026 arf authors
+CopyrightUrl: https://github.com/eitsupi/arf/blob/HEAD/LICENSE.md
+ShortDescription: Alternative R Frontend — a modern R console written in Rust
+Description: arf is a modern, cross-platform R console written in Rust. It provides a rich interactive experience with fuzzy help search, intelligent history navigation, and syntax highlighting—all with fast startup times.
+Moniker: arf
+Tags:
+- console
+- r
+- rust
+- terminal
+ReleaseNotes: |-
+  Release Notes
+  Added
+  - Experimental: arf ipc session and arf headless --json now report an ipc_policy object describing the active IPC policy, including the silent-eval allowlist and whether visible requests require human approval. :info meta command shows the same information for the running session. arf ipc list remains discovery-only; use arf ipc session to inspect policy details (#316).
+  Changed
+  - Breaking: Reprex mode is now a single three-state setting (off, on, or format) instead of separate reprex and auto-format switches (#318, #319).
+    - Set the startup mode with [startup] reprex, start arf in it with --reprex=<off|on|format>, and switch during a session with :reprex on|off|format.
+    - Static reprex settings moved from [mode.reprex] to a top-level [reprex] table, which also gained the formatter setting.
+    - format mode now passes code to the formatter over stdin instead of writing a temporary file, and supports the Arity CLI alongside the Air CLI. Air 0.9.0 or later and Arity 0.18.0 or later are supported; formatter configuration is discovered from arf's working directory.
+    - formatter = "auto" (the default) prefers Air and then Arity when available. Explicit "air" or "arity" selections are strict and never fall back to the other backend.
+    - If formatting fails, arf reports the formatter's stderr and does not evaluate the unformatted code.
+    - The old keys and the --auto-format, :autoformat, and :format interfaces are removed without compatibility aliases. arf config check reports all removed reprex keys in a single run.
+  - Breaking: History storage now has explicit persistent and volatile modes, selected with [history] mode (#314).
+    - --no-history now means volatile, session-only history rather than no history: recall, search, the browser, metadata, and IPC history queries all keep working, but nothing is read from or written to disk.
+    - When a persistent database cannot be opened, arf falls back to volatile history and reports why instead of silently continuing without history. :info, startup warnings, and the history_runtime object in headless JSON carry the cause.
+    - history.disabled and top-level history.dir are still accepted with a migration warning when mode is omitted. With an explicit mode, disabled is ignored and reported, while top-level dir is an error.
+  - Meta command classification is now stored in history (#312).
+  - Experimental/Breaking: arf ipc eval without --visible now refuses R code unless every function it calls is allowlisted, so a program with access to the socket can no longer use this path to run arbitrary function calls in the session. Literals and object references still evaluate without configuration. Allow calls with [ipc.eval].allowed_functions or --ipc-eval-allow-function, or opt out for a session with --ipc-eval-unrestricted at startup. The check is syntactic, not an R sandbox (#303).
+  - Experimental/Breaking: arf ipc send and arf ipc eval --visible now show the submitted code and ask for confirmation before running it in an interactive REPL. :ipc send-policy allow disables the prompt until arf restarts. Headless sessions run visible requests immediately, and the eval allowlist does not apply to either visible path (#303).
+  - Experimental/Breaking: session_type is now required in session metadata. Session files written by an older arf that lack this field are no longer accepted by arf ipc list or other client commands. Such files are deleted once their process is gone and left untouched while it is still running (#317).
+  Migration Guide
+  If you have a configuration file from 0.4.x, apply the following changes. arf config check reports removed reprex keys, and arf warns at startup about deprecated history keys.
+  ──────────────────────────────────────────────────────────┬───────────────────────────────────────
+  0.4.x key                                                 │0.5.0 key
+  ──────────────────────────────────────────────────────────┼───────────────────────────────────────
+  startup.mode.reprex = true                                │startup.reprex = "on"
+  ──────────────────────────────────────────────────────────┼───────────────────────────────────────
+  startup.mode.reprex = true + startup.mode.autoformat =    │startup.reprex = "format"
+  true                                                      │
+  ──────────────────────────────────────────────────────────┼───────────────────────────────────────
+  mode.reprex.comment                                       │reprex.comment
+  ──────────────────────────────────────────────────────────┼───────────────────────────────────────
+  prompt.indicators.autoformat                              │prompt.indicators.reprex_format
+  ──────────────────────────────────────────────────────────┼───────────────────────────────────────
+  history.disabled = true                                   │history.mode = "volatile"
+  ──────────────────────────────────────────────────────────┼───────────────────────────────────────
+  history.dir = "/custom/path"                              │history.mode = { dir = "/custom/path" }
+  ──────────────────────────────────────────────────────────┴───────────────────────────────────────
+  Before (0.4.x):
+  [startup.mode]
+  reprex = true
+  autoformat = true
+  [mode.reprex]
+  comment = "#> "
+  [prompt.indicators]
+  reprex = "[reprex] "
+  autoformat = "[format] "
+  [history]
+  disabled = false
+  dir = "/custom/path"
+  After (0.5.0):
+  [startup]
+  reprex = "format"   # "off", "on", or "format"
+  [reprex]
+  comment = "#> "
+  formatter = "auto"  # "auto", "air", or "arity"
+  [prompt.indicators]
+  reprex = "[reprex] "
+  reprex_format = "[format] "
+  [history]
+  mode = { dir = "/custom/path" }   # or "persistent" / "volatile"
+  The command-line and meta command interfaces changed accordingly:
+  ──────────────────────┬──────────────────────
+  0.4.x                 │0.5.0
+  ──────────────────────┼──────────────────────
+  --reprex              │--reprex=on
+  ──────────────────────┼──────────────────────
+  --reprex --auto-format│--reprex=format
+  ──────────────────────┼──────────────────────
+  :reprex (toggle)      │:reprex on, :reprex
+                        │off
+  ──────────────────────┼──────────────────────
+  :autoformat, :format  │:reprex format
+  ──────────────────────┴──────────────────────
+  Fixed
+  - A command that prompted for input (readline(), menu(), browser()) recorded its success or failure against the answer typed at that prompt instead of against the command itself (#312).
+  - A history database error while saving a command no longer aborts the session (#312).
+  - Importing an arf history database now preserves session, hostname, working directory, duration, exit status, and metadata instead of only the command and timestamp (#313).
+  - Re-importing a source repairs those columns on entries an earlier import left empty without replacing values already recorded (#313).
+  - Importing a history database no longer writes to the source database (#313).
+  - Importing a file that is not an arf history database now reports an error instead of silently importing nothing (#313).
+  - macOS binaries no longer fail to start with a missing liblzma library error (#304).
+  - Experimental: IPC approval prompts previously showed only the first few hundred characters of submitted code while arf ran all of it, allowing executable code to be hidden beyond the visible portion. The prompt now shows the complete submitted code with control characters escaped (#315).
+  Install arf-console 0.5.0
+  Install prebuilt binaries via shell script
+  curl --proto '=https' --tlsv1.2 -LsSf https://github.com/eitsupi/arf/releases/download/v0.5.0/arf-console-installer.sh | sh
+  Install prebuilt binaries via powershell script
+  powershell -ExecutionPolicy Bypass -c "irm https://github.com/eitsupi/arf/releases/download/v0.5.0/arf-console-installer.ps1 | iex"
+  Download arf-console 0.5.0
+  ──────────────────────────────────────────────────┬───────────────────┬─────────────
+  File                                              │Platform           │Checksum
+  ──────────────────────────────────────────────────┼───────────────────┼─────────────
+  arf-console-aarch64-apple-darwin.tar.xz           │Apple Silicon macOS│checksum
+  ──────────────────────────────────────────────────┼───────────────────┼─────────────
+  arf-console-x86_64-apple-darwin.tar.xz            │Intel macOS        │checksum
+  ──────────────────────────────────────────────────┼───────────────────┼─────────────
+  arf-console-aarch64-pc-windows-msvc.zip           │ARM64 Windows      │checksum
+  ──────────────────────────────────────────────────┼───────────────────┼─────────────
+  arf-console-x86_64-pc-windows-msvc.zip            │x64 Windows        │checksum
+  ──────────────────────────────────────────────────┼───────────────────┼─────────────
+  arf-console-aarch64-unknown-linux-gnu.tar.xz      │ARM64 Linux        │checksum
+  ──────────────────────────────────────────────────┼───────────────────┼─────────────
+  arf-console-x86_64-unknown-linux-gnu.tar.xz       │x64 Linux          │checksum
+  ──────────────────────────────────────────────────┼───────────────────┼─────────────
+  arf-console-aarch64-unknown-linux-musl.tar.xz     │ARM64 MUSL Linux   │checksum
+  ──────────────────────────────────────────────────┼───────────────────┼─────────────
+  arf-console-x86_64-unknown-linux-musl.tar.xz      │x64 MUSL Linux     │checksum
+  ──────────────────────────────────────────────────┴───────────────────┴─────────────
+ReleaseNotesUrl: https://github.com/eitsupi/arf/releases/tag/v0.5.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

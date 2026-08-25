@@ -1,0 +1,175 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: dundee.gdu
+PackageVersion: 5.37.0
+PackageLocale: en-US
+Publisher: Daniel Milde
+PublisherUrl: https://milde.cz/en
+PublisherSupportUrl: https://milde.cz/en/contact
+Author: Daniel Milde
+PackageName: gdu
+PackageUrl: https://github.com/dundee/gdu
+License: MIT
+LicenseUrl: https://github.com/dundee/gdu/blob/HEAD/LICENSE.md
+Copyright: Copyright 2020-2021 Daniel Milde daniel@milde.cz
+CopyrightUrl: https://github.com/dundee/gdu/blob/master/LICENSE.md
+ShortDescription: Pretty fast disk usage analyzer written in Go.
+Tags:
+- cli
+- filesystem
+- go
+- ncdu
+- tui
+ReleaseNotes: |-
+  What's New
+  This release brings a browser-based UI, more control over long scans, richer
+  file-list information, and finer-grained configuration and export options. Below
+  is a walkthrough of each new feature.
+  Web UI
+  Gdu can now serve a browser-based interface instead of the terminal UI.
+  gdu --web /some/dir
+  Gdu scans the directory, prints the URL, and (by default) opens it in your
+  default browser. The interface shows an animated donut chart of the current
+  directory's contents alongside a sortable table with size bars, breadcrumb
+  navigation, and a disk-usage/apparent-size toggle. Scan progress is streamed
+  live while the analysis runs.
+  By default the server binds to localhost on a random free port. Use
+  --web-listen (or the web.listen config option) to pin a fixed address, and
+  --web-open=false to print the URL without launching a browser.
+  The compiled web assets are embedded in the binary, so no extra files or network
+  access are required.
+  Security: the web UI is read-only and has no authentication. It exposes file
+  names and sizes over HTTP, so keep it bound to localhost (the default). Binding
+  to a non-loopback address makes those details reachable by other hosts on the
+  network and prints a warning.
+  by @dundee in #617
+  Preview results during a scan (Tab)
+  You no longer have to wait for a scan to finish before looking at results. Press
+  Tab during a scan to preview the directory totals found so far, then keep
+  watching them update as the analysis continues.
+  by @ultranity in #594
+  Stop scanning and keep partial results
+  Long scans can now be cut short without losing work. Press Ctrl+C during a scan
+  to stop scheduling new work and keep the results found so far, so you can start
+  browsing (or exporting) immediately instead of aborting the whole run.
+  by @ShivamB25 in #606
+  Show symlink target
+  Symlinks can be displayed as name -> target, showing the link destination next
+  to the name just like ls -l. Enable it with:
+  gdu --show-symlink-target /some/dir
+  Symlinks and sockets continue to be marked with the @ file flag.
+  by @yurenchen000 in #612
+  Move items to XDG trash (D key)
+  In addition to permanent deletion (d), you can now move the selected file or
+  directory to the XDG trash with the D key on Linux, matching the behavior of most
+  desktop file managers so items can be recovered later.
+  by @phaethix in #608
+  Configurable colors for marked items
+  The colors used for marked items can now be customized in the configuration
+  file:
+  style:
+      marked:
+          text-color: white
+          background-color: "#6600cc"
+  by @dundee in #566
+  System-wide config: /etc/gdu.yaml
+  Gdu now loads /etc/gdu.yaml as a system-wide configuration file, letting
+  administrators set defaults for all users on a machine. Per-user config files
+  ($HOME/.config/gdu/gdu.yaml and $HOME/.gdu.yaml) still apply on top of it.
+  by @graysky2 in #567
+  Numeric percentage on usage bars
+  Usage bars now display the numeric percentage alongside the bar, making it easier
+  to read exactly how much space each item takes relative to its siblings.
+  by @dundee in #590
+  Confirm before quitting after a long scan
+  To prevent accidentally discarding the results of a long scan, gdu now asks for
+  confirmation before quitting when a lengthy scan's results would otherwise be
+  lost. You can disable the prompt with --no-confirm-quit.
+  by @ultranity in #593
+  Honor block size environment variables
+  Terminal output now honors the BLOCK_SIZE and BLOCKSIZE environment
+  variables. BLOCK_SIZE takes precedence; both accept GNU coreutils block-size
+  values such as 1K, kB, human-readable, and si. Explicit size-format flags
+  override these variables, and exported JSON always retains raw byte values.
+  by @ShivamB25 in #604
+  Customize JSON export attributes
+  The JSON export can now be trimmed to only the attributes you need:
+  gdu --output-attrs=asize,dsize -o out.json /some/dir
+  name is always included; available optional attributes are asize, dsize,
+  items, mtime, and notreg. Directories always retain their asize, dsize,
+  and items summary stats so they can be preserved on import.
+  by @ShivamB25 in #605
+  Exclude OneDrive online-only file sizes
+  Gdu can now exclude the sizes of OneDrive online-only ("cloud") files, so
+  placeholder files that aren't actually stored locally don't inflate your disk
+  usage totals.
+  by @tpill90 in #609
+  Summary of all changes
+  - feat: add web UI by @dundee in #617
+  - feat: preview results found so far during a scan (Tab) by @ultranity in #594
+  - feat: stop scanning and keep partial results by @ShivamB25 in #606
+  - feat: show symlink target #260 by @yurenchen000 in #612
+  - feat: move items to XDG trash with D key (#12) by @phaethix in #608
+  - feat: config option to change colors for marked items by @dundee in #566
+  - feat: load /etc/gdu.yaml as system-wide config by @graysky2 in #567
+  - feat: show numeric percentage on usage bars by @dundee in #590
+  - feat: confirm before quitting when a long scan would be lost by @ultranity in #593
+  - feat: honor block size environment by @ShivamB25 in #604
+  - feat: customize JSON export attributes by @ShivamB25 in #605
+  - feat: excluding OneDrive online file storage sizes by @tpill90 in #609
+  - feat: update vite by @dundee in #628
+  - fix: respect --show-apparent-size for file paths in non-interactive mode by @wahajahmed010 in #558
+  - fix: ignore for root directory not working by @dundee in #573
+  - fix: correct item count and size for empty dirs by @dundee in #574
+  - fix: stack overflow by @dundee in #577
+  - fix: import panic for empty array by @dundee in #578
+  - fix: import panic on wrong name by @dundee in #581
+  - fix: implement IsDir and GetPath for SimpleDir by @dundee in #583
+  - fix: SQLite analyzer permission error flags by @sjh9714 in #598
+  - fix(report): make JSON export respect -t, --depth and --summarize filters by @ShivamB25 in #600
+  - fix: sanitize control characters in paths printed on quit by @carfeii in #616
+  - fix(report): preserve directory stats in JSON export by @ShivamB25 in #603
+  - fix(device): skip malformed mount lines instead of panicking by @VXNCXNX in #625
+  - fix(cmd): stop truncating a --config-file path at the first space by @VXNCXNX in #624
+  - fix(ignore): anchor the whole ignore-pattern alternation by @VXNCXNX in #623
+  - fix: don't materialize dataless files when scanning on macOS by @ngrilly in #622
+  - fix(timefilter): drop the stray separator in the until= filter footer by @VXNCXNX in #621
+  - perf: concurrent processing in sqlite analyzer by @dundee in #565
+  - refactor: use atomic counter instead of mutex by @dundee in #597
+  - docs: fix typo "relase" -> "release" in release run-book by @maxtaran2010 in #601
+  - docs: for contributors and agents by @dundee in #626
+  - chore(deps): bump golang.org/x/text from 0.36.0 to 0.37.0 by @dependabot[bot] in #569
+  - chore(deps): bump golang.org/x/sys from 0.43.0 to 0.44.0 by @dependabot[bot] in #568
+  - chore(deps): bump golang.org/x/sys from 0.44.0 to 0.45.0 by @dependabot[bot] in #575
+  - chore(deps): bump github.com/gdamore/tcell/v2 from 2.13.9 to 2.13.10 by @dependabot[bot] in #579
+  - chore(deps): bump github.com/mattn/go-isatty from 0.0.21 to 0.0.22 by @dependabot[bot] in #559
+  - chore(deps): bump modernc.org/sqlite from 1.49.1 to 1.51.0 by @dependabot[bot] in #582
+  - chore(deps): bump actions/checkout from 6 to 7 by @dependabot[bot] in #592
+  - chore(deps): bump golang.org/x/net from 0.47.0 to 0.55.0 by @dependabot[bot] in #596
+  - chore(deps): bump actions/setup-go from 6 to 7 by @dependabot[bot] in #602
+  - chore(deps): bump actions/setup-node from 4 to 7 by @dependabot[bot] in #620
+  - chore(deps-dev): bump vitest from 2.1.9 to 3.2.6 in /webui/frontend by @dependabot[bot] in #619
+  - chore(deps): bump github/codeql-action from 4 to 4.37.4 by @dependabot[bot] in #613
+  - chore(deps): bump docker/login-action from 4 to 4.5.2 by @dependabot[bot] in #610
+  - chore(deps): bump modernc.org/sqlite from 1.51.0 to 1.52.0 by @dependabot[bot] in #588
+  - chore(deps): bump golang.org/x/sys from 0.45.0 to 0.46.0 by @dependabot[bot] in #587
+  - chore(deps): bump codecov/codecov-action from 6 to 7 by @dependabot[bot] in #585
+  - chore(deps): bump github.com/dgraph-io/badger/v4 from 4.9.1 to 4.9.2 by @dependabot[bot] in #589
+  - chore(deps): bump golang.org/x/text from 0.37.0 to 0.41.0 by @dependabot[bot] in #586
+  - chore(deps): bump go.opentelemetry.io/otel from 1.38.0 to 1.41.0 by @dependabot[bot] in #556
+  New Contributors
+  - @wahajahmed010 made their first contribution in #558
+  - @graysky2 made their first contribution in #567
+  - @ultranity made their first contribution in #593
+  - @maxtaran2010 made their first contribution in #601
+  - @sjh9714 made their first contribution in #598
+  - @carfeii made their first contribution in #616
+  - @phaethix made their first contribution in #608
+  - @tpill90 made their first contribution in #609
+  - @VXNCXNX made their first contribution in #625
+  - @ngrilly made their first contribution in #622
+  Full Changelog: v5.36.1...v5.37.0
+ReleaseNotesUrl: https://github.com/dundee/gdu/releases/tag/v5.37.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
