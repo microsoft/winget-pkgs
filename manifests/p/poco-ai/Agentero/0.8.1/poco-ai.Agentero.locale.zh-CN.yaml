@@ -1,0 +1,41 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: poco-ai.Agentero
+PackageVersion: 0.8.1
+PackageLocale: zh-CN
+Publisher: poco-ai
+PublisherUrl: https://github.com/poco-ai
+PublisherSupportUrl: https://github.com/poco-ai/Agentero/issues
+PackageName: Agentero
+PackageUrl: https://github.com/poco-ai/Agentero
+License: MIT
+LicenseUrl: https://github.com/poco-ai/Agentero/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 poco-ai
+ShortDescription: Agent 友好的文献管理方式。
+Description: 传统文献管理器对 Agent 并不友好：阅读高亮和笔记被锁在单篇文件里，Agent 很难跨论文复用；每次对话都要重新提供上下文，缺少稳定的本地知识地图；PDF 对人友好，但对 Agent 来讲不是最舒服的阅读材料。Agentero 旨在构建 Agent 友好、Agent 原生的文献管理方式，探索人与 Agent 在文献管理中的协作方式。通过 ACP 连接本机 Agent（BYOA），支持划词对话、论文导入与 Skill 导入，兼容 Zotero 生态，提供论文翻译、双链与知识图谱、PDF 深度阅读等功能。
+Tags:
+- agent
+- pdf
+- zotero
+- 学术
+- 引用
+- 文献
+- 文献管理
+- 研究
+- 论文
+ReleaseNotes: |-
+  v0.8.1 是一次聚焦稳定性与易用性的小版本补丁。主要修复了 Windows 系统代理回退、MinerU 云端版面分析结果解析，以及清理了 PDF 工具栏中已失效的批注入口；同时为设置 About 页和 Agent 历史标题带来了两处细节改进。
+  新功能
+  - 设置 About 页打开日志文件夹：在设置 → 关于中新增“打开日志文件夹”操作，用户反馈问题时可直接在系统文件管理器中定位日志目录，便于导出与排查。（78b0084e by @qychen2001）
+  - Agent 会话标题实时同步：转发 ACP 的 session_info_update 通知为 agent:session-info 事件，Agent 主动推送的会话标题会按运行时 id 或 providerSessionId 实时更新历史记录中的对应行，且不会覆盖视觉化追踪的标题。（bf6ac1f5 by @qychen2001）
+  修复
+  - MinerU 云端 layout.json 结果解析：兼容 MinerU Cloud v4 结果 ZIP 中 layout.json（无任务 ID 前缀）的命名方式，修复此前因找不到 *middle.json 导致的版面分析失败，并为两种命名都添加了回归测试。（954bf4c5 by @qychen2001）
+  - PDF 工具栏移除失效批注按钮：v0.8.0 移除右侧栏 Annotations 标签页后，PDF 工具栏的“批注”按钮仍指向已不存在的面板，点击后会跳回 Agent 面板；现移除该按钮及整个 onOpenAnnotations 调用链，关闭 #381。（4250b27b by @Phil-Fan）
+  - Windows 系统代理回退：当应用代理关闭时，Host 网络请求现在会检测 Windows 注册表中的系统代理（支持 http= / https= / socks= 形式）并作为回退使用，修复 Clash/V2RayN 等“系统代理”模式下 Plaza、Feeds 等应用内页面无法加载的问题；通用设置页在代理关闭时显示“已检测到系统代理”，关闭 #376。（b439b31c by @JiaheChen2002 and @qychen2001）
+ReleaseNotesUrl: https://github.com/poco-ai/Agentero/releases/tag/v0.8.1
+Documentations:
+- DocumentLabel: 文档
+  DocumentUrl: https://agentero-docs.poco-ai.com/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
