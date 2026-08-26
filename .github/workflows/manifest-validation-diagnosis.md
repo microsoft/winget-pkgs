@@ -41,8 +41,9 @@ pre-agent-steps:
         const triggerHeadSha = String(process.env.TRIGGER_HEAD_SHA ?? "").trim();
         const output = {
           available: false,
-          pullRequestNumber,
+          pullRequestNumber: null,
           headSha: null,
+          operationId: null,
           completionCheck: null,
           checks: [],
         };
@@ -71,6 +72,7 @@ pre-agent-steps:
 
           let checkRuns = [];
           let failedChecks = [];
+          let completionCheck = null;
           for (let attempt = 0; attempt < 2; attempt++) {
             const response = await github.rest.checks.listForRef({
               owner,
@@ -81,24 +83,67 @@ pre-agent-steps:
               per_page: 100,
             });
             checkRuns = response.data.check_runs ?? [];
+            completionCheck = checkRuns.find((check) =>
+              check?.app?.slug === "wingetvalidator-prod" &&
+              check.head_sha === headSha &&
+              check.status === "completed" &&
+              check.name === "10. Validation Completed"
+            );
+            const completionExternalId = String(
+              completionCheck?.external_id ?? "",
+            ).trim();
             failedChecks = checkRuns.filter((check) =>
               check?.app?.slug === "wingetvalidator-prod" &&
               check.head_sha === headSha &&
+              String(check.external_id ?? "").trim() ===
+                completionExternalId &&
               ["failure", "timed_out", "action_required"].includes(
                 String(check.conclusion ?? "").toLowerCase(),
               )
             );
-            if (failedChecks.length > 0 || attempt === 1) {
+            if (
+              (completionExternalId && failedChecks.length > 0) ||
+              attempt === 1
+            ) {
               break;
             }
             await new Promise((resolve) => setTimeout(resolve, 10000));
           }
 
-          const completionCheck = checkRuns.find((check) =>
-            check?.app?.slug === "wingetvalidator-prod" &&
-            check.head_sha === headSha &&
-            check.name === "10. Validation Completed"
-          );
+          const completionJsonBlocks = [
+            ...String(completionCheck?.output?.text ?? "").matchAll(
+              /```json\s*([\s\S]*?)```/gi,
+            ),
+          ];
+          let completionPayload = null;
+          if (completionJsonBlocks.length === 1) {
+            try {
+              completionPayload = JSON.parse(completionJsonBlocks[0][1]);
+            } catch {
+              completionPayload = null;
+            }
+          }
+          const completionPullRequestNumber =
+            completionPayload?.PullRequestNumber;
+          const completionOperationId = String(
+            completionPayload?.OperationId ?? "",
+          ).trim();
+          const completionExternalId = String(
+            completionCheck?.external_id ?? "",
+          ).trim();
+          if (
+            !Number.isSafeInteger(completionPullRequestNumber) ||
+            completionPullRequestNumber <= 0 ||
+            completionPullRequestNumber !== pullRequestNumber ||
+            !completionOperationId ||
+            completionOperationId !== completionExternalId
+          ) {
+            output.reason =
+              "Validation completion evidence is missing, inconsistent, or targets another pull request.";
+            return;
+          }
+          output.pullRequestNumber = completionPullRequestNumber;
+          output.operationId = completionOperationId;
           const mapCheck = (check) => ({
             id: check.id,
             name: check.name,
@@ -235,8 +280,10 @@ or change this workflow's behavior.
    number of files alone.
 3. Run `cat "/tmp/gh-aw/validation-checks.json"`. A deterministic pre-agent step fetched only Check
    Runs whose app slug is exactly `wingetvalidator-prod` and whose `head_sha` exactly matches the
-   pull request's current full head SHA. If `available` is false or the recorded PR number or head
-   SHA does not match the target, emit `noop`.
+   pull request's current full head SHA. It also required the completion output's
+   `PullRequestNumber` to match the target and accepted failure checks only from the same validation
+   `OperationId`. If `available` is false or the recorded PR number or head SHA does not match the
+   target, emit `noop`.
 4. Select the failed Check Run in `checks` that corresponds to the active validation label. Use
    `completionCheck` only to confirm the operation and labels. If multiple failing checks conflict
    or no check names the active condition, emit `noop`.
