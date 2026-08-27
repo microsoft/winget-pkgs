@@ -1,0 +1,37 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: lbjlaq.AntigravityTools
+PackageVersion: 4.5.7
+PackageLocale: zh-CN
+Publisher: lbjlaq
+PublisherUrl: https://github.com/lbjlaq
+PublisherSupportUrl: https://github.com/lbjlaq/Antigravity-Manager/issues
+PackageName: Antigravity Tools
+PackageUrl: https://github.com/lbjlaq/Antigravity-Manager
+License: CC-BY-NC-SA-4.0
+LicenseUrl: https://github.com/lbjlaq/Antigravity-Manager/blob/HEAD/LICENSE
+ShortDescription: 专业的 Antigravity 账号管理与切换工具。为 Antigravity 提供一键无缝账号切换功能。
+Description: |-
+  Antigravity Tools 是一个专为开发者和 AI 爱好者设计的全功能桌面应用。它将多账号管理、协议转换和智能请求调度完美结合，为您提供一个稳定、极速且成本低廉的 本地 AI 中转站。
+  通过本应用，您可以将常见的 Web 端 Session (Google/Anthropic) 转化为标准化的 API 接口，彻底消除不同厂商间的协议鸿沟。
+Tags:
+- account-manager
+- antigravity
+ReleaseNotes: |-
+  - [核心功能] 账号列表支持 5 小时 / 7 天周配额全局视图无缝切换 (5H/Weekly Quota Switcher):
+    - 双周期视图切换：在账号主管理页面顶部提供 5 小时滚动配额 与 7 天周配额 分段切换器（并持久化保存至本地存储）。
+    - 全景视图一览：切换至周配额模式时，列表与卡片视图直接呈现分组周配额剩余比例及重置倒计时（例如 5d 12h），无需逐个打开详情弹窗。
+    - 相关 PR: 详见 PR #3312。
+  - [核心优化] 智能预热重构为 7 天周期重置精准唤醒 (7-Day Weekly Reset-Aware Smart Warmup):
+    - 精准触发与零浪费：调度器改为仅在检测到 window == "WEEK" 且到达官方 reset_time 重置时间戳后触发单次极小预热，及时激活新周期计时器，彻底杜绝盲轮询与额度浪费。
+    - 周期冷却锁：记录周周期执行锁到 warmup_history.json，确保每个 7 天周期至多触发 1 次；设置中心重新开放智能预热设置项（默认保持关闭）。
+    - 内部接口放行：服务状态检查中间件放行 /internal/* 本地回环请求，修复代理总开关关闭时预热报 503 的问题。
+    - 相关 PR: 详见 PR #3312。
+  - [核心修复] 扩展 thought_signature 机制至 Gemini Flash 全系模型 (Thought Signature Flash Generalization):
+    - 泛化 Flash 家族判断：修复因白名单写死 3/3.1 导致 gemini-3.7-flash 系列在 Claude Code 多轮工具调用时抛出 400 Function call is missing a thought_signature 的缺陷，自动覆盖 3.5/3.6/3.7 及未来新版 Flash 模型。
+    - 哨兵签名兜底注入：在禁用 thinking 回退分支以及无 session 缓存分支中，均补齐注入 skip_thought_signature_validator 哨兵签名，保障多轮工具调用稳定。
+    - 相关 PR: 详见 PR #3314 (修复 #3313, 关联 #3272)。
+ReleaseNotesUrl: https://github.com/lbjlaq/Antigravity-Manager/releases/tag/v4.5.7
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
