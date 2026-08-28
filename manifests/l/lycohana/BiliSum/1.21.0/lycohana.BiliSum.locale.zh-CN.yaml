@@ -1,0 +1,163 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: lycohana.BiliSum
+PackageVersion: 1.21.0
+PackageLocale: zh-CN
+Publisher: lycohana
+PublisherUrl: https://github.com/lycohana
+PublisherSupportUrl: https://github.com/lycohana/BiliSum/issues
+PackageName: BiliSum
+PackageUrl: https://github.com/lycohana/BiliSum
+License: 免费软件
+ShortDescription: 为 Bilibili、YouTube 及本地视频提供 AI 视频摘要和知识库
+Tags:
+- bilibili
+- b站
+- youtube
+- 知识库
+ReleaseNotes: |-
+  v1.21.0
+  本说明覆盖 v1.20.0 之后至 v1.21.0 的全部变更，包含 v1.20.1-alpha.1、v1.20.1-alpha.2、v1.21.0-alpha.1 与本次稳定版的更新。
+  版本重点
+  BiliSum 1.21.0 主要完成 B 站视频合集工作流，并同步升级任务队列、阶段并发、LLM 缓存可观测性和模型推理控制：
+  - B 站合集：从视频读取合集、选择批量总结、合集卡片与详情页、排序筛选、收藏分组、自动检查、更新视频、批量任务和删除清理形成完整闭环（#131、#133、#137）。
+  - LLM 缓存与用量：补充缓存命中/未命中、缓存创建、输入输出 Token 和分阶段用量统计，方便判断缓存效率、处理速度与成本。
+  - 任务队列与并发：新增当前队列入口，拆分转写并发与 LLM 并发，区分展示顺序和任务执行顺序，支持并行任务进度、剩余队列、完成状态、Token 消耗和运行时间。
+  - 思考与推理控制：新增 thinking.type 与 reasoning_effort 设置，默认开启思考、推理强度为 low；不需要展示思考过程时可以关闭思考链，以减少额外 Token 消耗并缩短等待时间。
+  - 运行时与本地模型：改善设置保存、托管运行时自愈、macOS 知识库依赖安装和本地 LLM 兼容性，降低首次启动与长期运行中的失败概率。
+  新功能与体验改进
+  Bilibili 视频合集完整工作流（#131、#133、#137）
+  - 从 Bilibili 视频页读取所属合集信息，支持合集元数据、封面、UP 主信息、季列表和合集内视频。
+  - 检测到合集后进入选择流程，支持“仅总结当前视频”或选择合集内多个视频；触发检测的当前视频默认预选。
+  - 合集在视频库中作为与普通视频一致的一等卡片展示，沿用普通视频卡片的尺寸、封面/列表视图、排序、收藏、分组、置顶和右键菜单逻辑。
+  - 合集卡片显示总集数、已总结数量和未总结数量，并按合集内视频最新生成时间参与首页最近视频排序；合集内视频默认收纳在详情页，不重复占用外层视频库，但保留合集归属。
+  - 点击合集卡片进入独立合集详情页；从合集内视频详情返回时恢复正确的上一级路径，返回合集页而不是直接跳回视频库。
+  - 合集详情使用与视频库一致的视频卡片网格/列表布局，默认优先展示已总结内容；处理中任务继续在已总结区域显示状态，未总结内容单独归类。
+  - 合集详情支持返回视频库、刷新列表、手动更新、打开时自动检查新视频，并通过弱提示询问是否加入新发现的视频。
+  - 合集详情展示 UP 主头像和名称，点击可在浏览器打开对应 UP 主空间；头像加载失败时使用占位内容。
+  - 合集选择支持网格/列表切换、单击选择、连续拖动批量选择和多选状态同步；选择框不常驻，进入选择状态后由底部悬浮操作条承载全选、清空和一键总结未总结内容等操作。
+  - 合集批量总结在第一个任务创建成功后立即进入合集页，通知简化为“已添加合集总结任务”，其余视频在后台继续读取参数和创建任务。
+  - 合集内部视频支持右键添加到外层视频库，同时保留合集内部归属；合集内部与外层视频库使用一致的收藏、分组、置顶和右键操作。
+  - 删除合集时可选择仅移除合集关系并将视频恢复到总视频库，或连同合集视频、任务、摘要和相关文件一起删除；刷新后已从来源移除的历史成员也会进入完整清理流程。
+  - 合集集数角标统一使用低干扰的右下角紧凑计数牌和磨砂玻璃样式，适配浅色/深色主题，不遮挡封面主体。
+  - 统一合集卡片、选择态、拖入态、分页和批量选择相关边框，降低深色模式下的亮度和外发光，保持品牌色但避免刺眼描边。
+  - 默认恢复原合集顺序；状态只作为筛选条件，不会默认拆断原合集顺序。新增排序、分组、搜索和自定义拖动排序，工具栏支持吸顶；展示顺序与任务队列顺序相互独立。
+  LLM 缓存可观测性与思维导图优化（#127，含后续修复）
+  - 新增摘要上下文模式 auto、full、chunked，在缓存复用、上下文完整性和并发速度之间进行选择。
+  - 统一解析 OpenAI-compatible、DeepSeek、Anthropic 等服务商返回的 usage/cache 字段。
+  - 新增 llm_usage_breakdown，分别记录摘要、知识笔记、思维导图、图文取帧、VLM 解析和图文合成等请求的用量。
+  - 视频详情页可查看输入 Token、输出 Token、缓存命中/未命中、缓存创建、命中率和分阶段明细。
+  - 思维导图至少保证根节点下有 3 个一级分支；后续层级改为按概念、方法、案例、条件和结论等内容组织，不再强制固定数量。
+  - 当模型返回结构不合格时先发起一次修复请求，仍失败时使用本地内容兜底，避免只得到根节点或过度稀疏的结构。
+  - 没有缓存字段的服务商继续显示“未提供”，保持非缓存服务商兼容。
+  当前任务队列与阶段并发（#133）
+  - 标题栏新增当前队列状态入口，无任务时隐藏，有任务时显示“已完成任务/总任务数”。
+  - 展开队列后显示目前运行任务、剩余队列、已完成任务以及每个任务的进度百分比。
+  - 区分并发任务和非并发任务，支持查看 Token 消耗和运行时间；辅助数据使用左右切换，仅切换上方指标区域，不替换整个队列面板。
+  - 队列完成后平滑切换为完成状态，计数归零并重新计算下一轮任务；完成状态保留一段时间后优雅收起。
+  - 拆分转写并发数和 LLM 并发数，保留旧版 task_concurrency 兼容字段。
+  - 队列调度遵循各阶段并发配置，避免转写、LLM、摘要分块和思维导图任务互相挤占资源。
+  - 任务失败显示红色 0% 进度，任务完成显示绿色 100% 进度，并同步队列计数和状态颜色。
+  LLM 思考模式与推理强度（#133）
+  - 设置页新增 LLM 思考模式，默认开启：
+    - enabled：启用思考模式；
+    - disabled：关闭思考模式。
+  - 设置页新增 LLM 推理强度，默认值为 low：
+    - low；
+    - high；
+    - max。
+  - 设置保存、读取、运行时注入和连接测试统一支持：
+    {
+      "thinking": {
+        "type": "enabled"
+      },
+      "reasoning_effort": "low"
+    }
+  - 主摘要、视觉理解和视觉笔记请求统一使用配置值；Anthropic 请求保持原有格式，不注入 OpenAI 专用参数。
+  - 如果当前任务不需要模型展示思考过程，可以在设置中关闭思考链，以减少额外推理输出、缩短等待时间并降低 Token 消耗；复杂分析任务可以继续保持开启。
+  CLI、运行时与发布体验
+  - CLI 支持 summarize、brief、transcribe、status、tasks、doctor、start、stop 等命令。
+  - 支持 B 站、YouTube、本地视频、多 P 视频及全集处理，支持 Markdown、JSON 和纯转写输出。
+  - 支持 desktop、cli、custom、auto 四种运行环境；auto 优先连接桌面端，不可用时自动选择 CLI 独立环境。
+  - 新增 bilisum env setup 初始化独立 CLI 环境，新增 bilisum --setting 自动启动当前环境并打开网页设置。
+  - CLI 管理的后台服务默认空闲 10 分钟后自动退出；有排队或运行中的任务时不会退出。
+  - 发布成功后自动触发 npx 与 Docker 发布，并将发布状态挂到提交/PR 上。
+  修复
+  合集与批量任务
+  - 修复合集卡片与普通视频卡片尺寸、排序、收藏、分组和右键逻辑不一致的问题。
+  - 修复合集内视频未自动归入合集、外层视频库重复显示和合集关系丢失的问题。
+  - 修复合集详情页从视频详情返回时直接跳回视频库的问题，恢复正确的上一级页面路径。
+  - 修复合集批量任务创建后参数获取串行阻塞、通知持续刷屏和合集页面进入过慢的问题。
+  - 修复批量总结过程中出现 Internal Server Error 和 LLM returned no readable message content 时缺少统一处理的问题。
+  - LLM 请求检测失败时增加重试机制，默认重试 5 次，并沿用现有可配置重试设置。
+  - 修复任务失败时进度条仍显示处理中进度的问题：失败显示红色 0%，完成显示绿色 100%。
+  - 修复合集选择框、勾选状态、单击选择、连续拖动选择和底部批量操作栏之间的状态不同步问题。
+  - 修复合集卡片拖动预览出现巨大卡片、不可拖动视频仍显示拖动把手以及拖动把手与普通视频卡片不一致的问题。
+  - 修复合集内任务完成后仍停留在未总结区域的问题，处理中的任务会正确显示在已总结区域并同步状态。
+  - 修复刷新合集后已移出来源的历史成员未被删除合集内容流程清理的问题，避免资产、任务、摘要和文件成为孤儿数据。
+  运行时、设置与本地 LLM
+  - 普通保存设置时不再同步执行运行时 bootstrap、环境注入和缓存清理；只有运行通道实际变化时才执行昂贵的同步流程。
+  - SettingsManager.save() 增加并发锁，并通过临时文件加原子替换写入 settings.json，避免并发保存互相覆盖或写坏配置。
+  - 修复 LLM 设置保存后刷新恢复旧值的问题，保存并关闭后以后端持久化配置为准。
+  - 运行时同步失败时返回可读错误详情，不再只返回裸的 Internal Server Error。
+  - 增加便携运行时标准库健康检查，识别“python.exe 存在但运行时已损坏”等情况，并支持从健康种子刷新损坏的 base 运行时。
+  - FunASR 状态显示改为读取当前转写方式对应的安装标记，避免设置页显示错误状态。
+  - 修复冻结/便携运行时首次安装 macOS 知识库依赖时被写入只读 /install 路径的问题，改为写入 BiliSum 管理的可写运行时目录。
+  - 移除本地 LLM 不支持的 OpenAI 专用 response_format: {"type":"json_object"} 参数；Ollama、llama.cpp、vLLM 等后端继续通过 Prompt 约束 JSON 输出。
+  CI 与界面稳定性
+  - Docker 校验只在打包相关文件发生变化时触发，减少与发布无关的 CI 消耗。
+  - 修复并完善缓存遥测审查意见，保证用量字段、缓存字段和详情展示之间保持一致。
+  - Windows CI 与 release 工作流固定 FFmpeg 版本，避免动态 latest release 探测失败导致打包中断。
+  - 修复全局通知条出入动画、自动消失时间和多窗口遮挡问题，默认保留 5 秒并使用一致的浅色/深色主题样式。
+  - 修复深色模式下合集边框、选择态边框和状态药丸亮度过高的问题，统一相关组件的视觉规范。
+  - 将设计验证 playground 和临时测试产物加入 .gitignore，避免误提交。
+  兼容性与升级说明
+  - thinking.type 默认值为 enabled，reasoning_effort 默认值为 low。关闭思考模式可以减少推理输出和 Token 消耗，但复杂任务可能需要保持开启。
+  - 本版本对本地 LLM 请求参数做了兼容性调整：不再发送 OpenAI 专用 response_format 参数，本地模型仍需按 Prompt 返回合法 JSON。
+  - 已损坏或缺少标准库 DLL 的托管运行时会在后续检查中被识别并自动修复，运行时修复可能触发一次重新同步。
+  - macOS 知识库依赖会安装到 BiliSum 管理的可写运行时目录，不再依赖构建环境中的 /install 路径。
+  - 合集视频默认收纳在合集内部；如果需要在总视频库中直接查看，可使用合集内视频的右键菜单将其提升到外层列表，且不会解除合集归属。
+  - 合集批量任务会遵循转写与 LLM 并发配置，不会无上限地同时请求；如果遇到限流、超时或本地资源紧张，建议降低对应并发数。
+  快速开始
+  # 临时运行
+  npx bilisum@1.21.0 --help
+
+  # 或全局安装
+  npm install -g bilisum@1.21.0
+
+  # 初始化独立 CLI 环境
+  bilisum env setup
+  bilisum cli
+  bilisum --setting
+
+  # 生成完整知识笔记
+  bilisum summarize "https://www.bilibili.com/video/BV1xxxx"
+
+  # 快速摘要
+  bilisum brief "https://www.bilibili.com/video/BV1xxxx"
+
+  # 直接转写
+  bilisum transcribe ./demo.mp4 --output transcript.txt
+
+  # 恢复自动环境选择
+  bilisum auto
+  独立 CLI 环境首次初始化需要系统安装 Python 3.12。初始化完成后将使用 CLI 自己的虚拟环境运行。
+  验证情况
+  - v1.21.0-alpha.1 阶段已通过运行时、设置、LLM 缓存、思维导图、合集和本地 LLM 兼容性相关测试。
+  - PR #137 合集视图与批量调度修复：Python 全量测试 486 passed, 1 skipped，合集定向测试 15 passed。
+  - PR #137 的 CI 已通过 Python/CLI/桌面端验证、Windows 打包、macOS 打包、Docker 镜像构建和桌面包变更检测。
+  - 桌面端相关变更已执行 typecheck、桌面测试、renderer build 和 git diff --check。
+  相关变更
+  - #121 fix: avoid runtime sync on ordinary settings saves
+  - #122 fix: overview FunASR status reads the local ASR flag
+  - #123 fix: prevent macOS knowledge dependency installs from targeting /install
+  - #127 feat: improve LLM cache telemetry and mindmap structure
+  - #130 修复：本地 LLM 因 response_format json_object 参数报 400 错误
+  - #131 feat: support Bilibili video collections
+  - #133 feat(collection): 完善合集工作流并增强任务队列与 LLM 控制
+  - #137 feat: 完善合集视图控制与有序批量任务调度
+  Full Changelog: https://github.com/lycohana/BiliSum/compare/v1.21.0-alpha.1...v1.21.0
+ReleaseNotesUrl: https://github.com/lycohana/BiliSum/releases/tag/v1.21.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
