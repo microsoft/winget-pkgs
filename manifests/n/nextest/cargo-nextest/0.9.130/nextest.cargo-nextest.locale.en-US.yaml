@@ -1,0 +1,41 @@
+# Created with komac v2.15.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: nextest.cargo-nextest
+PackageVersion: 0.9.130
+PackageLocale: en-US
+Publisher: nextest
+PublisherUrl: https://github.com/nextest-rs
+PublisherSupportUrl: https://github.com/nextest-rs/nextest/issues
+PackageName: cargo-nextest
+PackageUrl: https://github.com/nextest-rs/nextest
+License: Apache-2.0
+ShortDescription: A next-generation test runner for Rust.
+Tags:
+- cargo-plugin
+- cargo-subcommand
+- flaky-tests
+- junit
+- nextest
+- rust
+- testing
+ReleaseNotes: |-
+  Added
+  - Nextest now sets several new environment variables for tests and setup scripts: (#3103)
+    - NEXTEST_VERSION: the current nextest version as a semver string.
+    - NEXTEST_REQUIRED_VERSION and NEXTEST_RECOMMENDED_VERSION: the minimum required and recommended nextest versions from the repository's nextest-version configuration. If not configured, the value is "none".
+    - NEXTEST_TEST_THREADS: the computed number of test threads for this run.
+    - NEXTEST_WORKSPACE_ROOT: the absolute path to the workspace root (respects --workspace-remap).
+  - Nextest now sets CARGO_BIN_EXE_<name> at runtime for integration tests and benchmarks, matching cargo test in Rust 1.94 and above. Nextest sets this variable on all Rust versions. (#3137)
+    Previously, nextest only set NEXTEST_BIN_EXE_<name>, which remains available (and, with underscores, continues to be the recommended form). The CARGO_BIN_EXE_<name> form improves compatibility with tests written for cargo test.
+  Changed
+  - The automatic migration of recorded test runs from the cache directory to the state directory, introduced in version 0.9.126, has been removed. Records in the old cache directory location will no longer be migrated. (#3101)
+  Fixed
+  A couple of displayer fixes:
+  - Better sorting for the final summary when counters aren't displayed. (#3100)
+  - Fixed counter width padding in progress output to use the run count rather than the total test count. (#3102)
+  Internal improvements
+  - Cargo JSON output is now streamed directly into the binary list, making binary listing around 6% faster on large workspaces. (#3131) Thanks cornmander for your first contribution!
+ReleaseNotesUrl: https://github.com/nextest-rs/nextest/releases/tag/cargo-nextest-0.9.130
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,89 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: astral-sh.ty
+PackageVersion: 0.0.30
+PackageLocale: en-US
+Publisher: Astral Software Inc.
+PublisherUrl: https://astral.sh/
+PublisherSupportUrl: https://github.com/astral-sh/ty/issues
+Author: Astral Software Inc.
+PackageName: ty
+PackageUrl: https://github.com/astral-sh/ty
+License: MIT
+LicenseUrl: https://github.com/astral-sh/ty/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2025 Astral Software Inc.
+CopyrightUrl: https://github.com/astral-sh/ty/blob/HEAD/LICENSE
+ShortDescription: An extremely fast Python type checker and language server, written in Rust.
+Moniker: ty
+Tags:
+- python
+ReleaseNotes: |-
+  As of v0.0.30, ty no longer unions Unknown into most inferred types of unannotated attributes. For example:
+  class Foo:
+      def __init__(self) -> None:
+          self.value = 1
+  reveal_type(Foo().value)  # revealed: int
+  Foo().value = "x"  # error: [invalid-assignment]
+  In previous versions, reveal_type(Foo().value) would have included Unknown, so the assignment to "x" would not have been flagged. Since this can affect inferred attribute types throughout a codebase, upgrading may lead to both new and resolved diagnostics. Initializers of None and other non-literal singleton types remain exceptions. See #24531 for details.
+  
+  Bug fixes
+  - Disallow bare ParamSpec in Concatenate prefixes (#24474)
+  - Ensure '/' parameter appears before '*' when rendering Callable types (#24497)
+  - Ensure nested conditional blocks inherit TYPE_CHECKING state from outer blocks (#24470)
+  - Fix bad diagnostic range for incorrect implicit __init_subclass__ calls (#24541)
+  - Fix incorrect assignability of type[T] to a metaclass (#24515)
+  - Fix stack overflows from recursive types (#24413)
+  - Server: fix signature help for ParamSpec-specialized class calls (#24399)
+  - Use TypedDict field types as type context to inform the inference of arguments passed to TypedDict constructors (#24422)
+  
+  LSP server
+  - Adjust semantic tokens implementation to ensure that type alias values have "type form" syntax highlighting in IDEs (#24478)
+  - Completions: rank symbols from typing and collections higher than third party re-exports (#23643)
+  - Ignore unsupported editor-selected Python versions (#24498)
+  - Improve TypedDict constructor support in the LSP by synthesizing __init__ (#24476, #24522, #24535)
+  - Return all attribute definitions for goto definition, rather than just the last definition in the given scope (#24332)
+  - Show info subdiagnostics in LSP diagnostic messages (#24328)
+  - Use the context of the kind of object a parameter is expected to receive to inform syntax highlighting of arguments passed to call expressions (#23949)
+  
+  Diagnostics
+  - Hide "Rule xyz is enabled"-style hints unless verbose mode was specified (#24469)
+  - Improve consistency of pedantic lints complaining about badly named types (#24575)
+  - Point to the first reachable declaration, rather than the first declaration, in declaration-based diagnostics (#24564)
+  
+  Core type checking
+  - Add support for functional Enum(...) syntax (#23602, #24570, #24571)
+  - Allow Final variable assignments in __post_init__ (#24529)
+  - Allow partially stringified type[...] annotations, e.g. type["MyClass"] (#24518)
+  - Emit a diagnostic when attempting to inherit from a class with __init_subclass__ = None (#24543)
+  - Fix TypeGuard and TypeIs narrowing for unbound method calls (#24612)
+  - Fix assignability of intersections with bounded TypeVars (#24502)
+  - Fix excess subscript argument inference for non-generic types so that list[int][0] leads to 1 diagnostic, rather than 2 (#24354)
+  - Inherit dataclass_transform metadata from metaclass bases (#24615)
+  - Lazily evaluate declaration reachability in field and enum filters (#24451)
+  - Normalize explicit None accessors in manual property construction (#24492)
+  - Reject deleting Final attributes (#24508)
+  - Respect non-required keys in TypedDict unpacking (#24446)
+  - Respect property deleters in attribute deletion checks (#24500)
+  - Stop special-casing str constructor (#24514)
+  - Stop unioning Unknown into types of un-annotated attributes (#24531)
+  - Support super() in metaclass methods (#24483)
+  - Tighten up a few edge cases in Concatenate type-expression parsing (#24172)
+  - Use basic blocks for determining if a node is in an if TYPE_CHECKING block (#24394)
+  
+  Contributors
+  - @charliermarsh
+  - @Glyphack
+  - @MichaReiser
+  - @sharkdp
+  - @carljm
+  - @YilunAllenChen
+  - @zanieb
+  - @AlexWaygood
+  - @thejchap
+ReleaseNotesUrl: https://github.com/astral-sh/ty/releases/tag/0.0.30
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://docs.astral.sh/ty/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,70 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: max-sixty.worktrunk
+PackageVersion: v0.39.0
+PackageLocale: en-US
+Publisher: max-sixty
+PublisherUrl: https://github.com/max-sixty
+PublisherSupportUrl: https://github.com/max-sixty/worktrunk/issues
+PackageName: worktrunk
+PackageUrl: https://github.com/max-sixty/worktrunk
+License: MIT OR Apache-2.0
+LicenseUrl: https://github.com/max-sixty/worktrunk/blob/HEAD/LICENSE
+ShortDescription: A Git worktree manager for trunk-based development
+Description: |-
+  worktrunk (wt) is a Git worktree manager designed for trunk-based development workflows.
+  It simplifies creating, switching between, and managing Git worktrees, making it easy to
+  work on multiple features or branches simultaneously without the overhead of stashing
+  or switching branches in a single working directory.
+Tags:
+- cli
+- git
+- git-worktree
+- rust
+- terminal
+- worktree
+ReleaseNotes: |-
+  Release Notes
+  Improved
+  - Aliases dispatch from top-level wt <name> (and graduate from experimental): Configured aliases now resolve as first-class commands — wt deploy works the same as wt step deploy, reading better as an everyday shortcut. Precedence is built-in → alias → wt-<name> PATH binary → unrecognized-subcommand error, matching git's model where [alias] entries shadow git-foo externals. The old "alias shadows a built-in" warning is gone; an alias named commit now simply runs via wt commit (only wt step commit remains shadowed). (#2266)
+  - wt switch --base accepts pr:N / mr:N: --base now routes through the same resolver as the positional branch argument, so wt switch -c feat-x --base pr:42 works symmetrically with wt switch pr:42. Same-repo PRs/MRs resolve to the source branch name; fork PRs/MRs fetch refs/pull/N/head (GitHub) or refs/merge-requests/N/head (GitLab) and use the resolved SHA, avoiding fork-branch pollution in the local namespace. (#2263, thanks @jrdncstr for the request in #2261)
+  - WORKTRUNK_PROJECT_CONFIG_PATH env override: Mirrors the existing WORKTRUNK_CONFIG_PATH (user) and WORKTRUNK_SYSTEM_CONFIG_PATH (system) overrides for the project config. Missing files at the overridden path resolve to no project config, same as a missing .config/wt.toml. wt config show --format=json now reports the overridden path in the project.path field. (#2267)
+  Fixed
+  - wt list handles [gone] upstreams gracefully: When a branch's configured upstream ref is gone (remote branch deleted, local tracking ref pruned), the Remote column was surfacing a raw fatal: ambiguous argument 'origin/<branch>' error from git rev-parse. Upstream resolution now reads %(upstream:track) and treats [gone] the same as no upstream, so the row renders cleanly. (#2262)
+  - Nix flake build with vendored skim-tuikit: The [patch.crates-io] path dependency on vendor/skim-tuikit was being stubbed out by crane's mkDummySrc during buildDepsOnly, breaking downstream skim resolution. The flake now preserves real sources for vendored path deps while still benefiting from dependency caching. (#2265, thanks @nickdichev)
+  Documentation
+  - Renamed "external subcommand" to "custom subcommand": The user-facing name for wt-<name> PATH-dispatched subcommands is now "custom subcommand" in docs and internal code, matching cargo's vocabulary. Avoids overloading "external," which the codebase already uses for shell_exec subprocesses. Internal renames: src/commands/external.rs → custom.rs, Commands::External → Commands::Custom. (#2270)
+  - Trimmed filler in prose docs: Removed sentences that restated obvious error behavior, duplicated nearby prose, or added visual weight without information across extending.md, faq.md, and tips-patterns.md. (#2271, #2272)
+  Internal
+  - Extracted a shared did_you_mean helper used by both top-level and wt step suggestion sites, so the 0.7 Jaro-Winkler threshold and sort order are defined in one place. (#2268)
+  Install worktrunk 0.39.0
+  Install prebuilt binaries via shell script
+  curl --proto '=https' --tlsv1.2 -LsSf https://github.com/max-sixty/worktrunk/releases/download/v0.39.0/worktrunk-installer.sh | sh && wt config shell install
+  Install prebuilt binaries via powershell script
+  powershell -ExecutionPolicy Bypass -c "irm https://github.com/max-sixty/worktrunk/releases/download/v0.39.0/worktrunk-installer.ps1 | iex"; git-wt config shell install
+  Install prebuilt binaries via Homebrew
+  brew install worktrunk && wt config shell install
+  Download worktrunk 0.39.0
+  ────────────────────────────────────────────────┬───────────────────┬─────────────
+  File                                            │Platform           │Checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-aarch64-apple-darwin.tar.xz           │Apple Silicon macOS│checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-x86_64-apple-darwin.tar.xz            │Intel macOS        │checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-x86_64-pc-windows-msvc.zip            │x64 Windows        │checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-aarch64-unknown-linux-musl.tar.xz     │ARM64 MUSL Linux   │checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-x86_64-unknown-linux-musl.tar.xz      │x64 MUSL Linux     │checksum
+  ────────────────────────────────────────────────┴───────────────────┴─────────────
+  Install via Cargo
+  cargo install worktrunk && wt config shell install
+  Install via Winget (Windows)
+  winget install max-sixty.worktrunk && git-wt config shell install
+  Install via AUR (Arch Linux)
+  paru worktrunk-bin && wt config shell install
+ReleaseNotesUrl: https://github.com/max-sixty/worktrunk/releases/tag/v0.39.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,47 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: endev.aube
+PackageVersion: 1.39.0
+PackageLocale: en-US
+Publisher: en.dev
+PublisherUrl: https://en.dev/
+PublisherSupportUrl: https://github.com/endevco/aube/discussions/categories/troubleshooting-and-bugs
+Author: en.dev
+PackageName: aube
+PackageUrl: https://aube.en.dev/
+License: MIT
+LicenseUrl: https://github.com/endevco/aube/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 en.dev inc
+CopyrightUrl: https://github.com/endevco/aube/blob/HEAD/LICENSE
+ShortDescription: A fast Node.js package manager
+Description: |-
+  aube is a package manager for Node.js projects. It uses pnpm-style isolated node_modules for fast, disk-efficient installs.
+
+  Existing projects keep their lockfile format. aube reads and writes pnpm-lock.yaml, package-lock.json, npm-shrinkwrap.json, yarn.lock, and bun.lock in place. New projects without a supported lockfile get aube-lock.yaml.
+
+  Why Try It
+  - Fast installs. Warm installs are about 8x faster than pnpm and about 5x faster than Bun in the current benchmarks. Repeat test commands run up to 35x faster than pnpm and up to 5x faster than Bun.
+  - Existing lockfiles. Reads and writes pnpm-lock.yaml, package-lock.json, npm-shrinkwrap.json, yarn.lock, and bun.lock in place.
+  - Cheap repeat commands. aubr test, aube test, and aube exec vitest auto-install when dependencies are stale, then skip that work when nothing changed. aubx uses a local binary when one is installed, or a throwaway environment for one-off tools.
+  - Less disk use. A global content-addressable store lets projects share package files instead of keeping a full copy of the same dependencies in every checkout.
+  - Secure defaults. Out of the box, exotic transitive deps are blocked, lifecycle scripts wait for approval, trust downgrades fail at resolve, and brand-new releases sit in a 24h cooling window. One paranoid: true line adds the build jail and turns the soft gates into hard fails.
+Moniker: aube
+ReleaseNotes: |-
+  This release adds a configurable default lockfile format, lets store prune reclaim stale global-virtual-store entries, tightens devEngines version enforcement, and lets embedders drop the comment-preserving workspace-YAML dependency chain.
+  Added
+  - Configurable default lockfile format (#1271 by @jdx) — New defaultLockfileFormat setting ("aube" or "pnpm", default "aube") chooses which lockfile to create when no supported lockfile is present on disk. Existing lockfiles remain authoritative, so the setting never converts a lockfile or writes a duplicate alongside one that already exists. This makes the aube clean --lockfile → reinstall workflow reliably regenerate pnpm-lock.yaml for projects that need pnpm compatibility. Configurable via workspace config, settings.toml, .npmrc, and env, and applied consistently across install and the add/remove/update/dedupe/audit write paths. Addresses #1264.
+    # settings.toml
+    defaultLockfileFormat = "pnpm"
+  - Optional workspace YAML preservation for embedders (#1278 by @jdx) — Comment- and format-preserving pnpm-workspace.yaml edits are now gated behind a default-on workspace-yaml-preserve feature. The standalone Aube CLI is unchanged, but embedders (e.g. mise) can disable the feature to drop the yamlpatch/yamlpath/tree-sitter dependency chain — which required Rust 1.97+ — falling back to a canonical full-document rewrite.
+
+  Fixed
+  - Prune unused global virtual store entries (#1273 by @jdx) — aube store prune previously only walked the content-addressable store, leaving hashed graph directories under <cacheDir>/virtual-store behind even after their projects were deleted. Installs that use the global virtual store now register the project (including warm/fast-path installs after upgrading), and prune uses that registry to keep entries still linked from live projects while removing unreachable ones before continuing with normal content-store cleanup. Installs and pruning coordinate via shared/exclusive locks, registry-managed entries live under a versioned virtual-store/v1/ namespace so older releases' entries are untouched, and registry failures fail closed with ERR_AUBE_GVS_PRUNE_FAILED. --dry-run covers the new phase. Addresses #1268.
+  - Enforce devEngines aube version errors (#1269 by @jdx) — An explicit devEngines.packageManager.onFail: "error" now correctly rejects the invoking aube when its version does not satisfy the declared aube version, instead of silently re-execing to an already-installed match. The same self-version policy is now enforced for aube --version (which previously returned before self-version handling), and aube --version --workspace-root works outside a workspace. devEngines.packageManager entries naming pnpm or other package managers keep their existing compatibility behavior. Fixes #1263.
+
+  💚 Sponsor aube
+  aube is maintained by @jdx, an open source developer for entire.io, the title sponsor of the jdx.dev open source tools including mise. Work on aube is funded by sponsors.
+  If aube is saving your team install time or CI minutes, please consider sponsoring at jdx.dev. Individual and company sponsorships are what keep the project fast, free, and independent.
+ReleaseNotesUrl: https://github.com/jdx/aube/releases/tag/v1.39.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

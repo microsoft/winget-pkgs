@@ -1,0 +1,122 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: pdfcpu.pdfcpu
+PackageVersion: 0.15.0
+PackageLocale: en-US
+Publisher: pdfcpu
+PublisherUrl: https://github.com/pdfcpu
+PublisherSupportUrl: https://github.com/pdfcpu/pdfcpu/issues
+Author: Horst Rutter
+PackageName: pdfcpu
+PackageUrl: https://github.com/pdfcpu/pdfcpu
+License: Apache-2.0
+LicenseUrl: https://github.com/pdfcpu/pdfcpu/blob/master/LICENSE.txt
+ShortDescription: A PDF processor written in Go.
+Tags:
+- go
+- golang
+- golang-library
+- pdf
+- pdf-files
+- pdf-lib
+- pdf-processor
+- pdflib
+- processor
+ReleaseNotes: |-
+  # pdfcpu v0.15.0
+
+  This release is a focused follow-up to v0.14.0 improving diagnostics and observability for validating large PDF corpora.
+   It also includes PDF processing hardening, CJK text wrapping for watermarks, and clearer signature-validation
+  behavior.
+
+  v0.15.0 follows v0.14.0 by only one week because post-release corpus testing made an existing operational gap clear:
+  large wildcard-driven validation runs delayed failure diagnostics until the full input set completed and provided no
+  quiet-mode indication of the file currently being processed. 
+
+  The changes are targeted and immediately useful to corpus testers, so holding them for a later feature release would unnecessarily delay feedback. The short interval is intentional and does not establish a weekly release routine.
+
+  ## Corpus validation diagnostics
+
+  Multi-file CLI validation now reports each failed input as soon as the failure is detected, continues with the remaining
+  inputs, and exits nonzero with a compact summary:
+
+  ```text
+  validation failed: 66 of 463 files invalid
+  ```
+
+  The new `--progress` flag identifies the active input during quiet validation runs. This is useful when a long-running
+  corpus job stalls on a particular file:
+
+  ```sh
+  pdfcpu validate -q --progress "**/*.pdf"
+  ```
+
+  The quotes are intentional. They pass the recursive pattern to pdfcpu for internal expansion instead of asking the shell
+  to expand thousands of paths into one command line, which may exceed the operating system's argument-size limit.
+
+  With `-q --progress`, progress and validation failures are written to standard error while standard output remains
+  clean:
+
+  ```text
+  validating(mode=relaxed) path/to/input.pdf ...
+  validate path/to/input.pdf: validation error: ...
+  ```
+
+  ## Corpus testing and issue reports
+
+  There is a new [Corpus Validation guide](https://pdfcpu.io/getting_started/corpus_validation/) documenting quick assessment,
+  progress monitoring, logging, validation modes, result interpretation, and focused issue reporting.
+
+  A failed corpus run is diagnostic input, not an issue backlog. 
+  Public reports must isolate one manually verified and independently reproduced problem with the smallest shareable PDF.
+  Include the relevant error and final summary, and attach large logs as compressed files instead of pasting them into an issue.
+
+  AI-generated, bulk-generated, or mechanically reformatted corpus reports will be closed immediately without investigation.
+  Corpus-wide analysis, failure classification, confidential-file investigation, and scheduled remediation are separate engineering work and may require a paid engagement. 
+
+  Limited corpus investigation and remediation work may be available by arrangement.
+
+  ## PDF validation and processing hardening
+
+  Malformed and inconsistent PDF structures now produce more contextual errors across reading, dereferencing, validation,
+  optimization, fonts, forms, and XObjects. Integer conversion and encryption handling have been tightened, and additional
+  guards reduce the risk of panics while processing damaged input.
+
+  This work is backed by expanded malformed-input, error-path, and optimization regression coverage.
+
+  ## CJK watermark text wrapping
+
+  Text watermarks now support automatic wrapping for CJK text, including long runs without spaces. Oversized text is
+  wrapped to the configured width instead of forcing unintended font-size reduction. This resolves issue #1427 and
+  includes expanded CJK wrapping and layout coverage.
+
+  ## Digital signatures
+
+  Signature validation output is clearer for legacy and unsupported cases. Evidence handling, PKCS#1 and PKCS#7
+  processing, and related error classification have also been tightened.
+
+  ## Compatibility notes
+
+  The `pkg/api` multi-file validation contract is unchanged: API callers continue to receive joined errors after
+  processing. The CLI now streams individual multi-file validation failures and returns a final summary, so scripts that
+  compare complete stderr strings should be updated to rely on exit status and stable error classification instead.
+
+  Existing non-quiet validation already reports the active input. 
+  `--progress` extends that visibility to quiet corpus runs without duplicating normal progress output.
+
+  ## Changelog
+  * f2686555086a2e76dc19f602ea1897f6e3baae4d bump version
+  * dcc168d28225f7f3266836668483a3cdaced729a update issue reporting guidelines
+  * f5f3edf37f9642c4403300db88109521085006f2 harden PDF validation and add progress reporting
+  * afc357e23773c32d61b8c18601f77aa8ffcb6dab clarify signature validation output and legacy handling
+  * c9c07d0fcd19439f967cfff96203ebe41a1e8327 harden crypto integer conversions
+  * 198382701afee53f783aaf425cc240ee26170ae4 upgrade gh workflows
+  * 4e5f3aba056aebb721d7334032b378aeba1708b8 harden crypto integer conversions
+  * b57300b5f79f9139a7a6534fce7cbc96633ae025 clean up for #1427
+  * a2c33719c6aa55593d0316e50247388a3763b5f2 add CJK auto-wrap support for text watermarks (#1427)
+
+
+ReleaseNotesUrl: https://github.com/pdfcpu/pdfcpu/releases/tag/v0.15.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

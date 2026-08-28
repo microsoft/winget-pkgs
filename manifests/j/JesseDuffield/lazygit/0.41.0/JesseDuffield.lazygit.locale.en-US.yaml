@@ -1,0 +1,125 @@
+# Created with komac v2.1.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.6.0.schema.json
+
+PackageIdentifier: JesseDuffield.lazygit
+PackageVersion: 0.41.0
+PackageLocale: en-US
+Publisher: Jesse Duffield
+PublisherUrl: https://github.com/jesseduffield
+PublisherSupportUrl: https://github.com/jesseduffield/lazygit/issues
+Author: Jesse Duffield
+PackageName: lazygit
+PackageUrl: https://github.com/jesseduffield/lazygit
+License: MIT
+LicenseUrl: https://github.com/jesseduffield/lazygit/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2018 Jesse Duffield
+CopyrightUrl: https://raw.githubusercontent.com/jesseduffield/lazygit/master/LICENSE
+ShortDescription: Simple terminal UI for git commands.
+Moniker: lazygit
+Tags:
+- cli
+- cross-platform
+- git
+- git-client
+- open-source
+- terminal-app
+ReleaseNotes: |-
+  Hold on tight because this is a HUGE release! This release includes a whopping 595 commits from a period of over 7 months, from 40 different contributors. Thanks to everybody who made this possible, and apologies for taking so long to actually release it: we'll be more frequent in future!Special thanks to Stefan Haller who is behind many of this release's changes and who has been critical in getting this release across the line.I've made a video running through the big changes here:What's Changed
+  Here's some highlighted features:Range select
+  range-selectYou can now press 'v' to toggle range select in any list view, just like you already could in the staging view. You can also press shift+up/down to select a range. You can use range select to:- stage/discard a range of files
+  - select multiple commits to fixup/squash/move outside an interactive rebase
+  - select multiple commits to mark as fixup/squash/etc within an interactive rebase
+  - select multiple commit files to discard or add to a custom patch (courtesy of @afhoffman)
+  - select multiple commits to cherry-pick
+  I have been waiting for this feature for a very long time and it's already made me way more productive. If I need to squash a range of commits I can now easily do it directly rather than needing to squash them one-by-one, or needing to manually start an interactive rebase first. Likewise, it's much easier to select a range of files and stage them than stage them one-by-one.This is a Breaking change: Unfortunately, the 'v' key clashes with the existing key for pasting commits (cherry-pick), so we've replaced that with shift+V and changed the commit copy key to shift+C. If you want the old keybindings back, you can do that like so:
+
+  keybinding:
+    universal:
+        toggleRangeSelect: <something other than v>
+      commits:
+        cherryPickCopy: 'c'
+        pasteCommits: 'v'
+
+  Auto-wrap in commit editor
+  The commit editor now automatically hard-wraps your content by default, so you no longer need to hit the enter key yourself when you approach the margin. You can disable/configure this in your config:
+
+  git:
+    commit:
+      autoWrapCommitMessage: true
+      autoWrapWidth: 72
+
+  Thanks to @stefanhaller for this feature.Easier remote branch checkout
+  Now when you go to checkout a remote branch, either via the c keybinding in the branches view or by pressing space on a remote branch, you'll be given the choice to checkout as a local branch or as a detached head (previously it would just check it out as a detached head which typically isn't what you want). This is a Breaking change in terms of muscle memory.Thanks to @stefanhaller for this feature.Easier start interactive rebase
+  Previously, to start an interactive rebase, you would need to navigate to a base commit and press e on it. Now you can simply press i and regardless of which commit is selected, an interactive rebase will begin that includes all the commits on your branch (or if there are merge commits: all the commits up to first merge commit).The above demo for range select showcases this.Easier squashing of fixup! commits
+  In a similar vein to the above section, now when you press shift+S, you're given the choice of squashing all commits above the selected commit and squashing all commits on the branch, which is what you typically want. This is a Breaking change in terms of muscle memory.Thanks to @stefanhaller for this feature.View divergence from upstream branch
+  If you press u on a local branch a menu appears which shows options relating to the branch's upstream. Now, the first option in that menu allows you to view the divergence from the upstream which shows commits to pull and commits to pushThanks to @stefanhaller for this feature.Find appropriate commit for fixup/amend
+  This one is some serious voodoo: if somebody suggests changes in a PR review, you'll often apply the changes, then go hunting for the appropriate commit to fixup/amend. Now, from the files view you can press ctrl+f and if Lazygit can identify an appropriate commit with certainty, it will select that commit for you. Pretty cool!We've made the algorithm very strict so that you can always trust the result, but this means in circumstances where we can't know for sure which commit is appropriate (such as when your changes only include added lines), it's left to you to manually find the commit. We're keen to get lots of feedback on this feature to see where the sweet spot is.For more info see the docsThanks to @stefanhaller for this feature.Delete remote branches/tags
+  Now when you press d on a local branch, remote branch, or tag, you're given the option to delete that branch/tag in the remote.Thanks to @AzraelSec for this feature.Add co-author to commit
+  When you press a on a commit an option now appears to add a co-author (something GitHub can read).Thanks to @omaussa for this feature.Filter commits by author
+  You can now filter commits by author via pressing ctrl+s in the commits view and selecting the option to filter by author.Thanks to @Part22 for this feature.Change branch sort order
+  You can now change branch sort order by pressing s in the branches view (and remote branches view). By default local branches are sorted by 'recency' meaning how recently they were checked out, but you can now sort by head commit date and alphabetically.Thanks to @hosaka for this feature.Better bare repo support
+  We have fixed a bunch of bugs relating to bare repos so if you had issues with them in the past it should work fine now.Thanks to @jwhitley for this feature.Miscelleneous UI changes
+  - Unstaged files are now shown in white, not red, which is easier on the eyes
+  - Scrollbars are thinner (and, thus, cooler)
+  - Keybindings menu now has section headers (@stefanhaller)
+  - Error toasts now appear for some errors (less intrusive than popups) (@stefanhaller)
+  - Search history is now retained (@karimkhaleel)
+  - Git log is shown by default (@stefanhaller)
+  More Breaking Changes 💥
+  - When you press 'g' to bring up the git reset menu, the 'mixed' option is now the first and default, rather than 'soft'. This is because 'mixed' is the most commonly used option.
+  - Push/pull/fetch loading statuses are now shown against the branch rather than in a popup. This allows you to e.g. fetch multiple branches in parallel and see the status for each branch.
+  - The git log graph in the commits view is now always shown by default (previously it was only shown when the view was maximised). If you find this too noisy, you can change it back via ctrl+L -> 'Show git graph' -> 'when maximised'
+  - Filtering (e.g. when pressing '/') is less fuzzy by default; it only matches substrings now. Multiple substrings can be matched by separating them with spaces. If you want to revert to the old behavior, set the following in your config:
+
+
+  gui:
+    filterMode: 'fuzzy'
+
+  What's Changed
+  All Enhancements 🔥
+  - Add range selection ability on list contexts by @jesseduffield in #3207
+  - Allow deleting remote tags/branches from local tag/branch views by @AzraelSec in #2738
+  - Add command to show divergence from upstream by @stefanhaller in #2871
+  - Add 'Quick start interactive rebase' action by @jesseduffield in #3213
+  - Add command to open git difftool by @stefanhaller in #3156
+  - Support editing files in existing neovim instance by @jesseduffield in #2916
+  - Show commit mark before showing extra info by @jesseduffield in #2928
+  - Jump to middle of the view when selection leaves the visible area by @stefanhaller in #2915
+  - Add emacs-keybinds for word navigation by @horriblename in #2935
+  - Add gui.scrollOffBehavior config for scrolling list views by half-pages by @stefanhaller in #2939
+  - Switch to editor from commit message panel by @stefanhaller in #2881
+  - Select same commit again after pressing "e" to edit a commit by @stefanhaller in #2954
+  - Support custom keybindings for confirm discard by @mskelton in #2960
+  - Allow adding a port to webDomain part of services config by @raidora in #2908
+  - Add icons for files with .mdx and .svelte file extensions by @hrstmr in #2889
+  - Section headers in keybindings menu by @stefanhaller in #2911
+  - Check for staged files for "Amend commit" and "Create fixup commit" by @stefanhaller in #2970
+  - Add support for external diff commands (e.g. difftastic) by @stefanhaller in #2868
+  - Save diff context size in state.yml instead of config.yml by @stefanhaller in #2969
+  - Support to reset the current branch to a selected branch upstream by @AzraelSec in #2940
+  - Replace whitespace with '-' when renaming a branch by @calthejuggler in #2990
+  - Add jump-to-panel label config setting by @MariaSolOs in #2993
+  - Add co-author to commits by @omaussa in #2912
+  - Change the default of the "gui.borders" config to "rounded" by @stefanhaller in #2998
+  - Add a DisabledReason mechanism for menu items and keybindings by @stefanhaller in #2992
+  - Allow cherry-picking commits during a rebase by @stefanhaller in #3013
+  - Add history for search view by @karimkhaleel in #2877
+  - Replace loader panels with waiting status (pull/push/fetch) by @stefanhaller in #2973
+  - Add menu to rebase onto selected branch remote upstream by @AzraelSec in #3020
+  - Add ability to force portrait mode by @ldelossa in #3037
+  - Add Micro editor preset by @kytta in #3049
+  - Show sync status in branches list by @stefanhaller in #3021
+  - Add 'lvim' editor preset for lunarvim by @zottelsheep in #3074
+  - Truncate branch names to make branch status always visible by @stefanhaller in #3075
+  - Color file icons by @jesseduffield in #3080
+  - Add UserConfig jsonschema generation script by @karimkhaleel in #3039
+  - Add a copy-to-clipboard menu to the file view (with diff copy options) by @AzraelSec in #3104
+  - Fix bottom line alignment by @stefanhaller in #3076
+  - Make move up/down blocking by @stefanhaller in #2966
+  - Add remote branch sorting menu by @hosaka in #3171
+  - Add age to stash entries by @AzraelSec in #3174
+  - Add local branch sorting menu by @hosaka in #3182
+  - Show a friendly error message when starting lazygit from a non-existent cwd by @simonwhitaker in #3192
+ReleaseNotesUrl: https://github.com/jesseduffield/lazygit/releases/tag/v0.41.0
+ManifestType: defaultLocale
+ManifestVersion: 1.6.0

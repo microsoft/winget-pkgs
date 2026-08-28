@@ -1,0 +1,46 @@
+# Created with komac v2.2.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.6.0.schema.json
+
+PackageIdentifier: Alex313031.Mercury
+PackageVersion: 123.0.1
+PackageLocale: en-US
+Publisher: Alex313031
+PublisherUrl: https://github.com/Alex313031
+Author: Alex313031
+PackageName: Mercury
+PackageUrl: https://github.com/Alex313031/Mercury
+License: MPL-2.0
+LicenseUrl: https://github.com/Alex313031/Mercury/blob/HEAD/LICENSE.md
+Copyright: Copyright (c) 2023 Alexander David Frick
+ShortDescription: Firefox fork with compiler optimizations and patches from Librewolf, Waterfox, and GNU IceCat.
+Description: |-
+  Firefox fork with compiler optimizations and patches from Librewolf, Waterfox, and Ghostery.
+  It aims to be the Firefox equivalent of my main project: Thorium (a Chromium fork).
+Moniker: Mercury
+Tags:
+- avx
+- avx-instructions
+- browser
+- compiler-optimization
+- firefox
+- firefox-fork
+- firefox-forking
+- mercury
+- optimization
+- privacy
+ReleaseNotes: |-
+  - MERCURY_PORTABLE binaries in the Linux .zips now work properly
+  - Enabled a new form of LTO: "cross thinLTO". This performs link time optimization across languages, namely Rust and C++ (Firefox uses alot of Rust compared to Chromium, especially in the Gecko rendering engine). It will stay enabled on Linux. On Windows, the default is FullLTO (rather than thinLTO, or cross thinLTO), so if performance is less than the default FullLTO, then I will revert it.
+  – Similarly, next release will enable a new experimental "cross PGO", which does the same thing as above, just for PGO rather than LTO.
+  - Completely disabled Pocket. (I thought I had fully disabled it before, but after noticing it was still pinging api.pocket.com, I took a patch from IceCat, and disabled fetching from the endpoint (the server endpoint is set to null). Speaking of IceCat, I'm making some experimental Linux builds using the optimizations of Mercury here >  since only Arch and Guix provide binaries anymore.
+  - Mozilla introduced more telemetry, so I promptly disabled that, lol.
+  - PGO is more effective by using a new LLVM flag (that Chromium, and consequently Thorium will also be using soon) called "-mllvm, -pgo-temporal-instrumentation"
+  - MacOS 10.15 is the new minimum supported MacOS version.
+  - Some libraries are compiled with AVX512 in the AVX and AVX2 versions, and it will select which codepath to use by detecting your CPU's capabilities at runtime. See > https://github.com/Alex313031/Mercury/compare/v.122.0.2...main#diff-094923038a1b5137279bcadbcb4382147e27a3dc66f1448402bc7ff820bb533dR3270
+  - Ubuntu 16.04 and Debian 8 are no longer supported. If you are using those OSes, I recommend using ver. 122, or (probably better for security), use ESR 115.
+  - Added cross-building mozconfigs for MacOS. If you are building Mercury yourself on a Mac, this will allow you to target arm64 on a x64 Mac, and vice-versa. As always, use ./setup.sh --help to see the available OS/architecture options, and use the flag appropriate for you.
+
+  I tried setting the default new tab page tiles to better websites (i.e. non-sponsored stuff, like removing twitter and amazon), via this line, but it didn't work. I must be doing something wrong, because I know it's possible, since WaterFox and IceCat both do it.UPDATE: MacOS releases coming soon, sorry for having it in the title but not actually providing any .dmgs. See > #153
+ReleaseNotesUrl: https://github.com/Alex313031/Mercury/releases/tag/v.123.0.1
+ManifestType: defaultLocale
+ManifestVersion: 1.6.0

@@ -1,0 +1,68 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: syedinsaf.otaripper
+PackageVersion: 3.0.0
+PackageLocale: en-US
+Publisher: Syed Insaf
+PublisherUrl: https://github.com/syedinsaf
+PublisherSupportUrl: https://github.com/syedinsaf/otaripper/issues
+Author: Syed Insaf
+PackageName: otaripper
+PackageUrl: https://github.com/syedinsaf/otaripper
+License: Apache-2.0
+LicenseUrl: https://github.com/syedinsaf/otaripper/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Syed Insaf
+ShortDescription: 'Fast, safe, and reliable Android OTA partition extractor '
+Description: otaripper is a high-performance, multi-threaded partition extractor for Android OTA packages (payload.bin and full OTA .zip files). Built in Rust, it features SIMD-accelerated memory operations and robust fail-safe behavior.
+Moniker: otaripper
+Tags:
+- android
+- aosp
+- cli
+- payload
+- terminal
+ReleaseNotes: |-
+  What’s New in v3.0.0
+  A massive architectural evolution. v3.0.0 introduces Remote HTTP Streaming, allowing you to instantly extract specific partitions directly from an OTA URL without downloading the massive 3GB+ firmware archive.
+  Highlights
+  - Remote HTTP Streaming: Skip the download. Pass an HTTP URL directly to otaripper, and it will intelligently stream only the bytes required to extract your requested partitions over the internet.
+  - Remote ARB Inspection (Zero-Download): The arbscan engine has been globally integrated. You can now instantly check a device's Anti-Rollback (ARB) index by passing an OTA URL directly to otaripper arb <url> -n—it pulls the metadata in seconds without downloading the firmware.
+  - Network Stability & DNS Fallbacks: Implemented a dynamic DNS resolution stack using hickory-dns with native Android fallbacks. This fixes major JNI networking crashes and ensures flawless performance inside Termux environments.
+  - "Gold Standard" Release Verification: otaripper now strictly separates distribution hashes. A master checksums.txt validates the zip archives, while an internal otaripper.sha256 protects the integrity of the binary inside.
+  - The "Lite" Build: For highly constrained environments that do not need network streaming, we now distribute otaripper-lite binaries that strip out the async networking stack for a drastically smaller footprint.
+  What's Changed
+  - feat: implement remote HTTP stream-based partition extraction
+  - feat: integrate global arbscan capabilities for zero-download remote metadata parsing
+  - fix: pin reqwest and overhaul DNS resolution to fix Android JNI crashes in Termux
+  - refactor: migrate CI/CD release infrastructure to generate atomic master checksums
+  - chore: introduce cargo lite and cargo full native build aliasing
+  Full Changelog: v2.3.0...v3.0.0
+  Download Guide — Pick the Right Build
+  ───────────────────┬──────────────────────┬────────────────────────────────────────────────┬──────────────────────────────────────────
+  Platform           │Architecture          │Download                                        │Notes
+  ───────────────────┼──────────────────────┼────────────────────────────────────────────────┼──────────────────────────────────────────
+  🪟 Windows         │x86_64 (MSVC)         │⬇️ otaripper-3.0.0-windows-msvc-x86_64.zip      │⭐ Recommended for most Windows users
+  ───────────────────┼──────────────────────┼────────────────────────────────────────────────┼──────────────────────────────────────────
+  🪟 Windows         │x86_64 (MinGW / GNU)  │⬇️ otaripper-3.0.0-windows-gnu-x86_64.zip       │Only if you explicitly need MinGW
+  ───────────────────┼──────────────────────┼────────────────────────────────────────────────┼──────────────────────────────────────────
+  🐧 Linux           │x86_64 (glibc)        │⬇️ otaripper-3.0.0-linux-x86_64.tar.gz          │Standard dynamic Linux build
+  ───────────────────┼──────────────────────┼────────────────────────────────────────────────┼──────────────────────────────────────────
+  🐧 Linux           │x86_64 (static / musl)│⬇️ otaripper-3.0.0-linux-static-x86_64.tar.gz   │Fully portable, works on almost any distro
+  ───────────────────┼──────────────────────┼────────────────────────────────────────────────┼──────────────────────────────────────────
+  🐧 Linux           │ARM64 (aarch64)       │⬇️ otaripper-3.0.0-linux-arm64.tar.gz           │ARM servers, SBCs, phones
+  ───────────────────┼──────────────────────┼────────────────────────────────────────────────┼──────────────────────────────────────────
+  🍎 macOS           │Intel (x86_64)        │⬇️ otaripper-3.0.0-macos-x86_64.tar.gz          │Intel-based Macs
+  ───────────────────┼──────────────────────┼────────────────────────────────────────────────┼──────────────────────────────────────────
+  🍎 macOS           │Apple Silicon (ARM64) │⬇️ otaripper-3.0.0-macos-arm64.tar.gz           │M1 / M2 / M3 Macs
+  ───────────────────┼──────────────────────┼────────────────────────────────────────────────┼──────────────────────────────────────────
+  🤖 Android / Termux│ARM64                 │⬇️ otaripper-3.0.0-android-arm64.zip            │Termux-only environment
+  ───────────────────┴──────────────────────┴────────────────────────────────────────────────┴──────────────────────────────────────────
+  Integrity & Verification
+  All releases now utilize a dual-checksum standard. You can verify the compressed archives using the master checksums.txt file attached to this release:
+  sha256sum -c checksums.txt
+  Once extracted, an internal otaripper.sha256 file is also provided to verify the raw executables:
+  sha256sum -c otaripper.sha256
+ReleaseNotesUrl: https://github.com/syedinsaf/otaripper/releases/tag/v3.0.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

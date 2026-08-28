@@ -1,0 +1,146 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: tstack.lnav
+PackageVersion: 0.14.1-rc1
+PackageLocale: en-US
+Publisher: Timothy Stack
+PublisherUrl: https://lnav.org/
+PublisherSupportUrl: https://lnav.org/
+Author: Timothy Stack
+PackageName: lnav
+PackageUrl: https://lnav.org/
+License: BSD-2-Clause
+LicenseUrl: https://github.com/tstack/lnav/blob/HEAD/LICENSE
+Copyright: Copyright (c) Timothy Stack
+ShortDescription: The Logfile Navigator is a log file viewer for the terminal
+Moniker: lnav
+Tags:
+- command-line-tool
+- less
+- log-analysis
+- log-monitor
+- log-viewer
+- log-visualization
+- logging
+- more
+- pager
+- tail
+- terminal
+- terminal-pager
+- tui
+ReleaseNotes: |-
+  lnav v0.14.1
+  Features:
+  - Added the :reload-view command, bound to F5/⌘-R,
+    that re-runs the operation that populated the current
+    view.
+    In the DB view, this re-executes the last SQL query; in
+    the TIMELINE view, it rebuilds the index. Views that
+    don't have a meaningful reload report an error.
+  - The DB view now shows a status bar above the bottom
+    status bar with the SQL query that populated the view,
+    the relative time when it was run, and how long it took.
+    A reload icon on the left side of the bar can be clicked
+    to re-run the query. For queries that read from log-backed
+    tables, the status bar also calls out whether the results
+    are "on current log data" or "on old log data" relative to
+    what lnav is currently indexing. The same information is
+    exposed via the new lnav_views.view_details column.
+  - For terminals that support the Kitty Keyboard
+    protocol, the following hotkeys are now supported
+    in the prompt:
+    - ⌘-C to copy the current selection to the
+      clipboard.
+    - ⌘-A to select all text.
+    - ⌘-X to cut the current selection to the
+      clipboard.
+    - ⌘-Z to undo the last change.
+  - The multi-line prompt can now be resized with the
+    keyboard: ALT-= grows the prompt by one line and
+    ALT-- shrinks it by one line. This complements
+    the existing click-and-drag resize on the prompt's
+    status bar.
+  - Additional readline-style key bindings in the
+    prompt (issue #1676):
+    - ALT-f / ALT-b move forward/backward by word.
+    - ALT-d cuts to the end of the next word.
+    - ALT-BACKSPACE is an alias for CTRL-W.
+    - ALT-l / ALT-u lower- or upper-case the
+      next word.
+    - ALT-c capitalizes the next word.
+    - CTRL-h and CTRL-d are aliases for
+      BACKSPACE and DELETE.
+    - CTRL-t transposes the two characters before
+      the cursor.
+  - In the log message details (opened by pressing p),
+    a File: row has been added that lists the file and
+    line number the log message is from. Also, for JSON
+    logs, you can focus on the JSON fields: row and
+    press c to copy the raw log message to the
+    clipboard.
+  - The measure_with_units collator now recognizes
+    (KiB, MiB, ...).
+  - Added disfavors to external-editor configuration
+    to express file names that the editor is not interested
+    in handling.
+  - The lnav_views.view_details column is now populated
+    for every time-based view (log, histogram, spectro,
+    timeline, db) with a JSON zoom-level field reflecting
+    the current :zoom-to setting.
+  - The :zoom-to command (and the z/Z hotkeys) now
+    affects only the currently focused view; previously,
+    zooming in either the histogram or the spectrogram
+    view would change both views' zoom level in lockstep.
+    Each view (log, histogram, spectro, timeline, db) now
+    has its own independent zoom level.
+  - The :zoom-to command now accepts + and - as
+    shortcuts to step in or out by one level from the
+    current view's zoom (the same behavior as the z/Z
+    hotkeys).
+  - SQL statements can now use $zoom_level to refer to
+    the current zoom level in the DB view. Pressing
+    z/Z in the DB view will now rerun the last query
+    with the new zoom value. The stats.hist PRQL
+    function now uses $zoom_level as the default value
+    for the slice parameter.
+  - A stats.timeseries PRQL function has been added to
+    make it easier to perform an aggregation over buckets
+    of time.
+  Breaking changes:
+  - The humanize_file_size() SQLite function now
+    uses 1,000 for the base instead of 1,024.
+  Bug Fixes:
+  - A PRQL query can now start with let in interactive
+    mode.
+  - Fix a bug in file loading that could cause a short
+    read and crash in some situations.
+  - Fix a lockup when viewing a file that contained log
+    messages and lots of binary data.
+  - Update Regex101 import functionality to handle a
+    change in their API response.
+  - More hardening for some diabolical inputs:
+    - Unsupported escape-sequences were ignored before,
+      but they are displayed now.
+    - Checks for archives with file paths that could
+      escape containment.
+  - The duplicate file check is less aggressive now.
+    Previously, if the first lines of logfiles matched
+    exactly, they were considered duplicates and the
+    smallest/oldest was hidden. Now, the duplication
+    check is only done on files that contain at least
+    100 lines and those lines are checked to see if
+    they have the same timestamp/file-offset.
+  - In the TIMELINE view, tags whose names start or end
+    with "stop", "stopped", "end", "ended", "finish", or
+    "finished" (case-insensitive) are now paired with
+    matching "start", "started", or "begin" tags that
+    share the same base name (for example, #start-foo
+    is paired with #stop-foo). The start tag's row
+    spans from the start time to the stop time, and the
+    stop tag is no longer shown as a separate row. Tags
+    without a base name (such as a bare #start) are
+    not paired.
+ReleaseNotesUrl: https://github.com/tstack/lnav/releases/tag/v0.14.1-rc1
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

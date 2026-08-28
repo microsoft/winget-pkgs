@@ -1,0 +1,163 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: BiomeJS.Biome
+PackageVersion: 2.4.15
+PackageLocale: en-US
+Publisher: BiomeJS
+PublisherUrl: https://biomejs.dev/
+PublisherSupportUrl: https://github.com/biomejs/biome/issues
+Author: Biome Developers and Contributors
+PackageName: Biome
+PackageUrl: https://biomejs.dev/
+License: Apache-2.0
+Copyright: Copyright (c) 2023-present Biome Developers and Contributors
+ShortDescription: Biome is a toolchain for web projects, aimed at providing functionalities to maintain them. It offers a formatter and linter, usable via CLI and LSP.
+Moniker: biome
+Tags:
+- css
+- formatter
+- javascript
+- json
+- jsx
+- linter
+- static-code-analysis
+- typescript
+- web
+ReleaseNotes: |-
+  2.4.15
+
+  Patch Changes
+  - #9394 ba3480e Thanks @dyc3! - Added the nursery rule useTestHooksInOrder in the test domain. The rule enforces that Jest/Vitest lifecycle hooks (beforeAll, beforeEach, afterEach, afterAll) are declared in the order they execute, making test setup and teardown easier to reason about.
+  - #10254 e0a54cc Thanks @dyc3! - Added a new nursery rule useVueNextTickPromise, which enforces Promise syntax when using Vue nextTick.
+    For example, the following snippet triggers the rule:
+    import { nextTick } from "vue";
+    nextTick(() => {
+      updateDom();
+    });
+  - #10219 64aee45 Thanks @dyc3! - Added a new nursery rule noVueVOnNumberValues, that disallows deprecated number modifiers on Vue v-on directives.
+    For example, the following snippet triggers the rule:
+    <input @keyup.13="submit" />
+  - #10195 7b8d4e1 Thanks @dyc3! - Added the new nursery rule useVueValidVFor, which validates Vue v-for directives and reports invalid aliases, missing component keys, and keys that do not use iteration variables.
+  - #10238 1110256 Thanks @dyc3! - Added the recommended nursery rule noVueImportCompilerMacros, which disallows importing Vue compiler macros such as defineProps from vue because they are automatically available.
+  - #10201 1a08f89 Thanks @realknove! - Fixed #10193: style/useReadonlyClassProperties no longer reports class properties as readonly-able when they are assigned inside arrow callbacks nested in class property initializers.
+  - #9574 3bd2b6a Thanks @Conaclos! - Fixed #9530. The diagnostics of organizeImports are now more detailed and more precise. They are also better at localizing where the issue is.
+  - #10205 a704a6c Thanks @Conaclos! - Fixed #10185. `organizeImports now errors when it encounters an unknown predefined group.
+    The following configuration is now reported as invalid because :INEXISTENT: is an unknown predefined group.
+    {
+      "assist": {
+        "actions": {
+          "source": {
+            "organizeImports": { "options": { "groups": [":INEXISTENT:"] } }
+          }
+        }
+      }
+    }
+  - #10052 b565bed Thanks @minseong0324! - Improved noMisleadingReturnType: it now flags union annotations whose extra variants are never returned, and suggests the narrower type (e.g. string | null → string).
+    These functions are now reported because null and number are included in the return annotations but never returned:
+    function getUser(): string | null {
+      return "hello";
+    } // null is never returned
+    function getCode(): string | number {
+      return "hello";
+    } // number is never returned
+  - #10213 ac30057 Thanks @dyc3! - Fixed #9450: HTML and Vue element formatting now preserves child line breaks when an element contains another element child on its own line, instead of collapsing the child element onto the same line.
+  - #10275 9ee6c03 Thanks @solithcy! - Fixed #10274: Svelte templates with missing expressions no longer parsed as HtmlBogusElement
+  - #10143 56798a7 Thanks @minseong0324! - noMisleadingReturnType now detects misleading return type annotations when object literal properties are initialized with as const.
+    This function is now reported because the return annotation widens a property initialized with as const:
+    function f(): { value: string } {
+      return { value: "text" as const };
+    }
+  - #10143 56798a7 Thanks @minseong0324! - noUselessTypeConversion now detects redundant conversions on object literal properties initialized with as const.
+    This conversion is now reported because message.value is inferred as a string literal:
+    const message = { value: "text" as const };
+    String(message.value);
+  - #9807 0ae5840 Thanks @dyc3! - Added the new nursery rule useThisInClassMethods, based on ESLint's class-methods-use-this.
+    The rule now reports instance methods, getters, setters, and function-valued instance fields that do not use this, and biome migrate eslint preserves the supported ignoreMethods, ignoreOverrideMethods, and ignoreClassesWithImplements options.
+    Invalid:
+    class Foo {
+      bar() {
+        // does not use `this`, invalid
+        console.log("Hello Biome");
+      }
+    }
+  - #10258 e7b18f7 Thanks @ematipico! - Improved linter performance by narrowing the query nodes for several lint rules, reducing how often they are evaluated.
+  - #10273 04e22a1 Thanks @dyc3! - Fixed #10271: The HTML parser now correctly parses of as text content when in text contexts.
+  - #9838 83f7385 Thanks @dyc3! - Added the nursery rule noBaseToString, which reports stringification sites that fall back to Object's default "[object Object]" formatting. The rule also supports the ignoredTypeNames option.
+  - #10143 56798a7 Thanks @minseong0324! - useExhaustiveSwitchCases now checks switch statements over object literal properties initialized with as const.
+    This switch is now reported because status.kind is inferred as the string literal "ready" but no case handles it:
+    const status = { kind: "ready" as const };
+    switch (status.kind) {
+    }
+  - #10143 56798a7 Thanks @minseong0324! - useStringStartsEndsWith now detects string index comparisons on object literal properties initialized with as const.
+    This comparison is now reported because message.value is inferred as a string literal:
+    const message = { value: "hello" as const };
+    message.value[0] === "h";
+
+  What's Changed
+  - fix(markdown_parser): parse indented reference continuation by @jfmcdowell in #10192
+  - fix(markdown_parser): parse quoted ordered list interrupts by @jfmcdowell in #10194
+  - docs: fix typo in CONTRIBUTING ("the these" -> "these") by @dfedoryshchev in #10203
+  - feat(css_formatter): improve SCSS @each rule formatting by @denbezrukov in #10202
+  - test(markdown_parser): cover quoted ordered sublist by @jfmcdowell in #10197
+  - fix(markdown_parser): keep loose lazy continuation by @jfmcdowell in #10198
+  - fix(organizeImports): error on unknown predefined groups by @Conaclos in #10205
+  - feat(css_formatter): improve SCSS map formatting for parenthesized list keys by @denbezrukov in #10207
+  - feat(css_parser): parse scss interpolated nth arguments by @denbezrukov in #10209
+  - fix(format/html): preserve multiline element-only children by @dyc3 in #10213
+  - test(css_parser): cover SCSS interpolated operator operands by @denbezrukov in #10214
+  - fix: collect readonly class property arrow writes by @realknove in #10201
+  - fix(css_parser): parse spaced SCSS function heads by context by @denbezrukov in #10215
+  - feat(css_formatter): improve SCSS map value and pair formatting for better readability by @denbezrukov in #10216
+  - feat(css_formatter): enhance SCSS map value formatting by @denbezrukov in #10217
+  - feat(css_formatter): improve formatting for parenthesized SCSS lists by @denbezrukov in #10218
+  - fix(markdown_parser): keep empty reference paragraph by @jfmcdowell in #10199
+  - fix(markdown_parser): diagnose backtick in fence info string by @jfmcdowell in #10224
+  - chore(deps): update rust crate insta to 1.47.2 by @renovate[bot] in #10233
+  - chore(deps): update pnpm to v10.33.2 by @renovate[bot] in #10231
+  - chore(deps): update github-actions by @renovate[bot] in #10230
+  - chore(deps): update dependency tombi to v0.10.1 by @renovate[bot] in #10227
+  - chore(deps): update rust crate indexmap to 2.14.0 by @renovate[bot] in #10232
+  - chore(deps): update rust docker tag to v1.95.0 by @renovate[bot] in #10225
+  - feat(yaml_parser): lex YAML properties by @l0ngvh in #9471
+  - feat(type-info): preserve object-literal as const properties by @minseong0324 in #10143
+  - fix: fmt and clippy by @ematipico in #10235
+  - feat(lint/html/vue): add noVueVOnNumberValues by @dyc3 in #10219
+  - feat(lint/js): add noBaseToString by @dyc3 in #9838
+  - fix(markdown_parser): preserve lazy emphasis and quoted thematic breaks by @jfmcdowell in #10228
+  - feat(fmt/md): headers spacing by @ematipico in #10250
+  - fix(lint): fix false negative in noMisleadingReturnType for union annotations by @minseong0324 in #10052
+  - feat(fmt/md): proper word filling by @ematipico in #10252
+  - feat(lint/js): add useThisForClassMethods by @dyc3 in #9807
+  - feat(css_formatter): improve SCSS @if and @else if formatting by @denbezrukov in #10253
+  - refactor(organizeImports): improve diagnostics by @Conaclos in #9574
+  - refactor(markdown_parser): name CommonMark magic numbers by @jfmcdowell in #10264
+  - fix: grammar in extends docstring by @Netail in #10263
+  - feat(css_formatter): improve formatting for SCSS parenthesized expressions and include arguments by @denbezrukov in #10269
+  - test(markdown_parser): promote html-only regression cases to .md fixtures by @jfmcdowell in #10255
+  - fix: svelte missing expression parsing by @solithcy in #10275
+  - fix(parse/html): treat of as text in text contexts by @dyc3 in #10273
+  - chore: update rustix transient dep to fix ci by @dyc3 in #10279
+  - feat(lint/vue): add noVueImportCompilerMacros by @dyc3 in #10238
+  - feat(css_formatter): improve SCSS map formatting by @denbezrukov in #10282
+  - feat(css_formatter): improve formatting SCSS function arguments with trailing commas by @denbezrukov in #10285
+  - feat(lint/js/vue): add useVueNextTickPromise by @dyc3 in #10254
+  - feat(yaml_parser): parse YAML properties by @l0ngvh in #10240
+  - feat(lint/js): add useTestHooksInOrder by @dyc3 in #9394
+  - perf: reduced queries in rules by @ematipico in #10258
+  - fix(formatter): flush indentation after align end by @ematipico in #10293
+  - test(formatter/yaml): populate Prettier tests for YAML by @siketyan in #8330
+  - fix(fmt/md): remove trailing spaces in markdown lists by @ematipico in #10290
+  - feat(css_parser): support SCSS string concatenation and improved interpolation handling in url() functions by @denbezrukov in #10294
+  - chore(deps): revert update rust crate mimalloc to 0.1.50 by @dyc3 in #10298
+  - chore: improve agent behaviour by @ematipico in #10303
+  - perf(css): deduplicate rules information by @ematipico in #10292
+  - feat(lint/html/vue): add useVueValidVFor by @dyc3 in #10195
+  - feat(parse/tailwind): parse arbitrary values as css by @dyc3 in #10299
+  - docs: fix duplicate-word typos in code comments by @dfedoryshchev in #10310
+ReleaseNotesUrl: https://github.com/biomejs/biome/releases/tag/@biomejs/biome@2.4.15
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://biomejs.dev/guides/getting-started/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,48 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.12.0.schema.json
+
+PackageIdentifier: Kuddev.Nebula
+PackageVersion: 1.2.0
+PackageLocale: zh-CN
+ShortDescription: 一款 GPU 加速的 Windows 终端：关闭窗口不杀会话，重新打开，你的 claude 对话原样回来。
+Description: Nebula 是一款 Windows 上的终端模拟器，以 Rust 编写，构建在 GPU 加速渲染内核之上，并围绕一个理念设计：终端会话太宝贵，不该随窗口一起消失。它把 tmux 式的常驻会话模型、玻璃质感界面、AI CLI 感知侧边栏和无需额外配置的 shell 体验组合在一起。
+Tags:
+- claude
+- codex
+- ssh
+- 终端
+ReleaseNotes: |-
+  新增
+  - 新增水平标题栏标签页 — 顶部模式支持选择、拖拽排序、停靠、分屏与水平自动滚动；设置入口收进三个点菜单，首个标签与终端/powerline 左边缘对齐，侧边栏模式不变。
+  - 新增 nebula ctl orchestrate 并扩展 Runtime 控制 — 支持强类型工作流、命名 agent、进程/控制键命令、真实退出码与 pane 生命周期事件。
+  - 新增事务式托管 agent worktree — agent fork 保留稳定的分支/路径身份，只在确认失败后回滚资源；两种安装包都附带 Runtime schema、API 文档与 nebula-runtime Skill。
+  - 新增 GPUI 的 SVN 仓库状态与操作工作流。
+  - 新增 SSH 失败重试 — 仅失败后在“关闭”左侧显示“重试”，两套界面都只原位替换失败的 pane。
+  修复
+  - 修复 Nebula 已运行时第二次启动会消失的问题 — 驻留实例现在会创建并聚焦所需标签/窗口。对应 #39。
+  - 修复普通字母与空格绕过 Windows text-input 路径的问题，搜狗等输入法可以正常确认组合文本。对应 #43。
+  - 修复 WSL 强制使用 Bash、没有保留来宾账号默认 shell 的问题。对应 #44。
+  - 修复无选区时 Ctrl+C 被复制动作吞掉，以及旧选区导致重复复制的问题。对应 #48。
+  - 修复旧格式 user@host:port 让 Windows ssh -G 探测报 11001；只有探测目标会规范化为 ssh://user@host:port。
+  - 修复 Codex 把 Shift+Enter 当作普通 Enter，ConPTY 现在会保留相应的 Win32 输入记录。
+  - 修复终端输出停在半帧、必须再按键或缩放窗口才继续的问题；PTY 仍有数据时会重新注册读取唤醒。
+  - 修复运行时模糊开关、不透明度滑块卡顿，以及关闭托盘后窗口仍保持隐藏的问题。
+  - 修复 WSL 冷启动/超时被显示为空目录，并恢复 Files 面板对本地、WSL 与 SSH pane 的跟随。
+  - 修复 PowerShell 在第一条提示符前缺少 OSC/补全注入的问题，并重新生成 shell 补全、同步安装器与 EXE 嵌入版本元数据。
+  改进
+  - 改进补全路由 — 本地、WSL 与 SSH pane 会查询各自的文件系统。
+  - 改进 WSL 文件树刷新 — 多个根目录合并为一次来宾 find，使用符合冷启动实际的超时与事件驱动刷新。
+  - 改进拖拽选择 — 指针移出终端顶部或底部后，视口会继续滚动。
+  - 改进 Runtime 传输/发现与 GPUI pane/window 所属关系。
+  - 改进混合 DPI 拖动、GPUI 分屏边框与标题栏整合。
+  - 改进 PowerShell、cmd、Nushell 与 fallback shell 的分类注入，并移除注入的 fmt 动作。
+  The SSH retry and 11001 probe fixes do not resolve the open TUI/disconnect reports in #45 and #50.
+  SSH 重试与 11001 探测修复不代表已解决 #45 和 #50 的 TUI/断连问题。
+ReleaseNotesUrl: https://github.com/Kuddev/nebula/releases/tag/v1.2.0
+Documentations:
+- DocumentLabel: 安装指南
+  DocumentUrl: https://github.com/Kuddev/nebula/blob/main/INSTALL.md
+- DocumentLabel: Lua 配置
+  DocumentUrl: https://github.com/Kuddev/nebula/blob/main/docs/lua-configuration.md
+ManifestType: locale
+ManifestVersion: 1.12.0

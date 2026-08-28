@@ -1,0 +1,126 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Miller.Miller
+PackageVersion: 6.20.2
+PackageLocale: en-US
+Publisher: John Kerl
+PublisherUrl: https://github.com/johnkerl
+PublisherSupportUrl: https://github.com/johnkerl/miller/issues
+Author: John Kerl
+PackageName: Miller
+PackageUrl: https://github.com/johnkerl/miller
+License: BSD-2-Clause
+LicenseUrl: https://github.com/johnkerl/miller/blob/HEAD/LICENSE.txt
+CopyrightUrl: https://raw.githubusercontent.com/johnkerl/miller/master/LICENSE.txt
+ShortDescription: Miller is like awk, sed, cut, join, and sort for name-indexed data such as CSV, TSV, and tabular JSON
+Description: |-
+  Miller is like awk, sed, cut, join, and sort for name-indexed data such as CSV, TSV, and tabular JSON. You get to work with your data using named fields, without needing to count positional column indices.
+
+  This is something the Unix toolkit always could have done, and arguably always should have done. It operates on key-value-pair data while the familiar Unix tools operate on integer-indexed fields: if the natural data structure for the latter is the array, then Miller’s natural data structure is the insertion-ordered hash map. This encompasses a variety of data formats, including but not limited to the familiar CSV, TSV, and JSON. (Miller can handle positionally-indexed data as a special case.)
+
+  ## Features
+
+  - Miller is multi-purpose: it’s useful for data cleaning, data reduction, statistical reporting, devops, system administration, log-file processing, format conversion, and database-query post-processing.
+  - You can use Miller to snarf and munge log-file data, including selecting out relevant substreams, then produce CSV format and load that into all-in-memory/data-frame utilities for further statistical and/or graphical processing.
+  - Miller complements data-analysis tools such as R, pandas, etc.: you can use Miller to clean and prepare your data. While you can do basic statistics entirely in Miller, its streaming-data feature and single-pass algorithms enable you to reduce very large data sets.
+  - Miller complements SQL databases: you can slice, dice, and reformat data on the client side on its way into or out of a database. (Examples here and here). You can also reap some of the benefits of databases for quick, setup-free one-off tasks when you just need to query some data in disk files in a hurry.
+  - Miller also goes beyond the classic Unix tools by stepping fully into our modern, no-SQL world: its essential record-heterogeneity property allows Miller to operate on data where records with different schema (field names) are interleaved.
+  - Miller is streaming: most operations need only a single record in memory at a time, rather than ingesting all input before producing any output. For those operations which require deeper retention (sort, tac, stats1), Miller retains only as much data as needed. This means that whenever functionally possible, you can operate on files which are larger than your system’s available RAM, and you can use Miller in tail -f contexts.
+  - Miller is pipe-friendly and interoperates with the Unix toolkit
+  - Miller’s I/O formats include tabular pretty-printing, positionally indexed (Unix-toolkit style), CSV, JSON, and others
+  - Miller does conversion between formats
+  - Miller’s processing is format-aware: e.g. CSV sort and tac keep header lines first
+  - Miller has high-throughput performance on par with the Unix toolkit
+  - Not unlike jq (for JSON), Miller is written in portable, modern C, with zero runtime dependencies. You can download or compile a single binary, scp it to a faraway machine, and expect it to work.
+Moniker: miller
+Tags:
+- csv
+- csv-format
+- data-cleaning
+- data-processing
+- data-reduction
+- data-regression
+- devops
+- devops-tools
+- json
+- json-data
+- statistical-analysis
+- statistics
+- streaming-algorithms
+- streaming-data
+- tabular-data
+- tsv
+ReleaseNotes: |-
+  What's new in 6.20.2
+  - Miller now treats AI agents as first-class users
+  - There is shell tab-completion for bash and zsh
+  - There is a new bytes datatype, along with base64 encode/decode support
+  (Note: versions 6.20.0 and 6.20.1 were in error and are not released.)
+  Miller and AI
+  Miller now treats AI agents as first-class users. Everything an agent needs to drive Miller well --
+  discovering what exists, learning your data's shape, validating expressions before running them, and
+  recovering from errors -- is now a built-in, structured feature of the mlr binary, packaged for
+  MCP-speaking agents (Claude Code, Claude Desktop, Cursor, ...) via a one-line setup. Your choice of
+  # Claude
+  mlr skill install ~/.claude/skills/miller
+  # Codex and Gemini
+  mlr skill install ~/.agents/skills/miller
+  or
+  # Claude
+  claude mcp add miller --  mlr mcp
+  # Codex
+  codex mcp add miller --  mlr mcp
+  # Gemini
+  gemini mcp add miller mlr mcp
+  See the new Miller and AI docs page for the quick start.
+  Reference pages:
+  - https://miller.readthedocs.io/en/latest/ai
+  - https://miller.readthedocs.io/en/latest/agent-skill
+  - https://miller.readthedocs.io/en/latest/mcp-server
+  - https://miller.readthedocs.io/en/latest/ai-support
+  PRs:
+  - Machine-readable help catalog, mlr help --as-json: by @johnkerl in #2099, #2106
+  - JSON capability index and mlr which intent router by @johnkerl in #2107
+  - Structured verb options, with enum value-sets by @johnkerl in #2111
+  - Structured error output, --errors-json, with hints and did-you-mean suggestions by @johnkerl in #2113
+  - DSL validate/dry-run, mlr put --explain / mlr filter --explain by @johnkerl in #2131
+  - New mlr describe verb: field names, types, cardinality, and value domains of your data in one pass by @johnkerl in #2132
+  - New mlr mcp MCP server and agent playbook, with a --no-shell sandbox flag by @johnkerl in #2133
+  - Roadmap doc by @johnkerl in #2103; "Miller and AI" docs page by @johnkerl in #2134
+  Shell tab-completion for bash and zsh
+  Documentation:
+  https://miller.readthedocs.io/en/latest/shell-completion/
+  PR:
+  - Shell tab-completion for bash and zsh by @johnkerl in #2096
+  A first-class bytes type in the DSL
+  Docs:
+  - https://miller.readthedocs.io/en/latest/reference-main-data-types/
+  - https://miller.readthedocs.io/en/latest/reference-dsl-builtin-functions/#base64_encode
+  - https://miller.readthedocs.io/en/latest/reference-dsl-builtin-functions/#base64_decode
+  PR:
+  - New bytes type with b"..." literals and base64/hex codecs by @johnkerl in #2122
+  More features
+  - New tail -n +N and head -n -N options by @farnoy in #2071
+  - Long-overdue --md flag by @johnkerl in #2100
+  - Windows-arm64 releases by @teo-tsirpanis in #2127
+  Bug fixes
+  - Fix masked unset-on-array error path (along with govet lint findings) by @johnkerl in #2129
+  Documentation
+  - CSV and JSON troubleshooting tips by @dashitongzhi in #2123, with page-refactor by @johnkerl in #2128
+  - Document time-conversion thread safety by @dashitongzhi in #2115
+  - PNG graphics in perf docs for issue-2084 perf mods by @johnkerl in #2095
+  Internals
+  - golangci-lint CI workflow by @dashitongzhi in #2076
+  - Lint fixes bringing staticcheck and errcheck to zero by @johnkerl in #2108, #2110, #2112, #2130
+  - Strip dead code from pkg/ by @johnkerl in #2121
+  - CI/actions updates by @johnkerl in #2119 and by @dependabot in #2101, #2102, #2104, #2105, #2114, #2116, #2118, #2124, #2125, #2126
+  - Dependency bumps by @dependabot in #2117, #2120
+  New Contributors
+  - @farnoy made their first contribution in #2071
+  - @dashitongzhi made their first contribution in #2076
+  - @teo-tsirpanis made their first contribution in #2127
+  Full Changelog: v6.19.0...v6.20.0
+ReleaseNotesUrl: https://github.com/johnkerl/miller/releases/tag/v6.20.2
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,163 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: agentjp.bdinfo-rs
+PackageVersion: 4.0.0
+PackageLocale: en-US
+Publisher: agentjp
+PublisherUrl: https://github.com/agentjp
+PublisherSupportUrl: https://github.com/agentjp/bdinfo-rs/issues
+Author: agentjp
+PackageName: bdinfo-rs
+PackageUrl: https://github.com/agentjp/bdinfo-rs
+License: LGPL-2.1
+LicenseUrl: https://github.com/agentjp/bdinfo-rs/blob/HEAD/LICENSE
+ShortDescription: Memory-safe, zero-C-dependency Rust Blu-ray disc analyzer — a drop-in BDInfo report tool for BDMV folders and .iso images.
+Description: 'bdinfo-rs is a memory-safe, statically-linked command-line Blu-ray disc analyzer and a drop-in replacement for the classic BDInfo tool. It scans BDMV folders and .iso images (playlists, clips, M2TS demux) and produces the classic human-readable disc report with per-stream video and audio specs: codecs, measured bitrates, resolution, HDR, Dolby Vision, and HDR10+. It ships as a single static binary with no runtime, no DLLs, and zero C dependencies.'
+Moniker: bdinfo-rs
+Tags:
+- bdinfo
+- bdmv
+- blu-ray
+- cli
+- dolby-vision
+- hdr
+- m2ts
+- memory-safety
+- no-unsafe
+- rust
+ReleaseNotes: |-
+  Release Notes
+  ⚠ BREAKING CHANGES
+  - core: each layer has one scan entry point again, and it takes the observers. BdRom::open
+    and BdRom::open_resilient take (root, mode, ScanOptions, scan_files, ScanObservers), and
+    scan::open_folder / scan::open_iso take the same; the _with and _observed twins
+    (open_with, open_observed, open_resilient_with, open_resilient_observed,
+    open_folder_observed, open_iso_observed) are removed. Migration: call the plain name and pass
+    the bundle — ScanObservers::none() where a caller has no progress callback, no cancel flag, and
+    no measured observer, ScanObservers::new(&mut progress, &cancel) otherwise, plus
+    .with_measured(&mut observer) for live snapshots. (#372)
+  - core: ClipSummary gains a measured: bool field recording whether the measurement pass
+    demuxed that stream file, so a 0-byte or header-destroyed *.m2ts is reported as short rather
+    than read as unscanned. Struct-literal construction of a ClipSummary therefore has to name it;
+    building through fixtures::clip(…) does not. The browser package's Clip mirrors it as
+    measured, additively on the wire. (#373)
+  Added
+  - core: a measured-snapshot observer on the scan API — the full pass emits per-stream byte
+    tallies and bitrates at chunk boundaries while it reads, so a front-end can fill measured cells
+    during the scan instead of waiting for the report. (#347, #348)
+  - gui: the playlist, stream-file, and codec grids tick their measured sizes and bitrates while
+    the scan runs. (#349)
+  - wasm: onMeasured streams those snapshots to the page, throttled to at most one a second.
+    (#350)
+  - wasm: the demo gains a light theme, chosen by an auto, light or dark setting; auto follows the
+    operating system. (#381)
+  - wasm: the demo's scan lifecycle matches the desktop app's — scanning with nothing ticked scans
+    every listed playlist rather than refusing, a cancelled or failed scan keeps the cells it measured
+    until the next scan starts, a running scan freezes what names its scan set while the highlighted
+    row and the live cells stay live, and the progress card carries elapsed and remaining times that
+    climb through a stall instead of freezing. (#382)
+  - wasm: the demo gains a disc-info strip — disc title, detected features, disc size in bytes and
+    in human-readable form, the hidden-tracks note, and the AACS indicator as a badge — plus a
+    View report that renders the structural zero-bitrate report over the current selection before any
+    measured scan, a source bar naming the loaded disc, a reveal on the filter hint, and Ctrl+C
+    copying the highlighted row's disc-relative path. (#383)
+  - wasm: the demo's progress strip shows an indeterminate state until the scan's first event — a
+    sweeping bar and a spinner where the percentage sits — instead of reporting a measurement it does
+    not have yet. (#387)
+  - core: stream files whose bytes stop before the span the disc declares are detected and named.
+    Such a file reads to a clean end of file, so nothing is recorded as a read error and every value
+    measured from it is silently smaller than the disc says; the CLI raises one stderr notice per
+    short file, the desktop app a banner, and the browser package disc.shortStreamNotices. The
+    report bytes are unchanged. (#345, #346)
+  Performance
+  - core: a caller whose earlier Codecs open already read the codec detail can skip the quick
+    codec pass (ScanOptions::skip_quick_pass), and can hand a prior open's AACS verdict to the next
+    one (ScanOptions::aacs_encrypted) instead of re-probing. The desktop app uses both, so its
+    measured scan no longer re-reads every stream file head — on damaged media each such read can
+    stall for minutes. (#358)
+  - core: the demux reads 256 KiB per request in the full pass and 16 KiB in the quick pass, so a
+    stalled read blocks for less and a cancel takes effect sooner. (#333)
+  Fixes
+  - core: a 3D clip whose BDMV/STREAM/SSIF/<clip>.ssif will not open is measured from the plain
+    *.m2ts instead of being abandoned — the base view is reported, the dependent (MVC) row is not,
+    and the failure is recorded against the .ssif in the WARNING block. (#363)
+  - core: three classic-parity corrections — an access unit's transfer interval is measured only
+    on a forward PTS (a backwards step no longer drags the interval base back), undecoded MPEG-1/2
+    and AAC audio rows fall back to the type-derived codec names instead of rendering an empty one,
+    and each clip's share of its playlist is computed against the finished playlist length rather
+    than the part accumulated so far. The first also reaches the playlist-level bitrate of a video
+    stream, where it moves a short playlist's kbps by a few counts; a feature-length one is
+    unchanged. See DIFFERENCES.md. (#364)
+  - core: the volume label of a disc mounted at a Windows drive root is read from the raw device
+    before the scan instead of after it, so a scan that records a read error still names the disc
+    — in the report body, in the BDINFO.<label>.txt file name, and in the desktop app's title —
+    rather than degrading to the drive letter. The read is only attempted for an input path that can
+    walk up to a nameless drive root, so an ordinary named folder costs no extra IO.
+    (#341, #378)
+  - cli: the progress line repaints about once a second through a stalled read, switching its
+    lead-in to Still scanning after five seconds, so a hung drive no longer looks like a hung
+    program. (#366, #378)
+  - core: the remaining-time readout shows --:--:-- until the first bytes are measured, on both
+    the command line and the desktop app, instead of 00:00:00 — which read as "about to finish" at
+    the moment nothing had been read, and could stand there for minutes beside a stalled read.
+    (#378)
+  - gui: deciding whether a path names a disc folder or an .iso image no longer reads the
+    filesystem — the kind is taken from the path's spelling, and whether the path can be opened is
+    answered by the listing worker. A source that has stopped answering (an unplugged drive, a share
+    that is gone) therefore no longer freezes the window before it appears when it is the remembered
+    last source, nor freezes a running window when it is dropped onto it; the stall lands on the
+    worker, behind the scan overlay's Cancel. A path that is missing or is not a disc still reaches
+    the same failure screen with the same message. (#379)
+  - gui: the disc-size line counts the interleaved *.ssif files, so a 3D disc no longer reads
+    smaller in the info box than in the report the same window renders. The log line carrying that
+    number moves with it. (#385)
+  - gui: the log records a stall clearing as well as a stall starting, the scan overlay no longer
+    passes clicks and drags through to the table beneath it, the scan-notice modal stops referring to
+    a report below it and says the report was generated rather than written, and a refused report save
+    names the destination it tried. (#377, #384)
+  - gui: cancelling a scan keeps the values it measured on the grids, the selection stays live
+    during a scan so the panes follow the highlighted row, and the remaining-time estimate climbs
+    through a stall instead of freezing. (#365)
+  - gui: read errors from the listing pass reach the warning banner and the log — both structural
+    opens' failures are merged and deduplicated — and gui.log keeps the previous launch as
+    gui.log.1, stamps its launch time, and records stalls, disc identity, and scan durations.
+    (#367)
+  - gui: the listing pass is cancellable and reports its progress, and the stall hint covers it.
+    (#339, #342)
+  - wasm: a failed measured open is reported instead of rendering a report of zero tallies, scan
+    errors are shown on the page, and a downloaded report is named from the scanned disc's volume
+    label. (#336, #369)
+  - Plural nouns agree with their counts in the command-line, desktop, and browser messages.
+    (#374)
+  Install bdinfo-rs 4.0.0
+  Install prebuilt binaries via shell script
+  curl --proto '=https' --tlsv1.2 -LsSf https://github.com/agentjp/bdinfo-rs/releases/download/v4.0.0/bdinfo-rs-installer.sh | sh
+  Install prebuilt binaries via powershell script
+  powershell -ExecutionPolicy Bypass -c "irm https://github.com/agentjp/bdinfo-rs/releases/download/v4.0.0/bdinfo-rs-installer.ps1 | iex"
+  Install prebuilt binaries via Homebrew
+  brew install agentjp/tap/bdinfo-rs
+  Download bdinfo-rs 4.0.0
+  ────────────────────────────────────────────────┬───────────────────┬─────────────
+  File                                            │Platform           │Checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  bdinfo-rs-aarch64-apple-darwin.tar.gz           │Apple Silicon macOS│checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  bdinfo-rs-x86_64-apple-darwin.tar.gz            │Intel macOS        │checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  bdinfo-rs-aarch64-pc-windows-msvc.zip           │ARM64 Windows      │checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  bdinfo-rs-x86_64-pc-windows-msvc.zip            │x64 Windows        │checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  bdinfo-rs-aarch64-unknown-linux-musl.tar.gz     │ARM64 MUSL Linux   │checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  bdinfo-rs-x86_64-unknown-linux-musl.tar.gz      │x64 MUSL Linux     │checksum
+  ────────────────────────────────────────────────┴───────────────────┴─────────────
+  Verifying GitHub Artifact Attestations
+  The artifacts in this release have attestations generated with GitHub Artifact Attestations. These can be verified by using the GitHub CLI:
+  gh attestation verify <file-path of downloaded artifact> --repo agentjp/bdinfo-rs
+  You can also download the attestation from GitHub and verify against that directly:
+  gh attestation verify <file-path of downloaded artifact> --bundle <file-path of downloaded attestation>
+ReleaseNotesUrl: https://github.com/agentjp/bdinfo-rs/releases/tag/v4.0.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

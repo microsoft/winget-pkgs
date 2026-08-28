@@ -34,60 +34,50 @@ extends:
       # Agent phase.
       - job: 'Rebuild'
         displayName: 'Start Rebuild'
+        pool:
+          name: Azure-Pipelines-1ESPT-ExDShared-StaticIP
+          image: windows-2022
+          os: windows
         variables:
           skipComponentGovernanceDetection: ${{ true }}
           runCodesignValidationInjection: ${{ false }}
         timeoutInMinutes: 0
-        
+
         steps:
 
         # Allow scripts to access the system token.
+        # Don't fetch all history.
+        # Don't fetch tags.
         - checkout: self
           persistCredentials: true
           clean: true
+          fetchDepth: 1
+          fetchTags: false
 
-        # Downloads all the setup files and its dependencies.
-        - task: AzureCLI@1
-          displayName: 'Azure Setup'
-          inputs:
-            azureSubscription: '$(WinGet.Subscription)'
-            scriptLocation: inlineScript
-            inlineScript: 'az storage blob download-batch -d . --pattern * -s servicewrapper --output none'
-          env:
-            AZURE_STORAGE_CONNECTION_STRING: $(ValidationStorageAccountConnectionString)
+        # Downloads dependencies and publishes the pipeline secrets.
+        - template: /DevOpsPipelineDefinitions/templates/winget-setup.yaml@self
+          parameters:
+            type: Rebuild
 
-        # WinGet setup
-        - task: CmdLine@2
-          name: 'wingetsetup'
-          displayName: 'WinGet Setup'
-          env:
-            HOST_KEY: $(AzureFunctionHostKey)
-            SIGN_ENDPOINT: $(AzFuncSignEndpoint)
-            PUBLISH_ENDPOINT: $(AzFuncRebuildPublishEndpoint)
-            CLEANUP_ENDPOINT: $(AzFuncRebuildCleanupEndpoint)
-            RESTSOURCE_REBUILD_ENDPOINT: $(AzFuncRestSourceRebuildEndpoint)
-          inputs:
-            script: 'winget_rebuild_setup.cmd'
-            workingDirectory: scripts
-
-        - task: CmdLine@2
+        - task: AzureCLI@2
           displayName: 'Validate Manifests'
           inputs:
-            script: 'WinGetSvcWrapper.exe rebuild --operationId %BUILD_BUILDNUMBER%'
-            failOnStderr: true
-          condition: succeeded()
+            azureSubscription: '$(WinGetSvc.DataAccess)'
+            scriptType: batch
+            scriptLocation: inlineScript
+            inlineScript: |
+              WinGetSvcWrapper.exe rebuild --operationId %BUILD_BUILDNUMBER%
+            addSpnToEnvironment: true
+            failOnStandardError: true
           env:
-            ValidationConnectionString: $(ValidationStorageAccountConnectionString)
-            ExecutionEnvironment: $(ExecutionEnvironment)
+            ValidationStorageAccountName: $(ValidationStorageAccountName)
+            CacheStorageAccountName: $(CacheStorageAccountName)
+            WinGet:AppConfig:PrimaryEndpoint: $(AppConfigPrimaryEndpoint)
+            WinGet:AppConfig:SecondaryEndpoint: $(AppConfigSecondaryEndpoint)
+            DIApplicationInsightKey: $(DIApplicationInsightKey)
             PackagePublisher: $(PackagePublisher)
             SYSTEM_ACCESSTOKEN: $(System.AccessToken)
-            DIApplicationInsightKey: $(DIApplicationInsightKey)
-            WinGet:AppConfig:Primary: $(AppConfigPrimary)
-            WinGet:AppConfig:Secondary: $(AppConfigSecondary)
-            DevOpsOrganization: $(DevOpsOrganization)
-            DevOpsProjectName: $(DevOpsProjectName)
-            DevOpsPublishPipelineDefinitionId: $(DevOpsPublishPipelineDefinitionId)
-            DevOpsRebuildPipelineDefinitionId: $(DevOpsRebuildPipelineDefinitionId)
+            ExecutionEnvironment: $(WinGetSvc.ExecutionEnvironment)
             SkipPausePublishPipeline: $(Rebuild.SkipPausePublishPipeline)
 
       # Agentless phase. Depends on previous job. 
@@ -111,16 +101,14 @@ extends:
             body: |
               {
               "operationId": "$(Build.BuildNumber)",
-              "BuildId": "$(Build.BuildId)",
-              "PlanUrl": "$(system.CollectionUri)",
-              "HubName": "$(system.HostType)",
+              "buildId": "$(Build.BuildId)",
+              "projectId": "$(system.TeamProjectId)",
+              "planId": "$(system.PlanId)", 
+              "jobId": "$(system.JobId)", 
+              "timelineId": "$(system.TimelineId)", 
+              "taskInstanceId": "$(system.TaskInstanceId)",
+              "repository": "$(build.repository.id)",
               "pipelineType": "RebuildPipeline",
-              "ProjectId": "$(system.TeamProjectId)",
-              "PlanId": "$(system.PlanId)", 
-              "JobId": "$(system.JobId)", 
-              "TimelineId": "$(system.TimelineId)", 
-              "TaskInstanceId": "$(system.TaskInstanceId)",
-              "AuthToken": "$(system.AccessToken)"
               }
             waitForCompletion: "true"
 
@@ -146,22 +134,20 @@ extends:
             body: |
               {
               "operationId": "$(Build.BuildNumber)",
-              "BuildId": "$(Build.BuildId)",
-              "PlanUrl": "$(system.CollectionUri)",
-              "HubName": "$(system.HostType)",
+              "buildId": "$(Build.BuildId)",
+              "projectId": "$(system.TeamProjectId)",
+              "planId": "$(system.PlanId)", 
+              "jobId": "$(system.JobId)", 
+              "timelineId": "$(system.TimelineId)", 
+              "taskInstanceId": "$(system.TaskInstanceId)",
+              "repository": "$(build.repository.id)",
               "pipelineType": "RebuildPipeline",
-              "ProjectId": "$(system.TeamProjectId)",
-              "PlanId": "$(system.PlanId)", 
-              "JobId": "$(system.JobId)", 
-              "TimelineId": "$(system.TimelineId)", 
-              "TaskInstanceId": "$(system.TaskInstanceId)",
-              "AuthToken": "$(system.AccessToken)",
-              "ContainerName": "$(CacheContainerName)",
-              "CommitTablePartitionKey": "$(CommitTablePartitionKey)",
-              "CommitTableRowKey": "$(CommitTableRowKey)",
-              "EnableContainerBackup": "$(Rebuild.EnableContainerBackup)",
-              "SkipManifestIndexUpdate": "$(Rebuild.SkipManifestIndexUpdate)",
-              "ClearContainer": "$(Rebuild.ClearContainer)",
+              "containerName": "$(CacheContainerName)",
+              "commitTablePartitionKey": "$(CommitTablePartitionKey)",
+              "commitTableRowKey": "$(CommitTableRowKey)",
+              "enableContainerBackup": "$(Rebuild.EnableContainerBackup)",
+              "skipManifestIndexUpdate": "$(Rebuild.SkipManifestIndexUpdate)",
+              "clearContainer": "$(Rebuild.ClearContainer)",
               }
             waitForCompletion: "true"
 
@@ -189,15 +175,13 @@ extends:
             body: |
               {
               "operationId": "$(Build.BuildNumber)",
-              "BuildId": "$(Build.BuildId)",
-              "PlanUrl": "$(system.CollectionUri)",
-              "HubName": "$(system.HostType)",
+              "buildId": "$(Build.BuildId)",
+              "projectId": "$(system.TeamProjectId)",
+              "planId": "$(system.PlanId)", 
+              "jobId": "$(system.JobId)", 
+              "timelineId": "$(system.TimelineId)", 
+              "taskInstanceId": "$(system.TaskInstanceId)",
+              "repository": "$(build.repository.id)",
               "pipelineType": "RebuildPipeline",
-              "ProjectId": "$(system.TeamProjectId)",
-              "PlanId": "$(system.PlanId)", 
-              "JobId": "$(system.JobId)", 
-              "TimelineId": "$(system.TimelineId)", 
-              "TaskInstanceId": "$(system.TaskInstanceId)",
-              "AuthToken": "$(system.AccessToken)",
               }
             waitForCompletion: "true"

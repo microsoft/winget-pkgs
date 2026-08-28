@@ -1,0 +1,169 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Mickem.NSClient
+PackageVersion: 0.14.1.0
+PackageLocale: en-US
+Publisher: MySolutions NORDIC
+PublisherUrl: https://medin.name/
+PublisherSupportUrl: https://github.com/mickem/nscp/issues
+Author: My Computer Solutions NORDIC KB
+PackageName: NSClient++
+PackageUrl: https://nsclient.org/
+License: GPL-2.0
+LicenseUrl: https://github.com/mickem/nscp/blob/HEAD/COPYING
+Copyright: Copyright (C) 2026 - Michael Medin
+ShortDescription: A fully fledged monitoring agent which can be used with many monitoring tools.
+Description: |-
+  NSClient++ (nscp) aims to be a simple yet powerful and secure monitoring daemon. It was built for Nagios/Icinga, but nothing in the daemon is Nagios/Icinga specific and it can be used in many other scenarios where you want to receive/distribute check metrics.
+  The daemon has 3 main functions:
+  - Allow a remote machine (monitoring server) to request commands to be run on this machine (the monitored machine) which return the status of the machine.
+  - Submit the same results to a remote (monitoring server).
+  - Take action and perform tasks.
+Moniker: nscp
+Tags:
+- icinga
+- naemon
+- nagios
+ReleaseNotes: |-
+  Host security posture, JSON-aware HTTP checks, and a clearer licence
+  This release adds a brand-new CheckSecurity module for monitoring a host's
+  security posture — certificates, firewall, antivirus, BitLocker, Secure Boot,
+  NLA and logged-on users — and teaches check_http to assert on values inside a
+  JSON response body. It also fixes boolean check arguments over REST, tidies up
+  process aggregation and module activation, relicenses the project under a clear
+  dual licence, and reworks the documentation to handle Windows and Linux side by
+  side.
+  Highlights
+  - New CheckSecurity module. Seven new checks for host security posture:
+    check_certificate, check_firewall, check_antivirus, check_bitlocker,
+    check_secureboot, check_nla and check_users. check_certificate and
+    check_users run everywhere; the rest are Windows-only. (#1339)
+  - check_http can assert on JSON responses. New json-path=alias:path
+    options extract values from a JSON body into filter keywords you can threshold
+    on and emit as perfdata. (#1341)
+  - CheckNet queries now emit performance data by default, so check_http,
+    check_tcp and friends graph out of the box without an explicit perf
+    syntax. (#1341)
+  - Boolean check arguments accept values, not just flags.
+    check_ping host=www.google.com total=true now works alongside the bare-flag
+    form — the form REST already used. (#1338)
+  - Activate several modules in one command:
+    nscp settings --active-module CheckSystem CheckNet. (#1329-follow-up)
+  - Clear dual licence. NSClient++ is now Apache-2.0 OR GPL-2.0-only, with
+    machine-readable REUSE metadata and third-party notices. (#1343)
+  - Reworked, multi-OS documentation that presents Windows and Linux options
+    and features together instead of assuming one platform. (#1342)
+  Detailed changes
+  CheckSecurity — new host security-posture module
+  A new module, CheckSecurity (alias security), checks whether a host is in
+  the security state you expect. Each check is a normal modern_filter check, so
+  you can override the default warn/crit expressions, filter, and
+  detail-syntax/top-syntax as usual.
+  Command Platforms What it checks
+  check_certificate All X.509 certificate expiry / validity / hygiene from files or the Windows store
+  check_users Windows + Linux Count and detail of logged-on / RDP sessions
+  check_firewall Windows only Firewall profile (Domain/Private/Public) enabled and active state
+  check_antivirus Windows only Registered antivirus products' enabled / up-to-date state (Security Center)
+  check_bitlocker Windows only BitLocker drive-encryption protection status per volume
+  check_secureboot Windows only Whether UEFI Secure Boot is enabled (distinguishes "disabled" from "legacy")
+  check_nla Windows only Network Location Awareness category (public/private/domain) per network
+  check_certificate defaults to warning when a certificate expires within 30
+  days and critical within 10 (matching common practice), emits expires_in (whole
+  days until expiry) as perfdata, and can scan a whole directory:
+  check_certificate file=/etc/ssl/certs/mysite.pem
+  check_certificate file=/etc/ssl/certs recursive=true "detail-syntax=${subject}: ${expires_in}d"
+  check_certificate file=/etc/pki/tls/certs critical=expired=1
+  The Windows checks expose the raw state fields so you can tighten or relax the
+  default posture. check_firewall adds an active flag (which profile is
+  currently in effect) alongside enabled, so you can warn when a machine silently
+  falls back to the Public profile after a network change:
+  check_firewall "warn=active = 1 and profile = 'Public'" "detail-syntax=${profile} profile is active"
+  check_secureboot "warn=supported = 0" "crit=supported = 1 and enabled = 0"
+  check_nla "crit=connected = 1 and category != 'domain'" "detail-syntax=${network}=${category}"
+  On a platform where a Windows-only check does not apply, the check returns
+  UNKNOWN with a clear message rather than failing.
+  CheckNet — check_http JSON path extraction
+  check_http can now pull values out of a JSON response body and treat them as
+  filter keywords. Each json-path=alias:path option extracts the value at a
+  dotted path (numeric segments index into arrays; single-quote a segment that
+  itself contains a dot) and makes it available for warning=/critical=
+  expressions and perfdata:
+  check_http url=https://api.example.com/health "json-path=qlen:data.queue.length" "crit=qlen > 100"
+  check_http url=https://api.example.com/health "json-path=st:status" "crit=st != 'ok'"
+  check_http url=https://api.example.com/health "json-path=err:metrics.error_rate" "warn=err > 0.01" "crit=err > 0.05"
+  check_http url=https://api.example.com/health "json-path=first:items.0.name" "json-path=cfg:'a.b'.c"
+  Numeric values keep full precision, strings compare and render as strings, and
+  booleans read as 1/0. A missing path — or a body that is not valid JSON —
+  leaves the alias empty rather than failing the check, and multiple json-path
+  options can be combined freely.
+  CheckNet — default performance data
+  CheckNet queries now attach sensible performance data by default, so
+  check_http, check_tcp and the other network checks produce graphable
+  perfdata without a hand-written perf syntax. check_ntp_offset threshold
+  handling was also tidied up in the same change.
+  Check arguments — boolean options accept values
+  Boolean check options now accept an explicit value in addition to the bare-flag
+  form:
+  check_ping host=www.google.com total=true
+  Previously the value form was rejected from the CLI even though REST always
+  passes flags as key=true tokens, so a boolean option that worked over REST
+  could look broken from the command line. Both forms now behave identically.
+  CheckSystem — process total aggregation
+  check_process process-total aggregation now correctly reports the started
+  and hung states (on both Windows and Linux), so totals of these statuses
+  match what the per-process detail shows.
+  Settings — activate multiple modules at once
+  nscp settings --active-module now accepts several module names in one
+  invocation:
+  nscp settings --active-module CheckSystem CheckNet
+  Licensing — dual-licensed Apache-2.0 OR GPL-2.0-only
+  NSClient++ is now explicitly dual-licensed under Apache-2.0 OR
+  GPL-2.0-only. Source headers were updated to SPDX identifiers, the project
+  carries machine-readable REUSE metadata
+  (REUSE.toml, LICENSES/), and a THIRD-PARTY-NOTICES.md / NOTICE collect
+  the third-party licences. The installer, packaging and docs licence text were
+  updated to match.
+  Build — Python library discovery
+  CMake now derives the default Python library name instead of hardcoding a
+  version, and defaults it to the soname so the module loads without the Python
+  development packages installed. This makes Linux builds far less sensitive to
+  the exact Python version on the build and target hosts. (#1334)
+  Documentation
+  - Multi-OS reference docs. The reference documentation was reworked to
+    present Windows and Linux options and features together, handling checks whose
+    options diverge by platform instead of documenting a single OS. Windows docs
+    were regenerated. (#1342)
+  - New docs/samples/ usage examples and descriptions for every new
+    CheckSecurity command and the check_http JSON feature.
+  - check_process docs cross-reference filter_perf for top-N processes. (#1330)
+  - README restructured and dead files removed. (#1340)
+  Quality and CI
+  - Spelling. A codespell GitHub workflow was added and spelling errors in
+    log messages and settings descriptions were fixed. (#1314, #1344)
+  - Live integration tests. A new opt-in test suite runs checks against a real
+    VM in Azure, alongside the existing REST-driven integration tests. New
+    integration tests cover CheckSecurity, the check_http JSON feature, and
+    --active-module. (#1335)
+  - Assorted build fixes for older Windows toolchains, Linux, and sanitizer runs.
+  Upgrade notes
+  - Licence change: NSClient++ is now distributed as Apache-2.0 OR
+    GPL-2.0-only. This is a clarification/relicensing — review it if your
+    organisation tracks the exact licence of bundled software. No code or runtime
+    behaviour changes as a result.
+  - CheckNet perfdata is now on by default. Network checks emit performance
+    data without an explicit perf syntax. If you were adding perfdata manually,
+    double-check you are not now emitting it twice; graphs that previously showed
+    nothing will start populating.
+  - Boolean check arguments: option=true / option=false now work from the
+    CLI as well as over REST. Existing bare-flag usage is unchanged.
+  - CheckSecurity is not loaded by default. Enable it before using the new
+    checks, e.g. nscp settings --active-module CheckSecurity. Windows-only
+    checks return UNKNOWN on other platforms rather than erroring.
+  Full Changelog: https://github.com/mickem/nscp/compare/0.14.0...0.14.1
+ReleaseNotesUrl: https://github.com/mickem/nscp/releases/tag/0.14.1
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://nsclient.org/docs/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

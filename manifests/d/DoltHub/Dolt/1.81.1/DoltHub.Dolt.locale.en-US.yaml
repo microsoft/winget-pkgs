@@ -1,0 +1,54 @@
+# Created with WinGet Updater using komac v2.14.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: DoltHub.Dolt
+PackageVersion: 1.81.1
+PackageLocale: en-US
+Publisher: DoltHub
+PublisherUrl: https://github.com/dolthub/dolt
+PublisherSupportUrl: https://github.com/dolthub/dolt/issues
+Author: DoltHub
+PackageName: Dolt
+PackageUrl: https://www.dolthub.com/
+License: Apache-2.0
+LicenseUrl: https://github.com/dolthub/dolt/blob/HEAD/LICENSE
+CopyrightUrl: https://raw.githubusercontent.com/dolthub/dolt/master/LICENSE
+ShortDescription: Dolt is a SQL database that you can fork, clone, branch, merge, push and pull just like a git repository.
+Description: |-
+  Dolt is a SQL database that you can fork, clone, branch, merge, push and pull just like a git repository.
+  Connect to Dolt just like any MySQL database to run queries or update the data using SQL commands.
+  Use the command line interface to import CSV files, commit your changes, push them to a remote, or merge your teammate's changes.
+Moniker: dolt
+Tags:
+- cli
+- data
+- git-for-data
+- versioning
+ReleaseNotes: |-
+  Merged PRs
+  dolt
+  - 10347: fixed output bug for foreign key constraints
+  go-mysql-server
+  - 3389: remove convertLeftAndRight
+    This PR removes c.convertLeftAndRight, which avoids calls to c.Left().Type() and c.Right().Type().
+    Not entirely sure why receiver methods would impact performance this much, but benchmarks say so.
+    Benchmarks: #10342 (comment)
+  - 3384: Look at every join node parent when computing outer scopes.
+    Previously, when building scopes for subqueries that appear inside joins, we would only track a single parent join node. If the subquery had multiple join parents, we would only be able to resolve references to the innermost subquery. This inhibits the optimizations we can perform.
+    This PR uses a custom tree walker to track a list of parent join nodes, and includes an example of a query that was not previously possible to optimize.
+  - 3370: Wrap errgroup.Group.Go() calls for consistent panic recovery
+    Each spawned goroutine needs a panic recovery handler to prevent an unexpected panic from crashing the entire Go process. This change introduces a helper function that wraps goroutine creation through errgroup.Group and installs a panic recovery handler and updates existing code to use it.
+  vitess
+  - 448: Move SERIAL type out of numeric type definitions so that unsigned value is not overwritten
+    fixes #10345
+    MySQL docs
+  - 446: Added DISTINCT ON expressions
+    Related PRs:
+    - dolthub/go-mysql-server#3369
+    - dolthub/doltgresql#2181
+  Closed Issues
+  - 10345: SERIAL type alias creates signed BIGINT instead of unsigned
+  - 10329: Foreign key constraint doesn't enforce index requirement on receiving table
+ReleaseNotesUrl: https://github.com/dolthub/dolt/releases/tag/v1.81.1
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

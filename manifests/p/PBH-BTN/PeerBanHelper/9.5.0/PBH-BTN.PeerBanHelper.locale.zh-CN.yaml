@@ -1,0 +1,68 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: PBH-BTN.PeerBanHelper
+PackageVersion: 9.5.0
+PackageLocale: zh-CN
+Publisher: PBH-BTN Community
+PublisherUrl: https://github.com/PBH-BTN
+PublisherSupportUrl: https://github.com/PBH-BTN/PeerBanHelper/issues
+PackageName: PeerBanHelper
+PackageUrl: https://github.com/PBH-BTN/PeerBanHelper
+License: GPL-3.0
+LicenseUrl: https://github.com/PBH-BTN/PeerBanHelper/blob/HEAD/LICENSE
+ShortDescription: 自动封禁不受欢迎、吸血和异常的 BT 客户端，并支持自定义规则。
+Tags:
+- bt
+- 种子
+ReleaseNotes: |-
+  新增功能
+  【实验性】Aria2Next 支持
+  @Ghost-chu @Gaojianli
+  本次更新添加了对 Aria2Next 下载器和 Motrix2Next 下载器（其使用 Aria2Next 内核）的实验性支持。
+  作为 Aria2 官方版本的分支，此版本继承了 Aria2 的许多优点。占用小，开销低，支持 HTTP 任务和 BitTorrent 混合下载。
+  然而，Aria2 (以及 Aria2Next) 并非专业 BitTorrent 下载器，仍然缺失了许多重要功能，且有一些 BitTorrent 协议规范仍未得到实现。如果您的主要目的是进行 BT 下载，使用传统的 qBittorrent、BitComet 等下载器仍是最佳方案。
+  本次添加的支持为实验性的，由于 Aria2 的灵活性，我们的测试难以覆盖到方方面面。因此在使用过程中请尽量避免一些非常规用法和配置（例如 listen-port 范围段等），这些设置明确不受支持。同时也请在使用过程中关注程序运行情况，我们对实验性质的功能稳定性不做保证。
+  对 Aria2Next 的兼容不代表已支持 Aria2 官方版或者其它 Aria2 分支，PeerBanHelper 对 Aria2Next 的支持是建立于大量 Aria2Next 专有 RPC 调用之上的。
+  要使用 Aria2Next，只需要将原版 Aria2 的二进制文件替换为 Aria2Next 的二进制文件即可，目前测试 AriaNg 等 WebUI/GUI 外壳仍然与 Aria2Next 兼容，无需做特别调整。
+  在此，感谢 @AnInsomniacy, @SnowCutieOwO 和 @dawn-lc，在共同合作下使得此下载器的兼容成为了可能。
+  与其他下载器相同，您可以通过 “添加下载器” 按钮，直接添加 Aria2Next 下载器。
+  暂不支持的功能
+  由于当前版本的技术限制，以下功能对 Aria2Next 类型的下载器暂不可用：
+  - 流量统计图表
+  - 主动监控
+  以下功能在未来也不会添加支持：
+  - ED2K/eMule 网络的反吸血支持（PeerBanHelper 专注于 BitTorrent 网络）
+  Teredo 支持
+  @Ghost-chu
+  本次更新新增对 IPV6 Teredo 隧道的支持，该功能默认关闭。使用此功能需要手动在配置文件中开启对应配置项，此配置不提供 WebUI 界面修改支持。
+  请注意：通过 Teredo 隧道传输 BitTorrent 流量是不道德的，PBH-BTN 不鼓励任何用户将 Teredo 隧道用于 BitTorrent 用途。
+  优化
+  - 减少 ProgressCheatBlocker 定时保存时的 I/O 数据量 @Ghost-chu
+  - 取消对非主流平台(仅保留 x86_64 和 arm64)的 epoll/kqueue/iouring 本地平台二进制文件的打包，缩减程序体积 @Ghost-chu
+    - 这些平台将回退普通的 select() 连接模型，预期性能不会出现非常明显的下降
+  错误修复
+  - 修复 MySQL/MariaDB/PostgreSQL/H2 用户遇到的 Flyway 迁移失败的问题 @paulzzh
+  - 修复发布文件中 .torrent 文件在 BitComet 上出现解析失败的问题 @paulzzh
+  - 修复当某个 IP 地址不在 GeoLite2/GeoCN 数据库其中之一时，整个查询返回失败空结果的问题 @Ghost-chu
+  - 修复 ProgressCheatBlocker 的首次出现日志记录数据在某些情况下可能因竟态条件导致后期被错误更新 @Ghost-chu
+  - 修复某些情况下 ProgressCheatBlocker 数据可能无法报错报告唯一键冲突的问题 @Ghost-chu @paulzzh
+  - 修复部分 Windows 设备上报告 oshi-ffm 错误，程序无法启动的问题 @paulzzh
+  其它更改
+  - 升级了依赖项版本，增强了整体安全性与稳定性 @paulzzh
+  -【BTN 网络】大幅改善 API 查询性能，恢复 IP 查询-BTN 数据的功能可用性 @Ghost-chu
+  -【BTN 网络】大幅改善 IP 信息聚合查询的性能 @Ghost-chu
+  -【BTN 网络】支持基于 GeoIP 的动态路由，改善中国移动运营商及福建省、江苏省、浙江省、四川省、重庆省、河南省、湖北省的用户 BTN 连通性 @Ghost-chu
+  -【基础设施】对基础设施进行例行维护，提升安全性稳定性和整体性能
+  -【BTN 规范】BTN 标准规范已得到更新，有关内容请参见：https://github.com/PBH-BTN/BTN-Spec
+  Docker
+  DockerHub: ghostchu/peerbanhelper:v9.5.0
+  阿里云国内镜像加速：registry.cn-hangzhou.aliyuncs.com/ghostchu/peerbanhelper:v9.5.0
+
+  部署教程 | 常见问题 | 如何设置下载器 | PBH-BTN 论坛
+ReleaseNotesUrl: https://github.com/PBH-BTN/PeerBanHelper/releases/tag/v9.5.0
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/PBH-BTN/PeerBanHelper/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

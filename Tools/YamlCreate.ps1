@@ -1,4 +1,26 @@
-﻿#Requires -Version 5
+﻿<#
+.SYNOPSIS
+    WinGet Manifest creation helper script
+.DESCRIPTION
+    This file intends to help you generate a manifest for publishing
+    to the Windows Package Manager repository.
+
+    It'll attempt to download an installer from the user-provided URL to calculate
+    a checksum. That checksum and the rest of the input data will be compiled into
+    a set of .YAML files.
+.EXAMPLE
+    PS C:\Projects\winget-pkgs> Get-Help .\Tools\YamlCreate.ps1 -Full
+    Show this script's help
+.EXAMPLE
+    PS C:\Projects\winget-pkgs> .\Tools\YamlCreate.ps1
+    Run the script to create a manifest file
+.NOTES
+    Please file an issue if you run into errors with this script:
+    https://github.com/microsoft/winget-pkgs/issues
+.LINK
+    https://github.com/microsoft/winget-pkgs/blob/master/Tools/YamlCreate.ps1
+#>
+#Requires -Version 5
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingWriteHost', '', Justification = 'This script is not intended to have any outputs piped')]
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', 'Preserve', Justification = 'The variable is used in a conditional but ScriptAnalyser does not recognize the scope')]
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseSingularNouns', '', Scope = 'Function', Target = 'Read-AppsAndFeaturesEntries',
@@ -30,7 +52,7 @@ if ($help) {
   exit
 }
 
-# Custom menu prompt that listens for keypresses. Requires a prompt and array of entries at minimum. Entries preceeded with `*` are shown in green
+# Custom menu prompt that listens for key presses. Requires a prompt and array of entries at minimum. Entries preceeded with `*` are shown in green
 # Returns a console key value
 Function Invoke-KeypressMenu {
   Param
@@ -113,12 +135,12 @@ if (Get-Command 'git' -ErrorAction SilentlyContinue) {
           try {
             winget upgrade --id Git.Git --exact
           } catch {
-            throw [UnmetDependencyException]::new('Git could not be upgraded sucessfully', $_)
+            throw [UnmetDependencyException]::new('Git could not be upgraded successfully', $_)
           } finally {
             $gitVersionString = ((git version) | Select-String '([0-9]{1,}\.?){3,}').Matches.Value.Trim(' ', '.')
             $gitVersion = [System.Version]::Parse($gitVersionString)
             if ($gitVersion -lt $GitMinimumVersion) {
-              throw [UnmetDependencyException]::new('Git could not be upgraded sucessfully')
+              throw [UnmetDependencyException]::new('Git could not be upgraded successfully')
             }
           }
         }
@@ -137,21 +159,67 @@ if (Get-Command 'git' -ErrorAction SilentlyContinue) {
   }
 }
 
-# Installs `powershell-yaml` as a dependency for parsing yaml content
-if (-not(Get-Module -ListAvailable -Name powershell-yaml)) {
-  try {
-    Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force
-    Install-Module -Name powershell-yaml -Force -Repository PSGallery -Scope CurrentUser
-  } catch {
-    # If there was an exception while installing powershell-yaml, pass it as an InternalException for further debugging
-    throw [UnmetDependencyException]::new("'powershell-yaml' unable to be installed successfully", $_.Exception)
-  } finally {
-    # Double check that it was installed properly
-    if (-not(Get-Module -ListAvailable -Name powershell-yaml)) {
-      throw [UnmetDependencyException]::new("'powershell-yaml' is not found")
+####
+# Description: Ensures a PowerShell module is installed
+# Inputs: PowerShell Module Name
+# Outputs: None
+####
+function Initialize-Module {
+  param (
+    [Parameter(Mandatory = $true)]
+    [String] $Name,
+    [Parameter(Mandatory = $false)]
+    [String[]] $Cmdlet,
+    [Parameter(Mandatory = $false)]
+    [String[]] $Function
+  )
+
+  $NuGetVersion = (Get-PackageProvider).Where({ $_.Name -ceq 'NuGet' }).Version
+  $installedModules = Get-Module -ListAvailable -Name $Name
+
+  # Ensure NuGet is installed and up to date
+  # If the NuGet Package Provider is not installed, the version will be null, which will satisfy the conditional
+  if ($NuGetVersion -lt $script:NuGetMinimumVersion) {
+    try {
+      Write-Debug 'NuGet Package Provider was not found, it will be installed'
+      # This might fail if the user is not an administrator, so catch the errors
+      Install-PackageProvider -Name NuGet -MinimumVersion $script:NuGetMinimumVersion.ToString() -Force -Scope CurrentUser
+    } catch {
+      Write-Error 'Could not install the NuGet package provider which is required to install script dependencies.' -ErrorAction Continue
+      Write-Error "You may be able to resolve this by running: Install-PackageProvider -Name NuGet -MinimumVersion $($script:NuGetMinimumVersion.ToString())"
     }
   }
+
+  Write-Verbose "Ensuring PowerShell module '$Name' is installed"
+  if ($installedModules) {
+    # If the module is installed, attempt to upgrade it
+    Write-Debug "Found $Name in installed modules"
+  } else {
+    # If the module is not installed, attempt to install it
+    try {
+      Install-Module -Name $Name -Force -Repository PSGallery -Scope CurrentUser
+    } catch {
+      Write-Error "$Name was unable to be installed successfully"
+    }
+  }
+  # Verify the module is installed and present
+  try {
+    if (!(Get-Module -Name $Name)) {
+      $importParameters = @{Name = $Name; Scope = 'Local' } # Force the module to be imported into the local scope to avoid changing the global scope
+      if ($PSBoundParameters.ContainsKey('Cmdlet')) { $importParameters['Cmdlet'] = $Cmdlet }
+      if ($PSBoundParameters.ContainsKey('Function')) { $importParameters['Function'] = $Function }
+
+      Import-Module @importParameters
+    }
+  } catch {
+    Write-Error "$Name was found in available modules, but could not be imported"
+  }
 }
+
+$script:NuGetMinimumVersion = [System.Version]::Parse('2.8.5.201')
+Initialize-Module -Name 'powershell-yaml' # Used for parsing YAML files
+Initialize-Module -Name 'MSI' -Cmdlet @('Get-MSITable'; 'Get-MSIProperty') # Used for fetching MSI Properties
+Initialize-Module -Name 'NtObjectManager' -Function @('Get-Win32ModuleResource'; 'Get-Win32ModuleManifest') # Used for checking installer type inno
 
 # Set settings directory on basis of Operating System
 $script:SettingsPath = Join-Path $(if ([System.Environment]::OSVersion.Platform -match 'Win') { $env:LOCALAPPDATA } else { $env:HOME + '/.config' } ) -ChildPath 'YamlCreate'
@@ -168,8 +236,8 @@ if ($Settings) {
   exit
 }
 
-$ScriptHeader = '# Created with YamlCreate.ps1 v2.4.0'
-$ManifestVersion = '1.6.0'
+$ScriptHeader = '# Created with YamlCreate.ps1 v2.8.0'
+$ManifestVersion = '1.12.0'
 $PSDefaultParameterValues = @{ '*:Encoding' = 'UTF8' }
 $Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
 $ofs = ', '
@@ -178,8 +246,21 @@ $callingCulture = [Threading.Thread]::CurrentThread.CurrentCulture
 [Threading.Thread]::CurrentThread.CurrentUICulture = 'en-US'
 [Threading.Thread]::CurrentThread.CurrentCulture = 'en-US'
 if (-not ([System.Environment]::OSVersion.Platform -match 'Win')) { $env:TEMP = '/tmp/' }
-$wingetUpstream = 'https://github.com/microsoft/winget-pkgs.git'
 $RunHash = $(Get-FileHash -InputStream $([IO.MemoryStream]::new([byte[]][char[]]$(Get-Date).Ticks.ToString()))).Hash.Substring(0, 8)
+$script:UserAgent = 'Microsoft-Delivery-Optimization/10.1'
+$script:CleanupPaths = @()
+
+$script:OriginalPSModulePath = $env:PSModulePath
+Write-Debug 'Setting up module paths for YamlCreate'
+Write-Debug "Adding $(Join-Path -Path $PSScriptRoot -ChildPath 'Modules') to PSModulePath"
+$env:PSModulePath = $env:PSModulePath + ';' + (Join-Path -Path $PSScriptRoot -ChildPath 'Modules') # Add the local modules to the PSModulePath
+
+Import-Module -Name 'YamlCreate' -Scope Global -Force -ErrorAction 'Stop' # Parent module that loads the rest of the modules required for the script
+
+$_wingetVersion = 1.0.0
+$_appInstallerVersion = (Get-AppxPackage Microsoft.DesktopAppInstaller).version
+if (Get-Command 'winget' -ErrorAction SilentlyContinue) { $_wingetVersion = (winget -v).TrimStart('v') }
+$script:backupUserAgent = "winget-cli WindowsPackageManager/$_wingetVersion DesktopAppInstaller/Microsoft.DesktopAppInstaller v$_appInstallerVersion"
 
 if ($ScriptSettings.EnableDeveloperOptions -eq $true -and $null -ne $ScriptSettings.OverrideManifestVersion) {
   $script:UsesPrerelease = $ScriptSettings.OverrideManifestVersion -gt $ManifestVersion
@@ -191,35 +272,19 @@ $useDirectSchemaLink = if ($env:GITHUB_ACTIONS -eq $true) {
 } else {
   (Invoke-WebRequest "https://aka.ms/winget-manifest.version.$ManifestVersion.schema.json" -UseBasicParsing).Content -match '<!doctype html>'
 }
-$SchemaUrls = @{
-  version       = if ($useDirectSchemaLink) { "https://raw.githubusercontent.com/microsoft/winget-cli/master/schemas/JSON/manifests/v$ManifestVersion/manifest.version.$ManifestVersion.json" } else { "https://aka.ms/winget-manifest.version.$ManifestVersion.schema.json" }
-  defaultLocale = if ($useDirectSchemaLink) { "https://raw.githubusercontent.com/microsoft/winget-cli/master/schemas/JSON/manifests/v$ManifestVersion/manifest.defaultLocale.$ManifestVersion.json" } else { "https://aka.ms/winget-manifest.defaultLocale.$ManifestVersion.schema.json" }
-  locale        = if ($useDirectSchemaLink) { "https://raw.githubusercontent.com/microsoft/winget-cli/master/schemas/JSON/manifests/v$ManifestVersion/manifest.locale.$ManifestVersion.json" } else { "https://aka.ms/winget-manifest.locale.$ManifestVersion.schema.json" }
-  installer     = if ($useDirectSchemaLink) { "https://raw.githubusercontent.com/microsoft/winget-cli/master/schemas/JSON/manifests/v$ManifestVersion/manifest.installer.$ManifestVersion.json" } else { "https://aka.ms/winget-manifest.installer.$ManifestVersion.schema.json" }
+
+if ($ManifestVersion -ne 'latest') {
+  $FullManifestVersion = "v$ManifestVersion"
+} else {
+  $FullManifestVersion = $ManifestVersion
 }
 
-<#
-.SYNOPSIS
-    Winget Manifest creation helper script
-.DESCRIPTION
-    The intent of this file is to help you generate a manifest for publishing
-    to the Windows Package Manager repository.
-
-    It'll attempt to download an installer from the user-provided URL to calculate
-    a checksum. That checksum and the rest of the input data will be compiled in a
-    .YAML file.
-.EXAMPLE
-    PS C:\Projects\winget-pkgs> Get-Help .\Tools\YamlCreate.ps1 -Full
-    Show this script's help
-.EXAMPLE
-    PS C:\Projects\winget-pkgs> .\Tools\YamlCreate.ps1
-    Run the script to create a manifest file
-.NOTES
-    Please file an issue if you run into errors with this script:
-    https://github.com/microsoft/winget-pkgs/issues/
-.LINK
-    https://github.com/microsoft/winget-pkgs/blob/master/Tools/YamlCreate.ps1
-#>
+$SchemaUrls = @{
+  version       = if ($useDirectSchemaLink) { "https://raw.githubusercontent.com/microsoft/winget-cli/master/schemas/JSON/manifests/$FullManifestVersion/manifest.version.$ManifestVersion.json" } else { "https://aka.ms/winget-manifest.version.$ManifestVersion.schema.json" }
+  defaultLocale = if ($useDirectSchemaLink) { "https://raw.githubusercontent.com/microsoft/winget-cli/master/schemas/JSON/manifests/$FullManifestVersion/manifest.defaultLocale.$ManifestVersion.json" } else { "https://aka.ms/winget-manifest.defaultLocale.$ManifestVersion.schema.json" }
+  locale        = if ($useDirectSchemaLink) { "https://raw.githubusercontent.com/microsoft/winget-cli/master/schemas/JSON/manifests/$FullManifestVersion/manifest.locale.$ManifestVersion.json" } else { "https://aka.ms/winget-manifest.locale.$ManifestVersion.schema.json" }
+  installer     = if ($useDirectSchemaLink) { "https://raw.githubusercontent.com/microsoft/winget-cli/master/schemas/JSON/manifests/$FullManifestVersion/manifest.installer.$ManifestVersion.json" } else { "https://aka.ms/winget-manifest.installer.$ManifestVersion.schema.json" }
+}
 
 # Fetch Schema data from github for entry validation, key ordering, and automatic commenting
 try {
@@ -233,6 +298,13 @@ try {
   $InstallerEntryProperties = (ConvertTo-Yaml $InstallerSchema.definitions.Installer.properties | ConvertFrom-Yaml -Ordered).Keys
   $InstallerDependencyProperties = (ConvertTo-Yaml $InstallerSchema.definitions.Dependencies.properties | ConvertFrom-Yaml -Ordered).Keys
   $AppsAndFeaturesEntryProperties = (ConvertTo-Yaml $InstallerSchema.definitions.AppsAndFeaturesEntry.properties | ConvertFrom-Yaml -Ordered).Keys
+
+  # Update the manifest version in case `latest` was specified
+  $ManifestVersion = $VersionSchema.properties.ManifestVersion.default
+  # Update the schema URLs to reflect the correct version for use in the manifest header
+  @($SchemaUrls.Keys) | ForEach-Object {
+    $SchemaUrls[$_] = "https://aka.ms/winget-manifest.$_.$ManifestVersion.schema.json"
+  }
 } catch {
   # Here we want to pass the exception as an inner exception for debugging if necessary
   throw [System.Net.WebException]::new('Manifest schemas could not be downloaded. Try running the script again', $_.Exception)
@@ -321,12 +393,16 @@ $Patterns = @{
 }
 
 # check if upstream exists
-($remoteUpstreamUrl = $(git remote get-url upstream)) *> $null
+$remoteUpstreamUrl = Get-Remote -RemoteName upstream
 if ($remoteUpstreamUrl -and $remoteUpstreamUrl -ne $wingetUpstream) {
-  git remote set-url upstream $wingetUpstream
+  if (-not (Set-Remote -RemoteName upstream -Url $wingetUpstream)) {
+    Write-Warning "Failed to update upstream remote URL. You may need to manually run: git remote set-url upstream $wingetUpstream"
+  }
 } elseif (!$remoteUpstreamUrl) {
   Write-Host -ForegroundColor 'Yellow' 'Upstream does not exist. Permanently adding https://github.com/microsoft/winget-pkgs as remote upstream'
-  git remote add upstream $wingetUpstream
+  if (-not (Set-Remote -RemoteName upstream -Url $wingetUpstream)) {
+    Write-Warning "Failed to add upstream remote. You may need to manually run: git remote add upstream $wingetUpstream"
+  }
 }
 
 # Since this script changes the UI Calling Culture, a clean exit should set it back to the user preference
@@ -337,9 +413,12 @@ Function Invoke-CleanExit {
     git remote set-url upstream $remoteUpstreamUrl
   }
 
+  Invoke-FileCleanup -FilePaths $script:CleanupPaths
+
   Write-Host
   [Threading.Thread]::CurrentThread.CurrentUICulture = $callingUICulture
   [Threading.Thread]::CurrentThread.CurrentCulture = $callingCulture
+  $env:PSModulePath = $script:OriginalPSModulePath
   exit
 }
 
@@ -409,25 +488,6 @@ Function Get-EffectiveInstallerType {
   return $Installer.NestedInstallerType
 }
 
-# Takes an array of strings and an array of colors then writes one line of text composed of each string being its respective color
-Function Write-MulticolorLine {
-  Param
-  (
-    [Parameter(Mandatory = $true, Position = 0)]
-    [string[]] $TextStrings,
-    [Parameter(Mandatory = $true, Position = 1)]
-    [string[]] $Colors
-  )
-  If ($TextStrings.Count -ne $Colors.Count) {
-    throw [System.ArgumentException]::new('Invalid Function Parameters. Arguments must be of equal length')
-  }
-  $_index = 0
-  Foreach ($String in $TextStrings) {
-    Write-Host -ForegroundColor $Colors[$_index] -NoNewline $String
-    $_index++
-  }
-}
-
 # Checks a URL and returns the status code received from the URL
 Function Test-Url {
   Param
@@ -437,13 +497,21 @@ Function Test-Url {
   )
   try {
     $HTTP_Request = [System.Net.WebRequest]::Create($URL)
-    $HTTP_Request.UserAgent = 'Microsoft-Delivery-Optimization/10.1'
+    $HTTP_Request.UserAgent = $script:UserAgent
     $HTTP_Response = $HTTP_Request.GetResponse()
     $script:ResponseUri = $HTTP_Response.ResponseUri.AbsoluteUri
     $HTTP_Status = [int]$HTTP_Response.StatusCode
   } catch {
-    # Take no action here; If there is an exception, we will treat it like a 404
-    $HTTP_Status = 404
+    # Failed to download with the Delivery-Optimization User Agent, so try again with the WinINet User Agent
+    try {
+      $HTTP_Request = [System.Net.WebRequest]::Create($URL)
+      $HTTP_Request.UserAgent = $script:backupUserAgent
+      $HTTP_Response = $HTTP_Request.GetResponse()
+      $script:ResponseUri = $HTTP_Response.ResponseUri.AbsoluteUri
+      $HTTP_Status = [int]$HTTP_Response.StatusCode
+    } catch {
+      $HTTP_Status = 404
+    }
   }
   If ($null -eq $HTTP_Response) { $HTTP_Status = 404 }
   Else { $HTTP_Response.Close() }
@@ -529,225 +597,24 @@ Function Get-InstallerFile {
 
   # Create a new web client for downloading the file
   $_WebClient = [System.Net.WebClient]::new()
-  $_WebClient.Headers.Add('User-Agent', 'Microsoft-Delivery-Optimization/10.1')
+  $_WebClient.Headers.Add('User-Agent', $script:UserAgent)
   # If the system has a default proxy set, use it
   # Powershell Core will automatically use this, so it's only necessary for PS5
   if ($PSVersionTable.PSVersion.Major -lt 6) { $_WebClient.Proxy = [System.Net.WebProxy]::GetDefaultProxy() }
   # Download the file
-  $_WebClient.DownloadFile($URI, $_OutFile)
-  # Dispose of the web client to release the resources it uses
-  $_WebClient.Dispose()
+  try {
+    $_WebClient.DownloadFile($URI, $_OutFile)
+  } catch {
+    # Failed to download with the Delivery-Optimization User Agent, so try again with the WinINet User Agent
+    $_WebClient.Headers.Clear()
+    $_WebClient.Headers.Add('User-Agent', $script:backupUserAgent)
+    $_WebClient.DownloadFile($URI, $_OutFile)
+  } finally {
+    # Dispose of the web client to release the resources it uses
+    $_WebClient.Dispose()
+  }
 
   return $_OutFile
-}
-
-Function Get-MSIProperty {
-  Param
-  (
-    [Parameter(Mandatory = $true)]
-    [string] $MSIPath,
-    [Parameter(Mandatory = $true)]
-    [string] $Parameter
-  )
-  try {
-    $windowsInstaller = New-Object -com WindowsInstaller.Installer
-    $database = $windowsInstaller.GetType().InvokeMember('OpenDatabase', 'InvokeMethod', $null, $windowsInstaller, @($MSIPath, 0))
-    $view = $database.GetType().InvokeMember('OpenView', 'InvokeMethod', $null, $database, ("SELECT Value FROM Property WHERE Property = '$Parameter'"))
-    $view.GetType().InvokeMember('Execute', 'InvokeMethod', $null, $view, $null)
-    $record = $view.GetType().InvokeMember('Fetch', 'InvokeMethod', $null, $view, $null)
-    $outputObject = $($record.GetType().InvokeMember('StringData', 'GetProperty', $null, $record, 1))
-    $view.GetType().InvokeMember('Close', 'InvokeMethod', $null, $view, $null)
-    [System.Runtime.InteropServices.Marshal]::FinalReleaseComObject($view)
-    [System.Runtime.InteropServices.Marshal]::FinalReleaseComObject($database)
-    [System.Runtime.InteropServices.Marshal]::FinalReleaseComObject($windowsInstaller)
-    [System.GC]::Collect()
-    [System.GC]::WaitForPendingFinalizers()
-    return $outputObject
-  } catch {
-    Write-Error -Message $_.ToString()
-    break
-  }
-}
-
-Function Get-ItemMetadata {
-  Param
-  (
-    [Parameter(Mandatory = $true)]
-    [string] $FilePath
-  )
-  try {
-    $MetaDataObject = [ordered] @{}
-    $FileInformation = (Get-Item $FilePath)
-    $ShellApplication = New-Object -ComObject Shell.Application
-    $ShellFolder = $ShellApplication.Namespace($FileInformation.Directory.FullName)
-    $ShellFile = $ShellFolder.ParseName($FileInformation.Name)
-    $MetaDataProperties = [ordered] @{}
-    0..400 | ForEach-Object -Process {
-      $DataValue = $ShellFolder.GetDetailsOf($null, $_)
-      $PropertyValue = (Get-Culture).TextInfo.ToTitleCase($DataValue.Trim()).Replace(' ', '')
-      if ($PropertyValue -ne '') {
-        $MetaDataProperties["$_"] = $PropertyValue
-      }
-    }
-    foreach ($Key in $MetaDataProperties.Keys) {
-      $Property = $MetaDataProperties[$Key]
-      $Value = $ShellFolder.GetDetailsOf($ShellFile, [int] $Key)
-      if ($Property -in 'Attributes', 'Folder', 'Type', 'SpaceFree', 'TotalSize', 'SpaceUsed') {
-        continue
-      }
-      If (($null -ne $Value) -and ($Value -ne '')) {
-        $MetaDataObject["$Property"] = $Value
-      }
-    }
-    [void][System.Runtime.InteropServices.Marshal]::FinalReleaseComObject($ShellFile)
-    [void][System.Runtime.InteropServices.Marshal]::FinalReleaseComObject($ShellFolder)
-    [void][System.Runtime.InteropServices.Marshal]::FinalReleaseComObject($ShellApplication)
-    [System.GC]::Collect()
-    [System.GC]::WaitForPendingFinalizers()
-    return $MetaDataObject
-  } catch {
-    Write-Error -Message $_.ToString()
-    break
-  }
-}
-
-function Get-Property ($Object, $PropertyName, [object[]]$ArgumentList) {
-  return $Object.GetType().InvokeMember($PropertyName, 'Public, Instance, GetProperty', $null, $Object, $ArgumentList)
-}
-
-Function Get-MsiDatabase {
-  Param
-  (
-    [Parameter(Mandatory = $true)]
-    [string] $FilePath
-  )
-  Write-Host -ForegroundColor 'Yellow' 'Reading Installer Database. This may take some time. . .'
-  $windowsInstaller = New-Object -com WindowsInstaller.Installer
-  $MSI = $windowsInstaller.OpenDatabase($FilePath, 0)
-  $_TablesView = $MSI.OpenView('select * from _Tables')
-  $_TablesView.Execute()
-  $_Database = @{}
-  do {
-    $_Table = $_TablesView.Fetch()
-    if ($_Table) {
-      $_TableName = Get-Property -Object $_Table -PropertyName StringData -ArgumentList 1
-      $_Database["$_TableName"] = @{}
-    }
-  } while ($_Table)
-  [void][System.Runtime.InteropServices.Marshal]::FinalReleaseComObject($_TablesView)
-  foreach ($_Table in $_Database.Keys) {
-    # Write-Host $_Table
-    $_ItemView = $MSI.OpenView("select * from $_Table")
-    $_ItemView.Execute()
-    do {
-      $_Item = $_ItemView.Fetch()
-      if ($_Item) {
-        $_ItemValue = $null
-        $_ItemName = Get-Property -Object $_Item -PropertyName StringData -ArgumentList 1
-        if ($_Table -eq 'Property') { $_ItemValue = Get-Property -Object $_Item -PropertyName StringData -ArgumentList 2 -ErrorAction SilentlyContinue }
-        $_Database.$_Table["$_ItemName"] = $_ItemValue
-      }
-    } while ($_Item)
-    [void][System.Runtime.InteropServices.Marshal]::FinalReleaseComObject($_ItemView)
-  }
-  [void][System.Runtime.InteropServices.Marshal]::FinalReleaseComObject($MSI)
-  [void][System.Runtime.InteropServices.Marshal]::FinalReleaseComObject($windowsInstaller)
-  Write-Host -ForegroundColor 'Yellow' 'Closing Installer Database. . .'
-  return $_Database
-}
-
-Function Test-IsWix {
-  Param
-  (
-    [Parameter(Mandatory = $true)]
-    [object] $Database,
-    [Parameter(Mandatory = $true)]
-    [object] $MetaDataObject
-  )
-  # If any of the table names match wix
-  if ($Database.Keys -match 'wix') { return $true }
-  # If any of the keys in the property table match wix
-  if ($Database.Property.Keys.Where({ $_ -match 'wix' })) { return $true }
-  # If the CreatedBy value matches wix
-  if ($MetaDataObject.ProgramName -match 'wix') { return $true }
-  # If the CreatedBy value matches xml
-  if ($MetaDataObject.ProgramName -match 'xml') { return $true }
-  return $false
-}
-
-Function Get-ExeType {
-  Param
-  (
-    [Parameter(Mandatory = $true)]
-    [String] $Path
-  )
-
-  $nsis = @(
-    77; 90; -112; 0; 3; 0; 0; 0; 4; 0; 0; 0; -1; -1; 0; 0;
-    -72; 0; 0; 0; 0; 0; 0; 0; 64; 0; 0; 0; 0; 0; 0; 0; 0; 0;
-    0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0;
-    0; 0; 0; 0; 0; 0; -40; 0; 0; 0; 14; 31; -70; 14; 0; -76;
-    9; -51; 33; -72; 1; 76; -51; 33; 84; 104; 105; 115;
-    32; 112; 114; 111; 103; 114; 97; 109; 32; 99; 97;
-    110; 110; 111; 116; 32; 98; 101; 32; 114; 117; 110;
-    32; 105; 110; 32; 68; 79; 83; 32; 109; 111; 100;
-    101; 46; 13; 13; 10; 36; 0; 0; 0; 0; 0; 0; 0; -83; 49;
-    8; -127; -23; 80; 102; -46; -23; 80; 102; -46; -23;
-    80; 102; -46; 42; 95; 57; -46; -21; 80; 102; -46;
-    -23; 80; 103; -46; 76; 80; 102; -46; 42; 95; 59; -46;
-    -26; 80; 102; -46; -67; 115; 86; -46; -29; 80; 102;
-    -46; 46; 86; 96; -46; -24; 80; 102; -46; 82; 105; 99;
-    104; -23; 80; 102; -46; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0;
-    0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 80; 69; 0; 0; 76;
-    1; 5; 0
-  )
-
-  $inno = @(
-    77; 90; 80; 0; 2; 0; 0; 0; 4; 0; 15; 0; 255; 255; 0; 0;
-    184; 0; 0; 0; 0; 0; 0; 0; 64; 0; 26; 0; 0; 0; 0; 0; 0; 0;
-    0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0;
-    0; 0; 0; 0; 0; 0; 0; 1; 0; 0; 186; 16; 0; 14; 31; 180; 9;
-    205; 33; 184; 1; 76; 205; 33; 144; 144; 84; 104; 105;
-    115; 32; 112; 114; 111; 103; 114; 97; 109; 32; 109;
-    117; 115; 116; 32; 98; 101; 32; 114; 117; 110; 32;
-    117; 110; 100; 101; 114; 32; 87; 105; 110; 51; 50;
-    13; 10; 36; 55; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0;
-    0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0;
-    0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0;
-    0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0;
-    0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0;
-    0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0;
-    0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0;
-    0; 0; 80; 69; 0; 0; 76; 1; 10; 0)
-
-  $burn = @(46; 119; 105; 120; 98; 117; 114; 110)
-
-  $exeType = $null
-
-  $fileStream = New-Object -TypeName System.IO.FileStream -ArgumentList ($Path, [System.IO.FileMode]::Open, [System.IO.FileAccess]::Read)
-  $reader = New-Object -TypeName System.IO.BinaryReader -ArgumentList $fileStream
-  $bytes = $reader.ReadBytes(264)
-
-  if (($bytes[0..223] -join '') -eq ($nsis -join '')) { $exeType = 'nullsoft' }
-  elseif (($bytes -join '') -eq ($inno -join '')) { $exeType = 'inno' }
-  # The burn header can appear before a certain point in the binary. Check to see if it's present in the first 264 bytes read
-  elseif (($bytes -join '') -match ($burn -join '')) { $exeType = 'burn' }
-  # If the burn header isn't present in the first 264 bytes, scan through the rest of the binary
-  elseif ($ScriptSettings.IdentifyBurnInstallers -eq 'true') {
-    $rollingBytes = $bytes[ - $burn.Length..-1]
-    for ($i = 265; $i -lt ($fileStream.Length, 524280 | Measure-Object -Minimum).Minimum; $i++) {
-      $rollingBytes = $rollingBytes[1..$rollingBytes.Length]
-      $rollingBytes += $reader.ReadByte()
-      if (($rollingBytes -join '') -match ($burn -join '')) {
-        $exeType = 'burn'
-        break
-      }
-    }
-  }
-
-  $reader.Dispose()
-  $fileStream.Dispose()
-  return $exeType
 }
 
 Function Get-UserSavePreference {
@@ -770,37 +637,6 @@ Function Get-UserSavePreference {
     }
   }
   return $_Preference
-}
-
-Function Get-PathInstallerType {
-  Param
-  (
-    [Parameter(Mandatory = $true, Position = 0)]
-    [string] $Path
-  )
-
-  if ($Path -match '\.msix(bundle){0,1}$') { return 'msix' }
-  if ($Path -match '\.msi$') {
-    if ([System.Environment]::OSVersion.Platform -match 'Unix') {
-      $ObjectDatabase = @{}
-      $ObjectMetadata = @{
-        ProgramName = $(([string](file $script:dest) | Select-String -Pattern 'Creating Application.+,').Matches.Value)
-      }
-    } else {
-      $ObjectMetadata = Get-ItemMetadata $Path
-      $ObjectDatabase = Get-MsiDatabase $Path
-    }
-
-    if (Test-IsWix -Database $ObjectDatabase -MetaDataObject $ObjectMetadata ) {
-      return 'wix'
-    }
-    return 'msi'
-  }
-  if ($Path -match '\.appx(bundle){0,1}$') { return 'appx' }
-  if ($Path -match '\.zip$') { return 'zip' }
-  if ($Path -match '\.exe$') { return Get-ExeType($Path) }
-
-  return $null
 }
 
 Function Get-UriArchitecture {
@@ -993,11 +829,46 @@ Function Read-NestedInstaller {
           'Y' { $AnotherNestedInstaller = $true }
           default { $AnotherNestedInstaller = $false }
         }
+
+        if (!$AnotherNestedInstaller -and $script:Option -eq 'New') {
+          # Prompt to see if the package depends on binaries being in the path
+          $_menu = @{
+            entries       = @(
+              '[Y] Yes'
+              '*[N] No'
+            )
+            Prompt        = 'Does this executable depend on DLLs or other files that are not available through Symlink?'
+            DefaultString = 'N'
+          }
+          switch ( Invoke-KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString']) {
+            'Y' { $_Installer['ArchiveBinariesDependOnPath'] = $true }
+
+            # Not required to explicitly set as CLI defaults to false
+            default { }
+          }
+        }
+      }
+
+      if ($_EffectiveType -eq 'font') {
+        # Prompt to see if multiple entries are needed
+        $_menu = @{
+          entries       = @(
+            '[Y] Yes'
+            '*[N] No'
+          )
+          Prompt        = 'Do you want to create another font entry?'
+          DefaultString = 'N'
+        }
+        switch ( Invoke-KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString']) {
+          'Y' { $AnotherNestedInstaller = $true }
+          default { $AnotherNestedInstaller = $false }
+        }
       }
       $_NestedInstallerFiles += $_InstallerFile
     } until (!$AnotherNestedInstaller)
     $_Installer['NestedInstallerFiles'] = $_NestedInstallerFiles
   }
+  Write-Host
   return $_Installer
 }
 
@@ -1141,14 +1012,14 @@ Function Read-InstallerEntry {
       }
       Write-Host "Time taken: $((Get-Date).Subtract($start_time).Seconds) second(s)" -ForegroundColor Green
       $_Installer['InstallerSha256'] = (Get-FileHash -Path $script:dest -Algorithm SHA256).Hash
-      Get-PathInstallerType -Path $script:dest -OutVariable _ | Out-Null
+      Resolve-InstallerType -Path $script:dest -OutVariable _ | Out-Null
       if ($_) { $_Installer['InstallerType'] = $_ | Select-Object -First 1 }
       Get-UriArchitecture -URI $_Installer['InstallerUrl'] -OutVariable _ | Out-Null
       if ($_) { $_Installer['Architecture'] = $_ | Select-Object -First 1 }
       Get-UriScope -URI $_Installer['InstallerUrl'] -OutVariable _ | Out-Null
       if ($_) { $_Installer['Scope'] = $_ | Select-Object -First 1 }
       if ([System.Environment]::OSVersion.Platform -match 'Win' -and ($script:dest).EndsWith('.msi')) {
-        $ProductCode = ([string](Get-MSIProperty -MSIPath $script:dest -Parameter 'ProductCode') | Select-String -Pattern '{[A-Z0-9]{8}-([A-Z0-9]{4}-){3}[A-Z0-9]{12}}').Matches.Value
+        $ProductCode = [string](Get-MSIProperty -Path $script:dest -Property 'ProductCode').Value
       } elseif ([System.Environment]::OSVersion.Platform -match 'Unix' -and (Get-Item $script:dest).Name.EndsWith('.msi')) {
         $ProductCode = ([string](file $script:dest) | Select-String -Pattern '{[A-Z0-9]{8}-([A-Z0-9]{4}-){3}[A-Z0-9]{12}}').Matches.Value
       }
@@ -1200,7 +1071,7 @@ Function Read-InstallerEntry {
       } else {
         $script:_returnValue = [ReturnValue]::new(400, 'Invalid Installer Type', "Value must exist in the enum - $(@($Patterns.ValidInstallerTypes -join ', '))", 2)
       }
-      if ($_Installer['InstallerType'] -eq 'zip' -and $ManifestVersion -lt '1.4.0') {
+      if ($_Installer['InstallerType'] -eq 'zip' -and [version]$ManifestVersion -lt [version]'1.4.0') {
         $script:_returnValue = [ReturnValue]::new(500, 'Zip Installer Not Supported', "Zip installers are only supported with ManifestVersion 1.4.0 or later. Current ManifestVersion: $ManifestVersion", 2)
       }
     } until ($script:_returnValue.StatusCode -eq [ReturnValue]::Success().StatusCode)
@@ -1420,7 +1291,7 @@ Function Read-InstallerEntry {
     $_Installer['AppsAndFeaturesEntries'] = @($AppsAndFeaturesEntries)
   }
 
-  if ($script:SaveOption -eq '1' -and (Test-Path -Path $script:dest)) { Remove-Item -Path $script:dest }
+  if ($script:SaveOption -eq '1' -and (Test-Path -Path $script:dest)) { $script:CleanupPaths += $script:dest }
 
   # If the installers array is empty, create it
   if (!$script:Installers) {
@@ -1431,7 +1302,7 @@ Function Read-InstallerEntry {
   $_Installer = Restore-YamlKeyOrder $_Installer $InstallerEntryProperties -NoComments
   $script:Installers += $_Installer
 
-  # Prompt the user for additional intaller entries
+  # Prompt the user for additional installer entries
   $_menu = @{
     entries       = @(
       '[Y] Yes'
@@ -1449,6 +1320,11 @@ Function Read-InstallerEntry {
   # If there are additional entries, run this function again to fetch the values and add them to the installers array
   if ($AnotherInstaller -eq '0') {
     Write-Host; Read-InstallerEntry
+  }
+
+  # If the app folder is in manifests and the installer type is font, change the app folder to point at fonts
+  if ($script:AppFolder -match 'manifests' -and (Get-EffectiveInstallerType $_Installer) -eq 'font') {
+    $script:AppFolder = $script:AppFolder -replace 'manifests', 'fonts'
   }
 }
 
@@ -1506,7 +1382,7 @@ Function Read-QuickInstallerEntry {
       # Check that MSI's aren't actually WIX, and EXE's aren't NSIS, INNO or BURN
       Write-Host -ForegroundColor 'Green' "Installer Downloaded!`nProcessing installer data. . . "
       if ($_NewInstaller['InstallerType'] -in @('msi'; 'exe')) {
-        $DetectedType = Get-PathInstallerType $script:dest
+        $DetectedType = Resolve-InstallerType $script:dest
         if ($DetectedType -in @('msi'; 'wix'; 'nullsoft'; 'inno'; 'burn')) { $_NewInstaller['InstallerType'] = $DetectedType }
       }
       # Get the Sha256
@@ -1515,7 +1391,7 @@ Function Read-QuickInstallerEntry {
       # If a new product code doesn't exist, and the installer isn't an `.exe` file, remove the product code if it exists
       $MSIProductCode = $null
       if ([System.Environment]::OSVersion.Platform -match 'Win' -and ($script:dest).EndsWith('.msi')) {
-        $MSIProductCode = ([string](Get-MSIProperty -MSIPath $script:dest -Parameter 'ProductCode') | Select-String -Pattern '{[A-Z0-9]{8}-([A-Z0-9]{4}-){3}[A-Z0-9]{12}}').Matches.Value
+        $MSIProductCode = [string](Get-MSIProperty -Path $script:dest -Property 'ProductCode').Value
       } elseif ([System.Environment]::OSVersion.Platform -match 'Unix' -and (Get-Item $script:dest).Name.EndsWith('.msi')) {
         $MSIProductCode = ([string](file $script:dest) | Select-String -Pattern '{[A-Z0-9]{8}-([A-Z0-9]{4}-){3}[A-Z0-9]{12}}').Matches.Value
       }
@@ -1546,7 +1422,7 @@ Function Read-QuickInstallerEntry {
         }
       }
       # Remove the downloaded files
-      Remove-Item -Path $script:dest
+      Request-RemoveItem -Path $script:dest
       Write-Host -ForegroundColor 'Green' "Installer updated!`n"
     }
 
@@ -1596,8 +1472,6 @@ Function Read-InstallerMetadataValue {
 # If a key does not exist, it sets the value to a special character to be removed / commented later
 # Returns the result as a new object
 Function Restore-YamlKeyOrder {
-  [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', 'InputObject', Justification = 'The variable is used inside a conditional but ScriptAnalyser does not recognize the scope')]
-  [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', 'NoComments', Justification = 'The variable is used inside a conditional but ScriptAnalyser does not recognize the scope')]
   Param
   (
     [Parameter(Mandatory = $true, Position = 0)]
@@ -2058,16 +1932,18 @@ Function Read-LocaleMetadata {
 # Requests the user to answer the prompts found in the winget-pkgs pull request template
 # Uses this template and responses to create a PR
 Function Read-PRBody {
-  $PrBodyContent = Get-Content $args[0]
+  $PrBodyContent = (Get-PrTemplate) -split '\n'
+  if (-not $PrBodyContent) {
+    Write-Warning "The Pull Request Template Contained No Content!"
+  }
   ForEach ($_line in $PrBodyContent) {
     # | Where-Object { $_ -like '-*[ ]*' }))
-    if ($_line -like '-*[ ]*' )
-    {
+    if ($_line -like '-*[ ]*' ) {
       $_showMenu = $true
-      switch -Wildcard ( $_line ) {
-        '*CLA*' {
+      switch -Regex ( $_line ) {
+        '(?i)CLA' {
           if ($ScriptSettings.SignedCLA -eq 'true') {
-            $PrBodyContent = $PrBodyContent.Replace($_line,$_line.Replace('[ ]','[x]'))
+            $PrBodyContent = $PrBodyContent.Replace($_line, $_line.Replace('[ ]', '[x]'))
             $_showMenu = $false
           } else {
             $_menu = @{
@@ -2080,7 +1956,7 @@ Function Read-PRBody {
           }
         }
 
-        '*open `[pull requests`]*' {
+        '(?i)open \[pull requests\]' {
           $_menu = @{
             Prompt        = "Have you checked that there aren't other open pull requests for the same manifest update/change?"
             Entries       = @('[Y] Yes'; '*[N] No')
@@ -2090,9 +1966,9 @@ Function Read-PRBody {
           }
         }
 
-        '*winget validate*' {
+        '(?i)winget validate' {
           if ($? -and $(Get-Command 'winget' -ErrorAction SilentlyContinue)) {
-            $PrBodyContent = $PrBodyContent.Replace($_line,$_line.Replace('[ ]','[x]'))
+            $PrBodyContent = $PrBodyContent.Replace($_line, $_line.Replace('[ ]', '[x]'))
             $_showMenu = $false
           } elseif ($script:Option -ne 'RemoveManifest') {
             $_menu = @{
@@ -2107,9 +1983,9 @@ Function Read-PRBody {
           }
         }
 
-        '*tested your manifest*' {
+        '(?i)tested .* ?manifest' {
           if ($script:SandboxTest -eq '0') {
-            $PrBodyContent = $PrBodyContent.Replace($_line,$_line.Replace('[ ]','[x]'))
+            $PrBodyContent = $PrBodyContent.Replace($_line, $_line.Replace('[ ]', '[x]'))
             $_showMenu = $false
           } elseif ($script:Option -ne 'RemoveManifest') {
             $_menu = @{
@@ -2124,7 +2000,7 @@ Function Read-PRBody {
           }
         }
 
-        '*schema*' {
+        '(?i)schema' {
           if ($script:Option -ne 'RemoveManifest') {
             $_Match = ($_line | Select-String -Pattern 'https://+.+(?=\))').Matches.Value
             $_menu = @{
@@ -2139,12 +2015,12 @@ Function Read-PRBody {
           }
         }
 
-        '*only modifies one*' {
-          $PrBodyContent = $PrBodyContent.Replace($_line,$_line.Replace('[ ]','[x]'))
+        '(?i)(only)? modifies one' {
+          $PrBodyContent = $PrBodyContent.Replace($_line, $_line.Replace('[ ]', '[x]'))
           $_showMenu = $false
         }
 
-        '*linked issue*' {
+        '(?i)linked .* ?issue' {
           # Linked issues is handled as a separate prompt below so that the issue numbers can be gathered
           $_showMenu = $false
         }
@@ -2162,7 +2038,7 @@ Function Read-PRBody {
 
       if ($_showMenu) {
         switch ( Invoke-KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString'] -HelpText $_menu['HelpText'] -HelpTextColor $_menu['HelpTextColor']) {
-          'Y' { $PrBodyContent = $PrBodyContent.Replace($_line,$_line.Replace('[ ]','[x]')) }
+          'Y' { $PrBodyContent = $PrBodyContent.Replace($_line, $_line.Replace('[ ]', '[x]')) }
           default { }
         }
       }
@@ -2178,7 +2054,7 @@ Function Read-PRBody {
   switch ( Invoke-KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString']) {
     'Y' {
       $_line = ($PrBodyContent | Select-String 'linked issue').Line
-      if ($_line) { $PrBodyContent = $PrBodyContent.Replace($_line,$_line.Replace('[ ]','[x]')) }
+      if ($_line) { $PrBodyContent = $PrBodyContent.Replace($_line, $_line.Replace('[ ]', '[x]')) }
 
       # If there were issues resolved by the PR, request user to enter them
       Write-Host
@@ -2462,9 +2338,9 @@ Function Write-InstallerManifest {
   }
 
   # Clean up the existing files just in case
-  if ($InstallerManifest['Commands']) { $InstallerManifest['Commands'] = @($InstallerManifest['Commands'] | UniqueItems | NoWhitespace | Sort-Object) }
-  if ($InstallerManifest['Protocols']) { $InstallerManifest['Protocols'] = @($InstallerManifest['Protocols'] | ToLower | UniqueItems | NoWhitespace | Sort-Object) }
-  if ($InstallerManifest['FileExtensions']) { $InstallerManifest['FileExtensions'] = @($InstallerManifest['FileExtensions'] | ToLower | UniqueItems | NoWhitespace | Sort-Object) }
+  if ($InstallerManifest['Commands']) { $InstallerManifest['Commands'] = @($InstallerManifest['Commands'] | NoWhitespace | UniqueItems | Sort-Object) }
+  if ($InstallerManifest['Protocols']) { $InstallerManifest['Protocols'] = @($InstallerManifest['Protocols'] | ToLower | NoWhitespace | UniqueItems | Sort-Object) }
+  if ($InstallerManifest['FileExtensions']) { $InstallerManifest['FileExtensions'] = @($InstallerManifest['FileExtensions'] | ToLower | NoWhitespace | UniqueItems | Sort-Object) }
 
   $InstallerManifest = Restore-YamlKeyOrder $InstallerManifest $InstallerProperties -NoComments
 
@@ -2515,7 +2391,7 @@ Function Write-LocaleManifest {
   Add-YamlParameter -Object $LocaleManifest -Parameter 'ManifestVersion' -Value $ManifestVersion
 
   # Clean up the existing files just in case
-  if ($LocaleManifest['Tags']) { $LocaleManifest['Tags'] = @($LocaleManifest['Tags'] | ToLower | UniqueItems | NoWhitespace | Sort-Object) }
+  if ($LocaleManifest['Tags']) { $LocaleManifest['Tags'] = @($LocaleManifest['Tags'] | ToLower | NoWhitespace | UniqueItems | Sort-Object) }
   if ($LocaleManifest['Moniker']) { $LocaleManifest['Moniker'] = $LocaleManifest['Moniker'] | ToLower | NoWhitespace }
 
   # Clean up the volatile fields
@@ -2524,7 +2400,7 @@ Function Write-LocaleManifest {
 
   $LocaleManifest = Restore-YamlKeyOrder $LocaleManifest $LocaleProperties
 
-  # Set the appropriate langage server depending on if it is a default locale file or generic locale file
+  # Set the appropriate language server depending on if it is a default locale file or generic locale file
   if ($LocaleManifest.ManifestType -eq 'defaultLocale') { $yamlServer = $SchemaUrls.defaultLocale } else { $yamlServer = $SchemaUrls.locale }
 
   # Create the folder for the file if it doesn't exist
@@ -2544,7 +2420,7 @@ Function Write-LocaleManifest {
         if ($script:OldLocaleManifest.Keys -contains 'Moniker') { $script:OldLocaleManifest.Remove('Moniker') }
         $script:OldLocaleManifest['ManifestVersion'] = $ManifestVersion
         # Clean up the existing files just in case
-        if ($script:OldLocaleManifest['Tags']) { $script:OldLocaleManifest['Tags'] = @($script:OldLocaleManifest['Tags'] | ToLower | UniqueItems | NoWhitespace | Sort-Object) }
+        if ($script:OldLocaleManifest['Tags']) { $script:OldLocaleManifest['Tags'] = @($script:OldLocaleManifest['Tags'] | ToLower | NoWhitespace | UniqueItems | Sort-Object) }
 
         # Clean up the volatile fields
         if ($OldLocaleManifest['ReleaseNotes'] -and (Test-String $script:ReleaseNotes -IsNull) -and !$Preserve) { $OldLocaleManifest.Remove('ReleaseNotes') }
@@ -2581,6 +2457,13 @@ if (Test-Path -Path "$PSScriptRoot\..\manifests") {
   $ManifestsFolder = (Resolve-Path '.\').Path
 }
 
+# Set the root folder where new font manifests should be created
+if (Test-Path -Path "$PSScriptRoot\..\fonts") {
+  $FontsFolder = (Resolve-Path "$PSScriptRoot\..\fonts").Path
+} else {
+  $FontsFolder = (Resolve-Path '.\').Path
+}
+
 # Initialize the return value to be a success
 $script:_returnValue = [ReturnValue]::new(200)
 
@@ -2592,15 +2475,18 @@ if (!$script:UsingAdvancedOption) {
   if ($Mode -in 1..6) {
     $UserChoice = $Mode
   } else {
-    Write-Host -ForegroundColor 'Yellow' "Select Mode:`n"
-    Write-MulticolorLine '  [', '1', "] New Manifest or Package Version`n" 'DarkCyan', 'White', 'DarkCyan'
-    Write-MulticolorLine '  [', '2', '] Quick Update Package Version ', "(Note: Must be used only when previous version`'s metadata is complete.)`n" 'DarkCyan', 'White', 'DarkCyan', 'Green'
-    Write-MulticolorLine '  [', '3', "] Update Package Metadata`n" 'DarkCyan', 'White', 'DarkCyan'
-    Write-MulticolorLine '  [', '4', "] New Locale`n" 'DarkCyan', 'White', 'DarkCyan'
-    Write-MulticolorLine '  [', '5', "] Remove a manifest`n" 'DarkCyan', 'White', 'DarkCyan'
-    Write-MulticolorLine '  [', '6', "] Move package to a new identifier`n" 'DarkCyan', 'White', 'DarkCyan'
-    Write-MulticolorLine '  [', 'Q', ']', " Any key to quit`n" 'DarkCyan', 'White', 'DarkCyan', 'Red'
-    Write-MulticolorLine "`nSelection: " 'White'
+    Write-Host @"
+${vtForegroundYellow} Select Mode:
+  ${vtForegroundCyan}[${vtForegroundWhite}1${vtForegroundCyan}] New Manifest or Package Version
+  ${vtForegroundCyan}[${vtForegroundWhite}2${vtForegroundCyan}] Quick Update Package Version
+  ${vtForegroundCyan}[${vtForegroundWhite}3${vtForegroundCyan}] Update Package Metadata ${vtForegroundGreen}(Note: Must be used only when previous version's metadata is complete.)
+  ${vtForegroundCyan}[${vtForegroundWhite}4${vtForegroundCyan}] New Locale
+  ${vtForegroundCyan}[${vtForegroundWhite}5${vtForegroundCyan}] Remove a manifest
+  ${vtForegroundCyan}[${vtForegroundWhite}6${vtForegroundCyan}] Move package to a new identifier
+  ${vtForegroundCyan}[${vtForegroundWhite}Q${vtForegroundCyan}] ${vtForegroundRed}Any key to quit
+  ${vtForegroundDefault}
+"@
+    Write-Host "Selection: " -NoNewLine
 
     # Listen for keypress and set operation mode based on keypress
     $Keys = @{
@@ -2811,7 +2697,7 @@ do {
 # Check the api for open PR's
 # This is unauthenticated because the call-rate per minute is assumed to be low
 if ($ScriptSettings.ContinueWithExistingPRs -ne 'always' -and $script:Option -ne 'RemoveManifest' -and !$SkipPRCheck) {
-  $PRApiResponse = @(Invoke-WebRequest "https://api.github.com/search/issues?q=repo%3Amicrosoft%2Fwinget-pkgs%20is%3Apr%20$($PackageIdentifier -replace '\.', '%2F'))%2F$PackageVersion%20in%3Apath&per_page=1" -UseBasicParsing -ErrorAction SilentlyContinue | ConvertFrom-Json)[0]
+  $PRApiResponse = Find-PullRequest -PackageIdentifier $PackageIdentifier -PackageVersion $PackageVersion
   # If there was a PR found, get the URL and title
   if ($PRApiResponse.total_count -gt 0) {
     $_PRUrl = $PRApiResponse.items.html_url
@@ -2838,6 +2724,33 @@ if ($ScriptSettings.ContinueWithExistingPRs -ne 'always' -and $script:Option -ne
 
 # Set the folder for the specific package and version
 $script:AppFolder = Join-Path $ManifestsFolder -ChildPath $PackageIdentifier.ToLower().Chars(0) | Join-Path -ChildPath $PackageIdentifierFolder | Join-Path -ChildPath $PackageVersion
+$script:FontFolder = Join-Path $FontsFolder -ChildPath $PackageIdentifier.ToLower().Chars(0) | Join-Path -ChildPath $PackageIdentifierFolder | Join-Path -ChildPath $PackageVersion
+
+# Attempt to see if the old package exists in the manifests folder, font folder, or both
+$script:DestinationFolder = $null;
+if (Test-Path -Path (Split-Path $script:AppFolder)) {
+  $script:DestinationFolder = $script:AppFolder
+}
+if (Test-Path -Path (Split-Path $script:FontFolder)) {
+  if ($script:DestinationFolder) {
+    $script:DestinationFolder = @($script:DestinationFolder; $script:FontFolder)
+  } else {
+    $script:DestinationFolder = $script:FontFolder
+  }
+}
+if ($script:DestinationFolder -and $script:DestinationFolder.Count -gt 1) {
+  $_menu = @{
+    entries       = @('[1] Manifests Folder'; '[2] Fonts Folder')
+    Prompt        = 'The package exists in both the manifests and fonts folder. Which folder do you want to use?'
+    DefaultString = '1'
+  }
+  switch ( Invoke-KeypressMenu -Prompt $_menu['Prompt'] -Entries $_menu['Entries'] -DefaultString $_menu['DefaultString'] ) {
+    '1' { $script:AppFolder = $script:AppFolder }
+    '2' { $script:AppFolder = $script:FontFolder }
+  }
+} elseif ($script:DestinationFolder -and $script:DestinationFolder.Count -eq 1) {
+  $script:AppFolder = $script:DestinationFolder
+}
 
 # If the user selected `NewLocale` or `EditMetadata` the version *MUST* already exist in the folder structure
 if ($script:Option -in @('NewLocale'; 'EditMetadata'; 'RemoveManifest')) {
@@ -2845,6 +2758,11 @@ if ($script:Option -in @('NewLocale'; 'EditMetadata'; 'RemoveManifest')) {
   if (Test-Path -Path "$AppFolder\..\$PackageVersion") {
     $script:OldManifests = Get-ChildItem -Path "$AppFolder\..\$PackageVersion"
     $LastVersion = $PackageVersion
+  } elseif (Test-Path -Path "$FontFolder\..\$PackageVersion") {
+    $script:OldManifests = Get-ChildItem -Path "$FontFolder\..\$PackageVersion"
+    $LastVersion = $PackageVersion
+    # Intentionally override AppFolder here to ensure the rest of the script works as expected
+    $script:AppFolder = $script:FontFolder
   }
   # If the old manifests could not be found, request a new version
   while (-not ($OldManifests.Name -like "$PackageIdentifier*.yaml")) {
@@ -2856,17 +2774,21 @@ if ($script:Option -in @('NewLocale'; 'EditMetadata'; 'RemoveManifest')) {
     }
     if (Test-Path -Path "$AppFolder\..\$PromptVersion") {
       $script:OldManifests = Get-ChildItem -Path "$AppFolder\..\$PromptVersion"
+      $script:AppFolder = Join-Path (Split-Path $AppFolder) -ChildPath $LastVersion
+    } elseif (Test-Path -Path "$FontFolder\..\$PromptVersion") {
+      $script:OldManifests = Get-ChildItem -Path "$FontFolder\..\$PromptVersion"
+      # Intentionally use AppFolder here to ensure the rest of the script works as expected
+      $script:AppFolder = Join-Path (Split-Path $FontFolder) -ChildPath $LastVersion
     }
     # If a new version is entered, we need to be sure to update the folder for writing manifests
     $LastVersion = $PromptVersion
-    $script:AppFolder = Join-Path (Split-Path $AppFolder) -ChildPath $LastVersion
     $script:PackageVersion = $LastVersion
   }
 }
 
 # If the user selected `QuickUpdateVersion`, the old manifests must exist
 # If the user selected `New`, the old manifest type is specified as none
-if (-not (Test-Path -Path "$AppFolder\..")) {
+if (-not (Test-Path -Path "$AppFolder\..") -and -not (Test-Path -Path "$FontFolder\..")) {
   if ($script:Option -in @('QuickUpdateVersion', 'Auto')) {
     Write-Host -ForegroundColor Red 'This option requires manifest of previous version of the package. If you want to create a new package, please select Option 1.'
     Invoke-CleanExit
@@ -3107,7 +3029,7 @@ Switch ($script:Option) {
       }
       # Check that MSI's aren't actually WIX, and EXE's aren't NSIS, INNO or BURN
       if ($_Installer['InstallerType'] -in @('msi'; 'exe')) {
-        $DetectedType = Get-PathInstallerType $script:dest
+        $DetectedType = Resolve-InstallerType $script:dest
         if ($DetectedType -in @('msi'; 'wix'; 'nullsoft'; 'inno'; 'burn')) { $_Installer['InstallerType'] = $DetectedType }
       }
       # Get the Sha256
@@ -3116,7 +3038,7 @@ Switch ($script:Option) {
       # If a new product code doesn't exist, and the installer isn't an `.exe` file, remove the product code if it exists
       $MSIProductCode = $null
       if ([System.Environment]::OSVersion.Platform -match 'Win' -and ($script:dest).EndsWith('.msi')) {
-        $MSIProductCode = ([string](Get-MSIProperty -MSIPath $script:dest -Parameter 'ProductCode') | Select-String -Pattern '{[A-Z0-9]{8}-([A-Z0-9]{4}-){3}[A-Z0-9]{12}}').Matches.Value
+        $MSIProductCode = [string](Get-MSIProperty -Path $script:dest -Property 'ProductCode').Value
       } elseif ([System.Environment]::OSVersion.Platform -match 'Unix' -and (Get-Item $script:dest).Name.EndsWith('.msi')) {
         $MSIProductCode = ([string](file $script:dest) | Select-String -Pattern '{[A-Z0-9]{8}-([A-Z0-9]{4}-){3}[A-Z0-9]{12}}').Matches.Value
       }
@@ -3148,7 +3070,7 @@ Switch ($script:Option) {
         }
       }
       # Remove the downloaded files
-      Remove-Item -Path $script:dest
+      Request-RemoveItem -Path $script:dest
       $_NewInstallers += Restore-YamlKeyOrder $_Installer $InstallerEntryProperties -NoComments
     }
     # Write the new manifests
@@ -3263,16 +3185,7 @@ if ($PromptSubmit -eq '0') {
     # If the user has the cli too
     if (Get-Command 'gh' -ErrorAction SilentlyContinue) {
       # Request the user to fill out the PR template
-      if (Test-Path -Path "$gitTopLevel\.github\PULL_REQUEST_TEMPLATE.md") {
-        Read-PRBody (Resolve-Path "$gitTopLevel\.github\PULL_REQUEST_TEMPLATE.md").Path
-      } else {
-        while ([string]::IsNullOrWhiteSpace($PRTemplate)) {
-          Write-Host
-          Write-Host -ForegroundColor 'Green' -Object 'PULL_REQUEST_TEMPLATE.md not found, input path'
-          $PRTemplate = Read-Host -Prompt 'PR Template' | TrimString
-        }
-        Read-PRBody "$PRTemplate"
-      }
+      Read-PRBody
     }
   }
 

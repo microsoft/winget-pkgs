@@ -1,0 +1,81 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Wangnov.CodexAppManager
+PackageVersion: 0.5.2
+PackageLocale: en-US
+Publisher: Wangnov
+PublisherUrl: https://github.com/Wangnov
+PublisherSupportUrl: https://github.com/Wangnov/Codex-App-Manager/issues
+PackageName: Codex App Manager
+PackageUrl: https://github.com/Wangnov/Codex-App-Manager
+License: MIT
+LicenseUrl: https://github.com/Wangnov/Codex-App-Manager/blob/HEAD/LICENSE
+ShortDescription: Installer, updater, and uninstaller for the official Codex desktop app.
+Description: A cross-platform desktop client to install, incrementally update, and cleanly uninstall the official Codex desktop app, with built-in self-update.
+Moniker: codex-app-manager
+Tags:
+- codex
+- installer
+- openai
+- tauri
+- updater
+ReleaseNotes: |-
+  Codex App Manager
+  > 新增从 GitHub Release 选择历史 Codex 版本，以及对 DMG、ZIP、MSIX 离线安装包的原生校验与降级安装。
+  > Adds historical Codex selection from GitHub Releases plus native verification and downgrade installs for offline DMG, ZIP, and MSIX packages.
+  ✨ 亮点 · Highlights
+  - 选择安装版本：直接读取 Wangnov/codex-app-mirror 的分页 GitHub Release 历史，按当前平台与架构列出可安装版本；确认页会明确展示版本、安装包、来源与更新策略，再执行升级、降级或全新安装。
+    Choose an install version: browse the paginated Wangnov/codex-app-mirror GitHub Release history filtered for the current platform and architecture, then confirm the exact version, asset, source, and update policy before upgrading, downgrading, or installing fresh.
+  - 安装离线 Release 包：可以选择已经从 GitHub Release 下载到本机的 macOS .dmg / .zip 或 Windows .msix。离线路径不请求 GitHub，也不使用 Sparkle；管理器会锁定确认时的 SHA-256，并在安装前再次核对同一文件，同时验证平台签名、包身份、架构与版本。
+    Install offline Release packages: select a macOS .dmg / .zip or Windows .msix already downloaded from GitHub Releases. The offline path makes no GitHub request and does not use Sparkle; the manager pins the SHA-256 shown at confirmation, rechecks the same file before installation, and verifies its platform signature, package identity, architecture, and version.
+  - 真实降级与更新控制：历史安装可同时选择是否阻止 Codex 自更新。macOS 通过原子替换与健康检查完成安装，失败自动回滚；Windows 支持 MSIX 强制降级，并在系统无法部署 MSIX 时使用已验证的便携安装回退。
+    Real downgrades with update control: historical installs can also keep Codex self-updates blocked. macOS uses an atomic swap with health checks and automatic rollback, while Windows supports forced MSIX downgrades and a verified portable fallback when MSIX deployment is unavailable.
+  🐛 修复 · Fixes
+  - 安装中断后可安全恢复：安装事务会在破坏性重命名和回滚前持久记录状态，并把所选自更新策略与最终安装结果一起恢复，避免崩溃或断电后误判已安装版本、丢失回滚材料或留下错误策略。
+    Recover safely after interruption: install transactions now persist state before destructive renames and rollback, and recover the selected self-update policy from the final on-disk verdict, avoiding false success, lost rollback material, or the wrong policy after a crash or power loss.
+  - 暂停下载锁定原目标：恢复普通更新或历史版本下载时会继续用户最初确认的精确版本、构建、安装路径和 Windows 安装方式；即使后台版本列表已刷新，也不会静默改装成新的最新版。
+    Paused downloads retain the confirmed target: resuming either a normal update or a historical install keeps the exact version, build, install path, and Windows route originally approved, even if the latest catalog changes in the meantime.
+  📦 安装与升级 · Install & Upgrade
+  已经安装? 打开应用即可收到本次更新——macOS 只下载版本间的增量,校验失败自动回滚。
+  Already installed? The app offers this update in-app — macOS pulls only the delta, with automatic rollback.
+  ─────────────────────┬───────────────────────────────────────────
+  平台 · Platform      │下载 · Download(国内直连 · China-reachable)
+  ─────────────────────┼───────────────────────────────────────────
+  macOS · Apple Silicon│CodexAppManager_aarch64.dmg
+  ─────────────────────┼───────────────────────────────────────────
+  macOS · Intel        │CodexAppManager_x86_64.dmg
+  ─────────────────────┼───────────────────────────────────────────
+  Windows · x64        │CodexAppManager_x64-setup.exe
+  ─────────────────────┼───────────────────────────────────────────
+  Windows · ARM64      │CodexAppManager_arm64-setup.exe
+  ─────────────────────┴───────────────────────────────────────────
+  Windows 签名状态: 本版 CodexAppManager_x64-setup.exe / CodexAppManager_arm64-setup.exe 没有 Authenticode 代码签名,首次运行可能出现 SmartScreen 提示;.sig / latest.json 的 Tauri updater 签名只校验更新字节,不代表 Windows 发行者身份。SignPath Foundation 申请仍在审核。参见 代码签名政策与 Windows signing and verification。
+  Windows signing status: This release's CodexAppManager_x64-setup.exe / CodexAppManager_arm64-setup.exe are not Authenticode-signed, so SmartScreen may warn on first run. The Tauri updater signature in .sig / latest.json verifies update bytes only and is not Windows publisher identity. The SignPath Foundation application is pending. See the code signing policy and Windows signing and verification.
+  隐私 · Privacy: 隐私政策 · Privacy policy
+  核验下载: 本页 Assets 带有 SHA256SUMS;Windows 用 Get-FileHash .\CodexAppManager_x64-setup.exe -Algorithm SHA256 或替换为 ARM64 文件名,macOS 用 shasum -a 256 CodexAppManager_aarch64.dmg,再与 SHA256SUMS 比对。
+  Verify downloads: This release includes SHA256SUMS in Assets; on Windows run Get-FileHash .\CodexAppManager_x64-setup.exe -Algorithm SHA256 or swap in the ARM64 filename, and on macOS run shasum -a 256 CodexAppManager_aarch64.dmg, then compare with SHA256SUMS.
+  # macOS · Homebrew
+  brew install --cask wangnov/tap/codex-app-manager
+  > 镜像直链恒指向最新版本;如需本页对应的历史版本,请使用下方 Assets。.app.tar.gz / .sig / latest.json 是自动更新器的工件,手动安装请选 .dmg / .exe。
+  > Mirror permalinks always resolve to the latest release — for this exact version use the assets below. .app.tar.gz / .sig / latest.json belong to the auto-updater; pick the .dmg / .exe for manual installs.
+  What's Changed
+  - chore(deps): bump base64 from 0.22.1 to 0.23.0 in /src-tauri by @dependabot[bot] in #239
+  - chore(deps-dev): bump globals from 17.7.0 to 17.8.0 by @dependabot[bot] in #244
+  - chore(deps): bump libc from 0.2.188 to 0.2.189 in /src-tauri by @dependabot[bot] in #242
+  - chore(deps-dev): bump @vitejs/plugin-react from 6.0.3 to 6.0.4 by @dependabot[bot] in #243
+  - chore(deps-dev): bump jsdom from 29.1.1 to 30.0.1 by @dependabot[bot] in #241
+  - fix(themes): harden composer scroll ownership by @Wangnov in #248
+  - fix(themes): invalidate composer overflow cache by @Wangnov in #249
+  - chore(deps): bump actions/attest from 4.2.0 to 4.2.1 by @dependabot[bot] in #250
+  - chore(deps-dev): bump vite from 8.1.5 to 8.2.0 by @dependabot[bot] in #251
+  - chore(deps-dev): bump @types/react from 19.2.17 to 19.2.18 by @dependabot[bot] in #252
+  - chore(deps-dev): bump @vitejs/plugin-react from 6.0.4 to 6.0.5 by @dependabot[bot] in #254
+  - chore(deps-dev): bump @types/react-dom from 19.2.3 to 19.2.4 by @dependabot[bot] in #253
+  - feat(themes): add CSP-safe motion video intros by @Wangnov in #226
+  - feat: install historical GitHub Release builds by @Wangnov in #257
+  - chore(release): bump version to 0.5.2 by @Wangnov in #258
+  Full Changelog: v0.5.1...v0.5.2
+ReleaseNotesUrl: https://github.com/Wangnov/Codex-App-Manager/releases/tag/v0.5.2
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

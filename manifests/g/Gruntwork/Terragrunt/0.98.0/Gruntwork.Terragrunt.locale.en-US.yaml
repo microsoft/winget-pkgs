@@ -1,0 +1,110 @@
+# Created with komac v2.14.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: Gruntwork.Terragrunt
+PackageVersion: 0.98.0
+PackageLocale: en-US
+Publisher: Gruntwork
+PublisherUrl: https://terragrunt.gruntwork.io/
+PublisherSupportUrl: https://terragrunt.gruntwork.io/docs/community/support
+PrivacyUrl: https://gruntwork.io/legal/privacy-policy
+PackageName: Terragrunt
+PackageUrl: https://github.com/gruntwork-io/terragrunt/releases/tag/v0.68.9
+License: MIT
+LicenseUrl: https://github.com/gruntwork-io/terragrunt/blob/HEAD/LICENSE.txt
+Copyright: © 2024 Gruntwork, Inc. All rights reserved.
+ShortDescription: Terragrunt is a thin wrapper for Terraform that provides extra tools for keeping your Terraform configurations DRY, working with multiple Terraform modules, and managing remote state.
+Description: Terragrunt is a thin wrapper for Terraform that provides extra tools for keeping your Terraform configurations DRY, working with multiple Terraform modules, and managing remote state.
+Tags:
+- IaC
+- Infrastructure as Code
+- Terraform
+- Terraform Wrapper
+- terragrunt
+ReleaseNotes: |-
+  ✨ New Features
+  The --filter flag now implies --all
+  When using the --filter flag, it is now optional to also supply --all. Terragrunt will automatically set the --all flag when you use the --filter flag.
+  🐛 Bug Fixes
+  Plan files are now correctly passed as CLI arguments for destroy operations
+  A bug in the logic used for injecting plan files as arguments to the apply -destroy command resulted in the plan file argument being injected prior to the -auto-approve flag, which is disallowed in OpenTofu/Terraform. That bug has been fixed.
+  GCS bootstrap authentication fixed
+  A bug in the authentication logic for GCS backends prevented successful bootstrapping of backends when using the --auth-provider-cmd flag. That bug has been fixed.
+  Git-based and Graph-based combinations fixed
+  A bug in the discovery logic for Git worktrees prevented using a combination of Git-based and Graph-based filter expressions in the same filter from working correctly.
+  e.g.
+   terragrunt find --filter '...^[HEAD^...HEAD]...'
+  That bug has been fixed.
+  Proper exit codes returned from -detailed-exitcode
+  A bug in the logic for handling retries combined with the OpenTofu/Terraform plan -detailed-exitcode and the Terragrunt --all flag resulted in the wrong exit code being returned when a failed run succeeded on a subsequent retry with a status code related to drift (exit code 2).
+  That logic has been corrected, and properly follows the rules outlined under the --all flag:
+  When not using -detailed-exitcode:
+  - Terragrunt will return the highest exit code of all runs performed.
+  When using -detailed-exitcode:
+  - If any run has an exit code that is 1, or greater than 2, run --all will return the highest exit code.
+  - Otherwise, if any run returns an exit code of 2, run --all will return an exit code of 2.
+  - Otherwise, run --all will return an exit code of 0.
+  OpenTelemetry traces in console mode fixed
+  A bug in OpenTelemetry trace exporting prevented traces from being exported when in console mode. That bug has been fixed.
+  Negation logic fixed
+  A bug in how negation logic was handled in filter expressions prevented successful exclusion of stacks from generation and over excluded units in runs when users only supplied negative filters.
+  ⚙️ Process Improvements
+  GPG Signing
+  Release artifacts are now signed using both GPG and Cosign.
+  To start performing signature validation on assets, in addition to the asset you’re downloading from the GitHub releases page, you’ll want to download some of the following files:
+  VERSION="v0.XX.X"  # Replace with actual version of Terragrunt you are installing
+  curl -LO "https://github.com/gruntwork-io/terragrunt/releases/download/${VERSION}/SHA256SUMS"
+  # For GPG:
+  curl -LO "https://github.com/gruntwork-io/terragrunt/releases/download/${VERSION}/SHA256SUMS.gpgsig"
+  # For Cosign:
+  curl -LO "https://github.com/gruntwork-io/terragrunt/releases/download/${VERSION}/SHA256SUMS.sig"
+  curl -LO "https://github.com/gruntwork-io/terragrunt/releases/download/${VERSION}/SHA256SUMS.pem"
+  To verify with GPG:
+  curl -s https://gruntwork.io/.well-known/pgp-key.txt | gpg --import
+  gpg --verify SHA256SUMS.gpgsig SHA256SUMS
+  sha256sum -c SHA256SUMS --ignore-missing
+  To verify with Cosign:
+  cosign verify-blob SHA256SUMS \
+    --signature SHA256SUMS.sig \
+    --certificate SHA256SUMS.pem \
+    --certificate-oidc-issuer https://token.actions.githubusercontent.com \
+    --certificate-identity-regexp "github.com/gruntwork-io/terragrunt"
+  sha256sum -c SHA256SUMS --ignore-missing
+  Terragrunt installation documentation will be updated soon to recommend this on every installation, the Gruntwork maintained asdf plugin will be updated to do this automatically, and all Gruntwork recommended mechanisms for installing Terragrunt will support this going forward.
+  Upgrade to Go 1.25.5
+  The Golang toolchain used to build Terragrunt has been upgraded to v1.25.5.
+  Package reorganization
+  All top-level Golang packages in the Terragrunt project have been migrated to either internal or pkg. The distinction between the two indicates maintainer expectations as to whether either are being actively being consumed as libraries by third parties (with internal being impossible to import without vendoring in go modules).
+  Note that this does not indicate any backwards compatibility guarantee for usage of the Terragrunt as a library. It will remain unstable, and can change at any time.
+  What's Changed
+  - feat: Automatically enable -all when using -filter by @yhakbar in #5265
+  - fix: Fixed passing of existing destroy plan files by @denis256 in #5327
+  - fix: Fixing auth in GCS bootstrap by @yhakbar in #5342
+  - fix: Fixing Git-expression + Graph-expression filter combinations by @yhakbar in #5355
+  - fix: Fixing detailed-exitcode by @yhakbar in #5362
+  - fix: traces output in console mode by @denis256 in #5329
+  - fix: Cleanup from #5342 by @yhakbar in #5356
+  - fix: Fixing negation logic by @yhakbar in #5368
+  - docs: Adding ambassadors by @karlcarstensen in #5330
+  - docs: Typo by @karlcarstensen in #5331
+  - docs: Fix link to Dallas Slaughter by @karlcarstensen in #5370
+  - chore: Dropping more utils by @yhakbar in #5300
+  - chore: Lint everything when linting by @yhakbar in #5344
+  - chore: Remove RunTarget from options by @yhakbar in #5264
+  - chore: Undo -all and -graph wrap by @yhakbar in #5257
+  - chore: move engine to internal package by @denis256 in #5340
+  - chore: scripts directories cleanup by @denis256 in #5343
+  - chore: Addressing #5355 feedback by @yhakbar in #5363
+  - chore: release files signing by @denis256 in #5291
+  - chore: pkg packages organisation by @denis256 in #5358
+  - chore: internal packages update by @denis256 in #5360
+  - chore: moved cli package to internal/cli by @denis256 in #5345
+  - chore: go 1.25.5 version update by @denis256 in #5339
+  - build(deps): bump @smithy/config-resolver from 4.1.4 to 4.4.5 in /docs-starlight/src/fixtures/terralith-to-terragrunt/app/best-cat by @dependabot[bot] in #5328
+  Full Changelog: v0.97.2...v0.98
+ReleaseNotesUrl: https://github.com/gruntwork-io/terragrunt/releases/tag/v0.98.0
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/gruntwork-io/terragrunt/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

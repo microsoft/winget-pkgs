@@ -13,6 +13,9 @@ trigger:
 
 pr: none
 
+variables:
+  Publish.SkipManifestIndexUpdate: $[coalesce(variables.SkipManifestIndexUpdate, 'False')]
+
 resources:
   repositories:
   - repository: 1ESPipelineTemplates
@@ -28,63 +31,57 @@ extends:
       os: windows
     customBuildTags:
     - ES365AIMigrationTooling
-    
+
     stages:
     - stage: WinGetSvc_Publish 
       jobs:
       # Agent phase.
       - job: 'CommitProcessing'
         displayName: 'Commit Processing'
+        pool:
+          name: Azure-Pipelines-1ESPT-ExDShared-StaticIP
+          image: windows-2022
+          os: windows
         variables:
           skipComponentGovernanceDetection: ${{ true }}
           runCodesignValidationInjection: ${{ false }}
         timeoutInMinutes: 0
-        
+
         steps:
-        
-        # Downloads all the setup files and its dependencies.
-        - task: AzureCLI@1
-          displayName: 'Azure Setup'
-          inputs:
-            azureSubscription: '$(WinGet.Subscription)'
-            scriptLocation: inlineScript
-            inlineScript: 'az storage blob download-batch -d . --pattern * -s servicewrapper --output none'
-          env:
-            AZURE_STORAGE_CONNECTION_STRING: $(ValidationStorageAccountConnectionString)
 
-        # WinGet setup
-        - task: CmdLine@2
-          name: 'wingetsetup'
-          displayName: 'WinGet Setup'
-          env:
-            HOST_KEY: $(AzureFunctionHostKey)
-            SIGN_ENDPOINT: $(AzFuncSignEndpoint)
-            CLEANUP_ENDPOINT: $(AzFuncPublishCleanupEndpoint)
-            MANIFEST_PUBLISH_COMPLETION_ENDPOINT: $(AzFuncManifestPublishCompletionEndpoint)
-            PIPELINE_TASK_MESSAGE_QUEUE_ENDPOINT: $(AzFuncPipelineTaskMessageQueueEndPoint)
-            RESTSOURCE_UPDATE_ENDPOINT: $(AzFuncRestSourceUpdateEndpoint)
-          inputs:
-            script: 'winget_publish_setup.cmd'
-            workingDirectory: scripts
+        # Allow scripts to access the system token.
+        # Fetch all history
+        # Don't fetch tags.
+        - checkout: self
+          clean: true
+          persistCredentials: true
+          fetchDepth: 0
+          fetchTags: false
 
-        - task: CmdLine@2
+        # Downloads dependencies and publishes the pipeline secrets.
+        - template: /DevOpsPipelineDefinitions/templates/winget-setup.yaml@self
+          parameters:
+            type: Publish
+
+        - task: AzureCLI@2
           displayName: 'Validate Commits'
           inputs:
-            script: 'WinGetSvcWrapper.exe validate-commits --operationId %BUILD_BUILDNUMBER%'
-            failOnStderr: true
-          condition: succeeded()
+            azureSubscription: '$(WinGetSvc.DataAccess)'
+            scriptType: batch
+            scriptLocation: inlineScript
+            inlineScript: |
+              WinGetSvcWrapper.exe validate-commits --operationId %BUILD_BUILDNUMBER%
+            addSpnToEnvironment: true
+            failOnStandardError: true
           env:
-            ValidationConnectionString: $(ValidationStorageAccountConnectionString)
-            ExecutionEnvironment: $(ExecutionEnvironment)
-            CacheConnectionString: $(CacheStorageAccountConnectionString)
-            PackagePublisher: $(PackagePublisher)
+            ValidationStorageAccountName: $(ValidationStorageAccountName)
+            CacheStorageAccountName: $(CacheStorageAccountName)
+            WinGet:AppConfig:PrimaryEndpoint: $(AppConfigPrimaryEndpoint)
+            WinGet:AppConfig:SecondaryEndpoint: $(AppConfigSecondaryEndpoint)
             DIApplicationInsightKey: $(DIApplicationInsightKey)
-            WinGet:AppConfig:Primary: $(AppConfigPrimary)
-            WinGet:AppConfig:Secondary: $(AppConfigSecondary)
+            PackagePublisher: $(PackagePublisher)
             SYSTEM_ACCESSTOKEN: $(System.AccessToken)
-            DevOpsOrganization: $(DevOpsOrganization)
-            DevOpsProjectName: $(DevOpsProjectName)
-            DevOpsPublishPipelineDefinitionId: $(DevOpsPublishPipelineDefinitionId)
+            ExecutionEnvironment: $(WinGetSvc.ExecutionEnvironment)
 
       # Agentless phase. Depends on previous job. 
       - job: 'SignPackage'
@@ -107,91 +104,51 @@ extends:
             body: |
               {
               "operationId": "$(Build.BuildNumber)",
-              "BuildId": "$(Build.BuildId)",
-              "PlanUrl": "$(system.CollectionUri)",
-              "HubName": "$(system.HostType)",
+              "buildId": "$(Build.BuildId)",
+              "projectId": "$(system.TeamProjectId)",
+              "planId": "$(system.PlanId)", 
+              "jobId": "$(system.JobId)", 
+              "timelineId": "$(system.TimelineId)", 
+              "taskInstanceId": "$(system.TaskInstanceId)",
+              "repository": "$(build.repository.id)",
               "pipelineType": "CommitPipeline",
-              "ProjectId": "$(system.TeamProjectId)",
-              "PlanId": "$(system.PlanId)", 
-              "JobId": "$(system.JobId)", 
-              "TimelineId": "$(system.TimelineId)", 
-              "TaskInstanceId": "$(system.TaskInstanceId)",
-              "AuthToken": "$(system.AccessToken)"
               }
             waitForCompletion: "true"
 
-      # Agent phase. Depends on previous job.
+      # Agentless phase. Depends on previous job.
       - job: 'Publish'
-        displayName: 'Publish'
-        variables:
-          skipComponentGovernanceDetection: ${{ true }}
-          runCodesignValidationInjection: ${{ false }}
-        dependsOn:
-          - 'SignPackage'
-        timeoutInMinutes: 0
-        
-        steps:
-
-        # Downloads all the setup files and its dependencies.
-        - task: AzureCLI@1
-          displayName: 'Azure Setup'
-          inputs:
-            azureSubscription: '$(WinGet.Subscription)'
-            scriptLocation: inlineScript
-            inlineScript: 'az storage blob download-batch -d . --pattern * -s servicewrapper --output none'
-          env:
-            AZURE_STORAGE_CONNECTION_STRING: $(ValidationStorageAccountConnectionString)
-
-        # Validates integrity of pull request.
-        - task: CmdLine@2
-          displayName: 'Publish'
-          inputs:
-            script: 'WinGetSvcWrapper.exe publish --operationId %BUILD_BUILDNUMBER%'
-            failOnStderr: true
-          condition: succeeded()
-          env:
-            ValidationConnectionString: $(ValidationStorageAccountConnectionString)
-            ExecutionEnvironment: $(ExecutionEnvironment)
-            CacheConnectionString: $(CacheStorageAccountConnectionString)
-            DIApplicationInsightKey: $(DIApplicationInsightKey)
-            WinGet:AppConfig:Primary: $(AppConfigPrimary)
-            WinGet:AppConfig:Secondary: $(AppConfigSecondary)
-            CdnAzureServicesAuthConnectionString: $(AzureServicesAuthConnectionString)
-            CacheContainerName: $(CacheContainerName)
-            WinGet::SubscriptionId: $(WinGet.SubscriptionId)
-
-      # Agentless phase. Depends on previous job. 
-      - job: 'PublishToRestSource'
         pool: server
         timeoutInMinutes: 1500
-        displayName: 'Publish to rest source'
+        displayName: 'Publish'
         dependsOn:
           - 'CommitProcessing'
-          - 'Publish'
+          - 'SignPackage'
+        condition: succeeded()
         variables:
           HostKeySecret: $[ dependencies.CommitProcessing.outputs['wingetsetup.hostkey']]
-          RestSourceUpdateEndpointSecret: $[ dependencies.CommitProcessing.outputs['wingetsetup.restsourceUpdateEndpoint']]
+          PublishEndpointSecret: $[ dependencies.CommitProcessing.outputs['wingetsetup.publishEndpoint']]
         steps:
 
-        # Publish updates to rest source
         - task: AzureFunction@1
-          displayName: 'Publishing to rest source'
+          displayName: 'Publish'
           inputs:
-            function: '$(RestSourceUpdateEndpointSecret)'
+            function: '$(PublishEndpointSecret)'
             key: '$(HostKeySecret)'
             body: |
               {
               "operationId": "$(Build.BuildNumber)",
-              "BuildId": "$(Build.BuildId)",
-              "PlanUrl": "$(system.CollectionUri)",
-              "HubName": "$(system.HostType)",
+              "buildId": "$(Build.BuildId)",
               "pipelineType": "CommitPipeline",
-              "ProjectId": "$(system.TeamProjectId)",
-              "PlanId": "$(system.PlanId)", 
-              "JobId": "$(system.JobId)", 
-              "TimelineId": "$(system.TimelineId)", 
-              "TaskInstanceId": "$(system.TaskInstanceId)",
-              "AuthToken": "$(system.AccessToken)"
+              "projectId": "$(system.TeamProjectId)",
+              "planId": "$(system.PlanId)",
+              "jobId": "$(system.JobId)",
+              "timelineId": "$(system.TimelineId)",
+              "taskInstanceId": "$(system.TaskInstanceId)",
+              "repository": "$(build.repository.id)",
+              "containerName": "$(CacheContainerName)",
+              "commitTablePartitionKey": "$(CommitTablePartitionKey)",
+              "commitTableRowKey": "$(CommitTableRowKey)",
+              "skipManifestIndexUpdate": "$(Publish.SkipManifestIndexUpdate)"
               }
             waitForCompletion: "true"
 
@@ -203,7 +160,6 @@ extends:
         dependsOn:
           - 'CommitProcessing'
           - 'Publish'
-          - 'PublishToRestSource'
         condition: and(succeeded(), ne(variables['Source.SkipPostPublish'], 'true'))
         variables:
           HostKeySecret: $[ dependencies.CommitProcessing.outputs['wingetsetup.hostkey']]
@@ -220,18 +176,15 @@ extends:
             body: |
               {
               "operationId": "$(Build.BuildNumber)",
-              "BuildId": "$(Build.BuildId)",
-              "PlanUrl": "$(system.CollectionUri)",
-              "HubName": "$(system.HostType)",
+              "buildId": "$(Build.BuildId)",
               "pipelineType": "CommitPipeline",
-              "ProjectId": "$(system.TeamProjectId)",
-              "PlanId": "$(system.PlanId)", 
-              "JobId": "$(system.JobId)", 
-              "TimelineId": "$(system.TimelineId)", 
-              "TaskInstanceId": "$(system.TaskInstanceId)",
-              "AuthToken": "$(system.AccessToken)",
-              "BuildRepositoryId": "$(build.repository.id)",
-              "TaskIdentifier": "WaiverCommit"
+              "projectId": "$(system.TeamProjectId)",
+              "planId": "$(system.PlanId)", 
+              "jobId": "$(system.JobId)", 
+              "timelineId": "$(system.TimelineId)", 
+              "taskInstanceId": "$(system.TaskInstanceId)",
+              "buildRepositoryId": "$(build.repository.id)",
+              "taskIdentifier": "WaiverCommit"
               }
             waitForCompletion: "true"
 
@@ -243,17 +196,14 @@ extends:
             body: |
               {
               "operationId": "$(Build.BuildNumber)",
-              "BuildId": "$(Build.BuildId)",
-              "PlanUrl": "$(system.CollectionUri)",
-              "HubName": "$(system.HostType)",
+              "buildId": "$(Build.BuildId)",
               "pipelineType": "CommitPipeline",
-              "ProjectId": "$(system.TeamProjectId)",
-              "PlanId": "$(system.PlanId)", 
-              "JobId": "$(system.JobId)", 
-              "TimelineId": "$(system.TimelineId)", 
-              "TaskInstanceId": "$(system.TaskInstanceId)",
-              "AuthToken": "$(system.AccessToken)",
-              "BuildRepositoryId": "$(build.repository.id)"
+              "projectId": "$(system.TeamProjectId)",
+              "planId": "$(system.PlanId)", 
+              "jobId": "$(system.JobId)", 
+              "timelineId": "$(system.TimelineId)", 
+              "taskInstanceId": "$(system.TaskInstanceId)",
+              "repository": "$(build.repository.id)"
               }
             waitForCompletion: "true"
 
@@ -266,16 +216,13 @@ extends:
             body: |
               {
               "operationId": "$(Build.BuildNumber)",
-              "BuildId": "$(Build.BuildId)",
-              "PlanUrl": "$(system.CollectionUri)",
-              "HubName": "$(system.HostType)",
+              "buildId": "$(Build.BuildId)",
               "pipelineType": "CommitPipeline",
-              "ProjectId": "$(system.TeamProjectId)",
-              "PlanId": "$(system.PlanId)", 
-              "JobId": "$(system.JobId)", 
-              "TimelineId": "$(system.TimelineId)", 
-              "TaskInstanceId": "$(system.TaskInstanceId)",
-              "AuthToken": "$(system.AccessToken)",
-              "BuildRepositoryId": "$(build.repository.id)"
+              "projectId": "$(system.TeamProjectId)",
+              "planId": "$(system.PlanId)", 
+              "jobId": "$(system.JobId)", 
+              "timelineId": "$(system.TimelineId)", 
+              "taskInstanceId": "$(system.TaskInstanceId)",
+              "repository": "$(build.repository.id)"
               }
             waitForCompletion: "true"

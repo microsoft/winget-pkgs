@@ -1,0 +1,149 @@
+# Created with komac v2.14.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: jj-vcs.jj
+PackageVersion: 0.37.0
+PackageLocale: en-US
+Publisher: jj-vcs
+PublisherUrl: https://github.com/jj-vcs
+PublisherSupportUrl: https://github.com/jj-vcs/jj/issues
+PackageName: jj
+PackageUrl: https://github.com/jj-vcs/jj
+License: Apache-2.0
+LicenseUrl: https://github.com/jj-vcs/jj/blob/HEAD/LICENSE
+ShortDescription: A Git-compatible VCS that is both simple and powerful
+Description: A Git-compatible VCS that is both simple and powerful
+Moniker: Jujutsu
+Tags:
+- cli
+- git
+- mercurial
+- vcs
+ReleaseNotes: |-
+  About
+  jj is a Git-compatible version control system that is both simple and powerful. See
+  the installation instructions to get started.
+  Release highlights
+  - A new syntax for referring to hidden and divergent change IDs is available:
+    xyz/n where n is a number. For instance, xyz/0 refers to the latest
+    version of xyz, while xyz/1 refers to the previous version of xyz.
+    This allows you to perform actions like jj restore --from xyz/1 --to xyz to
+    restore xyz to its previous contents, if you made a mistake.
+    For divergent changes, the numeric suffix will always be shown in the log,
+    allowing you to disambiguate them in a similar manner.
+  Breaking changes
+  - String patterns in revsets, command
+    arguments, and configuration are now parsed as globs by default. Use
+    substring: or exact: prefix as needed.
+  - remotes.<name>.auto-track-bookmarks is now parsed the same way they
+    are in revsets and can be combined with logical operators.
+  - jj bookmark track/untrack now accepts --remote argument. If omitted, all
+    remote bookmarks matching the bookmark names will be tracked/untracked. The
+    old <bookmark>@<remote> syntax is deprecated in favor of <bookmark> --remote=<remote>.
+  - On Windows, symlinks that point to a path with / won't be supported. This
+    path is invalid on Windows.
+  - The template alias format_short_change_id_with_hidden_and_divergent_info(commit)
+    has been replaced by format_short_change_id_with_change_offset(commit).
+  - The following deprecated config options have been removed:
+    - git.push-bookmark-prefix
+    - ui.default-description
+    - ui.diff.format
+    - ui.diff.tool
+  - The deprecated commit_id.normal_hex() template method has been removed.
+  - Template expansion that did not produce a terminating newline will not be
+    fixed up to provide one by jj log, jj evolog, or jj op log.
+  - The diff conflict marker style can now use \\\\\\\ markers to indicate
+    the continuation of a conflict label from the previous line.
+  Deprecations
+  - The git_head() and git_refs() functions will be removed from revsets and
+    templates. git_head() should point to the first_parent(@) revision in
+    colocated repositories. git_refs() can be approximated as
+    remote_bookmarks(remote=glob:*) | tags().
+  New features
+  - Updated the executable bit representation in the local working copy to allow
+    ignoring executable bit changes on Unix. By default we try to detect the
+    filesystem's behavior, but this can be overridden manually by setting
+    working-copy.exec-bit-change = "respect" | "ignore".
+  - jj workspace add now also works for empty destination directories.
+  - jj git remote family of commands now supports different fetch and push URLs.
+  - [colors] table now supports dim = true attribute.
+  - In color-words diffs, context line numbers are now rendered with decreased
+    intensity.
+  - Hidden and divergent commits can now be unambiguously selected using their
+    change ID combined with a numeric suffix. For instance, if there are two
+    commits with change ID xyz, then one can be referred to as xyz/0 and the
+    other can be referred to as xyz/1. These suffixes are shown in the log when
+    necessary to make a change ID unambiguous.
+  - jj util gc now prunes unreachable files in .jj/repo/store/extra to save
+    disk space.
+  - Early version of a jj file search command for searching for a pattern in
+    files (like git grep).
+  - Conflict labels now contain information about where the sides of a conflict
+    came from (e.g. nlqwxzwn 7dd24e73 "first line of description").
+  - --insert-before now accepts a revset that resolves to an empty set when
+    used with --insert-after. The behavior is similar to --onto.
+  - jj tag list now supports --sort option.
+  - TreeDiffEntry type now has a display_diff_path() method that formats
+    renames/copies appropriately.
+  - TreeDiffEntry now has a status_char() method that returns
+    single-character status codes (M/A/D/C/R).
+  - CommitEvolutionEntry type now has a predecessors() method which
+    returns the predecessor commits (previous versions) of the entry's commit.
+  - CommitEvolutionEntry type now has a inter_diff() method which
+    returns a TreeDiff between the entry's commit and its predecessor version.
+    Optionally accepts a fileset literal to limit the diff.
+  - jj file annotate now reports an error for non-files instead of succeeding
+    and displaying no content.
+  - jj workspace forget now warns about unknown workspaces instead of failing.
+  Fixed bugs
+  - Broken symlink on Windows. #6934.
+  - Fixed failure on exporting moved/deleted annotated tags to Git. Moved tags are
+    exported as lightweight tags.
+  - jj gerrit upload now correctly handles mixed explicit and implicit
+    Change-Ids in chains of commits (#8219)
+  - jj git push now updates partially-pushed remote bookmarks accordingly.
+    #6787
+  - Fixed problem of loading large Git packfiles.
+    GitoxideLabs/gitoxide#2265
+  - The builtin pager won't get stuck when stdin is redirected.
+  - jj workspace add now prevents creating an empty workspace name.
+  - Fixed checkout of symlinks pointing to themselves or .git/.jj on Unix. The
+    problem would still remain on Windows if symlinks are enabled.
+    #8348
+  - Fixed a bug where jj would fail to read git delta objects from pack files.
+    GitoxideLabs/gitoxide#2344
+  Contributors
+  Thanks to the people who made this release happen!
+  - Anton Älgmyr (@algmyr)
+  - Austin Seipp (@thoughtpolice)
+  - Bryce Berger (@bryceberger)
+  - Carlos Knippschild (@chuim)
+  - Cole Helbling (@cole-h)
+  - David Higgs (@higgsd)
+  - Eekle (@Eekle)
+  - Gaëtan Lehmann (@glehmann)
+  - Ian Wrzesinski (@isuffix)
+  - Ilya Grigoriev (@ilyagr)
+  - Julian Howes (@jlnhws)
+  - Kaiyi Li (@06393993)
+  - Lukas Krejci (@metlos)
+  - Martin von Zweigbergk (@martinvonz)
+  - Matt Stark (@matts1)
+  - Ori Avtalion (@salty-horse)
+  - Scott Taylor (@scott2000)
+  - Shaoxuan (Max) Yuan (@ffyuanda)
+  - Stephen Jennings (@jennings)
+  - Steve Fink (@hotsphink)
+  - Steve Klabnik (@steveklabnik)
+  - Theo Buehler (@botovq)
+  - Thomas Castiglione (@gulbanana)
+  - Vincent Ging Ho Yim (@cenviity)
+  - xtqqczze (@xtqqczze)
+  - Yuantao Wang (@0WD0)
+  - Yuya Nishihara (@yuja)
+ReleaseNotesUrl: https://github.com/jj-vcs/jj/releases/tag/v0.37.0
+Documentations:
+- DocumentLabel: Homepage
+  DocumentUrl: https://jj-vcs.github.io/jj/
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

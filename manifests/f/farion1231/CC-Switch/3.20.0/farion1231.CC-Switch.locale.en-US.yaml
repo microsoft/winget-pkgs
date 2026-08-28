@@ -1,0 +1,127 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: farion1231.CC-Switch
+PackageVersion: 3.20.0
+PackageLocale: en-US
+Publisher: farion1231
+PublisherUrl: https://github.com/farion1231
+PublisherSupportUrl: https://github.com/farion1231/cc-switch/issues
+Author: farion1231
+PackageName: CC Switch
+PackageUrl: https://github.com/farion1231/cc-switch
+License: MIT
+LicenseUrl: https://github.com/farion1231/cc-switch/blob/HEAD/LICENSE
+ShortDescription: A cross-platform desktop All-in-One assistant tool for Claude Code, Codex, OpenCode, openclaw & Gemini CLI.
+Moniker: ccswitch
+Tags:
+- ai-tools
+- claude-code
+- codex
+- desktop-app
+- mcp
+- minimax
+- omo
+- open-source
+- opencode
+- provider-management
+- rust
+- skills
+- skills-management
+- tauri
+- typescript
+- wsl-support
+ReleaseNotes: |-
+  CC Switch v3.20.0
+  > 这一版由三条结构性主线撑起：Pi 成为第九个受管应用——供应商、提示词、Skills、会话浏览与用量统计一站接入；Codex 支持多个 ChatGPT 账号——认证中心随便登几个，每张官方卡各绑各的，切换永不串账；Claude Code 内置 WebSearch 在 GPT 路由下终于可用。紧急修复也有一条：v3.19.2 在 WSL 路径上已有配置无法更新或切换，受影响用户请直接升级本版。同一批 Windows 修复还包括版本检测大修（五个 issue 一次修）、启动闪屏与 MSI 注册表垃圾键。本版包含数据库迁移（v16 → v17），升级前自动备份，降级需还原备份。
+  English → | 日本語版 →
+  重点内容：你现在可以
+  - 用 CC Switch 管理 Pi：第九个受管应用（#6064）。供应商表单是针对 Pi 原生 schema 的结构化编辑器，内置 58 个预设与 57 个模型的能力目录；提示词库、SYSTEM.md / APPEND_SYSTEM.md 编辑器、斜杠命令模板、Skills、会话浏览与安装升级一并接入。Pi 自己的登录、默认供应商与默认模型永远不被触碰。首启会导入 models.json 里已有的供应商，见升级提醒。
+  - 在看板里看到 Pi 的会话用量：逐模型的 token、成本、错误与中断轮次，独立的「Pi (Session)」来源与应用筛选；增量同步只解析文件新增部分（#6463）。
+  - 添加 Codex 官方供应商时直接选择已授权的 ChatGPT 账号：认证中心登录任意多个账号，新建官方卡时下拉直选其一完成绑定；也可以照旧添加一张不绑定的空官方卡，跟随 Codex CLI 本地登录、读取本地的 access token。切换到绑定卡会写入该账号完整的令牌包——裸 codex CLI 也以该账号运行、且能自行续期。接管下的请求会校验账号一致性，绝不静默把账单记到另一个账号头上（#3879、#6535）。
+  - 在 GPT 路由下使用 Claude Code 的内置 WebSearch：搜索在上游执行、结果带引用返回、次数进用量；Codex 新客户端的 Alpha Search 端点也不再 404（#5681）。
+  - 从 v3.19.2 的 WSL 故障中脱困：v3.19.2 在 \\wsl.localhost 路径上无法更新或切换已有配置（#6188），该版本内无任何绕过手段——请直接升级本版，并且 CI 从此在真实 WSL2 文件系统上跑测试（#6233）。
+  - 让 Windows 版本检测和你的终端看到的一致：检测改为合并注册表 PATH（用户+机器）、扫描独立安装器目录、优先探测 PATH 默认项——应用内自更新后「未安装」、winget 装的 Claude Code 找不到、旧 npm shim 遮住新版本，五个 issue 一网打尽（#6284）。
+  - 给每个模型声明它真实支持的思考档位：Codex 模型目录支持逐模型多选八个标准档位并指定默认值，各家预设按厂商文档预填了真实档位（#6228）。
+  - 信任你的备份：SQL 备份逐值保真往返、截断文件导入前即被拒绝（#6146）；备份文件原子发布、恢复先在暂存库整体校验、.db 恢复会把各应用 live 配置一并重建，所有同步/恢复路径严格串行（#6147）。
+  - 在几百个模型里直接搜：所有应用的模型下拉都换成了可输入过滤的组合框，按模型 id 和厂商名都能匹配（#6285）。
+  - 启动不再白/黑闪屏：主题在页面绘制前同步应用，Windows 上窗口加载完成前保持隐藏（#6252）。
+  使用攻略
+  本版改动集中在供应商管理与用量统计上，建议结合以下文档了解：
+  - 添加供应商：Pi 与新预设的入口。
+  - 用量统计：Pi 会话用量的来源与口径，以及 DeepSeek 调价对读数的影响。
+  - 请求路由：WebSearch 桥接生效的路由场景。
+  Warning
+  唯一官方渠道声明（请务必阅读）
+  CC Switch 是完全免费、开源的桌面应用，不会向用户收取任何费用。请仅通过下列官方渠道获取本软件：
+  ────────┬────────────────────────────────────
+  类别    │唯一官方
+  ────────┼────────────────────────────────────
+  官网    │ccswitch.io
+  ────────┼────────────────────────────────────
+  源码    │github.com/farion1231/cc-switch
+  ────────┼────────────────────────────────────
+  下载    │GitHub Releases
+  ────────┼────────────────────────────────────
+  作者    │@farion1231
+  ────────┼────────────────────────────────────
+  举报山寨│GitHub Issues
+  ────────┴────────────────────────────────────
+  任何向你收费、要求充值、或索取登录凭据的"CC Switch"网站或客户端均为假冒。如果你被诱导支付了费用，请立即停止操作并通过 GitHub Issues 反馈。
+  概览
+  CC Switch v3.20.0 横跨了几乎每个子系统，主线有三条。第一条是接入面扩张：Pi 成为第九个受管应用，从供应商编辑到会话用量全链路接入，并带来本版唯一的数据库迁移（v16 → v17，Pi 用量去重账本）；Codex 侧则补上了呼声已久的多 ChatGPT 账号管理，官方卡从此可以逐卡绑定账号，且刻意退出自动故障转移——重试永远不会把账单记到另一个账号。第二条是代理能力：Claude Code 内置 WebSearch 桥接到 OpenAI Responses 与 Codex OAuth 后端，Codex 的 Alpha Search 端点注册为语义透传，「GPT 路由下没有网页搜索」成为历史。
+  第三条是把 Windows 与数据可靠性欠的账还上：v3.19.2 的 WSL 写入回归热修（并新增真实 WSL2 CI 覆盖）、版本检测按注册表 PATH 大修、启动闪屏消除、MSI 自 v3.4.0 起写入的垃圾注册表键修正；备份/同步经外部贡献者审计后两波加固——SQL 逐值保真、原子发布、暂存校验、严格串行。此外还有 Codex 思考档位体系的整轮梳理（逐模型档位＋各厂真实档位预填＋聚合平台方言修正）、一轮供应商表单一致性打磨、macOS 中日文输入法修复，以及 DeepSeek V4 按厂商新牌价重定价。
+  发布日期：2026-08-18
+  更新规模：69 commits | 284 files changed | +53,108 / -6,678 lines
+  新功能
+  Pi 成为第九个受管应用
+  Pi 以累加模式接入（与 OpenCode、Hermes 同类）：供应商的启用与否等于其键是否存在于 ~/.pi/agent/models.json，多个供应商共存。供应商表单是针对 Pi 原生 schema 的结构化编辑器——API 格式、逐模型的思考等级映射（Pi 的七个等级）、兼容键——内置 58 个预设（覆盖表单五种 API 格式中的四种）与一份人工复核过的 57 模型能力目录；原始 JSON 编辑器与「拉取模型」按钮兜底，既有节点里的未知字段原样保留。每次读改写都有内容版本校验，别的进程改过的文件会以冲突报错拒绝、绝不覆盖。
+  边界刻意划清并写进文档：CC Switch 绝不把 Pi 的内置供应商物化进 models.json、绝不读写 Pi 的 auth.json、绝不碰 defaultProvider / defaultModel——Pi 自己的登录与模型选择归 Pi。供应商之外：提示词库把选中的一条写入 Pi 全局 AGENTS.md（已有的不匹配内容先自动备份成库条目）、SYSTEM.md（替换 Pi 基础提示词）与 APPEND_SYSTEM.md 各有专属编辑器、~/.pi/agent/prompts/*.md 斜杠命令模板管理、Skills 按「存在即启用」规则接入（同名但非 CC Switch 所有的 Skill 拒绝覆盖或删除）、JSONL 会话浏览器，以及设置 → 关于里的 Pi 安装与升级。Pi 没有原生 MCP 注册表，因此刻意不参与 MCP 同步；也没有代理接管、故障转移与托盘存在——代理与故障转移命令现在对所有无本地网关的应用显式拒绝，而不是写下一堆死配置。（#6064）
+  Pi 会话用量进入看板
+  新导入器读取 Pi 的会话文件，在独立的「Pi (Session)」来源下逐模型记录 token、成本、错误与中断轮次，带专属应用筛选。Pi 每条记录自带成本，为正时优先采用；缺失或全零则回退 CC Switch 的价格表。增量同步对每个文件的尾部做指纹，只解析新追加的字节；被改写或分叉的会话通过新的持久去重账本识别——session_usage_dedup 表，本版 v16 → v17 迁移的由来——该账本在明细行清理后仍存活，且保持设备本地（云同步排除、导入保留）。由于一个 Pi 会话可能混用 Anthropic 系与 OpenAI 系 API，含 Pi 的汇总带「缓存写不完整」的口径标注而非一个未加限定的数字。（#6463）
+  Codex：多个 ChatGPT 账号，逐卡绑定
+  认证中心可以持有任意数量的 ChatGPT（Codex OAuth）登录。添加 Codex 官方供应商时，直接从已 OAuth 授权的账号里选一个完成绑定——不必先建卡再回头配置；也可以沿用旧方式添加一张不绑定账号的空官方卡，它跟随 Codex CLI 自己的登录、读取本地的 access token。官方卡数量不限，两种方式的卡可以共存，绑定与解绑保留卡的身份、端点与健康历史。切换到绑定卡会把该账号完整的令牌包写入 ~/.codex/auth.json——裸 codex CLI 也以该账号运行，且能在访问令牌过期后自行续期；CLI 轮转过的刷新令牌会在每次写入前被回采，重复切换绝不会用旧登录盖掉新登录。
+  账号选择器是带标签的下拉框，可直接跳转认证中心；账号状态加载失败时显示带重试的警告而不再冒充「未登录」，也不再在下次保存时静默解绑。登出与移除账号和供应商切换严格互斥；OAuth 请求超时从十分钟收紧到 30 秒；登出还会取消仍在网络往返中的设备登录——被放弃的登录流程无法再在后台悄悄完成并复活账号（#6506）。接管下的请求会对照绑定账号校验：仍以另一个 ChatGPT 账号认证的 Codex 会话会得到「请重启 Codex」的明确报错，而不是静默把账单记到错误账号。（#3879、#6535、#6506）
+  Codex 模型目录：逐模型思考档位
+  Codex 供应商表单里的每个模型行现在可以声明其上游真实接受的思考档位——在八个标准档位（none 到 ultra）上多选，外加可选的默认档——生成的目录把它们带进 Codex 的选择器，不再继承基础模板的档位。未知值会被丢弃（笔误永远到不了 Codex），显式默认值会对照声明集校验，覆盖在原生 Responses 与 Chat 转换两条路径上都生效。代理转换层同时学会了 ultra：此前在路由供应商上选最深档会静默关闭扩展思考（Anthropic 路径）或丢掉 effort 参数，现在映射到上游合法的最深档。（#6228、#6181）
+  各厂预设按官方文档预填真实思考档位
+  预设现在带上各厂商实际文档化的档位——火山方舟 low/medium/high、DouBaoSeed minimal 到 high、混元 low/high、DeepSeek low/high/max、xAI Grok low/medium/high（无 none：思考关不掉）、智谱 GLM none/high 等——新建供应商的 Codex 选择器从此以事实起步；对智谱 GLM 来说，「关闭思考」终于能在 Codex 里选到。两个 Kimi 预设按 Moonshot 自家接入指南启用推理强度（顶层 reasoning_effort，只列网关接受的档位），Kimi For Coding 从一个模型扩到四个官方模型。百度千帆 Coding Plan 预设用平台文档化的 thinking 对象获得真实的思考开关。档位一律出自厂商文档或厂商自己的 Codex 目录，并收窄到真正行为有别的档——完全没有依据的模型保持不填。
+  Claude Code WebSearch 与 Codex Alpha Search 走通本地代理
+  两条此前在代理上走死胡同的网页搜索路径打通了。Claude Code 内置 WebSearch 工具桥接到 OpenAI Responses 与 Codex OAuth 后端：搜索在上游执行，结果以成对的 Anthropic 搜索块返回、引用保留并合并、搜索次数计入用量。max_uses 在 Responses API 支持处用 max_tool_calls 原生限额；Codex OAuth 后端拒绝该参数，仅在请求强制使用该工具时以流中截断本地限额，未强制却带 max_uses 的请求显式报错。Responses API 无法表达的约束（blocked_domains、非直连调用方、response_inclusion、未知工具版本）同样显式报错，绝不悄悄放宽搜索范围。桥接只覆盖 Responses 转换路径——Chat Completions 上游仍不支持托管 WebSearch。另外，Codex 独立的 Alpha Search 端点注册为语义透传，带完整的供应商选择、鉴权、模型映射、重试与日志流水线，新版 Codex 客户端的 404 就此终结。Claude-in-Codex 路由攻略已三语更新：「GPT 路由下没有网页搜索」在这些路径上不再成立。（#5681、#5363、#5378）
+  百度千帆 Token Plan 预设
+  千帆 Token Plan（个人版）——2026 年 7 月起替代 Coding Plan 面向新购用户——获得 Claude Code、Claude Desktop、Codex、OpenCode、OpenClaw 与 Hermes 六个应用的预设，走 /tokenplan/personal 端点。Codex 预设带六模型目录（DeepSeek V4 Pro / V4 Flash / V4 Flash 0731、GLM 5.2/5.1、Kimi K2.6），是首个思考开关与推理强度选择器都真实可用的千帆预设。密钥必须用 Token Plan 订阅的专属 key，而不是通用的千帆应用 key；老的 Coding Plan 预设为存量订阅保留。
+  模型选择器全面支持模糊搜索
+  供应商表单里所有「选模型」下拉——Claude Code（含 Copilot）、Claude Desktop 映射行、Codex、Gemini CLI、OpenCode、Hermes、OpenClaw 与 Pi——都换成了可输入过滤的组合框，按模型 id 和厂商名都能匹配，顺手把四份内联重复组件合而为一。对着返回几百个模型的供应商尤其好用。（#6285、#6353）
+  其他新增
+  - 接管开启确认动画：为当前应用打开路由接管时头部品牌区播放一次性彩带——应用启动、切换应用或系统偏好「减少动态效果」时绝不触发。同一改动补上一个真实缺口：接管开关在初始代理状态加载完成前置灰，对未知状态的点击不再可能把接管拨错方向。（#6209）
+  - Codex 表单 1M 上下文开关回归：上游 Codex 重新接受 model_context_window = 1000000，四月隐藏的开关（连同配套的自动压缩阈值输入）回来了，写的还是原来那两个 config.toml 字段。
+  - 新预设：PPIO（厂商贡献）、JieKou AI（厂商贡献）、XycAi（合作伙伴）分别接入各自支持的应用。（#6239、#6356）
+  变更
+  Codex 官方账号卡退出自动故障转移
+  官方 ChatGPT 卡不再被加入、列出或经由故障转移队列重试，官方路由上的所有错误类别一律不可重试——对着另一个供应商重试会把入站的 ChatGPT 授权用到别的账号头上。内置官方卡的存量队列行在读取时过滤。官方卡判定也不再只看类别标签：存了真实 API key 或显式第三方上游的卡按普通供应商对待，保留直连路径与故障转移资格。（#3879、#6535）
+  Codex OAuth 配额显示逐卡可配置
+  绑定 ChatGPT 账号的卡获得与脚本类供应商相同的「配置用量查询」入口：配额页脚可以关闭、刷新间隔可改（此前硬编码五分钟且没有关闭开关），对话框的测试按钮查询的是绑定的账号而不是 CLI 恰好登录的账号，托盘也不再给账号绑定卡装饰全局订阅百分比。（#6537）
+  OpenCode Go 改为直连
+  OpenCode Go 网关原生提供 Anthropic Messages，但其 /v1/messages 只认 x-api-key、静默忽略 Bearer 头——Claude Code 预设改为把密钥存进 ANTHROPIC_API_KEY 并去掉 Chat 格式声明，Claude Code 直连网关，不再需要路由接管、不再显示「需要路由」徽章。Claude Desktop 依设计保持代理模式（它自己不能改模型名），但代理现在透传 Anthropic Messages 而不是转成 OpenAI Chat。Codex 侧预设还把 DeepSeek V4 系模型的上下文窗口填到 1,048,576，Codex 不再围着 128K 回退值自动压缩。（#6171、#6196）
+  供应商表单一致性打磨
+  一轮贡献者主导的全应用供应商对话框对齐：Grok Build 与 Claude Desktop 表单搬上与其他应用相同的玻璃卡片；子分区共享同一套左规线层级；空配置编辑器收缩到三行而不是空占 6–14 行；Hermes 与 OpenClaw 的模型编辑器改为可展开详情的紧凑行并补上无障碍标签（展开状态改用稳定行键，删除模型不再让错误的行保持展开）；复选框统一为一个原生组件；Claude 表单的「API 格式」改名「上游格式」并逐选项说明哪些格式需要路由接管。另外，主面板供应商卡片上的合作伙伴星标已移除——合作伙伴标识只保留在预设选择器里。（#6198–#6201、#6203–#6208）
+  Claude Desktop：连接模式改为下拉选择、两套模型列表互不覆盖
+  直连与模型映射改为带标签的下拉选择而不是开关；来回切换时各模式保留自己的模型行；直连模式的模型列表常驻显示、不再藏在「高级」折叠里；选择直连预设会预填其模型列表而不是丢弃。（#6208）
+  Grok Build 表单重建在 Codex 布局上
+  Grok Build 供应商对话框现在渲染与 Codex 共享的字段集——端点、密钥、默认模型、含上游格式/思考/User-Agent 的高级区——文案全程 Grok 化（一个 follow-up 抓住了对齐时漏进来的五处 Codex 措辞）。独立的「API Backend」与「客户端模型档案」输入框移除：客户端一律讲 Responses——Chat 或 Anthropic 上游需要转换时对着本地代理、否则直连上游——上游协议经高级 → 上游格式表达；经表单保存会把存储配置的 api_backend 钉为 responses，当前供应商立即写入 live 配置、其余供应商在下次切换时生效——见升级提醒。（#6427、#6511）
+  Kimi 上游改为干净透传
+  应 Moonshot 方面要求，代理不再向 Kimi/Moonshot 端点的工具调用历史注入占位思考块、也不再发出非标准的 reasoning_content 字段——其网关已不再要求思考回放，注入的占位符反而扰乱模型思维链。Kimi 路由上的工具调用历史原样转发（代理流水线其余部分不变），对存量供应商立即生效。DeepSeek 与 MiMo 保留该行为——那是文档明载的服务端要求。
+  DeepSeek V4 按新峰值档牌价重定价、Gemini 3.7 Flash 播种
+  DeepSeek 于 2026-08-16 引入峰谷计价并大幅上调：deepseek-v4-flash（及其 -0731、deepseek-chat、deepseek-reasoner 别名）的内置价从每百万 token 输入/输出 $0.14/$0.28 调至 $0.44/$1.32、缓存读取 $0.014；deepseek-v4-pro 从 $0.435/$0.87 调至 $1.32/$3.96、缓存读取 $0.044。价格表没有时段维度，刻意录入峰值档——高峰时段（北京 9:00–12:00、14:00–18:00）与工作时间重合；一天中其余十七个小时的用量读数因此约为实际账单的两倍。守护式修复会迁移仍持有旧内置价的数据库；你自己改过的价格绝不触碰。gemini-3.7-flash 按介绍价 $0.75/$3.75（缓存读取 $0.075）播种，2027 年起恢复牌价；gemini-3.6-flash 未调整——它没有拿到促销价。
+  其他变更
+  - BytePlus 预设切换到原生 Responses：BytePlus 自家 Codex 指南在预设所用端点上配置 wire_api = "responses"，预设遂与境内的火山兄弟预设一致声明原生 Responses，并预填文档化的 low/medium/high 档位。
+  - Codex 表单移除 Goal 模式开关：codex-cli 0.147.0 起默认启用 goals，开关已具误导性——取消勾选会删掉配置行、进而回落为开启，界面显示关闭而功能仍在。现在无需任何配置；你此前写下的 goals = true 留在 config.toml 里，无副作用。
+  - 项目 Profile 变更触发自动同步：WebDAV/S3 自动同步的触发表从未加入 profiles 表，Profile 编辑只有蹭到其他表变更才会上云；两份传输各自的触发表合并为一份共享清单并纳入 profiles。（#6147）
+  - 合作伙伴清单维护：RunAPI 预设迁移到其新域名 runapi.host（预设类型支持处保留旧域名作后备端点）；PPIO 列为项目赞助商。
+  修复
+  Windows：WSL 路径上无法更新配置（v3.19.2 回归）
+  v3.19.2 把 Windows 原子写切换到 ReplaceFileW，而 WSL 文件系统以 ERROR_NOT_SUPPORTED (50) 拒绝它——rename 回退只在 NotFound 时触发，于是 \\wsl.localhost / \\wsl$ 路径上任何替换已有 live 配置的写入都直接失败：存量供应商无法更新或切换（只有配置文件的首次创建——缺失目标本就触发回退——仍然可用）。错误 50 现在落入 WSL 接受的 rename 路径。仅 v3.19.2 受影响；该版本内无任何绕过手段，受影响用户请直接升级。（#6232、#6224、#6219、#6188、#6247）
+  Windows：CLI 检测终于和终端看到的一致
+ReleaseNotesUrl: https://github.com/farion1231/cc-switch/releases/tag/v3.20.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

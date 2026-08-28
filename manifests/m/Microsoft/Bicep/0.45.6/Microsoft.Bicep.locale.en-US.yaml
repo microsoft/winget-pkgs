@@ -1,0 +1,125 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Microsoft.Bicep
+PackageVersion: 0.45.6
+PackageLocale: en-US
+Publisher: Microsoft Corporation
+PublisherUrl: https://github.com/Azure/bicep
+PublisherSupportUrl: https://github.com/Azure/bicep/issues
+PrivacyUrl: https://privacy.microsoft.com/privacystatement
+Author: Microsoft Corporation
+PackageName: Bicep CLI
+PackageUrl: https://github.com/Azure/bicep
+License: MIT
+LicenseUrl: https://github.com/Azure/bicep/blob/HEAD/LICENSE
+Copyright: Copyright (c) Microsoft Corporation.
+ShortDescription: A declarative language for describing and deploying Azure resources
+Description: |-
+  Bicep is a Domain Specific Language (DSL) for deploying Azure resources declaratively. It aims to drastically simplify the authoring experience with a cleaner syntax, improved type safety, and better support for modularity and code re-use. Bicep is a transparent abstraction over ARM and ARM templates, which means anything that can be done in an ARM Template can be done in Bicep (outside of temporary known limitations). All resource types, apiVersions, and properties that are valid in an ARM template are equally valid in Bicep on day one (Note: even if Bicep warns that type information is not available for a resource, it can still be deployed).
+  Bicep code is transpiled to standard ARM Template JSON files, which effectively treats the ARM Template as an Intermediate Language (IL).
+Moniker: bicep
+Tags:
+- arm-template
+- azure
+ReleaseNotes: |-
+  Highlights
+  - [Experimental] OCI registry support for Bicep extension publishing (#18956, #20032)
+    Publishing to non-ACR registries is now supported with the ociEnabled experimental feature enabled. Full documentation available here.
+    Example usage - publishing a module to GitHub Container Registry:
+    bicep publish ./main.bicep --target br:ghcr.io/myorg/modules/storage:v1
+    Example usage - consuming a module from GitHub Container Registry:
+    module storage 'br:ghcr.io/myorg/modules/storage:v1' = {
+      params: {
+        // ...
+      }
+    }
+  - @retryOn decorator is now GA! (#19988)
+    Use the @retryOn decorator to retry a resource deployment if the deployment hits a specific error code. You can also specify how many times this retry should happen.
+    Example usage:
+    @retryOn(['ServerError'], 1)
+    resource sqlServer 'Microsoft.Sql/servers@2021-11-01' = {
+      name: 'sql-server-name'
+      location: 'polandcentral'
+    }
+  - [Bicep console] Add line navigation features, and undo+redo handling (#19992, #19996)
+    Demo Video
+  - Inherited parameters are now optional in extended parameters files (#19698)
+    Example usage:
+    - shared.bicepparam
+      using none
+
+      // These 3 parameters are permitted, even though they're unused in main.bicep
+      param location = 'switzerlandnorth'
+      param customerId = '12345'
+      param namePrefix = 'contoso'
+    - main.bicepparam
+      using './main.bicep'
+      extends './shared.bicepparam'
+
+      param rgName = '${base.namePrefix}-infra'
+    - main.bicep
+      param rgName string
+  - Publish the language server as a NuGet dotnet tool (#19976)
+    It's now possible to run the Bicep Language Server with the following command:
+    dnx -y Azure.Bicep.LangServer
+  - Add secure-params-in-parameters-file linter rule (#20021)
+    The following usage pattern will be flagged:
+    // main.bicep
+    @secure()
+    param secureParam string
+    param insecureParam string
+    // main.bicepparam
+    using 'main.bicep'
+    param secureParam = 'MYSECRET'
+    param insecureParam = secureParam  // <-- now flagged (Warning)
+  - Add no-hardcoded-outputs linter rule (defaults to "off") (#19994)
+    The following usage pattern will be flagged:
+    output apiVersion string = '2024-01-01'
+    And given an automatic fix:
+    @export()
+    var apiVersion = '2024-01-01'
+  - Bicep RPC Client: Implement pooled client factory (#19886)
+    Instead of creating a new Bicep client for each call to Initialize, this factory manages a pool of clients with multiplexed connections, making it more efficient for use across multiple threads.
+    Example usage:
+    using var factory = new PooledBicepClientFactory();
+
+    using var bicep = await factory.Initialize(new() {
+        BicepVersion = "0.45.6"
+    });
+  Features and Bug Fixes
+  - Show version-specific docs links on resource hovers (#20016)
+  - Display nested operations in local deploy CLI (#19974)
+  - Display nested errors in local deploy (#19983)
+  - Make REPL load-function output locale-invariant for numeric values (#19752)
+  - Handle invalid json parameters files in the deployment pane (#19838)
+  - Improve inline type property decorator completion logic and add tests (#19174)
+  - Fix build-params crash for inherited object params in extended bicepparam files (#19895)
+  - Fix discriminated union IntelliSense for root-level params in .bicepparam files (#19987)
+  - Validate instance function call placement (#19980)
+  - Fix description not showing for template spec module (#20026)
+  - Fix force restore command to show picklist if active file is not a bicep file or no file is open (#20029)
+  - Emit warning comment when parameter names are renamed during decompilation (#19977)
+  - any? property and parameter incorrectly marked as required (#19990)
+  - Add '=' completion after module path string (Ctrl+Space) (#20022)
+  - Add warning when decompiling a bicep generated ARM template (#20028)
+  - Fix nested resource reference completions (#20017)
+  - Fix invalid rename location errors (#20015)
+  - Fix resource methods on aliased collection elements (#20019)
+  - Fix Bicep playground WASM file handling (#20023)
+  - Fix escape sequence semantic highlighting (#19975)
+  - Block non-pure functions in exported declarations (#20025)
+  - Replace BCP Error with Warning for Nullable Types (#20024)
+  - Allow readable resource properties in user-defined functions (#19979)
+  - Various improvements to the Visualizer rendering logic (#19757, #19792, #19884, #19937, #19939)
+  - Add Azure visualizer resource icons (#20014)
+  Community Contributions
+  - Fix local deploy compilation for large module templates (#19754) - thanks @GABRIELNGBTUC !
+  - fix: bicep console multi-line user-defined type input handling (#19699) - thanks @johnlokerse !
+  - Added option to exit Bicep console with CTRL+C (#19995) - thanks @johnlokerse !
+  - Allow roleDefinitions in resource ID lint rule (#19888) - thanks @nkgotcode !
+  - Support for filesystem-based mocks of registry aliases (#19452) - thanks @SimonWahlin !
+  - fix: include deploy pane dropdown defaults (#19793) - thanks @nanookclaw !
+ReleaseNotesUrl: https://github.com/Azure/bicep/releases/tag/v0.45.6
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

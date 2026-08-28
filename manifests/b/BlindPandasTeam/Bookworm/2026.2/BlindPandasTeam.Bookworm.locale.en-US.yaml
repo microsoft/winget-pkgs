@@ -1,0 +1,92 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: BlindPandasTeam.Bookworm
+PackageVersion: '2026.2'
+PackageLocale: en-US
+Publisher: BlindPandasTeam
+PublisherUrl: https://github.com/blindpandas
+PublisherSupportUrl: https://github.com/blindpandas/bookworm/issues
+PackageName: Bookworm
+PackageUrl: https://github.com/blindpandas/bookworm
+License: GPL V2
+LicenseUrl: https://github.com/blindpandas/bookworm/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2024 Blind Pandas and Bookworm contributors.
+ShortDescription: The universally accessible document reader
+Tags:
+- a11y
+- accessibility
+- book
+- document
+- e-book
+- epub
+- nvda
+- pdf
+- python
+- reader
+- sapi5
+- windows
+ReleaseNotes: |-
+  What's Changed
+  Localization Updates
+  - Finnish: Updated the translation, documentation, and user guide. (@jkinnunen, #372, #378, #382, #411)
+  - Spanish: Updated the translation for the 2026 message catalog. (@ericdq, #371)
+  - Vietnamese: Added the Vietnamese translation and user guide. (@nguyenanhduc09, #375)
+  - Traditional Chinese: Added the zh_TW translation. (@PeterDaveHello, #388)
+  - Simplified Chinese: Updated the user guide and message catalog, exposed additional user-facing messages for translation, and translated the new strings. (@cary-rowen, #399, 0962a9c, 0ccb20a, 5f11553)
+  - English documentation: Updated the README and user guide to cover the current feature set. (@cary-rowen, #397)
+  Features & Enhancements
+  - Added embedded image navigation for HTML, Markdown, EPUB, MOBI, AZW, and AZW3 documents. (@cary-rowen, #377, #381, #386, #395, #396)
+    - Images can be opened with Ctrl+Enter in a viewer with zoom, copy, save, and keyboard close actions. Available shortcuts are shown in the toolbar tooltips.
+    - Web documents can open remote images.
+    - Navigation can play an optional image sound and, by default, includes images with empty alternative text.
+  - Added AZW file support to the MOBI document handler. (@cary-rowen, cfac438)
+  - Migrated browseable messages and table views from the legacy HTML dialog to WebView. (@cary-rowen, #400)
+    - Retains tables, MathML, ARIA attributes, and safe presentation styles, with text wrapping, keyboard actions, and external link handling.
+    - Independent message windows now close with Bookworm, and empty table captions no longer produce malformed window titles.
+  Reading, Speech & OCR
+  - Replaced the OneCore speech engine's neosynth dependency with PyWinRT. (@cary-rowen, #401)
+    - Fixed voice selection, language switching, and restoration of the active voice profile.
+    - Fixed playback, highlighting, paragraph navigation, and continuous reading across pages and sections.
+  - Improved automatic OCR during continuous reading: following pages are prepared in advance, reading waits for OCR when needed, obsolete results no longer move focus, and canceling a dialog no longer resets the open book's OCR state. (@cary-rowen, #402)
+  - Windows OCR now uses PyWinRT directly instead of docrpy and preserves line breaks in recognized text. (@cary-rowen, #403)
+  Document Handling & Navigation
+  - Fixed search and search-result navigation. (@cary-rowen, #379, #380)
+    - Section-limited search now respects the selected table-of-contents section in single-page documents.
+    - Find Next and Find Previous move between individual matches, including matches on the same line and matches selected from the Search Results dialog. Reaching the first or last match no longer moves the cursor and now produces feedback.
+  - Improved Wikipedia document handling: desktop and mobile article URLs now load through the MediaWiki API, article structure is retained, same-article section links stay in the open document, and unmatched table links are no longer exposed as activatable links. (@cary-rowen, #384)
+  - Fixed EPUB and HTML link resolution and structural navigation. (@cary-rowen, 8c37cae, 0552d3c, faa2c28, #414)
+    - Internal links prefer exact targets, and HTML links are matched only to annotations in the corresponding anchor element.
+    - Navigation to multiline elements uses the line containing the start of the element.
+    - Table-of-contents entries and internal links resolve when EPUB navigation files and chapters use different path bases; ambiguous matches are left unresolved.
+  - Fixed highlight and annotation navigation: commands continue from the correct edge of a selection, Next Highlight returns the nearest following highlight, and extending a highlight backwards no longer creates an overlap. (@cary-rowen, 5bc8217, 9e7f534, #383)
+  - Fixed unintended reading-position changes. (@cary-rowen, #391, #392)
+    - Books opened from the bookshelf restore their saved position when the URI contains fallback_uri.
+    - Moving focus to the table of contents no longer moves the reading cursor to the start of the current section.
+  - Added migration support for reading positions and annotations stored by Bookworm 2026.1. (@cary-rowen, #409)
+    - Reading positions, bookmarks, notes, and quotes are migrated when the document text differs only in whitespace or embedded-image markers.
+    - If visible text has changed, legacy annotations remain available for viewing, export, and manual repositioning with Relocate Here.
+    - Replacing a file at the same path no longer merges reading history from different document contents.
+  > Upgrade note: Bookworm 2026.2 profiles can contain more than one content record for the same file path. Once this occurs, do not open that profile with Bookworm 2026.1 or earlier; those versions cannot safely represent the new records.
+  General Fixes & Improvements
+  - Reopening an unchanged EPUB now reuses cached preprocessed HTML instead of repeating that work. (@cary-rowen, #416)
+  - Improved Windows RichEdit performance and text handling. (@cary-rowen, #387, #413)
+    - Document loading, font changes, and zoom use native formatting while preserving fallback fonts for mathematical symbols, emoji, Arabic, and CJK text.
+    - Fixed cursor and saved-position mapping around emoji and other characters outside the Basic Multilingual Plane.
+  - Restored compatibility with the Windows over-the-air update bootstrap. (@cary-rowen, f134d98)
+  Dependency & Tooling Updates
+  - Updated application dependencies. (@cary-rowen, #404, #405)
+    - Applied available security updates; DiskCache remains on its latest release because its remaining advisory has no fixed version.
+    - Updated 16 compatible dependencies and replaced the withdrawn XlsxWriter 3.2.3 release with 3.2.9.
+  - Updated CI dependencies and setup: moved NSIS installation to Scoop and updated the NSIS, checkout, and Python setup actions. (@dependabot, @cary-rowen, #376, #393, #398, #415)
+  - Improved release automation. (@cary-rowen, c830de1, 2a9b21a, 68f5329)
+    - Added a manual Winget publishing workflow and configured its fork account.
+    - Release metadata updates now merge the generated channel into main without removing existing channels.
+  - Development dependency installation no longer fails when the optional offline_run setting is absent. (@cary-rowen, 97ef669)
+  New Contributors
+  - @nguyenanhduc09 (#375)
+  - @PeterDaveHello (#388)
+  Full Changelog: 2026.1...2026.2
+ReleaseNotesUrl: https://github.com/blindpandas/bookworm/releases/tag/2026.2
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

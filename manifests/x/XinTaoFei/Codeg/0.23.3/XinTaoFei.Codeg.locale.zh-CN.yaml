@@ -1,0 +1,41 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.12.0.schema.json
+
+PackageIdentifier: XinTaoFei.Codeg
+PackageVersion: 0.23.3
+PackageLocale: zh-CN
+ShortDescription: 在一个地方聚合并浏览 AI 编程代理会话（如 Claude Code、Codex、Gemini CLI 等）。支持桌面应用、自建服务器或 Docker 部署。
+Description: Codeg（Code Generation，代码生成）是一款企业级多代理编码工作区。它将本地 AI 编程代理（包括 Claude Code、Codex CLI、OpenCode、Gemini CLI、OpenClaw、Cline 等）统一集成于桌面应用、独立服务器或 Docker 容器中，支持通过任意浏览器进行远程开发；具备对话聚合、并行 Git 工作树开发、MCP/技能管理、聊天频道交互（Telegram、飞书、iLink 等），以及集成的 Git/文件/终端工作流。
+Tags:
+- claude-code
+- codex
+- gemini-cli
+- 人工智能
+- 代码
+- 大语言模型
+- 智能体
+- 编程
+- 聊天机器人
+- 自主智能
+ReleaseNotes: |-
+  这一版我们重点完善了任务的后续沟通，修正了用量与耗时统计，并打磨了桌面端和 Web 端的一批日常交互。
+  新增
+  - 按明确意图继续评审中的任务。 任务进入评审后，可以选择「修改返工」「继续推进」「提问答疑」或「自查验证」。提问时会明确要求 agent 只回答、不修改文件；自查验证无需补充说明也能直接发起。
+  - 重试、重新排队和取消时可补充上下文。 重试或重新排队时，可以附上一段说明并随下一轮提示词交给 agent；取消或放弃任务时，也可以将原因记录在进度时间线中。这些输入框现在支持完整编辑能力，包括 @ 引用、agent 的斜杠命令和 Codex 的 $ skills。
+  - 无代码变更的任务可直接完成。 如果任务只是回答问题或检查现有工作，并未产生文件改动，评审时可以直接标记完成，无需创建空合并，同时仍可选择是否保留工作树。
+  改进
+  - 任务看板优先展示最新动态。 所有看板列都会将最近更新的任务排在前面，刚移动、重试或完成的任务更容易找到。
+  - 运行中的 Claude 能更可靠地接收追加指令。 更新后的 Claude Code ACP 适配器可以立即接收运行中发送的指令，并在后续工作真正结束前保持任务处于执行状态。
+  - ACP 排障日志更加完整。 并发提示被拒绝或扩展通知未处理时，现在会留下更清晰的诊断信息——感谢 @ijpq 在 #415 中贡献这项改进。
+  - 内置 agent 版本更新。 Claude Code ACP 升级至 0.65.0，OpenCode 升级至 1.18.14，Cline 升级至 3.0.50，Kimi Code 升级至 0.33.0。
+  修复
+  - Token 用量与 agent 的实际统计保持一致。 Claude 的同一次 API 调用不再重复计数，Codex 的工具调用轮次不再遗漏，Claude 子智能体的消耗也会纳入统计；用量日期改为按回合开始时间归档。升级后会自动重新计算一次历史用量。
+  - 各类 agent 的执行耗时更加准确。 Codex 的多阶段回合不再重复累加耗时，Gemini 不再将两次消息之间的等待时间算入执行时长，Claude 回复结束后也能保留正确耗时。
+  - 删除任务工作树后，侧边栏立即同步。 已移除的工作树不再残留到下次刷新，属于该工作树的本地标签页也会一并关闭。
+  - Web 环境下的链接和弹窗可以正常打开。 Markdown 链接与应用弹窗在 Safari、WebKit webview 和远程桌面模式下不再被静默拦截。
+  - 隐藏的编辑器不再穿透页面。 Git 差异视图不会再透过任务看板、自动化、Token 用量页面或会话遮罩显示出来。
+  - 斜杠命令菜单不再被对话框裁切。 命令建议可以越过滚动容器，在空间不足时自动调整位置，并且在弹窗中保持可点击。
+  - 自定义 Codex 认证设置不再被覆盖。 保存 Codex 或模型提供商设置时，会保留用户明确配置的 requires_openai_auth = false。
+  - Claude 会话不再显示内部中断提示。 追加运行中指令时产生的 [Request interrupted by user] 等内部记录，不会再被误显示为用户发送的消息。
+ManifestType: locale
+ManifestVersion: 1.12.0

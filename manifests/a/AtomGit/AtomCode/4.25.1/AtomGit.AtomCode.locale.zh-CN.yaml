@@ -1,0 +1,103 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: AtomGit.AtomCode
+PackageVersion: 4.25.1
+PackageLocale: zh-CN
+Publisher: 重庆开源共创科技有限公司
+PublisherUrl: https://atomgit.com/
+PublisherSupportUrl: https://atomgit.com/atomgit_atomcode/atomcode/issues
+PrivacyUrl: https://docs.gitcode.com/docs/help/home/protocol/privacy-policy
+Author: 重庆开源共创科技有限公司
+PackageName: AtomCode
+PackageUrl: https://atomcode.atomgit.com/
+License: MIT
+LicenseUrl: https://atomgit.com/atomgit_atomcode/atomcode/blob/main/LICENSE
+Copyright: Copyright (c) 2026 Yubang Xu
+CopyrightUrl: https://docs.gitcode.com/docs/help/home/protocol/ai-privacy-policy
+ShortDescription: AI 编程助手 在你的终端中运行
+Description: Claude Code / Cursor Agent 的开源平替，住在你的终端里。连接任意 OpenAI 兼容大模型，自主读文件、改代码、跑测试、自我验证 —— 用 Rust 构建。
+Tags:
+- 人工智能
+- 代码
+- 大语言模型
+- 智能体
+- 编程
+- 聊天机器人
+- 自主智能
+ReleaseNotes: |-
+  AtomCode v4.25.1 Release Notes
+  发布日期：2026-06-12
+  v4.25.1 聚焦于图片附件与推理强度控制、可插拔搜索引擎后端、进程内 daemon 模式、TUI /view 文件查看器、微信桥接（Milestone 1/2），以及大量 Agent 健壮性与 WebUI 交互修复。
+
+  ✨ 新增功能（Features）
+  /view 文件查看命令
+  - /view <filepath> 命令：在 TUI 浮层窗口中查看文件内容，支持限界读取（8 MiB）、溢出裁剪、resize 后重绘，拒绝非普通文件（FIFO/设备）
+  WebUI 增强
+  - 图片附件：聊天中支持上传/粘贴图片，以 base64 发送请求，在用户消息中显示图片预览
+  - 推理强度选择器：新增推理强度（Reasoning Effort）选择器 UI，支持默认/High/Max 三级，通过 /live/reasoning_effort 接口同步
+  - ANSI 颜色渲染：Markdown 代码块支持 ANSI 转义序列渲染，添加 16 色 CSS 样式
+  - 本地斜杠命令：新增 login/logout/whoami/status/config/reload 等本地斜杠命令，带 display_messages 持久化
+  - 动态技能菜单：daemon 注入的动态技能出现在 / 斜杠菜单中
+  daemon / 服务器
+  - 进程内 daemon 模式：atomcode daemon 不再依赖同目录的 atomcode-daemon 独立二进制，改为进程内直接启动 Web 服务器（类似 /webui 模式），支持 --idle-timeout 及 ATOMCODE_DAEMON_IDLE_TIMEOUT 环境变量
+  网络工具
+  - 可插拔 web_search 后端：DuckDuckGo 不再是硬编码后端，新增 [web_search] 配置块，支持 provider = "exa" | "duckduckgo"，默认 Exa（无需 VPN 即可访问）；搜索失败时优雅降级引导至 web-access skill
+  推荐 / 邀请系统
+  - 邀请链接路径格式：支持 /invite/{code} 路径格式的邀请链接（兼容原有查询参数），生成链接时自动使用新格式
+  - 数据更新时间统一：面板数据使用 API 返回的 refreshed_at 统一展示更新时间，移除硬编码的"刚刚"
+  - 收款信息弹窗：新增收款信息查看/编辑弹窗，支持 light mode 样式，toast 通知移至顶部
+  TUI 交互提升
+  - 工具审批默认 Enter：审批提示中 Allow(once) 芯片标记为绿色 ↵ 默认入口，用户可直接 Enter 批准，无需寻找快捷键
+  - emoji 表格对齐：遗留符号区 emoji（☀☎✂等）从 1 列拓宽至 2 列，修复 Markdown 表格中 emoji 导致的错列；跨平台自适应（Windows legacy conhost 保持 1 列）
+  微信桥接（Milestone 1/2）
+  - 微信通道：新增 WeChat Instant Link (iLink) 桥接通道，包含扫码登录、消息透传、会话/权限状态管理、SSE 流式通信、审批权限 FSM 编排等基础设施
+  上下文管理
+  - collapse_committed 压缩：新增幂等、已提交的 collapse_committed 上下文压缩策略（替代旧的 microcompact），更安全地实现缓存友好的历史压缩
+
+  🛠 修复（Fixes）
+  Agent / 工具
+  - plan mode 回合提示：每轮注入 turn_reminder，确保模型只规划不实现（不再在回复中写入完整代码实现）
+  - 推理思考持久化：修复 DeepSeek V4 Flash 最终回答显示 "(no reasoning recorded)"——真正保存推理内容，消除上下文中的占位符污染
+  - 余额不足 fail-fast：上游返回余额不足/insufficient_quota/402 时立即报错并透传真实原因，不再重试 3 次
+  - web_fetch SSRF 加固：修复 DNS 重绑定 TOCTOU 漏洞——通过 resolve_to_addrs 锁定已验证 IP；阻止 IPv4 兼容 IPv6 地址（::127.0.0.1）绕过安全检查
+  - @-mention 文件索引 CPU 100%：限制递归遍历上限为 50,000 条目，跳过 home 目录/文件系统根目录的完整遍历
+  - 上下文压缩越界：修复 keep_recent_turns=0 时 compact_old_tool_results_in_place 数组越界 panic
+  TUI / 终端渲染
+  - @-mention 文件索引 TTL 刷新：新增 3 秒 STALE_TTL 机制，会话中新建的文件可在 @ 菜单中被发现，不再需要 /cd 重启
+  - 审批芯片真彩色：Allow/Always/Deny 芯片使用精确真彩色 RGB（绿色 #30D158 / 蓝色 #2BB8E0 / 红色 #FF453A），消除终端主题色板导致的辨识模糊
+  - 工具名换行高亮：审批提示中换行继续行正确追踪工具名边界，不丢失粗体高亮
+  - 审批耗时行内换行：修复窄窗口下工具耗时行换行时丢失时长显示的问题
+  - /view 文件查看器加固：拒绝 FIFO/设备文件、上限 8 MiB 磁盘读取、长文件名溢出裁剪、终端 resize 后覆盖重绘
+  - JediTerm 整行紧凑重绘：修复 DevEco 终端 CJK 行列渲染
+  命令 / CLI
+  - /wechat 命令门控：修复插件命令 /wechat（keyed weixin:wechat）因精确键匹配失败而不触发、泄漏为纯文本的问题，改用 resolve() 支持 bare-name 识别
+  - Always 权限作用域：edit_file / write_file / search_replace 的 Always 批准从全局缩窄为特定文件——按 [A] 只跳过对同一文件的重复审批
+  - Windows verbatim 路径哈希：消除 \\?\ 前缀导致的会话路径不统一，WebUI 与 TUI 会话可正确归入同一 bucket
+  - CLI 遥测与换行：修复异常退出路径上遥测未刷新、EOF 换行缺失
+  WebUI / VSCode 扩展
+  - LiveSession 数据丢失：交换 _sessionRuntimes.delete() 与 _client.deleteSession() 顺序——先执行服务端删除，成功后清理本地状态，防止网络失败时数据丢失
+  - LiveSession 遥测 mode：修复 /live 端点未提取 SessionMode 导致 telemetry envelope.mode 始终为 None
+  - ECONNREFUSED 重连竞态：重连后检查 controller.signal.aborted 避免竞争条件
+  - 流错误恢复：onError 中设置 srt.errorMessage 以支持持久化流错误恢复
+  - 闭包陈旧引用：sendMessage 中统一使用 stateRef.current 避免闭包捕获过期状态
+  - artifact 事件路由：onArtifactStart/Content/End 改为定向发送至对应面板，而非广播
+  - 会话切换同步：修复 panelReady 与 sessionId 绑定在会话切换时的同步问题
+  - 消息加载竞态：引入 messagesPromise 异步缓存避免竞态条件
+  - 面板控制事件广播：clearChat/generationStopped/focusInput 改为广播发送，确保多面板场景一致
+  daemon / 服务器
+  - M1/M2/M3 校准：构建 ctx 使用实际 provider_name 而非 config.default_provider，非默认模型获得正确上下文窗口策略；LiveSession 保留 turn_stats；延迟创建 snapshot 避免长会话 O(N) 克隆
+  - post_turn hook 上下文：补充 session_id 和 turn_number 字段
+  - 会话快照持久化：修复 Web 工具中会话快照的持久化保存
+  其他
+  - 邀请页文案：精简京东 E 卡规则文案，更新奖励计算周期为每月结算
+
+  📚 文档（Docs）
+  - README 命令列表：中英文 README 新增 /view 命令条目
+  - 站点文档：中英文斜杠命令页面（slash-commands.html）新增 /view 命令说明
+ReleaseNotesUrl: https://atomgit.com/atomgit_atomcode/atomcode/releases/v4.25.1
+Documentations:
+- DocumentLabel: 文档
+  DocumentUrl: https://atomcode.atomgit.com/docs/zh/index.html
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
