@@ -1,0 +1,70 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: sluicesync.sluice
+PackageVersion: 0.133.0
+PackageLocale: en-US
+Publisher: sluicesync
+PublisherUrl: https://sluicesync.com
+PackageName: sluice
+PackageUrl: https://sluicesync.com
+License: Apache-2.0
+LicenseUrl: https://github.com/sluicesync/sluice/blob/main/LICENSE
+Copyright: sluicesync
+ShortDescription: Open-source MySQL <-> Postgres database migration and continuous-sync (CDC) tool
+Description: sluice is an open-source database migration and continuous-sync (CDC) tool covering MySQL and Postgres in all four directions.
+Moniker: sluice
+Tags:
+- database
+- migration
+- cdc
+- mysql
+- postgres
+ReleaseNotes: |-
+  **Trigger-CDC can now capture replicated writes.** `sluice trigger setup --capture-replicated-writes` (ADR-0185) makes the `postgres-trigger` engine capture DML applied under `session_replication_role = 'replica'` — the writes a plain trigger install is silently blind to — turning the locked-down-primary → native-subscriber → sluice fan-out into a supported topology. The echo-loop hazard that made this dangerous is refused loudly, and the whole surface was value-fidelity-reviewed against real Postgres before the tag. Plus the honest refusal message for lossless type changes, forensic hardening, and the new notes-claims publish gate born from the v0.132.1 incident. Drop-in from v0.132.2.
+
+  ## Features
+
+  **`trigger setup --capture-replicated-writes` (ADR-0185).** The opt-in installs every capture trigger pair `ENABLE ALWAYS`, so writes applied by native logical-replication apply workers — and by privileged replication tools — are captured instead of silently skipped. Ground-truthed on a real publisher→subscriber pair：replicated INSERT, UPDATE, DELETE **and TRUNCATE** all reach the change log (the subscriber's TRUNCATE apply path fires the always-enabled statement trigger — observed, not assumed). The safety half: capturing replicated writes on a database that a sluice sync is itself applying into would loop the captured echoes, so that combination refuses loudly with the new **`SLUICE-E-CDC-TRIGGER-ECHO-LOOP`** — keyed on the upstream sync's control-table *existence* rather than its liveness, because a paused upstream resumes straight into the loop. The chosen posture is recorded in the install's meta table and the capture-shape door now verifies trigger enablement *matches* it in both directions, so a hand-flipped trigger (either way) is a loud refusal at the next stream open, with re-running `trigger setup` as the one repair. Without the flag, nothing changes: plain installs stay origin-only and the existing capture-gap WARN now steers to the new flag. Re-running setup without the flag deliberately reverts to origin-only.
+
+  **Upgrade-in-place is pinned.** Existing pgtrigger installs (whose meta table predates the posture column) open unchanged as origin-only — the tolerant read was driven against a genuine pre-upgrade table shape in the pre-tag value-fidelity review, and its invariant now has an integration pin that fails with the exact `42703` false-refuse if the tolerance is ever "simplified" away. The review's full matrix (old binary vs new table, new binary vs old table, interrupted-migration shapes, NULL postures) came back safe in every cell.
+
+  ## Fixed
+
+  **The unforwardable-type-change refusal is honest about lossless shapes.** v0.132.1's projection gate correctly refuses `ALTER COLUMN TYPE` shapes it cannot forward, but two of those are genuinely lossless — an unbounded `varchar ⇄ text` swap and interval precision *widening*, where Postgres performs no table rewrite at all — and the refusal claimed a silent divergence that never happened. Those shapes now get an honest message：no rewrite occurred, the change simply can't be forwarded — apply the same ALTER on the target via the drained model. Refuse/pass behavior is unchanged for every shape (pinned both directions), and a pass-without-forward allowlist is sketched in ADR-0091 for if an operator ever hits this in practice. (The common `varchar(n) → text` migration was never affected — it forwards and converges.)
+
+  **The signature-heal log is hardened**：a torn prior write can't fuse two records, a pathologically long verify-failure line reads back (1 MiB cap, loud refusal past it — never a skip), and the forensic-evidence rationale is documented at the field it protects.
+
+  ## Internal
+
+  **The notes-claims-vs-tag-tree gate is built** (`scripts/check-notes-claims.sh`, publish sub-check 4b)：every load-bearing identifier a release's notes name must exist in the tag's tree before publishing — the mechanical ratchet from the v0.132.1 missed-landing incident, self-tested in both directions and run against these very notes. Also: pgtrigger's probe-timeout roster floor covers the new posture probe; the perf-parity matrix gains the ADR-0184 byte-size-estimator row; the pre-commit hooks warn on a golangci-lint version drifting from CI's pin; and the C-2 lane-divergence and A2 allowlist design decisions are recorded where the next reader will look.
+
+  ## Compatibility
+
+  Drop-in from v0.132.2 — no schema, format, or existing-flag change. The new flag is opt-in; the new error code fires only under that opt-in on a loop-risk topology. Existing pgtrigger installs are untouched (posture reads as origin-only; the meta-table migration happens only at the next `trigger setup` run).
+
+  ## Who needs this
+
+  • **Anyone who wants trigger-CDC from a replication target** (a subscriber database, a fan-out midpoint)：this release makes it a supported, opt-in topology — read the new section in the CDC streaming guide, and let the echo-loop refusal protect you from the one shape that must stay unsupported.
+  • **Operators who saw the `SILENT-CAPTURE-GAP RISK` WARN**：the WARN now names your remedy.
+  • Everyone else：upgrade normally; no action.
+
+  ## Install
+
+  ```
+  # Homebrew
+  brew upgrade sluice
+
+  # Scoop (Windows)
+  scoop update sluice
+
+  # Go
+  go install sluicesync.dev/sluice/cmd/sluice@v0.133.0
+  ```
+
+  Container images：`ghcr.io/sluicesync/sluice:0.133.0` (multi-arch; the image tag carries no `v` prefix).
+
+  **Full changelog:** https://github.com/sluicesync/sluice/blob/main/CHANGELOG.md
+ReleaseNotesUrl: https://github.com/sluicesync/sluice/releases/tag/v0.133.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
