@@ -1,0 +1,111 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: JohnMacFarlane.Pandoc
+PackageVersion: '3.11'
+PackageLocale: en-US
+Publisher: John MacFarlane
+PublisherUrl: https://github.com/jgm/pandoc
+PublisherSupportUrl: https://github.com/jgm/pandoc/issues
+Author: John Mac Farlane
+PackageName: Pandoc
+PackageUrl: https://pandoc.org/
+License: GPL-2.0
+LicenseUrl: https://github.com/jgm/pandoc/blob/master/COPYRIGHT
+Copyright: Copyright (C) 2006-2024 John MacFarlane <jgm at berkeley dot edu>
+CopyrightUrl: https://github.com/jgm/pandoc/blob/master/COPYRIGHT
+ShortDescription: If you need to convert files from one markup format into another, pandoc is your swiss-army knife.
+Tags:
+- converter
+- doc
+- docs
+- markdown
+- pandoc
+ReleaseNotes: |-
+  I'm pleased to announce the release of pandoc 3.11,
+  available in the usual places:
+  Binary packages & changelog:
+  https://github.com/jgm/pandoc/releases/tag/3.11
+  Source & API documentation:
+  http://hackage.haskell.org/package/pandoc-3.11
+  Some changes of note:
+  - A new `--math-method` option, which replaces the (now deprecated but
+    still functional) options `--mathml`, `--mathjax`, `--gladtex`,
+    `--katex`, `--webtex`. The `plain` style can now be specified
+    explicitly. In defaults files, `html-math-method` is now
+    `math-method` (though `html-math-method` will still work).
+  - `mathml` is now the default math-method.
+  - A new option `--completion={bash,zsh,fish}` generates completion
+    scripts for all three shells (see the manual for instructions on
+    how to use them). `--bash-completion` continues ot work, an alias of
+    `--completion=bash`.
+  - It is now possible to reset a Markdown example list counter (e.g.,
+    at the beginning of a chapter), using the syntax `(1@)` or
+    `(1@label)`.
+  - Enhanced support for RTL languages: RTL text direction now
+    works in ODT. In addition, setting `lang` at the document level
+    is now sufficient in Docx to make documents RTL.
+  - Fixed pandoc 3.8 regressions in syntax highlighting.
+  - Fixed a security-related bug in template fetching which
+    could result in a local file being fetched instead of a
+    remote one.
+  API changes:
+  - Text.Pandoc.Options: Rename HTMLMathMethod type to MathMethod.
+    Rename `writerHTMLMathMethod` field of WriterOptions to
+    `writerMathMethod`.
+  - Text.Pandoc.App: the `optHTMLMathMethod` constructor for OPt
+    is renamed to optMathMethod.
+  Thanks to all who contributed, especially new contributors Wrong-Code
+  and wzy.
+  Click to expand changelog
+  - Add --math-method option. This replaces (now deprecated but still functional) options --mathml, --mathjax, --gladtex, --katex, --webtex. The plain style can now be specified explicitly. In defaults files, html-math-method is now math-method (though html-math-method will still work).
+  - Make mathml the default math-method (#11751).
+  - Add --completion={bash,zsh,fish} (#8542, wzy). Make --bash-completion an alias of --completion=bash. See the manual for instructions on how to use these completions.
+  - Text.Pandoc.Options [API change]:
+    - Rename HTMLMathMethod type to MathMethod.
+    - Rename writerHTMLMathMethod field of WriterOptions to writerMathMethod.
+  - Markdown reader:
+    - Add a syntax (1@label) for resetting example list counter (#10940). This is needed often at the beginning of a chapter.
+  - MediaWiki writer:
+    - Put <nowiki> around possible URLs (#11834). Otherwise they get linkified automatically.
+  - Docx reader:
+    - Handle case where non-header rows come before header rows (#11833).
+    - Improve handling of tables with uneven rows (#11833).
+  - RTF Reader:
+    - Add support for nested tables (#11218, Alex).
+  - Typst reader:
+    - Remove handling of ‘block’ as an inline-level element (#11814).
+  - HTML reader:
+    - Handle pre without code (#11810). Preserve whitespace as nonbreaking spaces.
+  - ODT/OpenDocument writers:
+    - Support RTL text direction (#11301). RTL is now properly handled in these cases: dir: rtl (or ltr) in document metadata; an RTL lang in metadata (e.g. he, ar), unless overridden by dir; a dir attribute on a Div. Code blocks remain ltr regardless.
+    - Use style:language-complex rather than fo:language for RTL languages (#11301).
+    - Fix treatment of DefaultHighlighting (#11829).
+  - Docx writer:
+    - Initialize envLang from lang metadata (#11301). This ensures that setting lang will affect the whole document. Previously, setting lang to he was not sufficient to make the document RTL.
+  - JATS writer:
+    - Fix illegal use of p element inside p (#11809).
+  - Ms writer:
+    - Fix treatment of DefaultHighlighting (#11829). (Regression from 3.8.)
+  - ConTeXt writer:
+    - Fix bug in syntax highlighting (#11829). (Regression from 3.8.)
+  - Text.Pandoc.App.Opt:
+    - In Opt, change optHTMLMathMethod to optMathMethod. [API change]
+  - MSI installer: Fix upgrade detection for per-machine installations (#11827, Wrong-Code). Previously, registry records of previous versions were not being removed.
+  - Text.Pandoc.Templates:
+    - Fix bug in getTemplate. When calling fetchItem in getTemplate, we temporarily reset the stSourceURL in CommonState so that the template is sought locally. Previously, an exception in fetchItem would prevent stSourceURL from being set back to its original value. This could result in a local file being fetched instead of a remote one. Note that an exception is triggered when one uses e.g. --template default.html5; in that case getTemplate handles the exception by looking for the file in the user data directory. This patch fixes the bug so that the stSourceURL is reset regardless of whether fetchItem raises an exception. Thanks to Yingjie Su for identifying the problem.
+  - beamer template: remove spurious extra tableofcontents (#11819).
+  - Text.Pandoc.App.CommandLineOptions:
+    - Export OptionSpec, which can encode the type of completion needed by each option (wzy).
+  - Add new unexported module Text.Pandoc.Completion (wzy).
+  - Replace a use of nub with nubOrd.
+  - Use latest releases of djot, asciidoc, typst, texmath.
+  - MANUAL.txt:
+    - Add a note that thanks in typst doesn’t currently work (#11807).
+    - Note that sourcepos extension works for djot too.
+ReleaseNotesUrl: https://github.com/jgm/pandoc/releases/tag/3.11
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/jgm/pandoc/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
