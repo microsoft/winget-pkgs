@@ -1,0 +1,117 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: QZYH123.OrbCue
+PackageVersion: 0.2.5
+PackageLocale: zh-CN
+Publisher: orbcue
+PublisherUrl: https://github.com/QZYH123
+PublisherSupportUrl: https://github.com/QZYH123/OrbCue/issues
+Author: QZYH123
+PackageName: OrbCue
+PackageUrl: https://github.com/QZYH123/OrbCue
+License: MIT
+LicenseUrl: https://github.com/QZYH123/OrbCue/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 OrbCue contributors
+ShortDescription: 在 Windows 桌面上提醒你 AI 命令行助手需要你处理的悬浮小球
+Description: |-
+  同时开着几个终端里的 AI 助手，窗口一多就很难看出谁在干活、谁在等你。
+  OrbCue 在 Windows 桌面上放一个小球：orb 是形态，cue 是该你出手了。工作时只显示数量，需要你处理时才提醒。 点开小球是按项目分组的列表，点条目上的返回箭头可以跳回对应终端。命令行是 orb。
+  - 不读取对话、提示词、命令或代码，也不替你操作这些工具
+  - 默认不联网；状态只保存在本机当前用户目录
+  - 支持的命令行工具：
+  | 工具         | 命令                 |
+  | ------------ | -------------------- |
+  | Claude Code  | claude               |
+  | Grok Build   | grok                 |
+  | Codex        | codex                |
+  | Cursor Agent | agent / cursor-agent |
+  以上指的都是 CLI 版本。
+
+  它做什么、不做什么
+
+  做
+  - 多个工具共用一个小球。数字是「正在工作的主会话 / 当前列表里的主会话」，例如 2/5
+  - 等待输入、等待授权或失败时，弹一次系统通知并播提示音；正常完成只播提示音，不弹通知
+  - 在「连接」页接上本机已经装好的工具：不替换可执行文件，确认前会列出将要改的文件
+  - 从列表跳回终端。用 orb run 在 Windows Terminal 里开出的专属标签，可以精确回到那个标签
+
+  不做
+  - 不读取对话记录、提示词、命令、代码、终端输出或凭据
+  - 不扫描进程列表去猜测工具是否在工作
+  - 不替换工具的可执行文件；连接失败也不会下载或重装任何东西
+  - 不监听网络端口，不上传任何数据
+  - 面板不展示对话摘要，只显示工具名、所属项目和状态
+
+  界面
+  点小球展开面板；再点一次或点面板右上角 × 收起。托盘菜单可以「打开 OrbCue」、隐藏或显示小球、退出。
+  | 页面 | 作用                                                                                      |
+  | ---- | ----------------------------------------------------------------------------------------- |
+  | 小球 | 桌面常驻。数字是工作中 / 追踪中；? 表示有任务在等你，! 表示有失败。可拖到屏幕边缘贴成半圆 |
+  | 动态 | 当前会话列表，按项目分组，可筛选全部 / 工作中 / 未工作                                    |
+  | 审计 | 本次运行里最近的完成、失败、等待和关闭，最多 128 条，只在内存中，重启即清空               |
+  | 连接 | 列出本机检测到的工具，确认后连接或断开                                                    |
+  | 设置 | 外观、提示音、系统通知、开机自启、快捷键、圆标、侧边收起，以及启动别名                    |
+  外观主题有五套：原型、Fluent、Glyph、Braun、Glass，在「设置」里切换。
+
+  动态
+  每条会话显示工具名、项目和状态，没有对话内容。
+  - 已读：去掉等待提醒
+  - 清除：把卡住的条目从列表拿掉。只影响 OrbCue 的显示，不会向工具发命令；清掉之后这条不会再回来
+  - 返回箭头：跳回终端。用 orb run 开出的专属标签能精确回去（标签被拖出或合并过也有效）；自己手动开的终端只回到该窗口最近交互过的位置，窗口已经关掉时会提示失败，不会跳错地方
+  - 底栏「全部已读」「清除全部」对当前列表一次性操作
+  - 工具进程退出后，对应条目会自动消失
+  - 子任务计入所属的主任务，不单独占小球上的数字
+  要精确跳到某一个 Windows Terminal 标签：在「设置」里给启动方式起一个短命令（启动别名），然后用这个短命令在新标签里打开工具。没设别名时，在新开的 Windows Terminal 里运行 orb run grok（或 claude / codex 等）效果相同。第一次用之前需要先启动过一次 OrbCue，并新开终端。
+
+  连接
+  每一行是一个已检测到的工具，并标明在 Windows 还是 WSL。状态是「可连接」或「已连接」。
+  - 连接：先弹出将要改哪些文件，点「确认连接」才动手
+  - 断开：只移除 OrbCue 自己写入的内容，不会动你后来改过的其他设置
+  - 刷新：重新检测本机工具
+  - 从文件夹添加：官方安装路径里找不到时，选包含可执行文件的文件夹
+  同名工具在 Windows 和 WSL 各装了一份，就各占一行，分开连接。Cursor 编辑器本身不会被当成命令行工具。
+  连接页会查看：桌面程序能看到的 PATH、用户 PATH，以及常见安装目录（例如 %USERPROFILE%\.local\bin、Grok Build 的 %USERPROFILE%\.grok\bin、Cursor 命令行的 %LOCALAPPDATA%\cursor-agent）。装了 WSL 时再查看 WSL 里的 PATH（WSL 里能看到的 Windows 程序不重复计）。
+
+  设置
+  - 启动别名：给 orb run 起短命令，方便精确跳回
+  - 隐藏圆标：小球右上角不再显示 ? / !
+  - 收到侧边：默认打开。拖到屏幕边缘约一个球宽内，小球会贴成半圆，略透明、不显示数字；鼠标悬停会沿同一边滑出来，移开后再贴回去。出现 ? 或 ! 时会保持展开，直到你再把它拖到边上。关掉则只是普通拖动
+  - 完成 / 等待 / 失败提示音、系统通知
+  - 开机自启：登录 Windows 后自动打开 OrbCue
+  - 全局快捷键：默认 Ctrl+Shift+Space 打开或收起面板
+
+  连接时改了什么
+  连接方式取决于工具是否提供 hook（工具自带的事件通知机制）：
+  | 工具                    | 连接方式                      | 能报告的状态                                   |
+  | ----------------------- | ----------------------------- | ---------------------------------------------- |
+  | Claude Code、Grok Build | 在该工具自己的配置里登记 hook | 开始、等待、完成、失败、关闭                   |
+  | Cursor                  | 在该工具自己的配置里登记 hook | 开始、完成、失败、关闭；选择题不会标成「等待」 |
+  | Codex                   | 在该工具自己的配置里登记 hook | 开始、等待、完成、关闭；打断和报错看不到       |
+
+  限制会写在连接页对应行上：
+  - Cursor 命令行偶尔不会通知已经结束，任务会停在「工作中」，直到进程退出才消失
+  - Codex 用 Esc 或 Ctrl+C 打断当前回复时，不会通知 OrbCue，任务停在「工作中」；对话报错也不会显示为失败。在动态页点「清除」即可；退出 Codex 后任务也会从列表消失
+  - Claude Code / Codex 在授权框里点拒绝时，不会通知 OrbCue。小球会停在「等待授权」，直到它继续干活或这一轮结束；也可以在动态页点「清除」。Grok Build 点拒绝会马上回到工作中
+  - 首次修改 Claude Code / Codex / Cursor 的配置前，会保留一份备份（例如 settings.json.orbcue.bak）
+
+  隐私与数据
+  - 只在本机、当前用户范围内通信：Windows 用命名管道，WSL 里的命令行用 Unix socket；不监听任何网络端口
+  - 写入磁盘的只有：来源、任务 ID、状态、时间、已读标记、终端标记、项目路径。Windows 在 %LOCALAPPDATA%\OrbCue\state.json；WSL / Linux 命令行在 $XDG_STATE_HOME/orbcue/state.json（默认 ~/.local/state 下）
+  - 任务摘要只在内存里短暂存在，不写盘；对话、提示词、命令一概不经手
+  - 重启后会恢复上述最小状态，但不会重播提醒；过期事件直接丢弃
+  - 判断工具进程是否退出时，只查询连接时记下的那一个进程，不扫描整个进程列表
+  - 提示音、界面或某个连接出问题，不影响状态服务本身；卡住的条目可以随时「清除」
+Tags:
+- claude-code
+- codex
+- grok-build
+- 人工智能
+- 通知
+ReleaseNotes: |-
+  Windows 10 上点小球不再画出系统标题栏和白边。
+  修复
+  - 小球：去掉标题栏样式，并拦住非客户区绘制。点选或拖动时不再出现最小化、关闭按钮，上半圆也不再有白边。
+ReleaseNotesUrl: https://github.com/QZYH123/OrbCue/releases/tag/v0.2.5
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
