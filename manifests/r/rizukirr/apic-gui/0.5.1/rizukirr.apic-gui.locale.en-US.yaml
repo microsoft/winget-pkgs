@@ -1,0 +1,55 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: rizukirr.apic-gui
+PackageVersion: 0.5.1
+PackageLocale: en-US
+Publisher: Rizki Rakasiwi
+PublisherUrl: https://github.com/rizukirr
+PublisherSupportUrl: https://github.com/rizukirr/apic/issues
+Author: Rizki Rakasiwi
+PackageName: apic-gui
+PackageUrl: https://github.com/rizukirr/apic
+License: MIT
+LicenseUrl: https://github.com/rizukirr/apic/blob/main/LICENSE
+Copyright: Copyright (c) Rizki Rakasiwi
+ShortDescription: Desktop GUI for apic — design and collaborate on Git-friendly API contracts.
+Description: apic-gui is the desktop front-end for apic, built on the shared apic-core, for designing, validating, and collaborating on API contracts with a graphical interface.
+Moniker: apic-gui
+Tags:
+- api
+- contract
+- gui
+- json
+- rest
+ReleaseNotes: |-
+  A packaging release on top of 0.5.0, plus one change to how the git panel presents a diff. The CLI, the TUI, and the contract format are unchanged, so existing projects need no migration.
+
+  ## Installable from apt on Ubuntu
+
+  `packaging/debian/` builds `apic` and `apic-gui` as `.deb` packages for Ubuntu 26.04 on amd64 and arm64, published through the PPA `ppa:rizukirr/apic`.
+
+  Unlike the AUR and Copr packages, which ship prebuilt binaries, Launchpad compiles from source on builders with no network access. `mk-orig.sh` vendors all 566 crate dependencies into the orig tarball and verifies the vendor tree is internally consistent before writing it. `apic-gui` now declares the `git` runtime dependency it has always needed.
+
+  Getting there meant moving `eframe` and `egui_extras` back to 0.35 and dropping the declared MSRV from 1.97 to 1.92. `epaint 0.36.1` requires Rust 1.95, while Ubuntu 26.04 ships 1.93 as its newest archive toolchain, which put the desktop GUI out of reach of the current LTS. The downgrade needed no source change and the full suite passes on 1.92.
+
+  A new `msrv` job in CI builds and tests the workspace on the minimum supported version, so a routine dependency bump cannot silently push the project past what the Ubuntu archive can compile.
+
+  ## Git panel：field list first, real diff behind the toggle
+
+  Selecting a changed contract now opens on its field list, which says what changed about the contract, rather than on the whole file with the changed lines tinted.
+
+  The checkbox that read `Show changed fields` now reads `Show raw diff` and gives git's own output, with hunk headers and `+`/`-` markers, instead of the entire file. It stays where you put it when you click a different file rather than resetting each time.
+
+  Anything the field list cannot describe falls through to the diff：a non-contract file, an untracked file, or a change that is only formatting. A selection never lands on an empty pane.
+
+  One fix underneath this. The diff renderer kept only the first hunk header and printed every later one a character short, which nothing noticed while the panel asked git for the whole file as a single hunk. It now keeps the markers git emits and colors each `@@` header.
+
+  ## Install
+
+  Prebuilt binaries for Linux, macOS, and Windows are attached below, each with a `.sha256`. The desktop GUI also ships as a macOS `.app` bundle and a Windows MSI.
+
+  Arch users can install `apic-bin` from the AUR, Fedora users from the `apic-cli` Copr, and Windows users through winget as `rizukirr.apic` or `rizukirr.apic-gui`. Those manifests currently track 0.5.0.
+ReleaseNotesUrl: https://github.com/rizukirr/apic/releases/tag/v0.5.1
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
