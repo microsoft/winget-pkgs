@@ -1,0 +1,128 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: MySolutionsNORDIC.NSClient++
+PackageVersion: 0.17.0
+PackageLocale: en-US
+Publisher: MySolutions NORDIC
+PublisherUrl: https://medin.name/
+PublisherSupportUrl: https://github.com/mickem/nscp/issues
+Author: My Computer Solutions NORDIC KB
+PackageName: NSClient++
+PackageUrl: https://nsclient.org/
+License: GPL-2.0
+LicenseUrl: https://github.com/mickem/nscp/blob/HEAD/COPYING
+Copyright: Copyright (C) 2026 - Michael Medin
+ShortDescription: A fully fledged monitoring agent which can be used with many monitoring tools.
+Description: |-
+  NSClient++ (nscp) aims to be a simple yet powerful and secure monitoring daemon. It was built for Nagios/Icinga, but nothing in the daemon is Nagios/Icinga specific and it can be used in many other scenarios where you want to receive/distribute check metrics.
+  The daemon has 3 main functions:
+  - Allow a remote machine (monitoring server) to request commands to be run on this machine (the monitored machine) which return the status of the machine.
+  - Submit the same results to a remote (monitoring server).
+  - Take action and perform tasks.
+Moniker: nscp
+Tags:
+- icinga
+- naemon
+- nagios
+ReleaseNotes: |-
+  Windows server roles get their own checks, and check messages finally read like numbers
+  0.17.0 adds twelve new checks — eight for IIS and Remote Desktop Services on
+  Windows, four for the status pages of the common web servers — and gives every
+  filter check control over how it renders numbers, so 140.293GB/0.983TB can
+  become 141.09GB/1006.85GB (or 141,09GB/1.006,85GB). Alongside that, the
+  filter engine stops quietly doing the wrong thing: text-versus-number
+  comparisons are numeric, fractional thresholds mean what they say, and an error
+  inside a syntax template is reported instead of rendering a blank.
+  Highlights
+  - Eight new Windows checks for IIS and Remote Desktop Services. The new
+    CheckWindowsApps module covers IIS sites, application pools, worker
+    processes and HTTP.sys request queues, plus RDS CAL licensing, session
+    counts, per-session load and the Connection Broker counterset.
+  - Four new web-server status checks. check_apache_status,
+    check_nginx_status, check_phpfpm_status and check_tomcat_status read the
+    vendors' machine-readable status endpoints over HTTP(S), sharing
+    check_http's auth and TLS handling.
+  - Check messages can be told how to render their numbers. Four new options —
+    decimals, byte-unit, decimal-separator, thousands-separator — on every
+    filter check and every real-time filter (#1428). Perfdata and thresholds are
+    untouched.
+  - Filter comparisons between text and a bare number are now numeric.
+    filter=value > 90 no longer matches value=100 as false because "100" sorts
+    before "90", and 90 > value evaluates at all.
+  - Fractional thresholds stop being truncated. count > 2.5 meant count > 3
+    and working_set > 1.5g meant 1g; both now mean what they say.
+  - Host name placeholders resolve across the whole settings subsystem —
+    including attachment targets and [/includes] (#458) — and are sanitized
+    before they land in a local path 🔒.
+  - Syslog submission works again after ten years. SyslogClient read its
+    connection settings from the wrong place and sent nothing at all; a configured
+    syslog target will start receiving traffic on upgrade.
+  - Check-specific filter keywords that shadowed the generic summary keywords
+    are renamed, with the old names kept as deprecated aliases.
+  Detailed changes
+  CheckWindowsApps — a new module for Windows server roles
+  A new Windows-only module carrying IIS and Remote Desktop Services checks, built
+  on the performance counter sets and enriched from WMI where the role's provider
+  is installed. The two roles share one module deliberately: every check module
+  statically links Boost and the filter engine, so a role earns its own DLL only
+  when it drags in a heavy or optional dependency (the way CheckMySQL carries
+  libmariadb.dll).
+  ──────────────────────────┬────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  Command                   │Reports
+  ──────────────────────────┼────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  check_iis_app_pools       │Per-pool state, uptime and recycles. CRITICAL by default when an auto-start pool is not running; a pool that has never started since boot surfaces as unknown rather than hiding.
+  ──────────────────────────┼────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  check_iis_sites           │Per-site state, connections and uptime, plus requests_per_sec / bytes_per_sec behind averages=true. CRITICAL by default when an auto-start site is stopped.
+  ──────────────────────────┼────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  check_iis_worker_processes│Per-w3wp active and served requests, with the <pid>_<pool> instance name split into keywords. An empty set is OK — idle pools spin their workers down.
+  ──────────────────────────┼────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  check_iis_request_queues  │Per-queue length, rejections and age, defaulting to HTTP.sys' 1000-request limit (warn > 800, critical > 1000).
+  ──────────────────────────┼────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  check_rds_licenses        │One record per CAL key pack from Win32_TSLicenseKeyPack: total, issued and available licences. Warns at available < 10 and total > 0, critical at available = 0 and total > 0.
+  ──────────────────────────┼────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  check_rds_sessions        │Active, inactive and total session counts, all three as perfdata. No default thresholds — the interesting limits are per-farm.
+  ──────────────────────────┼────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  check_rds_session_load    │One record per session (Console, Services, RDP-Tcp <n>) with CPU, working set and, on session hosts, RDP protocol bytes — the per-user attribution check_process cannot give. sessions-only=true skips the session-0
+                            │aggregate.
+  ──────────────────────────┼────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  check_rds_broker          │The Connection Broker counterset. Counter names vary between Windows Server versions, so the check enumerates whatever the counterset exposes and reports one record per counter instead of hard-coding names.
+  ──────────────────────────┴────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  A host without the role gets a clean UNKNOWN naming the missing role, not a WMI
+  or PDH error dump. The counter plumbing landed as a reusable gather helper that
+  collects a set of English counter names for every instance of an object in one
+  query, keeping the existing localized/English/index resolution fallback — it was
+  verified against live Swedish-localized counters.
+  CheckNet — status-page checks for the common web servers
+  ───────────────────┬───────────────────────────────────────────────┬────────────────────────────────────────────────────────────────────────────────────────────────────
+  Command            │Endpoint                                       │Keywords
+  ───────────────────┼───────────────────────────────────────────────┼────────────────────────────────────────────────────────────────────────────────────────────────────
+  check_apache_status│mod_status (?auto appended automatically)      │workers, requests/s, scoreboard
+  ───────────────────┼───────────────────────────────────────────────┼────────────────────────────────────────────────────────────────────────────────────────────────────
+  check_nginx_status │stub_status                                    │active/reading/writing/waiting, cumulative accepts/handled/requests, derived dropped count
+  ───────────────────┼───────────────────────────────────────────────┼────────────────────────────────────────────────────────────────────────────────────────────────────
+  check_phpfpm_status│FPM status page                                │processes, listen queue, max_children_reached, slow requests; warns by default when requests queue
+                     │                                               │up
+  ───────────────────┼───────────────────────────────────────────────┼────────────────────────────────────────────────────────────────────────────────────────────────────
+  check_tomcat_status│manager status?XML=true (appended              │per-connector thread pool, request/error counters, JVM heap; defaults fire at 75%/90% pool usage
+                     │automatically)                                 │
+  ───────────────────┴───────────────────────────────────────────────┴────────────────────────────────────────────────────────────────────────────────────────────────────
+  All four share check_http's connection handling — Basic auth, TLS version /
+  verify / CA, timeout — and go CRITICAL by default when the endpoint is
+  unreachable, answers non-2xx, or serves something that is not the expected
+  status format. Numeric parsing pins the classic locale, so a host with a decimal
+  comma no longer truncates ReqPerSec at the decimal point.
+  Filter messages — configurable number rendering
+  check_drivesize reported 140.293GB/0.983TB used: two units and six decimals
+  in one line, with no way to change either (#1428). Every filter check now takes
+  four options, and real-time filters take the same values as settings keys
+  (decimals, byte unit, decimal separator, thousands separator),
+  inheritable from the default template.
+  ───────────────────┬────────────────────────────────────────────────────────────────────────────────────────────────────────
+  Option             │Effect
+ReleaseNotesUrl: https://github.com/mickem/nscp/releases/tag/0.17.0
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://nsclient.org/docs/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
