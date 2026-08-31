@@ -1,0 +1,49 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: FluxCD.Flux
+PackageVersion: 2.9.5
+PackageLocale: en-US
+Publisher: FluxCD
+PublisherUrl: https://fluxcd.io/
+PublisherSupportUrl: https://github.com/fluxcd/flux2/issues
+PackageName: Flux
+PackageUrl: https://github.com/fluxcd/flux2
+License: Apache-2.0
+LicenseUrl: https://github.com/fluxcd/flux2/blob/HEAD/LICENSE
+ShortDescription: A command line tool for communicating with FluxCD
+Tags:
+- continuous-delivery
+- gitops
+- gitops-toolkit
+- helm
+- kubernetes
+- kustomize
+ReleaseNotes: |-
+  Highlights
+  Flux v2.9.5 is a patch release that moves helm-controller and source-controller back to upstream Helm, now at v4.2.4, dropping the temporary Flux fork. It hardens the handling of kubeconfig Secrets in helm-controller and kustomize-controller, which now reject kubeconfigs referencing files on the local filesystem and require credentials and certificates to be embedded inline. It also stops kustomize-controller from leaving behind the temporary directories of a previous process that exited without running its cleanup, and fixes a crash in post-build substitution where a substring expression with a negative length, e.g. ${VAR:2:-1}, panicked instead of counting back from the end of the string like Bash does. Across all controllers and the CLI, the fluxcd/pkg dependencies have been updated, bringing Kubernetes to 1.36.4. Users are encouraged to upgrade for the best experience.
+  ℹ️ Please follow the Upgrade Procedure for Flux v2.7+ for a smooth upgrade from Flux v2.6 to the latest version.
+  Fixes:
+  - Validate kubeconfigs from .spec.kubeConfig Secrets, rejecting local file references in certificate-authority, tokenFile, client-certificate and client-key; credentials and certificates must be embedded inline (helm-controller, kustomize-controller)
+  - Purge temporary directories at startup (kustomize-controller)
+  - Fix panic on negative-length substring expressions in post-build substitution (kustomize-controller, flux CLI)
+  Improvements:
+  - Move back to upstream Helm v4.2.4, dropping the Flux fork (helm-controller, source-controller)
+  - Update fluxcd/pkg dependencies, which bring Kubernetes to 1.36.4 (all controllers, flux CLI)
+
+  Components changelog
+  - source-controller v1.9.5
+  - source-watcher v2.2.4
+  - kustomize-controller v1.9.5
+  - helm-controller v1.6.4
+  - notification-controller v1.9.4
+  - image-reflector-controller v1.2.5
+  - image-automation-controller v1.2.5
+
+  CLI changelog
+  - Update fluxcd/pkg dependencies by @fluxcdbot in #6046
+  - Update fluxcd/pkg dependencies by @fluxcdbot in #6048
+  - Update toolkit components by @fluxcdbot in #6049
+ReleaseNotesUrl: https://github.com/fluxcd/flux2/releases/tag/v2.9.5
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
