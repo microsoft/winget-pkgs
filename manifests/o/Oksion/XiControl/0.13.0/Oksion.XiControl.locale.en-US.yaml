@@ -1,0 +1,57 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Oksion.XiControl
+PackageVersion: 0.13.0
+PackageLocale: en-US
+Publisher: Oksion
+PublisherUrl: https://github.com/Oksion
+PublisherSupportUrl: https://github.com/Oksion/XiControl/issues
+PackageName: Xi Control
+PackageUrl: https://github.com/Oksion/XiControl
+License: GPL-3.0
+LicenseUrl: https://github.com/Oksion/XiControl/blob/HEAD/LICENSE
+Copyright: Copyright (c) Oksion
+ShortDescription: Tray utility for Xiaomi/Redmi laptops - battery charge limit, performance modes, OSD and Mi button, driver-free via the stock firmware WMI interface (MIFS).
+Description: |-
+  Xi Control is a lightweight tray utility for Xiaomi / Redmi (Redmibook) laptops,
+  built primarily for the Xiaomi Book Pro 14 (2026) but not limited to it.
+  Battery care (charge limit) with automatic re-arm after sleep, five performance
+  modes including the hidden Eco mode, OSD overlays, Mi button gestures, special
+  key fixes (Fn-Lock OSD, microphone mute, keyboard backlight levels) and an
+  owl mode that keeps the system awake while the lid is closed on AC power.
+  Everything is driven through the firmware's stock WMI interface - no WinRing0,
+  no third-party drivers. Requires administrator rights (a firmware WMI
+  requirement); the app elevates itself via UAC on launch.
+Moniker: xicontrol
+Tags:
+- battery
+- charge-limit
+- laptop
+- redmi
+- redmibook
+- tray
+- wmi
+- xiaomi
+ReleaseNotes: |-
+  This release is mostly about laptops that are not a Book Pro 14. Two owners sent detailed reports and diagnostic dumps, and almost everything below exists because of them.
+  Other models finally work
+  Firmware commands are no longer declared failed when they succeeded. XiControl required status 0x80 in the reply, but some firmware never sends a status byte at all — it echoes the command instead, with the value one position earlier. Owners of those machines saw "didn't work" on commands the hardware had actually carried out. The response layout is now detected at startup with a single read: no configuration, no model list, works on a laptop nobody has ever reported.
+  Where a firmware genuinely has no data, you now get a plain dash instead of a plausible invention. On one measured model the charge-threshold family is not implemented at all, and decoding those bytes naively would have shown "adapter: 6 W" and "battery health: 1%".
+  Performance modes adapt to your machine. A mode the firmware refuses both on AC and on battery removes itself from the list — one power source is deliberately not enough, since Full-speed legitimately refuses on battery and works on AC. Nothing is probed behind your back: it learns only from modes you pick yourself. Any mode can also be hidden by hand in Settings → Performance, and Balanced finally appears in the list at all.
+  Temperature on non-Intel machines. Temperatures were read through Intel DPTF, which ships with Intel drivers and simply does not exist on AMD models — those owners had no temperature row. There is now a fallback to the stock ACPI thermal zone. It is a different quantity — one coarse board number, not the hottest CPU domain — so it is labelled "Board temperature" rather than passed off as the same thing.
+  Stock keys answer without being set up. XiControl now reads the same firmware dispatcher the vendor utility listens to. Caps Lock, Num Lock, Windows-key lock and the touchpad indicator get a localized OSD; the snipping and task-view keys do what is printed on them. The Mi button works out of the box on the Redmi Book Pro 15 2022, and key codes can be overridden through config.json for models we have never seen.
+  Screen refresh rate
+  The hardware refresh-rate key now cycles the built-in panel's modes and shows the resulting rate. With Keep refresh rate on, a deliberate press becomes the configured rate for the current power source — otherwise our own guard would have undone it 1.5 seconds later and the key would have looked broken.
+  No such key on your model? The same cycle is available as an assignable action in Settings → Keys, so it can go on the Mi button or any remappable key.
+  Fixes
+  The "brighter" key stopped working after we changed brightness ourselves. The brightness limit and auto-brightness ease brightness with a smooth ramp, and every percent it passed through was marked as our own write for ten seconds. The "brighter" key lands right inside that range, so a real key press was read as an echo of our own change: the ramp kept going and the built-in "you insist, we back off for two hours" never triggered. From the outside it looked as if brightness went down easily and refused to go up.
+  The performance mode came from the key, not from the firmware. On one model the key cycles three values while the firmware accepts two, so the middle press announced a mode the machine never entered. XiControl now asks the firmware what mode it is actually in. Also: one mode change now produces one OSD, not three.
+  Auto refresh rate survives a power change during sleep, the weak-charger warning respects its setting, and a recognised but unhandled key leaves a trace in the log instead of vanishing silently.
+  Thanks
+  @x-Ai — the OEM key dispatcher, the refresh-rate key, and the sleep/power-change fix.
+  @FilJed — three detailed reports from a Redmi Book Pro 15 2022, each of which overturned an assumption in this code.
+  Full technical detail is in CHANGELOG.md.
+ReleaseNotesUrl: https://github.com/Oksion/XiControl/releases/tag/v0.13.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
