@@ -1,0 +1,103 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Psychotoxical.Psysonic
+PackageVersion: 1.52.0
+PackageLocale: en-US
+Publisher: Psysonic
+PublisherUrl: https://github.com/Psychotoxical
+PublisherSupportUrl: https://github.com/Psychotoxical/psysonic/issues
+PackageName: Psysonic
+PackageUrl: https://www.psysonic.de/
+License: GPL-3.0
+LicenseUrl: https://github.com/Psysonic/psysonic/blob/HEAD/LICENSE
+ShortDescription: Gorgeous, modern desktop client for Navidrome and Subsonic music servers
+Description: A beautiful desktop music player built for Subsonic API compatible servers (Navidrome, Gonic, etc.). Built with Tauri v2 and React, featuring a native Rust/rodio audio engine, community theme store, Last.fm integration, synchronized lyrics, EQ, crossfade, gapless playback, and more.
+Tags:
+- audio
+- music
+- navidrome
+- player
+- subsonic
+ReleaseNotes: |-
+  Added
+  Scrobbling — configurable threshold and force scrobble
+  By @JayDawgThaGOAT, PR #1425
+  - Settings → Integrations → Music Network now has a 25–90% scrobble threshold (default remains 50%).
+  - Advanced settings can show a Force scrobble action in the player bar and fullscreen player. It shows listening progress and can immediately submit the current track to the media server and every enabled Music Network destination.
+  Full names on hover, wherever a card cuts one off
+  By @Psychotoxical, PR #1433
+  - Hovering a card whose title or artist is too long to fit now shows the complete text. Multi-disc releases carry the disc number at the end of the title, so it was exactly the part that got cut — telling disc 1 from disc 3 meant opening each album.
+  - Applies to album, artist, playlist, radio, song and offline cards, and only appears when the text is actually shortened, so nothing pops up where there is nothing to reveal.
+  - Can be turned off under Settings → Appearance → Display.
+  - Screen readers now announce album cards and the offline play button in the selected language; both were stuck on a German word regardless of the chosen language.
+  Table view for the album catalogue pages
+  By @Psychotoxical, PR #1435
+  - All Albums, New Releases and Lossless can switch between the card grid and a table. The choice is remembered per page, so one catalogue can stay a table while another stays a grid.
+  - The table lists cover, title, artist, song count, year, duration and the date an album was added, and drops columns from the right as the space narrows. Title and year sort from the column headers.
+  - Song count, duration and the added date now reach every album browse surface, including filtered views and the lossless catalogue, where one or the other used to be blank.
+  - Albums added in the last two days show the new-release ribbon on the All Albums grid as well, not only under New Releases.
+  Telling your own playlists apart from shared ones
+  By @Psychotoxical, PR #1454
+  - A server hands over your own playlists together with every public playlist of everyone else on it, all in one undivided list. The Playlists page can now separate them into your own, the ones you share, and the ones other people share with you.
+  - The switch only appears once something on the server is actually shared, and it works alongside the folder view and the search box instead of replacing either.
+  - Your playlists are now recognised as yours no matter how the username was capitalised when the server profile was created. A mismatch there previously also left the delete button greyed out on your own playlists.
+  Playlist covers in the sidebar, and a sortable playlist list
+  By @Psychotoxical, PR #1455
+  - The sidebar playlist list shows each playlist's cover and how many songs it holds. Playlists without their own cover keep the plain list icon.
+  - The list can be ordered by name, by when a playlist was created, or by how many songs it has. The setting is remembered and applies to the sidebar and the Playlists page alike — the page had no ordering of its own until now.
+  - The personal / shared split from the previous entry now applies to the sidebar list as well.
+  Offline downloads — resume interruptions and survive slow servers
+  By @cucadmuh, issue reported by @jsongerber, PR #1457
+  - Original-quality offline downloads no longer fail just because the whole transfer takes more than two minutes. The timeout now measures stalled reads, so a slow server can keep sending for as long as data continues to arrive.
+  - Interrupted downloads can resume from a verified partial file instead of starting over. Changed or unsafe server responses discard the partial cleanly, while cancellation, disk-space reservations and concurrent download attempts no longer race the final file.
+  - Album, artist, playlist and favourites pins now keep every owner, survive restarts and server-address migrations, and do not return after the user cancels them.
+  Every track an artist performs on
+  By @Psychotoxical, suggested by MrMiniblock, PR #1458
+  - An artist page showed five popular tracks and offered no way to reach the rest. It now has two tabs: the familiar ranking, and the complete list of everything that artist performs on — their own records as well as the compilations and guest appearances they turn up on.
+  - The full list is ordered by album, disc and track number, and can be sorted by any column. Which columns are shown is up to you: title, album and duration to begin with, and artist, genre, year, format, plays, last played and BPM available from the column menu.
+  - It is loaded the moment you open the tab, straight from the local index, so the artist page itself stays as quick to open as before.
+  Navidrome ID upgrades keep local libraries intact
+  By @cucadmuh, PR #1464
+  - When a future Navidrome release switches albums, artists and tracks to canonical IDs, Psysonic pauses startup while it safely updates the local library, analysis results, offline downloads, cached covers and saved app state, then verifies everything with a full sync.
+  - The migration resumes after an interruption and protects normal playback, sync, imports and background work from seeing a half-converted library. Navidrome 0.63.2 and older servers, and other Subsonic servers, continue without migration.
+  Ukrainian translation
+  By @albedych, PR #1465
+  - Full Ukrainian (Українська) UI translation — selectable from the language picker on the Settings and Login screens.
+  - Counts read naturally in Ukrainian: the one, few and many plural forms are all translated, so quantities such as 1, 2 and 5 items no longer fall back to English.
+  - Library identity keys now fold Ukrainian Cyrillic (ї → і) the way Russian and Bulgarian already do, so the same release still merges into a single entry across servers. The keys are rebuilt once after updating, which takes a few seconds on a large library.
+  Changed
+  Rust internals — smaller focused modules with the same behaviour
+  By @cucadmuh, PR #1430
+  - Large analysis, audio, library, sync, cache, integration, CLI and startup modules are split into focused child modules behind the same public APIs and Tauri command/event contracts. Hand-written Rust files above 600 lines drop from 61 to 5 without an intended user-visible change.
+  - Hot-path coverage follows the extracted implementation files, including Discord presence URL safety and text helpers. Comparable runtime benchmarks plus Linux and Windows CI found no reproducible behaviour or performance regression.
+  Windows update notices arrive hours after a release instead of days
+  By @Psychotoxical, PR #1440
+  - On Windows the update notice is held back until WinGet has had time to moderate a new release, so it never points at a version winget upgrade cannot install yet. That wait was set to two days before any real timings were available.
+  - Recent releases cleared WinGet moderation in one to two hours, so the wait is now twelve hours. Windows users see a new version roughly a day and a half sooner, with room left for a slower submission.
+  Fixed
+  Albums no longer start dragging on their own
+  By @Psychotoxical, PR #1437
+  - Holding the mouse button on an album while the list changed underneath — switching between grid and table, or a refresh arriving — could leave a drag primed. The next mouse movement anywhere then picked up that album, long after the pointer had moved on.
+  Synced lyrics keep up with the music
+  By @Psychotoxical, PR #1442
+  - Lines could light up close to a second after they were sung, and inconsistently so — some on time, others noticeably behind. The player only learned the playback position about once per second, which is imperceptible on a clock but not in lyrics, so the position is now followed continuously between those updates.
+  - The fullscreen rail was worst affected, because it picked its line from an even coarser signal than its own word highlighting used. Every lyrics view now reads the same position, including after seeking to a line while paused.
+  Live Search no longer shows the same result twice
+  By @cucadmuh, reported by HiveMind on the Psysonic Discord, PR #1448
+  - Artists, albums and songs could each appear twice when the local index and the server response used different forms of the same server identity. Live Search now aligns that identity before combining the results, while still keeping genuinely separate matches from different servers.
+  Navidrome multi-artist credits survive background sync
+  By @devyeah1978, PR #1449
+  - Navidrome delta updates no longer collapse structured track and album artist credits into one comma-joined artist. Current native credits replace stale names while richer OpenSubsonic artist references remain intact when the native response omits them.
+  Linux shortcuts work immediately after returning to the app
+  By @cucadmuh, issue reported by HiveMind on the Psysonic Discord, PR #1450
+  - Linux/KDE Plasma: Alt+Tab could return to Psysonic while leaving its webview without keyboard focus, so Space, F11 and other in-app shortcuts did nothing until the window was clicked. Psysonic now restores keyboard focus as soon as the native window is reactivated.
+  Drags no longer start on their own when a press goes nowhere
+  By @Psychotoxical, PR #1456
+  - Albums were fixed above; the same problem sat in every other place a track can be dragged from — the queue and the mini-player queue, playlists, favorites, search results, Random Mix and the song cards on Home. Holding the mouse button while the list changed underneath left a drag primed, and the next movement picked up a row that was no longer on screen.
+  - A press whose release never arrives now ends with whatever replaces it — the pointer leaving the window, the app losing focus, or the system taking the drag over — instead of waiting for a mouse-up that is never delivered.
+  Individual libraries can be selected again after updating
+  By @cucadmuh, issue reported by @tummydummy, PR #1459
+ReleaseNotesUrl: https://github.com/Psysonic/psysonic/releases/tag/app-v1.52.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
