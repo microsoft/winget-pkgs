@@ -1,0 +1,58 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.12.0.schema.json
+#
+# The installer manifest for winget-pkgs. This copy is the source of truth for
+# the fields winget-pkgs cannot work out on its own -- everything else
+# (Version, InstallerUrl, InstallerSha256) is regenerated per release by
+# `wingetcreate update`, which the release workflow runs through
+# vedantmgoyal9/winget-releaser.
+#
+# THE POINT OF THIS FILE IS `Dependencies`.
+#
+# 0.3.16 failed winget's manual validation with a crash inside Qt6Core
+# (c0000409 / FAST_FAIL_FATAL_APP_EXIT, which is qFatal). The cause, found by
+# installing it in Windows Sandbox and reading the start-up log: **there is no
+# git on a clean Windows**, and this application is a front end for git. The
+# code no longer dies over it -- see git_ops._cannot_run -- but an application
+# that starts only to say "install git first" is not what anyone wants from a
+# package manager that could have installed it.
+#
+# `wingetcreate update` carries fields it did not generate forward from the
+# previously published version, so this needs to reach winget-pkgs **once**.
+# After that every auto-submitted release inherits it.
+
+PackageIdentifier: StefanGhitescu.GitAssistant
+PackageVersion: 0.3.18
+
+# Git for Windows, installed first by winget if it is not already there.
+Dependencies:
+  PackageDependencies:
+    - PackageIdentifier: Git.Git
+
+MinimumOSVersion: 10.0.17763.0
+InstallerType: nullsoft
+# Per-user only, deliberately: the self-updating build is not published here.
+# winget owns upgrades for anything it installed, and shipping a build that also
+# replaces itself would give one machine two update mechanisms that disagree.
+Scope: user
+InstallModes:
+  - interactive
+  - silent
+  - silentWithProgress
+UpgradeBehavior: install
+ReleaseDate: 2026-08-07
+
+Installers:
+  - Architecture: x64
+    InstallerUrl: https://github.com/ONEoo7/ai_tools_git_assistant/releases/download/v0.3.18/git-assistant-0.3.18-noupdate-user-windows-x64-setup.exe
+    # Taken from the release this URL names, and from nowhere else. Two
+    # independently computed values agree on it: `Get-FileHash` on the runner
+    # (the release notes table) and the digest GitHub computed on upload.
+    #
+    # A digest carried over from the previous release is the failure to avoid
+    # here -- it is well-formed, `winget validate` accepts it, and it is wrong
+    # only at the moment somebody tries to install. So this line moves when the
+    # URL above it moves, never separately.
+    InstallerSha256: E660CE0D847951A427A2F0CD669D409800B099BAA2CC3BFE4DAED23FA8CADA3D
+
+ManifestType: installer
+ManifestVersion: 1.12.0
