@@ -1,0 +1,43 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.12.0.schema.json
+#
+# The same hard-won rules as the User edition manifest apply here - read
+# docs/specifications/done/SPECIFICATION_WINGET_PUBLISHING.md before editing:
+#   * point at the Inno setup.exe directly (InstallerType: inno). Never at a ZIP.
+#   * NO `Dependencies` (sends winget into a resolution loop -> 0x8A150044).
+#   * NO `NestedInstallerType` (the "inconsistency" note is a non-blocking guide).
+#
+# Two things DIFFER from the User manifest, and both are deliberate:
+#
+#   * `Scope: machine`. The User manifest omits Scope entirely, because declaring
+#     `user` there forced a non-elevated flow that failed. Here the product is a
+#     Windows service, a machine state directory and a firewall rule - it is
+#     machine-scope by construction, and the installer is PrivilegesRequired=admin.
+#     Declaring it makes winget request elevation instead of discovering mid-install
+#     that it needed it.
+#
+#   * `MinimumOSVersion: 10.0.14393`. The User manifest deliberately omits this
+#     because its setup also installs a 32-bit net48 viewer for Windows 7/8.1 and the
+#     declaration would hide the package from exactly those machines. This package
+#     has no such half: the Share Manager is .NET 10 x64 and the whole point is a
+#     service surviving logoff, so the floor is real and stating it keeps the package
+#     off machines where it cannot work.
+#
+# The silent switches are the SAME as the User edition's - but note the Server
+# installer refuses a silent install when a User edition is present unless
+# /MIGRATEFROMUSER is passed, so an unattended migration is never implicit.
+
+PackageIdentifier: SerZhyAle.FastMediaSorter.Server
+PackageVersion: "26.8.15.1510"
+InstallerType: inno
+Scope: machine
+MinimumOSVersion: 10.0.14393
+InstallerSwitches:
+  Silent: /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /SP- /MIGRATEFROMUSER=yes
+  SilentWithProgress: /SILENT /SUPPRESSMSGBOXES /NORESTART /SP- /MIGRATEFROMUSER=yes
+Installers:
+- Architecture: x64
+  InstallerUrl: https://github.com/SerZhyAle/FastMediaSorter_Lite/releases/download/v26.8.15.1510/FastMediaSorter-26.8.15.1510-windows-x64-server-setup.exe
+  InstallerSha256: 33DFAFA2F094911ADCF3308116A16F2C9C8498431C1ECF780A83FF8A81F4B0A9
+ManifestType: installer
+ManifestVersion: 1.12.0
+ReleaseDate: 2026-08-15
