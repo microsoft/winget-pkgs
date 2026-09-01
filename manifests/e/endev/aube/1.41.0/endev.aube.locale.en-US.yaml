@@ -1,0 +1,53 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: endev.aube
+PackageVersion: 1.41.0
+PackageLocale: en-US
+Publisher: en.dev
+PublisherUrl: https://en.dev/
+PublisherSupportUrl: https://github.com/endevco/aube/discussions/categories/troubleshooting-and-bugs
+Author: en.dev
+PackageName: aube
+PackageUrl: https://aube.en.dev/
+License: MIT
+LicenseUrl: https://github.com/endevco/aube/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 en.dev inc
+CopyrightUrl: https://github.com/endevco/aube/blob/HEAD/LICENSE
+ShortDescription: A fast Node.js package manager
+Description: |-
+  aube is a package manager for Node.js projects. It uses pnpm-style isolated node_modules for fast, disk-efficient installs.
+
+  Existing projects keep their lockfile format. aube reads and writes pnpm-lock.yaml, package-lock.json, npm-shrinkwrap.json, yarn.lock, and bun.lock in place. New projects without a supported lockfile get aube-lock.yaml.
+
+  Why Try It
+  - Fast installs. Warm installs are about 8x faster than pnpm and about 5x faster than Bun in the current benchmarks. Repeat test commands run up to 35x faster than pnpm and up to 5x faster than Bun.
+  - Existing lockfiles. Reads and writes pnpm-lock.yaml, package-lock.json, npm-shrinkwrap.json, yarn.lock, and bun.lock in place.
+  - Cheap repeat commands. aubr test, aube test, and aube exec vitest auto-install when dependencies are stale, then skip that work when nothing changed. aubx uses a local binary when one is installed, or a throwaway environment for one-off tools.
+  - Less disk use. A global content-addressable store lets projects share package files instead of keeping a full copy of the same dependencies in every checkout.
+  - Secure defaults. Out of the box, exotic transitive deps are blocked, lifecycle scripts wait for approval, trust downgrades fail at resolve, and brand-new releases sit in a 24h cooling window. One paranoid: true line adds the build jail and turns the soft gates into hard fails.
+Moniker: aube
+ReleaseNotes: |-
+  This release adds a cache path command and pnpm-style catalog pruning, makes aube remove avoid unnecessary resolution and network requests, validates packageExtensions up front, and fixes several install/linker correctness issues around hoisted workspaces and global-virtual-store links.
+  Added
+  - aube cache path command (#1302 by @jdx) — Prints the resolved metadata/policy cache root so CI jobs have one stable path to cache packuments, runtime metadata, and lockfile policy-verification records. It honors cacheDir/cache-dir overrides and platform defaults, and resolves the cache relative to the workspace/project root (so nested workspace packages share one root). Mirrors the command added in pnpm 11.22.
+    aube cache path
+  - catalogPrune setting (#1308 by @jdx) — Adds pnpm 11.22's catalogPrune as the canonical setting for pruning unused workspace catalog entries after install. The previous cleanupUnusedCatalogs name is retained as a deprecated alias; when both are set, catalogPrune wins. Configurable via env, .npmrc, workspace YAML, and settings.toml.
+
+  Fixed
+  - Validate packageExtensions before resolution (#1304 by @jdx) — Malformed packageExtensions (non-object shapes, non-string dependency ranges like a null version, invalid peerDependenciesMeta) were previously dropped silently, quietly changing the effective policy. They now fail early with a stable ERR_AUBE_INVALID_PACKAGE_EXTENSION diagnostic that names the offending field path, applied consistently across install, update, remove, dedupe, and audit. aube remove validates before writing package.json so a bad policy can't leave the manifest and lockfile inconsistent.
+  - Repair stale nested global-virtual-store links (#1299 by @jdx) — Warm installs and GVS cache hits could leave nested node_modules links inside shared global-virtual-store packages pointing at an outdated dependency identity even after the lockfile graph moved on. The linker now reconciles nested links in cached GVS entries (fixing stale, missing, or wrongly-targeted links), and the warm fast path is invalidated when shared topology drifts. Fixes #1298.
+  - Keep hoisted workspace installs warm (#1295 by @jdx) — In hoisted workspaces where a member's direct dependency is satisfied from the root node_modules, install state previously always recorded a member-local path that is intentionally empty, so every freshness check treated a valid layout as stale and reinstalled the whole tree (and re-triggered "Auto-installing" on repeated aube run). Install state now records the actual ancestor-visible placement for hoisted direct dependencies. Fixes #1292.
+  - SBOM output reflects the current host (#1309 by @jdx) — Default aube sbom output now filters out platform-incompatible optional packages using effective supportedArchitectures and ignoredOptionalDependencies, and aligns optional-edge traversal with pnpm/Yarn Berry semantics. A new --lockfile-only flag retains the complete platform-independent lockfile graph in the CycloneDX/SPDX output.
+  - lowest-direct resolution is now distinct from time-based (#1307, #1311 by @jdx) — resolution-mode=lowest-direct now picks the oldest satisfying version for direct dependencies (with transitives still on the newest satisfying version) without computing a publish-time cutoff or writing a time: block into the lockfile, instead of being folded into time-based mode. The public aube_resolver::ResolutionMode enum stays stable for embedders — the behavior is driven through additive builder state rather than a new enum variant.
+  - Embedded install memory diagnostics (#1303 by @jdx) — Embedded hosts such as mise now honor the same AUBE_DIAG_* env surface as the CLI, initializing and flushing diagnostics at operation boundaries. Adds OOM-safe per-event flushing (AUBE_DIAG_FLUSH=1), periodic current/peak RSS samples (AUBE_DIAG_KERNEL=1), and richer resolver/extraction metrics to help distinguish resolver retention from extraction spikes. Install behavior is unchanged. Supports #1301.
+
+  Changed
+  - Faster aube remove without unnecessary resolution (#1306 by @jdx) — For single-project installs with a fresh lockfile, remove now prunes the removed roots and their unreachable transitive closure directly from the existing graph and relinks in frozen/offline mode, avoiding registry metadata requests entirely. Multi-importer workspaces, patch/catalog/manifest drift, removed overrides, and surviving peer contexts still fall back to full resolution.
+
+  💚 Sponsor aube
+  aube is maintained by @jdx, an open source developer for entire.io, the title sponsor of the jdx.dev open source tools including mise. Work on aube is funded by sponsors.
+  If aube is saving your team install time or CI minutes, please consider sponsoring at jdx.dev. Individual and company sponsorships are what keep the project fast, free, and independent.
+ReleaseNotesUrl: https://github.com/jdx/aube/releases/tag/v1.41.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

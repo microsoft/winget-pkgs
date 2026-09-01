@@ -1,0 +1,128 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: AMD.LemonadeServer
+PackageVersion: 11.7.0
+PackageLocale: en-US
+Publisher: AMD
+PublisherUrl: https://lemonade-server.ai/
+PublisherSupportUrl: https://github.com/lemonade-sdk/lemonade/issues
+PackageName: Lemonade Server
+PackageUrl: https://lemonade-server.ai/
+License: Apache-2.0
+LicenseUrl: https://github.com/lemonade-sdk/lemonade/blob/HEAD/LICENSE
+Copyright: Copyright (C) 2026 AMD
+ShortDescription: Refreshingly fast LLMs on GPUs and NPUs
+Description: "\U0001F34B Lemonade Server is a server interface that uses the standard Open AI API, allowing applications to integrate with local LLMs. This means that you can easily replace cloud-based LLMs with private and free LLMs that run locally on your own PC's NPU and GPU."
+Tags:
+- ai
+- chatbot
+- large-language-model
+- llm
+- local-llm
+ReleaseNotes: |-
+  Headline
+  - A new POST /v1/models/register endpoint registers or updates user.* model definitions without downloading any files.
+  - New GET/POST/DELETE /v1/models/{id}/options endpoints save, inspect, and reset per-model recipe options without loading the model, with per-load transient overrides.
+  - New GET /v1/stats and Prometheus /metrics endpoints report prefix-cache effectiveness and router route-switch counters.
+  - The built-in catalog adds the Qwen3.8-27B and NVIDIA Nemotron 3.5 Lightning 30B-A3B GGUF models and the Z-Image-Turbo image model.
+  - Lemonade can now be installed on Windows with winget and on macOS with a Homebrew cask.
+  Breaking Changes
+  - POST /pull now returns 400 and registers nothing when a model definition names an unservable or contradictory deployment mode; such labels are no longer silently normalized.
+  - Stored user_models.json entries that violate the new deployment-mode label rule are now skipped at startup with an error instead of being repaired.
+  - Removed the deprecated Lite Collection and Ultra Collection model registry entries.
+  - /v1/audio/transcriptions now returns raw text bodies for text/srt/vtt instead of a JSON {text: ...} wrapper, and returns 400 for unsupported response_format values.
+  - The TheNoise image backend no longer accepts per-request upscale and lora_dir recipe options; lora_dir is now set server-wide in config.json and upscale is only honored as a passed-through request parameter.
+  - lemonade launch opencode now emits a limit object (limit.context/limit.output) instead of a top-level contextWindow field.
+  - The no_broadcast config key is replaced by an inverted broadcast boolean, auto-migrated on load.
+  - An existing but unreadable extra_models_dir now returns 400 on /internal/set instead of being silently applied.
+  Lemonade Server
+
+  | Operating System   | Downloads                                 |
+  | ------------------ | ----------------------------------------- |
+  | Windows            | lemonade.msi                              |
+  | Ubuntu 24.04+      | Launchpad PPA                             |
+  | Debian 13 (x86_64) | lemonade-server_11.7.0-debian13_amd64.deb |
+  | Debian 13 (ARM64)  | lemonade-server_11.7.0-debian13_arm64.deb |
+  | Fedora 43 (x86_64) | lemonade-server-11.7.0-fc43.x86_64.rpm    |
+  | Fedora 43 (ARM64)  | lemonade-server-11.7.0-fc43.aarch64.rpm   |
+  | Fedora 44 (x86_64) | lemonade-server-11.7.0-fc44.x86_64.rpm    |
+  | Fedora 44 (ARM64)  | lemonade-server-11.7.0-fc44.aarch64.rpm   |
+  | macOS              | Lemonade-11.7.0-Darwin.pkg                |
+
+  Other platforms? See our Installation Options for Docker, Snap, Arch, Debian, and more.
+  Embeddable Lemonade
+  Portable binaries for bundling into your own installer. Run lemond ./ as a subprocess.
+
+  | Platform     | Download                                       |
+  | ------------ | ---------------------------------------------- |
+  | Ubuntu x64   | lemonade-embeddable-11.7.0-ubuntu-x64.tar.gz   |
+  | Ubuntu arm64 | lemonade-embeddable-11.7.0-ubuntu-arm64.tar.gz |
+  | Windows x64  | lemonade-embeddable-11.7.0-windows-x64.zip     |
+  | macOS arm64  | lemonade-embeddable-11.7.0-macos-arm64.tar.gz  |
+
+  What's Changed
+  Thanks @SlawomirNowaczyk, @abn, @anditherobot, @bitgamma, @blackdeathdrow, @bong-water-water-bong, @fl0rianr, @ianbmacdonald, @iswaryaalex, @jeremyfowers, @kenvandine, @mzyy94, @osimarr, @popey, @ramkrishna2910, @superm1, @yelliver, @zaneni6 for your awesome contributions to this release!
+  Click to expand changelog
+  - Bump TheNoise to version v0.1.2 by @bitgamma in https://github.com/lemonade-sdk/lemonade/pull/3079
+  - docs(backends): drop the model catalog tables from the backend reference by @jeremyfowers in https://github.com/lemonade-sdk/lemonade/pull/3103
+  - fix(alias): report the real reason for alias validation failures by @ramkrishna2910 in https://github.com/lemonade-sdk/lemonade/pull/3111
+  - feat(server): add model registration endpoint by @fl0rianr in https://github.com/lemonade-sdk/lemonade/pull/3118
+  - Debian packaging improvements by @superm1 in https://github.com/lemonade-sdk/lemonade/pull/3039
+  - docs: add winget and Homebrew install to homepage quickstart by @yelliver in https://github.com/lemonade-sdk/lemonade/pull/2970
+  - Trigger snap release candidate build from release branches by @kenvandine in https://github.com/lemonade-sdk/lemonade/pull/2908
+  - fix(server): compare artifacts, not commit SHAs, when checking for model updates by @blackdeathdrow in https://github.com/lemonade-sdk/lemonade/pull/3073
+  - fix(server): normalize thinking controls for llama.cpp by @fl0rianr in https://github.com/lemonade-sdk/lemonade/pull/3132
+  - fix: stop request during prefill now possible by @fl0rianr in https://github.com/lemonade-sdk/lemonade/pull/3133
+  - ci: stop building unused targets in the validate workflows by @jeremyfowers in https://github.com/lemonade-sdk/lemonade/pull/3052
+  - fix(server): harden extra models directory handling by @fl0rianr in https://github.com/lemonade-sdk/lemonade/pull/3105
+  - Fix #1833: Improve transcription response format compatibility by @anditherobot in https://github.com/lemonade-sdk/lemonade/pull/2088
+  - ci: stop pinning lite validation legs to the 128gb runner by @jeremyfowers in https://github.com/lemonade-sdk/lemonade/pull/3139
+  - feat(models): add an explicit chat label by @jeremyfowers in https://github.com/lemonade-sdk/lemonade/pull/3099
+  - feat(telemetry): capture prefix-cache effectiveness (cache_n, cached_tokens) and route-switch counts by @ramkrishna2910 in https://github.com/lemonade-sdk/lemonade/pull/2968
+  - Update FLM version by @zaneni6 in https://github.com/lemonade-sdk/lemonade/pull/3144
+  - Backend Battle Nightly Regression by @iswaryaalex in https://github.com/lemonade-sdk/lemonade/pull/3069
+  - Remove emoji from FAQ title by @jeremyfowers in https://github.com/lemonade-sdk/lemonade/pull/3154
+  - Manage per-model recipe options without loading by @jeremyfowers in https://github.com/lemonade-sdk/lemonade/pull/3110
+  - Enable % used context on opencode side panel by @osimarr in https://github.com/lemonade-sdk/lemonade/pull/1725
+  - feat(server,cli): add discovery and broadcast controls with config decoupling by @abn in https://github.com/lemonade-sdk/lemonade/pull/3135
+  - fix(packaging): add AppStream MetaInfo files for desktop entries by @superm1 in https://github.com/lemonade-sdk/lemonade/pull/3123
+  - fix(flm): correctly report downloaded model size by @mzyy94 in https://github.com/lemonade-sdk/lemonade/pull/3166
+  - Minor refactor of new gate code by @SlawomirNowaczyk in https://github.com/lemonade-sdk/lemonade/pull/2971
+  - update TheNoise v0.2.1 by @bitgamma in https://github.com/lemonade-sdk/lemonade/pull/3171
+  - fix(flm): stop re-pulling already-downloaded models on every load by @mzyy94 in https://github.com/lemonade-sdk/lemonade/pull/3167
+  - feat: flag comment slop in a pre-commit rule, and run pre-commit in CI by @ianbmacdonald in https://github.com/lemonade-sdk/lemonade/pull/2689
+  - add lemonade version to benchmark results by @bitgamma in https://github.com/lemonade-sdk/lemonade/pull/3173
+  - feat(server): support transient null overrides on load by @fl0rianr in https://github.com/lemonade-sdk/lemonade/pull/3172
+  - fix(macos): reduce log directory permissions to prevent privilege esc… by @superm1 in https://github.com/lemonade-sdk/lemonade/pull/2625
+  - docs: add pull request template by @fl0rianr in https://github.com/lemonade-sdk/lemonade/pull/2551
+  - fix(npu): pre-reject NPU loads when auto-tune can only reserve fallback ctx (#1151) by @bong-water-water-bong in https://github.com/lemonade-sdk/lemonade/pull/3164
+  - models: add Qwen3.8 and Nemotron 3.5 GGUF by @yelliver in https://github.com/lemonade-sdk/lemonade/pull/3177
+  - Fix pre-commit JSON validation issues by @superm1 in https://github.com/lemonade-sdk/lemonade/pull/3179
+  - docs: fix multi-file checkpoint rendering by @yelliver in https://github.com/lemonade-sdk/lemonade/pull/3174
+  - Remove some MTP default flags by @bitgamma in https://github.com/lemonade-sdk/lemonade/pull/3187
+  - ci: wire server eviction tests into CI by @fl0rianr in https://github.com/lemonade-sdk/lemonade/pull/3015
+  - ci: run watchdog lifecycle tests in backend CI by @fl0rianr in https://github.com/lemonade-sdk/lemonade/pull/3021
+  - test: replace Python system info replicas with C++ coverage by @fl0rianr in https://github.com/lemonade-sdk/lemonade/pull/3020
+  - fix(server): let load args override saved args by @fl0rianr in https://github.com/lemonade-sdk/lemonade/pull/3204
+  - refactor(server): drop load_command from the options endpoint by @jeremyfowers in https://github.com/lemonade-sdk/lemonade/pull/3199
+  - fix(test): new watchdog test concurrency issue by @fl0rianr in https://github.com/lemonade-sdk/lemonade/pull/3201
+  - fix(pre-commit): make comment-slop runnable on Windows by @blackdeathdrow in https://github.com/lemonade-sdk/lemonade/pull/3208
+  - Update to ROCm 7.14 by @superm1 in https://github.com/lemonade-sdk/lemonade/pull/2768
+  - Fix stale gfx90X-dcgpu TheRock URL mapping for gfx908/gfx90a by @kenvandine in https://github.com/lemonade-sdk/lemonade/pull/3196
+  - test: add concurrent chat completion coverage by @fl0rianr in https://github.com/lemonade-sdk/lemonade/pull/2060
+  - Fail startup when one resolved address cannot bind by @popey in https://github.com/lemonade-sdk/lemonade/pull/3197
+  - fix(ci): resolve test flakes across C++ store, python test harness, and workflows by @abn in https://github.com/lemonade-sdk/lemonade/pull/2805
+  New Contributors
+  - @yelliver made their first contribution in https://github.com/lemonade-sdk/lemonade/pull/2970
+  - @zaneni6 made their first contribution in https://github.com/lemonade-sdk/lemonade/pull/3144
+  - @mzyy94 made their first contribution in https://github.com/lemonade-sdk/lemonade/pull/3166
+  Full Changelog: https://github.com/lemonade-sdk/lemonade/compare/v11.6.0...v11.7.0
+
+  Windows installers are signed. Free code signing provided by SignPath.io, certificate by SignPath Foundation. See our Code Signing Policy.
+ReleaseNotesUrl: https://github.com/lemonade-sdk/lemonade/releases/tag/v11.7.0
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://lemonade-server.ai/docs/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
