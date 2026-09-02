@@ -1,0 +1,85 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: can1357.oh-my-pi
+PackageVersion: 18.0.10
+PackageLocale: en-US
+Publisher: Can Bölük
+PublisherUrl: https://can.ac/
+PublisherSupportUrl: https://github.com/can1357/oh-my-pi/issues
+Author: Can Bölük
+PackageName: oh-my-pi
+PackageUrl: https://omp.sh/
+License: MIT
+LicenseUrl: https://github.com/can1357/oh-my-pi/blob/HEAD/LICENSE
+Copyright: |-
+  Copyright (c) 2025 Mario Zechner
+  Copyright (c) 2025-2026 Can Bölük
+ShortDescription: ⌥ AI Coding agent for the terminal — hash-anchored edits, optimized tool harness, LSP, Python, browser, subagents, and more
+Description: |-
+  omp is a terminal-first coding agent that runs on your machine, talks to any provider, and treats sessions like git branches.
+  omp (pronounced “oh-em-pi”, binary omp) is a fork of Mario Zechner’s Pi. It runs as a single Bun process, drives any model provider you have credentials for, and ships a flat tool surface the model uses to read code, run commands, edit files, drive a debugger, and spawn subagents that coordinate over an in-process IRC bus.
+  Sessions persist as JSONL under ~/.omp/agent/sessions/. You resume, fork, branch, and share them. Settings, credentials, plugins, and caches all live under ~/.omp/agent/. Nothing leaves the machine unless you call a tool that does.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  @oh-my-pi/pi-agent-core
+  Added
+  - Added support for continuing interrupted agent runs with pending tool calls, allowing those calls to be retried before requesting the next model response.
+  @oh-my-pi/pi-coding-agent
+  Added
+  - Added the Sharpshooter memory backend for tracking friction-earned project decisions, with /memory queue and /memory sync controls.
+  - Added /restart to relaunch omp with its original launch flags and resume the current session in place.
+  - Added the band composer shape, a flush powerline status band above the prompt; it is now the default while existing composer.shape settings remain unchanged.
+  - Added in-place retry for interrupted or failed tool calls: use F5, Alt+R (app.retry), or /retry to replay an intact failed batch without an additional model round trip.
+  - Improved the working status display with a timed braille spinner, streamed intent, session accent colors across relevant status elements, and theme-aware session accent generation.
+  - Updated the unicode and ascii symbol presets to use π/pi for the brand icon, avoiding tofu on fonts without the nerd-font glyph.
+  Changed
+  - The /review command's PR-style comparison now uses the merge base against the current branch, excluding commits that exist only on the base branch; selecting the current branch reports no changes.
+  - Prompt history is now persisted immediately when submitted, and session database state is checkpointed on exit to improve durability and prevent unbounded WAL growth.
+  Fixed
+  - Fixed edit-tool parsing of －-prefixed MATCH lines so they correctly represent whole-line deletions and can be replaced by a following ＋ run.
+  - Fixed interrupted and failed Python evaluation cells being reported as successful results instead of errors, improving model handling, telemetry, retries, and background-job failure reporting.
+  - Fixed native-extension imports such as numpy hanging indefinitely in the Python evaluation tool on Windows.
+  - Fixed a macOS composer display issue where undercurl could remain attached to stale text after rapid typing.
+  - Improved xd:// MCP failure messages with actionable transport stages, failure categories, server and tool context, retryability, trace IDs, and redacted JSON-RPC details.
+  - Fixed ACP read tool-call locations so clients such as Zed Follow receive the resolved filesystem path rather than the OMP line-range selector.
+  @oh-my-pi/pi-natives
+  Added
+  - Added native process replacement support for the CLI’s /restart command.
+  - Added VcsGitRepo.mergeBase(a, b) to find the best common ancestor of two Git revisions, returning null when the histories are unrelated.
+  @oh-my-pi/pi-tui
+  Added
+  - Press the Right Arrow at the end of a line to accept autocomplete suggestions, inline ghost-text completions, and spelling corrections, just like Tab.
+  - Added a smooth brand-color transition and an elapsed turn timer to the status line while the agent is working.
+  - Added a full-width “band” composer style for flush status lines.
+  @oh-my-pi/pi-utils
+  Added
+  - Added postmortem.drainStdout to flush buffered standard output before process exit or exec-replacement.
+  - Added an exitOnly option to postmortem.register for resources that should remain available during keep-alive cleanup and be released only on actual process exit.
+  - Added hexToOklch and oklchToHex color conversion utilities with sRGB gamut mapping that reduces chroma when necessary.
+  - Added checkpointWal to checkpoint committed SQLite WAL frames without blocking concurrent readers.
+  Fixed
+  - Fixed repeatable postmortem cleanup behavior so persistent resources and callbacks registered during cleanup remain active until the eventual process exit.
+  - Fixed asynchronous postmortem cleanup so callbacks registered during a cleanup pass are awaited before cleanup completes, including during signal-driven exits.
+  What's Changed
+  - fix(eval): read python runner stdin serially to unblock numpy on windows by @roboomp in https://github.com/can1357/oh-my-pi/pull/7987
+  - fix(review): pass base and head as separate revisions in PR-style diff by @roboomp in https://github.com/can1357/oh-my-pi/pull/10070
+  - fix(storage): flush deferred writes on exit by @roboomp in https://github.com/can1357/oh-my-pi/pull/10083
+  - fix(acp): strip read selector from ToolCallLocation.path by @roboomp in https://github.com/can1357/oh-my-pi/pull/10090
+  - fix(mcp): preserve actionable transport diagnostics by @roboomp in https://github.com/can1357/oh-my-pi/pull/10094
+  Full Changelog: https://github.com/can1357/oh-my-pi/compare/v18.0.9...v18.0.10
+ReleaseNotesUrl: https://github.com/can1357/oh-my-pi/releases/tag/v18.0.10
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://omp.sh/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

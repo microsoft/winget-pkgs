@@ -1,0 +1,114 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: BaldurKarlsson.RenderDoc
+PackageVersion: 1.46.0
+PackageLocale: en-US
+Publisher: Baldur Karlsson
+PublisherUrl: https://renderdoc.org/
+PublisherSupportUrl: https://github.com/baldurk/renderdoc/issues
+Author: Baldur Karlsson
+PackageName: RenderDoc
+PackageUrl: https://renderdoc.org/
+License: MIT
+LicenseUrl: https://github.com/baldurk/renderdoc/blob/HEAD/LICENSE.md
+Copyright: Copyright © Baldur Karlsson 2026
+ShortDescription: A stand-alone graphics debugging tool
+Description: RenderDoc is a free MIT licensed stand-alone graphics debugger that allows quick and easy single-frame capture and detailed introspection of any application using Vulkan, D3D11, OpenGL & OpenGL ES or D3D12 across Windows, Linux, Android, or Nintendo Switch™.
+Moniker: renderdoc
+Tags:
+- debug
+- debugger
+- debugging
+- debugging-tool
+- graphics
+- rendering
+ReleaseNotes: |-
+  This release contains a significantly revamped tutorial for getting started with python scripting - if you have not already tried it, python scripts in RenderDoc are a good way to automate workflows or tailor your personal use of RenderDoc. It also includes improvements for python development including automatic generation of python stubs for IDEs like VS Code, and integration with an external python debugger.
+  Get started at the Python docs if you are interested and follow along with the tutorial there.
+  NOTE: currently AMD's official drivers contain a reported bug that may cause any shader debugging that depends on multiple threads to fail to debug correctly. You may also encounter problems with using VK_EXT_descriptor_buffer as noted in the v1.40 release notes as well as other instabilities that have been reported.
+  Binary builds with installers, zips and tarballs are available on renderdoc.org.
+  Main highlights
+  Improved python script editor
+  The python script editor now supports having multiple scripts open as well as editing UI extensions and pre-provided example scripts within the editor itself. The autocomplete has been significantly improved and while it is not IDE quality for simple scripts it will be easier to navigate the API and understand what functionality is available directly from the editor.
+  Python debugging support
+  RenderDoc now supports integrating with an external IDE like VS Code to debug the python code while it executes within RenderDoc.
+  This workflow is explained in the documentation and if VS Code is already installed with python support it is very easy to get up and running.
+  Rewritten python documentation
+  The Python docs has been rewritten to be easier to get started with and step you through how to write simple scripts in RenderDoc. There are a number of new examples demonstrating different ways that the RenderDoc python API can be used to solve bespoke problems and perhaps give you some ideas of what you could use it for.
+  No functionality has been removed and it is still possible to use RenderDoc as a standalone python module, but the documentation covers the common case of users wanting to script the RenderDoc UI itself.
+  Python Breaking API changes
+  - GetDefaultCaptureOptions has been removed, CaptureOptions is now initialised to the defaults when created.
+  - ActionDescription's members next and previous have been renamed to nextAction and previousAction to avoid a clash with internal swig members.
+  - PythonShell has removed the SetScriptText method as now multiple scripts can be opened. CreateNewScriptEditor can be used to create a new script editor with given text.
+  - CaptureDialog method TriggerCapture has been renamed to Launch to better describe what is happening, which now also returns a handle to the connection window.
+  - ReplayManager method AsyncInvoke has changed the order of parameters for tagged calls, so the callback is always first and the tag optionally comes second.
+  Features/Improvements
+  - UI: In mesh viewer, truncate column names from the middle rather than the end and add a tooltip with the full element name.
+  - UI: Add tooltips for all docking tabs with the full panel title.
+  - UI: Bundled python version updated to 3.8.
+  - D3D12: Add support for SDK 1.619.4 with byte-offset views and TryCreate* descriptor functions
+  - D3D12: Add support for capturing programs using up to SM6.9.
+  - Vulkan: Improve startup time of shader debugging for cases with extremely high number of variables in debug info.
+  - Vulkan: Allow debugging shaders that use variable rate shading.
+  - Vulkan: Add support for extensions:
+    - VK_KHR_extended_flags
+    - VK_KHR_shader_abort
+    - VK_KHR_shader_constant_data
+    - VK_KHR_shader_fma
+    - VK_EXT_depth_bias_control
+    - VK_EXT_image_sliced_view_of_3d
+    - VK_EXT_layer_settings
+    - VK_EXT_physical_device_drm
+    - VK_EXT_present_timing
+    - VK_EXT_ray_tracing_invocation_reorder
+    - VK_EXT_shader_64bit_indexing
+    - VK_EXT_shader_split_barrier
+    - VK_EXT_shader_subgroup_partitioned
+    - VK_EXT_shader_tile_image
+    - VK_EXT_zero_initialize_device_memory
+    - VK_NV_device_diagnostic_checkpoints
+    - VK_NV_device_diagnostics_config
+    - VK_NV_ray_tracing_invocation_reorder
+  Bugfixes
+  - UI: If a single capture is made in a program but it fails to automatically open when the application is closed, do not close the connection window so the capture is inaccessible. The connection window will only automatically close if the capture opens successfully.
+  - UI: Fix matrix sizes not being properly flipped for non-float GLSL style matrix declarations in the buffer formatter.
+  - UI: Improve display of sampler variables in shader debugger.
+  - All: Fix a potential crash when a device lost is detected in a capture that uses annotations.
+  - Android: Fix display of shader reflection & debugging data after a shader edit, which would incorrectly display the unedited information.
+  - Linux: Improve terminal emulator handling to run elevated commands for vulkan layer registration, to work in more cases.
+  - Linux: Fix corrupted icon being shown for close button on floating windows.
+  - Linux: Fix a case where loading A8 texture files would display wrong data.
+  - D3D12: Fix a problem with shader debugging where resources with the same binding in different namespaces (SRV vs UAV) could alias and cause incorrect results for resource info queries.
+  - D3D12: Correctly handle some legacy dxil instructions.
+  - D3D12: Fix a crash if a debug variable name contains path-like characters including . without being a member of a struct.
+  - OpenGL: Fix potentially incorrect data returned for integer texture pixel history.
+  - OpenGL: Fix some cases where pixel history on textures bound with particular layer/properties would fail.
+  - OpenGL: Hack around absolutely terrible spec language that mesa implements for querying stencil ref values.
+  - OpenGL: Fix some cases where depth-equal pixel history events would wrongly show as failed.
+  - Vulkan: Improve fix in v1.45 for pipeline caches larger than 4GB to serialise them correctly instead of ignoring them.
+  - Vulkan: Fix a bug with empty vkQueueSubmit that submits nothing.
+  - Vulkan: Improve SPIR-V disassembly in some cases with unusual loop and switch constructs.
+  - Vulkan: Depth resolve attachments were not visible in pipeline state view when using dynamic rendering.
+  - Vulkan: Fix a problem reading indirect parameter arguments from submitted command buffers on queues other than the primary queue.
+  - Vulkan: Prevent image state information from leaking when images are destroyed during capture.
+  - Vulkan: Fix image contents for pre-initialized images from not being saved properly if otherwise unmodified.
+  - Vulkan: Fix a crash if all 32 bits are set in a multiview view mask.
+  - Vulkan: Fix downstream layers not being reported via VK_EXT_tooling_info.
+  - Vulkan: Fix calculation of SPIR-V array sizes when determining structure packing.
+  - Vulkan: Handle mutually recursive pointer types in buffer formatter.
+  - Vulkan: Fix incorrect debugging of 64-bit inputs (doubles, longs) in pixel shaders.
+  - Vulkan: Detect strides from pointer declarations properly to determine correct packing for buffer declarations.
+  - Vulkan: Add partial workaround for buffers written by both CPU and GPU during capture at different times potentially causing raced updates.
+  - Vulkan: Fix a crash fetching task shader outputs if VK_EXT_shader_object is in use.
+  - Vulkan: Fix a crash when using fake-MSAA render passes with non-default resolve modes.
+  - Vulkan: Fix a potential internal corruption where image lookups (particularly buffer lookups) would fail wrongly in shader debugging.
+  - Vulkan: Fix a potential error displaying "clear before X" overlays on depth-only targets.
+ReleaseNotesUrl: https://github.com/baldurk/renderdoc/releases/tag/v1.46
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://renderdoc.org/docs/index.html
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/baldurk/renderdoc/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

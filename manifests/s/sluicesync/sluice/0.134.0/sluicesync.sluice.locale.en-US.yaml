@@ -1,0 +1,60 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: sluicesync.sluice
+PackageVersion: 0.134.0
+PackageLocale: en-US
+Publisher: sluicesync
+PublisherUrl: https://sluicesync.com
+PackageName: sluice
+PackageUrl: https://sluicesync.com
+License: Apache-2.0
+LicenseUrl: https://github.com/sluicesync/sluice/blob/main/LICENSE
+Copyright: sluicesync
+ShortDescription: Open-source MySQL <-> Postgres database migration and continuous-sync (CDC) tool
+Description: sluice is an open-source database migration and continuous-sync (CDC) tool covering MySQL and Postgres in all four directions.
+Moniker: sluice
+Tags:
+- database
+- migration
+- cdc
+- mysql
+- postgres
+ReleaseNotes: |-
+  The consistency-and-hygiene release. The headline is a deliberate behavior change：a mid-sync `timestamp ⇄ timestamptz` column swap now **refuses** under the default `--schema-changes=forward` instead of silently forwarding — the rewritten values depend on the source ALTER session's `TimeZone`, which the replication wire does not carry, so the target's identical cast can silently diverge. Its sibling (`time ⇄ timetz`) already refused; the session-TZ-cast class now has one posture. Plus seven audit-filed hygiene items, all mutation-verified.
+
+  ## Changed
+
+  **`timestamp ⇄ timestamptz` mid-stream swaps refuse under forward mode** (`cdc_relations.go`, the `sessionTZSwapPair` predicate, both directions, refusal naming the source-vs-target session-TimeZone mechanism and the drained-model remedy). Precision-only temporal changes (`timestamp(6)→(3)` etc.) forward and converge exactly as before — pinned. sluice's applier does not pin a session TimeZone, and a target-side pin could not close the hazard anyway (the source ALTER session's zone is not on the wire) — recorded in ADR-0091. Honest residuals filed, not fixed：the ARRAY variants (`time[] ⇄ timetz[]`, `timestamp[] ⇄ timestamptz[]`) still forward with the same per-element hazard, and MySQL's `timestamp ⇄ datetime` MODIFY is the other lane's class analogue — both are design-scoped follow-ups.
+
+  ## Fixed
+
+  **`timetz` columns now project `WithTimeZone` in CDC relation state** (registry parity with the schema reader), removing a live phantom-alter every timetz column previously produced at classifier boundaries. The fix's naive form would have silently flipped `time ⇄ timetz` swaps from refuse to forward — caught by mutation before landing; the refusal is preserved with an honest session-TZ message. **The `SLUICE-E-CDC-STATEMENT-DML` tripwire now enumerates `WITH` (CTE-DML)** — previously a documented residue, a statement-format `WITH x AS (…) UPDATE` was silently dropped; it now refuses like the other DML verbs. **`LocalStore` crash-orphaned temp files** are invisible to `List` and swept (age-guarded, best-effort) by the next same-key write.
+
+  ## Internal
+
+  The CDC roster gates refuse alias references of their guarded preflights (closing the invoke-through-a-variable evasion, with self-tests; name-based residual stated); honest comment corrections (`splitDBList`'s per-arm asymmetry; the probe round-trip count claim); dependency bumps (otel v1.46.0 family; kong 1.16.1 via Dependabot).
+
+  ## Compatibility
+
+  Drop-in from v0.133.1 with one deliberate posture change：a `timestamp ⇄ timestamptz` ALTER mid-sync now stops the stream loudly where every prior release forwarded it. If both your ALTER session and the apply path ran UTC, the old forwarding converged and nothing was lost; if they differed, prior releases silently diverged pre-existing rows — run `sluice verify` on any table that crossed that ALTER historically. The refusal's remedy is the standard drained-model apply.
+
+  ## Install
+
+  ```
+  # Homebrew
+  brew upgrade sluice
+
+  # Scoop (Windows)
+  scoop update sluice
+
+  # Go
+  go install sluicesync.dev/sluice/cmd/sluice@v0.134.0
+  ```
+
+  Container images：`ghcr.io/sluicesync/sluice:0.134.0` (multi-arch; the image tag carries no `v` prefix).
+
+  **Full changelog:** https://github.com/sluicesync/sluice/blob/main/CHANGELOG.md
+ReleaseNotesUrl: https://github.com/sluicesync/sluice/releases/tag/v0.134.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
