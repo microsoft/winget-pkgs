@@ -10,6 +10,7 @@ on:
   pull_request_target:
     types: [labeled]
   roles: [admin, maintainer, write]
+  bots: ["wingetvalidator-prod[bot]"]
 if: >-
   github.event_name == 'pull_request_target' &&
   github.event.action == 'labeled' &&

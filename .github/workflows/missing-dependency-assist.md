@@ -14,6 +14,7 @@ on:
   pull_request_target:
     types: [labeled]
   roles: [admin, maintainer, write]
+  bots: ["wingetvalidator-prod[bot]"]
 # Label gate: only act when THIS event applied the Validation-Missing-Dependency label.
 if: github.event.label.name == 'Validation-Missing-Dependency'
 # We do not need the PR's code; skip checkout to avoid touching untrusted fork content.

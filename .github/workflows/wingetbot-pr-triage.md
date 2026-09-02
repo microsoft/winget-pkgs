@@ -16,6 +16,7 @@ on:
         required: false
         type: string
   roles: [admin, maintainer, write]
+  bots: ["wingetvalidator-prod[bot]"]
 if: >-
   github.event_name == 'workflow_dispatch' ||
   (
