@@ -1,0 +1,86 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: jmrplens.gitlab-mcp-server
+PackageVersion: 2.7.5
+PackageLocale: en-US
+Publisher: José M. Requena Plens
+PublisherUrl: https://github.com/jmrplens
+PublisherSupportUrl: https://github.com/jmrplens/gitlab-mcp-server/issues
+PrivacyUrl: https://github.com/jmrplens/gitlab-mcp-server/blob/main/PRIVACY.md
+PackageName: GitLab MCP Server
+PackageUrl: https://github.com/jmrplens/gitlab-mcp-server
+License: MIT
+LicenseUrl: https://github.com/jmrplens/gitlab-mcp-server/blob/HEAD/LICENSE
+ShortDescription: GitLab MCP server exposing the REST v4 and GraphQL APIs as tools for AI assistants.
+Description: A Model Context Protocol (MCP) server that connects AI assistants (Claude, Cursor, VS Code + Copilot, and any MCP client) to GitLab.com or self-managed GitLab instances. Covers the full REST API v4 and GraphQL with automatic edition gating — roughly 850 to 1070 tools depending on the GitLab tier — plus 45 MCP resources, 37 prompts, argument completions, and progress notifications. Single static binary, stdio and HTTP transports, read-only and safe (mutation-preview) modes, and an interactive setup wizard (gitlab-mcp-server --setup) that auto-configures most MCP clients.
+Moniker: gitlab-mcp-server
+Tags:
+- ai
+- ci-cd
+- claude
+- devops
+- gitlab
+- graphql
+- llm
+- mcp
+- model-context-protocol
+- rest-api
+ReleaseNotes: |-
+  Yes, another one. In my defence, 2.7.4 shipped a flag whose entire purpose was to let browsers talk to this server, and it did not let browsers talk to this server. The flag was fine. The preflight it depended on was refused, so the browser never got as far as sending the request the flag would have allowed. `curl` said `200` throughout, which is how it shipped.
+
+  So：2.7.5 is the one where the browser path is actually exercised by something other than optimism.
+
+  ---
+
+  ## The browser path
+
+  **`--trusted-origins` now works from a browser.** A preflight `OPTIONS` from a trusted origin is answered `204` with the CORS headers, and `Mcp-Session-Id` / `Mcp-Protocol-Version` are exposed so a client can read them back.
+
+  **⚠️ If you run behind a reverse proxy that adds its own CORS headers, remove that block in the same deploy as this upgrade.** This is not tidiness — upgrading without it makes your deployment *worse than it was*:
+
+  > Access to fetch at `.../gitlab` has been blocked by CORS policy：The `'Access-Control-Allow-Origin'` header contains multiple values `'http://127.0.0.1:18090, *'`, but only one is allowed.
+
+  Fetch treats two `Access-Control-Allow-Origin` headers as a failure rather than merging them. Before the upgrade your proxy's lone `*` at least worked for uncredentialed requests; after it, the server sends its own and the pair cancel out. `curl` reports `200` either way, so nothing but a real browser will tell you. See [Security — The browser preflight](https://jmrp.io/docs/gitlab-mcp-server/concepts/security).
+
+  ## What happens to a request that does not get through
+
+  **A public deployment was an amplifier.** Unauthenticated traffic — which anyone can generate — was relayed to GitLab one request for one, and on gitlab.com that became rate-limit pressure charged to *this server's* address, landing on the legitimate users who share it. Three layers now sit in front：a per-address failure budget checked before anything else, a five-minute rejected-token cache keyed by SHA-256 digest (never the raw credential, bounded to 4096 entries because callers choose the keys), and the existing verified-identity cache. Six retries with the same bad token now reach GitLab once.
+
+  **A throttled GitLab was reported as an invalid token.** A `429` was wrapped in `ErrInvalidToken`, so a well-behaved MCP client did the worst possible thing：discarded a perfectly good credential and started a fresh authorization flow — more upstream traffic at the exact moment the instance asked for less, and a user asked to re-approve an application that was never at fault. Upstream conditions now answer `503`, carry GitLab's own `Retry-After`, and are never cached as a rejection.
+
+  **Rejections say what they are.** RFC 6750 `error` codes distinguish *reauthorize* from *ask for more scope* from *just retry*, in the JSON-RPC shape the rest of the endpoint uses rather than plain text — which a client is told by the specification to read as an initialization-era server, turning a missing header into a false protocol diagnosis.
+
+  **Least-privilege scope.** A read-only deployment asks for `read_api` instead of `api`, and `api` is accepted where `read_api` is required, since it is a strict superset. Real introspection had turned the old hardcoded `api` into a lockout for `read_api` tokens.
+
+  ## Fixes you would only notice in the logs
+
+  **Every HTTP legacy request logged no user at all.** Identity was read from a field only the SDK's bearer middleware can populate, and legacy mode does not mount it, so the zero identity resolved every time. The pool now resolves the user once when it builds an entry — one call per entry, not per request.
+
+  **`Bearer` is matched case-insensitively**, per RFC 9110. The SDK verified the token, spending an API call, and the gate then refused it.
+
+  **The SEP-2243 header annotation was doubled.** The SDK prepends `Mcp-Param-` on both the sending and validating side, so declaring the full name put `Mcp-Param-Mcp-Param-Action` on the wire and made the documented header a mismatch.
+
+  **`PUBLIC_URL` and `TRUSTED_ORIGINS` are read in HTTP mode.** Both were documented and neither was consulted, so a compose deployment configured entirely through the environment could never enable OAuth.
+
+  **Concurrent clients sharing one credential build one entry, not one each.** A normal startup burst of twelve connections cost twenty-four upstream probes for a single token; the waiters now block exactly as long as they would have anyway, and the upstream cost is one.
+
+  **A pooled entry is never cached for a server that was not built.** A factory reporting success while returning nothing was inserted, then rejected on the way out — so the caller who triggered it got an error and every later caller for that credential got a nil server with a nil error. Not reachable with the current factory; the contract was wrong regardless.
+
+  ## Tests
+
+  **`make test-e2e-http` — 125 cases, about three minutes, no GitLab and no credentials.** The existing e2e suite drives tools through an in-memory transport, which answers *"does this tool work against GitLab"* and none of *"does this endpoint behave"*. Cross-origin decisions, preflight, auth modes, rate limiting, rejection shapes and every limiting flag live in a handler chain no test could import. Four bugs shipped through that gap in a row, each found by hand after the previous fix looked complete. It now runs on every pull request, and four of the fixes above are its findings.
+
+  It includes a real nginx in Docker, because that is where a whole class of failure lives — a proxy that answers `OPTIONS` itself hides a server that cannot, which is exactly how the broken preflight shipped.
+
+  **Unit coverage of `internal/` is at 99.85%**, up from 99.65%. What was missing were whole behaviours, not stray lines：the entire multi round-trip branch of URL elicitation, the guard between a work-item update and the two lists GitLab replaces wholesale, and approver-filter validation on three of the four merge-request list surfaces — where GitLab silently drops a filter it cannot parse and returns a confidently unfiltered result.
+
+  ## Upgrading
+
+  Drop-in for stdio. For HTTP behind a proxy, read the warning at the top — it is the one change this release requires you to make yourself.
+ReleaseNotesUrl: https://github.com/jmrplens/gitlab-mcp-server/releases/tag/v2.7.5
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://jmrplens.github.io/gitlab-mcp-server/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

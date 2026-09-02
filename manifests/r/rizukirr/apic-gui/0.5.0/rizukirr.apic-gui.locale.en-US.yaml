@@ -1,0 +1,60 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: rizukirr.apic-gui
+PackageVersion: 0.5.0
+PackageLocale: en-US
+Publisher: Rizki Rakasiwi
+PublisherUrl: https://github.com/rizukirr
+PublisherSupportUrl: https://github.com/rizukirr/apic/issues
+Author: Rizki Rakasiwi
+PackageName: apic-gui
+PackageUrl: https://github.com/rizukirr/apic
+License: MIT
+LicenseUrl: https://github.com/rizukirr/apic/blob/main/LICENSE
+Copyright: Copyright (c) Rizki Rakasiwi
+ShortDescription: Desktop GUI for apic — design and collaborate on Git-friendly API contracts.
+Description: apic-gui is the desktop front-end for apic, built on the shared apic-core, for designing, validating, and collaborating on API contracts with a graphical interface.
+Moniker: apic-gui
+Tags:
+- api
+- contract
+- gui
+- json
+- rest
+ReleaseNotes: |-
+  The desktop GUI gains a git panel. The CLI, the TUI and the contract format are unchanged, so existing projects need no migration and nothing has to be updated to keep working.
+
+  ## Git panel in the desktop GUI
+
+  A second sidebar tab, next to Explorer, that appears when the project sits inside a git repository. It shells out to your own `git`, so hooks, credential helpers and config behave exactly as they do in a terminal.
+
+  **Status and staging.** Changed files listed under `CONFLICTS`, `STAGED` and `UNSTAGED`, nested by folder like the Explorer tree, scoped to your contract working directory plus `.apic/`. Changes elsewhere in the repository are counted on a line you can expand rather than hidden. Stage, unstage and discard with `+`, `-` and `x` on any file or folder, then commit. Discard is offered for tracked files only and always names what it will revert.
+
+  **Diffs.** Selecting a file shows it whole with changed lines coloured. A toggle switches to a field-level summary that names each changed field and its old and new value, which is the better view for a schema change buried in a large contract.
+
+  **Branches.** A dropdown lists every local branch. Picking one checks it out, `+` creates one, `x` deletes one behind a confirmation. Deleting is never forced, so git's refusal to drop unmerged work is surfaced rather than overridden. A checkout is refused while a contract has unsaved edits, and after a successful switch the open contract is reloaded from the new branch or closed if it does not exist there.
+
+  **Conflict resolution.** A conflicted file opens a resolver：each conflict block in file order with both sides shown, and `Accept ours`, `Accept theirs` or `Accept both` per block. A live preview shows the resulting file as you choose. Nothing is written until Resolve, which stays disabled until every block is decided, then writes the file and stages it.
+
+  Not included：merge, pull, fetch, rebase, stash and remote branches.
+
+  ## Under the hood
+
+  `apic-gui` was restructured into `app`, `features` and `ui` layers. `main.rs` was split into app modules, `ContractsState` and `ShellState` were extracted from `App`, panel frames moved into a shell, and the widget and theme modules were split into components, focus, colours, spacing and typography.
+
+  A suite of git wiring tests was added, driving a real `App` against a real temporary repository with no rendering. It caught several defects that unit tests on individual functions could not, including one that only appeared on macOS.
+
+  Dependencies are on their latest stable versions, including eframe and egui 0.36.
+
+  ## Fixed
+
+  • Scope paths are resolved through symlinks before comparison, closing a case where a symlinked directory made the git panel treat in-scope files as out of scope.
+  • Unstaging an untracked file works correctly, instead of leaving it staged.
+
+  ## Install
+
+  Prebuilt binaries for Linux, macOS and Windows are attached below, each with a `.sha256`. The desktop GUI ships as a Windows MSI and a macOS `.app` bundle. See the README for package manager options.
+ReleaseNotesUrl: https://github.com/rizukirr/apic/releases/tag/v0.5.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
