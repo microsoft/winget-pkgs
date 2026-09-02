@@ -1,0 +1,59 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: FahrenheitResearch.ArWen
+PackageVersion: 2.6.4
+PackageLocale: en-US
+Publisher: Fahrenheit Research
+PublisherUrl: https://github.com/FahrenheitResearch
+PublisherSupportUrl: https://github.com/FahrenheitResearch/arwen/issues
+Author: Fahrenheit Research
+PackageName: ArWen
+PackageUrl: https://github.com/FahrenheitResearch/arwen
+License: Apache-2.0
+LicenseUrl: https://github.com/FahrenheitResearch/arwen/blob/main/LICENSE
+Copyright: Copyright © Fahrenheit Research
+CopyrightUrl: https://github.com/FahrenheitResearch/arwen/blob/main/LICENSE
+ShortDescription: 'ArWen: GPU-native WRF-ARW-class regional weather model, verified against WRF v4.6.1'
+Description: "ArWen is an independent, GPU-native implementation of a WRF-ARW-class regional atmospheric model. It is not affiliated with or endorsed by NCAR or UCAR. The name is a wordmark for \"the ARW solver, GPU-native\"; the Python package is currently named gpuwm. Safety. ArWen is a research and educational tool. It is never a substitute for official forecasts and warnings from your national meteorological service. Do not use it to make safety decisions. Regional numerical weather prediction at convective scale has mostly required institutional clusters, which means most of the world runs on global-model guidance at 10-25 km. ArWen's aim is to put a verified, kilometer-scale limited-area model on a single consumer GPU: pick a point, size a nest ladder to your card, pull public analysis data, and run a 1 km (or 500 m) simulation of your own area on hardware you own -- especially in places where no national convection-permitting model exists."
+Moniker: arwen
+ReleaseNotes: |-
+  A third cumulus scheme, and two fixes that were live in 2.6.3: nest
+  relocation leaked the physics driver, and the prepared cache refused
+  every tree written before 2.6.1.
+  New:
+  - cu_physics = 16 selects New Tiedtke, the WRF v4.6.1 module_cu_ntiedtke
+    scheme ported to CUDA. All 21 stages and the assembled pipeline reproduce
+    the byte-frozen Fortran bitwise over an 18-case, 6-spacing oracle corpus
+    that ships with the wheel. It requires a PBL scheme and cudt_minutes = 0
+    and refuses by name otherwise; its state rides across a restart; chunking
+    is proven not to imprint (nine of nine output files byte-identical at two
+    chunk widths on a real two-domain case). ntiedtke_tiedtke_closure
+    (default off) runs its kernels with classic Tiedtke's deep closure.
+    docs/cumulus-new-tiedtke.md records the scheme's grid-thickness deep
+    first guess and what it does to a tropical-cyclone core.
+  - Per-level diabatic heating is written for every configuration
+    (H_DIABATIC, RTHRATLW, RTHRATSW). The three were computed each step
+    and discarded; writing them changes no forecast value.
+  Fixed:
+  - Nest relocation freed neither the dropped physics driver nor its cumulus
+    adapter: the two held each other in a reference cycle, so every relocation
+    left the whole driver graph resident on the card (measured per relocation:
+    Grell-Freitas 35 MiB, New Tiedtke 61 MiB, Kain-Fritsch 1.3 MiB). The
+    adapter now releases its driver at relocation and the receipt carries
+    cumulus_workspace_bytes. Output is byte-identical before and after.
+  - Prepared trees written before run.p3_backend joined the run config were
+    refused with these identity fields differ: run.p3_backend. The field
+    joins the tolerant identity table: it is scoped to mp_physics = 50, so a
+    tree written before it existed could not have selected a backend, and a
+    tree that carries a value is still compared strictly.
+  Credit:
+  - Roch contributed the New Tiedtke port, its oracle corpus and suites, and
+    both fixes.
+ReleaseNotesUrl: https://github.com/FahrenheitResearch/arwen/releases/tag/v2.6.4
+InstallationNotes: |-
+  This application requires an NVIDIA GPU with CUDA support to run.
+  Will not function on integrated graphics or non-NVIDIA hardware.
+  Without compatible hardware, the application will fail to launch.
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
