@@ -1,0 +1,91 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Anthropic.ClaudeCode
+PackageVersion: 2.1.232
+PackageLocale: en-US
+Publisher: Anthropic PBC
+Author: Anthropic PBC
+PackageName: Claude Code
+License: Proprietary
+Copyright: © 2026 Anthropic PBC
+ShortDescription: Unleash Claude’s raw power directly in your terminal. Search million-line codebases instantly. Turn hours-long workflows into a single command. Your tools. Your workflow. Your codebase, evolving at thought speed.
+Description: |-
+  Claude Code is Anthropic’s agentic coding tool that lives in your terminal and helps you turn ideas into code faster than ever before.
+  What Claude Code does for you
+  - Build features from descriptions: Tell Claude what you want to build in plain English. It will make a plan, write the code, and ensure it works.
+  - Debug and fix issues: Describe a bug or paste an error message. Claude Code will analyze your codebase, identify the problem, and implement a fix.
+  - Navigate any codebase: Ask anything about your team’s codebase, and get a thoughtful answer back. Claude Code maintains awareness of your entire project structure, can find up-to-date information from the web, and with MCP can pull from external datasources like Google Drive, Figma, and Slack.
+  - Automate tedious tasks: Fix fiddly lint issues, resolve merge conflicts, and write release notes. Do all this in a single command from your developer machines, or automatically in CI.
+  Why developers love Claude Code
+  - Works in your terminal: Not another chat window. Not another IDE. Claude Code meets you where you already work, with the tools you already love.
+  - Takes action: Claude Code can directly edit files, run commands, and create commits. Need more? MCP lets Claude read your design docs in Google Drive, update your tickets in Jira, or use your custom developer tooling.
+  - Unix philosophy: Claude Code is composable and scriptable. tail -f app.log | claude -p "Slack me if you see any anomalies appear in this log stream" works. Your CI can run claude -p "If there are new text strings, translate them into French and raise a PR for @lang-fr-team to review".
+  - Enterprise-ready: Use Anthropic’s API, or host on AWS or GCP. Enterprise-grade security, privacy, and compliance is built-in.
+Moniker: claudecode
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- claude
+- claude-code
+- claudecode
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  - Subagent forking is now on by default: a subagent_type: "fork" subagent inherits the full conversation and prompt cache, and non-teammate agent spawns in interactive sessions now run in the background by default
+  - Type @ in the prompt to mention another Claude session by name; Claude then uses SendMessage to reach that session directly
+  - SendMessage now delivers to a bare name that exactly matches one live session, instead of asking to confirm with a ref first
+  - Interactive sessions on one machine now keep unique names: starting or renaming a session to a name another live session already uses gives it a name-word-word variant and tells you
+  - Added /config rows for "Dialog expiry" and "Messages from your other sessions" (cross-session inbound accept/hold/refuse)
+  - Added secret redaction for GitLab token families (glrt-, gloas-, glptt-, glagent-, glimt-, glsoat-, glcbt-, glft-, glffct-) and full redaction of routable glpat-/gldt- tokens; the glab CLI config store gets the same sandbox and credential-path protection as gh
+  - Added GitLab support to plugin marketplaces: bare gitlab.com repo URLs (including nested subgroups) now clone like github.com URLs, and clone auth-failure hints name your actual git host
+  - Settings: additionalMarketplaces and allowedMarketplaces are now accepted as friendlier aliases for extraKnownMarketplaces and strictKnownMarketplaces
+  - Enterprise policy: a url-typed blockedMarketplaces entry for a bare repo URL keeps blocking that URL when the CLI classifies it as a git clone
+  - Gateway: the desktop: overlay now accepts every released Desktop setting (was 11 hand-listed keys), validated at boot against Desktop's own schema; unknown or invalid keys fail boot
+  - Gateway: empty managed.policies[].match.groups/admin.admin_groups entries and malformed email_domain values (empty, or containing @, whitespace, or commas) now fail at boot instead of silently matching no one or granting admin access
+  - Fable 5 is offered as an advisor in /advisor again for organizations with Fable access, with usage-credits consent set up through /model fable
+  - Fixed a PowerShell permission bypass where variable-writing parameters could silently overwrite $PSDefaultParameterValues and redirect later commands' file access
+  - Fixed a Windows permission bypass where Git Bash followed Cygwin-style symlinks that path validation saw as regular files; writes through them now require permission approval
+  - Fixed nested git repositories inheriting trust from a parent directory; each repository now requires its own trust confirmation
+  - Fixed MCP connections hanging for the full 30-second connect timeout when a server fails to answer or sends a malformed reply to the protocol-version probe
+  - Fixed Remote Control sessions hosted by a bridge inside a cloud session inheriting that session's transcript or credentials
+  - Fixed Remote Control sessions started from Claude Desktop or an IDE appearing as a new claude.ai session each time the local session was resumed; they now reattach to the existing one
+  - Fixed Remote Control sessions appearing unreachable to newly attached clients while idle
+  - Fixed Remote Control bridge sessions not restoring conversation history when the session worker restarts
+  - Remote Control: resuming a conversation whose session was deleted from claude.ai or the app now starts a replacement instead of failing with a message about your login (regressed in v2.1.227)
+  - Fixed Cloud gateway /login exiting silently or leaving an unresponsive terminal after "Press Enter to continue" when managed settings failed to load; the reason is now shown
+  - Fixed voice mode on native builds getting stuck on "listening…" when the voice service rejected the connection; the rejection is now shown immediately
+  - Fixed mTLS client certificate rotation requiring a restart; Claude Code now reloads the rotated cert and key automatically on connection errors
+  - Fixed malformed AWS or Vertex region values being used to build request URLs; they now fall back to the default region
+  - Fixed stream idle timeout errors failing the request instead of recovering on Bedrock, Vertex, and gateway deployments
+  - Fixed content-sized overlays containing truncated text rendering one column too wide, and start-truncated text collapsing to an ellipsis
+  - Fixed a stray garbled character where a long shell-command or agent-description preview was cut off mid-emoji
+  - Fixed a startup race that could silently unregister a plugin marketplace due to concurrent writes to known_marketplaces.json
+  - Fixed /update and /tui refusing to restart while work that survives the relaunch was running
+  - Fixed usage-limit guidance suggesting unavailable slash commands in SDK and remote sessions
+  - Fixed the consent message for interactive --advisor fable launches, which told you to run /model fable in an interactive session that had just exited
+  - Improved fullscreen streaming: long sessions stay responsive because the whole conversation is no longer re-normalized on every update
+  - Improved the managed settings approval dialog: shows endpoint URLs, uses clearer wording for telemetry-only changes, skips routine OpenTelemetry options, and requires approval for server-managed sandbox binary overrides (sandbox.bwrapPath, sandbox.socatPath, sandbox.ripgrep)
+  - /feedback and /bug now open immediately when invoked while Claude is responding, instead of waiting for the turn to finish
+  - /plugin install plugin@marketplace now refreshes the marketplace first, so newly published plugins install without a manual marketplace update
+  - /code-review at high, xhigh, and max effort now runs in a background agent like the other levels
+  - Pasted and clipboard images are read without blocking the event loop
+  - Remote Control now keeps reconnecting for about 30 minutes after a network blip and no longer drops after a few blips spread across an hour
+  - Remote Control: resuming a conversation no longer silently takes Remote Control away from another Claude Code on the same machine that still has it; run /remote-control there to move it
+  - Updated agent panel: completed subagents hide immediately with a /tasks footer hint, and the "↓ N more" overflow indicator moved left for visibility
+  - Remote Control: the terminal now says whether a session was taken over by another device, ended from another app, or deleted, and stops suggesting a reconnect that would undo it
+  - Bash input redirections (< file) are now permission-checked like their argument spellings on all platforms
+  - Shortened the message shown when resuming a completed background agent
+  - Cowork sessions no longer inline external @-imports from user-scope memory files
+  - Hardened the auto-generated cross-session messaging socket directory on shared /tmp: a pre-planted symlink or another user's directory is now refused instead of used
+  - Hardened the Linux filesystem sandbox against a protected-path bypass
+  - Changed sandbox.ripgrep to be honored only from user, managed, and --settings settings; project settings can no longer override the sandbox's ripgrep binary
+  - Removed the startup tip suggesting you create custom subagents, and the matching nudge in the /powerup tour
+ReleaseNotesUrl: https://github.com/anthropics/claude-code/blob/HEAD/CHANGELOG.md#21232
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
