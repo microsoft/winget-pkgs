@@ -275,7 +275,9 @@ safe-outputs:
       if: >-
         needs.detection.result == 'success' &&
         needs.detection.outputs.detection_success == 'true'
-      permissions: {issues: write}
+      permissions:
+        issues: write
+        pull-requests: read
       inputs:
         body:
           description: Complete comment body without the template footer
