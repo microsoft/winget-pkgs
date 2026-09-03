@@ -1,0 +1,92 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: NortheBridge.LuminalShine
+PackageVersion: 26.08.4
+PackageLocale: en-US
+Publisher: NortheBridge Foundation
+PublisherUrl: https://github.com/NortheBridge
+PublisherSupportUrl: https://apps.northebridge.com/en/luminalshine
+Author: NortheBridge Foundation
+PackageName: LuminalShine
+PackageUrl: https://github.com/NortheBridge/luminalshine
+License: GPL-3.0
+LicenseUrl: https://github.com/NortheBridge/luminalshine/blob/HEAD/LICENSE
+Copyright: Copyright (c) NortheBridge Foundation
+ShortDescription: A Modern Self-hosted High Performance Sunshine-compatible game stream host for Moonlight designed for Windows 11 and Windows 11 Insider Preview. Maintained by the NortheBridge Foundation.
+Description: Modern Self-Hosted High Performance Sunshine-compatible game streaming host for Moonlight clients designed for Windows 11 and Windows 11 Insider Preview.
+Moniker: luminalshine
+Tags:
+- amdgpu
+- blackwell-gpu
+- contributions-welcome
+- contributors-welcome
+- cpp
+- game-stream
+- game-streaming
+- game-streaming-server
+- geforce-experience
+- intelgpu
+- moonlight
+- nvidia-gpu
+- python
+- remote-desktop
+- windows-insiders
+- windows11
+ReleaseNotes: |-
+  LuminalShine 26.08.4
+  Important
+  Bundled virtual display driver: LuminalVGD v0.1.0-alpha.9
+  Signed driver 0.1.0.27 · protocol 0.10 · Build 27 · driver build date August 7, 2026
+  LuminalShine 26.08.4 is a stable Windows reliability and documentation release. It improves behavior under heavy GPU-memory pressure, restores the preferred NVIDIA driver-settings path with compatibility fallback, makes forced shutdowns cleaner when the graphics stack is wedged, and brings the public architecture documentation in line with the implementation—including the existing AMD AMF hardware-encoding pipeline.
+  Highlights
+  - VRAM paging-stall mitigation: LuminalShine now maintains a cooperative IDXGIAdapter3 video-memory reservation for each active adapter. The reservation tracks the process working set with bounded headroom, observes Windows VidMm budget changes, and logs material usage, budget, reservation, and over-budget transitions.
+  - Paging-storm pressure relief: repeated large budget moves are recognized as a paging storm. Capture temporarily halves its claim rate while VidMm is moving allocations in bulk, then automatically returns to full rate after the budget settles. This reduces LuminalShine's contribution to GPU/PCIe stalls during high-pressure game transitions.
+  - NVIDIA power-profile compatibility: the official NvAPI_DRS_SetSetting interface is preferred again so legacy DRS settings—including the high-performance power-state pin—work on current R610-era drivers. The NVIDIA-App-era interface remains available as a call-time fallback.
+  - Cleaner recovery from wedged shutdowns: if orderly termination cannot complete within ten seconds, LuminalShine now exits without deliberately generating a crash dump in the middle of a graphics-stack collapse; the service wrapper can restart it cleanly.
+  - AMD AMF architecture reference: a transparent 1672 × 941 PNG at mmd/AMD_AMF_PIPELINE.png documents the already-implemented FFmpeg/AMF hardware path, including D3D11 capture/input, runtime probing, H.264/AVC, HEVC, and AV1 selection, color/HDR handling, low-latency controls, safeguards, hardware/driver requirements, and encoded-frame delivery.
+  AMD AMF support in this release
+  AMD AMF hardware encoding was already implemented in LuminalShine and remains fully available in 26.08.4 through the FFmpeg AMF encoders. At startup LuminalShine probes the installed AMD AMF runtime (amfrt64.dll) and per-codec capabilities, binds AMF to a D3D11 device, and exposes H.264/AVC, HEVC, and AV1 when supported by the installed AMD GPU and driver. The new diagram makes that implemented path easy to audit; this release does not replace the encoder implementation with documentation-only behavior.
+  Documentation and project presentation
+  This release contains the complete Claude-assisted documentation series merged after 26.08.3:
+  - README modernization (#150): refreshed the project overview and feature list; linked the official LuminalShine product page; described LuminalVGD as the shipped first-party virtual-display backend; updated Windows system, hardware, software, development, WebRTC, encoder, Vue/Tailwind, WiX 7, WinGet, portable-package, licensing, and contributor information.
+  - Correct documentation URL (#151): replaced the stale documentation address with the official appdocs.northebridge.com/projects/luminalshine/en/latest/ site.
+  - Direct-to-Encoder architecture (#152): corrected the capture description to show DWM rendering into LuminalVGD, frames and HDR metadata crossing the shared-texture VGD ring, and the D3D11, D3D11-on-D3D12, and native D3D12 encode paths. WGC is documented as the seamless mid-stream fallback with active D2E restoration and DXGI Desktop Duplication as the last-resort tier.
+  - Remove obsolete SudoVDA references (#153): aligned the README with the current product by identifying LuminalVGD as the sole virtual-display backend.
+  - AMD AMF pipeline chart (#155): added the transparent PNG architecture chart covering the implemented AMF pipeline, supported codecs, runtime/capability probing, safeguards, and requirements.
+  Windows stability work
+  The VRAM stability change in #154 includes:
+  - one idempotent, process-lifetime VRAM keeper per adapter LUID;
+  - cooperative reservation sizing based on current local-memory use plus 12.5% headroom, clamped to Windows' available reservation budget;
+  - reservation hysteresis to avoid churn from ordinary frame-to-frame allocation movement;
+  - event-driven VidMm budget monitoring with a polling fallback;
+  - paging-storm detection after three significant budget changes within five seconds, with a rolling three-second recovery hold;
+  - automatic temporary capture-rate reduction during a storm and full-rate restoration afterward;
+  - explicit telemetry for VRAM usage, budget, reservation, over-budget state, and storm start/end;
+  - official-first NVAPI DRS setting resolution with compatibility fallback; and
+  - forced-exit behavior that avoids creating misleading crash dumps for known wedged teardown paths.
+  Build and release verification
+  - Built by the repository's official Windows release workflow from commit 1077efcd82bc9470c099419a43c776c84cbeb937.
+  - Signed LuminalVGD bundle download verified against its pinned SHA-256 before packaging; the bundled catalog and driver DLL passed Authenticode validation.
+  - Native build, executable signing, WiX MSI/portable packaging, MSI upgrade-compatibility and invariant gates, MSI/bootstrapper signing, staged signature verification, C++ tests, configuration-consistency checks, and debug-symbol packaging completed successfully in GitHub Actions run 32600108123.
+  - The release tag is pinned to the exact commit that produced the binaries.
+  Downloads
+  - LuminalShine_x64-installer.exe — recommended signed Windows installer; contains the MSI payload and bundled LuminalVGD driver.
+  - LuminalShine_x64-portable.zip — portable Windows package.
+  - LuminalShine_x64-debuginfo.7z — debug symbols for diagnostics.
+  Checksums (SHA-256)
+  912be4bd520f9af591a40dfb815e78a41d6efc3a861eef428bd7987ed2f9d3eb  LuminalShine_x64-installer.exe
+  b14607795481c03b6762fcd9745fa3801b9b9c368a22944041fc7d3861947f9b  LuminalShine_x64-portable.zip
+  d654e8396fc93382bb6205f10be291eced2a3641a4a5413adbec31369f114836  LuminalShine_x64-debuginfo.7z
+  The attached SHA256SUMS file can be checked with sha256sum -c SHA256SUMS or compared with Get-FileHash -Algorithm SHA256 on PowerShell.
+  Full change list
+  - #150 — README: modernize for current LuminalShine
+  - #151 — README: correct documentation site URL
+  - #152 — README: describe the Direct-to-Encoder capture architecture
+  - #153 — README: drop SudoVDA references
+  - #154 — Windows: mitigate VRAM paging stalls
+  - #155 — Docs: add AMD AMF pipeline architecture chart
+  Full comparison: 26.08.3...26.08.4
+ReleaseNotesUrl: https://github.com/NortheBridge/luminalshine/releases/tag/26.08.4
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

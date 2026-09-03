@@ -1,0 +1,34 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Iewnfod.LuminaTerminal
+PackageVersion: 0.2.3
+PackageLocale: en-US
+Publisher: iewnfod
+PublisherUrl: https://github.com/iewnfod
+PublisherSupportUrl: https://github.com/iewnfod/lumina-terminal/issues
+Author: Iewnfod
+PackageName: Lumina Terminal
+PackageUrl: https://github.com/iewnfod/lumina-terminal
+License: MPL-2.0
+LicenseUrl: https://github.com/iewnfod/lumina-terminal/blob/HEAD/LICENSE
+ShortDescription: A modern, cross-platform terminal emulator built with Tauri, React, and Xterm.js.
+Description: Lumina Terminal is a modern, cross-platform terminal emulator built with Tauri, React, and Xterm.js, featuring a sleek UI, a command palette, and customizable profiles. Each tab runs a real shell process with multi-tab support, tear-off tabs, find-in-terminal, configurable shells (PowerShell, WSL, Git Bash, or any executable), an optional WebGL renderer, and session save and restore.
+Tags:
+- console
+- shell
+- terminal
+ReleaseNotes: |-
+  ✨ Features
+  - Wrap a profile as an app — Any profile can now generate a real desktop launcher that opens it in its own window: a Linux .desktop entry, a macOS .app bundle, or a Windows Start-Menu shortcut, each with its own title, working directory, sidebar visibility, and icon (auto-derived from the startup command, or picked manually via the new shared icon picker). Launchers regenerate on every settings save and orphaned ones prune themselves. Configure per profile in Settings → Profiles
+  - Copy, select-all & paste bindings — Ctrl+Shift+C/Cmd+Shift+C, Ctrl+Shift+A, and Ctrl+Shift+V now work out of the box as rebindable actions, replacing the hard-coded copy handler and the copyWithCtrl swap setting. Copy with nothing selected falls through to the shell, so even a copy rebound to plain Ctrl+C stays SIGINT-safe; paste goes through xterm's bracketed-paste path, and clipboard reads use the native plugin because WKWebView/WebKitGTK reject navigator.clipboard reads
+  -  --sidebar show|hide launch flag — Overrides sidebar visibility for a single launch without overwriting the stored setting (the first explicit toggle drops the override). Unlike the tab-shaping flags, it does not affect tab seeding or skip session restore
+  🐛 Bug Fixes
+  -  -e/--command parsing — Previously everything after -e was swallowed verbatim, so Lumina's own flags could never follow the command. Now -T/--title, --hold, --working-directory, --profile, and --sidebar after -e parse as flags again (lumina-terminal -e nvim -T nvim works), while unknown dash tokens (grep -n), repeated -e (grep -e pat), and --help remain command data — and -- forces fully verbatim capture for commands using the same spellings (-e -- ssh -T host)
+  🎨 Polish
+  - Tolerant color-spread edge detection — The background bleed for fullscreen TUIs (vim, htop, lazygit…) no longer cancels when a single edge cell differs: a dominant color covering ≥90% of the sampled edge cells now wins, so a differently-colored statusline segment or characters touching the edge no longer leave a theme-colored border around the canvas
+  🔧 Chores
+  - Fixed the AUR publish trigger workflow: the repository-dispatch endpoint requires contents: write rather than actions: write, which had been causing 403s after release-triggered permission stripping
+ReleaseNotesUrl: https://github.com/iewnfod/lumina-terminal/releases/tag/v0.2.3
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
