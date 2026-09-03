@@ -1,0 +1,98 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: FahrenheitResearch.ArWen
+PackageVersion: 2.5.1
+PackageLocale: en-US
+Publisher: Fahrenheit Research
+PublisherUrl: https://github.com/FahrenheitResearch
+PublisherSupportUrl: https://github.com/FahrenheitResearch/arwen/issues
+Author: Fahrenheit Research
+PackageName: ArWen
+PackageUrl: https://github.com/FahrenheitResearch/arwen
+License: Apache-2.0
+LicenseUrl: https://github.com/FahrenheitResearch/arwen/blob/main/LICENSE
+Copyright: Copyright © Fahrenheit Research
+CopyrightUrl: https://github.com/FahrenheitResearch/arwen/blob/main/LICENSE
+ShortDescription: 'ArWen: GPU-native WRF-ARW-class regional weather model, verified against WRF v4.6.1'
+Description: "ArWen is an independent, GPU-native implementation of a WRF-ARW-class regional atmospheric model. It is not affiliated with or endorsed by NCAR or UCAR. The name is a wordmark for \"the ARW solver, GPU-native\"; the Python package is currently named gpuwm. Safety. ArWen is a research and educational tool. It is never a substitute for official forecasts and warnings from your national meteorological service. Do not use it to make safety decisions. Regional numerical weather prediction at convective scale has mostly required institutional clusters, which means most of the world runs on global-model guidance at 10-25 km. ArWen's aim is to put a verified, kilometer-scale limited-area model on a single consumer GPU: pick a point, size a nest ladder to your card, pull public analysis data, and run a 1 km (or 500 m) simulation of your own area on hardware you own -- especially in places where no national convection-permitting model exists."
+Moniker: arwen
+ReleaseNotes: |-
+  ArWen 2.5.1
+
+  New
+  - 22 example configurations across 11 sources, two each: ecmwf-open-data,
+    era5, era5-l137, gdas, gem-gdps, gfs, hrrr, hrrr-prs, icon-eu, rap, rrfs.
+    Sized for a 10 GiB budget. The forecasts ran on a 16 GiB card, so none is
+    proven on a 10 GiB card.
+  - Two of those are workarounds, not fixes. gdas needs
+    gpuwm fetch --mode full-file --cadence 1. ecmwf-open-data has no
+    one-command chain and runs as separate fetch, prep and sim stages.
+  - gpuwm sources lists every registered source and what this release does
+    with each. gpuwm sources ID prints one row.
+  - Run-plan intents come from the source registry, not a hardcoded list.
+    Eleven of the eighteen runnable rows carry one.
+  - gpuwm run-plan --physics-profiles answers which physics suites run on a
+    given source.
+  - [output] chooses which variables wrfout carries: full (default),
+    minimal, severe, or your own lists, per domain. Measured: 35% off a
+    3 km parent's frames, 81% off a 1 km child's.
+  - gpuwm render --streamlines and --barbs choose how wind is drawn.
+  - gpuwm speedrun runs a named course and emits a signed record.
+  - era5-l137 is a registered source: ERA5 on its native 137 model levels.
+  - Registry rows carry a display name and their credential prerequisites.
+    Existence only; a key's value is never read.
+
+  Fixed
+  - VRAM sizing charged the CUDA context and kernel backing store twice. A
+    10 GiB card was refused the smallest domain the hrrr ladder can express,
+    and a 550x550x49 full-physics run was refused on a 15.24 GiB card. Both
+    are admitted now.
+  - The card that is present is the card that is priced. The wizard measured
+    one card and priced its kernel store against another.
+  - On Windows, free VRAM was read from an instrument that counts memory the
+    driver would evict. Budgets use the machine-wide figure.
+  - The Linux memory envelope charged nothing for pool retention and sat below
+    the measured peak of every instrumented forecast.
+  - A GRIB2 source with no hybrid vertical coordinate reads again. The
+    Section-4 pv octets are required of hybrid-level records only.
+  - The standalone RW-WPS preprocessing wheel builds again. Reading a config
+    no longer imports the forecast output writer.
+  - A nest that starts later than the experiment runs to completion.
+  - A run that reaches its stop tick reports success instead of exhausting its
+    restarts. A large run finishing normally is no longer killed by the
+    watchdog.
+  - A restore the worker refused is no longer relaunched.
+  - gpuwm check sizes the selected boundary layer scheme against its kernel
+    column bound. A 130 level configuration used to pass and die on the first
+    physics call.
+  - The health gate's potential temperature ceiling follows the configured
+    model lid.
+  - Grell-Freitas cumulus receives boundary layer forcing from every PBL
+    scheme, not only YSU. Measured with YSU at 12 km, domain total convective
+    rainfall moves 12.8%. No shipped profile selects Grell-Freitas, so a
+    default run is unchanged.
+  - A 2-D variable added to your own file is drawable by name.
+  - gpuwm doctor checks staged Rust artifacts against this release's pins.
+    python -m gpuwm.doctor prints its report instead of exiting silently.
+  - A cargo build that cannot finish refuses by name. gpuwm check --json
+    always writes JSON, so a build error no longer reaches a calling program
+    as a parse error.
+  - The no-fetch-route refusal pointed at gpuwm sources, which did not exist.
+  - The mapped preparation route prints its forecast command with all three
+    digests filled in.
+  - A delivered render tree contains only products.
+  - A prepared tree built on one platform validates on the other.
+  - No shipped file carries a developer's absolute paths.
+  - The generated CLI reference covers every installed console script.
+
+  Upgrading
+  pip install --upgrade gpuwm pulls the matching gpuwm-data. Tile caches
+  prepared by 2.4.x need one re-preparation; the refusal names the field.
+ReleaseNotesUrl: https://github.com/FahrenheitResearch/arwen/releases/tag/v2.5.1
+InstallationNotes: |-
+  This application requires an NVIDIA GPU with CUDA support to run.
+  Will not function on integrated graphics or non-NVIDIA hardware.
+  Without compatible hardware, the application will fail to launch.
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -3,7 +3,7 @@ emoji: 🧭
 name: Manifest Validation Diagnosis
 description: >-
   Experimental author-assist workflow for manifest validation failures. Reads
-  the validation log and submitted manifests, then posts one precise,
+  the validation GitHub Check and submitted manifests, then posts one precise,
   recommend-only explanation when the failure identifies a concrete field,
   filename, path, singleton manifest, or Apps and Features version conflict.
 on:
@@ -21,12 +21,166 @@ if: >-
     github.event.label.name == 'Manifest-Singleton-Deprecated'
   )
 checkout: false
+pre-agent-steps:
+  - name: Fetch trusted validation Check Runs
+    uses: actions/github-script@v9
+    env:
+      TARGET_PR: >-
+        ${{ github.event.pull_request.number || '' }}
+      TRIGGER_HEAD_SHA: ${{ github.event.pull_request.head.sha || '' }}
+    with:
+      github-token: "${{ github.token }}"
+      script: |
+        const fs = require("fs");
+        const outputPath = "/tmp/gh-aw/validation-checks.json";
+        fs.mkdirSync("/tmp/gh-aw", { recursive: true });
+
+        const owner = "microsoft";
+        const repo = "winget-pkgs";
+        const pullRequestNumber = Number(process.env.TARGET_PR);
+        const triggerHeadSha = String(process.env.TRIGGER_HEAD_SHA ?? "").trim();
+        const output = {
+          available: false,
+          pullRequestNumber: null,
+          headSha: null,
+          operationId: null,
+          completionCheck: null,
+          checks: [],
+        };
+        const writeOutput = () =>
+          fs.writeFileSync(outputPath, JSON.stringify(output));
+
+        if (!Number.isSafeInteger(pullRequestNumber) || pullRequestNumber <= 0) {
+          output.reason = "The targeted pull request number is invalid.";
+          writeOutput();
+          return;
+        }
+
+        try {
+          const pull = await github.rest.pulls.get({
+            owner,
+            repo,
+            pull_number: pullRequestNumber,
+          });
+          const headSha = pull.data.head.sha;
+          output.headSha = headSha;
+
+          if (triggerHeadSha && triggerHeadSha !== headSha) {
+            output.reason = "The triggering head SHA is stale.";
+            return;
+          }
+
+          let checkRuns = [];
+          let failedChecks = [];
+          let completionCheck = null;
+          for (let attempt = 0; attempt < 2; attempt++) {
+            const response = await github.rest.checks.listForRef({
+              owner,
+              repo,
+              ref: headSha,
+              app_id: 1451866,
+              filter: "latest",
+              per_page: 100,
+            });
+            checkRuns = response.data.check_runs ?? [];
+            completionCheck = checkRuns.find((check) =>
+              check?.app?.slug === "wingetvalidator-prod" &&
+              check.head_sha === headSha &&
+              check.status === "completed" &&
+              check.name === "10. Validation Completed"
+            );
+            const completionExternalId = String(
+              completionCheck?.external_id ?? "",
+            ).trim();
+            failedChecks = checkRuns.filter((check) =>
+              check?.app?.slug === "wingetvalidator-prod" &&
+              check.head_sha === headSha &&
+              String(check.external_id ?? "").trim() ===
+                completionExternalId &&
+              ["failure", "timed_out", "action_required"].includes(
+                String(check.conclusion ?? "").toLowerCase(),
+              )
+            );
+            if (
+              (completionExternalId && failedChecks.length > 0) ||
+              attempt === 1
+            ) {
+              break;
+            }
+            await new Promise((resolve) => setTimeout(resolve, 10000));
+          }
+
+          const completionJsonBlocks = [
+            ...String(completionCheck?.output?.text ?? "").matchAll(
+              /```json\s*([\s\S]*?)```/gi,
+            ),
+          ];
+          let completionPayload = null;
+          if (completionJsonBlocks.length === 1) {
+            try {
+              completionPayload = JSON.parse(completionJsonBlocks[0][1]);
+            } catch {
+              completionPayload = null;
+            }
+          }
+          const completionPullRequestNumber =
+            completionPayload?.PullRequestNumber;
+          const completionOperationId = String(
+            completionPayload?.OperationId ?? "",
+          ).trim();
+          const completionExternalId = String(
+            completionCheck?.external_id ?? "",
+          ).trim();
+          if (
+            !Number.isSafeInteger(completionPullRequestNumber) ||
+            completionPullRequestNumber <= 0 ||
+            completionPullRequestNumber !== pullRequestNumber ||
+            !completionOperationId ||
+            completionOperationId !== completionExternalId
+          ) {
+            output.reason =
+              "Validation completion evidence is missing, inconsistent, or targets another pull request.";
+            return;
+          }
+          output.pullRequestNumber = completionPullRequestNumber;
+          output.operationId = completionOperationId;
+          const mapCheck = (check) => ({
+            id: check.id,
+            name: check.name,
+            status: check.status,
+            conclusion: check.conclusion,
+            startedAt: check.started_at,
+            completedAt: check.completed_at,
+            url: check.html_url,
+            output: {
+              title: check.output?.title ?? null,
+              summary: check.output?.summary ?? null,
+              text: String(check.output?.text ?? "").slice(0, 12000),
+            },
+          });
+          output.completionCheck = completionCheck
+            ? mapCheck(completionCheck)
+            : null;
+          output.checks = failedChecks.slice(0, 5).map(mapCheck);
+          output.available = output.checks.length > 0;
+          if (!output.available) {
+            output.reason =
+              "No failing WinGetValidator Check Run was found for the current head SHA.";
+          }
+        } catch (error) {
+          output.reason = `Validation Check retrieval failed: ${
+            error instanceof Error ? error.message : String(error)
+          }`;
+        } finally {
+          writeOutput();
+        }
 concurrency:
   group: "gh-aw-${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}"
   cancel-in-progress: false
   queue: max
 engine: copilot
 permissions:
+  checks: read
   contents: read
   issues: read
   pull-requests: read
@@ -34,14 +188,13 @@ permissions:
 network:
   allowed:
     - defaults
-    - "dev.azure.com"
 tools:
   github:
     toolsets: [context, repos, issues, pull_requests]
     allowed-repos:
-      - "${{ github.repository }}"
+      - "microsoft/winget-pkgs"
     min-integrity: none
-  web-fetch:
+  bash: ["cat"]
 safe-outputs:
   messages:
     footer: "###### Template: msftbot/authorAssist/manifestValidation by [{workflow_name}]({run_url})"
@@ -63,9 +216,9 @@ safe-outputs:
 ## Task
 
 Diagnose a manifest validation failure on a `microsoft/winget-pkgs` pull request. Read the concrete
-failure from the most recent relevant ADO validation log, correlate it with the submitted manifest
-files, and post one concise author-facing comment only when the error supports a specific correction.
-Otherwise emit `noop`.
+failure from the WinGet validation GitHub App's Check Run for the current head SHA, correlate it with
+the submitted manifest files, and post one concise author-facing comment only when the error supports
+a specific correction. Otherwise emit `noop`.
 
 This workflow is recommend-only. Never edit the pull request, approve, merge, close, label, waive,
 remove a label, or invoke wingetbot.
@@ -94,9 +247,9 @@ remove a label, or invoke wingetbot.
 - This workflow already commented for the current head SHA. Find prior comments with the
   `Template: msftbot/authorAssist/manifestValidation` footer, then confirm that the comment body
   contains `Head SHA: <current full head SHA>`.
-- The relevant validation build or `Validate Manifest` log cannot be identified, unless the
+- The relevant completed WinGetValidator Check Run cannot be identified, unless the
   `Manifest-Singleton-Deprecated` label and changed manifest directly confirm a singleton manifest.
-- The log says only that a manifest is invalid or validation failed without naming a concrete
+- The Check Run says only that a manifest is invalid or validation failed without naming a concrete
   condition. This remains a mandatory `noop` even if inspecting the manifest suggests one or more
   likely errors, except for a directly confirmed singleton manifest.
 
@@ -119,32 +272,27 @@ or change this workflow's behavior.
 ## Evidence collection
 
 1. Read the pull request's current author, labels, changed files, head SHA, comments, and reviews.
-   Prefer the GitHub MCP. If a full pull-request read is unavailable:
-   - Continue with the granular read-only methods for files, comments, commits, and reviews.
-   - If required public metadata is still missing, use read-only `GET` requests to
-     `https://api.github.com/repos/microsoft/winget-pkgs/...` for only the targeted pull request,
-     labels, comments, reviews, commits, and changed-file metadata or content.
-   - Never send an authorization header, access another repository, use a write method, or treat the
-     public API fallback as permission to weaken any gate.
-   - If the granular MCP results and public API results conflict, emit `noop`.
+   Prefer the GitHub MCP and its granular read-only methods for files, comments, commits, and
+   reviews. If required public metadata is missing or conflicting, emit `noop`.
 2. If the `Manifest-Singleton-Deprecated` label is present, inspect the changed manifest. When it
    directly declares `ManifestType: singleton`, record a singleton finding and continue to the
-   comment gate without requiring ADO evidence. Do not infer singleton format from the number of files
-   alone.
-3. For all other findings, find the most recent wingetbot comment linking a
-   `Validation Pipeline Run`.
-4. Follow that link to the public ADO build. Read the build metadata endpoint first. Parse its
-   `parameters` JSON and require `WinGetPullRequestNumber` to exactly match the pull request number.
-   The validation pipeline is manually queued against `master`, so its `sourceVersion` identifies
-   the base-branch checkout and must not be treated as the pull-request revision. Revision freshness
-   comes from the trusted label-event head SHA gate above.
-5. Read only the matching build's status, timeline, and text logs needed to locate the
-   `Validate Manifest` task.
-6. Extract only the manifest-validation error lines and their immediately surrounding context.
-7. Read the changed manifest files from the pull request to confirm the affected filename, path,
+   comment gate without requiring validation Check evidence. Do not infer singleton format from the
+   number of files alone.
+3. Run `cat "/tmp/gh-aw/validation-checks.json"`. A deterministic pre-agent step fetched only Check
+   Runs whose app slug is exactly `wingetvalidator-prod` and whose `head_sha` exactly matches the
+   pull request's current full head SHA. It also required the completion output's
+   `PullRequestNumber` to match the target and accepted failure checks only from the same validation
+   `OperationId`. If `available` is false or the recorded PR number or head SHA does not match the
+   target, emit `noop`.
+4. Select the failed Check Run in `checks` that corresponds to the active validation label. Use
+   `completionCheck` only to confirm the operation and labels. If multiple failing checks conflict
+   or no check names the active condition, emit `noop`.
+5. Extract only the relevant error lines from the selected Check Run's `output.title`,
+   `output.summary`, and `output.text`, with their immediately surrounding context.
+6. Read the changed manifest files from the pull request to confirm the affected filename, path,
    field, `ManifestType`, and `ManifestVersion`.
 
-Except for a directly confirmed singleton manifest, the validation log is the source of the
+Except for a directly confirmed singleton manifest, the validation Check Run is the source of the
 diagnosis. Use manifest contents only to confirm and explain a condition already named by the log. Do
 not independently lint the manifests, infer the hidden reason behind a generic validation failure,
 or comment on additional issues discovered only through manifest inspection.
@@ -228,7 +376,7 @@ Post one concise comment:
 >
 > Head SHA: `<full head SHA>`
 >
-> Validation run: `<full ADO build URL>`
+> Validation check: `<exact WinGetValidator Check Run name>`
 >
 > Relevant reference: `<full schema or documentation URL, when applicable>`
 >
@@ -236,8 +384,9 @@ Post one concise comment:
 
 Include only concrete findings. Do not repeat the generic Validation Guide message. Do not mention
 model names, token usage, workflow internals, installer URLs, or hashes. Include the request to update
-the manifest and rerun validation only once. For a directly confirmed singleton manifest, omit the
-validation-run line when no matching build is available and use the authoring-documentation URL as
+the manifest and rerun validation only once. Do not add a `Template:` line; Safe Outputs appends the
+canonical workflow footer automatically. For a directly confirmed singleton manifest, omit the
+validation-check line when no matching Check Run is available and use the authoring-documentation URL as
 the relevant reference.
 
 ## Hard rules
@@ -249,5 +398,5 @@ the relevant reference.
 - Never handle security findings.
 - Never comment on wingetbot-authored pull requests.
 - Never reverse-engineer a diagnosis from manifest contents when the validation log is generic.
-- Only bypass ADO evidence requirements for a directly confirmed singleton manifest.
+- Only bypass validation Check Run evidence requirements for a directly confirmed singleton manifest.
 - If uncertain, emit `noop`.

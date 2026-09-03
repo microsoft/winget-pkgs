@@ -1,0 +1,82 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: ggml.llamacpp
+PackageVersion: b10545
+PackageLocale: en-US
+Publisher: ggml
+PublisherUrl: https://github.com/ggml-org
+PublisherSupportUrl: https://github.com/ggml-org/llama.cpp/issues
+PackageName: llama.cpp
+PackageUrl: https://github.com/ggml-org/llama.cpp
+License: MIT
+LicenseUrl: https://github.com/ggml-org/llama.cpp/blob/HEAD/LICENSE
+ShortDescription: LLM inference in C/C++
+Tags:
+- ggml
+- llama
+ReleaseNotes: |-
+  metal : clamp K extent in tensor API mat-mat kernel for K not a multiple of 32 (#27450)
+  The Tensor API mat-mat path of kernel_mul_mm (GGML_METAL_HAS_TENSOR) fed a
+  static K=32 tile to the matmul2d op on every iteration. On the last, partial
+  K tile (ne00 % 32 != 0) the src1 slice extends past the K extent of the
+  tensor, and the op reads those out-of-bounds elements (undefined behavior per
+  the MSL specification, section 2.22.2). Depending on stale memory contents,
+  this corrupted the result or produced NaN.
+  Make the matmul2d op use dynamic_extent for K, and clamp the K extent of both
+  operand tensor views to the remaining valid K range (min(32, K - loop_k)) per
+  iteration, so the op reads exactly the valid K range on every iteration
+  (mirroring the tail handling of the MPP matmul2d examples). On K-aligned
+  inputs the clamp degenerates to the full 32-wide tile: the only difference
+  from the static-K op is that the dynamic-K op derives K from the operand
+  extents and edge-checks the tile against the tensor extents (a handful of
+  integer ops per iteration).
+  Add test-backend-ops MUL_MAT cases with K not a multiple of 32 to exercise
+  the unaligned K path.
+  Assisted-by: pi:llama.cpp/Qwen3.8-27B
+  Website:
+  - https://llama.app
+  Attestations:
+  - https://github.com/ggml-org/llama.cpp/attestations/42040575
+  macOS/iOS:
+  - macOS Apple Silicon (arm64)
+  - macOS Apple Silicon (arm64, KleidiAI enabled) DISABLED
+  - macOS Intel (x64)
+  - iOS XCFramework
+  Linux:
+  - Ubuntu x64 (CPU)
+  - Ubuntu arm64 (CPU)
+  - Ubuntu s390x (CPU)
+  - Ubuntu x64 (Vulkan)
+  - Ubuntu arm64 (Vulkan)
+  - Ubuntu x64 (ROCm 7.14)DISABLED
+  - Ubuntu x64 (OpenVINO)
+  - Ubuntu x64 (SYCL FP32)
+  - Ubuntu x64 (SYCL FP16)
+  Android:
+  - Android arm64 (CPU)
+  Windows:
+  - Windows x64 (CPU)
+  - Windows arm64 (CPU)
+  - Windows arm64 (OpenCL Adreno)
+  - Windows x64 (CUDA 12) - CUDA 12.4 DLLs
+  - Windows x64 (CUDA 13) - CUDA 13.3 DLLs
+  - Windows arm64 (CUDA 13) (preview) - CUDA 13.4 DLLs
+  - Windows x64 (Vulkan)
+  - Windows x64 (OpenVINO)
+  - Windows x64 (SYCL)
+  - Windows x64 (ROCm 7.14)
+  openEuler:
+  - DISABLED
+  - openEuler x86 (310p)
+  - openEuler x86 (910b, ACL Graph)
+  - openEuler aarch64 (310p)
+  - openEuler aarch64 (910b, ACL Graph)
+  UI:
+  - UI
+ReleaseNotesUrl: https://github.com/ggml-org/llama.cpp/releases/tag/b10545
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/ggml-org/llama.cpp/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

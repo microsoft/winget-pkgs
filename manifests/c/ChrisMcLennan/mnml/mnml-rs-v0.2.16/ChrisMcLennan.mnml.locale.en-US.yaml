@@ -1,0 +1,161 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: ChrisMcLennan.mnml
+PackageVersion: mnml-rs-v0.2.16
+PackageLocale: en-US
+Publisher: Chris McLennan
+PublisherUrl: https://github.com/chris-mclennan
+PublisherSupportUrl: https://github.com/chris-mclennan/mnml/issues
+Author: Chris McLennan
+PackageName: mnml
+PackageUrl: https://mnml.sh/
+License: Apache-2.0
+LicenseUrl: https://github.com/chris-mclennan/mnml/blob/main/LICENSE-MIT
+ShortDescription: A NvChad-style terminal IDE in Rust.
+Description: 'mnml is a terminal IDE: vim or standard editing, LSP, git, embedded HTTP/CDP/DAP, AI panes, headless test harness.'
+Tags:
+- editor
+- ide
+- rust
+- terminal
+- tui
+- vim
+ReleaseNotes: |-
+  Release Notes
+  Tester-round release. Two rounds of persona-driven bug hunts
+  (R10 nvchad-user / vscode-keyboard / api-workflow, then R11 of
+  each) turned up two SEV-1 stability bugs plus a wide field of
+  vim-fidelity + keyboard-completeness gaps. All fixed, most
+  with regression-lock tests.
+  Fixed
+  - Multi-cursor + /search + insert no longer panics
+    (#1149, 73618036). clear_find_and_deselect had cleared
+    extra_cursors but not extra_anchors, tripping a
+    debug_assert (and silently desyncing in release) on the very
+    next multi-cursor motion — the exact recovery gesture a user
+    would try after a /search on multi-cursor state. Both vecs
+    now clear together via Editor::clear_extra_cursors().
+  - <leader>n / [ui] line_numbers = false actually hides
+    the digits (#1149, 73618036 + 98c753ee). The renderer
+    was emitting format!("{:>0} ", n+1) which still produces
+    the digit at width 0. Guard the branch, and while
+    auditing, also fix the wrapped-continuation glyph's
+    gutter-width invariant for the same num_w == 0 case so
+    wrapped rows align with straight rows when line numbers
+    are off.
+  - Shift+Tab (both terminal forms) walks buffers
+    backward (#1149, 73618036 + 35d6a805). Some terminals
+    send Shift+Tab as Tab + SHIFT rather than BackTab;
+    bare Tab if !ctrl was catching that and running
+    buffer.next (the opposite direction). Explicit Tab if SHIFT arm added, ordered before the ctrl arm.
+    Ctrl+Shift+Tab now also lands on buffer.prev in both
+    vim and standard modes (VS Code muscle memory) — the
+    standard-mode binding was silently falling through to the
+    editor and inserting a literal \t.
+  - <leader>? cheatsheet Esc actually closes the pane
+    (#1149, 73618036). Was just refocusing off the pane
+    (which stayed open). NvChad's <leader>? is a floating
+    window that Esc dismisses; a Cheatsheet pane with no undo
+    state is safe to close on Esc.
+  - Y on empty line no longer captures \n (#1153, three
+    commits). NvChad's Y = y$ rewrite crossed the newline via
+    MoveRight on empty lines, so Y then p split whatever
+    was on the next line. Real vim y$ on empty is a no-op —
+    now matches. Same guard also fixes d$/c$ on empty which
+    used to delete the newline and merge lines.
+  - y operator now preserves the cursor across every yank
+    code path (#1153, three commits). All 5 yank arms —
+    generic motion, explicit Y, yf<c>/yt<c>, text-object
+    yanks (yiw, yap, ...), and ygn/ygN — now restore
+    ctx.cursor after YankSelection, matching vim's
+    y-preserves-cursor invariant.
+  - p no longer silently pastes stale system clipboard
+    after Y on empty line (#1149, 73618036). The
+    unnamed-register fallback path used to serve the OS
+    clipboard whenever it differed from the empty register.
+    Track register_owned — after any in-mnml yank/delete the
+    register is authoritative; only cold-start (pre-first-yank)
+    falls back to the OS. "+p still explicitly reads the OS
+    clipboard.
+  - Ctrl+K Ctrl+S opens keys.edit as advertised (#1154,
+    859b8ee5). The global Ctrl+S save-anywhere handler was
+    shadowing the chord chain. Guard on
+    pending_chord_seq.is_empty() so a chord in flight
+    resolves through the chain instead.
+  - Palette pane-scope regression fixed (#1154, 859b8ee5
+    - c1d2d5e9). priority = 1 from #1113 was a hard tier
+      that always beat fuzzy score, so common queries like
+      save file picked lsp.diagnostics_severity_filter_cycle
+      over file.save (a 341-score bull's-eye). New
+      PickerItem.score_bonus: i64 field lets you nudge without
+      the always-wins semantics — palette uses +20 for pane-
+      scope, +50 for recents, restoring the documented
+      "recents > pane-scoped > everything-else" invariant at
+      empty query while letting a strong match elsewhere still
+      win on typed queries.
+  - HTTP Env chip agrees with the pane (#1152, 56a94239).
+    Top-bar chip was using the legacy EnvSet::select and
+    showing none ▾ + warning-yellow when only workspace TOML
+    [http] default_env set the active env, while the Vars
+    tab / URL var-coloring / actual Send all correctly
+    resolved. Threaded config_default_env down + switched to
+    select_with_config_default.
+  - Response pane copy chip copies what's on screen
+    (#1152, 56a94239). Was hard-wired to
+    http_copy_response_body() regardless of which sub-tab was
+    active — clicking copy while viewing Headers silently
+    copied the body (toast literally said "response body
+    copied" while headers were on screen). Branches on
+    rp.response_tab and routes Headers → http_copy_response_ headers; Body/Timeline/Tests keep copying body.
+  - HTTP no longer auto-arms its filter on entry (#1154,
+    859b8ee5). Entering the HTTP activity opens a Request
+    pane that steals Focus::Pane, so typing landed in the
+    URL field instead of / filter. HTTP's "top thing you
+    type" is a URL, not a filter — leave HTTP unarmed.
+  - Scratch strip title uses the actual chord (#1155,
+    f92f5cfc). Focused label said "`term.scratch_toggle`
+    closes" — an internal palette command id, not a keyboard
+    chord. Now reads "Ctrl+` closes" (which is what actually
+    works).
+  Added
+  - <leader>fb / <leader>fg fast-fire chords (#1149,
+    4963cba9) — picker.buffers and find.grep bound directly
+    at the keymap layer, matching the space f f fast-fire
+    precedent. No whichkey overlay wait for these daily-hit
+    chords.
+  - [ui] tree_preview_on_arrow Settings row (#1155,
+    f92f5cfc) — the R10 F9 knob was TOML-only; now shows up
+    in Ctrl+, alongside the other UI toggles.
+  - PickerItem.score_bonus field (#1154, 859b8ee5) —
+    additive fuzzy-score bump for "prefer this row for ties"
+    without the always-wins semantics of priority. Palette
+    and future score-nudge use cases build on this.
+  - Regression-lock tests for the vim Tab-family arms and
+    the palette score_bonus tier order (#1154, f936dd75).
+    Both had flip-flopped across consecutive reviewer rounds;
+    the tests stop a third regression.
+  Install mnml-rs 0.2.16
+  Install prebuilt binaries via shell script
+  curl --proto '=https' --tlsv1.2 -LsSf https://github.com/chris-mclennan/mnml/releases/download/mnml-rs-v0.2.16/mnml-rs-installer.sh | sh
+  Install prebuilt binaries via powershell script
+  powershell -ExecutionPolicy Bypass -c "irm https://github.com/chris-mclennan/mnml/releases/download/mnml-rs-v0.2.16/mnml-rs-installer.ps1 | iex"
+  Download mnml-rs 0.2.16
+  ─────────────────────────────────────────────┬───────────────────┬─────────────
+  File                                         │Platform           │Checksum
+  ─────────────────────────────────────────────┼───────────────────┼─────────────
+  mnml-rs-aarch64-apple-darwin.tar.xz          │Apple Silicon macOS│checksum
+  ─────────────────────────────────────────────┼───────────────────┼─────────────
+  mnml-rs-x86_64-apple-darwin.tar.xz           │Intel macOS        │checksum
+  ─────────────────────────────────────────────┼───────────────────┼─────────────
+  mnml-rs-x86_64-pc-windows-gnu.zip            │x64 MinGW          │checksum
+  ─────────────────────────────────────────────┼───────────────────┼─────────────
+  mnml-rs-x86_64-pc-windows-gnu.msi            │x64 MinGW          │checksum
+  ─────────────────────────────────────────────┼───────────────────┼─────────────
+  mnml-rs-aarch64-unknown-linux-gnu.tar.xz     │ARM64 Linux        │checksum
+  ─────────────────────────────────────────────┼───────────────────┼─────────────
+  mnml-rs-x86_64-unknown-linux-gnu.tar.xz      │x64 Linux          │checksum
+  ─────────────────────────────────────────────┴───────────────────┴─────────────
+ReleaseNotesUrl: https://github.com/chris-mclennan/mnml/releases/tag/mnml-rs-v0.2.16
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
