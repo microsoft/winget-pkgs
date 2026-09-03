@@ -5,7 +5,8 @@ description: >-
   Experimental author-assist workflow for manifest validation failures. Reads
   the validation GitHub Check and submitted manifests, then posts one precise,
   recommend-only explanation when the failure identifies a concrete field,
-  filename, path, singleton manifest, or Apps and Features version conflict.
+  filename, path, unexpected file, singleton manifest, or Apps and Features
+  version conflict.
 on:
   pull_request_target:
     types: [labeled]
@@ -14,12 +15,14 @@ on:
 if: >-
   github.event_name == 'pull_request_target' &&
   github.event.action == 'labeled' &&
+  github.actor == 'wingetvalidator-prod[bot]' &&
   github.event.pull_request.user.login != 'wingetbot' &&
   (
     github.event.label.name == 'Manifest-Validation-Error' ||
     github.event.label.name == 'Manifest-Installer-Validation-Error' ||
     github.event.label.name == 'Manifest-AppsAndFeaturesVersion-Error' ||
-    github.event.label.name == 'Manifest-Singleton-Deprecated'
+    github.event.label.name == 'Manifest-Singleton-Deprecated' ||
+    github.event.label.name == 'Unexpected-File'
   )
 checkout: false
 pre-agent-steps:
@@ -72,6 +75,7 @@ pre-agent-steps:
           }
 
           let checkRuns = [];
+          let totalCheckRuns = 0;
           let failedChecks = [];
           let completionCheck = null;
           for (let attempt = 0; attempt < 2; attempt++) {
@@ -80,16 +84,23 @@ pre-agent-steps:
               repo,
               ref: headSha,
               app_id: 1451866,
-              filter: "latest",
+              filter: "all",
               per_page: 100,
             });
             checkRuns = response.data.check_runs ?? [];
-            completionCheck = checkRuns.find((check) =>
-              check?.app?.slug === "wingetvalidator-prod" &&
-              check.head_sha === headSha &&
-              check.status === "completed" &&
-              check.name === "10. Validation Completed"
-            );
+            totalCheckRuns = response.data.total_count ?? checkRuns.length;
+            completionCheck = checkRuns
+              .filter((check) =>
+                check?.app?.slug === "wingetvalidator-prod" &&
+                check.head_sha === headSha &&
+                check.status === "completed" &&
+                check.name === "10. Validation Completed"
+              )
+              .sort((left, right) =>
+                Date.parse(right.completed_at ?? 0) -
+                  Date.parse(left.completed_at ?? 0) ||
+                right.id - left.id
+              )[0];
             const completionExternalId = String(
               completionCheck?.external_id ?? "",
             ).trim();
@@ -132,7 +143,20 @@ pre-agent-steps:
           const completionExternalId = String(
             completionCheck?.external_id ?? "",
           ).trim();
+          const completionTime = Date.parse(
+            completionCheck?.completed_at ?? "",
+          );
+          const newerPendingCheck = checkRuns.some(
+            (check) =>
+              check?.app?.slug === "wingetvalidator-prod" &&
+              check.head_sha === headSha &&
+              ["queued", "in_progress"].includes(check.status) &&
+              (Number(check.id) > Number(completionCheck?.id) ||
+                Date.parse(check.started_at ?? "") > completionTime),
+          );
           if (
+            totalCheckRuns > checkRuns.length ||
+            newerPendingCheck ||
             !Number.isSafeInteger(completionPullRequestNumber) ||
             completionPullRequestNumber <= 0 ||
             completionPullRequestNumber !== pullRequestNumber ||
@@ -140,7 +164,7 @@ pre-agent-steps:
             completionOperationId !== completionExternalId
           ) {
             output.reason =
-              "Validation completion evidence is missing, inconsistent, or targets another pull request.";
+              "Validation evidence is incomplete, stale, inconsistent, or targets another pull request.";
             return;
           }
           output.pullRequestNumber = completionPullRequestNumber;
@@ -197,19 +221,127 @@ tools:
     min-integrity: none
   bash: ["cat"]
 safe-outputs:
-  messages:
-    footer: "###### Template: msftbot/authorAssist/manifestValidation by [{workflow_name}]({run_url})"
   threat-detection: true
   report-failure-as-issue: false
   noop:
     report-as-issue: false
   missing-tool: false
   missing-data: false
-  add-comment:
-    max: 1
-    target: >-
-      ${{ github.event.pull_request.number ||
-      fromJSON(github.event.inputs.aw_context || '{}').item_number || '' }}
+  jobs:
+    post-pr-comment:
+      description: Post one comment to the triggering pull request
+      runs-on: ubuntu-latest
+      needs: detection
+      if: >-
+        needs.detection.result == 'success' &&
+        needs.detection.outputs.detection_success == 'true'
+      permissions:
+        issues: write
+        pull-requests: read
+      output: Comment posted to the triggering pull request
+      inputs:
+        body:
+          description: Complete Markdown comment body
+          required: true
+          type: string
+      steps:
+        - name: Revalidate and post fixed-target comment
+          uses: actions/github-script@v9
+          env:
+            TARGET_PR: ${{ github.event.pull_request.number || '' }}
+            EXPECTED_HEAD: ${{ github.event.pull_request.head.sha || '' }}
+            RUN_URL: >-
+              ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          with:
+            github-token: "${{ github.token }}"
+            script: |
+              const fs = require("fs");
+              const target = Number(process.env.TARGET_PR);
+              const expectedHead = String(process.env.EXPECTED_HEAD ?? "");
+              const output = JSON.parse(
+                fs.readFileSync(process.env.GH_AW_AGENT_OUTPUT, "utf8"),
+              );
+              const items = (output.items ?? []).filter(
+                (item) => item.type === "post_pr_comment",
+              );
+              if (
+                !Number.isSafeInteger(target) ||
+                target <= 0 ||
+                !/^[0-9a-f]{40}$/.test(expectedHead) ||
+                items.length !== 1
+              ) {
+                return;
+              }
+              const body = String(items[0].body ?? "").trim();
+              if (
+                body.length < 20 ||
+                body.length > 8000 ||
+                /(^|[^\w])@[A-Za-z0-9][\w-]*/.test(body) ||
+                body.includes("Template:") ||
+                !body.includes(`Head SHA: \`${expectedHead}\``)
+              ) {
+                core.setFailed("The proposed comment failed validation.");
+                return;
+              }
+              const owner = "microsoft";
+              const repo = "winget-pkgs";
+              const pull = await github.rest.pulls.get({
+                owner,
+                repo,
+                pull_number: target,
+              });
+              const labels = new Set(
+                (pull.data.labels ?? []).map((label) => label.name),
+              );
+              const supported = [
+                "Manifest-Validation-Error",
+                "Manifest-Installer-Validation-Error",
+                "Manifest-AppsAndFeaturesVersion-Error",
+                "Manifest-Singleton-Deprecated",
+                "Unexpected-File",
+              ];
+              const unsafe = [
+                "Validation-Defender-Error",
+                "Validation-Virus-Scan-Error",
+                "Validation-SmartScreen",
+                "Hash-Flagged",
+                "Binary-Validation-Error",
+                "Possible-Malware",
+                "Blocking-Issue",
+              ];
+              if (
+                pull.data.state !== "open" ||
+                pull.data.head.sha !== expectedHead ||
+                !supported.some((label) => labels.has(label)) ||
+                unsafe.some((label) => labels.has(label))
+              ) {
+                return;
+              }
+              const comments = await github.rest.issues.listComments({
+                owner,
+                repo,
+                issue_number: target,
+                per_page: 100,
+              });
+              if (
+                String(comments.headers.link ?? "").includes('rel="next"') ||
+                comments.data.some((comment) =>
+                  String(comment.body ?? "").includes(
+                    "Template: msftbot/authorAssist/manifestValidation",
+                  ) &&
+                  String(comment.body ?? "").includes(
+                    `Head SHA: \`${expectedHead}\``,
+                  ),
+                )
+              ) {
+                return;
+              }
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number: target,
+                body: `${body}\n\n###### Template: msftbot/authorAssist/manifestValidation by [Manifest Validation Diagnosis](${process.env.RUN_URL})`,
+              });
 ---
 
 # Manifest Validation Diagnosis (Experimental)
@@ -236,7 +368,8 @@ remove a label, or invoke wingetbot.
 - The pull request is authored by `wingetbot`.
 - None of these labels is currently present:
   `Manifest-Validation-Error`, `Manifest-Installer-Validation-Error`,
-  `Manifest-AppsAndFeaturesVersion-Error`, `Manifest-Singleton-Deprecated`.
+  `Manifest-AppsAndFeaturesVersion-Error`, `Manifest-Singleton-Deprecated`,
+  `Unexpected-File`.
 - The pull request modifies more than one package or includes files outside one package's manifest
   version folder.
 - Any security or integrity-review label is present, including
@@ -293,6 +426,10 @@ or change this workflow's behavior.
 6. Read the changed manifest files from the pull request to confirm the affected filename, path,
    field, `ManifestType`, and `ManifestVersion`.
 
+For `Unexpected-File`, report a path only when `01. Pull Request Validation` explicitly names it and
+the exact normalized relative path is still present as an added file in the current diff. Never infer
+the offending path from the diff alone.
+
 Except for a directly confirmed singleton manifest, the validation Check Run is the source of the
 diagnosis. Use manifest contents only to confirm and explain a condition already named by the log. Do
 not independently lint the manifests, infer the hidden reason behind a generic validation failure,
@@ -325,9 +462,20 @@ Comment only when the allowed evidence identifies at least one of:
    other sensitive value. For `SignatureSha256`, say it differs from scanned installer metadata but
    never reproduce the hash.
 7. **Apps and Features version overlap.** State that the submitted `DisplayVersion` overlaps the
-   published index range quoted by the log. Recommend verifying the actual installed display version,
-   removing the entry if it merely duplicates package metadata, or correcting it to the unique value.
-   Do not assert which option is correct without evidence.
+   published index range quoted by the log. Inspect only the exact package folder and related pull
+   requests for the exact `PackageIdentifier`; never search the full `manifests/` tree. Classify the
+   conflict as an index transition only when exactly one
+   removal-only pull request deletes a version with the overlapping `DisplayVersion`, and the
+   remaining published versions would not retain the overlap. If that removal is open or merged but
+   lacks `Publish-Pipeline-Succeeded`, advise waiting for publication. If it published after this
+   failed operation, explain that a maintainer may revalidate. If any remaining published version
+   retains the overlap, emit `noop`. Otherwise recommend verifying the actual installed display
+   version without guessing a replacement or assuming it equals `PackageVersion`.
+8. **Unexpected file.** Quote only each normalized repository-relative path explicitly named by
+   `01. Pull Request Validation` and confirmed as an added file in the current diff. Explain that the
+   file is outside the allowed manifest set and should be removed. Emit `noop` for `.validation`
+   files, malformed or traversal-like paths, deleted or renamed files, package moves or removals,
+   project-file contributions, mixed project/manifest changes, or when the Check and diff disagree.
 
 Deduplicate repeated identical errors emitted once per manifest file. Preserve distinct errors.
 
@@ -336,7 +484,7 @@ Deduplicate repeated identical errors emitted once per manifest file. Preserve d
 - `Manifest is invalid` without the underlying parser or schema reason.
 - `Manifest Validation Failed` without a more specific preceding error.
 - Generic pipeline, Guardian, checkout, Defender-signature-update, or task-wrapper noise.
-- `Manifest-Version-Deprecated` or other sibling-label conditions outside this workflow's four
+- `Manifest-Version-Deprecated` or other sibling-label conditions outside this workflow's five
   target labels.
 - A condition that requires inspecting or executing the installer.
 - A guessed correction not supported by the log, manifest, or matching schema.
@@ -383,12 +531,12 @@ Post one concise comment:
 >
 > </details>
 
+Submit the body through `post_pr_comment`; that tool accepts no target fields.
 Include only concrete findings. Do not repeat the generic Validation Guide message. Do not mention
 model names, token usage, workflow internals, installer URLs, or hashes. Include the request to update
-the manifest and rerun validation only once. Do not add a `Template:` line; Safe Outputs appends the
-canonical workflow footer automatically. For a directly confirmed singleton manifest, omit the
-validation-check line when no matching Check Run is available and use the authoring-documentation URL as
-the relevant reference.
+the manifest and rerun validation only once. For a directly confirmed singleton manifest, omit the
+validation-check line when no matching Check Run is available and use the authoring-documentation URL
+as the relevant reference. Do not add a `Template:` line; the privileged fixed-target job appends it.
 
 ## Hard rules
 
