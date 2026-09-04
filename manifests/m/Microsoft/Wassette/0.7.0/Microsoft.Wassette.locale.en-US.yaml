@@ -1,0 +1,147 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: Microsoft.Wassette
+PackageVersion: 0.7.0
+PackageLocale: en-US
+Publisher: Microsoft Corporation
+PublisherUrl: https://github.com/microsoft
+PublisherSupportUrl: https://github.com/microsoft/wassette/issues
+PrivacyUrl: https://www.microsoft.com/privacy/privacystatement
+PackageName: Wassette
+PackageUrl: https://github.com/microsoft/wassette
+License: MIT
+LicenseUrl: https://github.com/microsoft/wassette/blob/main/LICENSE
+Copyright: Copyright (c) Microsoft Corporation.
+CopyrightUrl: https://github.com/microsoft/wassette/blob/main/LICENSE
+ShortDescription: "Wassette: A security-oriented runtime that runs WebAssembly Components via MCP"
+Description: |-
+  Wassette: A security-oriented runtime that runs WebAssembly Components via MCP
+
+  Why Wassette?
+
+  - Convenience: Wassette makes it easy to extend AI agents with new tools, all without ever having to leave the chat window.
+  - Reusability: Wasm Components are generic and reusable; there is nothing MCP-specific about them.
+  - Security: Wassette is built on the Wasmtime security sandbox, providing browser-grade isolation of tools.
+Moniker: wassette
+Tags:
+- capabilities
+- mcp
+- mcp-server
+- oci
+- oci-artifacts
+- permissions
+- wasm
+- wasm-component
+- wasmtime
+ReleaseNotes: |-
+  ## Highlights
+
+  ### MCP protocol and serving
+
+  • Streamable HTTP now supports the stateless MCP lifecycle from protocol revision `2026-07-28`, alongside the existing session-based lifecycle, with optional JSON responses and a subscription stream for tool-list changes (#759).
+  • Deployments can configure the Streamable HTTP Host allowlist through `--allowed-host`, `WASSETTE_ALLOWED_HOSTS`, or `config.toml`, while the secure loopback-only default remains unchanged (#757).
+  • `serve --manifest` can opt into degraded startup with `--continue-on-provisioning-failure`, serving components that provisioned successfully while reporting those that did not (#785).
+
+  ### Component provisioning and tools
+
+  • Manifest-declared policies are now attached to the component they were synthesized for, so declared network permissions work instead of failing closed with an empty allowlist (#777).
+  • Manifest entries can explicitly declare no permissions, and the worked manifest examples are valid and documented (#780, #784).
+  • `run` and `serve` now honor the global `--component-dir`, keeping startup restoration and later component operations on the same directory (#767).
+  • Cached tools restored during startup retain their names, descriptions, input schemas, and callable identities while components compile in the background (#788).
+  • Tool-name collisions are reported when components register, before the first ambiguous call fails (#786).
+  • Component load failures preserve their full cause chain across the CLI, MCP responses, logs, and manifest provisioning (#782).
+
+  ### Examples
+
+  • The `get-weather-js` and `get-open-meteo-weather-js` examples now import `wasi:config/store@0.2.0-rc.1`, matching the host runtime (#781).
+  • `arxiv-rs` once again exports its three component functions after regenerating its WIT bindings (#787).
+  • Release publishing no longer includes the unpublished `context7-rs` example, and main-branch example builds now move the `latest` tag as documented (#773, #783).
+
+  ### Release engineering
+
+  • A new opt-in `latest` prerelease channel builds any commit into six immutable platform assets without changing what stable installers resolve (#769).
+  • Release builds use a shared matrix workflow, channel retention prunes by publication time, and the release process is documented end to end (#768, #775, #776).
+  • MCP client and Inspector harnesses now cover both protocol generations and the documented terminal clients (#759, #774).
+  • Coverage runs once instead of twice, and Rust caches can fall back to partial restores (#758, #778, #779).
+
+  ### Installation
+
+  • The installer no longer rejects supported Bash shells whose executable path is not literally `/bin/bash` (#766).
+
+  ### Breaking changes
+
+  • `mcp_server::handle_resources_list` no longer accepts an unused `serde_json::Value` request argument. Library callers should remove that argument (#759).
+
+
+  <!-- Release notes generated using configuration in .github/release.yml at e20d44f23fef29bf30de6e116207794e3106415d -->
+
+  ## What's Changed
+  • feat(serve)：make the Streamable HTTP Host allowlist configurable by @asw101 in https://github.com/microsoft/wassette/pull/757
+  • Increase recursion limit for nightly coverage job compilation by @asw101 in https://github.com/microsoft/wassette/pull/758
+  • feat(serve)：serve the stateless MCP lifecycle from protocol revision 2026-07-28 by @asw101 in https://github.com/microsoft/wassette/pull/759
+  • fix(install)：stop reporting bash as an unsupported shell by @asw101 in https://github.com/microsoft/wassette/pull/766
+  • fix(cli)：honour the global --component-dir in run and serve by @asw101 in https://github.com/microsoft/wassette/pull/767
+  • refactor(ci)：extract the release build matrix into a reusable workflow by @asw101 in https://github.com/microsoft/wassette/pull/768
+  • chore：update winget and homebrew for v0.6.0 by @asw101 in https://github.com/microsoft/wassette/pull/772
+  • feat(ci)：add a latest channel of on-demand prereleases built from any commit by @asw101 in https://github.com/microsoft/wassette/pull/769
+  • chore(examples)：stop publishing the context7-rs example component by @asw101 in https://github.com/microsoft/wassette/pull/773
+  • fix(ci)：prune channel builds by publish time, not commit date by @asw101 in https://github.com/microsoft/wassette/pull/775
+  • docs(release)：document the latest channel and the reusable build workflow by @asw101 in https://github.com/microsoft/wassette/pull/776
+  • test(mcp)：add an on-demand harness for the documented terminal clients by @asw101 in https://github.com/microsoft/wassette/pull/774
+  • fix：serve --manifest never attaches the policy it synthesizes by @asw101 in https://github.com/microsoft/wassette/pull/777
+  • fix(ci)：run the instrumented coverage suite once, not twice by @asw101 in https://github.com/microsoft/wassette/pull/778
+  • fix(ci)：let the rust cache fall back to a partial restore by @asw101 in https://github.com/microsoft/wassette/pull/779
+  • fix(examples)：move wasi:config imports from 0.2.0-draft to 0.2.0-rc.1 by @asw101 in https://github.com/microsoft/wassette/pull/781
+  • fix(errors)：keep the cause of a component load failure visible by @asw101 in https://github.com/microsoft/wassette/pull/782
+  • fix：allow a manifest entry to declare no permissions by @asw101 in https://github.com/microsoft/wassette/pull/780
+  • fix(ci)：move :latest when examples are published from main by @asw101 in https://github.com/microsoft/wassette/pull/783
+  • fix(examples)：make the provisioning manifests usable as written, and document the format by @asw101 in https://github.com/microsoft/wassette/pull/784
+  • feat(serve)：add --continue-on-provisioning-failure to serve a degraded manifest by @asw101 in https://github.com/microsoft/wassette/pull/785
+  • feat(registry)：warn when two loaded components export the same tool name by @asw101 in https://github.com/microsoft/wassette/pull/786
+  • fix(examples)：regenerate arxiv-rs bindings so the component exports its functions by @asw101 in https://github.com/microsoft/wassette/pull/787
+  • fix(schema)：preserve cached tool metadata during startup by @asw101 in https://github.com/microsoft/wassette/pull/788
+  • chore(release)：bump version to 0.7.0 by @asw101 in https://github.com/microsoft/wassette/pull/789
+  • feat(release)：support curated release highlights by @asw101 in https://github.com/microsoft/wassette/pull/790
+
+
+  **Full Changelog**：https://github.com/microsoft/wassette/compare/v0.6.0...v0.7.0
+
+  ## Downloads
+
+  ### Linux
+  • [AMD64 (tar.gz)](https://github.com/microsoft/wassette/releases/download/v0.7.0/wassette_0.7.0_linux_amd64.tar.gz)
+  • [ARM64 (tar.gz)](https://github.com/microsoft/wassette/releases/download/v0.7.0/wassette_0.7.0_linux_arm64.tar.gz)
+
+  ### macOS (Darwin)
+  • [AMD64/Intel (tar.gz)](https://github.com/microsoft/wassette/releases/download/v0.7.0/wassette_0.7.0_darwin_amd64.tar.gz)
+  • [ARM64/Apple Silicon (tar.gz)](https://github.com/microsoft/wassette/releases/download/v0.7.0/wassette_0.7.0_darwin_arm64.tar.gz)
+
+  ### Windows
+  • [AMD64 (zip)](https://github.com/microsoft/wassette/releases/download/v0.7.0/wassette_0.7.0_windows_amd64.zip)
+  • [ARM64 (zip)](https://github.com/microsoft/wassette/releases/download/v0.7.0/wassette_0.7.0_windows_arm64.zip)
+
+  ## Install
+
+  ### All Platforms (Shell Script)
+
+  ```bash
+  curl -fsSL https://raw.githubusercontent.com/microsoft/wassette/main/scripts/install.sh | WASSETTE_GITHUB_REPO=microsoft/wassette bash
+  ```
+
+  This will detect your platform and install the latest `wassette` binary to your `$PATH`.
+
+  ## Usage
+  ```bash
+  # Local MCP client integration (stdio)
+  wassette run
+
+  # Remote MCP server (Streamable HTTP)
+  wassette serve
+  ```
+ReleaseNotesUrl: https://github.com/microsoft/wassette/releases/tag/v0.7.0
+Documentations:
+- DocumentLabel: Wassette Documentation
+  DocumentUrl: https://microsoft.github.io/wassette/latest/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
