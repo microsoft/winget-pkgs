@@ -48,7 +48,7 @@ pre-agent-steps:
         const fs = require("fs");
         const path = require("path");
         const destination = path.join(
-          process.env.RUNNER_TEMP, "manifest-metadata-candidate.json",
+          process.env.RUNNER_TEMP, "gh-aw", "manifest-metadata-candidate.json",
         );
         const owner = "microsoft";
         const repo = "winget-pkgs";
@@ -401,7 +401,7 @@ safe-outputs:
 Give the author up to three optional findings about one validated PR. This is
 read-only except for one comment. Never edit, review, label, assign, approve,
 merge, close, reopen, rerun, waive, invoke a bot, or create an issue.
-Run `cat "$RUNNER_TEMP/manifest-metadata-candidate.json"`. Emit `noop` unless
+Run `cat "$RUNNER_TEMP/gh-aw/manifest-metadata-candidate.json"`. Emit `noop` unless
 `eligible` is true. Before commenting, prove the PR is open and current head
 equals `head`. Read only envelope paths at `head` and, when needed, `base`;
 never list or recursively search `manifests/`. Require one
