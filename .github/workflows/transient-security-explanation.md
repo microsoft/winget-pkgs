@@ -413,7 +413,7 @@ safe-outputs:
         needs.detection.outputs.detection_success == 'true'
       inputs:
         body: {description: Exact body without the footer, required: true, type: string}
-      permissions: {issues: write}
+      permissions: {issues: write, pull-requests: read}
       steps:
         - name: Download sealed transient-security evidence
           uses: actions/download-artifact@v8
