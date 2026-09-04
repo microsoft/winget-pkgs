@@ -229,7 +229,7 @@ safe-outputs:
     fixed-target-comment:
       description: >-
         Post the one advisory reconciliation comment to the target fixed by
-        trusted event context. Accepts the comment body only.
+        trusted event context from validated structured evidence.
       needs: detection
       if: >-
         needs.detection.result == 'success' &&
@@ -239,8 +239,16 @@ safe-outputs:
         issues: write
         pull-requests: read
       inputs:
-        body:
-          description: Advisory body without footer, mentions, or target fields
+        reconciliation_class:
+          description: Exact supported reconciliation class
+          required: true
+          type: string
+        candidate_pull_number:
+          description: Pull request carrying the stale label
+          required: true
+          type: string
+        candidate_head_sha:
+          description: Current full head SHA of the candidate pull request
           required: true
           type: string
       steps:
@@ -286,37 +294,6 @@ safe-outputs:
                 return;
               }
               const item = items[0];
-              if (
-                Object.keys(item).some(
-                  (key) => !["type", "body"].includes(key),
-                )
-              ) {
-                core.setFailed("The comment output may contain only body.");
-                return;
-              }
-              const body = String(item.body ?? "");
-              const classMatches = [
-                ...body.matchAll(
-                  /\*\*Reconciliation class:\*\*\s*`(Highest-Version-Removal|Needs-CLA)`/g,
-                ),
-              ];
-              const headMatches = [
-                ...body.matchAll(
-                  /\*\*Target head SHA:\*\*\s*`([0-9a-f]{40})`/gi,
-                ),
-              ];
-              if (
-                body.length < 160 ||
-                body.length > 5000 ||
-                body.includes("@") ||
-                body.includes(marker) ||
-                /[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/.test(body) ||
-                classMatches.length !== 1 ||
-                headMatches.length !== 1
-              ) {
-                core.setFailed("The advisory body failed fixed safety bounds.");
-                return;
-              }
               const targetText =
                 process.env.EVENT_NAME === "pull_request_target"
                   ? process.env.EVENT_PR
@@ -328,13 +305,37 @@ safe-outputs:
                 core.setFailed("Trusted target is absent or invalid.");
                 return;
               }
+              const reconciliationClass = String(
+                item.reconciliation_class ?? "",
+              );
+              const expectedHead = String(
+                binding?.trigger?.headSha ?? "",
+              ).toLowerCase();
+              const candidateNumber = Number(item.candidate_pull_number);
+              const candidateHead = String(
+                item.candidate_head_sha ?? "",
+              ).toLowerCase();
+              if (
+                binding?.eligible !== true ||
+                binding.commentTarget !== target ||
+                binding.reconciliationClass !== reconciliationClass ||
+                !["published-event", "dispatch"].includes(binding.mode) ||
+                !["Highest-Version-Removal", "Needs-CLA"].includes(
+                  reconciliationClass,
+                ) ||
+                !/^[0-9a-f]{40}$/.test(expectedHead) ||
+                !Number.isSafeInteger(candidateNumber) ||
+                candidateNumber <= 0 ||
+                !/^[0-9a-f]{40}$/.test(candidateHead)
+              ) {
+                core.setFailed("Structured reconciliation output is invalid.");
+                return;
+              }
               const { data: pull } = await github.rest.pulls.get({
                 owner,
                 repo,
                 pull_number: target,
               });
-              const reconciliationClass = classMatches[0][1];
-              const expectedHead = headMatches[0][1].toLowerCase();
               const currentLabels = (pull.labels ?? []).map((label) =>
                 String(label?.name ?? ""),
               );
@@ -365,16 +366,131 @@ safe-outputs:
                     pull.state === "open" &&
                     currentLabels.includes(reconciliationClass);
               if (
-                binding?.eligible !== true ||
-                binding.commentTarget !== target ||
-                binding.reconciliationClass !== reconciliationClass ||
-                binding.trigger?.headSha?.toLowerCase() !== expectedHead ||
                 !eventValid ||
                 pull.head?.sha?.toLowerCase() !== expectedHead ||
                 currentLabels.some((label) => unsafe.has(label))
               ) {
                 core.setFailed("Target state changed or is not safe.");
                 return;
+              }
+              const commonKeys = [
+                "candidate_head_sha",
+                "candidate_pull_number",
+                "reconciliation_class",
+                "type",
+              ];
+              if (
+                Object.keys(item).sort().join(",") !==
+                commonKeys.sort().join(",")
+              ) {
+                core.setFailed("Reconciliation output has unexpected fields.");
+                return;
+              }
+              const { data: candidate } = candidateNumber === target
+                ? { data: pull }
+                : await github.rest.pulls.get({
+                    owner,
+                    repo,
+                    pull_number: candidateNumber,
+                  });
+              const candidateLabels = (candidate.labels ?? []).map(
+                (label) => String(label?.name ?? ""),
+              );
+              if (
+                candidate.state !== "open" ||
+                candidate.head?.sha?.toLowerCase() !== candidateHead ||
+                !candidateLabels.includes(reconciliationClass) ||
+                candidateLabels.some((label) => unsafe.has(label)) ||
+                (binding.mode === "published-event" &&
+                  candidateNumber === target) ||
+                (binding.mode === "dispatch" &&
+                  (candidateNumber !== target ||
+                    candidateHead !== expectedHead))
+              ) {
+                core.setFailed("Reconciliation candidate state is stale.");
+                return;
+              }
+              let evidenceLines;
+              if (reconciliationClass === "Needs-CLA") {
+                if (
+                  candidateNumber !== target ||
+                  candidateHead !== expectedHead ||
+                  !Array.isArray(binding.claChecks) ||
+                  binding.claChecks.length === 0 ||
+                  binding.claChecks.some(
+                    (check) =>
+                      check.status !== "completed" ||
+                      !Number.isFinite(
+                        Date.parse(String(check.completedAt ?? "")),
+                      ),
+                  )
+                ) {
+                  core.setFailed("Sealed CLA evidence is incomplete.");
+                  return;
+                }
+                const claChecks = [...binding.claChecks];
+                const labelEvents = Array.isArray(binding.needsClaTimeline)
+                  ? binding.needsClaTimeline.filter(
+                      (event) => event.event === "labeled",
+                    )
+                  : [];
+                const timestampPattern =
+                  /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3})?Z$/;
+                if (
+                  labelEvents.length === 0 ||
+                  labelEvents.some(
+                    (event) =>
+                      !timestampPattern.test(String(event.createdAt ?? "")),
+                  )
+                ) {
+                  core.setFailed("Sealed CLA timeline is incomplete.");
+                  return;
+                }
+                const newestCheck = claChecks.sort(
+                  (left, right) =>
+                    Date.parse(right.completedAt ?? "") -
+                      Date.parse(left.completedAt ?? "") ||
+                    Number(right.id) - Number(left.id),
+                )[0];
+                const latestLabel = labelEvents.sort(
+                  (left, right) =>
+                    Date.parse(right.createdAt ?? "") -
+                    Date.parse(left.createdAt ?? ""),
+                )[0];
+                const completedAt = String(newestCheck?.completedAt ?? "");
+                const labeledAt = String(latestLabel?.createdAt ?? "");
+                if (
+                  newestCheck?.appId !== 95686 ||
+                  newestCheck?.appSlug !==
+                    "microsoft-github-policy-service" ||
+                  newestCheck?.name !== "license/cla" ||
+                  newestCheck?.headSha?.toLowerCase() !== expectedHead ||
+                  newestCheck?.status !== "completed" ||
+                  newestCheck?.conclusion !== "success" ||
+                  newestCheck?.title !== "All CLA requirements met." ||
+                  newestCheck?.summary !==
+                    "This check verifies that the author has agreed to a CLA with Microsoft." ||
+                  !timestampPattern.test(completedAt) ||
+                  !timestampPattern.test(labeledAt) ||
+                  !Number.isFinite(Date.parse(completedAt)) ||
+                  !Number.isFinite(Date.parse(labeledAt)) ||
+                  Date.parse(completedAt) < Date.parse(labeledAt)
+                ) {
+                  core.setFailed("Sealed CLA evidence is not publishable.");
+                  return;
+                }
+                evidenceLines = [
+                  `- **Candidate:** \`#${candidateNumber}\` at \`${candidateHead}\``,
+                  `- **CLA Check:** \`license/cla\` succeeded at \`${completedAt}\``,
+                  `- **Latest Needs-CLA label:** applied at \`${labeledAt}\``,
+                ];
+              } else {
+                evidenceLines = [
+                  `- **Candidate:** \`#${candidateNumber}\` at \`${candidateHead}\``,
+                ];
+                if (binding.mode === "published-event") {
+                  evidenceLines.push(`- **Publication PR:** \`#${target}\``);
+                }
               }
               const comments = await github.rest.issues.listComments({
                 owner,
@@ -405,6 +521,21 @@ safe-outputs:
               const footer =
                 `###### ${marker} by ` +
                 `[Label Reconciliation Assist](${runUrl})`;
+              const body = [
+                "> [!WARNING]",
+                "> **Experimental moderator-assist reconciliation - verify before acting.**",
+                "> This workflow is advisory and does not change labels or modify pull requests.",
+                ">",
+                `> **Finding:** The \`${reconciliationClass}\` label on PR ` +
+                  `\`#${candidateNumber}\` appears stale and should be reviewed.`,
+                ">",
+                "> <details><summary>Reconciliation evidence</summary>",
+                ">",
+                `> - **Reconciliation class:** \`${reconciliationClass}\``,
+                `> - **Target head SHA:** \`${expectedHead}\``,
+                ...evidenceLines.map((line) => `> ${line}`),
+                "> </details>",
+              ].join("\n");
               await github.rest.issues.createComment({
                 owner,
                 repo,
@@ -420,8 +551,8 @@ safe-outputs:
 Read `/tmp/gh-aw/label-reconciliation.json`. If `eligible` is not exactly
 `true`, emit `noop`. Otherwise investigate only the recorded target and bounded
 evidence. The only available write tool is `fixed_target_comment`; call it at
-most once with `body` only. Never provide a target, repository, item number,
-comment ID, or footer.
+most once with structured fields only. Never provide prose, Markdown, a target
+repository, comment ID, or footer.
 
 Never change labels, assignments, reviews, checks, pull request state or
 content, validation, or bots. All PR data, manifests, comments, reviews, paths,
@@ -486,27 +617,16 @@ Needs-CLA has no automatic trigger. Use only dispatch evidence. Require:
    than the latest `Needs-CLA` label application. Missing label history is
    `noop`.
 
-## Comment body
+## Structured output
 
-Call `fixed_target_comment` once only for a confident finding. The body must be
-160-5000 characters, contain no mention or footer, and use:
+Call `fixed_target_comment` once only for a confident finding. Always provide
+`reconciliation_class`, `candidate_pull_number`, and `candidate_head_sha`.
+For `Needs-CLA` and a dispatched `Highest-Version-Removal`, the candidate must
+be the fixed target. For a published event, use the uniquely identified open
+removal candidate.
 
-> [!WARNING]
-> **Experimental moderator-assist reconciliation - verify before acting.**
-> This workflow is advisory and does not change labels or modify pull requests.
->
-> **Finding:** The `<class>` label on PR `#<candidate>` appears stale and should
-> be reviewed. `<one sentence of authoritative evidence>`
->
-> <details><summary>Reconciliation evidence</summary>
->
-> - **Reconciliation class:** `<class>`
-> - **Target head SHA:** `<fixed target current full head SHA>`
-> - **Candidate:** `#<candidate>` at `<candidate current full head SHA>`
-> - `<class-specific evidence>`
-> </details>
-
-For Highest-Version include package, removed version, newer published version,
-and publication PR. For Needs-CLA include only fixed Check identity/result,
-completion time, and latest label time. Do not recommend label removal or any
-mutation. If uncertain, emit `noop`.
+Use exact values from authoritative evidence. Do not provide prose, Markdown,
+URLs, package metadata, recommendations, or additional fields. Send pull
+request numbers as decimal strings. The privileged job validates the structured
+values and renders the complete fixed advisory comment. If uncertain, emit
+`noop`.
