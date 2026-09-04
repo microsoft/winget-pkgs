@@ -398,8 +398,13 @@ safe-outputs:
               );
               if (comments.some((comment) => {
                 const prior = String(comment.body ?? "");
+                const priorHeads = [...prior.matchAll(
+                  /Head SHA:\s*`?([0-9a-f]{40})`?/gi,
+                )];
                 return prior.includes(footer) &&
-                  prior.includes(`Head SHA: \`${expectedHead}\``);
+                  priorHeads.some(
+                    (match) => match[1].toLowerCase() === expectedHead,
+                  );
               })) return;
               await github.rest.issues.createComment({
                 owner, repo, issue_number: target,
