@@ -259,6 +259,7 @@ safe-outputs:
           type: string
       permissions:
         issues: write
+        pull-requests: read
       steps:
         - name: Download deterministic evidence
           uses: actions/download-artifact@v8
