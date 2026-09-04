@@ -227,6 +227,7 @@ safe-outputs:
       runs-on: ubuntu-latest
       permissions:
         issues: write
+        pull-requests: read
       inputs:
         body:
           description: Advisory body without footer, mentions, or target fields
