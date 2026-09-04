@@ -108,7 +108,7 @@ pre-agent-steps:
               Date.parse(right.completed_at) - Date.parse(left.completed_at) ||
               right.id - left.id,
           )[0];
-          if (!completion) fail();
+          if (!completion || completion.conclusion !== "success") fail();
           const completionTime = Date.parse(completion.completed_at);
           if (
             trustedChecks.some(
@@ -350,7 +350,7 @@ safe-outputs:
                   ? ` ${categories.map(([key, value]) => `${key}: ${value}`).join("; ")}.`
                   : "";
                 const expectedBody = [
-                  "[!WARNING]", "**Experimental moderator routing - no image analysis was performed.**", "",
+                  "> [!WARNING]", "> **Experimental moderator routing - no image analysis was performed.**", "",
                   `Trusted validation metadata shows that the current operation's **${installation.stage}** stage ended with **\`${outcomes[installation.outcome]}\`** and produced a screenshot artifact. This workflow did not access or interpret the screenshot, logs, archive, or installer.`,
                   "", `Screenshot metadata: **\`${screenshot.format}\`**, **\`${screenshot.sizeBytes}\` bytes**.${categoryText}`, "",
                   "**Moderator action:** inspect the screenshot through approved internal tooling. Treat it only as an investigation route, not as an automated diagnosis.",
@@ -373,23 +373,43 @@ safe-outputs:
                   !labels.has("Validation-Unattended-Failed") ||
                   [...labels].some((label) => unsafeLabels.has(label))
                 ) stop();
-                const comments = await github.rest.issues.listComments({
-                  owner, repo, issue_number: target, per_page: 100, page: 1,
-                });
-                if (String(comments.headers?.link ?? "").includes('rel="next"')) stop();
+                const [comments, reviews, reviewComments] = await Promise.all([
+                  github.rest.issues.listComments({
+                    owner, repo, issue_number: target, per_page: 100, page: 1,
+                  }),
+                  github.rest.pulls.listReviews({
+                    owner, repo, pull_number: target, per_page: 100, page: 1,
+                  }),
+                  github.rest.pulls.listReviewComments({
+                    owner, repo, pull_number: target, per_page: 100, page: 1,
+                  }),
+                ]);
                 if (
-                  comments.data.some((comment) => {
-                    const prior = String(comment.body ?? "");
-                    return prior.includes(footer) && prior.includes(evidenceHead);
-                  }) ||
-                  comments.data.some(
-                    (comment) =>
-                      comment.user?.type === "User" &&
-                      ["OWNER", "MEMBER", "COLLABORATOR"].includes(
-                        String(comment.author_association ?? ""),
-                      ),
+                  [comments, reviews, reviewComments].some((result) =>
+                    String(result.headers?.link ?? "").includes('rel="next"'),
                   )
                 ) stop();
+                const moderatorAssociations =
+                  new Set(["OWNER", "MEMBER", "COLLABORATOR"]);
+                const isHumanModerator = (item) =>
+                  item.user?.type === "User" &&
+                  !String(item.user?.login ?? "").endsWith("[bot]") &&
+                  moderatorAssociations.has(
+                    String(item.author_association ?? ""),
+                  );
+                const duplicate = comments.data.some((comment) => {
+                  const prior = String(comment.body ?? "");
+                  return prior.includes(footer) && prior.includes(evidenceHead);
+                });
+                const humanFeedback =
+                  comments.data.some(isHumanModerator) ||
+                  reviews.data.some(
+                    (review) =>
+                      review.state !== "DISMISSED" &&
+                      isHumanModerator(review),
+                  ) ||
+                  reviewComments.data.some(isHumanModerator);
+                if (duplicate || humanFeedback) stop();
                 if (process.env.GH_AW_SAFE_OUTPUTS_STAGED === "true") {
                   core.info("Fixed-target comment passed staged safety checks.");
                   return;
@@ -412,7 +432,7 @@ Run `cat "/tmp/gh-aw/unattended-artifact.json"`. Emit `noop` unless
 
 ## Evidence boundary
 
-The collector binds the current PR head to the newest completed
+The collector binds the current PR head to the newest successfully completed
 `10. Validation Completed` from App `1451866`/`wingetvalidator-prod`, rejects a
 newer pending trusted Check, and requires same-operation installation failure,
 the active failure label, exact HTTPS CDN host, and one bounded PNG/JPEG
@@ -421,8 +441,9 @@ Check text, logs, archives, and operation IDs.
 
 The custom job requires that evidence, reconstructs the canonical body, and
 re-fetches only the dispatch-input PR. It rejects stale/closed heads, unsafe
-labels, human moderation, incomplete history, duplicates, mentions, or any body
-that differs from evidence-derived text.
+labels, human issue comments, reviews or inline review comments, incomplete
+history, duplicates, mentions, or any body that differs from evidence-derived
+text.
 
 ## Privacy and no-op policy
 
@@ -438,8 +459,8 @@ render `timed_out` as `timed out`; append optional categories only for non-null
 values in architecture/scope/locale order.
 
 ```text
-[!WARNING]
-**Experimental moderator routing - no image analysis was performed.**
+> [!WARNING]
+> **Experimental moderator routing - no image analysis was performed.**
 
 Trusted validation metadata shows that the current operation's **08. Installation Validation** stage ended with **`<outcome>`** and produced a screenshot artifact. This workflow did not access or interpret the screenshot, logs, archive, or installer.
 
