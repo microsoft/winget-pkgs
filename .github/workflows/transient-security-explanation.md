@@ -399,6 +399,8 @@ tools:
 safe-outputs:
   threat-detection: true
   report-failure-as-issue: false
+  report-incomplete:
+    create-issue: false
   noop:
     report-as-issue: false
   missing-tool: false
