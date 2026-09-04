@@ -260,12 +260,23 @@ safe-outputs:
               const fs = require("fs");
               const target = Number(process.env.TARGET_PR);
               const expectedHead = String(process.env.EXPECTED_HEAD ?? "");
-              const output = JSON.parse(
-                fs.readFileSync(process.env.GH_AW_AGENT_OUTPUT, "utf8"),
-              );
-              const items = (output.items ?? []).filter(
-                (item) => item.type === "post_pr_comment",
-              );
+              const outputPath = process.env.GH_AW_AGENT_OUTPUT;
+              let output;
+              try {
+                if (!outputPath || !fs.existsSync(outputPath)) {
+                  core.notice("Agent output is unavailable; no comment will be posted.");
+                  return;
+                }
+                output = JSON.parse(fs.readFileSync(outputPath, "utf8"));
+              } catch (error) {
+                core.notice(
+                  `Agent output is invalid; no comment will be posted: ${error.message}`,
+                );
+                return;
+              }
+              const items = Array.isArray(output?.items)
+                ? output.items.filter((item) => item.type === "post_pr_comment")
+                : [];
               if (
                 !Number.isSafeInteger(target) ||
                 target <= 0 ||
