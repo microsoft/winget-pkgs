@@ -494,13 +494,9 @@ safe-outputs:
               const body = items[0].body;
               if (typeof body !== "string" || body.length < 200 || body.length > 1200 ||
                   body.includes("@") || body.trim() !== expectedBody) return;
-              const response = await fetch(`https://api.github.com/repos/${owner}/${repo}/pulls/${prNumber}`,
-                { redirect: "error", headers: { accept: "application/vnd.github+json" } });
-              if (response.status !== 200 || Number(
-                  response.headers.get("content-length") ?? 0) > 200000) return;
-              const pullText = await response.text();
-              if (pullText.length > 200000) return;
-              const pull = JSON.parse(pullText);
+              const { data: pull } = await github.rest.pulls.get({
+                owner, repo, pull_number: prNumber,
+              });
               const labels = new Set((pull.labels ?? []).map((item) => item.name));
               if (pull.number !== prNumber || pull.state !== "open" || pull.head?.sha !== eventHead ||
                   pull.user?.login === "wingetbot" || !labels.has(label) ||
