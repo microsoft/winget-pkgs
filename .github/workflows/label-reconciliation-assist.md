@@ -316,21 +316,11 @@ safe-outputs:
                 core.setFailed("Trusted target is absent or invalid.");
                 return;
               }
-              const pullResponse = await fetch(
-                `https://api.github.com/repos/${owner}/${repo}/pulls/${target}`,
-                {
-                  headers: {
-                    Accept: "application/vnd.github+json",
-                    "User-Agent": "label-reconciliation-assist",
-                    "X-GitHub-Api-Version": "2022-11-28",
-                  },
-                },
-              );
-              if (!pullResponse.ok) {
-                core.setFailed("Exact-target refresh failed.");
-                return;
-              }
-              const pull = await pullResponse.json();
+              const { data: pull } = await github.rest.pulls.get({
+                owner,
+                repo,
+                pull_number: target,
+              });
               const reconciliationClass = classMatches[0][1];
               const expectedHead = headMatches[0][1].toLowerCase();
               const currentLabels = (pull.labels ?? []).map((label) =>
