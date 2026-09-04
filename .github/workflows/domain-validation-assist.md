@@ -296,9 +296,11 @@ safe-outputs:
                 "Validation-Virus-Scan-Error", "Validation-SmartScreen",
                 "Validation-SmartScreen-Error", "Needs-SmartScreen-Investigation",
                 "Validation-Hash-Flagged", "Validation-Hash-Verification-Failed",
-                "Error-Hash-Mismatch", "Validation-Executable-Error",
+                "Validation-Hash-Error", "Error-Hash-Mismatch",
+                "Validation-Signature-Error", "Validation-Executable-Error",
                 "Validation-Shell-Execute", "Binary-Validation-Error",
-                "Possible-Malware", "Blocking-Issue",
+                "Internal-Error-Static-Scan", "Possible-Malware",
+                "Blocking-Issue",
               ]);
               const fail = (message) => {
                 core.setFailed(message);
