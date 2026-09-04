@@ -341,7 +341,7 @@ safe-outputs:
                 /(https?:\/\/|\b[0-9a-f]{64}\b)/i.test(body) ||
                 /Template:/i.test(body) ||
                 /[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/.test(body) ||
-                !body.includes(`Head SHA: ${eventHead}`)
+                !body.includes(`Head SHA: \`${eventHead}\``)
               ) {
                 return fail("Domain comment body failed safety validation.");
               }
@@ -351,7 +351,9 @@ safe-outputs:
               );
               const duplicate = comments.some((comment) =>
                 String(comment?.body ?? "").includes(footer) &&
-                String(comment?.body ?? "").includes(`Head SHA: ${eventHead}`),
+                String(comment?.body ?? "").includes(
+                  `Head SHA: \`${eventHead}\``,
+                ),
               );
               const pull = await github.rest.pulls.get({
                 owner,
@@ -369,7 +371,8 @@ safe-outputs:
                 labels.some((label) => security.has(label)) ||
                 duplicate
               ) {
-                return fail("Pull request is no longer safe to comment on.");
+                core.notice("Pull request is no longer eligible for a comment.");
+                return;
               }
               const runUrl =
                 `${process.env.GITHUB_SERVER_URL}/` +
