@@ -53,6 +53,8 @@ pre-agent-steps:
         const triggerHeadSha = String(process.env.TRIGGER_HEAD_SHA ?? "").trim();
         const maxPatchLength = 12000;
         const maxManifestBytes = 65536;
+        const maxOperationChecks = 12;
+        const maxCheckTextLength = 12000;
         const output = {
           eligible: false, pullRequestNumber: null, headSha: null, baseSha: null,
           operationId: null, installerPath: null, baseManifest: null,
@@ -64,9 +66,14 @@ pre-agent-steps:
           output.reason = reason;
         };
         const unsafeLabels = new Set([
-          "Validation-Defender-Error", "Validation-Virus-Scan-Error",
-          "Validation-SmartScreen", "Hash-Flagged", "Binary-Validation-Error",
-          "Validation-Executable-Error", "Possible-Malware", "Blocking-Issue",
+          "URL-Validation-Error", "Validation-Defender-Error",
+          "Validation-Virus-Scan-Error", "Validation-SmartScreen",
+          "Validation-SmartScreen-Error", "Needs-SmartScreen-Investigation",
+          "Validation-Hash-Flagged", "Validation-Hash-Verification-Failed",
+          "Validation-Hash-Error", "Error-Hash-Mismatch",
+          "Validation-Signature-Error", "Validation-Shell-Execute",
+          "Binary-Validation-Error", "Validation-Executable-Error",
+          "Internal-Error-Static-Scan", "Possible-Malware", "Blocking-Issue",
         ]);
         async function getManifest(path, ref, missingIsNull = false) {
           try {
@@ -221,6 +228,24 @@ pre-agent-steps:
             reject("The newest trusted validation operation is not final.");
             return;
           }
+          const completedOperationChecks = operationChecks.filter(
+            (check) => check.status === "completed",
+          );
+          const evidenceChecks = [
+            completionCheck,
+            ...completedOperationChecks,
+          ].filter(Boolean);
+          if (
+            completedOperationChecks.length > maxOperationChecks ||
+            evidenceChecks.some(
+              (check) =>
+                String(check.output?.text ?? "").length >
+                  maxCheckTextLength,
+            )
+          ) {
+            reject("Validation Check evidence exceeds the safe review bounds.");
+            return;
+          }
           const mapCheck = (check) => ({
             name: check.name,
             conclusion: check.conclusion,
@@ -228,14 +253,12 @@ pre-agent-steps:
             output: {
               title: check.output?.title ?? null,
               summary: check.output?.summary ?? null,
-              text: String(check.output?.text ?? "").slice(0, 12000),
+              text: String(check.output?.text ?? ""),
             },
           });
           output.operationId = operationId;
           output.completionCheck = mapCheck(completionCheck);
-          output.checks = operationChecks.filter(
-            (check) => check.status === "completed")
-            .slice(0, 12).map(mapCheck);
+          output.checks = completedOperationChecks.map(mapCheck);
           output.eligible = true;
         } catch (error) {
           reject(`Evidence retrieval failed: ${
@@ -303,10 +326,15 @@ safe-outputs:
               const footer =
                 `###### Template: msftbot/authorAssist/elevationRequirement by [Elevation Requirement Review](${process.env.RUN_URL})`;
               const unsafe = new Set([
-                "Validation-Defender-Error", "Validation-Virus-Scan-Error",
-                "Validation-SmartScreen", "Hash-Flagged", "Binary-Validation-Error",
-                "Validation-Executable-Error",
-                "Possible-Malware", "Blocking-Issue",
+                "URL-Validation-Error", "Validation-Defender-Error",
+                "Validation-Virus-Scan-Error", "Validation-SmartScreen",
+                "Validation-SmartScreen-Error", "Needs-SmartScreen-Investigation",
+                "Validation-Hash-Flagged", "Validation-Hash-Verification-Failed",
+                "Validation-Hash-Error", "Error-Hash-Mismatch",
+                "Validation-Signature-Error", "Validation-Shell-Execute",
+                "Binary-Validation-Error", "Validation-Executable-Error",
+                "Internal-Error-Static-Scan", "Possible-Malware",
+                "Blocking-Issue",
               ]);
               if (!Number.isSafeInteger(target) || target <= 0) {
                 core.setFailed("Invalid fixed pull request target.");
@@ -391,9 +419,9 @@ labels, files, comments, and reviews. Emit `noop` if:
 - PR/head changed, the PR closed, author is `wingetbot`, or
   `Validation-Completed` is absent;
 - any security or integrity label is present, including
-  `Validation-Defender-Error`, `Validation-Virus-Scan-Error`,
-  `Validation-SmartScreen`, `Hash-Flagged`, `Binary-Validation-Error`,
-  `Validation-Executable-Error`, `Possible-Malware`, or `Blocking-Issue`;
+  URL validation, Defender, virus scan, SmartScreen, hash, signature, shell
+  execution, executable/binary validation, static-scan, malware, or blocking
+  labels;
 - files are outside one package version folder;
 - a non-bot human already gave substantive elevation feedback; or
 - that template footer already exists with the current full head SHA.
