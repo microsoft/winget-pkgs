@@ -37,10 +37,14 @@ pre-agent-steps:
         const appSlug = "wingetvalidator-prod";
         const targetLabel = "Validation-Defender-Error";
         const conflicts = new Set([
-          "Validation-Virus-Scan-Error", "Validation-SmartScreen", "Hash-Flagged",
-          "Error-Hash-Mismatch", "Binary-Validation-Error", "Possible-Malware",
-          "Blocking-Issue", "Validation-Hash-Error", "Validation-Signature-Error",
-          "Internal-Error-Static-Scan",
+          "URL-Validation-Error", "Validation-Virus-Scan-Error",
+          "Validation-SmartScreen", "Validation-SmartScreen-Error",
+          "Needs-SmartScreen-Investigation", "Validation-Hash-Flagged",
+          "Validation-Hash-Verification-Failed", "Validation-Hash-Error",
+          "Error-Hash-Mismatch", "Validation-Signature-Error",
+          "Validation-Shell-Execute", "Binary-Validation-Error",
+          "Validation-Executable-Error", "Internal-Error-Static-Scan",
+          "Possible-Malware", "Blocking-Issue",
         ]);
         const outcomes = new Map([
           ["01. Pull Request Validation", "success"],
@@ -434,9 +438,14 @@ safe-outputs:
               const owner = "microsoft", repo = "winget-pkgs";
               const label = "Validation-Defender-Error", footer = "###### Template: msftbot/authorAssist/transientSecurity";
               const conflicts = new Set([
-                "Validation-Virus-Scan-Error", "Validation-SmartScreen", "Hash-Flagged", "Error-Hash-Mismatch",
-                "Binary-Validation-Error", "Possible-Malware", "Blocking-Issue", "Validation-Hash-Error",
-                "Validation-Signature-Error", "Internal-Error-Static-Scan",
+                "URL-Validation-Error", "Validation-Virus-Scan-Error",
+                "Validation-SmartScreen", "Validation-SmartScreen-Error",
+                "Needs-SmartScreen-Investigation", "Validation-Hash-Flagged",
+                "Validation-Hash-Verification-Failed", "Validation-Hash-Error",
+                "Error-Hash-Mismatch", "Validation-Signature-Error",
+                "Validation-Shell-Execute", "Binary-Validation-Error",
+                "Validation-Executable-Error", "Internal-Error-Static-Scan",
+                "Possible-Malware", "Blocking-Issue",
               ]);
               const eventPr = context.payload.pull_request;
               const prNumber = Number(eventPr?.number), eventHead = String(eventPr?.head?.sha ?? "");
