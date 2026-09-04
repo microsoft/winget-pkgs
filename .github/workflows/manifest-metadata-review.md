@@ -109,10 +109,15 @@ pre-agent-steps:
             return;
           }
           const blocked = new Set([
-            "Validation-Defender-Error", "Validation-Virus-Scan-Error",
-            "Validation-SmartScreen", "Hash-Flagged",
-            "Binary-Validation-Error", "Possible-Malware",
-            "Blocking-Issue", "Malware", "Security",
+            "URL-Validation-Error", "Validation-Defender-Error",
+            "Validation-Virus-Scan-Error", "Validation-SmartScreen",
+            "Validation-SmartScreen-Error", "Needs-SmartScreen-Investigation",
+            "Validation-Hash-Flagged", "Validation-Hash-Verification-Failed",
+            "Validation-Hash-Error", "Error-Hash-Mismatch",
+            "Validation-Signature-Error", "Validation-Shell-Execute",
+            "Binary-Validation-Error", "Validation-Executable-Error",
+            "Internal-Error-Static-Scan", "Possible-Malware",
+            "Blocking-Issue",
           ].map((label) => label.toLowerCase()));
           if (labels.some((label) => blocked.has(label.toLowerCase()))) {
             fail("security-label");
@@ -367,10 +372,15 @@ safe-outputs:
                 (label) => String(label.name ?? "").toLowerCase(),
               );
               const blocked = [
-                "validation-defender-error", "validation-virus-scan-error",
-                "validation-smartscreen", "hash-flagged",
-                "binary-validation-error", "possible-malware",
-                "blocking-issue", "malware", "security",
+                "url-validation-error", "validation-defender-error",
+                "validation-virus-scan-error", "validation-smartscreen",
+                "validation-smartscreen-error", "needs-smartscreen-investigation",
+                "validation-hash-flagged", "validation-hash-verification-failed",
+                "validation-hash-error", "error-hash-mismatch",
+                "validation-signature-error", "validation-shell-execute",
+                "binary-validation-error", "validation-executable-error",
+                "internal-error-static-scan", "possible-malware",
+                "blocking-issue",
               ];
               const eventHead = process.env.EXPECTED_EVENT_HEAD.toLowerCase();
               if (
