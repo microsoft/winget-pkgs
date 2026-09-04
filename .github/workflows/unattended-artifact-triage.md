@@ -38,6 +38,17 @@ pre-agent-steps:
         const maxTextBytes = 20000, maxJsonBytes = 16000, maxEntries = 100;
         const maxEntryBytes = 10 * 1024 * 1024;
         const maxScreenshotBytes = 5 * 1024 * 1024;
+        const unsafeLabels = new Set([
+          "URL-Validation-Error", "Validation-Defender-Error",
+          "Validation-Virus-Scan-Error", "Validation-SmartScreen",
+          "Validation-SmartScreen-Error", "Needs-SmartScreen-Investigation",
+          "Validation-Hash-Flagged", "Validation-Hash-Verification-Failed",
+          "Validation-Hash-Error", "Error-Hash-Mismatch",
+          "Validation-Signature-Error", "Validation-Shell-Execute",
+          "Binary-Validation-Error", "Validation-Executable-Error",
+          "Internal-Error-Static-Scan", "Possible-Malware",
+          "Blocking-Issue",
+        ]);
         const output = {
           available: false, pullRequestNumber: null, headSha: null,
           operationBound: false, installation: null, screenshot: null,
@@ -65,11 +76,7 @@ pre-agent-steps:
           );
           if (
             !labels.has(targetLabel) ||
-            [...labels].some(
-              (label) =>
-                /security|malware|virus|defender|smartscreen|hash-flagged|binary-validation|validation-executable|blocking-issue/i
-                  .test(label),
-            )
+            [...labels].some((label) => unsafeLabels.has(label))
           ) fail();
           const checksResponse = await github.rest.checks.listForRef({
             owner, repo, ref: headSha, app_id: appId,
@@ -284,6 +291,17 @@ safe-outputs:
               const repo = "winget-pkgs";
               const footer =
                 "###### Template: msftbot/moderatorAssist/unattendedArtifactTriage";
+              const unsafeLabels = new Set([
+                "URL-Validation-Error", "Validation-Defender-Error",
+                "Validation-Virus-Scan-Error", "Validation-SmartScreen",
+                "Validation-SmartScreen-Error", "Needs-SmartScreen-Investigation",
+                "Validation-Hash-Flagged", "Validation-Hash-Verification-Failed",
+                "Validation-Hash-Error", "Error-Hash-Mismatch",
+                "Validation-Signature-Error", "Validation-Shell-Execute",
+                "Binary-Validation-Error", "Validation-Executable-Error",
+                "Internal-Error-Static-Scan", "Possible-Malware",
+                "Blocking-Issue",
+              ]);
               const stop = () => { throw new Error("Comment safety gate failed."); };
               try {
                 const target = Number(process.env.TARGET_PR);
@@ -353,10 +371,7 @@ safe-outputs:
                   pull.state !== "open" ||
                   pull.head?.sha !== evidenceHead ||
                   !labels.has("Validation-Unattended-Failed") ||
-                  [...labels].some((label) =>
-                    /security|malware|virus|defender|smartscreen|hash-flagged|binary-validation|validation-executable|blocking-issue/i
-                      .test(label),
-                  )
+                  [...labels].some((label) => unsafeLabels.has(label))
                 ) stop();
                 const comments = await github.rest.issues.listComments({
                   owner, repo, issue_number: target, per_page: 100, page: 1,
