@@ -259,6 +259,7 @@ safe-outputs:
         needs.detection.outputs.detection_success == 'true'
       permissions:
         issues: write
+        pull-requests: read
       inputs:
         body:
           description: Comment body without the Template footer
