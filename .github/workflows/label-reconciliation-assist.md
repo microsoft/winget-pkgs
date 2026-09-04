@@ -48,8 +48,8 @@ pre-agent-steps:
       github-token: "${{ github.token }}"
       script: |
         const fs = require("fs");
-        fs.mkdirSync("/tmp/gh-aw/agent", { recursive: true });
-        const outputPath = "/tmp/gh-aw/agent/label-reconciliation.json";
+        fs.mkdirSync("/tmp/gh-aw", { recursive: true });
+        const outputPath = "/tmp/gh-aw/label-reconciliation.json";
         const owner = "microsoft";
         const repo = "winget-pkgs";
         const output = { eligible: false };
@@ -192,6 +192,14 @@ pre-agent-steps:
         } finally {
           fs.writeFileSync(outputPath, JSON.stringify(output));
         }
+  - name: Upload sealed reconciliation evidence
+    uses: actions/upload-artifact@v7
+    with:
+      name: >-
+        label-reconciliation-evidence-${{ github.run_id }}-${{ github.run_attempt }}
+      path: /tmp/gh-aw/label-reconciliation.json
+      if-no-files-found: error
+      retention-days: 1
 permissions:
   checks: read
   contents: read
@@ -236,6 +244,12 @@ safe-outputs:
           required: true
           type: string
       steps:
+        - name: Download sealed reconciliation evidence
+          uses: actions/download-artifact@v8
+          with:
+            name: >-
+              label-reconciliation-evidence-${{ github.run_id }}-${{ github.run_attempt }}
+            path: ${{ runner.temp }}/label-reconciliation-evidence
         - name: Revalidate exact target and post comment
           uses: actions/github-script@v9
           env:
@@ -244,6 +258,8 @@ safe-outputs:
             EVENT_HEAD: ${{ github.event.pull_request.head.sha || '' }}
             EVENT_SENDER: ${{ github.event.sender.login || '' }}
             DISPATCH_PR: ${{ github.event.inputs.target_pull_request || '' }}
+            BINDING_PATH: >-
+              ${{ runner.temp }}/label-reconciliation-evidence/label-reconciliation.json
           with:
             github-token: "${{ github.token }}"
             script: |
@@ -255,11 +271,7 @@ safe-outputs:
               const outputFile = process.env.GH_AW_AGENT_OUTPUT;
               if (!outputFile || !fs.existsSync(outputFile)) return;
               const output = JSON.parse(fs.readFileSync(outputFile, "utf8"));
-              const bindingFile = require("path").join(
-                require("path").dirname(outputFile),
-                "agent",
-                "label-reconciliation.json",
-              );
+              const bindingFile = process.env.BINDING_PATH;
               if (!fs.existsSync(bindingFile)) {
                 core.setFailed("Trusted target binding is unavailable.");
                 return;
@@ -326,8 +338,17 @@ safe-outputs:
               const currentLabels = (pull.labels ?? []).map((label) =>
                 String(label?.name ?? ""),
               );
-              const unsafe =
-                /(?:security|integrity|malware|virus|defender|smartscreen|hash-flagged|binary-validation|validation-executable-error|blocking-issue)/i;
+              const unsafe = new Set([
+                "URL-Validation-Error", "Validation-Defender-Error",
+                "Validation-Virus-Scan-Error", "Validation-SmartScreen",
+                "Validation-SmartScreen-Error", "Needs-SmartScreen-Investigation",
+                "Validation-Hash-Flagged", "Validation-Hash-Verification-Failed",
+                "Validation-Hash-Error", "Error-Hash-Mismatch",
+                "Validation-Signature-Error", "Validation-Shell-Execute",
+                "Binary-Validation-Error", "Validation-Executable-Error",
+                "Internal-Error-Static-Scan", "Possible-Malware",
+                "Blocking-Issue",
+              ]);
               const eventValid =
                 process.env.EVENT_NAME === "pull_request_target"
                   ? target === Number(process.env.EVENT_PR) &&
@@ -350,7 +371,7 @@ safe-outputs:
                 binding.trigger?.headSha?.toLowerCase() !== expectedHead ||
                 !eventValid ||
                 pull.head?.sha?.toLowerCase() !== expectedHead ||
-                currentLabels.some((label) => unsafe.test(label))
+                currentLabels.some((label) => unsafe.has(label))
               ) {
                 core.setFailed("Target state changed or is not safe.");
                 return;
@@ -396,7 +417,7 @@ safe-outputs:
 
 ## Mission
 
-Read `/tmp/gh-aw/agent/label-reconciliation.json`. If `eligible` is not exactly
+Read `/tmp/gh-aw/label-reconciliation.json`. If `eligible` is not exactly
 `true`, emit `noop`. Otherwise investigate only the recorded target and bounded
 evidence. The only available write tool is `fixed_target_comment`; call it at
 most once with `body` only. Never provide a target, repository, item number,
