@@ -16,6 +16,7 @@ on:
         required: false
         type: string
   roles: [admin, maintainer, write]
+  bots: ["wingetvalidator-prod[bot]"]
 if: >-
   github.event_name == 'workflow_dispatch' ||
   (
@@ -237,6 +238,8 @@ safe-outputs:
     footer: "###### Template: msftbot/moderatorAssist/wingetbotTriage by [{workflow_name}]({run_url})"
   threat-detection: true
   report-failure-as-issue: false
+  report-incomplete:
+    create-issue: false
   noop:
     report-as-issue: false
   add-comment:

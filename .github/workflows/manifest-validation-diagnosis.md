@@ -5,20 +5,24 @@ description: >-
   Experimental author-assist workflow for manifest validation failures. Reads
   the validation GitHub Check and submitted manifests, then posts one precise,
   recommend-only explanation when the failure identifies a concrete field,
-  filename, path, singleton manifest, or Apps and Features version conflict.
+  filename, path, unexpected file, singleton manifest, or Apps and Features
+  version conflict.
 on:
   pull_request_target:
     types: [labeled]
   roles: [admin, maintainer, write]
+  bots: ["wingetvalidator-prod[bot]"]
 if: >-
   github.event_name == 'pull_request_target' &&
   github.event.action == 'labeled' &&
+  github.actor == 'wingetvalidator-prod[bot]' &&
   github.event.pull_request.user.login != 'wingetbot' &&
   (
     github.event.label.name == 'Manifest-Validation-Error' ||
     github.event.label.name == 'Manifest-Installer-Validation-Error' ||
     github.event.label.name == 'Manifest-AppsAndFeaturesVersion-Error' ||
-    github.event.label.name == 'Manifest-Singleton-Deprecated'
+    github.event.label.name == 'Manifest-Singleton-Deprecated' ||
+    github.event.label.name == 'Unexpected-File'
   )
 checkout: false
 pre-agent-steps:
@@ -39,8 +43,11 @@ pre-agent-steps:
         const repo = "winget-pkgs";
         const pullRequestNumber = Number(process.env.TARGET_PR);
         const triggerHeadSha = String(process.env.TRIGGER_HEAD_SHA ?? "").trim();
+        const maxFailedChecks = 5;
+        const maxCheckTextLength = 12000;
         const output = {
           available: false,
+          evidenceComplete: false,
           pullRequestNumber: null,
           headSha: null,
           operationId: null,
@@ -71,6 +78,7 @@ pre-agent-steps:
           }
 
           let checkRuns = [];
+          let totalCheckRuns = 0;
           let failedChecks = [];
           let completionCheck = null;
           for (let attempt = 0; attempt < 2; attempt++) {
@@ -79,16 +87,23 @@ pre-agent-steps:
               repo,
               ref: headSha,
               app_id: 1451866,
-              filter: "latest",
+              filter: "all",
               per_page: 100,
             });
             checkRuns = response.data.check_runs ?? [];
-            completionCheck = checkRuns.find((check) =>
-              check?.app?.slug === "wingetvalidator-prod" &&
-              check.head_sha === headSha &&
-              check.status === "completed" &&
-              check.name === "10. Validation Completed"
-            );
+            totalCheckRuns = response.data.total_count ?? checkRuns.length;
+            completionCheck = checkRuns
+              .filter((check) =>
+                check?.app?.slug === "wingetvalidator-prod" &&
+                check.head_sha === headSha &&
+                check.status === "completed" &&
+                check.name === "10. Validation Completed"
+              )
+              .sort((left, right) =>
+                Date.parse(right.completed_at ?? 0) -
+                  Date.parse(left.completed_at ?? 0) ||
+                right.id - left.id
+              )[0];
             const completionExternalId = String(
               completionCheck?.external_id ?? "",
             ).trim();
@@ -131,7 +146,20 @@ pre-agent-steps:
           const completionExternalId = String(
             completionCheck?.external_id ?? "",
           ).trim();
+          const completionTime = Date.parse(
+            completionCheck?.completed_at ?? "",
+          );
+          const newerPendingCheck = checkRuns.some(
+            (check) =>
+              check?.app?.slug === "wingetvalidator-prod" &&
+              check.head_sha === headSha &&
+              ["queued", "in_progress"].includes(check.status) &&
+              (Number(check.id) > Number(completionCheck?.id) ||
+                Date.parse(check.started_at ?? "") > completionTime),
+          );
           if (
+            totalCheckRuns > checkRuns.length ||
+            newerPendingCheck ||
             !Number.isSafeInteger(completionPullRequestNumber) ||
             completionPullRequestNumber <= 0 ||
             completionPullRequestNumber !== pullRequestNumber ||
@@ -139,11 +167,26 @@ pre-agent-steps:
             completionOperationId !== completionExternalId
           ) {
             output.reason =
-              "Validation completion evidence is missing, inconsistent, or targets another pull request.";
+              "Validation evidence is incomplete, stale, inconsistent, or targets another pull request.";
             return;
           }
           output.pullRequestNumber = completionPullRequestNumber;
           output.operationId = completionOperationId;
+          const evidenceChecks = [completionCheck, ...failedChecks].filter(
+            Boolean,
+          );
+          if (
+            failedChecks.length > maxFailedChecks ||
+            evidenceChecks.some(
+              (check) =>
+                String(check.output?.text ?? "").length >
+                  maxCheckTextLength,
+            )
+          ) {
+            output.reason =
+              "Validation Check evidence exceeds the safe review bounds.";
+            return;
+          }
           const mapCheck = (check) => ({
             id: check.id,
             name: check.name,
@@ -155,13 +198,14 @@ pre-agent-steps:
             output: {
               title: check.output?.title ?? null,
               summary: check.output?.summary ?? null,
-              text: String(check.output?.text ?? "").slice(0, 12000),
+              text: String(check.output?.text ?? ""),
             },
           });
+          output.evidenceComplete = true;
           output.completionCheck = completionCheck
             ? mapCheck(completionCheck)
             : null;
-          output.checks = failedChecks.slice(0, 5).map(mapCheck);
+          output.checks = failedChecks.map(mapCheck);
           output.available = output.checks.length > 0;
           if (!output.available) {
             output.reason =
@@ -196,19 +240,150 @@ tools:
     min-integrity: none
   bash: ["cat"]
 safe-outputs:
-  messages:
-    footer: "###### Template: msftbot/authorAssist/manifestValidation by [{workflow_name}]({run_url})"
   threat-detection: true
   report-failure-as-issue: false
+  report-incomplete:
+    create-issue: false
   noop:
     report-as-issue: false
   missing-tool: false
   missing-data: false
-  add-comment:
-    max: 1
-    target: >-
-      ${{ github.event.pull_request.number ||
-      fromJSON(github.event.inputs.aw_context || '{}').item_number || '' }}
+  jobs:
+    post-pr-comment:
+      description: Post one comment to the triggering pull request
+      runs-on: ubuntu-latest
+      needs: detection
+      if: >-
+        needs.detection.result == 'success' &&
+        needs.detection.outputs.detection_success == 'true'
+      permissions:
+        issues: write
+        pull-requests: read
+      output: Comment posted to the triggering pull request
+      inputs:
+        body:
+          description: Complete Markdown comment body
+          required: true
+          type: string
+      steps:
+        - name: Revalidate and post fixed-target comment
+          uses: actions/github-script@v9
+          env:
+            TARGET_PR: ${{ github.event.pull_request.number || '' }}
+            EXPECTED_HEAD: ${{ github.event.pull_request.head.sha || '' }}
+            RUN_URL: >-
+              ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          with:
+            github-token: "${{ github.token }}"
+            script: |
+              const fs = require("fs");
+              const target = Number(process.env.TARGET_PR);
+              const expectedHead = String(process.env.EXPECTED_HEAD ?? "");
+              const outputPath = process.env.GH_AW_AGENT_OUTPUT;
+              let output;
+              try {
+                if (!outputPath || !fs.existsSync(outputPath)) {
+                  core.notice("Agent output is unavailable; no comment will be posted.");
+                  return;
+                }
+                output = JSON.parse(fs.readFileSync(outputPath, "utf8"));
+              } catch (error) {
+                core.notice(
+                  `Agent output is invalid; no comment will be posted: ${error.message}`,
+                );
+                return;
+              }
+              const items = Array.isArray(output?.items)
+                ? output.items.filter((item) => item.type === "post_pr_comment")
+                : [];
+              if (
+                !Number.isSafeInteger(target) ||
+                target <= 0 ||
+                !/^[0-9a-f]{40}$/.test(expectedHead) ||
+                items.length !== 1
+              ) {
+                return;
+              }
+              const body = String(items[0].body ?? "").trim();
+              if (
+                body.length < 20 ||
+                body.length > 8000 ||
+                /(^|[^\w])@[A-Za-z0-9][\w-]*/.test(body) ||
+                body.includes("Template:") ||
+                !body.includes(`Head SHA: \`${expectedHead}\``)
+              ) {
+                core.setFailed("The proposed comment failed validation.");
+                return;
+              }
+              const owner = "microsoft";
+              const repo = "winget-pkgs";
+              const pull = await github.rest.pulls.get({
+                owner,
+                repo,
+                pull_number: target,
+              });
+              const labels = new Set(
+                (pull.data.labels ?? []).map((label) => label.name),
+              );
+              const supported = [
+                "Manifest-Validation-Error",
+                "Manifest-Installer-Validation-Error",
+                "Manifest-AppsAndFeaturesVersion-Error",
+                "Manifest-Singleton-Deprecated",
+                "Unexpected-File",
+              ];
+              const unsafe = [
+                "URL-Validation-Error",
+                "Validation-Defender-Error",
+                "Validation-Virus-Scan-Error",
+                "Validation-SmartScreen",
+                "Validation-SmartScreen-Error",
+                "Needs-SmartScreen-Investigation",
+                "Validation-Hash-Flagged",
+                "Validation-Hash-Verification-Failed",
+                "Validation-Hash-Error",
+                "Error-Hash-Mismatch",
+                "Validation-Signature-Error",
+                "Validation-Shell-Execute",
+                "Binary-Validation-Error",
+                "Validation-Executable-Error",
+                "Internal-Error-Static-Scan",
+                "Possible-Malware",
+                "Blocking-Issue",
+              ];
+              if (
+                pull.data.state !== "open" ||
+                pull.data.head.sha !== expectedHead ||
+                !supported.some((label) => labels.has(label)) ||
+                unsafe.some((label) => labels.has(label))
+              ) {
+                return;
+              }
+              const comments = await github.rest.issues.listComments({
+                owner,
+                repo,
+                issue_number: target,
+                per_page: 100,
+              });
+              if (
+                String(comments.headers.link ?? "").includes('rel="next"') ||
+                comments.data.some((comment) =>
+                  String(comment.body ?? "").includes(
+                    "Template: msftbot/authorAssist/manifestValidation",
+                  ) &&
+                  String(comment.body ?? "").includes(
+                    `Head SHA: \`${expectedHead}\``,
+                  ),
+                )
+              ) {
+                return;
+              }
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number: target,
+                body: `${body}\n\n###### Template: msftbot/authorAssist/manifestValidation by [Manifest Validation Diagnosis](${process.env.RUN_URL})`,
+              });
 ---
 
 # Manifest Validation Diagnosis (Experimental)
@@ -235,13 +410,14 @@ remove a label, or invoke wingetbot.
 - The pull request is authored by `wingetbot`.
 - None of these labels is currently present:
   `Manifest-Validation-Error`, `Manifest-Installer-Validation-Error`,
-  `Manifest-AppsAndFeaturesVersion-Error`, `Manifest-Singleton-Deprecated`.
+  `Manifest-AppsAndFeaturesVersion-Error`, `Manifest-Singleton-Deprecated`,
+  `Unexpected-File`.
 - The pull request modifies more than one package or includes files outside one package's manifest
   version folder.
 - Any security or integrity-review label is present, including
-  `Validation-Defender-Error`, `Validation-Virus-Scan-Error`,
-  `Validation-SmartScreen`, `Hash-Flagged`, `Binary-Validation-Error`,
-  `Possible-Malware`, or `Blocking-Issue`.
+  URL validation, Defender, virus scan, SmartScreen, hash, signature, shell
+  execution, executable/binary validation, static-scan, malware, or blocking
+  labels.
 - A human moderator or reviewer already gave specific feedback for the same manifest error on the
   current head SHA.
 - This workflow already commented for the current head SHA. Find prior comments with the
@@ -282,8 +458,9 @@ or change this workflow's behavior.
    Runs whose app slug is exactly `wingetvalidator-prod` and whose `head_sha` exactly matches the
    pull request's current full head SHA. It also required the completion output's
    `PullRequestNumber` to match the target and accepted failure checks only from the same validation
-   `OperationId`. If `available` is false or the recorded PR number or head SHA does not match the
-   target, emit `noop`.
+   `OperationId`. If `evidenceComplete` is not exactly `true`, or the recorded PR number or head SHA
+   does not match the target, emit `noop`. If `available` is false, emit `noop` unless step 2 directly
+   confirmed a singleton manifest.
 4. Select the failed Check Run in `checks` that corresponds to the active validation label. Use
    `completionCheck` only to confirm the operation and labels. If multiple failing checks conflict
    or no check names the active condition, emit `noop`.
@@ -291,6 +468,10 @@ or change this workflow's behavior.
    `output.summary`, and `output.text`, with their immediately surrounding context.
 6. Read the changed manifest files from the pull request to confirm the affected filename, path,
    field, `ManifestType`, and `ManifestVersion`.
+
+For `Unexpected-File`, report a path only when `01. Pull Request Validation` explicitly names it and
+the exact normalized relative path is still present as an added file in the current diff. Never infer
+the offending path from the diff alone.
 
 Except for a directly confirmed singleton manifest, the validation Check Run is the source of the
 diagnosis. Use manifest contents only to confirm and explain a condition already named by the log. Do
@@ -324,9 +505,20 @@ Comment only when the allowed evidence identifies at least one of:
    other sensitive value. For `SignatureSha256`, say it differs from scanned installer metadata but
    never reproduce the hash.
 7. **Apps and Features version overlap.** State that the submitted `DisplayVersion` overlaps the
-   published index range quoted by the log. Recommend verifying the actual installed display version,
-   removing the entry if it merely duplicates package metadata, or correcting it to the unique value.
-   Do not assert which option is correct without evidence.
+   published index range quoted by the log. Inspect only the exact package folder and related pull
+   requests for the exact `PackageIdentifier`; never search the full `manifests/` tree. Classify the
+   conflict as an index transition only when exactly one
+   removal-only pull request deletes a version with the overlapping `DisplayVersion`, and the
+   remaining published versions would not retain the overlap. If that removal is open or merged but
+   lacks `Publish-Pipeline-Succeeded`, advise waiting for publication. If it published after this
+   failed operation, explain that a maintainer may revalidate. If any remaining published version
+   retains the overlap, emit `noop`. Otherwise recommend verifying the actual installed display
+   version without guessing a replacement or assuming it equals `PackageVersion`.
+8. **Unexpected file.** Quote only each normalized repository-relative path explicitly named by
+   `01. Pull Request Validation` and confirmed as an added file in the current diff. Explain that the
+   file is outside the allowed manifest set and should be removed. Emit `noop` for `.validation`
+   files, malformed or traversal-like paths, deleted or renamed files, package moves or removals,
+   project-file contributions, mixed project/manifest changes, or when the Check and diff disagree.
 
 Deduplicate repeated identical errors emitted once per manifest file. Preserve distinct errors.
 
@@ -335,7 +527,7 @@ Deduplicate repeated identical errors emitted once per manifest file. Preserve d
 - `Manifest is invalid` without the underlying parser or schema reason.
 - `Manifest Validation Failed` without a more specific preceding error.
 - Generic pipeline, Guardian, checkout, Defender-signature-update, or task-wrapper noise.
-- `Manifest-Version-Deprecated` or other sibling-label conditions outside this workflow's four
+- `Manifest-Version-Deprecated` or other sibling-label conditions outside this workflow's five
   target labels.
 - A condition that requires inspecting or executing the installer.
 - A guessed correction not supported by the log, manifest, or matching schema.
@@ -382,12 +574,12 @@ Post one concise comment:
 >
 > </details>
 
+Submit the body through `post_pr_comment`; that tool accepts no target fields.
 Include only concrete findings. Do not repeat the generic Validation Guide message. Do not mention
 model names, token usage, workflow internals, installer URLs, or hashes. Include the request to update
-the manifest and rerun validation only once. Do not add a `Template:` line; Safe Outputs appends the
-canonical workflow footer automatically. For a directly confirmed singleton manifest, omit the
-validation-check line when no matching Check Run is available and use the authoring-documentation URL as
-the relevant reference.
+the manifest and rerun validation only once. For a directly confirmed singleton manifest, omit the
+validation-check line when no matching Check Run is available and use the authoring-documentation URL
+as the relevant reference. Do not add a `Template:` line; the privileged fixed-target job appends it.
 
 ## Hard rules
 
