@@ -315,6 +315,7 @@ safe-outputs:
       max: 1
       permissions:
         issues: write
+        pull-requests: read
       inputs:
         body:
           description: Complete comment body without the workflow footer.
