@@ -223,7 +223,8 @@ pre-agent-steps:
   - name: Upload deterministic evidence
     uses: actions/upload-artifact@v7
     with:
-      name: unattended-artifact-evidence
+      name: >-
+        unattended-artifact-evidence-${{ github.run_id }}-${{ github.run_attempt }}
       path: /tmp/gh-aw/unattended-artifact.json
       if-no-files-found: error
       retention-days: 1
@@ -266,7 +267,8 @@ safe-outputs:
         - name: Download deterministic evidence
           uses: actions/download-artifact@v8
           with:
-            name: unattended-artifact-evidence
+            name: >-
+              unattended-artifact-evidence-${{ github.run_id }}-${{ github.run_attempt }}
             path: ${{ runner.temp }}/unattended-artifact-evidence
         - name: Validate and post fixed-target comment
           uses: actions/github-script@v9
@@ -341,12 +343,9 @@ safe-outputs:
                 ].join("\n");
                 if (body !== expectedBody) stop();
                 const evidenceHead = evidence.headSha;
-                const response = await fetch(
-                  `https://api.github.com/repos/${owner}/${repo}/pulls/${target}`,
-                  { headers: { Accept: "application/vnd.github+json" } },
-                );
-                if (!response.ok) stop();
-                const pull = await response.json();
+                const { data: pull } = await github.rest.pulls.get({
+                  owner, repo, pull_number: target,
+                });
                 const labels = new Set(
                   (pull.labels ?? []).map((label) => String(label.name ?? "")),
                 );
