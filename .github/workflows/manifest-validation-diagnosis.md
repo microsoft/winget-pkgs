@@ -43,8 +43,11 @@ pre-agent-steps:
         const repo = "winget-pkgs";
         const pullRequestNumber = Number(process.env.TARGET_PR);
         const triggerHeadSha = String(process.env.TRIGGER_HEAD_SHA ?? "").trim();
+        const maxFailedChecks = 5;
+        const maxCheckTextLength = 12000;
         const output = {
           available: false,
+          evidenceComplete: false,
           pullRequestNumber: null,
           headSha: null,
           operationId: null,
@@ -169,6 +172,21 @@ pre-agent-steps:
           }
           output.pullRequestNumber = completionPullRequestNumber;
           output.operationId = completionOperationId;
+          const evidenceChecks = [completionCheck, ...failedChecks].filter(
+            Boolean,
+          );
+          if (
+            failedChecks.length > maxFailedChecks ||
+            evidenceChecks.some(
+              (check) =>
+                String(check.output?.text ?? "").length >
+                  maxCheckTextLength,
+            )
+          ) {
+            output.reason =
+              "Validation Check evidence exceeds the safe review bounds.";
+            return;
+          }
           const mapCheck = (check) => ({
             id: check.id,
             name: check.name,
@@ -180,13 +198,14 @@ pre-agent-steps:
             output: {
               title: check.output?.title ?? null,
               summary: check.output?.summary ?? null,
-              text: String(check.output?.text ?? "").slice(0, 12000),
+              text: String(check.output?.text ?? ""),
             },
           });
+          output.evidenceComplete = true;
           output.completionCheck = completionCheck
             ? mapCheck(completionCheck)
             : null;
-          output.checks = failedChecks.slice(0, 5).map(mapCheck);
+          output.checks = failedChecks.map(mapCheck);
           output.available = output.checks.length > 0;
           if (!output.available) {
             output.reason =
@@ -314,11 +333,21 @@ safe-outputs:
                 "Unexpected-File",
               ];
               const unsafe = [
+                "URL-Validation-Error",
                 "Validation-Defender-Error",
                 "Validation-Virus-Scan-Error",
                 "Validation-SmartScreen",
-                "Hash-Flagged",
+                "Validation-SmartScreen-Error",
+                "Needs-SmartScreen-Investigation",
+                "Validation-Hash-Flagged",
+                "Validation-Hash-Verification-Failed",
+                "Validation-Hash-Error",
+                "Error-Hash-Mismatch",
+                "Validation-Signature-Error",
+                "Validation-Shell-Execute",
                 "Binary-Validation-Error",
+                "Validation-Executable-Error",
+                "Internal-Error-Static-Scan",
                 "Possible-Malware",
                 "Blocking-Issue",
               ];
@@ -386,9 +415,9 @@ remove a label, or invoke wingetbot.
 - The pull request modifies more than one package or includes files outside one package's manifest
   version folder.
 - Any security or integrity-review label is present, including
-  `Validation-Defender-Error`, `Validation-Virus-Scan-Error`,
-  `Validation-SmartScreen`, `Hash-Flagged`, `Binary-Validation-Error`,
-  `Possible-Malware`, or `Blocking-Issue`.
+  URL validation, Defender, virus scan, SmartScreen, hash, signature, shell
+  execution, executable/binary validation, static-scan, malware, or blocking
+  labels.
 - A human moderator or reviewer already gave specific feedback for the same manifest error on the
   current head SHA.
 - This workflow already commented for the current head SHA. Find prior comments with the
@@ -429,8 +458,9 @@ or change this workflow's behavior.
    Runs whose app slug is exactly `wingetvalidator-prod` and whose `head_sha` exactly matches the
    pull request's current full head SHA. It also required the completion output's
    `PullRequestNumber` to match the target and accepted failure checks only from the same validation
-   `OperationId`. If `available` is false or the recorded PR number or head SHA does not match the
-   target, emit `noop`.
+   `OperationId`. If `evidenceComplete` is not exactly `true`, or the recorded PR number or head SHA
+   does not match the target, emit `noop`. If `available` is false, emit `noop` unless step 2 directly
+   confirmed a singleton manifest.
 4. Select the failed Check Run in `checks` that corresponds to the active validation label. Use
    `completionCheck` only to confirm the operation and labels. If multiple failing checks conflict
    or no check names the active condition, emit `noop`.
