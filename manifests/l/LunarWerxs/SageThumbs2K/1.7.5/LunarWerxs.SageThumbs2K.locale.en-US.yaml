@@ -1,0 +1,60 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: LunarWerxs.SageThumbs2K
+PackageVersion: 1.7.5
+PackageLocale: en-US
+Publisher: LunarWerx
+PublisherUrl: https://github.com/LunarWerxs
+PublisherSupportUrl: https://github.com/LunarWerxs/SageThumbs-2k/issues
+PackageName: SageThumbs 2K
+PackageUrl: https://github.com/LunarWerxs/SageThumbs-2k
+License: PolyForm Noncommercial License 1.0.0
+LicenseUrl: https://github.com/LunarWerxs/SageThumbs-2k/blob/HEAD/LICENSE.md
+Copyright: Copyright (c) 2026 LunarWerx
+ShortDescription: Explorer thumbnails for 326 file types Windows can't read, plus a right-click image toolkit.
+Description: SageThumbs 2K is a modern, crash-isolated Windows 11 shell extension written in Rust that rebuilds the classic SageThumbs. It gives File Explorer thumbnails for 326 file types Windows can't preview on its own — camera RAW, HEIC/AVIF, Photoshop, DjVu, ebooks and comics, video frames, 3D-print files and a long tail of obscure formats — plus a right-click image toolkit (convert, resize, rotate, OCR, color picker, metadata strip, combine-to-PDF/CBZ) and a console/AI CLI. Free for personal use.
+Moniker: sagethumbs2k
+Tags:
+- converter
+- explorer
+- heic
+- image
+- raw
+- shell-extension
+- thumbnails
+ReleaseNotes: |-
+  What's changed
+  Fixed
+  - Black-and-white scanned pages could render as a solid black square. Some JPEG 2000
+    scans - the kind archive.org uses for book and map pages - store the picture as numbered
+    colours rather than as brightness, and a blank white page is stored as "colour number 0".
+    Our new decoder was treating that number as a brightness value, so the whitest page came
+    out the darkest. It now reads the colour table the file provides. (issue #11)
+  - The preview pane could stop refreshing after it had been sitting idle. Come back to a
+    folder after a while, click a different picture, and the pane sometimes kept showing the
+    previous one. Windows quietly recycles the preview pane when it has been idle, which
+    destroys the window we draw into; we kept drawing into the window that no longer existed,
+    so the update went nowhere and the stale picture stayed put. We now notice the window has
+    gone and rebuild it. (issue #11)
+  Added
+  - A built-in JPEG 2000 decoder that only decodes what the thumbnail needs. JPEG 2000
+    stores every image as a stack of halved resolutions, but every decoder we could reach
+    either could not use that (ImageMagick's reduction flag returns the wrong part of the
+    image) or did not exist in usable form - so until now a 76-megapixel scan had to be
+    decoded in full just to make a tile. The new decoder reads only the resolution being
+    displayed: that scan now thumbnails in 0.25 seconds instead of 4.4, and previews in 1.2
+    seconds instead of 5 - and the result is slightly sharper, because a true wavelet
+    resolution level keeps detail that shrinking a full decode averages away. Verified
+    bit-exact on lossless test images (a correct reversible decode has no rounding excuse),
+    and anything the decoder does not support falls back to the old path automatically, so
+    no file that rendered before renders worse.
+  Verified installer
+  - File: SageThumbs2K-Setup-1.7.5.exe
+  - Size: 13434438 bytes
+  - SHA-256: 36e61661273d544afff4f2ca4a37a18ae110e3a61bf18658844dea6bb906d07d
+  - ARM64 installer: SageThumbs2K-Setup-1.7.5-arm64.exe
+  - ARM64 SHA-256: 5437afe73d328de2bc467c7de9ea1fccbb1cd67d800e5d424399b6c02a6367f4
+ReleaseNotesUrl: https://github.com/LunarWerxs/SageThumbs-2k/releases/tag/v1.7.5
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

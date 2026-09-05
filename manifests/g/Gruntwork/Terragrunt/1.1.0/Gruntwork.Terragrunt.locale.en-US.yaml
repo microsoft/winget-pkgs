@@ -1,0 +1,148 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Gruntwork.Terragrunt
+PackageVersion: 1.1.0
+PackageLocale: en-US
+Publisher: Gruntwork
+PublisherUrl: https://terragrunt.gruntwork.io/
+PublisherSupportUrl: https://terragrunt.gruntwork.io/docs/community/support
+PrivacyUrl: https://gruntwork.io/legal/privacy-policy
+PackageName: Terragrunt
+PackageUrl: https://github.com/gruntwork-io/terragrunt/releases/tag/v0.68.9
+License: MIT
+LicenseUrl: https://github.com/gruntwork-io/terragrunt/blob/HEAD/LICENSE.txt
+Copyright: © 2024 Gruntwork, Inc. All rights reserved.
+ShortDescription: Terragrunt is a thin wrapper for Terraform that provides extra tools for keeping your Terraform configurations DRY, working with multiple Terraform modules, and managing remote state.
+Description: Terragrunt is a thin wrapper for Terraform that provides extra tools for keeping your Terraform configurations DRY, working with multiple Terraform modules, and managing remote state.
+Tags:
+- IaC
+- Infrastructure as Code
+- Terraform
+- Terraform Wrapper
+- terragrunt
+ReleaseNotes: |-
+  ✨ New Features
+  Stack dependencies
+  A stack generates a tree of units from a single terragrunt.stack.hcl file. Wiring one of those units to another used to mean defining dependency blocks in your catalog and threading dependency paths through values. Stack dependencies let you declare those relationships up front instead.
+  Add an autoinclude block inside a unit or stack block, and Terragrunt generates a partial configuration (a terragrunt.autoinclude.hcl file) next to the generated terragrunt.hcl or terragrunt.stack.hcl that's automatically merged into the unit or stack definition. The new unit.<name>.path and stack.<name>.path references resolve to generated paths, so you don't have to hardcode them:
+  # terragrunt.stack.hcl
+  unit "vpc" {
+    source = "github.com/acme/catalog//units/vpc"
+    path   = "vpc"
+  }
+  unit "app" {
+    source = "github.com/acme/catalog//units/app"
+    path   = "app"
+    autoinclude {
+      dependency "vpc" {
+        config_path = unit.vpc.path
+      }
+      inputs = {
+        vpc_id = dependency.vpc.outputs.vpc_id
+      }
+    }
+  }
+  Anything that's valid in a unit configuration is valid in its autoinclude block, so you can also patch catalog units with configuration they don't ship with, like retry rules:
+  # terragrunt.stack.hcl
+  unit "app" {
+    source = "github.com/acme/catalog//units/app"
+    path   = "app"
+    autoinclude {
+      errors {
+        retry "transient_errors" {
+          retryable_errors   = [".*Error: transient network issue.*"]
+          max_attempts       = 3
+          sleep_interval_sec = 5
+        }
+      }
+    }
+  }
+  The same works for nested stacks: an autoinclude block inside a stack block patches the generated terragrunt.stack.hcl, so you can, for example, add an extra unit to one environment without forking the stack in your catalog.
+  Stack configurations also gained two capabilities along the way:
+  - include blocks now work in terragrunt.stack.hcl files, so shared stack configuration can live in a parent folder.
+  - dependency blocks can target stack directories, and the run queue expands them to the units inside. Note that this relationship only goes one way: units can depend on stacks, but stacks cannot depend on stacks or units.
+  See the stacks documentation for the full reference. Previously gated behind the stack-dependencies experiment, all of this is now enabled by default.
+  Content Addressable Store (CAS)
+  The Content Addressable Store (CAS) deduplicates source downloads across configurations. It addresses repositories and modules by their content, stores them locally, and serves later requests from that local store instead of repeating the fetch. This speeds up catalog cloning, OpenTofu/Terraform source fetching, and stack generation, and identical files occupy disk space once regardless of how many configurations use them.
+  The CAS is no longer limited to Git. It also deduplicates HTTP, Amazon S3, Google Cloud Storage, Mercurial, and SMB sources, along with OpenTofu/Terraform registry sources fetched via tfr://. See supported sources for how each one resolves and deduplicates content.
+  CAS is enabled by default. Use the --no-cas flag (or TG_NO_CAS=true) to opt out of it for a run:
+  terragrunt run --all --no-cas -- plan
+  Two new attributes give you finer control, and both default to off:
+  - update_source_with_cas makes a generated stack self-contained. Set it on a unit, stack, or terraform block with a relative source, and terragrunt stack generate rewrites that source into a content-addressed cas:: reference, so the generated tree no longer depends on the surrounding repository layout. Catalog authors can keep relative paths in their sources and still ship a portable, reproducible stack:
+    # stacks/networking/terragrunt.stack.hcl
+    unit "vpc" {
+      source = "../..//units/vpc"
+      path   = "vpc"
+      update_source_with_cas = true
+    }
+    After terragrunt stack generate, the relative path is replaced by a reference to the exact tree the CAS stored:
+    # Generated output
+    unit "vpc" {
+      source = "cas::sha1:f39ea0ebf891c9954c89d07b73b487ff938ef08b"
+      path   = "vpc"
+      update_source_with_cas = true
+    }
+  - mutable controls how the CAS places fetched content on disk. By default, the CAS hard links files from its shared store into .terragrunt-cache and marks them read-only, which is fast and uses no extra space, but means the files can't be edited in place. Set mutable = true on a terraform block to copy the content instead, making the working tree safe to edit at the cost of extra I/O and disk space:
+    # units/vpc/terragrunt.hcl
+    terraform {
+      source = "github.com/acme/catalog//modules/vpc"
+      mutable = true
+    }
+  Previously gated behind the cas experiment, the CAS no longer requires --experiment cas.
+  Redesigned terragrunt catalog
+  The catalog command has been redesigned. It now starts without any configuration, discovers components across your catalog repositories in the background, and streams them into the TUI as they're found.
+  Discovery is no longer limited to a modules/ directory; components can live anywhere in a catalog repository. To control what gets discovered, add a .terragrunt-catalog-ignore file with .gitignore-style globs for the paths you want filtered out.
+  Components in the TUI now carry metadata to help you navigate a large catalog: each one shows a kind label (template, stack, unit, or module) and optional tags defined in the front-matter of its README.md. From the component list, press s to open a new screen that interactively collects the values used to scaffold the component into your repository.
+  Previously gated behind the catalog-redesign experiment, the redesigned catalog is now the default terragrunt catalog experience.
+  Reading detection for local module sources
+  Terragrunt can select units by the files they read, which is the basis of change-based runs in CI. Previously, pointing a unit's terraform block at a local directory didn't mark the files inside that directory as read, so a change to the module wouldn't select the unit.
+  When a unit's source is a local module, Terragrunt now records the module's *.tf, *.tf.json, *.hcl, *.tofu, and *.tofu.json files as read by that unit, so --filter 'reading=<path>' and --queue-include-units-reading select the unit when a module file changes:
+  terragrunt run --all --filter 'reading=./modules/vpc/main.tf' -- plan
+  For files that reading detection doesn't track on its own, the new mark_glob_as_read() HCL function expands a glob and marks every matching file as read in one call:
+  locals {
+    configs = mark_glob_as_read("${get_terragrunt_dir()}/config/{*.yaml,**/*.yaml}")
+  }
+  Existing pipelines built on --queue-include-units-reading or reading= filters may select more units than before, because changes to local module files now count as reads. Previously gated behind the mark-many-as-read experiment, these behaviors no longer require --experiment mark-many-as-read.
+  Skip auth during discovery with --no-discovery-auth-provider-cmd
+  By default, Terragrunt runs your --auth-provider-cmd once for every unit it discovers, so HCL functions that need credentials resolve correctly during parsing. In a large repository, that can mean hundreds of invocations before any unit runs, which can dominate wall-clock time on change-based runs.
+  The --no-discovery-auth-provider-cmd flag (env: TG_NO_DISCOVERY_AUTH_PROVIDER_CMD) skips those invocations during the discovery phase, leaving auth to run only for the units that actually execute:
+  terragrunt run --all \
+    --no-discovery-auth-provider-cmd \
+    --queue-include-units-reading=./changed-file.txt \
+    -- plan
+  Warning
+  Use this only when you know parsing resolves without credentials. Units whose configuration depends on values from --auth-provider-cmd during discovery (for example, via get_aws_account_id()) will fail to parse when the flag is set.
+  Previously gated behind the opt-out-auth experiment, the flag now works without --experiment opt-out-auth.
+  Run queue displayed as a dependency tree
+  Before a run --all, Terragrunt lists the units it's about to run. That list now renders as a dependency tree by default instead of a flat list, with units nested under their dependencies, so the run order and the relationships between units are visible before anything executes:
+  The following units will be run, starting with dependencies and then their dependents:
+  .
+  ├── monitoring
+  ╰── vpc
+      ╰── database
+          ╰── backend-app
+  The header adapts to direction: dependencies come before dependents on apply, and the order reverses on destroy.
+  Previously gated behind the dag-queue-display experiment, the tree display no longer requires --experiment dag-queue-display.
+  💡 Tips Added
+  Tip when filtering a stack leaves nested stacks ungenerated
+  terragrunt stack generate --filter './my-stack | type=stack' generates only the selected
+  stack, not the nested stacks it contains, which can be surprising for a stack of stacks.
+  When a non-glob | type=stack filter leaves a stack's nested stacks ungenerated, Terragrunt
+  now prints a tip showing how to generate them too, for example
+  --filter './my-stack | type=stack' --filter './my-stack/** | type=stack'.
+  🐛 Bug Fixes
+  Fix permission denied when generated files overwrite CAS-materialized files
+  With the CAS enabled, Terragrunt fetches sources as read-only files. Writing a generated file over one of them no longer fails with permission denied:
+  - Files from generate blocks with if_exists = "overwrite", when the module ships the target file (for example, its own versions.tf).
+  - terragrunt.values.hcl, when the unit or stack source already contains one.
+  - terragrunt.autoinclude.hcl, when the unit or stack source already contains one.
+  - .terraform.lock.hcl, when the provider cache server updates a committed lock file during init -upgrade.
+  In each case, the read-only file is replaced with a writable one, and the shared CAS store is never modified.
+  Fix permission denied when CAS fetches a git source across filesystems
+ReleaseNotesUrl: https://github.com/gruntwork-io/terragrunt/releases/tag/v1.1.0
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/gruntwork-io/terragrunt/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

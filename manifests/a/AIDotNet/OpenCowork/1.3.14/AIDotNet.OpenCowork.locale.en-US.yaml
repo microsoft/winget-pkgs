@@ -1,0 +1,45 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: AIDotNet.OpenCowork
+PackageVersion: 1.3.14
+PackageLocale: en-US
+Publisher: example.com
+PublisherUrl: https://github.com/AIDotNet
+PublisherSupportUrl: https://github.com/AIDotNet/OpenCowork/issues
+PackageName: OpenCoWork
+PackageUrl: https://github.com/AIDotNet/OpenCowork
+License: Apache-2.0
+LicenseUrl: https://github.com/AIDotNet/OpenCowork/blob/HEAD/LICENSE
+Copyright: Copyright 2026 AIDotNet
+ShortDescription: Open-source desktop platform for multi-agent collaboration. Empowering AI agents with local tools, parallel teamwork, and seamless workplace integration.
+Description: |-
+  Traditional LLM interfaces are often "environment-isolated islands." Developers spend 50% of their time copy-pasting code, terminal logs, and file contents between the chat and their IDE.
+  OpenCowork solves this by providing:
+  - Local Agency: Agents can directly read/write files and execute shell commands with your permission.
+  - Context Awareness: No more manual context feeding. Agents explore your codebase and logs autonomously.
+  - Task Orchestration: Complex tasks (like "Refactor this module and update tests") are broken down and handled by specialized sub-agents.
+  - Human-in-the-loop: You stay in control with a transparent tool-call approval system.
+Tags:
+- agent
+- agentic
+- ai
+- large-language-model
+- llm
+ReleaseNotes: |-
+  Added
+  - Added live context-compression progress in chat: the summarizer's draft streams into a status card with retry attempts, and long compressions no longer trip the IPC wait timeout because progress frames are live-only while the durable outbox records only completed compression events.
+  - Added read-only orchestration tools to the ACP lead agent — Skill, MemoryList/MemoryRead/MemorySearch, codegraph_explore, WebSearch, WebFetch, TeamCreate/SendMessage/TeamStatus/TeamDelete, CronList, and Notify — so the parent can plan and delegate without gaining Write, Edit, Bash, or CronAdd.
+  - Added attached user images to Gemini generateContent, Gemini Interactions, and OpenAI chat-completions by normalizing wire image sources into inline bytes or URLs instead of dropping them.
+  - Added a live thinking preview: the collapsed reasoning header shows the latest thinking line while the model is still reasoning.
+  Changed
+  - New user turns now pin to the top of the viewport via a bottom spacer, so a long reply scrolls beneath the question instead of pushing it off screen.
+  - Split the 4,000-line SettingsPage into focused panels (General, Model, Runtime, Data, Memory, Analytics, System, About, plus the provider and AI-coding workbenches) behind a shared nav and primitives module, and dropped the unused SettingsDialog.
+  Fixed
+  - Fixed Fast mode being forced on for every hosted-session, cron, and channel run: the main-process provider config copied the model catalog's priority service tier straight onto the request, so fast-capable models like GPT-5.6 Sol/Terra/Luna were billed at the priority tier even with the Fast toggle off. Only Codex OAuth still ignores the toggle, because its plans are always priority.
+  - Fixed auto-compression silently never running for models without a configured context length: an unknown window produced a null compression config while the input-area gauge kept measuring against the 200K default, so both the hosted-session assembler and the interactive run path now fall back to that same default.
+  - Fixed a session staying permanently busy after a send failed during preflight (#159): the streaming pointer, abort controller, and sidecar run id leaked, which disabled the plan review actions and queued every later message instead of dispatching it, leaving Continue as the only path that still worked. Such a failure now also reports an error card instead of the turn silently disappearing.
+  - Fixed EnterPlanMode forking a second plan row and .plan file when a run died after ExitPlanMode (#159), which left the review card pointing at the abandoned plan; awaiting-review and approved plans are now reopened in place and moved back to drafting while they are rewritten.
+ReleaseNotesUrl: https://github.com/AIDotNet/OpenCowork/releases/tag/1.3.14
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

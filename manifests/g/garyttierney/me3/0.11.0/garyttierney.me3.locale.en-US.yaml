@@ -1,0 +1,82 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: garyttierney.me3
+PackageVersion: 0.11.0
+PackageLocale: en-US
+Publisher: garyttierney
+PublisherUrl: https://github.com/garyttierney
+PublisherSupportUrl: https://github.com/garyttierney/me3/issues
+Author: Gary Tierney
+PackageName: me3
+PackageUrl: https://github.com/garyttierney/me3
+License: Apache-2.0
+LicenseUrl: https://github.com/garyttierney/me3/blob/main/README.md#license
+ShortDescription: A framework for modding and instrumenting games.
+Description: me3 is a tool that extends the functionality of FROMSOFTWARE games.
+Tags:
+- eldenring
+- fromsoftware
+- mod
+- mod-manager
+- modengine
+- nightreign
+ReleaseNotes: |-
+  me3 v0.11.0
+  Windows Installation
+  Download the me3_installer.exe setup wizard.
+  Already have me3 installed? Update to the latest version by opening the run prompt (Ctrl + R) and running me3 update.
+  Linux Installation
+  curl --proto '=https' --tlsv1.2 -sSfL https://github.com/garyttierney/me3/releases/download/v0.11.0/installer.sh | sh
+  me3 - v0.11.0 - 2026-02-28
+  🚀 Features
+  - 357ea39 (host) Log game version on attach in #639
+  - 0b5092f (installer) Improve upgrade logic and clean uninstallation in #645
+    > fix #644
+  - 8790a68 Offload file logging to the launcher
+  - 1d43d39 Use a named pipe for logging on Linux
+  - 053780d Implement shared memory IPC
+  🐛 Bug Fixes
+  - ede89b5 (cli) Avoid me3 update crash by using explicit native TLS agent in #643
+    > fix #642
+    > Upstream:https://github.com/algesten/ureq/blob/main/src/tls/mod.rs#L29-L42
+    > https://github.com/algesten/ureq/blob/main/src/lib.rs#L599-L616
+  - 096bfc7 (linux) Resolve Steam metadata when custom exe is used in #719
+    > Recently we split up the launch code and introduced a check for Linux
+    > launches to verify that the game was being run under Steam, while before
+    > it would unconditionally run under Steam even with a custom exe.
+    > This check is unfortunately a breaking change for users who were already
+    > passing --exe on Linux, so we need to accomodate that situation.
+  - 58fbf37 (linux) Append null terminator to wine DOS path conversion in #720
+    > Custom sounds and filesystem overrides were not loading on Linux when
+    > running the release build, even though they worked in the debug build.
+    > In the code that converts Linux paths to Wine DOS paths
+    > (normalize_dos_path), the string being passed to Wine (os_path) was
+    > missing a null-terminator (0).
+    > - In a debug build, the memory allocator accidentally had a zero byte at
+    >   the end, so it worked.
+    > - In a release build, the memory was not zeroed out, causing the
+    >   function to read garbage data and fail to resolve the path.
+    > Appended a null byte (0) to the end of the os_path array to
+    > guarantee it is properly null-terminated before sending it to the Wine
+    > function.
+  - b1153ac (linux) Convert Unix paths to DOS for WINE in #700
+    > Some APIs used by the game expect to work with Windows paths, and
+    > currently we passthrough the Unix path directly which can cause path
+    > parsing errors and missing game functionality. wwise is known to have
+    > problems with those paths, and this workaround should deal with that
+    > until we can investigate hooking closer to the fs/io code in wwise.
+    > Fixes #683
+  - 51206fc (linux) Mount any needed filesystems under SLR in #661
+  - f51911a (linux) Ignore empty Steam directories
+  - 302663d Disable Steam input configuration check in #728
+    > This isn't working quite correctly. Certain users no longer see double
+    > inputs, but a larger number of users see no controller input at all.
+    > Needs more investigation to determine how this is supposed to be applied
+    > properly.
+  - a9a0c47 Configure SDL to use Steam Input unless it's disabled
+  📚 Documentation
+  - 62e7d9f Explain new "load_early" profile setting in #652
+ReleaseNotesUrl: https://github.com/garyttierney/me3/releases/tag/v0.11.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

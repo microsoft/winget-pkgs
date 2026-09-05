@@ -1,0 +1,100 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Gruntwork.Terragrunt
+PackageVersion: 1.1.1
+PackageLocale: en-US
+Publisher: Gruntwork
+PublisherUrl: https://terragrunt.gruntwork.io/
+PublisherSupportUrl: https://terragrunt.gruntwork.io/docs/community/support
+PrivacyUrl: https://gruntwork.io/legal/privacy-policy
+PackageName: Terragrunt
+PackageUrl: https://github.com/gruntwork-io/terragrunt/releases/tag/v0.68.9
+License: MIT
+LicenseUrl: https://github.com/gruntwork-io/terragrunt/blob/HEAD/LICENSE.txt
+Copyright: © 2024 Gruntwork, Inc. All rights reserved.
+ShortDescription: Terragrunt is a thin wrapper for Terraform that provides extra tools for keeping your Terraform configurations DRY, working with multiple Terraform modules, and managing remote state.
+Description: Terragrunt is a thin wrapper for Terraform that provides extra tools for keeping your Terraform configurations DRY, working with multiple Terraform modules, and managing remote state.
+Tags:
+- IaC
+- Infrastructure as Code
+- Terraform
+- Terraform Wrapper
+- terragrunt
+ReleaseNotes: |-
+  🐛 Bug Fixes
+  Chained role assumption for the S3 backend
+  When AWS credentials were supplied through --auth-provider-cmd or environment variables, Terragrunt ignored the assume_role attribute of the remote_state block for its own backend operations, such as bootstrapping the state bucket. In cross-account setups this caused access errors, even though OpenTofu/Terraform itself assumed the role correctly during runs.
+  Terragrunt now uses the supplied credentials as the source identity and assumes the configured role on top of them. The same applies to roles configured via the iam_role attribute or the --iam-assume-role flag, and to fetching dependency outputs directly from S3 state.
+  Safer temporary clone directories for terragrunt catalog
+  Terragrunt now creates a fresh temporary clone directory for each catalog load, rejects symlinked clone roots, and removes catalog clones when the TUI session exits.
+  Resolve dependency outputs for units that reference a dependency in a hook, extra_arguments, or remote_state block
+  Resolving a unit's dependency outputs for a downstream unit no longer fails when that unit references its own dependency in:
+  - a before_hook, after_hook, or error_hook
+  - an extra_arguments block
+  - a remote_state block
+  Previously these raised There is no variable named "dependency" on the downstream unit, and a remote_state reference could crash Terragrunt.
+  Limit IaC engine archive extraction
+  Terragrunt now protects developer machines and CI runners from engine archives that expand into unexpectedly large amounts of data. If an IaC engine package is unusually large or contains too many files, Terragrunt stops processing it before it can consume excessive disk space.
+  --filter-allow-destroy with ...[] dependent-traversal filters no longer fails
+  --filter-allow-destroy --filter '...[HEAD~1...HEAD]' failed with "Too many command line arguments" or hung when the deleted unit had dependents. Terragrunt now correctly plans and destroys deleted units regardless of whether dependents are included in the run.
+  Fix find and list missing units inside generated stacks for Git-based filters
+  terragrunt find and terragrunt list with a Git-based filter (for example --filter '[HEAD^1...HEAD]') now detect units inside generated stacks. Previously they did not generate stacks in the worktrees they create for the comparison, so no unit nested in a generated stack was ever surfaced, while terragrunt run --all with the same filter targeted those units correctly.
+  This affected every change that lands inside a generated stack, including a modified terragrunt.stack.hcl, a change to a unit's own files, and a change to a file the stack reads via read_terragrunt_config or mark_glob_as_read.
+  Stacks are generated only inside the comparison worktrees; find and list still do not generate stacks in your current working directory by default.
+  Treat Git source ref values strictly as references
+  Terragrunt now passes the ref from a Git module source to git strictly as a reference when downloading through content-addressable storage. Previously a source whose ref began with a git option (for example a value starting with --) could be interpreted by git as an option rather than a reference while fetching the source.
+  Terragrunt now terminates git option parsing before the repository and reference arguments in its fetch, clone, and ls-remote invocations, so these values can only ever be read as the repository and reference they are meant to be. Normal refs, branches, tags, and commit SHAs continue to work unchanged.
+  hcl validate resolves get_original_terragrunt_dir() to the discovered unit
+  terragrunt hcl validate and terragrunt hcl validate --inputs now resolve get_original_terragrunt_dir() to each discovered unit's own directory instead of the directory the command was launched from. Previously, when the command ran from a parent directory that discovered units in subdirectories, any read_terragrunt_config() call that built a path relative to get_original_terragrunt_dir() resolved against the wrong directory and failed with "You attempted to run terragrunt in a folder that does not contain a terragrunt.hcl file", even though plan, apply, and run validate worked on the same configuration.
+  Both commands now set the original config path per discovered unit before parsing, matching the behavior of run and backend bootstrap, so relative paths resolve against the unit that owns them.
+  Respect -lockfile=readonly during provider caching
+  When you pass -lockfile=readonly to init, Terragrunt no longer generates or updates .terraform.lock.hcl while warming the provider cache. Previously the cache step could write the lock file before OpenTofu/Terraform ran, so the read-only check always passed and silently defeated the flag.
+  Terragrunt now leaves the lock file untouched and lets OpenTofu/Terraform enforce it, failing when the lock file is missing or incomplete. The flag is honored whether it is supplied on the command line or through the TF_CLI_ARGS or TF_CLI_ARGS_init environment variables.
+  run --all no longer crashes on dependency discovery with graph filters
+  Running run --all with a filter that expands a git range through the dependency graph (for example [HEAD~1...HEAD]...) could fail during dependency discovery, reporting that a component "is missing its working directory". Whether it happened depended on the size and shape of the changed unit's dependency closure, so the same filter succeeded on smaller branches and find was unaffected.
+  A dependency reached from several units at once could become visible to discovery before its working directory was set, so a concurrent traversal could read it before it was complete. Dependencies now have their working directory set before they become visible, so run --all behaves the same regardless of graph size.
+  terraform_binary respected by run --all when both tofu and terraform are on PATH
+  run --all ignored a unit's terraform_binary setting and fell back to the auto-detected default (OpenTofu when both binaries are on PATH). The per-unit options used to execute each unit are cloned from the stack options, whose binary path is the auto-detected default, and the configured value was never applied to them.
+  Each unit now honors its own terraform_binary, matching the behavior of a single run. Setting --tf-path or TG_TF_PATH still takes precedence over the config value.
+  S3 bucket creation failures report the underlying error
+  When creating the state bucket failed during backend bootstrap, the reported error was a misleading NoSuchBucket from a follow-up access check, hiding the actual cause. The original creation error, such as AccessDenied, is now part of the reported message.
+  Allow empty locals blocks in terragrunt.stack.hcl
+  Fixed a bug where an empty locals {} block in a stack configuration could break stack generate.
+  Clear error when terraform.source references a dependency output
+  A terraform.source that references dependency.<name>.outputs.<key> is now rejected with a message explaining that the module source must be resolvable before dependencies are evaluated.
+  Terragrunt resolves the source while discovering units and building the run queue, before any dependency has run, so such a source can never be satisfied. Previously it surfaced a cryptic decode error.
+  🧪 Experiments Added
+  oci - Module sources from OCI registries
+  The oci experiment has been added as the gate for downloading source code (including OpenTofu modules) from OCI Distribution registries using oci:// schema URLs in Terragrunt configurations (including terraform.source attributes). This targets the same registries OpenTofu 1.10 supports natively, such as Amazon ECR, GitHub Container Registry, Azure Container Registry, Google Artifact Registry, and self-hosted or air-gapped registries.
+  Enabling the experiment has no behavioral effect yet: the getter that will resolve oci:// sources is not wired into source downloading, so oci:// sources still fail to download. Functional support will land in follow-up releases, gated by this experiment.
+  For setup steps, see the experiment documentation.
+  version-attribute - Resolve registry modules from a version constraint
+  The version-attribute experiment has been added to gate a new version attribute on the terraform block. It holds a version constraint (such as ~> 3.3 or >= 1.0.0, < 2.0.0) for a tfr:// registry module, and Terragrunt resolves it to the highest published version that satisfies the constraint before downloading:
+  terraform {
+    source  = "tfr://registry.opentofu.org/terraform-aws-modules/vpc/aws"
+    version = "~> 3.3"
+  }
+  This brings the terraform block to parity with the version argument on OpenTofu and Terraform module blocks. The attribute applies to tfr:// sources only, and cannot be combined with an inline ?version= on the same source.
+  Enable it with --experiment version-attribute. For setup steps and the criteria for stabilization, see the experiment documentation.
+  ⚙️ Process Updates
+  Friendly panic reports
+  Terragrunt now writes a terragrunt-crash-YYYYMMDDTHHMMSSZ-<pid>.log file when it crashes.
+  The report includes runtime details, the command line, the panic message, and the stack trace. You can conveniently share this file (after reviewing for sensitive information) to report panics if Terragrunt crashes.
+  Pull Requests
+  ✨ Features
+  - feat: terragrunt panic reporting by @denis256 in #6120
+  - feat(experiment): introduce oci experiment flag for OCI module sources by @denis256 in #6461
+  - feat(getter): add OCIGetter by @denis256 in #6478
+  - feat: Add and validate the version attribute on the terraform block by @yhakbar in #6475
+  - feat: Gate and resolve the version constraint at download time by @yhakbar in #6477
+  🐛 Bug Fixes
+  - fix: Avoiding generation of the lockfile when users supply -lockfile=readonly by @yhakbar in #6358
+  - fix: Fixing combination of --filter-allow-destroy with graph + Git expression combo by @yhakbar in #6322
+  - fix: use updated/correct GTM tag by @ZachGoldberg in #6439
+ReleaseNotesUrl: https://github.com/gruntwork-io/terragrunt/releases/tag/v1.1.1
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/gruntwork-io/terragrunt/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

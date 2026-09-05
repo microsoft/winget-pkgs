@@ -1,0 +1,103 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Radius.Radius
+PackageVersion: 0.59.0
+PackageLocale: en-US
+Publisher: Radius Project
+PublisherUrl: https://github.com/radius-project/radius
+PublisherSupportUrl: https://github.com/radius-project/radius/blob/main/SUPPORT.md
+PackageName: Radius
+PackageUrl: https://github.com/radius-project/radius
+License: Apache-2.0
+LicenseUrl: https://github.com/radius-project/radius/blob/HEAD/LICENSE
+Copyright: Copyright 2023 The Radius Authors
+ShortDescription: Radius is a cloud-native application platform that enables developers and the platform engineers that support them to collaborate on delivering and managing cloud-native applications.
+Description: Radius is a cloud-native application platform that enables developers and the platform engineers that support them to collaborate on delivering and managing cloud-native applications that follow organizational best practices for cost, operations and security, by default. Radius is an open-source project that supports deploying applications across private cloud, Microsoft Azure, and Amazon Web Services, with more cloud providers to come.
+Moniker: radius
+ReleaseNotes: |-
+  Announcing Radius v0.59.0
+  Today we're happy to announce the release of Radius v0.59.0. Check out the highlights below, along with the full changelog for more details.
+  We would like to extend our thanks to all contributors who helped make this release possible!
+  Intro to Radius
+  If you're new to Radius, check out our website, radapp.io, for more information. Also visit our getting started guide to learn how to install Radius and create your first app.
+  Highlights
+  Radius Resource Types for compute platform extensibility
+  > Note: the new Radius.Core/* Resource Types are actively under development and only available now as an early and sparsely documented preview. You may try the features by using the --preview flag in relevant CLI commands, please refer to the rad CLI reference for more details.
+  CLI support for the new Radius.Core resource types
+  Radius is introducing a new set of resource types under the Radius.Core namespace (e.g., Radius.Core/applications, Radius.Core/environments) that will eventually replace the existing Applications.Core types. These new types are available via the v20250801preview API surface and represent the next generation of Radius's resource model.
+  Currently, CLI commands like rad app list and rad app graph operate on the existing Applications.Core/applications type, meaning that applications deployed using the new Radius.Core/applications type were invisible to the CLI. The added --preview flag directs commands to operate against Radius.Core resources:
+  - rad app graph --preview and rad app status --preview — View the application graph and check status for apps deployed as Radius.Core/applications. (#11983)
+  - rad workspace create --preview — Create workspaces that use Radius.Core/environments, so you can pair them with the new resource types. (#11905)
+  Kubernetes namespace for Radius.Core environments
+  Previously, environments created with the Application.Core/environments created a new Kubernetes namespace on behalf of the user. We found that this approach was not representative of enterprise scenarios where namespace creation is managed by the cluster admins. New Radius.Core/environments require you to explicitly pass the Kubernetes namespace you want to use for application deployments, falling back to 'default' if none is specified.
+  Default Contour Gateway for route recipes
+  Radius now sets up Gateway API infrastructure automatically when Contour is installed. rad install kubernetes creates a shared GatewayClass/contour and Gateway/radius in radius-system, and the default Radius.Compute/routes recipe is pre-configured to attach route resources to this managed Gateway. Applications no longer need to define their own gateway resource in the default path.
+  Deprecation warning for rad run with extensible environments
+  The rad run command is not supported for environments configured with the new extensible Radius.Core/environments model and is planned for deprecation. rad run depends on Kubernetes-specific behaviors (including log streaming and port forwarding), making it incompatible with the platform-agnostic design of the new architecture, where compute runtimes can extend beyond Kubernetes. Instead, use rad deploy and rely on the native tooling of your chosen compute platform to access logs and establish connectivity.
+  Bug Fixes
+  - Fixed Helm chart Terraform binary path mismatch: The pre-mounted Terraform binary path in the Helm chart didn't match what the runtime expected, causing Radius to silently re-download Terraform from releases.hashicorp.com on every cold start. Now the paths are aligned and the pre-mounted binary is used correctly.
+  - Fixed recipe pack OCI tags: Core resource type recipes now use the full semantic version (e.g., 0.58.0) for OCI tags instead of the version channel (e.g., 0.40), aligning with the kube-recipes publishing pipeline.
+  - Aligned rad env create and rad env update flags: rad env create now supports cloud provider flags (--azure-subscription-id, --aws-region, etc.) and rad env update now supports --namespace, unifying the configuration options across both commands.
+  - Honor x-ms-client-flatten in Bicep type generator: The Bicep type generator now flattens the ARM .properties. envelope, so users write container.container.image instead of container.properties.container.image in their Bicep templates.
+  Upgrading to Radius v0.59.0
+  You can upgrade to this release by upgrading your Radius CLI then running rad upgrade kubernetes. Only incremental version upgrades are supported. Consult the upgrade documentation for full details.
+  Full changelog
+  - add workspace create --preview by @nithyatsu in #11905
+  - Modify rad install to create default resource group and environment by @zachcasper in #11870
+  - Fix Helm chart pre-mounted Terraform binary path mismatch by @willdavsmith in #11880
+  - converts the radius-code-review prompt into a skill by @nellshamrell in #11961
+  - Add --preview flag for 'rad app graph' and 'rad app status' by @lakshmimsft in #11983
+  - build(deps): bump the github-actions group across 2 directories with 7 updates by @dependabot[bot] in #12004
+  - build(deps): bump the go-dependencies group across 2 directories with 21 updates by @dependabot[bot] in #12006
+  - Cherry-pick #11712: app graph design into main by @Copilot in #11998
+  - Fix Test_Flux_Complex namespace teardown flake by @willdavsmith in #12013
+  - Improve line-number accuracy in radius-code-review skill by @brooke-hamilton in #12017
+  - Architecture doc describing credentials by @brooke-hamilton in #11837
+  - build(deps): bump the github-actions group across 1 directory with 5 updates by @dependabot[bot] in #12050
+  - build(deps): bump the go-dependencies group across 1 directory with 18 updates by @dependabot[bot] in #12051
+  - Fix recipe pack OCI tags to use full semver version by @lakshmimsft in #12027
+  - add persistence packages for graph by @nithyatsu in #12008
+  - Align configuration options for rad env create and rad env update commands by @Copilot in #11774
+  - build(go): bump to 1.26.4 by @DariuszPorowski in #12054
+  - Update test framework to support RRTs by @lakshmimsft in #12012
+  - ci: disable fail-fast in functional test by @DariuszPorowski in #12055
+  - fix(test): make Test_TerraformRecipe_AzureResourceGroup safe under concurrent CI by @sylvainsf in #12062
+  - build(deps): bump the go-dependencies group across 2 directories with 11 updates by @dependabot[bot] in #12060
+  - build(deps-dev): bump the npm-dependencies group across 2 directories with 5 updates by @dependabot[bot] in #12037
+  - build(go): bump to 1.26.4 by @DariuszPorowski in #12059
+  - ci: env var and token handling improvements by @DariuszPorowski in #12072
+  - ci(docs): use GitHub App and improve sync by @DariuszPorowski in #12077
+  - support rad app graph app.bicep (modeled graphs) by @nithyatsu in #12057
+  - build(deps): bump the github-actions group across 1 directory with 3 updates by @dependabot[bot] in #12088
+  - build(deps): bump the npm-dependencies group across 4 directories with 12 updates by @dependabot[bot] in #12087
+  - Update app.bicep for preview command by @sk593 in #12082
+  - Default Kubernetes namespace to "default" for new Radius.Core environments by @willdavsmith in #12045
+  - ci(deps): update repo-files-sync action and change token usage by @DariuszPorowski in #12094
+  - Add markdown instructions aligned with markdownlint config by @brooke-hamilton in #12093
+  - Honor x-ms-client-flatten in Bicep type generator by @willdavsmith in #12001
+  - Show deprecation warning for rad run with extensible Radius.Core environments by @Copilot in #12042
+  - Radius.Compute/containerImages design by @willdavsmith in #11734
+  - Deployment lineage graph storage proposal by @brooke-hamilton in #11848
+  - Direct module support for Recipes by @Reshrahim in #11876
+  - Update container mechanics tests by @lakshmimsft in #12084
+  - Migrate Container tests to use new RRTs by @lakshmimsft in #12076
+  - docs(contributing): Agent Ex Phase 0 — authoring and conventions guides by @brooke-hamilton in #12095
+  - add a secret so the debug setup works by @nithyatsu in #12103
+  - Add default Contour Gateway for route recipes by @willdavsmith in #11995
+  - Add new User Journey issue template by @zachcasper in #12123
+  - Resource type icons feature specification by @brooke-hamilton in #12011
+  - ci(release): use GitHub App token instead of PAT by @DariuszPorowski in #12131
+  - ci(purge-old-images): use GitHub App instead of PAT by @DariuszPorowski in #12130
+  - ci(purge-old-images): resolve dev container image names by @DariuszPorowski in #12135
+  - ci(purge-old-images): switch to classic PAT for deleting old dev container images by @DariuszPorowski in #12136
+  - Add copilot-setup-steps.yml to provision the Copilot Cloud Agent environment (Agent Ex Phase 2) by @brooke-hamilton in #12133
+  - Document Radius extensibility architecture document by @brooke-hamilton in #11994
+  - ci(purge-old-images): optimize image deletion by selecting only tagged images by @DariuszPorowski in #12137
+  - Agent Ex Phase 1: single AGENTS.md entry point with copilot-instructions.md symlink by @brooke-hamilton in #12105
+  - Radius.Compute/containerImages type: add rootless BuildKit sidecar to dynamic-rp chart by @willdavsmith in #11882
+  - Update resource-types-contrib reference (pre-release) by @lakshmimsft in #12142
+  - chore(release): Release candidate v0.59.0-rc1 by @lakshmimsft in #12143
+ReleaseNotesUrl: https://github.com/radius-project/radius/releases/tag/v0.59.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

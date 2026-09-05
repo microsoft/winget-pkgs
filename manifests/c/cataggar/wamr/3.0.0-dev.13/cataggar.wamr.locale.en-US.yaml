@@ -1,0 +1,38 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: cataggar.wamr
+PackageVersion: 3.0.0-dev.13
+PackageLocale: en-US
+Publisher: cataggar
+PublisherUrl: https://github.com/cataggar
+PublisherSupportUrl: https://github.com/cataggar/wamr/issues
+PackageName: wamr
+PackageUrl: https://github.com/cataggar/wamr
+License: Apache-2.0
+LicenseUrl: https://github.com/cataggar/wamr/blob/main/LICENSE
+ShortDescription: WebAssembly Micro Runtime — interpreter (wamr) and AOT compiler (wamrc).
+Description: |-
+  WebAssembly Micro Runtime distribution with two portable commands:
+    - wamr  — stack-based interpreter that decodes and runs a .wasm binary.
+    - wamrc — AOT (ahead-of-time) compiler that lowers a .wasm module to native code.
+  A fork of bytecodealliance/wasm-micro-runtime ported from C to Zig and maintained with AI assistance.
+Moniker: wamr
+Tags:
+- aot
+- compiler
+- interpreter
+- runtime
+- wasm
+- webassembly
+- zig
+ReleaseNotes: |-
+  Highlights — changes since v3.0.0-dev.12:
+  - Outbound HTTP futures sleep instead of busy-spinning — worker-thread-settled wasi:http futures get a cross-platform self-pipe Waker on PendingHttpFetchShared; httpFetchWorker signals it after publishing done, pollableBackend(.http_future_response) hands poll() the waker's read fd (P2 block path), and driveAsyncEvents parks on the waker fds rather than re-polling on a 1ms cadence (P3 waitable-set path). pollable.block over a future-incoming-response no longer burns a full core during the round-trip, matching wasmtime's "sleep on the socket" CPU profile; Windows keeps its short re-poll fallback via a comptime-guarded parkOnHttpWakers (#833, #839).
+  - Dead code elimination re-enabled safely — DCE is wired back into every default IR pipeline, with a regression test guarding that it stays installed across all pipelines (#834, #837).
+  Install:
+  ghr install cataggar/wamr@v3.0.0-dev.13
+  See INSTALL.md for more options.
+ReleaseNotesUrl: https://github.com/cataggar/wamr/releases/tag/v3.0.0-dev.13
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

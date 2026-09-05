@@ -1,0 +1,43 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: endev.aube
+PackageVersion: 1.31.0
+PackageLocale: en-US
+Publisher: en.dev
+PublisherUrl: https://en.dev/
+PublisherSupportUrl: https://github.com/endevco/aube/discussions/categories/troubleshooting-and-bugs
+Author: en.dev
+PackageName: aube
+PackageUrl: https://aube.en.dev/
+License: MIT
+LicenseUrl: https://github.com/endevco/aube/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 en.dev inc
+CopyrightUrl: https://github.com/endevco/aube/blob/HEAD/LICENSE
+ShortDescription: A fast Node.js package manager
+Description: |-
+  aube is a package manager for Node.js projects. It uses pnpm-style isolated node_modules for fast, disk-efficient installs.
+
+  Existing projects keep their lockfile format. aube reads and writes pnpm-lock.yaml, package-lock.json, npm-shrinkwrap.json, yarn.lock, and bun.lock in place. New projects without a supported lockfile get aube-lock.yaml.
+
+  Why Try It
+  - Fast installs. Warm installs are about 8x faster than pnpm and about 5x faster than Bun in the current benchmarks. Repeat test commands run up to 35x faster than pnpm and up to 5x faster than Bun.
+  - Existing lockfiles. Reads and writes pnpm-lock.yaml, package-lock.json, npm-shrinkwrap.json, yarn.lock, and bun.lock in place.
+  - Cheap repeat commands. aubr test, aube test, and aube exec vitest auto-install when dependencies are stale, then skip that work when nothing changed. aubx uses a local binary when one is installed, or a throwaway environment for one-off tools.
+  - Less disk use. A global content-addressable store lets projects share package files instead of keeping a full copy of the same dependencies in every checkout.
+  - Secure defaults. Out of the box, exotic transitive deps are blocked, lifecycle scripts wait for approval, trust downgrades fail at resolve, and brand-new releases sit in a 24h cooling window. One paranoid: true line adds the build jail and turns the soft gates into hard fails.
+Moniker: aube
+ReleaseNotes: |-
+  A small release that continues the library-embedding work from v1.30.0, letting install-only hosts like mise depend on the aube crate without pulling in the sigstore publishing stack or a forced DNS resolver. Standalone aube behavior is unchanged.
+  Added
+  - The aube crate is now embeddable without the publish/DNS stack (#1069 by @jdx) — Follow-up to #1068, unblocking mise's use of the install path (aube::embed::add) as a library instead of shelling out to the aube binary. Two dependencies an install-only embedder never needs are now opt-out:
+    - A new publish feature (on by default) gates the sigstore provenance/signing supply chain (sigstore-*, ambient-id, x509-cert, etc.), which is only used by aube publish. The Publish CLI variant and its command modules are compiled out when the feature is off.
+    - hickory-dns is dropped from aube-registry's defaults (now default = ["rustls"]), so embedders pulling it in transitively no longer have reqwest's DNS resolver silently flipped for the whole binary via feature unification. The aube binary re-enables it through the aube crate's defaults, so standalone builds are unchanged.
+    - The aube crate gains rustls and hickory-dns features that forward to reqwest / aube-registry / aube-util, so it can be depended on with default-features = false, features = ["rustls"] — producing a build tree with zero sigstore, hickory, ratatui, or mimalloc nodes.
+
+  💚 Sponsor aube
+  aube is maintained by @jdx, an open source developer for entire.io, the title sponsor of the jdx.dev open source tools including mise. Work on aube is funded by sponsors.
+  If aube is saving your team install time or CI minutes, please consider sponsoring at jdx.dev. Individual and company sponsorships are what keep the project fast, free, and independent.
+ReleaseNotesUrl: https://github.com/jdx/aube/releases/tag/v1.31.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,51 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: endev.aube
+PackageVersion: 1.26.0
+PackageLocale: en-US
+Publisher: en.dev
+PublisherUrl: https://en.dev/
+PublisherSupportUrl: https://github.com/endevco/aube/discussions/categories/troubleshooting-and-bugs
+Author: en.dev
+PackageName: aube
+PackageUrl: https://aube.en.dev/
+License: MIT
+LicenseUrl: https://github.com/endevco/aube/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 en.dev inc
+CopyrightUrl: https://github.com/endevco/aube/blob/HEAD/LICENSE
+ShortDescription: A fast Node.js package manager
+Description: |-
+  aube is a package manager for Node.js projects. It uses pnpm-style isolated node_modules for fast, disk-efficient installs.
+
+  Existing projects keep their lockfile format. aube reads and writes pnpm-lock.yaml, package-lock.json, npm-shrinkwrap.json, yarn.lock, and bun.lock in place. New projects without a supported lockfile get aube-lock.yaml.
+
+  Why Try It
+  - Fast installs. Warm installs are about 8x faster than pnpm and about 5x faster than Bun in the current benchmarks. Repeat test commands run up to 35x faster than pnpm and up to 5x faster than Bun.
+  - Existing lockfiles. Reads and writes pnpm-lock.yaml, package-lock.json, npm-shrinkwrap.json, yarn.lock, and bun.lock in place.
+  - Cheap repeat commands. aubr test, aube test, and aube exec vitest auto-install when dependencies are stale, then skip that work when nothing changed. aubx uses a local binary when one is installed, or a throwaway environment for one-off tools.
+  - Less disk use. A global content-addressable store lets projects share package files instead of keeping a full copy of the same dependencies in every checkout.
+  - Secure defaults. Out of the box, exotic transitive deps are blocked, lifecycle scripts wait for approval, trust downgrades fail at resolve, and brand-new releases sit in a 24h cooling window. One paranoid: true line adds the build jail and turns the soft gates into hard fails.
+Moniker: aube
+ReleaseNotes: |-
+  A feature release that adds two pnpm-compatible commands (aube bugs and aube prefix), fills a workspace-flag gap in aube bin, propagates proxy configuration into lifecycle scripts, and fixes two install-time failure modes around old lockfiles and malformed JSR specs.
+  Added
+  - aube bugs (alias issues) (#992 by @jdx) — Resolves the package's bug tracker URL and opens it in the default browser, modeled on pnpm. With no arguments it reads the current project's package.json; with name or name@version it fetches the registry packument (honoring shared NetworkArgs / --registry). URLs come from bugs (string or bugs.url), falling back to repository with normalization for GitHub/GitLab/Bitbucket shorthands, git@ URLs, and an /issues suffix when needed. Only http(s) URLs are opened; set AUBE_NO_OPEN=1 to print without spawning a browser.
+  - aube prefix / aube prefix -g (#991 by @jdx) — Prints the nearest package root (or cwd), aligned with pnpm. -g prints the global prefix directory, resolved from AUBE_HOME / PNPM_HOME / platform defaults; this stays separate from globalBinDir, so a custom global bin path does not change what prefix -g reports. The command respects -C and is exempt from the package-manager guard like other path-only helpers.
+  - aube bin -w / --workspace-root (#993 by @jdx) — The long form already worked because the global --workspace-root flag chdirs before dispatch, but bin never registered the pnpm-style -w short. From a workspace sub-package, aube bin -w now walks up via find_workspace_root and prints the root node_modules/.bin. Conflicts with -g/--global at parse time; a no-op (falls through to plain bin) outside a workspace so it's safe in shell aliases.
+  - Proxy env for lifecycle scripts (#996 by @jdx, closes #983) — Scripts now inherit the same outbound proxy aube uses for registry traffic via standard HTTP_PROXY / HTTPS_PROXY / NO_PROXY, plus NODE_USE_ENV_PROXY=1 so Node 24+ honors the same proxy for built-in fetch/http (which ignore npm_config_proxy). httpProxy falls back to httpsProxy per npm/pnpm behavior. The block is set only when a proxy URL is actually configured — noProxy alone won't stamp env — so direct-connection users don't see Node's experimental proxy warnings.
+
+  Fixed
+  - Recover from lockfiles missing tarball integrity (#995 by @jdx) — Follows up #994: older lockfiles that still contain a resolution.tarball without an accompanying integrity field were failing during parse even though strictStoreIntegrity defaults to false. A new ParseOptions (strict_store_integrity) is threaded through the install path — pre-parse, frozen/dry-run selection, lockfile-only, metadata overlay, --lockfile-dir remapping, and ensure_for_cwd — so non-strict installs read those entries and re-resolve instead of aborting. Library callers and parse_for_import remain strict by default.
+  - Reject malformed jsr: specs (#990 by @jdx) — jsr_to_npm_name now validates each scope and name component with valid_jsr_name_part: empty parts, ., .., uppercase, spaces, encoded slashes, and anything outside [a-z0-9._-] are rejected before being translated to @jsr/…. aube add jsr:@std/../collections and similar now fail as invalid jsr: spec at parse time; legitimate scoped names like @std/collections are unchanged.
+
+  Changed
+  - Refreshed benchmarks for v1.25.2 (#975 by @jdx) — Regenerated on the hermetic Verdaccio registry (500 Mbit / 50 ms) against aube 1.25.2 and deno 2.9.1. Warm fresh install drops 437ms → 319ms; public README ratios update to ~5× Bun and ~8× pnpm on warm installs, and ~7× Bun / ~39× pnpm on the npm install && npm run test repeat case.
+  - Sponsor references (#978 by @jdx) — README, aube sponsors, generated CLI docs, and the release-workflow sponsor blurb now list entire.io as title sponsor and point at jdx.dev as the canonical sponsors hub. The docs-site sponsors feed switches to title / premier / partner tier naming.
+
+  💚 Sponsor aube
+  aube is maintained by @jdx, an open source developer for entire.io, the title sponsor of the jdx.dev open source tools including mise. Work on aube is funded by sponsors.
+  If aube is saving your team install time or CI minutes, please consider sponsoring at jdx.dev. Individual and company sponsorships are what keep the project fast, free, and independent.
+ReleaseNotesUrl: https://github.com/jdx/aube/releases/tag/v1.26.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

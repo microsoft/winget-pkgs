@@ -1,0 +1,102 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: ggml.llamacpp
+PackageVersion: b10666
+PackageLocale: en-US
+Publisher: ggml
+PublisherUrl: https://github.com/ggml-org
+PublisherSupportUrl: https://github.com/ggml-org/llama.cpp/issues
+PackageName: llama.cpp
+PackageUrl: https://github.com/ggml-org/llama.cpp
+License: MIT
+LicenseUrl: https://github.com/ggml-org/llama.cpp/blob/HEAD/LICENSE
+ShortDescription: LLM inference in C/C++
+Tags:
+- ggml
+- llama
+ReleaseNotes: |-
+  tests : run test-save-load-state across all architectures (#27755)
+  - tests : run test-save-load-state across all architectures
+  test-save-load-state previously only ran in ctest against a single
+  downloaded model (tinyllamas/stories15M), i.e. only the llama arch.
+  Add a --models DIR mode to test-save-load-state that runs the full
+  save/load suite over every *.gguf in a directory, reporting a
+  per-model PASS/FAIL and exiting non-zero if any model fails, and wire
+  a ctest to run it over all architectures using the existing
+  generate-models fixture (test-llama-archs). The single-model -m mode
+  is preserved (still used by ci/run.sh).
+  Also bump the dummy-model training context in test-llama-archs from
+  128 to 256 so that the per-sequence context (which is padded up to a
+  multiple of 256) no longer exceeds n_ctx_train and emits the
+  "possible training context overflow" warning.
+  The test is expected to fail until the affected arches are fixed:
+  deepseek4 (host seq-copy), gemma2/gpt-oss/lfm2 (device seq-copy),
+  minimax-01 (state load). It aborts at the first arch that crashes.
+  Assisted-by: pi:llama.cpp/Qwen3.8-27B
+  - tests : match dummy DSA indexer to fused Lightning Indexer kernel
+  The dummy DSA indexer (deepseek32, glm-dsa, ...) used key_length=64 and head_count=1, so the fused Lightning Indexer op's q tensor was shaped [64, 1, ...]. The Metal fused kernel is fixed to DK=128, NH=64, so it rejected the op and the scheduler fell back to CPU, emitting a 'layer assigned to MTL but Lightning Indexer on CPU' warning. Bump key_length to 128 and the DSA head_count to 64 so the fused op runs on the GPU.
+  Assisted-by: pi:llama.cpp/Qwen3.8-27B
+  - tests : add --help and document -o in test-llama-archs
+  Add a --help/-h flag to test-llama-archs and list the existing -o/--out option in the usage text, which was previously missing.
+  Assisted-by: pi:llama.cpp/Qwen3.8-27B
+  - tests : use 64 indexer heads for deepseek4
+  deepseek4's indexer head count was set to n_head (8), which does not match the fused Lightning Indexer kernel's fixed NH=64, so the fused op fell back to the CPU backend and emitted a device-mismatch warning. Give it the same fixed 64 as the other indexer archs by dropping it from the n_head ternary (only minimax-m3 keeps n_head, since it does not use the fused Lightning Indexer op).
+  Assisted-by: pi:llama.cpp/Qwen3.8-27B
+  - tests : fix dsv4 save-load n_stream mismatch
+  The dsv4 KV cache keeps per-sequence KV/state streams even in unified mode, so its n_stream equals n_seq_max. The test saved the state in the baseline with n_seq_max=1 but loaded it in the seq-copy tests with n_seq_max=2, so state_read threw an n_stream mismatch. Use n_seq_max=2 in the baseline and state-load tests so the save and load agree.
+  Assisted-by: pi:llama.cpp/Qwen3.8-27B
+  - context : relax on-device seq-copy chunk alignment
+  The on-device state seq copy (llama_state_seq_set_data with LLAMA_STATE_SEQ_FLAGS_ON_DEVICE) copied the write-side cpy tensors to the read-side targets 1:1 by index, requiring the writer and reader to emit the same number of chunks in the same order with the same per-chunk sizes. state_write_data chunks per cell-range while state_read_data chunks contiguous-or-per-cell, so the counts diverged for non-contiguous sources (dsv4, SWA) and the copy aborted with "memory buffer mismatch".
+  All state writers and readers enumerate the same logical data in the same order, differing only in chunking. Copy the flat write-side data into the read-side targets with a byte cursor that walks both tensor lists across their boundaries, so the chunking no longer needs to match. Keep the total-size guard; drop the n_tensors equality check.
+  Assisted-by: pi:llama.cpp/Qwen3.8-27B
+  - model : fix dangling hparams ref in minimax-01 LA graph input
+    llm_graph_input_la stored const llama_hparams & hparams, bound to the llm_graph_params temporary in llama_context::process_ubatch. The input object outlives that temporary (it is kept in llm_graph_result::inputs for graph reuse), so set_input() read destroyed stack memory on every graph reuse - test-save-load-state crashed for minimax-01 when the stack region was overwritten (n_layer_all read as 0, abort in llama_hparams::n_head). Store a copy like every other graph input class.
+    Assisted-by: pi:llama.cpp/Qwen3.8-27B
+  - context : handle "worst case" graph and add TODO
+  Website:
+  - https://llama.app
+  Attestations:
+  - https://github.com/ggml-org/llama.cpp/attestations/43594208
+  macOS/iOS:
+  - macOS Apple Silicon (arm64)
+  - macOS Apple Silicon (arm64, KleidiAI enabled) DISABLED
+  - macOS Intel (x64)
+  - iOS XCFramework
+  Linux:
+  - Ubuntu x64 (CPU)
+  - Ubuntu arm64 (CPU)
+  - Ubuntu s390x (CPU)
+  - Ubuntu x64 (Vulkan)
+  - Ubuntu arm64 (Vulkan)
+  - Ubuntu x64 (ROCm 7.14)
+  - Ubuntu x64 (OpenVINO)
+  - Ubuntu x64 (SYCL FP32)
+  - Ubuntu x64 (SYCL FP16)
+  Android:
+  - Android arm64 (CPU)
+  Windows:
+  - Windows x64 (CPU)
+  - Windows arm64 (CPU)
+  - Windows arm64 (OpenCL Adreno)
+  - Windows x64 (CUDA 12) - CUDA 12.4 DLLs
+  - Windows x64 (CUDA 13) - CUDA 13.3 DLLs
+  - Windows arm64 (CUDA 13) (preview) - CUDA 13.4 DLLs
+  - Windows x64 (Vulkan)
+  - Windows x64 (OpenVINO)
+  - Windows x64 (SYCL)
+  - Windows x64 (ROCm 7.14)
+  openEuler:
+  - DISABLED
+  - openEuler x86 (310p)
+  - openEuler x86 (910b, ACL Graph)
+  - openEuler aarch64 (310p)
+  - openEuler aarch64 (910b, ACL Graph)
+  UI:
+  - UI
+ReleaseNotesUrl: https://github.com/ggml-org/llama.cpp/releases/tag/b10666
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/ggml-org/llama.cpp/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

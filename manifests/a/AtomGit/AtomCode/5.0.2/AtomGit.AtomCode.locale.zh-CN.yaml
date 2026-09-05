@@ -1,0 +1,66 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: AtomGit.AtomCode
+PackageVersion: 5.0.2
+PackageLocale: zh-CN
+Publisher: 重庆开源共创科技有限公司
+PublisherUrl: https://atomgit.com/
+PublisherSupportUrl: https://atomgit.com/atomgit_atomcode/atomcode/issues
+PrivacyUrl: https://docs.gitcode.com/docs/help/home/protocol/privacy-policy
+Author: 重庆开源共创科技有限公司
+PackageName: AtomCode
+PackageUrl: https://atomcode.atomgit.com/
+License: MIT
+LicenseUrl: https://atomgit.com/atomgit_atomcode/atomcode/blob/main/LICENSE
+Copyright: Copyright (c) 2026 Yubang Xu
+CopyrightUrl: https://docs.gitcode.com/docs/help/home/protocol/ai-privacy-policy
+ShortDescription: AI 编程助手 在你的终端中运行
+Description: Claude Code / Cursor Agent 的开源平替，住在你的终端里。连接任意 OpenAI 兼容大模型，自主读文件、改代码、跑测试、自我验证 —— 用 Rust 构建。
+Tags:
+- 人工智能
+- 代码
+- 大语言模型
+- 智能体
+- 编程
+- 聊天机器人
+- 自主智能
+ReleaseNotes: |-
+  AtomCode v5.0.2 Release Notes
+  发布日期：2026-07-24
+  v5.0.2 聚焦于自定义指令（Custom Commands） 的完善——args 字段真正生效、渲染与键值生成落地，同时带来了 WebUI 多窗口体验优化、Provider/TLS 连接韧性加固、Config 容错能力提升以及安装脚本的 PATH 匹配修复。
+
+  ✨ 新增功能（Features）
+  自定义指令 (Custom Commands)
+  - args 字段真实生效：自定义指令配置中的 args 字段从前端注册到后端分发（dispatch）全链路打通，指令可以声明所需的参数并正确传递
+  - 渲染与键值生成：自定义指令支持在 TUI 中渲染参数提示（${ARGUMENTS} 占位符），并自动生成唯一的键值（hotkey），用户可通过键值快速触发
+  WebUI
+  - 项目删除：WebUI 支持删除项目
+
+  🛠 修复（Fixes）
+  自定义指令 (Custom Commands)
+  - Render 链式替换递归损坏：修复 ${ARGUMENTS} → $ARGUMENTS 归一化后链式替换递归问题，防止用户输入含 placeholder 字面量时被轮回替换
+  - 修复未知命令静默失败回归：恢复 CmdUnknownCommand 错误渲染，未知命令不再被静默吞掉
+  - 补齐 Required+空参数分发路径：补齐 Required 模式下空参数的拒绝路径测试，确保空参数不触发 submit
+  Config / Provider
+  - 无效 Provider 隔离：启动时校验失败的 [providers.<name>] 段被隔离，不影响启动
+  - 写入路径容错：/model 等写入操作时不再因磁盘残留无效 provider 段报「配置保存失败」——写入路径也容错，且原样保留无效段（不丢失）
+  - 单坏证书不 abort 整个 HTTP Client：单个 OS 根证书被 rustls 拒绝时不再导致全部 Provider 启动失败，改为跳过坏证书继续构建
+  TLS / 网络
+  - TLS 1.2 降级重试：AtomGit 连接在 TLS 1.3 握手失败时自动以 TLS 1.2 重试（仅握手阶段降级，使用现代密码套件），提升 CDN/中间件兼容性
+  WebUI
+  - Session 加载竞态修复：修复 WebUI 中 Session 加载时的竞态条件，避免丢失会话状态
+  - Model Selector 下拉时暂停轮询：下拉菜单打开时暂停模型列表自动轮询，防止切换中断
+  - 项目切换状态同步：WebUI 切换项目时，正确同步 TUI 和 daemon 的项目状态，确保会话一致性
+  安装脚本
+  - PATH 匹配修复：install.sh 和 install.ps1 中 PATH 检测从子串匹配改为完整条目匹配，修复因假阳性跳过添加 install 目录导致新终端找不到 atomcode 命令的问题
+
+  📚 文档（Docs）
+  - 自定义指令教程：README 新增自定义命令完整教程，涵盖路径配置、args 行为说明、插件作用域
+  - 示例冲突修复：修正 README 中自定义指令示例与内置 /review 命令的冲突
+ReleaseNotesUrl: https://atomgit.com/atomgit_atomcode/atomcode/releases/v5.0.2
+Documentations:
+- DocumentLabel: 文档
+  DocumentUrl: https://atomcode.atomgit.com/docs/zh/index.html
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

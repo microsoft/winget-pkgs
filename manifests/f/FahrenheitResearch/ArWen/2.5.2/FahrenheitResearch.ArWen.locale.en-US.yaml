@@ -1,0 +1,61 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: FahrenheitResearch.ArWen
+PackageVersion: 2.5.2
+PackageLocale: en-US
+Publisher: Fahrenheit Research
+PublisherUrl: https://github.com/FahrenheitResearch
+PublisherSupportUrl: https://github.com/FahrenheitResearch/arwen/issues
+Author: Fahrenheit Research
+PackageName: ArWen
+PackageUrl: https://github.com/FahrenheitResearch/arwen
+License: Apache-2.0
+LicenseUrl: https://github.com/FahrenheitResearch/arwen/blob/main/LICENSE
+Copyright: Copyright © Fahrenheit Research
+CopyrightUrl: https://github.com/FahrenheitResearch/arwen/blob/main/LICENSE
+ShortDescription: 'ArWen: GPU-native WRF-ARW-class regional weather model, verified against WRF v4.6.1'
+Description: "ArWen is an independent, GPU-native implementation of a WRF-ARW-class regional atmospheric model. It is not affiliated with or endorsed by NCAR or UCAR. The name is a wordmark for \"the ARW solver, GPU-native\"; the Python package is currently named gpuwm. Safety. ArWen is a research and educational tool. It is never a substitute for official forecasts and warnings from your national meteorological service. Do not use it to make safety decisions. Regional numerical weather prediction at convective scale has mostly required institutional clusters, which means most of the world runs on global-model guidance at 10-25 km. ArWen's aim is to put a verified, kilometer-scale limited-area model on a single consumer GPU: pick a point, size a nest ladder to your card, pull public analysis data, and run a 1 km (or 500 m) simulation of your own area on hardware you own -- especially in places where no national convection-permitting model exists."
+Moniker: arwen
+ReleaseNotes: |-
+  New
+  - Radiation is about 1.9x faster at the default column chunk, and the
+    allocation estimate drops roughly 1.5 GB. Output is byte-identical on
+    both cards it was measured on. Contributed by Roch.
+  - The chunk ladder flattened with the radiation workspace. gpuwm check
+    against a 19.5 GiB budget now names one halving of the configured chunk
+    where the same case used to have to walk back two.
+  - gpuwm fetch --source era5 writes era5-cds-retrieve.py beside the
+    request document and prints the one command that runs it. The script
+    resolves every path from its own location, so it produces the same
+    files from any working directory and under any interpreter, including
+    a WSL python3 reached from Windows.
+  - gpuwm fetch --source era5 --validate reports the delivered grid shape,
+    spacing and corners, and fails a file whose grid falls short of the
+    requested --area, naming the edge and the shortfall.
+  - gpuwm doctor checks that the directory holding the gpuwm console
+    script is on PATH and prints the exact line that fixes it.
+
+  Fixed
+  - gpuwm downscale runs a full-physics child without
+    --child-surface-from. The child's land identity and soil warm start
+    are taken from the parent's own history frame. Previously the flag was
+    mandatory and pointed at a file no command could produce for a
+    config-driven parent, so a full-physics child of a [case_data] run
+    was unreachable. The flag stays as the higher-fidelity route.
+  - gpuwm downscale --point writes the derived child config to
+    <out>/child.toml, inside the run it describes.
+  - Static fields no longer depend on which source window a build read. On
+    a geography source that wraps in x, two builds covering the same ground
+    sampled the source at coordinates differing in their last bits, so a
+    moving nest whose statics corridor crossed the wrap seam refused every
+    relocation and wrote no frames after the first move. Measured after the
+    fix: 3,519,936 cells compared per move, zero mismatches, two moves
+    completed, 26 frames.
+ReleaseNotesUrl: https://github.com/FahrenheitResearch/arwen/releases/tag/v2.5.2
+InstallationNotes: |-
+  This application requires an NVIDIA GPU with CUDA support to run.
+  Will not function on integrated graphics or non-NVIDIA hardware.
+  Without compatible hardware, the application will fail to launch.
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,46 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: openwong2kim.wmux
+PackageVersion: 3.36.0
+PackageLocale: en-US
+Publisher: openwong2kim
+PublisherUrl: https://github.com/openwong2kim
+PublisherSupportUrl: https://github.com/openwong2kim/wmux/issues
+PackageName: wmux
+PackageUrl: https://github.com/openwong2kim/wmux
+License: MIT
+LicenseUrl: https://github.com/openwong2kim/wmux/blob/HEAD/LICENSE
+ShortDescription: Windows terminal multiplexer with MCP server for AI agents
+Description: |-
+  wmux is a Windows terminal multiplexer built for AI coding agents.
+  Run Claude Code, Codex, and Gemini CLI side by side with split terminals,
+  browser automation, and MCP integration. Features include session persistence,
+  dangerous command detection, real-time token cost tracking, and cross-workspace
+  terminal control via MCP tools.
+Moniker: wmux
+Tags:
+- ai-agent
+- developer-tools
+- electron
+- mcp
+- multiplexer
+- terminal
+- windows
+ReleaseNotes: |-
+  Added
+  - See what an agent actually changed before you approve it. An approval prompt on a phone gave you a screenful of terminal and a yes/no button — the agent asked to edit a file and the one thing you needed was what the edit was. wmux web now answers that from the pane's own repository: the changed file list and the full patch, staged and unstaged, read straight out of git. It works on a read-only server, because reading a diff is reading. A pane that is not in a git repository says so plainly rather than looking broken — running in a scratch directory is normal, and only git itself gets to say a directory is not a repository: a git that could not be run at all reports a failure instead of blaming your working tree. Files the agent has just created are in the patch too, which plain git diff never shows. Large diffs are capped at 512 KB so a phone on a train is not made to pull a generated-file commit to answer one question, and if any part of the patch could not be collected the response says so — an empty patch that silently meant "a git command failed" would read on a phone as "nothing changed", which is the one wrong answer to show someone who is about to approve an edit. Two things it deliberately does not trust. It reads the directory the pane was spawned in, not the one the pane says it is in now: the live directory is tracked from terminal escape sequences, which any process running in that pane can emit, so following it would let a program inside a pane point this read at any repository on the machine. And it treats the repository as hostile input, because an agent may have cloned it from anywhere — every git command runs with external diff drivers, textconv filters, filesystem monitors and the whole inherited GIT_* environment disabled, so none of the several config keys and .gitattributes entries that are commands git will execute can execute anything. It also never takes git's index lock, so reading a diff cannot block or break the agent's own commit. At most two diffs are collected at once daemon-wide, and simultaneous requests for the same pane share one answer.
+  - Open and close panes from the phone. wmux web can now spawn a new pane (optionally in a chosen workspace and directory) and close one, so a phone is no longer restricted to the panes that happened to exist when you left your desk. Both require the server to have been started with --allow-input: an interactive shell is arbitrary execution, and closing someone's pane ends their running build, so neither belongs on a server that promised to be read-only. A pane created this way is a real, monitored, recoverable session — it is not yet drawn in the desktop window's layout. A named workspace has to be one the daemon can actually see a live pane running in: the workspace list belongs to the desktop, and the daemon accepting an unverifiable id would have let a caller file a pane under any workspace it cared to name. The cost is stated plainly in the API docs — a real workspace with no panes open cannot be named until one is — and spawning without a workspace always works.
+  - Attention events now say how much of a human they are asking for. Every event on /api/events (SSE and the JSON backlog) carries tier: act when someone is blocked on a person — an approval was raised, a critical-risk action fired — and info for a notification, a review-risk signal, or the lifecycle echo of an approval that is already over. Clients were each re-deriving urgency from the event kind, which meant the answer lived in every app instead of in the daemon. The vocabulary is deliberately two plain words rather than one platform's notification taxonomy: the wire states the fact, the client decides what to do about it. Additive — a client that ignores the field behaves exactly as it did before, and the tier is stamped after the payload, so a pane cannot declare its own critical event unimportant.
+  - An approval that names a destructive action is flagged as such. Approval records gain an optional risk: 'critical', set at creation when the question or an option label matches the same destructive-action patterns that already raise the critical signal (rm -rf, git push --force, DROP TABLE, terraform destroy, …), and carried through persistence, GET /api/approvals, and the approval event. It is a hint for a client that wants to step up its confirmation — Face ID, a second tap — and never a gate: the patterns are regexes over agent-authored prose, they miss and they over-fire, and answering a flagged request works exactly like answering any other. Absence means "nothing matched", not "safe".
+  Fixed
+  - A red perf gate is now confirmed by a re-run before it fails the build. The gate has been red-lighting on CI without a code change to explain it: the same commit measured coldStart.firstPtyDataMs at 3038 ms and 1385 ms an hour apart, and one inputLatency8 run cleared its fail line by 0.05 ms. A gate that fires at random teaches people to re-run rather than look, which is the state where a real regression walks through. When the gate fails, CI now measures the failing scenarios once more on the same runner and only keeps the red if the failure reproduces — a deterministic regression should, a shared-runner tail spike should not, and the trade is stated plainly in bench/README.md: a regression that only appears in half of runs now has to land twice. No baseline moves, in either direction: the thresholds are exactly what they were, and "descriptive, not aspirational" is untouched. What gets re-measured is the whole app instance the failing metric was measured on, never the single metric — the benchmark runs several scenarios in sequence on one instance and each inherits what the previous ones left behind, so a narrower retry would measure something else and its verdict would mean nothing. The first run's numbers are never overwritten: they are what gets published to the perf trend, tail sample and all, and the job summary shows the two measurements side by side so a cleared red is still visible rather than silently swallowed. Everything that is not an explicit second pass keeps the build red — a crashed re-run, an unreadable result, a failing scenario that did not run again, or a sibling scenario from the selected app instance that disappears after the first run measured it — because "could not confirm" is not "it was fine". The two correctness checks (the IME composition and the WebGL context recovery) are deliberately never re-run: they are pass/fail consistency checks rather than tail-prone measurements, and "it worked the second time" is not a reason to ship a broken one — and if one of them breaks during a re-run, that keeps the build red too, even though it is not what went red first. Two long-standing footguns in the same tool are closed along the way: pointing an output at --current or --baseline (which used to overwrite the input and still report the gate's verdict) and a result file that is valid JSON but not a result object (which used to pass green, because every gate read as "not measured") are both now refused outright. Costs CI time only on runs that are already red. (#570)
+  What's Changed
+  - Read a pane's diff, and open or close a pane, from a phone by @openwong2kim in #630
+  - Tell the phone which events need a human, and which approvals look dangerous by @openwong2kim in #631
+  - Confirm a red perf gate with a re-run before it fails the build by @snowyukitty in #632
+  - chore(release): 3.36.0 by @openwong2kim in #633
+  Full Changelog: v3.35.1...v3.36.0
+ReleaseNotesUrl: https://github.com/openwong2kim/wmux/releases/tag/v3.36.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,69 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: soldforaloss.DevHUD
+PackageVersion: 0.1.1
+PackageLocale: en-US
+Publisher: Tommy Rush
+PublisherUrl: https://github.com/soldforaloss
+PublisherSupportUrl: https://github.com/soldforaloss/dev-hud/issues
+PackageName: Dev HUD
+PackageUrl: https://github.com/soldforaloss/dev-hud
+License: MIT
+LicenseUrl: https://github.com/soldforaloss/dev-hud/blob/main/LICENSE
+Copyright: Copyright (c) 2026 Tommy Rush
+ShortDescription: Always-on desktop HUD for your AI dev stack
+Description: One glass widget, pinned to your desktop, showing live Claude and Codex rate-limit rings and burn, active AI sessions, your GitHub repos' pulse (CI, PRs, issues, releases), gateway health, and system/hardware telemetry (CPU, RAM, GPU, thermals, disks, network quality, Docker, WSL, Tailscale, and more). Built with Tauri 2 — small, native, no Electron.
+Moniker: dev-hud
+Tags:
+- ai
+- claude
+- codex
+- dashboard
+- desktop-widget
+- developer-tools
+- hud
+- monitoring
+- tauri
+- widget
+ReleaseNotes: |-
+  A trust-focused hardening release. No new cards — this one makes the promises the app already made actually hold, per the [product audit](https://github.com/soldforaloss/dev-hud/blob/main/docs/DEV-HUD-AUDIT-AND-REPUTATION-ROADMAP.md) now included in the repo.
+
+  ## Security & trust
+
+    **Custom cards can no longer be injected over IPC.** The frontend registers a validated card list once; runs happen by id only. Command targets are pinned to their canonical path and SHA-256 at registration — if the file changes on disk, the card fails visibly instead of running something else.
+    **Thermals setup verifies what it elevates.** The LibreHardwareMonitor executable is located only inside its winget package directory, held open with write/delete denied, SHA-256 pinned, and the hash is re-verified inside the elevated context immediately before launch.
+    **Content Security Policy** is now a restrictive `default-src 'self'` policy instead of disabled.
+    **Destructive actions in the inspector require arm + confirm.** One click arms, a second click runs; Escape disarms; switching targets disarms.
+    **The header stops overclaiming.** "All systems healthy" is only shown when every visible card is actually healthy and fresh; otherwise the degraded/stale/pending counts are named.
+    **Ongoing alerts stay truthful** — an open alert's title updates with the latest observation instead of freezing at the first one.
+
+  ## Privacy
+
+    New [PRIVACY.md](https://github.com/soldforaloss/dev-hud/blob/main/PRIVACY.md) documents every outbound endpoint: what triggers it, how often, what is sent, which credential is used, and how to turn it off. README and CONTRIBUTING now match actual network behavior. Still no analytics, accounts, or maintainer telemetry.
+
+  ## Fixes
+
+    **The temperature unit setting now works.** Fahrenheit was saved but never read; every display hardcoded °C. Thermals and GPU cards, collapsed-card summaries, chart stats, alert titles, and the alert threshold inputs now follow the setting (thresholds are stored in °C, so switching units never changes what they mean).
+    The "more processes" overflow row opens the first *hidden* process, not the first visible one.
+
+  ## CI
+
+    Every push and PR now runs the full gate on GitHub Actions: frontend tests, typecheck, build, dependency audit, `cargo fmt`, `clippy -D warnings`, and Rust tests — all third-party actions SHA-pinned.
+
+  ## Install
+
+  Download and run the NSIS installer (`dev-hud_0.1.1_x64-setup.exe`) below. Windows only. The installer is not yet code-signed, so SmartScreen will warn — see the README's Install section.
+
+  SHA-256: `7736CBBCF0A4FFC33FD3FFFDEB14E67DC9C45B3106C909E1A2B7C2BFB227AB83`
+
+  Or build from source:
+
+  ```
+  npm install
+  npm run tauri build
+  ```
+
+ReleaseNotesUrl: https://github.com/soldforaloss/dev-hud/releases/tag/v0.1.1
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

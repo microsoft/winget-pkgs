@@ -1,0 +1,107 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: ggml.llamacpp
+PackageVersion: b10293
+PackageLocale: en-US
+Publisher: ggml
+PublisherUrl: https://github.com/ggml-org
+PublisherSupportUrl: https://github.com/ggml-org/llama.cpp/issues
+PackageName: llama.cpp
+PackageUrl: https://github.com/ggml-org/llama.cpp
+License: MIT
+LicenseUrl: https://github.com/ggml-org/llama.cpp/blob/HEAD/LICENSE
+ShortDescription: LLM inference in C/C++
+Tags:
+- ggml
+- llama
+ReleaseNotes: |-
+  ci : onboard AMD ROCm CI with gfx1151 fixes (#26544)
+  - ci: prepare for amd rocm ci
+  Signed-off-by: Aaron Teo aaron.teo1@ibm.com
+  - ci: fix editorconfig-checker
+  Signed-off-by: Aaron Teo aaron.teo1@ibm.com
+  - ci: fix device not recognised
+  Signed-off-by: Aaron Teo aaron.teo1@ibm.com
+  - ci: rename gpu-amd to gpu-hip
+  Signed-off-by: Aaron Teo aaron.teo1@ibm.com
+  - ci: gpu-hip to gpu-rocm
+  haha
+  Signed-off-by: Aaron Teo aaron.teo1@ibm.com
+  - CUDA: allow integrated-GPU host output buffer in debug assert
+  On integrated GPUs (APUs), the scheduler can legitimately place a graph
+  node's output on the host-visible buffer, which ggml_cuda_compute_forward
+  already handles. The debug assert in ggml_cuda_graph_evaluate_and_capture
+  required every node output to be on the device buffer, so a debug build
+  aborts on such a node (e.g. attn_residual ADD -> ROCm_Host on RDNA3.5).
+  The source-tensor assert directly below already permits this via the
+  integrated + cuda_host exception; apply the same exception to the node's
+  own output buffer. Debug-only; no effect on release/compute.
+  Fixes test-recurrent-state-rollback on gfx1151 (Strix Halo).
+  - ci: enable unified memory for ROCm gfx1151 job
+  Work around a coherence issue on integrated RDNA3.5 (gfx1151) where GPU
+  kernels reading mmap-loaded weights can return incorrect output, which
+  makes test-llama-archs (and real inference) intermittently wrong.
+  GGML_CUDA_ENABLE_UNIFIED_MEMORY=1 uses managed memory, which restores
+  coherence. Remove once the underlying ROCm/HIP issue is fixed.
+  - test-llama-archs: skip jamba on HIP backend
+  jamba produces incorrect output (~0.55 NMSE vs CPU) on the HIP backend on
+  RDNA3.5 (gfx1151); the SSM kernels need separate investigation. Skip it
+  for now, matching the existing per-backend carve-outs (WebGPU), so the
+  ROCm CI can run the test for the remaining architectures.
+  - ci: use HIP_LAUNCH_BLOCKING for ROCm gfx1151 job
+  The gfx1151 ROCm CI job produced incorrect inference output (qwen3 perplexity ~88 vs ~9.4) due to an async-execution correctness issue in the HIP path. Serializing kernel launches with HIP_LAUNCH_BLOCKING=1 restores correctness. This replaces the earlier GGML_CUDA_ENABLE_UNIFIED_MEMORY workaround, which did not fix batched inference.
+  - test-backend-sampler: skip top-k subtests on HIP backend
+  The ROCm backend does not support the TOP_K/ARGSORT op at vocab scale (no CUB; bitonic argsort is capped at ncols <= 1024), so top-k/top-p backend samplers cannot be offloaded. The penalties, set_sampler, mixed, and top_p subtests assert that offload happened, so they fail on HIP. Skip them until TOP_K is supported on the ROCm backend.
+  - Update tests/test-backend-sampler.cpp
+  Co-authored-by: Aaron Teo taronaeo@gmail.com
+  - Update tests/test-backend-sampler.cpp
+  Co-authored-by: Georgi Gerganov ggerganov@gmail.com
+  Signed-off-by: Aaron Teo aaron.teo1@ibm.com
+  Co-authored-by: Aaron Teo aaron.teo1@ibm.com
+  Co-authored-by: Jim Wu ywu@xilinx.com
+  Co-authored-by: Aaron Teo taronaeo@gmail.com
+  Co-authored-by: Georgi Gerganov ggerganov@gmail.com
+  Website:
+  - https://llama.app
+  macOS/iOS:
+  - macOS Apple Silicon (arm64)
+  - macOS Apple Silicon (arm64, KleidiAI enabled) DISABLED
+  - macOS Intel (x64)
+  - iOS XCFramework
+  Linux:
+  - Ubuntu x64 (CPU)
+  - Ubuntu arm64 (CPU)
+  - Ubuntu s390x (CPU)
+  - Ubuntu x64 (Vulkan)
+  - Ubuntu arm64 (Vulkan)
+  - Ubuntu x64 (ROCm 7.2)
+  - Ubuntu x64 (OpenVINO)
+  - Ubuntu x64 (SYCL FP32)
+  - Ubuntu x64 (SYCL FP16)
+  Android:
+  - Android arm64 (CPU)
+  Windows:
+  - Windows x64 (CPU)
+  - Windows arm64 (CPU)
+  - Windows arm64 (OpenCL Adreno)
+  - Windows x64 (CUDA 12) - CUDA 12.4 DLLs
+  - Windows x64 (CUDA 13) - CUDA 13.3 DLLs
+  - Windows x64 (Vulkan)
+  - Windows x64 (OpenVINO)
+  - Windows x64 (SYCL)
+  - Windows x64 (HIP)
+  openEuler:
+  - DISABLED
+  - openEuler x86 (310p)
+  - openEuler x86 (910b, ACL Graph)
+  - openEuler aarch64 (310p)
+  - openEuler aarch64 (910b, ACL Graph)
+  UI:
+  - UI
+ReleaseNotesUrl: https://github.com/ggml-org/llama.cpp/releases/tag/b10293
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/ggml-org/llama.cpp/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

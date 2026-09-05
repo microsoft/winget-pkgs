@@ -1,0 +1,50 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Proma.Proma
+PackageVersion: 0.13.4
+PackageLocale: zh-CN
+Publisher: ErlichLiu
+PublisherUrl: https://proma.cool/
+PublisherSupportUrl: https://github.com/proma-ai/Proma/issues
+PackageName: Proma
+PackageUrl: https://proma.cool/download
+License: 免费软件
+Copyright: Copyright © 2024-2026 Proma
+ShortDescription: 把最丝滑的通用 Agent 体验带进你的工作流，为 100x 专业用户而生的未来产品，正在实现 proactive Agent 阶段。基于 Claude Agent SDK 的完整开源实践，原生支持飞书群聊调用、灵活接入任意大模型供应商 —— 让顶级 Agent 能力真正跑在你每天用的地方。
+Description: |-
+  Proma 是一个本地优先的 AI 桌面应用，把多模型 Chat、通用 Agent、工作区、Skills、MCP、远程机器人和记忆能力放在同一个开源客户端里。
+  它不是只面向闲聊的聊天框，而是一个可以长期沉淀个人工作流的 Agent 工作台：简单问题用 Chat，复杂任务交给 Agent，数据和配置尽量留在本地。
+
+  现在能做什么
+  - Chat 模式：多模型对话、附件解析、图片输入、Markdown / Mermaid / KaTeX / 代码高亮、并排对话、系统提示词、上下文管理。
+  - Agent 模式：基于 @anthropic-ai/claude-agent-sdk 的通用 Agent，支持工作区隔离、权限模式、文件操作、长任务流式输出、计划确认和用户追问。
+  - SubAgent / Tasks：复杂任务可以通过 Claude Agent SDK 的 Agent 工具拆分为子 Agent / Task，并在消息流中展示调用过程和结果。
+  - Skills & MCP：每个工作区可以独立配置 Skills、MCP Server 和工作区文件，适合沉淀可复用能力。
+  - 远程机器人：支持飞书 / Lark 机器人桥接，并已提供钉钉、微信桥接入口，用手机或群聊触发本机 Agent 工作流。
+  - 记忆与工具：Chat 和 Agent 可共享记忆能力，并支持联网搜索、内置 Chat 工具、Agent 推荐等辅助能力。
+  - 本地优先：会话、工作区、附件、配置、Skills 等默认存储在 ~/.proma/，使用 JSON / JSONL 文件组织，不依赖本地数据库。
+  - 桌面体验：自动更新、代理设置、文件预览、全局快捷键、快速任务窗口、语音输入、亮色 / 暗色 / 跟随系统主题。
+Tags:
+- 人工智能
+- 大语言模型
+- 智能体
+- 自主智能
+ReleaseNotes: |-
+  Proma v0.13.4
+  对比基准：v0.13.0
+  这一版以稳定性修复为主线，同步带来界面风格与定时任务两项体验提升。稳定性方面解决了生产环境中并发 Agent 会话导致的同步写风暴（主进程 UI 阶段性冻结）、适配了 v0.13.0 升级 SDK 0.3.185 后每会话 2 秒的 drain timeout、修复了长任务网络断连后上下文丢失从零重做的严重缺陷。功能侧新增「经典 / 现代」界面风格一键切换，以及定时任务 once 一次性调度与 maxRuns 运行次数上限——让"未来某时间点跑一次 / 跑有限几次就停"的延时任务也能纳入 Proma 自动化体系。
+  新功能
+  - 经典 / 现代界面风格切换 — 外观设置新增「界面风格」分段控制器，提供「经典」与「现代」两档选择（默认「现代」）。经典风完整保留旧版视觉：rounded-2xl + shadow-xl 侧栏、bg-muted 按钮底色、--radius: 0.625rem 全局圆角基准；现代风重新校准全局圆角为 --radius: 0.375rem（6px），侧栏去除圆角与投影改为纯色 --sidebar-surface，TabBar、输入框等区域引入独立分区底色 token（--tabbar-surface / --input-surface / --tab-surface），折叠按钮改用 border + bg-primary/5 的轻量 hover 态，整体质感更扁平统一。设置项通过 interfaceVariantAtom 持久化到 localStorage 与主进程，跨窗口实时同步。(#915)
+  - 定时任务 once 一次性调度 + maxRuns 运行次数上限 — 为定时任务补充两个正交能力：once 调度类型通过 scheduledAt 绝对时间戳在指定时刻只跑一次，computeNextRunAt 直接返回该时间戳不做前进推算，跑完自动停用（重启后过期任务补跑一次）；maxRuns 正交于所有调度类型，按实际执行次数计（成功 + 失败，不含 skipped），达到上限自动停用；completedAt 标记自动完成态，重新启用时重置计数器相当于再跑一轮配额。UI 新增频率下拉「仅运行一次」+ datetime 选择器、运行次数上限输入、「已完成」分组与状态展示。同步修订 SKILL.md 与工具描述层，纠正原先一刀切排除一次性任务的矛盾。(#914)
+  Bug 修复
+  - 并发会话同步写风暴修复 — 生产构建中多个 Agent 并发时（委派或手动），onSessionId 回调每条 SDK 消息都触发（SDK v2 几乎每条消息带 session_id），但守卫误用「初始快照后永不更新」的 existingSdkSessionId 作比较——回调里实际更新的是另一个变量 capturedSdkSessionId。新会话的 existingSdkSessionId 为 undefined，导致守卫恒为真，每条消息都全量 readIndex + 原子写 + 备份会话索引，再叠加一次读回验证。历史会话越多索引越大、并发越多，同步 fsync 风暴越严重，wedge 主进程事件循环；渲染进程因等待同步 IPC 一并冻结（彩虹条、悬浮预览延迟）。dev 环境索引近乎空故无法复现，仅生产暴露。修复后仅在 session_id 真正变化时持久化一次，并删除不必要的调试读回。顺带修复 file:resolve-path 对目录路径调用 registerPromaFilePath 抛「不是文件」未捕获异常的问题。(#910)
+  - SDK 0.3.185 iterator 终止语义适配 — v0.13.0 升级 SDK 后每个会话都触发 orchestrator 的「drain timeout: SDK iterator 在 result 后 2000ms 内未关闭，强制退出」，白白浪费 2 秒。根因：SDK 0.3.185 把会话终止逻辑全部挪进 Query.cleanup()，而 cleanup() 只在 iterator.return() 被调用时触发（Transport.close 注释明确 "eliminating need for endInput"，旧的 stdin-EOF 自然结束路径已废弃）。adapter 收到 result 后只调 channel.close()、不再有人调 .return()，输出流不会 yield done，orchestrator 的 while 循环挂在 next() 上，只能靠 2s drain timeout 兜底调 queryIterator.return()——安全网退化成了主路径。修复：关闭 SDK promptSuggestions（它在每轮 result 之后才到达，是"收到 result 后仍需等尾部消息"的根源），adapter 收到非 keep-open 的 terminal result 后在 yield 该消息后主动 break for-await 循环触发 iterator.return() → cleanup()。drain timeout 退化为真正永不触发的安全网。(#913)
+  - 长任务断连后上下文保留 — 长任务运行中网络断连后，编排层终止分支用 shouldClearSession = !apiError || statusCode >= 500 判断是否清除 sdkSessionId。普通断连从 stderr 解析不出 HTTP 状态码（apiError = null），于是 !apiError 命中，把指向 SDK 磁盘完整历史 JSONL 的 resume 指针清空——但 SDK 的 JSONL 仍在磁盘上本可 resume。指针丢失后下一轮退化为仅 ~50K 的 buildContextPrompt 冷启动，模型从零重新执行；"Interrupt + Continue" 也无法恢复，只能新建会话手动救回。修复：终止分支不再清除 sdkSessionId（网络断连 / 5xx / 未知错误都不代表会话失效），扩展 TRANSIENT_NETWORK_PATTERN 覆盖更多断连错误模式（ECONNABORTED / connection closed / AbortError / timed out 等），冷启动兜底升级为强指令要求模型先读取完整 JSONL 历史。同时将 sdkSessionId 的主动清除收敛为仅 thinking-signature 跨模型不兼容这一处——此前 session-not-found 等场景也会误清。(#903)
+  - 推荐消息保留草稿 — 点击 Agent 推荐条发送建议后，setInputContent('') 会无条件清空用户正在编辑的草稿。修复后仅在无 overrideText 时清空，与 handleSend 内部 overrideText ?? inputContent 的取值语义保持一致。(#904)
+  - 有序列表 Shift+Enter 续项修复 — Agent 输入框有序列表中 Shift+Enter 无法正确续项，修复后续项行为恢复正常。(#908)
+  - 附件 chip 支持点击预览 — 已发送消息中的附件 chip 支持点击打开预览。(#906)
+  - 轻量主题下代码选区对比度优化 (#911)；预览面板切换时保留 AskUserQuestion 草稿 (#912)；移除 auto preview toggle (#909)
+ReleaseNotesUrl: https://github.com/proma-ai/Proma/releases/tag/v0.13.4
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

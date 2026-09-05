@@ -1,0 +1,36 @@
+# Created with komac v2.9.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
+
+PackageIdentifier: Databricks.DatabricksCLI
+PackageVersion: 1.14.0
+PackageLocale: en-US
+Publisher: Databricks
+PublisherUrl: https://databricks.com/
+PublisherSupportUrl: https://github.com/databricks/cli/issues
+PackageName: DatabricksCLI
+PackageUrl: https://github.com/databricks/cli
+License: DB license
+LicenseUrl: https://github.com/databricks/cli/blob/HEAD/LICENSE
+ShortDescription: Databricks Command Line Interface
+Tags:
+- command-line-interface
+- databricks
+ReleaseNotes: |-
+  Notable Changes
+  - Bundles still on Terraform state are now migrated to the direct engine automatically, after a deploy whose dry-run conversion comes back clean. To opt out, set engine: terraform under bundle or DATABRICKS_BUNDLE_ENGINE=terraform. See https://docs.databricks.com/aws/en/dev-tools/bundles/direct
+  CLI
+  - Fixed idle databricks ssh connect sessions disconnecting after a few minutes, on dedicated clusters and on serverless. The tunnel now keeps itself warm: the SSH client and the SSH server on the compute exchange keepalives every 30 seconds, and the CLI's proxy pings the tunnel's websocket every 20 seconds. A session nobody is typing into stays connected, with no need to set ServerAliveInterval by hand.
+  Bundles
+  - bundle plan no longer reports a permanent, unconvergeable update on securable_kind for Unity Catalog TABLE securables declared under an app's resources. The field is computed by the backend (output-only), so it is now ignored during drift detection. Direct engine only (#6342).
+  - Add support for the cluster_policies resource type in Declarative Automation Bundles. Cluster policies are only supported in direct deployment mode.
+  - bundle destroy no longer counts resources that are already gone remotely in its Destroy: N deleted summary. Such deletes only clean up stale state and are not listed under the deletion prompt, so they are now excluded from the count as well, matching the terraform engine.
+  - bundle destroy now also removes the directory named after the bundle, not just the target directory beneath it, when workspace.root_path ends in ${bundle.name}/${bundle.target} — which includes the default root path. It is removed non-recursively, so it stays in place while another target of the same bundle is still deployed there. Previously every destroy left an empty directory behind (#6317).
+  - job_runs now plans skip for a run that is still in progress and when on_bundle_deploy is removed, instead of treating either case as an update. (#6357)
+  - Added DATABRICKS_BUNDLE_RESOURCE_MAX_WAIT (in seconds) to cap how long deploy and destroy wait for a resource. Direct engine only.
+  - Fixed bundle deploy on the direct engine failing with Nothing to update, or reporting a change it never applied, when a schema, catalog, volume, registered model or external location field was removed from the configuration or set outside the bundle. The update now sends the fields the plan reports as cleared instead of dropping them.
+  Dependency Updates
+  - Bump github.com/databricks/databricks-sdk-go from v0.171.0 to v0.175.0 (#6322).
+  - Bump Terraform provider from v1.127.0 to v1.128.0 (#6323).
+ReleaseNotesUrl: https://github.com/databricks/cli/releases/tag/v1.14.0
+ManifestType: defaultLocale
+ManifestVersion: 1.9.0

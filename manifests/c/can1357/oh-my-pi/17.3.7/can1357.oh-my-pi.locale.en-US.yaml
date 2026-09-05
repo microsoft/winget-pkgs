@@ -1,0 +1,63 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: can1357.oh-my-pi
+PackageVersion: 17.3.7
+PackageLocale: en-US
+Publisher: Can Bölük
+PublisherUrl: https://can.ac/
+PublisherSupportUrl: https://github.com/can1357/oh-my-pi/issues
+Author: Can Bölük
+PackageName: oh-my-pi
+PackageUrl: https://omp.sh/
+License: MIT
+LicenseUrl: https://github.com/can1357/oh-my-pi/blob/HEAD/LICENSE
+Copyright: |-
+  Copyright (c) 2025 Mario Zechner
+  Copyright (c) 2025-2026 Can Bölük
+ShortDescription: ⌥ AI Coding agent for the terminal — hash-anchored edits, optimized tool harness, LSP, Python, browser, subagents, and more
+Description: |-
+  omp is a terminal-first coding agent that runs on your machine, talks to any provider, and treats sessions like git branches.
+  omp (pronounced “oh-em-pi”, binary omp) is a fork of Mario Zechner’s Pi. It runs as a single Bun process, drives any model provider you have credentials for, and ships a flat tool surface the model uses to read code, run commands, edit files, drive a debugger, and spawn subagents that coordinate over an in-process IRC bus.
+  Sessions persist as JSONL under ~/.omp/agent/sessions/. You resume, fork, branch, and share them. Settings, credentials, plugins, and caches all live under ~/.omp/agent/. Nothing leaves the machine unless you call a tool that does.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  @oh-my-pi/pi-ai
+  Changed
+  - Send the omp/<version> User-Agent on xAI chat (xai and xai-oauth) unless the request already set its own.
+  @oh-my-pi/pi-catalog
+  Changed
+  - Changed the paid xAI (XAI_API_KEY) and SuperGrok (xai-oauth) default models to grok-4.6.
+  Fixed
+  - Raised the GPT-5.6 Sol/Terra/Luna context window on the Codex transport (openai-codex) from 372K to 1M tokens: OpenAI enabled the 1M window for subscription Codex on 2026-08-16, but the Codex model registry still reports the stale 272,000, so discovery now floors these SKUs at 1,000,000 instead of trusting the reported value (openai/codex#38917).
+  @oh-my-pi/pi-coding-agent
+  Added
+  - Added ExtensionAPI.registerFileWriteFallback(handler) and ExtensionAPI.registerFileDeleteFallback(handler), letting an extension supply a fallback writer or deleter that is consulted when a native write, edit, or apply_patch byte-write or unlink is denied with a permission error (EPERM/EACCES/EROFS) — for hosts that embed the agent inside a sandbox that denies direct filesystem access but exposes a privileged channel. The brokered path is symlink-resolved so a handler's allowlist sees the real destination, a destination that cannot be resolved is not brokered at all, and req.sessionId names the session that issued the mutation so a handler sharing the process-wide registry can enforce policy per session. See docs/extensions.md.
+  Changed
+  - Send the omp/<version> User-Agent on xAI chat (xai and xai-oauth) unless the request already set its own (#8840 by @Jaaneek).
+  - Updated the default model for XAI_API_KEY (xai) and SuperGrok OAuth (xai-oauth) to grok-4.6. Automatic model selection continues to prefer paid xai/grok-4.6 when only XAI_API_KEY is set, with xai-oauth/grok-4.6 still available explicitly.
+  Fixed
+  - Fixed omp stats and /stats dashboards being unreachable from container hosts by accepting an explicit --host bind address while preserving the 127.0.0.1 default.
+  @oh-my-pi/omp-stats
+  Fixed
+  - Fixed the stats dashboard being unreachable from container hosts by accepting an explicit --host bind address while preserving loopback-only binding and same-origin API access by default.
+  What's Changed
+  - fix(ai): send omp User-Agent on xAI chat only by @Jaaneek in https://github.com/can1357/oh-my-pi/pull/8840
+  New Contributors
+  - @Jaaneek made their first contribution in https://github.com/can1357/oh-my-pi/pull/8840
+  Full Changelog: https://github.com/can1357/oh-my-pi/compare/v17.3.6...v17.3.7
+ReleaseNotesUrl: https://github.com/can1357/oh-my-pi/releases/tag/v17.3.7
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://omp.sh/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
