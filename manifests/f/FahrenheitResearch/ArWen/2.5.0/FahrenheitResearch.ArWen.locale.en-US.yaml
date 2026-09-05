@@ -1,0 +1,66 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: FahrenheitResearch.ArWen
+PackageVersion: 2.5.0
+PackageLocale: en-US
+Publisher: Fahrenheit Research
+PublisherUrl: https://github.com/FahrenheitResearch
+PublisherSupportUrl: https://github.com/FahrenheitResearch/arwen/issues
+Author: Fahrenheit Research
+PackageName: ArWen
+PackageUrl: https://github.com/FahrenheitResearch/arwen
+License: Apache-2.0
+LicenseUrl: https://github.com/FahrenheitResearch/arwen/blob/main/LICENSE
+Copyright: Copyright © Fahrenheit Research
+CopyrightUrl: https://github.com/FahrenheitResearch/arwen/blob/main/LICENSE
+ShortDescription: 'ArWen: GPU-native WRF-ARW-class regional weather model, verified against WRF v4.6.1'
+Description: "ArWen is an independent, GPU-native implementation of a WRF-ARW-class regional atmospheric model. It is not affiliated with or endorsed by NCAR or UCAR. The name is a wordmark for \"the ARW solver, GPU-native\"; the Python package is currently named gpuwm. Safety. ArWen is a research and educational tool. It is never a substitute for official forecasts and warnings from your national meteorological service. Do not use it to make safety decisions. Regional numerical weather prediction at convective scale has mostly required institutional clusters, which means most of the world runs on global-model guidance at 10-25 km. ArWen's aim is to put a verified, kilometer-scale limited-area model on a single consumer GPU: pick a point, size a nest ladder to your card, pull public analysis data, and run a 1 km (or 500 m) simulation of your own area on hardware you own -- especially in places where no national convection-permitting model exists."
+Moniker: arwen
+ReleaseNotes: |-
+  ArWen 2.5.0
+  The arbitrary-inputs release. Initialize from 15 weather models through one table-driven engine, mix fields between them, and run the whole data path on Rust. Every route below was proven with a real GPU simulation before shipping.
+  Install: pip install gpuwm (pulls the new gpuwm-data companion automatically). Python 3.11 to 3.14.
+
+  New
+  - 15 models as initialization sources: GFS, GDAS, HRRR (native and pressure-level), ERA5, 20CRv3 (member archive and public ensemble mean), ICON-EU, AIFS, GEM, ECMWF IFS open data, RAP, GEFS, AIGFS, AIGEFS, RRFS. Adding a model is table work, not code.
+  - Arbitrary sources: the mapped route runs any GRIB2/NetCDF dataset from a user-authored mapping JSON. No adapter code, no rebuild.
+  - gpuwm fetch --source downloads bytes for every routed model, parallel by default. Sources without public bytes refuse by name and point at --source-root.
+  - Cross-model composition on shared grids: borrow fields between sources, declared explicitly. The AI models run with GDAS soil this way out of the box.
+  - Ensemble members are first-class: GEFS and AIGEFS member selection, plus mean, spread, and paintball panels through the Rust ensemble renderer.
+  - Rust data path end to end: GRIB decode, the mapping engine, terrain and static fields, NetCDF writing, and rendering. The engine reads grids the 2.4 line refused outright, Lambert-projected models like RAP and RRFS included.
+  - Spectral verification: gpuwm spectral scores any run against a reference by wavelength band, with coherence, phase error, preregistered gates, and self-hashed receipts.
+  - Run-stamped outputs: every run claims its own run-<launch>Z_i<init>Z/ folder, downloads stay cached across runs, latest-run.txt names the newest.
+  - The domain wizard accepts every registered source and refuses out-of-coverage domains at plan time with the source's actual window.
+  - Downscaling has a verified command-by-command walkthrough (docs/public/DOWNSCALE.md), and tile streaming announces itself in the go banner and files renders per valid day.
+  - Time-to-first-plot instrumentation on by default, with a published scaling law for prep cost.
+  - gpuwm doctor covers all 31 registered routes, one line each, and prints what changed since the version it last saw. --source accepts any registry id.
+  - Downloads count their bytes as they arrive, gpuwm setup included. No more silent minutes.
+  - New pages: a glossary mapping ArWen vocabulary to its WPS analogues, and a walkthrough of everything a box without a GPU can run.
+  - A scientific manual for researchers ships with the release, receipts cited throughout, plus a short paper-style summary.
+
+  Fixed
+  - Moving nests reset physics accumulators at every relocation in 2.4.1, wiping convective rain each move. State now moves with the nest, on by default.
+  - Sub-kilometer nests were floored at 1-minute radiation calls, costing most of the wall clock on fine nests. Nests now inherit the root cadence, and an explicit radt still wins.
+  - Quickstart output could not be downscaled and nothing said so. It can now, and dry-run warns about anything runtime would refuse.
+  - Config errors were reported as VRAM refusals. They now name the config problem.
+  - Watching progress.json could kill a run on Windows. Runs survive readers.
+  - 2.4.x archives downscale again. 2.4.1 tile caches need one re-preparation, and the refusal names the field.
+  - GPU installs on driver-only boxes looped forever on a wrong remedy. pip install 'gpuwm[gpu-cu13]' now works first try, toolkit included.
+  - The HRRR route runs gpuwm prep then gpuwm sim with no extra flags, and cache restore no longer crashes on solved soil.
+  - Refusals arrive as sentences with remedies, not tracebacks: source coverage, missing data package, short forcing series. When a refusal prints a command, typing it verbatim runs.
+  - The memory gate priced Windows cards with a guess and refused runs that fit. The envelope is now measured on real hardware, the wizard and the checker use one formula, and profile advice names only configurations your source accepts.
+  - The domain wizard sizes a config on any box, GPU or not: declare a card, let it measure the local one, or get a refusal naming both options.
+  - A failed render published an empty run folder and moved latest-run.txt to it. Folders and pointers now appear only after the first image lands.
+  - Composition scratch moved off the system temp to the run's own disk, so big sources no longer die on RAM-backed /tmp.
+  - Re-running a printed prep command is a no-op when nothing changed, and a real change refuses naming both digests.
+  - Renderer: lat/lon grids no longer lose half the frame, and ensemble products ingest each member's whole time series.
+  - The wheel split into gpuwm plus gpuwm-data so both sit well under the PyPI size limit. Installs are unchanged, one command.
+  Full changelog: CHANGELOG.md
+ReleaseNotesUrl: https://github.com/FahrenheitResearch/arwen/releases/tag/v2.5.0
+InstallationNotes: |-
+  This application requires an NVIDIA GPU with CUDA support to run.
+  Will not function on integrated graphics or non-NVIDIA hardware.
+  Without compatible hardware, the application will fail to launch.
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

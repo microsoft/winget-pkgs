@@ -1,0 +1,54 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: endev.aube
+PackageVersion: 2.1.0
+PackageLocale: en-US
+Publisher: en.dev
+PublisherUrl: https://en.dev/
+PublisherSupportUrl: https://github.com/endevco/aube/discussions/categories/troubleshooting-and-bugs
+Author: en.dev
+PackageName: aube
+PackageUrl: https://aube.en.dev/
+License: MIT
+LicenseUrl: https://github.com/endevco/aube/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 en.dev inc
+CopyrightUrl: https://github.com/endevco/aube/blob/HEAD/LICENSE
+ShortDescription: A fast Node.js package manager
+Description: |-
+  aube is a package manager for Node.js projects. It uses pnpm-style isolated node_modules for fast, disk-efficient installs.
+
+  Existing projects keep their lockfile format. aube reads and writes pnpm-lock.yaml, package-lock.json, npm-shrinkwrap.json, yarn.lock, and bun.lock in place. New projects without a supported lockfile get aube-lock.yaml.
+
+  Why Try It
+  - Fast installs. Warm installs are about 8x faster than pnpm and about 5x faster than Bun in the current benchmarks. Repeat test commands run up to 35x faster than pnpm and up to 5x faster than Bun.
+  - Existing lockfiles. Reads and writes pnpm-lock.yaml, package-lock.json, npm-shrinkwrap.json, yarn.lock, and bun.lock in place.
+  - Cheap repeat commands. aubr test, aube test, and aube exec vitest auto-install when dependencies are stale, then skip that work when nothing changed. aubx uses a local binary when one is installed, or a throwaway environment for one-off tools.
+  - Less disk use. A global content-addressable store lets projects share package files instead of keeping a full copy of the same dependencies in every checkout.
+  - Secure defaults. Out of the box, exotic transitive deps are blocked, lifecycle scripts wait for approval, trust downgrades fail at resolve, and brand-new releases sit in a 24h cooling window. One paranoid: true line adds the build jail and turns the soft gates into hard fails.
+Moniker: aube
+ReleaseNotes: |-
+  This release centers on aube run: scripts now echo their expanded command line the way npm, pnpm, and bun do, and a series of startup and process-handoff optimizations trim overhead off every invocation. It also fixes global virtual store flags being dropped during aube ci.
+  Added
+  - aube run echoes the script command line (#1358 by @jdx) — Before running a script, aube now prints its expanded command line to stderr prefixed with $, matching npm/pnpm/bun. This makes CI logs self-documenting: a failed aube run build now records exactly what build expanded to. The echoed line is the post-injection command (so a forwarded --inspect shows up), pre/post scripts each get their own line, and parallel recursive runs carry the same <package>: prefix as the rest of their output. Suppress it with --silent / -s / --loglevel silent.
+    $ aube run build
+    $ tsc -p .
+    Note: this changes default stderr output for every script run — anything parsing aube's stderr will see the new line. Use --silent to opt out.
+
+  Fixed
+  - aube ci honors global virtual store flags (#1355 by @jdx) — --disable-global-virtual-store / --enable-global-virtual-store (including via the clean-install alias) were being dropped by the CI install path and now correctly control whether packages are materialized locally or linked from the global store. The CI hard-disable of dependency builds is unchanged.
+
+  Performance
+  The run hot path saw several improvements. Individual gains are modest but compound on warm invocations, and after them aube run edges out bun run on plain script bodies:
+  - Exec plain single-command scripts without a shell (#1363 by @jdx) — A script body that is one plain command (e.g. tsc -p ., vitest run, node build.js) is now resolved and exec'd directly instead of going through sh -c, eliminating a resident shell process. Anything with operators, expansion, quoting, globs, a custom scriptShell/shellEmulator, or --inspect still uses the shell path, and a resolution miss falls back to sh so exit-127 semantics are preserved.
+  - Exec the final script shell on Unix (#1360 by @jdx) — For direct aubr runs on Unix, aube now replaces its own process with the final script shell (same PID) instead of supervising a child, removing a parent-process wait/exit handoff. Skipped when a post script still needs to run and for recursive/filtered/embedded runs.
+  - Lightweight startup runtime for aubr scripts (#1357 by @jdx) — Warm script runs now start on a current-thread Tokio runtime instead of spinning up multi-thread workers; a full parallel install runtime is created lazily only when a stale tree actually needs installing.
+  - Only rewrite node-gyp shims when they change (#1361 by @jdx) — The lazy node-gyp shims were rewritten (temp file + rename + chmod, twice per run) on every invocation. aube now compares content and mode first and leaves matching shims alone — worth ~6% of wall time on a trivial script — while still self-healing shipped shim fixes or a stripped exec bit.
+  - Reuse manifest and settings contexts (#1359 by @jdx) — Consolidates redundant settings-source loads and a duplicate package.json read on the run path; the manifest used to select Node is now the same value used to select the script.
+
+  💚 Sponsor aube
+  aube is maintained by @jdx, an open source developer for entire.io, the title sponsor of the jdx.dev open source tools including mise. Work on aube is funded by sponsors.
+  If aube is saving your team install time or CI minutes, please consider sponsoring at jdx.dev. Individual and company sponsorships are what keep the project fast, free, and independent.
+ReleaseNotesUrl: https://github.com/jdx/aube/releases/tag/v2.1.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,93 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: LunarWerxs.SageThumbs2K
+PackageVersion: 2.2.0
+PackageLocale: en-US
+Publisher: LunarWerx
+PublisherUrl: https://github.com/LunarWerxs
+PublisherSupportUrl: https://github.com/LunarWerxs/SageThumbs-2k/issues
+PackageName: SageThumbs 2K
+PackageUrl: https://github.com/LunarWerxs/SageThumbs-2k
+License: PolyForm Noncommercial License 1.0.0
+LicenseUrl: https://github.com/LunarWerxs/SageThumbs-2k/blob/HEAD/LICENSE.md
+Copyright: Copyright (c) 2026 LunarWerx
+ShortDescription: Explorer thumbnails for 331 file types Windows can't read, plus a right-click image toolkit.
+Description: SageThumbs 2K is a modern, crash-isolated Windows 11 shell extension written in Rust that rebuilds the classic SageThumbs. It gives File Explorer thumbnails for 331 file types Windows can't preview on its own — camera RAW, HEIC/AVIF, Photoshop, DjVu, ebooks and comics, video frames, 3D-print files and a long tail of obscure formats — plus a right-click image toolkit (convert, resize, rotate, OCR, color picker, metadata strip, combine-to-PDF/CBZ) and a console/AI CLI. Free for personal use.
+Moniker: sagethumbs2k
+Tags:
+- converter
+- explorer
+- heic
+- image
+- raw
+- shell-extension
+- thumbnails
+ReleaseNotes: |-
+  ## What's changed
+  
+  ### Fixed
+  
+  - **A handful of registered formats could never show a thumbnail, on any version.**
+    Wavefront RLA, PlayStation TIM, MacPaint, Dr Halo CUT, Alias PIX, Garmin JNX and ZX Spectrum
+    SCREEN$ were all listed as supported and none of them ever worked.
+  
+    The reason is the same for all of them. Most image formats begin with a few bytes that
+    identify them, so a decoder handed anonymous bytes can work out what it is looking at. These
+    formats do not. The only thing that says what they are is the file name, and the stage of our
+    pipeline that handles the obscure long tail was being given the bytes without the name, so it
+    always answered "I do not recognise this". Camera RAW files were caught by the same wall
+    whenever the camera had not stored a preview picture inside the file, which is why the
+    Minolta test file produced nothing at all.
+  
+    When every other stage has already given up, that stage is now told the file's name too. All
+    seven formats decode, and a Minolta RAW with no built-in preview now gets a thumbnail
+    developed from the sensor data instead of nothing.
+  
+    Formats that identify themselves are deliberately left alone, so nothing that worked before
+    can be pushed down a different path by a misleading file name.
+  
+  - **Layered GIMP files lost their upper layers, and some stopped showing a thumbnail at all.**
+    Reported on 2026-08-17 as "xcf don't work anymore with new versions for big files", and that
+    is exactly what was happening.
+  
+    2.0.0 added a limit on how much layer data a `.xcf` may be worth decoding, so that a
+    deliberately malformed file cannot claim thousands of full-size layers and tie up your
+    machine drawing them. The limit was sound. The order it was spent in was not: layers were
+    paid for from the bottom of the stack upward, so a file with more layers than the allowance
+    covers spent everything on the layers underneath and then quietly skipped the ones on top,
+    the only ones you can actually see. The thumbnail that came out looked completely normal and
+    was a picture of a half-finished image.
+  
+    How big is "big"? Any file whose layers add up to more than a 16384 x 16384 image: twelve
+    full-canvas layers of a 6000 x 4000 picture, twenty-three of a 4000 x 3000 one, or just two
+    layers of a 12000 x 12000 canvas. Where the lower layers happened to be transparent (an
+    erased background, an empty base), everything drawn was invisible, the result was a blank
+    image, and the file fell back to the plain document icon. That is the "no thumbnail" half of
+    the report.
+  
+    Layers are now paid for from the top down, so a file too big for the allowance gives up the
+    layers underneath whatever is covering them instead of the ones on top. Hidden layers, fully
+    transparent ones and layers parked off the edge of the canvas are no longer charged at all.
+    They cannot change the picture, so they now cost nothing, which leaves the whole allowance
+    for layers that are actually visible. Large layered files are also faster as a result: a
+    12000 x 12000 two-layer file went from 11.8 to 5.4 seconds, and now shows the right image.
+  
+  - **GIMP files over 256 MB now get a thumbnail. They never have before, on any version.**
+  
+    There was a ceiling on how much of a file we will read into memory at once, and a `.xcf`
+    past it was simply refused. Most formats have a way around that: a photo has a small preview
+    baked into its header, and Windows can open a huge PNG or TIFF itself and shrink it while it
+    reads. A GIMP file has neither. It stores no preview at all, and Windows has no idea what an
+    `.xcf` is, so every one of those escape routes declined and the file kept the plain document
+    icon. Layered artwork is exactly the kind of file that gets that big, so this hit the people
+    most likely to have installed SageThumbs for GIMP support in the first place.
+  
+    It now reads a `.xcf` the way the format is actually built: as a map of positions, jumping
+    to the layers it needs and pulling one 64-pixel tile at a time, so nothing is ever held in
+    memory but the piece being looked at. A 305 MB file that produced nothing now thumbnails in
+    3.2 seconds. Files under the old ceiling take the same route and produce the identical
+    picture, verified across the whole test corpus.
+ReleaseNotesUrl: https://github.com/LunarWerxs/SageThumbs-2k/releases/tag/v2.2.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

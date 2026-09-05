@@ -1,0 +1,43 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: endev.aube
+PackageVersion: 2.2.4
+PackageLocale: en-US
+Publisher: en.dev
+PublisherUrl: https://en.dev/
+PublisherSupportUrl: https://github.com/endevco/aube/discussions/categories/troubleshooting-and-bugs
+Author: en.dev
+PackageName: aube
+PackageUrl: https://aube.en.dev/
+License: MIT
+LicenseUrl: https://github.com/endevco/aube/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 en.dev inc
+CopyrightUrl: https://github.com/endevco/aube/blob/HEAD/LICENSE
+ShortDescription: A fast Node.js package manager
+Description: |-
+  aube is a package manager for Node.js projects. It uses pnpm-style isolated node_modules for fast, disk-efficient installs.
+
+  Existing projects keep their lockfile format. aube reads and writes pnpm-lock.yaml, package-lock.json, npm-shrinkwrap.json, yarn.lock, and bun.lock in place. New projects without a supported lockfile get aube-lock.yaml.
+
+  Why Try It
+  - Fast installs. Warm installs are about 8x faster than pnpm and about 5x faster than Bun in the current benchmarks. Repeat test commands run up to 35x faster than pnpm and up to 5x faster than Bun.
+  - Existing lockfiles. Reads and writes pnpm-lock.yaml, package-lock.json, npm-shrinkwrap.json, yarn.lock, and bun.lock in place.
+  - Cheap repeat commands. aubr test, aube test, and aube exec vitest auto-install when dependencies are stale, then skip that work when nothing changed. aubx uses a local binary when one is installed, or a throwaway environment for one-off tools.
+  - Less disk use. A global content-addressable store lets projects share package files instead of keeping a full copy of the same dependencies in every checkout.
+  - Secure defaults. Out of the box, exotic transitive deps are blocked, lifecycle scripts wait for approval, trust downgrades fail at resolve, and brand-new releases sit in a 24h cooling window. One paranoid: true line adds the build jail and turns the soft gates into hard fails.
+Moniker: aube
+ReleaseNotes: |-
+  A small but impactful release: aube now treats versions recorded in your lockfile as already-accepted trust decisions, eliminating a costly per-package metadata re-fetch on frozen and repeat installs. In benchmarking this cut a cold install with a frozen lockfile by roughly 62% (from ~7.1s to ~2.7s), with lockfile trust resolution dropping from ~5.7s to ~15ms.
+  Fixed
+  - Trust locked packages without revalidation (#1418 by @jdx) — With trustPolicy=no-downgrade (the default), aube previously re-fetched publishing trust evidence for every package name in the lockfile on each install, which dominated cold-install time. Now no-downgrade is enforced only when a version is newly resolved; versions already present in the active lockfile are trusted without re-fetching their evidence. Integrity checks and the rest of the install-time security pipeline are unchanged, and paranoid still forces the full pipeline.
+
+  Behavior Notes
+  - Trust downgrade detection for a locked version no longer re-runs on every reuse — it applies when the version is first resolved. A fresh resolve (e.g. a new or changed dependency) still enforces no-downgrade as before. See the updated security docs for details on the lockfile trust boundary.
+
+  💚 Sponsor aube
+  aube is maintained by @jdx, an open source developer for entire.io, the title sponsor of the jdx.dev open source tools including mise. Work on aube is funded by sponsors.
+  If aube is saving your team install time or CI minutes, please consider sponsoring at jdx.dev. Individual and company sponsorships are what keep the project fast, free, and independent.
+ReleaseNotesUrl: https://github.com/jdx/aube/releases/tag/v2.2.4
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
