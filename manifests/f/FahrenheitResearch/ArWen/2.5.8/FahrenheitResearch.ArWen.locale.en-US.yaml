@@ -1,0 +1,65 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: FahrenheitResearch.ArWen
+PackageVersion: 2.5.8
+PackageLocale: en-US
+Publisher: Fahrenheit Research
+PublisherUrl: https://github.com/FahrenheitResearch
+PublisherSupportUrl: https://github.com/FahrenheitResearch/arwen/issues
+Author: Fahrenheit Research
+PackageName: ArWen
+PackageUrl: https://github.com/FahrenheitResearch/arwen
+License: Apache-2.0
+LicenseUrl: https://github.com/FahrenheitResearch/arwen/blob/main/LICENSE
+Copyright: Copyright © Fahrenheit Research
+CopyrightUrl: https://github.com/FahrenheitResearch/arwen/blob/main/LICENSE
+ShortDescription: 'ArWen: GPU-native WRF-ARW-class regional weather model, verified against WRF v4.6.1'
+Description: "ArWen is an independent, GPU-native implementation of a WRF-ARW-class regional atmospheric model. It is not affiliated with or endorsed by NCAR or UCAR. The name is a wordmark for \"the ARW solver, GPU-native\"; the Python package is currently named gpuwm. Safety. ArWen is a research and educational tool. It is never a substitute for official forecasts and warnings from your national meteorological service. Do not use it to make safety decisions. Regional numerical weather prediction at convective scale has mostly required institutional clusters, which means most of the world runs on global-model guidance at 10-25 km. ArWen's aim is to put a verified, kilometer-scale limited-area model on a single consumer GPU: pick a point, size a nest ladder to your card, pull public analysis data, and run a 1 km (or 500 m) simulation of your own area on hardware you own -- especially in places where no national convection-permitting model exists."
+Moniker: arwen
+ReleaseNotes: |-
+  The land surface follows the soil profile it was handed.
+  New:
+  - The RUC land surface is parametric over WRF's admitted soil-level counts,
+    6 and 9, host and device, oracle-matched to WRF 4.7.1 ZS/DZS at both.
+    Six levels carries no bit-exactness claim: there is no six-level Fortran
+    oracle, and the warn says so.
+  - A real mp_physics=28 run initializes from WRF's global monthly
+    water/ice-friendly aerosol climatology, staged with gpuwm fetch-tables --wif. The synthetic profile stays as a named fallback, and the run report
+    names it.
+  - bl_mynn_mixscalars is admitted at 0 and 1. At 1, MYNN-EDMF mixes nc, ni,
+    nwfa and nifa, on CPU and on device.
+  - rw_mpas_mesh --cull-parent cuts a limited-area mesh out of a global grid
+    or static, byte-matching the native cull. A region is a JSON row, not a
+    code path.
+  - rw_mpas_convert --window mesh frames a render from the mesh's own refined
+    region, so a fine core anywhere renders at its own resolution, and
+    --compose draws a coarse run and its fine runs as one frame. Every
+    rw_wrfbatch PNG publishes its own projection and map rectangle.
+  - The mesh generator stops rebuilding one polygon on every evaluation:
+    322.4 s to 166.9 s on a 112,676-cell spec, byte-identical output.
+  - rw_mpas_lbc ships in the bridge bundle, so a lateral-boundary stream no
+    longer needs a source checkout.
+  - The MPAS seam document ships as package data, so a seam check reads it from
+    site-packages.
+  Fixed:
+  - RUC ground heat flux was about five times too large at six soil levels:
+    the finalize step used the nine-level spacing.
+  - A 2.5.7 checkpoint resumes under 2.5.8. The new aerosol settings are
+    scoped to mp_physics=28, so they no longer move the restart identity of
+    runs that never read them, and a stray value under another scheme is
+    refused by name.
+  - A cell with no valid albedo pixel no longer costs a whole static; it takes
+    the mean of its neighbours.
+  - The frozen focus-window digest was red on Linux and green on Windows from
+    identical source. The cause is the C library, at most 4 ULP of latitude, so
+    the digest is a per-platform row and an unmeasured platform refuses.
+  - One published page told readers to run gpuwm import. The door is
+    gpuwm import-namelist.
+ReleaseNotesUrl: https://github.com/FahrenheitResearch/arwen/releases/tag/v2.5.8
+InstallationNotes: |-
+  This application requires an NVIDIA GPU with CUDA support to run.
+  Will not function on integrated graphics or non-NVIDIA hardware.
+  Without compatible hardware, the application will fail to launch.
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
