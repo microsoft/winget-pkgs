@@ -1,0 +1,33 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.6.0.schema.json
+PackageIdentifier: UnexTechnologies.FixKon
+PackageVersion: 1.0.28
+MinimumOSVersion: 10.0.17763.0
+InstallerType: inno
+# The installer is PrivilegesRequired=lowest and installs to
+# {localappdata}\Programs\FixKon, so it needs no elevation. FixKon.exe itself
+# requires admin at RUN time; that is a separate thing and does not make this
+# an elevated install.
+Scope: user
+InstallModes:
+- interactive
+- silent
+- silentWithProgress
+InstallerSwitches:
+  Silent: /VERYSILENT /SUPPRESSMSGBOXES /NORESTART
+  SilentWithProgress: /SILENT /SUPPRESSMSGBOXES /NORESTART
+  Custom: /NOCANCEL
+UpgradeBehavior: install
+# Matches AppId in FixKon.iss, with the _is1 suffix Inno appends. This is what
+# lets winget see an existing install and report upgrades correctly.
+ProductCode: '{6F2E7C9A-6B0E-4B7A-9B36-2E7A5B7B1F2A}_is1'
+ReleaseDate: 2026-09-04
+Installers:
+- Architecture: x64
+  # NOT a github.com/releases/download link: the repo is private, so that URL
+  # 404s for anyone without our token - including Microsoft's validation
+  # pipeline, which re-downloads this anonymously. api.fixkon.com/download/<ver>
+  # is public and pinned to ONE version, so these bytes never change.
+  InstallerUrl: https://api.fixkon.com/download/1.0.28
+  InstallerSha256: 3B921CCCEBD8034C44C5515BB7D039BF4C3074F5D6D1053FBBEF7EBFCCA67EEA
+ManifestType: installer
+ManifestVersion: 1.6.0
