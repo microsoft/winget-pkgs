@@ -1,0 +1,49 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.12.0.schema.json
+
+PackageIdentifier: RidoIT.RidoGuard
+PackageVersion: 1.2.4
+
+# RidoGuard.UI targets net8.0-windows10.0.19041.0.
+MinimumOSVersion: 10.0.19041.0
+Platform:
+  - Windows.Desktop
+InstallerLocale: en-US
+ReleaseDate: 2026-09-01
+
+Installers:
+  # Inno Setup, machine scope. Payload is a self-contained win-x64 publish, so no runtime
+  # prerequisite and no prompt. Switches are declared rather than inherited from winget's inno
+  # defaults. The [Code] section contains no MsgBox: /SUPPRESSMSGBOXES does not suppress those
+  # and one would hang the validation VM.
+  - Architecture: x64
+    InstallerType: inno
+    Scope: machine
+    InstallerUrl: https://github.com/Ridocompany/ridoguard-releases/releases/download/v1.2.4/RidoGuard-Setup-1.2.4.exe
+    InstallerSha256: '412A605296B089C12FC15F3175CE1A92B75B5C7CCC3E963FB267DCA2CCE1BFA3'
+    InstallerSwitches:
+      Silent: /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /SP-
+      SilentWithProgress: /SILENT /SUPPRESSMSGBOXES /NORESTART /SP-
+    InstallModes:
+      - interactive
+      - silent
+      - silentWithProgress
+    ElevationRequirement: elevatesSelf
+    ProductCode: '{A7F3B2C1-D4E5-4F6A-8B9C-0D1E2F3A4B5C}_is1'
+    UpgradeBehavior: install
+
+  # Portable zip. Files sit at the archive root, no wrapping folder. Scope is omitted because
+  # winget validate warns it is unsupported for portable. RidoGuard.UI.exe resolves ~300 runtime
+  # files from its own directory, so it cannot run through a symlink alone.
+  - Architecture: x64
+    InstallerType: zip
+    NestedInstallerType: portable
+    InstallerUrl: https://github.com/Ridocompany/ridoguard-releases/releases/download/v1.2.4/RidoGuard-Portable-1.2.4.zip
+    InstallerSha256: 'CE32D5D07B1096B5A33A0642DA5A81F4CDAC4B9A14084BDCDD9F72FFA842080E'
+    NestedInstallerFiles:
+      - RelativeFilePath: RidoGuard.UI.exe
+        PortableCommandAlias: ridoguard
+    ArchiveBinariesDependOnPath: true
+    UpgradeBehavior: install
+
+ManifestType: installer
+ManifestVersion: 1.12.0
