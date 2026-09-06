@@ -1,0 +1,88 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: MistralAI.MistralVibe.ACP
+PackageVersion: 2.25.0
+PackageLocale: en-US
+Publisher: Mistral AI
+PublisherUrl: https://mistral.ai/
+PublisherSupportUrl: https://github.com/mistralai/mistral-vibe/issues
+PrivacyUrl: https://legal.mistral.ai/terms/privacy-policy
+Author: Mistral AI
+PackageName: Mistral Vibe (ACP mode)
+PackageUrl: https://github.com/mistralai/mistral-vibe
+License: Apache-2.0
+LicenseUrl: https://github.com/mistralai/mistral-vibe/blob/HEAD/LICENSE
+Copyright: Copyright 2026 Mistral AI
+CopyrightUrl: https://legal.mistral.ai/terms
+ShortDescription: Minimal CLI coding agent by Mistral
+Description: |-
+  Mistral's open-source CLI coding assistant.
+  Mistral Vibe is a command-line coding assistant powered by Mistral's models. It provides a conversational interface to your codebase, allowing you to use natural language to explore, modify, and interact with your projects through a powerful set of tools.
+Tags:
+- agent
+- agentic
+- ai
+- code
+- coding
+- develop
+- development
+- programming
+ReleaseNotes: |-
+  Added
+  - /skills browser for session skills, with search and filter; shared skills sync on session start. Experimental, off by default.
+  - Browser SSO completes behind split-horizon reverse proxies; opt-in browser_auth_allow_origin_rewrite rewrites sign-in/poll URLs onto configured origins
+  - Discovery of Mistral's built-in web-search connector
+  - Plugin-declared MCP servers in /mcp, tagged with their plugin and authenticatable via /mcp login; a pending login is announced at session start
+  - Connectors (Notion, Linear, Slack, GitHub, Gmail, Google Calendar, Drive) in ACP
+  - ACP elicitation-form clients can answer ask_user_question and exit_plan_mode
+  - Session-scoped model pinning for resumed conversations
+  - vibe update to check for and install a newer release
+  Changed
+  - Connector discovery skips unsupported protocols
+  - agents/list no longer requires a session id
+  - Prompt queueing runs through the app server with select, edit, remove, pause, and resume controls
+  - /skills browser groups by scope, fits rows to width, and pages long lists
+  - vibe --yolo selects the auto-approve profile (cyclable with Shift+Tab; blockable via disabled_agents)
+  - A plugin MCP server whose name collides with an [[mcp_servers]] entry is dropped with a warning instead of inheriting the configured credential
+  - /config saves to user config by default; Tab cycles user / session / (trusted) project target
+  - Vibe CLI sends queued prompts as a single turn; Desktop keeps turn-by-turn
+  - /mcp title marks an in-flight background refresh
+  Fixed
+  - Pruning cached skills preserves versions pinned by other repos
+  - Approved file operations act on the cleared path, preventing symlink redirection outside the project; approved writes outside the project execute
+  - Onboarding crash on a malformed browser_auth_api_base_url port
+  - Split-horizon account and re-signin reach the connector origin and adopt tenant domains from /whoami
+  - Multi-line tool descriptions (remote MCP, connector, plugin) no longer break /mcp layout; rows render the first line only, [source] prefix stripped
+  - Mode indicator reflects the effective tool-approval bypass (--yolo, --auto-approve, bypass_tool_permissions)
+  - Builtin vibe skill no longer recommends the removed /terminal-setup and now documents /copy, /paste-image, /remote-project
+  - Context gauge drops the discarded conversation immediately after /clear and /compact
+  - /config shows and edits the active model's effective auto-compaction threshold, preserving org-enforced global locks
+  - Session event stream no longer crashes on a JSON-Patch move from a field relocation
+  - /mcp login no longer probes with a bare GET (405 before credentials); for a plugin server it sends the plugin's declared headers and uses its own URL, not a same-named [[mcp_servers]] entry from another session
+  - Toggling an MCP row the app server refuses to change shows a notice instead of ending the session
+  - /mcp add under a plugin-owned name takes the name immediately for the configured entry
+  - /mcp refresh reconnects plugin servers, not just configured ones
+  - Same-named plugin MCP servers each get their own /mcp row with their own status and tools
+  - Adding then removing an [[mcp_servers]] entry under a plugin-owned name no longer strands the plugin's server
+  - A second session no longer drops the first's plugin servers or [[mcp_servers]] entries; each session's configured servers are its own
+  - A server whose name another session shares no longer gets that session's credential deleted on identity mismatch
+  - Context-window indicator updates on model switch without a restart
+  - Failed queue merge no longer leaves a ghost prompt; rewind targets the merged turn's real history entry and survives removing the first queued prompt
+  - Connectors/MCP panel auto-sizes to content instead of a fixed 50vh
+  - /mcp no longer paints a failing-discovery source or unlinked connector as enabled before it comes up
+  - Crash on closing the app while a turn is streaming
+  - Loading spinner keeps its "Interrupting" label in the pre-surface gap
+  - Closing the resume picker mid-load no longer crashes with NoMatches
+  - Invalid active model falls back to the current default; the banner model refreshes after clearing a session
+  - Account refresh no longer overwrites third-party provider settings on a concurrent model change
+  - Rewind into a new session and rewind-in-place while resyncing no longer redraw stale turns
+  - /mcp opens from cache and waits 60s before refreshing; HTTP setup runs outside the UI loop
+  - System trust store respected during browser sign-in
+  - A message sent while idle or right after interrupting no longer flashes as queued and shows the loading indicator immediately
+  - Escape-to-interrupt updates the status immediately; Escape+Enter to restart a queued turn no longer drops the Enter; Escape just as a turn finishes no longer stalls the next message
+  Removed
+  - Devstral Small (devstral-small-latest) from the default models list; stale sparse config overrides migrated automatically
+ReleaseNotesUrl: https://github.com/mistralai/mistral-vibe/blob/HEAD/CHANGELOG.md#2250---2026-09-03
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

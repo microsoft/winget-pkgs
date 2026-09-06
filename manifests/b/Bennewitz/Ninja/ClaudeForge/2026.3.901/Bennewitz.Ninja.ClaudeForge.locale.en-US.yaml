@@ -1,0 +1,104 @@
+# Created using wingetcreate 1.12.13.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Bennewitz.Ninja.ClaudeForge
+PackageVersion: 2026.3.901
+PackageLocale: en-US
+Publisher: Brian Bennewitz
+PublisherUrl: https://github.com/JanusMael
+PublisherSupportUrl: https://github.com/JanusMael/ClaudeForge/issues
+Author: Brian Bennewitz
+PackageName: ClaudeForge
+PackageUrl: https://github.com/JanusMael/ClaudeForge
+License: MIT
+LicenseUrl: https://github.com/JanusMael/ClaudeForge/blob/main/LICENSE
+Copyright: Copyright (c) 2024-2026 ClaudeForge Contributors
+CopyrightUrl: https://github.com/JanusMael/ClaudeForge/blob/main/LICENSE
+ShortDescription: A cross-platform desktop editor for Claude Code and Claude Desktop configuration files.
+Description: ClaudeForge is a cross-platform desktop editor for Claude Code and Claude Desktop configuration. It provides schema-validated, guided editors for settings.json, permission allow/deny/ask rules, hooks, MCP servers, environment variables, the model catalog, user-memory files, and agents/skills/slash-commands — plus backup and restore.
+Moniker: claudeforge
+Tags:
+- claude
+- claude-code
+- anthropic
+- ai
+- configuration
+- settings
+- editor
+- developer-tools
+- avalonia
+- dotnet
+ReleaseNotes: |-
+  ## Downloads
+
+  | Platform              | Architecture   | File                                                                       |
+  |-----------------------|----------------|----------------------------------------------------------------------------|
+  | Windows               | x64            | `ClaudeForge-win-x64.zip`                                       |
+  | Windows               | ARM64          | `ClaudeForge-win-arm64.zip`                                     |
+  | Linux                 | x64            | `ClaudeForge-linux-x64.tar.gz`                                  |
+  | Linux                 | ARM64          | `ClaudeForge-linux-arm64.tar.gz`                                |
+  | macOS (Intel)         | x64            | `ClaudeForge-osx-x64.tar.gz`                                    |
+  | macOS (Apple Silicon) | ARM64          | `ClaudeForge-osx-arm64.tar.gz`                                  |
+
+  The version (2026.3.901) is encoded in the release tag rather than in
+  the archive filenames — publish.ps1 produces unversioned artefact names
+  so local dev builds and CI builds share one filename pattern.
+
+  **Linux:** Extract, then run the bundled `linux-setup.sh` to install a per-user `.desktop` entry so Wayland compositors render the window icon correctly:
+  ```bash
+  tar -xzf ClaudeForge-linux-x64.tar.gz -C ~/ClaudeForge
+  cd ~/ClaudeForge
+  ./linux-setup.sh
+  ./ClaudeForge
+  ```
+
+  **macOS:** The binary is unsigned. Use the bundled `allow-app-to-run.sh` to strip the Gatekeeper quarantine xattr from every file in the extracted directory:
+  ```bash
+  tar -xzf ClaudeForge-osx-arm64.tar.gz -C ~/ClaudeForge
+  cd ~/ClaudeForge
+  ./allow-app-to-run.sh
+  ./ClaudeForge
+  ```
+
+  ---
+
+  ## What's Changed
+
+  Claude Fable 5.1 (`claude-fable-5-1`) is the current Fable build, so the `fable`
+  alias now resolves to it and Fable 5 becomes a legacy-but-still-pinnable row.
+  Verified against the models overview rather than recall — Fable 5 is listed
+  under "Legacy models (still available)".
+
+  Followed the AGENTS.md / docs/MODEL-CATALOG.md "new model launch" playbook:
+
+  - model-catalog.json — new `claude-fable-5-1` row (1M context, effort low..max
+    incl. ultracode, default `high`, auto-mode capable, copied from the outgoing
+    build); `alias: "fable"` moved onto it; `aliases.fable` repointed; the previous
+    holder demoted to `legacy: true, alias: null` (row kept — still a valid pin).
+    Invariant preserved: exactly one non-legacy row per family alias.
+  - claude-code-settings.overlay.json — AutoCompleteBox suggestion and the
+    `model.description` example swapped to the new snapshot id.
+  - enumdescriptions.json — added the 5.1 pin tooltip, refreshed the `fable` and
+    `best` tooltips, and REPLACED the old pin row rather than accumulating it.
+    `model.examples` <-> tooltip keys are exactly 1:1 (11/11, no orphans).
+
+  No test change needed: ModelCatalogTests only hardcodes the `opus` alias target.
+  The bundled JSON schema is untouched — schemastore.org omits model names, so
+  `refresh-schema` is never the mechanism that adds a model (a dry run confirms
+  zero content changes; PR #33 already brought the schema current).
+
+  Docs: both playbooks now name where to verify model facts
+  (platform.claude.com models overview) and warn that a family can supersede
+  itself within a generation — Fable 5 -> 5.1 is not a whole-number bump. That
+  lookup was the one step being re-derived every session.
+
+  Verified: validate-model-catalog.ps1 passes (models=9, aliases=4); full suite
+  2708 passed / 11 skipped / 0 failed.
+
+  Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+ReleaseNotesUrl: https://github.com/JanusMael/ClaudeForge/releases/tag/v2026.3.901
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/JanusMael/ClaudeForge/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
