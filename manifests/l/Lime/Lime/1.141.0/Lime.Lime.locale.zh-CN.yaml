@@ -1,0 +1,63 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Lime.Lime
+PackageVersion: 1.141.0
+PackageLocale: zh-CN
+Publisher: Lime
+PublisherUrl: https://limeai.run/
+PublisherSupportUrl: https://github.com/limecloud/lime/issues
+PrivacyUrl: https://limeai.run/privacy/
+PackageName: Lime
+PackageUrl: https://limeai.run/
+License: 专有软件
+LicenseUrl: https://limeai.run/terms/
+Copyright: © 2026 Lime
+ShortDescription: 给中文创作者用的开源 AI 内容工作台
+Description: |-
+  Lime 是一个开源的 Electron 桌面端 AI 内容工作台，面向中文创作者、品牌运营、研究型写作者和小团队，覆盖 AI 写作、选题研究、素材管理、提示词沉淀、知识库和多模型创作流程。
+
+  你可以把它理解成一个更适合长期创作的 AI 工作台：
+  - 不是只问一句、答一句，而是围绕一个项目持续推进
+  - 不是每次都重新找资料、重新写提示词，而是把参考、风格和做法沉淀下来
+  - 不是生成完就散落在聊天记录里，而是把结果保存起来，下一次还能继续用
+  - 不是绑定某一家 AI 服务，而是让你使用自己已经配置好的模型能力
+  如果你经常在收藏夹、文档、聊天工具、图片工具和模型后台之间来回切换，Lime 想帮你把这些动作收回到同一个创作空间里。
+
+  你可以用 Lime 做什么
+  - AI 写作与内容创作：写公众号文章、小红书笔记、视频脚本、播客提纲和直播话术
+  - 资料研究与知识整理：整理网页、笔记、截图、访谈和历史材料，生成报告或简报
+  - 选题分析与内容复盘：拆解爆款案例、竞品内容、发布节奏和表达风格
+  - 提示词管理与风格复用：保存常用写法、品牌语气、选题方法和团队模板
+  - 多模态创作准备：生成图片提示词、封面方向、演示稿结构或网页草稿
+  - 多模型工作流：使用自己配置的 AI 服务商和模型，在同一个任务里持续修改、扩写、压缩或换平台发布
+ReleaseNotes: |-
+  Lime v1.141.0
+  新功能
+  - 新增独立 Code Mode protocol、runtime、host 与 session facade crate，统一承载 stdio/gRPC、V8 执行、typed content、取消、重连和 session lease 生命周期。
+  - CLI/TUI 继续扩展为统一 App Server 产品面：支持 Thread 恢复与管理、MCP/Skills/Plugin 查询、模型与权限控制、JSON/JSONL、prompt history、审批、request_user_input 和队列输入编辑。
+  - 新增远程 WebSocket session transport，支持 ws/wss、Bearer token、协议身份校验、ping/pong 与 fail-closed 认证策略；CLI/TUI 复用同一 session facade，不复制 runtime 或持久化。
+  - TUI 新增 Codex 对齐的 Markdown、Diff、语法高亮、OSC 8 链接、宽度感知表格、剪贴板/图片粘贴、slash command popup、static pager、transcript overlay 和 queued follow-up 预览。
+  修复
+  - 收紧 App Server command/exec 权限边界，拒绝客户端注入的授权字段并保持 typed lowering fail-closed。
+  - 修复 Code Mode host/client 的断线、重复 execution、stale cell、pending callback 和 session close 清理，避免旧代际状态泄漏到重连会话。
+  - 修复 CLI/TUI 终端生命周期、external editor、Unicode 光标、窄终端截断、队列恢复与失败终态投影边界。
+  - 修复文件系统 watch、Agent Runtime typed content、MCP 通知投影和工具生命周期摘要的回归断言。
+  优化与重构
+  - 将 Code Mode 旧 tool-runtime 内嵌 process/V8 实现物理迁出并删除，生产调用统一切换到四层 current crate；旧路径仅保留显式兼容导出。
+  - CLI Rust 目录与命令 owner 按 Codex 形状收敛，npm 根包/平台包 launcher、native payload、signal forwarding 与发布顺序统一到 packages/cli。
+  - TUI 交互、渲染和终端算法按 snapshot inventory 分层迁移，保持 canonical Thread/Turn/Item 为唯一会话事实源。
+  - 补充 CLI/TUI/Code Mode、远程 transport、Windows restricted execution、Electron release workflow 和治理边界守卫；Cloud 仅保留经认证 transport 的扩展点，不进入生产路径。
+  测试与质量
+  - 新增 Code Mode protocol/runtime/host/facade 生命周期、typed content、gRPC、重连与取消测试，并补齐 App Server 权限边界回归。
+  - 扩展 CLI Gate B、TUI Gate B、真实 stdio/PTY、npm packaged launcher、远程认证、snapshot inventory、终端渲染和跨平台发布守卫。
+  - 保持五语言文案、协议生成、脚本/CLI 边界、Electron Forge、版本一致性和 legacy 治理检查为发布门禁。
+  文档
+  - 更新架构、命令、治理、质量工作流与 CLI/TUI、Code Mode 执行计划，记录 Product Surface → App Server JSON-RPC → RuntimeCore → Thread/Turn/Item 的唯一业务主链及 Cloud transport 边界。
+  其他
+  - 将根应用、CLI npm 包、Rust workspace 与 Cargo.lock 版本统一提升到 1.141.0。
+  - 本次发布候选排除 undefined/ 下本地 SQLite/WAL、runtime 数据库和 .DS_Store 运行产物；Code Mode 旧物理实现归 dead/deleted，不新增平行 runtime、compat 或 deprecated owner。
+  完整变更：v1.140.0 → v1.141.0
+ReleaseNotesUrl: https://github.com/limecloud/lime/releases/tag/v1.141.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
