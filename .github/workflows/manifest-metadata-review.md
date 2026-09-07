@@ -109,15 +109,28 @@ pre-agent-steps:
             return;
           }
           const blocked = new Set([
-            "URL-Validation-Error", "Validation-Defender-Error",
-            "Validation-Virus-Scan-Error", "Validation-SmartScreen",
-            "Validation-SmartScreen-Error", "Needs-SmartScreen-Investigation",
+            "Binary-Validation-Error", "Blocking-Issue",
+            "Error-Analysis-Timeout", "Error-Hash-Mismatch",
+            "Internal-Error", "Internal-Error-AppsAndFeaturesVersion",
+            "Internal-Error-Dependencies", "Internal-Error-Domain",
+            "Internal-Error-Dynamic-Scan", "Internal-Error-Keyword-Policy",
+            "Internal-Error-Manifest", "Internal-Error-Manifest-Installer",
+            "Internal-Error-NoArchitectures",
+            "Internal-Error-NoSupportedArchitectures", "Internal-Error-PR",
+            "Internal-Error-Static-Scan", "Internal-Error-URL",
+            "Internal-Error-Webhook", "Needs-SmartScreen-Investigation",
+            "Network-Blocker", "Package-Flagged", "PUA-Detection",
+            "PullRequest-Error", "Scripted-Application",
+            "URL-Validation-Error", "Validation-Certificate-Root",
+            "Validation-Defender-Error", "Validation-Executable-Error",
             "Validation-Hash-Flagged", "Validation-Hash-Verification-Failed",
-            "Validation-Hash-Error", "Error-Hash-Mismatch",
-            "Validation-Signature-Error", "Validation-Shell-Execute",
-            "Binary-Validation-Error", "Validation-Executable-Error",
-            "Internal-Error-Static-Scan", "Possible-Malware",
-            "Blocking-Issue",
+            "Validation-HTTP-Error", "Validation-No-Executables",
+            "Validation-Shell-Execute", "Validation-SmartScreen",
+            "Validation-SmartScreen-Error", "Validation-Submission-Expired",
+            "Validation-Submission-Failed", "Validation-Submission-Mismatch",
+            "Validation-Submission-Missing",
+            "Validation-Submission-Unsupported",
+            "Validation-Virus-Scan-Error",
           ].map((label) => label.toLowerCase()));
           if (labels.some((label) => blocked.has(label.toLowerCase()))) {
             fail("security-label");
@@ -372,16 +385,30 @@ safe-outputs:
                 (label) => String(label.name ?? "").toLowerCase(),
               );
               const blocked = [
-                "url-validation-error", "validation-defender-error",
-                "validation-virus-scan-error", "validation-smartscreen",
-                "validation-smartscreen-error", "needs-smartscreen-investigation",
-                "validation-hash-flagged", "validation-hash-verification-failed",
-                "validation-hash-error", "error-hash-mismatch",
-                "validation-signature-error", "validation-shell-execute",
-                "binary-validation-error", "validation-executable-error",
-                "internal-error-static-scan", "possible-malware",
-                "blocking-issue",
-              ];
+                "Binary-Validation-Error", "Blocking-Issue",
+                "Error-Analysis-Timeout", "Error-Hash-Mismatch",
+                "Internal-Error", "Internal-Error-AppsAndFeaturesVersion",
+                "Internal-Error-Dependencies", "Internal-Error-Domain",
+                "Internal-Error-Dynamic-Scan", "Internal-Error-Keyword-Policy",
+                "Internal-Error-Manifest", "Internal-Error-Manifest-Installer",
+                "Internal-Error-NoArchitectures",
+                "Internal-Error-NoSupportedArchitectures", "Internal-Error-PR",
+                "Internal-Error-Static-Scan", "Internal-Error-URL",
+                "Internal-Error-Webhook", "Needs-SmartScreen-Investigation",
+                "Network-Blocker", "Package-Flagged", "PUA-Detection",
+                "PullRequest-Error", "Scripted-Application",
+                "URL-Validation-Error", "Validation-Certificate-Root",
+                "Validation-Defender-Error", "Validation-Executable-Error",
+                "Validation-Hash-Flagged", "Validation-Hash-Verification-Failed",
+                "Validation-HTTP-Error", "Validation-No-Executables",
+                "Validation-Shell-Execute", "Validation-SmartScreen",
+                "Validation-SmartScreen-Error", "Validation-Submission-Expired",
+                "Validation-Submission-Failed",
+                "Validation-Submission-Mismatch",
+                "Validation-Submission-Missing",
+                "Validation-Submission-Unsupported",
+                "Validation-Virus-Scan-Error",
+              ].map((label) => label.toLowerCase());
               const eventHead = process.env.EXPECTED_EVENT_HEAD.toLowerCase();
               if (
                 pull.state !== "open" ||
