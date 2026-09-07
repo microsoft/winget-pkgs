@@ -55,6 +55,7 @@ pre-agent-steps:
         const maxManifestBytes = 65536;
         const maxOperationChecks = 12;
         const maxCheckTextLength = 12000;
+        const maxEvidenceBytes = 500000;
         const output = {
           eligible: false, pullRequestNumber: null, headSha: null, baseSha: null,
           operationId: null, installerPath: null, baseManifest: null,
@@ -250,6 +251,7 @@ pre-agent-steps:
             name: check.name,
             conclusion: check.conclusion,
             completedAt: check.completed_at,
+            externalId: String(check.external_id ?? "").trim(),
             output: {
               title: check.output?.title ?? null,
               summary: check.output?.summary ?? null,
@@ -260,12 +262,34 @@ pre-agent-steps:
           output.completionCheck = mapCheck(completionCheck);
           output.checks = completedOperationChecks.map(mapCheck);
           output.eligible = true;
+          if (
+            Buffer.byteLength(JSON.stringify(output), "utf8") >
+              maxEvidenceBytes
+          ) {
+            output.eligible = false;
+            output.operationId = null;
+            output.baseManifest = null;
+            output.headManifest = null;
+            output.patch = null;
+            output.files = [];
+            output.completionCheck = null;
+            output.checks = [];
+            reject("The complete evidence envelope exceeds the review bound.");
+          }
         } catch (error) {
           reject(`Evidence retrieval failed: ${
             error instanceof Error ? error.message : String(error)}`);
         } finally {
           writeOutput();
         }
+  - name: Upload sealed elevation evidence
+    uses: actions/upload-artifact@v7
+    with:
+      name: >-
+        elevation-review-evidence-${{ github.run_id }}-${{ github.run_attempt }}
+      path: /tmp/gh-aw/elevation-review.json
+      if-no-files-found: error
+      retention-days: 1
 engine: copilot
 permissions:
   checks: read
@@ -301,6 +325,7 @@ safe-outputs:
         needs.detection.result == 'success' &&
         needs.detection.outputs.detection_success == 'true'
       permissions:
+        contents: read
         issues: write
         pull-requests: read
       inputs:
@@ -309,9 +334,17 @@ safe-outputs:
           required: true
           type: string
       steps:
+        - name: Download sealed elevation evidence
+          uses: actions/download-artifact@v8
+          with:
+            name: >-
+              elevation-review-evidence-${{ github.run_id }}-${{ github.run_attempt }}
+            path: ${{ runner.temp }}/elevation-review-evidence
         - name: Recheck and post fixed-target comment
           uses: actions/github-script@v9
           env:
+            EVIDENCE_PATH: >-
+              ${{ runner.temp }}/elevation-review-evidence/elevation-review.json
             TARGET_PR: ${{ github.event.pull_request.number || github.event.inputs.pull_request_number || '' }}
             EVENT_HEAD: ${{ github.event.pull_request.head.sha || '' }}
             RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
@@ -340,12 +373,38 @@ safe-outputs:
                 core.setFailed("Invalid fixed pull request target.");
                 return;
               }
-              let data;
+              let data, evidence;
               try {
+                const evidencePath = process.env.EVIDENCE_PATH;
+                if (!evidencePath || fs.statSync(evidencePath).size > 500000) {
+                  throw new Error("Sealed evidence is unavailable or oversized.");
+                }
+                evidence = JSON.parse(fs.readFileSync(evidencePath, "utf8"));
                 data = JSON.parse(fs.readFileSync(
                   process.env.GH_AW_AGENT_OUTPUT, "utf8"));
               } catch {
-                core.setFailed("Safe output is unavailable.");
+                core.setFailed("Safe output or sealed evidence is unavailable.");
+                return;
+              }
+              const operationId = String(evidence?.operationId ?? "");
+              const evidenceChecks = evidence?.checks;
+              if (
+                evidence?.eligible !== true ||
+                evidence?.pullRequestNumber !== target ||
+                !/^[0-9a-f]{40}$/.test(evidence?.headSha ?? "") ||
+                (eventHead && evidence.headSha !== eventHead) ||
+                operationId.length === 0 ||
+                operationId.length > 128 ||
+                evidence?.completionCheck?.name !==
+                  "10. Validation Completed" ||
+                evidence.completionCheck.externalId !== operationId ||
+                !Array.isArray(evidenceChecks) ||
+                evidenceChecks.length > 12 ||
+                evidenceChecks.some(
+                  (check) => check?.externalId !== operationId,
+                )
+              ) {
+                core.setFailed("Sealed elevation evidence is not publishable.");
                 return;
               }
               const items = (data.items ?? [])
@@ -380,6 +439,7 @@ safe-outputs:
                   "Template: msftbot/authorAssist/elevationRequirement") &&
                 commentHead.test(String(comment.body ?? "")));
               if (pull.number !== target || pull.state !== "open" || !head ||
+                  head !== evidence.headSha ||
                   (eventHead && eventHead !== head) ||
                   bodyHeads.length !== 1 || bodyHeads[0] !== head ||
                   !labels.has("Validation-Completed") ||
