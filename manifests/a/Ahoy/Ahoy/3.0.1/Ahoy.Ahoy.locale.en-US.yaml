@@ -1,0 +1,120 @@
+# Created with WinGet Updater using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Ahoy.Ahoy
+PackageVersion: 3.0.1
+PackageLocale: en-US
+Publisher: Ahoy
+PublisherUrl: https://github.com/ahoy-cli
+PublisherSupportUrl: https://github.com/ahoy-cli/ahoy/issues
+PackageName: Ahoy
+PackageUrl: https://github.com/ahoy-cli/ahoy
+License: MIT
+LicenseUrl: https://github.com/ahoy-cli/ahoy/blob/HEAD/LICENSE
+ShortDescription: Automate and organize your workflows, no matter what technology you use
+Moniker: ahoy
+Tags:
+- bash
+- cli
+- cli-app
+- devops
+- yaml
+ReleaseNotes: |-
+  Ahoy v3.0.1
+  A patch release fixing three regressions in v3.0.0, plus one new feature.
+  If you are on v3.0.0, please upgrade! Two of these bugs changed the arguments your commands received without telling you: the wrapped tool ran, exited 0, and may well have done something other than what you typed. Sorry.
+  Fixes
+  Interactive and full-screen commands work again
+  #180, reported and fixed by @hanoii in #181.
+  v3.0.0 replaced the process-wide os.Stderr with a pipe (for reason while in the early stages of migrating to Cobra), so every child process inherited a pipe on fd 2 instead of the terminal. Anything that draws a TUI on stderr could no longer ask the terminal how big it was, measured 0x0, and rendered nothing. gum on Bubble Tea v2 crashed outright with makeslice: len out of range.
+  That covers gum, fzf, glow, progress bars, spinners, and anything else that repaints the terminal (or bits of it) in place.
+  # v3.0.0
+  $ ahoy fds
+  l-wx------ ... /proc/self/fd/2 -> 'pipe:[3079507]'
+  # v3.0.1
+  $ ahoy fds
+  lrwx------ ... /proc/self/fd/2 -> /dev/pts/2
+  Ahoy no longer displaces anything on stderr. Output is not buffered either, so a long-running command's output appears as it is produced.
+  A follow-up (#184) removed the pipe entirely. It turned out to be dead code: it had been added to intercept Cobra's error output during the v3 migration, that job had since moved elsewhere, and what remained copied stderr to stderr, achieving nothing except the loss of the terminal.
+  Command arguments are passed through verbatim
+  #182, reported by @jurgenhaas, fixed in #185. Also closes #163, raised by @AlexSkrypnyk.
+  v3.0.0 let Cobra parse each command's arguments before running it. Any flag it did not recognise was silently dropped, along with the token following it.
+  $ ahoy echoargs AAA --log-junit x.xml --configuration y.dist BBB
+  AAA BBB                                            # v3.0.0
+  AAA --log-junit x.xml --configuration y.dist BBB   # v3.0.1, and v2.5.0
+  Because Ahoy is often used to wrap other CLIs, this was quiet rather than loud. Reported effects included phpunit --configuration <path> --list-suites receiving nothing at all, chown -R www-data:www-data . arriving as chown ., and mkdir -p /tmp/logs arriving as mkdir.
+  Ahoy's own flags were being claimed after the command name too, which was the same defect, driven by a CLI change that I decided was actually counterproductive. Something like ahoy phpunit -v turned on Ahoy's verbose mode instead of PHPUnit's.
+  All text after the command name now reaches your command exactly as typed, in order. Ahoy's own flags are recognised only before the command name.
+  ahoy --verbose deploy     # --verbose is Ahoy's
+  ahoy deploy --verbose     # --verbose belongs to the deploy command
+  Two things to know when upgrading:
+  - ahoy <command> --help now reaches the wrapped tool, so ahoy drush --help gives you Drush's help. Ahoy's own help for a command is ahoy help <command>. That form was documented but didn't work correctly, and is now a real command.
+  - -v and --verbose after a command name belong to the command. Put them before the command name for Ahoy's verbose output.
+  This also resolves #163: appending arguments has never needed --, and now does not lose them either.
+  A literal -- reaches your command
+  #186, fixed in #187.
+  Ahoy removed every -- a user typed, not just a leading one, so a separator meant as data never arrived. Lots of tools need to use those.
+  ───────────────────────────────┬──────────────────────────┬─────────────────────────────
+  Typed                          │v3.0.0                    │v3.0.1
+  ───────────────────────────────┼──────────────────────────┼─────────────────────────────
+  ahoy k exec mypod -- ls /app   │kubectl exec mypod ls /app│kubectl exec mypod -- ls /app
+  ───────────────────────────────┼──────────────────────────┼─────────────────────────────
+  ahoy npm run build -- --verbose│npm run build --verbose   │npm run build -- --verbose
+  ───────────────────────────────┼──────────────────────────┼─────────────────────────────
+  ahoy cargo run -- --port 8080  │cargo run --port 8080     │cargo run -- --port 8080
+  ───────────────────────────────┼──────────────────────────┼─────────────────────────────
+  ahoy git checkout -- deploy    │git checkout deploy       │git checkout -- deploy
+  ───────────────────────────────┴──────────────────────────┴─────────────────────────────
+  That last row is a bit of a nasty one. With a branch and a file sharing a name, asking to discard edits to the file switched branch instead and left the edits in place.
+  A leading -- is still consumed, so ahoy up -- --build behaves exactly as before. Any later -- is now your command's data. This applied to v2 as well, so it is a fix rather than a regression.
+  ✨ New feature: optional env files
+  Written up in #188, added in #189.
+  A missing env: file used to be skipped in complete silence. No output, exit code 0, and every variable the command expected left empty. Nothing was printed even with --verbose, and there was no way to tell Ahoy that a file had to be present.
+  An env entry is now required by default and reported on stderr when absent. Mark the optional ones like this:
+  env:
+    - .env                  # required, warns if absent
+    - path: .env.local
+      optional: true        # silent if absent
+  $ ahoy deploy
+  [warn] environment file '.env' not found, continuing without it. Add 'optional: true' to that entry if it is meant to be absent.
+  optional has the same meaning here as it already has for the imports section of the config file.
+  This is not a breaking change. A missing file is still not fatal and the command still runs, so existing configurations behave as they did apart from the new warning. Every existing form still parses: the env: .env shorthand, plain lists, empty lists and nulls.
+  This allows for two smaller improvements:
+  - ahoy config validate now reports only the required files that are missing, and shows optional ones as an expected absence rather than a problem.
+  - An env entry that names no file (env: "", a null list entry, or a mapping with no path) is now a config error naming the offending position, instead of being treated as a file called ''.
+  The mapping form cannot be read by Ahoy versions before v3.0.1, so ahoy config validate flags it if you are targeting an older release.
+  Where this came from
+  A project using Ahoy in the wild, teosibileau/arca, a CLI for issuing invoices against the Argentine tax authority. Its .ahoy.yml carries a hand-written check-env command called from the top of every command that needs credentials, with a comment explaining why:
+  > porque ahoy ignora silenciosamente un env file ausente y correría con variables vacías
+  >
+  > ("because ahoy silently ignores an absent env file and would run with empty variables")
+  Sometimes someone writing a workaround is as good as a bug report. @teosibileau hopefully your workaround isn't needed any more now!
+  Documentation
+  The docs site has been updated to add more details about these fixes:
+  - Standard streams: what Ahoy does with stdin, stdout and stderr, which is nothing, and why that matters for full-screen and TUI commands.
+  - Passing arguments: a table of which tokens are Ahoy's and which are your command's, including the = forms and --.
+  - Wrapper commands: how a wrapped tool keeps its own flags, and where ahoy help <command> fits.
+  - Environment files: the required/optional distinction and the mapping form.
+  Upgrading
+  No configuration changes are required. Existing .ahoy.yml files work unchanged.
+  Worth checking after upgrading:
+  1. Anywhere you rely on Ahoy's -v, --verbose, -f or --file after a command name. Move those ahead of the command name.
+  2. Any script using ahoy <command> --help to get Ahoy's help. Use ahoy help <command>.
+  3. Any env: entry for a file that is deliberately absent. Mark it optional: true to silence the new warning.
+  Run ahoy config validate to have most of this checked for you.
+  Thanks
+  - @hanoii for reporting #180 with a precise diagnosis, and for the fix in #181.
+  - @jurgenhaas for reporting #182, including an isolated pflag reproduction that made the root cause obvious.
+  - @AlexSkrypnyk for #163, which turned out to be the same underlying problem.
+  - @teosibileau for using Ahoy, for your sponsorship, and for giving me some ideas!
+  Two of the three regressions were found and diagnosed by users rather than by our tests. I thought that would be the case when I released v3.0.0 with all the underlying changes, I'm happy it's worked out and sorry for any inconvenience.
+  Full changelog
+  - #181 Preserve terminal stderr for subprocesses (@hanoii), fixes #180
+  - #184 Remove the dead stderr capture pipe
+  - #185 Restore verbatim argument pass-through, fixes #182, closes #163
+  - #187 Only strip a leading --, fixes #186
+  - #189 Optional env files and missing-file reporting, fixes #188
+  Full diff: v3.0.0...v3.0.1
+ReleaseNotesUrl: https://github.com/ahoy-cli/ahoy/releases/tag/v3.0.1
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
