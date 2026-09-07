@@ -70,6 +70,7 @@ pre-agent-steps:
             pull_number: pullRequestNumber,
           });
           const headSha = pull.data.head.sha;
+          output.pullRequestNumber = pullRequestNumber;
           output.headSha = headSha;
 
           if (triggerHeadSha && triggerHeadSha !== headSha) {
@@ -218,6 +219,14 @@ pre-agent-steps:
         } finally {
           writeOutput();
         }
+  - name: Upload sealed validation evidence
+    uses: actions/upload-artifact@v7
+    with:
+      name: >-
+        manifest-validation-evidence-${{ github.run_id }}-${{ github.run_attempt }}
+      path: /tmp/gh-aw/validation-checks.json
+      if-no-files-found: error
+      retention-days: 1
 concurrency:
   group: "gh-aw-${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}"
   cancel-in-progress: false
@@ -257,6 +266,7 @@ safe-outputs:
         needs.detection.result == 'success' &&
         needs.detection.outputs.detection_success == 'true'
       permissions:
+        contents: read
         issues: write
         pull-requests: read
       output: Comment posted to the triggering pull request
@@ -265,10 +275,22 @@ safe-outputs:
           description: Complete Markdown comment body
           required: true
           type: string
+        evidence_mode:
+          description: Sealed checks or independently verified singleton
+          required: true
+          type: string
       steps:
+        - name: Download sealed validation evidence
+          uses: actions/download-artifact@v8
+          with:
+            name: >-
+              manifest-validation-evidence-${{ github.run_id }}-${{ github.run_attempt }}
+            path: ${{ runner.temp }}/manifest-validation-evidence
         - name: Revalidate and post fixed-target comment
           uses: actions/github-script@v9
           env:
+            EVIDENCE_PATH: >-
+              ${{ runner.temp }}/manifest-validation-evidence/validation-checks.json
             TARGET_PR: ${{ github.event.pull_request.number || '' }}
             EXPECTED_HEAD: ${{ github.event.pull_request.head.sha || '' }}
             RUN_URL: >-
@@ -280,16 +302,24 @@ safe-outputs:
               const target = Number(process.env.TARGET_PR);
               const expectedHead = String(process.env.EXPECTED_HEAD ?? "");
               const outputPath = process.env.GH_AW_AGENT_OUTPUT;
-              let output;
+              const evidencePath = process.env.EVIDENCE_PATH;
+              let output, evidence;
               try {
-                if (!outputPath || !fs.existsSync(outputPath)) {
-                  core.notice("Agent output is unavailable; no comment will be posted.");
+                if (
+                  !outputPath ||
+                  !fs.existsSync(outputPath) ||
+                  !evidencePath ||
+                  !fs.existsSync(evidencePath) ||
+                  fs.statSync(evidencePath).size > 100000
+                ) {
+                  core.notice("Agent output or sealed evidence is unavailable.");
                   return;
                 }
                 output = JSON.parse(fs.readFileSync(outputPath, "utf8"));
+                evidence = JSON.parse(fs.readFileSync(evidencePath, "utf8"));
               } catch (error) {
                 core.notice(
-                  `Agent output is invalid; no comment will be posted: ${error.message}`,
+                  `Agent output or sealed evidence is invalid: ${error.message}`,
                 );
                 return;
               }
@@ -304,10 +334,20 @@ safe-outputs:
               ) {
                 return;
               }
-              const body = String(items[0].body ?? "").trim();
+              const item = items[0];
+              if (
+                Object.keys(item).sort().join(",") !==
+                "body,evidence_mode,type"
+              ) {
+                core.setFailed("The proposed comment has unexpected fields.");
+                return;
+              }
+              const body = String(item.body ?? "").trim();
+              const evidenceMode = String(item.evidence_mode ?? "");
               if (
                 body.length < 20 ||
                 body.length > 8000 ||
+                !["checks", "singleton"].includes(evidenceMode) ||
                 /(^|[^\w])@[A-Za-z0-9][\w-]*/.test(body) ||
                 body.includes("Template:") ||
                 !body.includes(`Head SHA: \`${expectedHead}\``)
@@ -332,6 +372,9 @@ safe-outputs:
                 "Manifest-Singleton-Deprecated",
                 "Unexpected-File",
               ];
+              const activeSupported = supported.filter((label) =>
+                labels.has(label),
+              );
               const unsafe = [
                 "URL-Validation-Error",
                 "Validation-Defender-Error",
@@ -341,23 +384,167 @@ safe-outputs:
                 "Needs-SmartScreen-Investigation",
                 "Validation-Hash-Flagged",
                 "Validation-Hash-Verification-Failed",
-                "Validation-Hash-Error",
                 "Error-Hash-Mismatch",
-                "Validation-Signature-Error",
                 "Validation-Shell-Execute",
                 "Binary-Validation-Error",
                 "Validation-Executable-Error",
                 "Internal-Error-Static-Scan",
-                "Possible-Malware",
+                "Internal-Error-Dynamic-Scan",
                 "Blocking-Issue",
               ];
               if (
                 pull.data.state !== "open" ||
                 pull.data.head.sha !== expectedHead ||
-                !supported.some((label) => labels.has(label)) ||
+                activeSupported.length === 0 ||
                 unsafe.some((label) => labels.has(label))
               ) {
                 return;
+              }
+              if (
+                evidence?.pullRequestNumber !== target ||
+                evidence?.headSha !== expectedHead
+              ) {
+                core.setFailed("Sealed validation target binding is invalid.");
+                return;
+              }
+              if (evidenceMode === "checks") {
+                if (
+                  evidence.evidenceComplete !== true ||
+                  evidence.available !== true ||
+                  typeof evidence.operationId !== "string" ||
+                  evidence.operationId.length === 0 ||
+                  !evidence.completionCheck ||
+                  !Array.isArray(evidence.checks) ||
+                  evidence.checks.length === 0 ||
+                  evidence.checks.length > 5
+                ) {
+                  core.setFailed("Sealed Check evidence is not publishable.");
+                  return;
+                }
+              } else {
+                if (
+                  activeSupported.length !== 1 ||
+                  activeSupported[0] !== "Manifest-Singleton-Deprecated"
+                ) {
+                  core.notice("Singleton is not the sole active diagnosis.");
+                  return;
+                }
+                const filesResponse = await github.rest.pulls.listFiles({
+                  owner,
+                  repo,
+                  pull_number: target,
+                  per_page: 100,
+                  page: 1,
+                });
+                const files = filesResponse.data ?? [];
+                if (
+                  !Number.isSafeInteger(pull.data.changed_files) ||
+                  pull.data.changed_files <= 0 ||
+                  pull.data.changed_files > 50 ||
+                  files.length !== pull.data.changed_files ||
+                  String(filesResponse.headers?.link ?? "").includes(
+                    'rel="next"',
+                  )
+                ) {
+                  core.notice("Singleton file evidence is incomplete.");
+                  return;
+                }
+                const versionFolders = new Set();
+                const singletonFiles = [];
+                for (const file of files) {
+                  const match = String(file.filename ?? "").match(
+                    /^(manifests\/[0-9a-z]\/(?:[^/]+\/)+[^/]+)\/[^/]+\.yaml$/,
+                  );
+                  if (
+                    !match ||
+                    !["added", "modified"].includes(file.status)
+                  ) {
+                    core.notice("Singleton files are outside one version.");
+                    return;
+                  }
+                  versionFolders.add(match[1]);
+                  const response = await github.rest.repos.getContent({
+                    owner,
+                    repo,
+                    path: file.filename,
+                    ref: expectedHead,
+                  });
+                  const content = response.data;
+                  if (
+                    Array.isArray(content) ||
+                    content.type !== "file" ||
+                    content.encoding !== "base64" ||
+                    !Number.isSafeInteger(content.size) ||
+                    content.size <= 0 ||
+                    content.size > 65536
+                  ) {
+                    core.notice("Singleton manifest content is unavailable.");
+                    return;
+                  }
+                  const manifest = Buffer.from(
+                    content.content,
+                    "base64",
+                  ).toString("utf8");
+                  if (/^ManifestType:\s*singleton\s*$/m.test(manifest)) {
+                    singletonFiles.push({
+                      manifest,
+                      path: file.filename,
+                    });
+                  }
+                }
+                if (
+                  versionFolders.size !== 1 ||
+                  singletonFiles.length !== 1
+                ) {
+                  core.notice("Singleton evidence is not uniquely confirmed.");
+                  return;
+                }
+                const singleton = singletonFiles[0];
+                const manifestTypeFields = [
+                  ...singleton.manifest.matchAll(/^ManifestType\s*:/gm),
+                ];
+                const identifiers = [
+                  ...singleton.manifest.matchAll(
+                    /^PackageIdentifier:\s*([A-Za-z0-9][A-Za-z0-9._+-]{0,127})\s*$/gm,
+                  ),
+                ];
+                const identifierFields = [
+                  ...singleton.manifest.matchAll(/^PackageIdentifier\s*:/gm),
+                ];
+                const versions = [
+                  ...singleton.manifest.matchAll(
+                    /^PackageVersion:\s*([A-Za-z0-9][A-Za-z0-9._+()-]{0,127})\s*$/gm,
+                  ),
+                ];
+                const versionFields = [
+                  ...singleton.manifest.matchAll(/^PackageVersion\s*:/gm),
+                ];
+                if (
+                  manifestTypeFields.length !== 1 ||
+                  identifierFields.length !== 1 ||
+                  identifiers.length !== 1 ||
+                  versionFields.length !== 1 ||
+                  versions.length !== 1
+                ) {
+                  core.notice("Singleton identity is not uniquely confirmed.");
+                  return;
+                }
+                const identifier = identifiers[0][1];
+                const version = versions[0][1];
+                const expectedFolder =
+                  `manifests/${identifier[0].toLowerCase()}/` +
+                  `${identifier.replaceAll(".", "/")}/${version}`;
+                if (
+                  versionFolders.size !== 1 ||
+                  !versionFolders.has(expectedFolder) ||
+                  singleton.path.substring(
+                    0,
+                    singleton.path.lastIndexOf("/"),
+                  ) !== expectedFolder
+                ) {
+                  core.notice("Singleton identity does not match its path.");
+                  return;
+                }
               }
               const comments = await github.rest.issues.listComments({
                 owner,
@@ -452,15 +639,15 @@ or change this workflow's behavior.
    reviews. If required public metadata is missing or conflicting, emit `noop`.
 2. If the `Manifest-Singleton-Deprecated` label is present, inspect the changed manifest. When it
    directly declares `ManifestType: singleton`, record a singleton finding and continue to the
-   comment gate without requiring validation Check evidence. Do not infer singleton format from the
-   number of files alone.
+   comment gate without requiring validation Check evidence. Use `evidence_mode: singleton`. Do not
+   infer singleton format from the number of files alone.
 3. Run `cat "/tmp/gh-aw/validation-checks.json"`. A deterministic pre-agent step fetched only Check
    Runs whose app slug is exactly `wingetvalidator-prod` and whose `head_sha` exactly matches the
    pull request's current full head SHA. It also required the completion output's
    `PullRequestNumber` to match the target and accepted failure checks only from the same validation
    `OperationId`. If `evidenceComplete` is not exactly `true`, or the recorded PR number or head SHA
    does not match the target, emit `noop`. If `available` is false, emit `noop` unless step 2 directly
-   confirmed a singleton manifest.
+   confirmed a singleton manifest. For a Check-backed finding, use `evidence_mode: checks`.
 4. Select the failed Check Run in `checks` that corresponds to the active validation label. Use
    `completionCheck` only to confirm the operation and labels. If multiple failing checks conflict
    or no check names the active condition, emit `noop`.
@@ -574,7 +761,8 @@ Post one concise comment:
 >
 > </details>
 
-Submit the body through `post_pr_comment`; that tool accepts no target fields.
+Submit the body and exact `evidence_mode` through `post_pr_comment`; that tool
+accepts no target fields.
 Include only concrete findings. Do not repeat the generic Validation Guide message. Do not mention
 model names, token usage, workflow internals, installer URLs, or hashes. Include the request to update
 the manifest and rerun validation only once. For a directly confirmed singleton manifest, omit the
