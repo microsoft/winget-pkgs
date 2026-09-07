@@ -193,6 +193,7 @@ pre-agent-steps:
             name: check.name,
             status: check.status,
             conclusion: check.conclusion,
+            externalId: String(check.external_id ?? "").trim(),
             startedAt: check.started_at,
             completedAt: check.completed_at,
             url: check.html_url,
@@ -413,10 +414,19 @@ safe-outputs:
                   evidence.available !== true ||
                   typeof evidence.operationId !== "string" ||
                   evidence.operationId.length === 0 ||
+                  evidence.operationId.length > 128 ||
                   !evidence.completionCheck ||
+                  evidence.completionCheck.name !==
+                    "10. Validation Completed" ||
+                  evidence.completionCheck.externalId !==
+                    evidence.operationId ||
                   !Array.isArray(evidence.checks) ||
                   evidence.checks.length === 0 ||
-                  evidence.checks.length > 5
+                  evidence.checks.length > 5 ||
+                  evidence.checks.some(
+                    (check) =>
+                      check?.externalId !== evidence.operationId,
+                  )
                 ) {
                   core.setFailed("Sealed Check evidence is not publishable.");
                   return;
