@@ -272,19 +272,28 @@ safe-outputs:
     post-domain-validation-comment:
       description: >-
         Post the one validated domain-assist comment to the triggering pull
-        request. The only accepted argument is the complete comment body.
+        request from structured, evidence-bound fields.
       runs-on: ubuntu-slim
       needs: detection
       if: >-
         needs.detection.result == 'success' &&
         needs.detection.outputs.detection_success == 'true'
       permissions:
+        checks: read
         contents: read
         issues: write
         pull-requests: read
       inputs:
-        body:
-          description: Comment body without the Template footer
+        classification:
+          description: Exact supported domain finding class
+          required: true
+          type: string
+        check_name:
+          description: Exact trusted Check Run name containing the evidence
+          required: true
+          type: string
+        hostname:
+          description: Lowercase hostname named by the trusted Check
           required: true
           type: string
       steps:
@@ -312,8 +321,14 @@ safe-outputs:
               const eventHead = String(process.env.EVENT_HEAD ?? "").trim();
               const eventLabel = String(process.env.EVENT_LABEL ?? "").trim();
               const type = "post_domain_validation_comment";
+              const trustedAppId = 1451866;
+              const trustedAppSlug = "wingetvalidator-prod";
               const footer =
                 "###### Template: msftbot/authorAssist/domainValidation";
+              const classifications = new Set([
+                "DEAD_URL", "MALFORMED_URL", "WAIVER_REVIEW",
+                "CDN_REDIRECT_REVIEW",
+              ]);
               const supported = new Set([
                 "Error-Installer-Availability", "Validate-Domain-Installer",
                 "Validation-404-Error", "Validation-Agreement-Domain",
@@ -349,6 +364,68 @@ safe-outputs:
               const fail = (message) => {
                 core.setFailed(message);
                 return false;
+              };
+              const parseCompletionPayload = (check) => {
+                const blocks = [...String(check?.output?.text ?? "").matchAll(
+                  /```json\s*([\s\S]*?)```/gi,
+                )];
+                if (blocks.length !== 1) return null;
+                try {
+                  return JSON.parse(blocks[0][1]);
+                } catch {
+                  return null;
+                }
+              };
+              const hostnameFromUri = (value) => {
+                try {
+                  return new URL(value).hostname.toLowerCase();
+                } catch {
+                  return String(value).match(
+                    /^[a-z][a-z0-9+.-]*:\/\/([^/:?#\s]+)/i,
+                  )?.[1]?.toLowerCase() ?? null;
+                }
+              };
+              const parseCsv = (text) => {
+                const rows = [];
+                let row = [];
+                let field = "";
+                let quoted = false;
+                for (let index = 0; index < text.length; index++) {
+                  const character = text[index];
+                  if (quoted) {
+                    if (character === '"') {
+                      if (text[index + 1] === '"') {
+                        field += '"';
+                        index++;
+                      } else {
+                        quoted = false;
+                      }
+                    } else {
+                      field += character;
+                    }
+                  } else if (character === '"') {
+                    if (field.length !== 0) {
+                      throw new Error("Invalid CSV quoting.");
+                    }
+                    quoted = true;
+                  } else if (character === ",") {
+                    row.push(field);
+                    field = "";
+                  } else if (character === "\n") {
+                    row.push(field.replace(/\r$/, ""));
+                    rows.push(row);
+                    row = [];
+                    field = "";
+                  } else {
+                    field += character;
+                  }
+                }
+                if (quoted) throw new Error("Unterminated CSV field.");
+                if (field.length !== 0 || row.length !== 0) {
+                  row.push(field.replace(/\r$/, ""));
+                  rows.push(row);
+                }
+                return rows;
               };
               if (
                 !Number.isSafeInteger(targetPr) ||
@@ -403,35 +480,31 @@ safe-outputs:
                 return fail("Expected exactly one domain comment output.");
               }
               const item = matches[0];
+              const expectedKeys = [
+                "check_name", "classification", "hostname", "type",
+              ];
               if (
-                Object.keys(item).sort().join(",") !== "body,type" ||
-                typeof item.body !== "string"
+                Object.keys(item).sort().join(",") !==
+                  expectedKeys.sort().join(",")
               ) {
                 return fail("Domain comment output has unexpected fields.");
               }
-              const body = item.body.trim();
+              const classification = String(item.classification ?? "").trim();
+              const checkName = String(item.check_name ?? "").trim();
+              const hostname = String(item.hostname ?? "").trim();
               if (
-                body.length === 0 ||
-                body.length > 3000 ||
-                Buffer.byteLength(body, "utf8") > 6000 ||
-                body.includes("@") ||
-                /(https?:\/\/|\b[0-9a-f]{64}\b)/i.test(body) ||
-                /Template:/i.test(body) ||
-                /[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/.test(body) ||
-                !body.includes(`Head SHA: \`${eventHead}\``)
+                !classifications.has(classification) ||
+                !["03. URLs Validation", "04. URL Domain Validation"].includes(
+                  checkName,
+                ) ||
+                hostname !== hostname.toLowerCase() ||
+                hostname.length > 253 ||
+                !/^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/.test(
+                  hostname,
+                )
               ) {
-                return fail("Domain comment body failed safety validation.");
+                return fail("Structured domain output failed validation.");
               }
-              const comments = await github.paginate(
-                github.rest.issues.listComments,
-                { owner, repo, issue_number: targetPr, per_page: 100 },
-              );
-              const duplicate = comments.some((comment) =>
-                String(comment?.body ?? "").includes(footer) &&
-                String(comment?.body ?? "").includes(
-                  `Head SHA: \`${eventHead}\``,
-                ),
-              );
               const pull = await github.rest.pulls.get({
                 owner,
                 repo,
@@ -445,12 +518,443 @@ safe-outputs:
                 pull.data.head?.sha !== eventHead ||
                 active.length !== 1 ||
                 active[0] !== eventLabel ||
-                labels.some((label) => security.has(label)) ||
-                duplicate
+                labels.some((label) => security.has(label))
               ) {
                 core.notice("Pull request is no longer eligible for a comment.");
                 return;
               }
+              const files = await github.paginate(
+                github.rest.pulls.listFiles,
+                { owner, repo, pull_number: targetPr, per_page: 100 },
+              );
+              if (files.length === 0 || files.length > 100) {
+                return fail("Current changed-file evidence is incomplete.");
+              }
+              const versionFolders = new Set();
+              const packageIdentifiers = new Set();
+              for (const file of files) {
+                const path = String(file?.filename ?? "");
+                const match = path.match(
+                  /^manifests\/[0-9a-z]\/((?:[^/]+\/)+)([^/]+)\/[^/]+\.yaml$/,
+                );
+                if (!match) {
+                  return fail("Current files are outside one package version.");
+                }
+                versionFolders.add(
+                  path.substring(0, path.lastIndexOf("/")),
+                );
+                packageIdentifiers.add(
+                  match[1].slice(0, -1).replaceAll("/", "."),
+                );
+              }
+              if (
+                versionFolders.size !== 1 ||
+                packageIdentifiers.size !== 1
+              ) {
+                return fail("Current files do not identify one package version.");
+              }
+              const packageIdentifier = [...packageIdentifiers][0];
+              const classLabels = {
+                DEAD_URL: new Set([
+                  "Error-Installer-Availability", "Validation-404-Error",
+                ]),
+                MALFORMED_URL: new Set([
+                  "Validation-Open-Url-Failed",
+                ]),
+                WAIVER_REVIEW: new Set([
+                  "Validation-Agreement-Domain", "Validation-Domain",
+                  "Validation-Forbidden-URL-Error",
+                  "Validation-Unapproved-URL",
+                ]),
+                CDN_REDIRECT_REVIEW: new Set([
+                  "Validate-Domain-Installer", "Validation-Domains-Mismatch",
+                  "Validation-Indirect-URL",
+                ]),
+              };
+              if (!classLabels[classification].has(eventLabel)) {
+                return fail("The active label does not support this class.");
+              }
+              let manifestField = null;
+              if (
+                classification === "WAIVER_REVIEW" ||
+                classification === "CDN_REDIRECT_REVIEW"
+              ) {
+                const repository = await github.rest.repos.get({
+                  owner,
+                  repo,
+                });
+                const defaultBranch = String(
+                  repository.data.default_branch ?? "",
+                );
+                if (
+                  !defaultBranch ||
+                  pull.data.base?.repo?.full_name !== `${owner}/${repo}` ||
+                  pull.data.base?.ref !== defaultBranch
+                ) {
+                  return fail("The pull request does not target the default branch.");
+                }
+                const inventoryResponse = await github.rest.repos.getContent({
+                  owner,
+                  repo,
+                  path: "Tools/ManualValidation/Autowaiver.csv",
+                  ref: defaultBranch,
+                });
+                const inventory = inventoryResponse.data;
+                if (
+                  Array.isArray(inventory) ||
+                  inventory.type !== "file" ||
+                  inventory.encoding !== "base64" ||
+                  !Number.isSafeInteger(inventory.size) ||
+                  inventory.size <= 0 ||
+                  inventory.size > 200000
+                ) {
+                  return fail("The current Autowaiver inventory is unavailable.");
+                }
+                let rows;
+                try {
+                  rows = parseCsv(
+                    Buffer.from(inventory.content, "base64").toString("utf8"),
+                  );
+                } catch {
+                  return fail("The current Autowaiver inventory is invalid.");
+                }
+                const header = [
+                  "PackageIdentifier", "ManifestValue", "ManifestKey",
+                  "RemoveLabel",
+                ];
+                if (
+                  rows.length < 2 ||
+                  rows[0].length !== header.length ||
+                  rows[0].some((value, index) => value !== header[index]) ||
+                  rows.slice(1).some((row) => row.length !== header.length)
+                ) {
+                  return fail("The current Autowaiver inventory shape is invalid.");
+                }
+                const expected = [
+                  packageIdentifier, hostname, eventLabel,
+                ].map((value) => value.toLowerCase());
+                const matchingRows = rows.slice(1).filter((row) =>
+                  row[0].trim().toLowerCase() === expected[0] &&
+                  row[1].trim().toLowerCase() === expected[1] &&
+                  row[3].trim().toLowerCase() === expected[2] &&
+                  /^[A-Za-z][A-Za-z0-9]{0,63}(?:Url|URL)$/.test(
+                    row[2].trim(),
+                  ),
+                );
+                if (matchingRows.length !== 1) {
+                  return fail("No exact current Autowaiver tuple supports this review.");
+                }
+                manifestField = matchingRows[0][2].trim();
+              }
+
+              const [
+                finalPullResponse,
+                comments,
+                reviews,
+                reviewComments,
+              ] = await Promise.all([
+                github.rest.pulls.get({
+                  owner,
+                  repo,
+                  pull_number: targetPr,
+                }),
+                github.paginate(
+                  github.rest.issues.listComments,
+                  { owner, repo, issue_number: targetPr, per_page: 100 },
+                ),
+                github.paginate(
+                  github.rest.pulls.listReviews,
+                  { owner, repo, pull_number: targetPr, per_page: 100 },
+                ),
+                github.paginate(
+                  github.rest.pulls.listReviewComments,
+                  { owner, repo, pull_number: targetPr, per_page: 100 },
+                ),
+              ]);
+              const finalPull = finalPullResponse.data;
+              const finalLabels = (finalPull.labels ?? [])
+                .map((label) => String(label?.name ?? ""));
+              const finalActive = finalLabels.filter((label) =>
+                supported.has(label),
+              );
+              const duplicate = comments.some((comment) =>
+                String(comment?.body ?? "").includes(footer) &&
+                String(comment?.body ?? "").includes(
+                  `Head SHA: \`${eventHead}\``,
+                ),
+              );
+              const feedbackPattern =
+                /\b(?:URL|URI|domain|hostname|redirect|404|forbidden|waiv(?:e|er))\b/i;
+              const addressPattern =
+                /(?:https?:\/\/[^\s<>()]+|\b(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}\b)/i;
+              const isHumanFeedback = (item) =>
+                item?.user?.type === "User" &&
+                !String(item.user?.login ?? "").endsWith("[bot]") &&
+                (
+                  feedbackPattern.test(String(item.body ?? "")) ||
+                  addressPattern.test(String(item.body ?? ""))
+                );
+              const humanFeedback =
+                comments.some(isHumanFeedback) ||
+                reviews.some(
+                  (review) =>
+                    review.state !== "DISMISSED" &&
+                    isHumanFeedback(review),
+                ) ||
+                reviewComments.some(isHumanFeedback);
+              if (
+                finalPull.state !== "open" ||
+                finalPull.head?.sha !== eventHead ||
+                finalActive.length !== 1 ||
+                finalActive[0] !== eventLabel ||
+                finalLabels.some((label) => security.has(label)) ||
+                finalLabels.some((label) => label.startsWith("Waived-")) ||
+                humanFeedback ||
+                duplicate
+              ) {
+                core.notice("Final pull request gate suppressed the comment.");
+                return;
+              }
+
+              // Keep this as the final evidence read before rendering and posting.
+              const checksResponse = await github.rest.checks.listForRef({
+                owner,
+                repo,
+                ref: eventHead,
+                app_id: trustedAppId,
+                filter: "all",
+                per_page: 100,
+              });
+              const checkRuns = checksResponse.data.check_runs ?? [];
+              if (
+                (checksResponse.data.total_count ?? checkRuns.length) >
+                  checkRuns.length
+              ) {
+                return fail("Fresh trusted Check evidence is incomplete.");
+              }
+              const trustedChecks = checkRuns.filter(
+                (check) =>
+                  check?.app?.id === trustedAppId &&
+                  check?.app?.slug === trustedAppSlug &&
+                  check.head_sha === eventHead,
+              );
+              const completionCheck = trustedChecks
+                .filter(
+                  (check) =>
+                    check.name === "10. Validation Completed" &&
+                    check.status === "completed",
+                )
+                .sort(
+                  (left, right) =>
+                    Date.parse(right.completed_at ?? "") -
+                      Date.parse(left.completed_at ?? "") ||
+                    Number(right.id) - Number(left.id),
+                )[0];
+              const completionPayload =
+                parseCompletionPayload(completionCheck);
+              const freshOperationId = String(
+                completionPayload?.OperationId ?? "",
+              ).trim();
+              const completionTime = Date.parse(
+                completionCheck?.completed_at ?? "",
+              );
+              const newerTrustedCheck = trustedChecks.some(
+                (check) =>
+                  check.id !== completionCheck?.id &&
+                  (
+                    Number(check.id) > Number(completionCheck?.id) ||
+                    Date.parse(check.started_at ?? "") > completionTime
+                  ),
+              );
+              if (
+                !completionCheck ||
+                completionPayload?.PullRequestNumber !== targetPr ||
+                freshOperationId !== operationId ||
+                String(completionCheck.external_id ?? "").trim() !==
+                  operationId ||
+                newerTrustedCheck
+              ) {
+                return fail("The sealed validation operation is no longer newest.");
+              }
+              const selectedChecks = trustedChecks.filter(
+                (check) =>
+                  check.status === "completed" &&
+                  check.name === checkName &&
+                  String(check.external_id ?? "").trim() === operationId,
+              );
+              if (selectedChecks.length !== 1) {
+                return fail("The selected trusted Check is not unique.");
+              }
+              const selectedCheck = selectedChecks[0];
+              if (
+                !["neutral", "failure", "action_required"].includes(
+                  String(selectedCheck.conclusion ?? "").toLowerCase(),
+                ) ||
+                !evidence.checks.some(
+                  (check) =>
+                    check?.id === selectedCheck.id &&
+                    check?.name === checkName &&
+                    check?.externalId === operationId,
+                )
+              ) {
+                return fail("The selected Check is not bound to sealed evidence.");
+              }
+              const checkText = [
+                selectedCheck.output?.title,
+                selectedCheck.output?.summary,
+                selectedCheck.output?.text,
+              ].map((value) => String(value ?? "")).join("\n");
+              const lines = checkText
+                .split(/\r?\n/)
+                .map((line) => line.trim())
+                .filter(Boolean);
+              const failedUriLines = lines.filter((line) =>
+                /\bURI:\s*.*?,\s*Validation result:\s*Failed\b/i.test(line),
+              );
+              const urlRecords = lines.map((line) => {
+                const match = line.match(
+                  /\bURI:\s*(.*?),\s*Validation result:\s*([A-Za-z]+)(.*)$/i,
+                );
+                const details = String(match?.[3] ?? "");
+                const status = details.match(
+                  /(?:^|,\s*)Http status code:\s*([^,\r\n]+)/i,
+                )?.[1]?.trim().toLowerCase() ?? "";
+                const diagnostic = details.match(
+                  /(?:^|,\s*)(?:Error Message|Exception|Error):\s*(.+)$/i,
+                )?.[1]?.trim() ?? "";
+                const raw = String(match?.[1] ?? "").trim();
+                return match
+                  ? {
+                      diagnostic,
+                      hostname: hostnameFromUri(raw),
+                      href: (() => {
+                        try {
+                          return new URL(raw).href;
+                        } catch {
+                          return null;
+                        }
+                      })(),
+                      line,
+                      raw,
+                      result: match[2].toLowerCase(),
+                      status,
+                    }
+                  : null;
+              }).filter(Boolean);
+              const failedRecords = urlRecords.filter(
+                (record) =>
+                  record.result === "failed" &&
+                  record.hostname,
+              );
+              if (
+                failedUriLines.length !== failedRecords.length ||
+                failedUriLines.length !==
+                  urlRecords.filter(
+                    (record) => record.result === "failed",
+                  ).length
+              ) {
+                return fail("A failed URI record is incomplete or unparseable.");
+              }
+              const deadRecords = failedRecords.filter(
+                (record) =>
+                  /^(?:404|not[\s_-]*found)$/.test(record.status),
+              );
+              const malformedRecords = failedRecords.filter(
+                (record) =>
+                  /\b(?:(?:invalid|malformed)\s+(?:url|uri)|(?:url|uri)\s+(?:is\s+)?(?:invalid|malformed)|(?:url|uri)\s+format)\b/i.test(
+                    record.diagnostic,
+                  ),
+              );
+              const forbiddenRecords = failedRecords.filter(
+                (record) =>
+                  /^(?:403|forbidden)$/.test(record.status),
+              );
+              const domainHostnames = new Set();
+              for (const line of lines) {
+                const match = line.match(
+                  /(?:^|\b\d{2}:\d{2}:\d{2}Z\s+)-\s+([a-z0-9.-]+)\s*$/i,
+                );
+                if (match) domainHostnames.add(match[1].toLowerCase());
+              }
+              const oneHost = (records) => {
+                const hostnames = new Set(
+                  records.map((record) => record.hostname),
+                );
+                return hostnames.size === 1 && hostnames.has(hostname);
+              };
+              const manualDomainReview =
+                domainHostnames.size === 1 &&
+                domainHostnames.has(hostname) &&
+                /installer URLs need to be validated/i.test(checkText) &&
+                /needs to go to manual review/i.test(checkText);
+              const provenClasses = [];
+              if (
+                failedRecords.length > 0 &&
+                deadRecords.length === failedRecords.length &&
+                oneHost(deadRecords)
+              ) {
+                provenClasses.push("DEAD_URL");
+              }
+              if (
+                failedRecords.length > 0 &&
+                malformedRecords.length === failedRecords.length &&
+                oneHost(malformedRecords)
+              ) {
+                provenClasses.push("MALFORMED_URL");
+              }
+              if (
+                (
+                  failedRecords.length > 0 &&
+                  forbiddenRecords.length === failedRecords.length &&
+                  oneHost(forbiddenRecords)
+                ) ||
+                (
+                  failedRecords.length === 0 &&
+                  classification === "WAIVER_REVIEW" &&
+                  manualDomainReview
+                )
+              ) {
+                provenClasses.push("WAIVER_REVIEW");
+              }
+              if (
+                failedRecords.length === 0 &&
+                classification === "CDN_REDIRECT_REVIEW" &&
+                manualDomainReview
+              ) {
+                provenClasses.push("CDN_REDIRECT_REVIEW");
+              }
+              if (
+                provenClasses.length !== 1 ||
+                provenClasses[0] !== classification
+              ) {
+                return fail("Fresh Check evidence does not prove one class.");
+              }
+              const recommendation =
+                classification === "WAIVER_REVIEW"
+                  ? "Wait for maintainer review of the exact approved inventory match; this workflow does not create or promise a waiver."
+                  : classification === "CDN_REDIRECT_REVIEW"
+                    ? "Wait for maintainer review of the exact approved redirect or domain inventory match; this workflow does not create or promise a waiver."
+                    : "Replace or remove the invalid or unavailable URL using verified publisher-controlled information; if it is an InstallerUrl, regenerate InstallerSha256.";
+              const finding =
+                manifestField
+                  ? `field **\`${manifestField}\`** on hostname **\`${hostname}\`**`
+                  : `hostname **\`${hostname}\`**`;
+              const body = [
+                "> [!WARNING]",
+                "> **Experimental automated suggestion - please verify before acting.**",
+                ">",
+                `> The trusted validation result reported **\`${classification}\`** for ${finding}.`,
+                ">",
+                `> **Suggested action:** ${recommendation}`,
+                ">",
+                "> <details><summary>Validation evidence</summary>",
+                ">",
+                `> Head SHA: \`${eventHead}\``,
+                ">",
+                `> Validation check: \`${checkName}\``,
+                ">",
+                "> </details>",
+              ].join("\n");
               const runUrl =
                 `${process.env.GITHUB_SERVER_URL}/` +
                 `${process.env.GITHUB_REPOSITORY}/actions/runs/` +
@@ -512,23 +1016,15 @@ host safe. Output only the affected field and hostname, never a raw URL or hash.
 
 ## Tool output
 Call only `post_domain_validation_comment`, exactly once, with its required
-`body` string and no other fields. The body must contain:
+structured fields and no others:
 
-> [!WARNING]
-> **Experimental automated suggestion - please verify before acting.**
->
-> The trusted validation result reported **`<supported class>`** for field
-> **`<field>`** on hostname **`<hostname>`**.
->
-> **Suggested action:** `<one recommendation allowed above>`.
->
-> <details><summary>Validation evidence</summary>
->
-> Head SHA: `<current full head SHA>`
->
-> Validation check: `<exact Check name>`
->
-> </details>
+- `classification`: exactly one of `DEAD_URL`, `MALFORMED_URL`,
+  `WAIVER_REVIEW`, or `CDN_REDIRECT_REVIEW`;
+- `check_name`: the exact trusted Check name containing the decisive evidence;
+- `hostname`: the exact lowercase hostname without a scheme, path, or port.
 
-Do not add a footer, URL, mention, or alternate target. Never edit, label,
-assign, approve, merge, close, waive, rerun, or post wingetbot commands.
+The privileged finalizer re-fetches the newest trusted operation, verifies
+these fields and any required current `Autowaiver.csv` tuple, and renders the
+complete comment. Never supply prose, a footer, URL, mention, alternate target,
+or recommendation. Never edit, label, assign, approve, merge, close, waive,
+rerun, or post wingetbot commands.
