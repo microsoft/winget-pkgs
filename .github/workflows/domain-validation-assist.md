@@ -38,6 +38,7 @@ pre-agent-steps:
         const trustedAppSlug = "wingetvalidator-prod";
         const pullRequestNumber = Number(process.env.TARGET_PR);
         const triggerHeadSha = String(process.env.TRIGGER_HEAD_SHA ?? "").trim();
+        const maxEvidenceBytes = 600000;
         const output = {
           available: false,
           pullRequestNumber: null,
@@ -210,6 +211,18 @@ pre-agent-steps:
             output.reason ??=
               "No completed trusted Check belongs to the newest validation operation.";
           }
+          if (
+            output.available &&
+            Buffer.byteLength(JSON.stringify(output), "utf8") >
+              maxEvidenceBytes
+          ) {
+            output.available = false;
+            output.operationId = null;
+            output.completionCheck = null;
+            output.checks = [];
+            output.reason =
+              "The complete evidence envelope exceeds the review bound.";
+          }
         } catch (error) {
           output.reason = `Validation Check retrieval failed: ${
             error instanceof Error ? error.message : String(error)
@@ -217,6 +230,14 @@ pre-agent-steps:
         } finally {
           writeOutput();
         }
+  - name: Upload sealed domain validation evidence
+    uses: actions/upload-artifact@v7
+    with:
+      name: >-
+        domain-validation-evidence-${{ github.run_id }}-${{ github.run_attempt }}
+      path: /tmp/gh-aw/validation-checks.json
+      if-no-files-found: error
+      retention-days: 1
 concurrency:
   group: "gh-aw-${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}"
   cancel-in-progress: false
@@ -258,6 +279,7 @@ safe-outputs:
         needs.detection.result == 'success' &&
         needs.detection.outputs.detection_success == 'true'
       permissions:
+        contents: read
         issues: write
         pull-requests: read
       inputs:
@@ -266,9 +288,17 @@ safe-outputs:
           required: true
           type: string
       steps:
+        - name: Download sealed domain validation evidence
+          uses: actions/download-artifact@v8
+          with:
+            name: >-
+              domain-validation-evidence-${{ github.run_id }}-${{ github.run_attempt }}
+            path: ${{ runner.temp }}/domain-validation-evidence
         - name: Revalidate and post fixed-target comment
           uses: actions/github-script@v9
           env:
+            EVIDENCE_PATH: >-
+              ${{ runner.temp }}/domain-validation-evidence/validation-checks.json
             TARGET_PR: ${{ github.event.pull_request.number || '' }}
             EVENT_HEAD: ${{ github.event.pull_request.head.sha || '' }}
             EVENT_LABEL: ${{ github.event.label.name || '' }}
@@ -314,13 +344,44 @@ safe-outputs:
               ) {
                 return fail("Invalid trusted pull-request event context.");
               }
-              let items;
+              let items, evidence;
               try {
+                const evidencePath = process.env.EVIDENCE_PATH;
+                if (!evidencePath || fs.statSync(evidencePath).size > 600000) {
+                  throw new Error("Sealed evidence is unavailable or oversized.");
+                }
+                evidence = JSON.parse(fs.readFileSync(evidencePath, "utf8"));
                 items = JSON.parse(fs.readFileSync(
                   process.env.GH_AW_AGENT_OUTPUT, "utf8",
                 )).items;
               } catch {
-                return fail("Agent output is missing or invalid.");
+                return fail("Agent output or sealed evidence is missing or invalid.");
+              }
+              const operationId = String(evidence?.operationId ?? "");
+              if (
+                evidence?.available !== true ||
+                evidence?.checksTruncated !== false ||
+                evidence?.pullRequestNumber !== targetPr ||
+                evidence?.headSha !== eventHead ||
+                operationId.length === 0 ||
+                operationId.length > 128 ||
+                !Array.isArray(evidence?.currentLabels) ||
+                !evidence.currentLabels.includes(eventLabel) ||
+                !Array.isArray(evidence?.completionLabels) ||
+                !evidence.completionLabels.some(
+                  (label) => label?.name === eventLabel,
+                ) ||
+                evidence?.completionCheck?.name !==
+                  "10. Validation Completed" ||
+                evidence.completionCheck.externalId !== operationId ||
+                !Array.isArray(evidence?.checks) ||
+                evidence.checks.length === 0 ||
+                evidence.checks.length > 12 ||
+                evidence.checks.some(
+                  (check) => check?.externalId !== operationId,
+                )
+              ) {
+                return fail("Sealed domain evidence is not publishable.");
               }
               const matches = Array.isArray(items)
                 ? items.filter((item) => item?.type === type) : [];
