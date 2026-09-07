@@ -67,14 +67,28 @@ pre-agent-steps:
           output.reason = reason;
         };
         const unsafeLabels = new Set([
-          "URL-Validation-Error", "Validation-Defender-Error",
-          "Validation-Virus-Scan-Error", "Validation-SmartScreen",
-          "Validation-SmartScreen-Error", "Needs-SmartScreen-Investigation",
+          "Binary-Validation-Error", "Blocking-Issue",
+          "Error-Analysis-Timeout", "Error-Hash-Mismatch",
+          "Internal-Error", "Internal-Error-AppsAndFeaturesVersion",
+          "Internal-Error-Dependencies", "Internal-Error-Domain",
+          "Internal-Error-Dynamic-Scan", "Internal-Error-Keyword-Policy",
+          "Internal-Error-Manifest", "Internal-Error-Manifest-Installer",
+          "Internal-Error-NoArchitectures",
+          "Internal-Error-NoSupportedArchitectures", "Internal-Error-PR",
+          "Internal-Error-Static-Scan", "Internal-Error-URL",
+          "Internal-Error-Webhook", "Needs-SmartScreen-Investigation",
+          "Network-Blocker", "Package-Flagged", "PUA-Detection",
+          "PullRequest-Error", "Scripted-Application",
+          "URL-Validation-Error", "Validation-Certificate-Root",
+          "Validation-Defender-Error", "Validation-Executable-Error",
           "Validation-Hash-Flagged", "Validation-Hash-Verification-Failed",
-          "Validation-Hash-Error", "Error-Hash-Mismatch",
-          "Validation-Signature-Error", "Validation-Shell-Execute",
-          "Binary-Validation-Error", "Validation-Executable-Error",
-          "Internal-Error-Static-Scan", "Possible-Malware", "Blocking-Issue",
+          "Validation-HTTP-Error", "Validation-No-Executables",
+          "Validation-Shell-Execute", "Validation-SmartScreen",
+          "Validation-SmartScreen-Error", "Validation-Submission-Expired",
+          "Validation-Submission-Failed", "Validation-Submission-Mismatch",
+          "Validation-Submission-Missing",
+          "Validation-Submission-Unsupported",
+          "Validation-Virus-Scan-Error",
         ]);
         async function getManifest(path, ref, missingIsNull = false) {
           try {
@@ -359,15 +373,29 @@ safe-outputs:
               const footer =
                 `###### Template: msftbot/authorAssist/elevationRequirement by [Elevation Requirement Review](${process.env.RUN_URL})`;
               const unsafe = new Set([
-                "URL-Validation-Error", "Validation-Defender-Error",
-                "Validation-Virus-Scan-Error", "Validation-SmartScreen",
-                "Validation-SmartScreen-Error", "Needs-SmartScreen-Investigation",
+                "Binary-Validation-Error", "Blocking-Issue",
+                "Error-Analysis-Timeout", "Error-Hash-Mismatch",
+                "Internal-Error", "Internal-Error-AppsAndFeaturesVersion",
+                "Internal-Error-Dependencies", "Internal-Error-Domain",
+                "Internal-Error-Dynamic-Scan", "Internal-Error-Keyword-Policy",
+                "Internal-Error-Manifest", "Internal-Error-Manifest-Installer",
+                "Internal-Error-NoArchitectures",
+                "Internal-Error-NoSupportedArchitectures", "Internal-Error-PR",
+                "Internal-Error-Static-Scan", "Internal-Error-URL",
+                "Internal-Error-Webhook", "Needs-SmartScreen-Investigation",
+                "Network-Blocker", "Package-Flagged", "PUA-Detection",
+                "PullRequest-Error", "Scripted-Application",
+                "URL-Validation-Error", "Validation-Certificate-Root",
+                "Validation-Defender-Error", "Validation-Executable-Error",
                 "Validation-Hash-Flagged", "Validation-Hash-Verification-Failed",
-                "Validation-Hash-Error", "Error-Hash-Mismatch",
-                "Validation-Signature-Error", "Validation-Shell-Execute",
-                "Binary-Validation-Error", "Validation-Executable-Error",
-                "Internal-Error-Static-Scan", "Possible-Malware",
-                "Blocking-Issue",
+                "Validation-HTTP-Error", "Validation-No-Executables",
+                "Validation-Shell-Execute", "Validation-SmartScreen",
+                "Validation-SmartScreen-Error", "Validation-Submission-Expired",
+                "Validation-Submission-Failed",
+                "Validation-Submission-Mismatch",
+                "Validation-Submission-Missing",
+                "Validation-Submission-Unsupported",
+                "Validation-Virus-Scan-Error",
               ]);
               if (!Number.isSafeInteger(target) || target <= 0) {
                 core.setFailed("Invalid fixed pull request target.");
