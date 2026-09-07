@@ -37,14 +37,28 @@ pre-agent-steps:
         const appSlug = "wingetvalidator-prod";
         const targetLabel = "Validation-Defender-Error";
         const conflicts = new Set([
-          "URL-Validation-Error", "Validation-Virus-Scan-Error",
-          "Validation-SmartScreen", "Validation-SmartScreen-Error",
-          "Needs-SmartScreen-Investigation", "Validation-Hash-Flagged",
-          "Validation-Hash-Verification-Failed", "Validation-Hash-Error",
-          "Error-Hash-Mismatch", "Validation-Signature-Error",
-          "Validation-Shell-Execute", "Binary-Validation-Error",
-          "Validation-Executable-Error", "Internal-Error-Static-Scan",
-          "Possible-Malware", "Blocking-Issue",
+          "Binary-Validation-Error", "Blocking-Issue",
+          "Error-Analysis-Timeout", "Error-Hash-Mismatch",
+          "Internal-Error", "Internal-Error-AppsAndFeaturesVersion",
+          "Internal-Error-Dependencies", "Internal-Error-Domain",
+          "Internal-Error-Dynamic-Scan", "Internal-Error-Keyword-Policy",
+          "Internal-Error-Manifest", "Internal-Error-Manifest-Installer",
+          "Internal-Error-NoArchitectures",
+          "Internal-Error-NoSupportedArchitectures", "Internal-Error-PR",
+          "Internal-Error-Static-Scan", "Internal-Error-URL",
+          "Internal-Error-Webhook", "Needs-SmartScreen-Investigation",
+          "Network-Blocker", "Package-Flagged", "PUA-Detection",
+          "PullRequest-Error", "Scripted-Application",
+          "URL-Validation-Error", "Validation-Certificate-Root",
+          "Validation-Defender-Error", "Validation-Executable-Error",
+          "Validation-Hash-Flagged", "Validation-Hash-Verification-Failed",
+          "Validation-HTTP-Error", "Validation-No-Executables",
+          "Validation-Shell-Execute", "Validation-SmartScreen",
+          "Validation-SmartScreen-Error", "Validation-Submission-Expired",
+          "Validation-Submission-Failed", "Validation-Submission-Mismatch",
+          "Validation-Submission-Missing",
+          "Validation-Submission-Unsupported",
+          "Validation-Virus-Scan-Error",
         ]);
         const outcomes = new Map([
           ["01. Pull Request Validation", "success"],
@@ -238,7 +252,8 @@ pre-agent-steps:
           evidence.headSha = head || null;
           if (initial.state !== "open" || head !== triggerHead) return finish("stale_head");
           if (!labels.has(targetLabel)) return finish("inactive_label");
-          if ([...conflicts].some((l) => labels.has(l))) return finish("conflicting_label");
+          if ([...conflicts].some((l) => l !== targetLabel && labels.has(l)))
+            return finish("conflicting_label");
 
           const response = await github.rest.checks.listForRef({
             owner, repo, ref: head, app_id: appId, filter: "latest", per_page: 100,
@@ -364,7 +379,7 @@ pre-agent-steps:
           const finalLabels = new Set((final.labels ?? []).map((l) => l.name));
           if (final.state !== "open" || final.head?.sha !== head ||
               !finalLabels.has(targetLabel) ||
-              [...conflicts].some((l) => finalLabels.has(l)))
+              [...conflicts].some((l) => l !== targetLabel && finalLabels.has(l)))
             return finish("stale_after_classification");
           evidence.verdict = "transient_defender_scan_contention";
           evidence.reasonCode = "supported";
@@ -438,14 +453,29 @@ safe-outputs:
               const owner = "microsoft", repo = "winget-pkgs";
               const label = "Validation-Defender-Error", footer = "###### Template: msftbot/authorAssist/transientSecurity";
               const conflicts = new Set([
-                "URL-Validation-Error", "Validation-Virus-Scan-Error",
-                "Validation-SmartScreen", "Validation-SmartScreen-Error",
-                "Needs-SmartScreen-Investigation", "Validation-Hash-Flagged",
-                "Validation-Hash-Verification-Failed", "Validation-Hash-Error",
-                "Error-Hash-Mismatch", "Validation-Signature-Error",
-                "Validation-Shell-Execute", "Binary-Validation-Error",
-                "Validation-Executable-Error", "Internal-Error-Static-Scan",
-                "Possible-Malware", "Blocking-Issue",
+                "Binary-Validation-Error", "Blocking-Issue",
+                "Error-Analysis-Timeout", "Error-Hash-Mismatch",
+                "Internal-Error", "Internal-Error-AppsAndFeaturesVersion",
+                "Internal-Error-Dependencies", "Internal-Error-Domain",
+                "Internal-Error-Dynamic-Scan", "Internal-Error-Keyword-Policy",
+                "Internal-Error-Manifest", "Internal-Error-Manifest-Installer",
+                "Internal-Error-NoArchitectures",
+                "Internal-Error-NoSupportedArchitectures", "Internal-Error-PR",
+                "Internal-Error-Static-Scan", "Internal-Error-URL",
+                "Internal-Error-Webhook", "Needs-SmartScreen-Investigation",
+                "Network-Blocker", "Package-Flagged", "PUA-Detection",
+                "PullRequest-Error", "Scripted-Application",
+                "URL-Validation-Error", "Validation-Certificate-Root",
+                "Validation-Defender-Error", "Validation-Executable-Error",
+                "Validation-Hash-Flagged", "Validation-Hash-Verification-Failed",
+                "Validation-HTTP-Error", "Validation-No-Executables",
+                "Validation-Shell-Execute", "Validation-SmartScreen",
+                "Validation-SmartScreen-Error", "Validation-Submission-Expired",
+                "Validation-Submission-Failed",
+                "Validation-Submission-Mismatch",
+                "Validation-Submission-Missing",
+                "Validation-Submission-Unsupported",
+                "Validation-Virus-Scan-Error",
               ]);
               const eventPr = context.payload.pull_request;
               const prNumber = Number(eventPr?.number), eventHead = String(eventPr?.head?.sha ?? "");
@@ -509,7 +539,7 @@ safe-outputs:
               const labels = new Set((pull.labels ?? []).map((item) => item.name));
               if (pull.number !== prNumber || pull.state !== "open" || pull.head?.sha !== eventHead ||
                   pull.user?.login === "wingetbot" || !labels.has(label) ||
-                  [...conflicts].some((item) => labels.has(item))) return;
+                  [...conflicts].some((item) => item !== label && labels.has(item))) return;
               const comments = []; let complete = false;
               for (let page = 1; page <= 10; page++) {
                 const result = await github.rest.issues.listComments(
