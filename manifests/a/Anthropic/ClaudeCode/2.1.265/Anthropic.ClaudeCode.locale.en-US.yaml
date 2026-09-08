@@ -1,0 +1,92 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Anthropic.ClaudeCode
+PackageVersion: 2.1.265
+PackageLocale: en-US
+Publisher: Anthropic PBC
+Author: Anthropic PBC
+PackageName: Claude Code
+License: Proprietary
+Copyright: © 2026 Anthropic PBC
+ShortDescription: Unleash Claude’s raw power directly in your terminal. Search million-line codebases instantly. Turn hours-long workflows into a single command. Your tools. Your workflow. Your codebase, evolving at thought speed.
+Description: |-
+  Claude Code is Anthropic’s agentic coding tool that lives in your terminal and helps you turn ideas into code faster than ever before.
+  What Claude Code does for you
+  - Build features from descriptions: Tell Claude what you want to build in plain English. It will make a plan, write the code, and ensure it works.
+  - Debug and fix issues: Describe a bug or paste an error message. Claude Code will analyze your codebase, identify the problem, and implement a fix.
+  - Navigate any codebase: Ask anything about your team’s codebase, and get a thoughtful answer back. Claude Code maintains awareness of your entire project structure, can find up-to-date information from the web, and with MCP can pull from external datasources like Google Drive, Figma, and Slack.
+  - Automate tedious tasks: Fix fiddly lint issues, resolve merge conflicts, and write release notes. Do all this in a single command from your developer machines, or automatically in CI.
+  Why developers love Claude Code
+  - Works in your terminal: Not another chat window. Not another IDE. Claude Code meets you where you already work, with the tools you already love.
+  - Takes action: Claude Code can directly edit files, run commands, and create commits. Need more? MCP lets Claude read your design docs in Google Drive, update your tickets in Jira, or use your custom developer tooling.
+  - Unix philosophy: Claude Code is composable and scriptable. tail -f app.log | claude -p "Slack me if you see any anomalies appear in this log stream" works. Your CI can run claude -p "If there are new text strings, translate them into French and raise a PR for @lang-fr-team to review".
+  - Enterprise-ready: Use Anthropic’s API, or host on AWS or GCP. Enterprise-grade security, privacy, and compliance is built-in.
+Moniker: claudecode
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- claude
+- claude-code
+- claudecode
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  - Added user.email and user.groups to the telemetry Claude Desktop and Cowork send through a Claude apps gateway, matching terminal sessions
+  - Added support for pointing --plugin-dir at a folder of plugins: each child folder with a manifest loads, and children added or removed while running are picked up
+  - Added a 1 GB cap on tool results saved to disk; the in-conversation preview says when a saved file was truncated
+  - Fixed resuming a foreground-spawned subagent changing its tool list and system prompt prefix, which broke prompt-cache reuse for that agent
+  - Fixed agent teammates and resumed subagents moving SubagentStart hook context and preloaded skills out of the prompt prefix on later turns, which broke prompt-cache reuse
+  - Fixed resume after the previous process died while a tool was running: the last prompt is no longer rewritten, and the interrupted tool call is kept and marked interrupted
+  - Fixed /model opusplan[1m] being rejected with "Model not found"
+  - Fixed syntax-highlighted code in permission prompts and messages sometimes omitting a character after a Ruby ?, Erlang $, or Perl $ sigil
+  - Fixed the fullscreen transcript jumping by one row whenever the slash-command or @-file suggestion list opened or closed
+  - Fixed a plugin path containing a backslash bypassing the symlink containment check on macOS and Linux
+  - Fixed plugin directories whose names begin with two dots being wrongly refused as outside the plugin root
+  - Fixed VS Code and SDK sessions occasionally requiring re-login when a session was closed while refreshing its token
+  - Fixed Remote Control sessions sending the end-of-turn signal before the reply's last message, which could show a reply as finished in the Claude app before its last part arrived
+  - Fixed background (--bg) sessions occasionally being retired mid-turn when a message arrived just before the idle timeout
+  - Fixed Claude Code's own git status and diff probes running clean filters configured by a nested repository inside the working tree
+  - Fixed the advisor tool and its instructions being re-decided per request from the request's model; the decision is now made once and announced in the conversation when it changes
+  - Fixed artifact publish accepting connector tool names the connector doesn't expose; the publish is now refused when none of the declared tools exist, and warned when only some don't
+  - Fixed /add-dir <subdirectory> refusing to load a subdirectory's agents when managed settings lock only skills to plugins, and promising agents when only agents are locked
+  - Fixed two-key keyboard shortcuts cancelling silently when the second key arrived more than a second later, as happens inside tmux; they now wait 3 seconds and show a notice when they time out
+  - Fixed forked skills (context: fork) not streaming their kickoff prompt and, with --forward-subagent-text, their text turns as progress events in stream-json
+  - Fixed a plugin's default component folder that the OS cannot check, such as a symlink loop, being silently skipped; it is now reported in /plugin with the error code
+  - Fixed the Claude apps gateway's OTLP telemetry relay pausing all forwarding to a collector for 30 seconds after it rejected a few payloads as malformed or too large
+  - Fixed /plugin Discover/Browse and claude plugin list --json --available showing no description or display name for marketplace plugins whose metadata lives only in their plugin.json
+  - Fixed /login showing "no gateway URL is configured" when re-run in a session that signed in to a Claude apps gateway set by managed settings
+  - Fixed /model claiming a model was "saved as your default" when the settings file couldn't be written; it now says the save failed and why
+  - Fixed /clear from Remote Control waiting on SessionStart hooks and on open terminal dialogs before completing
+  - Fixed the /config dialog changing height when switching between its tabs
+  - Fixed resuming a workflow run after its container restarted; a resume whose run journal is missing now fails with a clear error instead of rerunning every agent
+  - Fixed the claude-api skill's error-code reference: model access failures return 404 and unavailable beta headers return 400, not 403
+  - Fixed non-interactive sessions (-p with stream-json input, Agent SDK, cloud sessions) resetting the shell working directory at each new user message; a cd now persists across turns
+  - Fixed MCP servers configured as http that only speak the legacy HTTP+SSE transport never connecting; Claude Code now falls back to SSE as the MCP spec describes
+  - Fixed some claude.ai connectors in cloud sessions showing as needing authentication even though they are connected in claude.ai (servers that answer an unsupported request with HTTP 401)
+  - Fixed remote sessions keeping their sandbox container alive while a connector approval or sign-in link waits for you
+  - Fixed resumed sessions showing long model-facing recovery instructions in "background task didn't finish" notices instead of a short status line
+  - Windows: Fixed Read, Write and Edit refusing every file ("symlink resolution changed after permission was checked") when running inside an AppContainer or restricted-token sandbox
+  - Improved --worktree startup on large repositories: the new worktree is now checked out in parallel (git 2.32+)
+  - Improved /workflows agent detail: tool calls are marked running, failed or done, the subagent's task list is shown when it has one, and Enter unfolds the listed calls with their inputs and results
+  - Improved slash commands typed mid-prompt: matches now show in a list (Tab opens it outside fullscreen) instead of a single suggestion, and a plugin skill is now found by its bare name
+  - Improved remote MCP servers that need sign-in: Claude Code no longer registers an OAuth client with them until you actually authenticate
+  - Improved the time to resume long sessions that read many files
+  - Improved the error shown when an image over the size limits cannot be decoded: it now names the cause and how to fix it instead of only citing the limit
+  - Improved the Artifact tool's read of an artifact someone else wrote: the summary now treats the page as untrusted content and flags embedded instructions rather than relaying them
+  - Updated the .claude folder permission option to say what it actually allows: editing files in the project's .claude folder (or ~/.claude) for the session
+  - Changed machines with forceLoginGatewayUrl in managed settings to be Claude apps gateway sessions from startup, like forceLoginMethod: "gateway"; a leftover claude.ai login or API key is not used
+  - Changed image processing to use the runtime's built-in image support; the CLI no longer extracts a native image module to the temp directory
+  - Changed plugin display metadata to prefer the marketplace entry over plugin.json on the Installed tab and claude plugin details, filling gaps from plugin.json
+  - Changed Claude apps gateway sessions to export OpenTelemetry directly to a collector the gateway's managed settings name in OTEL_EXPORTER_OTLP_ENDPOINT, instead of through the gateway's relay; sessions without a named collector still use the relay
+  - [VSCode] Added automatic archiving of sessions inactive for a set period (new "Archive inactive sessions" setting, default 14 days)
+  - [VSCode] Fixed the sidebar chat coming back blank after Reload Window or a restart when the conversation had been open for more than 10 minutes
+  - [VSCode] Fixed the timeline dot sitting below the text on the "Remote Control is active" message
+ReleaseNotesUrl: https://github.com/anthropics/claude-code/blob/HEAD/CHANGELOG.md#21265
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
