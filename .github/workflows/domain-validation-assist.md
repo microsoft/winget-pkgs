@@ -738,6 +738,16 @@ safe-outputs:
                   check?.app?.slug === trustedAppSlug &&
                   check.head_sha === eventHead,
               );
+              const operationPattern = new RegExp(
+                `^WinGetSvc-Validation-${targetPr}-([0-9]+)$`,
+              );
+              const selectedSequence = operationPattern.exec(operationId);
+              const operationSequences = trustedChecks.map((check) => {
+                const match = operationPattern.exec(
+                  String(check.external_id ?? "").trim(),
+                );
+                return match ? BigInt(match[1]) : null;
+              });
               const completionCheck = trustedChecks
                 .filter(
                   (check) =>
@@ -768,6 +778,12 @@ safe-outputs:
               );
               if (
                 !completionCheck ||
+                !selectedSequence ||
+                operationSequences.some(
+                  (sequence) =>
+                    sequence === null ||
+                    sequence > BigInt(selectedSequence[1]),
+                ) ||
                 completionPayload?.PullRequestNumber !== targetPr ||
                 freshOperationId !== operationId ||
                 String(completionCheck.external_id ?? "").trim() !==
