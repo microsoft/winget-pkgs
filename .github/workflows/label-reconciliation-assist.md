@@ -182,6 +182,7 @@ pre-agent-steps:
                         event.label?.name === "Needs-CLA",
                     )
                     .map((event) => ({
+                      id: event.id,
                       event: event.event,
                       createdAt: event.created_at,
                     }));
@@ -236,6 +237,8 @@ safe-outputs:
         needs.detection.outputs.detection_success == 'true'
       runs-on: ubuntu-latest
       permissions:
+        checks: read
+        contents: read
         issues: write
         pull-requests: read
       inputs:
@@ -250,6 +253,14 @@ safe-outputs:
         candidate_head_sha:
           description: Current full head SHA of the candidate pull request
           required: true
+          type: string
+        publication_pull_number:
+          description: Merged pull request that published the newer version
+          required: false
+          type: string
+        publication_head_sha:
+          description: Full head SHA of the publication pull request
+          required: false
           type: string
       steps:
         - name: Download sealed reconciliation evidence
@@ -276,6 +287,163 @@ safe-outputs:
               const repo = "winget-pkgs";
               const marker =
                 "Template: msftbot/moderatorAssist/labelReconciliation";
+              const parseNumber = (value) => {
+                const parsed = Number(value);
+                return Number.isSafeInteger(parsed) && parsed > 0
+                  ? parsed : null;
+              };
+              const labelNames = (pull) =>
+                (pull.labels ?? []).map((label) =>
+                  String(label?.name ?? label)
+                );
+              const manifestSet = (files, status) => {
+                if (
+                  !Array.isArray(files) ||
+                  files.length === 0 ||
+                  files.some(
+                    (file) =>
+                      file.status !== status ||
+                      typeof file.sha !== "string" ||
+                      !/^[0-9a-f]{40}$/.test(file.sha),
+                  )
+                ) {
+                  return null;
+                }
+                const folders = new Set();
+                const packageIds = new Set();
+                const versions = new Set();
+                for (const file of files) {
+                  const match = String(file.filename ?? "").match(
+                    /^manifests\/[0-9a-z]\/(.+)\/([^/]+)\/[^/]+\.yaml$/,
+                  );
+                  if (!match) return null;
+                  folders.add(
+                    file.filename.substring(
+                      0, file.filename.lastIndexOf("/"),
+                    ),
+                  );
+                  packageIds.add(match[1].replaceAll("/", "."));
+                  versions.add(match[2]);
+                }
+                if (
+                  folders.size !== 1 ||
+                  packageIds.size !== 1 ||
+                  versions.size !== 1
+                ) {
+                  return null;
+                }
+                return {
+                  files,
+                  folder: [...folders][0],
+                  packageId: [...packageIds][0],
+                  version: [...versions][0],
+                };
+              };
+              const compareVersions = (left, right) => {
+                const parse = (value) => {
+                  if (
+                    value.length > 128 ||
+                    !/^\d+(?:[._-]\d+)*$/.test(value)
+                  ) {
+                    return null;
+                  }
+                  const components = value.split(/[._-]/);
+                  if (components.some((part) => part.length > 18)) return null;
+                  return {
+                    components: components.map((part) => BigInt(part)),
+                    separators: value.match(/[._-]/g) ?? [],
+                  };
+                };
+                const leftVersion = parse(left);
+                const rightVersion = parse(right);
+                if (
+                  !leftVersion ||
+                  !rightVersion ||
+                  leftVersion.components.length !==
+                    rightVersion.components.length ||
+                  leftVersion.separators.join("") !==
+                    rightVersion.separators.join("")
+                ) {
+                  return null;
+                }
+                for (
+                  let index = 0;
+                  index < leftVersion.components.length;
+                  index += 1
+                ) {
+                  if (
+                    leftVersion.components[index] >
+                    rightVersion.components[index]
+                  ) return 1;
+                  if (
+                    leftVersion.components[index] <
+                    rightVersion.components[index]
+                  ) return -1;
+                }
+                return 0;
+              };
+              const currentFolder = async (folder, files, packageId, version) => {
+                const response = await github.rest.repos.getContent({
+                  owner,
+                  repo,
+                  path: folder,
+                  ref: defaultBranch,
+                });
+                if (
+                  !Array.isArray(response.data) ||
+                  response.data.length !== files.length ||
+                  response.data.some((entry) => entry.type !== "file")
+                ) {
+                  return false;
+                }
+                const currentFiles = new Map(
+                  response.data.map((entry) => [entry.path, entry.sha]),
+                );
+                if (
+                  files.some(
+                    (file) => currentFiles.get(file.filename) !== file.sha,
+                  )
+                ) {
+                  return false;
+                }
+                const versionPath = `${folder}/${packageId}.yaml`;
+                if (!currentFiles.has(versionPath)) return false;
+                const versionResponse = await github.rest.repos.getContent({
+                  owner,
+                  repo,
+                  path: versionPath,
+                  ref: defaultBranch,
+                });
+                const file = versionResponse.data;
+                if (
+                  Array.isArray(file) ||
+                  file.type !== "file" ||
+                  file.encoding !== "base64" ||
+                  file.sha !== currentFiles.get(versionPath)
+                ) {
+                  return false;
+                }
+                const text = Buffer.from(
+                  file.content, "base64",
+                ).toString("utf8");
+                const scalar = (name) => {
+                  const value = text.match(
+                    new RegExp(`^${name}:\\s*([^\\r\\n]+)$`, "m"),
+                  )?.[1]?.trim();
+                  return (
+                    value?.length >= 2 &&
+                    (
+                      (value.startsWith("'") && value.endsWith("'")) ||
+                      (value.startsWith('"') && value.endsWith('"'))
+                    )
+                  ) ? value.slice(1, -1) : value;
+                };
+                return (
+                  scalar("PackageIdentifier") === packageId &&
+                  scalar("PackageVersion") === version &&
+                  scalar("ManifestType") === "version"
+                );
+              };
               const outputFile = process.env.GH_AW_AGENT_OUTPUT;
               if (!outputFile || !fs.existsSync(outputFile)) return;
               const output = JSON.parse(fs.readFileSync(outputFile, "utf8"));
@@ -314,6 +482,12 @@ safe-outputs:
               const candidateNumber = Number(item.candidate_pull_number);
               const candidateHead = String(
                 item.candidate_head_sha ?? "",
+              ).toLowerCase();
+              const publicationNumber = parseNumber(
+                item.publication_pull_number,
+              );
+              const publicationHead = String(
+                item.publication_head_sha ?? "",
               ).toLowerCase();
               if (
                 binding?.eligible !== true ||
@@ -393,9 +567,28 @@ safe-outputs:
                 "reconciliation_class",
                 "type",
               ];
+              const publicationKeys = [
+                "publication_head_sha",
+                "publication_pull_number",
+              ];
+              const allowedKeys = [...commonKeys, ...publicationKeys];
               if (
-                Object.keys(item).sort().join(",") !==
-                commonKeys.sort().join(",")
+                commonKeys.some((key) => !(key in item)) ||
+                Object.keys(item).some((key) => !allowedKeys.includes(key)) ||
+                (
+                  reconciliationClass === "Highest-Version-Removal" &&
+                  (
+                    publicationKeys.some((key) => !(key in item)) ||
+                    !publicationNumber ||
+                    !/^[0-9a-f]{40}$/.test(publicationHead)
+                  )
+                ) ||
+                (
+                  reconciliationClass === "Needs-CLA" &&
+                  publicationKeys.some(
+                    (key) => item[key] !== null && item[key] !== undefined,
+                  )
+                )
               ) {
                 core.setFailed("Reconciliation output has unexpected fields.");
                 return;
@@ -410,9 +603,19 @@ safe-outputs:
               const candidateLabels = (candidate.labels ?? []).map(
                 (label) => String(label?.name ?? ""),
               );
+              const repository = await github.rest.repos.get({
+                owner,
+                repo,
+              });
+              const defaultBranch = String(
+                repository.data.default_branch ?? "",
+              );
               if (
+                !defaultBranch ||
                 candidate.state !== "open" ||
                 candidate.head?.sha?.toLowerCase() !== candidateHead ||
+                candidate.base?.repo?.full_name !== `${owner}/${repo}` ||
+                candidate.base?.ref !== defaultBranch ||
                 !candidateLabels.includes(reconciliationClass) ||
                 candidateLabels.some((label) => unsafe.has(label)) ||
                 (binding.mode === "published-event" &&
@@ -424,6 +627,206 @@ safe-outputs:
                 core.setFailed("Reconciliation candidate state is stale.");
                 return;
               }
+              let publication = null;
+              if (reconciliationClass === "Highest-Version-Removal") {
+                if (
+                  (binding.mode === "published-event" &&
+                    (
+                      publicationNumber !== target ||
+                      publicationHead !== expectedHead
+                    )) ||
+                  (binding.mode === "dispatch" &&
+                    (
+                      publicationNumber === target ||
+                      publicationNumber === candidateNumber
+                    ))
+                ) {
+                  core.setFailed("Publication output is not bound to the mode.");
+                  return;
+                }
+                publication = publicationNumber === target
+                  ? pull
+                  : (
+                      await github.rest.pulls.get({
+                        owner,
+                        repo,
+                        pull_number: publicationNumber,
+                      })
+                    ).data;
+                const publicationLabels = labelNames(publication);
+                if (
+                  !defaultBranch ||
+                  publication.state !== "closed" ||
+                  publication.merged !== true ||
+                  publication.head?.sha?.toLowerCase() !== publicationHead ||
+                  publication.base?.repo?.full_name !== `${owner}/${repo}` ||
+                  publication.base?.ref !== defaultBranch ||
+                  !publicationLabels.includes("Publish-Pipeline-Succeeded") ||
+                  publicationLabels.some((label) => unsafe.has(label)) ||
+                  publication.changed_files <= 0 ||
+                  publication.changed_files > 50 ||
+                  candidate.changed_files <= 0 ||
+                  candidate.changed_files > 50
+                ) {
+                  core.setFailed("Publication evidence is not eligible.");
+                  return;
+                }
+                const [publicationFilesResponse, candidateFilesResponse] =
+                  await Promise.all([
+                    github.rest.pulls.listFiles({
+                      owner,
+                      repo,
+                      pull_number: publicationNumber,
+                      per_page: 50,
+                    }),
+                    github.rest.pulls.listFiles({
+                      owner,
+                      repo,
+                      pull_number: candidateNumber,
+                      per_page: 50,
+                    }),
+                  ]);
+                if (
+                  publicationFilesResponse.data.length !==
+                    publication.changed_files ||
+                  candidateFilesResponse.data.length !==
+                    candidate.changed_files
+                ) {
+                  core.setFailed("Version evidence is incomplete.");
+                  return;
+                }
+                const publishedSet = manifestSet(
+                  publicationFilesResponse.data, "added",
+                );
+                const removedSet = manifestSet(
+                  candidateFilesResponse.data, "removed",
+                );
+                const publishedPackageFolder = publishedSet?.folder.substring(
+                  0, publishedSet.folder.lastIndexOf("/"),
+                );
+                const removedPackageFolder = removedSet?.folder.substring(
+                  0, removedSet.folder.lastIndexOf("/"),
+                );
+                if (
+                  !publishedSet ||
+                  !removedSet ||
+                  publishedSet.packageId !== removedSet.packageId ||
+                  publishedPackageFolder !== removedPackageFolder ||
+                  publishedSet.folder === removedSet.folder ||
+                  compareVersions(
+                    publishedSet.version, removedSet.version,
+                  ) !== 1 ||
+                  !await currentFolder(
+                    publishedSet.folder,
+                    publishedSet.files,
+                    publishedSet.packageId,
+                    publishedSet.version,
+                  ) ||
+                  !await currentFolder(
+                    removedSet.folder,
+                    removedSet.files,
+                    removedSet.packageId,
+                    removedSet.version,
+                  )
+                ) {
+                  core.notice(
+                    "The candidate is not bound to the newer publication.",
+                  );
+                  return;
+                }
+                if (binding.mode === "published-event") {
+                  const candidates =
+                    await github.rest.search.issuesAndPullRequests({
+                      q: `repo:${owner}/${repo} is:pr is:open ` +
+                        'label:"Highest-Version-Removal" ' +
+                        `"${publishedSet.packageId}"`,
+                      per_page: 100,
+                    });
+                  if (
+                    candidates.data.total_count >
+                      candidates.data.items.length ||
+                    candidates.data.items.length > 100
+                  ) {
+                    core.notice("Removal-candidate search is incomplete.");
+                    return;
+                  }
+                  const matchingCandidates = [];
+                  for (const result of candidates.data.items) {
+                    const candidatePull = (
+                      await github.rest.pulls.get({
+                        owner,
+                        repo,
+                        pull_number: result.number,
+                      })
+                    ).data;
+                    if (
+                      candidatePull.state !== "open" ||
+                      candidatePull.base?.repo?.full_name !==
+                        `${owner}/${repo}` ||
+                      candidatePull.base?.ref !== defaultBranch ||
+                      !labelNames(candidatePull).includes(
+                        "Highest-Version-Removal",
+                      ) ||
+                      candidatePull.changed_files <= 0 ||
+                      candidatePull.changed_files > 50
+                    ) continue;
+                    const files = (
+                      await github.rest.pulls.listFiles({
+                        owner,
+                        repo,
+                        pull_number: result.number,
+                        per_page: 50,
+                      })
+                    ).data;
+                    const set = files.length === candidatePull.changed_files
+                      ? manifestSet(files, "removed") : null;
+                    if (
+                      set?.packageId === publishedSet.packageId &&
+                      compareVersions(publishedSet.version, set.version) === 1
+                    ) {
+                      matchingCandidates.push({
+                        head: candidatePull.head?.sha?.toLowerCase(),
+                        number: candidatePull.number,
+                      });
+                    }
+                  }
+                  if (
+                    matchingCandidates.length !== 1 ||
+                    matchingCandidates[0].number !== candidateNumber ||
+                    matchingCandidates[0].head !== candidateHead
+                  ) {
+                    core.notice("The removal candidate is not unique.");
+                    return;
+                  }
+                } else {
+                  const packageResponse =
+                    await github.rest.repos.getContent({
+                      owner,
+                      repo,
+                      path: publishedPackageFolder,
+                      ref: defaultBranch,
+                    });
+                  if (
+                    !Array.isArray(packageResponse.data) ||
+                    packageResponse.data.length >= 1000
+                  ) {
+                    core.notice("Current package versions are unavailable.");
+                    return;
+                  }
+                  const newerVersions = packageResponse.data.filter(
+                    (entry) =>
+                      entry.type === "dir" &&
+                      compareVersions(entry.name, removedSet.version) === 1,
+                  );
+                  if (
+                    newerVersions.length !== 1 ||
+                    newerVersions[0].path !== publishedSet.folder
+                  ) {
+                    core.notice("The newer published version is not unique.");
+                    return;
+                  }
+                }
+              }
               let evidenceLines;
               if (reconciliationClass === "Needs-CLA") {
                 if (
@@ -431,66 +834,207 @@ safe-outputs:
                   candidateHead !== expectedHead ||
                   !Array.isArray(binding.claChecks) ||
                   binding.claChecks.length === 0 ||
-                  binding.claChecks.some(
-                    (check) =>
-                      check.status !== "completed" ||
-                      !Number.isFinite(
-                        Date.parse(String(check.completedAt ?? "")),
-                      ),
-                  )
+                  !Array.isArray(binding.needsClaTimeline) ||
+                  binding.needsClaTimeline.length === 0
                 ) {
                   core.setFailed("Sealed CLA evidence is incomplete.");
                   return;
                 }
-                const claChecks = [...binding.claChecks];
-                const labelEvents = Array.isArray(binding.needsClaTimeline)
-                  ? binding.needsClaTimeline.filter(
-                      (event) => event.event === "labeled",
+              } else {
+                evidenceLines = [
+                  `- **Candidate:** \`#${candidateNumber}\` at \`${candidateHead}\``,
+                  `- **Publication:** \`#${publicationNumber}\` at \`${publicationHead}\``,
+                ];
+              }
+              const readEngagement = async () => {
+                const result = new Map();
+                for (const pullNumber of new Set([
+                  target,
+                  candidateNumber,
+                  ...(publicationNumber ? [publicationNumber] : []),
+                ])) {
+                  const [comments, reviews, reviewComments] =
+                    await Promise.all([
+                      github.rest.issues.listComments({
+                        owner, repo, issue_number: pullNumber, per_page: 100,
+                      }),
+                      github.rest.pulls.listReviews({
+                        owner, repo, pull_number: pullNumber, per_page: 100,
+                      }),
+                      github.rest.pulls.listReviewComments({
+                        owner, repo, pull_number: pullNumber, per_page: 100,
+                      }),
+                    ]);
+                  if (
+                    [comments, reviews, reviewComments].some((response) =>
+                      String(response.headers?.link ?? "")
+                        .includes('rel="next"')
                     )
-                  : [];
-                const timestampPattern =
-                  /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3})?Z$/;
-                if (
-                  labelEvents.length === 0 ||
-                  labelEvents.some(
-                    (event) =>
-                      !timestampPattern.test(String(event.createdAt ?? "")),
+                  ) return null;
+                  result.set(pullNumber, {
+                    comments: comments.data,
+                    reviews: reviews.data,
+                    reviewComments: reviewComments.data,
+                  });
+                }
+                return result;
+              };
+              const engagement = await readEngagement();
+              if (!engagement) {
+                core.setFailed("Human-engagement evidence is incomplete.");
+                return;
+              }
+              const automationLogins = new Set([
+                "azure-pipelines",
+                "microsoft-github-policy-service",
+                "wingetbot",
+                "wingetvalidator-prod",
+              ]);
+              const isHumanFeedback = (entry) => {
+                const login = String(entry?.user?.login ?? "");
+                return (
+                  entry?.user?.type !== "Bot" &&
+                  !login.endsWith("[bot]") &&
+                  !automationLogins.has(login) &&
+                  (
+                    String(entry?.body ?? "").trim().length > 0 ||
+                    (
+                      typeof entry?.state === "string" &&
+                      entry.state !== "DISMISSED"
+                    )
                   )
-                ) {
-                  core.setFailed("Sealed CLA timeline is incomplete.");
+                );
+              };
+              const hasHumanFeedback = (evidence) =>
+                [...evidence.values()].some((entry) =>
+                entry.comments.some(isHumanFeedback) ||
+                entry.reviews.some(
+                  (review) =>
+                    review.state !== "DISMISSED" &&
+                    isHumanFeedback(review),
+                ) ||
+                entry.reviewComments.some(isHumanFeedback)
+              );
+              const hasDuplicate = (evidence) =>
+                (evidence.get(target)?.comments ?? []).some((comment) => {
+                const prior = String(comment.body ?? "");
+                return (
+                  prior.includes(marker) &&
+                  prior.includes(
+                    `Reconciliation class:** \`${reconciliationClass}\``,
+                  ) &&
+                  prior.includes(`Target head SHA:** \`${expectedHead}\``)
+                );
+              });
+              if (reconciliationClass === "Highest-Version-Removal") {
+                const publishedAt = Date.parse(
+                  String(publication.merged_at ?? ""),
+                );
+                const publicationSucceeded =
+                  Number.isFinite(publishedAt) &&
+                  (engagement.get(publicationNumber)?.comments ?? []).some(
+                    (comment) =>
+                      comment.user?.login === "wingetbot" &&
+                      Date.parse(String(comment.created_at ?? "")) >=
+                        publishedAt &&
+                      /publish pipeline succeeded/i.test(
+                        String(comment.body ?? ""),
+                      ),
+                  );
+                if (!publicationSucceeded) {
+                  core.notice(
+                    "Trusted publication confirmation is unavailable.",
+                  );
                   return;
                 }
-                const newestCheck = claChecks.sort(
-                  (left, right) =>
-                    Date.parse(right.completedAt ?? "") -
-                      Date.parse(left.completedAt ?? "") ||
-                    Number(right.id) - Number(left.id),
-                )[0];
-                const latestLabel = labelEvents.sort(
-                  (left, right) =>
-                    Date.parse(right.createdAt ?? "") -
-                    Date.parse(left.createdAt ?? ""),
-                )[0];
-                const completedAt = String(newestCheck?.completedAt ?? "");
-                const labeledAt = String(latestLabel?.createdAt ?? "");
+              }
+              if (reconciliationClass === "Needs-CLA") {
+                const [checks, timeline] = await Promise.all([
+                  github.rest.checks.listForRef({
+                    owner,
+                    repo,
+                    ref: candidateHead,
+                    app_id: 95686,
+                    filter: "all",
+                    per_page: 100,
+                  }),
+                  github.rest.issues.listEventsForTimeline({
+                    owner,
+                    repo,
+                    issue_number: candidateNumber,
+                    per_page: 100,
+                  }),
+                ]);
                 if (
-                  newestCheck?.appId !== 95686 ||
-                  newestCheck?.appSlug !==
+                  (checks.data?.total_count ?? 0) >
+                    (checks.data?.check_runs ?? []).length ||
+                  String(checks.headers?.link ?? "").includes('rel="next"') ||
+                  String(timeline.headers?.link ?? "").includes('rel="next"')
+                ) {
+                  core.setFailed("Fresh CLA evidence is incomplete.");
+                  return;
+                }
+                const currentChecks = (checks.data?.check_runs ?? [])
+                  .filter(
+                    (check) =>
+                      check.app?.id === 95686 &&
+                      check.app?.slug ===
+                        "microsoft-github-policy-service" &&
+                      check.name === "license/cla" &&
+                      check.head_sha?.toLowerCase() === candidateHead,
+                  )
+                  .sort((left, right) => Number(right.id) - Number(left.id));
+                const currentEvents = (timeline.data ?? [])
+                  .filter(
+                    (event) =>
+                      ["labeled", "unlabeled"].includes(event.event) &&
+                      event.label?.name === "Needs-CLA",
+                  )
+                  .sort(
+                    (left, right) =>
+                      Date.parse(right.created_at ?? "") -
+                        Date.parse(left.created_at ?? "") ||
+                      Number(right.id) - Number(left.id),
+                  );
+                const newestCheck = currentChecks[0];
+                const newestEvent = currentEvents[0];
+                const sealedCheck = binding.claChecks.find(
+                  (check) => check.id === newestCheck?.id,
+                );
+                const sealedEvent = binding.needsClaTimeline.find(
+                  (event) =>
+                    event.id === newestEvent?.id &&
+                    event.event === newestEvent?.event &&
+                    event.createdAt === newestEvent?.created_at,
+                );
+                const completedAt = String(
+                  newestCheck?.completed_at ?? "",
+                );
+                const labeledAt = String(newestEvent?.created_at ?? "");
+                if (
+                  !sealedCheck ||
+                  !sealedEvent ||
+                  sealedCheck.appId !== 95686 ||
+                  sealedCheck.appSlug !==
                     "microsoft-github-policy-service" ||
-                  newestCheck?.name !== "license/cla" ||
-                  newestCheck?.headSha?.toLowerCase() !== expectedHead ||
-                  newestCheck?.status !== "completed" ||
-                  newestCheck?.conclusion !== "success" ||
-                  newestCheck?.title !== "All CLA requirements met." ||
-                  newestCheck?.summary !==
+                  sealedCheck.name !== "license/cla" ||
+                  sealedCheck.headSha?.toLowerCase() !== candidateHead ||
+                  sealedCheck.status !== newestCheck?.status ||
+                  sealedCheck.conclusion !== newestCheck?.conclusion ||
+                  sealedCheck.title !== newestCheck?.output?.title ||
+                  sealedCheck.summary !== newestCheck?.output?.summary ||
+                  sealedCheck.completedAt !== completedAt ||
+                  newestCheck.status !== "completed" ||
+                  newestCheck.conclusion !== "success" ||
+                  newestCheck.output?.title !== "All CLA requirements met." ||
+                  newestCheck.output?.summary !==
                     "This check verifies that the author has agreed to a CLA with Microsoft." ||
-                  !timestampPattern.test(completedAt) ||
-                  !timestampPattern.test(labeledAt) ||
+                  newestEvent.event !== "labeled" ||
                   !Number.isFinite(Date.parse(completedAt)) ||
                   !Number.isFinite(Date.parse(labeledAt)) ||
                   Date.parse(completedAt) < Date.parse(labeledAt)
                 ) {
-                  core.setFailed("Sealed CLA evidence is not publishable.");
+                  core.setFailed("Fresh CLA evidence is not publishable.");
                   return;
                 }
                 evidenceLines = [
@@ -498,34 +1042,66 @@ safe-outputs:
                   `- **CLA Check:** \`license/cla\` succeeded at \`${completedAt}\``,
                   `- **Latest Needs-CLA label:** applied at \`${labeledAt}\``,
                 ];
-              } else {
-                evidenceLines = [
-                  `- **Candidate:** \`#${candidateNumber}\` at \`${candidateHead}\``,
-                ];
-                if (binding.mode === "published-event") {
-                  evidenceLines.push(`- **Publication PR:** \`#${target}\``);
-                }
               }
-              const comments = await github.rest.issues.listComments({
+              const { data: finalTarget } = await github.rest.pulls.get({
                 owner,
                 repo,
-                issue_number: target,
-                per_page: 100,
+                pull_number: target,
               });
+              const { data: finalCandidate } = candidateNumber === target
+                ? { data: finalTarget }
+                : await github.rest.pulls.get({
+                    owner,
+                    repo,
+                    pull_number: candidateNumber,
+                  });
+              const { data: finalPublication } =
+                publicationNumber === target
+                  ? { data: finalTarget }
+                  : publicationNumber === candidateNumber
+                    ? { data: finalCandidate }
+                    : publicationNumber
+                      ? await github.rest.pulls.get({
+                          owner,
+                          repo,
+                          pull_number: publicationNumber,
+                        })
+                      : { data: null };
+              const finalTargetLabels = labelNames(finalTarget);
+              const finalCandidateLabels = labelNames(finalCandidate);
+              const finalPublicationLabels = finalPublication
+                ? labelNames(finalPublication) : [];
+              const finalEngagement = await readEngagement();
+              if (!finalEngagement) {
+                core.setFailed("Final human-engagement evidence is incomplete.");
+                return;
+              }
               if (
-                String(comments.headers?.link ?? "").includes('rel="next"') ||
-                comments.data.some((comment) => {
-                  const prior = String(comment.body ?? "");
-                  return (
-                    prior.includes(marker) &&
-                    prior.includes(
-                      `Reconciliation class:** \`${reconciliationClass}\``,
-                    ) &&
-                    prior.includes(`Target head SHA:** \`${expectedHead}\``)
-                  );
-                })
+                hasHumanFeedback(finalEngagement) ||
+                hasDuplicate(finalEngagement) ||
+                finalTarget.head?.sha?.toLowerCase() !== expectedHead ||
+                finalCandidate.state !== "open" ||
+                finalCandidate.head?.sha?.toLowerCase() !== candidateHead ||
+                finalCandidate.base?.repo?.full_name !== `${owner}/${repo}` ||
+                finalCandidate.base?.ref !== defaultBranch ||
+                !finalCandidateLabels.includes(reconciliationClass) ||
+                (
+                  reconciliationClass === "Highest-Version-Removal" &&
+                  (
+                    finalPublication?.state !== "closed" ||
+                    finalPublication?.merged !== true ||
+                    finalPublication?.head?.sha?.toLowerCase() !==
+                      publicationHead ||
+                    !finalPublicationLabels.includes(
+                      "Publish-Pipeline-Succeeded",
+                    )
+                  )
+                ) ||
+                finalTargetLabels.some((label) => unsafe.has(label)) ||
+                finalCandidateLabels.some((label) => unsafe.has(label)) ||
+                finalPublicationLabels.some((label) => unsafe.has(label))
               ) {
-                core.setFailed("Comment history is incomplete or duplicated.");
+                core.notice("Final reconciliation gate suppressed the comment.");
                 return;
               }
               if (process.env.GH_AW_SAFE_OUTPUTS_STAGED === "true") return;
@@ -598,7 +1174,7 @@ For `published-event`, the fixed comment target is the merged published PR:
    `Publish-Pipeline-Succeeded` label, and a post-merge comment from exactly
    `wingetbot` stating the publish pipeline succeeded.
 2. Search open PRs using that exact identifier plus
-   `Highest-Version-Removal`; inspect at most 10 results. Require exactly one
+   `Highest-Version-Removal`; inspect at most 100 results. Require exactly one
    current open candidate whose unchanged diff removes only one version of the
    exact package, whose label remains active, and whose removed folder remains
    on current `master`.
@@ -637,7 +1213,10 @@ Call `fixed_target_comment` once only for a confident finding. Always provide
 `reconciliation_class`, `candidate_pull_number`, and `candidate_head_sha`.
 For `Needs-CLA` and a dispatched `Highest-Version-Removal`, the candidate must
 be the fixed target. For a published event, use the uniquely identified open
-removal candidate.
+removal candidate. For `Highest-Version-Removal`, also provide
+`publication_pull_number` and `publication_head_sha` for the exact merged PR
+that published the newer version; on a published event this is the fixed
+comment target.
 
 Use exact values from authoritative evidence. Do not provide prose, Markdown,
 URLs, package metadata, recommendations, or additional fields. Send pull
