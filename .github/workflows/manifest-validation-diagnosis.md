@@ -32,6 +32,7 @@ pre-agent-steps:
       TARGET_PR: >-
         ${{ github.event.pull_request.number || '' }}
       TRIGGER_HEAD_SHA: ${{ github.event.pull_request.head.sha || '' }}
+      TRIGGER_LABEL: ${{ github.event.label.name || '' }}
     with:
       github-token: "${{ github.token }}"
       script: |
@@ -43,6 +44,7 @@ pre-agent-steps:
         const repo = "winget-pkgs";
         const pullRequestNumber = Number(process.env.TARGET_PR);
         const triggerHeadSha = String(process.env.TRIGGER_HEAD_SHA ?? "").trim();
+        const triggerLabel = String(process.env.TRIGGER_LABEL ?? "").trim();
         const maxFailedChecks = 5;
         const maxCheckTextLength = 12000;
         const output = {
@@ -50,6 +52,7 @@ pre-agent-steps:
           evidenceComplete: false,
           pullRequestNumber: null,
           headSha: null,
+          triggerLabel: null,
           operationId: null,
           completionCheck: null,
           checks: [],
@@ -77,6 +80,24 @@ pre-agent-steps:
             output.reason = "The triggering head SHA is stale.";
             return;
           }
+          const supported = new Set([
+            "Manifest-Validation-Error",
+            "Manifest-Installer-Validation-Error",
+            "Manifest-AppsAndFeaturesVersion-Error",
+            "Manifest-Singleton-Deprecated",
+            "Unexpected-File",
+          ]);
+          const labels = new Set(
+            (pull.data.labels ?? []).map((label) =>
+              String(label?.name ?? "")
+            ),
+          );
+          if (!supported.has(triggerLabel) || !labels.has(triggerLabel)) {
+            output.reason =
+              "The triggering diagnosis label is no longer active.";
+            return;
+          }
+          output.triggerLabel = triggerLabel;
 
           let checkRuns = [];
           let totalCheckRuns = 0;
@@ -267,6 +288,7 @@ safe-outputs:
         needs.detection.result == 'success' &&
         needs.detection.outputs.detection_success == 'true'
       permissions:
+        checks: read
         contents: read
         issues: write
         pull-requests: read
@@ -294,6 +316,7 @@ safe-outputs:
               ${{ runner.temp }}/manifest-validation-evidence/validation-checks.json
             TARGET_PR: ${{ github.event.pull_request.number || '' }}
             EXPECTED_HEAD: ${{ github.event.pull_request.head.sha || '' }}
+            EXPECTED_LABEL: ${{ github.event.label.name || '' }}
             RUN_URL: >-
               ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           with:
@@ -302,6 +325,7 @@ safe-outputs:
               const fs = require("fs");
               const target = Number(process.env.TARGET_PR);
               const expectedHead = String(process.env.EXPECTED_HEAD ?? "");
+              const expectedLabel = String(process.env.EXPECTED_LABEL ?? "");
               const outputPath = process.env.GH_AW_AGENT_OUTPUT;
               const evidencePath = process.env.EVIDENCE_PATH;
               let output, evidence;
@@ -331,6 +355,7 @@ safe-outputs:
                 !Number.isSafeInteger(target) ||
                 target <= 0 ||
                 !/^[0-9a-f]{40}$/.test(expectedHead) ||
+                !expectedLabel ||
                 items.length !== 1
               ) {
                 return;
@@ -403,14 +428,16 @@ safe-outputs:
               if (
                 pull.data.state !== "open" ||
                 pull.data.head.sha !== expectedHead ||
-                activeSupported.length === 0 ||
+                !supported.includes(expectedLabel) ||
+                !labels.has(expectedLabel) ||
                 unsafe.some((label) => labels.has(label))
               ) {
                 return;
               }
               if (
                 evidence?.pullRequestNumber !== target ||
-                evidence?.headSha !== expectedHead
+                evidence?.headSha !== expectedHead ||
+                evidence?.triggerLabel !== expectedLabel
               ) {
                 core.setFailed("Sealed validation target binding is invalid.");
                 return;
@@ -581,6 +608,108 @@ safe-outputs:
                 )
               ) {
                 return;
+              }
+              const finalPull = await github.rest.pulls.get({
+                owner,
+                repo,
+                pull_number: target,
+              });
+              const finalLabels = new Set(
+                (finalPull.data.labels ?? []).map((label) => label.name),
+              );
+              if (
+                finalPull.data.state !== "open" ||
+                finalPull.data.head.sha !== expectedHead ||
+                !finalLabels.has(expectedLabel) ||
+                unsafe.some((label) => finalLabels.has(label))
+              ) {
+                return;
+              }
+              if (evidenceMode === "checks") {
+                const response = await github.rest.checks.listForRef({
+                  owner,
+                  repo,
+                  ref: expectedHead,
+                  app_id: 1451866,
+                  filter: "all",
+                  per_page: 100,
+                });
+                const runs = response.data?.check_runs ?? [];
+                if (
+                  response.data?.total_count !== runs.length ||
+                  runs.length > 100
+                ) {
+                  core.setFailed("Fresh Check evidence is incomplete.");
+                  return;
+                }
+                const trustedRuns = runs.filter(
+                  (check) =>
+                    check?.app?.id === 1451866 &&
+                    check?.app?.slug === "wingetvalidator-prod" &&
+                    check?.head_sha === expectedHead,
+                );
+                const operationPattern = new RegExp(
+                  `^WinGetSvc-Validation-${target}-([0-9]+)$`,
+                );
+                const selectedMatch = operationPattern.exec(
+                  evidence.operationId,
+                );
+                const sequences = trustedRuns.map((check) => {
+                  const match = operationPattern.exec(
+                    String(check.external_id ?? "").trim(),
+                  );
+                  return match ? BigInt(match[1]) : null;
+                });
+                const completion = trustedRuns.find(
+                  (check) =>
+                    check.id === evidence.completionCheck.id &&
+                    check.name === "10. Validation Completed" &&
+                    check.status === "completed" &&
+                    String(check.external_id ?? "").trim() ===
+                      evidence.operationId,
+                );
+                const blocks = [
+                  ...String(completion?.output?.text ?? "").matchAll(
+                    /```json\s*([\s\S]*?)```/gi,
+                  ),
+                ];
+                let payload = null;
+                try {
+                  if (blocks.length === 1) {
+                    payload = JSON.parse(blocks[0][1]);
+                  }
+                } catch {
+                  payload = null;
+                }
+                const freshOperation = trustedRuns.filter(
+                  (check) =>
+                    String(check.external_id ?? "").trim() ===
+                      evidence.operationId,
+                );
+                const freshIds = new Set(
+                  freshOperation.map((check) => check.id),
+                );
+                if (
+                  !selectedMatch ||
+                  sequences.some(
+                    (sequence) =>
+                      sequence === null ||
+                      sequence > BigInt(selectedMatch[1]),
+                  ) ||
+                  !completion ||
+                  completion.conclusion !== "success" ||
+                  payload?.PullRequestNumber !== target ||
+                  String(payload?.OperationId ?? "").trim() !==
+                    evidence.operationId ||
+                  evidence.checks.some(
+                    (check) => !freshIds.has(check.id),
+                  )
+                ) {
+                  core.setFailed(
+                    "The sealed validation operation is no longer current.",
+                  );
+                  return;
+                }
               }
               await github.rest.issues.createComment({
                 owner,
