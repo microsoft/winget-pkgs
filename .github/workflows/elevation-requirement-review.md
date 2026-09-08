@@ -262,6 +262,7 @@ pre-agent-steps:
             return;
           }
           const mapCheck = (check) => ({
+            id: check.id,
             name: check.name,
             conclusion: check.conclusion,
             completedAt: check.completed_at,
@@ -339,6 +340,7 @@ safe-outputs:
         needs.detection.result == 'success' &&
         needs.detection.outputs.detection_success == 'true'
       permissions:
+        checks: read
         contents: read
         issues: write
         pull-requests: read
@@ -370,6 +372,8 @@ safe-outputs:
               const repo = "winget-pkgs";
               const target = Number(process.env.TARGET_PR);
               const eventHead = String(process.env.EVENT_HEAD ?? "").trim();
+              const appId = 1451866;
+              const appSlug = "wingetvalidator-prod";
               const footer =
                 `###### Template: msftbot/authorAssist/elevationRequirement by [Elevation Requirement Review](${process.env.RUN_URL})`;
               const unsafe = new Set([
@@ -474,6 +478,97 @@ safe-outputs:
                   [...labels].some((label) => unsafe.has(label)) ||
                   humanFeedback || duplicate) {
                 core.info("Final pull request gate suppressed the comment.");
+                return;
+              }
+              const checksResponse = await github.rest.checks.listForRef({
+                owner,
+                repo,
+                ref: head,
+                app_id: appId,
+                filter: "all",
+                per_page: 100,
+              });
+              const checkRuns = checksResponse.data?.check_runs ?? [];
+              if (
+                checksResponse.data?.total_count !== checkRuns.length ||
+                checkRuns.length > 100
+              ) {
+                core.setFailed("Fresh Check evidence is incomplete.");
+                return;
+              }
+              const trustedChecks = checkRuns.filter(
+                (check) =>
+                  check?.app?.id === appId &&
+                  check?.app?.slug === appSlug &&
+                  check?.head_sha === head,
+              );
+              const operationPattern = new RegExp(
+                `^WinGetSvc-Validation-${target}-([0-9]+)$`,
+              );
+              const selectedSequence = operationPattern.exec(operationId);
+              const operationSequences = trustedChecks.map((check) => {
+                const match = operationPattern.exec(
+                  String(check.external_id ?? "").trim(),
+                );
+                return match ? BigInt(match[1]) : null;
+              });
+              const completion = trustedChecks.find(
+                (check) =>
+                  check.id === evidence.completionCheck.id &&
+                  check.name === "10. Validation Completed" &&
+                  check.status === "completed" &&
+                  String(check.external_id ?? "").trim() === operationId,
+              );
+              const blocks = [
+                ...String(completion?.output?.text ?? "").matchAll(
+                  /```json\s*([\s\S]*?)```/gi,
+                ),
+              ];
+              let completionPayload = null;
+              try {
+                if (blocks.length === 1) {
+                  completionPayload = JSON.parse(blocks[0][1]);
+                }
+              } catch {
+                completionPayload = null;
+              }
+              const operationChecks = trustedChecks.filter(
+                (check) =>
+                  String(check.external_id ?? "").trim() === operationId,
+              );
+              const freshById = new Map(
+                operationChecks.map((check) => [check.id, check]),
+              );
+              const evidenceIds = evidenceChecks.map((check) => check.id)
+                .sort((left, right) => left - right);
+              const freshIds = operationChecks.map((check) => check.id)
+                .sort((left, right) => left - right);
+              if (
+                !selectedSequence ||
+                operationSequences.some(
+                  (sequence) =>
+                    sequence === null ||
+                    sequence > BigInt(selectedSequence[1]),
+                ) ||
+                !completion ||
+                completion.conclusion !== "success" ||
+                completionPayload?.PullRequestNumber !== target ||
+                String(completionPayload?.OperationId ?? "").trim() !==
+                  operationId ||
+                freshIds.join(",") !== evidenceIds.join(",") ||
+                evidenceChecks.some((sealed) => {
+                  const fresh = freshById.get(sealed.id);
+                  return (
+                    !fresh ||
+                    fresh.name !== sealed.name ||
+                    fresh.status !== "completed" ||
+                    fresh.conclusion !== sealed.conclusion
+                  );
+                })
+              ) {
+                core.setFailed(
+                  "The sealed validation operation is no longer current.",
+                );
                 return;
               }
               await github.rest.issues.createComment({
