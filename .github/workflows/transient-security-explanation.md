@@ -77,7 +77,8 @@ pre-agent-steps:
         const evidence = {
           schemaVersion: 1, verdict: "noop", reasonCode: "unclassified",
           pullRequestNumber: Number.isSafeInteger(prNumber) ? prNumber : null,
-          headSha: null, facts: null,
+          headSha: null, operationId: null, completionCheckId: null,
+          checkRunIds: null, facts: null,
         };
         const finish = (reason) => { evidence.reasonCode = reason; };
         const trusted = (c, head) =>
@@ -383,6 +384,11 @@ pre-agent-steps:
             return finish("stale_after_classification");
           evidence.verdict = "transient_defender_scan_contention";
           evidence.reasonCode = "supported";
+          evidence.operationId = operationId;
+          evidence.completionCheckId = completion.id;
+          evidence.checkRunIds = operation.map((check) => check.id).sort(
+            (left, right) => left - right,
+          );
           evidence.facts = {
             completeTrustedOperation: true,
             allInstallationRecordsBound: true,
@@ -434,7 +440,7 @@ safe-outputs:
         needs.detection.outputs.detection_success == 'true'
       inputs:
         body: {description: Exact body without the footer, required: true, type: string}
-      permissions: {issues: write, pull-requests: read}
+      permissions: {checks: read, issues: write, pull-requests: read}
       steps:
         - name: Download sealed transient-security evidence
           uses: actions/download-artifact@v8
@@ -452,6 +458,19 @@ safe-outputs:
               const fs = require("fs");
               const owner = "microsoft", repo = "winget-pkgs";
               const label = "Validation-Defender-Error", footer = "###### Template: msftbot/authorAssist/transientSecurity";
+              const appId = 1451866, appSlug = "wingetvalidator-prod";
+              const outcomes = new Map([
+                ["01. Pull Request Validation", "success"],
+                ["02. Manifest Validation", "success"],
+                ["03. URLs Validation", "success"],
+                ["04. URL Domain Validation", "success"],
+                ["05. Manifest Policy Validation", "success"],
+                ["06. Catalog Content Verification", "success"],
+                ["07. Installers Scan", "success"],
+                ["08. Installation Validation", "failure|action_required"],
+                ["09. Installer Metadata Validation", "skipped"],
+                ["10. Validation Completed", "success"],
+              ]);
               const conflicts = new Set([
                 "Binary-Validation-Error", "Blocking-Issue",
                 "Error-Analysis-Timeout", "Error-Hash-Mismatch",
@@ -477,6 +496,49 @@ safe-outputs:
                 "Validation-Submission-Unsupported",
                 "Validation-Virus-Scan-Error",
               ]);
+              const trusted = (check, head) =>
+                check?.app?.id === appId &&
+                check?.app?.slug === appSlug &&
+                check?.head_sha === head;
+              const boundedOutput = (check) => {
+                const output = check?.output;
+                const skippedText =
+                  check?.name === "09. Installer Metadata Validation" &&
+                  (output?.text === null || output?.text === "");
+                const values = [
+                  output?.title,
+                  output?.summary,
+                  skippedText ? "" : output?.text,
+                ];
+                return values.every((value) => typeof value === "string") &&
+                  output.title.length > 0 && output.summary.length > 0 &&
+                  output.title.length <= 1000 &&
+                  output.summary.length <= 10000 &&
+                  values[2].length <= 30000 &&
+                  (skippedText || values[2].length > 0) &&
+                  !/\b(?:output (?:was )?truncated|truncated due to)\b|\[\s*(?:output\s+)?truncated\s*\]/i
+                    .test(values.join("\n"));
+              };
+              const finding = (text) => [
+                /\b(?:detected|found|blocked|quarantined)\b.{0,100}\b(?:threat|malware|virus|trojan|pua)\b/is,
+                /\b(?:threat|malware|virus|trojan|pua)\b.{0,100}\b(?:detected|found|blocked|quarantined)\b/is,
+                /\bsmartscreen\b.{0,100}\b(?:blocked|malicious|unsafe|warning|failed)\b/is,
+                /\b(?:hash|signature|integrity)\b.{0,100}\b(?:mismatch|invalid|tampered|compromised)\b/is,
+              ].some((pattern) => pattern.test(text));
+              const parseCompletion = (check) => {
+                if (!boundedOutput(check)) return null;
+                const blocks = [
+                  ...check.output.text.matchAll(
+                    /```json\s*([\s\S]*?)```/gi,
+                  ),
+                ];
+                try {
+                  return blocks.length === 1
+                    ? JSON.parse(blocks[0][1]) : null;
+                } catch {
+                  return null;
+                }
+              };
               const eventPr = context.payload.pull_request;
               const prNumber = Number(eventPr?.number), eventHead = String(eventPr?.head?.sha ?? "");
               if (context.eventName !== "pull_request_target" || context.payload.action !== "labeled" ||
@@ -498,7 +560,9 @@ safe-outputs:
               if (!evidenceStat.isFile() || evidenceStat.size < 2 || evidenceStat.size > 4096) return;
               const evidence = JSON.parse(fs.readFileSync(evidenceFile, "utf8"));
               const evidenceKeys = [
-                "schemaVersion", "verdict", "reasonCode", "pullRequestNumber", "headSha", "facts",
+                "schemaVersion", "verdict", "reasonCode", "pullRequestNumber",
+                "headSha", "operationId", "completionCheckId", "checkRunIds",
+                "facts",
               ];
               const requiredFacts = [
                 "completeTrustedOperation", "allInstallationRecordsBound",
@@ -510,7 +574,22 @@ safe-outputs:
                   !evidenceKeys.every((key) => Object.hasOwn(evidence, key)) ||
                   evidence.verdict !== "transient_defender_scan_contention" ||
                   evidence.reasonCode !== "supported" || evidence.pullRequestNumber !== prNumber ||
-                  evidence.headSha !== eventHead || !evidence.facts ||
+                  evidence.headSha !== eventHead ||
+                  !new RegExp(
+                    `^WinGetSvc-Validation-${prNumber}-[0-9]+$`,
+                  ).test(evidence.operationId) ||
+                  !Number.isSafeInteger(evidence.completionCheckId) ||
+                  !Array.isArray(evidence.checkRunIds) ||
+                  evidence.checkRunIds.length !== 10 ||
+                  evidence.checkRunIds.some(
+                    (id) => !Number.isSafeInteger(id),
+                  ) ||
+                  new Set(evidence.checkRunIds).size !==
+                    evidence.checkRunIds.length ||
+                  !evidence.checkRunIds.includes(
+                    evidence.completionCheckId,
+                  ) ||
+                  !evidence.facts ||
                   Object.keys(evidence.facts).length !== requiredFacts.length ||
                   !requiredFacts.every((fact) => evidence.facts[fact] === true)) return;
               const outputFile = process.env.GH_AW_AGENT_OUTPUT;
@@ -549,6 +628,129 @@ safe-outputs:
               }
               if (!complete || comments.some((comment) => String(comment.body ?? "").includes(footer) &&
                   String(comment.body ?? "").includes(`Head SHA: \`${eventHead}\``))) return;
+              const { data: finalPull } = await github.rest.pulls.get({
+                owner, repo, pull_number: prNumber,
+              });
+              const finalLabels = new Set(
+                (finalPull.labels ?? []).map((item) => item.name),
+              );
+              if (
+                finalPull.state !== "open" ||
+                finalPull.head?.sha !== eventHead ||
+                !finalLabels.has(label) ||
+                [...conflicts].some(
+                  (item) => item !== label && finalLabels.has(item),
+                )
+              ) return;
+              // Keep trusted Checks as the final evidence read before posting.
+              const response = await github.rest.checks.listForRef({
+                owner, repo, ref: eventHead, app_id: appId,
+                filter: "all", per_page: 100, page: 1,
+              });
+              const runs = response.data?.check_runs ?? [];
+              if (
+                response.data?.total_count !== runs.length ||
+                runs.length > 100
+              ) return;
+              const trustedRuns = runs.filter(
+                (check) => trusted(check, eventHead),
+              );
+              const operationPattern = new RegExp(
+                `^WinGetSvc-Validation-${prNumber}-([0-9]+)$`,
+              );
+              const selectedSequence = operationPattern.exec(
+                evidence.operationId,
+              );
+              const operationSequences = trustedRuns.map((check) => {
+                const match = operationPattern.exec(
+                  String(check.external_id ?? "").trim(),
+                );
+                return match ? BigInt(match[1]) : null;
+              });
+              if (
+                !selectedSequence ||
+                operationSequences.some(
+                  (sequence) =>
+                    sequence === null ||
+                    sequence > BigInt(selectedSequence[1]),
+                )
+              ) return;
+              const completions = trustedRuns.filter(
+                (check) =>
+                  check.name === "10. Validation Completed" &&
+                  check.status === "completed" &&
+                  Number.isSafeInteger(check.id) &&
+                  Number.isFinite(Date.parse(check.completed_at ?? "")),
+              ).sort(
+                (left, right) =>
+                  Date.parse(right.completed_at) -
+                    Date.parse(left.completed_at) ||
+                  right.id - left.id,
+              );
+              const completion = completions[0];
+              const payload = parseCompletion(completion);
+              const completionTime = Date.parse(
+                completion?.completed_at ?? "",
+              );
+              const newerTrustedRun = trustedRuns.some(
+                (check) =>
+                  check.id !== completion?.id &&
+                  (
+                    (
+                      ["queued", "in_progress"].includes(check.status) &&
+                      String(check.external_id ?? "").trim() !==
+                        evidence.operationId
+                    ) ||
+                    !Number.isSafeInteger(check.id) ||
+                    check.id > completion?.id ||
+                    Date.parse(check.started_at ?? "") > completionTime
+                  ),
+              );
+              const operation = trustedRuns.filter(
+                (check) =>
+                  String(check.external_id ?? "").trim() ===
+                    evidence.operationId,
+              );
+              const freshIds = operation.map((check) => check.id).sort(
+                (left, right) => left - right,
+              );
+              const byName = new Map();
+              for (const check of operation) {
+                if (
+                  !outcomes.has(check.name) ||
+                  byName.has(check.name) ||
+                  !boundedOutput(check)
+                ) return;
+                byName.set(check.name, check);
+              }
+              if (
+                !completion ||
+                completion.id !== evidence.completionCheckId ||
+                completion.conclusion !== "success" ||
+                String(completion.external_id ?? "").trim() !==
+                  evidence.operationId ||
+                payload?.PullRequestNumber !== prNumber ||
+                payload?.OperationId !== evidence.operationId ||
+                !Array.isArray(payload?.Labels) ||
+                payload.Labels.length !== 1 ||
+                payload.Labels[0]?.Name !== label ||
+                payload.Labels[0]?.Result !== "TestPlan" ||
+                newerTrustedRun ||
+                operation.length !== outcomes.size ||
+                freshIds.join(",") !== evidence.checkRunIds.join(",")
+              ) return;
+              for (const [name, allowed] of outcomes) {
+                const check = byName.get(name);
+                if (
+                  check?.status !== "completed" ||
+                  !new RegExp(`^(?:${allowed})$`).test(
+                    String(check.conclusion).toLowerCase(),
+                  )
+                ) return;
+              }
+              if (finding(operation.map((check) =>
+                `${check.output.title}\n${check.output.summary}\n` +
+                check.output.text).join("\n"))) return;
               if (process.env.GH_AW_SAFE_OUTPUTS_STAGED === "true") return;
               await github.rest.issues.createComment({
                 owner, repo, issue_number: prNumber, body: `${expectedBody}\n\n${footer}`,
