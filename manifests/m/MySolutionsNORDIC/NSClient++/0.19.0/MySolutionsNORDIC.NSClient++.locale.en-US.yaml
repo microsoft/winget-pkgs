@@ -1,0 +1,155 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: MySolutionsNORDIC.NSClient++
+PackageVersion: 0.19.0
+PackageLocale: en-US
+Publisher: MySolutions NORDIC
+PublisherUrl: https://medin.name/
+PublisherSupportUrl: https://github.com/mickem/nscp/issues
+Author: My Computer Solutions NORDIC KB
+PackageName: NSClient++
+PackageUrl: https://nsclient.org/
+License: GPL-2.0
+LicenseUrl: https://github.com/mickem/nscp/blob/HEAD/COPYING
+Copyright: Copyright (C) 2026 - Michael Medin
+ShortDescription: A fully fledged monitoring agent which can be used with many monitoring tools.
+Description: |-
+  NSClient++ (nscp) aims to be a simple yet powerful and secure monitoring daemon. It was built for Nagios/Icinga, but nothing in the daemon is Nagios/Icinga specific and it can be used in many other scenarios where you want to receive/distribute check metrics.
+  The daemon has 3 main functions:
+  - Allow a remote machine (monitoring server) to request commands to be run on this machine (the monitored machine) which return the status of the machine.
+  - Submit the same results to a remote (monitoring server).
+  - Take action and perform tasks.
+Moniker: nscp
+Tags:
+- icinga
+- naemon
+- nagios
+ReleaseNotes: |-
+  A real nscp test prompt, a crash fix for service filters
+  0.19.0 gives the interactive console a proper prompt — line editing, history,
+  tab completion and highlighting — and fixes a heap-corruption crash that took
+  the whole agent down whenever a check_service filter matched nothing (#1499).
+  A whole-codebase security review closed three findings: a client module's
+  configured credential could be sent to a caller-chosen host, REST script
+  uploads were staged at a predictable path, and a junction defeated the
+  modern-layout lockdown of %ProgramData%\NSClient++. The collectd client was
+  reworked end to end — host names resolve, timeout and retries are honoured,
+  failed sends are reported, datagrams are sized correctly and a multicast target
+  no longer fans out over every local interface.
+  Alongside that, the WEB server's authentication limiter escalates against
+  rapid-fire guessing, NRDP warns about an unverified TLS link, Icinga honours a
+  base path in the target address, every documented query now has prose and
+  captured samples, and the Upgrading and Security notices pages are
+  assembled from one file per note with a module/version/action filter.
+  ✨ Highlights
+  - 🖥️ nscp test is a real prompt. On a terminal you get line editing,
+    persistent per-user history, position-aware tab completion against the
+    command registry, hints, and highlighting that turns an unknown query or
+    module name red before you press enter. Log messages redraw around the line
+    you are typing instead of landing in the middle of it. Piping commands in now
+    works on Windows, and an exhausted stdin no longer spins a core at 100%.
+    (#1488)
+  - 🛡️ A check_service filter that matched no service no longer kills the
+    agent. check_service "filter=name = 'nosuchservice'" — or a filter that
+    merely missed on case — terminated nscp with exception code 0xC0000374
+    and no result. Both check_service keywords and check_logfile's column()
+    now answer the documented empty-result contract, and every optional read in
+    the tree goes through .value() so a future miss is a reported error, not a
+    write to freed memory. (#1499)
+  - 🔐 Client credentials stay with their target. host=, port= and
+    address= moved a submission's destination while the target's configured
+    password or token came along, so any holder of queries.execute could
+    have the agent post the NRDP token, the Icinga login, the SMTP login or the
+    NSCA password to a host of their choosing. That combination is refused now;
+    target= also works for queries, and allow host override = true restores
+    the old behaviour per target. (#1492)
+  - 🔒 Two more review findings closed. PUT /api/v2/scripts/… staged the
+    upload at ${temp}/<name>, where a local user could plant a file of the same
+    name and have it imported as a command; it is staged in a randomly named,
+    owner-only file now. On the opt-in modern layout, a pre-created junction at
+    %ProgramData%\NSClient++ had the lockdown secure the junction's target;
+    reparse points are refused and the installer, the migration and service start
+    all fail on one. (#1492)
+  - 📡 The collectd client works the way its settings say. A target named by
+    host name threw on every metrics cycle; timeout and retries were read and
+    ignored; a failed send looked exactly like a delivered one; a value list of a
+    few hundred entries overflowed the 1452-byte datagram the receiver reads; and
+    a multicast target sent a copy through every local interface, DMZ and guest
+    NICs included. All fixed, with a new per-target multicast interface setting
+    (auto, the default, all, or a list of local addresses). (#1494)
+  - 🔒 Failed WEB logins back off exponentially. The fixed 60-second block
+    after ten failures let an attacker resume at a steady rate forever — about
+    14 000 guesses a day per address. Each further block now doubles up to an
+    hour, but only for a run of failures that burned the whole budget at machine
+    speed, so a client retrying a stale password behind NAT cannot lock out
+    everyone sharing its address. (#1493)
+  - 🔧 The console log is no longer held in a 64 KB buffer, so nscp test
+    shows log lines as they happen instead of when you press a key, and a
+    redirected or supervised console streams. --no-stderr and the oneline
+    format finally take effect. (#1488)
+  - 📚 Every documented query has a description and samples, captured
+    against a running agent, with the errors the capture turned up corrected in
+    the text. The Upgrading and Security notices pages are now built from one
+    file per note, with a filter for the version you come from, the modules you
+    run and whether a note needs action. (#1480, #1482)
+  🔍 Detailed changes
+  🖥️ CommandClient — nscp test gets a real prompt
+  The interactive console was a poll loop around std::getline: no line
+  editing, no history, no colour. When both stdin and stdout are a terminal it
+  now runs on replxx, vendored under
+  libs/replxx/ (byte-identical to upstream so provenance can be diffed; no
+  network needed at build time).
+  ────────────┬─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  History     │Persistent, per user, saved after every command (nscp test is routinely killed). %APPDATA%\NSClient++\console-history.txt on Windows, $XDG_STATE_HOME/nscp/console-history or ~/.nscp_history elsewhere, created 0600 on POSIX.
+  ────────────┼─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  Completion  │Position-aware: built-in verbs and registered queries in command position, query names after desc, the query's own parameter names as name= once you are typing arguments. load/enable offer the modules that are not yet loaded or enabled, unload/disable the ones that
+              │are.
+  ────────────┼─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  Highlighting│A query or module name that does not resolve turns red before you press enter.
+  ────────────┼─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  Hints       │The command's one-line description, greyed after the cursor.
+  ────────────┼─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  Log         │The agent logs from a background thread the whole time the prompt is up; messages are drawn above the prompt and the half-typed line redrawn underneath. Multi-line results keep their line breaks.
+  ────────────┴─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  Commands typed at a prompt can carry credentials, so a new [/settings/cli]
+  section controls what is kept: history size = 0 turns persistence off,
+  history file relocates it, color disables colour.
+  The first load <tab> of a session pauses while the core scans the module
+  directory; it is done once per process. help is now generated from the same
+  vocabulary as the prompt, so it lists all sixteen built-in verbs instead of the
+  eight it had drifted to, and an empty Performance data: line is no longer
+  printed after every result that has none. See
+  Test mode.
+  With stdin not a terminal nothing changes — no prompt, no history, no
+  colour — except three fixes: piping commands in now works on Windows (the
+  readiness check used a console-only API and silently ignored a file or pipe),
+  an exhausted stdin parks the loop instead of spinning at 100% CPU on POSIX,
+  and end of input is no longer treated as a reason to exit, which is how the
+  agent is normally started under a supervisor.
+  To make this possible a module can now take the console over: the new
+  NSAPISetLogOption core API accepts the same strings as the --log switch,
+  and the prompt calls set_log_option("no-console") while it owns the
+  terminal. Fixing the one-way console flag exposed that oneline and
+  no-std-err were being forwarded to the log level parser, rejected with
+  Invalid log level: no-std-err, and never applied. Both reach the log driver
+  now.
+  🔧 Core — the console log is flushed
+  The console log backend installed a 64 KB buffer on standard output and
+  nothing ever emptied it. MSVC's stream honours that buffer, so on Windows log
+  output sat there until something else flushed the stream — in nscp test
+  that was reading the next line of input, which is why the log appeared to
+  catch up only when you pressed a key. A redirected console (nscp test > log.txt, a container, a supervisor) looked mute until 64 KB had built up or
+  the process exited. Every message is flushed as it is written now.
+  🛡️ Filters — an empty filter result no longer corrupts the heap
+  When nothing matches a filter, the framework re-evaluates the warning and
+  critical expressions with no object bound to the evaluation context, so that an
+  expression which also reads the summary (… or count = 0) still reaches a
+  verdict. check_service defaults to not state_is_perfect() and
+  not state_is_ok(), and both read the service straight off the context without
+ReleaseNotesUrl: https://github.com/mickem/nscp/releases/tag/0.19.0
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://nsclient.org/docs/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
