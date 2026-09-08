@@ -64,7 +64,7 @@ pre-agent-steps:
         ]);
         const output = {
           available: false, pullRequestNumber: null, headSha: null,
-          operationBound: false, installation: null, screenshot: null,
+          operationId: null, installation: null, screenshot: null,
         };
         const fail = () => { throw new Error("Evidence is unavailable."); };
         const boundedInteger = (value, maximum) =>
@@ -216,7 +216,7 @@ pre-agent-steps:
             );
             return values.size === 1 ? [...values][0] : null;
           };
-          output.operationBound = true;
+          output.operationId = operationId;
           output.installation = {
             stage: installationName,
             outcome,
@@ -281,6 +281,7 @@ safe-outputs:
           required: true
           type: string
       permissions:
+        checks: read
         issues: write
         pull-requests: read
       steps:
@@ -304,6 +305,10 @@ safe-outputs:
               const repo = "winget-pkgs";
               const footer =
                 "###### Template: msftbot/moderatorAssist/unattendedArtifactTriage";
+              const appId = 1451866;
+              const appSlug = "wingetvalidator-prod";
+              const completionName = "10. Validation Completed";
+              const installationName = "08. Installation Validation";
               const unsafeLabels = new Set([
                 "Binary-Validation-Error", "Blocking-Issue",
                 "Error-Analysis-Timeout", "Error-Hash-Mismatch",
@@ -330,6 +335,24 @@ safe-outputs:
                 "Validation-Virus-Scan-Error",
               ]);
               const stop = () => { throw new Error("Comment safety gate failed."); };
+              const parseCompletion = (check) => {
+                const text = String(check?.output?.text ?? "");
+                const blocks = [
+                  ...text.matchAll(/```json\s*([\s\S]*?)```/gi),
+                ];
+                if (
+                  text.length === 0 ||
+                  text.length > 20000 ||
+                  blocks.length !== 1 ||
+                  blocks[0][1].length === 0 ||
+                  blocks[0][1].length > 16000
+                ) return null;
+                try {
+                  return JSON.parse(blocks[0][1]);
+                } catch {
+                  return null;
+                }
+              };
               try {
                 const target = Number(process.env.TARGET_PR);
                 if (!Number.isSafeInteger(target) || target <= 0) stop();
@@ -356,7 +379,9 @@ safe-outputs:
                   !evidence.available ||
                   evidence.pullRequestNumber !== target ||
                   !/^[0-9a-f]{40}$/.test(evidence.headSha ?? "") ||
-                  evidence.operationBound !== true ||
+                  typeof evidence.operationId !== "string" ||
+                  evidence.operationId.length === 0 ||
+                  evidence.operationId.length > 128 ||
                   installation?.stage !== "08. Installation Validation" ||
                   !Object.hasOwn(outcomes, installation?.outcome) ||
                   installation.timedOut !== (installation.outcome === "timed_out") ||
@@ -437,6 +462,92 @@ safe-outputs:
                   ) ||
                   reviewComments.data.some(isHumanModerator);
                 if (duplicate || humanFeedback) stop();
+                const { data: finalPull } = await github.rest.pulls.get({
+                  owner, repo, pull_number: target,
+                });
+                const finalLabels = new Set(
+                  (finalPull.labels ?? []).map(
+                    (label) => String(label.name ?? ""),
+                  ),
+                );
+                if (
+                  finalPull.state !== "open" ||
+                  finalPull.head?.sha !== evidenceHead ||
+                  !finalLabels.has("Validation-Unattended-Failed") ||
+                  [...finalLabels].some((label) => unsafeLabels.has(label))
+                ) stop();
+                // Keep trusted Checks as the final evidence read before posting.
+                const checksResponse = await github.rest.checks.listForRef({
+                  owner, repo, ref: evidenceHead, app_id: appId,
+                  filter: "all", per_page: 100, page: 1,
+                });
+                const checks = checksResponse.data?.check_runs ?? [];
+                const totalChecks = Number(
+                  checksResponse.data?.total_count ?? 0,
+                );
+                if (
+                  !Number.isSafeInteger(totalChecks) ||
+                  totalChecks > 100 ||
+                  checks.length !== totalChecks
+                ) stop();
+                const trustedChecks = checks.filter(
+                  (check) =>
+                    check?.app?.id === appId &&
+                    check?.app?.slug === appSlug &&
+                    check?.head_sha === evidenceHead,
+                );
+                const completions = trustedChecks.filter(
+                  (check) =>
+                    check.name === completionName &&
+                    check.status === "completed" &&
+                    Number.isSafeInteger(check.id) &&
+                    Number.isFinite(Date.parse(check.completed_at ?? "")),
+                );
+                const completion = completions.sort(
+                  (left, right) =>
+                    Date.parse(right.completed_at) -
+                      Date.parse(left.completed_at) ||
+                    right.id - left.id,
+                )[0];
+                const payload = parseCompletion(completion);
+                const completionTime = Date.parse(
+                  completion?.completed_at ?? "",
+                );
+                const newerTrustedCheck = trustedChecks.some(
+                  (check) =>
+                    check.id !== completion?.id &&
+                    (
+                      (
+                        ["queued", "in_progress"].includes(check.status) &&
+                        String(check.external_id ?? "").trim() !==
+                          evidence.operationId
+                      ) ||
+                      !Number.isSafeInteger(check.id) ||
+                      check.id > completion?.id ||
+                      Date.parse(check.started_at ?? "") > completionTime
+                    ),
+                );
+                const installationChecks = trustedChecks.filter(
+                  (check) =>
+                    check.name === installationName &&
+                    check.status === "completed" &&
+                    String(check.external_id ?? "").trim() ===
+                      evidence.operationId,
+                );
+                if (
+                  !completion ||
+                  completion.conclusion !== "success" ||
+                  payload?.PullRequestNumber !== target ||
+                  String(payload?.OperationId ?? "").trim() !==
+                    evidence.operationId ||
+                  String(completion.external_id ?? "").trim() !==
+                    evidence.operationId ||
+                  newerTrustedCheck ||
+                  installationChecks.length !== 1 ||
+                  String(
+                    installationChecks[0].conclusion ?? "",
+                  ).toLowerCase() !== installation.outcome
+                ) stop();
                 if (process.env.GH_AW_SAFE_OUTPUTS_STAGED === "true") {
                   core.info("Fixed-target comment passed staged safety checks.");
                   return;
