@@ -7,7 +7,7 @@
 # reviewer who sees them is entitled to reject the submission.
 
 PackageIdentifier: NeverAwayTeams.NeverAway
-PackageVersion: 2.0.1
+PackageVersion: 2.0.2
 PackageLocale: en-US
 
 Publisher: NeverAwayTeams
@@ -66,16 +66,29 @@ Tags:
   - remote-work
 
 ReleaseNotes: |-
-  Fixes a defect in 2.0.0 that could leave the application running after it was closed.
+  Keeps the display awake by default, and stops the scheduled times moving between restarts.
 
-  - Closing now closes, from the window, the taskbar and the notification area alike. In 2.0.0
-    the shutdown could be abandoned part-way: the window and the icon disappeared, so the
-    program looked closed, but the process stayed alive holding the single-instance lock - which
-    meant it could not be started again either.
-  - The notification-area menu now follows the current state, instead of continuing to offer
-    "Start" after presence had already been started from that same menu.
-  - The status dot is green while presence is being maintained and red while it is not. It was
-    grey when stopped, which on a grey taskbar was indistinguishable from no dot at all.
+  - The display is now kept awake by default. The previous default asked Windows only to keep
+    the machine from sleeping, which deliberately does not stop the screen going black - so on a
+    machine whose screen blanks after a few minutes, it did.
+  - Scheduled times no longer change from one launch to the next. With randomisation on, the
+    offsets were drawn fresh each time the program started, so a close set for 18:00 could be
+    announced as 18:07, then 18:02 after a restart. They are now fixed for the day, still early
+    for the opening and late for the closing, and still different from day to day.
+  - The activity log now records that presence is working, once an hour, and records it when a
+    presence signal starts being refused by Windows and when it recovers. Previously this only
+    existed in memory, so after the fact there was no way to tell a working presence loop from a
+    stopped one.
+
+  Also carried forward from 2.0.1:
+
+  - Closing closes, from the window, the taskbar and the notification area alike. In 2.0.0 the
+    shutdown could be abandoned part-way: the window and the icon disappeared, so the program
+    looked closed, but the process stayed alive holding the single-instance lock - which meant
+    it could not be started again either, and its presence loop was already stopped.
+  - The notification-area menu follows the current state instead of continuing to offer "Start"
+    after presence had been started from that same menu.
+  - The status dot is green while presence is being maintained and red while it is not.
   - The update check no longer reports an update to people already running the newest build.
 
 ReleaseNotesUrl: https://neverawayteams.com/news/
