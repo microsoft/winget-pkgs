@@ -14,6 +14,7 @@ on:
   pull_request_target:
     types: [labeled]
   roles: [admin, maintainer, write]
+  bots: ["wingetvalidator-prod[bot]"]
 # Label gate: only act when THIS event applied the Validation-Missing-Dependency label.
 if: github.event.label.name == 'Validation-Missing-Dependency'
 # We do not need the PR's code; skip checkout to avoid touching untrusted fork content.
@@ -198,6 +199,8 @@ safe-outputs:
     footer: "###### Template: msftbot/authorAssist/missingDependency by [{workflow_name}]({run_url})"
   threat-detection: true
   report-failure-as-issue: false
+  report-incomplete:
+    create-issue: false
   noop:
     report-as-issue: false
   add-comment:
