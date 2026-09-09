@@ -1,0 +1,101 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: can1357.oh-my-pi
+PackageVersion: 18.1.16
+PackageLocale: en-US
+Publisher: Can Bölük
+PublisherUrl: https://can.ac/
+PublisherSupportUrl: https://github.com/can1357/oh-my-pi/issues
+Author: Can Bölük
+PackageName: oh-my-pi
+PackageUrl: https://omp.sh/
+License: MIT
+LicenseUrl: https://github.com/can1357/oh-my-pi/blob/HEAD/LICENSE
+Copyright: |-
+  Copyright (c) 2025 Mario Zechner
+  Copyright (c) 2025-2026 Can Bölük
+ShortDescription: ⌥ AI Coding agent for the terminal — hash-anchored edits, optimized tool harness, LSP, Python, browser, subagents, and more
+Description: |-
+  omp is a terminal-first coding agent that runs on your machine, talks to any provider, and treats sessions like git branches.
+  omp (pronounced “oh-em-pi”, binary omp) is a fork of Mario Zechner’s Pi. It runs as a single Bun process, drives any model provider you have credentials for, and ships a flat tool surface the model uses to read code, run commands, edit files, drive a debugger, and spawn subagents that coordinate over an in-process IRC bus.
+  Sessions persist as JSONL under ~/.omp/agent/sessions/. You resume, fork, branch, and share them. Settings, credentials, plugins, and caches all live under ~/.omp/agent/. Nothing leaves the machine unless you call a tool that does.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  @oh-my-pi/pi-ai
+  Fixed
+  - Codex SSE streams that end without a terminal completion event now retry when replay-safe and remain transient errors when partial output prevents replay (#11349).
+  @oh-my-pi/pi-coding-agent
+  Added
+  - /rename without a title now generates a session name from recent conversation using the configured tiny model.
+  - Added opt-in experimental notes-backed context windows with persistent branch-local notes, searchable original session history, retained latest user requests, and a model-callable rollover tool, including in Code Mode.
+  - /loop accepts --until '<cmd>' / --while '<cmd>' to gate each iteration on a shell command's exit status, so a loop can stop on real project state instead of only a count or duration. (#10858 by @andyhite)
+  Fixed
+  - Read error and preview rendering now sanitizes tabs and Windows-style CRLF (e.g. ssh host-key failures, tab-indented fetched content) so raw output can no longer tear the result frame.
+  - Unset tiny model roles now honor the configured @smol fallback in direct execution and the /models Roles view (#11311).
+  - Extension Control Center (/extensions) search now accepts j and k, so extensions like jira/json are searchable; bare j/k no longer move the list selection (use arrow keys or the configured tui.select.up/down) (#11350).
+  - Codex turns interrupted before terminal completion now auto-continue after resolved tool calls instead of stopping (#11349).
+  - Fixed the status line's pi brand/working segment double-padding the first separator, so every gap around a separator is a single space (#11103).
+  - /handoff no longer leaves the TUI in a running state when completion races with delayed session events (#11263).
+  - Fixed legacy Pi extensions failing to load when calling ctx.isProjectTrusted() in an event handler; the extension context now exposes it (always true, since OMP applies no project-trust gating) (#7955).
+  - Fixed Ctrl+Z jobs exiting successfully after fg instead of restarting the TUI because terminal teardown left Bun without a referenced event-loop handle while waiting for SIGCONT (#8585).
+  - Extensions loaded by the npm CLI now apply settings overrides to the active session, so generated agents and model choices remain isolated between sessions (#11047 by @mgpai22).
+  - Live task dispatch now reloads added, changed, removed, and deleted project task and retry settings before resolving subagents (#11191).
+  - Reset /loop iterations combined with --while / --until no longer keep submitting without resetting when vibe mode is enabled while the condition command is still running; the loop now disables itself instead (#10858).
+  @oh-my-pi/pi-utils
+  Fixed
+  - Fixed $which capturing Bun.which at import on Linux and Windows, so Bun.which stubs installed later (e.g. per-test spies) are honoured and PATH-only language servers no longer leak into test results.
+  What's Changed
+  - feat(coding-agent): add experimental notes-backed context windows by @wolfiesch in https://github.com/can1357/oh-my-pi/pull/10893
+  - fix(coding-agent): sanitize tabs and CR in read error rendering by @H4vC in https://github.com/can1357/oh-my-pi/pull/11305
+  - TUI: single delta marker for turn elapsed time in usage rows by @JamieJ5926 in https://github.com/can1357/oh-my-pi/pull/11332
+  - fix(agent): retry truncated Codex streams by @roboomp in https://github.com/can1357/oh-my-pi/pull/11356
+  - fix(tui): let /extensions search accept j and k by @roboomp in https://github.com/can1357/oh-my-pi/pull/11352
+  - fix(coding-agent): honor configured smol fallback for tiny by @roboomp in https://github.com/can1357/oh-my-pi/pull/11312
+  - fix(tui): clear stale loader after handoff completion by @roboomp in https://github.com/can1357/oh-my-pi/pull/11264
+  - fix(auth): refresh desktop database for native zcode:// oauth by @roboomp in https://github.com/can1357/oh-my-pi/pull/11287
+  - fix(update): validate foreign symlink targets by @roboomp in https://github.com/can1357/oh-my-pi/pull/11155
+  - fix(compaction): rearm idle timer after setting changes by @roboomp in https://github.com/can1357/oh-my-pi/pull/10244
+  - feat(coding-agent): gate /loop iterations on a shell condition by @andyhite in https://github.com/can1357/oh-my-pi/pull/10858
+  - fix(tests): dispose status lines before settings teardown by @roboomp in https://github.com/can1357/oh-my-pi/pull/11098
+  - fix(commit): route agentic pipeline through commit model by @roboomp in https://github.com/can1357/oh-my-pi/pull/10993
+  - fix(eval): return immediate thenable handles from JS completion/agent by @roboomp in https://github.com/can1357/oh-my-pi/pull/10992
+  - fix(plan-mode): inline approved plan content by @roboomp in https://github.com/can1357/oh-my-pi/pull/10926
+  - docs: fix README hashline package link to deleted directory by @roboomp in https://github.com/can1357/oh-my-pi/pull/10885
+  - fix(coding-agent): recheck vibe guard after loop condition gate by @H4vC in https://github.com/can1357/oh-my-pi/pull/11367
+  - fix(coding-agent): break tiny/smol fallback cycle on default alias by @H4vC in https://github.com/can1357/oh-my-pi/pull/11363
+  - fix(settings): refresh project cache before reload by @roboomp in https://github.com/can1357/oh-my-pi/pull/11198
+  - fix(coding-agent): discover --plugin-dir agents without claude opt-in by @roboomp in https://github.com/can1357/oh-my-pi/pull/11153
+  - fix(tui): drop trailing pad from pi status segment by @roboomp in https://github.com/can1357/oh-my-pi/pull/11105
+  - fix(coding-agent): preserve npm extension session settings by @roboomp in https://github.com/can1357/oh-my-pi/pull/11051
+  - fix(coding-agent): restore getSupportedThinkingLevels in legacy pi-ai shim by @roboomp in https://github.com/can1357/oh-my-pi/pull/10801
+  - fix(task): ignore Claude marketplace model aliases by @roboomp in https://github.com/can1357/oh-my-pi/pull/7967
+  - fix(coding-agent): keep suspended sessions alive for fg by @roboomp in https://github.com/can1357/oh-my-pi/pull/8629
+  - feat(catalog): update Fire Pass models to glm-5.2-fast and kimi-k3-fast by @olegpulatov in https://github.com/can1357/oh-my-pi/pull/10859
+  - feat(coding-agent): generate a title when /rename has no arguments by @gitpushoriginmaster in https://github.com/can1357/oh-my-pi/pull/11084
+  - fix(extensions): expose ctx.isProjectTrusted for legacy pi extensions by @roboomp in https://github.com/can1357/oh-my-pi/pull/7958
+  - test(ai): gate the ::1 callback bind assertion on the host's IPv6 loopback by @PeterPonyu in https://github.com/can1357/oh-my-pi/pull/11385
+  - fix(utils): resolve Bun.which per call in whichFresh by @PeterPonyu in https://github.com/can1357/oh-my-pi/pull/11386
+  - test(coding-agent): make the project-venv setup test hermetic to an activated env by @PeterPonyu in https://github.com/can1357/oh-my-pi/pull/11387
+  - fix(coding-agent): guard reset loops against in-flight vibe activation by @H4vC in https://github.com/can1357/oh-my-pi/pull/11368
+  - docs: point AGENTS.md VCS helpers at natives/vcs by @PeterPonyu in https://github.com/can1357/oh-my-pi/pull/11396
+  - fix(coding-agent): complete title signal stub in working-accent harness by @H4vC in https://github.com/can1357/oh-my-pi/pull/11398
+  New Contributors
+  - @gitpushoriginmaster made their first contribution in https://github.com/can1357/oh-my-pi/pull/11084
+  - @PeterPonyu made their first contribution in https://github.com/can1357/oh-my-pi/pull/11385
+  Full Changelog: https://github.com/can1357/oh-my-pi/compare/v18.1.15...v18.1.16
+ReleaseNotesUrl: https://github.com/can1357/oh-my-pi/releases/tag/v18.1.16
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://omp.sh/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
