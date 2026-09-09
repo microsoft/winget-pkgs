@@ -707,7 +707,14 @@ safe-outputs:
                       !fresh ||
                       fresh.name !== sealed.name ||
                       fresh.status !== "completed" ||
-                      fresh.conclusion !== sealed.conclusion
+                      fresh.conclusion !== sealed.conclusion ||
+                      fresh.completed_at !== sealed.completedAt ||
+                      (fresh.output?.title ?? null) !==
+                        sealed.output.title ||
+                      (fresh.output?.summary ?? null) !==
+                        sealed.output.summary ||
+                      String(fresh.output?.text ?? "") !==
+                        sealed.output.text
                     );
                   })
                 ) {
