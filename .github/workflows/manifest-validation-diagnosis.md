@@ -686,8 +686,8 @@ safe-outputs:
                     String(check.external_id ?? "").trim() ===
                       evidence.operationId,
                 );
-                const freshIds = new Set(
-                  freshOperation.map((check) => check.id),
+                const freshById = new Map(
+                  freshOperation.map((check) => [check.id, check]),
                 );
                 if (
                   !selectedMatch ||
@@ -701,9 +701,15 @@ safe-outputs:
                   payload?.PullRequestNumber !== target ||
                   String(payload?.OperationId ?? "").trim() !==
                     evidence.operationId ||
-                  evidence.checks.some(
-                    (check) => !freshIds.has(check.id),
-                  )
+                  evidence.checks.some((sealed) => {
+                    const fresh = freshById.get(sealed.id);
+                    return (
+                      !fresh ||
+                      fresh.name !== sealed.name ||
+                      fresh.status !== "completed" ||
+                      fresh.conclusion !== sealed.conclusion
+                    );
+                  })
                 ) {
                   core.setFailed(
                     "The sealed validation operation is no longer current.",
