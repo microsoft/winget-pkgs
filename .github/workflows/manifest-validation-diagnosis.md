@@ -241,6 +241,37 @@ pre-agent-steps:
         } finally {
           writeOutput();
         }
+  - name: Skip agent when no supported evidence path remains
+    uses: actions/github-script@v9
+    with:
+      script: |
+        const fs = require("fs");
+        const path = require("path");
+        const evidence = JSON.parse(
+          fs.readFileSync("/tmp/gh-aw/validation-checks.json", "utf8"),
+        );
+        const checkPathAvailable =
+          evidence.evidenceComplete === true &&
+          evidence.available === true;
+        const singletonPathAvailable =
+          evidence.triggerLabel === "Manifest-Singleton-Deprecated";
+        if (!checkPathAvailable && !singletonPathAvailable) {
+          const safeOutputsPath = String(
+            process.env.GH_AW_SAFE_OUTPUTS ?? "",
+          ).trim();
+          if (!safeOutputsPath) {
+            core.setFailed("Safe outputs path is unavailable.");
+            return;
+          }
+          fs.mkdirSync(path.dirname(safeOutputsPath), { recursive: true });
+          fs.appendFileSync(
+            safeOutputsPath,
+            `${JSON.stringify({
+              type: "noop",
+              message: "No supported manifest diagnosis evidence is available.",
+            })}\n`,
+          );
+        }
   - name: Upload sealed validation evidence
     uses: actions/upload-artifact@v7
     with:
