@@ -297,6 +297,39 @@ pre-agent-steps:
         } catch {
           fail("api-failure");
         }
+  - name: Skip agent when metadata evidence is ineligible
+    uses: actions/github-script@v9
+    with:
+      script: |
+        const fs = require("fs");
+        const path = require("path");
+        const evidence = JSON.parse(
+          fs.readFileSync(
+            path.join(
+              process.env.RUNNER_TEMP,
+              "gh-aw",
+              "manifest-metadata-candidate.json",
+            ),
+            "utf8",
+          ),
+        );
+        if (evidence.eligible !== true) {
+          const safeOutputsPath = String(
+            process.env.GH_AW_SAFE_OUTPUTS ?? "",
+          ).trim();
+          if (!safeOutputsPath) {
+            core.setFailed("Safe outputs path is unavailable.");
+            return;
+          }
+          fs.mkdirSync(path.dirname(safeOutputsPath), { recursive: true });
+          fs.appendFileSync(
+            safeOutputsPath,
+            `${JSON.stringify({
+              type: "noop",
+              message: "No eligible manifest metadata evidence is available.",
+            })}\n`,
+          );
+        }
 engine: copilot
 permissions:
   checks: read
