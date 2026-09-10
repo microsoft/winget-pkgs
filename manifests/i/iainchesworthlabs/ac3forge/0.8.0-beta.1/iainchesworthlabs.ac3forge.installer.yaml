@@ -1,0 +1,34 @@
+# Points at the win64.zip release asset (.github/workflows/release.yml's
+# windows-msvc leg), not an NSIS .exe: this release didn't produce one
+# (makensis wasn't on the runner - see cmake/Packaging.cmake), and the zip
+# already carries both end-user binaries (bin/ac3cli.exe, bin/ac3gui.exe -
+# CPack's "runtime" component, see docs/releasing.md#what-gets-published).
+# InstallerType zip + NestedInstallerType portable installs straight from
+# that archive with no separate installer to build - see
+# docs/releasing.md#winget-manifest for what changes this if a real NSIS
+# installer becomes available for a future release.
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.12.0.schema.json
+PackageIdentifier: iainchesworthlabs.ac3forge
+PackageVersion: 0.8.0-beta.1
+InstallerLocale: en-US
+Platform:
+  - Windows.Desktop
+MinimumOSVersion: 10.0.17763.0
+InstallerType: zip
+NestedInstallerType: portable
+NestedInstallerFiles:
+  - RelativeFilePath: bin/ac3cli.exe
+    PortableCommandAlias: ac3cli
+  - RelativeFilePath: bin/ac3gui.exe
+    PortableCommandAlias: ac3gui
+Installers:
+  - Architecture: x64
+    InstallerUrl: https://github.com/iainchesworthlabs/ac3forge/releases/download/v0.8.0-beta.1/ac3forge-0.8.0-win64.zip
+    # Computed directly (sha256sum) from the release asset - winget wants
+    # SHA256, unlike the SHA512SUMS release.yml publishes (see
+    # docs/releasing.md#what-gets-published). If `winget install` ever
+    # reports a mismatch, trust winget's reported hash over this one and
+    # update it here, same policy as the vcpkg port's SHA512 comment.
+    InstallerSha256: 18CEEC80A3BE305B44D7927D2B722EE82D35CB111A0BBFCC714C1EA3883F4E44
+ManifestType: installer
+ManifestVersion: 1.12.0
