@@ -1,4 +1,4 @@
-﻿# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.6.0.schema.json
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.6.0.schema.json
 #
 # The description Microsoft's reviewers read and users see in `winget show`.
 #
@@ -7,7 +7,7 @@
 # reviewer who sees them is entitled to reject the submission.
 
 PackageIdentifier: NeverAwayTeams.NeverAway
-PackageVersion: 2.0.4
+PackageVersion: 2.0.6
 PackageLocale: en-US
 
 Publisher: NeverAwayTeams
@@ -66,7 +66,32 @@ Tags:
   - remote-work
 
 ReleaseNotes: |-
-  Fixes scheduled closing on managed machines, where it could be deferred indefinitely.
+  Fixes waking from sleep, and the scheduled close reporting a meeting that was not happening.
+
+  - Waking the machine brings presence back. It relied on the resume notification Windows sends for the
+    classic sleep states, which a machine using Modern Standby - the low-power idle most recent laptops
+    use - may never send at all. When it did not arrive, nothing turned presence back on: the machine was
+    awake, the application was sitting there inactive, and only restarting it helped. It now also notices
+    a wake from the gap in its own clock, which needs no cooperation from Windows and works for sleep,
+    hibernation and Modern Standby alike.
+  - Waking is reported as its own event again, with how long the machine was away. It shared a message
+    with the tray's Resume command, so an overnight sleep and a click on Resume produced the same line.
+
+  Also in this release:
+
+  - Teams is no longer treated as permanently in a meeting. The evidence for a call is a UDP endpoint
+    owned by Teams, and ms-teams.exe holds two of them for as long as it is running, for its own
+    signalling - so "Teams is open" was indistinguishable from "Teams is in a call" and the scheduled
+    close was postponed every sixty seconds indefinitely. Those two sockets are now recognised for what
+    they are and discounted.
+  - Having looked and found no call is now a different answer from having been unable to look. It
+    previously reported both as "unknown", which postpones the close and, unlike a detected meeting, was
+    not overridden by the "force close during a meeting" setting either - so there was no way to
+    configure around it. Being unable to read the system's process or network tables still postpones the
+    close, which is the case worth being careful about.
+  - Both corrections are applied to the fallback path as well.
+
+  Carried forward from 2.0.4 and 2.0.5:
 
   - Meeting detection no longer needs a script host. It asked PowerShell for the process list and
     the UDP endpoint table; on a company-managed machine that request can be refused - Windows
