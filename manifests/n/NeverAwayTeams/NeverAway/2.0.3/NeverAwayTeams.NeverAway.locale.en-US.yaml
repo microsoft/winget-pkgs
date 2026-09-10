@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.6.0.schema.json
+﻿# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.6.0.schema.json
 #
 # The description Microsoft's reviewers read and users see in `winget show`.
 #
@@ -7,7 +7,7 @@
 # reviewer who sees them is entitled to reject the submission.
 
 PackageIdentifier: NeverAwayTeams.NeverAway
-PackageVersion: 2.0.2
+PackageVersion: 2.0.3
 PackageLocale: en-US
 
 Publisher: NeverAwayTeams
@@ -66,21 +66,27 @@ Tags:
   - remote-work
 
 ReleaseNotes: |-
-  Keeps the display awake by default, and stops the scheduled times moving between restarts.
+  Fixes a defect that let the machine sleep while presence was running.
 
-  - The display is now kept awake by default. The previous default asked Windows only to keep
-    the machine from sleeping, which deliberately does not stop the screen going black - so on a
-    machine whose screen blanks after a few minutes, it did.
-  - Scheduled times no longer change from one launch to the next. With randomisation on, the
-    offsets were drawn fresh each time the program started, so a close set for 18:00 could be
-    announced as 18:07, then 18:02 after a restart. They are now fixed for the day, still early
-    for the opening and late for the closing, and still different from day to day.
-  - The activity log now records that presence is working, once an hour, and records it when a
-    presence signal starts being refused by Windows and when it recovers. Previously this only
-    existed in memory, so after the fact there was no way to tell a working presence loop from a
-    stopped one.
+  - The request that keeps Windows awake is now renewed continuously. It was made once, when
+    presence started, and never again. That request does not reliably survive a suspend/resume
+    cycle or a session switch, and once it had lapsed nothing restored it: the presence signal
+    kept working, the window kept saying ACTIVE, and the machine went to sleep anyway. The 1.x
+    releases renewed it on every timer tick, which is why they did not have this problem.
+  - The display is kept awake by default. The previous default asked Windows only to keep the
+    machine from sleeping, which deliberately does not stop the screen going black.
+  - Scheduled times no longer change from one launch to the next. With randomisation on the
+    offsets were drawn fresh at every start, so a close set for 18:00 could be announced as
+    18:07 and then 18:02 after a restart. They are now fixed for the day, still early for the
+    opening and late for the closing, and still different from day to day.
+  - The activity log records that presence is working, hourly, and records it when a presence
+    signal starts being refused by Windows and when it recovers. This previously existed only
+    in memory, so after the fact a working presence loop was indistinguishable from a stopped
+    one.
+  - Support and download destinations, and any notice from the developer, can now be updated
+    without a new release. Nothing about an existing licence depends on them.
 
-  Also carried forward from 2.0.1:
+  Carried forward from 2.0.1 and 2.0.2:
 
   - Closing closes, from the window, the taskbar and the notification area alike. In 2.0.0 the
     shutdown could be abandoned part-way: the window and the icon disappeared, so the program
