@@ -401,6 +401,35 @@ pre-agent-steps:
         } finally {
           fs.writeFileSync(outputPath, JSON.stringify(evidence));
         }
+  - name: Skip agent when transient-security evidence is ineligible
+    uses: actions/github-script@v9
+    with:
+      script: |
+        const fs = require("fs");
+        const path = require("path");
+        const evidence = JSON.parse(
+          fs.readFileSync(
+            "/tmp/gh-aw/transient-security-evidence.json",
+            "utf8",
+          ),
+        );
+        if (evidence.verdict !== "transient_defender_scan_contention") {
+          const safeOutputsPath = String(
+            process.env.GH_AW_SAFE_OUTPUTS ?? "",
+          ).trim();
+          if (!safeOutputsPath) {
+            core.setFailed("Safe outputs path is unavailable.");
+            return;
+          }
+          fs.mkdirSync(path.dirname(safeOutputsPath), { recursive: true });
+          fs.appendFileSync(
+            safeOutputsPath,
+            `${JSON.stringify({
+              type: "noop",
+              message: "No eligible transient-security evidence is available.",
+            })}\n`,
+          );
+        }
   - name: Seal deterministic transient-security evidence
     uses: actions/upload-artifact@v7
     with:
