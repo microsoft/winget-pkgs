@@ -1,0 +1,67 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: WebCodr.jwtd
+PackageVersion: 5.7.0
+PackageLocale: en-US
+Publisher: webcodr
+PublisherUrl: https://github.com/webcodr
+PublisherSupportUrl: https://github.com/webcodr/jwtd/issues
+Author: David Henning
+PackageName: jwtd
+PackageUrl: https://github.com/webcodr/jwtd
+License: MIT
+LicenseUrl: https://github.com/webcodr/jwtd/blob/main/LICENSE
+Copyright: Copyright (c) David Henning
+ShortDescription: Decode and pretty-print JSON Web Tokens with syntax highlighting
+Description: jwtd is a command-line tool that decodes and pretty-prints JSON Web Tokens (JWT) and JSON Web Encryption (JWE) tokens with syntax-highlighted JSON output. It can verify JWS signatures and decrypt JWEs when given a key via the --key flag or the JWTD_KEY environment variable.
+Moniker: jwtd
+Tags:
+- cli
+- command-line
+- command-line-tool
+- jwe
+- jwt
+- jwt-decode
+- jwt-decoder
+- jwt-token
+ReleaseNotes: |-
+  ## A hardening release
+
+  Two code-base reviews since 5.6.0 turned up nineteen findings, and this release closes all of them. Nothing changes for well-formed tokens and keys; every fix tightens an edge where jwtd accepted something it should have refused, printed something it should not have, or reported a verdict it could not stand behind.
+
+  ## Three of them mattered for verification
+
+  **An empty `oct` JWK was an empty HMAC secret.** jwtd rejects an empty symmetric secret because everyone knows it, but a JWK or JWK Set entry with `"k"：""` reached the verifier without passing that gate, so an HS256 token signed with the empty key reported `Signature: VALID`. Every JWK path now goes through the same check as `raw:` and `hmac:`, and the rejection names the key instead of falling through to a hint that would have suggested the JWK's own JSON as a secret.
+
+  **A non-string `kid` selected the first key in a JWK Set.** RFC 7515 requires `kid` to be a string. A header carrying `"kid"：123` or `"kid": null` was treated as if no `kid` were present, and a JWK Set then handed back its first entry without a word. It is now an error, on the human and `--json` paths and for JWEs alike.
+
+  **The signing-method allowlist fails closed.** An X25519 key parses as a valid JWE key but can verify no JWS. It used to skip the allowlist and rely on each `Verify` implementation's type assertion to refuse it; jwtd now refuses such a key itself before any verification runs.
+
+  ## Claim validation no longer trusts a number it cannot represent
+
+  `--verify-claims` handed `exp`, `nbf`, and `iat` to the JWT library as raw numbers, and the library converts them through a float whose conversion error it discards. An `exp` of `1e400` therefore reported `token is expired`, and an `nbf` of `1e400` reported valid. Both now yield `Claims：INVALID` with a reason that names the claim and says the value is not a representable timestamp — the same rule the display already applied when it declined to annotate the value.
+
+  ## `--key` reaches nested tokens
+
+  A decrypted JWE payload that is itself a JWE or JWT is decoded recursively, but the recursion dropped the key：the inner JWE printed its encrypted part sizes and asked for a key you had already passed, and the inner JWT printed without a signature verdict. The outer key is now applied at every level, and an invalid nested signature sets the exit code. When the key does not fit the inner token, jwtd falls back to the keyless rendering it produced before.
+
+  ## Also in this release
+
+  • A `null` header or payload segment is rejected as `expected JSON object` instead of rendering as `{}` with a passing claim verdict.
+  • The human JWT path resolves the key before writing anything, as the JWE and `--json` paths already did, so an unusable `--key` yields the error alone rather than three decoded sections followed by one. A directory passed as `--key` says so instead of being read as base64 text.
+  • `jwtd ""` and an empty stdin pipe both report `no token provided`. Piped input is bounded at 16 MiB with an explicit error rather than a silent truncation.
+  • `--json --color=bogus` is rejected like the non-JSON path, and a JWE whose plaintext is the JSON literal `null` now emits `"decryptedPayload"：null` instead of omitting the field.
+  • The `expires in` / `not yet valid` annotations are computed from Unix seconds, so an `exp` more than 292 years away shows its real distance instead of the `106751d` at which `time.Duration` saturates.
+  • Encrypted part sizes are measured arithmetically from the base64url text instead of decoding the ciphertext to count it.
+
+
+  ## What's Changed
+  • fix：close review findings on verification, flags, and output by @bsg62 in https://github.com/webcodr/jwtd/pull/31
+  • fix：close code-review findings on keys, claims, and output by @bsg62 in https://github.com/webcodr/jwtd/pull/32
+
+
+  **Full Changelog**：https://github.com/webcodr/jwtd/compare/v5.6.0...v5.7.0
+ReleaseNotesUrl: https://github.com/webcodr/jwtd/releases/tag/v5.7.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
