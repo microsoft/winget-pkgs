@@ -55,6 +55,23 @@ configuration:
             then:
               - addLabel:
                   label: Needs-CLA
+      - description: Add Copilot-Instructions label to PRs modifying Copilot instruction files
+        if:
+          - payloadType: Pull_Request
+          - or:
+              - isAction:
+                  action: Opened
+              - isAction:
+                  action: Synchronize
+          - filesMatchPattern:
+              pattern: ^\.github/(copilot-instructions\.md|instructions/.+\.instructions\.md)$
+              matchAny: true
+          - not:
+              hasLabel:
+                label: Copilot-Instructions
+        then:
+          - addLabel:
+              label: Copilot-Instructions
       - description: Add Needs-Triage to new issues
         if:
           - payloadType: Issues
@@ -225,6 +242,9 @@ configuration:
             - not:
                 isActivitySender:
                   user: wingetbot
+            - not:
+                isActivitySender:
+                  user: wingetvalidator-prod[bot]
         then:
           - addLabel:
               label: Author-Not-Authorized

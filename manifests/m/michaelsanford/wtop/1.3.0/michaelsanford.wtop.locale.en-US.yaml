@@ -1,0 +1,148 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: michaelsanford.wtop
+PackageVersion: 1.3.0
+PackageLocale: en-US
+Publisher: michaelsanford
+PublisherUrl: https://www.michaelsanford.com/
+PublisherSupportUrl: https://github.com/michaelsanford/wtop/issues
+Author: Michael Sanford
+PackageName: wtop
+PackageUrl: https://www.michaelsanford.com/wtop/
+License: MIT
+LicenseUrl: https://github.com/michaelsanford/wtop/blob/HEAD/LICENSE
+ShortDescription: Windows re-imagining of htop, written in Go
+Description: A self-contained, single-binary system monitor for Windows — inspired by htop. CPU, memory, GPU, network, and processes. Live. In your terminal.
+Tags:
+- golang
+- htop-alternative
+- terminal-based
+- windows
+ReleaseNotes: |-
+  Four new sensors, web search on the selected process, and a substantial rewrite of the collection
+  path onto native NT and Win32 calls. Two new keys: i and ?.
+  Disk, battery, uptime and effective CPU clock
+  A Disk panel shows per-physical-disk read/write throughput and a busy percentage, taken from PDH
+  rather than gopsutil — disk.IOCounters reports cumulative counters keyed by volume, so two
+  volumes on one spindle double-count, and it has no equivalent of % Idle Time. Capacity bars are
+  drawn for each fixed volume.
+  Volumes are reconciled against the real physical disks before being shown. DRIVE_FIXED is not
+  proof a volume exists: Google Drive's mount reports fixed, reports NTFS, and mirrors the system
+  drive's exact byte size. Only volumes that some \PhysicalDisk instance claims survive, so no
+  phantom copy of C: appears.
+  Per-process disk I/O arrives as DISK R and DISK W columns, sortable like any other. These
+  cost no additional syscalls — ReadTransferCount and WriteTransferCount were already sitting
+  unused in the SYSTEM_PROCESS_INFORMATION buffer the process collector parses. Validated by writing
+  64 MiB and confirming ~58 MiB attributed within the sampling window.
+  The status bar gains battery and power state (AC/battery, charge, time remaining, battery-saver),
+  system uptime, and the effective CPU clock including turbo, read from
+  % Processor Performance against the nominal base clock. A boosting CPU reads above 100% of base, so
+  the figure is deliberately not clamped. On a desktop with no battery the power field is omitted
+  rather than left blank.
+  Web search on the selected process
+  ? looks the selected process up in your default browser, on whatever search engine that browser is
+  actually set to — read out of the browser's own profile, so a Chrome or Edge switched to DuckDuckGo
+  searches DuckDuckGo rather than Google or Bing.
+  A child process is searched together with its nearest differently-named ancestor, so a bare
+  msedgewebview2.exe becomes GoogleDriveFS.exe msedgewebview2.exe and you find out which
+  application is actually hosting it.
+  Two things this required, for anyone reading the code: a Chromium browser cannot be told to run a
+  search from the command line — everything after -- goes through Chromium's URL fixup, so
+  msedge.exe -- "a.exe b.exe" silently navigates to http://a.exe%20b.exe/. There is no flag for it.
+  Gecko browsers do have one (--search), which is why the two families are driven differently. The
+  Chromium engine is therefore read from Preferences → default_search_provider_data; Edge leaves
+  that key null and keeps a readable copy in mirrored_template_url_data, so both are tried.
+  wtop itself opens no connection. The request is made by your browser, at your keypress, and is
+  subject to that search engine's privacy policy. PRIVACY.md
+  now says so explicitly.
+  Collection path rewritten onto native calls
+  Process collection is now a single NtQuerySystemInformation(SystemProcessInformation) call,
+  replacing 1,500+ Win32 syscalls and 16 worker goroutines per tick. Network collection goes directly
+  to GetIfTable2. NVIDIA GPUs are read in-process through nvml.dll, falling back to DXGI, PDH and
+  nvidia-smi — no subprocess on the common path.
+  ─────────────────────┬─────────────────────────────────┬─────────────────────────────
+  Metric               │Before                           │After
+  ─────────────────────┼─────────────────────────────────┼─────────────────────────────
+  Process collection   │48.8 ms / 1,026 KB / 6,717 allocs│10.8 ms / 110 KB / 525 allocs
+  ─────────────────────┼─────────────────────────────────┼─────────────────────────────
+  CPU collection       │111 µs / 7.9 KB / 42 allocs      │1.04 µs / 336 B / 3 allocs
+  ─────────────────────┼─────────────────────────────────┼─────────────────────────────
+  Network collection   │7.80 ms / 75.0 KB / 54 allocs    │1.19 ms / 7.9 KB / 25 allocs
+  ─────────────────────┼─────────────────────────────────┼─────────────────────────────
+  Full collection cycle│42.4 ms / 1,118 KB / 6,915 allocs│13.5 ms / 122 KB / 565 allocs
+  ─────────────────────┴─────────────────────────────────┴─────────────────────────────
+  The first frame is populated immediately; the "Initialising…" screen is gone.
+  Fixes
+  - IDXGIAdapter1::GetDesc1 was calling the wrong vtable slot (11 instead of 10), which invoked
+    GetDesc2 and overwrote 8 bytes of stack with a struct larger than the caller expected. This
+    affected non-NVIDIA GPUs specifically, where DXGI is the path taken. If you run AMD or Intel
+    graphics, this is the reason to take this release.
+  - Disk busy % no longer reports a false 100% when an idle counter is missing or failed; the map
+    is checked before the rate is derived.
+  - A recycled PID no longer reports a garbage CPU spike on its first tick. Both the CPU and I/O
+    deltas are now gated on CreateTime matching, so a new process cannot inherit a dead one's
+    counters.
+  - Narrow terminals no longer panic in the GPU panel. gpuNameLine measures with
+    ansi.StringWidth and truncates on rune boundaries, fixing a negative slice bound below three
+    columns of name width and mid-rune splits on multi-byte names.
+  - Panels can no longer overflow their reserved height. lipgloss Width() word-wraps and
+    Height() is only a minimum, so a single over-long line rendered a panel taller than the caller
+    reserved — measured through the real View(), a 50×40 terminal rendered 44 rows and pushed the
+    status bar off-screen. Clipping now happens inside RenderPanel.
+  - Two process rows come back. computeTableHeight was reserving a header row that
+    bubbles/table.SetHeight already accounts for.
+  Layout
+  The panel row is Memory plus as many rotating panels as the terminal can hold. GPU, Network and Disk
+  share those slots and page through them with i.
+  ──────────────┬───────────────────────────────
+  Terminal width│Panel row
+  ──────────────┼───────────────────────────────
+  below 110     │Memory + one rotating panel
+  ──────────────┼───────────────────────────────
+  110 – 159     │Memory + two rotating panels
+  ──────────────┼───────────────────────────────
+  160 and wider │Memory + all three; i is a
+                │no-op
+  ──────────────┴───────────────────────────────
+  DISK R and DISK W appear at 120 columns and disappear together below it. Sorting by a hidden
+  column still works — the status bar is the authoritative sort indicator. At the default rotation
+  offset the rendering is identical to v1.2.1 at every width.
+  Deliberately not included
+  Drive and CPU temperatures. IOCTL_STORAGE_QUERY_PROPERTY with
+  StorageDeviceTemperatureProperty returns ERROR_INVALID_FUNCTION on a current Samsung NVMe, even
+  though the handle opens unelevated and StorageDeviceProperty on that same handle returns real data
+  — the driver simply doesn't implement it. MSAcpi_ThermalZoneTemperature returns "not supported",
+  and SMART via WMI returns Access Denied without elevation. Real core temperatures need MSR access
+  through a signed kernel driver, which is incompatible with a single unprivileged binary.
+  Also
+  Snyk dependency and code scanning on every push and PR; required checks now always report rather
+  than going missing on a filtered path; the Go toolchain and golangci-lint pins are mirrored so the
+  linter cannot silently fail open against a newer stdlib.
+  Verifying this release
+  .\Verify-Release.ps1            # latest release
+  .\Verify-Release.ps1 -WinGet    # the binary winget installed
+  Checks the GitHub build provenance attestation, the cosign signature, and the CycloneDX SBOM.
+  What's Changed
+  - test(bench): add a benchmark suite for the render and collection paths by @michaelsanford in #19
+  - build: harden release binaries against Defender ML heuristics by @michaelsanford in #23
+  - docs: add multi-jurisdiction privacy policy by @michaelsanford in #24
+  - docs: add live download count and winget badges by @michaelsanford in #25
+  - docs(community): add code of conduct, contributing guide, and issue templates by @michaelsanford in #26
+  - fix(ci): scope winget reconciliation to winget-tracker label by @michaelsanford in #27
+  - feat(ci): auto-enable winget tracker on release and auto-disable when merged by @michaelsanford in #28
+  - fix(ci): fix multiline string indentation in release.yml WDSI issue step by @michaelsanford in #29
+  - feat(collector): optimize launch latency, process collection, and resource footprint by @michaelsanford in #31
+  - chore(ci): remove qodana workflow, configuration, and docs by @michaelsanford in #32
+  - feat: disk, battery, uptime and CPU clock sensors by @michaelsanford in #33
+  - ci: add Snyk dependency and code scanning by @michaelsanford in #34
+  - feat(ui): search the selected process on the web with [?] by @michaelsanford in #35
+  - ci(snyk): mark repo public so scans stop consuming the private-test quota by @michaelsanford in #36
+  - ci: replace paths-ignore with a changes gate so required checks always report by @michaelsanford in #37
+  - ci: always-reporting required checks, and mirror the Go / golangci-lint pins by @michaelsanford in #38
+  - fix(collector): fix DXGI vtable index, guard idle rate, and optimize UI sorting by @michaelsanford in #39
+  - docs: bring the site up to date with the current feature set by @michaelsanford in #40
+  Full Changelog: v1.2.1...v1.3.0
+ReleaseNotesUrl: https://github.com/michaelsanford/wtop/releases/tag/v1.3.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

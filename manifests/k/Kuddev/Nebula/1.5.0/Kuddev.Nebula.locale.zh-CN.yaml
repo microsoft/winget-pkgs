@@ -1,0 +1,81 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.12.0.schema.json
+
+PackageIdentifier: Kuddev.Nebula
+PackageVersion: 1.5.0
+PackageLocale: zh-CN
+ShortDescription: 一款 GPU 加速的 Windows 终端：关闭窗口不杀会话，重新打开，你的 claude 对话原样回来。
+Description: Nebula 是一款 Windows 上的终端模拟器，以 Rust 编写，构建在 GPU 加速渲染内核之上，并围绕一个理念设计：终端会话太宝贵，不该随窗口一起消失。它把 tmux 式的常驻会话模型、玻璃质感界面、AI CLI 感知侧边栏和无需额外配置的 shell 体验组合在一起。
+Tags:
+- claude
+- codex
+- ssh
+- 终端
+ReleaseNotes: |-
+  新增
+  - SSH 连接新增分离的用户名与主机字段。
+  - SSH 用户名新增最近连接与 OpenSSH 配置建议。
+  - 新增 SSH 认证完成后打开的 Remote Files 远程文件工作区。
+  - Remote Files 可跟随交互式远端 shell 的工作目录。
+  - Remote Files 提供上一级、刷新以及文件、目录和符号链接详情。
+  - SFTP 新增多文件上传。
+  - SFTP 新增递归目录上传。
+  - 新增把远端文件和目录递归下载到指定本地位置。
+  - 新增远端目录创建、重命名和递归删除。
+  - 新增跨远端目录和 SSH 目标的复制粘贴。
+  - 传输冲突新增覆盖、跳过和保留两者三种选择。
+  - 传输新增类型不匹配保护和符号链接警告。
+  - 新增跳过未变化远端文件的选项。
+  - 新增按字节显示的 SFTP 进度以及准备和错误状态。
+  - 新增传输取消；取消期间仍可继续浏览远端目录。
+  - 新增紧凑的保存命令管理器，支持搜索、运行、编辑和删除可复用命令。
+  - 新增仓库感知的“加入 .gitignore”操作，会定位正确的仓库根并写入所选路径。
+  - 新增 Git 历史视图，使用丝滑的语义轨道展示提交拓扑。
+  - 分支、标签、合并和冲突使用含义匹配的独立图标。
+  - Git 历史现在会正确分类本地与远端引用。
+  - 新增三栏冲突解决 Tab，可并排比较 ours、结果与 theirs。
+  - 保存冲突结果后会写回文件并在 Git 中暂存。
+  - 文件抽屉新增带索引的文件名搜索，以及区分大小写、全词和正则选项。此项对应 #88 的搜索框部分；需求中的 Ctrl+F 快捷键仍未完成。
+  - 新增永久跳过高风险多行粘贴确认的选项。由 @Sakyvo 在 #76 中贡献。
+  - 新增在两种标签布局中隐藏关闭按钮的选项，同时保留中键关闭。由 @Sakyvo 在 #77 中贡献。
+  修复
+  - 修复 GPUI 文本输入框把 Ctrl+V 发送到背后终端的问题。
+  - 修复保存命令管理器只有少量结果时仍展开出大块空白区域的问题。
+  - 修复切换 SSH 标签时重新加载 Remote Files；每个 pane 现在会保留已经确认的目录内容、选中项和滚动位置。
+  - 修复 SSH 认证完成前 Remote Files 就发起 SFTP 请求的问题。
+  - 用户切换 pane 或路径后返回的过期目录结果会被丢弃。
+  - 修复 SSH 重复密码提示。
+  - 不再复用已经失效的 SSH 连接；受影响的 channel 会在全新连接上重试一次。此项对应 #50 的失败后重连部分；间歇断连和渲染报告仍保持开放。
+  - 单个 SSH channel 失败不再终止无关 pane。
+  - 修复 Nebula 没有可继承控制台句柄时，TortoiseSVN 对话框因 ERROR_INVALID_HANDLE（os error 6）无法打开。
+  - 现在会从完整的已提交命令识别直接启动的 WSL Agent。
+  - 通过 npx、node 和 uvx 启动的 WSL Agent 会显示正确的 Agent 名称。
+  - 广播 Enter 现在会进入每个接收方 WSL pane 的命令跟踪。
+  - 命令完成后会清除 WSL Agent 与 Runtime 活动态。
+  - 原始 guest shell 提示符恢复后会清除过期的 WSL Agent 状态。
+  改进
+  - SFTP 通过有界文件并发提升吞吐，同时限制内存占用。
+  - 上传现在使用流水线式远端写入。
+  - 大文件下载现在使用并行分段读取。
+  - SFTP 发布改用同目录暂存文件和原子替换。
+  - 替换中断时会保留可恢复备份。
+  - 远端支持时会保留时间戳与权限。
+  - 取消操作会安全清理临时传输状态。
+  - 改进现代与旧版 SSH 服务上的远端目录跟随。
+  - 可定位经 su 或 sudo 进入的前台 shell 工作目录。
+  - 远端会话存在歧义时会安全回退，不猜测路径。
+  - WSL shell 集成现在会上报命令完成和退出状态。
+  - WSL shell 集成现在会上报 cwd 和下一提示符边界。
+  - WSL 集成会保留 guest 已配置的登录 shell。
+  - 现有 WSLENV 项会被保留，不再覆盖。
+  - 新增 Wayland 与 X11 的 Linux GPUI 平台接线，作为原生 Linux 移植地基。
+  - GPUI 产品壳已与旧版窗口、输入、渲染和事件适配器隔离，让 Linux 可沿用同一套产品架构。
+  - 将 GPUI 设为默认产品壳，旧壳保留在显式 feature 后，普通 Release 构建与打包应用使用同一条产品路径。
+ReleaseNotesUrl: https://github.com/Kuddev/nebula/releases/tag/v1.5.0
+Documentations:
+- DocumentLabel: 安装指南
+  DocumentUrl: https://github.com/Kuddev/nebula/blob/main/INSTALL.md
+- DocumentLabel: Lua 配置
+  DocumentUrl: https://github.com/Kuddev/nebula/blob/main/docs/lua-configuration.md
+ManifestType: locale
+ManifestVersion: 1.12.0

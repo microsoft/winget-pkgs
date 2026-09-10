@@ -1,0 +1,31 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: Fangyuan025.Chaty
+PackageVersion: 2.1.7
+PackageLocale: en-US
+Publisher: Fangyuan Lin
+PublisherUrl: https://github.com/Fangyuan025
+PublisherSupportUrl: https://github.com/Fangyuan025/Chaty/issues
+PackageName: Chaty
+PackageUrl: https://chaty.ca
+License: MIT
+LicenseUrl: https://github.com/Fangyuan025/Chaty/blob/main/LICENSE
+ShortDescription: Private, local AI desktop app — run open LLMs fully offline with a coding agent, knowledge base and voice.
+Description: Chaty runs open large language models 100% locally. Chat with any GGUF model (llama.cpp, Vulkan GPU), use a local coding agent that can drive a real browser, ground answers in your own documents with a private knowledge base (RAG), generate cited Deep Research reports, and talk hands-free with offline voice. No account, no cloud, no telemetry.
+Moniker: chaty
+Tags:
+- ai
+- chatbot
+- coding-agent
+- gguf
+- llamacpp
+- llm
+- local
+- offline
+- privacy
+- rag
+ReleaseNotes: "## A long run that stops starting over\n\nA prompt is resumed from the engine's cache up to the first token\nthat differs from last time. On the architectures the Qwen3.5\nfamily uses that is all-or-nothing：three quarters of their layers\nkeep a recurrent state that cannot be rewound to a midpoint, so\nanything the cache cannot account for throws all of it away and the\nconversation is read from the beginning. Six things in code mode\nwere doing exactly that.\n\nThe clock sat in the system prompt, to the minute, so a turn that\nbegan in a new minute matched about twenty tokens and re-read the\nrest. The answer that ended a turn was never written down, so every\ncontinuation started cold — and the model could not see what it had\nlast told you. Tool results arrived as if you had typed them, which\na Qwen3.5 template counts as a new request：the model would\nannounce that you had sent one halfway through the work it was\nalready doing, and repeat your request back at you. The closing tag\nof a tool call went missing, and one round threw away 5006 cached\ntokens over the four it could not account for. Two paths recorded a\nturn their own way. And a repeated call — usually progress,\nre-running the tests after an edit — turned reasoning off for one\nstep, which re-renders the whole history, and then back again.\n\nAfter：a median of 99% of each prompt resumed from cache on both\nengines, across turn boundaries as well as within a turn. A first\nturn still costs a full read, so does a conversation crossing the\npoint where its history must be compacted, and so does the first\nturn after the app restarts — the cache lives in memory and does\nnot outlive the process. The turn after that resumes 99% again.\n\n## Speculative decoding, on models that bring their own head\n\nSome checkpoints carry a small block trained to guess the tokens\nthe model is about to produce. The model then checks a whole run of\nguesses in one pass instead of one pass per token, and every token\nthat survives is one its own sampler drew — the reply is the reply\nit would have given either way. Both engines can drive it now.\n\nIt ships off, and marked experimental. Measured, it is a large win\non text whose continuation is obvious and roughly a wash on\nordinary prose, and nothing readable before a reply starts says\nwhich one it will be; a default that is sometimes slower is not a\ndefault. The switch is in Settings → Model, offered only on models\nthat actually carry a head — read from the file, not assumed.\n\nThree things that reached v2.1.6 as a rebuild are in here for\nanyone who installed that version on release day：a chat reply now\nsurvives the interface reloading under it, the composer stops\nlosing a line to a scrollbar at 110% and 120% UI scale, and the\nerror log can be emptied from Settings.\n\n<!-- Highlights go above this line, hand-written per release —\n     the release page is where people who found Chaty through a\n     model's name land, and a bare install table tells them\n     nothing about why this version exists. -->\n\n## Install\n\n| Platform | File |\n|---|---|\n| **Windows x64** | `Chaty_*_x64-setup.exe` — per-user installer, no admin |\n| **macOS (Apple Silicon)** | `Chaty_*_aarch64.dmg` |\n| **Linux x64 (beta)** | `Chaty_*_amd64.AppImage` — `chmod +x` and run. First Linux release — please report anything odd |\n\n### ⚠️ macOS first launch — \"Apple could not verify…\" / \"damaged\"\n\nChaty is **ad-hoc signed but not notarized** (no paid Apple Developer\naccount), so Gatekeeper flags it on first launch. The app is safe —\neverything runs locally. Clear the download quarantine once, in Terminal:\n\n```sh\nxattr -dr com.apple.quarantine /Applications/Chaty.app\n```\n\nThen open Chaty normally. (Alternatively：try to open it once, then go to\n**System Settings → Privacy & Security → Open Anyway**.)\n\n---\n\n\n**Full Changelog**：https://github.com/Fangyuan025/Chaty/compare/v2.1.6...v2.1.7"
+ReleaseNotesUrl: https://github.com/Fangyuan025/Chaty/releases/tag/v2.1.7
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,64 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: NortheBridge.LuminalShine
+PackageVersion: 26.08.3
+PackageLocale: en-US
+Publisher: NortheBridge Foundation
+PublisherUrl: https://github.com/NortheBridge
+PublisherSupportUrl: https://apps.northebridge.com/en/luminalshine
+Author: NortheBridge Foundation
+PackageName: LuminalShine
+PackageUrl: https://github.com/NortheBridge/luminalshine
+License: GPL-3.0
+LicenseUrl: https://github.com/NortheBridge/luminalshine/blob/HEAD/LICENSE
+Copyright: Copyright (c) NortheBridge Foundation
+ShortDescription: A Modern Self-hosted High Performance Sunshine-compatible game stream host for Moonlight designed for Windows 11 and Windows 11 Insider Preview. Maintained by the NortheBridge Foundation.
+Description: Modern Self-Hosted High Performance Sunshine-compatible game streaming host for Moonlight clients designed for Windows 11 and Windows 11 Insider Preview.
+Moniker: luminalshine
+Tags:
+- amdgpu
+- blackwell-gpu
+- contributions-welcome
+- contributors-welcome
+- cpp
+- game-stream
+- game-streaming
+- game-streaming-server
+- geforce-experience
+- intelgpu
+- moonlight
+- nvidia-gpu
+- python
+- remote-desktop
+- windows-insiders
+- windows11
+ReleaseNotes: |-
+  LuminalShine 26.08.3
+  LuminalShine 26.08.3 is a performance-focused release: it removes a hard ~21 fps delivery ceiling that affected high-resolution HDR sessions and cuts standing capture-to-send latency from ~145 ms to ~6 ms, restoring full client-requested frame rates (verified live at 3456×2160@120 YUV 4:4:4 10-bit HDR: 119 fps sustained). It bundles the signed LuminalVGD v0.1.0-alpha.9 (driver 0.1.0.27, protocol 0.10, Build 27, driver build date 08/07/2026).
+  The root cause was OS timing behavior on current Windows builds: timed waits that expire cost a full ~15.6 ms timer quantum even at 0 ms timeouts, and timer-resolution raises can be silently ignored for windowless background service processes. Two per-frame loops each stacked three quanta (3 × 15.6 ms ≈ the observed 47 ms/frame cadence). All hot-path waits now use quantization-immune primitives, and the pipeline self-reports its timing health in every log.
+  Highlights
+  - Full-rate frame delivery: the capture ring poll and the egress loop's sideband event checks no longer pay timer quanta; sessions deliver at the client-requested rate (21 → 119 fps in the field) with capture-to-send latency of a few milliseconds.
+  - Real-time worker timing profile: the isolated capture/encode worker raises timer resolution, opts out of background power throttling, runs at high priority (restoring parity with the pre-isolation architecture), and logs its measured sleep quantum at startup — support bundles now prove which timing regime a host is in.
+  - Stream-ordered CUDA interop (YUV 4:4:4 10-bit): the per-frame map/copy/unmap sequence is enqueued on a dedicated non-blocking stream with polled completion and a bounded 1 s deadline that fails into normal session recovery instead of blocking until GPU reset. Falls back to the synchronous path automatically when unavailable.
+  - Pipeline health telemetry: one 30-second line per stage — capture cadence (driver-published vs host-claimed frames), encode cycle, NVENC phases, worker egress, and broadcast cycle — attributes any future delivery ceiling to a single stage from a standard log.
+  - Attributable capture reinits: display-stack-triggered encoder rebuilds now log their trigger instead of restarting silently.
+  - Wider worker video pipe: the worker-to-host video channel grows from 64 KiB to 4 MiB, decoupling encode cadence from the host reader's drain cadence.
+  - Bundled LuminalVGD v0.1.0-alpha.9: signed driver 0.1.0.27, protocol 0.10 fence-only transport, teardown/drain fixes for stall-free monitor departure.
+  Also in this release (26.08.2 → 26.08.3)
+  - Strict-client session startup: encoder prewarm at launch and a bounded ANNOUNCE hold for clients with tight connection budgets (Xbox, webOS).
+  - Decoder-safe egress QoS: predictive frames after a lost packet are withheld until a fresh IDR; bitrate-aware wire pacing shapes bursts to the negotiated rate.
+  - LuminalVGD host resilience: deferred ring-generation binding, control-device self-heal after I/O failure, and clean WGC pivot when a ring is unavailable.
+  - Display helper: calmer apply verification and pre-capture modeset ordering.
+  - Outbound TLS floor raised to 1.2; SSLv2/v3 disabled on GameStream HTTPS.
+  - Mailbox and process-lifecycle hardening in the session core.
+  - Modernized streaming architecture diagrams in the documentation.
+  - Release tooling: the MSI upgrade-compatibility oracle now normalizes the Upgrade table's version-bearing fields, so version bumps no longer trip the gate while UpgradeCode and upgrade semantics remain enforced.
+  Checksums (SHA-256)
+  f6dfe7688759df0358d953a85a755d6425ba940a21a607ed90a0a0ba87e83173  LuminalShine_x64-installer.exe
+  3d8ba1b781d7340684c1e630e238fd82823cc440736e41e947fdf156977d5bce  LuminalShine_x64-portable.zip
+  c459cc97c2e49c091bb816088b3a0759da8b78c86769871b4074991a8e2c3da7  LuminalShine_x64-debuginfo.7z
+  A SHA256SUMS file is attached to this release for sha256sum -c verification.
+ReleaseNotesUrl: https://github.com/NortheBridge/luminalshine/releases/tag/26.08.3
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

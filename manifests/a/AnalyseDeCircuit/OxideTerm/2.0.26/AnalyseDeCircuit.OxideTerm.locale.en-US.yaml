@@ -1,0 +1,103 @@
+# Created with WinGet Tracker using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: AnalyseDeCircuit.OxideTerm
+PackageVersion: 2.0.26
+PackageLocale: en-US
+Publisher: AnalyseDeCircuit
+PublisherUrl: https://github.com/AnalyseDeCircuit
+PublisherSupportUrl: https://github.com/AnalyseDeCircuit/oxideterm/issues
+Author: AnalyseDeCircuit
+PackageName: OxideTerm
+PackageUrl: https://github.com/AnalyseDeCircuit/oxideterm
+License: GPL-3.0
+LicenseUrl: https://github.com/AnalyseDeCircuit/oxideterm/blob/HEAD/LICENSE
+ShortDescription: Local-first SSH workspace for local shells and remote machines.Zero Electron, zero OpenSSL, zero telemetry, and no app subscription for core SSH workflows.
+Tags:
+- agent
+- ai-terminal
+- bring-your-own-key
+- filemanager
+- mcp
+- rag
+- russh
+- rust
+- sftp
+- ssh-client
+- tauri
+- terminal
+- terminal-emulator
+- tool-calling
+- wslg
+- xterm-js
+ReleaseNotes: |-
+  English
+  OxideTerm 2.0.26 adds configurable terminal font weight and multiline Quick Command editing, improves native drag-and-drop and input handling across all three desktop platforms, and repairs macOS Keychain compatibility without reintroducing duplicate startup authentication.
+  ✨ Terminal Display and Quick Commands
+  - Added a terminal font-weight setting from 100 to 900. Regular text uses the selected weight, bold terminal cells remain at least bold, and fonts without an exact face may select their nearest available weight.
+  - Replaced the Quick Command body field with a multiline editor. Enter and pasted line breaks are preserved so shell continuations, heredocs, and other structured commands can be stored without flattening them into one line.
+  - Limited Quick Command template expansion to the explicit {{param.*}} and {{ctx.*}} namespaces. Other double-brace syntax, including Docker Go templates such as {{.LogPath}}, now remains literal.
+  - Added deletion for every custom Quick Command group. A confirmation explains the operation, and commands in the removed group move to the built-in default group instead of being deleted.
+  🖥️ Desktop Input and Drag Reliability
+  - Added macOS file and folder drag-and-drop for local terminal panes. Dropped paths are inserted as POSIX-quoted shell words with a trailing space and are never executed automatically; remote and non-terminal sessions do not accept this drop path.
+  - Fixed Linux text input for XIM methods that send COMPOUND_TEXT; malformed or unsupported input is rejected safely instead of being accepted as invalid text.
+  - Fixed a Windows redraw loop that could occur while editing SFTP and local file-manager address fields.
+  - Fixed Windows tab dragging that could remain active after the mouse button was released and interfere with later clicks.
+  🔐 macOS Keychain and Managed SSH Keys
+  - Preserved multiline managed SSH private keys when reading from newer macOS Keychain implementations, and added a guarded recovery path for entries previously stored as hexadecimal text. Unencrypted recovery is persisted only after the public-key fingerprint matches the saved metadata; encrypted recovery is not rewritten before it can be validated with its passphrase.
+  - Restored opening encrypted connection data with a single Touch ID request instead of a password prompt followed by Touch ID, while retaining correct multiline managed-key reads.
+  🧰 Package Compatibility
+  - Moved Linux arm64 release builds to the Ubuntu 22.04 runner and added an ELF symbol-version check that rejects binaries requiring newer than glibc 2.35, matching the existing Linux compatibility baseline for distributions such as Kylin V11.
+  - Added complete Windows installer file properties, including the package version, application description, and copyright metadata.
+  中文
+  OxideTerm 2.0.26 新增可配置终端字重和多行快捷命令编辑，改进三个桌面平台的原生拖放与输入处理，并修复 macOS 钥匙串兼容性，同时避免重新引入启动时重复认证。
+  ✨ 终端显示与快捷命令
+  - 新增 100 至 900 的终端字重设置。普通文本使用所选字重，终端粗体单元格至少保持粗体；若字体没有完全对应的字重，系统可选择最接近的可用字重。
+  - 将快捷命令正文改为多行编辑器。Enter 和粘贴内容中的换行会被保留，因此 Shell 续行、heredoc 及其它结构化命令不再被压成一行。
+  - 将快捷命令模板展开限制在明确的 {{param.*}} 和 {{ctx.*}} 命名空间。其它双花括号语法会保持原文，包括 {{.LogPath}} 等 Docker Go 模板。
+  - 支持删除所有自定义快捷命令分组。操作前会显示确认说明，被删除分组中的命令会移至内置默认分组，而不会随分组一起删除。
+  🖥️ 桌面输入与拖放可靠性
+  - 为 macOS 本地终端窗格新增文件和文件夹拖放。拖入路径会作为经过 POSIX 引用的 Shell 单词插入，并在末尾保留空格，但绝不会自动执行；远程及非终端会话不会接受该拖放路径。
+  - 修复使用 COMPOUND_TEXT 的 XIM 输入法在 Linux 上的文字输入；格式错误或不支持的输入会被安全拒绝，不再作为无效文字接收。
+  - 修复 Windows 编辑 SFTP 与本地文件管理器地址栏时可能出现的重绘循环。
+  - 修复 Windows 标签拖动在鼠标已经松开后仍可能保持活动并影响后续点击的问题。
+  🔐 macOS 钥匙串与托管 SSH 密钥
+  - 在新版 macOS 钥匙串中完整保留多行托管 SSH 私钥，并为此前被保存为十六进制文本的条目增加受限恢复路径。未加密私钥只有在公钥指纹与已保存元数据一致后才会写回；加密私钥在使用口令完成验证前不会改写钥匙串。
+  - 恢复使用单次 Touch ID 打开加密连接数据，不再先出现密码提示再要求 Touch ID，同时继续正确读取多行托管密钥。
+  🧰 软件包兼容性
+  - 将 Linux arm64 发布构建迁移至 Ubuntu 22.04 runner，并增加 ELF 符号版本检查，拒绝依赖高于 glibc 2.35 的二进制文件，使其与现有 Linux 兼容基线一致并覆盖银河麒麟 V11 等发行版。
+  - 补齐 Windows 安装器文件属性，包括软件包版本、应用说明和版权信息。
+  📥 Download for your system
+  ────────────────┬─────────────────────────────────┬─────────────────────────────────
+  Operating system│x64                              │ARM64
+  ────────────────┼─────────────────────────────────┼─────────────────────────────────
+  Windows         │Setup (.exe)                     │Setup (.exe)
+  ────────────────┼─────────────────────────────────┼─────────────────────────────────
+  macOS           │DMG (Intel)                      │DMG (Apple Silicon)
+  ────────────────┼─────────────────────────────────┼─────────────────────────────────
+  Linux           │AppImage · DEB · RPM             │AppImage · DEB · RPM
+  ────────────────┴─────────────────────────────────┴─────────────────────────────────
+  Portable archives, signatures, and sha256sums.txt remain available in the release assets below.
+  📌 Installation Tips / 安装提示
+  macOS
+  Downloaded .dmg files may be quarantined by Gatekeeper. Run in Terminal:
+  xattr -cr ~/Downloads/OxideTerm_*.dmg
+  # or after install / 或安装后
+  xattr -cr /Applications/OxideTerm.app
+  Windows
+  If SmartScreen warns, click More info -> Run anyway.
+  若 SmartScreen 弹出警告，点击 更多信息 -> 仍要运行。
+  Linux
+  # AppImage
+  chmod +x OxideTerm_*_linux_*.AppImage && ./OxideTerm_*_linux_*.AppImage
+  # Debian/Ubuntu
+  sudo dpkg -i OxideTerm_*_linux_*.deb && sudo apt-get install -f
+  # Fedora/RHEL-compatible systems
+  sudo dnf install ./OxideTerm_*_linux_*.rpm
+  🔗 Links
+  - Documentation: https://oxideterm.app
+  - GitHub Issues: https://github.com/AnalyseDeCircuit/oxideterm/issues
+  - Changelog: https://github.com/AnalyseDeCircuit/oxideterm/blob/main/.github/release-notes/stable-changelog.md
+ReleaseNotesUrl: https://github.com/AnalyseDeCircuit/oxideterm/releases/tag/v2.0.26
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

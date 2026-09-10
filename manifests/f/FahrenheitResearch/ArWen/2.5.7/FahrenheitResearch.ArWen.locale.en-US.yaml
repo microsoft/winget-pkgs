@@ -1,0 +1,46 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: FahrenheitResearch.ArWen
+PackageVersion: 2.5.7
+PackageLocale: en-US
+Publisher: Fahrenheit Research
+PublisherUrl: https://github.com/FahrenheitResearch
+PublisherSupportUrl: https://github.com/FahrenheitResearch/arwen/issues
+Author: Fahrenheit Research
+PackageName: ArWen
+PackageUrl: https://github.com/FahrenheitResearch/arwen
+License: Apache-2.0
+LicenseUrl: https://github.com/FahrenheitResearch/arwen/blob/main/LICENSE
+Copyright: Copyright © Fahrenheit Research
+CopyrightUrl: https://github.com/FahrenheitResearch/arwen/blob/main/LICENSE
+ShortDescription: 'ArWen: GPU-native WRF-ARW-class regional weather model, verified against WRF v4.6.1'
+Description: "ArWen is an independent, GPU-native implementation of a WRF-ARW-class regional atmospheric model. It is not affiliated with or endorsed by NCAR or UCAR. The name is a wordmark for \"the ARW solver, GPU-native\"; the Python package is currently named gpuwm. Safety. ArWen is a research and educational tool. It is never a substitute for official forecasts and warnings from your national meteorological service. Do not use it to make safety decisions. Regional numerical weather prediction at convective scale has mostly required institutional clusters, which means most of the world runs on global-model guidance at 10-25 km. ArWen's aim is to put a verified, kilometer-scale limited-area model on a single consumer GPU: pick a point, size a nest ladder to your card, pull public analysis data, and run a 1 km (or 500 m) simulation of your own area on hardware you own -- especially in places where no national convection-permitting model exists."
+Moniker: arwen
+ReleaseNotes: |-
+  ArWen 2.5.7
+  A default lid above the anvils, and a moving nest that resumes.
+  Fixed:
+  - The default model top moves from 100 hPa to 50 hPa (p_top 5000 Pa, the
+    WRF Registry default), taking the damp_opt=3 sponge base from ~11 km
+    to ~15.6 km AGL. The 100 hPa lid damped anvil-layer updrafts and
+    smeared convective structure on a bare default run; measured on a
+    3 km HRRR A/B vs MRMS, the 50 hPa lid restores updraft tops and core
+    counts at equal-or-better FSS and no VRAM or wall cost. Emissions are
+    bounded per source: a source whose certified ladder stops at 100 hPa
+    (GFS pgrb2, 20CRv3 NetCDF) keeps its covered top.
+  - A tree with [relocation.containment] can be resumed: the checkpoint
+    records the parent slides in the move chain, the slid parent is put
+    back with its own initializer, and a restore is no longer judged by
+    the per-move steering cap.
+  - A resumed or branched run of a moving nest keeps the precipitation
+    totals a move shifted into the domain edge; the restore migration
+    zeroes only what no relocation carries.
+  The moving-nest restart fixes were contributed by Roch.
+ReleaseNotesUrl: https://github.com/FahrenheitResearch/arwen/releases/tag/v2.5.7
+InstallationNotes: |-
+  This application requires an NVIDIA GPU with CUDA support to run.
+  Will not function on integrated graphics or non-NVIDIA hardware.
+  Without compatible hardware, the application will fail to launch.
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

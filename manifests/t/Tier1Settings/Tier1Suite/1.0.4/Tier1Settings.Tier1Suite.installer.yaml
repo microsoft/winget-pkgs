@@ -1,0 +1,38 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.9.0.schema.json
+
+# Filled from the final signed 1.0.4 artifact on 2026-08-17; ready to submit.
+# InstallerSha256 was verified against the bytes actually served from InstallerUrl (not just the
+# local build output), and ProductCode was read from that same signed MSI. Rebuilding 1.0.4 would invalidate both,
+# since wix mints a fresh ProductCode on every build — re-fill these if that ever happens.
+#
+# Unlike Tier1Timer/Tier1Stretch (InstallerType: portable — a loose signed exe), Tier1Suite ships
+# a real per-machine MSI (WP-9), so this manifest uses InstallerType: msi + Scope: machine and
+# relies on the MSI's own UI (WixUI_InstallDir) rather than winget-driven silent switches for the
+# interactive case; /quiet and /passive are still declared for `winget install --silent` and
+# unattended/managed deployments.
+
+PackageIdentifier: Tier1Settings.Tier1Suite
+PackageVersion: 1.0.4
+InstallerType: msi
+Scope: machine
+InstallModes:
+  - interactive
+  - silent
+  - silentWithProgress
+InstallerSwitches:
+  Silent: "/quiet"
+  SilentWithProgress: "/passive"
+UpgradeBehavior: install
+Installers:
+  - Architecture: x64
+    # Versioned object, immutable — never overwrite it once this hash is published. The custom
+    # domain rather than the raw s3.amazonaws.com host (both serve it) so the URL survives a bucket
+    # rename or a move behind a CDN.
+    InstallerUrl: https://downloads.tier1settings.com/tier1suite/downloads/Tier1Suite-1.0.4-x64.msi
+    InstallerSha256: "CF2DCFAF2AD34F9E72AAECCF15860386D7273B6F219C6B22667D4CCC512837D2"
+    # UpgradeCode is fixed (8C628175-7C7F-4685-B679-BFF064207FAA, see installer/Tier1Suite.wxs) and
+    # is not declared here — winget/MSI upgrade detection keys off ProductCode plus this manifest's
+    # PackageVersion.
+    ProductCode: "{4BD84ABD-1391-4254-8CAF-0552AA5D0D4C}"
+ManifestType: installer
+ManifestVersion: 1.9.0

@@ -1,0 +1,122 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: FahrenheitResearch.ArWen
+PackageVersion: 1.3.1
+PackageLocale: en-US
+Publisher: Fahrenheit Research
+PublisherUrl: https://github.com/FahrenheitResearch
+PublisherSupportUrl: https://github.com/FahrenheitResearch/arwen/issues
+Author: Fahrenheit Research
+PackageName: ArWen
+PackageUrl: https://github.com/FahrenheitResearch/arwen
+License: Apache-2.0
+LicenseUrl: https://github.com/FahrenheitResearch/arwen/blob/main/LICENSE
+Copyright: Copyright © Fahrenheit Research
+CopyrightUrl: https://github.com/FahrenheitResearch/arwen/blob/main/LICENSE
+ShortDescription: 'ArWen: GPU-native WRF-ARW-class regional weather model, verified against WRF v4.6.1'
+Description: 'ArWen is an independent, GPU-native implementation of a WRF-ARW-class regional atmospheric model. It is not affiliated with or endorsed by NCAR or UCAR. The name is a wordmark for "the ARW solver, GPU-native"; the Python package is currently named gpuwm. Safety. ArWen is a research and educational tool. It is never a substitute for official forecasts and warnings from your national meteorological service. Do not use it to make safety decisions. Regional numerical weather prediction at convective scale has mostly required institutional clusters, which means most of the world runs on global-model guidance at 10-25 km. ArWen''s aim is to put a verified, kilometer-scale limited-area model on a single consumer GPU: pick a point, size a nest ladder to your card, pull public analysis data, and run a 1 km (or 500 m) simulation of your own area on hardware you own -- especially in places where no national convection-permitting model exists.'
+Moniker: arwen
+ReleaseNotes: |-
+  Four commands take a fresh machine to a rendered forecast: pip install gpuwm[gpu,render], gpuwm setup, gpuwm domain, gpuwm go.
+  Physics combination admission follows WRF v4.6.1's own compatibility
+  verdicts, the run-time parameter ledger is closed out with every
+  unimplemented parameter refusing by name, polar stereographic and
+  Mercator projections run end to end, and mixed microphysics across a
+  nest edge runs under a named transition policy.
+  The four-command chain
+  - Both forecast runners live in the installed package. python -m gpuwm.prepared_single_domain_forecast and python -m gpuwm.prepared_domain_tree_forecast work from any directory, with
+    console scripts gpuwm-prepared-forecast and
+    gpuwm-prepared-tree-forecast; the tools/ scripts a checkout
+    carries delegate to the same module objects, so no second copy
+    exists to drift. Every command the CLI prints is one a pip install
+    can execute. In 1.3.0 the chain's last two stages were spelled as
+    relative script paths only a git checkout has.
+  - gpuwm go <config> runs the whole single-domain GFS chain as six
+    stages in one invocation -- authority, fetch, manifest, prepare,
+    forecast, render -- and prints a heartbeat every 20 seconds with
+    the stage's elapsed time and, where the stage publishes one, its
+    model seconds. Rendering is the sixth stage rather than a command
+    to paste; a missing render extra is named instead of skipped.
+  - A refused stage speaks in sentences. A reused output directory is
+    refused up front with the directory named, why it is create-only,
+    and both ways out; in 1.3.0 this surfaced as a raw
+    FileExistsError traceback from a flag the caller never typed.
+  - gpuwm go drives one domain from GFS. A multi-domain tree is
+    refused up front and the refusal names
+    python -m gpuwm.prepared_domain_tree_forecast.
+  The wizard composes with go
+  - gpuwm domain at a bare prompt asks its questions and emits a
+    config gpuwm go accepts: one 12 km domain on the model-validated
+    morrison-mp10-ysu-mm5-noah-kf-rte-rrtmgp-v1 profile, with both
+    supplied defaults stated in the session. This changes the
+    bare-session emission -- in 1.3.0 it was a four-domain ladder on
+    the product default suite, a shape the single-domain chain refuses
+    twice over. Pass --ladder for nests and --physics-profile for
+    another suite; a session with any explicit flag keeps the flag
+    path's own defaults.
+  - The closing next-steps block branches on source: a GFS emission
+    ends at gpuwm go, an ERA5 emission keeps gpuwm run, and HRRR
+    and multi-domain trees get their route named. In 1.3.0 the block
+    ended at gpuwm run for every source, and gpuwm run refuses GFS
+    configs by design.
+  - A domain sized to fill the card prints an advisory when its fetch
+    box exceeds 90 degrees of longitude, naming --vram-gib for a
+    smaller first run. Sizing itself is unchanged, and continental
+    domains under the threshold pass without comment.
+  WRF v4.6.1 combination admission
+  The combination authority is a 2,400-cell transcription of WRF
+  v4.6.1's own PBL, surface-layer, and land-surface admission: 1,080
+  cells legal, 360 legal with WRF's silent reconfiguration named, 600
+  fatal, 360 not expressible in WRF. Three pairings 1.3.0 refused are
+  admitted because WRF admits them -- PBL off with the MYNN surface
+  layer, and MYNN PBL with either MM5 surface layer, each across the
+  four routed land models -- and refusals cite the matrix cell that
+  produced them. An edge policy is not a loophole: a PBL/surface-layer
+  pairing the matrix calls fatal refuses whatever the nest declares.
+  Run-time parameters
+  The declared WRF namelist parameter set stands at 158: 104
+  implemented, and each of the 54 others refuses by name with the
+  blocking dependency cited. Five parameters whose runtime branches
+  already existed are wired end to end: isfflx, o3input,
+  use_mp_re, seaice_albedo_default (replacing a live-path
+  literal), and rdmaxalb.
+  Projections
+  Polar stereographic and Mercator domains run end to end -- wizard
+  emission, WPS namelist, static-field preparation, map factors, and
+  earth-relative wind rotation -- verified against WPS geogrid
+  references for both families. A bare interactive session at high
+  latitude emits map_proj = "polar" with a matching namelist.
+  Nest edges
+  All 20 ordered pairs of ported microphysics schemes run across a
+  parent-child edge under an explicit nest_microphysics_transition
+  policy, and a mixed edge without one refuses naming the setting.
+  Each policy's mass and number handling is a registry row with its
+  WRF citation, not a code path a config reaches silently.
+  Byte-stable checkouts
+  .gitattributes declares * -text: a clone materializes the
+  committed bytes on every platform. That immediately exposed one
+  shipped defect, fixed here -- the packaged GFS Vtable's hash
+  contract named the file's CRLF form, which only a Windows checkout
+  produced. The contract names the committed bytes, and
+  tests/test_line_ending_stability.py holds every hashed-contract
+  file to its blob.
+  Fixed
+  - gpuwm go's render stage handed the render CLI the wrfout
+    directory rather than its frames, failing after a successful
+    forecast. Found driving this release's own acceptance chain; the
+    frames are enumerated, and --dry-run still prints the glob.
+  - --materialize-authorities refused a reused output directory with
+    a raw traceback; a missing base input did the same. Both are
+    sentences.
+  - The packaged GFS Vtable hash pin, above.
+  The four certified profiles are byte-identical to 1.3.0: their
+  pinned two-step trajectory hashes did not move, and the registry
+  regenerates to the tracked bytes.
+ReleaseNotesUrl: https://github.com/FahrenheitResearch/arwen/releases/tag/v1.3.1
+InstallationNotes: |-
+  This application requires an NVIDIA GPU with CUDA support to run.
+  Will not function on integrated graphics or non-NVIDIA hardware.
+  Without compatible hardware, the application will fail to launch.
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

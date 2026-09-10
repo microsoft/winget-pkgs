@@ -1,0 +1,138 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: BiomeJS.Biome
+PackageVersion: 2.5.11
+PackageLocale: en-US
+Publisher: BiomeJS
+PublisherUrl: https://biomejs.dev/
+PublisherSupportUrl: https://github.com/biomejs/biome/issues
+Author: Biome Developers and Contributors
+PackageName: Biome
+PackageUrl: https://biomejs.dev/
+License: Apache-2.0
+Copyright: Copyright (c) 2023-present Biome Developers and Contributors
+ShortDescription: Biome is a toolchain for web projects, aimed at providing functionalities to maintain them. It offers a formatter and linter, usable via CLI and LSP.
+Moniker: biome
+Tags:
+- css
+- formatter
+- javascript
+- json
+- jsx
+- linter
+- static-code-analysis
+- typescript
+- web
+ReleaseNotes: |-
+  2.5.11
+
+  Patch Changes
+  - #11499 9743d0c Thanks @scs0209! - Fixed #11496: useValidAnchor now treats Astro JSX shorthand attributes like <a {href}> as a valid href.
+  - #11437 88f805e Thanks @Princesseuh! - Fixed #9944: adjacent elements inside an Astro expression now parse as an implicit fragment instead of raising an error.
+    {options.map(() =>
+      <div />
+      <div />
+    )}
+  - #11437 88f805e Thanks @Princesseuh! - Fixed Astro templates rejecting unclosed HTML void elements, such as {cond && <br>}.
+  - #11507 e2fc036 Thanks @dyc3! - Fixed #11157: noUnusedVariables no longer reports Vue <script setup> bindings used by CSS v-bind() as unused.
+  - #11398 afc4615 Thanks @dyc3! - Fixed #11389: Files passed through --stdin-file-path now use full HTML support for Astro, Svelte, and Vue when it is enabled.
+  - #11526 372cd68 Thanks @dyc3! - Fixed noVueRefAsOperand to track Vue refs through declaration aliases and toRefs() properties, and to recognize useTemplateRef() results. The rule no longer reports false positives such as plain ref transfers, plain toRefs() property access, defineModel() modifiers, or the supported .effect member as operands.
+    The refactor enabling these fixes also improves the performance of the rule.
+  - #11458 a7cd286 Thanks @dyc3! - Fixed #11436: GritQL snippets such as export { $specifiers } from $source now match named re-exports with aliases, inline type modifiers, and multiple specifiers.
+  - #11515 382b15d Thanks @dyc3! - Fixed #11390, where noFloatingPromises performed expensive full type inference for calls to non-Promise methods declared on third-party TypeScript classes. The rule now classifies those calls using targeted type information.
+  - #11516 6f40e82 Thanks @levrik! - Fixed noVueRefAsOperand so it no longer reports a callback parameter (e.g. from .find(), .map()) as an unwrapped ref value just because it's nested inside a ref(), computed(), or similar call.
+    const result = computed(() => list.find((item) => item.label === "a"));
+    Previously, item here was incorrectly treated as a ref value because the rule attributed it to the outer computed() call.
+  - #11495 496268d Thanks @Netail! - Fixed useGraphqlNamingConvention so it no longer reports GraphQL enum value definitions with comments & descriptions and now displays a more accurate diagnostic range.
+  - #11407 6ef52b0 Thanks @1678092075! - Fixed #11214: noUnusedVariables no longer reports type parameters declared by non-default function overload signatures that have an implementation.
+  - #11322 5c353e6 Thanks @jp-knj! - Added a new nursery rule noAstroSetHtmlDirective, which disallows Astro's set:html directive because untrusted content can introduce cross-site scripting vulnerabilities.
+    For example, the following snippet triggers the rule:
+    <div set:html={content} />
+  - #11462 18883b7 Thanks @dyc3! - Fixed #10776: useVueHyphenatedAttributes no longer reports lowercase attribute names containing punctuation, such as pt:header:data-test-id and some_attr.
+  - #11476 3270ca4 Thanks @dyc3! - Fixed #10330: Vue interpolation delimiters now stay attached to whitespace-sensitive element boundaries and adjacent inline siblings, wrapping their expression when needed to fit the configured line width. Interpolations followed by text now also converge after one formatting pass.
+    -<v-btn v-if="store.state.user" variant="text" to="/my-rooms"
+    -  >{{ $t("nav.my-rooms") }}</v-btn
+    ->
+    +<v-btn v-if="store.state.user" variant="text" to="/my-rooms">{{
+    +  $t("nav.my-rooms")
+    +}}</v-btn>
+  - #11191 3e5367f Thanks @ematipico! - Added the nursery rule noUndeclaredCustomProperties, which reports references to custom properties that are not defined in available CSS, static HTML-like style attributes, or JSX string style attributes.
+    For example, the following snippet triggers the rule:
+    a { color: var(--undefined-color); }
+  - #11435 7754894 Thanks @levrik! - Fixed: Variables and imports used as custom Vue directives are no longer reported as unused.
+    For example:
+    <script setup>
+    const vHighlight = {
+      mounted: (element) => {
+        element.style.color = "red";
+      },
+    };
+    </script>
+    <template>
+      <p v-highlight>Hello</p>
+    </template>
+  - #11501 e6acded Thanks @aminya! - Improved the performance of useArraySortCompare by skipping type inference for calls to unrelated methods.
+  - #11467 66b282c Thanks @dyc3! - Fixed #11464: Biome now parses parenthesized object literals returned from arrow functions when they contain a conditional expression and a nested arrow function.
+  - #11456 db9aa2a Thanks @dyc3! - Fixed #10278: Marked the fix for noThisInStatic as unsafe by default.
+  - #11502 652aedb Thanks @levrik! - noGlobalAssign no longer reports assignments to a Vue <script setup> binding from a template expression, when the binding's name happens to match a built-in global (e.g. open, parent, top).
+    For example, this no longer triggers a diagnostic:
+    <script setup>
+    const open = defineModel();
+    </script>
+    <template>
+      <button @click="open = !open">Toggle</button>
+    </template>
+
+  What's Changed
+  - feat(js_plugin): support TypeScript plugins by @siketyan in #11418
+  - chore: rework skills by @ematipico in #11449
+  - fix(lint/js): mark no-this-in-static fixes unsafe by @dyc3 in #11456
+  - fix(grit): match named re-export specifiers by @dyc3 in #11458
+  - feat(lint): rule noUndeclaredCustomProperties by @ematipico in #11191
+  - feat: adds the noAstroSetHtmlDirective rule for .astro by @jp-knj in #11322
+  - fix(html): ignore punctuation in Vue attribute casing by @dyc3 in #11462
+  - ci: remove agent scan workflow by @ematipico in #11472
+  - chore(tools): configure the agent scan by @ematipico in #11473
+  - fix(yaml/parse): coverage and more fixes by @ematipico in #11471
+  - fix(parse/js): disambiguate parenthesized object expressions by @dyc3 in #11467
+  - perf(markdown): hoist list sibling scan by @dyc3 in #11466
+  - perf(markdown): inline common word group atom by @dyc3 in #11468
+  - perf(markdown): scan textual whitespace runs once by @dyc3 in #11469
+  - fix(noUnusedVariables): handle generic parameters in function overloads by @1678092075 in #11407
+  - chore: update Rust to 1.98.0 by @nhedger in #11481
+  - chore(deps): update rust crate papaya to 0.2.5 by @renovate[bot] in #11485
+  - chore(deps): update pnpm to v11.22.0 by @renovate[bot] in #11486
+  - chore(tools): fix agent scan configuration by @ematipico in #11489
+  - fix(js/parser): support Astro implicit fragments and void elements by @Princesseuh in #11437
+  - perf(format/markdown): avoid quadratic list formatting by @dyc3 in #11482
+  - fix(markdown): keep blockquote fenced code formatting idempotent by @scs0209 in #11493
+  - fix(graphql_analyze): useGraphqlNamingConvention exclude trivia by @Netail in #11495
+  - fix(lint): don’t report variables and imports used as custom Vue directives by @levrik in #11435
+  - fix(lint): recognize Astro JSX shorthand href in useValidAnchor by @scs0209 in #11499
+  - perf(analyzer): fast-path for useArraySortCompare via syntax before type inference by @aminya in #11501
+  - chore: changesets 3 by @Netail in #11412
+  - perf(markdown): reduce parser rescans by @ematipico in #11503
+  - perf(markdown): reduce checks and string allocations by @ematipico in #11505
+  - fix(noGlobalAssign): do not report assignments to bindings from Vue setup script by @levrik in #11502
+  - feat(analyze/vue): track embedded references in v-bind css by @dyc3 in #11507
+  - perf(markdown): reduce checks by @ematipico in #11506
+  - fix(format/html/vue): preserve Vue interpolation adjacency by @dyc3 in #11476
+  - perf(md): reduce checks for link lookahead by @ematipico in #11514
+  - fix(noVueRefAsOperand): do not report identifiers unrelated to a ref call by @levrik in #11516
+  - perf(type_inference): collect declaration only class methods as class members by @dyc3 in #11515
+  - refactor(noVueRefAsOperand): overhaul rule, and make it faster by @dyc3 in #11526
+  - fix(service): preserve embedded references in stateless processing by @dyc3 in #11398
+  - refactor(ci): agentscan setup by @MatteoGabriele in #11527
+  - ci: release by @github-actions[bot] in #11457
+
+  New Contributors
+  - @scs0209 made their first contribution in #11493
+  - @aminya made their first contribution in #11501
+  Full Changelog: https://github.com/biomejs/biome/compare/@biomejs/biome@2.5.10...@biomejs/biome@2.5.11
+ReleaseNotesUrl: https://github.com/biomejs/biome/releases/tag/@biomejs/biome@2.5.11
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://biomejs.dev/guides/getting-started/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

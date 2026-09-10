@@ -1,0 +1,40 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.12.0.schema.json
+
+PackageIdentifier: AbishekNarasimhan.RavensPort
+PackageVersion: 4.3.4
+Platform:
+- Windows.Desktop
+# Matches MinVersion in installer/RavensPort.iss and SupportedOSPlatformVersion in
+# Directory.Build.props: Windows 10 1809.
+MinimumOSVersion: 10.0.17763.0
+InstallerType: inno
+# PrivilegesRequired=lowest in the .iss, so {autopf} lands in %LocalAppData%\Programs and the
+# uninstall entry is written to HKCU. No elevation prompt, which is what lets a silent install run
+# unattended.
+Scope: user
+UpgradeBehavior: install
+# Inno appends "_is1" to AppId for the Add or Remove Programs key. This is how winget correlates
+# an existing install with the package, so it must track AppId in RavensPort.iss, which never
+# changes.
+ProductCode: '{C47DF74F-150F-4AD3-9B12-46A8BF02BE9C}_is1'
+# RavensPort will not install over a copy of itself that is running, and the [Code] section of
+# installer/RavensPort.iss makes that case return 7 -- a code Setup produces for no other reason.
+# Without this mapping `winget upgrade` reports only "Installer failed with exit code: 7"; with it,
+# winget tells the user the application is in use and to close it.
+ExpectedReturnCodes:
+- InstallerReturnCode: 7
+  ReturnResponse: packageInUse
+ReleaseDate: 2026-08-16
+Installers:
+# ArchitecturesAllowed=x64compatible, so this also installs and runs on ARM64 Windows under
+# emulation; winget treats x64 as applicable there.
+- Architecture: x64
+  InstallerUrl: https://github.com/abishekvupputur/ravensPort/releases/download/v4.3.4/RavensPort-Setup-4.3.4.exe
+  # Taken from the published release asset, not a local build: the release is built by CI from the
+  # tag, and a hash that does not match what winget downloads fails validation. A local installer
+  # built from the same commit hashes differently — compression settings and Inno's embedded
+  # timestamps see to that — so this is downloaded from the release every time. See
+  # docs/WINGET-SUBMISSION.md.
+  InstallerSha256: 87308345C3569C4919D0935F20E9495D252114E725D8D7958FD37BD08437F8E2
+ManifestType: installer
+ManifestVersion: 1.12.0
