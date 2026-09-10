@@ -1,0 +1,86 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: laurentiu021.SysManager
+PackageVersion: 1.87.1
+PackageLocale: en-US
+Publisher: laurentiu021
+PublisherUrl: https://github.com/laurentiu021
+PublisherSupportUrl: https://github.com/laurentiu021/SystemManager/issues
+PackageName: SysManager
+PackageUrl: https://github.com/laurentiu021/SystemManager
+License: MIT
+LicenseUrl: https://github.com/laurentiu021/SystemManager/blob/HEAD/LICENSE
+ShortDescription: Modern Windows system toolkit — network monitor, performance tuning, cleanup, battery health, process manager, and more.
+Description: |-
+  SysManager is a modern Windows system toolkit built with WPF and .NET 10.
+  It provides a comprehensive set of tools in a single application including
+  live network monitoring, ping and traceroute, speed tests, performance tuning
+  with power plan management, deep disk cleanup, duplicate file finder, disk
+  analyzer, battery health monitoring, process manager, app uninstaller,
+  startup control, Windows services manager, Windows features manager, driver
+  information, and system health overview.
+Tags:
+- battery
+- cleanup
+- dotnet
+- network-monitor
+- open-source
+- performance
+- process-manager
+- system-utility
+- uninstaller
+- windows
+- wpf
+ReleaseNotes: |-
+  [1.87.1] - 2026-09-10
+  Opening the Startup Manager no longer reaches out to the internet. The Signature column checks
+  each program's certificate against your own machine, and it was written to do that without asking any
+  server anything — but Windows has a second, separate switch for that, and it was left at its default.
+  So on a PC that had not seen a particular publisher's certificate before, checking the column could
+  quietly fetch part of it, and on a PC with no connection at all it could sit and wait for that fetch to
+  time out. It now asks nothing and answers immediately.
+  Fixed
+  - The signature check on the Startup Manager makes no network request. Turning off the revocation
+    lookup, which the tab already did, does not turn off certificate downloads — that is a separate
+    setting, and it defaults to on. Both are now decided together, so a check that was chosen to stay
+    local actually stays local.
+  - On a machine with no network, that column no longer waits out a download timeout per unfamiliar
+    publisher before it can draw.
+  - The two places that verify a single file and should use the network — the in-app updater checking
+    a downloaded build, and the check on the third-party speed-test tool before it runs — keep it. There,
+    fetching a missing intermediate certificate is what lets a genuine signature verify, and the wait is
+    part of an action you asked for.
+  Verify the download
+  Get-FileHash .\SysManager-v1.87.1.exe -Algorithm SHA256
+  Expected SHA256: EADE5799A96CC81D01D4C315B7852AC6BF6C47C333E8043A43A098E60D3EEF96
+  This build is not code-signed, so Windows will warn on first launch. That is
+  expected for a small independent app: see what the warning says and what to
+  click.
+  Code signing is planned through the SignPath Foundation,
+  which provides free certificates to open-source projects, with signing performed by
+  SignPath.io. Until then, the SHA256 above and the build
+  attestation below are what establish that a download is the genuine build.
+  Code signing policy
+  This release is not code-signed. The team roles, release-approval process and
+  privacy policy required by the SignPath Foundation programme
+  are documented in advance under Code signing
+  policy. That
+  documentation is a prerequisite for applying, not evidence of a certificate. The
+  attribution line naming SignPath as the signing provider will appear here once a
+  certificate is actually issued.
+  This program will not transfer any information to other networked systems unless
+  specifically requested by the user or the person installing or operating it. Full
+  privacy policy.
+  Verify where this binary came from
+  This exe was built by GitHub Actions from this public source, and the build is
+  recorded in the Sigstore public transparency log. With the
+  GitHub CLI:
+  gh attestation verify .\SysManager-v1.87.1.exe --repo laurentiu021/SystemManager
+  That proves which commit and workflow produced this exact binary, something the
+  SHA256 file cannot show, since it is published alongside the exe it describes.
+  Each release also ships SysManager-v1.87.1.sbom.json, a CycloneDX inventory of
+  every dependency resolved for this build.
+ReleaseNotesUrl: https://github.com/laurentiu021/SystemManager/releases/tag/v1.87.1
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
