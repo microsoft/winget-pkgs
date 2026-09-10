@@ -7,7 +7,7 @@
 # reviewer who sees them is entitled to reject the submission.
 
 PackageIdentifier: NeverAwayTeams.NeverAway
-PackageVersion: 2.0.3
+PackageVersion: 2.0.4
 PackageLocale: en-US
 
 Publisher: NeverAwayTeams
@@ -66,7 +66,22 @@ Tags:
   - remote-work
 
 ReleaseNotes: |-
-  Fixes a defect that let the machine sleep while presence was running.
+  Fixes scheduled closing on managed machines, where it could be deferred indefinitely.
+
+  - Meeting detection no longer needs a script host. It asked PowerShell for the process list and
+    the UDP endpoint table; on a company-managed machine that request can be refused - Windows
+    PowerShell is blocked outright by some AppLocker and WDAC policies, and Defender's
+    attack-surface rules can stop it being launched as a child process. A refused request is not
+    the same as "no meeting", so the scheduled close was deferred, retried every sixty seconds,
+    and Teams stayed open all night. Both questions are now answered directly from Windows, with
+    no interpreter, no execution policy and no child process involved.
+  - When the script host is used as a fallback and complains but still answers, the answer is now
+    used. Previously anything written to its error stream discarded a perfectly good verdict.
+    "No meeting" is the exception and still requires a clean run, because it is the only verdict
+    that permits a close and a close during a call is the one outcome worth being strict about.
+  - The activity log now records why detection failed, not only that it did.
+
+  Also in this release:
 
   - The request that keeps Windows awake is now renewed continuously. It was made once, when
     presence started, and never again. That request does not reliably survive a suspend/resume
