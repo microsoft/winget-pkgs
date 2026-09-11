@@ -1,0 +1,52 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.12.0.schema.json
+
+PackageIdentifier: poco-ai.Agentero
+PackageVersion: 0.9.1
+PackageLocale: en-US
+ShortDescription: Agent-friendly reference management.
+Description: 'Traditional reference managers are not agent-friendly: highlights and notes stay locked inside single files, making it hard for agents to reuse knowledge across papers; every conversation starts from scratch without a stable local knowledge map; PDFs are human-friendly but not the most comfortable reading material for agents. Agentero aims to build an agent-friendly, agent-native way to manage references, exploring how humans and agents collaborate on reference management. Connect your local agent via ACP (BYOA), select-text chat, import papers and Skills, stay compatible with the Zotero ecosystem, and get paper translation, bidirectional links with a knowledge graph, and deep PDF reading.'
+Tags:
+- academics
+- agent
+- article
+- literature
+- paper
+- pdf
+- reference
+- research
+- thesis
+- zotero
+ReleaseNotes: |-
+  This patch release focuses on the reading and editing experience: editing long Markdown notes is significantly faster, hover previews for figures, tables, equations, and in-text citations now work in ACS papers, and the PDF top toolbars auto-hide while reading. It also adds a toggle for auto-opening paper notes and MinerU language / force-OCR options, and fixes duplicate imports, restored tab titles, the arXiv HTML view on Windows, and the CLI stub shipped in Windows installers.
+  Features
+  - Optional auto-opening of paper notes: A new "automatically open notes when opening a paper" toggle in Settings → General (on by default). When off, opening a paper shows only the PDF/HTML body; notes remain one ⌘\ or the file tree's "Open notes" action away. (#409, c33272a0 by @Phil-Fan)
+  - MinerU language and force-OCR options: A collapsible "Advanced" section on the MinerU provider card lets you pick the recognition language (Chinese-English / English-only) and force full-page OCR. Both options apply to layout analysis and PAPER.md body parsing, improving parse quality for non-Chinese papers. (#402, 4dbcc411 by @qychen2001)
+  Improvements
+  - Long-note editing performance: The TOC outline re-scans only the edited block, block handle menus mount on first hover, global drag state no longer re-renders every block, and block margins are read from a cache — typing, hovering, and dragging in long documents are noticeably cheaper. (b89c68bb / 31463c0a / 1bb9efb3 / 653bbe19 by @Phil-Fan)
+  - Onboarding copy: The wizard's titles and options were rewritten in plain language, with a one-line description under each step, lowering the barrier for terms like "layout analysis" and "bring-your-own API". (91a540b7 by @Phil-Fan)
+  - Auto-hiding PDF top toolbars: Both floating toolbars fade out while reading and reappear on scroll or when the pointer nears the top edge; open panels, the find bar, region marquee, and zoom-field focus keep them pinned. (#400, b84d52b9 by @Phil-Fan)
+  - Windows CLI install experience: Install/uninstall failures in Settings → About now surface the real error text with localized copy; a successful install shows a copyable verification command, and 404 download errors include the full asset URL so architecture/version mismatches are self-explanatory. (4149a80e by @JiaheChen2002)
+  - Tab bar divider: A divider now separates the workspace tab bar from the content below, avoiding same-tone edges. (#408, 242d5c65 by @Phil-Fan)
+  Fixes
+  - Figure/table/equation hover previews (ACS): Fixed hover previews failing to resolve in ACS PDFs: page-wide /FitR destination collisions are now disambiguated via link rectangles and link text (Figure 1 / Table 1), with /FitH vertical anchors and an order-based fallback for untitled equations. (#407, 61297c9e, 1b22eb3a by @Phil-Fan)
+  - In-text citation hover (ACS): Fixed citation superscript hover not showing previews in ACS papers; range citations like 14-18 now expand to list refs 14…18 with stacked preview cards, while comma-separated neighbors stay unexpanded. (ac988f5e / f9f61f7c by @Phil-Fan)
+  - Enter on horizontal rules: Pressing Enter on a horizontal rule now inserts a new paragraph below instead of doing nothing; the rule's selection tint was also slimmed down so it no longer renders as a tall empty box. (#397, 3a3c9e31 by @Phil-Fan)
+  - Heading spacing: H1–H3 / H4–H6 top margins now use fixed steps instead of scaling with heading font size, fixing the oversized gaps where large headings stacked with horizontal rules. (#397, c5825c9f by @Phil-Fan)
+  - TOC rail: The collapsed outline rail no longer flashes a hover scrollbar, and its rows and markers were narrowed toward a Notion-like pill look. (#395, 1ef180f5 by @Phil-Fan)
+  - Agent session replay: Reopened Claude Code sessions no longer show synthetic placeholder messages like "No response requested." as the agent's reply; mixed turns keep their real parts. (#411, c298eb21 by @Phil-Fan)
+  - Import deduplication: A local PDF whose recognized DOI / arXiv / PMID / ISBN matches an existing catalog entry now merges into it — becoming the main PDF when the entry has none, otherwise going to attachments — instead of creating a duplicate; identifier imports also cross-check all identifier columns before commit. (#406, e212940b by @Phil-Fan)
+  - arXiv HTML view on Windows: Fixed switching to the arXiv HTML view failing with ERR_CONNECTION_REFUSED on Windows (custom-protocol origins are http, not https, under WebView2). (#412, e0a4ea4a by @Phil-Fan)
+  - Restored tab titles: Fixed restored workspaces showing the folder basename on inactive tabs until clicked; tabs now seed from the persisted display title. (#410, 618a63b2 by @Phil-Fan)
+  - Journal name completion: Journal/conference names now prefer Semantic Scholar's publicationVenue (Crossref truncates ACL/NAACL titles and arXiv often lacks them), fixing incomplete journal tags. (#399, 6a0fedea by @Phil-Fan)
+  - Onboarding replaying every launch: Fixed the first-run wizard and feature tour resetting on every launch because the Host settings dropped the completion flags. (#398, 00557972 by @Phil-Fan)
+  - Windows installer CLI stub: Fixed fresh Windows installs popping an "Unsupported 16-bit application" system dialog caused by a disguised agentero-cli.exe placeholder script shipped in the bundle. Installers no longer embed any CLI file; install the matching-version CLI from Settings → About. (9dee13f0 by @JiaheChen2002)
+  Resolved Issues
+  - Onboarding for new users (#369): The onboarding wizard shipped in v0.9.0; this release completes the plain-language rewrite and the persistence fix for onboarding state, closing the issue.
+  Full Changelog: https://github.com/poco-ai/Agentero/compare/v0.9.0...v0.9.1
+ReleaseNotesUrl: https://github.com/poco-ai/Agentero/releases/tag/v0.9.1
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://agentero-docs.poco-ai.com/
+ManifestType: locale
+ManifestVersion: 1.12.0
