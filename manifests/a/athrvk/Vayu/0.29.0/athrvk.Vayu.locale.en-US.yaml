@@ -1,0 +1,61 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: athrvk.Vayu
+PackageVersion: 0.29.0
+PackageLocale: en-US
+Publisher: Atharva Kusumbia
+PublisherUrl: https://github.com/athrvk
+PublisherSupportUrl: https://github.com/athrvk/vayu/issues
+Author: Atharva Kusumbia
+PackageName: Vayu
+PackageUrl: https://github.com/athrvk/vayu
+License: AGPL-3.0
+LicenseUrl: https://github.com/athrvk/vayu/blob/HEAD/LICENSE
+Copyright: Copyright © 2026 Atharva Kusumbia
+ShortDescription: Open-source API client with a native C++ load-testing engine - Postman-style requests and k6-level load tests in one local app.
+Description: Vayu is a free, open-source desktop app for Windows, macOS, and Linux that combines a full REST and GraphQL request builder - with collections, environments, and scripting - and a high-throughput load tester powered by a C++20 engine, with all data staying on your machine.
+Moniker: vayu
+Tags:
+- api
+- api-client
+- api-testing
+- benchmark
+- developer-tools
+- graphql
+- http
+- insomnia
+- load-testing
+- performance
+- postman
+- rest
+ReleaseNotes: |-
+  0.29.0 - 2026-09-11
+  Mock servers get a tab of their own, a per-request choice of which example they answer with, and a live log of everything they served. They also work from a browser now - a page calling a mock or a webhook inbox used to fail at the preflight while curl worked fine. The app gains a motion system across its menus, tabs and disclosures, and the History sidebar is a compact, day-grouped list.
+  Added
+  - A mock server tab, with the route table and a live activity feed side by side - the Services drawer's row expanded in place before, which a list that grows while you watch it does not fit. Each route shows its method, path, response mode and hit count, and the header carries the mock's added latency and failure rate. A running mock has an Open collection button and the collection's running-mock chip has an Open mock server button, so the two are one click apart in both directions.
+  - A request's Examples tab chooses how a mock answers it: the first example, a specific one, or a random pick per request. The choice is stored on the request, so it survives a restart and rides along through OpenAPI export and re-import.
+  - Every request a mock serves is recorded - path, status, which example answered (or that nothing matched, or that the failure rate injected the error), and when. The feed is bounded, so a mock left running does not grow without limit.
+  - MCP gains get_mock_activity for that log, and update_request now takes mockResponseMode and mockExampleId.
+  - New environment and Import environment are available from the title-bar environment switcher, which could previously only switch between environments that already existed.
+  - A run's entry in History shows the request's name when it had one, instead of only its URL.
+  - Requests, responses and collections remember which sub-tab you were last on, per item, instead of resetting to the default every time you switch workspace tabs.
+  Changed
+  - Motion is now a system rather than a per-component decision. Menus, tooltips, popovers, selects and toasts share the dialog's open/close curves; switching a tab fades its content in and slides the active indicator; every expand and collapse animates its height. A button whose label changes in place - Send, Save, Copy, Restart Engine - crossfades between the two words at a fixed width, so the row no longer reflows; the Send button's spinner is gone with it.
+  - History is a one-line row per run, grouped under Today / Yesterday / a date, so a relative time is said once per day instead of once per row. Up/Down/Home/End move between rows and Enter opens one; moving focus never opens a run on its own.
+  - Deleting a collection that has mock servers running under it names them in the confirmation dialog and stops them once you confirm.
+  - Electron 44.2.0.
+  - Internal: nested cards flattened into hairline lists, several hand-rolled controls replaced with the shared tab, toggle and list-row primitives they duplicated, app/src/utils folded into lib, and documentation kept in step with all of it.
+  Fixed
+  - Mock servers and webhook inboxes answer browser callers. Both run as their own listener and neither sent CORS headers, so a page calling one failed at the preflight; a preflight is now answered with 204 before any capture, latency or injected failure applies, and a sandboxed or file:// page's null origin is echoed without credentials.
+  - A mock replaying a captured example no longer forwards the Content-Encoding of the original transfer. The stored body is already decoded, so a browser failed the whole request with a decoding error before any of it was visible.
+  - A scenario run's report no longer stops at 100 steps. Past that, steps the run had actually executed and stored were silently missing from the view.
+  - A collection run's tab is named for the collection it ran, instead of "Design run".
+  - Reopening a finished run while its report loads says so, instead of saying it is waiting for the first step to execute.
+  - The Load Test dialog no longer fails to open on a configuration saved by an older build.
+  - A fast pointer flick across the sidebar rail's icons no longer leaves a tooltip stuck open.
+  - The context rail can close the bar again on a tab where one of its sections has nothing to show.
+  - Activating a segment in a mode picker no longer shoves the rest of the row sideways.
+ReleaseNotesUrl: https://github.com/athrvk/vayu/releases/tag/v0.29.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
