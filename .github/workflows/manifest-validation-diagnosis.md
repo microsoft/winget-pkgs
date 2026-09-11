@@ -243,6 +243,8 @@ pre-agent-steps:
         }
   - name: Skip agent when no supported evidence path remains
     uses: actions/github-script@v9
+    env:
+      GH_AW_SAFE_OUTPUTS: ${{ steps.set-runtime-paths.outputs.GH_AW_SAFE_OUTPUTS }}
     with:
       script: |
         const fs = require("fs");
@@ -256,13 +258,14 @@ pre-agent-steps:
         const singletonPathAvailable =
           evidence.triggerLabel === "Manifest-Singleton-Deprecated";
         if (!checkPathAvailable && !singletonPathAvailable) {
-          const safeOutputsPath = String(
-            process.env.GH_AW_SAFE_OUTPUTS ?? "",
-          ).trim();
-          if (!safeOutputsPath) {
-            core.setFailed("Safe outputs path is unavailable.");
-            return;
-          }
+          const safeOutputsPath =
+            String(process.env.GH_AW_SAFE_OUTPUTS ?? "").trim() ||
+            path.join(
+              process.env.RUNNER_TEMP || "/tmp",
+              "gh-aw",
+              "safeoutputs",
+              "outputs.jsonl",
+            );
           fs.mkdirSync(path.dirname(safeOutputsPath), { recursive: true });
           fs.appendFileSync(
             safeOutputsPath,
