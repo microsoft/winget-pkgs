@@ -13,6 +13,15 @@ InstallModes:
 - silentWithProgress
 UpgradeBehavior: install
 ReleaseDate: 2026-08-26
+# rudbman.exe links the MSVC runtime dynamically (VCRUNTIME140.dll and the
+# api-ms-win-crt-* forwarders). The bundled Java runtime carries its own copy
+# under runtime\bin, but that directory is not on the exe's DLL search path,
+# so a machine without the VC redistributable fails at load with
+# STATUS_DLL_NOT_FOUND (0xC0000135) — which is what the winget-pkgs validation
+# VM reported. Declaring the dependency makes winget install the runtime first.
+Dependencies:
+  PackageDependencies:
+  - PackageIdentifier: Microsoft.VCRedist.2015+.x64
 Installers:
 # The x64 build also runs under emulation on ARM64 Windows, but there is no native
 # arm64 artifact to declare here yet.
