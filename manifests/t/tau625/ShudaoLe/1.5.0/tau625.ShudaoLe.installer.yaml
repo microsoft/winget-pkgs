@@ -1,0 +1,29 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.12.0.schema.json
+PackageIdentifier: tau625.ShudaoLe
+PackageVersion: 1.5.0
+InstallerType: inno
+# installer.iss 是 PrivilegesRequired=admin + {autopf}：装到 Program Files，
+# Scope 与 ElevationRequirement 两个语义都要声明（缺 Scope 时
+# winget install --scope machine/user 无法按范围过滤到这个包）
+Scope: machine
+InstallModes:
+- interactive
+- silent
+- silentWithProgress
+# 显式写全（与 winget 对 inno 的默认值一致）：一旦清单里给了 Silent，
+# winget 就不再叠加自己的默认参数，缺 /SUPPRESSMSGBOXES 会漏掉对话框抑制
+InstallerSwitches:
+  Silent: /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /SP-
+  SilentWithProgress: /SILENT /SUPPRESSMSGBOXES /NORESTART /SP-
+UpgradeBehavior: install
+Installers:
+- Architecture: x64
+  InstallerUrl: https://github.com/tau625/ShudaoLe/releases/download/v1.5.0/ShudaoLe-1.5.0-setup.exe
+  InstallerSha256: 1a624ba77caf1fe554df7d62d35bf9518f1fd6209f64ed42999b529b64fbe815
+  ElevationRequirement: elevationRequired
+  AppsAndFeaturesEntries:
+  - DisplayName: 书到了（ShudaoLe）
+    Publisher: tau625
+    DisplayVersion: 1.5.0
+ManifestType: installer
+ManifestVersion: 1.12.0
